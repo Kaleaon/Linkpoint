@@ -138,6 +138,10 @@ Key Response Fields:
 
 ```kotlin
 fun createPasswordHash(password: String): String {
+    // Support already-hashed passwords (35 chars: "$1$" + 32 hex)
+    if (password.length == 35 && password.startsWith("\$1\$")) {
+        return password
+    }
     // CRITICAL: Truncate to 16 characters (SL protocol requirement)
     val truncated = password.trim().take(16)
     val md5 = MessageDigest.getInstance("MD5")

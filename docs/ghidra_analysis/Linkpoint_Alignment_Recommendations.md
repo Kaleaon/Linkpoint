@@ -129,24 +129,29 @@ private fun generateMacAddress(): String {
             if (mac != null && mac.size == 6) {
                 val macStr = mac.joinToString(":") { String.format("%02X", it) }
                 if (macStr != "00:00:00:00:00:00") {
-                    return md5Hash(macStr).take(12).chunked(2).joinToString(":")
+                    // Hash the actual MAC for privacy, then format as MAC-style string
+                    // Official viewers use hashed MAC - the hash itself is what's sent
+                    return md5Hash(macStr)
                 }
             }
         }
         // Fallback: Use Android ID for consistent identification
         val androidId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
-        md5Hash(androidId ?: UUID.randomUUID().toString()).take(12).chunked(2).joinToString(":")
+        md5Hash(androidId ?: UUID.randomUUID().toString())
     } catch (e: Exception) {
         // Final fallback: persistent random based on installation
         val prefs = context.getSharedPreferences("linkpoint_device", Context.MODE_PRIVATE)
         prefs.getString("device_mac", null) ?: run {
-            val newMac = (0..5).joinToString(":") { String.format("%02X", (0..255).random()) }
+            // Generate a random hash-like string and store it
+            val newMac = md5Hash(UUID.randomUUID().toString())
             prefs.edit().putString("device_mac", newMac).apply()
             newMac
         }
     }
 }
 ```
+
+**Note**: The MAC address sent to SL servers is typically a hashed value, not the actual MAC in colon-separated format. Official viewers (LibreMetaverse, Firestorm) send `md5Hash(macAddress)` - a 32-character hex string.
 
 **Files to Edit**:
 - `Linkpoint/src/main/java/com/linkpoint/network/SecondLifeProtocol.kt`

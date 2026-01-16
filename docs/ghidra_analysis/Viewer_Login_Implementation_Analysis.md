@@ -297,11 +297,13 @@ Step 3: Prefix with "$1$" → "$1$a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
 
 | Viewer | Truncation | Hash Format | Pre-hashed Support |
 |--------|------------|-------------|-------------------|
-| LibreMetaverse | Automatic | $1$ + MD5 | Yes (detects $1$ prefix) |
-| Firestorm | Automatic | $1$ + MD5 | Yes |
-| Alchemy | Automatic | $1$ + MD5 | Yes |
-| Lumiya | 16 chars | $1$ + MD5 | No |
-| Linkpoint | 16 chars | $1$ + MD5 | No (TODO: Add) |
+| LibreMetaverse | 16 chars (before hash) | $1$ + MD5 | Yes (detects $1$ prefix) |
+| Firestorm | 16 chars (before hash) | $1$ + MD5 | Yes |
+| Alchemy | 16 chars (before hash) | $1$ + MD5 | Yes |
+| Lumiya | 16 chars (before hash) | $1$ + MD5 | No |
+| Linkpoint | 16 chars (before hash) | $1$ + MD5 | No (TODO: Add) |
+
+**Note**: All viewers truncate to 16 characters before MD5 hashing. "Automatic" means the viewer handles this transparently. Pre-hashed support means the viewer can accept passwords that are already in `$1$<md5>` format without re-hashing them.
 
 ### LibreMetaverse Implementation
 

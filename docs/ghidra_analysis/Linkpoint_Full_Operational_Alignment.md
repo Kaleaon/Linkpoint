@@ -44,8 +44,32 @@ This document provides a comprehensive analysis of changes needed to bring Linkp
 **File**: `Linkpoint/src/main/java/com/linkpoint/network/SecondLifeProtocol.kt`
 
 ```kotlin
-// 1. Add last_exec_event
-append("<member><name>last_exec_event</name><value><i4>${getLastExecStatus()}</i4></value></member>")
+// 1. Add last_exec_event - tracks previous app exit status for crash reporting
+// getLastExecStatus() should be implemented via CrashTracker class (see below)
+append("<member><name>last_exec_event</name><value><i4>${crashTracker.getLastExecStatus()}</i4></value></member>")
+
+// CrashTracker implementation:
+class CrashTracker(context: Context) {
+    private val prefs = context.getSharedPreferences("crash_tracker", Context.MODE_PRIVATE)
+    
+    enum class Status(val value: Int) {
+        NORMAL(0), FROZE(1), FORCED_CRASH(2), OTHER_CRASH(3), LOGOUT_FROZE(4), LOGOUT_CRASH(5)
+    }
+    
+    fun getLastExecStatus(): Int = prefs.getInt("last_exec", Status.NORMAL.value)
+    
+    fun recordCleanShutdown() {
+        prefs.edit().putInt("last_exec", Status.NORMAL.value).apply()
+    }
+    
+    fun recordAppStart() {
+        // If not NORMAL, we crashed last time
+        val lastStatus = prefs.getInt("last_exec", -1)
+        if (lastStatus != Status.NORMAL.value && lastStatus != -1) {
+            prefs.edit().putInt("last_exec", Status.OTHER_CRASH.value).apply()
+        }
+    }
+}
 
 // 2. Fix password hash detection
 fun createPasswordHash(password: String): String {

@@ -14,7 +14,7 @@ This directory contains the results of analyzing Second Life viewer APKs using G
 - **Purpose**: Extract official networking standards and protocols
 
 ### 2. Lumiya APK (3.4.2)
-- **Analysis Date**: September 2025
+- **Analysis Date**: January 2025
 - **Ghidra Version**: 11.4.2 PUBLIC
 - **Purpose**: Mobile viewer reference implementation
 
