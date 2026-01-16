@@ -190,12 +190,21 @@ class WorldMap(
     
     /**
      * Get nearby users
-     * Returns list of users within a certain range
+     * Returns list of users within the specified range, sorted by distance
+     * 
+     * @param maxDistance Maximum distance in meters to search for users (default 96m - typical draw distance)
+     * @param maxResults Maximum number of results to return (default 100)
+     * @return List of nearby users sorted by distance
      */
-    suspend fun getNearbyUsers(): List<NearbyUser> {
+    suspend fun getNearbyUsers(maxDistance: Float = 96f, maxResults: Int = 100): List<NearbyUser> {
         return withContext(Dispatchers.IO) {
             // TODO: This needs to be implemented properly by querying the simulator
             // for nearby avatars using the ObjectUpdate messages and avatar positions.
+            // The implementation should:
+            // 1. Query the simulator for avatar positions within maxDistance
+            // 2. Calculate distances from current position
+            // 3. Check friend status using FriendsManager
+            // 4. Sort by distance and limit to maxResults
             // For now, returning an empty list until the full protocol implementation
             // is complete.
             emptyList()
