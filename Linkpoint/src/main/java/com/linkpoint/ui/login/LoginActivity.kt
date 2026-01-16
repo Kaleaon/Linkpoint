@@ -22,6 +22,8 @@ import androidx.lifecycle.lifecycleScope
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.core.GridInfo
+import com.linkpoint.core.StartLocationOption
+import com.linkpoint.core.StartLocationType
 import com.linkpoint.network.LoginResult
 import com.linkpoint.network.NetworkDiagnostics
 import com.linkpoint.network.NetworkExceptionUtils.ErrorCategory
@@ -32,6 +34,7 @@ import com.linkpoint.ui.tos.TosActivity
 import com.linkpoint.ui.world.WorldViewActivity
 import com.linkpoint.utils.PermissionManager
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.security.KeyStore
@@ -50,8 +53,10 @@ import javax.crypto.spec.GCMParameterSpec
  * - Secure password storage with encryption (like Lumiya)
  * - Quick login with saved credentials
  * - Better network error handling
+ * - Start location selection with cached landmarks and themed destinations
+ * - Avatar selection options
  */
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationListener {
     
     companion object {
         private const val TAG = "LoginActivity"
@@ -77,11 +82,15 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var passwordEdit: EditText
     private lateinit var gridSpinner: Spinner
     private lateinit var startLocationSpinner: Spinner
+    private lateinit var startLocationButton: Button
     private lateinit var savePasswordCheck: CheckBox
     private lateinit var loginButton: Button
     private lateinit var progressBar: ProgressBar
     private lateinit var statusText: TextView
     private lateinit var btnSettings: ImageButton
+    
+    // Current start location display text
+    private var currentStartLocationText: String = "Last Location"
     
     private val app by lazy { LinkpointApp.getInstance() }
     
@@ -469,15 +478,140 @@ class LoginActivity : AppCompatActivity() {
             }
         }
         
-        // Setup start location
-        val locations = listOf("Last Location", "Home", "Custom...")
+        // Setup start location with enhanced selection
+        setupStartLocationSelection()
+    }
+    
+    /**
+     * Setup enhanced start location selection.
+     * Uses StartLocationManager for cached landmarks, favorites, and destinations.
+     */
+    private fun setupStartLocationSelection() {
+        // Create list of basic options + cached landmarks for quick selection
+        val options = mutableListOf<String>()
+        options.add("Last Location")
+        options.add("Home")
+        
+        // Add cached landmarks (if any)
+        val cachedLandmarks = app.startLocationManager.cachedLandmarks.value
+        if (cachedLandmarks.isNotEmpty()) {
+            cachedLandmarks.take(3).forEach { lm ->
+                options.add(lm.name)
+            }
+        }
+        
+        // Add "More..." option to open full dialog
+        options.add("More Locations...")
+        
         val locationAdapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_item,
-            locations
+            options
         )
         locationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         startLocationSpinner.adapter = locationAdapter
+        
+        // Restore last selected option
+        when (app.startLocationManager.selectedOption.value) {
+            StartLocationType.LAST_LOCATION -> startLocationSpinner.setSelection(0)
+            StartLocationType.HOME -> startLocationSpinner.setSelection(1)
+            StartLocationType.LANDMARK -> {
+                val selectedLandmark = app.startLocationManager.selectedLandmark.value
+                if (selectedLandmark != null) {
+                    val index = cachedLandmarks.indexOfFirst { it.inventoryItemId == selectedLandmark.inventoryItemId }
+                    if (index >= 0 && index < 3) {
+                        startLocationSpinner.setSelection(index + 2)
+                    }
+                }
+            }
+            else -> startLocationSpinner.setSelection(0)
+        }
+        
+        startLocationSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                when {
+                    position == 0 -> {
+                        // Last Location
+                        app.startLocationManager.selectOption(StartLocationOption(
+                            type = StartLocationType.LAST_LOCATION,
+                            displayName = "Last Location",
+                            description = "Return to where you logged off",
+                            iconType = com.linkpoint.core.StartLocationIconType.HISTORY
+                        ))
+                        currentStartLocationText = "Last Location"
+                    }
+                    position == 1 -> {
+                        // Home
+                        app.startLocationManager.selectOption(StartLocationOption(
+                            type = StartLocationType.HOME,
+                            displayName = "Home",
+                            description = "Teleport to your home location",
+                            iconType = com.linkpoint.core.StartLocationIconType.HOME
+                        ))
+                        currentStartLocationText = "Home"
+                    }
+                    position == options.size - 1 -> {
+                        // "More Locations..." - show dialog
+                        showStartLocationDialog()
+                        // Reset to previous selection
+                        startLocationSpinner.setSelection(0)
+                    }
+                    else -> {
+                        // Cached landmark
+                        val landmarkIndex = position - 2
+                        if (landmarkIndex in cachedLandmarks.indices) {
+                            val landmark = cachedLandmarks[landmarkIndex]
+                            app.startLocationManager.selectOption(StartLocationOption(
+                                type = StartLocationType.LANDMARK,
+                                displayName = landmark.name,
+                                description = landmark.regionName,
+                                iconType = com.linkpoint.core.StartLocationIconType.LANDMARK,
+                                slurl = landmark.toSLURL(),
+                                landmarkId = landmark.inventoryItemId
+                            ))
+                            currentStartLocationText = landmark.name
+                        }
+                    }
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+        
+        // Observe changes to update UI
+        lifecycleScope.launch {
+            app.startLocationManager.selectedOption.collectLatest { type ->
+                Log.d(TAG, "Start location type changed to: $type")
+            }
+        }
+    }
+    
+    /**
+     * Show the full start location selection dialog.
+     */
+    private fun showStartLocationDialog() {
+        StartLocationDialog.newInstance().show(supportFragmentManager, StartLocationDialog.TAG)
+    }
+    
+    // StartLocationDialog.StartLocationListener implementation
+    override fun onStartLocationSelected(option: StartLocationOption) {
+        app.startLocationManager.selectOption(option)
+        currentStartLocationText = option.displayName
+        
+        // Update spinner to show selected (or reset to "Last Location" if not in quick list)
+        when (option.type) {
+            StartLocationType.LAST_LOCATION -> startLocationSpinner.setSelection(0)
+            StartLocationType.HOME -> startLocationSpinner.setSelection(1)
+            else -> {
+                // For other types, we show in status instead
+                statusText.text = getString(R.string.start_at, option.displayName)
+            }
+        }
+    }
+    
+    override fun onCustomSLURLEntered(slurl: String) {
+        app.startLocationManager.setCustomSLURL(slurl)
+        currentStartLocationText = "Custom: $slurl"
+        statusText.text = getString(R.string.start_at, slurl)
     }
     
     private fun setupListeners() {
@@ -510,12 +644,9 @@ class LoginActivity : AppCompatActivity() {
             return
         }
         
-        // Get start location
-        val startLocation = when (startLocationSpinner.selectedItemPosition) {
-            0 -> "last"
-            1 -> "home"
-            else -> "last"
-        }
+        // Get start location from StartLocationManager
+        val startLocation = app.startLocationManager.getStartLocationForLogin()
+        Log.d(TAG, "Start location for login: $startLocation")
         
         // Save credentials
         saveCredentials()
@@ -739,6 +870,12 @@ class LoginActivity : AppCompatActivity() {
         when (result) {
             is LoginResult.Success -> {
                 statusText.text = "Login successful!"
+                
+                // Mark first login complete for landmark caching
+                if (!app.startLocationManager.isFirstLoginComplete()) {
+                    app.startLocationManager.markFirstLoginComplete()
+                    Log.i(TAG, "First login complete - landmark caching enabled")
+                }
                 
                 // Navigate to world view
                 val intent = Intent(this, WorldViewActivity::class.java)

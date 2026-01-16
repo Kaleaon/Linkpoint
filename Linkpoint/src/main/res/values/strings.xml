@@ -227,4 +227,44 @@
     <string name="huds_hidden">HUDs hidden</string>
     <string name="huds_visible">HUDs visible</string>
     <string name="no_huds_attached">No HUDs attached</string>
+    
+    <!-- Start Location Selection -->
+    <string name="select_start_location">Select Start Location</string>
+    <string name="search_locations">Search locations…</string>
+    <string name="no_locations_found">No locations found</string>
+    <string name="enter_custom_slurl">Enter Custom SLURL…</string>
+    <string name="enter_slurl">Enter SLURL</string>
+    <string name="last_location">Last Location</string>
+    <string name="home_location">Home</string>
+    <string name="saved_landmarks">Saved Landmarks</string>
+    <string name="featured_destinations">Featured Destinations</string>
+    <string name="popular_destinations">Popular Destinations</string>
+    <string name="location_icon">Location icon</string>
+    <string name="select">Select</string>
+    <string name="custom_location">Custom Location</string>
+    <string name="start_at">Start at: %s</string>
+    
+    <!-- Avatar Selection -->
+    <string name="select_avatar">Select Avatar</string>
+    <string name="avatar_type">Avatar Type</string>
+    <string name="human_male">Human Male</string>
+    <string name="human_female">Human Female</string>
+    <string name="vampire">Vampire</string>
+    <string name="robot">Robot</string>
+    <string name="furry_animal">Furry/Animal</string>
+    <string name="fantasy">Fantasy</string>
+    <string name="vehicle_object">Vehicle/Object</string>
+    <string name="keep_current">Keep Current</string>
+    <string name="saved_avatars">Saved Avatars</string>
+    
+    <!-- Destination Guide -->
+    <string name="destination_guide">Destination Guide</string>
+    <string name="newcomer_friendly">Newcomer Friendly</string>
+    <string name="shopping">Shopping</string>
+    <string name="entertainment">Entertainment</string>
+    <string name="roleplay">Roleplay</string>
+    <string name="parks_nature">Parks &amp; Nature</string>
+    <string name="education">Education</string>
+    <string name="arts_culture">Arts &amp; Culture</string>
+    <string name="social_hangouts">Social Hangouts</string>
 </resources>
