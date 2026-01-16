@@ -10,6 +10,8 @@ import androidx.compose.runtime.setValue
 import dev.romainguy.kotlin.math.Float3
 import dev.romainguy.kotlin.math.Quaternion
 
+private const val PI_F = kotlin.math.PI.toFloat()
+
 /**
  * State holder for the 3D world scene.
  * 
@@ -112,7 +114,7 @@ class WorldState {
         worldTimeHours = hours
         
         // Calculate sun angle (0 = midnight, 12 = noon)
-        val sunAngle = (hours / 24f) * 2f * Math.PI.toFloat() - (Math.PI.toFloat() / 2f)
+        val sunAngle = (hours / 24f) * 2f * PI_F - (PI_F / 2f)
         
         sunDirection = Float3(
             kotlin.math.cos(sunAngle),

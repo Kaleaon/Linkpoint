@@ -319,19 +319,24 @@ fun getGitHash(): String {
 }
 
 // Task to copy libGDX native libraries
-tasks.register<Copy>("copyNatives") {
-    doFirst {
-        file("libs/armeabi-v7a/").mkdirs()
-        file("libs/arm64-v8a/").mkdirs()
-        file("libs/x86/").mkdirs()
-        file("libs/x86_64/").mkdirs()
-    }
-    
-    natives.asFileTree.forEach { jarFile ->
-        copy {
-            from(zipTree(jarFile))
-            into("libs/${jarFile.nameWithoutExtension.substringAfterLast("natives-")}")
-            include("*.so")
+tasks.register("copyNatives") {
+    doLast {
+        // Create target directories
+        val targetDirs = listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+        targetDirs.forEach { dir ->
+            file("libs/$dir/").mkdirs()
+        }
+        
+        // Copy native .so files from each jar
+        natives.files.forEach { jarFile ->
+            val targetArch = jarFile.nameWithoutExtension.substringAfterLast("natives-")
+            if (targetArch in targetDirs) {
+                copy {
+                    from(zipTree(jarFile))
+                    into("libs/$targetArch")
+                    include("*.so")
+                }
+            }
         }
     }
 }

@@ -9,7 +9,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import dev.romainguy.kotlin.math.Float3
 import io.github.sceneview.Scene
 import io.github.sceneview.collision.CollisionSystem

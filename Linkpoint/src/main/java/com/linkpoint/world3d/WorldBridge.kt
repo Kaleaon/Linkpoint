@@ -247,18 +247,18 @@ class AvatarController {
     private var isGrounded = true
     
     fun fixedUpdate(dt: Float, input: InputState) {
-        // Calculate movement direction
+        // Calculate movement direction (avoid normalizing zero vector)
         val speed = if (isFlying) flySpeed else walkSpeed
-        val moveDir = Vector3(input.moveX, 0f, -input.moveY).nor()
+        val rawMoveDir = Vector3(input.moveX, 0f, -input.moveY)
+        val moveDir = if (rawMoveDir.len2() > 0.001f) rawMoveDir.nor() else Vector3.Zero
         
         // Apply movement
         if (isFlying) {
             velocity.x = moveDir.x * speed
             velocity.z = moveDir.z * speed
-            // Vertical movement in fly mode
-            if (input.moveY > 0.5f) velocity.y = speed * 0.5f
-            else if (input.moveY < -0.5f) velocity.y = -speed * 0.5f
-            else velocity.y *= 0.9f
+            // Vertical movement in fly mode (separate from horizontal)
+            // Use a dedicated fly up/down input or vertical component
+            velocity.y *= 0.9f  // Gradual stop when no vertical input
         } else {
             velocity.x = moveDir.x * speed
             velocity.z = moveDir.z * speed
