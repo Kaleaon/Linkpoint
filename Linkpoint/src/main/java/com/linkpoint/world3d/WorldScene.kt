@@ -85,22 +85,9 @@ fun WorldScene(
     // Camera manipulator for user interaction
     val cameraManipulator = rememberCameraManipulator()
     
-    // Environment (skybox + IBL)
+    // Environment (skybox + IBL) - uses default environment from SceneView
+    // Custom HDR environment loading can be implemented later if needed
     val environment = rememberEnvironment(environmentLoader)
-    
-    // Update environment when HDR path changes
-    DisposableEffect(worldState.environmentHdrPath) {
-        worldState.environmentHdrPath?.let { hdrPath ->
-            try {
-                // Load custom HDR environment
-                // Note: rememberEnvironment provides a default environment
-                // Custom HDR loading can be done through environmentLoader directly
-            } catch (e: Exception) {
-                // Use default environment on failure
-            }
-        }
-        onDispose { }
-    }
     
     // Dynamic nodes from world state
     val childNodes = rememberNodes {
