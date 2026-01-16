@@ -228,11 +228,17 @@ class WorldMap(
             }
             
             val myAvatar = avatarManager.getMyAvatar()
-            val myPosition = myAvatar?.position ?: return@withContext emptyList()
+            if (myAvatar == null) {
+                Log.w(TAG, "getNearbyUsers: Local avatar not loaded yet")
+                return@withContext emptyList()
+            }
+            
+            val myPosition = myAvatar.position
+            val myAgentId = myAvatar.agentId
             
             // Get all avatars except ourselves
             val allAvatars = avatarManager.getAllAvatars()
-                .filter { it.agentId != myAvatar.agentId }
+                .filter { it.agentId != myAgentId }
             
             // Convert avatars to NearbyUser with distance and friend status
             allAvatars
