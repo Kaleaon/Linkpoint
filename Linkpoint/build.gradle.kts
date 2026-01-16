@@ -246,6 +246,10 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
     
+    // Compose UI Libraries
+    implementation("com.github.manalkaff:JetStick:1.2")  // Virtual joystick for avatar movement
+    implementation("io.github.thechance101:chart:Beta-0.0.5")  // Charts including RadarChart
+    
     // Compose debugging
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
