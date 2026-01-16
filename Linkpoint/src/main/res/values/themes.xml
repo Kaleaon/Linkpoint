@@ -31,4 +31,153 @@
         <item name="android:windowFullscreen">true</item>
     </style>
 
+    <!-- CleverFerret Theme - Elegant gold accents on dark background -->
+    <style name="Theme.Linkpoint.CleverFerret" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="colorPrimary">@color/cleverferret_primary</item>
+        <item name="colorPrimaryVariant">@color/cleverferret_primary_dark</item>
+        <item name="colorOnPrimary">@color/cleverferret_on_primary</item>
+        <item name="colorSecondary">@color/cleverferret_secondary</item>
+        <item name="colorSecondaryVariant">@color/cleverferret_secondary</item>
+        <item name="colorOnSecondary">@color/cleverferret_on_secondary</item>
+        <item name="colorSurface">@color/cleverferret_surface</item>
+        <item name="colorOnSurface">@color/cleverferret_on_surface</item>
+        <item name="colorOnSurfaceVariant">@color/cleverferret_on_surface_variant</item>
+        <item name="colorSurfaceVariant">@color/cleverferret_surface</item>
+        <item name="android:statusBarColor">@color/cleverferret_primary_dark</item>
+        <item name="android:windowBackground">@color/cleverferret_background</item>
+    </style>
+
+    <style name="Theme.Linkpoint.CleverFerret.NoActionBar" parent="Theme.Linkpoint.CleverFerret">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <!-- ==================== CLEVERFERRET THEME PACKS ==================== -->
+
+    <!-- Navy + Gold Theme - Elegant and Professional -->
+    <style name="Theme.Linkpoint.NavyGold" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="colorPrimary">@color/navy_gold_primary</item>
+        <item name="colorPrimaryVariant">@color/navy_gold_primary_dark</item>
+        <item name="colorOnPrimary">@color/navy_gold_on_primary</item>
+        <item name="colorSecondary">@color/navy_gold_secondary</item>
+        <item name="colorSecondaryVariant">@color/navy_gold_secondary</item>
+        <item name="colorOnSecondary">@color/navy_gold_on_secondary</item>
+        <item name="colorSurface">@color/navy_gold_surface</item>
+        <item name="colorOnSurface">@color/navy_gold_on_surface</item>
+        <item name="colorOnSurfaceVariant">@color/navy_gold_on_surface_variant</item>
+        <item name="colorSurfaceVariant">@color/navy_gold_surface</item>
+        <item name="android:statusBarColor">@color/navy_gold_primary_dark</item>
+        <item name="android:windowBackground">@color/navy_gold_background</item>
+    </style>
+
+    <style name="Theme.Linkpoint.NavyGold.NoActionBar" parent="Theme.Linkpoint.NavyGold">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <!-- Royal Purple + Silver Theme - Regal and Modern -->
+    <style name="Theme.Linkpoint.RoyalSilver" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="colorPrimary">@color/royal_silver_primary</item>
+        <item name="colorPrimaryVariant">@color/royal_silver_primary_dark</item>
+        <item name="colorOnPrimary">@color/royal_silver_on_primary</item>
+        <item name="colorSecondary">@color/royal_silver_secondary</item>
+        <item name="colorSecondaryVariant">@color/royal_silver_secondary</item>
+        <item name="colorOnSecondary">@color/royal_silver_on_secondary</item>
+        <item name="colorSurface">@color/royal_silver_surface</item>
+        <item name="colorOnSurface">@color/royal_silver_on_surface</item>
+        <item name="colorOnSurfaceVariant">@color/royal_silver_on_surface_variant</item>
+        <item name="colorSurfaceVariant">@color/royal_silver_surface</item>
+        <item name="android:statusBarColor">@color/royal_silver_primary_dark</item>
+        <item name="android:windowBackground">@color/royal_silver_background</item>
+    </style>
+
+    <style name="Theme.Linkpoint.RoyalSilver.NoActionBar" parent="Theme.Linkpoint.RoyalSilver">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <!-- Forest Green + Copper Theme - Natural and Warm -->
+    <style name="Theme.Linkpoint.ForestCopper" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="colorPrimary">@color/forest_copper_primary</item>
+        <item name="colorPrimaryVariant">@color/forest_copper_primary_dark</item>
+        <item name="colorOnPrimary">@color/forest_copper_on_primary</item>
+        <item name="colorSecondary">@color/forest_copper_secondary</item>
+        <item name="colorSecondaryVariant">@color/forest_copper_secondary</item>
+        <item name="colorOnSecondary">@color/forest_copper_on_secondary</item>
+        <item name="colorSurface">@color/forest_copper_surface</item>
+        <item name="colorOnSurface">@color/forest_copper_on_surface</item>
+        <item name="colorOnSurfaceVariant">@color/forest_copper_on_surface_variant</item>
+        <item name="colorSurfaceVariant">@color/forest_copper_surface</item>
+        <item name="android:statusBarColor">@color/forest_copper_primary_dark</item>
+        <item name="android:windowBackground">@color/forest_copper_background</item>
+    </style>
+
+    <style name="Theme.Linkpoint.ForestCopper.NoActionBar" parent="Theme.Linkpoint.ForestCopper">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <!-- Burgundy + Rose Gold Theme - Luxurious and Elegant -->
+    <style name="Theme.Linkpoint.BurgundyRoseGold" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="colorPrimary">@color/burgundy_rosegold_primary</item>
+        <item name="colorPrimaryVariant">@color/burgundy_rosegold_primary_dark</item>
+        <item name="colorOnPrimary">@color/burgundy_rosegold_on_primary</item>
+        <item name="colorSecondary">@color/burgundy_rosegold_secondary</item>
+        <item name="colorSecondaryVariant">@color/burgundy_rosegold_secondary</item>
+        <item name="colorOnSecondary">@color/burgundy_rosegold_on_secondary</item>
+        <item name="colorSurface">@color/burgundy_rosegold_surface</item>
+        <item name="colorOnSurface">@color/burgundy_rosegold_on_surface</item>
+        <item name="colorOnSurfaceVariant">@color/burgundy_rosegold_on_surface_variant</item>
+        <item name="colorSurfaceVariant">@color/burgundy_rosegold_surface</item>
+        <item name="android:statusBarColor">@color/burgundy_rosegold_primary_dark</item>
+        <item name="android:windowBackground">@color/burgundy_rosegold_background</item>
+    </style>
+
+    <style name="Theme.Linkpoint.BurgundyRoseGold.NoActionBar" parent="Theme.Linkpoint.BurgundyRoseGold">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <!-- Charcoal + Champagne Theme - Sophisticated and Subtle -->
+    <style name="Theme.Linkpoint.CharcoalChampagne" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="colorPrimary">@color/charcoal_champagne_primary</item>
+        <item name="colorPrimaryVariant">@color/charcoal_champagne_primary_dark</item>
+        <item name="colorOnPrimary">@color/charcoal_champagne_on_primary</item>
+        <item name="colorSecondary">@color/charcoal_champagne_secondary</item>
+        <item name="colorSecondaryVariant">@color/charcoal_champagne_secondary</item>
+        <item name="colorOnSecondary">@color/charcoal_champagne_on_secondary</item>
+        <item name="colorSurface">@color/charcoal_champagne_surface</item>
+        <item name="colorOnSurface">@color/charcoal_champagne_on_surface</item>
+        <item name="colorOnSurfaceVariant">@color/charcoal_champagne_on_surface_variant</item>
+        <item name="colorSurfaceVariant">@color/charcoal_champagne_surface</item>
+        <item name="android:statusBarColor">@color/charcoal_champagne_primary_dark</item>
+        <item name="android:windowBackground">@color/charcoal_champagne_background</item>
+    </style>
+
+    <style name="Theme.Linkpoint.CharcoalChampagne.NoActionBar" parent="Theme.Linkpoint.CharcoalChampagne">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <!-- Slate + Gunmetal Theme - Modern and Industrial -->
+    <style name="Theme.Linkpoint.SlateGunmetal" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="colorPrimary">@color/slate_gunmetal_primary</item>
+        <item name="colorPrimaryVariant">@color/slate_gunmetal_primary_dark</item>
+        <item name="colorOnPrimary">@color/slate_gunmetal_on_primary</item>
+        <item name="colorSecondary">@color/slate_gunmetal_secondary</item>
+        <item name="colorSecondaryVariant">@color/slate_gunmetal_secondary</item>
+        <item name="colorOnSecondary">@color/slate_gunmetal_on_secondary</item>
+        <item name="colorSurface">@color/slate_gunmetal_surface</item>
+        <item name="colorOnSurface">@color/slate_gunmetal_on_surface</item>
+        <item name="colorOnSurfaceVariant">@color/slate_gunmetal_on_surface_variant</item>
+        <item name="colorSurfaceVariant">@color/slate_gunmetal_surface</item>
+        <item name="android:statusBarColor">@color/slate_gunmetal_primary_dark</item>
+        <item name="android:windowBackground">@color/slate_gunmetal_background</item>
+    </style>
+
+    <style name="Theme.Linkpoint.SlateGunmetal.NoActionBar" parent="Theme.Linkpoint.SlateGunmetal">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
 </resources>
