@@ -8,6 +8,7 @@ import com.linkpoint.assets.MeshManager
 import com.linkpoint.assets.TextureManager
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.messages.AvatarAnimationData
+import com.linkpoint.protocol.messages.TerseUpdateData
 import com.linkpoint.protocol.messages.UDPConnection
 import com.linkpoint.protocol.types.LLQuaternion
 import com.linkpoint.protocol.types.LLVector3
@@ -126,6 +127,95 @@ class AvatarManager(
      * Alias for handleAnimationUpdate - handles AvatarAnimation UDP messages
      */
     fun handleAvatarAnimation(data: AvatarAnimationData) = handleAnimationUpdate(data)
+    
+    /**
+     * Handle terse position update from ImprovedTerseObjectUpdate message.
+     * This is used for fast position updates for avatars (when isAvatar=true).
+     * Currently only updates our own avatar position.
+     * TODO: Maintain a localId -> agentId mapping to update other avatars.
+     */
+    fun handleTerseUpdate(data: TerseUpdateData) {
+        // TerseUpdate uses localId - in a full implementation, we'd maintain
+        // a localId -> agentId mapping to update any avatar. For now, only
+        // update our own avatar when receiving avatar terse updates.
+        if (data.isAvatar && myAvatar != null) {
+            myAvatar?.let { avatar ->
+                avatar.position = data.position
+                avatar.rotation = data.rotation
+                avatar.velocity = data.velocity
+                avatar.lastUpdate = System.currentTimeMillis()
+                Log.d(TAG, "TerseUpdate: updated myAvatar, localId=${data.localId}, pos=${data.position}")
+            }
+        }
+        // Note: other avatar terse updates are not processed until localId->agentId mapping is implemented
+    }
+    
+    /**
+     * Handle CoarseLocationUpdate message.
+     * This provides rough positions for all avatars in the region.
+     * Format:
+     * - You block: 2 bytes (index of our agent in the list)
+     * - Prey block: 2 bytes (index of prey agent, or -1)
+     * - AgentData count: 1 byte
+     * - AgentData block (variable): AgentID (UUID), X (U8), Y (U8), Z (U8) = 19 bytes each
+     */
+    fun handleCoarseLocationUpdate(payload: ByteArray) {
+        // Minimum size: You (2) + Prey (2) + count (1) = 5 bytes
+        // With at least 1 agent: 5 + 19 = 24 bytes
+        if (payload.size < 5) return
+        
+        try {
+            val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            
+            // You block - index of our agent in the list (2 bytes, signed short, -1 if not in list)
+            val youIndex = buffer.short.toInt()
+            
+            // Prey block - index of prey agent (2 bytes, signed short, -1 if no prey)
+            val preyIndex = buffer.short.toInt()
+            
+            // AgentData blocks - count is 1 byte
+            val agentCount = buffer.get().toInt() and 0xFF
+            
+            Log.d(TAG, "CoarseLocationUpdate: $agentCount agents, youIndex=$youIndex")
+            
+            for (i in 0 until agentCount) {
+                if (buffer.remaining() < 19) break // 16 bytes UUID + 3 bytes position
+                
+                // Agent ID (16 bytes UUID)
+                val uuidBytes = ByteArray(16)
+                buffer.get(uuidBytes)
+                val agentIdBuffer = java.nio.ByteBuffer.wrap(uuidBytes).order(java.nio.ByteOrder.BIG_ENDIAN)
+                val agentId = UUID(agentIdBuffer.long, agentIdBuffer.long)
+                
+                // Position in region (X, Y, Z as bytes - each represents 0-255 in region coords)
+                val x = (buffer.get().toInt() and 0xFF).toFloat()
+                val y = (buffer.get().toInt() and 0xFF).toFloat()
+                val z = (buffer.get().toInt() and 0xFF).toFloat()
+                
+                val position = LLVector3(x, y, z)
+                
+                // Update or create avatar entry with coarse position
+                // Skip zero UUID (invalid/null UUID)
+                val isValidUUID = agentId != UUID(0L, 0L)
+                if (isValidUUID) {
+                    val avatar = avatars.getOrPut(agentId) {
+                        createAvatar(agentId)
+                    }
+                    avatar.position = position
+                    avatar.lastUpdate = System.currentTimeMillis()
+                    
+                    if (agentId == myAgentId) {
+                        myAvatar = avatar
+                    }
+                }
+            }
+            
+            _avatarCount.value = avatars.size
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing CoarseLocationUpdate", e)
+        }
+    }
     
     /**
      * Update all avatars
