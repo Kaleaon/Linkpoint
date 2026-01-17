@@ -491,6 +491,78 @@ class LinkpointApp : Application() {
             }
         }
         
+        // StartPingCheck - CRITICAL: Must respond with CompletePingCheck to maintain connection
+        // The simulator sends this periodically to verify the client is still alive
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.START_PING_CHECK) { _, payload ->
+            try {
+                if (payload.isNotEmpty()) {
+                    val pingId = payload[0]
+                    // OldestUnacked is at offset 1, 4 bytes, but we don't use it - we compute our own
+                    Log.d(TAG, "StartPingCheck received: pingId=$pingId")
+                    applicationScope.launch {
+                        udpConnection.handleStartPingCheck(pingId, 0)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling StartPingCheck", e)
+            }
+        }
+        
+        // ImprovedTerseObjectUpdate - Fast position updates for objects/avatars
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.IMPROVED_TERSE_OBJECT_UPDATE) { _, payload ->
+            try {
+                val updates = com.linkpoint.protocol.messages.MessageParser.parseTerseObjectUpdate(payload)
+                updates.forEach { update ->
+                    if (update.isAvatar) {
+                        // Avatar position update
+                        if (::avatarManager.isInitialized) {
+                            avatarManager.handleTerseUpdate(update)
+                        }
+                    } else {
+                        // Object position update
+                        if (::objectManager.isInitialized) {
+                            objectManager.handleTerseUpdate(update)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling ImprovedTerseObjectUpdate", e)
+            }
+        }
+        
+        // KillObject - Notification when objects are removed from the scene
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.KILL_OBJECT) { _, payload ->
+            try {
+                // KillObject format: 1-byte count, then list of 4-byte local IDs
+                val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+                val count = buffer.get().toInt() and 0xFF
+                for (i in 0 until count) {
+                    if (buffer.remaining() >= 4) {
+                        val localId = buffer.int
+                        if (::objectManager.isInitialized) {
+                            objectManager.removeObject(localId)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling KillObject", e)
+            }
+        }
+        
+        // CoarseLocationUpdate - Location updates for nearby avatars
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.COARSE_LOCATION_UPDATE) { _, payload ->
+            try {
+                // CoarseLocationUpdate provides rough avatar positions in the region
+                // Format: RegionData block, then AgentID blocks with X, Y, Z (bytes)
+                // We'll use this to track nearby avatars even before full ObjectUpdate
+                if (::avatarManager.isInitialized) {
+                    avatarManager.handleCoarseLocationUpdate(payload)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling CoarseLocationUpdate", e)
+            }
+        }
+        
         Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ UDP MESSAGE HANDLERS REGISTERED: ${udpConnection.getRegisteredHandlerCount()}")
         Log.i(TAG, "║ Handlers: ${udpConnection.getRegisteredHandlerIds().joinToString(", ")}")

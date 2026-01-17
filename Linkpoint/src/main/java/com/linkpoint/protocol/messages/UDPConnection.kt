@@ -654,6 +654,7 @@ class UDPConnection {
         }
         
         // Handle acks at end of packet
+        // Appended ACKs are little-endian per SL protocol (unlike header which is big-endian)
         if (hasAcks && decoded.size > 1) {
             val numAcks = decoded[decoded.size - 1].toInt() and 0xFF
             if (numAcks > 0) {
@@ -662,7 +663,8 @@ class UDPConnection {
                 if (ackStart > PACKET_HEADER_SIZE) {
                     for (i in 0 until numAcks) {
                         val offset = ackStart + i * 4
-                        val ackSeq = ByteBuffer.wrap(decoded, offset, 4).order(HEADER_BYTE_ORDER).int
+                        // Appended ACKs are little-endian (body byte order)
+                        val ackSeq = ByteBuffer.wrap(decoded, offset, 4).order(BODY_BYTE_ORDER).int
                         pendingAcks.remove(ackSeq)
                         Log.d(TAG, "   ACK for packet #$ackSeq")
                     }
