@@ -1124,7 +1124,6 @@ class UDPConnection {
         Log.w(TAG, "Using legacy receiveLoop - consider using receiveLoopNIO instead")
         // This method is now unused but kept for reference
     }
-    }
     
     private fun processPacket(data: ByteArray) {
         if (data.size < PACKET_HEADER_SIZE) {
