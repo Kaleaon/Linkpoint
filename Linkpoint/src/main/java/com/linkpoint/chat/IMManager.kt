@@ -351,34 +351,39 @@ class IMManager(
                 
                 val payload = java.nio.ByteBuffer.allocate(100).order(java.nio.ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData
-                payload.putLong(agentId.mostSignificantBits)
-                payload.putLong(agentId.leastSignificantBits)
-                repeat(16) { payload.put(0) }  // Session ID placeholder
+                // AgentData block - UUIDs are big-endian per SL protocol
+                payload.putUUID(agentId)
+                payload.putUUID(udpConnection.getSessionId())  // Proper session ID
                 
                 // MessageBlock
-                payload.put(0)  // FromGroup
-                payload.putLong(targetId.mostSignificantBits)
-                payload.putLong(targetId.leastSignificantBits)
+                payload.put(0)  // FromGroup (BOOL)
+                payload.putUUID(targetId)  // ToAgentID
                 payload.putInt(0)  // ParentEstateID
-                repeat(16) { payload.put(0) }  // RegionID
-                payload.putFloat(0f)  // Position
-                payload.putFloat(0f)
-                payload.putFloat(0f)
+                payload.putUUID(UUID(0, 0))  // RegionID (empty)
+                payload.putFloat(0f)  // Position X
+                payload.putFloat(0f)  // Position Y
+                payload.putFloat(0f)  // Position Z
                 payload.put(0)  // Offline
-                payload.put(41)  // Dialog = IM_TYPING_START
-                payload.putLong(sessionId.mostSignificantBits)
-                payload.putLong(sessionId.leastSignificantBits)
-                payload.putInt((System.currentTimeMillis() / 1000).toInt())
+                payload.put(IM_TYPING_START.toByte())  // Dialog
+                payload.putUUID(sessionId)  // ID (session/IM ID)
+                payload.putInt((System.currentTimeMillis() / 1000).toInt())  // Timestamp
                 
-                // Empty name and message
-                payload.put(0)  // FromAgentName length
-                payload.putShort(0)  // Message length
-                payload.putShort(0)  // BinaryBucket length
+                // FromAgentName (Variable 1)
+                payload.put(0)  // Empty name
+                // Message (Variable 2)
+                payload.putShort(0)
+                // BinaryBucket (Variable 2)
+                payload.putShort(0)
+                
+                // EstateBlock
+                payload.putInt(0)  // EstateID
+                
+                // MetaData Variable block - count = 0
+                payload.put(0)
                 
                 udpConnection.sendPacket(
                     com.linkpoint.protocol.messages.MessageIds.IMPROVED_INSTANT_MESSAGE,
-                    payload.array(),
+                    payload.array().copyOf(payload.position()),
                     reliable = false
                 )
                 Log.d(TAG, "Sent typing start to session $sessionId")
@@ -405,34 +410,39 @@ class IMManager(
                 
                 val payload = java.nio.ByteBuffer.allocate(100).order(java.nio.ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData
-                payload.putLong(agentId.mostSignificantBits)
-                payload.putLong(agentId.leastSignificantBits)
-                repeat(16) { payload.put(0) }  // Session ID placeholder
+                // AgentData block - UUIDs are big-endian per SL protocol
+                payload.putUUID(agentId)
+                payload.putUUID(udpConnection.getSessionId())  // Proper session ID
                 
                 // MessageBlock
-                payload.put(0)  // FromGroup
-                payload.putLong(targetId.mostSignificantBits)
-                payload.putLong(targetId.leastSignificantBits)
+                payload.put(0)  // FromGroup (BOOL)
+                payload.putUUID(targetId)  // ToAgentID
                 payload.putInt(0)  // ParentEstateID
-                repeat(16) { payload.put(0) }  // RegionID
-                payload.putFloat(0f)  // Position
-                payload.putFloat(0f)
-                payload.putFloat(0f)
+                payload.putUUID(UUID(0, 0))  // RegionID (empty)
+                payload.putFloat(0f)  // Position X
+                payload.putFloat(0f)  // Position Y
+                payload.putFloat(0f)  // Position Z
                 payload.put(0)  // Offline
-                payload.put(42)  // Dialog = IM_TYPING_STOP
-                payload.putLong(sessionId.mostSignificantBits)
-                payload.putLong(sessionId.leastSignificantBits)
-                payload.putInt((System.currentTimeMillis() / 1000).toInt())
+                payload.put(IM_TYPING_STOP.toByte())  // Dialog
+                payload.putUUID(sessionId)  // ID (session/IM ID)
+                payload.putInt((System.currentTimeMillis() / 1000).toInt())  // Timestamp
                 
-                // Empty name and message
+                // FromAgentName (Variable 1)
+                payload.put(0)  // Empty name
+                // Message (Variable 2)
+                payload.putShort(0)
+                // BinaryBucket (Variable 2)
+                payload.putShort(0)
+                
+                // EstateBlock
+                payload.putInt(0)  // EstateID
+                
+                // MetaData Variable block - count = 0
                 payload.put(0)
-                payload.putShort(0)
-                payload.putShort(0)
                 
                 udpConnection.sendPacket(
                     com.linkpoint.protocol.messages.MessageIds.IMPROVED_INSTANT_MESSAGE,
-                    payload.array(),
+                    payload.array().copyOf(payload.position()),
                     reliable = false
                 )
                 Log.d(TAG, "Sent typing stop to session $sessionId")
@@ -524,4 +534,17 @@ sealed class IMSessionEvent {
     data class Left(val sessionId: UUID) : IMSessionEvent()
     data class ParticipantJoined(val sessionId: UUID, val agentId: UUID) : IMSessionEvent()
     data class ParticipantLeft(val sessionId: UUID, val agentId: UUID) : IMSessionEvent()
+}
+
+/**
+ * Extension function to write UUID to ByteBuffer in big-endian (SL protocol format).
+ * UUIDs in SL are always stored as 16 raw bytes in big-endian order.
+ */
+private fun java.nio.ByteBuffer.putUUID(uuid: UUID): java.nio.ByteBuffer {
+    val originalOrder = order()
+    order(java.nio.ByteOrder.BIG_ENDIAN)
+    putLong(uuid.mostSignificantBits)
+    putLong(uuid.leastSignificantBits)
+    order(originalOrder)
+    return this
 }
