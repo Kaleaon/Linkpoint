@@ -253,8 +253,8 @@ dependencies {
     implementation("com.github.manalkaff:JetStick:1.2")  // Virtual joystick for avatar movement
     implementation("io.github.thechance101:chart:Beta-0.0.5")  // Charts (line, bar, pie) - Note: Radar is custom in RadarCompose.kt
     
-    // Note: LSL syntax highlighting is implemented natively using custom LSLSyntaxHighlighter
-    // See com.linkpoint.scripts.lsl package for full LSL language support
+    // LSL syntax highlighting uses custom LSLLanguage definition (native Compose implementation)
+    // See com.linkpoint.scripts.lsl package for complete LSL language support with 350+ functions
     
     // SceneView - Compose wrapper for Filament 3D/AR rendering
     implementation("io.github.sceneview:sceneview:2.3.3")
