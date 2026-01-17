@@ -471,7 +471,18 @@ class DebugReportService private constructor(private val context: Context) {
                         
                         if (objDiag.totalObjects == 0) {
                             appendLine()
-                            appendLine("⚠️ NO OBJECTS IN SCENE - World may not be loading!")
+                            // Check initialization phase to provide better context
+                            val initPhase = InitializationTracker.getDiagnostics().currentPhase
+                            val isStillConnecting = initPhase.name.contains("CONNECTING") || 
+                                initPhase.name.contains("UDP") ||
+                                initPhase == InitializationTracker.Phase.SESSION_SETUP
+                            if (isStillConnecting) {
+                                appendLine("ℹ️ NO OBJECTS YET - Connection still in progress (phase: $initPhase)")
+                                appendLine("   Objects will appear after RegionHandshake is processed.")
+                            } else {
+                                appendLine("⚠️ NO OBJECTS IN SCENE - World may not be loading!")
+                                appendLine("   Check if OBJECT_UPDATE messages are being received.")
+                            }
                         }
                     } else {
                         appendLine("Object manager not initialized (not logged in)")
@@ -503,7 +514,18 @@ class DebugReportService private constructor(private val context: Context) {
                         
                         if (avatarDiag.totalAvatars == 0) {
                             appendLine()
-                            appendLine("⚠️ NO AVATARS IN SCENE - Avatar data may not be loading!")
+                            // Check initialization phase to provide better context
+                            val initPhase = InitializationTracker.getDiagnostics().currentPhase
+                            val isStillConnecting = initPhase.name.contains("CONNECTING") || 
+                                initPhase.name.contains("UDP") ||
+                                initPhase == InitializationTracker.Phase.SESSION_SETUP
+                            if (isStillConnecting) {
+                                appendLine("ℹ️ NO AVATARS YET - Connection still in progress (phase: $initPhase)")
+                                appendLine("   Avatar data will appear after CoarseLocationUpdate is received.")
+                            } else {
+                                appendLine("⚠️ NO AVATARS IN SCENE - Avatar data may not be loading!")
+                                appendLine("   Check if COARSE_LOCATION_UPDATE messages are being received.")
+                            }
                         }
                     } else {
                         appendLine("Avatar manager not initialized (not logged in)")
@@ -563,7 +585,18 @@ class DebugReportService private constructor(private val context: Context) {
                         
                         if (regionInfo.name == "Unknown") {
                             appendLine()
-                            appendLine("⚠️ REGION NAME UNKNOWN - RegionHandshake may not have been received!")
+                            // Check initialization phase to provide better context
+                            val initPhase = InitializationTracker.getDiagnostics().currentPhase
+                            val isStillConnecting = initPhase.name.contains("CONNECTING") || 
+                                initPhase.name.contains("UDP") ||
+                                initPhase == InitializationTracker.Phase.SESSION_SETUP
+                            if (isStillConnecting) {
+                                appendLine("ℹ️ REGION NAME PENDING - Waiting for RegionHandshake (phase: $initPhase)")
+                                appendLine("   The actual region name will be received from the simulator.")
+                            } else {
+                                appendLine("⚠️ REGION NAME UNKNOWN - RegionHandshake may not have been received!")
+                                appendLine("   Check if REGION_HANDSHAKE is in the message statistics.")
+                            }
                         }
                     } else {
                         appendLine("No region info available - not connected to a region")
