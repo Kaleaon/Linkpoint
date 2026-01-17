@@ -164,18 +164,15 @@ class TeleportManager(
                 
                 val payload = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData
-                payload.putLong(agentId.mostSignificantBits)
-                payload.putLong(agentId.leastSignificantBits)
-                payload.putLong(sessionId.mostSignificantBits)
-                payload.putLong(sessionId.leastSignificantBits)
+                // AgentData - UUIDs use big-endian per SL protocol
+                payload.putUUID(agentId)
+                payload.putUUID(sessionId)
                 
                 // Info
-                payload.putLong(landmarkId.mostSignificantBits)
-                payload.putLong(landmarkId.leastSignificantBits)
+                payload.putUUID(landmarkId)
                 payload.putInt(TELEPORT_FLAGS_VIA_LANDMARK)
                 
-                udpConnection.sendPacket(MessageIds.TELEPORT_LANDMARK_REQUEST, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIds.TELEPORT_LANDMARK_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
                 
                 Log.i(TAG, "Sent teleport landmark request for $landmarkId")
                 TeleportResult.Pending
@@ -202,16 +199,14 @@ class TeleportManager(
                 
                 val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData
-                payload.putLong(agentId.mostSignificantBits)
-                payload.putLong(agentId.leastSignificantBits)
-                payload.putLong(sessionId.mostSignificantBits)
-                payload.putLong(sessionId.leastSignificantBits)
+                // AgentData - UUIDs use big-endian per SL protocol
+                payload.putUUID(agentId)
+                payload.putUUID(sessionId)
                 
                 // Flags
                 payload.putInt(TELEPORT_FLAGS_VIA_HOME)
                 
-                udpConnection.sendPacket(MessageIds.TELEPORT_HOME_REQUEST, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIds.TELEPORT_HOME_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
                 
                 Log.i(TAG, "Sent teleport home request")
                 TeleportResult.Pending
@@ -232,21 +227,18 @@ class TeleportManager(
                 val messageBytes = message.toByteArray(Charsets.UTF_8)
                 val payload = ByteBuffer.allocate(80 + messageBytes.size).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData
-                payload.putLong(agentId.mostSignificantBits)
-                payload.putLong(agentId.leastSignificantBits)
-                payload.putLong(sessionId.mostSignificantBits)
-                payload.putLong(sessionId.leastSignificantBits)
+                // AgentData - UUIDs use big-endian per SL protocol
+                payload.putUUID(agentId)
+                payload.putUUID(sessionId)
                 
                 // Info - target agent
-                payload.putLong(targetAgentId.mostSignificantBits)
-                payload.putLong(targetAgentId.leastSignificantBits)
+                payload.putUUID(targetAgentId)
                 
                 // Message
                 payload.putShort(messageBytes.size.toShort())
                 payload.put(messageBytes)
                 
-                udpConnection.sendPacket(MessageIds.START_LURE, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIds.START_LURE, payload.array().copyOf(payload.position()), reliable = true)
                 
                 Log.i(TAG, "Sent teleport lure to $targetAgentId")
                 true
@@ -268,20 +260,16 @@ class TeleportManager(
                 
                 val payload = ByteBuffer.allocate(80).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData
-                payload.putLong(agentId.mostSignificantBits)
-                payload.putLong(agentId.leastSignificantBits)
-                payload.putLong(sessionId.mostSignificantBits)
-                payload.putLong(sessionId.leastSignificantBits)
+                // AgentData - UUIDs use big-endian per SL protocol
+                payload.putUUID(agentId)
+                payload.putUUID(sessionId)
                 
                 // Info
-                payload.putLong(lure.senderId.mostSignificantBits)
-                payload.putLong(lure.senderId.leastSignificantBits)
-                payload.putLong(lure.lureId.mostSignificantBits)
-                payload.putLong(lure.lureId.leastSignificantBits)
+                payload.putUUID(lure.senderId)
+                payload.putUUID(lure.lureId)
                 payload.putInt(TELEPORT_FLAGS_VIA_LURE)
                 
-                udpConnection.sendPacket(MessageIds.TELEPORT_LURE_REQUEST, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIds.TELEPORT_LURE_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
                 
                 Log.i(TAG, "Accepted teleport lure from ${lure.senderName}")
                 pendingLure = null
@@ -365,11 +353,9 @@ class TeleportManager(
             val regionNameBytes = regionName.toByteArray(Charsets.UTF_8)
             val payload = ByteBuffer.allocate(100 + regionNameBytes.size).order(ByteOrder.LITTLE_ENDIAN)
             
-            // AgentData
-            payload.putLong(agentId.mostSignificantBits)
-            payload.putLong(agentId.leastSignificantBits)
-            payload.putLong(sessionId.mostSignificantBits)
-                payload.putLong(sessionId.leastSignificantBits)
+            // AgentData - UUIDs use big-endian per SL protocol
+            payload.putUUID(agentId)
+            payload.putUUID(sessionId)
             
             // Info
             payload.putLong(0) // Region handle (0 = resolve by name)
@@ -392,7 +378,7 @@ class TeleportManager(
             payload.putShort(regionNameBytes.size.toShort())
             payload.put(regionNameBytes)
             
-            udpConnection.sendPacket(MessageIds.TELEPORT_LOCATION_REQUEST, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIds.TELEPORT_LOCATION_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
             
             _teleportState.value = TeleportState.IN_PROGRESS
             Log.i(TAG, "Sent UDP teleport request to $regionName ($x, $y, $z)")
@@ -538,3 +524,16 @@ data class SLURLData(
     val y: Float,
     val z: Float
 )
+
+/**
+ * Extension function to write UUID to ByteBuffer in big-endian (SL protocol format).
+ * UUIDs in SL are always stored as 16 raw bytes in big-endian order.
+ */
+private fun ByteBuffer.putUUID(uuid: UUID): ByteBuffer {
+    val originalOrder = order()
+    order(ByteOrder.BIG_ENDIAN)
+    putLong(uuid.mostSignificantBits)
+    putLong(uuid.leastSignificantBits)
+    order(originalOrder)
+    return this
+}
