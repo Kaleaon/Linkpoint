@@ -11,6 +11,7 @@ import java.nio.ByteOrder
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.resume
 
 /**
@@ -73,6 +74,9 @@ class UDPConnection {
         private val HEADER_BYTE_ORDER = ByteOrder.BIG_ENDIAN
         private val BODY_BYTE_ORDER = ByteOrder.LITTLE_ENDIAN
         
+        // Message name prefix for critical messages (used in logging)
+        private const val CRITICAL_MESSAGE_PREFIX = "⭐ "
+        
         // Packet flags
         const val FLAG_ZEROCODED = 0x80
         const val FLAG_RELIABLE = 0x40
@@ -116,7 +120,7 @@ class UDPConnection {
     // ==================== MESSAGE STATISTICS TRACKING ====================
     // These track detailed message statistics for diagnostics
     private val totalPacketsReceived = AtomicInteger(0)
-    private val totalBytesReceived = java.util.concurrent.atomic.AtomicLong(0)
+    private val totalBytesReceived = AtomicLong(0)
     private val packetsResentCount = AtomicInteger(0)
     private val messageTypeCounts = ConcurrentHashMap<String, AtomicInteger>()
     private val lastMessageTimes = ConcurrentHashMap<String, Long>()
@@ -140,6 +144,9 @@ class UDPConnection {
             Log.i(TAG, "║ Target: $simIP:$simPort                                          ║")
             Log.i(TAG, "║ Circuit Code: $circuitCode                                       ║")
             Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
+            
+            // Reset message statistics for new connection
+            resetMessageStatistics()
             
             socket = DatagramSocket()
             socket?.soTimeout = 5000
@@ -535,8 +542,8 @@ class UDPConnection {
         ackCallbacks.clear()  // Clear ACK callbacks to prevent memory leaks
         synchronized(pendingAckIds) { pendingAckIds.clear() }
         
-        // Reset message statistics for next session
-        // (Keep them for post-disconnect diagnostics, but they'll be reset on next connect)
+        // Note: Message statistics are preserved for post-disconnect diagnostics.
+        // They will be reset when connect() is called for a new session.
         
         Log.i(TAG, "Disconnected")
     }
@@ -761,7 +768,7 @@ class UDPConnection {
         Log.i(TAG, "   📨 Message: $messageName (0x${messageId.toString(16).uppercase()})")
         
         // Track message statistics for diagnostics
-        val cleanMessageName = messageName.replace("⭐ ", "") // Remove emoji for stats key
+        val cleanMessageName = messageName.replace(CRITICAL_MESSAGE_PREFIX, "") // Remove prefix for stats key
         messageTypeCounts.getOrPut(cleanMessageName) { AtomicInteger(0) }.incrementAndGet()
         lastMessageTimes[cleanMessageName] = System.currentTimeMillis()
         
@@ -815,7 +822,7 @@ class UDPConnection {
         return when (messageId) {
             MessageIds.USE_CIRCUIT_CODE -> "UseCircuitCode"
             MessageIds.COMPLETE_AGENT_MOVEMENT -> "CompleteAgentMovement"
-            MessageIds.REGION_HANDSHAKE -> "⭐ RegionHandshake"
+            MessageIds.REGION_HANDSHAKE -> "${CRITICAL_MESSAGE_PREFIX}RegionHandshake"
             MessageIds.REGION_HANDSHAKE_REPLY -> "RegionHandshakeReply"
             MessageIds.AGENT_THROTTLE -> "AgentThrottle"
             MessageIds.AGENT_MOVEMENT_COMPLETE -> "AgentMovementComplete"
@@ -1003,6 +1010,18 @@ class UDPConnection {
     )
     
     // ==================== DIAGNOSTIC METHODS ====================
+    
+    /**
+     * Reset message statistics for a new connection session.
+     */
+    private fun resetMessageStatistics() {
+        totalPacketsReceived.set(0)
+        totalBytesReceived.set(0)
+        packetsResentCount.set(0)
+        messageTypeCounts.clear()
+        lastMessageTimes.clear()
+        Log.d(TAG, "Message statistics reset for new connection")
+    }
     
     /**
      * Check if the UDP connection is currently connected
