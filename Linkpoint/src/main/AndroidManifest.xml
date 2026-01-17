@@ -24,7 +24,9 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
     
     <!-- Bluetooth (for voice chat) -->
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30"/>
@@ -219,6 +221,30 @@
             android:name=".services.StreamingMediaService"
             android:enabled="true"
             android:exported="false" />
+
+        <!-- Background Connection Service - Keeps SL connected when app is in background -->
+        <service
+            android:name=".service.LinkpointConnectionService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"
+            android:stopWithTask="false" />
+
+        <!-- Script Editor Activity - LSL syntax highlighting -->
+        <activity
+            android:name=".ui.scripts.ScriptEditorActivity"
+            android:label="Script Editor"
+            android:theme="@style/Theme.Linkpoint"
+            android:exported="false"
+            android:parentActivityName=".ui.inventory.InventoryActivity" />
+
+        <!-- Notecard Editor Activity -->
+        <activity
+            android:name=".ui.notecard.NotecardEditorActivity"
+            android:label="Notecard Editor"
+            android:theme="@style/Theme.Linkpoint"
+            android:exported="false"
+            android:parentActivityName=".ui.inventory.InventoryActivity" />
 
         <!-- File Provider for sharing -->
         <provider

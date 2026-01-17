@@ -28,18 +28,6 @@ class GroupsManager(
     private val agentId: UUID
 ) : EventHandler {
     
-    companion object {
-        private const val TAG = "GroupsManager"
-        
-        // Group powers (bit flags)
-        const val GP_MEMBER_INVITE = 0x2L
-        const val GP_MEMBER_EJECT = 0x4L
-        const val GP_ROLE_PROPERTIES = 0x100L
-        const val GP_NOTICE_SEND = 0x1000L
-        const val GP_NOTICES_RECEIVE = 0x2000L
-        const val GP_GROUP_CHANGE_IDENTITY = 0x10000000L
-    }
-    
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     
     // Groups the agent is a member of
@@ -306,6 +294,239 @@ class GroupsManager(
     fun shutdown() {
         scope.cancel()
     }
+    
+    // ==================== GROUP ACCOUNTING ====================
+    
+    /**
+     * Request group account summary.
+     */
+    suspend fun requestAccountSummary(groupId: UUID): GroupAccountSummary? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val payload = ByteBuffer.allocate(52).order(ByteOrder.LITTLE_ENDIAN)
+                
+                // AgentData
+                payload.putUUID(agentId)
+                payload.putUUID(groupId)
+                payload.putUUID(udpConnection.getSessionId())
+                
+                // MoneyData
+                payload.putInt(0) // RequestID - server will echo this back
+                payload.putInt(-1) // IntervalDays - current
+                payload.putInt(0) // CurrentInterval - start
+                
+                udpConnection.sendPacket(MSG_GROUP_ACCOUNT_SUMMARY_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
+                Log.d(TAG, "Requested account summary for group: $groupId")
+                
+                // Note: Response will come via message handler
+                null
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to request account summary", e)
+                null
+            }
+        }
+    }
+    
+    /**
+     * Request group account details.
+     */
+    suspend fun requestAccountDetails(groupId: UUID): GroupAccountDetails? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val payload = ByteBuffer.allocate(52).order(ByteOrder.LITTLE_ENDIAN)
+                
+                // AgentData
+                payload.putUUID(agentId)
+                payload.putUUID(groupId)
+                payload.putUUID(udpConnection.getSessionId())
+                
+                // MoneyData
+                payload.putInt(0) // RequestID
+                payload.putInt(-1) // IntervalDays
+                payload.putInt(0) // CurrentInterval
+                
+                udpConnection.sendPacket(MSG_GROUP_ACCOUNT_DETAILS_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
+                Log.d(TAG, "Requested account details for group: $groupId")
+                
+                null
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to request account details", e)
+                null
+            }
+        }
+    }
+    
+    /**
+     * Request group account transactions.
+     */
+    suspend fun requestAccountTransactions(groupId: UUID): List<GroupTransaction>? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val payload = ByteBuffer.allocate(52).order(ByteOrder.LITTLE_ENDIAN)
+                
+                // AgentData
+                payload.putUUID(agentId)
+                payload.putUUID(groupId)
+                payload.putUUID(udpConnection.getSessionId())
+                
+                // MoneyData
+                payload.putInt(0) // RequestID
+                payload.putInt(-1) // IntervalDays
+                payload.putInt(0) // CurrentInterval
+                
+                udpConnection.sendPacket(MSG_GROUP_ACCOUNT_TRANSACTIONS_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
+                Log.d(TAG, "Requested account transactions for group: $groupId")
+                
+                null
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to request account transactions", e)
+                null
+            }
+        }
+    }
+    
+    // ==================== GROUP PROPOSALS/VOTING ====================
+    
+    /**
+     * Request active proposals for a group.
+     */
+    suspend fun requestActiveProposals(groupId: UUID) {
+        withContext(Dispatchers.IO) {
+            try {
+                val payload = ByteBuffer.allocate(52).order(ByteOrder.LITTLE_ENDIAN)
+                
+                // AgentData
+                payload.putUUID(agentId)
+                payload.putUUID(udpConnection.getSessionId())
+                
+                // GroupData
+                payload.putUUID(groupId)
+                
+                // TransactionData
+                payload.putUUID(UUID.randomUUID()) // TransactionID
+                
+                udpConnection.sendPacket(MSG_GROUP_ACTIVE_PROPOSALS_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
+                Log.d(TAG, "Requested active proposals for group: $groupId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to request active proposals", e)
+            }
+        }
+    }
+    
+    /**
+     * Request vote history for a group.
+     */
+    suspend fun requestVoteHistory(groupId: UUID) {
+        withContext(Dispatchers.IO) {
+            try {
+                val payload = ByteBuffer.allocate(52).order(ByteOrder.LITTLE_ENDIAN)
+                
+                // AgentData
+                payload.putUUID(agentId)
+                payload.putUUID(udpConnection.getSessionId())
+                
+                // GroupData
+                payload.putUUID(groupId)
+                
+                // TransactionData
+                payload.putUUID(UUID.randomUUID()) // TransactionID
+                
+                udpConnection.sendPacket(MSG_GROUP_VOTE_HISTORY_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
+                Log.d(TAG, "Requested vote history for group: $groupId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to request vote history", e)
+            }
+        }
+    }
+    
+    /**
+     * Cast a vote on a proposal.
+     */
+    suspend fun castVote(groupId: UUID, proposalId: UUID, voteString: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val voteBytes = voteString.toByteArray(Charsets.UTF_8)
+                val payload = ByteBuffer.allocate(52 + voteBytes.size).order(ByteOrder.LITTLE_ENDIAN)
+                
+                // AgentData
+                payload.putUUID(agentId)
+                payload.putUUID(udpConnection.getSessionId())
+                
+                // ProposalData
+                payload.putUUID(groupId)
+                payload.putUUID(proposalId)
+                payload.put(voteBytes.size.toByte())
+                payload.put(voteBytes)
+                
+                udpConnection.sendPacket(MSG_GROUP_PROPOSAL_BALLOT, payload.array().copyOf(payload.position()), reliable = true)
+                Log.i(TAG, "Cast vote on proposal $proposalId: $voteString")
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to cast vote", e)
+                false
+            }
+        }
+    }
+    
+    /**
+     * Start a new proposal.
+     */
+    suspend fun startProposal(
+        groupId: UUID,
+        quorum: Int,
+        majority: Float,
+        duration: Int, // in seconds
+        proposalText: String
+    ): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val textBytes = proposalText.toByteArray(Charsets.UTF_8)
+                val payload = ByteBuffer.allocate(60 + textBytes.size).order(ByteOrder.LITTLE_ENDIAN)
+                
+                // AgentData
+                payload.putUUID(agentId)
+                payload.putUUID(udpConnection.getSessionId())
+                
+                // ProposalData
+                payload.putUUID(groupId)
+                payload.putInt(quorum)
+                payload.putFloat(majority)
+                payload.putInt(duration)
+                payload.putShort(textBytes.size.toShort())
+                payload.put(textBytes)
+                
+                udpConnection.sendPacket(MSG_START_GROUP_PROPOSAL, payload.array().copyOf(payload.position()), reliable = true)
+                Log.i(TAG, "Started new proposal in group $groupId")
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to start proposal", e)
+                false
+            }
+        }
+    }
+    
+    companion object {
+        private const val TAG = "GroupsManager"
+        
+        // Group powers (bit flags)
+        const val GP_MEMBER_INVITE = 0x2L
+        const val GP_MEMBER_EJECT = 0x4L
+        const val GP_ROLE_PROPERTIES = 0x100L
+        const val GP_NOTICE_SEND = 0x1000L
+        const val GP_NOTICES_RECEIVE = 0x2000L
+        const val GP_GROUP_CHANGE_IDENTITY = 0x10000000L
+        
+        // Group accounting message IDs
+        const val MSG_GROUP_ACCOUNT_SUMMARY_REQUEST = 0xFF0070
+        const val MSG_GROUP_ACCOUNT_DETAILS_REQUEST = 0xFF0071
+        const val MSG_GROUP_ACCOUNT_TRANSACTIONS_REQUEST = 0xFF0072
+        
+        // Group proposals message IDs
+        const val MSG_GROUP_ACTIVE_PROPOSALS_REQUEST = 0xFF0073
+        const val MSG_GROUP_VOTE_HISTORY_REQUEST = 0xFF0074
+        const val MSG_GROUP_PROPOSAL_BALLOT = 0xFF0075
+        const val MSG_START_GROUP_PROPOSAL = 0xFF0076
+    }
 }
 
 @Parcelize
@@ -356,3 +577,89 @@ sealed class GroupEvent {
     data class NoticeReceived(val notice: GroupNotice) : GroupEvent()
     data class ChatReceived(val message: GroupChatMessage) : GroupEvent()
 }
+
+// ==================== GROUP ACCOUNTING DATA CLASSES ====================
+
+/**
+ * Group account summary data.
+ */
+data class GroupAccountSummary(
+    val groupId: UUID,
+    val balance: Int,
+    val totalCredits: Int,
+    val totalDebits: Int,
+    val objectTaxCurrent: Int,
+    val lightTaxCurrent: Int,
+    val landTaxCurrent: Int,
+    val groupTaxCurrent: Int,
+    val parcelDirFeeCurrent: Int,
+    val objectTaxEstimate: Int,
+    val lightTaxEstimate: Int,
+    val landTaxEstimate: Int,
+    val groupTaxEstimate: Int,
+    val parcelDirFeeEstimate: Int,
+    val startDate: String,
+    val lastTaxDate: String,
+    val taxDate: String
+)
+
+/**
+ * Group account details data.
+ */
+data class GroupAccountDetails(
+    val groupId: UUID,
+    val items: List<AccountDetailItem>
+)
+
+/**
+ * A single account detail item.
+ */
+data class AccountDetailItem(
+    val description: String,
+    val amount: Int,
+    val date: String
+)
+
+/**
+ * Group transaction data.
+ */
+data class GroupTransaction(
+    val groupId: UUID,
+    val time: String,
+    val type: String,
+    val item: String,
+    val user: String,
+    val amount: Int
+)
+
+/**
+ * Group proposal data.
+ */
+@Parcelize
+data class GroupProposal(
+    val proposalId: UUID,
+    val groupId: UUID,
+    val proposerName: String,
+    val proposalText: String,
+    val quorum: Int,
+    val majority: Float,
+    val startDate: Long,
+    val endDate: Long,
+    val voteYes: Int = 0,
+    val voteNo: Int = 0,
+    val voteAbstain: Int = 0
+) : Parcelable
+
+/**
+ * Group vote history item.
+ */
+@Parcelize
+data class GroupVoteHistoryItem(
+    val voteId: UUID,
+    val proposalText: String,
+    val result: String,
+    val voteDate: Long,
+    val yesVotes: Int,
+    val noVotes: Int,
+    val abstainVotes: Int
+) : Parcelable

@@ -5,37 +5,63 @@ import android.util.Log
 import com.linkpoint.assets.*
 import com.linkpoint.utils.CrashReporter
 import com.linkpoint.avatar.AvatarManager
+import com.linkpoint.avatar.baking.AvatarBakingSystem
 import com.linkpoint.chat.ChatManager
 import com.linkpoint.chat.IMManager
+import com.linkpoint.chat.dialogs.ScriptDialogManager
 import com.linkpoint.core.GridManager
 import com.linkpoint.core.SessionManager
 import com.linkpoint.core.StartLocationManager
 import com.linkpoint.core.DestinationGuide
 import com.linkpoint.core.AvatarSelectionManager
+import com.linkpoint.economy.EconomyManager
 import com.linkpoint.inventory.GestureManager
 import com.linkpoint.inventory.InventoryManager
 import com.linkpoint.inventory.OutfitManager
+import com.linkpoint.inventory.notecard.NotecardManager
 import com.linkpoint.network.NetworkSettings
 import com.linkpoint.network.SecondLifeProtocol
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.objects.BuildTools
 import com.linkpoint.objects.ObjectManager
+import com.linkpoint.objects.inventory.TaskInventoryManager
+import com.linkpoint.objects.prim.FlexiblePrimSimulator
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.messages.UDPConnection
 import com.linkpoint.protocol.messages.parseRegionHandshake
 import com.linkpoint.protocol.messages.parseAgentMovementComplete
+import com.linkpoint.protocol.transfer.TransferManager
+import com.linkpoint.protocol.transfer.XferManager
+import com.linkpoint.render.DrawDistanceManager
+import com.linkpoint.render.HoverTextManager
 import com.linkpoint.render.RenderManager
+import com.linkpoint.render.particles.ParticleSystem
+import com.linkpoint.rlv.RLVController
+import com.linkpoint.service.ConnectionKeepAliveManager
+import com.linkpoint.service.IdleHandler
+import com.linkpoint.service.LinkpointConnectionService
+import com.linkpoint.users.DisplayNameManager
+import com.linkpoint.users.MuteManager
+import com.linkpoint.users.UserProfileManager
 import com.linkpoint.voice.VoiceManager
 import com.linkpoint.world.FriendsManager
 import com.linkpoint.world.ParcelManager
 import com.linkpoint.world.ProfileManager
 import com.linkpoint.world.SearchManager
 import com.linkpoint.world.WorldMap
+import com.linkpoint.world.environment.EnvironmentManager
+import com.linkpoint.world.minimap.MinimapManager
 import com.linkpoint.groups.GroupsManager
 import com.linkpoint.animesh.AnimeshManager
+import com.linkpoint.avatar.AnimationController
 import com.linkpoint.bom.BakesOnMeshManager
+import com.linkpoint.inventory.LandmarkManager
+import com.linkpoint.media.MediaManager
+import com.linkpoint.objects.SitManager
+import com.linkpoint.snapshot.SnapshotManager
 import com.linkpoint.teleport.TeleportManager
 import com.linkpoint.hud.HUDManager
+import com.linkpoint.world.estate.EstateManager
 import com.linkpoint.xr.XRManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -161,6 +187,104 @@ class LinkpointApp : Application() {
     lateinit var voiceManager: VoiceManager
         private set
     
+    // Transfer system (NEW)
+    lateinit var transferManager: TransferManager
+        private set
+    lateinit var xferManager: XferManager
+        private set
+    
+    // Notecard system (NEW)
+    lateinit var notecardManager: NotecardManager
+        private set
+    
+    // Task inventory (NEW)
+    lateinit var taskInventoryManager: TaskInventoryManager
+        private set
+    
+    // Environment/Windlight (NEW)
+    lateinit var environmentManager: EnvironmentManager
+        private set
+    
+    // Display names (NEW)
+    lateinit var displayNameManager: DisplayNameManager
+        private set
+    
+    // Mute list (NEW)
+    lateinit var muteManager: MuteManager
+        private set
+    
+    // Script dialogs (NEW)
+    lateinit var scriptDialogManager: ScriptDialogManager
+        private set
+    
+    // Hover text (NEW)
+    lateinit var hoverTextManager: HoverTextManager
+        private set
+    
+    // Economy/L$ (NEW)
+    lateinit var economyManager: EconomyManager
+        private set
+    
+    // RLV Controller (NEW)
+    lateinit var rlvController: RLVController
+        private set
+    
+    // User Profile Manager (NEW)
+    lateinit var userProfileManager: UserProfileManager
+        private set
+    
+    // Draw Distance Manager (NEW)
+    lateinit var drawDistanceManager: DrawDistanceManager
+        private set
+    
+    // Minimap (NEW)
+    lateinit var minimapManager: MinimapManager
+        private set
+    
+    // Avatar Baking System (NEW)
+    lateinit var avatarBakingSystem: AvatarBakingSystem
+        private set
+    
+    // Flexible Prim Simulator (NEW)
+    lateinit var flexiblePrimSimulator: FlexiblePrimSimulator
+        private set
+    
+    // Connection Keep-Alive (NEW)
+    lateinit var connectionKeepAlive: ConnectionKeepAliveManager
+        private set
+    
+    // Idle Handler (NEW)
+    lateinit var idleHandler: IdleHandler
+        private set
+    
+    // Landmark Manager (NEW)
+    lateinit var landmarkManager: LandmarkManager
+        private set
+    
+    // Media Manager (NEW)
+    lateinit var mediaManager: MediaManager
+        private set
+    
+    // Estate Manager (NEW)
+    lateinit var estateManager: EstateManager
+        private set
+    
+    // Snapshot Manager (NEW)
+    lateinit var snapshotManager: SnapshotManager
+        private set
+    
+    // Script Manager (NEW)
+    lateinit var scriptManager: ScriptManager
+        private set
+    
+    // Sit Manager (NEW)
+    lateinit var sitManager: SitManager
+        private set
+    
+    // Animation Controller (NEW)
+    lateinit var animationController: AnimationController
+        private set
+    
     // Crash Reporter
     lateinit var crashReporter: CrashReporter
         private set
@@ -242,6 +366,45 @@ class LinkpointApp : Application() {
         // Voice
         voiceManager = VoiceManager(this, capabilityManager)
         
+        // NEW: Environment/Windlight
+        environmentManager = EnvironmentManager(capabilityManager)
+        
+        // NEW: Display names
+        displayNameManager = DisplayNameManager(capabilityManager)
+        
+        // NEW: Hover text
+        hoverTextManager = HoverTextManager()
+        
+        // NEW: Xfer manager (needs UDP connection)
+        xferManager = XferManager(udpConnection)
+        
+        // NEW: RLV Controller
+        rlvController = RLVController()
+        
+        // NEW: Draw Distance Manager
+        drawDistanceManager = DrawDistanceManager()
+        
+        // NEW: Minimap
+        minimapManager = MinimapManager(udpConnection)
+        
+        // NEW: Avatar Baking System
+        avatarBakingSystem = AvatarBakingSystem()
+        
+        // NEW: Flexible Prim Simulator
+        flexiblePrimSimulator = FlexiblePrimSimulator()
+        
+        // NEW: Connection Keep-Alive (critical for background operation)
+        connectionKeepAlive = ConnectionKeepAliveManager(this, udpConnection)
+        
+        // NEW: Idle Handler
+        idleHandler = IdleHandler(connectionKeepAlive)
+        
+        // NEW: Media Manager
+        mediaManager = MediaManager(this, udpConnection)
+        
+        // NEW: Snapshot Manager
+        snapshotManager = SnapshotManager(this, capabilityManager)
+        
         Log.d(TAG, "Core managers initialized")
     }
     
@@ -258,6 +421,33 @@ class LinkpointApp : Application() {
         groupsManager = GroupsManager(udpConnection, capabilityManager, agentId)
         
         Log.d(TAG, "Initializing agent-specific managers for $agentId")
+        
+        // NEW: Transfer manager (needs agent ID and session)
+        transferManager = TransferManager(udpConnection, agentId, udpConnection.getSessionId())
+        
+        // NEW: Notecard manager
+        notecardManager = NotecardManager(transferManager)
+        
+        // NEW: Task inventory manager
+        taskInventoryManager = TaskInventoryManager(udpConnection, xferManager, agentId)
+        
+        // NEW: Mute manager
+        muteManager = MuteManager(udpConnection, xferManager, agentId)
+        
+        // NEW: User Profile Manager
+        userProfileManager = UserProfileManager(capabilityManager, udpConnection, agentId)
+        
+        // NEW: Initialize connection keep-alive with credentials
+        connectionKeepAlive.initialize(agentId, udpConnection.getSessionId())
+        
+        // Start background service for connection persistence
+        LinkpointConnectionService.start(this)
+        
+        // NEW: Script dialog manager
+        scriptDialogManager = ScriptDialogManager(udpConnection, agentId)
+        
+        // NEW: Economy manager
+        economyManager = EconomyManager(udpConnection, capabilityManager, agentId)
         
         // Avatar manager
         avatarManager = AvatarManager(
@@ -298,6 +488,21 @@ class LinkpointApp : Application() {
         
         // HUD manager
         hudManager = HUDManager(objectManager, udpConnection, agentId)
+        
+        // NEW: Landmark Manager
+        landmarkManager = LandmarkManager(capabilityManager, transferManager, inventoryManager, udpConnection, agentId)
+        
+        // NEW: Estate Manager
+        estateManager = EstateManager(udpConnection, capabilityManager, agentId)
+        
+        // NEW: Script Manager
+        scriptManager = ScriptManager(capabilityManager, transferManager)
+        
+        // NEW: Sit Manager
+        sitManager = SitManager(udpConnection, agentId)
+        
+        // NEW: Animation Controller
+        animationController = AnimationController(udpConnection, agentId)
         
         // Connect WorldMap to AvatarManager and FriendsManager for nearby users
         worldMap.setAvatarManagerProvider { avatarManager }
@@ -579,6 +784,9 @@ class LinkpointApp : Application() {
         super.onTerminate()
         Log.i(TAG, "Linkpoint application terminating")
         
+        // Stop background connection service
+        LinkpointConnectionService.stop(this)
+        
         // Cleanup
         voiceManager.shutdown()
         if (::avatarManager.isInitialized) avatarManager.shutdown()
@@ -597,6 +805,34 @@ class LinkpointApp : Application() {
         animationManager.shutdown()
         meshManager.shutdown()
         textureManager.shutdown()
+        
+        // Shutdown new managers
+        if (::economyManager.isInitialized) economyManager.shutdown()
+        if (::scriptDialogManager.isInitialized) scriptDialogManager.shutdown()
+        if (::muteManager.isInitialized) muteManager.shutdown()
+        if (::taskInventoryManager.isInitialized) taskInventoryManager.shutdown()
+        if (::notecardManager.isInitialized) notecardManager.shutdown()
+        if (::transferManager.isInitialized) transferManager.shutdown()
+        if (::xferManager.isInitialized) xferManager.shutdown()
+        if (::displayNameManager.isInitialized) displayNameManager.shutdown()
+        if (::environmentManager.isInitialized) environmentManager.shutdown()
+        
+        // Shutdown additional new managers
+        if (::rlvController.isInitialized) rlvController.shutdown()
+        if (::userProfileManager.isInitialized) userProfileManager.shutdown()
+        if (::minimapManager.isInitialized) minimapManager.shutdown()
+        if (::avatarBakingSystem.isInitialized) avatarBakingSystem.shutdown()
+        if (::connectionKeepAlive.isInitialized) connectionKeepAlive.shutdown()
+        if (::idleHandler.isInitialized) idleHandler.shutdown()
+        
+        // Shutdown latest new managers
+        if (::landmarkManager.isInitialized) landmarkManager.shutdown()
+        if (::mediaManager.isInitialized) mediaManager.shutdown()
+        if (::estateManager.isInitialized) estateManager.shutdown()
+        if (::snapshotManager.isInitialized) snapshotManager.shutdown()
+        if (::scriptManager.isInitialized) scriptManager.shutdown()
+        if (::sitManager.isInitialized) sitManager.shutdown()
+        if (::animationController.isInitialized) animationController.shutdown()
         
         capabilityManager.shutdown()
         udpConnection.disconnect()

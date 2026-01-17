@@ -36,6 +36,11 @@ allprojects {
             name = "Clojars"
             url = "https://repo.clojars.org/"
         }
+        // Add JitPack for compose-code-editor
+        maven {
+            name = "JitPack"
+            url = "https://jitpack.io"
+        }
     }
 }
 

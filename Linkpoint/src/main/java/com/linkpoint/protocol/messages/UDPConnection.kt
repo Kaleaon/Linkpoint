@@ -451,35 +451,6 @@ class UDPConnection {
     }
     
     /**
-     * Get human-readable message name from ID for debugging.
-     */
-    private fun getMessageName(messageId: Int): String {
-        return when (messageId) {
-            MessageIds.USE_CIRCUIT_CODE -> "UseCircuitCode"
-            MessageIds.COMPLETE_AGENT_MOVEMENT -> "CompleteAgentMovement"
-            MessageIds.LOGOUT_REQUEST -> "LogoutRequest"
-            MessageIds.REGION_HANDSHAKE -> "RegionHandshake"
-            MessageIds.AGENT_MOVEMENT_COMPLETE -> "AgentMovementComplete"
-            MessageIds.CHAT_FROM_SIMULATOR -> "ChatFromSimulator"
-            MessageIds.IMPROVED_INSTANT_MESSAGE -> "ImprovedInstantMessage"
-            MessageIds.OBJECT_UPDATE -> "ObjectUpdate"
-            MessageIds.OBJECT_UPDATE_COMPRESSED -> "ObjectUpdateCompressed"
-            MessageIds.IMPROVED_TERSE_OBJECT_UPDATE -> "ImprovedTerseObjectUpdate"
-            MessageIds.KILL_OBJECT -> "KillObject"
-            MessageIds.COARSE_LOCATION_UPDATE -> "CoarseLocationUpdate"
-            MessageIds.PACKET_ACK -> "PacketAck"
-            MessageIds.START_PING_CHECK -> "StartPingCheck"
-            MessageIds.COMPLETE_PING_CHECK -> "CompletePingCheck"
-            MessageIds.AGENT_UPDATE -> "AgentUpdate"
-            MessageIds.AGENT_ANIMATION -> "AgentAnimation"
-            MessageIds.AVATAR_ANIMATION -> "AvatarAnimation"
-            MessageIds.AGENT_THROTTLE -> "AgentThrottle"
-            MessageIds.REGION_HANDSHAKE_REPLY -> "RegionHandshakeReply"
-            else -> "Unknown(0x${messageId.toString(16).uppercase()})"
-        }
-    }
-    
-    /**
      * Extract the sequence number from raw packet data.
      * Packet header format: flags (1 byte), sequence (4 bytes big-endian), extra (1 byte)
      */
@@ -1550,23 +1521,31 @@ class UDPConnection {
         }
     }
     
+    /**
+     * Get human-readable message name from ID for debugging.
+     */
     private fun getMessageName(messageId: Int): String {
         return when (messageId) {
             MessageIds.USE_CIRCUIT_CODE -> "UseCircuitCode"
             MessageIds.COMPLETE_AGENT_MOVEMENT -> "CompleteAgentMovement"
+            MessageIds.LOGOUT_REQUEST -> "LogoutRequest"
             MessageIds.REGION_HANDSHAKE -> "${CRITICAL_MESSAGE_PREFIX}RegionHandshake"
             MessageIds.REGION_HANDSHAKE_REPLY -> "RegionHandshakeReply"
             MessageIds.AGENT_THROTTLE -> "AgentThrottle"
             MessageIds.AGENT_MOVEMENT_COMPLETE -> "AgentMovementComplete"
             MessageIds.CHAT_FROM_SIMULATOR -> "ChatFromSimulator"
+            MessageIds.IMPROVED_INSTANT_MESSAGE -> "ImprovedInstantMessage"
             MessageIds.OBJECT_UPDATE -> "ObjectUpdate"
             MessageIds.OBJECT_UPDATE_COMPRESSED -> "ObjectUpdateCompressed"
             MessageIds.IMPROVED_TERSE_OBJECT_UPDATE -> "ImprovedTerseObjectUpdate"
             MessageIds.AVATAR_ANIMATION -> "AvatarAnimation"
+            MessageIds.AGENT_ANIMATION -> "AgentAnimation"
             MessageIds.COARSE_LOCATION_UPDATE -> "CoarseLocationUpdate"
             MessageIds.KILL_OBJECT -> "KillObject"
+            MessageIds.PACKET_ACK -> "PacketAck"
             MessageIds.START_PING_CHECK -> "StartPingCheck"
             MessageIds.COMPLETE_PING_CHECK -> "CompletePingCheck"
+            MessageIds.AGENT_UPDATE -> "AgentUpdate"
             else -> "Unknown(0x${messageId.toString(16).uppercase()})"
         }
     }
@@ -2041,4 +2020,11 @@ object MessageIds {
     const val AGENT_SET_APPEARANCE: Int = 0xFFFF0054.toInt()
     const val AGENT_WEARABLES_UPDATE: Int = 0xFFFF00A1.toInt()
     const val AGENT_IS_NOW_WEARING: Int = 0xFFFF00A2.toInt()
+    
+    // Estate/Region management
+    const val ESTATE_OWNER_MESSAGE: Int = 0xFFFF00B0.toInt()
+    const val FREEZE_USER: Int = 0xFFFF00B1.toInt()
+    const val EJECT_USER: Int = 0xFFFF00B2.toInt()
+    const val ESTATE_COVENANT_REQUEST: Int = 0xFFFF00B3.toInt()
+    const val ESTATE_COVENANT_REPLY: Int = 0xFFFF00B4.toInt()
 }
