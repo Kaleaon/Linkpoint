@@ -11,6 +11,7 @@ import java.nio.ByteOrder
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
@@ -67,6 +68,15 @@ class UDPConnection {
      */
     fun getCircuitCode(): Int = circuitCode
     
+    private var socket: DatagramSocket? = null
+    private var receiveJob: Job? = null
+    private var agentUpdateJob: Job? = null
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    
+    // ==================== CONFIGURABLE PARALLEL PROCESSING ====================
+    // These settings control CPU and RAM usage for packet processing.
+    // Users can adjust these via UI sliders for performance tuning.
+    
     companion object {
         private const val TAG = "UDPConnection"
         private const val BUFFER_SIZE = 65535
@@ -91,12 +101,226 @@ class UDPConnection {
         // ACK batching configuration
         private const val MAX_ACKS_PER_PACKET = 10
         private const val ACK_FLUSH_INTERVAL_MS = 100L
+        
+        // ==================== STANDARD MEMORY SIZES ====================
+        // Standard computer memory measurements for user-friendly configuration.
+        // These align with how users typically think about memory allocation.
+        
+        // Memory size constants in bytes
+        const val KB = 1024L
+        const val MB = 1024L * KB
+        const val GB = 1024L * MB
+        
+        // Average packet size estimate for calculating packet counts from memory
+        private const val AVG_PACKET_SIZE_BYTES = 1024L  // ~1KB average packet
+        
+        /**
+         * Standard memory sizes for buffer allocation.
+         * Users select memory amounts, which are converted to packet counts internally.
+         */
+        enum class MemorySize(val bytes: Long, val displayName: String) {
+            MB_64(64 * MB, "64 MB"),
+            MB_128(128 * MB, "128 MB"),
+            MB_256(256 * MB, "256 MB"),
+            MB_512(512 * MB, "512 MB"),
+            GB_1(1 * GB, "1 GB"),
+            GB_2(2 * GB, "2 GB"),
+            GB_4(4 * GB, "4 GB"),
+            GB_8(8 * GB, "8 GB");
+            
+            /** Convert memory size to approximate packet count */
+            fun toPacketCount(): Int = (bytes / AVG_PACKET_SIZE_BYTES).toInt().coerceIn(64, Int.MAX_VALUE)
+            
+            companion object {
+                /** Get all available memory sizes for UI display */
+                fun getDisplayNames(): List<String> = values().map { it.displayName }
+                
+                /** Find memory size by display name */
+                fun fromDisplayName(name: String): MemorySize? = values().find { it.displayName == name }
+                
+                /** Snap a byte value to the nearest standard memory size */
+                fun snapToNearest(bytes: Long): MemorySize {
+                    var closest = values().first()
+                    var minDiff = kotlin.math.abs(bytes - closest.bytes)
+                    
+                    for (size in values()) {
+                        val diff = kotlin.math.abs(bytes - size.bytes)
+                        if (diff < minDiff) {
+                            minDiff = diff
+                            closest = size
+                        }
+                    }
+                    return closest
+                }
+            }
+        }
+        
+        /**
+         * Standard batch sizes for parallel processing.
+         * Smaller batches = more responsive, larger batches = more throughput.
+         */
+        enum class BatchSize(val count: Int, val displayName: String) {
+            SMALL(16, "Small (16)"),
+            MEDIUM(64, "Medium (64)"),
+            LARGE(256, "Large (256)"),
+            EXTRA_LARGE(1024, "Extra Large (1024)");
+            
+            companion object {
+                fun getDisplayNames(): List<String> = values().map { it.displayName }
+                fun fromDisplayName(name: String): BatchSize? = values().find { it.displayName == name }
+            }
+        }
     }
     
-    private var socket: DatagramSocket? = null
-    private var receiveJob: Job? = null
-    private var agentUpdateJob: Job? = null
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    /**
+     * Processing configuration that can be adjusted at runtime.
+     * Controls the balance between processing speed and resource usage.
+     * Uses standard computer memory measurements (MB, GB) for user-friendly configuration.
+     */
+    data class ProcessingConfig(
+        /** Number of threads for parallel packet processing (1-16, default: CPU cores) */
+        val threadCount: Int = Runtime.getRuntime().availableProcessors().coerceIn(1, 16),
+        /** Maximum memory for packet buffer - uses standard sizes (64 MB - 8 GB) */
+        val bufferMemory: MemorySize = MemorySize.MB_256,
+        /** Batch size for parallel processing */
+        val batchSize: BatchSize = BatchSize.MEDIUM,
+        /** Processing priority level affecting resource allocation */
+        val priority: ProcessingPriority = ProcessingPriority.BALANCED
+    ) {
+        /** Get buffer size as packet count based on memory allocation */
+        fun getBufferPacketCount(): Int = bufferMemory.toPacketCount()
+        
+        /** Get batch size count */
+        fun getBatchCount(): Int = batchSize.count
+        
+        /** Get human-readable description of current config */
+        fun getDescription(): String = 
+            "Threads: $threadCount, Buffer: ${bufferMemory.displayName}, Batch: ${batchSize.displayName}, Priority: $priority"
+    }
+    
+    /**
+     * Processing priority levels for resource allocation.
+     * Each level has recommended memory and batch settings.
+     */
+    enum class ProcessingPriority(
+        val threadMultiplier: Float,
+        val recommendedMemory: MemorySize,
+        val recommendedBatch: BatchSize,
+        val displayName: String
+    ) {
+        /** Minimal resource usage - conserve battery and memory */
+        LOW(0.5f, MemorySize.MB_64, BatchSize.SMALL, "Low (Battery Saver)"),
+        /** Balanced resource usage - good for most situations */
+        BALANCED(1.0f, MemorySize.MB_256, BatchSize.MEDIUM, "Balanced"),
+        /** High performance - faster loading, more memory usage */
+        HIGH(1.5f, MemorySize.MB_512, BatchSize.LARGE, "High Performance"),
+        /** Maximum performance - use all available resources */
+        MAXIMUM(2.0f, MemorySize.GB_1, BatchSize.EXTRA_LARGE, "Maximum");
+        
+        companion object {
+            fun getDisplayNames(): List<String> = values().map { it.displayName }
+            fun fromDisplayName(name: String): ProcessingPriority? = values().find { it.displayName == name }
+        }
+    }
+    
+    // Current processing configuration - can be updated at runtime
+    @Volatile
+    private var processingConfig = ProcessingConfig()
+    
+    // Dedicated thread pool for parallel packet processing
+    // Dynamically sized based on configuration
+    private var packetProcessorExecutor = Executors.newFixedThreadPool(
+        getEffectiveThreadCount()
+    )
+    private var packetProcessorDispatcher = packetProcessorExecutor.asCoroutineDispatcher()
+    
+    /**
+     * Calculate effective thread count based on config and priority
+     */
+    private fun getEffectiveThreadCount(): Int {
+        val base = processingConfig.threadCount
+        val multiplier = processingConfig.priority.threadMultiplier
+        return (base * multiplier).toInt().coerceIn(1, 16)
+    }
+    
+    /**
+     * Calculate effective buffer size (packet count) based on memory config.
+     * Converts user-friendly memory size to internal packet count.
+     */
+    private fun getEffectiveBufferSize(): Int {
+        return processingConfig.bufferMemory.toPacketCount()
+    }
+    
+    /**
+     * Calculate effective batch size based on config.
+     */
+    private fun getEffectiveBatchSize(): Int {
+        return processingConfig.batchSize.count
+    }
+    
+    /**
+     * Get effective memory allocation in bytes for diagnostics.
+     */
+    fun getEffectiveMemoryBytes(): Long {
+        return processingConfig.bufferMemory.bytes
+    }
+    
+    /**
+     * Update processing configuration at runtime.
+     * This allows users to adjust CPU/RAM usage via UI sliders.
+     * Uses standard computer memory measurements for intuitive configuration.
+     * 
+     * @param config New processing configuration
+     */
+    fun updateProcessingConfig(config: ProcessingConfig) {
+        val oldConfig = processingConfig
+        processingConfig = config
+        
+        val effectiveBuffer = getEffectiveBufferSize()
+        val effectiveBatch = getEffectiveBatchSize()
+        val memoryBytes = config.bufferMemory.bytes
+        
+        Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+        Log.i(TAG, "║ PROCESSING CONFIG UPDATED")
+        Log.i(TAG, "║ Threads: ${getEffectiveThreadCount()} (was ${(oldConfig.threadCount * oldConfig.priority.threadMultiplier).toInt()})")
+        Log.i(TAG, "║ Buffer Memory: ${config.bufferMemory.displayName} (~$effectiveBuffer packets)")
+        Log.i(TAG, "║ Batch Size: ${config.batchSize.displayName}")
+        Log.i(TAG, "║ Priority: ${config.priority.displayName}")
+        Log.i(TAG, "║ Available memory sizes: ${MemorySize.getDisplayNames()}")
+        Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+        
+        // Recreate thread pool if thread count changed
+        val newThreadCount = getEffectiveThreadCount()
+        val oldThreadCount = (oldConfig.threadCount * oldConfig.priority.threadMultiplier).toInt().coerceIn(1, 16)
+        if (newThreadCount != oldThreadCount) {
+            rebuildThreadPool(newThreadCount)
+        }
+    }
+    
+    /**
+     * Rebuild the thread pool with new thread count.
+     * Gracefully shuts down old pool and creates new one.
+     */
+    private fun rebuildThreadPool(threadCount: Int) {
+        Log.i(TAG, "   Rebuilding thread pool with $threadCount threads...")
+        val oldDispatcher = packetProcessorDispatcher
+        val oldExecutor = packetProcessorExecutor
+        
+        // Create new pool first
+        packetProcessorExecutor = Executors.newFixedThreadPool(threadCount)
+        packetProcessorDispatcher = packetProcessorExecutor.asCoroutineDispatcher()
+        
+        // Shutdown old pool gracefully
+        oldDispatcher.close()
+        oldExecutor.shutdown()
+        
+        Log.i(TAG, "   ✓ Thread pool rebuilt")
+    }
+    
+    /**
+     * Get current processing configuration for UI display
+     */
+    fun getProcessingConfig(): ProcessingConfig = processingConfig
     
     private val sequenceNumber = AtomicInteger(0)
     private val pendingAcks = ConcurrentHashMap<Int, PendingPacket>()
@@ -112,12 +336,6 @@ class UDPConnection {
     // establishment and message handler registration.
     private val packetBuffer = ConcurrentLinkedQueue<BufferedPacket>()
     private val handlersReady = AtomicBoolean(false)
-    
-    // Maximum number of packets to buffer before dropping.
-    // 1000 packets is sufficient to handle the initial handshake burst (typically 5-20 packets)
-    // while providing protection against memory exhaustion in pathological cases.
-    // At ~1KB average packet size, this limits buffer memory to ~1MB maximum.
-    private val maxBufferedPackets = 1000
     
     /**
      * Data class to hold buffered packet information
@@ -599,8 +817,12 @@ class UDPConnection {
     }
     
     /**
-     * Process all buffered packets in order.
+     * Process all buffered packets using parallel processing for efficiency.
      * Called when handlers become ready.
+     * 
+     * Uses coroutines with a dedicated thread pool to process multiple packets
+     * concurrently, maximizing throughput on multi-core devices.
+     * Processing is done in configurable batches to balance throughput and resource usage.
      */
     private fun processBufferedPackets() {
         val bufferedCount = packetBuffer.size
@@ -609,24 +831,44 @@ class UDPConnection {
             return
         }
         
-        Log.i(TAG, "   Processing $bufferedCount buffered packet(s)...")
-        var processedCount = 0
-        var errorCount = 0
+        val config = processingConfig
+        val effectiveThreads = getEffectiveThreadCount()
+        val batchSize = getEffectiveBatchSize()
         
+        Log.i(TAG, "   Processing $bufferedCount buffered packet(s) in parallel...")
+        Log.i(TAG, "   Config: ${effectiveThreads} threads, batch size $batchSize, memory ${config.bufferMemory.displayName}")
+        
+        val processedCount = AtomicInteger(0)
+        val errorCount = AtomicInteger(0)
+        
+        // Collect all buffered packets
+        val packetsToProcess = mutableListOf<BufferedPacket>()
         while (true) {
-            val bufferedPacket = packetBuffer.poll() ?: break
-            try {
-                val age = System.currentTimeMillis() - bufferedPacket.timestamp
-                Log.d(TAG, "   Processing buffered packet (age: ${age}ms, size: ${bufferedPacket.data.size} bytes)")
-                dispatchPacket(bufferedPacket.data)
-                processedCount++
-            } catch (e: Exception) {
-                Log.e(TAG, "   Error processing buffered packet", e)
-                errorCount++
-            }
+            val packet = packetBuffer.poll() ?: break
+            packetsToProcess.add(packet)
         }
         
-        Log.i(TAG, "   ✓ Processed $processedCount buffered packets ($errorCount errors)")
+        // Process packets in parallel batches using coroutines
+        scope.launch(packetProcessorDispatcher) {
+            // Process in batches for better resource management
+            packetsToProcess.chunked(batchSize).forEach { batch ->
+                batch.map { bufferedPacket ->
+                    async {
+                        try {
+                            val age = System.currentTimeMillis() - bufferedPacket.timestamp
+                            Log.d(TAG, "   Processing buffered packet (age: ${age}ms, size: ${bufferedPacket.data.size} bytes)")
+                            dispatchPacket(bufferedPacket.data)
+                            processedCount.incrementAndGet()
+                        } catch (e: Exception) {
+                            Log.e(TAG, "   Error processing buffered packet", e)
+                            errorCount.incrementAndGet()
+                        }
+                    }
+                }.awaitAll()
+            }
+            
+            Log.i(TAG, "   ✓ Processed ${processedCount.get()} buffered packets (${errorCount.get()} errors)")
+        }
     }
     
     /**
@@ -827,12 +1069,12 @@ class UDPConnection {
         if (handlersReady.get()) {
             dispatchPacket(decoded)
         } else {
-            // Buffer the packet for later processing
-            if (packetBuffer.size < maxBufferedPackets) {
+            // Buffer the packet for later processing (using configurable buffer size)
+            if (packetBuffer.size < getEffectiveBufferSize()) {
                 packetBuffer.offer(BufferedPacket(decoded.copyOf()))
-                Log.d(TAG, "   📥 Packet buffered (handlers not ready yet) - buffer size: ${packetBuffer.size}")
+                Log.d(TAG, "   📥 Packet buffered (handlers not ready yet) - buffer size: ${packetBuffer.size}/${getEffectiveBufferSize()}")
             } else {
-                Log.w(TAG, "   ⚠️ Packet buffer full, dropping packet")
+                Log.w(TAG, "   ⚠️ Packet buffer full (${getEffectiveBufferSize()}), dropping packet")
             }
         }
     }
@@ -846,6 +1088,9 @@ class UDPConnection {
      * because buffered packets store the decoded (zero-expanded) data, not raw data.
      * The minimal duplication (flags parsing) is acceptable to keep the buffer simple
      * and avoid storing additional metadata per packet.
+     * 
+     * Handler execution is dispatched asynchronously on the packet processor thread pool
+     * to enable parallel processing and prevent blocking the receive loop.
      */
     private fun dispatchPacket(decoded: ByteArray) {
         if (decoded.size < PACKET_HEADER_SIZE) {
@@ -893,7 +1138,7 @@ class UDPConnection {
         // Dispatch to handler
         val payload = decoded.copyOfRange(offset, decoded.size - if (hasAcks) 1 + (decoded[decoded.size - 1].toInt() and 0xFF) * 4 else 0)
         
-        // Handle PacketAck messages internally (acknowledges our sent packets)
+        // Handle PacketAck messages internally (acknowledges our sent packets) - process synchronously as it's time-critical
         if (messageId == MessageIds.PACKET_ACK) {
             handlePacketAck(payload)
             return
@@ -901,12 +1146,15 @@ class UDPConnection {
         
         val handler = messageHandlers[messageId]
         if (handler != null) {
-            Log.d(TAG, "   → Dispatching to handler (${payload.size} bytes payload)")
-            try {
-                handler.onMessage(messageId, payload)
-                Log.d(TAG, "   ✓ Handler executed successfully")
-            } catch (e: Exception) {
-                Log.e(TAG, "   ✗ Handler failed", e)
+            Log.d(TAG, "   → Dispatching to handler asynchronously (${payload.size} bytes payload)")
+            // Dispatch handler execution on thread pool for parallel processing
+            scope.launch(packetProcessorDispatcher) {
+                try {
+                    handler.onMessage(messageId, payload)
+                    Log.d(TAG, "   ✓ Handler executed successfully for $messageName")
+                } catch (e: Exception) {
+                    Log.e(TAG, "   ✗ Handler failed for $messageName", e)
+                }
             }
         } else {
             Log.w(TAG, "   ⚠️ No handler registered for message: $messageName")
@@ -1233,7 +1481,11 @@ class UDPConnection {
             socketOpen = socket?.let { !it.isClosed } ?: false,
             receiveLoopActive = receiveJob?.isActive == true,
             bufferedPacketCount = packetBuffer.size,
-            handlersReady = handlersReady.get()
+            handlersReady = handlersReady.get(),
+            processorThreadCount = getEffectiveThreadCount(),
+            bufferMemorySize = processingConfig.bufferMemory.displayName,
+            batchSize = getEffectiveBatchSize(),
+            processingPriority = processingConfig.priority.displayName
         )
     }
     
@@ -1255,7 +1507,11 @@ class UDPConnection {
         val socketOpen: Boolean,
         val receiveLoopActive: Boolean,
         val bufferedPacketCount: Int = 0,
-        val handlersReady: Boolean = false
+        val handlersReady: Boolean = false,
+        val processorThreadCount: Int = 0,
+        val bufferMemorySize: String = "256 MB",
+        val batchSize: Int = 64,
+        val processingPriority: String = "Balanced"
     )
     
     /**
