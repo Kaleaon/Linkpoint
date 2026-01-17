@@ -1,0 +1,181 @@
+package com.google.gson;
+
+import com.google.gson.internal.C$Gson$Preconditions;
+import com.google.gson.internal.LazilyParsedNumber;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+/* loaded from: classes.dex */
+public final class JsonPrimitive extends JsonElement {
+    private static final Class<?>[] PRIMITIVE_TYPES = {Integer.TYPE, Long.TYPE, Short.TYPE, Float.TYPE, Double.TYPE, Byte.TYPE, Boolean.TYPE, Character.TYPE, Integer.class, Long.class, Short.class, Float.class, Double.class, Byte.class, Boolean.class, Character.class};
+    private Object value;
+
+    public JsonPrimitive(Boolean bool) {
+        setValue(bool);
+    }
+
+    public JsonPrimitive(Character ch) {
+        setValue(ch);
+    }
+
+    public JsonPrimitive(Number number) {
+        setValue(number);
+    }
+
+    /* JADX INFO: Access modifiers changed from: package-private */
+    public JsonPrimitive(Object obj) {
+        setValue(obj);
+    }
+
+    public JsonPrimitive(String str) {
+        setValue(str);
+    }
+
+    private static boolean isIntegral(JsonPrimitive jsonPrimitive) {
+        if (jsonPrimitive.value instanceof Number) {
+            Number number = (Number) jsonPrimitive.value;
+            return (number instanceof BigInteger) || (number instanceof Long) || (number instanceof Integer) || (number instanceof Short) || (number instanceof Byte);
+        }
+        return false;
+    }
+
+    private static boolean isPrimitiveOrString(Object obj) {
+        if (obj instanceof String) {
+            return true;
+        }
+        Class<?> cls = obj.getClass();
+        for (Class<?> cls2 : PRIMITIVE_TYPES) {
+            if (cls2.isAssignableFrom(cls)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /* JADX INFO: Access modifiers changed from: package-private */
+    @Override // com.google.gson.JsonElement
+    public JsonPrimitive deepCopy() {
+        return this;
+    }
+
+    public boolean equals(Object obj) {
+        if (this != obj) {
+            if (obj != null && getClass() == obj.getClass()) {
+                JsonPrimitive jsonPrimitive = (JsonPrimitive) obj;
+                if (this.value == null) {
+                    return jsonPrimitive.value == null;
+                } else if (isIntegral(this) && isIntegral(jsonPrimitive)) {
+                    return getAsNumber().longValue() == jsonPrimitive.getAsNumber().longValue();
+                } else if ((this.value instanceof Number) && (jsonPrimitive.value instanceof Number)) {
+                    double doubleValue = getAsNumber().doubleValue();
+                    double doubleValue2 = jsonPrimitive.getAsNumber().doubleValue();
+                    return doubleValue == doubleValue2 || (Double.isNaN(doubleValue) && Double.isNaN(doubleValue2));
+                } else {
+                    return this.value.equals(jsonPrimitive.value);
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
+    @Override // com.google.gson.JsonElement
+    public BigDecimal getAsBigDecimal() {
+        return !(this.value instanceof BigDecimal) ? new BigDecimal(this.value.toString()) : (BigDecimal) this.value;
+    }
+
+    @Override // com.google.gson.JsonElement
+    public BigInteger getAsBigInteger() {
+        return !(this.value instanceof BigInteger) ? new BigInteger(this.value.toString()) : (BigInteger) this.value;
+    }
+
+    @Override // com.google.gson.JsonElement
+    public boolean getAsBoolean() {
+        return !isBoolean() ? Boolean.parseBoolean(getAsString()) : getAsBooleanWrapper().booleanValue();
+    }
+
+    @Override // com.google.gson.JsonElement
+    Boolean getAsBooleanWrapper() {
+        return (Boolean) this.value;
+    }
+
+    @Override // com.google.gson.JsonElement
+    public byte getAsByte() {
+        return !isNumber() ? Byte.parseByte(getAsString()) : getAsNumber().byteValue();
+    }
+
+    @Override // com.google.gson.JsonElement
+    public char getAsCharacter() {
+        return getAsString().charAt(0);
+    }
+
+    @Override // com.google.gson.JsonElement
+    public double getAsDouble() {
+        return !isNumber() ? Double.parseDouble(getAsString()) : getAsNumber().doubleValue();
+    }
+
+    @Override // com.google.gson.JsonElement
+    public float getAsFloat() {
+        return !isNumber() ? Float.parseFloat(getAsString()) : getAsNumber().floatValue();
+    }
+
+    @Override // com.google.gson.JsonElement
+    public int getAsInt() {
+        return !isNumber() ? Integer.parseInt(getAsString()) : getAsNumber().intValue();
+    }
+
+    @Override // com.google.gson.JsonElement
+    public long getAsLong() {
+        return !isNumber() ? Long.parseLong(getAsString()) : getAsNumber().longValue();
+    }
+
+    @Override // com.google.gson.JsonElement
+    public Number getAsNumber() {
+        return !(this.value instanceof String) ? (Number) this.value : new LazilyParsedNumber((String) this.value);
+    }
+
+    @Override // com.google.gson.JsonElement
+    public short getAsShort() {
+        return !isNumber() ? Short.parseShort(getAsString()) : getAsNumber().shortValue();
+    }
+
+    @Override // com.google.gson.JsonElement
+    public String getAsString() {
+        return !isNumber() ? !isBoolean() ? (String) this.value : getAsBooleanWrapper().toString() : getAsNumber().toString();
+    }
+
+    public int hashCode() {
+        if (this.value != null) {
+            if (isIntegral(this)) {
+                long longValue = getAsNumber().longValue();
+                return (int) (longValue ^ (longValue >>> 32));
+            } else if (this.value instanceof Number) {
+                long doubleToLongBits = Double.doubleToLongBits(getAsNumber().doubleValue());
+                return (int) (doubleToLongBits ^ (doubleToLongBits >>> 32));
+            } else {
+                return this.value.hashCode();
+            }
+        }
+        return 31;
+    }
+
+    public boolean isBoolean() {
+        return this.value instanceof Boolean;
+    }
+
+    public boolean isNumber() {
+        return this.value instanceof Number;
+    }
+
+    public boolean isString() {
+        return this.value instanceof String;
+    }
+
+    void setValue(Object obj) {
+        if (obj instanceof Character) {
+            this.value = String.valueOf(((Character) obj).charValue());
+            return;
+        }
+        C$Gson$Preconditions.checkArgument((obj instanceof Number) || isPrimitiveOrString(obj));
+        this.value = obj;
+    }
+}

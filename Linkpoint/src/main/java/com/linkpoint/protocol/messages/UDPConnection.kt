@@ -3,11 +3,12 @@ package com.linkpoint.protocol.messages
 import android.util.Log
 import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
-import java.net.DatagramPacket
-import java.net.DatagramSocket
-import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.nio.channels.DatagramChannel
+import java.nio.channels.SelectionKey
+import java.nio.channels.Selector
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -68,7 +69,11 @@ class UDPConnection {
      */
     fun getCircuitCode(): Int = circuitCode
     
-    private var socket: DatagramSocket? = null
+    // Use DatagramChannel (NIO) instead of DatagramSocket for better mobile network compatibility
+    // This matches Lumiya's approach which works reliably on cellular networks
+    private var datagramChannel: DatagramChannel? = null
+    private var selector: Selector? = null
+    private var selectionKey: SelectionKey? = null
     private var receiveJob: Job? = null
     private var agentUpdateJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -389,22 +394,49 @@ class UDPConnection {
      * 
      * This sequence is based on Lumiya's SLAgentCircuit.SendUseCode() which uses
      * an event listener to wait for the ACK before sending CompleteAgentMovement.
+     * 
+     * CRITICAL: Uses DatagramChannel with connect() for proper mobile/cellular network
+     * support, exactly like Lumiya does. This "connects" the UDP socket to only 
+     * send/receive from the specific simulator address.
      */
     suspend fun connect(): Boolean = withContext(Dispatchers.IO) {
         try {
             Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
-            Log.i(TAG, "║ INITIATING UDP CONNECTION (Lumiya-style)                         ║")
+            Log.i(TAG, "║ INITIATING UDP CONNECTION (Lumiya-style with DatagramChannel)    ║")
             Log.i(TAG, "║ Target: $simIP:$simPort                                          ║")
             Log.i(TAG, "║ Circuit Code: $circuitCode                                       ║")
             Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
             
+            // Set IPv4 preference like Lumiya does - important for mobile networks
+            System.setProperty("java.net.preferIPv4Stack", "true")
+            System.setProperty("java.net.preferIPv6Addresses", "false")
+            Log.i(TAG, "✓ IPv4 stack preference set")
+            
             // Reset message statistics for new connection
             resetMessageStatistics()
             
-            socket = DatagramSocket()
-            socket?.soTimeout = 5000
+            // Create and configure DatagramChannel (NIO) like Lumiya
+            // Using DatagramChannel instead of DatagramSocket is CRITICAL for mobile networks
+            val address = InetSocketAddress(simIP, simPort)
             
-            Log.i(TAG, "✓ Datagram socket created")
+            datagramChannel = DatagramChannel.open().apply {
+                // Configure as non-blocking for NIO
+                configureBlocking(false)
+                // Connect to the simulator address - this is KEY for receiving responses!
+                // Unlike DatagramSocket, connecting a DatagramChannel ensures we only
+                // receive packets from the connected address
+                connect(address)
+            }
+            
+            Log.i(TAG, "✓ DatagramChannel created and connected to $simIP:$simPort")
+            Log.i(TAG, "   Channel connected: ${datagramChannel?.isConnected}")
+            Log.i(TAG, "   Channel open: ${datagramChannel?.isOpen}")
+            
+            // Create selector for NIO operations
+            selector = Selector.open()
+            selectionKey = datagramChannel?.register(selector, SelectionKey.OP_READ)
+            
+            Log.i(TAG, "✓ NIO Selector registered for read operations")
             
             // CRITICAL: Set isConnected BEFORE starting receive loop
             // The receive loop checks this flag in its while condition,
@@ -413,12 +445,12 @@ class UDPConnection {
             
             Log.i(TAG, "✓ isConnected flag set to true")
             
-            // Start receive loop
+            // Start receive loop using NIO
             receiveJob = scope.launch {
-                receiveLoop()
+                receiveLoopNIO()
             }
             
-            Log.i(TAG, "✓ Receive loop started")
+            Log.i(TAG, "✓ NIO Receive loop started")
             
             // Send UseCircuitCode and wait for ACK (Lumiya-style)
             // This is CRITICAL - we must wait for the circuit to be acknowledged
@@ -449,7 +481,7 @@ class UDPConnection {
             Log.i(TAG, "✓ AgentThrottle sent")
             
             Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
-            Log.i(TAG, "║ UDP CONNECTION ESTABLISHED                                         ║")
+            Log.i(TAG, "║ UDP CONNECTION ESTABLISHED (DatagramChannel)                       ║")
             Log.i(TAG, "║ Waiting for simulator to send RegionHandshake...                    ║")
             Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
             
@@ -458,8 +490,15 @@ class UDPConnection {
             Log.e(TAG, "❌ Connection failed", e)
             isConnected = false
             receiveJob?.cancel()
-            socket?.close()
-            socket = null
+            try {
+                datagramChannel?.close()
+                selector?.close()
+            } catch (closeEx: Exception) {
+                Log.w(TAG, "Error closing channel/selector", closeEx)
+            }
+            datagramChannel = null
+            selector = null
+            selectionKey = null
             false
         }
     }
@@ -789,8 +828,18 @@ class UDPConnection {
         // Flush any remaining ACKs
         scope.launch { flushAcks() }
         
-        socket?.close()
-        socket = null
+        // Close DatagramChannel and Selector (NIO)
+        try {
+            selectionKey?.cancel()
+            datagramChannel?.close()
+            selector?.close()
+        } catch (e: Exception) {
+            Log.w(TAG, "Error closing channel/selector", e)
+        }
+        datagramChannel = null
+        selector = null
+        selectionKey = null
+        
         pendingAcks.clear()
         ackCallbacks.clear()  // Clear ACK callbacks to prevent memory leaks
         synchronized(pendingAckIds) { pendingAckIds.clear() }
@@ -895,10 +944,12 @@ class UDPConnection {
     fun areHandlersReady(): Boolean = handlersReady.get()
     
     /**
-     * Send a packet.
+     * Send a packet using NIO DatagramChannel.
      *
      * The payload must already be encoded in little-endian message order; the header and message
      * number are written in network (big-endian) order.
+     * 
+     * Uses DatagramChannel.write() for connected channel (Lumiya-style).
      * 
      * @param onAck Optional callback to invoke when this packet is acknowledged.
      *              Only invoked if the packet is reliable.
@@ -911,11 +962,11 @@ class UDPConnection {
         zerocoded: Boolean = false,
         onAck: (() -> Unit)? = null
     ): Int = withContext(Dispatchers.IO) {
-        val socket = this@UDPConnection.socket ?: return@withContext -1
+        val channel = this@UDPConnection.datagramChannel ?: return@withContext -1
         
         val seqNum = sequenceNumber.getAndIncrement()
         
-        // Build packet header
+        // Build packet header (BIG_ENDIAN per protocol)
         var flags = 0
         if (reliable) flags = flags or FLAG_RELIABLE
         if (zerocoded) flags = flags or FLAG_ZEROCODED
@@ -923,15 +974,17 @@ class UDPConnection {
         val header = ByteBuffer.allocate(PACKET_HEADER_SIZE).order(HEADER_BYTE_ORDER)
         header.put(flags.toByte())
         header.putInt(seqNum)
-        header.put(0.toByte()) // Extra header byte
+        header.put(0.toByte()) // Extra header byte (no extra data)
         
         // Determine message ID size (network order, per SL/PyOGP packet layout).
+        // This matches Lumiya's PackPayload which writes the message ID prefix
         val messageBytes = when {
             messageId <= 0xFF -> byteArrayOf(messageId.toByte())
             messageId in 0xFF00..0xFFFF -> {
                 byteArrayOf(0xFF.toByte(), (messageId and 0xFF).toByte())
             }
             messageId ushr 16 == 0xFFFF -> {
+                // Low frequency message: FF FF XX XX
                 byteArrayOf(
                     0xFF.toByte(),
                     0xFF.toByte(),
@@ -946,16 +999,20 @@ class UDPConnection {
         val finalPacket = if (zerocoded) zeroencode(packet) else packet
         
         try {
-            val address = InetAddress.getByName(simIP)
-            val datagram = DatagramPacket(finalPacket, finalPacket.size, address, simPort)
-            socket.send(datagram)
+            // Use DatagramChannel.write() for connected channel (like Lumiya)
+            val buffer = ByteBuffer.wrap(finalPacket)
+            val bytesWritten = channel.write(buffer)
             
-            if (reliable) {
-                pendingAcks[seqNum] = PendingPacket(seqNum, finalPacket, System.currentTimeMillis())
-                // Register ACK callback if provided
-                if (onAck != null) {
-                    ackCallbacks[seqNum] = onAck
+            if (bytesWritten > 0) {
+                if (reliable) {
+                    pendingAcks[seqNum] = PendingPacket(seqNum, finalPacket, System.currentTimeMillis())
+                    // Register ACK callback if provided
+                    if (onAck != null) {
+                        ackCallbacks[seqNum] = onAck
+                    }
                 }
+            } else {
+                Log.w(TAG, "DatagramChannel.write() returned 0 bytes - packet may not have been sent")
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send packet", e)
@@ -964,60 +1021,109 @@ class UDPConnection {
         seqNum
     }
     
-    private suspend fun receiveLoop() {
-        val buffer = ByteArray(BUFFER_SIZE)
+    /**
+     * NIO-based receive loop using DatagramChannel with Selector (Lumiya-style).
+     * 
+     * This approach provides better support for mobile/cellular networks by:
+     * 1. Using a connected DatagramChannel that only receives from the simulator
+     * 2. Using non-blocking I/O with a Selector for efficient packet reception
+     * 3. Allowing proper timeout handling without blocking
+     */
+    private suspend fun receiveLoopNIO() {
+        val buffer = ByteBuffer.allocate(BUFFER_SIZE)
         var packetsReceived = 0
         var localBytesReceived = 0L
         
         Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
-        Log.i(TAG, "║ UDP RECEIVE LOOP STARTED                                            ║")
-        Log.i(TAG, "║ Will log all incoming packets for debugging                          ║")
+        Log.i(TAG, "║ NIO UDP RECEIVE LOOP STARTED (DatagramChannel)                   ║")
+        Log.i(TAG, "║ Will log all incoming packets for debugging                       ║")
         Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
         
-        while (isConnected) {
+        val localSelector = selector
+        val localChannel = datagramChannel
+        
+        if (localSelector == null || localChannel == null) {
+            Log.e(TAG, "❌ Selector or DatagramChannel is null - cannot start receive loop")
+            return
+        }
+        
+        while (isConnected && localChannel.isOpen) {
             try {
-                val datagram = DatagramPacket(buffer, buffer.size)
-                socket?.receive(datagram)
+                // Use select with timeout for periodic resend checks
+                val readyKeys = localSelector.select(1000) // 1 second timeout
                 
-                if (datagram.length > 0) {
-                    packetsReceived++
-                    localBytesReceived += datagram.length
-                    
-                    // Update global statistics for diagnostics
-                    totalPacketsReceived.incrementAndGet()
-                    totalBytesReceived.addAndGet(datagram.length.toLong())
-                    
-                    val data = buffer.copyOf(datagram.length)
-                    
-                    // Log packet reception
-                    Log.i(TAG, "📦 PACKET RECEIVED #${packetsReceived}: ${datagram.length} bytes from ${datagram.address}:${datagram.port}")
-                    
-                    // Log raw hex for first few packets (for debugging)
-                    if (packetsReceived <= 10) {
-                        val hexPreview = data.take(32).joinToString(" ") { "%02X".format(it) }
-                        Log.d(TAG, "   Raw preview: $hexPreview")
+                if (readyKeys > 0) {
+                    val iterator = localSelector.selectedKeys().iterator()
+                    while (iterator.hasNext()) {
+                        val key = iterator.next()
+                        iterator.remove()
+                        
+                        if (key.isReadable) {
+                            buffer.clear()
+                            
+                            // Read from connected channel - no need to specify address
+                            val bytesRead = localChannel.read(buffer)
+                            
+                            if (bytesRead > 0) {
+                                packetsReceived++
+                                localBytesReceived += bytesRead
+                                
+                                // Update global statistics for diagnostics
+                                totalPacketsReceived.incrementAndGet()
+                                totalBytesReceived.addAndGet(bytesRead.toLong())
+                                
+                                buffer.flip()
+                                val data = ByteArray(bytesRead)
+                                buffer.get(data)
+                                
+                                // Log packet reception
+                                Log.i(TAG, "📦 PACKET RECEIVED #${packetsReceived}: $bytesRead bytes (NIO)")
+                                
+                                // Log raw hex for first few packets (for debugging)
+                                if (packetsReceived <= 10) {
+                                    val hexPreview = data.take(32).joinToString(" ") { "%02X".format(it) }
+                                    Log.d(TAG, "   Raw preview: $hexPreview")
+                                }
+                                
+                                processPacket(data)
+                            }
+                        }
                     }
-                    
-                    processPacket(data)
+                } else {
+                    // Timeout - check for resends
+                    if (packetsReceived == 0) {
+                        Log.w(TAG, "⚠️ No packets received yet (NIO), waiting...")
+                    }
                 }
-            } catch (e: java.net.SocketTimeoutException) {
-                // Normal timeout, continue
-                if (packetsReceived == 0) {
-                    Log.w(TAG, "⚠️ No packets received yet, waiting...")
-                }
+                
+                // Always try to resend pending packets after processing
                 resendPendingPackets()
+                
+            } catch (e: java.nio.channels.ClosedChannelException) {
+                Log.i(TAG, "Channel closed - stopping receive loop")
+                break
             } catch (e: Exception) {
                 if (isConnected) {
-                    Log.e(TAG, "❌ Receive error", e)
+                    Log.e(TAG, "❌ NIO Receive error", e)
                 }
             }
         }
         
         Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
-        Log.i(TAG, "║ UDP RECEIVE LOOP STOPPED                                             ║")
+        Log.i(TAG, "║ NIO UDP RECEIVE LOOP STOPPED                                      ║")
         Log.i(TAG, "║ Total packets received: $packetsReceived                                 ║")
         Log.i(TAG, "║ Total bytes received: $localBytesReceived                                   ║")
         Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
+    }
+    
+    /**
+     * Legacy receive loop using blocking DatagramSocket (kept for fallback/reference)
+     */
+    @Deprecated("Use receiveLoopNIO() instead for better mobile network support")
+    private suspend fun receiveLoop() {
+        Log.w(TAG, "Using legacy receiveLoop - consider using receiveLoopNIO instead")
+        // This method is now unused but kept for reference
+    }
     }
     
     private fun processPacket(data: ByteArray) {
@@ -1311,6 +1417,8 @@ class UDPConnection {
     
     private suspend fun resendPendingPackets() {
         val now = System.currentTimeMillis()
+        val channel = datagramChannel
+        
         pendingAcks.values.filter { now - it.timestamp > ACK_TIMEOUT_MS }.forEach { pending ->
             if (pending.retries < MAX_RETRIES) {
                 // Resend with resent flag
@@ -1318,12 +1426,14 @@ class UDPConnection {
                 resendPacket[0] = (resendPacket[0].toInt() or FLAG_RESENT).toByte()
                 
                 try {
-                    val address = InetAddress.getByName(simIP)
-                    val datagram = DatagramPacket(resendPacket, resendPacket.size, address, simPort)
-                    socket?.send(datagram)
-                    pending.retries++
-                    pending.timestamp = now
-                    packetsResentCount.incrementAndGet() // Track resent packets for diagnostics
+                    // Use DatagramChannel.write() for connected channel
+                    if (channel != null && channel.isConnected) {
+                        val buffer = ByteBuffer.wrap(resendPacket)
+                        channel.write(buffer)
+                        pending.retries++
+                        pending.timestamp = now
+                        packetsResentCount.incrementAndGet() // Track resent packets for diagnostics
+                    }
                 } catch (e: Exception) {
                     Log.w(TAG, "Resend failed for seq ${pending.seqNum}")
                 }
@@ -1490,7 +1600,8 @@ class UDPConnection {
             registeredHandlerCount = messageHandlers.size,
             registeredHandlers = getRegisteredHandlerIds(),
             pendingPackets = pendingPacketInfo,
-            socketOpen = socket?.let { !it.isClosed } ?: false,
+            // DatagramChannel status instead of socket
+            socketOpen = datagramChannel?.isOpen ?: false,
             receiveLoopActive = receiveJob?.isActive == true,
             bufferedPacketCount = packetBuffer.size,
             handlersReady = handlersReady.get(),
