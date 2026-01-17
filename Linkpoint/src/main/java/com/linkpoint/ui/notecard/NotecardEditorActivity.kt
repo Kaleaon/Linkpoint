@@ -9,6 +9,7 @@ import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -116,6 +117,13 @@ class NotecardEditorActivity : AppCompatActivity() {
                     hasUnsavedChanges = true
                     invalidateOptionsMenu()
                 }
+            }
+        })
+        
+        // Handle back button properly
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                handleBack()
             }
         })
     }
@@ -252,11 +260,6 @@ class NotecardEditorActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
-    }
-    
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        handleBack()
     }
     
     private fun handleBack() {

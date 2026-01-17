@@ -230,6 +230,22 @@
             android:foregroundServiceType="dataSync"
             android:stopWithTask="false" />
 
+        <!-- Script Editor Activity - LSL syntax highlighting -->
+        <activity
+            android:name=".ui.scripts.ScriptEditorActivity"
+            android:label="Script Editor"
+            android:theme="@style/Theme.Linkpoint"
+            android:exported="false"
+            android:parentActivityName=".ui.inventory.InventoryActivity" />
+
+        <!-- Notecard Editor Activity -->
+        <activity
+            android:name=".ui.notecard.NotecardEditorActivity"
+            android:label="Notecard Editor"
+            android:theme="@style/Theme.Linkpoint"
+            android:exported="false"
+            android:parentActivityName=".ui.inventory.InventoryActivity" />
+
         <!-- File Provider for sharing -->
         <provider
             android:name="androidx.core.content.FileProvider"

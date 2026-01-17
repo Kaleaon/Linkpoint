@@ -100,7 +100,8 @@ class EstateManager(
     fun requestEstateInfo() {
         scope.launch {
             try {
-                val payload = ByteBuffer.allocate(40).order(ByteOrder.LITTLE_ENDIAN)
+                // 3 UUIDs (48 bytes) + Invoice int (4 bytes) = 52 bytes
+                val payload = ByteBuffer.allocate(52).order(ByteOrder.LITTLE_ENDIAN)
                 
                 // AgentData
                 payload.putUUID(agentId)
@@ -242,7 +243,8 @@ class EstateManager(
         
         scope.launch {
             try {
-                val payload = ByteBuffer.allocate(80).order(ByteOrder.LITTLE_ENDIAN)
+                // Calculate buffer size: 3 UUIDs (48) + method (1+7) + param count (1) + delay string (1 + up to 10 chars) = ~70
+                val payload = ByteBuffer.allocate(128).order(ByteOrder.LITTLE_ENDIAN)
                 
                 // AgentData
                 payload.putUUID(agentId)

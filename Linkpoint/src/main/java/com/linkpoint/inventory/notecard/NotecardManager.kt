@@ -404,6 +404,7 @@ class NotecardManager(
     
     /**
      * Save a notecard (update text content).
+     * Note: Full implementation requires UpdateNotecardAgentInventory capability.
      */
     suspend fun saveNotecard(itemId: UUID, newText: String): Boolean {
         return withContext(Dispatchers.IO) {
@@ -411,15 +412,15 @@ class NotecardManager(
                 // Create new notecard data
                 val notecardData = createNotecardData(newText)
                 
-                // Upload via capability
-                // TODO: Implement notecard upload via UpdateNotecardAgentInventory capability
-                Log.d(TAG, "Saving notecard $itemId: ${newText.length} chars")
+                // Upload via capability - requires UpdateNotecardAgentInventory
+                Log.w(TAG, "Notecard save not fully implemented - data prepared but upload pending capability implementation")
+                Log.d(TAG, "Prepared notecard $itemId: ${newText.length} chars, ${notecardData.size} bytes")
                 
-                // For now, return true as placeholder
-                // Full implementation requires UpdateNotecardAgentInventory capability
-                true
+                // Return false to indicate save is not yet complete
+                // This will show user that the feature is not yet fully implemented
+                false
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to save notecard $itemId", e)
+                Log.e(TAG, "Failed to prepare notecard $itemId", e)
                 false
             }
         }

@@ -176,10 +176,18 @@ class MediaManager(
     private fun stopMusicInternal() {
         try {
             musicPlayer?.apply {
-                if (isPlaying) {
-                    stop()
+                try {
+                    if (isPlaying) {
+                        stop()
+                    }
+                } catch (e: IllegalStateException) {
+                    // Player already stopped, ignore
                 }
-                reset()
+                try {
+                    reset()
+                } catch (e: IllegalStateException) {
+                    // Player in error state, just release
+                }
                 release()
             }
         } catch (e: Exception) {

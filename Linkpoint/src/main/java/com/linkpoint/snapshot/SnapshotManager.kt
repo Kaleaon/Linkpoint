@@ -60,6 +60,13 @@ class SnapshotManager(
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     
+    // Reusable HTTP client for uploads
+    private val httpClient = okhttp3.OkHttpClient.Builder()
+        .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .writeTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .build()
+    
     // Snapshot state
     private val _isTakingSnapshot = MutableStateFlow(false)
     val isTakingSnapshot: StateFlow<Boolean> = _isTakingSnapshot
@@ -210,14 +217,8 @@ class SnapshotManager(
                 if (response is LLSDMap) {
                     val uploaderUrl = response.getString("uploader")
                     if (uploaderUrl != null) {
-                        // Upload the image data using OkHttp directly to the uploader URL
+                        // Upload the image data using the reusable HTTP client
                         try {
-                            val client = okhttp3.OkHttpClient.Builder()
-                                .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-                                .writeTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
-                                .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-                                .build()
-                            
                             val requestBody = imageBytes.toRequestBody("application/octet-stream".toMediaTypeOrNull())
                             
                             val uploadRequest = okhttp3.Request.Builder()
@@ -225,7 +226,7 @@ class SnapshotManager(
                                 .post(requestBody)
                                 .build()
                             
-                            val uploadHttpResponse = client.newCall(uploadRequest).execute()
+                            val uploadHttpResponse = httpClient.newCall(uploadRequest).execute()
                             val uploadResponseBody = uploadHttpResponse.body?.string()
                             
                             if (uploadHttpResponse.isSuccessful && uploadResponseBody != null) {
