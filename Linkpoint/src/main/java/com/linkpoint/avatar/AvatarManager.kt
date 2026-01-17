@@ -138,16 +138,16 @@ class AvatarManager(
         // TerseUpdate uses localId - in a full implementation, we'd maintain
         // a localId -> agentId mapping to update any avatar. For now, only
         // update our own avatar when receiving avatar terse updates.
-        if (data.isAvatar) {
+        if (data.isAvatar && myAvatar != null) {
             myAvatar?.let { avatar ->
                 avatar.position = data.position
                 avatar.rotation = data.rotation
                 avatar.velocity = data.velocity
                 avatar.lastUpdate = System.currentTimeMillis()
+                Log.d(TAG, "TerseUpdate: updated myAvatar, localId=${data.localId}, pos=${data.position}")
             }
         }
-        
-        Log.d(TAG, "TerseUpdate (avatar): localId=${data.localId}, pos=${data.position}")
+        // Note: other avatar terse updates are not processed until localId->agentId mapping is implemented
     }
     
     /**
@@ -195,8 +195,9 @@ class AvatarManager(
                 val position = LLVector3(x, y, z)
                 
                 // Update or create avatar entry with coarse position
-                // Skip zero UUID
-                if (agentId.mostSignificantBits != 0L || agentId.leastSignificantBits != 0L) {
+                // Skip zero UUID (invalid/null UUID)
+                val isValidUUID = agentId != UUID(0L, 0L)
+                if (isValidUUID) {
                     val avatar = avatars.getOrPut(agentId) {
                         createAvatar(agentId)
                     }

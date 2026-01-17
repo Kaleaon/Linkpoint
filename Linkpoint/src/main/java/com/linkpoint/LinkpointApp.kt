@@ -493,13 +493,15 @@ class LinkpointApp : Application() {
         
         // StartPingCheck - CRITICAL: Must respond with CompletePingCheck to maintain connection
         // The simulator sends this periodically to verify the client is still alive
+        // Format: PingID (1 byte) + OldestUnacked (4 bytes)
+        // We only need PingID to respond; OldestUnacked is for the sim's reference
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.START_PING_CHECK) { _, payload ->
             try {
                 if (payload.isNotEmpty()) {
                     val pingId = payload[0]
-                    // OldestUnacked is at offset 1, 4 bytes, but we don't use it - we compute our own
                     Log.d(TAG, "StartPingCheck received: pingId=$pingId")
                     applicationScope.launch {
+                        // handleStartPingCheck computes our own OldestUnacked for the response
                         udpConnection.handleStartPingCheck(pingId, 0)
                     }
                 }
