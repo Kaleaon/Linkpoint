@@ -131,16 +131,14 @@ class AvatarManager(
     /**
      * Handle terse position update from ImprovedTerseObjectUpdate message.
      * This is used for fast position updates for avatars (when isAvatar=true).
+     * Currently only updates our own avatar position.
+     * TODO: Maintain a localId -> agentId mapping to update other avatars.
      */
     fun handleTerseUpdate(data: TerseUpdateData) {
-        // TerseUpdate uses localId, but for avatars we need to find by localId
-        // In a full implementation, we'd maintain a localId -> agentId mapping
-        // For now, update any avatar that has a matching position or is our avatar
-        
-        // Look for avatar to update by checking if it's our local avatar
-        // (Avatar terse updates typically come with the avatar flag set)
+        // TerseUpdate uses localId - in a full implementation, we'd maintain
+        // a localId -> agentId mapping to update any avatar. For now, only
+        // update our own avatar when receiving avatar terse updates.
         if (data.isAvatar) {
-            // For our own avatar, update position
             myAvatar?.let { avatar ->
                 avatar.position = data.position
                 avatar.rotation = data.rotation
@@ -158,10 +156,13 @@ class AvatarManager(
      * Format:
      * - You block: 2 bytes (index of our agent in the list)
      * - Prey block: 2 bytes (index of prey agent, or -1)
-     * - AgentData block (variable): AgentID (UUID), X (U8), Y (U8), Z (U8)
+     * - AgentData count: 1 byte
+     * - AgentData block (variable): AgentID (UUID), X (U8), Y (U8), Z (U8) = 19 bytes each
      */
     fun handleCoarseLocationUpdate(payload: ByteArray) {
-        if (payload.size < 6) return // Minimum: You + Prey + 1 agent
+        // Minimum size: You (2) + Prey (2) + count (1) = 5 bytes
+        // With at least 1 agent: 5 + 19 = 24 bytes
+        if (payload.size < 5) return
         
         try {
             val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
