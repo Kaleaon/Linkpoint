@@ -864,6 +864,69 @@ class DebugReportService private constructor(private val context: Context) {
             }
             appendLine()
             
+            // ==================== PROTOCOL MESSAGE STATISTICS ====================
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ PROTOCOL MESSAGE STATISTICS                                       │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            if (app != null) {
+                try {
+                    val udpDiag = app.udpConnection.getDiagnostics()
+                    val msgStats = app.udpConnection.getMessageStatistics()
+                    
+                    appendLine("Total Packets Received: ${msgStats.totalPacketsReceived}")
+                    appendLine("Total Bytes Received: ${formatBytes(msgStats.totalBytesReceived)}")
+                    appendLine("Packets Sent: ${udpDiag.sequenceNumber}")
+                    appendLine("Packets Resent: ${msgStats.packetsResent}")
+                    appendLine()
+                    
+                    if (msgStats.messageTypeCounts.isNotEmpty()) {
+                        appendLine("Messages by Type (top 10):")
+                        msgStats.messageTypeCounts.entries
+                            .sortedByDescending { it.value }
+                            .take(10)
+                            .forEach { (type, count) ->
+                                appendLine("  $type: $count")
+                            }
+                        appendLine()
+                    }
+                    
+                    if (msgStats.lastMessageTimes.isNotEmpty()) {
+                        appendLine("Last Received (key messages):")
+                        val keyMessages = listOf(
+                            "RegionHandshake", "AgentMovementComplete",
+                            "ObjectUpdate", "CoarseLocationUpdate"
+                        )
+                        keyMessages.forEach { msgType ->
+                            val lastTime = msgStats.lastMessageTimes[msgType]
+                            if (lastTime != null && lastTime > 0) {
+                                val ago = System.currentTimeMillis() - lastTime
+                                appendLine("  $msgType: ${formatDuration(ago)} ago")
+                            } else {
+                                appendLine("  $msgType: Never received")
+                            }
+                        }
+                        appendLine()
+                    }
+                    
+                    // Warning if critical messages haven't been received
+                    val regionHandshakeTime = msgStats.lastMessageTimes["RegionHandshake"]
+                    val agentMovementTime = msgStats.lastMessageTimes["AgentMovementComplete"]
+                    
+                    if (regionHandshakeTime == null || regionHandshakeTime == 0L) {
+                        appendLine("⚠️ RegionHandshake never received - world data won't load!")
+                    }
+                    if (agentMovementTime == null || agentMovementTime == 0L) {
+                        appendLine("⚠️ AgentMovementComplete never received - agent not in world!")
+                    }
+                } catch (e: Exception) {
+                    appendLine("Protocol statistics unavailable: ${e.message}")
+                }
+            } else {
+                appendLine("Protocol statistics: App not initialized")
+            }
+            appendLine()
+            
             // Recent network log excerpt for debugging loading issues
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ RECENT NETWORK LOG (Last 30 entries)                              │")

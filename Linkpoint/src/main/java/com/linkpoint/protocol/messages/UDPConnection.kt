@@ -113,6 +113,14 @@ class UDPConnection {
     
     private var isConnected = false
     
+    // ==================== MESSAGE STATISTICS TRACKING ====================
+    // These track detailed message statistics for diagnostics
+    private val totalPacketsReceived = AtomicInteger(0)
+    private val totalBytesReceived = java.util.concurrent.atomic.AtomicLong(0)
+    private val packetsResentCount = AtomicInteger(0)
+    private val messageTypeCounts = ConcurrentHashMap<String, AtomicInteger>()
+    private val lastMessageTimes = ConcurrentHashMap<String, Long>()
+    
     /**
      * Connect to the simulator.
      * 
@@ -526,6 +534,10 @@ class UDPConnection {
         pendingAcks.clear()
         ackCallbacks.clear()  // Clear ACK callbacks to prevent memory leaks
         synchronized(pendingAckIds) { pendingAckIds.clear() }
+        
+        // Reset message statistics for next session
+        // (Keep them for post-disconnect diagnostics, but they'll be reset on next connect)
+        
         Log.i(TAG, "Disconnected")
     }
     
@@ -609,7 +621,7 @@ class UDPConnection {
     private suspend fun receiveLoop() {
         val buffer = ByteArray(BUFFER_SIZE)
         var packetsReceived = 0
-        var totalBytesReceived = 0L
+        var localBytesReceived = 0L
         
         Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ UDP RECEIVE LOOP STARTED                                            ║")
@@ -623,7 +635,11 @@ class UDPConnection {
                 
                 if (datagram.length > 0) {
                     packetsReceived++
-                    totalBytesReceived += datagram.length
+                    localBytesReceived += datagram.length
+                    
+                    // Update global statistics for diagnostics
+                    totalPacketsReceived.incrementAndGet()
+                    totalBytesReceived.addAndGet(datagram.length.toLong())
                     
                     val data = buffer.copyOf(datagram.length)
                     
@@ -654,7 +670,7 @@ class UDPConnection {
         Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ UDP RECEIVE LOOP STOPPED                                             ║")
         Log.i(TAG, "║ Total packets received: $packetsReceived                                 ║")
-        Log.i(TAG, "║ Total bytes received: $totalBytesReceived                                   ║")
+        Log.i(TAG, "║ Total bytes received: $localBytesReceived                                   ║")
         Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
     }
     
@@ -743,6 +759,11 @@ class UDPConnection {
         // Get message name for logging
         val messageName = getMessageName(messageId)
         Log.i(TAG, "   📨 Message: $messageName (0x${messageId.toString(16).uppercase()})")
+        
+        // Track message statistics for diagnostics
+        val cleanMessageName = messageName.replace("⭐ ", "") // Remove emoji for stats key
+        messageTypeCounts.getOrPut(cleanMessageName) { AtomicInteger(0) }.incrementAndGet()
+        lastMessageTimes[cleanMessageName] = System.currentTimeMillis()
         
         // Dispatch to handler
         val payload = decoded.copyOfRange(offset, decoded.size - if (hasAcks) 1 + (decoded[decoded.size - 1].toInt() and 0xFF) * 4 else 0)
@@ -917,6 +938,7 @@ class UDPConnection {
                     socket?.send(datagram)
                     pending.retries++
                     pending.timestamp = now
+                    packetsResentCount.incrementAndGet() // Track resent packets for diagnostics
                 } catch (e: Exception) {
                     Log.w(TAG, "Resend failed for seq ${pending.seqNum}")
                 }
@@ -1021,6 +1043,31 @@ class UDPConnection {
             }
         }
     }
+    
+    /**
+     * Get detailed message statistics for diagnostics.
+     * Provides information about which messages have been received and when.
+     */
+    fun getMessageStatistics(): MessageStatistics {
+        return MessageStatistics(
+            totalPacketsReceived = totalPacketsReceived.get(),
+            totalBytesReceived = totalBytesReceived.get(),
+            packetsResent = packetsResentCount.get(),
+            messageTypeCounts = messageTypeCounts.mapValues { it.value.get() },
+            lastMessageTimes = lastMessageTimes.toMap()
+        )
+    }
+    
+    /**
+     * Detailed message statistics for diagnostics
+     */
+    data class MessageStatistics(
+        val totalPacketsReceived: Int,
+        val totalBytesReceived: Long,
+        val packetsResent: Int,
+        val messageTypeCounts: Map<String, Int>,
+        val lastMessageTimes: Map<String, Long>
+    )
     
     /**
      * Get comprehensive diagnostic data for debug reports
