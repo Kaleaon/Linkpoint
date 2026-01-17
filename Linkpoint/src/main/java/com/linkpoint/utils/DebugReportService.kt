@@ -8,6 +8,7 @@ import com.linkpoint.assets.CacheManager
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.core.ConnectionQualityManager
 import com.linkpoint.network.core.NetworkStateManager
+import com.linkpoint.protocol.messages.UDPConnection
 import kotlinx.coroutines.*
 import java.io.File
 import java.text.SimpleDateFormat
@@ -339,11 +340,114 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine()
                         appendLine("⚠️ No handlers registered - RegionHandshake won't be processed!")
                     }
+                    
+                    // NEW: Socket details for detailed debugging
+                    appendLine()
+                    val socketDetails = app.udpConnection.getSocketDetails()
+                    appendLine("Socket Details:")
+                    appendLine("  Local Bind Address: ${socketDetails.localBindAddress ?: "Unknown"}")
+                    appendLine("  Local Bind Port: ${if (socketDetails.localBindPort > 0) socketDetails.localBindPort else "Unknown"}")
+                    appendLine("  Remote Address: ${socketDetails.remoteAddress.ifEmpty { "Not set" }}")
+                    appendLine("  Remote Port: ${if (socketDetails.remotePort > 0) socketDetails.remotePort else "Not set"}")
+                    appendLine("  Channel Connected: ${socketDetails.isConnected}")
+                    appendLine("  Channel Open: ${socketDetails.isOpen}")
+                    
+                    // Timing information
+                    appendLine()
+                    appendLine("Timing:")
+                    if (socketDetails.connectionAttemptTime > 0) {
+                        val connectionAge = System.currentTimeMillis() - socketDetails.connectionAttemptTime
+                        appendLine("  Connection Attempted: ${formatDuration(connectionAge)} ago")
+                    } else {
+                        appendLine("  Connection Attempted: Never")
+                    }
+                    if (socketDetails.lastSendAttemptTime > 0) {
+                        val sendAge = System.currentTimeMillis() - socketDetails.lastSendAttemptTime
+                        appendLine("  Last Send Attempt: ${formatDuration(sendAge)} ago")
+                    } else {
+                        appendLine("  Last Send Attempt: Never")
+                    }
+                    if (socketDetails.lastReceiveTime > 0) {
+                        val receiveAge = System.currentTimeMillis() - socketDetails.lastReceiveTime
+                        appendLine("  Last Packet Received: ${formatDuration(receiveAge)} ago")
+                    } else {
+                        appendLine("  Last Packet Received: Never ⚠️")
+                    }
+                    if (socketDetails.lastConnectionError != null) {
+                        appendLine()
+                        appendLine("  ⚠️ Last Connection Error: ${socketDetails.lastConnectionError}")
+                    }
                 } catch (e: Exception) {
                     appendLine("UDP diagnostics unavailable: ${e.message}")
                 }
             } else {
                 appendLine("UDP connection: App not initialized")
+            }
+            appendLine()
+            
+            // NEW: Packet History section for detailed packet tracing
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ UDP PACKET HISTORY (Recent Activity)                              │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            if (app != null) {
+                try {
+                    val packetHistory = app.udpConnection.getPacketHistory()
+                    if (packetHistory.isNotEmpty()) {
+                        appendLine("Recent Packet Events (last ${packetHistory.size}):")
+                        appendLine()
+                        val recentEntries = packetHistory.takeLast(20)
+                        recentEntries.forEachIndexed { index, entry ->
+                            val relativeTime = System.currentTimeMillis() - entry.timestamp
+                            val icon = when (entry.type) {
+                                UDPConnection.PacketHistoryEntry.PacketEventType.SEND_SUCCESS -> "→"
+                                UDPConnection.PacketHistoryEntry.PacketEventType.SEND_FAILED -> "✗→"
+                                UDPConnection.PacketHistoryEntry.PacketEventType.RECEIVE -> "←"
+                                UDPConnection.PacketHistoryEntry.PacketEventType.RESEND -> "⟳"
+                                UDPConnection.PacketHistoryEntry.PacketEventType.ACK_RECEIVED -> "✓"
+                                UDPConnection.PacketHistoryEntry.PacketEventType.ACK_TIMEOUT -> "⏱"
+                            }
+                            val statusIcon = if (entry.success) "" else " ⚠️"
+                            appendLine("  [${formatDuration(relativeTime)} ago] $icon ${entry.messageName} (seq=${entry.sequenceNumber}, ${entry.size}B)$statusIcon")
+                            if (!entry.success && entry.errorMessage != null) {
+                                appendLine("     Error: ${entry.errorMessage}")
+                            }
+                            // Show hex preview for failed packets or first few entries
+                            if (!entry.success || index < 3) {
+                                appendLine("     Hex: ${entry.hexPreview}")
+                            }
+                        }
+                        
+                        // Summary statistics
+                        val sendSuccessCount = packetHistory.count { it.type == UDPConnection.PacketHistoryEntry.PacketEventType.SEND_SUCCESS }
+                        val sendFailedCount = packetHistory.count { it.type == UDPConnection.PacketHistoryEntry.PacketEventType.SEND_FAILED }
+                        val receiveCount = packetHistory.count { it.type == UDPConnection.PacketHistoryEntry.PacketEventType.RECEIVE }
+                        val resendCount = packetHistory.count { it.type == UDPConnection.PacketHistoryEntry.PacketEventType.RESEND }
+                        
+                        appendLine()
+                        appendLine("History Summary:")
+                        appendLine("  Sent Successfully: $sendSuccessCount")
+                        appendLine("  Send Failures: $sendFailedCount")
+                        appendLine("  Received: $receiveCount")
+                        appendLine("  Resends: $resendCount")
+                        
+                        if (receiveCount == 0 && sendSuccessCount > 0) {
+                            appendLine()
+                            appendLine("⚠️ PACKETS SENT BUT NONE RECEIVED!")
+                            appendLine("   Possible causes:")
+                            appendLine("   - Firewall blocking UDP")
+                            appendLine("   - NAT traversal issue")
+                            appendLine("   - Simulator not responding")
+                            appendLine("   - Wrong port/address")
+                        }
+                    } else {
+                        appendLine("No packet history recorded yet")
+                    }
+                } catch (e: Exception) {
+                    appendLine("Packet history unavailable: ${e.message}")
+                }
+            } else {
+                appendLine("Packet history: App not initialized")
             }
             appendLine()
             

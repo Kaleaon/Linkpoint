@@ -383,6 +383,184 @@ class UDPConnection {
     private val messageTypeCounts = ConcurrentHashMap<String, AtomicInteger>()
     private val lastMessageTimes = ConcurrentHashMap<String, Long>()
     
+    // ==================== PACKET HISTORY FOR DETAILED DEBUGGING ====================
+    // Track recent packet activity for debug reports - helps diagnose UDP issues
+    private val recentPacketHistory = ConcurrentLinkedQueue<PacketHistoryEntry>()
+    private val maxPacketHistorySize = 50  // Keep last 50 packet events
+    @Volatile private var lastSendAttemptTime: Long = 0
+    @Volatile private var lastReceiveTime: Long = 0
+    @Volatile private var connectionAttemptTime: Long = 0
+    @Volatile private var lastConnectionError: String? = null
+    @Volatile private var localBindAddress: String? = null
+    @Volatile private var localBindPort: Int = 0
+    
+    /**
+     * Packet history entry for debugging UDP issues.
+     * Records detailed information about each packet event.
+     */
+    data class PacketHistoryEntry(
+        val timestamp: Long,
+        val type: PacketEventType,
+        val messageId: Int,
+        val messageName: String,
+        val size: Int,
+        val sequenceNumber: Int,
+        val hexPreview: String,
+        val success: Boolean,
+        val errorMessage: String? = null
+    ) {
+        enum class PacketEventType {
+            SEND_SUCCESS,
+            SEND_FAILED,
+            RECEIVE,
+            RESEND,
+            ACK_RECEIVED,
+            ACK_TIMEOUT
+        }
+    }
+    
+    /**
+     * Record a packet event in the history for debugging.
+     */
+    private fun recordPacketEvent(
+        type: PacketHistoryEntry.PacketEventType,
+        messageId: Int,
+        data: ByteArray,
+        sequenceNumber: Int,
+        success: Boolean = true,
+        errorMessage: String? = null
+    ) {
+        val entry = PacketHistoryEntry(
+            timestamp = System.currentTimeMillis(),
+            type = type,
+            messageId = messageId,
+            messageName = getMessageName(messageId),
+            size = data.size,
+            sequenceNumber = sequenceNumber,
+            hexPreview = data.take(24).joinToString(" ") { "%02X".format(it) },
+            success = success,
+            errorMessage = errorMessage
+        )
+        
+        recentPacketHistory.offer(entry)
+        
+        // Keep bounded size
+        while (recentPacketHistory.size > maxPacketHistorySize) {
+            recentPacketHistory.poll()
+        }
+    }
+    
+    /**
+     * Get human-readable message name from ID for debugging.
+     */
+    private fun getMessageName(messageId: Int): String {
+        return when (messageId) {
+            MessageIds.USE_CIRCUIT_CODE -> "UseCircuitCode"
+            MessageIds.COMPLETE_AGENT_MOVEMENT -> "CompleteAgentMovement"
+            MessageIds.LOGOUT_REQUEST -> "LogoutRequest"
+            MessageIds.REGION_HANDSHAKE -> "RegionHandshake"
+            MessageIds.AGENT_MOVEMENT_COMPLETE -> "AgentMovementComplete"
+            MessageIds.CHAT_FROM_SIMULATOR -> "ChatFromSimulator"
+            MessageIds.IMPROVED_INSTANT_MESSAGE -> "ImprovedInstantMessage"
+            MessageIds.OBJECT_UPDATE -> "ObjectUpdate"
+            MessageIds.OBJECT_UPDATE_COMPRESSED -> "ObjectUpdateCompressed"
+            MessageIds.IMPROVED_TERSE_OBJECT_UPDATE -> "ImprovedTerseObjectUpdate"
+            MessageIds.KILL_OBJECT -> "KillObject"
+            MessageIds.COARSE_LOCATION_UPDATE -> "CoarseLocationUpdate"
+            MessageIds.PACKET_ACK -> "PacketAck"
+            MessageIds.START_PING_CHECK -> "StartPingCheck"
+            MessageIds.COMPLETE_PING_CHECK -> "CompletePingCheck"
+            MessageIds.AGENT_UPDATE -> "AgentUpdate"
+            MessageIds.AGENT_ANIMATION -> "AgentAnimation"
+            MessageIds.AVATAR_ANIMATION -> "AvatarAnimation"
+            MessageIds.AGENT_THROTTLE -> "AgentThrottle"
+            MessageIds.REGION_HANDSHAKE_REPLY -> "RegionHandshakeReply"
+            else -> "Unknown(0x${messageId.toString(16).uppercase()})"
+        }
+    }
+    
+    /**
+     * Extract the sequence number from raw packet data.
+     * Packet header format: flags (1 byte), sequence (4 bytes big-endian), extra (1 byte)
+     */
+    private fun extractSequenceNumber(data: ByteArray): Int {
+        if (data.size < 5) return -1
+        val buffer = ByteBuffer.wrap(data, 1, 4).order(HEADER_BYTE_ORDER)
+        return buffer.int
+    }
+    
+    /**
+     * Extract the message ID from raw packet data.
+     * Returns -1 if packet is too short to contain a valid message ID.
+     */
+    private fun extractMessageId(data: ByteArray): Int {
+        if (data.size < 7) return -1
+        
+        // Skip header (6 bytes): flags (1) + sequence (4) + extra (1)
+        val msgStart = 6
+        
+        return when {
+            data.size < msgStart + 1 -> -1
+            data[msgStart].toInt() and 0xFF != 0xFF -> {
+                // High frequency (single byte)
+                data[msgStart].toInt() and 0xFF
+            }
+            data.size < msgStart + 2 -> -1
+            data[msgStart + 1].toInt() and 0xFF != 0xFF -> {
+                // Medium frequency (0xFF XX)
+                0xFF00 or (data[msgStart + 1].toInt() and 0xFF)
+            }
+            data.size < msgStart + 4 -> -1
+            else -> {
+                // Low frequency (0xFF FF XX XX)
+                val byte2 = data[msgStart + 2].toInt() and 0xFF
+                val byte3 = data[msgStart + 3].toInt() and 0xFF
+                0xFFFF0000.toInt() or (byte2 shl 8) or byte3
+            }
+        }
+    }
+    
+    /**
+     * Get the recent packet history for diagnostic reports.
+     */
+    fun getPacketHistory(): List<PacketHistoryEntry> {
+        return recentPacketHistory.toList()
+    }
+    
+    /**
+     * Get detailed socket/channel information for diagnostics.
+     */
+    fun getSocketDetails(): SocketDetails {
+        return SocketDetails(
+            localBindAddress = localBindAddress,
+            localBindPort = localBindPort,
+            remoteAddress = simIP,
+            remotePort = simPort,
+            isConnected = datagramChannel?.isConnected == true,
+            isOpen = datagramChannel?.isOpen == true,
+            connectionAttemptTime = connectionAttemptTime,
+            lastSendAttemptTime = lastSendAttemptTime,
+            lastReceiveTime = lastReceiveTime,
+            lastConnectionError = lastConnectionError
+        )
+    }
+    
+    /**
+     * Socket details for diagnostics.
+     */
+    data class SocketDetails(
+        val localBindAddress: String?,
+        val localBindPort: Int,
+        val remoteAddress: String,
+        val remotePort: Int,
+        val isConnected: Boolean,
+        val isOpen: Boolean,
+        val connectionAttemptTime: Long,
+        val lastSendAttemptTime: Long,
+        val lastReceiveTime: Long,
+        val lastConnectionError: String?
+    )
+    
     /**
      * Connect to the simulator.
      * 
@@ -401,6 +579,10 @@ class UDPConnection {
      */
     suspend fun connect(): Boolean = withContext(Dispatchers.IO) {
         try {
+            // Record connection attempt time for diagnostics
+            connectionAttemptTime = System.currentTimeMillis()
+            lastConnectionError = null
+            
             Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
             Log.i(TAG, "║ INITIATING UDP CONNECTION (Lumiya-style with DatagramChannel)    ║")
             Log.i(TAG, "║ Target: $simIP:$simPort                                          ║")
@@ -415,6 +597,9 @@ class UDPConnection {
             // Reset message statistics for new connection
             resetMessageStatistics()
             
+            // Also reset packet history for new connection
+            recentPacketHistory.clear()
+            
             // Create and configure DatagramChannel (NIO) like Lumiya
             // Using DatagramChannel instead of DatagramSocket is CRITICAL for mobile networks
             val address = InetSocketAddress(simIP, simPort)
@@ -426,6 +611,16 @@ class UDPConnection {
                 // Unlike DatagramSocket, connecting a DatagramChannel ensures we only
                 // receive packets from the connected address
                 connect(address)
+            }
+            
+            // Capture local bind information for diagnostics
+            try {
+                val localAddr = datagramChannel?.localAddress as? InetSocketAddress
+                localBindAddress = localAddr?.address?.hostAddress
+                localBindPort = localAddr?.port ?: 0
+                Log.i(TAG, "✓ Local bind: $localBindAddress:$localBindPort")
+            } catch (e: Exception) {
+                Log.w(TAG, "Could not determine local bind address: ${e.message}")
             }
             
             Log.i(TAG, "✓ DatagramChannel created and connected to $simIP:$simPort")
@@ -488,6 +683,7 @@ class UDPConnection {
             true
         } catch (e: Exception) {
             Log.e(TAG, "❌ Connection failed", e)
+            lastConnectionError = e.message ?: e.javaClass.simpleName
             isConnected = false
             receiveJob?.cancel()
             try {
@@ -999,11 +1195,23 @@ class UDPConnection {
         val finalPacket = if (zerocoded) zeroencode(packet) else packet
         
         try {
+            // Record send attempt time
+            lastSendAttemptTime = System.currentTimeMillis()
+            
             // Use DatagramChannel.write() for connected channel (like Lumiya)
             val buffer = ByteBuffer.wrap(finalPacket)
             val bytesWritten = channel.write(buffer)
             
             if (bytesWritten > 0) {
+                // Record successful send in packet history
+                recordPacketEvent(
+                    type = PacketHistoryEntry.PacketEventType.SEND_SUCCESS,
+                    messageId = messageId,
+                    data = finalPacket,
+                    sequenceNumber = seqNum,
+                    success = true
+                )
+                
                 if (reliable) {
                     pendingAcks[seqNum] = PendingPacket(seqNum, finalPacket, System.currentTimeMillis())
                     // Register ACK callback if provided
@@ -1013,9 +1221,27 @@ class UDPConnection {
                 }
             } else {
                 Log.w(TAG, "DatagramChannel.write() returned 0 bytes - packet may not have been sent")
+                // Record failed send
+                recordPacketEvent(
+                    type = PacketHistoryEntry.PacketEventType.SEND_FAILED,
+                    messageId = messageId,
+                    data = finalPacket,
+                    sequenceNumber = seqNum,
+                    success = false,
+                    errorMessage = "DatagramChannel.write() returned 0 bytes"
+                )
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send packet", e)
+            // Record failed send with error
+            recordPacketEvent(
+                type = PacketHistoryEntry.PacketEventType.SEND_FAILED,
+                messageId = messageId,
+                data = finalPacket,
+                sequenceNumber = seqNum,
+                success = false,
+                errorMessage = e.message
+            )
         }
         
         seqNum
@@ -1071,6 +1297,7 @@ class UDPConnection {
                                 // Update global statistics for diagnostics
                                 totalPacketsReceived.incrementAndGet()
                                 totalBytesReceived.addAndGet(bytesRead.toLong())
+                                lastReceiveTime = System.currentTimeMillis()
                                 
                                 buffer.flip()
                                 val data = ByteArray(bytesRead)
@@ -1084,6 +1311,18 @@ class UDPConnection {
                                     val hexPreview = data.take(32).joinToString(" ") { "%02X".format(it) }
                                     Log.d(TAG, "   Raw preview: $hexPreview")
                                 }
+                                
+                                // Extract message ID from packet for history
+                                val msgId = extractMessageId(data)
+                                
+                                // Record receive event in packet history
+                                recordPacketEvent(
+                                    type = PacketHistoryEntry.PacketEventType.RECEIVE,
+                                    messageId = msgId,
+                                    data = data,
+                                    sequenceNumber = extractSequenceNumber(data),
+                                    success = true
+                                )
                                 
                                 processPacket(data)
                             }
@@ -1293,8 +1532,18 @@ class UDPConnection {
         for (i in 0 until count) {
             if (buffer.remaining() >= 4) {
                 val ackSeq = buffer.int
-                pendingAcks.remove(ackSeq)
+                val removedPacket = pendingAcks.remove(ackSeq)
                 Log.d(TAG, "   ACK for packet #$ackSeq")
+                
+                // Record ACK received event in packet history
+                recordPacketEvent(
+                    type = PacketHistoryEntry.PacketEventType.ACK_RECEIVED,
+                    messageId = MessageIds.PACKET_ACK,
+                    data = payload,
+                    sequenceNumber = ackSeq,
+                    success = true
+                )
+                
                 // Invoke ACK callback if registered (for sequence-dependent operations)
                 ackCallbacks.remove(ackSeq)?.invoke()
             }
@@ -1432,13 +1681,43 @@ class UDPConnection {
                         pending.retries++
                         pending.timestamp = now
                         packetsResentCount.incrementAndGet() // Track resent packets for diagnostics
+                        
+                        // Record resend event in packet history
+                        val msgId = extractMessageId(resendPacket)
+                        recordPacketEvent(
+                            type = PacketHistoryEntry.PacketEventType.RESEND,
+                            messageId = msgId,
+                            data = resendPacket,
+                            sequenceNumber = pending.seqNum,
+                            success = true
+                        )
                     }
                 } catch (e: Exception) {
                     Log.w(TAG, "Resend failed for seq ${pending.seqNum}")
+                    // Record failed resend - extract message ID for better diagnostics
+                    val msgId = extractMessageId(resendPacket)
+                    recordPacketEvent(
+                        type = PacketHistoryEntry.PacketEventType.RESEND,
+                        messageId = msgId,
+                        data = resendPacket,
+                        sequenceNumber = pending.seqNum,
+                        success = false,
+                        errorMessage = e.message
+                    )
                 }
             } else {
                 pendingAcks.remove(pending.seqNum)
                 Log.w(TAG, "Packet ${pending.seqNum} dropped after max retries")
+                // Record ACK timeout in packet history - extract message ID for better diagnostics
+                val msgId = extractMessageId(pending.data)
+                recordPacketEvent(
+                    type = PacketHistoryEntry.PacketEventType.ACK_TIMEOUT,
+                    messageId = msgId,
+                    data = pending.data,
+                    sequenceNumber = pending.seqNum,
+                    success = false,
+                    errorMessage = "Dropped after $MAX_RETRIES retries"
+                )
             }
         }
     }
