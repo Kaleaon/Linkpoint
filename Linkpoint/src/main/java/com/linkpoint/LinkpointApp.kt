@@ -565,6 +565,10 @@ class LinkpointApp : Application() {
             }
         }
         
+        // Mark handlers as ready and process any buffered packets
+        // This is critical for handling packets that arrived before handlers were registered
+        udpConnection.setHandlersReady()
+        
         Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ UDP MESSAGE HANDLERS REGISTERED: ${udpConnection.getRegisteredHandlerCount()}")
         Log.i(TAG, "║ Handlers: ${udpConnection.getRegisteredHandlerIds().joinToString(", ")}")
