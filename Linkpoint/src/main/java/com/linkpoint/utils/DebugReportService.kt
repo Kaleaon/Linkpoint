@@ -396,12 +396,12 @@ class DebugReportService private constructor(private val context: Context) {
                     if (packetHistory.isNotEmpty()) {
                         appendLine("Recent Packet Events (last ${packetHistory.size}):")
                         appendLine()
-                        packetHistory.takeLast(20).forEach { entry ->
+                        val recentEntries = packetHistory.takeLast(20)
+                        recentEntries.forEachIndexed { index, entry ->
                             val relativeTime = System.currentTimeMillis() - entry.timestamp
                             val icon = when (entry.type) {
                                 UDPConnection.PacketHistoryEntry.PacketEventType.SEND_SUCCESS -> "→"
                                 UDPConnection.PacketHistoryEntry.PacketEventType.SEND_FAILED -> "✗→"
-                                UDPConnection.PacketHistoryEntry.PacketEventType.SEND_ATTEMPT -> "→?"
                                 UDPConnection.PacketHistoryEntry.PacketEventType.RECEIVE -> "←"
                                 UDPConnection.PacketHistoryEntry.PacketEventType.RESEND -> "⟳"
                                 UDPConnection.PacketHistoryEntry.PacketEventType.ACK_RECEIVED -> "✓"
@@ -413,7 +413,7 @@ class DebugReportService private constructor(private val context: Context) {
                                 appendLine("     Error: ${entry.errorMessage}")
                             }
                             // Show hex preview for failed packets or first few entries
-                            if (!entry.success || packetHistory.indexOf(entry) < 3) {
+                            if (!entry.success || index < 3) {
                                 appendLine("     Hex: ${entry.hexPreview}")
                             }
                         }

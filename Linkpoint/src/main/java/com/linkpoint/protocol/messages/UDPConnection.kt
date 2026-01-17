@@ -410,7 +410,6 @@ class UDPConnection {
         val errorMessage: String? = null
     ) {
         enum class PacketEventType {
-            SEND_ATTEMPT,
             SEND_SUCCESS,
             SEND_FAILED,
             RECEIVE,
@@ -1695,10 +1694,11 @@ class UDPConnection {
                     }
                 } catch (e: Exception) {
                     Log.w(TAG, "Resend failed for seq ${pending.seqNum}")
-                    // Record failed resend
+                    // Record failed resend - extract message ID for better diagnostics
+                    val msgId = extractMessageId(resendPacket)
                     recordPacketEvent(
                         type = PacketHistoryEntry.PacketEventType.RESEND,
-                        messageId = -1,
+                        messageId = msgId,
                         data = resendPacket,
                         sequenceNumber = pending.seqNum,
                         success = false,
@@ -1708,10 +1708,11 @@ class UDPConnection {
             } else {
                 pendingAcks.remove(pending.seqNum)
                 Log.w(TAG, "Packet ${pending.seqNum} dropped after max retries")
-                // Record ACK timeout in packet history
+                // Record ACK timeout in packet history - extract message ID for better diagnostics
+                val msgId = extractMessageId(pending.data)
                 recordPacketEvent(
                     type = PacketHistoryEntry.PacketEventType.ACK_TIMEOUT,
-                    messageId = -1,
+                    messageId = msgId,
                     data = pending.data,
                     sequenceNumber = pending.seqNum,
                     success = false,
