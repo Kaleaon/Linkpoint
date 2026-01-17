@@ -1,6 +1,7 @@
 package com.linkpoint.protocol.messages
 
 import android.util.Log
+import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
 import java.net.DatagramPacket
 import java.net.DatagramSocket
@@ -751,20 +752,6 @@ class UDPConnection {
         payload.put(1.toByte())  // Count: 1 ACK
         payload.putInt(seqNum)
         sendPacket(MessageIds.PACKET_ACK, payload.array(), reliable = false)
-    }
-    
-    /**
-     * Write UUID to ByteBuffer in Second Life format.
-     * SL stores UUIDs as 16 raw bytes in big-endian order, even in little-endian blocks.
-     */
-    private fun ByteBuffer.putUUID(uuid: UUID): ByteBuffer {
-        // UUID fields are big-endian while the rest of the block uses little-endian.
-        val originalOrder = order()
-        order(ByteOrder.BIG_ENDIAN)
-        putLong(uuid.mostSignificantBits)
-        putLong(uuid.leastSignificantBits)
-        order(originalOrder)
-        return this
     }
     
     private suspend fun sendUseCircuitCode() {
