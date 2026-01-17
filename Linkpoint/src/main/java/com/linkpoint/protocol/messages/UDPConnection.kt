@@ -229,8 +229,9 @@ class UDPConnection {
     
     // Dedicated thread pool for parallel packet processing
     // Dynamically sized based on configuration
+    // Note: Initialized with default thread count to avoid accessing processingConfig before it's ready
     private var packetProcessorExecutor = Executors.newFixedThreadPool(
-        getEffectiveThreadCount()
+        Runtime.getRuntime().availableProcessors().coerceIn(1, 16)
     )
     private var packetProcessorDispatcher = packetProcessorExecutor.asCoroutineDispatcher()
     
@@ -310,9 +311,20 @@ class UDPConnection {
         packetProcessorExecutor = Executors.newFixedThreadPool(threadCount)
         packetProcessorDispatcher = packetProcessorExecutor.asCoroutineDispatcher()
         
-        // Shutdown old pool gracefully
+        // Shutdown old pool gracefully with timeout
         oldDispatcher.close()
         oldExecutor.shutdown()
+        try {
+            // Wait up to 5 seconds for tasks to complete
+            if (!oldExecutor.awaitTermination(5, java.util.concurrent.TimeUnit.SECONDS)) {
+                Log.w(TAG, "   Thread pool did not terminate gracefully, forcing shutdown")
+                oldExecutor.shutdownNow()
+            }
+        } catch (e: InterruptedException) {
+            Log.w(TAG, "   Thread pool shutdown interrupted", e)
+            oldExecutor.shutdownNow()
+            Thread.currentThread().interrupt()
+        }
         
         Log.i(TAG, "   ✓ Thread pool rebuilt")
     }
