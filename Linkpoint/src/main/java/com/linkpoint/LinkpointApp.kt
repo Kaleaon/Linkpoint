@@ -5,6 +5,7 @@ import android.util.Log
 import com.linkpoint.assets.*
 import com.linkpoint.utils.CrashReporter
 import com.linkpoint.avatar.AvatarManager
+import com.linkpoint.avatar.baking.AvatarBakingSystem
 import com.linkpoint.chat.ChatManager
 import com.linkpoint.chat.IMManager
 import com.linkpoint.chat.dialogs.ScriptDialogManager
@@ -24,16 +25,24 @@ import com.linkpoint.network.NetworkLogger
 import com.linkpoint.objects.BuildTools
 import com.linkpoint.objects.ObjectManager
 import com.linkpoint.objects.inventory.TaskInventoryManager
+import com.linkpoint.objects.prim.FlexiblePrimSimulator
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.messages.UDPConnection
 import com.linkpoint.protocol.messages.parseRegionHandshake
 import com.linkpoint.protocol.messages.parseAgentMovementComplete
 import com.linkpoint.protocol.transfer.TransferManager
 import com.linkpoint.protocol.transfer.XferManager
+import com.linkpoint.render.DrawDistanceManager
 import com.linkpoint.render.HoverTextManager
 import com.linkpoint.render.RenderManager
+import com.linkpoint.render.particles.ParticleSystem
+import com.linkpoint.rlv.RLVController
+import com.linkpoint.service.ConnectionKeepAliveManager
+import com.linkpoint.service.IdleHandler
+import com.linkpoint.service.LinkpointConnectionService
 import com.linkpoint.users.DisplayNameManager
 import com.linkpoint.users.MuteManager
+import com.linkpoint.users.UserProfileManager
 import com.linkpoint.voice.VoiceManager
 import com.linkpoint.world.FriendsManager
 import com.linkpoint.world.ParcelManager
@@ -41,6 +50,7 @@ import com.linkpoint.world.ProfileManager
 import com.linkpoint.world.SearchManager
 import com.linkpoint.world.WorldMap
 import com.linkpoint.world.environment.EnvironmentManager
+import com.linkpoint.world.minimap.MinimapManager
 import com.linkpoint.groups.GroupsManager
 import com.linkpoint.animesh.AnimeshManager
 import com.linkpoint.bom.BakesOnMeshManager
@@ -209,6 +219,38 @@ class LinkpointApp : Application() {
     lateinit var economyManager: EconomyManager
         private set
     
+    // RLV Controller (NEW)
+    lateinit var rlvController: RLVController
+        private set
+    
+    // User Profile Manager (NEW)
+    lateinit var userProfileManager: UserProfileManager
+        private set
+    
+    // Draw Distance Manager (NEW)
+    lateinit var drawDistanceManager: DrawDistanceManager
+        private set
+    
+    // Minimap (NEW)
+    lateinit var minimapManager: MinimapManager
+        private set
+    
+    // Avatar Baking System (NEW)
+    lateinit var avatarBakingSystem: AvatarBakingSystem
+        private set
+    
+    // Flexible Prim Simulator (NEW)
+    lateinit var flexiblePrimSimulator: FlexiblePrimSimulator
+        private set
+    
+    // Connection Keep-Alive (NEW)
+    lateinit var connectionKeepAlive: ConnectionKeepAliveManager
+        private set
+    
+    // Idle Handler (NEW)
+    lateinit var idleHandler: IdleHandler
+        private set
+    
     // Crash Reporter
     lateinit var crashReporter: CrashReporter
         private set
@@ -302,6 +344,27 @@ class LinkpointApp : Application() {
         // NEW: Xfer manager (needs UDP connection)
         xferManager = XferManager(udpConnection)
         
+        // NEW: RLV Controller
+        rlvController = RLVController()
+        
+        // NEW: Draw Distance Manager
+        drawDistanceManager = DrawDistanceManager()
+        
+        // NEW: Minimap
+        minimapManager = MinimapManager(udpConnection)
+        
+        // NEW: Avatar Baking System
+        avatarBakingSystem = AvatarBakingSystem()
+        
+        // NEW: Flexible Prim Simulator
+        flexiblePrimSimulator = FlexiblePrimSimulator()
+        
+        // NEW: Connection Keep-Alive (critical for background operation)
+        connectionKeepAlive = ConnectionKeepAliveManager(this, udpConnection)
+        
+        // NEW: Idle Handler
+        idleHandler = IdleHandler(connectionKeepAlive)
+        
         Log.d(TAG, "Core managers initialized")
     }
     
@@ -330,6 +393,15 @@ class LinkpointApp : Application() {
         
         // NEW: Mute manager
         muteManager = MuteManager(udpConnection, xferManager, agentId)
+        
+        // NEW: User Profile Manager
+        userProfileManager = UserProfileManager(capabilityManager, udpConnection, agentId)
+        
+        // NEW: Initialize connection keep-alive with credentials
+        connectionKeepAlive.initialize(agentId, udpConnection.getSessionId())
+        
+        // Start background service for connection persistence
+        LinkpointConnectionService.start(this)
         
         // NEW: Script dialog manager
         scriptDialogManager = ScriptDialogManager(udpConnection, agentId)
@@ -657,6 +729,9 @@ class LinkpointApp : Application() {
         super.onTerminate()
         Log.i(TAG, "Linkpoint application terminating")
         
+        // Stop background connection service
+        LinkpointConnectionService.stop(this)
+        
         // Cleanup
         voiceManager.shutdown()
         if (::avatarManager.isInitialized) avatarManager.shutdown()
@@ -686,6 +761,14 @@ class LinkpointApp : Application() {
         if (::xferManager.isInitialized) xferManager.shutdown()
         if (::displayNameManager.isInitialized) displayNameManager.shutdown()
         if (::environmentManager.isInitialized) environmentManager.shutdown()
+        
+        // Shutdown additional new managers
+        if (::rlvController.isInitialized) rlvController.shutdown()
+        if (::userProfileManager.isInitialized) userProfileManager.shutdown()
+        if (::minimapManager.isInitialized) minimapManager.shutdown()
+        if (::avatarBakingSystem.isInitialized) avatarBakingSystem.shutdown()
+        if (::connectionKeepAlive.isInitialized) connectionKeepAlive.shutdown()
+        if (::idleHandler.isInitialized) idleHandler.shutdown()
         
         capabilityManager.shutdown()
         udpConnection.disconnect()
