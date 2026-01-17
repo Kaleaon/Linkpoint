@@ -1,10 +1,16 @@
 # Linkpoint Documentation
 
+## 📋 Master Tracking
+
+| Document | Description |
+|----------|-------------|
+| **[MASTER_TRACKING.md](MASTER_TRACKING.md)** | **📌 MASTER DOCUMENT - All fixes and work with labeled status** |
+
 ## Core Documentation
 
 | Document | Description |
 |----------|-------------|
-| [FIXES_AND_STATUS.md](FIXES_AND_STATUS.md) | **Current status, fix history, and known issues** |
+| [FIXES_AND_STATUS.md](FIXES_AND_STATUS.md) | Current status, fix history, and known issues |
 | [Broken_Code_Analysis_and_Fixes.md](Broken_Code_Analysis_and_Fixes.md) | Technical analysis of code issues |
 
 ## Protocol & Integration Guides
