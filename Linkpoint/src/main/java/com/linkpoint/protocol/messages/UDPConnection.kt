@@ -711,6 +711,12 @@ class UDPConnection {
         // Dispatch to handler
         val payload = decoded.copyOfRange(offset, decoded.size - if (hasAcks) 1 + (decoded[decoded.size - 1].toInt() and 0xFF) * 4 else 0)
         
+        // Handle PacketAck messages internally (acknowledges our sent packets)
+        if (messageId == MessageIds.PACKET_ACK) {
+            handlePacketAck(payload)
+            return
+        }
+        
         val handler = messageHandlers[messageId]
         if (handler != null) {
             Log.d(TAG, "   → Dispatching to handler (${payload.size} bytes payload)")
@@ -722,6 +728,27 @@ class UDPConnection {
             }
         } else {
             Log.w(TAG, "   ⚠️ No handler registered for message: $messageName")
+        }
+    }
+    
+    /**
+     * Handle standalone PacketAck message from simulator.
+     * Format: 1 byte count, then N x 4-byte sequence numbers (little-endian).
+     */
+    private fun handlePacketAck(payload: ByteArray) {
+        if (payload.isEmpty()) return
+        
+        val buffer = ByteBuffer.wrap(payload).order(BODY_BYTE_ORDER)
+        val count = buffer.get().toInt() and 0xFF
+        
+        Log.d(TAG, "   Processing $count ACKs from PacketAck message")
+        
+        for (i in 0 until count) {
+            if (buffer.remaining() >= 4) {
+                val ackSeq = buffer.int
+                pendingAcks.remove(ackSeq)
+                Log.d(TAG, "   ACK for packet #$ackSeq")
+            }
         }
     }
     
