@@ -1144,14 +1144,18 @@ class UDPConnection {
         header.put(0.toByte()) // Extra header byte (no extra data)
         
         // Determine message ID size (network order, per SL/PyOGP packet layout).
-        // This matches Lumiya's PackPayload which writes the message ID prefix
+        // This matches Lumiya's PackPayload which writes the message ID prefix.
+        //
+        // CRITICAL: Low frequency message IDs like 0xFFFF0003.toInt() become negative
+        // integers in Kotlin/Java (e.g., -65533). We MUST check for low frequency first
+        // using the unsigned right shift (ushr), which correctly identifies them even
+        // when negative. If we checked `messageId <= 0xFF` first, negative IDs would
+        // incorrectly match that branch since -65533 < 255.
         val messageBytes = when {
-            messageId <= 0xFF -> byteArrayOf(messageId.toByte())
-            messageId in 0xFF00..0xFFFF -> {
-                byteArrayOf(0xFF.toByte(), (messageId and 0xFF).toByte())
-            }
+            // Low frequency messages: 0xFFFF0000 - 0xFFFFFFFF (negative when signed)
+            // Check first because these IDs are negative and would match <= 0xFF check
             messageId ushr 16 == 0xFFFF -> {
-                // Low frequency message: FF FF XX XX
+                // Low frequency message: FF FF XX XX (4 bytes)
                 byteArrayOf(
                     0xFF.toByte(),
                     0xFF.toByte(),
@@ -1159,7 +1163,17 @@ class UDPConnection {
                     (messageId and 0xFF).toByte()
                 )
             }
-            else -> byteArrayOf(messageId.toByte())
+            // Medium frequency messages: 0xFF00 - 0xFFFE (positive, 2 bytes)
+            messageId in 0xFF00..0xFFFE -> {
+                byteArrayOf(0xFF.toByte(), (messageId and 0xFF).toByte())
+            }
+            // High frequency messages: 0x00 - 0xFE (single byte)
+            messageId in 0x00..0xFE -> byteArrayOf(messageId.toByte())
+            // Fallback (should not normally be reached)
+            else -> {
+                Log.w(TAG, "Unexpected message ID format: 0x${messageId.toString(16)}")
+                byteArrayOf(messageId.toByte())
+            }
         }
         
         val packet = header.array() + messageBytes + payload
