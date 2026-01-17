@@ -12,6 +12,7 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * UDP Connection handler for Second Life protocol.
@@ -857,27 +858,47 @@ class UDPConnection {
         
         Log.d(TAG, "Sending UseCircuitCode: circuit=$circuitCode, agent=${agentId.toString().take(8)}...")
         
-        // Use suspendCancellableCoroutine to wait for ACK
+        // Use suspendCancellableCoroutine to wait for ACK with proper exception handling
         return try {
             withTimeout(timeoutMs) {
                 suspendCancellableCoroutine { continuation ->
+                    // Track the sequence number so we can clean up on cancellation
+                    var seqNum = -1
+                    
+                    continuation.invokeOnCancellation {
+                        // Clean up the callback if the continuation is cancelled
+                        if (seqNum >= 0) {
+                            ackCallbacks.remove(seqNum)
+                        }
+                    }
+                    
                     scope.launch {
-                        sendPacket(
-                            MessageIds.USE_CIRCUIT_CODE,
-                            payload.array(),
-                            reliable = true,
-                            onAck = {
-                                Log.d(TAG, "UseCircuitCode ACK received!")
-                                if (continuation.isActive) {
-                                    continuation.resume(true)
+                        try {
+                            seqNum = sendPacket(
+                                MessageIds.USE_CIRCUIT_CODE,
+                                payload.array(),
+                                reliable = true,
+                                onAck = {
+                                    Log.d(TAG, "UseCircuitCode ACK received!")
+                                    if (continuation.isActive) {
+                                        continuation.resume(true)
+                                    }
                                 }
+                            )
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Failed to send UseCircuitCode", e)
+                            if (continuation.isActive) {
+                                continuation.resume(false)
                             }
-                        )
+                        }
                     }
                 }
             }
         } catch (e: TimeoutCancellationException) {
             Log.w(TAG, "UseCircuitCode ACK timeout after ${timeoutMs}ms")
+            false
+        } catch (e: Exception) {
+            Log.e(TAG, "Error waiting for UseCircuitCode ACK", e)
             false
         }
     }
