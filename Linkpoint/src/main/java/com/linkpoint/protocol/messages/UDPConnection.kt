@@ -10,6 +10,8 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.resume
@@ -103,6 +105,22 @@ class UDPConnection {
     // ACK callback mechanism - notified when specific packets are acknowledged
     // Key is sequence number, value is callback to invoke when ACK received
     private val ackCallbacks = ConcurrentHashMap<Int, () -> Unit>()
+    
+    // ==================== PACKET BUFFER ====================
+    // Buffer to store incoming packets that arrive before handlers are registered.
+    // This prevents packet loss during the race condition between UDP connection
+    // establishment and message handler registration.
+    private val packetBuffer = ConcurrentLinkedQueue<BufferedPacket>()
+    private val handlersReady = AtomicBoolean(false)
+    private val maxBufferedPackets = 1000  // Prevent unbounded memory growth
+    
+    /**
+     * Data class to hold buffered packet information
+     */
+    private data class BufferedPacket(
+        val data: ByteArray,
+        val timestamp: Long = System.currentTimeMillis()
+    )
     
     // ACK batching for efficiency (matches official viewer behavior)
     private val pendingAckIds = mutableListOf<Int>()
@@ -542,6 +560,10 @@ class UDPConnection {
         ackCallbacks.clear()  // Clear ACK callbacks to prevent memory leaks
         synchronized(pendingAckIds) { pendingAckIds.clear() }
         
+        // Clear packet buffer and reset handlers ready flag for next connection
+        packetBuffer.clear()
+        handlersReady.set(false)
+        
         // Note: Message statistics are preserved for post-disconnect diagnostics.
         // They will be reset when connect() is called for a new session.
         
@@ -554,6 +576,64 @@ class UDPConnection {
     fun registerHandler(messageId: Int, handler: MessageHandler) {
         messageHandlers[messageId] = handler
     }
+    
+    /**
+     * Mark handlers as ready and process any buffered packets.
+     * This should be called after all critical message handlers have been registered.
+     * 
+     * This method ensures packets that arrived before handlers were registered
+     * are not lost and are processed in order.
+     */
+    fun setHandlersReady() {
+        if (handlersReady.compareAndSet(false, true)) {
+            Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+            Log.i(TAG, "║ HANDLERS MARKED READY - Processing buffered packets")
+            Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+            processBufferedPackets()
+        }
+    }
+    
+    /**
+     * Process all buffered packets in order.
+     * Called when handlers become ready.
+     */
+    private fun processBufferedPackets() {
+        val bufferedCount = packetBuffer.size
+        if (bufferedCount == 0) {
+            Log.i(TAG, "   No buffered packets to process")
+            return
+        }
+        
+        Log.i(TAG, "   Processing $bufferedCount buffered packet(s)...")
+        var processedCount = 0
+        var errorCount = 0
+        
+        while (true) {
+            val bufferedPacket = packetBuffer.poll() ?: break
+            try {
+                val age = System.currentTimeMillis() - bufferedPacket.timestamp
+                Log.d(TAG, "   Processing buffered packet (age: ${age}ms, size: ${bufferedPacket.data.size} bytes)")
+                dispatchPacket(bufferedPacket.data)
+                processedCount++
+            } catch (e: Exception) {
+                Log.e(TAG, "   Error processing buffered packet", e)
+                errorCount++
+            }
+        }
+        
+        Log.i(TAG, "   ✓ Processed $processedCount buffered packets ($errorCount errors)")
+    }
+    
+    /**
+     * Get the number of packets currently in the buffer.
+     * Useful for diagnostics.
+     */
+    fun getBufferedPacketCount(): Int = packetBuffer.size
+    
+    /**
+     * Check if handlers are ready to process packets.
+     */
+    fun areHandlersReady(): Boolean = handlersReady.get()
     
     /**
      * Send a packet.
@@ -708,7 +788,7 @@ class UDPConnection {
             Log.d(TAG, "   Zero-decoded: ${decoded.size} bytes")
         }
         
-        // Handle acks at end of packet
+        // Handle acks at end of packet - ALWAYS process these immediately (time-sensitive)
         // CRITICAL: Appended ACKs are BIG_ENDIAN (network order), same as packet header
         // This is different from the message payload which is LITTLE_ENDIAN
         // See Lumiya's SLMessage.Pack() and AppendPendingAcks() for reference
@@ -731,12 +811,40 @@ class UDPConnection {
             }
         }
         
-        // Send ack if reliable
+        // Send ack if reliable - ALWAYS send immediately (time-sensitive)
         if (isReliable) {
             scope.launch {
                 sendAck(seqNum)
             }
         }
+        
+        // If handlers are ready, dispatch immediately; otherwise buffer for later processing
+        if (handlersReady.get()) {
+            dispatchPacket(decoded)
+        } else {
+            // Buffer the packet for later processing
+            if (packetBuffer.size < maxBufferedPackets) {
+                packetBuffer.offer(BufferedPacket(decoded.copyOf()))
+                Log.d(TAG, "   📥 Packet buffered (handlers not ready yet) - buffer size: ${packetBuffer.size}")
+            } else {
+                Log.w(TAG, "   ⚠️ Packet buffer full, dropping packet")
+            }
+        }
+    }
+    
+    /**
+     * Dispatch a packet to its message handler.
+     * This handles the actual message parsing and handler invocation.
+     * Called directly when handlers are ready, or from processBufferedPackets() for buffered packets.
+     */
+    private fun dispatchPacket(decoded: ByteArray) {
+        if (decoded.size < PACKET_HEADER_SIZE) {
+            Log.w(TAG, "   ⚠️ Decoded packet too small for dispatch: ${decoded.size} bytes")
+            return
+        }
+        
+        val flags = decoded[0].toInt() and 0xFF
+        val hasAcks = (flags and FLAG_ACK) != 0
         
         // Parse message ID
         var offset = PACKET_HEADER_SIZE
@@ -1113,7 +1221,9 @@ class UDPConnection {
             registeredHandlers = getRegisteredHandlerIds(),
             pendingPackets = pendingPacketInfo,
             socketOpen = socket?.let { !it.isClosed } ?: false,
-            receiveLoopActive = receiveJob?.isActive == true
+            receiveLoopActive = receiveJob?.isActive == true,
+            bufferedPacketCount = packetBuffer.size,
+            handlersReady = handlersReady.get()
         )
     }
     
@@ -1133,7 +1243,9 @@ class UDPConnection {
         val registeredHandlers: List<String>,
         val pendingPackets: List<PendingPacketInfo>,
         val socketOpen: Boolean,
-        val receiveLoopActive: Boolean
+        val receiveLoopActive: Boolean,
+        val bufferedPacketCount: Int = 0,
+        val handlersReady: Boolean = false
     )
     
     /**
