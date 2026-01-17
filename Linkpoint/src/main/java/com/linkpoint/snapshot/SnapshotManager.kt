@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -208,18 +210,41 @@ class SnapshotManager(
                 if (response is LLSDMap) {
                     val uploaderUrl = response.getString("uploader")
                     if (uploaderUrl != null) {
-                        // Upload the image data using the uploader URL
-                        val uploadResponse = capabilityManager.postBinary(uploaderUrl, imageBytes, "image/jpeg")
-                        
-                        if (uploadResponse is LLSDMap) {
-                            val assetId = uploadResponse.getUUID("new_asset")
-                            val itemId = uploadResponse.getUUID("new_inventory_item")
+                        // Upload the image data using OkHttp directly to the uploader URL
+                        try {
+                            val client = okhttp3.OkHttpClient.Builder()
+                                .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                                .writeTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+                                .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                                .build()
                             
-                            if (assetId != null) {
-                                _snapshotEvents.emit(SnapshotEvent.UploadComplete(assetId))
-                                Log.i(TAG, "Snapshot uploaded: asset=$assetId, item=$itemId")
-                                return@withContext UploadResult.Success(assetId, itemId)
+                            val requestBody = imageBytes.toRequestBody("application/octet-stream".toMediaTypeOrNull())
+                            
+                            val uploadRequest = okhttp3.Request.Builder()
+                                .url(uploaderUrl)
+                                .post(requestBody)
+                                .build()
+                            
+                            val uploadHttpResponse = client.newCall(uploadRequest).execute()
+                            val uploadResponseBody = uploadHttpResponse.body?.string()
+                            
+                            if (uploadHttpResponse.isSuccessful && uploadResponseBody != null) {
+                                // Parse LLSD response
+                                val uploadResponse = LLSDParser.parse(uploadResponseBody.toByteArray())
+                                
+                                if (uploadResponse is LLSDMap) {
+                                    val assetId = uploadResponse.getUUID("new_asset")
+                                    val itemId = uploadResponse.getUUID("new_inventory_item")
+                                    
+                                    if (assetId != null) {
+                                        _snapshotEvents.emit(SnapshotEvent.UploadComplete(assetId))
+                                        Log.i(TAG, "Snapshot uploaded: asset=$assetId, item=$itemId")
+                                        return@withContext UploadResult.Success(assetId, itemId)
+                                    }
+                                }
                             }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Failed to upload to uploader URL", e)
                         }
                     }
                     

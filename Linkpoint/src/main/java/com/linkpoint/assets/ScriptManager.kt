@@ -172,19 +172,23 @@ class ScriptManager(
                 
                 if (response is LLSDMap) {
                     val scripts = response.getArray("scripts")
-                    scripts?.map { item ->
-                        if (item is LLSDMap) {
-                            ScriptInfo(
-                                itemId = item.getUUID("item_id") ?: UUID(0, 0),
-                                name = item.getString("name") ?: "Unknown",
-                                isRunning = item.getBoolean("running") ?: false,
-                                isMono = item.getBoolean("mono") ?: false,
-                                memoryUsed = item.getInt("memory") ?: 0,
-                                memoryLimit = item.getInt("memory_limit") ?: 65536,
-                                timeUsed = item.getReal("time")?.toFloat() ?: 0f
-                            )
-                        } else null
-                    }?.filterNotNull()
+                    val result = mutableListOf<ScriptInfo>()
+                    if (scripts != null) {
+                        for (item in scripts.value) {
+                            if (item is LLSDMap) {
+                                result.add(ScriptInfo(
+                                    itemId = item.getUUID("item_id") ?: UUID(0, 0),
+                                    name = item.getString("name") ?: "Unknown",
+                                    isRunning = item.getBoolean("running") ?: false,
+                                    isMono = item.getBoolean("mono") ?: false,
+                                    memoryUsed = item.getInt("memory") ?: 0,
+                                    memoryLimit = item.getInt("memory_limit") ?: 65536,
+                                    timeUsed = item.getReal("time")?.toFloat() ?: 0f
+                                ))
+                            }
+                        }
+                    }
+                    if (result.isNotEmpty()) result else null
                 } else null
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to get script info", e)

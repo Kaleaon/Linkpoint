@@ -68,7 +68,7 @@ class AnimationController(
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     
     // Currently playing animations
-    private val playingAnimations = ConcurrentHashMap<UUID, AnimationState>()
+    private val playingAnimations = ConcurrentHashMap<UUID, AnimationPlayingState>()
     
     // Animation events
     private val _animationEvents = MutableSharedFlow<AnimationEvent>(replay = 0, extraBufferCapacity = 32)
@@ -227,7 +227,7 @@ class AnimationController(
     /**
      * Get animation state.
      */
-    fun getAnimationPlayingState(animationId: UUID): AnimationState? {
+    fun getAnimationPlayingState(animationId: UUID): AnimationPlayingState? {
         return playingAnimations[animationId]
     }
     

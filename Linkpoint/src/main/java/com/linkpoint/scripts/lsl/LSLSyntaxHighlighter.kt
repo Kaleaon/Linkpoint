@@ -26,19 +26,19 @@ class LSLSyntaxHighlighter {
         val textStr = text.toString()
         
         // Highlight multi-line comments first (highest priority)
-        highlightPattern(textStr, LSLSyntax.PATTERNS.MULTI_LINE_COMMENT, LSLSyntax.Colors.COMMENT, highlights)
+        highlightPattern(textStr, LSLSyntax.Patterns.MULTI_LINE_COMMENT, LSLSyntax.Colors.COMMENT, highlights)
         
         // Highlight single-line comments
-        highlightPattern(textStr, LSLSyntax.PATTERNS.SINGLE_LINE_COMMENT, LSLSyntax.Colors.COMMENT, highlights)
+        highlightPattern(textStr, LSLSyntax.Patterns.SINGLE_LINE_COMMENT, LSLSyntax.Colors.COMMENT, highlights)
         
         // Highlight strings
-        highlightPattern(textStr, LSLSyntax.PATTERNS.STRING, LSLSyntax.Colors.STRING, highlights)
+        highlightPattern(textStr, LSLSyntax.Patterns.STRING, LSLSyntax.Colors.STRING, highlights)
         
         // Highlight numbers
-        highlightPattern(textStr, LSLSyntax.PATTERNS.NUMBER, LSLSyntax.Colors.NUMBER, highlights)
+        highlightPattern(textStr, LSLSyntax.Patterns.NUMBER, LSLSyntax.Colors.NUMBER, highlights)
         
         // Highlight identifiers (keywords, types, functions, etc.)
-        val identifierMatcher = LSLSyntax.PATTERNS.IDENTIFIER.matcher(textStr)
+        val identifierMatcher = LSLSyntax.Patterns.IDENTIFIER.matcher(textStr)
         while (identifierMatcher.find()) {
             val word = identifierMatcher.group()
             val start = identifierMatcher.start()

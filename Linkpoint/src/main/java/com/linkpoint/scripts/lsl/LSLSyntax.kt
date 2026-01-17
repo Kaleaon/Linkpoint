@@ -504,14 +504,14 @@ object LSLSyntax {
     
     // ==================== PATTERNS ====================
     
-    val PATTERNS = object {
-        val STRING = Pattern.compile("\"([^\"\\\\]|\\\\.)*\"")
-        val SINGLE_LINE_COMMENT = Pattern.compile("//.*")
-        val MULTI_LINE_COMMENT = Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL)
-        val NUMBER = Pattern.compile("\\b(0x[0-9A-Fa-f]+|\\d+\\.?\\d*([eE][+-]?\\d+)?|\\d*\\.\\d+([eE][+-]?\\d+)?)\\b")
-        val IDENTIFIER = Pattern.compile("\\b[a-zA-Z_][a-zA-Z0-9_]*\\b")
-        val OPERATOR = Pattern.compile("[+\\-*/%=<>!&|^~?:;,{}()\\[\\]]")
-        val VECTOR_ROTATION = Pattern.compile("<[^>]+>")
+    object Patterns {
+        val STRING: Pattern = Pattern.compile("\"([^\"\\\\]|\\\\.)*\"")
+        val SINGLE_LINE_COMMENT: Pattern = Pattern.compile("//.*")
+        val MULTI_LINE_COMMENT: Pattern = Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL)
+        val NUMBER: Pattern = Pattern.compile("\\b(0x[0-9A-Fa-f]+|\\d+\\.?\\d*([eE][+-]?\\d+)?|\\d*\\.\\d+([eE][+-]?\\d+)?)\\b")
+        val IDENTIFIER: Pattern = Pattern.compile("\\b[a-zA-Z_][a-zA-Z0-9_]*\\b")
+        val OPERATOR: Pattern = Pattern.compile("[+\\-*/%=<>!&|^~?:;,{}()\\[\\]]")
+        val VECTOR_ROTATION: Pattern = Pattern.compile("<[^>]+>")
     }
     
     /**
