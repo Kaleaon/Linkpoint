@@ -2020,4 +2020,11 @@ object MessageIds {
     const val AGENT_SET_APPEARANCE: Int = 0xFFFF0054.toInt()
     const val AGENT_WEARABLES_UPDATE: Int = 0xFFFF00A1.toInt()
     const val AGENT_IS_NOW_WEARING: Int = 0xFFFF00A2.toInt()
+    
+    // Estate/Region management
+    const val ESTATE_OWNER_MESSAGE: Int = 0xFFFF00B0.toInt()
+    const val FREEZE_USER: Int = 0xFFFF00B1.toInt()
+    const val EJECT_USER: Int = 0xFFFF00B2.toInt()
+    const val ESTATE_COVENANT_REQUEST: Int = 0xFFFF00B3.toInt()
+    const val ESTATE_COVENANT_REPLY: Int = 0xFFFF00B4.toInt()
 }

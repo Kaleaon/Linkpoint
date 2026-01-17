@@ -53,9 +53,15 @@ import com.linkpoint.world.environment.EnvironmentManager
 import com.linkpoint.world.minimap.MinimapManager
 import com.linkpoint.groups.GroupsManager
 import com.linkpoint.animesh.AnimeshManager
+import com.linkpoint.avatar.AnimationController
 import com.linkpoint.bom.BakesOnMeshManager
+import com.linkpoint.inventory.LandmarkManager
+import com.linkpoint.media.MediaManager
+import com.linkpoint.objects.SitManager
+import com.linkpoint.snapshot.SnapshotManager
 import com.linkpoint.teleport.TeleportManager
 import com.linkpoint.hud.HUDManager
+import com.linkpoint.world.estate.EstateManager
 import com.linkpoint.xr.XRManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -251,6 +257,34 @@ class LinkpointApp : Application() {
     lateinit var idleHandler: IdleHandler
         private set
     
+    // Landmark Manager (NEW)
+    lateinit var landmarkManager: LandmarkManager
+        private set
+    
+    // Media Manager (NEW)
+    lateinit var mediaManager: MediaManager
+        private set
+    
+    // Estate Manager (NEW)
+    lateinit var estateManager: EstateManager
+        private set
+    
+    // Snapshot Manager (NEW)
+    lateinit var snapshotManager: SnapshotManager
+        private set
+    
+    // Script Manager (NEW)
+    lateinit var scriptManager: ScriptManager
+        private set
+    
+    // Sit Manager (NEW)
+    lateinit var sitManager: SitManager
+        private set
+    
+    // Animation Controller (NEW)
+    lateinit var animationController: AnimationController
+        private set
+    
     // Crash Reporter
     lateinit var crashReporter: CrashReporter
         private set
@@ -365,6 +399,12 @@ class LinkpointApp : Application() {
         // NEW: Idle Handler
         idleHandler = IdleHandler(connectionKeepAlive)
         
+        // NEW: Media Manager
+        mediaManager = MediaManager(this, udpConnection)
+        
+        // NEW: Snapshot Manager
+        snapshotManager = SnapshotManager(this, capabilityManager)
+        
         Log.d(TAG, "Core managers initialized")
     }
     
@@ -448,6 +488,21 @@ class LinkpointApp : Application() {
         
         // HUD manager
         hudManager = HUDManager(objectManager, udpConnection, agentId)
+        
+        // NEW: Landmark Manager
+        landmarkManager = LandmarkManager(capabilityManager, transferManager, inventoryManager, udpConnection, agentId)
+        
+        // NEW: Estate Manager
+        estateManager = EstateManager(udpConnection, capabilityManager, agentId)
+        
+        // NEW: Script Manager
+        scriptManager = ScriptManager(capabilityManager, transferManager)
+        
+        // NEW: Sit Manager
+        sitManager = SitManager(udpConnection, agentId)
+        
+        // NEW: Animation Controller
+        animationController = AnimationController(udpConnection, agentId)
         
         // Connect WorldMap to AvatarManager and FriendsManager for nearby users
         worldMap.setAvatarManagerProvider { avatarManager }
@@ -769,6 +824,15 @@ class LinkpointApp : Application() {
         if (::avatarBakingSystem.isInitialized) avatarBakingSystem.shutdown()
         if (::connectionKeepAlive.isInitialized) connectionKeepAlive.shutdown()
         if (::idleHandler.isInitialized) idleHandler.shutdown()
+        
+        // Shutdown latest new managers
+        if (::landmarkManager.isInitialized) landmarkManager.shutdown()
+        if (::mediaManager.isInitialized) mediaManager.shutdown()
+        if (::estateManager.isInitialized) estateManager.shutdown()
+        if (::snapshotManager.isInitialized) snapshotManager.shutdown()
+        if (::scriptManager.isInitialized) scriptManager.shutdown()
+        if (::sitManager.isInitialized) sitManager.shutdown()
+        if (::animationController.isInitialized) animationController.shutdown()
         
         capabilityManager.shutdown()
         udpConnection.disconnect()

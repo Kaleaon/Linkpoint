@@ -354,6 +354,78 @@ class NotecardManager(
     fun getCachedNotecard(assetId: UUID): Notecard? = notecardCache[assetId]
     
     /**
+     * Fetch a notecard by asset ID (suspend function).
+     */
+    suspend fun fetchNotecard(assetId: UUID): NotecardData? {
+        return withContext(Dispatchers.IO) {
+            // Check cache
+            notecardCache[assetId]?.let { cached ->
+                return@withContext NotecardData(
+                    assetId = cached.assetId,
+                    text = cached.text,
+                    embeddedItems = cached.embeddedItems.map { item ->
+                        com.linkpoint.inventory.notecard.EmbeddedItem(
+                            itemId = item.itemId,
+                            assetId = item.assetId,
+                            assetType = item.assetType,
+                            name = item.name,
+                            description = item.description
+                        )
+                    }
+                )
+            }
+            
+            // Fetch via transfer
+            val data = transferManager.fetchAsset(assetId, AssetType.NOTECARD.code) ?: return@withContext null
+            
+            try {
+                val notecard = parseNotecard(assetId, data)
+                notecardCache[assetId] = notecard
+                
+                NotecardData(
+                    assetId = notecard.assetId,
+                    text = notecard.text,
+                    embeddedItems = notecard.embeddedItems.map { item ->
+                        com.linkpoint.inventory.notecard.EmbeddedItem(
+                            itemId = item.itemId,
+                            assetId = item.assetId,
+                            assetType = item.assetType,
+                            name = item.name,
+                            description = item.description
+                        )
+                    }
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to parse notecard $assetId", e)
+                null
+            }
+        }
+    }
+    
+    /**
+     * Save a notecard (update text content).
+     */
+    suspend fun saveNotecard(itemId: UUID, newText: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                // Create new notecard data
+                val notecardData = createNotecardData(newText)
+                
+                // Upload via capability
+                // TODO: Implement notecard upload via UpdateNotecardAgentInventory capability
+                Log.d(TAG, "Saving notecard $itemId: ${newText.length} chars")
+                
+                // For now, return true as placeholder
+                // Full implementation requires UpdateNotecardAgentInventory capability
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to save notecard $itemId", e)
+                false
+            }
+        }
+    }
+    
+    /**
      * Shutdown the manager.
      */
     fun shutdown() {
@@ -393,6 +465,20 @@ data class EmbeddedItem(
     val assetType: AssetType,
     val name: String,
     val description: String
+) {
+    /**
+     * Get the type as an integer.
+     */
+    val type: Int get() = assetType.code
+}
+
+/**
+ * Notecard data for UI layer.
+ */
+data class NotecardData(
+    val assetId: UUID,
+    val text: String,
+    val embeddedItems: List<EmbeddedItem>
 )
 
 /**

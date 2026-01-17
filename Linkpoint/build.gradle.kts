@@ -249,6 +249,9 @@ dependencies {
     implementation("com.github.manalkaff:JetStick:1.2")  // Virtual joystick for avatar movement
     implementation("io.github.thechance101:chart:Beta-0.0.5")  // Charts (line, bar, pie) - Note: Radar is custom in RadarCompose.kt
     
+    // KodeEditor - Code editor with syntax highlighting for LSL scripts
+    implementation("com.github.markusressel.KodeEditor:library:v4.1.1")
+    
     // SceneView - Compose wrapper for Filament 3D/AR rendering
     implementation("io.github.sceneview:sceneview:2.3.3")
     

@@ -78,6 +78,48 @@ class TransferManager(
     private val _stats = MutableStateFlow(TransferStats())
     val stats: StateFlow<TransferStats> = _stats
     
+    // Pending completions for suspend functions
+    private val pendingCompletions = ConcurrentHashMap<UUID, CompletableDeferred<ByteArray?>>()
+    
+    /**
+     * Fetch an asset synchronously (suspend function).
+     * 
+     * @param assetId The UUID of the asset
+     * @param assetType The asset type code
+     * @return The asset data or null if failed
+     */
+    suspend fun fetchAsset(assetId: UUID, assetType: Int): ByteArray? {
+        return withContext(Dispatchers.IO) {
+            val deferred = CompletableDeferred<ByteArray?>()
+            val type = AssetType.fromCode(assetType) ?: AssetType.OBJECT
+            
+            val transferId = requestAssetTransfer(
+                assetId = assetId,
+                assetType = type,
+                callback = { key, result ->
+                    when (result) {
+                        is TransferResult.Success -> deferred.complete(result.data)
+                        is TransferResult.Error -> deferred.complete(null)
+                    }
+                }
+            )
+            
+            pendingCompletions[transferId] = deferred
+            
+            try {
+                // Wait with timeout
+                withTimeout(30_000) {
+                    deferred.await()
+                }
+            } catch (e: TimeoutCancellationException) {
+                Log.w(TAG, "Asset transfer timed out: $assetId")
+                null
+            } finally {
+                pendingCompletions.remove(transferId)
+            }
+        }
+    }
+    
     /**
      * Request an asset transfer.
      * 
