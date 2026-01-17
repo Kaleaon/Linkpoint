@@ -112,7 +112,12 @@ class UDPConnection {
     // establishment and message handler registration.
     private val packetBuffer = ConcurrentLinkedQueue<BufferedPacket>()
     private val handlersReady = AtomicBoolean(false)
-    private val maxBufferedPackets = 1000  // Prevent unbounded memory growth
+    
+    // Maximum number of packets to buffer before dropping.
+    // 1000 packets is sufficient to handle the initial handshake burst (typically 5-20 packets)
+    // while providing protection against memory exhaustion in pathological cases.
+    // At ~1KB average packet size, this limits buffer memory to ~1MB maximum.
+    private val maxBufferedPackets = 1000
     
     /**
      * Data class to hold buffered packet information
@@ -836,6 +841,11 @@ class UDPConnection {
      * Dispatch a packet to its message handler.
      * This handles the actual message parsing and handler invocation.
      * Called directly when handlers are ready, or from processBufferedPackets() for buffered packets.
+     * 
+     * Note: This method intentionally re-reads the flags byte from the decoded packet data
+     * because buffered packets store the decoded (zero-expanded) data, not raw data.
+     * The minimal duplication (flags parsing) is acceptable to keep the buffer simple
+     * and avoid storing additional metadata per packet.
      */
     private fun dispatchPacket(decoded: ByteArray) {
         if (decoded.size < PACKET_HEADER_SIZE) {
