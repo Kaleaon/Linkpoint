@@ -1038,6 +1038,10 @@ object MessageIds {
     const val AGENT_ANIMATION: Int = 0xFF05
     const val SOUND_TRIGGER: Int = 0xFF1D
     
+    // Low frequency chat message (0xFFFFxxxx)
+    // ChatFromViewer is Low 80 = 0xFFFF0050 per message_template.msg
+    const val CHAT_FROM_VIEWER: Int = 0xFFFF0050.toInt()
+    
     // High frequency (0x00 - 0xFE)
     const val START_PING_CHECK: Int = 0x01
     const val COMPLETE_PING_CHECK: Int = 0x02

@@ -7,6 +7,7 @@ import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.llsd.*
 import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -354,17 +355,4 @@ sealed class GroupEvent {
     data class LeftGroup(val groupId: UUID) : GroupEvent()
     data class NoticeReceived(val notice: GroupNotice) : GroupEvent()
     data class ChatReceived(val message: GroupChatMessage) : GroupEvent()
-}
-
-/**
- * Extension function to write UUID to ByteBuffer in big-endian (SL protocol format).
- * UUIDs in SL are always stored as 16 raw bytes in big-endian order.
- */
-private fun ByteBuffer.putUUID(uuid: UUID): ByteBuffer {
-    val originalOrder = order()
-    order(ByteOrder.BIG_ENDIAN)
-    putLong(uuid.mostSignificantBits)
-    putLong(uuid.leastSignificantBits)
-    order(originalOrder)
-    return this
 }

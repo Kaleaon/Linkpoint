@@ -5,6 +5,7 @@ import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.llsd.*
 import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -534,17 +535,4 @@ sealed class IMSessionEvent {
     data class Left(val sessionId: UUID) : IMSessionEvent()
     data class ParticipantJoined(val sessionId: UUID, val agentId: UUID) : IMSessionEvent()
     data class ParticipantLeft(val sessionId: UUID, val agentId: UUID) : IMSessionEvent()
-}
-
-/**
- * Extension function to write UUID to ByteBuffer in big-endian (SL protocol format).
- * UUIDs in SL are always stored as 16 raw bytes in big-endian order.
- */
-private fun java.nio.ByteBuffer.putUUID(uuid: UUID): java.nio.ByteBuffer {
-    val originalOrder = order()
-    order(java.nio.ByteOrder.BIG_ENDIAN)
-    putLong(uuid.mostSignificantBits)
-    putLong(uuid.leastSignificantBits)
-    order(originalOrder)
-    return this
 }

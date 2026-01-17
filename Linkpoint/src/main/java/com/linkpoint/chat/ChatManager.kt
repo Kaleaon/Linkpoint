@@ -4,8 +4,10 @@ import android.util.Log
 import com.linkpoint.protocol.messages.ChatData
 import com.linkpoint.protocol.messages.ChatSourceType
 import com.linkpoint.protocol.messages.ChatType
+import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnection
 import com.linkpoint.protocol.types.LLVector3
+import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,16 +17,6 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-
-/**
- * Message IDs for Chat messages.
- * Per SL protocol: ChatFromViewer is Low 80 = 0xFFFF0050
- */
-private object ChatMessageIds {
-    // ChatFromViewer - Low 80 NotTrusted Zerocoded
-    // Used for sending chat, whisper, shout, and typing indicators
-    const val CHAT_FROM_VIEWER = 0xFFFF0050.toInt()
-}
 
 /**
  * Manages local and nearby chat
@@ -96,7 +88,7 @@ class ChatManager(
     fun sendChat(message: String, type: ChatType = ChatType.NORMAL, channel: Int = 0) {
         scope.launch {
             val data = buildChatPacket(message, type, channel)
-            udpConnection.sendPacket(ChatMessageIds.CHAT_FROM_VIEWER, data)
+            udpConnection.sendPacket(MessageIds.CHAT_FROM_VIEWER, data)
             
             // Add to local history
             val localMessage = ChatMessage(
@@ -135,7 +127,7 @@ class ChatManager(
     fun startTyping() {
         scope.launch {
             val data = buildChatPacket("", ChatType.START_TYPING, 0)
-            udpConnection.sendPacket(ChatMessageIds.CHAT_FROM_VIEWER, data)
+            udpConnection.sendPacket(MessageIds.CHAT_FROM_VIEWER, data)
         }
     }
     
@@ -145,7 +137,7 @@ class ChatManager(
     fun stopTyping() {
         scope.launch {
             val data = buildChatPacket("", ChatType.STOP_TYPING, 0)
-            udpConnection.sendPacket(ChatMessageIds.CHAT_FROM_VIEWER, data)
+            udpConnection.sendPacket(MessageIds.CHAT_FROM_VIEWER, data)
         }
     }
     
@@ -165,17 +157,12 @@ class ChatManager(
         val buffer = ByteBuffer.allocate(39 + messageBytes.size)
             .order(ByteOrder.LITTLE_ENDIAN)
         
-        // AgentData block - UUIDs are big-endian
-        val originalOrder = buffer.order()
-        buffer.order(ByteOrder.BIG_ENDIAN)
-        buffer.putLong(agentId.mostSignificantBits)
-        buffer.putLong(agentId.leastSignificantBits)
+        // AgentData block - UUIDs use big-endian per SL protocol
+        buffer.putUUID(agentId)
         
         // SessionID - get from UDPConnection
         val sessionId = udpConnection.getSessionId()
-        buffer.putLong(sessionId.mostSignificantBits)
-        buffer.putLong(sessionId.leastSignificantBits)
-        buffer.order(originalOrder)
+        buffer.putUUID(sessionId)
         
         // ChatData block
         // Message - Variable 2 (2-byte length prefix + string + null terminator)
