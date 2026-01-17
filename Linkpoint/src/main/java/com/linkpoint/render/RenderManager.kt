@@ -148,30 +148,80 @@ class RenderManager(private val context: Context) {
         val surface = surfaceView?.holder?.surface
         if (surface == null || !surface.isValid) {
             if (!swapChainWarningLogged) {
-                Log.w(TAG, "SwapChain unavailable - surface not ready")
+                Log.w(TAG, "SwapChain unavailable - surface not ready (surface=${surface != null}, valid=${surface?.isValid})")
                 swapChainWarningLogged = true
             }
             return null
         }
-        swapChain = engine.createSwapChain(surface)
-        if (swapChain == null) {
-            if (!swapChainWarningLogged) {
-                Log.w(TAG, "SwapChain creation failed")
-                swapChainWarningLogged = true
+        try {
+            swapChain = engine.createSwapChain(surface)
+            if (swapChain == null) {
+                if (!swapChainWarningLogged) {
+                    Log.w(TAG, "SwapChain creation failed - engine.createSwapChain returned null")
+                    swapChainWarningLogged = true
+                }
+            } else {
+                swapChainWarningLogged = false
+                Log.i(TAG, "SwapChain created successfully")
+                attachDisplayHelper()
+                val width = surfaceView?.width ?: 0
+                val height = surfaceView?.height ?: 0
+                if (width > 0 && height > 0) {
+                    view?.viewport = Viewport(0, 0, width, height)
+                    viewportWidth = width
+                    viewportHeight = height
+                    updateProjection(width, height)
+                    Log.d(TAG, "Viewport set to ${width}x${height}")
+                }
             }
-        } else {
-            swapChainWarningLogged = false
-            attachDisplayHelper()
-            val width = surfaceView?.width ?: 0
-            val height = surfaceView?.height ?: 0
-            if (width > 0 && height > 0) {
-                view?.viewport = Viewport(0, 0, width, height)
-                viewportWidth = width
-                viewportHeight = height
-                updateProjection(width, height)
-            }
+        } catch (e: Exception) {
+            Log.e(TAG, "SwapChain creation threw exception", e)
+            lastInitializationError = "SwapChain: ${e.message}"
         }
         return swapChain
+    }
+    
+    /**
+     * Force recreation of the SwapChain.
+     * Call this when the surface becomes available or after a surface change.
+     */
+    @Synchronized
+    fun recreateSwapChain() {
+        val engine = this.engine ?: return
+        val surface = surfaceView?.holder?.surface ?: return
+        
+        if (!surface.isValid) {
+            Log.w(TAG, "Cannot recreate SwapChain - surface not valid")
+            return
+        }
+        
+        // Destroy existing swap chain using local reference to avoid race condition
+        val currentSwapChain = swapChain
+        if (currentSwapChain != null) { 
+            engine.destroySwapChain(currentSwapChain)
+            swapChain = null
+        }
+        
+        // Create new swap chain
+        try {
+            swapChain = engine.createSwapChain(surface)
+            if (swapChain != null) {
+                Log.i(TAG, "SwapChain recreated successfully")
+                attachDisplayHelper()
+                val width = surfaceView?.width ?: 0
+                val height = surfaceView?.height ?: 0
+                if (width > 0 && height > 0) {
+                    view?.viewport = Viewport(0, 0, width, height)
+                    viewportWidth = width
+                    viewportHeight = height
+                    updateProjection(width, height)
+                }
+            } else {
+                Log.e(TAG, "SwapChain recreation failed")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "SwapChain recreation threw exception", e)
+        }
     }
 
     private fun attachDisplayHelper() {

@@ -52,6 +52,28 @@ class DebugReportService private constructor(private val context: Context) {
         }
         
         fun getInstanceOrNull(): DebugReportService? = instance
+        
+        /**
+         * Phases that indicate the connection is still in progress.
+         * Used to provide more accurate diagnostic messages.
+         */
+        private val CONNECTING_PHASES = setOf(
+            InitializationTracker.Phase.NOT_STARTED,
+            InitializationTracker.Phase.LOGIN_STARTING,
+            InitializationTracker.Phase.LOGIN_HTTP_REQUEST,
+            InitializationTracker.Phase.LOGIN_SUCCESS,
+            InitializationTracker.Phase.SESSION_SETUP,
+            InitializationTracker.Phase.UDP_CONNECTING,
+            InitializationTracker.Phase.UDP_CONNECTED,
+            InitializationTracker.Phase.CAPABILITIES_FETCHING
+        )
+        
+        /**
+         * Check if the current initialization phase indicates connection is still in progress.
+         */
+        private fun isStillConnecting(phase: InitializationTracker.Phase): Boolean {
+            return phase in CONNECTING_PHASES
+        }
     }
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -471,7 +493,15 @@ class DebugReportService private constructor(private val context: Context) {
                         
                         if (objDiag.totalObjects == 0) {
                             appendLine()
-                            appendLine("⚠️ NO OBJECTS IN SCENE - World may not be loading!")
+                            // Check initialization phase to provide better context
+                            val initPhase = InitializationTracker.getDiagnostics().currentPhase
+                            if (isStillConnecting(initPhase)) {
+                                appendLine("ℹ️ NO OBJECTS YET - Connection still in progress (phase: $initPhase)")
+                                appendLine("   Objects will appear after RegionHandshake is processed.")
+                            } else {
+                                appendLine("⚠️ NO OBJECTS IN SCENE - World may not be loading!")
+                                appendLine("   Check if OBJECT_UPDATE messages are being received.")
+                            }
                         }
                     } else {
                         appendLine("Object manager not initialized (not logged in)")
@@ -503,7 +533,15 @@ class DebugReportService private constructor(private val context: Context) {
                         
                         if (avatarDiag.totalAvatars == 0) {
                             appendLine()
-                            appendLine("⚠️ NO AVATARS IN SCENE - Avatar data may not be loading!")
+                            // Check initialization phase to provide better context
+                            val initPhase = InitializationTracker.getDiagnostics().currentPhase
+                            if (isStillConnecting(initPhase)) {
+                                appendLine("ℹ️ NO AVATARS YET - Connection still in progress (phase: $initPhase)")
+                                appendLine("   Avatar data will appear after CoarseLocationUpdate is received.")
+                            } else {
+                                appendLine("⚠️ NO AVATARS IN SCENE - Avatar data may not be loading!")
+                                appendLine("   Check if COARSE_LOCATION_UPDATE messages are being received.")
+                            }
                         }
                     } else {
                         appendLine("Avatar manager not initialized (not logged in)")
@@ -563,7 +601,15 @@ class DebugReportService private constructor(private val context: Context) {
                         
                         if (regionInfo.name == "Unknown") {
                             appendLine()
-                            appendLine("⚠️ REGION NAME UNKNOWN - RegionHandshake may not have been received!")
+                            // Check initialization phase to provide better context
+                            val initPhase = InitializationTracker.getDiagnostics().currentPhase
+                            if (isStillConnecting(initPhase)) {
+                                appendLine("ℹ️ REGION NAME PENDING - Waiting for RegionHandshake (phase: $initPhase)")
+                                appendLine("   The actual region name will be received from the simulator.")
+                            } else {
+                                appendLine("⚠️ REGION NAME UNKNOWN - RegionHandshake may not have been received!")
+                                appendLine("   Check if REGION_HANDSHAKE is in the message statistics.")
+                            }
                         }
                     } else {
                         appendLine("No region info available - not connected to a region")
@@ -861,6 +907,69 @@ class DebugReportService private constructor(private val context: Context) {
                 }
             } catch (e: Exception) {
                 appendLine("Initialization timeline unavailable: ${e.message}")
+            }
+            appendLine()
+            
+            // ==================== PROTOCOL MESSAGE STATISTICS ====================
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ PROTOCOL MESSAGE STATISTICS                                       │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            if (app != null) {
+                try {
+                    val udpDiag = app.udpConnection.getDiagnostics()
+                    val msgStats = app.udpConnection.getMessageStatistics()
+                    
+                    appendLine("Total Packets Received: ${msgStats.totalPacketsReceived}")
+                    appendLine("Total Bytes Received: ${formatBytes(msgStats.totalBytesReceived)}")
+                    appendLine("Packets Sent: ${udpDiag.sequenceNumber}")
+                    appendLine("Packets Resent: ${msgStats.packetsResent}")
+                    appendLine()
+                    
+                    if (msgStats.messageTypeCounts.isNotEmpty()) {
+                        appendLine("Messages by Type (top 10):")
+                        msgStats.messageTypeCounts.entries
+                            .sortedByDescending { it.value }
+                            .take(10)
+                            .forEach { (type, count) ->
+                                appendLine("  $type: $count")
+                            }
+                        appendLine()
+                    }
+                    
+                    if (msgStats.lastMessageTimes.isNotEmpty()) {
+                        appendLine("Last Received (key messages):")
+                        val keyMessages = listOf(
+                            "RegionHandshake", "AgentMovementComplete",
+                            "ObjectUpdate", "CoarseLocationUpdate"
+                        )
+                        keyMessages.forEach { msgType ->
+                            val lastTime = msgStats.lastMessageTimes[msgType]
+                            if (lastTime != null && lastTime > 0) {
+                                val ago = System.currentTimeMillis() - lastTime
+                                appendLine("  $msgType: ${formatDuration(ago)} ago")
+                            } else {
+                                appendLine("  $msgType: Never received")
+                            }
+                        }
+                        appendLine()
+                    }
+                    
+                    // Warning if critical messages haven't been received
+                    val regionHandshakeTime = msgStats.lastMessageTimes["RegionHandshake"]
+                    val agentMovementTime = msgStats.lastMessageTimes["AgentMovementComplete"]
+                    
+                    if (regionHandshakeTime == null || regionHandshakeTime == 0L) {
+                        appendLine("⚠️ RegionHandshake never received - world data won't load!")
+                    }
+                    if (agentMovementTime == null || agentMovementTime == 0L) {
+                        appendLine("⚠️ AgentMovementComplete never received - agent not in world!")
+                    }
+                } catch (e: Exception) {
+                    appendLine("Protocol statistics unavailable: ${e.message}")
+                }
+            } else {
+                appendLine("Protocol statistics: App not initialized")
             }
             appendLine()
             

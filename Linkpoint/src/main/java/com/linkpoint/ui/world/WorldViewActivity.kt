@@ -477,6 +477,23 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         surfaceView = SurfaceView(this)
         renderContainer.addView(surfaceView)
         
+        // Add a callback to ensure SwapChain is created when surface is available
+        surfaceView.holder.addCallback(object : android.view.SurfaceHolder.Callback {
+            override fun surfaceCreated(holder: android.view.SurfaceHolder) {
+                android.util.Log.i(TAG, "Surface created - ensuring SwapChain")
+                // The RenderManager's UiHelper should handle this, but let's ensure it
+                app.renderManager.recreateSwapChain()
+            }
+            
+            override fun surfaceChanged(holder: android.view.SurfaceHolder, format: Int, width: Int, height: Int) {
+                android.util.Log.d(TAG, "Surface changed: ${width}x${height}")
+            }
+            
+            override fun surfaceDestroyed(holder: android.view.SurfaceHolder) {
+                android.util.Log.i(TAG, "Surface destroyed")
+            }
+        })
+        
         app.renderManager.initialize(surfaceView)
         isRendering = true
         
