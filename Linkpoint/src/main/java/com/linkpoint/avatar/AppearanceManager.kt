@@ -3,6 +3,7 @@ package com.linkpoint.avatar
 import android.util.Log
 import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -244,14 +245,3 @@ data class WearableEntry(
     val itemId: UUID,
     val wearableType: WearableType
 )
-
-/**
- * Extension function to put UUID into ByteBuffer.
- */
-private fun ByteBuffer.putUUID(uuid: UUID) {
-    val originalOrder = order()
-    order(ByteOrder.BIG_ENDIAN)
-    putLong(uuid.mostSignificantBits)
-    putLong(uuid.leastSignificantBits)
-    order(originalOrder)
-}

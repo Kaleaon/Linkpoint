@@ -7,6 +7,7 @@ import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.llsd.*
 import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -283,24 +284,21 @@ class FriendsManager(
                 
                 val payload = ByteBuffer.allocate(200 + messageBytes.size).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData
-                payload.putLong(agentId.mostSignificantBits)
-                payload.putLong(agentId.leastSignificantBits)
-                repeat(16) { payload.put(0) }  // Session ID placeholder
+                // AgentData block - UUIDs use big-endian per SL protocol
+                payload.putUUID(agentId)
+                payload.putUUID(udpConnection.getSessionId())
                 
                 // MessageBlock
                 payload.put(0)  // FromGroup = false
-                payload.putLong(targetAgentId.mostSignificantBits)
-                payload.putLong(targetAgentId.leastSignificantBits)
+                payload.putUUID(targetAgentId)
                 payload.putInt(0)  // ParentEstateID
-                repeat(16) { payload.put(0) }  // RegionID
+                payload.putUUID(UUID(0, 0))  // RegionID (empty)
                 payload.putFloat(0f)  // Position X
                 payload.putFloat(0f)  // Position Y
                 payload.putFloat(0f)  // Position Z
                 payload.put(0)  // Offline
                 payload.put(38)  // Dialog = IM_FRIENDSHIP_OFFERED
-                payload.putLong(transactionId.mostSignificantBits)
-                payload.putLong(transactionId.leastSignificantBits)
+                payload.putUUID(transactionId)
                 payload.putInt((System.currentTimeMillis() / 1000).toInt())  // Timestamp
                 
                 // FromAgentName
@@ -315,7 +313,7 @@ class FriendsManager(
                 // BinaryBucket - empty for friendship offer
                 payload.putShort(0)
                 
-                udpConnection.sendPacket(MessageIds.IMPROVED_INSTANT_MESSAGE, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIds.IMPROVED_INSTANT_MESSAGE, payload.array().copyOf(payload.position()), reliable = true)
                 Log.i(TAG, "Offered friendship to $targetAgentId")
                 true
             } catch (e: Exception) {
@@ -334,16 +332,14 @@ class FriendsManager(
                 // TerminateFriendship message
                 val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData
-                payload.putLong(agentId.mostSignificantBits)
-                payload.putLong(agentId.leastSignificantBits)
-                repeat(16) { payload.put(0) }  // Session ID placeholder
+                // AgentData - UUIDs use big-endian per SL protocol
+                payload.putUUID(agentId)
+                payload.putUUID(udpConnection.getSessionId())
                 
                 // ExBlock
-                payload.putLong(friendAgentId.mostSignificantBits)
-                payload.putLong(friendAgentId.leastSignificantBits)
+                payload.putUUID(friendAgentId)
                 
-                udpConnection.sendPacket(MessageIds.TERMINATE_FRIENDSHIP, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIds.TERMINATE_FRIENDSHIP, payload.array().copyOf(payload.position()), reliable = true)
                 
                 friends.remove(friendAgentId)
                 _onlineFriends.value = _onlineFriends.value - friendAgentId
@@ -369,20 +365,18 @@ class FriendsManager(
                 // GrantUserRights message
                 val payload = ByteBuffer.allocate(56).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData
-                payload.putLong(agentId.mostSignificantBits)
-                payload.putLong(agentId.leastSignificantBits)
-                repeat(16) { payload.put(0) }  // Session ID placeholder
+                // AgentData - UUIDs use big-endian per SL protocol
+                payload.putUUID(agentId)
+                payload.putUUID(udpConnection.getSessionId())
                 
                 // Rights block count
                 payload.put(1)
                 
                 // Rights block
-                payload.putLong(friendAgentId.mostSignificantBits)
-                payload.putLong(friendAgentId.leastSignificantBits)
+                payload.putUUID(friendAgentId)
                 payload.putInt(rights)
                 
-                udpConnection.sendPacket(MessageIds.GRANT_USER_RIGHTS, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIds.GRANT_USER_RIGHTS, payload.array().copyOf(payload.position()), reliable = true)
                 
                 friends[friendAgentId] = friend.copy(rightsGiven = rights)
                 
@@ -416,16 +410,14 @@ class FriendsManager(
                 // FindAgent message
                 val payload = ByteBuffer.allocate(50).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData (requesting agent)
-                payload.putLong(agentId.mostSignificantBits)
-                payload.putLong(agentId.leastSignificantBits)
-                repeat(16) { payload.put(0) }  // Session ID placeholder
+                // AgentData (requesting agent) - UUIDs use big-endian per SL protocol
+                payload.putUUID(agentId)
+                payload.putUUID(udpConnection.getSessionId())
                 
                 // TargetBlock
-                payload.putLong(friendAgentId.mostSignificantBits)
-                payload.putLong(friendAgentId.leastSignificantBits)
+                payload.putUUID(friendAgentId)
                 
-                udpConnection.sendPacket(MessageIds.FIND_AGENT, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIds.FIND_AGENT, payload.array().copyOf(payload.position()), reliable = true)
                 Log.d(TAG, "Requested location for friend $friendAgentId")
                 
                 // Response will come asynchronously via event handler
@@ -448,26 +440,23 @@ class FriendsManager(
                 val messageBytes = message.toByteArray(Charsets.UTF_8)
                 val payload = ByteBuffer.allocate(200 + messageBytes.size).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData
-                payload.putLong(agentId.mostSignificantBits)
-                payload.putLong(agentId.leastSignificantBits)
-                repeat(16) { payload.put(0) }  // Session ID placeholder
+                // AgentData - UUIDs use big-endian per SL protocol
+                payload.putUUID(agentId)
+                payload.putUUID(udpConnection.getSessionId())
                 
                 // MessageBlock
                 payload.put(0)  // FromGroup = false
-                payload.putLong(friendAgentId.mostSignificantBits)
-                payload.putLong(friendAgentId.leastSignificantBits)
+                payload.putUUID(friendAgentId)
                 payload.putInt(0)  // ParentEstateID
-                repeat(16) { payload.put(0) }  // RegionID
-                payload.putFloat(0f)  // Position
-                payload.putFloat(0f)
-                payload.putFloat(0f)
+                payload.putUUID(UUID(0, 0))  // RegionID (empty)
+                payload.putFloat(0f)  // Position X
+                payload.putFloat(0f)  // Position Y
+                payload.putFloat(0f)  // Position Z
                 payload.put(0)  // Offline
                 payload.put(22)  // Dialog = IM_LURE_USER (teleport request)
                 
                 val transactionId = UUID.randomUUID()
-                payload.putLong(transactionId.mostSignificantBits)
-                payload.putLong(transactionId.leastSignificantBits)
+                payload.putUUID(transactionId)
                 payload.putInt((System.currentTimeMillis() / 1000).toInt())
                 
                 // FromAgentName
@@ -482,7 +471,7 @@ class FriendsManager(
                 // BinaryBucket - empty
                 payload.putShort(0)
                 
-                udpConnection.sendPacket(MessageIds.IMPROVED_INSTANT_MESSAGE, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIds.IMPROVED_INSTANT_MESSAGE, payload.array().copyOf(payload.position()), reliable = true)
                 Log.i(TAG, "Requested teleport to friend $friendAgentId")
                 true
             } catch (e: Exception) {
@@ -502,28 +491,25 @@ class FriendsManager(
                 val messageBytes = message.toByteArray(Charsets.UTF_8)
                 val payload = ByteBuffer.allocate(200 + messageBytes.size).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData
-                payload.putLong(agentId.mostSignificantBits)
-                payload.putLong(agentId.leastSignificantBits)
-                repeat(16) { payload.put(0) }  // Session ID placeholder
+                // AgentData - UUIDs use big-endian per SL protocol
+                payload.putUUID(agentId)
+                payload.putUUID(udpConnection.getSessionId())
                 
                 // Info block
                 payload.put(0)  // LureType = 0 (normal teleport offer)
                 
                 // MessageBlock - sending IM with dialog type 15 (IM_TELEPORT_REQUEST)
                 payload.put(0)  // FromGroup = false
-                payload.putLong(friendAgentId.mostSignificantBits)
-                payload.putLong(friendAgentId.leastSignificantBits)
+                payload.putUUID(friendAgentId)
                 payload.putInt(0)  // ParentEstateID
-                repeat(16) { payload.put(0) }  // RegionID
-                payload.putFloat(0f)  // Position
-                payload.putFloat(0f)
-                payload.putFloat(0f)
+                payload.putUUID(UUID(0, 0))  // RegionID (empty)
+                payload.putFloat(0f)  // Position X
+                payload.putFloat(0f)  // Position Y
+                payload.putFloat(0f)  // Position Z
                 payload.put(0)  // Offline
                 
                 val transactionId = UUID.randomUUID()
-                payload.putLong(transactionId.mostSignificantBits)
-                payload.putLong(transactionId.leastSignificantBits)
+                payload.putUUID(transactionId)
                 
                 // Message
                 payload.putShort(messageBytes.size.toShort())
@@ -531,10 +517,9 @@ class FriendsManager(
                 
                 // TargetID (friend to send offer to)
                 payload.put(1)  // Number of targets
-                payload.putLong(friendAgentId.mostSignificantBits)
-                payload.putLong(friendAgentId.leastSignificantBits)
+                payload.putUUID(friendAgentId)
                 
-                udpConnection.sendPacket(MessageIds.START_LURE, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIds.START_LURE, payload.array().copyOf(payload.position()), reliable = true)
                 Log.i(TAG, "Offered teleport to friend $friendAgentId")
                 true
             } catch (e: Exception) {

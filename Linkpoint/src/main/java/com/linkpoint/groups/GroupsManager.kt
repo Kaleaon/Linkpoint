@@ -7,6 +7,7 @@ import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.llsd.*
 import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -159,20 +160,18 @@ class GroupsManager(
             try {
                 val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData
-                payload.putLong(agentId.mostSignificantBits)
-                payload.putLong(agentId.leastSignificantBits)
-                repeat(16) { payload.put(0) } // Session ID placeholder
+                // AgentData - UUIDs use big-endian per SL protocol
+                payload.putUUID(agentId)
+                payload.putUUID(udpConnection.getSessionId())
                 
                 // GroupData
                 if (groupId != null) {
-                    payload.putLong(groupId.mostSignificantBits)
-                    payload.putLong(groupId.leastSignificantBits)
+                    payload.putUUID(groupId)
                 } else {
-                    repeat(16) { payload.put(0) } // UUID_ZERO
+                    payload.putUUID(UUID(0, 0)) // UUID_ZERO
                 }
                 
-                udpConnection.sendPacket(MessageIds.ACTIVATE_GROUP, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIds.ACTIVATE_GROUP, payload.array().copyOf(payload.position()), reliable = true)
                 _activeGroup.value = groupId
                 
                 Log.i(TAG, "Active group set to: $groupId")
@@ -193,14 +192,12 @@ class GroupsManager(
                 val messageBytes = message.toByteArray(Charsets.UTF_8)
                 val payload = ByteBuffer.allocate(100 + messageBytes.size).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData
-                payload.putLong(agentId.mostSignificantBits)
-                payload.putLong(agentId.leastSignificantBits)
-                repeat(16) { payload.put(0) } // Session ID placeholder
+                // AgentData - UUIDs use big-endian per SL protocol
+                payload.putUUID(agentId)
+                payload.putUUID(udpConnection.getSessionId())
                 
                 // ChatData
-                payload.putLong(groupId.mostSignificantBits)
-                payload.putLong(groupId.leastSignificantBits)
+                payload.putUUID(groupId)
                 
                 // Message
                 payload.putShort(messageBytes.size.toShort())
@@ -256,16 +253,14 @@ class GroupsManager(
             try {
                 val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData
-                payload.putLong(agentId.mostSignificantBits)
-                payload.putLong(agentId.leastSignificantBits)
-                repeat(16) { payload.put(0) } // Session ID placeholder
+                // AgentData - UUIDs use big-endian per SL protocol
+                payload.putUUID(agentId)
+                payload.putUUID(udpConnection.getSessionId())
                 
                 // GroupData
-                payload.putLong(groupId.mostSignificantBits)
-                payload.putLong(groupId.leastSignificantBits)
+                payload.putUUID(groupId)
                 
-                udpConnection.sendPacket(MessageIds.LEAVE_GROUP_REQUEST, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIds.LEAVE_GROUP_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
                 
                 groups.remove(groupId)
                 if (_activeGroup.value == groupId) {
@@ -293,16 +288,14 @@ class GroupsManager(
             try {
                 val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData
-                payload.putLong(agentId.mostSignificantBits)
-                payload.putLong(agentId.leastSignificantBits)
-                repeat(16) { payload.put(0) } // Session ID placeholder
+                // AgentData - UUIDs use big-endian per SL protocol
+                payload.putUUID(agentId)
+                payload.putUUID(udpConnection.getSessionId())
                 
                 // GroupData
-                payload.putLong(groupId.mostSignificantBits)
-                payload.putLong(groupId.leastSignificantBits)
+                payload.putUUID(groupId)
                 
-                udpConnection.sendPacket(MessageIds.GROUP_PROFILE_REQUEST, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIds.GROUP_PROFILE_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
                 Log.d(TAG, "Requested group info for: $groupId")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to request group info", e)

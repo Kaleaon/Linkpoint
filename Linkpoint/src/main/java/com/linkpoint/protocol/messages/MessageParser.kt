@@ -584,6 +584,32 @@ enum class ChatType(val value: Int) {
  * Parse RegionHandshake message.
  * This message is sent by the simulator after CompleteAgentMovement
  * and must be acknowledged with RegionHandshakeReply.
+ * 
+ * Message format per SL protocol (message_template.msg):
+ * RegionInfo block:
+ *   - RegionFlags (U32)
+ *   - SimAccess (U8)
+ *   - SimName (Variable 1)
+ *   - SimOwner (LLUUID)
+ *   - IsEstateManager (BOOL)
+ *   - WaterHeight (F32)
+ *   - BillableFactor (F32)
+ *   - CacheID (LLUUID)
+ *   - TerrainBase0-3 (4 LLUUIDs)
+ *   - TerrainDetail0-3 (4 LLUUIDs)
+ *   - TerrainStartHeight00-11 (4 F32)
+ *   - TerrainHeightRange00-11 (4 F32)
+ * RegionInfo2 block:
+ *   - RegionID (LLUUID)
+ * RegionInfo3 block:
+ *   - CPUClassID (S32)
+ *   - CPURatio (S32)
+ *   - ColoName (Variable 1)
+ *   - ProductSKU (Variable 1)
+ *   - ProductName (Variable 1)
+ * RegionInfo4 block (Variable):
+ *   - RegionFlagsExtended (U64)
+ *   - RegionProtocols (U64)
  */
 fun MessageParser.parseRegionHandshake(data: ByteArray): RegionHandshakeData? {
     val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
@@ -593,7 +619,7 @@ fun MessageParser.parseRegionHandshake(data: ByteArray): RegionHandshakeData? {
         val regionFlags = buffer.int
         val simAccess = buffer.get().toInt() and 0xFF
         
-        // SimName - variable length string
+        // SimName - variable length string (1-byte length prefix)
         val simNameLen = buffer.get().toInt() and 0xFF
         val simNameBytes = ByteArray(simNameLen)
         buffer.get(simNameBytes)
@@ -604,13 +630,13 @@ fun MessageParser.parseRegionHandshake(data: ByteArray): RegionHandshakeData? {
         buffer.get(simOwnerBytes)
         val simOwner = bytesToUUID(simOwnerBytes)
         
-        // IsEstateManager
+        // IsEstateManager (BOOL = 1 byte)
         val isEstateManager = buffer.get() != 0.toByte()
         
         // Water height
         val waterHeight = buffer.float
         
-        // Billboard sunset
+        // Billable factor
         val billableFactor = buffer.float
         
         // Cache ID
@@ -618,19 +644,91 @@ fun MessageParser.parseRegionHandshake(data: ByteArray): RegionHandshakeData? {
         buffer.get(cacheIdBytes)
         val cacheId = bytesToUUID(cacheIdBytes)
         
-        // Terrain textures (4 UUIDs)
-        val terrainTextures = (0 until 4).map {
+        // TerrainBase0-3 (4 UUIDs for base terrain textures)
+        val terrainBaseTextures = (0 until 4).map {
             val texBytes = ByteArray(16)
             buffer.get(texBytes)
             bytesToUUID(texBytes)
         }
         
-        // Terrain start/end heights (8 floats)
+        // TerrainDetail0-3 (4 UUIDs for detail terrain textures)
+        val terrainDetailTextures = (0 until 4).map {
+            val texBytes = ByteArray(16)
+            buffer.get(texBytes)
+            bytesToUUID(texBytes)
+        }
+        
+        // Combine into single list (8 textures total)
+        val terrainTextures = terrainBaseTextures + terrainDetailTextures
+        
+        // Terrain start heights (4 floats: 00, 01, 10, 11)
         val terrainStartHeight = (0 until 4).map { buffer.float }
+        
+        // Terrain height ranges (4 floats: 00, 01, 10, 11)
         val terrainHeightRange = (0 until 4).map { buffer.float }
         
-        // Region UUID (from RegionInfo2 block if present)
-        // For simplicity, we'll generate from cache ID
+        // RegionInfo2 block - RegionID
+        var regionId: UUID? = null
+        if (buffer.remaining() >= 16) {
+            val regionIdBytes = ByteArray(16)
+            buffer.get(regionIdBytes)
+            regionId = bytesToUUID(regionIdBytes)
+        }
+        
+        // RegionInfo3 block (optional - may not be present in all messages)
+        var cpuClassId: Int? = null
+        var cpuRatio: Int? = null
+        var coloName: String? = null
+        var productSKU: String? = null
+        var productName: String? = null
+        
+        if (buffer.remaining() >= 8) {
+            cpuClassId = buffer.int
+            cpuRatio = buffer.int
+            
+            // ColoName - variable string
+            if (buffer.remaining() >= 1) {
+                val coloNameLen = buffer.get().toInt() and 0xFF
+                if (buffer.remaining() >= coloNameLen) {
+                    val coloNameBytes = ByteArray(coloNameLen)
+                    buffer.get(coloNameBytes)
+                    coloName = String(coloNameBytes, Charsets.UTF_8).trimEnd('\u0000')
+                }
+            }
+            
+            // ProductSKU - variable string
+            if (buffer.remaining() >= 1) {
+                val productSKULen = buffer.get().toInt() and 0xFF
+                if (buffer.remaining() >= productSKULen) {
+                    val productSKUBytes = ByteArray(productSKULen)
+                    buffer.get(productSKUBytes)
+                    productSKU = String(productSKUBytes, Charsets.UTF_8).trimEnd('\u0000')
+                }
+            }
+            
+            // ProductName - variable string
+            if (buffer.remaining() >= 1) {
+                val productNameLen = buffer.get().toInt() and 0xFF
+                if (buffer.remaining() >= productNameLen) {
+                    val productNameBytes = ByteArray(productNameLen)
+                    buffer.get(productNameBytes)
+                    productName = String(productNameBytes, Charsets.UTF_8).trimEnd('\u0000')
+                }
+            }
+        }
+        
+        // RegionInfo4 block (Variable block - may have 0 or 1 entries)
+        var regionFlagsExtended: Long? = null
+        var regionProtocols: Long? = null
+        
+        // Check for variable block count byte
+        if (buffer.remaining() >= 1) {
+            val numRegionInfo4Blocks = buffer.get().toInt() and 0xFF
+            if (numRegionInfo4Blocks > 0 && buffer.remaining() >= 16) {
+                regionFlagsExtended = buffer.long
+                regionProtocols = buffer.long
+            }
+        }
         
         return RegionHandshakeData(
             regionFlags = regionFlags,
@@ -641,7 +739,15 @@ fun MessageParser.parseRegionHandshake(data: ByteArray): RegionHandshakeData? {
             waterHeight = waterHeight,
             billableFactor = billableFactor,
             cacheId = cacheId,
-            terrainTextures = terrainTextures
+            terrainTextures = terrainTextures,
+            regionId = regionId,
+            cpuClassId = cpuClassId,
+            cpuRatio = cpuRatio,
+            coloName = coloName,
+            productSKU = productSKU,
+            productName = productName,
+            regionFlagsExtended = regionFlagsExtended,
+            regionProtocols = regionProtocols
         )
     } catch (e: Exception) {
         Log.e("MessageParser", "Failed to parse RegionHandshake", e)
@@ -660,6 +766,18 @@ private fun bytesToUUID(bytes: ByteArray): UUID {
 /**
  * Parse AgentMovementComplete message.
  * Confirms the agent is fully in the region.
+ * 
+ * Message format per SL protocol:
+ * AgentData block:
+ *   - AgentID (LLUUID)
+ *   - SessionID (LLUUID)
+ * Data block:
+ *   - Position (LLVector3)
+ *   - LookAt (LLVector3)
+ *   - RegionHandle (U64)
+ *   - Timestamp (U32)
+ * SimData block:
+ *   - ChannelVersion (Variable 2) - 2-byte length prefixed string
  */
 fun MessageParser.parseAgentMovementComplete(data: ByteArray): AgentMovementCompleteData? {
     val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
@@ -686,13 +804,25 @@ fun MessageParser.parseAgentMovementComplete(data: ByteArray): AgentMovementComp
         val regionHandle = buffer.long
         val timestamp = buffer.int
         
+        // SimData block - ChannelVersion (Variable 2: 2-byte length prefix)
+        var channelVersion: String? = null
+        if (buffer.remaining() >= 2) {
+            val channelVersionLen = buffer.short.toInt() and 0xFFFF
+            if (buffer.remaining() >= channelVersionLen) {
+                val channelVersionBytes = ByteArray(channelVersionLen)
+                buffer.get(channelVersionBytes)
+                channelVersion = String(channelVersionBytes, Charsets.UTF_8).trimEnd('\u0000')
+            }
+        }
+        
         return AgentMovementCompleteData(
             agentId = agentId,
             sessionId = sessionId,
             position = position,
             lookAt = lookAt,
             regionHandle = regionHandle,
-            timestamp = timestamp
+            timestamp = timestamp,
+            channelVersion = channelVersion
         )
     } catch (e: Exception) {
         Log.e("MessageParser", "Failed to parse AgentMovementComplete", e)
@@ -712,7 +842,18 @@ data class RegionHandshakeData(
     val waterHeight: Float,
     val billableFactor: Float,
     val cacheId: UUID,
-    val terrainTextures: List<UUID>
+    val terrainTextures: List<UUID>,  // 8 textures: 4 base + 4 detail
+    // RegionInfo2 block
+    val regionId: UUID? = null,
+    // RegionInfo3 block (optional)
+    val cpuClassId: Int? = null,
+    val cpuRatio: Int? = null,
+    val coloName: String? = null,
+    val productSKU: String? = null,
+    val productName: String? = null,
+    // RegionInfo4 block (optional)
+    val regionFlagsExtended: Long? = null,
+    val regionProtocols: Long? = null
 )
 
 /**
@@ -724,5 +865,6 @@ data class AgentMovementCompleteData(
     val position: LLVector3,
     val lookAt: LLVector3,
     val regionHandle: Long,
-    val timestamp: Int
+    val timestamp: Int,
+    val channelVersion: String? = null  // SimData block
 )

@@ -8,6 +8,7 @@ import com.linkpoint.protocol.messages.TerseUpdateData
 import com.linkpoint.protocol.messages.UDPConnection
 import com.linkpoint.protocol.types.LLQuaternion
 import com.linkpoint.protocol.types.LLVector3
+import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -719,14 +720,6 @@ class ObjectManager(
         scope.cancel()
         objects.clear()
         objectsByUUID.clear()
-    }
-
-    private fun ByteBuffer.putUUID(uuid: UUID) {
-        val originalOrder = order()
-        order(ByteOrder.BIG_ENDIAN)
-        putLong(uuid.mostSignificantBits)
-        putLong(uuid.leastSignificantBits)
-        order(originalOrder)
     }
     
     // ==================== DIAGNOSTIC METHODS ====================

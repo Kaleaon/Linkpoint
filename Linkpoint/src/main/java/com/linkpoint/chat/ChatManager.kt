@@ -4,8 +4,10 @@ import android.util.Log
 import com.linkpoint.protocol.messages.ChatData
 import com.linkpoint.protocol.messages.ChatSourceType
 import com.linkpoint.protocol.messages.ChatType
+import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnection
 import com.linkpoint.protocol.types.LLVector3
+import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,10 +17,6 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-
-object MessageIds {
-    const val CHAT_FROM_VIEWER = 0xFFFF0050.toInt()
-}
 
 /**
  * Manages local and nearby chat
@@ -84,6 +82,9 @@ class ChatManager(
     /**
      * Send chat message
      */
+    /**
+     * Send chat message
+     */
     fun sendChat(message: String, type: ChatType = ChatType.NORMAL, channel: Int = 0) {
         scope.launch {
             val data = buildChatPacket(message, type, channel)
@@ -142,15 +143,38 @@ class ChatManager(
     
     private fun buildChatPacket(message: String, type: ChatType, channel: Int): ByteArray {
         val messageBytes = message.toByteArray(Charsets.UTF_8)
-        val buffer = ByteBuffer.allocate(20 + messageBytes.size + 1)
+        
+        // ChatFromViewer message format per SL protocol:
+        // AgentData block:
+        //   - AgentID (LLUUID, 16 bytes) - big-endian UUID
+        //   - SessionID (LLUUID, 16 bytes) - big-endian UUID
+        // ChatData block:
+        //   - Message (Variable 2) - 2-byte length prefix, then message bytes
+        //   - Type (U8)
+        //   - Channel (S32, little-endian)
+        
+        // Total: 16 + 16 + 2 + message.length + 1 + 4 = 39 + message.length
+        val buffer = ByteBuffer.allocate(39 + messageBytes.size)
             .order(ByteOrder.LITTLE_ENDIAN)
         
-        // Header would be added by UDPConnection
-        buffer.putInt(channel)
-        buffer.put(type.value.toByte())
+        // AgentData block - UUIDs use big-endian per SL protocol
+        buffer.putUUID(agentId)
+        
+        // SessionID - get from UDPConnection
+        val sessionId = udpConnection.getSessionId()
+        buffer.putUUID(sessionId)
+        
+        // ChatData block
+        // Message - Variable 2 (2-byte length prefix + string + null terminator)
         buffer.putShort((messageBytes.size + 1).toShort())
         buffer.put(messageBytes)
         buffer.put(0) // Null terminator
+        
+        // Type (U8)
+        buffer.put(type.value.toByte())
+        
+        // Channel (S32, little-endian)
+        buffer.putInt(channel)
         
         return buffer.array()
     }
