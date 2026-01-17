@@ -1,5 +1,5 @@
 # Android Build Files
-build/
+/build/
 .gradle/
 local.properties
 *.apk
