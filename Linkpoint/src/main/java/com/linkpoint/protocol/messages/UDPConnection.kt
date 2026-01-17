@@ -11,6 +11,7 @@ import java.nio.ByteOrder
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.coroutines.resume
 
 /**
  * UDP Connection handler for Second Life protocol.
@@ -95,6 +96,10 @@ class UDPConnection {
     private val pendingAcks = ConcurrentHashMap<Int, PendingPacket>()
     private val messageHandlers = ConcurrentHashMap<Int, MessageHandler>()
     
+    // ACK callback mechanism - notified when specific packets are acknowledged
+    // Key is sequence number, value is callback to invoke when ACK received
+    private val ackCallbacks = ConcurrentHashMap<Int, () -> Unit>()
+    
     // ACK batching for efficiency (matches official viewer behavior)
     private val pendingAckIds = mutableListOf<Int>()
     @Volatile private var lastAckFlush = System.currentTimeMillis()
@@ -109,14 +114,23 @@ class UDPConnection {
     private var isConnected = false
     
     /**
-     * Connect to the simulator
+     * Connect to the simulator.
+     * 
+     * Follows Lumiya's connection sequence:
+     * 1. Send UseCircuitCode (reliable)
+     * 2. Wait for ACK before proceeding (critical!)
+     * 3. Send CompleteAgentMovement
+     * 4. Simulator responds with AgentMovementComplete and RegionHandshake
+     * 
+     * This sequence is based on Lumiya's SLAgentCircuit.SendUseCode() which uses
+     * an event listener to wait for the ACK before sending CompleteAgentMovement.
      */
     suspend fun connect(): Boolean = withContext(Dispatchers.IO) {
         try {
             Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
-            Log.i(TAG, "║ INITIATING UDP CONNECTION                                          ║")
-            Log.i(TAG, "║ Target: $simIP:$simPort                                               ║")
-            Log.i(TAG, "║ Circuit Code: $circuitCode                                                ║")
+            Log.i(TAG, "║ INITIATING UDP CONNECTION (Lumiya-style)                         ║")
+            Log.i(TAG, "║ Target: $simIP:$simPort                                          ║")
+            Log.i(TAG, "║ Circuit Code: $circuitCode                                       ║")
             Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
             
             socket = DatagramSocket()
@@ -138,29 +152,33 @@ class UDPConnection {
             
             Log.i(TAG, "✓ Receive loop started")
             
-            // Send UseCircuitCode message
-            Log.i(TAG, "→ Sending UseCircuitCode...")
-            sendUseCircuitCode()
-            Log.i(TAG, "✓ UseCircuitCode sent")
+            // Send UseCircuitCode and wait for ACK (Lumiya-style)
+            // This is CRITICAL - we must wait for the circuit to be acknowledged
+            // before sending CompleteAgentMovement
+            Log.i(TAG, "→ Sending UseCircuitCode (waiting for ACK)...")
+            val useCircuitAcked = sendUseCircuitCodeAndWait(timeoutMs = 5000)
             
-            // Wait a moment for the circuit to be established
-            Log.d(TAG, "  Waiting 500ms for circuit establishment...")
-            delay(500)
-            
-            // Send AgentThrottle to set bandwidth allocation
-            // This is CRITICAL - must be sent before CompleteAgentMovement
-            Log.i(TAG, "→ Sending AgentThrottle (bandwidth configuration)...")
-            sendAgentThrottle()
-            Log.i(TAG, "✓ AgentThrottle sent")
-            
-            // Wait a moment
-            Log.d(TAG, "  Waiting 200ms after AgentThrottle...")
-            delay(200)
+            if (useCircuitAcked) {
+                Log.i(TAG, "✓ UseCircuitCode acknowledged by simulator")
+            } else {
+                Log.w(TAG, "⚠️ UseCircuitCode ACK timeout - proceeding anyway (may fail)")
+            }
             
             // Send CompleteAgentMovement to tell the simulator we're ready
+            // Lumiya sends this immediately after UseCircuitCode ACK
             Log.i(TAG, "→ Sending CompleteAgentMovement...")
             sendCompleteAgentMovement()
             Log.i(TAG, "✓ CompleteAgentMovement sent")
+            
+            // Give a small delay for the simulator to process
+            delay(100)
+            
+            // Send AgentThrottle to set bandwidth allocation
+            // Note: Lumiya sends this after receiving RegionHandshake, but
+            // sending it early shouldn't hurt and helps ensure bandwidth is set
+            Log.i(TAG, "→ Sending AgentThrottle (bandwidth configuration)...")
+            sendAgentThrottle()
+            Log.i(TAG, "✓ AgentThrottle sent")
             
             Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
             Log.i(TAG, "║ UDP CONNECTION ESTABLISHED                                         ║")
@@ -212,6 +230,7 @@ class UDPConnection {
      * Based on Lumiya's SLAgentCircuit.sendRegionHandshakeReply()
      * 
      * NOTE: Second Life message blocks use little-endian encoding; UUID bytes remain big-endian.
+     * NOTE: This message is zero-coded per Lumiya's RegionHandshakeReply.java (zeroCoded = true)
      */
     suspend fun sendRegionHandshakeReply(flags: Int = 0) {
         // RegionHandshakeReply message format:
@@ -232,7 +251,8 @@ class UDPConnection {
         payload.putInt(flags)
         
         Log.d(TAG, "Sending RegionHandshakeReply")
-        sendPacket(MessageIds.REGION_HANDSHAKE_REPLY, payload.array(), reliable = true)
+        // Zero-coded per Lumiya's implementation
+        sendPacket(MessageIds.REGION_HANDSHAKE_REPLY, payload.array(), reliable = true, zerocoded = true)
     }
     
     /**
@@ -504,6 +524,7 @@ class UDPConnection {
         socket?.close()
         socket = null
         pendingAcks.clear()
+        ackCallbacks.clear()  // Clear ACK callbacks to prevent memory leaks
         synchronized(pendingAckIds) { pendingAckIds.clear() }
         Log.i(TAG, "Disconnected")
     }
@@ -520,14 +541,19 @@ class UDPConnection {
      *
      * The payload must already be encoded in little-endian message order; the header and message
      * number are written in network (big-endian) order.
+     * 
+     * @param onAck Optional callback to invoke when this packet is acknowledged.
+     *              Only invoked if the packet is reliable.
+     * @return The sequence number assigned to this packet
      */
     suspend fun sendPacket(
         messageId: Int,
         payload: ByteArray,
         reliable: Boolean = false,
-        zerocoded: Boolean = false
-    ) = withContext(Dispatchers.IO) {
-        val socket = this@UDPConnection.socket ?: return@withContext
+        zerocoded: Boolean = false,
+        onAck: (() -> Unit)? = null
+    ): Int = withContext(Dispatchers.IO) {
+        val socket = this@UDPConnection.socket ?: return@withContext -1
         
         val seqNum = sequenceNumber.getAndIncrement()
         
@@ -568,10 +594,16 @@ class UDPConnection {
             
             if (reliable) {
                 pendingAcks[seqNum] = PendingPacket(seqNum, finalPacket, System.currentTimeMillis())
+                // Register ACK callback if provided
+                if (onAck != null) {
+                    ackCallbacks[seqNum] = onAck
+                }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send packet", e)
         }
+        
+        seqNum
     }
     
     private suspend fun receiveLoop() {
@@ -654,7 +686,9 @@ class UDPConnection {
         }
         
         // Handle acks at end of packet
-        // Appended ACKs are little-endian per SL protocol (unlike header which is big-endian)
+        // CRITICAL: Appended ACKs are BIG_ENDIAN (network order), same as packet header
+        // This is different from the message payload which is LITTLE_ENDIAN
+        // See Lumiya's SLMessage.Pack() and AppendPendingAcks() for reference
         if (hasAcks && decoded.size > 1) {
             val numAcks = decoded[decoded.size - 1].toInt() and 0xFF
             if (numAcks > 0) {
@@ -663,10 +697,12 @@ class UDPConnection {
                 if (ackStart > PACKET_HEADER_SIZE) {
                     for (i in 0 until numAcks) {
                         val offset = ackStart + i * 4
-                        // Appended ACKs are little-endian (body byte order)
-                        val ackSeq = ByteBuffer.wrap(decoded, offset, 4).order(BODY_BYTE_ORDER).int
+                        // Appended ACKs are BIG_ENDIAN (network order) - NOT little-endian!
+                        val ackSeq = ByteBuffer.wrap(decoded, offset, 4).order(HEADER_BYTE_ORDER).int
                         pendingAcks.remove(ackSeq)
                         Log.d(TAG, "   ACK for packet #$ackSeq")
+                        // Invoke ACK callback if registered (for sequence-dependent operations)
+                        ackCallbacks.remove(ackSeq)?.invoke()
                     }
                 }
             }
@@ -748,6 +784,8 @@ class UDPConnection {
                 val ackSeq = buffer.int
                 pendingAcks.remove(ackSeq)
                 Log.d(TAG, "   ACK for packet #$ackSeq")
+                // Invoke ACK callback if registered (for sequence-dependent operations)
+                ackCallbacks.remove(ackSeq)?.invoke()
             }
         }
     }
@@ -783,24 +821,86 @@ class UDPConnection {
         sendPacket(MessageIds.PACKET_ACK, payload.array(), reliable = false)
     }
     
-    private suspend fun sendUseCircuitCode() {
-        // UseCircuitCode message format:
-        // - CircuitCode (4 bytes, U32) - little-endian
-        // - SessionID (16 bytes, UUID) - raw bytes (big-endian UUID)
-        // - AgentID (16 bytes, UUID) - raw bytes (big-endian UUID)
-        //
-        // NOTE: Second Life message blocks use little-endian encoding; UUID bytes remain big-endian.
+    /**
+     * Create the UseCircuitCode payload buffer.
+     * 
+     * UseCircuitCode message format:
+     * - CircuitCode (4 bytes, U32) - little-endian
+     * - SessionID (16 bytes, UUID) - raw bytes (big-endian UUID)
+     * - AgentID (16 bytes, UUID) - raw bytes (big-endian UUID)
+     * 
+     * NOTE: Second Life message blocks use little-endian encoding; UUID bytes remain big-endian.
+     */
+    private fun createUseCircuitCodePayload(): ByteArray {
         val payload = ByteBuffer.allocate(36).order(BODY_BYTE_ORDER)
         payload.putInt(circuitCode)
-        
-        // Session ID (UUID)
         payload.putUUID(sessionId)
-        
-        // Agent ID (UUID)
         payload.putUUID(agentId)
+        return payload.array()
+    }
+    
+    private suspend fun sendUseCircuitCode() {
+        Log.d(TAG, "Sending UseCircuitCode: circuit=$circuitCode, agent=${agentId.toString().take(8)}...")
+        sendPacket(MessageIds.USE_CIRCUIT_CODE, createUseCircuitCodePayload(), reliable = true)
+    }
+    
+    /**
+     * Send UseCircuitCode and wait for its ACK.
+     * 
+     * This follows Lumiya's SLAgentCircuit.SendUseCode() pattern which uses
+     * an event listener to wait for the ACK before proceeding.
+     * 
+     * @param timeoutMs Maximum time to wait for ACK
+     * @return true if ACK was received, false if timeout
+     */
+    private suspend fun sendUseCircuitCodeAndWait(timeoutMs: Long = 5000): Boolean {
+        val payload = createUseCircuitCodePayload()
         
         Log.d(TAG, "Sending UseCircuitCode: circuit=$circuitCode, agent=${agentId.toString().take(8)}...")
-        sendPacket(MessageIds.USE_CIRCUIT_CODE, payload.array(), reliable = true)
+        
+        // Use suspendCancellableCoroutine to wait for ACK with proper exception handling
+        return try {
+            withTimeout(timeoutMs) {
+                suspendCancellableCoroutine { continuation ->
+                    // Track the sequence number so we can clean up on cancellation
+                    var seqNum = -1
+                    
+                    continuation.invokeOnCancellation {
+                        // Clean up the callback if the continuation is cancelled
+                        if (seqNum >= 0) {
+                            ackCallbacks.remove(seqNum)
+                        }
+                    }
+                    
+                    scope.launch {
+                        try {
+                            seqNum = sendPacket(
+                                MessageIds.USE_CIRCUIT_CODE,
+                                payload,
+                                reliable = true,
+                                onAck = {
+                                    Log.d(TAG, "UseCircuitCode ACK received!")
+                                    if (continuation.isActive) {
+                                        continuation.resume(true)
+                                    }
+                                }
+                            )
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Failed to send UseCircuitCode", e)
+                            if (continuation.isActive) {
+                                continuation.resume(false)
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e: TimeoutCancellationException) {
+            Log.w(TAG, "UseCircuitCode ACK timeout after ${timeoutMs}ms")
+            false
+        } catch (e: Exception) {
+            Log.e(TAG, "Error waiting for UseCircuitCode ACK", e)
+            false
+        }
     }
     
     private suspend fun resendPendingPackets() {
