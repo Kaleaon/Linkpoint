@@ -129,9 +129,9 @@ class UDPConnection {
     suspend fun connect(): Boolean = withContext(Dispatchers.IO) {
         try {
             Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
-            Log.i(TAG, "║ INITIATING UDP CONNECTION (Lumiya-style sequence)                   ║")
-            Log.i(TAG, "║ Target: $simIP:$simPort                                               ║")
-            Log.i(TAG, "║ Circuit Code: $circuitCode                                                ║")
+            Log.i(TAG, "║ INITIATING UDP CONNECTION (Lumiya-style)                         ║")
+            Log.i(TAG, "║ Target: $simIP:$simPort                                          ║")
+            Log.i(TAG, "║ Circuit Code: $circuitCode                                       ║")
             Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
             
             socket = DatagramSocket()
@@ -525,6 +525,7 @@ class UDPConnection {
         socket?.close()
         socket = null
         pendingAcks.clear()
+        ackCallbacks.clear()  // Clear ACK callbacks to prevent memory leaks
         synchronized(pendingAckIds) { pendingAckIds.clear() }
         Log.i(TAG, "Disconnected")
     }
@@ -821,24 +822,27 @@ class UDPConnection {
         sendPacket(MessageIds.PACKET_ACK, payload.array(), reliable = false)
     }
     
-    private suspend fun sendUseCircuitCode() {
-        // UseCircuitCode message format:
-        // - CircuitCode (4 bytes, U32) - little-endian
-        // - SessionID (16 bytes, UUID) - raw bytes (big-endian UUID)
-        // - AgentID (16 bytes, UUID) - raw bytes (big-endian UUID)
-        //
-        // NOTE: Second Life message blocks use little-endian encoding; UUID bytes remain big-endian.
+    /**
+     * Create the UseCircuitCode payload buffer.
+     * 
+     * UseCircuitCode message format:
+     * - CircuitCode (4 bytes, U32) - little-endian
+     * - SessionID (16 bytes, UUID) - raw bytes (big-endian UUID)
+     * - AgentID (16 bytes, UUID) - raw bytes (big-endian UUID)
+     * 
+     * NOTE: Second Life message blocks use little-endian encoding; UUID bytes remain big-endian.
+     */
+    private fun createUseCircuitCodePayload(): ByteArray {
         val payload = ByteBuffer.allocate(36).order(BODY_BYTE_ORDER)
         payload.putInt(circuitCode)
-        
-        // Session ID (UUID)
         payload.putUUID(sessionId)
-        
-        // Agent ID (UUID)
         payload.putUUID(agentId)
-        
+        return payload.array()
+    }
+    
+    private suspend fun sendUseCircuitCode() {
         Log.d(TAG, "Sending UseCircuitCode: circuit=$circuitCode, agent=${agentId.toString().take(8)}...")
-        sendPacket(MessageIds.USE_CIRCUIT_CODE, payload.array(), reliable = true)
+        sendPacket(MessageIds.USE_CIRCUIT_CODE, createUseCircuitCodePayload(), reliable = true)
     }
     
     /**
@@ -851,10 +855,7 @@ class UDPConnection {
      * @return true if ACK was received, false if timeout
      */
     private suspend fun sendUseCircuitCodeAndWait(timeoutMs: Long = 5000): Boolean {
-        val payload = ByteBuffer.allocate(36).order(BODY_BYTE_ORDER)
-        payload.putInt(circuitCode)
-        payload.putUUID(sessionId)
-        payload.putUUID(agentId)
+        val payload = createUseCircuitCodePayload()
         
         Log.d(TAG, "Sending UseCircuitCode: circuit=$circuitCode, agent=${agentId.toString().take(8)}...")
         
@@ -876,7 +877,7 @@ class UDPConnection {
                         try {
                             seqNum = sendPacket(
                                 MessageIds.USE_CIRCUIT_CODE,
-                                payload.array(),
+                                payload,
                                 reliable = true,
                                 onAck = {
                                     Log.d(TAG, "UseCircuitCode ACK received!")
