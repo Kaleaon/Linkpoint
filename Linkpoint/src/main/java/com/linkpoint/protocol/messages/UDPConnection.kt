@@ -12,7 +12,6 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 /**
  * UDP Connection handler for Second Life protocol.
