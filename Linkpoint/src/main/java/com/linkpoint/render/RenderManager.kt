@@ -185,6 +185,7 @@ class RenderManager(private val context: Context) {
      * Force recreation of the SwapChain.
      * Call this when the surface becomes available or after a surface change.
      */
+    @Synchronized
     fun recreateSwapChain() {
         val engine = this.engine ?: return
         val surface = surfaceView?.holder?.surface ?: return
@@ -194,9 +195,10 @@ class RenderManager(private val context: Context) {
             return
         }
         
-        // Destroy existing swap chain
-        swapChain?.let { 
-            engine.destroySwapChain(it)
+        // Destroy existing swap chain using local reference to avoid race condition
+        val currentSwapChain = swapChain
+        if (currentSwapChain != null) { 
+            engine.destroySwapChain(currentSwapChain)
             swapChain = null
         }
         

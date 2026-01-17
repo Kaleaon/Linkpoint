@@ -52,6 +52,28 @@ class DebugReportService private constructor(private val context: Context) {
         }
         
         fun getInstanceOrNull(): DebugReportService? = instance
+        
+        /**
+         * Phases that indicate the connection is still in progress.
+         * Used to provide more accurate diagnostic messages.
+         */
+        private val CONNECTING_PHASES = setOf(
+            InitializationTracker.Phase.NOT_STARTED,
+            InitializationTracker.Phase.LOGIN_STARTING,
+            InitializationTracker.Phase.LOGIN_HTTP_REQUEST,
+            InitializationTracker.Phase.LOGIN_SUCCESS,
+            InitializationTracker.Phase.SESSION_SETUP,
+            InitializationTracker.Phase.UDP_CONNECTING,
+            InitializationTracker.Phase.UDP_CONNECTED,
+            InitializationTracker.Phase.CAPABILITIES_FETCHING
+        )
+        
+        /**
+         * Check if the current initialization phase indicates connection is still in progress.
+         */
+        private fun isStillConnecting(phase: InitializationTracker.Phase): Boolean {
+            return phase in CONNECTING_PHASES
+        }
     }
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -473,10 +495,7 @@ class DebugReportService private constructor(private val context: Context) {
                             appendLine()
                             // Check initialization phase to provide better context
                             val initPhase = InitializationTracker.getDiagnostics().currentPhase
-                            val isStillConnecting = initPhase.name.contains("CONNECTING") || 
-                                initPhase.name.contains("UDP") ||
-                                initPhase == InitializationTracker.Phase.SESSION_SETUP
-                            if (isStillConnecting) {
+                            if (isStillConnecting(initPhase)) {
                                 appendLine("ℹ️ NO OBJECTS YET - Connection still in progress (phase: $initPhase)")
                                 appendLine("   Objects will appear after RegionHandshake is processed.")
                             } else {
@@ -516,10 +535,7 @@ class DebugReportService private constructor(private val context: Context) {
                             appendLine()
                             // Check initialization phase to provide better context
                             val initPhase = InitializationTracker.getDiagnostics().currentPhase
-                            val isStillConnecting = initPhase.name.contains("CONNECTING") || 
-                                initPhase.name.contains("UDP") ||
-                                initPhase == InitializationTracker.Phase.SESSION_SETUP
-                            if (isStillConnecting) {
+                            if (isStillConnecting(initPhase)) {
                                 appendLine("ℹ️ NO AVATARS YET - Connection still in progress (phase: $initPhase)")
                                 appendLine("   Avatar data will appear after CoarseLocationUpdate is received.")
                             } else {
@@ -587,10 +603,7 @@ class DebugReportService private constructor(private val context: Context) {
                             appendLine()
                             // Check initialization phase to provide better context
                             val initPhase = InitializationTracker.getDiagnostics().currentPhase
-                            val isStillConnecting = initPhase.name.contains("CONNECTING") || 
-                                initPhase.name.contains("UDP") ||
-                                initPhase == InitializationTracker.Phase.SESSION_SETUP
-                            if (isStillConnecting) {
+                            if (isStillConnecting(initPhase)) {
                                 appendLine("ℹ️ REGION NAME PENDING - Waiting for RegionHandshake (phase: $initPhase)")
                                 appendLine("   The actual region name will be received from the simulator.")
                             } else {
