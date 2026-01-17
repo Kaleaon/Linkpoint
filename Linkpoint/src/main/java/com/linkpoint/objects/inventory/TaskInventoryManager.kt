@@ -59,7 +59,9 @@ class TaskInventoryManager(
     
     init {
         // Register xfer handler for task inventory files
-        xferManager.registerHandler("*") { filename, result ->
+        // Task inventory files have format like "task_inv_<uuid>" or similar
+        // We'll only process files we're tracking in xferToObject
+        xferManager.registerHandler("task_inv") { filename, result ->
             handleXferComplete(filename, result)
         }
     }

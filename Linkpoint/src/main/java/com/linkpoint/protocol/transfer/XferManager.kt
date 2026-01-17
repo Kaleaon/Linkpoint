@@ -64,6 +64,12 @@ class XferManager(
     
     /**
      * Register a handler for xfer requests by filename pattern.
+     * 
+     * @param filenamePattern Pattern to match. Can be:
+     *   - "*" to match all files
+     *   - A prefix string (e.g., "task_inv" matches "task_inv_abc.txt")
+     *   - A regex pattern starting with "^" (e.g., "^mute_.*\\.txt$")
+     * @param handler Handler to call when matching xfer completes
      */
     fun registerHandler(filenamePattern: String, handler: XferHandler) {
         xferHandlers[filenamePattern] = handler
@@ -206,11 +212,26 @@ class XferManager(
     
     /**
      * Notify registered handlers of xfer completion.
+     * Patterns are matched as prefixes (filename.startsWith(pattern)) for more predictable behavior.
+     * Use "*" to match all files.
      */
     private fun notifyHandlers(xfer: Xfer, result: XferResult) {
-        // Find matching handler
+        // Find matching handler using prefix matching for more predictable behavior
         for ((pattern, handler) in xferHandlers) {
-            if (xfer.filename.contains(pattern) || pattern == "*") {
+            val matches = when {
+                pattern == "*" -> true
+                pattern.startsWith("^") -> {
+                    // Regex pattern if starts with ^
+                    try {
+                        Regex(pattern).containsMatchIn(xfer.filename)
+                    } catch (e: Exception) {
+                        false
+                    }
+                }
+                else -> xfer.filename.startsWith(pattern, ignoreCase = true)
+            }
+            
+            if (matches) {
                 try {
                     handler.onXferComplete(xfer.filename, result)
                 } catch (e: Exception) {

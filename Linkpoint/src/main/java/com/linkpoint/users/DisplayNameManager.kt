@@ -28,9 +28,6 @@ class DisplayNameManager(
         // Max IDs per request (SL limit is typically 90)
         private const val MAX_IDS_PER_REQUEST = 80
         
-        // Cache expiry (1 hour)
-        private const val CACHE_EXPIRY_MS = 60 * 60 * 1000L
-        
         // Request batch delay
         private const val BATCH_DELAY_MS = 100L
     }

@@ -7,30 +7,40 @@ import com.linkpoint.utils.CrashReporter
 import com.linkpoint.avatar.AvatarManager
 import com.linkpoint.chat.ChatManager
 import com.linkpoint.chat.IMManager
+import com.linkpoint.chat.dialogs.ScriptDialogManager
 import com.linkpoint.core.GridManager
 import com.linkpoint.core.SessionManager
 import com.linkpoint.core.StartLocationManager
 import com.linkpoint.core.DestinationGuide
 import com.linkpoint.core.AvatarSelectionManager
+import com.linkpoint.economy.EconomyManager
 import com.linkpoint.inventory.GestureManager
 import com.linkpoint.inventory.InventoryManager
 import com.linkpoint.inventory.OutfitManager
+import com.linkpoint.inventory.notecard.NotecardManager
 import com.linkpoint.network.NetworkSettings
 import com.linkpoint.network.SecondLifeProtocol
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.objects.BuildTools
 import com.linkpoint.objects.ObjectManager
+import com.linkpoint.objects.inventory.TaskInventoryManager
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.messages.UDPConnection
 import com.linkpoint.protocol.messages.parseRegionHandshake
 import com.linkpoint.protocol.messages.parseAgentMovementComplete
+import com.linkpoint.protocol.transfer.TransferManager
+import com.linkpoint.protocol.transfer.XferManager
+import com.linkpoint.render.HoverTextManager
 import com.linkpoint.render.RenderManager
+import com.linkpoint.users.DisplayNameManager
+import com.linkpoint.users.MuteManager
 import com.linkpoint.voice.VoiceManager
 import com.linkpoint.world.FriendsManager
 import com.linkpoint.world.ParcelManager
 import com.linkpoint.world.ProfileManager
 import com.linkpoint.world.SearchManager
 import com.linkpoint.world.WorldMap
+import com.linkpoint.world.environment.EnvironmentManager
 import com.linkpoint.groups.GroupsManager
 import com.linkpoint.animesh.AnimeshManager
 import com.linkpoint.bom.BakesOnMeshManager
@@ -161,6 +171,44 @@ class LinkpointApp : Application() {
     lateinit var voiceManager: VoiceManager
         private set
     
+    // Transfer system (NEW)
+    lateinit var transferManager: TransferManager
+        private set
+    lateinit var xferManager: XferManager
+        private set
+    
+    // Notecard system (NEW)
+    lateinit var notecardManager: NotecardManager
+        private set
+    
+    // Task inventory (NEW)
+    lateinit var taskInventoryManager: TaskInventoryManager
+        private set
+    
+    // Environment/Windlight (NEW)
+    lateinit var environmentManager: EnvironmentManager
+        private set
+    
+    // Display names (NEW)
+    lateinit var displayNameManager: DisplayNameManager
+        private set
+    
+    // Mute list (NEW)
+    lateinit var muteManager: MuteManager
+        private set
+    
+    // Script dialogs (NEW)
+    lateinit var scriptDialogManager: ScriptDialogManager
+        private set
+    
+    // Hover text (NEW)
+    lateinit var hoverTextManager: HoverTextManager
+        private set
+    
+    // Economy/L$ (NEW)
+    lateinit var economyManager: EconomyManager
+        private set
+    
     // Crash Reporter
     lateinit var crashReporter: CrashReporter
         private set
@@ -242,6 +290,18 @@ class LinkpointApp : Application() {
         // Voice
         voiceManager = VoiceManager(this, capabilityManager)
         
+        // NEW: Environment/Windlight
+        environmentManager = EnvironmentManager(capabilityManager)
+        
+        // NEW: Display names
+        displayNameManager = DisplayNameManager(capabilityManager)
+        
+        // NEW: Hover text
+        hoverTextManager = HoverTextManager()
+        
+        // NEW: Xfer manager (needs UDP connection)
+        xferManager = XferManager(udpConnection)
+        
         Log.d(TAG, "Core managers initialized")
     }
     
@@ -258,6 +318,24 @@ class LinkpointApp : Application() {
         groupsManager = GroupsManager(udpConnection, capabilityManager, agentId)
         
         Log.d(TAG, "Initializing agent-specific managers for $agentId")
+        
+        // NEW: Transfer manager (needs agent ID and session)
+        transferManager = TransferManager(udpConnection, agentId, udpConnection.getSessionId())
+        
+        // NEW: Notecard manager
+        notecardManager = NotecardManager(transferManager)
+        
+        // NEW: Task inventory manager
+        taskInventoryManager = TaskInventoryManager(udpConnection, xferManager, agentId)
+        
+        // NEW: Mute manager
+        muteManager = MuteManager(udpConnection, xferManager, agentId)
+        
+        // NEW: Script dialog manager
+        scriptDialogManager = ScriptDialogManager(udpConnection, agentId)
+        
+        // NEW: Economy manager
+        economyManager = EconomyManager(udpConnection, capabilityManager, agentId)
         
         // Avatar manager
         avatarManager = AvatarManager(
@@ -597,6 +675,17 @@ class LinkpointApp : Application() {
         animationManager.shutdown()
         meshManager.shutdown()
         textureManager.shutdown()
+        
+        // Shutdown new managers
+        if (::economyManager.isInitialized) economyManager.shutdown()
+        if (::scriptDialogManager.isInitialized) scriptDialogManager.shutdown()
+        if (::muteManager.isInitialized) muteManager.shutdown()
+        if (::taskInventoryManager.isInitialized) taskInventoryManager.shutdown()
+        if (::notecardManager.isInitialized) notecardManager.shutdown()
+        if (::transferManager.isInitialized) transferManager.shutdown()
+        if (::xferManager.isInitialized) xferManager.shutdown()
+        if (::displayNameManager.isInitialized) displayNameManager.shutdown()
+        if (::environmentManager.isInitialized) environmentManager.shutdown()
         
         capabilityManager.shutdown()
         udpConnection.disconnect()
