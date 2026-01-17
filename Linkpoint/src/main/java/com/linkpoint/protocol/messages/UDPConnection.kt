@@ -744,8 +744,13 @@ class UDPConnection {
     }
     
     private suspend fun sendAck(seqNum: Int) {
-        val payload = ByteBuffer.allocate(4).order(BODY_BYTE_ORDER).putInt(seqNum).array()
-        sendPacket(MessageIds.PACKET_ACK, payload, reliable = false)
+        // PacketAck message format per SL protocol:
+        // - Count (U8): Number of ACKs (1 in this case)
+        // - ID (U32): Sequence number, little-endian per message template
+        val payload = ByteBuffer.allocate(5).order(BODY_BYTE_ORDER)
+        payload.put(1.toByte())  // Count: 1 ACK
+        payload.putInt(seqNum)
+        sendPacket(MessageIds.PACKET_ACK, payload.array(), reliable = false)
     }
     
     /**
@@ -1025,7 +1030,6 @@ object MessageIds {
     
     // Medium frequency (0xFFxx)
     const val AGENT_UPDATE: Int = 0xFF04
-    const val CHAT_FROM_VIEWER: Int = 0xFF50
     const val INSTANT_MESSAGE: Int = 0xFF4B
     const val KILL_OBJECT: Int = 0xFF0C
     const val OBJECT_SELECT: Int = 0xFF09
@@ -1033,8 +1037,6 @@ object MessageIds {
     const val MULTIPLE_OBJECT_UPDATE: Int = 0xFF0B
     const val AGENT_ANIMATION: Int = 0xFF05
     const val SOUND_TRIGGER: Int = 0xFF1D
-    const val TYPING_START: Int = 0xFF4C
-    const val TYPING_STOP: Int = 0xFF4D
     
     // High frequency (0x00 - 0xFE)
     const val START_PING_CHECK: Int = 0x01
