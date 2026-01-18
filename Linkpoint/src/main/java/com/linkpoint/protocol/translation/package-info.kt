@@ -18,15 +18,22 @@
  *    
  * 3. **LLSD formatting**: The seed capability expects an LLSD array of strings,
  *    not a map or other format.
+ *    
+ * 4. **Asset transfer URLs**: GetTexture, GetMesh, and other asset URLs need the
+ *    same hostname repair as capability URLs.
  * 
  * ## Components
  * 
- * - [LumiyaTranslationLayer]: Core translation utilities for URL repair and grid detection
+ * - [LumiyaTranslationLayer]: Core translation utilities for URL repair, grid detection,
+ *   and asset transfer handling (textures, meshes, sounds, animations)
  * - [MessageTranslation]: Message ID encoding/decoding compatible with Lumiya
- * - [LumiyaProtocolBridge]: High-level bridge coordinating all translation
+ * - [LumiyaProtocolBridge]: High-level bridge coordinating all translation, including
+ *   asset fetching with proper URL repair
  * - [ProtocolDiagnostics]: Comprehensive debugging and statistics collection
  * 
  * ## Usage
+ * 
+ * ### Capability Initialization
  * 
  * The translation layer is automatically used when initializing capabilities:
  * 
@@ -37,6 +44,27 @@
  * // New way with Lumiya translation:
  * capabilityManager.initialize(seedCapUrl, loginUrl)
  * ```
+ * 
+ * ### Asset Fetching
+ * 
+ * For textures, meshes, and other assets:
+ * 
+ * ```kotlin
+ * val bridge = LumiyaProtocolBridge(loginUrl)
+ * 
+ * // Fetch texture with URL repair
+ * val textureData = bridge.fetchTexture(textureUuid)
+ * 
+ * // Fetch mesh with URL repair
+ * val meshData = bridge.fetchMesh(meshUuid)
+ * 
+ * // Get a repaired asset URL for external use
+ * val textureUrl = bridge.prepareAssetUrl(
+ *     "GetTexture", textureUuid, AssetTransferType.TEXTURE
+ * )
+ * ```
+ * 
+ * ### Configuration
  * 
  * You can also configure the behavior:
  * 
@@ -76,5 +104,7 @@
  * 
  * @see com.linkpoint.protocol.capabilities.CapabilityManager
  * @see com.linkpoint.protocol.messages.UDPConnection
+ * @see com.linkpoint.assets.TextureManager
+ * @see com.linkpoint.assets.MeshManager
  */
 package com.linkpoint.protocol.translation

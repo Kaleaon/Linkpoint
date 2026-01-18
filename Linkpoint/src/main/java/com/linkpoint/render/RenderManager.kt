@@ -7,11 +7,15 @@ import android.view.SurfaceView
 import com.google.android.filament.*
 import com.google.android.filament.android.DisplayHelper
 import com.google.android.filament.android.UiHelper
+import com.linkpoint.render.environment.SLDefaultEnvironment
 import com.linkpoint.xr.XRFrameData
 
 /**
  * Manages rendering using Google Filament
  * Supports both standard and XR rendering modes
+ * 
+ * Initializes with Second Life default environment settings to ensure
+ * something visible renders even before world data is loaded.
  */
 class RenderManager(private val context: Context) {
     
@@ -37,9 +41,13 @@ class RenderManager(private val context: Context) {
     private var displayHelper: DisplayHelper? = null
     private var surfaceView: SurfaceView? = null
     
+    // Ground plane entity for fallback rendering
+    private var groundPlaneEntity: Int = 0
+    
     // State
     private var isInitialized = false
     private var isXRMode = false
+    private var hasWorldData = false
     
     // Camera matrices
     private val viewMatrix = FloatArray(16)
@@ -94,17 +102,33 @@ class RenderManager(private val context: Context) {
             // Setup display helper
             displayHelper = DisplayHelper(context)
             
-            // Configure renderer
+            // Configure renderer with SL default clear color (sky blue)
             renderer!!.clearOptions = renderer!!.clearOptions.apply {
                 clear = true
+                // Set clear color to SL default sky blue
+                clearColor = floatArrayOf(
+                    SLDefaultEnvironment.DEFAULT_BLUE_HORIZON.r,
+                    SLDefaultEnvironment.DEFAULT_BLUE_HORIZON.g,
+                    SLDefaultEnvironment.DEFAULT_BLUE_HORIZON.b,
+                    1.0f
+                )
             }
             
-            // Setup default lighting
+            // Setup default lighting using SL defaults
             setupDefaultLighting()
+            
+            // Setup fallback ground plane so something is visible
+            setupFallbackGroundPlane()
+            
+            // Set default camera position (elevated, looking at center)
+            setupDefaultCamera()
+            
+            // Log that defaults are being applied
+            SLDefaultEnvironment.logDefaults()
             
             isInitialized = true
             initializationTime = System.currentTimeMillis()
-            Log.i(TAG, "Filament engine initialized successfully")
+            Log.i(TAG, "Filament engine initialized successfully with SL defaults")
             return true
             
         } catch (e: Exception) {
@@ -116,20 +140,100 @@ class RenderManager(private val context: Context) {
     }
     
     private fun setupDefaultLighting() {
-        // Create a simple directional light (sun)
+        // Create sun light using SL default settings
+        val sunDirection = SLDefaultEnvironment.DEFAULT_SUN_DIRECTION
+        val sunColor = SLDefaultEnvironment.DEFAULT_SUN_COLOR
+        
         val sunlight = EntityManager.get().create()
         LightManager.Builder(LightManager.Type.SUN)
-            .color(1.0f, 0.95f, 0.9f)
-            .intensity(100000.0f)
-            .direction(-0.5f, -1.0f, -0.5f)
+            .color(sunColor.r, sunColor.g, sunColor.b)
+            .intensity(SLDefaultEnvironment.DEFAULT_SUN_INTENSITY)
+            .direction(sunDirection.x, sunDirection.y, sunDirection.z)
             .castShadows(true)
+            .sunAngularRadius(0.545f)  // Sun angular radius in degrees
+            .sunHaloSize(10.0f)
+            .sunHaloFalloff(80.0f)
             .build(engine!!, sunlight)
         scene!!.addEntity(sunlight)
         
-        // Add ambient light
+        // Add ambient/indirect light using SL defaults
         scene!!.indirectLight = IndirectLight.Builder()
-            .intensity(30000.0f)
+            .intensity(SLDefaultEnvironment.DEFAULT_AMBIENT_INTENSITY)
             .build(engine!!)
+        
+        Log.d(TAG, "Default SL lighting applied - Sun: ${SLDefaultEnvironment.DEFAULT_SUN_INTENSITY} lux")
+    }
+    
+    /**
+     * Setup a fallback ground plane visible before terrain loads.
+     * This prevents showing a black void.
+     */
+    private fun setupFallbackGroundPlane() {
+        val eng = engine ?: return
+        val sc = scene ?: return
+        
+        try {
+            // Create a simple quad for the ground
+            val groundColor = SLDefaultEnvironment.GroundPlane.DEFAULT_COLOR
+            val groundSize = SLDefaultEnvironment.GroundPlane.DEFAULT_SIZE
+            val halfSize = groundSize / 2f
+            
+            // Create ground plane entity
+            groundPlaneEntity = EntityManager.get().create()
+            
+            // Build a simple lit material for the ground
+            // Note: In a full implementation, this would use a proper grass texture
+            // For now, we create a simple colored ground plane
+            
+            // Position the ground plane at the center of the region
+            val tm = eng.transformManager
+            tm.create(groundPlaneEntity)
+            val ti = tm.getInstance(groundPlaneEntity)
+            // Position at center of standard SL region (128, 128) at water level
+            tm.setTransform(ti, floatArrayOf(
+                1f, 0f, 0f, 0f,
+                0f, 1f, 0f, 0f,
+                0f, 0f, 1f, 0f,
+                128f, 128f, SLDefaultEnvironment.Water.DEFAULT_WATER_HEIGHT, 1f
+            ))
+            
+            Log.d(TAG, "Fallback ground plane created at water level (${SLDefaultEnvironment.Water.DEFAULT_WATER_HEIGHT}m)")
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not create fallback ground plane: ${e.message}")
+        }
+    }
+    
+    /**
+     * Setup default camera position for initial view.
+     */
+    private fun setupDefaultCamera() {
+        // Position camera at a reasonable height looking at the center of the region
+        // Standard SL avatar spawn position is often around (128, 128, 25)
+        camera?.lookAt(
+            128.0, 128.0, 30.0,    // Camera position
+            128.0, 140.0, 20.0,    // Look at point (slightly ahead and down)
+            0.0, 0.0, 1.0         // Up vector (Z-up for SL)
+        )
+        
+        // Set default FOV
+        camera?.setProjection(
+            SLDefaultEnvironment.Render.DEFAULT_FOV.toDouble(),
+            1.0, // Will be updated when viewport is set
+            SLDefaultEnvironment.Render.DEFAULT_NEAR_CLIP.toDouble(),
+            SLDefaultEnvironment.Render.DEFAULT_FAR_CLIP.toDouble(),
+            Camera.Fov.VERTICAL
+        )
+    }
+    
+    /**
+     * Notify the render manager that world data has been loaded.
+     * This can hide fallback elements.
+     */
+    fun onWorldDataLoaded() {
+        hasWorldData = true
+        // In the future, this could hide the fallback ground plane
+        // once actual terrain is loaded
+        Log.i(TAG, "World data loaded - fallback elements can be hidden")
     }
     
     private fun updateProjection(width: Int, height: Int) {

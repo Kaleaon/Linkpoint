@@ -362,4 +362,238 @@ object LumiyaTranslationLayer {
         error?.let { Log.e(TAG, "║ Error: $it") }
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
     }
+    
+    // ==================================================================================
+    // ASSET TRANSFER TRANSLATION
+    // ==================================================================================
+    
+    /**
+     * Asset types that the translation layer supports.
+     */
+    enum class AssetTransferType {
+        TEXTURE,
+        MESH,
+        SOUND,
+        ANIMATION,
+        GESTURE,
+        NOTECARD,
+        SCRIPT,
+        LANDMARK,
+        CLOTHING,
+        BODYPART,
+        OBJECT,
+        UNKNOWN
+    }
+    
+    /**
+     * Prepare an asset URL for fetching.
+     * 
+     * This applies all necessary URL repairs and transformations for asset downloads.
+     * Asset URLs (GetTexture, GetMesh, etc.) may also need the same hostname repair
+     * as capability URLs on the Agni grid.
+     * 
+     * @param loginUrl The login URL (for grid detection)
+     * @param assetUrl The asset URL to prepare
+     * @param assetType The type of asset being fetched
+     * @return The prepared asset URL
+     */
+    fun prepareAssetUrl(loginUrl: String, assetUrl: String, assetType: AssetTransferType): String {
+        if (!config.repairCapabilityUrls) {
+            return assetUrl
+        }
+        
+        val gridType = detectGridType(loginUrl)
+        
+        // Apply URL repair for Linden Lab grids
+        val repairedUrl = when (gridType) {
+            GridType.AGNI, GridType.ADITI -> repairCapabilityUrl(true, assetUrl)
+            else -> assetUrl
+        }
+        
+        // Ensure HTTPS for Linden Lab grids
+        val finalUrl = if (gridType == GridType.AGNI || gridType == GridType.ADITI) {
+            ensureHttps(repairedUrl)
+        } else {
+            repairedUrl
+        }
+        
+        if (config.verboseLogging && finalUrl != assetUrl) {
+            Log.d(TAG, "Asset URL repaired for ${assetType.name}: ${finalUrl.take(60)}...")
+        }
+        
+        return finalUrl
+    }
+    
+    /**
+     * Build a texture fetch URL with Lumiya-compatible format.
+     * 
+     * Lumiya uses the format: capability_url?texture_id=UUID
+     * This matches the official SL viewer (lltexturefetch.cpp).
+     * 
+     * @param loginUrl The login URL (for grid detection)
+     * @param textureCapabilityUrl The GetTexture capability URL
+     * @param textureId The texture UUID to fetch
+     * @return The prepared texture fetch URL
+     */
+    fun buildTextureUrl(loginUrl: String, textureCapabilityUrl: String, textureId: String): String {
+        val preparedCapUrl = prepareAssetUrl(loginUrl, textureCapabilityUrl, AssetTransferType.TEXTURE)
+        return "$preparedCapUrl?texture_id=$textureId"
+    }
+    
+    /**
+     * Build a mesh fetch URL with Lumiya-compatible format.
+     * 
+     * Lumiya uses the format: capability_url?mesh_id=UUID
+     * 
+     * @param loginUrl The login URL (for grid detection)
+     * @param meshCapabilityUrl The GetMesh/GetMesh2 capability URL
+     * @param meshId The mesh UUID to fetch
+     * @return The prepared mesh fetch URL
+     */
+    fun buildMeshUrl(loginUrl: String, meshCapabilityUrl: String, meshId: String): String {
+        val preparedCapUrl = prepareAssetUrl(loginUrl, meshCapabilityUrl, AssetTransferType.MESH)
+        return "$preparedCapUrl?mesh_id=$meshId"
+    }
+    
+    /**
+     * Validate asset data received from the server.
+     * 
+     * Performs basic validation on the received asset data to ensure it's
+     * in the expected format for the asset type.
+     * 
+     * @param data The raw asset data
+     * @param assetType The expected asset type
+     * @return true if the data appears valid
+     */
+    fun validateAssetData(data: ByteArray, assetType: AssetTransferType): Boolean {
+        if (data.isEmpty()) {
+            return false
+        }
+        
+        return when (assetType) {
+            AssetTransferType.TEXTURE -> validateTextureData(data)
+            AssetTransferType.MESH -> validateMeshData(data)
+            AssetTransferType.SOUND -> validateSoundData(data)
+            AssetTransferType.ANIMATION -> validateAnimationData(data)
+            else -> true // No specific validation for other types
+        }
+    }
+    
+    /**
+     * Validate texture data format.
+     * Second Life textures are primarily JPEG2000 format.
+     */
+    private fun validateTextureData(data: ByteArray): Boolean {
+        if (data.size < 12) return false
+        
+        // Check for JPEG2000 magic bytes
+        // JP2 file format box signature
+        val isJp2 = data[0] == 0x00.toByte() && data[1] == 0x00.toByte() &&
+                    data[2] == 0x00.toByte() && data[3] == 0x0C.toByte()
+        
+        // J2C codestream signature
+        val isJ2c = data[0] == 0xFF.toByte() && data[1] == 0x4F.toByte()
+        
+        // JPEG signature (fallback format)
+        val isJpeg = data[0] == 0xFF.toByte() && data[1] == 0xD8.toByte()
+        
+        // PNG signature (fallback format)
+        val isPng = data[0] == 0x89.toByte() && data[1] == 0x50.toByte() &&
+                    data[2] == 0x4E.toByte() && data[3] == 0x47.toByte()
+        
+        return isJp2 || isJ2c || isJpeg || isPng
+    }
+    
+    /**
+     * Validate mesh data format.
+     * Second Life meshes use LLSD binary format header.
+     */
+    private fun validateMeshData(data: ByteArray): Boolean {
+        if (data.size < 4) return false
+        
+        // Mesh files start with LLSD binary header
+        // Look for common LLSD markers
+        return data[0] == '{'.code.toByte() || // LLSD map marker
+               data[0] == 0x7B.toByte() ||     // Alternate map marker
+               (data.size > 10) // Minimum reasonable mesh size
+    }
+    
+    /**
+     * Validate sound data format.
+     * Second Life sounds use Ogg Vorbis format.
+     */
+    private fun validateSoundData(data: ByteArray): Boolean {
+        if (data.size < 4) return false
+        
+        // Ogg container signature: "OggS"
+        return data[0] == 0x4F.toByte() && data[1] == 0x67.toByte() &&
+               data[2] == 0x67.toByte() && data[3] == 0x53.toByte()
+    }
+    
+    /**
+     * Validate animation data format.
+     * Second Life animations use LLSD binary format.
+     */
+    private fun validateAnimationData(data: ByteArray): Boolean {
+        if (data.size < 4) return false
+        
+        // Animation files should have reasonable minimum size
+        // and start with version info
+        return data.size > 20
+    }
+    
+    /**
+     * Get HTTP headers appropriate for asset fetching.
+     * 
+     * Returns headers that match Lumiya's asset fetch behavior.
+     * 
+     * @param assetType The type of asset being fetched
+     * @return Map of header name to value
+     */
+    fun getAssetFetchHeaders(assetType: AssetTransferType): Map<String, String> {
+        val baseHeaders = mutableMapOf(
+            "User-Agent" to "Linkpoint/1.0 (Lumiya-compatible)",
+            "Connection" to "keep-alive"
+        )
+        
+        when (assetType) {
+            AssetTransferType.TEXTURE -> {
+                baseHeaders["Accept"] = "image/x-j2c, image/jp2, image/jpeg, image/*"
+            }
+            AssetTransferType.MESH -> {
+                baseHeaders["Accept"] = "application/octet-stream, */*"
+            }
+            AssetTransferType.SOUND -> {
+                baseHeaders["Accept"] = "audio/ogg, audio/*, */*"
+            }
+            AssetTransferType.ANIMATION -> {
+                baseHeaders["Accept"] = "application/octet-stream, */*"
+            }
+            else -> {
+                baseHeaders["Accept"] = "*/*"
+            }
+        }
+        
+        return baseHeaders
+    }
+    
+    /**
+     * Log asset transfer diagnostics.
+     */
+    fun logAssetTransferDiagnostics(
+        operation: String,
+        assetType: AssetTransferType,
+        assetId: String,
+        url: String?,
+        dataSize: Int?,
+        error: String?
+    ) {
+        if (!config.verboseLogging) return
+        
+        Log.d(TAG, "Asset Transfer [$operation]: $assetType")
+        Log.d(TAG, "  Asset ID: $assetId")
+        url?.let { Log.d(TAG, "  URL: ${it.take(60)}...") }
+        dataSize?.let { Log.d(TAG, "  Data size: $it bytes") }
+        error?.let { Log.e(TAG, "  Error: $it") }
+    }
 }

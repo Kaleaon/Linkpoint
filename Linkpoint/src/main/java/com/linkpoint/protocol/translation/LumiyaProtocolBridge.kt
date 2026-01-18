@@ -386,6 +386,185 @@ class LumiyaProtocolBridge(
         val config: LumiyaTranslationLayer.CompatibilityConfig
     )
     
+    // ==================================================================================
+    // ASSET TRANSFER METHODS
+    // ==================================================================================
+    
+    /**
+     * Fetch a texture using Lumiya-compatible URL handling.
+     * 
+     * This method:
+     * 1. Repairs the GetTexture capability URL if needed
+     * 2. Builds the proper texture request URL
+     * 3. Fetches the texture with appropriate headers
+     * 4. Validates the returned data
+     * 
+     * @param textureId The texture UUID to fetch
+     * @return The raw texture data (JPEG2000 format) or null on failure
+     */
+    suspend fun fetchTexture(textureId: String): ByteArray? = withContext(Dispatchers.IO) {
+        val textureCapUrl = getCapability("GetTexture")
+        if (textureCapUrl == null) {
+            Log.w(TAG, "GetTexture capability not available")
+            return@withContext null
+        }
+        
+        val url = LumiyaTranslationLayer.buildTextureUrl(loginUrl, textureCapUrl, textureId)
+        val headers = LumiyaTranslationLayer.getAssetFetchHeaders(LumiyaTranslationLayer.AssetTransferType.TEXTURE)
+        
+        fetchAsset(url, headers, LumiyaTranslationLayer.AssetTransferType.TEXTURE, textureId)
+    }
+    
+    /**
+     * Fetch a mesh using Lumiya-compatible URL handling.
+     * 
+     * This method:
+     * 1. Repairs the GetMesh/GetMesh2 capability URL if needed
+     * 2. Builds the proper mesh request URL
+     * 3. Fetches the mesh with appropriate headers
+     * 4. Validates the returned data
+     * 
+     * @param meshId The mesh UUID to fetch
+     * @return The raw mesh data (LLSD format) or null on failure
+     */
+    suspend fun fetchMesh(meshId: String): ByteArray? = withContext(Dispatchers.IO) {
+        // Prefer GetMesh2 over GetMesh
+        val meshCapUrl = getCapability("GetMesh2") ?: getCapability("GetMesh")
+        if (meshCapUrl == null) {
+            Log.w(TAG, "GetMesh/GetMesh2 capability not available")
+            return@withContext null
+        }
+        
+        val url = LumiyaTranslationLayer.buildMeshUrl(loginUrl, meshCapUrl, meshId)
+        val headers = LumiyaTranslationLayer.getAssetFetchHeaders(LumiyaTranslationLayer.AssetTransferType.MESH)
+        
+        fetchAsset(url, headers, LumiyaTranslationLayer.AssetTransferType.MESH, meshId)
+    }
+    
+    /**
+     * Generic asset fetching with Lumiya-compatible handling.
+     * 
+     * @param url The prepared asset URL
+     * @param headers HTTP headers for the request
+     * @param assetType The type of asset being fetched
+     * @param assetId The asset ID (for logging)
+     * @return The raw asset data or null on failure
+     */
+    private suspend fun fetchAsset(
+        url: String,
+        headers: Map<String, String>,
+        assetType: LumiyaTranslationLayer.AssetTransferType,
+        assetId: String
+    ): ByteArray? = withContext(Dispatchers.IO) {
+        try {
+            val requestBuilder = Request.Builder().url(url)
+            headers.forEach { (key, value) ->
+                requestBuilder.header(key, value)
+            }
+            
+            val response = httpClient.newCall(requestBuilder.build()).execute()
+            
+            if (!response.isSuccessful) {
+                LumiyaTranslationLayer.logAssetTransferDiagnostics(
+                    "FETCH_FAILED",
+                    assetType,
+                    assetId,
+                    url,
+                    null,
+                    "HTTP ${response.code}"
+                )
+                return@withContext null
+            }
+            
+            val data = response.body?.bytes()
+            response.close()
+            
+            if (data == null || data.isEmpty()) {
+                LumiyaTranslationLayer.logAssetTransferDiagnostics(
+                    "EMPTY_RESPONSE",
+                    assetType,
+                    assetId,
+                    url,
+                    0,
+                    "Empty response body"
+                )
+                return@withContext null
+            }
+            
+            // Validate the received data
+            if (!LumiyaTranslationLayer.validateAssetData(data, assetType)) {
+                LumiyaTranslationLayer.logAssetTransferDiagnostics(
+                    "INVALID_DATA",
+                    assetType,
+                    assetId,
+                    url,
+                    data.size,
+                    "Data validation failed"
+                )
+                return@withContext null
+            }
+            
+            LumiyaTranslationLayer.logAssetTransferDiagnostics(
+                "SUCCESS",
+                assetType,
+                assetId,
+                url,
+                data.size,
+                null
+            )
+            
+            data
+        } catch (e: Exception) {
+            LumiyaTranslationLayer.logAssetTransferDiagnostics(
+                "ERROR",
+                assetType,
+                assetId,
+                url,
+                null,
+                "${e.javaClass.simpleName}: ${e.message}"
+            )
+            null
+        }
+    }
+    
+    /**
+     * Prepare an asset URL for external use.
+     * 
+     * Use this when you need a repaired asset URL for use outside of this bridge.
+     * 
+     * @param capabilityName The capability name (e.g., "GetTexture", "GetMesh")
+     * @param assetId The asset UUID
+     * @param assetType The type of asset
+     * @return The prepared asset URL or null if capability unavailable
+     */
+    fun prepareAssetUrl(
+        capabilityName: String,
+        assetId: String,
+        assetType: LumiyaTranslationLayer.AssetTransferType
+    ): String? {
+        val capUrl = getCapability(capabilityName) ?: return null
+        
+        val preparedCapUrl = LumiyaTranslationLayer.prepareAssetUrl(loginUrl, capUrl, assetType)
+        
+        return when (assetType) {
+            LumiyaTranslationLayer.AssetTransferType.TEXTURE -> "$preparedCapUrl?texture_id=$assetId"
+            LumiyaTranslationLayer.AssetTransferType.MESH -> "$preparedCapUrl?mesh_id=$assetId"
+            LumiyaTranslationLayer.AssetTransferType.SOUND -> "$preparedCapUrl?asset_id=$assetId"
+            LumiyaTranslationLayer.AssetTransferType.ANIMATION -> "$preparedCapUrl?asset_id=$assetId"
+            else -> "$preparedCapUrl?asset_id=$assetId"
+        }
+    }
+    
+    /**
+     * Check if the bridge has texture fetch capability.
+     */
+    fun hasTextureCapability(): Boolean = hasCapability("GetTexture")
+    
+    /**
+     * Check if the bridge has mesh fetch capability.
+     */
+    fun hasMeshCapability(): Boolean = hasCapability("GetMesh2") || hasCapability("GetMesh")
+    
     /**
      * Clean up resources.
      */
