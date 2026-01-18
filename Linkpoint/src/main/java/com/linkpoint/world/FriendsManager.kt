@@ -2,6 +2,7 @@ package com.linkpoint.world
 
 import android.os.Parcelable
 import android.util.Log
+import com.linkpoint.network.NetworkLogger
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.llsd.*
@@ -20,7 +21,9 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Manages friends list, online status, and friendship operations
+ * Manages friends list, online status, and friendship operations.
+ * 
+ * Enhanced with detailed logging for debugging friend-related issues.
  */
 class FriendsManager(
     private val udpConnection: UDPConnection,
@@ -63,6 +66,7 @@ class FriendsManager(
     }
     
     override fun onEvent(message: String, body: LLSDMap) {
+        Log.d(TAG, "📬 Friend event received: $message")
         when (message) {
             "FriendshipOffered" -> handleFriendshipOffered(body)
             "FriendshipAccepted" -> handleFriendshipAccepted(body)
@@ -78,6 +82,9 @@ class FriendsManager(
         val fromName = body.getString("from_name") ?: "Unknown"
         val transactionId = UUID.fromString(body.getString("transaction_id") ?: return)
         val message = body.getString("message") ?: ""
+        
+        Log.i(TAG, "👋 Friendship offer from: $fromName ($fromId)")
+        NetworkLogger.logFriendshipOffer(fromId.toString(), fromName, message)
         
         val offer = FriendshipOffer(
             transactionId = transactionId,
@@ -98,6 +105,9 @@ class FriendsManager(
         val fromId = UUID.fromString(body.getString("from_id") ?: return)
         val fromName = body.getString("from_name") ?: "Unknown"
         
+        Log.i(TAG, "✓ Friendship accepted by: $fromName ($fromId)")
+        NetworkLogger.logFriendshipAccepted(fromId.toString(), fromName)
+        
         val friend = Friend(
             agentId = fromId,
             name = fromName,
@@ -114,13 +124,19 @@ class FriendsManager(
     
     private fun handleFriendshipDeclined(body: LLSDMap) {
         val transactionId = UUID.fromString(body.getString("transaction_id") ?: return)
-        pendingOffers.remove(transactionId)
+        val offer = pendingOffers.remove(transactionId)
+        
+        Log.i(TAG, "✗ Friendship declined for transaction: $transactionId")
+        offer?.let { NetworkLogger.logFriendshipDeclined(it.fromAgentId.toString()) }
     }
     
     private fun handleFriendshipTerminated(body: LLSDMap) {
         val otherId = UUID.fromString(body.getString("other_id") ?: return)
         
         friends.remove(otherId)?.let { friend ->
+            Log.i(TAG, "👋 Friendship terminated with: ${friend.name} ($otherId)")
+            NetworkLogger.logFriendshipTerminated(otherId.toString(), friend.name)
+            
             _onlineFriends.value = _onlineFriends.value - otherId
             
             scope.launch {
@@ -131,16 +147,25 @@ class FriendsManager(
     
     private fun handleOnlineNotification(body: LLSDMap) {
         val agents = body.getArray("AgentOnline")
+        val count = agents?.value?.size ?: 0
+        Log.d(TAG, "🟢 Online notification received with $count agents")
+        
         agents?.value?.forEach { agent ->
             if (agent is LLSDMap) {
                 val agentIdStr = agent.getString("agent_id") ?: return@forEach
-                val agentId = UUID.fromString(agentIdStr)
+                val agentUuid = UUID.fromString(agentIdStr)
                 
-                friends[agentId]?.isOnline = true
-                _onlineFriends.value = _onlineFriends.value + agentId
+                val friend = friends[agentUuid]
+                val friendName = friend?.name ?: "Unknown"
+                
+                friend?.isOnline = true
+                _onlineFriends.value = _onlineFriends.value + agentUuid
+                
+                Log.i(TAG, "🟢 Friend online: $friendName ($agentUuid)")
+                NetworkLogger.logFriendOnlineStatus(agentUuid.toString(), friendName, true)
                 
                 scope.launch {
-                    _friendsFlow.emit(FriendEvent.OnlineStatusChanged(agentId, true))
+                    _friendsFlow.emit(FriendEvent.OnlineStatusChanged(agentUuid, true))
                 }
             }
         }
@@ -148,16 +173,25 @@ class FriendsManager(
     
     private fun handleOfflineNotification(body: LLSDMap) {
         val agents = body.getArray("AgentOffline")
+        val count = agents?.value?.size ?: 0
+        Log.d(TAG, "🔴 Offline notification received with $count agents")
+        
         agents?.value?.forEach { agent ->
             if (agent is LLSDMap) {
                 val agentIdStr = agent.getString("agent_id") ?: return@forEach
-                val agentId = UUID.fromString(agentIdStr)
+                val agentUuid = UUID.fromString(agentIdStr)
                 
-                friends[agentId]?.isOnline = false
-                _onlineFriends.value = _onlineFriends.value - agentId
+                val friend = friends[agentUuid]
+                val friendName = friend?.name ?: "Unknown"
+                
+                friend?.isOnline = false
+                _onlineFriends.value = _onlineFriends.value - agentUuid
+                
+                Log.i(TAG, "🔴 Friend offline: $friendName ($agentUuid)")
+                NetworkLogger.logFriendOnlineStatus(agentUuid.toString(), friendName, false)
                 
                 scope.launch {
-                    _friendsFlow.emit(FriendEvent.OnlineStatusChanged(agentId, false))
+                    _friendsFlow.emit(FriendEvent.OnlineStatusChanged(agentUuid, false))
                 }
             }
         }
@@ -276,6 +310,9 @@ class FriendsManager(
      * Offer friendship to someone
      */
     suspend fun offerFriendship(targetAgentId: UUID, message: String = ""): Boolean {
+        Log.d(TAG, "👋 Sending friendship offer to: $targetAgentId")
+        NetworkLogger.logFriendshipOfferSent(targetAgentId.toString(), message)
+        
         return withContext(Dispatchers.IO) {
             try {
                 // OfferFriendship via ImprovedInstantMessage
@@ -314,10 +351,10 @@ class FriendsManager(
                 payload.putShort(0)
                 
                 udpConnection.sendPacket(MessageIds.IMPROVED_INSTANT_MESSAGE, payload.array().copyOf(payload.position()), reliable = true)
-                Log.i(TAG, "Offered friendship to $targetAgentId")
+                Log.i(TAG, "✓ Friendship offer sent to $targetAgentId (transaction: $transactionId)")
                 true
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to offer friendship", e)
+                Log.e(TAG, "✗ Failed to offer friendship to $targetAgentId", e)
                 false
             }
         }
@@ -530,8 +567,60 @@ class FriendsManager(
     }
     
     fun shutdown() {
+        Log.d(TAG, "FriendsManager shutting down - ${friends.size} friends, ${_onlineFriends.value.size} online")
         scope.cancel()
     }
+    
+    // ==================== DIAGNOSTIC METHODS ====================
+    
+    /**
+     * Get diagnostic information for debug reports
+     */
+    fun getDiagnostics(): FriendsDiagnostics {
+        return FriendsDiagnostics(
+            totalFriends = friends.size,
+            onlineFriends = _onlineFriends.value.size,
+            pendingOffers = pendingOffers.size,
+            friendsList = friends.values.map { friend ->
+                FriendInfo(
+                    agentId = friend.agentId.toString(),
+                    name = friend.name,
+                    isOnline = friend.isOnline,
+                    rightsGiven = formatRights(friend.rightsGiven),
+                    rightsHas = formatRights(friend.rightsHas)
+                )
+            }
+        )
+    }
+    
+    private fun formatRights(rights: Int): String {
+        val rightsList = mutableListOf<String>()
+        if ((rights and RIGHTS_ONLINE_STATUS) != 0) rightsList.add("Online")
+        if ((rights and RIGHTS_MAP_LOCATION) != 0) rightsList.add("Map")
+        if ((rights and RIGHTS_MODIFY_OBJECTS) != 0) rightsList.add("Modify")
+        return rightsList.ifEmpty { listOf("None") }.joinToString(", ")
+    }
+    
+    /**
+     * Friends diagnostics data class
+     */
+    data class FriendsDiagnostics(
+        val totalFriends: Int,
+        val onlineFriends: Int,
+        val pendingOffers: Int,
+        val friendsList: List<FriendInfo>
+    )
+    
+    /**
+     * Individual friend info for diagnostics
+     */
+    data class FriendInfo(
+        val agentId: String,
+        val name: String,
+        val isOnline: Boolean,
+        val rightsGiven: String,
+        val rightsHas: String
+    )
 }
 
 @Parcelize

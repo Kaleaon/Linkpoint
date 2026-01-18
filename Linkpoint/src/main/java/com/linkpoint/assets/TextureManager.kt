@@ -3,6 +3,7 @@ package com.linkpoint.assets
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import com.linkpoint.network.NetworkLogger
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +17,9 @@ import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Manages texture downloading and decoding
- * Handles JPEG2000 (J2K) format used by Second Life
+ * Handles JPEG2000 (J2K) format used by Second Life.
+ * 
+ * Enhanced with detailed logging for debugging texture loading issues.
  */
 class TextureManager(
     private val context: android.content.Context,
@@ -148,9 +151,14 @@ class TextureManager(
     ): ByteArray? = withContext(Dispatchers.IO) {
         updateStats { it.copy(pendingDownloads = it.pendingDownloads + 1) }
         
+        val startTime = System.currentTimeMillis()
+        
         try {
             // Build texture URL
             val url = buildTextureUrl(textureId, discard)
+            
+            Log.d(TAG, "🖼️ Starting texture download: $textureId")
+            NetworkLogger.logTextureRequest(textureId.toString(), url, "NORMAL")
             
             val request = Request.Builder()
                 .url(url)
@@ -158,23 +166,54 @@ class TextureManager(
                 .build()
             
             val response = httpClient.newCall(request).execute()
+            val durationMs = System.currentTimeMillis() - startTime
+            val protocol = response.protocol.toString()
             
             if (response.isSuccessful) {
                 val data = response.body?.bytes()
+                val sizeBytes = data?.size ?: 0
+                
+                Log.d(TAG, "🖼️ Texture downloaded: $textureId ($sizeBytes bytes, ${durationMs}ms, $protocol)")
+                NetworkLogger.logTextureResult(
+                    textureId = textureId.toString(),
+                    success = true,
+                    durationMs = durationMs,
+                    sizeBytes = sizeBytes,
+                    protocol = protocol
+                )
+                
                 updateStats { it.copy(
                     downloadedCount = it.downloadedCount + 1,
-                    downloadedBytes = it.downloadedBytes + (data?.size ?: 0)
+                    downloadedBytes = it.downloadedBytes + sizeBytes
                 )}
                 data
             } else {
-                Log.w(TAG, "Texture download failed: ${response.code}")
+                Log.w(TAG, "🖼️ Texture download failed: $textureId - HTTP ${response.code}")
+                NetworkLogger.logTextureResult(
+                    textureId = textureId.toString(),
+                    success = false,
+                    durationMs = durationMs,
+                    sizeBytes = null,
+                    protocol = protocol,
+                    error = "HTTP ${response.code}: ${response.message}"
+                )
+                
                 lastError = "HTTP ${response.code}: Download failed"
                 lastErrorTime = System.currentTimeMillis()
                 updateStats { it.copy(failedCount = it.failedCount + 1) }
                 null
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Texture download error: $textureId", e)
+            val durationMs = System.currentTimeMillis() - startTime
+            Log.e(TAG, "🖼️ Texture download error: $textureId - ${e.javaClass.simpleName}: ${e.message}")
+            NetworkLogger.logTextureResult(
+                textureId = textureId.toString(),
+                success = false,
+                durationMs = durationMs,
+                sizeBytes = null,
+                error = "${e.javaClass.simpleName}: ${e.message}"
+            )
+            
             lastError = "${e.javaClass.simpleName}: ${e.message}"
             lastErrorTime = System.currentTimeMillis()
             updateStats { it.copy(failedCount = it.failedCount + 1) }
@@ -196,9 +235,17 @@ class TextureManager(
     }
     
     private fun decodeTexture(textureId: UUID, data: ByteArray): Bitmap? {
+        val startTime = System.currentTimeMillis()
+        
         return try {
+            // Determine format
+            val isJ2k = isJPEG2000(data)
+            val format = if (isJ2k) "JPEG2000" else "Standard (PNG/JPEG)"
+            
+            Log.d(TAG, "🖼️ Decoding texture: $textureId (${data.size} bytes, $format)")
+            
             // Check if it's JPEG2000 (J2K/JP2)
-            val bitmap = if (isJPEG2000(data)) {
+            val bitmap = if (isJ2k) {
                 j2kDecodeAttempts.incrementAndGet()
                 val result = decodeJPEG2000(data)
                 if (result != null) {
@@ -210,13 +257,33 @@ class TextureManager(
                 BitmapFactory.decodeByteArray(data, 0, data.size)
             }
             
+            val durationMs = System.currentTimeMillis() - startTime
+            
             bitmap?.let {
+                Log.d(TAG, "🖼️ Texture decoded: $textureId (${it.width}x${it.height}, ${durationMs}ms)")
+                NetworkLogger.logTextureDecode(textureId.toString(), true, format, durationMs)
+                
                 textureCache[textureId] = it
                 updateStats { s -> s.copy(decodedCount = s.decodedCount + 1) }
             }
+            
+            if (bitmap == null) {
+                Log.w(TAG, "🖼️ Texture decode returned null: $textureId")
+                NetworkLogger.logTextureDecode(textureId.toString(), false, format, durationMs, "Decoder returned null")
+            }
+            
             bitmap
         } catch (e: Exception) {
-            Log.e(TAG, "Texture decode error: $textureId", e)
+            val durationMs = System.currentTimeMillis() - startTime
+            Log.e(TAG, "🖼️ Texture decode error: $textureId - ${e.javaClass.simpleName}: ${e.message}")
+            NetworkLogger.logTextureDecode(
+                textureId.toString(), 
+                false, 
+                if (isJPEG2000(data)) "JPEG2000" else "Standard",
+                durationMs,
+                "${e.javaClass.simpleName}: ${e.message}"
+            )
+            
             lastError = "Decode: ${e.javaClass.simpleName}: ${e.message}"
             lastErrorTime = System.currentTimeMillis()
             updateStats { it.copy(decodeFailedCount = it.decodeFailedCount + 1) }

@@ -952,6 +952,11 @@ class LinkpointApp : Application() {
     fun isGroupsManagerInitialized(): Boolean = ::groupsManager.isInitialized
     
     /**
+     * Check if friends manager is initialized (for debug reports)
+     */
+    fun isFriendsManagerInitialized(): Boolean = ::friendsManager.isInitialized
+    
+    /**
      * Check if animesh manager is initialized (for debug reports)
      */
     fun isAnimeshManagerInitialized(): Boolean = ::animeshManager.isInitialized
