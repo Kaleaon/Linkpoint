@@ -1231,7 +1231,7 @@ class DebugReportService private constructor(private val context: Context) {
                             val relativeTime = System.currentTimeMillis() - entry.timestamp
                             appendLine("    [${formatDuration(relativeTime)} ago] ${entry.reason}")
                             appendLine("      Details: ${entry.details}")
-                            appendLine("      Hex: ${entry.hexPreview.take(48)}...")
+                            appendLine("      Hex: ${entry.hexPreview}...")
                         }
                     }
                 } else {

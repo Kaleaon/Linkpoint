@@ -673,12 +673,18 @@ object EnhancedPacketLogger {
      * Extract sequence number from raw packet data.
      * Packet header format: flags (1 byte), sequence (4 bytes big-endian), extra (1 byte)
      * 
+     * Uses manual byte operations for efficiency (avoids ByteBuffer allocation).
+     * 
      * @param data The raw packet data
      * @return The sequence number, or null if data is too small
      */
     private fun extractSequenceNumber(data: ByteArray): Int? {
         if (data.size < 5) return null
-        return java.nio.ByteBuffer.wrap(data, 1, 4).order(java.nio.ByteOrder.BIG_ENDIAN).int
+        // Big-endian: bytes 1-4 contain sequence number (byte 0 is flags)
+        return ((data[1].toInt() and 0xFF) shl 24) or
+               ((data[2].toInt() and 0xFF) shl 16) or
+               ((data[3].toInt() and 0xFF) shl 8) or
+               (data[4].toInt() and 0xFF)
     }
     
     /**

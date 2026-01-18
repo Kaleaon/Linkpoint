@@ -1404,14 +1404,16 @@ class UDPConnection {
                 decoded = zerodecode(data)
                 Log.d(TAG, "   Zero-decoded: ${decoded.size} bytes")
                 
-                // Sanity check: zero-decoded should be at least as large as original minus the header
+                // Sanity check: zero-decoded should be at least as large as header
                 if (decoded.size < PACKET_HEADER_SIZE) {
                     Log.w(TAG, "⚠️ Zero-decode produced invalid result: ${decoded.size} bytes")
-                    EnhancedPacketLogger.logZeroDecodeFailure(data, "Decoded size ${decoded.size} smaller than header")
+                    // Log the decoded result (not original) to show what zero-decode produced
+                    EnhancedPacketLogger.logZeroDecodeFailure(decoded, "Decoded size ${decoded.size} smaller than header (original size: ${data.size})")
                     return
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "⚠️ Zero-decode failed: ${e.message}")
+                // Log original data since decode failed completely
                 EnhancedPacketLogger.logZeroDecodeFailure(data, "Exception during decode: ${e.message}")
                 return
             }
@@ -1427,12 +1429,9 @@ class UDPConnection {
                 Log.d(TAG, "   Contains $numAcks ACK(s)")
                 val ackStart = decoded.size - 1 - numAcks * 4
                 
-                // Validate ACK structure
-                if (ackStart <= PACKET_HEADER_SIZE) {
-                    Log.w(TAG, "⚠️ ACK count ($numAcks) too large for packet size - malformed packet")
-                    val availableBytes = decoded.size - 1 - PACKET_HEADER_SIZE
-                    EnhancedPacketLogger.logAckCountMismatch(decoded, numAcks, availableBytes)
-                } else {
+                // Validate ACK structure - ackStart must be after header for valid packet
+                if (ackStart > PACKET_HEADER_SIZE) {
+                    // Valid ACK structure - process ACKs
                     for (i in 0 until numAcks) {
                         val offset = ackStart + i * 4
                         // Appended ACKs are BIG_ENDIAN (network order) - NOT little-endian!
@@ -1442,6 +1441,12 @@ class UDPConnection {
                         // Invoke ACK callback if registered (for sequence-dependent operations)
                         ackCallbacks.remove(ackSeq)?.invoke()
                     }
+                } else {
+                    // Invalid - ACK count claims more data than available
+                    Log.w(TAG, "⚠️ ACK count ($numAcks) too large for packet size - malformed packet")
+                    val availableBytes = decoded.size - 1 - PACKET_HEADER_SIZE
+                    EnhancedPacketLogger.logAckCountMismatch(decoded, numAcks, availableBytes)
+                    // Don't return - continue processing the message even if ACKs are malformed
                 }
             }
         }
