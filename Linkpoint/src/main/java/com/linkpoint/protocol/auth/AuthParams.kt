@@ -29,11 +29,6 @@ data class AuthParams(
     fun getUsername(): String = "$firstName $lastName"
     
     /**
-     * Get the grid URL
-     */
-    fun getGridUrl(): String = gridUrl
-    
-    /**
      * Validate the parameters
      */
     fun validate(): Boolean {

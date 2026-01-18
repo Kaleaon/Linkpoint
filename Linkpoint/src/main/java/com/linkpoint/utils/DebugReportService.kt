@@ -403,12 +403,12 @@ class DebugReportService private constructor(private val context: Context) {
                         recentEntries.forEachIndexed { index, entry ->
                             val relativeTime = System.currentTimeMillis() - entry.timestamp
                             val icon = when (entry.type) {
-                                UDPConnection.PacketHistoryEntry.PacketEventType.SEND_SUCCESS -> "→"
-                                UDPConnection.PacketHistoryEntry.PacketEventType.SEND_FAILED -> "✗→"
-                                UDPConnection.PacketHistoryEntry.PacketEventType.RECEIVE -> "←"
-                                UDPConnection.PacketHistoryEntry.PacketEventType.RESEND -> "⟳"
-                                UDPConnection.PacketHistoryEntry.PacketEventType.ACK_RECEIVED -> "✓"
-                                UDPConnection.PacketHistoryEntry.PacketEventType.ACK_TIMEOUT -> "⏱"
+                                UDPConnectionFixed.PacketHistoryEntry.PacketEventType.SEND_SUCCESS -> "→"
+                                UDPConnectionFixed.PacketHistoryEntry.PacketEventType.SEND_FAILED -> "✗→"
+                                UDPConnectionFixed.PacketHistoryEntry.PacketEventType.RECEIVE -> "←"
+                                UDPConnectionFixed.PacketHistoryEntry.PacketEventType.RESEND -> "⟳"
+                                UDPConnectionFixed.PacketHistoryEntry.PacketEventType.ACK_RECEIVED -> "✓"
+                                UDPConnectionFixed.PacketHistoryEntry.PacketEventType.ACK_TIMEOUT -> "⏱"
                             }
                             val statusIcon = if (entry.success) "" else " ⚠️"
                             appendLine("  [${formatDuration(relativeTime)} ago] $icon ${entry.messageName} (seq=${entry.sequenceNumber}, ${entry.size}B)$statusIcon")
@@ -422,10 +422,10 @@ class DebugReportService private constructor(private val context: Context) {
                         }
                         
                         // Summary statistics
-                        val sendSuccessCount = packetHistory.count { it.type == UDPConnection.PacketHistoryEntry.PacketEventType.SEND_SUCCESS }
-                        val sendFailedCount = packetHistory.count { it.type == UDPConnection.PacketHistoryEntry.PacketEventType.SEND_FAILED }
-                        val receiveCount = packetHistory.count { it.type == UDPConnection.PacketHistoryEntry.PacketEventType.RECEIVE }
-                        val resendCount = packetHistory.count { it.type == UDPConnection.PacketHistoryEntry.PacketEventType.RESEND }
+                        val sendSuccessCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.SEND_SUCCESS }
+                        val sendFailedCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.SEND_FAILED }
+                        val receiveCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.RECEIVE }
+                        val resendCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.RESEND }
                         
                         appendLine()
                         appendLine("History Summary:")

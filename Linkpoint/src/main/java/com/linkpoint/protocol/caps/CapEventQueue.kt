@@ -66,7 +66,7 @@ class CapEventQueue(
      */
     fun start(capabilityUrl: String, pollInterval: Long = DEFAULT_POLL_INTERVAL_MS) {
         if (isActive) {
-            NetworkLogger.log(TAG, "Event queue already active", Log.WARN)
+            NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Event queue already active")
             return
         }
         
@@ -74,14 +74,14 @@ class CapEventQueue(
         isActive = true
         
         pollingJob = scope.launch {
-            NetworkLogger.log(TAG, "Starting event queue polling: $capabilityUrl")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Starting event queue polling: $capabilityUrl")
             
-            while (isActive && !scope.coroutineContext[Job]?.isCancelled == true) {
+            while (isActive && scope.coroutineContext[Job]?.isCancelled != true) {
                 try {
                     pollEvents(capabilityUrl)
                     delay(pollIntervalMs)
                 } catch (e: Exception) {
-                    NetworkLogger.log(TAG, "Error polling events: ${e.message}", Log.ERROR)
+                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Error polling events: ${e.message}")
                 }
             }
         }
@@ -95,7 +95,7 @@ class CapEventQueue(
         // This would make HTTP requests to the capability URL
         // and process any returned events
         
-        NetworkLogger.log(TAG, "Polling events from: $capabilityUrl")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Polling events from: $capabilityUrl")
     }
     
     /**
@@ -106,11 +106,11 @@ class CapEventQueue(
             if (eventQueue.size >= MAX_QUEUE_SIZE) {
                 // Remove oldest event
                 eventQueue.removeAt(0)
-                NetworkLogger.log(TAG, "Event queue full, removed oldest event", Log.WARN)
+                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Event queue full, removed oldest event")
             }
             
             eventQueue.add(event)
-            NetworkLogger.log(TAG, "Added event: ${event.eventType}")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Added event: ${event.eventType}")
         }
     }
     
@@ -142,7 +142,7 @@ class CapEventQueue(
     fun clearEvents() {
         synchronized(eventQueue) {
             eventQueue.clear()
-            NetworkLogger.log(TAG, "Cleared all events")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Cleared all events")
         }
     }
     
@@ -168,12 +168,12 @@ class CapEventQueue(
             return
         }
         
-        NetworkLogger.log(TAG, "Stopping event queue")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Stopping event queue")
         
         isActive = false
         pollingJob?.cancel()
         
-        NetworkLogger.log(TAG, "Event queue stopped")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Event queue stopped")
     }
     
     /**

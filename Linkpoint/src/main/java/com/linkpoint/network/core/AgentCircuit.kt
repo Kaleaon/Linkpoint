@@ -3,10 +3,11 @@ package com.linkpoint.network.core
 import android.util.Log
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.events.EventBus
+import com.linkpoint.network.events.ConnectionState
 import com.linkpoint.network.events.ConnectionStateChangedEvent
 import com.linkpoint.network.events.MessageReceivedEvent
 import com.linkpoint.protocol.auth.AuthReply
-import com.linkpoint.protocol.messages.UDPConnectionFixedFixed
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.messages.MessageRouter
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -117,14 +118,16 @@ class AgentCircuit(
     // ==================== CIRCUIT LIFECYCLE ====================
     
     init {
-        initializeCircuit()
+        scope.launch {
+            initializeCircuit()
+        }
     }
     
     /**
      * Initialize the circuit
      */
-    private fun initializeCircuit() {
-        NetworkLogger.log(TAG, "Initializing agent circuit")
+    private suspend fun initializeCircuit() {
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Initializing agent circuit")
         
         try {
             // Start UDP connection with fixed implementation
@@ -136,10 +139,10 @@ class AgentCircuit(
             _circuitState.value = CircuitState.CONNECTED
             isConnected = true
             
-            NetworkLogger.log(TAG, "Agent circuit initialized successfully")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Agent circuit initialized successfully")
             
         } catch (e: Exception) {
-            NetworkLogger.log(TAG, "Failed to initialize circuit: ${e.message}", Log.ERROR)
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Failed to initialize circuit: ${e.message}")
             _circuitState.value = CircuitState.CLOSED
             throw e
         }
@@ -150,13 +153,13 @@ class AgentCircuit(
      * Uses UDPConnectionFixed which properly handles receive operations
      */
     private suspend fun startUDPConnectionFixed() {
-        NetworkLogger.log(TAG, "Starting UDP connection (Fixed implementation)")
-        NetworkLogger.log(TAG, "Sim IP: ${authReply.simIP}, Port: ${authReply.simPort}")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Starting UDP connection (Fixed implementation)")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Sim IP: ${authReply.simIP}, Port: ${authReply.simPort}")
         
         val connected = udpConnection.connect()
         
         if (connected) {
-            NetworkLogger.log(TAG, "✓ UDP connection established successfully")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ UDP connection established successfully")
             isConnected = true
             
             // Publish connection state event via EventBus
@@ -165,7 +168,7 @@ class AgentCircuit(
                 ConnectionState.CONNECTED
             ))
         } else {
-            NetworkLogger.log(TAG, "✗ Failed to establish UDP connection", Log.ERROR)
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "✗ Failed to establish UDP connection")
             isConnected = false
             throw IllegalStateException("Failed to connect UDP")
         }
@@ -183,7 +186,7 @@ class AgentCircuit(
                     sendAgentUpdate()
                     delay(AGENT_UPDATE_INTERVAL_MS)
                 } catch (e: Exception) {
-                    NetworkLogger.log(TAG, "Error in agent update: ${e.message}", Log.ERROR)
+                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Error in agent update: ${e.message}")
                 }
             }
         }
@@ -205,7 +208,7 @@ class AgentCircuit(
             // This maintains mobile-optimized update intervals
             udpConnection.sendAgentUpdate()
         } catch (e: Exception) {
-            NetworkLogger.log(TAG, "Error sending agent update: ${e.message}", Log.ERROR)
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Error sending agent update: ${e.message}")
         }
     }
     
@@ -214,7 +217,7 @@ class AgentCircuit(
      * Uses MessageRouter for efficient message routing
      */
     suspend fun registerHandler(messageId: Int, handler: MessageRouter.Handler) {
-        NetworkLogger.log(TAG, "Registering handler for message ID: $messageId")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Registering handler for message ID: $messageId")
         messageRouter.registerHandler(messageId, handler)
     }
     
@@ -223,7 +226,7 @@ class AgentCircuit(
      */
     suspend fun sendMessage(messageId: Int, payload: ByteArray, reliable: Boolean = false) {
         if (!isConnected) {
-            NetworkLogger.log(TAG, "Cannot send message: circuit not connected", Log.WARN)
+            NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Cannot send message: circuit not connected")
             return
         }
         
@@ -231,9 +234,9 @@ class AgentCircuit(
             // UDPConnectionFixed handles the actual sending with proper protocol
             // This maintains mobile-optimized settings (reliability, zero-coding, etc.)
             udpConnection.sendPacket(messageId, payload, reliable)
-            NetworkLogger.log(TAG, "Sent message ID: $messageId (${payload.size} bytes)")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Sent message ID: $messageId (${payload.size} bytes)")
         } catch (e: Exception) {
-            NetworkLogger.log(TAG, "Error sending message: ${e.message}", Log.ERROR)
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Error sending message: ${e.message}")
         }
     }
     
@@ -258,7 +261,7 @@ class AgentCircuit(
      * Close the circuit
      */
     fun close() {
-        NetworkLogger.log(TAG, "Closing agent circuit")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Closing agent circuit")
         
         isConnected = false
         
@@ -277,7 +280,7 @@ class AgentCircuit(
                 ))
             }
         } catch (e: Exception) {
-            NetworkLogger.log(TAG, "Error closing UDP connection: ${e.message}", Log.ERROR)
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Error closing UDP connection: ${e.message}")
         }
         
         _circuitState.value = CircuitState.CLOSED
@@ -285,6 +288,6 @@ class AgentCircuit(
         // Cancel scope
         scope.cancel()
         
-        NetworkLogger.log(TAG, "Agent circuit closed")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Agent circuit closed")
     }
 }

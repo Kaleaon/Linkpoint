@@ -77,7 +77,7 @@ class MessageRouter {
             val handlerList = handlers.getOrPut(messageId) { mutableListOf() }
             
             if (handlerList.size >= MAX_HANDLERS_PER_MESSAGE) {
-                NetworkLogger.log(TAG, "Max handlers reached for message $messageId", Log.WARN)
+                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Max handlers reached for message $messageId")
                 return@withLock
             }
             
@@ -85,7 +85,7 @@ class MessageRouter {
             handlerList.add(handler)
             handlerList.sortBy { it.getPriority() }
             
-            NetworkLogger.log(TAG, "Registered handler for message $messageId (priority ${handler.getPriority()})")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Registered handler for message $messageId (priority ${handler.getPriority()})")
         }
     }
     
@@ -103,7 +103,7 @@ class MessageRouter {
                 if (handlerList.isEmpty()) {
                     handlers.remove(messageId)
                 }
-                NetworkLogger.log(TAG, "Unregistered handler for message $messageId")
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Unregistered handler for message $messageId")
             }
         }
     }
@@ -123,7 +123,7 @@ class MessageRouter {
         }
         
         if (handlerList.isNullOrEmpty()) {
-            NetworkLogger.log(TAG, "No handler registered for message $messageId", Log.WARN)
+            NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "No handler registered for message $messageId")
             failedRoutes++
             return false
         }
@@ -133,10 +133,10 @@ class MessageRouter {
             try {
                 if (handler.handleMessage(messageId, data)) {
                     handled = true
-                    NetworkLogger.log(TAG, "Message $messageId handled successfully")
+                    NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Message $messageId handled successfully")
                 }
             } catch (e: Exception) {
-                NetworkLogger.log(TAG, "Handler error for message $messageId: ${e.message}", Log.ERROR)
+                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Handler error for message $messageId: ${e.message}")
             }
         }
         
@@ -144,7 +144,7 @@ class MessageRouter {
             successfulRoutes++
         } else {
             failedRoutes++
-            NetworkLogger.log(TAG, "Message $messageId not handled by any handler", Log.WARN)
+            NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Message $messageId not handled by any handler")
         }
         
         return handled
@@ -189,7 +189,7 @@ class MessageRouter {
             totalMessagesRouted = 0
             successfulRoutes = 0
             failedRoutes = 0
-            NetworkLogger.log(TAG, "All handlers cleared")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "All handlers cleared")
         }
     }
 }

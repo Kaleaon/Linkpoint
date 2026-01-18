@@ -125,13 +125,13 @@ class GridConnection(
         when (connectionState.value) {
             ConnectionState.IDLE -> performConnection()
             ConnectionState.CONNECTING -> {
-                NetworkLogger.log(TAG, "Already connecting, ignoring duplicate request")
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Already connecting, ignoring duplicate request")
             }
             ConnectionState.CONNECTED -> {
-                NetworkLogger.log(TAG, "Already connected, ignoring duplicate request")
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Already connected, ignoring duplicate request")
             }
             else -> {
-                NetworkLogger.log(TAG, "Cannot connect from state: ${connectionState.value}")
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Cannot connect from state: ${connectionState.value}")
             }
         }
     }
@@ -141,7 +141,7 @@ class GridConnection(
      */
     private suspend fun performConnection() {
         _connectionState.value = ConnectionState.CONNECTING
-        NetworkLogger.log(TAG, "Starting connection process")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Starting connection process")
         
         try {
             // TODO: Implement actual connection logic
@@ -157,7 +157,9 @@ class GridConnection(
             authReply = AuthReply(
                 sessionId = UUID.randomUUID(),
                 agentId = UUID.randomUUID(),
-                circuitCode = 123456789
+                circuitCode = 123456789,
+                simIP = "127.0.0.1",  // TODO: Get actual sim IP from authentication
+                simPort = 12035       // TODO: Get actual sim port from authentication
             )
             
             activeAgentUUID = authReply!!.agentId
@@ -168,10 +170,10 @@ class GridConnection(
             firstConnect = false
             reconnectAttempts = 0
             
-            NetworkLogger.log(TAG, "Connection successful")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Connection successful")
             
         } catch (e: Exception) {
-            NetworkLogger.log(TAG, "Connection failed: ${e.message}", Log.ERROR)
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Connection failed: ${e.message}")
             _connectionState.value = ConnectionState.ERROR
             
             // Attempt reconnection if appropriate
@@ -205,10 +207,10 @@ class GridConnection(
                 
                 _connectionState.value = ConnectionState.IDLE
                 
-                NetworkLogger.log(TAG, "Disconnected successfully")
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Disconnected successfully")
                 
             } catch (e: Exception) {
-                NetworkLogger.log(TAG, "Error during disconnect: ${e.message}", Log.ERROR)
+                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Error during disconnect: ${e.message}")
                 _connectionState.value = ConnectionState.ERROR
             }
         }
@@ -230,7 +232,7 @@ class GridConnection(
         isReconnecting = true
         reconnectAttempts++
         
-        NetworkLogger.log(TAG, "Attempting reconnection ($reconnectAttempts/$MAX_RECONNECT_ATTEMPTS)")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Attempting reconnection ($reconnectAttempts/$MAX_RECONNECT_ATTEMPTS)")
         
         // Exponential backoff: 1s, 2s, 4s, 8s, 16s
         val backoffDelay = (1L shl reconnectAttempts) * 1000L

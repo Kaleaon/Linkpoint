@@ -6,7 +6,7 @@ import com.linkpoint.network.events.EventBus
 import com.linkpoint.network.events.ConnectionStateChangedEvent
 import com.linkpoint.network.events.ConnectionState
 import com.linkpoint.protocol.auth.AuthReply
-import com.linkpoint.protocol.messages.UDPConnectionFixedFixed
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.messages.MessageRouter
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -115,14 +115,16 @@ class TempCircuit(
     // ==================== CIRCUIT LIFECYCLE ====================
     
     init {
-        initializeCircuit()
+        scope.launch {
+            initializeCircuit()
+        }
     }
     
     /**
      * Initialize the temp circuit
      */
     private suspend fun initializeCircuit() {
-        NetworkLogger.log(TAG, "Initializing temp circuit")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Initializing temp circuit")
         
         try {
             // Start UDP connection with fixed implementation
@@ -134,10 +136,10 @@ class TempCircuit(
             _circuitState.value = CircuitState.ACTIVE
             isActive = true
             
-            NetworkLogger.log(TAG, "Temp circuit initialized successfully")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Temp circuit initialized successfully")
             
         } catch (e: Exception) {
-            NetworkLogger.log(TAG, "Failed to initialize temp circuit: ${e.message}", Log.ERROR)
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Failed to initialize temp circuit: ${e.message}")
             _circuitState.value = CircuitState.ERROR
             close()
             throw e
@@ -149,13 +151,13 @@ class TempCircuit(
      * Uses UDPConnectionFixed which properly handles receive operations
      */
     private suspend fun startUDPConnectionFixed() {
-        NetworkLogger.log(TAG, "Starting temp circuit UDP connection (Fixed implementation)")
-        NetworkLogger.log(TAG, "Sim IP: ${authReply.simIP}, Port: ${authReply.simPort}")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Starting temp circuit UDP connection (Fixed implementation)")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Sim IP: ${authReply.simIP}, Port: ${authReply.simPort}")
         
         val connected = udpConnection.connect()
         
         if (connected) {
-            NetworkLogger.log(TAG, "✓ Temp circuit UDP connection established")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ Temp circuit UDP connection established")
             isActive = true
             
             // Publish connection state event via EventBus
@@ -164,7 +166,7 @@ class TempCircuit(
                 ConnectionState.CONNECTED
             ))
         } else {
-            NetworkLogger.log(TAG, "✗ Failed to establish temp circuit UDP connection", Log.ERROR)
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "✗ Failed to establish temp circuit UDP connection")
             isActive = false
             throw IllegalStateException("Failed to connect temp circuit UDP")
         }
@@ -179,7 +181,7 @@ class TempCircuit(
             delay(DEFAULT_TIMEOUT_MS)
             
             if (isActive) {
-                NetworkLogger.log(TAG, "Temp circuit timed out", Log.WARN)
+                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Temp circuit timed out")
                 _circuitState.value = CircuitState.TIMEOUT
                 close()
             }
@@ -193,7 +195,7 @@ class TempCircuit(
      * Uses MessageRouter for efficient message routing
      */
     suspend fun registerHandler(messageId: Int, handler: MessageRouter.Handler) {
-        NetworkLogger.log(TAG, "Registering temp circuit handler for message ID: $messageId")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Registering temp circuit handler for message ID: $messageId")
         messageRouter.registerHandler(messageId, handler)
     }
     
@@ -202,16 +204,16 @@ class TempCircuit(
      */
     suspend fun sendMessage(messageId: Int, payload: ByteArray, reliable: Boolean = false) {
         if (!isActive) {
-            NetworkLogger.log(TAG, "Cannot send message: temp circuit not active", Log.WARN)
+            NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Cannot send message: temp circuit not active")
             return
         }
         
         try {
             // UDPConnectionFixed handles the actual sending with proper protocol
             udpConnection.sendPacket(messageId, payload, reliable)
-            NetworkLogger.log(TAG, "Sent temp circuit message ID: $messageId (${payload.size} bytes)")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Sent temp circuit message ID: $messageId (${payload.size} bytes)")
         } catch (e: Exception) {
-            NetworkLogger.log(TAG, "Error sending message: ${e.message}", Log.ERROR)
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Error sending message: ${e.message}")
         }
     }
     
@@ -221,7 +223,7 @@ class TempCircuit(
      */
     fun markCompleted() {
         if (isActive) {
-            NetworkLogger.log(TAG, "Marking temp circuit as completed")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Marking temp circuit as completed")
             isActive = false
             _circuitState.value = CircuitState.COMPLETED
             
@@ -238,7 +240,7 @@ class TempCircuit(
      */
     fun markFailed(error: String) {
         if (isActive) {
-            NetworkLogger.log(TAG, "Marking temp circuit as failed: $error", Log.ERROR)
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Marking temp circuit as failed: $error")
             isActive = false
             _circuitState.value = CircuitState.ERROR
             
@@ -275,7 +277,7 @@ class TempCircuit(
             return // Already closed
         }
         
-        NetworkLogger.log(TAG, "Closing temp circuit")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Closing temp circuit")
         
         isActive = false
         
@@ -294,7 +296,7 @@ class TempCircuit(
                 ))
             }
         } catch (e: Exception) {
-            NetworkLogger.log(TAG, "Error closing UDP connection: ${e.message}", Log.ERROR)
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Error closing UDP connection: ${e.message}")
         }
         
         _circuitState.value = CircuitState.CLOSED
@@ -302,6 +304,6 @@ class TempCircuit(
         // Cancel scope
         scope.cancel()
         
-        NetworkLogger.log(TAG, "Temp circuit closed")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Temp circuit closed")
     }
 }
