@@ -36,6 +36,9 @@ object NetworkLogger {
     private const val LOG_DIR_NAME = "Lumiya Logs"
     private const val AUTO_SAVE_INTERVAL_MS = 30000L // Auto-save every 30 seconds
     
+    // URL truncation length for log messages
+    private const val URL_TRUNCATE_LENGTH = 80
+    
     // Context for file operations
     private var appContext: Context? = null
     
@@ -246,6 +249,112 @@ object NetworkLogger {
         const val TIMEOUT = "TIMEOUT"
         const val AUTHENTICATION = "AUTH"
         const val PROTOCOL = "PROTOCOL"
+        const val HTTP2 = "HTTP2"
+        const val TEXTURE = "TEXTURE"
+        const val MESH = "MESH"
+        const val FRIENDS = "FRIENDS"
+        const val CAPABILITY = "CAP"
+    }
+    
+    // ==================== HTTP/2 PROTOCOL TRACKING ====================
+    // Track HTTP protocol versions used for different request types
+    
+    /**
+     * Protocol statistics for HTTP/2 usage tracking
+     */
+    data class ProtocolStatistics(
+        var http2Requests: Int = 0,
+        var http11Requests: Int = 0,
+        var http10Requests: Int = 0,
+        var textureHttp2Count: Int = 0,
+        var textureHttp11Count: Int = 0,
+        var meshHttp2Count: Int = 0,
+        var meshHttp11Count: Int = 0,
+        var capabilityHttp2Count: Int = 0,
+        var capabilityHttp11Count: Int = 0,
+        var lastTextureProtocol: String = "unknown",
+        var lastMeshProtocol: String = "unknown",
+        var lastCapabilityProtocol: String = "unknown"
+    ) {
+        fun getHttp2Percentage(): Float {
+            val total = http2Requests + http11Requests + http10Requests
+            return if (total > 0) (http2Requests.toFloat() / total) * 100 else 0f
+        }
+        
+        override fun toString(): String {
+            return buildString {
+                appendLine("HTTP Protocol Statistics:")
+                appendLine("  HTTP/2 Requests: $http2Requests (${String.format("%.1f", getHttp2Percentage())}%)")
+                appendLine("  HTTP/1.1 Requests: $http11Requests")
+                appendLine("  HTTP/1.0 Requests: $http10Requests")
+                appendLine()
+                appendLine("  By Request Type:")
+                appendLine("    Textures: HTTP/2=$textureHttp2Count, HTTP/1.1=$textureHttp11Count")
+                appendLine("    Meshes: HTTP/2=$meshHttp2Count, HTTP/1.1=$meshHttp11Count")
+                appendLine("    Capabilities: HTTP/2=$capabilityHttp2Count, HTTP/1.1=$capabilityHttp11Count")
+                appendLine()
+                appendLine("  Last Protocols Used:")
+                appendLine("    Texture: $lastTextureProtocol")
+                appendLine("    Mesh: $lastMeshProtocol")
+                appendLine("    Capability: $lastCapabilityProtocol")
+            }
+        }
+    }
+    
+    /**
+     * Request type enum for explicit categorization (avoids URL string matching)
+     */
+    enum class RequestType {
+        TEXTURE,
+        MESH,
+        CAPABILITY,
+        LOGIN,
+        EVENT_QUEUE,
+        INVENTORY,
+        OTHER
+    }
+    
+    // Protocol statistics instance
+    private val protocolStats = ProtocolStatistics()
+    
+    /**
+     * Get HTTP/2 protocol statistics
+     */
+    fun getProtocolStatistics(): ProtocolStatistics = protocolStats.copy()
+    
+    /**
+     * Track protocol usage by explicit request type (preferred over URL matching)
+     */
+    fun trackProtocolUsageByType(type: RequestType, protocol: String) {
+        val isHttp2 = protocol.contains("h2", ignoreCase = true) || protocol.contains("http/2", ignoreCase = true)
+        val isHttp11 = protocol.contains("1.1")
+        val isHttp10 = protocol.contains("1.0")
+        
+        // Update overall protocol counts
+        when {
+            isHttp2 -> protocolStats.http2Requests++
+            isHttp11 -> protocolStats.http11Requests++
+            isHttp10 -> protocolStats.http10Requests++
+        }
+        
+        // Track by request type
+        when (type) {
+            RequestType.TEXTURE -> {
+                protocolStats.lastTextureProtocol = protocol
+                if (isHttp2) protocolStats.textureHttp2Count++ else protocolStats.textureHttp11Count++
+            }
+            RequestType.MESH -> {
+                protocolStats.lastMeshProtocol = protocol
+                if (isHttp2) protocolStats.meshHttp2Count++ else protocolStats.meshHttp11Count++
+            }
+            RequestType.CAPABILITY, RequestType.LOGIN, RequestType.EVENT_QUEUE, RequestType.INVENTORY -> {
+                protocolStats.lastCapabilityProtocol = protocol
+                if (isHttp2) protocolStats.capabilityHttp2Count++ else protocolStats.capabilityHttp11Count++
+            }
+            RequestType.OTHER -> {
+                // Only update overall counts (already done above)
+            }
+        }
     }
     
     /**
@@ -281,15 +390,19 @@ object NetworkLogger {
     }
     
     /**
-     * Log an HTTP response received
+     * Log an HTTP response received with HTTP/2 protocol tracking
      */
     fun logResponse(response: Response, durationMs: Long) {
         if (!shouldLog(Level.DEBUG)) return
         
+        // Track HTTP protocol version
+        val protocol = response.protocol.toString()
+        trackProtocolUsage(response.request.url.toString(), protocol)
+        
         val message = buildString {
             append("← ${response.code} ${response.message} (${durationMs}ms)\n")
             append("URL: ${response.request.url}\n")
-            append("Protocol: ${response.protocol}\n")
+            append("Protocol: $protocol\n")
             append("Headers:\n")
             response.headers.forEach { (name, value) ->
                 append("  $name: $value\n")
@@ -305,6 +418,44 @@ object NetworkLogger {
         }
         
         log(Level.DEBUG, Category.HTTP_RESPONSE, message.trimEnd())
+    }
+    
+    /**
+     * Track protocol usage by URL pattern matching (fallback for generic HTTP responses).
+     * 
+     * NOTE: For specialized logging (textures, meshes, capabilities), use the explicit
+     * `trackProtocolUsageByType()` method which is more reliable than URL pattern matching.
+     * This method is used as a fallback for the general `logResponse()` function.
+     */
+    private fun trackProtocolUsage(url: String, protocol: String) {
+        val isHttp2 = protocol.contains("h2", ignoreCase = true) || protocol.contains("http/2", ignoreCase = true)
+        val isHttp11 = protocol.contains("1.1")
+        val isHttp10 = protocol.contains("1.0")
+        
+        // Update overall protocol counts
+        when {
+            isHttp2 -> protocolStats.http2Requests++
+            isHttp11 -> protocolStats.http11Requests++
+            isHttp10 -> protocolStats.http10Requests++
+        }
+        
+        // Track by request type based on URL patterns (best-effort classification)
+        // For more reliable tracking, use trackProtocolUsageByType() instead
+        val urlLower = url.lowercase()
+        when {
+            urlLower.contains("texture") || urlLower.contains("gettexture") -> {
+                protocolStats.lastTextureProtocol = protocol
+                if (isHttp2) protocolStats.textureHttp2Count++ else protocolStats.textureHttp11Count++
+            }
+            urlLower.contains("mesh") || urlLower.contains("getmesh") -> {
+                protocolStats.lastMeshProtocol = protocol
+                if (isHttp2) protocolStats.meshHttp2Count++ else protocolStats.meshHttp11Count++
+            }
+            urlLower.contains("cap") || urlLower.contains("simhost") || urlLower.contains("secondlife.com") -> {
+                protocolStats.lastCapabilityProtocol = protocol
+                if (isHttp2) protocolStats.capabilityHttp2Count++ else protocolStats.capabilityHttp11Count++
+            }
+        }
     }
     
     /**
@@ -426,6 +577,187 @@ object NetworkLogger {
     fun logProtocol(operation: String, details: String) {
         val message = "📡 Protocol: $operation - $details"
         log(Level.DEBUG, Category.PROTOCOL, message)
+    }
+    
+    // ==================== TEXTURE LOGGING ====================
+    
+    /**
+     * Log texture download request
+     */
+    fun logTextureRequest(textureId: String, url: String, priority: String = "NORMAL") {
+        val message = buildString {
+            append("🖼️ Texture Request: $textureId\n")
+            append("  URL: ${url.take(URL_TRUNCATE_LENGTH)}...\n")
+            append("  Priority: $priority")
+        }
+        log(Level.DEBUG, Category.TEXTURE, message)
+    }
+    
+    /**
+     * Log texture download result
+     */
+    fun logTextureResult(
+        textureId: String, 
+        success: Boolean, 
+        durationMs: Long, 
+        sizeBytes: Int?,
+        protocol: String? = null,
+        error: String? = null
+    ) {
+        val statusIcon = if (success) "✓" else "✗"
+        val message = buildString {
+            append("🖼️ Texture $statusIcon: $textureId\n")
+            append("  Duration: ${durationMs}ms\n")
+            sizeBytes?.let { append("  Size: $it bytes\n") }
+            protocol?.let { 
+                append("  Protocol: $it\n")
+                // Track HTTP/2 usage for textures using explicit type
+                trackProtocolUsageByType(RequestType.TEXTURE, it)
+            }
+            error?.let { append("  Error: $it") }
+        }
+        log(if (success) Level.DEBUG else Level.WARN, Category.TEXTURE, message.trimEnd())
+    }
+    
+    /**
+     * Log texture decode attempt
+     */
+    fun logTextureDecode(textureId: String, success: Boolean, format: String, durationMs: Long, error: String? = null) {
+        val statusIcon = if (success) "✓" else "✗"
+        val message = buildString {
+            append("🖼️ Texture Decode $statusIcon: $textureId\n")
+            append("  Format: $format\n")
+            append("  Duration: ${durationMs}ms")
+            error?.let { append("\n  Error: $it") }
+        }
+        log(if (success) Level.DEBUG else Level.WARN, Category.TEXTURE, message)
+    }
+    
+    // ==================== MESH LOGGING ====================
+    
+    /**
+     * Log mesh download request
+     */
+    fun logMeshRequest(meshId: String, url: String) {
+        val message = buildString {
+            append("📦 Mesh Request: $meshId\n")
+            append("  URL: ${url.take(URL_TRUNCATE_LENGTH)}...")
+        }
+        log(Level.DEBUG, Category.MESH, message)
+    }
+    
+    /**
+     * Log mesh download result
+     */
+    fun logMeshResult(
+        meshId: String, 
+        success: Boolean, 
+        durationMs: Long, 
+        sizeBytes: Int?,
+        protocol: String? = null,
+        error: String? = null
+    ) {
+        val statusIcon = if (success) "✓" else "✗"
+        val message = buildString {
+            append("📦 Mesh $statusIcon: $meshId\n")
+            append("  Duration: ${durationMs}ms\n")
+            sizeBytes?.let { append("  Size: $it bytes\n") }
+            protocol?.let {
+                append("  Protocol: $it\n")
+                trackProtocolUsageByType(RequestType.MESH, it)
+            }
+            error?.let { append("  Error: $it") }
+        }
+        log(if (success) Level.DEBUG else Level.WARN, Category.MESH, message.trimEnd())
+    }
+    
+    // ==================== FRIENDS LOGGING ====================
+    
+    /**
+     * Log friend online status change
+     */
+    fun logFriendOnlineStatus(agentId: String, name: String, isOnline: Boolean) {
+        val statusIcon = if (isOnline) "🟢" else "🔴"
+        val status = if (isOnline) "online" else "offline"
+        val message = "$statusIcon Friend $status: $name ($agentId)"
+        log(Level.INFO, Category.FRIENDS, message)
+    }
+    
+    /**
+     * Log friendship offer received
+     */
+    fun logFriendshipOffer(fromAgentId: String, fromName: String, message: String?) {
+        val logMsg = buildString {
+            append("👋 Friendship Offer Received\n")
+            append("  From: $fromName ($fromAgentId)")
+            message?.takeIf { it.isNotEmpty() }?.let { append("\n  Message: $it") }
+        }
+        log(Level.INFO, Category.FRIENDS, logMsg)
+    }
+    
+    /**
+     * Log friendship offer sent
+     */
+    fun logFriendshipOfferSent(toAgentId: String, message: String?) {
+        val logMsg = buildString {
+            append("👋 Friendship Offer Sent to $toAgentId")
+            message?.takeIf { it.isNotEmpty() }?.let { append("\n  Message: $it") }
+        }
+        log(Level.INFO, Category.FRIENDS, logMsg)
+    }
+    
+    /**
+     * Log friendship accepted
+     */
+    fun logFriendshipAccepted(agentId: String, name: String) {
+        val message = "✓ Friendship Accepted: $name ($agentId)"
+        log(Level.INFO, Category.FRIENDS, message)
+    }
+    
+    /**
+     * Log friendship declined
+     */
+    fun logFriendshipDeclined(agentId: String) {
+        val message = "✗ Friendship Declined: $agentId"
+        log(Level.INFO, Category.FRIENDS, message)
+    }
+    
+    /**
+     * Log friendship terminated
+     */
+    fun logFriendshipTerminated(agentId: String, name: String?) {
+        val nameInfo = name?.let { " ($it)" } ?: ""
+        val message = "👋 Friendship Terminated: $agentId$nameInfo"
+        log(Level.INFO, Category.FRIENDS, message)
+    }
+    
+    // ==================== CAPABILITY LOGGING ====================
+    
+    /**
+     * Log capability request
+     */
+    fun logCapabilityRequest(capName: String, url: String) {
+        val message = buildString {
+            append("🔗 Capability Request: $capName\n")
+            append("  URL: ${url.take(URL_TRUNCATE_LENGTH)}...")
+        }
+        log(Level.DEBUG, Category.CAPABILITY, message)
+    }
+    
+    /**
+     * Log capability response
+     */
+    fun logCapabilityResponse(capName: String, success: Boolean, durationMs: Long, protocol: String? = null, error: String? = null) {
+        val statusIcon = if (success) "✓" else "✗"
+        val message = buildString {
+            append("🔗 Capability $statusIcon: $capName (${durationMs}ms)")
+            protocol?.let {
+                append("\n  Protocol: $it")
+                trackProtocolUsageByType(RequestType.CAPABILITY, it)
+            }
+            error?.let { append("\n  Error: $it") }
+        }
+        log(if (success) Level.DEBUG else Level.WARN, Category.CAPABILITY, message)
     }
     
     /**

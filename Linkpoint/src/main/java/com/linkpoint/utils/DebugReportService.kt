@@ -1077,6 +1077,159 @@ class DebugReportService private constructor(private val context: Context) {
             }
             appendLine()
             
+            // ==================== HTTP/2 PROTOCOL STATISTICS ====================
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ HTTP/2 PROTOCOL STATISTICS                                        │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            try {
+                val protocolStats = NetworkLogger.getProtocolStatistics()
+                appendLine("Protocol Usage Summary:")
+                appendLine("  HTTP/2 Requests: ${protocolStats.http2Requests} (${String.format("%.1f", protocolStats.getHttp2Percentage())}%)")
+                appendLine("  HTTP/1.1 Requests: ${protocolStats.http11Requests}")
+                appendLine("  HTTP/1.0 Requests: ${protocolStats.http10Requests}")
+                appendLine()
+                appendLine("By Request Type:")
+                appendLine("  Textures: HTTP/2=${protocolStats.textureHttp2Count}, HTTP/1.1=${protocolStats.textureHttp11Count}")
+                appendLine("  Meshes: HTTP/2=${protocolStats.meshHttp2Count}, HTTP/1.1=${protocolStats.meshHttp11Count}")
+                appendLine("  Capabilities: HTTP/2=${protocolStats.capabilityHttp2Count}, HTTP/1.1=${protocolStats.capabilityHttp11Count}")
+                appendLine()
+                appendLine("Last Protocols Used:")
+                appendLine("  Texture Requests: ${protocolStats.lastTextureProtocol}")
+                appendLine("  Mesh Requests: ${protocolStats.lastMeshProtocol}")
+                appendLine("  Capability Requests: ${protocolStats.lastCapabilityProtocol}")
+                
+                if (protocolStats.http2Requests == 0 && (protocolStats.textureHttp11Count > 0 || protocolStats.meshHttp11Count > 0)) {
+                    appendLine()
+                    appendLine("ℹ️ HTTP/2 NOT USED - All requests using HTTP/1.1")
+                    appendLine("   HTTP/2 provides better performance for asset loading.")
+                }
+            } catch (e: Exception) {
+                appendLine("HTTP/2 statistics unavailable: ${e.message}")
+            }
+            appendLine()
+            
+            // ==================== FRIENDS MANAGER STATUS ====================
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ FRIENDS MANAGER STATUS                                            │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            if (app != null) {
+                try {
+                    if (app.isFriendsManagerInitialized()) {
+                        val friendsDiag = app.friendsManager.getDiagnostics()
+                        appendLine("Total Friends: ${friendsDiag.totalFriends}")
+                        appendLine("Online Friends: ${friendsDiag.onlineFriends}")
+                        appendLine("Pending Offers: ${friendsDiag.pendingOffers}")
+                        
+                        if (friendsDiag.totalFriends > 0 && friendsDiag.friendsList.isNotEmpty()) {
+                            appendLine()
+                            appendLine("Friends List (showing up to 10):")
+                            friendsDiag.friendsList.take(10).forEach { friend ->
+                                val status = if (friend.isOnline) "🟢" else "🔴"
+                                appendLine("  $status ${friend.name}")
+                                appendLine("      ID: ${friend.agentId}")
+                                appendLine("      Rights Given: ${friend.rightsGiven}")
+                                appendLine("      Rights Has: ${friend.rightsHas}")
+                            }
+                            if (friendsDiag.friendsList.size > 10) {
+                                appendLine("  ... and ${friendsDiag.friendsList.size - 10} more")
+                            }
+                        }
+                        
+                        if (friendsDiag.totalFriends == 0) {
+                            appendLine()
+                            appendLine("ℹ️ NO FRIENDS LOADED - Friend list may not have been fetched yet")
+                            appendLine("   Friends are populated from login response and OnlineNotification events.")
+                        }
+                    } else {
+                        appendLine("Friends manager not initialized (not logged in)")
+                    }
+                } catch (e: Exception) {
+                    appendLine("Friends diagnostics unavailable: ${e.message}")
+                }
+            } else {
+                appendLine("Friends manager: App not initialized")
+            }
+            appendLine()
+            
+            // ==================== ENHANCED PACKET LOGGER STATISTICS ====================
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ ENHANCED PACKET LOGGER STATISTICS                                 │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            try {
+                val packetStats = com.linkpoint.protocol.messages.EnhancedPacketLogger.getStatistics()
+                appendLine("Session Duration: ${formatDuration(packetStats.sessionDurationMs)}")
+                appendLine()
+                appendLine("Packet Statistics:")
+                appendLine("  Packets Sent: ${packetStats.packetsSent}")
+                appendLine("  Packets Received: ${packetStats.packetsReceived}")
+                appendLine("  Bytes Sent: ${formatBytes(packetStats.bytesSent)}")
+                appendLine("  Bytes Received: ${formatBytes(packetStats.bytesReceived)}")
+                appendLine()
+                appendLine("ACK Statistics:")
+                appendLine("  ACKs Sent: ${packetStats.acksSent}")
+                appendLine("  ACKs Received: ${packetStats.acksReceived}")
+                appendLine("  Resend Count: ${packetStats.resendCount}")
+                appendLine()
+                appendLine("Error Statistics:")
+                appendLine("  Parse Errors: ${packetStats.parseErrors}")
+                appendLine("  Handler Misses: ${packetStats.handlerMisses}")
+                appendLine()
+                appendLine("Handler Information:")
+                appendLine("  Registered Handlers: ${packetStats.registeredHandlerCount}")
+                appendLine("  Unique Message Types Sent: ${packetStats.uniqueMessageTypesSent}")
+                appendLine("  Unique Message Types Received: ${packetStats.uniqueMessageTypesReceived}")
+                
+                if (packetStats.lastPacketSentMs >= 0) {
+                    appendLine()
+                    appendLine("  Last Packet Sent: ${formatDuration(packetStats.lastPacketSentMs)} ago")
+                }
+                if (packetStats.lastPacketReceivedMs >= 0) {
+                    appendLine("  Last Packet Received: ${formatDuration(packetStats.lastPacketReceivedMs)} ago")
+                } else if (packetStats.packetsSent > 0) {
+                    appendLine("  Last Packet Received: Never ⚠️")
+                }
+                
+                if (packetStats.packetsSent > 0 && packetStats.packetsReceived == 0L) {
+                    appendLine()
+                    appendLine("⚠️ PACKETS SENT BUT NONE RECEIVED!")
+                    appendLine("   Possible causes:")
+                    appendLine("   - Firewall blocking UDP")
+                    appendLine("   - NAT traversal issue")
+                    appendLine("   - Simulator not responding")
+                }
+                
+                if (packetStats.handlerMisses > 0) {
+                    appendLine()
+                    appendLine("⚠️ ${packetStats.handlerMisses} messages had no registered handler!")
+                }
+                
+                // Show sent message breakdown
+                val sentBreakdown = com.linkpoint.protocol.messages.EnhancedPacketLogger.getSentMessageBreakdown(10)
+                if (sentBreakdown.isNotEmpty()) {
+                    appendLine()
+                    appendLine("Sent Message Types (top 10):")
+                    sentBreakdown.forEach { (name, count) ->
+                        appendLine("  $name: $count")
+                    }
+                }
+                
+                // Show received message breakdown
+                val receivedBreakdown = com.linkpoint.protocol.messages.EnhancedPacketLogger.getReceivedMessageBreakdown(10)
+                if (receivedBreakdown.isNotEmpty()) {
+                    appendLine()
+                    appendLine("Received Message Types (top 10):")
+                    receivedBreakdown.forEach { (name, count) ->
+                        appendLine("  $name: $count")
+                    }
+                }
+            } catch (e: Exception) {
+                appendLine("Enhanced packet logger unavailable: ${e.message}")
+            }
+            appendLine()
+            
             // Recent network log excerpt for debugging loading issues
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ RECENT NETWORK LOG (Last 30 entries)                              │")
