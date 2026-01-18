@@ -5,6 +5,7 @@ import android.view.SurfaceView
 import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
@@ -36,6 +37,7 @@ class XRWorldActivity : AppCompatActivity() {
         
         initViews()
         initXR()
+        setupBackPressHandler()
     }
     
     private fun setupImmersiveMode() {
@@ -149,8 +151,15 @@ class XRWorldActivity : AppCompatActivity() {
         app.xrManager.shutdown()
     }
     
-    override fun onBackPressed() {
-        // Exit XR mode
-        finish()
+    /**
+     * Setup back press handler using modern OnBackPressedCallback
+     */
+    private fun setupBackPressHandler() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // Exit XR mode
+                finish()
+            }
+        })
     }
 }

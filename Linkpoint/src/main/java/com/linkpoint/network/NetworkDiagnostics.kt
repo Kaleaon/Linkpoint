@@ -1,5 +1,6 @@
 package com.linkpoint.network
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -207,6 +208,7 @@ object NetworkDiagnostics {
         }
     }
     
+    @SuppressLint("MissingPermission")
     private fun detectCellularType(context: Context): Pair<NetworkType, String> {
         try {
             val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
