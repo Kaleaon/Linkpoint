@@ -1,7 +1,7 @@
 package com.linkpoint.chat.dialogs
 
 import android.util.Log
-import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap
  * - Load URL: URL open request from llLoadURL()
  */
 class ScriptDialogManager(
-    private val udpConnection: UDPConnection,
+    private val udpConnection: UDPConnectionFixed,
     private val agentId: UUID
 ) {
     companion object {

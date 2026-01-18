@@ -5,7 +5,7 @@ import com.linkpoint.protocol.messages.ChatData
 import com.linkpoint.protocol.messages.ChatSourceType
 import com.linkpoint.protocol.messages.ChatType
 import com.linkpoint.protocol.messages.MessageIds
-import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLVector3
 import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Manages local and nearby chat
  */
 class ChatManager(
-    private val udpConnection: UDPConnection,
+    private val udpConnection: UDPConnectionFixed,
     private val agentId: UUID
 ) {
     companion object {

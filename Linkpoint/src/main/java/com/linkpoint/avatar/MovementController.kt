@@ -2,7 +2,7 @@ package com.linkpoint.avatar
 
 import android.util.Log
 import com.linkpoint.protocol.messages.MessageIds
-import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLQuaternion
 import com.linkpoint.protocol.types.LLVector3
 import kotlinx.coroutines.*
@@ -28,7 +28,7 @@ import kotlin.math.sin
  * @see <a href="https://wiki.secondlife.com/wiki/AgentUpdate">AgentUpdate Message</a>
  */
 class MovementController(
-    private val udpConnection: UDPConnection
+    private val udpConnection: UDPConnectionFixed
 ) {
     companion object {
         private const val TAG = "MovementController"

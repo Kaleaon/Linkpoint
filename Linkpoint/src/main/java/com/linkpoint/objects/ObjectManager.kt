@@ -5,7 +5,7 @@ import android.util.Log
 import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.ObjectUpdateData
 import com.linkpoint.protocol.messages.TerseUpdateData
-import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLQuaternion
 import com.linkpoint.protocol.types.LLVector3
 import com.linkpoint.protocol.types.putUUID
@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Handles object selection, editing, and interaction
  */
 class ObjectManager(
-    private val udpConnection: UDPConnection
+    private val udpConnection: UDPConnectionFixed
 ) {
     companion object {
         private const val TAG = "ObjectManager"

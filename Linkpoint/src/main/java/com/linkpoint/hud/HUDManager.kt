@@ -4,7 +4,7 @@ import android.os.Parcelable
 import android.util.Log
 import com.linkpoint.objects.ObjectManager
 import com.linkpoint.objects.SceneObject
-import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLVector3
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class HUDManager(
     private val objectManager: ObjectManager,
-    private val udpConnection: UDPConnection,
+    private val udpConnection: UDPConnectionFixed,
     private val agentId: UUID
 ) {
     companion object {

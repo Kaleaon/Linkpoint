@@ -8,7 +8,7 @@ import com.linkpoint.assets.CacheManager
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.core.ConnectionQualityManager
 import com.linkpoint.network.core.NetworkStateManager
-import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
 import java.io.File
 import java.text.SimpleDateFormat

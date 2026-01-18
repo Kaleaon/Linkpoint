@@ -4,7 +4,7 @@ import android.util.Log
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
 import com.linkpoint.protocol.messages.MessageIds
-import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Based on Lumiya/Firestorm estate management.
  */
 class EstateManager(
-    private val udpConnection: UDPConnection,
+    private val udpConnection: UDPConnectionFixed,
     private val capabilityManager: CapabilityManager,
     private val agentId: UUID
 ) {

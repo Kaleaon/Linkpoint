@@ -4,7 +4,7 @@ import android.util.Log
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.llsd.*
-import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Handles private IMs, group chat, and conference chat
  */
 class IMManager(
-    private val udpConnection: UDPConnection,
+    private val udpConnection: UDPConnectionFixed,
     private val capabilityManager: CapabilityManager,
     private val agentId: UUID
 ) : EventHandler {

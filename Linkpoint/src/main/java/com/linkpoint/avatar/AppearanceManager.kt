@@ -2,7 +2,7 @@ package com.linkpoint.avatar
 
 import android.util.Log
 import com.linkpoint.protocol.messages.MessageIds
-import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
 import java.nio.ByteBuffer
@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * @see <a href="https://wiki.secondlife.com/wiki/AgentSetAppearance">AgentSetAppearance Message</a>
  */
 class AppearanceManager(
-    private val udpConnection: UDPConnection,
+    private val udpConnection: UDPConnectionFixed,
     private val avatarBaker: AvatarBaker
 ) {
     companion object {

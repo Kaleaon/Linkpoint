@@ -27,7 +27,7 @@ import com.linkpoint.objects.ObjectManager
 import com.linkpoint.objects.inventory.TaskInventoryManager
 import com.linkpoint.objects.prim.FlexiblePrimSimulator
 import com.linkpoint.protocol.capabilities.CapabilityManager
-import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.messages.parseRegionHandshake
 import com.linkpoint.protocol.messages.parseAgentMovementComplete
 import com.linkpoint.protocol.transfer.TransferManager
@@ -116,7 +116,7 @@ class LinkpointApp : Application() {
     // Protocol layer
     lateinit var capabilityManager: CapabilityManager
         private set
-    lateinit var udpConnection: UDPConnection
+    lateinit var udpConnection: UDPConnectionFixed
         private set
     
     // Asset system
@@ -339,7 +339,7 @@ class LinkpointApp : Application() {
         
         // Protocol components
         capabilityManager = CapabilityManager()
-        udpConnection = UDPConnection()
+        udpConnection = UDPConnectionFixed()
         
         // Protocol handler
         protocol = SecondLifeProtocol(this)

@@ -2,7 +2,7 @@ package com.linkpoint.world
 
 import android.util.Log
 import com.linkpoint.protocol.messages.MessageIds
-import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLVector3
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Manages parcel/land information
  */
 class ParcelManager(
-    private val udpConnection: UDPConnection
+    private val udpConnection: UDPConnectionFixed
 ) {
     companion object {
         private const val TAG = "ParcelManager"

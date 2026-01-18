@@ -9,7 +9,7 @@ import com.linkpoint.assets.TextureManager
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.messages.AvatarAnimationData
 import com.linkpoint.protocol.messages.TerseUpdateData
-import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLQuaternion
 import com.linkpoint.protocol.types.LLVector3
 import kotlinx.coroutines.*
@@ -27,7 +27,7 @@ class AvatarManager(
     private val textureManager: TextureManager,
     private val animationManager: AnimationManager,
     private val capabilityManager: CapabilityManager,
-    private val udpConnection: UDPConnection? = null
+    private val udpConnection: UDPConnectionFixed? = null
 ) {
     companion object {
         private const val TAG = "AvatarManager"
