@@ -41,6 +41,9 @@ class DebugReportService private constructor(private val context: Context) {
         // Truncation length for URLs in debug reports
         private const val DIAGNOSTIC_URL_TRUNCATE_LENGTH = 50
         
+        // Number of recent malformed packets to show in debug reports
+        private const val MALFORMED_PACKET_HISTORY_COUNT = 5
+        
         @Volatile
         private var instance: DebugReportService? = null
         
@@ -1220,7 +1223,7 @@ class DebugReportService private constructor(private val context: Context) {
                     if (packetStats.oversizedPackets > 0) appendLine("    Oversized Packets: ${packetStats.oversizedPackets}")
                     
                     // Show recent malformed packet details
-                    val malformedHistory = com.linkpoint.protocol.messages.EnhancedPacketLogger.getMalformedPacketHistory(5)
+                    val malformedHistory = com.linkpoint.protocol.messages.EnhancedPacketLogger.getMalformedPacketHistory(MALFORMED_PACKET_HISTORY_COUNT)
                     if (malformedHistory.isNotEmpty()) {
                         appendLine()
                         appendLine("  Recent Malformed Packets:")

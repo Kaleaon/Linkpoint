@@ -529,16 +529,12 @@ object EnhancedPacketLogger {
      * Log invalid flags in packet header.
      */
     fun logInvalidFlags(data: ByteArray, flags: Int, issue: String) {
-        val sequenceNumber = if (data.size >= 5) {
-            java.nio.ByteBuffer.wrap(data, 1, 4).order(java.nio.ByteOrder.BIG_ENDIAN).int
-        } else null
-        
         logMalformedPacket(
             reason = MalformedPacketEntry.MalformedReason.INVALID_FLAGS,
             data = data,
             details = "Invalid flags: $issue",
             rawFlags = flags,
-            sequenceNumber = sequenceNumber
+            sequenceNumber = extractSequenceNumber(data)
         )
     }
     
@@ -546,17 +542,12 @@ object EnhancedPacketLogger {
      * Log failed message ID decoding.
      */
     fun logInvalidMessageId(data: ByteArray, offset: Int, issue: String) {
-        val sequenceNumber = if (data.size >= 5) {
-            java.nio.ByteBuffer.wrap(data, 1, 4).order(java.nio.ByteOrder.BIG_ENDIAN).int
-        } else null
-        val flags = if (data.isNotEmpty()) data[0].toInt() and 0xFF else null
-        
         logMalformedPacket(
             reason = MalformedPacketEntry.MalformedReason.INVALID_MESSAGE_ID,
             data = data,
             details = "Failed to decode message ID at offset $offset: $issue",
-            rawFlags = flags,
-            sequenceNumber = sequenceNumber
+            rawFlags = extractFlags(data),
+            sequenceNumber = extractSequenceNumber(data)
         )
     }
     
@@ -564,17 +555,12 @@ object EnhancedPacketLogger {
      * Log zero-decode failure.
      */
     fun logZeroDecodeFailure(data: ByteArray, error: String) {
-        val flags = if (data.isNotEmpty()) data[0].toInt() and 0xFF else null
-        val sequenceNumber = if (data.size >= 5) {
-            java.nio.ByteBuffer.wrap(data, 1, 4).order(java.nio.ByteOrder.BIG_ENDIAN).int
-        } else null
-        
         logMalformedPacket(
             reason = MalformedPacketEntry.MalformedReason.ZERO_DECODE_FAILURE,
             data = data,
             details = "Zero-decode expansion failed: $error",
-            rawFlags = flags,
-            sequenceNumber = sequenceNumber
+            rawFlags = extractFlags(data),
+            sequenceNumber = extractSequenceNumber(data)
         )
     }
     
@@ -582,17 +568,12 @@ object EnhancedPacketLogger {
      * Log ACK count mismatch (reported ACK count doesn't match available bytes).
      */
     fun logAckCountMismatch(data: ByteArray, reportedCount: Int, availableBytes: Int) {
-        val flags = if (data.isNotEmpty()) data[0].toInt() and 0xFF else null
-        val sequenceNumber = if (data.size >= 5) {
-            java.nio.ByteBuffer.wrap(data, 1, 4).order(java.nio.ByteOrder.BIG_ENDIAN).int
-        } else null
-        
         logMalformedPacket(
             reason = MalformedPacketEntry.MalformedReason.ACK_COUNT_MISMATCH,
             data = data,
             details = "ACK count $reportedCount requires ${reportedCount * 4} bytes but only $availableBytes available",
-            rawFlags = flags,
-            sequenceNumber = sequenceNumber
+            rawFlags = extractFlags(data),
+            sequenceNumber = extractSequenceNumber(data)
         )
     }
     
@@ -600,17 +581,12 @@ object EnhancedPacketLogger {
      * Log corrupted payload structure.
      */
     fun logCorruptedPayload(data: ByteArray, messageId: Int, issue: String) {
-        val flags = if (data.isNotEmpty()) data[0].toInt() and 0xFF else null
-        val sequenceNumber = if (data.size >= 5) {
-            java.nio.ByteBuffer.wrap(data, 1, 4).order(java.nio.ByteOrder.BIG_ENDIAN).int
-        } else null
-        
         logMalformedPacket(
             reason = MalformedPacketEntry.MalformedReason.CORRUPTED_PAYLOAD,
             data = data,
             details = "Payload structure invalid: $issue",
-            rawFlags = flags,
-            sequenceNumber = sequenceNumber,
+            rawFlags = extractFlags(data),
+            sequenceNumber = extractSequenceNumber(data),
             messageId = messageId
         )
     }
@@ -619,17 +595,12 @@ object EnhancedPacketLogger {
      * Log oversized packet.
      */
     fun logOversizedPacket(data: ByteArray, maxExpectedSize: Int) {
-        val flags = if (data.isNotEmpty()) data[0].toInt() and 0xFF else null
-        val sequenceNumber = if (data.size >= 5) {
-            java.nio.ByteBuffer.wrap(data, 1, 4).order(java.nio.ByteOrder.BIG_ENDIAN).int
-        } else null
-        
         logMalformedPacket(
             reason = MalformedPacketEntry.MalformedReason.OVERSIZED,
             data = data,
             details = "Packet size ${data.size} exceeds maximum expected $maxExpectedSize bytes",
-            rawFlags = flags,
-            sequenceNumber = sequenceNumber
+            rawFlags = extractFlags(data),
+            sequenceNumber = extractSequenceNumber(data)
         )
     }
     
@@ -696,6 +667,29 @@ object EnhancedPacketLogger {
         while (packetHistory.size > MAX_PACKET_HISTORY) {
             packetHistory.poll()
         }
+    }
+    
+    /**
+     * Extract sequence number from raw packet data.
+     * Packet header format: flags (1 byte), sequence (4 bytes big-endian), extra (1 byte)
+     * 
+     * @param data The raw packet data
+     * @return The sequence number, or null if data is too small
+     */
+    private fun extractSequenceNumber(data: ByteArray): Int? {
+        if (data.size < 5) return null
+        return java.nio.ByteBuffer.wrap(data, 1, 4).order(java.nio.ByteOrder.BIG_ENDIAN).int
+    }
+    
+    /**
+     * Extract flags byte from raw packet data.
+     * 
+     * @param data The raw packet data
+     * @return The flags byte as Int (0-255), or null if data is empty
+     */
+    private fun extractFlags(data: ByteArray): Int? {
+        if (data.isEmpty()) return null
+        return data[0].toInt() and 0xFF
     }
     
     private fun formatHexPreview(data: ByteArray): String {

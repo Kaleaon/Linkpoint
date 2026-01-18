@@ -100,6 +100,12 @@ class UDPConnection {
         const val FLAG_RESENT = 0x20
         const val FLAG_ACK = 0x10
         
+        // Valid flag mask for validation (all known flags OR'd together)
+        private const val VALID_FLAG_MASK = FLAG_ZEROCODED or FLAG_RELIABLE or FLAG_RESENT or FLAG_ACK
+        
+        // Maximum expected packet size (32KB should be more than enough for any SL packet)
+        private const val MAX_EXPECTED_PACKET_SIZE = 32768
+        
         // Agent update interval (matches official viewers - 10 updates/sec)
         private const val AGENT_UPDATE_INTERVAL_MS = 100L
         
@@ -1363,7 +1369,6 @@ class UDPConnection {
         }
         
         // Validate maximum packet size (UDP max is ~65535, but SL typically uses much smaller)
-        val MAX_EXPECTED_PACKET_SIZE = 32768 // 32KB should be more than enough for any SL packet
         if (data.size > MAX_EXPECTED_PACKET_SIZE) {
             Log.w(TAG, "⚠️ Packet unusually large: ${data.size} bytes (max expected $MAX_EXPECTED_PACKET_SIZE)")
             EnhancedPacketLogger.logOversizedPacket(data, MAX_EXPECTED_PACKET_SIZE)
@@ -1378,7 +1383,6 @@ class UDPConnection {
         val hasAcks = (flags and FLAG_ACK) != 0
         
         // Validate flag combinations - check for reserved/invalid flag bits
-        val VALID_FLAG_MASK = FLAG_ZEROCODED or FLAG_RELIABLE or FLAG_RESENT or FLAG_ACK
         val unknownFlags = flags and VALID_FLAG_MASK.inv()
         if (unknownFlags != 0) {
             Log.w(TAG, "⚠️ Packet has unknown flags: 0x${unknownFlags.toString(16).uppercase()}")
