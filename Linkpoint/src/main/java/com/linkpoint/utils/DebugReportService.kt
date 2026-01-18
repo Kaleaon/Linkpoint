@@ -41,6 +41,9 @@ class DebugReportService private constructor(private val context: Context) {
         // Truncation length for URLs in debug reports
         private const val DIAGNOSTIC_URL_TRUNCATE_LENGTH = 50
         
+        // Number of recent malformed packets to show in debug reports
+        private const val MALFORMED_PACKET_HISTORY_COUNT = 5
+        
         @Volatile
         private var instance: DebugReportService? = null
         
@@ -1204,6 +1207,35 @@ class DebugReportService private constructor(private val context: Context) {
                 if (packetStats.handlerMisses > 0) {
                     appendLine()
                     appendLine("⚠️ ${packetStats.handlerMisses} messages had no registered handler!")
+                }
+                
+                // Malformed packet statistics - NEW SECTION
+                appendLine()
+                appendLine("Malformed Packet Statistics:")
+                if (packetStats.malformedPackets > 0) {
+                    appendLine("  ⚠️ MALFORMED PACKETS DETECTED!")
+                    appendLine("  Total Malformed: ${packetStats.malformedPackets}")
+                    if (packetStats.truncatedPackets > 0) appendLine("    Truncated (too small): ${packetStats.truncatedPackets}")
+                    if (packetStats.invalidFlagsPackets > 0) appendLine("    Invalid Flags: ${packetStats.invalidFlagsPackets}")
+                    if (packetStats.invalidMessageIdPackets > 0) appendLine("    Invalid Message ID: ${packetStats.invalidMessageIdPackets}")
+                    if (packetStats.corruptedPayloadPackets > 0) appendLine("    Corrupted Payload: ${packetStats.corruptedPayloadPackets}")
+                    if (packetStats.zeroDecodeFailures > 0) appendLine("    Zero-Decode Failures: ${packetStats.zeroDecodeFailures}")
+                    if (packetStats.oversizedPackets > 0) appendLine("    Oversized Packets: ${packetStats.oversizedPackets}")
+                    
+                    // Show recent malformed packet details
+                    val malformedHistory = com.linkpoint.protocol.messages.EnhancedPacketLogger.getMalformedPacketHistory(MALFORMED_PACKET_HISTORY_COUNT)
+                    if (malformedHistory.isNotEmpty()) {
+                        appendLine()
+                        appendLine("  Recent Malformed Packets:")
+                        malformedHistory.forEach { entry ->
+                            val relativeTime = System.currentTimeMillis() - entry.timestamp
+                            appendLine("    [${formatDuration(relativeTime)} ago] ${entry.reason}")
+                            appendLine("      Details: ${entry.details}")
+                            appendLine("      Hex: ${entry.hexPreview}...")
+                        }
+                    }
+                } else {
+                    appendLine("  ✓ No malformed packets detected")
                 }
                 
                 // Show sent message breakdown

@@ -100,6 +100,12 @@ class UDPConnection {
         const val FLAG_RESENT = 0x20
         const val FLAG_ACK = 0x10
         
+        // Valid flag mask for validation (all known flags OR'd together)
+        private const val VALID_FLAG_MASK = FLAG_ZEROCODED or FLAG_RELIABLE or FLAG_RESENT or FLAG_ACK
+        
+        // Maximum expected packet size (32KB should be more than enough for any SL packet)
+        private const val MAX_EXPECTED_PACKET_SIZE = 32768
+        
         // Agent update interval (matches official viewers - 10 updates/sec)
         private const val AGENT_UPDATE_INTERVAL_MS = 100L
         
@@ -1355,9 +1361,18 @@ class UDPConnection {
     }
     
     private fun processPacket(data: ByteArray) {
+        // Validate minimum packet size
         if (data.size < PACKET_HEADER_SIZE) {
             Log.w(TAG, "⚠️ Packet too small: ${data.size} bytes (minimum $PACKET_HEADER_SIZE)")
+            EnhancedPacketLogger.logTruncatedPacket(data, PACKET_HEADER_SIZE)
             return
+        }
+        
+        // Validate maximum packet size (UDP max is ~65535, but SL typically uses much smaller)
+        if (data.size > MAX_EXPECTED_PACKET_SIZE) {
+            Log.w(TAG, "⚠️ Packet unusually large: ${data.size} bytes (max expected $MAX_EXPECTED_PACKET_SIZE)")
+            EnhancedPacketLogger.logOversizedPacket(data, MAX_EXPECTED_PACKET_SIZE)
+            // Continue processing but log the anomaly
         }
         
         val flags = data[0].toInt() and 0xFF
@@ -1367,18 +1382,41 @@ class UDPConnection {
         val isReliable = (flags and FLAG_RELIABLE) != 0
         val hasAcks = (flags and FLAG_ACK) != 0
         
+        // Validate flag combinations - check for reserved/invalid flag bits
+        val unknownFlags = flags and VALID_FLAG_MASK.inv()
+        if (unknownFlags != 0) {
+            Log.w(TAG, "⚠️ Packet has unknown flags: 0x${unknownFlags.toString(16).uppercase()}")
+            EnhancedPacketLogger.logInvalidFlags(data, flags, "Unknown flag bits set: 0x${unknownFlags.toString(16).uppercase()}")
+        }
+        
         // Log packet details
         val flagsStr = buildString {
             if (isZerocoded) append("[ZERO]")
             if (isReliable) append("[RELIABLE]")
             if (hasAcks) append("[ACK]")
+            if ((flags and FLAG_RESENT) != 0) append("[RESENT]")
         }
         Log.d(TAG, "   Packet #$seqNum $flagsStr - ${data.size} bytes")
         
         var decoded = data
         if (isZerocoded) {
-            decoded = zerodecode(data)
-            Log.d(TAG, "   Zero-decoded: ${decoded.size} bytes")
+            try {
+                decoded = zerodecode(data)
+                Log.d(TAG, "   Zero-decoded: ${decoded.size} bytes")
+                
+                // Sanity check: zero-decoded should be at least as large as header
+                if (decoded.size < PACKET_HEADER_SIZE) {
+                    Log.w(TAG, "⚠️ Zero-decode produced invalid result: ${decoded.size} bytes")
+                    // Log the decoded result (not original) to show what zero-decode produced
+                    EnhancedPacketLogger.logZeroDecodeFailure(decoded, "Decoded size ${decoded.size} smaller than header (original size: ${data.size})")
+                    return
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "⚠️ Zero-decode failed: ${e.message}")
+                // Log original data since decode failed completely
+                EnhancedPacketLogger.logZeroDecodeFailure(data, "Exception during decode: ${e.message}")
+                return
+            }
         }
         
         // Handle acks at end of packet - ALWAYS process these immediately (time-sensitive)
@@ -1390,7 +1428,10 @@ class UDPConnection {
             if (numAcks > 0) {
                 Log.d(TAG, "   Contains $numAcks ACK(s)")
                 val ackStart = decoded.size - 1 - numAcks * 4
+                
+                // Validate ACK structure - ackStart must be after header for valid packet
                 if (ackStart > PACKET_HEADER_SIZE) {
+                    // Valid ACK structure - process ACKs
                     for (i in 0 until numAcks) {
                         val offset = ackStart + i * 4
                         // Appended ACKs are BIG_ENDIAN (network order) - NOT little-endian!
@@ -1400,6 +1441,12 @@ class UDPConnection {
                         // Invoke ACK callback if registered (for sequence-dependent operations)
                         ackCallbacks.remove(ackSeq)?.invoke()
                     }
+                } else {
+                    // Invalid - ACK count claims more data than available
+                    Log.w(TAG, "⚠️ ACK count ($numAcks) too large for packet size - malformed packet")
+                    val availableBytes = decoded.size - 1 - PACKET_HEADER_SIZE
+                    EnhancedPacketLogger.logAckCountMismatch(decoded, numAcks, availableBytes)
+                    // Don't return - continue processing the message even if ACKs are malformed
                 }
             }
         }
@@ -1441,6 +1488,7 @@ class UDPConnection {
     private fun dispatchPacket(decoded: ByteArray) {
         if (decoded.size < PACKET_HEADER_SIZE) {
             Log.w(TAG, "   ⚠️ Decoded packet too small for dispatch: ${decoded.size} bytes")
+            EnhancedPacketLogger.logTruncatedPacket(decoded, PACKET_HEADER_SIZE)
             return
         }
         
@@ -1457,6 +1505,7 @@ class UDPConnection {
         val messageId = decodeMessageIdLumiyaStyle(decoded, offset)
         if (messageId == null) {
             Log.w(TAG, "   ⚠️ Could not parse message ID")
+            EnhancedPacketLogger.logInvalidMessageId(decoded, offset, "decodeMessageIdLumiyaStyle returned null")
             return
         }
         offset = messageId.second
