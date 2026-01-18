@@ -254,6 +254,9 @@ object NetworkLogger {
         const val MESH = "MESH"
         const val FRIENDS = "FRIENDS"
         const val CAPABILITY = "CAP"
+        const val UDP = "UDP"
+        const val UDP_MALFORMED = "UDP_MALFORMED"
+        const val UDP_PACKET = "UDP_PKT"
     }
     
     // ==================== HTTP/2 PROTOCOL TRACKING ====================
@@ -758,6 +761,123 @@ object NetworkLogger {
             error?.let { append("\n  Error: $it") }
         }
         log(if (success) Level.DEBUG else Level.WARN, Category.CAPABILITY, message)
+    }
+    
+    // ==================== UDP LOGGING ====================
+    
+    /**
+     * Log UDP packet sent
+     */
+    fun logUdpPacketSent(
+        messageId: Int,
+        messageName: String,
+        sequenceNumber: Int,
+        sizeBytes: Int,
+        targetAddress: String,
+        targetPort: Int
+    ) {
+        val message = buildString {
+            append("📤 UDP Sent: $messageName\n")
+            append("  Message ID: 0x${messageId.toString(16).uppercase()}\n")
+            append("  Sequence: $sequenceNumber\n")
+            append("  Size: $sizeBytes bytes\n")
+            append("  Target: $targetAddress:$targetPort")
+        }
+        log(Level.DEBUG, Category.UDP_PACKET, message)
+    }
+    
+    /**
+     * Log UDP packet received
+     */
+    fun logUdpPacketReceived(
+        messageId: Int,
+        messageName: String,
+        sequenceNumber: Int,
+        sizeBytes: Int,
+        sourceAddress: String?,
+        hasHandler: Boolean
+    ) {
+        val statusIcon = if (hasHandler) "✓" else "⚠️"
+        val handlerInfo = if (hasHandler) "" else " [NO HANDLER]"
+        val message = buildString {
+            append("📥 UDP Received $statusIcon: $messageName$handlerInfo\n")
+            append("  Message ID: 0x${messageId.toString(16).uppercase()}\n")
+            append("  Sequence: $sequenceNumber\n")
+            append("  Size: $sizeBytes bytes")
+            sourceAddress?.let { append("\n  Source: $it") }
+        }
+        log(if (hasHandler) Level.DEBUG else Level.WARN, Category.UDP_PACKET, message)
+    }
+    
+    /**
+     * Log UDP connection status change
+     */
+    fun logUdpConnectionStatus(
+        connected: Boolean,
+        address: String,
+        port: Int,
+        details: String? = null
+    ) {
+        val statusIcon = if (connected) "🟢" else "🔴"
+        val status = if (connected) "CONNECTED" else "DISCONNECTED"
+        val message = buildString {
+            append("$statusIcon UDP $status: $address:$port")
+            details?.let { append("\n  Details: $it") }
+        }
+        log(Level.INFO, Category.UDP, message)
+    }
+    
+    /**
+     * Log malformed UDP packet detected
+     */
+    fun logUdpMalformedPacket(
+        reason: String,
+        sizeBytes: Int,
+        hexPreview: String,
+        details: String
+    ) {
+        val message = buildString {
+            append("⚠️ MALFORMED UDP PACKET\n")
+            append("  Reason: $reason\n")
+            append("  Size: $sizeBytes bytes\n")
+            append("  Details: $details\n")
+            append("  Hex Preview: $hexPreview")
+        }
+        log(Level.WARN, Category.UDP_MALFORMED, message)
+    }
+    
+    /**
+     * Log UDP packet resend attempt
+     */
+    fun logUdpResend(
+        messageName: String,
+        sequenceNumber: Int,
+        attempt: Int,
+        ageMs: Long
+    ) {
+        val message = "⟳ UDP Resend: $messageName (seq=$sequenceNumber, attempt #$attempt, age=${ageMs}ms)"
+        log(Level.WARN, Category.UDP, message)
+    }
+    
+    /**
+     * Log UDP ACK received
+     */
+    fun logUdpAckReceived(sequenceNumber: Int, forMessageName: String?) {
+        val msgInfo = forMessageName?.let { " ($it)" } ?: ""
+        val message = "✓ UDP ACK received for seq=$sequenceNumber$msgInfo"
+        log(Level.DEBUG, Category.UDP, message)
+    }
+    
+    /**
+     * Log UDP packet timeout (no ACK received)
+     */
+    fun logUdpTimeout(
+        messageName: String,
+        sequenceNumber: Int,
+        timeoutMs: Long
+    ) {
+        val message = "⏱️ UDP Timeout: $messageName (seq=$sequenceNumber) after ${timeoutMs}ms - no ACK received"
+        log(Level.WARN, Category.UDP, message)
     }
     
     /**

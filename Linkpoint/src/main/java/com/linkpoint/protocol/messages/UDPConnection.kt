@@ -1355,9 +1355,19 @@ class UDPConnection {
     }
     
     private fun processPacket(data: ByteArray) {
+        // Validate minimum packet size
         if (data.size < PACKET_HEADER_SIZE) {
             Log.w(TAG, "⚠️ Packet too small: ${data.size} bytes (minimum $PACKET_HEADER_SIZE)")
+            EnhancedPacketLogger.logTruncatedPacket(data, PACKET_HEADER_SIZE)
             return
+        }
+        
+        // Validate maximum packet size (UDP max is ~65535, but SL typically uses much smaller)
+        val MAX_EXPECTED_PACKET_SIZE = 32768 // 32KB should be more than enough for any SL packet
+        if (data.size > MAX_EXPECTED_PACKET_SIZE) {
+            Log.w(TAG, "⚠️ Packet unusually large: ${data.size} bytes (max expected $MAX_EXPECTED_PACKET_SIZE)")
+            EnhancedPacketLogger.logOversizedPacket(data, MAX_EXPECTED_PACKET_SIZE)
+            // Continue processing but log the anomaly
         }
         
         val flags = data[0].toInt() and 0xFF
@@ -1367,18 +1377,40 @@ class UDPConnection {
         val isReliable = (flags and FLAG_RELIABLE) != 0
         val hasAcks = (flags and FLAG_ACK) != 0
         
+        // Validate flag combinations - check for reserved/invalid flag bits
+        val VALID_FLAG_MASK = FLAG_ZEROCODED or FLAG_RELIABLE or FLAG_RESENT or FLAG_ACK
+        val unknownFlags = flags and VALID_FLAG_MASK.inv()
+        if (unknownFlags != 0) {
+            Log.w(TAG, "⚠️ Packet has unknown flags: 0x${unknownFlags.toString(16).uppercase()}")
+            EnhancedPacketLogger.logInvalidFlags(data, flags, "Unknown flag bits set: 0x${unknownFlags.toString(16).uppercase()}")
+        }
+        
         // Log packet details
         val flagsStr = buildString {
             if (isZerocoded) append("[ZERO]")
             if (isReliable) append("[RELIABLE]")
             if (hasAcks) append("[ACK]")
+            if ((flags and FLAG_RESENT) != 0) append("[RESENT]")
         }
         Log.d(TAG, "   Packet #$seqNum $flagsStr - ${data.size} bytes")
         
         var decoded = data
         if (isZerocoded) {
-            decoded = zerodecode(data)
-            Log.d(TAG, "   Zero-decoded: ${decoded.size} bytes")
+            try {
+                decoded = zerodecode(data)
+                Log.d(TAG, "   Zero-decoded: ${decoded.size} bytes")
+                
+                // Sanity check: zero-decoded should be at least as large as original minus the header
+                if (decoded.size < PACKET_HEADER_SIZE) {
+                    Log.w(TAG, "⚠️ Zero-decode produced invalid result: ${decoded.size} bytes")
+                    EnhancedPacketLogger.logZeroDecodeFailure(data, "Decoded size ${decoded.size} smaller than header")
+                    return
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "⚠️ Zero-decode failed: ${e.message}")
+                EnhancedPacketLogger.logZeroDecodeFailure(data, "Exception during decode: ${e.message}")
+                return
+            }
         }
         
         // Handle acks at end of packet - ALWAYS process these immediately (time-sensitive)
@@ -1390,7 +1422,13 @@ class UDPConnection {
             if (numAcks > 0) {
                 Log.d(TAG, "   Contains $numAcks ACK(s)")
                 val ackStart = decoded.size - 1 - numAcks * 4
-                if (ackStart > PACKET_HEADER_SIZE) {
+                
+                // Validate ACK structure
+                if (ackStart <= PACKET_HEADER_SIZE) {
+                    Log.w(TAG, "⚠️ ACK count ($numAcks) too large for packet size - malformed packet")
+                    val availableBytes = decoded.size - 1 - PACKET_HEADER_SIZE
+                    EnhancedPacketLogger.logAckCountMismatch(decoded, numAcks, availableBytes)
+                } else {
                     for (i in 0 until numAcks) {
                         val offset = ackStart + i * 4
                         // Appended ACKs are BIG_ENDIAN (network order) - NOT little-endian!
@@ -1441,6 +1479,7 @@ class UDPConnection {
     private fun dispatchPacket(decoded: ByteArray) {
         if (decoded.size < PACKET_HEADER_SIZE) {
             Log.w(TAG, "   ⚠️ Decoded packet too small for dispatch: ${decoded.size} bytes")
+            EnhancedPacketLogger.logTruncatedPacket(decoded, PACKET_HEADER_SIZE)
             return
         }
         
@@ -1457,6 +1496,7 @@ class UDPConnection {
         val messageId = decodeMessageIdLumiyaStyle(decoded, offset)
         if (messageId == null) {
             Log.w(TAG, "   ⚠️ Could not parse message ID")
+            EnhancedPacketLogger.logInvalidMessageId(decoded, offset, "decodeMessageIdLumiyaStyle returned null")
             return
         }
         offset = messageId.second

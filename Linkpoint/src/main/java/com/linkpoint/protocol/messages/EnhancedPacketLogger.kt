@@ -65,6 +65,19 @@ object EnhancedPacketLogger {
     private val parseErrors = AtomicInteger(0)
     private val handlerMisses = AtomicInteger(0)
     
+    // Malformed packet tracking - detailed categorization for debugging
+    private val malformedPacketCount = AtomicInteger(0)
+    private val truncatedPacketCount = AtomicInteger(0)
+    private val invalidFlagsCount = AtomicInteger(0)
+    private val invalidMessageIdCount = AtomicInteger(0)
+    private val corruptedPayloadCount = AtomicInteger(0)
+    private val zeroDecodeFailureCount = AtomicInteger(0)
+    private val oversizedPacketCount = AtomicInteger(0)
+    
+    // Recent malformed packet history for detailed debugging
+    private const val MAX_MALFORMED_HISTORY = 50
+    private val malformedPacketHistory = ConcurrentLinkedQueue<MalformedPacketEntry>()
+    
     // Message type tracking
     private val sentMessageCounts = ConcurrentHashMap<String, AtomicLong>()
     private val receivedMessageCounts = ConcurrentHashMap<String, AtomicLong>()
@@ -144,6 +157,49 @@ object EnhancedPacketLogger {
     }
     
     /**
+     * Malformed packet entry for tracking broken/invalid packets.
+     * These help diagnose protocol issues and network corruption.
+     */
+    data class MalformedPacketEntry(
+        val timestamp: Long,
+        val reason: MalformedReason,
+        val size: Int,
+        val hexPreview: String,
+        val details: String,
+        val rawFlags: Int? = null,
+        val sequenceNumber: Int? = null,
+        val messageId: Int? = null
+    ) {
+        enum class MalformedReason {
+            /** Packet smaller than minimum header size */
+            TRUNCATED,
+            /** Invalid flag combination */
+            INVALID_FLAGS,
+            /** Message ID could not be decoded */
+            INVALID_MESSAGE_ID,
+            /** Payload structure doesn't match expected format */
+            CORRUPTED_PAYLOAD,
+            /** Zero-decode expansion failed */
+            ZERO_DECODE_FAILURE,
+            /** Packet exceeds maximum expected size */
+            OVERSIZED,
+            /** ACK count doesn't match available bytes */
+            ACK_COUNT_MISMATCH,
+            /** Sequence number is invalid or out of expected range */
+            INVALID_SEQUENCE,
+            /** General parse failure */
+            PARSE_ERROR
+        }
+        
+        fun formatForDisplay(): String {
+            val timeStr = SimpleDateFormat("HH:mm:ss.SSS", Locale.US).format(Date(timestamp))
+            val seqInfo = sequenceNumber?.let { " seq=$it" } ?: ""
+            val msgIdInfo = messageId?.let { " msgId=0x${it.toString(16).uppercase()}" } ?: ""
+            return "[$timeStr] ⚠️ MALFORMED: $reason (${size}B)$seqInfo$msgIdInfo\n    Details: $details\n    Hex: $hexPreview"
+        }
+    }
+    
+    /**
      * Start a new logging session.
      */
     fun startSession() {
@@ -169,11 +225,19 @@ object EnhancedPacketLogger {
         resendCount.set(0)
         parseErrors.set(0)
         handlerMisses.set(0)
+        malformedPacketCount.set(0)
+        truncatedPacketCount.set(0)
+        invalidFlagsCount.set(0)
+        invalidMessageIdCount.set(0)
+        corruptedPayloadCount.set(0)
+        zeroDecodeFailureCount.set(0)
+        oversizedPacketCount.set(0)
         sentMessageCounts.clear()
         receivedMessageCounts.clear()
         lastMessageTimes.clear()
         handlerDispatchCounts.clear()
         packetHistory.clear()
+        malformedPacketHistory.clear()
         lastPacketSentTime = 0
         lastPacketReceivedTime = 0
     }
@@ -386,6 +450,247 @@ object EnhancedPacketLogger {
         Log.i(TAG, "⭐ CRITICAL: $messageName - $details")
     }
     
+    // ==================== MALFORMED PACKET LOGGING ====================
+    
+    /**
+     * Log a malformed packet with detailed information for debugging.
+     * This is the main entry point for tracking broken/invalid packets.
+     * 
+     * @param reason The category of malformation detected
+     * @param data The raw packet data (or partial data if truncated)
+     * @param details Human-readable description of the issue
+     * @param rawFlags The raw flags byte (if available)
+     * @param sequenceNumber The sequence number (if parseable)
+     * @param messageId The message ID (if parseable)
+     */
+    fun logMalformedPacket(
+        reason: MalformedPacketEntry.MalformedReason,
+        data: ByteArray,
+        details: String,
+        rawFlags: Int? = null,
+        sequenceNumber: Int? = null,
+        messageId: Int? = null
+    ) {
+        if (!isEnabled) return
+        
+        // Update overall malformed count
+        malformedPacketCount.incrementAndGet()
+        
+        // Update specific category counts
+        when (reason) {
+            MalformedPacketEntry.MalformedReason.TRUNCATED -> truncatedPacketCount.incrementAndGet()
+            MalformedPacketEntry.MalformedReason.INVALID_FLAGS -> invalidFlagsCount.incrementAndGet()
+            MalformedPacketEntry.MalformedReason.INVALID_MESSAGE_ID -> invalidMessageIdCount.incrementAndGet()
+            MalformedPacketEntry.MalformedReason.CORRUPTED_PAYLOAD -> corruptedPayloadCount.incrementAndGet()
+            MalformedPacketEntry.MalformedReason.ZERO_DECODE_FAILURE -> zeroDecodeFailureCount.incrementAndGet()
+            MalformedPacketEntry.MalformedReason.OVERSIZED -> oversizedPacketCount.incrementAndGet()
+            else -> {} // Other categories tracked by overall count only
+        }
+        
+        // Create entry for history
+        val hexPreview = data.take(48).joinToString(" ") { "%02X".format(it) }
+        val entry = MalformedPacketEntry(
+            timestamp = System.currentTimeMillis(),
+            reason = reason,
+            size = data.size,
+            hexPreview = hexPreview,
+            details = details,
+            rawFlags = rawFlags,
+            sequenceNumber = sequenceNumber,
+            messageId = messageId
+        )
+        
+        // Add to malformed history
+        addToMalformedHistory(entry)
+        
+        // Log to console with full details
+        Log.w(TAG, "⚠️ MALFORMED PACKET DETECTED ⚠️")
+        Log.w(TAG, "  Reason: $reason")
+        Log.w(TAG, "  Size: ${data.size} bytes")
+        Log.w(TAG, "  Details: $details")
+        rawFlags?.let { Log.w(TAG, "  Raw Flags: 0x${it.toString(16).uppercase().padStart(2, '0')}") }
+        sequenceNumber?.let { Log.w(TAG, "  Sequence: $it") }
+        messageId?.let { Log.w(TAG, "  Message ID: 0x${it.toString(16).uppercase()}") }
+        Log.w(TAG, "  Hex Preview: $hexPreview")
+    }
+    
+    /**
+     * Log a truncated packet (too small to contain required header).
+     */
+    fun logTruncatedPacket(data: ByteArray, expectedMinSize: Int) {
+        logMalformedPacket(
+            reason = MalformedPacketEntry.MalformedReason.TRUNCATED,
+            data = data,
+            details = "Packet size ${data.size} bytes is smaller than minimum required $expectedMinSize bytes"
+        )
+    }
+    
+    /**
+     * Log invalid flags in packet header.
+     */
+    fun logInvalidFlags(data: ByteArray, flags: Int, issue: String) {
+        val sequenceNumber = if (data.size >= 5) {
+            java.nio.ByteBuffer.wrap(data, 1, 4).order(java.nio.ByteOrder.BIG_ENDIAN).int
+        } else null
+        
+        logMalformedPacket(
+            reason = MalformedPacketEntry.MalformedReason.INVALID_FLAGS,
+            data = data,
+            details = "Invalid flags: $issue",
+            rawFlags = flags,
+            sequenceNumber = sequenceNumber
+        )
+    }
+    
+    /**
+     * Log failed message ID decoding.
+     */
+    fun logInvalidMessageId(data: ByteArray, offset: Int, issue: String) {
+        val sequenceNumber = if (data.size >= 5) {
+            java.nio.ByteBuffer.wrap(data, 1, 4).order(java.nio.ByteOrder.BIG_ENDIAN).int
+        } else null
+        val flags = if (data.isNotEmpty()) data[0].toInt() and 0xFF else null
+        
+        logMalformedPacket(
+            reason = MalformedPacketEntry.MalformedReason.INVALID_MESSAGE_ID,
+            data = data,
+            details = "Failed to decode message ID at offset $offset: $issue",
+            rawFlags = flags,
+            sequenceNumber = sequenceNumber
+        )
+    }
+    
+    /**
+     * Log zero-decode failure.
+     */
+    fun logZeroDecodeFailure(data: ByteArray, error: String) {
+        val flags = if (data.isNotEmpty()) data[0].toInt() and 0xFF else null
+        val sequenceNumber = if (data.size >= 5) {
+            java.nio.ByteBuffer.wrap(data, 1, 4).order(java.nio.ByteOrder.BIG_ENDIAN).int
+        } else null
+        
+        logMalformedPacket(
+            reason = MalformedPacketEntry.MalformedReason.ZERO_DECODE_FAILURE,
+            data = data,
+            details = "Zero-decode expansion failed: $error",
+            rawFlags = flags,
+            sequenceNumber = sequenceNumber
+        )
+    }
+    
+    /**
+     * Log ACK count mismatch (reported ACK count doesn't match available bytes).
+     */
+    fun logAckCountMismatch(data: ByteArray, reportedCount: Int, availableBytes: Int) {
+        val flags = if (data.isNotEmpty()) data[0].toInt() and 0xFF else null
+        val sequenceNumber = if (data.size >= 5) {
+            java.nio.ByteBuffer.wrap(data, 1, 4).order(java.nio.ByteOrder.BIG_ENDIAN).int
+        } else null
+        
+        logMalformedPacket(
+            reason = MalformedPacketEntry.MalformedReason.ACK_COUNT_MISMATCH,
+            data = data,
+            details = "ACK count $reportedCount requires ${reportedCount * 4} bytes but only $availableBytes available",
+            rawFlags = flags,
+            sequenceNumber = sequenceNumber
+        )
+    }
+    
+    /**
+     * Log corrupted payload structure.
+     */
+    fun logCorruptedPayload(data: ByteArray, messageId: Int, issue: String) {
+        val flags = if (data.isNotEmpty()) data[0].toInt() and 0xFF else null
+        val sequenceNumber = if (data.size >= 5) {
+            java.nio.ByteBuffer.wrap(data, 1, 4).order(java.nio.ByteOrder.BIG_ENDIAN).int
+        } else null
+        
+        logMalformedPacket(
+            reason = MalformedPacketEntry.MalformedReason.CORRUPTED_PAYLOAD,
+            data = data,
+            details = "Payload structure invalid: $issue",
+            rawFlags = flags,
+            sequenceNumber = sequenceNumber,
+            messageId = messageId
+        )
+    }
+    
+    /**
+     * Log oversized packet.
+     */
+    fun logOversizedPacket(data: ByteArray, maxExpectedSize: Int) {
+        val flags = if (data.isNotEmpty()) data[0].toInt() and 0xFF else null
+        val sequenceNumber = if (data.size >= 5) {
+            java.nio.ByteBuffer.wrap(data, 1, 4).order(java.nio.ByteOrder.BIG_ENDIAN).int
+        } else null
+        
+        logMalformedPacket(
+            reason = MalformedPacketEntry.MalformedReason.OVERSIZED,
+            data = data,
+            details = "Packet size ${data.size} exceeds maximum expected $maxExpectedSize bytes",
+            rawFlags = flags,
+            sequenceNumber = sequenceNumber
+        )
+    }
+    
+    private fun addToMalformedHistory(entry: MalformedPacketEntry) {
+        malformedPacketHistory.offer(entry)
+        while (malformedPacketHistory.size > MAX_MALFORMED_HISTORY) {
+            malformedPacketHistory.poll()
+        }
+    }
+    
+    /**
+     * Get malformed packet history.
+     */
+    fun getMalformedPacketHistory(count: Int = 20): List<MalformedPacketEntry> {
+        return malformedPacketHistory.toList().takeLast(count)
+    }
+    
+    /**
+     * Get malformed packet statistics.
+     */
+    fun getMalformedStatistics(): MalformedPacketStatistics {
+        return MalformedPacketStatistics(
+            totalMalformed = malformedPacketCount.get(),
+            truncated = truncatedPacketCount.get(),
+            invalidFlags = invalidFlagsCount.get(),
+            invalidMessageId = invalidMessageIdCount.get(),
+            corruptedPayload = corruptedPayloadCount.get(),
+            zeroDecodeFailure = zeroDecodeFailureCount.get(),
+            oversized = oversizedPacketCount.get()
+        )
+    }
+    
+    /**
+     * Statistics for malformed packets.
+     */
+    data class MalformedPacketStatistics(
+        val totalMalformed: Int,
+        val truncated: Int,
+        val invalidFlags: Int,
+        val invalidMessageId: Int,
+        val corruptedPayload: Int,
+        val zeroDecodeFailure: Int,
+        val oversized: Int
+    ) {
+        fun hasIssues(): Boolean = totalMalformed > 0
+        
+        fun toFormattedString(): String {
+            if (totalMalformed == 0) return "No malformed packets detected"
+            
+            return buildString {
+                appendLine("Total Malformed: $totalMalformed")
+                if (truncated > 0) appendLine("  Truncated: $truncated")
+                if (invalidFlags > 0) appendLine("  Invalid Flags: $invalidFlags")
+                if (invalidMessageId > 0) appendLine("  Invalid Message ID: $invalidMessageId")
+                if (corruptedPayload > 0) appendLine("  Corrupted Payload: $corruptedPayload")
+                if (zeroDecodeFailure > 0) appendLine("  Zero-Decode Failures: $zeroDecodeFailure")
+                if (oversized > 0) appendLine("  Oversized: $oversized")
+            }
+        }
+    }
+    
     private fun addToHistory(entry: PacketLogEntry) {
         packetHistory.offer(entry)
         while (packetHistory.size > MAX_PACKET_HISTORY) {
@@ -438,7 +743,14 @@ object EnhancedPacketLogger {
             lastPacketReceivedMs = if (lastPacketReceivedTime > 0) now - lastPacketReceivedTime else -1,
             uniqueMessageTypesSent = sentMessageCounts.size,
             uniqueMessageTypesReceived = receivedMessageCounts.size,
-            registeredHandlerCount = registeredHandlers.size
+            registeredHandlerCount = registeredHandlers.size,
+            malformedPackets = malformedPacketCount.get(),
+            truncatedPackets = truncatedPacketCount.get(),
+            invalidFlagsPackets = invalidFlagsCount.get(),
+            invalidMessageIdPackets = invalidMessageIdCount.get(),
+            corruptedPayloadPackets = corruptedPayloadCount.get(),
+            zeroDecodeFailures = zeroDecodeFailureCount.get(),
+            oversizedPackets = oversizedPacketCount.get()
         )
     }
     
@@ -595,6 +907,35 @@ object EnhancedPacketLogger {
             }
             appendLine()
             
+            // Malformed packet section
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ MALFORMED PACKET STATISTICS                                       │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            val malformedStats = getMalformedStatistics()
+            if (malformedStats.hasIssues()) {
+                appendLine("⚠️ MALFORMED PACKETS DETECTED!")
+                appendLine("  Total: ${malformedStats.totalMalformed}")
+                if (malformedStats.truncated > 0) appendLine("  Truncated (too small): ${malformedStats.truncated}")
+                if (malformedStats.invalidFlags > 0) appendLine("  Invalid Flags: ${malformedStats.invalidFlags}")
+                if (malformedStats.invalidMessageId > 0) appendLine("  Invalid Message ID: ${malformedStats.invalidMessageId}")
+                if (malformedStats.corruptedPayload > 0) appendLine("  Corrupted Payload: ${malformedStats.corruptedPayload}")
+                if (malformedStats.zeroDecodeFailure > 0) appendLine("  Zero-Decode Failures: ${malformedStats.zeroDecodeFailure}")
+                if (malformedStats.oversized > 0) appendLine("  Oversized: ${malformedStats.oversized}")
+                appendLine()
+                
+                // Show recent malformed packet history
+                val recentMalformed = getMalformedPacketHistory(10)
+                if (recentMalformed.isNotEmpty()) {
+                    appendLine("Recent Malformed Packets:")
+                    recentMalformed.forEach { entry ->
+                        appendLine("  ${entry.formatForDisplay()}")
+                    }
+                }
+            } else {
+                appendLine("  ✓ No malformed packets detected")
+            }
+            appendLine()
+            
             appendLine("═══════════════════════════════════════════════════════════════════")
             appendLine("End of Enhanced Packet Logger Report")
             appendLine("═══════════════════════════════════════════════════════════════════")
@@ -629,6 +970,13 @@ object EnhancedPacketLogger {
         val lastPacketReceivedMs: Long,
         val uniqueMessageTypesSent: Int,
         val uniqueMessageTypesReceived: Int,
-        val registeredHandlerCount: Int
+        val registeredHandlerCount: Int,
+        val malformedPackets: Int = 0,
+        val truncatedPackets: Int = 0,
+        val invalidFlagsPackets: Int = 0,
+        val invalidMessageIdPackets: Int = 0,
+        val corruptedPayloadPackets: Int = 0,
+        val zeroDecodeFailures: Int = 0,
+        val oversizedPackets: Int = 0
     )
 }
