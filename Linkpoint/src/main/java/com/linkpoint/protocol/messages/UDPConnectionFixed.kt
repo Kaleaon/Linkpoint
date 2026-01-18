@@ -340,10 +340,21 @@ class UDPConnectionFixed {
     /**
      * Register a message handler using a lambda
      * This is a convenience method that wraps the lambda in a MessageRouter.Handler
-     * Note: Uses scope.launch for non-blocking registration
+     * Note: Uses runBlocking to ensure handler is registered before returning
+     * This is critical for ensuring handlers are ready when packets arrive
      */
     fun registerHandler(messageId: Int, handler: (Int, ByteArray) -> Unit) {
-        scope.launch {
+        // Also register in messageHandlers for diagnostics
+        messageHandlers[messageId] = object : MessageHandler {
+            override fun handleMessage(messageId: Int, data: ByteArray): Boolean {
+                handler(messageId, data)
+                return true
+            }
+        }
+        
+        // Register with messageRouter synchronously using runBlocking
+        // This ensures handler is ready before we return
+        kotlinx.coroutines.runBlocking {
             messageRouter.registerHandler(messageId, object : MessageRouter.Handler {
                 override fun handleMessage(messageId: Int, data: ByteArray): Boolean {
                     handler(messageId, data)
@@ -351,6 +362,9 @@ class UDPConnectionFixed {
                 }
             })
         }
+        
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, 
+            "Registered handler for message $messageId (total: ${messageHandlers.size})")
     }
     
     /**
