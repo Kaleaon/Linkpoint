@@ -94,11 +94,29 @@ class UDPConnectionFixed {
     // Receive job
     private var receiveJob: Job? = null
     
+    // Agent update job
+    private var agentUpdateJob: Job? = null
+    
+    // Mobile optimized: 10 updates/sec = 100ms interval
+    private val AGENT_UPDATE_INTERVAL_MS = 100L
+    
     // Statistics
     private val packetsReceived = AtomicInteger(0)
     private val bytesReceived = AtomicLong(0)
     private val messagesRouted = AtomicInteger(0)
     private var lastReceiveTime = 0L
+    private val messageTypeCounts = java.util.concurrent.ConcurrentHashMap<String, AtomicInteger>()
+    private val lastMessageTimes = java.util.concurrent.ConcurrentHashMap<String, Long>()
+    private val packetsResentCount = AtomicInteger(0)
+    
+    // Control flags for movement
+    private var controlFlags: Int = 0
+    
+    // Current look-at direction
+    private var currentLookAt: FloatArray = floatArrayOf(128f, 128f, 25f)
+    
+    // Registered message handlers
+    private val messageHandlers = java.util.concurrent.ConcurrentHashMap<Int, MessageHandler>()
     
     /**
      * Default constructor
@@ -132,11 +150,26 @@ class UDPConnectionFixed {
     }
     
     /**
+     * Get the agent ID for this connection
+     */
+    fun getAgentId(): UUID = agentId
+    
+    /**
+     * Get the session ID for this connection
+     */
+    fun getSessionId(): UUID = sessionId
+    
+    /**
+     * Get the circuit code for this connection
+     */
+    fun getCircuitCode(): Int = circuitCode
+    
+    /**
      * Connect to the simulator
      */
     suspend fun connect(): Boolean = withContext(Dispatchers.IO) {
         try {
-            NetworkLogger.log(TAG, "=== INITIATING FIXED UDP CONNECTION ===")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== INITIATING FIXED UDP CONNECTION ===")
             
             val address = InetSocketAddress(simIP, simPort)
             
@@ -146,9 +179,9 @@ class UDPConnectionFixed {
                 connect(address)
             }
             
-            NetworkLogger.log(TAG, "✓ DatagramChannel connected to $simIP:$simPort")
-            NetworkLogger.log(TAG, "  Channel connected: ${datagramChannel?.isConnected}")
-            NetworkLogger.log(TAG, "  Channel open: ${datagramChannel?.isOpen}")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ DatagramChannel connected to $simIP:$simPort")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "  Channel connected: ${datagramChannel?.isConnected}")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "  Channel open: ${datagramChannel?.isOpen}")
             
             // Create selector
             selector = Selector.open()
@@ -160,9 +193,9 @@ class UDPConnectionFixed {
                 throw IllegalStateException("Selection key is not valid")
             }
             
-            NetworkLogger.log(TAG, "✓ Selector registered for OP_READ")
-            NetworkLogger.log(TAG, "  Selection key valid: ${selectionKey?.isValid}")
-            NetworkLogger.log(TAG, "  Selector open: ${selector?.isOpen}")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ Selector registered for OP_READ")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "  Selection key valid: ${selectionKey?.isValid}")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "  Selector open: ${selector?.isOpen}")
             
             // Set connected state
             _isConnected.value = true
@@ -178,8 +211,8 @@ class UDPConnectionFixed {
                 receiveLoop()
             }
             
-            NetworkLogger.log(TAG, "✓ Receive loop started")
-            NetworkLogger.log(TAG, "=== UDP CONNECTION ESTABLISHED ===")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ Receive loop started")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== UDP CONNECTION ESTABLISHED ===")
             
             // Send initial messages
             sendUseCircuitCode()
@@ -191,7 +224,7 @@ class UDPConnectionFixed {
             true
             
         } catch (e: Exception) {
-            NetworkLogger.log(TAG, "✗ Connection failed: ${e.message}", Log.ERROR)
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "✗ Connection failed: ${e.message}")
             _isConnected.value = false
             disconnect()
             false
@@ -204,7 +237,7 @@ class UDPConnectionFixed {
     private suspend fun receiveLoop() {
         val buffer = ByteBuffer.allocate(BUFFER_SIZE)
         
-        NetworkLogger.log(TAG, "=== RECEIVE LOOP STARTED ===")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== RECEIVE LOOP STARTED ===")
         
         while (_isConnected.value) {
             try {
@@ -212,12 +245,12 @@ class UDPConnectionFixed {
                 val localChannel = datagramChannel
                 
                 if (localSelector == null || localChannel == null) {
-                    NetworkLogger.log(TAG, "Selector or channel is null, exiting loop", Log.ERROR)
+                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Selector or channel is null, exiting loop")
                     break
                 }
                 
                 if (!localSelector.isOpen || !localChannel.isOpen) {
-                    NetworkLogger.log(TAG, "Selector or channel closed, exiting loop", Log.ERROR)
+                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Selector or channel closed, exiting loop")
                     break
                 }
                 
@@ -244,7 +277,7 @@ class UDPConnectionFixed {
                                 val data = ByteArray(bytesRead)
                                 buffer.get(data)
                                 
-                                NetworkLogger.log(TAG, "📦 PACKET RECEIVED #${packetsReceived.get()}: $bytesRead bytes")
+                                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "📦 PACKET RECEIVED #${packetsReceived.get()}: $bytesRead bytes")
                                 
                                 // Publish message received event
                                 val messageId = extractMessageId(data)
@@ -259,15 +292,15 @@ class UDPConnectionFixed {
                 
             } catch (e: Exception) {
                 if (_isConnected.value) {
-                    NetworkLogger.log(TAG, "✗ Receive error: ${e.message}", Log.ERROR)
+                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "✗ Receive error: ${e.message}")
                 }
             }
         }
         
-        NetworkLogger.log(TAG, "=== RECEIVE LOOP STOPPED ===")
-        NetworkLogger.log(TAG, "Total packets: ${packetsReceived.get()}")
-        NetworkLogger.log(TAG, "Total bytes: ${bytesReceived.get()}")
-        NetworkLogger.log(TAG, "Messages routed: ${messagesRouted.get()}")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== RECEIVE LOOP STOPPED ===")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Total packets: ${packetsReceived.get()}")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Total bytes: ${bytesReceived.get()}")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Messages routed: ${messagesRouted.get()}")
     }
     
     /**
@@ -305,9 +338,25 @@ class UDPConnectionFixed {
     fun getMessageRouter(): MessageRouter = messageRouter
     
     /**
-     * Register a message handler
+     * Register a message handler using a lambda
+     * This is a convenience method that wraps the lambda in a MessageRouter.Handler
+     * Note: Uses scope.launch for non-blocking registration
      */
-    suspend fun registerHandler(messageId: Int, handler: MessageRouter.Handler) {
+    fun registerHandler(messageId: Int, handler: (Int, ByteArray) -> Unit) {
+        scope.launch {
+            messageRouter.registerHandler(messageId, object : MessageRouter.Handler {
+                override fun handleMessage(messageId: Int, data: ByteArray): Boolean {
+                    handler(messageId, data)
+                    return true
+                }
+            })
+        }
+    }
+    
+    /**
+     * Register a message handler with MessageRouter.Handler interface
+     */
+    suspend fun registerHandlerWithPriority(messageId: Int, handler: MessageRouter.Handler) {
         messageRouter.registerHandler(messageId, handler)
     }
     
@@ -316,7 +365,7 @@ class UDPConnectionFixed {
      * Uses mobile-optimized packet construction
      */
     private suspend fun sendUseCircuitCode() {
-        NetworkLogger.log(TAG, "→ Sending UseCircuitCode")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sending UseCircuitCode")
         
         // UseCircuitCode message format:
         // - CircuitCode (4 bytes, little-endian)
@@ -339,7 +388,7 @@ class UDPConnectionFixed {
      * Uses mobile-optimized packet construction
      */
     private suspend fun sendCompleteAgentMovement() {
-        NetworkLogger.log(TAG, "→ Sending CompleteAgentMovement")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sending CompleteAgentMovement")
         
         // CompleteAgentMovement message format:
         // - AgentID (16 bytes, UUID)
@@ -435,6 +484,66 @@ class UDPConnectionFixed {
     }
     
     /**
+     * Send RegionHandshakeReply message.
+     * Must be sent in response to RegionHandshake from simulator.
+     */
+    suspend fun sendRegionHandshakeReply(flags: Int = 0) {
+        val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
+        
+        // Agent ID
+        payload.putUUID(agentId)
+        
+        // Session ID
+        payload.putUUID(sessionId)
+        
+        // Flags (typically 0)
+        payload.putInt(flags)
+        
+        Log.d(TAG, "Sending RegionHandshakeReply")
+        sendPacket(MessageIds.REGION_HANDSHAKE_REPLY, payload.array(), reliable = true, zerocoded = true)
+    }
+    
+    /**
+     * Send AgentThrottle message to set bandwidth allocations.
+     * Tells the simulator how much bandwidth we want for different data types.
+     */
+    suspend fun sendAgentThrottle(
+        resend: Float = 50000f,
+        land: Float = 100000f,
+        wind: Float = 10000f,
+        cloud: Float = 10000f,
+        task: Float = 200000f,
+        texture: Float = 200000f,
+        asset: Float = 100000f
+    ) {
+        val payload = ByteBuffer.allocate(36 + 4 + 28).order(ByteOrder.LITTLE_ENDIAN)
+        
+        // Agent ID
+        payload.putUUID(agentId)
+        
+        // Session ID
+        payload.putUUID(sessionId)
+        
+        // Circuit code
+        payload.putInt(circuitCode)
+        
+        // GenCounter
+        payload.putInt(1)
+        
+        // Throttles - 7 float values for bandwidth allocation
+        payload.putFloat(resend)
+        payload.putFloat(land)
+        payload.putFloat(wind)
+        payload.putFloat(cloud)
+        payload.putFloat(task)
+        payload.putFloat(texture)
+        payload.putFloat(asset)
+        
+        Log.d(TAG, "Sending AgentThrottle")
+        sendPacket(MessageIds.AGENT_THROTTLE, payload.array(), reliable = true)
+    }
+    
+    /**
      * Send a packet with proper SL protocol encoding
      * 
      * @param messageId The message ID
@@ -449,7 +558,7 @@ class UDPConnectionFixed {
         zerocoded: Boolean = false
     ) {
         if (!_isConnected.value) {
-            NetworkLogger.log(TAG, "Cannot send: not connected", Log.WARN)
+            NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Cannot send: not connected")
             return
         }
         
@@ -476,10 +585,10 @@ class UDPConnectionFixed {
             val buffer = ByteBuffer.wrap(finalPacket)
             datagramChannel?.write(buffer)
             
-            NetworkLogger.log(TAG, "→ Sent packet: ${finalPacket.size} bytes (ID: $messageId, reliable: $reliable)")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sent packet: ${finalPacket.size} bytes (ID: $messageId, reliable: $reliable)")
             
         } catch (e: Exception) {
-            NetworkLogger.log(TAG, "✗ Send error: ${e.message}", Log.ERROR)
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "✗ Send error: ${e.message}")
         }
     }
     
@@ -545,27 +654,30 @@ class UDPConnectionFixed {
      * Disconnect
      */
     fun disconnect() {
-        NetworkLogger.log(TAG, "=== DISCONNECTING ===")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== DISCONNECTING ===")
         
         _isConnected.value = false
         
         receiveJob?.cancel()
+        agentUpdateJob?.cancel()
         
         try {
             selectionKey?.cancel()
             selector?.close()
             datagramChannel?.close()
         } catch (e: Exception) {
-            NetworkLogger.log(TAG, "Error during disconnect: ${e.message}", Log.ERROR)
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Error during disconnect: ${e.message}")
         }
         
-        // Publish connection state event
-        EventBus.publish(ConnectionStateChangedEvent(
-            ConnectionState.CONNECTED,
-            ConnectionState.DISCONNECTED
-        ))
+        // Publish connection state event (using scope.launch since publish is suspend)
+        scope.launch {
+            EventBus.publish(ConnectionStateChangedEvent(
+                ConnectionState.CONNECTED,
+                ConnectionState.DISCONNECTED
+            ))
+        }
         
-        NetworkLogger.log(TAG, "=== DISCONNECTED ===")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== DISCONNECTED ===")
     }
     
     /**
@@ -579,6 +691,258 @@ class UDPConnectionFixed {
             "messagesRouted" to messagesRouted.get(),
             "lastReceiveTime" to lastReceiveTime,
             "routerStats" to messageRouter.getStatistics()
+        )
+    }
+    
+    /**
+     * Start sending periodic AgentUpdate messages.
+     * This is required for proper operation in Second Life.
+     */
+    fun startAgentUpdates() {
+        agentUpdateJob?.cancel()
+        agentUpdateJob = scope.launch {
+            Log.d(TAG, "Starting periodic AgentUpdate messages")
+            while (_isConnected.value) {
+                sendAgentUpdate()
+                delay(AGENT_UPDATE_INTERVAL_MS)
+            }
+        }
+    }
+    
+    /**
+     * Stop sending periodic AgentUpdate messages.
+     */
+    fun stopAgentUpdates() {
+        agentUpdateJob?.cancel()
+        agentUpdateJob = null
+    }
+    
+    /**
+     * Register a message handler for a specific message ID
+     */
+    fun registerMessageHandler(messageId: Int, handler: MessageHandler) {
+        messageHandlers[messageId] = handler
+    }
+    
+    /**
+     * Unregister a message handler
+     */
+    fun unregisterMessageHandler(messageId: Int) {
+        messageHandlers.remove(messageId)
+    }
+    
+    /**
+     * Set control flags (for movement).
+     */
+    fun setControlFlags(flags: Int) {
+        controlFlags = flags
+    }
+    
+    /**
+     * Update look-at direction for camera/avatar orientation
+     */
+    fun updateLookAt(x: Float, y: Float, z: Float) {
+        currentLookAt = floatArrayOf(x, y, z)
+    }
+    
+    /**
+     * Get list of registered message handler IDs for diagnostics
+     */
+    fun getRegisteredHandlerIds(): List<String> {
+        return messageHandlers.keys.map { id ->
+            when (id) {
+                MessageIds.REGION_HANDSHAKE -> "REGION_HANDSHAKE"
+                MessageIds.AGENT_MOVEMENT_COMPLETE -> "AGENT_MOVEMENT_COMPLETE"
+                MessageIds.CHAT_FROM_SIMULATOR -> "CHAT_FROM_SIMULATOR"
+                MessageIds.OBJECT_UPDATE -> "OBJECT_UPDATE"
+                MessageIds.OBJECT_UPDATE_COMPRESSED -> "OBJECT_UPDATE_COMPRESSED"
+                MessageIds.AVATAR_ANIMATION -> "AVATAR_ANIMATION"
+                MessageIds.IMPROVED_TERSE_OBJECT_UPDATE -> "IMPROVED_TERSE_OBJECT_UPDATE"
+                MessageIds.KILL_OBJECT -> "KILL_OBJECT"
+                MessageIds.COARSE_LOCATION_UPDATE -> "COARSE_LOCATION_UPDATE"
+                MessageIds.START_PING_CHECK -> "START_PING_CHECK"
+                MessageIds.PACKET_ACK -> "PACKET_ACK"
+                else -> "0x${id.toString(16).uppercase()}"
+            }
+        }
+    }
+    
+    /**
+     * Get the number of registered message handlers
+     */
+    fun getRegisteredHandlerCount(): Int = messageHandlers.size
+    
+    /**
+     * Update agent position for AgentUpdate messages
+     */
+    fun updateAgentPosition(x: Float, y: Float, z: Float) {
+        // Position is not currently used in sendAgentUpdate but can be added later
+    }
+    
+    /**
+     * Handle StartPingCheck message from simulator.
+     * Responds with CompletePingCheck to maintain the connection.
+     */
+    suspend fun handleStartPingCheck(pingId: Byte, oldestUnacked: Int) {
+        val payload = ByteBuffer.allocate(5).order(ByteOrder.LITTLE_ENDIAN)
+        payload.put(pingId)
+        payload.putInt(0) // Simplified - no pending ACKs tracking yet
+        
+        Log.d(TAG, "Responding to ping check $pingId")
+        sendPacket(MessageIds.COMPLETE_PING_CHECK, payload.array(), reliable = false)
+    }
+    
+    /**
+     * Mark handlers as ready. 
+     * In this simplified implementation, this is a no-op.
+     */
+    fun setHandlersReady() {
+        Log.i(TAG, "Handlers marked ready")
+    }
+    
+    /**
+     * Track message reception for statistics
+     */
+    fun trackMessageReceived(messageType: String) {
+        messageTypeCounts.computeIfAbsent(messageType) { AtomicInteger(0) }.incrementAndGet()
+        lastMessageTimes[messageType] = System.currentTimeMillis()
+    }
+    
+    /**
+     * Get message statistics for diagnostics
+     */
+    fun getMessageStatistics(): MessageStatistics {
+        return MessageStatistics(
+            totalPacketsReceived = packetsReceived.get(),
+            totalBytesReceived = bytesReceived.get(),
+            packetsResent = packetsResentCount.get(),
+            messageTypeCounts = messageTypeCounts.mapValues { it.value.get() },
+            lastMessageTimes = lastMessageTimes.toMap()
+        )
+    }
+    
+    /**
+     * Get comprehensive diagnostic data for debug reports
+     */
+    fun getDiagnostics(): UDPDiagnostics {
+        return UDPDiagnostics(
+            isConnected = _isConnected.value,
+            simIP = simIP,
+            simPort = simPort,
+            circuitCode = circuitCode,
+            agentId = agentId,
+            sessionId = sessionId,
+            sequenceNumber = 0, // TODO: Track sequence numbers
+            pendingAckCount = 0,
+            registeredHandlerCount = messageHandlers.size,
+            registeredHandlers = messageHandlers.keys.map { it.toString() },
+            pendingPackets = emptyList(),
+            socketOpen = datagramChannel?.isOpen ?: false,
+            receiveLoopActive = receiveJob?.isActive == true
+        )
+    }
+    
+    /**
+     * Detailed message statistics for diagnostics
+     */
+    data class MessageStatistics(
+        val totalPacketsReceived: Int,
+        val totalBytesReceived: Long,
+        val packetsResent: Int,
+        val messageTypeCounts: Map<String, Int>,
+        val lastMessageTimes: Map<String, Long>
+    )
+    
+    /**
+     * Diagnostic data class for UDP connection state
+     */
+    data class UDPDiagnostics(
+        val isConnected: Boolean,
+        val simIP: String,
+        val simPort: Int,
+        val circuitCode: Int,
+        val agentId: UUID,
+        val sessionId: UUID,
+        val sequenceNumber: Int,
+        val pendingAckCount: Int,
+        val registeredHandlerCount: Int,
+        val registeredHandlers: List<String>,
+        val pendingPackets: List<PendingPacketInfo>,
+        val socketOpen: Boolean,
+        val receiveLoopActive: Boolean
+    )
+    
+    /**
+     * Info about a pending packet for diagnostics
+     */
+    data class PendingPacketInfo(
+        val seqNum: Int,
+        val retries: Int,
+        val ageMs: Long
+    )
+    
+    /**
+     * Packet history entry for debugging.
+     */
+    data class PacketHistoryEntry(
+        val timestamp: Long,
+        val type: PacketEventType,
+        val messageId: Int,
+        val messageName: String,
+        val size: Int,
+        val sequenceNumber: Int,
+        val hexPreview: String,
+        val success: Boolean,
+        val errorMessage: String? = null
+    ) {
+        enum class PacketEventType {
+            SEND_SUCCESS,
+            SEND_FAILED,
+            RECEIVE,
+            RESEND,
+            ACK_RECEIVED,
+            ACK_TIMEOUT
+        }
+    }
+    
+    /**
+     * Socket details for diagnostics.
+     */
+    data class SocketDetails(
+        val localBindAddress: String?,
+        val localBindPort: Int,
+        val remoteAddress: String,
+        val remotePort: Int,
+        val isConnected: Boolean,
+        val isOpen: Boolean,
+        val connectionAttemptTime: Long,
+        val lastSendAttemptTime: Long,
+        val lastReceiveTime: Long,
+        val lastConnectionError: String?
+    )
+    
+    /**
+     * Get packet history for debugging (returns empty list - simplified implementation)
+     */
+    fun getPacketHistory(): List<PacketHistoryEntry> {
+        return emptyList()
+    }
+    
+    /**
+     * Get socket details for diagnostics.
+     */
+    fun getSocketDetails(): SocketDetails {
+        return SocketDetails(
+            localBindAddress = null,
+            localBindPort = 0,
+            remoteAddress = simIP,
+            remotePort = simPort,
+            isConnected = datagramChannel?.isConnected == true,
+            isOpen = datagramChannel?.isOpen == true,
+            connectionAttemptTime = 0L,
+            lastSendAttemptTime = 0L,
+            lastReceiveTime = lastReceiveTime,
+            lastConnectionError = null
         )
     }
 }

@@ -49,16 +49,16 @@ object GridConnectionManager {
     @Nullable
     fun getConnection(connectionId: UUID?): GridConnection? {
         if (connectionId == null) {
-            NetworkLogger.log(TAG, "getConnection: null connectionId provided")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "getConnection: null connectionId provided")
             return null
         }
         
         synchronized(lock) {
             val connection = connections[connectionId]
             if (connection != null) {
-                NetworkLogger.log(TAG, "Retrieved connection: $connectionId")
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Retrieved connection: $connectionId")
             } else {
-                NetworkLogger.log(TAG, "Connection not found: $connectionId")
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Connection not found: $connectionId")
             }
             return connection
         }
@@ -73,8 +73,8 @@ object GridConnectionManager {
     fun addConnection(@Nonnull connectionId: UUID, connection: GridConnection) {
         synchronized(lock) {
             connections[connectionId] = connection
-            NetworkLogger.log(TAG, "Added connection: $connectionId")
-            NetworkLogger.log(TAG, "Active connections: ${connections.size}")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Added connection: $connectionId")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Active connections: ${connections.size}")
         }
     }
     
@@ -87,10 +87,10 @@ object GridConnectionManager {
     fun removeConnection(@Nonnull connectionId: UUID, connection: GridConnection) {
         synchronized(lock) {
             if (connections.remove(connectionId) == connection) {
-                NetworkLogger.log(TAG, "Removed connection: $connectionId")
-                NetworkLogger.log(TAG, "Remaining connections: ${connections.size}")
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Removed connection: $connectionId")
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Remaining connections: ${connections.size}")
             } else {
-                NetworkLogger.log(TAG, "Connection not found or mismatch: $connectionId")
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Connection not found or mismatch: $connectionId")
             }
         }
     }
@@ -137,7 +137,7 @@ object GridConnectionManager {
         synchronized(lock) {
             val count = connections.size
             connections.clear()
-            NetworkLogger.log(TAG, "Cleared all connections: $count")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Cleared all connections: $count")
         }
     }
     
