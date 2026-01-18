@@ -336,10 +336,12 @@ class SecondLifeProtocol(private val context: Context) {
                     )
                     Log.i(TAG, "[STEP 2/2] Initializing capabilities from seed...")
                     Log.d(TAG, "[STEP 2/2] Seed URL: ${seedCap.take(80)}...")
+                    Log.d(TAG, "[STEP 2/2] Using Lumiya translation layer with login URL: ${loginUri.take(60)}...")
                     app.applicationScope.launch {
                         try {
-                            Log.d(TAG, "[STEP 2/2] capabilityManager.initialize() starting...")
-                            val capsInitialized = app.capabilityManager.initialize(seedCap)
+                            Log.d(TAG, "[STEP 2/2] capabilityManager.initialize() starting with Lumiya translation...")
+                            // Use the overload that accepts loginUri for Lumiya-compatible URL repair
+                            val capsInitialized = app.capabilityManager.initialize(seedCap, loginUri)
                             if (capsInitialized) {
                                 com.linkpoint.utils.InitializationTracker.completePhase(
                                     com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_FETCHING,

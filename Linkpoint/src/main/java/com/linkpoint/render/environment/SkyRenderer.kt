@@ -221,37 +221,31 @@ data class SkyPreset(
     val sunColor: LLColor4,
     val sunIntensity: Float,
     val ambientIntensity: Float,
-    val horizonColor: LLColor4 = LLColor4(0.5f, 0.6f, 0.8f, 1f),
-    val hazeColor: LLColor4 = LLColor4(0.2f, 0.3f, 0.5f, 1f),
-    val cloudColor: LLColor4 = LLColor4.white(),
-    val cloudCoverage: Float = 0.5f
+    val horizonColor: LLColor4 = SLDefaultEnvironment.DEFAULT_BLUE_HORIZON,
+    val hazeColor: LLColor4 = SLDefaultEnvironment.DEFAULT_BLUE_DENSITY,
+    val cloudColor: LLColor4 = SLDefaultEnvironment.DEFAULT_CLOUD_COLOR,
+    val cloudCoverage: Float = SLDefaultEnvironment.DEFAULT_CLOUD_COVERAGE
 ) {
     companion object {
-        val DEFAULT = SkyPreset(
-            name = "Default Midday",
-            sunDirection = LLVector3(-0.5f, -1f, -0.5f).normalize(),
-            sunColor = LLColor4(1f, 0.95f, 0.9f, 1f),
-            sunIntensity = 110_000f,
-            ambientIntensity = 30_000f
-        )
+        /**
+         * Default preset using SL standard midday settings.
+         */
+        val DEFAULT = SLDefaultEnvironment.createDefaultSkyPreset()
         
-        val SUNSET = SkyPreset(
-            name = "Sunset",
-            sunDirection = LLVector3(-0.9f, -0.2f, -0.4f).normalize(),
-            sunColor = LLColor4(1f, 0.6f, 0.3f, 1f),
-            sunIntensity = 80_000f,
-            ambientIntensity = 15_000f,
-            horizonColor = LLColor4(1f, 0.5f, 0.2f, 1f)
-        )
+        /**
+         * Sunset preset using SL-like sunset settings.
+         */
+        val SUNSET = SLDefaultEnvironment.TimeOfDayPresets.SUNSET
         
-        val MIDNIGHT = SkyPreset(
-            name = "Midnight",
-            sunDirection = LLVector3(0f, 1f, 0f).normalize(),
-            sunColor = LLColor4(0.2f, 0.2f, 0.3f, 1f),
-            sunIntensity = 1_000f,
-            ambientIntensity = 500f,
-            horizonColor = LLColor4(0.1f, 0.1f, 0.2f, 1f)
-        )
+        /**
+         * Midnight preset using SL-like night settings.
+         */
+        val MIDNIGHT = SLDefaultEnvironment.TimeOfDayPresets.MIDNIGHT
+        
+        /**
+         * Sunrise preset using SL-like sunrise settings.
+         */
+        val SUNRISE = SLDefaultEnvironment.TimeOfDayPresets.SUNRISE
     }
 }
 
@@ -292,21 +286,23 @@ data class EEPSettings(
         const val KEY_SUN_SCALE = "sun_scale"
         const val KEY_AMBIENT_SCALE = "ambient_scale"
         const val KEY_MOON_SCALE = "moon_scale"
-        private val DEFAULT_AMBIENT_COLOR = LLColor4(0.5f, 0.5f, 0.5f, 1f)
-        private val DEFAULT_BLUE_DENSITY = LLColor4(0.2f, 0.3f, 0.5f, 1f)
+        
+        // Use SL defaults for fallback values
+        private val DEFAULT_AMBIENT_COLOR = SLDefaultEnvironment.DEFAULT_AMBIENT_COLOR
+        private val DEFAULT_BLUE_DENSITY = SLDefaultEnvironment.DEFAULT_BLUE_DENSITY
 
         fun fromEepOsd(map: LLSDMap): EEPSettings {
             val defaults = SkyPreset.DEFAULT
             return EEPSettings(
                 name = map.getString(KEY_NAME) ?: "EEP",
                 sunDirection = map.getVector3(KEY_SUN_DIRECTION, KEY_SUN_DIR) ?: defaults.sunDirection,
-                moonDirection = map.getVector3(KEY_MOON_DIRECTION, KEY_MOON_DIR) ?: LLVector3.zero(),
+                moonDirection = map.getVector3(KEY_MOON_DIRECTION, KEY_MOON_DIR) ?: SLDefaultEnvironment.DEFAULT_MOON_DIRECTION,
                 sunlightColor = map.getColor4(KEY_SUNLIGHT_COLOR) ?: defaults.sunColor,
                 ambientColor = map.getColor4(KEY_AMBIENT, KEY_AMBIENT_COLOR) ?: DEFAULT_AMBIENT_COLOR,
                 blueHorizon = map.getColor4(KEY_BLUE_HORIZON) ?: defaults.horizonColor,
                 blueDensity = map.getColor4(KEY_BLUE_DENSITY) ?: DEFAULT_BLUE_DENSITY,
-                hazeHorizon = map.getFloatValue(KEY_HAZE_HORIZON) ?: 0f,
-                hazeDensity = map.getFloatValue(KEY_HAZE_DENSITY) ?: 0f,
+                hazeHorizon = map.getFloatValue(KEY_HAZE_HORIZON) ?: SLDefaultEnvironment.DEFAULT_HAZE_HORIZON,
+                hazeDensity = map.getFloatValue(KEY_HAZE_DENSITY) ?: SLDefaultEnvironment.DEFAULT_HAZE_DENSITY,
                 cloudColor = map.getColor4(KEY_CLOUD_COLOR) ?: defaults.cloudColor,
                 cloudCoverage = map.getFloatValue(KEY_CLOUD_COVERAGE) ?: defaults.cloudCoverage,
                 sunScale = map.getFloatValue(KEY_SUN_SCALE) ?: 1f,
