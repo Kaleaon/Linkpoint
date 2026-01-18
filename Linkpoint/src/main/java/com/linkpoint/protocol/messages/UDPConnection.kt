@@ -107,6 +107,27 @@ class UDPConnection {
         private const val MAX_ACKS_PER_PACKET = 10
         private const val ACK_FLUSH_INTERVAL_MS = 100L
         
+        // ==================== MESSAGE FREQUENCY CONSTANTS ====================
+        // Per Lumiya's DecodeMessageID(), message IDs are decoded as follows:
+        // - High frequency: signed byte value (-128 to 254, excluding -1/0xFF)
+        // - Medium frequency: (byte | 65280) = 65280-65534
+        // - Low frequency: (short | -65536) = negative values < -128
+        
+        // Invalid message ID - used as error indicator
+        const val INVALID_MESSAGE_ID = Int.MIN_VALUE
+        
+        // Medium frequency range (byte | 65280)
+        private const val MEDIUM_FREQUENCY_BASE = 65280
+        private const val MEDIUM_FREQUENCY_MIN = 65280
+        private const val MEDIUM_FREQUENCY_MAX = 65534
+        
+        // Low frequency base (-65536 in Lumiya)
+        private const val LOW_FREQUENCY_BASE = -65536
+        
+        // Threshold for distinguishing high vs low frequency
+        // Values < -128 are low frequency (result of short | -65536)
+        private const val HIGH_FREQUENCY_THRESHOLD = -128
+        
         // ==================== STANDARD MEMORY SIZES ====================
         // Standard computer memory measurements for user-friendly configuration.
         // These align with how users typically think about memory allocation.
@@ -461,19 +482,15 @@ class UDPConnection {
     }
     
     /**
-     * Extract the message ID from raw packet data.
-     * Returns -1 if packet is too short to contain a valid message ID.
-     */
-    /**
      * Extract message ID from raw packet data using Lumiya-style decoding.
      * Used for packet history and diagnostics.
      */
     private fun extractMessageId(data: ByteArray): Int {
-        if (data.size < 7) return Int.MIN_VALUE // Use MIN_VALUE as error indicator
+        if (data.size < PACKET_HEADER_SIZE + 1) return INVALID_MESSAGE_ID
         
         // Skip header (6 bytes): flags (1) + sequence (4) + extra (1)
-        val result = decodeMessageIdLumiyaStyle(data, 6)
-        return result?.first ?: Int.MIN_VALUE
+        val result = decodeMessageIdLumiyaStyle(data, PACKET_HEADER_SIZE)
+        return result?.first ?: INVALID_MESSAGE_ID
     }
     
     /**
@@ -1132,17 +1149,17 @@ class UDPConnection {
         // This must be the INVERSE of decodeMessageIdLumiyaStyle().
         //
         // Lumiya-style message IDs:
-        // - High frequency: -128 to 127 (signed byte), but typically 0-254 and -5 (PacketAck)
+        // - High frequency: signed byte (-128 to 254, excluding -1)
         //   -> Encoded as single byte
-        // - Medium frequency: 65280-65534 (byte | 65280)
+        // - Medium frequency: MEDIUM_FREQUENCY_MIN to MEDIUM_FREQUENCY_MAX (65280-65534)
         //   -> Encoded as 0xFF followed by (id & 0xFF)
-        // - Low frequency: negative values like -65533 (short | -65536)
+        // - Low frequency: negative values < HIGH_FREQUENCY_THRESHOLD (-128)
         //   -> Encoded as 0xFF 0xFF followed by big-endian short
         val messageBytes = when {
-            // Low frequency: negative values less than -128 (result of short | -65536)
+            // Low frequency: negative values less than HIGH_FREQUENCY_THRESHOLD
             // e.g., -65533 for UseCircuitCode, -65388 for RegionHandshake
-            messageId < -128 -> {
-                // Extract the original short value: messageId = short | -65536
+            messageId < HIGH_FREQUENCY_THRESHOLD -> {
+                // Extract the original short value: messageId = short | LOW_FREQUENCY_BASE
                 // So short = messageId & 0xFFFF
                 val shortValue = messageId and 0xFFFF
                 byteArrayOf(
@@ -1152,14 +1169,13 @@ class UDPConnection {
                     (shortValue and 0xFF).toByte()
                 )
             }
-            // Medium frequency: 65280-65534 (byte | 65280)
+            // Medium frequency: MEDIUM_FREQUENCY_MIN to MEDIUM_FREQUENCY_MAX
             // e.g., 65286 for CoarseLocationUpdate
-            messageId in 65280..65534 -> {
+            messageId in MEDIUM_FREQUENCY_MIN..MEDIUM_FREQUENCY_MAX -> {
                 byteArrayOf(0xFF.toByte(), (messageId and 0xFF).toByte())
             }
-            // High frequency: -128 to 254 (signed byte range, excluding -1/0xFF)
+            // High frequency: signed byte range (excluding -1/0xFF which is prefix)
             // e.g., 12 for ObjectUpdate, -5 for PacketAck
-            // Note: -1 (0xFF) would be confused with medium/low frequency prefix
             else -> {
                 byteArrayOf(messageId.toByte())
             }
@@ -1531,8 +1547,8 @@ class UDPConnection {
      * 
      * Key insight: Lumiya uses SIGNED bytes and shorts, which affects the resulting IDs:
      * - High frequency: signed byte (0x00-0xFE = 0-254, but 0xFB = -5)
-     * - Medium frequency: (signed byte | 65280) gives 65280-65534
-     * - Low frequency: (signed short | -65536) gives negative values like -65533
+     * - Medium frequency: (signed byte | MEDIUM_FREQUENCY_BASE) gives MEDIUM_FREQUENCY_MIN-MEDIUM_FREQUENCY_MAX
+     * - Low frequency: (signed short | LOW_FREQUENCY_BASE) gives negative values < HIGH_FREQUENCY_THRESHOLD
      * 
      * @param data The packet data
      * @param startOffset The offset where the message ID starts (after header)
@@ -1560,26 +1576,29 @@ class UDPConnection {
         offset++
         
         if (b2 != -1) {
-            // Medium frequency message - byte OR 65280
+            // Medium frequency message - byte OR MEDIUM_FREQUENCY_BASE
             // This matches Lumiya: b2 | 65280
             // e.g., 0x06 (6) | 65280 = 65286 = CoarseLocationUpdate
-            return Pair(b2 or 65280, offset)
+            return Pair(b2 or MEDIUM_FREQUENCY_BASE, offset)
         }
         
-        // Low frequency message - next two bytes as signed short OR -65536
+        // Low frequency message - next two bytes as signed short OR LOW_FREQUENCY_BASE
         if (data.size <= offset + 1) return null
         
-        // Read as big-endian short (network order) then convert to signed
+        // Big-endian to signed short conversion:
+        // 1. Read two bytes as unsigned (byte3=high, byte4=low) in network/big-endian order
+        // 2. Combine into a 16-bit value: (byte3 << 8) | byte4
+        // 3. Convert to signed short via .toShort().toInt() to sign-extend
+        // This matches Java's ByteBuffer.getShort() in BIG_ENDIAN order
         val byte3 = data[offset].toInt() and 0xFF
         val byte4 = data[offset + 1].toInt() and 0xFF
         offset += 2
         
-        // Combine bytes as big-endian short, then sign-extend
         val shortValue = ((byte3 shl 8) or byte4).toShort().toInt()
         
         // This matches Lumiya: byteBuffer.getShort() | (-65536)
         // e.g., 0x0094 (148) | -65536 = -65388 = RegionHandshake
-        return Pair(shortValue or (-65536), offset)
+        return Pair(shortValue or LOW_FREQUENCY_BASE, offset)
     }
     
     /**
