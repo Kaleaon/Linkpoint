@@ -421,7 +421,11 @@ object NetworkLogger {
     }
     
     /**
-     * Track protocol usage by request type for HTTP/2 monitoring
+     * Track protocol usage by URL pattern matching (fallback for generic HTTP responses).
+     * 
+     * NOTE: For specialized logging (textures, meshes, capabilities), use the explicit
+     * `trackProtocolUsageByType()` method which is more reliable than URL pattern matching.
+     * This method is used as a fallback for the general `logResponse()` function.
      */
     private fun trackProtocolUsage(url: String, protocol: String) {
         val isHttp2 = protocol.contains("h2", ignoreCase = true) || protocol.contains("http/2", ignoreCase = true)
@@ -435,7 +439,8 @@ object NetworkLogger {
             isHttp10 -> protocolStats.http10Requests++
         }
         
-        // Track by request type based on URL patterns
+        // Track by request type based on URL patterns (best-effort classification)
+        // For more reliable tracking, use trackProtocolUsageByType() instead
         val urlLower = url.lowercase()
         when {
             urlLower.contains("texture") || urlLower.contains("gettexture") -> {
