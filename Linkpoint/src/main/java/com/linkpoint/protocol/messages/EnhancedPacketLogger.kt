@@ -27,6 +27,16 @@ object EnhancedPacketLogger {
     
     private const val TAG = "PacketLogger"
     
+    // Message names that should not count as handler misses
+    // These are internal protocol messages or handled specially
+    private val EXPECTED_UNHANDLED_MESSAGES = setOf(
+        "PacketAck",
+        "PacketAckResponse", 
+        "StartPingCheck",
+        "CompletePingCheck",
+        "Unknown" // Unknown messages are expected and tracked separately
+    )
+    
     // Configuration
     @Volatile
     var isEnabled: Boolean = true
@@ -231,7 +241,12 @@ object EnhancedPacketLogger {
         receivedMessageCounts.getOrPut(messageName) { AtomicLong(0) }.incrementAndGet()
         lastMessageTimes[messageName] = lastPacketReceivedTime
         
-        if (!handlerFound && !messageName.contains("PacketAck") && !messageName.contains("Unknown")) {
+        // Check if this is an expected unhandled message type
+        val isExpectedUnhandled = EXPECTED_UNHANDLED_MESSAGES.any { expectedName ->
+            messageName.contains(expectedName, ignoreCase = true)
+        }
+        
+        if (!handlerFound && !isExpectedUnhandled) {
             handlerMisses.incrementAndGet()
         }
         

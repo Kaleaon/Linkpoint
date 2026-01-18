@@ -36,6 +36,9 @@ object NetworkLogger {
     private const val LOG_DIR_NAME = "Lumiya Logs"
     private const val AUTO_SAVE_INTERVAL_MS = 30000L // Auto-save every 30 seconds
     
+    // URL truncation length for log messages
+    private const val URL_TRUNCATE_LENGTH = 80
+    
     // Context for file operations
     private var appContext: Context? = null
     
@@ -298,6 +301,19 @@ object NetworkLogger {
         }
     }
     
+    /**
+     * Request type enum for explicit categorization (avoids URL string matching)
+     */
+    enum class RequestType {
+        TEXTURE,
+        MESH,
+        CAPABILITY,
+        LOGIN,
+        EVENT_QUEUE,
+        INVENTORY,
+        OTHER
+    }
+    
     // Protocol statistics instance
     private val protocolStats = ProtocolStatistics()
     
@@ -305,6 +321,41 @@ object NetworkLogger {
      * Get HTTP/2 protocol statistics
      */
     fun getProtocolStatistics(): ProtocolStatistics = protocolStats.copy()
+    
+    /**
+     * Track protocol usage by explicit request type (preferred over URL matching)
+     */
+    fun trackProtocolUsageByType(type: RequestType, protocol: String) {
+        val isHttp2 = protocol.contains("h2", ignoreCase = true) || protocol.contains("http/2", ignoreCase = true)
+        val isHttp11 = protocol.contains("1.1")
+        val isHttp10 = protocol.contains("1.0")
+        
+        // Update overall protocol counts
+        when {
+            isHttp2 -> protocolStats.http2Requests++
+            isHttp11 -> protocolStats.http11Requests++
+            isHttp10 -> protocolStats.http10Requests++
+        }
+        
+        // Track by request type
+        when (type) {
+            RequestType.TEXTURE -> {
+                protocolStats.lastTextureProtocol = protocol
+                if (isHttp2) protocolStats.textureHttp2Count++ else protocolStats.textureHttp11Count++
+            }
+            RequestType.MESH -> {
+                protocolStats.lastMeshProtocol = protocol
+                if (isHttp2) protocolStats.meshHttp2Count++ else protocolStats.meshHttp11Count++
+            }
+            RequestType.CAPABILITY, RequestType.LOGIN, RequestType.EVENT_QUEUE, RequestType.INVENTORY -> {
+                protocolStats.lastCapabilityProtocol = protocol
+                if (isHttp2) protocolStats.capabilityHttp2Count++ else protocolStats.capabilityHttp11Count++
+            }
+            RequestType.OTHER -> {
+                // Only update overall counts (already done above)
+            }
+        }
+    }
     
     /**
      * Log an HTTP request being sent
@@ -531,7 +582,7 @@ object NetworkLogger {
     fun logTextureRequest(textureId: String, url: String, priority: String = "NORMAL") {
         val message = buildString {
             append("🖼️ Texture Request: $textureId\n")
-            append("  URL: ${url.take(80)}...\n")
+            append("  URL: ${url.take(URL_TRUNCATE_LENGTH)}...\n")
             append("  Priority: $priority")
         }
         log(Level.DEBUG, Category.TEXTURE, message)
@@ -555,8 +606,8 @@ object NetworkLogger {
             sizeBytes?.let { append("  Size: $it bytes\n") }
             protocol?.let { 
                 append("  Protocol: $it\n")
-                // Track HTTP/2 usage for textures
-                trackProtocolUsage("texture/$textureId", it)
+                // Track HTTP/2 usage for textures using explicit type
+                trackProtocolUsageByType(RequestType.TEXTURE, it)
             }
             error?.let { append("  Error: $it") }
         }
@@ -585,7 +636,7 @@ object NetworkLogger {
     fun logMeshRequest(meshId: String, url: String) {
         val message = buildString {
             append("📦 Mesh Request: $meshId\n")
-            append("  URL: ${url.take(80)}...")
+            append("  URL: ${url.take(URL_TRUNCATE_LENGTH)}...")
         }
         log(Level.DEBUG, Category.MESH, message)
     }
@@ -608,7 +659,7 @@ object NetworkLogger {
             sizeBytes?.let { append("  Size: $it bytes\n") }
             protocol?.let {
                 append("  Protocol: $it\n")
-                trackProtocolUsage("mesh/$meshId", it)
+                trackProtocolUsageByType(RequestType.MESH, it)
             }
             error?.let { append("  Error: $it") }
         }
@@ -683,7 +734,7 @@ object NetworkLogger {
     fun logCapabilityRequest(capName: String, url: String) {
         val message = buildString {
             append("🔗 Capability Request: $capName\n")
-            append("  URL: ${url.take(80)}...")
+            append("  URL: ${url.take(URL_TRUNCATE_LENGTH)}...")
         }
         log(Level.DEBUG, Category.CAPABILITY, message)
     }
@@ -697,7 +748,7 @@ object NetworkLogger {
             append("🔗 Capability $statusIcon: $capName (${durationMs}ms)")
             protocol?.let {
                 append("\n  Protocol: $it")
-                trackProtocolUsage("cap/$capName", it)
+                trackProtocolUsageByType(RequestType.CAPABILITY, it)
             }
             error?.let { append("\n  Error: $it") }
         }
