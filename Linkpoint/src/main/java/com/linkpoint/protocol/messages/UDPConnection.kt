@@ -464,31 +464,16 @@ class UDPConnection {
      * Extract the message ID from raw packet data.
      * Returns -1 if packet is too short to contain a valid message ID.
      */
+    /**
+     * Extract message ID from raw packet data using Lumiya-style decoding.
+     * Used for packet history and diagnostics.
+     */
     private fun extractMessageId(data: ByteArray): Int {
-        if (data.size < 7) return -1
+        if (data.size < 7) return Int.MIN_VALUE // Use MIN_VALUE as error indicator
         
         // Skip header (6 bytes): flags (1) + sequence (4) + extra (1)
-        val msgStart = 6
-        
-        return when {
-            data.size < msgStart + 1 -> -1
-            data[msgStart].toInt() and 0xFF != 0xFF -> {
-                // High frequency (single byte)
-                data[msgStart].toInt() and 0xFF
-            }
-            data.size < msgStart + 2 -> -1
-            data[msgStart + 1].toInt() and 0xFF != 0xFF -> {
-                // Medium frequency (0xFF XX)
-                0xFF00 or (data[msgStart + 1].toInt() and 0xFF)
-            }
-            data.size < msgStart + 4 -> -1
-            else -> {
-                // Low frequency (0xFF FF XX XX)
-                val byte2 = data[msgStart + 2].toInt() and 0xFF
-                val byte3 = data[msgStart + 3].toInt() and 0xFF
-                0xFFFF0000.toInt() or (byte2 shl 8) or byte3
-            }
-        }
+        val result = decodeMessageIdLumiyaStyle(data, 6)
+        return result?.first ?: Int.MIN_VALUE
     }
     
     /**
@@ -1143,35 +1128,39 @@ class UDPConnection {
         header.putInt(seqNum)
         header.put(0.toByte()) // Extra header byte (no extra data)
         
-        // Determine message ID size (network order, per SL/PyOGP packet layout).
-        // This matches Lumiya's PackPayload which writes the message ID prefix.
+        // Encode message ID for transmission (network order).
+        // This must be the INVERSE of decodeMessageIdLumiyaStyle().
         //
-        // CRITICAL: Low frequency message IDs like 0xFFFF0003.toInt() become negative
-        // integers in Kotlin/Java (e.g., -65533). We MUST check for low frequency first
-        // using the unsigned right shift (ushr), which correctly identifies them even
-        // when negative. If we checked `messageId <= 0xFF` first, negative IDs would
-        // incorrectly match that branch since -65533 < 255.
+        // Lumiya-style message IDs:
+        // - High frequency: -128 to 127 (signed byte), but typically 0-254 and -5 (PacketAck)
+        //   -> Encoded as single byte
+        // - Medium frequency: 65280-65534 (byte | 65280)
+        //   -> Encoded as 0xFF followed by (id & 0xFF)
+        // - Low frequency: negative values like -65533 (short | -65536)
+        //   -> Encoded as 0xFF 0xFF followed by big-endian short
         val messageBytes = when {
-            // Low frequency messages: 0xFFFF0000 - 0xFFFFFFFF (negative when signed)
-            // Check first because these IDs are negative and would match <= 0xFF check
-            messageId ushr 16 == 0xFFFF -> {
-                // Low frequency message: FF FF XX XX (4 bytes)
+            // Low frequency: negative values less than -128 (result of short | -65536)
+            // e.g., -65533 for UseCircuitCode, -65388 for RegionHandshake
+            messageId < -128 -> {
+                // Extract the original short value: messageId = short | -65536
+                // So short = messageId & 0xFFFF
+                val shortValue = messageId and 0xFFFF
                 byteArrayOf(
                     0xFF.toByte(),
                     0xFF.toByte(),
-                    ((messageId shr 8) and 0xFF).toByte(),
-                    (messageId and 0xFF).toByte()
+                    ((shortValue shr 8) and 0xFF).toByte(),
+                    (shortValue and 0xFF).toByte()
                 )
             }
-            // Medium frequency messages: 0xFF00 - 0xFFFE (positive, 2 bytes)
-            messageId in 0xFF00..0xFFFE -> {
+            // Medium frequency: 65280-65534 (byte | 65280)
+            // e.g., 65286 for CoarseLocationUpdate
+            messageId in 65280..65534 -> {
                 byteArrayOf(0xFF.toByte(), (messageId and 0xFF).toByte())
             }
-            // High frequency messages: 0x00 - 0xFE (single byte)
-            messageId in 0x00..0xFE -> byteArrayOf(messageId.toByte())
-            // Fallback (should not normally be reached)
+            // High frequency: -128 to 254 (signed byte range, excluding -1/0xFF)
+            // e.g., 12 for ObjectUpdate, -5 for PacketAck
+            // Note: -1 (0xFF) would be confused with medium/low frequency prefix
             else -> {
-                Log.w(TAG, "Unexpected message ID format: 0x${messageId.toString(16)}")
                 byteArrayOf(messageId.toByte())
             }
         }
@@ -1442,34 +1431,24 @@ class UDPConnection {
         val flags = decoded[0].toInt() and 0xFF
         val hasAcks = (flags and FLAG_ACK) != 0
         
-        // Parse message ID
+        // Parse message ID using Lumiya-compatible decoding
+        // This matches Lumiya's SLMessage.DecodeMessageID() exactly:
+        //   byte b = byteBuffer.get();
+        //   if (b != -1) return b;  // High frequency - returns SIGNED byte
+        //   byte b2 = byteBuffer.get();
+        //   return b2 != -1 ? b2 | 65280 : byteBuffer.getShort() | (-65536);
         var offset = PACKET_HEADER_SIZE
-        val messageId = when {
-            decoded[offset] != 0xFF.toByte() -> {
-                val id = decoded[offset].toInt() and 0xFF
-                offset++
-                id
-            }
-            decoded.size > offset + 1 && decoded[offset + 1] != 0xFF.toByte() -> {
-                val id = (0xFF00 or (decoded[offset + 1].toInt() and 0xFF))
-                offset += 2
-                id
-            }
-            decoded.size > offset + 3 -> {
-                val id = ((decoded[offset + 2].toInt() and 0xFF) shl 8) or
-                    (decoded[offset + 3].toInt() and 0xFF)
-                offset += 4
-                (0xFFFF shl 16) or id
-            }
-            else -> {
-                Log.w(TAG, "   ⚠️ Could not parse message ID")
-                return
-            }
+        val messageId = decodeMessageIdLumiyaStyle(decoded, offset)
+        if (messageId == null) {
+            Log.w(TAG, "   ⚠️ Could not parse message ID")
+            return
         }
+        offset = messageId.second
+        val msgId = messageId.first
         
         // Get message name for logging
-        val messageName = getMessageName(messageId)
-        Log.i(TAG, "   📨 Message: $messageName (0x${messageId.toString(16).uppercase()})")
+        val messageName = getMessageName(msgId)
+        Log.i(TAG, "   📨 Message: $messageName (0x${msgId.toString(16).uppercase()})")
         
         // Track message statistics for diagnostics
         val cleanMessageName = messageName.replace(CRITICAL_MESSAGE_PREFIX, "") // Remove prefix for stats key
@@ -1480,18 +1459,18 @@ class UDPConnection {
         val payload = decoded.copyOfRange(offset, decoded.size - if (hasAcks) 1 + (decoded[decoded.size - 1].toInt() and 0xFF) * 4 else 0)
         
         // Handle PacketAck messages internally (acknowledges our sent packets) - process synchronously as it's time-critical
-        if (messageId == MessageIds.PACKET_ACK) {
+        if (msgId == MessageIds.PACKET_ACK) {
             handlePacketAck(payload)
             return
         }
         
-        val handler = messageHandlers[messageId]
+        val handler = messageHandlers[msgId]
         if (handler != null) {
             Log.d(TAG, "   → Dispatching to handler asynchronously (${payload.size} bytes payload)")
             // Dispatch handler execution on thread pool for parallel processing
             scope.launch(packetProcessorDispatcher) {
                 try {
-                    handler.onMessage(messageId, payload)
+                    handler.onMessage(msgId, payload)
                     Log.d(TAG, "   ✓ Handler executed successfully for $messageName")
                 } catch (e: Exception) {
                     Log.e(TAG, "   ✗ Handler failed for $messageName", e)
@@ -1533,6 +1512,74 @@ class UDPConnection {
                 ackCallbacks.remove(ackSeq)?.invoke()
             }
         }
+    }
+    
+    /**
+     * Decode message ID using Lumiya-compatible method.
+     * 
+     * This exactly matches Lumiya's SLMessage.DecodeMessageID():
+     * ```java
+     * public static int DecodeMessageID(ByteBuffer byteBuffer) {
+     *     byte b = byteBuffer.get();
+     *     if (b != -1) {
+     *         return b;  // High frequency: returns SIGNED byte (-128 to 127)
+     *     }
+     *     byte b2 = byteBuffer.get();
+     *     return b2 != -1 ? b2 | 65280 : byteBuffer.getShort() | (-65536);
+     * }
+     * ```
+     * 
+     * Key insight: Lumiya uses SIGNED bytes and shorts, which affects the resulting IDs:
+     * - High frequency: signed byte (0x00-0xFE = 0-254, but 0xFB = -5)
+     * - Medium frequency: (signed byte | 65280) gives 65280-65534
+     * - Low frequency: (signed short | -65536) gives negative values like -65533
+     * 
+     * @param data The packet data
+     * @param startOffset The offset where the message ID starts (after header)
+     * @return Pair of (messageId, newOffset) or null if parsing failed
+     */
+    private fun decodeMessageIdLumiyaStyle(data: ByteArray, startOffset: Int): Pair<Int, Int>? {
+        if (data.size <= startOffset) return null
+        
+        var offset = startOffset
+        
+        // First byte - check if it's 0xFF (which is -1 as signed byte)
+        val b1 = data[offset].toInt() // Signed byte, -128 to 127
+        offset++
+        
+        if (b1 != -1) {
+            // High frequency message - return the signed byte value directly
+            // This matches Lumiya: if (b != -1) return b;
+            // e.g., 0x0C (12) = ObjectUpdate, 0xFB (-5) = PacketAck
+            return Pair(b1, offset)
+        }
+        
+        // Second byte
+        if (data.size <= offset) return null
+        val b2 = data[offset].toInt() // Signed byte
+        offset++
+        
+        if (b2 != -1) {
+            // Medium frequency message - byte OR 65280
+            // This matches Lumiya: b2 | 65280
+            // e.g., 0x06 (6) | 65280 = 65286 = CoarseLocationUpdate
+            return Pair(b2 or 65280, offset)
+        }
+        
+        // Low frequency message - next two bytes as signed short OR -65536
+        if (data.size <= offset + 1) return null
+        
+        // Read as big-endian short (network order) then convert to signed
+        val byte3 = data[offset].toInt() and 0xFF
+        val byte4 = data[offset + 1].toInt() and 0xFF
+        offset += 2
+        
+        // Combine bytes as big-endian short, then sign-extend
+        val shortValue = ((byte3 shl 8) or byte4).toShort().toInt()
+        
+        // This matches Lumiya: byteBuffer.getShort() | (-65536)
+        // e.g., 0x0094 (148) | -65536 = -65388 = RegionHandshake
+        return Pair(shortValue or (-65536), offset)
     }
     
     /**
@@ -1817,6 +1864,8 @@ class UDPConnection {
                 MessageIds.IMPROVED_TERSE_OBJECT_UPDATE -> "IMPROVED_TERSE_OBJECT_UPDATE"
                 MessageIds.KILL_OBJECT -> "KILL_OBJECT"
                 MessageIds.COARSE_LOCATION_UPDATE -> "COARSE_LOCATION_UPDATE"
+                MessageIds.START_PING_CHECK -> "START_PING_CHECK"
+                MessageIds.PACKET_ACK -> "PACKET_ACK"
                 else -> "0x${id.toString(16).uppercase()}"
             }
         }
@@ -1983,35 +2032,42 @@ object MessageIds {
     const val PARCEL_DISABLE_OBJECTS: Int = 0xFFFF00C9.toInt()
     
     // Medium frequency (0xFFxx)
-    const val AGENT_UPDATE: Int = 0xFF04
-    const val INSTANT_MESSAGE: Int = 0xFF4B
-    const val KILL_OBJECT: Int = 0xFF0C
-    const val OBJECT_SELECT: Int = 0xFF09
-    const val OBJECT_DESELECT: Int = 0xFF0A
-    const val MULTIPLE_OBJECT_UPDATE: Int = 0xFF0B
-    const val AGENT_ANIMATION: Int = 0xFF05
-    const val SOUND_TRIGGER: Int = 0xFF1D
+    // Format: 0xFF prefix followed by message byte, decoded as (byte | 65280)
+    // Per Lumiya's DecodeMessageID: b2 | 65280
+    const val INSTANT_MESSAGE: Int = 65355        // 0xFF4B = (75 | 65280) = 65355
+    const val OBJECT_SELECT: Int = 65289          // 0xFF09 = (9 | 65280) = 65289
+    const val OBJECT_DESELECT: Int = 65290        // 0xFF0A = (10 | 65280) = 65290
+    const val MULTIPLE_OBJECT_UPDATE: Int = 65282 // 0xFF02 = per Lumiya SLMessageFactory
+    const val SOUND_TRIGGER: Int = 65309          // 0xFF1D = (29 | 65280) = 65309
     
     // Low frequency chat message (0xFFFFxxxx)
     // ChatFromViewer is Low 80 = 0xFFFF0050 per message_template.msg
     const val CHAT_FROM_VIEWER: Int = 0xFFFF0050.toInt()
     
-    // High frequency (0x00 - 0xFE)
-    const val START_PING_CHECK: Int = 0x01
-    const val COMPLETE_PING_CHECK: Int = 0x02
-    const val OBJECT_UPDATE: Int = 0x0C
-    const val OBJECT_UPDATE_COMPRESSED: Int = 0x0D
-    const val OBJECT_UPDATE_CACHED: Int = 0x0E
-    const val IMPROVED_TERSE_OBJECT_UPDATE: Int = 0x0F
-    const val AVATAR_ANIMATION: Int = 0x14
-    const val COARSE_LOCATION_UPDATE: Int = 0x06
+    // High frequency (0x00 - 0xFE) - single byte, returned as-is
+    // These match Lumiya's SLMessageFactory exactly
+    const val START_PING_CHECK: Int = 1          // 0x01
+    const val COMPLETE_PING_CHECK: Int = 2       // 0x02
+    const val AGENT_UPDATE: Int = 4              // 0x04 - High frequency per Lumiya
+    const val AGENT_ANIMATION: Int = 5           // 0x05 - High frequency per Lumiya
+    const val OBJECT_UPDATE: Int = 12            // 0x0C
+    const val OBJECT_UPDATE_COMPRESSED: Int = 13 // 0x0D
+    const val OBJECT_UPDATE_CACHED: Int = 14     // 0x0E
+    const val IMPROVED_TERSE_OBJECT_UPDATE: Int = 15 // 0x0F
+    const val KILL_OBJECT: Int = 16              // 0x10 - High frequency per Lumiya
+    const val AVATAR_ANIMATION: Int = 20         // 0x14
+    
+    // Medium frequency (0xFF00 - 0xFFFE) - 0xFF prefix + byte, returned as (byte | 65280)
+    // These match Lumiya's SLMessageFactory (e.g., CoarseLocationUpdate = 65286)
+    const val COARSE_LOCATION_UPDATE: Int = 65286 // 0xFF06 = (6 | 65280)
     
     // Region/Connection messages
     const val REGION_HANDSHAKE_REPLY: Int = 0xFFFF0095.toInt()
     const val AGENT_THROTTLE: Int = 0xFFFF0099.toInt()
     
-    // Packet ACK is high frequency (0xFB)
-    const val PACKET_ACK: Int = 0xFB
+    // PacketAck - Lumiya treats this as signed byte 0xFB = -5
+    // Per SLMessageFactory: case -5: return new PacketAck();
+    const val PACKET_ACK: Int = -5
     
     // Inventory messages
     const val MOVE_INVENTORY_ITEM: Int = 0xFFFF0109.toInt()
