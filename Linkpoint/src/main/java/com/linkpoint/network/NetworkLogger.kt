@@ -1,13 +1,16 @@
 package com.linkpoint.network
 
+import android.content.ContentValues
 import android.content.Context
 import android.os.Build
 import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import okhttp3.Request
 import okhttp3.Response
 import java.io.File
 import java.io.IOException
+import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -23,7 +26,10 @@ import kotlinx.coroutines.*
  * - Retry attempts with backoff timing
  * - SSL/TLS handshake information
  * - DNS resolution results
- * - Automatic saving to Downloads/Lumiya Logs/ directory
+ * - Automatic saving to external storage Downloads/Lumiya Logs/ directory
+ * 
+ * Logs are saved to the PUBLIC Downloads folder at /Download/Lumiya Logs/
+ * so they can be accessed outside the app via file manager.
  * 
  * All logs are tagged for easy filtering in logcat:
  * - `adb logcat NetworkLogger:D *:S` - Only network logs
@@ -77,7 +83,14 @@ object NetworkLogger {
     fun initialize(context: Context) {
         appContext = context.applicationContext
         startAutoSave()
-        Log.i(TAG, "NetworkLogger initialized, auto-save enabled to Downloads/$LOG_DIR_NAME/")
+        
+        // Log the actual path where logs will be saved
+        val logDir = getLogDirectory()
+        if (logDir != null) {
+            Log.i(TAG, "NetworkLogger initialized, logs will be saved to: ${logDir.absolutePath}")
+        } else {
+            Log.w(TAG, "NetworkLogger initialized, but log directory is not available")
+        }
     }
     
     /**
@@ -98,35 +111,83 @@ object NetworkLogger {
     }
     
     /**
-     * Get the log directory in Downloads folder
+     * Get the log directory in the PUBLIC Downloads folder.
+     * 
+     * Logs are saved to /storage/emulated/0/Download/Lumiya Logs/ (or equivalent)
+     * so they can be accessed via file manager outside the app.
+     * 
+     * For Android 10+ (API 29+), we use the legacy external storage path which
+     * still works for the Downloads directory. MediaStore is used as a fallback
+     * for writing individual files if direct file access fails.
      */
     private fun getLogDirectory(): File? {
-        val context = appContext ?: return null
+        // Use the public Downloads directory on external storage
+        // This path is: /storage/emulated/0/Download/Lumiya Logs/
+        @Suppress("DEPRECATION")
+        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        val logDir = File(downloadsDir, LOG_DIR_NAME)
         
-        // For Android 10+ (API 29+), use MediaStore or app-specific directory
-        // For now, use the public Downloads directory which doesn't require runtime permissions on Android 10+
-        val downloadsDir = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // Android 10+ - use app-specific directory in Downloads
-            File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), LOG_DIR_NAME)
-        } else {
-            // Android 9 and below - use public Downloads directory
-            File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), LOG_DIR_NAME)
+        try {
+            if (!logDir.exists()) {
+                val created = logDir.mkdirs()
+                if (created) {
+                    Log.i(TAG, "Created log directory: ${logDir.absolutePath}")
+                } else {
+                    Log.w(TAG, "Failed to create log directory: ${logDir.absolutePath}")
+                    // Try fallback to app-specific external directory
+                    return getAppSpecificLogDirectory()
+                }
+            }
+            
+            // Verify we can write to this directory
+            if (!logDir.canWrite()) {
+                Log.w(TAG, "Cannot write to log directory: ${logDir.absolutePath}")
+                return getAppSpecificLogDirectory()
+            }
+            
+            return logDir
+        } catch (e: Exception) {
+            Log.e(TAG, "Error accessing log directory: ${e.message}", e)
+            return getAppSpecificLogDirectory()
         }
-        
-        if (!downloadsDir.exists()) {
-            downloadsDir.mkdirs()
-        }
-        
-        return downloadsDir
     }
     
     /**
-     * Save current logs to a file
+     * Fallback to app-specific external directory if public Downloads is not accessible.
+     * This is still accessible via Android/data/com.linkpoint.debug/files/Download/Lumiya Logs/
+     */
+    private fun getAppSpecificLogDirectory(): File? {
+        val context = appContext ?: return null
+        
+        val appExtDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+        if (appExtDir == null) {
+            Log.w(TAG, "External files directory not available")
+            return null
+        }
+        
+        val logDir = File(appExtDir, LOG_DIR_NAME)
+        try {
+            if (!logDir.exists()) {
+                logDir.mkdirs()
+            }
+            Log.i(TAG, "Using app-specific log directory: ${logDir.absolutePath}")
+            return logDir
+        } catch (e: Exception) {
+            Log.e(TAG, "Error creating app-specific log directory: ${e.message}", e)
+            return null
+        }
+    }
+    
+    /**
+     * Save current logs to a file in the public Downloads/Lumiya Logs/ directory.
+     * 
+     * On Android 10+ (API 29+), if direct file access fails, this will attempt
+     * to use MediaStore API to write to the Downloads directory.
      */
     fun saveLogsToFile(): File? {
         val logDir = getLogDirectory() ?: run {
-            Log.w(TAG, "Cannot get log directory - context not initialized")
-            return null
+            Log.w(TAG, "Cannot get log directory - trying MediaStore fallback")
+            return saveLogsViaMediaStore()
         }
         
         if (logBuffer.isEmpty()) {
@@ -145,12 +206,15 @@ object NetworkLogger {
                 logFileWriter?.apply {
                     write("=== Linkpoint Network Activity Log ===\n")
                     write("Started: ${timestampFormat.format(Date())}\n")
+                    write("Log Location: ${logDir.absolutePath}\n")
                     write("Device: ${Build.MANUFACTURER} ${Build.MODEL}\n")
                     write("Android: ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})\n")
                     write("Log Level: $logLevel\n")
                     write("=".repeat(60) + "\n\n")
                     flush()
                 }
+                
+                Log.i(TAG, "Created new log file: ${currentLogFile?.absolutePath}")
             }
             
             // Append new log entries
@@ -172,7 +236,87 @@ object NetworkLogger {
             return currentLogFile
             
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to save logs to file: ${e.message}", e)
+            Log.e(TAG, "Failed to save logs to file: ${e.message}, trying MediaStore fallback", e)
+            return saveLogsViaMediaStore()
+        }
+    }
+    
+    /**
+     * Save logs using MediaStore API for Android 10+ (API 29+).
+     * This is a fallback when direct file access to public Downloads fails.
+     * 
+     * Creates files in the Downloads directory accessible via file manager.
+     */
+    private fun saveLogsViaMediaStore(): File? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            Log.w(TAG, "MediaStore fallback not available on Android < 10")
+            return null
+        }
+        
+        val context = appContext ?: run {
+            Log.w(TAG, "Cannot save via MediaStore - context not initialized")
+            return null
+        }
+        
+        if (logBuffer.isEmpty()) {
+            return null
+        }
+        
+        try {
+            val timestamp = fileNameFormat.format(Date())
+            val fileName = "network_log_$timestamp.txt"
+            val relativePath = "${Environment.DIRECTORY_DOWNLOADS}/$LOG_DIR_NAME"
+            
+            val contentValues = ContentValues().apply {
+                put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+                put(MediaStore.Downloads.MIME_TYPE, "text/plain")
+                put(MediaStore.Downloads.RELATIVE_PATH, relativePath)
+            }
+            
+            val resolver = context.contentResolver
+            val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+            
+            if (uri == null) {
+                Log.e(TAG, "Failed to create MediaStore entry for log file")
+                return null
+            }
+            
+            resolver.openOutputStream(uri)?.use { outputStream ->
+                val writer = outputStream.bufferedWriter()
+                
+                // Write header
+                writer.write("=== Linkpoint Network Activity Log ===\n")
+                writer.write("Started: ${timestampFormat.format(Date())}\n")
+                writer.write("Log Location: $relativePath/$fileName (via MediaStore)\n")
+                writer.write("Device: ${Build.MANUFACTURER} ${Build.MODEL}\n")
+                writer.write("Android: ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})\n")
+                writer.write("Log Level: $logLevel\n")
+                writer.write("=".repeat(60) + "\n\n")
+                
+                // Write log entries
+                logBuffer.forEach { entry ->
+                    val entryTimestamp = timestampFormat.format(Date(entry.timestamp))
+                    writer.write("[$entryTimestamp] [${entry.level}] [${entry.category}]\n")
+                    writer.write("${entry.message}\n")
+                    entry.exception?.let { e ->
+                        writer.write("Exception: ${e.javaClass.simpleName}: ${e.message}\n")
+                        writer.write("${e.stackTraceToString()}\n")
+                    }
+                    writer.write("\n")
+                }
+                
+                writer.flush()
+            }
+            
+            Log.i(TAG, "Saved ${logBuffer.size} log entries via MediaStore to $relativePath/$fileName")
+            
+            // Return a File object pointing to the expected location (for reference)
+            @Suppress("DEPRECATION")
+            val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            return File(File(downloadsDir, LOG_DIR_NAME), fileName)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to save logs via MediaStore: ${e.message}", e)
             return null
         }
     }
@@ -192,27 +336,93 @@ object NetworkLogger {
     }
     
     /**
-     * Clean up old log files (keep last N files)
+     * Clean up old log files (keep last N files).
+     * Works with both direct file access and MediaStore on Android 10+.
      */
     fun cleanOldLogs(keepCount: Int = 10) {
-        val logDir = getLogDirectory() ?: return
-        
-        val logFiles = logDir.listFiles { file ->
-            file.name.startsWith("network_log_") && file.name.endsWith(".txt")
-        } ?: return
-        
-        // Sort by last modified, newest first
-        val sortedFiles = logFiles.sortedByDescending { it.lastModified() }
-        
-        // Delete old files beyond keepCount
-        sortedFiles.drop(keepCount).forEach { file ->
-            try {
-                if (file.delete()) {
-                    Log.d(TAG, "Deleted old log file: ${file.name}")
-                }
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to delete old log: ${file.name}", e)
+        // Try direct file cleanup first
+        val logDir = getLogDirectory()
+        if (logDir != null) {
+            val logFiles = logDir.listFiles { file ->
+                file.name.startsWith("network_log_") && file.name.endsWith(".txt")
             }
+            
+            if (logFiles != null && logFiles.isNotEmpty()) {
+                // Sort by last modified, newest first
+                val sortedFiles = logFiles.sortedByDescending { it.lastModified() }
+                
+                // Delete old files beyond keepCount
+                sortedFiles.drop(keepCount).forEach { file ->
+                    try {
+                        if (file.delete()) {
+                            Log.d(TAG, "Deleted old log file: ${file.name}")
+                        }
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Failed to delete old log: ${file.name}", e)
+                    }
+                }
+                return
+            }
+        }
+        
+        // Fallback: Try MediaStore cleanup on Android 10+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            cleanOldLogsViaMediaStore(keepCount)
+        }
+    }
+    
+    /**
+     * Clean up old log files using MediaStore API (Android 10+).
+     */
+    private fun cleanOldLogsViaMediaStore(keepCount: Int) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return
+        
+        val context = appContext ?: return
+        
+        try {
+            val resolver = context.contentResolver
+            val relativePath = "${Environment.DIRECTORY_DOWNLOADS}/$LOG_DIR_NAME"
+            
+            // Query for our log files
+            val projection = arrayOf(
+                MediaStore.Downloads._ID,
+                MediaStore.Downloads.DISPLAY_NAME,
+                MediaStore.Downloads.DATE_MODIFIED
+            )
+            val selection = "${MediaStore.Downloads.RELATIVE_PATH} = ? AND ${MediaStore.Downloads.DISPLAY_NAME} LIKE ?"
+            val selectionArgs = arrayOf("$relativePath/", "network_log_%.txt")
+            val sortOrder = "${MediaStore.Downloads.DATE_MODIFIED} DESC"
+            
+            resolver.query(
+                MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                projection,
+                selection,
+                selectionArgs,
+                sortOrder
+            )?.use { cursor ->
+                val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Downloads._ID)
+                val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Downloads.DISPLAY_NAME)
+                
+                var count = 0
+                while (cursor.moveToNext()) {
+                    count++
+                    if (count > keepCount) {
+                        val id = cursor.getLong(idColumn)
+                        val name = cursor.getString(nameColumn)
+                        val uri = android.content.ContentUris.withAppendedId(
+                            MediaStore.Downloads.EXTERNAL_CONTENT_URI, id
+                        )
+                        try {
+                            resolver.delete(uri, null, null)
+                            Log.d(TAG, "Deleted old log file via MediaStore: $name")
+                        } catch (e: Exception) {
+                            Log.w(TAG, "Failed to delete old log via MediaStore: $name", e)
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error cleaning old logs via MediaStore: ${e.message}", e)
         }
     }
     
@@ -221,6 +431,16 @@ object NetworkLogger {
      */
     fun getCurrentLogFilePath(): String? {
         return currentLogFile?.absolutePath
+    }
+    
+    /**
+     * Get the log directory path for display purposes.
+     * Returns the expected public Downloads path regardless of whether direct access is available.
+     */
+    fun getLogDirectoryPath(): String {
+        @Suppress("DEPRECATION")
+        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        return File(downloadsDir, LOG_DIR_NAME).absolutePath
     }
     
     /**
