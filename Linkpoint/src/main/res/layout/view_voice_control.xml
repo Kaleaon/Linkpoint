@@ -15,7 +15,7 @@
         android:src="@drawable/ic_voice_off"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/toggle_voice"
-        android:tint="?attr/colorOnSurface" />
+        app:tint="?attr/colorOnSurface" />
 
     <!-- Voice status text -->
     <TextView
@@ -38,6 +38,6 @@
         android:src="@drawable/ic_mic_on"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/toggle_mute"
-        android:tint="?attr/colorOnSurface" />
+        app:tint="?attr/colorOnSurface" />
 
 </LinearLayout>

@@ -468,7 +468,8 @@ class TeleportManager(
         for (pattern in patterns) {
             val match = pattern.find(slurl)
             if (match != null) {
-                val regionName = java.net.URLDecoder.decode(match.groupValues[1], Charsets.UTF_8)
+                // Use the older URLDecoder.decode method that takes a String charset name (available since API 1)
+                val regionName = java.net.URLDecoder.decode(match.groupValues[1], "UTF-8")
                 val x = match.groupValues.getOrNull(2)?.toFloatOrNull() ?: 128f
                 val y = match.groupValues.getOrNull(3)?.toFloatOrNull() ?: 128f
                 val z = match.groupValues.getOrNull(4)?.toFloatOrNull() ?: 25f

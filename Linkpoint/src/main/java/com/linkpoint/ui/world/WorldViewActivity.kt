@@ -11,6 +11,7 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -101,6 +102,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         initDebugFloater()
         initRenderer()
         setupNavigation()
+        setupBackPressHandler()
         observeState()
     }
     
@@ -680,20 +682,27 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         }
     }
     
-    override fun onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START)
-        } else {
-            // Confirm exit
-            androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle("Logout")
-                .setMessage("Are you sure you want to logout?")
-                .setPositiveButton("Logout") { _, _ ->
-                    app.protocol.disconnect()
+    /**
+     * Setup back press handler using modern OnBackPressedCallback
+     */
+    private fun setupBackPressHandler() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                } else {
+                    // Confirm exit
+                    androidx.appcompat.app.AlertDialog.Builder(this@WorldViewActivity)
+                        .setTitle("Logout")
+                        .setMessage("Are you sure you want to logout?")
+                        .setPositiveButton("Logout") { _, _ ->
+                            app.protocol.disconnect()
+                        }
+                        .setNegativeButton("Cancel", null)
+                        .show()
                 }
-                .setNegativeButton("Cancel", null)
-                .show()
-        }
+            }
+        })
     }
     
     override fun onPause() {
