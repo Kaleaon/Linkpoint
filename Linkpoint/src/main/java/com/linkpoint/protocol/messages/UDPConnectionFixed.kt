@@ -340,9 +340,10 @@ class UDPConnectionFixed {
     /**
      * Register a message handler using a lambda
      * This is a convenience method that wraps the lambda in a MessageRouter.Handler
+     * Note: Uses scope.launch for non-blocking registration
      */
     fun registerHandler(messageId: Int, handler: (Int, ByteArray) -> Unit) {
-        kotlinx.coroutines.runBlocking {
+        scope.launch {
             messageRouter.registerHandler(messageId, object : MessageRouter.Handler {
                 override fun handleMessage(messageId: Int, data: ByteArray): Boolean {
                     handler(messageId, data)
@@ -725,7 +726,7 @@ class UDPConnectionFixed {
     
     /**
      * Unregister a message handler
-    */
+     */
     fun unregisterMessageHandler(messageId: Int) {
         messageHandlers.remove(messageId)
     }
