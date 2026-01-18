@@ -149,6 +149,30 @@ class SessionManager(private val context: Context) {
     }
     
     /**
+     * Update the region handle and position after receiving AgentMovementComplete.
+     * This provides the authoritative region handle from the simulator.
+     */
+    fun updateRegionInfo(regionHandle: Long, x: Int, y: Int) {
+        val current = _currentRegion.value
+        if (current != null) {
+            _currentRegion.value = current.copy(handle = regionHandle, x = x, y = y)
+            Log.i(TAG, "Region info updated: handle=$regionHandle, position=($x, $y)")
+        } else {
+            // Create minimal region info if we don't have any yet
+            _currentRegion.value = RegionInfo(
+                name = "Unknown",
+                handle = regionHandle,
+                x = x,
+                y = y,
+                simIP = "",
+                simPort = 0,
+                seedCapability = null
+            )
+            Log.i(TAG, "Region info created with handle=$regionHandle, position=($x, $y)")
+        }
+    }
+    
+    /**
      * Update connection state
      */
     fun setConnectionState(state: ConnectionState) {
