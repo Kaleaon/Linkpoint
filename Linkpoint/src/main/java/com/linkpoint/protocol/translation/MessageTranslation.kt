@@ -106,14 +106,19 @@ object MessageTranslation {
         }
         
         // Read short in big-endian (network byte order)
-        val byte3 = data[pos].toInt() and 0xFF
-        val byte4 = data[pos + 1].toInt() and 0xFF
+        // Each byte is masked with 0xFF to get unsigned value
+        val highByte = data[pos].toInt() and 0xFF
+        val lowByte = data[pos + 1].toInt() and 0xFF
         pos += 2
         
-        // Convert to signed short and apply low frequency base
-        val shortValue = ((byte3 shl 8) or byte4).toShort().toInt()
+        // Combine bytes into a 16-bit value
+        val rawShort = (highByte shl 8) or lowByte
         
-        return Pair(shortValue or LOW_FREQUENCY_BASE, pos)
+        // Convert to signed short (to match Lumiya's Java behavior)
+        // then back to Int for the final message ID calculation
+        val signedShortValue = rawShort.toShort().toInt()
+        
+        return Pair(signedShortValue or LOW_FREQUENCY_BASE, pos)
     }
     
     /**
@@ -205,16 +210,18 @@ object MessageTranslation {
         const val COARSE_LOCATION_UPDATE = 65286 // 0xFF06 -> 6 | 65280
         
         // Low frequency messages (0xFFFF + short -> short | -65536)
-        // These are commonly used messages in the SL protocol
-        const val USE_CIRCUIT_CODE = 0xFFFF0003.toInt()      // -65533 when decoded
-        const val COMPLETE_AGENT_MOVEMENT = 0xFFFF00F9.toInt()
-        const val LOGOUT_REQUEST = 0xFFFF00FC.toInt()
-        const val REGION_HANDSHAKE = 0xFFFF0094.toInt()      // -65388 when decoded
-        const val REGION_HANDSHAKE_REPLY = 0xFFFF0095.toInt()
-        const val AGENT_THROTTLE = 0xFFFF0099.toInt()
-        const val AGENT_MOVEMENT_COMPLETE = 0xFFFF00FA.toInt()
-        const val CHAT_FROM_SIMULATOR = 0xFFFF00A3.toInt()
-        const val IMPROVED_INSTANT_MESSAGE = 0xFFFF00FE.toInt()
+        // Format: 0xFFFFxxxx.toInt() where xxxx is the message number
+        // These values are negative when stored as Int due to the high bit being set
+        // The actual protocol wire format is [0xFF][0xFF][xx][xx] (big-endian short)
+        const val USE_CIRCUIT_CODE = (0xFFFF0003).toInt()          // Wire: FF FF 00 03
+        const val COMPLETE_AGENT_MOVEMENT = (0xFFFF00F9).toInt()   // Wire: FF FF 00 F9
+        const val LOGOUT_REQUEST = (0xFFFF00FC).toInt()            // Wire: FF FF 00 FC
+        const val REGION_HANDSHAKE = (0xFFFF0094).toInt()          // Wire: FF FF 00 94
+        const val REGION_HANDSHAKE_REPLY = (0xFFFF0095).toInt()    // Wire: FF FF 00 95
+        const val AGENT_THROTTLE = (0xFFFF0099).toInt()            // Wire: FF FF 00 99
+        const val AGENT_MOVEMENT_COMPLETE = (0xFFFF00FA).toInt()   // Wire: FF FF 00 FA
+        const val CHAT_FROM_SIMULATOR = (0xFFFF00A3).toInt()       // Wire: FF FF 00 A3
+        const val IMPROVED_INSTANT_MESSAGE = (0xFFFF00FE).toInt()  // Wire: FF FF 00 FE
         
         /**
          * Get a human-readable name for a message ID.

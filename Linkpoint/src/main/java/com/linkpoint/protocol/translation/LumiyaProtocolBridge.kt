@@ -53,6 +53,13 @@ class LumiyaProtocolBridge(
         private const val MAX_RETRIES = 3
         private const val INITIAL_RETRY_DELAY_MS = 1000L
         private const val MAX_RETRY_DELAY_MS = 15000L
+        
+        // User-Agent for Lumiya-compatible requests
+        private const val USER_AGENT = "Linkpoint/1.0 (Lumiya-compatible)"
+        
+        // LLSD XML wrapper template
+        private const val LLSD_XML_HEADER = """<?xml version="1.0" encoding="UTF-8"?><llsd>"""
+        private const val LLSD_XML_FOOTER = """</llsd>"""
     }
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -138,8 +145,7 @@ class LumiyaProtocolBridge(
                     .url(preparedUrl)
                     .header("Accept", "application/llsd+xml, application/xml, text/xml")
                     .header("Content-Type", "application/llsd+xml")
-                    // Match Lumiya's user agent pattern
-                    .header("User-Agent", "Linkpoint/1.0 (Lumiya-compatible)")
+                    .header("User-Agent", USER_AGENT)
                     .post(requestBody.toRequestBody("application/llsd+xml".toMediaType()))
                     .build()
                 
@@ -225,7 +231,7 @@ class LumiyaProtocolBridge(
             }
         }
         
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><llsd>${llsdArray.toXML()}</llsd>"
+        return "$LLSD_XML_HEADER${llsdArray.toXML()}$LLSD_XML_FOOTER"
     }
     
     /**
@@ -325,10 +331,10 @@ class LumiyaProtocolBridge(
             val requestBuilder = Request.Builder()
                 .url(url)
                 .header("Accept", "application/llsd+xml")
-                .header("User-Agent", "Linkpoint/1.0 (Lumiya-compatible)")
+                .header("User-Agent", USER_AGENT)
             
             if (body != null) {
-                val xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><llsd>${body.toXML()}</llsd>"
+                val xml = "$LLSD_XML_HEADER${body.toXML()}$LLSD_XML_FOOTER"
                 requestBuilder.post(xml.toRequestBody("application/llsd+xml".toMediaType()))
             } else {
                 requestBuilder.get()
