@@ -2,7 +2,7 @@ package com.linkpoint.world.minimap
 
 import android.graphics.*
 import android.util.Log
-import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap
  * - Rotation based on camera direction
  */
 class MinimapManager(
-    private val udpConnection: UDPConnection
+    private val udpConnection: UDPConnectionFixed
 ) {
     companion object {
         private const val TAG = "MinimapManager"

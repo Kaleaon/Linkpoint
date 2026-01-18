@@ -1,0 +1,195 @@
+package com.linkpoint.protocol.messages
+
+import android.util.Log
+import com.linkpoint.network.NetworkLogger
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+
+/**
+ * Message Router
+ * 
+ * Routes incoming Second Life protocol messages to appropriate handlers.
+ * Based on Lumiya's SLMessageRouter implementation.
+ * 
+ * Features:
+ * - Message ID to handler mapping
+ * - Priority-based handler selection
+ * - Handler registration and removal
+ * - Message statistics tracking
+ * 
+ * Mobile-First Considerations:
+ * - Efficient handler lookup
+ * - Thread-safe operations
+ * - Minimal memory overhead
+ * - Fast routing decisions
+ */
+class MessageRouter {
+    
+    companion object {
+        private const val TAG = "MessageRouter"
+        private const val MAX_HANDLERS_PER_MESSAGE = 10
+    }
+    
+    /**
+     * Message handler interface
+     */
+    interface Handler {
+        /**
+         * Handle an incoming message
+         * 
+         * @param messageId The message ID
+         * @param data The message data
+         * @return true if handled successfully, false otherwise
+         */
+        fun handleMessage(messageId: Int, data: ByteArray): Boolean
+        
+        /**
+         * Get the priority of this handler (lower = higher priority)
+         */
+        fun getPriority(): Int = 0
+    }
+    
+    /**
+     * Registered handlers: message ID -> list of handlers
+     */
+    private val handlers = mutableMapOf<Int, MutableList<Handler>>()
+    
+    /**
+     * Mutex for thread-safe operations
+     */
+    private val mutex = Mutex()
+    
+    /**
+     * Statistics
+     */
+    private var totalMessagesRouted = 0
+    private var successfulRoutes = 0
+    private var failedRoutes = 0
+    
+    /**
+     * Register a handler for a specific message ID
+     * 
+     * @param messageId The message ID to handle
+     * @param handler The handler to register
+     */
+    suspend fun registerHandler(messageId: Int, handler: Handler) {
+        mutex.withLock {
+            val handlerList = handlers.getOrPut(messageId) { mutableListOf() }
+            
+            if (handlerList.size >= MAX_HANDLERS_PER_MESSAGE) {
+                NetworkLogger.log(TAG, "Max handlers reached for message $messageId", Log.WARN)
+                return@withLock
+            }
+            
+            // Add handler and sort by priority
+            handlerList.add(handler)
+            handlerList.sortBy { it.getPriority() }
+            
+            NetworkLogger.log(TAG, "Registered handler for message $messageId (priority ${handler.getPriority()})")
+        }
+    }
+    
+    /**
+     * Unregister a handler for a specific message ID
+     * 
+     * @param messageId The message ID
+     * @param handler The handler to unregister
+     */
+    suspend fun unregisterHandler(messageId: Int, handler: Handler) {
+        mutex.withLock {
+            val handlerList = handlers[messageId]
+            if (handlerList != null) {
+                handlerList.remove(handler)
+                if (handlerList.isEmpty()) {
+                    handlers.remove(messageId)
+                }
+                NetworkLogger.log(TAG, "Unregistered handler for message $messageId")
+            }
+        }
+    }
+    
+    /**
+     * Route a message to its handlers
+     * 
+     * @param messageId The message ID
+     * @param data The message data
+     * @return true if message was handled, false otherwise
+     */
+    suspend fun routeMessage(messageId: Int, data: ByteArray): Boolean {
+        totalMessagesRouted++
+        
+        val handlerList = mutex.withLock {
+            handlers[messageId]?.toList() // Copy to avoid holding lock during handling
+        }
+        
+        if (handlerList.isNullOrEmpty()) {
+            NetworkLogger.log(TAG, "No handler registered for message $messageId", Log.WARN)
+            failedRoutes++
+            return false
+        }
+        
+        var handled = false
+        for (handler in handlerList) {
+            try {
+                if (handler.handleMessage(messageId, data)) {
+                    handled = true
+                    NetworkLogger.log(TAG, "Message $messageId handled successfully")
+                }
+            } catch (e: Exception) {
+                NetworkLogger.log(TAG, "Handler error for message $messageId: ${e.message}", Log.ERROR)
+            }
+        }
+        
+        if (handled) {
+            successfulRoutes++
+        } else {
+            failedRoutes++
+            NetworkLogger.log(TAG, "Message $messageId not handled by any handler", Log.WARN)
+        }
+        
+        return handled
+    }
+    
+    /**
+     * Get the number of registered handlers
+     */
+    suspend fun getHandlerCount(): Int = mutex.withLock {
+        handlers.values.sumOf { it.size }
+    }
+    
+    /**
+     * Get the number of messages with handlers
+     */
+    suspend fun getMessageCount(): Int = mutex.withLock {
+        handlers.size
+    }
+    
+    /**
+     * Get router statistics
+     */
+    fun getStatistics(): Map<String, Any> {
+        return mapOf(
+            "totalMessagesRouted" to totalMessagesRouted,
+            "successfulRoutes" to successfulRoutes,
+            "failedRoutes" to failedRoutes,
+            "successRate" to if (totalMessagesRouted > 0) {
+                (successfulRoutes.toFloat() / totalMessagesRouted * 100)
+            } else {
+                0f
+            }
+        )
+    }
+    
+    /**
+     * Clear all handlers
+     */
+    suspend fun clearAll() {
+        mutex.withLock {
+            handlers.clear()
+            totalMessagesRouted = 0
+            successfulRoutes = 0
+            failedRoutes = 0
+            NetworkLogger.log(TAG, "All handlers cleared")
+        }
+    }
+}

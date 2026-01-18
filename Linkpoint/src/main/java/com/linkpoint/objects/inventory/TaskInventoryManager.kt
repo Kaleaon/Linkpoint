@@ -1,7 +1,7 @@
 package com.linkpoint.objects.inventory
 
 import android.util.Log
-import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.transfer.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap
  * 4. Parse inventory listing
  */
 class TaskInventoryManager(
-    private val udpConnection: UDPConnection,
+    private val udpConnection: UDPConnectionFixed,
     private val xferManager: XferManager,
     private val agentId: UUID
 ) {

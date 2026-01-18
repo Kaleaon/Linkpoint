@@ -5,7 +5,7 @@ import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
 import android.util.Log
-import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.world.ParcelInfo
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class MediaManager(
     private val context: Context,
-    private val udpConnection: UDPConnection
+    private val udpConnection: UDPConnectionFixed
 ) {
     companion object {
         private const val TAG = "MediaManager"

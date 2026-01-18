@@ -1,7 +1,7 @@
 package com.linkpoint.protocol.transfer
 
 import android.util.Log
-import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicLong
  * 4. Transfer complete when final packet received (packet | 0x80000000)
  */
 class XferManager(
-    private val udpConnection: UDPConnection
+    private val udpConnection: UDPConnectionFixed
 ) {
     companion object {
         private const val TAG = "XferManager"

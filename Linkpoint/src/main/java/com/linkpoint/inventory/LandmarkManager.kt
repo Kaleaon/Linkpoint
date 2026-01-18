@@ -4,7 +4,7 @@ import android.util.Log
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
 import com.linkpoint.protocol.messages.MessageIds
-import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.transfer.TransferManager
 import com.linkpoint.protocol.types.LLVector3
 import com.linkpoint.protocol.types.putUUID
@@ -31,7 +31,7 @@ class LandmarkManager(
     private val capabilityManager: CapabilityManager,
     private val transferManager: TransferManager,
     private val inventoryManager: InventoryManager,
-    private val udpConnection: UDPConnection,
+    private val udpConnection: UDPConnectionFixed,
     private val agentId: UUID
 ) {
     companion object {

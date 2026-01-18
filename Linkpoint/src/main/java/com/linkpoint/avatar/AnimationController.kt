@@ -2,7 +2,7 @@ package com.linkpoint.avatar
 
 import android.util.Log
 import com.linkpoint.protocol.messages.MessageIds
-import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLQuaternion
 import com.linkpoint.protocol.types.LLVector3
 import com.linkpoint.protocol.types.putUUID
@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Based on Lumiya animation system.
  */
 class AnimationController(
-    private val udpConnection: UDPConnection,
+    private val udpConnection: UDPConnectionFixed,
     private val agentId: UUID
 ) {
     companion object {

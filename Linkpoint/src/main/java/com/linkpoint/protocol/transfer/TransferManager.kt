@@ -1,7 +1,7 @@
 package com.linkpoint.protocol.transfer
 
 import android.util.Log
-import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap
  * 4. Transfer complete when all packets received or error status
  */
 class TransferManager(
-    private val udpConnection: UDPConnection,
+    private val udpConnection: UDPConnectionFixed,
     private val agentId: UUID,
     private val sessionId: UUID
 ) {

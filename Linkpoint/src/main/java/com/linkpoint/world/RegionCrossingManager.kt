@@ -2,7 +2,7 @@ package com.linkpoint.world
 
 import android.util.Log
 import com.linkpoint.protocol.capabilities.CapabilityManager
-import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap
  * @see <a href="https://wiki.secondlife.com/wiki/Simulator/Region_Crossing">Region Crossing</a>
  */
 class RegionCrossingManager(
-    private val udpConnection: UDPConnection,
+    private val udpConnection: UDPConnectionFixed,
     private val capabilityManager: CapabilityManager
 ) {
     companion object {
