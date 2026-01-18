@@ -5,6 +5,7 @@ import com.linkpoint.network.core.HttpRequestOptions
 import com.linkpoint.network.core.PolicyClass
 import com.linkpoint.network.core.RequestThrottler
 import com.linkpoint.protocol.llsd.*
+import com.linkpoint.protocol.translation.LumiyaTranslationLayer
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,6 +28,7 @@ import java.util.concurrent.TimeUnit
  * - Request throttling for inventory operations
  * - Retry-After header support
  * - Per-capability request options
+ * - Lumiya-compatible URL repair for Agni grid
  */
 class CapabilityManager {
     
@@ -186,6 +188,35 @@ class CapabilityManager {
     @Volatile private var lastInitializationAttempts: Int = 0
     @Volatile private var lastSeedCapabilityUsed: String? = null
     
+    // Lumiya translation layer support
+    @Volatile private var loginUrl: String? = null
+    
+    /**
+     * Initialize capabilities from seed with Lumiya translation layer support.
+     * 
+     * This overload accepts the login URL to enable Lumiya-compatible capability URL
+     * repair and grid-specific handling.
+     * 
+     * @param seedCap The seed capability URL
+     * @param loginUrlParam The login URL used for authentication (enables URL repair)
+     * @return true if initialization succeeded
+     */
+    suspend fun initialize(seedCap: String, loginUrlParam: String): Boolean {
+        this.loginUrl = loginUrlParam
+        
+        // Apply Lumiya URL repair to seed capability
+        val repairedSeedCap = LumiyaTranslationLayer.prepareSeedCapability(loginUrlParam, seedCap)
+        
+        if (repairedSeedCap != seedCap) {
+            Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+            Log.i(TAG, "║ LUMIYA TRANSLATION: Seed capability URL repaired")
+            Log.i(TAG, "║ Grid Type: ${LumiyaTranslationLayer.detectGridType(loginUrlParam)}")
+            Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+        }
+        
+        return initialize(repairedSeedCap)
+    }
+    
     /**
      * Initialize capabilities from seed
      */
@@ -200,29 +231,39 @@ class CapabilityManager {
         Log.i(TAG, "║ CAPABILITY INITIALIZATION STARTING")
         Log.i(TAG, "╠══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ Seed URL: ${seedCap.take(80)}...")
+        Log.i(TAG, "║ Lumiya Mode: ${if (loginUrl != null) "ENABLED" else "DISABLED"}")
+        if (loginUrl != null) {
+            Log.i(TAG, "║ Grid Type: ${LumiyaTranslationLayer.detectGridType(loginUrl!!)}")
+        }
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
         
-        val capNames = listOf(
-            CAP_EVENT_QUEUE,
-            CAP_FETCH_INVENTORY,
-            CAP_FETCH_LIB_INVENTORY,
-            CAP_FETCH_INVENTORY_DESCENDENTS,
-            CAP_GET_TEXTURE,
-            CAP_GET_MESH,
-            CAP_GET_MESH2,
-            CAP_VIEW_STATS,
-            CAP_AGENT_STATE,
-            CAP_UPDATE_AGENT_INFO,
-            CAP_UPLOAD_BAKED_TEXTURE,
-            CAP_OBJECT_MEDIA,
-            CAP_PARCEL_VOICE,
-            CAP_PROVISION_VOICE,
-            CAP_CHAT_PASS,
-            CAP_ENVIRONMENT,
-            CAP_EXT_ENVIRONMENT,
-            CAP_AVATAR_PICKER,
-            CAP_SEARCH_STATIC
-        )
+        // Use Lumiya capability list when enabled for better compatibility
+        val capNames = if (loginUrl != null && LumiyaTranslationLayer.config.useLumiyaCapabilityList) {
+            Log.d(TAG, "Using Lumiya-compatible capability list")
+            LumiyaTranslationLayer.getLumiyaCapabilityNames()
+        } else {
+            listOf(
+                CAP_EVENT_QUEUE,
+                CAP_FETCH_INVENTORY,
+                CAP_FETCH_LIB_INVENTORY,
+                CAP_FETCH_INVENTORY_DESCENDENTS,
+                CAP_GET_TEXTURE,
+                CAP_GET_MESH,
+                CAP_GET_MESH2,
+                CAP_VIEW_STATS,
+                CAP_AGENT_STATE,
+                CAP_UPDATE_AGENT_INFO,
+                CAP_UPLOAD_BAKED_TEXTURE,
+                CAP_OBJECT_MEDIA,
+                CAP_PARCEL_VOICE,
+                CAP_PROVISION_VOICE,
+                CAP_CHAT_PASS,
+                CAP_ENVIRONMENT,
+                CAP_EXT_ENVIRONMENT,
+                CAP_AVATAR_PICKER,
+                CAP_SEARCH_STATIC
+            )
+        }
         
         Log.d(TAG, "Requesting ${capNames.size} capabilities from seed...")
         
@@ -274,9 +315,27 @@ class CapabilityManager {
             return@withContext false
         }
         
+        // Apply Lumiya URL repair to each capability URL if enabled
+        val shouldRepairUrls = loginUrl != null && LumiyaTranslationLayer.config.repairCapabilityUrls
+        var repairedCount = 0
+        
         resolvedCaps.forEach { (name, url) ->
-            capabilities[name] = url
-            Log.d(TAG, "Capability: $name -> ${url.take(60)}...")
+            val finalUrl = if (shouldRepairUrls) {
+                val repairedUrl = LumiyaTranslationLayer.repairUrl(loginUrl!!, url)
+                if (repairedUrl != url) {
+                    repairedCount++
+                    Log.d(TAG, "Repaired URL for $name")
+                }
+                repairedUrl
+            } else {
+                url
+            }
+            capabilities[name] = finalUrl
+            Log.d(TAG, "Capability: $name -> ${finalUrl.take(60)}...")
+        }
+        
+        if (repairedCount > 0) {
+            Log.i(TAG, "Lumiya translation: Repaired $repairedCount capability URLs")
         }
         
         // Start event queue
