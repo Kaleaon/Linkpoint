@@ -75,10 +75,10 @@ private fun UUID.asBytes(): ByteArray {
  * - Support for all SL message frequencies (high, medium, low)
  * 
  * ### Diagnostic Capabilities (Critical for Debugging)
- * - **Packet History Tracking**: Records all sent/received packets with raw hex data
- *   - Enables diagnosis of protocol issues by capturing actual packet contents
+ * - **Full Packet Logging**: Records COMPLETE packet data (all bytes) for every packet
+ *   - Enables full protocol diagnosis by capturing entire packet contents
+ *   - Both sent and received packets are logged with complete hex dumps
  *   - Stored in circular buffer (configurable via [DEFAULT_PACKET_HISTORY_SIZE])
- *   - Hex preview size configurable via [PACKET_HISTORY_HEX_SIZE]
  * - **EnhancedPacketLogger Integration**: Comprehensive statistics and logging
  *   - Tracks packet counts, byte volumes, message types
  *   - Records malformed packets for protocol debugging
@@ -97,22 +97,20 @@ private fun UUID.asBytes(): ByteArray {
  * 
  * This class is instantiated by LinkpointApp and shared across managers.
  * Packet history and diagnostics are accessed via:
- * - `getPacketHistory()` - Recent packet events with hex dumps
+ * - `getPacketHistory()` - Recent packet events with FULL hex dumps
  * - `getSocketDetails()` - Connection state and timing
  * - `getDiagnostics()` - Overall connection diagnostics
  * - `getMessageStatistics()` - Message type counts and timing
  * 
  * ## Packet Data Logging
  * 
- * Raw packet data is logged for diagnostic purposes:
- * - Each sent packet: message ID, sequence number, size, hex preview
- * - Each received packet: message ID, sequence number, size, hex preview
+ * FULL raw packet data is logged for diagnostic purposes:
+ * - Each sent packet: message ID, sequence number, size, COMPLETE hex dump
+ * - Each received packet: message ID, sequence number, size, COMPLETE hex dump
  * - Failed operations include error messages
  * 
- * The amount of data captured is configurable:
- * - [PACKET_HEX_PREVIEW_SIZE]: Bytes shown in NetworkLogger output
- * - [PACKET_HISTORY_HEX_SIZE]: Bytes stored in packet history buffer
- * - [DEFAULT_PACKET_HISTORY_SIZE]: Number of packets to keep in history
+ * Full packet data is now captured by default for complete protocol diagnosis.
+ * The number of packets kept in history is configurable via [DEFAULT_PACKET_HISTORY_SIZE].
  * 
  * This addresses the debugging need identified in issue reports:
  * "Not enough data is being gathered, we need raw input and output to understand"
@@ -154,7 +152,7 @@ class UDPConnectionFixed {
         
         // ==================== CONFIGURABLE PACKET LOGGING CONSTANTS ====================
         // These control memory usage and overhead for packet diagnostic features.
-        // Adjust these if debugging needs change or to reduce overhead in production.
+        // Full packet data is captured to enable complete protocol diagnosis.
         
         /**
          * Maximum number of packet events to keep in history.
@@ -164,17 +162,11 @@ class UDPConnectionFixed {
         const val DEFAULT_PACKET_HISTORY_SIZE = 50
         
         /**
-         * Number of bytes to capture in hex preview for each packet.
-         * Larger values provide more data for debugging but use more memory and CPU.
-         * 32 bytes typically captures the header and start of message body.
+         * Whether to log full packet data or just a preview.
+         * When true (default), all packet bytes are logged for complete diagnosis.
+         * Set to false to reduce log verbosity in production.
          */
-        const val PACKET_HEX_PREVIEW_SIZE = 32
-        
-        /**
-         * Number of bytes to capture for recordPacketEvent hex preview.
-         * Smaller than the log preview to reduce memory in the history buffer.
-         */
-        const val PACKET_HISTORY_HEX_SIZE = 24
+        const val LOG_FULL_PACKET_DATA = true
     }
     
     // Connection parameters
@@ -463,11 +455,12 @@ class UDPConnectionFixed {
                                 val messageId = extractMessageId(data)
                                 val messageName = getMessageName(messageId)
                                 val seqNum = extractSequenceNumber(data)
-                                val hexPreview = data.take(PACKET_HEX_PREVIEW_SIZE).joinToString(" ") { "%02X".format(it) }
+                                // Generate full hex dump of all packet bytes
+                                val fullHexDump = data.joinToString(" ") { "%02X".format(it) }
                                 
                                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "📦 PACKET RECEIVED #${packetsReceived.get()}: $bytesRead bytes")
                                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "   Message: $messageName (ID: 0x${messageId.toString(16).uppercase()}, seq: $seqNum)")
-                                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "   Raw data: $hexPreview")
+                                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "   Full packet data: $fullHexDump")
                                 
                                 // Record in packet history for debug reports
                                 recordPacketEvent(
@@ -853,9 +846,10 @@ class UDPConnectionFixed {
             // Zero-code if requested
             val finalPacket = if (zerocoded) zeroEncode(packet) else packet
             
-            // Get message name and hex preview for logging
+            // Get message name and full hex dump for logging
             val messageName = getMessageName(messageId)
-            val hexPreview = finalPacket.take(PACKET_HEX_PREVIEW_SIZE).joinToString(" ") { "%02X".format(it) }
+            // Generate full hex dump of all packet bytes
+            val fullHexDump = finalPacket.joinToString(" ") { "%02X".format(it) }
             
             // Send via DatagramChannel
             val buffer = ByteBuffer.wrap(finalPacket)
@@ -868,7 +862,7 @@ class UDPConnectionFixed {
                 
                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sent packet: ${finalPacket.size} bytes (ID: $messageId, reliable: $reliable)")
                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "   Message: $messageName (seq: $seqNum)")
-                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "   Raw data: $hexPreview")
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "   Full packet data: $fullHexDump")
                 
                 // Record in packet history for debug reports
                 recordPacketEvent(
@@ -1210,6 +1204,7 @@ class UDPConnectionFixed {
     
     /**
      * Packet history entry for debugging.
+     * Contains complete packet data for full protocol diagnosis.
      */
     data class PacketHistoryEntry(
         val timestamp: Long,
@@ -1218,7 +1213,8 @@ class UDPConnectionFixed {
         val messageName: String,
         val size: Int,
         val sequenceNumber: Int,
-        val hexPreview: String,
+        /** Complete hex dump of all packet bytes for full diagnosis */
+        val fullHexDump: String,
         val success: Boolean,
         val errorMessage: String? = null
     ) {
@@ -1250,7 +1246,7 @@ class UDPConnectionFixed {
     
     /**
      * Record a packet event in the history for debugging.
-     * This captures raw packet data including hex dumps for diagnostic purposes.
+     * Captures complete raw packet data as hex dump for full protocol diagnosis.
      */
     private fun recordPacketEvent(
         type: PacketHistoryEntry.PacketEventType,
@@ -1260,6 +1256,9 @@ class UDPConnectionFixed {
         success: Boolean = true,
         errorMessage: String? = null
     ) {
+        // Generate complete hex dump of all packet bytes for full diagnosis
+        val fullHexDump = data.joinToString(" ") { "%02X".format(it) }
+        
         val entry = PacketHistoryEntry(
             timestamp = System.currentTimeMillis(),
             type = type,
@@ -1267,7 +1266,7 @@ class UDPConnectionFixed {
             messageName = getMessageName(messageId),
             size = data.size,
             sequenceNumber = sequenceNumber,
-            hexPreview = data.take(PACKET_HISTORY_HEX_SIZE).joinToString(" ") { "%02X".format(it) },
+            fullHexDump = fullHexDump,
             success = success,
             errorMessage = errorMessage
         )

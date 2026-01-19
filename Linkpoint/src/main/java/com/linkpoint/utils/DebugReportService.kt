@@ -415,10 +415,8 @@ class DebugReportService private constructor(private val context: Context) {
                             if (!entry.success && entry.errorMessage != null) {
                                 appendLine("     Error: ${entry.errorMessage}")
                             }
-                            // Show hex preview for failed packets or first few entries
-                            if (!entry.success || index < 3) {
-                                appendLine("     Hex: ${entry.hexPreview}")
-                            }
+                            // Show full hex dump for all packets (complete packet data for diagnosis)
+                            appendLine("     Full packet: ${entry.fullHexDump}")
                         }
                         
                         // Summary statistics
