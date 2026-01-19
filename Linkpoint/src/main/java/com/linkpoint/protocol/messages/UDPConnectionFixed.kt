@@ -49,6 +49,19 @@ private fun UUID.asBytes(): ByteArray {
  * It provides comprehensive packet handling with full diagnostic capabilities
  * for debugging connection issues.
  * 
+ * ## History & Design Decision
+ * 
+ * This class supersedes the original `UDPConnection.kt` implementation.
+ * The "Fixed" suffix reflects the architectural improvements made:
+ * - Better mobile network compatibility using NIO DatagramChannel
+ * - Integrated MessageRouter for proper message dispatch
+ * - EventBus integration for reactive updates
+ * - Comprehensive diagnostic capabilities for debugging
+ * 
+ * The original UDPConnection.kt was removed from the codebase as it was
+ * no longer used and this implementation covers all its functionality
+ * with improved reliability and diagnostics.
+ * 
  * ## Architecture Overview
  * 
  * This class implements the Second Life UDP protocol with proper message routing
@@ -64,7 +77,8 @@ private fun UUID.asBytes(): ByteArray {
  * ### Diagnostic Capabilities (Critical for Debugging)
  * - **Packet History Tracking**: Records all sent/received packets with raw hex data
  *   - Enables diagnosis of protocol issues by capturing actual packet contents
- *   - Stored in circular buffer (last 50 packets) for memory efficiency
+ *   - Stored in circular buffer (configurable via [DEFAULT_PACKET_HISTORY_SIZE])
+ *   - Hex preview size configurable via [PACKET_HISTORY_HEX_SIZE]
  * - **EnhancedPacketLogger Integration**: Comprehensive statistics and logging
  *   - Tracks packet counts, byte volumes, message types
  *   - Records malformed packets for protocol debugging
@@ -77,6 +91,7 @@ private fun UUID.asBytes(): ByteArray {
  * - Efficient resource usage with non-blocking NIO
  * - Battery-conscious operations with selective logging
  * - Memory-efficient buffering with bounded queues
+ * - Configurable logging overhead via companion object constants
  * 
  * ## Usage
  * 
@@ -93,6 +108,11 @@ private fun UUID.asBytes(): ByteArray {
  * - Each sent packet: message ID, sequence number, size, hex preview
  * - Each received packet: message ID, sequence number, size, hex preview
  * - Failed operations include error messages
+ * 
+ * The amount of data captured is configurable:
+ * - [PACKET_HEX_PREVIEW_SIZE]: Bytes shown in NetworkLogger output
+ * - [PACKET_HISTORY_HEX_SIZE]: Bytes stored in packet history buffer
+ * - [DEFAULT_PACKET_HISTORY_SIZE]: Number of packets to keep in history
  * 
  * This addresses the debugging need identified in issue reports:
  * "Not enough data is being gathered, we need raw input and output to understand"
@@ -131,6 +151,30 @@ class UDPConnectionFixed {
         
         /** Sentinel value for invalid/unparseable message IDs */
         private const val INVALID_MESSAGE_ID = Int.MIN_VALUE
+        
+        // ==================== CONFIGURABLE PACKET LOGGING CONSTANTS ====================
+        // These control memory usage and overhead for packet diagnostic features.
+        // Adjust these if debugging needs change or to reduce overhead in production.
+        
+        /**
+         * Maximum number of packet events to keep in history.
+         * Higher values provide more diagnostic data but use more memory.
+         * Default of 50 provides sufficient history for debugging connection issues.
+         */
+        const val DEFAULT_PACKET_HISTORY_SIZE = 50
+        
+        /**
+         * Number of bytes to capture in hex preview for each packet.
+         * Larger values provide more data for debugging but use more memory and CPU.
+         * 32 bytes typically captures the header and start of message body.
+         */
+        const val PACKET_HEX_PREVIEW_SIZE = 32
+        
+        /**
+         * Number of bytes to capture for recordPacketEvent hex preview.
+         * Smaller than the log preview to reduce memory in the history buffer.
+         */
+        const val PACKET_HISTORY_HEX_SIZE = 24
     }
     
     // Connection parameters
@@ -218,11 +262,9 @@ class UDPConnectionFixed {
      * Circular buffer of recent packet events including raw hex data.
      * Used by DebugReportService to show packet history in debug reports.
      * Each entry contains: timestamp, type, message ID, size, sequence number, hex preview
+     * Size is controlled by [DEFAULT_PACKET_HISTORY_SIZE]
      */
     private val recentPacketHistory = java.util.concurrent.ConcurrentLinkedQueue<PacketHistoryEntry>()
-    
-    /** Maximum number of packet events to keep in history (memory bounded) */
-    private val maxPacketHistorySize = 50
     
     /** 
      * Sequence number for outgoing packets.
@@ -421,7 +463,7 @@ class UDPConnectionFixed {
                                 val messageId = extractMessageId(data)
                                 val messageName = getMessageName(messageId)
                                 val seqNum = extractSequenceNumber(data)
-                                val hexPreview = data.take(32).joinToString(" ") { "%02X".format(it) }
+                                val hexPreview = data.take(PACKET_HEX_PREVIEW_SIZE).joinToString(" ") { "%02X".format(it) }
                                 
                                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "📦 PACKET RECEIVED #${packetsReceived.get()}: $bytesRead bytes")
                                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "   Message: $messageName (ID: 0x${messageId.toString(16).uppercase()}, seq: $seqNum)")
@@ -813,7 +855,7 @@ class UDPConnectionFixed {
             
             // Get message name and hex preview for logging
             val messageName = getMessageName(messageId)
-            val hexPreview = finalPacket.take(32).joinToString(" ") { "%02X".format(it) }
+            val hexPreview = finalPacket.take(PACKET_HEX_PREVIEW_SIZE).joinToString(" ") { "%02X".format(it) }
             
             // Send via DatagramChannel
             val buffer = ByteBuffer.wrap(finalPacket)
@@ -1225,15 +1267,15 @@ class UDPConnectionFixed {
             messageName = getMessageName(messageId),
             size = data.size,
             sequenceNumber = sequenceNumber,
-            hexPreview = data.take(24).joinToString(" ") { "%02X".format(it) },
+            hexPreview = data.take(PACKET_HISTORY_HEX_SIZE).joinToString(" ") { "%02X".format(it) },
             success = success,
             errorMessage = errorMessage
         )
         
         recentPacketHistory.offer(entry)
         
-        // Keep bounded size
-        while (recentPacketHistory.size > maxPacketHistorySize) {
+        // Keep bounded size using configurable constant
+        while (recentPacketHistory.size > DEFAULT_PACKET_HISTORY_SIZE) {
             recentPacketHistory.poll()
         }
     }
