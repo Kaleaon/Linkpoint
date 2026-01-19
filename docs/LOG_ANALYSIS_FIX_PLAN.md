@@ -71,9 +71,9 @@ public void HandleRegionHandshake(RegionHandshake regionHandshake) {
 ```
 
 ### Recommended Fix
-1. **Verify message ID decoding** - `0xFFFF0094` is a low-frequency message (4 bytes)
-2. **Add debug logging** before handler registration to confirm ID
-3. **Check SimName parsing** - Lumiya uses `unpackVariable(byteBuffer, 1)` for variable-length string
+1. **Verify message ID decoding** - `0xFFFF0094` is decoded as a low-frequency message in Lumiya (4-byte header: `0xFFFF` prefix + 2-byte ID `0x0094`). Note: The actual ID on wire is `148` (0x94).
+2. **Add debug logging** before handler registration to confirm correct ID mapping
+3. **Check SimName parsing** - Lumiya uses `unpackVariable(byteBuffer, 1)` for variable-length string with 1-byte length prefix
 
 ---
 
@@ -138,9 +138,11 @@ public void HandleObjectUpdateCompressed(ObjectUpdateCompressed objectUpdateComp
 ```
 
 ### Recommended Fixes
-1. **Add LayerData handler** - Register for message ID `11`
-2. **Verify ObjectUpdateCompressed handler** - Should be registered for `13` (high-frequency) not `65297`
-3. **Check message ID decoding** - `65297` = `0xFF11` suggests medium-frequency decode error
+1. **Add LayerData handler** - Register for message ID `11` (high-frequency, single byte)
+2. **Investigate ObjectUpdateCompressed ID mismatch** - Log shows `65297` (0xFF11) but standard SL protocol uses `13` for high-frequency ObjectUpdateCompressed. This suggests either:
+   - Linkpoint is using `0xFF` + `0x11` (medium-frequency encoding) incorrectly
+   - The simulator is sending a different message type
+3. **Check message ID decoding logic** - Review `extractMessageId()` in `UDPConnectionFixed.kt` for proper high/medium/low frequency handling
 
 ---
 
@@ -155,9 +157,9 @@ SwapChain: ✗
 ### Root Cause
 The SwapChain must be created when the Surface is available. This happens via Filament's `UiHelper` callback system.
 
-### Lumiya/Filament Pattern (from RenderManager exploration)
+### Linkpoint RenderManager Pattern (Kotlin)
 ```kotlin
-// SwapChain should be created in surface callback
+// SwapChain should be created in surface callback (from Linkpoint's RenderManager.kt)
 uiHelper = UiHelper(UiHelper.ContextErrorPolicy.DONT_CHECK).apply {
     renderCallback = object : UiHelper.RendererCallback {
         override fun onNativeWindowChanged(surface: Surface) {
@@ -173,6 +175,9 @@ uiHelper = UiHelper(UiHelper.ContextErrorPolicy.DONT_CHECK).apply {
     attachTo(surfaceView)
 }
 ```
+
+Note: Lumiya used OpenGL ES directly. Linkpoint uses Google Filament for modern 3D rendering.
+The SwapChain pattern above is Filament-specific and already exists in `RenderManager.kt`.
 
 ### Recommended Fix
 1. **Verify SurfaceView lifecycle** - Is the surface created before render loop starts?
