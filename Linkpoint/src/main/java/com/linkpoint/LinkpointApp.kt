@@ -770,6 +770,22 @@ class LinkpointApp : Application() {
             }
         }
         
+        // PacketAck - Acknowledgment messages for reliable packets
+        // These are sent by the simulator to confirm receipt of our reliable packets.
+        // We register a handler to prevent "No handler registered" warnings.
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.PACKET_ACK) { _, payload ->
+            // PacketAck format: Count (1 byte), then list of acknowledged sequence numbers (4 bytes each)
+            // Currently we just acknowledge receipt - full ACK tracking could be added later
+            try {
+                val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+                val count = buffer.get().toInt() and 0xFF
+                // Log at debug level to avoid spam
+                Log.d(TAG, "PacketAck received: $count packets acknowledged")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling PacketAck", e)
+            }
+        }
+        
         // Mark handlers as ready and process any buffered packets
         // This is critical for handling packets that arrived before handlers were registered
         udpConnection.setHandlersReady()

@@ -664,8 +664,8 @@ class UDPConnectionFixed {
         payload.put(sessionId.asBytes())
         payload.putInt(circuitCode)
         
-        // Message ID for CompleteAgentMovement (high frequency: 19)
-        val messageId = 19
+        // Message ID for CompleteAgentMovement (low frequency message)
+        val messageId = MessageIds.COMPLETE_AGENT_MOVEMENT
         
         // Build packet with header
         sendPacket(messageId, payload.array(), reliable = true)
