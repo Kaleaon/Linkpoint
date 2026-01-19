@@ -3,10 +3,11 @@ package com.linkpoint.protocol.messages
 /**
  * Second Life Protocol Message IDs
  * 
- * Message ID encoding:
- * - High frequency: Single byte (0x01-0xFE)
- * - Medium frequency: 0xFF + byte, decoded as (byte | 65280)
- * - Low frequency: 0xFF 0xFF + short, decoded as (short | -65536) = negative Int value
+ * Message ID encoding (wire format -> internal representation):
+ * - High frequency: Single byte (0x01-0xFE) -> stored as-is (1-254)
+ * - Medium frequency: 0xFF + byte -> stored as (byte | 0xFF00), e.g., 0xFF06 -> 65286
+ * - Low frequency: 0xFF 0xFF + short -> stored as 0xFFFFxxxx as signed Int (negative values)
+ *   For example: wire format FF FF 00 03 -> internal value 0xFFFF0003 as Int = -65533
  * 
  * These values match Lumiya's internal representation for compatibility.
  */
