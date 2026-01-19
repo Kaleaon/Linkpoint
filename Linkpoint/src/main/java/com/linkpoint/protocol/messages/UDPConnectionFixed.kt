@@ -72,8 +72,10 @@ class UDPConnectionFixed {
         private const val PACKET_HEADER_SIZE = 6
         
         // Frequency bases for message ID encoding (matching Lumiya)
+        // Medium: 0xFF00 (65280) - used for messages 0xFF01-0xFFFE
         private const val MEDIUM_FREQUENCY_BASE = 65280  // 0xFF00
-        private const val LOW_FREQUENCY_BASE = -65536    // 0xFFFF0000
+        // Low: -65536 (0xFFFF0000 as signed Int32) - used for messages 0xFFFF0000-0xFFFFFFFF
+        private const val LOW_FREQUENCY_BASE = -65536    // 0xFFFF0000 as signed Int32
         
         private const val INVALID_MESSAGE_ID = Int.MIN_VALUE
     }
@@ -406,7 +408,7 @@ class UDPConnectionFixed {
      * This is critical for ensuring handlers are ready when packets arrive
      */
     fun registerHandler(messageId: Int, handler: (Int, ByteArray) -> Unit) {
-        // Also register in messageHandlers for diagnostics
+        // Register in messageHandlers for diagnostics (using SAM conversion for functional interface)
         messageHandlers[messageId] = MessageHandler { msgId, data ->
             handler(msgId, data)
         }
