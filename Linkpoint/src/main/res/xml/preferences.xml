@@ -262,6 +262,11 @@
             android:title="Clear Crash Logs"
             android:summary="Delete all saved crash reports" />
 
+        <Preference
+            android:key="export_log"
+            android:title="Export Log"
+            android:summary="Save combined log to a location in the file system" />
+
     </PreferenceCategory>
 
     <!-- About -->
