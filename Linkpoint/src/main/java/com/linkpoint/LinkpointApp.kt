@@ -666,6 +666,32 @@ class LinkpointApp : Application() {
         val PCODE_PRIM = 9
         val PCODE_AVATAR = 47
         
+        // Helper function to process object updates by PCode
+        fun processObjectUpdate(update: com.linkpoint.protocol.messages.ObjectUpdateData) {
+            when (update.pcode) {
+                PCODE_AVATAR -> {
+                    avatarUpdateCount++
+                    if (avatarUpdateCount <= 5 || avatarUpdateCount % 50 == 0) {
+                        Log.d(TAG, "Avatar update: localId=${update.localId}, fullId=${update.fullId} (total: $avatarUpdateCount)")
+                    }
+                    if (::avatarManager.isInitialized) {
+                        avatarManager.updateAvatar(
+                            agentId = update.fullId,
+                            position = update.position,
+                            rotation = update.rotation,
+                            velocity = update.velocity
+                        )
+                    }
+                }
+                else -> {
+                    // Prims, trees, grass, particles all go to object manager
+                    if (::objectManager.isInitialized) {
+                        objectManager.handleObjectUpdate(update)
+                    }
+                }
+            }
+        }
+        
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE) { _, payload ->
             try {
                 val updates = com.linkpoint.protocol.messages.MessageParser.parseObjectUpdate(payload)
@@ -674,36 +700,7 @@ class LinkpointApp : Application() {
                 if (objectUpdateCount <= 5 || objectUpdateCount % 100 == 0) {
                     Log.d(TAG, "OBJECT_UPDATE received: ${updates.size} objects (total: $objectUpdateCount)")
                 }
-                updates.forEach { update ->
-                    // Route based on PCode - avatars go to AvatarManager, prims to ObjectManager
-                    when (update.pcode) {
-                        PCODE_AVATAR -> {
-                            avatarUpdateCount++
-                            if (avatarUpdateCount <= 5 || avatarUpdateCount % 50 == 0) {
-                                Log.d(TAG, "Avatar update: localId=${update.localId}, fullId=${update.fullId} (total: $avatarUpdateCount)")
-                            }
-                            if (::avatarManager.isInitialized) {
-                                avatarManager.updateAvatar(
-                                    agentId = update.fullId,
-                                    position = update.position,
-                                    rotation = update.rotation,
-                                    velocity = update.velocity
-                                )
-                            }
-                        }
-                        PCODE_PRIM -> {
-                            if (::objectManager.isInitialized) {
-                                objectManager.handleObjectUpdate(update)
-                            }
-                        }
-                        else -> {
-                            // Other types (trees, grass, particles) go to object manager
-                            if (::objectManager.isInitialized) {
-                                objectManager.handleObjectUpdate(update)
-                            }
-                        }
-                    }
-                }
+                updates.forEach { processObjectUpdate(it) }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling ObjectUpdate", e)
             }
@@ -718,27 +715,7 @@ class LinkpointApp : Application() {
                 if (compressedObjectUpdateCount <= 5 || compressedObjectUpdateCount % 100 == 0) {
                     Log.d(TAG, "OBJECT_UPDATE_COMPRESSED received: ${updates.size} objects (total: $compressedObjectUpdateCount)")
                 }
-                updates.forEach { update ->
-                    // Route based on PCode - avatars go to AvatarManager, prims to ObjectManager
-                    when (update.pcode) {
-                        PCODE_AVATAR -> {
-                            avatarUpdateCount++
-                            if (::avatarManager.isInitialized) {
-                                avatarManager.updateAvatar(
-                                    agentId = update.fullId,
-                                    position = update.position,
-                                    rotation = update.rotation,
-                                    velocity = update.velocity
-                                )
-                            }
-                        }
-                        else -> {
-                            if (::objectManager.isInitialized) {
-                                objectManager.handleObjectUpdate(update)
-                            }
-                        }
-                    }
-                }
+                updates.forEach { processObjectUpdate(it) }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling ObjectUpdateCompressed", e)
             }
