@@ -57,18 +57,26 @@ class TerrainPatch(
             var diag = true
             var horizontal = false
             
-            while (x < 16 && y < 16) {
+            while (n < 256 && x >= 0 && y >= 0 && x < 16 && y < 16) {
                 copyMatrix16[y * 16 + x] = n++
                 
                 if (!horizontal) {
                     if (diag) {
-                        x++
-                        y--
-                        if (x == 15 || y == 0) horizontal = true
+                        // Moving up-right diagonal
+                        if (x == 15 || y == 0) {
+                            horizontal = true
+                        } else {
+                            x++
+                            y--
+                        }
                     } else {
-                        x--
-                        y++
-                        if (y == 15 || x == 0) horizontal = true
+                        // Moving down-left diagonal
+                        if (y == 15 || x == 0) {
+                            horizontal = true
+                        } else {
+                            x--
+                            y++
+                        }
                     }
                 } else {
                     if (diag) {
