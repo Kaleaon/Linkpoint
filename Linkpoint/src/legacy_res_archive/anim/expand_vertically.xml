@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<set xmlns:android="http://schemas.android.com/apk/res/android">
-    <scale android:interpolator="@android:anim/linear_interpolator" android:duration="300" android:pivotY="0%" android:fromYScale="0" android:toYScale="1"/>
-</set>

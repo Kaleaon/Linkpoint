@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt">
-    <item android:icon="?attr/MenuIconUsers" android:id="@+id/item_manage_accounts" android:title="Accounts" app:showAsAction="never|ifRoom|withText"/>
-    <item android:icon="?attr/MenuIconSettings" android:id="@+id/item_settings" android:title="Settings" app:showAsAction="never|ifRoom|withText"/>
-    <item android:icon="?attr/MenuIconMinimap" android:id="@+id/item_manage_grids" android:title="Grids"/>
-    <item android:icon="?attr/MenuIconShowPassword" android:id="@+id/item_show_password" android:title="Show password"/>
-</menu>

@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt">
-    <item android:icon="?attr/MenuIconTopRightExpand" android:id="@+id/item_copy_all" android:title="@string/copy_all_to_inventory" android:titleCondensed="@string/copy_all_to_inventory_condensed" app:showAsAction="never|ifRoom|withText"/>
-</menu>
