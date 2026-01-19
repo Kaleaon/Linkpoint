@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:id="@+id/user_card_view" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:layout_marginTop="4dp" android:layout_marginRight="10dp" android:layout_marginBottom="4dp" app:cardBackgroundColor="?attr/CardViewDetailsBackground" app:cardElevation="2dp">
-    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
-        <FrameLayout android:id="@+id/user_item_view_holder" android:background="?attr/selectableItemBackground" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content"/>
-        <LinearLayout android:orientation="horizontal" android:id="@+id/user_item_selected_layout" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="14dp">
-            <Button android:layout_gravity="center_vertical" android:id="@+id/user_item_chat_button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/button_chat" android:layout_weight="0" style="@style/BorderlessCardButton"/>
-        </LinearLayout>
-    </LinearLayout>
-</android.support.v7.widget.CardView>

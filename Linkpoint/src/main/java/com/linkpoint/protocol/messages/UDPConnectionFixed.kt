@@ -43,40 +43,93 @@ private fun UUID.asBytes(): ByteArray {
 }
 
 /**
- * Fixed UDP Connection Handler
+ * Fixed UDP Connection Handler for Second Life Protocol
  * 
- * Enhanced UDP connection with proper message routing and event bus integration.
- * Fixes the receive issue by implementing Lumiya-style architecture.
+ * This is the primary UDP connection implementation used throughout Linkpoint.
+ * It provides comprehensive packet handling with full diagnostic capabilities
+ * for debugging connection issues.
  * 
- * Key Fixes:
+ * ## Architecture Overview
+ * 
+ * This class implements the Second Life UDP protocol with proper message routing
+ * and event bus integration, following Lumiya-style architecture patterns.
+ * 
+ * ## Key Features
+ * 
+ * ### Message Routing
  * - Integrated MessageRouter for proper message handling
- * - EventBus integration for reactive updates
- * - Improved selector registration and validation
- * - Enhanced buffer management
- * - Better error handling and diagnostics
+ * - EventBus integration for reactive updates across the app
+ * - Support for all SL message frequencies (high, medium, low)
  * 
- * Mobile-First Considerations:
- * - Efficient resource usage
- * - Battery-conscious operations
- * - Memory-efficient buffering
- * - Comprehensive logging
+ * ### Diagnostic Capabilities (Critical for Debugging)
+ * - **Packet History Tracking**: Records all sent/received packets with raw hex data
+ *   - Enables diagnosis of protocol issues by capturing actual packet contents
+ *   - Stored in circular buffer (last 50 packets) for memory efficiency
+ * - **EnhancedPacketLogger Integration**: Comprehensive statistics and logging
+ *   - Tracks packet counts, byte volumes, message types
+ *   - Records malformed packets for protocol debugging
+ * - **Socket Details**: Connection timing and state information
+ *   - Local/remote addresses and ports
+ *   - Connection attempt and last activity timestamps
+ *   - Last error information for troubleshooting
+ * 
+ * ### Mobile-First Design
+ * - Efficient resource usage with non-blocking NIO
+ * - Battery-conscious operations with selective logging
+ * - Memory-efficient buffering with bounded queues
+ * 
+ * ## Usage
+ * 
+ * This class is instantiated by LinkpointApp and shared across managers.
+ * Packet history and diagnostics are accessed via:
+ * - `getPacketHistory()` - Recent packet events with hex dumps
+ * - `getSocketDetails()` - Connection state and timing
+ * - `getDiagnostics()` - Overall connection diagnostics
+ * - `getMessageStatistics()` - Message type counts and timing
+ * 
+ * ## Packet Data Logging
+ * 
+ * Raw packet data is logged for diagnostic purposes:
+ * - Each sent packet: message ID, sequence number, size, hex preview
+ * - Each received packet: message ID, sequence number, size, hex preview
+ * - Failed operations include error messages
+ * 
+ * This addresses the debugging need identified in issue reports:
+ * "Not enough data is being gathered, we need raw input and output to understand"
+ * 
+ * @see EnhancedPacketLogger for detailed packet statistics
+ * @see MessageRouter for message dispatch logic
+ * @see DebugReportService for how diagnostics are displayed
  */
 class UDPConnectionFixed {
     
     companion object {
         private const val TAG = "UDPConnectionFixed"
+        
+        /** Maximum UDP datagram size (64KB - 1) */
         private const val BUFFER_SIZE = 65535
+        
+        /** Timeout for NIO selector operations (1 second) */
         private const val SELECTOR_TIMEOUT_MS = 1000L
         
-        // Packet header size: flags (1) + sequence (4) + extra (1) = 6 bytes
+        /** 
+         * Packet header size: flags (1) + sequence (4) + extra (1) = 6 bytes
+         * This is constant across all SL UDP packets
+         */
         private const val PACKET_HEADER_SIZE = 6
         
-        // Frequency bases for message ID encoding (matching Lumiya)
-        // Medium: 0xFF00 (65280) - used for messages 0xFF01-0xFFFE
+        /**
+         * Frequency bases for message ID encoding (matching Lumiya)
+         * 
+         * Second Life uses three message frequency ranges:
+         * - High frequency: Single byte (0x00-0xFE), used for frequent messages like ObjectUpdate
+         * - Medium frequency: 0xFF + byte, decoded as (byte | 65280)
+         * - Low frequency: 0xFF 0xFF + short, decoded as (short | -65536)
+         */
         private const val MEDIUM_FREQUENCY_BASE = 65280  // 0xFF00
-        // Low: -65536 (0xFFFF0000 as signed Int32) - used for messages 0xFFFF0000-0xFFFFFFFF
         private const val LOW_FREQUENCY_BASE = -65536    // 0xFFFF0000 as signed Int32
         
+        /** Sentinel value for invalid/unparseable message IDs */
         private const val INVALID_MESSAGE_ID = Int.MIN_VALUE
     }
     
@@ -111,14 +164,71 @@ class UDPConnectionFixed {
     // Mobile optimized: 10 updates/sec = 100ms interval
     private val AGENT_UPDATE_INTERVAL_MS = 100L
     
-    // Statistics
+    // ==================== STATISTICS & DIAGNOSTICS ====================
+    // These fields track packet activity for debug reports and diagnostic purposes.
+    // Raw packet data including hex dumps are captured to enable protocol debugging.
+    
+    /** Total packets received from simulator */
     private val packetsReceived = AtomicInteger(0)
+    
+    /** Total packets sent to simulator */
+    private val packetsSent = AtomicInteger(0)
+    
+    /** Total bytes received from simulator */
     private val bytesReceived = AtomicLong(0)
+    
+    /** Total bytes sent to simulator */
+    private val bytesSent = AtomicLong(0)
+    
+    /** Count of messages successfully routed to handlers */
     private val messagesRouted = AtomicInteger(0)
+    
+    /** Timestamp of last packet received (for timing diagnostics) */
     private var lastReceiveTime = 0L
+    
+    /** Timestamp of last packet sent (for timing diagnostics) */
+    private var lastSendTime = 0L
+    
+    /** Timestamp when connection was attempted (for connection duration) */
+    private var connectionAttemptTime = 0L
+    
+    /** Last connection error message (for troubleshooting) */
+    private var lastConnectionError: String? = null
+    
+    /** Local bind address for socket diagnostics */
+    private var localBindAddress: String? = null
+    
+    /** Local bind port for socket diagnostics */
+    private var localBindPort: Int = 0
+    
+    /** Count of each message type received (for protocol analysis) */
     private val messageTypeCounts = java.util.concurrent.ConcurrentHashMap<String, AtomicInteger>()
+    
+    /** Last time each message type was received (for protocol analysis) */
     private val lastMessageTimes = java.util.concurrent.ConcurrentHashMap<String, Long>()
+    
+    /** Count of packets that were resent due to ACK timeout */
     private val packetsResentCount = AtomicInteger(0)
+    
+    // ==================== PACKET HISTORY FOR RAW DATA LOGGING ====================
+    // Critical for debugging: captures raw packet data with hex dumps.
+    // This addresses the requirement: "we need raw input and output to understand"
+    
+    /** 
+     * Circular buffer of recent packet events including raw hex data.
+     * Used by DebugReportService to show packet history in debug reports.
+     * Each entry contains: timestamp, type, message ID, size, sequence number, hex preview
+     */
+    private val recentPacketHistory = java.util.concurrent.ConcurrentLinkedQueue<PacketHistoryEntry>()
+    
+    /** Maximum number of packet events to keep in history (memory bounded) */
+    private val maxPacketHistorySize = 50
+    
+    /** 
+     * Sequence number for outgoing packets.
+     * Incremented for each packet sent, used for reliable delivery ACK tracking.
+     */
+    private val sequenceNumber = AtomicInteger(0)
     
     // Control flags for movement
     private var controlFlags: Int = 0
@@ -180,6 +290,14 @@ class UDPConnectionFixed {
      */
     suspend fun connect(): Boolean = withContext(Dispatchers.IO) {
         try {
+            // Record connection attempt time and reset statistics
+            connectionAttemptTime = System.currentTimeMillis()
+            lastConnectionError = null
+            recentPacketHistory.clear()
+            
+            // Start EnhancedPacketLogger session for comprehensive tracking
+            EnhancedPacketLogger.startSession()
+            
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== INITIATING FIXED UDP CONNECTION ===")
             
             val address = InetSocketAddress(simIP, simPort)
@@ -188,6 +306,16 @@ class UDPConnectionFixed {
             datagramChannel = DatagramChannel.open().apply {
                 configureBlocking(false)
                 connect(address)
+            }
+            
+            // Capture local bind information for diagnostics
+            try {
+                val localAddr = datagramChannel?.localAddress as? InetSocketAddress
+                localBindAddress = localAddr?.address?.hostAddress
+                localBindPort = localAddr?.port ?: 0
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ Local bind: $localBindAddress:$localBindPort")
+            } catch (e: Exception) {
+                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Could not determine local bind address: ${e.message}")
             }
             
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ DatagramChannel connected to $simIP:$simPort")
@@ -235,6 +363,7 @@ class UDPConnectionFixed {
             true
             
         } catch (e: Exception) {
+            lastConnectionError = e.message ?: e.javaClass.simpleName
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "✗ Connection failed: ${e.message}")
             _isConnected.value = false
             disconnect()
@@ -288,10 +417,36 @@ class UDPConnectionFixed {
                                 val data = ByteArray(bytesRead)
                                 buffer.get(data)
                                 
+                                // Extract message info for logging
+                                val messageId = extractMessageId(data)
+                                val messageName = getMessageName(messageId)
+                                val seqNum = extractSequenceNumber(data)
+                                val hexPreview = data.take(32).joinToString(" ") { "%02X".format(it) }
+                                
                                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "📦 PACKET RECEIVED #${packetsReceived.get()}: $bytesRead bytes")
+                                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "   Message: $messageName (ID: 0x${messageId.toString(16).uppercase()}, seq: $seqNum)")
+                                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "   Raw data: $hexPreview")
+                                
+                                // Record in packet history for debug reports
+                                recordPacketEvent(
+                                    type = PacketHistoryEntry.PacketEventType.RECEIVE,
+                                    messageId = messageId,
+                                    data = data,
+                                    sequenceNumber = seqNum,
+                                    success = true
+                                )
+                                
+                                // Log to EnhancedPacketLogger for comprehensive tracking
+                                EnhancedPacketLogger.logPacketReceived(
+                                    messageId = messageId,
+                                    messageName = messageName,
+                                    sequenceNumber = seqNum,
+                                    data = data,
+                                    flags = extractPacketFlags(data),
+                                    handlerFound = messageHandlers.containsKey(messageId)
+                                )
                                 
                                 // Publish message received event
-                                val messageId = extractMessageId(data)
                                 EventBus.publish(MessageReceivedEvent(messageId, data))
                                 
                                 // Route message through router
@@ -640,11 +795,11 @@ class UDPConnectionFixed {
         try {
             // Build packet header (big-endian per SL protocol)
             val flags = (if (reliable) 0x40 else 0) or (if (zerocoded) 0x80 else 0)
-            val sequence = 0 // TODO: Track sequence numbers
+            val seqNum = sequenceNumber.getAndIncrement()
             
             val header = ByteBuffer.allocate(6).order(ByteOrder.BIG_ENDIAN)
             header.put(flags.toByte())
-            header.putInt(sequence)
+            header.putInt(seqNum)
             header.put(0.toByte()) // Extra header byte
             
             // Encode message ID (Lumiya-style)
@@ -656,14 +811,69 @@ class UDPConnectionFixed {
             // Zero-code if requested
             val finalPacket = if (zerocoded) zeroEncode(packet) else packet
             
+            // Get message name and hex preview for logging
+            val messageName = getMessageName(messageId)
+            val hexPreview = finalPacket.take(32).joinToString(" ") { "%02X".format(it) }
+            
             // Send via DatagramChannel
             val buffer = ByteBuffer.wrap(finalPacket)
-            datagramChannel?.write(buffer)
+            val bytesWritten = datagramChannel?.write(buffer) ?: 0
             
-            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sent packet: ${finalPacket.size} bytes (ID: $messageId, reliable: $reliable)")
+            if (bytesWritten > 0) {
+                packetsSent.incrementAndGet()
+                bytesSent.addAndGet(bytesWritten.toLong())
+                lastSendTime = System.currentTimeMillis()
+                
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sent packet: ${finalPacket.size} bytes (ID: $messageId, reliable: $reliable)")
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "   Message: $messageName (seq: $seqNum)")
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "   Raw data: $hexPreview")
+                
+                // Record in packet history for debug reports
+                recordPacketEvent(
+                    type = PacketHistoryEntry.PacketEventType.SEND_SUCCESS,
+                    messageId = messageId,
+                    data = finalPacket,
+                    sequenceNumber = seqNum,
+                    success = true
+                )
+                
+                // Log to EnhancedPacketLogger for comprehensive tracking
+                EnhancedPacketLogger.logPacketSent(
+                    messageId = messageId,
+                    messageName = messageName,
+                    sequenceNumber = seqNum,
+                    data = finalPacket,
+                    flags = EnhancedPacketLogger.PacketFlags(
+                        reliable = reliable,
+                        resent = false,
+                        zerocoded = zerocoded,
+                        hasAcks = false
+                    )
+                )
+            } else {
+                // Record failed send
+                recordPacketEvent(
+                    type = PacketHistoryEntry.PacketEventType.SEND_FAILED,
+                    messageId = messageId,
+                    data = finalPacket,
+                    sequenceNumber = seqNum,
+                    success = false,
+                    errorMessage = "DatagramChannel.write() returned 0 bytes"
+                )
+                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "→ Send may have failed: 0 bytes written (ID: $messageId)")
+            }
             
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "✗ Send error: ${e.message}")
+            // Record failed send with error
+            recordPacketEvent(
+                type = PacketHistoryEntry.PacketEventType.SEND_FAILED,
+                messageId = messageId,
+                data = payload,
+                sequenceNumber = sequenceNumber.get(),
+                success = false,
+                errorMessage = e.message
+            )
         }
     }
     
@@ -907,7 +1117,7 @@ class UDPConnectionFixed {
             circuitCode = circuitCode,
             agentId = agentId,
             sessionId = sessionId,
-            sequenceNumber = 0, // TODO: Track sequence numbers
+            sequenceNumber = sequenceNumber.get(),
             pendingAckCount = 0,
             registeredHandlerCount = messageHandlers.size,
             registeredHandlers = messageHandlers.keys.map { it.toString() },
@@ -997,10 +1207,100 @@ class UDPConnectionFixed {
     )
     
     /**
-     * Get packet history for debugging (returns empty list - simplified implementation)
+     * Record a packet event in the history for debugging.
+     * This captures raw packet data including hex dumps for diagnostic purposes.
+     */
+    private fun recordPacketEvent(
+        type: PacketHistoryEntry.PacketEventType,
+        messageId: Int,
+        data: ByteArray,
+        sequenceNumber: Int,
+        success: Boolean = true,
+        errorMessage: String? = null
+    ) {
+        val entry = PacketHistoryEntry(
+            timestamp = System.currentTimeMillis(),
+            type = type,
+            messageId = messageId,
+            messageName = getMessageName(messageId),
+            size = data.size,
+            sequenceNumber = sequenceNumber,
+            hexPreview = data.take(24).joinToString(" ") { "%02X".format(it) },
+            success = success,
+            errorMessage = errorMessage
+        )
+        
+        recentPacketHistory.offer(entry)
+        
+        // Keep bounded size
+        while (recentPacketHistory.size > maxPacketHistorySize) {
+            recentPacketHistory.poll()
+        }
+    }
+    
+    /**
+     * Extract the sequence number from raw packet data.
+     * Packet header format: flags (1 byte), sequence (4 bytes big-endian), extra (1 byte)
+     */
+    private fun extractSequenceNumber(data: ByteArray): Int {
+        if (data.size < 5) return -1
+        return ((data[1].toInt() and 0xFF) shl 24) or
+               ((data[2].toInt() and 0xFF) shl 16) or
+               ((data[3].toInt() and 0xFF) shl 8) or
+               (data[4].toInt() and 0xFF)
+    }
+    
+    /**
+     * Extract packet flags from raw packet data for EnhancedPacketLogger.
+     */
+    private fun extractPacketFlags(data: ByteArray): EnhancedPacketLogger.PacketFlags {
+        if (data.isEmpty()) {
+            return EnhancedPacketLogger.PacketFlags(false, false, false, false)
+        }
+        val flags = data[0].toInt() and 0xFF
+        return EnhancedPacketLogger.PacketFlags(
+            reliable = (flags and 0x40) != 0,
+            resent = (flags and 0x20) != 0,
+            zerocoded = (flags and 0x80) != 0,
+            hasAcks = (flags and 0x10) != 0
+        )
+    }
+    
+    /**
+     * Get human-readable message name from ID for debugging.
+     */
+    private fun getMessageName(messageId: Int): String {
+        return when (messageId) {
+            MessageIds.USE_CIRCUIT_CODE -> "UseCircuitCode"
+            MessageIds.COMPLETE_AGENT_MOVEMENT -> "CompleteAgentMovement"
+            MessageIds.LOGOUT_REQUEST -> "LogoutRequest"
+            MessageIds.REGION_HANDSHAKE -> "RegionHandshake"
+            MessageIds.REGION_HANDSHAKE_REPLY -> "RegionHandshakeReply"
+            MessageIds.AGENT_THROTTLE -> "AgentThrottle"
+            MessageIds.AGENT_MOVEMENT_COMPLETE -> "AgentMovementComplete"
+            MessageIds.CHAT_FROM_SIMULATOR -> "ChatFromSimulator"
+            MessageIds.IMPROVED_INSTANT_MESSAGE -> "ImprovedInstantMessage"
+            MessageIds.OBJECT_UPDATE -> "ObjectUpdate"
+            MessageIds.OBJECT_UPDATE_COMPRESSED -> "ObjectUpdateCompressed"
+            MessageIds.IMPROVED_TERSE_OBJECT_UPDATE -> "ImprovedTerseObjectUpdate"
+            MessageIds.AVATAR_ANIMATION -> "AvatarAnimation"
+            MessageIds.AGENT_ANIMATION -> "AgentAnimation"
+            MessageIds.COARSE_LOCATION_UPDATE -> "CoarseLocationUpdate"
+            MessageIds.KILL_OBJECT -> "KillObject"
+            MessageIds.PACKET_ACK -> "PacketAck"
+            MessageIds.START_PING_CHECK -> "StartPingCheck"
+            MessageIds.COMPLETE_PING_CHECK -> "CompletePingCheck"
+            MessageIds.AGENT_UPDATE -> "AgentUpdate"
+            else -> "Unknown(0x${messageId.toString(16).uppercase()})"
+        }
+    }
+    
+    /**
+     * Get packet history for debugging.
+     * Returns the list of recent packet events including raw hex data.
      */
     fun getPacketHistory(): List<PacketHistoryEntry> {
-        return emptyList()
+        return recentPacketHistory.toList()
     }
     
     /**
@@ -1008,16 +1308,16 @@ class UDPConnectionFixed {
      */
     fun getSocketDetails(): SocketDetails {
         return SocketDetails(
-            localBindAddress = null,
-            localBindPort = 0,
+            localBindAddress = localBindAddress,
+            localBindPort = localBindPort,
             remoteAddress = simIP,
             remotePort = simPort,
             isConnected = datagramChannel?.isConnected == true,
             isOpen = datagramChannel?.isOpen == true,
-            connectionAttemptTime = 0L,
-            lastSendAttemptTime = 0L,
+            connectionAttemptTime = connectionAttemptTime,
+            lastSendAttemptTime = lastSendTime,
             lastReceiveTime = lastReceiveTime,
-            lastConnectionError = null
+            lastConnectionError = lastConnectionError
         )
     }
 }
