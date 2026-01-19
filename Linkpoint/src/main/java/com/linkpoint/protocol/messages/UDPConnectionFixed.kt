@@ -8,6 +8,7 @@ import com.linkpoint.network.events.CircuitEstablishedEvent
 import com.linkpoint.network.events.MessageReceivedEvent
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.protocol.types.putUUID
+import com.linkpoint.utils.SessionLogRecorder
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -485,6 +486,15 @@ class UDPConnectionFixed {
                                     handlerFound = messageHandlers.containsKey(messageId)
                                 )
                                 
+                                // Log to SessionLogRecorder for full session recording
+                                SessionLogRecorder.logPacketReceived(
+                                    messageId = messageId,
+                                    messageName = messageName,
+                                    sequenceNumber = seqNum,
+                                    data = data,
+                                    handlerFound = messageHandlers.containsKey(messageId)
+                                )
+                                
                                 // Publish message received event
                                 EventBus.publish(MessageReceivedEvent(messageId, data))
                                 
@@ -889,6 +899,15 @@ class UDPConnectionFixed {
                         zerocoded = zerocoded,
                         hasAcks = false
                     )
+                )
+                
+                // Log to SessionLogRecorder for full session recording
+                SessionLogRecorder.logPacketSent(
+                    messageId = messageId,
+                    messageName = messageName,
+                    sequenceNumber = seqNum,
+                    data = finalPacket,
+                    reliable = reliable
                 )
             } else {
                 // Record failed send
