@@ -16,13 +16,17 @@ class TerrainPatch(
     companion object {
         const val END_OF_PATCHES = 97
         const val PATCH_SIZE = 16
+        const val PATCHES_PER_SIDE = 16
         
         // Pre-computed tables for DCT decompression
         private val dequantizeTable16 = FloatArray(256)
         private val cosineTable16 = FloatArray(256)
         private val copyMatrix16 = IntArray(256)
         
+        // DCT constants
         private const val OO_SQRT2 = 0.70710677f
+        private const val PI_OVER_32 = 0.09817477f  // π/32 for cosine table
+        private const val IDCT_NORMALIZATION = 0.125f  // 1/8 for IDCT normalization
         
         init {
             buildDequantizeTable16()
@@ -41,7 +45,7 @@ class TerrainPatch(
         private fun setupCosines16() {
             for (i in 0 until 16) {
                 for (j in 0 until 16) {
-                    cosineTable16[i * 16 + j] = cos((j * 2.0f + 1.0f) * i * 0.09817477f).toFloat()
+                    cosineTable16[i * 16 + j] = cos((j * 2.0f + 1.0f) * i * PI_OVER_32).toFloat()
                 }
             }
         }
@@ -174,7 +178,7 @@ class TerrainPatch(
                 for (k in 1 until 16) {
                     sum += input[rowIdx + k] * cosineTable16[k * 16 + col]
                 }
-                output[rowIdx + col] = sum * 0.125f
+                output[rowIdx + col] = sum * IDCT_NORMALIZATION
             }
         }
     }

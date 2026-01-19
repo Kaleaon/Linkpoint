@@ -108,7 +108,7 @@ object LayerDataParser {
             while (!buffer.isEOF()) {
                 val patch = TerrainPatch.decompressPatch(buffer, patchSize) ?: break
                 
-                if (patch.x < 16 && patch.y < 16) {
+                if (patch.x < TerrainPatch.PATCHES_PER_SIDE && patch.y < TerrainPatch.PATCHES_PER_SIDE) {
                     patches.add(patch)
                 }
             }

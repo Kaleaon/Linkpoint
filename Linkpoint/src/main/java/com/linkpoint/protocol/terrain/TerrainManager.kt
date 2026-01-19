@@ -18,6 +18,7 @@ class TerrainManager {
         const val REGION_SIZE = 256
         const val PATCH_SIZE = 16
         const val PATCHES_PER_SIDE = 16
+        const val DEFAULT_WATER_HEIGHT = 20.0f
     }
     
     // Full heightmap (256x256)
@@ -27,7 +28,7 @@ class TerrainManager {
     private val validPatches = ConcurrentHashMap<Int, Boolean>()
     
     // Water height from RegionHandshake
-    var waterHeight: Float = 20.0f
+    var waterHeight: Float = DEFAULT_WATER_HEIGHT
         private set
     
     // Terrain renderer reference (set when rendering is ready)
@@ -162,7 +163,7 @@ class TerrainManager {
         heightMap.fill(0f)
         validPatches.clear()
         validPatchCount = 0
-        waterHeight = 20.0f
+        waterHeight = DEFAULT_WATER_HEIGHT
         Log.i(TAG, "Terrain data reset")
     }
     

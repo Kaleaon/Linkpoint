@@ -980,14 +980,14 @@ class UDPConnectionFixed {
      * 
      * Zero-coding is a run-length encoding for zeros used in SL protocol.
      * Format: 0x00 followed by count byte means that many zeros.
-     * The first 6 bytes (header) are not zero-coded.
+     * The first PACKET_HEADER_SIZE bytes (header) are not zero-coded.
      */
     private fun zeroDecode(data: ByteArray): ByteArray {
         val result = mutableListOf<Byte>()
         var i = 0
         
-        // Copy header unchanged (first 6 bytes are not zero-coded)
-        while (i < 6 && i < data.size) {
+        // Copy header unchanged (first PACKET_HEADER_SIZE bytes are not zero-coded)
+        while (i < PACKET_HEADER_SIZE && i < data.size) {
             result.add(data[i])
             i++
         }
