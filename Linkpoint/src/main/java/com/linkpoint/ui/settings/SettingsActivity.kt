@@ -1,13 +1,17 @@
 package com.linkpoint.ui.settings
 
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -18,9 +22,16 @@ import androidx.preference.ListPreference
 import androidx.preference.SeekBarPreference
 import com.linkpoint.BuildConfig
 import com.linkpoint.R
+import com.linkpoint.network.NetworkLogger
 import com.linkpoint.ui.tos.TosActivity
 import com.linkpoint.utils.CrashReporter
+import com.linkpoint.utils.DebugReportService
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * Settings Activity
@@ -71,6 +82,18 @@ class SettingsActivity : AppCompatActivity() {
     }
     
     class SettingsFragment : PreferenceFragmentCompat() {
+        
+        // ActivityResultLauncher for saving the exported log file
+        private var pendingLogContent: String? = null
+        private val createDocumentLauncher: ActivityResultLauncher<Intent> = 
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    result.data?.data?.let { uri ->
+                        writeLogToUri(uri)
+                    }
+                }
+                pendingLogContent = null
+            }
         
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.preferences, rootKey)
@@ -391,6 +414,12 @@ class SettingsActivity : AppCompatActivity() {
                 confirmClearCrashLogs()
                 true
             }
+            
+            // Export Log
+            findPreference<Preference>("export_log")?.setOnPreferenceClickListener {
+                exportLog()
+                true
+            }
         }
         
         /**
@@ -681,6 +710,192 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 .setNegativeButton("Cancel", null)
                 .show()
+        }
+        
+        /**
+         * Export combined log to a user-selected location in the file system
+         */
+        private fun exportLog() {
+            viewLifecycleOwner.lifecycleScope.launch {
+                Toast.makeText(requireContext(), "Generating combined log...", Toast.LENGTH_SHORT).show()
+                
+                val logContent = withContext(Dispatchers.IO) {
+                    generateCombinedLog()
+                }
+                
+                // Store the content for use by the result callback
+                pendingLogContent = logContent
+                
+                // Generate a default filename with timestamp
+                val timestamp = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US).format(Date())
+                val defaultFilename = "linkpoint_log_$timestamp.txt"
+                
+                // Use Storage Access Framework to let user choose location
+                val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TITLE, defaultFilename)
+                }
+                
+                try {
+                    createDocumentLauncher.launch(intent)
+                } catch (e: Exception) {
+                    pendingLogContent = null
+                    Toast.makeText(
+                        requireContext(),
+                        "Could not open file picker: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
+        
+        /**
+         * Write the log content to the selected URI
+         */
+        private fun writeLogToUri(uri: Uri) {
+            val content = pendingLogContent
+            if (content == null) {
+                Toast.makeText(requireContext(), "No log content to save", Toast.LENGTH_SHORT).show()
+                return
+            }
+            
+            viewLifecycleOwner.lifecycleScope.launch {
+                val success = withContext(Dispatchers.IO) {
+                    try {
+                        requireContext().contentResolver.openOutputStream(uri)?.use { outputStream ->
+                            outputStream.bufferedWriter().use { writer ->
+                                writer.write(content)
+                            }
+                        }
+                        true
+                    } catch (e: Exception) {
+                        android.util.Log.e("SettingsActivity", "Failed to write log file", e)
+                        false
+                    }
+                }
+                
+                if (success) {
+                    Toast.makeText(requireContext(), "Log exported successfully", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(requireContext(), "Failed to export log", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+        
+        /**
+         * Generate a combined log from all log sources
+         */
+        private fun generateCombinedLog(): String {
+            return buildString {
+                appendLine("╔══════════════════════════════════════════════════════════════════╗")
+                appendLine("║               LINKPOINT COMBINED LOG EXPORT                       ║")
+                appendLine("╚══════════════════════════════════════════════════════════════════╝")
+                appendLine()
+                appendLine("Export Time: ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z", Locale.US).format(Date())}")
+                appendLine("Version: ${BuildConfig.VERSION_NAME} (Build ${BuildConfig.VERSION_CODE})")
+                appendLine("Device: ${Build.MANUFACTURER} ${Build.MODEL}")
+                appendLine("Android: ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})")
+                appendLine()
+                
+                // Include most recent debug report
+                appendLine("┌──────────────────────────────────────────────────────────────────┐")
+                appendLine("│ MOST RECENT DEBUG REPORT                                          │")
+                appendLine("└──────────────────────────────────────────────────────────────────┘")
+                appendLine()
+                try {
+                    val debugService = DebugReportService.getInstanceOrNull()
+                    if (debugService != null) {
+                        val reports = debugService.getDebugReports()
+                        if (reports.isNotEmpty()) {
+                            val latestReport = reports.first()
+                            val content = debugService.readReport(latestReport)
+                            if (content != null) {
+                                appendLine("Source: ${latestReport.name}")
+                                appendLine()
+                                appendLine(content)
+                            } else {
+                                appendLine("Could not read debug report")
+                            }
+                        } else {
+                            appendLine("No debug reports available")
+                        }
+                    } else {
+                        appendLine("Debug report service not initialized")
+                    }
+                } catch (e: Exception) {
+                    appendLine("Error reading debug reports: ${e.message}")
+                }
+                appendLine()
+                
+                // Include crash logs
+                appendLine("┌──────────────────────────────────────────────────────────────────┐")
+                appendLine("│ CRASH LOGS                                                        │")
+                appendLine("└──────────────────────────────────────────────────────────────────┘")
+                appendLine()
+                try {
+                    val crashReporter = CrashReporter.getInstanceOrNull()
+                    if (crashReporter != null) {
+                        val crashLogs = crashReporter.getCrashLogs()
+                        if (crashLogs.isNotEmpty()) {
+                            appendLine("Total crash logs: ${crashLogs.size}")
+                            appendLine()
+                            // Include last 5 crash logs
+                            crashLogs.take(5).forEach { logFile ->
+                                appendLine("--- ${logFile.name} ---")
+                                val content = crashReporter.readCrashLog(logFile)
+                                if (content != null) {
+                                    appendLine(content)
+                                } else {
+                                    appendLine("Could not read crash log")
+                                }
+                                appendLine()
+                            }
+                            if (crashLogs.size > 5) {
+                                appendLine("... and ${crashLogs.size - 5} more crash logs")
+                            }
+                        } else {
+                            appendLine("No crash logs found (this is good!)")
+                        }
+                    } else {
+                        appendLine("Crash reporter not initialized")
+                    }
+                } catch (e: Exception) {
+                    appendLine("Error reading crash logs: ${e.message}")
+                }
+                appendLine()
+                
+                // Include recent network logs
+                appendLine("┌──────────────────────────────────────────────────────────────────┐")
+                appendLine("│ RECENT NETWORK ACTIVITY                                           │")
+                appendLine("└──────────────────────────────────────────────────────────────────┘")
+                appendLine()
+                try {
+                    val networkLogs = NetworkLogger.getRecentLogs(100)
+                    if (networkLogs.isNotEmpty()) {
+                        appendLine(networkLogs)
+                    } else {
+                        appendLine("No recent network activity logged")
+                    }
+                    
+                    appendLine()
+                    appendLine("Network Statistics:")
+                    val stats = NetworkLogger.getStatistics()
+                    appendLine("  Requests: ${stats.requestCount}")
+                    appendLine("  Responses: ${stats.responseCount}")
+                    appendLine("  Errors: ${stats.errorCount}")
+                    appendLine("  Warnings: ${stats.warningCount}")
+                    appendLine("  Retries: ${stats.retryCount}")
+                    appendLine("  Timeouts: ${stats.timeoutCount}")
+                } catch (e: Exception) {
+                    appendLine("Error reading network logs: ${e.message}")
+                }
+                appendLine()
+                
+                appendLine("═══════════════════════════════════════════════════════════════════")
+                appendLine("End of Combined Log Export")
+                appendLine("═══════════════════════════════════════════════════════════════════")
+            }
         }
         
         /**
