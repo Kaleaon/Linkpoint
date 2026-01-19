@@ -76,12 +76,20 @@ class RenderManager(private val context: Context) {
             uiHelper = UiHelper(UiHelper.ContextErrorPolicy.DONT_CHECK).apply {
                 renderCallback = object : UiHelper.RendererCallback {
                     override fun onNativeWindowChanged(surface: Surface) {
-                        swapChain?.let { engine?.destroySwapChain(it) }
+                        Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+                        Log.i(TAG, "║ ⭐ onNativeWindowChanged - Surface available")
+                        Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+                        swapChain?.let { 
+                            Log.d(TAG, "Destroying old SwapChain")
+                            engine?.destroySwapChain(it) 
+                        }
                         swapChain = engine?.createSwapChain(surface)
+                        Log.i(TAG, "✓ SwapChain created: ${swapChain != null}")
                         attachDisplayHelper()
                     }
                     
                     override fun onDetachedFromSurface() {
+                        Log.w(TAG, "onDetachedFromSurface - Surface lost")
                         displayHelper?.detach()
                         swapChain?.let {
                             engine?.destroySwapChain(it)
@@ -90,6 +98,7 @@ class RenderManager(private val context: Context) {
                     }
                     
                     override fun onResized(width: Int, height: Int) {
+                        Log.d(TAG, "onResized: ${width}x${height}")
                         view?.viewport = Viewport(0, 0, width, height)
                         viewportWidth = width
                         viewportHeight = height
@@ -97,6 +106,7 @@ class RenderManager(private val context: Context) {
                     }
                 }
                 attachTo(surfaceView)
+                Log.d(TAG, "UiHelper attached to SurfaceView")
             }
             
             // Setup display helper
