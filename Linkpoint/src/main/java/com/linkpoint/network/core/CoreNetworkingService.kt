@@ -464,13 +464,11 @@ class CoreNetworkingService(private val context: Context) {
             .build()
         
         Log.d(TAG, "Executing login request to: $loginUri")
-        NetworkLogger.logRequest(request, attempt = 0)
+        // Note: Request/response logging is handled by executeWithBodyRetry() to avoid duplicate logs
         
-        val startTime = System.currentTimeMillis()
         val (response, responseBody) = executeWithBodyRetry(client, request, options)
-        val duration = System.currentTimeMillis() - startTime
         
-        NetworkLogger.logResponse(response, duration)
+        // Log response body at verbose level for debugging (response headers already logged by executeWithBodyRetry)
         NetworkLogger.logResponseBody(loginUri, responseBody)
         
         if (!response.isSuccessful) {
