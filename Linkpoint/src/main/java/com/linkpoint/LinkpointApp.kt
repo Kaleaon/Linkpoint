@@ -285,6 +285,10 @@ class LinkpointApp : Application() {
     lateinit var animationController: AnimationController
         private set
     
+    // Terrain Manager (NEW)
+    lateinit var terrainManager: com.linkpoint.protocol.terrain.TerrainManager
+        private set
+    
     // Crash Reporter
     lateinit var crashReporter: CrashReporter
         private set
@@ -404,6 +408,9 @@ class LinkpointApp : Application() {
         
         // NEW: Snapshot Manager
         snapshotManager = SnapshotManager(this, capabilityManager)
+        
+        // NEW: Terrain Manager (for processing LayerData terrain patches)
+        terrainManager = com.linkpoint.protocol.terrain.TerrainManager()
         
         Log.d(TAG, "Core managers initialized")
     }
@@ -544,6 +551,13 @@ class LinkpointApp : Application() {
                     // Update session with region info
                     sessionManager.updateRegionName(regionData.simName)
                     Log.d(TAG, "Session region name updated to: ${regionData.simName}")
+                    
+                    // Update terrain manager with water height
+                    if (::terrainManager.isInitialized) {
+                        terrainManager.setWaterHeight(regionData.waterHeight)
+                        terrainManager.reset()  // Reset terrain for new region
+                        Log.d(TAG, "Terrain manager reset for new region, water height: ${regionData.waterHeight}")
+                    }
                     
                     // Send RegionHandshakeReply to acknowledge - THIS IS REQUIRED!
                     applicationScope.launch {
@@ -693,6 +707,31 @@ class LinkpointApp : Application() {
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling AvatarAnimation", e)
+            }
+        }
+        
+        // LayerData - Terrain heightmap, wind, and cloud data
+        // Type 76 ('L') = terrain, Type 87 ('W') = wind, Type 67 ('C') = cloud
+        var layerDataCount = 0
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.LAYER_DATA) { _, payload ->
+            try {
+                val result = com.linkpoint.protocol.terrain.LayerDataParser.parse(payload)
+                if (result != null) {
+                    layerDataCount++
+                    if (layerDataCount <= 5 || layerDataCount % 50 == 0) {
+                        Log.d(TAG, "LAYER_DATA received: type=${result.type}, patches=${result.patches.size} (total: $layerDataCount)")
+                    }
+                    
+                    // Process terrain data if it's land type
+                    if (result.type == com.linkpoint.protocol.terrain.LayerType.LAND ||
+                        result.type == com.linkpoint.protocol.terrain.LayerType.LAND_EXTENDED) {
+                        if (::terrainManager.isInitialized) {
+                            terrainManager.processLayerData(result)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling LayerData", e)
             }
         }
         
