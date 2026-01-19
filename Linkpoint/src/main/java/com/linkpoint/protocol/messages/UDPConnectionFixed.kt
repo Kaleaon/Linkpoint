@@ -67,6 +67,15 @@ class UDPConnectionFixed {
         private const val TAG = "UDPConnectionFixed"
         private const val BUFFER_SIZE = 65535
         private const val SELECTOR_TIMEOUT_MS = 1000L
+        
+        // Packet header size: flags (1) + sequence (4) + extra (1) = 6 bytes
+        private const val PACKET_HEADER_SIZE = 6
+        
+        // Frequency bases for message ID encoding (matching Lumiya)
+        private const val MEDIUM_FREQUENCY_BASE = 65280  // 0xFF00
+        private const val LOW_FREQUENCY_BASE = -65536    // 0xFFFF0000
+        
+        private const val INVALID_MESSAGE_ID = Int.MIN_VALUE
     }
     
     // Connection parameters
@@ -316,19 +325,72 @@ class UDPConnectionFixed {
     }
     
     /**
-     * Extract message ID from packet
+     * Extract message ID from packet using Lumiya-style decoding.
+     * 
+     * The packet format is:
+     * - Bytes 0-5: Header (flags, sequence number, extra byte)
+     * - Bytes 6+: Message ID and payload
+     * 
+     * Message ID encoding:
+     * - High frequency: 1 byte (values 0-254, where 255/-1 means continue to medium)
+     * - Medium frequency: 2 bytes (0xFF, then value) - value | 65280
+     * - Low frequency: 4 bytes (0xFF, 0xFF, then 2-byte big-endian short) - short | -65536
      */
     private fun extractMessageId(data: ByteArray): Int {
-        if (data.size < 6) return -1
+        if (data.size < PACKET_HEADER_SIZE + 1) return INVALID_MESSAGE_ID
         
-        val flags = data[0].toInt() and 0xFF
-        val frequency = data[1].toInt() and 0xFF
+        val result = decodeMessageIdLumiyaStyle(data, PACKET_HEADER_SIZE)
+        return result?.first ?: INVALID_MESSAGE_ID
+    }
+    
+    /**
+     * Decode message ID using Lumiya-compatible encoding.
+     * Returns Pair of (messageId, nextOffset) or null if invalid.
+     */
+    private fun decodeMessageIdLumiyaStyle(data: ByteArray, startOffset: Int): Pair<Int, Int>? {
+        if (data.size <= startOffset) return null
         
-        return when {
-            frequency < 128 -> frequency // High frequency
-            frequency < 255 -> frequency or 0xFF00 // Medium frequency
-            else -> (frequency shl 8) or (data[2].toInt() and 0xFF) // Low frequency
+        var offset = startOffset
+        
+        // First byte - check if it's 0xFF (which is -1 as signed byte)
+        val b1 = data[offset].toInt() // Signed byte, -128 to 127
+        offset++
+        
+        if (b1 != -1) {
+            // High frequency message - return the signed byte value directly
+            // This matches Lumiya: if (b != -1) return b;
+            // e.g., 0x0C (12) = ObjectUpdate, 0xFB (-5) = PacketAck
+            return Pair(b1, offset)
         }
+        
+        // Second byte
+        if (data.size <= offset) return null
+        val b2 = data[offset].toInt() // Signed byte
+        offset++
+        
+        if (b2 != -1) {
+            // Medium frequency message - byte OR MEDIUM_FREQUENCY_BASE
+            // This matches Lumiya: b2 | 65280
+            // e.g., 0x06 (6) | 65280 = 65286 = CoarseLocationUpdate
+            return Pair(b2 or MEDIUM_FREQUENCY_BASE, offset)
+        }
+        
+        // Low frequency message - next two bytes as signed short OR LOW_FREQUENCY_BASE
+        if (data.size <= offset + 1) return null
+        
+        // Big-endian to signed short conversion:
+        // 1. Read two bytes as unsigned (byte3=high, byte4=low) in network/big-endian order
+        // 2. Combine into a 16-bit value: (byte3 << 8) | byte4
+        // 3. Convert to signed short via .toShort().toInt() to sign-extend
+        val byte3 = data[offset].toInt() and 0xFF
+        val byte4 = data[offset + 1].toInt() and 0xFF
+        offset += 2
+        
+        val shortValue = ((byte3 shl 8) or byte4).toShort().toInt()
+        
+        // This matches Lumiya: byteBuffer.getShort() | (-65536)
+        // e.g., 0x0094 (148) | -65536 = -65388 = RegionHandshake
+        return Pair(shortValue or LOW_FREQUENCY_BASE, offset)
     }
     
     /**
@@ -345,11 +407,8 @@ class UDPConnectionFixed {
      */
     fun registerHandler(messageId: Int, handler: (Int, ByteArray) -> Unit) {
         // Also register in messageHandlers for diagnostics
-        messageHandlers[messageId] = object : MessageHandler {
-            override fun handleMessage(messageId: Int, data: ByteArray): Boolean {
-                handler(messageId, data)
-                return true
-            }
+        messageHandlers[messageId] = MessageHandler { msgId, data ->
+            handler(msgId, data)
         }
         
         // Register with messageRouter synchronously using runBlocking
