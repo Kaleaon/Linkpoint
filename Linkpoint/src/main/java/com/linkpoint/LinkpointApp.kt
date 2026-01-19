@@ -725,6 +725,17 @@ class LinkpointApp : Application() {
                     if (::objectManager.isInitialized) {
                         objectManager.handleObjectUpdate(update)
                     }
+                    
+                    // Extract and prefetch textures from the object's TextureEntry
+                    if (::textureManager.isInitialized && update.textureEntry.isNotEmpty()) {
+                        val textureIds = com.linkpoint.protocol.textures.TextureEntryParser.extractTextureIds(update.textureEntry)
+                        val downloadableIds = textureIds.filter { 
+                            com.linkpoint.protocol.textures.TextureEntryParser.shouldDownload(it) 
+                        }
+                        if (downloadableIds.isNotEmpty()) {
+                            textureManager.prefetch(downloadableIds.toList())
+                        }
+                    }
                 }
             }
         }
