@@ -1328,6 +1328,7 @@ class UDPConnectionFixed {
             MessageIds.AGENT_ANIMATION -> "AgentAnimation"
             MessageIds.COARSE_LOCATION_UPDATE -> "CoarseLocationUpdate"
             MessageIds.KILL_OBJECT -> "KillObject"
+            MessageIds.LAYER_DATA -> "LayerData"
             MessageIds.PACKET_ACK -> "PacketAck"
             MessageIds.START_PING_CHECK -> "StartPingCheck"
             MessageIds.COMPLETE_PING_CHECK -> "CompletePingCheck"

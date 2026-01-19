@@ -25,6 +25,9 @@ object MessageIds {
     /** AgentUpdate - Agent position/rotation/flags update */
     const val AGENT_UPDATE = 4
     
+    /** LayerData - Terrain, wind, and cloud data */
+    const val LAYER_DATA = 11
+    
     /** ObjectUpdate - Full object properties */
     const val OBJECT_UPDATE = 12
     
