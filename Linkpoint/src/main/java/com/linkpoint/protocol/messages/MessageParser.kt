@@ -52,8 +52,14 @@ object MessageParser {
         var offset = PACKET_HEADER_SIZE
         
         // Decode message ID to determine its length
-        // Note: Byte.toInt() preserves sign, so 0xFF becomes -1
-        // This matches the SL protocol where 0xFF indicates medium/low frequency
+        // 
+        // SL Protocol Message ID Encoding (matching Lumiya implementation):
+        // - Byte.toInt() in Kotlin preserves sign: 0xFF becomes -1, 0xFB becomes -5, etc.
+        // - This is INTENTIONAL because SL message IDs use signed interpretation:
+        //   * High frequency: single byte, values 0-254 (or -128 to 127 signed where 0xFF/-1 means "continue")
+        //   * Medium frequency: 0xFF + byte, decoded with 65280 base
+        //   * Low frequency: 0xFF 0xFF + short, decoded with -65536 base
+        // - The -1 check specifically detects the 0xFF sentinel byte
         val b1 = rawPacket[offset].toInt()
         offset++
         
@@ -89,19 +95,26 @@ object MessageParser {
     /**
      * Get the message ID from a raw packet.
      * 
+     * Message IDs can be negative due to signed byte interpretation:
+     * - High frequency: -128 to 126 (byte values 0x80-0xFE, excluding 0xFF)
+     * - Medium frequency: positive values around 65280+
+     * - Low frequency: negative values around -65536+
+     * 
      * @param rawPacket The complete raw packet data including header
-     * @return The message ID, or Int.MIN_VALUE if packet is malformed
+     * @return The message ID (may be negative), or Int.MIN_VALUE if packet is malformed
      */
     fun extractMessageId(rawPacket: ByteArray): Int {
         if (rawPacket.size < PACKET_HEADER_SIZE + 1) return Int.MIN_VALUE
         
         var offset = PACKET_HEADER_SIZE
         
+        // Signed byte interpretation - intentional for SL protocol compatibility
         val b1 = rawPacket[offset].toInt()
         offset++
         
         if (b1 != -1) {
-            // High frequency message
+            // High frequency message - return signed byte value directly
+            // Examples: 4 = AgentUpdate, 12 = ObjectUpdate, -5 (0xFB) = PacketAck
             return b1
         }
         

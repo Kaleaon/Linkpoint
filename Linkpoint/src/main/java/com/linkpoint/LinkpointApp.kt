@@ -297,7 +297,7 @@ class LinkpointApp : Application() {
     var agentId: UUID? = null
         private set
     
-     override fun onCreate() {
+    override fun onCreate() {
         super.onCreate()
         instance = this
         Log.i(TAG, "Linkpoint application starting...")
