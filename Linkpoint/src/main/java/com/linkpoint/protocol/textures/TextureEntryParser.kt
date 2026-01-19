@@ -34,6 +34,8 @@ object TextureEntryParser {
         }
         
         val textureIds = mutableSetOf<UUID>()
+        // TextureEntry format: UUIDs are big-endian, other fields (floats, shorts) are little-endian
+        // We start with little-endian order; readUUID() switches to big-endian for UUID reading
         val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
         
         try {
@@ -108,12 +110,13 @@ object TextureEntryParser {
     
     /**
      * Common SL "blank" texture UUIDs that should be skipped.
+     * Precomputed to avoid UUID.fromString() overhead on class load.
      */
     private val SKIP_TEXTURES = setOf(
-        UUID.fromString("00000000-0000-0000-0000-000000000000"),  // Null
-        UUID.fromString("5748decc-f629-461c-9a36-a35a221fe21f"),  // Blank
-        UUID.fromString("8dcd4a48-2d37-4909-9f78-f7a9eb4ef903"),  // Default sculpt
-        UUID.fromString("89556747-24cb-43ed-920b-47caed15465f"),  // Default
+        UUID(0L, 0L),  // Null UUID
+        UUID(0x5748deccf629461cL, -0x5cc962e01de0ba1L.toLong()),  // Blank (5748decc-f629-461c-9a36-a35a221fe21f)
+        UUID(-0x723252b7c26836f7L.toLong(), -0x6087056b82a6f6dL.toLong()),  // Default sculpt (8dcd4a48-2d37-4909-9f78-f7a9eb4ef903)
+        UUID(-0x76aa98b8db4312edL.toLong(), -0x6fd4eff8d231eca1L.toLong()),  // Default (89556747-24cb-43ed-920b-47caed15465f)
     )
     
     /**

@@ -63,6 +63,7 @@ import com.linkpoint.teleport.TeleportManager
 import com.linkpoint.hud.HUDManager
 import com.linkpoint.world.estate.EstateManager
 import com.linkpoint.xr.XRManager
+import com.linkpoint.protocol.textures.TextureEntryParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -728,10 +729,8 @@ class LinkpointApp : Application() {
                     
                     // Extract and prefetch textures from the object's TextureEntry
                     if (::textureManager.isInitialized && update.textureEntry.isNotEmpty()) {
-                        val textureIds = com.linkpoint.protocol.textures.TextureEntryParser.extractTextureIds(update.textureEntry)
-                        val downloadableIds = textureIds.filter { 
-                            com.linkpoint.protocol.textures.TextureEntryParser.shouldDownload(it) 
-                        }
+                        val textureIds = TextureEntryParser.extractTextureIds(update.textureEntry)
+                        val downloadableIds = textureIds.filter { TextureEntryParser.shouldDownload(it) }
                         if (downloadableIds.isNotEmpty()) {
                             textureManager.prefetch(downloadableIds.toList())
                         }
