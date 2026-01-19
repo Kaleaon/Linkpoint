@@ -660,6 +660,11 @@ class LinkpointApp : Application() {
         // Object updates - track counts for diagnostics
         var objectUpdateCount = 0
         var compressedObjectUpdateCount = 0
+        var avatarUpdateCount = 0
+        
+        // PCode constants (from Lumiya)
+        val PCODE_PRIM = 9
+        val PCODE_AVATAR = 47
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE) { _, payload ->
             try {
@@ -670,8 +675,33 @@ class LinkpointApp : Application() {
                     Log.d(TAG, "OBJECT_UPDATE received: ${updates.size} objects (total: $objectUpdateCount)")
                 }
                 updates.forEach { update ->
-                    if (::objectManager.isInitialized) {
-                        objectManager.handleObjectUpdate(update)
+                    // Route based on PCode - avatars go to AvatarManager, prims to ObjectManager
+                    when (update.pcode) {
+                        PCODE_AVATAR -> {
+                            avatarUpdateCount++
+                            if (avatarUpdateCount <= 5 || avatarUpdateCount % 50 == 0) {
+                                Log.d(TAG, "Avatar update: localId=${update.localId}, fullId=${update.fullId} (total: $avatarUpdateCount)")
+                            }
+                            if (::avatarManager.isInitialized) {
+                                avatarManager.updateAvatar(
+                                    agentId = update.fullId,
+                                    position = update.position,
+                                    rotation = update.rotation,
+                                    velocity = update.velocity
+                                )
+                            }
+                        }
+                        PCODE_PRIM -> {
+                            if (::objectManager.isInitialized) {
+                                objectManager.handleObjectUpdate(update)
+                            }
+                        }
+                        else -> {
+                            // Other types (trees, grass, particles) go to object manager
+                            if (::objectManager.isInitialized) {
+                                objectManager.handleObjectUpdate(update)
+                            }
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -689,8 +719,24 @@ class LinkpointApp : Application() {
                     Log.d(TAG, "OBJECT_UPDATE_COMPRESSED received: ${updates.size} objects (total: $compressedObjectUpdateCount)")
                 }
                 updates.forEach { update ->
-                    if (::objectManager.isInitialized) {
-                        objectManager.handleObjectUpdate(update)
+                    // Route based on PCode - avatars go to AvatarManager, prims to ObjectManager
+                    when (update.pcode) {
+                        PCODE_AVATAR -> {
+                            avatarUpdateCount++
+                            if (::avatarManager.isInitialized) {
+                                avatarManager.updateAvatar(
+                                    agentId = update.fullId,
+                                    position = update.position,
+                                    rotation = update.rotation,
+                                    velocity = update.velocity
+                                )
+                            }
+                        }
+                        else -> {
+                            if (::objectManager.isInitialized) {
+                                objectManager.handleObjectUpdate(update)
+                            }
+                        }
                     }
                 }
             } catch (e: Exception) {
