@@ -318,6 +318,10 @@ class LinkpointApp : Application() {
         NetworkLogger.initialize(this)
         Log.i(TAG, "Network logger initialized with auto-save to Downloads/Lumiya Logs/")
         
+        // Initialize session log recorder for comprehensive packet logging
+        com.linkpoint.utils.SessionLogRecorder.initialize(this)
+        Log.i(TAG, "Session log recorder initialized")
+        
         initializeManagers()
         
         Log.i(TAG, "Linkpoint initialized successfully")
@@ -533,7 +537,7 @@ class LinkpointApp : Application() {
         // RegionHandshake - CRITICAL: Must respond with RegionHandshakeReply for world data to load
         // This is why nothing was loading after login - we weren't acknowledging the region handshake
         // Register handlers for all critical packets
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.REGION_HANDSHAKE) { _, payload ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.REGION_HANDSHAKE) { _, rawPacket ->
             com.linkpoint.utils.InitializationTracker.startPhase(
                 com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
                 "Processing RegionHandshake"
@@ -541,8 +545,20 @@ class LinkpointApp : Application() {
             Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
             Log.i(TAG, "║ ⭐ REGION_HANDSHAKE RECEIVED (CRITICAL MESSAGE)")
             Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
-            Log.d(TAG, "RegionHandshake payload size: ${payload.size} bytes")
+            Log.d(TAG, "RegionHandshake raw packet size: ${rawPacket.size} bytes")
             try {
+                // Extract payload from raw packet (skip header and message ID)
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) {
+                    Log.e(TAG, "Failed to extract RegionHandshake payload from raw packet")
+                    com.linkpoint.utils.InitializationTracker.failPhase(
+                        com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
+                        "Payload extraction failed"
+                    )
+                    return@registerHandler
+                }
+                Log.d(TAG, "RegionHandshake extracted payload size: ${payload.size} bytes")
+                
                 val regionData = com.linkpoint.protocol.messages.MessageParser.parseRegionHandshake(payload)
                 if (regionData != null) {
                     Log.i(TAG, "RegionHandshake parsed: simName='${regionData.simName}'")
@@ -551,6 +567,11 @@ class LinkpointApp : Application() {
                     // Update session with region info
                     sessionManager.updateRegionName(regionData.simName)
                     Log.d(TAG, "Session region name updated to: ${regionData.simName}")
+                    
+                    // Log to session recorder if active
+                    com.linkpoint.utils.SessionLogRecorder.logRegionChange(
+                        regionData.simName, 0L, null
+                    )
                     
                     // Update terrain manager with water height
                     if (::terrainManager.isInitialized) {
@@ -600,7 +621,7 @@ class LinkpointApp : Application() {
         }
         
         // AgentMovementComplete - Confirms agent is fully in region
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.AGENT_MOVEMENT_COMPLETE) { _, payload ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.AGENT_MOVEMENT_COMPLETE) { _, rawPacket ->
             com.linkpoint.utils.InitializationTracker.startPhase(
                 com.linkpoint.utils.InitializationTracker.Phase.AGENT_MOVEMENT_COMPLETE,
                 "Agent fully in region"
@@ -609,6 +630,17 @@ class LinkpointApp : Application() {
             Log.i(TAG, "║ ⭐ AGENT_MOVEMENT_COMPLETE RECEIVED")
             Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
             try {
+                // Extract payload from raw packet (skip header and message ID)
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) {
+                    Log.e(TAG, "Failed to extract AgentMovementComplete payload from raw packet")
+                    com.linkpoint.utils.InitializationTracker.failPhase(
+                        com.linkpoint.utils.InitializationTracker.Phase.AGENT_MOVEMENT_COMPLETE,
+                        "Payload extraction failed"
+                    )
+                    return@registerHandler
+                }
+                
                 val moveData = com.linkpoint.protocol.messages.MessageParser.parseAgentMovementComplete(payload)
                 if (moveData != null) {
                     Log.i(TAG, "AgentMovementComplete: position=${moveData.position}")
@@ -646,8 +678,13 @@ class LinkpointApp : Application() {
         }
         
         // Chat from simulator (nearby chat)
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.CHAT_FROM_SIMULATOR) { _, payload ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.CHAT_FROM_SIMULATOR) { _, rawPacket ->
             try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) {
+                    Log.w(TAG, "Failed to extract ChatFromSimulator payload")
+                    return@registerHandler
+                }
                 val chatData = com.linkpoint.protocol.messages.MessageParser.parseChatFromSimulator(payload)
                 if (chatData != null && ::chatManager.isInitialized) {
                     chatManager.handleChatFromSimulator(chatData)
@@ -692,8 +729,10 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE) { _, payload ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE) { _, rawPacket ->
             try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
                 val updates = com.linkpoint.protocol.messages.MessageParser.parseObjectUpdate(payload)
                 objectUpdateCount += updates.size
                 // Log occasionally to avoid spam
@@ -707,8 +746,10 @@ class LinkpointApp : Application() {
         }
         
         // Compressed object updates
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE_COMPRESSED) { _, payload ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE_COMPRESSED) { _, rawPacket ->
             try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
                 val updates = com.linkpoint.protocol.messages.MessageParser.parseObjectUpdateCompressed(payload)
                 compressedObjectUpdateCount += updates.size
                 // Log occasionally to avoid spam
@@ -722,8 +763,10 @@ class LinkpointApp : Application() {
         }
         
         // Avatar animation updates
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.AVATAR_ANIMATION) { _, payload ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.AVATAR_ANIMATION) { _, rawPacket ->
             try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
                 val animData = com.linkpoint.protocol.messages.MessageParser.parseAvatarAnimation(payload)
                 if (animData != null && ::avatarManager.isInitialized) {
                     avatarManager.handleAvatarAnimation(animData)
@@ -736,8 +779,10 @@ class LinkpointApp : Application() {
         // LayerData - Terrain heightmap, wind, and cloud data
         // Type 76 ('L') = terrain, Type 87 ('W') = wind, Type 67 ('C') = cloud
         var layerDataCount = 0
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.LAYER_DATA) { _, payload ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.LAYER_DATA) { _, rawPacket ->
             try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
                 val result = com.linkpoint.protocol.terrain.LayerDataParser.parse(payload)
                 if (result != null) {
                     layerDataCount++
@@ -762,9 +807,10 @@ class LinkpointApp : Application() {
         // The simulator sends this periodically to verify the client is still alive
         // Format: PingID (1 byte) + OldestUnacked (4 bytes)
         // We only need PingID to respond; OldestUnacked is for the sim's reference
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.START_PING_CHECK) { _, payload ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.START_PING_CHECK) { _, rawPacket ->
             try {
-                if (payload.isNotEmpty()) {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && payload.isNotEmpty()) {
                     val pingId = payload[0]
                     Log.d(TAG, "StartPingCheck received: pingId=$pingId")
                     applicationScope.launch {
@@ -778,8 +824,10 @@ class LinkpointApp : Application() {
         }
         
         // ImprovedTerseObjectUpdate - Fast position updates for objects/avatars
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.IMPROVED_TERSE_OBJECT_UPDATE) { _, payload ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.IMPROVED_TERSE_OBJECT_UPDATE) { _, rawPacket ->
             try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
                 val updates = com.linkpoint.protocol.messages.MessageParser.parseTerseObjectUpdate(payload)
                 updates.forEach { update ->
                     if (update.isAvatar) {
@@ -800,8 +848,10 @@ class LinkpointApp : Application() {
         }
         
         // KillObject - Notification when objects are removed from the scene
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.KILL_OBJECT) { _, payload ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.KILL_OBJECT) { _, rawPacket ->
             try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
                 // KillObject format: 1-byte count, then list of 4-byte local IDs
                 val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
                 val count = buffer.get().toInt() and 0xFF
@@ -819,8 +869,10 @@ class LinkpointApp : Application() {
         }
         
         // CoarseLocationUpdate - Location updates for nearby avatars
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.COARSE_LOCATION_UPDATE) { _, payload ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.COARSE_LOCATION_UPDATE) { _, rawPacket ->
             try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
                 // CoarseLocationUpdate provides rough avatar positions in the region
                 // Format: RegionData block, then AgentID blocks with X, Y, Z (bytes)
                 // We'll use this to track nearby avatars even before full ObjectUpdate
@@ -835,10 +887,12 @@ class LinkpointApp : Application() {
         // PacketAck - Acknowledgment messages for reliable packets
         // These are sent by the simulator to confirm receipt of our reliable packets.
         // We register a handler to prevent "No handler registered" warnings.
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.PACKET_ACK) { _, payload ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.PACKET_ACK) { _, rawPacket ->
             // PacketAck format: Count (1 byte), then list of acknowledged sequence numbers (4 bytes each)
             // Currently we just acknowledge receipt - full ACK tracking could be added later
             try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
                 val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
                 val count = buffer.get().toInt() and 0xFF
                 // Log at debug level to avoid spam
@@ -1053,4 +1107,47 @@ class LinkpointApp : Application() {
      * Check if HUD manager is initialized (for debug reports)
      */
     fun isHudManagerInitialized(): Boolean = ::hudManager.isInitialized
+    
+    // ==================== SESSION RECORDING ====================
+    
+    /**
+     * Start recording a full session log including all packets.
+     * Call this when detailed diagnostic logging is needed from app startup to close.
+     * 
+     * @return true if recording started, false if already recording or failed
+     */
+    fun startSessionRecording(): Boolean {
+        return com.linkpoint.utils.SessionLogRecorder.startRecording()
+    }
+    
+    /**
+     * Stop session recording and get the log file.
+     * 
+     * @return The log file, or null if not recording
+     */
+    fun stopSessionRecording(): java.io.File? {
+        return com.linkpoint.utils.SessionLogRecorder.stopRecording()
+    }
+    
+    /**
+     * Check if session recording is active.
+     */
+    fun isSessionRecordingActive(): Boolean {
+        return com.linkpoint.utils.SessionLogRecorder.isRecording()
+    }
+    
+    /**
+     * Get session recording statistics.
+     */
+    fun getSessionRecordingStats(): com.linkpoint.utils.SessionLogRecorder.RecordingStats {
+        return com.linkpoint.utils.SessionLogRecorder.getStats()
+    }
+    
+    /**
+     * Get the path where session logs are stored.
+     * Returns the public Downloads/Lumiya Logs path.
+     */
+    fun getSessionLogDirectoryPath(): String {
+        return com.linkpoint.utils.SessionLogRecorder.getLogDirectoryPath()
+    }
 }

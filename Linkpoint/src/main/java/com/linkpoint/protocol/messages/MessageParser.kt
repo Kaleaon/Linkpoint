@@ -15,10 +15,127 @@ private val MESSAGE_BYTE_ORDER = ByteOrder.LITTLE_ENDIAN
  * Parses Second Life UDP message payloads.
  *
  * Payload fields are little-endian per message templates; UUIDs are raw big-endian bytes.
+ * 
+ * IMPORTANT: Raw packet data from UDPConnectionFixed includes the 6-byte header and
+ * message ID encoding. Use [extractPayload] to get just the message payload before
+ * calling parse functions.
  */
 object MessageParser {
     
     private const val TAG = "MessageParser"
+    
+    /** Packet header size: flags (1) + sequence (4) + extra (1) = 6 bytes */
+    private const val PACKET_HEADER_SIZE = 6
+    
+    /**
+     * Extract the payload portion from a raw UDP packet.
+     * 
+     * The packet format is:
+     * - Bytes 0-5: Header (flags, sequence number, extra byte)
+     * - Bytes 6+: Message ID encoding (variable length based on frequency)
+     * - Remaining: Payload data
+     * 
+     * Message ID encoding:
+     * - High frequency: 1 byte (values 0-254)
+     * - Medium frequency: 2 bytes (0xFF, then value)
+     * - Low frequency: 4 bytes (0xFF, 0xFF, then 2-byte short)
+     * 
+     * @param rawPacket The complete raw packet data including header
+     * @return The payload data without header or message ID, or null if packet is malformed
+     */
+    fun extractPayload(rawPacket: ByteArray): ByteArray? {
+        if (rawPacket.size < PACKET_HEADER_SIZE + 1) {
+            Log.w(TAG, "Packet too small to contain header: ${rawPacket.size} bytes")
+            return null
+        }
+        
+        var offset = PACKET_HEADER_SIZE
+        
+        // Decode message ID to determine its length
+        // 
+        // SL Protocol Message ID Encoding (matching Lumiya implementation):
+        // - Byte.toInt() in Kotlin preserves sign: 0xFF becomes -1, 0xFB becomes -5, etc.
+        // - This is INTENTIONAL because SL message IDs use signed interpretation:
+        //   * High frequency: single byte, values 0-254 (or -128 to 127 signed where 0xFF/-1 means "continue")
+        //   * Medium frequency: 0xFF + byte, decoded with 65280 base
+        //   * Low frequency: 0xFF 0xFF + short, decoded with -65536 base
+        // - The -1 check specifically detects the 0xFF sentinel byte
+        val b1 = rawPacket[offset].toInt()
+        offset++
+        
+        if (b1 != -1) {
+            // High frequency: 1 byte message ID, payload starts at offset
+            return rawPacket.copyOfRange(offset, rawPacket.size)
+        }
+        
+        // Check for medium/low frequency
+        if (rawPacket.size < offset + 1) {
+            Log.w(TAG, "Packet truncated at medium frequency check")
+            return null
+        }
+        
+        val b2 = rawPacket[offset].toInt()
+        offset++
+        
+        if (b2 != -1) {
+            // Medium frequency: 2 byte message ID (0xFF, byte)
+            return rawPacket.copyOfRange(offset, rawPacket.size)
+        }
+        
+        // Low frequency: 4 byte message ID (0xFF, 0xFF, 2 bytes)
+        if (rawPacket.size < offset + 2) {
+            Log.w(TAG, "Packet truncated at low frequency check")
+            return null
+        }
+        
+        offset += 2  // Skip the 2-byte short
+        return rawPacket.copyOfRange(offset, rawPacket.size)
+    }
+    
+    /**
+     * Get the message ID from a raw packet.
+     * 
+     * Message IDs can be negative due to signed byte interpretation:
+     * - High frequency: -128 to 126 (byte values 0x80-0xFE, excluding 0xFF)
+     * - Medium frequency: positive values around 65280+
+     * - Low frequency: negative values around -65536+
+     * 
+     * @param rawPacket The complete raw packet data including header
+     * @return The message ID (may be negative), or Int.MIN_VALUE if packet is malformed
+     */
+    fun extractMessageId(rawPacket: ByteArray): Int {
+        if (rawPacket.size < PACKET_HEADER_SIZE + 1) return Int.MIN_VALUE
+        
+        var offset = PACKET_HEADER_SIZE
+        
+        // Signed byte interpretation - intentional for SL protocol compatibility
+        val b1 = rawPacket[offset].toInt()
+        offset++
+        
+        if (b1 != -1) {
+            // High frequency message - return signed byte value directly
+            // Examples: 4 = AgentUpdate, 12 = ObjectUpdate, -5 (0xFB) = PacketAck
+            return b1
+        }
+        
+        if (rawPacket.size < offset + 1) return Int.MIN_VALUE
+        val b2 = rawPacket[offset].toInt()
+        offset++
+        
+        if (b2 != -1) {
+            // Medium frequency: byte | 65280
+            return b2 or 65280
+        }
+        
+        // Low frequency: next two bytes as short | -65536
+        if (rawPacket.size < offset + 2) return Int.MIN_VALUE
+        
+        val byte3 = rawPacket[offset].toInt() and 0xFF
+        val byte4 = rawPacket[offset + 1].toInt() and 0xFF
+        val shortValue = ((byte3 shl 8) or byte4).toShort().toInt()
+        
+        return shortValue or -65536
+    }
     
     /**
      * Parse ObjectUpdate message
