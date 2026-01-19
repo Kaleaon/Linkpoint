@@ -285,6 +285,10 @@ class LinkpointApp : Application() {
     lateinit var animationController: AnimationController
         private set
     
+    // Terrain Manager (NEW)
+    lateinit var terrainManager: com.linkpoint.protocol.terrain.TerrainManager
+        private set
+    
     // Crash Reporter
     lateinit var crashReporter: CrashReporter
         private set
@@ -404,6 +408,9 @@ class LinkpointApp : Application() {
         
         // NEW: Snapshot Manager
         snapshotManager = SnapshotManager(this, capabilityManager)
+        
+        // NEW: Terrain Manager (for processing LayerData terrain patches)
+        terrainManager = com.linkpoint.protocol.terrain.TerrainManager()
         
         Log.d(TAG, "Core managers initialized")
     }
@@ -545,6 +552,13 @@ class LinkpointApp : Application() {
                     sessionManager.updateRegionName(regionData.simName)
                     Log.d(TAG, "Session region name updated to: ${regionData.simName}")
                     
+                    // Update terrain manager with water height
+                    if (::terrainManager.isInitialized) {
+                        terrainManager.setWaterHeight(regionData.waterHeight)
+                        terrainManager.reset()  // Reset terrain for new region
+                        Log.d(TAG, "Terrain manager reset for new region, water height: ${regionData.waterHeight}")
+                    }
+                    
                     // Send RegionHandshakeReply to acknowledge - THIS IS REQUIRED!
                     applicationScope.launch {
                         try {
@@ -646,6 +660,37 @@ class LinkpointApp : Application() {
         // Object updates - track counts for diagnostics
         var objectUpdateCount = 0
         var compressedObjectUpdateCount = 0
+        var avatarUpdateCount = 0
+        
+        // PCode constants (from Lumiya)
+        val PCODE_PRIM = 9
+        val PCODE_AVATAR = 47
+        
+        // Helper function to process object updates by PCode
+        fun processObjectUpdate(update: com.linkpoint.protocol.messages.ObjectUpdateData) {
+            when (update.pcode) {
+                PCODE_AVATAR -> {
+                    avatarUpdateCount++
+                    if (avatarUpdateCount <= 5 || avatarUpdateCount % 50 == 0) {
+                        Log.d(TAG, "Avatar update: localId=${update.localId}, fullId=${update.fullId} (total: $avatarUpdateCount)")
+                    }
+                    if (::avatarManager.isInitialized) {
+                        avatarManager.updateAvatar(
+                            agentId = update.fullId,
+                            position = update.position,
+                            rotation = update.rotation,
+                            velocity = update.velocity
+                        )
+                    }
+                }
+                else -> {
+                    // Prims, trees, grass, particles all go to object manager
+                    if (::objectManager.isInitialized) {
+                        objectManager.handleObjectUpdate(update)
+                    }
+                }
+            }
+        }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE) { _, payload ->
             try {
@@ -655,11 +700,7 @@ class LinkpointApp : Application() {
                 if (objectUpdateCount <= 5 || objectUpdateCount % 100 == 0) {
                     Log.d(TAG, "OBJECT_UPDATE received: ${updates.size} objects (total: $objectUpdateCount)")
                 }
-                updates.forEach { update ->
-                    if (::objectManager.isInitialized) {
-                        objectManager.handleObjectUpdate(update)
-                    }
-                }
+                updates.forEach { processObjectUpdate(it) }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling ObjectUpdate", e)
             }
@@ -674,11 +715,7 @@ class LinkpointApp : Application() {
                 if (compressedObjectUpdateCount <= 5 || compressedObjectUpdateCount % 100 == 0) {
                     Log.d(TAG, "OBJECT_UPDATE_COMPRESSED received: ${updates.size} objects (total: $compressedObjectUpdateCount)")
                 }
-                updates.forEach { update ->
-                    if (::objectManager.isInitialized) {
-                        objectManager.handleObjectUpdate(update)
-                    }
-                }
+                updates.forEach { processObjectUpdate(it) }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling ObjectUpdateCompressed", e)
             }
@@ -693,6 +730,31 @@ class LinkpointApp : Application() {
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling AvatarAnimation", e)
+            }
+        }
+        
+        // LayerData - Terrain heightmap, wind, and cloud data
+        // Type 76 ('L') = terrain, Type 87 ('W') = wind, Type 67 ('C') = cloud
+        var layerDataCount = 0
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.LAYER_DATA) { _, payload ->
+            try {
+                val result = com.linkpoint.protocol.terrain.LayerDataParser.parse(payload)
+                if (result != null) {
+                    layerDataCount++
+                    if (layerDataCount <= 5 || layerDataCount % 50 == 0) {
+                        Log.d(TAG, "LAYER_DATA received: type=${result.type}, patches=${result.patches.size} (total: $layerDataCount)")
+                    }
+                    
+                    // Process terrain data if it's land type
+                    if (result.type == com.linkpoint.protocol.terrain.LayerType.LAND ||
+                        result.type == com.linkpoint.protocol.terrain.LayerType.LAND_EXTENDED) {
+                        if (::terrainManager.isInitialized) {
+                            terrainManager.processLayerData(result)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling LayerData", e)
             }
         }
         
