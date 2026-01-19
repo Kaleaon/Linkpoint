@@ -1145,8 +1145,9 @@ class LinkpointApp : Application() {
     
     /**
      * Get the path where session logs are stored.
+     * Returns the public Downloads/Lumiya Logs path.
      */
-    fun getSessionLogDirectoryPath(): String? {
+    fun getSessionLogDirectoryPath(): String {
         return com.linkpoint.utils.SessionLogRecorder.getLogDirectoryPath()
     }
 }

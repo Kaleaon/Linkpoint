@@ -197,12 +197,6 @@
     <!-- Network Settings -->
     <PreferenceCategory android:title="Network">
 
-        <SwitchPreferenceCompat
-            android:key="http2_enabled"
-            android:title="Use HTTP/2"
-            android:summary="Use HTTP/2 for asset downloads"
-            android:defaultValue="true" />
-
         <SeekBarPreference
             android:key="bandwidth_limit"
             android:title="Bandwidth Limit"

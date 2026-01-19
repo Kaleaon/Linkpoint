@@ -52,6 +52,8 @@ object MessageParser {
         var offset = PACKET_HEADER_SIZE
         
         // Decode message ID to determine its length
+        // Note: Byte.toInt() preserves sign, so 0xFF becomes -1
+        // This matches the SL protocol where 0xFF indicates medium/low frequency
         val b1 = rawPacket[offset].toInt()
         offset++
         

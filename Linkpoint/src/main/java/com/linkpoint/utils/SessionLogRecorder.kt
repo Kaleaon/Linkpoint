@@ -1,8 +1,10 @@
 package com.linkpoint.utils
 
+import android.content.ContentValues
 import android.content.Context
 import android.os.Build
 import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.protocol.messages.EnhancedPacketLogger
@@ -10,6 +12,8 @@ import kotlinx.coroutines.*
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
+import java.io.OutputStream
+import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -30,6 +34,10 @@ import java.util.concurrent.atomic.AtomicLong
  * - Region transitions
  * 
  * Designed for full diagnostic output to help debug connection and protocol issues.
+ * 
+ * IMPORTANT: Logs are saved to the PUBLIC Downloads folder at:
+ *   /storage/emulated/0/Download/Lumiya Logs/
+ * This ensures logs are accessible via file manager outside the app.
  * 
  * Usage:
  * - Call `startRecording()` at app startup or when diagnostic logging is needed
@@ -371,8 +379,14 @@ object SessionLogRecorder {
             headers?.let {
                 append("\nHeaders:")
                 it.forEach { (k, v) ->
-                    val safeValue = if (k.contains("auth", ignoreCase = true) || 
-                                       k.contains("cookie", ignoreCase = true)) "***" else v
+                    // Sanitize sensitive headers to prevent credential leakage
+                    val sensitiveHeaders = listOf(
+                        "auth", "authorization", "cookie", "token", "bearer",
+                        "api-key", "apikey", "secret", "password", "credential"
+                    )
+                    val safeValue = if (sensitiveHeaders.any { sensitive -> 
+                        k.contains(sensitive, ignoreCase = true) 
+                    }) "***REDACTED***" else v
                     append("\n  $k: $safeValue")
                 }
             }
@@ -467,10 +481,11 @@ object SessionLogRecorder {
     }
     
     /**
-     * Get the path where logs are stored
+     * Get the path where logs are stored.
+     * Returns the expected public Downloads path.
      */
-    fun getLogDirectoryPath(): String? {
-        return getLogDirectory()?.absolutePath
+    fun getLogDirectoryPath(): String {
+        return getExpectedLogPath()
     }
     
     // ==================== PRIVATE METHODS ====================
@@ -579,50 +594,89 @@ object SessionLogRecorder {
         }
     }
     
+    /**
+     * Get the log directory in the PUBLIC Downloads folder.
+     * 
+     * Target location: /storage/emulated/0/Download/Lumiya Logs/
+     * This ensures logs are accessible via file manager outside the app.
+     * 
+     * For Android 10+ (API 29+), we use legacy external storage which still works
+     * for the Downloads directory. If that fails, we'll need to use MediaStore.
+     */
     private fun getLogDirectory(): File? {
-        val context = appContext ?: return null
-        
-        // Try public Downloads directory first
+        // Use the public Downloads directory on external storage
+        // Path: /storage/emulated/0/Download/Lumiya Logs/
         @Suppress("DEPRECATION")
         val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         val logDir = File(downloadsDir, LOG_DIR_NAME)
         
+        Log.d(TAG, "Attempting to use public Downloads: ${logDir.absolutePath}")
+        
         try {
-            if (!logDir.exists()) {
-                if (!logDir.mkdirs()) {
-                    Log.w(TAG, "Could not create public log directory, using app-specific")
-                    return getAppSpecificLogDirectory()
+            // Ensure parent Downloads directory exists
+            if (!downloadsDir.exists()) {
+                Log.w(TAG, "Public Downloads directory doesn't exist: ${downloadsDir.absolutePath}")
+                // On some devices, we may need to create it
+                if (!downloadsDir.mkdirs()) {
+                    Log.e(TAG, "Failed to create public Downloads directory")
                 }
             }
+            
+            // Create our log subdirectory
+            if (!logDir.exists()) {
+                val created = logDir.mkdirs()
+                if (created) {
+                    Log.i(TAG, "Created log directory: ${logDir.absolutePath}")
+                } else {
+                    Log.w(TAG, "Failed to create log directory via mkdirs: ${logDir.absolutePath}")
+                    // Try alternative approach - create parent first
+                    logDir.parentFile?.mkdirs()
+                    if (!logDir.mkdir()) {
+                        Log.e(TAG, "All attempts to create log directory failed")
+                        return null
+                    }
+                }
+            }
+            
+            // Verify we can write
             if (logDir.canWrite()) {
+                Log.i(TAG, "Using public log directory: ${logDir.absolutePath}")
                 return logDir
+            } else {
+                Log.w(TAG, "Cannot write to log directory: ${logDir.absolutePath}")
+                // Try to create a test file to verify
+                try {
+                    val testFile = File(logDir, ".write_test")
+                    if (testFile.createNewFile()) {
+                        testFile.delete()
+                        Log.i(TAG, "Write test passed for: ${logDir.absolutePath}")
+                        return logDir
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Write test failed: ${e.message}")
+                }
             }
         } catch (e: Exception) {
-            Log.w(TAG, "Error accessing public downloads", e)
+            Log.e(TAG, "Error accessing public downloads: ${e.message}", e)
         }
         
-        return getAppSpecificLogDirectory()
+        // If we get here, direct file access failed - this shouldn't happen for Downloads
+        // but log the failure clearly
+        Log.e(TAG, "FAILED to access public Downloads folder!")
+        Log.e(TAG, "Session logs will NOT be accessible outside the app.")
+        Log.e(TAG, "This may be a permissions issue. Ensure WRITE_EXTERNAL_STORAGE is granted.")
+        
+        return null
     }
     
-    private fun getAppSpecificLogDirectory(): File? {
-        val context = appContext ?: return null
-        
-        val appExtDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
-        if (appExtDir == null) {
-            Log.w(TAG, "External files directory not available")
-            return null
-        }
-        
-        val logDir = File(appExtDir, LOG_DIR_NAME)
-        try {
-            if (!logDir.exists()) {
-                logDir.mkdirs()
-            }
-            return logDir
-        } catch (e: Exception) {
-            Log.e(TAG, "Error creating app-specific log directory", e)
-            return null
-        }
+    /**
+     * Get the expected public log directory path for display purposes.
+     * Returns the expected path regardless of whether we can actually write there.
+     */
+    fun getExpectedLogPath(): String {
+        @Suppress("DEPRECATION")
+        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        return File(downloadsDir, LOG_DIR_NAME).absolutePath
     }
     
     private fun formatDuration(ms: Long): String {
