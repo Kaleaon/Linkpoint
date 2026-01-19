@@ -448,8 +448,12 @@ class UDPConnectionFixed {
                                 lastReceiveTime = System.currentTimeMillis()
                                 
                                 buffer.flip()
-                                val data = ByteArray(bytesRead)
-                                buffer.get(data)
+                                val rawData = ByteArray(bytesRead)
+                                buffer.get(rawData)
+                                
+                                // Check if packet is zero-coded and decode if needed
+                                val isZerocoded = (rawData[0].toInt() and 0x80) != 0
+                                val data = if (isZerocoded) zeroDecode(rawData) else rawData
                                 
                                 // Extract message info for logging
                                 val messageId = extractMessageId(data)
@@ -458,7 +462,7 @@ class UDPConnectionFixed {
                                 // Generate full hex dump of all packet bytes
                                 val fullHexDump = data.joinToString(" ") { "%02X".format(it) }
                                 
-                                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "📦 PACKET RECEIVED #${packetsReceived.get()}: $bytesRead bytes")
+                                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "📦 PACKET RECEIVED #${packetsReceived.get()}: $bytesRead bytes${if (isZerocoded) " (decoded to ${data.size})" else ""}")
                                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "   Message: $messageName (ID: 0x${messageId.toString(16).uppercase()}, seq: $seqNum)")
                                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "   Full packet data: $fullHexDump")
                                 
@@ -962,6 +966,44 @@ class UDPConnectionFixed {
                 }
                 result.add(0.toByte())
                 result.add(count.toByte())
+            } else {
+                result.add(data[i])
+                i++
+            }
+        }
+        
+        return result.toByteArray()
+    }
+    
+    /**
+     * Zero-decode packet data.
+     * 
+     * Zero-coding is a run-length encoding for zeros used in SL protocol.
+     * Format: 0x00 followed by count byte means that many zeros.
+     * The first 6 bytes (header) are not zero-coded.
+     */
+    private fun zeroDecode(data: ByteArray): ByteArray {
+        val result = mutableListOf<Byte>()
+        var i = 0
+        
+        // Copy header unchanged (first 6 bytes are not zero-coded)
+        while (i < 6 && i < data.size) {
+            result.add(data[i])
+            i++
+        }
+        
+        // Decode body
+        while (i < data.size) {
+            if (data[i] == 0.toByte()) {
+                // Zero run: next byte is count of zeros
+                i++
+                if (i < data.size) {
+                    val count = data[i].toInt() and 0xFF
+                    repeat(count) {
+                        result.add(0.toByte())
+                    }
+                    i++
+                }
             } else {
                 result.add(data[i])
                 i++

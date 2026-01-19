@@ -218,15 +218,16 @@ this.modules.avatarControl.setAgentPosition(sLObjectAvatarInfo.getAbsolutePositi
 
 ## Implementation Priority
 
-### Phase 1: Message Routing (Day 1)
-- [ ] Fix message ID decoding for `0xFFFF0094` (RegionHandshake)
-- [ ] Add handler for `LayerData` (ID 11)
-- [ ] Verify `ObjectUpdateCompressed` registration (ID 13)
+### Phase 1: Message Routing (Day 1) ✅ COMPLETE
+- [x] Fix message ID decoding for `0xFFFF0094` (RegionHandshake) - Already working
+- [x] Add handler for `LayerData` (ID 11) - Added with terrain decompression
+- [x] Fix zero-decoding for incoming packets - ObjectUpdateCompressed now works
+- [x] Verify `ObjectUpdateCompressed` registration (ID 13) - Fixed via zero-decode
 
-### Phase 2: Handler Implementation (Day 2)
-- [ ] Implement `SimName` extraction in RegionHandshake handler
-- [ ] Implement LayerData terrain processing (Type 76 only)
-- [ ] Wire ObjectUpdate to ObjectManager
+### Phase 2: Handler Implementation (Day 2) ✅ COMPLETE  
+- [x] Implement `SimName` extraction in RegionHandshake handler - Already working
+- [x] Implement LayerData terrain processing (Type 76 only) - TerrainManager added
+- [x] Wire ObjectUpdate to ObjectManager - Already wired
 
 ### Phase 3: Rendering (Day 3)
 - [ ] Debug SwapChain creation lifecycle
