@@ -166,6 +166,7 @@ class TextureManager(
                     success = false,
                     durationMs = 0,
                     sizeBytes = null,
+                    protocol = null,
                     error = "GetTexture capability not available"
                 )
                 
