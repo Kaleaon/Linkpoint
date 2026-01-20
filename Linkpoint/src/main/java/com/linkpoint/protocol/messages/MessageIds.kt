@@ -87,6 +87,13 @@ object MessageIds {
     const val IMPROVED_INSTANT_MESSAGE = (0xFFFF00FE).toInt()  // Wire: FF FF 00 FE
 
     // =====================================
+    // Sound Messages
+    // =====================================
+    
+    /** SoundTrigger - Sound triggered by script (llTriggerSound) */
+    const val SOUND_TRIGGER = (0xFFFF009E).toInt()             // Wire: FF FF 00 9E
+
+    // =====================================
     // Chat Messages
     // =====================================
     

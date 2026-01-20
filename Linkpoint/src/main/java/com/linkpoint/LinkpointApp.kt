@@ -912,6 +912,41 @@ class LinkpointApp : Application() {
             }
         }
         
+        // SoundTrigger - Sound triggered by in-world scripts (llTriggerSound)
+        // These are sent when a script plays a sound that should be heard by nearby avatars.
+        // We register a handler to prevent "No handler registered" warnings.
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.SOUND_TRIGGER) { _, rawPacket ->
+            // SoundTrigger format:
+            // - SoundID (UUID, 16 bytes) - The sound asset to play
+            // - OwnerID (UUID, 16 bytes) - Owner of the object playing the sound  
+            // - ObjectID (UUID, 16 bytes) - The object triggering the sound
+            // - ParentID (UUID, 16 bytes) - Parent object (if linked)
+            // - Handle (U64, 8 bytes) - Region handle
+            // - Position (Vector3, 12 bytes) - Position of the sound
+            // - Gain (F32, 4 bytes) - Volume (0.0 to 1.0)
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
+                
+                if (payload.size >= 16) {
+                    val soundIdBytes = payload.copyOfRange(0, 16)
+                    val soundId = java.util.UUID(
+                        java.nio.ByteBuffer.wrap(soundIdBytes.copyOfRange(0, 8)).long,
+                        java.nio.ByteBuffer.wrap(soundIdBytes.copyOfRange(8, 16)).long
+                    )
+                    
+                    // Pass to SoundManager for potential playback
+                    // Note: Full sound playback implementation would require:
+                    // 1. Downloading the sound asset
+                    // 2. Decoding the OGG/Vorbis audio
+                    // 3. Playing at the appropriate volume/position
+                    Log.d(TAG, "SoundTrigger received: soundId=$soundId")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling SoundTrigger", e)
+            }
+        }
+        
         // Mark handlers as ready and process any buffered packets
         // This is critical for handling packets that arrived before handlers were registered
         udpConnection.setHandlersReady()
