@@ -57,7 +57,7 @@ class TerrainPatch(
             var goingUpRight = true
             var inDiagonal = false
             
-            while (x < 16 && y < 16) {
+            while (x in 0..15 && y in 0..15) {
                 copyMatrix16[y * 16 + x] = n++
                 
                 if (inDiagonal) {
@@ -88,6 +88,8 @@ class TerrainPatch(
                     inDiagonal = true
                 }
             }
+            
+            require(n == 256) { "Zigzag matrix must fill exactly 256 elements, but filled $n" }
         }
         
         /**
