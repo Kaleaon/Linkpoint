@@ -54,41 +54,42 @@ class TerrainPatch(
             var n = 0
             var x = 0
             var y = 0
-            var diag = true
-            var horizontal = false
+            var goingUpRight = true
+            var inDiagonal = false
             
-            while (n < 256 && x >= 0 && y >= 0 && x < 16 && y < 16) {
+            while (x in 0..15 && y in 0..15) {
                 copyMatrix16[y * 16 + x] = n++
                 
-                if (!horizontal) {
-                    if (diag) {
+                if (inDiagonal) {
+                    if (goingUpRight) {
                         // Moving up-right diagonal
+                        x++
+                        y--
                         if (x == 15 || y == 0) {
-                            horizontal = true
-                        } else {
-                            x++
-                            y--
+                            inDiagonal = false
                         }
                     } else {
                         // Moving down-left diagonal
+                        x--
+                        y++
                         if (y == 15 || x == 0) {
-                            horizontal = true
-                        } else {
-                            x--
-                            y++
+                            inDiagonal = false
                         }
                     }
                 } else {
-                    if (diag) {
+                    // Horizontal/vertical step to start next diagonal
+                    if (goingUpRight) {
                         if (x < 15) x++ else y++
-                        diag = false
+                        goingUpRight = false
                     } else {
                         if (y < 15) y++ else x++
-                        diag = true
+                        goingUpRight = true
                     }
-                    horizontal = false
+                    inDiagonal = true
                 }
             }
+            
+            require(n == 256) { "Zigzag matrix must fill exactly 256 elements, but filled $n" }
         }
         
         /**
