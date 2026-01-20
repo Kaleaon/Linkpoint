@@ -1144,6 +1144,7 @@ class UDPConnectionFixed {
                 MessageIds.COARSE_LOCATION_UPDATE -> "COARSE_LOCATION_UPDATE"
                 MessageIds.START_PING_CHECK -> "START_PING_CHECK"
                 MessageIds.PACKET_ACK -> "PACKET_ACK"
+                MessageIds.SOUND_TRIGGER -> "SOUND_TRIGGER"
                 else -> "0x${id.toString(16).uppercase()}"
             }
         }
@@ -1394,6 +1395,7 @@ class UDPConnectionFixed {
             MessageIds.START_PING_CHECK -> "StartPingCheck"
             MessageIds.COMPLETE_PING_CHECK -> "CompletePingCheck"
             MessageIds.AGENT_UPDATE -> "AgentUpdate"
+            MessageIds.SOUND_TRIGGER -> "SoundTrigger"
             else -> "Unknown(0x${messageId.toString(16).uppercase()})"
         }
     }

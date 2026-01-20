@@ -154,8 +154,27 @@ class TextureManager(
         val startTime = System.currentTimeMillis()
         
         try {
-            // Build texture URL
+            // Build texture URL - returns null if capability is not available
             val url = buildTextureUrl(textureId, discard)
+            
+            if (url == null) {
+                // No capability URL available - texture fetching requires GetTexture capability
+                // The asset CDN fallback doesn't work without authentication
+                Log.w(TAG, "🖼️ Texture download skipped: $textureId - GetTexture capability not available")
+                NetworkLogger.logTextureResult(
+                    textureId = textureId.toString(),
+                    success = false,
+                    durationMs = 0,
+                    sizeBytes = null,
+                    protocol = null,
+                    error = "GetTexture capability not available"
+                )
+                
+                lastError = "GetTexture capability not available"
+                lastErrorTime = System.currentTimeMillis()
+                updateStats { it.copy(failedCount = it.failedCount + 1) }
+                return@withContext null
+            }
             
             Log.d(TAG, "🖼️ Starting texture download: $textureId")
             NetworkLogger.logTextureRequest(textureId.toString(), url, "NORMAL")
@@ -223,15 +242,18 @@ class TextureManager(
         }
     }
     
-    private fun buildTextureUrl(textureId: UUID, discard: Int): String {
-        // Use capability URL if available, otherwise fall back to asset server
+    private fun buildTextureUrl(textureId: UUID, discard: Int): String? {
+        // Use capability URL if available
         // Per official SL viewer (lltexturefetch.cpp), the URL format is:
         // http_url + "/?texture_id=" + uuid
         // Note: discard_level is NOT passed as a query parameter - the SL protocol
         // uses HTTP Range headers for progressive/partial image loading instead.
-        return capabilityUrl?.let {
-            "$it?texture_id=$textureId"
-        } ?: "https://asset-cdn.glb.agni.lindenlab.com/?texture_id=$textureId"
+        //
+        // IMPORTANT: The asset CDN (asset-cdn.glb.agni.lindenlab.com) requires authentication
+        // and does not support unauthenticated texture fetching. If no capability URL is
+        // available, texture downloads will fail with HTTP 403 Forbidden.
+        // In this case, we return null to indicate that texture fetching is not possible.
+        return capabilityUrl?.let { "$it?texture_id=$textureId" }
     }
     
     private fun decodeTexture(textureId: UUID, data: ByteArray): Bitmap? {
