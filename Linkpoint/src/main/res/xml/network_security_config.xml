@@ -46,6 +46,22 @@
         </trust-anchors>
     </domain-config>
     
+    <!--
+        Second Life Asset CDN (Akamai)
+        The SL asset servers use HTTP for texture/mesh/asset downloads via the
+        GetTexture, GetMesh, and ViewerAsset capabilities. These capability URLs
+        are returned by the simulator after login and use the asset-cdn.glb domain.
+        
+        Without this, texture loading fails with:
+        "CLEARTEXT communication to asset-cdn.glb.agni.lindenlab.com not permitted"
+    -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">asset-cdn.glb.agni.lindenlab.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+    
     <!-- Kitely Grid (OpenSim) -->
     <domain-config cleartextTrafficPermitted="false">
         <domain includeSubdomains="true">kitely.com</domain>
