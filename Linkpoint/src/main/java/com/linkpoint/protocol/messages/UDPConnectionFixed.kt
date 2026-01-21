@@ -390,7 +390,7 @@ class UDPConnectionFixed {
             
             // Send initial messages
             sendUseCircuitCode()
-            sendCompleteAgentMovement()
+            // Note: CompleteAgentMovement is now sent after RegionHandshake to ensure correct sequence
             
             // Publish circuit established event
             EventBus.publish(CircuitEstablishedEvent(circuitCode))
@@ -656,7 +656,7 @@ class UDPConnectionFixed {
         payload.put(agentId.asBytes())
         
         // Message ID for UseCircuitCode (low frequency: -65533)
-        val messageId = -65533
+        val messageId = MessageIds.USE_CIRCUIT_CODE
         
         // Build packet with header
         sendPacket(messageId, payload.array(), reliable = true)
@@ -666,7 +666,7 @@ class UDPConnectionFixed {
      * Send CompleteAgentMovement message
      * Uses mobile-optimized packet construction
      */
-    private suspend fun sendCompleteAgentMovement() {
+    suspend fun sendCompleteAgentMovement() {
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sending CompleteAgentMovement")
         
         // CompleteAgentMovement message format:

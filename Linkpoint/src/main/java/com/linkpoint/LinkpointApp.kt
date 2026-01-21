@@ -600,6 +600,12 @@ class LinkpointApp : Application() {
                             Log.d(TAG, "Sending AgentThrottle...")
                             udpConnection.sendAgentThrottle()
                             Log.i(TAG, "✓ AgentThrottle SENT - bandwidth configured")
+
+                            // Send CompleteAgentMovement to signal we are ready to enter the region
+                            // This replaces the premature call in UDPConnectionFixed.connect()
+                            Log.d(TAG, "Sending CompleteAgentMovement...")
+                            udpConnection.sendCompleteAgentMovement()
+                            Log.i(TAG, "✓ CompleteAgentMovement SENT - requesting entry")
                         } catch (e: Exception) {
                             com.linkpoint.utils.InitializationTracker.failPhase(
                                 com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,

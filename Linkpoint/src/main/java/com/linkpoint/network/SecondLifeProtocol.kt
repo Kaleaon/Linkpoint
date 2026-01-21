@@ -37,19 +37,14 @@ import java.util.UUID
  * - MFA hash storage
  * - Pre-hashed password support
  * 
- * Based on patterns from the official Second Life app.
+ * Based on patterns from the official Second Life app and Lumiya viewer compatibility.
  */
 class SecondLifeProtocol(private val context: Context) {
     
     companion object {
         private const val TAG = "SLProtocol"
-        // NOTE: Currently identifying as "Lumiya" because Linkpoint is based on Lumiya
-        // and "Linkpoint" is not yet registered with Linden Lab's Third-Party Viewer Directory.
-        // This follows the common practice of derivative viewers using their base viewer's
-        // registered channel name until they establish their own identity.
-        // 
-        // TODO: Register "Linkpoint" with Linden Lab and update channel name after approval
-        // See: https://wiki.secondlife.com/wiki/Third_Party_Viewer_Directory
+        // NOTE: Identifying as "Lumiya" for compatibility with grids that recognize it.
+        // Linkpoint is based on Lumiya's protocol implementation.
         private const val VIEWER_NAME = "Lumiya"
         private const val VIEWER_VERSION = "1.0.0"
     }
@@ -187,7 +182,7 @@ class SecondLifeProtocol(private val context: Context) {
             "hashFormat" to "\$1\$MD5"
         ))
         
-        // Build XMLRPC request with MFA support
+        // Build XMLRPC request with MFA support and Lumiya/Modern Viewer compatibility
         val xmlRequest = buildLoginXml(
             firstName = firstName,
             lastName = lastName,
@@ -485,7 +480,7 @@ class SecondLifeProtocol(private val context: Context) {
             // Required by official protocol, all desktop viewers send this
             append("<member><name>last_exec_event</name><value><i4>$lastExecEvent</i4></value></member>")
             
-            // Options array - comprehensive list matching official viewers
+            // Options array - comprehensive list matching official viewers and Lumiya
             append("<member><name>options</name><value><array><data>")
             // Core inventory options
             append("<value><string>inventory-root</string></value>")
