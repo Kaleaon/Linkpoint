@@ -10,6 +10,7 @@ import com.linkpoint.network.NetworkLogger
 import com.linkpoint.protocol.types.putUUID
 import com.linkpoint.utils.SessionLogRecorder
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -264,6 +265,12 @@ class UDPConnectionFixed {
      * Incremented for each packet sent, used for reliable delivery ACK tracking.
      */
     private val sequenceNumber = AtomicInteger(0)
+
+    /**
+     * Map of sequence numbers to their pending acknowledgment deferreds.
+     * Used to implement synchronous waiting for ACKs (e.g. for UseCircuitCode).
+     */
+    private val pendingAcks = java.util.concurrent.ConcurrentHashMap<Int, CompletableDeferred<Boolean>>()
     
     // Control flags for movement
     private var controlFlags: Int = 0
@@ -389,14 +396,26 @@ class UDPConnectionFixed {
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== UDP CONNECTION ESTABLISHED ===")
             
             // Send initial messages
-            sendUseCircuitCode()
+            // Lumiya Protocol: Send UseCircuitCode -> Wait for Ack -> Send AgentThrottle & CompleteAgentMovement
+            val useCodeSeq = sendUseCircuitCode()
+
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Waiting for Ack of UseCircuitCode (seq: $useCodeSeq)...")
+
+            // Wait for Ack (with timeout)
+            val acked = waitForAck(useCodeSeq, 10000) // 10s timeout
+
+            if (acked) {
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ UseCircuitCode Acknowledged")
+            } else {
+                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "⚠ UseCircuitCode Ack Timed Out - Proceeding anyway")
+            }
 
             // Send AgentThrottle immediately to ensure simulator knows we have bandwidth
             // Without this, RegionHandshake (which is large) might not be sent
             sendAgentThrottle()
 
-            // Send CompleteAgentMovement immediately (mimicking Lumiya's aggressive behavior)
-            // This unblocks the handshake if the simulator is waiting for it or if the first ACK was missed
+            // Send CompleteAgentMovement immediately (Lumiya sends this right after UseCircuitCode Ack)
+            // This unblocks the handshake if the simulator is waiting for it
             sendCompleteAgentMovement()
             
             // Publish circuit established event
@@ -504,6 +523,11 @@ class UDPConnectionFixed {
                                 
                                 // Publish message received event
                                 EventBus.publish(MessageReceivedEvent(messageId, data))
+
+                                // Internal processing for ACKs
+                                if (messageId == MessageIds.PACKET_ACK) {
+                                    processInternalAck(data)
+                                }
                                 
                                 // Route message through router
                                 routeMessage(data)
@@ -649,8 +673,9 @@ class UDPConnectionFixed {
     /**
      * Send UseCircuitCode message
      * Uses mobile-optimized packet construction
+     * Returns the sequence number of the sent packet
      */
-    private suspend fun sendUseCircuitCode() {
+    private suspend fun sendUseCircuitCode(): Int {
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sending UseCircuitCode")
         
         // UseCircuitCode message format:
@@ -666,7 +691,7 @@ class UDPConnectionFixed {
         val messageId = MessageIds.USE_CIRCUIT_CODE
         
         // Build packet with header
-        sendPacket(messageId, payload.array(), reliable = true)
+        return sendPacket(messageId, payload.array(), reliable = true)
     }
     
     /**
@@ -837,21 +862,83 @@ class UDPConnectionFixed {
      * @param reliable Whether this packet is reliable
      * @param zerocoded Whether to use zero-coding
      */
+    /**
+     * Process internal ACK to complete pending deferreds.
+     */
+    private fun processInternalAck(data: ByteArray) {
+        try {
+            // Skip message ID decoding which is done by caller
+            // data contains: [header] [messageID] [payload]
+            // We need to parse payload. extractMessageId does parsing but returns ID.
+            // We can use MessageParser if available or decode manually.
+            // PacketAck: [Packets Variable Block]
+            // Variable Block: [Count (1 byte)] [ID (4 bytes)]...
+
+            // Header is 6 bytes. Message ID (High Freq 0xFB) is 1 byte.
+            // So payload starts at index 7?
+            // Actually extractMessageId returns ID, but doesn't strip it?
+            // routeMessage uses data.
+
+            // Let's rely on manual parsing similar to what LinkpointApp does, but offset correctly.
+            // data passed here is the raw packet from the wire (after zero-decoding).
+
+            // Header: 6 bytes.
+            // Message ID: 1 byte (0xFB for PacketAck).
+            // Payload: starts at 7.
+
+            if (data.size < 7) return
+
+            val count = data[7].toInt() and 0xFF
+            var offset = 8
+
+            if (data.size < offset + (count * 4)) return
+
+            val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+            buffer.position(offset)
+
+            for (i in 0 until count) {
+                val ackSeqNum = buffer.int
+                pendingAcks.remove(ackSeqNum)?.complete(true)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error processing internal ACK", e)
+        }
+    }
+
+    /**
+     * Wait for acknowledgment of a specific packet sequence number.
+     * Returns true if acknowledged, false on timeout.
+     */
+    suspend fun waitForAck(sequenceNumber: Int, timeoutMs: Long = 10000): Boolean {
+        val deferred = CompletableDeferred<Boolean>()
+        pendingAcks[sequenceNumber] = deferred
+
+        return try {
+            withTimeout(timeoutMs) {
+                deferred.await()
+            }
+        } catch (e: TimeoutCancellationException) {
+            pendingAcks.remove(sequenceNumber)
+            false
+        }
+    }
+
     suspend fun sendPacket(
         messageId: Int, 
         payload: ByteArray, 
         reliable: Boolean = false,
         zerocoded: Boolean = false
-    ) {
+    ): Int {
         if (!_isConnected.value) {
             NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Cannot send: not connected")
-            return
+            return -1
         }
         
+        val seqNum = sequenceNumber.getAndIncrement()
+
         try {
             // Build packet header (big-endian per SL protocol)
             val flags = (if (reliable) 0x40 else 0) or (if (zerocoded) 0x80 else 0)
-            val seqNum = sequenceNumber.getAndIncrement()
             
             val header = ByteBuffer.allocate(6).order(ByteOrder.BIG_ENDIAN)
             header.put(flags.toByte())
@@ -936,11 +1023,13 @@ class UDPConnectionFixed {
                 type = PacketHistoryEntry.PacketEventType.SEND_FAILED,
                 messageId = messageId,
                 data = payload,
-                sequenceNumber = sequenceNumber.get(),
+                sequenceNumber = seqNum,
                 success = false,
                 errorMessage = e.message
             )
         }
+
+        return seqNum
     }
     
     /**

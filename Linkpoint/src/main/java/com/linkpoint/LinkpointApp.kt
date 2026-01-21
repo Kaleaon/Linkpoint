@@ -596,16 +596,11 @@ class LinkpointApp : Application() {
                             )
                             Log.i(TAG, "✓ RegionHandshakeReply SENT - world data should start loading")
                             
-                            // Also send AgentThrottle to set bandwidth allocation
-                            Log.d(TAG, "Sending AgentThrottle...")
-                            udpConnection.sendAgentThrottle()
-                            Log.i(TAG, "✓ AgentThrottle SENT - bandwidth configured")
-
-                            // Send CompleteAgentMovement to signal we are ready to enter the region
-                            // This replaces the premature call in UDPConnectionFixed.connect()
-                            Log.d(TAG, "Sending CompleteAgentMovement...")
-                            udpConnection.sendCompleteAgentMovement()
-                            Log.i(TAG, "✓ CompleteAgentMovement SENT - requesting entry")
+                            // Note: We used to send AgentThrottle and CompleteAgentMovement here.
+                            // But following strictly Lumiya protocol, these are sent immediately after UseCircuitCode Ack
+                            // in UDPConnectionFixed.connect(). Sending them here again is redundant or incorrect.
+                            // We only send RegionHandshakeReply here.
+                            Log.d(TAG, "RegionHandshake processing complete (strict Lumiya protocol)")
                         } catch (e: Exception) {
                             com.linkpoint.utils.InitializationTracker.failPhase(
                                 com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
