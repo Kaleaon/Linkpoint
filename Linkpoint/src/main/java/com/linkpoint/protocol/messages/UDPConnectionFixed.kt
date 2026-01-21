@@ -390,6 +390,13 @@ class UDPConnectionFixed {
             
             // Send initial messages
             sendUseCircuitCode()
+
+            // Send AgentThrottle immediately to ensure simulator knows we have bandwidth
+            // Without this, RegionHandshake (which is large) might not be sent
+            sendAgentThrottle()
+
+            // Send CompleteAgentMovement immediately (mimicking Lumiya's aggressive behavior)
+            // This unblocks the handshake if the simulator is waiting for it or if the first ACK was missed
             sendCompleteAgentMovement()
             
             // Publish circuit established event
@@ -656,7 +663,7 @@ class UDPConnectionFixed {
         payload.put(agentId.asBytes())
         
         // Message ID for UseCircuitCode (low frequency: -65533)
-        val messageId = -65533
+        val messageId = MessageIds.USE_CIRCUIT_CODE
         
         // Build packet with header
         sendPacket(messageId, payload.array(), reliable = true)
@@ -666,7 +673,7 @@ class UDPConnectionFixed {
      * Send CompleteAgentMovement message
      * Uses mobile-optimized packet construction
      */
-    private suspend fun sendCompleteAgentMovement() {
+    suspend fun sendCompleteAgentMovement() {
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sending CompleteAgentMovement")
         
         // CompleteAgentMovement message format:
