@@ -49,6 +49,10 @@ class SecondLifeConnection(context: Context? = null) {
         )
 
         private const val MSG_CHAT_FROM_VIEWER = 0x0050
+        private const val MSG_TELEPORT_LOCATION_REQUEST = 0x0147
+
+        // Teleport flags
+        private const val TELEPORT_FLAGS_VIA_LOCATION = 0x00000010
     }
     
     // Keep a weak reference to context for networking service
@@ -393,6 +397,68 @@ class SecondLifeConnection(context: Context? = null) {
         return buffer.array()
     }
 
+    private fun buildTeleportPacket(
+        regionName: String,
+        x: Float,
+        y: Float,
+        z: Float,
+        agentId: UUID,
+        sessionId: UUID
+    ): ByteArray {
+        val regionNameBytes = regionName.toByteArray(Charsets.UTF_8)
+
+        // Calculate size
+        // Header: 1 (flags) + 4 (seq) + 1 (extra) = 6
+        // MsgID: 4
+        // AgentData: 16 + 16 = 32
+        // Info: 8 (RegionHandle) + 8 (Sec) + 12 (Pos) + 12 (LookAt) + 4 (Flags) = 44
+        // RegionName: 2 (len) + nameBytes
+
+        val totalSize = 6 + 4 + 32 + 44 + 2 + regionNameBytes.size
+
+        val buffer = ByteBuffer.allocate(totalSize)
+        buffer.order(ByteOrder.BIG_ENDIAN) // Network byte order for header
+
+        // Header
+        buffer.put(0x40.toByte()) // Flags: Reliable
+        buffer.putInt(getNextSequenceNumber())
+        buffer.put(0.toByte()) // Extra ID count
+
+        // Message ID (Low Frequency)
+        buffer.putShort(0xFFFF.toShort())
+        buffer.putShort(MSG_TELEPORT_LOCATION_REQUEST.toShort())
+
+        // AgentData Block
+        putUUID(buffer, agentId)
+        putUUID(buffer, sessionId)
+
+        // Info Block - Switch to Little Endian
+        buffer.order(ByteOrder.LITTLE_ENDIAN)
+
+        // Region Handle (0) & Second Long (0) - matching TeleportManager
+        buffer.putLong(0)
+        buffer.putLong(0)
+
+        // Position
+        buffer.putFloat(x)
+        buffer.putFloat(y)
+        buffer.putFloat(z)
+
+        // LookAt
+        buffer.putFloat(1f)
+        buffer.putFloat(0f)
+        buffer.putFloat(0f)
+
+        // Flags
+        buffer.putInt(TELEPORT_FLAGS_VIA_LOCATION)
+
+        // RegionName
+        buffer.putShort(regionNameBytes.size.toShort())
+        buffer.put(regionNameBytes)
+
+        return buffer.array()
+    }
+
     private fun getNextSequenceNumber(): Int {
         return ++sequenceNumber
     }
@@ -424,12 +490,44 @@ class SecondLifeConnection(context: Context? = null) {
         
         Log.d(TAG, "Requesting teleport to $regionName ($x, $y, $z)")
         
-        // TODO: Implement teleport
-        return@withContext TeleportResult(
-            success = true,
-            message = "Teleport request sent to $regionName",
-            regionName = regionName
-        )
+        val socket = udpSocket
+        val ip = simIp
+        val port = simPort
+        val agentIdStr = agentId
+        val sessionIdStr = sessionId
+
+        if (socket == null || ip == null || agentIdStr == null || sessionIdStr == null) {
+            Log.e(TAG, "Cannot teleport: socket or session info missing")
+            return@withContext TeleportResult(
+                success = false,
+                message = "Connection details missing"
+            )
+        }
+
+        try {
+            val packetData = buildTeleportPacket(
+                regionName,
+                x, y, z,
+                UUID.fromString(agentIdStr),
+                UUID.fromString(sessionIdStr)
+            )
+
+            val address = InetAddress.getByName(ip)
+            val packet = DatagramPacket(packetData, packetData.size, address, port)
+            socket.send(packet)
+
+            return@withContext TeleportResult(
+                success = true,
+                message = "Teleport request sent to $regionName",
+                regionName = regionName
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to send teleport packet", e)
+            return@withContext TeleportResult(
+                success = false,
+                message = "Teleport failed: ${e.message}"
+            )
+        }
     }
     
     /**
