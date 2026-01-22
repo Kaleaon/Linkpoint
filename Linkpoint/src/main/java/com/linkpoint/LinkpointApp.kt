@@ -70,6 +70,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Main Application class for Linkpoint - Second Life viewer for Android and XR
@@ -301,8 +302,8 @@ class LinkpointApp : Application() {
     // Flag to track if CompleteAgentMovement has been sent
     // Per Lumiya protocol: This must be sent immediately when UseCircuitCode (seq 0) is ACKed
     // The server won't send RegionHandshake until we send this
-    @Volatile
-    private var completeAgentMovementSent = false
+    // Using AtomicBoolean to prevent race conditions with concurrent PacketAck messages
+    private val completeAgentMovementSent = AtomicBoolean(false)
     
     override fun onCreate() {
         super.onCreate()
@@ -433,7 +434,7 @@ class LinkpointApp : Application() {
         this.agentId = agentId
         
         // Reset connection state tracking for new session
-        completeAgentMovementSent = false
+        completeAgentMovementSent.set(false)
         
         // Initialize friendsManager here since it requires agentId
         friendsManager = FriendsManager(udpConnection, capabilityManager, agentId)
@@ -942,8 +943,8 @@ class LinkpointApp : Application() {
                 // This is CRITICAL - per Lumiya's protocol, we must send CompleteAgentMovement
                 // immediately when UseCircuitCode is ACKed. The server waits for this before
                 // sending RegionHandshake and other world data.
-                if (ackedSequences.contains(0) && !completeAgentMovementSent) {
-                    completeAgentMovementSent = true
+                // Using compareAndSet for thread-safe, atomic check-and-set operation
+                if (ackedSequences.contains(0) && completeAgentMovementSent.compareAndSet(false, true)) {
                     Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
                     Log.i(TAG, "║ ⭐ UseCircuitCode ACKNOWLEDGED - Sending CompleteAgentMovement")
                     Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
@@ -959,7 +960,8 @@ class LinkpointApp : Application() {
                             Log.i(TAG, "✓ AgentThrottle SENT - bandwidth configured")
                         } catch (e: Exception) {
                             Log.e(TAG, "✗ Error sending CompleteAgentMovement/AgentThrottle", e)
-                            completeAgentMovementSent = false // Allow retry
+                            // Reset flag atomically to allow retry on next ACK
+                            completeAgentMovementSent.set(false)
                         }
                     }
                 }
@@ -1070,7 +1072,7 @@ class LinkpointApp : Application() {
         capabilityManager.shutdown()
         
         // Reset connection state tracking
-        completeAgentMovementSent = false
+        completeAgentMovementSent.set(false)
         
         udpConnection.disconnect()
         
