@@ -249,4 +249,11 @@ object MessageIds {
 
     /** DeactivateGestures - Deactivate a gesture */
     const val DEACTIVATE_GESTURES = (0xFFFF0097).toInt()       // Wire: FF FF 00 97
+
+    // =====================================
+    // Inventory Messages
+    // =====================================
+
+    /** CopyInventoryItem - Copy item to new folder */
+    const val COPY_INVENTORY_ITEM = (0xFFFF0076).toInt()       // Wire: FF FF 00 76
 }
