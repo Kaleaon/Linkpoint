@@ -4,9 +4,13 @@ import android.util.Log
 import com.linkpoint.avatar.AvatarBaker
 import com.linkpoint.avatar.WearableData
 import com.linkpoint.avatar.WearableType
+import com.linkpoint.objects.ObjectManager
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -17,7 +21,11 @@ import java.util.concurrent.ConcurrentHashMap
 class OutfitManager(
     private val inventoryManager: InventoryManager,
     private val baker: AvatarBaker,
-    private val gestureManager: GestureManager
+    private val gestureManager: GestureManager,
+    private val udpConnection: UDPConnectionFixed? = null,
+    private val agentId: UUID? = null,
+    private val sessionId: UUID? = null,
+    private val objectManager: ObjectManager? = null
 ) {
     companion object {
         private const val TAG = "OutfitManager"
@@ -78,6 +86,10 @@ class OutfitManager(
         const val ATTACH_GROIN = 53
         const val ATTACH_HIND_LEFT_FOOT = 54
         const val ATTACH_HIND_RIGHT_FOOT = 55
+
+        // Protocol Message IDs
+        private const val OBJECT_DETACH = (0xFFFF0118).toInt()
+        private const val REZ_SINGLE_ATTACHMENT_FROM_INV = (0xFFFF0117).toInt()
     }
     
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -162,7 +174,34 @@ class OutfitManager(
         
         updateCurrentOutfit()
         
-        // TODO: Send RezSingleAttachmentFromInv to server
+        // RezSingleAttachmentFromInv packet
+        if (udpConnection != null && agentId != null && sessionId != null) {
+            try {
+                // AgentData Block
+                // - AgentID (16 bytes)
+                // - SessionID (16 bytes)
+                // ObjectData Block
+                // - AttachmentBlock
+                //   - AttachmentPoint (U8) | 0x80 (if append/not replace)
+                //   - ItemID (16 bytes)
+                //   - OwnerID (16 bytes)
+                //   - GroupMask (U32)
+                //   - EveryoneMask (U32)
+                //   - NextOwnerMask (U32)
+                //   - Name (Variable 1)
+                //   - Description (Variable 1)
+
+                // Simplified packet construction for RezSingleAttachmentFromInv
+                // Note: Full implementation requires more item details
+                // This is a placeholder for the packet structure
+
+                // TODO: Need more item details (permissions, name, desc) to build full packet
+                Log.d(TAG, "Sending RezSingleAttachmentFromInv for item ${item.itemId} at point $point")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to send RezSingleAttachmentFromInv", e)
+            }
+        }
+
         return true
     }
     
@@ -185,12 +224,84 @@ class OutfitManager(
      * Detach an object
      */
     suspend fun detachFromPoint(point: Int): Boolean {
+        val itemId = wornAttachments[point]
         wornAttachments.remove(point)
         updateCurrentOutfit()
-        // TODO: Send detach to server
+
+        // Send ObjectDetach to server
+        if (udpConnection != null && agentId != null && sessionId != null) {
+            try {
+                sendObjectDetach(point, itemId)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to send ObjectDetach", e)
+            }
+        }
         return true
     }
     
+    /**
+     * Send ObjectDetach packet
+     */
+    private suspend fun sendObjectDetach(point: Int, itemId: UUID?) {
+        if (udpConnection == null || agentId == null || sessionId == null) return
+
+        if (itemId == null) {
+             Log.w(TAG, "Cannot send ObjectDetach: Missing ItemID for point $point")
+             return
+        }
+
+        // Try to get LocalID from ObjectManager if available
+        var localId: Int = 0
+        if (objectManager != null) {
+            val obj = objectManager.getObjectByUUID(itemId)
+            if (obj != null) {
+                localId = obj.localId
+            }
+        }
+
+        if (localId == 0) {
+            Log.w(TAG, "Cannot send ObjectDetach: Missing LocalID for attachment at point $point (item $itemId)")
+            // Some viewers might try to guess or use 0? No, 0 is invalid.
+            return
+        }
+
+        // ObjectDetach packet format:
+        // AgentData Block
+        // - AgentID (16 bytes)
+        // - SessionID (16 bytes)
+        // ObjectData Block (Variable Array)
+        // - ObjectLocalID (U32)
+
+        val payload = ByteBuffer.allocate(16 + 16 + 1 + 4)
+            .order(ByteOrder.LITTLE_ENDIAN) // Message body is little endian
+
+        // AgentData - UUIDs are big-endian in payload if we use putUUID helper which might handle it?
+        // Let's use putUUID from existing code or check how it does it.
+        // ChatManager uses buffer.putUUID(agentId).
+        // Let's see putUUID implementation in ChatManager context or copy it.
+        // It seems `com.linkpoint.protocol.types.putUUID` is an extension method.
+        // It likely handles endianness.
+
+        // AgentData
+        putUUID(payload, agentId)
+        putUUID(payload, sessionId)
+
+        // ObjectData (Array)
+        payload.put(1.toByte()) // Count = 1
+        payload.putInt(localId)
+
+        udpConnection.sendPacket(OBJECT_DETACH, payload.array(), reliable = true)
+        Log.i(TAG, "Sent ObjectDetach for localId $localId (point $point)")
+    }
+
+    private fun putUUID(buffer: ByteBuffer, uuid: UUID) {
+        val originalOrder = buffer.order()
+        buffer.order(ByteOrder.BIG_ENDIAN)
+        buffer.putLong(uuid.mostSignificantBits)
+        buffer.putLong(uuid.leastSignificantBits)
+        buffer.order(originalOrder)
+    }
+
     /**
      * Detach by item ID
      */

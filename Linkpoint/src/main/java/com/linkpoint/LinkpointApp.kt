@@ -488,15 +488,23 @@ class LinkpointApp : Application() {
             chatManager.sendChat(message)
         }
 
-        // Outfit manager (needs baker from avatar manager)
-        val myAvatar = avatarManager.getMyAvatar()
-        if (myAvatar != null) {
-            outfitManager = OutfitManager(inventoryManager, myAvatar.baker, gestureManager)
-        }
-        
         // Object manager
         objectManager = ObjectManager(udpConnection)
         buildTools = BuildTools(objectManager)
+
+        // Outfit manager (needs baker from avatar manager)
+        val myAvatar = avatarManager.getMyAvatar()
+        if (myAvatar != null) {
+            outfitManager = OutfitManager(
+                inventoryManager,
+                myAvatar.baker,
+                gestureManager,
+                udpConnection,
+                agentId,
+                udpConnection.getSessionId(),
+                objectManager
+            )
+        }
         
         // Modern features: Animesh and Bakes on Mesh
         animeshManager = AnimeshManager(meshManager, animationManager)
