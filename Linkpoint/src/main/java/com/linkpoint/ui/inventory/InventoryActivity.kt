@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import java.util.UUID
+import android.content.Intent
+import com.linkpoint.ui.notecard.NotecardEditorActivity
 
 /**
  * Inventory Activity - Browse and manage inventory
@@ -128,7 +130,15 @@ class InventoryActivity : AppCompatActivity() {
     }
     
     private fun openNotecard(item: ActivityInventoryItem) {
-        // TODO: Open notecard editor activity
+        val intent = Intent(this, NotecardEditorActivity::class.java).apply {
+            putExtra(NotecardEditorActivity.EXTRA_ITEM_ID, item.id.toString())
+            putExtra(NotecardEditorActivity.EXTRA_NOTECARD_NAME, item.name)
+            item.assetId?.let { putExtra(NotecardEditorActivity.EXTRA_ASSET_ID, it.toString()) }
+
+            // Allow editing by default for now
+            putExtra(NotecardEditorActivity.EXTRA_READ_ONLY, false)
+        }
+        startActivity(intent)
     }
     
     private fun offerTeleport(item: ActivityInventoryItem) {
