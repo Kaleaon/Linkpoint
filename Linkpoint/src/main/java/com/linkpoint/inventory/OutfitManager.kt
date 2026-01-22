@@ -228,10 +228,7 @@ class OutfitManager(
 
         // AttachmentPt
         // ATTACHMENT_APPEND_FLAG means APPEND. If replace is false, we append.
-        var attachPtByte = point
-        if (!replace) {
-             attachPtByte = attachPtByte or ATTACHMENT_APPEND_FLAG
-        }
+        val attachPtByte = if (!replace) point or ATTACHMENT_APPEND_FLAG else point
         payload.put(attachPtByte.toByte())
 
         payload.putInt(item.flags)

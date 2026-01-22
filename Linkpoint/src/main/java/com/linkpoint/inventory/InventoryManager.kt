@@ -482,7 +482,8 @@ class InventoryManager(
                     val truncatedNameBytes = if (nameBytes.size > 255) nameBytes.copyOf(255) else nameBytes
 
                     // Payload size: AgentID(16) + SessionID(16) + FolderID(16) + ParentID(16) + Type(1) + NameLength(1) + NameBytes(N)
-                    val payloadSize = 66 + truncatedNameBytes.size
+                    val fixedSize = 16 + 16 + 16 + 16 + 1 + 1  // 66 bytes
+                    val payloadSize = fixedSize + truncatedNameBytes.size
                     val payload = ByteBuffer.allocate(payloadSize).order(ByteOrder.LITTLE_ENDIAN)
 
                     // AgentData block
@@ -625,7 +626,11 @@ class InventoryManager(
         // UUIDs (16*6) + U32 (4*6) + Bool (1) + UUID (16) + S8 (1) + S8 (1) + U32 (1) + U8 (1) + S32 (1) + Var (1+N) + Var (1+N) + S32 (1) + U32 (1)
         // Fixed part per item: 96 + 24 + 1 + 16 + 1 + 1 + 4 + 1 + 4 + 4 + 4 = 156 bytes
         // Variable part: 1 + nameLen + 1 + descLen
-        val payloadSize = 48 + 1 + (156 + 1 + safeNameBytes.size + 1 + safeDescBytes.size)
+        val agentDataSize = 16 + 16 + 16  // 48 bytes
+        val inventoryDataCount = 1
+        val inventoryDataFixed = 16*6 + 4*6 + 1 + 16 + 1 + 1 + 4 + 1 + 4 + 4 + 4  // 156 bytes
+        val inventoryDataVariable = 1 + safeNameBytes.size + 1 + safeDescBytes.size
+        val payloadSize = agentDataSize + inventoryDataCount + inventoryDataFixed + inventoryDataVariable
 
         val buffer = ByteBuffer.allocate(payloadSize).order(ByteOrder.LITTLE_ENDIAN)
 
