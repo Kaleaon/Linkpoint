@@ -5,11 +5,16 @@ import android.util.Log
 import com.linkpoint.assets.AssetType
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
+import com.linkpoint.protocol.messages.UDPConnectionFixed
+import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.cancellation.CancellationException
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -19,7 +24,8 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class InventoryManager(
     private val capabilityManager: CapabilityManager,
-    private val agentId: UUID
+    private val agentId: UUID,
+    private val udpConnection: UDPConnectionFixed? = null
 ) {
     companion object {
         private const val TAG = "InventoryManager"
@@ -433,7 +439,36 @@ class InventoryManager(
                     version = 0
                 )
                 folders[folderId] = folder
-                Log.d(TAG, "Created folder '$name' locally (no capability)")
+
+                // Send CreateInventoryFolder message to server if capability unavailable
+                if (udpConnection != null) {
+                    val nameBytes = name.toByteArray(Charsets.UTF_8)
+                    // Limit name length to 255 bytes for Variable 1 encoding
+                    val truncatedNameBytes = if (nameBytes.size > 255) nameBytes.copyOf(255) else nameBytes
+
+                    // Payload size: AgentID(16) + SessionID(16) + FolderID(16) + ParentID(16) + Type(1) + NameLength(1) + NameBytes(N)
+                    val payloadSize = 66 + truncatedNameBytes.size
+                    val payload = ByteBuffer.allocate(payloadSize).order(ByteOrder.LITTLE_ENDIAN)
+
+                    // AgentData block
+                    payload.putUUID(agentId)
+                    payload.putUUID(udpConnection.getSessionId())
+
+                    // FolderData block
+                    payload.putUUID(folderId)
+                    payload.putUUID(parentId)
+                    payload.put(type.toByte())
+
+                    // Variable 1 field: 1-byte length + data
+                    payload.put(truncatedNameBytes.size.toByte())
+                    payload.put(truncatedNameBytes)
+
+                    udpConnection.sendPacket(MessageIds.CREATE_INVENTORY_FOLDER, payload.array(), reliable = true)
+                    Log.d(TAG, "Created folder '$name' locally and sent CreateInventoryFolder packet")
+                } else {
+                    Log.d(TAG, "Created folder '$name' locally (no capability, no UDP)")
+                }
+
                 folderId
                 
             } catch (e: Exception) {

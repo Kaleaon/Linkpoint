@@ -242,4 +242,11 @@ object MessageIds {
 
     /** DeactivateGestures - Deactivate a gesture */
     const val DEACTIVATE_GESTURES = (0xFFFF0097).toInt()       // Wire: FF FF 00 97
+
+    // =====================================
+    // Inventory Messages
+    // =====================================
+
+    /** CreateInventoryFolder - Create a new inventory folder */
+    const val CREATE_INVENTORY_FOLDER = (0xFFFF0111).toInt()   // Wire: FF FF 01 11
 }
