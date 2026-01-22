@@ -462,7 +462,7 @@ class InventoryManager(
                     }
                 }
                 
-                // Fallback: create locally
+                // Fallback: create locally and send UDP packet if available
                 val folder = InventoryFolder(
                     folderId = folderId,
                     parentId = parentId,
@@ -471,7 +471,37 @@ class InventoryManager(
                     version = 0
                 )
                 folders[folderId] = folder
-                Log.d(TAG, "Created folder '$name' locally (no capability)")
+                
+                // Send CreateInventoryFolder message to server via UDP
+                try {
+                    val nameBytes = name.toByteArray(Charsets.UTF_8)
+                    // Limit name length to 255 bytes for Variable 1 encoding
+                    val truncatedNameBytes = if (nameBytes.size > 255) nameBytes.copyOf(255) else nameBytes
+
+                    // Payload size: AgentID(16) + SessionID(16) + FolderID(16) + ParentID(16) + Type(1) + NameLength(1) + NameBytes(N)
+                    val payloadSize = 66 + truncatedNameBytes.size
+                    val payload = ByteBuffer.allocate(payloadSize).order(ByteOrder.LITTLE_ENDIAN)
+
+                    // AgentData block
+                    payload.putUUID(agentId)
+                    payload.putUUID(udpConnection.getSessionId())
+
+                    // FolderData block
+                    payload.putUUID(folderId)
+                    payload.putUUID(parentId)
+                    payload.put(type.toByte())
+
+                    // Variable 1 field: 1-byte length + data
+                    payload.put(truncatedNameBytes.size.toByte())
+                    payload.put(truncatedNameBytes)
+
+                    udpConnection.sendPacket(MessageIds.CREATE_INVENTORY_FOLDER, payload.array(), reliable = true)
+                    Log.d(TAG, "Created folder '$name' locally and sent CreateInventoryFolder packet")
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to send CreateInventoryFolder packet: ${e.message}")
+                    Log.d(TAG, "Created folder '$name' locally only")
+                }
+                
                 folderId
                 
             } catch (e: Exception) {
@@ -498,57 +528,144 @@ class InventoryManager(
     }
     
     /**
-     * Rename item using UpdateInventoryItem capability.
+     * Rename item using UpdateInventoryItem capability or UDP fallback.
      */
     suspend fun renameItem(itemId: UUID, newName: String): Boolean {
-        items[itemId]?.let { item ->
-            // Try to use UpdateInventoryItem capability
-            val capUrl = capabilityManager.getCapability(CapabilityManager.CAP_UPDATE_INVENTORY_ITEM)
-            if (capUrl != null) {
-                try {
-                    val request = LLSDMap().apply {
-                        this["item_id"] = LLSDString(itemId.toString())
-                        this["name"] = LLSDString(newName)
-                    }
-                    capabilityManager.request(CapabilityManager.CAP_UPDATE_INVENTORY_ITEM, request)
-                    Log.d(TAG, "Renamed item $itemId to '$newName' via capability")
-                } catch (e: Exception) {
-                    Log.w(TAG, "Failed to rename item via capability: ${e.message}")
+        val item = items[itemId] ?: return false
+        var success = false
+        
+        // Try to use UpdateInventoryItem capability
+        val capUrl = capabilityManager.getCapability(CapabilityManager.CAP_UPDATE_INVENTORY_ITEM)
+        if (capUrl != null) {
+            try {
+                val request = LLSDMap().apply {
+                    this["item_id"] = LLSDString(itemId.toString())
+                    this["name"] = LLSDString(newName)
                 }
+                capabilityManager.request(CapabilityManager.CAP_UPDATE_INVENTORY_ITEM, request)
+                Log.d(TAG, "Renamed item $itemId to '$newName' via capability")
+                success = true
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to rename item via capability: ${e.message}")
             }
-            
-            // Update local cache
-            items[itemId] = item.copy(name = newName)
-            return true
         }
-        return false
+        
+        // Fallback to UDP UpdateInventoryItem if capability not available or failed
+        if (!success) {
+            try {
+                sendUpdateInventoryItemPacket(item.copy(name = newName))
+                Log.d(TAG, "Renamed item $itemId to '$newName' via UDP")
+                success = true
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to rename item via UDP: ${e.message}")
+            }
+        }
+        
+        // Update local cache
+        items[itemId] = item.copy(name = newName)
+        return true
     }
     
     /**
-     * Update item description using UpdateInventoryItem capability.
+     * Update item description using UpdateInventoryItem capability or UDP fallback.
      */
     suspend fun updateItemDescription(itemId: UUID, description: String): Boolean {
-        items[itemId]?.let { item ->
-            // Try to use UpdateInventoryItem capability
-            val capUrl = capabilityManager.getCapability(CapabilityManager.CAP_UPDATE_INVENTORY_ITEM)
-            if (capUrl != null) {
-                try {
-                    val request = LLSDMap().apply {
-                        this["item_id"] = LLSDString(itemId.toString())
-                        this["desc"] = LLSDString(description)
-                    }
-                    capabilityManager.request(CapabilityManager.CAP_UPDATE_INVENTORY_ITEM, request)
-                    Log.d(TAG, "Updated description for item $itemId")
-                } catch (e: Exception) {
-                    Log.w(TAG, "Failed to update item description: ${e.message}")
+        val item = items[itemId] ?: return false
+        var success = false
+        
+        // Try to use UpdateInventoryItem capability
+        val capUrl = capabilityManager.getCapability(CapabilityManager.CAP_UPDATE_INVENTORY_ITEM)
+        if (capUrl != null) {
+            try {
+                val request = LLSDMap().apply {
+                    this["item_id"] = LLSDString(itemId.toString())
+                    this["desc"] = LLSDString(description)
                 }
+                capabilityManager.request(CapabilityManager.CAP_UPDATE_INVENTORY_ITEM, request)
+                Log.d(TAG, "Updated description for item $itemId")
+                success = true
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to update item description: ${e.message}")
             }
-            
-            // Update local cache
-            items[itemId] = item.copy(description = description)
-            return true
         }
-        return false
+        
+        // Fallback to UDP UpdateInventoryItem if capability not available or failed
+        if (!success) {
+            try {
+                sendUpdateInventoryItemPacket(item.copy(description = description))
+                Log.d(TAG, "Updated item description $itemId via UDP")
+                success = true
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to update item description via UDP: ${e.message}")
+            }
+        }
+        
+        // Update local cache
+        items[itemId] = item.copy(description = description)
+        return true
+    }
+    
+    /**
+     * Helper to send UpdateInventoryItem packet via UDP.
+     */
+    private suspend fun sendUpdateInventoryItemPacket(item: InventoryItem) {
+        // Calculate size first
+        val nameBytes = item.name.toByteArray(Charsets.UTF_8).let { if (it.lastOrNull() == 0.toByte()) it else it + 0.toByte() }
+        val descBytes = item.description.toByteArray(Charsets.UTF_8).let { if (it.lastOrNull() == 0.toByte()) it else it + 0.toByte() }
+
+        // Limit name and desc to 255 bytes (1 byte length)
+        val safeNameBytes = if (nameBytes.size > 255) nameBytes.copyOf(255) else nameBytes
+        val safeDescBytes = if (descBytes.size > 255) descBytes.copyOf(255) else descBytes
+
+        // Size = AgentData (16+16+16) + InventoryData Count (1) + InventoryData Block
+        // InventoryData Block:
+        // UUIDs (16*6) + U32 (4*6) + Bool (1) + UUID (16) + S8 (1) + S8 (1) + U32 (1) + U8 (1) + S32 (1) + Var (1+N) + Var (1+N) + S32 (1) + U32 (1)
+        // Fixed part per item: 96 + 24 + 1 + 16 + 1 + 1 + 4 + 1 + 4 + 4 + 4 = 156 bytes
+        // Variable part: 1 + nameLen + 1 + descLen
+        val payloadSize = 48 + 1 + (156 + 1 + safeNameBytes.size + 1 + safeDescBytes.size)
+
+        val buffer = ByteBuffer.allocate(payloadSize).order(ByteOrder.LITTLE_ENDIAN)
+
+        // AgentData Block
+        buffer.putUUID(agentId)
+        buffer.putUUID(udpConnection.getSessionId())
+        buffer.putUUID(UUID.randomUUID()) // TransactionID
+
+        // InventoryData Block Count
+        buffer.put(1.toByte())
+
+        // InventoryData Block Content
+        buffer.putUUID(item.itemId)
+        buffer.putUUID(item.parentId)
+        buffer.putInt(0) // CallbackID
+        buffer.putUUID(item.permissions.creatorId)
+        buffer.putUUID(item.permissions.ownerId)
+        buffer.putUUID(UUID(0,0)) // GroupID - assuming not group owned or we don't know
+        buffer.putInt(item.permissions.baseMask)
+        buffer.putInt(item.permissions.ownerMask)
+        buffer.putInt(item.permissions.groupMask)
+        buffer.putInt(item.permissions.everyoneMask)
+        buffer.putInt(item.permissions.nextOwnerMask)
+        buffer.put(0.toByte()) // GroupOwned - simplified
+        buffer.putUUID(UUID(0,0)) // TransactionID
+        buffer.put(item.assetType.toByte())
+        buffer.put(item.inventoryType.toByte())
+        buffer.putInt(item.flags)
+        buffer.put(item.saleInfo.saleType.toByte())
+        buffer.putInt(item.saleInfo.salePrice)
+
+        // Name (Variable 1)
+        buffer.put(safeNameBytes.size.toByte())
+        buffer.put(safeNameBytes)
+
+        // Description (Variable 1)
+        buffer.put(safeDescBytes.size.toByte())
+        buffer.put(safeDescBytes)
+
+        buffer.putInt(item.creationDate)
+        buffer.putInt(0) // CRC
+
+        udpConnection.sendPacket(MessageIds.UPDATE_INVENTORY_ITEM, buffer.array(), reliable = true)
     }
     
     /**
