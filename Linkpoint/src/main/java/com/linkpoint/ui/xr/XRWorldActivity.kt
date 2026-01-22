@@ -5,11 +5,15 @@ import android.view.SurfaceView
 import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
+import android.util.Log
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.xr.XRManager
+import com.linkpoint.xr.ControllerState
+import com.linkpoint.protocol.types.LLVector3
+import com.linkpoint.protocol.types.LLQuaternion
 
 /**
  * XR World Activity - Immersive VR/AR mode
@@ -27,6 +31,9 @@ class XRWorldActivity : AppCompatActivity() {
     private val app by lazy { LinkpointApp.getInstance() }
     private var isRendering = false
     
+    // Track trigger state to prevent rapid-fire interactions
+    private val triggerState = mutableMapOf<ControllerState.Hand, Boolean>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
@@ -117,6 +124,11 @@ class XRWorldActivity : AppCompatActivity() {
     private fun handleControllerInput() {
         val controllers = app.xrManager.getControllers()
         
+        // Ensure we have access to managers
+        if (!app.isAvatarManagerInitialized() || !app.isObjectManagerInitialized()) return
+
+        val myAvatar = app.avatarManager.getMyAvatar() ?: return
+
         for (controller in controllers) {
             val (thumbX, thumbY) = controller.thumbstick[0] to controller.thumbstick[1]
             
@@ -131,14 +143,71 @@ class XRWorldActivity : AppCompatActivity() {
                     app.avatarManager.movementController.setRotationInput(thumbX)
 
                     // Handle trigger for interaction (typically right hand dominant)
-                    if (controller.triggerValue > 0.5f) {
-                        // TODO: Handle selection/interaction
+                    val isTriggerPressed = controller.triggerValue > 0.5f
+                    val wasTriggerPressed = triggerState[controller.hand] ?: false
+
+                    if (isTriggerPressed && !wasTriggerPressed) {
+                        // Trigger just pressed - Perform raycast interaction
+                        performInteraction(controller, myAvatar)
                     }
+
+                    // Update state
+                    triggerState[controller.hand] = isTriggerPressed
                 }
             }
         }
     }
     
+    private fun performInteraction(controller: ControllerState, avatar: com.linkpoint.avatar.Avatar) {
+        // 1. Get controller pose in local tracking space
+        // Controller orientation (quaternion x,y,z,w)
+        val ctrlRot = LLQuaternion(
+            controller.orientation[0],
+            controller.orientation[1],
+            controller.orientation[2],
+            controller.orientation[3]
+        )
+
+        // Controller position (x,y,z)
+        val ctrlPos = LLVector3(
+            controller.position[0],
+            controller.position[1],
+            controller.position[2]
+        )
+
+        // 2. Convert to World Space
+        // Assuming controller pose is relative to the avatar/tracking origin
+        // WorldRot = AvatarRot * ControllerRot
+        val worldRot = avatar.rotation * ctrlRot
+
+        // WorldPos = AvatarPos + (AvatarRot * ControllerPos)
+        // Note: This assumes tracking origin aligns with Avatar position (feet/root)
+        val worldPos = avatar.position + (avatar.rotation.rotate(ctrlPos))
+
+        // 3. Calculate Ray Direction
+        // OpenXR/AndroidXR controllers typically point down -Z
+        val forwardLocal = LLVector3(0f, 0f, -1f)
+        val rayDirection = worldRot.rotate(forwardLocal)
+
+        // 4. Perform Raycast
+        val hit = app.objectManager.raycast(worldPos, rayDirection, maxDistance = 10f)
+
+        if (hit != null) {
+            Log.d(TAG, "Interaction ray hit object: localId=${hit.localId}, dist=${hit.distance}")
+
+            // Calculate approximate normal/binormal for the touch
+            // Ideally we'd get surface normal from raycast, but for now we approximate
+            // Normal points back along the ray (towards user)
+            val normal = rayDirection * -1f
+            val binormal = LLVector3.unitZ().cross(normal).normalize()
+
+            // Send object touch/grab
+            app.objectManager.touchObject(hit.localId, hit.hitPosition, normal, binormal)
+
+            // Visual feedback could be added here (e.g., haptic pulse or highlight)
+        }
+    }
+
     override fun onPause() {
         super.onPause()
         isRendering = false
