@@ -91,7 +91,6 @@ class OutfitManager(
 
         // Protocol Message IDs
         private const val OBJECT_DETACH = (0xFFFF0118).toInt()
-        private const val REZ_SINGLE_ATTACHMENT_FROM_INV = (0xFFFF0117).toInt()
     }
     
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())

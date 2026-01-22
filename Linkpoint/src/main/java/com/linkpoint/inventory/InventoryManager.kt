@@ -563,7 +563,7 @@ class InventoryManager(
         
         // Update local cache
         items[itemId] = item.copy(name = newName)
-        return true
+        return success
     }
     
     /**
@@ -602,7 +602,7 @@ class InventoryManager(
         
         // Update local cache
         items[itemId] = item.copy(description = description)
-        return true
+        return success
     }
     
     /**
@@ -610,8 +610,8 @@ class InventoryManager(
      */
     private suspend fun sendUpdateInventoryItemPacket(item: InventoryItem) {
         // Calculate size first
-        val nameBytes = item.name.toByteArray(Charsets.UTF_8).let { if (it.lastOrNull() == 0.toByte()) it else it + 0.toByte() }
-        val descBytes = item.description.toByteArray(Charsets.UTF_8).let { if (it.lastOrNull() == 0.toByte()) it else it + 0.toByte() }
+        val nameBytes = item.name.toByteArray(Charsets.UTF_8)
+        val descBytes = item.description.toByteArray(Charsets.UTF_8)
 
         // Limit name and desc to 255 bytes (1 byte length)
         val safeNameBytes = if (nameBytes.size > 255) nameBytes.copyOf(255) else nameBytes
