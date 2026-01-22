@@ -395,7 +395,7 @@ class LinkpointApp : Application() {
         xferManager = XferManager(udpConnection)
         
         // NEW: RLV Controller
-        rlvController = RLVController()
+        rlvController = RLVController(chatManager = { if (::chatManager.isInitialized) chatManager else null })
         
         // NEW: Draw Distance Manager
         drawDistanceManager = DrawDistanceManager()
@@ -742,11 +742,29 @@ class LinkpointApp : Application() {
                             velocity = update.velocity
                         )
                     }
+                    // Add avatar to scene for rendering
+                    if (::renderManager.isInitialized) {
+                        renderManager.getSceneManager()?.updateAvatar(
+                            agentId = update.fullId,
+                            position = update.position,
+                            rotation = update.rotation
+                        )
+                    }
                 }
                 else -> {
                     // Prims, trees, grass, particles all go to object manager
                     if (::objectManager.isInitialized) {
                         objectManager.handleObjectUpdate(update)
+                    }
+                    // Add object to scene for rendering
+                    if (::renderManager.isInitialized) {
+                        renderManager.getSceneManager()?.updateObject(
+                            objectId = update.fullId,
+                            localId = update.localId,
+                            position = update.position,
+                            rotation = update.rotation,
+                            scale = update.scale
+                        )
                     }
                     
                     // Extract and prefetch textures from the object's TextureEntry
@@ -891,7 +909,13 @@ class LinkpointApp : Application() {
                     if (buffer.remaining() >= 4) {
                         val localId = buffer.int
                         if (::objectManager.isInitialized) {
+                            // Get UUID before removal so we can remove from scene
+                            val obj = objectManager.getObject(localId)
                             objectManager.removeObject(localId)
+                            // Remove from scene
+                            if (::renderManager.isInitialized && obj != null) {
+                                renderManager.getSceneManager()?.removeObject(obj.fullId)
+                            }
                         }
                     }
                 }

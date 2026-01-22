@@ -8,6 +8,7 @@ import com.google.android.filament.*
 import com.google.android.filament.android.DisplayHelper
 import com.google.android.filament.android.UiHelper
 import com.linkpoint.render.environment.SLDefaultEnvironment
+import com.linkpoint.render.scene.SceneManager
 import com.linkpoint.xr.XRFrameData
 
 /**
@@ -35,6 +36,9 @@ class RenderManager(private val context: Context) {
     private var view: View? = null
     private var camera: Camera? = null
     private var swapChain: SwapChain? = null
+    
+    // Scene management
+    private var sceneManager: SceneManager? = null
     
     // Helpers
     private var uiHelper: UiHelper? = null
@@ -68,6 +72,10 @@ class RenderManager(private val context: Context) {
             scene = engine!!.createScene()
             view = engine!!.createView()
             camera = engine!!.createCamera(engine!!.entityManager.create())
+            
+            // Initialize scene manager
+            sceneManager = SceneManager(engine!!, scene!!)
+            Log.d(TAG, "SceneManager initialized")
             
             view!!.scene = scene
             view!!.camera = camera
@@ -427,6 +435,11 @@ class RenderManager(private val context: Context) {
      * Get the Filament scene
      */
     fun getScene(): Scene? = scene
+    
+    /**
+     * Get the scene manager for adding/removing objects and avatars
+     */
+    fun getSceneManager(): SceneManager? = sceneManager
     
     // ==================== DIAGNOSTIC METHODS ====================
     
