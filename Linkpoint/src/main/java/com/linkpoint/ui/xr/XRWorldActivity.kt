@@ -118,17 +118,23 @@ class XRWorldActivity : AppCompatActivity() {
         val controllers = app.xrManager.getControllers()
         
         for (controller in controllers) {
-            // Handle movement with thumbstick
             val (thumbX, thumbY) = controller.thumbstick[0] to controller.thumbstick[1]
             
-            if (kotlin.math.abs(thumbX) > 0.1f || kotlin.math.abs(thumbY) > 0.1f) {
-                // Move avatar based on thumbstick
-                // TODO: Implement movement
-            }
-            
-            // Handle trigger for interaction
-            if (controller.triggerValue > 0.5f) {
-                // TODO: Handle selection/interaction
+            // Map controls based on hand
+            when (controller.hand) {
+                com.linkpoint.xr.ControllerState.Hand.LEFT -> {
+                    // Left stick moves character (WASD equivalent)
+                    app.avatarManager.movementController.setJoystickInput(thumbX, thumbY)
+                }
+                com.linkpoint.xr.ControllerState.Hand.RIGHT -> {
+                    // Right stick turns character (Yaw)
+                    app.avatarManager.movementController.setRotationInput(thumbX)
+
+                    // Handle trigger for interaction (typically right hand dominant)
+                    if (controller.triggerValue > 0.5f) {
+                        // TODO: Handle selection/interaction
+                    }
+                }
             }
         }
     }
