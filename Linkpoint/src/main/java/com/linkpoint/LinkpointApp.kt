@@ -298,6 +298,12 @@ class LinkpointApp : Application() {
     var agentId: UUID? = null
         private set
     
+    // Flag to track if CompleteAgentMovement has been sent
+    // Per Lumiya protocol: This must be sent immediately when UseCircuitCode (seq 0) is ACKed
+    // The server won't send RegionHandshake until we send this
+    @Volatile
+    private var completeAgentMovementSent = false
+    
     override fun onCreate() {
         super.onCreate()
         instance = this
@@ -425,6 +431,9 @@ class LinkpointApp : Application() {
      */
     fun initializeAgentManagers(agentId: UUID) {
         this.agentId = agentId
+        
+        // Reset connection state tracking for new session
+        completeAgentMovementSent = false
         
         // Initialize friendsManager here since it requires agentId
         friendsManager = FriendsManager(udpConnection, capabilityManager, agentId)
@@ -597,6 +606,8 @@ class LinkpointApp : Application() {
                     }
                     
                     // Send RegionHandshakeReply to acknowledge - THIS IS REQUIRED!
+                    // NOTE: CompleteAgentMovement and AgentThrottle are sent earlier in PacketAck
+                    // handler when UseCircuitCode is acknowledged (per Lumiya protocol)
                     applicationScope.launch {
                         try {
                             Log.d(TAG, "Sending RegionHandshakeReply...")
@@ -610,23 +621,12 @@ class LinkpointApp : Application() {
                                 "Waiting for world data"
                             )
                             Log.i(TAG, "✓ RegionHandshakeReply SENT - world data should start loading")
-                            
-                            // Also send AgentThrottle to set bandwidth allocation
-                            Log.d(TAG, "Sending AgentThrottle...")
-                            udpConnection.sendAgentThrottle()
-                            Log.i(TAG, "✓ AgentThrottle SENT - bandwidth configured")
-
-                            // Send CompleteAgentMovement to signal we are ready to enter the region
-                            // This replaces the premature call in UDPConnectionFixed.connect()
-                            Log.d(TAG, "Sending CompleteAgentMovement...")
-                            udpConnection.sendCompleteAgentMovement()
-                            Log.i(TAG, "✓ CompleteAgentMovement SENT - requesting entry")
                         } catch (e: Exception) {
                             com.linkpoint.utils.InitializationTracker.failPhase(
                                 com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
                                 "Failed to send reply: ${e.message}"
                             )
-                            Log.e(TAG, "✗ Error sending RegionHandshakeReply/AgentThrottle", e)
+                            Log.e(TAG, "✗ Error sending RegionHandshakeReply", e)
                         }
                     }
                 } else {
@@ -917,17 +917,52 @@ class LinkpointApp : Application() {
         
         // PacketAck - Acknowledgment messages for reliable packets
         // These are sent by the simulator to confirm receipt of our reliable packets.
-        // We register a handler to prevent "No handler registered" warnings.
+        // CRITICAL: When UseCircuitCode (seq 0) is acknowledged, we MUST immediately send
+        // CompleteAgentMovement. This follows Lumiya's protocol behavior - the server
+        // won't send RegionHandshake until it receives CompleteAgentMovement.
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.PACKET_ACK) { _, rawPacket ->
             // PacketAck format: Count (1 byte), then list of acknowledged sequence numbers (4 bytes each)
-            // Currently we just acknowledge receipt - full ACK tracking could be added later
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
                 val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
                 val count = buffer.get().toInt() and 0xFF
-                // Log at debug level to avoid spam
-                Log.d(TAG, "PacketAck received: $count packets acknowledged")
+                
+                // Parse the acknowledged sequence numbers
+                val ackedSequences = mutableListOf<Int>()
+                for (i in 0 until count) {
+                    if (buffer.remaining() >= 4) {
+                        ackedSequences.add(buffer.int)
+                    }
+                }
+                
+                Log.d(TAG, "PacketAck received: $count packets acknowledged - sequences: $ackedSequences")
+                
+                // Check if UseCircuitCode (sequence 0) was acknowledged
+                // This is CRITICAL - per Lumiya's protocol, we must send CompleteAgentMovement
+                // immediately when UseCircuitCode is ACKed. The server waits for this before
+                // sending RegionHandshake and other world data.
+                if (ackedSequences.contains(0) && !completeAgentMovementSent) {
+                    completeAgentMovementSent = true
+                    Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+                    Log.i(TAG, "║ ⭐ UseCircuitCode ACKNOWLEDGED - Sending CompleteAgentMovement")
+                    Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+                    
+                    applicationScope.launch {
+                        try {
+                            // Send CompleteAgentMovement to signal we're ready to enter the region
+                            udpConnection.sendCompleteAgentMovement()
+                            Log.i(TAG, "✓ CompleteAgentMovement SENT - server should now send RegionHandshake")
+                            
+                            // Also send AgentThrottle to configure bandwidth
+                            udpConnection.sendAgentThrottle()
+                            Log.i(TAG, "✓ AgentThrottle SENT - bandwidth configured")
+                        } catch (e: Exception) {
+                            Log.e(TAG, "✗ Error sending CompleteAgentMovement/AgentThrottle", e)
+                            completeAgentMovementSent = false // Allow retry
+                        }
+                    }
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling PacketAck", e)
             }
@@ -1033,6 +1068,10 @@ class LinkpointApp : Application() {
         if (::animationController.isInitialized) animationController.shutdown()
         
         capabilityManager.shutdown()
+        
+        // Reset connection state tracking
+        completeAgentMovementSent = false
+        
         udpConnection.disconnect()
         
         xrManager.shutdown()
