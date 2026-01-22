@@ -4,9 +4,14 @@ import android.util.Log
 import com.linkpoint.avatar.AvatarBaker
 import com.linkpoint.avatar.WearableData
 import com.linkpoint.avatar.WearableType
+import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.UDPConnectionFixed
+import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -17,7 +22,10 @@ import java.util.concurrent.ConcurrentHashMap
 class OutfitManager(
     private val inventoryManager: InventoryManager,
     private val baker: AvatarBaker,
-    private val gestureManager: GestureManager
+    private val gestureManager: GestureManager,
+    private val udpConnection: UDPConnectionFixed,
+    private val agentId: UUID,
+    private val sessionId: UUID
 ) {
     companion object {
         private const val TAG = "OutfitManager"
@@ -162,8 +170,73 @@ class OutfitManager(
         
         updateCurrentOutfit()
         
-        // TODO: Send RezSingleAttachmentFromInv to server
+        // Send RezSingleAttachmentFromInv to server
+        sendRezSingleAttachmentFromInv(item, point, replace)
         return true
+    }
+
+    private suspend fun sendRezSingleAttachmentFromInv(item: InventoryItem, point: Int, replace: Boolean) {
+        val nameBytes = item.name.toByteArray(Charsets.UTF_8)
+        val descBytes = item.description.toByteArray(Charsets.UTF_8)
+
+        // Ensure name/desc are within limits (1 byte length max 255)
+        val safeNameBytes = if (nameBytes.size > 255) nameBytes.copyOf(255) else nameBytes
+        val safeDescBytes = if (descBytes.size > 255) descBytes.copyOf(255) else descBytes
+
+        // Calculate size:
+        // AgentData: 16 (AgentID) + 16 (SessionID) = 32
+        // ObjectData:
+        //   ItemID (16)
+        //   OwnerID (16)
+        //   AttachmentPt (1)
+        //   ItemFlags (4)
+        //   GroupMask (4)
+        //   EveryoneMask (4)
+        //   NextOwnerMask (4)
+        //   Name (1 + len)
+        //   Description (1 + len)
+        //   CreationDate (4)
+        //   CRC (4)
+
+        val payloadSize = 32 + 16 + 16 + 1 + 4 + 4 + 4 + 4 +
+                          1 + safeNameBytes.size + 1 + safeDescBytes.size + 4 + 4
+
+        val payload = ByteBuffer.allocate(payloadSize).order(ByteOrder.LITTLE_ENDIAN)
+
+        // AgentData
+        payload.putUUID(agentId)
+        payload.putUUID(sessionId)
+
+        // ObjectData
+        payload.putUUID(item.itemId)
+        payload.putUUID(item.permissions.ownerId)
+
+        // AttachmentPt
+        // 0x80 means APPEND. If replace is false, we append.
+        var attachPtByte = point
+        if (!replace) {
+             attachPtByte = attachPtByte or 0x80
+        }
+        payload.put(attachPtByte.toByte())
+
+        payload.putInt(item.flags)
+        payload.putInt(item.permissions.groupMask)
+        payload.putInt(item.permissions.everyoneMask)
+        payload.putInt(item.permissions.nextOwnerMask)
+
+        // Name (Variable 1)
+        payload.put(safeNameBytes.size.toByte())
+        payload.put(safeNameBytes)
+
+        // Description (Variable 1)
+        payload.put(safeDescBytes.size.toByte())
+        payload.put(safeDescBytes)
+
+        payload.putInt(item.creationDate)
+        payload.putInt(0) // CRC
+
+        udpConnection.sendPacket(MessageIds.REZ_SINGLE_ATTACHMENT_FROM_INV, payload.array(), reliable = true)
+        Log.d(TAG, "Sent RezSingleAttachmentFromInv for item ${item.itemId} at point $point (replace=$replace)")
     }
     
     private suspend fun activateGesture(item: InventoryItem): Boolean {

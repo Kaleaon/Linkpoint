@@ -491,7 +491,14 @@ class LinkpointApp : Application() {
         // Outfit manager (needs baker from avatar manager)
         val myAvatar = avatarManager.getMyAvatar()
         if (myAvatar != null) {
-            outfitManager = OutfitManager(inventoryManager, myAvatar.baker, gestureManager)
+            outfitManager = OutfitManager(
+                inventoryManager,
+                myAvatar.baker,
+                gestureManager,
+                udpConnection,
+                agentId,
+                udpConnection.getSessionId()
+            )
         }
         
         // Object manager

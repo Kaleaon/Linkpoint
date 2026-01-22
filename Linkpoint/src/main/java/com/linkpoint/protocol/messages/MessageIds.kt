@@ -131,6 +131,9 @@ object MessageIds {
     
     /** RezObject - Rez object from inventory */
     const val REZ_OBJECT = (0xFFFF0127).toInt()                // Wire: FF FF 01 27
+
+    /** RezSingleAttachmentFromInv - Wear object from inventory */
+    const val REZ_SINGLE_ATTACHMENT_FROM_INV = (0xFFFF012A).toInt() // Wire: FF FF 01 2A
     
     /** DeRezObject - Take/delete object */
     const val DEREZ_OBJECT = (0xFFFF0128).toInt()              // Wire: FF FF 01 28
