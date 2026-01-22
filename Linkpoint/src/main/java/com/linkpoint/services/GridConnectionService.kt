@@ -129,8 +129,13 @@ class GridConnectionService : Service() {
     private suspend fun sendKeepAlive() {
         if (app.sessionManager.isConnected()) {
             // Send UDP keep-alive to simulator
-            // TODO: Implement actual keep-alive packet
-            Log.d(TAG, "Sending keep-alive")
+            try {
+                // Send AgentUpdate message as keep-alive
+                app.udpConnection.sendAgentUpdate()
+                Log.d(TAG, "Sending keep-alive")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to send keep-alive", e)
+            }
         }
     }
     
