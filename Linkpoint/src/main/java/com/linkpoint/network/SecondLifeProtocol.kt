@@ -226,6 +226,47 @@ class SecondLifeProtocol(private val context: Context) {
                     "simPort" to result.simPort.toString()
                 ))
                 
+                // Validate critical login response fields
+                val circuitCode = result.circuitCode ?: 0
+                if (circuitCode == 0) {
+                    Log.e(TAG, "Login failed: Server did not provide a valid circuit code")
+                    com.linkpoint.utils.InitializationTracker.failPhase(
+                        com.linkpoint.utils.InitializationTracker.Phase.LOGIN_SUCCESS,
+                        "Missing circuit code in login response"
+                    )
+                    return@withContext LoginResult.Failure(
+                        message = "Login server did not provide connection information (missing circuit code)",
+                        errorCode = "MISSING_CIRCUIT_CODE",
+                        technicalDetails = "The server returned a successful login but did not include the circuit code required for simulator connection."
+                    )
+                }
+                
+                if (result.simIp.isEmpty()) {
+                    Log.e(TAG, "Login failed: Server did not provide simulator IP address")
+                    com.linkpoint.utils.InitializationTracker.failPhase(
+                        com.linkpoint.utils.InitializationTracker.Phase.LOGIN_SUCCESS,
+                        "Missing simulator IP in login response"
+                    )
+                    return@withContext LoginResult.Failure(
+                        message = "Login server did not provide connection information (missing simulator IP)",
+                        errorCode = "MISSING_SIM_IP",
+                        technicalDetails = "The server returned a successful login but did not include the simulator IP address."
+                    )
+                }
+                
+                if (result.simPort <= 0) {
+                    Log.e(TAG, "Login failed: Server did not provide a valid simulator port")
+                    com.linkpoint.utils.InitializationTracker.failPhase(
+                        com.linkpoint.utils.InitializationTracker.Phase.LOGIN_SUCCESS,
+                        "Missing or invalid simulator port in login response"
+                    )
+                    return@withContext LoginResult.Failure(
+                        message = "Login server did not provide connection information (invalid simulator port: ${result.simPort})",
+                        errorCode = "INVALID_SIM_PORT",
+                        technicalDetails = "The server returned simPort=${result.simPort}, which is not valid."
+                    )
+                }
+                
                 val regionInfo = RegionInfo(
                     name = result.regionName ?: "Unknown",
                     handle = 0,
@@ -264,67 +305,68 @@ class SecondLifeProtocol(private val context: Context) {
                 
                 // Configure and connect UDP connection for simulator communication
                 // This is critical for receiving object updates, chat, IMs, etc.
-                val circuitCode = result.circuitCode ?: 0
-                if (circuitCode != 0 && result.simIp.isNotEmpty() && result.simPort > 0) {
-                    com.linkpoint.utils.InitializationTracker.startPhase(
+                // IMPORTANT: We now wait for UDP connection before returning success
+                com.linkpoint.utils.InitializationTracker.startPhase(
+                    com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTING,
+                    "Connecting to ${result.simIp}:${result.simPort}"
+                )
+                
+                Log.i(TAG, "[STEP 1/2] Establishing UDP connection to ${result.simIp}:${result.simPort} with circuit $circuitCode")
+                app.udpConnection.configure(result.simIp, result.simPort, circuitCode)
+                
+                // Set session info for circuit establishment
+                val sessionUUID = try {
+                    UUID.fromString(result.sessionId)
+                } catch (e: Exception) {
+                    Log.w(TAG, "Invalid session ID format, using random UUID")
+                    UUID.randomUUID()
+                }
+                app.udpConnection.setSessionInfo(sessionUUID, agentId)
+                
+                // Connect UDP synchronously - wait for connection before continuing
+                val udpConnected = try {
+                    Log.d(TAG, "[STEP 1/2] UDP connect() starting...")
+                    app.udpConnection.connect()
+                } catch (e: Exception) {
+                    Log.e(TAG, "[STEP 1/2] ✗ Error establishing UDP connection", e)
+                    com.linkpoint.utils.InitializationTracker.failPhase(
                         com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTING,
-                        "Connecting to ${result.simIp}:${result.simPort}"
+                        "Exception: ${e.message}"
                     )
-                    
-                    Log.i(TAG, "[STEP 1/2] Establishing UDP connection to ${result.simIp}:${result.simPort} with circuit $circuitCode")
-                    app.udpConnection.configure(result.simIp, result.simPort, circuitCode)
-                    
-                    // Set session info for circuit establishment
-                    val sessionUUID = try {
-                        UUID.fromString(result.sessionId)
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Invalid session ID format, using random UUID")
-                        UUID.randomUUID()
-                    }
-                    app.udpConnection.setSessionInfo(sessionUUID, agentId)
-                    
-                    app.applicationScope.launch {
-                        try {
-                            Log.d(TAG, "[STEP 1/2] UDP connect() starting...")
-                            val udpConnected = app.udpConnection.connect()
-                            if (udpConnected) {
-                                com.linkpoint.utils.InitializationTracker.completePhase(
-                                    com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTING,
-                                    "UDP connected"
-                                )
-                                com.linkpoint.utils.InitializationTracker.startPhase(
-                                    com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTED,
-                                    "Waiting for simulator messages"
-                                )
-                                Log.i(TAG, "[STEP 1/2] ✓ UDP connection established - simulator packets active")
-                                Log.i(TAG, "[STEP 1/2] Registered handlers: ${app.udpConnection.getRegisteredHandlerIds()}")
-                            } else {
-                                com.linkpoint.utils.InitializationTracker.failPhase(
-                                    com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTING,
-                                    "UDP connect() returned false"
-                                )
-                                Log.w(TAG, "[STEP 1/2] ✗ Failed to establish UDP connection - simulator features may not work")
-                            }
-                        } catch (e: Exception) {
-                            com.linkpoint.utils.InitializationTracker.failPhase(
-                                com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTING,
-                                "Exception: ${e.message}"
-                            )
-                            Log.e(TAG, "[STEP 1/2] ✗ Error establishing UDP connection", e)
-                        }
-                    }
+                    false
+                }
+                
+                if (udpConnected) {
+                    com.linkpoint.utils.InitializationTracker.completePhase(
+                        com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTING,
+                        "UDP connected"
+                    )
+                    com.linkpoint.utils.InitializationTracker.startPhase(
+                        com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTED,
+                        "Waiting for simulator messages"
+                    )
+                    Log.i(TAG, "[STEP 1/2] ✓ UDP connection established - simulator packets active")
+                    Log.i(TAG, "[STEP 1/2] Registered handlers: ${app.udpConnection.getRegisteredHandlerIds()}")
                 } else {
                     com.linkpoint.utils.InitializationTracker.failPhase(
                         com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTING,
-                        "Missing circuit code or sim info"
+                        "UDP connect() returned false"
                     )
-                    Log.w(TAG, "[STEP 1/2] ✗ Missing circuit code or sim info - UDP connection not established")
-                    Log.w(TAG, "  circuitCode=$circuitCode, simIp=${result.simIp}, simPort=${result.simPort}")
+                    Log.w(TAG, "[STEP 1/2] ✗ Failed to establish UDP connection")
+                    // Continue with degraded functionality:
+                    // - HTTP/capabilities features will work (texture fetching, profile lookup, map tiles)
+                    // - Local chat and IMs will NOT work (these require UDP)
+                    // - Object updates won't be received (avatar won't see objects appear/move)
+                    // - Avatar movement won't be sent to simulator
+                    // User will need to restart app to retry connection
                 }
                 
                 // Initialize capabilities from seed capability (for textures, meshes, etc.)
                 // This is critical for rendering - like Lumiya's SLCaps.GetCapabilities()
-                result.seedCapability?.let { seedCap ->
+                // IMPORTANT: We now wait for capabilities initialization before returning success
+                var capsInitialized = false
+                val seedCap = result.seedCapability
+                if (seedCap != null && seedCap.isNotBlank()) {
                     com.linkpoint.utils.InitializationTracker.startPhase(
                         com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_FETCHING,
                         "Fetching capabilities from seed"
@@ -332,50 +374,59 @@ class SecondLifeProtocol(private val context: Context) {
                     Log.i(TAG, "[STEP 2/2] Initializing capabilities from seed...")
                     Log.d(TAG, "[STEP 2/2] Seed URL: ${seedCap.take(80)}...")
                     Log.d(TAG, "[STEP 2/2] Using Lumiya translation layer with login URL: ${loginUri.take(60)}...")
-                    app.applicationScope.launch {
-                        try {
-                            Log.d(TAG, "[STEP 2/2] capabilityManager.initialize() starting with Lumiya translation...")
-                            // Use the overload that accepts loginUri for Lumiya-compatible URL repair
-                            val capsInitialized = app.capabilityManager.initialize(seedCap, loginUri)
-                            if (capsInitialized) {
-                                com.linkpoint.utils.InitializationTracker.completePhase(
-                                    com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_FETCHING,
-                                    "${app.capabilityManager.getCapabilityCount()} capabilities loaded"
-                                )
-                                com.linkpoint.utils.InitializationTracker.startPhase(
-                                    com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_READY,
-                                    "Capabilities available for use"
-                                )
-                                Log.i(TAG, "[STEP 2/2] ✓ Capabilities initialized - textures and assets ready")
-                                Log.i(TAG, "[STEP 2/2] Capabilities loaded: ${app.capabilityManager.getCapabilityCount()}")
-                                // Connect texture manager to capability-based fetching
-                                app.textureManager.onCapabilitiesReady()
-                                Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
-                                Log.i(TAG, "║ POST-LOGIN INITIALIZATION COMPLETE - WORLD SHOULD START LOADING")
-                                Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
-                            } else {
-                                com.linkpoint.utils.InitializationTracker.failPhase(
-                                    com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_FETCHING,
-                                    "initialize() returned false - see CapabilityManager logs"
-                                )
-                                Log.w(TAG, "[STEP 2/2] ✗ Failed to initialize capabilities - textures may not load")
-                                Log.w(TAG, "[STEP 2/2] Check CapabilityManager logs for detailed error information")
-                            }
-                        } catch (e: Exception) {
+                    
+                    try {
+                        Log.d(TAG, "[STEP 2/2] capabilityManager.initialize() starting with Lumiya translation...")
+                        // Use the overload that accepts loginUri for Lumiya-compatible URL repair
+                        capsInitialized = app.capabilityManager.initialize(seedCap, loginUri)
+                        if (capsInitialized) {
+                            com.linkpoint.utils.InitializationTracker.completePhase(
+                                com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_FETCHING,
+                                "${app.capabilityManager.getCapabilityCount()} capabilities loaded"
+                            )
+                            com.linkpoint.utils.InitializationTracker.startPhase(
+                                com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_READY,
+                                "Capabilities available for use"
+                            )
+                            Log.i(TAG, "[STEP 2/2] ✓ Capabilities initialized - textures and assets ready")
+                            Log.i(TAG, "[STEP 2/2] Capabilities loaded: ${app.capabilityManager.getCapabilityCount()}")
+                            // Connect texture manager to capability-based fetching
+                            app.textureManager.onCapabilitiesReady()
+                        } else {
                             com.linkpoint.utils.InitializationTracker.failPhase(
                                 com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_FETCHING,
-                                "Exception: ${e.message}"
+                                "initialize() returned false - see CapabilityManager logs"
                             )
-                            Log.e(TAG, "[STEP 2/2] ✗ Error initializing capabilities", e)
+                            Log.w(TAG, "[STEP 2/2] ✗ Failed to initialize capabilities - textures may not load")
+                            Log.w(TAG, "[STEP 2/2] Check CapabilityManager logs for detailed error information")
                         }
+                    } catch (e: Exception) {
+                        com.linkpoint.utils.InitializationTracker.failPhase(
+                            com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_FETCHING,
+                            "Exception: ${e.message}"
+                        )
+                        Log.e(TAG, "[STEP 2/2] ✗ Error initializing capabilities", e)
                     }
-                } ?: run {
+                } else {
                     com.linkpoint.utils.InitializationTracker.failPhase(
                         com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_FETCHING,
                         "No seed capability in login response"
                     )
                     Log.w(TAG, "[STEP 2/2] ✗ No seed capability in login response - textures may not load")
-                    Log.w(TAG, "  seedCapability was null in login response")
+                    Log.w(TAG, "  seedCapability was null or empty in login response")
+                }
+                
+                // Log final initialization status
+                if (udpConnected && capsInitialized) {
+                    Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+                    Log.i(TAG, "║ POST-LOGIN INITIALIZATION COMPLETE - WORLD SHOULD START LOADING")
+                    Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+                } else {
+                    Log.w(TAG, "╔══════════════════════════════════════════════════════════════════")
+                    Log.w(TAG, "║ POST-LOGIN INITIALIZATION PARTIAL - some features may not work")
+                    Log.w(TAG, "║   UDP Connected: $udpConnected")
+                    Log.w(TAG, "║   Capabilities Initialized: $capsInitialized")
+                    Log.w(TAG, "╚══════════════════════════════════════════════════════════════════")
                 }
                 
                 com.linkpoint.utils.InitializationTracker.completePhase(
