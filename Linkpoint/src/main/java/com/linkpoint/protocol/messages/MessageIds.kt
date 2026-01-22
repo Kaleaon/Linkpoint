@@ -256,4 +256,13 @@ object MessageIds {
 
     /** CopyInventoryItem - Copy item to new folder */
     const val COPY_INVENTORY_ITEM = (0xFFFF0076).toInt()       // Wire: FF FF 00 76
+
+    /** UpdateInventoryItem - Update item properties */
+    const val UPDATE_INVENTORY_ITEM = (0xFFFF010A).toInt()     // Wire: FF FF 01 0A
+
+    /** CreateInventoryFolder - Create a new inventory folder */
+    const val CREATE_INVENTORY_FOLDER = (0xFFFF0111).toInt()   // Wire: FF FF 01 11
+
+    /** RezSingleAttachmentFromInv - Wear object from inventory */
+    const val REZ_SINGLE_ATTACHMENT_FROM_INV = (0xFFFF012A).toInt() // Wire: FF FF 01 2A
 }

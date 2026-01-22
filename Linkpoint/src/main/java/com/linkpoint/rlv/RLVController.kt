@@ -22,7 +22,9 @@ import java.util.concurrent.ConcurrentHashMap
  *   @sendchat=n       - Prevent chat
  *   @sit:<uuid>=force - Force sit on object
  */
-class RLVController {
+class RLVController(
+    private val chatManager: (() -> com.linkpoint.chat.ChatManager)? = null
+) {
     
     companion object {
         private const val TAG = "RLVController"
@@ -220,8 +222,19 @@ class RLVController {
             else -> return RLVResult.UnknownCommand
         }
         
-        // TODO: Send reply to chat channel
-        Log.d(TAG, "RLV reply on $channel: $reply")
+        // Send reply to chat channel
+        chatManager?.invoke()?.let { manager ->
+            scope.launch {
+                try {
+                    manager.sendChat(reply, channel = channel)
+                    Log.d(TAG, "RLV reply sent on channel $channel: $reply")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to send RLV reply on channel $channel", e)
+                }
+            }
+        } ?: run {
+            Log.w(TAG, "RLV reply not sent - ChatManager unavailable. Reply: $reply on channel $channel")
+        }
         
         return RLVResult.Success
     }
