@@ -4,12 +4,17 @@ import android.os.Parcelable
 import android.util.Log
 import com.linkpoint.assets.AssetType
 import com.linkpoint.protocol.capabilities.CapabilityManager
+import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.UDPConnectionFixed
+import com.linkpoint.protocol.types.putUUID
 import com.linkpoint.protocol.llsd.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.cancellation.CancellationException
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -19,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class InventoryManager(
     private val capabilityManager: CapabilityManager,
+    private val udpConnection: UDPConnectionFixed,
     private val agentId: UUID
 ) {
     companion object {
@@ -319,7 +325,7 @@ class InventoryManager(
     
     /**
      * Move item to folder.
-     * Uses AISv3 capability when available, falls back to local cache update.
+     * Uses AISv3 capability when available, falls back to UDP MoveInventoryItem.
      */
     suspend fun moveItem(itemId: UUID, newParentId: UUID): Boolean {
         items[itemId]?.let { item ->
@@ -341,6 +347,38 @@ class InventoryManager(
                     }
                 } catch (e: Exception) {
                     Log.w(TAG, "Failed to move item via AIS: ${e.message}")
+                }
+            } else {
+                // UDP Fallback for grids without AISv3
+                try {
+                    // MoveInventoryItem packet
+                    // AgentData block: AgentID (16) + SessionID (16) + Stamp (4) = 36 bytes
+                    // InventoryData block count: 1 byte
+                    // InventoryData block: ItemID (16) + FolderID (16) + NewName (1 byte length + 0 bytes) = 33 bytes
+                    // Total payload: 70 bytes
+
+                    val payload = ByteBuffer.allocate(70).order(ByteOrder.LITTLE_ENDIAN)
+                    val sessionId = udpConnection.getSessionId()
+
+                    // AgentData
+                    payload.putUUID(agentId)
+                    payload.putUUID(sessionId)
+                    payload.putInt(0) // Stamp = 0 (false/default)
+
+                    // InventoryData count (Variable block)
+                    payload.put(1.toByte())
+
+                    // InventoryData
+                    payload.putUUID(itemId)
+                    payload.putUUID(newParentId)
+                    payload.put(0.toByte()) // NewName length = 0 (empty string to keep name)
+
+                    udpConnection.sendPacket(MessageIds.MOVE_INVENTORY_ITEM, payload.array(), reliable = true)
+                    Log.d(TAG, "Moved item $itemId to folder $newParentId via UDP")
+
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to move item via UDP: ${e.message}")
+                    // Don't return false here, we still update local cache optimistically
                 }
             }
             
