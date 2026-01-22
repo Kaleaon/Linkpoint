@@ -30,6 +30,9 @@ class InventoryManager(
     companion object {
         private const val TAG = "InventoryManager"
         
+        // Null UUID constant
+        private val NULL_UUID = UUID(0L, 0L)
+        
         // Folder types
         const val FOLDER_TYPE_TEXTURE = 0
         const val FOLDER_TYPE_SOUND = 1
@@ -640,14 +643,14 @@ class InventoryManager(
         buffer.putInt(0) // CallbackID
         buffer.putUUID(item.permissions.creatorId)
         buffer.putUUID(item.permissions.ownerId)
-        buffer.putUUID(UUID(0,0)) // GroupID - assuming not group owned or we don't know
+        buffer.putUUID(NULL_UUID) // GroupID - assuming not group owned or we don't know
         buffer.putInt(item.permissions.baseMask)
         buffer.putInt(item.permissions.ownerMask)
         buffer.putInt(item.permissions.groupMask)
         buffer.putInt(item.permissions.everyoneMask)
         buffer.putInt(item.permissions.nextOwnerMask)
         buffer.put(0.toByte()) // GroupOwned - simplified
-        buffer.putUUID(UUID(0,0)) // TransactionID
+        buffer.putUUID(NULL_UUID) // TransactionID
         buffer.put(item.assetType.toByte())
         buffer.put(item.inventoryType.toByte())
         buffer.putInt(item.flags)

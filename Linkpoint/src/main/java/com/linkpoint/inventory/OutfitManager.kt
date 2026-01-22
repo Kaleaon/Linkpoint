@@ -91,6 +91,9 @@ class OutfitManager(
 
         // Protocol Message IDs
         private const val OBJECT_DETACH = (0xFFFF0118).toInt()
+        
+        // Attachment flags
+        private const val ATTACHMENT_APPEND_FLAG = 0x80
     }
     
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -224,10 +227,10 @@ class OutfitManager(
         payload.putUUID(item.permissions.ownerId)
 
         // AttachmentPt
-        // 0x80 means APPEND. If replace is false, we append.
+        // ATTACHMENT_APPEND_FLAG means APPEND. If replace is false, we append.
         var attachPtByte = point
         if (!replace) {
-             attachPtByte = attachPtByte or 0x80
+             attachPtByte = attachPtByte or ATTACHMENT_APPEND_FLAG
         }
         payload.put(attachPtByte.toByte())
 
