@@ -215,5 +215,18 @@ class LLSDParserTest {
                 fail("Should not throw Exception in test setup: " + e.getMessage());
             }
         }
+
+        @Test
+        @DisplayName("Should handle empty LLSD element")
+        void testEmptyLLSD() throws Exception {
+            String emptyDoc = "<?xml version=\"1.0\"?><llsd></llsd>";
+            try (InputStream inputStream = new ByteArrayInputStream(emptyDoc.getBytes(StandardCharsets.UTF_8))) {
+                LLSDParser parser = new LLSDParser();
+                LLSD result = parser.parse(inputStream);
+
+                assertNotNull(result, "Parser should return a non-null LLSD object for empty LLSD");
+                assertNull(result.getContent(), "Content should be null for empty LLSD");
+            }
+        }
     }
 }

@@ -15,6 +15,7 @@ import java.io.InputStream
 import java.net.URI
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.logging.Logger
 import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.ParserConfigurationException
@@ -92,7 +93,7 @@ class LLSDParser @Throws(ParserConfigurationException::class) constructor() {
         
         val childNodesTrimmed = extractElements(llsdNode.childNodes)
         if (childNodesTrimmed.isEmpty()) {
-            // XXX: Warn?
+            LOGGER.warning("Empty LLSD tag found. This might indicate a malformed or empty response.")
             return LLSD(null)
         }
         
@@ -179,6 +180,9 @@ class LLSDParser @Throws(ParserConfigurationException::class) constructor() {
             }
             
             val value = parseNode(valueNode)
+            if (key == null) {
+                throw LLSDException("Key for map cannot be null.")
+            }
             valueMap[key] = value
             
             nodeIdx += 2
@@ -301,6 +305,7 @@ class LLSDParser @Throws(ParserConfigurationException::class) constructor() {
     }
     
     companion object {
+        private val LOGGER = Logger.getLogger(LLSDParser::class.java.name)
         private const val ISO8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'"
     }
 }
