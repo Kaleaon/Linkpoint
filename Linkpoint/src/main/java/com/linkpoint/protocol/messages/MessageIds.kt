@@ -234,6 +234,13 @@ object MessageIds {
     const val FREEZE_USER = (0xFFFF019B).toInt()               // Wire: FF FF 01 9B
 
     // =====================================
+    // Inventory Messages
+    // =====================================
+
+    /** UpdateInventoryItem - Update item properties */
+    const val UPDATE_INVENTORY_ITEM = (0xFFFF010A).toInt()     // Wire: FF FF 01 0A
+
+    // =====================================
     // Gesture Messages
     // =====================================
 
