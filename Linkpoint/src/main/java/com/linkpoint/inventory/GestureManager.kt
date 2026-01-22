@@ -5,10 +5,15 @@ import com.linkpoint.assets.AnimationManager
 import com.linkpoint.assets.AssetCache
 import com.linkpoint.assets.AssetType
 import com.linkpoint.assets.SoundManager
+import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLVector3
+import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -19,6 +24,9 @@ class GestureManager(
     private val cache: AssetCache,
     private val animationManager: AnimationManager,
     private val soundManager: SoundManager,
+    private val udpConnection: UDPConnectionFixed,
+    private val agentId: UUID,
+    private val sessionId: UUID,
     private val chatCallback: (String) -> Unit
 ) {
     companion object {
@@ -47,7 +55,7 @@ class GestureManager(
     /**
      * Activate a gesture
      */
-    suspend fun activateGesture(assetId: UUID): Boolean {
+    suspend fun activateGesture(assetId: UUID, itemId: UUID): Boolean {
         val data = cache.get(assetId, AssetType.GESTURE) ?: return false
         val gesture = parseGesture(assetId, data) ?: return false
         
@@ -59,18 +67,72 @@ class GestureManager(
         }
         
         updateActiveList()
+
+        // Send activation to server
+        sendActivateGesture(assetId, itemId)
+
         return true
     }
     
     /**
      * Deactivate a gesture
      */
-    fun deactivateGesture(assetId: UUID) {
+    suspend fun deactivateGesture(assetId: UUID, itemId: UUID) {
         activeGestures.remove(assetId)?.let { gesture ->
             triggerMap.remove(gesture.trigger.lowercase())
         }
         stopGesture(assetId)
         updateActiveList()
+
+        // Send deactivation to server
+        sendDeactivateGesture(itemId)
+    }
+
+    /**
+     * Send ActivateGestures packet
+     */
+    private suspend fun sendActivateGesture(assetId: UUID, itemId: UUID) {
+        // Packet layout:
+        // Header (handled by sendPacket)
+        // AgentData: AgentID(16), SessionID(16), Flags(4)
+        // GestureData: AssetID(16), ItemID(16)
+
+        val payload = ByteBuffer.allocate(36 + 32).order(ByteOrder.LITTLE_ENDIAN)
+
+        // AgentData
+        payload.putUUID(agentId)
+        payload.putUUID(sessionId)
+        payload.putInt(0) // Flags
+
+        // GestureData
+        payload.putUUID(assetId)
+        payload.putUUID(itemId)
+
+        udpConnection.sendPacket(MessageIds.ACTIVATE_GESTURES, payload.array(), reliable = true)
+        Log.d(TAG, "Sent ActivateGestures for item $itemId (asset $assetId)")
+    }
+
+    /**
+     * Send DeactivateGestures packet
+     */
+    private suspend fun sendDeactivateGesture(itemId: UUID) {
+        // Packet layout:
+        // Header
+        // AgentData: AgentID(16), SessionID(16), Flags(4)
+        // GestureData: GestureID(16) -> This is actually the ItemID
+
+        val payload = ByteBuffer.allocate(36 + 16).order(ByteOrder.LITTLE_ENDIAN)
+
+        // AgentData
+        payload.putUUID(agentId)
+        payload.putUUID(sessionId)
+        payload.putInt(0) // Flags
+
+        // GestureData
+        payload.putUUID(itemId)
+
+        udpConnection.sendPacket(MessageIds.DEACTIVATE_GESTURES, payload.array(), reliable = true)
+        Log.d(TAG, "Sent DeactivateGestures for item $itemId")
     }
     
     /**

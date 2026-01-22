@@ -16,7 +16,8 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class OutfitManager(
     private val inventoryManager: InventoryManager,
-    private val baker: AvatarBaker
+    private val baker: AvatarBaker,
+    private val gestureManager: GestureManager
 ) {
     companion object {
         private const val TAG = "OutfitManager"
@@ -166,8 +167,7 @@ class OutfitManager(
     }
     
     private suspend fun activateGesture(item: InventoryItem): Boolean {
-        // TODO: Add to active gestures
-        return true
+        return gestureManager.activateGesture(item.assetId, item.itemId)
     }
     
     /**

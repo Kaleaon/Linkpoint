@@ -232,4 +232,14 @@ object MessageIds {
     
     /** FreezeUser - Freeze/unfreeze user */
     const val FREEZE_USER = (0xFFFF019B).toInt()               // Wire: FF FF 01 9B
+
+    // =====================================
+    // Gesture Messages
+    // =====================================
+
+    /** ActivateGestures - Activate a gesture */
+    const val ACTIVATE_GESTURES = (0xFFFF0096).toInt()         // Wire: FF FF 00 96
+
+    /** DeactivateGestures - Deactivate a gesture */
+    const val DEACTIVATE_GESTURES = (0xFFFF0097).toInt()       // Wire: FF FF 00 97
 }
