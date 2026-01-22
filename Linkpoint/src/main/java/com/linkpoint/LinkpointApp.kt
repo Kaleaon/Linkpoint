@@ -476,15 +476,22 @@ class LinkpointApp : Application() {
         // Inventory
         inventoryManager = InventoryManager(capabilityManager, agentId)
         
+        // Gesture manager
+        gestureManager = GestureManager(
+            assetCache,
+            animationManager,
+            soundManager,
+            udpConnection,
+            agentId,
+            udpConnection.getSessionId()
+        ) { message ->
+            chatManager.sendChat(message)
+        }
+
         // Outfit manager (needs baker from avatar manager)
         val myAvatar = avatarManager.getMyAvatar()
         if (myAvatar != null) {
-            outfitManager = OutfitManager(inventoryManager, myAvatar.baker)
-        }
-        
-        // Gesture manager
-        gestureManager = GestureManager(assetCache, animationManager, soundManager) { message ->
-            chatManager.sendChat(message)
+            outfitManager = OutfitManager(inventoryManager, myAvatar.baker, gestureManager)
         }
         
         // Object manager
