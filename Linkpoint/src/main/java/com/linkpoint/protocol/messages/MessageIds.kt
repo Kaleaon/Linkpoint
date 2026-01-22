@@ -157,6 +157,13 @@ object MessageIds {
     const val OBJECT_DEGRAB = (0xFFFF0083).toInt()             // Wire: FF FF 00 83
 
     // =====================================
+    // Inventory Messages
+    // =====================================
+
+    /** MoveInventoryItem - Move items between folders */
+    const val MOVE_INVENTORY_ITEM = (0xFFFF0077).toInt()       // Wire: FF FF 00 77
+
+    // =====================================
     // Teleport Messages
     // =====================================
     
