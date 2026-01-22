@@ -7,6 +7,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
 import java.security.MessageDigest
+import java.net.DatagramSocket
+import java.net.DatagramPacket
+import java.net.InetAddress
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.util.UUID
 
 /**
  * Handles Second Life grid authentication and connection
@@ -41,6 +47,8 @@ class SecondLifeConnection(context: Context? = null) {
             "OSGrid (Insecure)" to "http://login.osgrid.org/",
             "InWorldz (Insecure)" to "http://login.inworldz.com:8002/"
         )
+
+        private const val MSG_CHAT_FROM_VIEWER = 0x0050
     }
     
     // Keep a weak reference to context for networking service
@@ -55,6 +63,10 @@ class SecondLifeConnection(context: Context? = null) {
     private var agentId: String? = null
     private var simIp: String? = null
     private var simPort: Int = 0
+
+    // UDP Connection for Chat
+    private var udpSocket: DatagramSocket? = null
+    private var sequenceNumber: Int = 0
     
     data class LoginResult(
         val success: Boolean,
@@ -125,6 +137,13 @@ class SecondLifeConnection(context: Context? = null) {
                 
                 Log.i(TAG, "Login successful! Session: $sessionId, Agent: $agentId")
                 Log.i(TAG, "Sim: $simIp:$simPort")
+
+                try {
+                    udpSocket = DatagramSocket()
+                    sequenceNumber = 1
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to create UDP socket: ${e.message}")
+                }
                 
                 LoginResult(
                     success = true,
@@ -281,8 +300,109 @@ class SecondLifeConnection(context: Context? = null) {
         
         Log.d(TAG, "Sending chat message: $message (channel: $channel, type: $type)")
         
-        // TODO: Implement via gRPC or UDP
-        return@withContext true
+        val socket = udpSocket
+        val ip = simIp
+        val port = simPort
+        val agentIdStr = agentId
+        val sessionIdStr = sessionId
+
+        if (socket == null || ip == null || agentIdStr == null || sessionIdStr == null) {
+            Log.e(TAG, "Cannot send chat: socket or session info missing")
+            return@withContext false
+        }
+
+        try {
+             val packetData = buildChatPacket(
+                 message,
+                 channel,
+                 type,
+                 UUID.fromString(agentIdStr),
+                 UUID.fromString(sessionIdStr)
+             )
+
+             val address = InetAddress.getByName(ip)
+             val packet = DatagramPacket(packetData, packetData.size, address, port)
+             socket.send(packet)
+             return@withContext true
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to send chat packet", e)
+            return@withContext false
+        }
+    }
+
+    private fun buildChatPacket(
+        message: String,
+        channel: Int,
+        type: ChatType,
+        agentId: UUID,
+        sessionId: UUID
+    ): ByteArray {
+        val messageBytes = message.toByteArray(Charsets.UTF_8)
+        // Header (Unreliable 0x00) + Sequence (4) + Extra (0) + MsgID (4) + AgentData(32) + ChatData (Variable)
+        // MsgID: FF FF 00 50
+        // Payload:
+        // AgentID (16)
+        // SessionID (16)
+        // Message (2 + len + 1)
+        // Type (1)
+        // Channel (4)
+
+        // Calculate size
+        // Header: 1 (flags) + 4 (seq) + 1 (extra count) = 6
+        // MsgID: 4
+        // AgentData: 16 + 16 = 32
+        // ChatData: 2 (len) + msgLen + 1 (null) + 1 (type) + 4 (channel) = 8 + msgLen
+
+        val totalSize = 6 + 4 + 32 + 8 + messageBytes.size
+
+        val buffer = ByteBuffer.allocate(totalSize)
+        buffer.order(ByteOrder.BIG_ENDIAN) // Network byte order for header
+
+        // Header
+        buffer.put(0.toByte()) // Flags: Unreliable, Unencoded
+        buffer.putInt(getNextSequenceNumber())
+        buffer.put(0.toByte()) // Extra ID count
+
+        // Message ID (Low Frequency)
+        buffer.putShort(0xFFFF.toShort())
+        buffer.putShort(MSG_CHAT_FROM_VIEWER.toShort())
+
+        // AgentData Block
+        // UUIDs are Big Endian in LLUDP?
+        // ChatManager says: "UUIDs use big-endian per SL protocol"
+        putUUID(buffer, agentId)
+        putUUID(buffer, sessionId)
+
+        // ChatData Block
+        // Variable fields like strings usually have Little Endian length?
+        // ChatManager uses Little Endian buffer for payload.
+        // Let's switch to Little Endian for the payload part if needed, or just putLE.
+        buffer.order(ByteOrder.LITTLE_ENDIAN)
+
+        // Message (Variable 2)
+        buffer.putShort((messageBytes.size + 1).toShort())
+        buffer.put(messageBytes)
+        buffer.put(0.toByte()) // Null terminator
+
+        // Type (U8)
+        buffer.put(type.value.toByte())
+
+        // Channel (S32)
+        buffer.putInt(channel)
+
+        return buffer.array()
+    }
+
+    private fun getNextSequenceNumber(): Int {
+        return ++sequenceNumber
+    }
+
+    private fun putUUID(buffer: ByteBuffer, uuid: UUID) {
+        val currentOrder = buffer.order()
+        buffer.order(ByteOrder.BIG_ENDIAN)
+        buffer.putLong(uuid.mostSignificantBits)
+        buffer.putLong(uuid.leastSignificantBits)
+        buffer.order(currentOrder)
     }
     
     /**
@@ -374,6 +494,8 @@ class SecondLifeConnection(context: Context? = null) {
         agentId = null
         simIp = null
         simPort = 0
+        udpSocket?.close()
+        udpSocket = null
     }
     
     /**
