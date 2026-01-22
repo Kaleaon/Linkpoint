@@ -5,11 +5,16 @@ import android.util.Log
 import com.linkpoint.assets.AssetType
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
+import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.UDPConnectionFixed
+import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.cancellation.CancellationException
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -19,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class InventoryManager(
     private val capabilityManager: CapabilityManager,
+    private val udpConnection: UDPConnectionFixed,
     private val agentId: UUID
 ) {
     companion object {
@@ -528,17 +534,66 @@ class InventoryManager(
         }
         
         val newItemId = UUID.randomUUID()
+        val actualNewName = newName ?: source.name
         val copy = source.copy(
             itemId = newItemId,
             parentId = destinationId,
-            name = newName ?: source.name
+            name = actualNewName
         )
         items[newItemId] = copy
         
-        // Note: For full server sync, would need to use CopyInventoryItem UDP message
-        // or CopyInventoryFromNotecard capability
-        Log.d(TAG, "Copied item $itemId to $newItemId (local cache only)")
+        // Send to server
+        sendCopyInventoryItem(
+            oldAgentId = source.permissions.ownerId,
+            oldItemId = itemId,
+            newFolderId = destinationId,
+            newName = actualNewName
+        )
+
+        Log.d(TAG, "Copied item $itemId to $newItemId")
         return newItemId
+    }
+
+    /**
+     * Send CopyInventoryItem packet
+     */
+    private suspend fun sendCopyInventoryItem(oldAgentId: UUID, oldItemId: UUID, newFolderId: UUID, newName: String) {
+        val nameBytes = newName.toByteArray(Charsets.UTF_8)
+        val nameLength = nameBytes.size.coerceAtMost(255)
+
+        // Packet layout:
+        // AgentData block:
+        //  AgentID: UUID (16)
+        //  SessionID: UUID (16)
+        // InventoryData block (Variable count):
+        //  Block Count (1 byte)
+        //  CallbackID: U32 (4)
+        //  OldAgentID: UUID (16)
+        //  OldItemID: UUID (16)
+        //  NewFolderID: UUID (16)
+        //  NewName: Variable 1 (1 + nameLength)
+
+        val payloadSize = 32 + 1 + (4 + 16 + 16 + 16 + 1 + nameLength)
+        val payload = ByteBuffer.allocate(payloadSize).order(ByteOrder.LITTLE_ENDIAN)
+
+        // AgentData
+        payload.putUUID(agentId)
+        payload.putUUID(udpConnection.getSessionId())
+
+        // InventoryData Block Count
+        payload.put(1.toByte())
+
+        // InventoryData fields
+        payload.putInt(0) // CallbackID (0 for no callback)
+        payload.putUUID(oldAgentId)
+        payload.putUUID(oldItemId)
+        payload.putUUID(newFolderId)
+
+        // NewName (Variable 1)
+        payload.put(nameLength.toByte())
+        payload.put(nameBytes, 0, nameLength)
+
+        udpConnection.sendPacket(MessageIds.COPY_INVENTORY_ITEM, payload.array(), reliable = true)
     }
     
     /**

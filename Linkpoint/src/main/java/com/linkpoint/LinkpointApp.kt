@@ -474,7 +474,7 @@ class LinkpointApp : Application() {
         imManager = IMManager(udpConnection, capabilityManager, agentId)
         
         // Inventory
-        inventoryManager = InventoryManager(capabilityManager, agentId)
+        inventoryManager = InventoryManager(capabilityManager, udpConnection, agentId)
         
         // Gesture manager
         gestureManager = GestureManager(
