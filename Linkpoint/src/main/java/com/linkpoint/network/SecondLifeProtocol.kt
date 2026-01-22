@@ -353,8 +353,12 @@ class SecondLifeProtocol(private val context: Context) {
                         "UDP connect() returned false"
                     )
                     Log.w(TAG, "[STEP 1/2] ✗ Failed to establish UDP connection")
-                    // Continue anyway - some features will work without UDP (capabilities, basic navigation)
-                    // The user will see a partial world but can still interact with some features
+                    // Continue with degraded functionality:
+                    // - HTTP/capabilities features will work (texture fetching, profile lookup, map tiles)
+                    // - Local chat and IMs will NOT work (these require UDP)
+                    // - Object updates won't be received (avatar won't see objects appear/move)
+                    // - Avatar movement won't be sent to simulator
+                    // User will need to restart app to retry connection
                 }
                 
                 // Initialize capabilities from seed capability (for textures, meshes, etc.)
