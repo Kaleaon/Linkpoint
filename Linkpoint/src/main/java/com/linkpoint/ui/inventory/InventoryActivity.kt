@@ -7,11 +7,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
+import com.linkpoint.teleport.TeleportResult
 import java.util.UUID
 
 /**
@@ -132,7 +136,31 @@ class InventoryActivity : AppCompatActivity() {
     }
     
     private fun offerTeleport(item: ActivityInventoryItem) {
-        // TODO: Show teleport dialog
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Teleport")
+            .setMessage("Teleport to ${item.name}?")
+            .setPositiveButton("Teleport") { _, _ ->
+                if (app.isTeleportManagerInitialized()) {
+                    lifecycleScope.launch {
+                        val result = app.teleportManager.teleportToLandmark(item.assetId ?: item.id)
+                        when (result) {
+                            is TeleportResult.Success -> {
+                                Toast.makeText(this@InventoryActivity, "Teleporting to ${result.regionName}...", Toast.LENGTH_SHORT).show()
+                            }
+                            is TeleportResult.Failure -> {
+                                Toast.makeText(this@InventoryActivity, result.message, Toast.LENGTH_SHORT).show()
+                            }
+                            is TeleportResult.Pending -> {
+                                Toast.makeText(this@InventoryActivity, "Teleport requested...", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                } else {
+                    Toast.makeText(this, "Teleport manager not initialized", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
     
     private fun showItemDetails(item: ActivityInventoryItem) {
