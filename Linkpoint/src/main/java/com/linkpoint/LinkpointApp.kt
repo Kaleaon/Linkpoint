@@ -929,11 +929,15 @@ class LinkpointApp : Application() {
                 val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
                 val count = buffer.get().toInt() and 0xFF
                 
-                // Parse the acknowledged sequence numbers
+                // Parse the acknowledged sequence numbers and check for seq 0 during parsing
+                // (optimization: avoid extra contains() call on the list)
                 val ackedSequences = mutableListOf<Int>()
+                var containsSeq0 = false
                 for (i in 0 until count) {
                     if (buffer.remaining() >= 4) {
-                        ackedSequences.add(buffer.int)
+                        val seq = buffer.int
+                        ackedSequences.add(seq)
+                        if (seq == 0) containsSeq0 = true
                     }
                 }
                 
@@ -944,7 +948,7 @@ class LinkpointApp : Application() {
                 // immediately when UseCircuitCode is ACKed. The server waits for this before
                 // sending RegionHandshake and other world data.
                 // Using compareAndSet for thread-safe, atomic check-and-set operation
-                if (ackedSequences.contains(0) && completeAgentMovementSent.compareAndSet(false, true)) {
+                if (containsSeq0 && completeAgentMovementSent.compareAndSet(false, true)) {
                     Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
                     Log.i(TAG, "║ ⭐ UseCircuitCode ACKNOWLEDGED - Sending CompleteAgentMovement")
                     Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
