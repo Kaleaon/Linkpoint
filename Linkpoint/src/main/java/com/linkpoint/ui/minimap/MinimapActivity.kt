@@ -44,6 +44,10 @@ class MinimapActivity : AppCompatActivity() {
     // Map scale
     private var scale = 1.0f
     
+    // Pan offset
+    private var panX = 0f
+    private var panY = 0f
+
     // Paints
     private val backgroundPaint = Paint().apply {
         color = Color.parseColor("#1a472a") // Green land
@@ -126,7 +130,8 @@ class MinimapActivity : AppCompatActivity() {
                     val dx = event.x - lastTouchX
                     val dy = event.y - lastTouchY
                     
-                    // TODO: Implement panning
+                    panX += dx
+                    panY += dy
                     
                     lastTouchX = event.x
                     lastTouchY = event.y
@@ -164,8 +169,8 @@ class MinimapActivity : AppCompatActivity() {
             val width = canvas.width.toFloat()
             val height = canvas.height.toFloat()
             val size = minOf(width, height)
-            val offsetX = (width - size) / 2
-            val offsetY = (height - size) / 2
+            val offsetX = (width - size) / 2 + panX
+            val offsetY = (height - size) / 2 + panY
             
             // Clear
             canvas.drawColor(Color.BLACK)
