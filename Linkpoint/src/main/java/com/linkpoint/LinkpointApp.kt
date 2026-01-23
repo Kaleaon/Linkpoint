@@ -134,6 +134,8 @@ class LinkpointApp : Application() {
         private set
     lateinit var soundManager: SoundManager
         private set
+    lateinit var cacheManager: CacheManager
+        private set
     
     // Avatar system
     lateinit var avatarManager: AvatarManager
@@ -367,6 +369,9 @@ class LinkpointApp : Application() {
         
         // XR/VR support
         xrManager = XRManager(this)
+        
+        // Cache management system (Lumiya Cache structure)
+        cacheManager = CacheManager(this)
         
         // Asset system
         assetCache = AssetCache(this)

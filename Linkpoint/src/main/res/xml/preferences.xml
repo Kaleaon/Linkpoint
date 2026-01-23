@@ -111,7 +111,19 @@
             android:summary="Where to store cached assets"
             android:entries="@array/cache_location_entries"
             android:entryValues="@array/cache_location_values"
-            android:defaultValue="internal" />
+            android:defaultValue="external" />
+
+        <EditTextPreference
+            android:key="custom_cache_path"
+            android:title="Custom Cache Path"
+            android:summary="Custom location for Lumiya Cache folder"
+            android:defaultValue="/sdcard/Lumiya Cache"
+            android:inputType="text" />
+
+        <Preference
+            android:key="cache_path_info"
+            android:title="Current Cache Path"
+            android:summary="Tap to view full path" />
 
         <SeekBarPreference
             android:key="disk_cache_size"
@@ -188,9 +200,19 @@
             android:summary="See current cache usage" />
 
         <Preference
+            android:key="clear_public_cache"
+            android:title="Clear Public Cache"
+            android:summary="Delete cached textures, meshes, sounds and animations (shared)" />
+
+        <Preference
+            android:key="clear_private_cache"
+            android:title="Clear Private Cache"
+            android:summary="Delete cached messages, friends lists (user-specific)" />
+
+        <Preference
             android:key="clear_cache"
             android:title="Clear All Cache"
-            android:summary="Delete all cached textures, meshes, sounds and animations" />
+            android:summary="Delete all cached data (public and private)" />
 
     </PreferenceCategory>
 

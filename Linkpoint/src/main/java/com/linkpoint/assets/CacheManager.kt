@@ -45,6 +45,9 @@ class CacheManager(private val context: Context) {
         // Cache location key
         const val KEY_CACHE_LOCATION = "cache_location"
         
+        // Custom cache path key (for user-specified location)
+        const val KEY_CUSTOM_CACHE_PATH = "custom_cache_path"
+        
         // Texture memory (RAM) dedication key
         const val KEY_TEXTURE_MEMORY_MB = "texture_memory_mb"
         
@@ -83,19 +86,74 @@ class CacheManager(private val context: Context) {
         // Low space threshold (500MB free required)
         const val LOW_SPACE_THRESHOLD_MB = 500
         
-        // Cache subdirectories
+        // Lumiya Cache structure directories
+        // Root: "Lumiya Cache" on external storage
+        const val LUMIYA_CACHE_ROOT = "Lumiya Cache"
+        
+        // Public cache - shared data per grid (textures, sounds, meshes, animations)
+        const val PUBLIC_DIR = "Public"
+        
+        // Private cache - user-specific data per grid (messages, friends, settings)
+        const val PRIVATE_DIR = "Private"
+        
+        // Cache subdirectories (under Public/<Grid>/)
         private const val TEXTURES_DIR = "textures"
         private const val MESHES_DIR = "meshes"
         private const val SOUNDS_DIR = "sounds"
         private const val ANIMATIONS_DIR = "animations"
         private const val GENERAL_DIR = "asset_cache"
         
+        // Private subdirectories (under Private/<Grid>/<UserID>/)
+        private const val MESSAGES_DIR = "messages"
+        private const val FRIENDS_DIR = "friends"
+        private const val SETTINGS_DIR = "settings"
+        private const val INVENTORY_DIR = "inventory"
+        
         // Cache location options
         const val LOCATION_INTERNAL = "internal"
         const val LOCATION_EXTERNAL = "external"
+        const val LOCATION_CUSTOM = "custom"
+        
+        // Default external path for Lumiya Cache
+        val DEFAULT_EXTERNAL_CACHE_PATH: String
+            get() = "${Environment.getExternalStorageDirectory().absolutePath}/$LUMIYA_CACHE_ROOT"
     }
     
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    
+    // Current grid name (e.g., "Agni", "Aditi")
+    private var currentGridName: String = "SecondLife"
+    
+    // Current user ID (UUID string)
+    private var currentUserId: String? = null
+    
+    /**
+     * Set the current grid name for cache path resolution.
+     * Call this when connecting to a grid.
+     */
+    fun setCurrentGrid(gridName: String) {
+        currentGridName = gridName.replace(Regex("[^a-zA-Z0-9_-]"), "_") // Sanitize for file system
+        Log.i(TAG, "Current grid set to: $currentGridName")
+    }
+    
+    /**
+     * Set the current user ID for private cache path resolution.
+     * Call this after login.
+     */
+    fun setCurrentUser(userId: String?) {
+        currentUserId = userId?.replace(Regex("[^a-zA-Z0-9_-]"), "_") // Sanitize for file system
+        Log.i(TAG, "Current user set to: ${currentUserId ?: "none"}")
+    }
+    
+    /**
+     * Get current grid name
+     */
+    fun getCurrentGridName(): String = currentGridName
+    
+    /**
+     * Get current user ID
+     */
+    fun getCurrentUserId(): String? = currentUserId
     
     // ========== Total Cache Size Settings ==========
     
@@ -221,10 +279,10 @@ class CacheManager(private val context: Context) {
     
     /**
      * Get the configured cache location.
-     * Returns "internal" or "external".
+     * Returns "internal", "external", or "custom".
      */
     fun getCacheLocation(): String {
-        return prefs.getString(KEY_CACHE_LOCATION, LOCATION_INTERNAL) ?: LOCATION_INTERNAL
+        return prefs.getString(KEY_CACHE_LOCATION, LOCATION_EXTERNAL) ?: LOCATION_EXTERNAL
     }
     
     /**
@@ -232,13 +290,29 @@ class CacheManager(private val context: Context) {
      * Note: Changing this requires app restart to take effect.
      */
     fun setCacheLocation(location: String) {
-        if (location != LOCATION_INTERNAL && location != LOCATION_EXTERNAL) {
-            Log.w(TAG, "Invalid cache location: $location, using internal")
-            prefs.edit().putString(KEY_CACHE_LOCATION, LOCATION_INTERNAL).apply()
+        if (location != LOCATION_INTERNAL && location != LOCATION_EXTERNAL && location != LOCATION_CUSTOM) {
+            Log.w(TAG, "Invalid cache location: $location, using external")
+            prefs.edit().putString(KEY_CACHE_LOCATION, LOCATION_EXTERNAL).apply()
             return
         }
         prefs.edit().putString(KEY_CACHE_LOCATION, location).apply()
         Log.i(TAG, "Cache location set to $location (requires restart)")
+    }
+    
+    /**
+     * Get the custom cache path (user-specified location).
+     */
+    fun getCustomCachePath(): String {
+        return prefs.getString(KEY_CUSTOM_CACHE_PATH, DEFAULT_EXTERNAL_CACHE_PATH) ?: DEFAULT_EXTERNAL_CACHE_PATH
+    }
+    
+    /**
+     * Set the custom cache path.
+     * @param path The absolute path to use for cache (e.g., "/sdcard/Lumiya Cache")
+     */
+    fun setCustomCachePath(path: String) {
+        prefs.edit().putString(KEY_CUSTOM_CACHE_PATH, path).apply()
+        Log.i(TAG, "Custom cache path set to: $path")
     }
     
     /**
@@ -249,20 +323,100 @@ class CacheManager(private val context: Context) {
     }
     
     /**
-     * Get the base cache directory based on current location setting.
+     * Get the Lumiya Cache root directory.
+     * Structure: <root>/Lumiya Cache/
      */
-    fun getBaseCacheDirectory(): File {
-        return when (getCacheLocation()) {
+    fun getLumiyaCacheRoot(): File {
+        val rootDir = when (getCacheLocation()) {
+            LOCATION_CUSTOM -> File(getCustomCachePath())
             LOCATION_EXTERNAL -> {
                 if (isExternalStorageAvailable()) {
-                    context.getExternalFilesDir("cache") ?: context.cacheDir
+                    File(Environment.getExternalStorageDirectory(), LUMIYA_CACHE_ROOT)
                 } else {
                     Log.w(TAG, "External storage not available, falling back to internal")
-                    context.cacheDir
+                    File(context.filesDir, LUMIYA_CACHE_ROOT)
                 }
             }
-            else -> context.cacheDir
+            else -> File(context.filesDir, LUMIYA_CACHE_ROOT)
         }
+        if (!rootDir.exists()) {
+            rootDir.mkdirs()
+        }
+        return rootDir
+    }
+    
+    /**
+     * Get the Public cache directory for the current grid.
+     * Structure: Lumiya Cache/Public/<GridName>/
+     * 
+     * Public cache holds shared data: textures, sounds, meshes, animations.
+     * This data is not user-specific and can be shared across users.
+     */
+    fun getPublicCacheDirectory(): File {
+        val publicDir = File(getLumiyaCacheRoot(), "$PUBLIC_DIR/$currentGridName")
+        if (!publicDir.exists()) {
+            publicDir.mkdirs()
+        }
+        return publicDir
+    }
+    
+    /**
+     * Get the Private cache directory for the current user on the current grid.
+     * Structure: Lumiya Cache/Private/<GridName>/<UserID>/
+     * 
+     * Private cache holds user-specific data: messages, friends lists, settings.
+     */
+    fun getPrivateCacheDirectory(): File {
+        val userId = currentUserId ?: "anonymous"
+        val privateDir = File(getLumiyaCacheRoot(), "$PRIVATE_DIR/$currentGridName/$userId")
+        if (!privateDir.exists()) {
+            privateDir.mkdirs()
+        }
+        return privateDir
+    }
+    
+    /**
+     * Get the base cache directory based on current location setting.
+     * This is now the Lumiya Cache root for backward compatibility.
+     */
+    fun getBaseCacheDirectory(): File {
+        return getLumiyaCacheRoot()
+    }
+    
+    /**
+     * Get public cache directory for a specific asset type.
+     * Structure: Lumiya Cache/Public/<GridName>/<assetType>/
+     */
+    fun getPublicAssetDirectory(assetType: CacheableAssetType): File {
+        val dirName = when (assetType) {
+            CacheableAssetType.TEXTURES -> TEXTURES_DIR
+            CacheableAssetType.MESHES -> MESHES_DIR
+            CacheableAssetType.SOUNDS -> SOUNDS_DIR
+            CacheableAssetType.ANIMATIONS -> ANIMATIONS_DIR
+        }
+        val dir = File(getPublicCacheDirectory(), dirName)
+        if (!dir.exists()) {
+            dir.mkdirs()
+        }
+        return dir
+    }
+    
+    /**
+     * Get private cache directory for a specific data type.
+     * Structure: Lumiya Cache/Private/<GridName>/<UserID>/<dataType>/
+     */
+    fun getPrivateDataDirectory(dataType: PrivateDataType): File {
+        val dirName = when (dataType) {
+            PrivateDataType.MESSAGES -> MESSAGES_DIR
+            PrivateDataType.FRIENDS -> FRIENDS_DIR
+            PrivateDataType.SETTINGS -> SETTINGS_DIR
+            PrivateDataType.INVENTORY -> INVENTORY_DIR
+        }
+        val dir = File(getPrivateCacheDirectory(), dirName)
+        if (!dir.exists()) {
+            dir.mkdirs()
+        }
+        return dir
     }
     
     /**
@@ -272,34 +426,79 @@ class CacheManager(private val context: Context) {
         val locations = mutableListOf<CacheLocationInfo>()
         
         // Internal storage
-        val internalDir = context.cacheDir
-        val internalStatFs = android.os.StatFs(internalDir.path)
-        locations.add(CacheLocationInfo(
-            id = LOCATION_INTERNAL,
-            name = "Internal Storage",
-            path = internalDir.absolutePath,
-            availableBytes = internalStatFs.availableBytes,
-            totalBytes = internalStatFs.totalBytes,
-            isAvailable = true
-        ))
-        
-        // External storage
-        val externalDir = context.getExternalFilesDir("cache")
-        if (externalDir != null && isExternalStorageAvailable()) {
-            val externalStatFs = android.os.StatFs(externalDir.path)
+        val internalDir = File(context.filesDir, LUMIYA_CACHE_ROOT)
+        try {
+            val internalStatFs = android.os.StatFs(context.filesDir.path)
             locations.add(CacheLocationInfo(
-                id = LOCATION_EXTERNAL,
-                name = "External Storage (SD Card)",
-                path = externalDir.absolutePath,
-                availableBytes = externalStatFs.availableBytes,
-                totalBytes = externalStatFs.totalBytes,
+                id = LOCATION_INTERNAL,
+                name = "Internal Storage",
+                path = internalDir.absolutePath,
+                availableBytes = internalStatFs.availableBytes,
+                totalBytes = internalStatFs.totalBytes,
                 isAvailable = true
             ))
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to get internal storage stats", e)
+        }
+        
+        // External storage (Lumiya Cache on sdcard)
+        if (isExternalStorageAvailable()) {
+            val externalDir = File(Environment.getExternalStorageDirectory(), LUMIYA_CACHE_ROOT)
+            try {
+                val externalStatFs = android.os.StatFs(Environment.getExternalStorageDirectory().path)
+                locations.add(CacheLocationInfo(
+                    id = LOCATION_EXTERNAL,
+                    name = "External Storage (SD Card)",
+                    path = externalDir.absolutePath,
+                    availableBytes = externalStatFs.availableBytes,
+                    totalBytes = externalStatFs.totalBytes,
+                    isAvailable = true
+                ))
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to get external storage stats", e)
+            }
         } else {
             locations.add(CacheLocationInfo(
                 id = LOCATION_EXTERNAL,
                 name = "External Storage (Not Available)",
                 path = "",
+                availableBytes = 0,
+                totalBytes = 0,
+                isAvailable = false
+            ))
+        }
+        
+        // Custom location
+        val customPath = getCustomCachePath()
+        val customDir = File(customPath)
+        try {
+            if (customDir.exists() || customDir.parentFile?.exists() == true) {
+                val parentPath = if (customDir.exists()) customDir.path else customDir.parentFile?.path ?: customPath
+                val customStatFs = android.os.StatFs(parentPath)
+                locations.add(CacheLocationInfo(
+                    id = LOCATION_CUSTOM,
+                    name = "Custom Location",
+                    path = customPath,
+                    availableBytes = customStatFs.availableBytes,
+                    totalBytes = customStatFs.totalBytes,
+                    isAvailable = true
+                ))
+            } else {
+                locations.add(CacheLocationInfo(
+                    id = LOCATION_CUSTOM,
+                    name = "Custom Location",
+                    path = customPath,
+                    availableBytes = 0,
+                    totalBytes = 0,
+                    isAvailable = false
+                ))
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to get custom location stats", e)
+            locations.add(CacheLocationInfo(
+                id = LOCATION_CUSTOM,
+                name = "Custom Location",
+                path = customPath,
                 availableBytes = 0,
                 totalBytes = 0,
                 isAvailable = false
@@ -354,14 +553,16 @@ class CacheManager(private val context: Context) {
     }
     
     /**
-     * Get comprehensive cache statistics
+     * Get comprehensive cache statistics for the current grid.
+     * Scans both Public and Private cache directories.
      */
     suspend fun getCacheStats(): CacheStatistics = withContext(Dispatchers.IO) {
-        val texturesDir = File(context.cacheDir, TEXTURES_DIR)
-        val meshesDir = File(context.cacheDir, MESHES_DIR)
-        val soundsDir = File(context.cacheDir, SOUNDS_DIR)
-        val animationsDir = File(context.cacheDir, ANIMATIONS_DIR)
-        val generalDir = File(context.cacheDir, GENERAL_DIR)
+        // Public cache directories (shared per grid)
+        val texturesDir = getPublicAssetDirectory(CacheableAssetType.TEXTURES)
+        val meshesDir = getPublicAssetDirectory(CacheableAssetType.MESHES)
+        val soundsDir = getPublicAssetDirectory(CacheableAssetType.SOUNDS)
+        val animationsDir = getPublicAssetDirectory(CacheableAssetType.ANIMATIONS)
+        val generalDir = File(getPublicCacheDirectory(), GENERAL_DIR)
         
         val texturesSize = calculateDirectorySize(texturesDir)
         val meshesSize = calculateDirectorySize(meshesDir)
@@ -375,14 +576,26 @@ class CacheManager(private val context: Context) {
         val animationsCount = countFiles(animationsDir)
         val generalCount = countFiles(generalDir)
         
-        val totalSize = texturesSize + meshesSize + soundsSize + animationsSize + generalSize
+        // Also include private cache size
+        val privateSize = calculateDirectorySize(getPrivateCacheDirectory())
+        
+        val totalSize = texturesSize + meshesSize + soundsSize + animationsSize + generalSize + privateSize
         val totalCount = texturesCount + meshesCount + soundsCount + animationsCount + generalCount
         
         val maxSize = getDiskCacheSizeMB().toLong() * 1024 * 1024
         val usagePercent = if (maxSize > 0) (totalSize.toFloat() / maxSize * 100).toInt() else 0
         
-        // Get available space
-        val statFs = android.os.StatFs(context.cacheDir.path)
+        // Get available space from cache root
+        val cacheRoot = getLumiyaCacheRoot()
+        val statFs = try {
+            if (cacheRoot.exists()) {
+                android.os.StatFs(cacheRoot.path)
+            } else {
+                android.os.StatFs(context.filesDir.path)
+            }
+        } catch (e: Exception) {
+            android.os.StatFs(context.filesDir.path)
+        }
         val availableSpace = statFs.availableBytes
         
         CacheStatistics(
@@ -406,27 +619,34 @@ class CacheManager(private val context: Context) {
     }
     
     /**
-     * Clear all cache
+     * Clear all cache (both public and private for current grid)
      */
     suspend fun clearAllCache(): ClearResult = withContext(Dispatchers.IO) {
         var clearedBytes = 0L
         var clearedFiles = 0
         var errors = 0
         
-        val directories = listOf(
-            File(context.cacheDir, TEXTURES_DIR),
-            File(context.cacheDir, MESHES_DIR),
-            File(context.cacheDir, SOUNDS_DIR),
-            File(context.cacheDir, ANIMATIONS_DIR),
-            File(context.cacheDir, GENERAL_DIR)
+        // Clear public cache directories for current grid
+        val publicDirectories = listOf(
+            getPublicAssetDirectory(CacheableAssetType.TEXTURES),
+            getPublicAssetDirectory(CacheableAssetType.MESHES),
+            getPublicAssetDirectory(CacheableAssetType.SOUNDS),
+            getPublicAssetDirectory(CacheableAssetType.ANIMATIONS),
+            File(getPublicCacheDirectory(), GENERAL_DIR)
         )
         
-        for (dir in directories) {
+        for (dir in publicDirectories) {
             val result = clearDirectory(dir)
             clearedBytes += result.first
             clearedFiles += result.second
             errors += result.third
         }
+        
+        // Clear private cache for current user
+        val privateResult = clearDirectory(getPrivateCacheDirectory())
+        clearedBytes += privateResult.first
+        clearedFiles += privateResult.second
+        errors += privateResult.third
         
         Log.i(TAG, "Cleared ${formatSize(clearedBytes)} ($clearedFiles files), $errors errors")
         
@@ -439,20 +659,29 @@ class CacheManager(private val context: Context) {
     }
     
     /**
-     * Clear specific cache type
+     * Clear specific cache type (public cache)
      */
     suspend fun clearCache(assetType: CacheableAssetType): ClearResult = withContext(Dispatchers.IO) {
-        val dirName = when (assetType) {
-            CacheableAssetType.TEXTURES -> TEXTURES_DIR
-            CacheableAssetType.MESHES -> MESHES_DIR
-            CacheableAssetType.SOUNDS -> SOUNDS_DIR
-            CacheableAssetType.ANIMATIONS -> ANIMATIONS_DIR
-        }
-        
-        val dir = File(context.cacheDir, dirName)
+        val dir = getPublicAssetDirectory(assetType)
         val result = clearDirectory(dir)
         
         Log.i(TAG, "Cleared ${assetType.name}: ${formatSize(result.first)} (${result.second} files)")
+        
+        ClearResult(
+            clearedBytes = result.first,
+            clearedFiles = result.second,
+            errors = result.third,
+            success = result.third == 0
+        )
+    }
+    
+    /**
+     * Clear private cache for current user
+     */
+    suspend fun clearPrivateCache(): ClearResult = withContext(Dispatchers.IO) {
+        val result = clearDirectory(getPrivateCacheDirectory())
+        
+        Log.i(TAG, "Cleared private cache: ${formatSize(result.first)} (${result.second} files)")
         
         ClearResult(
             clearedBytes = result.first,
@@ -477,17 +706,19 @@ class CacheManager(private val context: Context) {
             )
         }
         
-        // Need to prune - delete oldest files first
+        // Need to prune - delete oldest files first from public cache
         val targetSize = (maxBytes * 0.8).toLong() // Prune to 80% capacity
         var currentSize = stats.totalSizeBytes
         var prunedBytes = 0L
         var prunedFiles = 0
         
         val allCacheFiles = mutableListOf<File>()
-        listOf(TEXTURES_DIR, MESHES_DIR, SOUNDS_DIR, ANIMATIONS_DIR, GENERAL_DIR).forEach { dirName ->
-            val dir = File(context.cacheDir, dirName)
+        // Collect files from public cache (don't prune private user data)
+        CacheableAssetType.values().forEach { assetType ->
+            val dir = getPublicAssetDirectory(assetType)
             dir.listFiles()?.let { allCacheFiles.addAll(it) }
         }
+        File(getPublicCacheDirectory(), GENERAL_DIR).listFiles()?.let { allCacheFiles.addAll(it) }
         
         // Sort by last modified (oldest first)
         allCacheFiles.sortBy { it.lastModified() }
@@ -549,16 +780,11 @@ class CacheManager(private val context: Context) {
     }
     
     /**
-     * Get cache directory for specific asset type
+     * Get cache directory for specific asset type.
+     * Returns the public cache directory for the current grid.
      */
     fun getCacheDirectory(assetType: CacheableAssetType): File {
-        val dirName = when (assetType) {
-            CacheableAssetType.TEXTURES -> TEXTURES_DIR
-            CacheableAssetType.MESHES -> MESHES_DIR
-            CacheableAssetType.SOUNDS -> SOUNDS_DIR
-            CacheableAssetType.ANIMATIONS -> ANIMATIONS_DIR
-        }
-        return File(context.cacheDir, dirName).also { it.mkdirs() }
+        return getPublicAssetDirectory(assetType)
     }
     
     private fun calculateDirectorySize(dir: File): Long {
@@ -697,4 +923,19 @@ data class CacheLocationInfo(
             name
         }
     }
+}
+
+/**
+ * Types of private user data stored in the private cache.
+ * Private cache structure: Lumiya Cache/Private/<Grid>/<UserID>/<DataType>/
+ */
+enum class PrivateDataType {
+    /** Instant messages and chat history */
+    MESSAGES,
+    /** Friends list and online status cache */
+    FRIENDS,
+    /** User preferences and settings */
+    SETTINGS,
+    /** Cached inventory data */
+    INVENTORY
 }
