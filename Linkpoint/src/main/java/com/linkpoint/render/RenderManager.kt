@@ -399,9 +399,8 @@ class RenderManager(private val context: Context) {
             val count = frameCount.incrementAndGet()
             lastFrameTime = System.currentTimeMillis()
             
-            // Log successful rendering milestone exactly once (thread-safe)
-            if (count == 1L && !firstFrameLogged) {
-                firstFrameLogged = true
+            // Log successful rendering milestone exactly once (thread-safe with compareAndSet)
+            if (count == 1L && firstFrameLogged.compareAndSet(false, true)) {
                 Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
                 Log.i(TAG, "║ 🎉 FIRST FRAME RENDERED!")
                 Log.i(TAG, "║ SwapChain is working correctly")
@@ -482,7 +481,7 @@ class RenderManager(private val context: Context) {
     @Volatile private var viewportHeight: Int = 0
     @Volatile private var displayAttachWarningLogged: Boolean = false
     @Volatile private var lastSwapChainWarningTime: Long = 0
-    @Volatile private var firstFrameLogged: Boolean = false
+    private val firstFrameLogged = java.util.concurrent.atomic.AtomicBoolean(false)
     
     /**
      * Get comprehensive diagnostic data for debug reports
