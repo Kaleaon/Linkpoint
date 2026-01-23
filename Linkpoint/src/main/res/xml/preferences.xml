@@ -217,6 +217,17 @@
 
     </PreferenceCategory>
 
+    <!-- RLV Settings -->
+    <PreferenceCategory android:title="RLV (Restrained Love Viewer)">
+
+        <SwitchPreferenceCompat
+            android:key="rlv_enabled"
+            android:title="Enable RLV"
+            android:summary="Enable Restrained Love Viewer functions"
+            android:defaultValue="false" />
+
+    </PreferenceCategory>
+
     <!-- Debug and Diagnostics -->
     <PreferenceCategory android:title="Debug &amp; Diagnostics">
 

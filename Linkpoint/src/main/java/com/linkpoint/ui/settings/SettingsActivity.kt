@@ -8,6 +8,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -115,6 +116,19 @@ class SettingsActivity : AppCompatActivity() {
             // Voice settings
             findPreference<SwitchPreferenceCompat>("enable_voice")?.setOnPreferenceChangeListener { _, newValue ->
                 updateVoice(newValue as Boolean)
+                true
+            }
+            
+            // RLV settings
+            findPreference<SwitchPreferenceCompat>("rlv_enabled")?.setOnPreferenceChangeListener { _, newValue ->
+                val enabled = newValue as Boolean
+                try {
+                    com.linkpoint.LinkpointApp.getInstance().rlvController.setEnabled(enabled)
+                    Toast.makeText(requireContext(), 
+                        "RLV ${if (enabled) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
+                } catch (e: Exception) {
+                    Log.e("SettingsActivity", "Failed to update RLV setting", e)
+                }
                 true
             }
             

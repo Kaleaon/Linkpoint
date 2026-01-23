@@ -1,6 +1,7 @@
 package com.linkpoint
 
 import android.app.Application
+import android.content.Context
 import android.util.Log
 import com.linkpoint.assets.*
 import com.linkpoint.utils.CrashReporter
@@ -396,6 +397,12 @@ class LinkpointApp : Application() {
         
         // NEW: RLV Controller
         rlvController = RLVController(chatManager = { if (::chatManager.isInitialized) chatManager else null })
+        
+        // Load RLV setting from SharedPreferences
+        val prefs = getSharedPreferences("com.linkpoint_preferences", Context.MODE_PRIVATE)
+        val rlvEnabled = prefs.getBoolean("rlv_enabled", false)
+        rlvController.setEnabled(rlvEnabled)
+        Log.i(TAG, "RLV initialized: enabled=$rlvEnabled")
         
         // NEW: Draw Distance Manager
         drawDistanceManager = DrawDistanceManager()
