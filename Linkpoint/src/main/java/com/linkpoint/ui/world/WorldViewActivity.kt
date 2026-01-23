@@ -516,10 +516,11 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             
             override fun surfaceDestroyed(holder: android.view.SurfaceHolder) {
                 android.util.Log.w(TAG, "⚠ Surface destroyed - stopping render loop")
-                // Stop rendering first, then mark surface as not ready (volatile ensures visibility)
+                // Mark surface as not ready first to prevent new render operations
+                // Then stop rendering (volatile + synchronized ensures atomicity)
                 synchronized(this@WorldViewActivity) {
-                    isRendering = false
                     isSurfaceReady = false
+                    isRendering = false
                 }
             }
         })
