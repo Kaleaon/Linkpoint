@@ -320,10 +320,7 @@ class MinimapManager(
                 System.arraycopy(data, 0, overlay, offset, minOf(data.size, overlay.size - offset))
                 Log.d(TAG, "Minimap parcel overlay updated: sequence=$sequenceId")
                 
-                // Trigger minimap redraw if sequence is complete
-                if (sequenceId >= 3) {
-                    updateMinimap()
-                }
+                // Parcel overlay will be used in rendering when getParcelOverlay() is called
             }
         }
     }

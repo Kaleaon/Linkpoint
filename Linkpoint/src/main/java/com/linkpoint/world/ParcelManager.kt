@@ -67,9 +67,6 @@ class ParcelManager(
     private val _currentParcel = MutableStateFlow<ParcelInfo?>(null)
     val currentParcel: StateFlow<ParcelInfo?> = _currentParcel
     
-    // Parcel overlay data (bitmap of parcel boundaries)
-    private var parcelOverlay: ByteArray? = null
-    
     /**
      * Write AgentData block (AgentID + SessionID) with UUIDs in big-endian bytes.
      * Message block fields remain little-endian per SL templates.
@@ -97,19 +94,6 @@ class ParcelManager(
         buffer.putLong(uuid.mostSignificantBits)
         buffer.putLong(uuid.leastSignificantBits)
         buffer.order(order)
-    }
-    
-    /**
-     * Handle ParcelOverlay message
-     */
-    fun handleParcelOverlay(sequence: Int, data: ByteArray) {
-        // Parcel overlay is sent in chunks
-        if (parcelOverlay == null) {
-            parcelOverlay = ByteArray(256 * 256 / 4) // 4 parcels per byte
-        }
-        
-        val offset = sequence * 1024
-        data.copyInto(parcelOverlay!!, offset, 0, minOf(data.size, 1024))
     }
     
     /**
@@ -217,14 +201,12 @@ class ParcelManager(
         val localX = x.toInt().coerceIn(0, 255)
         val localY = y.toInt().coerceIn(0, 255)
         
-        parcelOverlay?.let { overlay ->
-            val index = localY * 64 + localX / 4
-            if (index < overlay.size) {
-                val byte = overlay[index].toInt() and 0xFF
-                val shift = (localX % 4) * 2
-                val parcelId = (byte shr shift) and 0x03
-                return parcels[parcelId]
-            }
+        val index = localY * 64 + localX / 4
+        if (index < parcelOverlay.size) {
+            val byte = parcelOverlay[index].toInt() and 0xFF
+            val shift = (localX % 4) * 2
+            val parcelId = (byte shr shift) and 0x03
+            return parcels[parcelId]
         }
         
         return null
