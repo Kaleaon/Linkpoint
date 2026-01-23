@@ -837,7 +837,7 @@ class LinkpointApp : Application() {
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
-                val cachedData = com.linkpoint.protocol.messages.parseObjectUpdateCached(payload)
+                val cachedData = com.linkpoint.protocol.messages.MessageParser.parseObjectUpdateCached(payload)
                 if (cachedData != null) {
                     cachedObjectUpdateCount += cachedData.objects.size
                     // Log occasionally to avoid spam
@@ -865,7 +865,7 @@ class LinkpointApp : Application() {
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
-                val controlData = com.linkpoint.protocol.messages.parseScriptControlChange(payload)
+                val controlData = com.linkpoint.protocol.messages.MessageParser.parseScriptControlChange(payload)
                 if (controlData != null) {
                     scriptControlChangeCount++
                     // Log occasionally to avoid spam
