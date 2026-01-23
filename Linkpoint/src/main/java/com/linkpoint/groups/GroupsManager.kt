@@ -295,6 +295,26 @@ class GroupsManager(
         scope.cancel()
     }
     
+    // ==================== UDP MESSAGE HANDLERS ====================
+    
+    /**
+     * Handle active group update from AgentDataUpdate message
+     */
+    fun handleActiveGroupUpdate(groupId: UUID, groupTitle: String, groupPowers: Long) {
+        Log.i(TAG, "📋 Active group updated: $groupId, title='$groupTitle'")
+        
+        _activeGroup.value = groupId
+        
+        // Update group info if we have it
+        groups[groupId]?.let { group ->
+            groups[groupId] = group.copy(powers = groupPowers)
+        }
+        
+        scope.launch {
+            _groupEvents.emit(GroupEvent.ActiveGroupChanged(groupId, groupTitle))
+        }
+    }
+    
     // ==================== GROUP ACCOUNTING ====================
     
     /**
@@ -576,6 +596,7 @@ sealed class GroupEvent {
     data class LeftGroup(val groupId: UUID) : GroupEvent()
     data class NoticeReceived(val notice: GroupNotice) : GroupEvent()
     data class ChatReceived(val message: GroupChatMessage) : GroupEvent()
+    data class ActiveGroupChanged(val groupId: UUID, val groupTitle: String) : GroupEvent()
 }
 
 // ==================== GROUP ACCOUNTING DATA CLASSES ====================

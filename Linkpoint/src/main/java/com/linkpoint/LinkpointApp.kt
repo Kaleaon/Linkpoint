@@ -65,6 +65,7 @@ import com.linkpoint.hud.HUDManager
 import com.linkpoint.world.estate.EstateManager
 import com.linkpoint.xr.XRManager
 import com.linkpoint.protocol.textures.TextureEntryParser
+import com.linkpoint.protocol.types.getUUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -132,6 +133,8 @@ class LinkpointApp : Application() {
     lateinit var animationManager: AnimationManager
         private set
     lateinit var soundManager: SoundManager
+        private set
+    lateinit var cacheManager: CacheManager
         private set
     
     // Avatar system
@@ -366,6 +369,9 @@ class LinkpointApp : Application() {
         
         // XR/VR support
         xrManager = XRManager(this)
+        
+        // Cache management system (Lumiya Cache structure)
+        cacheManager = CacheManager(this)
         
         // Asset system
         assetCache = AssetCache(this)
@@ -1037,6 +1043,221 @@ class LinkpointApp : Application() {
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling SoundTrigger", e)
+            }
+        }
+        
+        // OnlineNotification - Friend came online (UDP fallback for capability events)
+        // The simulator sends this when a friend comes online if event system unavailable
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.ONLINE_NOTIFICATION) { _, rawPacket ->
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
+                
+                // OnlineNotification format: AgentBlock[] containing AgentID (16 bytes each)
+                val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+                val count = if (buffer.remaining() >= 1) buffer.get().toInt() and 0xFF else 0
+                
+                Log.i(TAG, "🟢 OnlineNotification received: $count friends came online")
+                
+                for (i in 0 until count) {
+                    if (buffer.remaining() >= 16) {
+                        val agentId = buffer.getUUID()
+                        Log.i(TAG, "🟢 Friend online: $agentId")
+                        
+                        // Notify FriendsManager via shared flow if initialized
+                        if (::friendsManager.isInitialized) {
+                            friendsManager.handleUdpOnlineNotification(agentId)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling OnlineNotification", e)
+            }
+        }
+        
+        // OfflineNotification - Friend went offline (UDP fallback for capability events)
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OFFLINE_NOTIFICATION) { _, rawPacket ->
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
+                
+                // OfflineNotification format: AgentBlock[] containing AgentID (16 bytes each)
+                val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+                val count = if (buffer.remaining() >= 1) buffer.get().toInt() and 0xFF else 0
+                
+                Log.i(TAG, "🔴 OfflineNotification received: $count friends went offline")
+                
+                for (i in 0 until count) {
+                    if (buffer.remaining() >= 16) {
+                        val agentId = buffer.getUUID()
+                        Log.i(TAG, "🔴 Friend offline: $agentId")
+                        
+                        // Notify FriendsManager via shared flow if initialized
+                        if (::friendsManager.isInitialized) {
+                            friendsManager.handleUdpOfflineNotification(agentId)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling OfflineNotification", e)
+            }
+        }
+        
+        // ChangeUserRights - Friend permissions changed
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.CHANGE_USER_RIGHTS) { _, rawPacket ->
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
+                
+                // ChangeUserRights format:
+                // AgentData: AgentID (16 bytes)
+                // Rights[]: AgentRelated (16 bytes), RelatedRights (4 bytes)
+                val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+                
+                if (buffer.remaining() >= 16) {
+                    buffer.getUUID() // Skip AgentID (our ID)
+                    
+                    if (buffer.remaining() >= 1) {
+                        val rightsCount = buffer.get().toInt() and 0xFF
+                        
+                        for (i in 0 until rightsCount) {
+                            if (buffer.remaining() >= 20) {  // 16 bytes UUID + 4 bytes rights
+                                val relatedId = buffer.getUUID()
+                                val rights = buffer.int
+                                
+                                Log.i(TAG, "🔐 ChangeUserRights: friend=$relatedId rights=$rights")
+                                
+                                if (::friendsManager.isInitialized) {
+                                    friendsManager.handleUdpRightsChange(relatedId, rights)
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling ChangeUserRights", e)
+            }
+        }
+        
+        // AgentDataUpdate - Agent data updated (active group, title, etc.)
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.AGENT_DATA_UPDATE) { _, rawPacket ->
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
+                
+                // AgentDataUpdate format:
+                // AgentData: AgentID (16 bytes), FirstName (var), LastName (var), 
+                // GroupTitle (var), ActiveGroupID (16 bytes), GroupPowers (8 bytes), GroupName (var)
+                val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+                
+                if (buffer.remaining() >= 16) {
+                    buffer.getUUID() // Skip AgentID
+                    
+                    // Parse variable strings (null-terminated)
+                    fun readVarString(): String {
+                        val bytes = mutableListOf<Byte>()
+                        while (buffer.remaining() > 0) {
+                            val b = buffer.get()
+                            if (b == 0.toByte()) break
+                            bytes.add(b)
+                        }
+                        return String(bytes.toByteArray(), Charsets.UTF_8)
+                    }
+                    
+                    val firstName = readVarString()
+                    val lastName = readVarString()
+                    val groupTitle = readVarString()
+                    
+                    var activeGroupId: java.util.UUID? = null
+                    var groupPowers = 0L
+                    var groupName = ""
+                    
+                    if (buffer.remaining() >= 16) {
+                        activeGroupId = buffer.getUUID()
+                    }
+                    
+                    if (buffer.remaining() >= 8) {
+                        groupPowers = buffer.long
+                    }
+                    
+                    if (buffer.remaining() > 0) {
+                        groupName = readVarString()
+                    }
+                    
+                    Log.i(TAG, "👤 AgentDataUpdate: $firstName $lastName, group='$groupTitle' ($groupName)")
+                    
+                    // Update session manager with agent data
+                    if (::sessionManager.isInitialized) {
+                        sessionManager.updateAgentData(firstName, lastName, groupTitle, activeGroupId, groupPowers, groupName)
+                    }
+                    
+                    // Update groups manager
+                    if (::groupsManager.isInitialized && activeGroupId != null) {
+                        groupsManager.handleActiveGroupUpdate(activeGroupId, groupTitle, groupPowers)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling AgentDataUpdate", e)
+            }
+        }
+        
+        // HealthMessage - Agent health status
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.HEALTH_MESSAGE) { _, rawPacket ->
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
+                
+                // HealthMessage format: HealthData: Health (F32, 4 bytes)
+                val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+                
+                if (buffer.remaining() >= 4) {
+                    val health = buffer.float
+                    Log.d(TAG, "❤️ HealthMessage: health=$health%")
+                    
+                    // Update avatar state with health
+                    if (::avatarManager.isInitialized) {
+                        avatarManager.updateAgentHealth(health)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling HealthMessage", e)
+            }
+        }
+        
+        // ParcelOverlay - Parcel boundary data for minimap/rendering
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.PARCEL_OVERLAY) { _, rawPacket ->
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
+                
+                // ParcelOverlay format:
+                // ParcelData: SequenceID (S32, 4 bytes), Data (variable - compressed bitmap)
+                // The bitmap represents parcel boundaries in a 64x64 grid (4 bits per parcel)
+                val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+                
+                if (buffer.remaining() >= 4) {
+                    val sequenceId = buffer.int
+                    val dataSize = buffer.remaining()
+                    
+                    if (dataSize > 0) {
+                        val overlayData = ByteArray(dataSize)
+                        buffer.get(overlayData)
+                        
+                        Log.d(TAG, "🗺️ ParcelOverlay: sequence=$sequenceId, dataSize=$dataSize bytes")
+                        
+                        // Forward to parcel manager for minimap rendering
+                        if (::parcelManager.isInitialized) {
+                            parcelManager.handleParcelOverlay(sequenceId, overlayData)
+                        }
+                        
+                        // Also forward to minimap manager if separate
+                        if (::minimapManager.isInitialized) {
+                            minimapManager.handleParcelOverlay(sequenceId, overlayData)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling ParcelOverlay", e)
             }
         }
         

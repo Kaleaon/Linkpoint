@@ -118,6 +118,32 @@ object MessageIds {
     
     /** AgentSit - Confirm sitting */
     const val AGENT_SIT = (0xFFFF010C).toInt()                 // Wire: FF FF 01 0C
+    
+    /** AgentDataUpdate - Agent data updated (groups, title, active group) */
+    const val AGENT_DATA_UPDATE = (0xFFFF0183).toInt()         // Wire: FF FF 01 83 = -65149
+    
+    /** HealthMessage - Agent health status from simulator */
+    const val HEALTH_MESSAGE = (0xFFFF008A).toInt()            // Wire: FF FF 00 8A = -65398
+
+    // =====================================
+    // Friends/Online Status Messages
+    // =====================================
+    
+    /** OnlineNotification - Friend came online (via UDP) */
+    const val ONLINE_NOTIFICATION = (0xFFFF0142).toInt()       // Wire: FF FF 01 42 = -65214
+    
+    /** OfflineNotification - Friend went offline (via UDP) */
+    const val OFFLINE_NOTIFICATION = (0xFFFF0143).toInt()      // Wire: FF FF 01 43 = -65213
+    
+    /** ChangeUserRights - Friend permissions changed */
+    const val CHANGE_USER_RIGHTS = (0xFFFF0141).toInt()        // Wire: FF FF 01 41 = -65215
+
+    // =====================================
+    // Parcel Messages (Overlay)
+    // =====================================
+    
+    /** ParcelOverlay - Parcel boundary data for minimap/rendering */
+    const val PARCEL_OVERLAY = (0xFFFF00C4).toInt()            // Wire: FF FF 00 C4 = -65340
 
     // =====================================
     // Object Messages

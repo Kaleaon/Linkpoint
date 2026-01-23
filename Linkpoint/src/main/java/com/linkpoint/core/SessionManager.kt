@@ -289,6 +289,46 @@ class SessionManager(private val context: Context) {
             Log.e(TAG, "Failed to save home location", e)
         }
     }
+    
+    // ==================== AGENT DATA ====================
+    
+    // Agent group/title data (from AgentDataUpdate message)
+    private var _activeGroupId: UUID? = null
+    private var _activeGroupTitle: String = ""
+    private var _activeGroupPowers: Long = 0
+    private var _activeGroupName: String = ""
+    
+    val activeGroupId: UUID? get() = _activeGroupId
+    val activeGroupTitle: String get() = _activeGroupTitle
+    val activeGroupName: String get() = _activeGroupName
+    
+    /**
+     * Update agent data from AgentDataUpdate message
+     */
+    fun updateAgentData(
+        firstName: String,
+        lastName: String,
+        groupTitle: String,
+        activeGroupId: UUID?,
+        groupPowers: Long,
+        groupName: String
+    ) {
+        // Update name if provided (non-empty)
+        if (firstName.isNotEmpty()) {
+            this.avatarFirstName = firstName
+        }
+        if (lastName.isNotEmpty()) {
+            this.avatarLastName = lastName
+        }
+        
+        // Update group data
+        this._activeGroupId = activeGroupId
+        this._activeGroupTitle = groupTitle
+        this._activeGroupPowers = groupPowers
+        this._activeGroupName = groupName
+        
+        Log.i(TAG, "Agent data updated: $avatarFirstName $avatarLastName, group='$groupTitle' ($groupName)")
+    }
 }
 
 enum class ConnectionState {

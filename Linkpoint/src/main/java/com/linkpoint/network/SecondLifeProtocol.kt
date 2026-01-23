@@ -291,6 +291,16 @@ class SecondLifeProtocol(private val context: Context) {
                     regionInfo = regionInfo
                 )
                 
+                // Configure cache manager with grid and user info for Lumiya Cache structure
+                // Grid name determines public cache path: Lumiya Cache/Public/<Grid>/
+                // User ID determines private cache path: Lumiya Cache/Private/<Grid>/<UserID>/
+                val gridName = app.gridManager.getSelectedGrid().gridNick.ifEmpty { 
+                    app.gridManager.getSelectedGrid().name 
+                }
+                app.cacheManager.setCurrentGrid(gridName)
+                app.cacheManager.setCurrentUser(result.agentId)
+                Log.i(TAG, "Cache configured for grid: $gridName, user: ${result.agentId}")
+                
                 // Initialize agent-specific managers (sets app.agentId)
                 app.initializeAgentManagers(agentId)
                 

@@ -617,6 +617,43 @@ class ParcelManager(
         udpConnection.sendPacket(MessageIds.PARCEL_PROPERTIES_UPDATE, payload.array(), reliable = true)
     }
     
+    // ==================== PARCEL OVERLAY ====================
+    
+    // Parcel overlay bitmap data (64x64 grid, 4 bits per parcel)
+    private val parcelOverlay = ByteArray(2048) // 64x64 / 2 = 2048 bytes
+    private var parcelOverlaySequence = 0
+    
+    /**
+     * Handle parcel overlay data from UDP message
+     * The overlay is a bitmap showing parcel boundaries for the minimap
+     */
+    fun handleParcelOverlay(sequenceId: Int, data: ByteArray) {
+        Log.d(TAG, "Received parcel overlay: sequence=$sequenceId, size=${data.size} bytes")
+        
+        // Each sequence represents 1/4 of the total overlay
+        // The region is divided into 4 horizontal strips, each 16 blocks tall
+        val stripSize = 512  // 64 * 8 = 512 bytes per strip (64 wide, 16 tall, 4 bits per cell / 2 = 512)
+        val offset = sequenceId * stripSize
+        
+        if (offset >= 0 && offset + data.size <= parcelOverlay.size) {
+            System.arraycopy(data, 0, parcelOverlay, offset, minOf(data.size, parcelOverlay.size - offset))
+            parcelOverlaySequence = maxOf(parcelOverlaySequence, sequenceId)
+            Log.d(TAG, "Parcel overlay updated: sequence=$sequenceId, copied ${minOf(data.size, parcelOverlay.size - offset)} bytes to offset $offset")
+        } else {
+            Log.w(TAG, "Parcel overlay sequence $sequenceId out of bounds (offset=$offset, dataSize=${data.size})")
+        }
+    }
+    
+    /**
+     * Get the parcel overlay bitmap for rendering
+     */
+    fun getParcelOverlay(): ByteArray = parcelOverlay.copyOf()
+    
+    /**
+     * Check if parcel overlay is complete
+     */
+    fun isParcelOverlayComplete(): Boolean = parcelOverlaySequence >= 3
+    
     fun shutdown() {
         scope.cancel()
     }

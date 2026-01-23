@@ -336,6 +336,19 @@ class AvatarManager(
         android.util.Log.i("AvatarManager", "Wear: ${wearable.name}")
     }
     
+    // ==================== AGENT HEALTH ====================
+    
+    private var _agentHealth: Float = 100f
+    val agentHealth: Float get() = _agentHealth
+    
+    /**
+     * Update agent health from HealthMessage
+     */
+    fun updateAgentHealth(health: Float) {
+        _agentHealth = health.coerceIn(0f, 100f)
+        android.util.Log.d("AvatarManager", "Agent health updated: $_agentHealth%")
+    }
+    
     fun shutdown() {
         scope.cancel()
         if (udpConnection != null) {
