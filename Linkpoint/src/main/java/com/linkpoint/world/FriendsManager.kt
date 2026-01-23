@@ -571,6 +571,75 @@ class FriendsManager(
         scope.cancel()
     }
     
+    // ==================== UDP MESSAGE HANDLERS ====================
+    
+    /**
+     * Handle OnlineNotification from UDP (fallback when capability events unavailable)
+     */
+    fun handleUdpOnlineNotification(agentId: UUID) {
+        Log.i(TAG, "🟢 UDP OnlineNotification: $agentId came online")
+        
+        val friend = friends[agentId]
+        val friendName = friend?.name ?: "Unknown"
+        
+        friend?.isOnline = true
+        _onlineFriends.value = _onlineFriends.value + agentId
+        
+        NetworkLogger.logFriendOnlineStatus(agentId.toString(), friendName, true)
+        
+        scope.launch {
+            _friendsFlow.emit(FriendEvent.OnlineStatusChanged(agentId, true))
+        }
+    }
+    
+    /**
+     * Handle OfflineNotification from UDP (fallback when capability events unavailable)
+     */
+    fun handleUdpOfflineNotification(agentId: UUID) {
+        Log.i(TAG, "🔴 UDP OfflineNotification: $agentId went offline")
+        
+        val friend = friends[agentId]
+        val friendName = friend?.name ?: "Unknown"
+        
+        friend?.isOnline = false
+        _onlineFriends.value = _onlineFriends.value - agentId
+        
+        NetworkLogger.logFriendOnlineStatus(agentId.toString(), friendName, false)
+        
+        scope.launch {
+            _friendsFlow.emit(FriendEvent.OnlineStatusChanged(agentId, false))
+        }
+    }
+    
+    /**
+     * Handle ChangeUserRights from UDP
+     */
+    fun handleUdpRightsChange(friendId: UUID, newRights: Int) {
+        Log.i(TAG, "🔐 UDP ChangeUserRights: $friendId rights=$newRights")
+        
+        val friend = friends[friendId]
+        if (friend != null) {
+            friends[friendId] = friend.copy(rightsHas = newRights)
+            
+            scope.launch {
+                _friendsFlow.emit(FriendEvent.RightsChanged(friendId))
+            }
+        }
+    }
+    
+    /**
+     * Add or update friend from login response data
+     */
+    fun addFriendFromLogin(agentId: UUID, name: String, rightsGiven: Int, rightsHas: Int) {
+        Log.d(TAG, "Adding friend from login: $name ($agentId)")
+        friends[agentId] = Friend(
+            agentId = agentId,
+            name = name,
+            rightsGiven = rightsGiven,
+            rightsHas = rightsHas
+        )
+    }
+    
     // ==================== DIAGNOSTIC METHODS ====================
     
     /**

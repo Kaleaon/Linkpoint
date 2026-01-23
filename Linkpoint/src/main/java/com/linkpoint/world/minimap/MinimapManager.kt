@@ -297,6 +297,42 @@ class MinimapManager(
         }
     }
     
+    // ==================== PARCEL OVERLAY ====================
+    
+    // Parcel overlay for minimap rendering
+    private var parcelOverlayData: ByteArray? = null
+    
+    /**
+     * Handle parcel overlay data for minimap display
+     */
+    fun handleParcelOverlay(sequenceId: Int, data: ByteArray) {
+        // Initialize overlay if needed
+        if (parcelOverlayData == null) {
+            parcelOverlayData = ByteArray(2048)
+        }
+        
+        // Copy overlay segment
+        val stripSize = 512
+        val offset = sequenceId * stripSize
+        
+        parcelOverlayData?.let { overlay ->
+            if (offset >= 0 && offset + data.size <= overlay.size) {
+                System.arraycopy(data, 0, overlay, offset, minOf(data.size, overlay.size - offset))
+                Log.d(TAG, "Minimap parcel overlay updated: sequence=$sequenceId")
+                
+                // Trigger minimap redraw if sequence is complete
+                if (sequenceId >= 3) {
+                    updateMinimap()
+                }
+            }
+        }
+    }
+    
+    /**
+     * Get parcel overlay for rendering
+     */
+    fun getParcelOverlay(): ByteArray? = parcelOverlayData?.copyOf()
+    
     fun shutdown() {
         scope.cancel()
         terrainBitmap?.recycle()
