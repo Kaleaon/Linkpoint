@@ -10,6 +10,8 @@ import com.google.android.filament.android.UiHelper
 import com.linkpoint.render.environment.SLDefaultEnvironment
 import com.linkpoint.render.scene.SceneManager
 import com.linkpoint.xr.XRFrameData
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Manages rendering using Google Filament
@@ -22,6 +24,7 @@ class RenderManager(private val context: Context) {
     
     companion object {
         private const val TAG = "RenderManager"
+        private const val FIRST_FRAME_COUNT = 1L
         
         init {
             // Load Filament native libraries before any Engine operations
@@ -269,22 +272,24 @@ class RenderManager(private val context: Context) {
         swapChain?.let { return it }
         val surface = surfaceView?.holder?.surface
         if (surface == null || !surface.isValid) {
-            if (!swapChainWarningLogged) {
-                Log.w(TAG, "SwapChain unavailable - surface not ready (surface=${surface != null}, valid=${surface?.isValid})")
-                swapChainWarningLogged = true
+            // Throttle warnings to at most once per second (avoids log spam)
+            if (shouldLogWarning()) {
+                Log.w(TAG, "SwapChain unavailable - surface not ready (surface=${surface != null}, valid=${surface?.isValid}, frame=${frameCount.get()})")
             }
             return null
         }
         try {
             swapChain = engine.createSwapChain(surface)
             if (swapChain == null) {
-                if (!swapChainWarningLogged) {
+                // Also throttle this warning to avoid log spam
+                if (shouldLogWarning()) {
                     Log.w(TAG, "SwapChain creation failed - engine.createSwapChain returned null")
-                    swapChainWarningLogged = true
                 }
             } else {
-                swapChainWarningLogged = false
-                Log.i(TAG, "SwapChain created successfully")
+                Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+                Log.i(TAG, "║ ✓ SwapChain created successfully!")
+                Log.i(TAG, "║ Frame count: ${frameCount.get()}")
+                Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
                 attachDisplayHelper()
                 val width = surfaceView?.width ?: 0
                 val height = surfaceView?.height ?: 0
@@ -317,9 +322,13 @@ class RenderManager(private val context: Context) {
             return
         }
         
+        Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+        Log.i(TAG, "║ 🔄 Recreating SwapChain...")
+        
         // Destroy existing swap chain using local reference to avoid race condition
         val currentSwapChain = swapChain
         if (currentSwapChain != null) { 
+            Log.d(TAG, "║ Destroying old SwapChain")
             engine.destroySwapChain(currentSwapChain)
             swapChain = null
         }
@@ -328,7 +337,7 @@ class RenderManager(private val context: Context) {
         try {
             swapChain = engine.createSwapChain(surface)
             if (swapChain != null) {
-                Log.i(TAG, "SwapChain recreated successfully")
+                Log.i(TAG, "║ ✓ SwapChain recreated successfully")
                 attachDisplayHelper()
                 val width = surfaceView?.width ?: 0
                 val height = surfaceView?.height ?: 0
@@ -337,13 +346,15 @@ class RenderManager(private val context: Context) {
                     viewportWidth = width
                     viewportHeight = height
                     updateProjection(width, height)
+                    Log.i(TAG, "║ Viewport: ${width}x${height}")
                 }
             } else {
-                Log.e(TAG, "SwapChain recreation failed")
+                Log.e(TAG, "║ ✗ SwapChain recreation failed - createSwapChain returned null")
             }
         } catch (e: Exception) {
-            Log.e(TAG, "SwapChain recreation threw exception", e)
+            Log.e(TAG, "║ ✗ SwapChain recreation threw exception: ${e.message}", e)
         }
+        Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
     }
 
     private fun attachDisplayHelper() {
@@ -362,6 +373,19 @@ class RenderManager(private val context: Context) {
     }
     
     /**
+     * Check if enough time has passed since last warning to log again.
+     * Prevents log spam by throttling warnings to at most once per second.
+     */
+    private fun shouldLogWarning(): Boolean {
+        val now = System.currentTimeMillis()
+        if (now - lastSwapChainWarningTime > 1000) {
+            lastSwapChainWarningTime = now
+            return true
+        }
+        return false
+    }
+    
+    /**
      * Render a frame
      */
     fun renderFrame() {
@@ -375,8 +399,16 @@ class RenderManager(private val context: Context) {
         if (renderer.beginFrame(swapChain, System.nanoTime())) {
             renderer.render(view)
             renderer.endFrame()
-            frameCount.incrementAndGet()
+            val count = frameCount.incrementAndGet()
             lastFrameTime = System.currentTimeMillis()
+            
+            // Log successful rendering milestone exactly once (thread-safe with compareAndSet)
+            if (count == FIRST_FRAME_COUNT && firstFrameLogged.compareAndSet(false, true)) {
+                Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+                Log.i(TAG, "║ 🎉 FIRST FRAME RENDERED!")
+                Log.i(TAG, "║ SwapChain is working correctly")
+                Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+            }
         }
     }
     
@@ -444,14 +476,15 @@ class RenderManager(private val context: Context) {
     // ==================== DIAGNOSTIC METHODS ====================
     
     // Tracking for diagnostics (volatile for thread safety)
-    private var frameCount = java.util.concurrent.atomic.AtomicLong(0)
+    private var frameCount = AtomicLong(0)
     @Volatile private var lastFrameTime: Long = 0
     @Volatile private var initializationTime: Long = 0
     @Volatile private var lastInitializationError: String? = null
     @Volatile private var viewportWidth: Int = 0
     @Volatile private var viewportHeight: Int = 0
-    @Volatile private var swapChainWarningLogged: Boolean = false
     @Volatile private var displayAttachWarningLogged: Boolean = false
+    @Volatile private var lastSwapChainWarningTime: Long = 0
+    private val firstFrameLogged = AtomicBoolean(false)
     
     /**
      * Get comprehensive diagnostic data for debug reports

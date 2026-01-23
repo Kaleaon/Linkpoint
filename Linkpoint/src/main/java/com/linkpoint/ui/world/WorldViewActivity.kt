@@ -85,7 +85,8 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private var debugFloaterButton: FloatingActionButton? = null
     
     private val app by lazy { LinkpointApp.getInstance() }
-    private var isRendering = false
+    @Volatile private var isRendering = false
+    @Volatile private var isSurfaceReady = false
     
     // Track current orientation setting to avoid unnecessary changes
     private var currentOrientationPref: String? = null
@@ -482,25 +483,54 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         // Add a callback to ensure SwapChain is created when surface is available
         surfaceView.holder.addCallback(object : android.view.SurfaceHolder.Callback {
             override fun surfaceCreated(holder: android.view.SurfaceHolder) {
-                android.util.Log.i(TAG, "Surface created - ensuring SwapChain")
-                // The RenderManager's UiHelper should handle this, but let's ensure it
+                android.util.Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+                android.util.Log.i(TAG, "║ ⭐ Surface created - Surface is now ready")
+                android.util.Log.i(TAG, "║ Surface valid: ${holder.surface.isValid}")
+                android.util.Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+                
+                // Mark surface as ready (volatile ensures visibility across threads)
+                isSurfaceReady = true
+                
+                // Eagerly create SwapChain now that surface is available
+                // This is more efficient than waiting for ensureSwapChain() to detect it on first render frame
                 app.renderManager.recreateSwapChain()
+                
+                // Start render loop only if not already rendering (synchronized to avoid race)
+                synchronized(this@WorldViewActivity) {
+                    if (!isRendering) {
+                        android.util.Log.i(TAG, "✓ Starting render loop now that surface is ready")
+                        isRendering = true
+                        startRenderLoop()
+                    }
+                }
             }
             
             override fun surfaceChanged(holder: android.view.SurfaceHolder, format: Int, width: Int, height: Int) {
                 android.util.Log.d(TAG, "Surface changed: ${width}x${height}")
+                // Recreate SwapChain to handle new dimensions or format changes
+                // This ensures viewport is updated immediately rather than waiting for next render frame
+                if (isSurfaceReady) {
+                    app.renderManager.recreateSwapChain()
+                }
             }
             
             override fun surfaceDestroyed(holder: android.view.SurfaceHolder) {
-                android.util.Log.i(TAG, "Surface destroyed")
+                android.util.Log.w(TAG, "⚠ Surface destroyed - stopping render loop")
+                // Mark surface as not ready first to prevent new render operations
+                // Then stop rendering (volatile + synchronized ensures atomicity)
+                synchronized(this@WorldViewActivity) {
+                    isSurfaceReady = false
+                    isRendering = false
+                }
             }
         })
         
+        // Initialize RenderManager with the SurfaceView
+        android.util.Log.i(TAG, "Initializing RenderManager...")
         app.renderManager.initialize(surfaceView)
-        isRendering = true
         
-        // Start render loop
-        startRenderLoop()
+        // Don't start render loop here - wait for surfaceCreated callback
+        android.util.Log.i(TAG, "✓ RenderManager initialized, waiting for surface to be ready...")
     }
     
     private fun startRenderLoop() {
@@ -714,8 +744,17 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         super.onResume()
         applyScreenOrientation() // Reapply orientation in case user changed setting
         updateDebugFloaterVisibility() // Update debug floater visibility based on settings
-        isRendering = true
-        startRenderLoop()
+        
+        // Only restart rendering if surface is ready (synchronized to avoid race)
+        synchronized(this) {
+            if (isSurfaceReady && !isRendering) {
+                android.util.Log.i(TAG, "onResume: Restarting render loop")
+                isRendering = true
+                startRenderLoop()
+            } else if (!isSurfaceReady) {
+                android.util.Log.w(TAG, "onResume: Surface not ready yet, will start when ready")
+            }
+        }
     }
     
     override fun onDestroy() {
