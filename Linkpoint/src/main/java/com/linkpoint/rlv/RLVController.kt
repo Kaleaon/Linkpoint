@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap
  *   @sit:<uuid>=force - Force sit on object
  */
 class RLVController(
-    private val chatManager: (() -> com.linkpoint.chat.ChatManager)? = null
+    private val chatManager: (() -> com.linkpoint.chat.ChatManager?)? = null
 ) {
     
     companion object {
