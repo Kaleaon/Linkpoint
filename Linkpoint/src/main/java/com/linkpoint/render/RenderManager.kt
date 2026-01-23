@@ -269,9 +269,11 @@ class RenderManager(private val context: Context) {
         swapChain?.let { return it }
         val surface = surfaceView?.holder?.surface
         if (surface == null || !surface.isValid) {
-            // Log warning periodically (every 60 frames = ~1 second at 60fps)
-            if (frameCount.get() % 60 == 0L) {
+            // Log warning at most once per second using timestamp (more efficient than modulo)
+            val now = System.currentTimeMillis()
+            if (now - lastSwapChainWarningTime > 1000) {
                 Log.w(TAG, "SwapChain unavailable - surface not ready (surface=${surface != null}, valid=${surface?.isValid}, frame=${frameCount.get()})")
+                lastSwapChainWarningTime = now
             }
             return null
         }
@@ -465,6 +467,7 @@ class RenderManager(private val context: Context) {
     @Volatile private var viewportWidth: Int = 0
     @Volatile private var viewportHeight: Int = 0
     @Volatile private var displayAttachWarningLogged: Boolean = false
+    @Volatile private var lastSwapChainWarningTime: Long = 0
     
     /**
      * Get comprehensive diagnostic data for debug reports

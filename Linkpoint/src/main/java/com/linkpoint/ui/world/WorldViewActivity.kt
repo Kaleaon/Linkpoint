@@ -85,8 +85,8 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private var debugFloaterButton: FloatingActionButton? = null
     
     private val app by lazy { LinkpointApp.getInstance() }
-    private var isRendering = false
-    private var isSurfaceReady = false
+    @Volatile private var isRendering = false
+    @Volatile private var isSurfaceReady = false
     
     // Track current orientation setting to avoid unnecessary changes
     private var currentOrientationPref: String? = null
@@ -488,17 +488,19 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 android.util.Log.i(TAG, "║ Surface valid: ${holder.surface.isValid}")
                 android.util.Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
                 
-                // Mark surface as ready
+                // Mark surface as ready (volatile ensures visibility across threads)
                 isSurfaceReady = true
                 
                 // Ensure SwapChain is created
                 app.renderManager.recreateSwapChain()
                 
-                // Start render loop only if not already rendering
-                if (!isRendering) {
-                    android.util.Log.i(TAG, "✓ Starting render loop now that surface is ready")
-                    isRendering = true
-                    startRenderLoop()
+                // Start render loop only if not already rendering (synchronized to avoid race)
+                synchronized(this@WorldViewActivity) {
+                    if (!isRendering) {
+                        android.util.Log.i(TAG, "✓ Starting render loop now that surface is ready")
+                        isRendering = true
+                        startRenderLoop()
+                    }
                 }
             }
             
@@ -512,8 +514,11 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             
             override fun surfaceDestroyed(holder: android.view.SurfaceHolder) {
                 android.util.Log.w(TAG, "⚠ Surface destroyed - stopping render loop")
-                isSurfaceReady = false
-                isRendering = false
+                // Stop rendering first, then mark surface as not ready (volatile ensures visibility)
+                synchronized(this@WorldViewActivity) {
+                    isRendering = false
+                    isSurfaceReady = false
+                }
             }
         })
         
@@ -737,13 +742,15 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         applyScreenOrientation() // Reapply orientation in case user changed setting
         updateDebugFloaterVisibility() // Update debug floater visibility based on settings
         
-        // Only restart rendering if surface is ready
-        if (isSurfaceReady && !isRendering) {
-            android.util.Log.i(TAG, "onResume: Restarting render loop")
-            isRendering = true
-            startRenderLoop()
-        } else if (!isSurfaceReady) {
-            android.util.Log.w(TAG, "onResume: Surface not ready yet, will start when ready")
+        // Only restart rendering if surface is ready (synchronized to avoid race)
+        synchronized(this) {
+            if (isSurfaceReady && !isRendering) {
+                android.util.Log.i(TAG, "onResume: Restarting render loop")
+                isRendering = true
+                startRenderLoop()
+            } else if (!isSurfaceReady) {
+                android.util.Log.w(TAG, "onResume: Surface not ready yet, will start when ready")
+            }
         }
     }
     
