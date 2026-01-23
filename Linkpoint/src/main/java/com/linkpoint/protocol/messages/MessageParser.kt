@@ -308,7 +308,8 @@ object MessageParser {
                 mediaUrl = mediaUrl,
                 ownerId = ownerId,
                 nameValue = nameValueStr,
-                regionHandle = regionHandle
+                regionHandle = regionHandle,
+                extraParams = extraParams
             )
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse object block", e)
@@ -617,7 +618,8 @@ data class ObjectUpdateData(
     val mediaUrl: String,
     val ownerId: UUID?,
     val nameValue: String,
-    val regionHandle: Long = 0L  // For computing global position
+    val regionHandle: Long = 0L,  // For computing global position
+    val extraParams: ByteArray = ByteArray(0)  // Extra params containing mesh/sculpt data
 ) {
     /**
      * Compute global X position from region handle and local position
@@ -640,6 +642,62 @@ data class ObjectUpdateData(
      */
     fun getGlobalPosition(): LLVector3d {
         return LLVector3d(getGlobalX(), getGlobalY(), position.z.toDouble())
+    }
+    
+    /**
+     * Extract mesh/sculpt asset ID from extra params.
+     * Sculpt/mesh data is stored in extra param type 0x30.
+     * Format: [type:2bytes][size:4bytes][data:size bytes]
+     * Sculpt data format: [sculptUUID:16bytes][sculptType:1byte]
+     * Mesh has sculptType = 5
+     */
+    fun getMeshAssetId(): UUID? {
+        if (extraParams.isEmpty()) return null
+        
+        try {
+            val buffer = java.nio.ByteBuffer.wrap(extraParams).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            
+            // Parse extra params - format: count:1byte, then [type:2bytes][size:4bytes][data]...
+            val paramCount = buffer.get().toInt() and 0xFF
+            
+            for (i in 0 until paramCount) {
+                if (buffer.remaining() < 6) break
+                
+                val paramType = buffer.short.toInt() and 0xFFFF
+                val paramSize = buffer.int
+                
+                if (buffer.remaining() < paramSize) break
+                
+                // Type 0x30 (48) = Sculpt/Mesh data
+                if (paramType == 0x30 && paramSize >= 17) {
+                    val uuidBytes = ByteArray(16)
+                    buffer.get(uuidBytes)
+                    val sculptType = buffer.get().toInt() and 0xFF
+                    
+                    // Sculpt type 5 = mesh
+                    if (sculptType == 5) {
+                        // Parse UUID (big-endian)
+                        val uuidBuffer = java.nio.ByteBuffer.wrap(uuidBytes).order(java.nio.ByteOrder.BIG_ENDIAN)
+                        return UUID(uuidBuffer.long, uuidBuffer.long)
+                    }
+                    
+                    // Skip remaining bytes of this param
+                    val remaining = paramSize - 17
+                    if (remaining > 0 && buffer.remaining() >= remaining) {
+                        buffer.position(buffer.position() + remaining)
+                    }
+                } else {
+                    // Skip this param
+                    if (buffer.remaining() >= paramSize) {
+                        buffer.position(buffer.position() + paramSize)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            // Silently fail - extraParams may be malformed
+        }
+        
+        return null
     }
 }
 

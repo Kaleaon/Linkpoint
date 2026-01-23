@@ -138,29 +138,64 @@ class GridConnection(
     
     /**
      * Perform the actual connection
+     * 
+     * Note: In the current architecture, actual login/authentication is handled by
+     * SecondLifeProtocol.login() which uses CoreNetworkingService. This GridConnection
+     * class is used for internal connection state management and testing scenarios.
+     * 
+     * For real connection:
+     * 1. HTTP login via SecondLifeProtocol.login() returns sim IP/port
+     * 2. UDP connection established via UDPConnectionFixed
+     * 3. Capabilities initialized via CapabilityManager
+     * 
+     * This method currently supports two modes:
+     * - Testing: Creates simulated connection with placeholder data
+     * - Real: Receives pre-authenticated data when connected through SecondLifeProtocol
      */
     private suspend fun performConnection() {
         _connectionState.value = ConnectionState.CONNECTING
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Starting connection process")
         
         try {
-            // TODO: Implement actual connection logic
-            // This would involve:
-            // 1. HTTP login to get authReply
-            // 2. Create agent circuit
-            // 3. Establish UDP connection
-            // 4. Initialize capabilities
+            // If authParams contains pre-authenticated data (from SecondLifeProtocol.login()),
+            // use that information. Otherwise, this is a test/development scenario.
+            val params = authParams
             
-            // Simulate connection for now
-            delay(1000)
+            if (params == null) {
+                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "No auth params provided")
+                _connectionState.value = ConnectionState.ERROR
+                return
+            }
             
-            authReply = AuthReply(
-                sessionId = UUID.randomUUID(),
-                agentId = UUID.randomUUID(),
-                circuitCode = 123456789,
-                simIP = "127.0.0.1",  // TODO: Get actual sim IP from authentication
-                simPort = 12035       // TODO: Get actual sim port from authentication
-            )
+            // In a full implementation, this would:
+            // 1. Make HTTP login request to params.gridUrl
+            // 2. Parse XMLRPC response to get simIP, simPort, circuitCode, etc.
+            // 3. The result would come from the server response
+            //
+            // Currently, the actual HTTP login is handled by SecondLifeProtocol.login()
+            // which provides the sim IP/port. This class can receive that info via
+            // the setAuthReply() method or by extending the connect() signature.
+            
+            // For now, indicate we need authentication data to be set externally
+            // This simulates waiting for auth response
+            delay(100)
+            
+            if (authReply == null) {
+                // No pre-set auth reply - this is a stub/test scenario
+                // In production, authReply should be set before calling connect
+                // or passed through from the actual login response
+                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, 
+                    "No auth reply set - operating in stub mode. " +
+                    "For real connections, use SecondLifeProtocol.login() instead.")
+                
+                authReply = AuthReply(
+                    sessionId = UUID.randomUUID(),
+                    agentId = UUID.randomUUID(),
+                    circuitCode = 123456789,
+                    simIP = "0.0.0.0",  // Placeholder - actual IP comes from login response
+                    simPort = 0         // Placeholder - actual port comes from login response
+                )
+            }
             
             activeAgentUUID = authReply!!.agentId
             agentCircuit = AgentCircuit(authReply!!)
@@ -170,7 +205,8 @@ class GridConnection(
             firstConnect = false
             reconnectAttempts = 0
             
-            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Connection successful")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, 
+                "Connection state updated. SimIP: ${authReply!!.simIP}, SimPort: ${authReply!!.simPort}")
             
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Connection failed: ${e.message}")
@@ -181,6 +217,16 @@ class GridConnection(
                 attemptReconnection()
             }
         }
+    }
+    
+    /**
+     * Set the authentication reply from an external source (e.g., SecondLifeProtocol.login()).
+     * Call this before connect() when you have pre-authenticated data.
+     */
+    fun setAuthReply(reply: AuthReply) {
+        this.authReply = reply
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, 
+            "Auth reply set: simIP=${reply.simIP}, simPort=${reply.simPort}")
     }
     
     /**

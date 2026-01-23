@@ -1,6 +1,7 @@
 package com.linkpoint.rlv
 
 import android.util.Log
+import com.linkpoint.objects.SitManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +24,8 @@ import java.util.concurrent.ConcurrentHashMap
  *   @sit:<uuid>=force - Force sit on object
  */
 class RLVController(
-    private val chatManager: (() -> com.linkpoint.chat.ChatManager?)? = null
+    private val chatManager: (() -> com.linkpoint.chat.ChatManager?)? = null,
+    private val sitManager: (() -> SitManager?)? = null
 ) {
     
     companion object {
@@ -242,15 +244,42 @@ class RLVController(
     // Force command implementations
     
     private fun forceSit(target: String?, objectId: UUID): RLVResult {
-        // TODO: Implement sit on target UUID
         Log.d(TAG, "Force sit on: $target")
-        return RLVResult.Success
+        if (target == null) {
+            return RLVResult.InvalidFormat
+        }
+        
+        // Parse the target UUID
+        val targetUUID = try {
+            UUID.fromString(target)
+        } catch (e: IllegalArgumentException) {
+            Log.w(TAG, "Invalid UUID for force sit: $target")
+            return RLVResult.InvalidFormat
+        }
+        
+        // Use SitManager to sit on the target object
+        sitManager?.invoke()?.let { manager ->
+            manager.sitOnObject(targetUUID)
+            Log.i(TAG, "Force sit executed on object $targetUUID")
+            return RLVResult.Success
+        } ?: run {
+            Log.w(TAG, "SitManager not available for force sit")
+            return RLVResult.Failed
+        }
     }
     
     private fun forceUnsit(): RLVResult {
-        // TODO: Implement stand up
         Log.d(TAG, "Force unsit")
-        return RLVResult.Success
+        
+        // Use SitManager to stand up
+        sitManager?.invoke()?.let { manager ->
+            manager.standUp()
+            Log.i(TAG, "Force unsit executed")
+            return RLVResult.Success
+        } ?: run {
+            Log.w(TAG, "SitManager not available for force unsit")
+            return RLVResult.Failed
+        }
     }
     
     private fun forceTeleport(coords: String?): RLVResult {

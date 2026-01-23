@@ -44,6 +44,10 @@ class AvatarManager(
     private var myAgentId: UUID? = null
     private var myAvatar: Avatar? = null
     
+    // Mapping from localId to agentId for terse updates
+    // This is populated when we receive full object updates with both IDs
+    private val localIdToAgentId = ConcurrentHashMap<Int, UUID>()
+    
     // Movement controller for the local avatar
     val movementController: MovementController by lazy {
         MovementController(udpConnection ?: throw IllegalStateException("UDP connection required for movement"))
@@ -90,11 +94,46 @@ class AvatarManager(
     }
     
     /**
+     * Add or update an avatar with localId for terse update mapping.
+     * This should be called when processing full ObjectUpdate messages for avatars.
+     */
+    fun updateAvatar(
+        agentId: UUID,
+        localId: Int,
+        position: LLVector3,
+        rotation: LLQuaternion,
+        velocity: LLVector3 = LLVector3.zero()
+    ) {
+        // Maintain localId -> agentId mapping for terse updates
+        localIdToAgentId[localId] = agentId
+        
+        // Delegate to the standard update
+        updateAvatar(agentId, position, rotation, velocity)
+        
+        // Store localId on the avatar for reference
+        avatars[agentId]?.localId = localId
+    }
+    
+    /**
+     * Register a localId -> agentId mapping (e.g., from ObjectUpdate for avatars).
+     * This enables terse updates to update the correct avatar.
+     */
+    fun registerLocalIdMapping(localId: Int, agentId: UUID) {
+        localIdToAgentId[localId] = agentId
+        avatars[agentId]?.localId = localId
+        Log.d(TAG, "Registered localId mapping: $localId -> $agentId")
+    }
+    
+    /**
      * Remove an avatar
      */
     fun removeAvatar(agentId: UUID) {
         avatars.remove(agentId)?.let { avatar ->
             avatar.animator.stopAll()
+            // Clean up localId mapping if present
+            avatar.localId?.let { localId ->
+                localIdToAgentId.remove(localId)
+            }
         }
         _avatarCount.value = avatars.size
     }
@@ -131,23 +170,38 @@ class AvatarManager(
     /**
      * Handle terse position update from ImprovedTerseObjectUpdate message.
      * This is used for fast position updates for avatars (when isAvatar=true).
-     * Currently only updates our own avatar position.
-     * TODO: Maintain a localId -> agentId mapping to update other avatars.
+     * Uses localId -> agentId mapping to update both our own and other avatars.
      */
     fun handleTerseUpdate(data: TerseUpdateData) {
-        // TerseUpdate uses localId - in a full implementation, we'd maintain
-        // a localId -> agentId mapping to update any avatar. For now, only
-        // update our own avatar when receiving avatar terse updates.
-        if (data.isAvatar && myAvatar != null) {
+        if (!data.isAvatar) return
+        
+        // Look up the agentId from localId mapping
+        val agentId = localIdToAgentId[data.localId]
+        
+        if (agentId != null) {
+            // Found the avatar by localId mapping
+            val avatar = avatars[agentId]
+            if (avatar != null) {
+                avatar.position = data.position
+                avatar.rotation = data.rotation
+                avatar.velocity = data.velocity
+                avatar.lastUpdate = System.currentTimeMillis()
+                Log.d(TAG, "TerseUpdate: updated avatar $agentId, localId=${data.localId}, pos=${data.position}")
+                return
+            }
+        }
+        
+        // Fallback: Try to update our own avatar if we don't have a mapping yet
+        // This handles the case before the localId mapping is established
+        if (myAvatar != null) {
             myAvatar?.let { avatar ->
                 avatar.position = data.position
                 avatar.rotation = data.rotation
                 avatar.velocity = data.velocity
                 avatar.lastUpdate = System.currentTimeMillis()
-                Log.d(TAG, "TerseUpdate: updated myAvatar, localId=${data.localId}, pos=${data.position}")
+                Log.d(TAG, "TerseUpdate: updated myAvatar (fallback), localId=${data.localId}, pos=${data.position}")
             }
         }
-        // Note: other avatar terse updates are not processed until localId->agentId mapping is implemented
     }
     
     /**
@@ -411,6 +465,9 @@ class Avatar(
     var velocity: LLVector3 = LLVector3.zero()
     var visualParams: ByteArray? = null
     var lastUpdate: Long = 0
+    
+    // LocalId for terse update mapping (set from ObjectUpdate messages)
+    var localId: Int? = null
     
     // Profile data
     var displayName: String? = null
