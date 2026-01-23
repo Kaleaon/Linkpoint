@@ -10,6 +10,8 @@ import com.google.android.filament.android.UiHelper
 import com.linkpoint.render.environment.SLDefaultEnvironment
 import com.linkpoint.render.scene.SceneManager
 import com.linkpoint.xr.XRFrameData
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Manages rendering using Google Filament
@@ -22,6 +24,7 @@ class RenderManager(private val context: Context) {
     
     companion object {
         private const val TAG = "RenderManager"
+        private const val FIRST_FRAME_COUNT = 1L
         
         init {
             // Load Filament native libraries before any Engine operations
@@ -400,7 +403,7 @@ class RenderManager(private val context: Context) {
             lastFrameTime = System.currentTimeMillis()
             
             // Log successful rendering milestone exactly once (thread-safe with compareAndSet)
-            if (count == 1L && firstFrameLogged.compareAndSet(false, true)) {
+            if (count == FIRST_FRAME_COUNT && firstFrameLogged.compareAndSet(false, true)) {
                 Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
                 Log.i(TAG, "║ 🎉 FIRST FRAME RENDERED!")
                 Log.i(TAG, "║ SwapChain is working correctly")
@@ -473,7 +476,7 @@ class RenderManager(private val context: Context) {
     // ==================== DIAGNOSTIC METHODS ====================
     
     // Tracking for diagnostics (volatile for thread safety)
-    private var frameCount = java.util.concurrent.atomic.AtomicLong(0)
+    private var frameCount = AtomicLong(0)
     @Volatile private var lastFrameTime: Long = 0
     @Volatile private var initializationTime: Long = 0
     @Volatile private var lastInitializationError: String? = null
@@ -481,7 +484,7 @@ class RenderManager(private val context: Context) {
     @Volatile private var viewportHeight: Int = 0
     @Volatile private var displayAttachWarningLogged: Boolean = false
     @Volatile private var lastSwapChainWarningTime: Long = 0
-    private val firstFrameLogged = java.util.concurrent.atomic.AtomicBoolean(false)
+    private val firstFrameLogged = AtomicBoolean(false)
     
     /**
      * Get comprehensive diagnostic data for debug reports
