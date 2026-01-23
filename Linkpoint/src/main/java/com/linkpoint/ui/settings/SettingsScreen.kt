@@ -56,7 +56,8 @@ data class SettingsState(
     val showOnlineStatus: Boolean = true,
     val autoAcceptFriends: Boolean = false,
     val renderDistance: Float = 64f,
-    val brightness: Float = 1.0f
+    val brightness: Float = 1.0f,
+    val rlvEnabled: Boolean = false
 )
 
 /**
@@ -200,6 +201,20 @@ fun SettingsScreen(
                     title = "Privacy Settings",
                     subtitle = "Manage permissions and data",
                     onClick = onOpenPrivacy
+                )
+            }
+            
+            // RLV Section
+            SettingsSection(title = "RLV (Restrained Love Viewer)") {
+                SettingsSwitchItem(
+                    icon = Icons.Default.Security,
+                    title = "Enable RLV",
+                    subtitle = "Enable Restrained Love Viewer functions",
+                    checked = currentSettings.rlvEnabled,
+                    onCheckedChange = {
+                        currentSettings = currentSettings.copy(rlvEnabled = it)
+                        onSettingsChange(currentSettings)
+                    }
                 )
             }
             
