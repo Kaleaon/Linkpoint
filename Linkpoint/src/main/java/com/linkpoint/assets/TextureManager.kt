@@ -211,10 +211,12 @@ class TextureManager(
                     )}
                     data
                 } else {
-                    // Consume error body to release connection properly
-                    @Suppress("UNUSED_VARIABLE")
+                    // Consume and log error body to release connection properly and aid debugging
                     val errorBody = response.body?.string()
-                    Log.w(TAG, "🖼️ Texture download failed: $textureId - HTTP ${response.code}")
+                    val errorDetails = if (errorBody != null && errorBody.length < 500) {
+                        " (${errorBody.take(200)})"
+                    } else ""
+                    Log.w(TAG, "🖼️ Texture download failed: $textureId - HTTP ${response.code}$errorDetails")
                     NetworkLogger.logTextureResult(
                         textureId = textureId.toString(),
                         success = false,

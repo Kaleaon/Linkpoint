@@ -325,8 +325,13 @@ class RenderManager(private val context: Context) {
      * Force recreation of the SwapChain.
      * Call this when the surface becomes available or after a surface change.
      * 
-     * Note: This method uses swapChainLock for synchronization with UiHelper callbacks.
-     * Do NOT call this from within UiHelper callbacks to avoid deadlock.
+     * Thread Safety:
+     * - This method uses swapChainLock for synchronization with UiHelper callbacks.
+     * - Safe to call from SurfaceHolder.Callback methods (surfaceCreated, surfaceChanged).
+     * - Do NOT call this from within UiHelper.RendererCallback methods (onNativeWindowChanged, 
+     *   onDetachedFromSurface) as those already hold the lock and calling this would cause deadlock.
+     * - If you need to recreate the SwapChain from a UiHelper callback context, the callback
+     *   already handles this automatically via the synchronized block.
      */
     fun recreateSwapChain() {
         val engine = this.engine ?: return
