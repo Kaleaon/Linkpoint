@@ -269,22 +269,21 @@ class RenderManager(private val context: Context) {
         swapChain?.let { return it }
         val surface = surfaceView?.holder?.surface
         if (surface == null || !surface.isValid) {
-            if (!swapChainWarningLogged) {
-                Log.w(TAG, "SwapChain unavailable - surface not ready (surface=${surface != null}, valid=${surface?.isValid})")
-                swapChainWarningLogged = true
+            // Log warning periodically (every 60 frames = ~1 second at 60fps)
+            if (frameCount.get() % 60 == 0L) {
+                Log.w(TAG, "SwapChain unavailable - surface not ready (surface=${surface != null}, valid=${surface?.isValid}, frame=${frameCount.get()})")
             }
             return null
         }
         try {
             swapChain = engine.createSwapChain(surface)
             if (swapChain == null) {
-                if (!swapChainWarningLogged) {
-                    Log.w(TAG, "SwapChain creation failed - engine.createSwapChain returned null")
-                    swapChainWarningLogged = true
-                }
+                Log.w(TAG, "SwapChain creation failed - engine.createSwapChain returned null")
             } else {
-                swapChainWarningLogged = false
-                Log.i(TAG, "SwapChain created successfully")
+                Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+                Log.i(TAG, "║ ✓ SwapChain created successfully!")
+                Log.i(TAG, "║ Frame count: ${frameCount.get()}")
+                Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
                 attachDisplayHelper()
                 val width = surfaceView?.width ?: 0
                 val height = surfaceView?.height ?: 0
@@ -317,9 +316,13 @@ class RenderManager(private val context: Context) {
             return
         }
         
+        Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+        Log.i(TAG, "║ 🔄 Recreating SwapChain...")
+        
         // Destroy existing swap chain using local reference to avoid race condition
         val currentSwapChain = swapChain
         if (currentSwapChain != null) { 
+            Log.d(TAG, "║ Destroying old SwapChain")
             engine.destroySwapChain(currentSwapChain)
             swapChain = null
         }
@@ -328,7 +331,7 @@ class RenderManager(private val context: Context) {
         try {
             swapChain = engine.createSwapChain(surface)
             if (swapChain != null) {
-                Log.i(TAG, "SwapChain recreated successfully")
+                Log.i(TAG, "║ ✓ SwapChain recreated successfully")
                 attachDisplayHelper()
                 val width = surfaceView?.width ?: 0
                 val height = surfaceView?.height ?: 0
@@ -337,13 +340,15 @@ class RenderManager(private val context: Context) {
                     viewportWidth = width
                     viewportHeight = height
                     updateProjection(width, height)
+                    Log.i(TAG, "║ Viewport: ${width}x${height}")
                 }
             } else {
-                Log.e(TAG, "SwapChain recreation failed")
+                Log.e(TAG, "║ ✗ SwapChain recreation failed - createSwapChain returned null")
             }
         } catch (e: Exception) {
-            Log.e(TAG, "SwapChain recreation threw exception", e)
+            Log.e(TAG, "║ ✗ SwapChain recreation threw exception: ${e.message}", e)
         }
+        Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
     }
 
     private fun attachDisplayHelper() {
@@ -377,6 +382,15 @@ class RenderManager(private val context: Context) {
             renderer.endFrame()
             frameCount.incrementAndGet()
             lastFrameTime = System.currentTimeMillis()
+            
+            // Log successful rendering milestone
+            val count = frameCount.get()
+            if (count == 1L) {
+                Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+                Log.i(TAG, "║ 🎉 FIRST FRAME RENDERED!")
+                Log.i(TAG, "║ SwapChain is working correctly")
+                Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+            }
         }
     }
     
@@ -450,7 +464,6 @@ class RenderManager(private val context: Context) {
     @Volatile private var lastInitializationError: String? = null
     @Volatile private var viewportWidth: Int = 0
     @Volatile private var viewportHeight: Int = 0
-    @Volatile private var swapChainWarningLogged: Boolean = false
     @Volatile private var displayAttachWarningLogged: Boolean = false
     
     /**
