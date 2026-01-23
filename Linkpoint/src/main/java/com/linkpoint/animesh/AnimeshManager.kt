@@ -92,13 +92,17 @@ class AnimeshManager(
     fun handleObjectUpdate(update: ObjectUpdateData) {
         if (isAnimesh(update.updateFlags)) {
             Log.d(TAG, "Animesh object detected: ${update.fullId}")
+            
+            // Extract mesh asset ID from extra params
+            val meshAssetId = update.getMeshAssetId()
+            
             updateAnimeshObject(
                 objectId = update.fullId,
                 localId = update.localId,
                 position = update.position,
                 rotation = update.rotation,
                 scale = update.scale,
-                meshAssetId = null, // TODO: Extract mesh ID from update data
+                meshAssetId = meshAssetId,
                 animationAssetId = null // Animation comes separately
             )
         }

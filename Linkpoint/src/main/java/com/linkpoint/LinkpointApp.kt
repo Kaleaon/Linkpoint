@@ -402,7 +402,10 @@ class LinkpointApp : Application() {
         xferManager = XferManager(udpConnection)
         
         // NEW: RLV Controller
-        rlvController = RLVController(chatManager = { if (::chatManager.isInitialized) chatManager else null })
+        rlvController = RLVController(
+            chatManager = { if (::chatManager.isInitialized) chatManager else null },
+            sitManager = { if (::sitManager.isInitialized) sitManager else null }
+        )
         
         // Load RLV setting from SharedPreferences
         val prefs = getSharedPreferences("com.linkpoint_preferences", Context.MODE_PRIVATE)

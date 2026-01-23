@@ -674,20 +674,43 @@ class SecondLifeProtocol(private val context: Context) {
     }
     
     /**
-     * Send a chat message
+     * Send a chat message via ChatManager.
+     * Delegates to the ChatManager which handles the actual UDP packet construction and sending.
      */
     suspend fun sendChat(message: String, channel: Int = 0, type: ChatType = ChatType.NORMAL) {
         Log.d(TAG, "Sending chat: $message on channel $channel")
-        // TODO: Implement via gRPC or UDP
+        val app = LinkpointApp.getInstance()
+        if (app.isChatManagerInitialized()) {
+            // Map our ChatType to the protocol ChatType
+            val protocolChatType = when (type) {
+                ChatType.WHISPER -> com.linkpoint.protocol.messages.ChatType.WHISPER
+                ChatType.NORMAL -> com.linkpoint.protocol.messages.ChatType.NORMAL
+                ChatType.SHOUT -> com.linkpoint.protocol.messages.ChatType.SHOUT
+            }
+            app.chatManager.sendChat(message, protocolChatType, channel)
+        } else {
+            Log.w(TAG, "ChatManager not initialized, cannot send chat")
+        }
     }
     
     /**
-     * Request teleport to location
+     * Request teleport to location via TeleportManager.
+     * Delegates to the TeleportManager which handles capabilities and UDP-based teleport requests.
      */
     suspend fun teleport(regionName: String, x: Float, y: Float, z: Float): TeleportResult {
         Log.d(TAG, "Requesting teleport to $regionName ($x, $y, $z)")
-        // TODO: Implement teleport request
-        return TeleportResult.Success(regionName)
+        val app = LinkpointApp.getInstance()
+        if (app.isTeleportManagerInitialized()) {
+            val result = app.teleportManager.teleportToLocation(regionName, x, y, z)
+            return when (result) {
+                is com.linkpoint.teleport.TeleportResult.Success -> TeleportResult.Success(result.regionName)
+                is com.linkpoint.teleport.TeleportResult.Failure -> TeleportResult.Failure(result.message)
+                is com.linkpoint.teleport.TeleportResult.Pending -> TeleportResult.Success(regionName) // Pending is treated as success (in progress)
+            }
+        } else {
+            Log.w(TAG, "TeleportManager not initialized, cannot teleport")
+            return TeleportResult.Failure("Teleport system not initialized")
+        }
     }
     
     /**
