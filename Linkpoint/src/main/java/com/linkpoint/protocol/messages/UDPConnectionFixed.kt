@@ -845,7 +845,12 @@ class UDPConnectionFixed {
         // - CacheMissType (1 byte)
         // - ID (4 bytes, U32)
         
-        val payloadSize = 32 + 1 + (objectIds.size * 5)  // Agent (32) + count (1) + objects (5 each)
+        // Message structure sizes
+        val agentDataSize = 32    // AgentID (16) + SessionID (16)
+        val objectCountSize = 1   // Object count byte
+        val objectEntrySize = 5   // CacheMissType (1) + ID (4)
+        
+        val payloadSize = agentDataSize + objectCountSize + (objectIds.size * objectEntrySize)
         val payload = ByteBuffer.allocate(payloadSize).order(ByteOrder.LITTLE_ENDIAN)
         
         // AgentData block
