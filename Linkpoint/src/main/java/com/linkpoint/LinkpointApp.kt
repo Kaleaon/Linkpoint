@@ -65,6 +65,7 @@ import com.linkpoint.hud.HUDManager
 import com.linkpoint.world.estate.EstateManager
 import com.linkpoint.xr.XRManager
 import com.linkpoint.protocol.textures.TextureEntryParser
+import com.linkpoint.protocol.types.getUUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -1055,12 +1056,7 @@ class LinkpointApp : Application() {
                 
                 for (i in 0 until count) {
                     if (buffer.remaining() >= 16) {
-                        val agentIdBytes = ByteArray(16)
-                        buffer.get(agentIdBytes)
-                        val agentId = java.util.UUID(
-                            java.nio.ByteBuffer.wrap(agentIdBytes.copyOfRange(0, 8)).long,
-                            java.nio.ByteBuffer.wrap(agentIdBytes.copyOfRange(8, 16)).long
-                        )
+                        val agentId = buffer.getUUID()
                         Log.i(TAG, "🟢 Friend online: $agentId")
                         
                         // Notify FriendsManager via shared flow if initialized
@@ -1088,12 +1084,7 @@ class LinkpointApp : Application() {
                 
                 for (i in 0 until count) {
                     if (buffer.remaining() >= 16) {
-                        val agentIdBytes = ByteArray(16)
-                        buffer.get(agentIdBytes)
-                        val agentId = java.util.UUID(
-                            java.nio.ByteBuffer.wrap(agentIdBytes.copyOfRange(0, 8)).long,
-                            java.nio.ByteBuffer.wrap(agentIdBytes.copyOfRange(8, 16)).long
-                        )
+                        val agentId = buffer.getUUID()
                         Log.i(TAG, "🔴 Friend offline: $agentId")
                         
                         // Notify FriendsManager via shared flow if initialized
@@ -1119,20 +1110,14 @@ class LinkpointApp : Application() {
                 val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
                 
                 if (buffer.remaining() >= 16) {
-                    val agentIdBytes = ByteArray(16)
-                    buffer.get(agentIdBytes)
+                    buffer.getUUID() // Skip AgentID (our ID)
                     
                     if (buffer.remaining() >= 1) {
                         val rightsCount = buffer.get().toInt() and 0xFF
                         
                         for (i in 0 until rightsCount) {
                             if (buffer.remaining() >= 20) {  // 16 bytes UUID + 4 bytes rights
-                                val relatedIdBytes = ByteArray(16)
-                                buffer.get(relatedIdBytes)
-                                val relatedId = java.util.UUID(
-                                    java.nio.ByteBuffer.wrap(relatedIdBytes.copyOfRange(0, 8)).long,
-                                    java.nio.ByteBuffer.wrap(relatedIdBytes.copyOfRange(8, 16)).long
-                                )
+                                val relatedId = buffer.getUUID()
                                 val rights = buffer.int
                                 
                                 Log.i(TAG, "🔐 ChangeUserRights: friend=$relatedId rights=$rights")
@@ -1161,12 +1146,7 @@ class LinkpointApp : Application() {
                 val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
                 
                 if (buffer.remaining() >= 16) {
-                    val agentIdBytes = ByteArray(16)
-                    buffer.get(agentIdBytes)
-                    val agentId = java.util.UUID(
-                        java.nio.ByteBuffer.wrap(agentIdBytes.copyOfRange(0, 8)).long,
-                        java.nio.ByteBuffer.wrap(agentIdBytes.copyOfRange(8, 16)).long
-                    )
+                    buffer.getUUID() // Skip AgentID
                     
                     // Parse variable strings (null-terminated)
                     fun readVarString(): String {
@@ -1188,12 +1168,7 @@ class LinkpointApp : Application() {
                     var groupName = ""
                     
                     if (buffer.remaining() >= 16) {
-                        val groupIdBytes = ByteArray(16)
-                        buffer.get(groupIdBytes)
-                        activeGroupId = java.util.UUID(
-                            java.nio.ByteBuffer.wrap(groupIdBytes.copyOfRange(0, 8)).long,
-                            java.nio.ByteBuffer.wrap(groupIdBytes.copyOfRange(8, 16)).long
-                        )
+                        activeGroupId = buffer.getUUID()
                     }
                     
                     if (buffer.remaining() >= 8) {
