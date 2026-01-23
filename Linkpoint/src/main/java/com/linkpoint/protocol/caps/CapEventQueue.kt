@@ -222,9 +222,11 @@ class CapEventQueue(
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Event: $message")
         
         // Convert to local Event format for queue
+        // Convert LLSDMap to Map<String, Any> for the Event data structure
+        val eventData = convertLLSDMapToMap(body)
         val localEvent = Event(
             eventType = message,
-            eventData = body.toMap(),
+            eventData = eventData,
             timestamp = System.currentTimeMillis()
         )
         addEvent(localEvent)
@@ -237,6 +239,26 @@ class CapEventQueue(
                 Log.e(TAG, "Event listener error", e)
             }
         }
+    }
+    
+    /**
+     * Convert LLSDMap to Map<String, Any> for simpler event data storage
+     */
+    private fun convertLLSDMapToMap(llsdMap: LLSDMap): Map<String, Any> {
+        val result = mutableMapOf<String, Any>()
+        for ((key, value) in llsdMap.value) {
+            when (value) {
+                is LLSDString -> result[key] = value.value
+                is LLSDInteger -> result[key] = value.value
+                is LLSDReal -> result[key] = value.value
+                is LLSDBoolean -> result[key] = value.value
+                is LLSDUUID -> result[key] = value.value
+                is LLSDMap -> result[key] = convertLLSDMapToMap(value)
+                is LLSDArray -> result[key] = value.value.map { it.toString() }
+                else -> result[key] = value.toString()
+            }
+        }
+        return result
     }
     
     /**

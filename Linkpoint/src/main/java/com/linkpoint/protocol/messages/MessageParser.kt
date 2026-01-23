@@ -678,7 +678,9 @@ data class ObjectUpdateData(
                     if (sculptType == 5) {
                         // Parse UUID (big-endian)
                         val uuidBuffer = java.nio.ByteBuffer.wrap(uuidBytes).order(java.nio.ByteOrder.BIG_ENDIAN)
-                        return UUID(uuidBuffer.long, uuidBuffer.long)
+                        val mostSigBits = uuidBuffer.long
+                        val leastSigBits = uuidBuffer.long
+                        return UUID(mostSigBits, leastSigBits)
                     }
                     
                     // Skip remaining bytes of this param
