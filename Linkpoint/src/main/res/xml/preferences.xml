@@ -117,7 +117,7 @@
             android:key="custom_cache_path"
             android:title="Custom Cache Path"
             android:summary="Custom location for Lumiya Cache folder"
-            android:defaultValue="/sdcard/Lumiya Cache"
+            android:defaultValue=""
             android:inputType="text" />
 
         <Preference
