@@ -269,7 +269,7 @@ class RenderManager(private val context: Context) {
         swapChain?.let { return it }
         val surface = surfaceView?.holder?.surface
         if (surface == null || !surface.isValid) {
-            // Log warning at most once per second using timestamp (more efficient than modulo)
+            // Throttle warnings to at most once per second (avoids log spam)
             val now = System.currentTimeMillis()
             if (now - lastSwapChainWarningTime > 1000) {
                 Log.w(TAG, "SwapChain unavailable - surface not ready (surface=${surface != null}, valid=${surface?.isValid}, frame=${frameCount.get()})")
@@ -280,7 +280,12 @@ class RenderManager(private val context: Context) {
         try {
             swapChain = engine.createSwapChain(surface)
             if (swapChain == null) {
-                Log.w(TAG, "SwapChain creation failed - engine.createSwapChain returned null")
+                // Also throttle this warning to avoid log spam
+                val now = System.currentTimeMillis()
+                if (now - lastSwapChainWarningTime > 1000) {
+                    Log.w(TAG, "SwapChain creation failed - engine.createSwapChain returned null")
+                    lastSwapChainWarningTime = now
+                }
             } else {
                 Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
                 Log.i(TAG, "║ ✓ SwapChain created successfully!")

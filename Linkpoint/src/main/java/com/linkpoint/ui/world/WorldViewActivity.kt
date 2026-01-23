@@ -491,7 +491,8 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 // Mark surface as ready (volatile ensures visibility across threads)
                 isSurfaceReady = true
                 
-                // Ensure SwapChain is created
+                // Eagerly create SwapChain now that surface is available
+                // This is more efficient than waiting for ensureSwapChain() to detect it on first render frame
                 app.renderManager.recreateSwapChain()
                 
                 // Start render loop only if not already rendering (synchronized to avoid race)
@@ -506,7 +507,8 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             
             override fun surfaceChanged(holder: android.view.SurfaceHolder, format: Int, width: Int, height: Int) {
                 android.util.Log.d(TAG, "Surface changed: ${width}x${height}")
-                // Ensure SwapChain is updated with new dimensions
+                // Recreate SwapChain to handle new dimensions or format changes
+                // This ensures viewport is updated immediately rather than waiting for next render frame
                 if (isSurfaceReady) {
                     app.renderManager.recreateSwapChain()
                 }
