@@ -238,6 +238,7 @@ object MessageTranslation {
                 IMPROVED_TERSE_OBJECT_UPDATE -> "ImprovedTerseObjectUpdate"
                 KILL_OBJECT -> "KillObject"
                 AVATAR_ANIMATION -> "AvatarAnimation"
+                29 -> "SoundTrigger"  // High frequency message
                 PACKET_ACK -> "PacketAck"
                 COARSE_LOCATION_UPDATE -> "CoarseLocationUpdate"
                 USE_CIRCUIT_CODE -> "UseCircuitCode"
@@ -249,6 +250,7 @@ object MessageTranslation {
                 AGENT_MOVEMENT_COMPLETE -> "AgentMovementComplete"
                 CHAT_FROM_SIMULATOR -> "ChatFromSimulator"
                 IMPROVED_INSTANT_MESSAGE -> "ImprovedInstantMessage"
+                (0xFFFF00BD).toInt() -> "ScriptControlChange"  // -65347
                 else -> "Unknown(0x${messageId.toString(16).uppercase()})"
             }
         }

@@ -34,6 +34,9 @@ object MessageIds {
     /** ObjectUpdateCompressed - Compressed object update */
     const val OBJECT_UPDATE_COMPRESSED = 13
     
+    /** ObjectUpdateCached - Server indicates cached object, client must request full data */
+    const val OBJECT_UPDATE_CACHED = 14
+    
     /** ImprovedTerseObjectUpdate - Minimal position update */
     const val IMPROVED_TERSE_OBJECT_UPDATE = 15
     
@@ -42,6 +45,9 @@ object MessageIds {
     
     /** AvatarAnimation - Avatar animation state */
     const val AVATAR_ANIMATION = 20
+    
+    /** SoundTrigger - Sound triggered by script (llTriggerSound) */
+    const val SOUND_TRIGGER = 29  // Wire: 0x1D (high frequency message)
     
     /** PacketAck - Packet acknowledgment (special: 0xFB as signed byte = -5) */
     const val PACKET_ACK = -5
@@ -85,13 +91,6 @@ object MessageIds {
     
     /** ImprovedInstantMessage - IM/Group notice/Teleport request */
     const val IMPROVED_INSTANT_MESSAGE = (0xFFFF00FE).toInt()  // Wire: FF FF 00 FE
-
-    // =====================================
-    // Sound Messages
-    // =====================================
-    
-    /** SoundTrigger - Sound triggered by script (llTriggerSound) */
-    const val SOUND_TRIGGER = (0xFFFF009E).toInt()             // Wire: FF FF 00 9E
 
     // =====================================
     // Chat Messages
@@ -181,6 +180,16 @@ object MessageIds {
     
     /** ObjectDeGrab - Release object */
     const val OBJECT_DEGRAB = (0xFFFF0083).toInt()             // Wire: FF FF 00 83
+    
+    /** RequestMultipleObjects - Request full object data for cached objects */
+    const val REQUEST_MULTIPLE_OBJECTS = (0xFFFF006C).toInt()  // Wire: FF FF 00 6C = -65428
+
+    // =====================================
+    // Script Messages
+    // =====================================
+    
+    /** ScriptControlChange - Script control permissions changed */
+    const val SCRIPT_CONTROL_CHANGE = (0xFFFF00BD).toInt()     // Wire: FF FF 00 BD = -65347
 
     // =====================================
     // Inventory Messages
