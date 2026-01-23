@@ -188,39 +188,50 @@ class TextureManager(
             val durationMs = System.currentTimeMillis() - startTime
             val protocol = response.protocol.toString()
             
-            if (response.isSuccessful) {
-                val data = response.body?.bytes()
-                val sizeBytes = data?.size ?: 0
-                
-                Log.d(TAG, "🖼️ Texture downloaded: $textureId ($sizeBytes bytes, ${durationMs}ms, $protocol)")
-                NetworkLogger.logTextureResult(
-                    textureId = textureId.toString(),
-                    success = true,
-                    durationMs = durationMs,
-                    sizeBytes = sizeBytes,
-                    protocol = protocol
-                )
-                
-                updateStats { it.copy(
-                    downloadedCount = it.downloadedCount + 1,
-                    downloadedBytes = it.downloadedBytes + sizeBytes
-                )}
-                data
-            } else {
-                Log.w(TAG, "🖼️ Texture download failed: $textureId - HTTP ${response.code}")
-                NetworkLogger.logTextureResult(
-                    textureId = textureId.toString(),
-                    success = false,
-                    durationMs = durationMs,
-                    sizeBytes = null,
-                    protocol = protocol,
-                    error = "HTTP ${response.code}: ${response.message}"
-                )
-                
-                lastError = "HTTP ${response.code}: Download failed"
-                lastErrorTime = System.currentTimeMillis()
-                updateStats { it.copy(failedCount = it.failedCount + 1) }
-                null
+            // Use try-finally to ensure response is always closed to prevent connection leaks
+            // This fixes "ProtocolException: Unexpected status line" errors caused by
+            // unconsumed response bodies polluting the connection pool
+            try {
+                if (response.isSuccessful) {
+                    val data = response.body?.bytes()
+                    val sizeBytes = data?.size ?: 0
+                    
+                    Log.d(TAG, "🖼️ Texture downloaded: $textureId ($sizeBytes bytes, ${durationMs}ms, $protocol)")
+                    NetworkLogger.logTextureResult(
+                        textureId = textureId.toString(),
+                        success = true,
+                        durationMs = durationMs,
+                        sizeBytes = sizeBytes,
+                        protocol = protocol
+                    )
+                    
+                    updateStats { it.copy(
+                        downloadedCount = it.downloadedCount + 1,
+                        downloadedBytes = it.downloadedBytes + sizeBytes
+                    )}
+                    data
+                } else {
+                    // Consume error body to release connection properly
+                    @Suppress("UNUSED_VARIABLE")
+                    val errorBody = response.body?.string()
+                    Log.w(TAG, "🖼️ Texture download failed: $textureId - HTTP ${response.code}")
+                    NetworkLogger.logTextureResult(
+                        textureId = textureId.toString(),
+                        success = false,
+                        durationMs = durationMs,
+                        sizeBytes = null,
+                        protocol = protocol,
+                        error = "HTTP ${response.code}: ${response.message}"
+                    )
+                    
+                    lastError = "HTTP ${response.code}: Download failed"
+                    lastErrorTime = System.currentTimeMillis()
+                    updateStats { it.copy(failedCount = it.failedCount + 1) }
+                    null
+                }
+            } finally {
+                // Always close response to release connection back to pool
+                response.close()
             }
         } catch (e: Exception) {
             val durationMs = System.currentTimeMillis() - startTime
