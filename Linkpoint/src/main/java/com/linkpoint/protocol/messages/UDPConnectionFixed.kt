@@ -823,6 +823,53 @@ class UDPConnectionFixed {
     }
     
     /**
+     * Send RequestMultipleObjects message to request full object data
+     * 
+     * This is used as a response to ObjectUpdateCached messages when the client
+     * doesn't have the cached object data and needs the full update.
+     * 
+     * @param objectIds List of local object IDs to request
+     * @param cacheMissType 0 = CRC mismatch/not cached, 1 = full request
+     */
+    suspend fun sendRequestMultipleObjects(objectIds: List<Int>, cacheMissType: Int = 0) {
+        if (objectIds.isEmpty()) return
+        
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, 
+            "→ Sending RequestMultipleObjects for ${objectIds.size} objects")
+        
+        // RequestMultipleObjects message format:
+        // AgentData:
+        // - AgentID (16 bytes, UUID)
+        // - SessionID (16 bytes, UUID)
+        // ObjectData (variable, one per object):
+        // - CacheMissType (1 byte)
+        // - ID (4 bytes, U32)
+        
+        // Message structure sizes
+        val agentDataSize = 32    // AgentID (16) + SessionID (16)
+        val objectCountSize = 1   // Object count byte
+        val objectEntrySize = 5   // CacheMissType (1) + ID (4)
+        
+        val payloadSize = agentDataSize + objectCountSize + (objectIds.size * objectEntrySize)
+        val payload = ByteBuffer.allocate(payloadSize).order(ByteOrder.LITTLE_ENDIAN)
+        
+        // AgentData block
+        payload.put(agentId.asBytes())
+        payload.put(sessionId.asBytes())
+        
+        // ObjectData count
+        payload.put(objectIds.size.toByte())
+        
+        // ObjectData blocks
+        for (objectId in objectIds) {
+            payload.put(cacheMissType.toByte())
+            payload.putInt(objectId)
+        }
+        
+        sendPacket(MessageIds.REQUEST_MULTIPLE_OBJECTS, payload.array(), reliable = true)
+    }
+    
+    /**
      * Send a packet with proper SL protocol encoding
      * 
      * @param messageId The message ID

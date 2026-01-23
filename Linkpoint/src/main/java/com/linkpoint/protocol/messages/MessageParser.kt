@@ -1045,3 +1045,120 @@ data class AgentMovementCompleteData(
     val timestamp: Int,
     val channelVersion: String? = null  // SimData block
 )
+
+/**
+ * Data from ObjectUpdateCached message (message ID 14)
+ * 
+ * This message indicates the server has cached object data.
+ * The client should respond with RequestMultipleObjects to get full data.
+ */
+data class ObjectUpdateCachedData(
+    val regionHandle: Long,
+    val timeDilation: Int,
+    val objects: List<CachedObjectData>
+)
+
+/**
+ * Individual cached object entry
+ */
+data class CachedObjectData(
+    val localId: Int,
+    val crc: Int,
+    val updateFlags: Int
+)
+
+/**
+ * Parse ObjectUpdateCached message (ID 14 / 0xE)
+ * 
+ * Format:
+ * - RegionData: RegionHandle (U64), TimeDilation (U16)
+ * - ObjectData (variable): ID (U32), CRC (U32), UpdateFlags (U32)
+ */
+fun MessageParser.parseObjectUpdateCached(data: ByteArray): ObjectUpdateCachedData? {
+    try {
+        val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+        
+        // RegionData block
+        val regionHandle = buffer.long
+        val timeDilation = buffer.short.toInt() and 0xFFFF
+        
+        // Count of object blocks
+        val numObjects = buffer.get().toInt() and 0xFF
+        
+        val objects = mutableListOf<CachedObjectData>()
+        
+        for (i in 0 until numObjects) {
+            val localId = buffer.int
+            val crc = buffer.int
+            val updateFlags = buffer.int
+            
+            objects.add(CachedObjectData(
+                localId = localId,
+                crc = crc,
+                updateFlags = updateFlags
+            ))
+        }
+        
+        return ObjectUpdateCachedData(
+            regionHandle = regionHandle,
+            timeDilation = timeDilation,
+            objects = objects
+        )
+    } catch (e: Exception) {
+        Log.e("MessageParser", "Failed to parse ObjectUpdateCached", e)
+        return null
+    }
+}
+
+/**
+ * Data from ScriptControlChange message (message ID -65347 / 0xFFFF00BD)
+ * 
+ * This message indicates that script control permissions have changed.
+ * Scripts can take/release keyboard/mouse controls from the agent.
+ */
+data class ScriptControlChangeData(
+    val controls: List<ControlData>
+)
+
+/**
+ * Individual control permission entry
+ */
+data class ControlData(
+    val takeControls: Boolean,
+    val controls: Int,  // Bitmask of control flags
+    val passToAgent: Boolean
+)
+
+/**
+ * Parse ScriptControlChange message (ID -65347 / 0xFFFF00BD)
+ * 
+ * Format:
+ * - Data (variable): TakeControls (BOOL), Controls (U32), PassToAgent (BOOL)
+ */
+fun MessageParser.parseScriptControlChange(data: ByteArray): ScriptControlChangeData? {
+    try {
+        val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+        
+        // Count of data blocks
+        val numData = buffer.get().toInt() and 0xFF
+        
+        val controls = mutableListOf<ControlData>()
+        
+        for (i in 0 until numData) {
+            val takeControls = buffer.get() != 0.toByte()
+            val controlFlags = buffer.int
+            val passToAgent = buffer.get() != 0.toByte()
+            
+            controls.add(ControlData(
+                takeControls = takeControls,
+                controls = controlFlags,
+                passToAgent = passToAgent
+            ))
+        }
+        
+        return ScriptControlChangeData(controls = controls)
+    } catch (e: Exception) {
+        Log.e("MessageParser", "Failed to parse ScriptControlChange", e)
+        return null
+    }
+}

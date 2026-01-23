@@ -238,6 +238,7 @@ object MessageTranslation {
                 IMPROVED_TERSE_OBJECT_UPDATE -> "ImprovedTerseObjectUpdate"
                 KILL_OBJECT -> "KillObject"
                 AVATAR_ANIMATION -> "AvatarAnimation"
+                com.linkpoint.protocol.messages.MessageIds.SOUND_TRIGGER -> "SoundTrigger"
                 PACKET_ACK -> "PacketAck"
                 COARSE_LOCATION_UPDATE -> "CoarseLocationUpdate"
                 USE_CIRCUIT_CODE -> "UseCircuitCode"
@@ -249,6 +250,7 @@ object MessageTranslation {
                 AGENT_MOVEMENT_COMPLETE -> "AgentMovementComplete"
                 CHAT_FROM_SIMULATOR -> "ChatFromSimulator"
                 IMPROVED_INSTANT_MESSAGE -> "ImprovedInstantMessage"
+                com.linkpoint.protocol.messages.MessageIds.SCRIPT_CONTROL_CHANGE -> "ScriptControlChange"
                 else -> "Unknown(0x${messageId.toString(16).uppercase()})"
             }
         }

@@ -31,6 +31,8 @@ import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.messages.parseRegionHandshake
 import com.linkpoint.protocol.messages.parseAgentMovementComplete
+import com.linkpoint.protocol.messages.parseObjectUpdateCached
+import com.linkpoint.protocol.messages.parseScriptControlChange
 import com.linkpoint.protocol.transfer.TransferManager
 import com.linkpoint.protocol.transfer.XferManager
 import com.linkpoint.render.DrawDistanceManager
@@ -825,6 +827,61 @@ class LinkpointApp : Application() {
                 updates.forEach { processObjectUpdate(it) }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling ObjectUpdateCompressed", e)
+            }
+        }
+        
+        // ObjectUpdateCached (ID 14) - Server notifies about cached objects
+        // We respond with RequestMultipleObjects to get full data
+        var cachedObjectUpdateCount = 0
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE_CACHED) { _, rawPacket ->
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
+                val cachedData = com.linkpoint.protocol.messages.parseObjectUpdateCached(payload)
+                if (cachedData != null) {
+                    cachedObjectUpdateCount += cachedData.objects.size
+                    // Log occasionally to avoid spam
+                    if (cachedObjectUpdateCount <= 5 || cachedObjectUpdateCount % 50 == 0) {
+                        Log.d(TAG, "OBJECT_UPDATE_CACHED received: ${cachedData.objects.size} cached objects (total: $cachedObjectUpdateCount)")
+                    }
+                    
+                    // Request full object data for all cached objects
+                    // Per Lumiya protocol: respond with RequestMultipleObjects with CacheMissType=0
+                    if (cachedData.objects.isNotEmpty()) {
+                        val objectIds = cachedData.objects.map { it.localId }
+                        applicationScope.launch {
+                            udpConnection.sendRequestMultipleObjects(objectIds, cacheMissType = 0)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling ObjectUpdateCached", e)
+            }
+        }
+        
+        // ScriptControlChange (ID -65347 / 0xFFFF00BD) - Script control permissions
+        var scriptControlChangeCount = 0
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.SCRIPT_CONTROL_CHANGE) { _, rawPacket ->
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
+                val controlData = com.linkpoint.protocol.messages.parseScriptControlChange(payload)
+                if (controlData != null) {
+                    scriptControlChangeCount++
+                    // Log occasionally to avoid spam
+                    if (scriptControlChangeCount <= 10 || scriptControlChangeCount % 100 == 0) {
+                        Log.d(TAG, "SCRIPT_CONTROL_CHANGE received: ${controlData.controls.size} control changes (total: $scriptControlChangeCount)")
+                        controlData.controls.forEach { ctrl ->
+                            Log.d(TAG, "  - Controls: 0x${ctrl.controls.toString(16)}, take=${ctrl.takeControls}, pass=${ctrl.passToAgent}")
+                        }
+                    }
+                    
+                    // TODO: Forward to script/control manager when implemented
+                    // For now, just acknowledge the message - scripts can take controls
+                    // The controls bitmask indicates which keys/mouse the script is capturing
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling ScriptControlChange", e)
             }
         }
         
