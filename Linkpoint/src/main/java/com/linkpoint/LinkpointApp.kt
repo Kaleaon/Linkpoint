@@ -1519,18 +1519,15 @@ class LinkpointApp : Application() {
         }
         
         // ParcelProperties - Full parcel information (high frequency)
+        // TODO: Implement ParcelProperties parser - complex message with many fields
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.PARCEL_PROPERTIES) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
                 
-                // ParcelProperties is complex - for now just log that we received it
+                // ParcelProperties message is complex (70+ fields)
+                // Need to implement parser before forwarding to parcelManager
                 Log.d(TAG, "🗺️ ParcelProperties received (${payload.size} bytes)")
-                
-                // Forward to parcel manager when full parsing is implemented
-                if (::parcelManager.isInitialized) {
-                    // parcelManager.handleParcelProperties(payload)
-                }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling ParcelProperties", e)
             }
@@ -1542,24 +1539,59 @@ class LinkpointApp : Application() {
         
         // --- Script/Dialog Messages ---
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.SCRIPT_DIALOG) { _, rawPacket ->
-            Log.d(TAG, "📋 ScriptDialog received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::scriptDialogManager.isInitialized) {
+                    scriptDialogManager.handleScriptDialog(payload)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling ScriptDialog", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.SCRIPT_QUESTION) { _, rawPacket ->
-            Log.d(TAG, "❓ ScriptQuestion (permission request) received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::scriptDialogManager.isInitialized) {
+                    scriptDialogManager.handleScriptQuestion(payload)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling ScriptQuestion", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.LOAD_URL) { _, rawPacket ->
-            Log.d(TAG, "🔗 LoadURL request received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::scriptDialogManager.isInitialized) {
+                    scriptDialogManager.handleLoadUrl(payload)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling LoadUrl", e)
+            }
         }
         
         // --- Economy Messages ---
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.MONEY_BALANCE_REPLY) { _, rawPacket ->
-            Log.d(TAG, "💰 MoneyBalanceReply received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::economyManager.isInitialized) {
+                    economyManager.handleMoneyBalanceReply(payload)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling MoneyBalanceReply", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.ECONOMY_DATA) { _, rawPacket ->
-            Log.d(TAG, "📊 EconomyData received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::economyManager.isInitialized) {
+                    economyManager.handleEconomyData(payload)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling EconomyData", e)
+            }
         }
         
         // --- Inventory Messages ---
