@@ -547,6 +547,129 @@ class GroupsManager(
         const val MSG_GROUP_PROPOSAL_BALLOT = 0xFF0075
         const val MSG_START_GROUP_PROPOSAL = 0xFF0076
     }
+    
+    // ==================== UDP MESSAGE HANDLERS ====================
+    
+    /**
+     * Handle GroupRoleDataReply UDP message.
+     * Parses role data for a group.
+     */
+    fun handleGroupRoleData(payload: ByteArray) {
+        try {
+            val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData block
+            buffer.position(buffer.position() + 32) // Skip AgentID and GroupID
+            
+            // Role count
+            if (buffer.remaining() < 4) return
+            val roleCount = buffer.int
+            
+            Log.d(TAG, "📋 Parsing $roleCount group roles")
+            
+            // Note: Full parsing would extract role names, powers, etc.
+            // For now we just acknowledge receipt
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing GroupRoleDataReply", e)
+        }
+    }
+    
+    /**
+     * Handle GroupTitlesReply UDP message.
+     * Parses available titles for a group.
+     */
+    fun handleGroupTitles(payload: ByteArray) {
+        try {
+            val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData block
+            buffer.position(buffer.position() + 48) // Skip AgentID, GroupID, RequestID
+            
+            // Title count
+            if (buffer.remaining() < 1) return
+            val titleCount = buffer.get().toInt() and 0xFF
+            
+            Log.d(TAG, "📋 Parsing $titleCount group titles")
+            
+            // Note: Full parsing would extract title names and IDs
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing GroupTitlesReply", e)
+        }
+    }
+    
+    /**
+     * Handle GroupNoticeAdd confirmation.
+     */
+    fun handleGroupNoticeAdd(payload: ByteArray) {
+        try {
+            Log.d(TAG, "📢 Group notice add confirmed (${payload.size} bytes)")
+            // This is typically a confirmation that a notice was added
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing GroupNoticeAdd", e)
+        }
+    }
+    
+    /**
+     * Handle AgentGroupDataUpdate UDP message.
+     * Updates the agent's group memberships from UDP (fallback for capability).
+     */
+    fun handleAgentGroupDataUpdate(payload: ByteArray) {
+        try {
+            val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData block - 16 bytes
+            buffer.position(buffer.position() + 16) // Skip AgentID
+            
+            // GroupData block count
+            if (buffer.remaining() < 1) return
+            val groupCount = buffer.get().toInt() and 0xFF
+            
+            Log.d(TAG, "📋 AgentGroupDataUpdate: $groupCount groups")
+            
+            // Parse each group
+            for (i in 0 until groupCount) {
+                if (buffer.remaining() < 43) break // Minimum group data size
+                
+                val groupId = com.linkpoint.protocol.types.getUUID(buffer)
+                val groupPowers = buffer.long
+                val acceptNotices = buffer.get() != 0.toByte()
+                val groupInsigniaId = com.linkpoint.protocol.types.getUUID(buffer)
+                val contribution = buffer.int
+                
+                // Read variable-length group name
+                val nameLen = buffer.get().toInt() and 0xFF
+                val nameBytes = ByteArray(nameLen)
+                if (buffer.remaining() >= nameLen) {
+                    buffer.get(nameBytes)
+                }
+                val groupName = String(nameBytes, Charsets.UTF_8).trimEnd('\u0000')
+                
+                // Update or add group
+                val group = groups[groupId]?.copy(
+                    powers = groupPowers,
+                    acceptNotices = acceptNotices,
+                    insigniaId = if (groupInsigniaId != UUID(0, 0)) groupInsigniaId else null,
+                    contribution = contribution
+                ) ?: Group(
+                    groupId = groupId,
+                    name = groupName,
+                    powers = groupPowers,
+                    acceptNotices = acceptNotices,
+                    insigniaId = if (groupInsigniaId != UUID(0, 0)) groupInsigniaId else null,
+                    contribution = contribution
+                )
+                
+                groups[groupId] = group
+            }
+            
+            // Emit update event
+            scope.launch {
+                _groupEvents.emit(GroupEvent.GroupsUpdated(groups.values.toList()))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing AgentGroupDataUpdate", e)
+        }
+    }
 }
 
 @Parcelize

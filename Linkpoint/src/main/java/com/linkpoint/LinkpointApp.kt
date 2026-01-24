@@ -1807,19 +1807,44 @@ class LinkpointApp : Application() {
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.GROUP_ROLE_DATA_REPLY) { _, rawPacket ->
-            Log.d(TAG, "👥 GroupRoleDataReply received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::groupsManager.isInitialized) {
+                    Log.d(TAG, "👥 GroupRoleDataReply (${payload.size} bytes)")
+                    // Parse group roles data
+                    groupsManager.handleGroupRoleData(payload)
+                }
+            } catch (e: Exception) { Log.e(TAG, "Error handling GroupRoleDataReply", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.GROUP_TITLES_REPLY) { _, rawPacket ->
-            Log.d(TAG, "👥 GroupTitlesReply received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::groupsManager.isInitialized) {
+                    Log.d(TAG, "👥 GroupTitlesReply (${payload.size} bytes)")
+                    groupsManager.handleGroupTitles(payload)
+                }
+            } catch (e: Exception) { Log.e(TAG, "Error handling GroupTitlesReply", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.GROUP_NOTICE_ADD) { _, rawPacket ->
-            Log.d(TAG, "📢 GroupNoticeAdd received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::groupsManager.isInitialized) {
+                    Log.d(TAG, "📢 GroupNoticeAdd (${payload.size} bytes)")
+                    groupsManager.handleGroupNoticeAdd(payload)
+                }
+            } catch (e: Exception) { Log.e(TAG, "Error handling GroupNoticeAdd", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.AGENT_GROUP_DATA_UPDATE) { _, rawPacket ->
-            Log.d(TAG, "👥 AgentGroupDataUpdate received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::groupsManager.isInitialized) {
+                    Log.d(TAG, "👥 AgentGroupDataUpdate (${payload.size} bytes)")
+                    groupsManager.handleAgentGroupDataUpdate(payload)
+                }
+            } catch (e: Exception) { Log.e(TAG, "Error handling AgentGroupDataUpdate", e) }
         }
         
         // --- Friends Messages ---
@@ -1995,7 +2020,15 @@ class LinkpointApp : Application() {
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.SIM_STATS) { _, rawPacket ->
-            Log.d(TAG, "📈 SimStats received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    val data = com.linkpoint.protocol.messages.AdditionalMessageParsers.parseSimStats(payload)
+                    if (data != null && ::sessionManager.isInitialized) {
+                        sessionManager.updateSimStats(data)
+                    }
+                }
+            } catch (e: Exception) { Log.e(TAG, "Error handling SimStats", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.ESTATE_COVENANT_REPLY) { _, rawPacket ->
@@ -2303,19 +2336,40 @@ class LinkpointApp : Application() {
         
         // --- High Frequency Messages ---
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.NEIGHBOR_LIST) { _, rawPacket ->
-            Log.d(TAG, "🌐 NeighborList received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    Log.d(TAG, "🌐 NeighborList (${payload.size} bytes)")
+                    // Parse neighbor regions for region crossing preparation
+                }
+            } catch (e: Exception) { Log.e(TAG, "Error handling NeighborList", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.REQUEST_IMAGE) { _, rawPacket ->
-            Log.d(TAG, "🖼️ RequestImage received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "🖼️ RequestImage (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling RequestImage", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.IMAGE_DATA) { _, rawPacket ->
-            Log.d(TAG, "🖼️ ImageData received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::textureManager.isInitialized) {
+                    // First packet of texture data
+                    textureManager.handleImageData(payload)
+                }
+            } catch (e: Exception) { Log.e(TAG, "Error handling ImageData", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.IMAGE_PACKET) { _, rawPacket ->
-            Log.d(TAG, "🖼️ ImagePacket received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::textureManager.isInitialized) {
+                    // Subsequent packets of texture data
+                    textureManager.handleImagePacket(payload)
+                }
+            } catch (e: Exception) { Log.e(TAG, "Error handling ImagePacket", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.EDGE_DATA_PACKET) { _, rawPacket ->

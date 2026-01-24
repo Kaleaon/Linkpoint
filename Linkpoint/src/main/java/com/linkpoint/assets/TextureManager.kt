@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.io.ByteArrayOutputStream
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.PriorityBlockingQueue
@@ -268,6 +269,104 @@ class TextureManager(
     
     // Track textures that are known to be missing
     private val missingTextures = java.util.concurrent.ConcurrentHashMap.newKeySet<UUID>()
+    
+    // Track in-progress UDP texture transfers
+    private val udpTextureTransfers = java.util.concurrent.ConcurrentHashMap<UUID, ByteArrayOutputStream>()
+    
+    /**
+     * Handle ImageData message - first packet of UDP texture transfer.
+     */
+    fun handleImageData(payload: ByteArray) {
+        try {
+            val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            
+            // ImageID block
+            val textureId = com.linkpoint.protocol.types.getUUID(buffer)
+            val codec = buffer.get().toInt() and 0xFF // 0 = raw, 2 = JPEG2000
+            val size = buffer.int
+            val packets = buffer.short.toInt() and 0xFFFF
+            
+            Log.d(TAG, "🖼️ ImageData: $textureId, codec=$codec, size=$size, packets=$packets")
+            
+            // Read image data
+            if (buffer.remaining() > 0) {
+                val data = ByteArray(buffer.remaining())
+                buffer.get(data)
+                
+                if (packets == 1) {
+                    // Single packet - decode immediately
+                    processTextureData(textureId, data)
+                } else {
+                    // Multi-packet - start accumulating
+                    val stream = ByteArrayOutputStream(size)
+                    stream.write(data)
+                    udpTextureTransfers[textureId] = stream
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error handling ImageData", e)
+        }
+    }
+    
+    /**
+     * Handle ImagePacket message - subsequent packets of UDP texture transfer.
+     */
+    fun handleImagePacket(payload: ByteArray) {
+        try {
+            val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            
+            // ImageID block
+            val textureId = com.linkpoint.protocol.types.getUUID(buffer)
+            val packet = buffer.short.toInt() and 0xFFFF
+            
+            // Read image data
+            if (buffer.remaining() > 0) {
+                val data = ByteArray(buffer.remaining())
+                buffer.get(data)
+                
+                val stream = udpTextureTransfers[textureId]
+                if (stream != null) {
+                    synchronized(stream) {
+                        stream.write(data)
+                    }
+                    Log.d(TAG, "🖼️ ImagePacket: $textureId, packet=$packet, cumulative=${stream.size()} bytes")
+                } else {
+                    Log.w(TAG, "🖼️ ImagePacket for unknown transfer: $textureId")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error handling ImagePacket", e)
+        }
+    }
+    
+    /**
+     * Complete a multi-packet texture transfer.
+     */
+    fun completeTextureTransfer(textureId: UUID) {
+        val stream = udpTextureTransfers.remove(textureId) ?: return
+        val data = stream.toByteArray()
+        processTextureData(textureId, data)
+    }
+    
+    /**
+     * Process received texture data and cache it.
+     */
+    private fun processTextureData(textureId: UUID, data: ByteArray) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                val bitmap = decodeTexture(textureId, data)
+                if (bitmap != null) {
+                    cache(textureId.toString(), bitmap)
+                    updateStats { it.copy(downloadedCount = it.downloadedCount + 1) }
+                    Log.i(TAG, "🖼️ UDP texture completed: $textureId")
+                } else {
+                    updateStats { it.copy(failedCount = it.failedCount + 1) }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error processing texture data: $textureId", e)
+            }
+        }
+    }
     
     private fun buildTextureUrl(textureId: UUID, discard: Int): String? {
         // Use capability URL if available
