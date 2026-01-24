@@ -357,7 +357,7 @@ class TextureManager(
             try {
                 val bitmap = decodeTexture(textureId, data)
                 if (bitmap != null) {
-                    cache(textureId.toString(), bitmap)
+                    textureCache[textureId] = bitmap
                     updateStats { it.copy(downloadedCount = it.downloadedCount + 1) }
                     Log.i(TAG, "🖼️ UDP texture completed: $textureId")
                 } else {

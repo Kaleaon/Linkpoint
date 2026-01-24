@@ -517,7 +517,7 @@ class SecondLifeProtocol(private val context: Context) {
                     Log.i(TAG, "[LOGIN DATA] ✓ Friends added: ${parsedData.buddyList.size}")
                     
                     // Now resolve display names for all friends
-                    if (::app.isInitialized && app.isDisplayNameManagerInitialized()) {
+                    if (app.isDisplayNameManagerInitialized()) {
                         try {
                             val friendIds = parsedData.buddyList.map { it.agentId }
                             Log.d(TAG, "[LOGIN DATA] Resolving display names for ${friendIds.size} friends...")

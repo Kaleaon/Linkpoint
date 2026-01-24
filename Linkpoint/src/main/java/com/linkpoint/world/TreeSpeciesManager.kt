@@ -97,7 +97,7 @@ class TreeSpeciesManager(context: Context?) {
                     trunkLength + branchLength * depth
                 } else {
                     // Geometric series: branchLength * (1 - scaleStep^depth) / (1 - scaleStep)
-                    val branchContribution = branchLength * (1 - pow(scaleStep.toDouble(), depth.toDouble()).toFloat()) / (1 - scaleStep)
+                    val branchContribution = branchLength * (1 - scaleStep.pow(depth)) / (1 - scaleStep)
                     trunkLength + branchContribution
                 }
             }
