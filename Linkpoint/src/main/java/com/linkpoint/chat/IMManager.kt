@@ -153,7 +153,7 @@ class IMManager(
                     try { UUID.fromString(it) } catch (e: Exception) { null }
                 }
                 if (agentId != null && agentId !in session.participants) {
-                    session.participants = session.participants + agentId
+                    session.participants.add(agentId)
                     scope.launch {
                         _sessionFlow.emit(IMSessionEvent.ParticipantJoined(sessionId, agentId))
                     }
@@ -166,7 +166,7 @@ class IMManager(
                     try { UUID.fromString(it) } catch (e: Exception) { null }
                 }
                 if (agentId != null) {
-                    session.participants = session.participants - agentId
+                    session.participants.remove(agentId)
                     scope.launch {
                         _sessionFlow.emit(IMSessionEvent.ParticipantLeft(sessionId, agentId))
                     }

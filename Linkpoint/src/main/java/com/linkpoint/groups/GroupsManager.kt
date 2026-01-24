@@ -7,6 +7,7 @@ import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.llsd.*
 import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnectionFixed
+import com.linkpoint.protocol.types.getUUID
 import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -630,10 +631,10 @@ class GroupsManager(
             for (i in 0 until groupCount) {
                 if (buffer.remaining() < 43) break // Minimum group data size
                 
-                val groupId = com.linkpoint.protocol.types.getUUID(buffer)
+                val groupId = buffer.getUUID()
                 val groupPowers = buffer.long
                 val acceptNotices = buffer.get() != 0.toByte()
-                val groupInsigniaId = com.linkpoint.protocol.types.getUUID(buffer)
+                val groupInsigniaId = buffer.getUUID()
                 val contribution = buffer.int
                 
                 // Read variable-length group name

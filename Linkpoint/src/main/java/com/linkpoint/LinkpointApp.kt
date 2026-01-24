@@ -53,7 +53,7 @@ import com.linkpoint.service.ConnectionKeepAliveManager
 import com.linkpoint.service.IdleHandler
 import com.linkpoint.service.LinkpointConnectionService
 import com.linkpoint.users.DisplayNameManager
-import com.linkpoint.users.MuteManager
+import com.linkpoint.chat.MuteManager
 import com.linkpoint.users.UserProfileManager
 import com.linkpoint.voice.VoiceManager
 import com.linkpoint.world.FriendsManager
@@ -481,7 +481,7 @@ class LinkpointApp : Application() {
         taskInventoryManager = TaskInventoryManager(udpConnection, xferManager, agentId)
         
         // NEW: Mute manager
-        muteManager = MuteManager(udpConnection, xferManager, agentId)
+        muteManager = MuteManager(this)
         
         // NEW: User Profile Manager
         userProfileManager = UserProfileManager(capabilityManager, udpConnection, agentId)
@@ -2411,7 +2411,7 @@ class LinkpointApp : Application() {
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::xferManager.isInitialized) {
-                    xferManager.handleXferPacket(payload)
+                    xferManager.handleSendXferPacket(payload)
                 }
             } catch (e: Exception) { Log.e(TAG, "Error handling SendXferPacket", e) }
         }
@@ -2871,7 +2871,9 @@ class LinkpointApp : Application() {
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "🏔️ ModifyLand (${payload.size} bytes)")
-            } catch (e: Exception) { Log.e(TAG, "Error handling ModifyLand", e) })
+            } catch (e: Exception) { 
+                Log.e(TAG, "Error handling ModifyLand", e) 
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.UNDO_LAND) { _, rawPacket ->
@@ -4684,7 +4686,6 @@ class LinkpointApp : Application() {
         // Shutdown new managers
         if (::economyManager.isInitialized) economyManager.shutdown()
         if (::scriptDialogManager.isInitialized) scriptDialogManager.shutdown()
-        if (::muteManager.isInitialized) muteManager.shutdown()
         if (::taskInventoryManager.isInitialized) taskInventoryManager.shutdown()
         if (::notecardManager.isInitialized) notecardManager.shutdown()
         if (::transferManager.isInitialized) transferManager.shutdown()

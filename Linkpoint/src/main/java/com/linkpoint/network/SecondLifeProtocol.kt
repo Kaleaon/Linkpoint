@@ -50,6 +50,9 @@ class SecondLifeProtocol(private val context: Context) {
         private const val VIEWER_VERSION = "1.0.0"
     }
     
+    // Reference to the LinkpointApp instance
+    private val app get() = LinkpointApp.getInstance()
+    
     // Core networking service with all connection management features
     private val networkingService = CoreNetworkingService(context)
     
@@ -514,7 +517,7 @@ class SecondLifeProtocol(private val context: Context) {
                     Log.i(TAG, "[LOGIN DATA] ✓ Friends added: ${parsedData.buddyList.size}")
                     
                     // Now resolve display names for all friends
-                    if (::app.isInitialized && app.isDisplayNameManagerInitialized()) {
+                    if (app.isDisplayNameManagerInitialized()) {
                         try {
                             val friendIds = parsedData.buddyList.map { it.agentId }
                             Log.d(TAG, "[LOGIN DATA] Resolving display names for ${friendIds.size} friends...")

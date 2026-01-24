@@ -154,10 +154,12 @@ class FriendsManager(
         Log.i(TAG, "✓ Friendship accepted: agent=$agentId, transaction=$transactionId")
         
         // Add as friend
-        addFriendFromLogin(agentId, "", 0)
+        addFriendFromLogin(agentId, "", 0, 0)
         
         scope.launch {
-            _friendsFlow.emit(FriendEvent.Added(agentId))
+            friends[agentId]?.let { friend ->
+                _friendsFlow.emit(FriendEvent.Added(friend))
+            }
         }
     }
     
@@ -177,14 +179,16 @@ class FriendsManager(
         
         // Add both as friends if they're not us
         if (fromAgentId != agentId) {
-            addFriendFromLogin(fromAgentId, "", 0)
+            addFriendFromLogin(fromAgentId, "", 0, 0)
         }
         if (toAgentId != agentId) {
-            addFriendFromLogin(toAgentId, "", 0)
+            addFriendFromLogin(toAgentId, "", 0, 0)
         }
         
         scope.launch {
-            _friendsFlow.emit(FriendEvent.Added(fromAgentId))
+            friends[fromAgentId]?.let { friend ->
+                _friendsFlow.emit(FriendEvent.Added(friend))
+            }
         }
     }
     

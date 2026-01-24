@@ -667,7 +667,7 @@ class UDPConnectionFixed {
             
             // Record in packet history
             recordPacketEvent(
-                type = PacketHistoryEntry.PacketEventType.SEND,
+                type = PacketHistoryEntry.PacketEventType.SEND_SUCCESS,
                 messageId = MessageIds.PACKET_ACK,
                 data = bytes,
                 sequenceNumber = seqNum,

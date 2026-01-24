@@ -6,6 +6,7 @@ import com.linkpoint.assets.AssetType
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnectionFixed
+import com.linkpoint.protocol.types.getUUID
 import com.linkpoint.protocol.types.putUUID
 import com.linkpoint.protocol.llsd.*
 import kotlinx.coroutines.*
@@ -895,7 +896,7 @@ class InventoryManager(
             val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
             
             // QueryData block
-            val transactionId = com.linkpoint.protocol.types.getUUID(buffer)
+            val transactionId = buffer.getUUID()
             val assetType = buffer.int
             val success = buffer.get() != 0.toByte()
             
@@ -924,8 +925,8 @@ class InventoryManager(
             for (i in 0 until folderCount) {
                 if (buffer.remaining() < 34) break
                 
-                val folderId = com.linkpoint.protocol.types.getUUID(buffer)
-                val parentId = com.linkpoint.protocol.types.getUUID(buffer)
+                val folderId = buffer.getUUID()
+                val parentId = buffer.getUUID()
                 val type = buffer.get().toInt()
                 val nameLen = buffer.get().toInt() and 0xFF
                 val nameBytes = ByteArray(nameLen)
@@ -964,8 +965,8 @@ class InventoryManager(
             for (i in 0 until moveCount) {
                 if (buffer.remaining() < 32) break
                 
-                val folderId = com.linkpoint.protocol.types.getUUID(buffer)
-                val newParentId = com.linkpoint.protocol.types.getUUID(buffer)
+                val folderId = buffer.getUUID()
+                val newParentId = buffer.getUUID()
                 
                 Log.d(TAG, "📁 Folder moved: $folderId -> $newParentId")
                 
@@ -993,8 +994,8 @@ class InventoryManager(
             // InventoryData block
             if (buffer.remaining() < 100) return // Item data is ~100+ bytes
             
-            val itemId = com.linkpoint.protocol.types.getUUID(buffer)
-            val folderId = com.linkpoint.protocol.types.getUUID(buffer)
+            val itemId = buffer.getUUID()
+            val folderId = buffer.getUUID()
             
             Log.d(TAG, "📦 Item created: $itemId in folder $folderId")
             
@@ -1015,8 +1016,8 @@ class InventoryManager(
             buffer.position(buffer.position() + 16) // Skip AgentID
             
             // InventoryData
-            val itemId = com.linkpoint.protocol.types.getUUID(buffer)
-            val newAssetId = com.linkpoint.protocol.types.getUUID(buffer)
+            val itemId = buffer.getUUID()
+            val newAssetId = buffer.getUUID()
             
             Log.d(TAG, "📦 Asset saved to inventory: item=$itemId, asset=$newAssetId")
             

@@ -5,6 +5,7 @@ import android.util.Log
 import org.w3c.dom.Element
 import java.util.UUID
 import javax.xml.parsers.DocumentBuilderFactory
+import kotlin.math.pow
 
 /**
  * Tree Species Manager - Manages tree/foliage species definitions.
@@ -96,7 +97,7 @@ class TreeSpeciesManager(context: Context?) {
                     trunkLength + branchLength * depth
                 } else {
                     // Geometric series: branchLength * (1 - scaleStep^depth) / (1 - scaleStep)
-                    val branchContribution = branchLength * (1 - kotlin.math.pow(scaleStep.toDouble(), depth.toDouble()).toFloat()) / (1 - scaleStep)
+                    val branchContribution = branchLength * (1 - scaleStep.pow(depth)) / (1 - scaleStep)
                     trunkLength + branchContribution
                 }
             }
