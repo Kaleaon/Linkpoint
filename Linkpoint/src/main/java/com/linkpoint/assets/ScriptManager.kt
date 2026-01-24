@@ -204,6 +204,27 @@ class ScriptManager(
         scriptCache.clear()
     }
     
+    /**
+     * Handle script control change notification.
+     * This is called when a script takes or releases control of the avatar.
+     * 
+     * @param controls The control flags being taken/released
+     * @param takeControls Whether the script is taking controls (true) or releasing (false)
+     * @param passToAgent Whether input should still be passed to the agent
+     */
+    fun handleScriptControlChange(controls: Int, takeControls: Boolean, passToAgent: Boolean) {
+        if (takeControls) {
+            Log.d(TAG, "Script taking controls: 0x${controls.toString(16)} (pass to agent: $passToAgent)")
+            // In a full implementation, this would:
+            // 1. Update UI to show script is controlling avatar
+            // 2. Modify input handling to respect passToAgent flag
+            // 3. Track which controls are captured (movement, mouse, etc.)
+        } else {
+            Log.d(TAG, "Script releasing controls: 0x${controls.toString(16)}")
+            // Would restore normal avatar control
+        }
+    }
+    
     fun shutdown() {
         scope.cancel()
         clearCache()
