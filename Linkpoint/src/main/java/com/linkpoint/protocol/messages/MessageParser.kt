@@ -1784,11 +1784,3 @@ fun MessageParser.parseCrossedRegion(data: ByteArray): CrossedRegionData? {
         return null
     }
 }
-
-/**
- * Helper to convert bytes to UUID for new parsers
- */
-private fun bytesToUUID(bytes: ByteArray): UUID {
-    val bb = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN)
-    return UUID(bb.long, bb.long)
-}

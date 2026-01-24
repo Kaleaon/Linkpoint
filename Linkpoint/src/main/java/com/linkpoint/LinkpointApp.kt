@@ -3551,7 +3551,8 @@ class LinkpointApp : Application() {
             Log.d(TAG, "💌 ImprovedInstantMessage received - processing via IM manager")
             val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
             if (payload != null) {
-                imManager.handleInstantMessage(payload)
+                // TODO: Parse message and call imManager.handleIncomingIM with proper parameters
+                Log.d(TAG, "ImprovedInstantMessage payload received: ${payload.size} bytes")
             }
         }
         
@@ -3661,9 +3662,10 @@ class LinkpointApp : Application() {
         }
         
         // --- Start Location ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.SET_START_LOCATION) { _, rawPacket ->
-            Log.d(TAG, "🏠 SetStartLocation received")
-        }
+        // Note: SET_START_LOCATION message ID doesn't exist, only SET_START_LOCATION_REQUEST
+        // udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.SET_START_LOCATION) { _, rawPacket ->
+        //     Log.d(TAG, "🏠 SetStartLocation received")
+        // }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.SET_START_LOCATION_REQUEST) { _, rawPacket ->
             Log.d(TAG, "🏠 SetStartLocationRequest received")
