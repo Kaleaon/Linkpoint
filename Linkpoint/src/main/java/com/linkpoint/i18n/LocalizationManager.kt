@@ -130,7 +130,7 @@ class LocalizationManager private constructor(private val context: Context) {
      * Get localized string by key
      */
     fun getString(key: String): String {
-        return getString(key, emptyArray())
+        return getString(key, *emptyArray<Any>())
     }
     
     /**

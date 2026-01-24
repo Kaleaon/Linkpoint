@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import com.linkpoint.network.NetworkLogger
+import com.linkpoint.protocol.types.getUUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -281,7 +282,7 @@ class TextureManager(
             val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
             
             // ImageID block
-            val textureId = com.linkpoint.protocol.types.getUUID(buffer)
+            val textureId = buffer.getUUID()
             val codec = buffer.get().toInt() and 0xFF // 0 = raw, 2 = JPEG2000
             val size = buffer.int
             val packets = buffer.short.toInt() and 0xFFFF
@@ -316,7 +317,7 @@ class TextureManager(
             val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
             
             // ImageID block
-            val textureId = com.linkpoint.protocol.types.getUUID(buffer)
+            val textureId = buffer.getUUID()
             val packet = buffer.short.toInt() and 0xFFFF
             
             // Read image data

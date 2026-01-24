@@ -2411,7 +2411,7 @@ class LinkpointApp : Application() {
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::xferManager.isInitialized) {
-                    xferManager.handleXferPacket(payload)
+                    xferManager.handleSendXferPacket(payload)
                 }
             } catch (e: Exception) { Log.e(TAG, "Error handling SendXferPacket", e) }
         }
@@ -2871,7 +2871,9 @@ class LinkpointApp : Application() {
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "🏔️ ModifyLand (${payload.size} bytes)")
-            } catch (e: Exception) { Log.e(TAG, "Error handling ModifyLand", e) })
+            } catch (e: Exception) { 
+                Log.e(TAG, "Error handling ModifyLand", e) 
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.UNDO_LAND) { _, rawPacket ->

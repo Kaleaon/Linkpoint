@@ -7,6 +7,7 @@ import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.llsd.*
 import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnectionFixed
+import com.linkpoint.protocol.types.getUUID
 import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -531,7 +532,7 @@ class TeleportManager(
             // Info block
             if (buffer.remaining() < 28) return
             
-            val agentId = com.linkpoint.protocol.types.getUUID(buffer)
+            val agentId = buffer.getUUID()
             val locationId = buffer.int
             val position = com.linkpoint.protocol.types.LLVector3(buffer.float, buffer.float, buffer.float)
             val lookAt = com.linkpoint.protocol.types.LLVector3(buffer.float, buffer.float, buffer.float)

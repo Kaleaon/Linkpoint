@@ -2,6 +2,7 @@ package com.linkpoint.chat
 
 import android.content.Context
 import android.util.Log
+import com.linkpoint.protocol.types.getUUID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.UUID
@@ -231,6 +232,29 @@ class MuteManager(context: Context) {
     }
     
     /**
+     * Mute by UUID with specific type.
+     */
+    fun muteByUUID(id: UUID, name: String, type: MuteType, flags: Int = MuteFlags.ALL) {
+        when (type) {
+            MuteType.AGENT -> muteAgent(id, name, flags)
+            MuteType.OBJECT -> muteObject(id, name, flags)
+            MuteType.GROUP -> muteGroup(id, name, flags)
+            MuteType.BY_NAME -> muteByName(name, flags)
+            MuteType.EXTERNAL -> muteAgent(id, name, flags) // Treat external as agent
+        }
+    }
+    
+    /**
+     * Unmute by UUID (tries all types).
+     */
+    fun unmute(id: UUID) {
+        // Try removing from all mute lists
+        unmuteAgent(id)
+        unmuteObject(id)
+        unmuteGroup(id)
+    }
+    
+    /**
      * Get all muted agents.
      */
     fun getMutedAgents(): List<MuteEntry> = mutedAgents.values.toList()
@@ -354,7 +378,7 @@ class MuteManager(context: Context) {
             // MuteData block
             if (buffer.remaining() < 21) return
             
-            val muteId = com.linkpoint.protocol.types.getUUID(buffer)
+            val muteId = buffer.getUUID()
             val muteType = buffer.int
             val muteFlags = buffer.int
             
@@ -386,7 +410,7 @@ class MuteManager(context: Context) {
             // MuteData block
             if (buffer.remaining() < 17) return
             
-            val muteId = com.linkpoint.protocol.types.getUUID(buffer)
+            val muteId = buffer.getUUID()
             
             // Read mute name (optional, for name-based unmute)
             if (buffer.remaining() > 0) {

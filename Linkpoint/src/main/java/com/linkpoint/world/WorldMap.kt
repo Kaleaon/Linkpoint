@@ -37,15 +37,15 @@ class WorldMap(
         // Default search radius for nearby users (meters)
         private const val DEFAULT_NEARBY_RADIUS = 96f
         
-        // Default access level when not specified by API
-        private const val DEFAULT_ACCESS_LEVEL = "PG"
+        // Default access level when not specified by API (0 = unknown/PG)
+        private const val DEFAULT_ACCESS_LEVEL = 0
     }
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     
     // Reusable HTTP client for map requests
     private val httpClient = OkHttpClient.Builder()
-        .connectTimeout(10, TimeUnit.SECONDS)
+        .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(10, TimeUnit.SECONDS)
         .build()
     
@@ -84,10 +84,6 @@ class WorldMap(
         regions[key] = info
         Log.d(TAG, "Cached region info: $name at ($gridX, $gridY)")
     }
-    
-    private val httpClient = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .build()
     
     // Cached map tiles
     private val mapTiles = ConcurrentHashMap<String, Bitmap>()
@@ -177,7 +173,8 @@ class WorldMap(
                     name = name,
                     gridX = x,
                     gridY = y,
-                    accessLevel = DEFAULT_ACCESS_LEVEL
+                    access = DEFAULT_ACCESS_LEVEL,
+                    mapImageId = null
                 ))
             }
             return results
@@ -233,7 +230,7 @@ class WorldMap(
                         gridX = x,
                         gridY = y,
                         regionHandle = regionHandle,
-                        accessLevel = DEFAULT_ACCESS_LEVEL,
+                        access = DEFAULT_ACCESS_LEVEL,
                         mapImageId = null
                     )
                     regions[key] = info

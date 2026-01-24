@@ -112,7 +112,7 @@ class ProfileManager(
                 
                 if (response is LLSDMap) {
                     val agents = response.getArray("agents")
-                    if (agents != null && agents.size() > 0) {
+                    if (agents != null && agents.size > 0) {
                         val agentData = agents.get(0) as? LLSDMap
                         val name = agentData?.getString("display_name") 
                             ?: agentData?.getString("username")
@@ -156,7 +156,7 @@ class ProfileManager(
                     if (response is LLSDMap) {
                         val agents = response.getArray("agents")
                         if (agents != null) {
-                            for (i in 0 until agents.size()) {
+                            for (i in 0 until agents.size) {
                                 val agentData = agents.get(i) as? LLSDMap ?: continue
                                 val idStr = agentData.getString("id") ?: continue
                                 val name = agentData.getString("display_name") 

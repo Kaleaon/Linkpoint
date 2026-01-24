@@ -50,6 +50,9 @@ class SecondLifeProtocol(private val context: Context) {
         private const val VIEWER_VERSION = "1.0.0"
     }
     
+    // Reference to the LinkpointApp instance
+    private val app get() = LinkpointApp.getInstance()
+    
     // Core networking service with all connection management features
     private val networkingService = CoreNetworkingService(context)
     
