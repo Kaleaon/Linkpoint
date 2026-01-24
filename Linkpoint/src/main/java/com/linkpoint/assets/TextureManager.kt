@@ -266,7 +266,17 @@ class TextureManager(
         // and does not support unauthenticated texture fetching. If no capability URL is
         // available, texture downloads will fail with HTTP 403 Forbidden.
         // In this case, we return null to indicate that texture fetching is not possible.
-        return capabilityUrl?.let { "$it?texture_id=$textureId" }
+        val baseUrl = capabilityUrl ?: return null
+        
+        // Ensure HTTPS for Linden Lab servers (required for authentication)
+        val secureUrl = if (baseUrl.startsWith("http://") && 
+            (baseUrl.contains(".lindenlab.com") || baseUrl.contains(".secondlife.com"))) {
+            baseUrl.replaceFirst("http://", "https://")
+        } else {
+            baseUrl
+        }
+        
+        return "$secureUrl?texture_id=$textureId"
     }
     
     private fun decodeTexture(textureId: UUID, data: ByteArray): Bitmap? {
