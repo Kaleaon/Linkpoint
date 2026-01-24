@@ -345,4 +345,215 @@ object MessageIds {
     
     /** ParcelProperties - Full parcel information (high frequency) */
     const val PARCEL_PROPERTIES = 23                            // Wire: 0x17 (high frequency)
+
+    // =====================================
+    // PHASE 2: Social & Communication (50 new handlers)
+    // =====================================
+
+    // --- Script/Dialog Messages ---
+    /** ScriptDialog - LSL script dialog popup */
+    const val SCRIPT_DIALOG = (0xFFFF00BE).toInt()              // Wire: FF FF 00 BE = -65346
+    
+    /** ScriptDialogReply - Reply to script dialog */
+    const val SCRIPT_DIALOG_REPLY = (0xFFFF00BF).toInt()        // Wire: FF FF 00 BF = -65345
+    
+    /** ScriptQuestion - Script permission request */
+    const val SCRIPT_QUESTION = (0xFFFF00AC).toInt()            // Wire: FF FF 00 AC = -65348
+    
+    /** LoadURL - Open URL request from script */
+    const val LOAD_URL = (0xFFFF00C6).toInt()                   // Wire: FF FF 00 C6 = -65342
+    
+    // --- Economy Messages ---
+    /** MoneyBalanceReply - L$ balance update */
+    const val MONEY_BALANCE_REPLY = (0xFFFF00E2).toInt()        // Wire: FF FF 00 E2 = -65310
+    
+    /** MoneyBalanceRequest - Request L$ balance */
+    const val MONEY_BALANCE_REQUEST = (0xFFFF00E1).toInt()      // Wire: FF FF 00 E1 = -65311
+    
+    /** EconomyData - Region economy info */
+    const val ECONOMY_DATA = (0xFFFF0019).toInt()               // Wire: FF FF 00 19 = -65511
+    
+    // --- Inventory Messages ---
+    /** InventoryDescendents - Folder contents */
+    const val INVENTORY_DESCENDENTS = (0xFFFF00F6).toInt()      // Wire: FF FF 00 F6 = -65290
+    
+    /** FetchInventoryReply - Item details */
+    const val FETCH_INVENTORY_REPLY = (0xFFFF00F8).toInt()      // Wire: FF FF 00 F8 = -65288
+    
+    /** BulkUpdateInventory - Batch inventory update */
+    const val BULK_UPDATE_INVENTORY = (0xFFFF00F9).toInt()      // Wire: FF FF 00 F9 = -65287
+    
+    /** UpdateCreateInventoryItem - Item created notification */
+    const val UPDATE_CREATE_INVENTORY_ITEM = (0xFFFF010B).toInt() // Wire: FF FF 01 0B = -65269
+    
+    /** RemoveInventoryItem - Item removed */
+    const val REMOVE_INVENTORY_ITEM = (0xFFFF010E).toInt()      // Wire: FF FF 01 0E = -65266
+    
+    /** RemoveInventoryFolder - Folder removed */
+    const val REMOVE_INVENTORY_FOLDER = (0xFFFF010F).toInt()    // Wire: FF FF 01 0F = -65265
+    
+    // --- Avatar/Appearance Messages ---
+    /** AvatarAppearance - Full avatar appearance */
+    const val AVATAR_APPEARANCE = (0xFFFF009E).toInt()          // Wire: FF FF 00 9E = -65378
+    
+    /** AgentWearablesUpdate - Outfit update */
+    const val AGENT_WEARABLES_UPDATE = (0xFFFF0102).toInt()     // Wire: FF FF 01 02 = -65278
+    
+    /** AgentCachedTexture - Baked texture cache request */
+    const val AGENT_CACHED_TEXTURE = (0xFFFF0100).toInt()       // Wire: FF FF 01 00 = -65280
+    
+    /** AgentCachedTextureResponse - Baked texture cache response */
+    const val AGENT_CACHED_TEXTURE_RESPONSE = (0xFFFF0101).toInt() // Wire: FF FF 01 01 = -65279
+    
+    /** AvatarPropertiesReply - Avatar profile data */
+    const val AVATAR_PROPERTIES_REPLY = (0xFFFF00A7).toInt()    // Wire: FF FF 00 A7 = -65369
+    
+    /** AvatarPropertiesRequest - Request avatar profile */
+    const val AVATAR_PROPERTIES_REQUEST = (0xFFFF00A8).toInt()  // Wire: FF FF 00 A8 = -65368
+    
+    /** AvatarInterestsReply - Avatar interests/picks */
+    const val AVATAR_INTERESTS_REPLY = (0xFFFF00A9).toInt()     // Wire: FF FF 00 A9 = -65367
+    
+    /** AvatarGroupsReply - Avatar group memberships */
+    const val AVATAR_GROUPS_REPLY = (0xFFFF00AB).toInt()        // Wire: FF FF 00 AB = -65365
+    
+    // --- Group Messages ---
+    /** GroupProfileReply - Group profile data */
+    const val GROUP_PROFILE_REPLY = (0xFFFF0160).toInt()        // Wire: FF FF 01 60 = -65184
+    
+    /** GroupMembersReply - Group member list */
+    const val GROUP_MEMBERS_REPLY = (0xFFFF015F).toInt()        // Wire: FF FF 01 5F = -65185
+    
+    /** GroupRoleDataReply - Group roles */
+    const val GROUP_ROLE_DATA_REPLY = (0xFFFF015C).toInt()      // Wire: FF FF 01 5C = -65188
+    
+    /** GroupTitlesReply - Group titles */
+    const val GROUP_TITLES_REPLY = (0xFFFF015B).toInt()         // Wire: FF FF 01 5B = -65189
+    
+    /** GroupNoticeAdd - New group notice */
+    const val GROUP_NOTICE_ADD = (0xFFFF0035).toInt()           // Wire: FF FF 00 35 = -65483
+    
+    /** AgentGroupDataUpdate - Agent's group list */
+    const val AGENT_GROUP_DATA_UPDATE = (0xFFFF0181).toInt()    // Wire: FF FF 01 81 = -65151
+    
+    // --- Friends Messages ---
+    /** AcceptFriendship - Accept friend request */
+    const val ACCEPT_FRIENDSHIP = (0xFFFF0119).toInt()          // Wire: FF FF 01 19 = -65255
+    
+    /** DeclineFriendship - Decline friend request */
+    const val DECLINE_FRIENDSHIP = (0xFFFF011A).toInt()         // Wire: FF FF 01 1A = -65254
+    
+    /** FormFriendship - Friend request sent */
+    const val FORM_FRIENDSHIP = (0xFFFF011B).toInt()            // Wire: FF FF 01 1B = -65253
+    
+    // --- Map Messages ---
+    /** MapBlockReply - Map tile data */
+    const val MAP_BLOCK_REPLY = (0xFFFF0195).toInt()            // Wire: FF FF 01 95 = -65131
+    
+    /** MapItemReply - Map markers/items */
+    const val MAP_ITEM_REPLY = (0xFFFF0197).toInt()             // Wire: FF FF 01 97 = -65129
+    
+    /** MapLayerReply - Map layer data */
+    const val MAP_LAYER_REPLY = (0xFFFF0192).toInt()            // Wire: FF FF 01 92 = -65134
+    
+    // --- Search Messages ---
+    /** DirPlacesReply - Places search results */
+    const val DIR_PLACES_REPLY = (0xFFFF001F).toInt()           // Wire: FF FF 00 1F = -65505
+    
+    /** DirPeopleReply - People search results */
+    const val DIR_PEOPLE_REPLY = (0xFFFF0020).toInt()           // Wire: FF FF 00 20 = -65504
+    
+    /** DirGroupsReply - Groups search results */
+    const val DIR_GROUPS_REPLY = (0xFFFF0022).toInt()           // Wire: FF FF 00 22 = -65502
+    
+    /** DirEventsReply - Events search results */
+    const val DIR_EVENTS_REPLY = (0xFFFF0021).toInt()           // Wire: FF FF 00 21 = -65503
+    
+    /** DirLandReply - Land search results */
+    const val DIR_LAND_REPLY = (0xFFFF0026).toInt()             // Wire: FF FF 00 26 = -65498
+    
+    /** DirClassifiedReply - Classified search results */
+    const val DIR_CLASSIFIED_REPLY = (0xFFFF0029).toInt()       // Wire: FF FF 00 29 = -65495
+    
+    // --- Region/Estate Messages ---
+    /** RegionInfo - Region settings */
+    const val REGION_INFO = (0xFFFF00A2).toInt()                // Wire: FF FF 00 A2 = -65374
+    
+    /** SimStats - Simulator statistics */
+    const val SIM_STATS = (0xFFFF00A4).toInt()                  // Wire: FF FF 00 A4 = -65372
+    
+    /** EstateCovenantReply - Estate covenant text */
+    const val ESTATE_COVENANT_REPLY = (0xFFFF00CC).toInt()      // Wire: FF FF 00 CC = -65332
+    
+    // --- Parcel Messages ---
+    /** ParcelInfoReply - Parcel information */
+    const val PARCEL_INFO_REPLY = (0xFFFF0037).toInt()          // Wire: FF FF 00 37 = -65481
+    
+    /** ParcelAccessListReply - Parcel access list */
+    const val PARCEL_ACCESS_LIST_REPLY = (0xFFFF00D8).toInt()   // Wire: FF FF 00 D8 = -65320
+    
+    /** ParcelDwellReply - Parcel traffic/dwell */
+    const val PARCEL_DWELL_REPLY = (0xFFFF00DB).toInt()         // Wire: FF FF 00 DB = -65317
+    
+    // --- Object Messages ---
+    /** ObjectPropertiesFamily - Quick object properties */
+    const val OBJECT_PROPERTIES_FAMILY = 65290                  // Wire: FF 0A = 10 | 65280 (medium frequency)
+    
+    /** RequestObjectPropertiesFamily - Request quick props */
+    const val REQUEST_OBJECT_PROPERTIES_FAMILY = 65285          // Wire: FF 05 = 5 | 65280 (medium frequency)
+    
+    /** ObjectAdd - Create object */
+    const val OBJECT_ADD = 65281                                // Wire: FF 01 = 1 | 65280 (medium frequency)
+    
+    // --- Sound Messages ---
+    /** AttachedSound - Sound attached to object */
+    const val ATTACHED_SOUND = 65293                            // Wire: FF 0D = 13 | 65280 (medium frequency)
+    
+    /** AttachedSoundGainChange - Sound volume change */
+    const val ATTACHED_SOUND_GAIN_CHANGE = 65294                // Wire: FF 0E = 14 | 65280 (medium frequency)
+    
+    /** PreloadSound - Preload sound asset */
+    const val PRELOAD_SOUND = 65295                             // Wire: FF 0F = 15 | 65280 (medium frequency)
+    
+    // --- Effect Messages ---
+    /** ViewerEffect - Visual effects (beams, particles) */
+    const val VIEWER_EFFECT = 65297                             // Wire: FF 11 = 17 | 65280 (medium frequency)
+    
+    // --- Transfer/Asset Messages ---
+    /** TransferInfo - Asset transfer info */
+    const val TRANSFER_INFO = (0xFFFF009A).toInt()              // Wire: FF FF 00 9A = -65382
+    
+    /** TransferPacket - Asset transfer data (high freq) */
+    const val TRANSFER_PACKET = 17                              // Wire: 0x11 (high frequency)
+    
+    /** AbortXfer - Cancel transfer */
+    const val ABORT_XFER = (0xFFFF009D).toInt()                 // Wire: FF FF 00 9D = -65379
+    
+    /** ImageNotInDatabase - Texture not found */
+    const val IMAGE_NOT_IN_DATABASE = (0xFFFF0086).toInt()      // Wire: FF FF 00 56 = -65450
+    
+    // --- Misc Messages ---
+    /** MeanCollisionAlert - Physical collision warning */
+    const val MEAN_COLLISION_ALERT = (0xFFFF0088).toInt()       // Wire: FF FF 00 88 = -65400
+    
+    /** AvatarSitResponse - Sit response */
+    const val AVATAR_SIT_RESPONSE = 21                          // Wire: 0x15 (high frequency)
+    
+    /** CameraConstraint - Camera limits */
+    const val CAMERA_CONSTRAINT = 22                            // Wire: 0x16 (high frequency)
+    
+    /** ConfirmEnableSimulator - Confirm neighbor sim */
+    const val CONFIRM_ENABLE_SIMULATOR = 65288                  // Wire: FF 08 = 8 | 65280 (medium frequency)
+    
+    /** SimStatus - Sim status message */
+    const val SIM_STATUS = 65292                                // Wire: FF 0C = 12 | 65280 (medium frequency)
+    
+    /** LogoutReply - Logout confirmation */
+    const val LOGOUT_REPLY = (0xFFFF00FD).toInt()               // Wire: FF FF 00 FD = -65283
+    
+    /** UUIDNameReply - UUID to name lookup result */
+    const val UUID_NAME_REPLY = (0xFFFF00EC).toInt()            // Wire: FF FF 00 EC = -65300
+    
+    /** UUIDGroupNameReply - UUID to group name result */
+    const val UUID_GROUP_NAME_REPLY = (0xFFFF00EE).toInt()      // Wire: FF FF 00 EE = -65298
 }

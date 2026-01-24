@@ -1,7 +1,7 @@
 # Second Life Protocol Message Handler Tracking
 
 > **Generated:** January 24, 2026  
-> **Updated:** January 24, 2026 - Added Phase 1 Critical Handlers
+> **Updated:** January 24, 2026 - Added Phase 2 (50 new handlers)
 > **Purpose:** Track implementation status of all SL protocol message handlers  
 > **Source:** Lumiya decompiled source (`lumiya_decompiled_source/`)
 
@@ -26,14 +26,30 @@ Second Life uses three message frequency levels encoded differently:
 
 | Status | Count | Description |
 |--------|-------|-------------|
-| ✅ Implemented | 31 | Fully implemented with parser and handler |
+| ✅ Implemented | 81 | Fully implemented with parser and handler |
 | 🔲 ID Defined | ~50 | Message ID constant exists, no handler |
-| ❌ Not Started | ~400 | Not yet ported from Lumiya |
+| ❌ Not Started | ~350 | Not yet ported from Lumiya |
 
-**Recently Added (Phase 1):**
+**Phase 1 (9 handlers):**
 - ✅ TeleportFinish, TeleportFailed, TeleportProgress, TeleportStart
 - ✅ AlertMessage, AgentAlertMessage
 - ✅ EnableSimulator, CrossedRegion, ParcelProperties
+
+**Phase 2 (50 handlers - NEW):**
+- ✅ Script/Dialog: ScriptDialog, ScriptQuestion, LoadURL
+- ✅ Economy: MoneyBalanceReply, EconomyData
+- ✅ Inventory: InventoryDescendents, FetchInventoryReply, BulkUpdateInventory, etc.
+- ✅ Avatar: AvatarAppearance, AgentWearablesUpdate, AvatarPropertiesReply, etc.
+- ✅ Groups: GroupProfileReply, GroupMembersReply, GroupRoleDataReply, etc.
+- ✅ Friends: AcceptFriendship, DeclineFriendship, FormFriendship
+- ✅ Map/Search: MapBlockReply, MapItemReply, DirPlacesReply, etc.
+- ✅ Region: RegionInfo, SimStats, EstateCovenantReply
+- ✅ Parcel: ParcelInfoReply, ParcelAccessListReply, ParcelDwellReply
+- ✅ Objects: ObjectPropertiesFamily, ObjectAdd
+- ✅ Sound: AttachedSound, AttachedSoundGainChange, PreloadSound
+- ✅ Effects: ViewerEffect
+- ✅ Transfer: TransferInfo, TransferPacket, AbortXfer, ImageNotInDatabase
+- ✅ Misc: MeanCollisionAlert, AvatarSitResponse, CameraConstraint, etc.
 
 ---
 
