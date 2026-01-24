@@ -12,6 +12,7 @@ import com.linkpoint.LinkpointApp
 import com.linkpoint.network.core.CoreNetworkingService
 import com.linkpoint.network.core.NetworkStateManager
 import com.linkpoint.network.NetworkLogger
+import com.linkpoint.protocol.auth.LoginResponseParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -402,6 +403,10 @@ class SecondLifeProtocol(private val context: Context) {
                             Log.i(TAG, "[STEP 2/2] Capabilities loaded: ${app.capabilityManager.getCapabilityCount()}")
                             // Connect texture manager to capability-based fetching
                             app.textureManager.onCapabilitiesReady()
+                            
+                            // Parse login response for buddy-list, inventory, etc.
+                            // This populates FriendsManager and InventoryManager with initial data
+                            parseAndPopulateLoginData(result.responseXml, agentId)
                         } else {
                             com.linkpoint.utils.InitializationTracker.failPhase(
                                 com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_FETCHING,
@@ -474,6 +479,74 @@ class SecondLifeProtocol(private val context: Context) {
                     technicalDetails = result.technicalDetails
                 )
             }
+        }
+    }
+    
+    /**
+     * Parse the login response XML and populate managers with initial data.
+     * 
+     * This extracts:
+     * - buddy-list: Friends list from login response
+     * - inventory-skeleton: Initial inventory folder structure
+     * 
+     * Based on Lumiya's login response parsing logic.
+     */
+    private fun parseAndPopulateLoginData(responseXml: String, agentId: UUID) {
+        try {
+            Log.i(TAG, "[LOGIN DATA] Parsing login response for buddy-list and inventory...")
+            
+            val parsedData = LoginResponseParser.parse(responseXml)
+            
+            // Populate friends from buddy-list
+            if (parsedData.buddyList.isNotEmpty()) {
+                Log.i(TAG, "[LOGIN DATA] Populating ${parsedData.buddyList.size} friends from login response")
+                
+                if (app.isFriendsManagerInitialized()) {
+                    parsedData.buddyList.forEach { buddy ->
+                        // We need to look up the name - for now use placeholder
+                        // The actual name will come from OnlineNotification or display name lookup
+                        app.friendsManager.addFriendFromLogin(
+                            agentId = buddy.agentId,
+                            name = "Friend", // Will be resolved later via display names
+                            rightsGiven = buddy.buddyRightsGiven,
+                            rightsHas = buddy.buddyRightsHas
+                        )
+                    }
+                    Log.i(TAG, "[LOGIN DATA] ✓ Friends populated: ${parsedData.buddyList.size}")
+                } else {
+                    Log.w(TAG, "[LOGIN DATA] FriendsManager not initialized, skipping buddy-list")
+                }
+            } else {
+                Log.d(TAG, "[LOGIN DATA] No friends in buddy-list")
+            }
+            
+            // Populate inventory skeleton
+            if (parsedData.inventorySkeleton.isNotEmpty()) {
+                Log.i(TAG, "[LOGIN DATA] Populating ${parsedData.inventorySkeleton.size} inventory folders from login response")
+                
+                if (app.isInventoryManagerInitialized()) {
+                    // Set root folder first
+                    parsedData.inventoryRoot?.let { rootId ->
+                        app.inventoryManager.setRootFolder(rootId)
+                        Log.d(TAG, "[LOGIN DATA] Set inventory root: $rootId")
+                    }
+                    
+                    // Register system folders by type
+                    parsedData.inventorySkeleton.forEach { folder ->
+                        if (folder.typeDefault >= 0) {
+                            app.inventoryManager.registerSystemFolder(folder.typeDefault, folder.folderId)
+                        }
+                    }
+                    Log.i(TAG, "[LOGIN DATA] ✓ Inventory skeleton populated: ${parsedData.inventorySkeleton.size} folders")
+                } else {
+                    Log.w(TAG, "[LOGIN DATA] InventoryManager not initialized, skipping inventory-skeleton")
+                }
+            } else {
+                Log.d(TAG, "[LOGIN DATA] No folders in inventory-skeleton")
+            }
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "[LOGIN DATA] Error parsing login response data", e)
         }
     }
     
