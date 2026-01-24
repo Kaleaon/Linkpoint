@@ -134,8 +134,28 @@ class WorldMap(
     }
     
     private fun parseRegionSearchResults(json: String): List<RegionSearchResult> {
-        // Parse JSON response (simplified)
-        return emptyList()
+        // Parse JSON response from region search
+        try {
+            val results = mutableListOf<RegionSearchResult>()
+            // Simple JSON parsing - look for region objects in the response
+            // Format: [{"name": "Region Name", "x": 1000, "y": 1000, ...}, ...]
+            val pattern = """\{"name"\s*:\s*"([^"]+)"\s*,\s*"x"\s*:\s*(\d+)\s*,\s*"y"\s*:\s*(\d+)""".toRegex()
+            pattern.findAll(json).forEach { match ->
+                val name = match.groupValues[1]
+                val x = match.groupValues[2].toIntOrNull() ?: 0
+                val y = match.groupValues[3].toIntOrNull() ?: 0
+                results.add(RegionSearchResult(
+                    name = name,
+                    gridX = x,
+                    gridY = y,
+                    accessLevel = "PG" // Default - actual API would provide this
+                ))
+            }
+            return results
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to parse region search results", e)
+            return emptyList()
+        }
     }
     
     /**
@@ -149,15 +169,58 @@ class WorldMap(
     }
     
     /**
-     * Get region info by grid coordinates
+     * Get region info by grid coordinates.
+     * Returns cached info if available, otherwise queries the simulator.
      */
     suspend fun getRegionInfoByGrid(x: Int, y: Int): RegionMapInfo? {
         val key = "$x-$y"
         
+        // Return cached if available
         regions[key]?.let { return it }
         
-        // Would query simulator for region info
-        return null
+        // Query region info via capability if available
+        return withContext(Dispatchers.IO) {
+            try {
+                // Compute region handle from grid coordinates
+                val regionHandle = (x.toLong() shl 32) or y.toLong()
+                
+                // Try MapBlockRequest capability or search by coordinates
+                // Most viewers use the map image URL to verify region existence
+                val mapUrl = MAP_URL_TEMPLATE
+                    .replace("{zoom}", "1")
+                    .replace("{x}", x.toString())
+                    .replace("{y}", y.toString())
+                
+                val request = Request.Builder()
+                    .url(mapUrl)
+                    .head() // Just check if it exists
+                    .build()
+                
+                val client = OkHttpClient.Builder()
+                    .connectTimeout(5, TimeUnit.SECONDS)
+                    .build()
+                
+                val response = client.newCall(request).execute()
+                if (response.isSuccessful) {
+                    // Region exists, create info from coordinates
+                    val info = RegionMapInfo(
+                        name = "Region ($x, $y)",
+                        gridX = x,
+                        gridY = y,
+                        regionHandle = regionHandle,
+                        accessLevel = "PG",
+                        mapImageId = null
+                    )
+                    regions[key] = info
+                    info
+                } else {
+                    null
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to query region info at $x, $y: ${e.message}")
+                null
+            }
+        }
     }
     
     /**

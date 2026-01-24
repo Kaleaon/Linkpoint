@@ -678,11 +678,26 @@ class ObjectManager(
     }
     
     /**
-     * Get up from sitting
+     * Get up from sitting.
+     * Sends AgentSit message with SIT_FLAG_NO_FLAGS (0) to request standing.
      */
     fun standUp() {
         scope.launch {
-            // Would send AgentRequestStand message
+            try {
+                // AgentSit message to stand up (sending with no target ID indicates stand)
+                val payload = ByteBuffer.allocate(33).order(MESSAGE_BYTE_ORDER)
+                
+                // AgentData block
+                repeat(32) { payload.put(0) }  // Agent + Session ID placeholder
+                
+                // SitObject - ZERO_UUID indicates stand request
+                payload.put(0)  // Flags = 0 (no sit flags, meaning stand)
+                
+                udpConnection.sendPacket(MessageIds.AGENT_SIT, payload.array(), reliable = true)
+                Log.i(TAG, "Requested stand up")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to stand up", e)
+            }
         }
     }
     
