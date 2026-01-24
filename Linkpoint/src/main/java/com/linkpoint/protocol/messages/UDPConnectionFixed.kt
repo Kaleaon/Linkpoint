@@ -247,6 +247,38 @@ class UDPConnectionFixed {
     /** Count of packets that were resent due to ACK timeout */
     private val packetsResentCount = AtomicInteger(0)
     
+    // ==================== RELIABLE MESSAGING SUPPORT ====================
+    // Critical for SL protocol: ACKs must be sent for reliable packets or server will resend/drop connection
+    
+    /**
+     * Queue of sequence numbers from reliable packets that need to be ACKed.
+     * When we receive a packet with the reliable flag (0x40), we must acknowledge it.
+     * ACKs can be piggy-backed on outgoing packets or sent as standalone PacketAck messages.
+     */
+    private val pendingAcksToSend = java.util.concurrent.ConcurrentLinkedQueue<Int>()
+    
+    /**
+     * Maximum number of ACKs to include in a single PacketAck message.
+     * Based on SL protocol limits and Lumiya's implementation.
+     */
+    private val MAX_ACKS_PER_PACKET = 255
+    
+    /**
+     * Interval for sending pending ACKs (milliseconds).
+     * ACKs are typically sent every 100ms or piggy-backed on outgoing packets.
+     */
+    private val ACK_SEND_INTERVAL_MS = 100L
+    
+    /**
+     * Last time ACKs were sent (for throttling standalone ACK packets).
+     */
+    private var lastAckSendTime = 0L
+    
+    /**
+     * Job for the ACK sender coroutine.
+     */
+    private var ackSenderJob: Job? = null
+    
     // ==================== PACKET HISTORY FOR RAW DATA LOGGING ====================
     // Critical for debugging: captures raw packet data with hex dumps.
     // This addresses the requirement: "we need raw input and output to understand"
@@ -386,6 +418,13 @@ class UDPConnectionFixed {
             }
             
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ Receive loop started")
+            
+            // Start ACK sender loop for reliable packet acknowledgments
+            ackSenderJob = scope.launch {
+                ackSenderLoop()
+            }
+            
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ ACK sender loop started")
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== UDP CONNECTION ESTABLISHED ===")
             
             // Send initial messages
@@ -476,13 +515,16 @@ class UDPConnectionFixed {
                                     success = true
                                 )
                                 
+                                // Extract packet flags once for reuse
+                                val packetFlags = extractPacketFlags(data)
+                                
                                 // Log to EnhancedPacketLogger for comprehensive tracking
                                 EnhancedPacketLogger.logPacketReceived(
                                     messageId = messageId,
                                     messageName = messageName,
                                     sequenceNumber = seqNum,
                                     data = data,
-                                    flags = extractPacketFlags(data),
+                                    flags = packetFlags,
                                     handlerFound = messageHandlers.containsKey(messageId)
                                 )
                                 
@@ -494,6 +536,14 @@ class UDPConnectionFixed {
                                     data = data,
                                     handlerFound = messageHandlers.containsKey(messageId)
                                 )
+                                
+                                // ==================== RELIABLE PACKET ACK HANDLING ====================
+                                // CRITICAL: If this packet has the reliable flag (0x40), we MUST ACK it.
+                                // Failure to ACK reliable packets causes the server to resend, timeout, or drop connection.
+                                if (packetFlags.reliable && seqNum >= 0) {
+                                    pendingAcksToSend.offer(seqNum)
+                                    NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "🔔 Queued ACK for reliable packet seq=$seqNum, pending ACKs: ${pendingAcksToSend.size}")
+                                }
                                 
                                 // Publish message received event
                                 EventBus.publish(MessageReceivedEvent(messageId, data))
@@ -516,6 +566,119 @@ class UDPConnectionFixed {
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Total packets: ${packetsReceived.get()}")
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Total bytes: ${bytesReceived.get()}")
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Messages routed: ${messagesRouted.get()}")
+    }
+    
+    /**
+     * ACK sender loop - periodically sends pending ACKs to the simulator.
+     * 
+     * CRITICAL FOR RELIABLE MESSAGING:
+     * The Second Life protocol requires clients to ACK reliable packets.
+     * Without ACKs, the server will:
+     * 1. Keep resending packets (wasting bandwidth)
+     * 2. Eventually timeout the connection
+     * 3. Not send subsequent reliable data (like chat, objects, terrain)
+     * 
+     * This follows Lumiya's implementation where ACKs are sent either:
+     * - Piggy-backed on outgoing packets (optimization)
+     * - As standalone PacketAck messages (when no other traffic)
+     */
+    private suspend fun ackSenderLoop() {
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== ACK SENDER LOOP STARTED ===")
+        
+        while (_isConnected.value) {
+            try {
+                // Wait for ACK interval before checking for pending ACKs
+                delay(ACK_SEND_INTERVAL_MS)
+                
+                // Send any pending ACKs
+                if (pendingAcksToSend.isNotEmpty()) {
+                    sendPendingAcks()
+                }
+            } catch (e: Exception) {
+                if (_isConnected.value) {
+                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "ACK sender error: ${e.message}")
+                }
+            }
+        }
+        
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== ACK SENDER LOOP STOPPED ===")
+    }
+    
+    /**
+     * Send pending ACKs as a PacketAck message.
+     * 
+     * PacketAck message format (High Frequency, ID = -5 / 0xFB):
+     * - Header: flags (1) + seq (4) + extra (1)
+     * - Message ID: 1 byte (0xFB = -5)
+     * - Packets block count: 1 byte
+     * - For each packet:
+     *   - ID: 4 bytes (unsigned int, little-endian) - the sequence number being ACKed
+     */
+    private suspend fun sendPendingAcks() = withContext(Dispatchers.IO) {
+        val acksToSend = mutableListOf<Int>()
+        
+        // Drain up to MAX_ACKS_PER_PACKET from the queue
+        while (acksToSend.size < MAX_ACKS_PER_PACKET) {
+            val ack = pendingAcksToSend.poll() ?: break
+            acksToSend.add(ack)
+        }
+        
+        if (acksToSend.isEmpty()) return@withContext
+        
+        try {
+            // Build PacketAck message
+            // Header (6 bytes) + MessageID (1 byte) + Count (1 byte) + (4 bytes per ACK)
+            val packetSize = PACKET_HEADER_SIZE + 1 + 1 + (acksToSend.size * 4)
+            val packet = ByteBuffer.allocate(packetSize).order(ByteOrder.BIG_ENDIAN)
+            
+            // Packet header
+            val seqNum = sequenceNumber.incrementAndGet()
+            packet.put(0x00.toByte()) // Flags: not reliable, not zerocoded
+            packet.putInt(seqNum)
+            packet.put(0x00.toByte()) // Extra byte
+            
+            // Message ID: PacketAck is high frequency -5 (0xFB as signed byte)
+            packet.put(0xFB.toByte())
+            
+            // Block count - use bitwise AND to ensure unsigned byte representation
+            packet.put((acksToSend.size and 0xFF).toByte())
+            
+            // Each ACKed sequence number (4 bytes, little-endian for the data)
+            packet.order(ByteOrder.LITTLE_ENDIAN)
+            for (ackSeq in acksToSend) {
+                packet.putInt(ackSeq)
+            }
+            
+            // Send the packet
+            packet.flip()
+            val bytes = ByteArray(packet.remaining())
+            packet.get(bytes)
+            
+            val channel = datagramChannel ?: return@withContext
+            val buffer = ByteBuffer.wrap(bytes)
+            channel.write(buffer)
+            
+            packetsSent.incrementAndGet()
+            bytesSent.addAndGet(bytes.size.toLong())
+            lastSendTime = System.currentTimeMillis()
+            lastAckSendTime = lastSendTime
+            
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✅ Sent PacketAck for ${acksToSend.size} packets: $acksToSend (remaining pending: ${pendingAcksToSend.size})")
+            
+            // Record in packet history
+            recordPacketEvent(
+                type = PacketHistoryEntry.PacketEventType.SEND,
+                messageId = MessageIds.PACKET_ACK,
+                data = bytes,
+                sequenceNumber = seqNum,
+                success = true
+            )
+            
+        } catch (e: Exception) {
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Failed to send PacketAck: ${e.message}")
+            // Re-queue the ACKs we couldn't send
+            acksToSend.forEach { pendingAcksToSend.offer(it) }
+        }
     }
     
     /**
@@ -1089,6 +1252,10 @@ class UDPConnectionFixed {
         
         receiveJob?.cancel()
         agentUpdateJob?.cancel()
+        ackSenderJob?.cancel()
+        
+        // Clear pending ACKs since we're disconnecting
+        pendingAcksToSend.clear()
         
         try {
             selectionKey?.cancel()

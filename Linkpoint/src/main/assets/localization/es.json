@@ -1,0 +1,165 @@
+{
+  "locale": "es",
+  "strings": [
+    {
+      "key": "notification.im_title",
+      "value": "{0} a {1}"
+    },
+    {
+      "key": "notification.group_title", 
+      "value": "{0} a {1}"
+    },
+    {
+      "key": "error.network_connection",
+      "value": "Error de conexión de red"
+    },
+    {
+      "key": "error.login_failed",
+      "value": "Error de inicio de sesión"
+    },
+    {
+      "key": "error.region_not_found",
+      "value": "Región no encontrada"
+    },
+    {
+      "key": "error.teleport_failed",
+      "value": "Error de teletransporte"
+    },
+    {
+      "key": "error.asset_load_failed",
+      "value": "Error al cargar el recurso"
+    },
+    {
+      "key": "error.inventory_error",
+      "value": "Error de operación de inventario"
+    },
+    {
+      "key": "status.connecting",
+      "value": "Conectando..."
+    },
+    {
+      "key": "status.connected",
+      "value": "Conectado"
+    },
+    {
+      "key": "status.disconnected",
+      "value": "Desconectado"
+    },
+    {
+      "key": "status.reconnecting",
+      "value": "Reconectando..."
+    },
+    {
+      "key": "status.loading_region",
+      "value": "Cargando región..."
+    },
+    {
+      "key": "status.teleporting",
+      "value": "Teletransportando..."
+    },
+    {
+      "key": "ui.settings",
+      "value": "Configuración"
+    },
+    {
+      "key": "ui.back",
+      "value": "Atrás"
+    },
+    {
+      "key": "ui.forward",
+      "value": "Adelante"
+    },
+    {
+      "key": "ui.cancel",
+      "value": "Cancelar"
+    },
+    {
+      "key": "ui.ok",
+      "value": "Aceptar"
+    },
+    {
+      "key": "ui.save",
+      "value": "Guardar"
+    },
+    {
+      "key": "ui.delete",
+      "value": "Eliminar"
+    },
+    {
+      "key": "ui.search",
+      "value": "Buscar"
+    },
+    {
+      "key": "ui.loading",
+      "value": "Cargando..."
+    },
+    {
+      "key": "chat.nearby",
+      "value": "Chat Cercano"
+    },
+    {
+      "key": "chat.instant_message",
+      "value": "MI"
+    },
+    {
+      "key": "chat.group_chat",
+      "value": "Chat de Grupo"
+    },
+    {
+      "key": "chat.typing",
+      "value": "{0} está escribiendo..."
+    },
+    {
+      "key": "avatar.online",
+      "value": "{0} está en línea"
+    },
+    {
+      "key": "avatar.offline",
+      "value": "{0} está desconectado"
+    },
+    {
+      "key": "inventory.folder",
+      "value": "Carpeta"
+    },
+    {
+      "key": "inventory.item",
+      "value": "Artículo"
+    },
+    {
+      "key": "inventory.texture",
+      "value": "Textura"
+    },
+    {
+      "key": "inventory.script",
+      "value": "Script"
+    },
+    {
+      "key": "inventory.clothing",
+      "value": "Ropa"
+    },
+    {
+      "key": "inventory.bodypart",
+      "value": "Parte del Cuerpo"
+    },
+    {
+      "key": "world.region",
+      "value": "Región"
+    },
+    {
+      "key": "world.parcel",
+      "value": "Parcela"
+    },
+    {
+      "key": "world.landmark",
+      "value": "Punto de Referencia"
+    },
+    {
+      "key": "money.balance",
+      "value": "L${0}"
+    },
+    {
+      "key": "money.payment",
+      "value": "¿Pagar L${0} a {1}?"
+    }
+  ]
+}
