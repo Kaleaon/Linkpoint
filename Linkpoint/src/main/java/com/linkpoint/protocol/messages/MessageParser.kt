@@ -1174,7 +1174,12 @@ data class ObjectPropertiesData(
 )
 
 /**
- * Individual object property entry from ObjectProperties message
+ * Individual object property entry from ObjectProperties message.
+ * 
+ * Note: equals() and hashCode() use only objectId for comparison because
+ * the objectId uniquely identifies an object in the Second Life protocol.
+ * Multiple ObjectProperties messages for the same object should update
+ * the existing entry rather than create duplicates.
  */
 data class ObjectPropertyEntry(
     val objectId: UUID,
@@ -1216,14 +1221,6 @@ data class ObjectPropertyEntry(
 }
 
 /**
- * Helper to convert bytes to UUID for ObjectProperties parsing
- */
-private fun objectPropertiesBytesToUUID(bytes: ByteArray): UUID {
-    val bb = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN)
-    return UUID(bb.long, bb.long)
-}
-
-/**
  * Parse ObjectProperties message (ID 65289 / 0xFF09 - medium frequency)
  * 
  * This message contains detailed object properties like name, description,
@@ -1248,7 +1245,7 @@ private fun objectPropertiesBytesToUUID(bytes: ByteArray): UUID {
  * - AggregatePermTextures (U8, 1 byte)
  * - AggregatePermTexturesOwner (U8, 1 byte)
  * - Category (U32, 4 bytes)
- * - InventorySerial (S16, 2 bytes)
+ * - InventorySerial (U16, 2 bytes) - treated as unsigned for protocol compatibility
  * - ItemID (UUID, 16 bytes)
  * - FolderID (UUID, 16 bytes)
  * - FromTaskID (UUID, 16 bytes)
@@ -1278,22 +1275,22 @@ fun MessageParser.parseObjectProperties(data: ByteArray): ObjectPropertiesData? 
             // ObjectID
             val objectIdBytes = ByteArray(16)
             buffer.get(objectIdBytes)
-            val objectId = objectPropertiesBytesToUUID(objectIdBytes)
+            val objectId = bytesToUUID(objectIdBytes)
             
             // CreatorID
             val creatorIdBytes = ByteArray(16)
             buffer.get(creatorIdBytes)
-            val creatorId = objectPropertiesBytesToUUID(creatorIdBytes)
+            val creatorId = bytesToUUID(creatorIdBytes)
             
             // OwnerID
             val ownerIdBytes = ByteArray(16)
             buffer.get(ownerIdBytes)
-            val ownerId = objectPropertiesBytesToUUID(ownerIdBytes)
+            val ownerId = bytesToUUID(ownerIdBytes)
             
             // GroupID
             val groupIdBytes = ByteArray(16)
             buffer.get(groupIdBytes)
-            val groupId = objectPropertiesBytesToUUID(groupIdBytes)
+            val groupId = bytesToUUID(groupIdBytes)
             
             // CreationDate (S64)
             val creationDate = buffer.long
@@ -1322,22 +1319,22 @@ fun MessageParser.parseObjectProperties(data: ByteArray): ObjectPropertiesData? 
             // ItemID
             val itemIdBytes = ByteArray(16)
             buffer.get(itemIdBytes)
-            val itemId = objectPropertiesBytesToUUID(itemIdBytes)
+            val itemId = bytesToUUID(itemIdBytes)
             
             // FolderID
             val folderIdBytes = ByteArray(16)
             buffer.get(folderIdBytes)
-            val folderId = objectPropertiesBytesToUUID(folderIdBytes)
+            val folderId = bytesToUUID(folderIdBytes)
             
             // FromTaskID
             val fromTaskIdBytes = ByteArray(16)
             buffer.get(fromTaskIdBytes)
-            val fromTaskId = objectPropertiesBytesToUUID(fromTaskIdBytes)
+            val fromTaskId = bytesToUUID(fromTaskIdBytes)
             
             // LastOwnerID
             val lastOwnerIdBytes = ByteArray(16)
             buffer.get(lastOwnerIdBytes)
-            val lastOwnerId = objectPropertiesBytesToUUID(lastOwnerIdBytes)
+            val lastOwnerId = bytesToUUID(lastOwnerIdBytes)
             
             // Name (variable, 1-byte length prefix)
             val nameLen = buffer.get().toInt() and 0xFF
