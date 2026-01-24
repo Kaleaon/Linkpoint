@@ -34,6 +34,13 @@ import com.linkpoint.protocol.messages.parseAgentMovementComplete
 import com.linkpoint.protocol.messages.parseObjectUpdateCached
 import com.linkpoint.protocol.messages.parseObjectProperties
 import com.linkpoint.protocol.messages.parseScriptControlChange
+import com.linkpoint.protocol.messages.parseTeleportFinish
+import com.linkpoint.protocol.messages.parseTeleportFailed
+import com.linkpoint.protocol.messages.parseTeleportProgress
+import com.linkpoint.protocol.messages.parseAlertMessage
+import com.linkpoint.protocol.messages.parseAgentAlertMessage
+import com.linkpoint.protocol.messages.parseEnableSimulator
+import com.linkpoint.protocol.messages.parseCrossedRegion
 import com.linkpoint.protocol.transfer.TransferManager
 import com.linkpoint.protocol.transfer.XferManager
 import com.linkpoint.render.DrawDistanceManager
@@ -1347,6 +1354,179 @@ class LinkpointApp : Application() {
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling ParcelOverlay", e)
+            }
+        }
+        
+        // =====================================
+        // PHASE 1 CRITICAL HANDLERS
+        // =====================================
+        
+        // TeleportFinish - Teleport completed successfully
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.TELEPORT_FINISH) { _, rawPacket ->
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
+                
+                val data = com.linkpoint.protocol.messages.MessageParser.parseTeleportFinish(payload)
+                if (data != null) {
+                    Log.i(TAG, "🚀 TeleportFinish: Connecting to ${data.simIP}:${data.simPort}, handle=${data.regionHandle}")
+                    
+                    // Notify teleport manager
+                    if (::teleportManager.isInitialized) {
+                        teleportManager.handleTeleportFinish(data)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling TeleportFinish", e)
+            }
+        }
+        
+        // TeleportFailed - Teleport failed with reason
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.TELEPORT_FAILED) { _, rawPacket ->
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
+                
+                val data = com.linkpoint.protocol.messages.MessageParser.parseTeleportFailed(payload)
+                if (data != null) {
+                    Log.e(TAG, "❌ TeleportFailed: ${data.reason}")
+                    
+                    // Notify teleport manager
+                    if (::teleportManager.isInitialized) {
+                        teleportManager.handleTeleportFailed(data.reason)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling TeleportFailed", e)
+            }
+        }
+        
+        // TeleportProgress - Teleport status update
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.TELEPORT_PROGRESS) { _, rawPacket ->
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
+                
+                val data = com.linkpoint.protocol.messages.MessageParser.parseTeleportProgress(payload)
+                if (data != null) {
+                    Log.i(TAG, "🔄 TeleportProgress: ${data.message}")
+                    
+                    // Notify teleport manager
+                    if (::teleportManager.isInitialized) {
+                        teleportManager.handleTeleportProgress(data.message)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling TeleportProgress", e)
+            }
+        }
+        
+        // TeleportStart - Teleport sequence starting
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.TELEPORT_START) { _, rawPacket ->
+            try {
+                Log.i(TAG, "🚀 TeleportStart: Teleport sequence beginning")
+                // TeleportStart has minimal payload, just acknowledge it
+                if (::teleportManager.isInitialized) {
+                    teleportManager.handleTeleportStart()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling TeleportStart", e)
+            }
+        }
+        
+        // AlertMessage - System alert
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.ALERT_MESSAGE) { _, rawPacket ->
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
+                
+                val data = com.linkpoint.protocol.messages.MessageParser.parseAlertMessage(payload)
+                if (data != null) {
+                    Log.w(TAG, "⚠️ AlertMessage: ${data.message}")
+                    
+                    // Show alert to user via script dialog manager or notification
+                    if (::scriptDialogManager.isInitialized) {
+                        scriptDialogManager.showSystemAlert(data.message)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling AlertMessage", e)
+            }
+        }
+        
+        // AgentAlertMessage - Agent-specific alert
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.AGENT_ALERT_MESSAGE) { _, rawPacket ->
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
+                
+                val data = com.linkpoint.protocol.messages.MessageParser.parseAgentAlertMessage(payload)
+                if (data != null) {
+                    Log.w(TAG, "⚠️ AgentAlertMessage: ${data.message} (modal=${data.modal})")
+                    
+                    // Show alert to user
+                    if (::scriptDialogManager.isInitialized) {
+                        scriptDialogManager.showAgentAlert(data.message, data.modal)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling AgentAlertMessage", e)
+            }
+        }
+        
+        // EnableSimulator - Enable connection to neighbor sim
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.ENABLE_SIMULATOR) { _, rawPacket ->
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
+                
+                val data = com.linkpoint.protocol.messages.MessageParser.parseEnableSimulator(payload)
+                if (data != null) {
+                    Log.i(TAG, "🌐 EnableSimulator: Neighbor sim at ${data.ip}:${data.port}, handle=${data.handle}")
+                    
+                    // This would typically connect to the neighbor sim for seamless region crossings
+                    // For now, just log it
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling EnableSimulator", e)
+            }
+        }
+        
+        // CrossedRegion - Agent crossed into new region (medium frequency)
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.CROSSED_REGION) { _, rawPacket ->
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
+                
+                val data = com.linkpoint.protocol.messages.MessageParser.parseCrossedRegion(payload)
+                if (data != null) {
+                    Log.i(TAG, "🚶 CrossedRegion: Moving to ${data.simIP}:${data.simPort}, position=${data.position}")
+                    
+                    // Handle region crossing - connect to new region
+                    if (::teleportManager.isInitialized) {
+                        teleportManager.handleCrossedRegion(data)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling CrossedRegion", e)
+            }
+        }
+        
+        // ParcelProperties - Full parcel information (high frequency)
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.PARCEL_PROPERTIES) { _, rawPacket ->
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
+                
+                // ParcelProperties is complex - for now just log that we received it
+                Log.d(TAG, "🗺️ ParcelProperties received (${payload.size} bytes)")
+                
+                // Forward to parcel manager when full parsing is implemented
+                if (::parcelManager.isInitialized) {
+                    // parcelManager.handleParcelProperties(payload)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling ParcelProperties", e)
             }
         }
         

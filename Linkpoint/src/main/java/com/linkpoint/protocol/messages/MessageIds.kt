@@ -219,6 +219,18 @@ object MessageIds {
     
     /** StartLure - Send teleport offer */
     const val START_LURE = (0xFFFF014B).toInt()                // Wire: FF FF 01 4B
+    
+    /** TeleportFinish - Teleport completed successfully, connect to new sim */
+    const val TELEPORT_FINISH = (0xFFFF0045).toInt()           // Wire: FF FF 00 45 = -65467
+    
+    /** TeleportFailed - Teleport failed with reason */
+    const val TELEPORT_FAILED = (0xFFFF004A).toInt()           // Wire: FF FF 00 4A = -65462
+    
+    /** TeleportProgress - Teleport status update */
+    const val TELEPORT_PROGRESS = (0xFFFF0042).toInt()         // Wire: FF FF 00 42 = -65470
+    
+    /** TeleportStart - Teleport sequence starting */
+    const val TELEPORT_START = (0xFFFF0049).toInt()            // Wire: FF FF 00 49 = -65463
 
     // =====================================
     // Group Messages
@@ -303,4 +315,34 @@ object MessageIds {
 
     /** RezSingleAttachmentFromInv - Wear object from inventory */
     const val REZ_SINGLE_ATTACHMENT_FROM_INV = (0xFFFF012A).toInt() // Wire: FF FF 01 2A
+
+    // =====================================
+    // Alert Messages
+    // =====================================
+    
+    /** AlertMessage - System alert message */
+    const val ALERT_MESSAGE = (0xFFFF0086).toInt()              // Wire: FF FF 00 86 = -65402
+    
+    /** AgentAlertMessage - Agent-specific alert with modal flag */
+    const val AGENT_ALERT_MESSAGE = (0xFFFF0087).toInt()        // Wire: FF FF 00 87 = -65401
+
+    // =====================================
+    // Simulator/Region Messages
+    // =====================================
+    
+    /** EnableSimulator - Enable connection to neighbor sim */
+    const val ENABLE_SIMULATOR = (0xFFFF0097).toInt()           // Wire: FF FF 00 97 = -65385
+    
+    /** DisableSimulator - Disable connection to neighbor sim */
+    const val DISABLE_SIMULATOR = (0xFFFF0098).toInt()          // Wire: FF FF 00 98 = -65384
+    
+    /** CrossedRegion - Agent crossed into new region (medium frequency) */
+    const val CROSSED_REGION = 65287                            // Wire: FF 07 = 7 | 65280 (medium frequency)
+
+    // =====================================
+    // Parcel Messages (High Frequency)
+    // =====================================
+    
+    /** ParcelProperties - Full parcel information (high frequency) */
+    const val PARCEL_PROPERTIES = 23                            // Wire: 0x17 (high frequency)
 }

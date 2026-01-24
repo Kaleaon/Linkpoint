@@ -453,6 +453,74 @@ class TeleportManager(
         // This would trigger region crossing/teleport completion
     }
     
+    // ==================== UDP MESSAGE HANDLERS ====================
+    // These are called from LinkpointApp when UDP messages are received
+    
+    /**
+     * Handle TeleportFinish UDP message - teleport completed, connect to new region
+     */
+    fun handleTeleportFinish(data: com.linkpoint.protocol.messages.TeleportFinishData) {
+        Log.i(TAG, "UDP TeleportFinish: ${data.simIP}:${data.simPort}, handle=${data.regionHandle}")
+        _teleportState.value = TeleportState.COMPLETED
+        _progressMessage.value = "Connected to new region"
+        
+        scope.launch {
+            _teleportEvents.emit(TeleportEvent.Completed(
+                regionName = "Region",  // Would need to resolve from handle
+                x = 128f,
+                y = 128f,
+                z = 25f
+            ))
+        }
+    }
+    
+    /**
+     * Handle TeleportFailed UDP message
+     */
+    fun handleTeleportFailed(reason: String) {
+        Log.e(TAG, "UDP TeleportFailed: $reason")
+        _teleportState.value = TeleportState.FAILED
+        _progressMessage.value = reason
+        
+        scope.launch {
+            _teleportEvents.emit(TeleportEvent.Failed(reason))
+        }
+    }
+    
+    /**
+     * Handle TeleportProgress UDP message
+     */
+    fun handleTeleportProgress(message: String) {
+        Log.d(TAG, "UDP TeleportProgress: $message")
+        _progressMessage.value = message
+    }
+    
+    /**
+     * Handle TeleportStart UDP message
+     */
+    fun handleTeleportStart() {
+        Log.d(TAG, "UDP TeleportStart")
+        _teleportState.value = TeleportState.IN_PROGRESS
+        _progressMessage.value = "Teleport starting..."
+    }
+    
+    /**
+     * Handle CrossedRegion UDP message - region crossing
+     */
+    fun handleCrossedRegion(data: com.linkpoint.protocol.messages.CrossedRegionData) {
+        Log.i(TAG, "UDP CrossedRegion: ${data.simIP}:${data.simPort}, position=${data.position}")
+        _progressMessage.value = "Crossing region boundary..."
+        
+        scope.launch {
+            _teleportEvents.emit(TeleportEvent.Completed(
+                regionName = "New Region",
+                x = data.position.x,
+                y = data.position.y,
+                z = data.position.z
+            ))
+        }
+    }
+    
     // ==================== HELPERS ====================
     
     private fun parseSLURL(slurl: String): SLURLData? {

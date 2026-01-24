@@ -357,6 +357,30 @@ class ScriptDialogManager(
      */
     fun getActiveDialogCount(): Int = activeDialogs.size
     
+    // ==================== ALERT MESSAGE HANDLERS ====================
+    
+    /**
+     * Show a system-wide alert message (AlertMessage).
+     * These are typically important server notifications.
+     */
+    fun showSystemAlert(message: String) {
+        Log.w(TAG, "System Alert: $message")
+        scope.launch {
+            _dialogEvents.emit(DialogEvent.SystemAlert(message, modal = false))
+        }
+    }
+    
+    /**
+     * Show an agent-specific alert message (AgentAlertMessage).
+     * These may be modal (blocking) or non-modal.
+     */
+    fun showAgentAlert(message: String, modal: Boolean) {
+        Log.w(TAG, "Agent Alert (modal=$modal): $message")
+        scope.launch {
+            _dialogEvents.emit(DialogEvent.SystemAlert(message, modal = modal))
+        }
+    }
+    
     /**
      * Shutdown the manager.
      */
@@ -414,4 +438,5 @@ sealed class DialogEvent {
     data class DialogReceived(val dialog: ScriptDialog) : DialogEvent()
     data class PermissionRequested(val request: PermissionRequest) : DialogEvent()
     data class UrlLoadRequested(val request: LoadUrlRequest) : DialogEvent()
+    data class SystemAlert(val message: String, val modal: Boolean) : DialogEvent()
 }
