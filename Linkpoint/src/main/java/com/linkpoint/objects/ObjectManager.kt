@@ -831,7 +831,6 @@ data class SceneObject(
     val localId: Int,
     val fullId: UUID,
     var ownerId: UUID? = null,
-    var ownerID: UUID? = null, // Alias for compatibility
     var groupID: UUID? = null,
     var parentId: Int = 0,
     var position: LLVector3 = LLVector3.zero(),
@@ -852,6 +851,11 @@ data class SceneObject(
     var description: String = "",
     var lastUpdate: Long = 0
 ) : Parcelable {
+    // Alias for compatibility - prefer using ownerId
+    var ownerID: UUID?
+        get() = ownerId
+        set(value) { ownerId = value }
+    
     val isPhysical: Boolean get() = (updateFlags and ObjectManager.FLAG_USE_PHYSICS) != 0
     val isPhantom: Boolean get() = (updateFlags and ObjectManager.FLAG_PHANTOM) != 0
     val isTemporary: Boolean get() = (updateFlags and ObjectManager.FLAG_TEMPORARY) != 0
