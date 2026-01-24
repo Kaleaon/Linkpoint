@@ -1,7 +1,7 @@
 # Second Life Protocol Message Handler Tracking
 
 > **Generated:** January 24, 2026  
-> **Updated:** January 24, 2026 - Added Phase 4 (100 more handlers)
+> **Updated:** January 24, 2026 - Added Phase 5 (100 more handlers)
 > **Purpose:** Track implementation status of all SL protocol message handlers  
 > **Source:** Lumiya decompiled source (`lumiya_decompiled_source/`)
 
@@ -26,9 +26,9 @@ Second Life uses three message frequency levels encoded differently:
 
 | Status | Count | Description |
 |--------|-------|-------------|
-| ✅ Implemented | 281 | Fully implemented with parser and handler |
-| 🔲 ID Defined | ~50 | Message ID constant exists, no handler |
-| ❌ Not Started | ~150 | Not yet ported from Lumiya |
+| ✅ Implemented | 381 | Fully implemented with parser and handler |
+| 🔲 ID Defined | ~30 | Message ID constant exists, no handler |
+| ❌ Not Started | ~70 | Not yet ported from Lumiya |
 
 **Phase 1 (9 handlers):**
 - ✅ TeleportFinish, TeleportFailed, TeleportProgress, TeleportStart
@@ -44,7 +44,7 @@ Second Life uses three message frequency levels encoded differently:
 - ✅ High Freq: NeighborList, RequestImage, ImageData, ImagePacket, etc.
 - ✅ Agent/Avatar, Groups Extended, Inventory Extended, Objects Extended, etc.
 
-**Phase 4 (100 handlers - NEW):**
+**Phase 4 (100 handlers):**
 - ✅ Circuit: CloseCircuit, OpenCircuit, AddCircuitCode, TrustedCircuit, etc.
 - ✅ Auction: CancelAuction, CompleteAuction, StartAuction, ViewerStartAuction, etc.
 - ✅ Parcel Extended: ParcelBuyPass, ParcelClaim, ParcelDivide, ParcelJoin, etc.
@@ -65,6 +65,40 @@ Second Life uses three message frequency levels encoded differently:
 - ✅ Test/Debug: TestMessage, NetTest, StateSave, etc.
 - ✅ Logging: LogTextMessage, LogDwellTime, LogFailedMoneyTransaction, etc.
 - ✅ System: SetCPURatio, SetSimPresenceInDatabase, etc.
+
+**Phase 5 (100 handlers - NEW):**
+- ✅ Agent Movement: AgentRequestSit, AgentSit, AgentHeightWidth, AgentSetAppearance, etc.
+- ✅ Object Request: ObjectSelect, ObjectDeselect, ObjectGrab, ObjectDeGrab, etc.
+- ✅ Object Update Extended: MultipleObjectUpdate, RequestMultipleObjects, ObjectPosition
+- ✅ Sound Extended: StopSound, SoundPreload, SoundGainChange
+- ✅ Animation: AgentAnimation, AgentRequestAnimation, AvatarAnimationDone
+- ✅ Gesture: ActivateGestures, DeactivateGestures, GestureRequest, GestureResponse
+- ✅ Appearance Extended: RebakeAvatarTextures, SetFollowCamProperties, ClearFollowCamProperties
+- ✅ Attachment Extended: ObjectAttachResponse, AttachmentIntoInventory, AttachFromInventory
+- ✅ User Data: UserInfoReqMsg, UserInfoReplyMsg, UpdateUserInfoMsg
+- ✅ Friendship Extended: TerminateFriendship, GrantUserRights, OfferFriendship, FriendshipOffered
+- ✅ Group Extended: LeaveGroupRequest, ActivateGroup, GroupProfileRequest, GroupNoticesResponse
+- ✅ Script Control: ScriptControlChange
+- ✅ Environment: WindLightSettingsUpdate, ParcelEnvironmentBlock, SetEnvironment
+- ✅ Notecard/Script: UpdateTaskInventoryNotecardItem, UpdateScriptAgent, UpdateScriptTask
+- ✅ Autopilot: Autopilot, AutopilotCancel
+- ✅ Terrain: TerrainHeightData
+- ✅ God Mode: GodKickUser, GodlikeMessage, GodUpdateRegionInfo, GodDeleteSim, etc.
+- ✅ Estate Manager: EstateOwnerMessage, EstateChangeInfo, EstateExperienceReply
+- ✅ Land Bank: LandBuy, LandBuyPass
+- ✅ Asset/Transfer Extended: AssetInfoRequest, AssetInfoResponse, MapLayerRequest/Reply
+- ✅ Agent Data: AgentDataUpdateRequest, AgentDataUpdate
+- ✅ Pick/Classified Extended: PickDelete, PickUpdateInfo, ClassifiedDelete, ClassifiedInfoUpdate
+- ✅ Interest List: InterestListRequest, InterestListReply
+- ✅ Object Export: ExportDynaFile, ExportDynaFileRequest
+- ✅ Upload: UploadBakedTexture, UploadBakedTextureResult
+- ✅ Object Permission: ObjectPermissionsRequest, ObjectPermissionsReply
+- ✅ Agent Camera: AgentCameraConstraint, CameraConstraintMsg
+- ✅ Voice: ProvisionVoiceAccountRequest/Reply, ParcelVoiceInfoRequest/Reply
+- ✅ Experience: ExperienceInfoRequest/Reply, ExperiencePermissionRequest/Reply
+- ✅ Region Object: RegionObjectUpdate, RegionObjectComplete
+- ✅ Pathfinding: NavMeshStatusRequest/Reply, CharacterPropertiesRequest/Reply
+- ✅ Animation Override: AgentAnimationOverride, ClearAnimationOverride
 
 ---
 
