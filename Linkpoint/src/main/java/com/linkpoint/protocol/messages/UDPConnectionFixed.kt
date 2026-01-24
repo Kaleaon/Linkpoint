@@ -468,6 +468,21 @@ class UDPConnectionFixed {
                     break
                 }
                 
+                // Check if the selection key is still valid - it can become invalid after
+                // network changes on mobile devices without the channel/selector being closed
+                val key = selectionKey
+                if (key == null || !key.isValid) {
+                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Selection key invalid (network may have changed), exiting loop")
+                    break
+                }
+                
+                // Also verify the channel is still connected - on mobile networks,
+                // the connection can be dropped without closing the channel
+                if (!localChannel.isConnected) {
+                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Channel no longer connected, exiting loop")
+                    break
+                }
+                
                 // Wait for packets with timeout
                 val readyKeys = localSelector.select(SELECTOR_TIMEOUT_MS)
                 

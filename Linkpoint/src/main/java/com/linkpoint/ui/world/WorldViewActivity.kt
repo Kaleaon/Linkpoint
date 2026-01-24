@@ -749,6 +749,9 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         synchronized(this) {
             if (isSurfaceReady && !isRendering) {
                 android.util.Log.i(TAG, "onResume: Restarting render loop")
+                // Ensure SwapChain is recreated - it may have been destroyed when activity was paused
+                // The UiHelper may have called onDetachedFromSurface() while we were paused
+                app.renderManager.recreateSwapChain()
                 isRendering = true
                 startRenderLoop()
             } else if (!isSurfaceReady) {

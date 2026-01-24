@@ -10,6 +10,7 @@ import android.util.Log
 import com.linkpoint.assets.AssetCache
 import com.linkpoint.assets.AssetType
 import com.linkpoint.assets.TextureManager
+import com.linkpoint.network.SSLHelper
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
 import kotlinx.coroutines.*
@@ -24,6 +25,9 @@ import java.util.concurrent.TimeUnit
 /**
  * Handles avatar texture baking
  * Composites multiple wearable textures into baked textures
+ * 
+ * Note: Uses custom SSL configuration to handle Akamai CDN hostname verification.
+ * The baked texture upload capability URLs go through the CDN.
  */
 class AvatarBaker(
     private val context: Context,
@@ -61,10 +65,13 @@ class AvatarBaker(
         // ... etc
     }
     
-    private val httpClient = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(60, TimeUnit.SECONDS)
-        .build()
+    // HTTP client configured for CDN access with custom hostname verification
+    // Baked texture uploads go through capability URLs which may use CDN
+    private val httpClient = SSLHelper.configureForCdn(
+        OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
+    ).build()
     
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     
