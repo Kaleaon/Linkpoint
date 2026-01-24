@@ -33,6 +33,9 @@ object LoginResponseParser {
         val version: Int
     )
     
+    /** Null UUID constant for missing parent IDs */
+    private val NULL_UUID = UUID(0L, 0L)
+    
     /**
      * Parsed login response data.
      */
@@ -42,24 +45,8 @@ object LoginResponseParser {
         val inventoryRoot: UUID?,
         val agentAccessMax: String?,
         val homeRegion: String?,
-        val lookAt: FloatArray?
-    ) {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-            other as ParsedLoginData
-            return buddyList == other.buddyList &&
-                   inventorySkeleton == other.inventorySkeleton &&
-                   inventoryRoot == other.inventoryRoot
-        }
-        
-        override fun hashCode(): Int {
-            var result = buddyList.hashCode()
-            result = 31 * result + inventorySkeleton.hashCode()
-            result = 31 * result + (inventoryRoot?.hashCode() ?: 0)
-            return result
-        }
-    }
+        val lookAt: List<Float>?
+    )
     
     /**
      * Parse the full login response XML.
@@ -196,7 +183,7 @@ object LoginResponseParser {
                     try {
                         val folder = InventoryFolderInfo(
                             folderId = UUID.fromString(folderIdStr),
-                            parentId = if (parentIdStr != null) UUID.fromString(parentIdStr) else UUID(0L, 0L),
+                            parentId = if (parentIdStr != null) UUID.fromString(parentIdStr) else NULL_UUID,
                             name = name,
                             typeDefault = typeDefault,
                             version = version
@@ -254,7 +241,7 @@ object LoginResponseParser {
     /**
      * Parse look_at vector from login response.
      */
-    private fun parseLookAt(xml: String): FloatArray? {
+    private fun parseLookAt(xml: String): List<Float>? {
         try {
             val lookAtStr = extractXmlValue(xml, "look_at") ?: return null
             // Format: [r<float>,r<float>,r<float>]
@@ -264,7 +251,7 @@ object LoginResponseParser {
             while (matcher.find() && values.size < 3) {
                 values.add(matcher.group(1)?.toFloatOrNull() ?: 0f)
             }
-            return if (values.size == 3) values.toFloatArray() else null
+            return if (values.size == 3) values else null
         } catch (e: Exception) {
             return null
         }

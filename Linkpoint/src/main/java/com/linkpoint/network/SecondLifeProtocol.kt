@@ -520,7 +520,8 @@ class SecondLifeProtocol(private val context: Context) {
                             Log.d(TAG, "[LOGIN DATA] Resolving display names for ${friendIds.size} friends...")
                             
                             // Use ProfileManager's batch display name lookup (which uses capabilities)
-                            kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                            // Using app.applicationScope for proper lifecycle management
+                            app.applicationScope.launch(kotlinx.coroutines.Dispatchers.IO) {
                                 try {
                                     val displayNames = app.profileManager.getDisplayNames(friendIds)
                                     displayNames.forEach { (agentId, displayName) ->
