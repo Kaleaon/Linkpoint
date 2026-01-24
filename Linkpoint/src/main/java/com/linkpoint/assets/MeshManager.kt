@@ -1,6 +1,7 @@
 package com.linkpoint.assets
 
 import android.util.Log
+import com.linkpoint.network.SSLHelper
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
 import kotlinx.coroutines.*
@@ -16,6 +17,11 @@ import java.util.zip.Inflater
 /**
  * Manages mesh asset downloading and parsing
  * Handles Second Life mesh format (LLMESH)
+ * 
+ * Note: Uses custom SSL configuration to handle Akamai CDN hostname verification.
+ * The Second Life asset CDN is served by Akamai, which uses certificates for
+ * *.akamaized.net domains. The SSLHelper.configureForCdn() method handles this
+ * hostname mismatch securely.
  */
 class MeshManager(
     private val cache: AssetCache,
@@ -25,10 +31,13 @@ class MeshManager(
         private const val TAG = "MeshManager"
     }
     
-    private val httpClient = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS)
-        .build()
+    // HTTP client configured for CDN access with custom hostname verification
+    // This handles Akamai CDN certificate hostname mismatch for mesh downloads
+    private val httpClient = SSLHelper.configureForCdn(
+        OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+    ).build()
     
     private val pendingMeshes = ConcurrentHashMap<UUID, Deferred<MeshData?>>()
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())

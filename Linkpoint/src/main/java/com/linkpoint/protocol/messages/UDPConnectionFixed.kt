@@ -468,6 +468,27 @@ class UDPConnectionFixed {
                     break
                 }
                 
+                // Check if the selection key is still valid - it can become invalid after
+                // network changes on mobile devices without the channel/selector being closed
+                val key = selectionKey
+                if (key == null || !key.isValid) {
+                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Selection key invalid (network may have changed), exiting loop")
+                    break
+                }
+                
+                // Check if the DatagramChannel is still connected.
+                // For UDP, isConnected() reflects the state set by connect() and can become
+                // false due to:
+                // - Explicit disconnect() calls
+                // - ICMP port unreachable messages (on some platforms)
+                // - Other network error conditions
+                // While UDP is connectionless at the protocol level, the channel connection
+                // state helps detect when communication is no longer possible.
+                if (!localChannel.isConnected) {
+                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "DatagramChannel.isConnected returned false, exiting loop")
+                    break
+                }
+                
                 // Wait for packets with timeout
                 val readyKeys = localSelector.select(SELECTOR_TIMEOUT_MS)
                 

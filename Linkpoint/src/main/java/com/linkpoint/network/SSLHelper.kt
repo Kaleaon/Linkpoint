@@ -9,7 +9,10 @@ import okhttp3.OkHttpClient
 import okhttp3.TlsVersion
 import java.security.KeyStore
 import java.security.cert.X509Certificate
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLSession
 import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.TrustManager
 import javax.net.ssl.TrustManagerFactory
@@ -90,6 +93,251 @@ object SSLHelper {
         sslContext.init(null, arrayOf<TrustManager>(trustManager), null)
         
         return sslContext.socketFactory to trustManager
+    }
+    
+    /**
+     * Custom HostnameVerifier for Second Life CDN domains.
+     * 
+     * Second Life uses Akamai CDN for asset delivery. The CDN serves content from
+     * domains like asset-cdn.glb.agni.lindenlab.com, but the SSL certificate is
+     * issued for Akamai domains (e.g., *.akamaized.net, a248.e.akamai.net).
+     * 
+     * This verifier allows the hostname mismatch for known CDN configurations:
+     * - lindenlab.com subdomains served by Akamai CDN
+     * - Certificate must be from Akamai (verified by checking issuer/subject)
+     * 
+     * Security considerations:
+     * - Only applies to specific known CDN patterns
+     * - Falls back to default verification for all other hostnames
+     * - Does NOT disable certificate validation (chain is still verified)
+     */
+    fun getCdnHostnameVerifier(): HostnameVerifier {
+        val defaultVerifier = HttpsURLConnection.getDefaultHostnameVerifier()
+        
+        return HostnameVerifier { hostname, session ->
+            // First, try default verification - this handles normal cases
+            if (defaultVerifier.verify(hostname, session)) {
+                return@HostnameVerifier true
+            }
+            
+            // Check if this is a known CDN pattern that needs special handling
+            if (isCdnHostnameMismatch(hostname, session)) {
+                Log.d(TAG, "CDN hostname verification: allowing $hostname via Akamai CDN")
+                return@HostnameVerifier true
+            }
+            
+            // Default: reject if verification fails
+            Log.w(TAG, "Hostname verification failed for: $hostname")
+            false
+        }
+    }
+    
+    /**
+     * Check if the hostname/certificate combination is a known CDN mismatch.
+     * 
+     * Returns true if:
+     * 1. The hostname is a Second Life asset CDN domain
+     * 2. The certificate is from Akamai (a known CDN provider for SL)
+     */
+    private fun isCdnHostnameMismatch(hostname: String, session: SSLSession): Boolean {
+        try {
+            // Only handle Second Life asset CDN domains
+            if (!isSecondLifeCdnDomain(hostname)) {
+                return false
+            }
+            
+            // Get the peer certificate to verify it's from Akamai
+            val certs = session.peerCertificates
+            if (certs.isEmpty()) {
+                return false
+            }
+            
+            val cert = certs[0] as? X509Certificate ?: return false
+            val subjectDN = cert.subjectDN.name.lowercase()
+            val issuerDN = cert.issuerDN.name.lowercase()
+            
+            // Validate the certificate is from a trusted source
+            // Akamai certificates are typically issued by DigiCert
+            val trustedIssuers = listOf("digicert", "globalsign", "geotrust", "symantec")
+            val hasTrustedIssuer = trustedIssuers.any { issuerDN.contains(it) }
+            
+            // Check if certificate is from Akamai
+            // Akamai certificates typically have:
+            // - Subject CN ending with ".akamai.net" (e.g., CN=a248.e.akamai.net)
+            // - SANs containing akamai-controlled domains
+            // - Issued by a trusted CA (DigiCert, etc.)
+            // 
+            // Extract and validate the CN (Common Name) from the subject DN
+            // Format: CN=a248.e.akamai.net,O=Akamai Technologies...
+            val hasAkamaiSubject = isValidAkamaiSubjectDN(subjectDN)
+            val hasAkamaiSANs = hasAkamaiSAN(cert)
+            
+            // Require BOTH Akamai identification AND trusted issuer for security
+            val isAkamaiCert = (hasAkamaiSubject || hasAkamaiSANs) && hasTrustedIssuer
+            
+            if (isAkamaiCert) {
+                Log.d(TAG, "Verified Akamai CDN certificate for SL domain: $hostname (issuer: ${cert.issuerDN.name})")
+                return true
+            }
+            
+            return false
+        } catch (e: Exception) {
+            Log.w(TAG, "Error checking CDN hostname mismatch: ${e.message}")
+            return false
+        }
+    }
+    
+    /**
+     * Validate that the subject DN contains a valid Akamai CN.
+     * Extracts the CN field and checks if it's an Akamai domain.
+     */
+    private fun isValidAkamaiSubjectDN(subjectDN: String): Boolean {
+        // Extract CN from subject DN (format: CN=value,O=...,...)
+        // The CN should be at the start or after a comma
+        val cnPattern = Regex("""(?:^|,)\s*cn=([^,]+)""", RegexOption.IGNORE_CASE)
+        val match = cnPattern.find(subjectDN) ?: return false
+        val cn = match.groupValues.getOrNull(1)?.lowercase()?.trim() ?: return false
+        
+        // Valid Akamai CN must be exactly or end with an Akamai domain
+        val akamaiDomains = listOf(
+            "akamai.net",
+            "akamaized.net",
+            "akamaihd.net"
+        )
+        
+        return akamaiDomains.any { domain ->
+            cn == domain || cn.endsWith(".$domain")
+        }
+    }
+    
+    /**
+     * Check if the hostname is a Second Life CDN domain that uses Akamai.
+     * 
+     * Known CDN domains:
+     * - asset-cdn.glb.agni.lindenlab.com (production grid)
+     * - asset-cdn.glb.aditi.lindenlab.com (beta grid)
+     * - simhost-*.agni.secondlife.com (simulator capability hosts)
+     */
+    private fun isSecondLifeCdnDomain(hostname: String): Boolean {
+        val lowercaseHostname = hostname.lowercase()
+        
+        // Exact match domains for asset CDN
+        val exactMatches = listOf(
+            "asset-cdn.glb.agni.lindenlab.com",
+            "asset-cdn.glb.aditi.lindenlab.com"
+        )
+        
+        if (exactMatches.any { lowercaseHostname == it }) {
+            return true
+        }
+        
+        // Subdomain matches (e.g., something.asset-cdn.glb.agni.lindenlab.com)
+        val suffixMatches = listOf(
+            ".asset-cdn.glb.agni.lindenlab.com",
+            ".asset-cdn.glb.aditi.lindenlab.com"
+        )
+        
+        if (suffixMatches.any { lowercaseHostname.endsWith(it) }) {
+            return true
+        }
+        
+        // Simulator host pattern: simhost-<hash>.agni.secondlife.com or simhost-<hash>.aditi.secondlife.com
+        // These are capability URLs returned by the simulator.
+        // The format is: simhost-<alphanumeric-hash>.<grid>.secondlife.com
+        // 
+        // Validate the complete structure to prevent attacks like:
+        // - simhost-evil.attacker.agni.secondlife.com (additional subdomains)
+        // - simhost-.agni.secondlife.com (empty hash)
+        if (lowercaseHostname.startsWith("simhost-")) {
+            // Valid patterns are exactly:
+            // - simhost-<hash>.agni.secondlife.com
+            // - simhost-<hash>.aditi.secondlife.com
+            // where <hash> is a non-empty alphanumeric string
+            
+            val simhostPatterns = listOf(
+                Regex("""^simhost-[a-z0-9]+\.agni\.secondlife\.com$"""),
+                Regex("""^simhost-[a-z0-9]+\.aditi\.secondlife\.com$""")
+            )
+            
+            if (simhostPatterns.any { it.matches(lowercaseHostname) }) {
+                return true
+            }
+        }
+        
+        return false
+    }
+    
+    /**
+     * Check if certificate has Akamai-related Subject Alternative Names.
+     * This verifies the certificate is legitimately from Akamai CDN.
+     * 
+     * Only accepts SANs that are clearly Akamai-controlled domains:
+     * - *.akamai.net
+     * - *.akamaized.net
+     * - *.akamaihd.net
+     * - *.akamaized-staging.net
+     * - *.akamaihd-staging.net
+     */
+    private fun hasAkamaiSAN(cert: X509Certificate): Boolean {
+        return try {
+            val sans = cert.subjectAlternativeNames ?: return false
+            
+            // Known Akamai domain suffixes (must be at end of domain name)
+            val akamaiDomainSuffixes = listOf(
+                ".akamai.net",
+                ".akamaized.net",
+                ".akamaihd.net",
+                ".akamaized-staging.net",
+                ".akamaihd-staging.net"
+            )
+            
+            // Also accept exact match for top-level Akamai domains
+            val akamaiExactDomains = listOf(
+                "akamai.net",
+                "akamaized.net",
+                "akamaihd.net"
+            )
+            
+            sans.any { san ->
+                // SAN entries are lists where:
+                // - Index 0: Integer type (2 = DNS name, 7 = IP address, etc.)
+                // - Index 1: The value
+                // We only want to check DNS name entries (type 2)
+                val type = san.getOrNull(0) as? Int
+                if (type != 2) return@any false  // 2 = DNS name (dNSName)
+                
+                val value = (san.getOrNull(1) as? String)?.lowercase() ?: return@any false
+                // Check if it's an exact Akamai domain or a subdomain of one
+                akamaiExactDomains.any { value == it } ||
+                        akamaiDomainSuffixes.any { value.endsWith(it) }
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+    
+    /**
+     * Configure OkHttpClient.Builder with CDN-compatible hostname verification.
+     * 
+     * This should be used for clients that connect to Second Life asset CDN
+     * (texture downloads, mesh downloads, etc.)
+     */
+    fun configureForCdn(builder: OkHttpClient.Builder): OkHttpClient.Builder {
+        try {
+            val (sslSocketFactory, trustManager) = getSSLSocketFactory()
+            
+            builder.sslSocketFactory(sslSocketFactory, trustManager)
+            builder.hostnameVerifier(getCdnHostnameVerifier())
+            builder.connectionSpecs(listOf(MODERN_TLS, COMPATIBLE_TLS))
+            
+            Log.d(TAG, "SSL configured for CDN access with custom hostname verifier")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error configuring SSL for CDN: ${e.message}", e)
+            // Fall back to default configuration (may fail for CDN)
+            builder.connectionSpecs(listOf(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS))
+        }
+        
+        return builder
     }
     
     /**
