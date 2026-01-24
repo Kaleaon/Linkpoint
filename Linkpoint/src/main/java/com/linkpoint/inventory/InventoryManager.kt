@@ -347,6 +347,23 @@ class InventoryManager(
     }
     
     /**
+     * Remove an item from inventory (called when server notifies us of removal)
+     */
+    fun removeItem(itemId: UUID) {
+        items.remove(itemId)
+        Log.d(TAG, "Removed item from cache: $itemId")
+    }
+    
+    /**
+     * Remove a folder from inventory (called when server notifies us of removal)
+     */
+    fun removeFolder(folderId: UUID) {
+        folders.remove(folderId)
+        systemFolders.entries.removeIf { it.value == folderId }
+        Log.d(TAG, "Removed folder from cache: $folderId")
+    }
+    
+    /**
      * Move item to folder.
      * Uses AISv3 capability when available, falls back to UDP MoveInventoryItem.
      */
