@@ -2712,92 +2712,166 @@ class LinkpointApp : Application() {
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_SCALE) { _, rawPacket ->
-            Log.d(TAG, "📦 ObjectScale received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::objectManager.isInitialized) {
+                    objectManager.handleObjectScaleUpdate(payload)
+                }
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectScale", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_ROTATION) { _, rawPacket ->
-            Log.d(TAG, "📦 ObjectRotation received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::objectManager.isInitialized) {
+                    objectManager.handleObjectRotationUpdate(payload)
+                }
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectRotation", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_POSITION) { _, rawPacket ->
-            Log.d(TAG, "📦 ObjectPosition received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::objectManager.isInitialized) {
+                    objectManager.handleObjectPositionUpdate(payload)
+                }
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectPosition", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_FLAG_UPDATE) { _, rawPacket ->
-            Log.d(TAG, "📦 ObjectFlagUpdate received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::objectManager.isInitialized) {
+                    objectManager.handleObjectFlagUpdate(payload)
+                }
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectFlagUpdate", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_CLICK_ACTION) { _, rawPacket ->
-            Log.d(TAG, "📦 ObjectClickAction received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "📦 ObjectClickAction (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectClickAction", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_IMAGE) { _, rawPacket ->
-            Log.d(TAG, "📦 ObjectImage received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "📦 ObjectImage (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectImage", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_MATERIAL) { _, rawPacket ->
-            Log.d(TAG, "📦 ObjectMaterial received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "📦 ObjectMaterial (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectMaterial", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_SHAPE) { _, rawPacket ->
-            Log.d(TAG, "📦 ObjectShape received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "📦 ObjectShape (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectShape", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_OWNER) { _, rawPacket ->
-            Log.d(TAG, "📦 ObjectOwner received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "📦 ObjectOwner (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectOwner", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_GROUP) { _, rawPacket ->
-            Log.d(TAG, "📦 ObjectGroup received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "📦 ObjectGroup (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectGroup", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_BUY) { _, rawPacket ->
-            Log.d(TAG, "💰 ObjectBuy received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "💰 ObjectBuy (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectBuy", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_PERMISSIONS) { _, rawPacket ->
-            Log.d(TAG, "🔒 ObjectPermissions received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "🔒 ObjectPermissions (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectPermissions", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_SALE_INFO) { _, rawPacket ->
-            Log.d(TAG, "💰 ObjectSaleInfo received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "💰 ObjectSaleInfo (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectSaleInfo", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_DESELECT) { _, rawPacket ->
-            Log.d(TAG, "📦 ObjectDeselect received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "📦 ObjectDeselect (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectDeselect", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_ATTACH) { _, rawPacket ->
-            Log.d(TAG, "📦 ObjectAttach received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "📦 ObjectAttach (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectAttach", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_DETACH) { _, rawPacket ->
-            Log.d(TAG, "📦 ObjectDetach received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "📦 ObjectDetach (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectDetach", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_DROP) { _, rawPacket ->
-            Log.d(TAG, "📦 ObjectDrop received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "📦 ObjectDrop (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectDrop", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_SPIN_START) { _, rawPacket ->
-            Log.d(TAG, "📦 ObjectSpinStart received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "📦 ObjectSpinStart (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectSpinStart", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_SPIN_UPDATE) { _, rawPacket ->
-            Log.d(TAG, "📦 ObjectSpinUpdate received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "📦 ObjectSpinUpdate (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectSpinUpdate", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_SPIN_STOP) { _, rawPacket ->
-            Log.d(TAG, "📦 ObjectSpinStop received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "📦 ObjectSpinStop (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectSpinStop", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_GRAB_UPDATE) { _, rawPacket ->
-            Log.d(TAG, "📦 ObjectGrabUpdate received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "📦 ObjectGrabUpdate (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling ObjectGrabUpdate", e) }
         }
         
         // --- Land/Terrain Messages ---
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.MODIFY_LAND) { _, rawPacket ->
-            Log.d(TAG, "🏔️ ModifyLand received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "🏔️ ModifyLand (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling ModifyLand", e) })
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.UNDO_LAND) { _, rawPacket ->
