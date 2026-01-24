@@ -2249,19 +2249,52 @@ class LinkpointApp : Application() {
                     Log.d(TAG, "📊 SimStatus received (${payload.size} bytes)")
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error handling SimStatus", e))
+                Log.e(TAG, "Error handling SimStatus", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.LOGOUT_REPLY) { _, rawPacket ->
-            Log.d(TAG, "👋 LogoutReply received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    val data = com.linkpoint.protocol.messages.AdditionalMessageParsers.parseLogoutReply(payload)
+                    if (data != null && ::sessionManager.isInitialized) {
+                        Log.d(TAG, "👋 LogoutReply: session=${data.sessionID}")
+                        sessionManager.disconnect()
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling LogoutReply", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.UUID_NAME_REPLY) { _, rawPacket ->
-            Log.d(TAG, "🏷️ UUIDNameReply received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    val data = com.linkpoint.protocol.messages.AdditionalMessageParsers.parseUUIDNameReply(payload)
+                    if (data != null) {
+                        Log.d(TAG, "🏷️ UUIDNameReply: ${data.entries.size} names")
+                        data.entries.forEach { entry ->
+                            // Cache names for display
+                            Log.d(TAG, "  ${entry.id} -> ${entry.firstName} ${entry.lastName}")
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling UUIDNameReply", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.UUID_GROUP_NAME_REPLY) { _, rawPacket ->
-            Log.d(TAG, "🏷️ UUIDGroupNameReply received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    Log.d(TAG, "🏷️ UUIDGroupNameReply received (${payload.size} bytes)")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling UUIDGroupNameReply", e)
+            }
         }
         
         // =====================================
@@ -2730,27 +2763,79 @@ class LinkpointApp : Application() {
         
         // --- Generic/System Messages ---
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.GENERIC_MESSAGE) { _, rawPacket ->
-            Log.d(TAG, "📨 GenericMessage received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    val data = com.linkpoint.protocol.messages.AdditionalMessageParsers.parseGenericMessage(payload)
+                    if (data != null) {
+                        Log.d(TAG, "📨 GenericMessage: method=${data.methodName}, ${data.params.size} params")
+                        handleGenericMessage(data.methodName, data.invoice, data.params)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling GenericMessage", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.SYSTEM_MESSAGE) { _, rawPacket ->
-            Log.d(TAG, "📨 SystemMessage received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    val data = com.linkpoint.protocol.messages.AdditionalMessageParsers.parseSystemMessage(payload)
+                    if (data != null) {
+                        Log.d(TAG, "📨 SystemMessage: method=${data.method}")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling SystemMessage", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.ERROR_MESSAGE) { _, rawPacket ->
-            Log.d(TAG, "❌ ErrorMessage received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    val data = com.linkpoint.protocol.messages.AdditionalMessageParsers.parseErrorMessage(payload)
+                    if (data != null) {
+                        Log.e(TAG, "❌ ErrorMessage: code=${data.errorCode}, message=${data.errorMessage}")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling ErrorMessage", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.FEATURE_DISABLED) { _, rawPacket ->
-            Log.d(TAG, "🚫 FeatureDisabled received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    Log.d(TAG, "🚫 FeatureDisabled received (${payload.size} bytes)")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling FeatureDisabled", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.VIEWER_FROZEN_MESSAGE) { _, rawPacket ->
-            Log.d(TAG, "🥶 ViewerFrozenMessage received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    Log.d(TAG, "🥶 ViewerFrozenMessage received (${payload.size} bytes)")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling ViewerFrozenMessage", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.VIEWER_STATS) { _, rawPacket ->
-            Log.d(TAG, "📊 ViewerStats received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    Log.d(TAG, "📊 ViewerStats received (${payload.size} bytes)")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling ViewerStats", e)
+            }
         }
         
         // --- Attachment Messages ---
@@ -4418,6 +4503,37 @@ class LinkpointApp : Application() {
      * Check if HUD manager is initialized (for debug reports)
      */
     fun isHudManagerInitialized(): Boolean = ::hudManager.isInitialized
+    
+    // ==================== GENERIC MESSAGE HANDLING ====================
+    
+    /**
+     * Handle GenericMessage method calls from simulator.
+     * GenericMessage is used for various RPC-style calls from LSL scripts.
+     */
+    private fun handleGenericMessage(method: String, invoice: UUID, params: List<ByteArray>) {
+        Log.d(TAG, "GenericMessage: method=$method, params=${params.size}")
+        
+        when (method) {
+            "teleporthomerequest" -> {
+                Log.i(TAG, "Teleport home request received")
+            }
+            "godpowers" -> {
+                Log.i(TAG, "God powers message received")
+            }
+            "experience" -> {
+                Log.i(TAG, "Experience message received")
+            }
+            "maturity" -> {
+                if (params.isNotEmpty()) {
+                    val maturity = String(params[0], Charsets.UTF_8)
+                    Log.i(TAG, "Maturity rating: $maturity")
+                }
+            }
+            else -> {
+                Log.d(TAG, "Unknown GenericMessage method: $method")
+            }
+        }
+    }
     
     // ==================== SESSION RECORDING ====================
     
