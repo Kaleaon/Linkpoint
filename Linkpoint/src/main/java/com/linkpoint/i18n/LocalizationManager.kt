@@ -256,10 +256,18 @@ class LocalizationManager private constructor(private val context: Context) {
      */
     fun formatDistance(meters: Float): String {
         return when {
-            meters < 1f -> getString("distance.meters", "%.1f".format(meters * 100), "cm")
-            meters < 1000f -> getString("distance.meters", "%.1f".format(meters), "m")
-            else -> getString("distance.kilometers", "%.2f".format(meters / 1000), "km")
-        }.let { if (!hasString("distance.meters")) "%.1f m".format(meters) else it }
+            meters < 1f -> {
+                val cm = meters * 100
+                "${numberFormat.format(cm)} cm"
+            }
+            meters < 1000f -> {
+                "${numberFormat.format(meters)} m"
+            }
+            else -> {
+                val km = meters / 1000
+                "${numberFormat.format(km)} km"
+            }
+        }
     }
     
     /**

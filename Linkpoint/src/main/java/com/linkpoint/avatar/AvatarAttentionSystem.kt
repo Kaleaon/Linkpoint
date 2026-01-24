@@ -233,7 +233,7 @@ class AvatarAttentionSystem(context: Context?) {
             targetPosition.z - headPosition.z
         )
         
-        val horizontalDist = kotlin.math.sqrt(direction.x * direction.x + direction.y * direction.y)
+        val horizontalDist = kotlin.math.hypot(direction.x, direction.y)
         
         // Calculate pitch (up/down)
         var pitch = kotlin.math.atan2(direction.z, horizontalDist)

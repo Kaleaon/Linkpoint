@@ -87,10 +87,19 @@ class TreeSpeciesManager(context: Context?) {
             get() = speciesId in setOf(SPECIES_WINTER_PINE_1, SPECIES_WINTER_PINE_2, SPECIES_WINTER_ASPEN)
         
         /**
-         * Get total tree height for LOD calculations
+         * Get total tree height for LOD calculations.
+         * Uses geometric series formula to account for recursive branching with scale reduction.
          */
         val estimatedHeight: Float
-            get() = trunkLength + (branchLength * depth * scaleStep)
+            get() {
+                return if (scaleStep >= 1.0f || depth <= 1) {
+                    trunkLength + branchLength * depth
+                } else {
+                    // Geometric series: branchLength * (1 - scaleStep^depth) / (1 - scaleStep)
+                    val branchContribution = branchLength * (1 - kotlin.math.pow(scaleStep.toDouble(), depth.toDouble()).toFloat()) / (1 - scaleStep)
+                    trunkLength + branchContribution
+                }
+            }
     }
     
     // Loaded species definitions
