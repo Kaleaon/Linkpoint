@@ -1,0 +1,76 @@
+{
+  "strings": [
+    {
+      "key": "notification.im_title",
+      "value": "{0} to {1}"
+    },
+    {
+      "key": "notification.group_title", 
+      "value": "{0} to {1}"
+    },
+    {
+      "key": "error.network_connection",
+      "value": "Network connection error"
+    },
+    {
+      "key": "error.login_failed",
+      "value": "Login failed"
+    },
+    {
+      "key": "status.connecting",
+      "value": "Connecting..."
+    },
+    {
+      "key": "status.connected",
+      "value": "Connected"
+    },
+    {
+      "key": "status.disconnected",
+      "value": "Disconnected"
+    },
+    {
+      "key": "ui.settings",
+      "value": "Settings"
+    },
+    {
+      "key": "ui.back",
+      "value": "Back"
+    },
+    {
+      "key": "ui.forward",
+      "value": "Forward"
+    },
+    {
+      "key": "debug.location_added",
+      "value": "Added new place to stack"
+    },
+    {
+      "key": "debug.current_location",
+      "value": "Current Location: {0} {1:F1} {2:F1} {3:F1}"
+    },
+    {
+      "key": "debug.going_to_location",
+      "value": "Going To Location: {0}"
+    },
+    {
+      "key": "debug.going_to_null",
+      "value": "Going To Location: null"
+    },
+    {
+      "key": "debug.current_location_null",
+      "value": "Current Location: null"
+    },
+    {
+      "key": "error.camera_initialization",
+      "value": "Error: Failed to initialize cameras"
+    },
+    {
+      "key": "error.visual_params",
+      "value": "Unable to load Master Avatar for VisualParam2 plugin."
+    },
+    {
+      "key": "error.local_notification",
+      "value": "Error while attempting local notification."
+    }
+  ]
+}
