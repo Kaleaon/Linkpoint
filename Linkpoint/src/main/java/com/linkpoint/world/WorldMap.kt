@@ -66,6 +66,25 @@ class WorldMap(
     fun setFriendsManagerProvider(provider: () -> FriendsManager?) {
         friendsManagerProvider = provider
     }
+    
+    /**
+     * Cache region info from MapBlockReply message.
+     */
+    fun cacheRegionInfo(gridX: Int, gridY: Int, name: String, mapImageId: UUID) {
+        val key = "$gridX-$gridY"
+        val regionHandle = (gridX.toLong() shl 32) or gridY.toLong()
+        val info = RegionMapInfo(
+            name = name,
+            gridX = gridX,
+            gridY = gridY,
+            regionHandle = regionHandle,
+            access = 0, // Default access level
+            mapImageId = mapImageId
+        )
+        regions[key] = info
+        Log.d(TAG, "Cached region info: $name at ($gridX, $gridY)")
+    }
+    
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
         .build()

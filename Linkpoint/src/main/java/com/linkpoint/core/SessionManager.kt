@@ -118,7 +118,21 @@ class SessionManager(private val context: Context) {
         if (current != null && current.name != regionName) {
             _currentRegion.value = current.copy(name = regionName)
             Log.i(TAG, "Region name updated: ${current.name} -> $regionName")
-        } else if (current == null) {
+        }
+    }
+    
+    /**
+     * Update region info from RegionInfo UDP message.
+     */
+    fun updateRegionInfo(regionName: String, waterHeight: Float, terrainRaiseLimit: Float, terrainLowerLimit: Float) {
+        val current = _currentRegion.value
+        if (current != null) {
+            _currentRegion.value = current.copy(
+                name = regionName,
+                waterHeight = waterHeight
+            )
+            Log.i(TAG, "Region info updated: $regionName, water=$waterHeight")
+        } else {
             // Create minimal region info if we don't have any yet
             _currentRegion.value = RegionInfo(
                 name = regionName,
@@ -127,7 +141,8 @@ class SessionManager(private val context: Context) {
                 y = 128,
                 simIP = "",
                 simPort = 0,
-                seedCapability = null
+                seedCapability = null,
+                waterHeight = waterHeight
             )
             Log.i(TAG, "Region info created for: $regionName")
         }
@@ -346,7 +361,8 @@ data class RegionInfo(
     val y: Int,
     val simIP: String,
     val simPort: Int,
-    val seedCapability: String? = null
+    val seedCapability: String? = null,
+    val waterHeight: Float = 20f
 )
 
 data class TeleportHistoryEntry(

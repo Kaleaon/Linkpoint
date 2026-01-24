@@ -145,6 +145,49 @@ class FriendsManager(
         }
     }
     
+    /**
+     * Handle UDP AcceptFriendship message (UDP fallback for capability)
+     */
+    fun handleFriendshipAccepted(agentId: UUID, transactionId: UUID) {
+        val offer = pendingOffers.remove(transactionId)
+        
+        Log.i(TAG, "✓ Friendship accepted: agent=$agentId, transaction=$transactionId")
+        
+        // Add as friend
+        addFriendFromLogin(agentId, "", 0)
+        
+        scope.launch {
+            _friendsFlow.emit(FriendEvent.Added(agentId))
+        }
+    }
+    
+    /**
+     * Handle UDP DeclineFriendship message (UDP fallback for capability)
+     */
+    fun handleFriendshipDeclined(agentId: UUID, transactionId: UUID) {
+        val offer = pendingOffers.remove(transactionId)
+        Log.i(TAG, "✗ Friendship declined: agent=$agentId, transaction=$transactionId")
+    }
+    
+    /**
+     * Handle UDP FormFriendship message (confirmation of new friendship)
+     */
+    fun handleFriendshipFormed(fromAgentId: UUID, toAgentId: UUID) {
+        Log.i(TAG, "🤝 Friendship formed: $fromAgentId <-> $toAgentId")
+        
+        // Add both as friends if they're not us
+        if (fromAgentId != agentId) {
+            addFriendFromLogin(fromAgentId, "", 0)
+        }
+        if (toAgentId != agentId) {
+            addFriendFromLogin(toAgentId, "", 0)
+        }
+        
+        scope.launch {
+            _friendsFlow.emit(FriendEvent.Added(fromAgentId))
+        }
+    }
+    
     private fun handleOnlineNotification(body: LLSDMap) {
         val agents = body.getArray("AgentOnline")
         val count = agents?.value?.size ?: 0

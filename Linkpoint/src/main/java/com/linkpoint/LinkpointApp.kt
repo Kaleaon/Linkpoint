@@ -1824,58 +1824,174 @@ class LinkpointApp : Application() {
         
         // --- Friends Messages ---
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.ACCEPT_FRIENDSHIP) { _, rawPacket ->
-            Log.d(TAG, "🤝 AcceptFriendship received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    val data = com.linkpoint.protocol.messages.AdditionalMessageParsers.parseAcceptFriendship(payload)
+                    if (data != null && ::friendsManager.isInitialized) {
+                        Log.d(TAG, "🤝 AcceptFriendship: agent=${data.agentID}, transaction=${data.transactionID}")
+                        friendsManager.handleFriendshipAccepted(data.agentID, data.transactionID)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling AcceptFriendship", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.DECLINE_FRIENDSHIP) { _, rawPacket ->
-            Log.d(TAG, "🚫 DeclineFriendship received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    val data = com.linkpoint.protocol.messages.AdditionalMessageParsers.parseDeclineFriendship(payload)
+                    if (data != null && ::friendsManager.isInitialized) {
+                        Log.d(TAG, "🚫 DeclineFriendship: agent=${data.agentID}, transaction=${data.transactionID}")
+                        friendsManager.handleFriendshipDeclined(data.agentID, data.transactionID)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling DeclineFriendship", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.FORM_FRIENDSHIP) { _, rawPacket ->
-            Log.d(TAG, "🤝 FormFriendship received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    val data = com.linkpoint.protocol.messages.AdditionalMessageParsers.parseFormFriendship(payload)
+                    if (data != null && ::friendsManager.isInitialized) {
+                        Log.d(TAG, "🤝 FormFriendship: ${data.fromAgentID} -> ${data.toAgentID}")
+                        friendsManager.handleFriendshipFormed(data.fromAgentID, data.toAgentID)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling FormFriendship", e)
+            }
         }
         
         // --- Map Messages ---
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.MAP_BLOCK_REPLY) { _, rawPacket ->
-            Log.d(TAG, "🗺️ MapBlockReply received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    val data = com.linkpoint.protocol.messages.AdditionalMessageParsers.parseMapBlockReply(payload)
+                    if (data != null && ::worldMap.isInitialized) {
+                        Log.d(TAG, "🗺️ MapBlockReply: ${data.blocks.size} blocks")
+                        data.blocks.forEach { block ->
+                            worldMap.cacheRegionInfo(block.x, block.y, block.name, block.mapImageID)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling MapBlockReply", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.MAP_ITEM_REPLY) { _, rawPacket ->
-            Log.d(TAG, "🗺️ MapItemReply received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    Log.d(TAG, "🗺️ MapItemReply received (${payload.size} bytes)")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling MapItemReply", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.MAP_LAYER_REPLY) { _, rawPacket ->
-            Log.d(TAG, "🗺️ MapLayerReply received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    Log.d(TAG, "🗺️ MapLayerReply received (${payload.size} bytes)")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling MapLayerReply", e)
+            }
         }
         
         // --- Search Messages ---
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.DIR_PLACES_REPLY) { _, rawPacket ->
-            Log.d(TAG, "🔍 DirPlacesReply received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    val data = com.linkpoint.protocol.messages.AdditionalMessageParsers.parseDirPlacesReply(payload)
+                    if (data != null) {
+                        Log.d(TAG, "🔍 DirPlacesReply: ${data.places.size} places")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling DirPlacesReply", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.DIR_PEOPLE_REPLY) { _, rawPacket ->
-            Log.d(TAG, "🔍 DirPeopleReply received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    Log.d(TAG, "🔍 DirPeopleReply received (${payload.size} bytes)")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling DirPeopleReply", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.DIR_GROUPS_REPLY) { _, rawPacket ->
-            Log.d(TAG, "🔍 DirGroupsReply received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    Log.d(TAG, "🔍 DirGroupsReply received (${payload.size} bytes)")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling DirGroupsReply", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.DIR_EVENTS_REPLY) { _, rawPacket ->
-            Log.d(TAG, "🔍 DirEventsReply received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    Log.d(TAG, "🔍 DirEventsReply received (${payload.size} bytes)")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling DirEventsReply", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.DIR_LAND_REPLY) { _, rawPacket ->
-            Log.d(TAG, "🔍 DirLandReply received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    Log.d(TAG, "🔍 DirLandReply received (${payload.size} bytes)")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling DirLandReply", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.DIR_CLASSIFIED_REPLY) { _, rawPacket ->
-            Log.d(TAG, "🔍 DirClassifiedReply received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    Log.d(TAG, "🔍 DirClassifiedReply received (${payload.size} bytes)")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling DirClassifiedReply", e)
+            }
         }
         
         // --- Region/Estate Messages ---
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.REGION_INFO) { _, rawPacket ->
-            Log.d(TAG, "🌍 RegionInfo received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    val data = com.linkpoint.protocol.messages.AdditionalMessageParsers.parseRegionInfo(payload)
+                    if (data != null && ::sessionManager.isInitialized) {
+                        Log.d(TAG, "🌍 RegionInfo: ${data.regionName} (estate ${data.estateID})")
+                        sessionManager.updateRegionInfo(data.regionName, data.waterHeight, data.terrainRaiseLimit, data.terrainLowerLimit)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling RegionInfo", e)
+            }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.SIM_STATS) { _, rawPacket ->
