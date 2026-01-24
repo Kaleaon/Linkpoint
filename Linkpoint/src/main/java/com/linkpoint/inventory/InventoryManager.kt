@@ -311,6 +311,26 @@ class InventoryManager(
     fun getFolder(folderId: UUID): InventoryFolder? = folders[folderId]
     
     /**
+     * Add folder from login response inventory-skeleton.
+     * This caches the folder structure immediately on login.
+     */
+    fun addFolderFromLogin(folderId: UUID, parentId: UUID, name: String, typeDefault: Int, version: Int) {
+        val folder = InventoryFolder(
+            folderId = folderId,
+            parentId = parentId,
+            name = name,
+            type = typeDefault,
+            version = version
+        )
+        folders[folderId] = folder
+        
+        // Also register as system folder if it has a type
+        if (typeDefault >= 0) {
+            systemFolders[typeDefault] = folderId
+        }
+    }
+    
+    /**
      * Get all subfolders of a folder (cached)
      */
     fun getFolders(parentId: UUID): List<InventoryFolder> {

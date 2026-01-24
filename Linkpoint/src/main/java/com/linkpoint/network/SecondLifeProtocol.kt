@@ -502,17 +502,39 @@ class SecondLifeProtocol(private val context: Context) {
                 Log.i(TAG, "[LOGIN DATA] Populating ${parsedData.buddyList.size} friends from login response")
                 
                 if (app.isFriendsManagerInitialized()) {
+                    // First, add all friends with placeholder names
                     parsedData.buddyList.forEach { buddy ->
-                        // We need to look up the name - for now use placeholder
-                        // The actual name will come from OnlineNotification or display name lookup
                         app.friendsManager.addFriendFromLogin(
                             agentId = buddy.agentId,
-                            name = "Friend", // Will be resolved later via display names
+                            name = "", // Will be resolved via display names
                             rightsGiven = buddy.buddyRightsGiven,
                             rightsHas = buddy.buddyRightsHas
                         )
                     }
-                    Log.i(TAG, "[LOGIN DATA] ✓ Friends populated: ${parsedData.buddyList.size}")
+                    Log.i(TAG, "[LOGIN DATA] ✓ Friends added: ${parsedData.buddyList.size}")
+                    
+                    // Now resolve display names for all friends
+                    if (::app.isInitialized && app.isDisplayNameManagerInitialized()) {
+                        try {
+                            val friendIds = parsedData.buddyList.map { it.agentId }
+                            Log.d(TAG, "[LOGIN DATA] Resolving display names for ${friendIds.size} friends...")
+                            
+                            // Use ProfileManager's batch display name lookup (which uses capabilities)
+                            kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                                try {
+                                    val displayNames = app.profileManager.getDisplayNames(friendIds)
+                                    displayNames.forEach { (agentId, displayName) ->
+                                        app.friendsManager.updateFriendName(agentId, displayName)
+                                    }
+                                    Log.i(TAG, "[LOGIN DATA] ✓ Resolved display names for ${displayNames.size} friends")
+                                } catch (e: Exception) {
+                                    Log.w(TAG, "[LOGIN DATA] Failed to resolve some display names: ${e.message}")
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.w(TAG, "[LOGIN DATA] Error starting display name resolution: ${e.message}")
+                        }
+                    }
                 } else {
                     Log.w(TAG, "[LOGIN DATA] FriendsManager not initialized, skipping buddy-list")
                 }
@@ -531,13 +553,17 @@ class SecondLifeProtocol(private val context: Context) {
                         Log.d(TAG, "[LOGIN DATA] Set inventory root: $rootId")
                     }
                     
-                    // Register system folders by type
+                    // Add all folders to inventory cache
                     parsedData.inventorySkeleton.forEach { folder ->
-                        if (folder.typeDefault >= 0) {
-                            app.inventoryManager.registerSystemFolder(folder.typeDefault, folder.folderId)
-                        }
+                        app.inventoryManager.addFolderFromLogin(
+                            folderId = folder.folderId,
+                            parentId = folder.parentId,
+                            name = folder.name,
+                            typeDefault = folder.typeDefault,
+                            version = folder.version
+                        )
                     }
-                    Log.i(TAG, "[LOGIN DATA] ✓ Inventory skeleton populated: ${parsedData.inventorySkeleton.size} folders")
+                    Log.i(TAG, "[LOGIN DATA] ✓ Inventory skeleton populated: ${parsedData.inventorySkeleton.size} folders cached")
                 } else {
                     Log.w(TAG, "[LOGIN DATA] InventoryManager not initialized, skipping inventory-skeleton")
                 }

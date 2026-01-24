@@ -3921,6 +3921,16 @@ class LinkpointApp : Application() {
     fun isFriendsManagerInitialized(): Boolean = ::friendsManager.isInitialized
     
     /**
+     * Check if display name manager is initialized (for login data parsing)
+     */
+    fun isDisplayNameManagerInitialized(): Boolean = ::displayNameManager.isInitialized
+    
+    /**
+     * Check if profile manager is initialized (for login data parsing)
+     */
+    fun isProfileManagerInitialized(): Boolean = ::profileManager.isInitialized
+    
+    /**
      * Check if animesh manager is initialized (for debug reports)
      */
     fun isAnimeshManagerInitialized(): Boolean = ::animeshManager.isInitialized

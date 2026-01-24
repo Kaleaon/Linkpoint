@@ -640,6 +640,16 @@ class FriendsManager(
         )
     }
     
+    /**
+     * Update a friend's display name after resolution.
+     */
+    fun updateFriendName(agentId: UUID, displayName: String) {
+        friends[agentId]?.let { friend ->
+            friends[agentId] = friend.copy(name = displayName)
+            Log.d(TAG, "Updated friend name: $agentId -> $displayName")
+        }
+    }
+    
     // ==================== DIAGNOSTIC METHODS ====================
     
     /**
