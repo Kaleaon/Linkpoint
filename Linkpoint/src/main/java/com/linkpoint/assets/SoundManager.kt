@@ -183,6 +183,29 @@ class SoundManager(
         }
     }
     
+    /**
+     * Play an attached sound from UDP message.
+     * Attached sounds are played relative to an object in the world.
+     */
+    fun playAttachedSound(soundId: UUID, objectId: UUID, ownerId: UUID, gain: Float) {
+        scope.launch {
+            // For now, play at listener position - in full implementation,
+            // would look up object position from ObjectManager
+            playSound(soundId, listenerPosition, gain, loop = false)
+            Log.d(TAG, "Playing attached sound $soundId on object $objectId")
+        }
+    }
+    
+    /**
+     * Preload a sound for later playback.
+     */
+    fun preloadSound(soundId: UUID) {
+        scope.launch {
+            loadSound(soundId)
+            Log.d(TAG, "Preloaded sound $soundId")
+        }
+    }
+    
     private fun calculateVolume(distance: Float, maxDistance: Float, gain: Float): Float {
         if (distance >= maxDistance) return 0f
         val attenuation = 1f - (distance / maxDistance)

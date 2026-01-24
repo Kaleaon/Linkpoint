@@ -702,6 +702,23 @@ class ObjectManager(
     }
     
     /**
+     * Handle ObjectPropertiesFamily message from server.
+     */
+    fun handleObjectPropertiesFamily(data: com.linkpoint.protocol.messages.AdditionalMessageParsers.ObjectPropertiesFamilyData) {
+        // Find object by UUID and update its properties
+        val obj = objects.values.find { it.fullId == data.objectID }
+        if (obj != null) {
+            obj.name = data.name
+            obj.description = data.description
+            obj.ownerID = data.ownerID
+            obj.groupID = data.groupID
+            Log.d(TAG, "Updated object properties: ${data.name}")
+        } else {
+            Log.w(TAG, "ObjectPropertiesFamily for unknown object: ${data.objectID}")
+        }
+    }
+    
+    /**
      * Ray cast to find object at screen position
      */
     fun raycast(
@@ -814,6 +831,8 @@ data class SceneObject(
     val localId: Int,
     val fullId: UUID,
     var ownerId: UUID? = null,
+    var ownerID: UUID? = null, // Alias for compatibility
+    var groupID: UUID? = null,
     var parentId: Int = 0,
     var position: LLVector3 = LLVector3.zero(),
     var rotation: LLQuaternion = LLQuaternion.identity(),

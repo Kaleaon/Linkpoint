@@ -398,6 +398,18 @@ class AvatarManager(
     }
     
     /**
+     * Handle AvatarSitResponse from server.
+     */
+    fun handleSitResponse(data: com.linkpoint.protocol.messages.AdditionalMessageParsers.AvatarSitResponseData) {
+        val avatar = myAvatar
+        if (avatar != null) {
+            avatar.isSitting = true
+            avatar.position = data.sitPosition
+            Log.d(TAG, "Agent is now sitting on ${data.sitObjectID} at ${data.sitPosition}")
+        }
+    }
+    
+    /**
      * Get wearables of a specific type from the current avatar's outfit
      * Stub implementation - would need full outfit manager integration
      */

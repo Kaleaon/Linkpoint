@@ -255,6 +255,20 @@ class TextureManager(
         }
     }
     
+    /**
+     * Handle ImageNotInDatabase message from server.
+     * This indicates the requested texture doesn't exist.
+     */
+    fun handleImageNotInDatabase(textureId: UUID) {
+        Log.w(TAG, "🖼️ Texture not in database: $textureId")
+        // Mark as failed so we don't retry
+        missingTextures.add(textureId)
+        updateStats { it.copy(failedCount = it.failedCount + 1) }
+    }
+    
+    // Track textures that are known to be missing
+    private val missingTextures = java.util.concurrent.ConcurrentHashMap.newKeySet<UUID>()
+    
     private fun buildTextureUrl(textureId: UUID, discard: Int): String? {
         // Use capability URL if available
         // Per official SL viewer (lltexturefetch.cpp), the URL format is:

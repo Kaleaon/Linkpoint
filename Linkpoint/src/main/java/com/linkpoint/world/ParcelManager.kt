@@ -206,6 +206,14 @@ class ParcelManager(
     }
     
     /**
+     * Handle ParcelInfoReply message from server.
+     */
+    fun handleParcelInfoReply(data: com.linkpoint.protocol.messages.AdditionalMessageParsers.ParcelInfoReplyData) {
+        Log.d(TAG, "Received parcel info: ${data.name} (${data.parcelID})")
+        // Cache parcel info - could be used for map display or teleport preview
+    }
+    
+    /**
      * Set current parcel
      */
     fun setCurrentParcel(localId: Int) {
