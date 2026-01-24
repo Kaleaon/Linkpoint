@@ -167,9 +167,9 @@ object SSLHelper {
             // - SANs containing akamai-controlled domains
             // - Issued by a trusted CA (DigiCert, etc.)
             // 
-            // Use strict domain suffix matching to prevent spoofing
-            val hasAkamaiSubject = subjectDN.contains(".akamai.net") || 
-                    subjectDN.contains("cn=akamai.net")
+            // Extract and validate the CN (Common Name) from the subject DN
+            // Format: CN=a248.e.akamai.net,O=Akamai Technologies...
+            val hasAkamaiSubject = isValidAkamaiSubjectDN(subjectDN)
             val hasAkamaiSANs = hasAkamaiSAN(cert)
             
             // Require BOTH Akamai identification AND trusted issuer for security
@@ -184,6 +184,29 @@ object SSLHelper {
         } catch (e: Exception) {
             Log.w(TAG, "Error checking CDN hostname mismatch: ${e.message}")
             return false
+        }
+    }
+    
+    /**
+     * Validate that the subject DN contains a valid Akamai CN.
+     * Extracts the CN field and checks if it's an Akamai domain.
+     */
+    private fun isValidAkamaiSubjectDN(subjectDN: String): Boolean {
+        // Extract CN from subject DN (format: CN=value,O=...,...)
+        // The CN should be at the start or after a comma
+        val cnPattern = Regex("""(?:^|,)\s*cn=([^,]+)""", RegexOption.IGNORE_CASE)
+        val match = cnPattern.find(subjectDN) ?: return false
+        val cn = match.groupValues.getOrNull(1)?.lowercase()?.trim() ?: return false
+        
+        // Valid Akamai CN must be exactly or end with an Akamai domain
+        val akamaiDomains = listOf(
+            "akamai.net",
+            "akamaized.net",
+            "akamaihd.net"
+        )
+        
+        return akamaiDomains.any { domain ->
+            cn == domain || cn.endsWith(".$domain")
         }
     }
     
@@ -221,19 +244,23 @@ object SSLHelper {
         // Simulator host pattern: simhost-<hash>.agni.secondlife.com or simhost-<hash>.aditi.secondlife.com
         // These are capability URLs returned by the simulator.
         // The format is: simhost-<alphanumeric-hash>.<grid>.secondlife.com
-        // We validate that there's exactly one part between simhost- prefix and .secondlife.com suffix
-        // to prevent attacks like simhost-evil.attacker.agni.secondlife.com
+        // 
+        // Validate the complete structure to prevent attacks like:
+        // - simhost-evil.attacker.agni.secondlife.com (additional subdomains)
+        // - simhost-.agni.secondlife.com (empty hash)
         if (lowercaseHostname.startsWith("simhost-")) {
-            val validSuffixes = listOf(".agni.secondlife.com", ".aditi.secondlife.com")
-            for (suffix in validSuffixes) {
-                if (lowercaseHostname.endsWith(suffix)) {
-                    // Extract the middle part (should be just "hash.agni" or "hash.aditi")
-                    val middle = lowercaseHostname.removePrefix("simhost-").removeSuffix(".secondlife.com")
-                    // Should only contain one dot (e.g., "abc123def456.agni")
-                    if (middle.count { it == '.' } == 1) {
-                        return true
-                    }
-                }
+            // Valid patterns are exactly:
+            // - simhost-<hash>.agni.secondlife.com
+            // - simhost-<hash>.aditi.secondlife.com
+            // where <hash> is a non-empty alphanumeric string
+            
+            val simhostPatterns = listOf(
+                Regex("""^simhost-[a-z0-9]+\.agni\.secondlife\.com$"""),
+                Regex("""^simhost-[a-z0-9]+\.aditi\.secondlife\.com$""")
+            )
+            
+            if (simhostPatterns.any { it.matches(lowercaseHostname) }) {
+                return true
             }
         }
         

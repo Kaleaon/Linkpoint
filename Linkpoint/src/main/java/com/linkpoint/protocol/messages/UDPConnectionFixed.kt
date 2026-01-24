@@ -476,10 +476,14 @@ class UDPConnectionFixed {
                     break
                 }
                 
-                // Also verify the channel is still connected - on mobile networks,
-                // the connection can be dropped without closing the channel
+                // Check if channel.isConnected is still true
+                // NOTE: For UDP DatagramChannel, isConnected() only reflects whether connect() 
+                // was called and not whether the network path is still valid. However, if 
+                // isConnected becomes false (which can happen if disconnect() is called or
+                // on certain error conditions), we should exit the loop.
+                // The main reliability check is the selection key validity above.
                 if (!localChannel.isConnected) {
-                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Channel no longer connected, exiting loop")
+                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Channel.isConnected returned false, exiting loop")
                     break
                 }
                 
