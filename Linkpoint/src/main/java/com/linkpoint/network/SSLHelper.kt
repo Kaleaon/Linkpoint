@@ -156,16 +156,24 @@ object SSLHelper {
             val subjectDN = cert.subjectDN.name.lowercase()
             val issuerDN = cert.issuerDN.name.lowercase()
             
+            // Validate the certificate is from a trusted source
+            // Akamai certificates are typically issued by DigiCert
+            val trustedIssuers = listOf("digicert", "globalsign", "geotrust", "symantec")
+            val hasTrustedIssuer = trustedIssuers.any { issuerDN.contains(it) }
+            
             // Check if certificate is from Akamai
             // Akamai certificates typically have:
             // - Subject CN containing "akamai" (e.g., CN=a248.e.akamai.net)
-            // - Or issuer containing DigiCert (Akamai's typical CA)
-            val isAkamaiCert = subjectDN.contains("akamai") ||
-                    // Check SANs for Akamai patterns
-                    hasAkamaiSAN(cert)
+            // - SANs containing akamai-related domains
+            // - Issued by a trusted CA (DigiCert, etc.)
+            val hasAkamaiSubject = subjectDN.contains("akamai")
+            val hasAkamaiSANs = hasAkamaiSAN(cert)
+            
+            // Require BOTH Akamai identification AND trusted issuer for security
+            val isAkamaiCert = (hasAkamaiSubject || hasAkamaiSANs) && hasTrustedIssuer
             
             if (isAkamaiCert) {
-                Log.d(TAG, "Verified Akamai CDN certificate for SL domain: $hostname")
+                Log.d(TAG, "Verified Akamai CDN certificate for SL domain: $hostname (issuer: ${cert.issuerDN.name})")
                 return true
             }
             
@@ -178,27 +186,49 @@ object SSLHelper {
     
     /**
      * Check if the hostname is a Second Life CDN domain that uses Akamai.
+     * 
+     * Known CDN domains:
+     * - asset-cdn.glb.agni.lindenlab.com (production grid)
+     * - asset-cdn.glb.aditi.lindenlab.com (beta grid)
+     * - simhost-*.agni.secondlife.com (simulator capability hosts)
      */
     private fun isSecondLifeCdnDomain(hostname: String): Boolean {
-        val cdnPatterns = listOf(
+        val lowercaseHostname = hostname.lowercase()
+        
+        // Exact match domains for asset CDN
+        val exactMatches = listOf(
             "asset-cdn.glb.agni.lindenlab.com",
-            "asset-cdn.glb.aditi.lindenlab.com",
-            // Wildcard patterns for asset CDN subdomains
-            ".asset-cdn.glb.agni.lindenlab.com",
-            ".asset-cdn.glb.aditi.lindenlab.com",
-            // Simulator hosts that may use CDN
-            "simhost-",
+            "asset-cdn.glb.aditi.lindenlab.com"
         )
         
-        return cdnPatterns.any { pattern ->
-            hostname.equals(pattern, ignoreCase = true) ||
-                    hostname.endsWith(pattern, ignoreCase = true) ||
-                    (pattern.startsWith("simhost-") && hostname.contains(pattern))
+        if (exactMatches.any { lowercaseHostname == it }) {
+            return true
         }
+        
+        // Subdomain matches (e.g., something.asset-cdn.glb.agni.lindenlab.com)
+        val suffixMatches = listOf(
+            ".asset-cdn.glb.agni.lindenlab.com",
+            ".asset-cdn.glb.aditi.lindenlab.com"
+        )
+        
+        if (suffixMatches.any { lowercaseHostname.endsWith(it) }) {
+            return true
+        }
+        
+        // Simulator host pattern: simhost-<hash>.agni.secondlife.com
+        // These are capability URLs returned by the simulator
+        if (lowercaseHostname.startsWith("simhost-") && 
+            (lowercaseHostname.endsWith(".agni.secondlife.com") || 
+             lowercaseHostname.endsWith(".aditi.secondlife.com"))) {
+            return true
+        }
+        
+        return false
     }
     
     /**
      * Check if certificate has Akamai-related Subject Alternative Names.
+     * This verifies the certificate is legitimately from Akamai CDN.
      */
     private fun hasAkamaiSAN(cert: X509Certificate): Boolean {
         return try {
