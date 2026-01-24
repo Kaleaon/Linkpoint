@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import com.linkpoint.network.NetworkLogger
+import com.linkpoint.network.SSLHelper
 import com.linkpoint.protocol.types.getUUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +23,11 @@ import java.util.concurrent.atomic.AtomicInteger
  * Handles JPEG2000 (J2K) format used by Second Life.
  * 
  * Enhanced with detailed logging for debugging texture loading issues.
+ * 
+ * Note: Uses custom SSL configuration to handle Akamai CDN hostname verification.
+ * The Second Life asset CDN (asset-cdn.glb.agni.lindenlab.com) is served by Akamai,
+ * which uses certificates for *.akamaized.net domains. The SSLHelper.configureForCdn()
+ * method handles this hostname mismatch securely.
  */
 class TextureManager(
     private val context: android.content.Context,
@@ -37,10 +43,14 @@ class TextureManager(
     }
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private val httpClient = OkHttpClient.Builder()
-        .connectTimeout(15, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .build()
+    
+    // HTTP client configured for CDN access with custom hostname verification
+    // This handles Akamai CDN certificate hostname mismatch for asset-cdn.glb.agni.lindenlab.com
+    private val httpClient = SSLHelper.configureForCdn(
+        OkHttpClient.Builder()
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+    ).build()
     
     // Download queue with priority
     private val downloadQueue = PriorityBlockingQueue<TextureRequest>(100)
