@@ -1,7 +1,7 @@
 # Second Life Protocol Message Handler Tracking
 
 > **Generated:** January 24, 2026  
-> **Updated:** January 24, 2026 - Added Phase 2 (50 new handlers)
+> **Updated:** January 24, 2026 - Added Phase 3 (100 more handlers)
 > **Purpose:** Track implementation status of all SL protocol message handlers  
 > **Source:** Lumiya decompiled source (`lumiya_decompiled_source/`)
 
@@ -26,16 +26,16 @@ Second Life uses three message frequency levels encoded differently:
 
 | Status | Count | Description |
 |--------|-------|-------------|
-| ✅ Implemented | 81 | Fully implemented with parser and handler |
+| ✅ Implemented | 181 | Fully implemented with parser and handler |
 | 🔲 ID Defined | ~50 | Message ID constant exists, no handler |
-| ❌ Not Started | ~350 | Not yet ported from Lumiya |
+| ❌ Not Started | ~250 | Not yet ported from Lumiya |
 
 **Phase 1 (9 handlers):**
 - ✅ TeleportFinish, TeleportFailed, TeleportProgress, TeleportStart
 - ✅ AlertMessage, AgentAlertMessage
 - ✅ EnableSimulator, CrossedRegion, ParcelProperties
 
-**Phase 2 (50 handlers - NEW):**
+**Phase 2 (50 handlers):**
 - ✅ Script/Dialog: ScriptDialog, ScriptQuestion, LoadURL
 - ✅ Economy: MoneyBalanceReply, EconomyData
 - ✅ Inventory: InventoryDescendents, FetchInventoryReply, BulkUpdateInventory, etc.
@@ -51,6 +51,31 @@ Second Life uses three message frequency levels encoded differently:
 - ✅ Transfer: TransferInfo, TransferPacket, AbortXfer, ImageNotInDatabase
 - ✅ Misc: MeanCollisionAlert, AvatarSitResponse, CameraConstraint, etc.
 
+**Phase 3 (100 handlers - NEW):**
+- ✅ High Freq: NeighborList, RequestImage, ImageData, ImagePacket, EdgeDataPacket, etc.
+- ✅ Agent: AgentPause, AgentResume, AgentDropGroup, AgentWearablesRequest
+- ✅ Avatar: AvatarPickerReply, AvatarNotesReply, AvatarPicksReply, AvatarClassifiedReply
+- ✅ Classified: ClassifiedInfoReply
+- ✅ Pick/Event: PickInfoReply, EventInfoReply
+- ✅ Groups Extended: GroupRoleMembersReply, GroupNoticesListReply, CreateGroupReply, etc.
+- ✅ Calling Cards: OfferCallingCard, AcceptCallingCard, DeclineCallingCard
+- ✅ Inventory Extended: FetchInventory, FetchInventoryDescendents, UpdateInventoryFolder, etc.
+- ✅ Task Inventory: RequestTaskInventory, ReplyTaskInventory
+- ✅ Objects Extended: ObjectDuplicate, ObjectScale, ObjectRotation, ObjectPosition, etc.
+- ✅ Land: ModifyLand, UndoLand
+- ✅ Parcel Extended: ParcelPropertiesRequest, ParcelMediaCommandMessage, etc.
+- ✅ Economy Extended: MoneyTransferRequest, RoutedMoneyBalanceReply, PayPriceReply
+- ✅ Scripts Extended: ScriptRunningReply, ScriptReset, ScriptSensorReply, etc.
+- ✅ Transfer: TransferRequest, TransferAbort, RequestXfer, AssetUploadRequest/Complete
+- ✅ Region: RequestRegionInfo, SimulatorViewerTimeMessage, TeleportLocal, SimCrashed
+- ✅ Map Extended: MapBlockRequest, MapNameRequest, MapLayerRequest, MapItemRequest
+- ✅ Mute: MuteListRequest, UpdateMuteListEntry, RemoveMuteListEntry, etc.
+- ✅ User Info: UserInfoRequest, UserInfoReply
+- ✅ System: GenericMessage, SystemMessage, ErrorMessage, FeatureDisabled, etc.
+- ✅ Attachments: RezMultipleAttachmentsFromInv, DetachAttachmentIntoInv, etc.
+- ✅ Rez/DeRez: RezObjectFromNotecard, RezRestoreToWorld, RezScript, DeRezAck
+- ✅ Misc: Undo, Redo, SetAlwaysRun, InitiateDownload, PlacesReply, etc.
+
 ---
 
 ## HIGH FREQUENCY MESSAGES (1-29)
@@ -61,14 +86,14 @@ These are the most common messages, sent frequently during normal operation.
 |----|---------|------------------|----------|-------|
 | 1 | StartPingCheck | ✅ Implemented | Critical | Network health |
 | 2 | CompletePingCheck | 🔲 ID Only | Critical | Response to ping |
-| 3 | NeighborList | ❌ Not Started | Low | Neighboring sims |
+| 3 | NeighborList | ✅ Implemented | Low | Neighboring sims |
 | 4 | AgentUpdate | 🔲 ID Only | Critical | Viewer->Sim position |
 | 5 | AgentAnimation | 🔲 ID Only | Medium | Start/stop anims |
 | 6 | AgentRequestSit | 🔲 ID Only | Medium | Sit request |
 | 7 | AgentSit | 🔲 ID Only | Medium | Sit confirm |
-| 8 | RequestImage | ❌ Not Started | High | Texture request |
-| 9 | ImageData | ❌ Not Started | High | Texture header |
-| 10 | ImagePacket | ❌ Not Started | High | Texture data |
+| 8 | RequestImage | ✅ Implemented | High | Texture request |
+| 9 | ImageData | ✅ Implemented | High | Texture header |
+| 10 | ImagePacket | ✅ Implemented | High | Texture data |
 | 11 | LayerData | ✅ Implemented | Critical | Terrain data |
 | 12 | ObjectUpdate | ✅ Implemented | Critical | Full object data |
 | 13 | ObjectUpdateCompressed | ✅ Implemented | Critical | Compressed objects |

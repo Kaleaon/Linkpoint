@@ -556,4 +556,568 @@ object MessageIds {
     
     /** UUIDGroupNameReply - UUID to group name result */
     const val UUID_GROUP_NAME_REPLY = (0xFFFF00EE).toInt()      // Wire: FF FF 00 EE = -65298
+
+    // =====================================
+    // PHASE 3: 100 Additional Message Handlers
+    // =====================================
+
+    // --- High Frequency Messages (3-10, 24-28) ---
+    /** NeighborList - List of neighboring regions */
+    const val NEIGHBOR_LIST = 3                                 // Wire: 0x03 (high frequency)
+    
+    /** AgentAnimation - Animation control (high freq) */
+    const val AGENT_ANIMATION_HF = 5                            // Wire: 0x05 (high frequency)
+    
+    /** RequestImage - Request texture from sim */
+    const val REQUEST_IMAGE = 8                                 // Wire: 0x08 (high frequency)
+    
+    /** ImageData - Texture header data */
+    const val IMAGE_DATA = 9                                    // Wire: 0x09 (high frequency)
+    
+    /** ImagePacket - Texture data packet */
+    const val IMAGE_PACKET = 10                                 // Wire: 0x0A (high frequency)
+    
+    /** EdgeDataPacket - Region edge data */
+    const val EDGE_DATA_PACKET = 24                             // Wire: 0x18 (high frequency)
+    
+    /** ChildAgentUpdate - Child agent data */
+    const val CHILD_AGENT_UPDATE = 25                           // Wire: 0x19 (high frequency)
+    
+    /** ChildAgentAlive - Child agent keepalive */
+    const val CHILD_AGENT_ALIVE = 26                            // Wire: 0x1A (high frequency)
+    
+    /** ChildAgentPositionUpdate - Child agent position */
+    const val CHILD_AGENT_POSITION_UPDATE = 27                  // Wire: 0x1B (high frequency)
+    
+    /** AtomicPassObject - Cross-sim object pass */
+    const val ATOMIC_PASS_OBJECT = 28                           // Wire: 0x1C (high frequency)
+    
+    /** SendXferPacket - Send transfer data */
+    const val SEND_XFER_PACKET = 18                             // Wire: 0x12 (high frequency)
+    
+    /** ConfirmXferPacket - Confirm transfer receipt */
+    const val CONFIRM_XFER_PACKET = 19                          // Wire: 0x13 (high frequency)
+
+    // --- Agent Messages ---
+    /** AgentPause - Pause agent updates */
+    const val AGENT_PAUSE = (0xFFFF0056).toInt()                // Wire: FF FF 00 56 = -65450
+    
+    /** AgentResume - Resume agent updates */
+    const val AGENT_RESUME = (0xFFFF0057).toInt()               // Wire: FF FF 00 57 = -65449
+    
+    /** AgentFOV - Agent field of view */
+    const val AGENT_FOV = (0xFFFF005A).toInt()                  // Wire: FF FF 00 5A = -65446
+    
+    /** AgentHeightWidth - Agent viewport size */
+    const val AGENT_HEIGHT_WIDTH = (0xFFFF005B).toInt()         // Wire: FF FF 00 5B = -65445
+    
+    /** AgentQuitCopy - Agent quit notification */
+    const val AGENT_QUIT_COPY = (0xFFFF005D).toInt()            // Wire: FF FF 00 5D = -65443
+    
+    /** AgentDropGroup - Agent dropped from group */
+    const val AGENT_DROP_GROUP = (0xFFFF0182).toInt()           // Wire: FF FF 01 82 = -65150
+    
+    /** AgentWearablesRequest - Request wearables */
+    const val AGENT_WEARABLES_REQUEST = (0xFFFF0103).toInt()    // Wire: FF FF 01 03 = -65277
+    
+    /** AgentDataUpdateRequest - Request agent data */
+    const val AGENT_DATA_UPDATE_REQUEST = (0xFFFF0184).toInt()  // Wire: FF FF 01 84 = -65148
+
+    // --- Avatar Messages ---
+    /** AvatarTextureUpdate - Avatar texture update */
+    const val AVATAR_TEXTURE_UPDATE = (0xFFFF0004).toInt()      // Wire: FF FF 00 04 = -65532
+    
+    /** AvatarPickerReply - Avatar picker results */
+    const val AVATAR_PICKER_REPLY = (0xFFFF001C).toInt()        // Wire: FF FF 00 1C = -65508
+    
+    /** AvatarPickerRequest - Request avatar picker */
+    const val AVATAR_PICKER_REQUEST = (0xFFFF001B).toInt()      // Wire: FF FF 00 1B = -65509
+    
+    /** AvatarNotesReply - Avatar notes */
+    const val AVATAR_NOTES_REPLY = (0xFFFF00B0).toInt()         // Wire: FF FF 00 B0 = -65360
+    
+    /** AvatarNotesUpdate - Update avatar notes */
+    const val AVATAR_NOTES_UPDATE = (0xFFFF00B1).toInt()        // Wire: FF FF 00 B1 = -65359
+    
+    /** AvatarInterestsUpdate - Update avatar interests */
+    const val AVATAR_INTERESTS_UPDATE = (0xFFFF00AF).toInt()    // Wire: FF FF 00 AF = -65361
+    
+    /** AvatarPropertiesUpdate - Update avatar properties */
+    const val AVATAR_PROPERTIES_UPDATE = (0xFFFF00AE).toInt()   // Wire: FF FF 00 AE = -65362
+    
+    /** AvatarPicksReply - Avatar picks list */
+    const val AVATAR_PICKS_REPLY = (0xFFFF00B2).toInt()         // Wire: FF FF 00 B2 = -65358
+    
+    /** AvatarClassifiedReply - Avatar classified ads */
+    const val AVATAR_CLASSIFIED_REPLY = (0xFFFF002A).toInt()    // Wire: FF FF 00 2A = -65494
+
+    // --- Classified Messages ---
+    /** ClassifiedInfoReply - Classified ad details */
+    const val CLASSIFIED_INFO_REPLY = (0xFFFF002C).toInt()      // Wire: FF FF 00 2C = -65492
+    
+    /** ClassifiedInfoRequest - Request classified info */
+    const val CLASSIFIED_INFO_REQUEST = (0xFFFF002B).toInt()    // Wire: FF FF 00 2B = -65493
+    
+    /** ClassifiedInfoUpdate - Update classified ad */
+    const val CLASSIFIED_INFO_UPDATE = (0xFFFF002D).toInt()     // Wire: FF FF 00 2D = -65491
+    
+    /** ClassifiedDelete - Delete classified ad */
+    const val CLASSIFIED_DELETE = (0xFFFF002E).toInt()          // Wire: FF FF 00 2E = -65490
+
+    // --- Pick Messages ---
+    /** PickInfoReply - Pick details */
+    const val PICK_INFO_REPLY = (0xFFFF00B8).toInt()            // Wire: FF FF 00 B8 = -65352
+    
+    /** PickInfoUpdate - Update pick */
+    const val PICK_INFO_UPDATE = (0xFFFF00B9).toInt()           // Wire: FF FF 00 B9 = -65351
+    
+    /** PickDelete - Delete pick */
+    const val PICK_DELETE = (0xFFFF00BA).toInt()                // Wire: FF FF 00 BA = -65350
+
+    // --- Event Messages ---
+    /** EventInfoReply - Event details */
+    const val EVENT_INFO_REPLY = (0xFFFF00B4).toInt()           // Wire: FF FF 00 B4 = -65356
+    
+    /** EventInfoRequest - Request event info */
+    const val EVENT_INFO_REQUEST = (0xFFFF00B3).toInt()         // Wire: FF FF 00 B3 = -65357
+    
+    /** EventNotificationAddRequest - Subscribe to event */
+    const val EVENT_NOTIFICATION_ADD_REQUEST = (0xFFFF00B5).toInt() // Wire: FF FF 00 B5 = -65355
+    
+    /** EventNotificationRemoveRequest - Unsubscribe from event */
+    const val EVENT_NOTIFICATION_REMOVE_REQUEST = (0xFFFF00B6).toInt() // Wire: FF FF 00 B6 = -65354
+
+    // --- Group Messages (Extended) ---
+    /** GroupRoleMembersReply - Group role members */
+    const val GROUP_ROLE_MEMBERS_REPLY = (0xFFFF015E).toInt()   // Wire: FF FF 01 5E = -65186
+    
+    /** GroupNoticesListReply - Group notices list */
+    const val GROUP_NOTICES_LIST_REPLY = (0xFFFF0033).toInt()   // Wire: FF FF 00 33 = -65485
+    
+    /** GroupNoticeRequest - Request group notice */
+    const val GROUP_NOTICE_REQUEST = (0xFFFF0034).toInt()       // Wire: FF FF 00 34 = -65484
+    
+    /** CreateGroupReply - Create group result */
+    const val CREATE_GROUP_REPLY = (0xFFFF0167).toInt()         // Wire: FF FF 01 67 = -65177
+    
+    /** JoinGroupReply - Join group result */
+    const val JOIN_GROUP_REPLY = (0xFFFF0168).toInt()           // Wire: FF FF 01 68 = -65176
+    
+    /** LeaveGroupReply - Leave group result */
+    const val LEAVE_GROUP_REPLY = (0xFFFF016C).toInt()          // Wire: FF FF 01 6C = -65172
+    
+    /** EjectGroupMemberReply - Eject member result */
+    const val EJECT_GROUP_MEMBER_REPLY = (0xFFFF016A).toInt()   // Wire: FF FF 01 6A = -65174
+    
+    /** InviteGroupResponse - Group invite response */
+    const val INVITE_GROUP_RESPONSE = (0xFFFF016E).toInt()      // Wire: FF FF 01 6E = -65170
+    
+    /** GroupAccountSummaryReply - Group account summary */
+    const val GROUP_ACCOUNT_SUMMARY_REPLY = (0xFFFF0172).toInt() // Wire: FF FF 01 72 = -65166
+    
+    /** GroupAccountDetailsReply - Group account details */
+    const val GROUP_ACCOUNT_DETAILS_REPLY = (0xFFFF0174).toInt() // Wire: FF FF 01 74 = -65164
+    
+    /** GroupAccountTransactionsReply - Group transactions */
+    const val GROUP_ACCOUNT_TRANSACTIONS_REPLY = (0xFFFF0176).toInt() // Wire: FF FF 01 76 = -65162
+    
+    /** GroupActiveProposalItemReply - Active proposal */
+    const val GROUP_ACTIVE_PROPOSAL_ITEM_REPLY = (0xFFFF0178).toInt() // Wire: FF FF 01 78 = -65160
+    
+    /** GroupVoteHistoryItemReply - Vote history */
+    const val GROUP_VOTE_HISTORY_ITEM_REPLY = (0xFFFF017A).toInt() // Wire: FF FF 01 7A = -65158
+
+    // --- Calling Card Messages ---
+    /** OfferCallingCard - Offer calling card */
+    const val OFFER_CALLING_CARD = (0xFFFF011D).toInt()         // Wire: FF FF 01 1D = -65251
+    
+    /** AcceptCallingCard - Accept calling card */
+    const val ACCEPT_CALLING_CARD = (0xFFFF011E).toInt()        // Wire: FF FF 01 1E = -65250
+    
+    /** DeclineCallingCard - Decline calling card */
+    const val DECLINE_CALLING_CARD = (0xFFFF011F).toInt()       // Wire: FF FF 01 1F = -65249
+
+    // --- Inventory Messages (Extended) ---
+    /** FetchInventoryDescendents - Fetch folder contents */
+    const val FETCH_INVENTORY_DESCENDENTS = (0xFFFF00F5).toInt() // Wire: FF FF 00 F5 = -65291
+    
+    /** FetchInventory - Fetch item details */
+    const val FETCH_INVENTORY = (0xFFFF00F7).toInt()            // Wire: FF FF 00 F7 = -65289
+    
+    /** PurgeInventoryDescendents - Purge folder */
+    const val PURGE_INVENTORY_DESCENDENTS = (0xFFFF00FD).toInt() // Wire: FF FF 00 FD = -65283
+    
+    /** RemoveInventoryObjects - Remove multiple items */
+    const val REMOVE_INVENTORY_OBJECTS = (0xFFFF00FC).toInt()   // Wire: FF FF 00 FC = -65284
+    
+    /** InventoryAssetResponse - Asset fetch response */
+    const val INVENTORY_ASSET_RESPONSE = (0xFFFF00FB).toInt()   // Wire: FF FF 00 FB = -65285
+    
+    /** UpdateInventoryFolder - Update folder */
+    const val UPDATE_INVENTORY_FOLDER = (0xFFFF0110).toInt()    // Wire: FF FF 01 10 = -65264
+    
+    /** MoveInventoryFolder - Move folder */
+    const val MOVE_INVENTORY_FOLDER = (0xFFFF010D).toInt()      // Wire: FF FF 01 0D = -65267
+    
+    /** CopyInventoryFromNotecard - Copy from notecard */
+    const val COPY_INVENTORY_FROM_NOTECARD = (0xFFFF0109).toInt() // Wire: FF FF 01 09 = -65271
+    
+    /** CreateInventoryItem - Create item */
+    const val CREATE_INVENTORY_ITEM = (0xFFFF0121).toInt()      // Wire: FF FF 01 21 = -65247
+    
+    /** SaveAssetIntoInventory - Save asset to inventory */
+    const val SAVE_ASSET_INTO_INVENTORY = (0xFFFF0108).toInt()  // Wire: FF FF 01 08 = -65272
+
+    // --- Task/Object Inventory Messages ---
+    /** RequestTaskInventory - Request object contents */
+    const val REQUEST_TASK_INVENTORY = (0xFFFF00FF).toInt()     // Wire: FF FF 00 FF = -65281
+    
+    /** ReplyTaskInventory - Object contents reply */
+    const val REPLY_TASK_INVENTORY = (0xFFFF0100).toInt()       // Wire: FF FF 01 00 = -65280
+    
+    /** UpdateTaskInventory - Update object contents */
+    const val UPDATE_TASK_INVENTORY = (0xFFFF00FE).toInt()      // Wire: FF FF 00 FE = -65282
+    
+    /** RemoveTaskInventory - Remove from object */
+    const val REMOVE_TASK_INVENTORY = (0xFFFF00FD).toInt()      // Wire: FF FF 00 FD = -65283
+    
+    /** MoveTaskInventory - Move in object */
+    const val MOVE_TASK_INVENTORY = (0xFFFF00FC).toInt()        // Wire: FF FF 00 FC = -65284
+
+    // --- Object Messages (Extended) ---
+    /** ObjectDuplicate - Duplicate object */
+    const val OBJECT_DUPLICATE = (0xFFFF006E).toInt()           // Wire: FF FF 00 6E = -65426
+    
+    /** ObjectDuplicateOnRay - Duplicate on ray */
+    const val OBJECT_DUPLICATE_ON_RAY = (0xFFFF006F).toInt()    // Wire: FF FF 00 6F = -65425
+    
+    /** ObjectScale - Scale object */
+    const val OBJECT_SCALE = (0xFFFF0074).toInt()               // Wire: FF FF 00 74 = -65420
+    
+    /** ObjectRotation - Rotate object */
+    const val OBJECT_ROTATION = (0xFFFF0075).toInt()            // Wire: FF FF 00 75 = -65419
+    
+    /** ObjectPosition - Position object (low freq) */
+    const val OBJECT_POSITION = 65284                           // Wire: FF 04 = 4 | 65280 (medium frequency)
+    
+    /** ObjectFlagUpdate - Update object flags */
+    const val OBJECT_FLAG_UPDATE = (0xFFFF0078).toInt()         // Wire: FF FF 00 78 = -65416
+    
+    /** ObjectClickAction - Set click action */
+    const val OBJECT_CLICK_ACTION = (0xFFFF0079).toInt()        // Wire: FF FF 00 79 = -65415
+    
+    /** ObjectImage - Set object texture */
+    const val OBJECT_IMAGE = (0xFFFF007A).toInt()               // Wire: FF FF 00 7A = -65414
+    
+    /** ObjectMaterial - Set object material */
+    const val OBJECT_MATERIAL = (0xFFFF007B).toInt()            // Wire: FF FF 00 7B = -65413
+    
+    /** ObjectShape - Set object shape */
+    const val OBJECT_SHAPE = (0xFFFF007C).toInt()               // Wire: FF FF 00 7C = -65412
+    
+    /** ObjectExtraParams - Set extra params */
+    const val OBJECT_EXTRA_PARAMS = (0xFFFF007D).toInt()        // Wire: FF FF 00 7D = -65411
+    
+    /** ObjectOwner - Set object owner */
+    const val OBJECT_OWNER = (0xFFFF007E).toInt()               // Wire: FF FF 00 7E = -65410
+    
+    /** ObjectGroup - Set object group */
+    const val OBJECT_GROUP = (0xFFFF007F).toInt()               // Wire: FF FF 00 7F = -65409
+    
+    /** ObjectBuy - Buy object */
+    const val OBJECT_BUY = (0xFFFF0080).toInt()                 // Wire: FF FF 00 80 = -65408
+    
+    /** ObjectPermissions - Set permissions */
+    const val OBJECT_PERMISSIONS = (0xFFFF0081).toInt()         // Wire: FF FF 00 81 = -65407
+    
+    /** ObjectSaleInfo - Set sale info */
+    const val OBJECT_SALE_INFO = (0xFFFF0082).toInt()           // Wire: FF FF 00 82 = -65406
+    
+    /** ObjectCategory - Set category */
+    const val OBJECT_CATEGORY = (0xFFFF0083).toInt()            // Wire: FF FF 00 83 = -65405
+    
+    /** ObjectDeselect - Deselect object */
+    const val OBJECT_DESELECT = (0xFFFF008F).toInt()            // Wire: FF FF 00 8F = -65393
+    
+    /** ObjectAttach - Attach object */
+    const val OBJECT_ATTACH = (0xFFFF0090).toInt()              // Wire: FF FF 00 90 = -65392
+    
+    /** ObjectDetach - Detach object */
+    const val OBJECT_DETACH = (0xFFFF0091).toInt()              // Wire: FF FF 00 91 = -65391
+    
+    /** ObjectDrop - Drop object */
+    const val OBJECT_DROP = (0xFFFF0092).toInt()                // Wire: FF FF 00 92 = -65390
+    
+    /** ObjectSpinStart - Start spinning */
+    const val OBJECT_SPIN_START = (0xFFFF0094).toInt()          // Wire: FF FF 00 94 = -65388
+    
+    /** ObjectSpinUpdate - Update spin */
+    const val OBJECT_SPIN_UPDATE = (0xFFFF0095).toInt()         // Wire: FF FF 00 95 = -65387
+    
+    /** ObjectSpinStop - Stop spinning */
+    const val OBJECT_SPIN_STOP = (0xFFFF0096).toInt()           // Wire: FF FF 00 96 = -65386
+    
+    /** ObjectGrabUpdate - Update grab */
+    const val OBJECT_GRAB_UPDATE = (0xFFFF0085).toInt()         // Wire: FF FF 00 85 = -65403
+
+    // --- Land/Terrain Messages ---
+    /** ModifyLand - Modify terrain */
+    const val MODIFY_LAND = (0xFFFF009C).toInt()                // Wire: FF FF 00 9C = -65380
+    
+    /** UndoLand - Undo terrain change */
+    const val UNDO_LAND = (0xFFFF0053).toInt()                  // Wire: FF FF 00 53 = -65453
+
+    // --- Parcel Messages (Extended) ---
+    /** ParcelPropertiesRequest - Request parcel props */
+    const val PARCEL_PROPERTIES_REQUEST = 65291                 // Wire: FF 0B = 11 | 65280 (medium frequency)
+    
+    /** ParcelPropertiesRequestByID - Request by ID */
+    const val PARCEL_PROPERTIES_REQUEST_BY_ID = (0xFFFF00CB).toInt() // Wire: FF FF 00 CB = -65333
+    
+    /** ParcelDisableObjects - Disable objects */
+    const val PARCEL_DISABLE_OBJECTS = (0xFFFF00CD).toInt()     // Wire: FF FF 00 CD = -65331
+    
+    /** ParcelSelectObjects - Select parcel objects */
+    const val PARCEL_SELECT_OBJECTS = (0xFFFF00CE).toInt()      // Wire: FF FF 00 CE = -65330
+    
+    /** ParcelMediaCommandMessage - Media command */
+    const val PARCEL_MEDIA_COMMAND_MESSAGE = (0xFFFF019B).toInt() // Wire: FF FF 01 9B = -65125
+    
+    /** ParcelMediaUpdate - Media update */
+    const val PARCEL_MEDIA_UPDATE = (0xFFFF019C).toInt()        // Wire: FF FF 01 9C = -65124
+    
+    /** ParcelObjectOwnersReply - Object owners list */
+    const val PARCEL_OBJECT_OWNERS_REPLY = (0xFFFF0039).toInt() // Wire: FF FF 00 39 = -65479
+    
+    /** ForceObjectSelect - Force select object */
+    const val FORCE_OBJECT_SELECT = (0xFFFF00CF).toInt()        // Wire: FF FF 00 CF = -65329
+
+    // --- Money/Economy Messages ---
+    /** MoneyTransferRequest - Transfer L$ */
+    const val MONEY_TRANSFER_REQUEST = (0xFFFF00E7).toInt()     // Wire: FF FF 00 E7 = -65305
+    
+    /** RoutedMoneyBalanceReply - Routed balance */
+    const val ROUTED_MONEY_BALANCE_REPLY = (0xFFFF00E3).toInt() // Wire: FF FF 00 E3 = -65309
+    
+    /** PayPriceReply - Pay price info */
+    const val PAY_PRICE_REPLY = (0xFFFF00A2).toInt()            // Wire: FF FF 00 A2 = -65374
+    
+    /** RequestPayPrice - Request pay info */
+    const val REQUEST_PAY_PRICE = (0xFFFF00A1).toInt()          // Wire: FF FF 00 A1 = -65375
+    
+    /** BuyObjectInventory - Buy object contents */
+    const val BUY_OBJECT_INVENTORY = (0xFFFF0081).toInt()       // Wire: FF FF 00 81 = -65407
+
+    // --- Script Messages (Extended) ---
+    /** ScriptRunningReply - Script status reply */
+    const val SCRIPT_RUNNING_REPLY = (0xFFFF00E4).toInt()       // Wire: FF FF 00 E4 = -65308
+    
+    /** GetScriptRunning - Get script status */
+    const val GET_SCRIPT_RUNNING = (0xFFFF00E3).toInt()         // Wire: FF FF 00 E3 = -65309
+    
+    /** SetScriptRunning - Set script status */
+    const val SET_SCRIPT_RUNNING = (0xFFFF00E5).toInt()         // Wire: FF FF 00 E5 = -65307
+    
+    /** ScriptReset - Reset script */
+    const val SCRIPT_RESET = (0xFFFF00E6).toInt()               // Wire: FF FF 00 E6 = -65306
+    
+    /** ScriptSensorReply - Sensor results */
+    const val SCRIPT_SENSOR_REPLY = (0xFFFF00E8).toInt()        // Wire: FF FF 00 E8 = -65304
+    
+    /** ScriptTeleportRequest - Script teleport */
+    const val SCRIPT_TELEPORT_REQUEST = (0xFFFF00C7).toInt()    // Wire: FF FF 00 C7 = -65337
+    
+    /** ForceScriptControlRelease - Release controls */
+    const val FORCE_SCRIPT_CONTROL_RELEASE = (0xFFFF00C0).toInt() // Wire: FF FF 00 C0 = -65344
+    
+    /** RevokePermissions - Revoke perms */
+    const val REVOKE_PERMISSIONS = (0xFFFF00C1).toInt()         // Wire: FF FF 00 C1 = -65343
+
+    // --- Asset/Transfer Messages ---
+    /** TransferRequest - Request transfer */
+    const val TRANSFER_REQUEST = (0xFFFF0099).toInt()           // Wire: FF FF 00 99 = -65383
+    
+    /** TransferAbort - Abort transfer */
+    const val TRANSFER_ABORT = (0xFFFF009B).toInt()             // Wire: FF FF 00 9B = -65381
+    
+    /** RequestXfer - Request xfer */
+    const val REQUEST_XFER = (0xFFFF009C).toInt()               // Wire: FF FF 00 9C = -65380
+    
+    /** AssetUploadRequest - Upload asset */
+    const val ASSET_UPLOAD_REQUEST = (0xFFFF0139).toInt()       // Wire: FF FF 01 39 = -65223
+    
+    /** AssetUploadComplete - Upload complete */
+    const val ASSET_UPLOAD_COMPLETE = (0xFFFF013A).toInt()      // Wire: FF FF 01 3A = -65222
+
+    // --- Region/Sim Messages ---
+    /** RequestRegionInfo - Request region info */
+    const val REQUEST_REGION_INFO = (0xFFFF00A5).toInt()        // Wire: FF FF 00 A5 = -65371
+    
+    /** GodUpdateRegionInfo - God region update */
+    const val GOD_UPDATE_REGION_INFO = (0xFFFF00A7).toInt()     // Wire: FF FF 00 A7 = -65369
+    
+    /** SimulatorViewerTimeMessage - Sim time */
+    const val SIMULATOR_VIEWER_TIME_MESSAGE = (0xFFFF00AA).toInt() // Wire: FF FF 00 AA = -65366
+    
+    /** TeleportLocal - Local teleport */
+    const val TELEPORT_LOCAL = (0xFFFF0044).toInt()             // Wire: FF FF 00 44 = -65468
+    
+    /** TeleportCancel - Cancel teleport */
+    const val TELEPORT_CANCEL = (0xFFFF0048).toInt()            // Wire: FF FF 00 48 = -65464
+    
+    /** TeleportRequest - Teleport request */
+    const val TELEPORT_REQUEST = (0xFFFF0046).toInt()           // Wire: FF FF 00 46 = -65466
+    
+    /** SimCrashed - Sim crash notification */
+    const val SIM_CRASHED = (0xFFFF0138).toInt()                // Wire: FF FF 01 38 = -65224
+
+    // --- Map Messages (Extended) ---
+    /** MapBlockRequest - Request map block */
+    const val MAP_BLOCK_REQUEST = (0xFFFF0193).toInt()          // Wire: FF FF 01 93 = -65133
+    
+    /** MapNameRequest - Request map by name */
+    const val MAP_NAME_REQUEST = (0xFFFF0194).toInt()           // Wire: FF FF 01 94 = -65132
+    
+    /** MapLayerRequest - Request map layer */
+    const val MAP_LAYER_REQUEST = (0xFFFF0191).toInt()          // Wire: FF FF 01 91 = -65135
+    
+    /** MapItemRequest - Request map items */
+    const val MAP_ITEM_REQUEST = (0xFFFF0196).toInt()           // Wire: FF FF 01 96 = -65130
+
+    // --- Mute Messages ---
+    /** MuteListRequest - Request mute list */
+    const val MUTE_LIST_REQUEST = (0xFFFF0106).toInt()          // Wire: FF FF 01 06 = -65274
+    
+    /** UpdateMuteListEntry - Update mute */
+    const val UPDATE_MUTE_LIST_ENTRY = (0xFFFF0107).toInt()     // Wire: FF FF 01 07 = -65273
+    
+    /** RemoveMuteListEntry - Remove mute */
+    const val REMOVE_MUTE_LIST_ENTRY = (0xFFFF0108).toInt()     // Wire: FF FF 01 08 = -65272
+    
+    /** MuteListUpdate - Mute list updated */
+    const val MUTE_LIST_UPDATE = (0xFFFF0114).toInt()           // Wire: FF FF 01 14 = -65260
+    
+    /** UseCachedMuteList - Use cached list */
+    const val USE_CACHED_MUTE_LIST = (0xFFFF0115).toInt()       // Wire: FF FF 01 15 = -65259
+
+    // --- User Info Messages ---
+    /** UserInfoRequest - Request user info */
+    const val USER_INFO_REQUEST = (0xFFFF017F).toInt()          // Wire: FF FF 01 7F = -65153
+    
+    /** UserInfoReply - User info reply */
+    const val USER_INFO_REPLY = (0xFFFF0180).toInt()            // Wire: FF FF 01 80 = -65152
+    
+    /** UpdateUserInfo - Update user info */
+    const val UPDATE_USER_INFO = (0xFFFF0181).toInt()           // Wire: FF FF 01 81 = -65151
+
+    // --- Godlike Messages ---
+    /** GodlikeMessage - Godlike command */
+    const val GODLIKE_MESSAGE = (0xFFFF0105).toInt()            // Wire: FF FF 01 05 = -65275
+    
+    /** GrantGodlikePowers - Grant god powers */
+    const val GRANT_GODLIKE_POWERS = (0xFFFF0102).toInt()       // Wire: FF FF 01 02 = -65278
+    
+    /** RequestGodlikePowers - Request powers */
+    const val REQUEST_GODLIKE_POWERS = (0xFFFF0101).toInt()     // Wire: FF FF 01 01 = -65279
+    
+    /** GodKickUser - God kick user */
+    const val GOD_KICK_USER = (0xFFFF00A1).toInt()              // Wire: FF FF 00 A1 = -65375
+    
+    /** SystemKickUser - System kick */
+    const val SYSTEM_KICK_USER = (0xFFFF00A2).toInt()           // Wire: FF FF 00 A2 = -65374
+    
+    /** EjectUser - Eject user */
+    const val EJECT_USER = (0xFFFF00A3).toInt()                 // Wire: FF FF 00 A3 = -65373
+    
+    /** FreezeUser_God - God freeze user */
+    const val FREEZE_USER_GOD = (0xFFFF00A4).toInt()            // Wire: FF FF 00 A4 = -65372
+    
+    /** KickUser - Kick user */
+    const val KICK_USER = (0xFFFF009F).toInt()                  // Wire: FF FF 00 9F = -65377
+    
+    /** KickUserAck - Kick acknowledged */
+    const val KICK_USER_ACK = (0xFFFF00A0).toInt()              // Wire: FF FF 00 A0 = -65376
+
+    // --- Generic/System Messages ---
+    /** GenericMessage - Generic message */
+    const val GENERIC_MESSAGE = (0xFFFF0105).toInt()            // Wire: FF FF 01 05 = -65275
+    
+    /** SystemMessage - System message */
+    const val SYSTEM_MESSAGE = (0xFFFF018C).toInt()             // Wire: FF FF 01 8C = -65140
+    
+    /** Error - Error message */
+    const val ERROR_MESSAGE = (0xFFFF019F).toInt()              // Wire: FF FF 01 9F = -65121
+    
+    /** FeatureDisabled - Feature disabled */
+    const val FEATURE_DISABLED = (0xFFFF0013).toInt()           // Wire: FF FF 00 13 = -65517
+    
+    /** ViewerFrozenMessage - Viewer frozen */
+    const val VIEWER_FROZEN_MESSAGE = (0xFFFF0089).toInt()      // Wire: FF FF 00 89 = -65399
+    
+    /** ViewerStats - Viewer statistics */
+    const val VIEWER_STATS = (0xFFFF0093).toInt()               // Wire: FF FF 00 93 = -65389
+
+    // --- Attachment Messages ---
+    /** RezMultipleAttachmentsFromInv - Rez multiple */
+    const val REZ_MULTIPLE_ATTACHMENTS_FROM_INV = (0xFFFF012C).toInt() // Wire: FF FF 01 2C = -65236
+    
+    /** DetachAttachmentIntoInv - Detach to inventory */
+    const val DETACH_ATTACHMENT_INTO_INV = (0xFFFF012D).toInt() // Wire: FF FF 01 2D = -65235
+    
+    /** CreateNewOutfitAttachments - Create outfit */
+    const val CREATE_NEW_OUTFIT_ATTACHMENTS = (0xFFFF012E).toInt() // Wire: FF FF 01 2E = -65234
+    
+    /** UpdateAttachment - Update attachment */
+    const val UPDATE_ATTACHMENT = (0xFFFF0137).toInt()          // Wire: FF FF 01 37 = -65225
+    
+    /** RemoveAttachment - Remove attachment */
+    const val REMOVE_ATTACHMENT = (0xFFFF0136).toInt()          // Wire: FF FF 01 36 = -65226
+    
+    /** RebakeAvatarTextures - Rebake textures */
+    const val REBAKE_AVATAR_TEXTURES = (0xFFFF0056).toInt()     // Wire: FF FF 00 56 = -65450
+
+    // --- Rez/DeRez Messages ---
+    /** RezObjectFromNotecard - Rez from notecard */
+    const val REZ_OBJECT_FROM_NOTECARD = (0xFFFF0126).toInt()   // Wire: FF FF 01 26 = -65242
+    
+    /** RezRestoreToWorld - Restore to world */
+    const val REZ_RESTORE_TO_WORLD = (0xFFFF019E).toInt()       // Wire: FF FF 01 9E = -65122
+    
+    /** RezScript - Rez script */
+    const val REZ_SCRIPT = (0xFFFF0120).toInt()                 // Wire: FF FF 01 20 = -65248
+    
+    /** DeRezAck - DeRez acknowledged */
+    const val DEREZ_ACK = (0xFFFF0124).toInt()                  // Wire: FF FF 01 24 = -65244
+
+    // --- Misc Messages ---
+    /** Undo - Undo action */
+    const val UNDO = (0xFFFF0051).toInt()                       // Wire: FF FF 00 51 = -65455
+    
+    /** Redo - Redo action */
+    const val REDO = (0xFFFF0052).toInt()                       // Wire: FF FF 00 52 = -65454
+    
+    /** SetAlwaysRun - Set always run */
+    const val SET_ALWAYS_RUN = (0xFFFF0058).toInt()             // Wire: FF FF 00 58 = -65448
+    
+    /** SetFollowCamProperties - Set follow cam */
+    const val SET_FOLLOW_CAM_PROPERTIES = (0xFFFF009F).toInt()  // Wire: FF FF 00 9F = -65377
+    
+    /** ClearFollowCamProperties - Clear follow cam */
+    const val CLEAR_FOLLOW_CAM_PROPERTIES = (0xFFFF00A0).toInt() // Wire: FF FF 00 A0 = -65376
+    
+    /** SetStartLocationRequest - Set start location */
+    const val SET_START_LOCATION_REQUEST = (0xFFFF013C).toInt() // Wire: FF FF 01 3C = -65220
+    
+    /** InitiateDownload - Start download */
+    const val INITIATE_DOWNLOAD = (0xFFFF018D).toInt()          // Wire: FF FF 01 8D = -65139
+    
+    /** DataHomeLocationReply - Home location reply */
+    const val DATA_HOME_LOCATION_REPLY = (0xFFFF0043).toInt()   // Wire: FF FF 00 43 = -65469
+
+    // --- Places/Directory Messages ---
+    /** PlacesReply - Places search reply */
+    const val PLACES_REPLY = (0xFFFF001E).toInt()               // Wire: FF FF 00 1E = -65506
+    
+    /** DirPopularReply - Popular places reply */
+    const val DIR_POPULAR_REPLY = (0xFFFF0027).toInt()          // Wire: FF FF 00 27 = -65497
 }
