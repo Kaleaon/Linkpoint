@@ -299,6 +299,13 @@ object SSLHelper {
             )
             
             sans.any { san ->
+                // SAN entries are lists where:
+                // - Index 0: Integer type (2 = DNS name, 7 = IP address, etc.)
+                // - Index 1: The value
+                // We only want to check DNS name entries (type 2)
+                val type = san.getOrNull(0) as? Int
+                if (type != 2) return@any false  // 2 = DNS name (dNSName)
+                
                 val value = (san.getOrNull(1) as? String)?.lowercase() ?: return@any false
                 // Check if it's an exact Akamai domain or a subdomain of one
                 akamaiExactDomains.any { value == it } ||
