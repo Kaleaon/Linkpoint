@@ -12,6 +12,7 @@ import com.linkpoint.LinkpointApp
 import com.linkpoint.network.core.CoreNetworkingService
 import com.linkpoint.network.core.NetworkStateManager
 import com.linkpoint.network.NetworkLogger
+import com.linkpoint.protocol.auth.LoginResponseParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -402,6 +403,10 @@ class SecondLifeProtocol(private val context: Context) {
                             Log.i(TAG, "[STEP 2/2] Capabilities loaded: ${app.capabilityManager.getCapabilityCount()}")
                             // Connect texture manager to capability-based fetching
                             app.textureManager.onCapabilitiesReady()
+                            
+                            // Parse login response for buddy-list, inventory, etc.
+                            // This populates FriendsManager and InventoryManager with initial data
+                            parseAndPopulateLoginData(result.responseXml, agentId)
                         } else {
                             com.linkpoint.utils.InitializationTracker.failPhase(
                                 com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_FETCHING,
@@ -474,6 +479,101 @@ class SecondLifeProtocol(private val context: Context) {
                     technicalDetails = result.technicalDetails
                 )
             }
+        }
+    }
+    
+    /**
+     * Parse the login response XML and populate managers with initial data.
+     * 
+     * This extracts:
+     * - buddy-list: Friends list from login response
+     * - inventory-skeleton: Initial inventory folder structure
+     * 
+     * Based on Lumiya's login response parsing logic.
+     */
+    private fun parseAndPopulateLoginData(responseXml: String, agentId: UUID) {
+        try {
+            Log.i(TAG, "[LOGIN DATA] Parsing login response for buddy-list and inventory...")
+            
+            val parsedData = LoginResponseParser.parse(responseXml)
+            
+            // Populate friends from buddy-list
+            if (parsedData.buddyList.isNotEmpty()) {
+                Log.i(TAG, "[LOGIN DATA] Populating ${parsedData.buddyList.size} friends from login response")
+                
+                if (app.isFriendsManagerInitialized()) {
+                    // First, add all friends with placeholder names
+                    parsedData.buddyList.forEach { buddy ->
+                        app.friendsManager.addFriendFromLogin(
+                            agentId = buddy.agentId,
+                            name = "", // Will be resolved via display names
+                            rightsGiven = buddy.buddyRightsGiven,
+                            rightsHas = buddy.buddyRightsHas
+                        )
+                    }
+                    Log.i(TAG, "[LOGIN DATA] ✓ Friends added: ${parsedData.buddyList.size}")
+                    
+                    // Now resolve display names for all friends
+                    if (::app.isInitialized && app.isDisplayNameManagerInitialized()) {
+                        try {
+                            val friendIds = parsedData.buddyList.map { it.agentId }
+                            Log.d(TAG, "[LOGIN DATA] Resolving display names for ${friendIds.size} friends...")
+                            
+                            // Use ProfileManager's batch display name lookup (which uses capabilities)
+                            // Using app.applicationScope for proper lifecycle management
+                            app.applicationScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                                try {
+                                    val displayNames = app.profileManager.getDisplayNames(friendIds)
+                                    displayNames.forEach { (agentId, displayName) ->
+                                        app.friendsManager.updateFriendName(agentId, displayName)
+                                    }
+                                    Log.i(TAG, "[LOGIN DATA] ✓ Resolved display names for ${displayNames.size} friends")
+                                } catch (e: Exception) {
+                                    Log.w(TAG, "[LOGIN DATA] Failed to resolve some display names: ${e.message}")
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.w(TAG, "[LOGIN DATA] Error starting display name resolution: ${e.message}")
+                        }
+                    }
+                } else {
+                    Log.w(TAG, "[LOGIN DATA] FriendsManager not initialized, skipping buddy-list")
+                }
+            } else {
+                Log.d(TAG, "[LOGIN DATA] No friends in buddy-list")
+            }
+            
+            // Populate inventory skeleton
+            if (parsedData.inventorySkeleton.isNotEmpty()) {
+                Log.i(TAG, "[LOGIN DATA] Populating ${parsedData.inventorySkeleton.size} inventory folders from login response")
+                
+                if (app.isInventoryManagerInitialized()) {
+                    // Set root folder first
+                    parsedData.inventoryRoot?.let { rootId ->
+                        app.inventoryManager.setRootFolder(rootId)
+                        Log.d(TAG, "[LOGIN DATA] Set inventory root: $rootId")
+                    }
+                    
+                    // Add all folders to inventory cache
+                    parsedData.inventorySkeleton.forEach { folder ->
+                        app.inventoryManager.addFolderFromLogin(
+                            folderId = folder.folderId,
+                            parentId = folder.parentId,
+                            name = folder.name,
+                            typeDefault = folder.typeDefault,
+                            version = folder.version
+                        )
+                    }
+                    Log.i(TAG, "[LOGIN DATA] ✓ Inventory skeleton populated: ${parsedData.inventorySkeleton.size} folders cached")
+                } else {
+                    Log.w(TAG, "[LOGIN DATA] InventoryManager not initialized, skipping inventory-skeleton")
+                }
+            } else {
+                Log.d(TAG, "[LOGIN DATA] No folders in inventory-skeleton")
+            }
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "[LOGIN DATA] Error parsing login response data", e)
         }
     }
     

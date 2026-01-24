@@ -145,6 +145,49 @@ class FriendsManager(
         }
     }
     
+    /**
+     * Handle UDP AcceptFriendship message (UDP fallback for capability)
+     */
+    fun handleFriendshipAccepted(agentId: UUID, transactionId: UUID) {
+        val offer = pendingOffers.remove(transactionId)
+        
+        Log.i(TAG, "✓ Friendship accepted: agent=$agentId, transaction=$transactionId")
+        
+        // Add as friend
+        addFriendFromLogin(agentId, "", 0)
+        
+        scope.launch {
+            _friendsFlow.emit(FriendEvent.Added(agentId))
+        }
+    }
+    
+    /**
+     * Handle UDP DeclineFriendship message (UDP fallback for capability)
+     */
+    fun handleFriendshipDeclined(agentId: UUID, transactionId: UUID) {
+        val offer = pendingOffers.remove(transactionId)
+        Log.i(TAG, "✗ Friendship declined: agent=$agentId, transaction=$transactionId")
+    }
+    
+    /**
+     * Handle UDP FormFriendship message (confirmation of new friendship)
+     */
+    fun handleFriendshipFormed(fromAgentId: UUID, toAgentId: UUID) {
+        Log.i(TAG, "🤝 Friendship formed: $fromAgentId <-> $toAgentId")
+        
+        // Add both as friends if they're not us
+        if (fromAgentId != agentId) {
+            addFriendFromLogin(fromAgentId, "", 0)
+        }
+        if (toAgentId != agentId) {
+            addFriendFromLogin(toAgentId, "", 0)
+        }
+        
+        scope.launch {
+            _friendsFlow.emit(FriendEvent.Added(fromAgentId))
+        }
+    }
+    
     private fun handleOnlineNotification(body: LLSDMap) {
         val agents = body.getArray("AgentOnline")
         val count = agents?.value?.size ?: 0
@@ -229,21 +272,65 @@ class FriendsManager(
     }
     
     /**
-     * Send IM to friend
+     * Send IM to friend via ImprovedInstantMessage protocol.
+     * Uses dialog type 0 (IM_NOTHING_SPECIAL) for regular instant messages.
      */
     suspend fun sendIM(friendAgentId: UUID, message: String) {
-        // This would be handled by IMManager
-        // For now, just log
-        Log.i(TAG, "Send IM to $friendAgentId: $message")
+        withContext(Dispatchers.IO) {
+            try {
+                val messageBytes = message.toByteArray(Charsets.UTF_8)
+                val payload = ByteBuffer.allocate(200 + messageBytes.size).order(ByteOrder.LITTLE_ENDIAN)
+                
+                // AgentData block
+                payload.putUUID(agentId)
+                payload.putUUID(udpConnection.getSessionId())
+                
+                // MessageBlock
+                payload.put(0)  // FromGroup = false
+                payload.putUUID(friendAgentId)  // ToAgentID
+                payload.putInt(0)  // ParentEstateID
+                payload.putUUID(UUID(0, 0))  // RegionID (empty)
+                payload.putFloat(0f)  // Position X
+                payload.putFloat(0f)  // Position Y
+                payload.putFloat(0f)  // Position Z
+                payload.put(0)  // Offline
+                payload.put(0)  // Dialog = IM_NOTHING_SPECIAL (regular IM)
+                
+                val transactionId = UUID.randomUUID()
+                payload.putUUID(transactionId)
+                payload.putInt((System.currentTimeMillis() / 1000).toInt())
+                
+                // FromAgentName
+                val nameBytes = "User".toByteArray(Charsets.UTF_8)
+                payload.put(nameBytes.size.toByte())
+                payload.put(nameBytes)
+                
+                // Message text
+                payload.putShort(messageBytes.size.toShort())
+                if (messageBytes.isNotEmpty()) payload.put(messageBytes)
+                
+                // BinaryBucket - empty for regular IM
+                payload.putShort(0)
+                
+                udpConnection.sendPacket(MessageIds.IMPROVED_INSTANT_MESSAGE, payload.array().copyOf(payload.position()), reliable = true)
+                Log.i(TAG, "Sent IM to friend $friendAgentId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to send IM to friend", e)
+            }
+        }
     }
     
     /**
-     * Teleport to a friend's location
+     * Teleport to a friend's location.
+     * Delegates to requestTeleportToFriend which sends IM_LURE_USER request.
      */
     suspend fun teleportTo(friendAgentId: UUID) {
-        // This would request teleport via capability
-        // For now, just log
-        Log.i(TAG, "Teleport to friend: $friendAgentId")
+        val success = requestTeleportToFriend(friendAgentId, "Requesting teleport to your location")
+        if (success) {
+            Log.i(TAG, "Teleport request sent to friend $friendAgentId")
+        } else {
+            Log.w(TAG, "Failed to send teleport request to friend $friendAgentId")
+        }
     }
     
     /**
@@ -638,6 +725,16 @@ class FriendsManager(
             rightsGiven = rightsGiven,
             rightsHas = rightsHas
         )
+    }
+    
+    /**
+     * Update a friend's display name after resolution.
+     */
+    fun updateFriendName(agentId: UUID, displayName: String) {
+        friends[agentId]?.let { friend ->
+            friends[agentId] = friend.copy(name = displayName)
+            Log.d(TAG, "Updated friend name: $agentId -> $displayName")
+        }
     }
     
     // ==================== DIAGNOSTIC METHODS ====================

@@ -118,7 +118,21 @@ class SessionManager(private val context: Context) {
         if (current != null && current.name != regionName) {
             _currentRegion.value = current.copy(name = regionName)
             Log.i(TAG, "Region name updated: ${current.name} -> $regionName")
-        } else if (current == null) {
+        }
+    }
+    
+    /**
+     * Update region info from RegionInfo UDP message.
+     */
+    fun updateRegionInfo(regionName: String, waterHeight: Float, terrainRaiseLimit: Float, terrainLowerLimit: Float) {
+        val current = _currentRegion.value
+        if (current != null) {
+            _currentRegion.value = current.copy(
+                name = regionName,
+                waterHeight = waterHeight
+            )
+            Log.i(TAG, "Region info updated: $regionName, water=$waterHeight")
+        } else {
             // Create minimal region info if we don't have any yet
             _currentRegion.value = RegionInfo(
                 name = regionName,
@@ -127,7 +141,8 @@ class SessionManager(private val context: Context) {
                 y = 128,
                 simIP = "",
                 simPort = 0,
-                seedCapability = null
+                seedCapability = null,
+                waterHeight = waterHeight
             )
             Log.i(TAG, "Region info created for: $regionName")
         }
@@ -329,6 +344,50 @@ class SessionManager(private val context: Context) {
         
         Log.i(TAG, "Agent data updated: $avatarFirstName $avatarLastName, group='$groupTitle' ($groupName)")
     }
+    
+    // ==================== SIM STATISTICS ====================
+    
+    // Sim stats storage
+    private var _simFPS: Float = 0f
+    private var _physFPS: Float = 0f
+    private var _agentUpdatesPerSec: Float = 0f
+    private var _mainAgents: Int = 0
+    private var _childAgents: Int = 0
+    private var _totalPrims: Int = 0
+    private var _activePrims: Int = 0
+    private var _activeScripts: Int = 0
+    private var _scriptLPS: Float = 0f
+    
+    val simFPS: Float get() = _simFPS
+    val physFPS: Float get() = _physFPS
+    val agentUpdatesPerSec: Float get() = _agentUpdatesPerSec
+    val mainAgents: Int get() = _mainAgents
+    val childAgents: Int get() = _childAgents
+    val totalPrims: Int get() = _totalPrims
+    val activePrims: Int get() = _activePrims
+    val activeScripts: Int get() = _activeScripts
+    val scriptLPS: Float get() = _scriptLPS
+    
+    /**
+     * Update simulator statistics from SimStats message.
+     */
+    fun updateSimStats(stats: com.linkpoint.protocol.messages.AdditionalMessageParsers.SimStatsData) {
+        for ((statId, value) in stats.stats) {
+            when (statId) {
+                0 -> _simFPS = value
+                1 -> _physFPS = value
+                2 -> _agentUpdatesPerSec = value
+                3 -> _mainAgents = value.toInt()
+                4 -> _childAgents = value.toInt()
+                5 -> _totalPrims = value.toInt()
+                6 -> _activePrims = value.toInt()
+                7 -> _activeScripts = value.toInt()
+                8 -> _scriptLPS = value
+            }
+        }
+        
+        Log.d(TAG, "📈 SimStats: FPS=$_simFPS, PhysFPS=$_physFPS, Agents=$_mainAgents+$_childAgents, Prims=$_totalPrims")
+    }
 }
 
 enum class ConnectionState {
@@ -346,7 +405,8 @@ data class RegionInfo(
     val y: Int,
     val simIP: String,
     val simPort: Int,
-    val seedCapability: String? = null
+    val seedCapability: String? = null,
+    val waterHeight: Float = 20f
 )
 
 data class TeleportHistoryEntry(

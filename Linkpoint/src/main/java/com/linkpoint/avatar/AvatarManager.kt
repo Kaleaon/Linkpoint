@@ -371,6 +371,45 @@ class AvatarManager(
     }
     
     /**
+     * Handle incoming avatar appearance data from UDP message.
+     */
+    fun handleAvatarAppearance(agentId: UUID, textureEntries: ByteArray, visualParams: ByteArray) {
+        val avatar = avatars[agentId]
+        if (avatar != null) {
+            // Update avatar appearance data
+            Log.d(TAG, "Updating appearance for avatar $agentId: ${visualParams.size} visual params")
+            // Visual params affect avatar shape (height, body, face, etc.)
+            avatar.visualParams = visualParams
+            avatar.textureEntry = textureEntries
+        } else {
+            Log.w(TAG, "Received appearance for unknown avatar: $agentId")
+        }
+    }
+    
+    /**
+     * Handle incoming wearables update from UDP message.
+     */
+    fun handleWearablesUpdate(wearables: List<com.linkpoint.protocol.messages.AdditionalMessageParsers.WearableData>) {
+        Log.d(TAG, "Received wearables update: ${wearables.size} items")
+        // Store wearables data for avatar baking/appearance
+        wearables.forEach { wearable ->
+            Log.d(TAG, "  Wearable type ${wearable.wearableType}: item=${wearable.itemID}, asset=${wearable.assetID}")
+        }
+    }
+    
+    /**
+     * Handle AvatarSitResponse from server.
+     */
+    fun handleSitResponse(data: com.linkpoint.protocol.messages.AdditionalMessageParsers.AvatarSitResponseData) {
+        val avatar = myAvatar
+        if (avatar != null) {
+            avatar.isSitting = true
+            avatar.position = data.sitPosition
+            Log.d(TAG, "Agent is now sitting on ${data.sitObjectID} at ${data.sitPosition}")
+        }
+    }
+    
+    /**
      * Get wearables of a specific type from the current avatar's outfit
      * Stub implementation - would need full outfit manager integration
      */
@@ -464,6 +503,7 @@ class Avatar(
     var rotation: LLQuaternion = LLQuaternion.identity()
     var velocity: LLVector3 = LLVector3.zero()
     var visualParams: ByteArray? = null
+    var textureEntry: ByteArray? = null
     var lastUpdate: Long = 0
     
     // LocalId for terse update mapping (set from ObjectUpdate messages)

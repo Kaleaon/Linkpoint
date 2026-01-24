@@ -139,18 +139,85 @@ class IMManager(
     }
     
     private fun handleSessionEvent(body: LLSDMap) {
-        val sessionId = UUID.fromString(body.getString("session_id") ?: return)
+        val sessionIdStr = body.getString("session_id") ?: return
+        val sessionId = try { UUID.fromString(sessionIdStr) } catch (e: Exception) { return }
         val success = body.getInt("success") == 1
+        val eventType = body.getString("event") ?: "unknown"
         
-        // Handle session events
+        val session = sessions[sessionId] ?: return
+        
+        when (eventType) {
+            "join" -> {
+                // Participant joined
+                val agentId = body.getString("agent_id")?.let { 
+                    try { UUID.fromString(it) } catch (e: Exception) { null }
+                }
+                if (agentId != null && agentId !in session.participants) {
+                    session.participants = session.participants + agentId
+                    scope.launch {
+                        _sessionFlow.emit(IMSessionEvent.ParticipantJoined(sessionId, agentId))
+                    }
+                    Log.d(TAG, "Participant $agentId joined session $sessionId")
+                }
+            }
+            "leave" -> {
+                // Participant left
+                val agentId = body.getString("agent_id")?.let { 
+                    try { UUID.fromString(it) } catch (e: Exception) { null }
+                }
+                if (agentId != null) {
+                    session.participants = session.participants - agentId
+                    scope.launch {
+                        _sessionFlow.emit(IMSessionEvent.ParticipantLeft(sessionId, agentId))
+                    }
+                    Log.d(TAG, "Participant $agentId left session $sessionId")
+                }
+            }
+            "typing" -> {
+                // Typing indicator
+                val agentId = body.getString("agent_id")?.let { 
+                    try { UUID.fromString(it) } catch (e: Exception) { null }
+                }
+                val isTyping = body.getInt("typing") == 1
+                if (agentId != null) {
+                    if (isTyping) {
+                        session.typingParticipants = session.typingParticipants + agentId
+                    } else {
+                        session.typingParticipants = session.typingParticipants - agentId
+                    }
+                }
+            }
+            else -> {
+                Log.d(TAG, "Unknown session event: $eventType for session $sessionId")
+            }
+        }
+        
+        updateSessionList()
     }
     
     private fun handleSessionStart(body: LLSDMap) {
-        val sessionId = UUID.fromString(body.getString("session_id") ?: return)
+        val sessionIdStr = body.getString("session_id") ?: return
+        val sessionId = try { UUID.fromString(sessionIdStr) } catch (e: Exception) { return }
         val success = body.getInt("success") == 1
         
         if (success) {
-            sessions[sessionId]?.isActive = true
+            val session = sessions[sessionId]
+            if (session != null) {
+                session.isActive = true
+                scope.launch {
+                    _sessionFlow.emit(IMSessionEvent.Joined(session))
+                }
+                Log.d(TAG, "Session $sessionId started successfully")
+            }
+            updateSessionList()
+        } else {
+            val error = body.getString("error") ?: "Unknown error"
+            Log.e(TAG, "Failed to start session $sessionId: $error")
+            // Remove failed session
+            sessions.remove(sessionId)
+            scope.launch {
+                _sessionFlow.emit(IMSessionEvent.Left(sessionId))
+            }
             updateSessionList()
         }
     }

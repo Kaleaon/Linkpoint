@@ -347,11 +347,15 @@ class RenderManager(private val context: Context) {
         
         // Use swapChainLock for synchronization with UiHelper callbacks
         synchronized(swapChainLock) {
-            // Check if UiHelper already created a valid swapchain
-            if (swapChain != null) {
-                Log.i(TAG, "║ SwapChain already exists (likely created by UiHelper)")
-                Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
-                return
+            // Destroy old SwapChain if it exists (it might be stale from a previous surface)
+            swapChain?.let { oldSwapChain ->
+                Log.i(TAG, "║ Destroying existing SwapChain before recreation")
+                try {
+                    engine.destroySwapChain(oldSwapChain)
+                } catch (e: Exception) {
+                    Log.w(TAG, "║ Warning: Error destroying old SwapChain: ${e.message}")
+                }
+                swapChain = null
             }
             
             // Create new swap chain

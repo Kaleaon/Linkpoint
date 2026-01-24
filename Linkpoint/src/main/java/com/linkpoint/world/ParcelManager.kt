@@ -179,12 +179,38 @@ class ParcelManager(
     }
     
     /**
-     * Request parcel info at position
+     * Request parcel info at position.
+     * Sends ParcelInfoRequest message to get parcel data at specific coordinates.
      */
     fun requestParcelInfo(position: LLVector3) {
         scope.launch {
-            // Would send ParcelInfoRequest
+            try {
+                // ParcelInfoRequest message format:
+                // AgentData block + InfoData block with position
+                val payload = ByteBuffer.allocate(44).order(ByteOrder.LITTLE_ENDIAN)
+                
+                // AgentData - placeholder (will be filled by UDP layer)
+                repeat(32) { payload.put(0) }  // Agent + Session ID
+                
+                // Position (as integers, local coordinates)
+                payload.putInt(position.x.toInt())
+                payload.putInt(position.y.toInt())
+                payload.putInt(position.z.toInt())
+                
+                udpConnection.sendPacket(MessageIds.PARCEL_INFO_REQUEST, payload.array(), reliable = true)
+                Log.d(TAG, "Requested parcel info at position: $position")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to request parcel info", e)
+            }
         }
+    }
+    
+    /**
+     * Handle ParcelInfoReply message from server.
+     */
+    fun handleParcelInfoReply(data: com.linkpoint.protocol.messages.AdditionalMessageParsers.ParcelInfoReplyData) {
+        Log.d(TAG, "Received parcel info: ${data.name} (${data.parcelID})")
+        // Cache parcel info - could be used for map display or teleport preview
     }
     
     /**

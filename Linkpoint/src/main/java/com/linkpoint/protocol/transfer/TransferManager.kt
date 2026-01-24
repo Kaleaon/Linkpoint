@@ -259,6 +259,27 @@ class TransferManager(
     }
     
     /**
+     * Handle TransferInfo message from parsed data.
+     */
+    fun handleTransferInfo(data: com.linkpoint.protocol.messages.AdditionalMessageParsers.TransferInfoData) {
+        val transfer = activeTransfers[data.transferID]
+        if (transfer == null) {
+            Log.w(TAG, "Received TransferInfo for unknown transfer: ${data.transferID}")
+            return
+        }
+        
+        Log.d(TAG, "TransferInfo: id=${data.transferID} status=${data.status} size=${data.size}")
+        
+        transfer.status = data.status
+        transfer.expectedSize = data.size
+        
+        if (data.status != STATUS_OK && data.status != STATUS_DONE) {
+            // Transfer failed
+            completeTransfer(transfer, TransferResult.Error(data.status, getStatusMessage(data.status)))
+        }
+    }
+    
+    /**
      * Handle TransferPacket message from server.
      */
     fun handleTransferPacket(payload: ByteArray) {
@@ -296,6 +317,31 @@ class TransferManager(
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing TransferPacket", e)
+        }
+    }
+    
+    /**
+     * Handle TransferPacket message from parsed data.
+     */
+    fun handleTransferPacket(data: com.linkpoint.protocol.messages.AdditionalMessageParsers.TransferPacketData) {
+        val transfer = activeTransfers[data.transferID]
+        if (transfer == null) {
+            Log.w(TAG, "Received TransferPacket for unknown transfer: ${data.transferID}")
+            return
+        }
+        
+        Log.v(TAG, "TransferPacket: id=${data.transferID} packet=${data.packet} status=${data.status} size=${data.data.size}")
+        
+        // Add data to transfer
+        transfer.addPacket(data.packet, data.data)
+        transfer.status = data.status
+        
+        // Check if transfer is complete
+        if (data.status == STATUS_DONE || 
+            (transfer.expectedSize > 0 && transfer.receivedSize >= transfer.expectedSize)) {
+            completeTransfer(transfer, TransferResult.Success(transfer.assembleData()))
+        } else if (data.status != STATUS_OK) {
+            completeTransfer(transfer, TransferResult.Error(data.status, getStatusMessage(data.status)))
         }
     }
     

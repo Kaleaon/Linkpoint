@@ -166,7 +166,9 @@ object LumiyaTranslationLayer {
         return try {
             val loginHost = URL(loginUrl).host
             if (loginHost.endsWith(LINDENLAB_DOMAIN, ignoreCase = true)) {
-                repairCapabilityUrl(true, capabilityUrl)
+                // For Linden Lab grids, repair hostname and ensure HTTPS
+                val repairedUrl = repairCapabilityUrl(true, capabilityUrl)
+                ensureHttps(repairedUrl)
             } else {
                 capabilityUrl
             }

@@ -678,11 +678,43 @@ class ObjectManager(
     }
     
     /**
-     * Get up from sitting
+     * Get up from sitting.
+     * Sends AgentSit message with SIT_FLAG_NO_FLAGS (0) to request standing.
      */
     fun standUp() {
         scope.launch {
-            // Would send AgentRequestStand message
+            try {
+                // AgentSit message to stand up (sending with no target ID indicates stand)
+                val payload = ByteBuffer.allocate(33).order(MESSAGE_BYTE_ORDER)
+                
+                // AgentData block
+                repeat(32) { payload.put(0) }  // Agent + Session ID placeholder
+                
+                // SitObject - ZERO_UUID indicates stand request
+                payload.put(0)  // Flags = 0 (no sit flags, meaning stand)
+                
+                udpConnection.sendPacket(MessageIds.AGENT_SIT, payload.array(), reliable = true)
+                Log.i(TAG, "Requested stand up")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to stand up", e)
+            }
+        }
+    }
+    
+    /**
+     * Handle ObjectPropertiesFamily message from server.
+     */
+    fun handleObjectPropertiesFamily(data: com.linkpoint.protocol.messages.AdditionalMessageParsers.ObjectPropertiesFamilyData) {
+        // Find object by UUID and update its properties
+        val obj = objects.values.find { it.fullId == data.objectID }
+        if (obj != null) {
+            obj.name = data.name
+            obj.description = data.description
+            obj.ownerID = data.ownerID
+            obj.groupID = data.groupID
+            Log.d(TAG, "Updated object properties: ${data.name}")
+        } else {
+            Log.w(TAG, "ObjectPropertiesFamily for unknown object: ${data.objectID}")
         }
     }
     
@@ -756,6 +788,141 @@ class ObjectManager(
      */
     fun getSelectedCount(): Int = _selectedObjects.value.size
     
+    // ==================== UDP MESSAGE HANDLERS ====================
+    
+    /**
+     * Handle ObjectScale message - object size changed.
+     */
+    fun handleObjectScaleUpdate(payload: ByteArray) {
+        try {
+            val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData block
+            buffer.position(buffer.position() + 32) // Skip AgentID and SessionID
+            
+            // ObjectData block count
+            if (buffer.remaining() < 1) return
+            val objectCount = buffer.get().toInt() and 0xFF
+            
+            for (i in 0 until objectCount) {
+                if (buffer.remaining() < 16) break
+                
+                val localId = buffer.int
+                val scaleX = buffer.float
+                val scaleY = buffer.float
+                val scaleZ = buffer.float
+                
+                objects[localId]?.let { obj ->
+                    obj.scale = com.linkpoint.protocol.types.LLVector3(scaleX, scaleY, scaleZ)
+                    obj.lastUpdate = System.currentTimeMillis()
+                    Log.d(TAG, "📦 Object $localId scale updated: ${obj.scale}")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing ObjectScale", e)
+        }
+    }
+    
+    /**
+     * Handle ObjectRotation message - object rotation changed.
+     */
+    fun handleObjectRotationUpdate(payload: ByteArray) {
+        try {
+            val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData block
+            buffer.position(buffer.position() + 32) // Skip AgentID and SessionID
+            
+            // ObjectData block count
+            if (buffer.remaining() < 1) return
+            val objectCount = buffer.get().toInt() and 0xFF
+            
+            for (i in 0 until objectCount) {
+                if (buffer.remaining() < 20) break
+                
+                val localId = buffer.int
+                val rotX = buffer.float
+                val rotY = buffer.float
+                val rotZ = buffer.float
+                val rotW = buffer.float
+                
+                objects[localId]?.let { obj ->
+                    obj.rotation = com.linkpoint.protocol.types.LLQuaternion(rotX, rotY, rotZ, rotW)
+                    obj.lastUpdate = System.currentTimeMillis()
+                    Log.d(TAG, "📦 Object $localId rotation updated: ${obj.rotation}")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing ObjectRotation", e)
+        }
+    }
+    
+    /**
+     * Handle ObjectPosition message - object position changed.
+     */
+    fun handleObjectPositionUpdate(payload: ByteArray) {
+        try {
+            val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData block
+            buffer.position(buffer.position() + 32) // Skip AgentID and SessionID
+            
+            // ObjectData block count
+            if (buffer.remaining() < 1) return
+            val objectCount = buffer.get().toInt() and 0xFF
+            
+            for (i in 0 until objectCount) {
+                if (buffer.remaining() < 16) break
+                
+                val localId = buffer.int
+                val posX = buffer.float
+                val posY = buffer.float
+                val posZ = buffer.float
+                
+                objects[localId]?.let { obj ->
+                    obj.position = com.linkpoint.protocol.types.LLVector3(posX, posY, posZ)
+                    obj.lastUpdate = System.currentTimeMillis()
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing ObjectPosition", e)
+        }
+    }
+    
+    /**
+     * Handle ObjectFlagUpdate message - object flags changed.
+     */
+    fun handleObjectFlagUpdate(payload: ByteArray) {
+        try {
+            val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData block
+            buffer.position(buffer.position() + 32) // Skip AgentID and SessionID
+            
+            // AgentData extras
+            val objectLocalId = buffer.int
+            val usePhysics = buffer.get() != 0.toByte()
+            val isTemporary = buffer.get() != 0.toByte()
+            val isPhantom = buffer.get() != 0.toByte()
+            val castsShadows = buffer.get() != 0.toByte()
+            
+            objects[objectLocalId]?.let { obj ->
+                var flags = obj.updateFlags
+                
+                if (usePhysics) flags = flags or FLAG_USE_PHYSICS else flags = flags and FLAG_USE_PHYSICS.inv()
+                if (isTemporary) flags = flags or FLAG_TEMPORARY else flags = flags and FLAG_TEMPORARY.inv()
+                if (isPhantom) flags = flags or FLAG_PHANTOM else flags = flags and FLAG_PHANTOM.inv()
+                
+                obj.updateFlags = flags
+                obj.lastUpdate = System.currentTimeMillis()
+                
+                Log.d(TAG, "📦 Object $objectLocalId flags updated: physics=$usePhysics, temp=$isTemporary, phantom=$isPhantom")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing ObjectFlagUpdate", e)
+        }
+    }
+    
     /**
      * Get comprehensive diagnostic data for debug reports
      */
@@ -799,6 +966,7 @@ data class SceneObject(
     val localId: Int,
     val fullId: UUID,
     var ownerId: UUID? = null,
+    var groupID: UUID? = null,
     var parentId: Int = 0,
     var position: LLVector3 = LLVector3.zero(),
     var rotation: LLQuaternion = LLQuaternion.identity(),
@@ -818,6 +986,11 @@ data class SceneObject(
     var description: String = "",
     var lastUpdate: Long = 0
 ) : Parcelable {
+    // Alias for compatibility - prefer using ownerId
+    var ownerID: UUID?
+        get() = ownerId
+        set(value) { ownerId = value }
+    
     val isPhysical: Boolean get() = (updateFlags and ObjectManager.FLAG_USE_PHYSICS) != 0
     val isPhantom: Boolean get() = (updateFlags and ObjectManager.FLAG_PHANTOM) != 0
     val isTemporary: Boolean get() = (updateFlags and ObjectManager.FLAG_TEMPORARY) != 0

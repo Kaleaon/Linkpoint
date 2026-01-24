@@ -341,4 +341,80 @@ class MuteManager(context: Context) {
             null
         }
     }
+    
+    // ==================== UDP MESSAGE HANDLERS ====================
+    
+    /**
+     * Handle UpdateMuteListEntry UDP message.
+     */
+    fun handleMuteListUpdate(payload: ByteArray) {
+        try {
+            val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            
+            // MuteData block
+            if (buffer.remaining() < 21) return
+            
+            val muteId = com.linkpoint.protocol.types.getUUID(buffer)
+            val muteType = buffer.int
+            val muteFlags = buffer.int
+            
+            // Read mute name
+            val nameLen = buffer.get().toInt() and 0xFF
+            val nameBytes = ByteArray(nameLen)
+            if (buffer.remaining() >= nameLen) {
+                buffer.get(nameBytes)
+            }
+            val muteName = String(nameBytes, Charsets.UTF_8).trimEnd('\u0000')
+            
+            Log.d(TAG, "🔇 MuteListUpdate: $muteId ($muteName), type=$muteType, flags=$muteFlags")
+            
+            // Add to mute list
+            val type = MuteType.values().find { it.value == muteType } ?: MuteType.AGENT
+            muteByUUID(muteId, muteName, type, muteFlags)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing UpdateMuteListEntry", e)
+        }
+    }
+    
+    /**
+     * Handle RemoveMuteListEntry UDP message.
+     */
+    fun handleMuteEntryRemoved(payload: ByteArray) {
+        try {
+            val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            
+            // MuteData block
+            if (buffer.remaining() < 17) return
+            
+            val muteId = com.linkpoint.protocol.types.getUUID(buffer)
+            
+            // Read mute name (optional, for name-based unmute)
+            if (buffer.remaining() > 0) {
+                val nameLen = buffer.get().toInt() and 0xFF
+                val nameBytes = ByteArray(nameLen)
+                if (buffer.remaining() >= nameLen) {
+                    buffer.get(nameBytes)
+                }
+            }
+            
+            Log.d(TAG, "🔇 RemoveMuteListEntry: $muteId")
+            
+            // Remove from mute list
+            unmute(muteId)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing RemoveMuteListEntry", e)
+        }
+    }
+    
+    /**
+     * Handle MuteListUpdate (full refresh) UDP message.
+     */
+    fun handleMuteListRefresh(payload: ByteArray) {
+        try {
+            Log.d(TAG, "🔇 MuteListRefresh received (${payload.size} bytes)")
+            // Note: Full mute list typically comes via Xfer, not inline
+        } catch (e: Exception) {
+            Log.e(TAG, "Error handling MuteListUpdate", e)
+        }
+    }
 }

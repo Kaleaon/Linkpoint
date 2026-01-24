@@ -521,6 +521,53 @@ class TeleportManager(
         }
     }
     
+    /**
+     * Handle TeleportLocal UDP message - local teleport within same region.
+     */
+    fun handleTeleportLocal(payload: ByteArray) {
+        try {
+            val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            
+            // Info block
+            if (buffer.remaining() < 28) return
+            
+            val agentId = com.linkpoint.protocol.types.getUUID(buffer)
+            val locationId = buffer.int
+            val position = com.linkpoint.protocol.types.LLVector3(buffer.float, buffer.float, buffer.float)
+            val lookAt = com.linkpoint.protocol.types.LLVector3(buffer.float, buffer.float, buffer.float)
+            val teleportFlags = if (buffer.remaining() >= 4) buffer.int else 0
+            
+            Log.i(TAG, "🚀 TeleportLocal: position=$position, lookAt=$lookAt")
+            
+            _teleportState.value = TeleportState.IDLE
+            _progressMessage.value = ""
+            
+            scope.launch {
+                _teleportEvents.emit(TeleportEvent.Completed(
+                    regionName = "Local",
+                    x = position.x,
+                    y = position.y,
+                    z = position.z
+                ))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing TeleportLocal", e)
+        }
+    }
+    
+    /**
+     * Handle teleport cancellation.
+     */
+    fun handleTeleportCancel() {
+        Log.i(TAG, "🚀 Teleport cancelled")
+        _teleportState.value = TeleportState.IDLE
+        _progressMessage.value = ""
+        
+        scope.launch {
+            _teleportEvents.emit(TeleportEvent.Cancelled)
+        }
+    }
+    
     // ==================== HELPERS ====================
     
     private fun parseSLURL(slurl: String): SLURLData? {
