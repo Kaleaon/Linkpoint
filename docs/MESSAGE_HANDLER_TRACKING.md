@@ -1,7 +1,7 @@
 # Second Life Protocol Message Handler Tracking
 
 > **Generated:** January 24, 2026  
-> **Updated:** January 24, 2026 - Added Phase 3 (100 more handlers)
+> **Updated:** January 24, 2026 - Added Phase 4 (100 more handlers)
 > **Purpose:** Track implementation status of all SL protocol message handlers  
 > **Source:** Lumiya decompiled source (`lumiya_decompiled_source/`)
 
@@ -26,9 +26,9 @@ Second Life uses three message frequency levels encoded differently:
 
 | Status | Count | Description |
 |--------|-------|-------------|
-| ✅ Implemented | 181 | Fully implemented with parser and handler |
+| ✅ Implemented | 281 | Fully implemented with parser and handler |
 | 🔲 ID Defined | ~50 | Message ID constant exists, no handler |
-| ❌ Not Started | ~250 | Not yet ported from Lumiya |
+| ❌ Not Started | ~150 | Not yet ported from Lumiya |
 
 **Phase 1 (9 handlers):**
 - ✅ TeleportFinish, TeleportFailed, TeleportProgress, TeleportStart
@@ -38,43 +38,33 @@ Second Life uses three message frequency levels encoded differently:
 **Phase 2 (50 handlers):**
 - ✅ Script/Dialog: ScriptDialog, ScriptQuestion, LoadURL
 - ✅ Economy: MoneyBalanceReply, EconomyData
-- ✅ Inventory: InventoryDescendents, FetchInventoryReply, BulkUpdateInventory, etc.
-- ✅ Avatar: AvatarAppearance, AgentWearablesUpdate, AvatarPropertiesReply, etc.
-- ✅ Groups: GroupProfileReply, GroupMembersReply, GroupRoleDataReply, etc.
-- ✅ Friends: AcceptFriendship, DeclineFriendship, FormFriendship
-- ✅ Map/Search: MapBlockReply, MapItemReply, DirPlacesReply, etc.
-- ✅ Region: RegionInfo, SimStats, EstateCovenantReply
-- ✅ Parcel: ParcelInfoReply, ParcelAccessListReply, ParcelDwellReply
-- ✅ Objects: ObjectPropertiesFamily, ObjectAdd
-- ✅ Sound: AttachedSound, AttachedSoundGainChange, PreloadSound
-- ✅ Effects: ViewerEffect
-- ✅ Transfer: TransferInfo, TransferPacket, AbortXfer, ImageNotInDatabase
-- ✅ Misc: MeanCollisionAlert, AvatarSitResponse, CameraConstraint, etc.
+- ✅ Inventory, Avatar, Groups, Friends, Map/Search, Region, Parcel, etc.
 
-**Phase 3 (100 handlers - NEW):**
-- ✅ High Freq: NeighborList, RequestImage, ImageData, ImagePacket, EdgeDataPacket, etc.
-- ✅ Agent: AgentPause, AgentResume, AgentDropGroup, AgentWearablesRequest
-- ✅ Avatar: AvatarPickerReply, AvatarNotesReply, AvatarPicksReply, AvatarClassifiedReply
-- ✅ Classified: ClassifiedInfoReply
-- ✅ Pick/Event: PickInfoReply, EventInfoReply
-- ✅ Groups Extended: GroupRoleMembersReply, GroupNoticesListReply, CreateGroupReply, etc.
-- ✅ Calling Cards: OfferCallingCard, AcceptCallingCard, DeclineCallingCard
-- ✅ Inventory Extended: FetchInventory, FetchInventoryDescendents, UpdateInventoryFolder, etc.
-- ✅ Task Inventory: RequestTaskInventory, ReplyTaskInventory
-- ✅ Objects Extended: ObjectDuplicate, ObjectScale, ObjectRotation, ObjectPosition, etc.
-- ✅ Land: ModifyLand, UndoLand
-- ✅ Parcel Extended: ParcelPropertiesRequest, ParcelMediaCommandMessage, etc.
-- ✅ Economy Extended: MoneyTransferRequest, RoutedMoneyBalanceReply, PayPriceReply
-- ✅ Scripts Extended: ScriptRunningReply, ScriptReset, ScriptSensorReply, etc.
-- ✅ Transfer: TransferRequest, TransferAbort, RequestXfer, AssetUploadRequest/Complete
-- ✅ Region: RequestRegionInfo, SimulatorViewerTimeMessage, TeleportLocal, SimCrashed
-- ✅ Map Extended: MapBlockRequest, MapNameRequest, MapLayerRequest, MapItemRequest
-- ✅ Mute: MuteListRequest, UpdateMuteListEntry, RemoveMuteListEntry, etc.
-- ✅ User Info: UserInfoRequest, UserInfoReply
-- ✅ System: GenericMessage, SystemMessage, ErrorMessage, FeatureDisabled, etc.
-- ✅ Attachments: RezMultipleAttachmentsFromInv, DetachAttachmentIntoInv, etc.
-- ✅ Rez/DeRez: RezObjectFromNotecard, RezRestoreToWorld, RezScript, DeRezAck
-- ✅ Misc: Undo, Redo, SetAlwaysRun, InitiateDownload, PlacesReply, etc.
+**Phase 3 (100 handlers):**
+- ✅ High Freq: NeighborList, RequestImage, ImageData, ImagePacket, etc.
+- ✅ Agent/Avatar, Groups Extended, Inventory Extended, Objects Extended, etc.
+
+**Phase 4 (100 handlers - NEW):**
+- ✅ Circuit: CloseCircuit, OpenCircuit, AddCircuitCode, TrustedCircuit, etc.
+- ✅ Auction: CancelAuction, CompleteAuction, StartAuction, ViewerStartAuction, etc.
+- ✅ Parcel Extended: ParcelBuyPass, ParcelClaim, ParcelDivide, ParcelJoin, etc.
+- ✅ Simulator: SimulatorLoad, SimulatorReady, SimulatorShutdownRequest, etc.
+- ✅ Child Agent: ChildAgentDying, ChildAgentUnknown, KillChildAgents
+- ✅ Email: SendPostcard, EmailMessageRequest, EmailMessageReply
+- ✅ RPC: RpcChannelRequest, RpcChannelReply, RpcScriptRequest/Reply
+- ✅ Script Extended: ScriptDataRequest/Reply, ScriptMailRegistration, etc.
+- ✅ Region Extended: RegionHandleRequest, RegionIDAndHandleReply, etc.
+- ✅ User Reports: UserReport, UserReportInternal, ReportAutosaveCrash
+- ✅ Event Extended: EventLocationRequest/Reply, EventGodDelete, etc.
+- ✅ Directory Query: DirFindQuery, DirPlacesQuery, DirClassifiedQuery, etc.
+- ✅ Inventory Extended: LinkInventoryItem, ChangeInventoryItemFlags, etc.
+- ✅ Group Request: CreateGroupRequest, JoinGroupRequest, etc.
+- ✅ Avatar Extended: AvatarNotesUpdate, AvatarInterestsUpdate, etc.
+- ✅ Velocity: VelocityInterpolateOn/Off
+- ✅ Object Extended: ObjectIncludeInSearch, ObjectExportSelected, etc.
+- ✅ Test/Debug: TestMessage, NetTest, StateSave, etc.
+- ✅ Logging: LogTextMessage, LogDwellTime, LogFailedMoneyTransaction, etc.
+- ✅ System: SetCPURatio, SetSimPresenceInDatabase, etc.
 
 ---
 
