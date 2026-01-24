@@ -2617,45 +2617,89 @@ class LinkpointApp : Application() {
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.ACCEPT_CALLING_CARD) { _, rawPacket ->
-            Log.d(TAG, "📇 AcceptCallingCard received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "📇 AcceptCallingCard (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling AcceptCallingCard", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.DECLINE_CALLING_CARD) { _, rawPacket ->
-            Log.d(TAG, "📇 DeclineCallingCard received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "📇 DeclineCallingCard (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling DeclineCallingCard", e) }
         }
         
         // --- Inventory Messages (Extended) ---
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.FETCH_INVENTORY_DESCENDENTS) { _, rawPacket ->
-            Log.d(TAG, "📦 FetchInventoryDescendents received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::inventoryManager.isInitialized) {
+                    Log.d(TAG, "📦 FetchInventoryDescendents (${payload.size} bytes)")
+                }
+            } catch (e: Exception) { Log.e(TAG, "Error handling FetchInventoryDescendents", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.FETCH_INVENTORY) { _, rawPacket ->
-            Log.d(TAG, "📦 FetchInventory received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::inventoryManager.isInitialized) {
+                    Log.d(TAG, "📦 FetchInventory (${payload.size} bytes)")
+                }
+            } catch (e: Exception) { Log.e(TAG, "Error handling FetchInventory", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.INVENTORY_ASSET_RESPONSE) { _, rawPacket ->
-            Log.d(TAG, "📦 InventoryAssetResponse received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::inventoryManager.isInitialized) {
+                    inventoryManager.handleAssetResponse(payload)
+                }
+            } catch (e: Exception) { Log.e(TAG, "Error handling InventoryAssetResponse", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.UPDATE_INVENTORY_FOLDER) { _, rawPacket ->
-            Log.d(TAG, "📁 UpdateInventoryFolder received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::inventoryManager.isInitialized) {
+                    inventoryManager.handleFolderUpdate(payload)
+                }
+            } catch (e: Exception) { Log.e(TAG, "Error handling UpdateInventoryFolder", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.MOVE_INVENTORY_FOLDER) { _, rawPacket ->
-            Log.d(TAG, "📁 MoveInventoryFolder received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::inventoryManager.isInitialized) {
+                    inventoryManager.handleFolderMove(payload)
+                }
+            } catch (e: Exception) { Log.e(TAG, "Error handling MoveInventoryFolder", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.CREATE_INVENTORY_ITEM) { _, rawPacket ->
-            Log.d(TAG, "📦 CreateInventoryItem received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::inventoryManager.isInitialized) {
+                    inventoryManager.handleItemCreated(payload)
+                }
+            } catch (e: Exception) { Log.e(TAG, "Error handling CreateInventoryItem", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.SAVE_ASSET_INTO_INVENTORY) { _, rawPacket ->
-            Log.d(TAG, "📦 SaveAssetIntoInventory received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null && ::inventoryManager.isInitialized) {
+                    inventoryManager.handleAssetSaved(payload)
+                }
+            } catch (e: Exception) { Log.e(TAG, "Error handling SaveAssetIntoInventory", e) }
         }
         
         // --- Task/Object Inventory Messages ---
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.REQUEST_TASK_INVENTORY) { _, rawPacket ->
-            Log.d(TAG, "📦 RequestTaskInventory received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) Log.d(TAG, "📦 RequestTaskInventory (${payload.size} bytes)")
+            } catch (e: Exception) { Log.e(TAG, "Error handling RequestTaskInventory", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.REPLY_TASK_INVENTORY) { _, rawPacket ->

@@ -885,6 +885,151 @@ class InventoryManager(
         scope.cancel()
     }
     
+    // ==================== UDP MESSAGE HANDLERS ====================
+    
+    /**
+     * Handle InventoryAssetResponse message - asset data for an inventory item.
+     */
+    fun handleAssetResponse(payload: ByteArray) {
+        try {
+            val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            
+            // QueryData block
+            val transactionId = com.linkpoint.protocol.types.getUUID(buffer)
+            val assetType = buffer.int
+            val success = buffer.get() != 0.toByte()
+            
+            Log.d(TAG, "📦 InventoryAssetResponse: type=$assetType, success=$success")
+            
+            // Note: Asset data follows if success
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing InventoryAssetResponse", e)
+        }
+    }
+    
+    /**
+     * Handle UpdateInventoryFolder message - folder was updated.
+     */
+    fun handleFolderUpdate(payload: ByteArray) {
+        try {
+            val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData block
+            buffer.position(buffer.position() + 32) // Skip AgentID and SessionID
+            
+            // FolderData block count
+            if (buffer.remaining() < 1) return
+            val folderCount = buffer.get().toInt() and 0xFF
+            
+            for (i in 0 until folderCount) {
+                if (buffer.remaining() < 34) break
+                
+                val folderId = com.linkpoint.protocol.types.getUUID(buffer)
+                val parentId = com.linkpoint.protocol.types.getUUID(buffer)
+                val type = buffer.get().toInt()
+                val nameLen = buffer.get().toInt() and 0xFF
+                val nameBytes = ByteArray(nameLen)
+                if (buffer.remaining() >= nameLen) {
+                    buffer.get(nameBytes)
+                }
+                val name = String(nameBytes, Charsets.UTF_8).trimEnd('\u0000')
+                
+                Log.d(TAG, "📁 Folder updated: $folderId - $name (type=$type)")
+                
+                // Update cached folder
+                val existing = folders[folderId]
+                if (existing != null) {
+                    folders[folderId] = existing.copy(name = name, parentId = parentId)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing UpdateInventoryFolder", e)
+        }
+    }
+    
+    /**
+     * Handle MoveInventoryFolder message - folder was moved.
+     */
+    fun handleFolderMove(payload: ByteArray) {
+        try {
+            val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData block
+            buffer.position(buffer.position() + 48) // Skip AgentID, SessionID, Stamp
+            
+            // InventoryData block count
+            if (buffer.remaining() < 1) return
+            val moveCount = buffer.get().toInt() and 0xFF
+            
+            for (i in 0 until moveCount) {
+                if (buffer.remaining() < 32) break
+                
+                val folderId = com.linkpoint.protocol.types.getUUID(buffer)
+                val newParentId = com.linkpoint.protocol.types.getUUID(buffer)
+                
+                Log.d(TAG, "📁 Folder moved: $folderId -> $newParentId")
+                
+                // Update cached folder
+                val existing = folders[folderId]
+                if (existing != null) {
+                    folders[folderId] = existing.copy(parentId = newParentId)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing MoveInventoryFolder", e)
+        }
+    }
+    
+    /**
+     * Handle CreateInventoryItem message - item was created.
+     */
+    fun handleItemCreated(payload: ByteArray) {
+        try {
+            val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData block
+            buffer.position(buffer.position() + 32) // Skip AgentID and SimApproved
+            
+            // InventoryData block
+            if (buffer.remaining() < 100) return // Item data is ~100+ bytes
+            
+            val itemId = com.linkpoint.protocol.types.getUUID(buffer)
+            val folderId = com.linkpoint.protocol.types.getUUID(buffer)
+            
+            Log.d(TAG, "📦 Item created: $itemId in folder $folderId")
+            
+            // Note: Full parsing would extract all item properties
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing CreateInventoryItem", e)
+        }
+    }
+    
+    /**
+     * Handle SaveAssetIntoInventory message - asset was saved.
+     */
+    fun handleAssetSaved(payload: ByteArray) {
+        try {
+            val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData
+            buffer.position(buffer.position() + 16) // Skip AgentID
+            
+            // InventoryData
+            val itemId = com.linkpoint.protocol.types.getUUID(buffer)
+            val newAssetId = com.linkpoint.protocol.types.getUUID(buffer)
+            
+            Log.d(TAG, "📦 Asset saved to inventory: item=$itemId, asset=$newAssetId")
+            
+            // Update cached item with new asset ID
+            val existing = items[itemId]
+            if (existing != null) {
+                items[itemId] = existing.copy(assetId = newAssetId)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing SaveAssetIntoInventory", e)
+        }
+    }
+    
     // ==================== DIAGNOSTIC METHODS ====================
     
     /**
