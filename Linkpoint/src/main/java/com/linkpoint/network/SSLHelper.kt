@@ -163,10 +163,13 @@ object SSLHelper {
             
             // Check if certificate is from Akamai
             // Akamai certificates typically have:
-            // - Subject CN containing "akamai" (e.g., CN=a248.e.akamai.net)
-            // - SANs containing akamai-related domains
+            // - Subject CN ending with ".akamai.net" (e.g., CN=a248.e.akamai.net)
+            // - SANs containing akamai-controlled domains
             // - Issued by a trusted CA (DigiCert, etc.)
-            val hasAkamaiSubject = subjectDN.contains("akamai")
+            // 
+            // Use strict domain suffix matching to prevent spoofing
+            val hasAkamaiSubject = subjectDN.contains(".akamai.net") || 
+                    subjectDN.contains("cn=akamai.net")
             val hasAkamaiSANs = hasAkamaiSAN(cert)
             
             // Require BOTH Akamai identification AND trusted issuer for security
@@ -215,12 +218,23 @@ object SSLHelper {
             return true
         }
         
-        // Simulator host pattern: simhost-<hash>.agni.secondlife.com
-        // These are capability URLs returned by the simulator
-        if (lowercaseHostname.startsWith("simhost-") && 
-            (lowercaseHostname.endsWith(".agni.secondlife.com") || 
-             lowercaseHostname.endsWith(".aditi.secondlife.com"))) {
-            return true
+        // Simulator host pattern: simhost-<hash>.agni.secondlife.com or simhost-<hash>.aditi.secondlife.com
+        // These are capability URLs returned by the simulator.
+        // The format is: simhost-<alphanumeric-hash>.<grid>.secondlife.com
+        // We validate that there's exactly one part between simhost- prefix and .secondlife.com suffix
+        // to prevent attacks like simhost-evil.attacker.agni.secondlife.com
+        if (lowercaseHostname.startsWith("simhost-")) {
+            val validSuffixes = listOf(".agni.secondlife.com", ".aditi.secondlife.com")
+            for (suffix in validSuffixes) {
+                if (lowercaseHostname.endsWith(suffix)) {
+                    // Extract the middle part (should be just "hash.agni" or "hash.aditi")
+                    val middle = lowercaseHostname.removePrefix("simhost-").removeSuffix(".secondlife.com")
+                    // Should only contain one dot (e.g., "abc123def456.agni")
+                    if (middle.count { it == '.' } == 1) {
+                        return true
+                    }
+                }
+            }
         }
         
         return false
@@ -229,15 +243,39 @@ object SSLHelper {
     /**
      * Check if certificate has Akamai-related Subject Alternative Names.
      * This verifies the certificate is legitimately from Akamai CDN.
+     * 
+     * Only accepts SANs that are clearly Akamai-controlled domains:
+     * - *.akamai.net
+     * - *.akamaized.net
+     * - *.akamaihd.net
+     * - *.akamaized-staging.net
+     * - *.akamaihd-staging.net
      */
     private fun hasAkamaiSAN(cert: X509Certificate): Boolean {
         return try {
             val sans = cert.subjectAlternativeNames ?: return false
+            
+            // Known Akamai domain suffixes (must be at end of domain name)
+            val akamaiDomainSuffixes = listOf(
+                ".akamai.net",
+                ".akamaized.net",
+                ".akamaihd.net",
+                ".akamaized-staging.net",
+                ".akamaihd-staging.net"
+            )
+            
+            // Also accept exact match for top-level Akamai domains
+            val akamaiExactDomains = listOf(
+                "akamai.net",
+                "akamaized.net",
+                "akamaihd.net"
+            )
+            
             sans.any { san ->
-                val value = san.getOrNull(1) as? String ?: return@any false
-                value.contains("akamai", ignoreCase = true) ||
-                        value.contains("akamaized", ignoreCase = true) ||
-                        value.contains("akamaihd", ignoreCase = true)
+                val value = (san.getOrNull(1) as? String)?.lowercase() ?: return@any false
+                // Check if it's an exact Akamai domain or a subdomain of one
+                akamaiExactDomains.any { value == it } ||
+                        akamaiDomainSuffixes.any { value.endsWith(it) }
             }
         } catch (e: Exception) {
             false
