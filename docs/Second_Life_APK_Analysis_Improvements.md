@@ -6,6 +6,43 @@ This document summarizes the improvements applied to Linkpoint based on analysis
 
 The Second Life mobile viewer (Unity-based) and Lumiya viewer were analyzed to identify features and data that could improve Linkpoint. The following key improvements were implemented:
 
+## CRITICAL FIX: Reliable Packet ACK System
+
+**Source**: Lumiya's `SLCircuit.java` - reliable messaging implementation
+
+**Problem Identified**:
+The Second Life protocol requires clients to ACK (acknowledge) reliable packets. Without ACKs:
+1. The server keeps resending packets (wasting bandwidth)
+2. Eventually the connection times out
+3. Critical data like chat, objects, and terrain are not delivered
+
+**Analysis of Lumiya's Implementation**:
+```java
+// From SLCircuit.java
+private ConcurrentLinkedQueue<SLMessage> unackedQueue;  // Track sent reliable packets
+private List<Integer> pendingAcks;                       // ACKs we need to send
+
+// When receiving a packet with reliable flag (0x40):
+// - Extract sequence number
+// - Add to pendingAcks list
+
+// When sending packets:
+// - Attach pending ACKs to outgoing packets (piggy-back)
+// - Or send standalone PacketAck messages
+```
+
+**Fix Implemented** in `UDPConnectionFixed.kt`:
+1. Added `pendingAcksToSend` queue to collect sequence numbers from reliable packets
+2. Added `ackSenderLoop()` that runs every 100ms to send pending ACKs
+3. Added `sendPendingAcks()` that constructs and sends PacketAck messages
+4. Modified receive loop to check for reliable flag (0x40) and queue ACKs
+
+**Why This Matters for Chat/Rendering**:
+- `CHAT_FROM_SIMULATOR` packets are sent as reliable - without ACKs, chat won't work
+- `LAYER_DATA` (terrain) packets are reliable - without ACKs, terrain won't render
+- `OBJECT_UPDATE` packets often reliable - without ACKs, objects won't appear
+- `REGION_HANDSHAKE` is reliable - without ACKs, region setup fails
+
 ## 1. Avatar Attention System
 
 **Source**: Second Life `attentions.xml`
