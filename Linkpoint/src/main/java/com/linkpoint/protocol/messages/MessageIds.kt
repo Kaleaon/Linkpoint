@@ -1484,9 +1484,6 @@ object MessageIds {
     /** AvatarPickerRequest - Picker request */
     const val AVATAR_PICKER_REQUEST_MSG = (0xFFFF001B).toInt()  // Wire: FF FF 00 1B = -65509
     
-        
-        
-        
     /** AvatarPropertiesRequest - Properties request */
     const val AVATAR_PROPERTIES_REQUEST_MSG = (0xFFFF00A8).toInt() // Wire: FF FF 00 A8 = -65368
     
