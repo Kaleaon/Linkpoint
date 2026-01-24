@@ -1162,3 +1162,258 @@ fun MessageParser.parseScriptControlChange(data: ByteArray): ScriptControlChange
         return null
     }
 }
+
+/**
+ * Data from ObjectProperties message (message ID 65289 / 0xFF09 - medium frequency)
+ * 
+ * Contains detailed object metadata sent from the server when object properties
+ * are requested via ObjectSelect or when the server pushes updated properties.
+ */
+data class ObjectPropertiesData(
+    val objects: List<ObjectPropertyEntry>
+)
+
+/**
+ * Individual object property entry from ObjectProperties message
+ */
+data class ObjectPropertyEntry(
+    val objectId: UUID,
+    val creatorId: UUID,
+    val ownerId: UUID,
+    val groupId: UUID,
+    val creationDate: Long,
+    val baseMask: Int,
+    val ownerMask: Int,
+    val groupMask: Int,
+    val everyoneMask: Int,
+    val nextOwnerMask: Int,
+    val ownershipCost: Int,
+    val saleType: Int,
+    val salePrice: Int,
+    val aggregatePerms: Int,
+    val aggregatePermTextures: Int,
+    val aggregatePermTexturesOwner: Int,
+    val category: Int,
+    val inventorySerial: Int,
+    val itemId: UUID,
+    val folderId: UUID,
+    val fromTaskId: UUID,
+    val lastOwnerId: UUID,
+    val name: String,
+    val description: String,
+    val touchName: String,
+    val sitName: String,
+    val textureIds: ByteArray
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as ObjectPropertyEntry
+        return objectId == other.objectId
+    }
+    
+    override fun hashCode(): Int = objectId.hashCode()
+}
+
+/**
+ * Helper to convert bytes to UUID for ObjectProperties parsing
+ */
+private fun objectPropertiesBytesToUUID(bytes: ByteArray): UUID {
+    val bb = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN)
+    return UUID(bb.long, bb.long)
+}
+
+/**
+ * Parse ObjectProperties message (ID 65289 / 0xFF09 - medium frequency)
+ * 
+ * This message contains detailed object properties like name, description,
+ * owner, permissions, and other metadata. It's typically sent in response
+ * to ObjectSelect or when properties change.
+ * 
+ * Format per ObjectData block:
+ * - ObjectID (UUID, 16 bytes)
+ * - CreatorID (UUID, 16 bytes)
+ * - OwnerID (UUID, 16 bytes)
+ * - GroupID (UUID, 16 bytes)
+ * - CreationDate (S64, 8 bytes)
+ * - BaseMask (U32, 4 bytes)
+ * - OwnerMask (U32, 4 bytes)
+ * - GroupMask (U32, 4 bytes)
+ * - EveryoneMask (U32, 4 bytes)
+ * - NextOwnerMask (U32, 4 bytes)
+ * - OwnershipCost (S32, 4 bytes)
+ * - SaleType (U8, 1 byte)
+ * - SalePrice (S32, 4 bytes)
+ * - AggregatePerms (U8, 1 byte)
+ * - AggregatePermTextures (U8, 1 byte)
+ * - AggregatePermTexturesOwner (U8, 1 byte)
+ * - Category (U32, 4 bytes)
+ * - InventorySerial (S16, 2 bytes)
+ * - ItemID (UUID, 16 bytes)
+ * - FolderID (UUID, 16 bytes)
+ * - FromTaskID (UUID, 16 bytes)
+ * - LastOwnerID (UUID, 16 bytes)
+ * - Name (Variable, 1-byte length prefix)
+ * - Description (Variable, 1-byte length prefix)
+ * - TouchName (Variable, 1-byte length prefix)
+ * - SitName (Variable, 1-byte length prefix)
+ * - TextureID (Variable, 1-byte length prefix)
+ */
+fun MessageParser.parseObjectProperties(data: ByteArray): ObjectPropertiesData? {
+    try {
+        val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+        
+        // Number of ObjectData blocks
+        val numObjects = buffer.get().toInt() and 0xFF
+        
+        val objects = mutableListOf<ObjectPropertyEntry>()
+        
+        for (i in 0 until numObjects) {
+            if (buffer.remaining() < 175) {
+                // Minimum size check (UUIDs + fixed fields, excluding variable strings)
+                Log.w("MessageParser", "ObjectProperties: insufficient data for object $i")
+                break
+            }
+            
+            // ObjectID
+            val objectIdBytes = ByteArray(16)
+            buffer.get(objectIdBytes)
+            val objectId = objectPropertiesBytesToUUID(objectIdBytes)
+            
+            // CreatorID
+            val creatorIdBytes = ByteArray(16)
+            buffer.get(creatorIdBytes)
+            val creatorId = objectPropertiesBytesToUUID(creatorIdBytes)
+            
+            // OwnerID
+            val ownerIdBytes = ByteArray(16)
+            buffer.get(ownerIdBytes)
+            val ownerId = objectPropertiesBytesToUUID(ownerIdBytes)
+            
+            // GroupID
+            val groupIdBytes = ByteArray(16)
+            buffer.get(groupIdBytes)
+            val groupId = objectPropertiesBytesToUUID(groupIdBytes)
+            
+            // CreationDate (S64)
+            val creationDate = buffer.long
+            
+            // Permission masks
+            val baseMask = buffer.int
+            val ownerMask = buffer.int
+            val groupMask = buffer.int
+            val everyoneMask = buffer.int
+            val nextOwnerMask = buffer.int
+            
+            // Sale info
+            val ownershipCost = buffer.int
+            val saleType = buffer.get().toInt() and 0xFF
+            val salePrice = buffer.int
+            
+            // Aggregate permissions
+            val aggregatePerms = buffer.get().toInt() and 0xFF
+            val aggregatePermTextures = buffer.get().toInt() and 0xFF
+            val aggregatePermTexturesOwner = buffer.get().toInt() and 0xFF
+            
+            // Category and inventory
+            val category = buffer.int
+            val inventorySerial = buffer.short.toInt() and 0xFFFF
+            
+            // ItemID
+            val itemIdBytes = ByteArray(16)
+            buffer.get(itemIdBytes)
+            val itemId = objectPropertiesBytesToUUID(itemIdBytes)
+            
+            // FolderID
+            val folderIdBytes = ByteArray(16)
+            buffer.get(folderIdBytes)
+            val folderId = objectPropertiesBytesToUUID(folderIdBytes)
+            
+            // FromTaskID
+            val fromTaskIdBytes = ByteArray(16)
+            buffer.get(fromTaskIdBytes)
+            val fromTaskId = objectPropertiesBytesToUUID(fromTaskIdBytes)
+            
+            // LastOwnerID
+            val lastOwnerIdBytes = ByteArray(16)
+            buffer.get(lastOwnerIdBytes)
+            val lastOwnerId = objectPropertiesBytesToUUID(lastOwnerIdBytes)
+            
+            // Name (variable, 1-byte length prefix)
+            val nameLen = buffer.get().toInt() and 0xFF
+            val name = if (nameLen > 0 && buffer.remaining() >= nameLen) {
+                val nameBytes = ByteArray(nameLen)
+                buffer.get(nameBytes)
+                String(nameBytes, Charsets.UTF_8).trimEnd('\u0000')
+            } else ""
+            
+            // Description (variable, 1-byte length prefix)
+            val descLen = buffer.get().toInt() and 0xFF
+            val description = if (descLen > 0 && buffer.remaining() >= descLen) {
+                val descBytes = ByteArray(descLen)
+                buffer.get(descBytes)
+                String(descBytes, Charsets.UTF_8).trimEnd('\u0000')
+            } else ""
+            
+            // TouchName (variable, 1-byte length prefix)
+            val touchNameLen = buffer.get().toInt() and 0xFF
+            val touchName = if (touchNameLen > 0 && buffer.remaining() >= touchNameLen) {
+                val touchNameBytes = ByteArray(touchNameLen)
+                buffer.get(touchNameBytes)
+                String(touchNameBytes, Charsets.UTF_8).trimEnd('\u0000')
+            } else ""
+            
+            // SitName (variable, 1-byte length prefix)
+            val sitNameLen = buffer.get().toInt() and 0xFF
+            val sitName = if (sitNameLen > 0 && buffer.remaining() >= sitNameLen) {
+                val sitNameBytes = ByteArray(sitNameLen)
+                buffer.get(sitNameBytes)
+                String(sitNameBytes, Charsets.UTF_8).trimEnd('\u0000')
+            } else ""
+            
+            // TextureID (variable, 1-byte length prefix - contains texture UUIDs)
+            val textureIdLen = buffer.get().toInt() and 0xFF
+            val textureIds = if (textureIdLen > 0 && buffer.remaining() >= textureIdLen) {
+                val textureIdBytes = ByteArray(textureIdLen)
+                buffer.get(textureIdBytes)
+                textureIdBytes
+            } else ByteArray(0)
+            
+            objects.add(ObjectPropertyEntry(
+                objectId = objectId,
+                creatorId = creatorId,
+                ownerId = ownerId,
+                groupId = groupId,
+                creationDate = creationDate,
+                baseMask = baseMask,
+                ownerMask = ownerMask,
+                groupMask = groupMask,
+                everyoneMask = everyoneMask,
+                nextOwnerMask = nextOwnerMask,
+                ownershipCost = ownershipCost,
+                saleType = saleType,
+                salePrice = salePrice,
+                aggregatePerms = aggregatePerms,
+                aggregatePermTextures = aggregatePermTextures,
+                aggregatePermTexturesOwner = aggregatePermTexturesOwner,
+                category = category,
+                inventorySerial = inventorySerial,
+                itemId = itemId,
+                folderId = folderId,
+                fromTaskId = fromTaskId,
+                lastOwnerId = lastOwnerId,
+                name = name,
+                description = description,
+                touchName = touchName,
+                sitName = sitName,
+                textureIds = textureIds
+            ))
+        }
+        
+        Log.d("MessageParser", "Parsed ObjectProperties: ${objects.size} objects")
+        return ObjectPropertiesData(objects = objects)
+    } catch (e: Exception) {
+        Log.e("MessageParser", "Failed to parse ObjectProperties", e)
+        return null
+    }
+}

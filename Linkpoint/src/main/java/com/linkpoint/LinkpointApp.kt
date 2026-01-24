@@ -32,6 +32,7 @@ import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.messages.parseRegionHandshake
 import com.linkpoint.protocol.messages.parseAgentMovementComplete
 import com.linkpoint.protocol.messages.parseObjectUpdateCached
+import com.linkpoint.protocol.messages.parseObjectProperties
 import com.linkpoint.protocol.messages.parseScriptControlChange
 import com.linkpoint.protocol.transfer.TransferManager
 import com.linkpoint.protocol.transfer.XferManager
@@ -856,6 +857,34 @@ class LinkpointApp : Application() {
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling ObjectUpdateCached", e)
+            }
+        }
+        
+        // ObjectProperties (ID 65289 / 0xFF09) - Object metadata (name, description, owner, etc.)
+        // Sent by server in response to ObjectSelect or when properties change
+        var objectPropertiesCount = 0
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_PROPERTIES) { _, rawPacket ->
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
+                val propsData = com.linkpoint.protocol.messages.MessageParser.parseObjectProperties(payload)
+                if (propsData != null) {
+                    objectPropertiesCount += propsData.objects.size
+                    // Log occasionally to avoid spam
+                    if (objectPropertiesCount <= 10 || objectPropertiesCount % 50 == 0) {
+                        Log.d(TAG, "OBJECT_PROPERTIES received: ${propsData.objects.size} objects (total: $objectPropertiesCount)")
+                    }
+                    
+                    // Update ObjectManager with the received properties
+                    propsData.objects.forEach { props ->
+                        objectManager.handleObjectProperties(props)
+                        if (objectPropertiesCount <= 5) {
+                            Log.d(TAG, "  - Object '${props.name}' owner=${props.ownerId}")
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling ObjectProperties", e)
             }
         }
         

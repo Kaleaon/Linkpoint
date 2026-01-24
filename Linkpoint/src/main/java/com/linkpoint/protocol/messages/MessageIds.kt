@@ -183,6 +183,9 @@ object MessageIds {
     
     /** RequestMultipleObjects - Request full object data for cached objects */
     const val REQUEST_MULTIPLE_OBJECTS = (0xFFFF006C).toInt()  // Wire: FF FF 00 6C = -65428
+    
+    /** ObjectProperties - Server sends object metadata (name, description, owner, etc.) */
+    const val OBJECT_PROPERTIES = 65289                        // Wire: FF 09 = 9 | 65280 (medium frequency)
 
     // =====================================
     // Script Messages

@@ -3,6 +3,7 @@ package com.linkpoint.objects
 import android.os.Parcelable
 import android.util.Log
 import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ObjectPropertyEntry
 import com.linkpoint.protocol.messages.ObjectUpdateData
 import com.linkpoint.protocol.messages.TerseUpdateData
 import com.linkpoint.protocol.messages.UDPConnectionFixed
@@ -124,6 +125,27 @@ class ObjectManager(
             velocity = data.velocity
             angularVelocity = data.angularVelocity
             lastUpdate = System.currentTimeMillis()
+        }
+    }
+    
+    /**
+     * Handle object properties update from ObjectProperties message.
+     * Updates object name, description, owner, and permissions.
+     */
+    fun handleObjectProperties(props: ObjectPropertyEntry) {
+        // Find object by UUID
+        val obj = objectsByUUID[props.objectId]
+        if (obj != null) {
+            obj.apply {
+                name = props.name
+                description = props.description
+                ownerId = props.ownerId
+                lastUpdate = System.currentTimeMillis()
+            }
+            Log.d(TAG, "Updated properties for object '${props.name}' (${props.objectId})")
+        } else {
+            // Object not in scene yet - this can happen if properties arrive before ObjectUpdate
+            Log.d(TAG, "Received properties for unknown object '${props.name}' (${props.objectId})")
         }
     }
     
