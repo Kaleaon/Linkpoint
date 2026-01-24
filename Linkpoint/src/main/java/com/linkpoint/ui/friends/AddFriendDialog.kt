@@ -41,7 +41,7 @@ class AddFriendDialog : DialogFragment() {
         val name = nameEditText.text.toString().trim()
         if (name.isNotEmpty()) {
             val friendsManager = LinkpointApp.getInstance().friendsManager
-            viewLifecycleOwner.lifecycleScope.launch {
+            lifecycleScope.launch {
                 try {
                     friendsManager.findAndAddFriend(name)
                     dismiss()

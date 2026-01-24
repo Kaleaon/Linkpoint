@@ -47,7 +47,7 @@ class FriendActionsDialog : DialogFragment() {
     private fun sendIM() {
         // Open IM with friend
         val friendsManager = LinkpointApp.getInstance().friendsManager
-        viewLifecycleOwner.lifecycleScope.launch {
+        lifecycleScope.launch {
             friendsManager.sendIM(friend.agentId, "")
         }
     }
@@ -55,7 +55,7 @@ class FriendActionsDialog : DialogFragment() {
     private fun viewProfile() {
         // View friend's profile
         val profileManager = LinkpointApp.getInstance().profileManager
-        viewLifecycleOwner.lifecycleScope.launch {
+        lifecycleScope.launch {
             profileManager.getAvatarProfile(friend.agentId)
         }
     }
@@ -63,7 +63,7 @@ class FriendActionsDialog : DialogFragment() {
     private fun teleportTo() {
         // Teleport to friend's location
         val friendsManager = LinkpointApp.getInstance().friendsManager
-        viewLifecycleOwner.lifecycleScope.launch {
+        lifecycleScope.launch {
             friendsManager.teleportTo(friend.agentId)
         }
     }
@@ -71,7 +71,7 @@ class FriendActionsDialog : DialogFragment() {
     private fun removeFriend() {
         // Remove friend
         val friendsManager = LinkpointApp.getInstance().friendsManager
-        viewLifecycleOwner.lifecycleScope.launch {
+        lifecycleScope.launch {
             friendsManager.removeFriend(friend.agentId)
         }
     }

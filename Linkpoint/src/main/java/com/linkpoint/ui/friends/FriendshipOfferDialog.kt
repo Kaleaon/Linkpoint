@@ -45,7 +45,7 @@ class FriendshipOfferDialog : DialogFragment() {
 
     private fun acceptOffer() {
         val friendsManager = LinkpointApp.getInstance().friendsManager
-        viewLifecycleOwner.lifecycleScope.launch {
+        lifecycleScope.launch {
             friendsManager.acceptFriendship(offer.transactionId)
             dismiss()
         }
@@ -53,7 +53,7 @@ class FriendshipOfferDialog : DialogFragment() {
 
     private fun declineOffer() {
         val friendsManager = LinkpointApp.getInstance().friendsManager
-        viewLifecycleOwner.lifecycleScope.launch {
+        lifecycleScope.launch {
             friendsManager.declineFriendship(offer.transactionId)
             dismiss()
         }
