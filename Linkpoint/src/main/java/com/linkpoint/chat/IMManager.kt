@@ -139,7 +139,8 @@ class IMManager(
     }
     
     private fun handleSessionEvent(body: LLSDMap) {
-        val sessionId = UUID.fromString(body.getString("session_id") ?: return)
+        val sessionIdStr = body.getString("session_id") ?: return
+        val sessionId = try { UUID.fromString(sessionIdStr) } catch (e: Exception) { return }
         val success = body.getInt("success") == 1
         val eventType = body.getString("event") ?: "unknown"
         
@@ -148,7 +149,9 @@ class IMManager(
         when (eventType) {
             "join" -> {
                 // Participant joined
-                val agentId = body.getString("agent_id")?.let { UUID.fromString(it) }
+                val agentId = body.getString("agent_id")?.let { 
+                    try { UUID.fromString(it) } catch (e: Exception) { null }
+                }
                 if (agentId != null && agentId !in session.participants) {
                     session.participants = session.participants + agentId
                     scope.launch {
@@ -159,7 +162,9 @@ class IMManager(
             }
             "leave" -> {
                 // Participant left
-                val agentId = body.getString("agent_id")?.let { UUID.fromString(it) }
+                val agentId = body.getString("agent_id")?.let { 
+                    try { UUID.fromString(it) } catch (e: Exception) { null }
+                }
                 if (agentId != null) {
                     session.participants = session.participants - agentId
                     scope.launch {
@@ -170,7 +175,9 @@ class IMManager(
             }
             "typing" -> {
                 // Typing indicator
-                val agentId = body.getString("agent_id")?.let { UUID.fromString(it) }
+                val agentId = body.getString("agent_id")?.let { 
+                    try { UUID.fromString(it) } catch (e: Exception) { null }
+                }
                 val isTyping = body.getInt("typing") == 1
                 if (agentId != null) {
                     if (isTyping) {
@@ -189,7 +196,8 @@ class IMManager(
     }
     
     private fun handleSessionStart(body: LLSDMap) {
-        val sessionId = UUID.fromString(body.getString("session_id") ?: return)
+        val sessionIdStr = body.getString("session_id") ?: return
+        val sessionId = try { UUID.fromString(sessionIdStr) } catch (e: Exception) { return }
         val success = body.getInt("success") == 1
         
         if (success) {

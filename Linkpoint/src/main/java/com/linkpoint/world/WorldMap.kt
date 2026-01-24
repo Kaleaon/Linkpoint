@@ -36,9 +36,18 @@ class WorldMap(
         
         // Default search radius for nearby users (meters)
         private const val DEFAULT_NEARBY_RADIUS = 96f
+        
+        // Default access level when not specified by API
+        private const val DEFAULT_ACCESS_LEVEL = "PG"
     }
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    
+    // Reusable HTTP client for map requests
+    private val httpClient = OkHttpClient.Builder()
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(10, TimeUnit.SECONDS)
+        .build()
     
     // Avatar and friends managers - set after login via setters
     private var avatarManagerProvider: (() -> com.linkpoint.avatar.AvatarManager?)? = null
@@ -135,6 +144,7 @@ class WorldMap(
     
     private fun parseRegionSearchResults(json: String): List<RegionSearchResult> {
         // Parse JSON response from region search
+        // Note: Using regex for simplicity - consider using kotlinx.serialization for complex responses
         try {
             val results = mutableListOf<RegionSearchResult>()
             // Simple JSON parsing - look for region objects in the response
@@ -148,7 +158,7 @@ class WorldMap(
                     name = name,
                     gridX = x,
                     gridY = y,
-                    accessLevel = "PG" // Default - actual API would provide this
+                    accessLevel = DEFAULT_ACCESS_LEVEL
                 ))
             }
             return results
@@ -196,11 +206,7 @@ class WorldMap(
                     .head() // Just check if it exists
                     .build()
                 
-                val client = OkHttpClient.Builder()
-                    .connectTimeout(5, TimeUnit.SECONDS)
-                    .build()
-                
-                val response = client.newCall(request).execute()
+                val response = httpClient.newCall(request).execute()
                 if (response.isSuccessful) {
                     // Region exists, create info from coordinates
                     val info = RegionMapInfo(
@@ -208,7 +214,7 @@ class WorldMap(
                         gridX = x,
                         gridY = y,
                         regionHandle = regionHandle,
-                        accessLevel = "PG",
+                        accessLevel = DEFAULT_ACCESS_LEVEL,
                         mapImageId = null
                     )
                     regions[key] = info

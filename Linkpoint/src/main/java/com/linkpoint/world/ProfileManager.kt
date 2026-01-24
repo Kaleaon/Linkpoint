@@ -48,9 +48,15 @@ class ProfileManager(
                         userName = response.getString("username") ?: "",
                         aboutText = response.getString("sl_about_text") ?: "",
                         firstLifeText = response.getString("fl_about_text") ?: "",
-                        profileImage = response.getString("sl_image_id")?.let { UUID.fromString(it) },
-                        firstLifeImage = response.getString("fl_image_id")?.let { UUID.fromString(it) },
-                        partner = response.getString("partner_id")?.let { UUID.fromString(it) },
+                        profileImage = response.getString("sl_image_id")?.let { 
+                            try { UUID.fromString(it) } catch (e: Exception) { null }
+                        },
+                        firstLifeImage = response.getString("fl_image_id")?.let { 
+                            try { UUID.fromString(it) } catch (e: Exception) { null }
+                        },
+                        partner = response.getString("partner_id")?.let { 
+                            try { UUID.fromString(it) } catch (e: Exception) { null }
+                        },
                         bornOn = response.getString("born_on") ?: "",
                         memberOf = emptyList(), // Parsed from response if available
                         groups = emptyList(),
@@ -235,15 +241,21 @@ class ProfileManager(
                         groupId = groupId,
                         name = response.getString("name") ?: "",
                         charter = response.getString("charter") ?: "",
-                        insigniaId = response.getString("insignia_id")?.let { UUID.fromString(it) },
+                        insigniaId = response.getString("insignia_id")?.let { 
+                            try { UUID.fromString(it) } catch (e: Exception) { null }
+                        },
                         founderName = response.getString("founder_name") ?: "",
-                        founderId = response.getString("founder_id")?.let { UUID.fromString(it) },
+                        founderId = response.getString("founder_id")?.let { 
+                            try { UUID.fromString(it) } catch (e: Exception) { null }
+                        },
                         memberCount = response.getInt("member_count") ?: 0,
                         isOpenEnrollment = response.getInt("open_enrollment") == 1,
                         membershipFee = response.getInt("membership_fee") ?: 0,
                         showInList = response.getInt("show_in_list") == 1,
                         maturePublish = response.getInt("mature_content") == 1,
-                        ownerRole = response.getString("owner_role_id")?.let { UUID.fromString(it) },
+                        ownerRole = response.getString("owner_role_id")?.let { 
+                            try { UUID.fromString(it) } catch (e: Exception) { null }
+                        },
                         roles = emptyList(),
                         members = emptyList(),
                         notices = emptyList()
