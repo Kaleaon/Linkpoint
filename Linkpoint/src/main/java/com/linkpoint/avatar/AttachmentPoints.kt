@@ -72,38 +72,68 @@ object AttachmentPoints {
     const val ATTACH_HIND_LFOOT = 54
     const val ATTACH_HIND_RFOOT = 55
     
-    // All attachment points
+    // All attachment points with position and rotation data from Second Life
     val ALL_POINTS: Map<Int, AttachmentPoint> = mapOf(
-        ATTACH_CHEST to AttachmentPoint(ATTACH_CHEST, "Chest", "mChest", false),
-        ATTACH_HEAD to AttachmentPoint(ATTACH_HEAD, "Skull", "mHead", false),
-        ATTACH_LSHOULDER to AttachmentPoint(ATTACH_LSHOULDER, "Left Shoulder", "mShoulderLeft", false),
-        ATTACH_RSHOULDER to AttachmentPoint(ATTACH_RSHOULDER, "Right Shoulder", "mShoulderRight", false),
-        ATTACH_LHAND to AttachmentPoint(ATTACH_LHAND, "Left Hand", "mHandLeft", false),
-        ATTACH_RHAND to AttachmentPoint(ATTACH_RHAND, "Right Hand", "mHandRight", false),
-        ATTACH_LFOOT to AttachmentPoint(ATTACH_LFOOT, "Left Foot", "mFootLeft", false),
-        ATTACH_RFOOT to AttachmentPoint(ATTACH_RFOOT, "Right Foot", "mFootRight", false),
-        ATTACH_BACK to AttachmentPoint(ATTACH_BACK, "Spine", "mChest", false),
-        ATTACH_PELVIS to AttachmentPoint(ATTACH_PELVIS, "Pelvis", "mPelvis", false),
-        ATTACH_MOUTH to AttachmentPoint(ATTACH_MOUTH, "Mouth", "mHead", false),
-        ATTACH_CHIN to AttachmentPoint(ATTACH_CHIN, "Chin", "mHead", false),
-        ATTACH_LEAR to AttachmentPoint(ATTACH_LEAR, "Left Ear", "mHead", false),
-        ATTACH_REAR to AttachmentPoint(ATTACH_REAR, "Right Ear", "mHead", false),
-        ATTACH_LEYE to AttachmentPoint(ATTACH_LEYE, "Left Eye", "mEyeLeft", false),
-        ATTACH_REYE to AttachmentPoint(ATTACH_REYE, "Right Eye", "mEyeRight", false),
-        ATTACH_NOSE to AttachmentPoint(ATTACH_NOSE, "Nose", "mHead", false),
-        ATTACH_RUARM to AttachmentPoint(ATTACH_RUARM, "R Upper Arm", "mElbowRight", false),
-        ATTACH_RLARM to AttachmentPoint(ATTACH_RLARM, "R Lower Arm", "mWristRight", false),
-        ATTACH_LUARM to AttachmentPoint(ATTACH_LUARM, "L Upper Arm", "mElbowLeft", false),
-        ATTACH_LLARM to AttachmentPoint(ATTACH_LLARM, "L Lower Arm", "mWristLeft", false),
-        ATTACH_RHIP to AttachmentPoint(ATTACH_RHIP, "Right Hip", "mHipRight", false),
-        ATTACH_RULEG to AttachmentPoint(ATTACH_RULEG, "R Upper Leg", "mKneeRight", false),
-        ATTACH_RLLEG to AttachmentPoint(ATTACH_RLLEG, "R Lower Leg", "mAnkleRight", false),
-        ATTACH_LHIP to AttachmentPoint(ATTACH_LHIP, "Left Hip", "mHipLeft", false),
-        ATTACH_LULEG to AttachmentPoint(ATTACH_LULEG, "L Upper Leg", "mKneeLeft", false),
-        ATTACH_LLLEG to AttachmentPoint(ATTACH_LLLEG, "L Lower Leg", "mAnkleLeft", false),
-        ATTACH_BELLY to AttachmentPoint(ATTACH_BELLY, "Stomach", "mChest", false),
-        ATTACH_RPEC to AttachmentPoint(ATTACH_RPEC, "Right Pec", "mChest", false),
-        ATTACH_LPEC to AttachmentPoint(ATTACH_LPEC, "Left Pec", "mChest", false),
+        ATTACH_CHEST to AttachmentPoint(ATTACH_CHEST, "Chest", "mChest", false, 
+            Triple(0.15f, 0f, -0.1f), Triple(0f, 90f, 90f), true, 6, 2),
+        ATTACH_HEAD to AttachmentPoint(ATTACH_HEAD, "Skull", "mHead", false,
+            Triple(0f, 0f, 0.15f), Triple(0f, 0f, 90f), false, 2, 2),
+        ATTACH_LSHOULDER to AttachmentPoint(ATTACH_LSHOULDER, "Left Shoulder", "mCollarLeft", false,
+            Triple(0f, 0f, 0.08f), Triple(0f, 0f, 0f), true, 3, 3),
+        ATTACH_RSHOULDER to AttachmentPoint(ATTACH_RSHOULDER, "Right Shoulder", "mCollarRight", false,
+            Triple(0f, 0f, 0.08f), Triple(0f, 0f, 0f), true, 1, 1),
+        ATTACH_LHAND to AttachmentPoint(ATTACH_LHAND, "Left Hand", "mWristLeft", false,
+            Triple(0f, 0.08f, -0.02f), Triple(0f, 0f, 0f), true, 4, 0, 1.5f),
+        ATTACH_RHAND to AttachmentPoint(ATTACH_RHAND, "Right Hand", "mWristRight", false,
+            Triple(0f, -0.08f, -0.02f), Triple(0f, 0f, 0f), true, 0, 0, 1.5f),
+        ATTACH_LFOOT to AttachmentPoint(ATTACH_LFOOT, "Left Foot", "mFootLeft", false,
+            Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true, 5, 6),
+        ATTACH_RFOOT to AttachmentPoint(ATTACH_RFOOT, "Right Foot", "mFootRight", false,
+            Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true, 7, 6),
+        ATTACH_BACK to AttachmentPoint(ATTACH_BACK, "Spine", "mChest", false,
+            Triple(-0.15f, 0f, -0.1f), Triple(0f, -90f, 90f), true, 6, 7),
+        ATTACH_PELVIS to AttachmentPoint(ATTACH_PELVIS, "Pelvis", "mPelvis", false,
+            Triple(0f, 0f, -0.15f), Triple(0f, 0f, 0f), true, 6, 6),
+        ATTACH_MOUTH to AttachmentPoint(ATTACH_MOUTH, "Mouth", "mHead", false,
+            Triple(0.12f, 0f, 0.001f), Triple(0f, 0f, 0f), false, 2, 6),
+        ATTACH_CHIN to AttachmentPoint(ATTACH_CHIN, "Chin", "mHead", false,
+            Triple(0.12f, 0f, -0.04f), Triple(0f, 0f, 0f), false, 2, 7),
+        ATTACH_LEAR to AttachmentPoint(ATTACH_LEAR, "Left Ear", "mHead", false,
+            Triple(0.015f, 0.08f, 0.017f), Triple(0f, 0f, 0f), false, 2, 4),
+        ATTACH_REAR to AttachmentPoint(ATTACH_REAR, "Right Ear", "mHead", false,
+            Triple(0.015f, -0.08f, 0.017f), Triple(0f, 0f, 0f), false, 2, 0),
+        ATTACH_LEYE to AttachmentPoint(ATTACH_LEYE, "Left Eye", "mEyeLeft", false,
+            Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), false, 2, 3),
+        ATTACH_REYE to AttachmentPoint(ATTACH_REYE, "Right Eye", "mEyeRight", false,
+            Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), false, 2, 1),
+        ATTACH_NOSE to AttachmentPoint(ATTACH_NOSE, "Nose", "mHead", false,
+            Triple(0.1f, 0f, 0.05f), Triple(0f, 0f, 0f), false, 2, 5),
+        ATTACH_RUARM to AttachmentPoint(ATTACH_RUARM, "R Upper Arm", "mShoulderRight", false,
+            Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true, 1, 2),
+        ATTACH_RLARM to AttachmentPoint(ATTACH_RLARM, "R Lower Arm", "mElbowRight", false,
+            Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true, 1, 3),
+        ATTACH_LUARM to AttachmentPoint(ATTACH_LUARM, "L Upper Arm", "mShoulderLeft", false,
+            Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true, 3, 2),
+        ATTACH_LLARM to AttachmentPoint(ATTACH_LLARM, "L Lower Arm", "mElbowLeft", false,
+            Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true, 3, 1),
+        ATTACH_RHIP to AttachmentPoint(ATTACH_RHIP, "Right Hip", "mHipRight", false,
+            Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true, 7, 7),
+        ATTACH_RULEG to AttachmentPoint(ATTACH_RULEG, "R Upper Leg", "mKneeRight", false,
+            Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true, 7, 0),
+        ATTACH_RLLEG to AttachmentPoint(ATTACH_RLLEG, "R Lower Leg", "mAnkleRight", false,
+            Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true, 7, 1),
+        ATTACH_LHIP to AttachmentPoint(ATTACH_LHIP, "Left Hip", "mHipLeft", false,
+            Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true, 5, 7),
+        ATTACH_LULEG to AttachmentPoint(ATTACH_LULEG, "L Upper Leg", "mKneeLeft", false,
+            Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true, 5, 0),
+        ATTACH_LLLEG to AttachmentPoint(ATTACH_LLLEG, "L Lower Leg", "mAnkleLeft", false,
+            Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true, 5, 1),
+        ATTACH_BELLY to AttachmentPoint(ATTACH_BELLY, "Stomach", "mChest", false,
+            Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true, 6, 1),
+        ATTACH_RPEC to AttachmentPoint(ATTACH_RPEC, "Right Pec", "mChest", false,
+            Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true, 6, 0),
+        ATTACH_LPEC to AttachmentPoint(ATTACH_LPEC, "Left Pec", "mChest", false,
+            Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true, 6, 4),
         
         // HUD points
         ATTACH_HUD_CENTER_2 to AttachmentPoint(ATTACH_HUD_CENTER_2, "HUD Center 2", null, true),
@@ -116,8 +146,10 @@ object AttachmentPoints {
         ATTACH_HUD_BOTTOM_RIGHT to AttachmentPoint(ATTACH_HUD_BOTTOM_RIGHT, "HUD Bottom Right", null, true),
         
         // More avatar points
-        ATTACH_NECK to AttachmentPoint(ATTACH_NECK, "Neck", "mNeck", false),
-        ATTACH_ROOT to AttachmentPoint(ATTACH_ROOT, "Avatar Center", "mPelvis", false),
+        ATTACH_NECK to AttachmentPoint(ATTACH_NECK, "Neck", "mNeck", false,
+            Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true, 6, 3),
+        ATTACH_ROOT to AttachmentPoint(ATTACH_ROOT, "Avatar Center", "mPelvis", false,
+            Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true),
         
         // Extended/Bento points
         ATTACH_LHAND_RING1 to AttachmentPoint(ATTACH_LHAND_RING1, "Left Ring Finger", "mHandRing1Left", false),
@@ -184,16 +216,37 @@ object AttachmentPoints {
     fun getPointsForBone(boneName: String): List<AttachmentPoint> {
         return ALL_POINTS.values.filter { it.jointName == boneName }
     }
+    
+    /**
+     * Get attachment points visible in first person view.
+     */
+    fun getFirstPersonVisiblePoints(): List<AttachmentPoint> {
+        return ALL_POINTS.values.filter { it.visibleInFirstPerson }
+    }
+    
+    /**
+     * Get attachment points by group.
+     */
+    fun getPointsByGroup(group: Int): List<AttachmentPoint> {
+        return ALL_POINTS.values.filter { it.group == group }
+    }
 }
 
 /**
  * Represents an attachment point on the avatar.
+ * Enhanced with position, rotation, and first-person visibility data from Second Life.
  */
 data class AttachmentPoint(
     val id: Int,
     val name: String,
     val jointName: String?,
-    val isHud: Boolean
+    val isHud: Boolean,
+    val position: Triple<Float, Float, Float> = Triple(0f, 0f, 0f),
+    val rotation: Triple<Float, Float, Float> = Triple(0f, 0f, 0f),
+    val visibleInFirstPerson: Boolean = true,
+    val group: Int = 0,
+    val pieSlice: Int = 0,
+    val maxAttachmentOffset: Float = 0f
 )
 
 /**
