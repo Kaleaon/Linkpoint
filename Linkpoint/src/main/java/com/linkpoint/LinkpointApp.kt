@@ -41,6 +41,7 @@ import com.linkpoint.protocol.messages.parseAlertMessage
 import com.linkpoint.protocol.messages.parseAgentAlertMessage
 import com.linkpoint.protocol.messages.parseEnableSimulator
 import com.linkpoint.protocol.messages.parseCrossedRegion
+import com.linkpoint.protocol.messages.parseImprovedInstantMessage
 import com.linkpoint.protocol.transfer.TransferManager
 import com.linkpoint.protocol.transfer.XferManager
 import com.linkpoint.render.DrawDistanceManager
@@ -912,9 +913,14 @@ class LinkpointApp : Application() {
                         }
                     }
                     
-                    // TODO: Forward to script/control manager when implemented
-                    // For now, just acknowledge the message - scripts can take controls
-                    // The controls bitmask indicates which keys/mouse the script is capturing
+                    // Forward to script manager
+                    controlData.controls.forEach { ctrl ->
+                        scriptManager.handleScriptControlChange(
+                            controls = ctrl.controls,
+                            takeControls = ctrl.takeControls,
+                            passToAgent = ctrl.passToAgent
+                        )
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling ScriptControlChange", e)
@@ -3551,8 +3557,19 @@ class LinkpointApp : Application() {
             Log.d(TAG, "💌 ImprovedInstantMessage received - processing via IM manager")
             val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
             if (payload != null) {
-                // TODO: Parse message and call imManager.handleIncomingIM with proper parameters
-                Log.d(TAG, "ImprovedInstantMessage payload received: ${payload.size} bytes")
+                val imData = com.linkpoint.protocol.messages.MessageParser.parseImprovedInstantMessage(payload)
+                if (imData != null) {
+                    imManager.handleIncomingIM(
+                        fromAgentId = imData.fromAgentId,
+                        fromName = imData.fromAgentName,
+                        message = imData.message,
+                        sessionId = imData.sessionId,
+                        dialogType = imData.dialog,
+                        timestamp = imData.timestamp
+                    )
+                } else {
+                    Log.e(TAG, "Failed to parse ImprovedInstantMessage")
+                }
             }
         }
         

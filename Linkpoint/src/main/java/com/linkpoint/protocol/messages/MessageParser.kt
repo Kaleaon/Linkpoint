@@ -1784,3 +1784,143 @@ fun MessageParser.parseCrossedRegion(data: ByteArray): CrossedRegionData? {
         return null
     }
 }
+
+/**
+ * Parse ImprovedInstantMessage message.
+ * Handles instant messages, group notices, typing indicators, etc.
+ */
+fun MessageParser.parseImprovedInstantMessage(data: ByteArray): ImprovedInstantMessageData? {
+    val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
+    
+    try {
+        // FromAgentID (UUID - 16 bytes)
+        val fromAgentIdBytes = ByteArray(16)
+        buffer.get(fromAgentIdBytes)
+        val fromAgentId = bytesToUUID(fromAgentIdBytes)
+        
+        // ToAgentID (UUID - 16 bytes)
+        val toAgentIdBytes = ByteArray(16)
+        buffer.get(toAgentIdBytes)
+        val toAgentId = bytesToUUID(toAgentIdBytes)
+        
+        // ParentEstateID (U32 - 4 bytes)
+        val parentEstateId = buffer.int
+        
+        // RegionID (UUID - 16 bytes)
+        val regionIdBytes = ByteArray(16)
+        buffer.get(regionIdBytes)
+        val regionId = bytesToUUID(regionIdBytes)
+        
+        // Position (Vector3 - 12 bytes)
+        val posBytes = ByteArray(12)
+        buffer.get(posBytes)
+        val position = LLVector3.fromBytes(posBytes)
+        
+        // Offline (U8 - 1 byte)
+        val offline = buffer.get().toInt() and 0xFF
+        
+        // Dialog (U8 - 1 byte)
+        val dialog = buffer.get().toInt() and 0xFF
+        
+        // ID (UUID - 16 bytes) - IM session ID
+        val sessionIdBytes = ByteArray(16)
+        buffer.get(sessionIdBytes)
+        val sessionId = bytesToUUID(sessionIdBytes)
+        
+        // Timestamp (U32 - 4 bytes)
+        val timestamp = buffer.int.toLong() and 0xFFFFFFFFL
+        
+        // FromAgentName (Variable 1 - length prefix 1 byte)
+        val fromNameLen = buffer.get().toInt() and 0xFF
+        val fromNameBytes = ByteArray(fromNameLen)
+        buffer.get(fromNameBytes)
+        val fromAgentName = String(fromNameBytes, Charsets.UTF_8).trimEnd('\u0000')
+        
+        // Message (Variable 2 - length prefix 2 bytes)
+        val messageLen = buffer.short.toInt() and 0xFFFF
+        val messageBytes = ByteArray(messageLen)
+        buffer.get(messageBytes)
+        val message = String(messageBytes, Charsets.UTF_8).trimEnd('\u0000')
+        
+        // BinaryBucket (Variable 2 - length prefix 2 bytes)
+        val binaryBucketLen = buffer.short.toInt() and 0xFFFF
+        val binaryBucket = ByteArray(binaryBucketLen)
+        if (binaryBucketLen > 0) {
+            buffer.get(binaryBucket)
+        }
+        
+        return ImprovedInstantMessageData(
+            fromAgentId = fromAgentId,
+            toAgentId = toAgentId,
+            parentEstateId = parentEstateId,
+            regionId = regionId,
+            position = position,
+            offline = offline,
+            dialog = dialog,
+            sessionId = sessionId,
+            timestamp = timestamp,
+            fromAgentName = fromAgentName,
+            message = message,
+            binaryBucket = binaryBucket
+        )
+    } catch (e: Exception) {
+        Log.e("MessageParser", "Failed to parse ImprovedInstantMessage", e)
+        return null
+    }
+}
+
+/**
+ * Data class for ImprovedInstantMessage
+ */
+data class ImprovedInstantMessageData(
+    val fromAgentId: UUID,
+    val toAgentId: UUID,
+    val parentEstateId: Int,
+    val regionId: UUID,
+    val position: LLVector3,
+    val offline: Int,
+    val dialog: Int,
+    val sessionId: UUID,
+    val timestamp: Long,
+    val fromAgentName: String,
+    val message: String,
+    val binaryBucket: ByteArray
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ImprovedInstantMessageData
+
+        if (fromAgentId != other.fromAgentId) return false
+        if (toAgentId != other.toAgentId) return false
+        if (parentEstateId != other.parentEstateId) return false
+        if (regionId != other.regionId) return false
+        if (position != other.position) return false
+        if (offline != other.offline) return false
+        if (dialog != other.dialog) return false
+        if (sessionId != other.sessionId) return false
+        if (timestamp != other.timestamp) return false
+        if (fromAgentName != other.fromAgentName) return false
+        if (message != other.message) return false
+        if (!binaryBucket.contentEquals(other.binaryBucket)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = fromAgentId.hashCode()
+        result = 31 * result + toAgentId.hashCode()
+        result = 31 * result + parentEstateId
+        result = 31 * result + regionId.hashCode()
+        result = 31 * result + position.hashCode()
+        result = 31 * result + offline
+        result = 31 * result + dialog
+        result = 31 * result + sessionId.hashCode()
+        result = 31 * result + timestamp.hashCode()
+        result = 31 * result + fromAgentName.hashCode()
+        result = 31 * result + message.hashCode()
+        result = 31 * result + binaryBucket.contentHashCode()
+        return result
+    }
+}
