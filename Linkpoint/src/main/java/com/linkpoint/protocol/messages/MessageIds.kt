@@ -2001,4 +2001,34 @@ object MessageIds {
     
     /** ClearAnimationOverride - Clear override */
     const val CLEAR_ANIMATION_OVERRIDE = (0xFFFF0077).toInt()    // Wire: FF FF 00 77 = -65417
+
+    // =====================================
+    // Phase 6: Final Remaining Handlers
+    // =====================================
+
+    // --- Chat Extended ---
+    /** ChatEvent - Chat event */
+    const val CHAT_EVENT = (0xFFFF00A4).toInt()                  // Wire: FF FF 00 A4 = -65372
+    
+    /** ChatPass - Chat pass */
+    const val CHAT_PASS = (0xFFFF00A5).toInt()                   // Wire: FF FF 00 A5 = -65371
+    
+    // --- Circuit ---
+    /** CircuitReady - Circuit ready notification */
+    const val CIRCUIT_READY = (0xFFFF0005).toInt()               // Wire: FF FF 00 05 = -65531
+    
+    // --- Data Home Location ---
+    /** DataHomeLocationRequest - Request home location */
+    const val DATA_HOME_LOCATION_REQUEST = (0xFFFF01A3).toInt()  // Wire: FF FF 01 A3 = -65117
+    
+    // --- Global Options ---
+    /** GlobalOptionsChange - Global options change */
+    const val GLOBAL_OPTIONS_CHANGE = (0xFFFF01A4).toInt()       // Wire: FF FF 01 A4 = -65116
+    
+    // --- UUID Request Messages ---
+    /** UUIDNameRequest - Request name for UUID */
+    const val UUID_NAME_REQUEST = (0xFFFF00ED).toInt()           // Wire: FF FF 00 ED = -65299
+    
+    /** UUIDGroupNameRequest - Request group name for UUID */
+    const val UUID_GROUP_NAME_REQUEST = (0xFFFF00EF).toInt()     // Wire: FF FF 00 EF = -65297
 }
