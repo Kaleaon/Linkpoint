@@ -1,0 +1,76 @@
+{
+  "strings": [
+    {
+      "key": "notification.im_title",
+      "value": "{0} à {1}"
+    },
+    {
+      "key": "notification.group_title", 
+      "value": "{0} à {1}"
+    },
+    {
+      "key": "error.network_connection",
+      "value": "Erreur de connexion réseau"
+    },
+    {
+      "key": "error.login_failed",
+      "value": "Échec de la connexion"
+    },
+    {
+      "key": "status.connecting",
+      "value": "Connexion en cours..."
+    },
+    {
+      "key": "status.connected",
+      "value": "Connecté"
+    },
+    {
+      "key": "status.disconnected",
+      "value": "Déconnecté"
+    },
+    {
+      "key": "ui.settings",
+      "value": "Paramètres"
+    },
+    {
+      "key": "ui.back",
+      "value": "Retour"
+    },
+    {
+      "key": "ui.forward",
+      "value": "Avancer"
+    },
+    {
+      "key": "debug.location_added",
+      "value": "Nouveau lieu ajouté à la pile"
+    },
+    {
+      "key": "debug.current_location",
+      "value": "Localisation Actuelle: {0} {1:F1} {2:F1} {3:F1}"
+    },
+    {
+      "key": "debug.going_to_location",
+      "value": "Aller à la Localisation: {0}"
+    },
+    {
+      "key": "debug.going_to_null",
+      "value": "Aller à la Localisation: null"
+    },
+    {
+      "key": "debug.current_location_null",
+      "value": "Localisation Actuelle: null"
+    },
+    {
+      "key": "error.camera_initialization",
+      "value": "Erreur: Impossible d'initialiser les caméras"
+    },
+    {
+      "key": "error.visual_params",
+      "value": "Impossible de charger Master Avatar pour le plugin VisualParam2."
+    },
+    {
+      "key": "error.local_notification",
+      "value": "Erreur lors de la tentative de notification locale."
+    }
+  ]
+}
