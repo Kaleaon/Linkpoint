@@ -27,32 +27,60 @@ class ProfileManager(
     private val displayNames = ConcurrentHashMap<UUID, String>()
     
     /**
-     * Get avatar profile
+     * Get avatar profile via capability request.
      */
     suspend fun getAvatarProfile(agentId: UUID): AvatarProfile? {
         avatarProfiles[agentId]?.let { return it }
         
         return withContext(Dispatchers.IO) {
             try {
-                // Would request profile from server
-                // For now, return placeholder
-                val profile = AvatarProfile(
-                    agentId = agentId,
-                    displayName = displayNames[agentId] ?: "",
-                    userName = "",
-                    aboutText = "",
-                    firstLifeText = "",
-                    profileImage = null,
-                    firstLifeImage = null,
-                    partner = null,
-                    bornOn = "",
-                    memberOf = emptyList(),
-                    groups = emptyList(),
-                    picks = emptyList(),
-                    interests = ProfileInterests()
-                )
-                avatarProfiles[agentId] = profile
-                profile
+                // Request profile from AgentProfile capability
+                val request = LLSDMap().apply {
+                    this["agent_id"] = LLSDString(agentId.toString())
+                }
+                
+                val response = capabilityManager.request("AgentProfile", request)
+                
+                if (response is LLSDMap) {
+                    val profile = AvatarProfile(
+                        agentId = agentId,
+                        displayName = response.getString("display_name") ?: displayNames[agentId] ?: "",
+                        userName = response.getString("username") ?: "",
+                        aboutText = response.getString("sl_about_text") ?: "",
+                        firstLifeText = response.getString("fl_about_text") ?: "",
+                        profileImage = response.getString("sl_image_id")?.let { UUID.fromString(it) },
+                        firstLifeImage = response.getString("fl_image_id")?.let { UUID.fromString(it) },
+                        partner = response.getString("partner_id")?.let { UUID.fromString(it) },
+                        bornOn = response.getString("born_on") ?: "",
+                        memberOf = emptyList(), // Parsed from response if available
+                        groups = emptyList(),
+                        picks = emptyList(),
+                        interests = ProfileInterests()
+                    )
+                    avatarProfiles[agentId] = profile
+                    Log.d(TAG, "Retrieved profile for $agentId")
+                    profile
+                } else {
+                    // Return placeholder if capability not available
+                    Log.w(TAG, "AgentProfile capability returned non-map response")
+                    val profile = AvatarProfile(
+                        agentId = agentId,
+                        displayName = displayNames[agentId] ?: "",
+                        userName = "",
+                        aboutText = "",
+                        firstLifeText = "",
+                        profileImage = null,
+                        firstLifeImage = null,
+                        partner = null,
+                        bornOn = "",
+                        memberOf = emptyList(),
+                        groups = emptyList(),
+                        picks = emptyList(),
+                        interests = ProfileInterests()
+                    )
+                    avatarProfiles[agentId] = profile
+                    profile
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to get avatar profile", e)
                 null
@@ -61,7 +89,7 @@ class ProfileManager(
     }
     
     /**
-     * Get display name
+     * Get display name via GetDisplayNames capability.
      */
     suspend fun getDisplayName(agentId: UUID): String {
         displayNames[agentId]?.let { return it }
@@ -74,17 +102,31 @@ class ProfileManager(
                     }
                 }
                 
-                // Request from server
-                // Placeholder
-                displayNames[agentId] ?: agentId.toString().substring(0, 8)
+                val response = capabilityManager.request(CapabilityManager.CAP_GET_DISPLAY_NAMES, request)
+                
+                if (response is LLSDMap) {
+                    val agents = response.getArray("agents")
+                    if (agents != null && agents.size() > 0) {
+                        val agentData = agents.get(0) as? LLSDMap
+                        val name = agentData?.getString("display_name") 
+                            ?: agentData?.getString("username")
+                            ?: agentId.toString().substring(0, 8)
+                        displayNames[agentId] = name
+                        return@withContext name
+                    }
+                }
+                
+                // Fallback
+                agentId.toString().substring(0, 8)
             } catch (e: Exception) {
+                Log.w(TAG, "Failed to get display name for $agentId: ${e.message}")
                 agentId.toString().substring(0, 8)
             }
         }
     }
     
     /**
-     * Get multiple display names
+     * Get multiple display names via batch GetDisplayNames capability request.
      */
     suspend fun getDisplayNames(agentIds: List<UUID>): Map<UUID, String> {
         return withContext(Dispatchers.IO) {
@@ -96,7 +138,38 @@ class ProfileManager(
             }
             
             if (missing.isNotEmpty()) {
-                // Would batch request from server
+                try {
+                    val request = LLSDMap().apply {
+                        this["ids"] = LLSDArray().apply {
+                            missing.forEach { add(LLSDString(it.toString())) }
+                        }
+                    }
+                    
+                    val response = capabilityManager.request(CapabilityManager.CAP_GET_DISPLAY_NAMES, request)
+                    
+                    if (response is LLSDMap) {
+                        val agents = response.getArray("agents")
+                        if (agents != null) {
+                            for (i in 0 until agents.size()) {
+                                val agentData = agents.get(i) as? LLSDMap ?: continue
+                                val idStr = agentData.getString("id") ?: continue
+                                val name = agentData.getString("display_name") 
+                                    ?: agentData.getString("username")
+                                    ?: continue
+                                try {
+                                    val uuid = UUID.fromString(idStr)
+                                    displayNames[uuid] = name
+                                    results[uuid] = name
+                                } catch (e: Exception) {
+                                    // Invalid UUID, skip
+                                }
+                            }
+                        }
+                    }
+                    Log.d(TAG, "Retrieved ${results.size} display names")
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to batch retrieve display names: ${e.message}")
+                }
             }
             
             results
@@ -143,33 +216,64 @@ class ProfileManager(
     }
     
     /**
-     * Get group profile
+     * Get group profile via GroupProfile capability.
      */
     suspend fun getGroupProfile(groupId: UUID): GroupProfile? {
         groupProfiles[groupId]?.let { return it }
         
         return withContext(Dispatchers.IO) {
             try {
-                // Would request from server
-                val profile = GroupProfile(
-                    groupId = groupId,
-                    name = "",
-                    charter = "",
-                    insigniaId = null,
-                    founderName = "",
-                    founderId = null,
-                    memberCount = 0,
-                    isOpenEnrollment = false,
-                    membershipFee = 0,
-                    showInList = true,
-                    maturePublish = false,
-                    ownerRole = null,
-                    roles = emptyList(),
-                    members = emptyList(),
-                    notices = emptyList()
-                )
-                groupProfiles[groupId] = profile
-                profile
+                // Request group profile from capability
+                val request = LLSDMap().apply {
+                    this["group_id"] = LLSDString(groupId.toString())
+                }
+                
+                val response = capabilityManager.request("GroupProfile", request)
+                
+                if (response is LLSDMap) {
+                    val profile = GroupProfile(
+                        groupId = groupId,
+                        name = response.getString("name") ?: "",
+                        charter = response.getString("charter") ?: "",
+                        insigniaId = response.getString("insignia_id")?.let { UUID.fromString(it) },
+                        founderName = response.getString("founder_name") ?: "",
+                        founderId = response.getString("founder_id")?.let { UUID.fromString(it) },
+                        memberCount = response.getInt("member_count") ?: 0,
+                        isOpenEnrollment = response.getInt("open_enrollment") == 1,
+                        membershipFee = response.getInt("membership_fee") ?: 0,
+                        showInList = response.getInt("show_in_list") == 1,
+                        maturePublish = response.getInt("mature_content") == 1,
+                        ownerRole = response.getString("owner_role_id")?.let { UUID.fromString(it) },
+                        roles = emptyList(),
+                        members = emptyList(),
+                        notices = emptyList()
+                    )
+                    groupProfiles[groupId] = profile
+                    Log.d(TAG, "Retrieved group profile for $groupId: ${profile.name}")
+                    profile
+                } else {
+                    // Return placeholder if capability not available
+                    Log.w(TAG, "GroupProfile capability returned non-map response")
+                    val profile = GroupProfile(
+                        groupId = groupId,
+                        name = "",
+                        charter = "",
+                        insigniaId = null,
+                        founderName = "",
+                        founderId = null,
+                        memberCount = 0,
+                        isOpenEnrollment = false,
+                        membershipFee = 0,
+                        showInList = true,
+                        maturePublish = false,
+                        ownerRole = null,
+                        roles = emptyList(),
+                        members = emptyList(),
+                        notices = emptyList()
+                    )
+                    groupProfiles[groupId] = profile
+                    profile
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to get group profile", e)
                 null
