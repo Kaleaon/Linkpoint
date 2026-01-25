@@ -36,8 +36,17 @@ class LumiyaGlobalOptions private constructor(private val context: Context) {
     
     companion object {
         private const val PREFS_NAME = "linkpoint_lumiya_options"
-        private const val BACKUP_FILENAME = "linkpoint_settings_backup.properties"
         private const val TAG = "LumiyaGlobalOptions"
+        
+        // External storage folder for all Linkpoint data (survives reinstall)
+        const val EXTERNAL_FOLDER_NAME = "Linkpoint Viewer"
+        const val SETTINGS_FILENAME = "settings.properties"
+        const val TEXTURE_CACHE_FOLDER = "textures"
+        const val MESH_CACHE_FOLDER = "meshes"
+        const val OBJECT_CACHE_FOLDER = "objects"
+        const val LOGS_FOLDER = "logs"
+        const val SOUNDS_CACHE_FOLDER = "sounds"
+        const val ANIMATIONS_CACHE_FOLDER = "animations"
         
         // Preference keys
         private const val KEY_AUTO_RECONNECT = "auto_reconnect"
@@ -86,11 +95,106 @@ class LumiyaGlobalOptions private constructor(private val context: Context) {
         }
         
         /**
+         * Get the main Linkpoint Viewer folder on external storage.
+         * Path: /storage/sdcard0/Linkpoint Viewer
+         * 
+         * This folder persists across app reinstalls and contains:
+         * - settings.properties (user settings backup)
+         * - textures/ (texture cache)
+         * - meshes/ (mesh cache)
+         * - objects/ (object cache)
+         * - logs/ (session logs)
+         * - sounds/ (sound cache)
+         * - animations/ (animation cache)
+         */
+        fun getExternalFolder(): File {
+            // Try primary external storage first (/storage/sdcard0 or /storage/emulated/0)
+            val primaryExternal = Environment.getExternalStorageDirectory()
+            val linkpointFolder = File(primaryExternal, EXTERNAL_FOLDER_NAME)
+            
+            // Create folder if it doesn't exist
+            if (!linkpointFolder.exists()) {
+                linkpointFolder.mkdirs()
+            }
+            
+            return linkpointFolder
+        }
+        
+        /**
+         * Get a specific cache subfolder
+         */
+        fun getCacheFolder(folderName: String): File {
+            val folder = File(getExternalFolder(), folderName)
+            if (!folder.exists()) {
+                folder.mkdirs()
+            }
+            return folder
+        }
+        
+        /**
+         * Get texture cache folder: /storage/sdcard0/Linkpoint Viewer/textures
+         */
+        fun getTextureCacheFolder(): File = getCacheFolder(TEXTURE_CACHE_FOLDER)
+        
+        /**
+         * Get mesh cache folder: /storage/sdcard0/Linkpoint Viewer/meshes
+         */
+        fun getMeshCacheFolder(): File = getCacheFolder(MESH_CACHE_FOLDER)
+        
+        /**
+         * Get object cache folder: /storage/sdcard0/Linkpoint Viewer/objects
+         */
+        fun getObjectCacheFolder(): File = getCacheFolder(OBJECT_CACHE_FOLDER)
+        
+        /**
+         * Get logs folder: /storage/sdcard0/Linkpoint Viewer/logs
+         */
+        fun getLogsFolder(): File = getCacheFolder(LOGS_FOLDER)
+        
+        /**
+         * Get sounds cache folder: /storage/sdcard0/Linkpoint Viewer/sounds
+         */
+        fun getSoundsCacheFolder(): File = getCacheFolder(SOUNDS_CACHE_FOLDER)
+        
+        /**
+         * Get animations cache folder: /storage/sdcard0/Linkpoint Viewer/animations
+         */
+        fun getAnimationsCacheFolder(): File = getCacheFolder(ANIMATIONS_CACHE_FOLDER)
+        
+        /**
          * Snap a value to the nearest standard tier
          */
         fun snapToNearestTier(value: Int, tiers: List<Int>): Int {
             if (tiers.isEmpty()) return value
             return tiers.minByOrNull { kotlin.math.abs(it - value) } ?: value
+        }
+        
+        /**
+         * Get total size of a cache folder in bytes
+         */
+        fun getCacheFolderSize(folder: File): Long {
+            if (!folder.exists() || !folder.isDirectory) return 0
+            return folder.walkTopDown().filter { it.isFile }.sumOf { it.length() }
+        }
+        
+        /**
+         * Clear a cache folder
+         */
+        fun clearCacheFolder(folder: File): Boolean {
+            return try {
+                if (folder.exists() && folder.isDirectory) {
+                    folder.listFiles()?.forEach { file ->
+                        if (file.isDirectory) {
+                            file.deleteRecursively()
+                        } else {
+                            file.delete()
+                        }
+                    }
+                }
+                true
+            } catch (e: Exception) {
+                false
+            }
         }
     }
     
@@ -371,14 +475,18 @@ class LumiyaGlobalOptions private constructor(private val context: Context) {
     // ==================== PERSISTENT BACKUP ====================
     
     /**
-     * Get backup file location (external storage, survives reinstall)
+     * Get backup file location in the external Linkpoint Viewer folder.
+     * Path: /storage/sdcard0/Linkpoint Viewer/settings.properties
+     * 
+     * This survives app reinstalls.
      */
     private fun getBackupFile(): File? {
         return try {
-            val dir = context.getExternalFilesDir(null) 
-                ?: Environment.getExternalStorageDirectory()
-            File(dir, BACKUP_FILENAME)
+            val linkpointFolder = getExternalFolder()
+            File(linkpointFolder, SETTINGS_FILENAME)
         } catch (e: Exception) {
+            NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.CONNECTION,
+                "LumiyaOptions: Cannot access external folder: ${e.message}")
             null
         }
     }
@@ -512,7 +620,8 @@ class LumiyaGlobalOptions private constructor(private val context: Context) {
         "meshMemoryLimitMb" to meshMemoryLimitMb,
         "objectCacheLimitMb" to objectCacheLimitMb,
         "drawDistance" to drawDistance,
-        "userModified" to userModified
+        "userModified" to userModified,
+        "externalFolder" to getExternalFolder().absolutePath
     )
     
     /**
@@ -538,5 +647,96 @@ class LumiyaGlobalOptions private constructor(private val context: Context) {
      */
     fun getMaxSafeTextureMemoryMb(): Int {
         return (detectedRamMb * 0.25).toInt().coerceAtMost(2048)
+    }
+    
+    // ==================== CACHE MANAGEMENT ====================
+    
+    /**
+     * Get cache statistics for display
+     */
+    fun getCacheStats(): Map<String, Long> {
+        return mapOf(
+            "textures" to getCacheFolderSize(getTextureCacheFolder()),
+            "meshes" to getCacheFolderSize(getMeshCacheFolder()),
+            "objects" to getCacheFolderSize(getObjectCacheFolder()),
+            "sounds" to getCacheFolderSize(getSoundsCacheFolder()),
+            "animations" to getCacheFolderSize(getAnimationsCacheFolder()),
+            "logs" to getCacheFolderSize(getLogsFolder())
+        )
+    }
+    
+    /**
+     * Get total cache size in bytes
+     */
+    fun getTotalCacheSize(): Long {
+        return getCacheStats().values.sum()
+    }
+    
+    /**
+     * Get total cache size as a readable string
+     */
+    fun getTotalCacheSizeString(): String {
+        val bytes = getTotalCacheSize()
+        return when {
+            bytes >= 1024 * 1024 * 1024 -> "%.2f GB".format(bytes / (1024.0 * 1024.0 * 1024.0))
+            bytes >= 1024 * 1024 -> "%.1f MB".format(bytes / (1024.0 * 1024.0))
+            bytes >= 1024 -> "%.1f KB".format(bytes / 1024.0)
+            else -> "$bytes bytes"
+        }
+    }
+    
+    /**
+     * Clear all caches
+     */
+    fun clearAllCaches() {
+        clearCacheFolder(getTextureCacheFolder())
+        clearCacheFolder(getMeshCacheFolder())
+        clearCacheFolder(getObjectCacheFolder())
+        clearCacheFolder(getSoundsCacheFolder())
+        clearCacheFolder(getAnimationsCacheFolder())
+        // Don't clear logs by default
+        
+        NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.CONNECTION,
+            "LumiyaOptions: All caches cleared")
+    }
+    
+    /**
+     * Clear texture cache only
+     */
+    fun clearTextureCache() {
+        clearCacheFolder(getTextureCacheFolder())
+        NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.CONNECTION,
+            "LumiyaOptions: Texture cache cleared")
+    }
+    
+    /**
+     * Clear logs folder
+     */
+    fun clearLogs() {
+        clearCacheFolder(getLogsFolder())
+        NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.CONNECTION,
+            "LumiyaOptions: Logs cleared")
+    }
+    
+    /**
+     * Initialize all external folders (call on app startup)
+     */
+    fun initializeExternalFolders() {
+        try {
+            // Create all cache folders
+            getExternalFolder()
+            getTextureCacheFolder()
+            getMeshCacheFolder()
+            getObjectCacheFolder()
+            getLogsFolder()
+            getSoundsCacheFolder()
+            getAnimationsCacheFolder()
+            
+            NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.CONNECTION,
+                "LumiyaOptions: External folders initialized at ${getExternalFolder().absolutePath}")
+        } catch (e: Exception) {
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.CONNECTION,
+                "LumiyaOptions: Failed to initialize external folders: ${e.message}")
+        }
     }
 }
