@@ -7,6 +7,7 @@ import com.linkpoint.network.events.ConnectionState
 import com.linkpoint.network.events.CircuitEstablishedEvent
 import com.linkpoint.network.events.MessageReceivedEvent
 import com.linkpoint.network.NetworkLogger
+import com.linkpoint.protocol.lumiya.LumiyaConstants
 import com.linkpoint.protocol.types.putUUID
 import com.linkpoint.utils.SessionLogRecorder
 import kotlinx.coroutines.*
@@ -125,17 +126,17 @@ class UDPConnectionFixed {
     companion object {
         private const val TAG = "UDPConnectionFixed"
         
-        /** Maximum UDP datagram size (64KB - 1) */
-        private const val BUFFER_SIZE = 65535
+        /** Maximum UDP datagram size - from LumiyaConstants */
+        private val BUFFER_SIZE = LumiyaConstants.MAX_MESSAGE_SIZE
         
-        /** Timeout for NIO selector operations (1 second) */
-        private const val SELECTOR_TIMEOUT_MS = 1000L
+        /** Timeout for NIO selector operations - from LumiyaConstants (1 second idle interval) */
+        private val SELECTOR_TIMEOUT_MS = LumiyaConstants.DEFAULT_IDLE_INTERVAL_MS
         
         /** 
          * Packet header size: flags (1) + sequence (4) + extra (1) = 6 bytes
-         * This is constant across all SL UDP packets
+         * This is constant across all SL UDP packets - from LumiyaConstants
          */
-        private const val PACKET_HEADER_SIZE = 6
+        private val PACKET_HEADER_SIZE = LumiyaConstants.PACKET_HEADER_SIZE
         
         /**
          * Frequency bases for message ID encoding (matching Lumiya)
@@ -168,6 +169,21 @@ class UDPConnectionFixed {
          * Set to false to reduce log verbosity in production.
          */
         const val LOG_FULL_PACKET_DATA = true
+        
+        // ==================== LUMIYA TIMING CONSTANTS ====================
+        // These critical values come from Lumiya's proven mobile implementation
+        
+        /** Message timeout from Lumiya (5 seconds) */
+        private val MESSAGE_TIMEOUT_MS = LumiyaConstants.MESSAGE_TIMEOUT_MS
+        
+        /** Maximum retries from Lumiya (3 retries) */
+        private val MESSAGE_MAX_RETRIES = LumiyaConstants.MESSAGE_MAX_RETRIES
+        
+        /** Time before sending ping from Lumiya (10 seconds) */
+        private val NEED_PING_TIMEOUT_MS = LumiyaConstants.NEED_PING_TIMEOUT_MS
+        
+        /** Unanswered pings before disconnect from Lumiya (3) */
+        private val UNANSWERED_PINGS_DISCONNECT = LumiyaConstants.UNANSWERED_PINGS_DISCONNECT
     }
     
     // Connection parameters
