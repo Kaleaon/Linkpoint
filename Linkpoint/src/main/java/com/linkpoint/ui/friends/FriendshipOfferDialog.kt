@@ -22,7 +22,8 @@ class FriendshipOfferDialog : DialogFragment() {
     private lateinit var offer: FriendshipOffer
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        offer = requireArguments().getParcelable("offer")!!
+        offer = requireArguments().getParcelable<FriendshipOffer>("offer")
+            ?: throw IllegalArgumentException("FriendshipOffer argument is required")
 
         val view = LayoutInflater.from(requireContext())
             .inflate(R.layout.dialog_friendship_offer, null)

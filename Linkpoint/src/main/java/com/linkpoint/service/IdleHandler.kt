@@ -34,8 +34,21 @@ class IdleHandler(
         const val IDLE_CHECK_INTERVAL_MS = 10_000L              // 10 seconds
     }
     
+    /**
+     * Coroutine scope for background idle checking operations.
+     * 
+     * Uses Default dispatcher for periodic checks as they're not I/O bound,
+     * and SupervisorJob to ensure failures don't cancel the entire scope.
+     */
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    private val mainHandler = Handler(Looper.getMainLooper())
+    
+    /**
+     * Main thread scope for UI updates and listener notifications.
+     * 
+     * Replaces the legacy Handler approach with coroutine-based UI updates.
+     * All UI updates and listener notifications should use mainScope.
+     */
+    private val mainScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     
     // Configuration
     var awayTimeoutMs = DEFAULT_AWAY_TIMEOUT_MS
@@ -186,15 +199,29 @@ class IdleHandler(
         listeners.remove(listener)
     }
     
+    /**
+     * Notify all registered listeners of an idle state change.
+     * 
+     * Uses mainScope to ensure notifications run on the main thread,
+     * replacing the legacy Handler.post() approach with coroutine-based
+     * execution for better integration with structured concurrency.
+     */
     private fun notifyStateChange(state: IdleState) {
-        mainHandler.post {
+        mainScope.launch {
             listeners.forEach { it.onIdleStateChanged(state) }
         }
     }
     
+    /**
+     * Shutdown the idle handler and cancel all operations.
+     * 
+     * Cancels both background and main thread scopes to prevent memory leaks
+     * and ensure proper cleanup of resources.
+     */
     fun shutdown() {
         checkJob?.cancel()
         scope.cancel()
+        mainScope.cancel()
         trackedActivities.clear()
         listeners.clear()
     }

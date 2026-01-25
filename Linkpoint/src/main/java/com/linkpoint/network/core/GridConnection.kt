@@ -197,8 +197,11 @@ class GridConnection(
                 )
             }
             
-            activeAgentUUID = authReply!!.agentId
-            agentCircuit = AgentCircuit(authReply!!)
+            // Validate auth reply was created successfully
+            val reply = authReply ?: throw IllegalStateException("Auth reply was not created")
+            
+            activeAgentUUID = reply.agentId
+            agentCircuit = AgentCircuit(reply)
             
             _connectionState.value = ConnectionState.CONNECTED
             hadConnected = true
@@ -206,7 +209,7 @@ class GridConnection(
             reconnectAttempts = 0
             
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, 
-                "Connection state updated. SimIP: ${authReply!!.simIP}, SimPort: ${authReply!!.simPort}")
+                "Connection state updated. SimIP: ${reply.simIP}, SimPort: ${reply.simPort}")
             
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Connection failed: ${e.message}")

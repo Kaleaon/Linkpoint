@@ -337,7 +337,8 @@ internal class Xfer(
         
         // Assemble packets in order
         packets.keys.sorted().forEach { packetNum ->
-            val data = packets[packetNum]!!
+            val data = packets[packetNum] 
+                ?: throw IllegalStateException("Packet $packetNum not found in xfer data")
             System.arraycopy(data, 0, result, offset, data.size)
             offset += data.size
         }

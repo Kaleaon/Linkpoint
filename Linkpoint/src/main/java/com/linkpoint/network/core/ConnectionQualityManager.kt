@@ -130,8 +130,12 @@ class ConnectionQualityManager(private val context: Context) {
             }
         }
         
+        // Validate callback was created successfully
+        val callback = networkCallback 
+            ?: throw IllegalStateException("Network callback was not initialized")
+        
         try {
-            connectivityManager.registerNetworkCallback(request, networkCallback!!)
+            connectivityManager.registerNetworkCallback(request, callback)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to register network callback: ${e.message}")
         }

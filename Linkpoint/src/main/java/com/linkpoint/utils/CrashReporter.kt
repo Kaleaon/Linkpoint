@@ -208,7 +208,10 @@ class CrashReporter private constructor(private val context: Context) {
      */
     private fun writeInitializationTestFile() {
         try {
-            val testFile = File(primaryStoragePath!!, INIT_TEST_FILE)
+            // Validate primary storage path is initialized
+            val storagePath = primaryStoragePath 
+                ?: throw IllegalStateException("Primary storage path not initialized")
+            val testFile = File(storagePath, INIT_TEST_FILE)
             val content = buildString {
                 appendLine("CrashReporter Initialization Test")
                 appendLine("Timestamp: ${Date()}")

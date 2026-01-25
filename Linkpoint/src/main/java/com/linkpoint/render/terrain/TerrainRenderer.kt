@@ -241,10 +241,15 @@ class TerrainRenderer(
         // Create renderable
         terrainEntity = EntityManager.get().create()
         
+        // Validate required components
+        val vb = vertexBuffer ?: throw IllegalStateException("Vertex buffer not initialized")
+        val ib = indexBuffer ?: throw IllegalStateException("Index buffer not initialized")
+        val mat = materialInstance ?: throw IllegalStateException("Material instance not initialized")
+        
         RenderableManager.Builder(1)
             .boundingBox(Box(0f, 0f, 0f, 256f, 256f, 100f))
-            .geometry(0, RenderableManager.PrimitiveType.TRIANGLES, vertexBuffer!!, indexBuffer!!)
-            .material(0, materialInstance!!)
+            .geometry(0, RenderableManager.PrimitiveType.TRIANGLES, vb, ib)
+            .material(0, mat)
             .build(engine, terrainEntity)
     }
     

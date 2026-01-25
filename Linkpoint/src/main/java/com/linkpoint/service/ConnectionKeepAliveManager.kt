@@ -52,8 +52,25 @@ class ConnectionKeepAliveManager(
         const val RECONNECT_DELAY_MS = 5_000L      // Wait before reconnect attempt
     }
     
+    /**
+     * Coroutine scope for background operations.
+     * 
+     * Uses IO dispatcher for network operations and SupervisorJob to ensure
+     * failures don't cancel the entire scope. This is managed by the caller
+     * (typically the Activity or Fragment) which should cancel this scope
+     * when appropriate to prevent memory leaks.
+     */
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private val mainHandler = Handler(Looper.getMainLooper())
+    
+    /**
+     * Main thread scope for UI updates.
+     * 
+     * Replaces the legacy Handler approach with coroutine-based UI updates.
+     * All UI updates should use withContext(Dispatchers.Main) instead of
+     * posting to a Handler. This provides better integration with structured
+     * concurrency and automatic cancellation.
+     */
+    private val mainScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     
     // State
     private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
@@ -303,7 +320,10 @@ class ConnectionKeepAliveManager(
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .build()
         
-        connectivityManager.registerNetworkCallback(request, networkCallback!!)
+        // Validate callback was created successfully
+        val callback = networkCallback 
+            ?: throw IllegalStateException("Network callback was not initialized")
+        connectivityManager.registerNetworkCallback(request, callback)
     }
     
     private fun unregisterNetworkCallback() {
@@ -326,17 +346,31 @@ class ConnectionKeepAliveManager(
         stateListeners.remove(listener)
     }
     
+    /**
+     * Notify all registered listeners of a connection state change.
+     * 
+     * Uses mainScope to ensure notifications run on the main thread,
+     * replacing the legacy Handler.post() approach with coroutine-based
+     * execution for better integration with structured concurrency.
+     */
     private fun notifyStateChange(state: ConnectionState) {
-        mainHandler.post {
+        mainScope.launch {
             stateListeners.forEach { it.onConnectionStateChanged(state) }
         }
     }
     
+    /**
+     * Shutdown the keep-alive manager and cancel all operations.
+     * 
+     * Cancels both background and main thread scopes to prevent memory leaks
+     * and ensure proper cleanup of resources.
+     */
     fun shutdown() {
         pingJob?.cancel()
         timeoutCheckJob?.cancel()
         unregisterNetworkCallback()
         scope.cancel()
+        mainScope.cancel()
         
         _connectionState.value = ConnectionState.DISCONNECTED
         Log.i(TAG, "Keep-alive manager shutdown")

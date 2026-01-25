@@ -638,14 +638,13 @@ class CoreNetworkingService(private val context: Context) {
                     }
                 }
                 
-                // Check if we got a response at all
-                if (response.body == null) {
-                    response.close()
-                    throw EOFIOException("Server returned empty response body")
-                }
-                
+                // Check if we got a response at all and read body safely
                 val responseBody = try {
-                    response.body!!.string()
+                    val body = response.body ?: run {
+                        response.close()
+                        throw EOFIOException("Server returned empty response body")
+                    }
+                    body.string()
                 } catch (e: EOFException) {
                     throw EOFIOException("EOF while reading response body", e)
                 } catch (e: IOException) {

@@ -196,11 +196,13 @@ object NetworkLogger {
         
         try {
             // Create new log file if needed
-            if (currentLogFile == null || !currentLogFile!!.exists()) {
+            if (currentLogFile == null || !currentLogFile.exists()) {
                 val timestamp = fileNameFormat.format(Date())
                 currentLogFile = File(logDir, "network_log_$timestamp.txt")
                 logFileWriter?.close()
-                logFileWriter = currentLogFile!!.bufferedWriter()
+                
+                val logFile = currentLogFile ?: throw IllegalStateException("Failed to create log file")
+                logFileWriter = logFile.bufferedWriter()
                 
                 // Write header
                 logFileWriter?.apply {

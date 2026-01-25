@@ -21,7 +21,8 @@ class FriendActionsDialog : DialogFragment() {
     private lateinit var friend: Friend
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        friend = requireArguments().getParcelable("friend")!!
+        friend = requireArguments().getParcelable<Friend>("friend")
+            ?: throw IllegalArgumentException("Friend argument is required")
 
         val options = arrayOf(
             getString(R.string.send_im),

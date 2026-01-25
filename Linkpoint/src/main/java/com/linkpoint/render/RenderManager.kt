@@ -75,17 +75,20 @@ class RenderManager(private val context: Context) {
             Log.d(TAG, "Initializing Filament engine...")
             
             engine = Engine.create()
-            renderer = engine!!.createRenderer()
-            scene = engine!!.createScene()
-            view = engine!!.createView()
-            camera = engine!!.createCamera(engine!!.entityManager.create())
+            val filamentEngine = engine ?: throw IllegalStateException("Failed to create Filament Engine")
+            
+            renderer = filamentEngine.createRenderer()
+            scene = filamentEngine.createScene()
+            view = filamentEngine.createView()
+            camera = filamentEngine.createCamera(filamentEngine.entityManager.create())
             
             // Initialize scene manager
-            sceneManager = SceneManager(engine!!, scene!!)
+            val filamentScene = scene ?: throw IllegalStateException("Failed to create Filament Scene")
+            sceneManager = SceneManager(filamentEngine, filamentScene)
             Log.d(TAG, "SceneManager initialized")
             
-            view!!.scene = scene
-            view!!.camera = camera
+            view?.scene = filamentScene
+            view?.camera = camera
             
             // Setup UI helper for surface management
             uiHelper = UiHelper(UiHelper.ContextErrorPolicy.DONT_CHECK).apply {
@@ -133,7 +136,7 @@ class RenderManager(private val context: Context) {
             displayHelper = DisplayHelper(context)
             
             // Configure renderer with SL default clear color (sky blue)
-            renderer!!.clearOptions = renderer!!.clearOptions.apply {
+            renderer?.clearOptions = renderer?.clearOptions?.apply {
                 clear = true
                 // Set clear color to SL default sky blue
                 clearColor = floatArrayOf(
@@ -175,6 +178,8 @@ class RenderManager(private val context: Context) {
         val sunColor = SLDefaultEnvironment.DEFAULT_SUN_COLOR
         
         val sunlight = EntityManager.get().create()
+        val filamentEngine = engine ?: throw IllegalStateException("Filament Engine not initialized")
+        
         LightManager.Builder(LightManager.Type.SUN)
             .color(sunColor.r, sunColor.g, sunColor.b)
             .intensity(SLDefaultEnvironment.DEFAULT_SUN_INTENSITY)
@@ -183,13 +188,14 @@ class RenderManager(private val context: Context) {
             .sunAngularRadius(0.545f)  // Sun angular radius in degrees
             .sunHaloSize(10.0f)
             .sunHaloFalloff(80.0f)
-            .build(engine!!, sunlight)
-        scene!!.addEntity(sunlight)
+            .build(filamentEngine, sunlight)
+        
+        scene?.addEntity(sunlight)
         
         // Add ambient/indirect light using SL defaults
-        scene!!.indirectLight = IndirectLight.Builder()
+        scene?.indirectLight = IndirectLight.Builder()
             .intensity(SLDefaultEnvironment.DEFAULT_AMBIENT_INTENSITY)
-            .build(engine!!)
+            .build(filamentEngine)
         
         Log.d(TAG, "Default SL lighting applied - Sun: ${SLDefaultEnvironment.DEFAULT_SUN_INTENSITY} lux")
     }
