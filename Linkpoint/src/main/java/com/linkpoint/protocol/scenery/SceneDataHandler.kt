@@ -2,6 +2,7 @@ package com.linkpoint.protocol.scenery
 
 import android.util.Log
 import com.linkpoint.network.NetworkLogger
+import com.linkpoint.render.SceneGraph
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
@@ -67,7 +68,7 @@ class SceneDataHandler(
             
             // Only process terrain layer (type 76)
             if (layerType != LAYER_TYPE_TERRAIN) {
-                NetworkLogger.log(NetworkLogger.Level.TRACE, NetworkLogger.Category.UDP,
+                NetworkLogger.log(NetworkLogger.Level.VERBOSE, NetworkLogger.Category.UDP,
                     "Skipping non-terrain layer type: $layerType")
                 return true
             }
@@ -138,7 +139,7 @@ class SceneDataHandler(
                         // Update scene graph
                         sceneGraph?.updateObject(obj)
                         
-                        NetworkLogger.log(NetworkLogger.Level.TRACE, NetworkLogger.Category.UDP,
+                        NetworkLogger.log(NetworkLogger.Level.VERBOSE, NetworkLogger.Category.UDP,
                             "Updated object: ${obj.name} (${obj.id})")
                     }
                 } else if (pCode == 0) {
@@ -146,7 +147,7 @@ class SceneDataHandler(
                     break
                 } else {
                     // Skip unknown object types
-                    NetworkLogger.log(NetworkLogger.Level.TRACE, NetworkLogger.Category.UDP,
+                    NetworkLogger.log(NetworkLogger.Level.VERBOSE, NetworkLogger.Category.UDP,
                         "Skipping object with pCode=$pCode")
                     break
                 }
@@ -207,7 +208,7 @@ class SceneDataHandler(
                         this.description = description
                     }
                     
-                    NetworkLogger.log(NetworkLogger.Level.TRACE, NetworkLogger.Category.UDP,
+                    NetworkLogger.log(NetworkLogger.Level.VERBOSE, NetworkLogger.Category.UDP,
                         "Stored pending properties for: $name (${objectId})")
                 }
             }

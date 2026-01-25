@@ -6,6 +6,7 @@ import com.linkpoint.network.events.EventBus
 import com.linkpoint.network.events.ConnectionState
 import com.linkpoint.network.events.ConnectionStateChangedEvent
 import com.linkpoint.protocol.auth.AuthReply
+import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.messages.MessageRouter
 import com.linkpoint.protocol.messages.MessageEventListener

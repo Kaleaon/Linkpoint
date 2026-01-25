@@ -231,14 +231,15 @@ class CapabilityManager {
         Log.i(TAG, "║ CAPABILITY INITIALIZATION STARTING")
         Log.i(TAG, "╠══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ Seed URL: ${seedCap.take(80)}...")
-        Log.i(TAG, "║ Lumiya Mode: ${if (loginUrl != null) "ENABLED" else "DISABLED"}")
-        if (loginUrl != null) {
-            Log.i(TAG, "║ Grid Type: ${LumiyaTranslationLayer.detectGridType(loginUrl)}")
+        val currentLoginUrl = loginUrl
+        Log.i(TAG, "║ Lumiya Mode: ${if (currentLoginUrl != null) "ENABLED" else "DISABLED"}")
+        if (currentLoginUrl != null) {
+            Log.i(TAG, "║ Grid Type: ${LumiyaTranslationLayer.detectGridType(currentLoginUrl)}")
         }
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
         
         // Use Lumiya capability list when enabled for better compatibility
-        val capNames = if (loginUrl != null && LumiyaTranslationLayer.config.useLumiyaCapabilityList) {
+        val capNames = if (currentLoginUrl != null && LumiyaTranslationLayer.config.useLumiyaCapabilityList) {
             Log.d(TAG, "Using Lumiya-compatible capability list")
             LumiyaTranslationLayer.getLumiyaCapabilityNames()
         } else {

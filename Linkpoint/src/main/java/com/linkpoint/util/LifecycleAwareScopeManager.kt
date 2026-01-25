@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.Dispatchers
 import java.util.concurrent.ConcurrentHashMap
 
@@ -186,7 +187,11 @@ object LifecycleAwareScopeManager {
      */
     fun getScope(activity: Activity): CoroutineScope {
         checkInitialized()
-        return getOrCreateScope(activity) { createActivityScope(activity) }
+        // Modern Activities (ComponentActivity, AppCompatActivity) implement LifecycleOwner
+        require(activity is LifecycleOwner) { 
+            "Activity must implement LifecycleOwner (use ComponentActivity or AppCompatActivity)" 
+        }
+        return getOrCreateScope(activity as LifecycleOwner) { createActivityScope(activity) }
     }
     
     /**
@@ -406,9 +411,11 @@ object LifecycleAwareScopeManager {
      * Creates a scope optimized for Activity lifecycle.
      */
     private fun createActivityScope(activity: Activity): ManagedScope {
-        val managedScope = scopeFactory.createScope(activity)
-        activity.lifecycle.addObserver(
-            ActivityLifecycleObserver(activity, managedScope)
+        // Activity should implement LifecycleOwner (checked in getScope)
+        val owner = activity as LifecycleOwner
+        val managedScope = scopeFactory.createScope(owner)
+        owner.lifecycle.addObserver(
+            ActivityLifecycleObserver(owner, managedScope)
         )
         return managedScope
     }
@@ -502,7 +509,7 @@ object LifecycleAwareScopeManager {
      * Lifecycle observer for Activity components.
      */
     private class ActivityLifecycleObserver(
-        private val activity: Activity,
+        private val activity: LifecycleOwner,
         private val managedScope: ManagedScope
     ) : DefaultLifecycleObserver {
         
