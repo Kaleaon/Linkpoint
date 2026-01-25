@@ -149,12 +149,12 @@ class ChatManager(
         //   - AgentID (LLUUID, 16 bytes) - big-endian UUID
         //   - SessionID (LLUUID, 16 bytes) - big-endian UUID
         // ChatData block:
-        //   - Message (Variable 2) - 2-byte length prefix, then message bytes
+        //   - Message (Variable 2) - 2-byte length prefix, then message bytes + null terminator
         //   - Type (U8)
         //   - Channel (S32, little-endian)
         
-        // Total: 16 + 16 + 2 + message.length + 1 + 4 = 39 + message.length
-        val buffer = ByteBuffer.allocate(39 + messageBytes.size)
+        // Total: 16 + 16 + 2 + message.length + 1 (null) + 1 (type) + 4 = 40 + message.length
+        val buffer = ByteBuffer.allocate(40 + messageBytes.size)
             .order(ByteOrder.LITTLE_ENDIAN)
         
         // AgentData block - UUIDs use big-endian per SL protocol
