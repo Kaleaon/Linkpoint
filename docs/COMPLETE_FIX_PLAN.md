@@ -277,6 +277,31 @@ public int AppendPendingAcks(ByteBuffer buffer, List<Integer> pendingAcks) {
 }
 ```
 
+### 6b. EXACT Message IDs (from PackPayload methods)
+```java
+// HIGH FREQUENCY MESSAGES (single byte after header)
+StartPingCheck:     0x01     // Sent by server to check if client alive
+CompletePingCheck:  0x02     // Client response to StartPingCheck
+
+// LOW FREQUENCY MESSAGES (0xFFFF prefix + 2-byte ID)
+UseCircuitCode:          0xFFFF0003  // First message to establish circuit
+CompleteAgentMovement:   0xFFFF00F9  // Request full world state after UseCircuitCode ACK
+PacketAck:               0xFFFFFFFB  // Standalone ACK packet (negative = 0xFFFFFFFB)
+RegionHandshake:         0xFFFF0094  // Server sends region info (148 decimal)
+RegionHandshakeReply:    0xFFFF0095  // Client must reply to receive world data
+
+// Message encoding in PackPayload:
+// UseCircuitCode.PackPayload:
+byteBuffer.putShort((short) -1);     // 0xFFFF - low frequency marker
+byteBuffer.put((byte) 0);            // 0x00
+byteBuffer.put((byte) 3);            // 0x03 = message ID 3
+
+// PacketAck.PackPayload:
+byteBuffer.putShort((short) -1);     // 0xFFFF
+byteBuffer.put((byte) -1);           // 0xFF
+byteBuffer.put((byte) -5);           // 0xFB = -5 signed = message ID -5
+```
+
 ### 7. Password Hash Algorithm (SLAuth.java)
 ```java
 public static String getPasswordHash(String password) {
@@ -347,6 +372,31 @@ class AgentUpdateTimerTask extends TimerTask {
             SendAgentUpdate(modules.drawDistance);
         }
     }
+}
+```
+
+### 10b. CRITICAL: RegionHandshake → RegionHandshakeReply (SLAgentCircuit.java)
+```java
+// Server won't send world data until client replies to RegionHandshake!
+public void HandleRegionHandshake(RegionHandshake regionHandshake) {
+    if (authReply.isTemporary) return;  // Skip for teleport temp circuits
+    
+    // IMMEDIATELY send reply - server is waiting!
+    RegionHandshakeReply reply = new RegionHandshakeReply();
+    reply.AgentData_Field.AgentID = circuitInfo.agentID;
+    reply.AgentData_Field.SessionID = circuitInfo.sessionID;
+    reply.RegionInfo_Field.Flags = 0;
+    SendMessage(reply);  // MUST send this to receive ObjectUpdates!
+    
+    // Now parse region info
+    regionName = SLMessage.stringFromVariableOEM(regionHandshake.RegionInfo_Field.SimName);
+    regionID = regionHandshake.RegionInfo2_Field.RegionID;
+    isEstateManager = regionHandshake.RegionInfo_Field.IsEstateManager;
+    
+    // Apply terrain data
+    gridConn.parcelInfo.terrainData.ApplyRegionInfo(regionHandshake.RegionInfo_Field);
+    
+    eventBus.publish(new SLRegionInfoChangedEvent());
 }
 ```
 
@@ -455,6 +505,183 @@ public void HandleCircuitReady() {
     }
 }
 ```
+
+### 17. UUID Interning Pool (UUIDPool.java)
+```java
+// Memory optimization: reuse UUID instances
+public class UUIDPool extends InternPool<UUID> {
+    private static final UUIDPool instance = new UUIDPool();
+    public static final UUID ZeroUUID = new UUID(0, 0);  // Constant for null UUID
+    
+    // WeakHashMap-based interning - deduplicate UUIDs
+    public static UUID getUUID(long mostSig, long leastSig) {
+        return instance.intern(new UUID(mostSig, leastSig));
+    }
+    
+    // Parsing with interning
+    public static UUID getUUID(String str) {
+        if (Strings.isNullOrEmpty(str)) return null;
+        return instance.intern(UUID.fromString(str));
+    }
+}
+```
+
+### 18. Texture Fetcher Limits (SLTextureFetcher.java)
+```java
+// CRITICAL: Only 2 concurrent UDP texture transfers!
+private static final int MAX_UDP_TRANSFERS = 2;
+
+// Implements SLIdleHandler for stall detection
+public void ProcessIdle() {
+    // Check every 1 second for stalled transfers
+    if (currentTimeMillis >= lastCheckForStalls + 1000) {
+        for (TextureUDPTransfer transfer : udpTransfers) {
+            if (transfer.hasStalled()) {
+                if (!transfer.RetryTransfer(agentCircuit, circuitInfo)) {
+                    // Cancel after retry fails
+                    udpTransfers.remove(transfer);
+                }
+            }
+        }
+    }
+}
+```
+
+### 19. Draw Distance Management (SLDrawDistance.java)
+```java
+// Adaptive draw distance based on activity
+public static final float CHAT_RANGE = 20.0f;       // Minimum for chat
+public static final float MIN_DRAW_RANGE = 10.5f;   // Absolute minimum
+private static final long DRAW_RANGE_TIMEOUT = 10000;  // 10s before reducing
+
+// Draw distance increases for 3D view, object selection, etc.
+// Decreases after 10 seconds of inactivity
+```
+
+### 20. Native Code Library (DirectByteBuffer.java)
+```java
+// CRITICAL: Native library for performance!
+static {
+    System.loadLibrary("rawbuf");  // Native C/C++ library
+}
+
+// Native zero-decode - much faster than Java
+public static int zeroDecode(byte[] dest, int destStart, int destMaxLen, 
+                              byte[] src, int srcStart, int srcLen) {
+    return zeroDecodeArray(dest, destStart, destMaxLen, src, srcStart, srcLen);
+}
+
+private static native int zeroDecodeArray(...);  // Native implementation
+
+// Native memory allocation/copy for buffers
+private native ByteBuffer allocate(int size);
+private native void copyPart(ByteBuffer dest, ByteBuffer src, ...);
+private native void release(ByteBuffer buf);
+```
+
+### 21. EventBus Pattern (EventBus.java)
+```java
+// Annotation-based event handling with weak references
+public synchronized void publish(Object event) {
+    for (HandlerInfo handler : handlers) {
+        if (handler.matchesEvent(event)) {
+            Object subscriber = handler.getSubscriber();  // WeakReference
+            if (subscriber == null) {
+                // Auto-cleanup dead references
+                toRemove.add(handler);
+            } else {
+                // Post to UI thread if Activity provided
+                new EventInvocation(event, activity, subscriber, method, handler)
+                    .runOnUIThread();
+            }
+        }
+    }
+}
+
+// Usage with @EventHandler annotation
+@EventHandler
+public void onLoginResult(SLLoginResultEvent event) {
+    // Handle login result
+}
+```
+
+### 22. LLSD Binary Format Support (LLSDContentTypeDetector.java)
+```java
+// Support both XML and Binary LLSD formats
+// Request header: "Accept: application/llsd+binary;q=0.5,application/llsd+xml;q=0.1"
+// Binary is preferred (q=0.5) over XML (q=0.1) for efficiency
+```
+
+### 23. OkHttp Client Configuration (SLHTTPSConnection.java)
+```java
+// Production-ready HTTP client settings
+private static final OkHttpClient okHttpClient = new OkHttpClient.Builder()
+    .proxy(Proxy.NO_PROXY)                    // Direct connection
+    .dns(new SLDNS())                         // Custom DNS with fallback
+    .connectionPool(new ConnectionPool(       // Connection reuse
+        8,                                    // Max 8 idle connections
+        5, TimeUnit.MINUTES))                 // 5 minute keep-alive
+    .connectTimeout(60, TimeUnit.SECONDS)     // 60s connect timeout
+    .readTimeout(60, TimeUnit.SECONDS)        // 60s read timeout
+    .hostnameVerifier((hostname, session) -> true)  // Accept any hostname
+    .sslSocketFactory(getSocketFactory(), trustEverythingManager)  // Trust all certs
+    .addNetworkInterceptor(new CharsetStripInterceptor())  // Strip charset from Content-Type
+    .build();
+```
+
+### 24. Object Flags Constants (SLObjectInfo.java)
+```java
+// Object permission and state flags
+public static final int FLAGS_USE_PHYSICS = 1;
+public static final int FLAGS_CREATE_SELECTED = 2;
+public static final int FLAGS_OBJECT_MODIFY = 4;
+public static final int FLAGS_OBJECT_COPY = 8;
+public static final int FLAGS_OBJECT_ANY_OWNER = 16;
+public static final int FLAGS_OBJECT_YOU_OWNER = 32;
+public static final int FLAGS_SCRIPTED = 64;
+public static final int FLAGS_HANDLE_TOUCH = 128;       // Touchable object
+public static final int FLAGS_OBJECT_MOVE = 256;
+public static final int FLAGS_TAKES_MONEY = 512;        // Pay-enabled
+public static final int FLAGS_PHANTOM = 1024;
+public static final int FLAGS_INVENTORY_EMPTY = 2048;
+public static final int FLAGS_ALLOW_INVENTORY_DROP = 65536;
+public static final int FLAGS_OBJECT_TRANSFER = 131072;
+public static final int FLAGS_TEMPORARY = 1073741824;   // Temp-on-rez
+public static final int FLAGS_ZLIB_COMPRESSED = Integer.MIN_VALUE;  // Compressed update
+```
+
+---
+
+## Summary of ALL Lumiya Techniques
+
+| # | Technique | File | Critical? |
+|---|-----------|------|-----------|
+| 1 | Network Constants (5s timeout, 3 retries, 1s idle) | SLCircuit.java | ✅ |
+| 2 | HTTP Timeouts (60s connect/read) | SLHTTPSConnection.java | ✅ |
+| 3 | DNS-over-HTTPS Fallback | SLHTTPSConnection.java | ✅ |
+| 4 | Message ACK/Timeout Callbacks | SLMessageEventListener.java | ✅ |
+| 5 | Device-adaptive Settings | GlobalOptions.java | ⚠️ |
+| 6a | Packet Flags & Size Limits | SLMessage.java | ✅ |
+| 6b | Exact Message IDs | Various messages | ✅ |
+| 7 | Password Hash (truncate 16, MD5) | SLAuth.java | ✅ |
+| 8 | Capability URL Repair | SLCaps.java | ⚠️ |
+| 9 | Event Queue Long Polling | SLCapEventQueue.java | ✅ |
+| 10a | Agent Update Timing | SLAvatarControl.java | ✅ |
+| 10b | RegionHandshake→Reply | SLAgentCircuit.java | ✅ |
+| 11 | Reconnection (3s delay, 10 max) | SLGridConnection.java | ✅ |
+| 12 | TempCircuit for Teleports | SLTempCircuit.java | ⚠️ |
+| 13 | WiFi Lock & Foreground Service | GridConnectionService.java | ✅ |
+| 14 | IPv4 Preference | SLConnection.java | ✅ |
+| 15 | Zero-Code Native Implementation | DirectByteBuffer.java | ⚠️ |
+| 16 | Module System | SLModules.java | ⚠️ |
+| 17 | UUID Interning Pool | UUIDPool.java | ⚠️ |
+| 18 | Max 2 UDP Texture Transfers | SLTextureFetcher.java | ✅ |
+| 19 | Draw Distance Management | SLDrawDistance.java | ⚠️ |
+| 20 | Native Memory Management | DirectByteBuffer.java | ⚠️ |
+| 21 | WeakRef EventBus Pattern | EventBus.java | ⚠️ |
+| 22 | LLSD Binary Preference | HTTP headers | ⚠️ |
+| 23 | OkHttp Connection Pool | SLHTTPSConnection.java | ✅ |
+| 24 | Object Permission Flags | SLObjectInfo.java | ⚠️ |
 
 ---
 
