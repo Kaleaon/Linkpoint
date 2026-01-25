@@ -136,7 +136,7 @@ class RenderManager(private val context: Context) {
             displayHelper = DisplayHelper(context)
             
             // Configure renderer with SL default clear color (sky blue)
-            renderer?.clearOptions = renderer?.clearOptions?.apply {
+            renderer?.clearOptions?.apply {
                 clear = true
                 // Set clear color to SL default sky blue
                 clearColor = floatArrayOf(

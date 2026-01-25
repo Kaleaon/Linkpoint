@@ -288,7 +288,7 @@ class UDPConnectionFixed {
         val sequenceNumber: Int,
         val messageId: Int,
         val listener: MessageEventListener,
-        val sentTime: Long,
+        var sentTime: Long,
         var retryCount: Int = 0
     )
     
@@ -748,6 +748,20 @@ class UDPConnectionFixed {
             lastAckSendTime = lastSendTime
             
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✅ Sent PacketAck for ${acksToSend.size} packets: $acksToSend (remaining pending: ${pendingAcksToSend.size})")
+            
+            // Record in packet history
+            recordPacketEvent(
+                type = PacketHistoryEntry.PacketEventType.SEND_SUCCESS,
+                messageId = MessageIds.PACKET_ACK,
+                data = bytes,
+                sequenceNumber = seqNum,
+                success = true
+            )
+            
+        } catch (e: Exception) {
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Failed to send PacketAck: ${e.message}")
+            // Re-queue the ACKs we couldn't send
+            acksToSend.forEach { pendingAcksToSend.offer(it) }
         }
     }
     
@@ -783,7 +797,7 @@ class UDPConnectionFixed {
             }
         } else {
             NetworkLogger.log(
-                NetworkLogger.Level.TRACE,
+                NetworkLogger.Level.VERBOSE,
                 NetworkLogger.Category.UDP,
                 "No callback registered for ACK seqNum=$sequenceNumber"
             )
@@ -843,22 +857,6 @@ class UDPConnectionFixed {
             }
             
             false // Keep in pending callbacks
-        }
-    }
-            
-            // Record in packet history
-            recordPacketEvent(
-                type = PacketHistoryEntry.PacketEventType.SEND_SUCCESS,
-                messageId = MessageIds.PACKET_ACK,
-                data = bytes,
-                sequenceNumber = seqNum,
-                success = true
-            )
-            
-        } catch (e: Exception) {
-            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Failed to send PacketAck: ${e.message}")
-            // Re-queue the ACKs we couldn't send
-            acksToSend.forEach { pendingAcksToSend.offer(it) }
         }
     }
     

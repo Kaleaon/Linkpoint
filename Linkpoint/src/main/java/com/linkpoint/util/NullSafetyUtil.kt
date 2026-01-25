@@ -354,7 +354,7 @@ object NullSafetyUtil {
      * @param T The type of the wrapped value
      * @property value The nullable value being wrapped
      */
-    class Optional<out T : Any>(private val value: T?) {
+    class Optional<T : Any>(@PublishedApi internal val value: T?) {
         
         /**
          * Returns true if the wrapped value is non-null.

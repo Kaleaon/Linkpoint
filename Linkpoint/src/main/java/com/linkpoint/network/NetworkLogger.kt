@@ -196,7 +196,8 @@ object NetworkLogger {
         
         try {
             // Create new log file if needed
-            if (currentLogFile == null || !currentLogFile.exists()) {
+            val file = currentLogFile
+            if (file == null || !file.exists()) {
                 val timestamp = fileNameFormat.format(Date())
                 currentLogFile = File(logDir, "network_log_$timestamp.txt")
                 logFileWriter?.close()

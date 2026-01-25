@@ -2,8 +2,10 @@ package com.linkpoint.util
 
 import android.os.Looper
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.selects.select
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
@@ -550,8 +552,8 @@ object ThreadSafetyUtil {
      * val (userData, inventory, friends) = results
      * ```
      */
-    suspend fun <T> parallel(vararg blocks: suspend () -> T): List<T> {
-        return blocks.map { block ->
+    suspend fun <T> parallel(vararg blocks: suspend () -> T): List<T> = coroutineScope {
+        blocks.map { block ->
             async { block() }
         }.awaitAll()
     }
@@ -572,11 +574,11 @@ object ThreadSafetyUtil {
      * )
      * ```
      */
-    suspend fun <T> race(vararg blocks: suspend () -> T): T {
-        return select {
+    suspend fun <T> race(vararg blocks: suspend () -> T): T = coroutineScope {
+        select {
             blocks.forEach { block ->
                 async { block() }.onAwait { result ->
-                    return@select result
+                    result
                 }
             }
         }

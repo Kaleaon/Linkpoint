@@ -167,8 +167,9 @@ class CapEventQueue(
      */
     private suspend fun pollEvents(capabilityUrl: String) {
         // Build LLSD request body
+        val ack = currentAck
         val requestBody = LLSDMap().apply {
-            this["ack"] = if (currentAck != null) LLSDInteger(currentAck) else LLSDBoolean(true)
+            this["ack"] = if (ack != null) LLSDInteger(ack) else LLSDBoolean(true)
             this["done"] = LLSDBoolean(false)
         }
         
