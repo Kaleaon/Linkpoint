@@ -80,6 +80,85 @@ Same server IP, but completely different behavior. This points to:
 
 ---
 
+## Lumiya Threading Analysis (CRITICAL INSIGHT)
+
+After reviewing Lumiya's decompiled source, the **threading architecture is fundamentally different** and this may be why Lumiya works flawlessly on mobile while Linkpoint struggles:
+
+### Lumiya's Threading Model (Proven Stable):
+```java
+// SLConnection.java - Single dedicated thread with NIO Selector
+public void run() {
+    while (!this.selector.keys().isEmpty()) {
+        // 1. Process wakeup for ALL circuits FIRST
+        for (SelectionKey key : this.selector.keys()) {
+            SLCircuit circuit = (SLCircuit) key.attachment();
+            circuit.ProcessWakeup();  // Handles resends, ACKs, pings
+        }
+        
+        // 2. Process selected keys (read/write)
+        for (SelectionKey key : this.selector.selectedKeys()) {
+            if (key.isReadable()) circuit.ProcessReceive();
+            if (key.isWritable()) circuit.ProcessTransmit();
+            circuit.UpdateSelectorOps();
+            circuit.TryProcessIdle();  // Ping checks
+        }
+        
+        // 3. Block with timeout
+        this.selector.select(idleInterval);  // 1000ms default
+    }
+}
+
+// SLCircuit.java - Key constants
+MESSAGE_TIMEOUT_MILLIS = 5000   // 5 seconds before message timeout
+PING_INTERVAL = 5000           // Ping every 5 seconds
+NEED_PING_TIMEOUT = 10000      // Start pinging after 10s no packets
+UNANSWERED_PINGS = 3           // Disconnect after 3 unanswered pings
+MESSAGE_MAX_RETRIES = 3        // Resend up to 3 times
+
+// SLThreadingCircuit.java - Message processing on dedicated thread
+BlockingQueue<Runnable> queue = new LinkedBlockingQueue();
+while (workEnabled) {
+    Runnable task = queue.poll(1000, TimeUnit.MILLISECONDS);
+    if (task != null) task.run();
+    else InvokeProcessIdle();  // Process idle handlers when no work
+}
+```
+
+### Linkpoint's Current Threading Model (Problematic):
+```kotlin
+// UDPConnectionFixed.kt - Separate coroutines, non-deterministic scheduling
+scope.launch { receiveLoop() }      // Coroutine 1
+scope.launch { ackSenderLoop() }    // Coroutine 2  
+scope.launch { agentUpdateLoop() }  // Coroutine 3
+
+// Receive loop doesn't call ProcessWakeup or handle resends
+private suspend fun receiveLoop() {
+    while (_isConnected.value) {
+        selector.select(SELECTOR_TIMEOUT_MS)  // 1000ms
+        // Only processes receives, no wakeup/idle processing
+    }
+}
+```
+
+### Critical Differences:
+
+| Aspect | Lumiya | Linkpoint |
+|--------|--------|-----------|
+| **Thread model** | Single dedicated thread | Coroutine thread pool |
+| **Processing order** | Deterministic: wakeup → receive → transmit → idle | Non-deterministic: coroutines scheduled independently |
+| **Resend logic** | Integrated in `ProcessWakeup()` before each select | Separate/missing |
+| **Ping checks** | Called after every packet in `TryProcessIdle()` | Not integrated with receive loop |
+| **ACK handling** | Synchronous with receive/transmit | Separate coroutine (race conditions possible) |
+| **Work queue** | `BlockingQueue` with 1s timeout → idle processing | No equivalent |
+
+### Why This Matters for Mobile:
+1. **Mobile networks are unreliable** - packets get lost, NAT times out
+2. **Lumiya's tight loop** ensures pings/resends happen EVERY second
+3. **Linkpoint's coroutines** may have scheduling delays, missing critical windows
+4. **Mobile NAT requires frequent UDP traffic** - Lumiya's 1s loop guarantees this
+
+---
+
 ## Assumptions (REVISED)
 
 1. **Protocol works correctly** - Confirmed by successful WiFi connection logs
@@ -87,10 +166,152 @@ Same server IP, but completely different behavior. This points to:
 3. **5G should be fast** - User confirmed 5G, so "5812ms latency" is NOT real network latency
 4. **UDP may be blocked/filtered** - Mobile carriers often have strict NAT for UDP
 5. **SwapChain issue is separate** - Need to ensure Surface lifecycle is handled
+6. **Threading model matters** - Lumiya's deterministic threading is key to mobile stability
 
 ---
 
 ## The Plan
+
+### Phase -1: Refactor to Lumiya-Style Threading (HIGHEST PRIORITY)
+
+**Problem**: Linkpoint uses coroutines which have non-deterministic scheduling. On mobile networks where timing is critical, this causes dropped connections. Lumiya uses a single dedicated thread with deterministic processing order.
+
+**Key Insight**: Modern devices have 10x more RAM than Lumiya's target devices. We can afford a dedicated thread model without worrying about resource constraints.
+
+**Fix -1.1: Create Dedicated Connection Thread**
+
+```kotlin
+// New: SLConnectionThread.kt - Lumiya-style single thread
+class SLConnectionThread : Runnable {
+    private val selector: Selector = Selector.open()
+    private val circuits = ConcurrentHashMap<SelectionKey, SLCircuit>()
+    private val workQueue = LinkedBlockingQueue<Runnable>()
+    
+    companion object {
+        const val IDLE_INTERVAL_MS = 1000L
+        const val PING_INTERVAL_MS = 5000L
+        const val MESSAGE_TIMEOUT_MS = 5000L
+        const val MAX_RETRIES = 3
+    }
+    
+    override fun run() {
+        while (selector.keys().isNotEmpty()) {
+            // 1. Process wakeup for ALL circuits FIRST (resends, ACKs)
+            processWakeups()
+            
+            // 2. Process selector events
+            val readyKeys = selector.select(IDLE_INTERVAL_MS)
+            if (readyKeys > 0) {
+                processSelectedKeys()
+            }
+            
+            // 3. Process work queue
+            processWorkQueue()
+            
+            // 4. Process idle (pings)
+            processIdle()
+        }
+    }
+    
+    private fun processWakeups() {
+        for (key in selector.keys()) {
+            val circuit = circuits[key] ?: continue
+            if (key.isValid) {
+                circuit.processResends()  // Resend timed-out reliable packets
+            }
+        }
+    }
+    
+    private fun processSelectedKeys() {
+        val iterator = selector.selectedKeys().iterator()
+        while (iterator.hasNext()) {
+            val key = iterator.next()
+            iterator.remove()
+            
+            val circuit = circuits[key] ?: continue
+            
+            if (key.isValid && key.isReadable) {
+                circuit.processReceive()
+            }
+            if (key.isValid && key.isWritable) {
+                circuit.processTransmit()
+            }
+            if (key.isValid) {
+                circuit.updateSelectorOps()
+            }
+        }
+    }
+    
+    private fun processIdle() {
+        for ((_, circuit) in circuits) {
+            circuit.tryProcessIdle()  // Send pings if needed
+        }
+    }
+}
+```
+
+**Fix -1.2: Integrate Resend Logic into Main Loop**
+
+```kotlin
+// In SLCircuit.kt
+fun processResends() {
+    val now = System.currentTimeMillis()
+    val iterator = unackedQueue.iterator()
+    
+    while (iterator.hasNext()) {
+        val message = iterator.next()
+        if (now >= message.sentTime + MESSAGE_TIMEOUT_MS) {
+            iterator.remove()
+            message.retries++
+            
+            if (message.retries > MAX_RETRIES) {
+                message.onTimeout()
+            } else {
+                message.isResent = true
+                message.sentTime = now
+                outgoingQueue.add(message)
+            }
+        }
+    }
+}
+```
+
+**Fix -1.3: Add Ping Check Logic Like Lumiya**
+
+```kotlin
+fun tryProcessIdle() {
+    val now = SystemClock.elapsedRealtime()
+    
+    // Only ping if we haven't received packets recently
+    if (now < lastReceivedTime + NEED_PING_TIMEOUT) return
+    if (now < lastPingSent + PING_INTERVAL) return
+    
+    if (unansweredPings >= MAX_UNANSWERED_PINGS) {
+        if (!timedOut) {
+            timedOut = true
+            processTimeout()
+        }
+        return
+    }
+    
+    // Send StartPingCheck
+    val ping = StartPingCheck().apply {
+        pingId = nextPingId++
+        oldestUnacked = unackedQueue.peek()?.seqNum ?: lastSeqNum
+    }
+    sendMessage(ping)
+    unansweredPings++
+    lastPingSent = now
+}
+```
+
+**Validation**:
+- Test on 5G mobile network
+- Monitor packet flow: should see pings every 5 seconds
+- Should see resends for reliable packets
+- Connection should stay alive with NAT keep-alive traffic
+
+---
 
 ### Phase 0: Fix Mobile UDP Connectivity (CRITICAL - Day 1)
 
