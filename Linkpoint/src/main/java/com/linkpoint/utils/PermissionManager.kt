@@ -38,7 +38,7 @@ class PermissionManager(private val activity: AppCompatActivity) {
             // Storage permissions for Lumiya Logs directory (Documents/Lumiya Logs/)
             // Required for saving crash logs and network logs
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-                // Android 9 and below: Need WRITE for public Downloads directory
+                // Android 9 and below: Need WRITE for public Documents directory
                 permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
             } else if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {

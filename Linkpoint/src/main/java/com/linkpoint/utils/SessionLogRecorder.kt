@@ -657,7 +657,7 @@ object SessionLogRecorder {
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error accessing public downloads: ${e.message}", e)
+            Log.e(TAG, "Error accessing public documents: ${e.message}", e)
         }
         
         // If we get here, direct file access failed - this shouldn't happen for Documents
