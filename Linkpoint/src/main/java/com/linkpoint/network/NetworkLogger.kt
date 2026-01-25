@@ -26,9 +26,9 @@ import kotlinx.coroutines.*
  * - Retry attempts with backoff timing
  * - SSL/TLS handshake information
  * - DNS resolution results
- * - Automatic saving to external storage Downloads/Lumiya Logs/ directory
+ * - Automatic saving to external storage Documents/Lumiya Logs/ directory
  * 
- * Logs are saved to the PUBLIC Downloads folder at /Download/Lumiya Logs/
+ * Logs are saved to the PUBLIC Documents folder at /Documents/Lumiya Logs/
  * so they can be accessed outside the app via file manager.
  * 
  * All logs are tagged for easy filtering in logcat:
@@ -111,21 +111,21 @@ object NetworkLogger {
     }
     
     /**
-     * Get the log directory in the PUBLIC Downloads folder.
+     * Get the log directory in the PUBLIC Documents folder.
      * 
-     * Logs are saved to /storage/emulated/0/Download/Lumiya Logs/ (or equivalent)
+     * Logs are saved to /storage/emulated/0/Documents/Lumiya Logs/ (or equivalent)
      * so they can be accessed via file manager outside the app.
      * 
      * For Android 10+ (API 29+), we use the legacy external storage path which
-     * still works for the Downloads directory. MediaStore is used as a fallback
+     * still works for the Documents directory. MediaStore is used as a fallback
      * for writing individual files if direct file access fails.
      */
     private fun getLogDirectory(): File? {
-        // Use the public Downloads directory on external storage
-        // This path is: /storage/emulated/0/Download/Lumiya Logs/
+        // Use the public Documents directory on external storage
+        // This path is: /storage/emulated/0/Documents/Lumiya Logs/
         @Suppress("DEPRECATION")
-        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        val logDir = File(downloadsDir, LOG_DIR_NAME)
+        val documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+        val logDir = File(documentsDir, LOG_DIR_NAME)
         
         try {
             if (!logDir.exists()) {
@@ -153,13 +153,13 @@ object NetworkLogger {
     }
     
     /**
-     * Fallback to app-specific external directory if public Downloads is not accessible.
-     * This is still accessible via Android/data/com.linkpoint.debug/files/Download/Lumiya Logs/
+     * Fallback to app-specific external directory if public Documents is not accessible.
+     * This is still accessible via Android/data/com.linkpoint.debug/files/Documents/Lumiya Logs/
      */
     private fun getAppSpecificLogDirectory(): File? {
         val context = appContext ?: return null
         
-        val appExtDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+        val appExtDir = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
         if (appExtDir == null) {
             Log.w(TAG, "External files directory not available")
             return null
@@ -179,7 +179,7 @@ object NetworkLogger {
     }
     
     /**
-     * Save current logs to a file in the public Downloads/Lumiya Logs/ directory.
+     * Save current logs to a file in the public Documents/Lumiya Logs/ directory.
      * 
      * On Android 10+ (API 29+), if direct file access fails, this will attempt
      * to use MediaStore API to write to the Downloads directory.
@@ -243,9 +243,9 @@ object NetworkLogger {
     
     /**
      * Save logs using MediaStore API for Android 10+ (API 29+).
-     * This is a fallback when direct file access to public Downloads fails.
+     * This is a fallback when direct file access to public Documents fails.
      * 
-     * Creates files in the Downloads directory accessible via file manager.
+     * Creates files in the Documents directory accessible via file manager.
      */
     private fun saveLogsViaMediaStore(): File? {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -265,7 +265,7 @@ object NetworkLogger {
         try {
             val timestamp = fileNameFormat.format(Date())
             val fileName = "network_log_$timestamp.txt"
-            val relativePath = "${Environment.DIRECTORY_DOWNLOADS}/$LOG_DIR_NAME"
+            val relativePath = "${Environment.DIRECTORY_DOCUMENTS}/$LOG_DIR_NAME"
             
             val contentValues = ContentValues().apply {
                 put(MediaStore.Downloads.DISPLAY_NAME, fileName)
@@ -312,8 +312,8 @@ object NetworkLogger {
             
             // Return a File object pointing to the expected location (for reference)
             @Suppress("DEPRECATION")
-            val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-            return File(File(downloadsDir, LOG_DIR_NAME), fileName)
+            val documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+            return File(File(documentsDir, LOG_DIR_NAME), fileName)
             
         } catch (e: Exception) {
             Log.e(TAG, "Failed to save logs via MediaStore: ${e.message}", e)
@@ -381,7 +381,7 @@ object NetworkLogger {
         
         try {
             val resolver = context.contentResolver
-            val relativePath = "${Environment.DIRECTORY_DOWNLOADS}/$LOG_DIR_NAME"
+            val relativePath = "${Environment.DIRECTORY_DOCUMENTS}/$LOG_DIR_NAME"
             
             // Query for our log files
             val projection = arrayOf(
@@ -435,12 +435,12 @@ object NetworkLogger {
     
     /**
      * Get the log directory path for display purposes.
-     * Returns the expected public Downloads path regardless of whether direct access is available.
+     * Returns the expected public Documents path regardless of whether direct access is available.
      */
     fun getLogDirectoryPath(): String {
         @Suppress("DEPRECATION")
-        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        return File(downloadsDir, LOG_DIR_NAME).absolutePath
+        val documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+        return File(documentsDir, LOG_DIR_NAME).absolutePath
     }
     
     /**

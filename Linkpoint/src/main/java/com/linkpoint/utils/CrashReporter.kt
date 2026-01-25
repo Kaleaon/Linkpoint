@@ -125,13 +125,13 @@ class CrashReporter private constructor(private val context: Context) {
             try {
                 val externalDir = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     // Android 10+ - use app-specific external directory
-                    context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)?.let {
+                    context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)?.let {
                         File(it, EXTERNAL_CRASH_LOG_DIR)
                     }
                 } else {
-                    // Android 9 and below - use public Downloads directory
+                    // Android 9 and below - use public Documents directory
                     @Suppress("DEPRECATION")
-                    File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), EXTERNAL_CRASH_LOG_DIR)
+                    File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), EXTERNAL_CRASH_LOG_DIR)
                 }
                 
                 if (externalDir != null && createAndVerifyDirectory(externalDir)) {

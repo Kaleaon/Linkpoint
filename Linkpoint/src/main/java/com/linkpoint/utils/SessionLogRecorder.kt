@@ -35,8 +35,8 @@ import java.util.concurrent.atomic.AtomicLong
  * 
  * Designed for full diagnostic output to help debug connection and protocol issues.
  * 
- * IMPORTANT: Logs are saved to the PUBLIC Downloads folder at:
- *   /storage/emulated/0/Download/Lumiya Logs/
+ * IMPORTANT: Logs are saved to the PUBLIC Documents folder at:
+ *   /storage/emulated/0/Documents/Lumiya Logs/
  * This ensures logs are accessible via file manager outside the app.
  * 
  * Usage:
@@ -595,30 +595,30 @@ object SessionLogRecorder {
     }
     
     /**
-     * Get the log directory in the PUBLIC Downloads folder.
+     * Get the log directory in the PUBLIC Documents folder.
      * 
-     * Target location: /storage/emulated/0/Download/Lumiya Logs/
+     * Target location: /storage/emulated/0/Documents/Lumiya Logs/
      * This ensures logs are accessible via file manager outside the app.
      * 
      * For Android 10+ (API 29+), we use legacy external storage which still works
-     * for the Downloads directory. If that fails, we'll need to use MediaStore.
+     * for the Documents directory. If that fails, we'll need to use MediaStore.
      */
     private fun getLogDirectory(): File? {
-        // Use the public Downloads directory on external storage
-        // Path: /storage/emulated/0/Download/Lumiya Logs/
+        // Use the public Documents directory on external storage
+        // Path: /storage/emulated/0/Documents/Lumiya Logs/
         @Suppress("DEPRECATION")
-        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        val logDir = File(downloadsDir, LOG_DIR_NAME)
+        val documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+        val logDir = File(documentsDir, LOG_DIR_NAME)
         
-        Log.d(TAG, "Attempting to use public Downloads: ${logDir.absolutePath}")
+        Log.d(TAG, "Attempting to use public Documents: ${logDir.absolutePath}")
         
         try {
-            // Ensure parent Downloads directory exists
-            if (!downloadsDir.exists()) {
-                Log.w(TAG, "Public Downloads directory doesn't exist: ${downloadsDir.absolutePath}")
+            // Ensure parent Documents directory exists
+            if (!documentsDir.exists()) {
+                Log.w(TAG, "Public Documents directory doesn't exist: ${documentsDir.absolutePath}")
                 // On some devices, we may need to create it
-                if (!downloadsDir.mkdirs()) {
-                    Log.e(TAG, "Failed to create public Downloads directory")
+                if (!documentsDir.mkdirs()) {
+                    Log.e(TAG, "Failed to create public Documents directory")
                 }
             }
             
@@ -660,9 +660,9 @@ object SessionLogRecorder {
             Log.e(TAG, "Error accessing public downloads: ${e.message}", e)
         }
         
-        // If we get here, direct file access failed - this shouldn't happen for Downloads
+        // If we get here, direct file access failed - this shouldn't happen for Documents
         // but log the failure clearly
-        Log.e(TAG, "FAILED to access public Downloads folder!")
+        Log.e(TAG, "FAILED to access public Documents folder!")
         Log.e(TAG, "Session logs will NOT be accessible outside the app.")
         Log.e(TAG, "This may be a permissions issue. Ensure WRITE_EXTERNAL_STORAGE is granted.")
         
@@ -675,8 +675,8 @@ object SessionLogRecorder {
      */
     fun getExpectedLogPath(): String {
         @Suppress("DEPRECATION")
-        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        return File(downloadsDir, LOG_DIR_NAME).absolutePath
+        val documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+        return File(documentsDir, LOG_DIR_NAME).absolutePath
     }
     
     private fun formatDuration(ms: Long): String {
