@@ -182,7 +182,7 @@ object NetworkLogger {
      * Save current logs to a file in the public Documents/Lumiya Logs/ directory.
      * 
      * On Android 10+ (API 29+), if direct file access fails, this will attempt
-     * to use MediaStore API to write to the Downloads directory.
+     * to use MediaStore API to write to the Documents directory.
      */
     fun saveLogsToFile(): File? {
         val logDir = getLogDirectory() ?: run {
@@ -267,14 +267,18 @@ object NetworkLogger {
             val fileName = "network_log_$timestamp.txt"
             val relativePath = "${Environment.DIRECTORY_DOCUMENTS}/$LOG_DIR_NAME"
             
+            // Use MediaStore.Files for Documents directory instead of MediaStore.Downloads
             val contentValues = ContentValues().apply {
-                put(MediaStore.Downloads.DISPLAY_NAME, fileName)
-                put(MediaStore.Downloads.MIME_TYPE, "text/plain")
-                put(MediaStore.Downloads.RELATIVE_PATH, relativePath)
+                put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                put(MediaStore.MediaColumns.MIME_TYPE, "text/plain")
+                put(MediaStore.MediaColumns.RELATIVE_PATH, relativePath)
             }
             
             val resolver = context.contentResolver
-            val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+            val uri = resolver.insert(
+                MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
+                contentValues
+            )
             
             if (uri == null) {
                 Log.e(TAG, "Failed to create MediaStore entry for log file")
@@ -383,25 +387,26 @@ object NetworkLogger {
             val resolver = context.contentResolver
             val relativePath = "${Environment.DIRECTORY_DOCUMENTS}/$LOG_DIR_NAME"
             
+            // Use MediaStore.Files for Documents directory instead of MediaStore.Downloads
             // Query for our log files
             val projection = arrayOf(
-                MediaStore.Downloads._ID,
-                MediaStore.Downloads.DISPLAY_NAME,
-                MediaStore.Downloads.DATE_MODIFIED
+                MediaStore.MediaColumns._ID,
+                MediaStore.MediaColumns.DISPLAY_NAME,
+                MediaStore.MediaColumns.DATE_MODIFIED
             )
-            val selection = "${MediaStore.Downloads.RELATIVE_PATH} = ? AND ${MediaStore.Downloads.DISPLAY_NAME} LIKE ?"
+            val selection = "${MediaStore.MediaColumns.RELATIVE_PATH} = ? AND ${MediaStore.MediaColumns.DISPLAY_NAME} LIKE ?"
             val selectionArgs = arrayOf("$relativePath/", "network_log_%.txt")
-            val sortOrder = "${MediaStore.Downloads.DATE_MODIFIED} DESC"
+            val sortOrder = "${MediaStore.MediaColumns.DATE_MODIFIED} DESC"
             
             resolver.query(
-                MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
                 projection,
                 selection,
                 selectionArgs,
                 sortOrder
             )?.use { cursor ->
-                val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Downloads._ID)
-                val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Downloads.DISPLAY_NAME)
+                val idColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
+                val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
                 
                 var count = 0
                 while (cursor.moveToNext()) {
@@ -410,7 +415,7 @@ object NetworkLogger {
                         val id = cursor.getLong(idColumn)
                         val name = cursor.getString(nameColumn)
                         val uri = android.content.ContentUris.withAppendedId(
-                            MediaStore.Downloads.EXTERNAL_CONTENT_URI, id
+                            MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), id
                         )
                         try {
                             resolver.delete(uri, null, null)

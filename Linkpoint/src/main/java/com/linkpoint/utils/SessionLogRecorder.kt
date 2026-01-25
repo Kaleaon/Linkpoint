@@ -482,7 +482,7 @@ object SessionLogRecorder {
     
     /**
      * Get the path where logs are stored.
-     * Returns the expected public Downloads path.
+     * Returns the expected public Documents path.
      */
     fun getLogDirectoryPath(): String {
         return getExpectedLogPath()
