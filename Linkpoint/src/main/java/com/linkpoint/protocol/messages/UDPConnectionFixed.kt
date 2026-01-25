@@ -442,7 +442,7 @@ class UDPConnectionFixed {
         this.simIP = simIP
         this.simPort = simPort
         this.circuitCode = circuitCode
-        registerInternalHandlers()
+        // Note: registerInternalHandlers() is called automatically by init block
     }
     
     /**
@@ -476,24 +476,6 @@ class UDPConnectionFixed {
      * Get the circuit code for this connection
      */
     fun getCircuitCode(): Int = circuitCode
-    
-    /**
-     * Register internal message handlers
-     * This must be called before using the connection
-     */
-    private fun registerInternalHandlers() {
-        // Register PacketAck handler - CRITICAL for reliable messaging
-        messageRouter.registerHandler(MessageIds.PACKET_ACK, object : MessageRouter.Handler {
-            override fun handleMessage(msgId: Int, data: ByteArray): Boolean {
-                return handlePacketAck(data)
-            }
-            
-            override fun getPriority(): Int = 0
-        })
-        
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, 
-            "✓ Internal handlers registered (PacketAck)")
-    }
     
     /**
      * Connect to the simulator
@@ -895,72 +877,6 @@ class UDPConnectionFixed {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Failed to send PacketAck: ${e.message}")
             // Re-queue the ACKs we couldn't send
             acksToSend.forEach { pendingAcksToSend.offer(it) }
-        }
-    }
-    
-    /**
-     * Handle PacketAck message from server
-     * 
-     * PacketAck message format (High Frequency, ID = -5 / 0xFB):
-     * - Header: flags (1) + seq (4) + extra (1) = 6 bytes
-     * - Message ID: 1 byte (0xFB = -5)
-     * - Packets block count: 1 byte
-     * - For each packet being ACKed:
-     *   - Sequence number: 4 bytes (unsigned int, little-endian)
-     * 
-     * @param data The complete packet data including header
-     * @return true if handled successfully
-     */
-    private fun handlePacketAck(data: ByteArray): Boolean {
-        try {
-            // PacketAck format after header (6 bytes):
-            // offset 6: message ID (should be 0xFB = -5)
-            // offset 7: packets block count
-            // offset 8+: sequence numbers (4 bytes each, little-endian)
-            
-            if (data.size < 8) {
-                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
-                    "PacketAck too short: ${data.size} bytes")
-                return false
-            }
-            
-            val packetsBlockCount = data[7].toInt() and 0xFF
-            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-                "📨 Received PacketAck with $packetsBlockCount ACKed packets")
-            
-            var offset = 8
-            val ackedSequences = mutableListOf<Int>()
-            
-            for (i in 0 until packetsBlockCount) {
-                if (offset + 4 > data.size) {
-                    NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
-                        "PacketAck truncated at packet $i")
-                    break
-                }
-                
-                // Read sequence number as unsigned int (little-endian)
-                val seqNum = ByteBuffer.wrap(data, offset, 4)
-                    .order(ByteOrder.LITTLE_ENDIAN)
-                    .int
-                    .toLong()
-                    .toInt()
-                
-                ackedSequences.add(seqNum)
-                offset += 4
-                
-                // Process this ACK
-                processReceivedAck(seqNum)
-            }
-            
-            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-                "✓ Processed ${ackedSequences.size} ACKs: $ackedSequences")
-            
-            return true
-            
-        } catch (e: Exception) {
-            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
-                "Error handling PacketAck: ${e.message}")
-            return false
         }
     }
     
