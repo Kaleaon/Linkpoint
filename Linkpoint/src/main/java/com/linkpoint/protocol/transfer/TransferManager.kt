@@ -589,7 +589,8 @@ internal class Transfer(
         
         // Assemble packets in order
         packets.keys.sorted().forEach { packetNum ->
-            val data = packets[packetNum]!!
+            val data = packets[packetNum] 
+                ?: throw IllegalStateException("Packet $packetNum not found in transfer data")
             System.arraycopy(data, 0, result, offset, data.size)
             offset += data.size
         }

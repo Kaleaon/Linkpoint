@@ -253,9 +253,21 @@ class LumiyaThreadedCircuit(
             lastPingTime.set(now)
             
             // Start the circuit thread
+            // 
+            // NOTE: This uses a dedicated Thread instead of coroutines for the following reasons:
+            // 1. The circuit loop is a long-running, blocking operation that must not be suspended
+            // 2. Socket operations are blocking and must run on a dedicated thread
+            // 3. Thread priority control is important for network responsiveness
+            // 4. Modernizing to coroutines would require significant refactoring of the protocol handling
+            // 
+            // Future enhancement: Consider using a coroutine with Dispatchers.IO and proper
+            // suspendCancellableCoroutine for socket operations, but this requires extensive
+            // testing to ensure protocol compatibility.
+            //
             running.set(true)
             circuitThread = Thread(::circuitLoop, "LumiyaCircuit-$simIP:$simPort").apply {
                 priority = Thread.MAX_PRIORITY - 1 // High priority for network
+                isDaemon = true // Don't prevent app shutdown
                 start()
             }
             

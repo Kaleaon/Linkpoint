@@ -154,10 +154,15 @@ class WaterRenderer(
         
         waterEntity = EntityManager.get().create()
         
+        // Validate required components
+        val vb = vertexBuffer ?: throw IllegalStateException("Water vertex buffer not initialized")
+        val ib = indexBuffer ?: throw IllegalStateException("Water index buffer not initialized")
+        val mat = materialInstance ?: throw IllegalStateException("Water material instance not initialized")
+        
         RenderableManager.Builder(1)
             .boundingBox(Box(0f, 0f, -1f, 256f, 256f, 1f))
-            .geometry(0, RenderableManager.PrimitiveType.TRIANGLES, vertexBuffer!!, indexBuffer!!)
-            .material(0, materialInstance!!)
+            .geometry(0, RenderableManager.PrimitiveType.TRIANGLES, vb, ib)
+            .material(0, mat)
             .build(engine, waterEntity)
         
         // Create transform

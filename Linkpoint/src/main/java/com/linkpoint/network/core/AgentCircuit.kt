@@ -5,77 +5,48 @@ import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.events.EventBus
 import com.linkpoint.network.events.ConnectionState
 import com.linkpoint.network.events.ConnectionStateChangedEvent
-import com.linkpoint.network.events.MessageReceivedEvent
 import com.linkpoint.protocol.auth.AuthReply
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.messages.MessageRouter
+import com.linkpoint.protocol.messages.MessageEventListener
+import com.linkpoint.protocol.scenery.SceneDataHandler
+import com.linkpoint.render.SceneGraph
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.UUID
 
 /**
- * Agent Circuit
+ * Agent Circuit with Circuit Establishment State Machine
  * 
- * Primary circuit for agent communication with the Second Life grid.
- * Based on Lumiya's SLAgentCircuit implementation with mobile-first optimizations.
- * 
- * Features:
- * - UDP connection management with UDPConnectionFixed
- * - Message routing and processing via MessageRouter
- * - Event bus integration for reactive updates
- * - Circuit state management
- * - Mobile-optimized packet handling
- * 
- * Mobile-First Considerations:
- * - Efficient packet buffering
- * - Battery-aware update intervals (10 updates/sec)
- * - Memory-efficient message queues
- * - Adaptive reliability settings
- * 
- * Integration Changes:
- * - Uses UDPConnectionFixed instead of UDPConnection
- * - Integrates MessageRouter for proper packet routing
- * - Uses EventBus for reactive event distribution
- * - Maintains mobile-optimized settings (update intervals, buffer sizes)
+ * Implements Lumiya's proven circuit establishment sequence:
+ * 1. UDP Connect
+ * 2. Send UseCircuitCode (reliable)
+ * 3. ACK triggers CompleteAgentMovement
+ * 4. ACK triggers CircuitReady
+ * 5. Scene data flows
  */
 class AgentCircuit(
     private val authReply: AuthReply,
+    private val sceneGraph: SceneGraph? = null,
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 ) {
     
     companion object {
         private const val TAG = "AgentCircuit"
-        private const val DEFAULT_ACK_TIMEOUT_MS = 1000L
-        private const val MAX_RETRIES = 5
-        
-        // Agent update interval (10 updates/sec matches official viewers)
-        // Mobile-optimized: reduces battery drain while maintaining responsiveness
         private const val AGENT_UPDATE_INTERVAL_MS = 100L
     }
     
-    /**
-     * Circuit states
-     */
-    enum class CircuitState {
-        INITIALIZING,
-        CONNECTED,
-        DISCONNECTING,
-        CLOSED
-    }
-    
-    /**
-     * Circuit state flow
-     */
-    private val _circuitState = MutableStateFlow(CircuitState.INITIALIZING)
+    private val _circuitState = MutableStateFlow(CircuitState.DISCONNECTED)
     val circuitState: StateFlow<CircuitState> = _circuitState.asStateFlow()
     
-    /**
-     * Fixed UDP connection for this circuit
-     * Using UDPConnectionFixed which includes MessageRouter integration
-     * This fixes the receive issue by properly routing messages to handlers
-     */
+    private var isConnected: Boolean = false
+    private var agentUpdateJob: Job? = null
+    private var stateListener: CircuitStateListener? = null
+    
     private val udpConnection = UDPConnectionFixed(
         simIP = authReply.simIP,
         simPort = authReply.simPort,
@@ -84,210 +55,191 @@ class AgentCircuit(
         setSessionInfo(authReply.sessionId, authReply.agentId)
     }
     
-    /**
-     * Message router for routing incoming messages to handlers
-     * Integrated with UDPConnectionFixed for efficient message processing
-     */
     private val messageRouter = udpConnection.getMessageRouter()
+    private val sceneDataHandler = SceneDataHandler(sceneGraph)
     
-    /**
-     * Circuit code from authentication
-     */
-    val circuitCode: Int = authReply.circuitCode
-    
-    /**
-     * Agent ID
-     */
-    val agentId: UUID = authReply.agentId
-    
-    /**
-     * Session ID
-     */
-    val sessionId: UUID = authReply.sessionId
-    
-    /**
-     * Agent update job
-     */
-    private var agentUpdateJob: Job? = null
-    
-    /**
-     * Connected flag
-     */
-    private var isConnected: Boolean = false
-    
-    // ==================== CIRCUIT LIFECYCLE ====================
+    interface CircuitStateListener {
+        fun onStateChanged(from: CircuitState, to: CircuitState)
+        fun onCircuitReady()
+        fun onCircuitError(reason: String)
+    }
     
     init {
-        scope.launch {
-            initializeCircuit()
+        scope.launch { initializeCircuit() }
+    }
+    
+    fun setStateListener(listener: CircuitStateListener) {
+        this.stateListener = listener
+    }
+    
+    private fun transitionState(newState: CircuitState, reason: String = "") {
+        val oldState = _circuitState.value
+        if (oldState != newState) {
+            NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
+                "Circuit state: $oldState → $newState ($reason)")
+            _circuitState.value = newState
+            stateListener?.onStateChanged(oldState, newState)
+            if (newState == CircuitState.CIRCUIT_READY) {
+                stateListener?.onCircuitReady()
+            }
         }
     }
     
-    /**
-     * Initialize the circuit
-     */
     private suspend fun initializeCircuit() {
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Initializing agent circuit")
-        
+        NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP, "=== Initializing Agent Circuit ===")
         try {
-            // Start UDP connection with fixed implementation
-            startUDPConnectionFixed()
-            
-            // Start agent updates (mobile-optimized interval)
-            startAgentUpdates()
-            
-            _circuitState.value = CircuitState.CONNECTED
-            isConnected = true
-            
-            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Agent circuit initialized successfully")
-            
+            registerSceneDataHandlers()
+            establishCircuit()
         } catch (e: Exception) {
-            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Failed to initialize circuit: ${e.message}")
-            _circuitState.value = CircuitState.CLOSED
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Failed: ${e.message}")
+            transitionState(CircuitState.ERROR, "Initialization failed")
+            stateListener?.onCircuitError("Initialization failed: ${e.message}")
             throw e
         }
     }
     
-    /**
-     * Start UDP connection
-     * Uses UDPConnectionFixed which properly handles receive operations
-     */
-    private suspend fun startUDPConnectionFixed() {
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Starting UDP connection (Fixed implementation)")
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Sim IP: ${authReply.simIP}, Port: ${authReply.simPort}")
+    private suspend fun establishCircuit() {
+        NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP, "=== Starting Circuit Establishment ===")
+        transitionState(CircuitState.CONNECTING, "Starting connection")
         
         val connected = udpConnection.connect()
-        
-        if (connected) {
-            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ UDP connection established successfully")
-            isConnected = true
-            
-            // Publish connection state event via EventBus
-            EventBus.publish(ConnectionStateChangedEvent(
-                ConnectionState.DISCONNECTED,
-                ConnectionState.CONNECTED
-            ))
-        } else {
-            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "✗ Failed to establish UDP connection")
-            isConnected = false
-            throw IllegalStateException("Failed to connect UDP")
+        if (!connected) {
+            transitionState(CircuitState.ERROR, "UDP connection failed")
+            stateListener?.onCircuitError("UDP connection failed")
+            return
         }
+        
+        isConnected = true
+        sendUseCircuitCode()
     }
     
-    /**
-     * Start agent updates
-     * Sends periodic agent update messages to the server
-     * Mobile-optimized: 10 updates/sec to balance responsiveness and battery
-     */
+    private suspend fun sendUseCircuitCode() {
+        NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP, "Sending UseCircuitCode")
+        
+        val listener = object : MessageEventListener {
+            override fun onMessageAcknowledged(seqNum: Int, msgId: Int) {
+                NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP, "✓ UseCircuitCode ACKed")
+                transitionState(CircuitState.USE_CIRCUIT_CODE_ACKED, "ACKed")
+                scope.launch { sendCompleteAgentMovement() }
+            }
+            
+            override fun onMessageTimeout(seqNum: Int, msgId: Int) {
+                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "✗ UseCircuitCode timeout")
+                transitionState(CircuitState.ERROR, "Timeout")
+                stateListener?.onCircuitError("UseCircuitCode timeout")
+            }
+        }
+        
+        val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putInt(authReply.circuitCode)
+        payload.put(authReply.sessionId.asBytes())
+        payload.put(authReply.agentId.asBytes())
+        
+        udpConnection.sendPacket(MessageIds.USE_CIRCUIT_CODE, payload.array(), reliable = true, listener = listener)
+        transitionState(CircuitState.USE_CIRCUIT_CODE_SENT, "Sent")
+    }
+    
+    private suspend fun sendCompleteAgentMovement() {
+        NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP, "Sending CompleteAgentMovement")
+        
+        val listener = object : MessageEventListener {
+            override fun onMessageAcknowledged(seqNum: Int, msgId: Int) {
+                NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP, "✓ CompleteAgentMovement ACKed - CIRCUIT READY")
+                transitionState(CircuitState.COMPLETE_AGENT_MOVEMENT_ACKED, "ACKed")
+                transitionState(CircuitState.CIRCUIT_READY, "Ready")
+                scope.launch { startAgentUpdates() }
+            }
+            
+            override fun onMessageTimeout(seqNum: Int, msgId: Int) {
+                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "✗ CompleteAgentMovement timeout")
+                transitionState(CircuitState.ERROR, "Timeout")
+                stateListener?.onCircuitError("CompleteAgentMovement timeout")
+            }
+        }
+        
+        val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
+        payload.put(authReply.agentId.asBytes())
+        payload.put(authReply.sessionId.asBytes())
+        payload.putInt(authReply.circuitCode)
+        
+        udpConnection.sendPacket(MessageIds.COMPLETE_AGENT_MOVEMENT, payload.array(), reliable = true, listener = listener)
+        transitionState(CircuitState.COMPLETE_AGENT_MOVEMENT_SENT, "Sent")
+    }
+    
+    private suspend fun registerSceneDataHandlers() {
+        messageRouter.registerHandler(MessageIds.LAYER_DATA, object : MessageRouter.Handler {
+            override fun handleMessage(msgId: Int, data: ByteArray) = sceneDataHandler.handleLayerData(data)
+            override fun getPriority() = 0
+        })
+        
+        messageRouter.registerHandler(MessageIds.OBJECT_UPDATE, object : MessageRouter.Handler {
+            override fun handleMessage(msgId: Int, data: ByteArray) = sceneDataHandler.handleObjectUpdate(data)
+            override fun getPriority() = 0
+        })
+        
+        messageRouter.registerHandler(MessageIds.OBJECT_PROPERTIES, object : MessageRouter.Handler {
+            override fun handleMessage(msgId: Int, data: ByteArray) = sceneDataHandler.handleObjectProperties(data)
+            override fun getPriority() = 0
+        })
+        
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ Scene handlers registered")
+    }
+    
     private fun startAgentUpdates() {
         agentUpdateJob = scope.launch {
             while (isActive && isConnected) {
                 try {
-                    sendAgentUpdate()
+                    udpConnection.sendAgentUpdate()
                     delay(AGENT_UPDATE_INTERVAL_MS)
                 } catch (e: Exception) {
-                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Error in agent update: ${e.message}")
+                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Agent update error: ${e.message}")
                 }
             }
         }
     }
     
-    // ==================== MESSAGE HANDLING ====================
+    suspend fun registerHandler(msgId: Int, handler: MessageRouter.Handler) {
+        messageRouter.registerHandler(msgId, handler)
+    }
     
-    /**
-     * Send agent update message
-     * Delegates to UDPConnectionFixed which handles the actual sending
-     */
-    private suspend fun sendAgentUpdate() {
-        if (!isConnected) {
-            return
-        }
-        
+    suspend fun sendMessage(msgId: Int, payload: ByteArray, reliable: Boolean = false) {
+        if (!isConnected) return
         try {
-            // UDPConnectionFixed handles the actual message construction and sending
-            // This maintains mobile-optimized update intervals
-            udpConnection.sendAgentUpdate()
+            udpConnection.sendPacket(msgId, payload, reliable)
         } catch (e: Exception) {
-            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Error sending agent update: ${e.message}")
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Send error: ${e.message}")
         }
     }
     
-    /**
-     * Register a message handler for a specific message type
-     * Uses MessageRouter for efficient message routing
-     */
-    suspend fun registerHandler(messageId: Int, handler: MessageRouter.Handler) {
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Registering handler for message ID: $messageId")
-        messageRouter.registerHandler(messageId, handler)
-    }
+    fun getStatistics() = mapOf(
+        "state" to _circuitState.value.name,
+        "connected" to isConnected,
+        "sceneStats" to sceneDataHandler.getStatistics()
+    )
     
-    /**
-     * Send a message through this circuit
-     */
-    suspend fun sendMessage(messageId: Int, payload: ByteArray, reliable: Boolean = false) {
-        if (!isConnected) {
-            NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Cannot send message: circuit not connected")
-            return
-        }
-        
-        try {
-            // UDPConnectionFixed handles the actual sending with proper protocol
-            // This maintains mobile-optimized settings (reliability, zero-coding, etc.)
-            udpConnection.sendPacket(messageId, payload, reliable)
-            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Sent message ID: $messageId (${payload.size} bytes)")
-        } catch (e: Exception) {
-            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Error sending message: ${e.message}")
-        }
-    }
+    fun isCircuitReady() = _circuitState.value == CircuitState.CIRCUIT_READY
     
-    /**
-     * Get circuit statistics
-     */
-    fun getStatistics(): Map<String, Any> {
-        return mapOf(
-            "circuitCode" to circuitCode,
-            "agentId" to agentId.toString(),
-            "sessionId" to sessionId.toString(),
-            "state" to circuitState.value.name,
-            "isConnected" to isConnected,
-            "udpConnected" to udpConnection.isConnected.value,
-            "simIP" to authReply.simIP,
-            "simPort" to authReply.simPort,
-            "messageRouterStats" to messageRouter.getStatistics()
-        )
-    }
-    
-    /**
-     * Close the circuit
-     */
     fun close() {
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Closing agent circuit")
-        
         isConnected = false
-        
-        // Cancel agent update job
         agentUpdateJob?.cancel()
-        
-        // Disconnect UDP connection
         try {
             udpConnection.disconnect()
-            
-            // Publish connection state event via EventBus
             scope.launch {
-                EventBus.publish(ConnectionStateChangedEvent(
-                    ConnectionState.CONNECTED,
-                    ConnectionState.DISCONNECTED
-                ))
+                EventBus.publish(ConnectionStateChangedEvent(ConnectionState.CONNECTED, ConnectionState.DISCONNECTED))
             }
         } catch (e: Exception) {
-            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Error closing UDP connection: ${e.message}")
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Close error: ${e.message}")
         }
-        
-        _circuitState.value = CircuitState.CLOSED
-        
-        // Cancel scope
+        transitionState(CircuitState.DISCONNECTED, "Closed")
         scope.cancel()
-        
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Agent circuit closed")
+    }
+    
+    private fun UUID.asBytes(): ByteArray {
+        val bytes = ByteArray(16)
+        val msb = this.mostSignificantBits
+        val lsb = this.leastSignificantBits
+        for (i in 7 downTo 0) bytes[7 - i] = (msb shr (i * 8)).toByte()
+        for (i in 7 downTo 0) bytes[15 - i] = (lsb shr (i * 8)).toByte()
+        return bytes
     }
 }

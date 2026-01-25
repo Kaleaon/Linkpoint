@@ -18,7 +18,8 @@ class ItemPropertiesDialog : DialogFragment() {
     private lateinit var item: InventoryItem
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        item = requireArguments().getParcelable("item")!!
+        item = requireArguments().getParcelable<InventoryItem>("item")
+            ?: throw IllegalArgumentException("InventoryItem argument is required")
 
         val view = LayoutInflater.from(requireContext())
             .inflate(R.layout.dialog_item_properties, null)

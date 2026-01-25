@@ -165,8 +165,12 @@ class AvatarAttentionSystem(context: Context?) {
         newType: AttentionType
     ): Boolean {
         val params = getParams(current.gender)
-        val currentParam = params[current.type] ?: defaultParams[current.type]!!
-        val newParam = params[newType] ?: defaultParams[newType]!!
+        val currentParam = params[current.type] 
+            ?: defaultParams[current.type] 
+            ?: throw IllegalStateException("Default parameter for ${current.type} not found")
+        val newParam = params[newType] 
+            ?: defaultParams[newType] 
+            ?: throw IllegalStateException("Default parameter for ${newType} not found")
         
         // Higher or equal priority takes over
         if (newParam.priority >= currentParam.priority) {
@@ -205,7 +209,9 @@ class AvatarAttentionSystem(context: Context?) {
      */
     fun checkTimeout(state: AttentionState): Boolean {
         val params = getParams(state.gender)
-        val param = params[state.type] ?: defaultParams[state.type]!!
+        val param = params[state.type] 
+            ?: defaultParams[state.type] 
+            ?: throw IllegalStateException("Default parameter for ${state.type} not found")
         
         if (param.timeout > 0 && state.elapsedSeconds >= param.timeout) {
             state.type = AttentionType.IDLE

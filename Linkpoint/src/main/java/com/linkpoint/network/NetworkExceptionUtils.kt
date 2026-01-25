@@ -354,12 +354,20 @@ object NetworkExceptionUtils {
     
     /**
      * Get the root cause of an exception chain.
+     * 
+     * Traverses the exception chain to find the original cause of the error.
+     * Limits traversal to 20 levels to prevent infinite loops in malformed
+     * exception chains.
+     * 
+     * @param e The exception to analyze
+     * @return The root cause of the exception chain
      */
     fun getRootCause(e: Throwable): Throwable {
         var current: Throwable = e
         var depth = 0
-        while (current.cause != null && depth < 20) {
-            current = current.cause!!
+        while (depth < 20) {
+            val cause = current.cause ?: break
+            current = cause
             depth++
         }
         return current

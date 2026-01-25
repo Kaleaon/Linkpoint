@@ -103,11 +103,16 @@ class PrimRenderer(
         val shape = determineShape(data)
         val mesh = getOrCreateMesh(shape)
         
+        // Get default material or throw if not initialized
+        val material = defaultMaterial ?: throw IllegalStateException(
+            "Default material not initialized. Call initialize() first."
+        )
+        
         // Create renderable
         RenderableManager.Builder(1)
             .boundingBox(Box(-0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f))
             .geometry(0, RenderableManager.PrimitiveType.TRIANGLES, mesh.vertexBuffer, mesh.indexBuffer)
-            .material(0, defaultMaterial!!)
+            .material(0, material)
             .culling(true)
             .receiveShadows(true)
             .castShadows(true)

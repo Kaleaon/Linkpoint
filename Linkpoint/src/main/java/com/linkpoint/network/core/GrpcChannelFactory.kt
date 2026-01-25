@@ -151,6 +151,9 @@ class GrpcChannelFactory(
     }
     
     // Thread pool for gRPC executor
+    // Using a cached thread pool with daemon threads for gRPC operations
+    // This is a legacy pattern that could be modernized to use coroutine dispatchers
+    // in future iterations, but keeping it for compatibility with gRPC library expectations
     private val executor: Executor = Executors.newCachedThreadPool { runnable ->
         Thread(runnable, "grpc-executor").apply {
             isDaemon = true

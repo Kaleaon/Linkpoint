@@ -274,6 +274,25 @@ class UDPConnectionFixed {
     private val pendingAcksToSend = java.util.concurrent.ConcurrentLinkedQueue<Int>()
     
     /**
+     * Track callbacks for reliable messages by sequence number.
+     * This allows callers to receive notifications when their messages are acknowledged.
+     * Critical for implementing circuit establishment state machine.
+     */
+    private val pendingCallbacks = java.util.concurrent.ConcurrentHashMap<Int, MessageCallbackInfo>()
+    
+    /**
+     * Internal callback info with timeout handling.
+     * Tracks message details for ACK/timeout callbacks.
+     */
+    private data class MessageCallbackInfo(
+        val sequenceNumber: Int,
+        val messageId: Int,
+        val listener: MessageEventListener,
+        val sentTime: Long,
+        var retryCount: Int = 0
+    )
+    
+    /**
      * Maximum number of ACKs to include in a single PacketAck message.
      * Based on SL protocol limits and Lumiya's implementation.
      */
@@ -294,6 +313,11 @@ class UDPConnectionFixed {
      * Job for the ACK sender coroutine.
      */
     private var ackSenderJob: Job? = null
+    
+    /**
+     * Job for the timeout checker coroutine.
+     */
+    private var timeoutCheckerJob: Job? = null
     
     // ==================== PACKET HISTORY FOR RAW DATA LOGGING ====================
     // Critical for debugging: captures raw packet data with hex dumps.
@@ -441,6 +465,13 @@ class UDPConnectionFixed {
             }
             
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ ACK sender loop started")
+            
+            // Start timeout checker for message timeouts
+            timeoutCheckerJob = scope.launch {
+                timeoutCheckerLoop()
+            }
+            
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ Timeout checker loop started")
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== UDP CONNECTION ESTABLISHED ===")
             
             // Send initial messages
@@ -642,6 +673,22 @@ class UDPConnectionFixed {
     }
     
     /**
+     * Timeout checker loop - periodically checks for message timeouts.
+     * Runs every 1 second to check if any reliable messages have timed out.
+     */
+    private suspend fun timeoutCheckerLoop() {
+        while (_isConnected.value && timeoutCheckerJob?.isActive == true) {
+            try {
+                checkMessageTimeouts()
+                delay(1000L) // Check every second
+            } catch (e: Exception) {
+                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                    "Error in timeout checker: ${e.message}")
+            }
+        }
+    }
+    
+    /**
      * Send pending ACKs as a PacketAck message.
      * 
      * PacketAck message format (High Frequency, ID = -5 / 0xFB):
@@ -701,6 +748,103 @@ class UDPConnectionFixed {
             lastAckSendTime = lastSendTime
             
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✅ Sent PacketAck for ${acksToSend.size} packets: $acksToSend (remaining pending: ${pendingAcksToSend.size})")
+        }
+    }
+    
+    /**
+     * Process received ACK from server and invoke callbacks.
+     * This is called when we receive a PacketAck message from the server.
+     * 
+     * @param sequenceNumber The sequence number being acknowledged
+     */
+    private fun processReceivedAck(sequenceNumber: Int) {
+        // Check if we have a callback for this sequence number
+        val callbackInfo = pendingCallbacks.remove(sequenceNumber)
+        
+        if (callbackInfo != null) {
+            try {
+                // Invoke the ACK callback
+                callbackInfo.listener.onMessageAcknowledged(
+                    sequenceNumber,
+                    callbackInfo.messageId
+                )
+                
+                NetworkLogger.log(
+                    NetworkLogger.Level.DEBUG,
+                    NetworkLogger.Category.UDP,
+                    "✓ ACK callback invoked for seqNum=$sequenceNumber, messageId=${callbackInfo.messageId}"
+                )
+            } catch (e: Exception) {
+                NetworkLogger.log(
+                    NetworkLogger.Level.ERROR,
+                    NetworkLogger.Category.UDP,
+                    "Error in ACK callback for seqNum=$sequenceNumber: ${e.message}"
+                )
+            }
+        } else {
+            NetworkLogger.log(
+                NetworkLogger.Level.TRACE,
+                NetworkLogger.Category.UDP,
+                "No callback registered for ACK seqNum=$sequenceNumber"
+            )
+        }
+    }
+    
+    /**
+     * Check for timeouts on pending reliable messages.
+     * This should be called periodically to handle message timeouts.
+     * Based on Lumiya's timeout and retry logic.
+     */
+    private suspend fun checkMessageTimeouts() {
+        val now = System.currentTimeMillis()
+        val timeout = MESSAGE_TIMEOUT_MS
+        val maxRetries = MESSAGE_MAX_RETRIES
+        
+        // Process all pending callbacks
+        pendingCallbacks.entries.removeIf { (seqNum, callbackInfo) ->
+            val age = now - callbackInfo.sentTime
+            
+            if (age > timeout) {
+                callbackInfo.retryCount++
+                
+                if (callbackInfo.retryCount > maxRetries) {
+                    // Max retries exceeded - invoke timeout callback
+                    try {
+                        callbackInfo.listener.onMessageTimeout(
+                            seqNum,
+                            callbackInfo.messageId
+                        )
+                        
+                        NetworkLogger.log(
+                            NetworkLogger.Level.WARN,
+                            NetworkLogger.Category.UDP,
+                            "✗ Message timeout: seqNum=$seqNum, messageId=${callbackInfo.messageId}, retries=${callbackInfo.retryCount}"
+                        )
+                    } catch (e: Exception) {
+                        NetworkLogger.log(
+                            NetworkLogger.Level.ERROR,
+                            NetworkLogger.Category.UDP,
+                            "Error in timeout callback for seqNum=$seqNum: ${e.message}"
+                        )
+                    }
+                    
+                    return@removeIf true // Remove from pending callbacks
+                } else {
+                    // Resend the packet (Note: This would require tracking the packet data)
+                    NetworkLogger.log(
+                        NetworkLogger.Level.WARN,
+                        NetworkLogger.Category.UDP,
+                        "⚠ Message timeout, would resend: seqNum=$seqNum, retry ${callbackInfo.retryCount}"
+                    )
+                    
+                    // Update sent time to avoid immediate timeout
+                    callbackInfo.sentTime = now
+                }
+            }
+            
+            false // Keep in pending callbacks
+        }
+    }
             
             // Record in packet history
             recordPacketEvent(
@@ -1081,7 +1225,8 @@ class UDPConnectionFixed {
         messageId: Int, 
         payload: ByteArray, 
         reliable: Boolean = false,
-        zerocoded: Boolean = false
+        zerocoded: Boolean = false,
+        listener: MessageEventListener? = null
     ) {
         if (!_isConnected.value) {
             NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Cannot send: not connected")
@@ -1092,6 +1237,20 @@ class UDPConnectionFixed {
             // Build packet header (big-endian per SL protocol)
             val flags = (if (reliable) 0x40 else 0) or (if (zerocoded) 0x80 else 0)
             val seqNum = sequenceNumber.getAndIncrement()
+            
+            // Track callback if this is a reliable message with listener
+            if (reliable && listener != null) {
+                val callbackInfo = MessageCallbackInfo(
+                    sequenceNumber = seqNum,
+                    messageId = messageId,
+                    listener = listener,
+                    sentTime = System.currentTimeMillis(),
+                    retryCount = 0
+                )
+                pendingCallbacks[seqNum] = callbackInfo
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
+                    "Registered callback for seqNum=$seqNum, messageId=$messageId")
+            }
             
             val header = ByteBuffer.allocate(6).order(ByteOrder.BIG_ENDIAN)
             header.put(flags.toByte())
@@ -1290,9 +1449,13 @@ class UDPConnectionFixed {
         receiveJob?.cancel()
         agentUpdateJob?.cancel()
         ackSenderJob?.cancel()
+        timeoutCheckerJob?.cancel()
         
         // Clear pending ACKs since we're disconnecting
         pendingAcksToSend.clear()
+        
+        // Clear pending callbacks since we're disconnecting
+        pendingCallbacks.clear()
         
         try {
             selectionKey?.cancel()

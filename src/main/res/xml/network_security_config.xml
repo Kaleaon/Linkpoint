@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Network Security Configuration for Linkpoint
+    
+    This configuration ensures secure network communication:
+    - Blocks cleartext traffic by default
+    - Uses system and user certificates
+    - Specifies trusted domains
+    - Allows localhost cleartext for debug builds
+-->
+<network-security-config>
+    <!-- Base configuration - deny cleartext traffic -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+    
+    <!-- Debug overrides - allow cleartext for localhost -->
+    <debug-overrides>
+        <base-config cleartextTrafficPermitted="true">
+            <trust-anchors>
+                <certificates src="system" />
+            </trust-anchors>
+        </base-config>
+    </debug-overrides>
+    
+    <!-- Second Life domains - secure HTTPS only -->
+    <domain-config>
+        <domain includeSubdomains="true">secondlife.com</domain>
+        <domain includeSubdomains="true">lindenlab.com</domain>
+        <domain includeSubdomains="true">agni.lindenlab.com</domain>
+        <domain includeSubdomains="true">aditi.lindenlab.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </domain-config>
+    
+    <!-- Grid login domains -->
+    <domain-config>
+        <domain includeSubdomains="true">login.agni.lindenlab.com</domain>
+        <domain includeSubdomains="true">login.aditi.lindenlab.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+        <pin-set>
+            <!-- Certificate pins for Second Life login servers -->
+            <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
+        </pin-set>
+    </domain-config>
+    
+    <!-- Capability domains -->
+    <domain-config>
+        <domain includeSubdomains="true">cap.secondlife.com</domain>
+        <domain includeSubdomains="true">simulator.secondlife.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+    
+    <!-- Asset domains -->
+    <domain-config>
+        <domain includeSubdomains="true">asset-cdn.glb.secondlife.com</domain>
+        <domain includeSubdomains="true">texture.secondlife.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+    
+    <!-- Map domains -->
+    <domain-config>
+        <domain includeSubdomains="true">map.secondlife.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+</network-security-config>

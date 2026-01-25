@@ -19,7 +19,8 @@ class ObjectPropertiesDialog : DialogFragment() {
     private lateinit var obj: SceneObject
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        obj = requireArguments().getParcelable("object")!!
+        obj = requireArguments().getParcelable<SceneObject>("object")
+            ?: throw IllegalArgumentException("SceneObject argument is required")
 
         val view = LayoutInflater.from(requireContext())
             .inflate(R.layout.dialog_object_properties, null)

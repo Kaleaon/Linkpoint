@@ -218,9 +218,14 @@ class OutfitManager(
 
         val payload = ByteBuffer.allocate(payloadSize).order(ByteOrder.LITTLE_ENDIAN)
 
-        // AgentData
-        payload.putUUID(agentId!!)
-        payload.putUUID(sessionId!!)
+        // AgentData - Validate required fields
+        val agentIdValue = agentId 
+            ?: throw IllegalStateException("Agent ID not initialized in OutfitManager")
+        val sessionIdValue = sessionId 
+            ?: throw IllegalStateException("Session ID not initialized in OutfitManager")
+        
+        payload.putUUID(agentIdValue)
+        payload.putUUID(sessionIdValue)
 
         // ObjectData
         payload.putUUID(item.itemId)
@@ -247,7 +252,10 @@ class OutfitManager(
         payload.putInt(item.creationDate)
         payload.putInt(0) // CRC
 
-        udpConnection!!.sendPacket(MessageIds.REZ_SINGLE_ATTACHMENT_FROM_INV, payload.array(), reliable = true)
+        // Validate UDP connection before sending
+        val connection = udpConnection 
+            ?: throw IllegalStateException("UDP connection not initialized in OutfitManager")
+        connection.sendPacket(MessageIds.REZ_SINGLE_ATTACHMENT_FROM_INV, payload.array(), reliable = true)
         Log.d(TAG, "Sent RezSingleAttachmentFromInv for item ${item.itemId} at point $point (replace=$replace)")
     }
     

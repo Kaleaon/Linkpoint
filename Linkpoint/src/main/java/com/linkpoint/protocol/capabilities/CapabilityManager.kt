@@ -233,7 +233,7 @@ class CapabilityManager {
         Log.i(TAG, "║ Seed URL: ${seedCap.take(80)}...")
         Log.i(TAG, "║ Lumiya Mode: ${if (loginUrl != null) "ENABLED" else "DISABLED"}")
         if (loginUrl != null) {
-            Log.i(TAG, "║ Grid Type: ${LumiyaTranslationLayer.detectGridType(loginUrl!!)}")
+            Log.i(TAG, "║ Grid Type: ${LumiyaTranslationLayer.detectGridType(loginUrl)}")
         }
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
         
@@ -321,7 +321,7 @@ class CapabilityManager {
         
         resolvedCaps.forEach { (name, url) ->
             val finalUrl = if (shouldRepairUrls) {
-                val repairedUrl = LumiyaTranslationLayer.repairUrl(loginUrl!!, url)
+                val repairedUrl = LumiyaTranslationLayer.repairUrl(loginUrl ?: "", url)
                 if (repairedUrl != url) {
                     repairedCount++
                     Log.d(TAG, "Repaired URL for $name")
@@ -670,7 +670,7 @@ class CapabilityManager {
             while (isActive && !done) {
                 try {
                     val requestBody = LLSDMap().apply {
-                        this["ack"] = if (ack != null) LLSDInteger(ack!!) else LLSDBoolean(true)
+                        this["ack"] = if (ack != null) LLSDInteger(ack) else LLSDBoolean(true)
                         this["done"] = LLSDBoolean(false)
                     }
                     
