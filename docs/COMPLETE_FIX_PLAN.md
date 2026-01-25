@@ -159,6 +159,305 @@ private suspend fun receiveLoop() {
 
 ---
 
+## Comprehensive Lumiya Source Code Analysis
+
+After exhaustive review of ALL Lumiya network-related source files, here are ALL techniques, patterns, and implementation details that can be used:
+
+### 1. Core Network Constants (SLCircuit.java)
+```java
+// CRITICAL TIMING CONSTANTS - PROVEN TO WORK
+private static final int DEFAULT_IDLE_INTERVAL = 1000;      // 1 second idle check
+private static final int FAST_IDLE_INTERVAL = 100;          // 100ms when active
+private static final int MESSAGE_MAX_RETRIES = 3;           // Retry 3 times
+private static final int MESSAGE_TIMEOUT_MILLIS = 5000;     // 5 second timeout
+private static final long NEED_PING_TIMEOUT = 10000;        // Ping after 10s no packets
+private static final long PING_INTERVAL = 5000;             // Ping every 5 seconds
+private static final int TRACK_HANDLED_PACKETS = 1024;      // Track last 1024 packets
+private static final int UNANSWERED_PINGS = 3;              // Disconnect after 3 missed pings
+```
+
+### 2. HTTP Connection Settings (SLHTTPSConnection.java)
+```java
+// OkHttp Configuration - Mobile Optimized
+private static final long CONNECT_TIMEOUT = 60;  // 60 second connect timeout
+private static final long READ_TIMEOUT = 60;     // 60 second read timeout
+ConnectionPool(8, 5, TimeUnit.MINUTES)           // 8 connections, 5 min keep-alive
+Proxy.NO_PROXY                                   // Direct connection, no proxy
+```
+
+### 3. DNS-over-HTTPS Fallback (SLHTTPSConnection.java - CRITICAL!)
+```java
+// Lumiya has DNS fallback when system DNS fails!
+class SLDNS implements Dns {
+    // First try system DNS
+    List<InetAddress> lookup = systemDns.lookup(hostname);
+    
+    // If system DNS fails, try DNS-over-HTTPS via Google
+    if (lookup fails) {
+        Response response = httpClient.newCall(
+            "https://dns.google.com/resolve?name=" + hostname + "&type=A"
+        ).execute();
+        // Parse JSON response and extract IP addresses
+    }
+    
+    // Hardcoded fallback for critical hosts!
+    if (hostname == "login.agni.lindenlab.com") {
+        return InetAddress.getByName("216.82.57.58");  // Static fallback IP
+    }
+}
+```
+
+### 4. Message Event Listener Pattern (SLMessageEventListener.java)
+```java
+// Every message can have acknowledgement and timeout callbacks!
+public interface SLMessageEventListener {
+    void onMessageAcknowledged(SLMessage message);  // Called when ACK received
+    void onMessageTimeout(SLMessage message);       // Called after 3 retries fail
+}
+
+// Usage in SLAgentCircuit:
+UseCircuitCode useCircuitCode = new UseCircuitCode();
+useCircuitCode.isReliable = true;
+useCircuitCode.setEventListener(new SLMessageEventListener() {
+    @Override
+    public void onMessageAcknowledged(SLMessage msg) {
+        // Only send CompleteAgentMovement AFTER UseCircuitCode is ACKed
+        SendCompleteAgentMovement();
+    }
+    
+    @Override
+    public void onMessageTimeout(SLMessage msg) {
+        gridConn.notifyLoginError("Timed out while connecting to the simulator.");
+    }
+});
+```
+
+### 5. Global Options / Configuration (GlobalOptions.java)
+```java
+// User-configurable settings that affect networking
+private boolean autoReconnect = true;
+private int maxReconnectAttempts = 10;      // Try 10 reconnects before giving up
+private int maxTextureDownloads = 2;        // Default parallel texture downloads
+private boolean keepWifiOn = true;          // Keep WiFi alive during connection
+
+// Device-adaptive settings based on RAM
+long totalMemory = getTotalMemory();
+if (availableProcessors >= 4 && totalMemory > 524288) {
+    maxTextureDownloads = 8;  // More parallel downloads on powerful devices
+} else if (availableProcessors >= 2) {
+    maxTextureDownloads = 4;
+}
+```
+
+### 6. SLMessage Packet Structure (SLMessage.java)
+```java
+// Packet flags
+private static final byte LL_ACK_FLAG = 16;        // 0x10 - Has ACK appended
+private static final byte LL_RELIABLE_FLAG = 64;   // 0x40 - Needs ACK
+private static final byte LL_RESENT_FLAG = 32;     // 0x20 - This is a resend
+private static final byte LL_ZERO_CODE_FLAG = -128; // 0x80 - Zero-coded
+
+// Size limits
+public static final int MAX_MESSAGE_SIZE = 65536;   // 64KB max message
+public static final int MAX_PAYLOAD_SIZE = 1018;    // Leave room for header/ACKs
+public static final int MAX_TRANSMIT_SIZE = 1024;   // Actual UDP packet size
+
+// ACK piggybacking - append ACKs to outgoing packets
+public int AppendPendingAcks(ByteBuffer buffer, List<Integer> pendingAcks) {
+    // Append ACKs to any outgoing packet to reduce separate ACK packets
+    while (iterator.hasNext() && buffer.position() <= 1019) {
+        buffer.putInt(iterator.next());
+        count++;
+    }
+    if (count != 0) {
+        buffer.put(0, (byte) (buffer.get(0) | 16));  // Set ACK flag
+        buffer.put((byte) count);
+    }
+    return count;
+}
+```
+
+### 7. Password Hash Algorithm (SLAuth.java)
+```java
+public static String getPasswordHash(String password) {
+    String trimmed = password.trim();
+    if (trimmed.length() > 16) {
+        trimmed = trimmed.substring(0, 16);  // TRUNCATE TO 16 CHARS!
+    }
+    return "$1$" + HashUtils.MD5_Hash(trimmed);  // MD5 with $1$ prefix
+}
+```
+
+### 8. Capability URL Repair (SLCaps.java)
+```java
+// Lumiya repairs broken capability URLs from SL servers
+private static String repairCapabilityURL(boolean isMainGrid, String url) {
+    if (isMainGrid) {
+        String host = new URL(url).getHost();
+        // If host is short name like "sim10234", add domain
+        if (!host.contains(".") && host.startsWith("sim")) {
+            url = url.replace(host, host + ".agni.lindenlab.com");
+        }
+    }
+    return url;
+}
+```
+
+### 9. Event Queue Long Polling (SLCapEventQueue.java)
+```java
+// Event queue polling with acknowledgement
+while (!threadMustExit) {
+    LLSDMap request = new LLSDMap(
+        new LLSDMapEntry("ack", lastEventID != 0 ? new LLSDInt(lastEventID) : new LLSDUndefined()),
+        new LLSDMapEntry("done", new LLSDBoolean(done))
+    );
+    
+    LLSDNode response = xmlReq.PerformRequest(capURL, request);
+    
+    lastEventID = response.byKey("id").asInt();  // Track for next ack
+    
+    // Process events
+    for (event in response.byKey("events")) {
+        String eventName = event.byKey("message").asString();
+        if (eventName == "TeleportFinish") {
+            done = true;  // Signal graceful exit
+        }
+        eventHandler.OnCapsEvent(new CapsEvent(eventName, event.byKey("body")));
+    }
+    
+    // Small delay between polls
+    Thread.sleep(2500);
+}
+```
+
+### 10. Agent Update Timing (SLAvatarControl.java)
+```java
+// Agent update intervals
+private static final int IDLE_AGENT_UPDATE_INTERVAL = 2000;  // 2s when idle
+private static final int MIN_AGENT_UPDATE_INTERVAL = 200;    // 200ms minimum
+
+// Send initial fast updates, then slow down
+private volatile int needFastUpdates = 10;  // First 10 updates are fast
+
+// Timer-based agent updates
+class AgentUpdateTimerTask extends TimerTask {
+    @Override
+    public void run() {
+        if (enableAgentUpdates) {
+            SendAgentUpdate(modules.drawDistance);
+        }
+    }
+}
+```
+
+### 11. Reconnection Logic (SLGridConnection.java)
+```java
+private synchronized boolean Reconnect() {
+    if (!userWantsConnected || !hadConnected || 
+        !GlobalOptions.getInstance().getAutoReconnect() || 
+        reconnectAttempts >= GlobalOptions.getInstance().getMaxReconnectAttempts()) {
+        isReconnecting = false;
+        return false;
+    }
+    
+    if (connectionState == ConnectionState.Idle && authParams != null) {
+        reconnectAttempts++;
+        isReconnecting = true;
+        eventBus.publish(new SLReconnectingEvent(reconnectAttempts));
+        
+        // Wait 3 seconds before reconnect attempt
+        Thread.sleep(3000);
+        DoConnect(authParams, "last");
+    }
+    return true;
+}
+```
+
+### 12. TempCircuit for Teleports (SLTempCircuit.java)
+```java
+// Pre-establish circuit to destination region during teleport
+public class SLTempCircuit extends SLCircuit {
+    private List<SLMessage> pendingMessages = new LinkedList();
+    
+    // Buffer messages until circuit is transferred to AgentCircuit
+    @Override
+    public void DefaultMessageHandler(SLMessage message) {
+        pendingMessages.add(message);
+    }
+}
+```
+
+### 13. GridConnectionService - Background Connection (GridConnectionService.java)
+```java
+// Android Service keeps connection alive in background
+public class GridConnectionService extends Service {
+    private WifiManager.WifiLock wifiLock;  // Prevent WiFi sleep
+    
+    // Update notification based on connection state
+    void updateOnlineNotification() {
+        // Keep foreground service running
+        startForeground(NOTIFICATION_ID, notification);
+    }
+}
+```
+
+### 14. IPv4 Preference (SLConnection.java)
+```java
+// Force IPv4 - SL doesn't support IPv6 well
+public SLConnection() {
+    System.setProperty("java.net.preferIPv4Stack", "true");
+    System.setProperty("java.net.preferIPv6Addresses", "false");
+}
+```
+
+### 15. Zero-Code Encoding/Decoding (SLMessage.java)
+```java
+// Zero-coding compresses runs of zeros
+private static void ZeroEncode(ByteBuffer in, ByteBuffer out) {
+    int zeroCount = 0;
+    while (in.hasRemaining()) {
+        byte b = in.get();
+        if (b != 0) {
+            if (zeroCount != 0) {
+                out.put((byte) zeroCount);
+                zeroCount = 0;
+            }
+            out.put(b);
+        } else {
+            if (!wasZero) {
+                out.put((byte) 0);  // Zero marker
+            }
+            zeroCount++;
+        }
+    }
+}
+
+// Native code for performance!
+DirectByteBuffer.zeroDecode(...)  // C/C++ implementation
+```
+
+### 16. Module System Architecture (SLModules.java)
+```java
+// All modules initialized together, share AgentCircuit
+public SLModules(SLAgentCircuit circuit, SLCaps caps, SLGridConnection conn) {
+    modules.add(userNameFetcher = new SLUserNameFetcher(circuit, caps));
+    modules.add(avatarControl = new SLAvatarControl(circuit));
+    modules.add(inventory = new SLInventory(circuit, caps));
+    modules.add(textureFetcher = new SLTextureFetcher(circuit, caps, ...));
+    modules.add(voice = new SLVoice(circuit, caps));
+    // ... 20+ modules
+}
+
+// All modules notified when circuit ready
+public void HandleCircuitReady() {
+    for (SLModule module : modules) {
+        module.HandleCircuitReady();
+    }
+}
+```
+
+---
+
 ## Assumptions (REVISED)
 
 1. **Protocol works correctly** - Confirmed by successful WiFi connection logs
