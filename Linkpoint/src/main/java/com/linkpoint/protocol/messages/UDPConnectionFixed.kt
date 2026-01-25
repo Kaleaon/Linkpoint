@@ -346,6 +346,90 @@ class UDPConnectionFixed {
     // Registered message handlers
     private val messageHandlers = java.util.concurrent.ConcurrentHashMap<Int, MessageHandler>()
     
+    // ==================== INTERNAL HANDLER REGISTRATION ====================
+    // Register internal handlers that must be processed by UDPConnectionFixed itself.
+    // This is called from init block to ensure handlers are registered before any packets arrive.
+    
+    init {
+        registerInternalHandlers()
+    }
+    
+    /**
+     * Register internal message handlers for protocol messages that UDPConnectionFixed
+     * must handle itself, such as PacketAck for reliable messaging.
+     */
+    private fun registerInternalHandlers() {
+        // Register PacketAck handler - CRITICAL for reliable messaging
+        // Without this, ACK callbacks are never invoked, breaking circuit establishment
+        kotlinx.coroutines.runBlocking {
+            messageRouter.registerHandler(MessageIds.PACKET_ACK, object : MessageRouter.Handler {
+                override fun handleMessage(messageId: Int, data: ByteArray): Boolean {
+                    return handlePacketAck(data)
+                }
+                override fun getPriority(): Int = Int.MAX_VALUE // Highest priority - process ACKs first
+            })
+        }
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, 
+            "✓ Internal handlers registered (PacketAck)")
+    }
+    
+    /**
+     * Handle incoming PacketAck messages from the server.
+     * 
+     * PacketAck message format (High Frequency, ID = -5 / 0xFB):
+     * - Header: flags (1) + seq (4) + extra (1) = 6 bytes
+     * - Message ID: 1 byte (0xFB = -5)
+     * - Packets block count: 1 byte
+     * - For each packet: sequence number (4 bytes, little-endian)
+     * 
+     * @param data The raw packet data including header
+     * @return true if handled successfully, false on error
+     */
+    private fun handlePacketAck(data: ByteArray): Boolean {
+        try {
+            // Minimum size: header (6) + message ID (1) + count (1) = 8 bytes
+            if (data.size < 8) {
+                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
+                    "PacketAck too short: ${data.size} bytes (expected at least 8)")
+                return false
+            }
+            
+            // Extract packets block count (byte 7, after 6-byte header and 1-byte message ID)
+            val packetsBlockCount = data[7].toInt() and 0xFF
+            
+            // Calculate expected size: 8 + (4 bytes per ACK)
+            val expectedSize = 8 + (packetsBlockCount * 4)
+            if (data.size < expectedSize) {
+                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
+                    "PacketAck truncated: ${data.size} bytes (expected $expectedSize for $packetsBlockCount ACKs)")
+                return false
+            }
+            
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
+                "📬 Received PacketAck with $packetsBlockCount ACKed packets")
+            
+            // Parse each ACKed sequence number and invoke callbacks
+            var offset = 8 // Start after header (6) + message ID (1) + count (1)
+            for (i in 0 until packetsBlockCount) {
+                // Read 4-byte little-endian unsigned integer as sequence number
+                val seqNum = ((data[offset].toInt() and 0xFF)) or
+                            ((data[offset + 1].toInt() and 0xFF) shl 8) or
+                            ((data[offset + 2].toInt() and 0xFF) shl 16) or
+                            ((data[offset + 3].toInt() and 0xFF) shl 24)
+                offset += 4
+                
+                // Process the ACK - this invokes any pending callbacks
+                processReceivedAck(seqNum)
+            }
+            
+            return true
+        } catch (e: Exception) {
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                "Error handling PacketAck: ${e.message}")
+            return false
+        }
+    }
+    
     /**
      * Default constructor
      */
