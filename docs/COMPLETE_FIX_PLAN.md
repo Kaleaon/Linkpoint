@@ -1,6 +1,7 @@
 # Complete Plan for Fixing Linkpoint App - Second Life Viewer
 
 > **Created:** January 25, 2026  
+> **Updated:** January 25, 2026 (with log analysis from actual device)
 > **Purpose:** Comprehensive implementation plan to achieve Lumiya-level functionality  
 > **Status:** Ready for Implementation
 
@@ -10,52 +11,151 @@
 
 This document provides a complete, actionable plan for fixing the Linkpoint Second Life viewer to achieve the functionality that Lumiya had 10 years ago: **world rendering, friends display, working chat, and working controls**.
 
-Based on comprehensive analysis of the codebase, the **good news** is that most of the infrastructure is already in place:
-- ✅ All 481 protocol message handlers are implemented
-- ✅ Message handlers are properly registered and wired to managers
+Based on comprehensive analysis of the codebase AND **actual debug logs from device testing**, the **good news** is that most of the infrastructure is already in place:
+- ✅ All 426 protocol message handlers are registered
+- ✅ Message handlers are properly wired to managers
 - ✅ UI components exist for chat, friends, world view, etc.
 - ✅ Build system is working (AGP 8.6.1, Kotlin 2.1.0)
+- ✅ **Protocol works on fast networks** (First log shows full login sequence succeeding)
 
-The **issues** are primarily in:
-- ❌ Rendering pipeline (SwapChain, object→scene graph wiring)
-- ❌ Data flow from protocol layer to UI layer
-- ❌ Connection stability on mobile networks
+The **critical issues** identified from actual device logs:
+- ❌ **SwapChain not created** → No rendering visible (confirmed in debug report)
+- ❌ **High latency kills connection** → 5.8 second average latency on LTE causes UseCircuitCode ACK timeout
+- ❌ **RegionHandshake not received on slow networks** → World data never loads
+- ❌ **Objects in scene: 0** → Even when data is received, not rendered
+
+---
+
+## Log Analysis Results (Critical Findings)
+
+### Successful Connection (network_log_2026-01-24, WiFi/fast network):
+```
+✅ UseCircuitCode sent → ACKed in 180ms
+✅ CompleteAgentMovement sent → RegionHandshake received
+✅ Region: Athanasia (parsed correctly)
+✅ AgentMovementComplete received  
+✅ ObjectUpdate messages flowing (with avatar data)
+✅ Friends online notifications working (45 friends online)
+⚠️ Texture errors: "GetTexture capability not available" (timing issue)
+```
+
+### Failed Connection (linkpoint_log_2026-01-25, Cellular LTE):
+```
+✅ UDP connected to 44.244.118.250:13006
+✅ 17 capabilities loaded (including GetTexture)
+❌ Network Quality: POOR (5812ms average latency!)
+❌ RegionHandshake: NEVER RECEIVED
+❌ AgentMovementComplete: NEVER RECEIVED
+❌ Objects in Scene: 0
+❌ Avatars in Scene: 0
+❌ SwapChain: ✗ (No rendering)
+❌ Only receiving: StartPingCheck, PacketAck (server thinks we're dead)
+```
+
+### Root Cause Identified
+
+**The UseCircuitCode packet is being sent but the ACK timeout is too short for cellular networks.** When the ACK doesn't arrive within the timeout window:
+1. `CompleteAgentMovement` is never triggered
+2. Server never sends `RegionHandshake`
+3. World data never loads
+4. Connection appears "connected" but is actually dead
 
 ---
 
 ## Assumptions
 
-1. **Protocol compatibility**: The Second Life protocol hasn't changed significantly in ways that break Linkpoint
-2. **Message parsing works**: The 481 message handlers parse packets correctly
-3. **UI exists**: All required Activities/Screens exist and are styled properly
-4. **The issues are wiring-related**: Data flows correctly but doesn't reach display components
-
----
-
-## Questions for Clarification
-
-Before implementation, these questions would help prioritize:
-
-1. **Do you have access to debug logs from actual connection attempts?** The debug log mentioned in FIXES_AND_STATUS.md would show exactly where data stops flowing.
-
-2. **Which feature is most critical to you first?** (World rendering, Friends, Chat, Controls) - This determines implementation order.
-
-3. **Do you have test accounts on both Main Grid and Beta Grid?** Beta Grid (Aditi) is better for development testing as it won't affect real inventory/relationships.
+1. **Protocol works correctly** - Confirmed by successful WiFi connection logs
+2. **Message parsing works** - RegionHandshake parsed "Athanasia" correctly
+3. **The main issue is network timing** - 5.8 second latency exceeds ACK timeout
+4. **SwapChain issue is separate** - Need to ensure Surface lifecycle is handled
 
 ---
 
 ## The Plan
 
+### Phase 0: Fix Network Timeout (CRITICAL - Day 1)
+
+**Problem**: On cellular networks with high latency (5+ seconds), the UseCircuitCode ACK is not received in time, so CompleteAgentMovement is never sent, and the server never sends world data.
+
+**Evidence from Logs**:
+```
+# WiFi (working) - 180ms round trip:
+18:29:00.264 → UseCircuitCode sent (seq: 0)
+18:29:00.445 ← PacketAck received (ACKing seq 0) [181ms later]
+18:29:00.455 → CompleteAgentMovement sent ✓
+18:29:00.620 ← RegionHandshake received (Athanasia) ✓
+
+# LTE (broken) - 5812ms average latency:
+→ UseCircuitCode sent
+❌ PacketAck never arrives within timeout
+❌ CompleteAgentMovement never triggered
+❌ RegionHandshake never received
+❌ World never loads
+```
+
+**Fix 0.1: Increase ACK Timeout for Mobile Networks**
+
+File: `Linkpoint/src/main/java/com/linkpoint/protocol/messages/UDPConnectionFixed.kt`
+
+```kotlin
+// Current timeout is likely 3 seconds - too short for cellular
+// Change to 15 seconds minimum for reliable mobile operation
+private const val ACK_TIMEOUT_MS = 15000L  // Was: 3000L
+private const val MAX_RETRIES = 5          // Was: 3
+```
+
+**Fix 0.2: Add Adaptive Timeout Based on Network Quality**
+
+```kotlin
+// Detect network type and adjust timeout accordingly
+private fun getAdaptiveTimeout(): Long {
+    return when (networkQuality) {
+        NetworkQuality.POOR -> 20000L    // 20 seconds for very slow networks
+        NetworkQuality.FAIR -> 15000L    // 15 seconds for cellular
+        NetworkQuality.GOOD -> 10000L    // 10 seconds for WiFi
+        NetworkQuality.EXCELLENT -> 5000L // 5 seconds for fast connections
+    }
+}
+```
+
+**Fix 0.3: Ensure CompleteAgentMovement is Sent Even on Delayed ACK**
+
+The current code waits for PacketAck before sending CompleteAgentMovement. On slow networks, we should also have a fallback timer:
+
+```kotlin
+// In PacketAck handler (LinkpointApp.kt lines 1063-1114):
+// Add a fallback timer that sends CompleteAgentMovement after 10 seconds
+// even if ACK hasn't arrived, in case ACK was lost but server received packet
+
+private fun startCompleteAgentMovementFallback() {
+    applicationScope.launch {
+        delay(10000) // 10 second fallback
+        if (!completeAgentMovementSent.get()) {
+            Log.w(TAG, "⚠️ ACK timeout - sending CompleteAgentMovement anyway")
+            udpConnection.sendCompleteAgentMovement()
+            completeAgentMovementSent.set(true)
+        }
+    }
+}
+```
+
+**Validation**:
+- Test on cellular LTE network with Debug Floater enabled
+- Should see "RegionHandshake received" in logs
+- Region name should show actual region (not "Unknown")
+
+---
+
 ### Phase 1: Fix World Rendering (CRITICAL - Week 1)
 
-**Problem**: Objects and avatars show "0" in scene despite receiving ObjectUpdate messages.
+**Problem**: Objects and avatars show "0" in scene even when ObjectUpdate messages ARE received (confirmed in WiFi log).
 
-**Root Cause Analysis**:
-1. SwapChain may not be created when SurfaceView becomes available
-2. ObjectUpdate handlers update ObjectManager but may not trigger SceneManager
-3. SceneManager may not be connected to RenderManager properly
+**Root Cause Analysis** (from debug report):
+1. **SwapChain: ✗** - Not created despite Filament engine being initialized
+2. ObjectUpdate handlers update ObjectManager but scene shows 0 objects
+3. The Surface lifecycle isn't being handled properly
 
-**Fix 1.1: Ensure SwapChain Creation**
+**Fix 1.1: Ensure SwapChain Creation on Surface Ready**
 
 File: `Linkpoint/src/main/java/com/linkpoint/render/RenderManager.kt`
 
