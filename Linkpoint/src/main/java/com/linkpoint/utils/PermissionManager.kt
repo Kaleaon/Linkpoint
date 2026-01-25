@@ -35,10 +35,10 @@ class PermissionManager(private val activity: AppCompatActivity) {
         fun getEssentialPermissions(): Array<String> {
             val permissions = mutableListOf<String>()
             
-            // Storage permissions for Lumiya Logs directory (Downloads/Lumiya Logs/)
+            // Storage permissions for Lumiya Logs directory (Documents/Lumiya Logs/)
             // Required for saving crash logs and network logs
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-                // Android 9 and below: Need WRITE for public Downloads directory
+                // Android 9 and below: Need WRITE for public Documents directory
                 permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
             } else if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
@@ -255,7 +255,7 @@ class PermissionManager(private val activity: AppCompatActivity) {
     fun showStorageRationale(onAccept: () -> Unit, onDeny: () -> Unit) {
         showPermissionRationale(
             title = "Storage Permission Required",
-            message = "Linkpoint needs storage access to save logs to the Downloads/Lumiya Logs/ folder. " +
+            message = "Linkpoint needs storage access to save logs to the Documents/Lumiya Logs/ folder. " +
                 "This includes crash reports and network activity logs for debugging.",
             onAccept = onAccept,
             onDeny = onDeny

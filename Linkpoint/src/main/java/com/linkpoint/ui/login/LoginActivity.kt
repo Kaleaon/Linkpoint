@@ -116,10 +116,10 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
     ) { permissions ->
         val granted = permissions.values.all { it }
         if (granted) {
-            Log.i(TAG, "Storage permissions granted - logs will be saved to Downloads/Lumiya Logs/")
+            Log.i(TAG, "Storage permissions granted - logs will be saved to Documents/Lumiya Logs/")
             Toast.makeText(
                 this,
-                "Network logs will be saved to Downloads/Lumiya Logs/",
+                "Network logs will be saved to Documents/Lumiya Logs/",
                 Toast.LENGTH_LONG
             ).show()
         } else {
@@ -246,7 +246,7 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
             Log.i(TAG, "Android 13+: Using app-specific directory, no permissions needed")
             Toast.makeText(
                 this,
-                "Network logs will be saved to Downloads/Lumiya Logs/",
+                "Network logs will be saved to Documents/Lumiya Logs/",
                 Toast.LENGTH_SHORT
             ).show()
             prefs.edit().putBoolean(KEY_STORAGE_PERMISSION_REQUESTED, true).apply()
@@ -259,7 +259,7 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
             Log.i(TAG, "Android 10-12: Using app-specific directory, no permissions needed")
             Toast.makeText(
                 this,
-                "Network logs will be saved to Downloads/Lumiya Logs/",
+                "Network logs will be saved to Documents/Lumiya Logs/",
                 Toast.LENGTH_SHORT
             ).show()
             prefs.edit().putBoolean(KEY_STORAGE_PERMISSION_REQUESTED, true).apply()
