@@ -387,18 +387,28 @@ class UDPConnectionFixed {
      */
     private fun handlePacketAck(data: ByteArray): Boolean {
         try {
-            // Minimum size: header (6) + message ID (1) + count (1) = 8 bytes
-            if (data.size < 8) {
+            // Use the same message ID decoder to find where the payload starts
+            val decodeResult = decodeMessageIdLumiyaStyle(data, PACKET_HEADER_SIZE)
+            if (decodeResult == null) {
                 NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
-                    "PacketAck too short: ${data.size} bytes (expected at least 8)")
+                    "PacketAck: Failed to decode message ID")
                 return false
             }
             
-            // Extract packets block count (byte 7, after 6-byte header and 1-byte message ID)
-            val packetsBlockCount = data[7].toInt() and 0xFF
+            val (messageId, payloadOffset) = decodeResult
             
-            // Calculate expected size: 8 + (4 bytes per ACK)
-            val expectedSize = 8 + (packetsBlockCount * 4)
+            // Minimum size: payloadOffset + count byte (1)
+            if (data.size < payloadOffset + 1) {
+                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
+                    "PacketAck too short: ${data.size} bytes (payload at $payloadOffset)")
+                return false
+            }
+            
+            // Extract packets block count (first byte after message ID)
+            val packetsBlockCount = data[payloadOffset].toInt() and 0xFF
+            
+            // Calculate expected size: payloadOffset + count (1) + (4 bytes per ACK)
+            val expectedSize = payloadOffset + 1 + (packetsBlockCount * 4)
             if (data.size < expectedSize) {
                 NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
                     "PacketAck truncated: ${data.size} bytes (expected $expectedSize for $packetsBlockCount ACKs)")
@@ -406,11 +416,17 @@ class UDPConnectionFixed {
             }
             
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-                "📬 Received PacketAck with $packetsBlockCount ACKed packets")
+                "📎 Received PacketAck with $packetsBlockCount ACKed packets (messageId=$messageId)")
             
             // Parse each ACKed sequence number and invoke callbacks
-            var offset = 8 // Start after header (6) + message ID (1) + count (1)
+            var offset = payloadOffset + 1 // Start after message ID + count byte
             for (i in 0 until packetsBlockCount) {
+                if (offset + 4 > data.size) {
+                    NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
+                        "PacketAck truncated at ACK $i (need 4 bytes, have ${data.size - offset})")
+                    break
+                }
+                
                 // Read 4-byte little-endian unsigned integer as sequence number
                 val seqNum = ((data[offset].toInt() and 0xFF)) or
                             ((data[offset + 1].toInt() and 0xFF) shl 8) or
@@ -426,6 +442,7 @@ class UDPConnectionFixed {
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
                 "Error handling PacketAck: ${e.message}")
+            e.printStackTrace()
             return false
         }
     }
