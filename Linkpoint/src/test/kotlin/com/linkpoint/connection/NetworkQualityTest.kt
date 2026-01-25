@@ -114,15 +114,14 @@ class NetworkQualityTest {
         val bytesTransferred = 1024 * 1024L // 1 MB
         val durationMs = 1000L // 1 second
         
-        // 1 MB/s = 8 Mbps = 8192 kbps
-        // But 1024 * 1024 = 1,048,576 bytes
+        // Calculate bandwidth:
+        // 1024 * 1024 = 1,048,576 bytes (1 MiB)
         // 1,048,576 * 8 = 8,388,608 bits
-        // 8,388,608 / 1000 = 8,388.608 kbps ≈ 8389 kbps
+        // 8,388,608 / 1000 = 8,388.608 kbps, truncates to 8388
         val bitsTransferred = bytesTransferred * 8
         val bandwidthKbps = bitsTransferred / durationMs // bits per ms = kbps
         
-        // 1024 * 1024 * 8 / 1000 = 8388.608, truncates to 8388
-        assertEquals("Bandwidth should be ~8388 kbps (1 MiB/s)", 8388L, bandwidthKbps)
+        assertEquals("Bandwidth should be 8388 kbps (1 MiB/s)", 8388L, bandwidthKbps)
     }
 
     @Test
