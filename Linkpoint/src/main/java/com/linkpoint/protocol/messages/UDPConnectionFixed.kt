@@ -397,10 +397,40 @@ class UDPConnectionFixed {
      */
     suspend fun connect(): Boolean = withContext(Dispatchers.IO) {
         try {
-            // Record connection attempt time and reset statistics
+            // Record connection attempt time and reset ALL statistics for new session
             connectionAttemptTime = System.currentTimeMillis()
             lastConnectionError = null
             recentPacketHistory.clear()
+            
+            // ==================== CRITICAL: RESET SEQUENCE NUMBER ====================
+            // The Second Life protocol requires UseCircuitCode to be sent with sequence 0
+            // to establish a new circuit. Without resetting, the server will ignore our
+            // packets because the sequence numbers are from a previous session.
+            // This was the root cause of "packets sent but none received" bugs.
+            sequenceNumber.set(0)
+            
+            // Reset packet statistics for accurate per-session tracking
+            packetsReceived.set(0)
+            packetsSent.set(0)
+            bytesReceived.set(0)
+            bytesSent.set(0)
+            messagesRouted.set(0)
+            packetsResentCount.set(0)
+            
+            // Reset timing information
+            lastReceiveTime = 0L
+            lastSendTime = 0L
+            lastAckSendTime = 0L
+            
+            // Clear pending ACKs from previous session (they're no longer valid)
+            pendingAcksToSend.clear()
+            
+            // Clear pending callbacks (they won't be satisfied by new circuit)
+            pendingCallbacks.clear()
+            
+            // Clear message statistics for accurate per-session tracking
+            messageTypeCounts.clear()
+            lastMessageTimes.clear()
             
             // Start EnhancedPacketLogger session for comprehensive tracking
             EnhancedPacketLogger.startSession()
