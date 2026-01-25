@@ -476,6 +476,7 @@ class UDPConnectionFixed {
      * Get the circuit code for this connection
      */
     fun getCircuitCode(): Int = circuitCode
+    }
     
     /**
      * Connect to the simulator
@@ -877,6 +878,25 @@ class UDPConnectionFixed {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Failed to send PacketAck: ${e.message}")
             // Re-queue the ACKs we couldn't send
             acksToSend.forEach { pendingAcksToSend.offer(it) }
+        }
+    }
+    
+    /**
+     * Handle PacketAck message from server
+     * 
+     * PacketAck message format (High Frequency, ID = -5 / 0xFB):
+     * - Header: flags (1) + seq (4) + extra (1) = 6 bytes
+     * - Message ID: 1 byte (0xFB = -5)
+     * - Packets block count: 1 byte
+     * - For each packet being ACKed:
+     *   - Sequence number: 4 bytes (unsigned int, little-endian)
+     * 
+     * @param data The complete packet data including header
+     * @return true if handled successfully
+     */
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                "Error handling PacketAck: ${e.message}")
+            return false
         }
     }
     
