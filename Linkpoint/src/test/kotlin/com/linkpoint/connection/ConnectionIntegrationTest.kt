@@ -503,12 +503,22 @@ class ConnectionIntegrationTest {
         buffer.putInt(circuitCode)
         
         // Session ID (16 bytes)
-        val sessionUuid = try { java.util.UUID.fromString(sessionId) } catch (e: Exception) { java.util.UUID.randomUUID() }
+        val sessionUuid = try { 
+            java.util.UUID.fromString(sessionId) 
+        } catch (e: Exception) { 
+            println("Warning: Failed to parse sessionId '$sessionId', using random UUID: ${e.message}")
+            java.util.UUID.randomUUID() 
+        }
         buffer.putLong(sessionUuid.mostSignificantBits)
         buffer.putLong(sessionUuid.leastSignificantBits)
         
         // Agent ID (16 bytes)
-        val agentUuid = try { java.util.UUID.fromString(agentId) } catch (e: Exception) { java.util.UUID.randomUUID() }
+        val agentUuid = try { 
+            java.util.UUID.fromString(agentId) 
+        } catch (e: Exception) { 
+            println("Warning: Failed to parse agentId '$agentId', using random UUID: ${e.message}")
+            java.util.UUID.randomUUID() 
+        }
         buffer.putLong(agentUuid.mostSignificantBits)
         buffer.putLong(agentUuid.leastSignificantBits)
         

@@ -175,11 +175,11 @@ class ConnectionDiagnosticTest {
         val zeroCoded = createTestPacket(flags = FLAG_ZEROCODED, sequenceNumber = 1, messageId = MSG_REGION_HANDSHAKE)
         val notZeroCoded = createTestPacket(flags = FLAG_RELIABLE, sequenceNumber = 1, messageId = MSG_REGION_HANDSHAKE)
         
-        val zecoCodedFlag = zeroCoded[0].toInt() and FLAG_ZEROCODED
+        val zeroCodedFlag = zeroCoded[0].toInt() and FLAG_ZEROCODED
         val notZeroCodedFlag = notZeroCoded[0].toInt() and FLAG_ZEROCODED
         
-        assertTrue("Should detect zero-coded packet", zecoCodedFlag != 0)
-        assertFalse("Should not detect zero-coded on regular packet", notZeroCodedFlag != 0)
+        assertTrue("Should detect zero-coded packet", zeroCodedFlag != 0)
+        assertTrue("Should not detect zero-coded on regular packet", notZeroCodedFlag == 0)
     }
 
     // ============================================================
