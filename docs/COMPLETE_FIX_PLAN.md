@@ -39,110 +39,154 @@ The **critical issues** identified from actual device logs:
 ⚠️ Texture errors: "GetTexture capability not available" (timing issue)
 ```
 
-### Failed Connection (linkpoint_log_2026-01-25, Cellular LTE):
+### Failed Connection (linkpoint_log_2026-01-25, 5G Mobile):
 ```
 ✅ UDP connected to 44.244.118.250:13006
 ✅ 17 capabilities loaded (including GetTexture)
-❌ Network Quality: POOR (5812ms average latency!)
+✅ Packets sent: 10,434 (mostly AgentUpdate)
+❌ Packets received: ONLY 5 (StartPingCheck x3, PacketAck x2)
 ❌ RegionHandshake: NEVER RECEIVED
-❌ AgentMovementComplete: NEVER RECEIVED
+❌ AgentMovementComplete: NEVER RECEIVED  
 ❌ Objects in Scene: 0
 ❌ Avatars in Scene: 0
 ❌ SwapChain: ✗ (No rendering)
-❌ Only receiving: StartPingCheck, PacketAck (server thinks we're dead)
+❌ App reports "5812ms latency" but user is on 5G (should be ~20-50ms)
 ```
 
-### Root Cause Identified
+### Root Cause Analysis (REVISED)
 
-**The UseCircuitCode packet is being sent but the ACK timeout is too short for cellular networks.** When the ACK doesn't arrive within the timeout window:
-1. `CompleteAgentMovement` is never triggered
-2. Server never sends `RegionHandshake`
-3. World data never loads
-4. Connection appears "connected" but is actually dead
+**The "5812ms latency" is NOT actual network latency** - user confirmed they're on 5G which should be fast. The app is measuring response time, but **the server is not responding**.
+
+Looking at the packet statistics:
+- **Sent**: 10,434 packets
+- **Received**: Only 5 packets (StartPingCheck, PacketAck)
+- **Expected**: Should receive RegionHandshake, AgentMovementComplete, ObjectUpdate, etc.
+
+**Possible causes**:
+
+1. **UseCircuitCode never acknowledged** - Server didn't receive or accept the circuit
+2. **NAT/Firewall issue** - Mobile carrier NAT blocking incoming UDP
+3. **Wrong session credentials** - Circuit code or session ID invalid
+4. **Server-side issue** - Different sim host than WiFi connection
+
+**Key difference between logs**:
+- WiFi (Jan 24): Connected to `44.244.118.250:13006` ✅ Full response
+- 5G (Jan 25): Connected to `44.244.118.250:13006` ❌ Almost no response
+
+Same server IP, but completely different behavior. This points to:
+- **Mobile carrier UDP issues** (symmetric NAT, port blocking)
+- **Session was already expired/invalid** when 5G attempt was made
+- **Capabilities worked** (HTTP) but **UDP is blocked/filtered**
 
 ---
 
-## Assumptions
+## Assumptions (REVISED)
 
 1. **Protocol works correctly** - Confirmed by successful WiFi connection logs
 2. **Message parsing works** - RegionHandshake parsed "Athanasia" correctly
-3. **The main issue is network timing** - 5.8 second latency exceeds ACK timeout
-4. **SwapChain issue is separate** - Need to ensure Surface lifecycle is handled
+3. **5G should be fast** - User confirmed 5G, so "5812ms latency" is NOT real network latency
+4. **UDP may be blocked/filtered** - Mobile carriers often have strict NAT for UDP
+5. **SwapChain issue is separate** - Need to ensure Surface lifecycle is handled
 
 ---
 
 ## The Plan
 
-### Phase 0: Fix Network Timeout (CRITICAL - Day 1)
+### Phase 0: Fix Mobile UDP Connectivity (CRITICAL - Day 1)
 
-**Problem**: On cellular networks with high latency (5+ seconds), the UseCircuitCode ACK is not received in time, so CompleteAgentMovement is never sent, and the server never sends world data.
+**Problem**: On 5G mobile, the server barely responds despite the network being fast. Only 5 packets received vs 10,434 sent. This suggests UDP connectivity issues, NOT latency.
 
 **Evidence from Logs**:
 ```
-# WiFi (working) - 180ms round trip:
+# WiFi (working) - Full bidirectional UDP:
 18:29:00.264 → UseCircuitCode sent (seq: 0)
 18:29:00.445 ← PacketAck received (ACKing seq 0) [181ms later]
 18:29:00.455 → CompleteAgentMovement sent ✓
 18:29:00.620 ← RegionHandshake received (Athanasia) ✓
+... hundreds of packets received ...
 
-# LTE (broken) - 5812ms average latency:
+# 5G (broken) - One-way UDP (we send, server barely responds):
 → UseCircuitCode sent
-❌ PacketAck never arrives within timeout
-❌ CompleteAgentMovement never triggered
-❌ RegionHandshake never received
-❌ World never loads
+← PacketAck received (x2 only)
+← StartPingCheck received (x3 only)
+→ 10,434 AgentUpdate packets sent
+❌ No RegionHandshake, No ObjectUpdate, No world data
 ```
 
-**Fix 0.1: Increase ACK Timeout for Mobile Networks**
+**Likely Causes**:
+1. **Mobile Carrier NAT** - Symmetric NAT blocks incoming UDP after timeout
+2. **UDP Port Mapping Timeout** - Carrier drops the UDP "connection" quickly
+3. **UseCircuitCode ACK triggers CompleteAgentMovement** but server response gets lost
+
+**Fix 0.1: Add UDP Keep-Alive Packets**
 
 File: `Linkpoint/src/main/java/com/linkpoint/protocol/messages/UDPConnectionFixed.kt`
 
 ```kotlin
-// Current timeout is likely 3 seconds - too short for cellular
-// Change to 15 seconds minimum for reliable mobile operation
-private const val ACK_TIMEOUT_MS = 15000L  // Was: 3000L
-private const val MAX_RETRIES = 5          // Was: 3
-```
+// Send keep-alive packets more frequently to maintain NAT mapping
+// Mobile NAT can timeout in as little as 30 seconds
+private const val KEEP_ALIVE_INTERVAL_MS = 5000L  // Every 5 seconds
 
-**Fix 0.2: Add Adaptive Timeout Based on Network Quality**
-
-```kotlin
-// Detect network type and adjust timeout accordingly
-private fun getAdaptiveTimeout(): Long {
-    return when (networkQuality) {
-        NetworkQuality.POOR -> 20000L    // 20 seconds for very slow networks
-        NetworkQuality.FAIR -> 15000L    // 15 seconds for cellular
-        NetworkQuality.GOOD -> 10000L    // 10 seconds for WiFi
-        NetworkQuality.EXCELLENT -> 5000L // 5 seconds for fast connections
+private fun startKeepAliveLoop() {
+    scope.launch {
+        while (isActive && isConnected) {
+            // Send a minimal packet to keep NAT mapping alive
+            sendAgentHeartbeat()
+            delay(KEEP_ALIVE_INTERVAL_MS)
+        }
     }
 }
 ```
 
-**Fix 0.3: Ensure CompleteAgentMovement is Sent Even on Delayed ACK**
+**Fix 0.2: Verify UseCircuitCode Response Handling**
 
-The current code waits for PacketAck before sending CompleteAgentMovement. On slow networks, we should also have a fallback timer:
+The WiFi log shows PacketAck is received and triggers CompleteAgentMovement. Check if the same happens on mobile:
 
 ```kotlin
-// In PacketAck handler (LinkpointApp.kt lines 1063-1114):
-// Add a fallback timer that sends CompleteAgentMovement after 10 seconds
-// even if ACK hasn't arrived, in case ACK was lost but server received packet
+// In PacketAck handler, add detailed logging:
+udpConnection.registerHandler(MessageIds.PACKET_ACK) { _, rawPacket ->
+    Log.i(TAG, "╔═══ PACKET_ACK RECEIVED ═══╗")
+    // ... parse ACKs ...
+    ackedSequences.forEach { seq ->
+        Log.i(TAG, "║ ACK for sequence: $seq")
+        if (seq == 0) {
+            Log.i(TAG, "║ ⭐ UseCircuitCode ACKed - triggering CompleteAgentMovement")
+        }
+    }
+    Log.i(TAG, "╚═══════════════════════════╝")
+}
+```
 
-private fun startCompleteAgentMovementFallback() {
-    applicationScope.launch {
-        delay(10000) // 10 second fallback
+**Fix 0.3: Add Fallback for Lost ACKs**
+
+Even if ACK is lost, try sending CompleteAgentMovement after a timeout:
+
+```kotlin
+// Start a fallback timer when UseCircuitCode is sent
+private fun sendUseCircuitCodeWithFallback() {
+    sendUseCircuitCode()
+    
+    // Fallback: Send CompleteAgentMovement after 5 seconds even without ACK
+    scope.launch {
+        delay(5000)
         if (!completeAgentMovementSent.get()) {
-            Log.w(TAG, "⚠️ ACK timeout - sending CompleteAgentMovement anyway")
-            udpConnection.sendCompleteAgentMovement()
+            Log.w(TAG, "⚠️ No ACK received - sending CompleteAgentMovement anyway")
+            sendCompleteAgentMovement()
             completeAgentMovementSent.set(true)
         }
     }
 }
 ```
 
+**Fix 0.4: Try TCP Fallback for Capabilities (Already Working)**
+
+The logs show capabilities loaded successfully (17 caps via HTTPS). This confirms HTTP works fine on mobile - only UDP has issues.
+
 **Validation**:
-- Test on cellular LTE network with Debug Floater enabled
-- Should see "RegionHandshake received" in logs
-- Region name should show actual region (not "Unknown")
+- Test on 5G with verbose logging enabled
+- Check if PacketAck for seq=0 is received
+- Check if CompleteAgentMovement is sent
+- Check if RegionHandshake arrives
 
 ---
 
