@@ -493,7 +493,6 @@ class UDPConnectionFixed {
      * Get the circuit code for this connection
      */
     fun getCircuitCode(): Int = circuitCode
-    }
     
     /**
      * Connect to the simulator
@@ -911,11 +910,6 @@ class UDPConnectionFixed {
      * @param data The complete packet data including header
      * @return true if handled successfully
      */
-            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
-                "Error handling PacketAck: ${e.message}")
-            return false
-        }
-    }
     
     /**
      * Process received ACK from server and invoke callbacks.
