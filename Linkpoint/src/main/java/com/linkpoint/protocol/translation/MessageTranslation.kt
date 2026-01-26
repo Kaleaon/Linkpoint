@@ -225,34 +225,10 @@ object MessageTranslation {
         
         /**
          * Get a human-readable name for a message ID.
+         * Delegates to the centralized MessageIds.getMessageName() for comprehensive coverage.
          */
         fun getName(messageId: Int): String {
-            return when (messageId) {
-                START_PING_CHECK -> "StartPingCheck"
-                COMPLETE_PING_CHECK -> "CompletePingCheck"
-                AGENT_UPDATE -> "AgentUpdate"
-                AGENT_ANIMATION -> "AgentAnimation"
-                OBJECT_UPDATE -> "ObjectUpdate"
-                OBJECT_UPDATE_COMPRESSED -> "ObjectUpdateCompressed"
-                OBJECT_UPDATE_CACHED -> "ObjectUpdateCached"
-                IMPROVED_TERSE_OBJECT_UPDATE -> "ImprovedTerseObjectUpdate"
-                KILL_OBJECT -> "KillObject"
-                AVATAR_ANIMATION -> "AvatarAnimation"
-                com.linkpoint.protocol.messages.MessageIds.SOUND_TRIGGER -> "SoundTrigger"
-                PACKET_ACK -> "PacketAck"
-                COARSE_LOCATION_UPDATE -> "CoarseLocationUpdate"
-                USE_CIRCUIT_CODE -> "UseCircuitCode"
-                COMPLETE_AGENT_MOVEMENT -> "CompleteAgentMovement"
-                LOGOUT_REQUEST -> "LogoutRequest"
-                REGION_HANDSHAKE -> "RegionHandshake"
-                REGION_HANDSHAKE_REPLY -> "RegionHandshakeReply"
-                AGENT_THROTTLE -> "AgentThrottle"
-                AGENT_MOVEMENT_COMPLETE -> "AgentMovementComplete"
-                CHAT_FROM_SIMULATOR -> "ChatFromSimulator"
-                IMPROVED_INSTANT_MESSAGE -> "ImprovedInstantMessage"
-                com.linkpoint.protocol.messages.MessageIds.SCRIPT_CONTROL_CHANGE -> "ScriptControlChange"
-                else -> "Unknown(0x${messageId.toString(16).uppercase()})"
-            }
+            return com.linkpoint.protocol.messages.MessageIds.getMessageName(messageId)
         }
     }
     
