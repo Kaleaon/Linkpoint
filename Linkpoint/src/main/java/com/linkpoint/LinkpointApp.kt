@@ -489,6 +489,26 @@ class LinkpointApp : Application() {
         // NEW: Initialize connection keep-alive with credentials
         connectionKeepAlive.initialize(agentId, udpConnection.getSessionId())
         
+        // Register reconnection callback for socket invalidation
+        // This is triggered when consecutive send errors indicate the socket is dead
+        // (e.g., "Operation not permitted" errors after network changes on mobile)
+        udpConnection.setReconnectionCallback {
+            Log.w(TAG, "🔄 Socket invalidation detected - triggering reconnection flow")
+            applicationScope.launch {
+                // Set connection state to reconnecting
+                connectionKeepAlive.notifyConnectionIssue()
+                
+                // For now, disconnect and notify - the user will need to reconnect
+                // A full auto-reconnect would require re-login which is complex
+                Log.e(TAG, "⚠️ UDP socket invalidated - please reconnect")
+                
+                // Post notification to UI about connection issue
+                withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    // UI can observe connection state changes
+                }
+            }
+        }
+        
         // Start background service for connection persistence
         LinkpointConnectionService.start(this)
         

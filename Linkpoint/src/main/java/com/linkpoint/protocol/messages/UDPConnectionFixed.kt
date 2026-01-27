@@ -319,6 +319,35 @@ class UDPConnectionFixed {
      */
     private var timeoutCheckerJob: Job? = null
     
+    // ==================== SEND ERROR TRACKING FOR RECONNECTION ====================
+    // Track consecutive send failures to detect socket invalidation (e.g., network change)
+    
+    /**
+     * Number of consecutive send errors encountered.
+     * When this exceeds [CONSECUTIVE_ERROR_THRESHOLD], we should trigger reconnection.
+     */
+    private val consecutiveSendErrors = AtomicInteger(0)
+    
+    /**
+     * Threshold for triggering reconnection due to consecutive send errors.
+     * Android socket errors like "Operation not permitted" indicate socket invalidation.
+     */
+    private val CONSECUTIVE_ERROR_THRESHOLD = 5
+    
+    /**
+     * Callback for notifying when reconnection is needed due to send failures.
+     * Set by LinkpointApp to trigger the reconnection flow.
+     */
+    private var reconnectionCallback: (() -> Unit)? = null
+    
+    /**
+     * Set a callback to be invoked when reconnection is needed.
+     * This is called when consecutive send errors exceed the threshold.
+     */
+    fun setReconnectionCallback(callback: () -> Unit) {
+        reconnectionCallback = callback
+    }
+    
     // ==================== PACKET HISTORY FOR RAW DATA LOGGING ====================
     // Critical for debugging: captures raw packet data with hex dumps.
     // This addresses the requirement: "we need raw input and output to understand"
@@ -748,6 +777,9 @@ class UDPConnectionFixed {
                                 // Publish message received event
                                 EventBus.publish(MessageReceivedEvent(messageId, data))
                                 
+                                // Track message for statistics (fixes "RegionHandshake never received" bug)
+                                trackMessageReceived(messageName)
+                                
                                 // Route message through router
                                 routeMessage(data)
                             }
@@ -889,6 +921,11 @@ class UDPConnectionFixed {
                 sequenceNumber = seqNum,
                 success = true
             )
+            
+            // Log ACKs sent to EnhancedPacketLogger for statistics
+            acksToSend.forEach { ackSeq ->
+                EnhancedPacketLogger.logAckSent(ackSeq)
+            }
             
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Failed to send PacketAck: ${e.message}")
@@ -1414,6 +1451,9 @@ class UDPConnectionFixed {
                 bytesSent.addAndGet(bytesWritten.toLong())
                 lastSendTime = System.currentTimeMillis()
                 
+                // Reset consecutive error counter on successful send
+                consecutiveSendErrors.set(0)
+                
                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sent packet: ${finalPacket.size} bytes (ID: $messageId, reliable: $reliable)")
                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "   Message: $messageName (seq: $seqNum)")
                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "   Full packet data: $fullHexDump")
@@ -1473,6 +1513,34 @@ class UDPConnectionFixed {
                 success = false,
                 errorMessage = e.message
             )
+            
+            // Track consecutive send errors for reconnection detection
+            val errorCount = consecutiveSendErrors.incrementAndGet()
+            NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, 
+                "Consecutive send errors: $errorCount (threshold: $CONSECUTIVE_ERROR_THRESHOLD)")
+            
+            // Check for critical errors that indicate socket invalidation
+            val errorMessage = e.message?.lowercase() ?: ""
+            if (errorMessage.contains("operation not permitted") ||
+                errorMessage.contains("network is unreachable") ||
+                errorMessage.contains("connection refused") ||
+                errorMessage.contains("broken pipe") ||
+                errorMessage.contains("socket closed")) {
+                
+                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                    "⚠️ Critical socket error detected: ${e.message}")
+                
+                if (errorCount >= CONSECUTIVE_ERROR_THRESHOLD) {
+                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                        "🔄 Too many consecutive send errors ($errorCount), triggering reconnection")
+                    
+                    // Trigger reconnection via callback
+                    reconnectionCallback?.invoke()
+                    
+                    // Reset counter after triggering reconnection
+                    consecutiveSendErrors.set(0)
+                }
+            }
         }
     }
     
