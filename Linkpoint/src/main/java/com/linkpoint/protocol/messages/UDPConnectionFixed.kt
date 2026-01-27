@@ -1090,7 +1090,11 @@ class UDPConnectionFixed {
         messageHandlers[messageId] = MessageHandler { msgId, data ->
             handler(msgId, data)
         }
-        
+
+        // Log handler registration with EnhancedPacketLogger for debug reports
+        val messageName = MessageIds.getMessageName(messageId)
+        EnhancedPacketLogger.logHandlerRegistered(messageId, messageName)
+
         // Register with messageRouter synchronously using runBlocking
         // This ensures handler is ready before we return
         kotlinx.coroutines.runBlocking {
@@ -1915,33 +1919,10 @@ class UDPConnectionFixed {
     
     /**
      * Get human-readable message name from ID for debugging.
+     * Uses the centralized MessageIds.getMessageName() for comprehensive coverage.
      */
     private fun getMessageName(messageId: Int): String {
-        return when (messageId) {
-            MessageIds.USE_CIRCUIT_CODE -> "UseCircuitCode"
-            MessageIds.COMPLETE_AGENT_MOVEMENT -> "CompleteAgentMovement"
-            MessageIds.LOGOUT_REQUEST -> "LogoutRequest"
-            MessageIds.REGION_HANDSHAKE -> "RegionHandshake"
-            MessageIds.REGION_HANDSHAKE_REPLY -> "RegionHandshakeReply"
-            MessageIds.AGENT_THROTTLE -> "AgentThrottle"
-            MessageIds.AGENT_MOVEMENT_COMPLETE -> "AgentMovementComplete"
-            MessageIds.CHAT_FROM_SIMULATOR -> "ChatFromSimulator"
-            MessageIds.IMPROVED_INSTANT_MESSAGE -> "ImprovedInstantMessage"
-            MessageIds.OBJECT_UPDATE -> "ObjectUpdate"
-            MessageIds.OBJECT_UPDATE_COMPRESSED -> "ObjectUpdateCompressed"
-            MessageIds.IMPROVED_TERSE_OBJECT_UPDATE -> "ImprovedTerseObjectUpdate"
-            MessageIds.AVATAR_ANIMATION -> "AvatarAnimation"
-            MessageIds.AGENT_ANIMATION -> "AgentAnimation"
-            MessageIds.COARSE_LOCATION_UPDATE -> "CoarseLocationUpdate"
-            MessageIds.KILL_OBJECT -> "KillObject"
-            MessageIds.LAYER_DATA -> "LayerData"
-            MessageIds.PACKET_ACK -> "PacketAck"
-            MessageIds.START_PING_CHECK -> "StartPingCheck"
-            MessageIds.COMPLETE_PING_CHECK -> "CompletePingCheck"
-            MessageIds.AGENT_UPDATE -> "AgentUpdate"
-            MessageIds.SOUND_TRIGGER -> "SoundTrigger"
-            else -> "Unknown(0x${messageId.toString(16).uppercase()})"
-        }
+        return MessageIds.getMessageName(messageId)
     }
     
     /**

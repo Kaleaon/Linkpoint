@@ -1945,7 +1945,230 @@ object MessageIds {
     // --- UUID Request Messages ---
     /** UUIDNameRequest - Request name for UUID */
     const val UUID_NAME_REQUEST = (0xFFFF00ED).toInt()           // Wire: FF FF 00 ED = -65299
-    
+
     /** UUIDGroupNameRequest - Request group name for UUID */
     const val UUID_GROUP_NAME_REQUEST = (0xFFFF00EF).toInt()     // Wire: FF FF 00 EF = -65297
+
+    // =====================================
+    // MESSAGE NAME LOOKUP
+    // =====================================
+
+    /**
+     * Get human-readable message name from message ID.
+     * This is the canonical lookup function - use this instead of maintaining
+     * duplicate mappings elsewhere.
+     *
+     * @param messageId The message ID (can be positive, negative, or medium frequency)
+     * @return Human-readable message name, or "Unknown(0xXXXX)" if not found
+     */
+    fun getMessageName(messageId: Int): String {
+        return messageNameMap[messageId] ?: formatUnknownMessageId(messageId)
+    }
+
+    /**
+     * Format an unknown message ID for display.
+     * Shows the ID in appropriate format based on frequency band.
+     */
+    private fun formatUnknownMessageId(messageId: Int): String {
+        return when {
+            // High frequency (1-254)
+            messageId in 1..254 -> "Unknown(0x${messageId.toString(16).uppercase().padStart(2, '0')})"
+            // Medium frequency (65280-65535, i.e., 0xFF00-0xFFFF)
+            messageId in 65280..65535 -> {
+                val lowByte = messageId and 0xFF
+                "Unknown(0xFF${lowByte.toString(16).uppercase().padStart(2, '0')})"
+            }
+            // Low frequency (negative values, 0xFFFFxxxx)
+            messageId < 0 -> {
+                // Convert to unsigned representation for display
+                val unsignedVal = messageId.toLong() and 0xFFFFFFFFL
+                "Unknown(0x${unsignedVal.toString(16).uppercase().padStart(8, '0')})"
+            }
+            // PacketAck special case (-5)
+            else -> "Unknown(0x${messageId.toString(16).uppercase()})"
+        }
+    }
+
+    /**
+     * Map of all known message IDs to their names.
+     * Comprehensive lookup for protocol debugging and logging.
+     */
+    private val messageNameMap: Map<Int, String> by lazy {
+        mapOf(
+            // High Frequency Messages (1-254)
+            START_PING_CHECK to "StartPingCheck",
+            COMPLETE_PING_CHECK to "CompletePingCheck",
+            NEIGHBOR_LIST to "NeighborList",
+            AGENT_UPDATE to "AgentUpdate",
+            AGENT_ANIMATION_HF to "AgentAnimation",
+            REQUEST_IMAGE to "RequestImage",
+            IMAGE_DATA to "ImageData",
+            IMAGE_PACKET to "ImagePacket",
+            LAYER_DATA to "LayerData",
+            OBJECT_UPDATE to "ObjectUpdate",
+            OBJECT_UPDATE_COMPRESSED to "ObjectUpdateCompressed",
+            OBJECT_UPDATE_CACHED to "ObjectUpdateCached",
+            IMPROVED_TERSE_OBJECT_UPDATE to "ImprovedTerseObjectUpdate",
+            KILL_OBJECT to "KillObject",
+            TRANSFER_PACKET to "TransferPacket",
+            SEND_XFER_PACKET to "SendXferPacket",
+            CONFIRM_XFER_PACKET to "ConfirmXferPacket",
+            AVATAR_ANIMATION to "AvatarAnimation",
+            AVATAR_SIT_RESPONSE to "AvatarSitResponse",
+            CAMERA_CONSTRAINT to "CameraConstraint",
+            PARCEL_PROPERTIES to "ParcelProperties",
+            EDGE_DATA_PACKET to "EdgeDataPacket",
+            CHILD_AGENT_UPDATE to "ChildAgentUpdate",
+            CHILD_AGENT_ALIVE to "ChildAgentAlive",
+            CHILD_AGENT_POSITION_UPDATE to "ChildAgentPositionUpdate",
+            ATOMIC_PASS_OBJECT to "AtomicPassObject",
+            SOUND_TRIGGER to "SoundTrigger",
+            PACKET_ACK to "PacketAck",
+
+            // Medium Frequency Messages (65280-65535)
+            COARSE_LOCATION_UPDATE to "CoarseLocationUpdate",
+            CROSSED_REGION to "CrossedRegion",
+            CONFIRM_ENABLE_SIMULATOR to "ConfirmEnableSimulator",
+            OBJECT_PROPERTIES to "ObjectProperties",
+            OBJECT_PROPERTIES_FAMILY to "ObjectPropertiesFamily",
+            REQUEST_OBJECT_PROPERTIES_FAMILY to "RequestObjectPropertiesFamily",
+            OBJECT_ADD to "ObjectAdd",
+            OBJECT_POSITION to "ObjectPosition",
+            PARCEL_PROPERTIES_REQUEST to "ParcelPropertiesRequest",
+            SIM_STATUS to "SimStatus",
+            ATTACHED_SOUND to "AttachedSound",
+            ATTACHED_SOUND_GAIN_CHANGE to "AttachedSoundGainChange",
+            PRELOAD_SOUND to "PreloadSound",
+            INTERNAL_SCRIPT_MAIL to "InternalScriptMail",
+            VIEWER_EFFECT to "ViewerEffect",
+
+            // Low Frequency Messages (negative values)
+            USE_CIRCUIT_CODE to "UseCircuitCode",
+            REGION_HANDSHAKE to "RegionHandshake",
+            REGION_HANDSHAKE_REPLY to "RegionHandshakeReply",
+            AGENT_THROTTLE to "AgentThrottle",
+            CHAT_FROM_SIMULATOR to "ChatFromSimulator",
+            COMPLETE_AGENT_MOVEMENT to "CompleteAgentMovement",
+            AGENT_MOVEMENT_COMPLETE to "AgentMovementComplete",
+            LOGOUT_REQUEST to "LogoutRequest",
+            LOGOUT_REPLY to "LogoutReply",
+            IMPROVED_INSTANT_MESSAGE to "ImprovedInstantMessage",
+            CHAT_FROM_VIEWER to "ChatFromViewer",
+            AGENT_ANIMATION to "AgentAnimation",
+            AGENT_SET_APPEARANCE to "AgentSetAppearance",
+            AGENT_IS_NOW_WEARING to "AgentIsNowWearing",
+            AGENT_REQUEST_SIT to "AgentRequestSit",
+            AGENT_SIT to "AgentSit",
+            AGENT_DATA_UPDATE to "AgentDataUpdate",
+            HEALTH_MESSAGE to "HealthMessage",
+            ONLINE_NOTIFICATION to "OnlineNotification",
+            OFFLINE_NOTIFICATION to "OfflineNotification",
+            CHANGE_USER_RIGHTS to "ChangeUserRights",
+            PARCEL_OVERLAY to "ParcelOverlay",
+            OBJECT_SELECT to "ObjectSelect",
+            MULTIPLE_OBJECT_UPDATE to "MultipleObjectUpdate",
+            REZ_OBJECT to "RezObject",
+            DEREZ_OBJECT to "DeRezObject",
+            OBJECT_DELETE to "ObjectDelete",
+            OBJECT_LINK to "ObjectLink",
+            OBJECT_DELINK to "ObjectDelink",
+            OBJECT_NAME to "ObjectName",
+            OBJECT_DESCRIPTION to "ObjectDescription",
+            OBJECT_GRAB to "ObjectGrab",
+            OBJECT_DEGRAB to "ObjectDeGrab",
+            REQUEST_MULTIPLE_OBJECTS to "RequestMultipleObjects",
+            SCRIPT_CONTROL_CHANGE to "ScriptControlChange",
+            MOVE_INVENTORY_ITEM to "MoveInventoryItem",
+            TELEPORT_LANDMARK_REQUEST to "TeleportLandmarkRequest",
+            TELEPORT_HOME_REQUEST to "TeleportHomeRequest",
+            TELEPORT_LOCATION_REQUEST to "TeleportLocationRequest",
+            TELEPORT_LURE_REQUEST to "TeleportLureRequest",
+            START_LURE to "StartLure",
+            TELEPORT_FINISH to "TeleportFinish",
+            TELEPORT_FAILED to "TeleportFailed",
+            TELEPORT_PROGRESS to "TeleportProgress",
+            TELEPORT_START to "TeleportStart",
+            TELEPORT_LOCAL to "TeleportLocal",
+            TELEPORT_CANCEL to "TeleportCancel",
+            TELEPORT_REQUEST to "TeleportRequest",
+            ACTIVATE_GROUP to "ActivateGroup",
+            LEAVE_GROUP_REQUEST to "LeaveGroupRequest",
+            GROUP_PROFILE_REQUEST to "GroupProfileRequest",
+            TERMINATE_FRIENDSHIP to "TerminateFriendship",
+            GRANT_USER_RIGHTS to "GrantUserRights",
+            FIND_AGENT to "FindAgent",
+            PARCEL_BUY to "ParcelBuy",
+            PARCEL_DEED_TO_GROUP to "ParcelDeedToGroup",
+            PARCEL_RELEASE to "ParcelRelease",
+            PARCEL_PROPERTIES_UPDATE to "ParcelPropertiesUpdate",
+            PARCEL_RETURN_OBJECTS to "ParcelReturnObjects",
+            PARCEL_ACCESS_LIST_UPDATE to "ParcelAccessListUpdate",
+            ESTATE_OWNER_MESSAGE to "EstateOwnerMessage",
+            FREEZE_USER to "FreezeUser",
+            ACTIVATE_GESTURES to "ActivateGestures",
+            DEACTIVATE_GESTURES to "DeactivateGestures",
+            COPY_INVENTORY_ITEM to "CopyInventoryItem",
+            UPDATE_INVENTORY_ITEM to "UpdateInventoryItem",
+            CREATE_INVENTORY_FOLDER to "CreateInventoryFolder",
+            REZ_SINGLE_ATTACHMENT_FROM_INV to "RezSingleAttachmentFromInv",
+            ALERT_MESSAGE to "AlertMessage",
+            AGENT_ALERT_MESSAGE to "AgentAlertMessage",
+            ENABLE_SIMULATOR to "EnableSimulator",
+            DISABLE_SIMULATOR to "DisableSimulator",
+            SCRIPT_DIALOG to "ScriptDialog",
+            SCRIPT_DIALOG_REPLY to "ScriptDialogReply",
+            SCRIPT_QUESTION to "ScriptQuestion",
+            LOAD_URL to "LoadURL",
+            MONEY_BALANCE_REPLY to "MoneyBalanceReply",
+            MONEY_BALANCE_REQUEST to "MoneyBalanceRequest",
+            ECONOMY_DATA to "EconomyData",
+            INVENTORY_DESCENDENTS to "InventoryDescendents",
+            FETCH_INVENTORY_REPLY to "FetchInventoryReply",
+            BULK_UPDATE_INVENTORY to "BulkUpdateInventory",
+            UPDATE_CREATE_INVENTORY_ITEM to "UpdateCreateInventoryItem",
+            REMOVE_INVENTORY_ITEM to "RemoveInventoryItem",
+            REMOVE_INVENTORY_FOLDER to "RemoveInventoryFolder",
+            AVATAR_APPEARANCE to "AvatarAppearance",
+            AGENT_WEARABLES_UPDATE to "AgentWearablesUpdate",
+            AGENT_CACHED_TEXTURE to "AgentCachedTexture",
+            AGENT_CACHED_TEXTURE_RESPONSE to "AgentCachedTextureResponse",
+            AVATAR_PROPERTIES_REPLY to "AvatarPropertiesReply",
+            AVATAR_PROPERTIES_REQUEST to "AvatarPropertiesRequest",
+            AVATAR_INTERESTS_REPLY to "AvatarInterestsReply",
+            AVATAR_GROUPS_REPLY to "AvatarGroupsReply",
+            GROUP_PROFILE_REPLY to "GroupProfileReply",
+            GROUP_MEMBERS_REPLY to "GroupMembersReply",
+            GROUP_ROLE_DATA_REPLY to "GroupRoleDataReply",
+            GROUP_TITLES_REPLY to "GroupTitlesReply",
+            GROUP_NOTICE_ADD to "GroupNoticeAdd",
+            AGENT_GROUP_DATA_UPDATE to "AgentGroupDataUpdate",
+            ACCEPT_FRIENDSHIP to "AcceptFriendship",
+            DECLINE_FRIENDSHIP to "DeclineFriendship",
+            FORM_FRIENDSHIP to "FormFriendship",
+            MAP_BLOCK_REPLY to "MapBlockReply",
+            MAP_ITEM_REPLY to "MapItemReply",
+            MAP_LAYER_REPLY to "MapLayerReply",
+            DIR_PLACES_REPLY to "DirPlacesReply",
+            DIR_PEOPLE_REPLY to "DirPeopleReply",
+            DIR_GROUPS_REPLY to "DirGroupsReply",
+            DIR_EVENTS_REPLY to "DirEventsReply",
+            DIR_LAND_REPLY to "DirLandReply",
+            DIR_CLASSIFIED_REPLY to "DirClassifiedReply",
+            REGION_INFO to "RegionInfo",
+            SIM_STATS to "SimStats",
+            ESTATE_COVENANT_REPLY to "EstateCovenantReply",
+            PARCEL_INFO_REPLY to "ParcelInfoReply",
+            PARCEL_ACCESS_LIST_REPLY to "ParcelAccessListReply",
+            PARCEL_DWELL_REPLY to "ParcelDwellReply",
+            TRANSFER_INFO to "TransferInfo",
+            ABORT_XFER to "AbortXfer",
+            MEAN_COLLISION_ALERT to "MeanCollisionAlert",
+            UUID_NAME_REPLY to "UUIDNameReply",
+            UUID_GROUP_NAME_REPLY to "UUIDGroupNameReply",
+            CLOSE_CIRCUIT to "CloseCircuit",
+            OPEN_CIRCUIT to "OpenCircuit",
+            ADD_CIRCUIT_CODE to "AddCircuitCode",
+            SIM_CRASHED to "SimCrashed"
+        )
+    }
 }
