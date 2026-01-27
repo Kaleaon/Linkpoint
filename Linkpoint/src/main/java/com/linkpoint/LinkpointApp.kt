@@ -501,11 +501,6 @@ class LinkpointApp : Application() {
                 // For now, disconnect and notify - the user will need to reconnect
                 // A full auto-reconnect would require re-login which is complex
                 Log.e(TAG, "⚠️ UDP socket invalidated - please reconnect")
-                
-                // Post notification to UI about connection issue
-                withContext(kotlinx.coroutines.Dispatchers.Main) {
-                    // UI can observe connection state changes
-                }
             }
         }
         

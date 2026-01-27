@@ -184,6 +184,12 @@ class UDPConnectionFixed {
         
         /** Unanswered pings before disconnect from Lumiya (3) */
         private val UNANSWERED_PINGS_DISCONNECT = LumiyaConstants.UNANSWERED_PINGS_DISCONNECT
+        
+        /**
+         * Threshold for triggering reconnection due to consecutive send errors.
+         * Android socket errors like "Operation not permitted" indicate socket invalidation.
+         */
+        const val CONSECUTIVE_ERROR_THRESHOLD = 5
     }
     
     // Connection parameters
@@ -329,10 +335,15 @@ class UDPConnectionFixed {
     private val consecutiveSendErrors = AtomicInteger(0)
     
     /**
-     * Threshold for triggering reconnection due to consecutive send errors.
-     * Android socket errors like "Operation not permitted" indicate socket invalidation.
+     * Error messages that indicate socket invalidation requiring reconnection.
      */
-    private val CONSECUTIVE_ERROR_THRESHOLD = 5
+    private val SOCKET_INVALIDATION_ERRORS = listOf(
+        "operation not permitted",
+        "network is unreachable", 
+        "connection refused",
+        "broken pipe",
+        "socket closed"
+    )
     
     /**
      * Callback for notifying when reconnection is needed due to send failures.
@@ -1521,12 +1532,9 @@ class UDPConnectionFixed {
             
             // Check for critical errors that indicate socket invalidation
             val errorMessage = e.message?.lowercase() ?: ""
-            if (errorMessage.contains("operation not permitted") ||
-                errorMessage.contains("network is unreachable") ||
-                errorMessage.contains("connection refused") ||
-                errorMessage.contains("broken pipe") ||
-                errorMessage.contains("socket closed")) {
-                
+            val isSocketInvalidationError = SOCKET_INVALIDATION_ERRORS.any { errorMessage.contains(it) }
+            
+            if (isSocketInvalidationError) {
                 NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
                     "⚠️ Critical socket error detected: ${e.message}")
                 
