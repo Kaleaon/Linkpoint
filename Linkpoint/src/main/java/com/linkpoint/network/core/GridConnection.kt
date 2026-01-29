@@ -9,6 +9,11 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.security.MessageDigest
 import java.util.UUID
 
 /**
@@ -110,6 +115,11 @@ class GridConnection(
      * Login thread
      */
     private var loginThread: Thread? = null
+
+    /**
+     * HTTP client for login requests
+     */
+    private val httpClient by lazy { OkHttpClient() }
     
     // ==================== CONNECTION MANAGEMENT ====================
     
@@ -176,25 +186,27 @@ class GridConnection(
             // which provides the sim IP/port. This class can receive that info via
             // the setAuthReply() method or by extending the connect() signature.
             
-            // For now, indicate we need authentication data to be set externally
-            // This simulates waiting for auth response
-            delay(100)
-            
             if (authReply == null) {
-                // No pre-set auth reply - this is a stub/test scenario
-                // In production, authReply should be set before calling connect
-                // or passed through from the actual login response
-                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, 
-                    "No auth reply set - operating in stub mode. " +
-                    "For real connections, use SecondLifeProtocol.login() instead.")
+                // Try to perform actual login if authReply is not set but we have params
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Performing direct login request...")
+                val reply = performLogin(params)
                 
-                authReply = AuthReply(
-                    sessionId = UUID.randomUUID(),
-                    agentId = UUID.randomUUID(),
-                    circuitCode = 123456789,
-                    simIP = "0.0.0.0",  // Placeholder - actual IP comes from login response
-                    simPort = 0         // Placeholder - actual port comes from login response
-                )
+                if (reply != null) {
+                    authReply = reply
+                    NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
+                        "Login successful: ${reply.simIP}:${reply.simPort}")
+                } else {
+                    NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
+                        "Login failed or not implemented fully - operating in stub mode.")
+
+                    authReply = AuthReply(
+                        sessionId = UUID.randomUUID(),
+                        agentId = UUID.randomUUID(),
+                        circuitCode = 123456789,
+                        simIP = "0.0.0.0",
+                        simPort = 0
+                    )
+                }
             }
             
             // Validate auth reply was created successfully
@@ -223,6 +235,130 @@ class GridConnection(
     }
     
     /**
+     * Perform HTTP login request and parse response
+     */
+    private suspend fun performLogin(params: AuthParams): AuthReply? = withContext(Dispatchers.IO) {
+        try {
+            val requestBody = buildLoginXml(params).toRequestBody("text/xml".toMediaType())
+
+            val request = Request.Builder()
+                .url(params.gridUrl)
+                .post(requestBody)
+                .header("Content-Type", "text/xml")
+                .header("Accept", "text/xml, application/xml")
+                .header("User-Agent", "Linkpoint/1.0.0 (Android)")
+                .build()
+
+            val response = httpClient.newCall(request).execute()
+            val responseBody = response.body?.string() ?: ""
+            response.close()
+
+            if (!response.isSuccessful) {
+                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                    "Login request failed: ${response.code}")
+                return@withContext null
+            }
+
+            // Parse response
+            val sessionIdStr = extractXmlValue(responseBody, "session_id")
+            val agentIdStr = extractXmlValue(responseBody, "agent_id")
+            val circuitCodeStr = extractXmlValue(responseBody, "circuit_code")
+            val simIpStr = extractXmlValue(responseBody, "sim_ip")
+            val simPortStr = extractXmlValue(responseBody, "sim_port")
+
+            if (sessionIdStr != null && agentIdStr != null && simIpStr != null && simPortStr != null) {
+                return@withContext AuthReply(
+                    sessionId = try { UUID.fromString(sessionIdStr) } catch (e: Exception) { UUID.randomUUID() },
+                    agentId = try { UUID.fromString(agentIdStr) } catch (e: Exception) { UUID.randomUUID() },
+                    circuitCode = circuitCodeStr?.toIntOrNull() ?: 0,
+                    simIP = simIpStr,
+                    simPort = simPortStr.toIntOrNull() ?: 0
+                )
+            }
+
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                "Login response missing required fields")
+            return@withContext null
+
+        } catch (e: Exception) {
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                "Login exception: ${e.message}")
+            return@withContext null
+        }
+    }
+
+    private fun extractXmlValue(xml: String, name: String): String? {
+        // Try string type
+        val stringPattern = "<name>$name</name>\\s*<value>\\s*<string>([^<]*)</string>".toRegex()
+        stringPattern.find(xml)?.groupValues?.get(1)?.let { return it }
+
+        // Try uuid type
+        val uuidPattern = "<name>$name</name>\\s*<value>\\s*<uuid>([^<]*)</uuid>".toRegex()
+        uuidPattern.find(xml)?.groupValues?.get(1)?.let { return it }
+
+        // Try integer types
+        val i4Pattern = "<name>$name</name>\\s*<value>\\s*<i4>([^<]*)</i4>".toRegex()
+        i4Pattern.find(xml)?.groupValues?.get(1)?.let { return it }
+
+        val intPattern = "<name>$name</name>\\s*<value>\\s*<int>([^<]*)</int>".toRegex()
+        intPattern.find(xml)?.groupValues?.get(1)?.let { return it }
+
+        return null
+    }
+
+    private fun buildLoginXml(params: AuthParams): String {
+        val safeFirstName = params.firstName
+        val safeLastName = params.lastName
+        val safePassword = createPasswordHash(params.password)
+        val safeStart = params.startLocation
+
+        // Basic Viewer ID info
+        val viewerDigest = "" // Not calculating in this simplified version
+        val macAddress = params.mac ?: ""
+        val id0 = params.id0 ?: ""
+
+        return buildString {
+            append("<?xml version=\"1.0\"?>")
+            append("<methodCall>")
+            append("<methodName>login_to_simulator</methodName>")
+            append("<params>")
+            append("<param>")
+            append("<value><struct>")
+
+            append("<member><name>first</name><value><string>$safeFirstName</string></value></member>")
+            append("<member><name>last</name><value><string>$safeLastName</string></value></member>")
+            append("<member><name>passwd</name><value><string>$safePassword</string></value></member>")
+            append("<member><name>start</name><value><string>$safeStart</string></value></member>")
+
+            append("<member><name>channel</name><value><string>${params.viewerChannel}</string></value></member>")
+            append("<member><name>version</name><value><string>${params.viewerVersion}</string></value></member>")
+            append("<member><name>platform</name><value><string>Android</string></value></member>")
+
+            append("<member><name>mac</name><value><string>$macAddress</string></value></member>")
+            append("<member><name>id0</name><value><string>$id0</string></value></member>")
+
+            append("<member><name>agree_to_tos</name><value><string>true</string></value></member>")
+            append("<member><name>read_critical</name><value><string>true</string></value></member>")
+
+            append("</struct></value>")
+            append("</param>")
+            append("</params>")
+            append("</methodCall>")
+        }
+    }
+
+    private fun createPasswordHash(password: String): String {
+        if (password.length == 35 && password.startsWith("\$1\$")) {
+            return password
+        }
+        val truncatedPassword = password.trim().take(16)
+        val md = MessageDigest.getInstance("MD5")
+        val digest = md.digest(truncatedPassword.toByteArray())
+        val hash = digest.joinToString("") { "%02x".format(it) }
+        return "\$1\$${hash}"
+    }
+
+    /**
      * Set the authentication reply from an external source (e.g., SecondLifeProtocol.login()).
      * Call this before connect() when you have pre-authenticated data.
      */
@@ -247,6 +383,7 @@ class GridConnection(
                 agentCircuit = null
                 
                 // Clean up temp circuits
+                tempCircuits.values.forEach { it.close() }
                 tempCircuits.values.forEach { it.close() }
                 tempCircuits.clear()
                 
