@@ -2,7 +2,7 @@
 # Linkpoint PWA - Build Verification Script
 # This script verifies that all required files exist for Vercel deployment
 
-set -e
+# set -e removed to allow reporting of multiple failures and avoid arithmetic expansion issues
 
 echo "🔍 Verifying Linkpoint PWA Build..."
 echo ""
