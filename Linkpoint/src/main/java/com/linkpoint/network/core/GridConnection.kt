@@ -249,37 +249,36 @@ class GridConnection(
                 .header("User-Agent", "Linkpoint/1.0.0 (Android)")
                 .build()
 
-            val response = httpClient.newCall(request).execute()
-            val responseBody = response.body?.string() ?: ""
-            response.close()
+            return@withContext httpClient.newCall(request).execute().use { response ->
+                val responseBody = response.body?.string() ?: ""
 
-            if (!response.isSuccessful) {
-                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
-                    "Login request failed: ${response.code}")
-                return@withContext null
+                if (!response.isSuccessful) {
+                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                        "Login request failed: ${response.code}")
+                    return@withContext null
+                }
+
+                // Parse response
+                val sessionIdStr = extractXmlValue(responseBody, "session_id")
+                val agentIdStr = extractXmlValue(responseBody, "agent_id")
+                val circuitCodeStr = extractXmlValue(responseBody, "circuit_code")
+                val simIpStr = extractXmlValue(responseBody, "sim_ip")
+                val simPortStr = extractXmlValue(responseBody, "sim_port")
+
+                if (sessionIdStr != null && agentIdStr != null && simIpStr != null && simPortStr != null) {
+                    AuthReply(
+                        sessionId = try { UUID.fromString(sessionIdStr) } catch (e: Exception) { UUID.randomUUID() },
+                        agentId = try { UUID.fromString(agentIdStr) } catch (e: Exception) { UUID.randomUUID() },
+                        circuitCode = circuitCodeStr?.toIntOrNull() ?: 0,
+                        simIP = simIpStr,
+                        simPort = simPortStr.toIntOrNull() ?: 0
+                    )
+                } else {
+                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                        "Login response missing required fields")
+                    null
+                }
             }
-
-            // Parse response
-            val sessionIdStr = extractXmlValue(responseBody, "session_id")
-            val agentIdStr = extractXmlValue(responseBody, "agent_id")
-            val circuitCodeStr = extractXmlValue(responseBody, "circuit_code")
-            val simIpStr = extractXmlValue(responseBody, "sim_ip")
-            val simPortStr = extractXmlValue(responseBody, "sim_port")
-
-            if (sessionIdStr != null && agentIdStr != null && simIpStr != null && simPortStr != null) {
-                return@withContext AuthReply(
-                    sessionId = try { UUID.fromString(sessionIdStr) } catch (e: Exception) { UUID.randomUUID() },
-                    agentId = try { UUID.fromString(agentIdStr) } catch (e: Exception) { UUID.randomUUID() },
-                    circuitCode = circuitCodeStr?.toIntOrNull() ?: 0,
-                    simIP = simIpStr,
-                    simPort = simPortStr.toIntOrNull() ?: 0
-                )
-            }
-
-            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
-                "Login response missing required fields")
-            return@withContext null
-
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
                 "Login exception: ${e.message}")
