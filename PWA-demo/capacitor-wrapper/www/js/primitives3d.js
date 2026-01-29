@@ -256,54 +256,80 @@ class Primitives3D {
    * Calculate tangents for normal mapping
    */
   static calculateTangents(vertices, normals, texCoords, indices) {
-    const tangents = new Array(vertices.length).fill(0);
-    const bitangents = new Array(vertices.length).fill(0);
+    // Use Float32Array for better performance
+    const vertexCount = vertices.length;
+    const tangents = new Float32Array(vertexCount);
 
-    for (let i = 0; i < indices.length; i += 3) {
-      const i0 = indices[i] * 3;
-      const i1 = indices[i + 1] * 3;
-      const i2 = indices[i + 2] * 3;
+    // Cache lengths for loop bounds
+    const indexCount = indices.length;
 
-      const v0 = [vertices[i0], vertices[i0 + 1], vertices[i0 + 2]];
-      const v1 = [vertices[i1], vertices[i1 + 1], vertices[i1 + 2]];
-      const v2 = [vertices[i2], vertices[i2 + 1], vertices[i2 + 2]];
+    // Variables for loop to avoid allocation
+    let i0, i1, i2;
+    let x1, y1, z1, x2, y2, z2;
+    let s1, t1, s2, t2;
+    let r;
+    let tx, ty, tz;
 
-      const uv0 = [texCoords[indices[i] * 2], texCoords[indices[i] * 2 + 1]];
-      const uv1 = [texCoords[indices[i + 1] * 2], texCoords[indices[i + 1] * 2 + 1]];
-      const uv2 = [texCoords[indices[i + 2] * 2], texCoords[indices[i + 2] * 2 + 1]];
+    for (let i = 0; i < indexCount; i += 3) {
+      i0 = indices[i] * 3;
+      i1 = indices[i + 1] * 3;
+      i2 = indices[i + 2] * 3;
 
-      const edge1 = [v1[0] - v0[0], v1[1] - v0[1], v1[2] - v0[2]];
-      const edge2 = [v2[0] - v0[0], v2[1] - v0[1], v2[2] - v0[2]];
+      // Vertices
+      // v1 - v0
+      x1 = vertices[i1] - vertices[i0];
+      y1 = vertices[i1 + 1] - vertices[i0 + 1];
+      z1 = vertices[i1 + 2] - vertices[i0 + 2];
 
-      const deltaUV1 = [uv1[0] - uv0[0], uv1[1] - uv0[1]];
-      const deltaUV2 = [uv2[0] - uv0[0], uv2[1] - uv0[1]];
+      // v2 - v0
+      x2 = vertices[i2] - vertices[i0];
+      y2 = vertices[i2 + 1] - vertices[i0 + 1];
+      z2 = vertices[i2 + 2] - vertices[i0 + 2];
 
-      const f = 1.0 / (deltaUV1[0] * deltaUV2[1] - deltaUV2[0] * deltaUV1[1]);
+      // UVs
+      // uv1 - uv0
+      s1 = texCoords[indices[i + 1] * 2] - texCoords[indices[i] * 2];
+      t1 = texCoords[indices[i + 1] * 2 + 1] - texCoords[indices[i] * 2 + 1];
 
-      const tangent = [
-        f * (deltaUV2[1] * edge1[0] - deltaUV1[1] * edge2[0]),
-        f * (deltaUV2[1] * edge1[1] - deltaUV1[1] * edge2[1]),
-        f * (deltaUV2[1] * edge1[2] - deltaUV1[1] * edge2[2])
-      ];
+      // uv2 - uv0
+      s2 = texCoords[indices[i + 2] * 2] - texCoords[indices[i] * 2];
+      t2 = texCoords[indices[i + 2] * 2 + 1] - texCoords[indices[i] * 2 + 1];
 
-      tangents[i0] += tangent[0];
-      tangents[i0 + 1] += tangent[1];
-      tangents[i0 + 2] += tangent[2];
-      tangents[i1] += tangent[0];
-      tangents[i1 + 1] += tangent[1];
-      tangents[i1 + 2] += tangent[2];
-      tangents[i2] += tangent[0];
-      tangents[i2 + 1] += tangent[1];
-      tangents[i2 + 2] += tangent[2];
+      r = 1.0 / (s1 * t2 - s2 * t1);
+
+      // Tangent
+      tx = (t2 * x1 - t1 * x2) * r;
+      ty = (t2 * y1 - t1 * y2) * r;
+      tz = (t2 * z1 - t1 * z2) * r;
+
+      // Accumulate
+      tangents[i0] += tx;
+      tangents[i0 + 1] += ty;
+      tangents[i0 + 2] += tz;
+
+      tangents[i1] += tx;
+      tangents[i1 + 1] += ty;
+      tangents[i1 + 2] += tz;
+
+      tangents[i2] += tx;
+      tangents[i2 + 1] += ty;
+      tangents[i2 + 2] += tz;
     }
 
     // Normalize tangents
-    for (let i = 0; i < tangents.length; i += 3) {
-      const len = Math.sqrt(tangents[i] ** 2 + tangents[i + 1] ** 2 + tangents[i + 2] ** 2);
-      if (len > 0) {
-        tangents[i] /= len;
-        tangents[i + 1] /= len;
-        tangents[i + 2] /= len;
+    const lenTangents = tangents.length;
+    for (let i = 0; i < lenTangents; i += 3) {
+      const x = tangents[i];
+      const y = tangents[i + 1];
+      const z = tangents[i + 2];
+
+      const sqLen = x * x + y * y + z * z;
+
+      if (sqLen > 1e-12) {
+        const invLen = 1.0 / Math.sqrt(sqLen);
+        tangents[i] = x * invLen;
+        tangents[i + 1] = y * invLen;
+        tangents[i + 2] = z * invLen;
       }
     }
 
