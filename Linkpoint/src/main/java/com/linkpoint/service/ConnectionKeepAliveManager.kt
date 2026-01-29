@@ -156,6 +156,22 @@ class ConnectionKeepAliveManager(
         }
     }
     
+    /**
+     * Notify that a critical connection issue was detected.
+     * This is called when the UDP socket becomes invalid (e.g., "Operation not permitted" errors).
+     */
+    fun notifyConnectionIssue() {
+        Log.w(TAG, "⚠️ Critical connection issue detected - socket may be invalid")
+        _connectionState.value = ConnectionState.ERROR
+        notifyStateChange(ConnectionState.ERROR)
+        
+        // Attempt reconnection through the keep-alive mechanism
+        scope.launch {
+            delay(RECONNECT_DELAY_MS)
+            attemptReconnect()
+        }
+    }
+    
     private fun startPingLoop() {
         pingJob?.cancel()
         pingJob = scope.launch {
@@ -383,7 +399,8 @@ class ConnectionKeepAliveManager(
 enum class ConnectionState {
     CONNECTED,
     RECONNECTING,
-    DISCONNECTED
+    DISCONNECTED,
+    ERROR  // Socket invalidated, needs full reconnection
 }
 
 /**
