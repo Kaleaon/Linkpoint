@@ -130,13 +130,18 @@ class ParticleSystem(
         }
         
         // Update existing particles
-        val iterator = source.particles.iterator()
-        while (iterator.hasNext()) {
-            val particle = iterator.next()
+        var i = 0
+        while (i < source.particles.size) {
+            val particle = source.particles[i]
             particle.age += deltaTime
             
             if (particle.age >= particle.lifetime) {
-                iterator.remove()
+                // Swap-remove optimization for O(1) removal
+                val lastIndex = source.particles.size - 1
+                if (i < lastIndex) {
+                    source.particles[i] = source.particles[lastIndex]
+                }
+                source.particles.removeAt(lastIndex)
                 continue
             }
             
@@ -167,6 +172,7 @@ class ParticleSystem(
                 val t = particle.age / particle.lifetime
                 particle.scale = params.startScale.lerp(params.endScale, t)
             }
+            i++
         }
     }
     
