@@ -22,7 +22,9 @@ data class AuthReply(
     val regionX: Int = 0,
     val regionY: Int = 0,
     val regionName: String = "Unknown",
-    val lookAt: FloatArray = floatArrayOf(128f, 128f, 20f)
+    val lookAt: FloatArray = floatArrayOf(128f, 128f, 20f),
+    val seedCapability: String = "",
+    val mfaHash: String? = null
 ) {
     /**
      * Get the region coordinates as a string
@@ -56,7 +58,9 @@ data class AuthReply(
             "simIP" to simIP,
             "simPort" to simPort,
             "regionName" to regionName,
-            "regionCoordinates" to getRegionCoordinates()
+            "regionCoordinates" to getRegionCoordinates(),
+            "hasSeedCapability" to seedCapability.isNotBlank(),
+            "hasMfaHash" to (mfaHash != null)
         )
     }
     
@@ -71,6 +75,8 @@ data class AuthReply(
         if (circuitCode != other.circuitCode) return false
         if (simIP != other.simIP) return false
         if (simPort != other.simPort) return false
+        if (seedCapability != other.seedCapability) return false
+        if (mfaHash != other.mfaHash) return false
         
         return true
     }
@@ -81,6 +87,8 @@ data class AuthReply(
         result = 31 * result + circuitCode
         result = 31 * result + simIP.hashCode()
         result = 31 * result + simPort
+        result = 31 * result + seedCapability.hashCode()
+        result = 31 * result + (mfaHash?.hashCode() ?: 0)
         return result
     }
 }

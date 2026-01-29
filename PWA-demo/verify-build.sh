@@ -2,8 +2,6 @@
 # Linkpoint PWA - Build Verification Script
 # This script verifies that all required files exist for Vercel deployment
 
-set -e
-
 echo "🔍 Verifying Linkpoint PWA Build..."
 echo ""
 
@@ -22,11 +20,11 @@ WARNINGS=0
 check_file() {
     if [ -f "$1" ]; then
         echo -e "${GREEN}✓${NC} $1"
-        ((PASSED++))
+        ((PASSED+=1))
         return 0
     else
         echo -e "${RED}✗${NC} $1 (MISSING)"
-        ((FAILED++))
+        ((FAILED+=1))
         return 1
     fi
 }
@@ -35,11 +33,11 @@ check_file() {
 check_dir() {
     if [ -d "$1" ]; then
         echo -e "${GREEN}✓${NC} $1/"
-        ((PASSED++))
+        ((PASSED+=1))
         return 0
     else
         echo -e "${RED}✗${NC} $1/ (MISSING)"
-        ((FAILED++))
+        ((FAILED+=1))
         return 1
     fi
 }
@@ -48,11 +46,11 @@ check_dir() {
 check_json() {
     if python3 -m json.tool "$1" > /dev/null 2>&1; then
         echo -e "${GREEN}✓${NC} $1 (valid JSON)"
-        ((PASSED++))
+        ((PASSED+=1))
         return 0
     else
         echo -e "${RED}✗${NC} $1 (invalid JSON)"
-        ((FAILED++))
+        ((FAILED+=1))
         return 1
     fi
 }

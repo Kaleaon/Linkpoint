@@ -226,13 +226,12 @@ class RLVController(
         
         // Send reply to chat channel
         chatManager?.invoke()?.let { manager ->
-            scope.launch {
-                try {
-                    manager.sendChat(reply, channel = channel)
-                    Log.d(TAG, "RLV reply sent on channel $channel: $reply")
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to send RLV reply on channel $channel", e)
-                }
+            try {
+                // ChatManager.sendChat handles its own coroutine/threading
+                manager.sendChat(reply, channel = channel)
+                Log.d(TAG, "RLV reply sent on channel $channel: $reply")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to send RLV reply on channel $channel", e)
             }
         } ?: run {
             Log.w(TAG, "RLV reply not sent - ChatManager unavailable. Reply: $reply on channel $channel")
