@@ -441,12 +441,65 @@ class ChatExtended {
   }
   
   /**
+   * Get local user UUID
+   * @returns {string|null} UUID of local user or null
+   */
+  getLocalUserUUID() {
+    if (window.app && window.app.protocol && window.app.protocol.agentId) {
+      return window.app.protocol.agentId;
+    }
+    if (window.app && window.app.auth) {
+      const user = window.app.auth.getUser();
+      return user ? user.id : null;
+    }
+    return null;
+  }
+
+  /**
+   * Send typing indicator packet
+   * @param {boolean} isTyping - True if start typing, false if stop
+   */
+  sendTypingPacket(isTyping) {
+    if (!window.app || !window.app.protocol) {
+      console.warn('Cannot send typing indicator: Protocol not initialized');
+      return;
+    }
+
+    const type = isTyping ? ChatType.START_TYPING : ChatType.STOP_TYPING;
+    const protocol = window.app.protocol;
+
+    try {
+      if (protocol.sendChat) {
+        // SLConnectionFull uses sendChat
+        protocol.sendChat('', 0, type);
+      } else if (protocol.sendMessage) {
+        // ProtocolManager uses sendMessage
+        // Assuming ChatFromViewer message structure
+        protocol.sendMessage('ChatFromViewer', {
+          message: '',
+          channel: 0,
+          type: type
+        });
+      } else {
+        console.warn('Cannot send typing indicator: No suitable method found');
+      }
+    } catch (error) {
+      console.error('Failed to send typing indicator:', error);
+    }
+  }
+
+  /**
    * Feature 40: Start typing indicator
    * @param {string} userUUID - UUID of typing user
    */
   startTyping(userUUID) {
     this.typingUsers.set(userUUID, Date.now());
-    // TODO: Send typing indicator to other clients
+
+    // Check if this is the local user starting to type
+    const localId = this.getLocalUserUUID();
+    if (localId && userUUID === localId) {
+      this.sendTypingPacket(true);
+    }
   }
   
   /**
@@ -455,7 +508,12 @@ class ChatExtended {
    */
   stopTyping(userUUID) {
     this.typingUsers.delete(userUUID);
-    // TODO: Send stop typing indicator
+
+    // Check if this is the local user stopping typing
+    const localId = this.getLocalUserUUID();
+    if (localId && userUUID === localId) {
+      this.sendTypingPacket(false);
+    }
   }
   
   /**
