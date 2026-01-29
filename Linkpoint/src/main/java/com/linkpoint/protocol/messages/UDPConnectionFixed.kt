@@ -898,6 +898,20 @@ class UDPConnectionFixed {
     }
     
     /**
+     * Handle PacketAck message from server
+     * 
+     * PacketAck message format (High Frequency, ID = -5 / 0xFB):
+     * - Header: flags (1) + seq (4) + extra (1) = 6 bytes
+     * - Message ID: 1 byte (0xFB = -5)
+     * - Packets block count: 1 byte
+     * - For each packet being ACKed:
+     *   - Sequence number: 4 bytes (unsigned int, little-endian)
+     * 
+     * @param data The complete packet data including header
+     * @return true if handled successfully
+     */
+    
+    /**
      * Process received ACK from server and invoke callbacks.
      * This is called when we receive a PacketAck message from the server.
      * 
