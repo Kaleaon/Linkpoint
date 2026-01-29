@@ -72,7 +72,8 @@ class CapabilitiesManager {
         throw new Error(`Seed capability request failed: ${response.status}`);
       }
       
-      const caps = await response.json();
+      const xmlText = await response.text();
+      const caps = LLSD.parseXML(xmlText);
       this.parseSeedResponse(caps);
       
       return caps;
@@ -90,7 +91,10 @@ class CapabilitiesManager {
       return;
     }
     
-    for (const [name, url] of Object.entries(caps)) {
+    // Check if response has 'capabilities' key (standard seed response)
+    const capsMap = caps.capabilities || caps;
+
+    for (const [name, url] of Object.entries(capsMap)) {
       if (typeof url === 'string') {
         this.setCapability(name, url);
       }
@@ -103,16 +107,10 @@ class CapabilitiesManager {
    * Create seed request LLSD
    */
   createSeedRequest(requestedCaps) {
-    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    xml += '<llsd><map>\n';
-    xml += '<key>capabilities</key>\n<array>\n';
-    
-    for (const cap of requestedCaps) {
-      xml += `<string>${this.escapeXml(cap)}</string>\n`;
-    }
-    
-    xml += '</array>\n</map></llsd>';
-    return xml;
+    const data = {
+      capabilities: requestedCaps
+    };
+    return LLSD.buildXML(data);
   }
   
   /**
