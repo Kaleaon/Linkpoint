@@ -2,6 +2,7 @@
 # Linkpoint PWA - Build Verification Script
 # This script verifies that all required files exist for Vercel deployment
 
+
 echo "🔍 Verifying Linkpoint PWA Build..."
 echo ""
 
