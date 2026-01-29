@@ -237,8 +237,49 @@ class ChatFromViewerMessage extends SLMessage {
   }
 
   packPayload(buffer) {
-    // TODO: Implement message packing
-    // This would be used to send chat to simulator
+    const view = new DataView(buffer);
+    let offset = 0;
+
+    // AgentData Block
+    // AgentID (LLUUID)
+    const agentBytes = this.uuidToBytes(this.agentId);
+    for (let i = 0; i < 16; i++) {
+      view.setUint8(offset++, agentBytes[i]);
+    }
+
+    // SessionID (LLUUID)
+    const sessionBytes = this.uuidToBytes(this.sessionId);
+    for (let i = 0; i < 16; i++) {
+      view.setUint8(offset++, sessionBytes[i]);
+    }
+
+    // ChatData Block
+    // Message (Variable 2 - U16 length + bytes)
+    const msgBytes = new TextEncoder().encode(this.message);
+    view.setUint16(offset, msgBytes.length, true); // Little Endian
+    offset += 2;
+    for (let i = 0; i < msgBytes.length; i++) {
+      view.setUint8(offset++, msgBytes[i]);
+    }
+
+    // Type (U8)
+    view.setUint8(offset++, this.type);
+
+    // Channel (S32)
+    view.setInt32(offset, this.channel, true); // Little Endian
+    offset += 4;
+
+    return offset;
+  }
+
+  uuidToBytes(uuid) {
+    if (!uuid) return new Uint8Array(16);
+    const hex = uuid.replace(/-/g, '');
+    const bytes = new Uint8Array(16);
+    for (let i = 0; i < 16; i++) {
+      bytes[i] = parseInt(hex.substring(i * 2, i * 2 + 2), 16);
+    }
+    return bytes;
   }
 }
 
