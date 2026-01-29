@@ -26,6 +26,9 @@ const MessageIDs = {
   REGION_HANDSHAKE: 0x94,
   REGION_HANDSHAKE_REPLY: 0x95,
   
+  // Inventory Messages
+  CREATE_INVENTORY_FOLDER: 0xFFFF0111,
+
   // System Messages
   PACKET_ACK: 0xFB,
   START_PING_CHECK: 0x01,
@@ -346,6 +349,65 @@ class AgentUpdateMessage extends SLMessage {
   }
 }
 
+/**
+ * CreateInventoryFolder message
+ */
+class CreateInventoryFolderMessage extends SLMessage {
+  constructor(agentId, sessionId, folderId, parentId, type, name) {
+    super();
+    this.agentId = agentId;
+    this.sessionId = sessionId;
+    this.folderId = folderId;
+    this.parentId = parentId;
+    this.type = type;
+    this.name = name;
+    this.isReliable = true;
+  }
+
+  getMessageID() {
+    return MessageIDs.CREATE_INVENTORY_FOLDER;
+  }
+
+  getMessageName() {
+    return 'CreateInventoryFolder';
+  }
+
+  packPayload(buffer) {
+    const view = new DataView(buffer);
+    let offset = 0;
+
+    // AgentData Block
+    // AgentID
+    offset = this.packUUID(view, offset, this.agentId);
+    // SessionID
+    offset = this.packUUID(view, offset, this.sessionId);
+
+    // FolderData Block
+    // FolderID
+    offset = this.packUUID(view, offset, this.folderId);
+    // ParentID
+    offset = this.packUUID(view, offset, this.parentId);
+    // Type (S8)
+    view.setInt8(offset++, this.type);
+    // Name (Variable 1) - length (1 byte) + bytes
+    const nameBytes = new TextEncoder().encode(this.name);
+    view.setUint8(offset++, nameBytes.length);
+    for (let i = 0; i < nameBytes.length; i++) {
+      view.setUint8(offset++, nameBytes[i]);
+    }
+
+    return offset;
+  }
+
+  packUUID(view, offset, uuidStr) {
+    const hex = uuidStr.replace(/-/g, '');
+    for (let i = 0; i < 16; i++) {
+      view.setUint8(offset + i, parseInt(hex.substring(i*2, i*2+2), 16));
+    }
+    return offset + 16;
+  }
+}
+
 // Export all message types
 window.SLMessageTypes = {
   MessageIDs,
@@ -355,5 +417,6 @@ window.SLMessageTypes = {
   ChatFromSimulatorMessage,
   ChatFromViewerMessage,
   ObjectUpdateMessage,
-  AgentUpdateMessage
+  AgentUpdateMessage,
+  CreateInventoryFolderMessage
 };
