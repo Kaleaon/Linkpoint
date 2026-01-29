@@ -325,15 +325,21 @@ class GroupsManager {
   /**
    * Send group notice
    * @param {string} groupUUID - UUID of the group
+   * @param {string} senderUUID - UUID of the sender
    * @param {string} subject - Notice subject
    * @param {string} message - Notice message
    * @param {Object} attachment - Optional inventory attachment
    */
-  sendGroupNotice(groupUUID, subject, message, attachment = null) {
+  sendGroupNotice(groupUUID, senderUUID, subject, message, attachment = null) {
     console.log(`Sending group notice to ${groupUUID}: ${subject}`);
     
+    // Validate permissions (ALLOW_SEND_NOTICE)
+    if (!this.hasPower(groupUUID, senderUUID, GroupPowers.ALLOW_SEND_NOTICE)) {
+      console.warn(`User ${senderUUID} missing ALLOW_SEND_NOTICE permission for group ${groupUUID}`);
+      throw new Error("You do not have permission to send notices to this group.");
+    }
+
     // TODO: Send GroupNoticeRequest capability request
-    // TODO: Validate permissions (ALLOW_SEND_NOTICE)
   }
   
   /**
@@ -701,4 +707,4 @@ class GroupsManager {
 // Export singleton instance
 const groupsManager = new GroupsManager();
 export default groupsManager;
-export { GroupsManager, GroupPowers };
+export { GroupsManager };
