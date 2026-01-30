@@ -13,6 +13,14 @@ import com.linkpoint.network.core.CoreNetworkingService
 import com.linkpoint.network.core.NetworkStateManager
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.protocol.auth.LoginResponseParser
+import com.linkpoint.protocol.llsd.LLSDArray
+import com.linkpoint.protocol.llsd.LLSDMap
+import com.linkpoint.protocol.llsd.LLSDReal
+import com.linkpoint.protocol.llsd.LLSDString
+import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.types.putUUID
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -797,22 +805,91 @@ class SecondLifeProtocol(private val context: Context) {
     }
     
     /**
-     * Request teleport to location via TeleportManager.
-     * Delegates to the TeleportManager which handles capabilities and UDP-based teleport requests.
+     * Request teleport to location
      */
     suspend fun teleport(regionName: String, x: Float, y: Float, z: Float): TeleportResult {
         Log.d(TAG, "Requesting teleport to $regionName ($x, $y, $z)")
         val app = LinkpointApp.getInstance()
-        if (app.isTeleportManagerInitialized()) {
-            val result = app.teleportManager.teleportToLocation(regionName, x, y, z)
-            return when (result) {
-                is com.linkpoint.teleport.TeleportResult.Success -> TeleportResult.Success(result.regionName)
-                is com.linkpoint.teleport.TeleportResult.Failure -> TeleportResult.Failure(result.message)
-                is com.linkpoint.teleport.TeleportResult.Pending -> TeleportResult.Success(regionName) // Pending is treated as success (in progress)
+
+        // 1. Try Capability (Preferred for named regions)
+        val caps = app.capabilityManager
+        if (caps.hasCapability("TeleportLocation")) {
+            try {
+                val request = LLSDMap().apply {
+                    this["region_name"] = LLSDString(regionName)
+                    this["position"] = LLSDArray().apply {
+                        add(LLSDReal(x.toDouble()))
+                        add(LLSDReal(y.toDouble()))
+                        add(LLSDReal(z.toDouble()))
+                    }
+                    this["look_at"] = LLSDArray().apply {
+                        add(LLSDReal(1.0))
+                        add(LLSDReal(0.0))
+                        add(LLSDReal(0.0))
+                    }
+                }
+
+                val response = caps.request("TeleportLocation", request)
+                if (response is LLSDMap) {
+                    val success = response.getBoolean("success") ?: false
+                    if (success) {
+                        return TeleportResult.Success(regionName)
+                    } else {
+                        val msg = response.getString("message") ?: "Unknown capability error"
+                        Log.w(TAG, "Capability teleport failed: $msg")
+                        return TeleportResult.Failure(msg)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error using TeleportLocation capability", e)
+                // Fallthrough to UDP
             }
-        } else {
-            Log.w(TAG, "TeleportManager not initialized, cannot teleport")
-            return TeleportResult.Failure("Teleport system not initialized")
+        }
+
+        // 2. Fallback to UDP
+        // Get agent ID (required for packet)
+        val agentId = app.agentId ?: return TeleportResult.Failure("Agent ID not initialized")
+        val sessionId = app.udpConnection.getSessionId()
+
+        try {
+            // Payload size:
+            // AgentData: 32 bytes
+            // Info: 8 (Handle) + 12 (Pos) + 12 (Look) + 4 (Flags) = 36 bytes
+            // Total: 68 bytes
+            val payload = ByteBuffer.allocate(68).order(ByteOrder.LITTLE_ENDIAN)
+
+            // AgentData
+            payload.putUUID(agentId)
+            payload.putUUID(sessionId)
+
+            // Info
+            payload.putLong(0) // RegionHandle (0)
+
+            payload.putFloat(x)
+            payload.putFloat(y)
+            payload.putFloat(z)
+
+            // LookAt (1,0,0)
+            payload.putFloat(1f)
+            payload.putFloat(0f)
+            payload.putFloat(0f)
+
+            // Flags (TELEPORT_FLAGS_VIA_LOCATION = 0x00000010)
+            val teleportFlagsViaLocation = 0x00000010
+            payload.putInt(teleportFlagsViaLocation)
+
+            app.udpConnection.sendPacket(
+                MessageIds.TELEPORT_LOCATION_REQUEST,
+                payload.array(),
+                reliable = true
+            )
+
+            Log.i(TAG, "Sent UDP teleport request to handle 0 (fallback for $regionName)")
+            return TeleportResult.Success(regionName)
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error sending teleport request", e)
+            return TeleportResult.Failure("Error sending request: ${e.message}")
         }
     }
     
