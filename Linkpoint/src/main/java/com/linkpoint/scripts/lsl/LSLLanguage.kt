@@ -84,6 +84,14 @@ object LSLLanguage {
     // ==================== DEPRECATED FUNCTIONS ====================
     
     val DEPRECATED_FUNCTIONS = LSLSyntax.DEPRECATED_FUNCTIONS
+
+    // ==================== REGEX PATTERNS ====================
+
+    private val multiLineCommentRegex = Regex("/\\*.*?\\*/", RegexOption.DOT_MATCHES_ALL)
+    private val singleLineCommentRegex = Regex("//.*")
+    private val stringRegex = Regex("\"([^\"\\\\]|\\\\.)*\"")
+    private val numberRegex = Regex("\\b(0x[0-9A-Fa-f]+|\\d+\\.?\\d*([eE][+-]?\\d+)?|\\d*\\.\\d+([eE][+-]?\\d+)?)\\b")
+    private val identifierRegex = Regex("\\b[a-zA-Z_][a-zA-Z0-9_]*\\b")
     
     /**
      * Highlight LSL code and return an AnnotatedString with syntax highlighting.
@@ -95,7 +103,6 @@ object LSLLanguage {
         val styledRanges = mutableListOf<IntRange>()
         
         // 1. Highlight multi-line comments first (highest priority)
-        val multiLineCommentRegex = Regex("/\\*.*?\\*/", RegexOption.DOT_MATCHES_ALL)
         multiLineCommentRegex.findAll(code).forEach { match ->
             builder.addStyle(
                 SpanStyle(color = Colors.COMMENT, fontStyle = FontStyle.Italic),
@@ -106,7 +113,6 @@ object LSLLanguage {
         }
         
         // 2. Highlight single-line comments
-        val singleLineCommentRegex = Regex("//.*")
         singleLineCommentRegex.findAll(code).forEach { match ->
             if (!isInStyledRange(match.range.first, styledRanges)) {
                 builder.addStyle(
@@ -119,7 +125,6 @@ object LSLLanguage {
         }
         
         // 3. Highlight strings
-        val stringRegex = Regex("\"([^\"\\\\]|\\\\.)*\"")
         stringRegex.findAll(code).forEach { match ->
             if (!isInStyledRange(match.range.first, styledRanges)) {
                 builder.addStyle(
@@ -132,7 +137,6 @@ object LSLLanguage {
         }
         
         // 4. Highlight numbers (hex and decimal)
-        val numberRegex = Regex("\\b(0x[0-9A-Fa-f]+|\\d+\\.?\\d*([eE][+-]?\\d+)?|\\d*\\.\\d+([eE][+-]?\\d+)?)\\b")
         numberRegex.findAll(code).forEach { match ->
             if (!isInStyledRange(match.range.first, styledRanges)) {
                 builder.addStyle(
@@ -144,7 +148,6 @@ object LSLLanguage {
         }
         
         // 5. Highlight identifiers (keywords, types, functions, events, constants)
-        val identifierRegex = Regex("\\b[a-zA-Z_][a-zA-Z0-9_]*\\b")
         identifierRegex.findAll(code).forEach { match ->
             if (!isInStyledRange(match.range.first, styledRanges)) {
                 val word = match.value
