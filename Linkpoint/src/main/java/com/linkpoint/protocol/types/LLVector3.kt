@@ -64,6 +64,13 @@ data class LLVector3(
     )
     
     fun distance(other: LLVector3): Float = (this - other).length()
+
+    fun distanceSquared(other: LLVector3): Float {
+        val dx = x - other.x
+        val dy = y - other.y
+        val dz = z - other.z
+        return dx * dx + dy * dy + dz * dz
+    }
     
     operator fun plus(other: LLVector3) = LLVector3(x + other.x, y + other.y, z + other.z)
     operator fun minus(other: LLVector3) = LLVector3(x - other.x, y - other.y, z - other.z)

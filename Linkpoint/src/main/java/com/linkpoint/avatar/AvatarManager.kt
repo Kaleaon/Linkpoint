@@ -300,9 +300,10 @@ class AvatarManager(
      * Get all nearby avatars
      */
     fun getNearbyAvatars(position: LLVector3, radius: Float): List<Avatar> {
+        val radiusSquared = radius * radius
         return avatars.values.filter { avatar ->
-            avatar.position.distance(position) <= radius
-        }.sortedBy { it.position.distance(position) }
+            avatar.position.distanceSquared(position) <= radiusSquared
+        }.sortedBy { it.position.distanceSquared(position) }
     }
     
     /**
