@@ -21,6 +21,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Base64;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A parser for LLSD (Linden Lab Structured Data) in its traditional XML format.
@@ -39,6 +41,7 @@ import java.util.Base64;
  */
 public class LLSDParser {
     private static final String ISO8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+    private static final Logger logger = Logger.getLogger(LLSDParser.class.getName());
 
     /**
      * Document builder used to parse the replies
@@ -111,7 +114,7 @@ public class LLSDParser {
 
         childNodesTrimmed = extractElements(llsdNode.getChildNodes());
         if (childNodesTrimmed.size() == 0) {
-            // XXX: Warn?
+            logger.log(Level.WARNING, "LLSD element has no sub-elements where expected.");
             return new LLSD(null);
         }
 
