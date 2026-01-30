@@ -41,6 +41,7 @@ import com.linkpoint.protocol.messages.parseAlertMessage
 import com.linkpoint.protocol.messages.parseAgentAlertMessage
 import com.linkpoint.protocol.messages.parseEnableSimulator
 import com.linkpoint.protocol.messages.parseCrossedRegion
+import com.linkpoint.protocol.messages.parseParcelProperties
 import com.linkpoint.protocol.messages.parseImprovedInstantMessage
 import com.linkpoint.protocol.transfer.TransferManager
 import com.linkpoint.protocol.transfer.XferManager
