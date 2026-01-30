@@ -62,6 +62,7 @@ class ChatExtended {
     this.typingUsers = new Map(); // UUID -> timestamp
     this.typingTimeout = 5000; // 5 seconds
     this.typingCheckInterval = null;
+    this.localUserUUID = null; // Cached local user UUID for performance
     
     // Additional features
     this.dbName = 'ChatHistory';
@@ -441,16 +442,26 @@ class ChatExtended {
   }
   
   /**
-   * Get local user UUID
+   * Get local user UUID (cached for performance)
    * @returns {string|null} UUID of local user or null
    */
   getLocalUserUUID() {
+    // Return cached value if available
+    if (this.localUserUUID) {
+      return this.localUserUUID;
+    }
+    
+    // Retrieve and cache the UUID
     if (window.app && window.app.protocol && window.app.protocol.agentId) {
-      return window.app.protocol.agentId;
+      this.localUserUUID = window.app.protocol.agentId;
+      return this.localUserUUID;
     }
     if (window.app && window.app.auth) {
       const user = window.app.auth.getUser();
-      return user ? user.id : null;
+      if (user && user.id) {
+        this.localUserUUID = user.id;
+        return this.localUserUUID;
+      }
     }
     return null;
   }
@@ -474,7 +485,7 @@ class ChatExtended {
         protocol.sendChat('', 0, type);
       } else if (protocol.sendMessage) {
         // ProtocolManager uses sendMessage
-        // Assuming ChatFromViewer message structure
+        // ChatFromViewer message structure (verified)
         protocol.sendMessage('ChatFromViewer', {
           message: '',
           channel: 0,
@@ -493,13 +504,14 @@ class ChatExtended {
    * @param {string} userUUID - UUID of typing user
    */
   startTyping(userUUID) {
-    this.typingUsers.set(userUUID, Date.now());
-
     // Check if this is the local user starting to type
     const localId = this.getLocalUserUUID();
     if (localId && userUUID === localId) {
       this.sendTypingPacket(true);
     }
+
+    // Add to typing users after sending packet to maintain consistency
+    this.typingUsers.set(userUUID, Date.now());
   }
   
   /**
@@ -507,13 +519,14 @@ class ChatExtended {
    * @param {string} userUUID - UUID of user who stopped typing
    */
   stopTyping(userUUID) {
-    this.typingUsers.delete(userUUID);
-
     // Check if this is the local user stopping typing
     const localId = this.getLocalUserUUID();
     if (localId && userUUID === localId) {
       this.sendTypingPacket(false);
     }
+
+    // Remove from typing users after sending packet to maintain consistency
+    this.typingUsers.delete(userUUID);
   }
   
   /**
