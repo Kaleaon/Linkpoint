@@ -1534,15 +1534,53 @@ class LinkpointApp : Application() {
         }
         
         // ParcelProperties - Full parcel information (high frequency)
-        // TODO: Implement ParcelProperties parser - complex message with many fields
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.PARCEL_PROPERTIES) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
                 
-                // ParcelProperties message is complex (70+ fields)
-                // Need to implement parser before forwarding to parcelManager
-                Log.d(TAG, "🗺️ ParcelProperties received (${payload.size} bytes)")
+                val data = com.linkpoint.protocol.messages.MessageParser.parseParcelProperties(payload)
+                if (data != null && ::parcelManager.isInitialized) {
+                    Log.d(TAG, "🗺️ ParcelProperties: ${data.name} (${data.area} sqm)")
+                    parcelManager.handleParcelProperties(
+                        localId = data.localId,
+                        ownerId = data.ownerId,
+                        groupId = data.groupId,
+                        name = data.name,
+                        description = data.description,
+                        claimDate = data.claimDate.toLong(),
+                        claimPrice = data.claimPrice,
+                        rentPrice = data.rentPrice,
+                        aabbMin = data.aabbMin,
+                        aabbMax = data.aabbMax,
+                        area = data.area,
+                        actualArea = data.area,
+                        simWideMaxPrims = data.simWideMaxPrims,
+                        simWideTotal = data.simWideTotalPrims,
+                        maxPrims = data.maxPrims,
+                        totalPrims = data.totalPrims,
+                        ownerPrims = data.ownerPrims,
+                        groupPrims = data.groupPrims,
+                        otherPrims = data.otherPrims,
+                        selectedPrims = data.selectedPrims,
+                        parcelPrimBonus = data.parcelPrimBonus,
+                        cleanTime = data.otherCleanTime,
+                        flags = data.parcelFlags,
+                        landingType = data.landingType,
+                        musicUrl = data.musicUrl,
+                        mediaUrl = data.mediaUrl,
+                        mediaId = data.mediaId,
+                        mediaAutoScale = data.mediaAutoScale != 0,
+                        groupPrimeOverride = data.groupPrimsAllowed,
+                        category = data.category,
+                        snapshotId = data.snapshotId,
+                        userLocation = data.userLocation,
+                        userLookAt = data.userLookAt,
+                        status = data.status,
+                        passPrice = data.passPrice,
+                        passHours = data.passHours
+                    )
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling ParcelProperties", e)
             }
