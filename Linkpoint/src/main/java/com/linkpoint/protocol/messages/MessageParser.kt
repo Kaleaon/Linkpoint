@@ -1924,3 +1924,285 @@ data class ImprovedInstantMessageData(
         return result
     }
 }
+
+/**
+ * Data from ParcelProperties message (ID 23 - high frequency)
+ */
+data class ParcelPropertiesData(
+    val requestResult: Int,
+    val sequenceId: Int,
+    val snapSelection: Boolean,
+    val selfCount: Int,
+    val otherCount: Int,
+    val publicCount: Int,
+    val localId: Int,
+    val ownerId: UUID,
+    val isGroupOwned: Boolean,
+    val auctionId: Int,
+    val claimDate: Int,
+    val claimPrice: Int,
+    val rentPrice: Int,
+    val aabbMin: LLVector3,
+    val aabbMax: LLVector3,
+    val bitmap: ByteArray,
+    val area: Int,
+    val status: Int,
+    val simWideMaxPrims: Int,
+    val simWideTotalPrims: Int,
+    val maxPrims: Int,
+    val totalPrims: Int,
+    val ownerPrims: Int,
+    val groupPrims: Int,
+    val otherPrims: Int,
+    val selectedPrims: Int,
+    val parcelPrimBonus: Float,
+    val otherCleanTime: Int,
+    val parcelFlags: Long, // U32
+    val salePrice: Int,
+    val name: String,
+    val description: String,
+    val musicUrl: String,
+    val mediaUrl: String,
+    val mediaId: UUID,
+    val mediaAutoScale: Int, // U8
+    val groupId: UUID,
+    val passPrice: Int,
+    val passHours: Float,
+    val category: Int, // U8
+    val authBuyerId: UUID,
+    val snapshotId: UUID,
+    val userLocation: LLVector3,
+    val userLookAt: LLVector3,
+    val landingType: Int, // U8
+    val regionPushOverride: Boolean,
+    val regionDenyAnonymous: Boolean,
+    val regionDenyIdentified: Boolean,
+    val regionDenyTransacted: Boolean,
+    val regionDenyAgeUnverified: Boolean,
+    val seeAVs: Boolean,
+    val anyAVSounds: Boolean,
+    val groupPrimsAllowed: Boolean
+)
+
+/**
+ * Parse ParcelProperties message (ID 23)
+ */
+fun MessageParser.parseParcelProperties(data: ByteArray): ParcelPropertiesData? {
+    try {
+        val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+
+        // Helper for variable string reading
+        fun ByteBuffer.readString1(): String {
+            if (this.remaining() < 1) return ""
+            val len = this.get().toInt() and 0xFF
+            if (len == 0) return ""
+            if (this.remaining() < len) return ""
+            val bytes = ByteArray(len)
+            this.get(bytes)
+            return String(bytes, Charsets.UTF_8).trimEnd('\u0000')
+        }
+
+        // 1. RequestResult (S32)
+        val requestResult = buffer.int
+
+        // 2. SequenceID (S32)
+        val sequenceId = buffer.int
+
+        // 3. SnapSelection (BOOL)
+        val snapSelection = buffer.get() != 0.toByte()
+
+        // 4. SelfCount (S32)
+        val selfCount = buffer.int
+
+        // 5. OtherCount (S32)
+        val otherCount = buffer.int
+
+        // 6. PublicCount (S32)
+        val publicCount = buffer.int
+
+        // 7. LocalID (S32)
+        val localId = buffer.int
+
+        // 8. OwnerID (UUID)
+        val ownerIdBytes = ByteArray(16)
+        buffer.get(ownerIdBytes)
+        val ownerId = bytesToUUID(ownerIdBytes)
+
+        // 9. IsGroupOwned (BOOL)
+        val isGroupOwned = buffer.get() != 0.toByte()
+
+        // 10. AuctionID (U32)
+        val auctionId = buffer.int
+
+        // 11. ClaimDate (S32)
+        val claimDate = buffer.int
+
+        // 12. ClaimPrice (S32)
+        val claimPrice = buffer.int
+
+        // 13. RentPrice (S32)
+        val rentPrice = buffer.int
+
+        // 14. AABBMin (Vector3)
+        val aabbMinBytes = ByteArray(12)
+        buffer.get(aabbMinBytes)
+        val aabbMin = LLVector3.fromBytes(aabbMinBytes)
+
+        // 15. AABBMax (Vector3)
+        val aabbMaxBytes = ByteArray(12)
+        buffer.get(aabbMaxBytes)
+        val aabbMax = LLVector3.fromBytes(aabbMaxBytes)
+
+        // 16. Bitmap (Variable 1)
+        val bitmapLen = buffer.get().toInt() and 0xFF
+        val bitmap = ByteArray(bitmapLen)
+        if (bitmapLen > 0) {
+            buffer.get(bitmap)
+        }
+
+        // 17. Area (S32)
+        val area = buffer.int
+
+        // 18. Status (U8)
+        val status = buffer.get().toInt() and 0xFF
+
+        // 19. SimWideMaxPrims (S32)
+        val simWideMaxPrims = buffer.int
+
+        // 20. SimWideTotalPrims (S32)
+        val simWideTotalPrims = buffer.int
+
+        // 21. MaxPrims (S32)
+        val maxPrims = buffer.int
+
+        // 22. TotalPrims (S32)
+        val totalPrims = buffer.int
+
+        // 23. OwnerPrims (S32)
+        val ownerPrims = buffer.int
+
+        // 24. GroupPrims (S32)
+        val groupPrims = buffer.int
+
+        // 25. OtherPrims (S32)
+        val otherPrims = buffer.int
+
+        // 26. SelectedPrims (S32)
+        val selectedPrims = buffer.int
+
+        // 27. ParcelPrimBonus (F32)
+        val parcelPrimBonus = buffer.float
+
+        // 28. OtherCleanTime (S32)
+        val otherCleanTime = buffer.int
+
+        // 29. ParcelFlags (U32)
+        val parcelFlags = buffer.int.toLong() and 0xFFFFFFFFL
+
+        // 30. SalePrice (S32)
+        val salePrice = buffer.int
+
+        // 31. Name (Variable 1)
+        val name = buffer.readString1()
+
+        // 32. Description (Variable 1)
+        val description = buffer.readString1()
+
+        // 33. MusicURL (Variable 1)
+        val musicUrl = buffer.readString1()
+
+        // 34. MediaURL (Variable 1)
+        val mediaUrl = buffer.readString1()
+
+        // 35. MediaID (UUID)
+        val mediaIdBytes = ByteArray(16)
+        buffer.get(mediaIdBytes)
+        val mediaId = bytesToUUID(mediaIdBytes)
+
+        // 36. MediaAutoScale (U8)
+        val mediaAutoScale = buffer.get().toInt() and 0xFF
+
+        // 37. GroupID (UUID)
+        val groupIdBytes = ByteArray(16)
+        buffer.get(groupIdBytes)
+        val groupId = bytesToUUID(groupIdBytes)
+
+        // 38. PassPrice (S32)
+        val passPrice = buffer.int
+
+        // 39. PassHours (F32)
+        val passHours = buffer.float
+
+        // 40. Category (U8)
+        val category = buffer.get().toInt() and 0xFF
+
+        // 41. AuthBuyerID (UUID)
+        val authBuyerIdBytes = ByteArray(16)
+        buffer.get(authBuyerIdBytes)
+        val authBuyerId = bytesToUUID(authBuyerIdBytes)
+
+        // 42. SnapshotID (UUID)
+        val snapshotIdBytes = ByteArray(16)
+        buffer.get(snapshotIdBytes)
+        val snapshotId = bytesToUUID(snapshotIdBytes)
+
+        // 43. UserLocation (Vector3)
+        val userLocationBytes = ByteArray(12)
+        buffer.get(userLocationBytes)
+        val userLocation = LLVector3.fromBytes(userLocationBytes)
+
+        // 44. UserLookAt (Vector3)
+        val userLookAtBytes = ByteArray(12)
+        buffer.get(userLookAtBytes)
+        val userLookAt = LLVector3.fromBytes(userLookAtBytes)
+
+        // 45. LandingType (U8)
+        val landingType = buffer.get().toInt() and 0xFF
+
+        // 46. RegionPushOverride (BOOL)
+        val regionPushOverride = buffer.get() != 0.toByte()
+
+        // 47. RegionDenyAnonymous (BOOL)
+        val regionDenyAnonymous = buffer.get() != 0.toByte()
+
+        // 48. RegionDenyIdentified (BOOL)
+        val regionDenyIdentified = buffer.get() != 0.toByte()
+
+        // 49. RegionDenyTransacted (BOOL)
+        val regionDenyTransacted = buffer.get() != 0.toByte()
+
+        // 50. RegionDenyAgeUnverified (BOOL)
+        val regionDenyAgeUnverified = buffer.get() != 0.toByte()
+
+        // Optional fields (check buffer remaining)
+        var seeAVs = true
+        var anyAVSounds = true
+        var groupPrimsAllowed = true
+
+        if (buffer.remaining() > 0) {
+            seeAVs = buffer.get() != 0.toByte()
+        }
+        if (buffer.remaining() > 0) {
+            anyAVSounds = buffer.get() != 0.toByte()
+        }
+        if (buffer.remaining() > 0) {
+            groupPrimsAllowed = buffer.get() != 0.toByte()
+        }
+
+        return ParcelPropertiesData(
+            requestResult, sequenceId, snapSelection, selfCount, otherCount, publicCount,
+            localId, ownerId, isGroupOwned, auctionId, claimDate, claimPrice, rentPrice,
+            aabbMin, aabbMax, bitmap, area, status, simWideMaxPrims, simWideTotalPrims,
+            maxPrims, totalPrims, ownerPrims, groupPrims, otherPrims, selectedPrims,
+            parcelPrimBonus, otherCleanTime, parcelFlags, salePrice, name, description,
+            musicUrl, mediaUrl, mediaId, mediaAutoScale, groupId, passPrice, passHours,
+            category, authBuyerId, snapshotId, userLocation, userLookAt, landingType,
+            regionPushOverride, regionDenyAnonymous, regionDenyIdentified, regionDenyTransacted,
+            regionDenyAgeUnverified, seeAVs, anyAVSounds, groupPrimsAllowed
+        )
+
+    } catch (e: Exception) {
+        Log.e("MessageParser", "Failed to parse ParcelProperties", e)
+        return null
+    }
+}
