@@ -3,7 +3,9 @@ package com.linkpoint.world
 import android.util.Log
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
+import com.linkpoint.util.await
 import kotlinx.coroutines.*
+import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
@@ -15,7 +17,10 @@ import java.util.concurrent.TimeUnit
  * Search manager for people, places, groups, and events
  */
 class SearchManager(
-    private val capabilityManager: CapabilityManager
+    private val capabilityManager: CapabilityManager,
+    private val httpCallFactory: Call.Factory = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .build()
 ) {
     companion object {
         private const val TAG = "SearchManager"
@@ -31,9 +36,6 @@ class SearchManager(
     }
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private val httpClient = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .build()
     
     /**
      * Search for avatars by name
@@ -93,7 +95,7 @@ class SearchManager(
                 // Web search API
                 val url = buildSearchUrl(CATEGORY_PLACES, query, category, start, count)
                 val request = Request.Builder().url(url).build()
-                val response = httpClient.newCall(request).execute()
+                val response = httpCallFactory.newCall(request).await()
                 
                 if (!response.isSuccessful) return@withContext SearchResults(emptyList(), 0, 0)
                 
@@ -118,7 +120,7 @@ class SearchManager(
             try {
                 val url = buildSearchUrl(CATEGORY_GROUPS, query, "", start, count)
                 val request = Request.Builder().url(url).build()
-                val response = httpClient.newCall(request).execute()
+                val response = httpCallFactory.newCall(request).await()
                 
                 if (!response.isSuccessful) return@withContext SearchResults(emptyList(), 0, 0)
                 
@@ -144,7 +146,7 @@ class SearchManager(
             try {
                 val url = buildSearchUrl(CATEGORY_EVENTS, query, category, start, count)
                 val request = Request.Builder().url(url).build()
-                val response = httpClient.newCall(request).execute()
+                val response = httpCallFactory.newCall(request).await()
                 
                 if (!response.isSuccessful) return@withContext SearchResults(emptyList(), 0, 0)
                 
@@ -265,7 +267,7 @@ class SearchManager(
                 }
                 
                 val request = Request.Builder().url(url).build()
-                val response = httpClient.newCall(request).execute()
+                val response = httpCallFactory.newCall(request).await()
                 
                 if (!response.isSuccessful) return@withContext emptyList()
                 
