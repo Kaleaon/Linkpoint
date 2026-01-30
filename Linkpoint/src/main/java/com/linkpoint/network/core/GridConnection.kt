@@ -59,7 +59,8 @@ class GridConnection(
         CONNECTING,
         CONNECTED,
         DISCONNECTING,
-        ERROR
+        ERROR,
+        MFA_REQUIRED
     }
     
     /**
@@ -67,6 +68,12 @@ class GridConnection(
      */
     private val _connectionState = MutableStateFlow(ConnectionState.IDLE)
     val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
+
+    /**
+     * Message explaining why MFA is required
+     */
+    var mfaMessage: String? = null
+        private set
     
     /**
      * Authentication parameters
@@ -153,6 +160,17 @@ class GridConnection(
     }
     
     /**
+     * Submit MFA code to proceed with login
+     */
+    suspend fun submitMfaCode(code: String) {
+        if (connectionState.value != ConnectionState.MFA_REQUIRED) {
+            NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Submit MFA code called when not in MFA_REQUIRED state")
+            return
+        }
+        performConnection(mfaToken = code)
+    }
+
+    /**
      * Perform the actual connection
      * 
      * Handles:
@@ -160,8 +178,9 @@ class GridConnection(
      * 2. UDP circuit establishment
      * 3. Capability initialization
      */
-    private suspend fun performConnection() {
+    private suspend fun performConnection(mfaToken: String = "") {
         _connectionState.value = ConnectionState.CONNECTING
+        mfaMessage = null
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Starting connection process")
         
         try {
@@ -183,7 +202,8 @@ class GridConnection(
                     firstName = params.firstName,
                     lastName = params.lastName,
                     passwordHash = passwordHash,
-                    startLocation = params.startLocation
+                    startLocation = params.startLocation,
+                    mfaToken = mfaToken
                 )
 
                 // Execute login
@@ -206,9 +226,8 @@ class GridConnection(
                     }
                     is CoreNetworkingService.LoginResult.MFARequired -> {
                         NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "MFA Required: ${loginResult.message}")
-                        // Currently, GridConnection does not support interactive MFA flow callback
-                        // TODO: Implement MFA callback mechanism
-                        _connectionState.value = ConnectionState.ERROR
+                        mfaMessage = loginResult.message
+                        _connectionState.value = ConnectionState.MFA_REQUIRED
                         return
                     }
                     is CoreNetworkingService.LoginResult.Failure -> {
