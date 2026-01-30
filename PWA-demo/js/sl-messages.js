@@ -241,26 +241,22 @@ class ChatFromViewerMessage extends SLMessage {
     let offset = 0;
 
     // AgentData Block
-    // AgentID (LLUUID)
-    const agentBytes = this.uuidToBytes(this.agentId);
-    for (let i = 0; i < 16; i++) {
-      view.setUint8(offset++, agentBytes[i]);
-    }
+    // AgentID (LLUUID - big-endian per SL protocol)
+    offset = this.uuidToBytes(this.agentId, view, offset);
 
-    // SessionID (LLUUID)
-    const sessionBytes = this.uuidToBytes(this.sessionId);
-    for (let i = 0; i < 16; i++) {
-      view.setUint8(offset++, sessionBytes[i]);
-    }
+    // SessionID (LLUUID - big-endian per SL protocol)
+    offset = this.uuidToBytes(this.sessionId, view, offset);
 
     // ChatData Block
-    // Message (Variable 2 - U16 length + bytes)
+    // Message (Variable 2 - U16 length (including null) + bytes + null terminator)
     const msgBytes = new TextEncoder().encode(this.message);
-    view.setUint16(offset, msgBytes.length, true); // Little Endian
+    view.setUint16(offset, msgBytes.length + 1, true); // Little Endian, include null terminator
     offset += 2;
     for (let i = 0; i < msgBytes.length; i++) {
       view.setUint8(offset++, msgBytes[i]);
     }
+    // Null terminator required by Second Life protocol
+    view.setUint8(offset++, 0);
 
     // Type (U8)
     view.setUint8(offset++, this.type);
@@ -272,14 +268,33 @@ class ChatFromViewerMessage extends SLMessage {
     return offset;
   }
 
-  uuidToBytes(uuid) {
-    if (!uuid) return new Uint8Array(16);
-    const hex = uuid.replace(/-/g, '');
-    const bytes = new Uint8Array(16);
-    for (let i = 0; i < 16; i++) {
-      bytes[i] = parseInt(hex.substring(i * 2, i * 2 + 2), 16);
+  uuidToBytes(uuid, view, offset) {
+    // Handle null/undefined/empty - write zero-filled UUID
+    if (!uuid) {
+      for (let i = 0; i < 16; i++) {
+        view.setUint8(offset++, 0);
+      }
+      return offset;
     }
-    return bytes;
+
+    const hex = uuid.replace(/-/g, '');
+
+    // Basic UUID validation: must be 32 hex characters after removing dashes
+    if (hex.length !== 32 || !/^[0-9a-fA-F]+$/.test(hex)) {
+      throw new Error(`Invalid UUID format: ${uuid}`);
+    }
+
+    // Parse UUID to get MSB and LSB (big-endian per SL protocol)
+    const msb = BigInt('0x' + hex.substring(0, 16));
+    const lsb = BigInt('0x' + hex.substring(16, 32));
+    
+    // Write as big-endian (network byte order) per SL protocol specification
+    view.setBigUint64(offset, msb, false); // big-endian
+    offset += 8;
+    view.setBigUint64(offset, lsb, false); // big-endian
+    offset += 8;
+
+    return offset;
   }
 }
 
