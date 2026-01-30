@@ -207,8 +207,9 @@ class PrimRenderer(
         val segments = 24
         val rings = 16
         
-        val vertices = mutableListOf<Float>()
-        val indices = mutableListOf<Short>()
+        val vertexCount = (rings + 1) * (segments + 1)
+        val vertices = FloatArray(vertexCount * 8)
+        var vIdx = 0
         
         for (y in 0..rings) {
             val phi = PI * y / rings
@@ -229,10 +230,21 @@ class PrimRenderer(
                 val u = x.toFloat() / segments
                 val v = y.toFloat() / rings
                 
-                vertices.addAll(listOf(px, py, pz, nx, ny, nz, u, v))
+                vertices[vIdx++] = px
+                vertices[vIdx++] = py
+                vertices[vIdx++] = pz
+                vertices[vIdx++] = nx
+                vertices[vIdx++] = ny
+                vertices[vIdx++] = nz
+                vertices[vIdx++] = u
+                vertices[vIdx++] = v
             }
         }
         
+        val indexCount = rings * segments * 6
+        val indices = ShortArray(indexCount)
+        var iIdx = 0
+
         for (y in 0 until rings) {
             for (x in 0 until segments) {
                 val i0 = (y * (segments + 1) + x).toShort()
@@ -240,18 +252,34 @@ class PrimRenderer(
                 val i2 = (i0 + segments + 1).toShort()
                 val i3 = (i2 + 1).toShort()
                 
-                indices.addAll(listOf(i0, i2, i1, i1, i2, i3))
+                indices[iIdx++] = i0
+                indices[iIdx++] = i2
+                indices[iIdx++] = i1
+
+                indices[iIdx++] = i1
+                indices[iIdx++] = i2
+                indices[iIdx++] = i3
             }
         }
         
-        return createMesh(vertices.toFloatArray(), indices.toShortArray())
+        return createMesh(vertices, indices)
     }
     
     private fun generateCylinderMesh(): PrimMesh {
         val segments = 24
         
-        val vertices = mutableListOf<Float>()
-        val indices = mutableListOf<Short>()
+        // Calculate buffer sizes
+        // Vertices: 2 for side loop (per segment+1), 1 top center, 1 top loop (per segment+1),
+        //           1 bottom center, 1 bottom loop (per segment+1)
+        // Total = 2*(segments+1) + 1 + (segments+1) + 1 + (segments+1) = 4*(segments+1) + 2
+        val vertexCount = 4 * (segments + 1) + 2
+        val vertices = FloatArray(vertexCount * 8)
+        var vIdx = 0
+
+        // Indices: Side loop (6 per segment), Top cap (3 per segment), Bottom cap (3 per segment)
+        val indexCount = segments * 12
+        val indices = ShortArray(indexCount)
+        var iIdx = 0
         
         // Side
         for (i in 0..segments) {
@@ -262,10 +290,25 @@ class PrimRenderer(
             val nz = sin(theta).toFloat()
             val u = i.toFloat() / segments
             
-            // Bottom
-            vertices.addAll(listOf(x, -0.5f, z, nx, 0f, nz, u, 0f))
-            // Top
-            vertices.addAll(listOf(x, 0.5f, z, nx, 0f, nz, u, 1f))
+            // Bottom vertex for side
+            vertices[vIdx++] = x
+            vertices[vIdx++] = -0.5f
+            vertices[vIdx++] = z
+            vertices[vIdx++] = nx
+            vertices[vIdx++] = 0f
+            vertices[vIdx++] = nz
+            vertices[vIdx++] = u
+            vertices[vIdx++] = 0f
+
+            // Top vertex for side
+            vertices[vIdx++] = x
+            vertices[vIdx++] = 0.5f
+            vertices[vIdx++] = z
+            vertices[vIdx++] = nx
+            vertices[vIdx++] = 0f
+            vertices[vIdx++] = nz
+            vertices[vIdx++] = u
+            vertices[vIdx++] = 1f
         }
         
         // Side indices
@@ -275,48 +318,86 @@ class PrimRenderer(
             val b1 = (i * 2 + 2).toShort()
             val t1 = (i * 2 + 3).toShort()
             
-            indices.addAll(listOf(b0, b1, t0, t0, b1, t1))
+            indices[iIdx++] = b0
+            indices[iIdx++] = b1
+            indices[iIdx++] = t0
+
+            indices[iIdx++] = t0
+            indices[iIdx++] = b1
+            indices[iIdx++] = t1
         }
         
         // Top cap center
-        val topCenter = (vertices.size / 8).toShort()
-        vertices.addAll(listOf(0f, 0.5f, 0f, 0f, 1f, 0f, 0.5f, 0.5f))
+        val topCenter = (vIdx / 8).toShort()
+        vertices[vIdx++] = 0f
+        vertices[vIdx++] = 0.5f
+        vertices[vIdx++] = 0f
+        vertices[vIdx++] = 0f
+        vertices[vIdx++] = 1f
+        vertices[vIdx++] = 0f
+        vertices[vIdx++] = 0.5f
+        vertices[vIdx++] = 0.5f
         
         // Top cap vertices
-        val topStart = (vertices.size / 8).toShort()
+        val topStart = (vIdx / 8).toShort()
         for (i in 0..segments) {
             val theta = 2 * PI * i / segments
             val x = (cos(theta) * 0.5).toFloat()
             val z = (sin(theta) * 0.5).toFloat()
-            vertices.addAll(listOf(x, 0.5f, z, 0f, 1f, 0f, 
-                (cos(theta) * 0.5 + 0.5).toFloat(), (sin(theta) * 0.5 + 0.5).toFloat()))
+
+            vertices[vIdx++] = x
+            vertices[vIdx++] = 0.5f
+            vertices[vIdx++] = z
+            vertices[vIdx++] = 0f
+            vertices[vIdx++] = 1f
+            vertices[vIdx++] = 0f
+            vertices[vIdx++] = (cos(theta) * 0.5 + 0.5).toFloat()
+            vertices[vIdx++] = (sin(theta) * 0.5 + 0.5).toFloat()
         }
         
         // Top cap indices
         for (i in 0 until segments) {
-            indices.addAll(listOf(topCenter, (topStart + i).toShort(), (topStart + i + 1).toShort()))
+            indices[iIdx++] = topCenter
+            indices[iIdx++] = (topStart + i).toShort()
+            indices[iIdx++] = (topStart + i + 1).toShort()
         }
         
         // Bottom cap center
-        val bottomCenter = (vertices.size / 8).toShort()
-        vertices.addAll(listOf(0f, -0.5f, 0f, 0f, -1f, 0f, 0.5f, 0.5f))
+        val bottomCenter = (vIdx / 8).toShort()
+        vertices[vIdx++] = 0f
+        vertices[vIdx++] = -0.5f
+        vertices[vIdx++] = 0f
+        vertices[vIdx++] = 0f
+        vertices[vIdx++] = -1f
+        vertices[vIdx++] = 0f
+        vertices[vIdx++] = 0.5f
+        vertices[vIdx++] = 0.5f
         
         // Bottom cap vertices
-        val bottomStart = (vertices.size / 8).toShort()
+        val bottomStart = (vIdx / 8).toShort()
         for (i in 0..segments) {
             val theta = 2 * PI * i / segments
             val x = (cos(theta) * 0.5).toFloat()
             val z = (sin(theta) * 0.5).toFloat()
-            vertices.addAll(listOf(x, -0.5f, z, 0f, -1f, 0f,
-                (cos(theta) * 0.5 + 0.5).toFloat(), (sin(theta) * 0.5 + 0.5).toFloat()))
+
+            vertices[vIdx++] = x
+            vertices[vIdx++] = -0.5f
+            vertices[vIdx++] = z
+            vertices[vIdx++] = 0f
+            vertices[vIdx++] = -1f
+            vertices[vIdx++] = 0f
+            vertices[vIdx++] = (cos(theta) * 0.5 + 0.5).toFloat()
+            vertices[vIdx++] = (sin(theta) * 0.5 + 0.5).toFloat()
         }
         
         // Bottom cap indices
         for (i in 0 until segments) {
-            indices.addAll(listOf(bottomCenter, (bottomStart + i + 1).toShort(), (bottomStart + i).toShort()))
+            indices[iIdx++] = bottomCenter
+            indices[iIdx++] = (bottomStart + i + 1).toShort()
+            indices[iIdx++] = (bottomStart + i).toShort()
         }
         
-        return createMesh(vertices.toFloatArray(), indices.toShortArray())
+        return createMesh(vertices, indices)
     }
     
     private fun generateTorusMesh(): PrimMesh {
@@ -325,8 +406,13 @@ class PrimRenderer(
         val majorRadius = 0.35f
         val minorRadius = 0.15f
         
-        val vertices = mutableListOf<Float>()
-        val indices = mutableListOf<Short>()
+        val vertexCount = (majorSegments + 1) * (minorSegments + 1)
+        val vertices = FloatArray(vertexCount * 8)
+        var vIdx = 0
+
+        val indexCount = majorSegments * minorSegments * 6
+        val indices = ShortArray(indexCount)
+        var iIdx = 0
         
         for (i in 0..majorSegments) {
             val u = 2 * PI * i / majorSegments
@@ -342,8 +428,14 @@ class PrimRenderer(
                 val ny = sin(v).toFloat()
                 val nz = (cos(v) * sin(u)).toFloat()
                 
-                vertices.addAll(listOf(x, y, z, nx, ny, nz,
-                    i.toFloat() / majorSegments, j.toFloat() / minorSegments))
+                vertices[vIdx++] = x
+                vertices[vIdx++] = y
+                vertices[vIdx++] = z
+                vertices[vIdx++] = nx
+                vertices[vIdx++] = ny
+                vertices[vIdx++] = nz
+                vertices[vIdx++] = i.toFloat() / majorSegments
+                vertices[vIdx++] = j.toFloat() / minorSegments
             }
         }
         
@@ -354,11 +446,17 @@ class PrimRenderer(
                 val i2 = (i0 + minorSegments + 1).toShort()
                 val i3 = (i2 + 1).toShort()
                 
-                indices.addAll(listOf(i0, i2, i1, i1, i2, i3))
+                indices[iIdx++] = i0
+                indices[iIdx++] = i2
+                indices[iIdx++] = i1
+
+                indices[iIdx++] = i1
+                indices[iIdx++] = i2
+                indices[iIdx++] = i3
             }
         }
         
-        return createMesh(vertices.toFloatArray(), indices.toShortArray())
+        return createMesh(vertices, indices)
     }
     
     private fun generatePrismMesh(): PrimMesh {
