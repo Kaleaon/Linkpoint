@@ -39,6 +39,9 @@ class WorldMap(
         
         // Default access level when not specified by API (0 = unknown/PG)
         private const val DEFAULT_ACCESS_LEVEL = 0
+
+        // Region search result parsing pattern
+        private val REGION_SEARCH_PATTERN = """\{"name"\s*:\s*"([^"]+)"\s*,\s*"x"\s*:\s*(\d+)\s*,\s*"y"\s*:\s*(\d+)""".toRegex()
     }
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -164,8 +167,7 @@ class WorldMap(
             val results = mutableListOf<RegionSearchResult>()
             // Simple JSON parsing - look for region objects in the response
             // Format: [{"name": "Region Name", "x": 1000, "y": 1000, ...}, ...]
-            val pattern = """\{"name"\s*:\s*"([^"]+)"\s*,\s*"x"\s*:\s*(\d+)\s*,\s*"y"\s*:\s*(\d+)""".toRegex()
-            pattern.findAll(json).forEach { match ->
+            REGION_SEARCH_PATTERN.findAll(json).forEach { match ->
                 val name = match.groupValues[1]
                 val x = match.groupValues[2].toIntOrNull() ?: 0
                 val y = match.groupValues[3].toIntOrNull() ?: 0
