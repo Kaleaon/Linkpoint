@@ -232,13 +232,16 @@ class AvatarManager(
             
             Log.d(TAG, "CoarseLocationUpdate: $agentCount agents, youIndex=$youIndex")
             
+            // Reusable buffers for parsing loop
+            val uuidBytes = ByteArray(16)
+            val agentIdBuffer = java.nio.ByteBuffer.wrap(uuidBytes).order(java.nio.ByteOrder.BIG_ENDIAN)
+
             for (i in 0 until agentCount) {
                 if (buffer.remaining() < 19) break // 16 bytes UUID + 3 bytes position
                 
                 // Agent ID (16 bytes UUID)
-                val uuidBytes = ByteArray(16)
                 buffer.get(uuidBytes)
-                val agentIdBuffer = java.nio.ByteBuffer.wrap(uuidBytes).order(java.nio.ByteOrder.BIG_ENDIAN)
+                agentIdBuffer.clear()
                 val agentId = UUID(agentIdBuffer.long, agentIdBuffer.long)
                 
                 // Position in region (X, Y, Z as bytes - each represents 0-255 in region coords)
