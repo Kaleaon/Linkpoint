@@ -327,6 +327,7 @@ class WorldMap(
             
             // Convert avatars to NearbyUser with distance and friend status
             allAvatars
+                .filter { it.position.distance(myPosition) <= maxDistance }
                 .map { avatar ->
                     val distance = avatar.position.distance(myPosition)
                     val isFriend = friendsManager?.isFriend(avatar.agentId) ?: false
@@ -341,7 +342,6 @@ class WorldMap(
                         profilePictureId = null // Could be populated from profile data if available
                     )
                 }
-                .filter { it.distance <= maxDistance }
                 .sortedBy { it.distance }
                 .take(maxResults)
         }
