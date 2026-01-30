@@ -460,7 +460,7 @@ class ChatExtended {
       const user = window.app.auth.getUser();
       if (user && user.id) {
         this.localUserUUID = user.id;
-        return user.id;
+        return this.localUserUUID;
       }
     }
     return null;
@@ -504,13 +504,14 @@ class ChatExtended {
    * @param {string} userUUID - UUID of typing user
    */
   startTyping(userUUID) {
-    this.typingUsers.set(userUUID, Date.now());
-
     // Check if this is the local user starting to type
     const localId = this.getLocalUserUUID();
     if (localId && userUUID === localId) {
       this.sendTypingPacket(true);
     }
+
+    // Add to typing users after sending packet to maintain consistency
+    this.typingUsers.set(userUUID, Date.now());
   }
   
   /**
