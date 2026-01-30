@@ -438,7 +438,7 @@ class CoreNetworkingService(private val context: Context) {
     /**
      * Execute a login request and return parsed response including redirect info.
      */
-    private fun executeLoginRequestWithRedirect(
+    private suspend fun executeLoginRequestWithRedirect(
         loginUri: String, 
         xmlRequest: String
     ): ParsedLoginResponse {
@@ -578,7 +578,7 @@ class CoreNetworkingService(private val context: Context) {
      * - Special handling for 503 errors
      * - Proper resource cleanup on all code paths
      */
-    private fun executeWithBodyRetry(
+    private suspend fun executeWithBodyRetry(
         client: OkHttpClient,
         request: Request,
         options: HttpRequestOptions = HttpRequestOptions.forLogin()
@@ -610,7 +610,7 @@ class CoreNetworkingService(private val context: Context) {
                         totalDelayMs,
                         lastException?.message ?: "Unknown error"
                     )
-                    Thread.sleep(totalDelayMs)
+                    delay(totalDelayMs)
                     
                     // Create fresh client to avoid reusing potentially stale connections
                     currentClient = channelFactory.createHttpClient(options)
