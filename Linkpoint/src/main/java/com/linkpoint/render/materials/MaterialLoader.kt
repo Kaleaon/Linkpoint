@@ -114,9 +114,10 @@ class MaterialLoader(
                 .optimization(MaterialBuilder.Optimization.PERFORMANCE)
                 .material(source)
 
-            val result = builder.build(engine.jobSystem)
+            val result = builder.build()
             if (result == null) {
-                Log.e(TAG, "MaterialBuilder.build() returned null for $name")
+                Log.e(TAG, "MaterialBuilder.build() returned null for $name - shader compilation may have failed")
+                Log.e(TAG, "Material source preview: ${source.take(200)}...")
                 return null
             }
 
