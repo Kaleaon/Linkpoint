@@ -284,12 +284,39 @@ object MessageParser {
             val extraParamsLen = buffer.get().toInt() and 0xFF
             val extraParams = ByteArray(extraParamsLen)
             buffer.get(extraParams)
-            
+
+            // Sound UUID (per Lumiya's ObjectUpdate.java - this comes BEFORE OwnerID)
+            val soundIdBytes = ByteArray(16)
+            buffer.get(soundIdBytes)
+            val soundId = bytesToUUID(soundIdBytes)
+
             // Owner ID
             val ownerIdBytes = ByteArray(16)
             buffer.get(ownerIdBytes)
             val ownerId = bytesToUUID(ownerIdBytes)
-            
+
+            // Gain (float) - sound volume
+            val gain = buffer.float
+
+            // Flags (byte) - sound flags
+            val soundFlags = buffer.get().toInt() and 0xFF
+
+            // Radius (float) - sound radius
+            val soundRadius = buffer.float
+
+            // JointType (byte)
+            val jointType = buffer.get().toInt() and 0xFF
+
+            // JointPivot (LLVector3)
+            val jointPivotBytes = ByteArray(12)
+            buffer.get(jointPivotBytes)
+            val jointPivot = LLVector3.fromBytes(jointPivotBytes)
+
+            // JointAxisOrAnchor (LLVector3)
+            val jointAxisBytes = ByteArray(12)
+            buffer.get(jointAxisBytes)
+            val jointAxisOrAnchor = LLVector3.fromBytes(jointAxisBytes)
+
             return ObjectUpdateData(
                 localId = localId,
                 fullId = fullId,
@@ -306,7 +333,14 @@ object MessageParser {
                 hoverText = text,
                 hoverTextColor = textColor,
                 mediaUrl = mediaUrl,
+                soundId = soundId,
                 ownerId = ownerId,
+                soundGain = gain,
+                soundFlags = soundFlags,
+                soundRadius = soundRadius,
+                jointType = jointType,
+                jointPivot = jointPivot,
+                jointAxisOrAnchor = jointAxisOrAnchor,
                 nameValue = nameValueStr,
                 regionHandle = regionHandle,
                 extraParams = extraParams
@@ -616,7 +650,14 @@ data class ObjectUpdateData(
     val hoverText: String,
     val hoverTextColor: LLColor4,
     val mediaUrl: String,
+    val soundId: UUID? = null,           // Sound attached to object (Lumiya: Sound field)
     val ownerId: UUID?,
+    val soundGain: Float = 0f,           // Sound volume (Lumiya: Gain field)
+    val soundFlags: Int = 0,             // Sound flags (Lumiya: Flags field)
+    val soundRadius: Float = 0f,         // Sound radius (Lumiya: Radius field)
+    val jointType: Int = 0,              // Joint type (Lumiya: JointType field)
+    val jointPivot: LLVector3 = LLVector3.zero(),  // Joint pivot point
+    val jointAxisOrAnchor: LLVector3 = LLVector3.zero(),  // Joint axis or anchor
     val nameValue: String,
     val regionHandle: Long = 0L,  // For computing global position
     val extraParams: ByteArray = ByteArray(0)  // Extra params containing mesh/sculpt data
