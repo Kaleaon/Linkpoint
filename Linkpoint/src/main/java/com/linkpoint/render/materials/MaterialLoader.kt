@@ -116,7 +116,8 @@ class MaterialLoader(
 
             val result = builder.build()
             if (result == null) {
-                Log.e(TAG, "MaterialBuilder.build() returned null for $name")
+                Log.e(TAG, "MaterialBuilder.build() returned null for $name - shader compilation may have failed")
+                Log.e(TAG, "Material source preview: ${source.take(200)}...")
                 return null
             }
 
