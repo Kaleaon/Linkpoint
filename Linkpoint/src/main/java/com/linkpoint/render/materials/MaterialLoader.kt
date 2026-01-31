@@ -114,7 +114,7 @@ class MaterialLoader(
                 .optimization(MaterialBuilder.Optimization.PERFORMANCE)
                 .material(source)
 
-            val result = builder.build(engine.jobSystem)
+            val result = builder.build()
             if (result == null) {
                 Log.e(TAG, "MaterialBuilder.build() returned null for $name")
                 return null
