@@ -8,7 +8,10 @@ import com.google.android.filament.*
 import com.google.android.filament.android.DisplayHelper
 import com.google.android.filament.android.UiHelper
 import com.linkpoint.render.environment.SLDefaultEnvironment
+import com.linkpoint.render.materials.MaterialLoader
+import com.linkpoint.render.prims.PrimRenderer
 import com.linkpoint.render.scene.SceneManager
+import com.linkpoint.protocol.messages.ObjectUpdateData
 import com.linkpoint.xr.XRFrameData
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
@@ -46,6 +49,10 @@ class RenderManager(private val context: Context) {
     
     // Scene management
     private var sceneManager: SceneManager? = null
+
+    // Material and prim rendering
+    private var materialLoader: MaterialLoader? = null
+    private var primRenderer: PrimRenderer? = null
     
     // Helpers
     private var uiHelper: UiHelper? = null
@@ -86,6 +93,24 @@ class RenderManager(private val context: Context) {
             val filamentScene = scene ?: throw IllegalStateException("Failed to create Filament Scene")
             sceneManager = SceneManager(filamentEngine, filamentScene)
             Log.d(TAG, "SceneManager initialized")
+
+            // Initialize material loader
+            materialLoader = MaterialLoader(context, filamentEngine)
+            if (materialLoader?.initialize() != true) {
+                Log.w(TAG, "MaterialLoader initialization failed - prims will not render")
+            } else {
+                Log.d(TAG, "MaterialLoader initialized")
+
+                // Initialize prim renderer with lit material
+                val litMaterial = materialLoader?.getLitMaterial()
+                if (litMaterial != null) {
+                    primRenderer = PrimRenderer(filamentEngine, filamentScene)
+                    primRenderer?.initialize(litMaterial)
+                    Log.d(TAG, "PrimRenderer initialized")
+                } else {
+                    Log.w(TAG, "No lit material available - PrimRenderer not initialized")
+                }
+            }
             
             view?.scene = filamentScene
             view?.camera = camera
@@ -504,6 +529,31 @@ class RenderManager(private val context: Context) {
      * Get the scene manager for adding/removing objects and avatars
      */
     fun getSceneManager(): SceneManager? = sceneManager
+
+    /**
+     * Get the prim renderer for rendering Second Life primitives
+     */
+    fun getPrimRenderer(): PrimRenderer? = primRenderer
+
+    /**
+     * Get the material loader for creating material instances
+     */
+    fun getMaterialLoader(): MaterialLoader? = materialLoader
+
+    /**
+     * Update or add a prim from ObjectUpdate data.
+     * This is the primary entry point for rendering prims from the network.
+     */
+    fun updatePrim(data: ObjectUpdateData) {
+        primRenderer?.updatePrim(data)
+    }
+
+    /**
+     * Remove a prim by its local ID.
+     */
+    fun removePrim(localId: Int) {
+        primRenderer?.removePrim(localId)
+    }
     
     // ==================== DIAGNOSTIC METHODS ====================
     
@@ -567,10 +617,18 @@ class RenderManager(private val context: Context) {
      */
     fun shutdown() {
         Log.i(TAG, "Shutting down render manager")
-        
+
+        // Shutdown prim renderer first (depends on materials)
+        primRenderer?.shutdown()
+        primRenderer = null
+
+        // Shutdown material loader
+        materialLoader?.shutdown()
+        materialLoader = null
+
         uiHelper?.detach()
         displayHelper?.detach()
-        
+
         engine?.let { eng ->
             synchronized(swapChainLock) {
                 swapChain?.let { eng.destroySwapChain(it) }

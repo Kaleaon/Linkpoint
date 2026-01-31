@@ -799,15 +799,10 @@ class LinkpointApp : Application() {
                     if (::objectManager.isInitialized) {
                         objectManager.handleObjectUpdate(update)
                     }
-                    // Add object to scene for rendering
+                    // Add object to scene for rendering using PrimRenderer
+                    // PrimRenderer creates actual renderable meshes (box, sphere, etc.)
                     if (::renderManager.isInitialized) {
-                        renderManager.getSceneManager()?.updateObject(
-                            objectId = update.fullId,
-                            localId = update.localId,
-                            position = update.position,
-                            rotation = update.rotation,
-                            scale = update.scale
-                        )
+                        renderManager.updatePrim(update)
                     }
                     
                     // Extract and prefetch textures from the object's TextureEntry
@@ -1043,9 +1038,12 @@ class LinkpointApp : Application() {
                             // Get UUID before removal so we can remove from scene
                             val obj = objectManager.getObject(localId)
                             objectManager.removeObject(localId)
-                            // Remove from scene
-                            if (::renderManager.isInitialized && obj != null) {
-                                renderManager.getSceneManager()?.removeObject(obj.fullId)
+                            // Remove from PrimRenderer and SceneManager
+                            if (::renderManager.isInitialized) {
+                                renderManager.removePrim(localId)
+                                if (obj != null) {
+                                    renderManager.getSceneManager()?.removeObject(obj.fullId)
+                                }
                             }
                         }
                     }
