@@ -340,7 +340,7 @@ class LinkpointApp : Application() {
         
         // Initialize network logger first for early debugging
         NetworkLogger.initialize(this)
-        Log.i(TAG, "Network logger initialized with auto-save to Documents/Lumiya Logs/")
+        Log.i(TAG, "Network logger initialized with auto-save to Documents/Linkpoint Logs/")
         
         // Initialize session log recorder for comprehensive packet logging
         com.linkpoint.utils.SessionLogRecorder.initialize(this)
@@ -5001,7 +5001,7 @@ class LinkpointApp : Application() {
     
     /**
      * Get the path where session logs are stored.
-     * Returns the public Documents/Lumiya Logs path.
+     * Returns the public Documents/Linkpoint Logs path.
      */
     fun getSessionLogDirectoryPath(): String {
         return com.linkpoint.utils.SessionLogRecorder.getLogDirectoryPath()

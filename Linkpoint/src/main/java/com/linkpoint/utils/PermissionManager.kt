@@ -30,12 +30,12 @@ class PermissionManager(private val activity: AppCompatActivity) {
         
         /**
          * Essential permissions required for the app to function properly.
-         * Includes storage permissions for Lumiya Logs directory.
+         * Includes storage permissions for Linkpoint Logs directory.
          */
         fun getEssentialPermissions(): Array<String> {
             val permissions = mutableListOf<String>()
             
-            // Storage permissions for Lumiya Logs directory (Documents/Lumiya Logs/)
+            // Storage permissions for Linkpoint Logs directory (Documents/Linkpoint Logs/)
             // Required for saving crash logs and network logs
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
                 // Android 9 and below: Need WRITE for public Documents directory
@@ -56,7 +56,7 @@ class PermissionManager(private val activity: AppCompatActivity) {
         }
         
         /**
-         * Storage permissions specifically for Lumiya Logs directory
+         * Storage permissions specifically for Linkpoint Logs directory
          */
         fun getStoragePermissions(): Array<String> {
             val permissions = mutableListOf<String>()
@@ -72,7 +72,7 @@ class PermissionManager(private val activity: AppCompatActivity) {
         }
         
         /**
-         * Check if storage permissions for Lumiya Logs are granted
+         * Check if storage permissions for Linkpoint Logs are granted
          */
         fun areStoragePermissionsGranted(context: Context): Boolean {
             // Android 13+ doesn't need storage permissions for app-specific dirs
@@ -255,7 +255,7 @@ class PermissionManager(private val activity: AppCompatActivity) {
     fun showStorageRationale(onAccept: () -> Unit, onDeny: () -> Unit) {
         showPermissionRationale(
             title = "Storage Permission Required",
-            message = "Linkpoint needs storage access to save logs to the Documents/Lumiya Logs/ folder. " +
+            message = "Linkpoint needs storage access to save logs to the Documents/Linkpoint Logs/ folder. " +
                 "This includes crash reports and network activity logs for debugging.",
             onAccept = onAccept,
             onDeny = onDeny
