@@ -634,7 +634,8 @@ class LinkpointApp : Application() {
                     com.linkpoint.utils.InitializationTracker.logInfo("Region: ${regionData.simName}")
                     
                     // Update session with region info
-                    val regionName = regionData.simName.trim()
+                    // Parser already trims null padding; trim whitespace for display safety.
+                    val regionName = regionData.simName.trim { it.isWhitespace() }
                     if (regionName.isNotEmpty()) {
                         sessionManager.updateRegionName(regionName)
                         Log.d(TAG, "Session region name updated to: $regionName")
