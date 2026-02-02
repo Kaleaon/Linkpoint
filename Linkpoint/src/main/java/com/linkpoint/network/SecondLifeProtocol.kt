@@ -23,8 +23,11 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import java.security.MessageDigest
 import java.util.UUID
 
@@ -529,11 +532,19 @@ class SecondLifeProtocol(private val context: Context) {
                         try {
                             val friendIds = parsedData.buddyList.map { it.agentId }
                             Log.d(TAG, "[LOGIN DATA] Resolving display names for ${friendIds.size} friends...")
-                            
+
                             // Use ProfileManager's batch display name lookup (which uses capabilities)
                             // Using app.applicationScope for proper lifecycle management
                             app.applicationScope.launch(kotlinx.coroutines.Dispatchers.IO) {
                                 try {
+                                    val ready = withTimeoutOrNull(10000L) {
+                                        app.capabilityManager.isReady.filter { it }.first()
+                                    } ?: false
+                                    if (!ready) {
+                                        Log.w(TAG, "[LOGIN DATA] Display name lookup skipped: capabilities not ready")
+                                        return@launch
+                                    }
+
                                     val displayNames = app.profileManager.getDisplayNames(friendIds)
                                     displayNames.forEach { (agentId, displayName) ->
                                         app.friendsManager.updateFriendName(agentId, displayName)

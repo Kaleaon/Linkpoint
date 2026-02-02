@@ -147,7 +147,8 @@ class FriendsListFragment : Fragment() {
                     is FriendEvent.Added,
                     is FriendEvent.Removed,
                     is FriendEvent.OnlineStatusChanged,
-                    is FriendEvent.RightsChanged -> {
+                    is FriendEvent.RightsChanged,
+                    is FriendEvent.NameUpdated -> {
                         // Refresh friends list
                         loadFriends()
                     }
