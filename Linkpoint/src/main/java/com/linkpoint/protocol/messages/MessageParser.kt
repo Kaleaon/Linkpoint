@@ -841,7 +841,7 @@ fun MessageParser.parseRegionHandshake(data: ByteArray): RegionHandshakeData? {
         val simNameLen = buffer.get().toInt() and 0xFF
         val simNameBytes = ByteArray(simNameLen)
         buffer.get(simNameBytes)
-        val simName = String(simNameBytes, Charsets.UTF_8).trim { it == '\u0000' }
+        val simName = String(simNameBytes, Charsets.UTF_8).trimEnd('\u0000')
         
         // SimOwner UUID
         val simOwnerBytes = ByteArray(16)
