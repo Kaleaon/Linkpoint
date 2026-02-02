@@ -6,6 +6,7 @@ import com.linkpoint.assets.AnimationManager
 import com.linkpoint.assets.AssetCache
 import com.linkpoint.assets.MeshManager
 import com.linkpoint.assets.TextureManager
+import com.linkpoint.inventory.OutfitManager
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.messages.AvatarAnimationData
 import com.linkpoint.protocol.messages.TerseUpdateData
@@ -43,6 +44,7 @@ class AvatarManager(
     // Local agent
     private var myAgentId: UUID? = null
     private var myAvatar: Avatar? = null
+    private var outfitManager: OutfitManager? = null
     
     // Mapping from localId to agentId for terse updates
     // This is populated when we receive full object updates with both IDs
@@ -66,6 +68,13 @@ class AvatarManager(
             movementController.setSessionInfo(agentId, UUID(0, 0)) // Session ID would be set from login
             movementController.startMovementUpdates()
         }
+    }
+
+    /**
+     * Connect the avatar manager to the outfit system.
+     */
+    fun setOutfitManager(manager: OutfitManager) {
+        outfitManager = manager
     }
     
     /**
@@ -415,22 +424,43 @@ class AvatarManager(
     
     /**
      * Get wearables of a specific type from the current avatar's outfit
-     * Stub implementation - would need full outfit manager integration
      */
     suspend fun getWearables(type: WearableType): List<Wearable> {
-        // This is a stub - in a full implementation, this would fetch
-        // wearables from the outfit manager or inventory
-        return emptyList()
+        val manager = outfitManager
+        if (manager == null) {
+            Log.w(TAG, "OutfitManager not configured; cannot resolve wearables")
+            return emptyList()
+        }
+
+        val wornItemId = manager.getWornWearable(type) ?: return emptyList()
+        val item = manager.getInventoryItem(wornItemId)
+        if (item == null) {
+            Log.w(TAG, "No inventory item found for worn wearable $wornItemId")
+            return emptyList()
+        }
+
+        return listOf(
+            Wearable.fromInventoryItem(
+                itemId = item.itemId,
+                assetId = item.assetId,
+                name = item.name,
+                description = item.description,
+                wearableType = type,
+                isWorn = true
+            )
+        )
     }
     
     /**
      * Wear a specific wearable item
-     * Stub implementation - would need full outfit manager integration
      */
     suspend fun wear(wearable: Wearable) {
-        // This is a stub - in a full implementation, this would
-        // trigger the outfit manager to wear the item
-        android.util.Log.i("AvatarManager", "Wear: ${wearable.name}")
+        val manager = outfitManager
+        if (manager == null) {
+            Log.w(TAG, "OutfitManager not configured; cannot wear ${wearable.name}")
+            return
+        }
+        manager.wearItem(wearable.itemId, replace = true)
     }
     
     // ==================== AGENT HEALTH ====================

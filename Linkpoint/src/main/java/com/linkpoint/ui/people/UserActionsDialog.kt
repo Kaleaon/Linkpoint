@@ -1,13 +1,14 @@
 package com.linkpoint.ui.people
 
 import android.app.Dialog
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
-import com.linkpoint.world.FriendsManager
+import com.linkpoint.ui.chat.ChatActivity
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -56,10 +57,14 @@ class UserActionsDialog : DialogFragment() {
     }
 
     private fun sendIM() {
-        val friendsManager = LinkpointApp.getInstance().friendsManager
-        viewLifecycleOwner.lifecycleScope.launch {
-            friendsManager.sendIM(agentId, "")
+        val app = LinkpointApp.getInstance()
+        val sessionId = app.imManager.startP2PSession(agentId, userName)
+        app.imManager.markAsRead(sessionId)
+
+        val intent = Intent(requireContext(), ChatActivity::class.java).apply {
+            putExtra(ChatActivity.EXTRA_IM_SESSION_ID, sessionId.toString())
         }
+        startActivity(intent)
     }
 
     private fun viewProfile() {

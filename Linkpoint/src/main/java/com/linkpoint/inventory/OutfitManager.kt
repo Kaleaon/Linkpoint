@@ -437,6 +437,11 @@ class OutfitManager(
      * Get worn wearable by type
      */
     fun getWornWearable(type: WearableType): UUID? = wornWearables[type]
+
+    /**
+     * Get inventory item details for a worn item.
+     */
+    fun getInventoryItem(itemId: UUID): InventoryItem? = inventoryManager.getItem(itemId)
     
     /**
      * Get attachment at point

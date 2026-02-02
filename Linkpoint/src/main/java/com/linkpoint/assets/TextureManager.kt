@@ -9,6 +9,8 @@ import com.linkpoint.protocol.types.getUUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.ByteArrayOutputStream
@@ -166,8 +168,10 @@ class TextureManager(
         val startTime = System.currentTimeMillis()
         
         try {
+            val capUrl = resolveTextureCapabilityUrl(timeoutMs)
+
             // Build texture URL - returns null if capability is not available
-            val url = buildTextureUrl(textureId, discard)
+            val url = capUrl?.let { buildTextureUrl(it, textureId) }
             
             if (url == null) {
                 // No capability URL available - texture fetching requires GetTexture capability
@@ -265,6 +269,25 @@ class TextureManager(
         } finally {
             updateStats { it.copy(pendingDownloads = it.pendingDownloads - 1) }
         }
+    }
+
+    private suspend fun resolveTextureCapabilityUrl(timeoutMs: Long): String? {
+        val currentUrl = capabilityUrl
+        if (currentUrl != null) {
+            return currentUrl
+        }
+
+        val manager = capabilityManager ?: return null
+        if (manager.isReady.value) {
+            return capabilityUrl
+        }
+
+        val waitMs = minOf(timeoutMs, 5000L)
+        val becameReady = withTimeoutOrNull(waitMs) {
+            manager.isReady.filter { it }.first()
+        }
+
+        return if (becameReady == true) capabilityUrl else null
     }
     
     /**
@@ -379,7 +402,7 @@ class TextureManager(
         }
     }
     
-    private fun buildTextureUrl(textureId: UUID, discard: Int): String? {
+    private fun buildTextureUrl(baseUrl: String, textureId: UUID): String {
         // Use capability URL if available
         // Per official SL viewer (lltexturefetch.cpp), the URL format is:
         // http_url + "/?texture_id=" + uuid
@@ -390,11 +413,10 @@ class TextureManager(
         // and does not support unauthenticated texture fetching. If no capability URL is
         // available, texture downloads will fail with HTTP 403 Forbidden.
         // In this case, we return null to indicate that texture fetching is not possible.
-        val baseUrl = capabilityUrl ?: return null
-        
         // Ensure HTTPS for Linden Lab servers (required for authentication)
-        val secureUrl = if (baseUrl.startsWith("http://") && 
-            (baseUrl.contains(".lindenlab.com") || baseUrl.contains(".secondlife.com"))) {
+        val secureUrl = if (baseUrl.startsWith("http://") &&
+            (baseUrl.contains(".lindenlab.com") || baseUrl.contains(".secondlife.com"))
+        ) {
             baseUrl.replaceFirst("http://", "https://")
         } else {
             baseUrl

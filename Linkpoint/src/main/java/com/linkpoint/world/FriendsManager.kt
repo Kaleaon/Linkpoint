@@ -722,10 +722,11 @@ class FriendsManager(
      * Add or update friend from login response data
      */
     fun addFriendFromLogin(agentId: UUID, name: String, rightsGiven: Int, rightsHas: Int) {
-        Log.d(TAG, "Adding friend from login: $name ($agentId)")
+        val resolvedName = name.ifBlank { "Resident (${agentId.toString().take(8)})" }
+        Log.d(TAG, "Adding friend from login: $resolvedName ($agentId)")
         friends[agentId] = Friend(
             agentId = agentId,
-            name = name,
+            name = resolvedName,
             rightsGiven = rightsGiven,
             rightsHas = rightsHas
         )
@@ -736,8 +737,13 @@ class FriendsManager(
      */
     fun updateFriendName(agentId: UUID, displayName: String) {
         friends[agentId]?.let { friend ->
-            friends[agentId] = friend.copy(name = displayName)
-            Log.d(TAG, "Updated friend name: $agentId -> $displayName")
+            if (friend.name != displayName) {
+                friends[agentId] = friend.copy(name = displayName)
+                Log.d(TAG, "Updated friend name: $agentId -> $displayName")
+                scope.launch {
+                    _friendsFlow.emit(FriendEvent.NameUpdated(agentId))
+                }
+            }
         }
     }
     
@@ -822,6 +828,7 @@ sealed class FriendEvent {
     data class OnlineStatusChanged(val agentId: UUID, val isOnline: Boolean) : FriendEvent()
     data class RightsChanged(val agentId: UUID) : FriendEvent()
     data class OfferReceived(val offer: FriendshipOffer) : FriendEvent()
+    data class NameUpdated(val agentId: UUID) : FriendEvent()
 }
 
 sealed class TrackResult {

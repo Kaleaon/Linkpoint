@@ -6,10 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
+import android.content.Intent
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
+import com.linkpoint.ui.chat.ChatActivity
 import com.linkpoint.world.Friend
 import kotlinx.coroutines.launch
 
@@ -46,11 +48,14 @@ class FriendActionsDialog : DialogFragment() {
     }
 
     private fun sendIM() {
-        // Open IM with friend
-        val friendsManager = LinkpointApp.getInstance().friendsManager
-        lifecycleScope.launch {
-            friendsManager.sendIM(friend.agentId, "")
+        val app = LinkpointApp.getInstance()
+        val sessionId = app.imManager.startP2PSession(friend.agentId, friend.name)
+        app.imManager.markAsRead(sessionId)
+
+        val intent = Intent(requireContext(), ChatActivity::class.java).apply {
+            putExtra(ChatActivity.EXTRA_IM_SESSION_ID, sessionId.toString())
         }
+        startActivity(intent)
     }
 
     private fun viewProfile() {

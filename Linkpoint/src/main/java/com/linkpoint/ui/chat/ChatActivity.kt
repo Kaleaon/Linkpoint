@@ -16,6 +16,7 @@ import com.google.android.material.tabs.TabLayout
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.network.ChatType
+import com.linkpoint.chat.SessionType
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -28,6 +29,7 @@ class ChatActivity : AppCompatActivity() {
     
     companion object {
         private const val TAG = "ChatActivity"
+        const val EXTRA_IM_SESSION_ID = "extra_im_session_id"
     }
     
     private lateinit var tabLayout: TabLayout
@@ -38,6 +40,8 @@ class ChatActivity : AppCompatActivity() {
     
     private val messages = mutableListOf<ActivityChatMessage>()
     private var currentChannel = ActivityChatChannel.LOCAL
+    private var activeImSessionId: UUID? = null
+    private var activeGroupSessionId: UUID? = null
     
     private val app by lazy { LinkpointApp.getInstance() }
     
@@ -53,6 +57,9 @@ class ChatActivity : AppCompatActivity() {
         initViews()
         setupTabs()
         setupChat()
+        handleIntent()
+        observeImMessages()
+        observeSessionUpdates()
     }
     
     private fun initViews() {
@@ -102,17 +109,100 @@ class ChatActivity : AppCompatActivity() {
         // Add welcome message
         addSystemMessage("Connected to local chat")
     }
+
+    private fun handleIntent() {
+        val sessionId = intent.getStringExtra(EXTRA_IM_SESSION_ID)
+            ?.let { runCatching { UUID.fromString(it) }.getOrNull() }
+        if (sessionId != null) {
+            val session = app.imManager.activeSessions.value.firstOrNull { it.sessionId == sessionId }
+            when (session?.type) {
+                SessionType.GROUP, SessionType.CONFERENCE -> {
+                    activeGroupSessionId = sessionId
+                    tabLayout.getTabAt(ActivityChatChannel.GROUP.ordinal)?.select()
+                }
+                else -> {
+                    activeImSessionId = sessionId
+                    tabLayout.getTabAt(ActivityChatChannel.IM.ordinal)?.select()
+                }
+            }
+        }
+    }
+
+    private fun observeImMessages() {
+        lifecycleScope.launch {
+            app.imManager.messageFlow.collect { imMessage ->
+                val sessionId = when (currentChannel) {
+                    ActivityChatChannel.IM -> activeImSessionId
+                    ActivityChatChannel.GROUP -> activeGroupSessionId
+                    else -> null
+                } ?: return@collect
+                if (imMessage.sessionId != sessionId) {
+                    return@collect
+                }
+                if (currentChannel != ActivityChatChannel.IM && currentChannel != ActivityChatChannel.GROUP) {
+                    return@collect
+                }
+
+                val activityMessage = imMessage.toActivityMessage(currentChannel)
+                messages.add(activityMessage)
+                adapter.notifyItemInserted(messages.size - 1)
+                recyclerView.scrollToPosition(messages.size - 1)
+            }
+        }
+    }
+
+    private fun observeSessionUpdates() {
+        lifecycleScope.launch {
+            app.imManager.activeSessions.collect {
+                if (currentChannel == ActivityChatChannel.IM || currentChannel == ActivityChatChannel.GROUP) {
+                    loadMessages()
+                }
+            }
+        }
+    }
     
     private fun loadMessages() {
         // Load messages for current channel
         messages.clear()
         adapter.notifyDataSetChanged()
         
-        // Add channel info
-        addSystemMessage("Switched to ${currentChannel.name.lowercase()} chat")
+        if (currentChannel == ActivityChatChannel.IM || currentChannel == ActivityChatChannel.GROUP) {
+            val sessionId = resolveSessionIdForChannel(currentChannel)
+            if (sessionId == null) {
+                addSystemMessage("No ${currentChannel.name.lowercase()} session available")
+                return
+            }
+
+            when (currentChannel) {
+                ActivityChatChannel.IM -> activeImSessionId = sessionId
+                ActivityChatChannel.GROUP -> activeGroupSessionId = sessionId
+                else -> {}
+            }
+            app.imManager.markAsRead(sessionId)
+
+            val imMessages = app.imManager.getSessionMessages(sessionId)
+            messages.addAll(imMessages.map { it.toActivityMessage(currentChannel) })
+            adapter.notifyDataSetChanged()
+            if (messages.isNotEmpty()) {
+                recyclerView.scrollToPosition(messages.size - 1)
+            }
+        } else {
+            // Add channel info
+            addSystemMessage("Switched to ${currentChannel.name.lowercase()} chat")
+        }
     }
     
     private fun sendMessage(text: String) {
+        if (currentChannel == ActivityChatChannel.IM || currentChannel == ActivityChatChannel.GROUP) {
+            val sessionId = resolveSessionIdForChannel(currentChannel)
+            if (sessionId == null) {
+                addSystemMessage("No ${currentChannel.name.lowercase()} session available")
+                return
+            }
+            app.imManager.sendIM(sessionId, text)
+            return
+        }
+
         // Determine chat type from command
         val (chatType, displayText) = when {
             text.startsWith("/shout ") -> ChatType.SHOUT to text.removePrefix("/shout ")
@@ -156,6 +246,33 @@ class ChatActivity : AppCompatActivity() {
         
         messages.add(message)
         adapter.notifyItemInserted(messages.size - 1)
+    }
+
+    private fun com.linkpoint.chat.IMMessage.toActivityMessage(channel: ActivityChatChannel): ActivityChatMessage {
+        return ActivityChatMessage(
+            id = id.toString(),
+            sender = fromName,
+            content = message,
+            timestamp = timestamp,
+            type = ActivityMessageType.NORMAL,
+            channel = channel
+        )
+    }
+
+    private fun resolveSessionIdForChannel(channel: ActivityChatChannel): UUID? {
+        return when (channel) {
+            ActivityChatChannel.IM -> {
+                activeImSessionId ?: app.imManager.activeSessions.value
+                    .firstOrNull { it.type == SessionType.P2P }
+                    ?.sessionId
+            }
+            ActivityChatChannel.GROUP -> {
+                activeGroupSessionId ?: app.imManager.activeSessions.value
+                    .firstOrNull { it.type == SessionType.GROUP || it.type == SessionType.CONFERENCE }
+                    ?.sessionId
+            }
+            else -> null
+        }
     }
     
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

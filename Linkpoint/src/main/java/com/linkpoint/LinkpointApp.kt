@@ -557,6 +557,7 @@ class LinkpointApp : Application() {
                 udpConnection.getSessionId(),
                 objectManager
             )
+            avatarManager.setOutfitManager(outfitManager)
         }
         
         // Modern features: Animesh and Bakes on Mesh
