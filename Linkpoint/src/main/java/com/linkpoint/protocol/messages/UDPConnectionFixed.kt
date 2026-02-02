@@ -1912,7 +1912,9 @@ class UDPConnectionFixed {
             registeredHandlers = messageHandlers.keys.map { it.toString() },
             pendingPackets = emptyList(),
             socketOpen = datagramChannel?.isOpen ?: false,
-            receiveLoopActive = receiveJob?.isActive == true
+            receiveLoopActive = receiveJob?.isActive == true,
+            lastPingTime = lastPingTime.get(),
+            unansweredPings = unansweredPings.get()
         )
     }
     
@@ -1943,7 +1945,9 @@ class UDPConnectionFixed {
         val registeredHandlers: List<String>,
         val pendingPackets: List<PendingPacketInfo>,
         val socketOpen: Boolean,
-        val receiveLoopActive: Boolean
+        val receiveLoopActive: Boolean,
+        val lastPingTime: Long,
+        val unansweredPings: Int
     )
     
     /**
@@ -1994,7 +1998,9 @@ class UDPConnectionFixed {
         val connectionAttemptTime: Long,
         val lastSendAttemptTime: Long,
         val lastReceiveTime: Long,
-        val lastConnectionError: String?
+        val lastConnectionError: String?,
+        val lastPingTime: Long,
+        val unansweredPings: Int
     )
     
     /**
@@ -2090,7 +2096,9 @@ class UDPConnectionFixed {
             connectionAttemptTime = connectionAttemptTime,
             lastSendAttemptTime = lastSendTime,
             lastReceiveTime = lastReceiveTime,
-            lastConnectionError = lastConnectionError
+            lastConnectionError = lastConnectionError,
+            lastPingTime = lastPingTime.get(),
+            unansweredPings = unansweredPings.get()
         )
     }
 }

@@ -376,6 +376,13 @@ class DebugReportService private constructor(private val context: Context) {
                     } else {
                         appendLine("  Last Packet Received: Never ⚠️")
                     }
+                    if (socketDetails.lastPingTime > 0) {
+                        val pingAge = System.currentTimeMillis() - socketDetails.lastPingTime
+                        appendLine("  Last Ping Check: ${formatDuration(pingAge)} ago")
+                        appendLine("  Unanswered Pings: ${socketDetails.unansweredPings}")
+                    } else {
+                        appendLine("  Last Ping Check: Never")
+                    }
                     if (socketDetails.lastConnectionError != null) {
                         appendLine()
                         appendLine("  ⚠️ Last Connection Error: ${socketDetails.lastConnectionError}")
