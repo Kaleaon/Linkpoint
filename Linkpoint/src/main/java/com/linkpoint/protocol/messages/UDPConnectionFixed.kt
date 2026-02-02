@@ -587,9 +587,13 @@ class UDPConnectionFixed {
             
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== INITIATING FIXED UDP CONNECTION ===")
             
-            // Force IPv4 preference (matches Lumiya; SL has limited IPv6 support)
-            System.setProperty("java.net.preferIPv4Stack", "true")
-            System.setProperty("java.net.preferIPv6Addresses", "false")
+            // NOTE:
+            // Historically this connection path forced IPv4 by setting the following JVM-wide properties:
+            //   System.setProperty("java.net.preferIPv4Stack", "true")
+            //   System.setProperty("java.net.preferIPv6Addresses", "false")
+            // This has global side effects on all network operations in the process (HTTP/HTTPS, other sockets, etc.).
+            // If the application still requires these settings, configure them once at application startup
+            // (e.g., in the Application class or a dedicated bootstrap) instead of per-connection here.
 
             val address = InetSocketAddress(simIP, simPort)
             
