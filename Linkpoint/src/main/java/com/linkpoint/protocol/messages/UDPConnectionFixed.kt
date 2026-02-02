@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.net.InetSocketAddress
+import java.net.StandardSocketOptions
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.DatagramChannel
@@ -207,7 +208,11 @@ class UDPConnectionFixed {
     // State
     private val _isConnected = MutableStateFlow(false)
     val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
-    
+
+    // Ping tracking for connection health
+    private val lastPingTime = AtomicLong(0)
+    private val unansweredPings = AtomicInteger(0)
+
     // Message routing
     private val messageRouter = MessageRouter()
     
@@ -560,9 +565,12 @@ class UDPConnectionFixed {
             packetsResentCount.set(0)
             
             // Reset timing information
-            lastReceiveTime = 0L
+            val now = System.currentTimeMillis()
+            lastReceiveTime = now
             lastSendTime = 0L
             lastAckSendTime = 0L
+            lastPingTime.set(now)
+            unansweredPings.set(0)
             
             // Clear pending ACKs from previous session (they're no longer valid)
             pendingAcksToSend.clear()
@@ -579,11 +587,16 @@ class UDPConnectionFixed {
             
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== INITIATING FIXED UDP CONNECTION ===")
             
+            // Force IPv4 preference (matches Lumiya; SL has limited IPv6 support)
+            System.setProperty("java.net.preferIPv4Stack", "true")
+            System.setProperty("java.net.preferIPv6Addresses", "false")
+
             val address = InetSocketAddress(simIP, simPort)
             
             // Create and configure DatagramChannel
             datagramChannel = DatagramChannel.open().apply {
                 configureBlocking(false)
+                setOption(StandardSocketOptions.SO_REUSEADDR, true)
                 connect(address)
             }
             
@@ -671,6 +684,7 @@ class UDPConnectionFixed {
         val buffer = ByteBuffer.allocate(BUFFER_SIZE)
         
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== RECEIVE LOOP STARTED ===")
+        var disconnectReason: String? = null
         
         while (_isConnected.value) {
             try {
@@ -679,11 +693,13 @@ class UDPConnectionFixed {
                 
                 if (localSelector == null || localChannel == null) {
                     NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Selector or channel is null, exiting loop")
+                    disconnectReason = "Selector or channel missing"
                     break
                 }
                 
                 if (!localSelector.isOpen || !localChannel.isOpen) {
                     NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Selector or channel closed, exiting loop")
+                    disconnectReason = "Selector or channel closed"
                     break
                 }
                 
@@ -692,6 +708,7 @@ class UDPConnectionFixed {
                 val key = selectionKey
                 if (key == null || !key.isValid) {
                     NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Selection key invalid (network may have changed), exiting loop")
+                    disconnectReason = "Selection key invalid"
                     break
                 }
                 
@@ -705,6 +722,7 @@ class UDPConnectionFixed {
                 // state helps detect when communication is no longer possible.
                 if (!localChannel.isConnected) {
                     NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "DatagramChannel.isConnected returned false, exiting loop")
+                    disconnectReason = "Channel no longer connected"
                     break
                 }
                 
@@ -726,6 +744,7 @@ class UDPConnectionFixed {
                                 packetsReceived.incrementAndGet()
                                 bytesReceived.addAndGet(bytesRead.toLong())
                                 lastReceiveTime = System.currentTimeMillis()
+                                unansweredPings.set(0)
                                 
                                 buffer.flip()
                                 val rawData = ByteArray(bytesRead)
@@ -805,6 +824,16 @@ class UDPConnectionFixed {
             }
         }
         
+        if (_isConnected.value && disconnectReason != null) {
+            NetworkLogger.log(
+                NetworkLogger.Level.WARN,
+                NetworkLogger.Category.UDP,
+                "Receive loop ended unexpectedly: $disconnectReason - disconnecting and signaling reconnection"
+            )
+            reconnectionCallback?.invoke()
+            disconnect()
+        }
+
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== RECEIVE LOOP STOPPED ===")
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Total packets: ${packetsReceived.get()}")
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Total bytes: ${bytesReceived.get()}")
@@ -855,11 +884,41 @@ class UDPConnectionFixed {
         while (_isConnected.value && timeoutCheckerJob?.isActive == true) {
             try {
                 checkMessageTimeouts()
+                checkPingHealth()
                 delay(1000L) // Check every second
             } catch (e: Exception) {
                 NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
                     "Error in timeout checker: ${e.message}")
             }
+        }
+    }
+
+    /**
+     * Check whether the connection needs a ping or should disconnect due to inactivity.
+     */
+    private fun checkPingHealth() {
+        val now = System.currentTimeMillis()
+        val timeSinceReceive = now - lastReceiveTime
+        val timeSincePing = now - lastPingTime.get()
+
+        if (timeSinceReceive > NEED_PING_TIMEOUT_MS &&
+            timeSincePing > LumiyaConstants.PING_INTERVAL_MS) {
+            lastPingTime.set(now)
+            val unanswered = unansweredPings.incrementAndGet()
+            NetworkLogger.log(
+                NetworkLogger.Level.DEBUG,
+                NetworkLogger.Category.UDP,
+                "Ping check - waiting for server response (unanswered: $unanswered)"
+            )
+        }
+
+        if (unansweredPings.get() >= UNANSWERED_PINGS_DISCONNECT) {
+            NetworkLogger.log(
+                NetworkLogger.Level.WARN,
+                NetworkLogger.Category.UDP,
+                "No response from server (${unansweredPings.get()} unanswered pings), disconnecting"
+            )
+            disconnect()
         }
     }
     
@@ -1859,7 +1918,9 @@ class UDPConnectionFixed {
             registeredHandlers = messageHandlers.keys.map { it.toString() },
             pendingPackets = emptyList(),
             socketOpen = datagramChannel?.isOpen ?: false,
-            receiveLoopActive = receiveJob?.isActive == true
+            receiveLoopActive = receiveJob?.isActive == true,
+            lastPingTime = lastPingTime.get(),
+            unansweredPings = unansweredPings.get()
         )
     }
     
@@ -1890,7 +1951,9 @@ class UDPConnectionFixed {
         val registeredHandlers: List<String>,
         val pendingPackets: List<PendingPacketInfo>,
         val socketOpen: Boolean,
-        val receiveLoopActive: Boolean
+        val receiveLoopActive: Boolean,
+        val lastPingTime: Long,
+        val unansweredPings: Int
     )
     
     /**
@@ -1941,7 +2004,9 @@ class UDPConnectionFixed {
         val connectionAttemptTime: Long,
         val lastSendAttemptTime: Long,
         val lastReceiveTime: Long,
-        val lastConnectionError: String?
+        val lastConnectionError: String?,
+        val lastPingTime: Long,
+        val unansweredPings: Int
     )
     
     /**
@@ -2037,7 +2102,9 @@ class UDPConnectionFixed {
             connectionAttemptTime = connectionAttemptTime,
             lastSendAttemptTime = lastSendTime,
             lastReceiveTime = lastReceiveTime,
-            lastConnectionError = lastConnectionError
+            lastConnectionError = lastConnectionError,
+            lastPingTime = lastPingTime.get(),
+            unansweredPings = unansweredPings.get()
         )
     }
 }
