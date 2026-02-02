@@ -477,7 +477,13 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     }
     
     private fun initRenderer() {
-        surfaceView = SurfaceView(this)
+        surfaceView = SurfaceView(this).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        }
+        renderContainer.removeAllViews()
         renderContainer.addView(surfaceView)
         
         // Add a callback to ensure SwapChain is created when surface is available
