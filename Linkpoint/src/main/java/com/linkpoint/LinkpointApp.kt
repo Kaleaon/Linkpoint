@@ -634,18 +634,16 @@ class LinkpointApp : Application() {
                     com.linkpoint.utils.InitializationTracker.logInfo("Region: ${regionData.simName}")
                     
                     // Update session with region info
-                    val regionName = regionData.simName.trim { it == '\u0000' || it.isWhitespace() }
+                    val regionName = regionData.simName.trim()
                     if (regionName.isNotEmpty()) {
                         sessionManager.updateRegionName(regionName)
                         Log.d(TAG, "Session region name updated to: $regionName")
+                        com.linkpoint.utils.SessionLogRecorder.logRegionChange(
+                            regionName, 0L, null
+                        )
                     } else {
                         Log.w(TAG, "RegionHandshake simName was empty after trimming")
                     }
-                    
-                    // Log to session recorder if active
-                    com.linkpoint.utils.SessionLogRecorder.logRegionChange(
-                        regionName.ifEmpty { regionData.simName }, 0L, null
-                    )
                     
                     // Update terrain manager with water height
                     if (::terrainManager.isInitialized) {
