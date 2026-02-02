@@ -13,7 +13,8 @@ import org.xml.sax.SAXException
 import java.io.IOException
 import java.io.InputStream
 import java.net.URI
-import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.format.DateTimeParseException
 import java.util.*
 import java.util.logging.Logger
 import javax.xml.parsers.DocumentBuilder
@@ -132,12 +133,8 @@ class LLSDParser @Throws(ParserConfigurationException::class) constructor() {
         }
         
         return try {
-            // Create a new DateFormat instance for thread safety
-            val dateFormat = SimpleDateFormat(ISO8601_PATTERN).apply {
-                timeZone = TimeZone.getTimeZone("UTC")
-            }
-            dateFormat.parse(elementContents)
-        } catch (e: java.text.ParseException) {
+            Date.from(Instant.parse(elementContents))
+        } catch (e: DateTimeParseException) {
             throw LLSDException("Unable to parse LLSD date value, received \"$elementContents\".", e)
         }
     }
@@ -248,7 +245,7 @@ class LLSDParser @Throws(ParserConfigurationException::class) constructor() {
         }
         
         return when (nodeName) {
-            "undef" -> ""
+            "undef" -> null
             "boolean" -> if (isUndefined) LLSDUndefined.BOOLEAN else parseBoolean(nodeText.toString())
             "date" -> if (isUndefined) LLSDUndefined.DATE else parseDate(nodeText.toString())
             "integer" -> if (isUndefined) LLSDUndefined.INTEGER else parseInteger(nodeText.toString())
@@ -266,14 +263,15 @@ class LLSDParser @Throws(ParserConfigurationException::class) constructor() {
             return 0.0
         }
         
-        if (elementContents == "nan") {
-            return Double.NaN
-        }
-        
-        return try {
-            elementContents.toDouble()
-        } catch (e: NumberFormatException) {
-            throw LLSDException("Unable to parse LLSD real value, received \"$elementContents\".", e)
+        return when (elementContents.lowercase(java.util.Locale.ROOT)) {
+            "nan" -> Double.NaN
+            "inf", "infinity" -> Double.POSITIVE_INFINITY
+            "-inf", "-infinity" -> Double.NEGATIVE_INFINITY
+            else -> try {
+                elementContents.toDouble()
+            } catch (e: NumberFormatException) {
+                throw LLSDException("Unable to parse LLSD real value, received \"$elementContents\".", e)
+            }
         }
     }
     
@@ -306,6 +304,5 @@ class LLSDParser @Throws(ParserConfigurationException::class) constructor() {
     
     companion object {
         private val LOGGER = Logger.getLogger(LLSDParser::class.java.name)
-        private const val ISO8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'"
     }
 }

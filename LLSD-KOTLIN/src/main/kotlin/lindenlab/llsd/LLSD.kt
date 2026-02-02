@@ -10,8 +10,8 @@ import java.io.IOException
 import java.io.StringWriter
 import java.io.Writer
 import java.net.URI
-import java.text.DecimalFormat
-import java.text.SimpleDateFormat
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 /**
@@ -70,12 +70,6 @@ class LLSD(val content: Any?) {
      */
     @Throws(IOException::class, LLSDException::class)
     private fun serialiseElement(writer: Writer, toSerialise: Any) {
-        // Create thread-safe local formatter instances
-        val dateFormat = SimpleDateFormat(ISO8601_PATTERN).apply {
-            timeZone = TimeZone.getTimeZone("UTC")
-        }
-        val decimalFormat = DecimalFormat("#0.0#")
-        
         when (toSerialise) {
             is Map<*, *> -> {
                 @Suppress("UNCHECKED_CAST")
@@ -83,7 +77,11 @@ class LLSD(val content: Any?) {
                 writer.write("<map>\n")
                 for ((key, value) in serialiseMap) {
                     writer.write("\t<key>${encodeXML(key)}</key>\n\t")
-                    value?.let { serialiseElement(writer, it) }
+                    if (value == null) {
+                        writer.write("<undef/>\n")
+                    } else {
+                        serialiseElement(writer, value)
+                    }
                 }
                 writer.write("</map>\n")
             }
@@ -91,7 +89,11 @@ class LLSD(val content: Any?) {
                 writer.write("<array>\n")
                 for (current in toSerialise) {
                     writer.write("\t")
-                    current?.let { serialiseElement(writer, it) }
+                    if (current == null) {
+                        writer.write("<undef/>\n")
+                    } else {
+                        serialiseElement(writer, current)
+                    }
                 }
                 writer.write("</array>\n")
             }
@@ -102,17 +104,19 @@ class LLSD(val content: Any?) {
                 writer.write("<integer>$toSerialise</integer>\n")
             }
             is Double -> {
-                if (toSerialise.isNaN()) {
-                    writer.write("<real>nan</real>\n")
-                } else {
-                    writer.write("<real>${decimalFormat.format(toSerialise)}</real>\n")
+                when {
+                    toSerialise.isNaN() -> writer.write("<real>nan</real>\n")
+                    toSerialise == Double.POSITIVE_INFINITY -> writer.write("<real>inf</real>\n")
+                    toSerialise == Double.NEGATIVE_INFINITY -> writer.write("<real>-inf</real>\n")
+                    else -> writer.write("<real>$toSerialise</real>\n")
                 }
             }
             is Float -> {
-                if (toSerialise.isNaN()) {
-                    writer.write("<real>nan</real>\n")
-                } else {
-                    writer.write("<real>${decimalFormat.format(toSerialise)}</real>\n")
+                when {
+                    toSerialise.isNaN() -> writer.write("<real>nan</real>\n")
+                    toSerialise == Float.POSITIVE_INFINITY -> writer.write("<real>inf</real>\n")
+                    toSerialise == Float.NEGATIVE_INFINITY -> writer.write("<real>-inf</real>\n")
+                    else -> writer.write("<real>$toSerialise</real>\n")
                 }
             }
             is UUID -> {
@@ -122,10 +126,10 @@ class LLSD(val content: Any?) {
                 writer.write("<string>${encodeXML(toSerialise)}</string>\n")
             }
             is Date -> {
-                writer.write("<date>${dateFormat.format(toSerialise)}</date>")
+                writer.write("<date>${ISO8601_FORMATTER.format(toSerialise.toInstant())}</date>\n")
             }
             is URI -> {
-                writer.write("<uri>${encodeXML(toSerialise.toString())}</uri>")
+                writer.write("<uri>${encodeXML(toSerialise.toString())}</uri>\n")
             }
             is ByteArray -> {
                 // Handle binary data as base64 encoded
@@ -171,7 +175,7 @@ class LLSD(val content: Any?) {
     }
     
     companion object {
-        private const val ISO8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        private val ISO8601_FORMATTER = DateTimeFormatter.ISO_INSTANT.withZone(ZoneId.of("UTC"))
         
         /**
          * Encodes a string for safe inclusion in an XML document.

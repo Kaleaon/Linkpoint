@@ -12,7 +12,8 @@ import java.io.InputStreamReader
 import java.net.URI
 import java.net.URISyntaxException
 import java.nio.charset.StandardCharsets
-import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.format.DateTimeParseException
 import java.util.*
 
 /**
@@ -218,7 +219,7 @@ class LLSDNotationParser {
         return when (val ch = tokenizer.peek()) {
             '!' -> {
                 tokenizer.consume() // consume '!'
-                "" // Undefined value represented as empty string
+                null // Undefined value represented as null
             }
             '1', 't', 'T' -> parseBoolean(tokenizer, true)
             '0', 'f', 'F' -> parseBoolean(tokenizer, false)
@@ -307,12 +308,8 @@ class LLSDNotationParser {
         val dateStr = tokenizer.consumeUntil(',', ']', '}', ' ', '\t', '\n', '\r')
         
         return try {
-            // Create a new DateFormat instance for thread safety
-            val dateFormat = SimpleDateFormat(ISO8601_PATTERN).apply {
-                timeZone = TimeZone.getTimeZone("UTC")
-            }
-            dateFormat.parse(dateStr)
-        } catch (e: java.text.ParseException) {
+            Date.from(Instant.parse(dateStr))
+        } catch (e: DateTimeParseException) {
             throw LLSDException("Invalid date format: $dateStr", e)
         }
     }
@@ -462,9 +459,5 @@ class LLSDNotationParser {
         }
         
         return map
-    }
-    
-    companion object {
-        private const val ISO8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'"
     }
 }

@@ -686,7 +686,7 @@ private fun LLSDValue.toJavaObject(): Any? = when (this) {
  * @return The equivalent [LLSDValue] object.
  */
 fun LLSD.toKotlinLLSD(): LLSDValue {
-    return llsdOf(this.getContent())
+    return llsdOf(this.content)
 }
 
 /**

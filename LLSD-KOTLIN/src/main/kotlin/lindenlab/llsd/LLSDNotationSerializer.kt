@@ -9,7 +9,8 @@ package lindenlab.llsd
 import java.io.IOException
 import java.io.Writer
 import java.net.URI
-import java.text.SimpleDateFormat
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 /**
@@ -60,7 +61,7 @@ class LLSDNotationSerializer {
     @Throws(IOException::class, LLSDException::class)
     private fun serializeValue(value: Any?, writer: Writer) {
         when {
-            value == null || (value is String && value.isEmpty()) -> {
+            value == null -> {
                 writer.write("!")
             }
             value is Map<*, *> -> {
@@ -90,11 +91,7 @@ class LLSDNotationSerializer {
             }
             value is Date -> {
                 writer.write("d")
-                // Create a new DateFormat instance for thread safety
-                val dateFormat = SimpleDateFormat(ISO8601_PATTERN).apply {
-                    timeZone = TimeZone.getTimeZone("UTC")
-                }
-                writer.write(dateFormat.format(value))
+                writer.write(ISO8601_FORMATTER.format(value.toInstant()))
             }
             value is URI -> {
                 writer.write("l")
@@ -213,6 +210,6 @@ class LLSDNotationSerializer {
     }
     
     companion object {
-        private const val ISO8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        private val ISO8601_FORMATTER = DateTimeFormatter.ISO_INSTANT.withZone(ZoneId.of("UTC"))
     }
 }
