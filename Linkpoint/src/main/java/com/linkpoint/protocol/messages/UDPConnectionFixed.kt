@@ -918,6 +918,7 @@ class UDPConnectionFixed {
                 NetworkLogger.Category.UDP,
                 "No response from server (${unansweredPings.get()} unanswered pings), disconnecting"
             )
+            reconnectionCallback?.invoke()
             disconnect()
         }
     }
