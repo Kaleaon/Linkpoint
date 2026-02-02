@@ -263,7 +263,7 @@ class LLSDParser @Throws(ParserConfigurationException::class) constructor() {
             return 0.0
         }
         
-        return when (elementContents.lowercase()) {
+        return when (elementContents.lowercase(java.util.Locale.ROOT)) {
             "nan" -> Double.NaN
             "inf", "infinity" -> Double.POSITIVE_INFINITY
             "-inf", "-infinity" -> Double.NEGATIVE_INFINITY
