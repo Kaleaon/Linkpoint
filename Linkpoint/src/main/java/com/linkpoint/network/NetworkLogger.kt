@@ -26,9 +26,9 @@ import kotlinx.coroutines.*
  * - Retry attempts with backoff timing
  * - SSL/TLS handshake information
  * - DNS resolution results
- * - Automatic saving to external storage Documents/Lumiya Logs/ directory
+ * - Automatic saving to external storage Documents/Linkpoint Logs/ directory
  * 
- * Logs are saved to the PUBLIC Documents folder at /Documents/Lumiya Logs/
+ * Logs are saved to the PUBLIC Documents folder at /Documents/Linkpoint Logs/
  * so they can be accessed outside the app via file manager.
  * 
  * All logs are tagged for easy filtering in logcat:
@@ -39,7 +39,7 @@ object NetworkLogger {
     
     private const val TAG = "NetworkLogger"
     private const val MAX_LOG_ENTRIES = 1000
-    private const val LOG_DIR_NAME = "Lumiya Logs"
+    private const val LOG_DIR_NAME = "Linkpoint Logs"
     private const val AUTO_SAVE_INTERVAL_MS = 30000L // Auto-save every 30 seconds
     
     // URL truncation length for log messages
@@ -113,7 +113,7 @@ object NetworkLogger {
     /**
      * Get the log directory in the PUBLIC Documents folder.
      * 
-     * Logs are saved to /storage/emulated/0/Documents/Lumiya Logs/ (or equivalent)
+     * Logs are saved to /storage/emulated/0/Documents/Linkpoint Logs/ (or equivalent)
      * so they can be accessed via file manager outside the app.
      * 
      * For Android 10+ (API 29+), we use the legacy external storage path which
@@ -122,7 +122,7 @@ object NetworkLogger {
      */
     private fun getLogDirectory(): File? {
         // Use the public Documents directory on external storage
-        // This path is: /storage/emulated/0/Documents/Lumiya Logs/
+        // This path is: /storage/emulated/0/Documents/Linkpoint Logs/
         @Suppress("DEPRECATION")
         val documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
         val logDir = File(documentsDir, LOG_DIR_NAME)
@@ -154,7 +154,7 @@ object NetworkLogger {
     
     /**
      * Fallback to app-specific external directory if public Documents is not accessible.
-     * This is still accessible via Android/data/com.linkpoint.debug/files/Documents/Lumiya Logs/
+     * This is still accessible via Android/data/com.linkpoint.debug/files/Documents/Linkpoint Logs/
      */
     private fun getAppSpecificLogDirectory(): File? {
         val context = appContext ?: return null
@@ -179,7 +179,7 @@ object NetworkLogger {
     }
     
     /**
-     * Save current logs to a file in the public Documents/Lumiya Logs/ directory.
+     * Save current logs to a file in the public Documents/Linkpoint Logs/ directory.
      * 
      * On Android 10+ (API 29+), if direct file access fails, this will attempt
      * to use MediaStore API to write to the Documents directory.

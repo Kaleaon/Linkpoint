@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicLong
  * Designed for full diagnostic output to help debug connection and protocol issues.
  * 
  * IMPORTANT: Logs are saved to the PUBLIC Documents folder at:
- *   /storage/emulated/0/Documents/Lumiya Logs/
+ *   /storage/emulated/0/Documents/Linkpoint Logs/
  * This ensures logs are accessible via file manager outside the app.
  * 
  * Usage:
@@ -51,7 +51,7 @@ object SessionLogRecorder {
     private const val TAG = "SessionLogRecorder"
     
     // Directory and file names
-    private const val LOG_DIR_NAME = "Lumiya Logs"
+    private const val LOG_DIR_NAME = "Linkpoint Logs"
     private const val SESSION_LOG_PREFIX = "session_log_"
     private const val SESSION_LOG_SUFFIX = ".txt"
     
@@ -597,7 +597,7 @@ object SessionLogRecorder {
     /**
      * Get the log directory in the PUBLIC Documents folder.
      * 
-     * Target location: /storage/emulated/0/Documents/Lumiya Logs/
+     * Target location: /storage/emulated/0/Documents/Linkpoint Logs/
      * This ensures logs are accessible via file manager outside the app.
      * 
      * For Android 10+ (API 29+), we use legacy external storage which still works
@@ -605,7 +605,7 @@ object SessionLogRecorder {
      */
     private fun getLogDirectory(): File? {
         // Use the public Documents directory on external storage
-        // Path: /storage/emulated/0/Documents/Lumiya Logs/
+        // Path: /storage/emulated/0/Documents/Linkpoint Logs/
         @Suppress("DEPRECATION")
         val documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
         val logDir = File(documentsDir, LOG_DIR_NAME)
