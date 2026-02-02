@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.net.InetSocketAddress
+import java.net.StandardSocketOptions
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.DatagramChannel
@@ -586,11 +587,20 @@ class UDPConnectionFixed {
             
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== INITIATING FIXED UDP CONNECTION ===")
             
+            // NOTE:
+            // Historically this connection path forced IPv4 by setting the following JVM-wide properties:
+            //   System.setProperty("java.net.preferIPv4Stack", "true")
+            //   System.setProperty("java.net.preferIPv6Addresses", "false")
+            // This has global side effects on all network operations in the process (HTTP/HTTPS, other sockets, etc.).
+            // If the application still requires these settings, configure them once at application startup
+            // (e.g., in the Application class or a dedicated bootstrap) instead of per-connection here.
+
             val address = InetSocketAddress(simIP, simPort)
             
             // Create and configure DatagramChannel
             datagramChannel = DatagramChannel.open().apply {
                 configureBlocking(false)
+                setOption(StandardSocketOptions.SO_REUSEADDR, true)
                 connect(address)
             }
             
@@ -912,6 +922,7 @@ class UDPConnectionFixed {
                 NetworkLogger.Category.UDP,
                 "No response from server (${unansweredPings.get()} unanswered pings), disconnecting"
             )
+            reconnectionCallback?.invoke()
             disconnect()
         }
     }
