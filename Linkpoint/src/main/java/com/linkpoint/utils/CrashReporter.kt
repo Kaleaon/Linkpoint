@@ -29,7 +29,7 @@ class CrashReporter private constructor(private val context: Context) {
     companion object {
         private const val TAG = "CrashReporter"
         private const val CRASH_LOG_DIR = "crash_logs"
-        private const val EXTERNAL_CRASH_LOG_DIR = "Lumiya Logs"
+        private const val EXTERNAL_CRASH_LOG_DIR = "Linkpoint Logs"
         private const val MAX_CRASH_LOGS = 10
         private const val CRASH_LOG_PREFIX = "crash_"
         private const val CRASH_LOG_SUFFIX = ".txt"
