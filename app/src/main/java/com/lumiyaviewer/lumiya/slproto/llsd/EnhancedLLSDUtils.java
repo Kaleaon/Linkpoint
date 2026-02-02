@@ -388,9 +388,21 @@ public final class EnhancedLLSDUtils {
     
     /**
      * Validate that required fields exist in the LLSD structure
-     * @param llsd The LLSD object to validate
-     * @param requiredPaths The paths to required fields (e.g., "AgentID", "AgentData.AgentID")
-     * @return List of missing field paths
+     * This method checks for field presence in the LLSD's content using field paths.
+     * Supports both simple keys and nested paths with dot notation.
+     * 
+     * @param llsd The LLSD object containing data to validate
+     * @param requiredPaths Field paths to check (e.g., "AgentID" for top-level, "AgentData.AgentID" for nested)
+     * @return List of missing field paths (empty list if all fields are present)
+     * 
+     * Example usage:
+     * <pre>
+     * LLSD data = ...;
+     * List&lt;String&gt; missing = validateRequiredFields(data, "AgentID", "FirstName");
+     * if (missing.isEmpty()) {
+     *     // All required fields present
+     * }
+     * </pre>
      */
     public static List<String> validateRequiredFields(LLSD llsd, String... requiredPaths) {
         List<String> missing = new ArrayList<>();
@@ -405,14 +417,64 @@ public final class EnhancedLLSDUtils {
             return missing;
         }
         
-        // Validate each required path
+        // Validate each required path using the helper method
         for (String path : requiredPaths) {
-            if (!fieldExists(content, path)) {
+            if (path == null || path.isEmpty()) {
+                continue; // Skip null/empty paths
+            }
+            
+            // Use hasValueAtPath which properly navigates nested structures
+            if (!hasValueAtPath(content, path)) {
                 missing.add(path);
             }
         }
         
         return missing;
+    }
+    
+    /**
+     * Check if a value exists at the given path in the content structure
+     * Supports dot notation for nested maps (e.g., "AgentData.AgentID")
+     * 
+     * @param content The content object (typically a Map)
+     * @param path The field path to check
+     * @return true if a non-null value exists at the path, false otherwise
+     */
+    private static boolean hasValueAtPath(Object content, String path) {
+        if (content == null || path == null || path.isEmpty()) {
+            return false;
+        }
+        
+        // For simple paths (no dots), check directly in Map
+        if (!path.contains(".")) {
+            if (content instanceof Map) {
+                Map<?, ?> map = (Map<?, ?>) content;
+                return map.containsKey(path) && map.get(path) != null;
+            }
+            return false;
+        }
+        
+        // For nested paths, navigate through the structure
+        String[] parts = path.split("\\.");
+        Object current = content;
+        
+        for (String part : parts) {
+            if (!(current instanceof Map)) {
+                return false;
+            }
+            
+            Map<?, ?> map = (Map<?, ?>) current;
+            if (!map.containsKey(part)) {
+                return false;
+            }
+            
+            current = map.get(part);
+            if (current == null) {
+                return false; // Null value in path means field doesn't exist
+            }
+        }
+        
+        return true; // Successfully navigated to a non-null value
     }
     
     /**
