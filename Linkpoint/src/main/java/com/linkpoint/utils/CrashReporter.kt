@@ -298,6 +298,7 @@ class CrashReporter private constructor(private val context: Context) {
         
         // Save crash log to file synchronously (since app is crashing)
         saveCrashLogSync(crashReport)
+        CodexUploadService.getInstance(context).uploadLatestReportsAsync("crash_uncaught")
     }
     
     /**
@@ -316,6 +317,7 @@ class CrashReporter private constructor(private val context: Context) {
                 )
                 recentCrashes.add(report)
                 saveCrashLogAsync(report)
+                CodexUploadService.getInstance(this@CrashReporter.context).uploadLatestReportsAsync("crash_reported")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to report exception", e)
             }

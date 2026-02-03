@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.EditTextPreference
 import androidx.preference.SwitchPreferenceCompat
 import androidx.preference.ListPreference
 import androidx.preference.SeekBarPreference
@@ -25,6 +26,7 @@ import com.linkpoint.BuildConfig
 import com.linkpoint.R
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.ui.tos.TosActivity
+import com.linkpoint.utils.CodexUploadService
 import com.linkpoint.utils.CrashReporter
 import com.linkpoint.utils.DebugReportService
 import kotlinx.coroutines.Dispatchers
@@ -389,6 +391,48 @@ class SettingsActivity : AppCompatActivity() {
                 ).show()
                 true
             }
+
+            // Codex auto-upload toggle
+            findPreference<SwitchPreferenceCompat>("codex_auto_upload")?.setOnPreferenceChangeListener { _, newValue ->
+                val enabled = newValue as Boolean
+                Toast.makeText(
+                    requireContext(),
+                    if (enabled) "Codex auto-upload enabled" else "Codex auto-upload disabled",
+                    Toast.LENGTH_SHORT
+                ).show()
+                true
+            }
+
+            // Codex endpoint configuration
+            findPreference<EditTextPreference>("codex_upload_endpoint")?.apply {
+                updateCodexEndpointSummary(this)
+                setOnPreferenceChangeListener { preference, newValue ->
+                    val endpoint = newValue?.toString()?.trim().orEmpty()
+                    CodexUploadService.getInstance(requireContext()).updateEndpoint(endpoint)
+                    updateCodexEndpointSummary(preference as EditTextPreference)
+                    true
+                }
+            }
+
+            // Upload pending Codex reports
+            findPreference<Preference>("codex_upload_now")?.setOnPreferenceClickListener {
+                val codexService = CodexUploadService.getInstance(requireContext())
+                Toast.makeText(requireContext(), "Uploading reports to Codex...", Toast.LENGTH_SHORT).show()
+                codexService.uploadLatestReportsAsync("manual_upload") { result ->
+                    val message = when (result) {
+                        is CodexUploadService.UploadResult.Success ->
+                            "Uploaded ${result.fileCount} report(s) to Codex"
+                        is CodexUploadService.UploadResult.NoData ->
+                            "No reports available to upload"
+                        is CodexUploadService.UploadResult.Disabled ->
+                            "Enable Codex auto-upload to send reports"
+                        is CodexUploadService.UploadResult.Failed ->
+                            "Codex upload failed: ${result.error.message}"
+                    }
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+                }
+                true
+            }
             
             // Capture Debug Report Now
             findPreference<Preference>("capture_debug_report")?.setOnPreferenceClickListener {
@@ -454,6 +498,15 @@ class SettingsActivity : AppCompatActivity() {
                 } else {
                     Toast.makeText(requireContext(), "Failed to capture debug report", Toast.LENGTH_SHORT).show()
                 }
+            }
+        }
+
+        private fun updateCodexEndpointSummary(pref: EditTextPreference) {
+            val endpoint = CodexUploadService.getInstance(requireContext()).getEndpoint()
+            pref.summary = if (pref.text.isNullOrBlank()) {
+                "Using default endpoint: $endpoint"
+            } else {
+                endpoint
             }
         }
         
