@@ -648,9 +648,6 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
         val startLocation = app.startLocationManager.getStartLocationForLogin()
         Log.d(TAG, "Start location for login: $startLocation")
         
-        // Save credentials
-        saveCredentials()
-        
         // Show progress
         setLoginInProgress(true)
         
@@ -864,12 +861,15 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
         }
     }
     
-    private fun handleLoginResult(result: LoginResult) {
+    private fun handleLoginResult(result: LoginResult, shouldSaveCredentials: Boolean = true) {
         setLoginInProgress(false)
         
         when (result) {
             is LoginResult.Success -> {
                 statusText.text = "Login successful!"
+                if (shouldSaveCredentials) {
+                    saveCredentials()
+                }
                 
                 // Mark first login complete for landmark caching
                 if (!app.startLocationManager.isFirstLoginComplete()) {
@@ -951,8 +951,13 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
                     startLocation = startLocation,
                     mfaToken = mfaToken
                 )
-                
-                handleLoginResult(result)
+
+                if (result is LoginResult.Success) {
+                    saveCredentials()
+                    handleLoginResult(result, shouldSaveCredentials = false)
+                } else {
+                    handleLoginResult(result)
+                }
             } catch (e: Exception) {
                 handleLoginResult(LoginResult.Failure(
                     message = "MFA verification failed: ${e.message}",
