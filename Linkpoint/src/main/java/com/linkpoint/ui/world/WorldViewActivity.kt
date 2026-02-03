@@ -115,17 +115,15 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private fun applyScreenOrientation() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val orientation = prefs.getString("screen_orientation", "portrait") ?: "portrait"
-        
-        // Only apply if preference has changed (currentOrientationPref is pre-initialized in onCreate)
-        if (orientation == currentOrientationPref) return
-        currentOrientationPref = orientation
-        
+
         requestedOrientation = when (orientation) {
             "portrait" -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             "landscape" -> ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
             "auto" -> ActivityInfo.SCREEN_ORIENTATION_SENSOR
             else -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
+
+        currentOrientationPref = orientation
     }
     
     /**
