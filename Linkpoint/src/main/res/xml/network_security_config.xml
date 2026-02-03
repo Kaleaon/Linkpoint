@@ -61,6 +61,13 @@
             <certificates src="system" />
         </trust-anchors>
     </domain-config>
+
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">asset-cdn.glb.aditi.lindenlab.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
     
     <!-- Kitely Grid (OpenSim) -->
     <domain-config cleartextTrafficPermitted="false">
