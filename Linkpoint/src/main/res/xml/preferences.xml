@@ -259,6 +259,24 @@
             android:summary="Show floating bug icon to capture debug reports"
             android:defaultValue="false" />
 
+        <SwitchPreferenceCompat
+            android:key="codex_auto_upload"
+            android:title="Auto-upload Debug Logs to Codex"
+            android:summary="Automatically send debug reports and crash logs for review"
+            android:defaultValue="false" />
+
+        <EditTextPreference
+            android:key="codex_upload_endpoint"
+            android:title="Codex Upload Endpoint"
+            android:summary="Optional custom endpoint for Codex uploads"
+            android:defaultValue=""
+            android:inputType="textUri" />
+
+        <Preference
+            android:key="codex_upload_now"
+            android:title="Upload Pending Codex Reports"
+            android:summary="Send any queued reports now" />
+
         <Preference
             android:key="capture_debug_report"
             android:title="Capture Debug Report Now"

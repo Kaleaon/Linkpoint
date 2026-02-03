@@ -111,6 +111,9 @@ class DebugReportService private constructor(private val context: Context) {
             val file = saveReport(report)
             cleanupOldReports()
             Log.i(TAG, "Debug report captured: ${file?.absolutePath}")
+            if (file != null) {
+                CodexUploadService.getInstance(context).uploadLatestReportsAsync("debug_report")
+            }
             file
         } catch (e: Exception) {
             Log.e(TAG, "Failed to capture debug report", e)
