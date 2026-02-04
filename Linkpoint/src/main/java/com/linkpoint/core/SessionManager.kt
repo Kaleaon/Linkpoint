@@ -1,8 +1,8 @@
 package com.linkpoint.core
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.util.Log
+import com.linkpoint.utils.SecurePreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.json.JSONArray
@@ -22,7 +22,7 @@ class SessionManager(private val context: Context) {
         private const val MAX_HISTORY_SIZE = 50
     }
     
-    private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private val prefs = SecurePreferences.getEncryptedPreferences(context, PREFS_NAME)
     
     // Session state
     private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)

@@ -1,8 +1,8 @@
 package com.linkpoint.core
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.util.Log
+import com.linkpoint.utils.SecurePreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.json.JSONArray
@@ -33,7 +33,7 @@ class StartLocationManager(private val context: Context) {
         private const val MAX_FAVORITE_LOCATIONS = 20
     }
     
-    private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private val prefs = SecurePreferences.getEncryptedPreferences(context, PREFS_NAME)
     
     // Start location options
     private val _startOptions = MutableStateFlow<List<StartLocationOption>>(emptyList())
