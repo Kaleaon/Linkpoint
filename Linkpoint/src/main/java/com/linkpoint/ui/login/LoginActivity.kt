@@ -3,13 +3,12 @@ package com.linkpoint.ui.login
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
-import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
 import android.util.Base64
 import android.util.Log
 import android.view.View
@@ -33,15 +32,15 @@ import com.linkpoint.ui.settings.SettingsActivity
 import com.linkpoint.ui.tos.TosActivity
 import com.linkpoint.ui.world.WorldViewActivity
 import com.linkpoint.utils.PermissionManager
+import com.linkpoint.utils.SecurePreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.security.KeyStore
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.security.KeyStore
 import javax.crypto.Cipher
-import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
@@ -65,12 +64,13 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
         private const val KEY_LAST_LAST = "last_last"
         private const val KEY_LAST_GRID = "last_grid"
         private const val KEY_SAVE_PASSWORD = "save_password"
+        private const val KEY_SAVED_PASSWORD = "saved_password"
         private const val KEY_ENCRYPTED_PASSWORD = "encrypted_password"
         private const val KEY_PASSWORD_IV = "password_iv"
         private const val KEY_STORAGE_PERMISSION_REQUESTED = "storage_permission_requested"
         private const val KEY_ALL_PERMISSIONS_REQUESTED = "all_permissions_requested"
         
-        // Android Keystore alias for password encryption
+        // Android Keystore alias for legacy password encryption
         private const val KEYSTORE_ALIAS = "LinkpointLoginKey"
         
         // MFA TOTP code length (standard is 6 digits)
@@ -96,6 +96,12 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
     
     // Permission manager for handling runtime permissions
     private lateinit var permissionManager: PermissionManager
+
+    private val loginPrefs by lazy {
+        SecurePreferences.getEncryptedPreferences(this, PREFS_NAME) { legacyPrefs, encryptedPrefs ->
+            migrateLegacyPassword(legacyPrefs, encryptedPrefs)
+        }
+    }
     
     // ToS acceptance result handler
     private val tosLauncher = registerForActivityResult(
@@ -132,7 +138,7 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
         }
         
         // Mark that we've requested permission
-        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+        loginPrefs.edit()
             .putBoolean(KEY_STORAGE_PERMISSION_REQUESTED, true)
             .apply()
     }
@@ -196,7 +202,7 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
         }
         
         // Mark that we've requested permissions
-        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+        loginPrefs.edit()
             .putBoolean(KEY_ALL_PERMISSIONS_REQUESTED, true)
             .apply()
     }
@@ -206,8 +212,7 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
      * This includes storage (for logs/cache), notifications, microphone, and Bluetooth.
      */
     private fun requestAllStartupPermissions() {
-        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        if (prefs.getBoolean(KEY_ALL_PERMISSIONS_REQUESTED, false)) {
+        if (loginPrefs.getBoolean(KEY_ALL_PERMISSIONS_REQUESTED, false)) {
             Log.i(TAG, "Startup permissions already requested")
             return
         }
@@ -222,7 +227,7 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
         
         if (permissionsToRequest.isEmpty()) {
             Log.i(TAG, "All startup permissions already granted")
-            prefs.edit().putBoolean(KEY_ALL_PERMISSIONS_REQUESTED, true).apply()
+            loginPrefs.edit().putBoolean(KEY_ALL_PERMISSIONS_REQUESTED, true).apply()
             return
         }
         
@@ -235,8 +240,7 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
      * Only requests once per install to avoid annoying users.
      */
     private fun requestStoragePermissionsIfNeeded() {
-        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        if (prefs.getBoolean(KEY_STORAGE_PERMISSION_REQUESTED, false)) {
+        if (loginPrefs.getBoolean(KEY_STORAGE_PERMISSION_REQUESTED, false)) {
             return // Already requested
         }
         
@@ -249,7 +253,7 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
                 "Network logs will be saved to Documents/Linkpoint Logs/",
                 Toast.LENGTH_SHORT
             ).show()
-            prefs.edit().putBoolean(KEY_STORAGE_PERMISSION_REQUESTED, true).apply()
+            loginPrefs.edit().putBoolean(KEY_STORAGE_PERMISSION_REQUESTED, true).apply()
             return
         }
         
@@ -262,7 +266,7 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
                 "Network logs will be saved to Documents/Linkpoint Logs/",
                 Toast.LENGTH_SHORT
             ).show()
-            prefs.edit().putBoolean(KEY_STORAGE_PERMISSION_REQUESTED, true).apply()
+            loginPrefs.edit().putBoolean(KEY_STORAGE_PERMISSION_REQUESTED, true).apply()
             return
         }
         
@@ -286,7 +290,7 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
                 storagePermissionLauncher.launch(permissions)
             } else {
                 Log.i(TAG, "Storage permissions already granted")
-                prefs.edit().putBoolean(KEY_STORAGE_PERMISSION_REQUESTED, true).apply()
+                loginPrefs.edit().putBoolean(KEY_STORAGE_PERMISSION_REQUESTED, true).apply()
             }
         }
     }
@@ -317,10 +321,9 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
     }
     
     private fun loadSavedCredentials() {
-        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        firstNameEdit.setText(prefs.getString(KEY_LAST_FIRST, ""))
-        lastNameEdit.setText(prefs.getString(KEY_LAST_LAST, ""))
-        savePasswordCheck.isChecked = prefs.getBoolean(KEY_SAVE_PASSWORD, false)
+        firstNameEdit.setText(loginPrefs.getString(KEY_LAST_FIRST, ""))
+        lastNameEdit.setText(loginPrefs.getString(KEY_LAST_LAST, ""))
+        savePasswordCheck.isChecked = loginPrefs.getBoolean(KEY_SAVE_PASSWORD, false)
         
         // Load saved password if user opted to save it
         if (savePasswordCheck.isChecked) {
@@ -335,7 +338,7 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
      * Save credentials including encrypted password (like Lumiya)
      */
     private fun saveCredentials() {
-        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+        val prefs = loginPrefs.edit()
         prefs.putString(KEY_LAST_FIRST, firstNameEdit.text.toString())
         prefs.putString(KEY_LAST_LAST, lastNameEdit.text.toString())
         prefs.putString(KEY_LAST_GRID, app.gridManager.getSelectedGrid().id)
@@ -357,98 +360,65 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
      * This is how Lumiya securely stores passwords
      */
     private fun savePasswordSecurely(password: String) {
-        try {
-            val keyStore = KeyStore.getInstance("AndroidKeyStore")
-            keyStore.load(null)
-            
-            // Generate or get existing key
-            if (!keyStore.containsAlias(KEYSTORE_ALIAS)) {
-                val keyGenerator = KeyGenerator.getInstance(
-                    KeyProperties.KEY_ALGORITHM_AES,
-                    "AndroidKeyStore"
-                )
-                keyGenerator.init(
-                    KeyGenParameterSpec.Builder(
-                        KEYSTORE_ALIAS,
-                        KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-                    )
-                        .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                        .build()
-                )
-                keyGenerator.generateKey()
-            }
-            
-            val secretKey = keyStore.getKey(KEYSTORE_ALIAS, null) as SecretKey
-            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey)
-            
-            val encryptedBytes = cipher.doFinal(password.toByteArray(Charsets.UTF_8))
-            val iv = cipher.iv
-            
-            // Store encrypted password and IV
-            val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
-            prefs.putString(KEY_ENCRYPTED_PASSWORD, Base64.encodeToString(encryptedBytes, Base64.DEFAULT))
-            prefs.putString(KEY_PASSWORD_IV, Base64.encodeToString(iv, Base64.DEFAULT))
-            prefs.apply()
-            
-            Log.d(TAG, "Password saved securely")
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to save password securely: ${e.message}")
-            // Notify user that password wasn't saved
-            android.widget.Toast.makeText(
-                this,
-                "Could not save password securely. You'll need to enter it next time.",
-                android.widget.Toast.LENGTH_SHORT
-            ).show()
-        }
+        loginPrefs.edit().putString(KEY_SAVED_PASSWORD, password).apply()
+        Log.d(TAG, "Password saved securely")
     }
     
     /**
      * Load and decrypt saved password
      */
     private fun loadSavedPassword(): String? {
-        return try {
-            val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-            val encryptedBase64 = prefs.getString(KEY_ENCRYPTED_PASSWORD, null) ?: return null
-            val ivBase64 = prefs.getString(KEY_PASSWORD_IV, null) ?: return null
-            
-            val encryptedBytes = Base64.decode(encryptedBase64, Base64.DEFAULT)
-            val iv = Base64.decode(ivBase64, Base64.DEFAULT)
-            
-            val keyStore = KeyStore.getInstance("AndroidKeyStore")
-            keyStore.load(null)
-            
-            val secretKey = keyStore.getKey(KEYSTORE_ALIAS, null) as SecretKey
-            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, GCMParameterSpec(128, iv))
-            
-            val decryptedBytes = cipher.doFinal(encryptedBytes)
-            String(decryptedBytes, Charsets.UTF_8)
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to load saved password: ${e.message}")
-            null
-        }
+        return loginPrefs.getString(KEY_SAVED_PASSWORD, null)
     }
     
     /**
      * Clear saved password
      */
     private fun clearSavedPassword() {
-        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
-        prefs.remove(KEY_ENCRYPTED_PASSWORD)
-        prefs.remove(KEY_PASSWORD_IV)
-        prefs.apply()
-        
-        // Optionally remove the key from keystore
-        try {
+        loginPrefs.edit()
+            .remove(KEY_SAVED_PASSWORD)
+            .remove(KEY_ENCRYPTED_PASSWORD)
+            .remove(KEY_PASSWORD_IV)
+            .apply()
+    }
+
+    private fun migrateLegacyPassword(
+        legacyPrefs: SharedPreferences,
+        encryptedPrefs: SharedPreferences
+    ) {
+        if (encryptedPrefs.contains(KEY_SAVED_PASSWORD)) {
+            return
+        }
+
+        val encryptedBase64 = legacyPrefs.getString(KEY_ENCRYPTED_PASSWORD, null) ?: return
+        val ivBase64 = legacyPrefs.getString(KEY_PASSWORD_IV, null) ?: return
+        val decrypted = decryptLegacyPassword(encryptedBase64, ivBase64)
+        if (decrypted != null) {
+            encryptedPrefs.edit().putString(KEY_SAVED_PASSWORD, decrypted).apply()
+        }
+        legacyPrefs.edit()
+            .remove(KEY_ENCRYPTED_PASSWORD)
+            .remove(KEY_PASSWORD_IV)
+            .apply()
+    }
+
+    private fun decryptLegacyPassword(encryptedBase64: String, ivBase64: String): String? {
+        return try {
+            val encryptedBytes = Base64.decode(encryptedBase64, Base64.DEFAULT)
+            val iv = Base64.decode(ivBase64, Base64.DEFAULT)
+
             val keyStore = KeyStore.getInstance("AndroidKeyStore")
             keyStore.load(null)
-            if (keyStore.containsAlias(KEYSTORE_ALIAS)) {
-                keyStore.deleteEntry(KEYSTORE_ALIAS)
-            }
+
+            val secretKey = keyStore.getKey(KEYSTORE_ALIAS, null) as? SecretKey ?: return null
+            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, GCMParameterSpec(128, iv))
+
+            val decryptedBytes = cipher.doFinal(encryptedBytes)
+            String(decryptedBytes, Charsets.UTF_8)
         } catch (e: Exception) {
-            // Ignore - key cleanup is not critical
+            Log.w(TAG, "Failed to migrate saved password: ${e.message}")
+            null
         }
     }
     
@@ -470,7 +440,7 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
         }
         
         // Restore last used grid
-        val lastGrid = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getString(KEY_LAST_GRID, null)
+        val lastGrid = loginPrefs.getString(KEY_LAST_GRID, null)
         if (lastGrid != null) {
             val gridIndex = grids.indexOfFirst { it.id == lastGrid }
             if (gridIndex >= 0) {
