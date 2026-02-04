@@ -3,10 +3,10 @@ import java.io.FileInputStream
 
 plugins {
     id("com.android.application") version "8.6.1"
-    id("org.jetbrains.kotlin.android") version "2.1.0"
-    id("org.jetbrains.kotlin.plugin.parcelize") version "2.1.0"
-    id("org.jetbrains.kotlin.plugin.compose") version "2.1.0"
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.1.0"
+    id("org.jetbrains.kotlin.android") version "1.9.22"
+    id("org.jetbrains.kotlin.plugin.parcelize") version "1.9.22"
+    id("org.jetbrains.kotlin.plugin.compose") version "1.9.22"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
 }
 
 // Configuration for libGDX native libraries
@@ -215,10 +215,10 @@ dependencies {
     // implementation("lindenlab:llsd:1.0")
     
     // Kotlin support
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:2.1.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.22")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     
     // Back-compat libs
@@ -306,7 +306,7 @@ dependencies {
 
     // Testing
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     testImplementation("com.squareup.okhttp3:okhttp:4.12.0")  // For integration tests
     testImplementation("org.json:json:20240303")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
