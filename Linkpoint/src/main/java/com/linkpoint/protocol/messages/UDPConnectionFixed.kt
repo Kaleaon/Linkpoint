@@ -890,9 +890,23 @@ class UDPConnectionFixed {
                 checkMessageTimeouts()
                 checkPingHealth()
                 delay(1000L) // Check every second
+            } catch (e: CancellationException) {
+                if (_isConnected.value) {
+                    NetworkLogger.log(
+                        NetworkLogger.Level.DEBUG,
+                        NetworkLogger.Category.UDP,
+                        "Timeout checker cancelled: ${e.message}"
+                    )
+                }
+                break
             } catch (e: Exception) {
-                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
-                    "Error in timeout checker: ${e.message}")
+                if (_isConnected.value) {
+                    NetworkLogger.log(
+                        NetworkLogger.Level.ERROR,
+                        NetworkLogger.Category.UDP,
+                        "Error in timeout checker: ${e.message}"
+                    )
+                }
             }
         }
     }
