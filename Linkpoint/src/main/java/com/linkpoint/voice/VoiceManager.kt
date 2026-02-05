@@ -6,8 +6,10 @@ import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -44,7 +46,7 @@ class VoiceManager(
         const val MODERATION_REGION_OWNER = 4
     }
     
-    private val voiceDispatcher: CoroutineDispatcher = Executors.newSingleThreadExecutor { runnable ->
+    private val voiceDispatcher: ExecutorCoroutineDispatcher = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "VoiceThread").apply { isDaemon = true }
     }.asCoroutineDispatcher()
     private val scope = CoroutineScope(voiceDispatcher + SupervisorJob())

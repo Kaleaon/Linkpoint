@@ -419,6 +419,8 @@ class RenderManager(private val context: Context) {
                         viewportHeight = height
                         updateProjection(width, height)
                         Log.i(TAG, "║ Viewport: ${width}x${height}")
+                    } else {
+                        Log.w(TAG, "║ Viewport size invalid: ${width}x${height}")
                     }
                 } else {
                     Log.e(TAG, "║ ✗ SwapChain recreation failed - createSwapChain returned null")
