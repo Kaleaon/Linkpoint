@@ -8,6 +8,7 @@ import com.linkpoint.network.events.ConnectionState
 import com.linkpoint.protocol.auth.AuthReply
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.messages.MessageRouter
+import com.linkpoint.protocol.messages.CircuitDispatcher
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,7 +44,7 @@ import java.util.UUID
  */
 class TempCircuit(
     private val authReply: AuthReply,
-    private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val scope: CoroutineScope = CoroutineScope(CircuitDispatcher.dispatcher + SupervisorJob())
 ) {
     
     companion object {

@@ -7,6 +7,7 @@ import com.linkpoint.network.events.ConnectionState
 import com.linkpoint.network.events.ConnectionStateChangedEvent
 import com.linkpoint.protocol.auth.AuthReply
 import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.CircuitDispatcher
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.messages.MessageRouter
 import com.linkpoint.protocol.messages.MessageEventListener
@@ -35,7 +36,7 @@ class AgentCircuit(
     private val authReply: AuthReply,
     private val sceneGraph: SceneGraph? = null,
     private val renderQueue: RenderQueue? = null,
-    private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val scope: CoroutineScope = CoroutineScope(CircuitDispatcher.dispatcher + SupervisorJob())
 ) {
     
     companion object {

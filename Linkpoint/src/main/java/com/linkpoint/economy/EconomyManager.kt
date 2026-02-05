@@ -3,6 +3,7 @@ package com.linkpoint.economy
 import android.util.Log
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
+import com.linkpoint.protocol.capabilities.EventQueueDispatcher
 import com.linkpoint.protocol.llsd.LLSDMap
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
@@ -63,7 +64,7 @@ class EconomyManager(
         const val MONEY_FLAG_SOURCE_AGGREGATES = 0x02
     }
     
-    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val scope = CoroutineScope(EventQueueDispatcher.dispatcher + SupervisorJob())
     
     // L$ balance
     private val _balance = MutableStateFlow(0)
@@ -78,7 +79,7 @@ class EconomyManager(
     val transactionEvents: SharedFlow<TransactionEvent> = _transactionEvents
     
     init {
-        capabilityManager.registerEventHandler("MoneyBalanceReply", this)
+        capabilityManager.registerEventHandler("MoneyBalanceReply", this, EventQueueDispatcher.dispatcher)
     }
     
     override fun onEvent(message: String, body: LLSDMap) {

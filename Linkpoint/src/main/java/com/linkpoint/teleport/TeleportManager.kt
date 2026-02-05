@@ -4,6 +4,7 @@ import android.util.Log
 import com.linkpoint.core.RegionInfo
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
+import com.linkpoint.protocol.capabilities.EventQueueDispatcher
 import com.linkpoint.protocol.llsd.*
 import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnectionFixed
@@ -71,7 +72,7 @@ class TeleportManager(
         const val TELEPORT_PENDING = 7
     }
     
-    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val scope = CoroutineScope(EventQueueDispatcher.dispatcher + SupervisorJob())
     
     // Teleport state
     private val _teleportState = MutableStateFlow(TeleportState.IDLE)
@@ -90,12 +91,12 @@ class TeleportManager(
     
     init {
         // Register for teleport-related events from the event queue
-        capabilityManager.registerEventHandler("TeleportProgress", this)
-        capabilityManager.registerEventHandler("TeleportLocal", this)
-        capabilityManager.registerEventHandler("TeleportFailed", this)
-        capabilityManager.registerEventHandler("TeleportFinish", this)
-        capabilityManager.registerEventHandler("TeleportStart", this)
-        capabilityManager.registerEventHandler("EstablishAgentCommunication", this)
+        capabilityManager.registerEventHandler("TeleportProgress", this, EventQueueDispatcher.dispatcher)
+        capabilityManager.registerEventHandler("TeleportLocal", this, EventQueueDispatcher.dispatcher)
+        capabilityManager.registerEventHandler("TeleportFailed", this, EventQueueDispatcher.dispatcher)
+        capabilityManager.registerEventHandler("TeleportFinish", this, EventQueueDispatcher.dispatcher)
+        capabilityManager.registerEventHandler("TeleportStart", this, EventQueueDispatcher.dispatcher)
+        capabilityManager.registerEventHandler("EstablishAgentCommunication", this, EventQueueDispatcher.dispatcher)
     }
     
     override fun onEvent(message: String, body: LLSDMap) {

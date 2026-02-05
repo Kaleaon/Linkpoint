@@ -217,7 +217,7 @@ class UDPConnectionFixed {
     private val messageRouter = MessageRouter()
     
     // Coroutine scope
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val scope = CoroutineScope(CircuitDispatcher.dispatcher + SupervisorJob())
 
     // Circuit threading and queues (Lumiya-style deterministic ordering)
     private val circuitThread = CircuitThread("CircuitThread")
@@ -562,7 +562,7 @@ class UDPConnectionFixed {
     /**
      * Connect to the simulator
      */
-    suspend fun connect(): Boolean = withContext(Dispatchers.IO) {
+    suspend fun connect(): Boolean = withContext(CircuitDispatcher.dispatcher) {
         try {
             // Record connection attempt time and reset ALL statistics for new session
             connectionAttemptTime = System.currentTimeMillis()
@@ -751,7 +751,7 @@ class UDPConnectionFixed {
                 }
                 
                 // Wait for packets with timeout
-                val readyKeys = withContext(Dispatchers.IO) {
+                val readyKeys = withContext(CircuitDispatcher.dispatcher) {
                     localSelector.select(SELECTOR_TIMEOUT_MS)
                 }
                 
@@ -764,7 +764,7 @@ class UDPConnectionFixed {
                         if (key.isReadable) {
                             buffer.clear()
                             
-                            val bytesRead = withContext(Dispatchers.IO) {
+                            val bytesRead = withContext(CircuitDispatcher.dispatcher) {
                                 localChannel.read(buffer)
                             }
                             
@@ -988,7 +988,7 @@ class UDPConnectionFixed {
      * - For each packet:
      *   - ID: 4 bytes (unsigned int, little-endian) - the sequence number being ACKed
      */
-    private suspend fun sendPendingAcks() = withContext(Dispatchers.IO) {
+    private suspend fun sendPendingAcks() = withContext(CircuitDispatcher.dispatcher) {
         val acksToSend = mutableListOf<Int>()
         
         // Drain up to MAX_ACKS_PER_PACKET from the queue
