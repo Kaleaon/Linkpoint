@@ -1048,10 +1048,13 @@ class LinkpointApp : Application() {
                             objectManager.removeObject(localId)
                             // Remove from PrimRenderer and SceneManager
                             if (::renderManager.isInitialized) {
-                                renderManager.removePrim(localId)
-                                if (obj != null) {
-                                    renderManager.getSceneManager()?.removeObject(obj.fullId)
-                                }
+                                val objectId = obj?.fullId
+                                renderManager.dispatcher.post(Runnable {
+                                    renderManager.removePrim(localId)
+                                    if (objectId != null) {
+                                        renderManager.getSceneManager()?.removeObject(objectId)
+                                    }
+                                })
                             }
                         }
                     }
