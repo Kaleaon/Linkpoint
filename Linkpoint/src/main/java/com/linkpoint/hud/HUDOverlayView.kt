@@ -89,6 +89,15 @@ class HUDOverlayView @JvmOverloads constructor(
         for (hud in huds) {
             drawHUD(canvas, hud)
         }
+
+        val currentIds = huds.map { it.localId }.toSet()
+        val iterator = screenBoundsMap.keys.iterator()
+        while (iterator.hasNext()) {
+            val hudId = iterator.next()
+            if (hudId !in currentIds) {
+                iterator.remove()
+            }
+        }
     }
     
     private fun drawHUD(canvas: Canvas, hud: HUDObject) {
@@ -319,6 +328,13 @@ class HUDOverlayView @JvmOverloads constructor(
         }
         
         return super.onTouchEvent(event)
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (w != oldw || h != oldh) {
+            resetInteraction()
+        }
     }
 
     private fun resetInteraction() {

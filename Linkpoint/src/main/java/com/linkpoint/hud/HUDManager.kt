@@ -12,6 +12,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
+import org.json.JSONException
 import org.json.JSONObject
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -382,21 +383,15 @@ class HUDManager(
             val version = root.optInt("version", 1)
             val layoutsObj = root.optJSONObject("layouts") ?: return
             val loadedLayouts = mutableMapOf<HudDeviceClass, MutableMap<HudOrientation, MutableMap<Int, HudLayoutEntry>>>()
-            val deviceKeys = layoutsObj.keys()
-            while (deviceKeys.hasNext()) {
-                val deviceKey = deviceKeys.next()
+            layoutsObj.keys().forEach { deviceKey ->
                 val deviceClass = runCatching { HudDeviceClass.valueOf(deviceKey) }.getOrNull() ?: continue
                 val deviceObj = layoutsObj.optJSONObject(deviceKey) ?: continue
-                val orientationKeys = deviceObj.keys()
                 val orientationMap = mutableMapOf<HudOrientation, MutableMap<Int, HudLayoutEntry>>()
-                while (orientationKeys.hasNext()) {
-                    val orientationKey = orientationKeys.next()
+                deviceObj.keys().forEach { orientationKey ->
                     val orientation = runCatching { HudOrientation.valueOf(orientationKey) }.getOrNull() ?: continue
                     val attachmentObj = deviceObj.optJSONObject(orientationKey) ?: continue
-                    val attachmentKeys = attachmentObj.keys()
                     val entryMap = mutableMapOf<Int, HudLayoutEntry>()
-                    while (attachmentKeys.hasNext()) {
-                        val attachmentKey = attachmentKeys.next()
+                    attachmentObj.keys().forEach { attachmentKey ->
                         val attachmentPoint = attachmentKey.toIntOrNull() ?: continue
                         val entryObj = attachmentObj.optJSONObject(attachmentKey) ?: continue
                         val entry = HudLayoutEntry(
@@ -412,7 +407,7 @@ class HUDManager(
                 loadedLayouts[deviceClass] = orientationMap
             }
             layoutConfig = HudLayoutConfig(version = version, layouts = loadedLayouts)
-        } catch (e: Exception) {
+        } catch (e: JSONException) {
             Log.w(TAG, "Failed to parse HUD layout config", e)
         }
     }
@@ -440,7 +435,7 @@ class HUDManager(
             }
             root.put("layouts", layoutsObj)
             prefs.edit().putString(KEY_LAYOUT_CONFIG, root.toString()).apply()
-        } catch (e: Exception) {
+        } catch (e: JSONException) {
             Log.w(TAG, "Failed to save HUD layout config", e)
         }
     }
