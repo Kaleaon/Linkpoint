@@ -5,6 +5,7 @@ import android.util.Log
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
+import com.linkpoint.protocol.capabilities.EventQueueDispatcher
 import com.linkpoint.protocol.llsd.*
 import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnectionFixed
@@ -40,7 +41,7 @@ class FriendsManager(
         const val RIGHTS_MODIFY_OBJECTS = 0x04
     }
     
-    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val scope = CoroutineScope(EventQueueDispatcher.dispatcher + SupervisorJob())
     
     // Friends list
     private val friends = ConcurrentHashMap<UUID, Friend>()
@@ -57,12 +58,12 @@ class FriendsManager(
     private val pendingOffers = ConcurrentHashMap<UUID, FriendshipOffer>()
     
     init {
-        capabilityManager.registerEventHandler("FriendshipOffered", this)
-        capabilityManager.registerEventHandler("FriendshipAccepted", this)
-        capabilityManager.registerEventHandler("FriendshipDeclined", this)
-        capabilityManager.registerEventHandler("FriendshipTerminated", this)
-        capabilityManager.registerEventHandler("OnlineNotification", this)
-        capabilityManager.registerEventHandler("OfflineNotification", this)
+        capabilityManager.registerEventHandler("FriendshipOffered", this, EventQueueDispatcher.dispatcher)
+        capabilityManager.registerEventHandler("FriendshipAccepted", this, EventQueueDispatcher.dispatcher)
+        capabilityManager.registerEventHandler("FriendshipDeclined", this, EventQueueDispatcher.dispatcher)
+        capabilityManager.registerEventHandler("FriendshipTerminated", this, EventQueueDispatcher.dispatcher)
+        capabilityManager.registerEventHandler("OnlineNotification", this, EventQueueDispatcher.dispatcher)
+        capabilityManager.registerEventHandler("OfflineNotification", this, EventQueueDispatcher.dispatcher)
     }
     
     override fun onEvent(message: String, body: LLSDMap) {

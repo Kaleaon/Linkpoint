@@ -28,6 +28,8 @@ import com.linkpoint.objects.ObjectManager
 import com.linkpoint.objects.inventory.TaskInventoryManager
 import com.linkpoint.objects.prim.FlexiblePrimSimulator
 import com.linkpoint.protocol.capabilities.CapabilityManager
+import com.linkpoint.protocol.capabilities.EventQueueDispatcher
+import com.linkpoint.protocol.messages.CircuitDispatcher
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.messages.parseRegionHandshake
 import com.linkpoint.protocol.messages.parseAgentMovementComplete
@@ -4790,6 +4792,7 @@ class LinkpointApp : Application() {
         if (::animationController.isInitialized) animationController.shutdown()
         
         capabilityManager.shutdown()
+        EventQueueDispatcher.shutdown()
         
         // Reset connection state tracking
         completeAgentMovementSent.set(false)
@@ -4801,6 +4804,7 @@ class LinkpointApp : Application() {
         
         // Shutdown protocol and networking
         protocol.shutdown()
+        CircuitDispatcher.shutdown()
         
         // Shutdown destination guide
         destinationGuide.shutdown()
