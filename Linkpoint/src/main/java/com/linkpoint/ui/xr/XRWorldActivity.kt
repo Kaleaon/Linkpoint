@@ -76,7 +76,7 @@ class XRWorldActivity : AppCompatActivity() {
         
         if (xrManager.initSession(mode)) {
             // Initialize renderer for XR
-            app.renderManager.initialize(surfaceView)
+            app.renderManager.initializeOnRenderThread(surfaceView)
             isRendering = true
             startXRRenderLoop()
         } else {
@@ -91,11 +91,11 @@ class XRWorldActivity : AppCompatActivity() {
     }
     
     private fun startXRRenderLoop() {
-        surfaceView.post(object : Runnable {
+        app.renderManager.dispatcher.post(object : Runnable {
             override fun run() {
                 if (isRendering) {
                     renderXRFrame()
-                    surfaceView.postDelayed(this, 11) // ~90fps for VR
+                    app.renderManager.dispatcher.postDelayed(this, 11) // ~90fps for VR
                 }
             }
         })

@@ -48,6 +48,7 @@ import com.linkpoint.protocol.transfer.XferManager
 import com.linkpoint.render.DrawDistanceManager
 import com.linkpoint.render.HoverTextManager
 import com.linkpoint.render.RenderManager
+import com.linkpoint.render.RenderableUpdate
 import com.linkpoint.render.particles.ParticleSystem
 import com.linkpoint.rlv.RLVController
 import com.linkpoint.service.ConnectionKeepAliveManager
@@ -792,10 +793,12 @@ class LinkpointApp : Application() {
                     }
                     // Add avatar to scene for rendering
                     if (::renderManager.isInitialized) {
-                        renderManager.getSceneManager()?.updateAvatar(
-                            agentId = update.fullId,
-                            position = update.position,
-                            rotation = update.rotation
+                        renderManager.enqueueUpdate(
+                            RenderableUpdate.AvatarUpdate(
+                                agentId = update.fullId,
+                                position = update.position,
+                                rotation = update.rotation
+                            )
                         )
                     }
                 }
@@ -807,7 +810,7 @@ class LinkpointApp : Application() {
                     // Add object to scene for rendering using PrimRenderer
                     // PrimRenderer creates actual renderable meshes (box, sphere, etc.)
                     if (::renderManager.isInitialized) {
-                        renderManager.updatePrim(update)
+                        renderManager.enqueueUpdate(RenderableUpdate.PrimUpdate(update))
                     }
                     
                     // Extract and prefetch textures from the object's TextureEntry
@@ -4786,7 +4789,7 @@ class LinkpointApp : Application() {
         udpConnection.disconnect()
         
         xrManager.shutdown()
-        renderManager.shutdown()
+        renderManager.shutdownOnRenderThread()
         
         // Shutdown protocol and networking
         protocol.shutdown()

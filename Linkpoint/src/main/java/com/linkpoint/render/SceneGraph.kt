@@ -47,24 +47,7 @@ class SceneGraph {
      */
     fun updateObject(sceneObject: com.linkpoint.protocol.scenery.SceneObject) {
         _objects.value = _objects.value.toMutableMap().apply {
-            val renderable = RenderableObject(
-                id = sceneObject.id,
-                name = sceneObject.name,
-                description = sceneObject.description,
-                position = Vector3(
-                    sceneObject.position.x,
-                    sceneObject.position.y,
-                    sceneObject.position.z
-                ),
-                rotation = Quaternion(
-                    sceneObject.rotation.w,
-                    sceneObject.rotation.x,
-                    sceneObject.rotation.y,
-                    sceneObject.rotation.z
-                ),
-                isAvatar = sceneObject.pCode == 47
-            )
-            put(sceneObject.id, renderable)
+            put(sceneObject.id, toRenderableObject(sceneObject))
         }
         
         lastUpdateTime = System.currentTimeMillis()
@@ -121,6 +104,55 @@ class SceneGraph {
         lastUpdateTime = System.currentTimeMillis()
         updateStatistics()
     }
+
+    /**
+     * Apply a batch of updates on the render thread.
+     */
+    fun applyUpdates(updates: List<RenderableUpdate>) {
+        if (updates.isEmpty()) return
+
+        val objectsMap = _objects.value.toMutableMap()
+        var objectsChanged = false
+        var terrainChanged = false
+
+        updates.forEach { update ->
+            when (update) {
+                is RenderableUpdate.SceneObjectUpdate -> {
+                    objectsMap[update.sceneObject.id] = toRenderableObject(update.sceneObject)
+                    objectsChanged = true
+                }
+                is RenderableUpdate.RemoveObject -> {
+                    if (objectsMap.remove(update.objectId) != null) {
+                        objectsChanged = true
+                    }
+                }
+                is RenderableUpdate.TerrainUpdate -> {
+                    _terrain.value = TerrainMesh(
+                        heightmap = update.heightmap,
+                        width = update.width,
+                        depth = update.depth
+                    )
+                    terrainChanged = true
+                }
+                RenderableUpdate.ClearScene -> {
+                    objectsMap.clear()
+                    _terrain.value = null
+                    objectsChanged = true
+                    terrainChanged = true
+                }
+                else -> Unit
+            }
+        }
+
+        if (objectsChanged) {
+            _objects.value = objectsMap
+        }
+
+        if (objectsChanged || terrainChanged) {
+            lastUpdateTime = System.currentTimeMillis()
+            updateStatistics()
+        }
+    }
     
     /**
      * Update scene statistics
@@ -130,6 +162,26 @@ class SceneGraph {
             objectCount = _objects.value.size,
             hasTerrain = _terrain.value != null,
             lastUpdateTime = lastUpdateTime
+        )
+    }
+
+    private fun toRenderableObject(sceneObject: SceneObject): RenderableObject {
+        return RenderableObject(
+            id = sceneObject.id,
+            name = sceneObject.name,
+            description = sceneObject.description,
+            position = Vector3(
+                sceneObject.position.x,
+                sceneObject.position.y,
+                sceneObject.position.z
+            ),
+            rotation = Quaternion(
+                sceneObject.rotation.w,
+                sceneObject.rotation.x,
+                sceneObject.rotation.y,
+                sceneObject.rotation.z
+            ),
+            isAvatar = sceneObject.pCode == 47
         )
     }
     

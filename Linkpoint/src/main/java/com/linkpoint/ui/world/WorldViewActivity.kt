@@ -497,7 +497,9 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 
                 // Eagerly create SwapChain now that surface is available
                 // This is more efficient than waiting for ensureSwapChain() to detect it on first render frame
-                app.renderManager.recreateSwapChain()
+                app.renderManager.dispatcher.post(
+                    Runnable { app.renderManager.recreateSwapChain() }
+                )
                 
                 // Start render loop only if not already rendering (synchronized to avoid race)
                 synchronized(this@WorldViewActivity) {
@@ -514,7 +516,9 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 // Recreate SwapChain to handle new dimensions or format changes
                 // This ensures viewport is updated immediately rather than waiting for next render frame
                 if (isSurfaceReady) {
-                    app.renderManager.recreateSwapChain()
+                    app.renderManager.dispatcher.post(
+                        Runnable { app.renderManager.recreateSwapChain() }
+                    )
                 }
             }
             
@@ -531,18 +535,18 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         
         // Initialize RenderManager with the SurfaceView
         android.util.Log.i(TAG, "Initializing RenderManager...")
-        app.renderManager.initialize(surfaceView)
+        app.renderManager.initializeOnRenderThread(surfaceView)
         
         // Don't start render loop here - wait for surfaceCreated callback
         android.util.Log.i(TAG, "✓ RenderManager initialized, waiting for surface to be ready...")
     }
     
     private fun startRenderLoop() {
-        surfaceView.post(object : Runnable {
+        app.renderManager.dispatcher.post(object : Runnable {
             override fun run() {
                 if (isRendering) {
                     app.renderManager.renderFrame()
-                    surfaceView.postDelayed(this, 16) // ~60fps
+                    app.renderManager.dispatcher.postDelayed(this, 16) // ~60fps
                 }
             }
         })
@@ -755,7 +759,9 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 android.util.Log.i(TAG, "onResume: Restarting render loop")
                 // Ensure SwapChain is recreated - it may have been destroyed when activity was paused
                 // The UiHelper may have called onDetachedFromSurface() while we were paused
-                app.renderManager.recreateSwapChain()
+                app.renderManager.dispatcher.post(
+                    Runnable { app.renderManager.recreateSwapChain() }
+                )
                 isRendering = true
                 startRenderLoop()
             } else if (!isSurfaceReady) {

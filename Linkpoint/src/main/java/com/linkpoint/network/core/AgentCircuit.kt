@@ -11,6 +11,7 @@ import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.messages.MessageRouter
 import com.linkpoint.protocol.messages.MessageEventListener
 import com.linkpoint.protocol.scenery.SceneDataHandler
+import com.linkpoint.render.RenderQueue
 import com.linkpoint.render.SceneGraph
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +34,7 @@ import java.util.UUID
 class AgentCircuit(
     private val authReply: AuthReply,
     private val sceneGraph: SceneGraph? = null,
+    private val renderQueue: RenderQueue? = null,
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 ) {
     
@@ -57,7 +59,7 @@ class AgentCircuit(
     }
     
     private val messageRouter = udpConnection.getMessageRouter()
-    private val sceneDataHandler = SceneDataHandler(sceneGraph)
+    private val sceneDataHandler = SceneDataHandler(sceneGraph, renderQueue)
     
     interface CircuitStateListener {
         fun onStateChanged(from: CircuitState, to: CircuitState)

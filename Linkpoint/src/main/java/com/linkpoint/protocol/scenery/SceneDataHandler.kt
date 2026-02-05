@@ -2,6 +2,8 @@ package com.linkpoint.protocol.scenery
 
 import android.util.Log
 import com.linkpoint.network.NetworkLogger
+import com.linkpoint.render.RenderQueue
+import com.linkpoint.render.RenderableUpdate
 import com.linkpoint.render.SceneGraph
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -21,7 +23,8 @@ import java.util.concurrent.ConcurrentHashMap
  * through the SceneGraph integration.
  */
 class SceneDataHandler(
-    private val sceneGraph: SceneGraph? = null
+    private val sceneGraph: SceneGraph? = null,
+    private val renderQueue: RenderQueue? = null
 ) {
     
     companion object {
@@ -87,7 +90,12 @@ class SceneDataHandler(
                 "✓ Terrain data processed: ${heightmapData.size} bytes (total: $layerDataCount layers)")
             
             // Update scene graph if provided
-            sceneGraph?.updateTerrain(terrainData)
+            if (renderQueue != null) {
+                val heightmapCopy = terrainData.getHeightmap().copyOf()
+                renderQueue.enqueue(RenderableUpdate.TerrainUpdate(heightmapCopy, 256, 256))
+            } else {
+                sceneGraph?.updateTerrain(terrainData)
+            }
             
             return true
         } catch (e: Exception) {
@@ -137,7 +145,11 @@ class SceneDataHandler(
                         objectCount++
                         
                         // Update scene graph
-                        sceneGraph?.updateObject(obj)
+                        if (renderQueue != null) {
+                            renderQueue.enqueue(RenderableUpdate.SceneObjectUpdate(obj.copy()))
+                        } else {
+                            sceneGraph?.updateObject(obj)
+                        }
                         
                         NetworkLogger.log(NetworkLogger.Level.VERBOSE, NetworkLogger.Category.UDP,
                             "Updated object: ${obj.name} (${obj.id})")
@@ -200,7 +212,11 @@ class SceneDataHandler(
                         "Updated properties: $name (${objectId})")
                     
                     // Update scene graph
-                    sceneGraph?.updateObject(obj)
+                    if (renderQueue != null) {
+                        renderQueue.enqueue(RenderableUpdate.SceneObjectUpdate(obj.copy()))
+                    } else {
+                        sceneGraph?.updateObject(obj)
+                    }
                 } else {
                     // Object not yet received, store pending
                     pendingProperties[objectId] = SceneObject(objectId).apply {
