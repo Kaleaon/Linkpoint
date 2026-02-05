@@ -15,6 +15,40 @@
 
     </PreferenceCategory>
 
+    <!-- Interface Settings -->
+    <PreferenceCategory android:title="Interface">
+
+        <SwitchPreferenceCompat
+            android:key="show_hud"
+            android:title="Show HUD"
+            android:summary="Display in-world HUD overlays"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="show_joysticks"
+            android:title="Show Joysticks"
+            android:summary="Display movement and camera joysticks"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="show_action_buttons"
+            android:title="Show Action Buttons"
+            android:summary="Display gesture and social buttons"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="show_movement_buttons"
+            android:title="Show Movement Buttons"
+            android:summary="Display fly, run, jump, and sit buttons"
+            android:defaultValue="true" />
+
+        <Preference
+            android:key="customize_layout"
+            android:title="Customize Layout"
+            android:summary="Reposition on-screen controls" />
+
+    </PreferenceCategory>
+
     <!-- Graphics Settings -->
     <PreferenceCategory android:title="Graphics">
 

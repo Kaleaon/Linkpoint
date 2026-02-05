@@ -7,6 +7,7 @@ import android.util.Log
 import com.linkpoint.objects.ObjectManager
 import com.linkpoint.objects.SceneObject
 import com.linkpoint.protocol.messages.UDPConnectionFixed
+import com.linkpoint.protocol.textures.TextureEntryParser
 import com.linkpoint.protocol.types.LLVector3
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -350,6 +351,19 @@ class HUDManager(
             hudsByPoint = hudsByPoint.mapValues { it.value.size },
             focusedHUD = _focusedHud.value?.name
         )
+    }
+
+    /**
+     * Resolve the primary texture UUID for a HUD object using its texture entry.
+     */
+    fun getPrimaryTextureId(hud: HUDObject): UUID? {
+        val sceneObject = objectManager.getObject(hud.localId) ?: return null
+        val textureEntry = sceneObject.textureEntry
+        if (textureEntry.isEmpty()) return null
+
+        val textureIds = TextureEntryParser.extractTextureIds(textureEntry)
+        val downloadable = textureIds.firstOrNull { TextureEntryParser.shouldDownload(it) }
+        return downloadable ?: textureIds.firstOrNull()
     }
     
     fun shutdown() {

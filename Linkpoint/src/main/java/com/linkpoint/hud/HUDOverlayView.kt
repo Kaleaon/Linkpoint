@@ -1,6 +1,7 @@
 package com.linkpoint.hud
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -11,7 +12,14 @@ import android.view.View
 import android.view.ViewConfiguration
 import kotlin.math.max
 import kotlin.math.min
+import com.linkpoint.LinkpointApp
+import com.linkpoint.assets.TexturePriority
 import com.linkpoint.protocol.types.LLVector3
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * HUDOverlayView - Renders HUD elements as an overlay on the 3D world view.
@@ -54,6 +62,12 @@ class HUDOverlayView @JvmOverloads constructor(
         textSize = 24f
         textAlign = Paint.Align.CENTER
     }
+
+    private val hudTexturePaint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
+
+    private val textureCache = ConcurrentHashMap<UUID, Bitmap>()
+    private val textureRequestJobs = ConcurrentHashMap<UUID, Job>()
+    private val textureFailureTimestamps = ConcurrentHashMap<UUID, Long>()
     
     // Touch tracking
     private var touchDownTime: Long = 0
@@ -181,14 +195,26 @@ class HUDOverlayView @JvmOverloads constructor(
         hud.screenBounds = rect
     }
 
-    private fun drawResizeHandle(canvas: Canvas, rect: RectF) {
-        val handleRect = RectF(
-            rect.right - handleSizePx,
-            rect.bottom - handleSizePx,
-            rect.right,
-            rect.bottom
-        )
-        canvas.drawRoundRect(handleRect, 6f, 6f, hudBorderPaint)
+    private fun requestTexture(textureId: UUID) {
+        if (textureCache.containsKey(textureId) || textureRequestJobs.containsKey(textureId)) return
+
+        val lastFailure = textureFailureTimestamps[textureId]
+        val now = System.currentTimeMillis()
+        if (lastFailure != null && now - lastFailure < 30000L) return
+
+        val app = LinkpointApp.getInstance()
+        val job = app.applicationScope.launch(Dispatchers.IO) {
+            val bitmap = app.textureManager.getTexture(textureId, TexturePriority.HIGH)
+            if (bitmap != null) {
+                textureCache[textureId] = bitmap
+                textureFailureTimestamps.remove(textureId)
+                postInvalidate()
+            } else {
+                textureFailureTimestamps[textureId] = System.currentTimeMillis()
+            }
+            textureRequestJobs.remove(textureId)
+        }
+        textureRequestJobs[textureId] = job
     }
     
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -379,6 +405,14 @@ class HUDOverlayView @JvmOverloads constructor(
      */
     fun refresh() {
         invalidate()
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        textureRequestJobs.values.forEach { it.cancel() }
+        textureRequestJobs.clear()
+        textureCache.clear()
+        textureFailureTimestamps.clear()
     }
 }
 
