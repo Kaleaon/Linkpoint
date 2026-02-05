@@ -1,6 +1,7 @@
 package com.linkpoint.chat
 
 import android.util.Log
+import com.linkpoint.messaging.MessagingDispatcher
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.llsd.*
@@ -16,7 +17,10 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Instant Message manager
- * Handles private IMs, group chat, and conference chat
+ * Handles private IMs, group chat, and conference chat.
+ *
+ * Inbound IM processing and flow emissions are serialized on the MessagingDispatcher
+ * "MessageThread" to avoid mixing Default/IO dispatchers with messaging state.
  */
 class IMManager(
     private val udpConnection: UDPConnectionFixed,
@@ -70,7 +74,7 @@ class IMManager(
         const val IM_TYPING_STOP = 42
     }
     
-    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val scope = CoroutineScope(MessagingDispatcher.dispatcher + SupervisorJob())
     
     // Active IM sessions
     private val sessions = ConcurrentHashMap<UUID, IMSession>()
@@ -95,16 +99,30 @@ class IMManager(
     
     init {
         // Register for event queue events
-        capabilityManager.registerEventHandler("ChatterBoxInvitation", this)
-        capabilityManager.registerEventHandler("ChatterBoxSessionEventReply", this)
-        capabilityManager.registerEventHandler("ChatterBoxSessionStartReply", this)
+        capabilityManager.registerEventHandler(
+            "ChatterBoxInvitation",
+            this,
+            MessagingDispatcher.dispatcher
+        )
+        capabilityManager.registerEventHandler(
+            "ChatterBoxSessionEventReply",
+            this,
+            MessagingDispatcher.dispatcher
+        )
+        capabilityManager.registerEventHandler(
+            "ChatterBoxSessionStartReply",
+            this,
+            MessagingDispatcher.dispatcher
+        )
     }
     
     override fun onEvent(message: String, body: LLSDMap) {
-        when (message) {
-            "ChatterBoxInvitation" -> handleInvitation(body)
-            "ChatterBoxSessionEventReply" -> handleSessionEvent(body)
-            "ChatterBoxSessionStartReply" -> handleSessionStart(body)
+        scope.launch {
+            when (message) {
+                "ChatterBoxInvitation" -> handleInvitation(body)
+                "ChatterBoxSessionEventReply" -> handleSessionEvent(body)
+                "ChatterBoxSessionStartReply" -> handleSessionStart(body)
+            }
         }
     }
     
@@ -233,41 +251,43 @@ class IMManager(
         dialogType: Int,
         timestamp: Long
     ) {
-        // Get or create session
-        val session = sessions.getOrPut(sessionId) {
-            IMSession(
-                sessionId = sessionId,
-                type = if (dialogType == IM_SESSION_GROUP_START) SessionType.GROUP else SessionType.P2P,
-                name = fromName,
-                participants = mutableListOf(fromAgentId)
-            )
-        }
-        
-        when (dialogType) {
-            IM_TYPING_START -> {
-                session.typingParticipants = session.typingParticipants + fromAgentId
-            }
-            IM_TYPING_STOP -> {
-                session.typingParticipants = session.typingParticipants - fromAgentId
-            }
-            else -> {
-                val imMessage = IMMessage(
-                    id = UUID.randomUUID(),
+        scope.launch {
+            // Get or create session
+            val session = sessions.getOrPut(sessionId) {
+                IMSession(
                     sessionId = sessionId,
-                    fromAgentId = fromAgentId,
-                    fromName = fromName,
-                    message = message,
-                    dialogType = dialogType,
-                    timestamp = timestamp,
-                    isOutgoing = false
+                    type = if (dialogType == IM_SESSION_GROUP_START) SessionType.GROUP else SessionType.P2P,
+                    name = fromName,
+                    participants = mutableListOf(fromAgentId)
                 )
-                
-                addMessage(sessionId, imMessage)
-                session.typingParticipants = session.typingParticipants - fromAgentId
             }
+            
+            when (dialogType) {
+                IM_TYPING_START -> {
+                    session.typingParticipants = session.typingParticipants + fromAgentId
+                }
+                IM_TYPING_STOP -> {
+                    session.typingParticipants = session.typingParticipants - fromAgentId
+                }
+                else -> {
+                    val imMessage = IMMessage(
+                        id = UUID.randomUUID(),
+                        sessionId = sessionId,
+                        fromAgentId = fromAgentId,
+                        fromName = fromName,
+                        message = message,
+                        dialogType = dialogType,
+                        timestamp = timestamp,
+                        isOutgoing = false
+                    )
+                    
+                    addMessage(sessionId, imMessage)
+                    session.typingParticipants = session.typingParticipants - fromAgentId
+                }
+            }
+            
+            updateSessionList()
         }
-        
-        updateSessionList()
     }
     
     /**

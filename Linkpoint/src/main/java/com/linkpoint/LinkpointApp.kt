@@ -70,6 +70,7 @@ import com.linkpoint.avatar.AnimationController
 import com.linkpoint.bom.BakesOnMeshManager
 import com.linkpoint.inventory.LandmarkManager
 import com.linkpoint.media.MediaManager
+import com.linkpoint.messaging.MessagingDispatcher
 import com.linkpoint.objects.SitManager
 import com.linkpoint.snapshot.SnapshotManager
 import com.linkpoint.teleport.TeleportManager
@@ -78,6 +79,7 @@ import com.linkpoint.world.estate.EstateManager
 import com.linkpoint.xr.XRManager
 import com.linkpoint.protocol.textures.TextureEntryParser
 import com.linkpoint.protocol.types.getUUID
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -110,6 +112,12 @@ class LinkpointApp : Application() {
     
     // Application-wide coroutine scope for background operations
     val applicationScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    
+    /**
+     * Single-threaded dispatcher for serialized messaging work (MessageThread).
+     */
+    val messagingDispatcher: CoroutineDispatcher
+        get() = MessagingDispatcher.dispatcher
     
     // Core managers
     lateinit var gridManager: GridManager
