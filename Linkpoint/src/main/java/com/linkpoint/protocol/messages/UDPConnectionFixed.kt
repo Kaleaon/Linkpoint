@@ -218,6 +218,20 @@ class UDPConnectionFixed {
     
     // Coroutine scope
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    // Circuit threading and queues (Lumiya-style deterministic ordering)
+    private val circuitThread = CircuitThread("CircuitThread")
+    private val circuitTaskQueue = CircuitTaskQueue(
+        circuitThread.scope,
+        SELECTOR_TIMEOUT_MS,
+        "CircuitQueue"
+    )
+    private val heavyThread = CircuitThread("CircuitWorker")
+    private val heavyTaskQueue = CircuitTaskQueue(
+        heavyThread.scope,
+        SELECTOR_TIMEOUT_MS,
+        "CircuitHeavyQueue"
+    )
     
     // Receive job
     private var receiveJob: Job? = null
@@ -227,6 +241,12 @@ class UDPConnectionFixed {
     
     // Mobile optimized: 10 updates/sec = 100ms interval
     private val AGENT_UPDATE_INTERVAL_MS = 100L
+
+    init {
+        circuitTaskQueue.setIdleHandler {
+            processCircuitIdle()
+        }
+    }
     
     // ==================== STATISTICS & DIAGNOSTICS ====================
     // These fields track packet activity for debug reports and diagnostic purposes.
@@ -642,7 +662,7 @@ class UDPConnectionFixed {
             ))
             
             // Start receive loop
-            receiveJob = scope.launch {
+            receiveJob = circuitThread.scope.launch {
                 receiveLoop()
             }
             
@@ -731,7 +751,9 @@ class UDPConnectionFixed {
                 }
                 
                 // Wait for packets with timeout
-                val readyKeys = localSelector.select(SELECTOR_TIMEOUT_MS)
+                val readyKeys = withContext(Dispatchers.IO) {
+                    localSelector.select(SELECTOR_TIMEOUT_MS)
+                }
                 
                 if (readyKeys > 0) {
                     val iterator = localSelector.selectedKeys().iterator()
@@ -742,7 +764,9 @@ class UDPConnectionFixed {
                         if (key.isReadable) {
                             buffer.clear()
                             
-                            val bytesRead = localChannel.read(buffer)
+                            val bytesRead = withContext(Dispatchers.IO) {
+                                localChannel.read(buffer)
+                            }
                             
                             if (bytesRead > 0) {
                                 packetsReceived.incrementAndGet()
@@ -815,7 +839,9 @@ class UDPConnectionFixed {
                                 trackMessageReceived(messageName)
                                 
                                 // Route message through router
-                                routeMessage(data)
+                                circuitTaskQueue.enqueue {
+                                    routeMessage(data)
+                                }
                             }
                         }
                     }
@@ -842,6 +868,17 @@ class UDPConnectionFixed {
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Total packets: ${packetsReceived.get()}")
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Total bytes: ${bytesReceived.get()}")
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Messages routed: ${messagesRouted.get()}")
+    }
+
+    /**
+     * Circuit idle processing that runs on the serialized circuit queue.
+     */
+    private suspend fun processCircuitIdle() {
+        if (!_isConnected.value) {
+            return
+        }
+
+        checkPingHealth()
     }
     
     /**
@@ -1137,7 +1174,7 @@ class UDPConnectionFixed {
      */
     private suspend fun routeMessage(data: ByteArray) {
         val messageId = extractMessageId(data)
-        val routed = messageRouter.routeMessage(messageId, data)
+        val routed = messageRouter.routeMessage(messageId, data, heavyTaskQueue)
         
         if (routed) {
             messagesRouted.incrementAndGet()
@@ -1226,6 +1263,13 @@ class UDPConnectionFixed {
      * This is critical for ensuring handlers are ready when packets arrive
      */
     fun registerHandler(messageId: Int, handler: (Int, ByteArray) -> Unit) {
+        registerHandler(messageId, false, handler)
+    }
+
+    /**
+     * Register a message handler using a lambda, optionally marking it as heavy.
+     */
+    fun registerHandler(messageId: Int, isHeavy: Boolean, handler: (Int, ByteArray) -> Unit) {
         // Register in messageHandlers for diagnostics (using SAM conversion for functional interface)
         messageHandlers[messageId] = MessageHandler { msgId, data ->
             handler(msgId, data)
@@ -1243,6 +1287,8 @@ class UDPConnectionFixed {
                     handler(messageId, data)
                     return true
                 }
+
+                override fun isHeavy(): Boolean = isHeavy
             })
         }
         
@@ -1752,6 +1798,9 @@ class UDPConnectionFixed {
         agentUpdateJob?.cancel()
         ackSenderJob?.cancel()
         timeoutCheckerJob?.cancel()
+
+        circuitTaskQueue.clearPending()
+        heavyTaskQueue.clearPending()
         
         // Clear pending ACKs since we're disconnecting
         pendingAcksToSend.clear()

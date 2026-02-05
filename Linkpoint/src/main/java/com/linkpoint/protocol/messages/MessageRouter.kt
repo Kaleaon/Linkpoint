@@ -1,6 +1,5 @@
 package com.linkpoint.protocol.messages
 
-import android.util.Log
 import com.linkpoint.network.NetworkLogger
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -47,6 +46,11 @@ class MessageRouter {
          * Get the priority of this handler (lower = higher priority)
          */
         fun getPriority(): Int = 0
+
+        /**
+         * Whether this handler should be offloaded to a secondary queue.
+         */
+        fun isHeavy(): Boolean = false
     }
     
     /**
@@ -115,7 +119,11 @@ class MessageRouter {
      * @param data The message data
      * @return true if message was handled, false otherwise
      */
-    suspend fun routeMessage(messageId: Int, data: ByteArray): Boolean {
+    suspend fun routeMessage(
+        messageId: Int,
+        data: ByteArray,
+        heavyQueue: CircuitTaskQueue? = null
+    ): Boolean {
         totalMessagesRouted++
         
         val handlerList = mutex.withLock {
@@ -131,9 +139,32 @@ class MessageRouter {
         var handled = false
         for (handler in handlerList) {
             try {
-                if (handler.handleMessage(messageId, data)) {
+                if (handler.isHeavy() && heavyQueue != null) {
+                    heavyQueue.enqueue {
+                        try {
+                            if (handler.handleMessage(messageId, data)) {
+                                NetworkLogger.log(
+                                    NetworkLogger.Level.DEBUG,
+                                    NetworkLogger.Category.UDP,
+                                    "Message $messageId handled successfully (heavy queue)"
+                                )
+                            }
+                        } catch (e: Exception) {
+                            NetworkLogger.log(
+                                NetworkLogger.Level.ERROR,
+                                NetworkLogger.Category.UDP,
+                                "Handler error for message $messageId (heavy queue): ${e.message}"
+                            )
+                        }
+                    }
                     handled = true
-                    NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Message $messageId handled successfully")
+                } else if (handler.handleMessage(messageId, data)) {
+                    handled = true
+                    NetworkLogger.log(
+                        NetworkLogger.Level.DEBUG,
+                        NetworkLogger.Category.UDP,
+                        "Message $messageId handled successfully"
+                    )
                 }
             } catch (e: Exception) {
                 NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Handler error for message $messageId: ${e.message}")
