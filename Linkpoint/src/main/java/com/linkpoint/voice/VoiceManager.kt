@@ -4,12 +4,19 @@ import android.content.Context
 import android.util.Log
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.webrtc.*
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
 
 /**
  * Voice chat manager using WebRTC
@@ -37,7 +44,10 @@ class VoiceManager(
         const val MODERATION_REGION_OWNER = 4
     }
     
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val voiceDispatcher: CoroutineDispatcher = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "VoiceThread").apply { isDaemon = true }
+    }.asCoroutineDispatcher()
+    private val scope = CoroutineScope(voiceDispatcher + SupervisorJob())
     
     // WebRTC components
     private var peerConnectionFactory: PeerConnectionFactory? = null
@@ -77,7 +87,9 @@ class VoiceManager(
     private var outputGain = 1.0f
     
     init {
-        initializeWebRTC()
+        runBlocking(voiceDispatcher) {
+            initializeWebRTC()
+        }
     }
     
     private fun initializeWebRTC() {
@@ -111,16 +123,16 @@ class VoiceManager(
             audioSource = peerConnectionFactory?.createAudioSource(audioConstraints)
             localAudioTrack = peerConnectionFactory?.createAudioTrack("localAudio", audioSource)
             
-            Log.i(TAG, "WebRTC initialized")
+            Log.i(TAG, "[${Thread.currentThread().name}] WebRTC initialized")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to initialize WebRTC", e)
+            Log.e(TAG, "[${Thread.currentThread().name}] Failed to initialize WebRTC", e)
         }
     }
     
     /**
      * Request voice info for current parcel
      */
-    suspend fun requestParcelVoiceInfo(): VoiceInfo? = withContext(Dispatchers.IO) {
+    suspend fun requestParcelVoiceInfo(): VoiceInfo? = withContext(voiceDispatcher) {
         val response = capabilityManager.request(CapabilityManager.CAP_PARCEL_VOICE)
         if (response is LLSDMap) {
             VoiceInfo(
@@ -135,7 +147,7 @@ class VoiceManager(
     /**
      * Provision voice account
      */
-    suspend fun provisionVoiceAccount(): VoiceAccountInfo? = withContext(Dispatchers.IO) {
+    suspend fun provisionVoiceAccount(): VoiceAccountInfo? = withContext(voiceDispatcher) {
         val response = capabilityManager.request(CapabilityManager.CAP_PROVISION_VOICE)
         if (response is LLSDMap) {
             VoiceAccountInfo(
@@ -149,21 +161,21 @@ class VoiceManager(
     /**
      * Join parcel voice
      */
-    suspend fun joinParcelVoice(): Boolean {
-        val voiceInfo = requestParcelVoiceInfo() ?: return false
-        
-        Log.i(TAG, "Joining voice channel: ${voiceInfo.channelUri}")
-        
+    suspend fun joinParcelVoice(): Boolean = withContext(voiceDispatcher) {
+        val voiceInfo = requestParcelVoiceInfo() ?: return@withContext false
+
+        Log.i(TAG, "[${Thread.currentThread().name}] Joining voice channel: ${voiceInfo.channelUri}")
+
         // Create WebRTC session
         val session = createSession(voiceInfo.channelUri)
         currentParcelSession = session
         activeSessions[voiceInfo.channelUri] = session
-        
+
         // Start connection
         session.connect(voiceInfo.channelUri, voiceInfo.channelCredentials)
-        
+
         _isConnected.value = true
-        return true
+        true
     }
     
     /**
@@ -176,6 +188,7 @@ class VoiceManager(
         }
         currentParcelSession = null
         _isConnected.value = false
+        Log.i(TAG, "[${Thread.currentThread().name}] Left voice channel")
     }
     
     /**
@@ -183,7 +196,10 @@ class VoiceManager(
      */
     fun setMuted(muted: Boolean) {
         _isMuted.value = muted
-        localAudioTrack?.setEnabled(!muted)
+        scope.launch {
+            localAudioTrack?.setEnabled(!muted)
+            Log.d(TAG, "[${Thread.currentThread().name}] Set muted=$muted")
+        }
     }
     
     /**
@@ -207,8 +223,11 @@ class VoiceManager(
     fun setOutputGain(gain: Float) {
         outputGain = gain.coerceIn(0f, 2f)
         // Apply to all audio tracks
-        for (session in activeSessions.values) {
-            session.setOutputGain(outputGain)
+        scope.launch {
+            for (session in activeSessions.values) {
+                session.setOutputGain(outputGain)
+            }
+            Log.d(TAG, "[${Thread.currentThread().name}] Set output gain to $outputGain")
         }
     }
     
@@ -216,31 +235,37 @@ class VoiceManager(
      * Start a P2P voice call
      */
     suspend fun startCall(targetAgentId: UUID): Boolean {
-        // Create session
-        val sessionId = "p2p_$targetAgentId"
-        val session = createSession(sessionId)
-        activeSessions[sessionId] = session
-        
-        // Create offer
-        val offer = session.createOffer()
-        
-        // Send offer via IM
-        // (Would send through chat/IM system)
-        
-        return true
+        return withContext(voiceDispatcher) {
+            // Create session
+            val sessionId = "p2p_$targetAgentId"
+            val session = createSession(sessionId)
+            activeSessions[sessionId] = session
+
+            // Create offer
+            val offer = session.createOffer()
+
+            // Send offer via IM
+            // (Would send through chat/IM system)
+
+            Log.i(TAG, "[${Thread.currentThread().name}] Started call to $targetAgentId (offer length=${offer.length})")
+            true
+        }
     }
     
     /**
      * Accept incoming voice call
      */
     suspend fun acceptCall(callId: String, offer: String): Boolean {
-        val session = createSession(callId)
-        activeSessions[callId] = session
-        
-        val answer = session.handleOffer(offer)
-        // Send answer back
-        
-        return true
+        return withContext(voiceDispatcher) {
+            val session = createSession(callId)
+            activeSessions[callId] = session
+
+            val answer = session.handleOffer(offer)
+            // Send answer back
+
+            Log.i(TAG, "[${Thread.currentThread().name}] Accepted call $callId (answer length=${answer.length})")
+            true
+        }
     }
     
     /**
@@ -249,6 +274,7 @@ class VoiceManager(
     fun endCall(callId: String) {
         activeSessions[callId]?.disconnect()
         activeSessions.remove(callId)
+        Log.i(TAG, "[${Thread.currentThread().name}] Ended call $callId")
     }
     
     // =====================================================================
@@ -279,7 +305,7 @@ class VoiceManager(
         _moderationLevel.value = level
         _canModerate.value = level != MODERATION_NONE
         
-        Log.i(TAG, "Moderation permissions updated: level=$level, canModerate=${_canModerate.value}")
+        Log.i(TAG, "[${Thread.currentThread().name}] Moderation permissions updated: level=$level, canModerate=${_canModerate.value}")
     }
     
     /**
@@ -291,7 +317,7 @@ class VoiceManager(
      */
     suspend fun muteParticipant(participantId: UUID): Boolean {
         if (!_canModerate.value) {
-            Log.w(TAG, "Cannot mute participant: no moderation permissions")
+            Log.w(TAG, "[${Thread.currentThread().name}] Cannot mute participant: no moderation permissions")
             return false
         }
         
@@ -304,7 +330,7 @@ class VoiceManager(
         if (success) {
             currentParticipants[participantId] = participant.copy(isMutedByModerator = true)
             _participants.value = currentParticipants
-            Log.i(TAG, "Muted participant: $participantId")
+            Log.i(TAG, "[${Thread.currentThread().name}] Muted participant: $participantId")
         }
         
         return success
@@ -319,7 +345,7 @@ class VoiceManager(
      */
     suspend fun unmuteParticipant(participantId: UUID): Boolean {
         if (!_canModerate.value) {
-            Log.w(TAG, "Cannot unmute participant: no moderation permissions")
+            Log.w(TAG, "[${Thread.currentThread().name}] Cannot unmute participant: no moderation permissions")
             return false
         }
         
@@ -331,7 +357,7 @@ class VoiceManager(
         if (success) {
             currentParticipants[participantId] = participant.copy(isMutedByModerator = false)
             _participants.value = currentParticipants
-            Log.i(TAG, "Unmuted participant: $participantId")
+            Log.i(TAG, "[${Thread.currentThread().name}] Unmuted participant: $participantId")
         }
         
         return success
@@ -346,7 +372,7 @@ class VoiceManager(
      */
     suspend fun muteAllParticipants(): Boolean {
         if (!_canModerate.value) {
-            Log.w(TAG, "Cannot mute all: no moderation permissions")
+            Log.w(TAG, "[${Thread.currentThread().name}] Cannot mute all: no moderation permissions")
             return false
         }
         
@@ -359,7 +385,7 @@ class VoiceManager(
                 p.copy(isMutedByModerator = true)
             }
             _participants.value = mutedParticipants
-            Log.i(TAG, "Muted all participants")
+            Log.i(TAG, "[${Thread.currentThread().name}] Muted all participants")
         }
         
         return success
@@ -373,7 +399,7 @@ class VoiceManager(
      */
     suspend fun unmuteAllParticipants(): Boolean {
         if (!_canModerate.value) {
-            Log.w(TAG, "Cannot unmute all: no moderation permissions")
+            Log.w(TAG, "[${Thread.currentThread().name}] Cannot unmute all: no moderation permissions")
             return false
         }
         
@@ -386,7 +412,7 @@ class VoiceManager(
                 p.copy(isMutedByModerator = false)
             }
             _participants.value = unmutedParticipants
-            Log.i(TAG, "Unmuted all participants")
+            Log.i(TAG, "[${Thread.currentThread().name}] Unmuted all participants")
         }
         
         return success
@@ -399,7 +425,7 @@ class VoiceManager(
         participantId: UUID?,
         mute: Boolean,
         muteAll: Boolean = false
-    ): Boolean = withContext(Dispatchers.IO) {
+    ): Boolean = withContext(voiceDispatcher) {
         try {
             val params = LLSDMap().apply {
                 this["mute"] = LLSDBoolean(mute)
@@ -417,7 +443,7 @@ class VoiceManager(
             
             (response as? LLSDMap)?.getBoolean("success") ?: false
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to send moderation request", e)
+            Log.e(TAG, "[${Thread.currentThread().name}] Failed to send moderation request", e)
             false
         }
     }
@@ -492,7 +518,7 @@ class VoiceManager(
         return VoiceSession(
             channelUri = channelUri,
             peerConnection = peerConnection,
-            scope = scope
+            dispatcher = voiceDispatcher
         )
     }
     
@@ -507,6 +533,7 @@ class VoiceManager(
         localAudioTrack?.dispose()
         audioSource?.dispose()
         peerConnectionFactory?.dispose()
+        voiceDispatcher.close()
     }
 }
 
@@ -527,7 +554,7 @@ private class PeerConnectionObserver : PeerConnection.Observer {
 class VoiceSession(
     val channelUri: String,
     private val peerConnection: PeerConnection?,
-    private val scope: CoroutineScope
+    private val dispatcher: CoroutineDispatcher
 ) {
     private var isConnected = false
     private var outputGain = 1.0f
@@ -546,10 +573,10 @@ class VoiceSession(
             // 2. Create offer/answer exchange
             // 3. Establish ICE connection
             
-            android.util.Log.i("VoiceSession", "Connecting to voice channel: $uri")
+            android.util.Log.i("VoiceSession", "[${Thread.currentThread().name}] Connecting to voice channel: $uri")
             isConnected = true
         } catch (e: Exception) {
-            android.util.Log.e("VoiceSession", "Failed to connect to voice channel", e)
+            android.util.Log.e("VoiceSession", "[${Thread.currentThread().name}] Failed to connect to voice channel", e)
             isConnected = false
         }
     }
@@ -559,14 +586,14 @@ class VoiceSession(
             localAudioTrack?.setEnabled(false)
             peerConnection?.close()
             isConnected = false
-            android.util.Log.i("VoiceSession", "Disconnected from voice channel")
+            android.util.Log.i("VoiceSession", "[${Thread.currentThread().name}] Disconnected from voice channel")
         } catch (e: Exception) {
-            android.util.Log.e("VoiceSession", "Error during disconnect", e)
+            android.util.Log.e("VoiceSession", "[${Thread.currentThread().name}] Error during disconnect", e)
         }
     }
     
     suspend fun createOffer(): String {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             try {
                 // Create SDP offer for WebRTC peer connection
                 peerConnection?.let { pc ->
@@ -577,28 +604,28 @@ class VoiceSession(
                     
                     // Note: In a real implementation, we'd use a CompletableFuture or
                     // coroutine-based SDP observer
-                    android.util.Log.d("VoiceSession", "Creating SDP offer")
+                    android.util.Log.d("VoiceSession", "[${Thread.currentThread().name}] Creating SDP offer")
                     ""
                 } ?: ""
             } catch (e: Exception) {
-                android.util.Log.e("VoiceSession", "Failed to create offer", e)
+                android.util.Log.e("VoiceSession", "[${Thread.currentThread().name}] Failed to create offer", e)
                 ""
             }
         }
     }
     
     suspend fun handleOffer(offer: String): String {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             try {
                 // Parse remote SDP offer and create answer
                 peerConnection?.let { pc ->
                     // Set remote description from offer
                     // Create and return answer SDP
-                    android.util.Log.d("VoiceSession", "Handling remote offer")
+                    android.util.Log.d("VoiceSession", "[${Thread.currentThread().name}] Handling remote offer")
                     ""
                 } ?: ""
             } catch (e: Exception) {
-                android.util.Log.e("VoiceSession", "Failed to handle offer", e)
+                android.util.Log.e("VoiceSession", "[${Thread.currentThread().name}] Failed to handle offer", e)
                 ""
             }
         }
@@ -621,7 +648,7 @@ class VoiceSession(
             }
         }
         
-        android.util.Log.d("VoiceSession", "Set output gain to $outputGain")
+        android.util.Log.d("VoiceSession", "[${Thread.currentThread().name}] Set output gain to $outputGain")
     }
     
     fun isConnected(): Boolean = isConnected

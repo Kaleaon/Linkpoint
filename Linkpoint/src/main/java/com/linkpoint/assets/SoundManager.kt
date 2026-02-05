@@ -5,11 +5,17 @@ import android.media.AudioAttributes
 import android.media.SoundPool
 import android.util.Log
 import com.linkpoint.protocol.types.LLVector3
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
 
 /**
  * Manages sound assets and playback
@@ -28,7 +34,10 @@ class SoundManager(
     private val loadedSounds = ConcurrentHashMap<UUID, Int>() // UUID -> SoundPool ID
     private val playingSounds = ConcurrentHashMap<Int, SoundPlayback>() // Stream ID -> Playback info
     
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val soundDispatcher = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "SoundThread").apply { isDaemon = true }
+    }.asCoroutineDispatcher()
+    private val scope = CoroutineScope(soundDispatcher + SupervisorJob())
     
     // Listener position for spatial audio
     private var listenerPosition = LLVector3(128f, 128f, 30f)
@@ -52,7 +61,7 @@ class SoundManager(
         
         soundPool.setOnLoadCompleteListener { _, sampleId, status ->
             if (status != 0) {
-                Log.w(TAG, "Sound load failed: $sampleId")
+                Log.w(TAG, "[${Thread.currentThread().name}] Sound load failed: $sampleId")
             }
         }
     }
@@ -79,51 +88,60 @@ class SoundManager(
         gain: Float = 1.0f,
         loop: Boolean = false
     ): Int? {
-        val soundPoolId = loadSound(soundId) ?: return null
-        
-        // Calculate spatial audio
-        val distance = position.distance(listenerPosition)
-        val maxDistance = 30f // SL uses ~30m for sound falloff
-        val volume = calculateVolume(distance, maxDistance, gain)
-        val pan = calculatePan(position)
-        
-        val streamId = soundPool.play(
-            soundPoolId,
-            volume * soundEffectsVolume * masterVolume,
-            volume * soundEffectsVolume * masterVolume,
-            1,
-            if (loop) -1 else 0,
-            1.0f
-        )
-        
-        if (streamId != 0) {
-            soundPlayCount.incrementAndGet()
-            playingSounds[streamId] = SoundPlayback(
-                streamId = streamId,
-                soundId = soundId,
-                position = position,
-                gain = gain,
-                loop = loop
+        return withContext(soundDispatcher) {
+            val soundPoolId = loadSound(soundId) ?: return@withContext null
+
+            // Calculate spatial audio
+            val distance = position.distance(listenerPosition)
+            val maxDistance = 30f // SL uses ~30m for sound falloff
+            val volume = calculateVolume(distance, maxDistance, gain)
+            val pan = calculatePan(position)
+
+            val streamId = soundPool.play(
+                soundPoolId,
+                volume * soundEffectsVolume * masterVolume,
+                volume * soundEffectsVolume * masterVolume,
+                1,
+                if (loop) -1 else 0,
+                1.0f
             )
+
+            if (streamId != 0) {
+                Log.d(TAG, "[${Thread.currentThread().name}] Started sound $soundId")
+                soundPlayCount.incrementAndGet()
+                playingSounds[streamId] = SoundPlayback(
+                    streamId = streamId,
+                    soundId = soundId,
+                    position = position,
+                    gain = gain,
+                    loop = loop
+                )
+            }
+
+            streamId
         }
-        
-        return streamId
     }
     
     /**
      * Play a UI sound (no spatial)
      */
     suspend fun playUISound(soundId: UUID, volume: Float = 1.0f): Int? {
-        val soundPoolId = loadSound(soundId) ?: return null
-        
-        return soundPool.play(
-            soundPoolId,
-            volume * masterVolume,
-            volume * masterVolume,
-            1,
-            0,
-            1.0f
-        )
+        return withContext(soundDispatcher) {
+            val soundPoolId = loadSound(soundId) ?: return@withContext null
+
+            val streamId = soundPool.play(
+                soundPoolId,
+                volume * masterVolume,
+                volume * masterVolume,
+                1,
+                0,
+                1.0f
+            )
+            if (streamId != 0) {
+                Log.d(TAG, "[${Thread.currentThread().name}] Started UI sound $soundId")
+            }
+            streamId
+        }
     }
     
     /**
@@ -149,8 +167,8 @@ class SoundManager(
         loadedSounds[soundId]?.let { return it }
         
         soundLoadAttempts.incrementAndGet()
-        
-        return withContext(Dispatchers.IO) {
+
+        return withContext(soundDispatcher) {
             val data = cache.get(soundId, AssetType.SOUND)
             if (data == null) {
                 lastError = "Sound not in cache: $soundId"
@@ -158,21 +176,22 @@ class SoundManager(
                 soundLoadFailures.incrementAndGet()
                 return@withContext null
             }
-            
+
             // Write to temp file (SoundPool requires file)
             val tempFile = File(context.cacheDir, "sound_$soundId.ogg")
             try {
                 FileOutputStream(tempFile).use { it.write(data) }
-                
+
                 val poolId = soundPool.load(tempFile.absolutePath, 1)
                 loadedSounds[soundId] = poolId
-                
+
                 // Wait for load
                 delay(100)
-                
+
+                Log.d(TAG, "[${Thread.currentThread().name}] Loaded sound $soundId")
                 poolId
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to load sound: $soundId", e)
+                Log.e(TAG, "[${Thread.currentThread().name}] Failed to load sound: $soundId", e)
                 lastError = "${e.javaClass.simpleName}: ${e.message}"
                 lastErrorTime = System.currentTimeMillis()
                 soundLoadFailures.incrementAndGet()
@@ -192,7 +211,7 @@ class SoundManager(
             // For now, play at listener position - in full implementation,
             // would look up object position from ObjectManager
             playSound(soundId, listenerPosition, gain, loop = false)
-            Log.d(TAG, "Playing attached sound $soundId on object $objectId")
+            Log.d(TAG, "[${Thread.currentThread().name}] Playing attached sound $soundId on object $objectId")
         }
     }
     
@@ -202,7 +221,7 @@ class SoundManager(
     fun preloadSound(soundId: UUID) {
         scope.launch {
             loadSound(soundId)
-            Log.d(TAG, "Preloaded sound $soundId")
+            Log.d(TAG, "[${Thread.currentThread().name}] Preloaded sound $soundId")
         }
     }
     
@@ -249,6 +268,7 @@ class SoundManager(
     
     fun shutdown() {
         scope.cancel()
+        soundDispatcher.close()
         soundPool.release()
         loadedSounds.clear()
         playingSounds.clear()
