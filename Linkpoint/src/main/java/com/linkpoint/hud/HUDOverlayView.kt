@@ -61,9 +61,12 @@ class HUDOverlayView @JvmOverloads constructor(
     private var activeHudId: Int? = null
     private var interactionMode: InteractionMode = InteractionMode.NONE
     private var pendingDrag = false
+    private var downTouchX = 0f
+    private var downTouchY = 0f
     private var lastTouchX = 0f
     private var lastTouchY = 0f
     private var activeHudRect: RectF? = null
+    private var originalLayoutEntry: HudLayoutEntry? = null
     private val minHudSizePx = 48f * resources.displayMetrics.density
     private val handleSizePx = 20f * resources.displayMetrics.density
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
@@ -89,18 +92,20 @@ class HUDOverlayView @JvmOverloads constructor(
     }
     
     private fun drawHUD(canvas: Canvas, hud: HUDObject) {
-        val screenPos = hudManager?.getScreenPositionForPoint(hud.attachmentPoint) ?: return
         val layoutEntry = hudManager?.getLayoutEntry(hud.attachmentPoint)
         val rect = if (layoutEntry != null && layoutEntry.width > 0f && layoutEntry.height > 0f) {
-            val left = layoutEntry.x * width
-            val top = layoutEntry.y * height
+            val viewWidth = width.toFloat()
+            val viewHeight = height.toFloat()
+            val left = layoutEntry.x * viewWidth
+            val top = layoutEntry.y * viewHeight
             RectF(
                 left,
                 top,
-                left + layoutEntry.width * width,
-                top + layoutEntry.height * height
+                left + layoutEntry.width * viewWidth,
+                top + layoutEntry.height * viewHeight
             )
         } else {
+            val screenPos = hudManager?.getScreenPositionForPoint(hud.attachmentPoint) ?: return
             // Convert normalized coordinates to pixel coordinates
             val centerX = screenPos.x * width
             val centerY = screenPos.y * height
@@ -159,7 +164,9 @@ class HUDOverlayView @JvmOverloads constructor(
             hudTextPaint
         )
 
-        drawResizeHandle(canvas, rect)
+        if (hud.localId == activeHudId) {
+            drawResizeHandle(canvas, rect)
+        }
         
         // Store bounds for hit testing
         hud.screenBounds = rect
@@ -187,21 +194,16 @@ class HUDOverlayView @JvmOverloads constructor(
                 val huds = manager.getAllHUDs()
                 for (hud in huds) {
                     val bounds = hud.screenBounds ?: continue
-                    if (isInResizeHandle(bounds, event.x, event.y)) {
+                    val inResizeHandle = isInResizeHandle(bounds, event.x, event.y)
+                    if (inResizeHandle || bounds.contains(event.x, event.y)) {
                         touchedHudId = hud.localId
                         activeHudId = hud.localId
-                        interactionMode = InteractionMode.RESIZE
+                        interactionMode = if (inResizeHandle) InteractionMode.RESIZE else InteractionMode.NONE
+                        pendingDrag = !inResizeHandle
                         activeHudRect = RectF(bounds)
-                        lastTouchX = event.x
-                        lastTouchY = event.y
-                        return true
-                    }
-                    if (bounds.contains(event.x, event.y)) {
-                        touchedHudId = hud.localId
-                        activeHudId = hud.localId
-                        interactionMode = InteractionMode.NONE
-                        pendingDrag = true
-                        activeHudRect = RectF(bounds)
+                        originalLayoutEntry = manager.getLayoutEntry(hud.attachmentPoint)
+                        downTouchX = event.x
+                        downTouchY = event.y
                         lastTouchX = event.x
                         lastTouchY = event.y
                         return true
@@ -218,20 +220,34 @@ class HUDOverlayView @JvmOverloads constructor(
                 val deltaX = event.x - lastTouchX
                 val deltaY = event.y - lastTouchY
                 if (interactionMode == InteractionMode.NONE && pendingDrag) {
-                    val distance = max(kotlin.math.abs(deltaX), kotlin.math.abs(deltaY))
+                    val distance = max(kotlin.math.abs(event.x - downTouchX), kotlin.math.abs(event.y - downTouchY))
                     if (distance > touchSlop) {
                         interactionMode = InteractionMode.DRAG
                     }
                 }
+                val viewWidth = width.toFloat()
+                val viewHeight = height.toFloat()
                 when (interactionMode) {
                     InteractionMode.DRAG -> {
-                        val newLeft = clamp(bounds.left + deltaX, 0f, width - bounds.width())
-                        val newTop = clamp(bounds.top + deltaY, 0f, height - bounds.height())
+                        val maxLeft = max(0f, viewWidth - bounds.width())
+                        val maxTop = max(0f, viewHeight - bounds.height())
+                        val newLeft = (bounds.left + deltaX).coerceIn(0f, maxLeft)
+                        val newTop = (bounds.top + deltaY).coerceIn(0f, maxTop)
                         bounds.offsetTo(newLeft, newTop)
                     }
                     InteractionMode.RESIZE -> {
-                        val newWidth = max(minHudSizePx, min(bounds.width() + deltaX, width - bounds.left))
-                        val newHeight = max(minHudSizePx, min(bounds.height() + deltaY, height - bounds.top))
+                        val minWidth = min(minHudSizePx, viewWidth)
+                        val minHeight = min(minHudSizePx, viewHeight)
+                        var newWidth = (bounds.width() + deltaX).coerceAtMost(viewWidth)
+                        var newHeight = (bounds.height() + deltaY).coerceAtMost(viewHeight)
+                        newWidth = max(minWidth, newWidth)
+                        newHeight = max(minHeight, newHeight)
+                        if (bounds.left + newWidth > viewWidth) {
+                            bounds.left = max(0f, viewWidth - newWidth)
+                        }
+                        if (bounds.top + newHeight > viewHeight) {
+                            bounds.top = max(0f, viewHeight - newHeight)
+                        }
                         bounds.right = bounds.left + newWidth
                         bounds.bottom = bounds.top + newHeight
                     }
@@ -285,6 +301,19 @@ class HUDOverlayView @JvmOverloads constructor(
             }
             
             MotionEvent.ACTION_CANCEL -> {
+                val hudId = activeHudId
+                if (hudId != null) {
+                    val hud = manager.getHUD(hudId)
+                    if (hud != null) {
+                        val originalEntry = originalLayoutEntry
+                        if (originalEntry != null) {
+                            manager.setLayoutEntry(hud.attachmentPoint, originalEntry)
+                        } else {
+                            manager.clearLayoutEntry(hud.attachmentPoint)
+                        }
+                        invalidate()
+                    }
+                }
                 resetInteraction()
             }
         }
@@ -298,16 +327,19 @@ class HUDOverlayView @JvmOverloads constructor(
         interactionMode = InteractionMode.NONE
         pendingDrag = false
         activeHudRect = null
+        originalLayoutEntry = null
     }
 
     private fun updateLayoutForHud(hudId: Int, bounds: RectF) {
         val manager = hudManager ?: return
         if (width == 0 || height == 0) return
         val hud = manager.getHUD(hudId) ?: return
-        val normalizedLeft = bounds.left / width
-        val normalizedTop = bounds.top / height
-        val normalizedWidth = bounds.width() / width
-        val normalizedHeight = bounds.height() / height
+        val viewWidth = width.toFloat()
+        val viewHeight = height.toFloat()
+        val normalizedLeft = bounds.left / viewWidth
+        val normalizedTop = bounds.top / viewHeight
+        val normalizedWidth = bounds.width() / viewWidth
+        val normalizedHeight = bounds.height() / viewHeight
         manager.setLayoutEntry(
             hud.attachmentPoint,
             HudLayoutEntry(
@@ -326,10 +358,6 @@ class HUDOverlayView @JvmOverloads constructor(
             y <= bounds.bottom
     }
 
-    private fun clamp(value: Float, minValue: Float, maxValue: Float): Float {
-        return max(minValue, min(value, maxValue))
-    }
-    
     /**
      * Refresh the HUD display.
      */

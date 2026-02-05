@@ -259,6 +259,17 @@ class HUDManager(
     }
 
     /**
+     * Remove layout entry for the current device class and orientation.
+     */
+    fun clearLayoutEntry(attachmentPoint: Int) {
+        val deviceClass = getCurrentDeviceClass()
+        val orientation = getCurrentOrientation()
+        layoutConfig.layouts[deviceClass]
+            ?.get(orientation)
+            ?.remove(attachmentPoint)
+    }
+
+    /**
      * Persist layout config to preferences.
      */
     fun persistLayoutConfig() {
