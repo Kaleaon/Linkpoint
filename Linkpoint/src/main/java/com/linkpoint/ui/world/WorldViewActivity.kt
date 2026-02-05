@@ -42,6 +42,14 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     
     companion object {
         private const val TAG = "WorldViewActivity"
+        private const val EXTRA_LAYOUT_EDITOR_MODE = "com.linkpoint.EXTRA_LAYOUT_EDITOR_MODE"
+
+        fun createLayoutEditorIntent(context: android.content.Context): Intent {
+            return Intent(context, WorldViewActivity::class.java).apply {
+                putExtra(EXTRA_LAYOUT_EDITOR_MODE, true)
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            }
+        }
     }
     
     private lateinit var drawerLayout: DrawerLayout
@@ -64,6 +72,8 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     // Joysticks
     private lateinit var joystickMove: JoystickView
     private lateinit var joystickCamera: JoystickView
+    private lateinit var movementButtonsGroup: View
+    private lateinit var actionButtonsGroup: View
     
     // Movement control buttons
     private lateinit var btnFly: ImageButton
@@ -87,6 +97,8 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private val app by lazy { LinkpointApp.getInstance() }
     @Volatile private var isRendering = false
     @Volatile private var isSurfaceReady = false
+    private var hudsVisibleFromManager: Boolean = true
+    private var isLayoutEditorMode: Boolean = false
     
     // Track current orientation setting to avoid unnecessary changes
     private var currentOrientationPref: String? = null
@@ -105,6 +117,10 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         setupNavigation()
         setupBackPressHandler()
         observeState()
+
+        if (intent.getBooleanExtra(EXTRA_LAYOUT_EDITOR_MODE, false)) {
+            enterLayoutEditorMode()
+        }
     }
     
     /**
@@ -192,6 +208,8 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         btnMinimap = findViewById(R.id.btnMinimap)
         btnInventory = findViewById(R.id.btnInventory)
         btnXR = findViewById(R.id.btnXR)
+        movementButtonsGroup = findViewById(R.id.movementButtons)
+        actionButtonsGroup = findViewById(R.id.actionButtons)
         
         // Setup quick action buttons
         btnChat.setOnClickListener {
@@ -226,6 +244,8 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         
         // Initialize action buttons
         initActionButtons()
+
+        applyInterfacePreferences()
     }
     
     /**
@@ -252,10 +272,41 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             // Observe HUD visibility changes
             lifecycleScope.launch {
                 app.hudManager.hudsVisible.collectLatest { visible ->
-                    hudOverlay.visibility = if (visible) View.VISIBLE else View.GONE
+                    hudsVisibleFromManager = visible
+                    val prefs = PreferenceManager.getDefaultSharedPreferences(this@WorldViewActivity)
+                    val showHud = prefs.getBoolean("show_hud", true)
+                    updateHudOverlayVisibility(showHud)
                 }
             }
         }
+    }
+
+    private fun updateHudOverlayVisibility(showHud: Boolean) {
+        hudOverlay.visibility = if (showHud && hudsVisibleFromManager) View.VISIBLE else View.GONE
+    }
+
+    private fun applyInterfacePreferences() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val showHud = prefs.getBoolean("show_hud", true)
+        val showJoysticks = prefs.getBoolean("show_joysticks", true)
+        val showActionButtons = prefs.getBoolean("show_action_buttons", true)
+        val showMovementButtons = prefs.getBoolean("show_movement_buttons", true)
+
+        updateHudOverlayVisibility(showHud)
+        joystickMove.visibility = if (showJoysticks) View.VISIBLE else View.GONE
+        joystickCamera.visibility = if (showJoysticks) View.VISIBLE else View.GONE
+        actionButtonsGroup.visibility = if (showActionButtons) View.VISIBLE else View.GONE
+        movementButtonsGroup.visibility = if (showMovementButtons) View.VISIBLE else View.GONE
+    }
+
+    private fun enterLayoutEditorMode() {
+        if (isLayoutEditorMode) return
+        isLayoutEditorMode = true
+        Toast.makeText(
+            this,
+            "Layout editor enabled. Drag controls to reposition them.",
+            Toast.LENGTH_LONG
+        ).show()
     }
     
     /**
@@ -752,6 +803,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         super.onResume()
         applyScreenOrientation() // Reapply orientation in case user changed setting
         updateDebugFloaterVisibility() // Update debug floater visibility based on settings
+        applyInterfacePreferences()
         
         // Only restart rendering if surface is ready (synchronized to avoid race)
         synchronized(this) {
