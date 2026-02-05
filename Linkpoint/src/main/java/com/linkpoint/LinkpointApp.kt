@@ -579,7 +579,7 @@ class LinkpointApp : Application() {
         teleportManager = TeleportManager(udpConnection, capabilityManager, agentId)
         
         // HUD manager
-        hudManager = HUDManager(objectManager, udpConnection, agentId)
+        hudManager = HUDManager(this, objectManager, udpConnection, agentId)
         
         // NEW: Landmark Manager
         landmarkManager = LandmarkManager(capabilityManager, transferManager, inventoryManager, udpConnection, agentId)

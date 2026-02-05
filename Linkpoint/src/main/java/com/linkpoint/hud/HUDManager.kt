@@ -1,5 +1,7 @@
 package com.linkpoint.hud
 
+import android.content.Context
+import android.content.res.Configuration
 import android.os.Parcelable
 import android.util.Log
 import com.linkpoint.objects.ObjectManager
@@ -11,6 +13,8 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
+import org.json.JSONException
+import org.json.JSONObject
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -35,12 +39,16 @@ import java.util.concurrent.ConcurrentHashMap
  * Based on Lumiya's HUD implementation.
  */
 class HUDManager(
+    private val context: Context,
     private val objectManager: ObjectManager,
     private val udpConnection: UDPConnectionFixed,
     private val agentId: UUID
 ) {
     companion object {
         private const val TAG = "HUDManager"
+        private const val PREFS_NAME = "linkpoint_hud_layout"
+        private const val KEY_LAYOUT_CONFIG = "hud_layout_config"
+        private const val TABLET_SMALLEST_WIDTH_DP = 600
         
         // HUD attachment points
         const val ATTACH_HUD_CENTER_2 = 31
@@ -79,6 +87,8 @@ class HUDManager(
     }
     
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private var layoutConfig = HudLayoutConfig()
     
     // HUD objects by attachment point
     private val hudsByPoint = ConcurrentHashMap<Int, MutableList<HUDObject>>()
@@ -93,6 +103,10 @@ class HUDManager(
     // Currently focused HUD (for input)
     private val _focusedHud = MutableStateFlow<HUDObject?>(null)
     val focusedHud: StateFlow<HUDObject?> = _focusedHud
+
+    init {
+        loadLayoutConfig()
+    }
     
     /**
      * Check if an attachment point is a HUD point.
@@ -223,6 +237,46 @@ class HUDManager(
     fun getScreenPositionForPoint(attachmentPoint: Int): HUDPosition? {
         return HUD_SCREEN_POSITIONS[attachmentPoint]
     }
+
+    /**
+     * Get saved layout entry for the current device class and orientation.
+     */
+    fun getLayoutEntry(attachmentPoint: Int): HudLayoutEntry? {
+        val deviceClass = getCurrentDeviceClass()
+        val orientation = getCurrentOrientation()
+        return layoutConfig.layouts[deviceClass]
+            ?.get(orientation)
+            ?.get(attachmentPoint)
+    }
+
+    /**
+     * Update layout entry for the current device class and orientation.
+     */
+    fun setLayoutEntry(attachmentPoint: Int, entry: HudLayoutEntry) {
+        val deviceClass = getCurrentDeviceClass()
+        val orientation = getCurrentOrientation()
+        val deviceLayouts = layoutConfig.layouts.getOrPut(deviceClass) { mutableMapOf() }
+        val orientationLayouts = deviceLayouts.getOrPut(orientation) { mutableMapOf() }
+        orientationLayouts[attachmentPoint] = entry
+    }
+
+    /**
+     * Remove layout entry for the current device class and orientation.
+     */
+    fun clearLayoutEntry(attachmentPoint: Int) {
+        val deviceClass = getCurrentDeviceClass()
+        val orientation = getCurrentOrientation()
+        layoutConfig.layouts[deviceClass]
+            ?.get(orientation)
+            ?.remove(attachmentPoint)
+    }
+
+    /**
+     * Persist layout config to preferences.
+     */
+    fun persistLayoutConfig() {
+        saveLayoutConfig()
+    }
     
     /**
      * Get ordered HUDs for rendering.
@@ -248,17 +302,23 @@ class HUDManager(
         
         // Check each HUD's bounding box
         for (hud in allHuds.values) {
-            val screenPos = HUD_SCREEN_POSITIONS[hud.attachmentPoint] ?: continue
-            
-            // Calculate bounds (simplified - in reality this would use actual HUD dimensions)
-            val halfWidth = hud.scale.x * 0.1f  // Approximate screen size
-            val halfHeight = hud.scale.y * 0.1f
-            
-            val left = screenPos.x - halfWidth
-            val right = screenPos.x + halfWidth
-            val top = screenPos.y - halfHeight
-            val bottom = screenPos.y + halfHeight
-            
+            val layoutEntry = getLayoutEntry(hud.attachmentPoint)
+            val (left, right, top, bottom) = if (layoutEntry != null && layoutEntry.width > 0f && layoutEntry.height > 0f) {
+                val rightBound = layoutEntry.x + layoutEntry.width
+                val bottomBound = layoutEntry.y + layoutEntry.height
+                Quad(layoutEntry.x, rightBound, layoutEntry.y, bottomBound)
+            } else {
+                val screenPos = HUD_SCREEN_POSITIONS[hud.attachmentPoint] ?: continue
+                val halfWidth = hud.scale.x * 0.1f  // Approximate screen size
+                val halfHeight = hud.scale.y * 0.1f
+                Quad(
+                    screenPos.x - halfWidth,
+                    screenPos.x + halfWidth,
+                    screenPos.y - halfHeight,
+                    screenPos.y + halfHeight
+                )
+            }
+
             if (screenX in left..right && screenY in top..bottom) {
                 return hud
             }
@@ -311,6 +371,88 @@ class HUDManager(
         allHuds.clear()
         hudsByPoint.clear()
     }
+
+    private fun getCurrentDeviceClass(): HudDeviceClass {
+        val smallestWidth = context.resources.configuration.smallestScreenWidthDp
+        return if (smallestWidth >= TABLET_SMALLEST_WIDTH_DP) {
+            HudDeviceClass.TABLET
+        } else {
+            HudDeviceClass.PHONE
+        }
+    }
+
+    private fun getCurrentOrientation(): HudOrientation {
+        val orientation = context.resources.configuration.orientation
+        return if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            HudOrientation.LANDSCAPE
+        } else {
+            HudOrientation.PORTRAIT
+        }
+    }
+
+    private fun loadLayoutConfig() {
+        val rawJson = prefs.getString(KEY_LAYOUT_CONFIG, null) ?: return
+        try {
+            val root = JSONObject(rawJson)
+            val version = root.optInt("version", 1)
+            val layoutsObj = root.optJSONObject("layouts") ?: return
+            val loadedLayouts = mutableMapOf<HudDeviceClass, MutableMap<HudOrientation, MutableMap<Int, HudLayoutEntry>>>()
+            layoutsObj.keys().forEach { deviceKey ->
+                val deviceClass = runCatching { HudDeviceClass.valueOf(deviceKey) }.getOrNull() ?: continue
+                val deviceObj = layoutsObj.optJSONObject(deviceKey) ?: continue
+                val orientationMap = mutableMapOf<HudOrientation, MutableMap<Int, HudLayoutEntry>>()
+                deviceObj.keys().forEach { orientationKey ->
+                    val orientation = runCatching { HudOrientation.valueOf(orientationKey) }.getOrNull() ?: continue
+                    val attachmentObj = deviceObj.optJSONObject(orientationKey) ?: continue
+                    val entryMap = mutableMapOf<Int, HudLayoutEntry>()
+                    attachmentObj.keys().forEach { attachmentKey ->
+                        val attachmentPoint = attachmentKey.toIntOrNull() ?: continue
+                        val entryObj = attachmentObj.optJSONObject(attachmentKey) ?: continue
+                        val entry = HudLayoutEntry(
+                            x = entryObj.optDouble("x", 0.0).toFloat(),
+                            y = entryObj.optDouble("y", 0.0).toFloat(),
+                            width = entryObj.optDouble("width", 0.0).toFloat(),
+                            height = entryObj.optDouble("height", 0.0).toFloat()
+                        )
+                        entryMap[attachmentPoint] = entry
+                    }
+                    orientationMap[orientation] = entryMap
+                }
+                loadedLayouts[deviceClass] = orientationMap
+            }
+            layoutConfig = HudLayoutConfig(version = version, layouts = loadedLayouts)
+        } catch (e: JSONException) {
+            Log.w(TAG, "Failed to parse HUD layout config", e)
+        }
+    }
+
+    private fun saveLayoutConfig() {
+        try {
+            val root = JSONObject()
+            root.put("version", layoutConfig.version)
+            val layoutsObj = JSONObject()
+            layoutConfig.layouts.forEach { (deviceClass, orientationMap) ->
+                val deviceObj = JSONObject()
+                orientationMap.forEach { (orientation, attachmentMap) ->
+                    val attachmentObj = JSONObject()
+                    attachmentMap.forEach { (attachmentPoint, entry) ->
+                        val entryObj = JSONObject()
+                        entryObj.put("x", entry.x)
+                        entryObj.put("y", entry.y)
+                        entryObj.put("width", entry.width)
+                        entryObj.put("height", entry.height)
+                        attachmentObj.put(attachmentPoint.toString(), entryObj)
+                    }
+                    deviceObj.put(orientation.name, attachmentObj)
+                }
+                layoutsObj.put(deviceClass.name, deviceObj)
+            }
+            root.put("layouts", layoutsObj)
+            prefs.edit().putString(KEY_LAYOUT_CONFIG, root.toString()).apply()
+        } catch (e: JSONException) {
+            Log.w(TAG, "Failed to save HUD layout config", e)
+        }
+    }
 }
 
 /**
@@ -336,6 +478,34 @@ data class HUDPosition(
 )
 
 /**
+ * HUD layout config data.
+ */
+data class HudLayoutConfig(
+    val version: Int = 1,
+    val layouts: MutableMap<HudDeviceClass, MutableMap<HudOrientation, MutableMap<Int, HudLayoutEntry>>> = mutableMapOf()
+)
+
+/**
+ * Normalized layout entry for a HUD attachment point.
+ */
+data class HudLayoutEntry(
+    val x: Float,
+    val y: Float,
+    val width: Float,
+    val height: Float
+)
+
+enum class HudOrientation {
+    PORTRAIT,
+    LANDSCAPE
+}
+
+enum class HudDeviceClass {
+    PHONE,
+    TABLET
+}
+
+/**
  * HUD alignment options.
  */
 enum class HUDAlignment {
@@ -356,4 +526,11 @@ data class HUDDiagnostics(
     val hudsVisible: Boolean,
     val hudsByPoint: Map<Int, Int>,
     val focusedHUD: String?
+)
+
+private data class Quad(
+    val left: Float,
+    val right: Float,
+    val top: Float,
+    val bottom: Float
 )

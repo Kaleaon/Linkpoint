@@ -9,6 +9,9 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
+import kotlin.math.max
+import kotlin.math.min
 import com.linkpoint.LinkpointApp
 import com.linkpoint.assets.TexturePriority
 import com.linkpoint.protocol.types.LLVector3
@@ -69,6 +72,24 @@ class HUDOverlayView @JvmOverloads constructor(
     // Touch tracking
     private var touchDownTime: Long = 0
     private var touchedHudId: Int? = null
+    private var activeHudId: Int? = null
+    private var interactionMode: InteractionMode = InteractionMode.NONE
+    private var pendingDrag = false
+    private var downTouchX = 0f
+    private var downTouchY = 0f
+    private var lastTouchX = 0f
+    private var lastTouchY = 0f
+    private var activeHudRect: RectF? = null
+    private var originalLayoutEntry: HudLayoutEntry? = null
+    private val minHudSizePx = 48f * resources.displayMetrics.density
+    private val handleSizePx = 20f * resources.displayMetrics.density
+    private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
+
+    private enum class InteractionMode {
+        NONE,
+        DRAG,
+        RESIZE
+    }
     
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -82,79 +103,92 @@ class HUDOverlayView @JvmOverloads constructor(
         for (hud in huds) {
             drawHUD(canvas, hud)
         }
+
+        val currentIds = huds.map { it.localId }.toSet()
+        val iterator = screenBoundsMap.keys.iterator()
+        while (iterator.hasNext()) {
+            val hudId = iterator.next()
+            if (hudId !in currentIds) {
+                iterator.remove()
+            }
+        }
     }
     
     private fun drawHUD(canvas: Canvas, hud: HUDObject) {
-        val screenPos = hudManager?.getScreenPositionForPoint(hud.attachmentPoint) ?: return
-        
-        // Convert normalized coordinates to pixel coordinates
-        val centerX = screenPos.x * width
-        val centerY = screenPos.y * height
-        
-        // Calculate HUD size (based on HUD scale, scaled for screen)
-        val hudWidth = hud.scale.x * 150f  // Approximate pixel size
-        val hudHeight = hud.scale.y * 150f
-        
-        // Adjust position based on alignment
-        val left: Float
-        val top: Float
-        
-        when (screenPos.alignment) {
-            HUDAlignment.TOP_LEFT -> {
-                left = centerX
-                top = centerY
-            }
-            HUDAlignment.TOP_CENTER -> {
-                left = centerX - hudWidth / 2
-                top = centerY
-            }
-            HUDAlignment.TOP_RIGHT -> {
-                left = centerX - hudWidth
-                top = centerY
-            }
-            HUDAlignment.CENTER -> {
-                left = centerX - hudWidth / 2
-                top = centerY - hudHeight / 2
-            }
-            HUDAlignment.BOTTOM_LEFT -> {
-                left = centerX
-                top = centerY - hudHeight
-            }
-            HUDAlignment.BOTTOM_CENTER -> {
-                left = centerX - hudWidth / 2
-                top = centerY - hudHeight
-            }
-            HUDAlignment.BOTTOM_RIGHT -> {
-                left = centerX - hudWidth
-                top = centerY - hudHeight
-            }
-        }
-        
-        val rect = RectF(left, top, left + hudWidth, top + hudHeight)
-
-        val textureId = hudManager?.getPrimaryTextureId(hud)
-        val textureBitmap = textureId?.let { textureCache[it] }
-        val hasTexture = textureBitmap != null
-
-        if (hasTexture) {
-            canvas.drawBitmap(textureBitmap!!, null, rect, hudTexturePaint)
-            canvas.drawRoundRect(rect, 8f, 8f, hudBorderPaint)
-        } else {
-            // Draw HUD background placeholder
-            canvas.drawRoundRect(rect, 8f, 8f, hudBackgroundPaint)
-            canvas.drawRoundRect(rect, 8f, 8f, hudBorderPaint)
-
-            // Draw HUD name/label
-            canvas.drawText(
-                hud.name.take(15),
-                rect.centerX(),
-                rect.centerY() + hudTextPaint.textSize / 3,
-                hudTextPaint
+        val layoutEntry = hudManager?.getLayoutEntry(hud.attachmentPoint)
+        val rect = if (layoutEntry != null && layoutEntry.width > 0f && layoutEntry.height > 0f) {
+            val viewWidth = width.toFloat()
+            val viewHeight = height.toFloat()
+            val left = layoutEntry.x * viewWidth
+            val top = layoutEntry.y * viewHeight
+            RectF(
+                left,
+                top,
+                left + layoutEntry.width * viewWidth,
+                top + layoutEntry.height * viewHeight
             )
+        } else {
+            val screenPos = hudManager?.getScreenPositionForPoint(hud.attachmentPoint) ?: return
+            // Convert normalized coordinates to pixel coordinates
+            val centerX = screenPos.x * width
+            val centerY = screenPos.y * height
+            
+            // Calculate HUD size (based on HUD scale, scaled for screen)
+            val hudWidth = hud.scale.x * 150f  // Approximate pixel size
+            val hudHeight = hud.scale.y * 150f
+            
+            // Adjust position based on alignment
+            val left: Float
+            val top: Float
+            
+            when (screenPos.alignment) {
+                HUDAlignment.TOP_LEFT -> {
+                    left = centerX
+                    top = centerY
+                }
+                HUDAlignment.TOP_CENTER -> {
+                    left = centerX - hudWidth / 2
+                    top = centerY
+                }
+                HUDAlignment.TOP_RIGHT -> {
+                    left = centerX - hudWidth
+                    top = centerY
+                }
+                HUDAlignment.CENTER -> {
+                    left = centerX - hudWidth / 2
+                    top = centerY - hudHeight / 2
+                }
+                HUDAlignment.BOTTOM_LEFT -> {
+                    left = centerX
+                    top = centerY - hudHeight
+                }
+                HUDAlignment.BOTTOM_CENTER -> {
+                    left = centerX - hudWidth / 2
+                    top = centerY - hudHeight
+                }
+                HUDAlignment.BOTTOM_RIGHT -> {
+                    left = centerX - hudWidth
+                    top = centerY - hudHeight
+                }
+            }
+            
+            RectF(left, top, left + hudWidth, top + hudHeight)
         }
+        
+        // Draw HUD background
+        canvas.drawRoundRect(rect, 8f, 8f, hudBackgroundPaint)
+        canvas.drawRoundRect(rect, 8f, 8f, hudBorderPaint)
+        
+        // Draw HUD name/label
+        canvas.drawText(
+            hud.name.take(15),
+            rect.centerX(),
+            rect.centerY() + hudTextPaint.textSize / 3,
+            hudTextPaint
+        )
 
-        if (textureId != null && !hasTexture) {
-            requestTexture(textureId)
+        if (hud.localId == activeHudId) {
+            drawResizeHandle(canvas, rect)
         }
         
         // Store bounds for hit testing
@@ -195,15 +229,79 @@ class HUDOverlayView @JvmOverloads constructor(
                 val huds = manager.getAllHUDs()
                 for (hud in huds) {
                     val bounds = hud.screenBounds ?: continue
-                    if (bounds.contains(event.x, event.y)) {
+                    val inResizeHandle = isInResizeHandle(bounds, event.x, event.y)
+                    if (inResizeHandle || bounds.contains(event.x, event.y)) {
                         touchedHudId = hud.localId
+                        activeHudId = hud.localId
+                        interactionMode = if (inResizeHandle) InteractionMode.RESIZE else InteractionMode.NONE
+                        pendingDrag = !inResizeHandle
+                        activeHudRect = RectF(bounds)
+                        originalLayoutEntry = manager.getLayoutEntry(hud.attachmentPoint)
+                        downTouchX = event.x
+                        downTouchY = event.y
+                        lastTouchX = event.x
+                        lastTouchY = event.y
                         return true
                     }
                 }
                 touchedHudId = null
+                activeHudId = null
+                interactionMode = InteractionMode.NONE
             }
             
+            MotionEvent.ACTION_MOVE -> {
+                val hudId = activeHudId ?: return false
+                val bounds = activeHudRect ?: return false
+                val deltaX = event.x - lastTouchX
+                val deltaY = event.y - lastTouchY
+                if (interactionMode == InteractionMode.NONE && pendingDrag) {
+                    val distance = max(kotlin.math.abs(event.x - downTouchX), kotlin.math.abs(event.y - downTouchY))
+                    if (distance > touchSlop) {
+                        interactionMode = InteractionMode.DRAG
+                    }
+                }
+                val viewWidth = width.toFloat()
+                val viewHeight = height.toFloat()
+                when (interactionMode) {
+                    InteractionMode.DRAG -> {
+                        val maxLeft = max(0f, viewWidth - bounds.width())
+                        val maxTop = max(0f, viewHeight - bounds.height())
+                        val newLeft = (bounds.left + deltaX).coerceIn(0f, maxLeft)
+                        val newTop = (bounds.top + deltaY).coerceIn(0f, maxTop)
+                        bounds.offsetTo(newLeft, newTop)
+                    }
+                    InteractionMode.RESIZE -> {
+                        val minWidth = min(minHudSizePx, viewWidth)
+                        val minHeight = min(minHudSizePx, viewHeight)
+                        var newWidth = (bounds.width() + deltaX).coerceAtMost(viewWidth)
+                        var newHeight = (bounds.height() + deltaY).coerceAtMost(viewHeight)
+                        newWidth = max(minWidth, newWidth)
+                        newHeight = max(minHeight, newHeight)
+                        if (bounds.left + newWidth > viewWidth) {
+                            bounds.left = max(0f, viewWidth - newWidth)
+                        }
+                        if (bounds.top + newHeight > viewHeight) {
+                            bounds.top = max(0f, viewHeight - newHeight)
+                        }
+                        bounds.right = bounds.left + newWidth
+                        bounds.bottom = bounds.top + newHeight
+                    }
+                    InteractionMode.NONE -> Unit
+                }
+                activeHudRect = bounds
+                lastTouchX = event.x
+                lastTouchY = event.y
+                updateLayoutForHud(hudId, bounds)
+                invalidate()
+                return true
+            }
+
             MotionEvent.ACTION_UP -> {
+                if (interactionMode != InteractionMode.NONE) {
+                    manager.persistLayoutConfig()
+                    resetInteraction()
+                    return true
+                }
                 val hudId = touchedHudId ?: return false
                 val elapsed = System.currentTimeMillis() - touchDownTime
                 
@@ -223,26 +321,85 @@ class HUDOverlayView @JvmOverloads constructor(
                             )
                             
                             invalidate()
+                            resetInteraction()
                             return true
                         }
                     }
                 } else {
                     // Long press
                     listener?.onHUDLongPressed(hudId)
+                    resetInteraction()
                     return true
                 }
                 
-                touchedHudId = null
+                resetInteraction()
             }
             
             MotionEvent.ACTION_CANCEL -> {
-                touchedHudId = null
+                val hudId = activeHudId
+                if (hudId != null) {
+                    val hud = manager.getHUD(hudId)
+                    if (hud != null) {
+                        val originalEntry = originalLayoutEntry
+                        if (originalEntry != null) {
+                            manager.setLayoutEntry(hud.attachmentPoint, originalEntry)
+                        } else {
+                            manager.clearLayoutEntry(hud.attachmentPoint)
+                        }
+                        invalidate()
+                    }
+                }
+                resetInteraction()
             }
         }
         
         return super.onTouchEvent(event)
     }
-    
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (w != oldw || h != oldh) {
+            resetInteraction()
+        }
+    }
+
+    private fun resetInteraction() {
+        touchedHudId = null
+        activeHudId = null
+        interactionMode = InteractionMode.NONE
+        pendingDrag = false
+        activeHudRect = null
+        originalLayoutEntry = null
+    }
+
+    private fun updateLayoutForHud(hudId: Int, bounds: RectF) {
+        val manager = hudManager ?: return
+        if (width == 0 || height == 0) return
+        val hud = manager.getHUD(hudId) ?: return
+        val viewWidth = width.toFloat()
+        val viewHeight = height.toFloat()
+        val normalizedLeft = bounds.left / viewWidth
+        val normalizedTop = bounds.top / viewHeight
+        val normalizedWidth = bounds.width() / viewWidth
+        val normalizedHeight = bounds.height() / viewHeight
+        manager.setLayoutEntry(
+            hud.attachmentPoint,
+            HudLayoutEntry(
+                x = normalizedLeft,
+                y = normalizedTop,
+                width = normalizedWidth,
+                height = normalizedHeight
+            )
+        )
+    }
+
+    private fun isInResizeHandle(bounds: RectF, x: Float, y: Float): Boolean {
+        return x >= bounds.right - handleSizePx &&
+            x <= bounds.right &&
+            y >= bounds.bottom - handleSizePx &&
+            y <= bounds.bottom
+    }
+
     /**
      * Refresh the HUD display.
      */
