@@ -693,7 +693,7 @@ class CapabilityManager {
             while (isActive && !done) {
                 try {
                     val requestBody = LLSDMap().apply {
-                        this["ack"] = if (ack != null) LLSDInteger(ack) else LLSDBoolean(true)
+                        this["ack"] = ack?.let { LLSDInteger(it) } ?: LLSDBoolean(true)
                         this["done"] = LLSDBoolean(false)
                     }
                     

@@ -398,16 +398,18 @@ class HUDManager(
             val layoutsObj = root.optJSONObject("layouts") ?: return
             val loadedLayouts = mutableMapOf<HudDeviceClass, MutableMap<HudOrientation, MutableMap<Int, HudLayoutEntry>>>()
             layoutsObj.keys().forEach { deviceKey ->
-                val deviceClass = runCatching { HudDeviceClass.valueOf(deviceKey) }.getOrNull() ?: continue
-                val deviceObj = layoutsObj.optJSONObject(deviceKey) ?: continue
+                val deviceClass = runCatching { HudDeviceClass.valueOf(deviceKey) }.getOrNull()
+                    ?: return@forEach
+                val deviceObj = layoutsObj.optJSONObject(deviceKey) ?: return@forEach
                 val orientationMap = mutableMapOf<HudOrientation, MutableMap<Int, HudLayoutEntry>>()
                 deviceObj.keys().forEach { orientationKey ->
-                    val orientation = runCatching { HudOrientation.valueOf(orientationKey) }.getOrNull() ?: continue
-                    val attachmentObj = deviceObj.optJSONObject(orientationKey) ?: continue
+                    val orientation = runCatching { HudOrientation.valueOf(orientationKey) }.getOrNull()
+                        ?: return@forEach
+                    val attachmentObj = deviceObj.optJSONObject(orientationKey) ?: return@forEach
                     val entryMap = mutableMapOf<Int, HudLayoutEntry>()
                     attachmentObj.keys().forEach { attachmentKey ->
-                        val attachmentPoint = attachmentKey.toIntOrNull() ?: continue
-                        val entryObj = attachmentObj.optJSONObject(attachmentKey) ?: continue
+                        val attachmentPoint = attachmentKey.toIntOrNull() ?: return@forEach
+                        val entryObj = attachmentObj.optJSONObject(attachmentKey) ?: return@forEach
                         val entry = HudLayoutEntry(
                             x = entryObj.optDouble("x", 0.0).toFloat(),
                             y = entryObj.optDouble("y", 0.0).toFloat(),

@@ -64,6 +64,10 @@ class HUDOverlayView @JvmOverloads constructor(
     }
 
     private val hudTexturePaint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
+    private val hudHandlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.argb(220, 230, 230, 230)
+        style = Paint.Style.FILL
+    }
 
     private val textureCache = ConcurrentHashMap<UUID, Bitmap>()
     private val textureRequestJobs = ConcurrentHashMap<UUID, Job>()
@@ -193,6 +197,21 @@ class HUDOverlayView @JvmOverloads constructor(
         
         // Store bounds for hit testing
         hud.screenBounds = rect
+    }
+
+    private fun drawResizeHandle(canvas: Canvas, rect: RectF) {
+        val handleLeft = rect.right - handleSizePx
+        val handleTop = rect.bottom - handleSizePx
+        val handleRect = RectF(handleLeft, handleTop, rect.right, rect.bottom)
+        canvas.drawRoundRect(handleRect, handleSizePx / 4f, handleSizePx / 4f, hudHandlePaint)
+        val lineOffset = handleSizePx / 3f
+        canvas.drawLine(
+            handleRect.left + lineOffset,
+            handleRect.bottom - lineOffset,
+            handleRect.right - lineOffset,
+            handleRect.top + lineOffset,
+            hudBorderPaint
+        )
     }
 
     private fun requestTexture(textureId: UUID) {

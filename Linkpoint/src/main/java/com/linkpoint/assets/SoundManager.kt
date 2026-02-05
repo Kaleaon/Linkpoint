@@ -6,8 +6,10 @@ import android.media.SoundPool
 import android.util.Log
 import com.linkpoint.protocol.types.LLVector3
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -34,7 +36,7 @@ class SoundManager(
     private val loadedSounds = ConcurrentHashMap<UUID, Int>() // UUID -> SoundPool ID
     private val playingSounds = ConcurrentHashMap<Int, SoundPlayback>() // Stream ID -> Playback info
     
-    private val soundDispatcher = Executors.newSingleThreadExecutor { runnable ->
+    private val soundDispatcher: ExecutorCoroutineDispatcher = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "SoundThread").apply { isDaemon = true }
     }.asCoroutineDispatcher()
     private val scope = CoroutineScope(soundDispatcher + SupervisorJob())
