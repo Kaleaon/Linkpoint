@@ -183,8 +183,13 @@ class CapabilityManager {
     private val _isReady = MutableStateFlow(false)
     val isReady: StateFlow<Boolean> = _isReady
     
+    private data class EventHandlerRegistration(
+        val handler: EventHandler,
+        val dispatcher: CoroutineDispatcher
+    )
+    
     // Event handlers
-    private val eventHandlers = ConcurrentHashMap<String, MutableList<EventHandler>>()
+    private val eventHandlers = ConcurrentHashMap<String, MutableList<EventHandlerRegistration>>()
     
     // Initialization tracking for diagnostics (volatile for thread safety)
     @Volatile private var initializationStartTime: Long = 0
@@ -655,7 +660,19 @@ class CapabilityManager {
      * Register an event handler
      */
     fun registerEventHandler(eventName: String, handler: EventHandler) {
-        eventHandlers.getOrPut(eventName) { mutableListOf() }.add(handler)
+        registerEventHandler(eventName, handler, Dispatchers.Default)
+    }
+    
+    /**
+     * Register an event handler with a specific dispatcher.
+     */
+    fun registerEventHandler(
+        eventName: String,
+        handler: EventHandler,
+        dispatcher: CoroutineDispatcher
+    ) {
+        eventHandlers.getOrPut(eventName) { mutableListOf() }
+            .add(EventHandlerRegistration(handler, dispatcher))
     }
     
     /**
@@ -756,11 +773,13 @@ class CapabilityManager {
         
         Log.d(TAG, "Event: $message")
         
-        eventHandlers[message]?.forEach { handler ->
-            try {
-                handler.onEvent(message, body ?: LLSDMap())
-            } catch (e: Exception) {
-                Log.e(TAG, "Event handler error", e)
+        eventHandlers[message]?.forEach { registration ->
+            scope.launch(registration.dispatcher) {
+                try {
+                    registration.handler.onEvent(message, body ?: LLSDMap())
+                } catch (e: Exception) {
+                    Log.e(TAG, "Event handler error", e)
+                }
             }
         }
     }

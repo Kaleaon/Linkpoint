@@ -2,6 +2,7 @@ package com.linkpoint.groups
 
 import android.os.Parcelable
 import android.util.Log
+import com.linkpoint.messaging.MessagingDispatcher
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.llsd.*
@@ -22,6 +23,9 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Manages Second Life groups - memberships, chat, notices, etc.
+ *
+ * Inbound group processing and flow emissions are serialized on the MessagingDispatcher
+ * "MessageThread" to avoid mixing Default/IO dispatchers with messaging state.
  */
 class GroupsManager(
     private val udpConnection: UDPConnectionFixed,
@@ -29,7 +33,7 @@ class GroupsManager(
     private val agentId: UUID
 ) : EventHandler {
     
-    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val scope = CoroutineScope(MessagingDispatcher.dispatcher + SupervisorJob())
     
     // Groups the agent is a member of
     private val groups = ConcurrentHashMap<UUID, Group>()
@@ -43,16 +47,30 @@ class GroupsManager(
     val groupEvents: SharedFlow<GroupEvent> = _groupEvents
     
     init {
-        capabilityManager.registerEventHandler("AgentGroupDataUpdate", this)
-        capabilityManager.registerEventHandler("GroupNotice", this)
-        capabilityManager.registerEventHandler("GroupChat", this)
+        capabilityManager.registerEventHandler(
+            "AgentGroupDataUpdate",
+            this,
+            MessagingDispatcher.dispatcher
+        )
+        capabilityManager.registerEventHandler(
+            "GroupNotice",
+            this,
+            MessagingDispatcher.dispatcher
+        )
+        capabilityManager.registerEventHandler(
+            "GroupChat",
+            this,
+            MessagingDispatcher.dispatcher
+        )
     }
     
     override fun onEvent(message: String, body: LLSDMap) {
-        when (message) {
-            "AgentGroupDataUpdate" -> handleGroupDataUpdate(body)
-            "GroupNotice" -> handleGroupNotice(body)
-            "GroupChat" -> handleGroupChat(body)
+        scope.launch {
+            when (message) {
+                "AgentGroupDataUpdate" -> handleGroupDataUpdate(body)
+                "GroupNotice" -> handleGroupNotice(body)
+                "GroupChat" -> handleGroupChat(body)
+            }
         }
     }
     
@@ -302,16 +320,16 @@ class GroupsManager(
      * Handle active group update from AgentDataUpdate message
      */
     fun handleActiveGroupUpdate(groupId: UUID, groupTitle: String, groupPowers: Long) {
-        Log.i(TAG, "📋 Active group updated: $groupId, title='$groupTitle'")
-        
-        _activeGroup.value = groupId
-        
-        // Update group info if we have it
-        groups[groupId]?.let { group ->
-            groups[groupId] = group.copy(powers = groupPowers)
-        }
-        
         scope.launch {
+            Log.i(TAG, "📋 Active group updated: $groupId, title='$groupTitle'")
+            
+            _activeGroup.value = groupId
+            
+            // Update group info if we have it
+            groups[groupId]?.let { group ->
+                groups[groupId] = group.copy(powers = groupPowers)
+            }
+            
             _groupEvents.emit(GroupEvent.ActiveGroupChanged(groupId, groupTitle))
         }
     }
