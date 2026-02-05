@@ -49,6 +49,7 @@ class RenderManager(private val context: Context) {
     
     // Scene management
     private var sceneManager: SceneManager? = null
+    private val sceneGraph = SceneGraph()
 
     // Material and prim rendering
     private var materialLoader: MaterialLoader? = null
@@ -66,6 +67,9 @@ class RenderManager(private val context: Context) {
     private var isInitialized = false
     private var isXRMode = false
     private var hasWorldData = false
+
+    val dispatcher = RenderThreadDispatcher()
+    private val renderQueue = RenderQueue()
     
     // Camera matrices
     private val viewMatrix = FloatArray(16)
@@ -75,6 +79,7 @@ class RenderManager(private val context: Context) {
      * Initialize the rendering engine
      */
     fun initialize(surfaceView: SurfaceView): Boolean {
+        requireRenderThread("initialize")
         if (isInitialized) return true
         this.surfaceView = surfaceView
         
@@ -119,38 +124,44 @@ class RenderManager(private val context: Context) {
             uiHelper = UiHelper(UiHelper.ContextErrorPolicy.DONT_CHECK).apply {
                 renderCallback = object : UiHelper.RendererCallback {
                     override fun onNativeWindowChanged(surface: Surface) {
-                        Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
-                        Log.i(TAG, "║ ⭐ UiHelper.onNativeWindowChanged - Surface available")
-                        Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
-                        // Use synchronized to prevent race conditions with recreateSwapChain()
-                        synchronized(swapChainLock) {
-                            swapChain?.let { 
-                                Log.d(TAG, "Destroying old SwapChain")
-                                engine?.destroySwapChain(it) 
+                        dispatcher.post(Runnable {
+                            Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+                            Log.i(TAG, "║ ⭐ UiHelper.onNativeWindowChanged - Surface available")
+                            Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+                            // Use synchronized to prevent race conditions with recreateSwapChain()
+                            synchronized(swapChainLock) {
+                                swapChain?.let { 
+                                    Log.d(TAG, "Destroying old SwapChain")
+                                    engine?.destroySwapChain(it) 
+                                }
+                                swapChain = engine?.createSwapChain(surface)
+                                Log.i(TAG, "✓ SwapChain created: ${swapChain != null}")
                             }
-                            swapChain = engine?.createSwapChain(surface)
-                            Log.i(TAG, "✓ SwapChain created: ${swapChain != null}")
-                        }
-                        attachDisplayHelper()
+                            attachDisplayHelper()
+                        })
                     }
                     
                     override fun onDetachedFromSurface() {
-                        Log.w(TAG, "UiHelper.onDetachedFromSurface - Surface lost")
-                        displayHelper?.detach()
-                        synchronized(swapChainLock) {
-                            swapChain?.let {
-                                engine?.destroySwapChain(it)
-                                swapChain = null
+                        dispatcher.post(Runnable {
+                            Log.w(TAG, "UiHelper.onDetachedFromSurface - Surface lost")
+                            displayHelper?.detach()
+                            synchronized(swapChainLock) {
+                                swapChain?.let {
+                                    engine?.destroySwapChain(it)
+                                    swapChain = null
+                                }
                             }
-                        }
+                        })
                     }
                     
                     override fun onResized(width: Int, height: Int) {
-                        Log.d(TAG, "onResized: ${width}x${height}")
-                        view?.viewport = Viewport(0, 0, width, height)
-                        viewportWidth = width
-                        viewportHeight = height
-                        updateProjection(width, height)
+                        dispatcher.post(Runnable {
+                            Log.d(TAG, "onResized: ${width}x${height}")
+                            view?.viewport = Viewport(0, 0, width, height)
+                            viewportWidth = width
+                            viewportHeight = height
+                            updateProjection(width, height)
+                        })
                     }
                 }
                 attachTo(surfaceView)
@@ -195,6 +206,10 @@ class RenderManager(private val context: Context) {
             shutdown()
             return false
         }
+    }
+
+    fun initializeOnRenderThread(surfaceView: SurfaceView): Boolean {
+        return dispatcher.runBlocking { initialize(surfaceView) }
     }
     
     private fun setupDefaultLighting() {
@@ -365,6 +380,7 @@ class RenderManager(private val context: Context) {
      *   already handles this automatically via the synchronized block.
      */
     fun recreateSwapChain() {
+        requireRenderThread("recreateSwapChain")
         val engine = this.engine ?: return
         val surface = surfaceView?.holder?.surface ?: return
         
@@ -446,7 +462,10 @@ class RenderManager(private val context: Context) {
      * Render a frame
      */
     fun renderFrame() {
+        requireRenderThread("renderFrame")
         if (!isInitialized) return
+
+        applyRenderUpdates()
         
         val engine = this.engine ?: return
         val renderer = this.renderer ?: return
@@ -473,7 +492,10 @@ class RenderManager(private val context: Context) {
      * Render a frame in XR mode (stereo rendering)
      */
     fun renderXRFrame(xrData: XRFrameData) {
+        requireRenderThread("renderXRFrame")
         if (!isInitialized) return
+
+        applyRenderUpdates()
         
         val engine = this.engine ?: return
         val renderer = this.renderer ?: return
@@ -530,6 +552,12 @@ class RenderManager(private val context: Context) {
      */
     fun getSceneManager(): SceneManager? = sceneManager
 
+    fun getSceneGraph(): SceneGraph = sceneGraph
+
+    fun enqueueUpdate(update: RenderableUpdate): Boolean {
+        return renderQueue.enqueue(update)
+    }
+
     /**
      * Get the prim renderer for rendering Second Life primitives
      */
@@ -545,6 +573,7 @@ class RenderManager(private val context: Context) {
      * This is the primary entry point for rendering prims from the network.
      */
     fun updatePrim(data: ObjectUpdateData) {
+        requireRenderThread("updatePrim")
         primRenderer?.updatePrim(data)
     }
 
@@ -552,6 +581,7 @@ class RenderManager(private val context: Context) {
      * Remove a prim by its local ID.
      */
     fun removePrim(localId: Int) {
+        requireRenderThread("removePrim")
         primRenderer?.removePrim(localId)
     }
     
@@ -616,6 +646,7 @@ class RenderManager(private val context: Context) {
      * Shutdown rendering
      */
     fun shutdown() {
+        requireRenderThread("shutdown")
         Log.i(TAG, "Shutting down render manager")
 
         // Shutdown prim renderer first (depends on materials)
@@ -651,6 +682,50 @@ class RenderManager(private val context: Context) {
         surfaceView = null
         
         isInitialized = false
+    }
+
+    fun shutdownOnRenderThread() {
+        dispatcher.runBlocking {
+            shutdown()
+        }
+        dispatcher.shutdown()
+    }
+
+    private fun applyRenderUpdates() {
+        val updates = renderQueue.drain()
+        if (updates.isEmpty()) return
+
+        val sceneUpdates = mutableListOf<RenderableUpdate>()
+        updates.forEach { update ->
+            when (update) {
+                is RenderableUpdate.PrimUpdate -> updatePrim(update.data)
+                is RenderableUpdate.AvatarUpdate -> {
+                    sceneManager?.updateAvatar(
+                        agentId = update.agentId,
+                        position = update.position,
+                        rotation = update.rotation,
+                        animations = update.animations
+                    )
+                }
+                is RenderableUpdate.SceneObjectUpdate,
+                is RenderableUpdate.TerrainUpdate,
+                is RenderableUpdate.RemoveObject,
+                RenderableUpdate.ClearScene -> sceneUpdates.add(update)
+            }
+        }
+
+        if (sceneUpdates.isNotEmpty()) {
+            sceneGraph.applyUpdates(sceneUpdates)
+        }
+    }
+
+    private fun requireRenderThread(apiName: String) {
+        if (!dispatcher.isRenderThread()) {
+            val message = "RenderManager.$apiName must run on render thread (${dispatcher.renderThreadName}); " +
+                "current=${Thread.currentThread().name}"
+            Log.e(TAG, message)
+            throw IllegalStateException(message)
+        }
     }
     
     private fun FloatArray.toDoubleArray(): DoubleArray {
