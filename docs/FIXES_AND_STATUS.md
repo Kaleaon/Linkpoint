@@ -102,7 +102,7 @@ fun ByteBuffer.putUUID(uuid: UUID): ByteBuffer {
 - Disabled Jetifier (all deps are AndroidX-native)
 - AGP: 8.1.4 → 8.6.1
 - Gradle: 8.5 → 8.7
-- Kotlin: 1.9.22 → 2.1.0
+- Kotlin: 1.9.22 → 2.2.21
 - compileSdk: 34 → 35
 - Added `kotlin.plugin.compose` and `kotlin.plugin.serialization`
 - Fixed code issues:
