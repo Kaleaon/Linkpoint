@@ -439,7 +439,7 @@ class CapabilityManager {
             Log.d(TAG, "Response body length: ${bodyBytes.size} bytes")
             
             // Log first few chars for debugging (don't log full body for security)
-            val isXmlContentType = contentType.contains("xml", ignoreCase = true)
+            val isXmlContentType = contentType?.contains("xml", ignoreCase = true) == true
             val previewSize = minOf(bodyBytes.size, SEED_CAP_HEADER_PREVIEW_BYTES)
             val headerBytes = bodyBytes.copyOfRange(0, previewSize)
             val asciiCheckSize = minOf(headerBytes.size, SEED_CAP_ASCII_CHECK_BYTES)
