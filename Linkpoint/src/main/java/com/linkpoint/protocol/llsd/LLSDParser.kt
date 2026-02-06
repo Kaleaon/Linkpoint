@@ -25,6 +25,19 @@ object LLSDParser {
             else -> parseBinary(data)
         }
     }
+
+    /**
+     * Parse LLSD using content-type detection and BOM handling.
+     */
+    fun parseAuto(data: ByteArray, contentType: String?): LLSDValue {
+        if (data.isEmpty()) return LLSDUndefined
+        val stream = ByteArrayInputStream(data)
+        val buffered = java.io.BufferedInputStream(stream, 65536)
+        return when (LLSDContentTypeDetector.detect(buffered, contentType)) {
+            LLSDContentTypeDetector.LLSDContentType.LLSD_BINARY -> parseBinary(data)
+            LLSDContentTypeDetector.LLSDContentType.LLSD_XML -> parseXML(String(data, Charsets.UTF_8))
+        }
+    }
     
     /**
      * Parse LLSD Binary format
@@ -270,7 +283,7 @@ object LLSDParser {
             .replace("&apos;", "'")
     }
 
-    private fun parseLlsdDate(value: String): Date? {
+    fun parseLlsdDate(value: String): Date? {
         val patterns = listOf(
             "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
             "yyyy-MM-dd'T'HH:mm:ss'Z'"

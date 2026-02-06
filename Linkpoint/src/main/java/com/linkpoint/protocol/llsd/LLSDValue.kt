@@ -164,6 +164,11 @@ data class LLSDMap(val value: MutableMap<String, LLSDValue> = mutableMapOf()) : 
         is LLSDURI -> entry.value
         else -> null
     }
+    fun getStringOrEmpty(key: String): String = getString(key) ?: ""
+    fun getIntOrZero(key: String): Int = getInt(key) ?: 0
+    fun getRealOrZero(key: String): Double = getReal(key) ?: 0.0
+    fun getBooleanOrFalse(key: String): Boolean = getBoolean(key) ?: false
+    fun getUUIDString(key: String): String? = getUUID(key)?.toString()
     fun getInt(key: String): Int? = (value[key] as? LLSDInteger)?.value
     fun getLong(key: String): Long? = (value[key] as? LLSDInteger)?.value?.toLong()
     fun getReal(key: String): Double? = (value[key] as? LLSDReal)?.value
@@ -171,6 +176,8 @@ data class LLSDMap(val value: MutableMap<String, LLSDValue> = mutableMapOf()) : 
     fun getUUID(key: String): UUID? = (value[key] as? LLSDUUID)?.value
     fun getMap(key: String): LLSDMap? = value[key] as? LLSDMap
     fun getArray(key: String): LLSDArray? = value[key] as? LLSDArray
+    fun getMapOrEmpty(key: String): LLSDMap = getMap(key) ?: LLSDMap()
+    fun getArrayOrEmpty(key: String): LLSDArray = getArray(key) ?: LLSDArray()
     
     override fun toXML(): String {
         val sb = StringBuilder("<map>")
@@ -209,6 +216,7 @@ data class LLSDArray(val value: MutableList<LLSDValue> = mutableListOf()) : LLSD
     operator fun get(index: Int): LLSDValue = value[index]
     fun add(llsdValue: LLSDValue) { value.add(llsdValue) }
     val size: Int get() = value.size
+    fun asStringList(): List<String> = value.map { it.toString() }
     
     override fun toXML(): String {
         val sb = StringBuilder("<array>")
