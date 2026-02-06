@@ -212,6 +212,7 @@ class UDPConnectionFixed {
     // Ping tracking for connection health
     private val lastPingTime = AtomicLong(0)
     private val unansweredPings = AtomicInteger(0)
+    private val nextPingId = AtomicInteger(0)
 
     // Message routing
     private val messageRouter = MessageRouter()
@@ -961,13 +962,7 @@ class UDPConnectionFixed {
 
         if (timeSinceReceive > NEED_PING_TIMEOUT_MS &&
             timeSincePing > LumiyaConstants.PING_INTERVAL_MS) {
-            lastPingTime.set(now)
-            val unanswered = unansweredPings.incrementAndGet()
-            NetworkLogger.log(
-                NetworkLogger.Level.DEBUG,
-                NetworkLogger.Category.UDP,
-                "Ping check - waiting for server response (unanswered: $unanswered)"
-            )
+            sendStartPingCheck()
         }
 
         if (unansweredPings.get() >= UNANSWERED_PINGS_DISCONNECT) {
@@ -981,6 +976,31 @@ class UDPConnectionFixed {
         }
     }
     
+
+    /**
+     * Send an explicit StartPingCheck packet so unanswered-ping tracking maps to real ping requests.
+     */
+    private fun sendStartPingCheck() {
+        val pingId = (nextPingId.incrementAndGet() and 0xFF)
+        lastPingTime.set(System.currentTimeMillis())
+        val unanswered = unansweredPings.incrementAndGet()
+
+        val payload = ByteBuffer.allocate(5).order(ByteOrder.BIG_ENDIAN)
+            .put(pingId.toByte())
+            .putInt(0)
+            .array()
+
+        scope.launch {
+            sendPacket(MessageIds.START_PING_CHECK, payload, reliable = false)
+        }
+
+        NetworkLogger.log(
+            NetworkLogger.Level.DEBUG,
+            NetworkLogger.Category.UDP,
+            "Ping check sent (pingId=$pingId, unanswered: $unanswered)"
+        )
+    }
+
     /**
      * Send pending ACKs as a PacketAck message.
      * 
