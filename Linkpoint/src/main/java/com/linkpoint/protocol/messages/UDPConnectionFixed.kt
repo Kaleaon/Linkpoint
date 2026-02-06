@@ -1956,7 +1956,7 @@ class UDPConnectionFixed {
             if (pos + 4 > data.size - 1) break
             val ackedSeq = ByteBuffer.wrap(data, pos, 4).order(ByteOrder.LITTLE_ENDIAN).int
             pos += 4
-            processAck(ackedSeq)
+            processReceivedAck(ackedSeq)
         }
     }
     

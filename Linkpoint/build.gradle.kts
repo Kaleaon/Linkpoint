@@ -160,6 +160,11 @@ android {
     }
 }
 
+// Exclude deprecated kotlin-android-extensions-runtime which conflicts with kotlin-parcelize-runtime
+configurations.all {
+    exclude(group = "org.jetbrains.kotlin", module = "kotlin-android-extensions-runtime")
+}
+
 kotlin {
     sourceSets["main"].kotlin.setSrcDirs(listOf("src/main/java"))
 }
