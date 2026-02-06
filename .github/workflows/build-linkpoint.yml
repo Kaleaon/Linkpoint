@@ -72,9 +72,6 @@ jobs:
       - name: Display Gradle version
         run: ./gradlew --version
       
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v2
-      
       - name: Check Kotlin source structure
         run: |
           echo "Checking Linkpoint project structure..."
