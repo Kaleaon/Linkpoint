@@ -3,7 +3,14 @@
 The following counts are based on `git ls-files` for tracked Java sources in
 `lumiya_decompiled_source`.
 
-- Remaining Java files: 2,951
+- Remaining Java files: 2,946
+- Recent top-20 cleanup: removed duplicate R.java files that already have Kotlin
+  translations.
+  - lumiya_decompiled_source/com/lumiyaviewer/lumiya/R.java
+  - lumiya_decompiled_source/android/support/design/R.java
+  - lumiya_decompiled_source/android/support/v14/preference/R.java
+  - lumiya_decompiled_source/android/support/v7/preference/R.java
+  - lumiya_decompiled_source/android/support/v7/appcompat/R.java
 - Sample paths:
   - lumiya_decompiled_source/android/arch/core/internal/FastSafeIterableMap.java
   - lumiya_decompiled_source/android/arch/core/internal/SafeIterableMap.java
