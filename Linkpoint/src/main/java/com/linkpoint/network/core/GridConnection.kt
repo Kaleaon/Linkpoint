@@ -20,7 +20,7 @@ import java.util.UUID
  * Grid Connection
  * 
  * Represents a connection to a Second Life grid.
- * Based on Lumiya's SLGridConnection implementation with mobile-first optimizations.
+ * Based on the reference viewer's SLGridConnection implementation with mobile-first optimizations.
  * 
  * Features:
  * - Connection state management
@@ -47,12 +47,12 @@ class GridConnection(
         private const val MAX_RECONNECT_ATTEMPTS = 5
 
         // Viewer identification
-        private const val VIEWER_NAME = "Lumiya"
+        private const val VIEWER_NAME = "Linkpoint"
         private const val VIEWER_VERSION = "1.0.0"
     }
     
     /**
-     * Connection states based on Lumiya's ConnectionState enum
+     * Connection states based on the reference viewer's ConnectionState enum
      */
     enum class ConnectionState {
         IDLE,

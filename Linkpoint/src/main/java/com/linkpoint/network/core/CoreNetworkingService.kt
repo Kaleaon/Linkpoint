@@ -1354,7 +1354,7 @@ class CoreNetworkingService(private val context: Context) {
      * - Networks where Google's connectivity check is blocked
      * 
      * The actual HTTP request will determine if the connection works.
-     * This matches Lumiya's behavior (which logs in instantly on the same networks).
+     * This matches the reference viewer's behavior (which logs in instantly on the same networks).
      */
     private fun validateNetworkConnection(): Boolean {
         // First check the cached value (which may be too strict)

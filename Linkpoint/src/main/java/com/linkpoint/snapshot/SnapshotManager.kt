@@ -33,7 +33,7 @@ import java.util.*
  * - Share to profile feed
  * - Screenshot of 3D view
  * 
- * Based on Lumiya/Firestorm snapshot functionality.
+ * Based on reference viewer/Firestorm snapshot functionality.
  */
 class SnapshotManager(
     private val context: Context,

@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap
  * - Volume control per media type
  * - Auto-play based on parcel settings
  * 
- * Based on Lumiya's media implementation.
+ * Based on the reference viewer's media implementation.
  */
 class MediaManager(
     private val context: Context,

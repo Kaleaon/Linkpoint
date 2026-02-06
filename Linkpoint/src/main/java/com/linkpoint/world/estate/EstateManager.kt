@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap
  * - Sun/time settings
  * - Terrain editing (for estate managers)
  * 
- * Based on Lumiya/Firestorm estate management.
+ * Based on reference viewer/Firestorm estate management.
  */
 class EstateManager(
     private val udpConnection: UDPConnectionFixed,

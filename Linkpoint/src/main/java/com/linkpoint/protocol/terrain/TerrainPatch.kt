@@ -5,7 +5,7 @@ import kotlin.math.cos
 /**
  * Terrain patch decoder for Second Life heightmap data.
  * 
- * Based on Lumiya's TerrainPatch implementation. Decodes DCT-compressed
+ * Based on the reference viewer's TerrainPatch implementation. Decodes DCT-compressed
  * terrain patches from LayerData messages.
  */
 class TerrainPatch(

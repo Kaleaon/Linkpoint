@@ -22,7 +22,7 @@ import com.linkpoint.ui.notecard.NotecardEditorActivity
 
 /**
  * Inventory Activity - Browse and manage inventory
- * Based on Lumiya's InventoryActivity
+ * Based on the reference viewer's InventoryActivity
  */
 class InventoryActivity : AppCompatActivity() {
     

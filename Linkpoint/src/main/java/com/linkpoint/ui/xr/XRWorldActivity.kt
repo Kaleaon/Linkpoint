@@ -17,7 +17,7 @@ import com.linkpoint.protocol.types.LLQuaternion
 
 /**
  * XR World Activity - Immersive VR/AR mode
- * Based on Lumiya's CardboardActivity but modernized for Android XR
+ * Based on the reference viewer's CardboardActivity but modernized for Android XR
  */
 class XRWorldActivity : AppCompatActivity() {
     

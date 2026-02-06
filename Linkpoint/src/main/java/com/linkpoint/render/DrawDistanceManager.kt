@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 /**
  * Draw Distance Manager - Controls object visibility based on distance.
  * 
- * Based on Lumiya's SLDrawDistance.java
+ * Based on the reference viewer's SLDrawDistance.java
  * 
  * Features:
  * - Dynamic draw distance based on scene complexity

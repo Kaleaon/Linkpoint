@@ -18,7 +18,7 @@ import java.util.UUID
 /**
  * Economy Manager - Handles L$ balance and transactions.
  * 
- * Based on Lumiya's SLFinancialInfo.java
+ * Based on the reference viewer's SLFinancialInfo.java
  * 
  * Manages:
  * - L$ balance tracking

@@ -14,7 +14,7 @@ import java.io.IOException
 
 /**
  * Service for handling streaming media (parcel audio, video)
- * Based on Lumiya's StreamingMediaService
+ * Based on the reference viewer's StreamingMediaService
  */
 class StreamingMediaService : Service() {
     

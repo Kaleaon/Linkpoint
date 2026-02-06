@@ -14,7 +14,7 @@ import com.linkpoint.R
 
 /**
  * My Avatar Activity - Avatar customization
- * Based on Lumiya's MyAvatarActivity
+ * Based on the reference viewer's MyAvatarActivity
  */
 class MyAvatarActivity : AppCompatActivity() {
     

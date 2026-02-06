@@ -8,7 +8,7 @@ import kotlinx.coroutines.sync.withLock
  * Message Router
  * 
  * Routes incoming Second Life protocol messages to appropriate handlers.
- * Based on Lumiya's SLMessageRouter implementation.
+ * Based on the reference viewer's SLMessageRouter implementation.
  * 
  * Features:
  * - Message ID to handler mapping
@@ -78,19 +78,32 @@ class MessageRouter {
      */
     suspend fun registerHandler(messageId: Int, handler: Handler) {
         mutex.withLock {
-            val handlerList = handlers.getOrPut(messageId) { mutableListOf() }
-            
-            if (handlerList.size >= MAX_HANDLERS_PER_MESSAGE) {
-                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Max handlers reached for message $messageId")
-                return@withLock
-            }
-            
-            // Add handler and sort by priority
-            handlerList.add(handler)
-            handlerList.sortBy { it.getPriority() }
-            
-            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Registered handler for message $messageId (priority ${handler.getPriority()})")
+            addHandlerInternal(messageId, handler)
         }
+    }
+
+    /**
+     * Register a handler synchronously without requiring a coroutine context.
+     * Use this during initialization to avoid runBlocking deadlocks on the main thread.
+     */
+    @Synchronized
+    fun registerHandlerSync(messageId: Int, handler: Handler) {
+        addHandlerInternal(messageId, handler)
+    }
+
+    private fun addHandlerInternal(messageId: Int, handler: Handler) {
+        val handlerList = handlers.getOrPut(messageId) { mutableListOf() }
+
+        if (handlerList.size >= MAX_HANDLERS_PER_MESSAGE) {
+            NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Max handlers reached for message $messageId")
+            return
+        }
+
+        // Add handler and sort by priority
+        handlerList.add(handler)
+        handlerList.sortBy { it.getPriority() }
+
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Registered handler for message $messageId (priority ${handler.getPriority()})")
     }
     
     /**

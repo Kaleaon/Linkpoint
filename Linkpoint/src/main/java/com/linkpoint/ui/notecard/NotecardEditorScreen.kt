@@ -71,7 +71,7 @@ import java.util.UUID
  * - Unsaved changes confirmation dialog
  * - Dark theme optimized for reading/editing
  * 
- * Based on Lumiya/Firestorm notecard viewer design.
+ * Based on reference viewer/Firestorm notecard viewer design.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -172,7 +172,7 @@ object NetworkDiagnostics {
         // - Networks where Google's connectivity check is blocked
         // 
         // The actual HTTP request will determine if connectivity works.
-        // This matches Lumiya's behavior (which logs in instantly on the same networks).
+        // This matches the reference viewer's behavior (which logs in instantly on the same networks).
         return NetworkInfo(
             isConnected = hasInternet,  // Don't require validated!
             type = networkType,

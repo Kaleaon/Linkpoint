@@ -167,7 +167,7 @@ object ProtocolDiagnostics {
         
         addToHistory(record)
         
-        if (LumiyaTranslationLayer.config.verboseLogging) {
+        if (LinkpointTranslationLayer.config.verboseLogging) {
             Log.v(TAG, "→ ${record.messageName} (seq=$sequenceNumber, ${size}B)")
         }
     }
@@ -199,7 +199,7 @@ object ProtocolDiagnostics {
         
         addToHistory(record)
         
-        if (LumiyaTranslationLayer.config.verboseLogging) {
+        if (LinkpointTranslationLayer.config.verboseLogging) {
             Log.v(TAG, "← ${record.messageName} (seq=$sequenceNumber, ${size}B)")
         }
     }
@@ -218,12 +218,12 @@ object ProtocolDiagnostics {
             val hexPreview = formatHexPreview(rawBytes, 16)
             Log.d(TAG, "  Raw header: $hexPreview")
             
-            // Try Lumiya-style decoding for comparison
-            val lumiyaDecoded = MessageTranslation.decodeMessageId(rawBytes, 0)
-            if (lumiyaDecoded != null) {
-                val (decodedId, _) = lumiyaDecoded
-                Log.d(TAG, "  Lumiya decode: $decodedId (0x${decodedId.toString(16).uppercase()})")
-                Log.d(TAG, "  Lumiya name: ${MessageTranslation.KnownMessages.getName(decodedId)}")
+            // Try Linkpoint decoding for comparison
+            val protocolDecoded = MessageTranslation.decodeMessageId(rawBytes, 0)
+            if (protocolDecoded != null) {
+                val (decodedId, _) = protocolDecoded
+                Log.d(TAG, "  SL protocol decode: $decodedId (0x${decodedId.toString(16).uppercase()})")
+                Log.d(TAG, "  SL protocol name: ${MessageTranslation.KnownMessages.getName(decodedId)}")
             }
         }
     }

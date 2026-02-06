@@ -11,19 +11,19 @@ import java.net.SocketTimeoutException
 import java.util.concurrent.TimeUnit
 
 /**
- * Lumiya Protocol Bridge - Coordinates all translation between Linkpoint and Lumiya protocols.
+ * Linkpoint Protocol Bridge - Coordinates all translation between Linkpoint and SL server protocols.
  * 
- * This is the main entry point for Lumiya compatibility. It coordinates:
+ * This is the main entry point for Linkpoint compatibility. It coordinates:
  * 
- * 1. **Capability URL Management**: Applies URL repair logic from LumiyaTranslationLayer
+ * 1. **Capability URL Management**: Applies URL repair logic from LinkpointTranslationLayer
  * 2. **Message Translation**: Uses MessageTranslation for protocol message handling
- * 3. **Request/Response Formatting**: Ensures LLSD requests match Lumiya's format
+ * 3. **Request/Response Formatting**: Ensures LLSD requests match the SL server's expected format
  * 
  * Usage:
  * ```kotlin
- * val bridge = LumiyaProtocolBridge(loginUrl)
+ * val bridge = LinkpointProtocolBridge(loginUrl)
  * 
- * // Fetch capabilities using Lumiya-compatible logic
+ * // Fetch capabilities using Linkpoint-compatible logic
  * val capabilities = bridge.fetchCapabilities(seedCapUrl)
  * 
  * // Make capability requests
@@ -31,20 +31,20 @@ import java.util.concurrent.TimeUnit
  * ```
  * 
  * This bridge ensures that Linkpoint can communicate with Second Life servers
- * using the same patterns that worked in Lumiya, solving issues where
+ * using the same patterns that worked in the reference viewer, solving issues where
  * "straight Kotlin is unworkable" due to subtle protocol differences.
  * 
  * @param loginUrl The login URL used for authentication (determines grid-specific behavior)
- * @see LumiyaTranslationLayer
+ * @see LinkpointTranslationLayer
  * @see MessageTranslation
  */
-class LumiyaProtocolBridge(
+class LinkpointProtocolBridge(
     private val loginUrl: String
 ) {
     companion object {
-        private const val TAG = "LumiyaProtocolBridge"
+        private const val TAG = "LinkpointProtocolBridge"
         
-        // Timeouts matching Lumiya's HTTP client settings
+        // Timeouts matching the reference viewer's HTTP client settings
         private const val CONNECT_TIMEOUT_SECONDS = 30L
         private const val READ_TIMEOUT_SECONDS = 60L
         private const val WRITE_TIMEOUT_SECONDS = 30L
@@ -54,18 +54,18 @@ class LumiyaProtocolBridge(
         private const val INITIAL_RETRY_DELAY_MS = 1000L
         private const val MAX_RETRY_DELAY_MS = 15000L
         
-        // User-Agent for Lumiya-compatible requests
-        private const val USER_AGENT = "Linkpoint/1.0 (Lumiya-compatible)"
+        // User-Agent for Linkpoint-compatible requests
+        private const val USER_AGENT = "Linkpoint/1.0 (Linkpoint-compatible)"
         
     }
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     
     // Grid-specific configuration
-    private val gridType = LumiyaTranslationLayer.detectGridType(loginUrl)
-    private val isAgniGrid = LumiyaTranslationLayer.isAgniGrid(loginUrl)
+    private val gridType = LinkpointTranslationLayer.detectGridType(loginUrl)
+    private val isAgniGrid = LinkpointTranslationLayer.isAgniGrid(loginUrl)
     
-    // HTTP client configured for Lumiya-style requests
+    // HTTP client configured for Linkpoint requests
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .readTimeout(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
@@ -78,12 +78,12 @@ class LumiyaProtocolBridge(
     
     init {
         Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
-        Log.i(TAG, "║ LUMIYA PROTOCOL BRIDGE INITIALIZED")
+        Log.i(TAG, "║ LINKPOINT PROTOCOL BRIDGE INITIALIZED")
         Log.i(TAG, "╠══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ Login URL: ${loginUrl.take(60)}...")
         Log.i(TAG, "║ Grid Type: $gridType")
         Log.i(TAG, "║ Is Agni Grid: $isAgniGrid")
-        Log.i(TAG, "║ URL Repair: ${LumiyaTranslationLayer.config.repairCapabilityUrls}")
+        Log.i(TAG, "║ URL Repair: ${LinkpointTranslationLayer.config.repairCapabilityUrls}")
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
     }
     
@@ -96,15 +96,15 @@ class LumiyaProtocolBridge(
      * @return The prepared URL ready for use
      */
     fun prepareSeedCapability(seedCapUrl: String): String {
-        return LumiyaTranslationLayer.prepareSeedCapability(loginUrl, seedCapUrl)
+        return LinkpointTranslationLayer.prepareSeedCapability(loginUrl, seedCapUrl)
     }
     
     /**
-     * Fetch capabilities from the seed capability URL using Lumiya-compatible logic.
+     * Fetch capabilities from the seed capability URL using Linkpoint-compatible logic.
      * 
      * This method:
      * 1. Repairs the seed capability URL if needed
-     * 2. Builds an LLSD array request with capability names (matching Lumiya's format)
+     * 2. Builds an LLSD array request with capability names (matching the SL server's expected format)
      * 3. Parses the response and repairs returned capability URLs
      * 
      * @param seedCapUrl The seed capability URL from login response
@@ -114,13 +114,13 @@ class LumiyaProtocolBridge(
         val preparedUrl = prepareSeedCapability(seedCapUrl)
         
         Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
-        Log.i(TAG, "║ FETCHING CAPABILITIES (Lumiya-compatible)")
+        Log.i(TAG, "║ FETCHING CAPABILITIES (Linkpoint-compatible)")
         Log.i(TAG, "║ Seed URL: ${preparedUrl.take(60)}...")
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
         
-        // Build capability request using Lumiya's capability list
-        val capabilityNames = if (LumiyaTranslationLayer.config.useLumiyaCapabilityList) {
-            LumiyaTranslationLayer.getLumiyaCapabilityNames()
+        // Build capability request using the reference viewer's capability list
+        val capabilityNames = if (LinkpointTranslationLayer.config.useReferenceCapabilityList) {
+            LinkpointTranslationLayer.getReferenceCapabilityNames()
         } else {
             getStandardCapabilityNames()
         }
@@ -170,7 +170,7 @@ class LumiyaProtocolBridge(
                 
                 if (result.isNullOrEmpty()) {
                     Log.w(TAG, "No capabilities parsed from response")
-                    LumiyaTranslationLayer.logCapabilityDiagnostics(
+                    LinkpointTranslationLayer.logCapabilityDiagnostics(
                         "PARSE_EMPTY",
                         loginUrl,
                         preparedUrl,
@@ -205,7 +205,7 @@ class LumiyaProtocolBridge(
         }
         
         Log.e(TAG, "All capability fetch attempts failed", lastError)
-        LumiyaTranslationLayer.logCapabilityDiagnostics(
+        LinkpointTranslationLayer.logCapabilityDiagnostics(
             "FETCH_FAILED",
             loginUrl,
             preparedUrl,
@@ -219,7 +219,7 @@ class LumiyaProtocolBridge(
     /**
      * Build the LLSD request body for capability fetching.
      * 
-     * Lumiya sends an LLSD array of capability names to the seed capability URL.
+     * The reference viewer sends an LLSD array of capability names to the seed capability URL.
      */
     private fun buildCapabilityRequestBody(capabilityNames: List<String>): String {
         val llsdArray = LLSDArray().apply {
@@ -250,8 +250,8 @@ class LumiyaProtocolBridge(
                 if (url.isBlank()) continue
                 
                 // Apply URL repair if configured
-                val repairedUrl = if (LumiyaTranslationLayer.config.repairCapabilityUrls) {
-                    LumiyaTranslationLayer.repairUrl(loginUrl, url)
+                val repairedUrl = if (LinkpointTranslationLayer.config.repairCapabilityUrls) {
+                    LinkpointTranslationLayer.repairUrl(loginUrl, url)
                 } else {
                     url
                 }
@@ -271,7 +271,7 @@ class LumiyaProtocolBridge(
     }
     
     /**
-     * Get standard capability names (non-Lumiya list).
+     * Get standard capability names (standard Linkpoint list).
      */
     private fun getStandardCapabilityNames(): List<String> {
         return listOf(
@@ -308,7 +308,7 @@ class LumiyaProtocolBridge(
     fun hasCapability(name: String): Boolean = capabilities.containsKey(name)
     
     /**
-     * Make a capability request with Lumiya-compatible formatting.
+     * Make a capability request with Linkpoint-compatible formatting.
      * 
      * @param capabilityName The capability name
      * @param body Optional LLSD body for POST requests
@@ -367,7 +367,7 @@ class LumiyaProtocolBridge(
             loginUrl = loginUrl,
             capabilityCount = capabilities.size,
             capabilityNames = capabilities.keys.toList().sorted(),
-            config = LumiyaTranslationLayer.config
+            config = LinkpointTranslationLayer.config
         )
     }
     
@@ -375,12 +375,12 @@ class LumiyaProtocolBridge(
      * Diagnostic data for the bridge.
      */
     data class BridgeDiagnostics(
-        val gridType: LumiyaTranslationLayer.GridType,
+        val gridType: LinkpointTranslationLayer.GridType,
         val isAgniGrid: Boolean,
         val loginUrl: String,
         val capabilityCount: Int,
         val capabilityNames: List<String>,
-        val config: LumiyaTranslationLayer.CompatibilityConfig
+        val config: LinkpointTranslationLayer.CompatibilityConfig
     )
     
     // ==================================================================================
@@ -388,7 +388,7 @@ class LumiyaProtocolBridge(
     // ==================================================================================
     
     /**
-     * Fetch a texture using Lumiya-compatible URL handling.
+     * Fetch a texture using Linkpoint-compatible URL handling.
      * 
      * This method:
      * 1. Repairs the GetTexture capability URL if needed
@@ -406,14 +406,14 @@ class LumiyaProtocolBridge(
             return@withContext null
         }
         
-        val url = LumiyaTranslationLayer.buildTextureUrl(loginUrl, textureCapUrl, textureId)
-        val headers = LumiyaTranslationLayer.getAssetFetchHeaders(LumiyaTranslationLayer.AssetTransferType.TEXTURE)
+        val url = LinkpointTranslationLayer.buildTextureUrl(loginUrl, textureCapUrl, textureId)
+        val headers = LinkpointTranslationLayer.getAssetFetchHeaders(LinkpointTranslationLayer.AssetTransferType.TEXTURE)
         
-        fetchAsset(url, headers, LumiyaTranslationLayer.AssetTransferType.TEXTURE, textureId)
+        fetchAsset(url, headers, LinkpointTranslationLayer.AssetTransferType.TEXTURE, textureId)
     }
     
     /**
-     * Fetch a mesh using Lumiya-compatible URL handling.
+     * Fetch a mesh using Linkpoint-compatible URL handling.
      * 
      * This method:
      * 1. Repairs the GetMesh/GetMesh2 capability URL if needed
@@ -432,14 +432,14 @@ class LumiyaProtocolBridge(
             return@withContext null
         }
         
-        val url = LumiyaTranslationLayer.buildMeshUrl(loginUrl, meshCapUrl, meshId)
-        val headers = LumiyaTranslationLayer.getAssetFetchHeaders(LumiyaTranslationLayer.AssetTransferType.MESH)
+        val url = LinkpointTranslationLayer.buildMeshUrl(loginUrl, meshCapUrl, meshId)
+        val headers = LinkpointTranslationLayer.getAssetFetchHeaders(LinkpointTranslationLayer.AssetTransferType.MESH)
         
-        fetchAsset(url, headers, LumiyaTranslationLayer.AssetTransferType.MESH, meshId)
+        fetchAsset(url, headers, LinkpointTranslationLayer.AssetTransferType.MESH, meshId)
     }
     
     /**
-     * Generic asset fetching with Lumiya-compatible handling.
+     * Generic asset fetching with Linkpoint-compatible handling.
      * 
      * @param url The prepared asset URL
      * @param headers HTTP headers for the request
@@ -450,7 +450,7 @@ class LumiyaProtocolBridge(
     private suspend fun fetchAsset(
         url: String,
         headers: Map<String, String>,
-        assetType: LumiyaTranslationLayer.AssetTransferType,
+        assetType: LinkpointTranslationLayer.AssetTransferType,
         assetId: String
     ): ByteArray? = withContext(Dispatchers.IO) {
         try {
@@ -462,7 +462,7 @@ class LumiyaProtocolBridge(
             val response = httpClient.newCall(requestBuilder.build()).execute()
             
             if (!response.isSuccessful) {
-                LumiyaTranslationLayer.logAssetTransferDiagnostics(
+                LinkpointTranslationLayer.logAssetTransferDiagnostics(
                     "FETCH_FAILED",
                     assetType,
                     assetId,
@@ -477,7 +477,7 @@ class LumiyaProtocolBridge(
             response.close()
             
             if (data == null || data.isEmpty()) {
-                LumiyaTranslationLayer.logAssetTransferDiagnostics(
+                LinkpointTranslationLayer.logAssetTransferDiagnostics(
                     "EMPTY_RESPONSE",
                     assetType,
                     assetId,
@@ -489,8 +489,8 @@ class LumiyaProtocolBridge(
             }
             
             // Validate the received data
-            if (!LumiyaTranslationLayer.validateAssetData(data, assetType)) {
-                LumiyaTranslationLayer.logAssetTransferDiagnostics(
+            if (!LinkpointTranslationLayer.validateAssetData(data, assetType)) {
+                LinkpointTranslationLayer.logAssetTransferDiagnostics(
                     "INVALID_DATA",
                     assetType,
                     assetId,
@@ -501,7 +501,7 @@ class LumiyaProtocolBridge(
                 return@withContext null
             }
             
-            LumiyaTranslationLayer.logAssetTransferDiagnostics(
+            LinkpointTranslationLayer.logAssetTransferDiagnostics(
                 "SUCCESS",
                 assetType,
                 assetId,
@@ -512,7 +512,7 @@ class LumiyaProtocolBridge(
             
             data
         } catch (e: Exception) {
-            LumiyaTranslationLayer.logAssetTransferDiagnostics(
+            LinkpointTranslationLayer.logAssetTransferDiagnostics(
                 "ERROR",
                 assetType,
                 assetId,
@@ -537,17 +537,17 @@ class LumiyaProtocolBridge(
     fun prepareAssetUrl(
         capabilityName: String,
         assetId: String,
-        assetType: LumiyaTranslationLayer.AssetTransferType
+        assetType: LinkpointTranslationLayer.AssetTransferType
     ): String? {
         val capUrl = getCapability(capabilityName) ?: return null
         
-        val preparedCapUrl = LumiyaTranslationLayer.prepareAssetUrl(loginUrl, capUrl, assetType)
+        val preparedCapUrl = LinkpointTranslationLayer.prepareAssetUrl(loginUrl, capUrl, assetType)
         
         return when (assetType) {
-            LumiyaTranslationLayer.AssetTransferType.TEXTURE -> "$preparedCapUrl?texture_id=$assetId"
-            LumiyaTranslationLayer.AssetTransferType.MESH -> "$preparedCapUrl?mesh_id=$assetId"
-            LumiyaTranslationLayer.AssetTransferType.SOUND -> "$preparedCapUrl?asset_id=$assetId"
-            LumiyaTranslationLayer.AssetTransferType.ANIMATION -> "$preparedCapUrl?asset_id=$assetId"
+            LinkpointTranslationLayer.AssetTransferType.TEXTURE -> "$preparedCapUrl?texture_id=$assetId"
+            LinkpointTranslationLayer.AssetTransferType.MESH -> "$preparedCapUrl?mesh_id=$assetId"
+            LinkpointTranslationLayer.AssetTransferType.SOUND -> "$preparedCapUrl?asset_id=$assetId"
+            LinkpointTranslationLayer.AssetTransferType.ANIMATION -> "$preparedCapUrl?asset_id=$assetId"
             else -> "$preparedCapUrl?asset_id=$assetId"
         }
     }
@@ -568,6 +568,6 @@ class LumiyaProtocolBridge(
     fun shutdown() {
         scope.cancel()
         capabilities.clear()
-        Log.i(TAG, "Lumiya Protocol Bridge shutdown")
+        Log.i(TAG, "Linkpoint Protocol Bridge shutdown")
     }
 }

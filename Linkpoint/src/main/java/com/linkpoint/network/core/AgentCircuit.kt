@@ -25,7 +25,7 @@ import java.util.UUID
 /**
  * Agent Circuit with Circuit Establishment State Machine
  * 
- * Implements Lumiya's proven circuit establishment sequence:
+ * Implements the proven circuit establishment sequence:
  * 1. UDP Connect
  * 2. Send UseCircuitCode (reliable)
  * 3. ACK triggers CompleteAgentMovement

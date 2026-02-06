@@ -20,7 +20,7 @@ import java.util.UUID
  * 
  * Temporary circuit for specific operations in the Second Life grid.
  * Used for tasks like teleportation, region crossing, and temporary asset operations.
- * Based on Lumiya's SLTempCircuit implementation with mobile-first optimizations.
+ * Based on the reference viewer's SLTempCircuit implementation with mobile-first optimizations.
  * 
  * Features:
  * - Short-lived circuit for temporary operations

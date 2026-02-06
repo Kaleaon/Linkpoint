@@ -4,7 +4,7 @@ import java.util.UUID
 
 /**
  * Represents a nearby avatar/user in the current region
- * Based on Lumiya/Firestorm nearby people tracking
+ * Based on reference viewer/Firestorm nearby people tracking
  */
 data class NearbyUser(
     val agentId: UUID,

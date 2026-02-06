@@ -1,11 +1,11 @@
-package com.linkpoint.protocol.lumiya
+package com.linkpoint.protocol.circuit
 
 import java.lang.ref.WeakReference
 import java.util.UUID
 import java.util.WeakHashMap
 
 /**
- * UUID Interning Pool (from Lumiya's UUIDPool.java)
+ * UUID Interning Pool (from the reference viewer's UUIDPool.java)
  * 
  * Memory optimization that reuses UUID instances across the application.
  * In Second Life, the same UUIDs appear repeatedly (agent IDs, object IDs, etc.)
@@ -37,7 +37,7 @@ import java.util.WeakHashMap
  */
 object UUIDPool {
     
-    /** The zero UUID constant (like Lumiya's ZeroUUID) */
+    /** The zero UUID constant (like the reference viewer's ZeroUUID) */
     val ZERO: UUID = UUID(0L, 0L)
     
     /** Internal pool using WeakHashMap for automatic cleanup */
@@ -86,7 +86,7 @@ object UUIDPool {
     
     /**
      * Set UUID with interning - returns existing if same bits, or creates new
-     * Like Lumiya's setUUID method
+     * Like the reference viewer's setUUID method
      */
     fun set(existing: UUID?, mostSignificantBits: Long, leastSignificantBits: Long): UUID {
         // If existing UUID has same bits, just return it

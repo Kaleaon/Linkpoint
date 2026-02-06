@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicLong
 /**
  * Xfer Manager - Handles file transfers via the Xfer protocol.
  * 
- * Based on Lumiya's SLXferManager.java
+ * Based on the reference viewer's SLXferManager.java
  * 
  * Xfer is used for:
  * - Task inventory listings

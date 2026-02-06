@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap
  * - Store favorite landmarks
  * - Teleport to landmarks
  * 
- * Based on Lumiya's landmark implementation.
+ * Based on the reference viewer's landmark implementation.
  */
 class LandmarkManager(
     private val capabilityManager: CapabilityManager,

@@ -11,7 +11,7 @@ import java.io.File
 /**
  * Centralized cache management with configurable sizes
  * 
- * Based on Lumiya's cache settings, this provides:
+ * Based on the reference viewer's cache settings, this provides:
  * - Configurable disk cache size (128MB - 10GB)
  * - Configurable memory cache size (100MB - 2GB)  
  * - Per-asset-type cache size limits (textures, meshes, sounds, animations)
@@ -86,9 +86,9 @@ class CacheManager(private val context: Context) {
         // Low space threshold (500MB free required)
         const val LOW_SPACE_THRESHOLD_MB = 500
         
-        // Lumiya Cache structure directories
-        // Root: "Lumiya Cache" on external storage
-        const val LUMIYA_CACHE_ROOT = "Lumiya Cache"
+        // Linkpoint Cache structure directories
+        // Root: "Linkpoint Cache" on external storage
+        const val LINKPOINT_CACHE_ROOT = "Linkpoint Cache"
         
         // Public cache - shared data per grid (textures, sounds, meshes, animations)
         const val PUBLIC_DIR = "Public"
@@ -114,7 +114,7 @@ class CacheManager(private val context: Context) {
         const val LOCATION_EXTERNAL = "external"
         const val LOCATION_CUSTOM = "custom"
         
-        // Default external path for Lumiya Cache
+        // Default external path for Linkpoint Cache
         val DEFAULT_EXTERNAL_CACHE_PATH: String
             get() = "${Environment.getExternalStorageDirectory().absolutePath}/$LUMIYA_CACHE_ROOT"
     }
@@ -308,7 +308,7 @@ class CacheManager(private val context: Context) {
     
     /**
      * Set the custom cache path.
-     * @param path The absolute path to use for cache (e.g., "/sdcard/Lumiya Cache")
+     * @param path The absolute path to use for cache (e.g., "/sdcard/Linkpoint Cache")
      */
     fun setCustomCachePath(path: String) {
         prefs.edit().putString(KEY_CUSTOM_CACHE_PATH, path).apply()
@@ -323,10 +323,10 @@ class CacheManager(private val context: Context) {
     }
     
     /**
-     * Get the Lumiya Cache root directory.
-     * Structure: <root>/Lumiya Cache/
+     * Get the Linkpoint Cache root directory.
+     * Structure: <root>/Linkpoint Cache/
      */
-    fun getLumiyaCacheRoot(): File {
+    fun getLinkpointCacheRoot(): File {
         val rootDir = when (getCacheLocation()) {
             LOCATION_CUSTOM -> File(getCustomCachePath())
             LOCATION_EXTERNAL -> {
@@ -347,13 +347,13 @@ class CacheManager(private val context: Context) {
     
     /**
      * Get the Public cache directory for the current grid.
-     * Structure: Lumiya Cache/Public/<GridName>/
+     * Structure: Linkpoint Cache/Public/<GridName>/
      * 
      * Public cache holds shared data: textures, sounds, meshes, animations.
      * This data is not user-specific and can be shared across users.
      */
     fun getPublicCacheDirectory(): File {
-        val publicDir = File(getLumiyaCacheRoot(), "$PUBLIC_DIR/$currentGridName")
+        val publicDir = File(getLinkpointCacheRoot(), "$PUBLIC_DIR/$currentGridName")
         if (!publicDir.exists()) {
             publicDir.mkdirs()
         }
@@ -362,13 +362,13 @@ class CacheManager(private val context: Context) {
     
     /**
      * Get the Private cache directory for the current user on the current grid.
-     * Structure: Lumiya Cache/Private/<GridName>/<UserID>/
+     * Structure: Linkpoint Cache/Private/<GridName>/<UserID>/
      * 
      * Private cache holds user-specific data: messages, friends lists, settings.
      */
     fun getPrivateCacheDirectory(): File {
         val userId = currentUserId ?: "anonymous"
-        val privateDir = File(getLumiyaCacheRoot(), "$PRIVATE_DIR/$currentGridName/$userId")
+        val privateDir = File(getLinkpointCacheRoot(), "$PRIVATE_DIR/$currentGridName/$userId")
         if (!privateDir.exists()) {
             privateDir.mkdirs()
         }
@@ -377,15 +377,15 @@ class CacheManager(private val context: Context) {
     
     /**
      * Get the base cache directory based on current location setting.
-     * This is now the Lumiya Cache root for backward compatibility.
+     * This is now the Linkpoint Cache root for backward compatibility.
      */
     fun getBaseCacheDirectory(): File {
-        return getLumiyaCacheRoot()
+        return getLinkpointCacheRoot()
     }
     
     /**
      * Get public cache directory for a specific asset type.
-     * Structure: Lumiya Cache/Public/<GridName>/<assetType>/
+     * Structure: Linkpoint Cache/Public/<GridName>/<assetType>/
      */
     fun getPublicAssetDirectory(assetType: CacheableAssetType): File {
         val dirName = when (assetType) {
@@ -403,7 +403,7 @@ class CacheManager(private val context: Context) {
     
     /**
      * Get private cache directory for a specific data type.
-     * Structure: Lumiya Cache/Private/<GridName>/<UserID>/<dataType>/
+     * Structure: Linkpoint Cache/Private/<GridName>/<UserID>/<dataType>/
      */
     fun getPrivateDataDirectory(dataType: PrivateDataType): File {
         val dirName = when (dataType) {
@@ -441,7 +441,7 @@ class CacheManager(private val context: Context) {
             Log.w(TAG, "Failed to get internal storage stats", e)
         }
         
-        // External storage (Lumiya Cache on sdcard)
+        // External storage (Linkpoint Cache on sdcard)
         if (isExternalStorageAvailable()) {
             val externalDir = File(Environment.getExternalStorageDirectory(), LUMIYA_CACHE_ROOT)
             try {
@@ -586,7 +586,7 @@ class CacheManager(private val context: Context) {
         val usagePercent = if (maxSize > 0) (totalSize.toFloat() / maxSize * 100).toInt() else 0
         
         // Get available space from cache root
-        val cacheRoot = getLumiyaCacheRoot()
+        val cacheRoot = getLinkpointCacheRoot()
         val statFs = try {
             if (cacheRoot.exists()) {
                 android.os.StatFs(cacheRoot.path)
@@ -927,7 +927,7 @@ data class CacheLocationInfo(
 
 /**
  * Types of private user data stored in the private cache.
- * Private cache structure: Lumiya Cache/Private/<Grid>/<UserID>/<DataType>/
+ * Private cache structure: Linkpoint Cache/Private/<Grid>/<UserID>/<DataType>/
  */
 enum class PrivateDataType {
     /** Instant messages and chat history */

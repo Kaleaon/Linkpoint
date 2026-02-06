@@ -4,7 +4,7 @@ package com.linkpoint.protocol.auth
  * Authentication Parameters
  * 
  * Contains all parameters needed for Second Life grid authentication.
- * Based on Lumiya's SLAuthParams implementation.
+ * Based on the reference viewer's SLAuthParams implementation.
  * 
  * Mobile-First Considerations:
  * - Minimal data overhead
@@ -17,7 +17,7 @@ data class AuthParams(
     val password: String,
     val startLocation: String = "home",
     val gridUrl: String = "https://login.agni.lindenlab.com/cgi-bin/login.cgi",
-    val viewerChannel: String = "Lumiya",
+    val viewerChannel: String = "Linkpoint",
     val viewerVersion: String = "1.0.0",
     val viewerId: String = "linkpoint-android",
     val mac: String? = null,

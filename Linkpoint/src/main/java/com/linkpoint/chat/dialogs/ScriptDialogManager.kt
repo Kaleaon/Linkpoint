@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Script Dialog Manager - Handles LSL script dialogs, text input boxes, and permission requests.
  * 
- * Based on Lumiya's SLChatScriptDialog.java, SLChatTextBoxDialog.java, etc.
+ * Based on the reference viewer's SLChatScriptDialog.java, SLChatTextBoxDialog.java, etc.
  * 
  * Dialog types:
  * - Script Dialog: Multi-button menu from llDialog()

@@ -39,7 +39,7 @@ import java.util.Locale
 
 /**
  * Settings Activity
- * Based on Lumiya's SettingsActivity
+ * Based on the reference viewer's SettingsActivity
  * 
  * Includes required disclosures per Third-Party Viewer Policy Section 1.g:
  * - Viewer name and version displayed in About section
@@ -158,7 +158,7 @@ class SettingsActivity : AppCompatActivity() {
         }
         
         /**
-         * Setup cache settings - Lumiya-style configurable caches
+         * Setup cache settings - Linkpoint configurable caches
          */
         private fun setupCacheSettings() {
             val cacheManager = com.linkpoint.assets.CacheManager(requireContext())

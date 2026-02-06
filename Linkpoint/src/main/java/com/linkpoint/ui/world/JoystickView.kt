@@ -19,7 +19,7 @@ import kotlin.math.sqrt
  * - Movement (forward/backward/strafe)
  * - Camera rotation
  * 
- * Based on Lumiya's joystick implementation.
+ * Based on the reference viewer's joystick implementation.
  */
 class JoystickView @JvmOverloads constructor(
     context: Context,

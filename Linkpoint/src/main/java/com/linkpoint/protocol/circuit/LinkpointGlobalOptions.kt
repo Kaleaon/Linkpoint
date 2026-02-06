@@ -1,4 +1,4 @@
-package com.linkpoint.protocol.lumiya
+package com.linkpoint.protocol.circuit
 
 import android.app.ActivityManager
 import android.content.Context
@@ -12,7 +12,7 @@ import java.io.FileReader
 import java.util.Properties
 
 /**
- * Global Options (Enhanced from Lumiya's GlobalOptions.java)
+ * Global Options (Enhanced from the reference viewer's GlobalOptions.java)
  * 
  * User-configurable settings that affect networking and performance.
  * Enhanced for modern devices with up to 16GB+ RAM.
@@ -32,11 +32,11 @@ import java.util.Properties
  * 
  * On first launch after reinstall, settings are restored from backup.
  */
-class LumiyaGlobalOptions private constructor(private val context: Context) {
+class LinkpointGlobalOptions private constructor(private val context: Context) {
     
     companion object {
-        private const val PREFS_NAME = "linkpoint_lumiya_options"
-        private const val TAG = "LumiyaGlobalOptions"
+        private const val PREFS_NAME = "linkpoint_circuit_options"
+        private const val TAG = "LinkpointGlobalOptions"
         
         // External storage folder for all Linkpoint data (survives reinstall)
         const val EXTERNAL_FOLDER_NAME = "Linkpoint Viewer"
@@ -123,11 +123,11 @@ class LumiyaGlobalOptions private constructor(private val context: Context) {
         )
         
         @Volatile
-        private var instance: LumiyaGlobalOptions? = null
+        private var instance: LinkpointGlobalOptions? = null
         
-        fun getInstance(context: Context): LumiyaGlobalOptions {
+        fun getInstance(context: Context): LinkpointGlobalOptions {
             return instance ?: synchronized(this) {
-                instance ?: LumiyaGlobalOptions(context.applicationContext).also {
+                instance ?: LinkpointGlobalOptions(context.applicationContext).also {
                     instance = it
                 }
             }
@@ -272,7 +272,7 @@ class LumiyaGlobalOptions private constructor(private val context: Context) {
      * Whether to auto-reconnect on disconnect
      */
     var autoReconnect: Boolean
-        get() = prefs.getBoolean(KEY_AUTO_RECONNECT, LumiyaConstants.AUTO_RECONNECT_DEFAULT)
+        get() = prefs.getBoolean(KEY_AUTO_RECONNECT, LinkpointConstants.AUTO_RECONNECT_DEFAULT)
         set(value) {
             prefs.edit { putBoolean(KEY_AUTO_RECONNECT, value) }
             markUserModified()
@@ -283,7 +283,7 @@ class LumiyaGlobalOptions private constructor(private val context: Context) {
      * Maximum reconnection attempts before giving up
      */
     var maxReconnectAttempts: Int
-        get() = prefs.getInt(KEY_MAX_RECONNECT_ATTEMPTS, LumiyaConstants.MAX_RECONNECT_ATTEMPTS)
+        get() = prefs.getInt(KEY_MAX_RECONNECT_ATTEMPTS, LinkpointConstants.MAX_RECONNECT_ATTEMPTS)
         set(value) {
             prefs.edit { putInt(KEY_MAX_RECONNECT_ATTEMPTS, value) }
             markUserModified()
@@ -519,7 +519,7 @@ class LumiyaGlobalOptions private constructor(private val context: Context) {
         val cpuCores = Runtime.getRuntime().availableProcessors()
         
         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.CONNECTION,
-            "LumiyaOptions: Device detected - RAM: ${totalMemoryMb}MB (snapped to ${snappedRamMb}MB), Cores: $cpuCores")
+            "LinkpointOptions: Device detected - RAM: ${totalMemoryMb}MB (snapped to ${snappedRamMb}MB), Cores: $cpuCores")
         
         prefs.edit {
             // Store detected RAM
@@ -636,7 +636,7 @@ class LumiyaGlobalOptions private constructor(private val context: Context) {
         saveBackup()
         
         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.CONNECTION,
-            "LumiyaOptions: Defaults set - HQ: $highQualityTextures, " +
+            "LinkpointOptions: Defaults set - HQ: $highQualityTextures, " +
             "TextureMem: ${textureMemoryLimitMb}MB, MeshMem: ${meshMemoryLimitMb}MB, " +
             "ObjCache: ${objectCacheLimitMb}MB, DrawDist: ${drawDistance}m, " +
             "MaxDownloads: $maxTextureDownloads, TotalCache: ${totalCacheLimitGb}GB")
@@ -689,7 +689,7 @@ class LumiyaGlobalOptions private constructor(private val context: Context) {
             File(linkpointFolder, SETTINGS_FILENAME)
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.CONNECTION,
-                "LumiyaOptions: Cannot access external folder: ${e.message}")
+                "LinkpointOptions: Cannot access external folder: ${e.message}")
             null
         }
     }
@@ -729,10 +729,10 @@ class LumiyaGlobalOptions private constructor(private val context: Context) {
             }
             
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.CONNECTION,
-                "LumiyaOptions: Settings backed up to ${file.absolutePath}")
+                "LinkpointOptions: Settings backed up to ${file.absolutePath}")
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.CONNECTION,
-                "LumiyaOptions: Failed to save backup: ${e.message}")
+                "LinkpointOptions: Failed to save backup: ${e.message}")
         }
     }
     
@@ -820,12 +820,12 @@ class LumiyaGlobalOptions private constructor(private val context: Context) {
             }
             
             NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.CONNECTION,
-                "LumiyaOptions: Restored settings from backup")
+                "LinkpointOptions: Restored settings from backup")
             return true
             
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.CONNECTION,
-                "LumiyaOptions: Failed to restore backup: ${e.message}")
+                "LinkpointOptions: Failed to restore backup: ${e.message}")
             return false
         }
     }
@@ -930,7 +930,7 @@ class LumiyaGlobalOptions private constructor(private val context: Context) {
         // Don't clear logs by default
         
         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.CONNECTION,
-            "LumiyaOptions: All caches cleared")
+            "LinkpointOptions: All caches cleared")
     }
     
     /**
@@ -939,7 +939,7 @@ class LumiyaGlobalOptions private constructor(private val context: Context) {
     fun clearTextureCache() {
         clearCacheFolder(getTextureCacheFolder())
         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.CONNECTION,
-            "LumiyaOptions: Texture cache cleared")
+            "LinkpointOptions: Texture cache cleared")
     }
     
     /**
@@ -948,7 +948,7 @@ class LumiyaGlobalOptions private constructor(private val context: Context) {
     fun clearLogs() {
         clearCacheFolder(getLogsFolder())
         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.CONNECTION,
-            "LumiyaOptions: Logs cleared")
+            "LinkpointOptions: Logs cleared")
     }
     
     /**
@@ -966,10 +966,10 @@ class LumiyaGlobalOptions private constructor(private val context: Context) {
             getAnimationsCacheFolder()
             
             NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.CONNECTION,
-                "LumiyaOptions: External folders initialized at ${getExternalFolder().absolutePath}")
+                "LinkpointOptions: External folders initialized at ${getExternalFolder().absolutePath}")
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.CONNECTION,
-                "LumiyaOptions: Failed to initialize external folders: ${e.message}")
+                "LinkpointOptions: Failed to initialize external folders: ${e.message}")
         }
     }
 }

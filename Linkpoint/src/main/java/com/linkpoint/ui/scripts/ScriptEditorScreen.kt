@@ -66,7 +66,7 @@ import java.util.UUID
  * - Toggle running state (for object scripts)
  * - Dark theme optimized for code editing
  * 
- * Based on Firestorm/Lumiya script editor design.
+ * Based on Firestorm/reference viewer script editor design.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

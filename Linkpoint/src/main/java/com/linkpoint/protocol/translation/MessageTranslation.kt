@@ -8,14 +8,14 @@ import java.nio.ByteOrder
  * Message translation utilities for Second Life protocol compatibility.
  * 
  * This handles the differences in how message IDs are encoded/decoded between
- * Linkpoint's Kotlin implementation and Lumiya's original Java implementation.
+ * Linkpoint's Kotlin implementation and the SL protocol's Java reference implementation.
  * 
  * Second Life uses three frequency classes for messages:
  * - **High frequency**: Single byte, values 1-254 (0xFF is reserved as escape)
  * - **Medium frequency**: 0xFF prefix + byte, resulting in values 65280-65534
  * - **Low frequency**: 0xFF 0xFF prefix + short, resulting in negative values
  * 
- * Lumiya's DecodeMessageID() uses signed bytes/shorts which affects the resulting IDs:
+ * The reference viewer's DecodeMessageID() uses signed bytes/shorts which affects the resulting IDs:
  * ```java
  * public static int DecodeMessageID(ByteBuffer byteBuffer) {
  *     byte b = byteBuffer.get();
@@ -34,7 +34,7 @@ object MessageTranslation {
     
     private const val TAG = "MessageTranslation"
     
-    // Message frequency constants matching Lumiya's implementation
+    // Message frequency constants matching the SL protocol implementation
     private const val ESCAPE_BYTE: Byte = 0xFF.toByte() // -1 as signed byte
     private const val MEDIUM_FREQUENCY_BASE = 65280
     private const val LOW_FREQUENCY_BASE = -65536
@@ -55,9 +55,9 @@ object MessageTranslation {
     }
     
     /**
-     * Decode a message ID from raw packet bytes using Lumiya-compatible logic.
+     * Decode a message ID from raw packet bytes using Linkpoint-compatible logic.
      * 
-     * This exactly matches Lumiya's SLMessage.DecodeMessageID() behavior:
+     * This exactly matches the reference viewer's SLMessage.DecodeMessageID() behavior:
      * - Reads the first byte as a signed byte
      * - If not -1 (0xFF), returns it as the high frequency ID
      * - If -1, reads next byte; if not -1, returns (byte | 65280) as medium frequency
@@ -114,7 +114,7 @@ object MessageTranslation {
         // Combine bytes into a 16-bit value
         val rawShort = (highByte shl 8) or lowByte
         
-        // Convert to signed short (to match Lumiya's Java behavior)
+        // Convert to signed short (to match signed Java byte behavior)
         // then back to Int for the final message ID calculation
         val signedShortValue = rawShort.toShort().toInt()
         
@@ -122,7 +122,7 @@ object MessageTranslation {
     }
     
     /**
-     * Encode a message ID for transmission using Lumiya-compatible logic.
+     * Encode a message ID for transmission using Linkpoint-compatible logic.
      * 
      * This is the inverse of decodeMessageId().
      * 
@@ -183,9 +183,9 @@ object MessageTranslation {
     }
     
     /**
-     * Well-known message IDs with Lumiya-compatible values.
+     * Well-known message IDs with Linkpoint-compatible values.
      * 
-     * These are calculated using the same formula as Lumiya:
+     * These are calculated using the same formula as the SL protocol:
      * - High frequency: signed byte value
      * - Medium frequency: byte | 65280
      * - Low frequency: short | -65536
@@ -203,7 +203,7 @@ object MessageTranslation {
         const val KILL_OBJECT = 16
         const val AVATAR_ANIMATION = 20
         
-        // PacketAck is special - Lumiya treats 0xFB as signed byte = -5
+        // PacketAck is special - The SL protocol treats 0xFB as signed byte = -5
         const val PACKET_ACK = -5
         
         // Medium frequency messages (0xFF + byte -> byte | 65280)
@@ -248,19 +248,19 @@ object MessageTranslation {
     }
     
     /**
-     * Convert a message ID from standard format to Lumiya format.
+     * Convert a message ID from standard format to SL protocol format.
      * 
      * Standard format uses unsigned values:
      * - High: 0x01-0xFE
      * - Medium: 0xFF00-0xFFFE
      * - Low: 0xFFFF0000-0xFFFFFFFF
      * 
-     * Lumiya format uses signed values as decoded by DecodeMessageID().
+     * SL protocol format uses signed values as decoded by DecodeMessageID().
      * 
      * @param standardId The standard format message ID
-     * @return The Lumiya-compatible message ID
+     * @return The Linkpoint-compatible message ID
      */
-    fun standardToLumiya(standardId: Long): Int {
+    fun standardToProtocol(standardId: Long): Int {
         return when {
             // Low frequency: 0xFFFFxxxx -> negative value
             (standardId and 0xFFFF0000L) == 0xFFFF0000L -> {
@@ -280,26 +280,26 @@ object MessageTranslation {
     }
     
     /**
-     * Convert a message ID from Lumiya format to standard format.
+     * Convert a message ID from the reference viewer format to standard format.
      * 
-     * @param lumiyaId The Lumiya-format message ID
+     * @param protocolId The SL protocol-format message ID
      * @return The standard format message ID
      */
-    fun lumiyaToStandard(lumiyaId: Int): Long {
+    fun protocolToStandard(protocolId: Int): Long {
         return when {
             // Low frequency: negative -> 0xFFFFxxxx
-            lumiyaId < HIGH_FREQUENCY_THRESHOLD -> {
-                val shortValue = lumiyaId and 0xFFFF
+            protocolId < HIGH_FREQUENCY_THRESHOLD -> {
+                val shortValue = protocolId and 0xFFFF
                 0xFFFF0000L or shortValue.toLong()
             }
             // Medium frequency: 65280+ -> 0xFFxx
-            lumiyaId >= MEDIUM_FREQUENCY_BASE -> {
-                val byteValue = lumiyaId and 0xFF
+            protocolId >= MEDIUM_FREQUENCY_BASE -> {
+                val byteValue = protocolId and 0xFF
                 0xFF00L or byteValue.toLong()
             }
             // High frequency
             else -> {
-                (lumiyaId and 0xFF).toLong()
+                (protocolId and 0xFF).toLong()
             }
         }
     }

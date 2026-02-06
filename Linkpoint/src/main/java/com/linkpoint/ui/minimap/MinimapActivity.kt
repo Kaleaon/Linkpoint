@@ -20,7 +20,7 @@ import kotlin.math.sin
 
 /**
  * Minimap Activity - Shows overhead view of the region
- * Based on Lumiya's MinimapActivity
+ * Based on the reference viewer's MinimapActivity
  */
 class MinimapActivity : AppCompatActivity() {
     

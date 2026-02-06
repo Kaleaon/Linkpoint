@@ -8,7 +8,7 @@ import java.util.regex.Pattern
  * Parses the full login response XML to extract buddy-list, inventory-skeleton,
  * and other data that isn't captured in the basic AuthReply.
  * 
- * Based on Second Life XMLRPC login response format and Lumiya's parsing logic.
+ * Based on Second Life XMLRPC login response format parsing logic.
  */
 object LoginResponseParser {
     private const val TAG = "LoginResponseParser"

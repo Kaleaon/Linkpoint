@@ -9,7 +9,7 @@ package com.linkpoint.protocol.messages
  * - Low frequency: 0xFF 0xFF + short -> stored as 0xFFFFxxxx as signed Int (negative values)
  *   For example: wire format FF FF 00 03 -> internal value 0xFFFF0003 as Int = -65533
  * 
- * These values match Lumiya's internal representation for compatibility.
+ * These values match the SL protocol's internal representation for compatibility.
  */
 object MessageIds {
     // =====================================

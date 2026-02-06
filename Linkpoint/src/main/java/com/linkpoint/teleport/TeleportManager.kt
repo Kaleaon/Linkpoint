@@ -31,7 +31,7 @@ import java.util.UUID
  * - Accepting/declining teleport offers
  * - Teleport progress tracking
  * 
- * Based on Lumiya's teleport implementation.
+ * Based on the reference viewer's teleport implementation.
  */
 class TeleportManager(
     private val udpConnection: UDPConnectionFixed,

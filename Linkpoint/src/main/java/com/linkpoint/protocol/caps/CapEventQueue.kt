@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
  * Capability Event Queue
  * 
  * Handles capability-based event queuing for Second Life protocol.
- * Based on Lumiya's SLCapEventQueue implementation.
+ * Based on the reference viewer's SLCapEventQueue implementation.
  * 
  * This implements the EventQueueGet capability which uses HTTP long-polling
  * to receive events from the simulator.
