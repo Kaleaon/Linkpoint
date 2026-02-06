@@ -3,7 +3,7 @@
 The following counts are based on `git ls-files` for tracked Java sources in
 `lumiya_decompiled_source`.
 
-- Remaining Java files: 2,952
+- Remaining Java files: 2,951
 - Sample paths:
   - lumiya_decompiled_source/android/arch/core/internal/FastSafeIterableMap.java
   - lumiya_decompiled_source/android/arch/core/internal/SafeIterableMap.java
