@@ -7,7 +7,7 @@ import com.linkpoint.network.events.ConnectionState
 import com.linkpoint.network.events.CircuitEstablishedEvent
 import com.linkpoint.network.events.MessageReceivedEvent
 import com.linkpoint.network.NetworkLogger
-import com.linkpoint.protocol.lumiya.LumiyaConstants
+import com.linkpoint.protocol.circuit.LinkpointConstants
 import com.linkpoint.protocol.types.putUUID
 import com.linkpoint.utils.SessionLogRecorder
 import kotlinx.coroutines.*
@@ -68,7 +68,7 @@ private fun UUID.asBytes(): ByteArray {
  * ## Architecture Overview
  * 
  * This class implements the Second Life UDP protocol with proper message routing
- * and event bus integration, following Lumiya-style architecture patterns.
+ * and event bus integration, following Linkpoint architecture patterns.
  * 
  * ## Key Features
  * 
@@ -127,20 +127,20 @@ class UDPConnectionFixed {
     companion object {
         private const val TAG = "UDPConnectionFixed"
         
-        /** Maximum UDP datagram size - from LumiyaConstants */
-        private val BUFFER_SIZE = LumiyaConstants.MAX_MESSAGE_SIZE
+        /** Maximum UDP datagram size - from LinkpointConstants */
+        private val BUFFER_SIZE = LinkpointConstants.MAX_MESSAGE_SIZE
         
-        /** Timeout for NIO selector operations - from LumiyaConstants (1 second idle interval) */
-        private val SELECTOR_TIMEOUT_MS = LumiyaConstants.DEFAULT_IDLE_INTERVAL_MS
+        /** Timeout for NIO selector operations - from LinkpointConstants (1 second idle interval) */
+        private val SELECTOR_TIMEOUT_MS = LinkpointConstants.DEFAULT_IDLE_INTERVAL_MS
         
         /** 
          * Packet header size: flags (1) + sequence (4) + extra (1) = 6 bytes
-         * This is constant across all SL UDP packets - from LumiyaConstants
+         * This is constant across all SL UDP packets - from LinkpointConstants
          */
-        private val PACKET_HEADER_SIZE = LumiyaConstants.PACKET_HEADER_SIZE
+        private val PACKET_HEADER_SIZE = LinkpointConstants.PACKET_HEADER_SIZE
         
         /**
-         * Frequency bases for message ID encoding (matching Lumiya)
+         * Frequency bases for message ID encoding (matching SL protocol)
          * 
          * Second Life uses three message frequency ranges:
          * - High frequency: Single byte (0x00-0xFE), used for frequent messages like ObjectUpdate
@@ -172,19 +172,19 @@ class UDPConnectionFixed {
         const val LOG_FULL_PACKET_DATA = true
         
         // ==================== LUMIYA TIMING CONSTANTS ====================
-        // These critical values come from Lumiya's proven mobile implementation
+        // These critical values come from the reference viewer's proven mobile implementation
         
-        /** Message timeout from Lumiya (5 seconds) */
-        private val MESSAGE_TIMEOUT_MS = LumiyaConstants.MESSAGE_TIMEOUT_MS
+        /** Message timeout from the reference viewer (5 seconds) */
+        private val MESSAGE_TIMEOUT_MS = LinkpointConstants.MESSAGE_TIMEOUT_MS
         
-        /** Maximum retries from Lumiya (3 retries) */
-        private val MESSAGE_MAX_RETRIES = LumiyaConstants.MESSAGE_MAX_RETRIES
+        /** Maximum retries from the reference viewer (3 retries) */
+        private val MESSAGE_MAX_RETRIES = LinkpointConstants.MESSAGE_MAX_RETRIES
         
-        /** Time before sending ping from Lumiya (10 seconds) */
-        private val NEED_PING_TIMEOUT_MS = LumiyaConstants.NEED_PING_TIMEOUT_MS
+        /** Time before sending ping from the reference viewer (10 seconds) */
+        private val NEED_PING_TIMEOUT_MS = LinkpointConstants.NEED_PING_TIMEOUT_MS
         
-        /** Unanswered pings before disconnect from Lumiya (3) */
-        private val UNANSWERED_PINGS_DISCONNECT = LumiyaConstants.UNANSWERED_PINGS_DISCONNECT
+        /** Unanswered pings before disconnect from the reference viewer (3) */
+        private val UNANSWERED_PINGS_DISCONNECT = LinkpointConstants.UNANSWERED_PINGS_DISCONNECT
         
         /**
          * Threshold for triggering reconnection due to consecutive send errors.
@@ -220,7 +220,7 @@ class UDPConnectionFixed {
     // Coroutine scope
     private val scope = CoroutineScope(CircuitDispatcher.dispatcher + SupervisorJob())
 
-    // Circuit threading and queues (Lumiya-style deterministic ordering)
+    // Circuit threading and queues (Linkpoint deterministic ordering)
     private val circuitThread = CircuitThread("CircuitThread")
     private val circuitTaskQueue = CircuitTaskQueue(
         circuitThread.scope,
@@ -326,7 +326,7 @@ class UDPConnectionFixed {
     
     /**
      * Maximum number of ACKs to include in a single PacketAck message.
-     * Based on SL protocol limits and Lumiya's implementation.
+     * Based on SL protocol limits .
      */
     private val MAX_ACKS_PER_PACKET = 255
     
@@ -427,14 +427,13 @@ class UDPConnectionFixed {
     private fun registerInternalHandlers() {
         // Register PacketAck handler - CRITICAL for reliable messaging
         // Without this, ACK callbacks are never invoked, breaking circuit establishment
-        kotlinx.coroutines.runBlocking {
-            messageRouter.registerHandler(MessageIds.PACKET_ACK, object : MessageRouter.Handler {
-                override fun handleMessage(messageId: Int, data: ByteArray): Boolean {
-                    return handlePacketAck(data)
-                }
-                override fun getPriority(): Int = Int.MAX_VALUE // Highest priority - process ACKs first
-            })
-        }
+        // NOTE: Direct call instead of runBlocking to avoid main thread deadlock
+        messageRouter.registerHandlerSync(MessageIds.PACKET_ACK, object : MessageRouter.Handler {
+            override fun handleMessage(messageId: Int, data: ByteArray): Boolean {
+                return handlePacketAck(data)
+            }
+            override fun getPriority(): Int = Int.MAX_VALUE // Highest priority - process ACKs first
+        })
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, 
             "✓ Internal handlers registered (PacketAck)")
     }
@@ -454,7 +453,7 @@ class UDPConnectionFixed {
     private fun handlePacketAck(data: ByteArray): Boolean {
         try {
             // Use the same message ID decoder to find where the payload starts
-            val decodeResult = decodeMessageIdLumiyaStyle(data, PACKET_HEADER_SIZE)
+            val decodeResult = decodeMessageIdSLProtocol(data, PACKET_HEADER_SIZE)
             if (decodeResult == null) {
                 NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
                     "PacketAck: Failed to decode message ID")
@@ -895,7 +894,7 @@ class UDPConnectionFixed {
      * 2. Eventually timeout the connection
      * 3. Not send subsequent reliable data (like chat, objects, terrain)
      * 
-     * This follows Lumiya's implementation where ACKs are sent either:
+     * This follows the SL protocol where ACKs are sent either:
      * - Piggy-backed on outgoing packets (optimization)
      * - As standalone PacketAck messages (when no other traffic)
      */
@@ -961,7 +960,7 @@ class UDPConnectionFixed {
         val timeSincePing = now - lastPingTime.get()
 
         if (timeSinceReceive > NEED_PING_TIMEOUT_MS &&
-            timeSincePing > LumiyaConstants.PING_INTERVAL_MS) {
+            timeSincePing > LinkpointConstants.PING_INTERVAL_MS) {
             sendStartPingCheck()
         }
 
@@ -1139,7 +1138,7 @@ class UDPConnectionFixed {
     /**
      * Check for timeouts on pending reliable messages.
      * This should be called periodically to handle message timeouts.
-     * Based on Lumiya's timeout and retry logic.
+     * Based on the reference viewer's timeout and retry logic.
      */
     private suspend fun checkMessageTimeouts() {
         val now = System.currentTimeMillis()
@@ -1198,14 +1197,27 @@ class UDPConnectionFixed {
     private suspend fun routeMessage(data: ByteArray) {
         val messageId = extractMessageId(data)
         val routed = messageRouter.routeMessage(messageId, data, heavyTaskQueue)
-        
+
         if (routed) {
+            messagesRouted.incrementAndGet()
+        }
+    }
+
+    /**
+     * Route a message by ID to the registered app-level handlers.
+     * Called by LinkpointThreadedCircuit to forward received packets.
+     */
+    fun routeMessage(messageId: Int, data: ByteArray) {
+        // Dispatch to the handler registered via registerHandler()
+        val handler = messageHandlers[messageId]
+        if (handler != null) {
+            handler.handleMessage(messageId, data)
             messagesRouted.incrementAndGet()
         }
     }
     
     /**
-     * Extract message ID from packet using Lumiya-style decoding.
+     * Extract message ID from packet using Linkpoint decoding.
      * 
      * The packet format is:
      * - Bytes 0-5: Header (flags, sequence number, extra byte)
@@ -1219,15 +1231,15 @@ class UDPConnectionFixed {
     private fun extractMessageId(data: ByteArray): Int {
         if (data.size < PACKET_HEADER_SIZE + 1) return INVALID_MESSAGE_ID
         
-        val result = decodeMessageIdLumiyaStyle(data, PACKET_HEADER_SIZE)
+        val result = decodeMessageIdSLProtocol(data, PACKET_HEADER_SIZE)
         return result?.first ?: INVALID_MESSAGE_ID
     }
     
     /**
-     * Decode message ID using Lumiya-compatible encoding.
+     * Decode message ID using Linkpoint-compatible encoding.
      * Returns Pair of (messageId, nextOffset) or null if invalid.
      */
-    private fun decodeMessageIdLumiyaStyle(data: ByteArray, startOffset: Int): Pair<Int, Int>? {
+    private fun decodeMessageIdSLProtocol(data: ByteArray, startOffset: Int): Pair<Int, Int>? {
         if (data.size <= startOffset) return null
         
         var offset = startOffset
@@ -1238,7 +1250,7 @@ class UDPConnectionFixed {
         
         if (b1 != -1) {
             // High frequency message - return the signed byte value directly
-            // This matches Lumiya: if (b != -1) return b;
+            // This matches the reference viewer: if (b != -1) return b;
             // e.g., 0x0C (12) = ObjectUpdate, 0xFB (-5) = PacketAck
             return Pair(b1, offset)
         }
@@ -1250,7 +1262,7 @@ class UDPConnectionFixed {
         
         if (b2 != -1) {
             // Medium frequency message - byte OR MEDIUM_FREQUENCY_BASE
-            // This matches Lumiya: b2 | 65280
+            // This matches the reference viewer: b2 | 65280
             // e.g., 0x06 (6) | 65280 = 65286 = CoarseLocationUpdate
             return Pair(b2 or MEDIUM_FREQUENCY_BASE, offset)
         }
@@ -1268,7 +1280,7 @@ class UDPConnectionFixed {
         
         val shortValue = ((byte3 shl 8) or byte4).toShort().toInt()
         
-        // This matches Lumiya: byteBuffer.getShort() | (-65536)
+        // This matches the reference viewer: byteBuffer.getShort() | (-65536)
         // e.g., 0x0094 (148) | -65536 = -65388 = RegionHandshake
         return Pair(shortValue or LOW_FREQUENCY_BASE, offset)
     }
@@ -1282,8 +1294,8 @@ class UDPConnectionFixed {
     /**
      * Register a message handler using a lambda
      * This is a convenience method that wraps the lambda in a MessageRouter.Handler
-     * Note: Uses runBlocking to ensure handler is registered before returning
-     * This is critical for ensuring handlers are ready when packets arrive
+     * Uses synchronous registration to avoid main-thread deadlocks.
+     * Handler is ready immediately when this method returns.
      */
     fun registerHandler(messageId: Int, handler: (Int, ByteArray) -> Unit) {
         registerHandler(messageId, false, handler)
@@ -1302,18 +1314,15 @@ class UDPConnectionFixed {
         val messageName = MessageIds.getMessageName(messageId)
         EnhancedPacketLogger.logHandlerRegistered(messageId, messageName)
 
-        // Register with messageRouter synchronously using runBlocking
-        // This ensures handler is ready before we return
-        kotlinx.coroutines.runBlocking {
-            messageRouter.registerHandler(messageId, object : MessageRouter.Handler {
-                override fun handleMessage(messageId: Int, data: ByteArray): Boolean {
-                    handler(messageId, data)
-                    return true
-                }
+        // Register with messageRouter synchronously (no runBlocking to avoid main thread deadlock)
+        messageRouter.registerHandlerSync(messageId, object : MessageRouter.Handler {
+            override fun handleMessage(messageId: Int, data: ByteArray): Boolean {
+                handler(messageId, data)
+                return true
+            }
 
-                override fun isHeavy(): Boolean = isHeavy
-            })
-        }
+            override fun isHeavy(): Boolean = isHeavy
+        })
         
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, 
             "Registered handler for message $messageId (total: ${messageHandlers.size})")
@@ -1600,7 +1609,7 @@ class UDPConnectionFixed {
             header.putInt(seqNum)
             header.put(0.toByte()) // Extra header byte
             
-            // Encode message ID (Lumiya-style)
+            // Encode message ID (Linkpoint)
             val messageIdBytes = encodeMessageId(messageId)
             
             // Combine header, message ID, and payload
@@ -1714,7 +1723,7 @@ class UDPConnectionFixed {
     }
     
     /**
-     * Encode message ID for transmission (Lumiya-style)
+     * Encode message ID for transmission (Linkpoint)
      */
     private fun encodeMessageId(messageId: Int): ByteArray {
         return when {
@@ -1962,7 +1971,7 @@ class UDPConnectionFixed {
     }
 
     /**
-     * Process ACKs appended to a received packet (Lumiya-style).
+     * Process ACKs appended to a received packet (Linkpoint).
      */
     private fun processAppendedAcks(data: ByteArray) {
         if (data.size < PACKET_HEADER_SIZE + 2) return

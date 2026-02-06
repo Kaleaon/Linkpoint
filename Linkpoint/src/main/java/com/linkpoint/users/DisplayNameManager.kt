@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Display Names Manager - Handles fetching and caching of display names.
  * 
- * Based on Lumiya's SLDisplayNameFetcher.java
+ * Based on the reference viewer's SLDisplayNameFetcher.java
  * 
  * Display names in Second Life are user-chosen names that appear alongside
  * or instead of the legacy username. They can be changed periodically.

@@ -12,7 +12,7 @@ import java.util.UUID
 /**
  * Environment Manager - Handles Windlight sky and water settings.
  * 
- * Based on Lumiya's Windlight system (WindlightDay.java, WindlightSky.java, etc.)
+ * Based on the reference viewer's Windlight system (WindlightDay.java, WindlightSky.java, etc.)
  * 
  * Windlight controls:
  * - Sky appearance (sun, moon, stars, clouds, atmosphere)

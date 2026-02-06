@@ -1,19 +1,19 @@
 /**
- * Lumiya Translation Layer Package
+ * Linkpoint Translation Layer Package
  * 
  * This package provides compatibility between Linkpoint's modern Kotlin implementation
- * and the communication patterns used by Lumiya's original Java implementation.
+ * and the communication patterns from the decompiled reference viewer.
  * 
  * ## Background
  * 
  * When connecting to Second Life servers, the protocol has specific quirks that
- * Lumiya's original implementation handled correctly. "Straight Kotlin" implementations
+ * The reference viewer's implementation handled correctly. "Straight Kotlin" implementations
  * may fail due to:
  * 
  * 1. **Capability URL issues**: The official SL grid (Agni) sometimes returns incomplete
  *    hostnames in capability URLs that need to be repaired.
  *    
- * 2. **Message ID encoding**: Lumiya uses signed byte/short values for message IDs,
+ * 2. **Message ID encoding**: The reference viewer uses signed byte/short values for message IDs,
  *    which affects how high/medium/low frequency messages are decoded.
  *    
  * 3. **LLSD formatting**: The seed capability expects an LLSD array of strings,
@@ -24,10 +24,10 @@
  * 
  * ## Components
  * 
- * - [LumiyaTranslationLayer]: Core translation utilities for URL repair, grid detection,
+ * - [LinkpointTranslationLayer]: Core translation utilities for URL repair, grid detection,
  *   and asset transfer handling (textures, meshes, sounds, animations)
- * - [MessageTranslation]: Message ID encoding/decoding compatible with Lumiya
- * - [LumiyaProtocolBridge]: High-level bridge coordinating all translation, including
+ * - [MessageTranslation]: Message ID encoding/decoding compatible with the SL protocol
+ * - [LinkpointProtocolBridge]: High-level bridge coordinating all translation, including
  *   asset fetching with proper URL repair
  * - [ProtocolDiagnostics]: Comprehensive debugging and statistics collection
  * 
@@ -41,7 +41,7 @@
  * // Old way (may fail on some grids):
  * capabilityManager.initialize(seedCapUrl)
  * 
- * // New way with Lumiya translation:
+ * // New way with Linkpoint translation:
  * capabilityManager.initialize(seedCapUrl, loginUrl)
  * ```
  * 
@@ -50,7 +50,7 @@
  * For textures, meshes, and other assets:
  * 
  * ```kotlin
- * val bridge = LumiyaProtocolBridge(loginUrl)
+ * val bridge = LinkpointProtocolBridge(loginUrl)
  * 
  * // Fetch texture with URL repair
  * val textureData = bridge.fetchTexture(textureUuid)
@@ -69,10 +69,10 @@
  * You can also configure the behavior:
  * 
  * ```kotlin
- * LumiyaTranslationLayer.configure(
- *     LumiyaTranslationLayer.CompatibilityConfig(
+ * LinkpointTranslationLayer.configure(
+ *     LinkpointTranslationLayer.CompatibilityConfig(
  *         repairCapabilityUrls = true,
- *         useLumiyaCapabilityList = true,
+ *         useReferenceCapabilityList = true,
  *         verboseLogging = true
  *     )
  * )
@@ -97,10 +97,10 @@
  * 
  * ## Reference
  * 
- * Based on analysis of Lumiya's decompiled source code:
- * - `com.lumiyaviewer.lumiya.slproto.caps.SLCaps` - Capability URL repair
- * - `com.lumiyaviewer.lumiya.slproto.SLAgentCircuit` - Message handling patterns
- * - `com.lumiyaviewer.lumiya.slproto.SLMessage` - Message ID encoding
+ * Based on analysis of the decompiled reference viewer code:
+ * - `com.lumiyaviewer.*.slproto.caps.SLCaps (decompiled reference)` - Capability URL repair
+ * - `com.lumiyaviewer.*.slproto.SLAgentCircuit (decompiled reference)` - Message handling patterns
+ * - `com.lumiyaviewer.*.slproto.SLMessage (decompiled reference)` - Message ID encoding
  * 
  * @see com.linkpoint.protocol.capabilities.CapabilityManager
  * @see com.linkpoint.protocol.messages.UDPConnection

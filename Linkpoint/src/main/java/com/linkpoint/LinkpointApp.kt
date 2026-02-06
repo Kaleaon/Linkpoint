@@ -94,7 +94,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * Main Application class for Linkpoint - Second Life viewer for Android and XR
  * 
- * Based on Lumiya's architecture, modernized for:
+ * Based on the reference viewer's architecture, modernized for:
  * - Kotlin
  * - Filament rendering
  * - Android XR / VR support
@@ -327,7 +327,7 @@ class LinkpointApp : Application() {
         private set
     
     // Flag to track if CompleteAgentMovement has been sent
-    // Per Lumiya protocol: This must be sent immediately when UseCircuitCode (seq 0) is ACKed
+    // Per SL protocol: This must be sent immediately when UseCircuitCode (seq 0) is ACKed
     // The server won't send RegionHandshake until we send this
     // Using AtomicBoolean to prevent race conditions with concurrent PacketAck messages
     private val completeAgentMovementSent = AtomicBoolean(false)
@@ -357,8 +357,11 @@ class LinkpointApp : Application() {
         com.linkpoint.utils.SessionLogRecorder.initialize(this)
         Log.i(TAG, "Session log recorder initialized")
         
+        // Initialize Linkpoint circuit integration (device-adaptive settings, DNS, IPv4)
+        com.linkpoint.protocol.circuit.LinkpointCircuitIntegration.initialize(this)
+
         initializeManagers()
-        
+
         Log.i(TAG, "Linkpoint initialized successfully")
     }
     
@@ -393,7 +396,7 @@ class LinkpointApp : Application() {
         // XR/VR support
         xrManager = XRManager(this)
         
-        // Cache management system (Lumiya Cache structure)
+        // Cache management system (Linkpoint Cache structure)
         cacheManager = CacheManager(this)
         
         // Asset system
@@ -667,7 +670,7 @@ class LinkpointApp : Application() {
                     
                     // Send RegionHandshakeReply to acknowledge - THIS IS REQUIRED!
                     // NOTE: CompleteAgentMovement and AgentThrottle are sent earlier in PacketAck
-                    // handler when UseCircuitCode is acknowledged (per Lumiya protocol)
+                    // handler when UseCircuitCode is acknowledged (per SL protocol)
                     applicationScope.launch {
                         try {
                             Log.d(TAG, "Sending RegionHandshakeReply...")
@@ -781,7 +784,7 @@ class LinkpointApp : Application() {
         var compressedObjectUpdateCount = 0
         var avatarUpdateCount = 0
         
-        // PCode constants (from Lumiya)
+        // PCode constants (from the reference viewer)
         val PCODE_PRIM = 9
         val PCODE_AVATAR = 47
         
@@ -884,7 +887,7 @@ class LinkpointApp : Application() {
                     }
                     
                     // Request full object data for all cached objects
-                    // Per Lumiya protocol: respond with RequestMultipleObjects with CacheMissType=0
+                    // Per SL protocol: respond with RequestMultipleObjects with CacheMissType=0
                     if (cachedData.objects.isNotEmpty()) {
                         val objectIds = cachedData.objects.map { it.localId }
                         applicationScope.launch {
@@ -1090,7 +1093,7 @@ class LinkpointApp : Application() {
         // PacketAck - Acknowledgment messages for reliable packets
         // These are sent by the simulator to confirm receipt of our reliable packets.
         // CRITICAL: When UseCircuitCode (seq 0) is acknowledged, we MUST immediately send
-        // CompleteAgentMovement. This follows Lumiya's protocol behavior - the server
+        // CompleteAgentMovement. This follows the SL protocol behavior - the server
         // won't send RegionHandshake until it receives CompleteAgentMovement.
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.PACKET_ACK) { _, rawPacket ->
             // PacketAck format: Count (1 byte), then list of acknowledged sequence numbers (4 bytes each)
@@ -1115,7 +1118,7 @@ class LinkpointApp : Application() {
                 Log.d(TAG, "PacketAck received: $count packets acknowledged - sequences: $ackedSequences")
                 
                 // Check if UseCircuitCode (sequence 0) was acknowledged
-                // This is CRITICAL - per Lumiya's protocol, we must send CompleteAgentMovement
+                // This is CRITICAL - per SL protocol, we must send CompleteAgentMovement
                 // immediately when UseCircuitCode is ACKed. The server waits for this before
                 // sending RegionHandshake and other world data.
                 // Using compareAndSet for thread-safe, atomic check-and-set operation

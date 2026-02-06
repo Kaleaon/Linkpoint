@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Task Inventory Manager - Handles object inventory (contents).
  * 
- * Based on Lumiya's SLTaskInventory.java
+ * Based on the reference viewer's SLTaskInventory.java
  * 
  * Task inventory is the inventory inside objects (prims).
  * It includes scripts, notecards, textures, and other items

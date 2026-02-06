@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap
  * - Handles touch events for HUD interaction
  * - Supports HUD visibility toggling
  * 
- * Based on Lumiya's HUD rendering.
+ * Based on the reference viewer's HUD rendering.
  */
 class HUDOverlayView @JvmOverloads constructor(
     context: Context,

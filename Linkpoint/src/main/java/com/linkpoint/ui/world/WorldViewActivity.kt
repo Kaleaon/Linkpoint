@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Main world view activity - shows the 3D world
- * Based on Lumiya's WorldViewActivity
+ * Based on the reference viewer's WorldViewActivity
  */
 class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     

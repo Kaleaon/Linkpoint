@@ -5,7 +5,7 @@ import java.util.UUID
 /**
  * Attachment Points - Defines all attachment points on an avatar.
  * 
- * Based on Lumiya's SLAttachmentPoint.java
+ * Based on the reference viewer's SLAttachmentPoint.java
  * 
  * Second Life avatars have 59+ attachment points where objects can be attached.
  * Each point has a unique ID, name, and bone/joint association.

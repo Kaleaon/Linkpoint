@@ -1,18 +1,18 @@
-package com.linkpoint.protocol.lumiya
+package com.linkpoint.protocol.circuit
 
 /**
- * Constants from Lumiya's decompiled source code.
- * These are the EXACT values that made Lumiya work flawlessly on mobile for 10+ years.
+ * Constants from the reference viewer's decompiled source code.
+ * These are the EXACT values that made the reference viewer work flawlessly on mobile for 10+ years.
  * 
- * Source: Exhaustive analysis of 804 Lumiya slproto Java files
+ * Source: Exhaustive analysis of 804 decompiled reference viewer slproto Java files
  * Reference: docs/COMPLETE_FIX_PLAN.md
  */
-object LumiyaConstants {
+object LinkpointConstants {
     
     // ==================== CORE NETWORK TIMING (SLCircuit.java) ====================
     // These timing constants are CRITICAL for mobile network stability
     
-    /** Idle check interval - Lumiya checks connection health every 1 second */
+    /** Idle check interval - Connection health check every 1 second */
     const val DEFAULT_IDLE_INTERVAL_MS = 1000L
     
     /** Fast idle interval when actively processing - 100ms for responsive feel */
@@ -21,7 +21,7 @@ object LumiyaConstants {
     /** Maximum message retry attempts before giving up */
     const val MESSAGE_MAX_RETRIES = 3
     
-    /** Message timeout - 5 seconds matches Lumiya exactly */
+    /** Message timeout - 5 seconds matches the reference viewer exactly */
     const val MESSAGE_TIMEOUT_MS = 5000L
     
     /** Time without packets before sending a ping to keep connection alive */
@@ -38,10 +38,10 @@ object LumiyaConstants {
     
     // ==================== HTTP CONNECTION SETTINGS (SLHTTPSConnection.java) ====================
     
-    /** HTTP connect timeout - 60 seconds like Lumiya */
+    /** HTTP connect timeout - 60 seconds like the reference viewer */
     const val HTTP_CONNECT_TIMEOUT_SECONDS = 60L
     
-    /** HTTP read timeout - 60 seconds like Lumiya */
+    /** HTTP read timeout - 60 seconds like the reference viewer */
     const val HTTP_READ_TIMEOUT_SECONDS = 60L
     
     /** OkHttp connection pool: max idle connections */
@@ -146,7 +146,7 @@ object LumiyaConstants {
     const val DRAW_RANGE_TIMEOUT_MS = 10000L
     
     // ==================== DNS FALLBACK IPS (SLHTTPSConnection.java) ====================
-    // These are Lumiya's hardcoded fallback IPs for when DNS fails
+    // Hardcoded fallback IPs for when DNS fails
     
     /** Fallback IP for login.agni.lindenlab.com (main grid) */
     const val FALLBACK_IP_LOGIN_AGNI = "216.82.57.58"
@@ -163,7 +163,7 @@ object LumiyaConstants {
     
     // ==================== PASSWORD HASH (SLAuth.java) ====================
     
-    /** Maximum password length before truncation (Lumiya truncates to 16 chars) */
+    /** Maximum password length before truncation (the protocol truncates to 16 chars) */
     const val PASSWORD_MAX_LENGTH = 16
     
     /** Password hash prefix for SL authentication */

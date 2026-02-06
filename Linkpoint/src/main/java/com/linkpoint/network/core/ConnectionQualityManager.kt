@@ -225,7 +225,7 @@ class ConnectionQualityManager(private val context: Context) {
      * - Networks where Google's connectivity check is blocked
      * 
      * The actual HTTP request will determine if connectivity works.
-     * This matches Lumiya's behavior (which logs in instantly on the same networks).
+     * This matches the reference viewer's behavior (which logs in instantly on the same networks).
      */
     private fun updateFromCapabilities(capabilities: NetworkCapabilities) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

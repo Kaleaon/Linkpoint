@@ -410,6 +410,42 @@ Priority test additions:
 
 ---
 
+## 8. Changes Made During This Review
+
+The following changes were implemented as part of this review to address P0 blockers:
+
+### Lumiya -> Linkpoint Rename (91 files, 479 replacements)
+
+All references to "Lumiya" in the app source code have been renamed to "Linkpoint":
+
+| Old Name | New Name | Location |
+|----------|----------|----------|
+| `LumiyaThreadedCircuit` | `LinkpointThreadedCircuit` | `protocol/circuit/` |
+| `LumiyaIntegration` | `LinkpointCircuitIntegration` | `protocol/circuit/` |
+| `LumiyaConstants` | `LinkpointConstants` | `protocol/circuit/` |
+| `LumiyaGlobalOptions` | `LinkpointGlobalOptions` | `protocol/circuit/` |
+| `LumiyaDnsResolver` | `LinkpointDnsResolver` | `protocol/circuit/` |
+| `LumiyaProtocolBridge` | `LinkpointProtocolBridge` | `protocol/translation/` |
+| `LumiyaTranslationLayer` | `LinkpointTranslationLayer` | `protocol/translation/` |
+| `protocol/lumiya/` directory | `protocol/circuit/` directory | Package rename |
+
+Additionally: VIEWER_NAME, AuthParams.viewerChannel, cache directory names, log tags, and all comments updated.
+
+### Integration of LinkpointThreadedCircuit
+
+- `LinkpointCircuitIntegration.initialize(this)` is now called in `LinkpointApp.onCreate()` (before manager init)
+- `LinkpointCircuitIntegration.onLogin()` now creates and starts a `LinkpointThreadedCircuit` instance
+- The threaded circuit routes received packets to `UDPConnectionFixed.routeMessage()` for app-level handlers
+- New public `UDPConnectionFixed.routeMessage(messageId, data)` method added for circuit-to-app routing
+
+### runBlocking Removal
+
+- `UDPConnectionFixed.registerInternalHandlers()` -- replaced `runBlocking { messageRouter.registerHandler() }` with direct `messageRouter.registerHandlerSync()`
+- `UDPConnectionFixed.registerHandler()` -- replaced `runBlocking { messageRouter.registerHandler() }` with direct `messageRouter.registerHandlerSync()`
+- New `MessageRouter.registerHandlerSync()` method added -- `@Synchronized` non-suspend alternative to avoid main-thread deadlocks
+
+---
+
 ## Environment Notes
 
 This review was conducted using the [android-emulator-skill](https://github.com/fluxxion82/android-emulator-skill) for guidance on Android review practices. The skill was installed to `.claude/skills/android-emulator-skill/`.

@@ -13,7 +13,7 @@ import java.nio.ByteBuffer
  * Loads and manages Filament materials for rendering.
  * Uses filamat to compile materials at runtime from .mat source files.
  *
- * Based on Lumiya's material handling approach where simple default
+ * Based on the reference viewer's material handling approach where simple default
  * materials are used for prims until textures are loaded.
  */
 class MaterialLoader(

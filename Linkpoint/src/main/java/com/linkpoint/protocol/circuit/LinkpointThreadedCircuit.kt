@@ -1,4 +1,4 @@
-package com.linkpoint.protocol.lumiya
+package com.linkpoint.protocol.circuit
 
 import android.util.Log
 import com.linkpoint.network.NetworkLogger
@@ -21,14 +21,14 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 
 /**
- * Lumiya-Style Threaded Circuit Connection
+ * Linkpoint Threaded Circuit Connection
  * 
- * This class implements the EXACT threading model that made Lumiya work flawlessly
+ * This class implements the EXACT threading model that made the reference viewer work flawlessly
  * on mobile networks for 10+ years, including 5G.
  * 
  * ## Why This Works Better Than Coroutines
  * 
- * Lumiya's secret was a SINGLE DEDICATED THREAD with a deterministic processing loop:
+ * The proven approach was a SINGLE DEDICATED THREAD with a deterministic processing loop:
  * 
  * ```
  * while (running) {
@@ -46,7 +46,7 @@ import java.util.concurrent.atomic.AtomicLong
  * - Potential race conditions between operations
  * - No guarantee that pings/resends happen within mobile NAT timeouts
  * 
- * ## Key Features from Lumiya Analysis
+ * ## Key Features from the reference viewer Analysis
  * 
  * 1. **Single Thread**: All network operations in one thread for determinism
  * 2. **1-Second Tight Loop**: Guarantees frequent pings for mobile NAT keep-alive
@@ -54,9 +54,9 @@ import java.util.concurrent.atomic.AtomicLong
  * 4. **Ping After Every Packet**: Keeps track of server responsiveness
  * 5. **Message ACK/Timeout Callbacks**: Every reliable message can have listeners
  * 
- * @see LumiyaConstants for all the exact timing values from Lumiya
+ * @see LinkpointConstants for all the exact timing values from the reference viewer
  */
-class LumiyaThreadedCircuit(
+class LinkpointThreadedCircuit(
     private val simIP: String,
     private val simPort: Int,
     private val circuitCode: Int,
@@ -65,7 +65,7 @@ class LumiyaThreadedCircuit(
 ) {
     
     companion object {
-        private const val TAG = "LumiyaThreadedCircuit"
+        private const val TAG = "LinkpointThreadedCircuit"
     }
     
     // ==================== CONNECTION STATE ====================
@@ -147,7 +147,7 @@ class LumiyaThreadedCircuit(
     /** Registered message handlers by message ID */
     private val messageHandlers = ConcurrentHashMap<Int, MessageHandler>()
     
-    /** Listener for message ACK/timeout events (Lumiya pattern) */
+    /** Listener for message ACK/timeout events (proven pattern) */
     interface MessageEventListener {
         fun onMessageAcknowledged(sequenceNumber: Int, messageId: Int)
         fun onMessageTimeout(sequenceNumber: Int, messageId: Int)
@@ -233,7 +233,7 @@ class LumiyaThreadedCircuit(
             
             // Create socket with reasonable timeout for blocking receive
             socket = DatagramSocket().apply {
-                soTimeout = LumiyaConstants.DEFAULT_IDLE_INTERVAL_MS.toInt()
+                soTimeout = LinkpointConstants.DEFAULT_IDLE_INTERVAL_MS.toInt()
                 reuseAddress = true
             }
             
@@ -244,7 +244,7 @@ class LumiyaThreadedCircuit(
             socket?.connect(remoteAddress)
             
             NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
-                "LumiyaCircuit: Socket created, connecting to $simIP:$simPort")
+                "LinkpointCircuit: Socket created, connecting to $simIP:$simPort")
             
             // Initialize timing
             val now = System.currentTimeMillis()
@@ -265,14 +265,14 @@ class LumiyaThreadedCircuit(
             // testing to ensure protocol compatibility.
             //
             running.set(true)
-            circuitThread = Thread(::circuitLoop, "LumiyaCircuit-$simIP:$simPort").apply {
+            circuitThread = Thread(::circuitLoop, "LinkpointCircuit-$simIP:$simPort").apply {
                 priority = Thread.MAX_PRIORITY - 1 // High priority for network
                 isDaemon = true // Don't prevent app shutdown
                 start()
             }
             
             NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
-                "LumiyaCircuit: Thread started with priority ${circuitThread?.priority}")
+                "LinkpointCircuit: Thread started with priority ${circuitThread?.priority}")
             
             // Send UseCircuitCode to establish the circuit
             sendUseCircuitCode()
@@ -281,7 +281,7 @@ class LumiyaThreadedCircuit(
             
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
-                "LumiyaCircuit: Connect failed: ${e.message}")
+                "LinkpointCircuit: Connect failed: ${e.message}")
             disconnect("Connect failed: ${e.message}")
             return false
         }
@@ -296,7 +296,7 @@ class LumiyaThreadedCircuit(
         }
         
         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
-            "LumiyaCircuit: Disconnecting - $reason")
+            "LinkpointCircuit: Disconnecting - $reason")
         
         // Close socket to unblock any waiting receive
         try {
@@ -371,14 +371,14 @@ class LumiyaThreadedCircuit(
     /**
      * The main circuit processing loop.
      * 
-     * This is the HEART of Lumiya's mobile stability - a single thread with
+     * This is the HEART of mobile stability - a single thread with
      * deterministic processing order that runs every 1 second (or faster when active).
      */
     private fun circuitLoop() {
         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
-            "LumiyaCircuit: === CIRCUIT LOOP STARTED ===")
+            "LinkpointCircuit: === CIRCUIT LOOP STARTED ===")
         
-        val receiveBuffer = ByteArray(LumiyaConstants.MAX_MESSAGE_SIZE)
+        val receiveBuffer = ByteArray(LinkpointConstants.MAX_MESSAGE_SIZE)
         val receivePacket = DatagramPacket(receiveBuffer, receiveBuffer.size)
         
         while (running.get()) {
@@ -401,7 +401,7 @@ class LumiyaThreadedCircuit(
                 } catch (e: Exception) {
                     if (running.get()) {
                         NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
-                            "LumiyaCircuit: Receive error: ${e.message}")
+                            "LinkpointCircuit: Receive error: ${e.message}")
                     }
                 }
                 
@@ -415,12 +415,12 @@ class LumiyaThreadedCircuit(
                 processIdleTasks()
                 
                 // ========== STEP 5: CALCULATE SLEEP TIME ==========
-                // Lumiya uses 1 second default, 100ms when active
+                // The reference viewer uses 1 second default, 100ms when active
                 val elapsed = System.currentTimeMillis() - loopStartTime
                 val targetInterval = if (outgoingMessageQueue.isNotEmpty() || pendingAcksToSend.isNotEmpty()) {
-                    LumiyaConstants.FAST_IDLE_INTERVAL_MS
+                    LinkpointConstants.FAST_IDLE_INTERVAL_MS
                 } else {
-                    LumiyaConstants.DEFAULT_IDLE_INTERVAL_MS
+                    LinkpointConstants.DEFAULT_IDLE_INTERVAL_MS
                 }
                 
                 val sleepTime = (targetInterval - elapsed).coerceAtLeast(10)
@@ -434,15 +434,15 @@ class LumiyaThreadedCircuit(
             } catch (e: Exception) {
                 if (running.get()) {
                     NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
-                        "LumiyaCircuit: Loop error: ${e.message}")
+                        "LinkpointCircuit: Loop error: ${e.message}")
                 }
             }
         }
         
         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
-            "LumiyaCircuit: === CIRCUIT LOOP STOPPED ===")
+            "LinkpointCircuit: === CIRCUIT LOOP STOPPED ===")
         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
-            "LumiyaCircuit: Stats - Sent: ${packetsSent.get()}, Received: ${packetsReceived.get()}")
+            "LinkpointCircuit: Stats - Sent: ${packetsSent.get()}, Received: ${packetsReceived.get()}")
     }
     
     // ==================== PACKET PROCESSING ====================
@@ -451,7 +451,7 @@ class LumiyaThreadedCircuit(
      * Process a received packet
      */
     private fun processReceivedPacket(rawData: ByteArray) {
-        if (rawData.size < LumiyaConstants.PACKET_HEADER_SIZE) {
+        if (rawData.size < LinkpointConstants.PACKET_HEADER_SIZE) {
             return // Too small to be valid
         }
         
@@ -462,7 +462,7 @@ class LumiyaThreadedCircuit(
         
         // Decode zero-coded packet if needed
         val flags = rawData[0].toInt() and 0xFF
-        val isZerocoded = (flags and LumiyaConstants.FLAG_ZEROCODED) != 0
+        val isZerocoded = (flags and LinkpointConstants.FLAG_ZEROCODED) != 0
         val data = if (isZerocoded) zeroDecode(rawData) else rawData
         
         // Extract sequence number
@@ -471,26 +471,26 @@ class LumiyaThreadedCircuit(
         // Check for duplicate packet
         if (handledPackets.contains(sequenceNumber)) {
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-                "LumiyaCircuit: Duplicate packet seq=$sequenceNumber, ignoring")
+                "LinkpointCircuit: Duplicate packet seq=$sequenceNumber, ignoring")
             return
         }
         
         // Add to handled packets (with limit)
         handledPackets.add(sequenceNumber)
-        if (handledPackets.size > LumiyaConstants.TRACK_HANDLED_PACKETS) {
+        if (handledPackets.size > LinkpointConstants.TRACK_HANDLED_PACKETS) {
             // Remove oldest entries (simple approach - clear half when full)
             val toRemove = handledPackets.take(handledPackets.size / 2)
             toRemove.forEach { handledPackets.remove(it) }
         }
         
         // If reliable packet, queue ACK
-        val isReliable = (flags and LumiyaConstants.FLAG_RELIABLE) != 0
+        val isReliable = (flags and LinkpointConstants.FLAG_RELIABLE) != 0
         if (isReliable) {
             pendingAcksToSend.offer(sequenceNumber)
         }
         
         // Check for appended ACKs
-        val hasAcks = (flags and LumiyaConstants.FLAG_ACK) != 0
+        val hasAcks = (flags and LinkpointConstants.FLAG_ACK) != 0
         if (hasAcks) {
             processAppendedAcks(data)
         }
@@ -499,14 +499,14 @@ class LumiyaThreadedCircuit(
         val messageId = extractMessageId(data)
         
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-            "LumiyaCircuit: Received msg=${messageIdToName(messageId)} seq=$sequenceNumber reliable=$isReliable")
+            "LinkpointCircuit: Received msg=${messageIdToName(messageId)} seq=$sequenceNumber reliable=$isReliable")
         
         // Handle special protocol messages
         when (messageId) {
-            LumiyaConstants.MSG_PACKET_ACK -> handlePacketAck(data)
-            LumiyaConstants.MSG_START_PING_CHECK -> handleStartPingCheck(data)
-            LumiyaConstants.MSG_COMPLETE_PING_CHECK -> unansweredPings.set(0)
-            LumiyaConstants.MSG_REGION_HANDSHAKE -> handleRegionHandshake(data)
+            LinkpointConstants.MSG_PACKET_ACK -> handlePacketAck(data)
+            LinkpointConstants.MSG_START_PING_CHECK -> handleStartPingCheck(data)
+            LinkpointConstants.MSG_COMPLETE_PING_CHECK -> unansweredPings.set(0)
+            LinkpointConstants.MSG_REGION_HANDSHAKE -> handleRegionHandshake(data)
             else -> {
                 // Route to registered handler
                 messageHandlers[messageId]?.handleMessage(messageId, data)
@@ -519,9 +519,9 @@ class LumiyaThreadedCircuit(
      * Handle PacketAck message - server is ACKing our reliable packets
      */
     private fun handlePacketAck(data: ByteArray) {
-        if (data.size < LumiyaConstants.PACKET_HEADER_SIZE + 2) return
+        if (data.size < LinkpointConstants.PACKET_HEADER_SIZE + 2) return
         
-        val offset = LumiyaConstants.PACKET_HEADER_SIZE + 1 // Skip header and message ID
+        val offset = LinkpointConstants.PACKET_HEADER_SIZE + 1 // Skip header and message ID
         val count = data[offset].toInt() and 0xFF
         
         var pos = offset + 1
@@ -535,13 +535,13 @@ class LumiyaThreadedCircuit(
             val pending = pendingReliableMessages.remove(ackedSeq)
             if (pending != null) {
                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-                    "LumiyaCircuit: ACK received for seq=$ackedSeq msg=${messageIdToName(pending.messageId)}")
+                    "LinkpointCircuit: ACK received for seq=$ackedSeq msg=${messageIdToName(pending.messageId)}")
                 
                 pending.listener?.onMessageAcknowledged(ackedSeq, pending.messageId)
                 messageEventListener?.onMessageAcknowledged(ackedSeq, pending.messageId)
                 
                 // Special handling for UseCircuitCode ACK
-                if (pending.messageId == LumiyaConstants.MSG_USE_CIRCUIT_CODE) {
+                if (pending.messageId == LinkpointConstants.MSG_USE_CIRCUIT_CODE) {
                     onUseCircuitCodeAcked()
                 }
             }
@@ -552,9 +552,9 @@ class LumiyaThreadedCircuit(
      * Handle StartPingCheck from server
      */
     private fun handleStartPingCheck(data: ByteArray) {
-        if (data.size < LumiyaConstants.PACKET_HEADER_SIZE + 6) return
+        if (data.size < LinkpointConstants.PACKET_HEADER_SIZE + 6) return
         
-        val offset = LumiyaConstants.PACKET_HEADER_SIZE + 1
+        val offset = LinkpointConstants.PACKET_HEADER_SIZE + 1
         val pingIdByte = data[offset].toInt() and 0xFF
         
         // Send CompletePingCheck response immediately
@@ -566,7 +566,7 @@ class LumiyaThreadedCircuit(
      */
     private fun handleRegionHandshake(data: ByteArray) {
         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
-            "LumiyaCircuit: RegionHandshake received! Sending reply...")
+            "LinkpointCircuit: RegionHandshake received! Sending reply...")
         
         // Send RegionHandshakeReply immediately (server is waiting!)
         sendRegionHandshakeReply()
@@ -575,7 +575,7 @@ class LumiyaThreadedCircuit(
         if (!fullyConnected.getAndSet(true)) {
             connectionListener?.onFullyConnected()
             NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
-                "LumiyaCircuit: === FULLY CONNECTED ===")
+                "LinkpointCircuit: === FULLY CONNECTED ===")
         }
     }
     
@@ -585,12 +585,12 @@ class LumiyaThreadedCircuit(
     private fun processAppendedAcks(data: ByteArray) {
         // ACKs are at the end of the packet
         // Last byte is the count, followed by 4-byte sequence numbers (in reverse)
-        if (data.size < LumiyaConstants.PACKET_HEADER_SIZE + 2) return
+        if (data.size < LinkpointConstants.PACKET_HEADER_SIZE + 2) return
         
         val count = data[data.size - 1].toInt() and 0xFF
         val acksStart = data.size - 1 - (count * 4)
         
-        if (acksStart < LumiyaConstants.PACKET_HEADER_SIZE) return
+        if (acksStart < LinkpointConstants.PACKET_HEADER_SIZE) return
         
         var pos = acksStart
         for (i in 0 until count) {
@@ -602,7 +602,7 @@ class LumiyaThreadedCircuit(
             val pending = pendingReliableMessages.remove(ackedSeq)
             if (pending != null) {
                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-                    "LumiyaCircuit: Appended ACK for seq=$ackedSeq")
+                    "LinkpointCircuit: Appended ACK for seq=$ackedSeq")
                 pending.listener?.onMessageAcknowledged(ackedSeq, pending.messageId)
                 messageEventListener?.onMessageAcknowledged(ackedSeq, pending.messageId)
             }
@@ -647,7 +647,7 @@ class LumiyaThreadedCircuit(
                 lastSendTime.set(System.currentTimeMillis())
                 
                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-                    "LumiyaCircuit: Sent msg=${messageIdToName(messageId)} seq=$seqNum reliable=$reliable")
+                    "LinkpointCircuit: Sent msg=${messageIdToName(messageId)} seq=$seqNum reliable=$reliable")
                 
                 // If reliable, track for ACK/retry
                 if (reliable) {
@@ -662,7 +662,7 @@ class LumiyaThreadedCircuit(
             }
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
-                "LumiyaCircuit: Send failed: ${e.message}")
+                "LinkpointCircuit: Send failed: ${e.message}")
         }
     }
     
@@ -682,7 +682,7 @@ class LumiyaThreadedCircuit(
         
         // Build PacketAck message
         val seqNum = nextSequenceNumber.getAndIncrement()
-        val packetSize = LumiyaConstants.PACKET_HEADER_SIZE + 1 + 1 + (acksToSend.size * 4)
+        val packetSize = LinkpointConstants.PACKET_HEADER_SIZE + 1 + 1 + (acksToSend.size * 4)
         val buffer = ByteBuffer.allocate(packetSize).order(ByteOrder.BIG_ENDIAN)
         
         // Header
@@ -691,7 +691,7 @@ class LumiyaThreadedCircuit(
         buffer.put(0x00.toByte()) // Extra
         
         // Message ID (high frequency PacketAck = 0xFB)
-        buffer.put(LumiyaConstants.MSG_PACKET_ACK.toByte())
+        buffer.put(LinkpointConstants.MSG_PACKET_ACK.toByte())
         
         // Count
         buffer.put(acksToSend.size.toByte())
@@ -712,7 +712,7 @@ class LumiyaThreadedCircuit(
                 bytesSent.addAndGet(packet.size.toLong())
                 
                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-                    "LumiyaCircuit: Sent PacketAck for ${acksToSend.size} packets: $acksToSend")
+                    "LinkpointCircuit: Sent PacketAck for ${acksToSend.size} packets: $acksToSend")
             }
         } catch (e: Exception) {
             // Re-queue ACKs on failure
@@ -734,8 +734,8 @@ class LumiyaThreadedCircuit(
         
         pendingReliableMessages.values.forEach { pending ->
             val elapsed = now - pending.sentTime
-            if (elapsed > LumiyaConstants.MESSAGE_TIMEOUT_MS) {
-                if (pending.retryCount < LumiyaConstants.MESSAGE_MAX_RETRIES) {
+            if (elapsed > LinkpointConstants.MESSAGE_TIMEOUT_MS) {
+                if (pending.retryCount < LinkpointConstants.MESSAGE_MAX_RETRIES) {
                     toRetry.add(pending)
                 } else {
                     toTimeout.add(pending)
@@ -747,13 +747,13 @@ class LumiyaThreadedCircuit(
         for (pending in toRetry) {
             pending.retryCount++
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-                "LumiyaCircuit: Retry ${pending.retryCount}/${LumiyaConstants.MESSAGE_MAX_RETRIES} " +
+                "LinkpointCircuit: Retry ${pending.retryCount}/${LinkpointConstants.MESSAGE_MAX_RETRIES} " +
                 "for seq=${pending.sequenceNumber} msg=${messageIdToName(pending.messageId)}")
             
             // Resend with RESENT flag
             try {
                 val packet = pending.data.copyOf()
-                packet[0] = (packet[0].toInt() or LumiyaConstants.FLAG_RESENT).toByte()
+                packet[0] = (packet[0].toInt() or LinkpointConstants.FLAG_RESENT).toByte()
                 
                 socket?.let { sock ->
                     val dgPacket = DatagramPacket(packet, packet.size, remoteAddress)
@@ -771,7 +771,7 @@ class LumiyaThreadedCircuit(
                 }
             } catch (e: Exception) {
                 NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
-                    "LumiyaCircuit: Retry send failed: ${e.message}")
+                    "LinkpointCircuit: Retry send failed: ${e.message}")
             }
         }
         
@@ -779,7 +779,7 @@ class LumiyaThreadedCircuit(
         for (pending in toTimeout) {
             pendingReliableMessages.remove(pending.sequenceNumber)
             NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
-                "LumiyaCircuit: Message timeout seq=${pending.sequenceNumber} msg=${messageIdToName(pending.messageId)}")
+                "LinkpointCircuit: Message timeout seq=${pending.sequenceNumber} msg=${messageIdToName(pending.messageId)}")
             
             pending.listener?.onMessageTimeout(pending.sequenceNumber, pending.messageId)
             messageEventListener?.onMessageTimeout(pending.sequenceNumber, pending.messageId)
@@ -789,13 +789,13 @@ class LumiyaThreadedCircuit(
         val timeSinceReceive = now - lastReceiveTime.get()
         val timeSincePing = now - lastPingTime.get()
         
-        if (timeSinceReceive > LumiyaConstants.NEED_PING_TIMEOUT_MS && 
-            timeSincePing > LumiyaConstants.PING_INTERVAL_MS) {
+        if (timeSinceReceive > LinkpointConstants.NEED_PING_TIMEOUT_MS && 
+            timeSincePing > LinkpointConstants.PING_INTERVAL_MS) {
             sendPing()
         }
         
         // Check for connection death
-        if (unansweredPings.get() >= LumiyaConstants.UNANSWERED_PINGS_DISCONNECT) {
+        if (unansweredPings.get() >= LinkpointConstants.UNANSWERED_PINGS_DISCONNECT) {
             disconnect("No response from server (${unansweredPings.get()} unanswered pings)")
         }
     }
@@ -807,7 +807,7 @@ class LumiyaThreadedCircuit(
      */
     private fun sendUseCircuitCode() {
         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
-            "LumiyaCircuit: Sending UseCircuitCode (circuit=$circuitCode)")
+            "LinkpointCircuit: Sending UseCircuitCode (circuit=$circuitCode)")
         
         // Payload: circuit code (4) + session ID (16) + agent ID (16)
         val payload = ByteBuffer.allocate(36).order(ByteOrder.BIG_ENDIAN)
@@ -816,7 +816,7 @@ class LumiyaThreadedCircuit(
         putUUID(payload, agentId)
         
         sendPacket(
-            messageId = LumiyaConstants.MSG_USE_CIRCUIT_CODE,
+            messageId = LinkpointConstants.MSG_USE_CIRCUIT_CODE,
             payload = payload.array(),
             reliable = true,
             listener = object : MessageEventListener {
@@ -840,7 +840,7 @@ class LumiyaThreadedCircuit(
         }
         
         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
-            "LumiyaCircuit: Circuit established! Sending CompleteAgentMovement...")
+            "LinkpointCircuit: Circuit established! Sending CompleteAgentMovement...")
         
         connectionListener?.onCircuitEstablished()
         
@@ -859,7 +859,7 @@ class LumiyaThreadedCircuit(
         payload.putInt(circuitCode)
         
         sendPacket(
-            messageId = LumiyaConstants.MSG_COMPLETE_AGENT_MOVEMENT,
+            messageId = LinkpointConstants.MSG_COMPLETE_AGENT_MOVEMENT,
             payload = payload.array(),
             reliable = true,
             listener = null
@@ -874,7 +874,7 @@ class LumiyaThreadedCircuit(
         payload.put(pingIdByte.toByte())
         
         sendPacket(
-            messageId = LumiyaConstants.MSG_COMPLETE_PING_CHECK,
+            messageId = LinkpointConstants.MSG_COMPLETE_PING_CHECK,
             payload = payload.array(),
             reliable = false,
             listener = null
@@ -894,14 +894,14 @@ class LumiyaThreadedCircuit(
         payload.putInt(0)
 
         sendPacket(
-            messageId = LumiyaConstants.MSG_START_PING_CHECK,
+            messageId = LinkpointConstants.MSG_START_PING_CHECK,
             payload = payload.array(),
             reliable = false,
             listener = null
         )
 
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-            "LumiyaCircuit: Ping check sent (pingId=$pingIdByte, unanswered: $unanswered)")
+            "LinkpointCircuit: Ping check sent (pingId=$pingIdByte, unanswered: $unanswered)")
     }
     
     /**
@@ -915,7 +915,7 @@ class LumiyaThreadedCircuit(
         payload.putInt(0) // Flags = 0
         
         sendPacket(
-            messageId = LumiyaConstants.MSG_REGION_HANDSHAKE_REPLY,
+            messageId = LinkpointConstants.MSG_REGION_HANDSHAKE_REPLY,
             payload = payload.array(),
             reliable = true,
             listener = null
@@ -931,12 +931,12 @@ class LumiyaThreadedCircuit(
         // Calculate message ID bytes needed
         val (messageIdBytes, isHighFreq) = encodeMessageId(messageId)
         
-        val totalSize = LumiyaConstants.PACKET_HEADER_SIZE + messageIdBytes.size + payload.size
+        val totalSize = LinkpointConstants.PACKET_HEADER_SIZE + messageIdBytes.size + payload.size
         val buffer = ByteBuffer.allocate(totalSize).order(ByteOrder.BIG_ENDIAN)
         
         // Flags
         var flags = 0
-        if (reliable) flags = flags or LumiyaConstants.FLAG_RELIABLE
+        if (reliable) flags = flags or LinkpointConstants.FLAG_RELIABLE
         buffer.put(flags.toByte())
         
         // Sequence number
@@ -960,7 +960,7 @@ class LumiyaThreadedCircuit(
     private fun encodeMessageId(messageId: Int): Pair<ByteArray, Boolean> {
         return when {
             // High frequency (single byte, 0x00-0xFE)
-            messageId in 0..254 || messageId == LumiyaConstants.MSG_PACKET_ACK -> {
+            messageId in 0..254 || messageId == LinkpointConstants.MSG_PACKET_ACK -> {
                 Pair(byteArrayOf(messageId.toByte()), true)
             }
             // Low frequency (0xFF 0xFF + 2-byte short)
@@ -978,9 +978,9 @@ class LumiyaThreadedCircuit(
      * Extract message ID from packet
      */
     private fun extractMessageId(data: ByteArray): Int {
-        if (data.size < LumiyaConstants.PACKET_HEADER_SIZE + 1) return -1
+        if (data.size < LinkpointConstants.PACKET_HEADER_SIZE + 1) return -1
         
-        var offset = LumiyaConstants.PACKET_HEADER_SIZE
+        var offset = LinkpointConstants.PACKET_HEADER_SIZE
         val b1 = data[offset].toInt() and 0xFF
         
         return when {
@@ -1007,13 +1007,13 @@ class LumiyaThreadedCircuit(
         var outPos = 0
         
         // Copy header unchanged (first 6 bytes)
-        val headerEnd = minOf(LumiyaConstants.PACKET_HEADER_SIZE, input.size)
+        val headerEnd = minOf(LinkpointConstants.PACKET_HEADER_SIZE, input.size)
         while (inPos < headerEnd) {
             output[outPos++] = input[inPos++]
         }
         
         // Clear zero-coded flag in output
-        output[0] = (output[0].toInt() and LumiyaConstants.FLAG_ZEROCODED.inv()).toByte()
+        output[0] = (output[0].toInt() and LinkpointConstants.FLAG_ZEROCODED.inv()).toByte()
         
         // Decode rest
         while (inPos < input.size) {
@@ -1044,13 +1044,13 @@ class LumiyaThreadedCircuit(
      */
     private fun messageIdToName(messageId: Int): String {
         return when (messageId) {
-            LumiyaConstants.MSG_START_PING_CHECK -> "StartPingCheck"
-            LumiyaConstants.MSG_COMPLETE_PING_CHECK -> "CompletePingCheck"
-            LumiyaConstants.MSG_PACKET_ACK -> "PacketAck"
-            LumiyaConstants.MSG_USE_CIRCUIT_CODE -> "UseCircuitCode"
-            LumiyaConstants.MSG_COMPLETE_AGENT_MOVEMENT -> "CompleteAgentMovement"
-            LumiyaConstants.MSG_REGION_HANDSHAKE -> "RegionHandshake"
-            LumiyaConstants.MSG_REGION_HANDSHAKE_REPLY -> "RegionHandshakeReply"
+            LinkpointConstants.MSG_START_PING_CHECK -> "StartPingCheck"
+            LinkpointConstants.MSG_COMPLETE_PING_CHECK -> "CompletePingCheck"
+            LinkpointConstants.MSG_PACKET_ACK -> "PacketAck"
+            LinkpointConstants.MSG_USE_CIRCUIT_CODE -> "UseCircuitCode"
+            LinkpointConstants.MSG_COMPLETE_AGENT_MOVEMENT -> "CompleteAgentMovement"
+            LinkpointConstants.MSG_REGION_HANDSHAKE -> "RegionHandshake"
+            LinkpointConstants.MSG_REGION_HANDSHAKE_REPLY -> "RegionHandshakeReply"
             else -> "0x${messageId.toString(16).uppercase()}"
         }
     }

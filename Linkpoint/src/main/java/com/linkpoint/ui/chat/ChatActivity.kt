@@ -23,7 +23,7 @@ import java.util.*
 
 /**
  * Chat Activity - Local chat, IMs, and group chat
- * Based on Lumiya's ChatNewActivity
+ * Based on the reference viewer's ChatNewActivity
  */
 class ChatActivity : AppCompatActivity() {
     

@@ -53,7 +53,7 @@ object MessageParser {
         
         // Decode message ID to determine its length
         // 
-        // SL Protocol Message ID Encoding (matching Lumiya implementation):
+        // SL Protocol Message ID Encoding (matching SL protocol):
         // - Byte.toInt() in Kotlin preserves sign: 0xFF becomes -1, 0xFB becomes -5, etc.
         // - This is INTENTIONAL because SL message IDs use signed interpretation:
         //   * High frequency: single byte, values 0-254 (or -128 to 127 signed where 0xFF/-1 means "continue")
@@ -285,7 +285,7 @@ object MessageParser {
             val extraParams = ByteArray(extraParamsLen)
             buffer.get(extraParams)
 
-            // Sound UUID (per Lumiya's ObjectUpdate.java - this comes BEFORE OwnerID)
+            // Sound UUID (per SL ObjectUpdate.java - this comes BEFORE OwnerID)
             val soundIdBytes = ByteArray(16)
             buffer.get(soundIdBytes)
             val soundId = bytesToUUID(soundIdBytes)
@@ -650,12 +650,12 @@ data class ObjectUpdateData(
     val hoverText: String,
     val hoverTextColor: LLColor4,
     val mediaUrl: String,
-    val soundId: UUID? = null,           // Sound attached to object (Lumiya: Sound field)
+    val soundId: UUID? = null,           // Sound attached to object 
     val ownerId: UUID?,
-    val soundGain: Float = 0f,           // Sound volume (Lumiya: Gain field)
-    val soundFlags: Int = 0,             // Sound flags (Lumiya: Flags field)
-    val soundRadius: Float = 0f,         // Sound radius (Lumiya: Radius field)
-    val jointType: Int = 0,              // Joint type (Lumiya: JointType field)
+    val soundGain: Float = 0f,           // Sound volume 
+    val soundFlags: Int = 0,             // Sound flags 
+    val soundRadius: Float = 0f,         // Sound radius 
+    val jointType: Int = 0,              // Joint type 
     val jointPivot: LLVector3 = LLVector3.zero(),  // Joint pivot point
     val jointAxisOrAnchor: LLVector3 = LLVector3.zero(),  // Joint axis or anchor
     val nameValue: String,

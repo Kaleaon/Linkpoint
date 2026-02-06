@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Transfer Manager - Handles asset transfers via UDP protocol.
  * 
- * Based on Lumiya's SLTransferManager.java
+ * Based on the reference viewer's SLTransferManager.java
  * 
  * Transfer types:
  * - Asset transfers (textures, animations, sounds, etc.)

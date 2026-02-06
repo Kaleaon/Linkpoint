@@ -4,15 +4,15 @@ import android.util.Log
 import java.net.URL
 
 /**
- * Translation Layer between Linkpoint (Kotlin) and Lumiya (legacy Java) communication patterns.
+ * Translation Layer for SL protocol communication patterns.
  * 
  * This layer bridges the communication differences between Linkpoint's modern Kotlin implementation
- * and the patterns used by Lumiya's original Java implementation. This is necessary because:
+ * and the patterns from the decompiled reference viewer. This is necessary because:
  * 
- * 1. **Capability URL Handling**: Lumiya has specific URL repair logic for the Agni grid that
+ * 1. **Capability URL Handling**: The reference viewer has specific URL repair logic for the Agni grid that
  *    fixes incomplete hostnames in capability URLs returned by Linden Lab servers.
  *    
- * 2. **Message ID Encoding**: Lumiya uses signed byte/short values for message IDs which affects
+ * 2. **Message ID Encoding**: The reference viewer uses signed byte/short values for message IDs which affects
  *    how high/medium/low frequency messages are encoded and decoded.
  *    
  * 3. **Protocol Versioning**: Different protocol versions may require different handling of
@@ -21,7 +21,7 @@ import java.net.URL
  * 4. **Grid-Specific Quirks**: The official SL grid (Agni) has specific behaviors that need
  *    special handling compared to OpenSim grids.
  *
- * Based on analysis of Lumiya's decompiled source code:
+ * Based on analysis of the decompiled reference viewer code:
  * - SLCaps.java: Capability URL repair logic
  * - SLAgentCircuit.java: Message handling patterns
  * - SLMessage.java: Message ID encoding/decoding
@@ -29,9 +29,9 @@ import java.net.URL
  * @see com.linkpoint.protocol.capabilities.CapabilityManager
  * @see com.linkpoint.protocol.messages.UDPConnection
  */
-object LumiyaTranslationLayer {
+object LinkpointTranslationLayer {
     
-    private const val TAG = "LumiyaTranslation"
+    private const val TAG = "LinkpointTranslation"
     
     // Grid detection patterns
     private const val AGNI_LOGIN_HOST = "login.agni.lindenlab.com"
@@ -84,7 +84,7 @@ object LumiyaTranslationLayer {
     /**
      * Check if the given login URL is for the Agni (main SL) grid.
      * 
-     * This matches Lumiya's detection logic in SLCaps.java:
+     * This matches the reference viewer's detection logic in SLCaps.java:
      * ```java
      * z = new URL(str).getHost().equals("login.agni.lindenlab.com");
      * ```
@@ -108,7 +108,7 @@ object LumiyaTranslationLayer {
      * For example, a capability URL might contain just "sim1234" instead of the full
      * "sim1234.agni.lindenlab.com" hostname.
      * 
-     * This method implements the same repair logic as Lumiya's SLCaps.repairCapabilityURL():
+     * This method implements the same repair logic as the reference viewer's SLCaps.repairCapabilityURL():
      * ```java
      * if (host.contains(".") || !host.startsWith("sim")) {
      *     return str;
@@ -140,7 +140,7 @@ object LumiyaTranslationLayer {
             val repairedUrl = capabilityUrl.replace(host, host + AGNI_DOMAIN_SUFFIX)
             
             Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
-            Log.i(TAG, "║ CAPABILITY URL REPAIRED (Lumiya compatibility)")
+            Log.i(TAG, "║ CAPABILITY URL REPAIRED (Linkpoint compatibility)")
             Log.i(TAG, "║ Original: ${capabilityUrl.take(80)}...")
             Log.i(TAG, "║ Repaired: ${repairedUrl.take(80)}...")
             Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
@@ -156,7 +156,7 @@ object LumiyaTranslationLayer {
      * Repair a URL based on the reference login URL.
      * 
      * This is the public API that combines grid detection and URL repair.
-     * Matches Lumiya's SLCaps.repairURL() method.
+     * Matches the reference viewer's SLCaps.repairURL() method.
      * 
      * @param loginUrl The login URL (used to detect grid)
      * @param capabilityUrl The capability URL to potentially repair
@@ -238,13 +238,13 @@ object LumiyaTranslationLayer {
     }
     
     /**
-     * Translate capability names between Linkpoint and Lumiya formats.
+     * Translate capability names between Linkpoint and SL server formats.
      * 
      * Some capability names may differ between implementations.
      * This ensures compatibility when requesting capabilities.
      * 
      * @param linkpointCapName The Linkpoint capability name
-     * @return The Lumiya-compatible capability name
+     * @return The Linkpoint-compatible capability name
      */
     fun translateCapabilityName(linkpointCapName: String): String {
         // Most capability names are the same, but some may need translation
@@ -255,16 +255,16 @@ object LumiyaTranslationLayer {
     }
     
     /**
-     * Get the complete list of capabilities that Lumiya requests.
+     * Get the complete list of capabilities that The reference viewer requests.
      * 
-     * This ensures we request all capabilities that Lumiya expects,
+     * This ensures we request all capabilities that the SL server expects,
      * which may be different from what modern viewers request.
      * 
-     * Based on Lumiya's SLCaps.SLCapability enum.
+     * Based on the reference viewer's SLCaps.SLCapability enum.
      */
-    fun getLumiyaCapabilityNames(): List<String> {
+    fun getReferenceCapabilityNames(): List<String> {
         return listOf(
-            // Core capabilities from Lumiya's SLCapability enum
+            // Core capabilities from the reference viewer's SLCapability enum
             "EventQueueGet",
             "GetTexture",
             "UploadBakedTexture",
@@ -302,16 +302,16 @@ object LumiyaTranslationLayer {
     }
     
     /**
-     * Configuration for Lumiya compatibility mode.
+     * Configuration for Linkpoint compatibility mode.
      * 
-     * These settings control how closely Linkpoint mimics Lumiya's behavior.
+     * These settings control how closely Linkpoint mimics the reference viewer's behavior.
      */
     data class CompatibilityConfig(
         /** Enable capability URL repair for Agni grid */
         val repairCapabilityUrls: Boolean = true,
         
-        /** Use Lumiya's exact capability list when fetching from seed */
-        val useLumiyaCapabilityList: Boolean = true,
+        /** Use the reference viewer's exact capability list when fetching from seed */
+        val useReferenceCapabilityList: Boolean = true,
         
         /** Enable verbose logging for debugging protocol issues */
         val verboseLogging: Boolean = true,
@@ -427,9 +427,9 @@ object LumiyaTranslationLayer {
     }
     
     /**
-     * Build a texture fetch URL with Lumiya-compatible format.
+     * Build a texture fetch URL with Linkpoint-compatible format.
      * 
-     * Lumiya uses the format: capability_url?texture_id=UUID
+     * The reference viewer uses the format: capability_url?texture_id=UUID
      * This matches the official SL viewer (lltexturefetch.cpp).
      * 
      * @param loginUrl The login URL (for grid detection)
@@ -443,9 +443,9 @@ object LumiyaTranslationLayer {
     }
     
     /**
-     * Build a mesh fetch URL with Lumiya-compatible format.
+     * Build a mesh fetch URL with Linkpoint-compatible format.
      * 
-     * Lumiya uses the format: capability_url?mesh_id=UUID
+     * The reference viewer uses the format: capability_url?mesh_id=UUID
      * 
      * @param loginUrl The login URL (for grid detection)
      * @param meshCapabilityUrl The GetMesh/GetMesh2 capability URL
@@ -547,14 +547,14 @@ object LumiyaTranslationLayer {
     /**
      * Get HTTP headers appropriate for asset fetching.
      * 
-     * Returns headers that match Lumiya's asset fetch behavior.
+     * Returns headers that match the reference viewer's asset fetch behavior.
      * 
      * @param assetType The type of asset being fetched
      * @return Map of header name to value
      */
     fun getAssetFetchHeaders(assetType: AssetTransferType): Map<String, String> {
         val baseHeaders = mutableMapOf(
-            "User-Agent" to "Linkpoint/1.0 (Lumiya-compatible)",
+            "User-Agent" to "Linkpoint/1.0 (Linkpoint-compatible)",
             "Connection" to "keep-alive"
         )
         

@@ -1,4 +1,4 @@
-package com.linkpoint.protocol.lumiya
+package com.linkpoint.protocol.circuit
 
 import android.util.Log
 import com.linkpoint.network.NetworkLogger
@@ -12,12 +12,12 @@ import java.net.UnknownHostException
 import java.util.concurrent.TimeUnit
 
 /**
- * Lumiya-Style DNS Resolver with Fallback
+ * Linkpoint DNS Resolver with Fallback
  * 
- * This implements Lumiya's DNS resolution strategy which enables connectivity
+ * This implements the reference viewer's DNS resolution strategy which enables connectivity
  * even when mobile carrier DNS is broken or filtered.
  * 
- * ## Resolution Order (exactly like Lumiya)
+ * ## Resolution Order (exactly like the reference viewer)
  * 
  * 1. **System DNS** - Try normal DNS resolution first
  * 2. **DNS-over-HTTPS** - If system DNS fails, use Google's DNS-over-HTTPS service
@@ -33,24 +33,24 @@ import java.util.concurrent.TimeUnit
  * 
  * Having DNS fallbacks ensures the app can still connect even when these issues occur.
  * 
- * @see LumiyaConstants for the hardcoded fallback IPs
+ * @see LinkpointConstants for the hardcoded fallback IPs
  */
-class LumiyaDnsResolver : Dns {
+class LinkpointDnsResolver : Dns {
     
     companion object {
-        private const val TAG = "LumiyaDnsResolver"
+        private const val TAG = "LinkpointDnsResolver"
         
         /** OkHttp client for DNS-over-HTTPS requests */
         private val dnsHttpClient: OkHttpClient by lazy {
             OkHttpClient.Builder()
                 .dns(DnsForDns()) // Use hardcoded Google DNS IPs to resolve dns.google.com
-                .connectTimeout(LumiyaConstants.HTTP_CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-                .readTimeout(LumiyaConstants.HTTP_READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .connectTimeout(LinkpointConstants.HTTP_CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .readTimeout(LinkpointConstants.HTTP_READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
                 .build()
         }
         
         /** Singleton instance */
-        val INSTANCE = LumiyaDnsResolver()
+        val INSTANCE = LinkpointDnsResolver()
     }
     
     /**
@@ -70,9 +70,9 @@ class LumiyaDnsResolver : Dns {
                     hostname.equals("dns.google", ignoreCase = true)) {
                     
                     NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.DNS,
-                        "LumiyaDNS: Using hardcoded IPs for $hostname")
+                        "LinkpointDNS: Using hardcoded IPs for $hostname")
                     
-                    LumiyaConstants.FALLBACK_IPS_GOOGLE_DNS.mapNotNull { ip ->
+                    LinkpointConstants.FALLBACK_IPS_GOOGLE_DNS.mapNotNull { ip ->
                         try {
                             InetAddress.getByName(ip)
                         } catch (e: Exception) {
@@ -95,12 +95,12 @@ class LumiyaDnsResolver : Dns {
             val result = Dns.SYSTEM.lookup(hostname)
             if (result.isNotEmpty()) {
                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.DNS,
-                    "LumiyaDNS: System DNS resolved $hostname to ${result.first().hostAddress}")
+                    "LinkpointDNS: System DNS resolved $hostname to ${result.first().hostAddress}")
                 return result
             }
         } catch (e: UnknownHostException) {
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.DNS,
-                "LumiyaDNS: System DNS failed for $hostname: ${e.message}")
+                "LinkpointDNS: System DNS failed for $hostname: ${e.message}")
         }
         
         // Step 2: Try DNS-over-HTTPS
@@ -108,24 +108,24 @@ class LumiyaDnsResolver : Dns {
             val result = resolveOverHttps(hostname)
             if (result.isNotEmpty()) {
                 NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.DNS,
-                    "LumiyaDNS: DNS-over-HTTPS resolved $hostname to ${result.first().hostAddress}")
+                    "LinkpointDNS: DNS-over-HTTPS resolved $hostname to ${result.first().hostAddress}")
                 return result
             }
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.DNS,
-                "LumiyaDNS: DNS-over-HTTPS failed for $hostname: ${e.message}")
+                "LinkpointDNS: DNS-over-HTTPS failed for $hostname: ${e.message}")
         }
         
         // Step 3: Try hardcoded fallbacks for critical hosts
         val fallback = getHardcodedFallback(hostname)
         if (fallback != null) {
             NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.DNS,
-                "LumiyaDNS: Using hardcoded fallback for $hostname: $fallback")
+                "LinkpointDNS: Using hardcoded fallback for $hostname: $fallback")
             return listOf(InetAddress.getByName(fallback))
         }
         
         // All resolution methods failed
-        throw UnknownHostException("LumiyaDNS: Failed to resolve $hostname")
+        throw UnknownHostException("LinkpointDNS: Failed to resolve $hostname")
     }
     
     /**
@@ -133,7 +133,7 @@ class LumiyaDnsResolver : Dns {
      */
     private fun resolveOverHttps(hostname: String): List<InetAddress> {
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.DNS,
-            "LumiyaDNS: Trying DNS-over-HTTPS for $hostname")
+            "LinkpointDNS: Trying DNS-over-HTTPS for $hostname")
         
         val url = HttpUrl.Builder()
             .scheme("https")
@@ -174,7 +174,7 @@ class LumiyaDnsResolver : Dns {
                         try {
                             addresses.add(InetAddress.getByName(data))
                             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.DNS,
-                                "LumiyaDNS: DoH resolved $hostname -> $data")
+                                "LinkpointDNS: DoH resolved $hostname -> $data")
                         } catch (e: Exception) {
                             // Skip invalid IPs
                         }
@@ -187,12 +187,12 @@ class LumiyaDnsResolver : Dns {
     }
     
     /**
-     * Get hardcoded fallback IP for critical hosts (like Lumiya does)
+     * Get hardcoded fallback IP for critical hosts (like the reference viewer does)
      */
     private fun getHardcodedFallback(hostname: String): String? {
         return when {
             hostname.equals("login.agni.lindenlab.com", ignoreCase = true) -> {
-                LumiyaConstants.FALLBACK_IP_LOGIN_AGNI
+                LinkpointConstants.FALLBACK_IP_LOGIN_AGNI
             }
             // Add more critical hosts as needed
             else -> null
@@ -201,7 +201,7 @@ class LumiyaDnsResolver : Dns {
 }
 
 /**
- * OkHttp client configured with Lumiya-style settings
+ * OkHttp client configured with Linkpoint settings
  * 
  * Includes:
  * - DNS fallback resolver
@@ -209,16 +209,16 @@ class LumiyaDnsResolver : Dns {
  * - 60-second timeouts
  * - No proxy (direct connection)
  */
-object LumiyaHttpClient {
+object LinkpointHttpClient {
     
     val client: OkHttpClient by lazy {
         OkHttpClient.Builder()
-            .dns(LumiyaDnsResolver.INSTANCE)
-            .connectTimeout(LumiyaConstants.HTTP_CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-            .readTimeout(LumiyaConstants.HTTP_READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .dns(LinkpointDnsResolver.INSTANCE)
+            .connectTimeout(LinkpointConstants.HTTP_CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(LinkpointConstants.HTTP_READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .connectionPool(okhttp3.ConnectionPool(
-                LumiyaConstants.HTTP_MAX_IDLE_CONNECTIONS,
-                LumiyaConstants.HTTP_KEEP_ALIVE_MINUTES,
+                LinkpointConstants.HTTP_MAX_IDLE_CONNECTIONS,
+                LinkpointConstants.HTTP_KEEP_ALIVE_MINUTES,
                 TimeUnit.MINUTES
             ))
             .proxy(java.net.Proxy.NO_PROXY)

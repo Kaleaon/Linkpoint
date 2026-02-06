@@ -23,7 +23,7 @@ import java.util.UUID
  * - Ground sit
  * - Sit position/rotation
  * 
- * Based on Lumiya sit implementation.
+ * Based on the reference viewer sit implementation.
  */
 class SitManager(
     private val udpConnection: UDPConnectionFixed,

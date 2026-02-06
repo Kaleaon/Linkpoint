@@ -1,4 +1,4 @@
-package com.linkpoint.protocol.lumiya
+package com.linkpoint.protocol.circuit
 
 import android.content.Context
 import android.util.Log
@@ -16,14 +16,14 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Lumiya Integration Manager
+ * Linkpoint Circuit Integration Manager
  * 
- * This class integrates ALL Lumiya techniques into the existing Linkpoint architecture.
- * It provides a bridge between the new Lumiya-style components and the existing managers.
+ * This class integrates proven circuit techniques into the existing Linkpoint architecture.
+ * It provides a bridge between the new Linkpoint components and the existing managers.
  * 
  * ## Phases Implemented
  * 
- * - **Phase -1**: Threading model (LumiyaThreadedCircuit available)
+ * - **Phase -1**: Threading model (LinkpointThreadedCircuit available)
  * - **Phase 0**: Mobile UDP connectivity (DNS fallback, keep-alive)
  * - **Phase 1**: World rendering wiring (Object → Scene)
  * - **Phase 2**: Friends list data flow
@@ -33,18 +33,18 @@ import java.util.concurrent.atomic.AtomicBoolean
  * 
  * ## Usage
  * 
- * Call `LumiyaIntegration.initialize(context)` early in app startup.
- * Call `LumiyaIntegration.onLogin(agentId, sessionId, ...)` after successful login.
+ * Call `LinkpointCircuitIntegration.initialize(context)` early in app startup.
+ * Call `LinkpointCircuitIntegration.onLogin(agentId, sessionId, ...)` after successful login.
  */
-object LumiyaIntegration {
+object LinkpointCircuitIntegration {
     
-    private const val TAG = "LumiyaIntegration"
+    private const val TAG = "LinkpointCircuitIntegration"
     
     private val initialized = AtomicBoolean(false)
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     
-    private var globalOptions: LumiyaGlobalOptions? = null
-    private var threadedCircuit: LumiyaThreadedCircuit? = null
+    private var globalOptions: LinkpointGlobalOptions? = null
+    private var threadedCircuit: LinkpointThreadedCircuit? = null
     
     // Connection state
     private var isConnected = AtomicBoolean(false)
@@ -52,7 +52,7 @@ object LumiyaIntegration {
     private var currentSessionId: UUID? = null
     
     /**
-     * Initialize Lumiya integration early in app startup.
+     * Initialize Linkpoint circuit integration early in app startup.
      * This sets up:
      * - Global options with device-adaptive settings
      * - External storage folders for caches
@@ -65,11 +65,11 @@ object LumiyaIntegration {
         }
         
         Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
-        Log.i(TAG, "║ LUMIYA INTEGRATION INITIALIZING")
+        Log.i(TAG, "║ LINKPOINT CIRCUIT INTEGRATION INITIALIZING")
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
         
         // Initialize global options (device-adaptive settings)
-        globalOptions = LumiyaGlobalOptions.getInstance(context)
+        globalOptions = LinkpointGlobalOptions.getInstance(context)
         
         // Initialize external storage folders
         globalOptions?.initializeExternalFolders()
@@ -83,23 +83,23 @@ object LumiyaIntegration {
             Log.i(TAG, "Draw Distance: ${options.drawDistance}m")
             Log.i(TAG, "Max Downloads: ${options.maxTextureDownloads}")
             Log.i(TAG, "Total Cache Limit: ${options.totalCacheLimitGb}GB")
-            Log.i(TAG, "External Folder: ${LumiyaGlobalOptions.getExternalFolder().absolutePath}")
+            Log.i(TAG, "External Folder: ${LinkpointGlobalOptions.getExternalFolder().absolutePath}")
         }
         
         // Force IPv4 preference (SL doesn't support IPv6 well)
         System.setProperty("java.net.preferIPv4Stack", "true")
         System.setProperty("java.net.preferIPv6Addresses", "false")
         
-        Log.i(TAG, "Lumiya integration initialized successfully")
+        Log.i(TAG, "Linkpoint circuit integration initialized successfully")
     }
     
     /**
      * Get the global options instance
      */
-    fun getOptions(): LumiyaGlobalOptions? = globalOptions
+    fun getOptions(): LinkpointGlobalOptions? = globalOptions
     
     /**
-     * Called after successful login to set up the connection with Lumiya techniques.
+     * Called after successful login to set up the connection with proven circuit techniques.
      * 
      * @param agentId The logged-in agent's UUID
      * @param sessionId The session UUID
@@ -117,37 +117,81 @@ object LumiyaIntegration {
         udpConnection: UDPConnectionFixed
     ) {
         Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
-        Log.i(TAG, "║ LUMIYA INTEGRATION - LOGIN")
+        Log.i(TAG, "║ LINKPOINT CIRCUIT INTEGRATION - LOGIN")
         Log.i(TAG, "║ Agent: $agentId")
         Log.i(TAG, "║ Sim: $simIP:$simPort")
+        Log.i(TAG, "║ Circuit Code: $circuitCode")
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
-        
+
         currentAgentId = agentId
         currentSessionId = sessionId
-        
-        // Apply Lumiya timing constants to the existing connection
-        applyLumiyaSettings(udpConnection)
-        
+
+        // Apply circuit timing constants to the existing connection
+        applyCircuitSettings(udpConnection)
+
+        // Create and start the proven single-threaded circuit
+        val circuit = LinkpointThreadedCircuit(simIP, simPort, circuitCode, sessionId, agentId)
+
+        // Wire circuit events to the existing UDPConnectionFixed handlers
+        circuit.setConnectionListener(object : LinkpointThreadedCircuit.ConnectionStateListener {
+            override fun onCircuitEstablished() {
+                Log.i(TAG, "LinkpointThreadedCircuit: Circuit established!")
+            }
+
+            override fun onFullyConnected() {
+                Log.i(TAG, "LinkpointThreadedCircuit: Fully connected - world data flowing")
+                isConnected.set(true)
+            }
+
+            override fun onDisconnected(reason: String) {
+                Log.w(TAG, "LinkpointThreadedCircuit: Disconnected - $reason")
+                isConnected.set(false)
+                handleDisconnect()
+            }
+
+            override fun onPacketReceived(messageId: Int, data: ByteArray) {
+                // Route packets to UDPConnectionFixed's message router for app-level handlers
+                try {
+                    udpConnection.routeMessage(messageId, data)
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to route message $messageId to app handlers: ${e.message}")
+                }
+            }
+        })
+
+        threadedCircuit = circuit
+
+        // Start the circuit connection
+        val connected = circuit.connect()
+        if (connected) {
+            Log.i(TAG, "LinkpointThreadedCircuit started successfully")
+        } else {
+            Log.e(TAG, "LinkpointThreadedCircuit failed to connect!")
+        }
+
         // Set up connection state monitoring
         setupConnectionMonitoring()
-        
-        isConnected.set(true)
-        
-        Log.i(TAG, "Lumiya integration active for agent $agentId")
+
+        Log.i(TAG, "Linkpoint circuit integration active for agent $agentId")
     }
+
+    /**
+     * Get the active threaded circuit, if connected.
+     */
+    fun getThreadedCircuit(): LinkpointThreadedCircuit? = threadedCircuit
     
     /**
-     * Apply Lumiya timing and settings to the existing UDP connection
+     * Apply circuit timing and settings to the existing UDP connection
      */
-    private fun applyLumiyaSettings(udpConnection: UDPConnectionFixed) {
-        // The UDPConnectionFixed already uses LumiyaConstants for timing
+    private fun applyCircuitSettings(udpConnection: UDPConnectionFixed) {
+        // The UDPConnectionFixed already uses LinkpointConstants for timing
         // Additional enhancements can be added here
         
-        Log.d(TAG, "Applied Lumiya settings:")
-        Log.d(TAG, "  - Message timeout: ${LumiyaConstants.MESSAGE_TIMEOUT_MS}ms")
-        Log.d(TAG, "  - Max retries: ${LumiyaConstants.MESSAGE_MAX_RETRIES}")
-        Log.d(TAG, "  - Idle interval: ${LumiyaConstants.DEFAULT_IDLE_INTERVAL_MS}ms")
-        Log.d(TAG, "  - Ping timeout: ${LumiyaConstants.NEED_PING_TIMEOUT_MS}ms")
+        Log.d(TAG, "Applied circuit settings:")
+        Log.d(TAG, "  - Message timeout: ${LinkpointConstants.MESSAGE_TIMEOUT_MS}ms")
+        Log.d(TAG, "  - Max retries: ${LinkpointConstants.MESSAGE_MAX_RETRIES}")
+        Log.d(TAG, "  - Idle interval: ${LinkpointConstants.DEFAULT_IDLE_INTERVAL_MS}ms")
+        Log.d(TAG, "  - Ping timeout: ${LinkpointConstants.NEED_PING_TIMEOUT_MS}ms")
     }
     
     /**
@@ -182,7 +226,7 @@ object LumiyaIntegration {
         if (options.autoReconnect && currentAgentId != null) {
             Log.i(TAG, "Auto-reconnect enabled, will attempt reconnection")
             // Reconnection logic would be handled by the existing connection managers
-            // This is a hook point for additional Lumiya-style reconnection behavior
+            // This is a hook point for additional Linkpoint reconnection behavior
         }
     }
     
@@ -190,7 +234,7 @@ object LumiyaIntegration {
      * Called when logging out or disconnecting
      */
     fun onLogout() {
-        Log.i(TAG, "Lumiya integration - logout")
+        Log.i(TAG, "Linkpoint circuit integration - logout")
         
         isConnected.set(false)
         currentAgentId = null
@@ -298,7 +342,7 @@ object LumiyaIntegration {
     // ==================== DIAGNOSTICS ====================
     
     /**
-     * Get diagnostic information about the Lumiya integration
+     * Get diagnostic information about the Linkpoint circuit integration
      */
     fun getDiagnostics(): Map<String, Any> {
         val diagnostics = mutableMapOf<String, Any>()
@@ -326,7 +370,7 @@ object LumiyaIntegration {
      */
     fun logDiagnostics() {
         Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
-        Log.i(TAG, "║ LUMIYA INTEGRATION DIAGNOSTICS")
+        Log.i(TAG, "║ LINKPOINT CIRCUIT INTEGRATION DIAGNOSTICS")
         Log.i(TAG, "╠══════════════════════════════════════════════════════════════════")
         
         getDiagnostics().forEach { (key, value) ->

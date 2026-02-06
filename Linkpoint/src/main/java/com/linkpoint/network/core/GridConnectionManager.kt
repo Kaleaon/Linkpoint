@@ -11,7 +11,7 @@ import javax.annotation.Nonnull
  * Grid Connection Manager
  * 
  * Manages multiple SL grid connections using a thread-safe WeakHashMap.
- * Based on Lumiya's GridConnectionManager implementation.
+ * Based on the reference viewer's GridConnectionManager implementation.
  * 
  * Features:
  * - Thread-safe connection management

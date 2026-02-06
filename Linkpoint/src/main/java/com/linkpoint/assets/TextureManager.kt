@@ -534,7 +534,7 @@ class TextureManager(
      * 
      * Note: The TextureManager already uses capability-based fetching dynamically
      * via the capabilityUrl property (see buildTextureUrl). This method is primarily
-     * for logging and notification purposes, similar to Lumiya's TextureCache.setFetcher()
+     * for logging and notification purposes, similar to the reference viewer's TextureCache.setFetcher()
      * pattern where the fetcher is set but the actual fetching logic already supports
      * the capability URL when available.
      */

@@ -19,7 +19,7 @@ import kotlinx.coroutines.*
 /**
  * Comprehensive network activity logger for debugging connection issues.
  * 
- * Based on Lumiya's network logging patterns. Provides automatic logging of:
+ * Based on the reference viewer's network logging patterns. Provides automatic logging of:
  * - All HTTP requests/responses with timing
  * - Network errors with full stack traces
  * - Connection state changes
@@ -52,7 +52,7 @@ object NetworkLogger {
     private var autoSaveJob: Job? = null
     private val autoSaveScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     
-    // Log levels matching Lumiya's verbosity
+    // Log levels matching reference viewer's verbosity
     enum class Level {
         VERBOSE,  // Every detail including request/response bodies
         DEBUG,    // Request/response headers and timing

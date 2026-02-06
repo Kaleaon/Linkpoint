@@ -8,7 +8,7 @@ import java.util.UUID
 /**
  * Parses Second Life TextureEntry binary data to extract texture UUIDs.
  * 
- * Based on Lumiya's SLTextureEntry implementation and the official SL viewer.
+ * Based on the reference viewer's SLTextureEntry implementation and the official SL viewer.
  * TextureEntry format uses a compact binary encoding with face bitfields to
  * specify which faces have overridden values vs using the default.
  * 

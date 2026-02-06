@@ -16,7 +16,7 @@ import java.util.zip.CRC32
 /**
  * Mute List Manager - Handles blocking/muting of avatars, objects, and groups.
  * 
- * Based on Lumiya's SLMuteList.java
+ * Based on the reference viewer's SLMuteList.java
  * 
  * Mute types:
  * - AGENT: Block an avatar

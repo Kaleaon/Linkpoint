@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * User Profile Manager - Handles avatar profiles (Second Life and Web profiles).
  * 
- * Based on Lumiya's SLUserProfiles.java
+ * Based on the reference viewer's SLUserProfiles.java
  * 
  * Profiles contain:
  * - Basic info (born date, partner, about text)

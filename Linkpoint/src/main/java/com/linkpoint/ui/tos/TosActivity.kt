@@ -13,10 +13,10 @@ import com.linkpoint.R
 /**
  * Terms of Service Activity
  * 
- * Based on Lumiya's approach: Users must accept Second Life's
+ * Based on the reference viewer's approach: Users must accept Second Life's
  * Terms of Service before their first login.
  * 
- * This is similar to how Lumiya handles ToS acceptance - it shows
+ * This is similar to how the reference viewer handles ToS acceptance - it shows
  * the ToS inline and requires explicit acceptance before proceeding.
  */
 class TosActivity : AppCompatActivity() {

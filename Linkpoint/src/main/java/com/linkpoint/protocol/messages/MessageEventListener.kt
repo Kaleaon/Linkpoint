@@ -2,7 +2,7 @@ package com.linkpoint.protocol.messages
 
 /**
  * Event listener for message acknowledgment and timeout events.
- * Based on Lumiya's SLMessageEventListener interface.
+ * Based on the reference viewer's SLMessageEventListener interface.
  * 
  * This interface allows callers to receive callbacks when reliable messages
  * are acknowledged by the server or when they timeout after max retries.

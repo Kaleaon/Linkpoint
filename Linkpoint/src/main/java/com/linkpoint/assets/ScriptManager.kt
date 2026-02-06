@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap
  * - Script memory/time usage
  * 
  * Note: Full script editing requires a desktop viewer. This provides
- * viewing and basic management functionality like Lumiya.
+ * viewing and basic management functionality like the reference viewer.
  */
 class ScriptManager(
     private val capabilityManager: CapabilityManager,

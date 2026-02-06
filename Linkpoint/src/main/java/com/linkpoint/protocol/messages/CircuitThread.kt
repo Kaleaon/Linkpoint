@@ -11,7 +11,7 @@ import java.util.concurrent.Executors
 
 /**
  * Single-threaded circuit dispatcher for ordered UDP/circuit processing.
- * Mirrors Lumiya-style circuit threading for deterministic packet handling.
+ * Mirrors Linkpoint circuit threading for deterministic packet handling.
  */
 class CircuitThread(threadName: String) : Closeable {
     private val executor = Executors.newSingleThreadExecutor { runnable ->

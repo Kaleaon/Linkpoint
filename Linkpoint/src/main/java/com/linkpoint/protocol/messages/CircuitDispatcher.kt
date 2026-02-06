@@ -8,7 +8,7 @@ import java.util.concurrent.Executors
  * Single-threaded dispatcher for circuit/network work.
  *
  * Keeps UDP receive, ACK, and timeout handling serialized on a dedicated thread,
- * matching Lumiya's deterministic circuit processing model.
+ * matching the proven deterministic circuit processing model.
  */
 object CircuitDispatcher {
     private val executor = Executors.newSingleThreadExecutor { runnable ->

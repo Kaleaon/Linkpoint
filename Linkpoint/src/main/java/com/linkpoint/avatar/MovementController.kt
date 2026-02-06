@@ -20,7 +20,7 @@ import kotlin.math.sin
  * This is the core movement system that translates user input (joystick, buttons)
  * into the control flags and position updates that the simulator expects.
  * 
- * Based on Lumiya's movement controls and LibreMetaverse AgentManager.Movement
+ * Based on the reference viewer's movement controls and LibreMetaverse AgentManager.Movement
  * 
  * Control flags are sent with AgentUpdate messages approximately 10 times per second.
  * The simulator uses these to move the avatar.

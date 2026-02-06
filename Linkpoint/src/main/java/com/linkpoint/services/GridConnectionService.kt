@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.collectLatest
 
 /**
  * Background service to maintain grid connection
- * Based on Lumiya's GridConnectionService
+ * Based on the reference viewer's GridConnectionService
  */
 class GridConnectionService : Service() {
     

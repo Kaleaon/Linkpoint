@@ -5,7 +5,7 @@ import com.linkpoint.network.core.HttpRequestOptions
 import com.linkpoint.network.core.PolicyClass
 import com.linkpoint.network.core.RequestThrottler
 import com.linkpoint.protocol.llsd.*
-import com.linkpoint.protocol.translation.LumiyaTranslationLayer
+import com.linkpoint.protocol.translation.LinkpointTranslationLayer
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit
  * - Request throttling for inventory operations
  * - Retry-After header support
  * - Per-capability request options
- * - Lumiya-compatible URL repair for Agni grid
+ * - Linkpoint-compatible URL repair for Agni grid
  */
 class CapabilityManager {
     
@@ -198,13 +198,13 @@ class CapabilityManager {
     @Volatile private var lastInitializationAttempts: Int = 0
     @Volatile private var lastSeedCapabilityUsed: String? = null
     
-    // Lumiya translation layer support
+    // Linkpoint translation layer support
     @Volatile private var loginUrl: String? = null
     
     /**
-     * Initialize capabilities from seed with Lumiya translation layer support.
+     * Initialize capabilities from seed with Linkpoint translation layer support.
      * 
-     * This overload accepts the login URL to enable Lumiya-compatible capability URL
+     * This overload accepts the login URL to enable Linkpoint-compatible capability URL
      * repair and grid-specific handling.
      * 
      * @param seedCap The seed capability URL
@@ -214,13 +214,13 @@ class CapabilityManager {
     suspend fun initialize(seedCap: String, loginUrlParam: String): Boolean {
         this.loginUrl = loginUrlParam
         
-        // Apply Lumiya URL repair to seed capability
-        val repairedSeedCap = LumiyaTranslationLayer.prepareSeedCapability(loginUrlParam, seedCap)
+        // Apply URL repair to seed capability
+        val repairedSeedCap = LinkpointTranslationLayer.prepareSeedCapability(loginUrlParam, seedCap)
         
         if (repairedSeedCap != seedCap) {
             Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
             Log.i(TAG, "║ LUMIYA TRANSLATION: Seed capability URL repaired")
-            Log.i(TAG, "║ Grid Type: ${LumiyaTranslationLayer.detectGridType(loginUrlParam)}")
+            Log.i(TAG, "║ Grid Type: ${LinkpointTranslationLayer.detectGridType(loginUrlParam)}")
             Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
         }
         
@@ -242,16 +242,16 @@ class CapabilityManager {
         Log.i(TAG, "╠══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ Seed URL: ${seedCap.take(80)}...")
         val currentLoginUrl = loginUrl
-        Log.i(TAG, "║ Lumiya Mode: ${if (currentLoginUrl != null) "ENABLED" else "DISABLED"}")
+        Log.i(TAG, "║ Translation Mode: ${if (currentLoginUrl != null) "ENABLED" else "DISABLED"}")
         if (currentLoginUrl != null) {
-            Log.i(TAG, "║ Grid Type: ${LumiyaTranslationLayer.detectGridType(currentLoginUrl)}")
+            Log.i(TAG, "║ Grid Type: ${LinkpointTranslationLayer.detectGridType(currentLoginUrl)}")
         }
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
         
-        // Use Lumiya capability list when enabled for better compatibility
-        val capNames = if (currentLoginUrl != null && LumiyaTranslationLayer.config.useLumiyaCapabilityList) {
-            Log.d(TAG, "Using Lumiya-compatible capability list")
-            LumiyaTranslationLayer.getLumiyaCapabilityNames()
+        // Use reference capability list when enabled for better compatibility
+        val capNames = if (currentLoginUrl != null && LinkpointTranslationLayer.config.useReferenceCapabilityList) {
+            Log.d(TAG, "Using Linkpoint-compatible capability list")
+            LinkpointTranslationLayer.getReferenceCapabilityNames()
         } else {
             listOf(
                 CAP_EVENT_QUEUE,
@@ -326,13 +326,13 @@ class CapabilityManager {
             return@withContext false
         }
         
-        // Apply Lumiya URL repair to each capability URL if enabled
-        val shouldRepairUrls = loginUrl != null && LumiyaTranslationLayer.config.repairCapabilityUrls
+        // Apply URL repair to each capability URL if enabled
+        val shouldRepairUrls = loginUrl != null && LinkpointTranslationLayer.config.repairCapabilityUrls
         var repairedCount = 0
         
         resolvedCaps.forEach { (name, url) ->
             val finalUrl = if (shouldRepairUrls) {
-                val repairedUrl = LumiyaTranslationLayer.repairUrl(loginUrl ?: "", url)
+                val repairedUrl = LinkpointTranslationLayer.repairUrl(loginUrl ?: "", url)
                 if (repairedUrl != url) {
                     repairedCount++
                     Log.d(TAG, "Repaired URL for $name")
@@ -346,7 +346,7 @@ class CapabilityManager {
         }
         
         if (repairedCount > 0) {
-            Log.i(TAG, "Lumiya translation: Repaired $repairedCount capability URLs")
+            Log.i(TAG, "Linkpoint translation: Repaired $repairedCount capability URLs")
         }
         
         // Start event queue

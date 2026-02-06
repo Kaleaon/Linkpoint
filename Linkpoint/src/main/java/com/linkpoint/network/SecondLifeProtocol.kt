@@ -49,15 +49,15 @@ import java.util.UUID
  * - MFA hash storage
  * - Pre-hashed password support
  * 
- * Based on patterns from the official Second Life app and Lumiya viewer compatibility.
+ * Based on patterns from the official Second Life app and reference viewer compatibility.
  */
 class SecondLifeProtocol(private val context: Context) {
     
     companion object {
         private const val TAG = "SLProtocol"
-        // NOTE: Identifying as "Lumiya" for compatibility with grids that recognize it.
-        // Linkpoint is based on Lumiya's protocol implementation.
-        private const val VIEWER_NAME = "Lumiya"
+        // NOTE: Identifying as "Linkpoint" for grid compatibility.
+        // Linkpoint is based on the reference viewer's protocol implementation.
+        private const val VIEWER_NAME = "Linkpoint"
         private const val VIEWER_VERSION = "1.0.0"
     }
     
@@ -182,7 +182,7 @@ class SecondLifeProtocol(private val context: Context) {
         // Log network diagnostics before login
         networkingService.logNetworkDiagnostics()
         
-        // Create password hash - IMPORTANT: Must truncate to 16 chars like Lumiya does
+        // Create password hash - IMPORTANT: Must truncate to 16 chars like the reference viewer does
         // This is a Second Life protocol requirement
         val truncatedPassword = password.trim().take(16)
         val passwordHash = createPasswordHash(password)
@@ -197,7 +197,7 @@ class SecondLifeProtocol(private val context: Context) {
             "hashFormat" to "\$1\$MD5"
         ))
         
-        // Build XMLRPC request with MFA support and Lumiya/Modern Viewer compatibility
+        // Build XMLRPC request with MFA support and Modern Viewer compatibility
         val xmlRequest = buildLoginXml(
             firstName = firstName,
             lastName = lastName,
@@ -306,9 +306,9 @@ class SecondLifeProtocol(private val context: Context) {
                     regionInfo = regionInfo
                 )
                 
-                // Configure cache manager with grid and user info for Lumiya Cache structure
-                // Grid name determines public cache path: Lumiya Cache/Public/<Grid>/
-                // User ID determines private cache path: Lumiya Cache/Private/<Grid>/<UserID>/
+                // Configure cache manager with grid and user info for Linkpoint Cache structure
+                // Grid name determines public cache path: Linkpoint Cache/Public/<Grid>/
+                // User ID determines private cache path: Linkpoint Cache/Private/<Grid>/<UserID>/
                 val gridName = app.gridManager.getSelectedGrid().gridNick.ifEmpty { 
                     app.gridManager.getSelectedGrid().name 
                 }
@@ -387,7 +387,7 @@ class SecondLifeProtocol(private val context: Context) {
                 }
                 
                 // Initialize capabilities from seed capability (for textures, meshes, etc.)
-                // This is critical for rendering - like Lumiya's SLCaps.GetCapabilities()
+                // This is critical for rendering - like the reference viewer's SLCaps.GetCapabilities()
                 // IMPORTANT: We now wait for capabilities initialization before returning success
                 var capsInitialized = false
                 val seedCap = result.seedCapability
@@ -398,11 +398,11 @@ class SecondLifeProtocol(private val context: Context) {
                     )
                     Log.i(TAG, "[STEP 2/2] Initializing capabilities from seed...")
                     Log.d(TAG, "[STEP 2/2] Seed URL: ${seedCap.take(80)}...")
-                    Log.d(TAG, "[STEP 2/2] Using Lumiya translation layer with login URL: ${loginUri.take(60)}...")
+                    Log.d(TAG, "[STEP 2/2] Using Linkpoint translation layer with login URL: ${loginUri.take(60)}...")
                     
                     try {
-                        Log.d(TAG, "[STEP 2/2] capabilityManager.initialize() starting with Lumiya translation...")
-                        // Use the overload that accepts loginUri for Lumiya-compatible URL repair
+                        Log.d(TAG, "[STEP 2/2] capabilityManager.initialize() starting with Linkpoint translation...")
+                        // Use the overload that accepts loginUri for Linkpoint-compatible URL repair
                         capsInitialized = app.capabilityManager.initialize(seedCap, loginUri)
                         if (capsInitialized) {
                             com.linkpoint.utils.InitializationTracker.completePhase(
@@ -503,7 +503,7 @@ class SecondLifeProtocol(private val context: Context) {
      * - buddy-list: Friends list from login response
      * - inventory-skeleton: Initial inventory folder structure
      * 
-     * Based on Lumiya's login response parsing logic.
+     * Based on the reference viewer's login response parsing logic.
      */
     private fun parseAndPopulateLoginData(responseXml: String, agentId: UUID) {
         try {
@@ -663,7 +663,7 @@ class SecondLifeProtocol(private val context: Context) {
             // Required by official protocol, all desktop viewers send this
             append("<member><name>last_exec_event</name><value><i4>$lastExecEvent</i4></value></member>")
             
-            // Options array - comprehensive list matching official viewers and Lumiya
+            // Options array - comprehensive list matching official viewers
             append("<member><name>options</name><value><array><data>")
             // Core inventory options
             append("<value><string>inventory-root</string></value>")

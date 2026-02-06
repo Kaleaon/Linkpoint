@@ -24,7 +24,7 @@ import java.util.UUID
  * - Save changes back to inventory
  * - Unsaved changes confirmation dialog
  * 
- * Based on Lumiya/Firestorm notecard viewer design.
+ * Based on reference viewer/Firestorm notecard viewer design.
  */
 class NotecardEditorActivity : ComponentActivity() {
     

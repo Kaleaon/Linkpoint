@@ -17,7 +17,7 @@ import kotlin.reflect.KClass
  * Event Bus
  * 
  * Centralized event distribution system for reactive programming.
- * Based on Lumiya's EventBus implementation.
+ * Based on the reference viewer's EventBus implementation.
  * 
  * Features:
  * - Type-safe event publishing and subscribing

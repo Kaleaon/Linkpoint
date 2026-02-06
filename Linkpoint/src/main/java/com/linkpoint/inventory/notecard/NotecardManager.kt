@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Notecard Manager - Handles reading and writing notecards.
  * 
- * Based on Lumiya's SLNotecard.java
+ * Based on the reference viewer's SLNotecard.java
  * 
  * Notecards in Second Life contain:
  * - Text content
