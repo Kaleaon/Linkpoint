@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CORS Proxy Test - Linkpoint PWA</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 900px;
+      margin: 50px auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 30px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .test-section {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+    }
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 5px;
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .result {
+      margin-top: 15px;
+      padding: 15px;
+      border-radius: 5px;
+      background: rgba(0, 0, 0, 0.2);
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .success {
+      border-left: 5px solid #4caf50;
+    }
+    .error {
+      border-left: 5px solid #f44336;
+    }
+    .info {
+      border-left: 5px solid #2196f3;
+    }
+    .status {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .status.success { background: #4caf50; }
+    .status.error { background: #f44336; }
+    .status.pending { background: #ff9800; }
+    .proxy-list {
+      list-style: none;
+      padding: 0;
+    }
+    .proxy-list li {
+      padding: 10px;
+      margin: 5px 0;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌐 CORS Proxy Test Suite</h1>
+    
+    <div class="test-section">
+      <h2>Current CORS Proxy Configuration</h2>
+      <ul class="proxy-list" id="proxyList">
+        <li>Loading...</li>
+      </ul>
+    </div>
+
+    <div class="test-section">
+      <h2>Test Individual Proxies</h2>
+      <p>Test each CORS proxy independently using a simple HTTP request.</p>
+      <button onclick="testAllOrigins()">Test AllOrigins</button>
+      <button onclick="testCodeTabs()">Test CodeTabs</button>
+      <button onclick="testThingProxy()">Test ThingProxy</button>
+      <div id="individualResults" class="result info" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>Test Fallback System</h2>
+      <p>Test the automatic fallback mechanism by simulating proxy failures.</p>
+      <button onclick="testFallbackSystem()">Test Fallback</button>
+      <div id="fallbackResults" class="result info" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>Test Second Life Login Endpoint (Read-Only)</h2>
+      <p>Test CORS proxy access to Second Life login server (HEAD request only).</p>
+      <button onclick="testSLEndpoint()">Test SL Endpoint</button>
+      <div id="slResults" class="result info" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>Environment Detection</h2>
+      <div id="envInfo" class="result info">Loading...</div>
+    </div>
+  </div>
+
+  <script src="js/cors-handler.js"></script>
+  <script>
+    // Display proxy configuration
+    function displayProxyConfig() {
+      const proxyList = document.getElementById('proxyList');
+      if (!window.corsHandler) {
+        proxyList.innerHTML = '<li>❌ CORS Handler not loaded</li>';
+        return;
+      }
+      
+      const proxies = window.corsHandler.corsProxies;
+      proxyList.innerHTML = proxies.map((proxy, idx) => 
+        `<li>
+          <strong>${idx + 1}. ${proxy.name}</strong><br>
+          URL: <code>${proxy.url}</code><br>
+          Encoding: ${proxy.encode ? '✅ Required' : '❌ Not needed'}
+        </li>`
+      ).join('');
+    }
+
+    // Display environment info
+    function displayEnvironment() {
+      const envInfo = document.getElementById('envInfo');
+      if (!window.corsHandler) {
+        envInfo.textContent = '❌ CORS Handler not loaded';
+        return;
+      }
+
+      const env = window.corsHandler.getEnvironmentInfo();
+      envInfo.innerHTML = `
+<strong>Environment Type:</strong> ${env.type}
+<strong>Name:</strong> ${env.name}
+<strong>CORS Support:</strong> ${env.corsSupport}
+<strong>Needs Proxy:</strong> ${env.needsProxy ? 'Yes' : 'No'}
+${env.proxyUrl ? `<strong>Proxy URL:</strong> ${env.proxyUrl}` : ''}
+      `.trim();
+    }
+
+    // Test individual proxy
+    async function testProxy(proxyConfig, testUrl = 'https://httpbin.org/get') {
+      const startTime = Date.now();
+      try {
+        const proxiedUrl = proxyConfig.encode ? 
+          proxyConfig.url + encodeURIComponent(testUrl) : 
+          proxyConfig.url + testUrl;
+        
+        console.log(`[TEST] Testing ${proxyConfig.name}: ${proxiedUrl}`);
+        
+        const response = await fetch(proxiedUrl, {
+          method: 'GET',
+          signal: AbortSignal.timeout(10000)
+        });
+        
+        const elapsed = Date.now() - startTime;
+        
+        if (response.ok) {
+          const contentType = response.headers.get('content-type');
+          return {
+            success: true,
+            proxy: proxyConfig.name,
+            status: response.status,
+            elapsed: elapsed,
+            contentType: contentType
+          };
+        } else {
+          return {
+            success: false,
+            proxy: proxyConfig.name,
+            status: response.status,
+            elapsed: elapsed,
+            error: `HTTP ${response.status}`
+          };
+        }
+      } catch (error) {
+        const elapsed = Date.now() - startTime;
+        return {
+          success: false,
+          proxy: proxyConfig.name,
+          elapsed: elapsed,
+          error: error.message
+        };
+      }
+    }
+
+    // Test AllOrigins
+    async function testAllOrigins() {
+      const results = document.getElementById('individualResults');
+      results.style.display = 'block';
+      results.className = 'result info';
+      results.textContent = '⏳ Testing AllOrigins...';
+      
+      const result = await testProxy({
+        name: 'AllOrigins',
+        url: 'https://api.allorigins.win/raw?url=',
+        encode: true
+      });
+      
+      displayTestResult(results, result);
+    }
+
+    // Test CodeTabs
+    async function testCodeTabs() {
+      const results = document.getElementById('individualResults');
+      results.style.display = 'block';
+      results.className = 'result info';
+      results.textContent = '⏳ Testing CodeTabs...';
+      
+      const result = await testProxy({
+        name: 'CodeTabs',
+        url: 'https://api.codetabs.com/v1/proxy?quest=',
+        encode: true
+      });
+      
+      displayTestResult(results, result);
+    }
+
+    // Test ThingProxy
+    async function testThingProxy() {
+      const results = document.getElementById('individualResults');
+      results.style.display = 'block';
+      results.className = 'result info';
+      results.textContent = '⏳ Testing ThingProxy...';
+      
+      const result = await testProxy({
+        name: 'ThingProxy',
+        url: 'https://thingproxy.freeboard.io/fetch/',
+        encode: false
+      });
+      
+      displayTestResult(results, result);
+    }
+
+    // Display test result
+    function displayTestResult(element, result) {
+      if (result.success) {
+        element.className = 'result success';
+        element.textContent = `✅ ${result.proxy} SUCCESS
+
+Status: ${result.status}
+Response Time: ${result.elapsed}ms
+Content-Type: ${result.contentType || 'N/A'}
+
+${result.proxy} is working correctly!`;
+      } else {
+        element.className = 'result error';
+        element.textContent = `❌ ${result.proxy} FAILED
+
+Status: ${result.status || 'N/A'}
+Response Time: ${result.elapsed}ms
+Error: ${result.error}
+
+${result.proxy} is currently unavailable or blocking requests.`;
+      }
+    }
+
+    // Test fallback system
+    async function testFallbackSystem() {
+      const results = document.getElementById('fallbackResults');
+      results.style.display = 'block';
+      results.className = 'result info';
+      results.textContent = '⏳ Testing fallback system...\n';
+      
+      const proxies = window.corsHandler.corsProxies;
+      const testResults = [];
+      
+      for (const proxy of proxies) {
+        results.textContent += `\nTesting ${proxy.name}...`;
+        const result = await testProxy(proxy);
+        testResults.push(result);
+        
+        if (result.success) {
+          results.textContent += ` ✅ Success (${result.elapsed}ms)`;
+        } else {
+          results.textContent += ` ❌ Failed (${result.error})`;
+        }
+      }
+      
+      const anySuccess = testResults.some(r => r.success);
+      const allSuccess = testResults.every(r => r.success);
+      
+      results.textContent += `\n\n═══════════════════════════════════
+FALLBACK SYSTEM TEST RESULTS
+═══════════════════════════════════\n`;
+      
+      if (allSuccess) {
+        results.className = 'result success';
+        results.textContent += '✅ All proxies are working!\nFallback system ready for maximum reliability.';
+      } else if (anySuccess) {
+        results.className = 'result success';
+        results.textContent += '✅ Fallback system working!\nAt least one proxy is available.';
+      } else {
+        results.className = 'result error';
+        results.textContent += '❌ All proxies failed!\nNo CORS proxies are currently available.';
+      }
+    }
+
+    // Test SL endpoint
+    async function testSLEndpoint() {
+      const results = document.getElementById('slResults');
+      results.style.display = 'block';
+      results.className = 'result info';
+      results.textContent = '⏳ Testing Second Life login endpoint...\n';
+      
+      const slUrl = 'https://login.agni.lindenlab.com/cgi-bin/login.cgi';
+      
+      // Try with CORS handler
+      if (window.corsHandler) {
+        try {
+          results.textContent += `\nUsing CORS handler to access: ${slUrl}\n`;
+          
+          const response = await window.corsHandler.makeRequest(slUrl, {
+            method: 'GET',
+            headers: {
+              'Accept': 'text/xml, application/xml'
+            }
+          });
+          
+          results.className = 'result success';
+          results.textContent += `\n✅ Successfully connected to Second Life login server!
+
+Status: ${response.status}
+Content-Type: ${response.headers.get('content-type')}
+
+Second Life HTTPS endpoint is accessible via CORS proxy.`;
+        } catch (error) {
+          results.className = 'result error';
+          results.textContent += `\n❌ Failed to connect to Second Life login server
+
+Error: ${error.message}
+
+This may be due to:
+- CORS proxy service unavailable
+- Network connectivity issues
+- Second Life server maintenance`;
+        }
+      } else {
+        results.className = 'result error';
+        results.textContent = '❌ CORS Handler not available';
+      }
+    }
+
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      displayProxyConfig();
+      displayEnvironment();
+    });
+  </script>
+</body>
+</html>

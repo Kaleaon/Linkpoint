@@ -1,0 +1,22 @@
+name: image-gs
+channels:
+  - nvidia
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.11.10
+  - pip=24.2
+  - pytorch=2.4.1
+  - torchvision=0.19.1
+  - torchaudio=2.4.1
+  - pytorch-cuda=12.4
+  - pip:
+      - flip-evaluator
+      - lpips==0.1.4
+      - matplotlib==3.9.2
+      - numpy==2.0.2
+      - opencv-python==4.12.0.88
+      - pytorch-msssim==1.0.0
+      - scikit-image==0.24.0
+      - scipy==1.13.1
+      - torchmetrics==1.5.2

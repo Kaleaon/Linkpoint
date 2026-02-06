@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.AlertDialogLayout android:gravity="0x00800033" android:orientation="1" android:id="@2131230848" android:layout_width="-1" android:layout_height="-2"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <include layout="@layout/abc_alert_dialog_title_material" />
+    <FrameLayout android:id="@2131230800" android:layout_width="-1" android:layout_height="-2" android:minHeight="48.0dip">
+        <View android:layout_gravity="0x00000030" android:id="@2131230856" android:background="?2130903131" android:visibility="2" android:layout_width="-1" android:layout_height="1.0dip" />
+        <androidx.core.widget.NestedScrollView android:id="@2131230857" android:clipToPadding="false" android:layout_width="-1" android:layout_height="-2">
+            <LinearLayout android:orientation="1" android:layout_width="-1" android:layout_height="-2">
+                <android.widget.Space android:id="@2131230899" android:visibility="2" android:layout_width="-1" android:layout_height="@2131099685" />
+                <TextView android:id="@16908299" android:paddingLeft="?2130903155" android:paddingRight="?2130903155" android:layout_width="-1" android:layout_height="-2" style="@style/TextAppearance.AppCompat.Subhead" />
+                <android.widget.Space android:id="@2131230898" android:visibility="2" android:layout_width="-1" android:layout_height="@2131099685" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+        <View android:layout_gravity="0x00000050" android:id="@2131230855" android:background="?2130903131" android:visibility="2" android:layout_width="-1" android:layout_height="1.0dip" />
+    </FrameLayout>
+    <FrameLayout android:id="@2131230802" android:layout_width="-1" android:layout_height="-2" android:minHeight="48.0dip">
+        <FrameLayout android:id="@2131230801" android:layout_width="-1" android:layout_height="-2" />
+    </FrameLayout>
+    <include android:layout_width="-1" android:layout_height="-2" layout="@layout/abc_alert_dialog_button_bar_material" />
+</androidx.appcompat.widget.AlertDialogLayout>

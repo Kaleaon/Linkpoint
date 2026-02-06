@@ -1,139 +1,125 @@
-# Linkpoint (Lumiya Viewer)
+# Linkpoint
 
-Linkpoint is an Android application for connecting to Second Life virtual worlds. This project contains the source code for the Lumiya viewer, a mobile client that allows users to access Second Life from their Android devices.
+A modern Android viewer for Second Life and OpenSimulator virtual worlds.
 
-## Features
-
-- **Virtual World Access**: Connect to Second Life virtual worlds
-- **3D Rendering**: Advanced 3D graphics rendering for mobile devices
-- **Asset Management**: Efficient handling of textures, animations, and geometry
-- **Network Protocol**: Implementation of Second Life's communication protocols
-- **Resource Caching**: Optimized caching system for improved performance
-
-## Project Structure
-
-The project follows standard Android application structure:
-
-```
-app/
-├── src/main/java/com/lumiyaviewer/lumiya/
-│   ├── render/          # 3D rendering system
-│   │   ├── avatar/      # Avatar rendering and animation
-│   │   ├── glres/       # OpenGL resource management
-│   │   ├── programs/    # Shader programs
-│   │   ├── spatial/     # Spatial indexing and culling
-│   │   ├── terrain/     # Terrain rendering
-│   │   └── tex/         # Texture management
-│   ├── res/             # Resource management system
-│   │   ├── anim/        # Animation cache
-│   │   ├── collections/ # Custom collections and queues
-│   │   ├── executors/   # Thread pool executors
-│   │   ├── geometry/    # Geometry cache
-│   │   ├── mesh/        # Mesh cache
-│   │   ├── terrain/     # Terrain resources
-│   │   ├── text/        # Text rendering
-│   │   └── textures/    # Texture cache
-│   ├── slproto/         # Second Life protocol implementation
-│   ├── ui/              # User interface components
-│   └── utils/           # Utility classes
-└── resources/           # Android resources and manifest
-```
-
-## Architecture
-
-The application is structured with the following main components:
-
-- **Resource Management**: Handles textures, animations, geometry, and other 3D assets
-- **Network Layer**: Implements Second Life protocol communication (`SLCircuit`, `SLConnection`)
-- **Rendering System**: 3D graphics rendering for terrain, objects, and avatars
-- **Asset Pipeline**: Efficient loading and caching of virtual world resources
-
-## Key Components
-
-- `ResourceManager` - Central resource management system
-- `SLAgentCircuit` - Main Second Life protocol handler  
-- `AnimationCache`, `TextureCache`, `GeometryCache` - Asset caching systems
-- `TerrainPatchGeometry` - Terrain rendering
-- `DrawableText*` - Text rendering systems
-
-## Building
-
-This is an Android application. To build:
-
-1. Ensure you have Android Studio and the Android SDK installed
-2. Open the project in Android Studio
-3. Build using the standard Android build process with Gradle
-
-### Build Requirements
-
-- **Android Studio**: Latest stable version
-- **Android SDK**: API Level 14+ (minimum), API Level 34+ (target)
-- **Java**: Version 8 or higher
-- **Gradle**: Included with Android Studio
-
-## Contributing
-
-When contributing to this project:
-
-1. Follow standard Java coding conventions
-2. Ensure proper error handling and logging
-3. Add appropriate documentation for new features
-4. Test on various Android devices when possible
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines.
-
-## Dependencies
-
-This project uses several key libraries:
-
-- **Google Guava** - Collections and utilities
-- **OkHttp** - HTTP networking
-- **AndroidX** - Android support libraries
-- **Custom OpenJPEG binding** - JPEG2000 image decoding
-
-## Documentation
-
-For detailed technical information about the project architecture and improvements:
-
-### Second Life Open Source Integration
-- **[Second Life Open Source Portal Integration Guide](docs/Second_Life_Open_Source_Portal_Integration_Guide.md)** - **PRIMARY GUIDE** - Comprehensive documentation for using Linkpoint with Second Life's open source ecosystem
-- **[OpenSimulator Compatibility](docs/OpenSimulator_Compatibility.md)** - Complete guide for connecting to and using OpenSimulator grids
-- **[LibreMetaverse Integration](docs/LibreMetaverse_Integration.md)** - Java implementation of LibreMetaverse patterns and protocols
-- **[Troubleshooting Second Life Integration](docs/Troubleshooting_Second_Life_Integration.md)** - Comprehensive troubleshooting guide for common SL integration issues
-
-### Core Architecture Documentation
-- **[API Analysis and Improvements](docs/API_Analysis_and_Improvements.md)** - Comprehensive analysis of LibreMetaverse API implementation and graphics engine architecture
-- **[API Usage Catalog](docs/API_Usage_Catalog.md)** - Complete mapping of all APIs, libraries, and frameworks used in the project  
-- **[Graphics Engine Roadmap](docs/Graphics_Engine_Roadmap.md)** - Detailed improvement plan for graphics and performance enhancements
-- **[Research Summary](docs/Research_Summary.md)** - Executive summary of OpenMetaverse/LibreMetaverse research and improvement opportunities
-
-### Modernization Documentation
-- **[Lumiya Modernization Guide](docs/Lumiya_Modernization_Guide.md)** - Comprehensive guide for modernizing Lumiya Viewer to work with Second Life using contemporary technologies
-- **[Broken Code Analysis and Fixes](docs/Broken_Code_Analysis_and_Fixes.md)** - Detailed analysis of broken code areas with specific fixes using modern virtual world technologies
-- **[Second Life Integration Guide](docs/Second_Life_Integration_Guide.md)** - Specific implementation details for integrating modern technologies with Second Life protocols
-- **[Implementation Roadmap](docs/Implementation_Roadmap.md)** - Practical step-by-step implementation guide with specific code changes and testing procedures
-
-### Key Modernization Features
-
-The modernization effort integrates insights from leading virtual world and metaverse projects:
-
-#### Referenced Technologies
-- **@webaverse-studios/webaverse** - Modern WebXR/3D web technologies and asset pipeline
-- **OMI Group (github.com/omigroup)** - Open Metaverse Interoperability standards
-- **@cinderblocks/libremetaverse** - Contemporary C# Second Life protocol implementation  
-- **Second Life OpenMetaverse Community** - Protocol modernization insights
-
-#### Key Improvements
-- **Modern Protocol Stack**: HTTP/2 CAPS, WebSocket events, OAuth2 authentication
-- **Advanced Graphics Pipeline**: Vulkan rendering, PBR materials, Basis Universal textures
-- **Interoperability Standards**: glTF 2.0, VRM avatars, OMI extensions
-- **Performance Optimization**: Multi-threaded rendering, GPU memory pools, adaptive quality
-- **Build System Fixes**: Resolved Android resource conflicts and native compilation issues
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+> ⚠️ **Disclaimer:** Linkpoint is not provided or supported by Linden Lab. This is an independent, community-developed third-party viewer that complies with [Linden Lab's Third-Party Viewer Policy](https://secondlife.com/corporate/third-party-viewers).
 
 ---
 
-*Note: This is a Second Life viewer implementation. Second Life is a trademark of Linden Lab.*
+## Current Status (January 2026)
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| Build | ✅ Working | APK builds successfully |
+| Login | ✅ Working | Connects to SL grid |
+| UDP Connection | ✅ Working | Socket connected |
+| Capabilities | ✅ Working | 12 caps loaded |
+| Event Queue | ✅ Working | 18 handlers active |
+| World Loading | ⚠️ In Progress | Objects/avatars not populating |
+| 3D Rendering | ⚠️ In Progress | Swap chain issues |
+
+**See [docs/FIXES_AND_STATUS.md](docs/FIXES_AND_STATUS.md) for detailed fix history and remaining issues.**
+
+---
+
+## Quick Start
+
+### Prerequisites
+- Android Studio Arctic Fox or later
+- JDK 17+
+- Android SDK 35
+
+### Build
+```bash
+./gradlew assembleDebug
+```
+
+### Install
+```bash
+adb install -r Linkpoint/build/outputs/apk/debug/Linkpoint-debug.apk
+```
+
+---
+
+## Features
+
+- **Grid Support:** Second Life, Beta Grid, OpenSimulator
+- **Modern UI:** Jetpack Compose with Material Design 3
+- **3D Rendering:** Filament-based rendering engine
+- **Voice Chat:** WebRTC integration
+- **Full Protocol:** UDP messages + HTTP capabilities
+
+---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [FIXES_AND_STATUS.md](docs/FIXES_AND_STATUS.md) | Fix history and current issues |
+| [Broken_Code_Analysis_and_Fixes.md](docs/Broken_Code_Analysis_and_Fixes.md) | Technical analysis |
+| [QUICK_START_GUIDE.md](QUICK_START_GUIDE.md) | Setup instructions |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute |
+| [PRIVACY_POLICY.md](PRIVACY_POLICY.md) | Privacy practices |
+| [THIRD_PARTY_VIEWER_POLICY_COMPLIANCE.md](THIRD_PARTY_VIEWER_POLICY_COMPLIANCE.md) | TPV compliance |
+
+---
+
+## Recent Fixes (PRs #222-227)
+
+### ✅ What Worked
+- **ACK byte order fix** - Changed appended ACKs from little-endian to big-endian
+- **Connection sequence** - Wait for UseCircuitCode ACK before CompleteAgentMovement
+- **Missing message handlers** - Added PING_CHECK, TERSE_UPDATE, COARSE_LOCATION, KILL_OBJECT
+- **UUID byte order** - Centralized big-endian UUID writes
+- **Build infrastructure** - AGP 8.6.1, Kotlin 2.1.0, compileSdk 35
+- **Theme crash** - Added missing MD3 color attributes
+
+### ⚠️ Still In Progress
+- RegionHandshake name parsing
+- Object/avatar scene population
+- Swap chain initialization
+- ACK timing on high-latency networks
+
+---
+
+## Architecture
+
+```
+Linkpoint/src/main/kotlin/com/linkpoint/
+├── slproto/          # Second Life protocol implementation
+│   ├── udp/          # UDP packet handling
+│   ├── caps/         # HTTP capabilities
+│   ├── llsd/         # LLSD serialization
+│   └── messages/     # Message handlers
+├── modern/           # Modern architecture components
+│   ├── connection/   # Connection management
+│   ├── graphics/     # Texture/rendering
+│   └── protocol/     # Protocol abstractions
+├── ui/               # User interface
+│   └── compose/      # Jetpack Compose screens
+└── render/           # 3D rendering (Filament)
+```
+
+---
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+
+---
+
+## Support
+
+- **Issues:** [GitHub Issues](https://github.com/Kaleaon/Linkpoint/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/Kaleaon/Linkpoint/discussions)
+
+---
+
+## License
+
+See [LICENSE](LICENSE) file for details.

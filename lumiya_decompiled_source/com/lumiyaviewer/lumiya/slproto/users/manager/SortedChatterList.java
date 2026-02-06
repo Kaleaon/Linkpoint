@@ -1,0 +1,88 @@
+package com.lumiyaviewer.lumiya.slproto.users.manager;
+
+import com.google.common.collect.ImmutableList;
+import com.lumiyaviewer.lumiya.Debug;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.ThreadSafe;
+@ThreadSafe
+/* loaded from: classes.dex */
+class SortedChatterList {
+    private final SortedSet<ChatterDisplayData> chatters;
+    private final OnListUpdated onListUpdatedListener;
+    private final Object lock = new Object();
+    private ImmutableList<ChatterDisplayData> sortedList = null;
+
+    /* JADX INFO: Access modifiers changed from: package-private */
+    public SortedChatterList(OnListUpdated onListUpdated, @Nullable Comparator<? super ChatterDisplayData> comparator) {
+        this.chatters = new TreeSet(comparator);
+        this.onListUpdatedListener = onListUpdated;
+    }
+
+    /* JADX INFO: Access modifiers changed from: package-private */
+    public void addChatter(ChatterDisplayData chatterDisplayData) {
+        boolean add;
+        synchronized (this.lock) {
+            add = this.chatters.add(chatterDisplayData);
+            Debug.Printf("FriendList: added chatter data %s, needUpdate %s, count %d", chatterDisplayData.displayName, Boolean.toString(add), Integer.valueOf(this.chatters.size()));
+            if (this.sortedList != null) {
+                Debug.Printf("FriendList: dropping instance because of addChatter", new Object[0]);
+            }
+            this.sortedList = null;
+        }
+        if (!add || this.onListUpdatedListener == null) {
+            return;
+        }
+        this.onListUpdatedListener.onListUpdated();
+    }
+
+    public ImmutableList<ChatterDisplayData> getChatterList() {
+        ImmutableList<ChatterDisplayData> immutableList;
+        synchronized (this.lock) {
+            if (this.sortedList == null) {
+                Debug.Printf("FriendList: creating new list instance", new Object[0]);
+                this.sortedList = ImmutableList.copyOf((Collection) this.chatters);
+            }
+            immutableList = this.sortedList;
+        }
+        return immutableList;
+    }
+
+    /* JADX INFO: Access modifiers changed from: package-private */
+    public void removeChatter(ChatterDisplayData chatterDisplayData) {
+        boolean remove;
+        synchronized (this.lock) {
+            remove = this.chatters.remove(chatterDisplayData);
+            if (this.sortedList != null) {
+                Debug.Printf("FriendList: dropping instance because of removeChatter", new Object[0]);
+            }
+            this.sortedList = null;
+        }
+        if (!remove || this.onListUpdatedListener == null) {
+            return;
+        }
+        this.onListUpdatedListener.onListUpdated();
+    }
+
+    /* JADX INFO: Access modifiers changed from: package-private */
+    public void replaceChatter(ChatterDisplayData chatterDisplayData, ChatterDisplayData chatterDisplayData2) {
+        boolean z = false;
+        synchronized (this.lock) {
+            if (this.chatters.remove(chatterDisplayData)) {
+                z = true;
+                this.chatters.add(chatterDisplayData2);
+            }
+            if (this.sortedList != null) {
+                Debug.Printf("FriendList: dropping instance because of replaceChatter", new Object[0]);
+            }
+            this.sortedList = null;
+        }
+        if (!z || this.onListUpdatedListener == null) {
+            return;
+        }
+        this.onListUpdatedListener.onListUpdated();
+    }
+}

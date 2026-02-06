@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="graphics_quality_entries">
+        <item>Low</item>
+        <item>Medium</item>
+        <item>High</item>
+        <item>Ultra</item>
+    </string-array>
+
+    <string-array name="graphics_quality_values">
+        <item>low</item>
+        <item>medium</item>
+        <item>high</item>
+        <item>ultra</item>
+    </string-array>
+
+    <string-array name="xr_mode_entries">
+        <item>Auto</item>
+        <item>Cardboard</item>
+        <item>OpenXR</item>
+        <item>Android XR</item>
+    </string-array>
+
+    <string-array name="xr_mode_values">
+        <item>auto</item>
+        <item>cardboard</item>
+        <item>openxr</item>
+        <item>android_xr</item>
+    </string-array>
+
+    <string-array name="start_location_entries">
+        <item>Last Location</item>
+        <item>Home</item>
+    </string-array>
+
+    <string-array name="start_location_values">
+        <item>last</item>
+        <item>home</item>
+    </string-array>
+
+    <string-array name="face_options">
+        <item>All Faces</item>
+        <item>Face 0</item>
+        <item>Face 1</item>
+        <item>Face 2</item>
+        <item>Face 3</item>
+        <item>Face 4</item>
+        <item>Face 5</item>
+        <item>Face 6</item>
+        <item>Face 7</item>
+        <item>Face 8</item>
+    </string-array>
+
+    <string-array name="shiny_options">
+        <item>None</item>
+        <item>Low</item>
+        <item>Medium</item>
+        <item>High</item>
+    </string-array>
+
+    <string-array name="bump_options">
+        <item>None</item>
+        <item>Brightness</item>
+        <item>Darkness</item>
+        <item>Woodgrain</item>
+        <item>Bark</item>
+        <item>Bricks</item>
+        <item>Checker</item>
+        <item>Concrete</item>
+        <item>Crustytile</item>
+        <item>Cutstone</item>
+        <item>Discs</item>
+        <item>Gravel</item>
+        <item>Petdish</item>
+        <item>Siding</item>
+        <item>Stone</item>
+        <item>Tile</item>
+        <item>Weave</item>
+    </string-array>
+
+    <string-array name="chat_type_options">
+        <item>Say</item>
+        <item>Whisper</item>
+        <item>Shout</item>
+    </string-array>
+
+    <string-array name="screen_orientation_entries">
+        <item>Portrait</item>
+        <item>Landscape</item>
+        <item>Auto</item>
+    </string-array>
+
+    <string-array name="screen_orientation_values">
+        <item>portrait</item>
+        <item>landscape</item>
+        <item>auto</item>
+    </string-array>
+
+    <!-- Cache location options -->
+    <string-array name="cache_location_entries">
+        <item>Internal Storage</item>
+        <item>External Storage (Lumiya Cache)</item>
+        <item>Custom Location</item>
+    </string-array>
+
+    <string-array name="cache_location_values">
+        <item>internal</item>
+        <item>external</item>
+        <item>custom</item>
+    </string-array>
+
+</resources>

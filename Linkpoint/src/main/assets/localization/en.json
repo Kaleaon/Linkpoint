@@ -1,0 +1,197 @@
+{
+  "locale": "en",
+  "strings": [
+    {
+      "key": "notification.im_title",
+      "value": "{0} to {1}"
+    },
+    {
+      "key": "notification.group_title", 
+      "value": "{0} to {1}"
+    },
+    {
+      "key": "error.network_connection",
+      "value": "Network connection error"
+    },
+    {
+      "key": "error.login_failed",
+      "value": "Login failed"
+    },
+    {
+      "key": "error.region_not_found",
+      "value": "Region not found"
+    },
+    {
+      "key": "error.teleport_failed",
+      "value": "Teleport failed"
+    },
+    {
+      "key": "error.asset_load_failed",
+      "value": "Failed to load asset"
+    },
+    {
+      "key": "error.inventory_error",
+      "value": "Inventory operation failed"
+    },
+    {
+      "key": "status.connecting",
+      "value": "Connecting..."
+    },
+    {
+      "key": "status.connected",
+      "value": "Connected"
+    },
+    {
+      "key": "status.disconnected",
+      "value": "Disconnected"
+    },
+    {
+      "key": "status.reconnecting",
+      "value": "Reconnecting..."
+    },
+    {
+      "key": "status.loading_region",
+      "value": "Loading region..."
+    },
+    {
+      "key": "status.teleporting",
+      "value": "Teleporting..."
+    },
+    {
+      "key": "ui.settings",
+      "value": "Settings"
+    },
+    {
+      "key": "ui.back",
+      "value": "Back"
+    },
+    {
+      "key": "ui.forward",
+      "value": "Forward"
+    },
+    {
+      "key": "ui.cancel",
+      "value": "Cancel"
+    },
+    {
+      "key": "ui.ok",
+      "value": "OK"
+    },
+    {
+      "key": "ui.save",
+      "value": "Save"
+    },
+    {
+      "key": "ui.delete",
+      "value": "Delete"
+    },
+    {
+      "key": "ui.search",
+      "value": "Search"
+    },
+    {
+      "key": "ui.loading",
+      "value": "Loading..."
+    },
+    {
+      "key": "chat.nearby",
+      "value": "Nearby Chat"
+    },
+    {
+      "key": "chat.instant_message",
+      "value": "IM"
+    },
+    {
+      "key": "chat.group_chat",
+      "value": "Group Chat"
+    },
+    {
+      "key": "chat.typing",
+      "value": "{0} is typing..."
+    },
+    {
+      "key": "avatar.online",
+      "value": "{0} is online"
+    },
+    {
+      "key": "avatar.offline",
+      "value": "{0} is offline"
+    },
+    {
+      "key": "inventory.folder",
+      "value": "Folder"
+    },
+    {
+      "key": "inventory.item",
+      "value": "Item"
+    },
+    {
+      "key": "inventory.texture",
+      "value": "Texture"
+    },
+    {
+      "key": "inventory.script",
+      "value": "Script"
+    },
+    {
+      "key": "inventory.clothing",
+      "value": "Clothing"
+    },
+    {
+      "key": "inventory.bodypart",
+      "value": "Body Part"
+    },
+    {
+      "key": "world.region",
+      "value": "Region"
+    },
+    {
+      "key": "world.parcel",
+      "value": "Parcel"
+    },
+    {
+      "key": "world.landmark",
+      "value": "Landmark"
+    },
+    {
+      "key": "debug.location_added",
+      "value": "Added new place to stack"
+    },
+    {
+      "key": "debug.current_location",
+      "value": "Current Location: {0} {1} {2} {3}"
+    },
+    {
+      "key": "debug.going_to_location",
+      "value": "Going To Location: {0}"
+    },
+    {
+      "key": "debug.going_to_null",
+      "value": "Going To Location: null"
+    },
+    {
+      "key": "debug.current_location_null",
+      "value": "Current Location: null"
+    },
+    {
+      "key": "error.camera_initialization",
+      "value": "Error: Failed to initialize cameras"
+    },
+    {
+      "key": "error.visual_params",
+      "value": "Unable to load Master Avatar for VisualParam2 plugin."
+    },
+    {
+      "key": "error.local_notification",
+      "value": "Error while attempting local notification."
+    },
+    {
+      "key": "money.balance",
+      "value": "L${0}"
+    },
+    {
+      "key": "money.payment",
+      "value": "Pay L${0} to {1}?"
+    }
+  ]
+}

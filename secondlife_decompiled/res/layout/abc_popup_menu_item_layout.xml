@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.view.menu.ListMenuItemView android:orientation="1" android:layout_width="-1" android:layout_height="-2" android:minWidth="196.0dip"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView android:id="@2131230814" android:background="@2131165220" android:layout_width="-1" android:layout_height="1.0dip" android:layout_marginTop="4.0dip" android:layout_marginBottom="4.0dip" />
+    <LinearLayout android:id="@2131230799" android:duplicateParentState="true" android:layout_width="-1" android:layout_height="?2130903173" style="@style/RtlOverlay.Widget.AppCompat.PopupMenuItem">
+        <RelativeLayout android:layout_gravity="0x00000010" android:duplicateParentState="true" android:layout_width="0.0dip" android:layout_height="-2" android:layout_weight="1.0" style="@style/RtlOverlay.Widget.AppCompat.PopupMenuItem.InternalGroup">
+            <TextView android:textAppearance="?2130903291" android:ellipsize="4" android:id="@2131230901" android:fadingEdge="0x00001000" android:duplicateParentState="true" android:layout_width="-1" android:layout_height="-2" android:singleLine="true" android:layout_alignParentTop="true" style="@style/RtlOverlay.Widget.AppCompat.PopupMenuItem.Text" />
+            <TextView android:textAppearance="?2130903298" android:id="@2131230869" android:duplicateParentState="true" android:layout_width="-2" android:layout_height="-2" android:singleLine="true" android:layout_below="@2131230901" style="@style/RtlOverlay.Widget.AppCompat.PopupMenuItem.Text" />
+        </RelativeLayout>
+        <ImageView android:layout_gravity="0x00000011" android:id="@2131230880" android:visibility="2" android:layout_width="-2" android:layout_height="-2" android:scaleType="5" style="@style/RtlOverlay.Widget.AppCompat.PopupMenuItem.SubmenuArrow" />
+    </LinearLayout>
+</androidx.appcompat.view.menu.ListMenuItemView>

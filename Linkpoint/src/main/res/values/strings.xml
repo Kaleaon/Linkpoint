@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Linkpoint</string>
+    <string name="app_description">Second Life Viewer for Android and XR</string>
+    
+    <!-- Login -->
+    <string name="login_title">Login</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="password">Password</string>
+    <string name="grid">Grid</string>
+    <string name="start_location">Start Location</string>
+    <string name="remember_me">Remember me</string>
+    <string name="login">Login</string>
+    <string name="logging_in">Logging in…</string>
+    <string name="login_failed">Login Failed</string>
+    
+    <!-- Navigation -->
+    <string name="nav_chat">Chat</string>
+    <string name="nav_inventory">Inventory</string>
+    <string name="nav_minimap">Minimap</string>
+    <string name="nav_avatar">My Avatar</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_xr_mode">XR Mode</string>
+    <string name="nav_logout">Logout</string>
+    <string name="cache_management">Cache Management</string>
+    
+    <!-- Bottom Navigation -->
+    <string name="chat">Chat</string>
+    <string name="inventory">Inventory</string>
+    <string name="minimap">Minimap</string>
+    <string name="settings">Settings</string>
+    
+    <!-- Chat -->
+    <string name="type_message">Type a message…</string>
+    <string name="send">Send</string>
+    <string name="tab_local">Local</string>
+    <string name="tab_ims">IMs</string>
+    <string name="tab_groups">Groups</string>
+    <string name="tab_nearby">Nearby</string>
+    
+    <!-- Inventory -->
+    <string name="inventory_empty">This folder is empty</string>
+    <string name="inventory_root">My Inventory</string>
+    <string name="inventory_load_failed">Failed to load inventory</string>
+    <string name="inventory_error">Error: %s</string>
+    <string name="unknown_folder">Unknown Folder</string>
+    <string name="folder_icon">Folder icon</string>
+    <string name="item_icon">Item icon</string>
+    <string name="permissions">Permissions</string>
+    <string name="navigate_back">Navigate back</string>
+    <string name="navigate_to_folder">Navigate to folder</string>
+    <string name="navigate_to_root">Navigate to root</string>
+    <string name="name">Name</string>
+    <string name="type">Type</string>
+    <string name="inventory_type">Inventory Type</string>
+    <string name="description">Description</string>
+    <string name="no_description">No description</string>
+    <string name="creation_date">Creation Date</string>
+    <string name="sale_info">Sale Info</string>
+    <string name="close">Close</string>
+    <string name="wear">Wear</string>
+    <string name="copy">Copy</string>
+    <string name="delete">Delete</string>
+    <string name="properties">Properties</string>
+    <string name="item_properties">Item Properties</string>
+    <string name="asset_id">Asset ID</string>
+    <string name="item_id">Item ID</string>
+    <string name="parent_id">Parent ID</string>
+    <string name="flags">Flags</string>
+    
+    <!-- Settings -->
+    <string name="settings_graphics">Graphics</string>
+    <string name="settings_audio">Audio</string>
+    <string name="settings_network">Network</string>
+    <string name="settings_xr">XR/VR</string>
+    
+    <!-- XR -->
+    <string name="xr_not_available">XR mode is not available on this device</string>
+    <string name="xr_mode_started">Entering XR mode…</string>
+    
+    <!-- General -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="loading">Loading…</string>
+    <string name="error">Error</string>
+    <string name="unknown_region">Unknown Region</string>
+    
+    <!-- Debug -->
+    <string name="capture_debug_report">Capture Debug Report</string>
+
+    <!-- Objects -->
+    <string name="object_properties">Object Properties</string>
+    <string name="position">Position</string>
+    <string name="rotation">Rotation</string>
+    <string name="scale">Scale</string>
+    <string name="full_id">Full ID</string>
+    <string name="owner_id">Owner ID</string>
+    <string name="creator_id">Creator ID</string>
+    <string name="edit">Edit</string>
+    <string name="avatar">Avatar</string>
+    <string name="wearable_icon">Wearable icon</string>
+    <string name="no_wearables_available">No wearables available</string>
+    <string name="error_loading_wearables">Error loading wearables: %s</string>
+
+    <!-- Voice -->
+    <string name="toggle_voice">Toggle voice</string>
+    <string name="toggle_mute">Toggle mute</string>
+
+    <!-- Friends -->
+    <string name="friends">Friends</string>
+    <string name="all_friends">All Friends</string>
+    <string name="online">Online</string>
+    <string name="offline">Offline</string>
+    <string name="no_friends">No friends yet</string>
+    <string name="no_online_friends">No friends online</string>
+    <string name="no_offline_friends">No offline friends</string>
+    <string name="error_loading_friends">Error loading friends: %s</string>
+    <string name="add_friend">Add Friend</string>
+    <string name="remove_friend">Remove Friend</string>
+    <string name="send_im">Send IM</string>
+    <string name="view_profile">View Profile</string>
+    <string name="teleport_to">Teleport To</string>
+    <string name="friend_avatar">Friend avatar</string>
+    <string name="friend_name">Friend name</string>
+    <string name="friendship_offer">Friendship Offer</string>
+    <string name="from">From</string>
+    <string name="message">Message</string>
+    <string name="no_message">No message</string>
+    <string name="accept">Accept</string>
+    <string name="decline">Decline</string>
+    <string name="last_seen_minutes">%d min ago</string>
+    <string name="last_seen_hours">%d hours ago</string>
+    <string name="last_seen_days">%d days ago</string>
+    <string name="add">Add</string>
+
+    <!-- Nearby People -->
+    <string name="nearby_people">Nearby People</string>
+    <string name="all">All</string>
+    <string name="nearby_friends">Nearby Friends</string>
+    <string name="strangers">Strangers</string>
+    <string name="no_nearby_people">No nearby people</string>
+    <string name="no_nearby_friends">No nearby friends</string>
+    <string name="no_nearby_strangers">No nearby strangers</string>
+    <string name="error_loading_nearby_people">Error loading nearby people: %s</string>
+    <string name="distance_meters">%sm away</string>
+    <string name="user_avatar">User avatar</string>
+
+    <!-- Movement Controls -->
+    <string name="fly">Fly</string>
+    <string name="run">Run</string>
+    <string name="jump">Jump</string>
+    <string name="sit">Sit</string>
+    <string name="stand">Stand</string>
+    <string name="crouch">Crouch</string>
+    <string name="gestures">Gestures</string>
+    <string name="nearby">Nearby</string>
+    <string name="flying_enabled">Flying enabled</string>
+    <string name="flying_disabled">Flying disabled</string>
+    <string name="running_enabled">Running enabled</string>
+    <string name="running_disabled">Running disabled</string>
+
+    <!-- Groups -->
+    <string name="groups">Groups</string>
+    <string name="my_groups">My Groups</string>
+    <string name="join_group">Join Group</string>
+    <string name="leave_group">Leave Group</string>
+    <string name="group_chat">Group Chat</string>
+    <string name="group_info">Group Info</string>
+    <string name="no_groups">No groups yet</string>
+    <string name="group_notices">Group Notices</string>
+    <string name="group_members">Group Members</string>
+    <string name="group_roles">Roles</string>
+    <string name="group_name">Group Name</string>
+    <string name="group_description">Group Description</string>
+
+    <!-- Teleport -->
+    <string name="teleport">Teleport</string>
+    <string name="teleport_home">Teleport Home</string>
+    <string name="teleport_history">Teleport History</string>
+    <string name="no_teleport_history">No teleport history</string>
+    <string name="landmarks">Landmarks</string>
+    <string name="set_home">Set Home</string>
+    <string name="home_set">Home location set</string>
+
+    <!-- Notifications -->
+    <string name="notifications">Notifications</string>
+    <string name="no_notifications">No notifications</string>
+    <string name="mark_all_read">Mark All Read</string>
+    <string name="clear_all">Clear All</string>
+
+    <!-- Radar -->
+    <string name="radar">Radar</string>
+    <string name="show_avatars">Show Avatars</string>
+    <string name="show_objects">Show Objects</string>
+    <string name="scan_radius">Scan Radius</string>
+
+    <!-- Camera -->
+    <string name="camera_controls">Camera Controls</string>
+    <string name="reset_camera">Reset Camera</string>
+    <string name="focus_on_avatar">Focus on Avatar</string>
+    <string name="mouselook">Mouselook</string>
+
+    <!-- Navigation -->
+    <string name="nav_search">Search</string>
+    <string name="nav_world_map">World Map</string>
+    <string name="set_as_active_group">Set as Active Group</string>
+    <string name="gestures_not_available">Gestures not available</string>
+    <string name="no_active_gestures">No active gestures</string>
+    
+    <!-- Teleport -->
+    <string name="teleport_not_available">Teleport not available</string>
+    <string name="teleporting_home">Teleporting home…</string>
+    <string name="teleport_failed">Teleport failed</string>
+    <string name="teleport_in_progress">Teleporting…</string>
+    <string name="teleport_arrived">Arrived at %s</string>
+    <string name="send_teleport_offer">Send Teleport Offer</string>
+    <string name="accept_teleport">Accept Teleport</string>
+    <string name="decline_teleport">Decline Teleport</string>
+    <string name="teleport_offer_from">Teleport offer from %s</string>
+    
+    <!-- HUD -->
+    <string name="show_huds">Show HUDs</string>
+    <string name="hide_huds">Hide HUDs</string>
+    <string name="huds_hidden">HUDs hidden</string>
+    <string name="huds_visible">HUDs visible</string>
+    <string name="no_huds_attached">No HUDs attached</string>
+    
+    <!-- Start Location Selection -->
+    <string name="select_start_location">Select Start Location</string>
+    <string name="search_locations">Search locations…</string>
+    <string name="no_locations_found">No locations found</string>
+    <string name="enter_custom_slurl">Enter Custom SLURL…</string>
+    <string name="enter_slurl">Enter SLURL</string>
+    <string name="last_location">Last Location</string>
+    <string name="home_location">Home</string>
+    <string name="saved_landmarks">Saved Landmarks</string>
+    <string name="featured_destinations">Featured Destinations</string>
+    <string name="popular_destinations">Popular Destinations</string>
+    <string name="location_icon">Location icon</string>
+    <string name="select">Select</string>
+    <string name="custom_location">Custom Location</string>
+    <string name="start_at">Start at: %s</string>
+    
+    <!-- Avatar Selection -->
+    <string name="select_avatar">Select Avatar</string>
+    <string name="avatar_type">Avatar Type</string>
+    <string name="human_male">Human Male</string>
+    <string name="human_female">Human Female</string>
+    <string name="vampire">Vampire</string>
+    <string name="robot">Robot</string>
+    <string name="furry_animal">Furry/Animal</string>
+    <string name="fantasy">Fantasy</string>
+    <string name="vehicle_object">Vehicle/Object</string>
+    <string name="keep_current">Keep Current</string>
+    <string name="saved_avatars">Saved Avatars</string>
+    
+    <!-- Destination Guide -->
+    <string name="destination_guide">Destination Guide</string>
+    <string name="newcomer_friendly">Newcomer Friendly</string>
+    <string name="shopping">Shopping</string>
+    <string name="entertainment">Entertainment</string>
+    <string name="roleplay">Roleplay</string>
+    <string name="parks_nature">Parks &amp; Nature</string>
+    <string name="education">Education</string>
+    <string name="arts_culture">Arts &amp; Culture</string>
+    <string name="social_hangouts">Social Hangouts</string>
+</resources>

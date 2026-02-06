@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- Display Settings -->
+    <PreferenceCategory android:title="Display">
+
+        <ListPreference
+            android:key="screen_orientation"
+            android:title="Screen Orientation"
+            android:summary="Choose how the world view is displayed"
+            android:entries="@array/screen_orientation_entries"
+            android:entryValues="@array/screen_orientation_values"
+            android:defaultValue="portrait" />
+
+    </PreferenceCategory>
+
+    <!-- Interface Settings -->
+    <PreferenceCategory android:title="Interface">
+
+        <SwitchPreferenceCompat
+            android:key="show_hud"
+            android:title="Show HUD"
+            android:summary="Display in-world HUD overlays"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="show_joysticks"
+            android:title="Show Joysticks"
+            android:summary="Display movement and camera joysticks"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="show_action_buttons"
+            android:title="Show Action Buttons"
+            android:summary="Display gesture and social buttons"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="show_movement_buttons"
+            android:title="Show Movement Buttons"
+            android:summary="Display fly, run, jump, and sit buttons"
+            android:defaultValue="true" />
+
+        <Preference
+            android:key="customize_layout"
+            android:title="Customize Layout"
+            android:summary="Reposition on-screen controls" />
+
+    </PreferenceCategory>
+
+    <!-- Graphics Settings -->
+    <PreferenceCategory android:title="Graphics">
+
+        <ListPreference
+            android:key="graphics_quality"
+            android:title="Graphics Quality"
+            android:summary="Overall rendering quality"
+            android:entries="@array/graphics_quality_entries"
+            android:entryValues="@array/graphics_quality_values"
+            android:defaultValue="medium" />
+
+        <SeekBarPreference
+            android:key="draw_distance"
+            android:title="Draw Distance"
+            android:summary="How far to render objects"
+            android:min="32"
+            android:max="512"
+            android:defaultValue="128"
+            app:showSeekBarValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="enable_shadows"
+            android:title="Shadows"
+            android:summary="Enable dynamic shadows"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="enable_water_reflections"
+            android:title="Water Reflections"
+            android:summary="Enable water reflections"
+            android:defaultValue="true" />
+
+    </PreferenceCategory>
+
+    <!-- Audio Settings -->
+    <PreferenceCategory android:title="Audio">
+
+        <SeekBarPreference
+            android:key="master_volume"
+            android:title="Master Volume"
+            android:min="0"
+            android:max="100"
+            android:defaultValue="75"
+            app:showSeekBarValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="enable_voice"
+            android:title="Voice Chat"
+            android:summary="Enable voice chat"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="enable_streaming"
+            android:title="Streaming Audio"
+            android:summary="Play parcel audio streams"
+            android:defaultValue="true" />
+
+    </PreferenceCategory>
+
+    <!-- XR Settings -->
+    <PreferenceCategory android:title="XR / VR">
+
+        <SwitchPreferenceCompat
+            android:key="enable_xr"
+            android:title="Enable XR Mode"
+            android:summary="Allow VR/AR viewing"
+            android:defaultValue="true" />
+
+        <ListPreference
+            android:key="xr_mode"
+            android:title="XR Mode"
+            android:summary="Preferred XR mode"
+            android:entries="@array/xr_mode_entries"
+            android:entryValues="@array/xr_mode_values"
+            android:defaultValue="auto" />
+
+        <SeekBarPreference
+            android:key="xr_movement_speed"
+            android:title="Movement Speed"
+            android:summary="XR locomotion speed"
+            android:min="1"
+            android:max="10"
+            android:defaultValue="5"
+            app:showSeekBarValue="true" />
+
+    </PreferenceCategory>
+
+    <!-- Cache Settings - Lumiya-style configurable caches -->
+    <PreferenceCategory android:title="Cache &amp; Memory">
+
+        <ListPreference
+            android:key="cache_location"
+            android:title="Cache Location"
+            android:summary="Where to store cached assets"
+            android:entries="@array/cache_location_entries"
+            android:entryValues="@array/cache_location_values"
+            android:defaultValue="external" />
+
+        <EditTextPreference
+            android:key="custom_cache_path"
+            android:title="Custom Cache Path"
+            android:summary="Custom location for Lumiya Cache folder"
+            android:defaultValue=""
+            android:inputType="text" />
+
+        <Preference
+            android:key="cache_path_info"
+            android:title="Current Cache Path"
+            android:summary="Tap to view full path" />
+
+        <SeekBarPreference
+            android:key="disk_cache_size"
+            android:title="Total Disk Cache (GB)"
+            android:summary="Maximum disk space for all cached assets (up to 50 GB)"
+            android:min="1"
+            android:max="50"
+            android:defaultValue="4"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:key="memory_cache_size"
+            android:title="Memory Cache (MB)"
+            android:summary="RAM for general asset caching (100-4096 MB)"
+            android:min="100"
+            android:max="4096"
+            android:defaultValue="512"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:key="texture_memory"
+            android:title="Texture Memory (MB)"
+            android:summary="RAM dedicated to decoded textures (64-2048 MB)"
+            android:min="64"
+            android:max="2048"
+            android:defaultValue="512"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:key="texture_cache_size"
+            android:title="Texture Cache (GB)"
+            android:summary="Disk space for texture cache (up to 20 GB)"
+            android:min="1"
+            android:max="20"
+            android:defaultValue="2"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:key="mesh_cache_size"
+            android:title="Mesh Cache (GB)"
+            android:summary="Disk space for 3D model cache (up to 10 GB)"
+            android:min="1"
+            android:max="10"
+            android:defaultValue="1"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:key="sound_cache_size"
+            android:title="Sound Cache (GB)"
+            android:summary="Disk space for audio cache (up to 4 GB)"
+            android:min="1"
+            android:max="4"
+            android:defaultValue="1"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:key="animation_cache_size"
+            android:title="Animation Cache (GB)"
+            android:summary="Disk space for animation cache (up to 4 GB)"
+            android:min="1"
+            android:max="4"
+            android:defaultValue="1"
+            app:showSeekBarValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="auto_clear_cache"
+            android:title="Auto-Clear on Low Space"
+            android:summary="Automatically clear cache when storage is low"
+            android:defaultValue="true" />
+
+        <Preference
+            android:key="view_cache_stats"
+            android:title="View Cache Statistics"
+            android:summary="See current cache usage" />
+
+        <Preference
+            android:key="clear_public_cache"
+            android:title="Clear Public Cache"
+            android:summary="Delete cached textures, meshes, sounds and animations (shared)" />
+
+        <Preference
+            android:key="clear_private_cache"
+            android:title="Clear Private Cache"
+            android:summary="Delete cached messages, friends lists (user-specific)" />
+
+        <Preference
+            android:key="clear_cache"
+            android:title="Clear All Cache"
+            android:summary="Delete all cached data (public and private)" />
+
+    </PreferenceCategory>
+
+    <!-- Network Settings -->
+    <PreferenceCategory android:title="Network">
+
+        <SeekBarPreference
+            android:key="bandwidth_limit"
+            android:title="Bandwidth Limit"
+            android:summary="Maximum bandwidth (0 = unlimited)"
+            android:min="0"
+            android:max="10000"
+            android:defaultValue="0"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:key="xml_buffer_size"
+            android:title="Login Buffer Size (MB)"
+            android:summary="Buffer size for login/XML responses (3-500 MB)"
+            android:min="3"
+            android:max="500"
+            android:defaultValue="100"
+            app:showSeekBarValue="true" />
+
+    </PreferenceCategory>
+
+    <!-- RLV Settings -->
+    <PreferenceCategory android:title="RLV (Restrained Love Viewer)">
+
+        <SwitchPreferenceCompat
+            android:key="rlv_enabled"
+            android:title="Enable RLV"
+            android:summary="Enable Restrained Love Viewer functions"
+            android:defaultValue="false" />
+
+    </PreferenceCategory>
+
+    <!-- Debug and Diagnostics -->
+    <PreferenceCategory android:title="Debug &amp; Diagnostics">
+
+        <SwitchPreferenceCompat
+            android:key="enable_debug_floater"
+            android:title="Debug Report Floater"
+            android:summary="Show floating bug icon to capture debug reports"
+            android:defaultValue="false" />
+
+        <SwitchPreferenceCompat
+            android:key="codex_auto_upload"
+            android:title="Auto-upload Debug Logs to Codex"
+            android:summary="Automatically send debug reports and crash logs for review"
+            android:defaultValue="false" />
+
+        <EditTextPreference
+            android:key="codex_upload_endpoint"
+            android:title="Codex Upload Endpoint"
+            android:summary="Optional custom endpoint for Codex uploads"
+            android:defaultValue=""
+            android:inputType="textUri" />
+
+        <Preference
+            android:key="codex_upload_now"
+            android:title="Upload Pending Codex Reports"
+            android:summary="Send any queued reports now" />
+
+        <Preference
+            android:key="capture_debug_report"
+            android:title="Capture Debug Report Now"
+            android:summary="Capture current app state for debugging" />
+
+        <Preference
+            android:key="view_debug_reports"
+            android:title="View Debug Reports"
+            android:summary="View saved debug reports" />
+
+        <Preference
+            android:key="view_crash_logs"
+            android:title="View Crash Logs"
+            android:summary="View saved crash reports for debugging" />
+
+        <Preference
+            android:key="crash_reporter_status"
+            android:title="Crash Reporter Status"
+            android:summary="Check if crash reporting is working" />
+
+        <Preference
+            android:key="test_crash"
+            android:title="Test Crash Reporter"
+            android:summary="Generate a test crash report (non-fatal)" />
+
+        <Preference
+            android:key="clear_crash_logs"
+            android:title="Clear Crash Logs"
+            android:summary="Delete all saved crash reports" />
+
+        <Preference
+            android:key="export_log"
+            android:title="Export Log"
+            android:summary="Save combined log to a location in the file system" />
+
+    </PreferenceCategory>
+
+    <!-- About -->
+    <PreferenceCategory android:title="About">
+
+        <Preference
+            android:key="about"
+            android:title="About Linkpoint"
+            android:summary="Version information and disclaimers" />
+
+        <Preference
+            android:key="view_tos"
+            android:title="Terms of Service"
+            android:summary="View the Terms of Service" />
+
+        <Preference
+            android:key="privacy_policy"
+            android:title="Privacy Policy"
+            android:summary="View the Privacy Policy" />
+
+        <Preference
+            android:key="tpv_compliance"
+            android:title="TPV Policy Compliance"
+            android:summary="Third-Party Viewer Policy compliance" />
+
+        <Preference
+            android:key="version"
+            android:title="Version"
+            android:summary="1.0.0" />
+
+        <Preference
+            android:key="licenses"
+            android:title="Open Source Licenses" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="0" android:id="@2131230859" android:layout_width="-1" android:layout_height="-1"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:textAppearance="?16842817" android:textColor="?16842806" android:gravity="0x00000010" android:id="@2131230858" android:visibility="2" android:layout_width="-2" android:layout_height="-1" android:layout_marginBottom="2.0dip" android:drawablePadding="0.0dip" />
+    <ImageView android:layout_gravity="0x00000010" android:id="@2131230860" android:focusable="true" android:layout_width="-2" android:layout_height="-1" android:contentDescription="@2131623962" style="?actionButtonStyle" />
+    <LinearLayout android:orientation="0" android:id="@2131230862" android:layout_width="-2" android:layout_height="-1" android:layout_marginLeft="8.0dip" android:layout_marginRight="8.0dip" android:layout_weight="1.0" android:layoutDirection="3">
+        <ImageView android:layout_gravity="0x00000010" android:id="@2131230864" android:visibility="2" android:layout_width="@2131099689" android:layout_height="-2" android:scaleType="7" style="@style/RtlOverlay.Widget.AppCompat.SearchView.MagIcon" />
+        <LinearLayout android:layout_gravity="0x00000010" android:orientation="0" android:id="@2131230865" android:layout_width="-2" android:layout_height="-1" android:layout_weight="1.0">
+            <view android:ellipsize="3" android:layout_gravity="0x00000010" android:id="@2131230866" android:background="@0" android:paddingLeft="@2131099690" android:paddingRight="@2131099691" android:layout_width="0.0dip" android:layout_height="36.0dip" android:singleLine="true" android:layout_weight="1.0" android:inputType="0x00090001" android:dropDownAnchor="@2131230862" android:imeOptions="0x00000003" android:dropDownHeight="-2" android:dropDownHorizontalOffset="0.0dip" android:dropDownVerticalOffset="0.0dip" class="androidx.appcompat.widget.SearchView$SearchAutoComplete" />
+            <ImageView android:layout_gravity="0x00000010" android:id="@2131230861" android:background="?2130903266" android:paddingLeft="8.0dip" android:paddingRight="8.0dip" android:focusable="true" android:layout_width="-2" android:layout_height="-1" android:contentDescription="@2131623960" />
+        </LinearLayout>
+        <LinearLayout android:orientation="0" android:id="@2131230881" android:layout_width="-2" android:layout_height="-1">
+            <ImageView android:layout_gravity="0x00000010" android:id="@2131230863" android:background="?2130903266" android:paddingLeft="16.0dip" android:paddingRight="16.0dip" android:focusable="true" android:visibility="2" android:layout_width="-2" android:layout_height="-1" android:contentDescription="@2131623963" />
+            <ImageView android:layout_gravity="0x00000010" android:id="@2131230867" android:background="?2130903266" android:paddingLeft="16.0dip" android:paddingRight="16.0dip" android:focusable="true" android:visibility="2" android:layout_width="-2" android:layout_height="-1" android:contentDescription="@2131623964" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="160dp"
+    android:orientation="vertical"
+    android:gravity="bottom"
+    android:padding="16dp"
+    android:background="@color/primary_dark">
+
+    <ImageView
+        android:id="@+id/navHeaderAvatar"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginBottom="12dp"
+        android:src="@drawable/ic_avatar_placeholder"
+        android:background="@drawable/circle_white"
+        android:padding="4dp" />
+
+    <TextView
+        android:id="@+id/navHeaderName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Avatar Name"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/navHeaderRegion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Region Name"
+        android:textColor="#CCFFFFFF"
+        android:textSize="13sp" />
+
+</LinearLayout>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="graphics_quality_entries">
+        <item>Low</item>
+        <item>Medium</item>
+        <item>High</item>
+        <item>Ultra</item>
+    </string-array>
+
+    <string-array name="graphics_quality_values">
+        <item>low</item>
+        <item>medium</item>
+        <item>high</item>
+        <item>ultra</item>
+    </string-array>
+
+    <string-array name="font_size_entries">
+        <item>Small</item>
+        <item>Medium</item>
+        <item>Large</item>
+    </string-array>
+
+    <string-array name="font_size_values">
+        <item>small</item>
+        <item>medium</item>
+        <item>large</item>
+    </string-array>
+</resources>

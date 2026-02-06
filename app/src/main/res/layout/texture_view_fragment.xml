@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<com.lumiyaviewer.lumiya.ui.common.LoadingLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:id="@+id/loading_layout" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_marginTop="4dp" android:layout_marginBottom="4dp">
-    <uk.co.senab.photoview.PhotoView android:id="@+id/texture_image_view" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter"/>
-</com.lumiyaviewer.lumiya.ui.common.LoadingLayout>

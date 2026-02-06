@@ -8,6 +8,11 @@ jobs:
   quick-release:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    
+    defaults:
+      run:
+        working-directory: Linkpoint
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,15 +33,17 @@ jobs:
         run: |
           sdkmanager --install \
             "platform-tools" \
-            "platforms;android-35" \
-            "build-tools;35.0.0"
+            "platforms;android-34" \
+            "build-tools;34.0.0"
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
       - name: Build Release
-        working-directory: app
-        run: ./gradlew :app:assembleRelease --stacktrace
+        run: ./gradlew assembleRelease --stacktrace
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
           name: Linkpoint-release-APK
-          path: app/app/build/outputs/apk/release/app-release.apk
+          path: Linkpoint/build/outputs/apk/release/*.apk

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_width="-1" android:layout_height="58.0dip" style="@style/RtlOverlay.Widget.AppCompat.Search.DropDown"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView android:id="@16908295" android:visibility="1" android:layout_width="@2131099689" android:layout_height="48.0dip" android:scaleType="7" android:layout_alignParentTop="true" android:layout_alignParentBottom="true" style="@style/RtlOverlay.Widget.AppCompat.Search.DropDown.Icon1" />
+    <ImageView android:id="@2131230808" android:background="?2130903265" android:visibility="2" android:layout_width="48.0dip" android:layout_height="48.0dip" android:scaleType="7" android:layout_alignParentTop="true" android:layout_alignParentBottom="true" style="@style/RtlOverlay.Widget.AppCompat.Search.DropDown.Query" />
+    <ImageView android:id="@16908296" android:visibility="2" android:layout_width="48.0dip" android:layout_height="48.0dip" android:scaleType="7" android:layout_alignParentTop="true" android:layout_alignParentBottom="true" android:layout_alignWithParentIfMissing="true" style="@style/RtlOverlay.Widget.AppCompat.Search.DropDown.Icon2" />
+    <TextView android:textAppearance="?2130903296" android:gravity="0x00000030" android:id="@16908309" android:paddingBottom="4.0dip" android:visibility="2" android:layout_width="-1" android:layout_height="29.0dip" android:singleLine="true" android:layout_alignParentBottom="true" android:layout_alignWithParentIfMissing="true" style="?16842886" />
+    <TextView android:textAppearance="?2130903297" android:id="@16908308" android:layout_width="-1" android:layout_height="-2" android:singleLine="true" android:layout_above="@16908309" android:layout_centerVertical="true" style="?16842886" />
+</RelativeLayout>

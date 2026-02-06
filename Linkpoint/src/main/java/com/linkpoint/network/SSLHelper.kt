@@ -1,0 +1,527 @@
+package com.linkpoint.network
+
+import android.content.Context
+import android.os.Build
+import android.util.Log
+import okhttp3.CipherSuite
+import okhttp3.ConnectionSpec
+import okhttp3.OkHttpClient
+import okhttp3.TlsVersion
+import java.security.KeyStore
+import java.security.cert.X509Certificate
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLSession
+import javax.net.ssl.SSLSocketFactory
+import javax.net.ssl.TrustManager
+import javax.net.ssl.TrustManagerFactory
+import javax.net.ssl.X509TrustManager
+
+/**
+ * SSL/TLS Helper for Android 9+ compatibility
+ * 
+ * Addresses common SSL issues on Android devices:
+ * - Android 9+ (API 28) stricter certificate validation
+ * - TLS 1.2/1.3 compatibility across Android versions
+ * - Proper cipher suite selection for security
+ * - Debug mode for SSL troubleshooting
+ */
+object SSLHelper {
+    
+    private const val TAG = "SSLHelper"
+    
+    /**
+     * Connection specifications for different security levels
+     */
+    private val MODERN_TLS = ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+        .tlsVersions(TlsVersion.TLS_1_3, TlsVersion.TLS_1_2)
+        .cipherSuites(
+            // TLS 1.3 cipher suites
+            CipherSuite.TLS_AES_128_GCM_SHA256,
+            CipherSuite.TLS_AES_256_GCM_SHA384,
+            CipherSuite.TLS_CHACHA20_POLY1305_SHA256,
+            // TLS 1.2 cipher suites (most secure first)
+            CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+            CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+            CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+            CipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+            CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+        )
+        .build()
+    
+    /**
+     * Compatible TLS for older servers that don't support modern protocols
+     */
+    private val COMPATIBLE_TLS = ConnectionSpec.Builder(ConnectionSpec.COMPATIBLE_TLS)
+        .tlsVersions(TlsVersion.TLS_1_2, TlsVersion.TLS_1_1, TlsVersion.TLS_1_0)
+        .allEnabledCipherSuites()
+        .build()
+    
+    /**
+     * Get the default system TrustManager
+     */
+    fun getDefaultTrustManager(): X509TrustManager {
+        val trustManagerFactory = TrustManagerFactory.getInstance(
+            TrustManagerFactory.getDefaultAlgorithm()
+        )
+        trustManagerFactory.init(null as KeyStore?)
+        
+        val trustManagers = trustManagerFactory.trustManagers
+        if (trustManagers.size != 1 || trustManagers[0] !is X509TrustManager) {
+            throw IllegalStateException("Unexpected default trust managers: ${trustManagers.contentToString()}")
+        }
+        
+        return trustManagers[0] as X509TrustManager
+    }
+    
+    /**
+     * Get SSLSocketFactory configured for Android 9+ compatibility
+     */
+    fun getSSLSocketFactory(): Pair<SSLSocketFactory, X509TrustManager> {
+        val trustManager = getDefaultTrustManager()
+        
+        val sslContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Android 10+: Use TLS 1.3
+            SSLContext.getInstance("TLSv1.3")
+        } else {
+            // Android 9 and below: Use TLS 1.2
+            SSLContext.getInstance("TLSv1.2")
+        }
+        
+        sslContext.init(null, arrayOf<TrustManager>(trustManager), null)
+        
+        return sslContext.socketFactory to trustManager
+    }
+    
+    /**
+     * Custom HostnameVerifier for Second Life CDN domains.
+     * 
+     * Second Life uses Akamai CDN for asset delivery. The CDN serves content from
+     * domains like asset-cdn.glb.agni.lindenlab.com, but the SSL certificate is
+     * issued for Akamai domains (e.g., *.akamaized.net, a248.e.akamai.net).
+     * 
+     * This verifier allows the hostname mismatch for known CDN configurations:
+     * - lindenlab.com subdomains served by Akamai CDN
+     * - Certificate must be from Akamai (verified by checking issuer/subject)
+     * 
+     * Security considerations:
+     * - Only applies to specific known CDN patterns
+     * - Falls back to default verification for all other hostnames
+     * - Does NOT disable certificate validation (chain is still verified)
+     */
+    fun getCdnHostnameVerifier(): HostnameVerifier {
+        val defaultVerifier = HttpsURLConnection.getDefaultHostnameVerifier()
+        
+        return HostnameVerifier { hostname, session ->
+            // First, try default verification - this handles normal cases
+            if (defaultVerifier.verify(hostname, session)) {
+                return@HostnameVerifier true
+            }
+            
+            // Check if this is a known CDN pattern that needs special handling
+            if (isCdnHostnameMismatch(hostname, session)) {
+                Log.d(TAG, "CDN hostname verification: allowing $hostname via Akamai CDN")
+                return@HostnameVerifier true
+            }
+            
+            // Default: reject if verification fails
+            Log.w(TAG, "Hostname verification failed for: $hostname")
+            false
+        }
+    }
+    
+    /**
+     * Check if the hostname/certificate combination is a known CDN mismatch.
+     * 
+     * Returns true if:
+     * 1. The hostname is a Second Life asset CDN domain
+     * 2. The certificate is from Akamai (a known CDN provider for SL)
+     */
+    private fun isCdnHostnameMismatch(hostname: String, session: SSLSession): Boolean {
+        try {
+            // Only handle Second Life asset CDN domains
+            if (!isSecondLifeCdnDomain(hostname)) {
+                return false
+            }
+            
+            // Get the peer certificate to verify it's from Akamai
+            val certs = session.peerCertificates
+            if (certs.isEmpty()) {
+                return false
+            }
+            
+            val cert = certs[0] as? X509Certificate ?: return false
+            val subjectDN = cert.subjectDN.name.lowercase()
+            val issuerDN = cert.issuerDN.name.lowercase()
+            
+            // Validate the certificate is from a trusted source
+            // Akamai certificates are typically issued by DigiCert
+            val trustedIssuers = listOf("digicert", "globalsign", "geotrust", "symantec")
+            val hasTrustedIssuer = trustedIssuers.any { issuerDN.contains(it) }
+            
+            // Check if certificate is from Akamai
+            // Akamai certificates typically have:
+            // - Subject CN ending with ".akamai.net" (e.g., CN=a248.e.akamai.net)
+            // - SANs containing akamai-controlled domains
+            // - Issued by a trusted CA (DigiCert, etc.)
+            // 
+            // Extract and validate the CN (Common Name) from the subject DN
+            // Format: CN=a248.e.akamai.net,O=Akamai Technologies...
+            val hasAkamaiSubject = isValidAkamaiSubjectDN(subjectDN)
+            val hasAkamaiSANs = hasAkamaiSAN(cert)
+            
+            // Require BOTH Akamai identification AND trusted issuer for security
+            val isAkamaiCert = (hasAkamaiSubject || hasAkamaiSANs) && hasTrustedIssuer
+            
+            if (isAkamaiCert) {
+                Log.d(TAG, "Verified Akamai CDN certificate for SL domain: $hostname (issuer: ${cert.issuerDN.name})")
+                return true
+            }
+            
+            return false
+        } catch (e: Exception) {
+            Log.w(TAG, "Error checking CDN hostname mismatch: ${e.message}")
+            return false
+        }
+    }
+    
+    /**
+     * Validate that the subject DN contains a valid Akamai CN.
+     * Extracts the CN field and checks if it's an Akamai domain.
+     */
+    private fun isValidAkamaiSubjectDN(subjectDN: String): Boolean {
+        // Extract CN from subject DN (format: CN=value,O=...,...)
+        // The CN should be at the start or after a comma
+        val cnPattern = Regex("""(?:^|,)\s*cn=([^,]+)""", RegexOption.IGNORE_CASE)
+        val match = cnPattern.find(subjectDN) ?: return false
+        val cn = match.groupValues.getOrNull(1)?.lowercase()?.trim() ?: return false
+        
+        // Valid Akamai CN must be exactly or end with an Akamai domain
+        val akamaiDomains = listOf(
+            "akamai.net",
+            "akamaized.net",
+            "akamaihd.net"
+        )
+        
+        return akamaiDomains.any { domain ->
+            cn == domain || cn.endsWith(".$domain")
+        }
+    }
+    
+    /**
+     * Check if the hostname is a Second Life CDN domain that uses Akamai.
+     * 
+     * Known CDN domains:
+     * - asset-cdn.glb.agni.lindenlab.com (production grid)
+     * - asset-cdn.glb.aditi.lindenlab.com (beta grid)
+     * - simhost-*.agni.secondlife.com (simulator capability hosts)
+     */
+    private fun isSecondLifeCdnDomain(hostname: String): Boolean {
+        val lowercaseHostname = hostname.lowercase()
+        
+        // Exact match domains for asset CDN
+        val exactMatches = listOf(
+            "asset-cdn.glb.agni.lindenlab.com",
+            "asset-cdn.glb.aditi.lindenlab.com"
+        )
+        
+        if (exactMatches.any { lowercaseHostname == it }) {
+            return true
+        }
+        
+        // Subdomain matches (e.g., something.asset-cdn.glb.agni.lindenlab.com)
+        val suffixMatches = listOf(
+            ".asset-cdn.glb.agni.lindenlab.com",
+            ".asset-cdn.glb.aditi.lindenlab.com"
+        )
+        
+        if (suffixMatches.any { lowercaseHostname.endsWith(it) }) {
+            return true
+        }
+        
+        // Simulator host pattern: simhost-<hash>.agni.secondlife.com or simhost-<hash>.aditi.secondlife.com
+        // These are capability URLs returned by the simulator.
+        // The format is: simhost-<alphanumeric-hash>.<grid>.secondlife.com
+        // 
+        // Validate the complete structure to prevent attacks like:
+        // - simhost-evil.attacker.agni.secondlife.com (additional subdomains)
+        // - simhost-.agni.secondlife.com (empty hash)
+        if (lowercaseHostname.startsWith("simhost-")) {
+            // Valid patterns are exactly:
+            // - simhost-<hash>.agni.secondlife.com
+            // - simhost-<hash>.aditi.secondlife.com
+            // where <hash> is a non-empty alphanumeric string
+            
+            val simhostPatterns = listOf(
+                Regex("""^simhost-[a-z0-9]+\.agni\.secondlife\.com$"""),
+                Regex("""^simhost-[a-z0-9]+\.aditi\.secondlife\.com$""")
+            )
+            
+            if (simhostPatterns.any { it.matches(lowercaseHostname) }) {
+                return true
+            }
+        }
+        
+        return false
+    }
+    
+    /**
+     * Check if certificate has Akamai-related Subject Alternative Names.
+     * This verifies the certificate is legitimately from Akamai CDN.
+     * 
+     * Only accepts SANs that are clearly Akamai-controlled domains:
+     * - *.akamai.net
+     * - *.akamaized.net
+     * - *.akamaihd.net
+     * - *.akamaized-staging.net
+     * - *.akamaihd-staging.net
+     */
+    private fun hasAkamaiSAN(cert: X509Certificate): Boolean {
+        return try {
+            val sans = cert.subjectAlternativeNames ?: return false
+            
+            // Known Akamai domain suffixes (must be at end of domain name)
+            val akamaiDomainSuffixes = listOf(
+                ".akamai.net",
+                ".akamaized.net",
+                ".akamaihd.net",
+                ".akamaized-staging.net",
+                ".akamaihd-staging.net"
+            )
+            
+            // Also accept exact match for top-level Akamai domains
+            val akamaiExactDomains = listOf(
+                "akamai.net",
+                "akamaized.net",
+                "akamaihd.net"
+            )
+            
+            sans.any { san ->
+                // SAN entries are lists where:
+                // - Index 0: Integer type (2 = DNS name, 7 = IP address, etc.)
+                // - Index 1: The value
+                // We only want to check DNS name entries (type 2)
+                val type = san.getOrNull(0) as? Int
+                if (type != 2) return@any false  // 2 = DNS name (dNSName)
+                
+                val value = (san.getOrNull(1) as? String)?.lowercase() ?: return@any false
+                // Check if it's an exact Akamai domain or a subdomain of one
+                akamaiExactDomains.any { value == it } ||
+                        akamaiDomainSuffixes.any { value.endsWith(it) }
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+    
+    /**
+     * Configure OkHttpClient.Builder with CDN-compatible hostname verification.
+     * 
+     * This should be used for clients that connect to Second Life asset CDN
+     * (texture downloads, mesh downloads, etc.)
+     */
+    fun configureForCdn(builder: OkHttpClient.Builder): OkHttpClient.Builder {
+        try {
+            val (sslSocketFactory, trustManager) = getSSLSocketFactory()
+            
+            builder.sslSocketFactory(sslSocketFactory, trustManager)
+            builder.hostnameVerifier(getCdnHostnameVerifier())
+            builder.connectionSpecs(listOf(MODERN_TLS, COMPATIBLE_TLS))
+            
+            Log.d(TAG, "SSL configured for CDN access with custom hostname verifier")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error configuring SSL for CDN: ${e.message}", e)
+            // Fall back to default configuration (may fail for CDN)
+            builder.connectionSpecs(listOf(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS))
+        }
+        
+        return builder
+    }
+    
+    /**
+     * Configure OkHttpClient.Builder with proper SSL settings for Android 9+
+     * 
+     * This is the main entry point for configuring HTTP clients for login.
+     */
+    fun configureSSL(builder: OkHttpClient.Builder, debugMode: Boolean = false): OkHttpClient.Builder {
+        try {
+            val (sslSocketFactory, trustManager) = getSSLSocketFactory()
+            
+            builder.sslSocketFactory(sslSocketFactory, trustManager)
+            
+            // Configure connection specs based on mode
+            if (debugMode) {
+                // In debug mode, allow more protocols for testing
+                builder.connectionSpecs(listOf(MODERN_TLS, COMPATIBLE_TLS, ConnectionSpec.CLEARTEXT))
+                Log.d(TAG, "SSL configured in DEBUG mode - allowing more protocols")
+            } else {
+                // Production: Modern TLS only, no cleartext
+                builder.connectionSpecs(listOf(MODERN_TLS, COMPATIBLE_TLS))
+                Log.d(TAG, "SSL configured in PRODUCTION mode - TLS 1.2+ only")
+            }
+            
+            // Enable hostname verification (always on for security)
+            // OkHttp does this by default, but we're explicit
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error configuring SSL: ${e.message}", e)
+            // Fall back to default configuration
+            builder.connectionSpecs(listOf(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS))
+        }
+        
+        return builder
+    }
+    
+    /**
+     * Diagnose SSL connection issues for a given URL
+     * Returns a detailed report of any problems found
+     */
+    fun diagnoseSSLIssues(url: String): SSLDiagnosticResult {
+        val issues = mutableListOf<String>()
+        val info = mutableListOf<String>()
+        
+        info.add("Android Version: ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})")
+        info.add("Target URL: $url")
+        
+        try {
+            val javaUrl = java.net.URL(url)
+            
+            // Check protocol
+            if (javaUrl.protocol == "http") {
+                issues.add("URL uses insecure HTTP protocol. HTTPS is strongly recommended.")
+            }
+            
+            // Check port
+            val port = if (javaUrl.port == -1) {
+                if (javaUrl.protocol == "https") 443 else 80
+            } else {
+                javaUrl.port
+            }
+            info.add("Port: $port")
+            
+            // For HTTPS, try to validate the certificate
+            if (javaUrl.protocol == "https") {
+                try {
+                    val connection = javaUrl.openConnection() as javax.net.ssl.HttpsURLConnection
+                    connection.connectTimeout = 10000
+                    connection.readTimeout = 10000
+                    
+                    // Try to connect
+                    connection.connect()
+                    
+                    // Get certificate info
+                    val certs = connection.serverCertificates
+                    if (certs.isNotEmpty()) {
+                        val cert = certs[0] as? X509Certificate
+                        cert?.let {
+                            info.add("Certificate Subject: ${it.subjectDN}")
+                            info.add("Certificate Issuer: ${it.issuerDN}")
+                            info.add("Valid From: ${it.notBefore}")
+                            info.add("Valid Until: ${it.notAfter}")
+                            
+                            // Check expiration
+                            val now = java.util.Date()
+                            if (now.before(it.notBefore)) {
+                                issues.add("Certificate is not yet valid!")
+                            }
+                            if (now.after(it.notAfter)) {
+                                issues.add("Certificate has EXPIRED!")
+                            }
+                        }
+                    }
+                    
+                    info.add("TLS Protocol: ${connection.cipherSuite}")
+                    connection.disconnect()
+                    
+                } catch (e: javax.net.ssl.SSLHandshakeException) {
+                    issues.add("SSL Handshake failed: ${e.message}")
+                    
+                    // Common causes
+                    when {
+                        e.message?.contains("CERTIFICATE_VERIFY_FAILED", ignoreCase = true) == true ->
+                            issues.add("Cause: Server certificate could not be verified. May be self-signed or from untrusted CA.")
+                        e.message?.contains("WRONG_VERSION", ignoreCase = true) == true ->
+                            issues.add("Cause: TLS version mismatch. Server may require older TLS versions.")
+                        e.message?.contains("HOSTNAME", ignoreCase = true) == true ->
+                            issues.add("Cause: Certificate hostname doesn't match the URL.")
+                    }
+                } catch (e: javax.net.ssl.SSLException) {
+                    issues.add("SSL Error: ${e.message}")
+                } catch (e: Exception) {
+                    issues.add("Connection error: ${e.javaClass.simpleName}: ${e.message}")
+                }
+            }
+            
+            // Android 9+ specific checks
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                info.add("Android 9+ detected - stricter SSL requirements apply")
+                
+                if (javaUrl.protocol == "http") {
+                    issues.add("Android 9+ blocks cleartext HTTP by default. " +
+                        "Ensure network_security_config.xml is properly configured.")
+                }
+            }
+            
+        } catch (e: Exception) {
+            issues.add("Failed to analyze URL: ${e.message}")
+        }
+        
+        return SSLDiagnosticResult(
+            url = url,
+            issues = issues,
+            info = info,
+            hasIssues = issues.isNotEmpty()
+        )
+    }
+    
+    data class SSLDiagnosticResult(
+        val url: String,
+        val issues: List<String>,
+        val info: List<String>,
+        val hasIssues: Boolean
+    ) {
+        fun toReport(): String = buildString {
+            appendLine("=== SSL Diagnostic Report ===")
+            appendLine()
+            appendLine("URL: $url")
+            appendLine()
+            appendLine("--- Info ---")
+            info.forEach { appendLine("  • $it") }
+            appendLine()
+            if (hasIssues) {
+                appendLine("--- Issues Found ---")
+                issues.forEach { appendLine("  ⚠️ $it") }
+            } else {
+                appendLine("--- No Issues Found ---")
+                appendLine("  ✓ SSL configuration appears correct")
+            }
+        }
+    }
+    
+    /**
+     * Check if the device supports TLS 1.3
+     */
+    fun supportsTLS13(): Boolean {
+        return try {
+            val sslContext = SSLContext.getInstance("TLSv1.3")
+            sslContext.init(null, null, null)
+            val protocols = sslContext.supportedSSLParameters.protocols
+            protocols?.contains("TLSv1.3") == true
+        } catch (e: Exception) {
+            false
+        }
+    }
+    
+    /**
+     * Get the highest supported TLS version on this device
+     */
+    fun getHighestSupportedTLSVersion(): String {
+        return when {
+            supportsTLS13() -> "TLS 1.3"
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN -> "TLS 1.2"
+            else -> "TLS 1.0"
+        }
+    }
+}

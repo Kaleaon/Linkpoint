@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1056032870108",
+    "project_id": "sl-mobile-flutter",
+    "storage_bucket": "sl-mobile-flutter.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1056032870108:android:495918dac1766e3e2cae19",
+        "android_client_info": {
+          "package_name": "com.lindenlab.secondlife"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACVsKbE-A9qdfoQE1ahNXew8WsqDCLpAA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

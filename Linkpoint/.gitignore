@@ -1,0 +1,31 @@
+# Android Build Files
+/build/
+.gradle/
+local.properties
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# IDE Files
+.idea/
+*.iml
+.DS_Store
+
+# Generated Files
+gen/
+out/
+captures/
+
+# Signing Files
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+
+# Logs
+*.log
+
+# Test credentials (NEVER COMMIT!)
+test-credentials.properties
+.linkpoint/

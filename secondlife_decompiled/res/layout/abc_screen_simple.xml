@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.FitWindowsLinearLayout android:orientation="1" android:id="@2131230762" android:fitsSystemWindows="true" android:layout_width="-1" android:layout_height="-1"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <androidx.appcompat.widget.ViewStubCompat android:id="@2131230773" android:layout="@2131427332" android:inflatedId="@2131230772" android:layout_width="-1" android:layout_height="-2" />
+    <include layout="@layout/abc_screen_content_include" />
+</androidx.appcompat.widget.FitWindowsLinearLayout>

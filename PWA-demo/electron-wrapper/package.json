@@ -1,0 +1,54 @@
+{
+  "name": "linkpoint-pwa-electron",
+  "version": "1.0.0",
+  "description": "Linkpoint PWA Desktop App with Built-in SL Proxy",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "NODE_ENV=development electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux"
+  },
+  "author": "Linkpoint PWA",
+  "license": "GPL-2.0",
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.linkpoint.pwa",
+    "productName": "Linkpoint PWA",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "../index.html",
+      "../css/**/*",
+      "../js/**/*",
+      "../assets/**/*",
+      "../manifest.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "../assets/icons/icon-512x512.png"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "../assets/icons/icon-512x512.png",
+      "category": "public.app-category.social-networking"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "../assets/icons/icon-512x512.png",
+      "category": "Network"
+    }
+  }
+}

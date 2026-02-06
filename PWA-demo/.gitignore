@@ -1,0 +1,44 @@
+# Linkpoint PWA - Git Ignore
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependencies (if added later)
+node_modules/
+bower_components/
+
+# Build outputs (if build process added)
+dist/
+build/
+*.min.js
+*.min.css
+
+# Temporary files
+tmp/
+temp/
+.cache/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# User data (for local testing)
+test-data/
+user-data/
+node_modules/

@@ -11,6 +11,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    
+    defaults:
+      run:
+        working-directory: Linkpoint
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,30 +31,38 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          api-level: 35
+          build-tools: 35.0.0
+          cmake: 3.22.1
+          ndk: 25.2.9519653
 
       - name: Install SDK components
         run: |
           sdkmanager --install \
             "platform-tools" \
             "platforms;android-35" \
-            "build-tools;35.0.0"
+            "build-tools;35.0.0" \
+            "cmake;3.22.1" \
+            "ndk;25.2.9519653"
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
       - name: Build Debug
-        working-directory: app
-        run: ./gradlew :app:assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --stacktrace
 
       - name: Build Release
-        working-directory: app
-        run: ./gradlew :app:assembleRelease --stacktrace
+        run: ./gradlew assembleRelease --stacktrace
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: Linkpoint-debug-APK
-          path: app/app/build/outputs/apk/debug/app-debug.apk
+          path: Linkpoint/build/outputs/apk/debug/*.apk
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
           name: Linkpoint-release-APK
-          path: app/app/build/outputs/apk/release/app-release.apk
+          path: Linkpoint/build/outputs/apk/release/*.apk
