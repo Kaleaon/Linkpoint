@@ -505,6 +505,7 @@ class LumiyaThreadedCircuit(
         when (messageId) {
             LumiyaConstants.MSG_PACKET_ACK -> handlePacketAck(data)
             LumiyaConstants.MSG_START_PING_CHECK -> handleStartPingCheck(data)
+            LumiyaConstants.MSG_COMPLETE_PING_CHECK -> unansweredPings.set(0)
             LumiyaConstants.MSG_REGION_HANDSHAKE -> handleRegionHandshake(data)
             else -> {
                 // Route to registered handler
@@ -881,16 +882,26 @@ class LumiyaThreadedCircuit(
     }
     
     /**
-     * Send a ping (StartPingCheck is sent by server, we just track our own)
+     * Send a ping (StartPingCheck) so unanswered-ping tracking reflects real requests.
      */
     private fun sendPing() {
+        val pingIdByte = pingId.incrementAndGet() and 0xFF
         lastPingTime.set(System.currentTimeMillis())
-        unansweredPings.incrementAndGet()
-        
-        // We don't actually send StartPingCheck (that's server-initiated)
-        // We just track that we're waiting for packets
+        val unanswered = unansweredPings.incrementAndGet()
+
+        val payload = ByteBuffer.allocate(5).order(ByteOrder.BIG_ENDIAN)
+        payload.put(pingIdByte.toByte())
+        payload.putInt(0)
+
+        sendPacket(
+            messageId = LumiyaConstants.MSG_START_PING_CHECK,
+            payload = payload.array(),
+            reliable = false,
+            listener = null
+        )
+
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-            "LumiyaCircuit: Ping check - waiting for server response (unanswered: ${unansweredPings.get()})")
+            "LumiyaCircuit: Ping check sent (pingId=$pingIdByte, unanswered: $unanswered)")
     }
     
     /**
