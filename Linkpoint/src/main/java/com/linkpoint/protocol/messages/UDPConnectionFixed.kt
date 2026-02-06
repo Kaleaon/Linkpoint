@@ -838,6 +838,9 @@ class UDPConnectionFixed {
                                 // Track message for statistics (fixes "RegionHandshake never received" bug)
                                 trackMessageReceived(messageName)
                                 
+                                // Process any appended ACKs (piggy-backed) before routing
+                                processAppendedAcks(data)
+
                                 // Route message through router
                                 circuitTaskQueue.enqueue {
                                     routeMessage(data)
@@ -1932,12 +1935,29 @@ class UDPConnectionFixed {
      * Responds with CompletePingCheck to maintain the connection.
      */
     suspend fun handleStartPingCheck(pingId: Byte, oldestUnacked: Int) {
-        val payload = ByteBuffer.allocate(5).order(ByteOrder.LITTLE_ENDIAN)
-        payload.put(pingId)
-        payload.putInt(0) // Simplified - no pending ACKs tracking yet
-        
+        val payload = byteArrayOf(pingId)
+
         Log.d(TAG, "Responding to ping check $pingId")
-        sendPacket(MessageIds.COMPLETE_PING_CHECK, payload.array(), reliable = false)
+        sendPacket(MessageIds.COMPLETE_PING_CHECK, payload, reliable = false)
+    }
+
+    /**
+     * Process ACKs appended to a received packet (Lumiya-style).
+     */
+    private fun processAppendedAcks(data: ByteArray) {
+        if (data.size < PACKET_HEADER_SIZE + 2) return
+
+        val count = data[data.size - 1].toInt() and 0xFF
+        val acksStart = data.size - 1 - (count * 4)
+        if (acksStart < PACKET_HEADER_SIZE) return
+
+        var pos = acksStart
+        for (i in 0 until count) {
+            if (pos + 4 > data.size - 1) break
+            val ackedSeq = ByteBuffer.wrap(data, pos, 4).order(ByteOrder.LITTLE_ENDIAN).int
+            pos += 4
+            processAck(ackedSeq)
+        }
     }
     
     /**
