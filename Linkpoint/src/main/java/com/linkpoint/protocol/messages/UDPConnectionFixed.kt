@@ -1211,7 +1211,7 @@ class UDPConnectionFixed {
         // Dispatch to the handler registered via registerHandler()
         val handler = messageHandlers[messageId]
         if (handler != null) {
-            handler.handleMessage(messageId, data)
+            handler.handle(messageId, data)
             messagesRouted.incrementAndGet()
         }
     }
