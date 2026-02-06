@@ -579,7 +579,7 @@ class LinkpointApp : Application() {
         teleportManager = TeleportManager(udpConnection, capabilityManager, agentId)
         
         // HUD manager
-        hudManager = HUDManager(objectManager, udpConnection, agentId)
+        hudManager = HUDManager(this, objectManager, udpConnection, agentId)
         
         // NEW: Landmark Manager
         landmarkManager = LandmarkManager(capabilityManager, transferManager, inventoryManager, udpConnection, agentId)
@@ -4490,6 +4490,9 @@ class LinkpointApp : Application() {
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.COMPLETE_PING_CHECK) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📡 CompletePingCheck received")
+            if (::connectionKeepAlive.isInitialized) {
+                connectionKeepAlive.onPongReceived()
+            }
         }
         
         // --- Inventory Copy ---

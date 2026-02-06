@@ -17,8 +17,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.UUID
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 
 /**
  * Connection Keep-Alive Manager - Prevents disconnection during background/idle.
@@ -41,11 +39,6 @@ class ConnectionKeepAliveManager(
         const val ACTIVE_PING_INTERVAL_MS = 5_000L      // 5 seconds when active
         const val BACKGROUND_PING_INTERVAL_MS = 15_000L // 15 seconds in background
         const val IDLE_PING_INTERVAL_MS = 25_000L       // 25 seconds when idle (must be < 30s SL timeout)
-        
-        // Agent update message ID
-        const val MSG_AGENT_UPDATE = 0x04
-        const val MSG_AGENT_HEARTBEAT = 0xFF00DE
-        const val MSG_COMPLETE_AGENT_MOVEMENT = 0xF9
         
         // Timeout thresholds
         const val CONNECTION_TIMEOUT_MS = 60_000L  // Consider disconnected after 60s no response
@@ -212,57 +205,15 @@ class ConnectionKeepAliveManager(
     }
     
     private suspend fun sendPing() {
-        val agent = agentId ?: return
-        val session = sessionId ?: return
-        
         try {
-            // Send AgentUpdate message (minimal version for keep-alive)
-            val payload = buildAgentUpdatePayload(agent, session)
-            udpConnection.sendPacket(MSG_AGENT_UPDATE, payload, reliable = false)
+            // Send standard AgentUpdate message for keep-alive
+            udpConnection.sendAgentUpdate()
             
             lastPingSentTime = System.currentTimeMillis()
             Log.v(TAG, "Ping sent")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send ping", e)
         }
-    }
-    
-    private fun buildAgentUpdatePayload(agentId: UUID, sessionId: UUID): ByteArray {
-        // Minimal AgentUpdate message
-        val buffer = ByteBuffer.allocate(76).order(ByteOrder.LITTLE_ENDIAN)
-        
-        // AgentData block
-        buffer.putLong(agentId.mostSignificantBits)
-        buffer.putLong(agentId.leastSignificantBits)
-        buffer.putLong(sessionId.mostSignificantBits)
-        buffer.putLong(sessionId.leastSignificantBits)
-        
-        // BodyRotation (quaternion - identity)
-        buffer.putFloat(0f)
-        buffer.putFloat(0f)
-        buffer.putFloat(0f)
-        buffer.putFloat(1f)
-        
-        // HeadRotation (quaternion - identity)
-        buffer.putFloat(0f)
-        buffer.putFloat(0f)
-        buffer.putFloat(0f)
-        buffer.putFloat(1f)
-        
-        // State
-        buffer.put(0) // State flags
-        
-        // CameraCenter (current position - use 0,0,0 for ping)
-        buffer.putFloat(0f)
-        buffer.putFloat(0f)
-        buffer.putFloat(0f)
-        
-        // Other fields...
-        buffer.putFloat(0f) // CameraAtAxis x
-        buffer.putFloat(1f) // CameraAtAxis y
-        buffer.putFloat(0f) // CameraAtAxis z
-        
-        return buffer.array()
     }
     
     private fun checkConnectionTimeout() {

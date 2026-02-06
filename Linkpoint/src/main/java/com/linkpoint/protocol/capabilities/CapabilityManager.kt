@@ -396,7 +396,7 @@ class CapabilityManager {
             }
         }
         
-        val xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><llsd>${requestBody.toXML()}</llsd>"
+        val xml = LLSDXmlUtils.wrap(requestBody)
         
         Log.d(TAG, "Requesting capabilities from: ${seedUrl.take(80)}...")
         Log.d(TAG, "Request body length: ${xml.length} bytes")
@@ -422,7 +422,7 @@ class CapabilityManager {
             }
             
             // Use try-finally to ensure response is always closed
-            val contentType = response.header("Content-Type") ?: ""
+            val contentType = response.header("Content-Type")
             val bodyBytes: ByteArray?
             try {
                 bodyBytes = response.body?.bytes()
@@ -471,11 +471,7 @@ class CapabilityManager {
             }
             
             val llsd = try {
-                if (looksLikeXml && bodyText != null) {
-                    LLSDParser.parseXML(bodyText)
-                } else {
-                    LLSDParser.parse(bodyBytes)
-                }
+                LLSDParser.parseAuto(bodyBytes, contentType)
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to parse LLSD from seed capability response", e)
                 lastInitializationError = "LLSD parse error: ${e.message}"
@@ -575,7 +571,7 @@ class CapabilityManager {
                 val requestBuilder = Request.Builder().url(url)
                 
                 if (body != null) {
-                    val xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><llsd>${body.toXML()}</llsd>"
+                    val xml = LLSDXmlUtils.wrap(body)
                     requestBuilder.post(xml.toRequestBody("application/llsd+xml".toMediaType()))
                 } else {
                     requestBuilder.get()
@@ -594,17 +590,18 @@ class CapabilityManager {
                     }
                 }
                 
-                val responseBody = response.body?.string()
+                val contentType = response.header("Content-Type")
+                val responseBytes = response.body?.bytes()
                 response.close()
                 
-                if (responseBody == null) {
+                if (responseBytes == null || responseBytes.isEmpty()) {
                     if (attempt < options.retries) {
                         throw RetryableException("Empty response body")
                     }
                     return@withContext null
                 }
-                
-                return@withContext LLSDParser.parseXML(responseBody)
+
+                return@withContext LLSDParser.parseAuto(responseBytes, contentType)
                 
             } catch (e: RetryableException) {
                 lastException = e
@@ -693,50 +690,50 @@ class CapabilityManager {
             while (isActive && !done) {
                 try {
                     val requestBody = LLSDMap().apply {
-                        this["ack"] = if (ack != null) LLSDInteger(ack) else LLSDBoolean(true)
+                        this["ack"] = ack?.let { LLSDInteger(it) } ?: LLSDBoolean(true)
                         this["done"] = LLSDBoolean(false)
                     }
                     
-                    val xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><llsd>${requestBody.toXML()}</llsd>"
+                    val xml = LLSDXmlUtils.wrap(requestBody)
                     
                     val request = Request.Builder()
                         .url(url)
                         .post(xml.toRequestBody("application/llsd+xml".toMediaType()))
                         .build()
                     
-                    val response = eventQueueClient.newCall(request).execute()
-                    val body = response.body?.string()
-                    val code = response.code
-                    response.close()
-                    
-                    // 502 is expected for long-poll timeout - retry immediately
-                    if (code == 502) {
-                        consecutiveErrors = 0  // Not an error
-                        continue
-                    }
-                    
-                    // Handle other HTTP errors with backoff
-                    if (code in RETRYABLE_HTTP_CODES) {
-                        consecutiveErrors++
-                        val retryAfter = parseRetryAfterHeader(response)
-                        val delayMs = options.calculateRetryDelay(consecutiveErrors - 1, retryAfter)
-                        Log.w(TAG, "Event queue HTTP $code, retrying in ${delayMs}ms")
-                        delay(delayMs)
-                        continue
-                    }
-                    
-                    // Success - reset error count
-                    consecutiveErrors = 0
-                    
-                    if (body != null) {
-                        val llsd = LLSDParser.parseXML(body)
-                        if (llsd is LLSDMap) {
-                            ack = llsd.getInt("id")
-                            
-                            val events = llsd.getArray("events")
-                            events?.value?.forEach { event ->
-                                if (event is LLSDMap) {
-                                    processEvent(event)
+                    eventQueueClient.newCall(request).execute().use { response ->
+                        val contentType = response.header("Content-Type")
+                        val code = response.code
+
+                        // 502 is expected for long-poll timeout - retry immediately
+                        if (code == 502) {
+                            consecutiveErrors = 0  // Not an error
+                            return@use
+                        }
+
+                        // Handle other HTTP errors with backoff
+                        if (code in RETRYABLE_HTTP_CODES) {
+                            consecutiveErrors++
+                            val retryAfter = parseRetryAfterHeader(response)
+                            val delayMs = options.calculateRetryDelay(consecutiveErrors - 1, retryAfter)
+                            Log.w(TAG, "Event queue HTTP $code, retrying in ${delayMs}ms")
+                            delay(delayMs)
+                            return@use
+                        }
+
+                        // Success - reset error count
+                        consecutiveErrors = 0
+
+                        response.body?.byteStream()?.use { stream ->
+                            val llsd = LLSDStreamingParser.parseAnyToValue(stream, contentType)
+                            if (llsd is LLSDMap) {
+                                ack = llsd.getInt("id")
+
+                                val events = llsd.getArray("events")
+                                events?.value?.forEach { event ->
+                                    if (event is LLSDMap) {
+                                        processEvent(event)
+                                    }
                                 }
                             }
                         }

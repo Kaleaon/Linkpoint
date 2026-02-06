@@ -26,6 +26,7 @@ import com.linkpoint.BuildConfig
 import com.linkpoint.R
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.ui.tos.TosActivity
+import com.linkpoint.ui.world.WorldViewActivity
 import com.linkpoint.utils.CodexUploadService
 import com.linkpoint.utils.CrashReporter
 import com.linkpoint.utils.DebugReportService
@@ -103,6 +104,9 @@ class SettingsActivity : AppCompatActivity() {
             
             // Display settings
             setupDisplaySettings()
+
+            // Interface settings
+            setupInterfaceSettings()
             
             // Graphics settings
             findPreference<ListPreference>("graphics_quality")?.setOnPreferenceChangeListener { _, newValue ->
@@ -1136,6 +1140,34 @@ class SettingsActivity : AppCompatActivity() {
                     ).show()
                     true
                 }
+            }
+        }
+
+        /**
+         * Setup interface settings (HUD/controls visibility + layout editor).
+         */
+        private fun setupInterfaceSettings() {
+            val visibilityPreferences = listOf(
+                "show_hud",
+                "show_joysticks",
+                "show_action_buttons",
+                "show_movement_buttons"
+            )
+
+            visibilityPreferences.forEach { key ->
+                findPreference<SwitchPreferenceCompat>(key)?.setOnPreferenceChangeListener { _, _ ->
+                    Toast.makeText(
+                        requireContext(),
+                        "Interface changes will apply when you return to the world view",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    true
+                }
+            }
+
+            findPreference<Preference>("customize_layout")?.setOnPreferenceClickListener {
+                startActivity(WorldViewActivity.createLayoutEditorIntent(requireContext()))
+                true
             }
         }
         

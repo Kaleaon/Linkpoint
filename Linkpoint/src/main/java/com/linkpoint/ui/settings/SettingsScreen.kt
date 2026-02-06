@@ -57,7 +57,11 @@ data class SettingsState(
     val autoAcceptFriends: Boolean = false,
     val renderDistance: Float = 64f,
     val brightness: Float = 1.0f,
-    val rlvEnabled: Boolean = false
+    val rlvEnabled: Boolean = false,
+    val showHud: Boolean = true,
+    val showJoysticks: Boolean = true,
+    val showActionButtons: Boolean = true,
+    val showMovementButtons: Boolean = true
 )
 
 /**
@@ -83,6 +87,7 @@ fun SettingsScreen(
     onOpenAccount: () -> Unit,
     onOpenPrivacy: () -> Unit,
     onOpenAbout: () -> Unit,
+    onOpenLayoutEditor: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var currentSettings by remember { mutableStateOf(settings) }
@@ -150,6 +155,68 @@ fun SettingsScreen(
                         currentSettings = currentSettings.copy(notificationsEnabled = it)
                         onSettingsChange(currentSettings)
                     }
+                )
+            }
+
+            // Interface Section
+            SettingsSection(title = "Interface") {
+                SettingsSwitchItem(
+                    icon = Icons.Default.Tune,
+                    title = "Show HUD",
+                    subtitle = "Toggle HUD overlays",
+                    checked = currentSettings.showHud,
+                    onCheckedChange = {
+                        currentSettings = currentSettings.copy(showHud = it)
+                        onSettingsChange(currentSettings)
+                    }
+                )
+
+                HorizontalDivider()
+
+                SettingsSwitchItem(
+                    icon = Icons.Default.Tune,
+                    title = "Show Joysticks",
+                    subtitle = "Toggle movement and camera joysticks",
+                    checked = currentSettings.showJoysticks,
+                    onCheckedChange = {
+                        currentSettings = currentSettings.copy(showJoysticks = it)
+                        onSettingsChange(currentSettings)
+                    }
+                )
+
+                HorizontalDivider()
+
+                SettingsSwitchItem(
+                    icon = Icons.Default.Tune,
+                    title = "Show Action Buttons",
+                    subtitle = "Toggle gesture and social buttons",
+                    checked = currentSettings.showActionButtons,
+                    onCheckedChange = {
+                        currentSettings = currentSettings.copy(showActionButtons = it)
+                        onSettingsChange(currentSettings)
+                    }
+                )
+
+                HorizontalDivider()
+
+                SettingsSwitchItem(
+                    icon = Icons.Default.Tune,
+                    title = "Show Movement Buttons",
+                    subtitle = "Toggle fly, run, jump, and sit buttons",
+                    checked = currentSettings.showMovementButtons,
+                    onCheckedChange = {
+                        currentSettings = currentSettings.copy(showMovementButtons = it)
+                        onSettingsChange(currentSettings)
+                    }
+                )
+
+                HorizontalDivider()
+
+                SettingsNavigationItem(
+                    icon = Icons.Default.Tune,
+                    title = "Customize Layout",
+                    subtitle = "Reposition on-screen controls",
+                    onClick = onOpenLayoutEditor
                 )
             }
             

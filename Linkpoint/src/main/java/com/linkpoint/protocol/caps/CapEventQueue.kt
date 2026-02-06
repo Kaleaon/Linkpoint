@@ -173,40 +173,39 @@ class CapEventQueue(
             this["done"] = LLSDBoolean(false)
         }
         
-        val xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><llsd>${requestBody.toXML()}</llsd>"
+        val xml = LLSDXmlUtils.wrap(requestBody)
         
         val request = Request.Builder()
             .url(capabilityUrl)
             .post(xml.toRequestBody("application/llsd+xml".toMediaType()))
             .build()
         
-        val response = httpClient.newCall(request).execute()
-        val body = response.body?.string()
-        val code = response.code
-        response.close()
-        
-        // 502 is expected for long-poll timeout - retry immediately
-        if (code == 502) {
-            return
-        }
-        
-        // Handle HTTP errors
-        if (code !in 200..299) {
-            throw Exception("HTTP $code from event queue")
-        }
-        
-        // Parse response
-        if (body != null) {
-            val llsd = LLSDParser.parseXML(body)
-            if (llsd is LLSDMap) {
-                // Update acknowledgement ID
-                currentAck = llsd.getInt("id")
-                
-                // Process events
-                val events = llsd.getArray("events")
-                events?.value?.forEach { event ->
-                    if (event is LLSDMap) {
-                        processLLSDEvent(event)
+        httpClient.newCall(request).execute().use { response ->
+            val code = response.code
+            val contentType = response.header("Content-Type")
+
+            // 502 is expected for long-poll timeout - retry immediately
+            if (code == 502) {
+                return
+            }
+
+            // Handle HTTP errors
+            if (code !in 200..299) {
+                throw Exception("HTTP $code from event queue")
+            }
+
+            response.body?.byteStream()?.use { stream ->
+                val llsd = LLSDStreamingParser.parseAnyToValue(stream, contentType)
+                if (llsd is LLSDMap) {
+                    // Update acknowledgement ID
+                    currentAck = llsd.getInt("id")
+
+                    // Process events
+                    val events = llsd.getArray("events")
+                    events?.value?.forEach { event ->
+                        if (event is LLSDMap) {
+                            processLLSDEvent(event)
+                        }
                     }
                 }
             }

@@ -110,6 +110,10 @@ android {
         compose = true
         prefab = true  // Enable Prefab for native dependencies
     }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.10"
+    }
     
     sourceSets {
         getByName("main") {
@@ -219,7 +223,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:2.2.21")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
     
     // Back-compat libs
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
@@ -258,7 +262,7 @@ dependencies {
     // See com.linkpoint.scripts.lsl package for complete LSL language support with 350+ functions
     
     // SceneView - Compose wrapper for Filament 3D/AR rendering
-    implementation("io.github.sceneview:sceneview:2.3.3")
+    implementation("io.github.sceneview:sceneview:2.2.1")
     
     // libGDX - Cross-platform game engine for game logic and input handling
     val gdxVersion = "1.12.1"
