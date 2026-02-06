@@ -9,11 +9,136 @@
 Linkpoint is a sophisticated Android application (~93,000 lines of Kotlin across 247 files) serving as a Third-Party Viewer for Second Life and OpenSimulator virtual worlds. The codebase demonstrates significant engineering effort with a modern tech stack (Jetpack Compose, Filament 3D, gRPC, WebRTC), but has critical issues in build configuration, application architecture, and protocol security that should be addressed before production release.
 
 **Overall Assessment:**
+- **Operational Status: INOPERABLE** - Linkpoint cannot connect, login, or render. Multiple critical blockers.
+- **Reference Viewer (Lumiya): FULLY FUNCTIONAL** - The decompiled Java viewer it is based on works flawlessly.
 - **Architecture:** Needs refactoring (god class anti-pattern in main Application)
 - **Security:** Generally strong with notable protocol-level vulnerabilities
 - **Test Coverage:** Moderate (~13 test files for 247 source files)
 - **Build Configuration:** Several critical misconfigurations
 - **Dependencies:** Well-chosen but some beta/RC versions in production
+
+---
+
+## 0. Lumiya vs Linkpoint: Why One Works and the Other Doesn't
+
+### Background
+
+Linkpoint is a Kotlin rewrite of **Lumiya**, a legacy Android Second Life viewer that worked flawlessly on mobile networks for 10+ years. The Lumiya source was obtained via APK decompilation (804 Java files at `lumiya_decompiled_source/`), and its proven protocol patterns were extracted into Kotlin modules under `protocol/lumiya/`. Despite having the correct reference implementation available, **Linkpoint is completely inoperable** while Lumiya fully works.
+
+### Root Cause: The Proven Circuit Design Was Never Activated
+
+The single most damaging issue is that `LumiyaThreadedCircuit` -- the exact single-threaded deterministic circuit loop that made Lumiya reliable -- **exists in the codebase but is never instantiated or used**.
+
+| Component | Lumiya (Works) | Linkpoint (Broken) |
+|-----------|----------------|-------------------|
+| **Circuit threading** | Single dedicated thread with deterministic loop | Coroutine-based with non-deterministic scheduling |
+| **Packet processing** | Synchronous: receive -> send -> idle -> sleep (1s loop) | Async receive loop that may never start |
+| **Handler registration** | Direct method calls, no blocking | `runBlocking` on main thread causing ANR/deadlock |
+| **NAT keep-alive** | Guaranteed ping every 10s in circuit loop | No deterministic timing guarantee |
+| **Error recovery** | Connection state properly managed | Silent failures, no reconnection |
+| **Initialization** | Lightweight `GlobalOptions.initialize()` | 62 `lateinit var` managers, blocking init |
+
+### Critical Blocker #1: `runBlocking` Deadlocks the App on Startup
+
+**Files:** `UDPConnectionFixed.kt:430,1307` and `LinkpointApp.kt:613-980`
+
+Every message handler registration calls `runBlocking` on the main thread:
+
+```kotlin
+// UDPConnectionFixed.kt:1307 - Called ~100 times during init
+fun registerHandler(messageId: Int, isHeavy: Boolean, handler: (Int, ByteArray) -> Unit) {
+    kotlinx.coroutines.runBlocking {  // BLOCKS MAIN THREAD
+        messageRouter.registerHandler(messageId, ...)
+    }
+}
+```
+
+`LinkpointApp.registerMessageHandlers()` calls this ~100 times sequentially, each blocking the main thread. This triggers Android's **ANR (Application Not Responding)** watchdog and kills the app before it can ever connect.
+
+**Lumiya's approach:** Direct synchronous method calls on the circuit thread -- no coroutines, no blocking, no deadlocks.
+
+### Critical Blocker #2: LumiyaThreadedCircuit Is Dead Code
+
+**File:** `protocol/lumiya/LumiyaThreadedCircuit.kt` (1,058 lines)
+
+This class contains the **exact** single-threaded circuit loop design that made Lumiya work:
+
+```kotlin
+// The proven pattern (exists but is NEVER CALLED):
+private fun circuitLoop() {
+    while (running.get()) {
+        // 1. RECEIVE PACKETS
+        socket?.receive(receivePacket)
+        // 2. SEND PENDING MESSAGES
+        processPendingTransmissions()
+        // 3. SEND PENDING ACKs
+        sendPendingAcks()
+        // 4. PROCESS IDLE TASKS (resends, pings, timeouts)
+        processIdleTasks()
+        // 5. SLEEP
+        Thread.sleep(sleepTime)
+    }
+}
+```
+
+**File:** `protocol/lumiya/LumiyaIntegration.kt:47`
+```kotlin
+private var threadedCircuit: LumiyaThreadedCircuit? = null  // NEVER INSTANTIATED
+```
+
+The variable is declared but never assigned. Zero references to it exist anywhere in the app. Linkpoint instead uses the broken `UDPConnectionFixed` coroutine-based approach.
+
+### Critical Blocker #3: Receive Loop Never Processes Packets
+
+**File:** `UDPConnectionFixed.kt:708-760`
+
+Even if the app survived initialization, the receive loop:
+1. May never start due to connection setup failures
+2. Exits silently if `DatagramChannel.isConnected` returns false
+3. Has no automatic reconnection -- once broken, stays broken
+4. Logs errors but takes no corrective action
+
+**Lumiya's approach:** The circuit loop runs continuously regardless of transient errors. Socket timeouts are expected and handled gracefully within the loop.
+
+### Critical Blocker #4: Dead Code and Unused Infrastructure
+
+**File:** `UDPConnectionFixed.kt:224-235`
+
+```kotlin
+private val circuitThread = CircuitThread("CircuitThread")
+private val circuitTaskQueue = CircuitTaskQueue(...)
+private val heavyThread = CircuitThread("CircuitWorker")
+private val heavyTaskQueue = CircuitTaskQueue(...)
+```
+
+These threads and queues are created during construction but **never used** -- no code references `circuitTaskQueue` or `heavyTaskQueue`. They consume resources for nothing.
+
+### Critical Blocker #5: Silent `lateinit` Failures
+
+**File:** `LinkpointApp.kt:335-363`
+
+If any of the 62 `lateinit var` managers fail to initialize (which they do, given the `runBlocking` deadlocks), subsequent code throws `UninitializedPropertyAccessException` with no recovery:
+
+```kotlin
+// Pattern used ~100 times - race condition + silent crash
+if (::avatarManager.isInitialized) {
+    avatarManager.updateAvatar(...)  // Crashes if not initialized
+}
+```
+
+**Lumiya's approach:** Single `GlobalOptions.initialize()` in `onCreate()` -- lightweight, synchronous, cannot deadlock.
+
+### Summary: What Needs to Happen
+
+To make Linkpoint operable, the project needs to:
+
+1. **Activate `LumiyaThreadedCircuit`** -- replace `UDPConnectionFixed` with the proven single-threaded circuit
+2. **Remove all `runBlocking` calls** -- use the circuit thread for synchronous operations
+3. **Wire `LumiyaIntegration` into the startup flow** -- it exists but is never called
+4. **Add connection recovery** -- automatic reconnection on failure
+5. **Simplify initialization** -- reduce 62 managers to essential-only for first connection
+
+The irony is that the correct solution already exists in the codebase (`protocol/lumiya/`). It just needs to be connected.
 
 ---
 
@@ -251,27 +376,37 @@ Priority test additions:
 
 ## 7. Recommendations Priority List
 
-### Immediate (Before Release)
-1. Resolve Kotlin version conflict (1.9.22 vs 2.2.21)
-2. Fix Compose compiler version to match Kotlin
-3. Add bounds checking to LLSD parser (security)
-4. Enable minification/shrinking for release builds
-5. Fix inconsistent manager cleanup in `onTerminate()`
+### P0: Make the App Functional (Currently Inoperable)
+1. **Activate `LumiyaThreadedCircuit`** as the primary UDP circuit -- replace `UDPConnectionFixed`
+2. **Remove all `runBlocking` calls** from handler registration and initialization paths
+3. **Wire `LumiyaIntegration.initialize()`** into `LinkpointApp.onCreate()` startup flow
+4. **Add connection recovery** with automatic reconnection (Lumiya pattern: 3 retries, exponential backoff)
+5. **Verify the receive loop starts** and processes packets end-to-end through to handlers
 
-### Short-Term
-6. Split `LinkpointApp.kt` into domain modules
-7. Add thread safety to shared manager access
-8. Replace `runBlocking` with proper async patterns
-9. Bound the `CircuitTaskQueue` channel capacity
-10. Make MFA encrypted storage mandatory (no fallback)
-11. Re-enable Gradle parallel builds, daemon, and caching
+### P1: Make the Build Correct
+6. Resolve Kotlin version conflict (1.9.22 vs 2.2.21)
+7. Fix Compose compiler version to match Kotlin
+8. Enable minification/shrinking for release builds
+9. Re-enable Gradle parallel builds, daemon, and caching
 
-### Medium-Term
-12. Add protocol parser security tests
-13. Increase unit test coverage for handlers
-14. Replace beta/RC dependencies with stable versions
-15. Narrow ProGuard keep rules
-16. Upgrade JVM target to 17
+### P2: Security Hardening
+10. Add bounds checking to LLSD parser
+11. Bound the `CircuitTaskQueue` channel capacity
+12. Make MFA encrypted storage mandatory (no fallback)
+13. Fix inconsistent manager cleanup in `onTerminate()`
+
+### P3: Architecture Improvement
+14. Split `LinkpointApp.kt` (5,028 lines) into domain modules
+15. Add thread safety to shared manager access (replace `lateinit var` pattern)
+16. Remove dead code (`CircuitThread`, `CircuitTaskQueue` instances in `UDPConnectionFixed`)
+
+### P4: Quality & Testing
+17. Add protocol parser security tests (LLSD fuzzing)
+18. Add UDP circuit integration tests
+19. Increase unit test coverage for message handlers
+20. Replace beta/RC dependencies with stable versions
+21. Narrow ProGuard keep rules
+22. Upgrade JVM target to 17
 
 ---
 
