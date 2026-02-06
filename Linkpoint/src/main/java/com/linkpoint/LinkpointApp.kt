@@ -4490,6 +4490,9 @@ class LinkpointApp : Application() {
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.COMPLETE_PING_CHECK) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📡 CompletePingCheck received")
+            if (::connectionKeepAlive.isInitialized) {
+                connectionKeepAlive.onPongReceived()
+            }
         }
         
         // --- Inventory Copy ---
