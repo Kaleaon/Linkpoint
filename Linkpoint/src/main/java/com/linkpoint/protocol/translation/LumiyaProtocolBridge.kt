@@ -57,9 +57,6 @@ class LumiyaProtocolBridge(
         // User-Agent for Lumiya-compatible requests
         private const val USER_AGENT = "Linkpoint/1.0 (Lumiya-compatible)"
         
-        // LLSD XML wrapper template
-        private const val LLSD_XML_HEADER = """<?xml version="1.0" encoding="UTF-8"?><llsd>"""
-        private const val LLSD_XML_FOOTER = """</llsd>"""
     }
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -231,7 +228,7 @@ class LumiyaProtocolBridge(
             }
         }
         
-        return "$LLSD_XML_HEADER${llsdArray.toXML()}$LLSD_XML_FOOTER"
+        return LLSDXmlUtils.wrap(llsdArray)
     }
     
     /**
@@ -239,7 +236,7 @@ class LumiyaProtocolBridge(
      */
     private fun parseCapabilityResponse(responseBody: String): Map<String, String>? {
         return try {
-            val llsd = LLSDParser.parseXML(responseBody)
+            val llsd = LLSDParser.parseAuto(responseBody.toByteArray(Charsets.UTF_8), "application/llsd+xml")
             
             if (llsd !is LLSDMap) {
                 Log.w(TAG, "Capability response is not a map: ${llsd.javaClass.simpleName}")
@@ -334,7 +331,7 @@ class LumiyaProtocolBridge(
                 .header("User-Agent", USER_AGENT)
             
             if (body != null) {
-                val xml = "$LLSD_XML_HEADER${body.toXML()}$LLSD_XML_FOOTER"
+                val xml = LLSDXmlUtils.wrap(body)
                 requestBuilder.post(xml.toRequestBody("application/llsd+xml".toMediaType()))
             } else {
                 requestBuilder.get()
@@ -353,7 +350,7 @@ class LumiyaProtocolBridge(
                 return@withContext null
             }
             
-            LLSDParser.parseXML(responseBody)
+            LLSDParser.parseAuto(responseBody.toByteArray(Charsets.UTF_8), "application/llsd+xml")
         } catch (e: Exception) {
             Log.e(TAG, "Capability request error: $capabilityName", e)
             null
