@@ -2,21 +2,32 @@ package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
+import com.lumiyaviewer.lumiya.slproto.llsd.EnhancedLLSDUtils;
+import lindenlab.llsd.LLSD;
+import lindenlab.llsd.LLSDUtils;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-/* loaded from: classes.dex */
+
+/**
+ * Enhanced ObjectLink using Kaleaon's LLSD-Java library
+ * Provides advanced LLSD features including JSON, Notation, and Binary formats
+ */
 public class ObjectLink extends SLMessage {
+    private LLSD messageLLSD;
+    
+    // Legacy compatibility fields
     public AgentData AgentData_Field;
     public ArrayList<ObjectData> ObjectData_Fields = new ArrayList<>();
 
-    /* loaded from: classes.dex */
     public static class AgentData {
         public UUID AgentID;
         public UUID SessionID;
     }
 
-    /* loaded from: classes.dex */
     public static class ObjectData {
         public int ObjectLocalID;
     }
@@ -24,40 +35,234 @@ public class ObjectLink extends SLMessage {
     public ObjectLink() {
         this.zeroCoded = false;
         this.AgentData_Field = new AgentData();
+        initializeDefaultLLSD();
+    }
+    
+    private void initializeDefaultLLSD() {
+        Map<String, Object> messageData = new HashMap<>();
+        
+        // Agent data
+        Map<String, Object> agentData = new HashMap<>();
+        agentData.put("AgentID", UUID.randomUUID());
+        agentData.put("SessionID", UUID.randomUUID());
+        messageData.put("AgentData", agentData);
+        
+        // Object data array
+        List<Map<String, Object>> objectDataList = new ArrayList<>();
+        messageData.put("ObjectData", objectDataList);
+        
+        this.messageLLSD = new LLSD(messageData);
+    }
+    
+    // Modern LLSD-based API
+    public LLSD getMessageLLSD() {
+        return messageLLSD;
+    }
+    
+    public void setMessageLLSD(LLSD messageData) {
+        if (messageData != null) {
+            this.messageLLSD = messageData;
+            syncToLegacyFields();
+        }
+    }
+    
+    // Agent data accessors using enhanced LLSD utilities with proper nested navigation
+    public UUID getAgentID() {
+        return EnhancedLLSDUtils.safeGetUUID(messageLLSD, "AgentData.AgentID", null);
+    }
+    
+    public UUID getSessionID() {
+        return EnhancedLLSDUtils.safeGetUUID(messageLLSD, "AgentData.SessionID", null);
+    }
+    
+    // Object data accessors
+    public List<Integer> getObjectLocalIDs() {
+        List<Integer> localIDs = new ArrayList<>();
+        Object content = messageLLSD.getContent();
+        if (content instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> map = (Map<String, Object>) content;
+            Object objectDataObj = map.get("ObjectData");
+            if (objectDataObj instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Object> objectDataList = (List<Object>) objectDataObj;
+                for (Object obj : objectDataList) {
+                    if (obj instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> objectMap = (Map<String, Object>) obj;
+                        Object localIDObj = objectMap.get("ObjectLocalID");
+                        if (localIDObj instanceof Integer) {
+                            localIDs.add((Integer) localIDObj);
+                        }
+                    }
+                }
+            }
+        }
+        return localIDs;
+    }
+    
+    public void addObjectLocalID(int localID) {
+        Object content = messageLLSD.getContent();
+        if (content instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> map = (Map<String, Object>) content;
+            Object objectDataObj = map.get("ObjectData");
+            if (objectDataObj instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Object> objectDataList = (List<Object>) objectDataObj;
+                Map<String, Object> objectItem = new HashMap<>();
+                objectItem.put("ObjectLocalID", localID);
+                objectDataList.add(objectItem);
+                syncToLegacyFields();
+            }
+        }
+    }
+    
+    public void clearObjectData() {
+        Object content = messageLLSD.getContent();
+        if (content instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> map = (Map<String, Object>) content;
+            Object objectDataObj = map.get("ObjectData");
+            if (objectDataObj instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Object> objectDataList = (List<Object>) objectDataObj;
+                objectDataList.clear();
+                syncToLegacyFields();
+            }
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void updateNestedLLSDField(String parentKey, String key, Object value) {
+        if (messageLLSD.getContent() instanceof Map) {
+            Map<String, Object> map = (Map<String, Object>) messageLLSD.getContent();
+            Object parentObj = map.get(parentKey);
+            if (parentObj instanceof Map) {
+                Map<String, Object> parentMap = (Map<String, Object>) parentObj;
+                parentMap.put(key, value);
+                syncToLegacyFields();
+            }
+        }
+    }
+    
+    private void syncToLegacyFields() {
+        if (AgentData_Field == null) {
+            AgentData_Field = new AgentData();
+        }
+        
+        AgentData_Field.AgentID = getAgentID();
+        AgentData_Field.SessionID = getSessionID();
+        
+        ObjectData_Fields.clear();
+        List<Integer> localIDs = getObjectLocalIDs();
+        for (Integer localID : localIDs) {
+            ObjectData objData = new ObjectData();
+            objData.ObjectLocalID = localID;
+            ObjectData_Fields.add(objData);
+        }
+    }
+    
+    private void syncFromLegacyFields() {
+        setAgentID(AgentData_Field.AgentID);
+        setSessionID(AgentData_Field.SessionID);
+        
+        clearObjectData();
+        for (ObjectData objData : ObjectData_Fields) {
+            addObjectLocalID(objData.ObjectLocalID);
+        }
     }
 
-    @Override // com.lumiyaviewer.lumiya.slproto.SLMessage
     public int CalcPayloadSize() {
-        return (this.ObjectData_Fields.size() * 4) + 37;
+        return (getObjectLocalIDs().size() * 4) + 37;
     }
 
-    @Override // com.lumiyaviewer.lumiya.slproto.SLMessage
     public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleObjectLink(this);
+        if (sLMessageHandler != null) {
+            sLMessageHandler.HandleObjectLink(this);
+        }
     }
 
-    @Override // com.lumiyaviewer.lumiya.slproto.SLMessage
     public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort((short) -1);
+        if (byteBuffer == null) {
+            return;
+        }
+
+        // Ensure legacy fields are current
+        syncToLegacyFields();
+
+        byteBuffer.putShort(-1);
         byteBuffer.put((byte) 0);
         byteBuffer.put((byte) 115);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        byteBuffer.put((byte) this.ObjectData_Fields.size());
-        for (ObjectData objectData : this.ObjectData_Fields) {
+        packUUID(byteBuffer, AgentData_Field.AgentID);
+        packUUID(byteBuffer, AgentData_Field.SessionID);
+        byteBuffer.put((byte) ObjectData_Fields.size());
+        for (ObjectData objectData : ObjectData_Fields) {
             packInt(byteBuffer, objectData.ObjectLocalID);
         }
     }
 
-    @Override // com.lumiyaviewer.lumiya.slproto.SLMessage
     public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        int i = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i2 = 0; i2 < i; i2++) {
+        if (byteBuffer == null) {
+            return;
+        }
+        
+        if (AgentData_Field == null) {
+            AgentData_Field = new AgentData();
+        }
+        
+        // Legacy unpacking
+        AgentData_Field.AgentID = unpackUUID(byteBuffer);
+        AgentData_Field.SessionID = unpackUUID(byteBuffer);
+        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
+        
+        ObjectData_Fields.clear();
+        for (int i = 0; i < b; i++) {
             ObjectData objectData = new ObjectData();
             objectData.ObjectLocalID = unpackInt(byteBuffer);
-            this.ObjectData_Fields.add(objectData);
+            ObjectData_Fields.add(objectData);
+        }
+        
+        // Sync to LLSD representation
+        syncFromLegacyFields();
+    }
+    
+    /**
+     * Export message as LLSD JSON for debugging/API usage
+     * Uses proper serialization handling
+     */
+    public String toJSONString() {
+        try {
+            return EnhancedLLSDUtils.toJSONString(messageLLSD);
+        } catch (Exception e) {
+            return "{}";
+        }
+    }
+    
+    /**
+     * Export message as LLSD Notation (compact format)
+     * Provides human-readable compact representation
+     */
+    public String toNotationString() {
+        try {
+            return EnhancedLLSDUtils.toNotationString(messageLLSD);
+        } catch (Exception e) {
+            return "{}";
+        }
+    }
+    
+    /**
+     * Validate message structure using LLSD utilities
+     */
+    public boolean isValid() {
+        try {
+            UUID agentID = getAgentID();
+            UUID sessionID = getSessionID();
+            List<Integer> objectIDs = getObjectLocalIDs();
+            
+            return agentID != null && sessionID != null && objectIDs != null;
+        } catch (Exception e) {
+            return false;
         }
     }
 }
