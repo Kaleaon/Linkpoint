@@ -668,29 +668,25 @@ class LinkpointApp : Application() {
                         Log.d(TAG, "Terrain manager reset for new region, water height: ${regionData.waterHeight}")
                     }
                     
-                    // Send RegionHandshakeReply to acknowledge - THIS IS REQUIRED!
-                    // NOTE: CompleteAgentMovement and AgentThrottle are sent earlier in PacketAck
-                    // handler when UseCircuitCode is acknowledged (per SL protocol)
-                    applicationScope.launch {
-                        try {
-                            Log.d(TAG, "Sending RegionHandshakeReply...")
-                            udpConnection.sendRegionHandshakeReply()
-                            com.linkpoint.utils.InitializationTracker.completePhase(
-                                com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
-                                "Reply sent to ${regionData.simName}"
-                            )
-                            com.linkpoint.utils.InitializationTracker.startPhase(
-                                com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_REPLIED,
-                                "Waiting for world data"
-                            )
-                            Log.i(TAG, "✓ RegionHandshakeReply SENT - world data should start loading")
-                        } catch (e: Exception) {
-                            com.linkpoint.utils.InitializationTracker.failPhase(
-                                com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
-                                "Failed to send reply: ${e.message}"
-                            )
-                            Log.e(TAG, "✗ Error sending RegionHandshakeReply", e)
-                        }
+                    // Send RegionHandshakeReply DIRECTLY from I/O thread (non-suspend now)
+                    try {
+                        Log.d(TAG, "Sending RegionHandshakeReply...")
+                        udpConnection.sendRegionHandshakeReply()
+                        com.linkpoint.utils.InitializationTracker.completePhase(
+                            com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
+                            "Reply sent to ${regionData.simName}"
+                        )
+                        com.linkpoint.utils.InitializationTracker.startPhase(
+                            com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_REPLIED,
+                            "Waiting for world data"
+                        )
+                        Log.i(TAG, "✓ RegionHandshakeReply SENT - world data should start loading")
+                    } catch (e: Exception) {
+                        com.linkpoint.utils.InitializationTracker.failPhase(
+                            com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
+                            "Failed to send reply: ${e.message}"
+                        )
+                        Log.e(TAG, "✗ Error sending RegionHandshakeReply", e)
                     }
                 } else {
                     com.linkpoint.utils.InitializationTracker.logWarning("RegionHandshake parse returned null")
@@ -890,9 +886,7 @@ class LinkpointApp : Application() {
                     // Per SL protocol: respond with RequestMultipleObjects with CacheMissType=0
                     if (cachedData.objects.isNotEmpty()) {
                         val objectIds = cachedData.objects.map { it.localId }
-                        applicationScope.launch {
-                            udpConnection.sendRequestMultipleObjects(objectIds, cacheMissType = 0)
-                        }
+                        udpConnection.sendRequestMultipleObjects(objectIds, cacheMissType = 0)
                     }
                 }
             } catch (e: Exception) {
@@ -1010,10 +1004,8 @@ class LinkpointApp : Application() {
                 if (payload != null && payload.isNotEmpty()) {
                     val pingId = payload[0]
                     Log.d(TAG, "StartPingCheck received: pingId=$pingId")
-                    applicationScope.launch {
-                        // handleStartPingCheck computes our own OldestUnacked for the response
-                        udpConnection.handleStartPingCheck(pingId, 0)
-                    }
+                    // Send ping response directly (non-suspend now)
+                    udpConnection.handleStartPingCheck(pingId, 0)
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling StartPingCheck", e)
@@ -1126,21 +1118,20 @@ class LinkpointApp : Application() {
                     Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
                     Log.i(TAG, "║ ⭐ UseCircuitCode ACKNOWLEDGED - Sending CompleteAgentMovement")
                     Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
-                    
-                    applicationScope.launch {
-                        try {
-                            // Send CompleteAgentMovement to signal we're ready to enter the region
-                            udpConnection.sendCompleteAgentMovement()
-                            Log.i(TAG, "✓ CompleteAgentMovement SENT - server should now send RegionHandshake")
-                            
-                            // Also send AgentThrottle to configure bandwidth
-                            udpConnection.sendAgentThrottle()
-                            Log.i(TAG, "✓ AgentThrottle SENT - bandwidth configured")
-                        } catch (e: Exception) {
-                            Log.e(TAG, "✗ Error sending CompleteAgentMovement/AgentThrottle", e)
-                            // Reset flag atomically to allow retry on next ACK
-                            completeAgentMovementSent.set(false)
-                        }
+
+                    // CRITICAL FIX: Send CompleteAgentMovement DIRECTLY from the I/O thread.
+                    // Previously this was wrapped in applicationScope.launch which added latency
+                    // and could fail if the dispatcher was starved. The send methods are now
+                    // non-suspend and thread-safe, matching Lumiya's synchronous approach.
+                    try {
+                        udpConnection.sendCompleteAgentMovement()
+                        Log.i(TAG, "✓ CompleteAgentMovement SENT - server should now send RegionHandshake")
+
+                        udpConnection.sendAgentThrottle()
+                        Log.i(TAG, "✓ AgentThrottle SENT - bandwidth configured")
+                    } catch (e: Exception) {
+                        Log.e(TAG, "✗ Error sending CompleteAgentMovement/AgentThrottle", e)
+                        completeAgentMovementSent.set(false)
                     }
                 }
             } catch (e: Exception) {
