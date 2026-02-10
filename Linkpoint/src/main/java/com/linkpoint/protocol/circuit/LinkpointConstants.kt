@@ -33,8 +33,10 @@ object LinkpointConstants {
     /** Number of handled packets to track for duplicate detection */
     const val TRACK_HANDLED_PACKETS = 1024
     
-    /** Number of unanswered pings before declaring connection dead */
-    const val UNANSWERED_PINGS_DISCONNECT = 3
+    /** Number of unanswered pings before declaring connection dead.
+     *  Increased from 3 to 5 for mobile network tolerance (LTE/5G can have
+     *  high latency spikes where 3 pings is too aggressive). */
+    const val UNANSWERED_PINGS_DISCONNECT = 5
     
     // ==================== HTTP CONNECTION SETTINGS (SLHTTPSConnection.java) ====================
     
