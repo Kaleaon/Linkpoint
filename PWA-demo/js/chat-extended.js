@@ -62,6 +62,7 @@ class ChatExtended {
     this.typingUsers = new Map(); // UUID -> timestamp
     this.typingTimeout = 5000; // 5 seconds
     this.typingCheckInterval = null;
+    this.localUserUUID = null; // Cached local user UUID for performance
     
     // Additional features
     this.dbName = 'ChatHistory';
@@ -441,12 +442,76 @@ class ChatExtended {
   }
   
   /**
+   * Get local user UUID (cached for performance)
+   * @returns {string|null} UUID of local user or null
+   */
+  getLocalUserUUID() {
+    // Return cached value if available
+    if (this.localUserUUID) {
+      return this.localUserUUID;
+    }
+    
+    // Retrieve and cache the UUID
+    if (window.app && window.app.protocol && window.app.protocol.agentId) {
+      this.localUserUUID = window.app.protocol.agentId;
+      return this.localUserUUID;
+    }
+    if (window.app && window.app.auth) {
+      const user = window.app.auth.getUser();
+      if (user && user.id) {
+        this.localUserUUID = user.id;
+        return this.localUserUUID;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Send typing indicator packet
+   * @param {boolean} isTyping - True if start typing, false if stop
+   */
+  sendTypingPacket(isTyping) {
+    if (!window.app || !window.app.protocol) {
+      console.warn('Cannot send typing indicator: Protocol not initialized');
+      return;
+    }
+
+    const type = isTyping ? ChatType.START_TYPING : ChatType.STOP_TYPING;
+    const protocol = window.app.protocol;
+
+    try {
+      if (protocol.sendChat) {
+        // SLConnectionFull uses sendChat
+        protocol.sendChat('', 0, type);
+      } else if (protocol.sendMessage) {
+        // ProtocolManager uses sendMessage
+        // ChatFromViewer message structure (verified)
+        protocol.sendMessage('ChatFromViewer', {
+          message: '',
+          channel: 0,
+          type: type
+        });
+      } else {
+        console.warn('Cannot send typing indicator: No suitable method found');
+      }
+    } catch (error) {
+      console.error('Failed to send typing indicator:', error);
+    }
+  }
+
+  /**
    * Feature 40: Start typing indicator
    * @param {string} userUUID - UUID of typing user
    */
   startTyping(userUUID) {
+    // Check if this is the local user starting to type
+    const localId = this.getLocalUserUUID();
+    if (localId && userUUID === localId) {
+      this.sendTypingPacket(true);
+    }
+
+    // Add to typing users after sending packet to maintain consistency
     this.typingUsers.set(userUUID, Date.now());
-    // TODO: Send typing indicator to other clients
   }
   
   /**
@@ -454,8 +519,14 @@ class ChatExtended {
    * @param {string} userUUID - UUID of user who stopped typing
    */
   stopTyping(userUUID) {
+    // Check if this is the local user stopping typing
+    const localId = this.getLocalUserUUID();
+    if (localId && userUUID === localId) {
+      this.sendTypingPacket(false);
+    }
+
+    // Remove from typing users after sending packet to maintain consistency
     this.typingUsers.delete(userUUID);
-    // TODO: Send stop typing indicator
   }
   
   /**

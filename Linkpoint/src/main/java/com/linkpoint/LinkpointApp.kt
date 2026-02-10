@@ -724,8 +724,18 @@ class LinkpointApp : Application() {
                 
                 val moveData = com.linkpoint.protocol.messages.MessageParser.parseAgentMovementComplete(payload)
                 if (moveData != null) {
-                    Log.i(TAG, "AgentMovementComplete: position=${moveData.position}")
+                    Log.i(TAG, "AgentMovementComplete: position=${moveData.position}, regionHandle=${moveData.regionHandle}")
                     com.linkpoint.utils.InitializationTracker.logInfo("Position: ${moveData.position}")
+                    
+                    // Update region info with region handle and position from AgentMovementComplete
+                    // This is critical for proper sim registration - the region handle identifies
+                    // which simulator region we're connected to
+                    sessionManager.updateRegionInfo(
+                        regionHandle = moveData.regionHandle,
+                        x = moveData.position.x.toInt(),
+                        y = moveData.position.y.toInt()
+                    )
+                    Log.i(TAG, "✓ Region handle registered: ${moveData.regionHandle}")
                     
                     // Update connection state to fully connected
                     sessionManager.setConnectionState(com.linkpoint.core.ConnectionState.CONNECTED)

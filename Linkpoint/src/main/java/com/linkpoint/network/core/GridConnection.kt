@@ -1,7 +1,6 @@
 package com.linkpoint.network.core
 
 import android.content.Context
-import android.util.Log
 import com.linkpoint.auth.CrashTracker
 import com.linkpoint.auth.DeviceIdentifier
 import com.linkpoint.network.NetworkLogger
