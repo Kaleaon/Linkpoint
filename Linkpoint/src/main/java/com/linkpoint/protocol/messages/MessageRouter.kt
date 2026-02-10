@@ -209,6 +209,36 @@ class MessageRouter {
     }
     
     /**
+     * Route a message synchronously without requiring coroutine context.
+     * Called from the dedicated I/O thread where we can't use suspend functions.
+     * Uses @Synchronized to match registerHandlerSync's thread safety model.
+     */
+    @Synchronized
+    fun routeMessageSync(messageId: Int, data: ByteArray): Boolean {
+        totalMessagesRouted++
+
+        val handlerList = handlers[messageId]?.toList()
+        if (handlerList.isNullOrEmpty()) {
+            return false
+        }
+
+        var handled = false
+        for (handler in handlerList) {
+            try {
+                if (handler.handleMessage(messageId, data)) {
+                    handled = true
+                }
+            } catch (e: Exception) {
+                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                    "Handler error for message $messageId: ${e.message}")
+            }
+        }
+
+        if (handled) successfulRoutes++ else failedRoutes++
+        return handled
+    }
+
+    /**
      * Get router statistics
      */
     fun getStatistics(): Map<String, Any> {
