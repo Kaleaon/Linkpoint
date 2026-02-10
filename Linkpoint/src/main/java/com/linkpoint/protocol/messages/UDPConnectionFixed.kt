@@ -1265,17 +1265,13 @@ class UDPConnectionFixed {
 
     /**
      * Check whether the connection needs a ping or should disconnect due to inactivity.
+     *
+     * IMPORTANT: The disconnect check runs BEFORE sending a new ping to avoid a race
+     * condition where sendStartPingCheck() increments unansweredPings and the disconnect
+     * threshold is immediately hit in the same call, giving the server zero time to respond.
      */
     private fun checkPingHealth() {
-        val now = System.currentTimeMillis()
-        val timeSinceReceive = now - lastReceiveTime
-        val timeSincePing = now - lastPingTime.get()
-
-        if (timeSinceReceive > NEED_PING_TIMEOUT_MS &&
-            timeSincePing > LinkpointConstants.PING_INTERVAL_MS) {
-            sendStartPingCheck()
-        }
-
+        // Check for connection death FIRST, based on pings already sent
         if (unansweredPings.get() >= UNANSWERED_PINGS_DISCONNECT) {
             NetworkLogger.log(
                 NetworkLogger.Level.WARN,
@@ -1284,6 +1280,17 @@ class UDPConnectionFixed {
             )
             reconnectionCallback?.invoke()
             disconnect()
+            return
+        }
+
+        // Then check if we need to send a new ping
+        val now = System.currentTimeMillis()
+        val timeSinceReceive = now - lastReceiveTime
+        val timeSincePing = now - lastPingTime.get()
+
+        if (timeSinceReceive > NEED_PING_TIMEOUT_MS &&
+            timeSincePing > LinkpointConstants.PING_INTERVAL_MS) {
+            sendStartPingCheck()
         }
     }
     

@@ -785,18 +785,22 @@ class LinkpointThreadedCircuit(
             messageEventListener?.onMessageTimeout(pending.sequenceNumber, pending.messageId)
         }
         
-        // Check if we need to send a ping
-        val timeSinceReceive = now - lastReceiveTime.get()
-        val timeSincePing = now - lastPingTime.get()
-        
-        if (timeSinceReceive > LinkpointConstants.NEED_PING_TIMEOUT_MS && 
-            timeSincePing > LinkpointConstants.PING_INTERVAL_MS) {
-            sendPing()
-        }
-        
-        // Check for connection death
+        // Check for connection death FIRST, based on pings already sent.
+        // This must run BEFORE sending a new ping to avoid a race condition where
+        // sendPing() increments unansweredPings and the disconnect threshold is
+        // immediately hit in the same call, giving the server zero time to respond.
         if (unansweredPings.get() >= LinkpointConstants.UNANSWERED_PINGS_DISCONNECT) {
             disconnect("No response from server (${unansweredPings.get()} unanswered pings)")
+            return
+        }
+
+        // Then check if we need to send a new ping
+        val timeSinceReceive = now - lastReceiveTime.get()
+        val timeSincePing = now - lastPingTime.get()
+
+        if (timeSinceReceive > LinkpointConstants.NEED_PING_TIMEOUT_MS &&
+            timeSincePing > LinkpointConstants.PING_INTERVAL_MS) {
+            sendPing()
         }
     }
     

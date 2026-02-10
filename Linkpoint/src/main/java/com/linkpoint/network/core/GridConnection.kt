@@ -258,13 +258,23 @@ class GridConnection(
                 val capManager = CapabilityManager()
                 capabilityManager = capManager
 
-                // Initialize capabilities asynchronously
+                // Initialize capabilities asynchronously, passing loginUrl to enable
+                // LinkpointTranslationLayer URL repair (critical for Agni grid)
+                val loginUrl = params.gridUrl
                 scope.launch {
-                    val capsReady = capManager.initialize(reply.seedCapability)
+                    val capsReady = capManager.initialize(reply.seedCapability, loginUrl)
                     if (capsReady) {
                         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP, "Capabilities initialized")
                     } else {
-                        NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Capability initialization failed or partial")
+                        NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Capability initialization failed, retrying...")
+                        // Retry once after a delay - capabilities are critical for textures/meshes
+                        delay(5000)
+                        val retryReady = capManager.initialize(reply.seedCapability, loginUrl)
+                        if (retryReady) {
+                            NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP, "Capabilities initialized on retry")
+                        } else {
+                            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Capability initialization failed after retry")
+                        }
                     }
                 }
             } else {
