@@ -129,45 +129,15 @@ object LinkpointCircuitIntegration {
         // Apply circuit timing constants to the existing connection
         applyCircuitSettings(udpConnection)
 
-        // Create and start the proven single-threaded circuit
-        val circuit = LinkpointThreadedCircuit(simIP, simPort, circuitCode, sessionId, agentId)
-
-        // Wire circuit events to the existing UDPConnectionFixed handlers
-        circuit.setConnectionListener(object : LinkpointThreadedCircuit.ConnectionStateListener {
-            override fun onCircuitEstablished() {
-                Log.i(TAG, "LinkpointThreadedCircuit: Circuit established!")
-            }
-
-            override fun onFullyConnected() {
-                Log.i(TAG, "LinkpointThreadedCircuit: Fully connected - world data flowing")
-                isConnected.set(true)
-            }
-
-            override fun onDisconnected(reason: String) {
-                Log.w(TAG, "LinkpointThreadedCircuit: Disconnected - $reason")
-                isConnected.set(false)
-                handleDisconnect()
-            }
-
-            override fun onPacketReceived(messageId: Int, data: ByteArray) {
-                // Route packets to UDPConnectionFixed's message router for app-level handlers
-                try {
-                    udpConnection.routeMessage(messageId, data)
-                } catch (e: Exception) {
-                    Log.w(TAG, "Failed to route message $messageId to app handlers: ${e.message}")
-                }
-            }
-        })
-
-        threadedCircuit = circuit
-
-        // Start the circuit connection
-        val connected = circuit.connect()
-        if (connected) {
-            Log.i(TAG, "LinkpointThreadedCircuit started successfully")
-        } else {
-            Log.e(TAG, "LinkpointThreadedCircuit failed to connect!")
-        }
+        // IMPORTANT: Do NOT create a separate LinkpointThreadedCircuit here.
+        // The app's UDPConnectionFixed (passed as udpConnection) is already connected
+        // and has already sent UseCircuitCode + CompleteAgentMovement. Creating a second
+        // socket would bind to a different local port, but the server only sends to ONE
+        // port - causing packet loss and connection failures.
+        //
+        // Following Lumiya's architecture: single socket, message routing handles
+        // circuit separation. The existing udpConnection IS the circuit.
+        isConnected.set(true)
 
         // Set up connection state monitoring
         setupConnectionMonitoring()

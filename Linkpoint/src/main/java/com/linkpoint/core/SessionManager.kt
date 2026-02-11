@@ -414,13 +414,10 @@ class SessionManager(private val context: Context) {
     }
 }
 
-enum class ConnectionState {
-    DISCONNECTED,
-    CONNECTING,
-    CONNECTED,
-    RECONNECTING,
-    ERROR
-}
+// ConnectionState is now unified in com.linkpoint.network.events.ConnectionState
+// Import it from there instead of defining a duplicate here.
+// typealias provided for backwards compatibility with existing imports.
+typealias ConnectionState = com.linkpoint.network.events.ConnectionState
 
 data class RegionInfo(
     val name: String,

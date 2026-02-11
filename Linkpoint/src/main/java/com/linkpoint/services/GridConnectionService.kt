@@ -26,7 +26,7 @@ class GridConnectionService : Service() {
     
     companion object {
         private const val TAG = "GridConnectionService"
-        private const val NOTIFICATION_ID = 1001
+        private const val NOTIFICATION_ID = 1002  // Unique ID (LinkpointConnectionService uses 1001)
         private const val CHANNEL_ID = "linkpoint_connection"
         
         fun start(context: Context) {

@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.security.MessageDigest
+import com.linkpoint.network.events.ConnectionState
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import java.util.UUID
 
 /**
@@ -36,6 +38,7 @@ import java.util.UUID
  */
 class GridConnection(
     private val context: Context,
+    private val sharedUdpConnection: UDPConnectionFixed? = null,
     private val connectionId: UUID = UUID.randomUUID(),
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 ) {
@@ -50,17 +53,8 @@ class GridConnection(
         private const val VIEWER_VERSION = "1.0.0"
     }
     
-    /**
-     * Connection states based on the reference viewer's ConnectionState enum
-     */
-    enum class ConnectionState {
-        IDLE,
-        CONNECTING,
-        CONNECTED,
-        DISCONNECTING,
-        ERROR,
-        MFA_REQUIRED
-    }
+    // ConnectionState is imported from the canonical definition in EventBus.kt
+    // This class references it as GridConnection.Companion.ConnectionState via typealias
     
     /**
      * Connection state flow for reactive updates
@@ -246,7 +240,7 @@ class GridConnection(
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
                 "Establishing agent circuit to ${reply.simIP}:${reply.simPort} (Circuit: ${reply.circuitCode})")
 
-            agentCircuit = AgentCircuit(reply, scope = scope)
+            agentCircuit = AgentCircuit(reply, sharedConnection = sharedUdpConnection, scope = scope)
 
             // Wait for circuit to be ready (optional, but good for robust startup)
             // AgentCircuit initiates connection in its init block
