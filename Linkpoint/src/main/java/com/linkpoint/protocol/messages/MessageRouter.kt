@@ -1,47 +1,45 @@
 package com.linkpoint.protocol.messages
 
 import com.linkpoint.network.NetworkLogger
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 
 /**
  * Message Router
- * 
+ *
  * Routes incoming Second Life protocol messages to appropriate handlers.
  * Based on the reference viewer's SLMessageRouter implementation.
- * 
+ *
  * Features:
  * - Message ID to handler mapping
  * - Priority-based handler selection
  * - Handler registration and removal
  * - Message statistics tracking
- * 
- * Mobile-First Considerations:
- * - Efficient handler lookup
- * - Thread-safe operations
- * - Minimal memory overhead
- * - Fast routing decisions
+ *
+ * Thread Safety:
+ * Uses @Synchronized consistently for ALL operations on the handlers map.
+ * Previous implementation mixed coroutine Mutex and @Synchronized which
+ * are independent lock mechanisms - they don't interlock, creating a data race.
+ * Following Lumiya's pattern of using a single synchronization mechanism.
  */
 class MessageRouter {
-    
+
     companion object {
         private const val TAG = "MessageRouter"
         private const val MAX_HANDLERS_PER_MESSAGE = 10
     }
-    
+
     /**
      * Message handler interface
      */
     interface Handler {
         /**
          * Handle an incoming message
-         * 
+         *
          * @param messageId The message ID
          * @param data The message data
          * @return true if handled successfully, false otherwise
          */
         fun handleMessage(messageId: Int, data: ByteArray): Boolean
-        
+
         /**
          * Get the priority of this handler (lower = higher priority)
          */
@@ -52,45 +50,23 @@ class MessageRouter {
          */
         fun isHeavy(): Boolean = false
     }
-    
+
     /**
-     * Registered handlers: message ID -> list of handlers
+     * Registered handlers: message ID -> list of handlers.
+     * All access synchronized via @Synchronized on this MessageRouter instance.
      */
     private val handlers = mutableMapOf<Int, MutableList<Handler>>()
-    
-    /**
-     * Mutex for thread-safe operations
-     */
-    private val mutex = Mutex()
-    
+
     /**
      * Statistics
      */
-    private var totalMessagesRouted = 0
-    private var successfulRoutes = 0
-    private var failedRoutes = 0
-    
-    /**
-     * Register a handler for a specific message ID
-     * 
-     * @param messageId The message ID to handle
-     * @param handler The handler to register
-     */
-    suspend fun registerHandler(messageId: Int, handler: Handler) {
-        mutex.withLock {
-            addHandlerInternal(messageId, handler)
-        }
-    }
+    @Volatile private var totalMessagesRouted = 0
+    @Volatile private var successfulRoutes = 0
+    @Volatile private var failedRoutes = 0
 
     /**
-     * Register a handler synchronously without requiring a coroutine context.
-     * Use this during initialization to avoid runBlocking deadlocks on the main thread.
+     * Internal handler addition - must be called under @Synchronized
      */
-    @Synchronized
-    fun registerHandlerSync(messageId: Int, handler: Handler) {
-        addHandlerInternal(messageId, handler)
-    }
-
     private fun addHandlerInternal(messageId: Int, handler: Handler) {
         val handlerList = handlers.getOrPut(messageId) { mutableListOf() }
 
@@ -105,29 +81,49 @@ class MessageRouter {
 
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Registered handler for message $messageId (priority ${handler.getPriority()})")
     }
-    
+
+    /**
+     * Register a handler for a specific message ID.
+     * This is a suspend function for API compatibility but uses @Synchronized internally.
+     *
+     * @param messageId The message ID to handle
+     * @param handler The handler to register
+     */
+    suspend fun registerHandler(messageId: Int, handler: Handler) {
+        registerHandlerSync(messageId, handler)
+    }
+
+    /**
+     * Register a handler synchronously without requiring a coroutine context.
+     * Safe to call from any thread including the main thread during initialization.
+     */
+    @Synchronized
+    fun registerHandlerSync(messageId: Int, handler: Handler) {
+        addHandlerInternal(messageId, handler)
+    }
+
     /**
      * Unregister a handler for a specific message ID
-     * 
+     *
      * @param messageId The message ID
      * @param handler The handler to unregister
      */
+    @Synchronized
     suspend fun unregisterHandler(messageId: Int, handler: Handler) {
-        mutex.withLock {
-            val handlerList = handlers[messageId]
-            if (handlerList != null) {
-                handlerList.remove(handler)
-                if (handlerList.isEmpty()) {
-                    handlers.remove(messageId)
-                }
-                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Unregistered handler for message $messageId")
+        val handlerList = handlers[messageId]
+        if (handlerList != null) {
+            handlerList.remove(handler)
+            if (handlerList.isEmpty()) {
+                handlers.remove(messageId)
             }
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Unregistered handler for message $messageId")
         }
     }
-    
+
     /**
-     * Route a message to its handlers
-     * 
+     * Route a message to its handlers.
+     * This is a suspend function for API compatibility but uses @Synchronized internally.
+     *
      * @param messageId The message ID
      * @param data The message data
      * @return true if message was handled, false otherwise
@@ -137,18 +133,35 @@ class MessageRouter {
         data: ByteArray,
         heavyQueue: CircuitTaskQueue? = null
     ): Boolean {
+        return routeMessageInternal(messageId, data, heavyQueue)
+    }
+
+    /**
+     * Route a message synchronously without requiring coroutine context.
+     * Called from the dedicated I/O thread where we can't use suspend functions.
+     */
+    fun routeMessageSync(messageId: Int, data: ByteArray): Boolean {
+        return routeMessageInternal(messageId, data, null)
+    }
+
+    /**
+     * Internal routing implementation. Copy handler list under lock,
+     * then invoke handlers outside the lock to avoid holding it during processing.
+     */
+    @Synchronized
+    private fun routeMessageInternal(
+        messageId: Int,
+        data: ByteArray,
+        heavyQueue: CircuitTaskQueue?
+    ): Boolean {
         totalMessagesRouted++
-        
-        val handlerList = mutex.withLock {
-            handlers[messageId]?.toList() // Copy to avoid holding lock during handling
-        }
-        
+
+        val handlerList = handlers[messageId]?.toList() // Copy under lock
         if (handlerList.isNullOrEmpty()) {
-            NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "No handler registered for message $messageId")
             failedRoutes++
             return false
         }
-        
+
         var handled = false
         for (handler in handlerList) {
             try {
@@ -173,69 +186,30 @@ class MessageRouter {
                     handled = true
                 } else if (handler.handleMessage(messageId, data)) {
                     handled = true
-                    NetworkLogger.log(
-                        NetworkLogger.Level.DEBUG,
-                        NetworkLogger.Category.UDP,
-                        "Message $messageId handled successfully"
-                    )
                 }
             } catch (e: Exception) {
                 NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Handler error for message $messageId: ${e.message}")
             }
         }
-        
-        if (handled) {
-            successfulRoutes++
-        } else {
-            failedRoutes++
-            NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Message $messageId not handled by any handler")
-        }
-        
-        return handled
-    }
-    
-    /**
-     * Get the number of registered handlers
-     */
-    suspend fun getHandlerCount(): Int = mutex.withLock {
-        handlers.values.sumOf { it.size }
-    }
-    
-    /**
-     * Get the number of messages with handlers
-     */
-    suspend fun getMessageCount(): Int = mutex.withLock {
-        handlers.size
-    }
-    
-    /**
-     * Route a message synchronously without requiring coroutine context.
-     * Called from the dedicated I/O thread where we can't use suspend functions.
-     * Uses @Synchronized to match registerHandlerSync's thread safety model.
-     */
-    @Synchronized
-    fun routeMessageSync(messageId: Int, data: ByteArray): Boolean {
-        totalMessagesRouted++
-
-        val handlerList = handlers[messageId]?.toList()
-        if (handlerList.isNullOrEmpty()) {
-            return false
-        }
-
-        var handled = false
-        for (handler in handlerList) {
-            try {
-                if (handler.handleMessage(messageId, data)) {
-                    handled = true
-                }
-            } catch (e: Exception) {
-                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
-                    "Handler error for message $messageId: ${e.message}")
-            }
-        }
 
         if (handled) successfulRoutes++ else failedRoutes++
         return handled
+    }
+
+    /**
+     * Get the number of registered handlers
+     */
+    @Synchronized
+    suspend fun getHandlerCount(): Int {
+        return handlers.values.sumOf { it.size }
+    }
+
+    /**
+     * Get the number of messages with handlers
+     */
+    @Synchronized
+    suspend fun getMessageCount(): Int {
+        return handlers.size
     }
 
     /**
@@ -253,17 +227,16 @@ class MessageRouter {
             }
         )
     }
-    
+
     /**
      * Clear all handlers
      */
+    @Synchronized
     suspend fun clearAll() {
-        mutex.withLock {
-            handlers.clear()
-            totalMessagesRouted = 0
-            successfulRoutes = 0
-            failedRoutes = 0
-            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "All handlers cleared")
-        }
+        handlers.clear()
+        totalMessagesRouted = 0
+        successfulRoutes = 0
+        failedRoutes = 0
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "All handlers cleared")
     }
 }

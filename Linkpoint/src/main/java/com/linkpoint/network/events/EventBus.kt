@@ -245,11 +245,20 @@ data class MeshDownloadEvent(
 )
 
 /**
- * Connection states
+ * Connection states - unified across the codebase.
+ * This is the canonical ConnectionState enum. Do not create duplicates elsewhere.
+ *
+ * Used by: EventBus events, UDPConnectionFixed, AgentCircuit, LinkpointThreadedCircuit,
+ *          LinkpointCircuitIntegration, SessionManager, SecondLifeProtocol,
+ *          ConnectionKeepAliveManager, GridConnectionService, WorldViewActivity
  */
 enum class ConnectionState {
     DISCONNECTED,
+    IDLE,
     CONNECTING,
     CONNECTED,
-    ERROR
+    RECONNECTING,
+    DISCONNECTING,
+    ERROR,
+    MFA_REQUIRED
 }
