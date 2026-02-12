@@ -15,7 +15,7 @@ import com.linkpoint.network.NetworkLogger
  * - Message statistics tracking
  *
  * Thread Safety:
- * Uses @Synchronized consistently for ALL operations on the handlers map.
+ * Uses synchronized blocks consistently for ALL operations on the handlers map.
  * Previous implementation mixed coroutine Mutex and @Synchronized which
  * are independent lock mechanisms - they don't interlock, creating a data race.
  * Following Lumiya's pattern of using a single synchronization mechanism.
@@ -108,15 +108,16 @@ class MessageRouter {
      * @param messageId The message ID
      * @param handler The handler to unregister
      */
-    @Synchronized
     suspend fun unregisterHandler(messageId: Int, handler: Handler) {
-        val handlerList = handlers[messageId]
-        if (handlerList != null) {
-            handlerList.remove(handler)
-            if (handlerList.isEmpty()) {
-                handlers.remove(messageId)
+        synchronized(this) {
+            val handlerList = handlers[messageId]
+            if (handlerList != null) {
+                handlerList.remove(handler)
+                if (handlerList.isEmpty()) {
+                    handlers.remove(messageId)
+                }
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Unregistered handler for message $messageId")
             }
-            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Unregistered handler for message $messageId")
         }
     }
 
@@ -199,17 +200,15 @@ class MessageRouter {
     /**
      * Get the number of registered handlers
      */
-    @Synchronized
-    suspend fun getHandlerCount(): Int {
-        return handlers.values.sumOf { it.size }
+    suspend fun getHandlerCount(): Int = synchronized(this) {
+        handlers.values.sumOf { it.size }
     }
 
     /**
      * Get the number of messages with handlers
      */
-    @Synchronized
-    suspend fun getMessageCount(): Int {
-        return handlers.size
+    suspend fun getMessageCount(): Int = synchronized(this) {
+        handlers.size
     }
 
     /**
@@ -231,12 +230,13 @@ class MessageRouter {
     /**
      * Clear all handlers
      */
-    @Synchronized
     suspend fun clearAll() {
-        handlers.clear()
-        totalMessagesRouted = 0
-        successfulRoutes = 0
-        failedRoutes = 0
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "All handlers cleared")
+        synchronized(this) {
+            handlers.clear()
+            totalMessagesRouted = 0
+            successfulRoutes = 0
+            failedRoutes = 0
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "All handlers cleared")
+        }
     }
 }

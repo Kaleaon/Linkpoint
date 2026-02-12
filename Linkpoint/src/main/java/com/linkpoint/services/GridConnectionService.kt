@@ -149,11 +149,14 @@ class GridConnectionService : Service() {
                     }
                     ConnectionState.CONNECTING -> "Connecting..."
                     ConnectionState.RECONNECTING -> "Reconnecting..."
+                    ConnectionState.IDLE -> "Idle"
+                    ConnectionState.DISCONNECTING -> "Disconnecting..."
                     ConnectionState.DISCONNECTED -> {
                         stopSelf()
                         "Disconnected"
                     }
                     ConnectionState.ERROR -> "Connection error"
+                    ConnectionState.MFA_REQUIRED -> "MFA required"
                 }
                 updateNotification(status)
             }
