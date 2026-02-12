@@ -259,19 +259,31 @@ class GridConnection(
                     if (capsReady) {
                         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP, "Capabilities initialized")
                     } else {
-                        NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Capability initialization failed, retrying...")
-                        // Retry once after a delay - capabilities are critical for textures/meshes
-                        delay(5000)
-                        val retryReady = capManager.initialize(reply.seedCapability, loginUrl)
-                        if (retryReady) {
-                            NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP, "Capabilities initialized on retry")
-                        } else {
-                            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Capability initialization failed after retry")
-                        }
+                        NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
+                            "Capability initialization failed, starting background retry loop...")
+                        // Start background retry loop instead of a single retry.
+                        // On mobile networks (especially cellular), the seed capability
+                        // often returns empty responses during initial connection.
+                        // The background retry uses exponential backoff (10s, 20s, 40s...)
+                        // and will keep trying until capabilities are loaded or max attempts reached.
+                        capManager.startBackgroundRetry(reply.seedCapability, loginUrl)
                     }
                 }
             } else {
                 NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "No seed capability provided, skipping caps init")
+            }
+
+            // Step 4: Set up UDP reconnection callback
+            // When the UDP connection detects it's dead (e.g. 5 unanswered pings,
+            // socket errors), this callback triggers reconnection of the full session.
+            sharedUdpConnection?.setReconnectionCallback {
+                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
+                    "UDP reconnection callback triggered - attempting to reconnect")
+                scope.launch {
+                    if (shouldReconnect()) {
+                        attemptReconnection()
+                    }
+                }
             }
             
             _connectionState.value = ConnectionState.CONNECTED

@@ -182,24 +182,34 @@ class CapabilityManager {
     
     private val _isReady = MutableStateFlow(false)
     val isReady: StateFlow<Boolean> = _isReady
-    
+
     private data class EventHandlerRegistration(
         val handler: EventHandler,
         val dispatcher: CoroutineDispatcher
     )
-    
+
     // Event handlers
     private val eventHandlers = ConcurrentHashMap<String, MutableList<EventHandlerRegistration>>()
-    
+
     // Initialization tracking for diagnostics (volatile for thread safety)
     @Volatile private var initializationStartTime: Long = 0
     @Volatile private var initializationEndTime: Long = 0
     @Volatile private var lastInitializationError: String? = null
     @Volatile private var lastInitializationAttempts: Int = 0
     @Volatile private var lastSeedCapabilityUsed: String? = null
-    
+
     // Linkpoint translation layer support
     @Volatile private var loginUrl: String? = null
+
+    // Background retry for capability initialization
+    private var backgroundRetryJob: Job? = null
+    @Volatile private var backgroundRetryCount: Int = 0
+
+    companion object BackgroundRetry {
+        private const val BACKGROUND_RETRY_INITIAL_DELAY_MS = 10_000L  // 10 seconds
+        private const val BACKGROUND_RETRY_MAX_DELAY_MS = 60_000L     // 60 seconds
+        private const val BACKGROUND_RETRY_MAX_ATTEMPTS = 10
+    }
     
     /**
      * Initialize capabilities from seed with Linkpoint translation layer support.
@@ -374,7 +384,60 @@ class CapabilityManager {
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
         true
     }
-    
+
+    /**
+     * Start a background retry loop for capability initialization.
+     *
+     * When the initial seed capability request fails (e.g. empty response on mobile networks),
+     * this launches a coroutine that periodically retries with exponential backoff.
+     * The loop stops as soon as capabilities are successfully loaded or the manager is shut down.
+     *
+     * @param seedCap The seed capability URL to retry
+     * @param loginUrlParam The login URL for URL repair
+     */
+    fun startBackgroundRetry(seedCap: String, loginUrlParam: String) {
+        // Don't start if already ready or already retrying
+        if (_isReady.value) return
+        backgroundRetryJob?.cancel()
+        backgroundRetryCount = 0
+
+        backgroundRetryJob = scope.launch {
+            while (isActive && !_isReady.value && backgroundRetryCount < BACKGROUND_RETRY_MAX_ATTEMPTS) {
+                backgroundRetryCount++
+                val delayMs = minOf(
+                    BACKGROUND_RETRY_INITIAL_DELAY_MS * (1L shl minOf(backgroundRetryCount - 1, 4)),
+                    BACKGROUND_RETRY_MAX_DELAY_MS
+                )
+                Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+                Log.i(TAG, "║ BACKGROUND CAPABILITY RETRY $backgroundRetryCount/$BACKGROUND_RETRY_MAX_ATTEMPTS")
+                Log.i(TAG, "║ Waiting ${delayMs}ms before retry...")
+                Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+                delay(delayMs)
+
+                if (_isReady.value) break
+
+                val success = try {
+                    initialize(seedCap, loginUrlParam)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Background capability retry $backgroundRetryCount failed: ${e.message}")
+                    false
+                }
+
+                if (success) {
+                    Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+                    Log.i(TAG, "║ BACKGROUND RETRY SUCCEEDED on attempt $backgroundRetryCount")
+                    Log.i(TAG, "║ Capabilities now available: ${capabilities.size}")
+                    Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+                    break
+                }
+            }
+
+            if (!_isReady.value) {
+                Log.e(TAG, "Background capability retry exhausted all $BACKGROUND_RETRY_MAX_ATTEMPTS attempts")
+            }
+        }
+    }
+
     /**
      * Request capabilities from seed
      * 
@@ -785,6 +848,7 @@ class CapabilityManager {
      * Stop the capability manager
      */
     fun shutdown() {
+        backgroundRetryJob?.cancel()
         eventQueueJob?.cancel()
         scope.cancel()
         capabilities.clear()

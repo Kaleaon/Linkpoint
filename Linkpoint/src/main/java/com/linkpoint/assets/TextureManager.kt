@@ -174,9 +174,8 @@ class TextureManager(
             val url = capUrl?.let { buildTextureUrl(it, textureId) }
             
             if (url == null) {
-                // No capability URL available - texture fetching requires GetTexture capability
-                // The asset CDN fallback doesn't work without authentication
-                Log.w(TAG, "🖼️ Texture download skipped: $textureId - GetTexture capability not available")
+                // No capability URL available - queue for retry when capabilities load
+                Log.w(TAG, "🖼️ Texture queued for retry: $textureId - GetTexture capability not yet available")
                 NetworkLogger.logTextureResult(
                     textureId = textureId.toString(),
                     success = false,
@@ -185,10 +184,15 @@ class TextureManager(
                     protocol = null,
                     error = "GetTexture capability not available"
                 )
-                
+
                 lastError = "GetTexture capability not available"
                 lastErrorTime = System.currentTimeMillis()
                 updateStats { it.copy(failedCount = it.failedCount + 1) }
+
+                // Queue for retry instead of permanent failure
+                capabilityPendingTextures.offer(TextureRequest(textureId, TexturePriority.NORMAL, discard))
+                ensureCapabilityRetryLoopStarted()
+
                 return@withContext null
             }
             
@@ -303,6 +307,10 @@ class TextureManager(
     
     // Track textures that are known to be missing
     private val missingTextures = java.util.concurrent.ConcurrentHashMap.newKeySet<UUID>()
+
+    // Track textures that failed due to missing capability (eligible for retry)
+    private val capabilityPendingTextures = java.util.concurrent.ConcurrentLinkedQueue<TextureRequest>()
+    @Volatile private var capabilityRetryJob: Job? = null
     
     // Track in-progress UDP texture transfers
     private val udpTextureTransfers = java.util.concurrent.ConcurrentHashMap<UUID, ByteArrayOutputStream>()
@@ -531,19 +539,59 @@ class TextureManager(
     
     /**
      * Called when capabilities are ready after login.
-     * 
-     * Note: The TextureManager already uses capability-based fetching dynamically
-     * via the capabilityUrl property (see buildTextureUrl). This method is primarily
-     * for logging and notification purposes, similar to the reference viewer's TextureCache.setFetcher()
-     * pattern where the fetcher is set but the actual fetching logic already supports
-     * the capability URL when available.
+     *
+     * Retriggers any texture downloads that were queued because the GetTexture capability
+     * was not yet available during the initial loading phase.
      */
     fun onCapabilitiesReady() {
         val textureCapUrl = capabilityUrl
         if (textureCapUrl != null) {
             Log.i(TAG, "Texture fetching enabled via capability: ${textureCapUrl.take(50)}...")
+            retryCapabilityPendingTextures()
         } else {
             Log.w(TAG, "GetTexture capability not available - using fallback asset server")
+        }
+    }
+
+    /**
+     * Re-download textures that were queued because GetTexture capability was unavailable.
+     */
+    private fun retryCapabilityPendingTextures() {
+        val pendingCount = capabilityPendingTextures.size
+        if (pendingCount == 0) return
+
+        Log.i(TAG, "🖼️ Retrying $pendingCount textures now that GetTexture capability is available")
+        val retryList = mutableListOf<TextureRequest>()
+        while (true) {
+            val req = capabilityPendingTextures.poll() ?: break
+            retryList.add(req)
+        }
+
+        retryList.forEach { req ->
+            if (!textureCache.containsKey(req.textureId)) {
+                downloadQueue.offer(req)
+            }
+        }
+    }
+
+    /**
+     * Start a background loop that periodically checks if capabilities have loaded
+     * and retries queued textures. Stops once capabilities are available or queue is empty.
+     */
+    private fun ensureCapabilityRetryLoopStarted() {
+        if (capabilityRetryJob?.isActive == true) return
+        capabilityRetryJob = scope.launch {
+            var attempts = 0
+            while (isActive && capabilityPendingTextures.isNotEmpty() && attempts < 30) {
+                attempts++
+                delay(5_000L)  // Check every 5 seconds
+
+                if (capabilityUrl != null) {
+                    Log.i(TAG, "🖼️ GetTexture capability now available, retrying queued textures")
+                    retryCapabilityPendingTextures()
+                    break
+                }
+            }
         }
     }
     
