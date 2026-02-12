@@ -1066,10 +1066,21 @@ class UDPConnectionFixed {
             NetworkLogger.log(
                 NetworkLogger.Level.WARN,
                 NetworkLogger.Category.UDP,
-                "Receive loop ended unexpectedly: $disconnectReason - disconnecting and signaling reconnection"
+                "Receive loop ended unexpectedly: $disconnectReason - attempting socket reconnect"
             )
-            reconnectionCallback?.invoke()
-            disconnect()
+            // Attempt socket reconnect from a coroutine (can't call suspend from plain thread)
+            scope.launch {
+                val reconnected = try { reconnect() } catch (e: Exception) { false }
+                if (!reconnected) {
+                    NetworkLogger.log(
+                        NetworkLogger.Level.ERROR,
+                        NetworkLogger.Category.UDP,
+                        "Socket reconnect failed after receive loop exit, triggering full reconnection"
+                    )
+                    reconnectionCallback?.invoke()
+                    disconnect()
+                }
+            }
         }
 
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== BLOCKING RECEIVE LOOP STOPPED ===")
@@ -1276,10 +1287,21 @@ class UDPConnectionFixed {
             NetworkLogger.log(
                 NetworkLogger.Level.WARN,
                 NetworkLogger.Category.UDP,
-                "No response from server (${unansweredPings.get()} unanswered pings), disconnecting"
+                "No response from server (${unansweredPings.get()} unanswered pings) - attempting socket reconnect before full disconnect"
             )
-            reconnectionCallback?.invoke()
-            disconnect()
+            // Try socket reconnect first before triggering full reconnection
+            scope.launch {
+                val reconnected = try { reconnect() } catch (e: Exception) { false }
+                if (!reconnected) {
+                    NetworkLogger.log(
+                        NetworkLogger.Level.ERROR,
+                        NetworkLogger.Category.UDP,
+                        "Socket reconnect failed, triggering full reconnection"
+                    )
+                    reconnectionCallback?.invoke()
+                    disconnect()
+                }
+            }
             return
         }
 
@@ -2034,16 +2056,23 @@ class UDPConnectionFixed {
             if (isSocketInvalidationError) {
                 NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
                     "⚠️ Critical socket error detected: ${e.message}")
-                
+
                 if (errorCount >= CONSECUTIVE_ERROR_THRESHOLD) {
                     NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
-                        "🔄 Too many consecutive send errors ($errorCount), triggering reconnection")
-                    
-                    // Trigger reconnection via callback
-                    reconnectionCallback?.invoke()
-                    
-                    // Reset counter after triggering reconnection
+                        "🔄 Too many consecutive send errors ($errorCount), attempting socket reconnect")
+
+                    // Reset counter before attempting reconnect
                     consecutiveSendErrors.set(0)
+
+                    // Try socket reconnect first, fall back to full reconnection
+                    scope.launch {
+                        val reconnected = try { reconnect() } catch (ex: Exception) { false }
+                        if (!reconnected) {
+                            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                                "Socket reconnect failed after send errors, triggering full reconnection")
+                            reconnectionCallback?.invoke()
+                        }
+                    }
                 }
             }
         }
@@ -2189,7 +2218,110 @@ class UDPConnectionFixed {
 
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== DISCONNECTED ===")
     }
-    
+
+    /**
+     * Reconnect the UDP socket without re-sending UseCircuitCode.
+     *
+     * This recreates the NIO DatagramChannel and restarts the receive loop when the
+     * existing socket has been invalidated (e.g. by mobile network changes, NAT timeout,
+     * or ICMP port-unreachable). The circuit code and session credentials are preserved.
+     *
+     * Unlike a full disconnect+connect cycle, this does NOT reset the sequence number
+     * or re-send UseCircuitCode/CompleteAgentMovement because the server-side circuit
+     * may still be alive. It re-sends UseCircuitCode to ensure the server maps our
+     * new source port to the existing circuit.
+     *
+     * @return true if reconnection succeeded
+     */
+    suspend fun reconnect(): Boolean = withContext(CircuitDispatcher.dispatcher) {
+        if (simIP.isBlank() || simPort == 0) {
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                "Cannot reconnect: no sim address configured")
+            return@withContext false
+        }
+
+        NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
+            "=== UDP SOCKET RECONNECT ===")
+        NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
+            "Recreating socket to $simIP:$simPort (circuit=$circuitCode)")
+
+        // Tear down the old socket and threads without publishing disconnect events
+        _isConnected.value = false
+        ioThread?.interrupt()
+        ioThread = null
+        receiveJob?.cancel()
+        ackSenderJob?.cancel()
+        timeoutCheckerJob?.cancel()
+        pendingAcksToSend.clear()
+
+        try {
+            selectionKey?.cancel()
+            selector?.close()
+            datagramChannel?.close()
+        } catch (e: Exception) {
+            NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
+                "Error closing old socket during reconnect: ${e.message}")
+        }
+
+        // Reset ping state so we don't immediately disconnect again
+        val now = System.currentTimeMillis()
+        lastReceiveTime = now
+        lastPingTime.set(now)
+        unansweredPings.set(0)
+        consecutiveSendErrors.set(0)
+
+        try {
+            val address = InetSocketAddress(simIP, simPort)
+            datagramChannel = DatagramChannel.open().apply {
+                configureBlocking(false)
+                setOption(StandardSocketOptions.SO_REUSEADDR, true)
+                connect(address)
+            }
+
+            try {
+                val localAddr = datagramChannel?.localAddress as? InetSocketAddress
+                localBindAddress = localAddr?.address?.hostAddress
+                localBindPort = localAddr?.port ?: 0
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
+                    "✓ Reconnect local bind: $localBindAddress:$localBindPort")
+            } catch (e: Exception) {
+                // Non-fatal
+            }
+
+            selector = Selector.open()
+            selectionKey = datagramChannel?.register(selector, SelectionKey.OP_READ)
+
+            _isConnected.value = true
+
+            // Start receive loop on dedicated I/O thread
+            ioThread = Thread({
+                receiveLoopBlocking()
+            }, "SLCircuitIO-reconnect").apply {
+                isDaemon = true
+                start()
+            }
+
+            // Restart ACK sender
+            ackSenderJob = scope.launch { ackSenderLoop() }
+
+            // Restart timeout checker
+            timeoutCheckerJob = scope.launch { timeoutCheckerLoop() }
+
+            // Re-send UseCircuitCode so the server maps our new source port
+            sendUseCircuitCode()
+
+            NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
+                "=== UDP SOCKET RECONNECT SUCCEEDED ===")
+            true
+        } catch (e: Exception) {
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                "UDP socket reconnect failed: ${e.message}")
+            lastConnectionError = "Reconnect failed: ${e.message}"
+            _isConnected.value = false
+            false
+        }
+    }
+
     /**
      * Get statistics
      */

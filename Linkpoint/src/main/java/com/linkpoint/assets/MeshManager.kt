@@ -41,6 +41,11 @@ class MeshManager(
     
     private val pendingMeshes = ConcurrentHashMap<UUID, Deferred<MeshData?>>()
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    // Meshes queued for retry when capability becomes available
+    private data class PendingMeshRequest(val meshId: UUID, val lod: MeshLOD)
+    private val capabilityPendingMeshes = java.util.concurrent.ConcurrentLinkedQueue<PendingMeshRequest>()
+    @Volatile private var capabilityRetryJob: Job? = null
     
     /**
      * Get mesh data (cached or download)
@@ -72,9 +77,13 @@ class MeshManager(
             ?: capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH)
         
         if (meshUrl == null) {
+            Log.w(TAG, "Mesh download queued for retry: $meshId - No mesh capability available yet")
             lastError = "No mesh capability available"
             lastErrorTime = System.currentTimeMillis()
             downloadFailCount.incrementAndGet()
+            // Queue for retry when capability becomes available
+            capabilityPendingMeshes.offer(PendingMeshRequest(meshId, lod))
+            ensureMeshCapabilityRetryStarted()
             return null
         }
         
@@ -289,7 +298,56 @@ class MeshManager(
         }
     }
     
+    /**
+     * Called when capabilities become available.
+     * Retries any mesh downloads that were queued due to missing GetMesh capability.
+     */
+    fun onCapabilitiesReady() {
+        val meshCap = capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH2)
+            ?: capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH)
+        if (meshCap != null) {
+            retryCapabilityPendingMeshes()
+        }
+    }
+
+    private fun retryCapabilityPendingMeshes() {
+        val pendingCount = capabilityPendingMeshes.size
+        if (pendingCount == 0) return
+
+        Log.i(TAG, "Retrying $pendingCount meshes now that GetMesh capability is available")
+        val retryList = mutableListOf<PendingMeshRequest>()
+        while (true) {
+            val req = capabilityPendingMeshes.poll() ?: break
+            retryList.add(req)
+        }
+
+        retryList.forEach { req ->
+            scope.launch {
+                downloadAndParseMesh(req.meshId, req.lod)
+            }
+        }
+    }
+
+    private fun ensureMeshCapabilityRetryStarted() {
+        if (capabilityRetryJob?.isActive == true) return
+        capabilityRetryJob = scope.launch {
+            var attempts = 0
+            while (isActive && capabilityPendingMeshes.isNotEmpty() && attempts < 30) {
+                attempts++
+                delay(5_000L)
+                val meshCap = capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH2)
+                    ?: capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH)
+                if (meshCap != null) {
+                    Log.i(TAG, "GetMesh capability now available, retrying queued meshes")
+                    retryCapabilityPendingMeshes()
+                    break
+                }
+            }
+        }
+    }
+
     fun shutdown() {
+        capabilityRetryJob?.cancel()
         scope.cancel()
         pendingMeshes.clear()
     }
