@@ -115,6 +115,11 @@ class CapabilityManager {
         
         // Retryable message patterns for IOException detection
         private val RETRYABLE_MESSAGE_PATTERNS = listOf("EOF", "reset", "closed", "timeout", "ECONNRESET")
+        
+        // Background retry constants
+        private const val BACKGROUND_RETRY_INITIAL_DELAY_MS = 10_000L  // 10 seconds
+        private const val BACKGROUND_RETRY_MAX_DELAY_MS = 60_000L     // 60 seconds
+        private const val BACKGROUND_RETRY_MAX_ATTEMPTS = 10
     }
     
     // Request throttler for rate limiting
@@ -205,11 +210,6 @@ class CapabilityManager {
     private var backgroundRetryJob: Job? = null
     @Volatile private var backgroundRetryCount: Int = 0
 
-    companion object BackgroundRetry {
-        private const val BACKGROUND_RETRY_INITIAL_DELAY_MS = 10_000L  // 10 seconds
-        private const val BACKGROUND_RETRY_MAX_DELAY_MS = 60_000L     // 60 seconds
-        private const val BACKGROUND_RETRY_MAX_ATTEMPTS = 10
-    }
     
     /**
      * Initialize capabilities from seed with Linkpoint translation layer support.
