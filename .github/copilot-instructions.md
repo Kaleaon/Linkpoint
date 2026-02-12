@@ -1,400 +1,180 @@
-copilot/fix-16
-# Linkpoint (Lumiya Second Life Viewer)
+# Linkpoint - Second Life Viewer for Android
 
-Linkpoint is an Android application for connecting to Second Life virtual worlds. It's a mobile client with 3D rendering, native C++ components, and complex resource management systems.
+Linkpoint is a modern Android application for connecting to Second Life virtual worlds. It is a 100% Kotlin codebase using Material 3, Filament rendering, and WebRTC voice.
 
 **ALWAYS reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.**
 
 ## Working Effectively
 
-### Known Build Issues - CRITICAL
-**The build currently FAILS due to documented resource conflicts. Do NOT expect it to build successfully without applying fixes first.**
+### Build System - CRITICAL
+**The Linkpoint build WORKS. Always verify your changes compile before submitting.**
 
-- `./gradlew build` - FAILS in ~2-45 seconds with resource conflicts
-- `./gradlew assembleDebug` - FAILS in ~2-45 seconds with resource conflicts  
-- `./gradlew lintDebug` - FAILS in ~2 seconds with resource conflicts
+The active application module is `Linkpoint/` (not `app/`). Build from the repository root using the root Gradle wrapper:
 
-**Expected Error Messages:**
+```bash
+# ✅ CORRECT - Build from repository root with :Linkpoint: prefix
+./gradlew :Linkpoint:assembleDebug --stacktrace
+
+# ✅ ALSO CORRECT - Build from within Linkpoint/ directory
+cd Linkpoint && ./gradlew assembleDebug --stacktrace
+
+# ❌ WRONG - Do NOT use app/ module commands (legacy, broken)
+# ./gradlew :app:assembleDebug  # OLD MODULE - DO NOT USE
 ```
-Resource compilation failed. Can not add resource to table.
-Duplicate value for resource 'attr/fontStyle'
-android:exported needs to be explicitly specified
-Can't process attribute android:pathData="@string/path_password_eye"
-```
 
-**The project requires fixes from docs/Broken_Code_Analysis_and_Fixes.md before building.**
+**You MUST verify compilation after making code changes:**
+```bash
+./gradlew :Linkpoint:compileDebugKotlin --stacktrace
+```
 
 ### Environment Setup
-- **Java**: Requires Java 8+ (Java 17 available in environment)
-- **Android SDK**: Located at `/usr/local/lib/android/sdk`
-- **NDK**: Available versions 26.3, 27.3, 28.2 in `$ANDROID_HOME/ndk/`
-- **Gradle**: Use `./gradlew` (v8.0) not system gradle (v9.0) - version mismatch causes issues
-- **CMake**: Required for native C++ components (Basis Universal transcoder)
+- **Java**: JDK 17 (Temurin distribution)
+- **Android SDK**: compileSdk 35, targetSdk 34, minSdk 24
+- **NDK**: 25.2.9519653
+- **Gradle**: 8.7 (via wrapper)
+- **Kotlin**: 1.9.22
+- **Build Tools**: 35.0.0
 
 ### Build System Commands
 ```bash
-# Clean (works) - takes ~1 minute 20 seconds. NEVER CANCEL.
+# Clean build
 ./gradlew clean
-# Timeout: Set to 300+ seconds
 
-# Check available tasks
-./gradlew tasks --all | grep -E "(build|lint|test)"
+# Build debug APK
+./gradlew :Linkpoint:assembleDebug --stacktrace
 
-# View build configuration  
-./gradlew :app:dependencies --configuration debugRuntimeClasspath
+# Build release APK
+./gradlew :Linkpoint:assembleRelease --stacktrace
+
+# Run Kotlin compilation check
+./gradlew :Linkpoint:compileDebugKotlin --stacktrace
+
+# Run unit tests
+./gradlew :Linkpoint:testDebugUnitTest --stacktrace
+
+# Run lint analysis
+./gradlew :Linkpoint:lintDebug --stacktrace
+
+# View dependencies
+./gradlew :Linkpoint:dependencies --configuration debugRuntimeClasspath
 ```
 
 ### Development Structure
 ```
-app/
-├── src/main/java/com/lumiyaviewer/lumiya/
-│   ├── render/          # 3D rendering system  
-│   ├── res/             # Resource management
-│   ├── slproto/         # Second Life protocol
-│   ├── ui/              # User interface
-│   └── utils/           # Utilities
-├── src/main/cpp/        # Native C++ code
-│   └── CMakeLists.txt   # CMake build config
-└── src/main/res/        # Android resources (causes conflicts)
-    ├── layout*/         # UI layouts with missing Material styles
-    └── values*/         # Resource values with missing attributes
+Linkpoint/                           # Main application module
+├── build.gradle.kts                 # Kotlin DSL build script
+├── settings.gradle.kts              # Project settings
+├── gradlew                          # Gradle wrapper (also usable)
+└── src/main/java/com/linkpoint/
+    ├── LinkpointApplication.kt      # Application entry point
+    ├── assets/                      # Asset management (textures, meshes)
+    ├── network/                     # Network and HTTP layer
+    │   └── core/                    # Grid connection, throttling
+    ├── protocol/                    # Second Life protocol
+    │   ├── capabilities/            # Capability management (HTTP endpoints)
+    │   ├── llsd/                    # LLSD data format
+    │   ├── messages/                # UDP message handling
+    │   └── translation/             # Protocol translation layer
+    ├── rendering/                   # 3D rendering (Filament)
+    ├── ui/                          # User interface (Material 3)
+    └── voice/                       # WebRTC voice system
 ```
 
-### Scripts and Tools
-```bash
-# Texture conversion (requires basisu tool - currently missing)
-chmod +x scripts/convert_textures.sh
-./scripts/convert_textures.sh
-# Expected: "Error: basisu command not found" - install from https://github.com/BinomialLLC/basis_universal
+### Repository Structure
+The repository root contains multiple modules, but only `Linkpoint/` is active:
 
-# Explore project structure  
-find . -name "*.gradle" -o -name "CMakeLists.txt" -o -name "*.md"
-```
+| Module | Location | Status |
+|--------|----------|--------|
+| **Linkpoint** | `Linkpoint/` | ✅ Active - 100% Kotlin |
+| PWA Demo | `PWA-demo/` | Web demo |
+| Gauss | `Gauss/` | 3D graphics research |
+| LLSD-Kotlin | `LLSD-KOTLIN/` | LLSD library |
+
+The root `settings.gradle` includes Linkpoint via `includeBuild('Linkpoint')`.
 
 ## Validation & Testing
 
-**CRITICAL: Since builds fail, focus on code analysis and applying documented fixes.**
+### ALWAYS Verify Compilation
+After making code changes, **always** verify they compile:
 
-### Validation Results (Verified Commands)
-**These commands work reliably:**
 ```bash
-./gradlew clean                    # ~1 min 15 sec - MEASURED
-./gradlew tasks                    # ~2 seconds - MEASURED  
-./gradlew :app:dependencies --configuration debugRuntimeClasspath  # ~25 seconds - MEASURED
-./scripts/convert_textures.sh      # Fails gracefully - missing basisu - VERIFIED
-grep -r "class.*Activity" app/src/main/java/  # Code exploration - VERIFIED
-find app/src/main/java -name "*Manager*"      # Find Manager classes - VERIFIED
+# Quick compilation check (~1-2 minutes)
+./gradlew :Linkpoint:compileDebugKotlin --stacktrace
+
+# Full debug build (~5-10 minutes)
+./gradlew :Linkpoint:assembleDebug --stacktrace
 ```
 
-**These WILL fail until resource conflicts are fixed:**
+### Running Tests
 ```bash
-./gradlew build                    # Resource linking failure ~25 seconds - VERIFIED
-./gradlew assembleDebug           # Resource linking failure ~3 seconds - VERIFIED  
-./gradlew lintDebug              # Resource linking failure ~1 second - VERIFIED
-./gradlew test                   # Resource linking failure ~4 seconds - VERIFIED
+# Unit tests
+./gradlew :Linkpoint:testDebugUnitTest --stacktrace --continue
+
+# Lint analysis
+./gradlew :Linkpoint:lintDebug --stacktrace
 ```
 
-### Manual Code Review Process
-1. **Analyze resource conflicts**: Check `app/src/main/res/` vs dependency resources
-2. **Review manifest issues**: Check `app/src/main/AndroidManifest.xml` for missing `android:exported`
-3. **Study documentation**: Read `docs/Broken_Code_Analysis_and_Fixes.md` for specific fixes
-4. **Apply suggested fixes**: Use fixes from documentation before attempting builds
-
-### Code Quality Checks (Currently Fail)
+### Code Exploration
 ```bash
-# Lint analysis - FAILS due to resource conflicts (~2 seconds)
-./gradlew lintDebug --continue
-# Expected: Same resource conflicts as build
+# Find Kotlin source files
+find Linkpoint/src -name "*.kt" | head -20
 
-# Check code style (when fixed)
-# ./gradlew checkJetifier
+# Search for specific classes
+grep -r "class.*Manager" Linkpoint/src/main/java/
+
+# Find protocol handlers
+find Linkpoint/src/main/java -name "*Capability*"
+
+# Check dependency configuration
+grep -A 5 "implementation" Linkpoint/build.gradle.kts
 ```
-
-### Testing Strategy (Post-Fix)
-After applying resource conflict fixes from documentation:
-1. **Build verification**: `./gradlew assembleDebug` - should take 30+ minutes with native components. **NEVER CANCEL.**
-2. **APK validation**: `unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -E "(libopenjpeg|classes.dex)"`
-3. **Native library check**: Verify C++ components compiled correctly
 
 ## Common Tasks & Patterns
 
-### Repository Navigation
-```bash
-# Key documentation (READ FIRST)
-ls docs/
-# Focus on: Broken_Code_Analysis_and_Fixes.md, Implementation_Roadmap.md
+### Adding New Features
+1. **Find the relevant package** in `Linkpoint/src/main/java/com/linkpoint/`
+2. **Check existing patterns** by examining similar classes
+3. **Write Kotlin** - the codebase is 100% Kotlin, do not add Java files
+4. **Verify compilation** with `./gradlew :Linkpoint:compileDebugKotlin`
+5. **Follow coroutines patterns** - async code uses `kotlinx.coroutines`
 
-# Main source areas
-find app/src/main/java -name "*.java" | head -10
-ls app/src/main/cpp/
+### Protocol and Network Changes
+- **Capabilities**: `protocol/capabilities/CapabilityManager.kt`
+- **UDP Messages**: `protocol/messages/`
+- **Grid Connection**: `network/core/GridConnection.kt`
+- **LLSD Format**: `protocol/llsd/`
 
-# Resource investigation 
-find app/resources/res -name "*.xml" | head -5
-grep -r "attr/fontStyle" app/resources/
-```
-
-### Resource Conflict Analysis
-```bash
-# Check for duplicate resources (root cause of build failures)
-grep -r "fontStyle\|passwordToggle\|buttonGravity" app/src/main/res/
-find app/src/main/res -name "values.xml" -exec grep -l "attr/" {} \;
-
-# AndroidX dependencies check
-grep -A 5 "implementation.*androidx" app/build.gradle
-```
-
-### Native Code Analysis
-```bash
-# CMake configuration
-cat app/src/main/cpp/CMakeLists.txt
-
-# Native source files
-find app/src/main/cpp -name "*.cpp" -o -name "*.h"
-
-# NDK configuration
-grep -A 5 "ndk\|cmake" app/build.gradle
-```
-
-## Critical Information
-
-### Build Timings & Timeouts
-- **Clean**: ~1 min 15 sec - Set timeout to 300+ seconds
-- **Resource merge**: Fails in ~2-45 seconds (conflicts)
-- **Full build**: Would be 30+ minutes with native compilation - Set timeout to 3600+ seconds
-- **NEVER CANCEL**: Native builds may appear hung but are processing
-- **Dual failure modes**: Resource conflicts (immediate) AND native linker issues (after resources fixed)
-
-### Expected Working Commands
-```bash
-# These work reliably:
-./gradlew clean                    # ~1 min 15 sec
-./gradlew tasks                    # ~2 seconds  
-./gradlew :app:dependencies --configuration debugRuntimeClasspath # ~25 seconds
-./scripts/convert_textures.sh      # Fails gracefully - missing basisu
-grep -r "class.*Activity" app/src/main/java/  # Code exploration
-```
-
-### Do NOT Attempt (Will Fail)
-```bash
-# These WILL fail until resource conflicts are fixed:
-./gradlew build
-./gradlew assembleDebug  
-./gradlew assembleRelease
-./gradlew lint
-./gradlew test
-```
-
-### Fix Application Order
-1. **Apply resource conflict fixes** from `docs/Broken_Code_Analysis_and_Fixes.md`
-2. **Update AndroidManifest.xml** - add `android:exported` attributes  
-3. **Resolve dependency conflicts** - use packagingOptions in build.gradle
-4. **Test incremental builds** - start with `./gradlew assembleDebug`
-5. **Validate native compilation** - ensure CMake builds C++ components
+### Key Classes
+- `CapabilityManager` - HTTP capability endpoint management
+- `GridConnection` - Main grid connection handler
+- `TextureManager` / `MeshManager` - Asset loading
+- `UDPConnectionFixed` - UDP protocol handler
+- `LinkpointTranslationLayer` - Protocol translation
 
 ## Key Files Reference
 
-### Critical Configuration Files
-- `build.gradle` - Top-level project config
-- `app/build.gradle` - Main app module (contains resource conflict issues)
-- `app/src/main/AndroidManifest.xml` - Missing android:exported declarations
-- `app/src/main/cpp/CMakeLists.txt` - Native build configuration
+### Build Configuration
+- `settings.gradle` - Root settings (includes Linkpoint)
+- `Linkpoint/build.gradle.kts` - App build configuration
+- `Linkpoint/settings.gradle.kts` - App settings
+- `Linkpoint/gradle.properties` - Gradle properties
 
-### Essential Documentation  
-- `docs/Broken_Code_Analysis_and_Fixes.md` - **MUST READ** - Contains exact fixes for build failures
-- `docs/Implementation_Roadmap.md` - Step-by-step fix implementation
-- `docs/Lumiya_Modernization_Guide.md` - Architecture modernization plan  
-- `README.md` - Project overview and structure
+### CI/CD Workflows
+- `.github/workflows/build-linkpoint.yml` - Primary build (builds from root)
+- `.github/workflows/build-release.yml` - Debug + Release builds
+- `.github/workflows/quick-release.yml` - Quick release build
+- `.github/workflows/deploy.yml` - Deployment pipeline
 
-### Important Source Areas
-- `app/src/main/java/com/lumiyaviewer/lumiya/render/` - 3D graphics system
-- `app/src/main/java/com/lumiyaviewer/lumiya/slproto/` - Second Life protocol  
-- `app/src/main/java/com/lumiyaviewer/lumiya/res/` - Resource management
-- `app/src/main/cpp/` - Native Basis Universal integration
-
-## Emergency Procedures
-
-### If Build Appears Hung
-- **DO NOT CANCEL** - Native compilation can take 30+ minutes
-- Monitor with: `ps aux | grep -E "(gradle|cmake|ndk-build)"`
-- Wait minimum 45 minutes before considering cancellation
-
-### If New Errors Appear  
-1. Check if resource conflicts are resolved: `grep -r "Duplicate.*resource" build/`
-2. Verify Android SDK version: `ls $ANDROID_HOME/platforms/`
-3. Compare with documented fixes in `docs/Broken_Code_Analysis_and_Fixes.md`
-
-**Remember: This project has documented build failures. Focus on applying the comprehensive fixes in the documentation rather than expecting immediate build success.**
-                     # Capabilities system
-│   │   ├── chat/                     # Chat protocols
-│   │   ├── inventory/                # Inventory system
-│   │   ├── llsd/                     # LLSD data format
-│   │   └── [15+ more modules]
-│   ├── ui/                           # User interface components
-│   └── openjpeg/                     # JPEG2000 + Basis Universal integration
-├── cpp/                              # Native C++ code
-│   ├── CMakeLists.txt               # CMake build configuration  
-│   ├── basis_universal/             # Basis Universal texture codec
-│   └── jni/                         # JNI wrapper functions
-└── resources/                       # Android resources and manifest
-    ├── AndroidManifest.xml          # App manifest (has known issues)
-    └── res/                         # UI resources (conflicting with AndroidX)
-```
-
-## Development Workflow
-
-### Code Exploration and Navigation
-Since builds fail, use these approaches for code analysis:
-
-- **Search specific functionality**: `grep -r "TextureCache" app/src/main/java/`
-- **Find protocol handlers**: `find app/src/main/java -name "*SLAgent*"`
-- **Locate rendering code**: `ls app/src/main/java/com/lumiyaviewer/lumiya/render/`
-- **Check native integration**: `find app/src/main/cpp -name "*.cpp" -o -name "*.h"`
-
-### Key Classes and Components
-Focus on these core systems when making changes:
-
-- `ResourceManager` - Central resource management system
-- `SLAgentCircuit` - Main Second Life protocol handler
-- `TextureCache`, `GeometryCache`, `AnimationCache` - Asset caching systems  
-- `TerrainPatchGeometry` - Terrain rendering
-- `ModernTextureManager` - Basis Universal texture integration
-- `OpenJPEG` class - JPEG2000 and KTX2 texture decoding
-
-### Native Code (C++)
-The project includes Basis Universal integration:
-- **Build requirements**: NDK with C++17 support, CMake 3.10.2+
-- **Location**: `app/src/main/cpp/`
-- **JNI integration**: Functions in `jni/openjpeg_basis_integration.cpp`
-- **Texture conversion**: Use `scripts/convert_textures.sh` for asset pipeline
-
-## Validation and Testing
-
-### Manual Validation Approaches
-Since automated testing fails, use these manual validation methods:
-
-**Code Quality Checks:**
-- Review Java files for proper null checks and exception handling
-- Check JNI function signatures match Java native method declarations  
-- Verify resource references in XML files are valid
-- Look for potential memory leaks in native code
-
-**Architecture Validation:**
-- Ensure new classes follow existing package structure
-- Check that protocol handlers extend appropriate base classes
-- Verify texture management code integrates with existing cache systems
-- Confirm UI components use proper Android lifecycle methods
-
-### Documentation Validation
-The project includes extensive documentation in `docs/`:
-- Check `docs/CPP_Integration_Guide.md` for native code requirements
-- Review `docs/Lumiya_Modernization_Guide.md` for architecture patterns
-- Reference `CONTRIBUTING.md` for code style guidelines
-
-## Common Development Tasks
-
-### Adding New Features
-When implementing new functionality:
-
-1. **Find the relevant subsystem** in the directory structure above
-2. **Check existing patterns** by examining similar classes in the same package
-3. **Follow the protocol architecture** - most features integrate with `slproto/` modules
-4. **Consider resource management** - use existing cache systems where appropriate
-5. **Test manually** by code review since builds fail
-
-### Texture and Asset Work
-For texture-related changes:
-
-- **Modern textures**: Work with `ModernTextureManager` class
-- **Legacy textures**: Check `TextureCache` and related systems
-- **Asset conversion**: Use the working `scripts/convert_textures.sh`
-- **Native integration**: JNI functions in `cpp/jni/` directory
-
-### Protocol and Network Changes
-For Second Life protocol work:
-
-- **Start with**: `slproto/` package - contains all protocol modules
-- **Authentication**: Check `slproto/auth/` 
-- **Object management**: Look at `slproto/objects/`
-- **Chat/messaging**: Review `slproto/chat/`
-
-## Known Limitations and Workarounds
-
-### Resource Conflicts (Critical Issue)
-The project contains pre-AndroidX Android Support Library resources that conflict with modern AndroidX dependencies. This prevents all build operations.
-
-**Affected areas:**
-- All build commands fail
-- Cannot run automated tests
-- Cannot generate APK files
-- Cannot use Android lint tools
-
-**Specific resource errors:**
-- Missing Material Design styles: `TextAppearance.Material.Body2`
-- Missing custom attributes: `navDrawerBackgroundColor`, `colorContentBackground`
-- Missing themed icons: `IconMaterialMicLight`, `MenuIconSearchThemed`
-- Private Android resource access: `android:id/action_menu_presenter`
-
-**Workarounds:**
-- Use code analysis and manual review instead of builds
-- Reference the extensive documentation for validation
-- Use search and grep commands for code exploration
-
-### Native Compilation Issues
-**Secondary issue discovered through testing:** Even after resolving resource conflicts, native builds fail due to linker problems:
-```
-/usr/bin/ld.gold: error: LLVMgold.so: could not load plugin library
-/usr/bin/ld.gold: fatal error: unsupported ELF machine number 183
-```
-
-**Root cause:** NDK toolchain incompatibility with current environment
-**Impact:** C++ Basis Universal transcoder cannot link properly
-**Workaround:** Focus on Java-only fixes until native toolchain resolved
-
-### Development Environment
-**Working environment requirements:**
-- Java 17+ (confirmed working with Eclipse Adoptium 17.0.16+8)
-- Gradle 8.0 (auto-downloads via wrapper)
-- Android SDK with API 34 support
-- NDK for native builds (if fixing C++ components)
-
-**Commands that work reliably:**
-- All `grep`, `find`, and file exploration commands
-- `./gradlew clean` and `./gradlew tasks`
-- Asset conversion scripts
-- Documentation and file editing
+### Documentation
+- `.github/BUILD_LINKPOINT_WORKFLOW.md` - Workflow documentation
+- `.github/BUILD_PIPELINE.md` - Build pipeline details
+- `docs/` - Additional project documentation
 
 ## Critical Reminders
 
-- **NEVER attempt builds** - they will always fail due to resource conflicts
-- **Use manual validation** - rely on code review and documentation
-- **Focus on architecture** - the extensive documentation provides implementation guidance  
-- **Test logic, not compilation** - validate code correctness through review
-- **Follow existing patterns** - the codebase has consistent architectural approaches
-
-## Quick Reference Commands
-
-```bash
-# Environment check
-./gradlew --version
-
-# Clean workspace  
-./gradlew clean
-
-# Explore codebase structure
-find app/src/main/java -name "*.java" | head -20
-ls -la app/src/main/java/com/lumiyaviewer/lumiya/
-
-# Search for specific functionality
-grep -r "class.*Manager" app/src/main/java/
-find app/src/main/java -name "*Cache*"
-
-# Asset pipeline (this works)
-chmod +x scripts/convert_textures.sh
-./scripts/convert_textures.sh
-
-# Documentation review
-ls docs/
-cat CONTRIBUTING.md
-```
-
-Remember: This is a sophisticated 3D graphics application with complex architecture. The build issues do not reflect code quality - focus on the architectural patterns and extensive documentation for development guidance.
+- **ALWAYS verify compilation** after code changes
+- **Build from root** using `./gradlew :Linkpoint:assembleDebug` or from `Linkpoint/` using its own `./gradlew`
+- **Do NOT reference `app/` module** - it is a legacy module that does not build
+- **100% Kotlin** - never add Java files
+- **One companion object per class** - Kotlin only allows one companion object
+- **Check CI** - the build-linkpoint.yml workflow runs on push and PR
