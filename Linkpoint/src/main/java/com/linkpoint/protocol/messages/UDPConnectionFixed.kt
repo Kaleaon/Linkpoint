@@ -1223,23 +1223,34 @@ class UDPConnectionFixed {
      */
     private suspend fun ackSenderLoop() {
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== ACK SENDER LOOP STARTED ===")
-        
+
         while (_isConnected.value) {
             try {
                 // Wait for ACK interval before checking for pending ACKs
                 delay(ACK_SEND_INTERVAL_MS)
-                
+
                 // Send any pending ACKs
                 if (pendingAcksToSend.isNotEmpty()) {
                     sendPendingAcks()
                 }
+            } catch (e: CancellationException) {
+                // Coroutine was cancelled (disconnect/reconnect) — this is expected, not an error.
+                // Matches the pattern used by timeoutCheckerLoop().
+                if (_isConnected.value) {
+                    NetworkLogger.log(
+                        NetworkLogger.Level.DEBUG,
+                        NetworkLogger.Category.UDP,
+                        "ACK sender cancelled: ${e.message}"
+                    )
+                }
+                break
             } catch (e: Exception) {
                 if (_isConnected.value) {
                     NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "ACK sender error: ${e.message}")
                 }
             }
         }
-        
+
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== ACK SENDER LOOP STOPPED ===")
     }
     
@@ -2344,9 +2355,18 @@ class UDPConnectionFixed {
         agentUpdateJob?.cancel()
         agentUpdateJob = scope.launch {
             Log.d(TAG, "Starting periodic AgentUpdate messages")
-            while (_isConnected.value) {
-                sendAgentUpdate()
-                delay(AGENT_UPDATE_INTERVAL_MS)
+            try {
+                while (_isConnected.value) {
+                    sendAgentUpdate()
+                    delay(AGENT_UPDATE_INTERVAL_MS)
+                }
+            } catch (e: CancellationException) {
+                // Expected during disconnect/reconnect — not an error
+                NetworkLogger.log(
+                    NetworkLogger.Level.DEBUG,
+                    NetworkLogger.Category.UDP,
+                    "AgentUpdate sender cancelled"
+                )
             }
         }
     }
@@ -2512,12 +2532,12 @@ class UDPConnectionFixed {
             agentId = agentId,
             sessionId = sessionId,
             sequenceNumber = sequenceNumber.get(),
-            pendingAckCount = 0,
+            pendingAckCount = pendingAcksToSend.size,
             registeredHandlerCount = messageHandlers.size,
             registeredHandlers = messageHandlers.keys.map { it.toString() },
             pendingPackets = emptyList(),
             socketOpen = datagramChannel?.isOpen ?: false,
-            receiveLoopActive = receiveJob?.isActive == true,
+            receiveLoopActive = ioThread?.isAlive == true,
             lastPingTime = lastPingTime.get(),
             unansweredPings = unansweredPings.get()
         )
