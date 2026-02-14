@@ -611,23 +611,33 @@ class UDPConnectionFixed {
             
             // Start EnhancedPacketLogger session for comprehensive tracking
             EnhancedPacketLogger.startSession()
-            
+
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== INITIATING FIXED UDP CONNECTION ===")
-            
-            // NOTE:
-            // Historically this connection path forced IPv4 by setting the following JVM-wide properties:
-            //   System.setProperty("java.net.preferIPv4Stack", "true")
-            //   System.setProperty("java.net.preferIPv6Addresses", "false")
-            // This has global side effects on all network operations in the process (HTTP/HTTPS, other sockets, etc.).
-            // If the application still requires these settings, configure them once at application startup
-            // (e.g., in the Application class or a dedicated bootstrap) instead of per-connection here.
+
+            // CRITICAL: Force IPv4 stack, matching Lumiya's SLConnection() constructor.
+            // Second Life simulators only listen on IPv4. On cellular networks, Android may
+            // create a dual-stack (IPv6) socket by default. When connecting to an IPv4
+            // simulator address from a dual-stack socket over cellular CGNAT, outgoing packets
+            // are sent as IPv4-mapped IPv6 but return packets may not be routed back correctly
+            // through the carrier's NAT. This causes "packets sent but none received."
+            // Lumiya proves this works on cellular by forcing IPv4 before any socket creation.
+            System.setProperty("java.net.preferIPv4Stack", "true")
+            System.setProperty("java.net.preferIPv6Addresses", "false")
 
             val address = InetSocketAddress(simIP, simPort)
-            
-            // Create and configure DatagramChannel
-            datagramChannel = DatagramChannel.open().apply {
+
+            // Create and configure DatagramChannel — force IPv4 (StandardProtocolFamily.INET)
+            // to match Lumiya's behavior. Falls back to default open() on older Android APIs.
+            datagramChannel = try {
+                DatagramChannel.open(java.net.StandardProtocolFamily.INET)
+            } catch (e: Exception) {
+                // Fallback for API < 26 — system properties above still ensure IPv4
+                DatagramChannel.open()
+            }
+            datagramChannel!!.apply {
                 configureBlocking(false)
-                setOption(StandardSocketOptions.SO_REUSEADDR, true)
+                setOption(StandardSocketOptions.SO_RCVBUF, 65536)
+                setOption(StandardSocketOptions.SO_SNDBUF, 65536)
                 connect(address)
             }
             
@@ -1223,23 +1233,34 @@ class UDPConnectionFixed {
      */
     private suspend fun ackSenderLoop() {
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== ACK SENDER LOOP STARTED ===")
-        
+
         while (_isConnected.value) {
             try {
                 // Wait for ACK interval before checking for pending ACKs
                 delay(ACK_SEND_INTERVAL_MS)
-                
+
                 // Send any pending ACKs
                 if (pendingAcksToSend.isNotEmpty()) {
                     sendPendingAcks()
                 }
+            } catch (e: CancellationException) {
+                // Coroutine was cancelled (disconnect/reconnect) — this is expected, not an error.
+                // Matches the pattern used by timeoutCheckerLoop().
+                if (_isConnected.value) {
+                    NetworkLogger.log(
+                        NetworkLogger.Level.DEBUG,
+                        NetworkLogger.Category.UDP,
+                        "ACK sender cancelled: ${e.message}"
+                    )
+                }
+                break
             } catch (e: Exception) {
                 if (_isConnected.value) {
                     NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "ACK sender error: ${e.message}")
                 }
             }
         }
-        
+
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== ACK SENDER LOOP STOPPED ===")
     }
     
@@ -1937,7 +1958,9 @@ class UDPConnectionFixed {
         try {
             // Build packet header (big-endian per SL protocol)
             val flags = (if (reliable) 0x40 else 0) or (if (zerocoded) 0x80 else 0)
-            val seqNum = sequenceNumber.getAndIncrement()
+            // Lumiya uses incrementAndGet() — first packet gets seq=1, not 0.
+            // This matches all other send paths (sendPendingAcks, sendPendingAcksFromIOThread).
+            val seqNum = sequenceNumber.incrementAndGet()
             
             // Track callback if this is a reliable message with listener
             if (reliable && listener != null) {
@@ -2272,9 +2295,15 @@ class UDPConnectionFixed {
 
         try {
             val address = InetSocketAddress(simIP, simPort)
-            datagramChannel = DatagramChannel.open().apply {
+            datagramChannel = try {
+                DatagramChannel.open(java.net.StandardProtocolFamily.INET)
+            } catch (e: Exception) {
+                DatagramChannel.open()
+            }
+            datagramChannel!!.apply {
                 configureBlocking(false)
-                setOption(StandardSocketOptions.SO_REUSEADDR, true)
+                setOption(StandardSocketOptions.SO_RCVBUF, 65536)
+                setOption(StandardSocketOptions.SO_SNDBUF, 65536)
                 connect(address)
             }
 
@@ -2344,9 +2373,18 @@ class UDPConnectionFixed {
         agentUpdateJob?.cancel()
         agentUpdateJob = scope.launch {
             Log.d(TAG, "Starting periodic AgentUpdate messages")
-            while (_isConnected.value) {
-                sendAgentUpdate()
-                delay(AGENT_UPDATE_INTERVAL_MS)
+            try {
+                while (_isConnected.value) {
+                    sendAgentUpdate()
+                    delay(AGENT_UPDATE_INTERVAL_MS)
+                }
+            } catch (e: CancellationException) {
+                // Expected during disconnect/reconnect — not an error
+                NetworkLogger.log(
+                    NetworkLogger.Level.DEBUG,
+                    NetworkLogger.Category.UDP,
+                    "AgentUpdate sender cancelled"
+                )
             }
         }
     }
@@ -2512,12 +2550,12 @@ class UDPConnectionFixed {
             agentId = agentId,
             sessionId = sessionId,
             sequenceNumber = sequenceNumber.get(),
-            pendingAckCount = 0,
+            pendingAckCount = pendingAcksToSend.size,
             registeredHandlerCount = messageHandlers.size,
             registeredHandlers = messageHandlers.keys.map { it.toString() },
             pendingPackets = emptyList(),
             socketOpen = datagramChannel?.isOpen ?: false,
-            receiveLoopActive = receiveJob?.isActive == true,
+            receiveLoopActive = ioThread?.isAlive == true,
             lastPingTime = lastPingTime.get(),
             unansweredPings = unansweredPings.get()
         )
