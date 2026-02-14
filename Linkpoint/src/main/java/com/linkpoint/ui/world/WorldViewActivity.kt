@@ -28,6 +28,7 @@ import com.linkpoint.ui.inventory.InventoryActivity
 import com.linkpoint.ui.minimap.MinimapActivity
 import com.linkpoint.ui.avatar.MyAvatarActivity
 import com.linkpoint.ui.people.NearbyPeopleActivity
+import com.linkpoint.render.lumiya.core.LumiyaGLSurfaceView
 import com.linkpoint.ui.settings.SettingsActivity
 import com.linkpoint.ui.xr.XRWorldActivity
 import com.linkpoint.utils.DebugReportService
@@ -55,6 +56,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navigationView: NavigationView
     private lateinit var surfaceView: SurfaceView
+    private var lumiyaSurfaceView: LumiyaGLSurfaceView? = null
     private lateinit var renderContainer: FrameLayout
     
     // HUD elements
@@ -97,6 +99,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private val app by lazy { LinkpointApp.getInstance() }
     @Volatile private var isRendering = false
     @Volatile private var isSurfaceReady = false
+    private var useSecondaryRenderer: Boolean = false
     private var hudsVisibleFromManager: Boolean = true
     private var isLayoutEditorMode: Boolean = false
     
@@ -526,6 +529,14 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     }
     
     private fun initRenderer() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        useSecondaryRenderer = prefs.getBoolean("enable_secondary_renderer", false)
+
+        if (useSecondaryRenderer) {
+            initSecondaryRenderer()
+            return
+        }
+
         surfaceView = SurfaceView(this).apply {
             layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
@@ -590,6 +601,21 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         
         // Don't start render loop here - wait for surfaceCreated callback
         android.util.Log.i(TAG, "✓ RenderManager initialized, waiting for surface to be ready...")
+    }
+
+    private fun initSecondaryRenderer() {
+        val glView = LumiyaGLSurfaceView(this).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        }
+        lumiyaSurfaceView = glView
+        renderContainer.removeAllViews()
+        renderContainer.addView(glView)
+        isSurfaceReady = true
+        isRendering = false
+        android.util.Log.i(TAG, "✓ Secondary Lumiya renderer enabled")
     }
     
     private fun startRenderLoop() {
@@ -796,7 +822,11 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     
     override fun onPause() {
         super.onPause()
-        isRendering = false
+        if (useSecondaryRenderer) {
+            lumiyaSurfaceView?.onPause()
+        } else {
+            isRendering = false
+        }
     }
     
     override fun onResume() {
@@ -804,6 +834,18 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         applyScreenOrientation() // Reapply orientation in case user changed setting
         updateDebugFloaterVisibility() // Update debug floater visibility based on settings
         applyInterfacePreferences()
+
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val preferredSecondaryRenderer = prefs.getBoolean("enable_secondary_renderer", false)
+        if (preferredSecondaryRenderer != useSecondaryRenderer) {
+            useSecondaryRenderer = preferredSecondaryRenderer
+            initRenderer()
+        }
+
+        if (useSecondaryRenderer) {
+            lumiyaSurfaceView?.onResume()
+            return
+        }
         
         // Only restart rendering if surface is ready (synchronized to avoid race)
         synchronized(this) {
@@ -824,6 +866,11 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     
     override fun onDestroy() {
         super.onDestroy()
-        isRendering = false
+        if (useSecondaryRenderer) {
+            lumiyaSurfaceView?.shutdown()
+            lumiyaSurfaceView = null
+        } else {
+            isRendering = false
+        }
     }
 }

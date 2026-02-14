@@ -140,6 +140,25 @@ location of your Java installation."
     fi
 fi
 
+# Gradle/Kotlin script compilation can fail on bleeding-edge Java versions.
+# If Java > 23 is detected, prefer a local Java 21 installation when present.
+java_version_raw=$("$JAVACMD" -version 2>&1 | sed -n '1s/.*version "\([^"]*\)".*/\1/p')
+java_major=$(printf '%s' "$java_version_raw" | cut -d. -f1)
+if [ -n "$java_major" ] && [ "$java_major" -gt 23 ] 2>/dev/null ; then
+    for candidate_home in \
+        "$HOME/.local/share/mise/installs/java/21.0.2" \
+        "$HOME/.local/share/mise/installs/java/21" \
+        "$HOME/.local/share/mise/installs/java/lts"
+    do
+        if [ -x "$candidate_home/bin/java" ] ; then
+            JAVA_HOME=$candidate_home
+            JAVACMD=$JAVA_HOME/bin/java
+            warn "Detected Java $java_version_raw; using Java 21 from $JAVA_HOME for Gradle compatibility"
+            break
+        fi
+    done
+fi
+
 # Increase the maximum file descriptors if we can.
 if ! "$cygwin" && ! "$darwin" && ! "$nonstop" ; then
     case $MAX_FD in #(

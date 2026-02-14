@@ -81,6 +81,12 @@
             android:summary="Enable water reflections"
             android:defaultValue="true" />
 
+        <SwitchPreferenceCompat
+            android:key="enable_secondary_renderer"
+            android:title="Use Secondary Renderer (Lumiya)"
+            android:summary="Switch to the alternate OpenGL renderer (requires world view restart)"
+            android:defaultValue="false" />
+
     </PreferenceCategory>
 
     <!-- Audio Settings -->
