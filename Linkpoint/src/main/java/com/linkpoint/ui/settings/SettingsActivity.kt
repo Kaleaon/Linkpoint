@@ -113,6 +113,17 @@ class SettingsActivity : AppCompatActivity() {
                 updateGraphicsQuality(newValue as String)
                 true
             }
+
+            findPreference<SwitchPreferenceCompat>("enable_secondary_renderer")?.setOnPreferenceChangeListener { _, newValue ->
+                val enabled = newValue as Boolean
+                Toast.makeText(
+                    requireContext(),
+                    if (enabled) "Secondary renderer enabled. Reopen world view to apply."
+                    else "Primary renderer enabled. Reopen world view to apply.",
+                    Toast.LENGTH_LONG
+                ).show()
+                true
+            }
             
             // XR settings
             findPreference<SwitchPreferenceCompat>("enable_xr")?.apply {
