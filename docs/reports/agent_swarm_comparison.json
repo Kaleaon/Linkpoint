@@ -1,0 +1,170 @@
+{
+  "Linkpoint": {
+    "name": "Linkpoint",
+    "file_counts": {
+      "code": {
+        ".java": 12,
+        ".kt": 3,
+        ".md": 1
+      },
+      "resources": {
+        ".xml": 1
+      },
+      "docs": {
+        ".md": 35
+      },
+      "total_files_scanned": 52
+    },
+    "manifest": {
+      "package": null,
+      "permissions": [],
+      "activities": [],
+      "services": [],
+      "receivers": [],
+      "providers": []
+    },
+    "top_packages": {
+      "com.lumiyaviewer.lumiya": 12,
+      "com.linkpoint.protocol": 1,
+      "com.linkpoint.utils": 1,
+      "com.linkpoint.security": 1
+    },
+    "domain_hits": {
+      "Chat/IM": 51,
+      "Physics/World": 46,
+      "Maps/Navigation": 41,
+      "Auth & Identity": 38,
+      "Inventory": 36,
+      "Voice & Audio": 35,
+      "Avatar/Appearance": 35,
+      "Media/Textures": 35,
+      "Scripting": 34,
+      "Network Transport": 32,
+      "Rendering/3D": 31,
+      "Security/Crypto": 17,
+      "Notifications": 17,
+      "Telemetry/Analytics": 6
+    },
+    "native_libs_top": {}
+  },
+  "Lumiya APK (decompiled)": {
+    "name": "Lumiya APK (decompiled)",
+    "file_counts": {
+      "code": {
+        ".java": 2948,
+        ".kt": 133,
+        ".md": 1
+      },
+      "resources": {
+        ".png": 937,
+        ".xml": 469,
+        ".m4a": 3
+      },
+      "docs": {},
+      "total_files_scanned": 4491
+    },
+    "manifest": {
+      "package": null,
+      "permissions": [],
+      "activities": [],
+      "services": [],
+      "receivers": [],
+      "providers": [],
+      "parse_error": "not well-formed (invalid token): line 1, column 0"
+    },
+    "top_packages": {
+      "com.lumiyaviewer.lumiya": 1292,
+      "com.google.common": 453,
+      "android.support.v4": 297,
+      "android.support.v7": 221,
+      "com.google.vr": 138,
+      "android.support.annotation": 96,
+      "android.support.transition": 76,
+      "com.google.gson": 63,
+      "android.support.design": 56,
+      "butterknife": 48,
+      "de.greenrobot.dao": 42,
+      "okhttp3": 35,
+      "okio": 27,
+      "uk.co.senab": 20,
+      "javax.annotation": 19,
+      "android.support.graphics": 17,
+      "com.nineoldandroids.animation": 17,
+      "android.arch.lifecycle": 15,
+      "okhttp3.internal.http2": 15,
+      "com.google.protobuf": 13
+    },
+    "domain_hits": {
+      "Chat/IM": 3052,
+      "Inventory": 649,
+      "Maps/Navigation": 639,
+      "Auth & Identity": 614,
+      "Network Transport": 529,
+      "Avatar/Appearance": 503,
+      "Physics/World": 430,
+      "Media/Textures": 331,
+      "Scripting": 328,
+      "Voice & Audio": 294,
+      "Notifications": 285,
+      "Rendering/3D": 217,
+      "Security/Crypto": 148,
+      "Economy/Commerce": 9,
+      "Telemetry/Analytics": 4
+    },
+    "native_libs_top": {
+      "libopenjpeg.so": 7,
+      "librawbuf.so": 7,
+      "libgvr.so": 3
+    }
+  },
+  "Second Life APK (decompiled)": {
+    "name": "Second Life APK (decompiled)",
+    "file_counts": {
+      "code": {},
+      "resources": {
+        ".png": 163,
+        ".xml": 159,
+        ".llm": 29,
+        ".json": 11,
+        "<noext>": 5,
+        ".bundle": 5,
+        ".binarypb": 1,
+        ".wav": 1,
+        ".hash": 1,
+        ".bin": 1
+      },
+      "docs": {
+        ".md": 8,
+        ".txt": 2
+      },
+      "total_files_scanned": 386
+    },
+    "manifest": {
+      "package": "com.lindenlab.secondlife",
+      "permissions": [],
+      "activities": [],
+      "services": [],
+      "receivers": [],
+      "providers": []
+    },
+    "top_packages": {},
+    "domain_hits": {
+      "Network Transport": 153,
+      "Inventory": 130,
+      "Chat/IM": 78,
+      "Avatar/Appearance": 78,
+      "Notifications": 31,
+      "Maps/Navigation": 25,
+      "Media/Textures": 24,
+      "Telemetry/Analytics": 23,
+      "Rendering/3D": 16,
+      "Auth & Identity": 14,
+      "Physics/World": 11,
+      "Economy/Commerce": 11,
+      "Voice & Audio": 10,
+      "Scripting": 10,
+      "Security/Crypto": 9
+    },
+    "native_libs_top": {}
+  }
+}
