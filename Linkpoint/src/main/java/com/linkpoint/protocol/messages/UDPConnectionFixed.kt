@@ -611,23 +611,33 @@ class UDPConnectionFixed {
             
             // Start EnhancedPacketLogger session for comprehensive tracking
             EnhancedPacketLogger.startSession()
-            
+
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== INITIATING FIXED UDP CONNECTION ===")
-            
-            // NOTE:
-            // Historically this connection path forced IPv4 by setting the following JVM-wide properties:
-            //   System.setProperty("java.net.preferIPv4Stack", "true")
-            //   System.setProperty("java.net.preferIPv6Addresses", "false")
-            // This has global side effects on all network operations in the process (HTTP/HTTPS, other sockets, etc.).
-            // If the application still requires these settings, configure them once at application startup
-            // (e.g., in the Application class or a dedicated bootstrap) instead of per-connection here.
+
+            // CRITICAL: Force IPv4 stack, matching Lumiya's SLConnection() constructor.
+            // Second Life simulators only listen on IPv4. On cellular networks, Android may
+            // create a dual-stack (IPv6) socket by default. When connecting to an IPv4
+            // simulator address from a dual-stack socket over cellular CGNAT, outgoing packets
+            // are sent as IPv4-mapped IPv6 but return packets may not be routed back correctly
+            // through the carrier's NAT. This causes "packets sent but none received."
+            // Lumiya proves this works on cellular by forcing IPv4 before any socket creation.
+            System.setProperty("java.net.preferIPv4Stack", "true")
+            System.setProperty("java.net.preferIPv6Addresses", "false")
 
             val address = InetSocketAddress(simIP, simPort)
-            
-            // Create and configure DatagramChannel
-            datagramChannel = DatagramChannel.open().apply {
+
+            // Create and configure DatagramChannel — force IPv4 (StandardProtocolFamily.INET)
+            // to match Lumiya's behavior. Falls back to default open() on older Android APIs.
+            datagramChannel = try {
+                DatagramChannel.open(java.net.StandardProtocolFamily.INET)
+            } catch (e: Exception) {
+                // Fallback for API < 26 — system properties above still ensure IPv4
+                DatagramChannel.open()
+            }
+            datagramChannel!!.apply {
                 configureBlocking(false)
-                setOption(StandardSocketOptions.SO_REUSEADDR, true)
+                setOption(StandardSocketOptions.SO_RCVBUF, 65536)
+                setOption(StandardSocketOptions.SO_SNDBUF, 65536)
                 connect(address)
             }
             
@@ -1948,7 +1958,9 @@ class UDPConnectionFixed {
         try {
             // Build packet header (big-endian per SL protocol)
             val flags = (if (reliable) 0x40 else 0) or (if (zerocoded) 0x80 else 0)
-            val seqNum = sequenceNumber.getAndIncrement()
+            // Lumiya uses incrementAndGet() — first packet gets seq=1, not 0.
+            // This matches all other send paths (sendPendingAcks, sendPendingAcksFromIOThread).
+            val seqNum = sequenceNumber.incrementAndGet()
             
             // Track callback if this is a reliable message with listener
             if (reliable && listener != null) {
@@ -2283,9 +2295,15 @@ class UDPConnectionFixed {
 
         try {
             val address = InetSocketAddress(simIP, simPort)
-            datagramChannel = DatagramChannel.open().apply {
+            datagramChannel = try {
+                DatagramChannel.open(java.net.StandardProtocolFamily.INET)
+            } catch (e: Exception) {
+                DatagramChannel.open()
+            }
+            datagramChannel!!.apply {
                 configureBlocking(false)
-                setOption(StandardSocketOptions.SO_REUSEADDR, true)
+                setOption(StandardSocketOptions.SO_RCVBUF, 65536)
+                setOption(StandardSocketOptions.SO_SNDBUF, 65536)
                 connect(address)
             }
 
