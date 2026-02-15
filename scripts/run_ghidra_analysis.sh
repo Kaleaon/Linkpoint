@@ -6,7 +6,8 @@
 set -e
 
 # Configuration
-REPO_ROOT="/home/runner/work/Linkpoint/Linkpoint"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
 GHIDRA_PATH="/tmp/ghidra/ghidra_11.4.2_PUBLIC"
 ANALYSIS_DIR="/tmp/lumiya_analysis"
 APK_FILE="$REPO_ROOT/Lumiya/Lumiya_3.4.2.apk"

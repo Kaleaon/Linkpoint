@@ -5,6 +5,9 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+
 echo "========================================="
 echo "Linkpoint PWA - Capacitor Build"
 echo "========================================="
@@ -16,7 +19,7 @@ NC='\033[0m' # No Color
 
 # Step 1: Sync PWA files to Capacitor
 echo -e "${BLUE}Step 1: Syncing PWA files to Capacitor...${NC}"
-cd /home/runner/work/Linkpoint/Linkpoint/PWA-demo
+cd "$SCRIPT_DIR"
 
 # Copy essential PWA files to Capacitor www directory
 cp -v index.html capacitor-wrapper/www/
@@ -58,7 +61,7 @@ fi
 
 # Step 3: Copy build info to builds folder
 echo -e "${BLUE}Step 3: Creating build info...${NC}"
-cd /home/runner/work/Linkpoint/Linkpoint
+cd "$REPO_ROOT"
 
 # Create builds folder if it doesn't exist
 mkdir -p builds/capacitor
