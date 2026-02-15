@@ -787,14 +787,9 @@ class LinkpointApp : Application() {
         }
         
         // Chat from simulator (nearby chat)
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.CHAT_FROM_SIMULATOR) { _, rawPacket ->
+        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIds.CHAT_FROM_SIMULATOR) { _, parsed ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload == null) {
-                    Log.w(TAG, "Failed to extract ChatFromSimulator payload")
-                    return@registerHandler
-                }
-                val chatData = com.linkpoint.protocol.messages.MessageParser.parseChatFromSimulator(payload)
+                val chatData = parsed as? com.linkpoint.protocol.messages.ChatData
                 if (chatData != null && ::chatManager.isInitialized) {
                     chatManager.handleChatFromSimulator(chatData)
                 }
@@ -869,8 +864,9 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE) { _, rawPacket ->
+        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE) { _, parsed ->
             try {
+                val updates = (parsed as? List<*>)?.filterIsInstance<com.linkpoint.protocol.messages.ObjectUpdateData>() ?: emptyList()
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
                 val updates = com.linkpoint.protocol.messages.MessageParser.parseObjectUpdate(payload)
@@ -888,8 +884,9 @@ class LinkpointApp : Application() {
         }
         
         // Compressed object updates
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE_COMPRESSED) { _, rawPacket ->
+        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE_COMPRESSED) { _, parsed ->
             try {
+                val updates = (parsed as? List<*>)?.filterIsInstance<com.linkpoint.protocol.messages.ObjectUpdateData>() ?: emptyList()
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
                 val updates = com.linkpoint.protocol.messages.MessageParser.parseObjectUpdateCompressed(payload)
@@ -1433,12 +1430,9 @@ class LinkpointApp : Application() {
         // =====================================
         
         // TeleportFinish - Teleport completed successfully
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.TELEPORT_FINISH) { _, rawPacket ->
+        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIds.TELEPORT_FINISH) { _, parsed ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload == null) return@registerHandler
-                
-                val data = com.linkpoint.protocol.messages.MessageParser.parseTeleportFinish(payload)
+                val data = parsed as? com.linkpoint.protocol.messages.TeleportFinishData
                 if (data != null) {
                     Log.i(TAG, "🚀 TeleportFinish: Connecting to ${data.simIP}:${data.simPort}, handle=${data.regionHandle}")
                     
@@ -1453,12 +1447,9 @@ class LinkpointApp : Application() {
         }
         
         // TeleportFailed - Teleport failed with reason
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.TELEPORT_FAILED) { _, rawPacket ->
+        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIds.TELEPORT_FAILED) { _, parsed ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload == null) return@registerHandler
-                
-                val data = com.linkpoint.protocol.messages.MessageParser.parseTeleportFailed(payload)
+                val data = parsed as? com.linkpoint.protocol.messages.TeleportFailedData
                 if (data != null) {
                     Log.e(TAG, "❌ TeleportFailed: ${data.reason}")
                     
@@ -1473,12 +1464,9 @@ class LinkpointApp : Application() {
         }
         
         // TeleportProgress - Teleport status update
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.TELEPORT_PROGRESS) { _, rawPacket ->
+        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIds.TELEPORT_PROGRESS) { _, parsed ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload == null) return@registerHandler
-                
-                val data = com.linkpoint.protocol.messages.MessageParser.parseTeleportProgress(payload)
+                val data = parsed as? com.linkpoint.protocol.messages.TeleportProgressData
                 if (data != null) {
                     Log.i(TAG, "🔄 TeleportProgress: ${data.message}")
                     

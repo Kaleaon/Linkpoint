@@ -1,0 +1,26 @@
+[
+  {
+    "name": "high-frequency-object-update-header",
+    "rawPacketHex": "0000000000000C01020304",
+    "expectedMessageId": 12,
+    "expectedPayloadHex": "01020304"
+  },
+  {
+    "name": "high-frequency-packet-ack-header",
+    "rawPacketHex": "000000000000FB0102",
+    "expectedMessageId": -5,
+    "expectedPayloadHex": "0102"
+  },
+  {
+    "name": "malformed-truncated-medium-frequency",
+    "rawPacketHex": "000000000000FF",
+    "expectedMessageId": -2147483648,
+    "expectedPayloadHex": null
+  },
+  {
+    "name": "malformed-truncated-low-frequency",
+    "rawPacketHex": "000000000000FFFF01",
+    "expectedMessageId": -2147483648,
+    "expectedPayloadHex": null
+  }
+]
