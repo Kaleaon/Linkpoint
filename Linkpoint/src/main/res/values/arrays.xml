@@ -110,4 +110,16 @@
         <item>custom</item>
     </string-array>
 
+    <string-array name="background_profile_entries">
+        <item>Conservative (best battery)</item>
+        <item>Balanced</item>
+        <item>Aggressive (fastest wake)</item>
+    </string-array>
+
+    <string-array name="background_profile_values">
+        <item>conservative</item>
+        <item>balanced</item>
+        <item>aggressive</item>
+    </string-array>
+
 </resources>

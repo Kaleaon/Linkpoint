@@ -7,11 +7,15 @@ import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.llsd.*
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.putUUID
+import com.linkpoint.push.PushEvent
+import com.linkpoint.push.PushEventBus
+import com.linkpoint.push.PushEventType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -96,6 +100,10 @@ class IMManager(
     // Unread counts
     private val _unreadCounts = MutableStateFlow<Map<UUID, Int>>(emptyMap())
     val unreadCounts: StateFlow<Map<UUID, Int>> = _unreadCounts
+
+    private val processedPushIds = ConcurrentHashMap.newKeySet<String>()
+    private val pendingSyncSessions = MutableStateFlow<Set<UUID>>(emptySet())
+    val syncNeededSessions: StateFlow<Set<UUID>> = pendingSyncSessions
     
     init {
         // Register for event queue events
@@ -114,8 +122,44 @@ class IMManager(
             this,
             MessagingDispatcher.dispatcher
         )
+
+        observePushEvents()
     }
     
+    private fun observePushEvents() {
+        scope.launch {
+            PushEventBus.events.collect { event ->
+                handlePushWakeEvent(event)
+            }
+        }
+    }
+
+    private fun handlePushWakeEvent(event: PushEvent) {
+        if (!processedPushIds.add(event.dedupeId)) {
+            return
+        }
+
+        val sessionId = event.sessionId ?: return
+        when (event.type) {
+            PushEventType.IM, PushEventType.GROUP_NOTICE -> {
+                pendingSyncSessions.value = pendingSyncSessions.value + sessionId
+            }
+            PushEventType.UNKNOWN -> Unit
+        }
+
+        if (processedPushIds.size > MAX_SESSION_HISTORY * 4) {
+            processedPushIds.clear()
+        }
+    }
+
+    /**
+     * Called by UI when opening a session after push wakeup.
+     * This allows queue reconciliation with event queue state.
+     */
+    fun reconcileSessionOnOpen(sessionId: UUID) {
+        pendingSyncSessions.value = pendingSyncSessions.value - sessionId
+    }
+
     override fun onEvent(message: String, body: LLSDMap) {
         scope.launch {
             when (message) {
@@ -283,6 +327,7 @@ class IMManager(
                     
                     addMessage(sessionId, imMessage)
                     session.typingParticipants = session.typingParticipants - fromAgentId
+                    pendingSyncSessions.value = pendingSyncSessions.value - sessionId
                 }
             }
             
@@ -552,6 +597,7 @@ class IMManager(
      */
     fun markAsRead(sessionId: UUID) {
         _unreadCounts.value = _unreadCounts.value - sessionId
+        pendingSyncSessions.value = pendingSyncSessions.value - sessionId
     }
     
     private fun addMessage(sessionId: UUID, message: IMMessage) {

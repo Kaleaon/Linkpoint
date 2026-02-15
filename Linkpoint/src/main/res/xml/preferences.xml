@@ -256,6 +256,31 @@
 
     </PreferenceCategory>
 
+    <!-- Background Runtime -->
+    <PreferenceCategory android:title="Background Runtime">
+
+        <SwitchPreferenceCompat
+            android:key="background_resume_enabled"
+            android:title="Resume in Background"
+            android:summary="Resume connection orchestration after reboot and process death"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="push_wakeups_enabled"
+            android:title="Push Wakeups"
+            android:summary="Allow FCM/self-hosted relay wakeups for IM and group notices"
+            android:defaultValue="true" />
+
+        <ListPreference
+            android:key="background_intensity_profile"
+            android:title="Background Intensity"
+            android:summary="Balance between delivery latency and battery usage"
+            android:entries="@array/background_profile_entries"
+            android:entryValues="@array/background_profile_values"
+            android:defaultValue="balanced" />
+
+    </PreferenceCategory>
+
     <!-- Network Settings -->
     <PreferenceCategory android:title="Network">
 

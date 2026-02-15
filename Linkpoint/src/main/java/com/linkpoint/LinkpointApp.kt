@@ -54,6 +54,7 @@ import com.linkpoint.render.RenderableUpdate
 import com.linkpoint.render.particles.ParticleSystem
 import com.linkpoint.rlv.RLVController
 import com.linkpoint.service.ConnectionKeepAliveManager
+import com.linkpoint.service.BackgroundResumeScheduler
 import com.linkpoint.service.IdleHandler
 import com.linkpoint.service.LinkpointConnectionService
 import com.linkpoint.users.DisplayNameManager
@@ -361,6 +362,7 @@ class LinkpointApp : Application() {
         com.linkpoint.protocol.circuit.LinkpointCircuitIntegration.initialize(this)
 
         initializeManagers()
+        BackgroundResumeScheduler.schedule(this, immediate = false)
 
         Log.i(TAG, "Linkpoint initialized successfully")
     }
