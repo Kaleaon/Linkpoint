@@ -7,8 +7,13 @@ import com.linkpoint.protocol.transfer.TransferManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
 
 /**
  * ScriptManager - Handles LSL/Mono script viewing and basic management.
@@ -29,6 +34,7 @@ class ScriptManager(
 ) {
     companion object {
         private const val TAG = "ScriptManager"
+        private const val SCRIPT_UPLOAD_CONTENT_TYPE = "application/octet-stream"
         
         // Script types
         const val SCRIPT_TYPE_LSL = 0
@@ -41,6 +47,12 @@ class ScriptManager(
     }
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val httpClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .retryOnConnectionFailure(true)
+        .build()
     
     // Cached script data
     private val scriptCache = ConcurrentHashMap<UUID, ScriptData>()
@@ -196,6 +208,111 @@ class ScriptManager(
             }
         }
     }
+
+    /**
+     * Save script source via UpdateScriptAgent/UpdateScriptTask capabilities.
+     */
+    suspend fun saveScript(itemId: UUID, scriptText: String, taskId: UUID? = null): ScriptSaveResult {
+        return withContext(Dispatchers.IO) {
+            try {
+                val capability = if (taskId == null) {
+                    CapabilityManager.CAP_UPDATE_SCRIPT_AGENT
+                } else {
+                    CapabilityManager.CAP_UPDATE_SCRIPT_TASK
+                }
+
+                val request = LLSDMap().apply {
+                    this["item_id"] = LLSDUUID(itemId)
+                    taskId?.let { this["task_id"] = LLSDUUID(it) }
+                    this["target"] = LLSDString("mono")
+                    if (taskId != null) {
+                        this["is_script_running"] = LLSDInteger(1)
+                    }
+                }
+
+                val capResponse = capabilityManager.request(capability, request) as? LLSDMap
+                    ?: return@withContext ScriptSaveResult(false, "$capability returned no payload")
+
+                val capState = capResponse.getString("state")
+                if (capState.equals("complete", ignoreCase = true)) {
+                    val completedResult = buildScriptSaveResult(capResponse)
+                    if (completedResult.success) {
+                        Log.i(TAG, "Saved script $itemId (${scriptText.length} chars) without uploader step")
+                    }
+                    return@withContext completedResult
+                }
+
+                val uploaderUrl = capResponse.getString("uploader")?.takeIf { it.isNotBlank() }
+                    ?: return@withContext ScriptSaveResult(false, "Uploader URL missing from capability response")
+
+                val normalizedUploader = if (uploaderUrl.startsWith("http://", ignoreCase = true)) {
+                    uploaderUrl.replaceFirst("http://", "https://", ignoreCase = true)
+                } else uploaderUrl
+
+                val uploadRequest = Request.Builder()
+                    .url(normalizedUploader)
+                    .addHeader("Accept", "application/llsd+xml")
+                    .post(scriptText.toByteArray(Charsets.UTF_8).toRequestBody(SCRIPT_UPLOAD_CONTENT_TYPE.toMediaType()))
+                    .build()
+
+                httpClient.newCall(uploadRequest).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        return@withContext ScriptSaveResult(false, "Script upload failed (HTTP ${response.code})")
+                    }
+
+                    val responseBody = response.body?.bytes()
+                        ?: return@withContext ScriptSaveResult(false, "Script upload returned empty response")
+
+                    val uploadResponse = LLSDParser.parseAuto(
+                        responseBody,
+                        response.header("Content-Type")
+                    ) as? LLSDMap ?: return@withContext ScriptSaveResult(
+                        false,
+                        "Script upload response was not LLSD map"
+                    )
+
+                    val saveResult = buildScriptSaveResult(uploadResponse)
+                    if (!saveResult.success) return@withContext saveResult
+
+                    Log.i(TAG, "Saved script $itemId (${scriptText.length} chars)")
+                    saveResult
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to save script $itemId", e)
+                ScriptSaveResult(success = false, error = e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    private fun buildScriptSaveResult(response: LLSDMap): ScriptSaveResult {
+        if (!response.getString("state").equals("complete", ignoreCase = true)) {
+            return ScriptSaveResult(
+                success = false,
+                error = "Upload state was ${response.getString("state") ?: "unknown"}"
+            )
+        }
+
+        val compileErrors = response.getArray("errors")
+            ?.value
+            ?.map { errorNode ->
+                when (errorNode) {
+                    is LLSDString -> errorNode.value
+                    is LLSDURI -> errorNode.value
+                    else -> errorNode.toXML()
+                }
+            }
+            .orEmpty()
+
+        if (response.getBoolean("compiled") == false) {
+            return ScriptSaveResult(
+                success = false,
+                error = compileErrors.firstOrNull() ?: "Script failed to compile",
+                compileErrors = compileErrors
+            )
+        }
+
+        return ScriptSaveResult(success = true, compileErrors = compileErrors)
+    }
     
     /**
      * Clear script cache.
@@ -266,3 +383,9 @@ data class ScriptInfo(
     val memoryPercentage: Float get() = (memoryUsed.toFloat() / memoryLimit) * 100f
     val memoryDisplay: String get() = "${memoryUsed / 1024}KB / ${memoryLimit / 1024}KB"
 }
+
+data class ScriptSaveResult(
+    val success: Boolean,
+    val error: String? = null,
+    val compileErrors: List<String> = emptyList()
+)

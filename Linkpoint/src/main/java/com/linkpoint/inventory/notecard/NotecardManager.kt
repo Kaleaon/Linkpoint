@@ -456,7 +456,7 @@ class NotecardManager(
                     }
 
                     val responseBody = response.body?.bytes()
-                    if (responseBody.isNullOrEmpty()) {
+                    if (responseBody == null || responseBody.isEmpty()) {
                         Log.w(TAG, "Notecard upload returned empty response for $itemId")
                         return@withContext false
                     }
