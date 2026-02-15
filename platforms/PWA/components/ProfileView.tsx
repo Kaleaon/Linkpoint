@@ -1,11 +1,39 @@
 'use client'
 
+import ThemeSelector, { getThemePresetById } from './ThemeSelector'
+
+type Tab = 'world' | 'inventory' | 'chat' | 'profile'
+
+type TabThemeOverrides = Partial<Record<Tab, string>>
+
 interface ProfileViewProps {
   user: any
   onLogout: () => void
+  globalThemeId: string
+  onGlobalThemeChange: (themeId: string) => void
+  tabThemeOverrides: TabThemeOverrides
+  onTabThemeChange: (tab: Tab, themeId: string) => void
+  onClearTabTheme: (tab: Tab) => void
 }
 
-export default function ProfileView({ user, onLogout }: ProfileViewProps) {
+const tabLabels: Record<Tab, string> = {
+  world: 'World',
+  chat: 'Chat',
+  inventory: 'Inventory',
+  profile: 'Profile',
+}
+
+export default function ProfileView({
+  user,
+  onLogout,
+  globalThemeId,
+  onGlobalThemeChange,
+  tabThemeOverrides,
+  onTabThemeChange,
+  onClearTabTheme,
+}: ProfileViewProps) {
+  const tabOrder: Tab[] = ['world', 'chat', 'inventory', 'profile']
+
   return (
     <div className="h-full overflow-y-auto bg-gray-50">
       <div className="max-w-2xl mx-auto p-4 space-y-4">
@@ -45,6 +73,57 @@ export default function ProfileView({ user, onLogout }: ProfileViewProps) {
               <span className="text-gray-600">Current Grid</span>
               <span className="font-medium text-gray-900">{user.grid}</span>
             </div>
+          </div>
+        </div>
+
+        {/* Theme Settings */}
+        <div className="card space-y-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Theme Settings</h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Set a global theme and optionally override it for specific tabs.
+            </p>
+          </div>
+
+          <ThemeSelector
+            label="Global theme"
+            selectedThemeId={globalThemeId}
+            onSelectTheme={onGlobalThemeChange}
+          />
+
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold text-gray-900">Per-tab overrides</h4>
+            {tabOrder.map((tab) => {
+              const overrideThemeId = tabThemeOverrides[tab]
+              const overrideThemeName = overrideThemeId
+                ? getThemePresetById(overrideThemeId)?.name || overrideThemeId
+                : 'Using global theme'
+
+              return (
+                <div key={tab} className="rounded-lg border border-gray-200 p-3 bg-white space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{tabLabels[tab]}</p>
+                      <p className="text-xs text-gray-500">{overrideThemeName}</p>
+                    </div>
+                    {overrideThemeId && (
+                      <button
+                        type="button"
+                        onClick={() => onClearTabTheme(tab)}
+                        className="text-xs font-medium text-blue-600 hover:text-blue-700"
+                      >
+                        Use global theme
+                      </button>
+                    )}
+                  </div>
+                  <ThemeSelector
+                    label={`${tabLabels[tab]} override`}
+                    selectedThemeId={overrideThemeId || globalThemeId}
+                    onSelectTheme={(themeId) => onTabThemeChange(tab, themeId)}
+                  />
+                </div>
+              )
+            })}
           </div>
         </div>
 
