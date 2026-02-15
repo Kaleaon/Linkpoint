@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.android.filament.*
 import com.google.android.filament.VertexBuffer.AttributeType
 import com.google.android.filament.VertexBuffer.VertexAttribute
+import com.linkpoint.diagnostics.ScenePopulationDiagnostics
 import com.linkpoint.protocol.messages.ObjectUpdateData
 import com.linkpoint.protocol.types.LLQuaternion
 import com.linkpoint.protocol.types.LLVector3
@@ -56,8 +57,11 @@ class PrimRenderer(
     /**
      * Add or update a prim from ObjectUpdate
      */
-    fun updatePrim(data: ObjectUpdateData) {
-        if (data.pcode != PCODE_PRIM) return
+    fun updatePrim(data: ObjectUpdateData): Boolean {
+        if (data.pcode != PCODE_PRIM) {
+            ScenePopulationDiagnostics.markSceneInserted(ScenePopulationDiagnostics.EntityType.OBJECT, false)
+            return false
+        }
         
         val prim = prims.getOrPut(data.localId) {
             createPrim(data)
@@ -74,6 +78,9 @@ class PrimRenderer(
             prim.textureEntry = data.textureEntry
             updatePrimMaterial(prim, data.textureEntry)
         }
+
+        ScenePopulationDiagnostics.markSceneInserted(ScenePopulationDiagnostics.EntityType.OBJECT, true)
+        return true
     }
     
     /**
@@ -499,8 +506,67 @@ class PrimRenderer(
     }
     
     private fun generateRingMesh(): PrimMesh {
-        // Similar to torus but with larger hole
-        return generateTorusMesh() // Use torus as placeholder
+        val majorSegments = 32
+        val minorSegments = 12
+        val majorRadius = 0.45f
+        val minorRadius = 0.08f
+
+        val vertexCount = (majorSegments + 1) * (minorSegments + 1)
+        val vertices = FloatArray(vertexCount * 8)
+        var vIdx = 0
+
+        for (i in 0..majorSegments) {
+            val u = 2.0 * PI * i / majorSegments
+            val cosU = cos(u).toFloat()
+            val sinU = sin(u).toFloat()
+
+            for (j in 0..minorSegments) {
+                val v = 2.0 * PI * j / minorSegments
+                val cosV = cos(v).toFloat()
+                val sinV = sin(v).toFloat()
+
+                val radial = majorRadius + minorRadius * cosV
+                val px = radial * cosU
+                val py = radial * sinU
+                val pz = minorRadius * sinV
+
+                val nx = cosV * cosU
+                val ny = cosV * sinU
+                val nz = sinV
+
+                vertices[vIdx++] = px
+                vertices[vIdx++] = py
+                vertices[vIdx++] = pz
+                vertices[vIdx++] = nx
+                vertices[vIdx++] = ny
+                vertices[vIdx++] = nz
+                vertices[vIdx++] = i.toFloat() / majorSegments
+                vertices[vIdx++] = j.toFloat() / minorSegments
+            }
+        }
+
+        val indices = ShortArray(majorSegments * minorSegments * 6)
+        var iIdx = 0
+        val stride = minorSegments + 1
+
+        for (i in 0 until majorSegments) {
+            for (j in 0 until minorSegments) {
+                val i0 = (i * stride + j).toShort()
+                val i1 = (i0 + 1).toShort()
+                val i2 = ((i + 1) * stride + j).toShort()
+                val i3 = (i2 + 1).toShort()
+
+                indices[iIdx++] = i0
+                indices[iIdx++] = i2
+                indices[iIdx++] = i1
+
+                indices[iIdx++] = i1
+                indices[iIdx++] = i2
+                indices[iIdx++] = i3
+            }
+        }
+
+        return createMesh(vertices, indices)
     }
     
     private fun createMesh(vertices: FloatArray, indices: ShortArray): PrimMesh {

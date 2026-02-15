@@ -8,6 +8,7 @@ import com.google.android.filament.*
 import com.google.android.filament.android.DisplayHelper
 import com.google.android.filament.android.UiHelper
 import com.linkpoint.render.environment.SLDefaultEnvironment
+import com.linkpoint.diagnostics.ScenePopulationDiagnostics
 import com.linkpoint.render.materials.MaterialLoader
 import com.linkpoint.render.prims.PrimRenderer
 import com.linkpoint.render.scene.SceneManager
@@ -557,7 +558,13 @@ class RenderManager(private val context: Context) {
     fun getSceneGraph(): SceneGraph = sceneGraph
 
     fun enqueueUpdate(update: RenderableUpdate): Boolean {
-        return renderQueue.enqueue(update)
+        val accepted = renderQueue.enqueue(update)
+        when (update) {
+            is RenderableUpdate.PrimUpdate -> ScenePopulationDiagnostics.markRendererSubmitted(ScenePopulationDiagnostics.EntityType.OBJECT, accepted)
+            is RenderableUpdate.AvatarUpdate -> ScenePopulationDiagnostics.markRendererSubmitted(ScenePopulationDiagnostics.EntityType.AVATAR, accepted)
+            else -> Unit
+        }
+        return accepted
     }
 
     /**
@@ -574,9 +581,10 @@ class RenderManager(private val context: Context) {
      * Update or add a prim from ObjectUpdate data.
      * This is the primary entry point for rendering prims from the network.
      */
-    fun updatePrim(data: ObjectUpdateData) {
+    fun updatePrim(data: ObjectUpdateData): Boolean {
         requireRenderThread("updatePrim")
-        primRenderer?.updatePrim(data)
+        val renderer = primRenderer ?: return false
+        return renderer.updatePrim(data)
     }
 
     /**
@@ -620,7 +628,8 @@ class RenderManager(private val context: Context) {
             frameCount = frameCount.get(),
             timeSinceLastFrame = if (lastFrameTime > 0) System.currentTimeMillis() - lastFrameTime else null,
             initializationTime = initializationTime,
-            lastInitializationError = lastInitializationError
+            lastInitializationError = lastInitializationError,
+            scenePopulationSnapshot = ScenePopulationDiagnostics.snapshot()
         )
     }
     
@@ -641,7 +650,8 @@ class RenderManager(private val context: Context) {
         val frameCount: Long,
         val timeSinceLastFrame: Long?,
         val initializationTime: Long,
-        val lastInitializationError: String?
+        val lastInitializationError: String?,
+        val scenePopulationSnapshot: ScenePopulationDiagnostics.Snapshot
     )
     
     /**
@@ -702,12 +712,18 @@ class RenderManager(private val context: Context) {
             when (update) {
                 is RenderableUpdate.PrimUpdate -> updatePrim(update.data)
                 is RenderableUpdate.AvatarUpdate -> {
-                    sceneManager?.updateAvatar(
-                        agentId = update.agentId,
-                        position = update.position,
-                        rotation = update.rotation,
-                        animations = update.animations
-                    )
+                    val manager = sceneManager
+                    if (manager != null) {
+                        manager.updateAvatar(
+                            agentId = update.agentId,
+                            position = update.position,
+                            rotation = update.rotation,
+                            animations = update.animations
+                        )
+                        ScenePopulationDiagnostics.markSceneInserted(ScenePopulationDiagnostics.EntityType.AVATAR, true)
+                    } else {
+                        ScenePopulationDiagnostics.markSceneInserted(ScenePopulationDiagnostics.EntityType.AVATAR, false)
+                    }
                 }
                 is RenderableUpdate.SceneObjectUpdate,
                 is RenderableUpdate.TerrainUpdate,

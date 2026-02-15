@@ -74,6 +74,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false  // Keep false until stable
+            buildConfigField("boolean", "ALLOW_PLACEHOLDER_ENTITIES", "false")
             isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -87,6 +88,7 @@ android {
         }
         debug {
             isMinifyEnabled = false
+            buildConfigField("boolean", "ALLOW_PLACEHOLDER_ENTITIES", "true")
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
         }
@@ -359,3 +361,26 @@ tasks.register("copyNatives") {
 tasks.named("preBuild") {
     dependsOn("copyNatives")
 }
+
+
+val verifyNoPlaceholderOnlyEntities by tasks.registering {
+    group = "verification"
+    description = "Fails when @PlaceholderOnlyEntity exists in production sources"
+    doLast {
+        val sourceRoot = file("src/main/java")
+        val offenders = sourceRoot.walkTopDown()
+            .filter { it.isFile && it.extension == "kt" }
+            .filter { file -> "@PlaceholderOnlyEntity" in file.readText() }
+            .map { it.relativeTo(projectDir).path }
+            .toList()
+
+        if (offenders.isNotEmpty()) {
+            throw GradleException(
+                "Release gate failed: placeholder-only entities found: ${offenders.joinToString()}"
+            )
+        }
+    }
+}
+
+tasks.matching { it.name == "assembleRelease" || it.name == "bundleRelease" || it.name == "lintVitalRelease" }
+    .configureEach { dependsOn(verifyNoPlaceholderOnlyEntities) }

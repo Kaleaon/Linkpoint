@@ -70,6 +70,7 @@ import com.linkpoint.world.minimap.MinimapManager
 import com.linkpoint.groups.GroupsManager
 import com.linkpoint.animesh.AnimeshManager
 import com.linkpoint.avatar.AnimationController
+import com.linkpoint.diagnostics.ScenePopulationDiagnostics
 import com.linkpoint.bom.BakesOnMeshManager
 import com.linkpoint.inventory.LandmarkManager
 import com.linkpoint.media.MediaManager
@@ -681,6 +682,7 @@ class LinkpointApp : Application() {
                             "Waiting for world data"
                         )
                         Log.i(TAG, "✓ RegionHandshakeReply SENT - world data should start loading")
+                        ScenePopulationDiagnostics.markRegionHandshakeComplete()
                     } catch (e: Exception) {
                         com.linkpoint.utils.InitializationTracker.failPhase(
                             com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
@@ -799,6 +801,8 @@ class LinkpointApp : Application() {
             when (update.pcode) {
                 PCODE_AVATAR -> {
                     avatarUpdateCount++
+                    ScenePopulationDiagnostics.markPacketReceived(ScenePopulationDiagnostics.EntityType.AVATAR)
+                    ScenePopulationDiagnostics.markParsed(ScenePopulationDiagnostics.EntityType.AVATAR)
                     if (avatarUpdateCount <= 5 || avatarUpdateCount % 50 == 0) {
                         Log.d(TAG, "Avatar update: localId=${update.localId}, fullId=${update.fullId} (total: $avatarUpdateCount)")
                     }
@@ -809,6 +813,9 @@ class LinkpointApp : Application() {
                             rotation = update.rotation,
                             velocity = update.velocity
                         )
+                        ScenePopulationDiagnostics.markManagerApplied(ScenePopulationDiagnostics.EntityType.AVATAR, true)
+                    } else {
+                        ScenePopulationDiagnostics.markManagerApplied(ScenePopulationDiagnostics.EntityType.AVATAR, false)
                     }
                     // Add avatar to scene for rendering
                     if (::renderManager.isInitialized) {
@@ -819,6 +826,8 @@ class LinkpointApp : Application() {
                                 rotation = update.rotation
                             )
                         )
+                    } else {
+                        ScenePopulationDiagnostics.markRendererSubmitted(ScenePopulationDiagnostics.EntityType.AVATAR, false)
                     }
                 }
                 else -> {
@@ -849,6 +858,8 @@ class LinkpointApp : Application() {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
                 val updates = com.linkpoint.protocol.messages.MessageParser.parseObjectUpdate(payload)
+                ScenePopulationDiagnostics.markPacketReceived(ScenePopulationDiagnostics.EntityType.OBJECT, updates.size)
+                ScenePopulationDiagnostics.markParsed(ScenePopulationDiagnostics.EntityType.OBJECT, updates.size)
                 objectUpdateCount += updates.size
                 // Log occasionally to avoid spam
                 if (objectUpdateCount <= 5 || objectUpdateCount % 100 == 0) {
@@ -866,6 +877,8 @@ class LinkpointApp : Application() {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
                 val updates = com.linkpoint.protocol.messages.MessageParser.parseObjectUpdateCompressed(payload)
+                ScenePopulationDiagnostics.markPacketReceived(ScenePopulationDiagnostics.EntityType.OBJECT, updates.size)
+                ScenePopulationDiagnostics.markParsed(ScenePopulationDiagnostics.EntityType.OBJECT, updates.size)
                 compressedObjectUpdateCount += updates.size
                 // Log occasionally to avoid spam
                 if (compressedObjectUpdateCount <= 5 || compressedObjectUpdateCount % 100 == 0) {
@@ -5029,4 +5042,11 @@ class LinkpointApp : Application() {
     fun getSessionLogDirectoryPath(): String {
         return com.linkpoint.utils.SessionLogRecorder.getLogDirectoryPath()
     }
+
+    fun runScenePopulationSmokeCheck(): ScenePopulationDiagnostics.SmokeCheckResult {
+        val objectCount = if (::objectManager.isInitialized) objectManager.getAllObjects().size else 0
+        val avatarCount = if (::avatarManager.isInitialized) avatarManager.getAllAvatars().size else 0
+        return ScenePopulationDiagnostics.runSmokeCheck(objectCount, avatarCount)
+    }
+
 }
