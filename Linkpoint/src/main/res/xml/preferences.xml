@@ -372,6 +372,27 @@
             android:title="Clear Crash Logs"
             android:summary="Delete all saved crash reports" />
 
+
+        <SwitchPreferenceCompat
+            android:key="diagnostic_verbose_packet_logging"
+            android:title="Verbose Packet Logging"
+            android:summary="Include packet hex dumps in private diagnostics logs"
+            android:defaultValue="false" />
+
+        <SwitchPreferenceCompat
+            android:key="diagnostic_verbose_body_logging"
+            android:title="Verbose HTTP Body Logging"
+            android:summary="Include HTTP response body snippets in diagnostics logs"
+            android:defaultValue="false" />
+
+        <ListPreference
+            android:key="diagnostic_log_retention_days"
+            android:title="Diagnostics Log Retention"
+            android:summary="Automatically purge private diagnostics logs older than selected days"
+            android:entries="@array/diagnostic_retention_entries"
+            android:entryValues="@array/diagnostic_retention_values"
+            android:defaultValue="7" />
+
         <Preference
             android:key="export_log"
             android:title="Export Log"

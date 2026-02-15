@@ -31,6 +31,7 @@ import com.linkpoint.ui.world.WorldViewActivity
 import com.linkpoint.utils.CodexUploadService
 import com.linkpoint.utils.CrashReporter
 import com.linkpoint.utils.DebugReportService
+import com.linkpoint.utils.DiagnosticsLoggingConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -521,9 +522,28 @@ class SettingsActivity : AppCompatActivity() {
                 true
             }
             
-            // Export Log
+            findPreference<SwitchPreferenceCompat>(DiagnosticsLoggingConfig.PREF_VERBOSE_PACKET_LOGGING)?.setOnPreferenceChangeListener { _, _ ->
+                Toast.makeText(requireContext(), "Verbose packet logging setting updated", Toast.LENGTH_SHORT).show()
+                true
+            }
+
+            findPreference<SwitchPreferenceCompat>(DiagnosticsLoggingConfig.PREF_VERBOSE_BODY_LOGGING)?.setOnPreferenceChangeListener { _, _ ->
+                Toast.makeText(requireContext(), "Verbose HTTP body logging setting updated", Toast.LENGTH_SHORT).show()
+                true
+            }
+
+            findPreference<ListPreference>(DiagnosticsLoggingConfig.PREF_LOG_RETENTION_DAYS)?.apply {
+                summary = "Keep private diagnostics for ${value ?: DiagnosticsLoggingConfig.DEFAULT_RETENTION_DAYS} days"
+                setOnPreferenceChangeListener { preference, newValue ->
+                    preference.summary = "Keep private diagnostics for $newValue days"
+                    Toast.makeText(requireContext(), "Diagnostics retention updated", Toast.LENGTH_SHORT).show()
+                    true
+                }
+            }
+
+            // Export diagnostics
             findPreference<Preference>("export_log")?.setOnPreferenceClickListener {
-                exportLog()
+                confirmExportDiagnostics()
                 true
             }
         }
@@ -827,31 +847,40 @@ class SettingsActivity : AppCompatActivity() {
                 .show()
         }
         
+        private fun confirmExportDiagnostics() {
+            val retentionDays = DiagnosticsLoggingConfig.getRetentionDays(requireContext())
+            AlertDialog.Builder(requireContext())
+                .setTitle("Export diagnostics")
+                .setMessage(
+                    "Diagnostics are kept in app-private storage and automatically purged after $retentionDays days.\n\n" +
+                        "Exporting may include sanitized network metadata and should only be shared with trusted support staff. Continue?"
+                )
+                .setPositiveButton("Export") { _, _ -> exportLog() }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
         /**
          * Export combined log to a user-selected location in the file system
          */
         private fun exportLog() {
             viewLifecycleOwner.lifecycleScope.launch {
                 Toast.makeText(requireContext(), "Generating combined log...", Toast.LENGTH_SHORT).show()
-                
+
                 val logContent = withContext(Dispatchers.IO) {
                     generateCombinedLog()
                 }
-                
-                // Store the content for use by the result callback
+
                 pendingLogContent = logContent
-                
-                // Generate a default filename with timestamp
                 val timestamp = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US).format(Date())
-                val defaultFilename = "linkpoint_log_$timestamp.txt"
-                
-                // Use Storage Access Framework to let user choose location
+                val defaultFilename = "linkpoint_diagnostics_$timestamp.txt"
+
                 val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
                     type = "text/plain"
                     putExtra(Intent.EXTRA_TITLE, defaultFilename)
                 }
-                
+
                 try {
                     createDocumentLauncher.launch(intent)
                 } catch (e: Exception) {

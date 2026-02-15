@@ -1,16 +1,14 @@
 package com.linkpoint.network
 
-import android.content.ContentValues
 import android.content.Context
 import android.os.Build
-import android.os.Environment
-import android.provider.MediaStore
 import android.util.Log
+import com.linkpoint.utils.DiagnosticsLogSanitizer
+import com.linkpoint.utils.DiagnosticsLoggingConfig
 import okhttp3.Request
 import okhttp3.Response
 import java.io.File
 import java.io.IOException
-import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -26,10 +24,9 @@ import kotlinx.coroutines.*
  * - Retry attempts with backoff timing
  * - SSL/TLS handshake information
  * - DNS resolution results
- * - Automatic saving to external storage Documents/Linkpoint Logs/ directory
+ * - Automatic saving to app-private diagnostics storage
  * 
- * Logs are saved to the PUBLIC Documents folder at /Documents/Linkpoint Logs/
- * so they can be accessed outside the app via file manager.
+ * Logs are saved to app-private storage by default and only shared via explicit export actions.
  * 
  * All logs are tagged for easy filtering in logcat:
  * - `adb logcat NetworkLogger:D *:S` - Only network logs
@@ -41,6 +38,7 @@ object NetworkLogger {
     private const val MAX_LOG_ENTRIES = 1000
     private const val LOG_DIR_NAME = "Linkpoint Logs"
     private const val AUTO_SAVE_INTERVAL_MS = 30000L // Auto-save every 30 seconds
+    private const val MAX_RETAINED_FILES = 20
     
     // URL truncation length for log messages
     private const val URL_TRUNCATE_LENGTH = 80
@@ -82,10 +80,17 @@ object NetworkLogger {
      */
     fun initialize(context: Context) {
         appContext = context.applicationContext
-        startAutoSave()
-        
-        // Log the actual path where logs will be saved
         val logDir = getLogDirectory()
+
+        // Perform retention cleanup once during initialization.
+        logDir?.let {
+            purgeExpiredLogs(it)
+            cleanOldLogs(it)
+        }
+
+        startAutoSave()
+
+        // Log the actual path where logs will be saved
         if (logDir != null) {
             Log.i(TAG, "NetworkLogger initialized, logs will be saved to: ${logDir.absolutePath}")
         } else {
@@ -111,83 +116,30 @@ object NetworkLogger {
     }
     
     /**
-     * Get the log directory in the PUBLIC Documents folder.
-     * 
-     * Logs are saved to /storage/emulated/0/Documents/Linkpoint Logs/ (or equivalent)
-     * so they can be accessed via file manager outside the app.
-     * 
-     * For Android 10+ (API 29+), we use the legacy external storage path which
-     * still works for the Documents directory. MediaStore is used as a fallback
-     * for writing individual files if direct file access fails.
+     * Get app-private log directory. Diagnostics stay private unless explicitly exported.
      */
     private fun getLogDirectory(): File? {
-        // Use the public Documents directory on external storage
-        // This path is: /storage/emulated/0/Documents/Linkpoint Logs/
-        @Suppress("DEPRECATION")
-        val documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-        val logDir = File(documentsDir, LOG_DIR_NAME)
-        
-        try {
-            if (!logDir.exists()) {
-                val created = logDir.mkdirs()
-                if (created) {
-                    Log.i(TAG, "Created log directory: ${logDir.absolutePath}")
-                } else {
-                    Log.w(TAG, "Failed to create log directory: ${logDir.absolutePath}")
-                    // Try fallback to app-specific external directory
-                    return getAppSpecificLogDirectory()
-                }
-            }
-            
-            // Verify we can write to this directory
-            if (!logDir.canWrite()) {
-                Log.w(TAG, "Cannot write to log directory: ${logDir.absolutePath}")
-                return getAppSpecificLogDirectory()
-            }
-            
-            return logDir
-        } catch (e: Exception) {
-            Log.e(TAG, "Error accessing log directory: ${e.message}", e)
-            return getAppSpecificLogDirectory()
-        }
-    }
-    
-    /**
-     * Fallback to app-specific external directory if public Documents is not accessible.
-     * This is still accessible via Android/data/com.linkpoint.debug/files/Documents/Linkpoint Logs/
-     */
-    private fun getAppSpecificLogDirectory(): File? {
         val context = appContext ?: return null
-        
-        val appExtDir = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
-        if (appExtDir == null) {
-            Log.w(TAG, "External files directory not available")
-            return null
-        }
-        
-        val logDir = File(appExtDir, LOG_DIR_NAME)
-        try {
+        val logDir = File(DiagnosticsLoggingConfig.diagnosticsDirectory(context), LOG_DIR_NAME)
+
+        return try {
             if (!logDir.exists()) {
                 logDir.mkdirs()
             }
-            Log.i(TAG, "Using app-specific log directory: ${logDir.absolutePath}")
-            return logDir
+            logDir
         } catch (e: Exception) {
-            Log.e(TAG, "Error creating app-specific log directory: ${e.message}", e)
-            return null
+            Log.e(TAG, "Error accessing app-private log directory: ${e.message}", e)
+            null
         }
     }
     
     /**
-     * Save current logs to a file in the public Documents/Linkpoint Logs/ directory.
-     * 
-     * On Android 10+ (API 29+), if direct file access fails, this will attempt
-     * to use MediaStore API to write to the Documents directory.
+     * Save current logs to an app-private diagnostics file.
      */
     fun saveLogsToFile(): File? {
         val logDir = getLogDirectory() ?: run {
-            Log.w(TAG, "Cannot get log directory - trying MediaStore fallback")
-            return saveLogsViaMediaStore()
+            Log.w(TAG, "Cannot get app-private log directory")
+            return null
         }
         
         if (logBuffer.isEmpty()) {
@@ -204,6 +156,9 @@ object NetworkLogger {
                 
                 val logFile = currentLogFile ?: throw IllegalStateException("Failed to create log file")
                 logFileWriter = logFile.bufferedWriter()
+
+                purgeExpiredLogs(logDir)
+                cleanOldLogs(logDir)
                 
                 // Write header
                 logFileWriter?.apply {
@@ -239,95 +194,20 @@ object NetworkLogger {
             return currentLogFile
             
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to save logs to file: ${e.message}, trying MediaStore fallback", e)
-            return saveLogsViaMediaStore()
-        }
-    }
-    
-    /**
-     * Save logs using MediaStore API for Android 10+ (API 29+).
-     * This is a fallback when direct file access to public Documents fails.
-     * 
-     * Creates files in the Documents directory accessible via file manager.
-     */
-    private fun saveLogsViaMediaStore(): File? {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            Log.w(TAG, "MediaStore fallback not available on Android < 10")
-            return null
-        }
-        
-        val context = appContext ?: run {
-            Log.w(TAG, "Cannot save via MediaStore - context not initialized")
-            return null
-        }
-        
-        if (logBuffer.isEmpty()) {
-            return null
-        }
-        
-        try {
-            val timestamp = fileNameFormat.format(Date())
-            val fileName = "network_log_$timestamp.txt"
-            val relativePath = "${Environment.DIRECTORY_DOCUMENTS}/$LOG_DIR_NAME"
-            
-            // Use MediaStore.Files for Documents directory instead of MediaStore.Downloads
-            val contentValues = ContentValues().apply {
-                put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                put(MediaStore.MediaColumns.MIME_TYPE, "text/plain")
-                put(MediaStore.MediaColumns.RELATIVE_PATH, relativePath)
-            }
-            
-            val resolver = context.contentResolver
-            val uri = resolver.insert(
-                MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
-                contentValues
-            )
-            
-            if (uri == null) {
-                Log.e(TAG, "Failed to create MediaStore entry for log file")
-                return null
-            }
-            
-            resolver.openOutputStream(uri)?.use { outputStream ->
-                val writer = outputStream.bufferedWriter()
-                
-                // Write header
-                writer.write("=== Linkpoint Network Activity Log ===\n")
-                writer.write("Started: ${timestampFormat.format(Date())}\n")
-                writer.write("Log Location: $relativePath/$fileName (via MediaStore)\n")
-                writer.write("Device: ${Build.MANUFACTURER} ${Build.MODEL}\n")
-                writer.write("Android: ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})\n")
-                writer.write("Log Level: $logLevel\n")
-                writer.write("=".repeat(60) + "\n\n")
-                
-                // Write log entries
-                logBuffer.forEach { entry ->
-                    val entryTimestamp = timestampFormat.format(Date(entry.timestamp))
-                    writer.write("[$entryTimestamp] [${entry.level}] [${entry.category}]\n")
-                    writer.write("${entry.message}\n")
-                    entry.exception?.let { e ->
-                        writer.write("Exception: ${e.javaClass.simpleName}: ${e.message}\n")
-                        writer.write("${e.stackTraceToString()}\n")
-                    }
-                    writer.write("\n")
-                }
-                
-                writer.flush()
-            }
-            
-            Log.i(TAG, "Saved ${logBuffer.size} log entries via MediaStore to $relativePath/$fileName")
-            
-            // Return a File object pointing to the expected location (for reference)
-            @Suppress("DEPRECATION")
-            val documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-            return File(File(documentsDir, LOG_DIR_NAME), fileName)
-            
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to save logs via MediaStore: ${e.message}", e)
+            Log.e(TAG, "Failed to save logs to file: ${e.message}", e)
             return null
         }
     }
     
+
+    private fun purgeExpiredLogs(logDir: File) {
+        val context = appContext ?: return
+        DiagnosticsLoggingConfig.purgeExpiredLogs(
+            logDir = logDir,
+            retentionDays = DiagnosticsLoggingConfig.getRetentionDays(context)
+        )
+    }
+
     /**
      * Close current log file and start a new one
      */
@@ -341,96 +221,24 @@ object NetworkLogger {
             Log.e(TAG, "Error rotating log file: ${e.message}", e)
         }
     }
-    
     /**
      * Clean up old log files (keep last N files).
-     * Works with both direct file access and MediaStore on Android 10+.
      */
-    fun cleanOldLogs(keepCount: Int = 10) {
-        // Try direct file cleanup first
-        val logDir = getLogDirectory()
-        if (logDir != null) {
-            val logFiles = logDir.listFiles { file ->
-                file.name.startsWith("network_log_") && file.name.endsWith(".txt")
-            }
-            
-            if (logFiles != null && logFiles.isNotEmpty()) {
-                // Sort by last modified, newest first
-                val sortedFiles = logFiles.sortedByDescending { it.lastModified() }
-                
-                // Delete old files beyond keepCount
-                sortedFiles.drop(keepCount).forEach { file ->
-                    try {
-                        if (file.delete()) {
-                            Log.d(TAG, "Deleted old log file: ${file.name}")
-                        }
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Failed to delete old log: ${file.name}", e)
-                    }
-                }
-                return
-            }
-        }
-        
-        // Fallback: Try MediaStore cleanup on Android 10+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            cleanOldLogsViaMediaStore(keepCount)
-        }
+    fun cleanOldLogs(keepCount: Int = MAX_RETAINED_FILES) {
+        val logDir = getLogDirectory() ?: return
+        cleanOldLogs(logDir, keepCount)
     }
-    
-    /**
-     * Clean up old log files using MediaStore API (Android 10+).
-     */
-    private fun cleanOldLogsViaMediaStore(keepCount: Int) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return
-        
-        val context = appContext ?: return
-        
-        try {
-            val resolver = context.contentResolver
-            val relativePath = "${Environment.DIRECTORY_DOCUMENTS}/$LOG_DIR_NAME"
-            
-            // Use MediaStore.Files for Documents directory instead of MediaStore.Downloads
-            // Query for our log files
-            val projection = arrayOf(
-                MediaStore.MediaColumns._ID,
-                MediaStore.MediaColumns.DISPLAY_NAME,
-                MediaStore.MediaColumns.DATE_MODIFIED
-            )
-            val selection = "${MediaStore.MediaColumns.RELATIVE_PATH} = ? AND ${MediaStore.MediaColumns.DISPLAY_NAME} LIKE ?"
-            val selectionArgs = arrayOf("$relativePath/", "network_log_%.txt")
-            val sortOrder = "${MediaStore.MediaColumns.DATE_MODIFIED} DESC"
-            
-            resolver.query(
-                MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
-                projection,
-                selection,
-                selectionArgs,
-                sortOrder
-            )?.use { cursor ->
-                val idColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
-                val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
-                
-                var count = 0
-                while (cursor.moveToNext()) {
-                    count++
-                    if (count > keepCount) {
-                        val id = cursor.getLong(idColumn)
-                        val name = cursor.getString(nameColumn)
-                        val uri = android.content.ContentUris.withAppendedId(
-                            MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), id
-                        )
-                        try {
-                            resolver.delete(uri, null, null)
-                            Log.d(TAG, "Deleted old log file via MediaStore: $name")
-                        } catch (e: Exception) {
-                            Log.w(TAG, "Failed to delete old log via MediaStore: $name", e)
-                        }
-                    }
-                }
+
+    private fun cleanOldLogs(logDir: File, keepCount: Int = MAX_RETAINED_FILES) {
+        val logFiles = logDir.listFiles { file ->
+            file.name.startsWith("network_log_") && file.name.endsWith(".txt")
+        } ?: return
+
+        val sortedFiles = logFiles.sortedByDescending { it.lastModified() }
+        sortedFiles.drop(keepCount).forEach { file ->
+            if (!file.delete()) {
+                Log.w(TAG, "Failed to delete old log file: ${file.absolutePath}")
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error cleaning old logs via MediaStore: ${e.message}", e)
         }
     }
     
@@ -443,12 +251,11 @@ object NetworkLogger {
     
     /**
      * Get the log directory path for display purposes.
-     * Returns the expected public Documents path regardless of whether direct access is available.
+     * Returns the app-private diagnostics path.
      */
     fun getLogDirectoryPath(): String {
-        @Suppress("DEPRECATION")
-        val documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-        return File(documentsDir, LOG_DIR_NAME).absolutePath
+        val context = appContext ?: return "unavailable"
+        return File(DiagnosticsLoggingConfig.diagnosticsDirectory(context), LOG_DIR_NAME).absolutePath
     }
     
     /**
@@ -601,13 +408,7 @@ object NetworkLogger {
             append("→ ${request.method} ${request.url}\n")
             append("Headers:\n")
             request.headers.forEach { (name, value) ->
-                // Don't log sensitive headers in full
-                val safeValue = when {
-                    name.equals("Authorization", ignoreCase = true) -> "***REDACTED***"
-                    name.equals("Cookie", ignoreCase = true) -> "***REDACTED***"
-                    else -> value
-                }
-                append("  $name: $safeValue\n")
+                append("  $name: $value\n")
             }
             request.body?.contentLength()?.let { length ->
                 append("Content-Length: $length bytes\n")
@@ -694,6 +495,8 @@ object NetworkLogger {
      */
     fun logResponseBody(url: String, body: String) {
         if (!shouldLog(Level.VERBOSE)) return
+        val context = appContext ?: return
+        if (!DiagnosticsLoggingConfig.isVerboseBodyLoggingEnabled(context)) return
         
         val preview = if (body.length > 500) {
             body.take(500) + "... (${body.length} total chars)"
@@ -991,6 +794,11 @@ object NetworkLogger {
         log(if (success) Level.DEBUG else Level.WARN, Category.CAPABILITY, message)
     }
     
+    private fun isVerbosePacketLoggingEnabled(): Boolean {
+        val context = appContext ?: return false
+        return DiagnosticsLoggingConfig.isVerbosePacketLoggingEnabled(context)
+    }
+
     // ==================== UDP LOGGING ====================
     
     /**
@@ -1004,6 +812,7 @@ object NetworkLogger {
         targetAddress: String,
         targetPort: Int
     ) {
+        if (!isVerbosePacketLoggingEnabled()) return
         val message = buildString {
             append("📤 UDP Sent: $messageName\n")
             append("  Message ID: 0x${messageId.toString(16).uppercase()}\n")
@@ -1025,6 +834,7 @@ object NetworkLogger {
         sourceAddress: String?,
         hasHandler: Boolean
     ) {
+        if (!isVerbosePacketLoggingEnabled()) return
         val statusIcon = if (hasHandler) "✓" else "⚠️"
         val handlerInfo = if (hasHandler) "" else " [NO HANDLER]"
         val message = buildString {
@@ -1064,6 +874,7 @@ object NetworkLogger {
         hexPreview: String,
         details: String
     ) {
+        if (!isVerbosePacketLoggingEnabled()) return
         val message = buildString {
             append("⚠️ MALFORMED UDP PACKET\n")
             append("  Reason: $reason\n")
@@ -1119,7 +930,7 @@ object NetworkLogger {
             timestamp = System.currentTimeMillis(),
             level = level,
             category = category,
-            message = message,
+            message = DiagnosticsLogSanitizer.sanitize(message),
             exception = exception
         )
         
@@ -1131,7 +942,7 @@ object NetworkLogger {
         
         // Format for logcat
         val timestamp = timestampFormat.format(Date(entry.timestamp))
-        val formattedMessage = "[$timestamp] [$category] $message"
+        val formattedMessage = "[$timestamp] [$category] ${entry.message}"
         
         // Write to logcat
         when (level) {
