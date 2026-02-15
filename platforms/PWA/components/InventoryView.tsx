@@ -40,6 +40,19 @@ const FOLDERS = [
   { name: 'Textures', icon: '🖼️', count: 67 },
 ]
 
+const FOLDER_TO_TYPE: Record<string, string> = {
+  Animations: 'Animation',
+  'Body Parts': 'Body Part',
+  Clothing: 'Clothing',
+  Gestures: 'Gesture',
+  Landmarks: 'Landmark',
+  Notecards: 'Notecard',
+  Objects: 'Object',
+  Scripts: 'Script',
+  Sounds: 'Sound',
+  Textures: 'Texture',
+}
+
 export default function InventoryView() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
@@ -47,9 +60,13 @@ export default function InventoryView() {
   const [lastNonComfortPreset, setLastNonComfortPreset] = useState<AccessibilityPresetId>(DEFAULT_PRESET)
   const [reducedGlare, setReducedGlare] = useState(false)
 
-  const filteredItems = INVENTORY_ITEMS.filter(item =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredItems = INVENTORY_ITEMS.filter((item) => {
+    const folderType = selectedFolder ? FOLDER_TO_TYPE[selectedFolder] : null
+    const matchesFolder = folderType ? item.type === folderType : true
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase())
+
+    return matchesFolder && matchesSearch
+  })
 
   const isComfortMode = COMFORT_PRESETS.includes(activePreset)
   const theme = resolveAccessibilityTheme(activePreset, reducedGlare)
