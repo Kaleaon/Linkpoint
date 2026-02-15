@@ -4840,6 +4840,8 @@ class LinkpointApp : Application() {
      * Check if XR mode is available on this device
      */
     fun isXRAvailable(): Boolean = xrManager.isAvailable()
+
+    fun isXREntryAvailable(): Boolean = xrManager.isUiEntryAvailable()
     
     /**
      * Check if currently connected to a grid

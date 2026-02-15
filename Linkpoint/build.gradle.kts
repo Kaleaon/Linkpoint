@@ -21,6 +21,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.linkpoint"
+    flavorDimensions += "xr"
     compileSdk = 35
     buildToolsVersion = "35.0.0"
     
@@ -51,6 +52,7 @@ android {
         // Add build info to BuildConfig
         buildConfigField("String", "BUILD_TIME", "\"${System.currentTimeMillis()}\"")
         buildConfigField("String", "GIT_COMMIT", "\"${getGitHash()}\"")
+        buildConfigField("Boolean", "XR_EXPERIMENTAL_MODE", "false")
     }
     
     externalNativeBuild {
@@ -71,6 +73,19 @@ android {
         }
     }
     
+    productFlavors {
+        create("stable") {
+            dimension = "xr"
+            buildConfigField("Boolean", "XR_EXPERIMENTAL_MODE", "false")
+        }
+        create("xrExperimental") {
+            dimension = "xr"
+            applicationIdSuffix = ".xrexp"
+            versionNameSuffix = "-xrexp"
+            buildConfigField("Boolean", "XR_EXPERIMENTAL_MODE", "true")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false  // Keep false until stable

@@ -120,13 +120,13 @@
         <SwitchPreferenceCompat
             android:key="enable_xr"
             android:title="Enable XR Mode"
-            android:summary="Allow VR/AR viewing"
+            android:summary="Requires Android 15+ immersive XR hardware or Cardboard-compatible VR mode"
             android:defaultValue="true" />
 
         <ListPreference
             android:key="xr_mode"
             android:title="XR Mode"
-            android:summary="Preferred XR mode"
+            android:summary="Auto selects supported runtime; experimental runtimes require xrExperimental build"
             android:entries="@array/xr_mode_entries"
             android:entryValues="@array/xr_mode_values"
             android:defaultValue="auto" />

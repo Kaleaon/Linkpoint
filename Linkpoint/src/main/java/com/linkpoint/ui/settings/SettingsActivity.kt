@@ -126,9 +126,17 @@ class SettingsActivity : AppCompatActivity() {
             }
             
             // XR settings
+            val xrManager = com.linkpoint.LinkpointApp.getInstance().xrManager
+            val xrCapability = xrManager.getEntryCapability()
             findPreference<SwitchPreferenceCompat>("enable_xr")?.apply {
-                isEnabled = com.linkpoint.LinkpointApp.getInstance().isXRAvailable()
+                isEnabled = xrManager.isUiEntryAvailable()
+                summary = when (xrCapability) {
+                    is com.linkpoint.xr.XRSessionCapability.Ready -> "Ready: ${xrCapability.detail}"
+                    is com.linkpoint.xr.XRSessionCapability.Experimental -> "Experimental build required: ${xrCapability.reason}"
+                    is com.linkpoint.xr.XRSessionCapability.Unsupported -> "Unavailable: ${xrCapability.reason}"
+                }
             }
+            findPreference<ListPreference>("xr_mode")?.isEnabled = xrManager.isUiEntryAvailable()
             
             // Voice settings
             findPreference<SwitchPreferenceCompat>("enable_voice")?.setOnPreferenceChangeListener { _, newValue ->
