@@ -129,6 +129,17 @@ fun ByteBuffer.putUUID(uuid: UUID): ByteBuffer {
 
 ## ⚠️ Known Issues (Not Yet Fixed)
 
+
+### Runtime Code Path Mapping (Issue → Stage)
+
+| Known issue | Packet + parse path | State update path | Scene insertion / renderer path |
+|---|---|---|---|
+| No Objects/Avatars in Scene | `LinkpointApp.registerMessageHandlers()` handles `OBJECT_UPDATE` / `OBJECT_UPDATE_COMPRESSED` / `IMPROVED_TERSE_OBJECT_UPDATE` and parses via `MessageParser` | Objects: `ObjectManager.handleObjectUpdate()` and terse updates; Avatars: `avatarManager.updateAvatar()` | Objects: `RenderManager.enqueueUpdate(PrimUpdate)` → `RenderManager.applyRenderUpdates()` → `PrimRenderer.updatePrim()`; Avatars: `RenderManager.enqueueUpdate(AvatarUpdate)` → `SceneManager.updateAvatar()` / `DrawableAvatarStore.draw()` |
+| No Swap Chain | N/A (render lifecycle issue) | `RenderManager.initialize()` + `UiHelper.RendererCallback.onNativeWindowChanged()` + `recreateSwapChain()` | `RenderManager.ensureSwapChain()` gates frame submission and logs swapchain readiness/failure |
+
+New structured diagnostics now tag entity flow as: **packet received → parsed → manager applied → scene inserted → renderer submitted**, with per-entity drop counters.
+
+
 ### 1. Region Name "Unknown"
 **Symptom:** Debug report shows `Current Region: Unknown`
 
