@@ -63,6 +63,15 @@ class ScriptEditorActivity : ComponentActivity() {
                         onLoadScript = { assetUuid ->
                             app.scriptManager.getScriptSource(assetUuid)
                         },
+                        onSaveScript = { scriptItemId, scriptObjectId, scriptText ->
+                            val saveResult = app.scriptManager.saveScript(
+                                itemId = scriptItemId,
+                                scriptText = scriptText,
+                                taskId = scriptObjectId
+                            )
+                            val message = saveResult.error ?: saveResult.compileErrors.firstOrNull()
+                            Pair(saveResult.success, message)
+                        },
                         onResetScript = { objId, itmId ->
                             app.scriptManager.resetScript(objId, itmId)
                         },
