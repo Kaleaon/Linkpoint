@@ -35,7 +35,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
         ndk {
-            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
         }
         
         // CMake configuration for native code
@@ -154,6 +154,7 @@ android {
             pickFirsts += listOf(
                 "**/libjnidispatch.so",
                 "**/libopenjpeg.so",
+                "**/libopenjp2.so",
                 "**/liblumiya-native.so"
             )
         }
