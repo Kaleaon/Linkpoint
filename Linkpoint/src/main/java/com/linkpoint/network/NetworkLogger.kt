@@ -83,7 +83,10 @@ object NetworkLogger {
         val logDir = getLogDirectory()
 
         // Perform retention cleanup once during initialization.
-        logDir?.let { purgeExpiredLogs(it) }
+        logDir?.let {
+            purgeExpiredLogs(it)
+            cleanOldLogs(it)
+        }
 
         startAutoSave()
 
@@ -155,7 +158,7 @@ object NetworkLogger {
                 logFileWriter = logFile.bufferedWriter()
 
                 purgeExpiredLogs(logDir)
-                cleanOldLogs()
+                cleanOldLogs(logDir)
                 
                 // Write header
                 logFileWriter?.apply {
@@ -223,6 +226,10 @@ object NetworkLogger {
      */
     fun cleanOldLogs(keepCount: Int = MAX_RETAINED_FILES) {
         val logDir = getLogDirectory() ?: return
+        cleanOldLogs(logDir, keepCount)
+    }
+
+    private fun cleanOldLogs(logDir: File, keepCount: Int = MAX_RETAINED_FILES) {
         val logFiles = logDir.listFiles { file ->
             file.name.startsWith("network_log_") && file.name.endsWith(".txt")
         } ?: return
