@@ -490,7 +490,7 @@ class LinkpointApp : Application() {
         transferManager = TransferManager(udpConnection, agentId, udpConnection.getSessionId())
         
         // NEW: Notecard manager
-        notecardManager = NotecardManager(transferManager)
+        notecardManager = NotecardManager(transferManager, capabilityManager)
         
         // NEW: Task inventory manager
         taskInventoryManager = TaskInventoryManager(udpConnection, xferManager, agentId)

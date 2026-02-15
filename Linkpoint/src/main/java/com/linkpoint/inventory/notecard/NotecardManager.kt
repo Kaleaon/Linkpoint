@@ -1,10 +1,17 @@
 package com.linkpoint.inventory.notecard
 
 import android.util.Log
+import com.linkpoint.protocol.capabilities.CapabilityManager
+import com.linkpoint.protocol.llsd.LLSDMap
+import com.linkpoint.protocol.llsd.LLSDUUID
 import com.linkpoint.protocol.transfer.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.MediaType.Companion.toMediaType
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -30,7 +37,9 @@ import java.util.concurrent.ConcurrentHashMap
  * }
  */
 class NotecardManager(
-    private val transferManager: TransferManager
+    private val transferManager: TransferManager,
+    private val capabilityManager: CapabilityManager,
+    private val httpClient: OkHttpClient = OkHttpClient()
 ) {
     companion object {
         private const val TAG = "NotecardManager"
@@ -409,18 +418,67 @@ class NotecardManager(
     suspend fun saveNotecard(itemId: UUID, newText: String): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                // Create new notecard data
                 val notecardData = createNotecardData(newText)
-                
-                // Upload via capability - requires UpdateNotecardAgentInventory
-                Log.w(TAG, "Notecard save not fully implemented - data prepared but upload pending capability implementation")
-                Log.d(TAG, "Prepared notecard $itemId: ${newText.length} chars, ${notecardData.size} bytes")
-                
-                // Return false to indicate save is not yet complete
-                // This will show user that the feature is not yet fully implemented
-                false
+                val request = LLSDMap().apply {
+                    this["item_id"] = LLSDUUID(itemId)
+                }
+
+                val capResponse = capabilityManager.request(
+                    CapabilityManager.CAP_UPDATE_NOTECARD_AGENT,
+                    request
+                ) as? LLSDMap
+
+                if (capResponse == null) {
+                    Log.w(TAG, "Notecard save failed: UpdateNotecardAgentInventory returned no payload")
+                    return@withContext false
+                }
+
+                val uploaderUrl = capResponse.getString("uploader")?.takeIf { it.isNotBlank() }
+                if (uploaderUrl == null) {
+                    Log.w(TAG, "Notecard save failed: cap response missing uploader URL")
+                    return@withContext false
+                }
+
+                val normalizedUploader = if (uploaderUrl.startsWith("http://", ignoreCase = true)) {
+                    uploaderUrl.replaceFirst("http://", "https://", ignoreCase = true)
+                } else uploaderUrl
+
+                val uploadRequest = Request.Builder()
+                    .url(normalizedUploader)
+                    .addHeader("Accept", "application/llsd+xml")
+                    .post(notecardData.toRequestBody("application/vnd.ll.notecard".toMediaType()))
+                    .build()
+
+                httpClient.newCall(uploadRequest).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        Log.w(TAG, "Notecard upload failed for $itemId: HTTP ${response.code}")
+                        return@withContext false
+                    }
+
+                    val responseBody = response.body?.bytes()
+                    if (responseBody.isNullOrEmpty()) {
+                        Log.w(TAG, "Notecard upload returned empty response for $itemId")
+                        return@withContext false
+                    }
+
+                    val uploadResponse = com.linkpoint.protocol.llsd.LLSDParser.parseAuto(
+                        responseBody,
+                        response.header("Content-Type")
+                    ) as? LLSDMap
+
+                    val state = uploadResponse?.getString("state")
+                    val completed = state.equals("complete", ignoreCase = true)
+                    if (!completed) {
+                        val errors = uploadResponse?.getString("errors")
+                        Log.w(TAG, "Notecard upload incomplete for $itemId: state=$state errors=$errors")
+                        return@withContext false
+                    }
+                }
+
+                Log.i(TAG, "Notecard $itemId saved successfully (${newText.length} chars)")
+                true
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to prepare notecard $itemId", e)
+                Log.e(TAG, "Failed to save notecard $itemId", e)
                 false
             }
         }

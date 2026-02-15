@@ -282,7 +282,8 @@ class CapabilityManager {
                 CAP_ENVIRONMENT,
                 CAP_EXT_ENVIRONMENT,
                 CAP_AVATAR_PICKER,
-                CAP_SEARCH_STATIC
+                CAP_SEARCH_STATIC,
+                CAP_GROUP_PROFILE
             )
         }
         

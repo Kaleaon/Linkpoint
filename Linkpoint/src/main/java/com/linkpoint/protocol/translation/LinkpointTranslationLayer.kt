@@ -279,6 +279,7 @@ object LinkpointTranslationLayer {
             "UpdateScriptTask",
             "UpdateScriptAgent",
             "GroupMemberData",
+            "GroupProfile",
             "HomeLocation",
             "ProvisionVoiceAccountRequest",
             "ParcelVoiceInfoRequest",
