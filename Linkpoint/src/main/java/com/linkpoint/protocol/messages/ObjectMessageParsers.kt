@@ -165,7 +165,7 @@ internal object ObjectMessageParsers {
                 updateFlags = updateFlags,
                 textureEntry = ByteArray(0),
                 hoverText = "",
-                hoverTextColor = LLColor4(0f, 0f, 0f, 0f),
+                hoverTextColor = LLColor4.white(),
                 mediaUrl = "",
                 ownerId = ownerId,
                 nameValue = "",
@@ -184,10 +184,14 @@ internal object ObjectMessageParsers {
         val state = bb.get().toInt() and 0xFF
         val isAvatar = (state and 0x01) != 0
         if (isAvatar && data.size >= 46) repeat(4) { bb.float }
-        val position = LLVector3.fromTerse(data, bb.position(), 256f); bb.position(bb.position() + 6)
-        val velocity = LLVector3.fromTerse(data, bb.position(), 256f); bb.position(bb.position() + 6)
-        val acceleration = LLVector3.fromTerse(data, bb.position(), 256f); bb.position(bb.position() + 6)
-        val rotation = LLQuaternion.fromTerse(data, bb.position()); bb.position(bb.position() + 8)
+        val position = LLVector3.fromTerse(data, bb.position(), 256f)
+        bb.position(bb.position() + 6)
+        val velocity = LLVector3.fromTerse(data, bb.position(), 256f)
+        bb.position(bb.position() + 6)
+        val acceleration = LLVector3.fromTerse(data, bb.position(), 256f)
+        bb.position(bb.position() + 6)
+        val rotation = LLQuaternion.fromTerse(data, bb.position())
+        bb.position(bb.position() + 8)
         val angularVelocity = if (bb.remaining() >= 6) LLVector3.fromTerse(data, bb.position(), 256f) else LLVector3.zero()
 
         return TerseUpdateData(localId, isAvatar, position, velocity, acceleration, rotation, angularVelocity)

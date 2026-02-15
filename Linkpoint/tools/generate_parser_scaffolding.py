@@ -5,6 +5,7 @@ from pathlib import Path
 root = Path(__file__).resolve().parents[1]
 tpl = json.loads((root / "tools/parser-templates/message-parser-templates.json").read_text())
 out = root / "src/main/java/com/linkpoint/protocol/messages/generated/GeneratedParserScaffolding.kt"
+out.parent.mkdir(parents=True, exist_ok=True)
 
 lines = [
     "package com.linkpoint.protocol.messages.generated",

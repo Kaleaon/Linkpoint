@@ -1,5 +1,6 @@
 package com.linkpoint.protocol.messages
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
@@ -31,7 +32,12 @@ class CircuitThread(threadName: String) : Closeable {
             val messageId = MessageParser.extractMessageId(rawPacket)
             if (messageId == Int.MIN_VALUE) return@launch
             val payload = MessageParser.extractPayload(rawPacket) ?: return@launch
-            onParsed(messageId, MessageParserRegistry.parse(messageId, payload))
+            val parsed = MessageParser.parseByMessageId(messageId, payload)
+            try {
+                onParsed(messageId, parsed)
+            } catch (e: Exception) {
+                Log.e("CircuitThread", "Error in parsed handler for messageId=$messageId", e)
+            }
         }
     }
 
