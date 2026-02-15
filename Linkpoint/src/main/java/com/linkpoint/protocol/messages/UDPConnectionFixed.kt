@@ -1694,7 +1694,7 @@ class UDPConnectionFixed {
     fun registerParsedHandler(messageId: Int, handler: (Int, Any?) -> Unit) {
         registerHandler(messageId) { msgId, rawPacket ->
             val payload = MessageParser.extractPayload(rawPacket) ?: return@registerHandler
-            handler(msgId, MessageParserRegistry.parse(msgId, payload))
+            handler(msgId, MessageParser.parseByMessageId(msgId, payload))
         }
     }
 

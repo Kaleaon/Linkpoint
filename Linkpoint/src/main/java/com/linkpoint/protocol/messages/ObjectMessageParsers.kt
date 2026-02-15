@@ -93,7 +93,7 @@ internal object ObjectMessageParsers {
             val parentId = buffer.int
             val updateFlags = buffer.int
             buffer.get(); buffer.get(); buffer.short; buffer.short
-            repeat(10) { buffer.get() }
+            repeat(11) { buffer.get() }
             buffer.short; buffer.short; buffer.short
 
             val textureEntry = ByteArray(buffer.short.toInt() and 0xFFFF).also(buffer::get)

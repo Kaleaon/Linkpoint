@@ -114,7 +114,7 @@ class MessageRouter {
         addHandlerInternal(messageId, object : Handler {
             override fun handleMessage(messageId: Int, data: ByteArray): Boolean {
                 val payload = MessageParser.extractPayload(data) ?: return false
-                val parsed = MessageParserRegistry.parse(messageId, payload)
+                val parsed = MessageParser.parseByMessageId(messageId, payload)
                 return handler.handleParsedMessage(messageId, payload, parsed)
             }
 
