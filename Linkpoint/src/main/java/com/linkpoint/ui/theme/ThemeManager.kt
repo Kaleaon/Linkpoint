@@ -5,12 +5,16 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.core.content.FileProvider
+import com.ktheme.library.KthemeAPI
+import com.ktheme.library.ThemeChangeListener
+import com.ktheme.models.Theme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * ThemeManager handles loading, saving, and sharing theme packs.
@@ -41,6 +45,8 @@ class ThemeManager private constructor(private val context: Context) {
         }
     }
     
+    private val isApplyingRemoteUpdate = AtomicBoolean(false)
+
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val themesDir = File(context.filesDir, THEMES_DIR).apply { mkdirs() }
     
@@ -55,20 +61,29 @@ class ThemeManager private constructor(private val context: Context) {
     init {
         loadThemes()
         loadActiveTheme()
+        subscribeToKthemeUpdates()
     }
     
     /**
      * Load all themes (built-in + user-created)
      */
     private fun loadThemes() {
-        val themes = mutableListOf<ThemePack>()
-        
-        // Add built-in themes
-        themes.addAll(BuiltInThemes.getAllBuiltInThemes())
-        
-        // Load user themes from storage
-        themes.addAll(loadUserThemes())
-        
+        val themesById = linkedMapOf<String, ThemePack>()
+
+        // Add built-in themes first.
+        BuiltInThemes.getAllBuiltInThemes().forEach { themesById[it.id] = it }
+
+        // Load user themes from app storage.
+        loadUserThemes().forEach { themesById[it.id] = it }
+
+        // Load shared Ktheme themes (cross-app + auto-updating source).
+        loadKthemeThemes().forEach { sharedTheme ->
+            if (!themesById.containsKey(sharedTheme.id)) {
+                themesById[sharedTheme.id] = sharedTheme
+            }
+        }
+
+        val themes = themesById.values.toList()
         _availableThemes.value = themes
         Log.d(TAG, "Loaded ${themes.size} themes (${BuiltInThemes.getAllBuiltInThemes().size} built-in)")
     }
@@ -95,6 +110,48 @@ class ThemeManager private constructor(private val context: Context) {
     }
     
     /**
+     * Load themes exposed via KthemeAPI and map them to ThemePack.
+     */
+    private fun loadKthemeThemes(): List<ThemePack> {
+        return try {
+            KthemeAPI.getAvailableThemes().map { it.toThemePack() }
+        } catch (e: Exception) {
+            Log.w(TAG, "Unable to load themes from KthemeAPI", e)
+            emptyList()
+        }
+    }
+
+    /**
+     * Subscribe to Ktheme updates so theme list auto-refreshes.
+     */
+    private fun subscribeToKthemeUpdates() {
+        try {
+            KthemeAPI.onThemeChanged(object : ThemeChangeListener {
+                override fun onThemeAdded(theme: Theme) {
+                    refreshThemesFromKtheme()
+                }
+
+                override fun onThemeRemoved(themeId: String) {
+                    refreshThemesFromKtheme()
+                }
+
+                override fun onThemeUpdated(theme: Theme) {
+                    refreshThemesFromKtheme()
+                }
+            })
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to subscribe to Ktheme updates", e)
+        }
+    }
+
+    private fun refreshThemesFromKtheme() {
+        isApplyingRemoteUpdate.set(true)
+        loadThemes()
+        loadActiveTheme()
+        isApplyingRemoteUpdate.set(false)
+    }
+
+    /**
      * Load the active theme from preferences
      */
     private fun loadActiveTheme() {
@@ -111,6 +168,15 @@ class ThemeManager private constructor(private val context: Context) {
     fun setActiveTheme(theme: ThemePack) {
         _activeTheme.value = theme
         prefs.edit().putString(PREF_ACTIVE_THEME, theme.id).apply()
+
+        if (!isApplyingRemoteUpdate.get()) {
+            try {
+                KthemeAPI.shareTheme(theme.toKthemeTheme())
+            } catch (e: Exception) {
+                Log.w(TAG, "Unable to publish active theme to KthemeAPI", e)
+            }
+        }
+
         Log.d(TAG, "Set active theme: ${theme.name}")
     }
     
