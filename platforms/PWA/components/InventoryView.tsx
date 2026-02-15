@@ -33,12 +33,30 @@ const FOLDERS = [
   { name: 'Textures', icon: '🖼️', count: 67 },
 ]
 
+const FOLDER_TO_TYPE: Record<string, string> = {
+  Animations: 'Animation',
+  'Body Parts': 'Body Part',
+  Clothing: 'Clothing',
+  Gestures: 'Gesture',
+  Landmarks: 'Landmark',
+  Notecards: 'Notecard',
+  Objects: 'Object',
+  Scripts: 'Script',
+  Sounds: 'Sound',
+  Textures: 'Texture',
+}
+
 export default function InventoryView() {
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
 
-  const filteredItems = INVENTORY_ITEMS.filter(item =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredItems = INVENTORY_ITEMS.filter((item) => {
+    const folderType = selectedFolder ? FOLDER_TO_TYPE[selectedFolder] : null
+    const matchesFolder = folderType ? item.type === folderType : true
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase())
+
+    return matchesFolder && matchesSearch
+  })
 
   return (
     <div className="h-full flex flex-col bg-white">
@@ -95,7 +113,11 @@ export default function InventoryView() {
               <div
                 key={folder.name}
                 onClick={() => setSelectedFolder(folder.name)}
-                className="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                className={`flex flex-col items-center p-4 rounded-lg cursor-pointer transition-colors ${
+                  selectedFolder === folder.name
+                    ? 'bg-blue-100 ring-2 ring-blue-500'
+                    : 'bg-gray-50 hover:bg-gray-100'
+                }`}
               >
                 <span className="text-3xl mb-2">{folder.icon}</span>
                 <div className="font-medium text-gray-900 text-sm text-center">
