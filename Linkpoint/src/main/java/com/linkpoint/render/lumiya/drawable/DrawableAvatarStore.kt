@@ -12,7 +12,7 @@ import java.nio.ByteOrder
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
-class DrawableAvatarStore(
+class DrawableAvatarStore internal constructor(
     private val avatarMeshProvider: (() -> AvatarMeshAsset?)? = null
 ) {
     companion object {
