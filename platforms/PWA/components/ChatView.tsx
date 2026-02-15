@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { getThemeTokens } from '../lib/themes'
 
 interface Message {
   id: string
@@ -34,6 +35,7 @@ export default function ChatView({ user }: ChatViewProps) {
   const [newMessage, setNewMessage] = useState('')
   const [activeChannel, setActiveChannel] = useState('Local')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const theme = getThemeTokens()
 
   const channels = ['Local', 'Group', 'IM', 'System']
 
@@ -49,10 +51,11 @@ export default function ChatView({ user }: ChatViewProps) {
     e.preventDefault()
     if (!newMessage.trim()) return
 
+    const pendingMessage = newMessage
     const message: Message = {
       id: Date.now().toString(),
       sender: user.fullName,
-      content: newMessage,
+      content: pendingMessage,
       timestamp: new Date(),
       isSent: true,
     }
@@ -60,12 +63,11 @@ export default function ChatView({ user }: ChatViewProps) {
     setMessages([...messages, message])
     setNewMessage('')
 
-    // Simulate a response
     setTimeout(() => {
       const response: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'Echo Bot',
-        content: `You said: "${newMessage}"`,
+        content: `You said: "${pendingMessage}"`,
         timestamp: new Date(),
         isSent: false,
       }
@@ -74,19 +76,19 @@ export default function ChatView({ user }: ChatViewProps) {
   }
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="h-full flex flex-col" style={{ backgroundColor: theme.panelBackground }}>
       {/* Channel Tabs */}
-      <div className="border-b border-gray-200 bg-gray-50">
+      <div className="border-b" style={{ borderColor: theme.border, backgroundColor: theme.panelMuted }}>
         <div className="flex overflow-x-auto">
           {channels.map((channel) => (
             <button
               key={channel}
               onClick={() => setActiveChannel(channel)}
-              className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
-                activeChannel === channel
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
+              className="px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-2"
+              style={{
+                color: activeChannel === channel ? theme.accent : theme.textSecondary,
+                borderColor: activeChannel === channel ? theme.accent : 'transparent',
+              }}
             >
               {channel}
             </button>
@@ -97,28 +99,22 @@ export default function ChatView({ user }: ChatViewProps) {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${message.isSent ? 'justify-end' : 'justify-start'}`}
-          >
+          <div key={message.id} className={`flex ${message.isSent ? 'justify-end' : 'justify-start'}`}>
             <div
-              className={`max-w-[80%] ${
-                message.isSent
-                  ? 'chat-bubble chat-bubble-sent'
-                  : 'chat-bubble chat-bubble-received'
-              }`}
+              className="rounded-lg p-3 mb-2 max-w-[80%] break-words"
+              style={{
+                backgroundColor: message.isSent ? theme.sentBubble : theme.receivedBubble,
+                color: message.isSent ? theme.accentContrast : theme.textPrimary,
+                border: `1px solid ${theme.border}`,
+              }}
             >
               {!message.isSent && (
-                <div className="font-semibold text-sm mb-1">
+                <div className="font-semibold text-sm mb-1" style={{ color: theme.accent }}>
                   {message.sender}
                 </div>
               )}
               <div className="text-sm">{message.content}</div>
-              <div
-                className={`text-xs mt-1 ${
-                  message.isSent ? 'text-blue-100' : 'text-gray-500'
-                }`}
-              >
+              <div className="text-xs mt-1" style={{ color: message.isSent ? theme.accentContrast : theme.textMuted }}>
                 {message.timestamp.toLocaleTimeString([], {
                   hour: '2-digit',
                   minute: '2-digit',
@@ -131,32 +127,28 @@ export default function ChatView({ user }: ChatViewProps) {
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSendMessage} className="border-t border-gray-200 p-4">
+      <form onSubmit={handleSendMessage} className="border-t p-4" style={{ borderColor: theme.border }}>
         <div className="flex space-x-2">
           <input
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder={`Type a message in ${activeChannel}...`}
-            className="flex-1 input-field"
+            className="flex-1 w-full px-4 py-2 rounded-lg focus:outline-none"
+            style={{
+              backgroundColor: theme.inputBackground,
+              border: `1px solid ${theme.inputBorder}`,
+              color: theme.textPrimary,
+            }}
           />
           <button
             type="submit"
             disabled={!newMessage.trim()}
-            className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            className="font-semibold py-2 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: theme.accentStrong, color: theme.accentContrast }}
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-              />
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
             </svg>
           </button>
         </div>

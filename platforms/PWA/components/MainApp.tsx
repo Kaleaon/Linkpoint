@@ -5,6 +5,7 @@ import WorldView from './WorldView'
 import InventoryView from './InventoryView'
 import ChatView from './ChatView'
 import ProfileView from './ProfileView'
+import { getThemeTokens } from '../lib/themes'
 
 interface MainAppProps {
   user: any
@@ -15,6 +16,7 @@ type Tab = 'world' | 'inventory' | 'chat' | 'profile'
 
 export default function MainApp({ user, onLogout }: MainAppProps) {
   const [activeTab, setActiveTab] = useState<Tab>('world')
+  const theme = getThemeTokens()
 
   const tabs = [
     { id: 'world' as Tab, name: 'World', icon: '🌍' },
@@ -24,20 +26,21 @@ export default function MainApp({ user, onLogout }: MainAppProps) {
   ]
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100">
+    <div className="h-screen flex flex-col" style={{ backgroundColor: theme.appBackground, color: theme.textPrimary }}>
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="shadow-sm border-b" style={{ backgroundColor: theme.panelBackground, borderColor: theme.border }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">Linkpoint</h1>
-              <span className="ml-4 text-sm text-gray-600">
+              <h1 className="text-xl font-bold" style={{ color: theme.textPrimary }}>Linkpoint</h1>
+              <span className="ml-4 text-sm" style={{ color: theme.textSecondary }}>
                 {user.fullName} @ {user.grid}
               </span>
             </div>
             <button
               onClick={onLogout}
-              className="text-sm text-red-600 hover:text-red-700 font-medium"
+              className="text-sm font-medium"
+              style={{ color: theme.danger }}
             >
               Logout
             </button>
@@ -54,18 +57,15 @@ export default function MainApp({ user, onLogout }: MainAppProps) {
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="bg-white border-t border-gray-200 mobile-nav">
+      <nav className="border-t mobile-nav" style={{ backgroundColor: theme.panelBackground, borderColor: theme.border }}>
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-around">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center py-3 px-4 transition-colors ${
-                  activeTab === tab.id
-                    ? 'text-blue-600'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
+                className="flex flex-col items-center py-3 px-4 transition-colors"
+                style={{ color: activeTab === tab.id ? theme.accent : theme.textSecondary }}
               >
                 <span className="text-2xl mb-1">{tab.icon}</span>
                 <span className="text-xs font-medium">{tab.name}</span>
