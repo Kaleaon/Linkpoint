@@ -1,0 +1,8 @@
+{
+  "messages": [
+    {"id": 12, "name": "ObjectUpdate", "domain": "object", "returnType": "List<ObjectUpdateData>"},
+    {"id": 20, "name": "AvatarAnimation", "domain": "avatar", "returnType": "AvatarAnimationData?"},
+    {"id": -65467, "name": "TeleportFinish", "domain": "teleport", "returnType": "TeleportFinishData?"},
+    {"id": -65397, "name": "InventoryDescendents", "domain": "inventory", "returnType": "AdditionalMessageParsers.InventoryDescendentsData?"}
+  ]
+}

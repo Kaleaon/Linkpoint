@@ -228,13 +228,16 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         }
         
         btnXR.setOnClickListener {
-            if (app.isXRAvailable()) {
+            if (app.isXREntryAvailable()) {
                 startActivity(Intent(this, XRWorldActivity::class.java))
+            } else {
+                Toast.makeText(this, "XR mode is unavailable in this build", Toast.LENGTH_SHORT).show()
             }
         }
-        
-        // Show/hide XR button based on availability
-        btnXR.visibility = if (app.isXRAvailable()) View.VISIBLE else View.GONE
+
+        // Show/hide XR button based on runtime and build availability
+        btnXR.visibility = if (app.isXREntryAvailable()) View.VISIBLE else View.GONE
+        navigationView.menu.findItem(R.id.nav_xr_mode)?.isVisible = app.isXREntryAvailable()
         
         // Initialize HUD overlay for Second Life HUD attachments
         initHudOverlay()
@@ -741,8 +744,10 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             R.id.nav_teleport_home -> teleportHome()
             R.id.nav_settings -> startActivity(Intent(this, SettingsActivity::class.java))
             R.id.nav_xr_mode -> {
-                if (app.isXRAvailable()) {
+                if (app.isXREntryAvailable()) {
                     startActivity(Intent(this, XRWorldActivity::class.java))
+                } else {
+                    Toast.makeText(this, "XR mode is unavailable in this build", Toast.LENGTH_SHORT).show()
                 }
             }
             R.id.nav_logout -> {

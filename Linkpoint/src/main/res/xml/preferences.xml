@@ -120,13 +120,13 @@
         <SwitchPreferenceCompat
             android:key="enable_xr"
             android:title="Enable XR Mode"
-            android:summary="Allow VR/AR viewing"
+            android:summary="Requires Android 15+ immersive XR hardware or Cardboard-compatible VR mode"
             android:defaultValue="true" />
 
         <ListPreference
             android:key="xr_mode"
             android:title="XR Mode"
-            android:summary="Preferred XR mode"
+            android:summary="Auto selects supported runtime; experimental runtimes require xrExperimental build"
             android:entries="@array/xr_mode_entries"
             android:entryValues="@array/xr_mode_values"
             android:defaultValue="auto" />
@@ -253,6 +253,31 @@
             android:key="clear_cache"
             android:title="Clear All Cache"
             android:summary="Delete all cached data (public and private)" />
+
+    </PreferenceCategory>
+
+    <!-- Background Runtime -->
+    <PreferenceCategory android:title="Background Runtime">
+
+        <SwitchPreferenceCompat
+            android:key="background_resume_enabled"
+            android:title="Resume in Background"
+            android:summary="Resume connection orchestration after reboot and process death"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="push_wakeups_enabled"
+            android:title="Push Wakeups"
+            android:summary="Allow FCM/self-hosted relay wakeups for IM and group notices"
+            android:defaultValue="true" />
+
+        <ListPreference
+            android:key="background_intensity_profile"
+            android:title="Background Intensity"
+            android:summary="Balance between delivery latency and battery usage"
+            android:entries="@array/background_profile_entries"
+            android:entryValues="@array/background_profile_values"
+            android:defaultValue="balanced" />
 
     </PreferenceCategory>
 

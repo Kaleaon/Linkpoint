@@ -2,6 +2,7 @@ package com.linkpoint.objects
 
 import android.os.Parcelable
 import android.util.Log
+import com.linkpoint.diagnostics.ScenePopulationDiagnostics
 import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.ObjectPropertyEntry
 import com.linkpoint.protocol.messages.ObjectUpdateData
@@ -86,6 +87,12 @@ class ObjectManager(
      * Handle object update from simulator
      */
     fun handleObjectUpdate(data: ObjectUpdateData) {
+        if (data.fullId == ZERO_UUID) {
+            ScenePopulationDiagnostics.markManagerApplied(ScenePopulationDiagnostics.EntityType.OBJECT, false)
+            Log.w(TAG, "Dropped object update localId=${data.localId} due to zero fullId")
+            return
+        }
+
         val obj = objects.getOrPut(data.localId) {
             SceneObject(
                 localId = data.localId,
@@ -113,6 +120,7 @@ class ObjectManager(
         }
         
         objectsByUUID[data.fullId] = obj
+        ScenePopulationDiagnostics.markManagerApplied(ScenePopulationDiagnostics.EntityType.OBJECT, true)
     }
     
     /**

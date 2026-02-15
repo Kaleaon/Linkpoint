@@ -1,9 +1,8 @@
 package com.linkpoint.xr
 
 import android.content.Context
-import android.content.pm.PackageManager
 import android.util.Log
-import android.view.Surface
+import com.linkpoint.BuildConfig
 
 /**
  * Manages XR (VR/AR) functionality for Linkpoint
@@ -28,6 +27,7 @@ class XRManager(private val context: Context) {
     private var isInitialized = false
     private var currentMode = MODE_NONE
     private var xrSession: XRSession? = null
+    private var sessionCapability: XRSessionCapability = XRSessionCapability.Unsupported("XR backend not evaluated")
     
     // XR capabilities
     private var hasCardboard = false
@@ -68,18 +68,36 @@ class XRManager(private val context: Context) {
     /**
      * Check if any XR mode is available
      */
-    fun isAvailable(): Boolean = hasCardboard || hasOpenXR || hasAndroidXR
+    fun isAvailable(): Boolean = getPreferredCapability() !is XRSessionCapability.Unsupported
+
+    fun isUiEntryAvailable(): Boolean {
+        return when (val capability = getPreferredCapability()) {
+            is XRSessionCapability.Ready -> true
+            is XRSessionCapability.Experimental -> BuildConfig.XR_EXPERIMENTAL_MODE
+            is XRSessionCapability.Unsupported -> false
+        }
+    }
+
+    fun getEntryCapability(): XRSessionCapability = getPreferredCapability()
     
     /**
      * Get the best available XR mode
      */
     fun getBestMode(): Int {
-        return when {
-            hasAndroidXR -> MODE_ANDROID_XR
-            hasOpenXR -> MODE_OPENXR
-            hasCardboard -> MODE_CARDBOARD
-            else -> MODE_NONE
+        val candidates = listOf(MODE_ANDROID_XR, MODE_OPENXR, MODE_CARDBOARD)
+        val readyMode = candidates.firstOrNull { getModeCapability(it) is XRSessionCapability.Ready }
+        if (readyMode != null) {
+            return readyMode
         }
+
+        if (BuildConfig.XR_EXPERIMENTAL_MODE) {
+            val experimentalMode = candidates.firstOrNull { getModeCapability(it) is XRSessionCapability.Experimental }
+            if (experimentalMode != null) {
+                return experimentalMode
+            }
+        }
+
+        return MODE_NONE
     }
     
     /**
@@ -100,6 +118,20 @@ class XRManager(private val context: Context) {
             MODE_ANDROID_XR -> AndroidXRSession(context)
             else -> null
         }
+
+        sessionCapability = getModeCapability(mode)
+
+        if (sessionCapability is XRSessionCapability.Unsupported) {
+            Log.w(TAG, "Cannot initialize unsupported XR mode: ${(sessionCapability as XRSessionCapability.Unsupported).reason}")
+            xrSession = null
+            return false
+        }
+
+        if (sessionCapability is XRSessionCapability.Experimental && !BuildConfig.XR_EXPERIMENTAL_MODE) {
+            Log.w(TAG, "Experimental XR mode blocked by build config")
+            xrSession = null
+            return false
+        }
         
         isInitialized = xrSession?.initialize() == true
         
@@ -110,6 +142,43 @@ class XRManager(private val context: Context) {
         }
         
         return isInitialized
+    }
+
+    private fun getPreferredCapability(): XRSessionCapability {
+        val candidates = listOf(MODE_ANDROID_XR, MODE_OPENXR, MODE_CARDBOARD)
+        candidates.forEach { mode ->
+            val capability = getModeCapability(mode)
+            if (capability is XRSessionCapability.Ready) {
+                return capability
+            }
+        }
+
+        candidates.forEach { mode ->
+            val capability = getModeCapability(mode)
+            if (capability is XRSessionCapability.Experimental) {
+                return capability
+            }
+        }
+
+        return XRSessionCapability.Unsupported("No XR runtime or compatible hardware detected")
+    }
+
+    private fun getModeCapability(mode: Int): XRSessionCapability {
+        return when (mode) {
+            MODE_CARDBOARD -> {
+                if (hasCardboard) XRSessionCapability.Ready("Cardboard/VR mode")
+                else XRSessionCapability.Unsupported("Cardboard capability missing")
+            }
+            MODE_OPENXR -> {
+                if (!hasOpenXR) XRSessionCapability.Unsupported("OpenXR runtime not present")
+                else XRSessionCapability.Experimental("OpenXR backend is still experimental")
+            }
+            MODE_ANDROID_XR -> {
+                if (!hasAndroidXR) XRSessionCapability.Unsupported("Android XR hardware/runtime not detected")
+                else XRSessionCapability.Experimental("Android XR integration is experimental")
+            }
+            else -> XRSessionCapability.Unsupported("No XR mode selected")
+        }
     }
     
     /**
@@ -148,6 +217,7 @@ class XRManager(private val context: Context) {
         xrSession = null
         isInitialized = false
         currentMode = MODE_NONE
+        sessionCapability = XRSessionCapability.Unsupported("XR session not running")
         Log.i(TAG, "XR session shutdown")
     }
     
@@ -160,6 +230,12 @@ class XRManager(private val context: Context) {
      * Get current XR mode
      */
     fun getCurrentMode(): Int = currentMode
+}
+
+sealed class XRSessionCapability {
+    data class Unsupported(val reason: String) : XRSessionCapability()
+    data class Experimental(val reason: String) : XRSessionCapability()
+    data class Ready(val detail: String) : XRSessionCapability()
 }
 
 /**
@@ -211,15 +287,77 @@ data class ControllerState(
 
 // Session implementations (stubs for now)
 class CardboardSession(private val context: Context) : XRSession {
+    private var lastPose = HeadPose(
+        position = floatArrayOf(0f, 1.6f, 0f),
+        orientation = floatArrayOf(0f, 0f, 0f, 1f),
+        timestamp = System.nanoTime()
+    )
+
     override fun initialize(): Boolean {
         Log.d("CardboardSession", "Initializing Cardboard session")
         return true
     }
-    override fun beginFrame(): XRFrameData? = null
+
+    override fun beginFrame(): XRFrameData {
+        val now = System.nanoTime()
+        lastPose = lastPose.copy(timestamp = now)
+
+        return XRFrameData(
+            leftEyeMatrix = buildViewMatrix(-0.032f),
+            rightEyeMatrix = buildViewMatrix(0.032f),
+            leftProjection = buildProjectionMatrix(),
+            rightProjection = buildProjectionMatrix(),
+            predictedDisplayTime = now + 11_000_000L
+        )
+    }
+
     override fun endFrame() {}
-    override fun getHeadPose(): HeadPose? = null
-    override fun getControllers(): List<ControllerState> = emptyList()
+    override fun getHeadPose(): HeadPose = lastPose
+    override fun getControllers(): List<ControllerState> = listOf(
+        ControllerState(
+            hand = ControllerState.Hand.LEFT,
+            position = floatArrayOf(-0.15f, 1.25f, -0.35f),
+            orientation = floatArrayOf(0f, 0f, 0f, 1f),
+            triggerValue = 0f,
+            gripValue = 0f,
+            thumbstick = floatArrayOf(0f, 0f),
+            buttons = 0
+        ),
+        ControllerState(
+            hand = ControllerState.Hand.RIGHT,
+            position = floatArrayOf(0.15f, 1.25f, -0.35f),
+            orientation = floatArrayOf(0f, 0f, 0f, 1f),
+            triggerValue = 0f,
+            gripValue = 0f,
+            thumbstick = floatArrayOf(0f, 0f),
+            buttons = 0
+        )
+    )
     override fun shutdown() {}
+
+    private fun buildViewMatrix(eyeOffsetX: Float): FloatArray {
+        return floatArrayOf(
+            1f, 0f, 0f, 0f,
+            0f, 1f, 0f, 0f,
+            0f, 0f, 1f, 0f,
+            -eyeOffsetX, -1.6f, 0f, 1f
+        )
+    }
+
+    private fun buildProjectionMatrix(
+        fovYDegrees: Float = 90f,
+        aspect: Float = 1f,
+        near: Float = 0.05f,
+        far: Float = 100f
+    ): FloatArray {
+        val f = (1f / kotlin.math.tan(Math.toRadians((fovYDegrees / 2f).toDouble()))).toFloat()
+        return floatArrayOf(
+            f / aspect, 0f, 0f, 0f,
+            0f, f, 0f, 0f,
+            0f, 0f, (far + near) / (near - far), -1f,
+            0f, 0f, (2f * far * near) / (near - far), 0f
+        )
+    }
 }
 
 class OpenXRSession(private val context: Context) : XRSession {

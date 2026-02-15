@@ -51,6 +51,23 @@ adb install -r Linkpoint/build/outputs/apk/debug/Linkpoint-debug.apk
 
 ---
 
+## XR Support & Runtime Requirements
+
+- **Stable builds (`stableDebug` / `stableRelease`)** expose only XR paths marked **Ready** at runtime.
+- **Experimental builds (`xrExperimentalDebug` / `xrExperimentalRelease`)** enable OpenXR/Android XR paths marked **Experimental**.
+- **Device/runtime checks:**
+  - Cardboard mode requires `android.software.vr.mode` or `android.hardware.vr.high_performance`.
+  - Android XR requires **Android 15+ (API 35)** and `android.hardware.xr.immersive`.
+  - OpenXR requires an available OpenXR runtime class on-device.
+- If XR init/rendering fails, the app exits XR and returns to the standard world view.
+
+### Building XR variants
+
+```bash
+./gradlew assembleStableDebug
+./gradlew assembleXrExperimentalDebug
+```
+
 ## Documentation
 
 | Document | Description |
