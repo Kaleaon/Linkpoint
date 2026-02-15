@@ -25,6 +25,7 @@ import androidx.preference.SeekBarPreference
 import com.linkpoint.BuildConfig
 import com.linkpoint.R
 import com.linkpoint.network.NetworkLogger
+import com.linkpoint.service.BackgroundResumeScheduler
 import com.linkpoint.ui.tos.TosActivity
 import com.linkpoint.ui.world.WorldViewActivity
 import com.linkpoint.utils.CodexUploadService
@@ -157,6 +158,9 @@ class SettingsActivity : AppCompatActivity() {
             
             // Cache settings
             setupCacheSettings()
+
+            setupBackgroundRuntimeSettings()
+
             
             // ToS viewing
             findPreference<Preference>("view_tos")?.setOnPreferenceClickListener {
@@ -168,6 +172,27 @@ class SettingsActivity : AppCompatActivity() {
             setupNetworkBufferSettings()
         }
         
+        private fun setupBackgroundRuntimeSettings() {
+            findPreference<SwitchPreferenceCompat>("background_resume_enabled")?.setOnPreferenceChangeListener { _, newValue ->
+                val enabled = newValue as Boolean
+                if (enabled) {
+                    BackgroundResumeScheduler.schedule(requireContext(), immediate = true)
+                } else {
+                    BackgroundResumeScheduler.cancel(requireContext())
+                }
+                true
+            }
+
+            findPreference<SwitchPreferenceCompat>("push_wakeups_enabled")?.setOnPreferenceChangeListener { _, _ ->
+                true
+            }
+
+            findPreference<ListPreference>("background_intensity_profile")?.setOnPreferenceChangeListener { _, _ ->
+                BackgroundResumeScheduler.schedule(requireContext(), immediate = false)
+                true
+            }
+        }
+
         /**
          * Setup cache settings - Linkpoint configurable caches
          */
