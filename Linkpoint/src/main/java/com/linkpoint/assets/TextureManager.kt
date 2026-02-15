@@ -2,6 +2,7 @@ package com.linkpoint.assets
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.util.Log
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.SSLHelper
@@ -42,6 +43,8 @@ class TextureManager(
         private const val TAG = "TextureManager"
         private const val MAX_CONCURRENT_DOWNLOADS = 4
         private const val TEXTURE_FETCH_TIMEOUT_MS = 30000L
+        private const val MAX_DECODE_RETRIES = 2
+        private const val MAX_DECODE_MEMORY_BYTES = 64 * 1024 * 1024
     }
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -61,6 +64,7 @@ class TextureManager(
     
     // Decoded texture cache
     private val textureCache = ConcurrentHashMap<UUID, Bitmap>()
+    private val textureErrorStates = ConcurrentHashMap<UUID, TextureDecodeErrorState>()
     
     // Statistics
     private val _stats = MutableStateFlow(TextureStats())
@@ -435,61 +439,83 @@ class TextureManager(
     
     private fun decodeTexture(textureId: UUID, data: ByteArray): Bitmap? {
         val startTime = System.currentTimeMillis()
-        
+
         return try {
-            // Determine format
             val isJ2k = isJPEG2000(data)
             val format = if (isJ2k) "JPEG2000" else "Standard (PNG/JPEG)"
-            
-            Log.d(TAG, "🖼️ Decoding texture: $textureId (${data.size} bytes, $format)")
-            
-            // Check if it's JPEG2000 (J2K/JP2)
-            val bitmap = if (isJ2k) {
-                j2kDecodeAttempts.incrementAndGet()
-                val result = decodeJPEG2000(data)
-                if (result != null) {
-                    j2kDecodeSuccesses.incrementAndGet()
+            val targetSize = if (isJ2k) JPEG2000Decoder.getImageSize(data) else null
+
+            if (targetSize != null) {
+                val expectedBytes = targetSize.first.toLong() * targetSize.second.toLong() * 4L
+                if (expectedBytes > MAX_DECODE_MEMORY_BYTES) {
+                    val reason = "Texture exceeds decode budget: ${targetSize.first}x${targetSize.second} (${expectedBytes / (1024 * 1024)}MB)"
+                    return recordDecodeFailure(textureId, format, startTime, reason)
                 }
-                result
-            } else {
-                // Try standard formats (PNG, JPEG)
-                BitmapFactory.decodeByteArray(data, 0, data.size)
             }
-            
+
+            Log.d(TAG, "🖼️ Decoding texture: $textureId (${data.size} bytes, $format)")
+
+            var decodeError: String? = null
+            var bitmap: Bitmap? = null
+            for (attempt in 1..MAX_DECODE_RETRIES) {
+                bitmap = if (isJ2k) {
+                    j2kDecodeAttempts.incrementAndGet()
+                    decodeJPEG2000(data)
+                } else {
+                    BitmapFactory.decodeByteArray(data, 0, data.size)
+                }
+                if (bitmap != null) {
+                    if (isJ2k) j2kDecodeSuccesses.incrementAndGet()
+                    break
+                }
+                decodeError = "Decode returned null (attempt $attempt/$MAX_DECODE_RETRIES)"
+                if (attempt < MAX_DECODE_RETRIES) {
+                    Thread.sleep(35L * attempt)
+                }
+            }
+
             val durationMs = System.currentTimeMillis() - startTime
-            
-            bitmap?.let {
-                Log.d(TAG, "🖼️ Texture decoded: $textureId (${it.width}x${it.height}, ${durationMs}ms)")
+
+            if (bitmap != null) {
+                textureErrorStates.remove(textureId)
+                textureCache[textureId] = bitmap
+                updateStats { st -> st.copy(decodedCount = st.decodedCount + 1) }
+                Log.d(TAG, "🖼️ Texture decoded: $textureId (${bitmap.width}x${bitmap.height}, ${durationMs}ms)")
                 NetworkLogger.logTextureDecode(textureId.toString(), true, format, durationMs)
-                
-                textureCache[textureId] = it
-                updateStats { s -> s.copy(decodedCount = s.decodedCount + 1) }
+                bitmap
+            } else {
+                recordDecodeFailure(textureId, format, startTime, decodeError ?: "Decoder returned null")
             }
-            
-            if (bitmap == null) {
-                Log.w(TAG, "🖼️ Texture decode returned null: $textureId")
-                NetworkLogger.logTextureDecode(textureId.toString(), false, format, durationMs, "Decoder returned null")
-            }
-            
-            bitmap
         } catch (e: Exception) {
-            val durationMs = System.currentTimeMillis() - startTime
-            Log.e(TAG, "🖼️ Texture decode error: $textureId - ${e.javaClass.simpleName}: ${e.message}")
-            NetworkLogger.logTextureDecode(
-                textureId.toString(), 
-                false, 
-                if (isJPEG2000(data)) "JPEG2000" else "Standard",
-                durationMs,
-                "${e.javaClass.simpleName}: ${e.message}"
-            )
-            
-            lastError = "Decode: ${e.javaClass.simpleName}: ${e.message}"
-            lastErrorTime = System.currentTimeMillis()
-            updateStats { it.copy(decodeFailedCount = it.decodeFailedCount + 1) }
-            null
+            recordDecodeFailure(textureId, if (isJPEG2000(data)) "JPEG2000" else "Standard", startTime, "${e.javaClass.simpleName}: ${e.message}")
         }
     }
-    
+
+    private fun recordDecodeFailure(textureId: UUID, format: String, startTime: Long, error: String): Bitmap {
+        val durationMs = System.currentTimeMillis() - startTime
+        val state = textureErrorStates.compute(textureId) { _, prev ->
+            val attempts = (prev?.attempts ?: 0) + 1
+            TextureDecodeErrorState(textureId, error, attempts, System.currentTimeMillis())
+        }!!
+
+        Log.w(TAG, "🖼️ Texture decode failed: $textureId - $error")
+        NetworkLogger.logTextureDecode(textureId.toString(), false, format, durationMs, "$error; attempts=${state.attempts}")
+        lastError = "Decode: $error"
+        lastErrorTime = System.currentTimeMillis()
+        updateStats { it.copy(decodeFailedCount = it.decodeFailedCount + 1) }
+
+        return createDecodePlaceholderBitmap(state.attempts)
+    }
+
+    private fun createDecodePlaceholderBitmap(attempts: Int): Bitmap {
+        val bitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888)
+        val color = if (attempts > 1) Color.argb(255, 180, 0, 0) else Color.argb(255, 255, 0, 255)
+        bitmap.eraseColor(color)
+        return bitmap
+    }
+
+    fun getTextureErrorState(textureId: UUID): TextureDecodeErrorState? = textureErrorStates[textureId]
+
     private fun isJPEG2000(data: ByteArray): Boolean {
         if (data.size < 12) return false
         // JPEG2000 magic bytes
@@ -623,7 +649,8 @@ class TextureManager(
             j2kDecodeAttempts = j2kDecodeAttempts.get(),
             j2kDecodeSuccesses = j2kDecodeSuccesses.get(),
             lastError = lastError,
-            lastErrorTimeAgo = if (lastErrorTime > 0) System.currentTimeMillis() - lastErrorTime else null
+            lastErrorTimeAgo = if (lastErrorTime > 0) System.currentTimeMillis() - lastErrorTime else null,
+            textureErrorStateCount = textureErrorStates.size
         )
     }
     
@@ -645,9 +672,18 @@ class TextureManager(
         val j2kDecodeAttempts: Int,
         val j2kDecodeSuccesses: Int,
         val lastError: String?,
-        val lastErrorTimeAgo: Long?
+        val lastErrorTimeAgo: Long?,
+        val textureErrorStateCount: Int
     )
 }
+
+data class TextureDecodeErrorState(
+    val textureId: UUID,
+    val reason: String,
+    val attempts: Int,
+    val lastFailedAt: Long
+)
+
 
 enum class TexturePriority(val value: Int) {
     CRITICAL(0),    // Avatar skin, UI elements

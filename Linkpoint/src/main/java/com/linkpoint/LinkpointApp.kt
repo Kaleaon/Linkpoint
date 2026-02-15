@@ -3,6 +3,9 @@ package com.linkpoint
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
 import com.linkpoint.assets.*
 import com.linkpoint.utils.CrashReporter
 import com.linkpoint.avatar.AvatarManager
@@ -54,6 +57,7 @@ import com.linkpoint.render.RenderableUpdate
 import com.linkpoint.render.particles.ParticleSystem
 import com.linkpoint.rlv.RLVController
 import com.linkpoint.service.ConnectionKeepAliveManager
+import com.linkpoint.service.BackgroundResumeScheduler
 import com.linkpoint.service.IdleHandler
 import com.linkpoint.service.LinkpointConnectionService
 import com.linkpoint.users.DisplayNameManager
@@ -70,6 +74,7 @@ import com.linkpoint.world.minimap.MinimapManager
 import com.linkpoint.groups.GroupsManager
 import com.linkpoint.animesh.AnimeshManager
 import com.linkpoint.avatar.AnimationController
+import com.linkpoint.diagnostics.ScenePopulationDiagnostics
 import com.linkpoint.bom.BakesOnMeshManager
 import com.linkpoint.inventory.LandmarkManager
 import com.linkpoint.media.MediaManager
@@ -352,6 +357,17 @@ class LinkpointApp : Application() {
         // Initialize network logger first for early debugging
         NetworkLogger.initialize(this)
         Log.i(TAG, "Network logger initialized with auto-save to Documents/Linkpoint Logs/")
+
+        val decoderStatus = JPEG2000Decoder.runStartupSelfTest()
+        if (!decoderStatus.available) {
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(
+                    this,
+                    "JPEG2000 support unavailable. Some textures may use placeholders.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
         
         // Initialize session log recorder for comprehensive packet logging
         com.linkpoint.utils.SessionLogRecorder.initialize(this)
@@ -361,6 +377,7 @@ class LinkpointApp : Application() {
         com.linkpoint.protocol.circuit.LinkpointCircuitIntegration.initialize(this)
 
         initializeManagers()
+        BackgroundResumeScheduler.schedule(this, immediate = false)
 
         Log.i(TAG, "Linkpoint initialized successfully")
     }
@@ -681,6 +698,7 @@ class LinkpointApp : Application() {
                             "Waiting for world data"
                         )
                         Log.i(TAG, "✓ RegionHandshakeReply SENT - world data should start loading")
+                        ScenePopulationDiagnostics.markRegionHandshakeComplete()
                     } catch (e: Exception) {
                         com.linkpoint.utils.InitializationTracker.failPhase(
                             com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
@@ -794,6 +812,8 @@ class LinkpointApp : Application() {
             when (update.pcode) {
                 PCODE_AVATAR -> {
                     avatarUpdateCount++
+                    ScenePopulationDiagnostics.markPacketReceived(ScenePopulationDiagnostics.EntityType.AVATAR)
+                    ScenePopulationDiagnostics.markParsed(ScenePopulationDiagnostics.EntityType.AVATAR)
                     if (avatarUpdateCount <= 5 || avatarUpdateCount % 50 == 0) {
                         Log.d(TAG, "Avatar update: localId=${update.localId}, fullId=${update.fullId} (total: $avatarUpdateCount)")
                     }
@@ -804,6 +824,9 @@ class LinkpointApp : Application() {
                             rotation = update.rotation,
                             velocity = update.velocity
                         )
+                        ScenePopulationDiagnostics.markManagerApplied(ScenePopulationDiagnostics.EntityType.AVATAR, true)
+                    } else {
+                        ScenePopulationDiagnostics.markManagerApplied(ScenePopulationDiagnostics.EntityType.AVATAR, false)
                     }
                     // Add avatar to scene for rendering
                     if (::renderManager.isInitialized) {
@@ -814,6 +837,8 @@ class LinkpointApp : Application() {
                                 rotation = update.rotation
                             )
                         )
+                    } else {
+                        ScenePopulationDiagnostics.markRendererSubmitted(ScenePopulationDiagnostics.EntityType.AVATAR, false)
                     }
                 }
                 else -> {
@@ -842,6 +867,11 @@ class LinkpointApp : Application() {
         udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE) { _, parsed ->
             try {
                 val updates = (parsed as? List<*>)?.filterIsInstance<com.linkpoint.protocol.messages.ObjectUpdateData>() ?: emptyList()
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
+                val updates = com.linkpoint.protocol.messages.MessageParser.parseObjectUpdate(payload)
+                ScenePopulationDiagnostics.markPacketReceived(ScenePopulationDiagnostics.EntityType.OBJECT, updates.size)
+                ScenePopulationDiagnostics.markParsed(ScenePopulationDiagnostics.EntityType.OBJECT, updates.size)
                 objectUpdateCount += updates.size
                 // Log occasionally to avoid spam
                 if (objectUpdateCount <= 5 || objectUpdateCount % 100 == 0) {
@@ -857,6 +887,11 @@ class LinkpointApp : Application() {
         udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE_COMPRESSED) { _, parsed ->
             try {
                 val updates = (parsed as? List<*>)?.filterIsInstance<com.linkpoint.protocol.messages.ObjectUpdateData>() ?: emptyList()
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload == null) return@registerHandler
+                val updates = com.linkpoint.protocol.messages.MessageParser.parseObjectUpdateCompressed(payload)
+                ScenePopulationDiagnostics.markPacketReceived(ScenePopulationDiagnostics.EntityType.OBJECT, updates.size)
+                ScenePopulationDiagnostics.markParsed(ScenePopulationDiagnostics.EntityType.OBJECT, updates.size)
                 compressedObjectUpdateCount += updates.size
                 // Log occasionally to avoid spam
                 if (compressedObjectUpdateCount <= 5 || compressedObjectUpdateCount % 100 == 0) {
@@ -4822,6 +4857,8 @@ class LinkpointApp : Application() {
      * Check if XR mode is available on this device
      */
     fun isXRAvailable(): Boolean = xrManager.isAvailable()
+
+    fun isXREntryAvailable(): Boolean = xrManager.isUiEntryAvailable()
     
     /**
      * Check if currently connected to a grid
@@ -5011,4 +5048,11 @@ class LinkpointApp : Application() {
     fun getSessionLogDirectoryPath(): String {
         return com.linkpoint.utils.SessionLogRecorder.getLogDirectoryPath()
     }
+
+    fun runScenePopulationSmokeCheck(): ScenePopulationDiagnostics.SmokeCheckResult {
+        val objectCount = if (::objectManager.isInitialized) objectManager.getAllObjects().size else 0
+        val avatarCount = if (::avatarManager.isInitialized) avatarManager.getAllAvatars().size else 0
+        return ScenePopulationDiagnostics.runSmokeCheck(objectCount, avatarCount)
+    }
+
 }

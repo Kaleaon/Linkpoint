@@ -1723,9 +1723,70 @@ class UDPConnectionFixed {
         
         // Message ID for UseCircuitCode (low frequency: -65533)
         val messageId = MessageIds.USE_CIRCUIT_CODE
-        
-        // Build packet with header
-        sendPacket(messageId, payload.array(), reliable = true)
+
+        // CRITICAL: UseCircuitCode MUST be sent with sequence number 0.
+        // The login handshake in LinkpointApp waits for PacketAck(seq=0) before
+        // sending CompleteAgentMovement. If this packet is sent as seq=1, the
+        // client never advances to world bootstrap and only ping traffic flows.
+        //
+        // Do not route through sendPacket() here because sendPacket() increments
+        // the sequence counter before assignment.
+        try {
+            val flags = 0x40 // reliable
+            val header = ByteBuffer.allocate(PACKET_HEADER_SIZE).order(ByteOrder.BIG_ENDIAN)
+            header.put(flags.toByte())
+            header.putInt(0) // REQUIRED by SL protocol for UseCircuitCode
+            header.put(0.toByte())
+
+            val messageIdBytes = encodeMessageId(messageId)
+            val packet = header.array() + messageIdBytes + payload.array()
+
+            val buffer = ByteBuffer.wrap(packet)
+            val bytesWritten = datagramChannel?.write(buffer) ?: 0
+            if (bytesWritten > 0) {
+                packetsSent.incrementAndGet()
+                bytesSent.addAndGet(bytesWritten.toLong())
+                lastSendTime = System.currentTimeMillis()
+
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
+                    "→ Sent UseCircuitCode with fixed seq=0 (${packet.size} bytes)")
+
+                recordPacketEvent(
+                    type = PacketHistoryEntry.PacketEventType.SEND_SUCCESS,
+                    messageId = messageId,
+                    data = packet,
+                    sequenceNumber = 0,
+                    success = true
+                )
+
+                EnhancedPacketLogger.logPacketSent(
+                    messageId = messageId,
+                    messageName = getMessageName(messageId),
+                    sequenceNumber = 0,
+                    data = packet,
+                    flags = EnhancedPacketLogger.PacketFlags(
+                        reliable = true,
+                        resent = false,
+                        zerocoded = false,
+                        hasAcks = false
+                    )
+                )
+
+                SessionLogRecorder.logPacketSent(
+                    messageId = messageId,
+                    messageName = getMessageName(messageId),
+                    sequenceNumber = 0,
+                    data = packet,
+                    reliable = true
+                )
+            } else {
+                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
+                    "UseCircuitCode write returned 0 bytes")
+            }
+        } catch (e: Exception) {
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                "Failed to send UseCircuitCode seq=0: ${e.message}")
+        }
     }
     
     /**

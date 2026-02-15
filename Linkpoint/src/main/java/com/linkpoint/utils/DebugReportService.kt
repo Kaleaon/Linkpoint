@@ -806,6 +806,12 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("JPEG2000 Decoding:")
                         appendLine("  Attempts: ${texDiag.j2kDecodeAttempts}")
                         appendLine("  Successes: ${texDiag.j2kDecodeSuccesses}")
+                        appendLine("  Error States: ${texDiag.textureErrorStateCount}")
+                        val decoderStatus = com.linkpoint.assets.JPEG2000Decoder.getStartupStatus()
+                        appendLine("  Backend: ${decoderStatus.activeBackend}")
+                        if (decoderStatus.warningMessage != null) {
+                            appendLine("  Warning: ${decoderStatus.warningMessage}")
+                        }
                         
                         if (texDiag.lastError != null) {
                             appendLine()

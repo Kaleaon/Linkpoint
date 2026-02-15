@@ -93,6 +93,8 @@ class LumiyaRenderer : RenderEngineProvider {
             // Build full-screen quad for post-processing
             createFullScreenQuad()
 
+            avatarStore = DrawableAvatarStore { AvatarMeshAssetLoader.loadDefaultAvatarMesh(context) }
+
             // Initialise subsystems
             terrainDrawable = DrawableTerrain(ctx)
             waterDrawable = DrawableWater(ctx)

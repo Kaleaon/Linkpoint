@@ -21,6 +21,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.linkpoint"
+    flavorDimensions += "xr"
     compileSdk = 35
     buildToolsVersion = "35.0.0"
     
@@ -35,7 +36,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
         ndk {
-            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
         }
         
         // CMake configuration for native code
@@ -51,6 +52,7 @@ android {
         // Add build info to BuildConfig
         buildConfigField("String", "BUILD_TIME", "\"${System.currentTimeMillis()}\"")
         buildConfigField("String", "GIT_COMMIT", "\"${getGitHash()}\"")
+        buildConfigField("Boolean", "XR_EXPERIMENTAL_MODE", "false")
     }
     
     externalNativeBuild {
@@ -71,9 +73,23 @@ android {
         }
     }
     
+    productFlavors {
+        create("stable") {
+            dimension = "xr"
+            buildConfigField("Boolean", "XR_EXPERIMENTAL_MODE", "false")
+        }
+        create("xrExperimental") {
+            dimension = "xr"
+            applicationIdSuffix = ".xrexp"
+            versionNameSuffix = "-xrexp"
+            buildConfigField("Boolean", "XR_EXPERIMENTAL_MODE", "true")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false  // Keep false until stable
+            buildConfigField("boolean", "ALLOW_PLACEHOLDER_ENTITIES", "false")
             isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -87,6 +103,7 @@ android {
         }
         debug {
             isMinifyEnabled = false
+            buildConfigField("boolean", "ALLOW_PLACEHOLDER_ENTITIES", "true")
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
         }
@@ -154,6 +171,7 @@ android {
             pickFirsts += listOf(
                 "**/libjnidispatch.so",
                 "**/libopenjpeg.so",
+                "**/libopenjp2.so",
                 "**/liblumiya-native.so"
             )
         }
@@ -194,6 +212,9 @@ dependencies {
     // Multidex support
     implementation("androidx.multidex:multidex:2.0.1")
     
+    // Firebase / push relay
+    implementation("com.google.firebase:firebase-messaging:24.0.1")
+
     // Google Play Services
     implementation("com.google.android.gms:play-services-drive:17.0.0")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
@@ -235,6 +256,9 @@ dependencies {
     
     // Preferences
     implementation("androidx.preference:preference-ktx:1.2.1")
+
+    // Background orchestration
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
     
     // Security - EncryptedSharedPreferences for secure storage
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
@@ -359,3 +383,26 @@ tasks.register("copyNatives") {
 tasks.named("preBuild") {
     dependsOn("copyNatives")
 }
+
+
+val verifyNoPlaceholderOnlyEntities by tasks.registering {
+    group = "verification"
+    description = "Fails when @PlaceholderOnlyEntity exists in production sources"
+    doLast {
+        val sourceRoot = file("src/main/java")
+        val offenders = sourceRoot.walkTopDown()
+            .filter { it.isFile && it.extension == "kt" }
+            .filter { file -> "@PlaceholderOnlyEntity" in file.readText() }
+            .map { it.relativeTo(projectDir).path }
+            .toList()
+
+        if (offenders.isNotEmpty()) {
+            throw GradleException(
+                "Release gate failed: placeholder-only entities found: ${offenders.joinToString()}"
+            )
+        }
+    }
+}
+
+tasks.matching { it.name == "assembleRelease" || it.name == "bundleRelease" || it.name == "lintVitalRelease" }
+    .configureEach { dependsOn(verifyNoPlaceholderOnlyEntities) }
