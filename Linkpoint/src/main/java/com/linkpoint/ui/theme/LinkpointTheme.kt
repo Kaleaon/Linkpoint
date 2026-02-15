@@ -7,8 +7,11 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 
 /**
  * CompositionLocal for providing LinkpointColors throughout the app
@@ -37,11 +40,15 @@ val LocalThemePack = staticCompositionLocalOf { BuiltInThemes.LINKPOINT_DEFAULT 
  */
 @Composable
 fun LinkpointTheme(
-    themePack: ThemePack = BuiltInThemes.LINKPOINT_DEFAULT,
+    themePack: ThemePack? = null,
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val linkpointColors = themePack.toComposeColors()
+    val context = LocalContext.current
+    val themeManager = remember(context) { ThemeManager.getInstance(context) }
+    val activeTheme by themeManager.activeTheme.collectAsState()
+    val resolvedThemePack = themePack ?: activeTheme
+    val linkpointColors = resolvedThemePack.toComposeColors()
     
     // Create Material 3 color scheme from ThemePack colors
     // Support both dark and light themes based on system preference
@@ -88,7 +95,7 @@ fun LinkpointTheme(
     
     CompositionLocalProvider(
         LocalLinkpointColors provides linkpointColors,
-        LocalThemePack provides themePack
+        LocalThemePack provides resolvedThemePack
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
