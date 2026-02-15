@@ -1,6 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import {
+  ACCESSIBILITY_PRESETS,
+  COMFORT_PRESETS,
+  DEFAULT_PRESET,
+  type AccessibilityPresetId,
+  resolveAccessibilityTheme,
+} from '../lib/themes'
 
 interface InventoryItem {
   id: string
@@ -49,6 +56,9 @@ const FOLDER_TO_TYPE: Record<string, string> = {
 export default function InventoryView() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
+  const [activePreset, setActivePreset] = useState<AccessibilityPresetId>(DEFAULT_PRESET)
+  const [lastNonComfortPreset, setLastNonComfortPreset] = useState<AccessibilityPresetId>(DEFAULT_PRESET)
+  const [reducedGlare, setReducedGlare] = useState(false)
 
   const filteredItems = INVENTORY_ITEMS.filter((item) => {
     const folderType = selectedFolder ? FOLDER_TO_TYPE[selectedFolder] : null
@@ -58,37 +68,101 @@ export default function InventoryView() {
     return matchesFolder && matchesSearch
   })
 
+  const isComfortMode = COMFORT_PRESETS.includes(activePreset)
+  const theme = resolveAccessibilityTheme(activePreset, reducedGlare)
+
+  const handlePresetChange = (preset: AccessibilityPresetId) => {
+    setActivePreset(preset)
+    if (!COMFORT_PRESETS.includes(preset)) {
+      setLastNonComfortPreset(preset)
+    }
+  }
+
+  const handleComfortToggle = () => {
+    if (isComfortMode) {
+      setActivePreset(lastNonComfortPreset)
+      return
+    }
+
+    setLastNonComfortPreset(activePreset)
+    setActivePreset(theme.isDark ? 'nightRed' : 'sepia')
+  }
+
   return (
-    <div className="h-full flex flex-col bg-white">
-      {/* Search Bar */}
-      <div className="p-4 border-b border-gray-200">
+    <div className="h-full flex flex-col" style={{ backgroundColor: theme.colors.appBackground, color: theme.colors.textPrimary }}>
+      <div className="p-3 border-b space-y-2" style={{ borderColor: theme.colors.border, backgroundColor: theme.colors.panelMutedBackground }}>
+        <div className="flex items-center justify-between gap-2">
+          <label className="text-xs font-semibold">Preset</label>
+          <select
+            value={activePreset}
+            onChange={(e) => handlePresetChange(e.target.value as AccessibilityPresetId)}
+            className="text-sm px-2 py-1 rounded border"
+            style={{ backgroundColor: theme.colors.panelBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }}
+          >
+            {Object.values(ACCESSIBILITY_PRESETS).map((preset) => (
+              <option key={preset.id} value={preset.id}>{preset.name}</option>
+            ))}
+          </select>
+        </div>
+        <div className="flex items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={handleComfortToggle}
+            className="px-3 py-1.5 rounded text-sm font-semibold border"
+            style={{
+              backgroundColor: isComfortMode ? theme.colors.accent : theme.colors.panelBackground,
+              color: isComfortMode ? theme.colors.accentText : theme.colors.textPrimary,
+              borderColor: theme.colors.border,
+            }}
+          >
+            Comfort Mode {isComfortMode ? 'On' : 'Off'}
+          </button>
+          <label className="text-xs flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={reducedGlare}
+              onChange={(e) => setReducedGlare(e.target.checked)}
+            />
+            Reduced Glare
+          </label>
+        </div>
+      </div>
+
+      <div className="p-4 border-b" style={{ borderColor: theme.colors.border, backgroundColor: theme.colors.panelBackground }}>
         <input
           type="text"
           placeholder="Search inventory..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="input-field"
+          className="w-full px-4 py-2 rounded-lg border focus:outline-none"
+          style={{ backgroundColor: theme.colors.panelBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }}
         />
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto">
-        {/* Recent Items */}
+      <div className="flex-1 overflow-y-auto" style={{ backgroundColor: theme.colors.panelBackground }}>
         <div className="p-4">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Recent Items</h2>
+          <h2 className="text-lg font-semibold mb-3">Recent Items</h2>
           <div className="space-y-2">
             {filteredItems.slice(0, 3).map((item) => (
               <div
                 key={item.id}
-                className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                className="flex items-center p-3 rounded-lg cursor-pointer transition-colors border"
+                style={{ backgroundColor: theme.colors.listItemBackground, borderColor: theme.colors.border }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = theme.colors.listItemHoverBackground
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = theme.colors.listItemBackground
+                }}
               >
                 <span className="text-2xl mr-3">{item.icon}</span>
                 <div className="flex-1">
-                  <div className="font-medium text-gray-900">{item.name}</div>
-                  <div className="text-sm text-gray-600">{item.type}</div>
+                  <div className="font-medium" style={{ color: theme.colors.textPrimary }}>{item.name}</div>
+                  <div className="text-sm" style={{ color: theme.colors.textSecondary }}>{item.type}</div>
                 </div>
                 <svg
-                  className="w-5 h-5 text-gray-400"
+                  className="w-5 h-5"
+                  style={{ color: theme.colors.textSecondary }}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -105,25 +179,24 @@ export default function InventoryView() {
           </div>
         </div>
 
-        {/* Folders */}
         <div className="p-4">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Folders</h2>
+          <h2 className="text-lg font-semibold mb-3">Folders</h2>
           <div className="grid grid-cols-2 gap-3">
             {FOLDERS.map((folder) => (
               <div
                 key={folder.name}
                 onClick={() => setSelectedFolder(folder.name)}
-                className={`flex flex-col items-center p-4 rounded-lg cursor-pointer transition-colors ${
-                  selectedFolder === folder.name
-                    ? 'bg-blue-100 ring-2 ring-blue-500'
-                    : 'bg-gray-50 hover:bg-gray-100'
-                }`}
+                className="flex flex-col items-center p-4 rounded-lg cursor-pointer transition-colors border"
+                style={{
+                  backgroundColor: selectedFolder === folder.name ? theme.colors.panelMutedBackground : theme.colors.cardBackground,
+                  borderColor: theme.colors.border,
+                }}
               >
                 <span className="text-3xl mb-2">{folder.icon}</span>
-                <div className="font-medium text-gray-900 text-sm text-center">
+                <div className="font-medium text-sm text-center" style={{ color: theme.colors.textPrimary }}>
                   {folder.name}
                 </div>
-                <div className="text-xs text-gray-600 mt-1">
+                <div className="text-xs mt-1" style={{ color: theme.colors.textSecondary }}>
                   {folder.count} items
                 </div>
               </div>
@@ -131,22 +204,22 @@ export default function InventoryView() {
           </div>
         </div>
 
-        {/* All Items */}
         {searchQuery && (
           <div className="p-4">
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">
+            <h2 className="text-lg font-semibold mb-3">
               Search Results ({filteredItems.length})
             </h2>
             <div className="space-y-2">
               {filteredItems.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                  className="flex items-center p-3 rounded-lg cursor-pointer border"
+                  style={{ backgroundColor: theme.colors.listItemBackground, borderColor: theme.colors.border }}
                 >
                   <span className="text-2xl mr-3">{item.icon}</span>
                   <div className="flex-1">
-                    <div className="font-medium text-gray-900">{item.name}</div>
-                    <div className="text-sm text-gray-600">{item.type}</div>
+                    <div className="font-medium" style={{ color: theme.colors.textPrimary }}>{item.name}</div>
+                    <div className="text-sm" style={{ color: theme.colors.textSecondary }}>{item.type}</div>
                   </div>
                 </div>
               ))}
