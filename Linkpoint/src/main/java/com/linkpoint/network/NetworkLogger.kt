@@ -80,10 +80,14 @@ object NetworkLogger {
      */
     fun initialize(context: Context) {
         appContext = context.applicationContext
-        startAutoSave()
-        
-        // Log the actual path where logs will be saved
         val logDir = getLogDirectory()
+
+        // Perform retention cleanup once during initialization.
+        logDir?.let { purgeExpiredLogs(it) }
+
+        startAutoSave()
+
+        // Log the actual path where logs will be saved
         if (logDir != null) {
             Log.i(TAG, "NetworkLogger initialized, logs will be saved to: ${logDir.absolutePath}")
         } else {
@@ -101,7 +105,6 @@ object NetworkLogger {
                 delay(AUTO_SAVE_INTERVAL_MS)
                 try {
                     saveLogsToFile()
-                    cleanOldLogs()
                 } catch (e: Exception) {
                     Log.e(TAG, "Auto-save failed: ${e.message}", e)
                 }
@@ -120,7 +123,6 @@ object NetworkLogger {
             if (!logDir.exists()) {
                 logDir.mkdirs()
             }
-            purgeExpiredLogs(logDir)
             logDir
         } catch (e: Exception) {
             Log.e(TAG, "Error accessing app-private log directory: ${e.message}", e)
@@ -151,6 +153,9 @@ object NetworkLogger {
                 
                 val logFile = currentLogFile ?: throw IllegalStateException("Failed to create log file")
                 logFileWriter = logFile.bufferedWriter()
+
+                purgeExpiredLogs(logDir)
+                cleanOldLogs()
                 
                 // Write header
                 logFileWriter?.apply {
@@ -218,13 +223,16 @@ object NetworkLogger {
      */
     fun cleanOldLogs(keepCount: Int = MAX_RETAINED_FILES) {
         val logDir = getLogDirectory() ?: return
-        purgeExpiredLogs(logDir)
         val logFiles = logDir.listFiles { file ->
             file.name.startsWith("network_log_") && file.name.endsWith(".txt")
         } ?: return
 
         val sortedFiles = logFiles.sortedByDescending { it.lastModified() }
-        sortedFiles.drop(keepCount).forEach { it.delete() }
+        sortedFiles.drop(keepCount).forEach { file ->
+            if (!file.delete()) {
+                Log.w(TAG, "Failed to delete old log file: ${file.absolutePath}")
+            }
+        }
     }
     
     /**
@@ -390,12 +398,10 @@ object NetworkLogger {
             if (attempt > 0) {
                 append("[Attempt $attempt] ")
             }
-            append("→ ${request.method} ${DiagnosticsLogSanitizer.sanitizeUrl(request.url.toString())}\n")
+            append("→ ${request.method} ${request.url}\n")
             append("Headers:\n")
             request.headers.forEach { (name, value) ->
-                // Don't log sensitive headers in full
-                val safeValue = DiagnosticsLogSanitizer.sanitizeHeader(name, value)
-                append("  $name: $safeValue\n")
+                append("  $name: $value\n")
             }
             request.body?.contentLength()?.let { length ->
                 append("Content-Length: $length bytes\n")
@@ -420,11 +426,11 @@ object NetworkLogger {
         
         val message = buildString {
             append("← ${response.code} ${response.message} (${durationMs}ms)\n")
-            append("URL: ${DiagnosticsLogSanitizer.sanitizeUrl(response.request.url.toString())}\n")
+            append("URL: ${response.request.url}\n")
             append("Protocol: $protocol\n")
             append("Headers:\n")
             response.headers.forEach { (name, value) ->
-                append("  $name: ${DiagnosticsLogSanitizer.sanitizeHeader(name, value)}\n")
+                append("  $name: $value\n")
             }
             response.body?.contentLength()?.let { length ->
                 if (length >= 0) {
