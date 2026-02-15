@@ -2,11 +2,13 @@ package com.linkpoint.utils
 
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.preference.PreferenceManager
 import java.io.File
 import java.util.concurrent.TimeUnit
 
 object DiagnosticsLoggingConfig {
+    private const val TAG = "DiagnosticsLoggingConfig"
     const val PREF_VERBOSE_PACKET_LOGGING = "diagnostic_verbose_packet_logging"
     const val PREF_VERBOSE_BODY_LOGGING = "diagnostic_verbose_body_logging"
     const val PREF_LOG_RETENTION_DAYS = "diagnostic_log_retention_days"
@@ -48,8 +50,8 @@ object DiagnosticsLoggingConfig {
         if (!logDir.exists()) return
         val cutoff = nowMs - TimeUnit.DAYS.toMillis(retentionDays.toLong())
         logDir.listFiles()?.forEach { file ->
-            if (file.isFile && file.lastModified() < cutoff) {
-                file.delete()
+            if (file.isFile && file.lastModified() < cutoff && !file.delete()) {
+                Log.w(TAG, "Failed to delete expired log file: ${file.absolutePath}")
             }
         }
     }

@@ -183,6 +183,14 @@ object SessionLogRecorder {
                 isRecording.set(false)
                 return false
             }
+
+            val context = appContext
+            if (context != null) {
+                DiagnosticsLoggingConfig.purgeExpiredLogs(
+                    logDir = logDir,
+                    retentionDays = DiagnosticsLoggingConfig.getRetentionDays(context)
+                )
+            }
             
             val timestamp = fileNameFormat.format(Date())
             currentLogFile = File(logDir, "$SESSION_LOG_PREFIX$timestamp$SESSION_LOG_SUFFIX")
@@ -277,7 +285,7 @@ object SessionLogRecorder {
             timestamp = System.currentTimeMillis(),
             type = type,
             tag = tag,
-            message = DiagnosticsLogSanitizer.sanitize(message)
+            message = message
         )
         addEntry(entry)
     }
@@ -295,7 +303,7 @@ object SessionLogRecorder {
             timestamp = System.currentTimeMillis(),
             type = type,
             tag = tag,
-            message = DiagnosticsLogSanitizer.sanitize(message),
+            message = message,
             hexDump = hexDump
         )
         addEntry(entry)
@@ -311,7 +319,7 @@ object SessionLogRecorder {
             timestamp = System.currentTimeMillis(),
             type = EntryType.ERROR,
             tag = tag,
-            message = DiagnosticsLogSanitizer.sanitize(message),
+            message = message,
             stackTrace = error?.stackTraceToString()?.take(1000)
         )
         addEntry(entry)
@@ -383,7 +391,7 @@ object SessionLogRecorder {
                     val safeValue = if (sensitiveHeaders.any { sensitive ->
                             k.contains(sensitive, ignoreCase = true)
                         }
-                    ) "***REDACTED***" else DiagnosticsLogSanitizer.sanitize(v)
+                    ) "***REDACTED***" else v
                     append("\n  $k: $safeValue")
                 }
             }
@@ -427,7 +435,7 @@ object SessionLogRecorder {
         val status = if (available) "✓ AVAILABLE" else "✗ UNAVAILABLE"
         val message = buildString {
             append("$capName: $status")
-            url?.let { append("\n  URL: ${DiagnosticsLogSanitizer.sanitizeUrl(it).take(80)}...") }
+            url?.let { append("\n  URL: ${it.take(80)}...") }
         }
         log(EntryType.CAPABILITY, "CAP", message)
     }
@@ -489,7 +497,7 @@ object SessionLogRecorder {
     private fun addEntry(entry: LogEntry) {
         val sanitizedEntry = entry.copy(
             message = DiagnosticsLogSanitizer.sanitize(entry.message),
-            hexDump = entry.hexDump?.let { DiagnosticsLogSanitizer.sanitize(it) },
+            hexDump = entry.hexDump,
             stackTrace = entry.stackTrace?.let { DiagnosticsLogSanitizer.sanitize(it) }
         )
         logBuffer.offer(sanitizedEntry)
@@ -519,7 +527,7 @@ object SessionLogRecorder {
             synchronized(writer) {
                 while (logBuffer.isNotEmpty()) {
                     val entry = logBuffer.poll() ?: break
-                    writer.write(entry.copy(message = DiagnosticsLogSanitizer.sanitize(entry.message)).format())
+                    writer.write(entry.format())
                 }
                 writer.flush()
             }
@@ -606,11 +614,6 @@ object SessionLogRecorder {
             if (!logDir.exists()) {
                 logDir.mkdirs()
             }
-
-            DiagnosticsLoggingConfig.purgeExpiredLogs(
-                logDir = logDir,
-                retentionDays = DiagnosticsLoggingConfig.getRetentionDays(context)
-            )
 
             return logDir
         } catch (e: Exception) {
