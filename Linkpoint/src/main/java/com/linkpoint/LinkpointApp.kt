@@ -3,6 +3,9 @@ package com.linkpoint
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
 import com.linkpoint.assets.*
 import com.linkpoint.utils.CrashReporter
 import com.linkpoint.avatar.AvatarManager
@@ -354,6 +357,17 @@ class LinkpointApp : Application() {
         // Initialize network logger first for early debugging
         NetworkLogger.initialize(this)
         Log.i(TAG, "Network logger initialized with auto-save to Documents/Linkpoint Logs/")
+
+        val decoderStatus = JPEG2000Decoder.runStartupSelfTest()
+        if (!decoderStatus.available) {
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(
+                    this,
+                    "JPEG2000 support unavailable. Some textures may use placeholders.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
         
         // Initialize session log recorder for comprehensive packet logging
         com.linkpoint.utils.SessionLogRecorder.initialize(this)
