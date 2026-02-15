@@ -1690,6 +1690,14 @@ class UDPConnectionFixed {
             "Registered handler for message $messageId (total: ${messageHandlers.size})")
     }
     
+
+    fun registerParsedHandler(messageId: Int, handler: (Int, Any?) -> Unit) {
+        registerHandler(messageId) { msgId, rawPacket ->
+            val payload = MessageParser.extractPayload(rawPacket) ?: return@registerHandler
+            handler(msgId, MessageParserRegistry.parse(msgId, payload))
+        }
+    }
+
     /**
      * Register a message handler with MessageRouter.Handler interface
      */

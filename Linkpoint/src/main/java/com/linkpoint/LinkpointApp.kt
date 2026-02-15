@@ -769,14 +769,9 @@ class LinkpointApp : Application() {
         }
         
         // Chat from simulator (nearby chat)
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.CHAT_FROM_SIMULATOR) { _, rawPacket ->
+        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIds.CHAT_FROM_SIMULATOR) { _, parsed ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload == null) {
-                    Log.w(TAG, "Failed to extract ChatFromSimulator payload")
-                    return@registerHandler
-                }
-                val chatData = com.linkpoint.protocol.messages.MessageParser.parseChatFromSimulator(payload)
+                val chatData = parsed as? com.linkpoint.protocol.messages.ChatData
                 if (chatData != null && ::chatManager.isInitialized) {
                     chatManager.handleChatFromSimulator(chatData)
                 }
@@ -844,11 +839,9 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE) { _, rawPacket ->
+        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE) { _, parsed ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload == null) return@registerHandler
-                val updates = com.linkpoint.protocol.messages.MessageParser.parseObjectUpdate(payload)
+                val updates = (parsed as? List<*>)?.filterIsInstance<com.linkpoint.protocol.messages.ObjectUpdateData>() ?: emptyList()
                 objectUpdateCount += updates.size
                 // Log occasionally to avoid spam
                 if (objectUpdateCount <= 5 || objectUpdateCount % 100 == 0) {

@@ -51,6 +51,12 @@ class MessageRouter {
         fun isHeavy(): Boolean = false
     }
 
+
+    interface ParsedHandler {
+        fun handleParsedMessage(messageId: Int, payload: ByteArray, parsed: Any?): Boolean
+        fun getPriority(): Int = 0
+    }
+
     /**
      * Registered handlers: message ID -> list of handlers.
      * All access synchronized via @Synchronized on this MessageRouter instance.
@@ -100,6 +106,20 @@ class MessageRouter {
     @Synchronized
     fun registerHandlerSync(messageId: Int, handler: Handler) {
         addHandlerInternal(messageId, handler)
+    }
+
+
+    @Synchronized
+    fun registerParsedHandlerSync(messageId: Int, handler: ParsedHandler) {
+        addHandlerInternal(messageId, object : Handler {
+            override fun handleMessage(messageId: Int, data: ByteArray): Boolean {
+                val payload = MessageParser.extractPayload(data) ?: return false
+                val parsed = MessageParserRegistry.parse(messageId, payload)
+                return handler.handleParsedMessage(messageId, payload, parsed)
+            }
+
+            override fun getPriority(): Int = handler.getPriority()
+        })
     }
 
     /**
