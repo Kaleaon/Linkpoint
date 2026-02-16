@@ -9,7 +9,6 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
 
-private val MESSAGE_BYTE_ORDER = ByteOrder.LITTLE_ENDIAN
 
 /**
  * Parses Second Life UDP message payloads.

@@ -21,8 +21,8 @@ class OutfitManagerTest {
     @Test
     fun testMessageIdConstantIsDefined() {
         // Verify the constant value matches the protocol specification
-        assertEquals("RezSingleAttachmentFromInv message ID should be 0xFFFF012A", 
-            (0xFFFF012A).toInt(), 
+        assertEquals("RezSingleAttachmentFromInv message ID should be 0xFFFF018B", 
+            (0xFFFF018B).toInt(), 
             MessageIds.REZ_SINGLE_ATTACHMENT_FROM_INV)
     }
     

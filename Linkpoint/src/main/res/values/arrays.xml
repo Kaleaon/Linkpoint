@@ -111,6 +111,19 @@
     </string-array>
 
 
+
+    <string-array name="background_profile_entries">
+        <item>Conservative (best battery life)</item>
+        <item>Balanced (recommended)</item>
+        <item>Aggressive (lowest latency)</item>
+    </string-array>
+
+    <string-array name="background_profile_values">
+        <item>conservative</item>
+        <item>balanced</item>
+        <item>aggressive</item>
+    </string-array>
+
     <string-array name="diagnostic_retention_entries">
         <item>3 days</item>
         <item>7 days</item>

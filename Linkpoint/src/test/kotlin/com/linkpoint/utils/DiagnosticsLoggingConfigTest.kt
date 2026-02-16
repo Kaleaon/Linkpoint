@@ -24,7 +24,7 @@ class DiagnosticsLoggingConfigTest {
     @Test
     fun `purgeExpiredLogs deletes files older than retention and keeps recent files`() {
         val tempDir = Files.createTempDirectory("diag-logs").toFile()
-        val now = 1_000_000L
+        val now = 1_000_000_000L
         val retentionDays = 7
         val cutoff = now - TimeUnit.DAYS.toMillis(retentionDays.toLong())
 
@@ -44,7 +44,7 @@ class DiagnosticsLoggingConfigTest {
     @Test
     fun `purgeExpiredLogs keeps files exactly at cutoff timestamp`() {
         val tempDir = Files.createTempDirectory("diag-cutoff").toFile()
-        val now = 2_000_000L
+        val now = 2_000_000_000L
         val retentionDays = 3
         val cutoff = now - TimeUnit.DAYS.toMillis(retentionDays.toLong())
 

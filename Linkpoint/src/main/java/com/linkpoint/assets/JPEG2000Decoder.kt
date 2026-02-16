@@ -177,10 +177,14 @@ object JPEG2000Decoder {
                     if (boxType == 0x69686472) {
                         val height = buffer.int
                         val width = buffer.int
-                        return Pair(width, height)
+                        if (width > 0 && height > 0) {
+                            return Pair(width, height)
+                        }
                     }
-                    pos += if (boxLen > 0) boxLen else 8
-                    if (pos <= 0) break
+
+                    // Some malformed/partial JP2 payloads have zero box length;
+                    // fall back to a byte-wise scan so we can still recover IHDR dimensions.
+                    pos += if (boxLen >= 8) boxLen else 1
                 }
             }
 

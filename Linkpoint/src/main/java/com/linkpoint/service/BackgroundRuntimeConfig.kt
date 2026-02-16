@@ -50,6 +50,10 @@ object BackgroundRuntimeConfig {
     fun getIntensityProfile(context: Context): IntensityProfile {
         val raw = PreferenceManager.getDefaultSharedPreferences(context)
             .getString(PREF_BACKGROUND_PROFILE, "balanced")
+        return mapIntensityProfile(raw)
+    }
+
+    internal fun mapIntensityProfile(raw: String?): IntensityProfile {
         return when (raw) {
             "conservative" -> IntensityProfile.CONSERVATIVE
             "aggressive" -> IntensityProfile.AGGRESSIVE
