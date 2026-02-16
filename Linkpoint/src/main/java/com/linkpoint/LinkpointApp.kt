@@ -867,9 +867,6 @@ class LinkpointApp : Application() {
         udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE) { _, parsed ->
             try {
                 val updates = (parsed as? List<*>)?.filterIsInstance<com.linkpoint.protocol.messages.ObjectUpdateData>() ?: emptyList()
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload == null) return@registerHandler
-                val updates = com.linkpoint.protocol.messages.MessageParser.parseObjectUpdate(payload)
                 ScenePopulationDiagnostics.markPacketReceived(ScenePopulationDiagnostics.EntityType.OBJECT, updates.size)
                 ScenePopulationDiagnostics.markParsed(ScenePopulationDiagnostics.EntityType.OBJECT, updates.size)
                 objectUpdateCount += updates.size
@@ -887,9 +884,6 @@ class LinkpointApp : Application() {
         udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE_COMPRESSED) { _, parsed ->
             try {
                 val updates = (parsed as? List<*>)?.filterIsInstance<com.linkpoint.protocol.messages.ObjectUpdateData>() ?: emptyList()
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload == null) return@registerHandler
-                val updates = com.linkpoint.protocol.messages.MessageParser.parseObjectUpdateCompressed(payload)
                 ScenePopulationDiagnostics.markPacketReceived(ScenePopulationDiagnostics.EntityType.OBJECT, updates.size)
                 ScenePopulationDiagnostics.markParsed(ScenePopulationDiagnostics.EntityType.OBJECT, updates.size)
                 compressedObjectUpdateCount += updates.size
