@@ -101,22 +101,22 @@ jobs:
           GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError"
       
       - name: Run Kotlin compilation checks
-        run: ./gradlew :Linkpoint:compileDebugKotlin --stacktrace
+        run: ./gradlew :Linkpoint:compileStableDebugKotlin --stacktrace
         continue-on-error: true
       
       - name: Run unit tests
-        run: ./gradlew :Linkpoint:testDebugUnitTest --stacktrace --continue
+        run: ./gradlew :Linkpoint:testStableDebugUnitTest --stacktrace --continue
         continue-on-error: true
       
       - name: Run lint analysis
-        run: ./gradlew :Linkpoint:lintDebug --stacktrace
+        run: ./gradlew :Linkpoint:lintStableDebug --stacktrace
         continue-on-error: true
       
       - name: Analyze APK size
         if: success()
         run: |
-          if [ -f Linkpoint/build/outputs/apk/debug/*.apk ]; then
-            APK_SIZE=$(du -h Linkpoint/build/outputs/apk/debug/*.apk | cut -f1)
+          if compgen -G "Linkpoint/build/outputs/apk/*/debug/*.apk" > /dev/null; then
+            APK_SIZE=$(du -h Linkpoint/build/outputs/apk/*/debug/*.apk | head -1 | cut -f1)
             echo "apk_size=$APK_SIZE" >> $GITHUB_ENV
             echo "📦 APK Size: $APK_SIZE"
           fi
@@ -126,7 +126,7 @@ jobs:
         if: success()
         with:
           name: linkpoint-debug-${{ github.sha }}
-          path: Linkpoint/build/outputs/apk/debug/*.apk
+          path: Linkpoint/build/outputs/apk/*/debug/*.apk
           retention-days: 14
           compression-level: 9
       
@@ -135,7 +135,7 @@ jobs:
         if: success()
         with:
           name: linkpoint-release-${{ github.sha }}
-          path: Linkpoint/build/outputs/apk/release/*.apk
+          path: Linkpoint/build/outputs/apk/*/release/*.apk
           retention-days: 30
           compression-level: 9
         continue-on-error: true
@@ -169,12 +169,12 @@ jobs:
           echo "## 🏗️ Build Status" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          if [ -f Linkpoint/build/outputs/apk/debug/*.apk ]; then
+          if compgen -G "Linkpoint/build/outputs/apk/*/debug/*.apk" > /dev/null; then
             echo "✅ **Debug APK built successfully**" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "### 📦 APK Details" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            ls -lh Linkpoint/build/outputs/apk/debug/*.apk >> $GITHUB_STEP_SUMMARY
+            ls -lh Linkpoint/build/outputs/apk/*/debug/*.apk >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "📊 **Size:** ${{ env.apk_size }}" >> $GITHUB_STEP_SUMMARY
