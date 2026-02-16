@@ -59,10 +59,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Linkpoint-debug-APK
-          path: Linkpoint/build/outputs/apk/debug/*.apk
+          path: Linkpoint/build/outputs/apk/*/debug/*.apk
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
           name: Linkpoint-release-APK
-          path: Linkpoint/build/outputs/apk/release/*.apk
+          path: Linkpoint/build/outputs/apk/*/release/*.apk
