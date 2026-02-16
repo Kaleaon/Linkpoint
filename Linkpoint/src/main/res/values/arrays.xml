@@ -138,16 +138,4 @@
         <item>30</item>
     </string-array>
 
-    <string-array name="background_profile_entries">
-        <item>Conservative (best battery life)</item>
-        <item>Balanced</item>
-        <item>Aggressive (lowest latency)</item>
-    </string-array>
-
-    <string-array name="background_profile_values">
-        <item>conservative</item>
-        <item>balanced</item>
-        <item>aggressive</item>
-    </string-array>
-
 </resources>
