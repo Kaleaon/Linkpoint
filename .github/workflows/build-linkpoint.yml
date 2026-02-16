@@ -126,7 +126,8 @@ jobs:
         if: success()
         with:
           name: linkpoint-debug-${{ github.sha }}
-          path: Linkpoint/build/outputs/apk/debug/*.apk
+          path: Linkpoint/build/outputs/apk/**/debug/*.apk
+          if-no-files-found: error
           retention-days: 14
           compression-level: 9
       
