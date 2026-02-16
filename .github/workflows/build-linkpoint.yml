@@ -116,7 +116,7 @@ jobs:
         if: success()
         run: |
           if compgen -G "Linkpoint/build/outputs/apk/*/debug/*.apk" > /dev/null; then
-            APK_SIZE=$(du -h Linkpoint/build/outputs/apk/*/debug/*.apk | head -1 | cut -f1)
+            APK_SIZE=$(du -ch Linkpoint/build/outputs/apk/*/debug/*.apk | tail -1 | cut -f1)
             echo "apk_size=$APK_SIZE" >> $GITHUB_ENV
             echo "📦 APK Size: $APK_SIZE"
           fi
