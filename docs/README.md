@@ -12,6 +12,7 @@
 |----------|-------------|
 | [FIXES_AND_STATUS.md](FIXES_AND_STATUS.md) | Current status, fix history, and known issues |
 | [Broken_Code_Analysis_and_Fixes.md](Broken_Code_Analysis_and_Fixes.md) | Technical analysis of code issues |
+| [AWESOME_KOTLIN_RECOMMENDATIONS.md](AWESOME_KOTLIN_RECOMMENDATIONS.md) | Tooling/library recommendations mapped to current Linkpoint blockers |
 
 ## Protocol & Integration Guides
 
