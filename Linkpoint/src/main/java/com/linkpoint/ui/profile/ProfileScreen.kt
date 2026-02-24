@@ -37,6 +37,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.background
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import java.text.SimpleDateFormat
@@ -150,6 +151,7 @@ fun ProfileScreen(
                         modifier = Modifier
                             .size(8.dp)
                             .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
