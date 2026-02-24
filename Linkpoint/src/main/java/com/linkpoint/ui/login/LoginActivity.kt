@@ -82,7 +82,6 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
     private lateinit var passwordEdit: EditText
     private lateinit var gridSpinner: Spinner
     private lateinit var startLocationSpinner: Spinner
-    private lateinit var startLocationButton: Button
     private lateinit var savePasswordCheck: CheckBox
     private lateinit var loginButton: Button
     private lateinit var progressBar: ProgressBar

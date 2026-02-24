@@ -7,6 +7,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.linkpoint.R
 
@@ -84,11 +85,24 @@ class TosActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tos)
-        
+
         requireAcceptance = intent.getBooleanExtra("require_acceptance", true)
-        
+
         setupViews()
         loadTos()
+        setupBackPressHandler()
+    }
+
+    private fun setupBackPressHandler() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (requireAcceptance) {
+                    declineTos()
+                } else {
+                    finish()
+                }
+            }
+        })
     }
     
     private fun setupViews() {
@@ -295,13 +309,5 @@ class TosActivity : AppCompatActivity() {
         }
         finish()
         return true
-    }
-    
-    override fun onBackPressed() {
-        if (requireAcceptance) {
-            declineTos()
-        } else {
-            super.onBackPressed()
-        }
     }
 }
