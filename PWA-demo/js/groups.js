@@ -652,7 +652,14 @@ class GroupsManager {
       else proposal.votesAgainst++;
     });
     
-    // TODO: Send VoteOnProposal message
+    if (window.app?.protocol?.sendMessage) {
+      window.app.protocol.sendMessage('VoteOnProposal', {
+        groupUUID,
+        proposalID,
+        vote: vote ? 'Yes' : 'No',
+        voterUUID
+      });
+    }
   }
   
   /**
