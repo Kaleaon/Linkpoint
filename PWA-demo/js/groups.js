@@ -549,9 +549,20 @@ class GroupsManager {
     if (group) {
       group.charter = charter;
       this.notifyChange('group-updated', groupUUID);
+
+      if (window.app && window.app.protocol) {
+        window.app.protocol.sendMessage('UpdateGroupInfo', {
+          uuid: group.uuid,
+          charter: group.charter,
+          showInList: group.showInList,
+          insigniaID: group.insigniaID,
+          membershipFee: group.membershipFee,
+          openEnrollment: group.openEnrollment,
+          allowPublish: group.allowPublish,
+          maturePublish: group.maturePublish
+        });
+      }
     }
-    
-    // TODO: Send UpdateGroupInfo message
   }
   
   /**
@@ -564,9 +575,20 @@ class GroupsManager {
     if (group) {
       group.insigniaID = insigniaID;
       this.notifyChange('group-updated', groupUUID);
+
+      if (window.app && window.app.protocol) {
+        window.app.protocol.sendMessage('UpdateGroupInfo', {
+          uuid: group.uuid,
+          charter: group.charter,
+          showInList: group.showInList,
+          insigniaID: group.insigniaID,
+          membershipFee: group.membershipFee,
+          openEnrollment: group.openEnrollment,
+          allowPublish: group.allowPublish,
+          maturePublish: group.maturePublish
+        });
+      }
     }
-    
-    // TODO: Send UpdateGroupInfo message
   }
   
   /**

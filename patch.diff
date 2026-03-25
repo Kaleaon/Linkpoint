@@ -1,0 +1,45 @@
+--- PWA-demo/js/groups.js
++++ PWA-demo/js/groups.js
+@@ -550,8 +550,18 @@
+       group.charter = charter;
+       this.notifyChange('group-updated', groupUUID);
+-    }
+-
+-    // TODO: Send UpdateGroupInfo message
++
++      if (window.app && window.app.protocol) {
++        window.app.protocol.sendMessage('UpdateGroupInfo', {
++          uuid: group.uuid,
++          charter: group.charter,
++          showInList: group.showInList,
++          insigniaID: group.insigniaID,
++          membershipFee: group.membershipFee,
++          openEnrollment: group.openEnrollment,
++          allowPublish: group.allowPublish,
++          maturePublish: group.maturePublish
++        });
++      }
++    }
+   }
+
+@@ -565,8 +575,18 @@
+       group.insigniaID = insigniaID;
+       this.notifyChange('group-updated', groupUUID);
+-    }
+-
+-    // TODO: Send UpdateGroupInfo message
++
++      if (window.app && window.app.protocol) {
++        window.app.protocol.sendMessage('UpdateGroupInfo', {
++          uuid: group.uuid,
++          charter: group.charter,
++          showInList: group.showInList,
++          insigniaID: group.insigniaID,
++          membershipFee: group.membershipFee,
++          openEnrollment: group.openEnrollment,
++          allowPublish: group.allowPublish,
++          maturePublish: group.maturePublish
++        });
++      }
++    }
+   }
