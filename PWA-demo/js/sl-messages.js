@@ -36,6 +36,9 @@ const MessageIDs = {
   TELEPORT_PROGRESS: 0x56,
   TELEPORT_FINISH: 0x57,
   TELEPORT_FAILED: 0x58,
+
+  // Friend Messages
+  GRANT_USER_RIGHTS: 0xFFFF0140,
 };
 
 /**
@@ -368,6 +371,78 @@ class ObjectUpdateMessage extends SLMessage {
   }
 }
 
+
+/**
+ * GrantUserRights message
+ */
+class GrantUserRightsMessage extends SLMessage {
+  constructor(agentId, sessionId, friendId, rights) {
+    super();
+    this.agentId = agentId;
+    this.sessionId = sessionId;
+    this.friendId = friendId;
+    this.rights = rights;
+    this.isReliable = true;
+  }
+
+  getMessageID() {
+    return MessageIDs.GRANT_USER_RIGHTS;
+  }
+
+  getMessageName() {
+    return 'GrantUserRights';
+  }
+
+  packPayload(buffer) {
+    const view = new DataView(buffer);
+    let offset = 0;
+
+    // AgentData Block
+    // AgentID (LLUUID - big-endian per SL protocol)
+    offset = this.uuidToBytes(this.agentId, view, offset);
+
+    // SessionID (LLUUID - big-endian per SL protocol)
+    offset = this.uuidToBytes(this.sessionId, view, offset);
+
+    // Rights block count (1 block)
+    view.setUint8(offset++, 1);
+
+    // Rights Block
+    // AgentRelated (LLUUID - big-endian per SL protocol)
+    offset = this.uuidToBytes(this.friendId, view, offset);
+
+    // RelatedRights (S32)
+    view.setInt32(offset, this.rights, true); // Little Endian
+    offset += 4;
+
+    return offset;
+  }
+
+  uuidToBytes(uuid, view, offset) {
+    if (!uuid) {
+      for (let i = 0; i < 16; i++) {
+        view.setUint8(offset++, 0);
+      }
+      return offset;
+    }
+
+    const hex = uuid.replace(/-/g, '');
+    if (hex.length !== 32 || !/^[0-9a-fA-F]+$/.test(hex)) {
+      throw new Error(`Invalid UUID format: ${uuid}`);
+    }
+
+    const msb = BigInt('0x' + hex.substring(0, 16));
+    const lsb = BigInt('0x' + hex.substring(16, 32));
+
+    view.setBigUint64(offset, msb, false); // big-endian
+    offset += 8;
+    view.setBigUint64(offset, lsb, false); // big-endian
+    offset += 8;
+
+    return offset;
+  }
+}
+
 /**
  * AgentUpdate message
  */
@@ -411,5 +486,6 @@ window.SLMessageTypes = {
   ChatFromSimulatorMessage,
   ChatFromViewerMessage,
   ObjectUpdateMessage,
-  AgentUpdateMessage
+  AgentUpdateMessage,
+  GrantUserRightsMessage
 };
