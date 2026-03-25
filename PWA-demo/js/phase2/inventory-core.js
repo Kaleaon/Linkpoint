@@ -72,6 +72,26 @@ class InventoryCore {
   }
 
   /**
+   * Delete folder from inventory
+   * @param {string} folderId - Folder UUID
+   */
+  deleteFolder(folderId) {
+    const folder = this.folders.get(folderId);
+    if (!folder) return;
+
+    // Remove from parent's children array
+    if (folder.parentId) {
+      const parent = this.folders.get(folder.parentId);
+      if (parent) {
+        parent.children = parent.children.filter(id => id !== folderId);
+      }
+    }
+
+    this.folders.delete(folderId);
+    console.log(`[Inventory] Deleted folder: ${folder.name}`);
+  }
+
+  /**
    * Get folder by ID
    * @param {string} folderId - Folder UUID
    * @returns {Object|null}
@@ -139,6 +159,26 @@ class InventoryCore {
     
     console.log(`[Inventory] Added item: ${item.name}`);
     return item;
+  }
+
+  /**
+   * Delete item from inventory
+   * @param {string} itemId - Item UUID
+   */
+  deleteItem(itemId) {
+    const item = this.items.get(itemId);
+    if (!item) return;
+
+    // Remove from folder's items array
+    if (item.folderId) {
+      const folder = this.folders.get(item.folderId);
+      if (folder) {
+        folder.items = folder.items.filter(id => id !== itemId);
+      }
+    }
+
+    this.items.delete(itemId);
+    console.log(`[Inventory] Deleted item: ${item.name}`);
   }
 
   /**
