@@ -127,9 +127,20 @@ class FriendsExtended {
   declineFriendRequest(fromUUID) {
     console.log(`Declining friend request from ${fromUUID}`);
     
+    // Get session ID before deleting the request
+    const request = this.pendingRequests.get(fromUUID);
+    const sessionID = request ? request.sessionID : null;
+
     this.pendingRequests.delete(fromUUID);
     
-    // TODO: Send DeclineFriendship message
+    // Send DeclineFriendship message via protocol manager
+    if (window.app && window.app.protocol) {
+      window.app.protocol.sendMessage('DeclineFriendship', {
+        agent_id: window.app.auth.user.id,
+        session_id: window.app.protocol.sessionId,
+        transaction_id: sessionID || '00000000-0000-0000-0000-000000000000'
+      });
+    }
   }
   
   /**
