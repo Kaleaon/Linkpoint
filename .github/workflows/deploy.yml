@@ -187,7 +187,7 @@ jobs:
         echo "- **Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         
-        if [ -f Linkpoint/build/outputs/apk/release/*.apk ]; then
+        if compgen -G "Linkpoint/build/outputs/apk/release/*.apk" > /dev/null; then
           echo "## 📦 APK Details" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
@@ -235,7 +235,18 @@ jobs:
       run: |
         if [ -f CHANGELOG.md ]; then
           # Extract changelog for this version
-          awk '/## \[${{ steps.version.outputs.version }}\]/,/## \[/{if(/## \[/ && !/## \[${{ steps.version.outputs.version }}\]/)exit;print}' CHANGELOG.md > release_notes.md
+          VERSION_ESCAPED=$(printf '%s\n' "${{ steps.version.outputs.version }}" | sed 's/[][\\.^$*+?(){}|/-]/\\&/g')
+          awk -v version="$VERSION_ESCAPED" '
+            $0 ~ "^## \\[" version "\\]" { in_section=1; print; next }
+            in_section && $0 ~ "^## \\[" { exit }
+            in_section { print }
+          ' CHANGELOG.md > release_notes.md
+          if [ ! -s release_notes.md ]; then
+            echo "## ${{ steps.version.outputs.version }}" > release_notes.md
+            echo "" >> release_notes.md
+            echo "- No dedicated changelog section found; using generated commit summary." >> release_notes.md
+            git log --pretty=format:"- %s (%h)" $(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")..HEAD >> release_notes.md
+          fi
         else
           # Generate changelog from commits
           git log --pretty=format:"- %s (%h)" $(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")..HEAD > release_notes.md
