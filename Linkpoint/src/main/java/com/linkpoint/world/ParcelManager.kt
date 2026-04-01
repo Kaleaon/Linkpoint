@@ -72,17 +72,8 @@ class ParcelManager(
      * Message block fields remain little-endian per SL templates.
      */
     private fun writeAgentData(buffer: ByteBuffer) {
-        val agentId = udpConnection.getAgentId()
-        val sessionId = udpConnection.getSessionId()
-        
-        // Write UUIDs in big-endian (SL protocol format)
-        val originalOrder = buffer.order()
-        buffer.order(ByteOrder.BIG_ENDIAN)
-        buffer.putLong(agentId.mostSignificantBits)
-        buffer.putLong(agentId.leastSignificantBits)
-        buffer.putLong(sessionId.mostSignificantBits)
-        buffer.putLong(sessionId.leastSignificantBits)
-        buffer.order(originalOrder)
+        writeUUID(buffer, udpConnection.getAgentId())
+        writeUUID(buffer, udpConnection.getSessionId())
     }
     
     /**
@@ -189,8 +180,8 @@ class ParcelManager(
                 // AgentData block + InfoData block with position
                 val payload = ByteBuffer.allocate(44).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData - placeholder (will be filled by UDP layer)
-                repeat(32) { payload.put(0) }  // Agent + Session ID
+                // AgentData
+                writeAgentData(payload)
                 
                 // Position (as integers, local coordinates)
                 payload.putInt(position.x.toInt())
@@ -469,7 +460,8 @@ class ParcelManager(
                 // Data block
                 payload.putInt(0)  // Flags - add to access
                 payload.putInt(localId)
-                payload.putLong(0)  // TransactionID placeholder
+                payload.putInt(0)  // TransactionID (upper 32 bits)
+                payload.putInt(0)  // TransactionID (lower 32 bits)
                 payload.putInt(1)  // SequenceID
                 payload.putInt(1)  // Sections
                 
@@ -501,7 +493,8 @@ class ParcelManager(
                 // Data block
                 payload.putInt(1)  // Flags - remove from access
                 payload.putInt(localId)
-                payload.putLong(0)
+                payload.putInt(0)
+                payload.putInt(0)
                 payload.putInt(1)
                 payload.putInt(1)
                 
@@ -533,7 +526,8 @@ class ParcelManager(
                 // Data block  
                 payload.putInt(2)  // Flags - ban list
                 payload.putInt(localId)
-                payload.putLong(0)
+                payload.putInt(0)
+                payload.putInt(0)
                 payload.putInt(1)
                 payload.putInt(1)
                 
@@ -565,7 +559,8 @@ class ParcelManager(
                 // Data block
                 payload.putInt(3)  // Flags - remove from ban
                 payload.putInt(localId)
-                payload.putLong(0)
+                payload.putInt(0)
+                payload.putInt(0)
                 payload.putInt(1)
                 payload.putInt(1)
                 
@@ -598,7 +593,7 @@ class ParcelManager(
             .order(ByteOrder.LITTLE_ENDIAN)
         
         // AgentData
-        repeat(32) { payload.put(0) }
+        writeAgentData(payload)
         
         // ParcelData
         payload.putInt(localId)

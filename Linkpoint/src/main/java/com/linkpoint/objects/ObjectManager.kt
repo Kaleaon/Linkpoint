@@ -82,6 +82,16 @@ class ObjectManager(
     
     private val _editMode = MutableStateFlow(EditMode.POSITION)
     val editMode: StateFlow<EditMode> = _editMode
+
+    private fun writeAgentData(buffer: ByteBuffer) {
+        buffer.putUUID(udpConnection.getAgentId())
+        buffer.putUUID(udpConnection.getSessionId())
+    }
+
+    private fun writeAgentGroupData(buffer: ByteBuffer, groupId: UUID = ZERO_UUID) {
+        writeAgentData(buffer)
+        buffer.putUUID(groupId)
+    }
     
     /**
      * Handle object update from simulator
@@ -288,10 +298,10 @@ class ObjectManager(
             // Build ObjectSelect packet
             // Format: AgentData block + ObjectData blocks
             // NOTE: Second Life message blocks are little-endian; UUIDs remain raw big-endian bytes.
-            val payload = ByteBuffer.allocate(16 + 4 * localIds.size).order(MESSAGE_BYTE_ORDER)
+            val payload = ByteBuffer.allocate(32 + 1 + 4 * localIds.size).order(MESSAGE_BYTE_ORDER)
             
-            // AgentData - placeholder for agent ID (16 bytes)
-            repeat(16) { payload.put(0) }
+            // AgentData
+            writeAgentData(payload)
             
             // Object count
             payload.put(localIds.size.toByte())
@@ -336,10 +346,10 @@ class ObjectManager(
             if (scale != null) dataSize += 12     // 3 floats
             
             // NOTE: Second Life message blocks are little-endian; UUIDs remain raw big-endian bytes.
-            val payload = ByteBuffer.allocate(16 + 1 + 4 + 1 + dataSize).order(MESSAGE_BYTE_ORDER)
+            val payload = ByteBuffer.allocate(32 + 1 + 4 + 1 + dataSize).order(MESSAGE_BYTE_ORDER)
             
-            // AgentData - placeholder
-            repeat(16) { payload.put(0) }
+            // AgentData
+            writeAgentData(payload)
             
             // Number of objects
             payload.put(1.toByte())
@@ -391,8 +401,8 @@ class ObjectManager(
             // NOTE: Second Life message blocks are little-endian; UUIDs remain raw big-endian bytes.
             val payload = ByteBuffer.allocate(100).order(MESSAGE_BYTE_ORDER)
             
-            // AgentData - placeholder (16 bytes agent, 16 bytes session, 16 bytes group)
-            repeat(48) { payload.put(0) }
+            // AgentData (agent, session, group)
+            writeAgentGroupData(payload)
             
             // RezData
             payload.putUUID(itemId)
@@ -428,8 +438,8 @@ class ObjectManager(
             // NOTE: Second Life message blocks are little-endian; UUIDs remain raw big-endian bytes.
             val payload = ByteBuffer.allocate(60).order(MESSAGE_BYTE_ORDER)
             
-            // AgentData - placeholder
-            repeat(48) { payload.put(0) }
+            // AgentData (agent, session, group)
+            writeAgentGroupData(payload)
             
             // DeRezData
             payload.put(4)  // Destination = Take to inventory
@@ -458,8 +468,8 @@ class ObjectManager(
             // NOTE: Second Life message blocks are little-endian; UUIDs remain raw big-endian bytes.
             val payload = ByteBuffer.allocate(25).order(MESSAGE_BYTE_ORDER)
             
-            // AgentData - placeholder
-            repeat(16) { payload.put(0) }
+            // AgentData
+            writeAgentData(payload)
             
             // Force
             payload.put(0)
@@ -494,8 +504,8 @@ class ObjectManager(
             // NOTE: Second Life message blocks are little-endian; UUIDs remain raw big-endian bytes.
             val payload = ByteBuffer.allocate(17 + 4 * localIds.size).order(MESSAGE_BYTE_ORDER)
             
-            // AgentData - placeholder
-            repeat(16) { payload.put(0) }
+            // AgentData
+            writeAgentData(payload)
             
             // ObjectData
             payload.put(localIds.size.toByte())
@@ -523,8 +533,8 @@ class ObjectManager(
             // NOTE: Second Life message blocks are little-endian; UUIDs remain raw big-endian bytes.
             val payload = ByteBuffer.allocate(17 + 4 * localIds.size).order(MESSAGE_BYTE_ORDER)
             
-            // AgentData - placeholder
-            repeat(16) { payload.put(0) }
+            // AgentData
+            writeAgentData(payload)
             
             // ObjectData
             payload.put(localIds.size.toByte())
@@ -553,8 +563,8 @@ class ObjectManager(
             val nameBytes = name.toByteArray(Charsets.UTF_8)
             val payload = ByteBuffer.allocate(17 + 4 + 1 + nameBytes.size).order(MESSAGE_BYTE_ORDER)
             
-            // AgentData - placeholder
-            repeat(16) { payload.put(0) }
+            // AgentData
+            writeAgentData(payload)
             
             // ObjectData
             payload.put(1)  // Number of objects
@@ -583,8 +593,8 @@ class ObjectManager(
             val descBytes = description.toByteArray(Charsets.UTF_8)
             val payload = ByteBuffer.allocate(17 + 4 + 1 + descBytes.size).order(MESSAGE_BYTE_ORDER)
             
-            // AgentData - placeholder
-            repeat(16) { payload.put(0) }
+            // AgentData
+            writeAgentData(payload)
             
             // ObjectData
             payload.put(1)  // Number of objects
@@ -610,8 +620,8 @@ class ObjectManager(
             // NOTE: Second Life message blocks are little-endian; UUIDs remain raw big-endian bytes.
             val grabPayload = ByteBuffer.allocate(80).order(MESSAGE_BYTE_ORDER)
             
-            // AgentData - placeholder
-            repeat(32) { grabPayload.put(0) }  // Agent + Session ID
+            // AgentData
+            writeAgentData(grabPayload)
             
             // ObjectData
             grabPayload.putInt(localId)
@@ -640,7 +650,7 @@ class ObjectManager(
                 
                 // ObjectDeGrab message
                 val degrabPayload = ByteBuffer.allocate(36).order(MESSAGE_BYTE_ORDER)
-                repeat(32) { degrabPayload.put(0) }  // Agent + Session ID
+                writeAgentData(degrabPayload)
                 degrabPayload.putInt(localId)
                 
                 udpConnection.sendPacket(MessageIds.OBJECT_DEGRAB, degrabPayload.array(), reliable = true)
@@ -660,8 +670,8 @@ class ObjectManager(
             // NOTE: Second Life message blocks are little-endian; UUIDs remain raw big-endian bytes.
             val payload = ByteBuffer.allocate(44).order(MESSAGE_BYTE_ORDER)
             
-            // AgentData - placeholder
-            repeat(32) { payload.put(0) }  // Agent + Session ID
+            // AgentData
+            writeAgentData(payload)
             
             // TargetObject
             val obj = objects[localId]
@@ -696,7 +706,7 @@ class ObjectManager(
                 val payload = ByteBuffer.allocate(33).order(MESSAGE_BYTE_ORDER)
                 
                 // AgentData block
-                repeat(32) { payload.put(0) }  // Agent + Session ID placeholder
+                writeAgentData(payload)
                 
                 // SitObject - ZERO_UUID indicates stand request
                 payload.put(0)  // Flags = 0 (no sit flags, meaning stand)

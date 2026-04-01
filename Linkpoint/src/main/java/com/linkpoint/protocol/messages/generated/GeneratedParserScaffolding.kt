@@ -6,18 +6,18 @@ import com.linkpoint.protocol.messages.*
 object GeneratedParserScaffolding {
     const val OBJECTUPDATE_ID: Int = 12
     // domain=object returnType=List<ObjectUpdateData>
-    fun parseObjectUpdate(payload: ByteArray): List<ObjectUpdateData> = TODO("Implement ObjectUpdate parser")
+    fun parseObjectUpdate(payload: ByteArray): List<ObjectUpdateData> = MessageParser.parseObjectUpdate(payload)
 
     const val AVATARANIMATION_ID: Int = 20
     // domain=avatar returnType=AvatarAnimationData?
-    fun parseAvatarAnimation(payload: ByteArray): AvatarAnimationData? = TODO("Implement AvatarAnimation parser")
+    fun parseAvatarAnimation(payload: ByteArray): AvatarAnimationData? = AvatarMessageParsers.parseAvatarAnimation(payload)
 
     const val TELEPORTFINISH_ID: Int = -65467
     // domain=teleport returnType=TeleportFinishData?
-    fun parseTeleportFinish(payload: ByteArray): TeleportFinishData? = TODO("Implement TeleportFinish parser")
+    fun parseTeleportFinish(payload: ByteArray): TeleportFinishData? = TeleportMessageParsers.parseTeleportFinish(payload)
 
     const val INVENTORYDESCENDENTS_ID: Int = -65397
     // domain=inventory returnType=AdditionalMessageParsers.InventoryDescendentsData?
-    fun parseInventoryDescendents(payload: ByteArray): AdditionalMessageParsers.InventoryDescendentsData? = TODO("Implement InventoryDescendents parser")
+    fun parseInventoryDescendents(payload: ByteArray): AdditionalMessageParsers.InventoryDescendentsData? = AdditionalMessageParsers.parseInventoryDescendents(payload)
 
 }
