@@ -4196,6 +4196,7 @@ class LinkpointApp : Application() {
         
         // Register additional message handlers (split for Kotlin compiler)
         registerLateMessageHandlers()
+        registerOutboundOnlyMessageHandlers()
 
         
         // Mark handlers as ready and process any buffered packets
@@ -4206,6 +4207,33 @@ class LinkpointApp : Application() {
         Log.i(TAG, "║ UDP MESSAGE HANDLERS REGISTERED: ${udpConnection.getRegisteredHandlerCount()}")
         Log.i(TAG, "║ Handlers: ${udpConnection.getRegisteredHandlerIds().joinToString(", ")}")
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+    }
+
+    /**
+     * Register no-op handlers for messages we currently only send outbound.
+     * This makes parity decisions explicit and gives diagnostics if simulators send these unexpectedly.
+     */
+    private fun registerOutboundOnlyMessageHandlers() {
+        val outboundOnlyIds = listOf(
+            com.linkpoint.protocol.messages.MessageIds.MOVE_INVENTORY_ITEM,
+            com.linkpoint.protocol.messages.MessageIds.UPDATE_TASK_INVENTORY,
+            com.linkpoint.protocol.messages.MessageIds.PARCEL_BUY,
+            com.linkpoint.protocol.messages.MessageIds.OBJECT_GRAB,
+            com.linkpoint.protocol.messages.MessageIds.OBJECT_DEGRAB,
+            com.linkpoint.protocol.messages.MessageIds.KICK_USER,
+            com.linkpoint.protocol.messages.MessageIds.UPDATE_USER_INFO,
+            com.linkpoint.protocol.messages.MessageIds.FIND_AGENT
+        )
+
+        outboundOnlyIds.forEach { messageId ->
+            udpConnection.registerHandler(messageId) { _, rawPacket ->
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                Log.w(
+                    TAG,
+                    "⚠️ Received outbound-only message id=$messageId payloadBytes=${payload?.size ?: 0}; no inbound parser wired."
+                )
+            }
+        }
     }
     
     /**
