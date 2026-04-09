@@ -413,6 +413,18 @@ object MessageIds {
     
     /** AvatarInterestsReply - Avatar interests/picks */
     const val AVATAR_INTERESTS_REPLY = (0xFFFF00AC).toInt()  // Wire: FF FF 00 AC = -65364 (Lumiya: AvatarInterestsReply)
+
+    /** AvatarInterestsRequest - Request avatar interests */
+    const val AVATAR_INTERESTS_REQUEST = (0xFFFF00AE).toInt()  // Legacy manager compatibility ID
+
+    /** AvatarNotesRequest - Request avatar notes */
+    const val AVATAR_NOTES_REQUEST = (0xFFFF00B2).toInt()      // Legacy manager compatibility ID
+
+    /** AvatarPicksRequest - Request avatar picks */
+    const val AVATAR_PICKS_REQUEST = (0xFFFF00B4).toInt()      // Legacy manager compatibility ID
+
+    /** AvatarClassifiedsRequest - Request avatar classifieds */
+    const val AVATAR_CLASSIFIEDS_REQUEST = (0xFFFF00B5).toInt() // Legacy manager compatibility ID
     
     /** AvatarGroupsReply - Avatar group memberships */
     const val AVATAR_GROUPS_REPLY = (0xFFFF00AD).toInt()  // Wire: FF FF 00 AD = -65363 (Lumiya: AvatarGroupsReply)
