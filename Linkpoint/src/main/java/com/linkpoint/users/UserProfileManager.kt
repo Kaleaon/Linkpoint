@@ -70,9 +70,9 @@ class UserProfileManager(
             pendingRequests.getOrPut(avatarId) { mutableListOf() }.add(callback)
         }
         
-        // Try capability first
+        // Capability-first flow (Lumiya-style), only fallback to UDP when caps are unavailable/invalid.
         try {
-            val cap = capabilityManager.getCapability("AgentProfile")
+            val cap = capabilityManager.getCapability(CapabilityManager.CAP_AGENT_PROFILE)
             if (cap != null) {
                 fetchProfileViaCap(avatarId)
                 return
@@ -91,17 +91,20 @@ class UserProfileManager(
     private suspend fun fetchProfileViaCap(avatarId: UUID) {
         try {
             val request = LLSDMap().apply {
-                this["avatar_id"] = LLSDUUID(avatarId)
+                this["agent_id"] = LLSDString(avatarId.toString())
             }
-            val response = capabilityRequest("AgentProfile", request)
+            val response = capabilityManager.request(CapabilityManager.CAP_AGENT_PROFILE, request)
+
             if (response is LLSDMap) {
                 val profile = parseProfileFromLLSD(avatarId, response)
                 cacheProfile(avatarId, profile)
                 notifyCallbacks(avatarId, profile)
-            } else {
-                Log.w(TAG, "AgentProfile capability returned non-map response, using UDP")
-                sendPropertiesRequest(avatarId)
+                Log.d(TAG, "Loaded profile for $avatarId via AgentProfile capability ($capUrl)")
+                return
             }
+
+            Log.w(TAG, "AgentProfile capability returned non-map response, falling back to UDP")
+            sendPropertiesRequest(avatarId)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to fetch profile via capability", e)
             // Fallback to UDP
@@ -241,7 +244,7 @@ class UserProfileManager(
             payload.putShort(notesBytes.size.toShort())
             payload.put(notesBytes)
             
-            udpConnection.sendPacket(MessageIds.AVATAR_NOTES_UPDATE, payload.array().copyOf(payload.position()), reliable = true)
+            udpConnection.sendPacket(MessageIds.AVATAR_NOTES_UPDATE_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
             Log.d(TAG, "Updated notes for $avatarId")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to update notes", e)

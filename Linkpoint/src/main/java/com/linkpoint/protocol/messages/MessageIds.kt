@@ -410,6 +410,21 @@ object MessageIds {
     
     /** AvatarPropertiesRequest - Request avatar profile */
     const val AVATAR_PROPERTIES_REQUEST = (0xFFFF00A9).toInt()  // Wire: FF FF 00 A9 = -65367 (Lumiya: AvatarPropertiesRequest)
+
+    /** AvatarInterestsRequest - Request avatar interests/details block */
+    const val AVATAR_INTERESTS_REQUEST = (0xFFFF00AE).toInt()   // Wire: FF FF 00 AE (legacy outbound request alias)
+
+    /** AvatarNotesRequest - Request personal notes for avatar */
+    const val AVATAR_NOTES_REQUEST = (0xFFFF00B2).toInt()       // Wire: FF FF 00 B2 (legacy outbound request alias)
+
+    /** AvatarNotesUpdateRequest - Update personal notes for avatar */
+    const val AVATAR_NOTES_UPDATE_REQUEST = (0xFFFF00B3).toInt() // Wire: FF FF 00 B3 (legacy outbound request alias)
+
+    /** AvatarPicksRequest - Request avatar picks list */
+    const val AVATAR_PICKS_REQUEST = (0xFFFF00B4).toInt()       // Wire: FF FF 00 B4 (legacy outbound request alias)
+
+    /** AvatarClassifiedsRequest - Request avatar classifieds */
+    const val AVATAR_CLASSIFIEDS_REQUEST = (0xFFFF00B5).toInt() // Wire: FF FF 00 B5 (legacy outbound request alias)
     
     /** AvatarInterestsReply - Avatar interests/picks */
     const val AVATAR_INTERESTS_REPLY = (0xFFFF00AC).toInt()  // Wire: FF FF 00 AC = -65364 (Lumiya: AvatarInterestsReply)
