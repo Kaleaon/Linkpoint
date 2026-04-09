@@ -1,6 +1,7 @@
 package com.linkpoint.chat.dialogs
 
 import android.util.Log
+import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -27,14 +28,7 @@ class ScriptDialogManager(
 ) {
     companion object {
         private const val TAG = "ScriptDialogManager"
-        
-        // Message IDs
-        const val MSG_SCRIPT_DIALOG = 0xFF0083
-        const val MSG_SCRIPT_DIALOG_REPLY = 0xFF0084
-        const val MSG_SCRIPT_QUESTION = 0xFF00AB
-        const val MSG_SCRIPT_ANSWER_YES = 0xFF00AC
-        const val MSG_LOAD_URL = 0xFF00C9
-        
+
         // Permission flags
         const val PERM_DEBIT = 0x0002
         const val PERM_TAKE_CONTROLS = 0x0004
@@ -271,7 +265,7 @@ class ScriptDialogManager(
             payload.put(buttonBytes.size.toByte())
             payload.put(buttonBytes)
             
-            udpConnection.sendPacket(MSG_SCRIPT_DIALOG_REPLY, payload.array().copyOf(payload.position()), reliable = true)
+            udpConnection.sendPacket(MessageIds.SCRIPT_DIALOG_REPLY, payload.array().copyOf(payload.position()), reliable = true)
             
             activeDialogs.remove(dialog.chatChannel)
             Log.d(TAG, "Sent dialog reply: $buttonText to channel ${dialog.chatChannel}")
@@ -304,7 +298,7 @@ class ScriptDialogManager(
             writeUUID(payload, request.itemId)
             payload.putInt(request.permissions)
             
-            udpConnection.sendPacket(MSG_SCRIPT_ANSWER_YES, payload.array().copyOf(payload.position()), reliable = true)
+            udpConnection.sendPacket(MessageIds.SCRIPT_ANSWER_YES, payload.array().copyOf(payload.position()), reliable = true)
             
             activePermissionRequests.remove(request.taskId)
             Log.d(TAG, "Granted permissions to ${request.objectName}: 0x${request.permissions.toString(16)}")

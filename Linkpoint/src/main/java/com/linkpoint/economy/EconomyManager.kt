@@ -5,6 +5,7 @@ import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.capabilities.EventQueueDispatcher
 import com.linkpoint.protocol.llsd.LLSDMap
+import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -34,14 +35,7 @@ class EconomyManager(
     
     companion object {
         private const val TAG = "EconomyManager"
-        
-        // Message IDs
-        const val MSG_MONEY_BALANCE_REQUEST = 0xFF00CE
-        const val MSG_MONEY_BALANCE_REPLY = 0xFF00CF
-        const val MSG_MONEY_TRANSFER_REQUEST = 0xFF00D0
-        const val MSG_ECONOMY_DATA_REQUEST = 0xFF00D1
-        const val MSG_ECONOMY_DATA = 0xFF00D2
-        
+
         // Transaction types
         const val TRANS_OBJECT_SALE = 5000
         const val TRANS_GIFT = 5001
@@ -204,7 +198,7 @@ class EconomyManager(
             // MoneyData
             writeUUID(payload, UUID.randomUUID()) // TransactionID
             
-            udpConnection.sendPacket(MSG_MONEY_BALANCE_REQUEST, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIds.MONEY_BALANCE_REQUEST, payload.array(), reliable = true)
             Log.d(TAG, "Requested balance")
             
         } catch (e: Exception) {
@@ -223,7 +217,7 @@ class EconomyManager(
             writeUUID(payload, agentId)
             writeUUID(payload, udpConnection.getSessionId())
             
-            udpConnection.sendPacket(MSG_ECONOMY_DATA_REQUEST, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIds.ECONOMY_DATA_REQUEST, payload.array(), reliable = true)
             Log.d(TAG, "Requested economy data")
             
         } catch (e: Exception) {
@@ -292,7 +286,7 @@ class EconomyManager(
             payload.put(descBytes.size.toByte())
             payload.put(descBytes)
             
-            udpConnection.sendPacket(MSG_MONEY_TRANSFER_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
+            udpConnection.sendPacket(MessageIds.MONEY_TRANSFER_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
             
             Log.i(TAG, "Sent payment: $amount L$ to $destinationId")
             
