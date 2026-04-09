@@ -22,6 +22,7 @@ import java.nio.channels.DatagramChannel
 import java.nio.channels.SelectionKey
 import java.nio.channels.Selector
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 
@@ -246,6 +247,7 @@ class UDPConnectionFixed {
 
     // Agent update job
     private var agentUpdateJob: Job? = null
+    private val movementLifecycleOwner = AtomicReference<String?>(null)
     
     // Mobile optimized: 10 updates/sec = 100ms interval
     private val AGENT_UPDATE_INTERVAL_MS = 100L
@@ -283,6 +285,7 @@ class UDPConnectionFixed {
     
     /** Timestamp when connection was attempted (for connection duration) */
     private var connectionAttemptTime = 0L
+    private val connectAttemptCount = AtomicInteger(0)
     
     /** Last connection error message (for troubleshooting) */
     private var lastConnectionError: String? = null
@@ -565,12 +568,56 @@ class UDPConnectionFixed {
      * Get the circuit code for this connection
      */
     fun getCircuitCode(): Int = circuitCode
+
+    /**
+     * Guards ownership of movement/reliable-send lifecycle for shared circuits.
+     * Only one owner should drive send loops at a time.
+     */
+    fun tryAcquireMovementLifecycle(ownerId: String): Boolean {
+        require(ownerId.isNotBlank()) { "ownerId must not be blank" }
+        val acquired = movementLifecycleOwner.compareAndSet(null, ownerId) || movementLifecycleOwner.get() == ownerId
+        if (!acquired) {
+            NetworkLogger.log(
+                NetworkLogger.Level.WARN,
+                NetworkLogger.Category.UDP,
+                "Movement lifecycle acquire denied for $ownerId; owner=${movementLifecycleOwner.get()}"
+            )
+        } else {
+            NetworkLogger.log(
+                NetworkLogger.Level.DEBUG,
+                NetworkLogger.Category.UDP,
+                "Movement lifecycle owned by ${movementLifecycleOwner.get()}"
+            )
+        }
+        return acquired
+    }
+
+    fun getMovementLifecycleOwner(): String? = movementLifecycleOwner.get()
+
+    fun releaseMovementLifecycle(ownerId: String) {
+        if (!movementLifecycleOwner.compareAndSet(ownerId, null)) {
+            NetworkLogger.log(
+                NetworkLogger.Level.WARN,
+                NetworkLogger.Category.UDP,
+                "Movement lifecycle release ignored for $ownerId; owner=${movementLifecycleOwner.get()}"
+            )
+        } else {
+            NetworkLogger.log(
+                NetworkLogger.Level.DEBUG,
+                NetworkLogger.Category.UDP,
+                "Movement lifecycle released by $ownerId"
+            )
+        }
+    }
+
+    fun getConnectAttemptCount(): Int = connectAttemptCount.get()
     
     /**
      * Connect to the simulator
      */
     suspend fun connect(): Boolean = withContext(CircuitDispatcher.dispatcher) {
         try {
+            connectAttemptCount.incrementAndGet()
             // Record connection attempt time and reset ALL statistics for new session
             connectionAttemptTime = System.currentTimeMillis()
             lastConnectionError = null

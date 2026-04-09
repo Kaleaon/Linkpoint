@@ -1,16 +1,14 @@
 package com.linkpoint.network.core
 
-import android.util.Log
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.events.EventBus
 import com.linkpoint.network.events.ConnectionState
 import com.linkpoint.network.events.ConnectionStateChangedEvent
 import com.linkpoint.protocol.auth.AuthReply
-import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.CircuitDispatcher
+import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.messages.MessageRouter
-import com.linkpoint.protocol.messages.MessageEventListener
 import com.linkpoint.protocol.scenery.SceneDataHandler
 import com.linkpoint.render.RenderQueue
 import com.linkpoint.render.SceneGraph
@@ -18,9 +16,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.util.UUID
 
 /**
  * Agent Circuit with Circuit Establishment State Machine
@@ -39,7 +34,7 @@ import java.util.UUID
  */
 class AgentCircuit(
     private val authReply: AuthReply,
-    private val sharedConnection: UDPConnectionFixed? = null,
+    private val sharedConnection: UDPConnectionFixed,
     private val sceneGraph: SceneGraph? = null,
     private val renderQueue: RenderQueue? = null,
     private val scope: CoroutineScope = CoroutineScope(CircuitDispatcher.dispatcher + SupervisorJob())
@@ -57,20 +52,8 @@ class AgentCircuit(
     private var agentUpdateJob: Job? = null
     private var stateListener: CircuitStateListener? = null
 
-    /**
-     * Use the shared connection if provided (correct Lumiya-style architecture).
-     * Only fall back to creating own connection if no shared connection given
-     * (backwards compatibility during migration).
-     */
-    private val udpConnection: UDPConnectionFixed = sharedConnection ?: UDPConnectionFixed(
-        simIP = authReply.simIP,
-        simPort = authReply.simPort,
-        circuitCode = authReply.circuitCode
-    ).apply {
-        setSessionInfo(authReply.sessionId, authReply.agentId)
-    }
-
-    private val usesSharedConnection = sharedConnection != null
+    private val udpConnection: UDPConnectionFixed = sharedConnection
+    private val lifecycleOwnerId = "AgentCircuit:${authReply.agentId}:${authReply.circuitCode}"
 
     private val messageRouter = udpConnection.getMessageRouter()
     private val sceneDataHandler = SceneDataHandler(sceneGraph, renderQueue)
@@ -118,83 +101,16 @@ class AgentCircuit(
     private suspend fun establishCircuit() {
         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP, "=== Starting Circuit Establishment ===")
         transitionState(CircuitState.CONNECTING, "Starting connection")
-
-        if (usesSharedConnection) {
-            // Shared connection is already connected - skip socket creation
-            // The main app's SecondLifeProtocol already sent UseCircuitCode and CompleteAgentMovement
-            NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
-                "Using shared connection (Lumiya-style) - skipping redundant UseCircuitCode")
-            isConnected = true
-            transitionState(CircuitState.USE_CIRCUIT_CODE_ACKED, "Shared connection")
-            transitionState(CircuitState.COMPLETE_AGENT_MOVEMENT_ACKED, "Shared connection")
-            transitionState(CircuitState.CIRCUIT_READY, "Ready (shared connection)")
-            startAgentUpdates()
-        } else {
-            // Legacy path: own connection (will be removed in future)
-            NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
-                "WARNING: AgentCircuit creating own socket - this creates competing connections!")
-            val connected = udpConnection.connect()
-            if (!connected) {
-                transitionState(CircuitState.ERROR, "UDP connection failed")
-                stateListener?.onCircuitError("UDP connection failed")
-                return
-            }
-            isConnected = true
-            sendUseCircuitCode()
-        }
-    }
-
-    private suspend fun sendUseCircuitCode() {
-        NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP, "Sending UseCircuitCode")
-
-        val listener = object : MessageEventListener {
-            override fun onMessageAcknowledged(seqNum: Int, msgId: Int) {
-                NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP, "UseCircuitCode ACKed")
-                transitionState(CircuitState.USE_CIRCUIT_CODE_ACKED, "ACKed")
-                scope.launch { sendCompleteAgentMovement() }
-            }
-
-            override fun onMessageTimeout(seqNum: Int, msgId: Int) {
-                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "UseCircuitCode timeout")
-                transitionState(CircuitState.ERROR, "Timeout")
-                stateListener?.onCircuitError("UseCircuitCode timeout")
-            }
-        }
-
-        val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
-        payload.putInt(authReply.circuitCode)
-        payload.put(authReply.sessionId.asBytes())
-        payload.put(authReply.agentId.asBytes())
-
-        udpConnection.sendPacket(MessageIds.USE_CIRCUIT_CODE, payload.array(), reliable = true, listener = listener)
-        transitionState(CircuitState.USE_CIRCUIT_CODE_SENT, "Sent")
-    }
-
-    private suspend fun sendCompleteAgentMovement() {
-        NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP, "Sending CompleteAgentMovement")
-
-        val listener = object : MessageEventListener {
-            override fun onMessageAcknowledged(seqNum: Int, msgId: Int) {
-                NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP, "CompleteAgentMovement ACKed - CIRCUIT READY")
-                transitionState(CircuitState.COMPLETE_AGENT_MOVEMENT_ACKED, "ACKed")
-                transitionState(CircuitState.CIRCUIT_READY, "Ready")
-                scope.launch { startAgentUpdates() }
-            }
-
-            override fun onMessageTimeout(seqNum: Int, msgId: Int) {
-                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "CompleteAgentMovement timeout")
-                transitionState(CircuitState.ERROR, "Timeout")
-                stateListener?.onCircuitError("CompleteAgentMovement timeout")
-            }
-        }
-
-        val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
-        payload.put(authReply.agentId.asBytes())
-        payload.put(authReply.sessionId.asBytes())
-        payload.putInt(authReply.circuitCode)
-
-        udpConnection.sendPacket(MessageIds.COMPLETE_AGENT_MOVEMENT, payload.array(), reliable = true, listener = listener)
-        transitionState(CircuitState.COMPLETE_AGENT_MOVEMENT_SENT, "Sent")
+        NetworkLogger.log(
+            NetworkLogger.Level.INFO,
+            NetworkLogger.Category.UDP,
+            "Using shared connection (Lumiya-style) - skipping redundant UseCircuitCode"
+        )
+        isConnected = true
+        transitionState(CircuitState.USE_CIRCUIT_CODE_ACKED, "Shared connection")
+        transitionState(CircuitState.COMPLETE_AGENT_MOVEMENT_ACKED, "Shared connection")
+        transitionState(CircuitState.CIRCUIT_READY, "Ready (shared connection)")
+        startAgentUpdates()
     }
 
     private suspend fun registerSceneDataHandlers() {
@@ -213,10 +129,21 @@ class AgentCircuit(
             override fun getPriority() = 0
         })
 
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Scene handlers registered on ${if (usesSharedConnection) "shared" else "own"} connection")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Scene handlers registered on shared connection")
     }
 
     private fun startAgentUpdates() {
+        val lifecycleAcquired = udpConnection.tryAcquireMovementLifecycle(lifecycleOwnerId)
+        if (!lifecycleAcquired) {
+            val currentOwner = udpConnection.getMovementLifecycleOwner()
+            NetworkLogger.log(
+                NetworkLogger.Level.WARN,
+                NetworkLogger.Category.UDP,
+                "Skipping AgentCircuit update loop; movement lifecycle already owned by $currentOwner"
+            )
+            return
+        }
+
         agentUpdateJob = scope.launch {
             while (isActive && isConnected) {
                 try {
@@ -245,7 +172,7 @@ class AgentCircuit(
     fun getStatistics() = mapOf(
         "state" to _circuitState.value.name,
         "connected" to isConnected,
-        "usesSharedConnection" to usesSharedConnection,
+        "usesSharedConnection" to true,
         "sceneStats" to sceneDataHandler.getStatistics()
     )
 
@@ -254,11 +181,8 @@ class AgentCircuit(
     fun close() {
         isConnected = false
         agentUpdateJob?.cancel()
+        udpConnection.releaseMovementLifecycle(lifecycleOwnerId)
         try {
-            // Only disconnect if we own the connection
-            if (!usesSharedConnection) {
-                udpConnection.disconnect()
-            }
             scope.launch {
                 EventBus.publish(ConnectionStateChangedEvent(ConnectionState.CONNECTED, ConnectionState.DISCONNECTED))
             }
@@ -269,12 +193,4 @@ class AgentCircuit(
         scope.cancel()
     }
 
-    private fun UUID.asBytes(): ByteArray {
-        val bytes = ByteArray(16)
-        val msb = this.mostSignificantBits
-        val lsb = this.leastSignificantBits
-        for (i in 7 downTo 0) bytes[7 - i] = (msb shr (i * 8)).toByte()
-        for (i in 7 downTo 0) bytes[15 - i] = (lsb shr (i * 8)).toByte()
-        return bytes
-    }
 }
