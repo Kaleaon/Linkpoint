@@ -1,266 +1,81 @@
-# LINKPOINT MASTER TRACKING DOCUMENT
+# LINKPOINT MASTER TRACKING DOCUMENT (Code-verified snapshot)
 
-> **Document ID:** `MASTER-2026-01`  
-> **Last Updated:** January 17, 2026  
-> **Status:** Active Development
-
----
-
-## 🏷️ LABEL LEGEND
-
-| Label | Meaning | Action Required |
-|-------|---------|-----------------|
-| `[FIXED]` | Issue resolved and verified | None |
-| `[PARTIAL]` | Partially fixed, needs more work | Review and complete |
-| `[BROKEN]` | Known issue, not yet addressed | Needs fix |
-| `[TODO]` | Planned work, not started | Schedule and implement |
-| `[BLOCKED]` | Cannot proceed, waiting on dependency | Resolve blocker |
-| `[TESTING]` | Fix applied, needs verification | Test and confirm |
+**Last verified:** 2026-04-09 (UTC)  
+**Commit:** `a9982607`  
+**Verification scope:** `Linkpoint/src/main/java/**/*.kt`
 
 ---
 
-## 📋 COMPLETED FIXES
+## Status legend
 
-### `[FIXED]` PR #227 - UDP Packet ACK Handling
-- **Issue:** Packets stuck in pending ACK state with 4+ retries
-- **Root Cause:** Wrong byte order for appended ACKs
-- **Solution:** Changed from LITTLE_ENDIAN to BIG_ENDIAN for header fields
-- **Files Changed:** `SLUDPConnection.kt`
-- **Verified:** ✅ ACK processing improved
-
-### `[FIXED]` PR #226 - ACK Processing & Message Handlers
-- **Issue:** ACKs never processed, missing handlers
-- **Root Cause:** No handler for `0xFB` PacketAck messages
-- **Solution:** Added PacketAck handler + 4 new message handlers
-- **Handlers Added:**
-  - `START_PING_CHECK` (0x01)
-  - `IMPROVED_TERSE_OBJECT_UPDATE` (0x0F)
-  - `COARSE_LOCATION_UPDATE` (0x06)
-  - `KILL_OBJECT` (0xFF0C)
-- **Verified:** ✅ 10 handlers now registered
-
-### `[FIXED]` PR #225 - Protocol Format Fixes
-- **Issue:** Malformed packets, wrong UUID byte order
-- **Root Cause:** Missing required fields in several messages
-- **Solutions:**
-  - PacketAck: Added count byte before sequence
-  - RegionHandshake: Added TerrainDetail0-3 textures
-  - AgentMovementComplete: Added SimData block
-  - ChatFromViewer: Added AgentData block
-- **Files Changed:** Multiple protocol handlers, `ByteBufferExtensions.kt`
-- **Verified:** ✅ Protocol format matches SL spec
-
-### `[FIXED]` PR #223 - UDP Endianness & EEP
-- **Issue:** Header/body byte order mismatch
-- **Root Cause:** Inconsistent endianness across packet parsing
-- **Solution:**
-  - Header fields: BIG_ENDIAN (network order)
-  - Body/payload: LITTLE_ENDIAN (per message template)
-  - EEP OSD keys aligned with SL conventions
-- **Verified:** ✅ Packet parsing working
-
-### `[FIXED]` PR #222 - Build Infrastructure
-- **Issue:** Build failing due to version incompatibilities
-- **Root Cause:** Outdated AGP, Kotlin, and Jetifier conflicts
-- **Solutions:**
-  - Disabled Jetifier
-  - AGP: 8.1.4 → 8.6.1
-  - Gradle: 8.5 → 8.7
-  - Kotlin: 1.9.22 → 2.1.0
-  - compileSdk: 34 → 35
-  - Fixed class collision: `SearchResult` → `ComposeSearchResult`
-- **Verified:** ✅ BUILD SUCCESSFUL
-
-### `[FIXED]` PR #218 - Theme Crash Fix
-- **Issue:** App crashes on startup with InflateException
-- **Root Cause:** Missing MD3 color attributes in theme
-- **Solution:** Added `colorSurface`, `colorOnSurface`, `colorOnSurfaceVariant`, `colorSurfaceVariant`
-- **Verified:** ✅ App launches without crash
+- `[CONFIRMED_NOW]` = confirmed in current codebase.
+- `[HISTORICAL]` = prior claim/incident retained for context, not a current blocker by static inspection.
+- `[OPEN_BLOCKER]` = concrete gap still visible in code.
 
 ---
 
-## ⚠️ KNOWN ISSUES - NEEDS WORK
+## [CONFIRMED_NOW] Fixed / implemented paths
 
-### `[BROKEN]` Region Name Shows "Unknown"
-- **Symptom:** Debug report shows `Current Region: Unknown`
-- **Diagnosis:** RegionHandshake received but SimName not extracted
-- **Location:** `handleRegionHandshake()` in protocol handlers
-- **Required Fix:**
-  ```kotlin
-  val simName = buffer.getString()
-  connectionState.regionName = simName
-  ```
-- **Priority:** 🔴 Critical
-- **Estimated Effort:** 1-2 hours
+1. **Script update capability flow exists**
+   - `com.linkpoint.assets.ScriptManager.saveScript(...)`
+   - Uses `CAP_UPDATE_SCRIPT_AGENT` / `CAP_UPDATE_SCRIPT_TASK` and uploader completion handling.
 
-### `[BROKEN]` No Objects in Scene
-- **Symptom:** `Total Objects in Scene: 0`
-- **Diagnosis:** OBJECT_UPDATE messages received but not added to ObjectManager
-- **Location:** Object update handlers, ObjectManager
-- **Required Fix:** Wire handler output to scene graph
-- **Priority:** 🔴 Critical
-- **Estimated Effort:** 2-4 hours
+2. **Group profile capability path exists end-to-end**
+   - Capability request list includes `GroupProfile`: `LinkpointTranslationLayer.getReferenceCapabilityNames()`.
+   - Runtime callsite: `ProfileManager.getGroupProfile(...)`.
 
-### `[BROKEN]` No Avatars in Scene
-- **Symptom:** `Total Avatars in Scene: 0`
-- **Diagnosis:** Avatar update messages not populating AvatarManager
-- **Location:** Avatar update handlers, AvatarManager
-- **Required Fix:** Parse avatar data and add to manager
-- **Priority:** 🔴 Critical
-- **Estimated Effort:** 2-4 hours
+3. **Scene/update routing is wired**
+   - `LinkpointApp.processObjectUpdate(...)` forwards object and avatar updates to managers and renderer queue.
+   - Object manager sink: `ObjectManager.handleObjectUpdate(...)`.
 
-### `[BROKEN]` No Swap Chain - Rendering Not Visible
-- **Symptom:** Filament `SwapChain: ✗`
-- **Diagnosis:** Surface not created or lifecycle callback missing
-- **Location:** RenderManager, WorldActivity
-- **Required Fix:**
-  ```kotlin
-  override fun surfaceCreated(holder: SurfaceHolder) {
-      swapChain = engine.createSwapChain(holder.surface)
-  }
-  ```
-- **Priority:** 🔴 Critical
-- **Estimated Effort:** 2-4 hours
-
-### `[PARTIAL]` Packet ACK Timing
-- **Symptom:** Packets retrying (3 pending, 5 retries each)
-- **Diagnosis:** High latency (7067ms) causing ACK timeouts
-- **Status:** Basic ACK handling works, but timing needs tuning
-- **Required Fix:** Increase retry timeout, add adaptive timing
-- **Priority:** 🟡 High
-- **Estimated Effort:** 2-3 hours
+4. **Swap chain lifecycle wiring exists**
+   - `WorldViewActivity.surfaceCreated(...)` invokes `RenderManager.recreateSwapChain()`.
+   - `RenderManager.recreateSwapChain()` creates swap chain via Filament engine.
 
 ---
 
-## 📝 TODO - PLANNED WORK
+## [OPEN_BLOCKER] Current blockers requiring follow-up
 
-### `[TODO]` Texture Loading System
-- **Description:** Fetch textures from SL asset system via GetTexture capability
-- **Dependencies:** Working connection, capabilities ready
-- **Location:** ModernTextureManager
-- **Priority:** 🟢 Medium
-- **Estimated Effort:** 4-8 hours
+1. **Task notecard save capability path is incomplete**
+   - Present symbols/caps: `CapabilityManager.CAP_UPDATE_NOTECARD_TASK`, translation list includes `UpdateNotecardTaskInventory`.
+   - Missing flow: `NotecardManager.saveNotecard(...)` currently only targets `CAP_UPDATE_NOTECARD_AGENT` and has no task/object variant.
 
-### `[TODO]` Mesh Loading System
-- **Description:** Load mesh assets via GetMesh capability
-- **Dependencies:** Working connection, capabilities ready
-- **Location:** Mesh loading subsystem
-- **Priority:** 🟢 Medium
-- **Estimated Effort:** 4-8 hours
+2. **Capability callsite coverage still incomplete for some declared caps**
+   - Declared constants without clear `capabilityManager.request(...)` usage paths:
+     - `CAP_SET_DISPLAY_NAME`
+     - `CAP_SIMULATOR_FEATURES`
+     - `CAP_AGENT_PREFERENCES`
+     - `CAP_UPDATE_AGENT_LANGUAGE`
+     - `CAP_RENDER_MATERIALS`
+     - `CAP_OBJECT_MEDIA_NAVIGATE`
+     - `CAP_COPY_INVENTORY_FROM_NOTECARD`
+     - `CAP_REGION_EXPERIENCE`
+     - `CAP_MOVE_INVENTORY_ITEM`
 
-### `[TODO]` Inventory System
-- **Description:** Fetch and display inventory tree
-- **Dependencies:** Working connection, FetchInventory capability
-- **Location:** InventoryManager, InventoryActivity
-- **Priority:** 🟢 Medium
-- **Estimated Effort:** 8-16 hours
+3. **Symbol consistency gap (literals vs constants)**
+   - Example: `ProfileManager.getGroupProfile(...)` uses literal `"GroupProfile"` instead of `CapabilityManager.CAP_GROUP_PROFILE`.
+   - This complicates static verification and can hide capability drift during refactors.
 
-### `[TODO]` Chat System
-- **Description:** Send/receive local and IM chat
-- **Dependencies:** Working connection, ChatFromViewer/ChatFromSimulator handlers
-- **Location:** ChatManager, ChatActivity
-- **Priority:** 🟢 Medium
-- **Estimated Effort:** 4-8 hours
+4. **Renderer feature parity still partial**
+   - `LumiyaRenderer` marks HUD pass as “not implemented yet”.
 
-### `[TODO]` Error Recovery
-- **Description:** Graceful handling of packet parsing failures
-- **Dependencies:** None
-- **Priority:** 🟡 High
-- **Estimated Effort:** 2-4 hours
-
-### `[TODO]` Auto-Reconnection
-- **Description:** Automatically reconnect on connection drop
-- **Dependencies:** Connection state machine
-- **Priority:** 🟡 High
-- **Estimated Effort:** 4-8 hours
+5. **Outfit pipeline still uses placeholder behavior**
+   - `OutfitManager` contains a placeholder return path (“For now, return a placeholder”).
 
 ---
 
-## 📊 STATUS SUMMARY
+## [HISTORICAL] Older issues now reclassified
 
-### Connection Pipeline Status
-| Stage | Status | Label |
-|-------|--------|-------|
-| HTTP Login | ✅ Working | `[FIXED]` |
-| UDP Socket | ✅ Connected | `[FIXED]` |
-| UseCircuitCode | ✅ Sent | `[FIXED]` |
-| CompleteAgentMovement | ✅ Sent | `[FIXED]` |
-| Capabilities | ✅ 12 loaded | `[FIXED]` |
-| Event Queue | ✅ Active | `[FIXED]` |
-| RegionHandshake | ⚠️ Partial | `[PARTIAL]` |
-| Object Updates | ❌ Not working | `[BROKEN]` |
-| Avatar Updates | ❌ Not working | `[BROKEN]` |
-| Rendering | ❌ No swap chain | `[BROKEN]` |
-
-### Build Status
-| Component | Status | Label |
-|-----------|--------|-------|
-| Gradle Sync | ✅ Success | `[FIXED]` |
-| Kotlin Compile | ✅ Success | `[FIXED]` |
-| APK Build | ✅ Success | `[FIXED]` |
-| Theme/UI | ✅ No crash | `[FIXED]` |
-
-### Feature Completion
-| Feature | Progress | Label |
-|---------|----------|-------|
-| Protocol Implementation | 90% | `[PARTIAL]` |
-| 3D Rendering | 80% | `[PARTIAL]` |
-| UI/UX | 100% | `[FIXED]` |
-| Inventory | 20% | `[TODO]` |
-| Chat | 30% | `[TODO]` |
-| Voice | 10% | `[TODO]` |
+- “No object/avatar scene wiring” is **historical** (handlers and routing now present).
+- “No swap chain init callback” is **historical** (callback and recreate path present).
+- “Script update caps missing” is **historical** (script save/update implemented).
 
 ---
 
-## 🎯 NEXT ACTIONS
+## Next verification pass checklist
 
-### Immediate (This Week)
-1. `[BROKEN]` Fix RegionHandshake name parsing
-2. `[BROKEN]` Wire object updates to ObjectManager
-3. `[BROKEN]` Wire avatar updates to AvatarManager
-4. `[BROKEN]` Initialize swap chain on surface created
+1. Add task-inventory variant to notecard save API and wire `UpdateNotecardTaskInventory`.
+2. Replace capability string literals with `CapabilityManager.CAP_*` constants in profile/world managers.
+3. Either implement or formally de-scope currently uncalled capability constants.
+4. Re-run static inventory after each change and refresh this file with new commit hash/date.
 
-### Short-term (Next 2 Weeks)
-1. `[PARTIAL]` Tune ACK timing for high-latency
-2. `[TODO]` Implement texture loading
-3. `[TODO]` Implement mesh loading
-
-### Medium-term (Next Month)
-1. `[TODO]` Complete inventory system
-2. `[TODO]` Complete chat system
-3. `[TODO]` Add error recovery
-4. `[TODO]` Add auto-reconnection
-
----
-
-## 📚 REFERENCE
-
-### Key Files
-| Purpose | Path |
-|---------|------|
-| UDP Protocol | `Linkpoint/src/main/kotlin/com/linkpoint/slproto/udp/` |
-| Message Handlers | `Linkpoint/src/main/kotlin/com/linkpoint/slproto/udp/handlers/` |
-| Connection State | `Linkpoint/src/main/kotlin/com/linkpoint/slproto/SLConnection.kt` |
-| Render Manager | `Linkpoint/src/main/kotlin/com/linkpoint/render/` |
-| Object Manager | `Linkpoint/src/main/kotlin/com/linkpoint/slproto/objects/` |
-
-### External References
-- [SL Protocol Wiki](https://wiki.secondlife.com/wiki/Protocol)
-- [Packet Layout](https://wiki.secondlife.com/wiki/Packet_Layout)
-- [Message Template](https://wiki.secondlife.com/wiki/Message_Template)
-- [LLSD Format](https://wiki.secondlife.com/wiki/LLSD)
-
----
-
-## 📝 CHANGE LOG
-
-| Date | Change | Author |
-|------|--------|--------|
-| 2026-01-17 | Created master tracking document | Copilot |
-| 2026-01-16 | PRs #222-227 merged | Various |
-| 2026-01-15 | PR #218 theme fix merged | Various |
-
----
-
-**Document maintained by:** Linkpoint Development Team  
-**For updates:** Edit this file and commit with message `[MASTER-2026-01] Update tracking`
