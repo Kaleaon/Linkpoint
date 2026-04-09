@@ -29,7 +29,12 @@ import java.util.concurrent.ConcurrentHashMap
 class UserProfileManager(
     private val capabilityManager: CapabilityManager,
     private val udpConnection: UDPConnectionFixed,
-    private val agentId: UUID
+    private val agentId: UUID,
+    private val capabilityRequest: suspend (String, LLSDValue?) -> LLSDValue? =
+        { capabilityName, body -> capabilityManager.request(capabilityName, body) },
+    private val udpFallbackRequest: suspend (UUID) -> Unit = { fallbackAvatarId ->
+        sendPropertiesRequestInternal(fallbackAvatarId)
+    }
 ) {
     companion object {
         private const val TAG = "UserProfileManager"
@@ -69,7 +74,7 @@ class UserProfileManager(
         try {
             val cap = capabilityManager.getCapability("AgentProfile")
             if (cap != null) {
-                fetchProfileViaCap(avatarId, cap)
+                fetchProfileViaCap(avatarId)
                 return
             }
         } catch (e: Exception) {
@@ -83,11 +88,20 @@ class UserProfileManager(
     /**
      * Fetch profile via AgentProfile capability.
      */
-    private suspend fun fetchProfileViaCap(avatarId: UUID, capUrl: String) {
+    private suspend fun fetchProfileViaCap(avatarId: UUID) {
         try {
-            // The capability URL includes the agent ID
-            // For now, just use UDP fallback since we don't have direct HTTP method
-            sendPropertiesRequest(avatarId)
+            val request = LLSDMap().apply {
+                this["avatar_id"] = LLSDUUID(avatarId)
+            }
+            val response = capabilityRequest("AgentProfile", request)
+            if (response is LLSDMap) {
+                val profile = parseProfileFromLLSD(avatarId, response)
+                cacheProfile(avatarId, profile)
+                notifyCallbacks(avatarId, profile)
+            } else {
+                Log.w(TAG, "AgentProfile capability returned non-map response, using UDP")
+                sendPropertiesRequest(avatarId)
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to fetch profile via capability", e)
             // Fallback to UDP
@@ -99,6 +113,10 @@ class UserProfileManager(
      * Send AvatarPropertiesRequest via UDP.
      */
     private suspend fun sendPropertiesRequest(avatarId: UUID) {
+        udpFallbackRequest(avatarId)
+    }
+
+    private suspend fun sendPropertiesRequestInternal(avatarId: UUID) {
         try {
             val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
             
