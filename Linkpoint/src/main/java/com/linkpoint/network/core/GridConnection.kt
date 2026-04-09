@@ -38,7 +38,7 @@ import java.util.UUID
  */
 class GridConnection(
     private val context: Context,
-    private val sharedUdpConnection: UDPConnectionFixed? = null,
+    private val sharedUdpConnection: UDPConnectionFixed,
     private val connectionId: UUID = UUID.randomUUID(),
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 ) {
@@ -276,7 +276,7 @@ class GridConnection(
             // Step 4: Set up UDP reconnection callback
             // When the UDP connection detects it's dead (e.g. 5 unanswered pings,
             // socket errors), this callback triggers reconnection of the full session.
-            sharedUdpConnection?.setReconnectionCallback {
+            sharedUdpConnection.setReconnectionCallback {
                 NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
                     "UDP reconnection callback triggered - attempting to reconnect")
                 scope.launch {
@@ -391,7 +391,7 @@ class GridConnection(
      * @return The created temp circuit
      */
     fun createTempCircuit(authReply: AuthReply): TempCircuit {
-        val tempCircuit = TempCircuit(authReply)
+        val tempCircuit = TempCircuit(authReply, sharedConnection = sharedUdpConnection)
         tempCircuits[authReply] = tempCircuit
         return tempCircuit
     }

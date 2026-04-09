@@ -29,7 +29,12 @@ import java.util.concurrent.ConcurrentHashMap
 class UserProfileManager(
     private val capabilityManager: CapabilityManager,
     private val udpConnection: UDPConnectionFixed,
-    private val agentId: UUID
+    private val agentId: UUID,
+    private val capabilityRequest: suspend (String, LLSDValue?) -> LLSDValue? =
+        { capabilityName, body -> capabilityManager.request(capabilityName, body) },
+    private val udpFallbackRequest: suspend (UUID) -> Unit = { fallbackAvatarId ->
+        sendPropertiesRequestInternal(fallbackAvatarId)
+    }
 ) {
     companion object {
         private const val TAG = "UserProfileManager"
@@ -69,7 +74,7 @@ class UserProfileManager(
         try {
             val cap = capabilityManager.getCapability(CapabilityManager.CAP_AGENT_PROFILE)
             if (cap != null) {
-                fetchProfileViaCap(avatarId, cap)
+                fetchProfileViaCap(avatarId)
                 return
             }
         } catch (e: Exception) {
@@ -83,7 +88,7 @@ class UserProfileManager(
     /**
      * Fetch profile via AgentProfile capability.
      */
-    private suspend fun fetchProfileViaCap(avatarId: UUID, capUrl: String) {
+    private suspend fun fetchProfileViaCap(avatarId: UUID) {
         try {
             val request = LLSDMap().apply {
                 this["agent_id"] = LLSDString(avatarId.toString())
@@ -111,6 +116,10 @@ class UserProfileManager(
      * Send AvatarPropertiesRequest via UDP.
      */
     private suspend fun sendPropertiesRequest(avatarId: UUID) {
+        udpFallbackRequest(avatarId)
+    }
+
+    private suspend fun sendPropertiesRequestInternal(avatarId: UUID) {
         try {
             val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
             
