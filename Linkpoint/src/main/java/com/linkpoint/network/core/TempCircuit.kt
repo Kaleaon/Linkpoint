@@ -1,10 +1,6 @@
 package com.linkpoint.network.core
 
-import android.util.Log
 import com.linkpoint.network.NetworkLogger
-import com.linkpoint.network.events.EventBus
-import com.linkpoint.network.events.ConnectionStateChangedEvent
-import com.linkpoint.network.events.ConnectionState
 import com.linkpoint.protocol.auth.AuthReply
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.messages.MessageRouter
@@ -44,6 +40,7 @@ import java.util.UUID
  */
 class TempCircuit(
     private val authReply: AuthReply,
+    private val sharedConnection: UDPConnectionFixed,
     private val scope: CoroutineScope = CoroutineScope(CircuitDispatcher.dispatcher + SupervisorJob())
 ) {
     
@@ -71,17 +68,8 @@ class TempCircuit(
     private val _circuitState = MutableStateFlow(CircuitState.INITIALIZING)
     val circuitState: StateFlow<CircuitState> = _circuitState.asStateFlow()
     
-    /**
-     * Fixed UDP connection for this circuit
-     * Using UDPConnectionFixed which includes MessageRouter integration
-     */
-    private val udpConnection = UDPConnectionFixed(
-        simIP = authReply.simIP,
-        simPort = authReply.simPort,
-        circuitCode = authReply.circuitCode
-    ).apply {
-        setSessionInfo(authReply.sessionId, authReply.agentId)
-    }
+    /** Shared UDP connection for this circuit. */
+    private val udpConnection: UDPConnectionFixed = sharedConnection
     
     /**
      * Message router for routing incoming messages to handlers
@@ -128,48 +116,19 @@ class TempCircuit(
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Initializing temp circuit")
         
         try {
-            // Start UDP connection with fixed implementation
-            startUDPConnectionFixed()
-            
             // Start timeout timer (mobile-optimized: 30s max)
             startTimeoutTimer()
             
             _circuitState.value = CircuitState.ACTIVE
             isActive = true
             
-            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Temp circuit initialized successfully")
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Temp circuit initialized successfully (shared UDP)")
             
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Failed to initialize temp circuit: ${e.message}")
             _circuitState.value = CircuitState.ERROR
             close()
             throw e
-        }
-    }
-    
-    /**
-     * Start UDP connection
-     * Uses UDPConnectionFixed which properly handles receive operations
-     */
-    private suspend fun startUDPConnectionFixed() {
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Starting temp circuit UDP connection (Fixed implementation)")
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Sim IP: ${authReply.simIP}, Port: ${authReply.simPort}")
-        
-        val connected = udpConnection.connect()
-        
-        if (connected) {
-            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ Temp circuit UDP connection established")
-            isActive = true
-            
-            // Publish connection state event via EventBus
-            EventBus.publish(ConnectionStateChangedEvent(
-                ConnectionState.DISCONNECTED,
-                ConnectionState.CONNECTED
-            ))
-        } else {
-            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "✗ Failed to establish temp circuit UDP connection")
-            isActive = false
-            throw IllegalStateException("Failed to connect temp circuit UDP")
         }
     }
     
@@ -285,26 +244,11 @@ class TempCircuit(
         // Cancel timeout job
         timeoutJob?.cancel()
         
-        // Disconnect UDP connection
-        try {
-            udpConnection.disconnect()
-            
-            // Publish connection state event via EventBus
-            scope.launch {
-                EventBus.publish(ConnectionStateChangedEvent(
-                    ConnectionState.CONNECTED,
-                    ConnectionState.DISCONNECTED
-                ))
-            }
-        } catch (e: Exception) {
-            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Error closing UDP connection: ${e.message}")
-        }
-        
         _circuitState.value = CircuitState.CLOSED
         
         // Cancel scope
         scope.cancel()
         
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Temp circuit closed")
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Temp circuit closed (shared UDP retained)")
     }
 }
