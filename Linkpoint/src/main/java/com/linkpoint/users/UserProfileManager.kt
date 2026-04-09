@@ -3,6 +3,7 @@ package com.linkpoint.users
 import android.util.Log
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
+import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,15 +33,7 @@ class UserProfileManager(
 ) {
     companion object {
         private const val TAG = "UserProfileManager"
-        
-        // Message IDs
-        const val MSG_AVATAR_PROPERTIES_REQUEST = 0xFF00AD
-        const val MSG_AVATAR_INTERESTS_REQUEST = 0xFF00AE
-        const val MSG_AVATAR_NOTES_REQUEST = 0xFF00B2
-        const val MSG_AVATAR_NOTES_UPDATE = 0xFF00B3
-        const val MSG_AVATAR_PICKS_REQUEST = 0xFF00B4
-        const val MSG_AVATAR_CLASSIFIEDS_REQUEST = 0xFF00B5
-        
+
         // Cache expiry (30 minutes)
         private const val CACHE_EXPIRY_MS = 30 * 60 * 1000L
     }
@@ -72,9 +65,9 @@ class UserProfileManager(
             pendingRequests.getOrPut(avatarId) { mutableListOf() }.add(callback)
         }
         
-        // Try capability first
+        // Capability-first flow (Lumiya-style), only fallback to UDP when caps are unavailable/invalid.
         try {
-            val cap = capabilityManager.getCapability("AgentProfile")
+            val cap = capabilityManager.getCapability(CapabilityManager.CAP_AGENT_PROFILE)
             if (cap != null) {
                 fetchProfileViaCap(avatarId, cap)
                 return
@@ -92,8 +85,20 @@ class UserProfileManager(
      */
     private suspend fun fetchProfileViaCap(avatarId: UUID, capUrl: String) {
         try {
-            // The capability URL includes the agent ID
-            // For now, just use UDP fallback since we don't have direct HTTP method
+            val request = LLSDMap().apply {
+                this["agent_id"] = LLSDString(avatarId.toString())
+            }
+            val response = capabilityManager.request(CapabilityManager.CAP_AGENT_PROFILE, request)
+
+            if (response is LLSDMap) {
+                val profile = parseProfileFromLLSD(avatarId, response)
+                cacheProfile(avatarId, profile)
+                notifyCallbacks(avatarId, profile)
+                Log.d(TAG, "Loaded profile for $avatarId via AgentProfile capability ($capUrl)")
+                return
+            }
+
+            Log.w(TAG, "AgentProfile capability returned non-map response, falling back to UDP")
             sendPropertiesRequest(avatarId)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to fetch profile via capability", e)
@@ -116,7 +121,7 @@ class UserProfileManager(
             // AvatarData
             writeUUID(payload, avatarId)
             
-            udpConnection.sendPacket(MSG_AVATAR_PROPERTIES_REQUEST, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIds.AVATAR_PROPERTIES_REQUEST, payload.array(), reliable = true)
             Log.d(TAG, "Sent AvatarPropertiesRequest for $avatarId")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send properties request", e)
@@ -193,7 +198,7 @@ class UserProfileManager(
             writeUUID(payload, udpConnection.getSessionId())
             writeUUID(payload, avatarId)
             
-            udpConnection.sendPacket(MSG_AVATAR_INTERESTS_REQUEST, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIds.AVATAR_INTERESTS_REQUEST, payload.array(), reliable = true)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to request interests", e)
         }
@@ -210,7 +215,7 @@ class UserProfileManager(
             writeUUID(payload, udpConnection.getSessionId())
             writeUUID(payload, avatarId)
             
-            udpConnection.sendPacket(MSG_AVATAR_NOTES_REQUEST, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIds.AVATAR_NOTES_REQUEST, payload.array(), reliable = true)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to request notes", e)
         }
@@ -230,7 +235,7 @@ class UserProfileManager(
             payload.putShort(notesBytes.size.toShort())
             payload.put(notesBytes)
             
-            udpConnection.sendPacket(MSG_AVATAR_NOTES_UPDATE, payload.array().copyOf(payload.position()), reliable = true)
+            udpConnection.sendPacket(MessageIds.AVATAR_NOTES_UPDATE_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
             Log.d(TAG, "Updated notes for $avatarId")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to update notes", e)
@@ -248,7 +253,7 @@ class UserProfileManager(
             writeUUID(payload, udpConnection.getSessionId())
             writeUUID(payload, avatarId)
             
-            udpConnection.sendPacket(MSG_AVATAR_PICKS_REQUEST, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIds.AVATAR_PICKS_REQUEST, payload.array(), reliable = true)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to request picks", e)
         }

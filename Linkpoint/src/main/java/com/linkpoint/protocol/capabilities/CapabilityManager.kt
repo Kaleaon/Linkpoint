@@ -53,6 +53,7 @@ class CapabilityManager {
         const val CAP_GET_MESH2 = "GetMesh2"
         const val CAP_VIEW_STATS = "ViewerStats"
         const val CAP_AGENT_STATE = "AgentState"
+        const val CAP_AGENT_PROFILE = "AgentProfile"
         const val CAP_UPDATE_AGENT_INFO = "UpdateAgentInformation"
         const val CAP_UPLOAD_BAKED_TEXTURE = "UploadBakedTexture"
         const val CAP_OBJECT_MEDIA = "ObjectMedia"

@@ -44,7 +44,6 @@ object LinkpointCircuitIntegration {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     
     private var globalOptions: LinkpointGlobalOptions? = null
-    private var threadedCircuit: LinkpointThreadedCircuit? = null
     
     // Connection state
     private var isConnected = AtomicBoolean(false)
@@ -146,11 +145,6 @@ object LinkpointCircuitIntegration {
     }
 
     /**
-     * Get the active threaded circuit, if connected.
-     */
-    fun getThreadedCircuit(): LinkpointThreadedCircuit? = threadedCircuit
-    
-    /**
      * Apply circuit timing and settings to the existing UDP connection
      */
     private fun applyCircuitSettings(udpConnection: UDPConnectionFixed) {
@@ -209,9 +203,6 @@ object LinkpointCircuitIntegration {
         isConnected.set(false)
         currentAgentId = null
         currentSessionId = null
-        
-        threadedCircuit?.disconnect("Logout")
-        threadedCircuit = null
     }
     
     /**
