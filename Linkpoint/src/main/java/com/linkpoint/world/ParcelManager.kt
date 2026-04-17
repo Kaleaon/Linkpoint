@@ -86,6 +86,13 @@ class ParcelManager(
         buffer.putLong(uuid.leastSignificantBits)
         buffer.order(order)
     }
+
+    private fun putVariable1String(buffer: ByteBuffer, value: String?) {
+        val bytes = (value ?: "").toByteArray(Charsets.UTF_8)
+        val safeBytes = if (bytes.size > 255) bytes.copyOf(255) else bytes
+        buffer.put(safeBytes.size.toByte())
+        buffer.put(safeBytes)
+    }
     
     /**
      * Handle ParcelProperties message
@@ -235,19 +242,27 @@ class ParcelManager(
     fun buyLand(localId: Int, forGroup: Boolean = false) {
         scope.launch {
             try {
-                // ParcelBuy message
-                val payload = ByteBuffer.allocate(80).order(ByteOrder.LITTLE_ENDIAN)
+                // ParcelBuy message (Lumiya parity):
+                // AgentData(32) + Data(16+1+1+4+1) + ParcelData(4+4) = 67 bytes
+                val payload = ByteBuffer.allocate(67).order(ByteOrder.LITTLE_ENDIAN)
+                val groupId = if (forGroup) {
+                    parcels[localId]?.groupId ?: UUID(0L, 0L)
+                } else {
+                    UUID(0L, 0L)
+                }
                 
                 // AgentData with proper IDs
                 writeAgentData(payload)
                 
                 // Data block
-                payload.putInt(localId)  // ParcelLocalID
-                payload.put(if (forGroup) 1 else 0)  // ForGroup
-                repeat(16) { payload.put(0) }  // GroupID placeholder
-                payload.put(0)  // IsGroupOwned
+                writeUUID(payload, groupId)
+                payload.put(if (forGroup) 1 else 0)  // IsGroupOwned
                 payload.put(0)  // RemoveContribution
-                payload.putInt(0)  // Final price (0 = use parcel price)
+                payload.putInt(localId)
+                payload.put(1)  // Final=true
+
+                // ParcelData block
+                payload.putInt(0)  // Price (0 = simulator authoritative price)
                 payload.putInt(0)  // Area
                 
                 udpConnection.sendPacket(MessageIds.PARCEL_BUY, payload.array(), reliable = true)
@@ -311,20 +326,23 @@ class ParcelManager(
     fun setForSale(localId: Int, price: Int, forAll: Boolean = true) {
         scope.launch {
             try {
-                // ParcelPropertiesUpdate message with sale info
-                val payload = ByteBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN)
-                
-                // AgentData with proper IDs
-                writeAgentData(payload)
-                
-                // ParcelData block
-                payload.putInt(localId)
-                payload.putInt(if (forAll) FLAG_FOR_SALE.toInt() else 0)  // Flags with FOR_SALE
-                payload.putInt(price)  // SalePrice
-                repeat(16) { payload.put(0) }  // Name placeholder (empty string)
-                repeat(16) { payload.put(0) }  // Description placeholder
-                
-                udpConnection.sendPacket(MessageIds.PARCEL_PROPERTIES_UPDATE, payload.array(), reliable = true)
+                val parcel = parcels[localId]
+                val existingFlags = parcel?.flags ?: 0L
+                val updatedFlags = if (forAll) {
+                    existingFlags or FLAG_FOR_SALE
+                } else {
+                    existingFlags and FLAG_FOR_SALE.inv()
+                }
+
+                if (parcel != null) {
+                    parcels[localId] = parcel.copy(flags = updatedFlags)
+                }
+
+                sendParcelPropertiesUpdate(
+                    localId = localId,
+                    salePriceOverride = price,
+                    parcelFlagsOverride = updatedFlags
+                )
                 Log.i(TAG, "Set parcel $localId for sale at price $price")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to set parcel for sale", e)
@@ -452,7 +470,8 @@ class ParcelManager(
         scope.launch {
             try {
                 // ParcelAccessListUpdate message
-                val payload = ByteBuffer.allocate(80).order(ByteOrder.LITTLE_ENDIAN)
+                val payload = ByteBuffer.allocate(93).order(ByteOrder.LITTLE_ENDIAN)
+                val transactionId = UUID.randomUUID()
                 
                 // AgentData with proper IDs
                 writeAgentData(payload)
@@ -460,8 +479,7 @@ class ParcelManager(
                 // Data block
                 payload.putInt(0)  // Flags - add to access
                 payload.putInt(localId)
-                payload.putInt(0)  // TransactionID (upper 32 bits)
-                payload.putInt(0)  // TransactionID (lower 32 bits)
+                writeUUID(payload, transactionId)
                 payload.putInt(1)  // SequenceID
                 payload.putInt(1)  // Sections
                 
@@ -485,7 +503,8 @@ class ParcelManager(
     fun removeFromAccessList(localId: Int, agentId: UUID) {
         scope.launch {
             try {
-                val payload = ByteBuffer.allocate(80).order(ByteOrder.LITTLE_ENDIAN)
+                val payload = ByteBuffer.allocate(93).order(ByteOrder.LITTLE_ENDIAN)
+                val transactionId = UUID.randomUUID()
                 
                 // AgentData with proper IDs
                 writeAgentData(payload)
@@ -493,8 +512,7 @@ class ParcelManager(
                 // Data block
                 payload.putInt(1)  // Flags - remove from access
                 payload.putInt(localId)
-                payload.putInt(0)
-                payload.putInt(0)
+                writeUUID(payload, transactionId)
                 payload.putInt(1)
                 payload.putInt(1)
                 
@@ -518,7 +536,8 @@ class ParcelManager(
     fun addToBanList(localId: Int, agentId: UUID) {
         scope.launch {
             try {
-                val payload = ByteBuffer.allocate(80).order(ByteOrder.LITTLE_ENDIAN)
+                val payload = ByteBuffer.allocate(93).order(ByteOrder.LITTLE_ENDIAN)
+                val transactionId = UUID.randomUUID()
                 
                 // AgentData with proper IDs
                 writeAgentData(payload)
@@ -526,8 +545,7 @@ class ParcelManager(
                 // Data block  
                 payload.putInt(2)  // Flags - ban list
                 payload.putInt(localId)
-                payload.putInt(0)
-                payload.putInt(0)
+                writeUUID(payload, transactionId)
                 payload.putInt(1)
                 payload.putInt(1)
                 
@@ -551,7 +569,8 @@ class ParcelManager(
     fun removeFromBanList(localId: Int, agentId: UUID) {
         scope.launch {
             try {
-                val payload = ByteBuffer.allocate(80).order(ByteOrder.LITTLE_ENDIAN)
+                val payload = ByteBuffer.allocate(93).order(ByteOrder.LITTLE_ENDIAN)
+                val transactionId = UUID.randomUUID()
                 
                 // AgentData with proper IDs
                 writeAgentData(payload)
@@ -559,8 +578,7 @@ class ParcelManager(
                 // Data block
                 payload.putInt(3)  // Flags - remove from ban
                 payload.putInt(localId)
-                payload.putInt(0)
-                payload.putInt(0)
+                writeUUID(payload, transactionId)
                 payload.putInt(1)
                 payload.putInt(1)
                 
@@ -581,15 +599,20 @@ class ParcelManager(
     /**
      * Send parcel properties update
      */
-    private suspend fun sendParcelPropertiesUpdate(localId: Int) {
+    private suspend fun sendParcelPropertiesUpdate(
+        localId: Int,
+        salePriceOverride: Int? = null,
+        parcelFlagsOverride: Long? = null
+    ) {
         val parcel = parcels[localId] ?: return
         
-        val nameBytes = parcel.name.toByteArray(Charsets.UTF_8)
-        val descBytes = parcel.description.toByteArray(Charsets.UTF_8)
-        val musicBytes = (parcel.musicUrl ?: "").toByteArray(Charsets.UTF_8)
-        val mediaBytes = (parcel.mediaUrl ?: "").toByteArray(Charsets.UTF_8)
-        
-        val payload = ByteBuffer.allocate(200 + nameBytes.size + descBytes.size + musicBytes.size + mediaBytes.size)
+        val nameSize = minOf(parcel.name.toByteArray(Charsets.UTF_8).size, 255)
+        val descSize = minOf(parcel.description.toByteArray(Charsets.UTF_8).size, 255)
+        val musicSize = minOf((parcel.musicUrl ?: "").toByteArray(Charsets.UTF_8).size, 255)
+        val mediaSize = minOf((parcel.mediaUrl ?: "").toByteArray(Charsets.UTF_8).size, 255)
+        val payloadSize = 126 + nameSize + descSize + musicSize + mediaSize
+
+        val payload = ByteBuffer.allocate(payloadSize)
             .order(ByteOrder.LITTLE_ENDIAN)
         
         // AgentData
@@ -597,25 +620,40 @@ class ParcelManager(
         
         // ParcelData
         payload.putInt(localId)
-        payload.putInt(parcel.flags.toInt())
-        payload.putInt(parcel.landingType)
+        payload.putInt(parcelFlagsOverride?.toInt() ?: parcel.flags.toInt()) // Flags
+        payload.putInt(parcel.flags.toInt()) // ParcelFlags
+        payload.putInt(salePriceOverride ?: parcel.claimPrice.coerceAtLeast(0)) // SalePrice
         
-        // Strings
-        payload.put(nameBytes.size.toByte())
-        payload.put(nameBytes)
-        payload.putShort(descBytes.size.toShort())
-        payload.put(descBytes)
-        payload.put(musicBytes.size.toByte())
-        payload.put(musicBytes)
-        payload.put(mediaBytes.size.toByte())
-        payload.put(mediaBytes)
-        
+        // Variable-length 1-byte strings
+        putVariable1String(payload, parcel.name)
+        putVariable1String(payload, parcel.description)
+        putVariable1String(payload, parcel.musicUrl)
+        putVariable1String(payload, parcel.mediaUrl)
+
         // Media info
-        repeat(16) { payload.put(0) }  // MediaID
+        writeUUID(payload, parcel.mediaId ?: UUID(0L, 0L))
         payload.put(if (parcel.mediaAutoScale) 1 else 0)
         
         // Group
-        repeat(16) { payload.put(0) }  // GroupID
+        writeUUID(payload, parcel.groupId ?: UUID(0L, 0L))
+
+        // Pass settings
+        payload.putInt(parcel.passPrice)
+        payload.putFloat(parcel.passHours)
+
+        // Category
+        payload.put(parcel.category.toByte())
+
+        // AuthBuyerID (none / any buyer), SnapshotID, landing vectors
+        writeUUID(payload, UUID(0L, 0L))
+        writeUUID(payload, parcel.snapshotId ?: UUID(0L, 0L))
+        payload.putFloat(parcel.userLocation.x)
+        payload.putFloat(parcel.userLocation.y)
+        payload.putFloat(parcel.userLocation.z)
+        payload.putFloat(parcel.userLookAt.x)
+        payload.putFloat(parcel.userLookAt.y)
+        payload.putFloat(parcel.userLookAt.z)
+        payload.put(parcel.landingType.toByte())
         
         udpConnection.sendPacket(MessageIds.PARCEL_PROPERTIES_UPDATE, payload.array(), reliable = true)
     }
