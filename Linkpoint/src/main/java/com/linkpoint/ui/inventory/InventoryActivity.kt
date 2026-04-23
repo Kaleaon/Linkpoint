@@ -138,6 +138,8 @@ class InventoryActivity : AppCompatActivity() {
             putExtra(NotecardEditorActivity.EXTRA_ITEM_ID, item.id.toString())
             putExtra(NotecardEditorActivity.EXTRA_NOTECARD_NAME, item.name)
             item.assetId?.let { putExtra(NotecardEditorActivity.EXTRA_ASSET_ID, it.toString()) }
+            item.taskId?.let { putExtra(NotecardEditorActivity.EXTRA_TASK_ID, it.toString()) }
+            item.objectId?.let { putExtra(NotecardEditorActivity.EXTRA_OBJECT_ID, it.toString()) }
 
             // Allow editing by default for now
             putExtra(NotecardEditorActivity.EXTRA_READ_ONLY, false)
@@ -229,6 +231,8 @@ data class ActivityInventoryItem(
     val parentId: UUID?,
     val type: InventoryType,
     val assetId: UUID? = null,
+    val taskId: UUID? = null,
+    val objectId: UUID? = null,
     val creatorId: UUID? = null,
     val permissions: Int = 0
 ) {

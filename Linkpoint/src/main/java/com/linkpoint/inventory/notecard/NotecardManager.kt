@@ -39,7 +39,10 @@ import java.util.concurrent.ConcurrentHashMap
 class NotecardManager(
     private val transferManager: TransferManager,
     private val capabilityManager: CapabilityManager,
-    private val httpClient: OkHttpClient = OkHttpClient()
+    private val httpClient: OkHttpClient = OkHttpClient(),
+    private val capabilityRequest: suspend (String, LLSDMap) -> com.linkpoint.protocol.llsd.LLSDValue? = { capName, body ->
+        capabilityManager.request(capName, body)
+    }
 ) {
     companion object {
         private const val TAG = "NotecardManager"
@@ -416,20 +419,32 @@ class NotecardManager(
      * Note: Full implementation requires UpdateNotecardAgentInventory capability.
      */
     suspend fun saveNotecard(itemId: UUID, newText: String): Boolean {
+        return saveNotecard(itemId, newText, taskId = null, objectId = null)
+    }
+
+    /**
+     * Save a notecard (update text content), supporting both agent and task inventory uploads.
+     */
+    suspend fun saveNotecard(itemId: UUID, newText: String, taskId: UUID?, objectId: UUID?): Boolean {
         return withContext(Dispatchers.IO) {
             try {
                 val notecardData = createNotecardData(newText)
+                val isTaskInventory = (taskId != null || objectId != null)
+                val capability = if (isTaskInventory) {
+                    CapabilityManager.CAP_UPDATE_NOTECARD_TASK
+                } else {
+                    CapabilityManager.CAP_UPDATE_NOTECARD_AGENT
+                }
                 val request = LLSDMap().apply {
                     this["item_id"] = LLSDUUID(itemId)
+                    taskId?.let { this["task_id"] = LLSDUUID(it) }
+                    objectId?.let { this["object_id"] = LLSDUUID(it) }
                 }
 
-                val capResponse = capabilityManager.request(
-                    CapabilityManager.CAP_UPDATE_NOTECARD_AGENT,
-                    request
-                ) as? LLSDMap
+                val capResponse = capabilityRequest(capability, request) as? LLSDMap
 
                 if (capResponse == null) {
-                    Log.w(TAG, "Notecard save failed: UpdateNotecardAgentInventory returned no payload")
+                    Log.w(TAG, "Notecard save failed: $capability returned no payload")
                     return@withContext false
                 }
 
@@ -475,7 +490,7 @@ class NotecardManager(
                     }
                 }
 
-                Log.i(TAG, "Notecard $itemId saved successfully (${newText.length} chars)")
+                Log.i(TAG, "Notecard $itemId saved successfully (${newText.length} chars, taskInventory=$isTaskInventory)")
                 true
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to save notecard $itemId", e)
