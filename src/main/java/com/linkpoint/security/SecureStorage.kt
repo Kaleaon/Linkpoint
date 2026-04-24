@@ -6,7 +6,7 @@ import android.security.keystore.KeyProperties
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import android.util.Log
-import java.security.KeyStore
+import android.content.SharedPreferences
 
 /**
  * Secure Storage Manager - Provides encrypted storage for sensitive data.
@@ -22,7 +22,6 @@ class SecureStorage(private val context: Context) {
     
     companion object {
         private const val TAG = "SecureStorage"
-        private const val KEYSTORE_PROVIDER = "AndroidKeyStore"
         private const val PREFS_FILE_NAME = "linkpoint_secure_prefs"
         
         // Keys for common stored values
@@ -35,7 +34,7 @@ class SecureStorage(private val context: Context) {
     }
     
     private val masterKey: MasterKey
-    private val encryptedPrefs: EncryptedSharedPreferences
+    private val encryptedPrefs: SharedPreferences
     
     init {
         try {
@@ -61,7 +60,7 @@ class SecureStorage(private val context: Context) {
                 masterKey,
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            ) as EncryptedSharedPreferences
+            )
             
             Log.d(TAG, "SecureStorage initialized successfully")
         } catch (e: Exception) {

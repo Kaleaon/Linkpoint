@@ -1,0 +1,124 @@
+{
+  "native_library_inventory": [
+    {
+      "path": "lib/arm64-v8a/libgvr.so",
+      "arch": "arm",
+      "bits": "64",
+      "lang": "c",
+      "sha256": "8c1f29087f9c09d339f52c30db5a37353142a9e74823b26ca8b31b5ab46a661e"
+    },
+    {
+      "path": "lib/arm64-v8a/libopenjpeg.so",
+      "arch": "arm",
+      "bits": "64",
+      "lang": "c++",
+      "sha256": "fb89bb648a6e116fb29b44d05f09ebd1f6203c0c23f8e414d4f76c8d0d2007ef"
+    },
+    {
+      "path": "lib/arm64-v8a/librawbuf.so",
+      "arch": "arm",
+      "bits": "64",
+      "lang": "c++",
+      "sha256": "cb254f138d08a1a4b099b70807560547f5dc470070724d3228b1eb09bb92f554"
+    },
+    {
+      "path": "lib/armeabi/libopenjpeg.so",
+      "arch": "arm",
+      "bits": "16",
+      "lang": "c++",
+      "sha256": "3b415e51aec06e4b90385c7b52fd3e08a9c7af9461196269887adc5bcdaa146c"
+    },
+    {
+      "path": "lib/armeabi/librawbuf.so",
+      "arch": "arm",
+      "bits": "16",
+      "lang": "c++",
+      "sha256": "31f2668065e541d382a756da11fc81f5bdd05def0d144b2853595ee17dbfb870"
+    },
+    {
+      "path": "lib/armeabi-v7a/libgvr.so",
+      "arch": "arm",
+      "bits": "16",
+      "lang": "c",
+      "sha256": "8d4e01782351abe9a2c6f9c407e88706d64f33fbc6afd6f2959f7466bebec048"
+    },
+    {
+      "path": "lib/armeabi-v7a/libopenjpeg.so",
+      "arch": "arm",
+      "bits": "16",
+      "lang": "c++",
+      "sha256": "f603af3379fc48c806d8ba0120828f7cd53d094bc5fe9960e9cd6145b7d80065"
+    },
+    {
+      "path": "lib/armeabi-v7a/librawbuf.so",
+      "arch": "arm",
+      "bits": "16",
+      "lang": "c++",
+      "sha256": "4775f8c64d7a5213006feda5e4633c6a267c85de227c955a3c7db9de3f1db388"
+    },
+    {
+      "path": "lib/mips/libopenjpeg.so",
+      "arch": "mips",
+      "bits": "32",
+      "lang": "c++",
+      "sha256": "be9b42869f5cf3ad4b8dc6d4dcd9234217a5801858da118ad65286d85558bf46"
+    },
+    {
+      "path": "lib/mips/librawbuf.so",
+      "arch": "mips",
+      "bits": "32",
+      "lang": "c++",
+      "sha256": "50b49003c9effd811486953b80fe3b160b4ea4cd300d21454910016e93332cd3"
+    },
+    {
+      "path": "lib/mips64/libopenjpeg.so",
+      "arch": "mips",
+      "bits": "32",
+      "lang": "c++",
+      "sha256": "4e4d5dd9364ff6572d17578c772ad37ab506a41d5f9263617b1ff9775288fcea"
+    },
+    {
+      "path": "lib/mips64/librawbuf.so",
+      "arch": "mips",
+      "bits": "32",
+      "lang": "c++",
+      "sha256": "eb935c660cd77428e938ea37baf593fb9eebaf5e40baef0fde939df5ca3f96ed"
+    },
+    {
+      "path": "lib/x86/libgvr.so",
+      "arch": "x86",
+      "bits": "32",
+      "lang": "c",
+      "sha256": "bb7613b4c611f186ca560e2297be9ced545ce6e9090dc3fe54cb62e292d15e58"
+    },
+    {
+      "path": "lib/x86/libopenjpeg.so",
+      "arch": "x86",
+      "bits": "32",
+      "lang": "c++",
+      "sha256": "15c069ecb73eda699c9eac0ff121b3cade741e08649908ae2bbc468336e2b783"
+    },
+    {
+      "path": "lib/x86/librawbuf.so",
+      "arch": "x86",
+      "bits": "32",
+      "lang": "c++",
+      "sha256": "e077188ef4d3791f5ec12b61950428774b6e1a543f884a079d2aa81eba2f1efb"
+    },
+    {
+      "path": "lib/x86_64/libopenjpeg.so",
+      "arch": "x86",
+      "bits": "64",
+      "lang": "c++",
+      "sha256": "b5724fb4b8a02385eb9bed39721d8022b4ee50952bff23ee60aeee36a988106c"
+    },
+    {
+      "path": "lib/x86_64/librawbuf.so",
+      "arch": "x86",
+      "bits": "64",
+      "lang": "c++",
+      "sha256": "cc7d344992ae34c29dbaf6db7743b7978d5d25c98a6113649be8a7f4b3abd1a0"
+    }
+  ],
+  "sensitive_string_hits": []
+}
