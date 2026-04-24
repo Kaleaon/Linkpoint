@@ -2,6 +2,7 @@ package com.linkpoint.world
 
 import android.util.Log
 import com.linkpoint.protocol.capabilities.CapabilityManager
+import com.linkpoint.protocol.capabilities.CapabilityRequester
 import com.linkpoint.protocol.llsd.*
 import kotlinx.coroutines.*
 import java.util.UUID
@@ -11,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Manages avatar and group profiles
  */
 class ProfileManager(
-    private val capabilityManager: CapabilityManager
+    private val capabilityManager: CapabilityRequester
 ) {
     companion object {
         private const val TAG = "ProfileManager"
@@ -39,7 +40,7 @@ class ProfileManager(
                     this["agent_id"] = LLSDString(agentId.toString())
                 }
                 
-                val response = capabilityManager.request("AgentProfile", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_AGENT_PROFILE, request)
                 
                 if (response is LLSDMap) {
                     val profile = AvatarProfile(
@@ -212,7 +213,7 @@ class ProfileManager(
                 }
                 
                 // Use AgentProfile capability
-                val response = capabilityManager.request("AgentProfile", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_AGENT_PROFILE, request)
                 response != null
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to update profile", e)
@@ -234,7 +235,7 @@ class ProfileManager(
                     this["group_id"] = LLSDString(groupId.toString())
                 }
                 
-                val response = capabilityManager.request("GroupProfile", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_GROUP_PROFILE, request)
                 
                 if (response is LLSDMap) {
                     val profile = GroupProfile(
@@ -305,7 +306,7 @@ class ProfileManager(
                     this["action"] = LLSDString("join")
                 }
                 
-                val response = capabilityManager.request("GroupMemberData", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_GROUP_MEMBER_DATA, request)
                 if (response != null) {
                     Log.i(TAG, "Successfully joined group $groupId")
                     true
@@ -332,7 +333,7 @@ class ProfileManager(
                     this["action"] = LLSDString("leave")
                 }
                 
-                val response = capabilityManager.request("GroupMemberData", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_GROUP_MEMBER_DATA, request)
                 if (response != null) {
                     Log.i(TAG, "Successfully left group $groupId")
                     true
@@ -361,7 +362,7 @@ class ProfileManager(
                     this["message"] = LLSDString(message)
                 }
                 
-                val response = capabilityManager.request("ChatSend", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_CHAT_SEND, request)
                 Log.i(TAG, "Sent friendship offer to $agentId")
                 response != null
             } catch (e: Exception) {
@@ -384,7 +385,7 @@ class ProfileManager(
                     this["dialog"] = LLSDInteger(39)  // IM_FRIENDSHIP_ACCEPTED
                 }
                 
-                val response = capabilityManager.request("ChatSend", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_CHAT_SEND, request)
                 Log.i(TAG, "Accepted friendship from $agentId")
                 response != null
             } catch (e: Exception) {
@@ -407,7 +408,7 @@ class ProfileManager(
                     this["dialog"] = LLSDInteger(40)  // IM_FRIENDSHIP_DECLINED
                 }
                 
-                val response = capabilityManager.request("ChatSend", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_CHAT_SEND, request)
                 Log.i(TAG, "Declined friendship from $agentId")
                 response != null
             } catch (e: Exception) {
@@ -428,7 +429,7 @@ class ProfileManager(
                     this["friend_id"] = LLSDString(agentId.toString())
                 }
                 
-                val response = capabilityManager.request("FriendshipTerminate", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_FRIENDSHIP_TERMINATE, request)
                 Log.i(TAG, "Removed friend $agentId")
                 response != null
             } catch (e: Exception) {

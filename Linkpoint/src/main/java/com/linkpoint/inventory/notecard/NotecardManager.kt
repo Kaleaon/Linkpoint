@@ -2,6 +2,7 @@ package com.linkpoint.inventory.notecard
 
 import android.util.Log
 import com.linkpoint.protocol.capabilities.CapabilityManager
+import com.linkpoint.protocol.capabilities.CapabilityRequester
 import com.linkpoint.protocol.llsd.LLSDMap
 import com.linkpoint.protocol.llsd.LLSDUUID
 import com.linkpoint.protocol.transfer.*
@@ -37,8 +38,8 @@ import java.util.concurrent.ConcurrentHashMap
  * }
  */
 class NotecardManager(
-    private val transferManager: TransferManager,
-    private val capabilityManager: CapabilityManager,
+    private val transferManager: TransferManager?,
+    private val capabilityManager: CapabilityRequester,
     private val httpClient: OkHttpClient = OkHttpClient()
 ) {
     companion object {
@@ -77,7 +78,11 @@ class NotecardManager(
         
         // Only start transfer if this is the first request
         if (callbacks.size == 1) {
-            transferManager.requestAssetTransfer(
+            val transfer = transferManager ?: run {
+                callback?.onNotecardError("Transfer manager unavailable")
+                return
+            }
+            transfer.requestAssetTransfer(
                 assetId = assetId,
                 assetType = AssetType.NOTECARD,
                 callback = { key, result ->
@@ -107,7 +112,11 @@ class NotecardManager(
         callback?.let { callbacks.add(it) }
         
         if (callbacks.size == 1) {
-            transferManager.requestInventoryItemTransfer(
+            val transfer = transferManager ?: run {
+                callback?.onNotecardError("Transfer manager unavailable")
+                return
+            }
+            transfer.requestInventoryItemTransfer(
                 itemId = itemId,
                 assetId = assetId,
                 ownerId = ownerId,
@@ -385,7 +394,8 @@ class NotecardManager(
             }
             
             // Fetch via transfer
-            val data = transferManager.fetchAsset(assetId, AssetType.NOTECARD.code) ?: return@withContext null
+            val transfer = transferManager ?: return@withContext null
+            val data = transfer.fetchAsset(assetId, AssetType.NOTECARD.code) ?: return@withContext null
             
             try {
                 val notecard = parseNotecard(assetId, data)
@@ -416,20 +426,33 @@ class NotecardManager(
      * Note: Full implementation requires UpdateNotecardAgentInventory capability.
      */
     suspend fun saveNotecard(itemId: UUID, newText: String): Boolean {
+        return saveNotecard(itemId = itemId, newText = newText, taskId = null)
+    }
+
+    /**
+     * Save a notecard with optional task context.
+     */
+    suspend fun saveNotecard(itemId: UUID, newText: String, taskId: UUID?): Boolean {
         return withContext(Dispatchers.IO) {
             try {
                 val notecardData = createNotecardData(newText)
                 val request = LLSDMap().apply {
                     this["item_id"] = LLSDUUID(itemId)
+                    taskId?.let { this["task_id"] = LLSDUUID(it) }
                 }
 
+                val capability = if (taskId != null) {
+                    CapabilityManager.CAP_UPDATE_NOTECARD_TASK
+                } else {
+                    CapabilityManager.CAP_UPDATE_NOTECARD_AGENT
+                }
                 val capResponse = capabilityManager.request(
-                    CapabilityManager.CAP_UPDATE_NOTECARD_AGENT,
+                    capability,
                     request
                 ) as? LLSDMap
 
                 if (capResponse == null) {
-                    Log.w(TAG, "Notecard save failed: UpdateNotecardAgentInventory returned no payload")
+                    Log.w(TAG, "Notecard save failed: $capability returned no payload")
                     return@withContext false
                 }
 
@@ -482,6 +505,39 @@ class NotecardManager(
                 false
             }
         }
+    }
+
+    /**
+     * Copy an embedded inventory item from notecard contents into destination folder.
+     */
+    suspend fun copyInventoryFromNotecard(
+        notecardItemId: UUID,
+        objectId: UUID?,
+        destinationFolderId: UUID,
+        embeddedItemId: UUID
+    ): Boolean = withContext(Dispatchers.IO) {
+        val request = LLSDMap().apply {
+            this["notecard-id"] = LLSDUUID(notecardItemId)
+            this["folder-id"] = LLSDUUID(destinationFolderId)
+            this["item-id"] = LLSDUUID(embeddedItemId)
+            objectId?.let { this["object-id"] = LLSDUUID(it) }
+        }
+        capabilityManager.request(CapabilityManager.CAP_COPY_INVENTORY_FROM_NOTECARD, request) != null
+    }
+
+    /**
+     * Move an inventory item produced from notecard interactions (trash/move endpoint).
+     */
+    suspend fun moveInventoryItem(itemId: UUID, destinationFolderId: UUID): Boolean = withContext(Dispatchers.IO) {
+        val request = LLSDMap().apply {
+            this["items"] = com.linkpoint.protocol.llsd.LLSDArray().apply {
+                add(LLSDMap().apply {
+                    this["item_id"] = LLSDUUID(itemId)
+                    this["folder_id"] = LLSDUUID(destinationFolderId)
+                })
+            }
+        }
+        capabilityManager.request(CapabilityManager.CAP_MOVE_INVENTORY_ITEM, request) != null
     }
     
     /**

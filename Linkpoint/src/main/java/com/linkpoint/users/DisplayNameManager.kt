@@ -2,6 +2,7 @@ package com.linkpoint.users
 
 import android.util.Log
 import com.linkpoint.protocol.capabilities.CapabilityManager
+import com.linkpoint.protocol.capabilities.CapabilityRequester
 import com.linkpoint.protocol.llsd.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Uses GetDisplayNames capability to fetch names in batches.
  */
 class DisplayNameManager(
-    private val capabilityManager: CapabilityManager
+    private val capabilityManager: CapabilityRequester
 ) {
     companion object {
         private const val TAG = "DisplayNameManager"
@@ -127,8 +128,7 @@ class DisplayNameManager(
         val result = mutableMapOf<UUID, DisplayName>()
         
         try {
-            val cap = capabilityManager.getCapability(CapabilityManager.CAP_GET_DISPLAY_NAMES)
-            if (cap == null) {
+            if (!capabilityManager.hasCapability(CapabilityManager.CAP_GET_DISPLAY_NAMES)) {
                 Log.w(TAG, "GetDisplayNames capability not available")
                 // Return legacy names as fallback
                 return agentIds.associateWith { id ->
@@ -144,7 +144,7 @@ class DisplayNameManager(
             
             // Fetch in batches
             for (batch in agentIds.chunked(MAX_IDS_PER_REQUEST)) {
-                val batchResult = fetchBatch(cap, batch)
+                val batchResult = fetchBatch(batch)
                 result.putAll(batchResult)
             }
             
@@ -158,16 +158,18 @@ class DisplayNameManager(
     /**
      * Fetch a batch of display names.
      */
-    private suspend fun fetchBatch(capUrl: String, agentIds: List<UUID>): Map<UUID, DisplayName> {
+    private suspend fun fetchBatch(agentIds: List<UUID>): Map<UUID, DisplayName> {
         val result = mutableMapOf<UUID, DisplayName>()
         
         try {
-            // Build URL with query parameters
-            val idsParam = agentIds.joinToString(",") { it.toString() }
-            val url = "$capUrl?ids=$idsParam"
+            val request = LLSDMap().apply {
+                this["ids"] = LLSDArray().apply {
+                    agentIds.forEach { add(LLSDString(it.toString())) }
+                }
+            }
             
             // Make request
-            val response = capabilityManager.request(CapabilityManager.CAP_GET_DISPLAY_NAMES)
+            val response = capabilityManager.request(CapabilityManager.CAP_GET_DISPLAY_NAMES, request)
             
             if (response is LLSDMap) {
                 parseDisplayNamesResponse(response, result)
@@ -178,6 +180,16 @@ class DisplayNameManager(
         }
         
         return result
+    }
+
+    /**
+     * Update the current user's display name.
+     */
+    suspend fun setDisplayName(newDisplayName: String): Boolean {
+        val request = LLSDMap().apply {
+            this["display_name"] = LLSDString(newDisplayName)
+        }
+        return capabilityManager.request(CapabilityManager.CAP_SET_DISPLAY_NAME, request) != null
     }
     
     /**

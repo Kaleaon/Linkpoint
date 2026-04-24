@@ -19,6 +19,12 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
+interface CapabilityRequester {
+    suspend fun request(capName: String, body: LLSDValue? = null): LLSDValue?
+    fun getCapability(name: String): String?
+    fun hasCapability(name: String): Boolean
+}
+
 /**
  * Manages Second Life Capabilities (Caps)
  * Caps are HTTP endpoints that provide various services.
@@ -30,7 +36,7 @@ import java.util.concurrent.TimeUnit
  * - Per-capability request options
  * - Linkpoint-compatible URL repair for Agni grid
  */
-class CapabilityManager {
+class CapabilityManager : CapabilityRequester {
     
     companion object {
         private const val TAG = "CapabilityManager"
@@ -57,6 +63,7 @@ class CapabilityManager {
         const val CAP_UPDATE_AGENT_INFO = "UpdateAgentInformation"
         const val CAP_UPLOAD_BAKED_TEXTURE = "UploadBakedTexture"
         const val CAP_OBJECT_MEDIA = "ObjectMedia"
+        // Deferred (2026-04-23): viewer-side media browser integration not wired yet.
         const val CAP_OBJECT_MEDIA_NAVIGATE = "ObjectMediaNavigate"
         const val CAP_PARCEL_VOICE = "ParcelVoiceInfoRequest"
         const val CAP_PROVISION_VOICE = "ProvisionVoiceAccountRequest"
@@ -69,6 +76,7 @@ class CapabilityManager {
         const val CAP_GROUP_PROFILE = "GroupProfile"
         const val CAP_ENVIRONMENT = "EnvironmentSettings"
         const val CAP_EXT_ENVIRONMENT = "ExtEnvironment"
+        // Deferred (2026-04-23): no consumer yet; keep declared for handshake parity.
         const val CAP_REGION_EXPERIENCE = "RegionExperiences"
         const val CAP_SIMULATE_LURE = "SimulatorLure"
         const val CAP_AVATAR_PICKER = "AvatarPickerSearch"
@@ -94,6 +102,9 @@ class CapabilityManager {
         
         // Render materials (PBR)
         const val CAP_RENDER_MATERIALS = "RenderMaterials"
+        const val CAP_GROUP_MEMBER_DATA = "GroupMemberData"
+        const val CAP_CHAT_SEND = "ChatSend"
+        const val CAP_FRIENDSHIP_TERMINATE = "FriendshipTerminate"
         
         // Capabilities that are inventory-related (for throttling)
         private val INVENTORY_CAPS = setOf(
@@ -589,12 +600,12 @@ class CapabilityManager {
     /**
      * Get a capability URL
      */
-    fun getCapability(name: String): String? = capabilities[name]
+    override fun getCapability(name: String): String? = capabilities[name]
     
     /**
      * Check if a capability is available
      */
-    fun hasCapability(name: String): Boolean = capabilities.containsKey(name)
+    override fun hasCapability(name: String): Boolean = capabilities.containsKey(name)
     
     /**
      * Make a capability request with Firestorm-style retry logic.
@@ -605,7 +616,7 @@ class CapabilityManager {
      * - Request throttling for inventory caps
      * - Appropriate timeouts per capability type
      */
-    suspend fun request(
+    override suspend fun request(
         capName: String,
         body: LLSDValue? = null
     ): LLSDValue? = withContext(Dispatchers.IO) {
