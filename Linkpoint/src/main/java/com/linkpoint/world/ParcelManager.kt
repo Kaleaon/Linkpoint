@@ -1,6 +1,7 @@
 package com.linkpoint.world
 
 import android.util.Log
+import com.linkpoint.protocol.core.AgentIdentity
 import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLVector3
@@ -72,8 +73,13 @@ class ParcelManager(
      * Message block fields remain little-endian per SL templates.
      */
     private fun writeAgentData(buffer: ByteBuffer) {
-        writeUUID(buffer, udpConnection.getAgentId())
-        writeUUID(buffer, udpConnection.getSessionId())
+        val identity = AgentIdentity(
+            agentId = udpConnection.getAgentId(),
+            sessionId = udpConnection.getSessionId(),
+            circuitCode = udpConnection.getCircuitCode()
+        ).requireValid("ParcelManager outbound packet")
+        writeUUID(buffer, identity.agentId)
+        writeUUID(buffer, identity.sessionId)
     }
     
     /**
