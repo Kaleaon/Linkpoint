@@ -78,7 +78,7 @@ public class PerfMonitor implements AutoCloseable {
                 throw new VrCoreNotAvailableException(8);
             } catch (SecurityException e2) {
                 throw new VrCoreNotAvailableException(6);
-            } catch (UnsupportedOperationException e3) {
+            } catch (IllegalStateException e3) {
                 throw new VrCoreNotAvailableException(7);
             }
         }

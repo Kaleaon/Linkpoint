@@ -136,7 +136,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
 
                 @Override // android.support.v4.util.MapCollections
                 protected Map<E, E> colGetMap() {
-                    throw new UnsupportedOperationException("not a map");
+                    throw new IllegalStateException("not a map");
                 }
 
                 @Override // android.support.v4.util.MapCollections
@@ -166,7 +166,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
 
                 @Override // android.support.v4.util.MapCollections
                 protected E colSetValue(int i, E e) {
-                    throw new UnsupportedOperationException("not a map");
+                    throw new IllegalStateException("not a map");
                 }
             };
         }

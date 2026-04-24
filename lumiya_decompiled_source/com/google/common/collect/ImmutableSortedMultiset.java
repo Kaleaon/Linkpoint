@@ -256,13 +256,13 @@ public abstract class ImmutableSortedMultiset<E> extends ImmutableSortedMultiset
     @Override // com.google.common.collect.SortedMultiset
     @Deprecated
     public final Multiset.Entry<E> pollFirstEntry() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.SortedMultiset
     @Deprecated
     public final Multiset.Entry<E> pollLastEntry() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.SortedMultiset

@@ -367,12 +367,12 @@ public final class ImmutableRangeSet<C extends Comparable> extends AbstractRange
 
     @Override // com.google.common.collect.AbstractRangeSet, com.google.common.collect.RangeSet
     public void add(Range<C> range) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.AbstractRangeSet, com.google.common.collect.RangeSet
     public void addAll(RangeSet<C> rangeSet) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.RangeSet
@@ -476,12 +476,12 @@ public final class ImmutableRangeSet<C extends Comparable> extends AbstractRange
 
     @Override // com.google.common.collect.AbstractRangeSet, com.google.common.collect.RangeSet
     public void remove(Range<C> range) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.AbstractRangeSet, com.google.common.collect.RangeSet
     public void removeAll(RangeSet<C> rangeSet) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.RangeSet

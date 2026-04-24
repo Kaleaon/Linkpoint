@@ -38,6 +38,6 @@ public abstract class AbstractLoadingCache<K, V> extends AbstractCache<K, V> imp
 
     @Override // com.google.common.cache.LoadingCache
     public void refresh(K k) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 }

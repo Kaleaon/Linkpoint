@@ -32,6 +32,6 @@ public final class BottomNavigationMenu extends MenuBuilder {
 
     @Override // android.support.v7.view.menu.MenuBuilder, android.view.Menu
     public SubMenu addSubMenu(int i, int i2, int i3, CharSequence charSequence) {
-        throw new UnsupportedOperationException("BottomNavigationView does not support submenus");
+        throw new IllegalStateException("BottomNavigationView does not support submenus");
     }
 }

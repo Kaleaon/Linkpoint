@@ -576,7 +576,7 @@ public final class MediaControllerCompat {
         @Override // android.support.v4.media.session.MediaControllerCompat.MediaControllerImpl
         public void addQueueItem(MediaDescriptionCompat mediaDescriptionCompat) {
             if ((getFlags() & 4) == 0) {
-                throw new UnsupportedOperationException("This session doesn't support queue management operations");
+                throw new IllegalStateException("This session doesn't support queue management operations");
             }
             Bundle bundle = new Bundle();
             bundle.putParcelable(MediaControllerCompat.COMMAND_ARGUMENT_MEDIA_DESCRIPTION, mediaDescriptionCompat);
@@ -586,7 +586,7 @@ public final class MediaControllerCompat {
         @Override // android.support.v4.media.session.MediaControllerCompat.MediaControllerImpl
         public void addQueueItem(MediaDescriptionCompat mediaDescriptionCompat, int i) {
             if ((getFlags() & 4) == 0) {
-                throw new UnsupportedOperationException("This session doesn't support queue management operations");
+                throw new IllegalStateException("This session doesn't support queue management operations");
             }
             Bundle bundle = new Bundle();
             bundle.putParcelable(MediaControllerCompat.COMMAND_ARGUMENT_MEDIA_DESCRIPTION, mediaDescriptionCompat);
@@ -772,7 +772,7 @@ public final class MediaControllerCompat {
         @Override // android.support.v4.media.session.MediaControllerCompat.MediaControllerImpl
         public void removeQueueItem(MediaDescriptionCompat mediaDescriptionCompat) {
             if ((getFlags() & 4) == 0) {
-                throw new UnsupportedOperationException("This session doesn't support queue management operations");
+                throw new IllegalStateException("This session doesn't support queue management operations");
             }
             Bundle bundle = new Bundle();
             bundle.putParcelable(MediaControllerCompat.COMMAND_ARGUMENT_MEDIA_DESCRIPTION, mediaDescriptionCompat);
@@ -864,7 +864,7 @@ public final class MediaControllerCompat {
         public void addQueueItem(MediaDescriptionCompat mediaDescriptionCompat) {
             try {
                 if ((this.mBinder.getFlags() & 4) == 0) {
-                    throw new UnsupportedOperationException("This session doesn't support queue management operations");
+                    throw new IllegalStateException("This session doesn't support queue management operations");
                 }
                 this.mBinder.addQueueItem(mediaDescriptionCompat);
             } catch (RemoteException e) {
@@ -876,7 +876,7 @@ public final class MediaControllerCompat {
         public void addQueueItem(MediaDescriptionCompat mediaDescriptionCompat, int i) {
             try {
                 if ((this.mBinder.getFlags() & 4) == 0) {
-                    throw new UnsupportedOperationException("This session doesn't support queue management operations");
+                    throw new IllegalStateException("This session doesn't support queue management operations");
                 }
                 this.mBinder.addQueueItemAt(mediaDescriptionCompat, i);
             } catch (RemoteException e) {
@@ -1079,7 +1079,7 @@ public final class MediaControllerCompat {
         public void removeQueueItem(MediaDescriptionCompat mediaDescriptionCompat) {
             try {
                 if ((this.mBinder.getFlags() & 4) == 0) {
-                    throw new UnsupportedOperationException("This session doesn't support queue management operations");
+                    throw new IllegalStateException("This session doesn't support queue management operations");
                 }
                 this.mBinder.removeQueueItem(mediaDescriptionCompat);
             } catch (RemoteException e) {

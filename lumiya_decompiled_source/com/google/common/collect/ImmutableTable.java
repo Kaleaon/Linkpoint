@@ -119,7 +119,7 @@ public abstract class ImmutableTable<R, C, V> extends AbstractTable<R, C, V> {
     @Override // com.google.common.collect.AbstractTable, com.google.common.collect.Table
     @Deprecated
     public final void clear() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.Table
@@ -193,19 +193,19 @@ public abstract class ImmutableTable<R, C, V> extends AbstractTable<R, C, V> {
     @Override // com.google.common.collect.AbstractTable, com.google.common.collect.Table
     @Deprecated
     public final V put(R r, C c, V v) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.AbstractTable, com.google.common.collect.Table
     @Deprecated
     public final void putAll(Table<? extends R, ? extends C, ? extends V> table) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.AbstractTable, com.google.common.collect.Table
     @Deprecated
     public final V remove(Object obj, Object obj2) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.Table

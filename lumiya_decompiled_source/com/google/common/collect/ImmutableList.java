@@ -349,13 +349,13 @@ public abstract class ImmutableList<E> extends ImmutableCollection<E> implements
     @Override // java.util.List
     @Deprecated
     public final void add(int i, E e) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.List
     @Deprecated
     public final boolean addAll(int i, Collection<? extends E> collection) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.ImmutableCollection
@@ -432,7 +432,7 @@ public abstract class ImmutableList<E> extends ImmutableCollection<E> implements
     @Override // java.util.List
     @Deprecated
     public final E remove(int i) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     public ImmutableList<E> reverse() {
@@ -442,7 +442,7 @@ public abstract class ImmutableList<E> extends ImmutableCollection<E> implements
     @Override // java.util.List
     @Deprecated
     public final E set(int i, E e) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.List

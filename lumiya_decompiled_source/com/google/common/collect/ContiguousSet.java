@@ -23,7 +23,7 @@ public abstract class ContiguousSet<C extends Comparable> extends ImmutableSorte
 
     @Deprecated
     public static <E> ImmutableSortedSet.Builder<E> builder() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     public static <C extends Comparable> ContiguousSet<C> create(Range<C> range, DiscreteDomain<C> discreteDomain) {

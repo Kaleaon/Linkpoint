@@ -31,7 +31,7 @@ abstract class AbstractMapEntry<K, V> implements Map.Entry<K, V> {
 
     @Override // java.util.Map.Entry
     public V setValue(V v) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     public String toString() {

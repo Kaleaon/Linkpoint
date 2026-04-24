@@ -68,11 +68,11 @@ public final class ImmutableTypeToInstanceMap<B> extends ForwardingMap<TypeToken
 
     @Override // com.google.common.reflect.TypeToInstanceMap
     public <T extends B> T putInstance(TypeToken<T> typeToken, T t) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.reflect.TypeToInstanceMap
     public <T extends B> T putInstance(Class<T> cls, T t) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 }

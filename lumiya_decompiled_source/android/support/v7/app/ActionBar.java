@@ -308,19 +308,19 @@ public abstract class ActionBar {
 
     public void setElevation(float f) {
         if (f != 0.0f) {
-            throw new UnsupportedOperationException("Setting a non-zero elevation is not supported in this action bar configuration.");
+            throw new IllegalStateException("Setting a non-zero elevation is not supported in this action bar configuration.");
         }
     }
 
     public void setHideOffset(int i) {
         if (i != 0) {
-            throw new UnsupportedOperationException("Setting an explicit action bar hide offset is not supported in this action bar configuration.");
+            throw new IllegalStateException("Setting an explicit action bar hide offset is not supported in this action bar configuration.");
         }
     }
 
     public void setHideOnContentScrollEnabled(boolean z) {
         if (z) {
-            throw new UnsupportedOperationException("Hide on content scroll is not supported in this action bar configuration.");
+            throw new IllegalStateException("Hide on content scroll is not supported in this action bar configuration.");
         }
     }
 

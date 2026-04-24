@@ -163,7 +163,7 @@ public final class C$Gson$Types {
     }
 
     private C$Gson$Types() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     public static GenericArrayType arrayOf(Type type) {

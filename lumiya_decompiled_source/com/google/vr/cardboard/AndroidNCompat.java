@@ -140,7 +140,7 @@ public class AndroidNCompat {
                 Log.w(TAG, "Failed to handle missing VrCore package.");
             }
             return false;
-        } catch (UnsupportedOperationException e2) {
+        } catch (IllegalStateException e2) {
             String str2 = TAG;
             String valueOf2 = String.valueOf(e2);
             Log.w(str2, new StringBuilder(String.valueOf(valueOf2).length() + 23).append("Failed to set VR mode: ").append(valueOf2).toString());

@@ -103,7 +103,7 @@ public abstract class TypeToken<T> extends TypeCapture<T> implements Serializabl
 
         @Override // com.google.common.reflect.TypeToken.TypeSet
         public TypeToken<T>.TypeSet interfaces() {
-            throw new UnsupportedOperationException("classes().interfaces() not supported.");
+            throw new IllegalStateException("classes().interfaces() not supported.");
         }
 
         @Override // com.google.common.reflect.TypeToken.TypeSet
@@ -130,7 +130,7 @@ public abstract class TypeToken<T> extends TypeCapture<T> implements Serializabl
 
         @Override // com.google.common.reflect.TypeToken.TypeSet
         public TypeToken<T>.TypeSet classes() {
-            throw new UnsupportedOperationException("interfaces().classes() not supported.");
+            throw new IllegalStateException("interfaces().classes() not supported.");
         }
 
         /* JADX INFO: Access modifiers changed from: protected */

@@ -43,7 +43,7 @@ public class LinkedTreeNode<T> implements Iterable<T> {
 
         @Override // java.util.Iterator
         public void remove() {
-            throw new UnsupportedOperationException("remove() not supported by LinkedTreeNode");
+            throw new IllegalStateException("remove() not supported by LinkedTreeNode");
         }
     }
 

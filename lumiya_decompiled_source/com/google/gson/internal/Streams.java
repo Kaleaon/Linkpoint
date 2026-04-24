@@ -68,7 +68,7 @@ public final class Streams {
     }
 
     private Streams() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     public static JsonElement parse(JsonReader jsonReader) throws JsonParseException {

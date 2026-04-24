@@ -117,13 +117,13 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E> imple
     @Override // java.util.AbstractCollection, java.util.Collection
     @Deprecated
     public final boolean add(E e) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.AbstractCollection, java.util.Collection
     @Deprecated
     public final boolean addAll(Collection<? extends E> collection) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     public ImmutableList<E> asList() {
@@ -139,7 +139,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E> imple
     @Override // java.util.AbstractCollection, java.util.Collection
     @Deprecated
     public final void clear() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.AbstractCollection, java.util.Collection, java.util.Set
@@ -175,19 +175,19 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E> imple
     @Override // java.util.AbstractCollection, java.util.Collection
     @Deprecated
     public final boolean remove(Object obj) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.AbstractCollection, java.util.Collection
     @Deprecated
     public final boolean removeAll(Collection<?> collection) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.AbstractCollection, java.util.Collection
     @Deprecated
     public final boolean retainAll(Collection<?> collection) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.AbstractCollection, java.util.Collection

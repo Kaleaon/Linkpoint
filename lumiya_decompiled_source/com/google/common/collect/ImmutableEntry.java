@@ -30,6 +30,6 @@ class ImmutableEntry<K, V> extends AbstractMapEntry<K, V> implements Serializabl
 
     @Override // com.google.common.collect.AbstractMapEntry, java.util.Map.Entry
     public final V setValue(V v) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 }

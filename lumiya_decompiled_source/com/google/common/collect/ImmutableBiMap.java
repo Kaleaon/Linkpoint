@@ -146,7 +146,7 @@ public abstract class ImmutableBiMap<K, V> extends ImmutableMap<K, V> implements
     @Override // com.google.common.collect.BiMap
     @Deprecated
     public V forcePut(K k, V v) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.BiMap

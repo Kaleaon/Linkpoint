@@ -73,7 +73,7 @@ public final class MutableTypeToInstanceMap<B> extends ForwardingMap<TypeToken<?
 
         @Override // com.google.common.collect.ForwardingMapEntry, java.util.Map.Entry
         public V setValue(V v) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
     }
 
@@ -113,7 +113,7 @@ public final class MutableTypeToInstanceMap<B> extends ForwardingMap<TypeToken<?
     }
 
     public B put(TypeToken<? extends B> typeToken, B b) {
-        throw new UnsupportedOperationException("Please use putInstance() instead.");
+        throw new IllegalStateException("Please use putInstance() instead.");
     }
 
     /* JADX WARN: Multi-variable type inference failed */
@@ -124,7 +124,7 @@ public final class MutableTypeToInstanceMap<B> extends ForwardingMap<TypeToken<?
 
     @Override // com.google.common.collect.ForwardingMap, java.util.Map, com.google.common.collect.BiMap
     public void putAll(Map<? extends TypeToken<? extends B>, ? extends B> map) {
-        throw new UnsupportedOperationException("Please use putInstance() instead.");
+        throw new IllegalStateException("Please use putInstance() instead.");
     }
 
     @Override // com.google.common.reflect.TypeToInstanceMap

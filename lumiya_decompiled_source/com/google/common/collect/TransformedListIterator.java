@@ -17,7 +17,7 @@ public abstract class TransformedListIterator<F, T> extends TransformedIterator<
 
     @Override // java.util.ListIterator
     public void add(T t) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.ListIterator
@@ -41,6 +41,6 @@ public abstract class TransformedListIterator<F, T> extends TransformedIterator<
     }
 
     public void set(T t) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 }

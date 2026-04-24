@@ -56,7 +56,7 @@ public abstract class CacheLoader<K, V> {
     }
 
     /* loaded from: classes.dex */
-    public static final class UnsupportedLoadingOperationException extends UnsupportedOperationException {
+    public static final class UnsupportedLoadingOperationException extends IllegalStateException {
         UnsupportedLoadingOperationException() {
         }
     }

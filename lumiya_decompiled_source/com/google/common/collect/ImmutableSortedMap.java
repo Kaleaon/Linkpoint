@@ -44,7 +44,7 @@ public final class ImmutableSortedMap<K, V> extends ImmutableSortedMapFauxveride
         @Beta
         @Deprecated
         public Builder<K, V> orderEntriesByValue(Comparator<? super V> comparator) {
-            throw new UnsupportedOperationException("Not available on ImmutableSortedMap.Builder");
+            throw new IllegalStateException("Not available on ImmutableSortedMap.Builder");
         }
 
         /* JADX WARN: Multi-variable type inference failed */
@@ -421,13 +421,13 @@ public final class ImmutableSortedMap<K, V> extends ImmutableSortedMapFauxveride
     @Override // java.util.NavigableMap
     @Deprecated
     public final Map.Entry<K, V> pollFirstEntry() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.NavigableMap
     @Deprecated
     public final Map.Entry<K, V> pollLastEntry() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.Map

@@ -69,7 +69,7 @@ public final class LittleEndianDataInputStream extends FilterInputStream impleme
 
     @Override // java.io.DataInput
     public String readLine() {
-        throw new UnsupportedOperationException("readLine is not supported");
+        throw new IllegalStateException("readLine is not supported");
     }
 
     @Override // java.io.DataInput
