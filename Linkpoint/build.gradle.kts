@@ -24,6 +24,12 @@ android {
     flavorDimensions += "xr"
     compileSdk = 35
     buildToolsVersion = "35.0.0"
+    // Pin NDK to r26 — the bundled OpenJPEG AAR
+    // (com.viliussutkus89.ndk.thirdparty:openjpeg-ndk26-static) is built
+    // against r26 and must be loaded by an r26-compiled liblinkpoint-j2k.so,
+    // otherwise System.loadLibrary("linkpoint-j2k") fails silently and
+    // JPEG2000Decoder reports `Backend: none` (see PR #455 debug capture).
+    ndkVersion = "26.3.11579264"
     
     defaultConfig {
         applicationId = "com.linkpoint"

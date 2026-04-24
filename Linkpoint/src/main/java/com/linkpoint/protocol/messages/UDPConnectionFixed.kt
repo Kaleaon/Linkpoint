@@ -250,8 +250,15 @@ class UDPConnectionFixed {
     private var agentUpdateJob: Job? = null
     private val movementLifecycleOwner = AtomicReference<String?>(null)
     
-    // Mobile optimized: 10 updates/sec = 100ms interval
+    // AgentUpdate cadence (docs/lumiya-port/README.md item 5).
+    // Active cadence matches the SL viewer reference (~10 Hz). When the avatar
+    // is idle (no movement controlFlags and no look-at change), back off to a
+    // lower cadence — the simulator only needs occasional updates to keep the
+    // circuit alive, and the saved packets are pure win on mobile data.
     private val AGENT_UPDATE_INTERVAL_MS = 100L
+    private val AGENT_UPDATE_IDLE_INTERVAL_MS = 500L
+    private val AGENT_UPDATE_IDLE_THRESHOLD_MS = 2_000L
+    @Volatile private var lastAgentInputAtMs: Long = 0L
 
     init {
         circuitTaskQueue.setIdleHandler {
@@ -2442,12 +2449,16 @@ class UDPConnectionFixed {
      */
     fun startAgentUpdates() {
         agentUpdateJob?.cancel()
+        // Treat the connection moment as fresh input so the first second of
+        // updates runs at the active cadence (helps the simulator pick up the
+        // initial avatar pose quickly).
+        lastAgentInputAtMs = System.currentTimeMillis()
         agentUpdateJob = scope.launch {
             Log.d(TAG, "Starting periodic AgentUpdate messages")
             try {
                 while (_isConnected.value) {
                     sendAgentUpdate()
-                    delay(AGENT_UPDATE_INTERVAL_MS)
+                    delay(currentAgentUpdateIntervalMs())
                 }
             } catch (e: CancellationException) {
                 // Expected during disconnect/reconnect — not an error
@@ -2486,14 +2497,36 @@ class UDPConnectionFixed {
      * Set control flags (for movement).
      */
     fun setControlFlags(flags: Int) {
+        if (flags != controlFlags) noteAgentInput()
         controlFlags = flags
     }
-    
+
     /**
      * Update look-at direction for camera/avatar orientation
      */
     fun updateLookAt(x: Float, y: Float, z: Float) {
+        val prev = currentLookAt
+        if (prev[0] == x && prev[1] == y && prev[2] == z) return
+        noteAgentInput()
         currentLookAt = floatArrayOf(x, y, z)
+    }
+
+    /**
+     * Pick the AgentUpdate send interval based on whether the avatar is
+     * actively moving or idle (no movement flags, no look-at change for
+     * [AGENT_UPDATE_IDLE_THRESHOLD_MS]). See docs/lumiya-port/README.md
+     * item 5.
+     */
+    private fun currentAgentUpdateIntervalMs(): Long {
+        val now = System.currentTimeMillis()
+        val movementActive = controlFlags != 0
+        val recentInput = (now - lastAgentInputAtMs) < AGENT_UPDATE_IDLE_THRESHOLD_MS
+        return if (movementActive || recentInput) AGENT_UPDATE_INTERVAL_MS
+               else AGENT_UPDATE_IDLE_INTERVAL_MS
+    }
+
+    private fun noteAgentInput() {
+        lastAgentInputAtMs = System.currentTimeMillis()
     }
     
     /**
