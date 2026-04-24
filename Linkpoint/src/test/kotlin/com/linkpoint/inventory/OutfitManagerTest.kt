@@ -5,6 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertFalse
 import org.junit.Test
 import java.util.UUID
 
@@ -68,6 +69,53 @@ class OutfitManagerTest {
             first,
             mutableState[WearableType.SHIRT]
         )
+
+        applyWearableSelection(mutableState, WearableType.PANTS, second, _replace = false)
+        assertEquals("Multi-wear add should not evict other wearable types", first, mutableState[WearableType.SHIRT])
+        assertEquals(second, mutableState[WearableType.PANTS])
+    }
+
+    @Test
+    fun parsedOutputIncludesTintParamsAndFiltersNullTextures() {
+        val assetId = UUID.fromString("dddddddd-dddd-dddd-dddd-dddddddddddd")
+        val includedTexture = UUID.fromString("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee")
+        val nullTexture = UUID.fromString("00000000-0000-0000-0000-000000000000")
+        val raw = """
+            LLWearable version 22
+            type 13
+            parameters 4
+            31 0.75
+            80 0.1
+            81 0.5
+            82 1.2
+            textures 2
+            1 $includedTexture
+            2 $nullTexture
+        """.trimIndent().toByteArray()
+
+        val parsed = WearableAssetParser.parse(raw, WearableType.SHIRT, assetId)
+        assertNotNull(parsed)
+        parsed!!
+        assertEquals(WearableType.GLOVES, parsed.type)
+        assertEquals(4, parsed.params.size)
+        assertEquals(0.75f, parsed.params[31] ?: -1f, 0.0001f)
+        assertEquals(includedTexture, parsed.textures[1])
+        assertFalse("NULL texture UUID entries must be ignored", parsed.textures.containsKey(2))
+        assertEquals(intArrayOf(26, 128, 255).toList(), parsed.tintColor?.toList())
+    }
+
+    @Test
+    fun parseDiagnosticsContainCorruptionReason() {
+        val assetId = UUID.fromString("ffffffff-ffff-ffff-ffff-ffffffffffff")
+        val malformedRaw = """
+            LLWearable version 22
+            textures 1
+            bad-index not-a-uuid
+        """.trimIndent().toByteArray()
+
+        val result = WearableAssetParser.parseWithDiagnostics(malformedRaw, WearableType.HAIR, assetId)
+        assertNull(result.data)
+        assertTrue(result.error?.contains("invalid texture index") == true)
     }
 
     @Test
