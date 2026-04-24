@@ -429,13 +429,18 @@ class NotecardManager(
      * Note: Full implementation requires UpdateNotecardAgentInventory capability.
      */
     suspend fun saveNotecard(itemId: UUID, newText: String): Boolean {
-        return saveNotecard(itemId = itemId, newText = newText, taskId = null)
+        return saveNotecard(itemId = itemId, newText = newText, taskId = null, objectId = null)
     }
 
     /**
-     * Save a notecard with optional task context.
+     * Save a notecard with optional task/object context.
      */
-    suspend fun saveNotecard(itemId: UUID, newText: String, taskId: UUID?): Boolean {
+    suspend fun saveNotecard(
+        itemId: UUID,
+        newText: String,
+        taskId: UUID?,
+        objectId: UUID? = null
+    ): Boolean {
         return withContext(Dispatchers.IO) {
             try {
                 val notecardData = createNotecardData(newText)
@@ -448,17 +453,9 @@ class NotecardManager(
                 val request = LLSDMap().apply {
                     this["item_id"] = LLSDUUID(itemId)
                     taskId?.let { this["task_id"] = LLSDUUID(it) }
+                    objectId?.let { this["object_id"] = LLSDUUID(it) }
                 }
-
-                val capability = if (taskId != null) {
-                    CapabilityManager.CAP_UPDATE_NOTECARD_TASK
-                } else {
-                    CapabilityManager.CAP_UPDATE_NOTECARD_AGENT
-                }
-                val capResponse = capabilityManager.request(
-                    capability,
-                    request
-                ) as? LLSDMap
+                val capResponse = capabilityRequest(capability, request) as? LLSDMap
 
                 if (capResponse == null) {
                     Log.w(TAG, "Notecard save failed: $capability returned no payload")

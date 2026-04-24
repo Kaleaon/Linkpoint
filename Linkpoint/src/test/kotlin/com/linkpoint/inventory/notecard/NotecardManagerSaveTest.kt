@@ -42,6 +42,13 @@ class NotecardManagerSaveTest {
     }
 
     @Test
+    fun `saveNotecard agent path fails when capability request returns no payload`() = runTest {
+        val manager = buildManager { _, _ -> null }
+        val success = manager.saveNotecard(UUID.randomUUID(), "agent failure")
+        assertFalse(success)
+    }
+
+    @Test
     fun `saveNotecard uses task capability and includes task and object identifiers`() = runTest {
         val requestInfo = AtomicReference<Pair<String, LLSDMap>>()
         val taskId = UUID.randomUUID()
@@ -66,6 +73,18 @@ class NotecardManagerSaveTest {
         assertEquals(CapabilityManager.CAP_UPDATE_NOTECARD_TASK, capName)
         assertEquals(taskId, (body["task_id"] as LLSDUUID).value)
         assertEquals(objectId, (body["object_id"] as LLSDUUID).value)
+    }
+
+    @Test
+    fun `saveNotecard task path fails when capability request returns no payload`() = runTest {
+        val manager = buildManager { _, _ -> null }
+        val success = manager.saveNotecard(
+            itemId = UUID.randomUUID(),
+            newText = "task failure",
+            taskId = UUID.randomUUID(),
+            objectId = UUID.randomUUID()
+        )
+        assertFalse(success)
     }
 
     @Test
