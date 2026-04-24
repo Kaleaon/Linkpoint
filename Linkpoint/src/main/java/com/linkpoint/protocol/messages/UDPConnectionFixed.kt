@@ -322,6 +322,15 @@ class UDPConnectionFixed {
      * Critical for implementing circuit establishment state machine.
      */
     private val pendingCallbacks = java.util.concurrent.ConcurrentHashMap<Int, MessageCallbackInfo>()
+
+    /**
+     * Sequence number used for the most recent UseCircuitCode send, or -1 if not sent yet.
+     * The login handshake's PacketAck handler uses this to know which ACK signals that
+     * the circuit is established so CompleteAgentMovement can be sent.
+     */
+    @Volatile
+    var useCircuitCodeSequence: Int = -1
+        private set
     
     /**
      * Internal callback info with timeout handling.
@@ -1767,7 +1776,7 @@ class UDPConnectionFixed {
     private fun sendUseCircuitCode() {
         val identity = outboundIdentity("UDPConnectionFixed.sendUseCircuitCode")
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sending UseCircuitCode")
-        
+
         // UseCircuitCode message format:
         // - CircuitCode (4 bytes, little-endian)
         // - SessionID (16 bytes, UUID)
@@ -1776,72 +1785,10 @@ class UDPConnectionFixed {
         payload.putInt(identity.circuitCode ?: 0)
         payload.put(identity.sessionId.asBytes())
         payload.put(identity.agentId.asBytes())
-        
-        // Message ID for UseCircuitCode (low frequency: -65533)
-        val messageId = MessageIds.USE_CIRCUIT_CODE
 
-        // CRITICAL: UseCircuitCode MUST be sent with sequence number 0.
-        // The login handshake in LinkpointApp waits for PacketAck(seq=0) before
-        // sending CompleteAgentMovement. If this packet is sent as seq=1, the
-        // client never advances to world bootstrap and only ping traffic flows.
-        //
-        // Do not route through sendPacket() here because sendPacket() increments
-        // the sequence counter before assignment.
-        try {
-            val flags = 0x40 // reliable
-            val header = ByteBuffer.allocate(PACKET_HEADER_SIZE).order(ByteOrder.BIG_ENDIAN)
-            header.put(flags.toByte())
-            header.putInt(0) // REQUIRED by SL protocol for UseCircuitCode
-            header.put(0.toByte())
-
-            val messageIdBytes = encodeMessageId(messageId)
-            val packet = header.array() + messageIdBytes + payload.array()
-
-            val buffer = ByteBuffer.wrap(packet)
-            val bytesWritten = datagramChannel?.write(buffer) ?: 0
-            if (bytesWritten > 0) {
-                packetsSent.incrementAndGet()
-                bytesSent.addAndGet(bytesWritten.toLong())
-                lastSendTime = System.currentTimeMillis()
-
-                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-                    "→ Sent UseCircuitCode with fixed seq=0 (${packet.size} bytes)")
-
-                recordPacketEvent(
-                    type = PacketHistoryEntry.PacketEventType.SEND_SUCCESS,
-                    messageId = messageId,
-                    data = packet,
-                    sequenceNumber = 0,
-                    success = true
-                )
-
-                EnhancedPacketLogger.logPacketSent(
-                    messageId = messageId,
-                    messageName = getMessageName(messageId),
-                    sequenceNumber = 0,
-                    data = packet,
-                    flags = EnhancedPacketLogger.PacketFlags(
-                        reliable = true,
-                        resent = false,
-                        zerocoded = false,
-                        hasAcks = false
-                    )
-                )
-
-                SessionLogRecorder.logPacketSent(
-                    messageId = messageId,
-                    messageName = getMessageName(messageId),
-                    sequenceNumber = 0,
-                    data = packet,
-                    reliable = true
-                )
-            } else {
-                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
-                    "UseCircuitCode write returned 0 bytes")
-            }
-        } catch (e: Exception) {
-            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
-                "Failed to send UseCircuitCode seq=0: ${e.message}")
+        val seq = sendPacket(MessageIds.USE_CIRCUIT_CODE, payload.array(), reliable = true)
+        if (seq >= 0) {
+            useCircuitCodeSequence = seq
         }
     }
     
@@ -2079,19 +2026,20 @@ class UDPConnectionFixed {
         reliable: Boolean = false,
         zerocoded: Boolean = false,
         listener: MessageEventListener? = null
-    ) {
+    ): Int {
         if (!_isConnected.value) {
             NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Cannot send: not connected")
-            return
+            return -1
         }
-        
+
+        // Lumiya uses incrementAndGet() — first packet gets seq=1, not 0.
+        // This matches all other send paths (sendPendingAcks, sendPendingAcksFromIOThread).
+        val seqNum = sequenceNumber.incrementAndGet()
+
         try {
             // Build packet header (big-endian per SL protocol)
             val flags = (if (reliable) 0x40 else 0) or (if (zerocoded) 0x80 else 0)
-            // Lumiya uses incrementAndGet() — first packet gets seq=1, not 0.
-            // This matches all other send paths (sendPendingAcks, sendPendingAcksFromIOThread).
-            val seqNum = sequenceNumber.incrementAndGet()
-            
+
             // Track callback if this is a reliable message with listener
             if (reliable && listener != null) {
                 val callbackInfo = MessageCallbackInfo(
@@ -2192,7 +2140,7 @@ class UDPConnectionFixed {
                 type = PacketHistoryEntry.PacketEventType.SEND_FAILED,
                 messageId = messageId,
                 data = payload,
-                sequenceNumber = sequenceNumber.get(),
+                sequenceNumber = seqNum,
                 success = false,
                 errorMessage = e.message
             )
@@ -2228,9 +2176,11 @@ class UDPConnectionFixed {
                     }
                 }
             }
+            return -1
         }
+        return seqNum
     }
-    
+
     /**
      * Encode message ID for transmission (Linkpoint)
      */
