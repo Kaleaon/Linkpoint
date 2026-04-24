@@ -328,7 +328,7 @@ class TeleportManager(
             }
             
             // TeleportLocation capability
-            val response = capabilityManager.request("TeleportLocation", request)
+            val response = capabilityManager.request(CapabilityManager.CAP_TELEPORT_LOCATION, request)
             
             if (response is LLSDMap) {
                 val success = response.getBoolean("success") ?: false

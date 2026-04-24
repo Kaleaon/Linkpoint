@@ -237,7 +237,7 @@ class GroupsManager(
                     this["session-id"] = LLSDUUID(groupId)
                 }
                 
-                val response = capabilityManager.request("ChatSessionRequest", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_CHAT_PASS, request)
                 if (response is LLSDMap) {
                     UUID.fromString(response.getString("session_id"))
                 } else {

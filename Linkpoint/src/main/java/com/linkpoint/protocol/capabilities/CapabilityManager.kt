@@ -49,7 +49,6 @@ class CapabilityManager : CapabilityRequester {
         private const val UTF8_BOM = '\uFEFF'
         
         // Common capability names
-        const val CAP_SEED = "Seed"
         const val CAP_EVENT_QUEUE = "EventQueueGet"
         const val CAP_FETCH_INVENTORY = "FetchInventory2"
         const val CAP_FETCH_LIB_INVENTORY = "FetchLib2"
@@ -63,7 +62,7 @@ class CapabilityManager : CapabilityRequester {
         const val CAP_UPDATE_AGENT_INFO = "UpdateAgentInformation"
         const val CAP_UPLOAD_BAKED_TEXTURE = "UploadBakedTexture"
         const val CAP_OBJECT_MEDIA = "ObjectMedia"
-        // Deferred (2026-04-23): viewer-side media browser integration not wired yet.
+        // @cap-status deferred since=2026-04-24 issue=https://github.com/Kaleaon/Linkpoint/issues/1688 rationale="Viewer-side media browser integration is not wired into current UI flows."
         const val CAP_OBJECT_MEDIA_NAVIGATE = "ObjectMediaNavigate"
         const val CAP_PARCEL_VOICE = "ParcelVoiceInfoRequest"
         const val CAP_PROVISION_VOICE = "ProvisionVoiceAccountRequest"
@@ -76,7 +75,7 @@ class CapabilityManager : CapabilityRequester {
         const val CAP_GROUP_PROFILE = "GroupProfile"
         const val CAP_ENVIRONMENT = "EnvironmentSettings"
         const val CAP_EXT_ENVIRONMENT = "ExtEnvironment"
-        // Deferred (2026-04-23): no consumer yet; keep declared for handshake parity.
+        // @cap-status deferred since=2026-04-24 issue=https://github.com/Kaleaon/Linkpoint/issues/1689 rationale="Region Experiences capability has no in-app consumer; retained for seed handshake parity."
         const val CAP_REGION_EXPERIENCE = "RegionExperiences"
         const val CAP_SIMULATE_LURE = "SimulatorLure"
         const val CAP_AVATAR_PICKER = "AvatarPickerSearch"
@@ -105,6 +104,16 @@ class CapabilityManager : CapabilityRequester {
         const val CAP_GROUP_MEMBER_DATA = "GroupMemberData"
         const val CAP_CHAT_SEND = "ChatSend"
         const val CAP_FRIENDSHIP_TERMINATE = "FriendshipTerminate"
+
+        const val CAP_TELEPORT_LOCATION = "TeleportLocation"
+        const val CAP_SEARCH_LAND = "SearchLand"
+        const val CAP_GET_SCRIPT_RUNNING = "GetScriptRunning"
+        const val CAP_SET_SCRIPT_RUNNING = "SetScriptRunning"
+        const val CAP_GET_SCRIPT_TASK_INFO = "GetScriptTaskInfo"
+        const val CAP_CREATE_INVENTORY_ITEM = "CreateInventoryItem"
+        const val CAP_NEW_FILE_AGENT_INVENTORY = "NewFileAgentInventory"
+        const val CAP_UPLOAD_AGENT_PROFILE_IMAGE = "UploadAgentProfileImage"
+        const val CAP_UPLOAD_AGENT_BAKED_TEXTURE = "UploadAgentBakedTexture"
         
         // Capabilities that are inventory-related (for throttling)
         private val INVENTORY_CAPS = setOf(

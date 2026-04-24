@@ -70,7 +70,7 @@ class LandmarkManager(
                 val assetData = buildLandmarkAsset(regionHandle, position)
                 
                 // Create the inventory item via CreateInventoryItem capability
-                val createCap = capabilityManager.getCapability("CreateInventoryItem")
+                val createCap = capabilityManager.getCapability(CapabilityManager.CAP_CREATE_INVENTORY_ITEM)
                 if (createCap != null) {
                     val request = LLSDMap().apply {
                         this["type"] = LLSDInteger(3) // Landmark asset type
@@ -84,7 +84,7 @@ class LandmarkManager(
                         }
                     }
                     
-                    val response = capabilityManager.request("CreateInventoryItem", request)
+                    val response = capabilityManager.request(CapabilityManager.CAP_CREATE_INVENTORY_ITEM, request)
                     if (response is LLSDMap) {
                         val itemId = response.getUUID("item_id")
                         if (itemId != null) {
