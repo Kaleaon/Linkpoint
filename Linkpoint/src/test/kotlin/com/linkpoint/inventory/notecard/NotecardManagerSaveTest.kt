@@ -7,14 +7,14 @@ import com.linkpoint.protocol.llsd.LLSDUUID
 import com.linkpoint.protocol.llsd.LLSDXmlUtils
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.transfer.TransferManager
-import com.sun.net.httpserver.HttpServer
 import kotlinx.coroutines.test.runTest
 import okhttp3.OkHttpClient
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.net.InetSocketAddress
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicReference
 
@@ -122,19 +122,19 @@ class NotecardManagerSaveTest {
         return LLSDXmlUtils.wrap(LLSDMap(mutableMapOf("state" to LLSDString(state))))
     }
 
-    private fun withTestServer(responseXml: String, block: (String) -> Unit) {
-        val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
-        server.createContext("/") { exchange ->
-            val bytes = responseXml.toByteArray(Charsets.UTF_8)
-            exchange.responseHeaders.add("Content-Type", "application/llsd+xml")
-            exchange.sendResponseHeaders(200, bytes.size.toLong())
-            exchange.responseBody.use { it.write(bytes) }
-        }
+    private suspend fun withTestServer(responseXml: String, block: suspend (String) -> Unit) {
+        val server = MockWebServer()
+        server.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .addHeader("Content-Type", "application/llsd+xml")
+                .setBody(responseXml)
+        )
         server.start()
         try {
-            block("http://127.0.0.1:${server.address.port}/")
+            block(server.url("/").toString())
         } finally {
-            server.stop(0)
+            server.shutdown()
         }
     }
 }

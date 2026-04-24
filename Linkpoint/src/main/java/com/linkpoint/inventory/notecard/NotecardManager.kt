@@ -38,8 +38,8 @@ import java.util.concurrent.ConcurrentHashMap
  * }
  */
 class NotecardManager(
-    private val transferManager: TransferManager,
-    private val capabilityManager: CapabilityManager,
+    private val transferManager: TransferManager?,
+    private val capabilityManager: CapabilityRequester,
     private val httpClient: OkHttpClient = OkHttpClient(),
     private val capabilityRequest: suspend (String, LLSDMap) -> com.linkpoint.protocol.llsd.LLSDValue? = { capName, body ->
         capabilityManager.request(capName, body)

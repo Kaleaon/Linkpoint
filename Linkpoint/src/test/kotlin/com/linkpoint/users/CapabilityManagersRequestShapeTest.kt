@@ -4,6 +4,7 @@ import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.FakeCapabilityRequester
 import com.linkpoint.protocol.llsd.LLSDArray
 import com.linkpoint.protocol.llsd.LLSDMap
+import com.linkpoint.protocol.llsd.LLSDString
 import com.linkpoint.render.RenderMaterialsManager
 import com.linkpoint.world.SimulatorFeaturesManager
 import kotlinx.coroutines.runBlocking
@@ -87,6 +88,6 @@ class CapabilityManagersRequestShapeTest {
         assertEquals(CapabilityManager.CAP_RENDER_MATERIALS, call.capName)
         val body = call.body as LLSDMap
         val ids = body.getArray("object_ids") as LLSDArray
-        assertEquals(objectId.toString(), ids.getString(0))
+        assertEquals(objectId.toString(), (ids[0] as LLSDString).value)
     }
 }
