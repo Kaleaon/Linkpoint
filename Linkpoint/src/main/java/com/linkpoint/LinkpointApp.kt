@@ -646,7 +646,7 @@ class LinkpointApp : Application() {
                     ?: transferManager.fetchAsset(item.assetId, item.assetType)?.also { fetched ->
                         assetCache.put(item.assetId, cacheType, fetched)
                     }
-            )
+            }
             avatarManager.setOutfitManager(outfitManager)
         }
         

@@ -32,9 +32,7 @@ class UserProfileManager(
     private val agentId: UUID,
     private val capabilityRequest: suspend (String, LLSDValue?) -> LLSDValue? =
         { capabilityName, body -> capabilityManager.request(capabilityName, body) },
-    private val udpFallbackRequest: suspend (UUID) -> Unit = { fallbackAvatarId ->
-        sendPropertiesRequestInternal(fallbackAvatarId)
-    }
+    private val udpFallbackRequest: (suspend (UUID) -> Unit)? = null
 ) {
     companion object {
         private const val TAG = "UserProfileManager"
@@ -93,13 +91,14 @@ class UserProfileManager(
             val request = LLSDMap().apply {
                 this["agent_id"] = LLSDString(avatarId.toString())
             }
-            val response = capabilityManager.request(CapabilityManager.CAP_AGENT_PROFILE, request)
+            val response = capabilityRequest(CapabilityManager.CAP_AGENT_PROFILE, request)
 
             if (response is LLSDMap) {
                 val profile = parseProfileFromLLSD(avatarId, response)
                 cacheProfile(avatarId, profile)
                 notifyCallbacks(avatarId, profile)
-                Log.d(TAG, "Loaded profile for $avatarId via AgentProfile capability ($capUrl)")
+                val capUrl = capabilityManager.getCapability(CapabilityManager.CAP_AGENT_PROFILE)
+                Log.d(TAG, "Loaded profile for $avatarId via AgentProfile capability (${capUrl ?: "unknown"})")
                 return
             }
 
@@ -116,7 +115,7 @@ class UserProfileManager(
      * Send AvatarPropertiesRequest via UDP.
      */
     private suspend fun sendPropertiesRequest(avatarId: UUID) {
-        udpFallbackRequest(avatarId)
+        udpFallbackRequest?.invoke(avatarId) ?: sendPropertiesRequestInternal(avatarId)
     }
 
     private suspend fun sendPropertiesRequestInternal(avatarId: UUID) {

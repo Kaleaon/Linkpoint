@@ -65,7 +65,11 @@ object DeclaredMessageSlices {
         val serialNum: Long,
     )
 
-    typealias AgentResumeMessage = AgentPauseMessage
+    data class AgentResumeMessage(
+        val agentId: UUID,
+        val sessionId: UUID,
+        val serialNum: Long,
+    )
 
     fun writeFetchInventoryDescendents(message: FetchInventoryDescendentsMessage): ByteArray =
         ByteBuffer.allocate(70).order(ByteOrder.LITTLE_ENDIAN).apply {
@@ -210,9 +214,13 @@ object DeclaredMessageSlices {
         )
     }
 
-    fun writeAgentResume(message: AgentResumeMessage): ByteArray = writeAgentPause(message)
+    fun writeAgentResume(message: AgentResumeMessage): ByteArray =
+        writeAgentPause(AgentPauseMessage(message.agentId, message.sessionId, message.serialNum))
 
-    fun parseAgentResume(payload: ByteArray): AgentResumeMessage = parseAgentPause(payload)
+    fun parseAgentResume(payload: ByteArray): AgentResumeMessage {
+        val pause = parseAgentPause(payload)
+        return AgentResumeMessage(pause.agentId, pause.sessionId, pause.serialNum)
+    }
 
     fun handle(messageId: Int, rawPacket: ByteArray, onHandled: (String) -> Unit): Boolean {
         val payload = MessageParser.extractPayload(rawPacket) ?: return false

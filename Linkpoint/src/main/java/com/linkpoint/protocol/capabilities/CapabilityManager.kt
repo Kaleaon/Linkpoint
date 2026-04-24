@@ -625,7 +625,7 @@ class CapabilityManager : CapabilityRequester {
      */
     override suspend fun request(
         capName: String,
-        body: LLSDValue? = null
+        body: LLSDValue?
     ): LLSDValue? = withContext(Dispatchers.IO) {
         val url = getCapability(capName) ?: return@withContext null
         val options = getOptionsForCapability(capName)
