@@ -331,7 +331,7 @@ public abstract class ImmutableMultimap<K, V> extends AbstractMultimap<K, V> imp
     @Override // com.google.common.collect.Multimap
     @Deprecated
     public void clear() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.AbstractMultimap, com.google.common.collect.Multimap
@@ -437,37 +437,37 @@ public abstract class ImmutableMultimap<K, V> extends AbstractMultimap<K, V> imp
     @Override // com.google.common.collect.AbstractMultimap, com.google.common.collect.Multimap
     @Deprecated
     public boolean put(K k, V v) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.AbstractMultimap, com.google.common.collect.Multimap
     @Deprecated
     public boolean putAll(Multimap<? extends K, ? extends V> multimap) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.AbstractMultimap, com.google.common.collect.Multimap
     @Deprecated
     public boolean putAll(K k, Iterable<? extends V> iterable) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.AbstractMultimap, com.google.common.collect.Multimap
     @Deprecated
     public boolean remove(Object obj, Object obj2) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.Multimap
     @Deprecated
     public ImmutableCollection<V> removeAll(Object obj) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.AbstractMultimap, com.google.common.collect.Multimap
     @Deprecated
     public ImmutableCollection<V> replaceValues(K k, Iterable<? extends V> iterable) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     /* JADX WARN: Multi-variable type inference failed */

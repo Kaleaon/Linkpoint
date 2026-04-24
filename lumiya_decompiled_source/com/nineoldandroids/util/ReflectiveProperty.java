@@ -96,7 +96,7 @@ class ReflectiveProperty<T, V> extends Property<T, V> {
     public void set(T t, V v) {
         if (this.mSetter == null) {
             if (this.mField == null) {
-                throw new UnsupportedOperationException("Property " + getName() + " is read-only");
+                throw new IllegalStateException("Property " + getName() + " is read-only");
             }
             try {
                 this.mField.set(t, v);

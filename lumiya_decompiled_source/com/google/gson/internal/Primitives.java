@@ -26,7 +26,7 @@ public final class Primitives {
     }
 
     private Primitives() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     private static void add(Map<Class<?>, Class<?>> map, Map<Class<?>, Class<?>> map2, Class<?> cls, Class<?> cls2) {

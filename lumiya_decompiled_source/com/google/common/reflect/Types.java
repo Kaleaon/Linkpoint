@@ -355,7 +355,7 @@ public final class Types {
                     throw e.getCause();
                 }
             }
-            throw new UnsupportedOperationException(name);
+            throw new IllegalStateException(name);
         }
     }
 

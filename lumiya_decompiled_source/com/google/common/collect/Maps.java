@@ -477,7 +477,7 @@ public final class Maps {
         public boolean removeAll(Collection<?> collection) {
             try {
                 return super.removeAll((Collection) Preconditions.checkNotNull(collection));
-            } catch (UnsupportedOperationException e) {
+            } catch (IllegalStateException e) {
                 return Sets.removeAllImpl(this, collection.iterator());
             }
         }
@@ -486,7 +486,7 @@ public final class Maps {
         public boolean retainAll(Collection<?> collection) {
             try {
                 return super.retainAll((Collection) Preconditions.checkNotNull(collection));
-            } catch (UnsupportedOperationException e) {
+            } catch (IllegalStateException e) {
                 HashSet newHashSetWithExpectedSize = Sets.newHashSetWithExpectedSize(collection.size());
                 for (Object obj : collection) {
                     if (contains(obj)) {
@@ -1641,7 +1641,7 @@ public final class Maps {
 
         @Override // com.google.common.collect.BiMap
         public V forcePut(K k, V v) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.BiMap
@@ -1825,12 +1825,12 @@ public final class Maps {
 
         @Override // java.util.NavigableMap
         public final Map.Entry<K, V> pollFirstEntry() {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // java.util.NavigableMap
         public final Map.Entry<K, V> pollLastEntry() {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // java.util.NavigableMap
@@ -1937,7 +1937,7 @@ public final class Maps {
         public boolean remove(Object obj) {
             try {
                 return super.remove(obj);
-            } catch (UnsupportedOperationException e) {
+            } catch (IllegalStateException e) {
                 for (Map.Entry<K, V> entry : map().entrySet()) {
                     if (Objects.equal(obj, entry.getValue())) {
                         map().remove(entry.getKey());
@@ -1952,7 +1952,7 @@ public final class Maps {
         public boolean removeAll(Collection<?> collection) {
             try {
                 return super.removeAll((Collection) Preconditions.checkNotNull(collection));
-            } catch (UnsupportedOperationException e) {
+            } catch (IllegalStateException e) {
                 HashSet newHashSet = Sets.newHashSet();
                 for (Map.Entry<K, V> entry : map().entrySet()) {
                     if (collection.contains(entry.getValue())) {
@@ -1967,7 +1967,7 @@ public final class Maps {
         public boolean retainAll(Collection<?> collection) {
             try {
                 return super.retainAll((Collection) Preconditions.checkNotNull(collection));
-            } catch (UnsupportedOperationException e) {
+            } catch (IllegalStateException e) {
                 HashSet newHashSet = Sets.newHashSet();
                 for (Map.Entry<K, V> entry : map().entrySet()) {
                     if (collection.contains(entry.getValue())) {
@@ -2468,12 +2468,12 @@ public final class Maps {
         return new ForwardingNavigableSet<E>() { // from class: com.google.common.collect.Maps.4
             @Override // com.google.common.collect.ForwardingCollection, java.util.Collection
             public boolean add(E e) {
-                throw new UnsupportedOperationException();
+                throw new IllegalStateException();
             }
 
             @Override // com.google.common.collect.ForwardingCollection, java.util.Collection
             public boolean addAll(Collection<? extends E> collection) {
-                throw new UnsupportedOperationException();
+                throw new IllegalStateException();
             }
 
             /* JADX INFO: Access modifiers changed from: protected */
@@ -2524,12 +2524,12 @@ public final class Maps {
         return new ForwardingSet<E>() { // from class: com.google.common.collect.Maps.2
             @Override // com.google.common.collect.ForwardingCollection, java.util.Collection
             public boolean add(E e) {
-                throw new UnsupportedOperationException();
+                throw new IllegalStateException();
             }
 
             @Override // com.google.common.collect.ForwardingCollection, java.util.Collection
             public boolean addAll(Collection<? extends E> collection) {
-                throw new UnsupportedOperationException();
+                throw new IllegalStateException();
             }
 
             /* JADX INFO: Access modifiers changed from: protected */
@@ -2545,12 +2545,12 @@ public final class Maps {
         return new ForwardingSortedSet<E>() { // from class: com.google.common.collect.Maps.3
             @Override // com.google.common.collect.ForwardingCollection, java.util.Collection
             public boolean add(E e) {
-                throw new UnsupportedOperationException();
+                throw new IllegalStateException();
             }
 
             @Override // com.google.common.collect.ForwardingCollection, java.util.Collection
             public boolean addAll(Collection<? extends E> collection) {
-                throw new UnsupportedOperationException();
+                throw new IllegalStateException();
             }
 
             /* JADX INFO: Access modifiers changed from: protected */

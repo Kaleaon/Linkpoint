@@ -241,7 +241,7 @@ public final class LinkifyCompat {
                     arrayList.add(linkSpec);
                 } catch (UnsupportedEncodingException e) {
                 }
-            } catch (UnsupportedOperationException e2) {
+            } catch (IllegalStateException e2) {
                 return;
             }
         }

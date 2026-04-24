@@ -147,22 +147,22 @@ public class ToolbarActionBar extends ActionBar {
 
     @Override // android.support.v7.app.ActionBar
     public void addTab(ActionBar.Tab tab) {
-        throw new UnsupportedOperationException("Tabs are not supported in toolbar action bars");
+        throw new IllegalStateException("Tabs are not supported in toolbar action bars");
     }
 
     @Override // android.support.v7.app.ActionBar
     public void addTab(ActionBar.Tab tab, int i) {
-        throw new UnsupportedOperationException("Tabs are not supported in toolbar action bars");
+        throw new IllegalStateException("Tabs are not supported in toolbar action bars");
     }
 
     @Override // android.support.v7.app.ActionBar
     public void addTab(ActionBar.Tab tab, int i, boolean z) {
-        throw new UnsupportedOperationException("Tabs are not supported in toolbar action bars");
+        throw new IllegalStateException("Tabs are not supported in toolbar action bars");
     }
 
     @Override // android.support.v7.app.ActionBar
     public void addTab(ActionBar.Tab tab, boolean z) {
-        throw new UnsupportedOperationException("Tabs are not supported in toolbar action bars");
+        throw new IllegalStateException("Tabs are not supported in toolbar action bars");
     }
 
     @Override // android.support.v7.app.ActionBar
@@ -227,7 +227,7 @@ public class ToolbarActionBar extends ActionBar {
 
     @Override // android.support.v7.app.ActionBar
     public ActionBar.Tab getSelectedTab() {
-        throw new UnsupportedOperationException("Tabs are not supported in toolbar action bars");
+        throw new IllegalStateException("Tabs are not supported in toolbar action bars");
     }
 
     @Override // android.support.v7.app.ActionBar
@@ -237,7 +237,7 @@ public class ToolbarActionBar extends ActionBar {
 
     @Override // android.support.v7.app.ActionBar
     public ActionBar.Tab getTabAt(int i) {
-        throw new UnsupportedOperationException("Tabs are not supported in toolbar action bars");
+        throw new IllegalStateException("Tabs are not supported in toolbar action bars");
     }
 
     @Override // android.support.v7.app.ActionBar
@@ -283,7 +283,7 @@ public class ToolbarActionBar extends ActionBar {
 
     @Override // android.support.v7.app.ActionBar
     public ActionBar.Tab newTab() {
-        throw new UnsupportedOperationException("Tabs are not supported in toolbar action bars");
+        throw new IllegalStateException("Tabs are not supported in toolbar action bars");
     }
 
     @Override // android.support.v7.app.ActionBar
@@ -340,7 +340,7 @@ public class ToolbarActionBar extends ActionBar {
 
     @Override // android.support.v7.app.ActionBar
     public void removeAllTabs() {
-        throw new UnsupportedOperationException("Tabs are not supported in toolbar action bars");
+        throw new IllegalStateException("Tabs are not supported in toolbar action bars");
     }
 
     @Override // android.support.v7.app.ActionBar
@@ -350,12 +350,12 @@ public class ToolbarActionBar extends ActionBar {
 
     @Override // android.support.v7.app.ActionBar
     public void removeTab(ActionBar.Tab tab) {
-        throw new UnsupportedOperationException("Tabs are not supported in toolbar action bars");
+        throw new IllegalStateException("Tabs are not supported in toolbar action bars");
     }
 
     @Override // android.support.v7.app.ActionBar
     public void removeTabAt(int i) {
-        throw new UnsupportedOperationException("Tabs are not supported in toolbar action bars");
+        throw new IllegalStateException("Tabs are not supported in toolbar action bars");
     }
 
     @Override // android.support.v7.app.ActionBar
@@ -370,7 +370,7 @@ public class ToolbarActionBar extends ActionBar {
 
     @Override // android.support.v7.app.ActionBar
     public void selectTab(ActionBar.Tab tab) {
-        throw new UnsupportedOperationException("Tabs are not supported in toolbar action bars");
+        throw new IllegalStateException("Tabs are not supported in toolbar action bars");
     }
 
     @Override // android.support.v7.app.ActionBar

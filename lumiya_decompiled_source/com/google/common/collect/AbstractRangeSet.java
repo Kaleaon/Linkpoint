@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 abstract class AbstractRangeSet<C extends Comparable> implements RangeSet<C> {
     @Override // com.google.common.collect.RangeSet
     public void add(Range<C> range) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.RangeSet
@@ -65,7 +65,7 @@ abstract class AbstractRangeSet<C extends Comparable> implements RangeSet<C> {
 
     @Override // com.google.common.collect.RangeSet
     public void remove(Range<C> range) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.RangeSet

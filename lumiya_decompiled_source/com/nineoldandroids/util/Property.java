@@ -28,6 +28,6 @@ public abstract class Property<T, V> {
     }
 
     public void set(T t, V v) {
-        throw new UnsupportedOperationException("Property " + getName() + " is read-only");
+        throw new IllegalStateException("Property " + getName() + " is read-only");
     }
 }

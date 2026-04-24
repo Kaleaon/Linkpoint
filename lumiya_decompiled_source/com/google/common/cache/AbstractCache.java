@@ -82,7 +82,7 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
 
     @Override // com.google.common.cache.Cache
     public ConcurrentMap<K, V> asMap() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.cache.Cache
@@ -91,7 +91,7 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
 
     @Override // com.google.common.cache.Cache
     public V get(K k, Callable<? extends V> callable) throws ExecutionException {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     /* JADX WARN: Multi-variable type inference failed */
@@ -109,12 +109,12 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
 
     @Override // com.google.common.cache.Cache
     public void invalidate(Object obj) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.cache.Cache
     public void invalidateAll() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.cache.Cache
@@ -127,7 +127,7 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
 
     @Override // com.google.common.cache.Cache
     public void put(K k, V v) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.cache.Cache
@@ -139,11 +139,11 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
 
     @Override // com.google.common.cache.Cache
     public long size() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.cache.Cache
     public CacheStats stats() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 }

@@ -568,12 +568,12 @@ public final class Sets {
 
         @Override // java.util.NavigableSet
         public E pollFirst() {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // java.util.NavigableSet
         public E pollLast() {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // java.util.NavigableSet

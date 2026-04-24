@@ -180,7 +180,7 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V> implements 
         }
 
         public void add(Map.Entry<K, V> entry) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // java.util.ListIterator, java.util.Iterator
@@ -250,7 +250,7 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V> implements 
         }
 
         public void set(Map.Entry<K, V> entry) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         void setValue(V v) {

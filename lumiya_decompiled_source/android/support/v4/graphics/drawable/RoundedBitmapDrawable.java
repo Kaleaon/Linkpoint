@@ -118,7 +118,7 @@ public abstract class RoundedBitmapDrawable extends Drawable {
     }
 
     void gravityCompatApply(int i, int i2, int i3, Rect rect, Rect rect2) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     public boolean hasAntiAlias() {
@@ -126,7 +126,7 @@ public abstract class RoundedBitmapDrawable extends Drawable {
     }
 
     public boolean hasMipMap() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     public boolean isCircular() {
@@ -210,7 +210,7 @@ public abstract class RoundedBitmapDrawable extends Drawable {
     }
 
     public void setMipMap(boolean z) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     public void setTargetDensity(int i) {

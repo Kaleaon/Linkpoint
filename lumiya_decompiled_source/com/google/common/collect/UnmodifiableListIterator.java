@@ -8,12 +8,12 @@ public abstract class UnmodifiableListIterator<E> extends UnmodifiableIterator<E
     @Override // java.util.ListIterator
     @Deprecated
     public final void add(E e) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.ListIterator
     @Deprecated
     public final void set(E e) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 }

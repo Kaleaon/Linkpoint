@@ -98,7 +98,7 @@ public abstract class MenuPopup implements ShowableListMenu, MenuPresenter, Adap
 
     @Override // android.support.v7.view.menu.MenuPresenter
     public MenuView getMenuView(ViewGroup viewGroup) {
-        throw new UnsupportedOperationException("MenuPopups manage their own views");
+        throw new IllegalStateException("MenuPopups manage their own views");
     }
 
     @Override // android.support.v7.view.menu.MenuPresenter

@@ -89,7 +89,7 @@ public class SafeIterableMap<K, V> implements Iterable<Map.Entry<K, V>> {
 
         @Override // java.util.Map.Entry
         public V setValue(V v) {
-            throw new UnsupportedOperationException("An entry modification is not supported");
+            throw new IllegalStateException("An entry modification is not supported");
         }
 
         public String toString() {

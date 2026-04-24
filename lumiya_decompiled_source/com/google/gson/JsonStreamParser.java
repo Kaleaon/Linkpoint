@@ -62,6 +62,6 @@ public final class JsonStreamParser implements Iterator<JsonElement> {
 
     @Override // java.util.Iterator
     public void remove() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 }

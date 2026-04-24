@@ -56,6 +56,6 @@ public final class Jdk9Platform extends Platform {
 
     @Override // okhttp3.internal.platform.Platform
     public X509TrustManager trustManager(SSLSocketFactory sSLSocketFactory) {
-        throw new UnsupportedOperationException("clientBuilder.sslSocketFactory(SSLSocketFactory) not supported on JDK 9+");
+        throw new IllegalStateException("clientBuilder.sslSocketFactory(SSLSocketFactory) not supported on JDK 9+");
     }
 }

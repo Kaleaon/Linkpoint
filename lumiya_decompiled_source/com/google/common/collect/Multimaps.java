@@ -552,17 +552,17 @@ public final class Multimaps {
 
         @Override // com.google.common.collect.AbstractMultimap, com.google.common.collect.Multimap
         public boolean put(K k, V v) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.AbstractMultimap, com.google.common.collect.Multimap
         public boolean putAll(Multimap<? extends K, ? extends V> multimap) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.AbstractMultimap, com.google.common.collect.Multimap
         public boolean putAll(K k, Iterable<? extends V> iterable) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.AbstractMultimap, com.google.common.collect.Multimap
@@ -588,7 +588,7 @@ public final class Multimaps {
 
         @Override // com.google.common.collect.AbstractMultimap, com.google.common.collect.Multimap
         public Set<V> replaceValues(K k, Iterable<? extends V> iterable) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.Multimap
@@ -634,7 +634,7 @@ public final class Multimaps {
 
         @Override // com.google.common.collect.Multimaps.TransformedEntriesMultimap, com.google.common.collect.AbstractMultimap, com.google.common.collect.Multimap
         public List<V2> replaceValues(K k, Iterable<? extends V2> iterable) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         /* JADX WARN: Multi-variable type inference failed */
@@ -716,17 +716,17 @@ public final class Multimaps {
 
         @Override // com.google.common.collect.AbstractMultimap, com.google.common.collect.Multimap
         public boolean put(K k, V2 v2) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.AbstractMultimap, com.google.common.collect.Multimap
         public boolean putAll(Multimap<? extends K, ? extends V2> multimap) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.AbstractMultimap, com.google.common.collect.Multimap
         public boolean putAll(K k, Iterable<? extends V2> iterable) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         /* JADX WARN: Multi-variable type inference failed */
@@ -743,7 +743,7 @@ public final class Multimaps {
 
         @Override // com.google.common.collect.AbstractMultimap, com.google.common.collect.Multimap
         public Collection<V2> replaceValues(K k, Iterable<? extends V2> iterable) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.Multimap
@@ -783,7 +783,7 @@ public final class Multimaps {
 
         @Override // com.google.common.collect.Multimaps.UnmodifiableMultimap, com.google.common.collect.ForwardingMultimap, com.google.common.collect.Multimap
         public List<V> removeAll(Object obj) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         /* JADX WARN: Multi-variable type inference failed */
@@ -794,7 +794,7 @@ public final class Multimaps {
 
         @Override // com.google.common.collect.Multimaps.UnmodifiableMultimap, com.google.common.collect.ForwardingMultimap, com.google.common.collect.Multimap
         public List<V> replaceValues(K k, Iterable<? extends V> iterable) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
     }
 
@@ -835,7 +835,7 @@ public final class Multimaps {
 
         @Override // com.google.common.collect.ForwardingMultimap, com.google.common.collect.Multimap
         public void clear() {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         /* JADX INFO: Access modifiers changed from: protected */
@@ -884,32 +884,32 @@ public final class Multimaps {
 
         @Override // com.google.common.collect.ForwardingMultimap, com.google.common.collect.Multimap
         public boolean put(K k, V v) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.ForwardingMultimap, com.google.common.collect.Multimap
         public boolean putAll(Multimap<? extends K, ? extends V> multimap) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.ForwardingMultimap, com.google.common.collect.Multimap
         public boolean putAll(K k, Iterable<? extends V> iterable) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.ForwardingMultimap, com.google.common.collect.Multimap
         public boolean remove(Object obj, Object obj2) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.ForwardingMultimap, com.google.common.collect.Multimap
         public Collection<V> removeAll(Object obj) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.ForwardingMultimap, com.google.common.collect.Multimap
         public Collection<V> replaceValues(K k, Iterable<? extends V> iterable) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.ForwardingMultimap, com.google.common.collect.Multimap
@@ -956,7 +956,7 @@ public final class Multimaps {
 
         @Override // com.google.common.collect.Multimaps.UnmodifiableMultimap, com.google.common.collect.ForwardingMultimap, com.google.common.collect.Multimap
         public Set<V> removeAll(Object obj) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         /* JADX WARN: Multi-variable type inference failed */
@@ -967,7 +967,7 @@ public final class Multimaps {
 
         @Override // com.google.common.collect.Multimaps.UnmodifiableMultimap, com.google.common.collect.ForwardingMultimap, com.google.common.collect.Multimap
         public Set<V> replaceValues(K k, Iterable<? extends V> iterable) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
     }
 
@@ -1003,7 +1003,7 @@ public final class Multimaps {
 
         @Override // com.google.common.collect.Multimaps.UnmodifiableSetMultimap, com.google.common.collect.Multimaps.UnmodifiableMultimap, com.google.common.collect.ForwardingMultimap, com.google.common.collect.Multimap
         public SortedSet<V> removeAll(Object obj) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         /* JADX WARN: Multi-variable type inference failed */
@@ -1020,7 +1020,7 @@ public final class Multimaps {
 
         @Override // com.google.common.collect.Multimaps.UnmodifiableSetMultimap, com.google.common.collect.Multimaps.UnmodifiableMultimap, com.google.common.collect.ForwardingMultimap, com.google.common.collect.Multimap
         public SortedSet<V> replaceValues(K k, Iterable<? extends V> iterable) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.SortedSetMultimap

@@ -168,7 +168,7 @@ public class WeakQueue<T> implements BlockingQueue<T> {
 
     @Override // java.util.Collection, java.lang.Iterable
     public Iterator<T> iterator() {
-        throw new UnsupportedOperationException("Iterating over WeakQueue is not supported");
+        throw new IllegalStateException("Iterating over WeakQueue is not supported");
     }
 
     @Override // java.util.concurrent.BlockingQueue, java.util.Queue

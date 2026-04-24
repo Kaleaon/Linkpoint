@@ -311,22 +311,22 @@ public final class Multisets {
 
         @Override // com.google.common.collect.ForwardingMultiset, com.google.common.collect.Multiset
         public int add(E e, int i) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.ForwardingCollection, java.util.Collection
         public boolean add(E e) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.ForwardingCollection, java.util.Collection
         public boolean addAll(Collection<? extends E> collection) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.ForwardingCollection, java.util.Collection, java.util.Set
         public void clear() {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         Set<E> createElementSet() {
@@ -368,32 +368,32 @@ public final class Multisets {
 
         @Override // com.google.common.collect.ForwardingMultiset, com.google.common.collect.Multiset
         public int remove(Object obj, int i) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.ForwardingCollection, java.util.Collection, java.util.Set
         public boolean remove(Object obj) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.ForwardingCollection, java.util.Collection, java.util.Set
         public boolean removeAll(Collection<?> collection) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.ForwardingCollection, java.util.Collection, java.util.Set
         public boolean retainAll(Collection<?> collection) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.ForwardingMultiset, com.google.common.collect.Multiset
         public int setCount(E e, int i) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.ForwardingMultiset, com.google.common.collect.Multiset
         public boolean setCount(E e, int i, int i2) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
     }
 

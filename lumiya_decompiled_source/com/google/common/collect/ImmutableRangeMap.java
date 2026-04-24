@@ -129,7 +129,7 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
 
     @Override // com.google.common.collect.RangeMap
     public void clear() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.RangeMap
@@ -171,17 +171,17 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
 
     @Override // com.google.common.collect.RangeMap
     public void put(Range<K> range, V v) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.RangeMap
     public void putAll(RangeMap<K, V> rangeMap) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.RangeMap
     public void remove(Range<K> range) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.RangeMap

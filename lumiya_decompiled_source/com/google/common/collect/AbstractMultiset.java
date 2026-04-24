@@ -52,7 +52,7 @@ public abstract class AbstractMultiset<E> extends AbstractCollection<E> implemen
     }
 
     public int add(@Nullable E e, int i) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.AbstractCollection, java.util.Collection, com.google.common.collect.Multiset
@@ -140,7 +140,7 @@ public abstract class AbstractMultiset<E> extends AbstractCollection<E> implemen
     }
 
     public int remove(@Nullable Object obj, int i) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.AbstractCollection, java.util.Collection, com.google.common.collect.Multiset

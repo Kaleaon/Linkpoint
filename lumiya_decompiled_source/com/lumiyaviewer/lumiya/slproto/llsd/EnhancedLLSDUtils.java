@@ -38,7 +38,7 @@ public final class EnhancedLLSDUtils {
     
     private EnhancedLLSDUtils() {
         // Utility class - prevent instantiation
-        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+        throw new IllegalStateException("Utility class cannot be instantiated");
     }
     
     /**
