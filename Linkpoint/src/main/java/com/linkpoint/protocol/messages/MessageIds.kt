@@ -2198,4 +2198,16 @@ object MessageIds {
             SIM_CRASHED to "SimCrashed"
         )
     }
+
+    /**
+     * Protocol-template classification tables used by conformance tests.
+     */
+    val supportedTemplateMessages: Set<String>
+        get() = MessageTemplateCatalog.supportedParserOrWriterMessages
+
+    val declaredOnlyTemplateMessages: Map<String, String>
+        get() = MessageTemplateCatalog.declaredOnlyMessagesWithRationale
+
+    val deprecatedTemplateMessages: Map<String, String>
+        get() = MessageTemplateCatalog.deprecatedMessagesWithRationale
 }
