@@ -27,9 +27,23 @@ class AssetCache(private val context: Context) {
     
     // Memory cache (LRU) - uses configured size from CacheManager
     private val memoryCache: LruCache<String, ByteArray> by lazy {
-        val maxMemoryMB = cacheManager.getMemoryCacheSizeMB()
-        Log.i(TAG, "Initializing memory cache: ${maxMemoryMB}MB")
-        object : LruCache<String, ByteArray>(maxMemoryMB * 1024 * 1024) {
+        val configuredMB = cacheManager.getMemoryCacheSizeMB()
+        // Clamp the MB value in case a persisted preference is outside the supported range,
+        // then compute bytes in Long to avoid Int overflow. LruCache's maxSize is an Int,
+        // so at >= 2048 MB the naive Int multiplication wraps to <= 0 and crashes the
+        // constructor with "maxSize <= 0".
+        val clampedMB = configuredMB.coerceIn(
+            CacheManager.MIN_MEMORY_CACHE_MB,
+            CacheManager.MAX_MEMORY_CACHE_MB
+        )
+        val maxBytes = (clampedMB.toLong() * 1024L * 1024L)
+            .coerceAtMost(Int.MAX_VALUE.toLong())
+            .toInt()
+        if (clampedMB != configuredMB) {
+            Log.w(TAG, "Memory cache size ${configuredMB}MB out of range; clamped to ${clampedMB}MB")
+        }
+        Log.i(TAG, "Initializing memory cache: ${maxBytes / 1024 / 1024}MB")
+        object : LruCache<String, ByteArray>(maxBytes) {
             override fun sizeOf(key: String, value: ByteArray): Int = value.size
         }
     }
