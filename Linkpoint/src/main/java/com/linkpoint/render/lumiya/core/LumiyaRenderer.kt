@@ -5,6 +5,7 @@ import android.opengl.GLES32
 import android.opengl.Matrix
 import android.util.Log
 import android.view.Surface
+import com.linkpoint.avatar.AttachmentPoints
 import com.linkpoint.render.lumiya.drawable.*
 
 /**
@@ -47,12 +48,16 @@ class LumiyaRenderer : RenderEngineProvider {
     private var waterDrawable: DrawableWater? = null
     private var skyDrawable: DrawableSky? = null
     private var primStore = DrawablePrimStore()
+    private var hudStore = DrawableHudStore()
     private var avatarStore = DrawableAvatarStore()
     private var particleManager: DrawableParticleManager? = null
 
     // Full-screen quad VAO for FXAA resolve
     private var quadVAO = 0
     private var quadVBO = 0
+    private val hudViewMatrix = FloatArray(16)
+    private val hudProjectionMatrix = FloatArray(16)
+    private var worldPassEnabled = true
 
     // =====================================================================
     // Lifecycle
@@ -102,6 +107,7 @@ class LumiyaRenderer : RenderEngineProvider {
             particleManager = DrawableParticleManager(ctx)
 
             ctx.updateCamera()
+            rebuildHudMatrices(width, height)
 
             isInitialized = true
             Log.i(TAG, "Lumiya renderer initialised  (GPU: ${ctx.gpuRenderer})")
@@ -118,6 +124,7 @@ class LumiyaRenderer : RenderEngineProvider {
         ctx.aspectRatio = width.toFloat() / height.toFloat()
         GLES32.glViewport(0, 0, width, height)
         if (ctx.fxaaEnabled) ctx.createFXAAFramebuffer(width, height)
+        rebuildHudMatrices(width, height)
     }
 
     override fun onSurfaceDestroyed() {
@@ -146,36 +153,36 @@ class LumiyaRenderer : RenderEngineProvider {
         // ── 3. Clear ─────────────────────────────────────────────────────
         GLES32.glClear(GLES32.GL_COLOR_BUFFER_BIT or GLES32.GL_DEPTH_BUFFER_BIT or GLES32.GL_STENCIL_BUFFER_BIT)
 
-        // ── 4. Opaque pass ───────────────────────────────────────────────
-        GLES32.glDepthMask(true)
-        GLES32.glDisable(GLES32.GL_BLEND)
-
-        terrainDrawable?.draw(ctx)
-
-        primStore.drawOpaque(ctx)
-
-        // ── 5. Avatar pass ───────────────────────────────────────────────
-        avatarStore.draw(ctx)
-
-        // ── 6. Sky pass (render behind everything) ───────────────────────
-        GLES32.glDepthFunc(GLES32.GL_LEQUAL)
-        GLES32.glDepthMask(false)
-        skyDrawable?.draw(ctx)
-        GLES32.glDepthMask(true)
-        GLES32.glDepthFunc(GLES32.GL_LEQUAL)
-
-        // ── 7. Transparent pass ──────────────────────────────────────────
-        GLES32.glEnable(GLES32.GL_BLEND)
-        GLES32.glBlendFunc(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
-        primStore.drawTransparent(ctx)
-
-        // ── 8. Water pass ────────────────────────────────────────────────
-        waterDrawable?.draw(ctx)
-
-        // ── 9. Particle pass ─────────────────────────────────────────────
-        particleManager?.draw(ctx)
-
-        // ── 10. HUD pass (not implemented yet) ───────────────────────────
+        val framePlan = LumiyaFramePlanner.createPlan(
+            worldPassEnabled = worldPassEnabled,
+            hasHudElements = hudStore.hasElements()
+        )
+        framePlan.forEach { pass ->
+            when (pass) {
+                LumiyaRenderPass.WORLD_OPAQUE -> {
+                    GLES32.glDepthMask(true)
+                    GLES32.glDisable(GLES32.GL_BLEND)
+                    terrainDrawable?.draw(ctx)
+                    primStore.drawOpaque(ctx)
+                }
+                LumiyaRenderPass.WORLD_AVATAR -> avatarStore.draw(ctx)
+                LumiyaRenderPass.WORLD_SKY -> {
+                    GLES32.glDepthFunc(GLES32.GL_LEQUAL)
+                    GLES32.glDepthMask(false)
+                    skyDrawable?.draw(ctx)
+                    GLES32.glDepthMask(true)
+                    GLES32.glDepthFunc(GLES32.GL_LEQUAL)
+                }
+                LumiyaRenderPass.WORLD_TRANSPARENT -> {
+                    GLES32.glEnable(GLES32.GL_BLEND)
+                    GLES32.glBlendFunc(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
+                    primStore.drawTransparent(ctx)
+                }
+                LumiyaRenderPass.WORLD_WATER -> waterDrawable?.draw(ctx)
+                LumiyaRenderPass.WORLD_PARTICLES -> particleManager?.draw(ctx)
+                LumiyaRenderPass.HUD -> renderHudPass()
+            }
+        }
 
         // ── 11. FXAA resolve ─────────────────────────────────────────────
         if (ctx.fxaaEnabled && ctx.fxaaFramebuffer != 0) {
@@ -222,6 +229,7 @@ class LumiyaRenderer : RenderEngineProvider {
 
     override fun removeObject(id: Long) {
         primStore.removePrim(id)
+        hudStore.removeHudPrim(id)
     }
 
     override fun updateTerrain(heightmap: FloatArray, width: Int, depth: Int) {
@@ -230,6 +238,7 @@ class LumiyaRenderer : RenderEngineProvider {
 
     override fun clearScene() {
         primStore.clear()
+        hudStore.clear()
         avatarStore.clear()
         terrainDrawable?.clear()
     }
@@ -246,6 +255,7 @@ class LumiyaRenderer : RenderEngineProvider {
         skyDrawable?.destroy()
         particleManager?.destroy()
         primStore.destroy()
+        hudStore.destroy()
         avatarStore.destroy()
         destroyFullScreenQuad()
         ctx.shutdown()
@@ -306,5 +316,68 @@ class LumiyaRenderer : RenderEngineProvider {
     private fun destroyFullScreenQuad() {
         if (quadVAO != 0) { GLES32.glDeleteVertexArrays(1, intArrayOf(quadVAO), 0); quadVAO = 0 }
         if (quadVBO != 0) { GLES32.glDeleteBuffers(1, intArrayOf(quadVBO), 0); quadVBO = 0 }
+    }
+
+    fun addAttachmentObject(
+        id: Long,
+        attachmentPoint: Int,
+        posX: Float,
+        posY: Float,
+        posZ: Float,
+        layer: Int = 0
+    ) {
+        if (AttachmentPoints.isHudPoint(attachmentPoint)) {
+            hudStore.addHudPrim(
+                id = id,
+                attachmentPoint = attachmentPoint,
+                posX = posX,
+                posY = posY,
+                posZ = posZ,
+                layer = layer
+            )
+        } else {
+            primStore.addPrim(id, posX, posY, posZ)
+        }
+    }
+
+    fun setWorldPassEnabled(enabled: Boolean) {
+        worldPassEnabled = enabled
+    }
+
+    private fun renderHudPass() {
+        val previousProjection = ctx.projectionMatrix.clone()
+        val previousView = ctx.viewMatrix.clone()
+        try {
+            System.arraycopy(hudProjectionMatrix, 0, ctx.projectionMatrix, 0, 16)
+            System.arraycopy(hudViewMatrix, 0, ctx.viewMatrix, 0, 16)
+            ctx.uploadGlobalUBO()
+
+            // Isolate HUD depth behavior from world geometry.
+            GLES32.glDisable(GLES32.GL_DEPTH_TEST)
+            GLES32.glDepthMask(false)
+            GLES32.glEnable(GLES32.GL_BLEND)
+            GLES32.glBlendFunc(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
+            hudStore.draw(ctx)
+        } finally {
+            System.arraycopy(previousProjection, 0, ctx.projectionMatrix, 0, 16)
+            System.arraycopy(previousView, 0, ctx.viewMatrix, 0, 16)
+            ctx.uploadGlobalUBO()
+            GLES32.glDepthMask(true)
+            GLES32.glEnable(GLES32.GL_DEPTH_TEST)
+        }
+    }
+
+    private fun rebuildHudMatrices(width: Int, height: Int) {
+        Matrix.setIdentityM(hudViewMatrix, 0)
+        Matrix.orthoM(
+            hudProjectionMatrix,
+            0,
+            0f,
+            width.toFloat(),
+            height.toFloat(),
+            0f,
+            -1f,
+            1f
+        )
     }
 }
