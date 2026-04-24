@@ -1,0 +1,50 @@
+{
+  "issue_count": 6,
+  "high": 3,
+  "medium": 3,
+  "low": 0,
+  "issues": [
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "file_bundle/ActiveChattersManager.java",
+      "symbol": "com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager.AnonymousClass2.processRequest",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(com.lumiyaviewer.lumiya.slproto.users.ChatterID) return=com.lumiyaviewer.lumiya.slproto.users.manager.UnreadMessageInfo"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "file_bundle/ActiveChattersManager.java",
+      "symbol": "com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager.m273lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_13379",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(com.lumiyaviewer.lumiya.slproto.users.ChatterID, com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent, boolean) return=void"
+    },
+    {
+      "category": "kotlin_logic_placeholder",
+      "severity": "medium",
+      "file": "src/main/java/com/linkpoint/protocol/messages/RobustUDPConnection.kt",
+      "symbol": "ByteArray(0)",
+      "details": "Potential placeholder packet/body content; verify against smali/original protocol behavior."
+    },
+    {
+      "category": "kotlin_backpressure_risk",
+      "severity": "medium",
+      "file": "src/main/java/com/linkpoint/protocol/messages/RobustUDPConnection.kt",
+      "symbol": "Channel.UNLIMITED",
+      "details": "Unbounded channel can cause memory growth; verify expected throughput and add backpressure strategy."
+    },
+    {
+      "category": "kotlin_backpressure_risk",
+      "severity": "medium",
+      "file": "src/main/java/com/linkpoint/utils/SessionLogRecorder.kt",
+      "symbol": "Channel.UNLIMITED",
+      "details": "Unbounded channel can cause memory growth; verify expected throughput and add backpressure strategy."
+    },
+    {
+      "category": "smali_artifact_availability",
+      "severity": "high",
+      "file": "docs/apk_analysis/java_smali_gap_report.json",
+      "symbol": "smali_class_count",
+      "details": "Smali class inventory missing/incomplete for current pass; rerun extraction with local APK to unblock stub reconstruction."
+    }
+  ]
+}

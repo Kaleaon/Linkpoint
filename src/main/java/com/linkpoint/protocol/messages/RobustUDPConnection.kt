@@ -41,7 +41,6 @@ class RobustUDPConnection(
         
         // Heartbeat settings
         private const val HEARTBEAT_INTERVAL_MS = 30000L
-        private const val HEARTBEAT_TIMEOUT_MS = 5000L
     }
     
     // Connection state
@@ -289,15 +288,15 @@ class RobustUDPConnection(
         _connectionState.value = ConnectionState.RECONNECTING
         
         // Calculate exponential backoff delay
-        val delay = minOf(
+        val reconnectDelayMs = minOf(
             INITIAL_RECONNECT_DELAY_MS * (1 shl (currentAttempts - 1)),
             MAX_RECONNECT_DELAY_MS
         )
         
-        Log.i(TAG, "Reconnecting in ${delay}ms (attempt $currentAttempts/$MAX_RECONNECT_ATTEMPTS)")
+        Log.i(TAG, "Reconnecting in ${reconnectDelayMs}ms (attempt $currentAttempts/$MAX_RECONNECT_ATTEMPTS)")
         
         scope.launch {
-            delay(delay)
+            delay(reconnectDelayMs)
             
             if (!isShuttingDown.get()) {
                 Log.i(TAG, "Attempting reconnection...")

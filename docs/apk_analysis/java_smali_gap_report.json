@@ -1,0 +1,23 @@
+{
+  "stub_method_count": 2,
+  "smali_class_count": 0,
+  "stubs_with_missing_smali_class_count": 2,
+  "stubs": [
+    {
+      "java_file": "file_bundle/ActiveChattersManager.java",
+      "class": "com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager.AnonymousClass2",
+      "method": "processRequest",
+      "params": "com.lumiyaviewer.lumiya.slproto.users.ChatterID",
+      "return_type": "com.lumiyaviewer.lumiya.slproto.users.manager.UnreadMessageInfo",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "file_bundle/ActiveChattersManager.java",
+      "class": "com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager",
+      "method": "m273lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_13379",
+      "params": "com.lumiyaviewer.lumiya.slproto.users.ChatterID, com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent, boolean",
+      "return_type": "void",
+      "smali_class_present": false
+    }
+  ]
+}
