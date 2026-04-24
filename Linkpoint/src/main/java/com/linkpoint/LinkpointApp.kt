@@ -116,6 +116,43 @@ class LinkpointApp : Application() {
         fun getInstance(): LinkpointApp {
             return instance ?: throw IllegalStateException("Application not initialized")
         }
+
+        /**
+         * Explicit list of UDP message names that have runtime parser/handler coverage in LinkpointApp.
+         * Used by protocol conformance tests to keep handler registration parity visible in CI reports.
+         */
+        val parserSupportedMessageNamesForConformance: Set<String> = setOf(
+            "AgentAlertMessage",
+            "AgentDataUpdate",
+            "AgentMovementComplete",
+            "AvatarAnimation",
+            "ChangeUserRights",
+            "ChatFromSimulator",
+            "CoarseLocationUpdate",
+            "CrossedRegion",
+            "EnableSimulator",
+            "HealthMessage",
+            "ImprovedInstantMessage",
+            "ImprovedTerseObjectUpdate",
+            "KillObject",
+            "LayerData",
+            "ObjectProperties",
+            "ObjectUpdate",
+            "ObjectUpdateCached",
+            "ObjectUpdateCompressed",
+            "OfflineNotification",
+            "OnlineNotification",
+            "PacketAck",
+            "ParcelOverlay",
+            "RegionHandshake",
+            "ScriptControlChange",
+            "SoundTrigger",
+            "StartPingCheck",
+            "TeleportFailed",
+            "TeleportFinish",
+            "TeleportProgress",
+            "TeleportStart",
+        )
     }
     
     // Application-wide coroutine scope for background operations
