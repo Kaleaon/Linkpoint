@@ -3,6 +3,7 @@ package com.linkpoint.objects
 import android.os.Parcelable
 import android.util.Log
 import com.linkpoint.diagnostics.ScenePopulationDiagnostics
+import com.linkpoint.protocol.core.AgentIdentity
 import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.ObjectPropertyEntry
 import com.linkpoint.protocol.messages.ObjectUpdateData
@@ -84,8 +85,13 @@ class ObjectManager(
     val editMode: StateFlow<EditMode> = _editMode
 
     private fun writeAgentData(buffer: ByteBuffer) {
-        buffer.putUUID(udpConnection.getAgentId())
-        buffer.putUUID(udpConnection.getSessionId())
+        val identity = AgentIdentity(
+            agentId = udpConnection.getAgentId(),
+            sessionId = udpConnection.getSessionId(),
+            circuitCode = udpConnection.getCircuitCode()
+        ).requireValid("ObjectManager outbound packet")
+        buffer.putUUID(identity.agentId)
+        buffer.putUUID(identity.sessionId)
     }
 
     private fun writeAgentGroupData(buffer: ByteBuffer, groupId: UUID = ZERO_UUID) {

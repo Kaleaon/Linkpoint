@@ -4,6 +4,7 @@ import android.util.Log
 import com.linkpoint.messaging.MessagingDispatcher
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
+import com.linkpoint.protocol.core.AgentIdentity
 import com.linkpoint.protocol.llsd.*
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.putUUID
@@ -104,6 +105,12 @@ class IMManager(
     private val processedPushIds = ConcurrentHashMap.newKeySet<String>()
     private val pendingSyncSessions = MutableStateFlow<Set<UUID>>(emptySet())
     val syncNeededSessions: StateFlow<Set<UUID>> = pendingSyncSessions
+
+    private fun outboundIdentity(): AgentIdentity = AgentIdentity(
+        agentId = agentId,
+        sessionId = udpConnection.getSessionId(),
+        circuitCode = udpConnection.getCircuitCode()
+    ).requireValid("IMManager outbound packet")
     
     init {
         // Register for event queue events
@@ -485,8 +492,9 @@ class IMManager(
                 val payload = java.nio.ByteBuffer.allocate(100).order(java.nio.ByteOrder.LITTLE_ENDIAN)
                 
                 // AgentData block - UUIDs are big-endian per SL protocol
-                payload.putUUID(agentId)
-                payload.putUUID(udpConnection.getSessionId())  // Proper session ID
+                val identity = outboundIdentity()
+                payload.putUUID(identity.agentId)
+                payload.putUUID(identity.sessionId)
                 
                 // MessageBlock
                 payload.put(0)  // FromGroup (BOOL)
@@ -544,8 +552,9 @@ class IMManager(
                 val payload = java.nio.ByteBuffer.allocate(100).order(java.nio.ByteOrder.LITTLE_ENDIAN)
                 
                 // AgentData block - UUIDs are big-endian per SL protocol
-                payload.putUUID(agentId)
-                payload.putUUID(udpConnection.getSessionId())  // Proper session ID
+                val identity = outboundIdentity()
+                payload.putUUID(identity.agentId)
+                payload.putUUID(identity.sessionId)
                 
                 // MessageBlock
                 payload.put(0)  // FromGroup (BOOL)

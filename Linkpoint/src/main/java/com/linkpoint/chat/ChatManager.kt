@@ -2,6 +2,7 @@ package com.linkpoint.chat
 
 import android.util.Log
 import com.linkpoint.messaging.MessagingDispatcher
+import com.linkpoint.protocol.core.AgentIdentity
 import com.linkpoint.protocol.messages.ChatData
 import com.linkpoint.protocol.messages.ChatSourceType
 import com.linkpoint.protocol.messages.ChatType
@@ -148,6 +149,12 @@ class ChatManager(
     }
     
     private fun buildChatPacket(message: String, type: ChatType, channel: Int): ByteArray {
+        val identity = AgentIdentity(
+            agentId = agentId,
+            sessionId = udpConnection.getSessionId(),
+            circuitCode = udpConnection.getCircuitCode()
+        ).requireValid("ChatManager.buildChatPacket")
+
         val messageBytes = message.toByteArray(Charsets.UTF_8)
         
         // ChatFromViewer message format per SL protocol:
@@ -164,11 +171,8 @@ class ChatManager(
             .order(ByteOrder.LITTLE_ENDIAN)
         
         // AgentData block - UUIDs use big-endian per SL protocol
-        buffer.putUUID(agentId)
-        
-        // SessionID - get from UDPConnection
-        val sessionId = udpConnection.getSessionId()
-        buffer.putUUID(sessionId)
+        buffer.putUUID(identity.agentId)
+        buffer.putUUID(identity.sessionId)
         
         // ChatData block
         // Message - Variable 2 (2-byte length prefix + string + null terminator)

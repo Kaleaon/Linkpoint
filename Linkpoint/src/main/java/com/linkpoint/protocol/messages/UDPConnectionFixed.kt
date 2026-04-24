@@ -7,6 +7,7 @@ import com.linkpoint.network.events.ConnectionState
 import com.linkpoint.network.events.CircuitEstablishedEvent
 import com.linkpoint.network.events.MessageReceivedEvent
 import com.linkpoint.network.NetworkLogger
+import com.linkpoint.protocol.core.AgentIdentity
 import com.linkpoint.protocol.circuit.LinkpointConstants
 import com.linkpoint.protocol.types.putUUID
 import com.linkpoint.utils.SessionLogRecorder
@@ -568,6 +569,13 @@ class UDPConnectionFixed {
      * Get the circuit code for this connection
      */
     fun getCircuitCode(): Int = circuitCode
+
+    private fun outboundIdentity(context: String): AgentIdentity =
+        AgentIdentity(
+            agentId = agentId,
+            sessionId = sessionId,
+            circuitCode = circuitCode
+        ).requireValid(context)
 
     /**
      * Guards ownership of movement/reliable-send lifecycle for shared circuits.
@@ -1757,6 +1765,7 @@ class UDPConnectionFixed {
      * Uses mobile-optimized packet construction
      */
     private fun sendUseCircuitCode() {
+        val identity = outboundIdentity("UDPConnectionFixed.sendUseCircuitCode")
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sending UseCircuitCode")
         
         // UseCircuitCode message format:
@@ -1764,9 +1773,9 @@ class UDPConnectionFixed {
         // - SessionID (16 bytes, UUID)
         // - AgentID (16 bytes, UUID)
         val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
-        payload.putInt(circuitCode)
-        payload.put(sessionId.asBytes())
-        payload.put(agentId.asBytes())
+        payload.putInt(identity.circuitCode ?: 0)
+        payload.put(identity.sessionId.asBytes())
+        payload.put(identity.agentId.asBytes())
         
         // Message ID for UseCircuitCode (low frequency: -65533)
         val messageId = MessageIds.USE_CIRCUIT_CODE
@@ -1841,6 +1850,7 @@ class UDPConnectionFixed {
      * Uses mobile-optimized packet construction
      */
     fun sendCompleteAgentMovement() {
+        val identity = outboundIdentity("UDPConnectionFixed.sendCompleteAgentMovement")
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sending CompleteAgentMovement")
         
         // CompleteAgentMovement message format:
@@ -1848,9 +1858,9 @@ class UDPConnectionFixed {
         // - SessionID (16 bytes, UUID)
         // - CircuitCode (4 bytes, little-endian)
         val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
-        payload.put(agentId.asBytes())
-        payload.put(sessionId.asBytes())
-        payload.putInt(circuitCode)
+        payload.put(identity.agentId.asBytes())
+        payload.put(identity.sessionId.asBytes())
+        payload.putInt(identity.circuitCode ?: 0)
         
         // Message ID for CompleteAgentMovement (low frequency message)
         val messageId = MessageIds.COMPLETE_AGENT_MOVEMENT
@@ -1864,6 +1874,7 @@ class UDPConnectionFixed {
      * Mobile-optimized: 10 updates/sec to balance responsiveness and battery
      */
     fun sendAgentUpdate() {
+        val identity = outboundIdentity("UDPConnectionFixed.sendAgentUpdate")
         if (!_isConnected.value) {
             return
         }
@@ -1884,8 +1895,8 @@ class UDPConnectionFixed {
         val payload = ByteBuffer.allocate(114).order(ByteOrder.LITTLE_ENDIAN)
         
         // AgentID and SessionID
-        payload.put(agentId.asBytes())
-        payload.put(sessionId.asBytes())
+        payload.put(identity.agentId.asBytes())
+        payload.put(identity.sessionId.asBytes())
         
         // Body rotation (identity quaternion: x=0, y=0, z=0, w computed by server)
         payload.putFloat(0f)
@@ -1941,13 +1952,14 @@ class UDPConnectionFixed {
      * Must be sent in response to RegionHandshake from simulator.
      */
     fun sendRegionHandshakeReply(flags: Int = 0) {
+        val identity = outboundIdentity("UDPConnectionFixed.sendRegionHandshakeReply")
         val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
         
         // Agent ID
-        payload.putUUID(agentId)
+        payload.putUUID(identity.agentId)
         
         // Session ID
-        payload.putUUID(sessionId)
+        payload.putUUID(identity.sessionId)
         
         // Flags (typically 0)
         payload.putInt(flags)
@@ -1969,16 +1981,17 @@ class UDPConnectionFixed {
         texture: Float = 200000f,
         asset: Float = 100000f
     ) {
+        val identity = outboundIdentity("UDPConnectionFixed.sendAgentThrottle")
         val payload = ByteBuffer.allocate(36 + 4 + 28).order(ByteOrder.LITTLE_ENDIAN)
         
         // Agent ID
-        payload.putUUID(agentId)
+        payload.putUUID(identity.agentId)
         
         // Session ID
-        payload.putUUID(sessionId)
+        payload.putUUID(identity.sessionId)
         
         // Circuit code
-        payload.putInt(circuitCode)
+        payload.putInt(identity.circuitCode ?: 0)
         
         // GenCounter
         payload.putInt(1)
@@ -2007,6 +2020,7 @@ class UDPConnectionFixed {
      */
     fun sendRequestMultipleObjects(objectIds: List<Int>, cacheMissType: Int = 0) {
         if (objectIds.isEmpty()) return
+        val identity = outboundIdentity("UDPConnectionFixed.sendRequestMultipleObjects")
         
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, 
             "→ Sending RequestMultipleObjects for ${objectIds.size} objects")
@@ -2028,8 +2042,8 @@ class UDPConnectionFixed {
         val payload = ByteBuffer.allocate(payloadSize).order(ByteOrder.LITTLE_ENDIAN)
         
         // AgentData block
-        payload.put(agentId.asBytes())
-        payload.put(sessionId.asBytes())
+        payload.put(identity.agentId.asBytes())
+        payload.put(identity.sessionId.asBytes())
         
         // ObjectData count
         payload.put(objectIds.size.toByte())
