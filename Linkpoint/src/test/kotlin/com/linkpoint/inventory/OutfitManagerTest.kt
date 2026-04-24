@@ -1,6 +1,7 @@
 package com.linkpoint.inventory
 
 import com.linkpoint.avatar.WearableType
+import com.linkpoint.avatar.AvatarBaker
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -10,6 +11,9 @@ import org.junit.Test
 import java.util.UUID
 
 class OutfitManagerTest {
+    companion object {
+        private const val WEARABLE_PARSE_SUCCESS_THRESHOLD = 0.95f
+    }
 
     @Test
     fun validWearableParsing() {
@@ -119,10 +123,90 @@ class OutfitManagerTest {
     }
 
     @Test
-    fun affectedBakeChannelsAreTargeted() {
-        val skinChannels = affectedBakeChannelsForType(WearableType.SKIN)
-        val shirtChannels = affectedBakeChannelsForType(WearableType.SHIRT)
-        assertTrue(skinChannels.size > shirtChannels.size)
-        assertTrue(shirtChannels.isNotEmpty())
+    fun knownWearableCorpusMeetsParseSuccessThreshold() {
+        val corpus = listOf(
+            """
+            LLWearable version 22
+            type 0
+            parameters 1
+            31 0.40
+            textures 0
+            """.trimIndent().toByteArray(),
+            """
+            LLWearable version 22
+            type 5
+            parameters 2
+            80 0.25
+            81 0.75
+            textures 1
+            0 11111111-1111-1111-1111-111111111111
+            """.trimIndent().toByteArray(),
+            """
+            LLWearable version 22
+            type 10
+            parameters 4
+            80 1.0
+            81 0.0
+            82 0.5
+            93 0.2
+            textures 2
+            2 22222222-2222-2222-2222-222222222222
+            3 33333333-3333-3333-3333-333333333333
+            """.trimIndent().toByteArray(),
+            """
+            LLWearable version 22
+            textures 1
+            1 44444444-4444-4444-4444-444444444444
+            """.trimIndent().toByteArray()
+        )
+        val successCount = corpus.count { bytes ->
+            WearableAssetParser.parseWithDiagnostics(
+                raw = bytes,
+                defaultType = WearableType.SHIRT,
+                assetId = UUID.randomUUID()
+            ).data != null
+        }
+        val successRate = successCount.toFloat() / corpus.size
+        assertTrue(
+            "Expected parse success rate >= $WEARABLE_PARSE_SUCCESS_THRESHOLD, got $successRate",
+            successRate >= WEARABLE_PARSE_SUCCESS_THRESHOLD
+        )
+    }
+
+    @Test
+    fun telemetryCountersTrackTypedFailureReasons() {
+        WearableAssetTelemetry.reset()
+
+        WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.MISSING_FETCHER)
+        WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.MISSING_ASSET_BYTES)
+        WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.CORRUPT_ASSET_PAYLOAD)
+        WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.FETCH_EXCEPTION)
+        WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.CORRUPT_ASSET_PAYLOAD)
+
+        assertEquals(1, WearableAssetTelemetry.count(WearableLoadFailureReason.MISSING_FETCHER))
+        assertEquals(1, WearableAssetTelemetry.count(WearableLoadFailureReason.MISSING_ASSET_BYTES))
+        assertEquals(2, WearableAssetTelemetry.count(WearableLoadFailureReason.CORRUPT_ASSET_PAYLOAD))
+        assertEquals(1, WearableAssetTelemetry.count(WearableLoadFailureReason.FETCH_EXCEPTION))
+    }
+
+    @Test
+    fun affectedBakeChannelsMatchExpectedOutputs() {
+        assertEquals(
+            setOf(AvatarBaker.BAKE_HAIR),
+            affectedBakeChannelsForType(WearableType.HAIR)
+        )
+        assertEquals(
+            setOf(AvatarBaker.BAKE_EYES),
+            affectedBakeChannelsForType(WearableType.EYES)
+        )
+        assertEquals(
+            setOf(AvatarBaker.BAKE_UPPER, AvatarBaker.BAKE_AUX2),
+            affectedBakeChannelsForType(WearableType.SHIRT)
+        )
+        assertEquals(
+            setOf(AvatarBaker.BAKE_LOWER, AvatarBaker.BAKE_AUX3),
+            affectedBakeChannelsForType(WearableType.PANTS)
+        )
+        assertTrue(affectedBakeChannelsForType(WearableType.SKIN).size >= 8)
     }
 }
