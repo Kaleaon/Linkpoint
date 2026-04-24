@@ -53,6 +53,10 @@ class InventoryManager(
         const val FOLDER_TYPE_ANIMATION = 20
         const val FOLDER_TYPE_GESTURE = 21
         const val FOLDER_TYPE_FAVORITES = 23
+        // SL protocol folder types that other Linkpoint constants gloss over but that
+        // actually appear in inventory-skeleton responses. Needed for warm-fetch.
+        const val FOLDER_TYPE_CURRENT_OUTFIT = 46
+        const val FOLDER_TYPE_INBOX = 50
         const val FOLDER_TYPE_MESH = 49
         const val FOLDER_TYPE_OUTBOX = 52
         const val FOLDER_TYPE_OUTFIT = 54
@@ -890,6 +894,53 @@ class InventoryManager(
             fetchFolderContents(landmarkFolder, fetchFolders = false, fetchItems = true)
         }
         return getLandmarks()
+    }
+
+    /**
+     * Warm-fetch a curated set of high-value system folders in parallel.
+     *
+     * The inventory-skeleton from login only gives us the folder tree; items
+     * are populated lazily when a folder is opened. For a just-connected
+     * session that leaves every folder at 0 items - including Current Outfit,
+     * which determines what the avatar is wearing. This pulls the small set
+     * of folders a viewer actually needs before the UI is touched, so the
+     * user sees landmarks/favorites/outfits immediately and appearance
+     * resolution has the data it needs.
+     *
+     * Launched on the internal IO scope; returns immediately. Per-folder
+     * failures are logged but never propagate - the UI can still lazy-fetch
+     * anything that was missed.
+     */
+    fun warmFetch() {
+        val priorityTypes = listOf(
+            FOLDER_TYPE_CURRENT_OUTFIT,
+            FOLDER_TYPE_FAVORITES,
+            FOLDER_TYPE_LANDMARK,
+            FOLDER_TYPE_MYOUTFITS,
+            FOLDER_TYPE_INBOX
+        )
+        val toFetch = priorityTypes.mapNotNull { type ->
+            systemFolders[type]?.let { type to it }
+        }
+        if (toFetch.isEmpty()) {
+            Log.i(TAG, "Warm-fetch skipped: no priority system folders registered yet")
+            return
+        }
+
+        scope.launch {
+            Log.i(TAG, "Warm-fetch starting for ${toFetch.size} folders: ${toFetch.map { it.first }}")
+            toFetch.map { (type, folderId) ->
+                async {
+                    try {
+                        val ok = fetchFolderContents(folderId, fetchFolders = false, fetchItems = true)
+                        Log.i(TAG, "Warm-fetch folder type=$type id=$folderId ok=$ok")
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Warm-fetch folder type=$type id=$folderId failed: ${e.message}")
+                    }
+                }
+            }.awaitAll()
+            Log.i(TAG, "Warm-fetch complete: items cached = ${items.size}")
+        }
     }
     
     fun shutdown() {
