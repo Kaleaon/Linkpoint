@@ -25,6 +25,14 @@ object MessageParserRegistry {
         register(MessageIds.CROSSED_REGION) { TeleportMessageParsers.parseCrossedRegion(it) }
 
         register(MessageIds.INVENTORY_DESCENDENTS) { AdditionalMessageParsers.parseInventoryDescendents(it) }
+        register(MessageIds.FETCH_INVENTORY_DESCENDENTS) { DeclaredMessageSlices.parseFetchInventoryDescendents(it) }
+        register(MessageIds.FETCH_INVENTORY) { DeclaredMessageSlices.parseFetchInventory(it) }
+        register(MessageIds.REQUEST_PAY_PRICE) { DeclaredMessageSlices.parseRequestPayPrice(it) }
+        register(MessageIds.DIR_FIND_QUERY) { DeclaredMessageSlices.parseDirFindQuery(it) }
+        register(MessageIds.GROUP_TITLES_REQUEST) { DeclaredMessageSlices.parseGroupTitlesRequest(it) }
+        register(MessageIds.MAP_NAME_REQUEST) { DeclaredMessageSlices.parseMapNameRequest(it) }
+        register(MessageIds.AGENT_PAUSE) { DeclaredMessageSlices.parseAgentPause(it) }
+        register(MessageIds.AGENT_RESUME) { DeclaredMessageSlices.parseAgentResume(it) }
     }
 
     fun register(messageId: Int, handler: (ByteArray) -> Any?) {
