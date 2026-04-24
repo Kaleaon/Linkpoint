@@ -1,8 +1,17 @@
 # LINKPOINT MASTER TRACKING DOCUMENT (Code-verified snapshot)
 
-**Last verified:** 2026-04-23 (UTC)  
-**Commit:** `TBD`  
+**Last verified:** 2026-04-24 (UTC)  
+**Commit:** `3da3de10f9fb5aa90d70c8fc30ea99eaebdb902b`  
+**Machine-readable tracker:** `docs/MASTER_TRACKING.json`  
 **Verification scope:** `Linkpoint/src/main/java/**/*.kt`
+
+---
+
+## Tracker policy (single source of truth)
+
+This file and `docs/MASTER_TRACKING.json` are the canonical tracker for modernization phase acceptance criteria.
+
+**PR update requirement:** any PR that changes files under protocol, assets, or render paths **must** update this tracker pair (`docs/MASTER_TRACKING.md` + `docs/MASTER_TRACKING.json`) to reflect task status, dependency, and acceptance test command changes.
 
 ---
 
@@ -11,6 +20,21 @@
 - `[CONFIRMED_NOW]` = confirmed in current codebase.
 - `[HISTORICAL]` = prior claim/incident retained for context, not a current blocker by static inspection.
 - `[OPEN_BLOCKER]` = concrete gap still visible in code.
+- `NOT_STARTED | IN_PROGRESS | BLOCKED | DONE` = machine-readable status values used in `docs/MASTER_TRACKING.json`.
+
+---
+
+## Modernization phase acceptance tracker
+
+| Task ID | Acceptance criterion | Owner | Status | Blocking deps | Acceptance tests / commands |
+|---|---|---|---|---|---|
+| `MP-001` | Script update capability flow exists end-to-end and uses task/agent update caps | `@protocol-assets` | `DONE` | none | `./gradlew :app:testDebugUnitTest --tests "*ScriptManager*"` |
+| `MP-002` | Group profile capability request + runtime consumer is wired | `@protocol` | `DONE` | none | `./gradlew :app:testDebugUnitTest --tests "*ProfileManager*"` |
+| `MP-003` | Scene/update routing forwards object/avatar updates to renderer queue | `@render-runtime` | `DONE` | none | `./gradlew :app:testDebugUnitTest --tests "*ObjectManager*"` |
+| `MP-004` | Swap-chain recreation is invoked from Android surface lifecycle | `@render-runtime` | `DONE` | Android instrumented harness for `WorldViewActivity` | `./gradlew :app:testDebugUnitTest --tests "*RenderManager*"` |
+| `MP-005` | Deferred caps are either implemented or explicitly tracked with owning backlog item | `@protocol` | `BLOCKED` | media browser/nav stack for `CAP_OBJECT_MEDIA_NAVIGATE`; region-experience consumer for `CAP_REGION_EXPERIENCE` | `./gradlew :app:testDebugUnitTest --tests "*Capability*"` |
+| `MP-006` | Renderer feature parity includes HUD pass support | `@render-runtime` | `IN_PROGRESS` | HUD scene graph + compositor pass integration | `./gradlew :app:testDebugUnitTest --tests "*LumiyaRenderer*"` |
+| `MP-007` | Outfit pipeline returns real wearable resolution (no placeholder path) | `@assets-avatar` | `BLOCKED` | wearable resolution rules + baked texture mapping parity decisions | `./gradlew :app:testDebugUnitTest --tests "*OutfitManager*"` |
 
 ---
 
@@ -53,11 +77,25 @@
 2. **Capability list cleanup**
    - Removed from requested-capability tracking gap list: `CAP_MOVE_INVENTORY_ITEM` (now implemented via notecard inventory flow request path).
 
-4. **Renderer feature parity still partial**
+3. **Renderer feature parity still partial**
    - `LumiyaRenderer` marks HUD pass as “not implemented yet”.
 
-5. **Outfit pipeline still uses placeholder behavior**
+4. **Outfit pipeline still uses placeholder behavior**
    - `OutfitManager` contains a placeholder return path (“For now, return a placeholder”).
+
+---
+
+## Parity debt (vs reference docs)
+
+**Last verified:** 2026-04-24 (UTC)  
+**Commit:** `3da3de10f9fb5aa90d70c8fc30ea99eaebdb902b`
+
+| Debt ID | Gap vs reference docs | Impact | Owner | Status |
+|---|---|---|---|---|
+| `PD-001` | Object media navigate capability exists in reference capability set but app lacks user-facing media navigation implementation. | Interactive media surfaces cannot be navigated in parity workflows. | `@protocol` | `OPEN` |
+| `PD-002` | Region experience capability is requested for parity but no runtime consumer path is enabled. | Experience/permission flows remain incomplete relative to reference behavior. | `@protocol` | `OPEN` |
+| `PD-003` | HUD render pass parity incomplete in Filament renderer path. | UI/HUD visual parity gap in scenes requiring overlay passes. | `@render-runtime` | `OPEN` |
+| `PD-004` | Outfit manager still returns placeholder path instead of full wearable resolution parity. | Avatar appearance and wearable state can diverge from expected reference outcomes. | `@assets-avatar` | `OPEN` |
 
 ---
 
@@ -73,4 +111,4 @@
 
 1. Continue deferral review for `CAP_OBJECT_MEDIA_NAVIGATE` and `CAP_REGION_EXPERIENCE` against product priorities.
 2. Keep new managers covered by request-shape unit tests when payload schemas evolve.
-3. Re-run static inventory after each capability refactor and refresh this file with new commit hash/date.
+3. Re-run static inventory after each capability refactor and refresh this file and `docs/MASTER_TRACKING.json` with new commit hash/date.
