@@ -15,6 +15,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.roundToInt
 
 /**
@@ -156,19 +157,26 @@ class OutfitManager(
 
     private suspend fun loadWearableData(item: InventoryItem): WearableData? {
         val wearableType = WearableType.fromValue(item.flags and 0xFF)
-        val fallback = wearableFallback(wearableType, item.assetId)
         val fetcher = wearableAssetFetcher
 
         if (fetcher == null) {
-            Log.w(TAG, "No wearable asset fetcher configured; using fallback for ${item.itemId}")
-            return fallback
+            return fallbackWearableData(
+                type = wearableType,
+                item = item,
+                reason = WearableLoadFailureReason.MISSING_FETCHER,
+                detail = "No wearable asset fetcher configured"
+            )
         }
 
         return try {
             val bytes = fetcher(item)
             if (bytes == null) {
-                Log.w(TAG, "Wearable asset fetch failed for item=${item.itemId} asset=${item.assetId}; using fallback")
-                fallback
+                fallbackWearableData(
+                    type = wearableType,
+                    item = item,
+                    reason = WearableLoadFailureReason.MISSING_ASSET_BYTES,
+                    detail = "Wearable asset fetch returned null bytes"
+                )
             } else {
                 val parseResult = WearableAssetParser.parseWithDiagnostics(
                     raw = bytes,
@@ -177,26 +185,51 @@ class OutfitManager(
                 )
                 val parsed = parseResult.data
                 if (parsed == null) {
-                    Log.e(
-                        TAG,
-                        "Wearable parse failed for item=${item.itemId} asset=${item.assetId} " +
-                            "(${parseResult.error ?: "unknown parse error"}, ${bytes.size} bytes); using fallback"
+                    fallbackWearableData(
+                        type = wearableType,
+                        item = item,
+                        reason = WearableLoadFailureReason.CORRUPT_ASSET_PAYLOAD,
+                        detail =
+                            "Wearable parse failed (${parseResult.error ?: "unknown parse error"}, ${bytes.size} bytes)"
                     )
-                    fallback
                 } else {
                     parsed
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to load wearable asset for item=${item.itemId}, falling back", e)
-            fallback
+            fallbackWearableData(
+                type = wearableType,
+                item = item,
+                reason = WearableLoadFailureReason.FETCH_EXCEPTION,
+                detail = "Failed to load wearable asset: ${e.message}",
+                throwable = e
+            )
         }
     }
 
-    private fun wearableFallback(type: WearableType, assetId: UUID): WearableData {
+    private fun fallbackWearableData(
+        type: WearableType,
+        item: InventoryItem,
+        reason: WearableLoadFailureReason,
+        detail: String,
+        throwable: Throwable? = null
+    ): WearableData {
+        WearableAssetTelemetry.recordFallback(reason)
+        if (throwable != null) {
+            Log.e(
+                TAG,
+                "Using fallback wearable for item=${item.itemId} asset=${item.assetId} reason=$reason detail=$detail",
+                throwable
+            )
+        } else {
+            Log.w(
+                TAG,
+                "Using fallback wearable for item=${item.itemId} asset=${item.assetId} reason=$reason detail=$detail"
+            )
+        }
         return WearableData(
             type = type,
-            assetId = assetId,
+            assetId = item.assetId,
             textures = emptyMap(),
             params = emptyMap()
         )
@@ -609,6 +642,32 @@ internal object WearableAssetParser {
             (g.coerceIn(0f, 1f) * 255f).roundToInt(),
             (b.coerceIn(0f, 1f) * 255f).roundToInt()
         )
+    }
+}
+
+internal enum class WearableLoadFailureReason {
+    MISSING_FETCHER,
+    MISSING_ASSET_BYTES,
+    CORRUPT_ASSET_PAYLOAD,
+    FETCH_EXCEPTION
+}
+
+internal object WearableAssetTelemetry {
+    private val fallbackCounts: MutableMap<WearableLoadFailureReason, AtomicInteger> =
+        WearableLoadFailureReason.entries.associateWith { AtomicInteger(0) }.toMutableMap()
+
+    fun recordFallback(reason: WearableLoadFailureReason) {
+        fallbackCounts.getValue(reason).incrementAndGet()
+    }
+
+    fun count(reason: WearableLoadFailureReason): Int = fallbackCounts.getValue(reason).get()
+
+    fun snapshot(): Map<WearableLoadFailureReason, Int> {
+        return fallbackCounts.mapValues { (_, value) -> value.get() }
+    }
+
+    fun reset() {
+        fallbackCounts.values.forEach { it.set(0) }
     }
 }
 

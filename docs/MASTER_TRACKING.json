@@ -82,11 +82,8 @@
       "task_id": "MP-007",
       "acceptance_criterion": "Outfit pipeline returns real wearable resolution (no placeholder path)",
       "owner": "@assets-avatar",
-      "status": "BLOCKED",
-      "blocking_deps": [
-        "Wearable resolution rules",
-        "Baked texture mapping parity decisions"
-      ],
+      "status": "DONE",
+      "blocking_deps": [],
       "acceptance_tests": [
         "./gradlew :app:testDebugUnitTest --tests \"*OutfitManager*\""
       ]
@@ -113,8 +110,8 @@
       },
       {
         "debt_id": "PD-004",
-        "gap": "Outfit manager still returns placeholder path instead of full wearable resolution parity",
-        "status": "OPEN"
+        "gap": "Outfit manager fallback path now uses typed failure reasons + telemetry counters and unit tests enforce parser threshold/bake-channel parity",
+        "status": "CLOSED"
       }
     ]
   }
