@@ -105,7 +105,7 @@ class ScriptManager(
                     this["item_id"] = LLSDUUID(itemId)
                 }
                 
-                val response = capabilityManager.request("GetScriptRunning", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_GET_SCRIPT_RUNNING, request)
                 
                 if (response is LLSDMap) {
                     ScriptRunningInfo(
@@ -134,7 +134,7 @@ class ScriptManager(
                     this["running"] = LLSDBoolean(running)
                 }
                 
-                val response = capabilityManager.request("SetScriptRunning", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_SET_SCRIPT_RUNNING, request)
                 
                 if (response is LLSDMap) {
                     val success = response.getBoolean("success") ?: false
@@ -180,7 +180,7 @@ class ScriptManager(
                     this["object_id"] = LLSDUUID(objectId)
                 }
                 
-                val response = capabilityManager.request("GetScriptTaskInfo", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_GET_SCRIPT_TASK_INFO, request)
                 
                 if (response is LLSDMap) {
                     val scripts = response.getArray("scripts")

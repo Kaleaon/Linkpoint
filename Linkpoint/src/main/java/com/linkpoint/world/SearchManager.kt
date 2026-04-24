@@ -196,7 +196,7 @@ class SearchManager(
                     this["count"] = LLSDInteger(count)
                 }
                 
-                val response = capabilityManager.request("SearchLand", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_SEARCH_LAND, request)
                 if (response != null) {
                     parseLandResults(response)
                 } else {
