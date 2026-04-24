@@ -459,16 +459,16 @@ app/src/main/kotlin/com/lumiyaviewer/lumiya/slproto/messages/ObjectLinkKt.kt,kt,
 cleanup-branches.sh,sh,OK,,ok,SecondLifeViewer|FirestormViewer
 file_bundle/ActiveChattersManager.java,java,BROKEN,decompilation-stub|unsupported-operation,not-checked,LibreMetaverse|SecondLifeViewer|FirestormViewer
 file_bundle/CardboardActivity.java,java,OK,,not-checked,LibreMetaverse|SecondLifeViewer|FirestormViewer
-file_bundle/GroupMainProfileTab.java,java,BROKEN,decompilation-stub|unsupported-operation,not-checked,LibreMetaverse|SecondLifeViewer|FirestormViewer
+file_bundle/GroupMainProfileTab.java,java,OK,,not-checked,LibreMetaverse|SecondLifeViewer|FirestormViewer
 file_bundle/InventoryFragment.java,java,OK,,not-checked,LibreMetaverse|SecondLifeViewer|FirestormViewer
 file_bundle/InventoryFragmentHelper.java,java,OK,,not-checked,LibreMetaverse|SecondLifeViewer|FirestormViewer
 file_bundle/ObjectDetailsFragment.java,java,OK,,not-checked,LibreMetaverse|SecondLifeViewer|FirestormViewer
 file_bundle/SLChatEvent.java,java,OK,,not-checked,LibreMetaverse|SecondLifeViewer|FirestormViewer
 file_bundle/SLInventory.java,java,OK,,not-checked,LLSD|LibreMetaverse|SecondLifeViewer|FirestormViewer
-file_bundle/SyncManager.java,java,BROKEN,decompilation-stub|unsupported-operation,not-checked,SecondLifeViewer|FirestormViewer
+file_bundle/SyncManager.java,java,OK,,not-checked,SecondLifeViewer|FirestormViewer
 file_bundle/UserFunctionsFragment.java,java,OK,,not-checked,LibreMetaverse|SecondLifeViewer|FirestormViewer
 file_bundle/VoiceStatusView.java,java,OK,,not-checked,SecondLifeViewer|FirestormViewer
-file_bundle/WorldViewActivity.java,java,BROKEN,decompilation-stub|unsupported-operation,not-checked,LibreMetaverse|SecondLifeViewer|FirestormViewer
+file_bundle/WorldViewActivity.java,java,OK,,not-checked,LibreMetaverse|SecondLifeViewer|FirestormViewer
 lumiya_decompiled_source/android/arch/core/internal/FastSafeIterableMap.java,java,OK,,not-checked,SecondLifeViewer|FirestormViewer
 lumiya_decompiled_source/android/arch/core/internal/SafeIterableMap.java,java,BROKEN,unsupported-operation,not-checked,SecondLifeViewer|FirestormViewer
 lumiya_decompiled_source/android/arch/lifecycle/BuildConfig.java,java,OK,,not-checked,SecondLifeViewer|FirestormViewer
@@ -3035,7 +3035,7 @@ lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/users/manager/OnListUpd
 lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/users/manager/SearchManager.java,java,OK,,not-checked,SecondLifeViewer|FirestormViewer
 lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/users/manager/SortedChatterList.java,java,OK,,not-checked,SecondLifeViewer|FirestormViewer
 lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/users/manager/SubscribableList.java,java,OK,,not-checked,SecondLifeViewer|FirestormViewer
-lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/users/manager/SyncManager.java,java,BROKEN,decompilation-stub|unsupported-operation,not-checked,SecondLifeViewer|FirestormViewer
+lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/users/manager/SyncManager.java,java,OK,,not-checked,SecondLifeViewer|FirestormViewer
 lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/users/manager/UnreadMessageInfo.java,java,OK,,not-checked,SecondLifeViewer|FirestormViewer
 lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/users/manager/UnreadNotificationInfo.java,java,OK,,not-checked,SecondLifeViewer|FirestormViewer
 lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/users/manager/UnreadNotificationManager.java,java,OK,,not-checked,SecondLifeViewer|FirestormViewer
@@ -3222,7 +3222,7 @@ lumiya_decompiled_source/com/lumiyaviewer/lumiya/ui/render/MoveControl.java,java
 lumiya_decompiled_source/com/lumiyaviewer/lumiya/ui/render/OnHoverListenerCompat.java,java,OK,,not-checked,SecondLifeViewer|FirestormViewer
 lumiya_decompiled_source/com/lumiyaviewer/lumiya/ui/render/RenderSettings.java,java,OK,,not-checked,LibreMetaverse|SecondLifeViewer|FirestormViewer
 lumiya_decompiled_source/com/lumiyaviewer/lumiya/ui/render/WorldSurfaceView.java,java,OK,,not-checked,LibreMetaverse|SecondLifeViewer|FirestormViewer
-lumiya_decompiled_source/com/lumiyaviewer/lumiya/ui/render/WorldViewActivity.java,java,BROKEN,decompilation-stub|unsupported-operation,not-checked,LibreMetaverse|SecondLifeViewer|FirestormViewer
+lumiya_decompiled_source/com/lumiyaviewer/lumiya/ui/render/WorldViewActivity.java,java,OK,,not-checked,LibreMetaverse|SecondLifeViewer|FirestormViewer
 lumiya_decompiled_source/com/lumiyaviewer/lumiya/ui/render/WorldViewActivity_ViewBinding.java,java,OK,,not-checked,SecondLifeViewer|FirestormViewer
 lumiya_decompiled_source/com/lumiyaviewer/lumiya/ui/search/ParcelInfoFragment.java,java,OK,,not-checked,LibreMetaverse|SecondLifeViewer|FirestormViewer
 lumiya_decompiled_source/com/lumiyaviewer/lumiya/ui/search/ParcelInfoFragment_ViewBinding.java,java,OK,,not-checked,SecondLifeViewer|FirestormViewer

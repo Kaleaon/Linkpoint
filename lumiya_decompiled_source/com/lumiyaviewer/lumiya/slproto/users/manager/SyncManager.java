@@ -179,11 +179,76 @@ public class SyncManager {
         To view partially-correct add '--show-bad-code' argument
     */
     public void m371x9b8293aa() {
-        /*
-            Method dump skipped, instructions count: 444
-            To view this dump add '--comments-level debug' option
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.users.manager.SyncManager.m371x9b8293aa():void");
+        if (!this.syncMessageSent.getAndSet(true)) {
+            boolean keepSyncMessageSent = false;
+            String myName = null;
+            if (this.myNameRetriever == null) {
+                this.myNameRetriever = new ChatterNameRetriever(ChatterID.getUserChatterID(this.userManager.getUserID(), this.userManager.getUserID()), new ChatterNameRetriever.OnChatterNameUpdated() {
+                    @Override
+                    public void onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
+                        SyncManager.this.m368x9b8293a7(chatterNameRetriever);
+                    }
+                }, this.dbExecutor, true);
+            }
+            myName = this.myNameRetriever.getResolvedName();
+            if (myName != null) {
+                Query<ChatMessage> query = this.messagesQuery.forCurrentThread();
+                query.setParameter(0, Long.valueOf(this.lastConfirmedMessageID));
+                de.greenrobot.dao.query.LazyList<ChatMessage> messages = query.listLazy();
+                ImmutableList.Builder<com.lumiyaviewer.lumiya.cloud.common.LogChatMessage> builder = ImmutableList.builder();
+                int count = 0;
+                long lastMessageId = 0;
+                for (ChatMessage chatMessage : messages) {
+                    com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent chatEvent = com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.loadFromDatabaseObject(chatMessage, this.userManager.getUserID());
+                    if (chatEvent != null) {
+                        Chatter chatter = this.chatterDao.load(Long.valueOf(chatMessage.getChatterID()));
+                        if (chatter != null) {
+                            String chatterName = resolveChatterName(chatter);
+                            if (chatterName == null) {
+                                break;
+                            }
+                            CharSequence text = chatEvent.getPlainTextMessage(this.context, this.userManager, false);
+                            com.lumiyaviewer.lumiya.cloud.common.LogChatMessage logChatMessage = new com.lumiyaviewer.lumiya.cloud.common.LogChatMessage(chatter.getType(), chatter.getUuid(), chatMessage.getId().longValue(), chatterName, "[" + this.dateFormat.format(chatMessage.getTimestamp()) + "] " + text);
+                            builder.add(logChatMessage);
+                            lastMessageId = logChatMessage.messageID;
+                            count++;
+                            if (count >= 100) {
+                                break;
+                            }
+                        }
+                    }
+                }
+                messages.close();
+                if (count > 0) {
+                    com.lumiyaviewer.lumiya.cloud.common.LogMessageBatch batch = new com.lumiyaviewer.lumiya.cloud.common.LogMessageBatch(this.userManager.getUserID(), myName, builder.build(), lastMessageId);
+                    CloudSyncServiceConnection connection = this.syncServiceConnection.get();
+                    if (connection != null) {
+                        keepSyncMessageSent = connection.sendMessage(com.lumiyaviewer.lumiya.cloud.common.MessageType.LogMessageBatch, batch);
+                    }
+                }
+                if (!this.flushChatterNames.isEmpty()) {
+                    CloudSyncServiceConnection connection2 = this.syncServiceConnection.get();
+                    if (connection2 != null) {
+                        java.util.Iterator<String> iterator = this.flushChatterNames.iterator();
+                        if (iterator.hasNext()) {
+                            String chatterName2 = iterator.next();
+                            iterator.remove();
+                            connection2.sendMessage(com.lumiyaviewer.lumiya.cloud.common.MessageType.LogFlushMessages, new com.lumiyaviewer.lumiya.cloud.common.LogFlushMessages(this.userManager.getUserID(), myName, chatterName2));
+                        }
+                    }
+                }
+            }
+            this.syncMessageSent.set(keepSyncMessageSent);
+        }
+        if (this.needsStopSyncing.getAndSet(false)) {
+            this.syncingEnabled.set(false);
+            CloudSyncServiceConnection connection3 = this.syncServiceConnection.getAndSet(null);
+            this.syncMessageSent.set(false);
+            if (connection3 != null) {
+                connection3.sendMessage(com.lumiyaviewer.lumiya.cloud.common.MessageType.LogFlushMessages, new com.lumiyaviewer.lumiya.cloud.common.LogFlushMessages(this.userManager.getUserID(), null, null));
+                connection3.disconnect();
+            }
+        }
     }
 
     /* JADX INFO: Access modifiers changed from: package-private */

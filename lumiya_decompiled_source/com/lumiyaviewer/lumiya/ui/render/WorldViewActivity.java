@@ -846,11 +846,72 @@ public class WorldViewActivity extends DetailsActivity implements View.OnTouchLi
         To view partially-correct add '--show-bad-code' argument
     */
     private void updateObjectPanel() {
-        /*
-            Method dump skipped, instructions count: 614
-            To view this dump add '--comments-level debug' option
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.ui.render.WorldViewActivity.updateObjectPanel():void");
+        MyAvatarState myAvatarState2 = this.myAvatarState.getData();
+        SLAgentCircuit circuit = this.agentCircuit.getData();
+        boolean isConnected = circuit != null;
+        boolean isSitting = myAvatarState2 != null && myAvatarState2.isSitting();
+        boolean hasHUDs = myAvatarState2 != null && myAvatarState2.hasHUDs();
+        boolean isFlying = myAvatarState2 != null && myAvatarState2.isFlying();
+        boolean canStandUp = circuit != null && circuit.getModules().rlvController.canStandUp();
+        boolean canSit = circuit != null && circuit.getModules().rlvController.canSit();
+        boolean hasPickedObject = this.pickedObject != null;
+        boolean cameraLocked = this.camButtonEnabled ? this.manualCamMode : false;
+
+        this.dragPointerLayout.setVisibility(this.isDragging ? 0 : 4);
+        this.dragPointer.setVisibility(this.isDragging ? 0 : 4);
+
+        boolean hideMovement = isSitting || !isConnected || cameraLocked || this.isDragging || hasPickedObject;
+        this.flyButtonsLayout.setVisibility(hideMovement ? 8 : 0);
+        this.moveButtonsLayout.setVisibility(hideMovement ? 4 : 0);
+
+        this.buttonStandUp.setVisibility((canStandUp && isSitting && !this.isDragging) ? 0 : 8);
+        this.buttonHUD.setVisibility((hasHUDs && !this.isDragging && isConnected) ? 0 : 8);
+        this.buttonFlyDownward.setVisibility((isFlying || !isConnected || cameraLocked) ? 0 : 8);
+        this.buttonStopFlying.setVisibility((isFlying && isConnected && !cameraLocked) ? 0 : 8);
+
+        this.buttonCamOn.setVisibility((this.camButtonEnabled && !this.manualCamMode && !this.isDragging && !hasPickedObject) ? 0 : 8);
+        this.buttonCamOff.setVisibility((this.camButtonEnabled && this.manualCamMode && !this.isDragging && !hasPickedObject) ? 0 : 8);
+
+        if (this.pickedObject == null || !isConnected) {
+            this.objectControlsPanel.setVisibility(8);
+            return;
+        }
+
+        this.objectControlsPanel.setVisibility(0);
+        boolean canTouch = this.pickedObject.isTouchable();
+        boolean isAvatar = this.pickedObject.isAvatar();
+        if (isAvatar) {
+            canTouch |= this.pickedObject.hasTouchableChildren();
+        }
+        this.objectTouchButton.setVisibility(canTouch ? 0 : 8);
+
+        boolean sittingOnPicked = isSitting && myAvatarState2 != null && this.pickedObject.localID == myAvatarState2.sittingOn();
+        boolean canSitOnPicked = !isAvatar && !sittingOnPicked;
+        this.objectSitButton.setVisibility((canSitOnPicked && canSit) ? 0 : 8);
+        this.objectStandButton.setVisibility((sittingOnPicked && canStandUp) ? 0 : 8);
+        this.objectChatButton.setVisibility(isAvatar ? 0 : 8);
+        this.avatarIconView.setVisibility(isAvatar ? 0 : 8);
+
+        this.objectPayButton.setVisibility((this.pickedObject.isPayable() || this.pickedObject.saleType != 0) ? 0 : 8);
+
+        String name = null;
+        if (isAvatar) {
+            if (this.pickedAvatarNameRetriever != null) {
+                name = this.pickedAvatarNameRetriever.getResolvedName();
+            }
+            if (name == null) {
+                name = getString(R.string.unknown_avatar);
+            }
+        } else {
+            SLObjectProfileData profileData = this.selectedObjectProfile.getData();
+            if (profileData != null && Objects.equal(profileData.objectUUID(), this.pickedObject.getId())) {
+                name = profileData.name().orNull();
+            }
+            if (name == null) {
+                name = this.pickedObject.name;
+            }
+        }
+        this.objectNameTextView.setText(name);
     }
 
     private void updateSimTimeOverride() {
