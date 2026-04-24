@@ -358,3 +358,25 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeGetImageSize(
     
     return env->NewObject(pairClass, pairConstructor, widthObj, heightObj);
 }
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_linkpoint_assets_JPEG2000Decoder_nativeHealthCheck(
+    JNIEnv* env,
+    jobject thiz
+) {
+    opj_dparameters_t params;
+    opj_set_default_decoder_parameters(&params);
+    const bool validParams = params.decod_format >= 0;
+    if (!validParams) {
+        LOGE("OpenJPEG health-check failed: invalid default decoder params");
+        return JNI_FALSE;
+    }
+
+    opj_codec_t* codec = opj_create_decompress(OPJ_CODEC_J2K);
+    if (!codec) {
+        LOGE("OpenJPEG health-check failed: unable to create decoder");
+        return JNI_FALSE;
+    }
+    opj_destroy_codec(codec);
+    return JNI_TRUE;
+}
