@@ -1,7 +1,7 @@
 # LINKPOINT MASTER TRACKING DOCUMENT (Code-verified snapshot)
 
 **Last verified:** 2026-04-24 (UTC)  
-**Commit:** `3da3de10f9fb5aa90d70c8fc30ea99eaebdb902b`  
+**Commit:** `e2011834a08d4888abd75beee10b772d7d0793a3`  
 **Machine-readable tracker:** `docs/MASTER_TRACKING.json`  
 **Verification scope:** `Linkpoint/src/main/java/**/*.kt`
 
@@ -77,8 +77,8 @@ This file and `docs/MASTER_TRACKING.json` are the canonical tracker for moderniz
 2. **Capability list cleanup**
    - Removed from requested-capability tracking gap list: `CAP_MOVE_INVENTORY_ITEM` (now implemented via notecard inventory flow request path).
 
-3. **Renderer feature parity still partial**
-   - `LumiyaRenderer` marks HUD pass as “not implemented yet”.
+3. **Renderer parity verification is currently blocked by unrelated compile failures**
+   - HUD pass and HUD attachment routing exist in `LumiyaRenderer`/`DrawableHudStore`, but the targeted renderer test command cannot complete until project-wide Kotlin compile errors are resolved.
 
 4. **Outfit pipeline still uses placeholder behavior**
    - `OutfitManager` contains a placeholder return path (“For now, return a placeholder”).
@@ -88,13 +88,13 @@ This file and `docs/MASTER_TRACKING.json` are the canonical tracker for moderniz
 ## Parity debt (vs reference docs)
 
 **Last verified:** 2026-04-24 (UTC)  
-**Commit:** `3da3de10f9fb5aa90d70c8fc30ea99eaebdb902b`
+**Commit:** `e2011834a08d4888abd75beee10b772d7d0793a3`
 
 | Debt ID | Gap vs reference docs | Impact | Owner | Status |
 |---|---|---|---|---|
 | `PD-001` | Object media navigate capability exists in reference capability set but app lacks user-facing media navigation implementation. | Interactive media surfaces cannot be navigated in parity workflows. | `@protocol` | `OPEN` |
 | `PD-002` | Region experience capability is requested for parity but no runtime consumer path is enabled. | Experience/permission flows remain incomplete relative to reference behavior. | `@protocol` | `OPEN` |
-| `PD-003` | HUD render pass parity incomplete in Filament renderer path. | UI/HUD visual parity gap in scenes requiring overlay passes. | `@render-runtime` | `OPEN` |
+| `PD-003` | HUD code path is implemented, but parity closure is pending green renderer tests in the current branch state. | Verification remains blocked by unrelated Kotlin compile failures before renderer unit tests execute. | `@render-runtime` | `OPEN` |
 | `PD-004` | Outfit manager still returns placeholder path instead of full wearable resolution parity. | Avatar appearance and wearable state can diverge from expected reference outcomes. | `@assets-avatar` | `OPEN` |
 
 ---
@@ -104,6 +104,7 @@ This file and `docs/MASTER_TRACKING.json` are the canonical tracker for moderniz
 - “No object/avatar scene wiring” is **historical** (handlers and routing now present).
 - “No swap chain init callback” is **historical** (callback and recreate path present).
 - “Script update caps missing” is **historical** (script save/update implemented).
+- “LumiyaRenderer marks HUD pass as not implemented yet” is **historical** (HUD pass + attachment routing now exist; closure waits on passing renderer tests).
 
 ---
 
