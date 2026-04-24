@@ -257,6 +257,10 @@ dependencies {
     // Preferences
     implementation("androidx.preference:preference-ktx:1.2.1")
 
+    // Room (inventory cache persistence)
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+
     // Background orchestration
     implementation("androidx.work:work-runtime-ktx:2.9.1")
     
