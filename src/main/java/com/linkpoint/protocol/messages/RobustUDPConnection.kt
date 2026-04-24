@@ -102,14 +102,12 @@ class RobustUDPConnection(
             datagramChannel?.configureBlocking(true)
             datagramChannel?.connect(address)
             
-            // Start receive loop
-            startReceiveLoop()
-            
-            // Start heartbeat
-            startHeartbeat()
-            
             _connectionState.value = ConnectionState.CONNECTED
             reconnectAttempts.set(0)
+
+            // Start loops after state is CONNECTED so their guards are true
+            startReceiveLoop()
+            startHeartbeat()
             
             Log.i(TAG, "✓ Connected to $simIP:$simPort")
             true
