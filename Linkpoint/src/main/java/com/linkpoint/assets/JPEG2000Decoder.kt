@@ -18,8 +18,10 @@ object JPEG2000Decoder {
 
     private const val TAG = "JPEG2000Decoder"
 
-    private var nativeLoaded = false
-    private var nativeError: String? = null
+    @Volatile private var nativeLoaded = false
+    @Volatile private var nativeHealthCheckPassed = false
+    @Volatile private var nativeError: String? = null
+    @Volatile private var nativeHealthError: String? = null
     private var startupStatus: DecoderStartupStatus? = null
 
     private var jp2DecoderCtor: java.lang.reflect.Constructor<*>? = null
@@ -34,10 +36,28 @@ object JPEG2000Decoder {
         try {
             System.loadLibrary("linkpoint-j2k")
             nativeLoaded = true
-            Log.i(TAG, "JPEG2000 native decoder loaded successfully")
+            nativeHealthCheckPassed = runNativeHealthCheck()
+            if (nativeHealthCheckPassed) {
+                Log.i(TAG, "JPEG2000 native decoder loaded and healthy")
+            } else {
+                Log.w(TAG, "JPEG2000 native decoder loaded but failed health-check")
+            }
         } catch (e: UnsatisfiedLinkError) {
             nativeError = e.message
             Log.w(TAG, "Native JPEG2000 decoder unavailable: ${e.message}")
+        }
+    }
+
+    private fun runNativeHealthCheck(): Boolean {
+        return try {
+            val healthy = nativeHealthCheck()
+            if (!healthy) {
+                nativeHealthError = "nativeHealthCheck returned false"
+            }
+            healthy
+        } catch (e: Throwable) {
+            nativeHealthError = "${e.javaClass.simpleName}: ${e.message}"
+            false
         }
     }
 
@@ -52,14 +72,14 @@ object JPEG2000Decoder {
         }
     }
 
-    fun isNativeAvailable(): Boolean = nativeLoaded
+    fun isNativeAvailable(): Boolean = nativeLoaded && nativeHealthCheckPassed
 
     fun getStartupStatus(): DecoderStartupStatus = startupStatus ?: runStartupSelfTest()
 
     fun runStartupSelfTest(): DecoderStartupStatus {
         val hasReflectionFallback = jp2DecoderCtor != null && jp2DecodeMethod != null
         val availability = when {
-            nativeLoaded -> "native"
+            nativeLoaded && nativeHealthCheckPassed -> "native"
             hasReflectionFallback -> "jp2forandroid"
             else -> "none"
         }
@@ -71,8 +91,10 @@ object JPEG2000Decoder {
             available = availability != "none",
             activeBackend = availability,
             nativeLoaded = nativeLoaded,
+            nativeHealthy = nativeHealthCheckPassed,
             jp2ForAndroidAvailable = hasReflectionFallback,
             nativeError = nativeError,
+            nativeHealthError = nativeHealthError,
             warningMessage = warning
         )
         startupStatus = status
@@ -87,9 +109,12 @@ object JPEG2000Decoder {
     fun decode(data: ByteArray): Bitmap? {
         if (data.isEmpty()) return null
 
-        if (nativeLoaded) {
-            decodeNative(data)?.let { return it }
-            Log.w(TAG, "Native decode failed, trying JP2ForAndroid fallback")
+        val discardPlan = buildDiscardPlan(0)
+        if (isNativeAvailable()) {
+            for (discard in discardPlan) {
+                decodeNativeWithDiscard(data, discard)?.let { return it }
+            }
+            Log.w(TAG, "Native decode failed for discard plan=$discardPlan, trying JP2ForAndroid fallback")
         }
 
         decodeViaJp2ForAndroid(data)?.let { return it }
@@ -99,9 +124,12 @@ object JPEG2000Decoder {
     fun decode(data: ByteArray, discardLevel: Int): Bitmap? {
         if (data.isEmpty()) return null
 
-        if (nativeLoaded) {
-            decodeNativeWithDiscard(data, discardLevel)?.let { return it }
-            Log.w(TAG, "Native decode with discard failed, trying JP2ForAndroid fallback")
+        val discardPlan = buildDiscardPlan(discardLevel)
+        if (isNativeAvailable()) {
+            for (discard in discardPlan) {
+                decodeNativeWithDiscard(data, discard)?.let { return it }
+            }
+            Log.w(TAG, "Native decode failed for discard plan=$discardPlan, trying JP2ForAndroid fallback")
         }
 
         decodeViaJp2ForAndroid(data)?.let { return it }
@@ -111,11 +139,18 @@ object JPEG2000Decoder {
     fun getImageSize(data: ByteArray): Pair<Int, Int>? {
         if (data.isEmpty()) return null
 
-        return if (nativeLoaded) {
+        return if (isNativeAvailable()) {
             nativeGetImageSize(data) ?: parseJ2KHeader(data)
         } else {
             parseJ2KHeader(data)
         }
+    }
+
+    internal fun buildDiscardPlan(requestedDiscardLevel: Int, maxAdditionalFallbackDiscards: Int = 2): List<Int> {
+        val base = requestedDiscardLevel.coerceIn(0, 5)
+        return (0..maxAdditionalFallbackDiscards)
+            .map { (base + it).coerceIn(0, 5) }
+            .distinct()
     }
 
     private fun decodeNative(data: ByteArray): Bitmap? {
@@ -224,13 +259,16 @@ object JPEG2000Decoder {
 
     private external fun nativeDecode(data: ByteArray, discardLevel: Int): DecodeResult?
     private external fun nativeGetImageSize(data: ByteArray): Pair<Int, Int>?
+    private external fun nativeHealthCheck(): Boolean
 
     data class DecoderStartupStatus(
         val available: Boolean,
         val activeBackend: String,
         val nativeLoaded: Boolean,
+        val nativeHealthy: Boolean,
         val jp2ForAndroidAvailable: Boolean,
         val nativeError: String?,
+        val nativeHealthError: String?,
         val warningMessage: String?
     )
 

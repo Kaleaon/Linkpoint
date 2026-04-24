@@ -2,7 +2,6 @@ package com.linkpoint.assets
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.util.Log
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.SSLHelper
@@ -45,6 +44,24 @@ class TextureManager(
         private const val TEXTURE_FETCH_TIMEOUT_MS = 30000L
         private const val MAX_DECODE_RETRIES = 2
         private const val MAX_DECODE_MEMORY_BYTES = 64 * 1024 * 1024
+
+        internal fun computeDiscardLevelForRequest(priority: TexturePriority, distanceMeters: Float? = null): Int {
+            val base = when (priority) {
+                TexturePriority.CRITICAL -> 0
+                TexturePriority.HIGH -> 1
+                TexturePriority.NORMAL -> 2
+                TexturePriority.LOW -> 3
+                TexturePriority.PREFETCH -> 4
+            }
+            val distanceBias = when {
+                distanceMeters == null -> 0
+                distanceMeters < 20f -> 0
+                distanceMeters < 64f -> 1
+                distanceMeters < 128f -> 2
+                else -> 3
+            }
+            return (base + distanceBias).coerceIn(0, 5)
+        }
     }
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -85,8 +102,10 @@ class TextureManager(
     suspend fun getTexture(
         textureId: UUID,
         priority: TexturePriority = TexturePriority.NORMAL,
-        discard: Int = 0
+        discard: Int = -1,
+        distanceMeters: Float? = null
     ): Bitmap? {
+        val effectiveDiscard = if (discard >= 0) discard else computeDiscardLevel(priority, distanceMeters)
         // Check decoded cache
         textureCache[textureId]?.let { return it }
         
@@ -95,7 +114,7 @@ class TextureManager(
         
         // Create new request
         val deferred = scope.async {
-            fetchTexture(textureId, priority, discard)
+            fetchTexture(textureId, priority, effectiveDiscard)
         }
         pendingTextures[textureId] = deferred
         
@@ -110,9 +129,10 @@ class TextureManager(
      * Prefetch textures in background
      */
     fun prefetch(textureIds: List<UUID>, priority: TexturePriority = TexturePriority.LOW) {
+        val discard = computeDiscardLevel(priority, distanceMeters = 256f)
         textureIds.forEach { id ->
             if (!textureCache.containsKey(id)) {
-                downloadQueue.offer(TextureRequest(id, priority, 0))
+                downloadQueue.offer(TextureRequest(id, priority, discard))
             }
         }
     }
@@ -137,10 +157,18 @@ class TextureManager(
         priority: TexturePriority,
         discard: Int
     ): Bitmap? {
+        val effectiveDiscard = discard.coerceIn(0, 5)
         // Check raw data cache
         val cachedData = cache.get(textureId, AssetType.TEXTURE)
         if (cachedData != null) {
-            return decodeTexture(textureId, cachedData)
+            val decoded = decodeTexture(textureId, cachedData, effectiveDiscard)
+            if (decoded != null) return decoded
+
+            // Deterministic retry: cached payload may be corrupt/truncated, force one re-download.
+            cache.remove(textureId, AssetType.TEXTURE)
+            val redownloaded = downloadTexture(textureId, effectiveDiscard, timeoutMs = 15000L) ?: return null
+            cache.put(textureId, AssetType.TEXTURE, redownloaded)
+            return decodeTexture(textureId, redownloaded, effectiveDiscard)
         }
         
         // Use priority to determine download timeout and retry behavior
@@ -159,7 +187,7 @@ class TextureManager(
         cache.put(textureId, AssetType.TEXTURE, data)
         
         // Decode and cache
-        return decodeTexture(textureId, data)
+        return decodeTexture(textureId, data, effectiveDiscard)
     }
     
     private suspend fun downloadTexture(
@@ -400,7 +428,7 @@ class TextureManager(
     private fun processTextureData(textureId: UUID, data: ByteArray) {
         scope.launch(Dispatchers.IO) {
             try {
-                val bitmap = decodeTexture(textureId, data)
+                val bitmap = decodeTexture(textureId, data, discardLevel = 0)
                 if (bitmap != null) {
                     textureCache[textureId] = bitmap
                     updateStats { it.copy(downloadedCount = it.downloadedCount + 1) }
@@ -437,7 +465,7 @@ class TextureManager(
         return "$secureUrl?texture_id=$textureId"
     }
     
-    private fun decodeTexture(textureId: UUID, data: ByteArray): Bitmap? {
+    private fun decodeTexture(textureId: UUID, data: ByteArray, discardLevel: Int): Bitmap? {
         val startTime = System.currentTimeMillis()
 
         return try {
@@ -460,7 +488,7 @@ class TextureManager(
             for (attempt in 1..MAX_DECODE_RETRIES) {
                 bitmap = if (isJ2k) {
                     j2kDecodeAttempts.incrementAndGet()
-                    decodeJPEG2000(data)
+                    decodeJPEG2000(data, discardLevel)
                 } else {
                     BitmapFactory.decodeByteArray(data, 0, data.size)
                 }
@@ -491,7 +519,7 @@ class TextureManager(
         }
     }
 
-    private fun recordDecodeFailure(textureId: UUID, format: String, startTime: Long, error: String): Bitmap {
+    private fun recordDecodeFailure(textureId: UUID, format: String, startTime: Long, error: String): Bitmap? {
         val durationMs = System.currentTimeMillis() - startTime
         val state = textureErrorStates.compute(textureId) { _, prev ->
             val attempts = (prev?.attempts ?: 0) + 1
@@ -503,15 +531,7 @@ class TextureManager(
         lastError = "Decode: $error"
         lastErrorTime = System.currentTimeMillis()
         updateStats { it.copy(decodeFailedCount = it.decodeFailedCount + 1) }
-
-        return createDecodePlaceholderBitmap(state.attempts)
-    }
-
-    private fun createDecodePlaceholderBitmap(attempts: Int): Bitmap {
-        val bitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888)
-        val color = if (attempts > 1) Color.argb(255, 180, 0, 0) else Color.argb(255, 255, 0, 255)
-        bitmap.eraseColor(color)
-        return bitmap
+        return null
     }
 
     fun getTextureErrorState(textureId: UUID): TextureDecodeErrorState? = textureErrorStates[textureId]
@@ -525,13 +545,17 @@ class TextureManager(
                (data[0] == 0xFF.toByte() && data[1] == 0x4F.toByte())
     }
     
-    private fun decodeJPEG2000(data: ByteArray): Bitmap? {
+    private fun decodeJPEG2000(data: ByteArray, discardLevel: Int): Bitmap? {
         return try {
-            JPEG2000Decoder.decode(data)
+            JPEG2000Decoder.decode(data, discardLevel)
         } catch (e: Exception) {
             Log.e(TAG, "JPEG2000 decode failed", e)
             null
         }
+    }
+
+    internal fun computeDiscardLevel(priority: TexturePriority, distanceMeters: Float? = null): Int {
+        return computeDiscardLevelForRequest(priority, distanceMeters)
     }
     
     private suspend fun downloadWorker() {
@@ -646,6 +670,10 @@ class TextureManager(
             downloadQueueSize = downloadQueue.size,
             activeDownloads = activeDownloads.get(),
             hasTextureCapability = capabilityUrl != null,
+            j2kNativeDecoderLoaded = JPEG2000Decoder.getStartupStatus().nativeLoaded,
+            j2kNativeDecoderHealthy = JPEG2000Decoder.getStartupStatus().nativeHealthy,
+            j2kNativeDecoderError = JPEG2000Decoder.getStartupStatus().nativeError
+                ?: JPEG2000Decoder.getStartupStatus().nativeHealthError,
             j2kDecodeAttempts = j2kDecodeAttempts.get(),
             j2kDecodeSuccesses = j2kDecodeSuccesses.get(),
             lastError = lastError,
@@ -669,6 +697,9 @@ class TextureManager(
         val downloadQueueSize: Int,
         val activeDownloads: Int,
         val hasTextureCapability: Boolean,
+        val j2kNativeDecoderLoaded: Boolean,
+        val j2kNativeDecoderHealthy: Boolean,
+        val j2kNativeDecoderError: String?,
         val j2kDecodeAttempts: Int,
         val j2kDecodeSuccesses: Int,
         val lastError: String?,
