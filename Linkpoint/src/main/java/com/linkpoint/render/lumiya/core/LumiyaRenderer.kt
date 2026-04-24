@@ -108,6 +108,7 @@ class LumiyaRenderer : RenderEngineProvider {
 
             ctx.updateCamera()
             rebuildHudMatrices(width, height)
+            hudStore.setViewportSize(width, height)
 
             isInitialized = true
             Log.i(TAG, "Lumiya renderer initialised  (GPU: ${ctx.gpuRenderer})")
@@ -125,6 +126,7 @@ class LumiyaRenderer : RenderEngineProvider {
         GLES32.glViewport(0, 0, width, height)
         if (ctx.fxaaEnabled) ctx.createFXAAFramebuffer(width, height)
         rebuildHudMatrices(width, height)
+        hudStore.setViewportSize(width, height)
     }
 
     override fun onSurfaceDestroyed() {
@@ -326,10 +328,11 @@ class LumiyaRenderer : RenderEngineProvider {
         posZ: Float,
         layer: Int = 0
     ) {
-        if (AttachmentPoints.isHudPoint(attachmentPoint)) {
+        val normalizedAttachmentPoint = normalizeAttachmentPoint(attachmentPoint)
+        if (AttachmentPoints.isHudPoint(normalizedAttachmentPoint)) {
             hudStore.addHudPrim(
                 id = id,
-                attachmentPoint = attachmentPoint,
+                attachmentPoint = normalizedAttachmentPoint,
                 posX = posX,
                 posY = posY,
                 posZ = posZ,
@@ -379,5 +382,10 @@ class LumiyaRenderer : RenderEngineProvider {
             -1f,
             1f
         )
+    }
+
+    private fun normalizeAttachmentPoint(attachmentPoint: Int): Int {
+        // Attachment points on the wire may carry APPEND flag in the upper bit (0x80).
+        return attachmentPoint and 0x7F
     }
 }
