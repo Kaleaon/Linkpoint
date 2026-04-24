@@ -175,7 +175,7 @@ object MessageTemplateCatalog {
         declaredParserOrWriterMessages + LinkpointApp.parserSupportedMessageNamesForConformance
 
     /** Declared-only messages kept for parity; each entry carries an explicit rationale. */
-    val declaredOnlyMessagesWithRationale: Map<String, String> = mapOf(
+    private val declaredOnlyBacklogMessages: Map<String, String> = mapOf(
         "AcceptCallingCard" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
         "AgentDataUpdateRequest" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
         "AgentFOV" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
@@ -470,6 +470,59 @@ object MessageTemplateCatalog {
         "ViewerFrozenMessage" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
         "ViewerStartAuction" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
     )
+
+    private val implementedDeclaredMessageNames: Set<String> = setOf(
+        "FetchInventoryDescendents",
+        "FetchInventory",
+        "RequestPayPrice",
+        "DirFindQuery",
+        "GroupTitlesRequest",
+        "MapNameRequest",
+        "AgentPause",
+        "AgentResume",
+    )
+
+    private const val DEFERRED_DATE = "2026-04-24"
+    private const val DEFERRED_ISSUE = "https://github.com/Kaleaon/Linkpoint/issues/1734"
+
+    private val userCriticalPrefixes = listOf("Chat", "Inventory", "Parcel", "Money", "Economy")
+    private val mediumUtilityPrefixes = listOf("Group", "Dir", "Map", "Search")
+
+    private fun classifyDeferredMessage(name: String): String = when {
+        userCriticalPrefixes.any { name.startsWith(it) } -> "user-critical"
+        mediumUtilityPrefixes.any { name.startsWith(it) } -> "medium-utility"
+        else -> "low-priority-admin"
+    }
+
+    private fun deferredRationale(category: String): String =
+        "@deferred category=$category since=$DEFERRED_DATE issue=$DEFERRED_ISSUE"
+
+    private val deferredMessageNames: Set<String> =
+        declaredOnlyBacklogMessages.keys - implementedDeclaredMessageNames
+
+    /** Declared-only backlog split by prioritization slice for parity tracking. */
+    val declaredOnlyUserCriticalMessagesWithRationale: Map<String, String> = deferredMessageNames
+        .filter { classifyDeferredMessage(it) == "user-critical" }
+        .sorted()
+        .associateWith { deferredRationale("user-critical") }
+
+    /** Declared-only backlog split by prioritization slice for parity tracking. */
+    val declaredOnlyMediumUtilityMessagesWithRationale: Map<String, String> = deferredMessageNames
+        .filter { classifyDeferredMessage(it) == "medium-utility" }
+        .sorted()
+        .associateWith { deferredRationale("medium-utility") }
+
+    /** Declared-only backlog split by prioritization slice for parity tracking. */
+    val declaredOnlyLowPriorityAdminMessagesWithRationale: Map<String, String> = deferredMessageNames
+        .filter { classifyDeferredMessage(it) == "low-priority-admin" }
+        .sorted()
+        .associateWith { deferredRationale("low-priority-admin") }
+
+    /** Declared-only messages kept for parity and explicitly deferred with dated issue linkage. */
+    val declaredOnlyMessagesWithRationale: Map<String, String> =
+        declaredOnlyUserCriticalMessagesWithRationale +
+            declaredOnlyMediumUtilityMessagesWithRationale +
+            declaredOnlyLowPriorityAdminMessagesWithRationale
 
     /** Deprecated template messages tracked explicitly to preserve historical parity. */
     val deprecatedMessagesWithRationale: Map<String, String> = mapOf(

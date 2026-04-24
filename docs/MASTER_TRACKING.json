@@ -57,13 +57,10 @@
       "task_id": "MP-005",
       "acceptance_criterion": "Deferred caps are either implemented or explicitly tracked with owning backlog item",
       "owner": "@protocol",
-      "status": "BLOCKED",
-      "blocking_deps": [
-        "Media browser/navigation stack for CAP_OBJECT_MEDIA_NAVIGATE",
-        "Region-experience runtime consumer for CAP_REGION_EXPERIENCE"
-      ],
+      "status": "DONE",
+      "blocking_deps": [],
       "acceptance_tests": [
-        "./gradlew :app:testDebugUnitTest --tests \"*Capability*\""
+        "./gradlew :app:testDebugUnitTest --tests \"*DeferredCapabilityConsumersTest*\""
       ]
     },
     {
@@ -96,12 +93,12 @@
       {
         "debt_id": "PD-001",
         "gap": "Object media navigate capability exists in reference capability set but app lacks user-facing media navigation implementation",
-        "status": "OPEN"
+        "status": "DONE"
       },
       {
         "debt_id": "PD-002",
         "gap": "Region experience capability is requested for parity but no runtime consumer path is enabled",
-        "status": "OPEN"
+        "status": "DONE"
       },
       {
         "debt_id": "PD-003",

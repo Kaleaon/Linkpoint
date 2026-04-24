@@ -68,6 +68,10 @@ jobs:
       
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+
+      - name: Validate parity snapshot clean-tree guards
+        run: bash scripts/check_parity_snapshot_guards.sh
+
       
       - name: Display Gradle version
         run: ./gradlew --version

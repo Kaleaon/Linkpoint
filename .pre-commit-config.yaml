@@ -1,0 +1,8 @@
+repos:
+  - repo: local
+    hooks:
+      - id: parity-snapshot-guard
+        name: parity snapshot scripts enforce clean tree
+        entry: bash scripts/check_parity_snapshot_guards.sh
+        language: system
+        pass_filenames: false

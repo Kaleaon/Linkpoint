@@ -13,6 +13,9 @@ class MessageTemplateProtocolConformanceTest {
         val supported = MessageIds.supportedTemplateMessages
         val declaredOnly = MessageIds.declaredOnlyTemplateMessages
         val deprecated = MessageIds.deprecatedTemplateMessages
+        val declaredUserCritical = MessageTemplateCatalog.declaredOnlyUserCriticalMessagesWithRationale
+        val declaredMediumUtility = MessageTemplateCatalog.declaredOnlyMediumUtilityMessagesWithRationale
+        val declaredLowPriorityAdmin = MessageTemplateCatalog.declaredOnlyLowPriorityAdminMessagesWithRationale
 
         val duplicateClassifications = templateMessages.filter { message ->
             listOf(
@@ -44,6 +47,9 @@ class MessageTemplateProtocolConformanceTest {
                 appendLine("template_count=${templateMessages.size}")
                 appendLine("supported_count=${templateMessages.count { it.name in supported }}")
                 appendLine("declared_only_count=${templateMessages.count { it.name in declaredOnly }}")
+                appendLine("declared_user_critical_count=${templateMessages.count { it.name in declaredUserCritical }}")
+                appendLine("declared_medium_utility_count=${templateMessages.count { it.name in declaredMediumUtility }}")
+                appendLine("declared_low_priority_admin_count=${templateMessages.count { it.name in declaredLowPriorityAdmin }}")
                 appendLine("deprecated_count=${templateMessages.count { it.name in deprecated }}")
                 appendLine("missing_classification_count=${missingClassification.size}")
                 appendLine("duplicate_classification_count=${duplicateClassifications.size}")
@@ -66,6 +72,24 @@ class MessageTemplateProtocolConformanceTest {
 
                 appendLine("[DECLARED_ONLY_MESSAGES]")
                 declaredOnly.toSortedMap().forEach { (name, rationale) ->
+                    appendLine("- $name :: $rationale")
+                }
+                appendLine()
+
+                appendLine("[DECLARED_ONLY_USER_CRITICAL]")
+                declaredUserCritical.toSortedMap().forEach { (name, rationale) ->
+                    appendLine("- $name :: $rationale")
+                }
+                appendLine()
+
+                appendLine("[DECLARED_ONLY_MEDIUM_UTILITY]")
+                declaredMediumUtility.toSortedMap().forEach { (name, rationale) ->
+                    appendLine("- $name :: $rationale")
+                }
+                appendLine()
+
+                appendLine("[DECLARED_ONLY_LOW_PRIORITY_ADMIN]")
+                declaredLowPriorityAdmin.toSortedMap().forEach { (name, rationale) ->
                     appendLine("- $name :: $rationale")
                 }
                 appendLine()

@@ -67,6 +67,7 @@ import com.linkpoint.voice.VoiceManager
 import com.linkpoint.world.FriendsManager
 import com.linkpoint.world.ParcelManager
 import com.linkpoint.world.ProfileManager
+import com.linkpoint.world.RegionExperienceManager
 import com.linkpoint.world.SearchManager
 import com.linkpoint.world.WorldMap
 import com.linkpoint.world.environment.EnvironmentManager
@@ -131,11 +132,15 @@ class LinkpointApp : Application() {
             "CoarseLocationUpdate",
             "CrossedRegion",
             "EnableSimulator",
+            "FetchInventory",
+            "FetchInventoryDescendents",
+            "GroupTitlesRequest",
             "HealthMessage",
             "ImprovedInstantMessage",
             "ImprovedTerseObjectUpdate",
             "KillObject",
             "LayerData",
+            "MapNameRequest",
             "ObjectProperties",
             "ObjectUpdate",
             "ObjectUpdateCached",
@@ -144,6 +149,7 @@ class LinkpointApp : Application() {
             "OnlineNotification",
             "PacketAck",
             "ParcelOverlay",
+            "RequestPayPrice",
             "RegionHandshake",
             "ScriptControlChange",
             "SoundTrigger",
@@ -152,6 +158,9 @@ class LinkpointApp : Application() {
             "TeleportFinish",
             "TeleportProgress",
             "TeleportStart",
+            "AgentPause",
+            "AgentResume",
+            "DirFindQuery",
         )
     }
     
@@ -226,6 +235,8 @@ class LinkpointApp : Application() {
     lateinit var searchManager: SearchManager
         private set
     lateinit var profileManager: ProfileManager
+        private set
+    lateinit var regionExperienceManager: RegionExperienceManager
         private set
     lateinit var parcelManager: ParcelManager
         private set
@@ -464,6 +475,7 @@ class LinkpointApp : Application() {
         worldMap = WorldMap(capabilityManager)
         searchManager = SearchManager(capabilityManager)
         profileManager = ProfileManager(capabilityManager)
+        regionExperienceManager = RegionExperienceManager(capabilityManager)
         parcelManager = ParcelManager(udpConnection)
         
         // Voice
@@ -512,7 +524,7 @@ class LinkpointApp : Application() {
         idleHandler = IdleHandler(connectionKeepAlive)
         
         // NEW: Media Manager
-        mediaManager = MediaManager(this, udpConnection)
+        mediaManager = MediaManager(this, udpConnection, capabilityManager)
         
         // NEW: Snapshot Manager
         snapshotManager = SnapshotManager(this, capabilityManager)
@@ -2558,15 +2570,19 @@ class LinkpointApp : Application() {
         // --- Agent Messages ---
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.AGENT_PAUSE) { _, rawPacket ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload != null) Log.d(TAG, "⏸️ AgentPause (${payload.size} bytes)")
+                com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
+                    com.linkpoint.protocol.messages.MessageIds.AGENT_PAUSE,
+                    rawPacket
+                ) { summary -> Log.d(TAG, "⏸️ $summary") }
             } catch (e: Exception) { Log.e(TAG, "Error handling AgentPause", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.AGENT_RESUME) { _, rawPacket ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload != null) Log.d(TAG, "▶️ AgentResume (${payload.size} bytes)")
+                com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
+                    com.linkpoint.protocol.messages.MessageIds.AGENT_RESUME,
+                    rawPacket
+                ) { summary -> Log.d(TAG, "▶️ $summary") }
             } catch (e: Exception) { Log.e(TAG, "Error handling AgentResume", e) }
         }
         
@@ -2765,19 +2781,19 @@ class LinkpointApp : Application() {
         // --- Inventory Messages (Extended) ---
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.FETCH_INVENTORY_DESCENDENTS) { _, rawPacket ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload != null && ::inventoryManager.isInitialized) {
-                    Log.d(TAG, "📦 FetchInventoryDescendents (${payload.size} bytes)")
-                }
+                com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
+                    com.linkpoint.protocol.messages.MessageIds.FETCH_INVENTORY_DESCENDENTS,
+                    rawPacket
+                ) { summary -> Log.d(TAG, "📦 $summary") }
             } catch (e: Exception) { Log.e(TAG, "Error handling FetchInventoryDescendents", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.FETCH_INVENTORY) { _, rawPacket ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload != null && ::inventoryManager.isInitialized) {
-                    Log.d(TAG, "📦 FetchInventory (${payload.size} bytes)")
-                }
+                com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
+                    com.linkpoint.protocol.messages.MessageIds.FETCH_INVENTORY,
+                    rawPacket
+                ) { summary -> Log.d(TAG, "📦 $summary") }
             } catch (e: Exception) { Log.e(TAG, "Error handling FetchInventory", e) }
         }
         
@@ -3175,8 +3191,10 @@ class LinkpointApp : Application() {
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.MAP_NAME_REQUEST) { _, rawPacket ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload != null) Log.d(TAG, "🗺️ MapNameRequest (${payload.size} bytes)")
+                com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
+                    com.linkpoint.protocol.messages.MessageIds.MAP_NAME_REQUEST,
+                    rawPacket
+                ) { summary -> Log.d(TAG, "🗺️ $summary") }
             } catch (e: Exception) { Log.e(TAG, "Error handling MapNameRequest", e) }
         }
         
@@ -3692,7 +3710,10 @@ class LinkpointApp : Application() {
         
         // --- Directory Query Messages ---
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.DIR_FIND_QUERY) { _, rawPacket ->
-            Log.d(TAG, "🔍 DirFindQuery received")
+            com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
+                com.linkpoint.protocol.messages.MessageIds.DIR_FIND_QUERY,
+                rawPacket
+            ) { summary -> Log.d(TAG, "🔍 $summary") }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.DIR_PLACES_QUERY) { _, rawPacket ->
@@ -3758,7 +3779,10 @@ class LinkpointApp : Application() {
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.GROUP_TITLES_REQUEST) { _, rawPacket ->
-            Log.d(TAG, "👥 GroupTitlesRequest received")
+            com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
+                com.linkpoint.protocol.messages.MessageIds.GROUP_TITLES_REQUEST,
+                rawPacket
+            ) { summary -> Log.d(TAG, "👥 $summary") }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.GROUP_MEMBERS_REQUEST) { _, rawPacket ->
@@ -4770,7 +4794,10 @@ class LinkpointApp : Application() {
         
         // --- Pay Price ---
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.REQUEST_PAY_PRICE) { _: Int, rawPacket: ByteArray ->
-            Log.d(TAG, "💰 RequestPayPrice received")
+            com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
+                com.linkpoint.protocol.messages.MessageIds.REQUEST_PAY_PRICE,
+                rawPacket
+            ) { summary -> Log.d(TAG, "💰 $summary") }
         }
         
         // --- Rez Extended ---
