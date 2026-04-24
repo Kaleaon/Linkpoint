@@ -67,6 +67,7 @@ import com.linkpoint.voice.VoiceManager
 import com.linkpoint.world.FriendsManager
 import com.linkpoint.world.ParcelManager
 import com.linkpoint.world.ProfileManager
+import com.linkpoint.world.RegionExperienceManager
 import com.linkpoint.world.SearchManager
 import com.linkpoint.world.WorldMap
 import com.linkpoint.world.environment.EnvironmentManager
@@ -226,6 +227,8 @@ class LinkpointApp : Application() {
     lateinit var searchManager: SearchManager
         private set
     lateinit var profileManager: ProfileManager
+        private set
+    lateinit var regionExperienceManager: RegionExperienceManager
         private set
     lateinit var parcelManager: ParcelManager
         private set
@@ -464,6 +467,7 @@ class LinkpointApp : Application() {
         worldMap = WorldMap(capabilityManager)
         searchManager = SearchManager(capabilityManager)
         profileManager = ProfileManager(capabilityManager)
+        regionExperienceManager = RegionExperienceManager(capabilityManager)
         parcelManager = ParcelManager(udpConnection)
         
         // Voice
@@ -512,7 +516,7 @@ class LinkpointApp : Application() {
         idleHandler = IdleHandler(connectionKeepAlive)
         
         // NEW: Media Manager
-        mediaManager = MediaManager(this, udpConnection)
+        mediaManager = MediaManager(this, udpConnection, capabilityManager)
         
         // NEW: Snapshot Manager
         snapshotManager = SnapshotManager(this, capabilityManager)
