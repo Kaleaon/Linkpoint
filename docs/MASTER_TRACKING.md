@@ -1,7 +1,7 @@
 # LINKPOINT MASTER TRACKING DOCUMENT (Code-verified snapshot)
 
-**Last verified:** 2026-04-09 (UTC)  
-**Commit:** `a9982607`  
+**Last verified:** 2026-04-23 (UTC)  
+**Commit:** `TBD`  
 **Verification scope:** `Linkpoint/src/main/java/**/*.kt`
 
 ---
@@ -32,29 +32,26 @@
    - `WorldViewActivity.surfaceCreated(...)` invokes `RenderManager.recreateSwapChain()`.
    - `RenderManager.recreateSwapChain()` creates swap chain via Filament engine.
 
+5. **Former declaration-only caps now have concrete manager request paths**
+   - `CAP_SET_DISPLAY_NAME` via `DisplayNameManager.setDisplayName(...)`.
+   - `CAP_SIMULATOR_FEATURES` via `SimulatorFeaturesManager.fetchSimulatorFeatures(...)`.
+   - `CAP_AGENT_PREFERENCES` / `CAP_UPDATE_AGENT_LANGUAGE` via `AgentPreferencesManager`.
+   - `CAP_RENDER_MATERIALS` via `RenderMaterialsManager.fetchRenderMaterials(...)`.
+   - `CAP_COPY_INVENTORY_FROM_NOTECARD` and `CAP_MOVE_INVENTORY_ITEM` via `NotecardManager`.
+
+6. **Task notecard update capability path is now wired**
+   - `NotecardManager.saveNotecard(itemId, newText, taskId)` routes to `CAP_UPDATE_NOTECARD_TASK`.
+
 ---
 
 ## [OPEN_BLOCKER] Current blockers requiring follow-up
 
-1. **Task notecard save capability path is incomplete**
-   - Present symbols/caps: `CapabilityManager.CAP_UPDATE_NOTECARD_TASK`, translation list includes `UpdateNotecardTaskInventory`.
-   - Missing flow: `NotecardManager.saveNotecard(...)` currently only targets `CAP_UPDATE_NOTECARD_AGENT` and has no task/object variant.
+1. **Deferred capability integrations remain intentionally out-of-scope**
+   - `CAP_OBJECT_MEDIA_NAVIGATE` deferred (2026-04-23): media browser/navigation stack not yet wired in app UI.
+   - `CAP_REGION_EXPERIENCE` deferred (2026-04-23): no active runtime consumer yet, kept for handshake parity.
 
-2. **Capability callsite coverage still incomplete for some declared caps**
-   - Declared constants without clear `capabilityManager.request(...)` usage paths:
-     - `CAP_SET_DISPLAY_NAME`
-     - `CAP_SIMULATOR_FEATURES`
-     - `CAP_AGENT_PREFERENCES`
-     - `CAP_UPDATE_AGENT_LANGUAGE`
-     - `CAP_RENDER_MATERIALS`
-     - `CAP_OBJECT_MEDIA_NAVIGATE`
-     - `CAP_COPY_INVENTORY_FROM_NOTECARD`
-     - `CAP_REGION_EXPERIENCE`
-     - `CAP_MOVE_INVENTORY_ITEM`
-
-3. **Symbol consistency gap (literals vs constants)**
-   - Example: `ProfileManager.getGroupProfile(...)` uses literal `"GroupProfile"` instead of `CapabilityManager.CAP_GROUP_PROFILE`.
-   - This complicates static verification and can hide capability drift during refactors.
+2. **Capability list cleanup**
+   - Removed from requested-capability tracking gap list: `CAP_MOVE_INVENTORY_ITEM` (now implemented via notecard inventory flow request path).
 
 4. **Renderer feature parity still partial**
    - `LumiyaRenderer` marks HUD pass as “not implemented yet”.
@@ -74,8 +71,6 @@
 
 ## Next verification pass checklist
 
-1. Add task-inventory variant to notecard save API and wire `UpdateNotecardTaskInventory`.
-2. Replace capability string literals with `CapabilityManager.CAP_*` constants in profile/world managers.
-3. Either implement or formally de-scope currently uncalled capability constants.
-4. Re-run static inventory after each change and refresh this file with new commit hash/date.
-
+1. Continue deferral review for `CAP_OBJECT_MEDIA_NAVIGATE` and `CAP_REGION_EXPERIENCE` against product priorities.
+2. Keep new managers covered by request-shape unit tests when payload schemas evolve.
+3. Re-run static inventory after each capability refactor and refresh this file with new commit hash/date.
