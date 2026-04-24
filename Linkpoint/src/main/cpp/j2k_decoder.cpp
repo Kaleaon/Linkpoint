@@ -192,19 +192,60 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeDecode(
     }
     
     opj_end_decompress(codec, stream);
-    
-    // Get image info
-    int width = image->x1 - image->x0;
-    int height = image->y1 - image->y0;
+
     int numComponents = image->numcomps;
-    
-    LOGI("Decoded image: %dx%d, %d components", width, height, numComponents);
-    
+    if (numComponents <= 0 || image->comps == nullptr) {
+        LOGE("Decoded image has no components");
+        opj_image_destroy(image);
+        opj_stream_destroy(stream);
+        opj_destroy_codec(codec);
+        env->ReleaseByteArrayElements(jdata, dataPtr, JNI_ABORT);
+        return nullptr;
+    }
+
+    // With cp_reduce > 0 OpenJPEG decodes a sub-resolution image; the canvas
+    // (x0/x1/y0/y1) stays at full size, but the actual pixel buffer is
+    // comps[i].w x comps[i].h. Driving the copy loop from the canvas size
+    // walks past the end of the component buffers and corrupts memory.
+    // Use the smallest component extent so we never read past any plane.
+    int width = image->comps[0].w;
+    int height = image->comps[0].h;
+    for (int c = 1; c < numComponents; ++c) {
+        if (image->comps[c].w < (OPJ_UINT32)width) width = image->comps[c].w;
+        if (image->comps[c].h < (OPJ_UINT32)height) height = image->comps[c].h;
+    }
+
+    if (width <= 0 || height <= 0) {
+        LOGE("Decoded image has invalid dimensions: %dx%d", width, height);
+        opj_image_destroy(image);
+        opj_stream_destroy(stream);
+        opj_destroy_codec(codec);
+        env->ReleaseByteArrayElements(jdata, dataPtr, JNI_ABORT);
+        return nullptr;
+    }
+
+    LOGI("Decoded image: %dx%d, %d components (canvas %dx%d, reduce=%d)",
+         width, height, numComponents,
+         image->x1 - image->x0, image->y1 - image->y0, discardLevel);
+
+    // Some component data pointers can be null if decoding failed silently
+    // for that plane; bail out before dereferencing them.
+    for (int c = 0; c < numComponents; ++c) {
+        if (image->comps[c].data == nullptr) {
+            LOGE("Component %d has null data buffer", c);
+            opj_image_destroy(image);
+            opj_stream_destroy(stream);
+            opj_destroy_codec(codec);
+            env->ReleaseByteArrayElements(jdata, dataPtr, JNI_ABORT);
+            return nullptr;
+        }
+    }
+
     // Convert to RGBA
-    size_t pixelCount = width * height;
+    size_t pixelCount = (size_t)width * (size_t)height;
     size_t rgbaSize = pixelCount * 4;
     uint8_t* rgbaData = (uint8_t*)malloc(rgbaSize);
-    
+
     if (!rgbaData) {
         LOGE("Failed to allocate output buffer");
         opj_image_destroy(image);
@@ -213,34 +254,55 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeDecode(
         env->ReleaseByteArrayElements(jdata, dataPtr, JNI_ABORT);
         return nullptr;
     }
-    
-    // Handle different component counts
+
+    // Normalise sample values to 8-bit. SL textures usually arrive as 8-bit
+    // unsigned, but signed/high-precision streams must be shifted/saturated
+    // before truncation, otherwise & 0xFF produces wrap-around garbage.
+    auto sampleToByte = [](OPJ_INT32 v, int prec, OPJ_BOOL signedSample) -> uint8_t {
+        if (signedSample) {
+            v += 1 << (prec - 1);
+        }
+        if (prec > 8) {
+            v >>= (prec - 8);
+        } else if (prec < 8 && prec > 0) {
+            v <<= (8 - prec);
+        }
+        if (v < 0) v = 0;
+        if (v > 255) v = 255;
+        return (uint8_t)v;
+    };
+
     if (numComponents >= 3) {
-        // RGB or RGBA
+        const auto& cR = image->comps[0];
+        const auto& cG = image->comps[1];
+        const auto& cB = image->comps[2];
+        const opj_image_comp_t* cA = (numComponents >= 4) ? &image->comps[3] : nullptr;
         for (size_t i = 0; i < pixelCount; i++) {
-            rgbaData[i * 4 + 0] = (uint8_t)(image->comps[0].data[i] & 0xFF); // R
-            rgbaData[i * 4 + 1] = (uint8_t)(image->comps[1].data[i] & 0xFF); // G
-            rgbaData[i * 4 + 2] = (uint8_t)(image->comps[2].data[i] & 0xFF); // B
-            rgbaData[i * 4 + 3] = (numComponents >= 4) ? 
-                (uint8_t)(image->comps[3].data[i] & 0xFF) : 255; // A
+            rgbaData[i * 4 + 0] = sampleToByte(cR.data[i], cR.prec, cR.sgnd);
+            rgbaData[i * 4 + 1] = sampleToByte(cG.data[i], cG.prec, cG.sgnd);
+            rgbaData[i * 4 + 2] = sampleToByte(cB.data[i], cB.prec, cB.sgnd);
+            rgbaData[i * 4 + 3] = (cA != nullptr)
+                ? sampleToByte(cA->data[i], cA->prec, cA->sgnd)
+                : (uint8_t)255;
         }
     } else if (numComponents == 1) {
-        // Grayscale
+        const auto& c0 = image->comps[0];
         for (size_t i = 0; i < pixelCount; i++) {
-            uint8_t gray = (uint8_t)(image->comps[0].data[i] & 0xFF);
+            uint8_t gray = sampleToByte(c0.data[i], c0.prec, c0.sgnd);
             rgbaData[i * 4 + 0] = gray;
             rgbaData[i * 4 + 1] = gray;
             rgbaData[i * 4 + 2] = gray;
             rgbaData[i * 4 + 3] = 255;
         }
-    } else if (numComponents == 2) {
-        // Grayscale + Alpha
+    } else { // numComponents == 2 (grayscale + alpha)
+        const auto& c0 = image->comps[0];
+        const auto& c1 = image->comps[1];
         for (size_t i = 0; i < pixelCount; i++) {
-            uint8_t gray = (uint8_t)(image->comps[0].data[i] & 0xFF);
+            uint8_t gray = sampleToByte(c0.data[i], c0.prec, c0.sgnd);
             rgbaData[i * 4 + 0] = gray;
             rgbaData[i * 4 + 1] = gray;
             rgbaData[i * 4 + 2] = gray;
-            rgbaData[i * 4 + 3] = (uint8_t)(image->comps[1].data[i] & 0xFF);
+            rgbaData[i * 4 + 3] = sampleToByte(c1.data[i], c1.prec, c1.sgnd);
         }
     }
     

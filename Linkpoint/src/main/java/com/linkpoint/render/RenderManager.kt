@@ -81,7 +81,20 @@ class RenderManager(private val context: Context) {
      */
     fun initialize(surfaceView: SurfaceView): Boolean {
         requireRenderThread("initialize")
-        if (isInitialized) return true
+        if (isInitialized) {
+            // Activity may have created a fresh SurfaceView (e.g. after a renderer
+            // toggle or configuration change) while we're already initialized.
+            // Adopt the new SurfaceView and rebuild the SwapChain against it,
+            // otherwise we keep rendering against a stale (or destroyed) surface.
+            if (this.surfaceView !== surfaceView) {
+                Log.i(TAG, "RenderManager.initialize: adopting new SurfaceView, rebuilding SwapChain")
+                this.surfaceView = surfaceView
+                uiHelper?.detach()
+                uiHelper?.attachTo(surfaceView)
+                rebuildSwapChainForCurrentSurface()
+            }
+            return true
+        }
         this.surfaceView = surfaceView
         
         try {
@@ -168,9 +181,18 @@ class RenderManager(private val context: Context) {
                 attachTo(surfaceView)
                 Log.d(TAG, "UiHelper attached to SurfaceView")
             }
-            
-            // Setup display helper
+
+            // Setup display helper BEFORE the eager swapchain rebuild so the
+            // attachDisplayHelper() call inside it can succeed on first try.
             displayHelper = DisplayHelper(context)
+
+            // UiHelper.attachTo does not always re-fire onNativeWindowChanged for
+            // surfaces that were already created before we attached - which is the
+            // common case here, because the SurfaceHolder.Callback in the activity
+            // dispatches us onto the render thread while the surface is already valid.
+            // Without this eager creation the SwapChain stays null forever and frames
+            // never composite, producing the "world refuses to load" symptom.
+            rebuildSwapChainForCurrentSurface()
             
             // Configure renderer with SL default clear color (sky blue)
             renderer?.clearOptions?.apply {
@@ -322,6 +344,38 @@ class RenderManager(private val context: Context) {
             1000.0,         // far plane
             Camera.Fov.VERTICAL
         )
+    }
+
+    private fun rebuildSwapChainForCurrentSurface() {
+        val eng = engine ?: return
+        val sv = surfaceView ?: return
+        val surface = sv.holder?.surface
+        if (surface == null || !surface.isValid) {
+            return
+        }
+        synchronized(swapChainLock) {
+            swapChain?.let {
+                try { eng.destroySwapChain(it) } catch (_: Exception) {}
+            }
+            swapChain = try {
+                eng.createSwapChain(surface)
+            } catch (e: Exception) {
+                Log.e(TAG, "rebuildSwapChainForCurrentSurface: createSwapChain threw", e)
+                null
+            }
+            if (swapChain != null) {
+                Log.i(TAG, "✓ SwapChain created eagerly during initialize")
+                attachDisplayHelper()
+                val width = sv.width
+                val height = sv.height
+                if (width > 0 && height > 0) {
+                    view?.viewport = Viewport(0, 0, width, height)
+                    viewportWidth = width
+                    viewportHeight = height
+                    updateProjection(width, height)
+                }
+            }
+        }
     }
 
     private fun ensureSwapChain(engine: Engine): SwapChain? {

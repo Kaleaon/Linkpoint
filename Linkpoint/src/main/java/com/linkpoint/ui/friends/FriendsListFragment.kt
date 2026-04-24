@@ -56,6 +56,14 @@ class FriendsListFragment : Fragment() {
         observeFriendEvents()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // The buddy-list parser populates FriendsManager asynchronously after login,
+        // so refresh whenever the user comes back to this screen rather than relying
+        // solely on the initial onViewCreated load.
+        loadFriends()
+    }
+
     private fun setupViews(view: View) {
         recyclerView = view.findViewById(R.id.friends_recyclerview)
         progressBar = view.findViewById(R.id.progress_bar)

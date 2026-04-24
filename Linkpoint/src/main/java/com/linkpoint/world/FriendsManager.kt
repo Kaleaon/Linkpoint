@@ -725,12 +725,20 @@ class FriendsManager(
     fun addFriendFromLogin(agentId: UUID, name: String, rightsGiven: Int, rightsHas: Int) {
         val resolvedName = name.ifBlank { "Resident (${agentId.toString().take(8)})" }
         Log.d(TAG, "Adding friend from login: $resolvedName ($agentId)")
-        friends[agentId] = Friend(
+        val friend = Friend(
             agentId = agentId,
             name = resolvedName,
             rightsGiven = rightsGiven,
             rightsHas = rightsHas
         )
+        val isNew = friends.put(agentId, friend) == null
+        // Emit so any UI that's already observing the flow refreshes once buddy-list
+        // parsing completes after the user has opened the Friends screen.
+        if (isNew) {
+            scope.launch {
+                _friendsFlow.emit(FriendEvent.Added(friend))
+            }
+        }
     }
     
     /**
