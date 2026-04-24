@@ -170,13 +170,18 @@ class OutfitManager(
                 Log.w(TAG, "Wearable asset fetch failed for item=${item.itemId} asset=${item.assetId}; using fallback")
                 fallback
             } else {
-                val parsed = WearableAssetParser.parse(
+                val parseResult = WearableAssetParser.parseWithDiagnostics(
                     raw = bytes,
                     defaultType = wearableType,
                     assetId = item.assetId
                 )
+                val parsed = parseResult.data
                 if (parsed == null) {
-                    Log.e(TAG, "Wearable parse failed for item=${item.itemId} asset=${item.assetId}; using fallback")
+                    Log.e(
+                        TAG,
+                        "Wearable parse failed for item=${item.itemId} asset=${item.assetId} " +
+                            "(${parseResult.error ?: "unknown parse error"}, ${bytes.size} bytes); using fallback"
+                    )
                     fallback
                 } else {
                     parsed
@@ -509,11 +514,16 @@ class OutfitManager(
 
 internal object WearableAssetParser {
     private const val NULL_UUID = "00000000-0000-0000-0000-000000000000"
+    internal data class ParseResult(val data: WearableData?, val error: String? = null)
 
     fun parse(raw: ByteArray, defaultType: WearableType, assetId: UUID): WearableData? {
+        return parseWithDiagnostics(raw, defaultType, assetId).data
+    }
+
+    fun parseWithDiagnostics(raw: ByteArray, defaultType: WearableType, assetId: UUID): ParseResult {
         val text = raw.toString(Charsets.UTF_8)
         val lines = text.lineSequence().map { it.trim() }.filter { it.isNotEmpty() }.toList()
-        if (lines.isEmpty()) return null
+        if (lines.isEmpty()) return ParseResult(null, "wearable asset is empty")
 
         var declaredType: WearableType? = null
         val params = mutableMapOf<Int, Float>()
@@ -531,27 +541,47 @@ internal object WearableAssetParser {
                     index++
                 }
                 line.startsWith("parameters ", ignoreCase = true) -> {
-                    val count = line.substringAfter("parameters").trim().toIntOrNull() ?: return null
+                    val count = line.substringAfter("parameters").trim().toIntOrNull()
+                        ?: return ParseResult(null, "invalid parameters count line: '$line'")
                     index++
                     repeat(count) {
-                        if (index >= lines.size) return null
+                        if (index >= lines.size) {
+                            return ParseResult(
+                                null,
+                                "parameters section truncated at entry ${it + 1} of $count"
+                            )
+                        }
                         val tokens = lines[index].split(Regex("\\s+"))
-                        if (tokens.size < 2) return null
-                        val paramId = tokens[0].toIntOrNull() ?: return null
-                        val value = tokens[1].toFloatOrNull() ?: return null
+                        if (tokens.size < 2) {
+                            return ParseResult(null, "invalid parameter row: '${lines[index]}'")
+                        }
+                        val paramId = tokens[0].toIntOrNull()
+                            ?: return ParseResult(null, "invalid parameter id: '${tokens[0]}'")
+                        val value = tokens[1].toFloatOrNull()
+                            ?: return ParseResult(null, "invalid parameter value: '${tokens[1]}'")
                         params[paramId] = value
                         index++
                     }
                 }
                 line.startsWith("textures ", ignoreCase = true) -> {
-                    val count = line.substringAfter("textures").trim().toIntOrNull() ?: return null
+                    val count = line.substringAfter("textures").trim().toIntOrNull()
+                        ?: return ParseResult(null, "invalid textures count line: '$line'")
                     index++
                     repeat(count) {
-                        if (index >= lines.size) return null
+                        if (index >= lines.size) {
+                            return ParseResult(
+                                null,
+                                "textures section truncated at entry ${it + 1} of $count"
+                            )
+                        }
                         val tokens = lines[index].split(Regex("\\s+"))
-                        if (tokens.size < 2) return null
-                        val textureIndex = tokens[0].toIntOrNull() ?: return null
-                        val uuid = runCatching { UUID.fromString(tokens[1]) }.getOrNull() ?: return null
+                        if (tokens.size < 2) {
+                            return ParseResult(null, "invalid texture row: '${lines[index]}'")
+                        }
+                        val textureIndex = tokens[0].toIntOrNull()
+                            ?: return ParseResult(null, "invalid texture index: '${tokens[0]}'")
+                        val uuid = runCatching { UUID.fromString(tokens[1]) }.getOrNull()
+                            ?: return ParseResult(null, "invalid texture uuid: '${tokens[1]}'")
                         if (uuid.toString() != NULL_UUID) {
                             textures[textureIndex] = uuid
                         }
@@ -564,7 +594,9 @@ internal object WearableAssetParser {
 
         val type = declaredType ?: defaultType
         val tintColor = extractTintColor(params)
-        return WearableData(type, assetId, textures.toMap(), params.toMap(), tintColor)
+        return ParseResult(
+            data = WearableData(type, assetId, textures.toMap(), params.toMap(), tintColor)
+        )
     }
 
     private fun extractTintColor(params: Map<Int, Float>): IntArray? {
