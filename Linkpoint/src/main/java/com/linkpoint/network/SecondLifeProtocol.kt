@@ -168,7 +168,7 @@ class SecondLifeProtocol(private val context: Context) {
         
         // Start initialization tracking
         com.linkpoint.utils.InitializationTracker.startSession()
-        com.linkpoint.utils.InitializationTracker.startPhase(
+        com.linkpoint.utils.InitializationTracker.reachPhase(
             com.linkpoint.utils.InitializationTracker.Phase.LOGIN_STARTING,
             "Login for $firstName $lastName"
         )
@@ -366,7 +366,7 @@ class SecondLifeProtocol(private val context: Context) {
                         com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTING,
                         "UDP connected"
                     )
-                    com.linkpoint.utils.InitializationTracker.startPhase(
+                    com.linkpoint.utils.InitializationTracker.reachPhase(
                         com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTED,
                         "Waiting for simulator messages"
                     )
@@ -409,7 +409,7 @@ class SecondLifeProtocol(private val context: Context) {
                                 com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_FETCHING,
                                 "${app.capabilityManager.getCapabilityCount()} capabilities loaded"
                             )
-                            com.linkpoint.utils.InitializationTracker.startPhase(
+                            com.linkpoint.utils.InitializationTracker.reachPhase(
                                 com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_READY,
                                 "Capabilities available for use"
                             )

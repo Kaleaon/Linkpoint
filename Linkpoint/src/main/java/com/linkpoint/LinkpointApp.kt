@@ -752,7 +752,7 @@ class LinkpointApp : Application() {
                             com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
                             "Reply sent to ${regionData.simName}"
                         )
-                        com.linkpoint.utils.InitializationTracker.startPhase(
+                        com.linkpoint.utils.InitializationTracker.reachPhase(
                             com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_REPLIED,
                             "Waiting for world data"
                         )
@@ -823,7 +823,7 @@ class LinkpointApp : Application() {
                         com.linkpoint.utils.InitializationTracker.Phase.AGENT_MOVEMENT_COMPLETE,
                         "Agent at ${moveData.position}"
                     )
-                    com.linkpoint.utils.InitializationTracker.startPhase(
+                    com.linkpoint.utils.InitializationTracker.reachPhase(
                         com.linkpoint.utils.InitializationTracker.Phase.FULLY_CONNECTED,
                         "Agent is now in world"
                     )

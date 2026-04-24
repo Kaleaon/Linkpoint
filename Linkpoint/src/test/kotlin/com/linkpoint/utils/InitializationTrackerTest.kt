@@ -70,4 +70,30 @@ class InitializationTrackerTest {
             diagnostics.failedPhases.contains(InitializationTracker.Phase.LOGIN_RESPONSE_PARSING)
         )
     }
+
+    @Test
+    fun `reachPhase marks milestone phase complete without a separate completePhase`() {
+        InitializationTracker.startSession()
+        InitializationTracker.reachPhase(InitializationTracker.Phase.CAPABILITIES_READY, "caps ready")
+
+        val diagnostics = InitializationTracker.getDiagnostics()
+
+        assertEquals(
+            "Current phase should track the reached milestone",
+            InitializationTracker.Phase.CAPABILITIES_READY,
+            diagnostics.currentPhase
+        )
+        assertTrue(
+            "Reached phase should show as completed",
+            diagnostics.completedPhases.contains(InitializationTracker.Phase.CAPABILITIES_READY)
+        )
+        assertFalse(
+            "Reached phase should not show as pending",
+            diagnostics.pendingPhases.contains(InitializationTracker.Phase.CAPABILITIES_READY)
+        )
+        assertFalse(
+            "Reached phase should not show as failed",
+            diagnostics.failedPhases.contains(InitializationTracker.Phase.CAPABILITIES_READY)
+        )
+    }
 }
