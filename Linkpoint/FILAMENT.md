@@ -225,6 +225,18 @@ All 12 components implemented:
 - `FILAMENT_NEXT_STEPS.md` - Future enhancements
 - Root `FILAMENT_*.md` files - Additional guides
 
+## Lumiya HUD pass lifecycle (Phase 4 alignment)
+
+The GL-based Lumiya renderer now executes HUD rendering as an explicit pass 10 stage:
+
+1. World passes (opaque/avatar/sky/transparent/water/particles) run only when world rendering is enabled.
+2. HUD attachments are routed into a dedicated HUD draw list whenever the attachment point is `ATTACHMENT_HUD_*`.
+3. Pass 10 switches to an orthographic camera matrix rebuilt from current surface width/height.
+4. HUD pass disables depth testing and depth writes, isolating HUD visuals from world geometry depth state.
+5. HUD overlap ordering is deterministic: `layer` → `attachmentPoint` → `entityId`.
+6. Surface resize/orientation changes trigger HUD projection rebuilds so anchors remain consistent.
+7. Deterministic frame-planner tests validate that HUD still renders when world pass execution is disabled.
+
 ## 🎓 Learning Resources
 
 - [Filament Docs](https://google.github.io/filament/)
