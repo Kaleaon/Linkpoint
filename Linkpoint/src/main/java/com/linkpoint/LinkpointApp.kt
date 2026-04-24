@@ -379,10 +379,10 @@ class LinkpointApp : Application() {
     var agentId: UUID? = null
         private set
     
-    // Flag to track if CompleteAgentMovement has been sent
-    // Per SL protocol: This must be sent immediately when UseCircuitCode (seq 0) is ACKed
-    // The server won't send RegionHandshake until we send this
-    // Using AtomicBoolean to prevent race conditions with concurrent PacketAck messages
+    // Flag to track if CompleteAgentMovement has been sent.
+    // Per SL protocol: This must be sent immediately once UseCircuitCode is ACKed;
+    // the server won't send RegionHandshake until it receives CompleteAgentMovement.
+    // Using AtomicBoolean to prevent race conditions with concurrent PacketAck messages.
     private val completeAgentMovementSent = AtomicBoolean(false)
     
     override fun onCreate() {
@@ -1171,11 +1171,10 @@ class LinkpointApp : Application() {
             }
         }
         
-        // PacketAck - Acknowledgment messages for reliable packets
+        // PacketAck - Acknowledgment messages for reliable packets.
         // These are sent by the simulator to confirm receipt of our reliable packets.
-        // CRITICAL: When UseCircuitCode (seq 0) is acknowledged, we MUST immediately send
-        // CompleteAgentMovement. This follows the SL protocol behavior - the server
-        // won't send RegionHandshake until it receives CompleteAgentMovement.
+        // CRITICAL: When UseCircuitCode is acknowledged, we MUST immediately send
+        // CompleteAgentMovement - the simulator won't send RegionHandshake until then.
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.PACKET_ACK) { _, rawPacket ->
             // PacketAck format: Count (1 byte), then list of acknowledged sequence numbers (4 bytes each)
             try {
@@ -1183,27 +1182,27 @@ class LinkpointApp : Application() {
                 if (payload == null) return@registerHandler
                 val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
                 val count = buffer.get().toInt() and 0xFF
-                
-                // Parse the acknowledged sequence numbers and check for seq 0 during parsing
-                // (optimization: avoid extra contains() call on the list)
+
+                // Match the ACK list against the exact sequence number we used for
+                // UseCircuitCode, not a hardcoded value. Lumiya sends UseCircuitCode
+                // with the counter's first increment (seq=1), and any reconnect uses
+                // a larger number — so we must match on what the sender recorded.
+                val useCircuitCodeSeq = udpConnection.useCircuitCodeSequence
                 val ackedSequences = mutableListOf<Int>()
-                var containsSeq0 = false
+                var containsUseCircuitCodeAck = false
                 for (i in 0 until count) {
                     if (buffer.remaining() >= 4) {
                         val seq = buffer.int
                         ackedSequences.add(seq)
-                        if (seq == 0) containsSeq0 = true
+                        if (useCircuitCodeSeq >= 0 && seq == useCircuitCodeSeq) {
+                            containsUseCircuitCodeAck = true
+                        }
                     }
                 }
-                
+
                 Log.d(TAG, "PacketAck received: $count packets acknowledged - sequences: $ackedSequences")
-                
-                // Check if UseCircuitCode (sequence 0) was acknowledged
-                // This is CRITICAL - per SL protocol, we must send CompleteAgentMovement
-                // immediately when UseCircuitCode is ACKed. The server waits for this before
-                // sending RegionHandshake and other world data.
-                // Using compareAndSet for thread-safe, atomic check-and-set operation
-                if (containsSeq0 && completeAgentMovementSent.compareAndSet(false, true)) {
+
+                if (containsUseCircuitCodeAck && completeAgentMovementSent.compareAndSet(false, true)) {
                     Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
                     Log.i(TAG, "║ ⭐ UseCircuitCode ACKNOWLEDGED - Sending CompleteAgentMovement")
                     Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
