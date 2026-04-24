@@ -429,20 +429,35 @@ class DebugReportService private constructor(private val context: Context) {
                             appendLine("     Full packet: ${entry.fullHexDump}")
                         }
                         
-                        // Summary statistics
+                        // Summary statistics (counted within the bounded history window)
                         val sendSuccessCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.SEND_SUCCESS }
                         val sendFailedCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.SEND_FAILED }
                         val receiveCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.RECEIVE }
                         val resendCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.RESEND }
-                        
+
                         appendLine()
-                        appendLine("History Summary:")
+                        appendLine("History Summary (recent ${packetHistory.size}-packet window):")
                         appendLine("  Sent Successfully: $sendSuccessCount")
                         appendLine("  Send Failures: $sendFailedCount")
                         appendLine("  Received: $receiveCount")
                         appendLine("  Resends: $resendCount")
-                        
-                        if (receiveCount == 0 && sendSuccessCount > 0) {
+
+                        // Determine whether any packets have EVER been received using the
+                        // absolute counter, not the bounded history window. AgentUpdate
+                        // sends ~10/sec quickly evict receive entries from a 50-entry
+                        // buffer, which previously produced a false "none received"
+                        // warning even after a successful handshake.
+                        val totalReceivedEver = try {
+                            app.udpConnection.getMessageStatistics().totalPacketsReceived
+                        } catch (e: Exception) {
+                            receiveCount
+                        }
+                        val totalSentEver = try {
+                            app.udpConnection.getDiagnostics().sequenceNumber
+                        } catch (e: Exception) {
+                            sendSuccessCount
+                        }
+                        if (totalReceivedEver == 0 && totalSentEver > 0) {
                             appendLine()
                             appendLine("⚠️ PACKETS SENT BUT NONE RECEIVED!")
                             appendLine("   Possible causes:")

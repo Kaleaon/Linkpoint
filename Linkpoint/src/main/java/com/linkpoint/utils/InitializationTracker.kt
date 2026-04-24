@@ -106,8 +106,30 @@ object InitializationTracker {
     fun completePhase(phase: Phase, message: String = "") {
         phaseCompletions[phase] = true
         val duration = phaseTimings[phase]?.let { System.currentTimeMillis() - it } ?: 0
-        
+
         val msg = if (message.isNotEmpty()) "$phase: $message (${duration}ms)" else "$phase completed (${duration}ms)"
+        logEvent(EventType.PHASE_COMPLETE, phase, msg)
+        Log.i(TAG, "[${getRelativeTimeString()}] ✓ $msg")
+    }
+
+    /**
+     * Record a milestone/state-marker phase as reached.
+     *
+     * Some phases (LOGIN_STARTING, UDP_CONNECTED, CAPABILITIES_READY,
+     * REGION_HANDSHAKE_REPLIED, FULLY_CONNECTED) represent "we arrived at this
+     * state" rather than "we are now doing work". They have no distinct
+     * completion event, so callers should use this method instead of
+     * [startPhase]. Otherwise they would show up as "pending" forever in the
+     * debug report even after the milestone was reached.
+     */
+    fun reachPhase(phase: Phase, message: String = "") {
+        currentPhase = phase
+        val now = System.currentTimeMillis()
+        phaseTimings[phase] = now
+        phasesFailed.remove(phase)
+        phaseCompletions[phase] = true
+
+        val msg = if (message.isNotEmpty()) "$phase: $message" else "$phase reached"
         logEvent(EventType.PHASE_COMPLETE, phase, msg)
         Log.i(TAG, "[${getRelativeTimeString()}] ✓ $msg")
     }
