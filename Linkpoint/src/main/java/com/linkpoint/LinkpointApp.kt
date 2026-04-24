@@ -830,7 +830,14 @@ class LinkpointApp : Application() {
                     com.linkpoint.utils.InitializationTracker.logCritical(
                         "FULLY CONNECTED - World loading should begin"
                     )
-                    
+
+                    // Warm-fetch priority inventory folders so Current Outfit /
+                    // Favorites / Landmarks / My Outfits / Inbox are already
+                    // populated by the time the UI opens them. Fire-and-forget.
+                    if (::inventoryManager.isInitialized) {
+                        inventoryManager.warmFetch()
+                    }
+
                     Log.i(TAG, "✓ Connection state set to CONNECTED - agent is in world")
                 } else {
                     com.linkpoint.utils.InitializationTracker.logWarning("AgentMovementComplete parse returned null")

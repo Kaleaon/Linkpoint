@@ -825,20 +825,10 @@ class UDPConnectionFixed {
                     break
                 }
                 
-                // Check if the DatagramChannel is still connected.
-                // For UDP, isConnected() reflects the state set by connect() and can become
-                // false due to:
-                // - Explicit disconnect() calls
-                // - ICMP port unreachable messages (on some platforms)
-                // - Other network error conditions
-                // While UDP is connectionless at the protocol level, the channel connection
-                // state helps detect when communication is no longer possible.
-                if (!localChannel.isConnected) {
-                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "DatagramChannel.isConnected returned false, exiting loop")
-                    disconnectReason = "Channel no longer connected"
-                    break
-                }
-                
+                // DatagramChannel.isConnected is intentionally NOT checked here (see
+                // receiveLoopBlocking for the full rationale). It only reports whether
+                // connect() was called, not real network liveness.
+
                 // Wait for packets with timeout
                 val readyKeys = withContext(CircuitDispatcher.dispatcher) {
                     localSelector.select(SELECTOR_TIMEOUT_MS)
@@ -1007,11 +997,12 @@ class UDPConnectionFixed {
                     break
                 }
 
-                if (!localChannel.isConnected) {
-                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "DatagramChannel.isConnected returned false, exiting loop")
-                    disconnectReason = "Channel no longer connected"
-                    break
-                }
+                // DatagramChannel.isConnected is intentionally NOT checked here: it only
+                // reflects whether connect() was called on the channel, not real network
+                // liveness. On mobile (LTE tower hand-off, ICMP port-unreachable on some
+                // Linux stacks) it can transiently report false while the socket is still
+                // usable. Real disconnects manifest as channel close (guarded above) or
+                // as read()/select() exceptions (caught below).
 
                 // BLOCKING select on THIS thread (not on CircuitDispatcher!)
                 // This is the key fix: the select() call blocks only the I/O thread,
@@ -2621,6 +2612,41 @@ class UDPConnectionFixed {
     /**
      * Get comprehensive diagnostic data for debug reports
      */
+    /**
+     * Debug-report formatter for a registered message ID.
+     *
+     * SL UDP message IDs span three frequency classes that all get stored as
+     * plain Kotlin Int:
+     *   - High   (1 byte):  0x01..0xFE        -> positive 1..254
+     *   - Medium (2 bytes): 0xFF01..0xFFFE    -> positive 65281..65534
+     *   - Low    (4 bytes): 0xFFFF0001..      -> negative (0xFFFFxxxx is <0 as signed Int)
+     *   - Fixed  (4 bytes): 0xFFFFFFFA..0xFFFFFFFF -> -6..-1
+     *
+     * The previous formatter just did Int.toString(), which is what produced
+     * the forest of confusing negatives in the debug report. Format here with
+     * the message name (when known) plus a stable hex form.
+     */
+    private fun formatHandlerIdForDiag(id: Int): String {
+        val name = MessageIds.getMessageName(id)
+        val hex = when {
+            id in 0x01..0xFE -> "0x%02X".format(id)
+            id in 0xFF01..0xFFFE -> "0x%04X".format(id)
+            else -> "0x%08X".format(id)
+        }
+        return if (name.isNotBlank() && !name.startsWith("Unknown")) {
+            "$name ($hex)"
+        } else {
+            hex
+        }
+    }
+
+    private fun messageFrequencyOrder(id: Int): Int = when {
+        id in 0x01..0xFE -> 0        // High
+        id in 0xFF01..0xFFFE -> 1    // Medium
+        id in -6..-1 -> 3            // Fixed (0xFFFFFFFA..0xFFFFFFFF)
+        else -> 2                    // Low (other negatives)
+    }
+
     fun getDiagnostics(): UDPDiagnostics {
         return UDPDiagnostics(
             isConnected = _isConnected.value,
@@ -2632,7 +2658,9 @@ class UDPConnectionFixed {
             sequenceNumber = sequenceNumber.get(),
             pendingAckCount = pendingAcksToSend.size,
             registeredHandlerCount = messageHandlers.size,
-            registeredHandlers = messageHandlers.keys.map { it.toString() },
+            registeredHandlers = messageHandlers.keys
+                .sortedWith(compareBy({ messageFrequencyOrder(it) }, { it }))
+                .map(::formatHandlerIdForDiag),
             pendingPackets = emptyList(),
             socketOpen = datagramChannel?.isOpen ?: false,
             receiveLoopActive = ioThread?.isAlive == true,

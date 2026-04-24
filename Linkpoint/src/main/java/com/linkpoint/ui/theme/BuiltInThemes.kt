@@ -173,12 +173,60 @@ object BuiltInThemes {
         colorOnSurface = "#ECF0F5",
         colorOnSurfaceVariant = "#CFD8E0"
     )
-    
+
+    /**
+     * Viewer-inspired theme: Second Life official viewer look.
+     * Linden blue on deep slate chrome, echoing the default "Dark"
+     * skin shipped by Linden Lab in the official viewer.
+     */
+    val SL_CLASSIC = ThemePack(
+        id = "sl_classic",
+        name = "Second Life Viewer",
+        description = "Classic Linden Lab viewer look - Linden blue on deep slate",
+        author = "Linkpoint",
+        version = "1.0.0",
+        isBuiltIn = true,
+        colorPrimary = "#4AA3DF",
+        colorPrimaryDark = "#0066CC",
+        colorOnPrimary = "#FFFFFF",
+        colorSecondary = "#7FB3D5",
+        colorOnSecondary = "#0B1520",
+        colorBackground = "#1B2430",
+        colorSurface = "#263548",
+        colorOnSurface = "#E6ECF2",
+        colorOnSurfaceVariant = "#AEBECF"
+    )
+
+    /**
+     * Viewer-inspired theme: Firestorm "Starlight-Dark" look.
+     * Fire-orange primary on near-black chrome, the signature palette
+     * of the Firestorm third-party viewer.
+     */
+    val FIRESTORM = ThemePack(
+        id = "firestorm",
+        name = "Firestorm Viewer",
+        description = "Firestorm third-party viewer look - fire orange on near-black",
+        author = "Linkpoint",
+        version = "1.0.0",
+        isBuiltIn = true,
+        colorPrimary = "#E85D00",
+        colorPrimaryDark = "#B84800",
+        colorOnPrimary = "#FFFFFF",
+        colorSecondary = "#FFB366",
+        colorOnSecondary = "#1A0E00",
+        colorBackground = "#121212",
+        colorSurface = "#1E1E1E",
+        colorOnSurface = "#F5F5F5",
+        colorOnSurfaceVariant = "#BDBDBD"
+    )
+
     /**
      * Get all built-in themes as a list
      */
     fun getAllBuiltInThemes(): List<ThemePack> = listOf(
         LINKPOINT_DEFAULT,
+        SL_CLASSIC,
+        FIRESTORM,
         CLEVERFERRET_GOLD,
         NAVY_GOLD,
         ROYAL_SILVER,
