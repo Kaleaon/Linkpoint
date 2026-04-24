@@ -17,6 +17,7 @@ object LLSDParser {
         val maxBinaryBytes: Int = 1024 * 1024,
         val maxArrayLength: Int = 10_000,
         val maxMapEntries: Int = 10_000,
+        val maxCollectionElementsTotal: Int = 20_000,
         val maxNestingDepth: Int = 128,
         val maxTotalBytes: Int = 4 * 1024 * 1024,
     )
@@ -160,6 +161,7 @@ object LLSDParser {
                     if (entries > limits.maxMapEntries) {
                         throw ParseLimitExceededException("Map entry count exceeds maxMapEntries.")
                     }
+                    enforceCollectionElementLimit(state, limits)
 
                     val keyLength = readLength(stream, state, limits)
                     if (keyLength > limits.maxStringBytes) {
@@ -176,17 +178,17 @@ object LLSDParser {
                 var elements = 0
 
                 while (true) {
-                    val peek = readByte(stream, state, limits)
-                    if (peek.toChar() == LLSDValue.MARKER_ARRAY_END) break
-
-                    stream.unread(peek)
-                    state.accumulatedBytes--
+                    if (peekByte(stream, state, limits).toChar() == LLSDValue.MARKER_ARRAY_END) {
+                        readByte(stream, state, limits)
+                        break
+                    }
 
                     elements++
                     state.collectionElementsRead++
                     if (elements > limits.maxArrayLength) {
                         throw ParseLimitExceededException("Array length exceeds maxArrayLength.")
                     }
+                    enforceCollectionElementLimit(state, limits)
 
                     array.add(parseBinaryValue(stream, state, limits))
                 }
@@ -220,6 +222,17 @@ object LLSDParser {
         return value
     }
 
+    private fun peekByte(
+        stream: PushbackInputStream,
+        state: ParseLimitsState,
+        limits: ParseLimits,
+    ): Int {
+        val value = readByte(stream, state, limits)
+        stream.unread(value)
+        state.accumulatedBytes--
+        return value
+    }
+
     private fun readExact(
         stream: InputStream,
         size: Int,
@@ -243,6 +256,12 @@ object LLSDParser {
     private fun enforceTotalBytesLimit(state: ParseLimitsState, limits: ParseLimits) {
         if (state.accumulatedBytes > limits.maxTotalBytes) {
             throw ParseLimitExceededException("Total bytes exceed maxTotalBytes.")
+        }
+    }
+
+    private fun enforceCollectionElementLimit(state: ParseLimitsState, limits: ParseLimits) {
+        if (state.collectionElementsRead > limits.maxCollectionElementsTotal) {
+            throw ParseLimitExceededException("Total collection elements exceed maxCollectionElementsTotal.")
         }
     }
 
