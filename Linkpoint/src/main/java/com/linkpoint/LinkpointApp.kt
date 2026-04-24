@@ -587,6 +587,16 @@ class LinkpointApp : Application() {
                 agentId,
                 udpConnection.getSessionId(),
                 objectManager
+            ) { item ->
+                val cacheType = when (item.assetType) {
+                    AssetType.CLOTHING.value -> AssetType.CLOTHING
+                    AssetType.BODYPART.value -> AssetType.BODYPART
+                    else -> AssetType.CLOTHING
+                }
+                assetCache.get(item.assetId, cacheType)
+                    ?: transferManager.fetchAsset(item.assetId, item.assetType)?.also { fetched ->
+                        assetCache.put(item.assetId, cacheType, fetched)
+                    }
             )
             avatarManager.setOutfitManager(outfitManager)
         }
