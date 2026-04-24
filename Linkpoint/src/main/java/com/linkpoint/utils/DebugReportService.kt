@@ -824,6 +824,16 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("  Error States: ${texDiag.textureErrorStateCount}")
                         val decoderStatus = com.linkpoint.assets.JPEG2000Decoder.getStartupStatus()
                         appendLine("  Backend: ${decoderStatus.activeBackend}")
+                        appendLine("  Native lib loaded: ${decoderStatus.nativeLoaded}")
+                        appendLine("  Native health OK: ${decoderStatus.nativeHealthy}")
+                        appendLine("  JP2ForAndroid fallback available: ${decoderStatus.jp2ForAndroidAvailable}")
+                        decoderStatus.nativeError?.let {
+                            appendLine("  Native load error: $it")
+                        }
+                        decoderStatus.nativeHealthError?.let {
+                            appendLine("  Native health error: $it")
+                        }
+                        appendLine("  Device ABIs: ${android.os.Build.SUPPORTED_ABIS.joinToString(", ")}")
                         if (decoderStatus.warningMessage != null) {
                             appendLine("  Warning: ${decoderStatus.warningMessage}")
                         }

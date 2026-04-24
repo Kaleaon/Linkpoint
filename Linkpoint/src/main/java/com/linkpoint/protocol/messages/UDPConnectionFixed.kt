@@ -280,7 +280,18 @@ class UDPConnectionFixed {
     
     /** Timestamp of last packet received (for timing diagnostics) */
     private var lastReceiveTime = 0L
-    
+
+    /**
+     * Baseline timestamp used by the ping-health check to decide whether the
+     * connection has been silent long enough to warrant another ping or
+     * reconnect. Advances whenever we receive a packet OR when we reset the
+     * socket (so a fresh reconnect gets a grace window before we declare
+     * another death spiral). Kept separate from [lastReceiveTime] so the debug
+     * report shows the time of the last actual packet receipt instead of being
+     * masked by silent socket restarts.
+     */
+    private var pingHealthGraceTime = 0L
+
     /** Timestamp of last packet sent (for timing diagnostics) */
     private var lastSendTime = 0L
     
@@ -646,9 +657,13 @@ class UDPConnectionFixed {
             messagesRouted.set(0)
             packetsResentCount.set(0)
             
-            // Reset timing information
+            // Reset timing information. lastReceiveTime stays 0 until a real
+            // packet arrives so the debug report can honestly say "Never" until
+            // then; pingHealthGraceTime carries the grace window for ping
+            // health.
             val now = System.currentTimeMillis()
-            lastReceiveTime = now
+            lastReceiveTime = 0L
+            pingHealthGraceTime = now
             lastSendTime = 0L
             lastAckSendTime = 0L
             lastPingTime.set(now)
@@ -851,17 +866,19 @@ class UDPConnectionFixed {
                             if (bytesRead > 0) {
                                 packetsReceived.incrementAndGet()
                                 bytesReceived.addAndGet(bytesRead.toLong())
-                                lastReceiveTime = System.currentTimeMillis()
+                                val receivedAt = System.currentTimeMillis()
+                                lastReceiveTime = receivedAt
+                                pingHealthGraceTime = receivedAt
                                 unansweredPings.set(0)
-                                
+
                                 buffer.flip()
                                 val rawData = ByteArray(bytesRead)
                                 buffer.get(rawData)
-                                
+
                                 // Check if packet is zero-coded and decode if needed
                                 val isZerocoded = (rawData[0].toInt() and 0x80) != 0
                                 val data = if (isZerocoded) zeroDecode(rawData) else rawData
-                                
+
                                 // Extract message info for logging
                                 val messageId = extractMessageId(data)
                                 val messageName = getMessageName(messageId)
@@ -1024,7 +1041,9 @@ class UDPConnectionFixed {
                             if (bytesRead > 0) {
                                 packetsReceived.incrementAndGet()
                                 bytesReceived.addAndGet(bytesRead.toLong())
-                                lastReceiveTime = System.currentTimeMillis()
+                                val receivedAt = System.currentTimeMillis()
+                                lastReceiveTime = receivedAt
+                                pingHealthGraceTime = receivedAt
                                 unansweredPings.set(0)
 
                                 buffer.flip()
@@ -1381,9 +1400,12 @@ class UDPConnectionFixed {
             return
         }
 
-        // Then check if we need to send a new ping
+        // Then check if we need to send a new ping. Use pingHealthGraceTime
+        // (not lastReceiveTime) so a fresh socket reconnect gets its grace
+        // window: otherwise the first health check after a silent reconnect
+        // would see a stale lastReceiveTime and ping immediately.
         val now = System.currentTimeMillis()
-        val timeSinceReceive = now - lastReceiveTime
+        val timeSinceReceive = now - pingHealthGraceTime
         val timeSincePing = now - lastPingTime.get()
 
         if (timeSinceReceive > NEED_PING_TIMEOUT_MS &&
@@ -1522,7 +1544,15 @@ class UDPConnectionFixed {
     private fun processReceivedAck(sequenceNumber: Int) {
         // Check if we have a callback for this sequence number
         val callbackInfo = pendingCallbacks.remove(sequenceNumber)
-        
+
+        // Record the ACK in diagnostics. The message name is attached when we
+        // have the originating callback info so the verbose log shows which
+        // outbound message was acknowledged.
+        EnhancedPacketLogger.logAckReceived(
+            sequenceNumber = sequenceNumber,
+            messageName = callbackInfo?.let { getMessageName(it.messageId) }
+        )
+
         if (callbackInfo != null) {
             try {
                 // Invoke the ACK callback
@@ -2416,9 +2446,12 @@ class UDPConnectionFixed {
                 "Error closing old socket during reconnect: ${e.message}")
         }
 
-        // Reset ping state so we don't immediately disconnect again
+        // Reset ping state so we don't immediately disconnect again. Advance
+        // only pingHealthGraceTime; lastReceiveTime is a "last real packet"
+        // marker that stays accurate in the debug report even across silent
+        // socket restarts.
         val now = System.currentTimeMillis()
-        lastReceiveTime = now
+        pingHealthGraceTime = now
         lastPingTime.set(now)
         unansweredPings.set(0)
         consecutiveSendErrors.set(0)
