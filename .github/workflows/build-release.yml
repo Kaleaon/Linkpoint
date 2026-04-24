@@ -35,7 +35,7 @@ jobs:
           api-level: 35
           build-tools: 35.0.0
           cmake: 3.22.1
-          ndk: 25.2.9519653
+          ndk: 26.3.11579264
 
       - name: Install SDK components
         run: |
@@ -44,7 +44,7 @@ jobs:
             "platforms;android-35" \
             "build-tools;35.0.0" \
             "cmake;3.22.1" \
-            "ndk;25.2.9519653"
+            "ndk;26.3.11579264"
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
