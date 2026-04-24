@@ -825,20 +825,10 @@ class UDPConnectionFixed {
                     break
                 }
                 
-                // Check if the DatagramChannel is still connected.
-                // For UDP, isConnected() reflects the state set by connect() and can become
-                // false due to:
-                // - Explicit disconnect() calls
-                // - ICMP port unreachable messages (on some platforms)
-                // - Other network error conditions
-                // While UDP is connectionless at the protocol level, the channel connection
-                // state helps detect when communication is no longer possible.
-                if (!localChannel.isConnected) {
-                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "DatagramChannel.isConnected returned false, exiting loop")
-                    disconnectReason = "Channel no longer connected"
-                    break
-                }
-                
+                // DatagramChannel.isConnected is intentionally NOT checked here (see
+                // receiveLoopBlocking for the full rationale). It only reports whether
+                // connect() was called, not real network liveness.
+
                 // Wait for packets with timeout
                 val readyKeys = withContext(CircuitDispatcher.dispatcher) {
                     localSelector.select(SELECTOR_TIMEOUT_MS)
@@ -1007,11 +997,12 @@ class UDPConnectionFixed {
                     break
                 }
 
-                if (!localChannel.isConnected) {
-                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "DatagramChannel.isConnected returned false, exiting loop")
-                    disconnectReason = "Channel no longer connected"
-                    break
-                }
+                // DatagramChannel.isConnected is intentionally NOT checked here: it only
+                // reflects whether connect() was called on the channel, not real network
+                // liveness. On mobile (LTE tower hand-off, ICMP port-unreachable on some
+                // Linux stacks) it can transiently report false while the socket is still
+                // usable. Real disconnects manifest as channel close (guarded above) or
+                // as read()/select() exceptions (caught below).
 
                 // BLOCKING select on THIS thread (not on CircuitDispatcher!)
                 // This is the key fix: the select() call blocks only the I/O thread,
