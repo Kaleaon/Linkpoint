@@ -107,7 +107,10 @@ jobs:
       - name: Run unit tests
         run: ./gradlew :Linkpoint:testStableDebugUnitTest --stacktrace --continue
         continue-on-error: true
-      
+
+      - name: Run LLSD parser fuzz target
+        run: ./gradlew :Linkpoint:testStableDebugUnitTest --tests "com.linkpoint.protocol.llsd.LLSDParserFuzzTargetTest" --stacktrace
+
       - name: Run lint analysis
         run: ./gradlew :Linkpoint:lintStableDebug --stacktrace
         continue-on-error: true
