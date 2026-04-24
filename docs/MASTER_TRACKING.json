@@ -1,7 +1,7 @@
 {
   "metadata": {
     "last_verified_utc": "2026-04-24",
-    "commit": "3da3de10f9fb5aa90d70c8fc30ea99eaebdb902b",
+    "commit": "e2011834a08d4888abd75beee10b772d7d0793a3",
     "tracker_policy": "Any PR touching protocol/assets/render paths must update docs/MASTER_TRACKING.md and docs/MASTER_TRACKING.json"
   },
   "allowed_status_values": [
@@ -88,7 +88,7 @@
   ],
   "parity_debt": {
     "last_verified_utc": "2026-04-24",
-    "commit": "3da3de10f9fb5aa90d70c8fc30ea99eaebdb902b",
+    "commit": "e2011834a08d4888abd75beee10b772d7d0793a3",
     "items": [
       {
         "debt_id": "PD-001",
@@ -102,7 +102,7 @@
       },
       {
         "debt_id": "PD-003",
-        "gap": "HUD render pass parity incomplete in Filament renderer path",
+        "gap": "HUD pass code path is implemented, but parity closure is pending green renderer tests in the current branch state",
         "status": "OPEN"
       },
       {
