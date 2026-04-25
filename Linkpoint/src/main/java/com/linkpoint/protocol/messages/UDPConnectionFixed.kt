@@ -193,6 +193,22 @@ class UDPConnectionFixed {
          * Android socket errors like "Operation not permitted" indicate socket invalidation.
          */
         const val CONSECUTIVE_ERROR_THRESHOLD = 5
+
+        /**
+         * Maximum time without ANY new received packet before we treat the
+         * inbound side as dead and force a socket rebind. Set above the
+         * unanswered-ping window (3 × 5s + slack) so the cheaper ping-based
+         * watchdog gets first shot, but well below typical user-visible
+         * timeouts so a stuck cellular NAT clears within ~45s.
+         */
+        const val INBOUND_DATA_STALL_MS = 45_000L
+
+        /**
+         * Cooldown after a socket rebind. Prevents tight reconnect loops if
+         * the rebind itself doesn't restore inbound flow (e.g. carrier-side
+         * outage rather than NAT eviction).
+         */
+        const val SOCKET_REBIND_COOLDOWN_MS = 30_000L
     }
     
     // Connection parameters
@@ -266,9 +282,22 @@ class UDPConnectionFixed {
     
     /** Timestamp of last packet received (for timing diagnostics) */
     private var lastReceiveTime = 0L
-    
+
     /** Timestamp of last packet sent (for timing diagnostics) */
     private var lastSendTime = 0L
+
+    /**
+     * Inbound-flow watchdog state. Catches "send-only zombie circuits" — the
+     * 2026-04-25 Athanasia capture showed 4+ minutes of pings + AgentUpdate
+     * going outbound while no application data ever arrived. Pings can keep
+     * `lastReceiveTime` fresh on cellular even when the data path is dead
+     * (NAT idle eviction often kills only large flows), so the existing
+     * unanswered-ping watchdog never triggered. We track packets-received
+     * growth instead and force a true socket rebind if it stalls.
+     */
+    private var lastInboundFlowSnapshot = 0
+    private var lastInboundFlowGrowthTime = 0L
+    private var lastSocketRebindTime = 0L
     
     /** Timestamp when connection was attempted (for connection duration) */
     private var connectionAttemptTime = 0L
@@ -667,6 +696,13 @@ class UDPConnectionFixed {
             // matching Lumiya's SLCircuit pattern.
             sequenceNumber.set(0)
             
+            // Reset inbound-flow watchdog state so the first observation
+            // after handshake establishes the baseline (rather than tripping
+            // off an old snapshot from a previous circuit).
+            lastInboundFlowSnapshot = 0
+            lastInboundFlowGrowthTime = 0L
+            lastSocketRebindTime = 0L
+
             // Reset packet statistics for accurate per-session tracking
             packetsReceived.set(0)
             packetsSent.set(0)
@@ -965,6 +1001,7 @@ class UDPConnectionFixed {
                 }
                 if (now - lastTimeoutCheckTime >= 1000L) {
                     checkPingHealth()
+                    checkInboundFlow()
                     checkMessageTimeouts()
                     lastTimeoutCheckTime = now
                 }
@@ -1161,6 +1198,83 @@ class UDPConnectionFixed {
         if (timeSinceReceive > NEED_PING_TIMEOUT_MS &&
             timeSincePing > LinkpointConstants.PING_INTERVAL_MS) {
             sendStartPingCheck()
+        }
+    }
+
+    /**
+     * Inbound-flow watchdog (independent of the unanswered-ping check).
+     *
+     * The unanswered-ping watchdog only catches "no response of any kind".
+     * On cellular networks the simulator's small ping-replies sometimes
+     * survive while the larger data flow (ObjectUpdate, AgentGroupDataUpdate,
+     * IM, friend status) is silently dropped — typically because the carrier
+     * NAT timed out the high-volume path or the per-flow rate-limiter capped
+     * the sim → client direction. The 2026-04-25 Athanasia capture showed
+     * exactly that: 4.5 minutes with `Unanswered Pings: 0` and 89 received
+     * packets total, all in the first 2 seconds.
+     *
+     * If [packetsReceived] hasn't grown in [INBOUND_DATA_STALL_MS] AND we're
+     * still actively sending, force a socket rebind to clear the stuck NAT
+     * mapping. A new `connect()` on the DatagramChannel picks a fresh
+     * ephemeral source port, which forces the carrier NAT to allocate a new
+     * mapping and the sim re-targets us via the follow-up `UseCircuitCode`.
+     *
+     * Cooled down by [SOCKET_REBIND_COOLDOWN_MS] so a carrier-side outage
+     * doesn't cause us to thrash.
+     */
+    private fun checkInboundFlow() {
+        if (!_isConnected.value) return
+
+        val now = System.currentTimeMillis()
+        val received = packetsReceived.get()
+
+        // Initialise snapshot the first time we observe any traffic.
+        if (lastInboundFlowGrowthTime == 0L) {
+            lastInboundFlowSnapshot = received
+            lastInboundFlowGrowthTime = now
+            return
+        }
+
+        // Refresh snapshot whenever inbound is healthy.
+        if (received > lastInboundFlowSnapshot) {
+            lastInboundFlowSnapshot = received
+            lastInboundFlowGrowthTime = now
+            return
+        }
+
+        // Don't trip the watchdog while we're still in the cooldown after a
+        // previous rebind (the new circuit needs time to receive its first
+        // packet through the freshly-allocated NAT mapping).
+        if (now - lastSocketRebindTime < SOCKET_REBIND_COOLDOWN_MS) return
+
+        val stallMs = now - lastInboundFlowGrowthTime
+        if (stallMs < INBOUND_DATA_STALL_MS) return
+
+        // Require evidence we're actually sending. If `packetsSent` isn't
+        // growing either, the unanswered-ping path will handle it; firing a
+        // rebind here would just race with that.
+        if (packetsSent.get() <= lastInboundFlowSnapshot) return
+
+        NetworkLogger.log(
+            NetworkLogger.Level.WARN,
+            NetworkLogger.Category.UDP,
+            "Inbound stalled for ${stallMs}ms (received=$received, sent=${packetsSent.get()}) - forcing socket rebind"
+        )
+        lastSocketRebindTime = now
+        emitNetworkState(NetworkStateTransition.RECONNECTING)
+        scope.launch {
+            val ok = try { reconnect() } catch (e: Exception) { false }
+            if (ok) {
+                emitNetworkState(NetworkStateTransition.CONNECTED)
+            } else {
+                NetworkLogger.log(
+                    NetworkLogger.Level.ERROR,
+                    NetworkLogger.Category.UDP,
+                    "Inbound-stall socket rebind failed; deferring to higher-level reconnect"
+                )
+                emitNetworkState(NetworkStateTransition.FAULTED)
+                reconnectionCallback?.invoke()
+            }
         }
     }
     
@@ -1683,7 +1797,35 @@ class UDPConnectionFixed {
         
         sendPacket(MessageIds.REQUEST_MULTIPLE_OBJECTS, payload.array(), reliable = true)
     }
-    
+
+    /**
+     * UDP fallback for resolving avatar UUIDs to legacy first/last name pairs.
+     * Used when the GetDisplayNames capability is unavailable, times out, or
+     * returns no entries for a subset of IDs (the 2026-04-25 Athanasia capture
+     * showed 851 friends stuck on `Resident (xxxx)` because the cap path
+     * silently failed). Reply arrives as `UUIDNameReply` and is handled by
+     * `LinkpointApp` to feed `FriendsManager` / display-name caches.
+     *
+     * Wire format (LL message template `UUIDNameRequest`, low-freq 235):
+     *   UUIDNameBlock (Variable u8 count): { ID LLUUID }
+     * No AgentData block — this message is `NotTrusted Unencoded`.
+     */
+    fun sendUUIDNameRequest(ids: List<UUID>) {
+        if (ids.isEmpty()) return
+        // Cap at 60 per packet to stay well under the ~1200B UDP MTU
+        // (1 + count*16). Sender batches if larger.
+        for (batch in ids.chunked(60)) {
+            val payload = ByteBuffer.allocate(1 + batch.size * 16).order(ByteOrder.LITTLE_ENDIAN)
+            payload.put(batch.size.toByte())
+            for (id in batch) {
+                payload.put(id.asBytes())
+            }
+            sendPacket(MessageIds.UUID_NAME_REQUEST, payload.array(), reliable = true)
+        }
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
+            "→ Sent UUIDNameRequest for ${ids.size} ids")
+    }
+
     /**
      * Send a packet with proper SL protocol encoding
      * 
@@ -2054,6 +2196,13 @@ class UDPConnectionFixed {
         lastPingTime.set(now)
         unansweredPings.set(0)
         consecutiveSendErrors.set(0)
+
+        // Re-baseline the inbound-flow watchdog. lastSocketRebindTime is
+        // set to `now` so the cooldown protects this attempt from being
+        // immediately retripped if the new socket also can't receive.
+        lastInboundFlowSnapshot = packetsReceived.get()
+        lastInboundFlowGrowthTime = now
+        lastSocketRebindTime = now
 
         try {
             val address = InetSocketAddress(simIP, simPort)
