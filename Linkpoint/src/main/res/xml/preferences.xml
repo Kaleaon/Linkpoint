@@ -441,10 +441,55 @@
             android:entryValues="@array/diagnostic_retention_values"
             android:defaultValue="7" />
 
+        <!--
+            Combined Log = most recent debug report + crash logs + a
+            header. The raw file lives in app-private storage which the
+            user can't browse, so every action below moves it off-device:
+            Copy → clipboard, Export → user-chosen file via SAF,
+            Share → ACTION_SEND through FileProvider.
+        -->
+        <Preference
+            android:key="copy_log"
+            android:title="Copy Combined Log to Clipboard"
+            android:summary="Copies debug report + crash logs as text" />
+
         <Preference
             android:key="export_log"
-            android:title="Export Log"
-            android:summary="Save combined log to a location in the file system" />
+            android:title="Export Combined Log to File"
+            android:summary="Save to a user-chosen location (Downloads, Drive, etc.)" />
+
+        <Preference
+            android:key="share_log"
+            android:title="Share Combined Log…"
+            android:summary="Send via email, messaging, or another app" />
+
+        <!--
+            Session Log Recorder.
+            The recorder is auto-started at app launch (LinkpointApp.onCreate)
+            and captures every packet, HTTP request, capability event, and
+            render-pipeline lifecycle event into a per-session text file.
+            That file is in app-private storage too, so use Copy / Export /
+            Share to actually get it off the device.
+        -->
+        <Preference
+            android:key="session_log_status"
+            android:title="Session Log Recorder"
+            android:summary="Recording status, file size, and entry count" />
+
+        <Preference
+            android:key="session_log_copy"
+            android:title="Copy Session Log to Clipboard"
+            android:summary="Copy the current session log file contents" />
+
+        <Preference
+            android:key="session_log_export"
+            android:title="Export Session Log to File"
+            android:summary="Save the raw session log to a user-chosen location" />
+
+        <Preference
+            android:key="session_log_share"
+            android:title="Share Session Log…"
+            android:summary="Share the session log via another app" />
 
     </PreferenceCategory>
 
