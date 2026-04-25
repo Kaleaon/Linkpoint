@@ -426,13 +426,14 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeHealthCheck(
     JNIEnv* env,
     jobject thiz
 ) {
+    // opj_set_default_decoder_parameters leaves decod_format at -1 by design
+    // (the caller picks the format before decoding). The previous check
+    // gated on decod_format >= 0, which always failed and made every
+    // device fall back to placeholder textures. Just verify we can
+    // create and destroy a J2K codec; that's all this self-test needs to
+    // confirm before letting the real decode paths run.
     opj_dparameters_t params;
     opj_set_default_decoder_parameters(&params);
-    const bool validParams = params.decod_format >= 0;
-    if (!validParams) {
-        LOGE("OpenJPEG health-check failed: invalid default decoder params");
-        return JNI_FALSE;
-    }
 
     opj_codec_t* codec = opj_create_decompress(OPJ_CODEC_J2K);
     if (!codec) {

@@ -154,29 +154,6 @@ class TempCircuit(
      * Register a message handler for a specific message type
      * Uses MessageRouter for efficient message routing
      */
-    suspend fun registerHandler(messageId: Int, handler: MessageRouter.Handler) {
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Registering temp circuit handler for message ID: $messageId")
-        messageRouter.registerHandler(messageId, handler)
-    }
-    
-    /**
-     * Send a message through this circuit
-     */
-    suspend fun sendMessage(messageId: Int, payload: ByteArray, reliable: Boolean = false) {
-        if (!isActive) {
-            NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Cannot send message: temp circuit not active")
-            return
-        }
-        
-        try {
-            // UDPConnectionFixed handles the actual sending with proper protocol
-            udpConnection.sendPacket(messageId, payload, reliable)
-            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Sent temp circuit message ID: $messageId (${payload.size} bytes)")
-        } catch (e: Exception) {
-            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Error sending message: ${e.message}")
-        }
-    }
-    
     /**
      * Mark operation as completed
      * Triggers cleanup after a short delay

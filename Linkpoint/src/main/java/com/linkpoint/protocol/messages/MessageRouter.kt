@@ -44,11 +44,6 @@ class MessageRouter {
          * Get the priority of this handler (lower = higher priority)
          */
         fun getPriority(): Int = 0
-
-        /**
-         * Whether this handler should be offloaded to a secondary queue.
-         */
-        fun isHeavy(): Boolean = false
     }
 
 
@@ -89,22 +84,11 @@ class MessageRouter {
     }
 
     /**
-     * Register a handler for a specific message ID.
-     * This is a suspend function for API compatibility but uses @Synchronized internally.
-     *
-     * @param messageId The message ID to handle
-     * @param handler The handler to register
-     */
-    suspend fun registerHandler(messageId: Int, handler: Handler) {
-        registerHandlerSync(messageId, handler)
-    }
-
-    /**
-     * Register a handler synchronously without requiring a coroutine context.
-     * Safe to call from any thread including the main thread during initialization.
+     * Register a handler for a specific message ID. Safe to call from any
+     * thread; addHandlerInternal is guarded by @Synchronized.
      */
     @Synchronized
-    fun registerHandlerSync(messageId: Int, handler: Handler) {
+    fun registerHandler(messageId: Int, handler: Handler) {
         addHandlerInternal(messageId, handler)
     }
 
@@ -123,58 +107,26 @@ class MessageRouter {
     }
 
     /**
-     * Unregister a handler for a specific message ID
-     *
-     * @param messageId The message ID
-     * @param handler The handler to unregister
+     * Unregister a handler for a specific message ID.
      */
-    suspend fun unregisterHandler(messageId: Int, handler: Handler) {
-        synchronized(this) {
-            val handlerList = handlers[messageId]
-            if (handlerList != null) {
-                handlerList.remove(handler)
-                if (handlerList.isEmpty()) {
-                    handlers.remove(messageId)
-                }
-                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Unregistered handler for message $messageId")
+    @Synchronized
+    fun unregisterHandler(messageId: Int, handler: Handler) {
+        val handlerList = handlers[messageId]
+        if (handlerList != null) {
+            handlerList.remove(handler)
+            if (handlerList.isEmpty()) {
+                handlers.remove(messageId)
             }
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Unregistered handler for message $messageId")
         }
     }
 
     /**
-     * Route a message to its handlers.
-     * This is a suspend function for API compatibility but uses @Synchronized internally.
-     *
-     * @param messageId The message ID
-     * @param data The message data
-     * @return true if message was handled, false otherwise
-     */
-    suspend fun routeMessage(
-        messageId: Int,
-        data: ByteArray,
-        heavyQueue: CircuitTaskQueue? = null
-    ): Boolean {
-        return routeMessageInternal(messageId, data, heavyQueue)
-    }
-
-    /**
-     * Route a message synchronously without requiring coroutine context.
-     * Called from the dedicated I/O thread where we can't use suspend functions.
-     */
-    fun routeMessageSync(messageId: Int, data: ByteArray): Boolean {
-        return routeMessageInternal(messageId, data, null)
-    }
-
-    /**
-     * Internal routing implementation. Copy handler list under lock,
-     * then invoke handlers outside the lock to avoid holding it during processing.
+     * Route a message to its handlers. Called from the I/O thread; handlers
+     * run synchronously on the caller's thread (Lumiya's pattern).
      */
     @Synchronized
-    private fun routeMessageInternal(
-        messageId: Int,
-        data: ByteArray,
-        heavyQueue: CircuitTaskQueue?
-    ): Boolean {
+    fun routeMessageSync(messageId: Int, data: ByteArray): Boolean {
         totalMessagesRouted++
 
         val handlerList = handlers[messageId]?.toList() // Copy under lock
@@ -186,26 +138,7 @@ class MessageRouter {
         var handled = false
         for (handler in handlerList) {
             try {
-                if (handler.isHeavy() && heavyQueue != null) {
-                    heavyQueue.enqueue {
-                        try {
-                            if (handler.handleMessage(messageId, data)) {
-                                NetworkLogger.log(
-                                    NetworkLogger.Level.DEBUG,
-                                    NetworkLogger.Category.UDP,
-                                    "Message $messageId handled successfully (heavy queue)"
-                                )
-                            }
-                        } catch (e: Exception) {
-                            NetworkLogger.log(
-                                NetworkLogger.Level.ERROR,
-                                NetworkLogger.Category.UDP,
-                                "Handler error for message $messageId (heavy queue): ${e.message}"
-                            )
-                        }
-                    }
-                    handled = true
-                } else if (handler.handleMessage(messageId, data)) {
+                if (handler.handleMessage(messageId, data)) {
                     handled = true
                 }
             } catch (e: Exception) {
@@ -220,16 +153,14 @@ class MessageRouter {
     /**
      * Get the number of registered handlers
      */
-    suspend fun getHandlerCount(): Int = synchronized(this) {
-        handlers.values.sumOf { it.size }
-    }
+    @Synchronized
+    fun getHandlerCount(): Int = handlers.values.sumOf { it.size }
 
     /**
      * Get the number of messages with handlers
      */
-    suspend fun getMessageCount(): Int = synchronized(this) {
-        handlers.size
-    }
+    @Synchronized
+    fun getMessageCount(): Int = handlers.size
 
     /**
      * Get router statistics
@@ -250,13 +181,12 @@ class MessageRouter {
     /**
      * Clear all handlers
      */
-    suspend fun clearAll() {
-        synchronized(this) {
-            handlers.clear()
-            totalMessagesRouted = 0
-            successfulRoutes = 0
-            failedRoutes = 0
-            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "All handlers cleared")
-        }
+    @Synchronized
+    fun clearAll() {
+        handlers.clear()
+        totalMessagesRouted = 0
+        successfulRoutes = 0
+        failedRoutes = 0
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "All handlers cleared")
     }
 }
