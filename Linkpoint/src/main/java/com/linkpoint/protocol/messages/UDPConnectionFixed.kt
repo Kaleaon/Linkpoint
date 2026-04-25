@@ -1210,7 +1210,15 @@ class UDPConnectionFixed {
     private fun processReceivedAck(sequenceNumber: Int) {
         // Check if we have a callback for this sequence number
         val callbackInfo = pendingCallbacks.remove(sequenceNumber)
-        
+        val ackedMessageName = callbackInfo?.let { getMessageName(it.messageId) }
+
+        // Always log the inbound ACK so the ACKs Received counter and
+        // packet history reflect every ACK the simulator sends, including
+        // those for which we no longer have a pending callback (e.g. ACKs
+        // for already-completed reliable sends or duplicate ACKs).
+        EnhancedPacketLogger.logAckReceived(sequenceNumber, ackedMessageName)
+        recordAckReceived(sequenceNumber, callbackInfo?.messageId ?: -1)
+
         if (callbackInfo != null) {
             try {
                 // Invoke the ACK callback
@@ -1218,7 +1226,7 @@ class UDPConnectionFixed {
                     sequenceNumber,
                     callbackInfo.messageId
                 )
-                
+
                 NetworkLogger.log(
                     NetworkLogger.Level.DEBUG,
                     NetworkLogger.Category.UDP,
@@ -1237,6 +1245,28 @@ class UDPConnectionFixed {
                 NetworkLogger.Category.UDP,
                 "No callback registered for ACK seqNum=$sequenceNumber"
             )
+        }
+    }
+
+    /**
+     * Record an inbound ACK in the bounded packet history so it shows up
+     * in the debug report's per-packet event log alongside sends/receives.
+     */
+    private fun recordAckReceived(sequenceNumber: Int, messageId: Int) {
+        val entry = PacketHistoryEntry(
+            timestamp = System.currentTimeMillis(),
+            type = PacketHistoryEntry.PacketEventType.ACK_RECEIVED,
+            messageId = messageId,
+            messageName = if (messageId >= 0) getMessageName(messageId) else "ACK",
+            size = 4,
+            sequenceNumber = sequenceNumber,
+            fullHexDump = "",
+            success = true,
+            errorMessage = null
+        )
+        recentPacketHistory.offer(entry)
+        while (recentPacketHistory.size > DEFAULT_PACKET_HISTORY_SIZE) {
+            recentPacketHistory.poll()
         }
     }
     

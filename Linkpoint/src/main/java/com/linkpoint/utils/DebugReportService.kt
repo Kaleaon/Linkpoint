@@ -8,6 +8,7 @@ import com.linkpoint.assets.CacheManager
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.core.ConnectionQualityManager
 import com.linkpoint.network.core.NetworkStateManager
+import com.linkpoint.protocol.messages.EnhancedPacketLogger
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
 import java.io.File
@@ -422,15 +423,15 @@ class DebugReportService private constructor(private val context: Context) {
                     if (packetHistory.isNotEmpty()) {
                         appendLine("Recent Packet Events (last ${packetHistory.size}):")
                         appendLine()
-                        val recentEntries = packetHistory.takeLast(20)
-                        recentEntries.forEachIndexed { index, entry ->
+
+                        fun renderEntry(entry: UDPConnectionFixed.PacketHistoryEntry) {
                             val relativeTime = System.currentTimeMillis() - entry.timestamp
                             val icon = when (entry.type) {
                                 UDPConnectionFixed.PacketHistoryEntry.PacketEventType.SEND_SUCCESS -> "→"
                                 UDPConnectionFixed.PacketHistoryEntry.PacketEventType.SEND_FAILED -> "✗→"
                                 UDPConnectionFixed.PacketHistoryEntry.PacketEventType.RECEIVE -> "←"
                                 UDPConnectionFixed.PacketHistoryEntry.PacketEventType.RESEND -> "⟳"
-                                UDPConnectionFixed.PacketHistoryEntry.PacketEventType.ACK_RECEIVED -> "✓"
+                                UDPConnectionFixed.PacketHistoryEntry.PacketEventType.ACK_RECEIVED -> "✓←"
                                 UDPConnectionFixed.PacketHistoryEntry.PacketEventType.ACK_TIMEOUT -> "⏱"
                             }
                             val statusIcon = if (entry.success) "" else " ⚠️"
@@ -439,7 +440,36 @@ class DebugReportService private constructor(private val context: Context) {
                                 appendLine("     Error: ${entry.errorMessage}")
                             }
                             // Show full hex dump for all packets (complete packet data for diagnosis)
-                            appendLine("     Full packet: ${entry.fullHexDump}")
+                            if (entry.fullHexDump.isNotEmpty()) {
+                                appendLine("     Full packet: ${entry.fullHexDump}")
+                            }
+                        }
+
+                        // Show incoming events first so they're never drowned
+                        // out by the 10-Hz AgentUpdate stream that dominates
+                        // the bounded history window.
+                        val incomingEntries = packetHistory.filter {
+                            it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.RECEIVE ||
+                            it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.ACK_RECEIVED ||
+                            it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.ACK_TIMEOUT
+                        }.takeLast(15)
+                        if (incomingEntries.isNotEmpty()) {
+                            appendLine("Incoming (last ${incomingEntries.size}):")
+                            incomingEntries.forEach(::renderEntry)
+                            appendLine()
+                        } else {
+                            appendLine("Incoming: none in history window ⚠️")
+                            appendLine()
+                        }
+
+                        val outgoingEntries = packetHistory.filter {
+                            it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.SEND_SUCCESS ||
+                            it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.SEND_FAILED ||
+                            it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.RESEND
+                        }.takeLast(15)
+                        if (outgoingEntries.isNotEmpty()) {
+                            appendLine("Outgoing (last ${outgoingEntries.size}):")
+                            outgoingEntries.forEach(::renderEntry)
                         }
                         
                         // Summary statistics (counted within the bounded history window)
@@ -447,12 +477,16 @@ class DebugReportService private constructor(private val context: Context) {
                         val sendFailedCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.SEND_FAILED }
                         val receiveCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.RECEIVE }
                         val resendCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.RESEND }
+                        val ackReceivedCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.ACK_RECEIVED }
+                        val ackTimeoutCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.ACK_TIMEOUT }
 
                         appendLine()
                         appendLine("History Summary (recent ${packetHistory.size}-packet window):")
                         appendLine("  Sent Successfully: $sendSuccessCount")
                         appendLine("  Send Failures: $sendFailedCount")
                         appendLine("  Received: $receiveCount")
+                        appendLine("  ACKs Received: $ackReceivedCount")
+                        appendLine("  ACK Timeouts: $ackTimeoutCount")
                         appendLine("  Resends: $resendCount")
 
                         // Determine whether any packets have EVER been received using the
@@ -489,7 +523,58 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Packet history: App not initialized")
             }
             appendLine()
-            
+
+            // ==================== INCOMING PACKET DETAILS ====================
+            // Pulls from EnhancedPacketLogger's 200-entry history filtered to
+            // inbound only, so you can actually see what the simulator sent us
+            // even when 10 Hz AgentUpdate sends would otherwise dominate the
+            // smaller per-connection history window.
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ INCOMING PACKET DETAILS (Receives + ACKs)                         │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            try {
+                val incoming = EnhancedPacketLogger.getIncomingPacketHistory(30)
+                if (incoming.isEmpty()) {
+                    appendLine("No incoming packets recorded yet.")
+                } else {
+                    val receiveCount = incoming.count { it.direction == EnhancedPacketLogger.PacketLogEntry.Direction.RECEIVED }
+                    val ackCount = incoming.count { it.direction == EnhancedPacketLogger.PacketLogEntry.Direction.ACK_RECEIVED }
+                    appendLine("Showing last ${incoming.size} inbound entries (receives=$receiveCount, acks=$ackCount):")
+                    appendLine()
+                    incoming.forEach { entry ->
+                        val ago = System.currentTimeMillis() - entry.timestamp
+                        val arrow = when (entry.direction) {
+                            EnhancedPacketLogger.PacketLogEntry.Direction.RECEIVED -> "←"
+                            EnhancedPacketLogger.PacketLogEntry.Direction.ACK_RECEIVED -> "✓←"
+                            else -> "?"
+                        }
+                        val handlerInfo = if (entry.direction == EnhancedPacketLogger.PacketLogEntry.Direction.RECEIVED && !entry.handlerDispatched) " [NO HANDLER]" else ""
+                        val flagStr = entry.flags.toShortString().let { if (it == "-") "" else " [$it]" }
+                        appendLine("  [${formatDuration(ago)} ago] $arrow ${entry.messageName} (seq=${entry.sequenceNumber}, ${entry.size}B)$flagStr$handlerInfo")
+                        entry.hexPreview?.let { hex ->
+                            if (hex.isNotBlank()) appendLine("     Hex: $hex")
+                        }
+                        entry.error?.let { appendLine("     Error: $it") }
+                    }
+                }
+
+                // Recent ACK sequence list — quick at-a-glance view of which
+                // sends the simulator has confirmed.
+                val recentAckSeqs = EnhancedPacketLogger.getIncomingPacketHistory(60)
+                    .filter { it.direction == EnhancedPacketLogger.PacketLogEntry.Direction.ACK_RECEIVED }
+                    .takeLast(20)
+                    .map { it.sequenceNumber }
+                if (recentAckSeqs.isNotEmpty()) {
+                    appendLine()
+                    appendLine("Recently ACK'd sequence numbers (last ${recentAckSeqs.size}):")
+                    appendLine("  ${recentAckSeqs.joinToString(", ")}")
+                }
+            } catch (e: Exception) {
+                appendLine("Incoming packet details unavailable: ${e.message}")
+            }
+            appendLine()
+
             // Capability Manager Status - CRITICAL for texture/mesh/inventory loading
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ CAPABILITY STATUS (HTTP Services)                                 │")
