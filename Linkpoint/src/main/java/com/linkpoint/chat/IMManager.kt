@@ -343,33 +343,150 @@ class IMManager(
     }
     
     /**
-     * Send IM
+     * Send an IM in the given session.
+     *
+     * P2P sessions go over UDP via ImprovedInstantMessage with dialog
+     * IM_NOTHING_SPECIAL (0); this is what the SL protocol expects for
+     * 1:1 messages and what the simulator routes to inbox / online
+     * delivery. Group / conference sessions go over the ChatSessionRequest
+     * capability with method=sendchat (per Lumiya parity doc segment 08
+     * §3 and the dialog-code table in §2).
+     *
+     * Previously every IM — including 1:1 — was POSTed to the
+     * ChatSessionRequest capability, which silently dropped on the server
+     * for sessions that the client hadn't joined via "start session" first.
+     * This was the user-reported "I can't message anyone on login" failure
+     * captured in the 2026-04-25 Athanasia debug capture.
+     *
+     * The local-history entry is appended before the network call so the
+     * UI shows the user's own message immediately; on send failure we
+     * append a system-style error row so the user knows it didn't go.
      */
     fun sendIM(sessionId: UUID, message: String) {
-        val session = sessions[sessionId] ?: return
-        
-        scope.launch {
-            val request = LLSDMap().apply {
-                this["session-id"] = LLSDString(sessionId.toString())
-                this["message"] = LLSDString(message)
-            }
-            
-            capabilityManager.request(CapabilityManager.CAP_CHAT_PASS, request)
-            
-            // Add to local history
-            val imMessage = IMMessage(
-                id = UUID.randomUUID(),
-                sessionId = sessionId,
-                fromAgentId = agentId,
-                fromName = "You",
-                message = message,
-                dialogType = IM_SESSION_SEND,
-                timestamp = System.currentTimeMillis(),
-                isOutgoing = true
-            )
-            
-            addMessage(sessionId, imMessage)
+        val session = sessions[sessionId]
+        if (session == null) {
+            Log.w(TAG, "sendIM: no session $sessionId — message dropped")
+            return
         }
+
+        // Show in local history immediately for responsive UX.
+        val outgoing = IMMessage(
+            id = UUID.randomUUID(),
+            sessionId = sessionId,
+            fromAgentId = agentId,
+            fromName = "You",
+            message = message,
+            dialogType = IM_SESSION_SEND,
+            timestamp = System.currentTimeMillis(),
+            isOutgoing = true
+        )
+        addMessage(sessionId, outgoing)
+
+        scope.launch {
+            val ok = try {
+                when (session.type) {
+                    SessionType.P2P -> sendP2PInstantMessage(session, message)
+                    SessionType.GROUP, SessionType.CONFERENCE ->
+                        sendSessionChat(session, message)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "sendIM failed for session $sessionId", e)
+                false
+            }
+            if (!ok) {
+                addMessage(
+                    sessionId,
+                    IMMessage(
+                        id = UUID.randomUUID(),
+                        sessionId = sessionId,
+                        fromAgentId = UUID(0, 0),
+                        fromName = "System",
+                        message = "Failed to send message — check connection",
+                        dialogType = IM_NOTHING_SPECIAL,
+                        timestamp = System.currentTimeMillis(),
+                        isOutgoing = false
+                    )
+                )
+            }
+        }
+    }
+
+    /**
+     * Build and send a 1:1 IM as an ImprovedInstantMessage UDP packet.
+     * Mirrors the layout used by sendTypingStart/sendTypingStop, with a
+     * non-empty FromAgentName and Message and dialog IM_NOTHING_SPECIAL.
+     */
+    private fun sendP2PInstantMessage(session: IMSession, message: String): Boolean {
+        val targetId = session.participants.firstOrNull()
+        if (targetId == null) {
+            Log.w(TAG, "sendP2PInstantMessage: session ${session.sessionId} has no participants")
+            return false
+        }
+
+        val identity = outboundIdentity()
+        val fromNameBytes = "You".toByteArray(Charsets.UTF_8)  // server replaces with our resolved name
+        val messageBytes = message.toByteArray(Charsets.UTF_8)
+
+        // 32 (AgentData) + 1 + 16 + 4 + 16 + 12 + 1 + 1 + 16 + 4 (MessageBlock fixed) +
+        // 1 + name + 1 + 2 + msg + 2 (Variables) + 4 (EstateBlock) + 1 (MetaData count) + slack
+        val payload = java.nio.ByteBuffer.allocate(160 + fromNameBytes.size + messageBytes.size)
+            .order(java.nio.ByteOrder.LITTLE_ENDIAN)
+
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+
+        payload.put(0)                          // FromGroup (BOOL)
+        payload.putUUID(targetId)               // ToAgentID
+        payload.putInt(0)                       // ParentEstateID
+        payload.putUUID(UUID(0, 0))             // RegionID
+        payload.putFloat(0f); payload.putFloat(0f); payload.putFloat(0f)  // Position
+        payload.put(0)                          // Offline
+        payload.put(IM_NOTHING_SPECIAL.toByte()) // Dialog
+        payload.putUUID(session.sessionId)      // ID (session/transaction id)
+        payload.putInt((System.currentTimeMillis() / 1000).toInt())
+
+        // FromAgentName (Variable 1: byte length + bytes + nul)
+        payload.put((fromNameBytes.size + 1).toByte())
+        payload.put(fromNameBytes)
+        payload.put(0)
+        // Message (Variable 2: short length + bytes + nul)
+        payload.putShort((messageBytes.size + 1).toShort())
+        payload.put(messageBytes)
+        payload.put(0)
+        // BinaryBucket (Variable 2)
+        payload.putShort(0)
+
+        payload.putInt(0)                       // EstateID
+        payload.put(0)                          // MetaData variable block count
+
+        udpConnection.sendPacket(
+            com.linkpoint.protocol.messages.MessageIds.IMPROVED_INSTANT_MESSAGE,
+            payload.array().copyOf(payload.position()),
+            reliable = true
+        )
+        Log.d(TAG, "P2P IM sent to $targetId (session=${session.sessionId})")
+        return true
+    }
+
+    /**
+     * Send a group/conference message via the ChatSessionRequest cap.
+     * Uses method=sendchat per the SL chat-session protocol.
+     */
+    private suspend fun sendSessionChat(session: IMSession, message: String): Boolean {
+        val request = LLSDMap().apply {
+            this["method"] = LLSDString("sendchat")
+            this["session-id"] = LLSDString(session.sessionId.toString())
+            this["params"] = LLSDMap().apply {
+                this["text"] = LLSDString(message)
+                this["type"] = LLSDInteger(0)
+            }
+        }
+        val response = capabilityManager.request(CapabilityManager.CAP_CHAT_PASS, request)
+        if (response == null) {
+            Log.w(TAG, "ChatSessionRequest unavailable or failed for session ${session.sessionId}")
+            return false
+        }
+        return true
     }
     
     /**
