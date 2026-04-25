@@ -32,8 +32,11 @@ class FriendsListFragment : Fragment() {
     private lateinit var tabLayout: TabLayout
     private lateinit var addFriendButton: FloatingActionButton
 
-    private val friendsManager by lazy { 
-        LinkpointApp.getInstance().friendsManager 
+    private val friendsManager by lazy {
+        LinkpointApp.getInstance().friendsManager
+    }
+    private val profileManager by lazy {
+        LinkpointApp.getInstance().profileManager
     }
 
     private var currentTab = TabType.ALL
@@ -62,6 +65,26 @@ class FriendsListFragment : Fragment() {
         // so refresh whenever the user comes back to this screen rather than relying
         // solely on the initial onViewCreated load.
         loadFriends()
+        // Login-time display-name resolution can fail silently if the cap
+        // wasn't ready yet (10s timeout). Retry for any friends still on
+        // the synthesised "Resident (xxxx)" placeholder so the list doesn't
+        // stay stuck on UUIDs.
+        resolveUnresolvedFriendNames()
+    }
+
+    private fun resolveUnresolvedFriendNames() {
+        val unresolved = friendsManager.getUnresolvedNameAgentIds()
+        if (unresolved.isEmpty()) return
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val names = profileManager.getDisplayNames(unresolved)
+                names.forEach { (agentId, name) ->
+                    friendsManager.updateFriendName(agentId, name)
+                }
+            } catch (_: Exception) {
+                // Best-effort retry — failures are logged inside ProfileManager.
+            }
+        }
     }
 
     private fun setupViews(view: View) {

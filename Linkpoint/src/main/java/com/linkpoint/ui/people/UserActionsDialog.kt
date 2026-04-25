@@ -9,6 +9,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.ui.chat.ChatActivity
+import com.linkpoint.ui.profile.ProfileActivity
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -68,10 +69,11 @@ class UserActionsDialog : DialogFragment() {
     }
 
     private fun viewProfile() {
-        val profileManager = LinkpointApp.getInstance().profileManager
-        viewLifecycleOwner.lifecycleScope.launch {
-            profileManager.getAvatarProfile(agentId)
+        val intent = Intent(requireContext(), ProfileActivity::class.java).apply {
+            putExtra(ProfileActivity.EXTRA_AGENT_ID, agentId.toString())
+            putExtra(ProfileActivity.EXTRA_IS_OWN, false)
         }
+        startActivity(intent)
     }
 
     private fun teleportTo() {

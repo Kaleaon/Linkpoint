@@ -136,7 +136,7 @@ class ProfileActivity : AppCompatActivity() {
             partnerName.text = "Partner: (loading...)"
             lifecycleScope.launch {
                 val name = (application as LinkpointApp).profileManager.getDisplayName(profile.partner)
-                partnerName.text = "Partner: $name"
+                partnerName.text = "Partner: ${name ?: "(unknown)"}"
             }
         } else {
             partnerName.visibility = View.GONE

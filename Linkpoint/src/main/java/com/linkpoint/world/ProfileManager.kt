@@ -97,10 +97,15 @@ class ProfileManager(
     
     /**
      * Get display name via GetDisplayNames capability.
+     *
+     * Returns null when the lookup did not resolve a name from the simulator.
+     * We deliberately do not synthesise a UUID-prefix fallback here, because
+     * caching that would prevent any later retry from ever updating the
+     * friends list / chat headers with the real name.
      */
-    suspend fun getDisplayName(agentId: UUID): String {
+    suspend fun getDisplayName(agentId: UUID): String? {
         displayNames[agentId]?.let { return it }
-        
+
         return withContext(Dispatchers.IO) {
             try {
                 val request = LLSDMap().apply {
@@ -108,26 +113,25 @@ class ProfileManager(
                         add(LLSDString(agentId.toString()))
                     }
                 }
-                
+
                 val response = capabilityManager.request(CapabilityManager.CAP_GET_DISPLAY_NAMES, request)
-                
+
                 if (response is LLSDMap) {
                     val agents = response.getArray("agents")
                     if (agents != null && agents.size > 0) {
                         val agentData = agents.get(0) as? LLSDMap
-                        val name = agentData?.getString("display_name") 
-                            ?: agentData?.getString("username")
-                            ?: agentId.toString().substring(0, 8)
-                        displayNames[agentId] = name
-                        return@withContext name
+                        val name = agentData?.getString("display_name")?.takeIf { it.isNotBlank() }
+                            ?: agentData?.getString("username")?.takeIf { it.isNotBlank() }
+                        if (name != null) {
+                            displayNames[agentId] = name
+                            return@withContext name
+                        }
                     }
                 }
-                
-                // Fallback
-                agentId.toString().substring(0, 8)
+                null
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to get display name for $agentId: ${e.message}")
-                agentId.toString().substring(0, 8)
+                null
             }
         }
     }
@@ -160,8 +164,8 @@ class ProfileManager(
                             for (i in 0 until agents.size) {
                                 val agentData = agents.get(i) as? LLSDMap ?: continue
                                 val idStr = agentData.getString("id") ?: continue
-                                val name = agentData.getString("display_name") 
-                                    ?: agentData.getString("username")
+                                val name = agentData.getString("display_name")?.takeIf { it.isNotBlank() }
+                                    ?: agentData.getString("username")?.takeIf { it.isNotBlank() }
                                     ?: continue
                                 try {
                                     val uuid = UUID.fromString(idStr)
