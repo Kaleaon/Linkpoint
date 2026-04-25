@@ -5,7 +5,10 @@ import android.util.Log
 import com.linkpoint.protocol.types.LLQuaternion
 import com.linkpoint.protocol.types.LLVector3
 import org.json.JSONObject
+import org.xmlpull.v1.XmlPullParser
+import org.xmlpull.v1.XmlPullParserFactory
 import java.io.InputStreamReader
+import java.io.StringReader
 
 /**
  * Avatar skeleton with bones and transforms
@@ -81,9 +84,110 @@ class AvatarSkeleton(context: Context?) {
         }
     }
     
+    /**
+     * Parse avatar_skeleton.xml from the Linden Lab system avatar.
+     *
+     * The file is a deeply-nested <linden_skeleton> document where every
+     * <bone> element carries name / pivot / pos / rot / scale / aliases /
+     * end attributes, with child <bone>s nested inside as the natural
+     * skeleton hierarchy. Collision volumes are siblings of bones; we
+     * ignore them here (they're for ray-test / physics, not rendering).
+     *
+     * Falls back to the hardcoded subset if parsing fails so avatars still
+     * render with at least the original 24-bone placeholder skeleton.
+     */
     private fun parseSkeletonXML(xml: String) {
-        // Parse skeleton XML (simplified)
-        createDefaultSkeleton()
+        try {
+            val factory = XmlPullParserFactory.newInstance()
+            factory.isNamespaceAware = false
+            val parser = factory.newPullParser()
+            parser.setInput(StringReader(xml))
+
+            val parentStack = ArrayDeque<Bone?>()
+            parentStack.addLast(null)
+            var rootBoneCandidate: Bone? = null
+            var event = parser.eventType
+            while (event != XmlPullParser.END_DOCUMENT) {
+                when (event) {
+                    XmlPullParser.START_TAG -> {
+                        if (parser.name == "bone") {
+                            val name = parser.getAttributeValue(null, "name") ?: ""
+                            val pivot = parseVec3(parser.getAttributeValue(null, "pivot"))
+                                ?: parseVec3(parser.getAttributeValue(null, "pos"))
+                                ?: LLVector3.zero()
+                            val rot = parseRotEuler(parser.getAttributeValue(null, "rot"))
+                            val scale = parseVec3(parser.getAttributeValue(null, "scale"))
+                                ?: LLVector3(1f, 1f, 1f)
+                            val parent = parentStack.lastOrNull()
+                            val bone = createBone(name, parent, pivot, rot)
+                            // Apply bind scale; createBone defaults to (1,1,1).
+                            bone.scale = scale
+                            if (rootBoneCandidate == null && parent == null) {
+                                rootBoneCandidate = bone
+                            }
+                            parentStack.addLast(bone)
+                        } else if (parser.name == "collision_volume") {
+                            // Push a sentinel so closing tag pops the right level
+                            // (collision_volume can be nested under bones too).
+                            parentStack.addLast(parentStack.lastOrNull())
+                        }
+                    }
+                    XmlPullParser.END_TAG -> {
+                        if (parser.name == "bone" || parser.name == "collision_volume") {
+                            if (parentStack.size > 1) parentStack.removeLast()
+                        }
+                    }
+                }
+                event = parser.next()
+            }
+
+            if (boneArray.isEmpty()) {
+                Log.w(TAG, "Skeleton XML had no bones; using hardcoded fallback")
+                createDefaultSkeleton()
+                return
+            }
+
+            rootBone = rootBoneCandidate ?: boneArray.firstOrNull()
+            updateBoneMatrices()
+            Log.i(TAG, "Loaded SL skeleton from XML: ${boneArray.size} bones")
+        } catch (e: Exception) {
+            Log.w(TAG, "Skeleton XML parse failed; using hardcoded fallback: ${e.message}")
+            createDefaultSkeleton()
+        }
+    }
+
+    private fun parseVec3(s: String?): LLVector3? {
+        if (s.isNullOrBlank()) return null
+        val parts = s.trim().split(Regex("\\s+"))
+        if (parts.size < 3) return null
+        return try {
+            LLVector3(parts[0].toFloat(), parts[1].toFloat(), parts[2].toFloat())
+        } catch (e: NumberFormatException) {
+            null
+        }
+    }
+
+    /**
+     * `rot` in avatar_skeleton.xml is given as Euler angles in degrees
+     * (X Y Z order), not as a quaternion. Default to identity when the
+     * angles are zero (the common case for the rest pose).
+     */
+    private fun parseRotEuler(s: String?): LLQuaternion {
+        val v = parseVec3(s) ?: return LLQuaternion.identity()
+        if (v.x == 0f && v.y == 0f && v.z == 0f) return LLQuaternion.identity()
+        val cx = kotlin.math.cos(Math.toRadians(v.x.toDouble()) * 0.5).toFloat()
+        val sx = kotlin.math.sin(Math.toRadians(v.x.toDouble()) * 0.5).toFloat()
+        val cy = kotlin.math.cos(Math.toRadians(v.y.toDouble()) * 0.5).toFloat()
+        val sy = kotlin.math.sin(Math.toRadians(v.y.toDouble()) * 0.5).toFloat()
+        val cz = kotlin.math.cos(Math.toRadians(v.z.toDouble()) * 0.5).toFloat()
+        val sz = kotlin.math.sin(Math.toRadians(v.z.toDouble()) * 0.5).toFloat()
+        // ZYX order (matches the LL viewer's LLQuaternion::setEulerAngles).
+        return LLQuaternion(
+            sx * cy * cz - cx * sy * sz,
+            cx * sy * cz + sx * cy * sz,
+            cx * cy * sz - sx * sy * cz,
+            cx * cy * cz + sx * sy * sz
+        )
     }
     
     private fun createDefaultSkeleton() {
@@ -162,11 +266,50 @@ class AvatarSkeleton(context: Context?) {
     }
     
     /**
-     * Update bone matrices (call after modifying poses)
+     * Apply VisualParam-driven bone scale offsets to the rest pose.
+     *
+     * For each `<param_skeleton>` in avatar_lad.xml, the LL viewer multiplies
+     * the param's weight by the per-bone scale offsets and adds the result
+     * to that bone's bind-pose scale (LLPolySkeletalDistortion in LL terms).
+     * The accumulated effect is what makes "Male_Skeleton", "BodyMass",
+     * "Heel_Height" etc. visibly change the avatar's silhouette.
+     *
+     * Resets every bone's scale to (1, 1, 1) before re-applying so this is
+     * idempotent across AvatarAppearance updates.
      */
+    fun applySkeletonParams(
+        visualParams: ByteArray,
+        params: List<VisualParamLoader.VisualParam>
+    ) {
+        // Reset to bind-pose scale.
+        for (bone in boneArray) {
+            bone.scale = LLVector3(1f, 1f, 1f)
+        }
+        if (visualParams.isEmpty() || params.isEmpty()) return
+
+        val maxIdx = minOf(visualParams.size, params.size)
+        for (i in 0 until maxIdx) {
+            val param = params[i]
+            if (param.boneScales.isEmpty()) continue
+            val w = param.weightForByte(visualParams[i].toInt())
+            // Skip params at their default — no contribution.
+            if (kotlin.math.abs(w - param.valueDefault) < 1e-4f) continue
+            for ((boneName, offset) in param.boneScales) {
+                val bone = bones[boneName] ?: continue
+                bone.scale = LLVector3(
+                    bone.scale.x + offset[0] * w,
+                    bone.scale.y + offset[1] * w,
+                    bone.scale.z + offset[2] * w
+                )
+            }
+        }
+        updateBoneMatrices()
+    }
+
+    /** Recompute every bone's worldMatrix + skinningMatrix from the rest pose. */
     fun updateBoneMatrices() {
-        rootBone?.let { calculateBoneMatrix(it, FloatArray(16).apply { 
-            this[0] = 1f; this[5] = 1f; this[10] = 1f; this[15] = 1f 
+        rootBone?.let { calculateBoneMatrix(it, FloatArray(16).apply {
+            this[0] = 1f; this[5] = 1f; this[10] = 1f; this[15] = 1f
         }) }
     }
     

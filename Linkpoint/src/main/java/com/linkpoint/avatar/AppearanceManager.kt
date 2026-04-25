@@ -63,7 +63,49 @@ class AppearanceManager(
     
     // Avatar size (computed from visual params)
     private var avatarHeight: Float = 1.7f
-    
+
+    // ---------------- Diagnostics for end-to-end pipeline visibility -----
+    // The bake → upload → AgentSetAppearance round trip happens on a
+    // coroutine scope and is otherwise invisible from outside; surfacing
+    // these counters (read by the debug report) is the only way to tell
+    // whether the pipeline ran at all on a given session, how many
+    // textures it actually managed to upload, and whether the simulator
+    // ACK'd the resulting AgentSetAppearance packet.
+
+    @Volatile
+    private var lastUpdateStartedMs: Long = 0
+    @Volatile
+    private var lastUpdateDurationMs: Long = 0
+    @Volatile
+    private var lastBakedTextureCount: Int = 0
+    @Volatile
+    private var lastUpdateError: String? = null
+    private val updatesSent = AtomicInteger(0)
+    private val updatesFailed = AtomicInteger(0)
+
+    data class DiagnosticsSnapshot(
+        val updatesSent: Int,
+        val updatesFailed: Int,
+        val lastUpdateAgoMs: Long?,
+        val lastUpdateDurationMs: Long,
+        val lastBakedTextureCount: Int,
+        val lastUpdateError: String?,
+        val lastSerialSent: Int
+    )
+
+    fun getDiagnostics(): DiagnosticsSnapshot {
+        val now = System.currentTimeMillis()
+        return DiagnosticsSnapshot(
+            updatesSent = updatesSent.get(),
+            updatesFailed = updatesFailed.get(),
+            lastUpdateAgoMs = if (lastUpdateStartedMs > 0) now - lastUpdateStartedMs else null,
+            lastUpdateDurationMs = lastUpdateDurationMs,
+            lastBakedTextureCount = lastBakedTextureCount,
+            lastUpdateError = lastUpdateError,
+            lastSerialSent = serialNum.get()
+        )
+    }
+
     /**
      * Set agent and session info (required before sending appearance).
      */
@@ -113,20 +155,27 @@ class AppearanceManager(
      * This bakes all textures and sends AgentSetAppearance.
      */
     suspend fun sendAppearanceUpdate() {
-        Log.i(TAG, "Starting appearance update...")
-        
+        val started = System.currentTimeMillis()
+        lastUpdateStartedMs = started
+        Log.i(TAG, "═══ Appearance update starting (serial+1=${serialNum.get() + 1}) ═══")
+
         try {
-            // 1. Bake all textures
-            Log.d(TAG, "Baking textures...")
+            Log.d(TAG, "  baking 11 channels (head/upper/lower/eyes/skirt/hair/leftarm/leftleg/aux1/aux2/aux3)...")
             val bakedTextures = avatarBaker.bakeAll(includeBoM = true)
-            Log.d(TAG, "Baked ${bakedTextures.size} textures")
-            
-            // 2. Send AgentSetAppearance message
+            lastBakedTextureCount = bakedTextures.size
+            Log.d(TAG, "  baked ${bakedTextures.size} channels: ${bakedTextures.keys.sorted().joinToString()}")
+
             sendAgentSetAppearance(bakedTextures)
-            
-            Log.i(TAG, "Appearance update sent successfully")
+
+            lastUpdateError = null
+            updatesSent.incrementAndGet()
+            lastUpdateDurationMs = System.currentTimeMillis() - started
+            Log.i(TAG, "✓ Appearance update sent (took ${lastUpdateDurationMs}ms)")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to send appearance update", e)
+            lastUpdateError = "${e.javaClass.simpleName}: ${e.message}"
+            updatesFailed.incrementAndGet()
+            lastUpdateDurationMs = System.currentTimeMillis() - started
+            Log.e(TAG, "✗ Appearance update failed after ${lastUpdateDurationMs}ms", e)
         }
     }
     
@@ -139,41 +188,143 @@ class AppearanceManager(
      */
     suspend fun sendAgentSetAppearance(bakedTextures: Map<Int, UUID>) {
         val serial = serialNum.incrementAndGet()
-        
-        // Calculate payload size:
-        // AgentData block: 16 (AgentID) + 16 (SessionID) + 4 (SerialNum) + 12 (Size) = 48
-        // WearableData block: 1 (count) + N * (1 (index) + 16 (textureId)) = 1 + N*17
-        // VisualParam block: 1 (count) + params = 1 + 218
-        
+
+        // Field layout per secondlife/viewer scripts/messages/message_template.msg:
+        //   AgentData    (Single):   AgentID LLUUID, SessionID LLUUID, SerialNum U32, Size LLVector3
+        //   WearableData (Variable): CacheID LLUUID, TextureIndex U8   — CacheID FIRST
+        //   ObjectData   (Single):   TextureEntry Variable 2  (U16 length prefix + bytes)
+        //   VisualParam  (Variable): ParamValue U8
+        //
+        // The previous code wrote TextureIndex before CacheID and skipped the
+        // ObjectData block entirely, which the simulator silently dropped on
+        // the floor — bakes never registered against the agent.
+
         val wearableCount = bakedTextures.size
-        val payloadSize = 48 + 1 + (wearableCount * 17) + 1 + VISUAL_PARAM_COUNT
-        
+        val textureEntry = buildTextureEntryFromBakes(bakedTextures)
+        val payloadSize =
+            48 +                                    // AgentData
+            1 + wearableCount * (16 + 1) +          // WearableData (count + N×(UUID + U8))
+            2 + textureEntry.size +                 // ObjectData TextureEntry (U16 length + bytes)
+            1 + VISUAL_PARAM_COUNT                  // VisualParam
+
         val payload = ByteBuffer.allocate(payloadSize).order(MESSAGE_BYTE_ORDER)
-        
-        // AgentData block
+
+        // AgentData
         payload.putUUID(agentId)
         payload.putUUID(sessionId)
         payload.putInt(serial)
-        
-        // Size (LLVector3 - avatar dimensions)
-        // Width, depth, height
-        payload.putFloat(0.45f)        // Width
-        payload.putFloat(0.6f)         // Depth
-        payload.putFloat(avatarHeight) // Height
-        
-        // WearableData block - list of baked texture entries
+        payload.putFloat(0.45f)         // Width
+        payload.putFloat(0.6f)          // Depth
+        payload.putFloat(avatarHeight)  // Height
+
+        // WearableData — CacheID first, TextureIndex second (per template).
         payload.put(wearableCount.toByte())
         bakedTextures.forEach { (channel, textureId) ->
-            payload.put(channelToTextureIndex(channel).toByte())
             payload.putUUID(textureId)
+            payload.put(channelToTextureIndex(channel).toByte())
         }
-        
-        // VisualParam block
+
+        // ObjectData: TextureEntry (Variable 2 = U16 length prefix + bytes).
+        payload.putShort(textureEntry.size.toShort())
+        payload.put(textureEntry)
+
+        // VisualParam — Variable, but with a U8 count we cap at 255 params
+        // (we send 218 — fits comfortably).
         payload.put(VISUAL_PARAM_COUNT.toByte())
         payload.put(visualParams)
-        
-        Log.d(TAG, "Sending AgentSetAppearance (serial=$serial, wearables=$wearableCount, params=$VISUAL_PARAM_COUNT)")
+
+        Log.d(TAG, "Sending AgentSetAppearance " +
+            "(serial=$serial, wearables=$wearableCount, " +
+            "textureEntry=${textureEntry.size}B, params=$VISUAL_PARAM_COUNT)")
         udpConnection.sendPacket(MessageIds.AGENT_SET_APPEARANCE, payload.array(), reliable = true)
+    }
+
+    /**
+     * Build a minimal TextureEntry blob that places each baked texture at
+     * its correct face slot (8..18 for head/upper/lower/eyes/skirt/hair/
+     * leftarm/leftleg/aux1/aux2/aux3). Slots not in [bakedTextures] keep
+     * the default (null) UUID.
+     *
+     * TextureEntry binary layout:
+     *   default texture UUID (16 bytes)
+     *   per-face overrides loop: face-bitfield + UUID, terminated by zero bitfield
+     *   default color (4 bytes)
+     *   per-face color overrides loop, terminated by zero bitfield
+     *   ... same pattern for scaleS, scaleT, offsetS, offsetT, rotation,
+     *       bumpmap, mediaflags, glow, materialsId
+     *
+     * For an avatar bake we only need the texture-UUID block populated; all
+     * other property blocks are emitted as "default + zero-bitfield
+     * terminator" so the parser sees a valid (if minimal) blob.
+     */
+    private fun buildTextureEntryFromBakes(bakedTextures: Map<Int, UUID>): ByteArray {
+        // SL channel index → TextureEntry face slot.
+        val faceForChannel = mapOf(
+            0 to 8, 1 to 9, 2 to 10, 3 to 11, 4 to 12, 5 to 13,
+            6 to 14, 7 to 15, 8 to 16, 9 to 17, 10 to 18
+        )
+        val out = java.io.ByteArrayOutputStream()
+        val bb = ByteBuffer.allocate(16).order(MESSAGE_BYTE_ORDER)
+
+        fun writeUuid(u: UUID) {
+            bb.clear()
+            bb.order(ByteOrder.BIG_ENDIAN)
+            bb.putLong(u.mostSignificantBits)
+            bb.putLong(u.leastSignificantBits)
+            out.write(bb.array(), 0, 16)
+        }
+        fun writeBitfield(face: Int) {
+            // Variable-length bitfield: 7 bits per byte, high bit = continuation.
+            // For face indices ≤ 6 this fits in a single byte; for ≥7 we emit
+            // multi-byte ULEB128-style. Matches LL viewer LLTextureEntry::pack.
+            val bits = 1L shl face
+            var v = bits
+            while (v != 0L) {
+                val low = (v and 0x7FL).toInt()
+                v = v ushr 7
+                val byte = if (v != 0L) (low or 0x80) else low
+                out.write(byte)
+            }
+        }
+        fun writeColorBytes(r: Int, g: Int, b: Int, a: Int) {
+            // LL convention: bytes are XOR'd with 0xFF on the wire so 0 = white.
+            out.write(r.xor(0xFF)); out.write(g.xor(0xFF))
+            out.write(b.xor(0xFF)); out.write(a.xor(0xFF))
+        }
+
+        // 1. Texture: default = null UUID; override each baked face.
+        writeUuid(UUID(0L, 0L))
+        for ((channel, textureId) in bakedTextures) {
+            val face = faceForChannel[channel] ?: continue
+            writeBitfield(face)
+            writeUuid(textureId)
+        }
+        out.write(0) // texture overrides terminator
+
+        // 2. Color: default white, no overrides.
+        writeColorBytes(255, 255, 255, 255)
+        out.write(0)
+        // 3. ScaleS, ScaleT (each a float, default 1.0).
+        out.write(ByteBuffer.allocate(4).order(MESSAGE_BYTE_ORDER).putFloat(1f).array())
+        out.write(0)
+        out.write(ByteBuffer.allocate(4).order(MESSAGE_BYTE_ORDER).putFloat(1f).array())
+        out.write(0)
+        // 4. OffsetS, OffsetT (S16 default 0).
+        out.write(ByteBuffer.allocate(2).order(MESSAGE_BYTE_ORDER).putShort(0).array())
+        out.write(0)
+        out.write(ByteBuffer.allocate(2).order(MESSAGE_BYTE_ORDER).putShort(0).array())
+        out.write(0)
+        // 5. Rotation (S16 default 0).
+        out.write(ByteBuffer.allocate(2).order(MESSAGE_BYTE_ORDER).putShort(0).array())
+        out.write(0)
+        // 6. Bumpmap, mediaflags, glow (each U8 default 0).
+        out.write(0); out.write(0)
+        out.write(0); out.write(0)
+        out.write(0); out.write(0)
+        // 7. MaterialsID (UUID default null).
+        writeUuid(UUID(0L, 0L))
+        out.write(0)
+        return out.toByteArray()
     }
     
     /**

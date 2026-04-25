@@ -443,3 +443,173 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeHealthCheck(
     opj_destroy_codec(codec);
     return JNI_TRUE;
 }
+
+// ===================================================================
+// JPEG2000 ENCODER
+// ===================================================================
+//
+// Used by AvatarBaker.uploadBakedTexture() to compress baked layered
+// textures into the codestream the simulator expects on the
+// UploadBakedTexture capability. Without this the upload had to ship
+// PNG bytes with an "image/x-j2c" MIME type, which the simulator
+// rejects.
+//
+// Input:  raw RGBA8 pixels (width * height * 4 bytes), little-endian
+//         component order R,G,B,A.
+// Output: a fresh byte[] containing the J2K codestream, or null on
+//         failure (caller falls back to PNG).
+
+typedef struct {
+    uint8_t* buf;
+    size_t   capacity;
+    size_t   size;
+} EncBuf;
+
+static OPJ_SIZE_T enc_stream_write(void* p_buffer, OPJ_SIZE_T n, void* userData) {
+    EncBuf* eb = (EncBuf*)userData;
+    if (eb->size + n > eb->capacity) {
+        size_t newCap = eb->capacity == 0 ? 65536 : eb->capacity * 2;
+        while (eb->size + n > newCap) newCap *= 2;
+        uint8_t* newBuf = (uint8_t*)realloc(eb->buf, newCap);
+        if (!newBuf) return (OPJ_SIZE_T)-1;
+        eb->buf = newBuf;
+        eb->capacity = newCap;
+    }
+    memcpy(eb->buf + eb->size, p_buffer, n);
+    eb->size += n;
+    return n;
+}
+
+static OPJ_OFF_T enc_stream_skip(OPJ_OFF_T n, void* userData) {
+    // Skip-on-write is treated as zero-fill; harmless for OpenJPEG which
+    // only seeks to overwrite headers it just wrote.
+    EncBuf* eb = (EncBuf*)userData;
+    if (eb->size + (size_t)n > eb->capacity) {
+        size_t newCap = eb->capacity == 0 ? 65536 : eb->capacity * 2;
+        while (eb->size + (size_t)n > newCap) newCap *= 2;
+        uint8_t* newBuf = (uint8_t*)realloc(eb->buf, newCap);
+        if (!newBuf) return -1;
+        eb->buf = newBuf;
+        eb->capacity = newCap;
+    }
+    memset(eb->buf + eb->size, 0, (size_t)n);
+    eb->size += (size_t)n;
+    return n;
+}
+
+static OPJ_BOOL enc_stream_seek(OPJ_OFF_T n, void* userData) {
+    EncBuf* eb = (EncBuf*)userData;
+    if ((size_t)n > eb->capacity) return OPJ_FALSE;
+    eb->size = (size_t)n;
+    return OPJ_TRUE;
+}
+
+extern "C" JNIEXPORT jbyteArray JNICALL
+Java_com_linkpoint_assets_JPEG2000Encoder_nativeEncode(
+    JNIEnv* env,
+    jobject thiz,
+    jbyteArray rgbaBytes,
+    jint width,
+    jint height,
+    jboolean lossless
+) {
+    if (width <= 0 || height <= 0) return nullptr;
+    jsize inLen = env->GetArrayLength(rgbaBytes);
+    if (inLen < width * height * 4) {
+        LOGE("nativeEncode: input too short (%d, need %d)", inLen, width * height * 4);
+        return nullptr;
+    }
+    jbyte* rgba = env->GetByteArrayElements(rgbaBytes, nullptr);
+    if (!rgba) return nullptr;
+
+    // Build OpenJPEG image with 4 separate component planes (R, G, B, A).
+    opj_image_cmptparm_t cmpt[4];
+    memset(cmpt, 0, sizeof(cmpt));
+    for (int i = 0; i < 4; i++) {
+        cmpt[i].dx = 1;
+        cmpt[i].dy = 1;
+        cmpt[i].w = width;
+        cmpt[i].h = height;
+        cmpt[i].x0 = 0;
+        cmpt[i].y0 = 0;
+        cmpt[i].prec = 8;
+        cmpt[i].bpp = 8;
+        cmpt[i].sgnd = 0;
+    }
+    opj_image_t* image = opj_image_create(4, cmpt, OPJ_CLRSPC_SRGB);
+    if (!image) {
+        env->ReleaseByteArrayElements(rgbaBytes, rgba, JNI_ABORT);
+        return nullptr;
+    }
+    image->x0 = 0; image->y0 = 0;
+    image->x1 = width; image->y1 = height;
+
+    const int npix = width * height;
+    for (int i = 0; i < npix; i++) {
+        image->comps[0].data[i] = (OPJ_INT32)((uint8_t)rgba[i * 4]);
+        image->comps[1].data[i] = (OPJ_INT32)((uint8_t)rgba[i * 4 + 1]);
+        image->comps[2].data[i] = (OPJ_INT32)((uint8_t)rgba[i * 4 + 2]);
+        image->comps[3].data[i] = (OPJ_INT32)((uint8_t)rgba[i * 4 + 3]);
+    }
+    env->ReleaseByteArrayElements(rgbaBytes, rgba, JNI_ABORT);
+
+    opj_cparameters_t params;
+    opj_set_default_encoder_parameters(&params);
+    params.tcp_numlayers = 1;
+    params.cp_disto_alloc = 1;
+    if (lossless) {
+        params.tcp_rates[0] = 0;          // 0 == lossless in OpenJPEG
+        params.irreversible = 0;
+    } else {
+        params.tcp_rates[0] = 10.0f;      // ~10:1 quality (LL viewer default)
+        params.irreversible = 1;
+    }
+    params.numresolution = 6;
+    params.cod_format = 0;                // 0 = J2K codestream (not JP2)
+
+    opj_codec_t* codec = opj_create_compress(OPJ_CODEC_J2K);
+    if (!codec) {
+        opj_image_destroy(image);
+        return nullptr;
+    }
+    if (!opj_setup_encoder(codec, &params, image)) {
+        opj_destroy_codec(codec);
+        opj_image_destroy(image);
+        LOGE("opj_setup_encoder failed");
+        return nullptr;
+    }
+
+    EncBuf eb = { nullptr, 0, 0 };
+    opj_stream_t* stream = opj_stream_default_create(OPJ_FALSE); // false = output
+    if (!stream) {
+        opj_destroy_codec(codec);
+        opj_image_destroy(image);
+        free(eb.buf);
+        return nullptr;
+    }
+    opj_stream_set_user_data(stream, &eb, nullptr);
+    opj_stream_set_user_data_length(stream, 0);
+    opj_stream_set_write_function(stream, (opj_stream_write_fn)enc_stream_write);
+    opj_stream_set_skip_function(stream, (opj_stream_skip_fn)enc_stream_skip);
+    opj_stream_set_seek_function(stream, (opj_stream_seek_fn)enc_stream_seek);
+
+    OPJ_BOOL ok = opj_start_compress(codec, image, stream)
+        && opj_encode(codec, stream)
+        && opj_end_compress(codec, stream);
+
+    opj_stream_destroy(stream);
+    opj_destroy_codec(codec);
+    opj_image_destroy(image);
+
+    if (!ok) {
+        LOGE("OpenJPEG encode failed");
+        free(eb.buf);
+        return nullptr;
+    }
+    LOGI("Encoded J2K: %dx%d -> %zu bytes", width, height, eb.size);
+
+    jbyteArray out = env->NewByteArray((jsize)eb.size);
+    if (out) env->SetByteArrayRegion(out, 0, (jsize)eb.size, (jbyte*)eb.buf);
+    free(eb.buf);
+    return out;
+}

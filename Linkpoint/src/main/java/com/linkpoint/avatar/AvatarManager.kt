@@ -388,14 +388,46 @@ class AvatarManager(
      */
     fun handleAvatarAppearance(agentId: UUID, textureEntries: ByteArray, visualParams: ByteArray) {
         val avatar = avatars[agentId]
-        if (avatar != null) {
-            // Update avatar appearance data
-            Log.d(TAG, "Updating appearance for avatar $agentId: ${visualParams.size} visual params")
-            // Visual params affect avatar shape (height, body, face, etc.)
-            avatar.visualParams = visualParams
-            avatar.textureEntry = textureEntries
-        } else {
+        if (avatar == null) {
             Log.w(TAG, "Received appearance for unknown avatar: $agentId")
+            return
+        }
+        Log.d(TAG, "Updating appearance for avatar $agentId: ${visualParams.size} visual params")
+        avatar.visualParams = visualParams
+        avatar.textureEntry = textureEntries
+
+        // Parse the TextureEntry blob and pull out the per-bake-channel
+        // texture UUIDs. SL's avatar uses 21 face slots (TEX_NUM_INDICES);
+        // slots 8..18 are the baked channels in the order
+        // head/upper/lower/eyes/skirt/hair/leftarm/leftleg/aux1/aux2/aux3.
+        // Surfacing them on the avatar object lets the BoM resolver hand
+        // them to mesh attachments that reference IMG_USE_BAKED_*.
+        if (textureEntries.isNotEmpty()) {
+            val faces = com.linkpoint.protocol.textures.TextureEntryParser.parseFull(textureEntries, 21)
+            if (faces != null) {
+                val bakes = HashMap<Int, UUID>()
+                // SL bake-slot index → TextureEntry face index.
+                val slotToFace = mapOf(
+                    com.linkpoint.avatar.BakesOnMesh.SLOT_HEAD     to 8,
+                    com.linkpoint.avatar.BakesOnMesh.SLOT_UPPER    to 9,
+                    com.linkpoint.avatar.BakesOnMesh.SLOT_LOWER    to 10,
+                    com.linkpoint.avatar.BakesOnMesh.SLOT_EYES     to 11,
+                    com.linkpoint.avatar.BakesOnMesh.SLOT_SKIRT    to 12,
+                    com.linkpoint.avatar.BakesOnMesh.SLOT_HAIR     to 13,
+                    com.linkpoint.avatar.BakesOnMesh.SLOT_LEFT_ARM to 14,
+                    com.linkpoint.avatar.BakesOnMesh.SLOT_LEFT_LEG to 15,
+                    com.linkpoint.avatar.BakesOnMesh.SLOT_AUX1     to 16,
+                    com.linkpoint.avatar.BakesOnMesh.SLOT_AUX2     to 17,
+                    com.linkpoint.avatar.BakesOnMesh.SLOT_AUX3     to 18
+                )
+                for ((slot, faceIdx) in slotToFace) {
+                    val face = faces.getOrNull(faceIdx) ?: continue
+                    val tid = face.textureId
+                    if (tid != UUID(0L, 0L)) bakes[slot] = tid
+                }
+                avatar.baker.setExternalBakedTextures(bakes)
+                Log.d(TAG, "  Extracted ${bakes.size} baked-texture UUIDs for $agentId")
+            }
         }
     }
     
@@ -404,11 +436,52 @@ class AvatarManager(
      */
     fun handleWearablesUpdate(wearables: List<com.linkpoint.protocol.messages.AdditionalMessageParsers.WearableData>) {
         Log.d(TAG, "Received wearables update: ${wearables.size} items")
-        // Store wearables data for avatar baking/appearance
         wearables.forEach { wearable ->
             Log.d(TAG, "  Wearable type ${wearable.wearableType}: item=${wearable.itemID}, asset=${wearable.assetID}")
         }
+
+        // Apply each wearable through OutfitManager so the asset is fetched,
+        // parsed, and handed to AvatarBaker. Without this the bakes never
+        // get fresh layer data and `sendAgentSetAppearance` would push stale
+        // (or default) baked-texture UUIDs.
+        val manager = outfitManager
+        if (manager == null) {
+            Log.w(TAG, "OutfitManager not configured; AgentWearablesUpdate dropped on the floor")
+            return
+        }
+        appearanceScope.launch {
+            try {
+                wearables.forEach { wearable ->
+                    if (wearable.itemID != UUID(0L, 0L)) {
+                        try {
+                            manager.wearItem(wearable.itemID, replace = false)
+                        } catch (e: Exception) {
+                            Log.w(TAG, "wearItem(${wearable.itemID}) failed: ${e.message}")
+                        }
+                    }
+                }
+                // Once all wearables are queued, push the resulting bakes
+                // up to the simulator. The AppearanceManager handles its
+                // own bake → upload → AgentSetAppearance flow.
+                appearanceUpdateTrigger?.invoke()
+            } catch (e: Exception) {
+                Log.w(TAG, "wearables update apply failed", e)
+            }
+        }
     }
+
+    /**
+     * Optional callback invoked after AgentWearablesUpdate has been
+     * applied to OutfitManager. Wired by LinkpointApp to call
+     * AppearanceManager.sendAppearanceUpdate() so the local agent's
+     * bake gets re-uploaded automatically.
+     */
+    @Volatile
+    var appearanceUpdateTrigger: (suspend () -> Unit)? = null
+
+    private val appearanceScope = kotlinx.coroutines.CoroutineScope(
+        kotlinx.coroutines.Dispatchers.Default + kotlinx.coroutines.SupervisorJob()
+    )
     
     /**
      * Handle AvatarSitResponse from server.

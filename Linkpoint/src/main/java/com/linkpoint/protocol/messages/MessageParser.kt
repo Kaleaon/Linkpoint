@@ -508,7 +508,14 @@ data class ObjectUpdateData(
     val jointAxisOrAnchor: LLVector3 = LLVector3.zero(),  // Joint axis or anchor
     val nameValue: String,
     val regionHandle: Long = 0L,  // For computing global position
-    val extraParams: ByteArray = ByteArray(0)  // Extra params containing mesh/sculpt data
+    val extraParams: ByteArray = ByteArray(0),  // Extra params containing mesh/sculpt data
+    /**
+     * Path/profile shape parameters from the ObjectUpdate. Drives real prim
+     * geometry instead of the previous hardcoded box. Defaulted so the
+     * compressed/cached/terse paths (which don't carry these bytes inline)
+     * keep working unchanged.
+     */
+    val shapeParams: PrimShapeParams = PrimShapeParams.DEFAULT
 ) {
     /**
      * Compute global X position from region handle and local position
@@ -806,6 +813,8 @@ fun MessageParser.parseRegionHandshake(data: ByteArray): RegionHandshakeData? {
             billableFactor = billableFactor,
             cacheId = cacheId,
             terrainTextures = terrainTextures,
+            terrainStartHeights = terrainStartHeight,
+            terrainHeightRanges = terrainHeightRange,
             regionId = regionId,
             cpuClassId = cpuClassId,
             cpuRatio = cpuRatio,
@@ -909,6 +918,10 @@ data class RegionHandshakeData(
     val billableFactor: Float,
     val cacheId: UUID,
     val terrainTextures: List<UUID>,  // 8 textures: 4 base + 4 detail
+    /** Per-corner elevation blend start heights (0,0 / 1,0 / 0,1 / 1,1). */
+    val terrainStartHeights: List<Float> = emptyList(),
+    /** Per-corner elevation blend ranges (matches startHeights ordering). */
+    val terrainHeightRanges: List<Float> = emptyList(),
     // RegionInfo2 block
     val regionId: UUID? = null,
     // RegionInfo3 block (optional)

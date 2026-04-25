@@ -209,68 +209,163 @@ class MeshManager(
     }
     
     private fun parseMeshGeometry(meshId: UUID, data: ByteArray, header: LLSDMap): MeshData {
-        val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
-        
+        // Each LOD blob, after zlib decompression, is itself an LLSD payload:
+        // an array of submesh maps. Each submesh has Position / Normal /
+        // TexCoord0 binary blobs of U16-quantised values, plus PositionDomain /
+        // TexCoord0Domain for de-quantisation, plus TriangleList. The previous
+        // implementation read fixed-stride raw bytes off the start of the
+        // blob, which never matched a real SL mesh and silently produced
+        // garbage geometry. Reference: LL viewer
+        // indra/llprimitive/llmodel.cpp readDecomposition / readModel.
         val faces = mutableListOf<MeshFace>()
-        
-        // Parse each face
-        while (buffer.hasRemaining()) {
-            try {
-                // Vertex count
+        try {
+            val lodValue = LLSDParser.parseBinary(data)
+            val submeshes = (lodValue as? LLSDArray)?.value ?: emptyList()
+            for (sub in submeshes) {
+                val submesh = sub as? LLSDMap ?: continue
+                val face = parseSubmesh(submesh) ?: continue
+                faces.add(face)
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Mesh $meshId LLSD-array LOD parse failed: ${e.message}")
+        }
+
+        // If LLSD-array parsing yielded nothing, fall back to the legacy
+        // fixed-stride layout in case some asset uses it. This is best-effort
+        // and almost never produces correct geometry, but it preserves
+        // behaviour for any asset that might depend on it.
+        if (faces.isEmpty()) {
+            faces.addAll(parseLegacyFixedStride(data))
+        }
+
+        val skinData = header.getMap("skin")?.let { parseSkinData(it) }
+        return MeshData(meshId = meshId, faces = faces, skinData = skinData)
+    }
+
+    /**
+     * Parse one submesh (= one face's worth of geometry). Returns null if the
+     * submesh is unrenderable (no position blob or no triangle list).
+     */
+    private fun parseSubmesh(map: LLSDMap): MeshFace? {
+        val posBytes = (map.value["Position"] as? LLSDBinary)?.value ?: return null
+        val triBytes = (map.value["TriangleList"] as? LLSDBinary)?.value ?: return null
+        val posDomain = map.getMap("PositionDomain")
+        val texDomain = map.getMap("TexCoord0Domain")
+
+        val posMin = readDomainVec(posDomain, "Min", default = floatArrayOf(-0.5f, -0.5f, -0.5f))
+        val posMax = readDomainVec(posDomain, "Max", default = floatArrayOf(0.5f, 0.5f, 0.5f))
+        val texMin = readDomainVec(texDomain, "Min", default = floatArrayOf(0f, 0f))
+        val texMax = readDomainVec(texDomain, "Max", default = floatArrayOf(1f, 1f))
+
+        // Position: 3 × U16 per vertex.
+        val vertexCount = posBytes.size / 6
+        if (vertexCount == 0) return null
+        val positions = FloatArray(vertexCount * 3)
+        run {
+            val bb = ByteBuffer.wrap(posBytes).order(ByteOrder.LITTLE_ENDIAN)
+            for (i in 0 until vertexCount) {
+                positions[i * 3]     = dequantU16(bb.short, posMin[0], posMax[0])
+                positions[i * 3 + 1] = dequantU16(bb.short, posMin[1], posMax[1])
+                positions[i * 3 + 2] = dequantU16(bb.short, posMin[2], posMax[2])
+            }
+        }
+
+        // Normal: optional. Synthesise flat normals if missing.
+        val normalBytes = (map.value["Normal"] as? LLSDBinary)?.value
+        val normals = FloatArray(vertexCount * 3)
+        if (normalBytes != null && normalBytes.size >= vertexCount * 6) {
+            val bb = ByteBuffer.wrap(normalBytes).order(ByteOrder.LITTLE_ENDIAN)
+            for (i in 0 until vertexCount) {
+                // Normals are quantised in [-1, 1].
+                normals[i * 3]     = dequantU16(bb.short, -1f, 1f)
+                normals[i * 3 + 1] = dequantU16(bb.short, -1f, 1f)
+                normals[i * 3 + 2] = dequantU16(bb.short, -1f, 1f)
+            }
+        } else {
+            // Default to +Z so the lit material at least gets shaded; not
+            // ideal, but better than zero normals which produce black faces.
+            for (i in 0 until vertexCount) {
+                normals[i * 3 + 2] = 1f
+            }
+        }
+
+        // TexCoord0: optional.
+        val uvBytes = (map.value["TexCoord0"] as? LLSDBinary)?.value
+        val uvs = FloatArray(vertexCount * 2)
+        if (uvBytes != null && uvBytes.size >= vertexCount * 4) {
+            val bb = ByteBuffer.wrap(uvBytes).order(ByteOrder.LITTLE_ENDIAN)
+            for (i in 0 until vertexCount) {
+                uvs[i * 2]     = dequantU16(bb.short, texMin[0], texMax[0])
+                uvs[i * 2 + 1] = dequantU16(bb.short, texMin[1], texMax[1])
+            }
+        }
+
+        // Triangle list: U16 indices.
+        val indexCount = triBytes.size / 2
+        val indices = ShortArray(indexCount)
+        run {
+            val bb = ByteBuffer.wrap(triBytes).order(ByteOrder.LITTLE_ENDIAN)
+            for (i in 0 until indexCount) indices[i] = bb.short
+        }
+
+        return MeshFace(positions = positions, normals = normals, uvs = uvs, indices = indices)
+    }
+
+    private fun readDomainVec(domain: LLSDMap?, key: String, default: FloatArray): FloatArray {
+        val arr = domain?.getArray(key)?.value ?: return default
+        if (arr.size < default.size) return default
+        return FloatArray(default.size) { i ->
+            (arr[i] as? LLSDReal)?.value?.toFloat() ?: default[i]
+        }
+    }
+
+    /** Map a U16 (-32768..32767) into the [min, max] range. */
+    private fun dequantU16(v: Short, min: Float, max: Float): Float {
+        // SL meshes use unsigned 16-bit quantisation: 0..65535 maps to min..max.
+        val u = v.toInt() and 0xFFFF
+        return min + (max - min) * (u.toFloat() / 65535f)
+    }
+
+    /**
+     * Legacy fallback: the old (incorrect) fixed-stride layout that this
+     * codebase used to assume. Kept as a defensive fallback until we have
+     * coverage data on whether any real SL asset uses it. Most likely this
+     * always returns empty.
+     */
+    private fun parseLegacyFixedStride(data: ByteArray): List<MeshFace> {
+        val out = mutableListOf<MeshFace>()
+        val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+        try {
+            while (buffer.hasRemaining()) {
                 val vertexCount = buffer.short.toInt() and 0xFFFF
-                if (vertexCount == 0) break
-                
-                // Positions (quantized)
+                if (vertexCount == 0 || vertexCount > 65000) break
                 val positions = FloatArray(vertexCount * 3)
                 for (i in 0 until vertexCount) {
                     positions[i * 3] = buffer.short / 32767f
                     positions[i * 3 + 1] = buffer.short / 32767f
                     positions[i * 3 + 2] = buffer.short / 32767f
                 }
-                
-                // Normals (quantized)
                 val normals = FloatArray(vertexCount * 3)
                 for (i in 0 until vertexCount) {
                     normals[i * 3] = buffer.short / 32767f
                     normals[i * 3 + 1] = buffer.short / 32767f
                     normals[i * 3 + 2] = buffer.short / 32767f
                 }
-                
-                // UVs (quantized)
                 val uvs = FloatArray(vertexCount * 2)
                 for (i in 0 until vertexCount) {
                     uvs[i * 2] = buffer.short / 32767f
                     uvs[i * 2 + 1] = buffer.short / 32767f
                 }
-                
-                // Index count
                 val indexCount = buffer.short.toInt() and 0xFFFF
-                
-                // Indices
+                if (indexCount == 0 || indexCount > 200_000) break
                 val indices = ShortArray(indexCount)
-                for (i in 0 until indexCount) {
-                    indices[i] = buffer.short
-                }
-                
-                faces.add(MeshFace(
-                    positions = positions,
-                    normals = normals,
-                    uvs = uvs,
-                    indices = indices
-                ))
-            } catch (e: Exception) {
-                break
+                for (i in 0 until indexCount) indices[i] = buffer.short
+                out.add(MeshFace(positions, normals, uvs, indices))
             }
+        } catch (_: Exception) {
+            // Expected for any mesh that doesn't use this layout.
         }
-        
-        // Get skin/rig data if present
-        val skinData = header.getMap("skin")?.let { parseSkinData(it) }
-        
-        return MeshData(
-            meshId = meshId,
-            faces = faces,
-            skinData = skinData
-        )
+        return out
     }
     
     private fun parseSkinData(skinMap: LLSDMap): SkinData? {

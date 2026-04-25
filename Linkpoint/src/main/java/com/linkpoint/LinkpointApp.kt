@@ -226,6 +226,8 @@ class LinkpointApp : Application() {
         private set
     lateinit var outfitManager: OutfitManager
         private set
+    lateinit var appearanceManager: com.linkpoint.avatar.AppearanceManager
+        private set
     lateinit var gestureManager: GestureManager
         private set
     
@@ -672,6 +674,24 @@ class LinkpointApp : Application() {
                     }
             }
             avatarManager.setOutfitManager(outfitManager)
+
+            // Wire the local-agent appearance pipeline. AppearanceManager
+            // bakes (via AvatarBaker), uploads each baked texture via the
+            // UploadBakedTexture capability, then sends AgentSetAppearance.
+            // The trigger lambda is called from AvatarManager whenever
+            // AgentWearablesUpdate has been applied so the simulator
+            // gets fresh bakes without an explicit user "save outfit" action.
+            appearanceManager = com.linkpoint.avatar.AppearanceManager(
+                udpConnection, myAvatar.baker
+            )
+            appearanceManager.setSessionInfo(agentId, udpConnection.getSessionId())
+            avatarManager.appearanceUpdateTrigger = {
+                try {
+                    appearanceManager.sendAppearanceUpdate()
+                } catch (e: Exception) {
+                    Log.w(TAG, "sendAppearanceUpdate failed: ${e.message}")
+                }
+            }
         }
         
         // Modern features: Animesh and Bakes on Mesh
@@ -766,6 +786,39 @@ class LinkpointApp : Application() {
                         terrainManager.setWaterHeight(regionData.waterHeight)
                         terrainManager.reset()  // Reset terrain for new region
                         Log.d(TAG, "Terrain manager reset for new region, water height: ${regionData.waterHeight}")
+                    }
+
+                    // Wire RegionHandshake terrain texture UUIDs + elevation
+                    // bounds into the renderer. terrainTextures is in the
+                    // order [Base0..3, Detail0..3]; the splatting material
+                    // uses the four detail textures.
+                    if (::renderManager.isInitialized) {
+                        val tr = renderManager.getTerrainRenderer()
+                        if (tr != null) {
+                            val starts = regionData.terrainStartHeights
+                            val ranges = regionData.terrainHeightRanges
+                            if (starts.size == 4 && ranges.size == 4) {
+                                tr.setHeightBlendParams(starts.toFloatArray(), ranges.toFloatArray())
+                            }
+                            // Resolve detail texture UUIDs through TextureManager;
+                            // each setDetailTexture() call will fire as soon as
+                            // the JPEG2000 decode lands.
+                            if (::textureManager.isInitialized && regionData.terrainTextures.size >= 8) {
+                                val detailIds = regionData.terrainTextures.subList(4, 8)
+                                detailIds.forEachIndexed { idx, uuid ->
+                                    applicationScope.launch {
+                                        val bmp = try {
+                                            textureManager.getTexture(uuid)
+                                        } catch (e: Exception) { null }
+                                        if (bmp != null) {
+                                            renderManager.dispatcher.post(Runnable {
+                                                renderManager.uploadTerrainDetailTexture(idx, bmp)
+                                            })
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                     
                     // Send RegionHandshakeReply DIRECTLY from I/O thread (non-suspend now)
@@ -927,6 +980,14 @@ class LinkpointApp : Application() {
                                 rotation = update.rotation
                             )
                         )
+                        // Drive the follow / mouselook camera off the local
+                        // agent's position so user input doesn't fight the
+                        // avatar's actual world location every frame.
+                        if (::avatarManager.isInitialized &&
+                            avatarManager.getMyAvatar()?.agentId == update.fullId
+                        ) {
+                            renderManager.cameraController.setAgentPosition(update.position)
+                        }
                     } else {
                         ScenePopulationDiagnostics.markRendererSubmitted(ScenePopulationDiagnostics.EntityType.AVATAR, false)
                     }
@@ -941,7 +1002,53 @@ class LinkpointApp : Application() {
                     if (::renderManager.isInitialized) {
                         renderManager.enqueueUpdate(RenderableUpdate.PrimUpdate(update))
                     }
-                    
+
+                    // Mesh-asset prims: kick off MeshManager fetch and ask
+                    // PrimRenderer to swap the path/profile fallback geometry
+                    // for the parsed mesh once it lands. Failures fall back
+                    // gracefully to the path/profile box already rendered.
+                    val meshAssetId = update.getMeshAssetId()
+                    if (meshAssetId != null && ::meshManager.isInitialized && ::renderManager.isInitialized) {
+                        val textureEntrySnapshot = update.textureEntry
+                        applicationScope.launch {
+                            val meshData = try {
+                                meshManager.getMesh(meshAssetId)
+                            } catch (e: Exception) {
+                                Log.w(TAG, "Mesh fetch failed for ${update.localId}: ${e.message}")
+                                null
+                            }
+                            if (meshData != null) {
+                                // TextureBinder: per face, BoM-resolve the
+                                // texture UUID, fetch via TextureManager,
+                                // hop to the render thread and call onLoaded.
+                                val binder = com.linkpoint.render.prims.MeshPrimRenderer.TextureBinder { _, texId, onLoaded ->
+                                    val resolvedId = if (::avatarManager.isInitialized) {
+                                        com.linkpoint.avatar.BakesOnMesh.resolve(texId) { slot ->
+                                            avatarManager.getMyAvatar()?.baker?.getBakedTextures()?.get(slot)
+                                        }
+                                    } else texId
+                                    if (!com.linkpoint.protocol.textures.TextureEntryParser.shouldDownload(resolvedId)) return@TextureBinder
+                                    if (!::textureManager.isInitialized) return@TextureBinder
+                                    applicationScope.launch {
+                                        val bmp = try { textureManager.getTexture(resolvedId) } catch (_: Exception) { null }
+                                        if (bmp != null) {
+                                            renderManager.dispatcher.post(Runnable {
+                                                val tex = renderManager.uploadBitmapAsTexture(bmp)
+                                                if (tex != null) onLoaded(tex)
+                                            })
+                                        }
+                                    }
+                                }
+                                renderManager.dispatcher.post(Runnable {
+                                    renderManager.attachMeshAsset(
+                                        update.localId, meshData,
+                                        textureEntrySnapshot, binder
+                                    )
+                                })
+                            }
+                        }
+                    }
+
                     // Extract and prefetch textures from the object's TextureEntry
                     if (::textureManager.isInitialized && update.textureEntry.isNotEmpty()) {
                         val textureIds = TextureEntryParser.extractTextureIds(update.textureEntry)
@@ -1873,6 +1980,64 @@ class LinkpointApp : Application() {
                     if (data != null && ::avatarManager.isInitialized) {
                         Log.d(TAG, "👤 AvatarAppearance: ${data.senderID} (${data.visualParams.size} params)")
                         avatarManager.handleAvatarAppearance(data.senderID, data.textureEntries, data.visualParams)
+
+                        // Apply VisualParam 33 (height) to the rendered
+                        // avatar so different avatars have visibly different
+                        // statures. Drives the avatar root's Z scale.
+                        if (::renderManager.isInitialized && data.visualParams.isNotEmpty()) {
+                            val heightByte = data.visualParams.firstOrNull()?.toInt()?.and(0xFF) ?: 128
+                            val heightScale = 0.85f + (heightByte / 255f) * (1.20f - 0.85f)
+                            renderManager.dispatcher.post(Runnable {
+                                renderManager.getSceneManager()?.setAvatarHeightScale(data.senderID, heightScale)
+                            })
+
+                            // Full body-shape morphing. Lazily populate the
+                            // VisualParam table from avatar_lad.xml on the
+                            // first AvatarAppearance, then drive system
+                            // avatar mesh morphs.
+                            if (!com.linkpoint.avatar.VisualParamLoader.isReady) {
+                                com.linkpoint.avatar.VisualParamLoader.load(applicationContext)
+                            }
+                            val morphParams = com.linkpoint.avatar.VisualParamLoader.allMorphParams()
+                            val skeletonParams = com.linkpoint.avatar.VisualParamLoader.allSkeletonParams()
+                            val colorParams = com.linkpoint.avatar.VisualParamLoader.allColorParams()
+                            val visualParamsCopy = data.visualParams.copyOf()
+
+                            if (morphParams.isNotEmpty()) {
+                                renderManager.dispatcher.post(Runnable {
+                                    renderManager.getSceneManager()?.applyAvatarMorphs(
+                                        data.senderID, visualParamsCopy, morphParams
+                                    )
+                                })
+                            }
+
+                            // Skeleton params: per-bone scale offsets that
+                            // accumulate onto the AvatarSkeleton's rest pose.
+                            // Affects mesh deformation through the GPU
+                            // skinning path on the next frame.
+                            if (skeletonParams.isNotEmpty() && ::avatarManager.isInitialized) {
+                                val a = avatarManager.getAvatar(data.senderID)
+                                a?.skeleton?.applySkeletonParams(visualParamsCopy, skeletonParams)
+                            }
+
+                            // Color params: blend a palette by param weight to
+                            // produce a per-channel tint (skin colour, hair
+                            // colour, etc.). For now we just pull skin (the
+                            // wearable="skin" subset) and feed it as a
+                            // baseColor tint on the avatar material — which
+                            // is the most-visible LL bake-time tint.
+                            if (colorParams.isNotEmpty()) {
+                                val skinTint = blendSkinColorParams(visualParamsCopy, colorParams)
+                                if (skinTint != null) {
+                                    renderManager.dispatcher.post(Runnable {
+                                        renderManager.getSceneManager()?.setAvatarSkinTint(
+                                            data.senderID,
+                                            skinTint[0], skinTint[1], skinTint[2], skinTint[3]
+                                        )
+                                    })
+                                }
+                            }
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -5007,6 +5172,35 @@ class LinkpointApp : Application() {
      * Check if avatar manager is initialized (for debug reports)
      */
     fun isAvatarManagerInitialized(): Boolean = ::avatarManager.isInitialized
+
+    /**
+     * Combine all `wearable="skin"` colour-palette params into a single
+     * baseColor tint by sampling each param's palette at the visual-params
+     * byte and averaging the results. Returns null if no skin colour
+     * params apply (avatar at default appearance).
+     *
+     * This is a deliberate simplification: the LL bake compositor blends
+     * many colour layers across head / upper / lower / eyes channels
+     * separately. Without that channel split we get a single tint that's
+     * roughly "the skin colour the user picked" — visibly close to the
+     * intended look on the system avatar without the full bake pipeline.
+     */
+    private fun blendSkinColorParams(
+        visualParams: ByteArray,
+        params: List<com.linkpoint.avatar.VisualParamLoader.VisualParam>
+    ): FloatArray? {
+        var r = 0f; var g = 0f; var b = 0f; var a = 0f; var n = 0
+        val maxIdx = minOf(visualParams.size, params.size)
+        for (i in 0 until maxIdx) {
+            val p = params[i]
+            if (p.wearable != "skin" || p.colorPalette.isEmpty()) continue
+            val w = p.weightForByte(visualParams[i].toInt())
+            val sample = p.sampleColor(w) ?: continue
+            r += sample[0]; g += sample[1]; b += sample[2]; a += sample[3]; n++
+        }
+        if (n == 0) return null
+        return floatArrayOf(r / n, g / n, b / n, a / n)
+    }
     
     /**
      * Check if inventory manager is initialized (for debug reports)
@@ -5040,7 +5234,13 @@ class LinkpointApp : Application() {
      * Note: RenderManager is initialized early, so this is always true after app init
      */
     fun isRenderManagerInitialized(): Boolean = ::renderManager.isInitialized
-    
+
+    /**
+     * Check if terrain manager is initialized (for late-binding the
+     * TerrainRenderer once the render thread is up).
+     */
+    fun isTerrainManagerInitialized(): Boolean = ::terrainManager.isInitialized
+
     /**
      * Check if animation manager is initialized (for debug reports)
      */

@@ -537,6 +537,16 @@ class SettingsActivity : AppCompatActivity() {
                 captureDebugReportNow()
                 true
             }
+
+            // Force Refresh Appearance
+            // Manual trigger for the bake → upload → AgentSetAppearance
+            // pipeline. Useful for testing without waiting for the next
+            // AgentWearablesUpdate, and for re-asserting appearance after
+            // edits to wearables/visual params from the device.
+            findPreference<Preference>("force_appearance_refresh")?.setOnPreferenceClickListener {
+                forceAppearanceRefresh()
+                true
+            }
             
             // View Debug Reports
             findPreference<Preference>("view_debug_reports")?.setOnPreferenceClickListener {
@@ -600,6 +610,47 @@ class SettingsActivity : AppCompatActivity() {
         /**
          * Capture a debug report immediately
          */
+        /**
+         * Manual trigger for the local agent's appearance pipeline:
+         * AvatarBaker.bakeAll → uploadBakedTexture (J2K) →
+         * AgentSetAppearance. Used for testing without waiting for the
+         * next AgentWearablesUpdate.
+         *
+         * Reports the result via Toast so the user can see whether
+         * anything actually happened. The full per-step state is in the
+         * debug report's APPEARANCE PIPELINE section.
+         */
+        private fun forceAppearanceRefresh() {
+            val app = requireContext().applicationContext as? com.linkpoint.LinkpointApp
+            if (app == null) {
+                Toast.makeText(requireContext(), "App not initialized", Toast.LENGTH_SHORT).show()
+                return
+            }
+            if (!app.isOutfitManagerInitialized()) {
+                Toast.makeText(requireContext(), "Not logged in (no AppearanceManager)", Toast.LENGTH_SHORT).show()
+                return
+            }
+            Toast.makeText(requireContext(), "Refreshing appearance — see logcat / debug report", Toast.LENGTH_SHORT).show()
+            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Default).launch {
+                try {
+                    app.appearanceManager.sendAppearanceUpdate()
+                    val diag = app.appearanceManager.getDiagnostics()
+                    requireActivity().runOnUiThread {
+                        val msg = if (diag.lastUpdateError != null) {
+                            "Appearance refresh failed: ${diag.lastUpdateError}"
+                        } else {
+                            "Appearance refresh OK — baked ${diag.lastBakedTextureCount} channels in ${diag.lastUpdateDurationMs}ms"
+                        }
+                        Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
+                    }
+                } catch (e: Exception) {
+                    requireActivity().runOnUiThread {
+                        Toast.makeText(requireContext(), "Refresh threw: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
+
         private fun captureDebugReportNow() {
             val debugService = com.linkpoint.utils.DebugReportService.getInstance(requireContext())
             debugService.captureDebugReportAsync("Manual capture from Settings") { file ->

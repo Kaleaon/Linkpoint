@@ -15,7 +15,7 @@
             android:id="@+id/renderContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#000000" />
+            android:background="@android:color/transparent" />
 
         <!-- HUD Objects Overlay (rendered on top of 3D world) -->
         <com.linkpoint.hud.HUDOverlayView
@@ -192,9 +192,18 @@
                     android:id="@+id/btnNearby"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
+                    android:layout_marginBottom="8dp"
                     android:src="@drawable/ic_nearby"
                     android:background="@drawable/circle_button"
                     android:contentDescription="@string/nearby" />
+
+                <ImageButton
+                    android:id="@+id/btnCameraMode"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@android:drawable/ic_menu_camera"
+                    android:background="@drawable/circle_button"
+                    android:contentDescription="@string/camera_mode_toggle" />
 
             </LinearLayout>
 

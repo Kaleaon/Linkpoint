@@ -3,14 +3,18 @@ package com.linkpoint.ui.world
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.view.GestureDetector
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.SurfaceView
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import com.linkpoint.render.CameraController
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -87,6 +91,14 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private lateinit var btnGestures: ImageButton
     private lateinit var btnFriends: ImageButton
     private lateinit var btnNearby: ImageButton
+    private lateinit var btnCameraMode: ImageButton
+
+    // Camera gesture detectors. The renderContainer (the empty area between
+    // the joysticks and action button rails) feeds touches here so drag
+    // becomes orbit and pinch becomes zoom; both are consumed by the
+    // CameraController in RenderManager.
+    private var cameraGestureDetector: GestureDetector? = null
+    private var cameraScaleDetector: ScaleGestureDetector? = null
     
     // Movement controller (lazy init after login)
     private val movementController by lazy {
@@ -251,6 +263,9 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         // Initialize action buttons
         initActionButtons()
 
+        // Attach camera orbit/pinch detectors to the empty world area.
+        attachCameraGestureDetectors()
+
         applyInterfacePreferences()
     }
     
@@ -303,6 +318,35 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         joystickCamera.visibility = if (showJoysticks) View.VISIBLE else View.GONE
         actionButtonsGroup.visibility = if (showActionButtons) View.VISIBLE else View.GONE
         movementButtonsGroup.visibility = if (showMovementButtons) View.VISIBLE else View.GONE
+
+        applyCameraPreferences()
+    }
+
+    /**
+     * Push the user's Camera prefs into RenderManager + CameraController.
+     * Called on first show and on every onResume so changes made in Settings
+     * take effect when the user comes back.
+     */
+    private fun applyCameraPreferences() {
+        if (!app.isRenderManagerInitialized()) return
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val fov = prefs.getInt("camera_fov", 60).toFloat()
+        val followDistance = prefs.getInt("camera_follow_distance", 5).toFloat()
+        val drawDistance = prefs.getInt("draw_distance", 128).toFloat()
+        // The seekbar is integer 1..20; multiply by 0.05 to get a usable
+        // deg/pixel range (~0.05 .. ~1.0).
+        val orbitSens = prefs.getInt("camera_orbit_sensitivity", 5) * 0.05f
+        val invertY = prefs.getBoolean("camera_invert_y", false)
+
+        app.renderManager.setFieldOfView(fov)
+        app.renderManager.setFarClip(drawDistance)
+        val controller = app.renderManager.cameraController
+        controller.followDistance = followDistance.coerceIn(
+            controller.minFollowDistance,
+            controller.maxFollowDistance
+        )
+        controller.orbitSensitivity = orbitSens
+        controller.invertY = invertY
     }
 
     private fun enterLayoutEditorMode() {
@@ -464,17 +508,82 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         btnGestures = findViewById(R.id.btnGestures)
         btnFriends = findViewById(R.id.btnFriends)
         btnNearby = findViewById(R.id.btnNearby)
-        
+        btnCameraMode = findViewById(R.id.btnCameraMode)
+
         btnGestures.setOnClickListener {
             showGesturesPopup()
         }
-        
+
         btnFriends.setOnClickListener {
             startActivity(Intent(this, FriendsActivity::class.java))
         }
-        
+
         btnNearby.setOnClickListener {
             startActivity(Intent(this, NearbyPeopleActivity::class.java))
+        }
+
+        btnCameraMode.setOnClickListener {
+            val controller = app.renderManager.cameraController
+            controller.toggleMode()
+            updateCameraModeButton(controller.mode)
+            val msg = when (controller.mode) {
+                CameraController.Mode.FOLLOW -> R.string.camera_mode_follow
+                CameraController.Mode.MOUSELOOK -> R.string.camera_mode_mouselook
+            }
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+        }
+        updateCameraModeButton(app.renderManager.cameraController.mode)
+    }
+
+    private fun updateCameraModeButton(mode: CameraController.Mode) {
+        btnCameraMode.alpha = when (mode) {
+            CameraController.Mode.FOLLOW -> 0.6f
+            CameraController.Mode.MOUSELOOK -> 1.0f
+        }
+        btnCameraMode.isSelected = (mode == CameraController.Mode.MOUSELOOK)
+    }
+
+    /**
+     * Hook the renderContainer up to a GestureDetector + ScaleGestureDetector
+     * so single-finger drag orbits the camera and pinch zooms it. Joysticks
+     * already consume their own touches; the renderContainer only sees
+     * events that fall outside the joystick / action-button rail areas, so
+     * the two input systems can't conflict.
+     */
+    private fun attachCameraGestureDetectors() {
+        val controller = app.renderManager.cameraController
+
+        cameraGestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
+            override fun onDown(e: MotionEvent): Boolean = true
+
+            override fun onScroll(
+                e1: MotionEvent?,
+                e2: MotionEvent,
+                distanceX: Float,
+                distanceY: Float
+            ): Boolean {
+                // GestureDetector's distance is "previous - current" so a
+                // rightward drag is negative dx; pass through directly to the
+                // controller which handles inversion.
+                controller.applyOrbit(-distanceX, -distanceY)
+                return true
+            }
+        })
+
+        cameraScaleDetector = ScaleGestureDetector(this, object :
+            ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            override fun onScale(detector: ScaleGestureDetector): Boolean {
+                controller.applyZoom(detector.scaleFactor)
+                return true
+            }
+        })
+
+        // Single onTouchListener feeds both detectors; the renderContainer
+        // is otherwise non-interactive so swallowing every event is fine.
+        renderContainer.setOnTouchListener { _, ev ->
+            cameraScaleDetector?.onTouchEvent(ev)
+            cameraGestureDetector?.onTouchEvent(ev)
+            true
         }
     }
     
@@ -578,11 +687,14 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             
             override fun surfaceChanged(holder: android.view.SurfaceHolder, format: Int, width: Int, height: Int) {
                 android.util.Log.d(TAG, "Surface changed: ${width}x${height}")
-                // Recreate SwapChain to handle new dimensions or format changes
-                // This ensures viewport is updated immediately rather than waiting for next render frame
+                // Recreate SwapChain to handle new dimensions or format changes.
+                // Pass the known width/height so the Filament View viewport is
+                // applied from the surface's real dimensions instead of
+                // surfaceView.width (which can still be 0 here on the first
+                // surfaceChanged before the View has been laid out).
                 if (isSurfaceReady) {
                     app.renderManager.dispatcher.post(
-                        Runnable { app.renderManager.recreateSwapChain() }
+                        Runnable { app.renderManager.recreateSwapChain(width, height) }
                     )
                 }
             }
@@ -601,7 +713,55 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         // Initialize RenderManager with the SurfaceView
         android.util.Log.i(TAG, "Initializing RenderManager...")
         app.renderManager.initializeOnRenderThread(surfaceView)
-        
+
+        // Connect protocol-side TerrainManager to the now-instantiated
+        // TerrainRenderer so incoming LayerData packets actually mesh into
+        // visible terrain. No-op if either side isn't ready yet.
+        if (app.isTerrainManagerInitialized()) {
+            app.renderManager.getTerrainRenderer()?.let { tr ->
+                app.terrainManager.setTerrainRenderer(tr)
+                android.util.Log.i(TAG, "✓ TerrainRenderer wired into TerrainManager")
+            }
+        }
+
+        // Bakes-on-Mesh: install a resolver on PrimRenderer so mesh
+        // attachments referencing IMG_USE_BAKED_* sentinels get rewritten to
+        // the local agent's actual baked texture UUIDs.
+        app.renderManager.getPrimRenderer()?.setBomResolver { slot ->
+            app.avatarManager.getMyAvatar()?.baker?.getBakedTextures()?.get(slot)
+        }
+
+        // Per-frame avatar pose tick. For each tracked avatar with a
+        // skeleton, advance the AvatarAnimator and write the resulting
+        // bone matrices into SceneManager so the body segments visibly
+        // animate. Cheap: ~1ms even for 30 nearby avatars.
+        var lastPoseTickMs = System.currentTimeMillis()
+        app.renderManager.avatarPoseProvider = {
+            try {
+                val sm = app.renderManager.getSceneManager()
+                if (sm != null && app.isAvatarManagerInitialized()) {
+                    val now = System.currentTimeMillis()
+                    val dt = ((now - lastPoseTickMs).coerceAtLeast(1L)) / 1000f
+                    lastPoseTickMs = now
+                    for (avatar in app.avatarManager.getAllAvatars()) {
+                        avatar.animator.update(dt)
+                        avatar.skeleton.updateBoneMatrices()
+                        // Pose path: drives the articulated capsule
+                        // segment transforms (no-op for system-mesh
+                        // avatars whose bodySegmentBones list is empty).
+                        sm.applyAvatarPose(avatar.agentId, avatar.skeleton)
+                        // Skinning path: pushes per-bone skinning matrices
+                        // to Filament so system-mesh avatars deform on
+                        // the GPU. No-op for capsule avatars (the segments
+                        // have no BONE_INDICES attribute).
+                        sm.applyAvatarSkinning(avatar.agentId, avatar.skeleton)
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.v(TAG, "avatar pose tick error: ${e.message}")
+            }
+        }
+
         // Don't start render loop here - wait for surfaceCreated callback
         android.util.Log.i(TAG, "✓ RenderManager initialized, waiting for surface to be ready...")
     }
