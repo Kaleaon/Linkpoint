@@ -570,18 +570,42 @@ class LinkpointApp : Application() {
         // NEW: Initialize connection keep-alive with credentials
         connectionKeepAlive.initialize(agentId, udpConnection.getSessionId())
         
-        // Register reconnection callback for socket invalidation
-        // This is triggered when consecutive send errors indicate the socket is dead
-        // (e.g., "Operation not permitted" errors after network changes on mobile)
+        // Drive NetworkStateManager status transitions from the UDP layer's
+        // watchdog. Without this, the live diagnostic counter stays at 0 even
+        // when the watchdog has fired and a socket reconnect is in flight.
+        // Captured by the 2026-04-25 Athanasia debug report.
+        udpConnection.setNetworkStateListener { transition ->
+            when (transition) {
+                UDPConnectionFixed.NetworkStateTransition.RECONNECTING -> {
+                    Log.i(TAG, "🔄 UDP watchdog: RECONNECTING (socket reconnect in flight)")
+                    protocol.stateManager.setStatus(
+                        com.linkpoint.network.core.NetworkStateManager.ConnectionStatus.RECONNECTING
+                    )
+                }
+                UDPConnectionFixed.NetworkStateTransition.CONNECTED -> {
+                    Log.i(TAG, "✓ UDP watchdog: CONNECTED (socket reconnect succeeded)")
+                    protocol.stateManager.setStatus(
+                        com.linkpoint.network.core.NetworkStateManager.ConnectionStatus.CONNECTED
+                    )
+                }
+                UDPConnectionFixed.NetworkStateTransition.FAULTED -> {
+                    Log.e(TAG, "✗ UDP watchdog: FAULTED (socket reconnect failed)")
+                    protocol.stateManager.setStatus(
+                        com.linkpoint.network.core.NetworkStateManager.ConnectionStatus.FAULTED
+                    )
+                }
+            }
+        }
+
+        // Hard-failure callback: fires only after the in-line socket reconnect
+        // has already failed. The status listener above has already marked the
+        // session FAULTED; this side-channel notifies the keep-alive manager
+        // for any cleanup/UI it owns. A full auto re-login is a separate
+        // workstream (see segment 01 §6).
         udpConnection.setReconnectionCallback {
-            Log.w(TAG, "🔄 Socket invalidation detected - triggering reconnection flow")
+            Log.w(TAG, "⚠️ Hard reconnect callback — socket reconnect already failed")
             applicationScope.launch {
-                // Set connection state to reconnecting
                 connectionKeepAlive.notifyConnectionIssue()
-                
-                // For now, disconnect and notify - the user will need to reconnect
-                // A full auto-reconnect would require re-login which is complex
-                Log.e(TAG, "⚠️ UDP socket invalidated - please reconnect")
             }
         }
         
