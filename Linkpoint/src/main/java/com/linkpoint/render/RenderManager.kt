@@ -898,19 +898,64 @@ class RenderManager(private val context: Context) {
      * faces, or the prim doesn't exist (the prim may have been deleted in
      * the time between fetch start and parse complete).
      */
-    fun attachMeshAsset(localId: Int, meshData: com.linkpoint.assets.MeshData) {
+    fun attachMeshAsset(
+        localId: Int,
+        meshData: com.linkpoint.assets.MeshData,
+        textureEntry: ByteArray? = null,
+        binder: com.linkpoint.render.prims.MeshPrimRenderer.TextureBinder? = null
+    ) {
         requireRenderThread("attachMeshAsset")
         val mp = meshPrimRenderer ?: return
         val pr = primRenderer ?: return
         val compiled = mp.getOrCompile(meshData) ?: return
         pr.replaceGeometry(localId) { entity ->
-            // Destroy any existing renderable component first; Filament
-            // requires the slot be free before Builder.build re-attaches.
             engine?.renderableManager?.let { rm ->
                 val inst = rm.getInstance(entity)
                 if (inst != 0) rm.destroy(entity)
             }
-            mp.attach(entity, compiled)
+            mp.attach(entity, compiled, textureEntry, binder)
+        }
+    }
+
+    /**
+     * Upload an Android Bitmap as a Filament Texture. Used by the
+     * TextureBinder when fetching per-face mesh-prim textures via
+     * TextureManager. Must run on the render thread (Filament resource
+     * creation is single-threaded).
+     */
+    fun uploadBitmapAsTexture(bitmap: android.graphics.Bitmap): Texture? {
+        requireRenderThread("uploadBitmapAsTexture")
+        val eng = engine ?: return null
+        return try {
+            val w = bitmap.width
+            val h = bitmap.height
+            val pixels = IntArray(w * h)
+            bitmap.getPixels(pixels, 0, w, 0, 0, w, h)
+            val rgba = java.nio.ByteBuffer.allocateDirect(w * h * 4)
+                .order(java.nio.ByteOrder.nativeOrder())
+            for (i in 0 until w * h) {
+                val argb = pixels[i]
+                rgba.put(((argb shr 16) and 0xFF).toByte())
+                rgba.put(((argb shr 8) and 0xFF).toByte())
+                rgba.put((argb and 0xFF).toByte())
+                rgba.put(((argb shr 24) and 0xFF).toByte())
+            }
+            rgba.flip()
+            val tex = Texture.Builder()
+                .width(w).height(h)
+                .levels(1)
+                .sampler(Texture.Sampler.SAMPLER_2D)
+                .format(Texture.InternalFormat.RGBA8)
+                .build(eng)
+            val pixelBuffer = Texture.PixelBufferDescriptor(
+                rgba, Texture.Format.RGBA, Texture.Type.UBYTE
+            )
+            tex.setImage(eng, 0, pixelBuffer)
+            tex.generateMipmaps(eng)
+            tex
+        } catch (e: Exception) {
+            Log.w(TAG, "uploadBitmapAsTexture failed: ${e.message}", e)
+            null
         }
     }
 

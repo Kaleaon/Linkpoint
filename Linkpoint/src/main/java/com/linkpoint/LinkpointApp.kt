@@ -989,6 +989,7 @@ class LinkpointApp : Application() {
                     // gracefully to the path/profile box already rendered.
                     val meshAssetId = update.getMeshAssetId()
                     if (meshAssetId != null && ::meshManager.isInitialized && ::renderManager.isInitialized) {
+                        val textureEntrySnapshot = update.textureEntry
                         applicationScope.launch {
                             val meshData = try {
                                 meshManager.getMesh(meshAssetId)
@@ -997,8 +998,32 @@ class LinkpointApp : Application() {
                                 null
                             }
                             if (meshData != null) {
+                                // TextureBinder: per face, BoM-resolve the
+                                // texture UUID, fetch via TextureManager,
+                                // hop to the render thread and call onLoaded.
+                                val binder = com.linkpoint.render.prims.MeshPrimRenderer.TextureBinder { _, texId, onLoaded ->
+                                    val resolvedId = if (::avatarManager.isInitialized) {
+                                        com.linkpoint.avatar.BakesOnMesh.resolve(texId) { slot ->
+                                            avatarManager.getMyAvatar()?.baker?.getBakedTextures()?.get(slot)
+                                        }
+                                    } else texId
+                                    if (!com.linkpoint.protocol.textures.TextureEntryParser.shouldDownload(resolvedId)) return@TextureBinder
+                                    if (!::textureManager.isInitialized) return@TextureBinder
+                                    applicationScope.launch {
+                                        val bmp = try { textureManager.getTexture(resolvedId) } catch (_: Exception) { null }
+                                        if (bmp != null) {
+                                            renderManager.dispatcher.post(Runnable {
+                                                val tex = renderManager.uploadBitmapAsTexture(bmp)
+                                                if (tex != null) onLoaded(tex)
+                                            })
+                                        }
+                                    }
+                                }
                                 renderManager.dispatcher.post(Runnable {
-                                    renderManager.attachMeshAsset(update.localId, meshData)
+                                    renderManager.attachMeshAsset(
+                                        update.localId, meshData,
+                                        textureEntrySnapshot, binder
+                                    )
                                 })
                             }
                         }
@@ -1938,17 +1963,30 @@ class LinkpointApp : Application() {
 
                         // Apply VisualParam 33 (height) to the rendered
                         // avatar so different avatars have visibly different
-                        // statures. The full set of 254 visual params (body
-                        // shape, head shape, etc.) is a separate task; just
-                        // height is the most-noticed one and easy to wire.
+                        // statures. Drives the avatar root's Z scale.
                         if (::renderManager.isInitialized && data.visualParams.isNotEmpty()) {
                             val heightByte = data.visualParams.firstOrNull()?.toInt()?.and(0xFF) ?: 128
-                            // Visual param 33 spans 0..255; LL maps to a
-                            // ~0.85x..1.20x avatar Z scale.
                             val heightScale = 0.85f + (heightByte / 255f) * (1.20f - 0.85f)
                             renderManager.dispatcher.post(Runnable {
                                 renderManager.getSceneManager()?.setAvatarHeightScale(data.senderID, heightScale)
                             })
+
+                            // Full body-shape morphing. Lazily populate the
+                            // VisualParam table from avatar_lad.xml on the
+                            // first AvatarAppearance, then drive system
+                            // avatar mesh morphs.
+                            if (!com.linkpoint.avatar.VisualParamLoader.isReady) {
+                                com.linkpoint.avatar.VisualParamLoader.load(applicationContext)
+                            }
+                            val morphParams = com.linkpoint.avatar.VisualParamLoader.allMorphParams()
+                            if (morphParams.isNotEmpty()) {
+                                val visualParamsCopy = data.visualParams.copyOf()
+                                renderManager.dispatcher.post(Runnable {
+                                    renderManager.getSceneManager()?.applyAvatarMorphs(
+                                        data.senderID, visualParamsCopy, morphParams
+                                    )
+                                })
+                            }
                         }
                     }
                 }

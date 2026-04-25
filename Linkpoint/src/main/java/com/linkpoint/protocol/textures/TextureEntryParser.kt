@@ -67,8 +67,154 @@ object TextureEntryParser {
     }
     
     /**
+     * Per-face TextureEntry properties for [parseFull]. All values are
+     * already resolved to per-face: every face starts with the default
+     * value, then overrides from the face bitfield blocks are applied.
+     * Faces beyond the parsed count keep the default.
+     */
+    data class FaceProperties(
+        val textureId: UUID,
+        val colorR: Float,
+        val colorG: Float,
+        val colorB: Float,
+        val colorA: Float,
+        val scaleS: Float,
+        val scaleT: Float,
+        val offsetS: Float,
+        val offsetT: Float,
+        val rotation: Float,
+        val materialsId: UUID
+    )
+
+    /**
+     * Decode a TextureEntry blob into per-face properties for the supplied
+     * [faceCount]. SL prims have at most ~32 faces; mesh-asset prims can
+     * have more (each LLMesh submesh = one face).
+     *
+     * Format reference (LL viewer indra/llprimitive/lltextureentry.cpp,
+     * unpackBinary): each property has a "default" value followed by zero
+     * or more (bitfield + override-value) blocks terminated by a zero
+     * bitfield. Properties are emitted in this order:
+     *
+     *   1. textureId          (UUID)
+     *   2. color              (4 × U8 = R, G, B, A)
+     *   3. scaleS             (float)
+     *   4. scaleT             (float)
+     *   5. offsetS            (S16 quantised, /32767 → -1..1)
+     *   6. offsetT            (S16)
+     *   7. rotation           (S16 → -2π..2π)
+     *   8. bumpmap (skipped)  (U8)
+     *   9. mediaflags         (U8) – skipped
+     *  10. glow               (U8) – skipped
+     *  11. materialsId        (UUID, optional)
+     *
+     * Returns null if the blob is malformed.
+     */
+    fun parseFull(data: ByteArray, faceCount: Int): List<FaceProperties>? {
+        if (data.size < 16 || faceCount <= 0) return null
+        val faces = MutableList(faceCount) {
+            FaceProperties(
+                textureId = UUID(0, 0),
+                colorR = 1f, colorG = 1f, colorB = 1f, colorA = 1f,
+                scaleS = 1f, scaleT = 1f,
+                offsetS = 0f, offsetT = 0f,
+                rotation = 0f,
+                materialsId = UUID(0, 0)
+            )
+        }
+        val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+        try {
+            // 1. Texture
+            applyOverrides(buffer, faces, ::readUUID) { f, v -> f.copy(textureId = v) }
+            // 2. Color (4 × U8, stored as inverse — the LL viewer XORs each
+            //    byte with 0xFF on the wire). 0 over the wire = white.
+            applyOverrides(buffer, faces, ::readColor) { f, v ->
+                f.copy(colorR = v[0], colorG = v[1], colorB = v[2], colorA = v[3])
+            }
+            // 3. ScaleS, ScaleT (each a float)
+            applyOverrides(buffer, faces, ::readFloat) { f, v -> f.copy(scaleS = v) }
+            applyOverrides(buffer, faces, ::readFloat) { f, v -> f.copy(scaleT = v) }
+            // 4. OffsetS, OffsetT (each a S16 quantised to -1..1)
+            applyOverrides(buffer, faces, ::readQuantS16) { f, v -> f.copy(offsetS = v) }
+            applyOverrides(buffer, faces, ::readQuantS16) { f, v -> f.copy(offsetT = v) }
+            // 5. Rotation (S16 quantised to ~-2π..2π)
+            applyOverrides(buffer, faces, ::readQuantRot) { f, v -> f.copy(rotation = v) }
+            // 6. Skip bumpmap / mediaflags / glow (U8 each, with face overrides).
+            skipU8Overrides(buffer)
+            skipU8Overrides(buffer)
+            skipU8Overrides(buffer)
+            // 7. MaterialsID (UUID, optional)
+            if (buffer.remaining() >= 16) {
+                applyOverrides(buffer, faces, ::readUUID) { f, v -> f.copy(materialsId = v) }
+            }
+            return faces
+        } catch (e: Exception) {
+            Log.w(TAG, "parseFull failed at byte ${buffer.position()}: ${e.message}")
+            return null
+        }
+    }
+
+    /**
+     * Read default value, then per-face override blocks until a zero
+     * bitfield. Apply each override to the corresponding face indices.
+     */
+    private inline fun <V> applyOverrides(
+        buffer: ByteBuffer,
+        faces: MutableList<FaceProperties>,
+        readValue: (ByteBuffer) -> V,
+        merge: (FaceProperties, V) -> FaceProperties
+    ) {
+        if (!buffer.hasRemaining()) return
+        val defaultValue = readValue(buffer)
+        for (i in faces.indices) {
+            faces[i] = merge(faces[i], defaultValue)
+        }
+        while (buffer.hasRemaining()) {
+            val bits = readFaceBitfield(buffer)
+            if (bits == 0) break
+            val v = readValue(buffer)
+            for (face in faces.indices) {
+                if ((bits ushr face) and 1 == 1) {
+                    faces[face] = merge(faces[face], v)
+                }
+            }
+        }
+    }
+
+    private fun skipU8Overrides(buffer: ByteBuffer) {
+        if (!buffer.hasRemaining()) return
+        buffer.get() // default
+        while (buffer.hasRemaining()) {
+            val bits = readFaceBitfield(buffer)
+            if (bits == 0) break
+            if (buffer.hasRemaining()) buffer.get()
+        }
+    }
+
+    private fun readFloat(buffer: ByteBuffer): Float = buffer.float
+
+    private fun readColor(buffer: ByteBuffer): FloatArray {
+        // Stored as 4 bytes XOR'd with 0xFF; 0xFF on the wire = 0 (black).
+        val r = ((buffer.get().toInt() and 0xFF) xor 0xFF) / 255f
+        val g = ((buffer.get().toInt() and 0xFF) xor 0xFF) / 255f
+        val b = ((buffer.get().toInt() and 0xFF) xor 0xFF) / 255f
+        val a = ((buffer.get().toInt() and 0xFF) xor 0xFF) / 255f
+        return floatArrayOf(r, g, b, a)
+    }
+
+    private fun readQuantS16(buffer: ByteBuffer): Float {
+        // S16 in the range -32768..32767 maps linearly to -1..1.
+        return buffer.short.toInt() / 32767f
+    }
+
+    private fun readQuantRot(buffer: ByteBuffer): Float {
+        // S16 maps to -2π..2π (LL viewer LLTextureEntry::rotationToBytes).
+        return buffer.short.toInt() / 32767f * (2f * Math.PI.toFloat())
+    }
+
+    /**
      * Read a face bitfield from the buffer.
-     * 
+     *
      * The bitfield uses variable-length encoding where each byte contributes
      * 7 bits, and the high bit indicates continuation.
      */

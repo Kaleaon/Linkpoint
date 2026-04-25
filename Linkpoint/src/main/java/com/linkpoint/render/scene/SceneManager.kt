@@ -72,6 +72,32 @@ class SceneManager(
     private var systemAvatarHeadMesh: AvatarMesh? = null
 
     /**
+     * CPU-side combined LLMesh (upper_body + lower_body) used as the base
+     * for VisualParam-driven morphs. Kept alongside the GPU buffers so we
+     * can compute morphed positions/normals without re-parsing the .llm
+     * files on every appearance update.
+     */
+    private var systemAvatarBodyBaseLLMesh: com.linkpoint.avatar.LLMeshLoader.LLMesh? = null
+    private var systemAvatarHeadBaseLLMesh: com.linkpoint.avatar.LLMeshLoader.LLMesh? = null
+
+    /**
+     * Per-avatar morphed mesh state. Lazy: avatars whose AvatarAppearance
+     * hasn't arrived (or whose visual params are at defaults) keep using
+     * the shared system body buffer.
+     */
+    private data class MorphedMesh(
+        val bodyMesh: AvatarMesh,
+        val bodyEntity: Int,
+        val headMesh: AvatarMesh?,
+        val headEntity: Int,
+        val morphedPositions: FloatArray,
+        val morphedNormals: FloatArray,
+        val headMorphedPositions: FloatArray,
+        val headMorphedNormals: FloatArray
+    )
+    private val perAvatarMorphed = ConcurrentHashMap<UUID, MorphedMesh>()
+
+    /**
      * Provide the lit material used to render avatar placeholder geometry.
      * Should be called once after MaterialLoader.initialize() returns success.
      * Existing avatars receive the renderable retroactively.
@@ -101,19 +127,30 @@ class SceneManager(
                 com.linkpoint.avatar.LLMeshLoader.load(ctx, "avatar_head.llm")
             if (upper != null && lower != null) {
                 val parts: List<com.linkpoint.avatar.LLMeshLoader.LLMesh> = listOf(upper, lower)
-                systemAvatarBodyMesh = uploadAvatarMesh(
-                    interleaveLLMesh(combineLLMeshes(parts)),
-                    combineIndices(parts)
-                )
-                Log.i(TAG, "Loaded SL system avatar body mesh (${upper.vertexCount + lower.vertexCount} vertices)")
+                val combined = combineLLMeshes(parts)
+                val combinedWithIndices = combined.copy(indices = combineIndices(parts))
+                systemAvatarBodyBaseLLMesh = combinedWithIndices
+                // Prefer the skinned upload path when the mesh has bone
+                // data; falls back to the unskinned upload otherwise so
+                // we still render something visible.
+                systemAvatarBodyMesh = uploadSkinnedAvatarMesh(combinedWithIndices)
+                    ?: uploadAvatarMesh(
+                        interleaveLLMesh(combinedWithIndices),
+                        combinedWithIndices.indices
+                    )
+                Log.i(TAG, "Loaded SL system avatar body mesh " +
+                    "(${combinedWithIndices.vertexCount} verts, " +
+                    "${combinedWithIndices.morphs.size} morphs, " +
+                    "${combinedWithIndices.jointNames.size} joints)")
             }
             if (headLL != null) {
-                val parts: List<com.linkpoint.avatar.LLMeshLoader.LLMesh> = listOf(headLL)
-                systemAvatarHeadMesh = uploadAvatarMesh(
-                    interleaveLLMesh(combineLLMeshes(parts)),
-                    combineIndices(parts)
-                )
-                Log.i(TAG, "Loaded SL system avatar head mesh (${headLL.vertexCount} vertices)")
+                systemAvatarHeadBaseLLMesh = headLL
+                systemAvatarHeadMesh = uploadSkinnedAvatarMesh(headLL)
+                    ?: uploadAvatarMesh(interleaveLLMesh(headLL), headLL.indices)
+                Log.i(TAG, "Loaded SL system avatar head mesh " +
+                    "(${headLL.vertexCount} verts, " +
+                    "${headLL.morphs.size} morphs, " +
+                    "${headLL.jointNames.size} joints)")
             }
         }
         Log.i(TAG, "Avatar material set; body meshes ready (system mesh=${systemAvatarBodyMesh != null})")
@@ -236,13 +273,21 @@ class SceneManager(
         if (sysBody != null) {
             try {
                 engine.transformManager.create(avatar.entity)
+                val bodyJoints = systemAvatarBodyBaseLLMesh?.jointNames?.size ?: 0
+                val headJoints = systemAvatarHeadBaseLLMesh?.jointNames?.size ?: 0
                 attachLLMeshSegment(avatar, sysBody, material,
-                    bound = 1.0f, zOffset = 0f)
+                    bound = 1.0f, zOffset = 0f,
+                    skinningBoneCount = bodyJoints)
                 if (sysHead != null) {
                     attachLLMeshSegment(avatar, sysHead, material,
-                        bound = 0.4f, zOffset = 0f)
+                        bound = 0.4f, zOffset = 0f,
+                        skinningBoneCount = headJoints)
                 }
                 avatar.renderable = avatar.entity
+                // Mark this avatar as system-meshed so applyAvatarPose
+                // doesn't try to drive the (non-existent) capsule
+                // segments off bone matrices.
+                avatar.bodySegmentBones.clear()
                 return
             } catch (e: Exception) {
                 Log.w(TAG, "System avatar mesh attach failed for ${avatar.agentId}; falling back: ${e.message}")
@@ -353,10 +398,11 @@ class SceneManager(
         mesh: AvatarMesh,
         material: MaterialInstance,
         bound: Float,
-        zOffset: Float
+        zOffset: Float,
+        skinningBoneCount: Int = 0
     ) {
         val child = entityManager.create()
-        RenderableManager.Builder(1)
+        val builder = RenderableManager.Builder(1)
             .boundingBox(Box(-bound, -bound, -bound, bound, bound, bound))
             .geometry(0, RenderableManager.PrimitiveType.TRIANGLES,
                 mesh.vertexBuffer, mesh.indexBuffer)
@@ -364,7 +410,19 @@ class SceneManager(
             .culling(true)
             .receiveShadows(true)
             .castShadows(true)
-            .build(engine, child)
+        // Enable Filament's GPU skinning path when the mesh has bone data.
+        // Filament will use the BONE_INDICES + BONE_WEIGHTS attributes on
+        // the VertexBuffer (declared at slot 1 in uploadSkinnedAvatarMesh)
+        // and our setBonesAsMatrices() per-frame call to compute final
+        // vertex positions on the GPU.
+        if (skinningBoneCount > 0) {
+            try {
+                builder.skinning(skinningBoneCount)
+            } catch (e: Exception) {
+                Log.w(TAG, "skinning(${skinningBoneCount}) builder call rejected: ${e.message}")
+            }
+        }
+        builder.build(engine, child)
 
         val tm = engine.transformManager
         val ti = tm.create(child)
@@ -497,9 +555,53 @@ class SceneManager(
             System.arraycopy(m.uvs,       0, uvs, v * 2, m.vertexCount * 2)
             v += m.vertexCount
         }
+
+        // Merge morph targets — vertex indices in the second+ mesh's morphs
+        // need to be offset by the cumulative vertex count of preceding
+        // meshes so they reference the right verts in the combined buffer.
+        val mergedMorphs = HashMap<String, com.linkpoint.avatar.LLMeshLoader.MorphTarget>()
+        var vOffset = 0
+        for (m in meshes) {
+            for ((name, morph) in m.morphs) {
+                if (vOffset == 0) {
+                    mergedMorphs[name] = morph
+                } else {
+                    val shifted = IntArray(morph.vertexIndices.size)
+                    for (i in shifted.indices) shifted[i] = morph.vertexIndices[i] + vOffset
+                    val existing = mergedMorphs[name]
+                    if (existing == null) {
+                        mergedMorphs[name] = morph.copy(vertexIndices = shifted)
+                    } else {
+                        // Two source meshes both define the same morph;
+                        // concatenate their sparse delta lists so a single
+                        // VisualParam drives both halves.
+                        val newIdx = IntArray(existing.vertexIndices.size + shifted.size)
+                        System.arraycopy(existing.vertexIndices, 0, newIdx, 0, existing.vertexIndices.size)
+                        System.arraycopy(shifted, 0, newIdx, existing.vertexIndices.size, shifted.size)
+                        val newCoord = FloatArray(existing.coordDeltas.size + morph.coordDeltas.size)
+                        System.arraycopy(existing.coordDeltas, 0, newCoord, 0, existing.coordDeltas.size)
+                        System.arraycopy(morph.coordDeltas, 0, newCoord, existing.coordDeltas.size, morph.coordDeltas.size)
+                        val newNormal = FloatArray(existing.normalDeltas.size + morph.normalDeltas.size)
+                        System.arraycopy(existing.normalDeltas, 0, newNormal, 0, existing.normalDeltas.size)
+                        System.arraycopy(morph.normalDeltas, 0, newNormal, existing.normalDeltas.size, morph.normalDeltas.size)
+                        val newUv = FloatArray(existing.uvDeltas.size + morph.uvDeltas.size)
+                        System.arraycopy(existing.uvDeltas, 0, newUv, 0, existing.uvDeltas.size)
+                        System.arraycopy(morph.uvDeltas, 0, newUv, existing.uvDeltas.size, morph.uvDeltas.size)
+                        mergedMorphs[name] = com.linkpoint.avatar.LLMeshLoader.MorphTarget(
+                            name = name, vertexIndices = newIdx,
+                            coordDeltas = newCoord, normalDeltas = newNormal,
+                            uvDeltas = newUv
+                        )
+                    }
+                }
+            }
+            vOffset += m.vertexCount
+        }
+
         return com.linkpoint.avatar.LLMeshLoader.LLMesh(
             name = "combined", positions = pos, normals = nor, uvs = uvs,
-            indices = ShortArray(0)
+            indices = ShortArray(0),
+            morphs = mergedMorphs
         )
     }
 
@@ -533,6 +635,70 @@ class SceneManager(
             out[i * 8 + 7] = m.uvs[i * 2 + 1]
         }
         return out
+    }
+
+    /**
+     * Build a skinned VertexBuffer with BONE_INDICES (UBYTE4) and
+     * BONE_WEIGHTS (FLOAT4) in a second buffer slot, alongside the
+     * interleaved POS+NORMAL+UV in slot 0. Filament's renderer uses the
+     * bone attributes when the RenderableComponent has skinning enabled,
+     * transforming each vertex by sum(weight_i * boneMatrix_i).
+     *
+     * Returns null if the mesh has no skin data — caller should fall back
+     * to the unskinned uploadAvatarMesh() path.
+     */
+    private fun uploadSkinnedAvatarMesh(
+        m: com.linkpoint.avatar.LLMeshLoader.LLMesh
+    ): AvatarMesh? {
+        val boneIndices = m.deriveBoneIndices() ?: return null
+        val boneWeights = m.deriveBoneWeights() ?: return null
+        val verts = interleaveLLMesh(m)
+        val vertexCount = m.vertexCount
+        val stride0 = 8 * 4 // POS + NORMAL + UV0
+        val stride1 = 4 + 16 // UBYTE4 indices + FLOAT4 weights
+
+        val vBytes0 = ByteBuffer.allocateDirect(verts.size * 4).order(ByteOrder.nativeOrder())
+        verts.forEach { vBytes0.putFloat(it) }
+        vBytes0.flip()
+
+        val vBytes1 = ByteBuffer.allocateDirect(vertexCount * stride1).order(ByteOrder.nativeOrder())
+        for (i in 0 until vertexCount) {
+            vBytes1.put(boneIndices[i * 4])
+            vBytes1.put(boneIndices[i * 4 + 1])
+            vBytes1.put(boneIndices[i * 4 + 2])
+            vBytes1.put(boneIndices[i * 4 + 3])
+            vBytes1.putFloat(boneWeights[i * 4])
+            vBytes1.putFloat(boneWeights[i * 4 + 1])
+            vBytes1.putFloat(boneWeights[i * 4 + 2])
+            vBytes1.putFloat(boneWeights[i * 4 + 3])
+        }
+        vBytes1.flip()
+
+        val vb = VertexBuffer.Builder()
+            .vertexCount(vertexCount)
+            .bufferCount(2)
+            .attribute(VertexAttribute.POSITION, 0, AttributeType.FLOAT3, 0, stride0)
+            .attribute(VertexAttribute.TANGENTS, 0, AttributeType.FLOAT3, 12, stride0)
+            .attribute(VertexAttribute.UV0,      0, AttributeType.FLOAT2, 24, stride0)
+            .attribute(VertexAttribute.BONE_INDICES, 1, AttributeType.UBYTE4, 0, stride1)
+            .attribute(VertexAttribute.BONE_WEIGHTS, 1, AttributeType.FLOAT4, 4, stride1)
+            // BONE_INDICES is integer; explicitly disable normalisation so
+            // joint index 5 stays as 5 (not 5/255).
+            .normalized(VertexAttribute.BONE_INDICES, false)
+            .build(engine)
+        vb.setBufferAt(engine, 0, vBytes0)
+        vb.setBufferAt(engine, 1, vBytes1)
+
+        val iBytes = ByteBuffer.allocateDirect(m.indices.size * 2).order(ByteOrder.nativeOrder())
+        for (i in m.indices.indices) iBytes.putShort(m.indices[i])
+        iBytes.flip()
+        val ib = IndexBuffer.Builder()
+            .indexCount(m.indices.size)
+            .bufferType(IndexBuffer.Builder.IndexType.USHORT)
+            .build(engine)
+        ib.setBuffer(engine, iBytes)
+
+        return AvatarMesh(vb, ib)
     }
 
     private fun uploadAvatarMesh(verts: FloatArray, idx: ShortArray): AvatarMesh {
@@ -585,13 +751,84 @@ class SceneManager(
             val bone = skeleton.getBone(boneName) ?: continue
             val ti = tm.getInstance(avatar.bodySegmentEntities[i])
             if (ti == 0) continue
-            // Use the bone's worldMatrix directly as the segment's parent-
-            // local transform. Since segments are children of the avatar
-            // root (which already carries the avatar's world transform),
-            // this places each segment at the bone's skeleton-local pose
-            // and inherits the avatar's world position automatically.
             tm.setTransform(ti, bone.worldMatrix)
         }
+    }
+
+    /**
+     * Push the avatar's skinning matrices (per-bone `worldMatrix *
+     * inverseBindMatrix`) onto each system-mesh segment that was attached
+     * with skinning enabled. Filament reads them via the renderable's
+     * BONE_INDICES + BONE_WEIGHTS vertex attributes and computes final
+     * vertex positions on the GPU each frame.
+     *
+     * Bone names in the LLM joint list (e.g. "mPelvis") map to the
+     * skeleton's [AvatarSkeleton.getBone] entries by name, so a vertex
+     * weighted to LL joint index N picks up the matrix for jointNames[N].
+     *
+     * No-op if the avatar isn't tracked, or none of its segments have
+     * skinning enabled (e.g. the articulated capsule fallback).
+     */
+    fun applyAvatarSkinning(agentId: UUID, skeleton: com.linkpoint.avatar.AvatarSkeleton) {
+        val avatar = avatars[agentId] ?: return
+        if (avatar.bodySegmentEntities.isEmpty()) return
+        val rm = engine.renderableManager
+
+        val bodyMesh = systemAvatarBodyBaseLLMesh
+        val headMesh = systemAvatarHeadBaseLLMesh
+        // Body segment is index 0, head segment is index 1 (set up in
+        // attachAvatarRenderable when the system mesh path takes over).
+        if (bodyMesh != null && bodyMesh.jointNames.isNotEmpty() &&
+            avatar.bodySegmentEntities.isNotEmpty()
+        ) {
+            applySkinningToEntity(rm, avatar.bodySegmentEntities[0],
+                skeleton, bodyMesh.jointNames)
+        }
+        if (headMesh != null && headMesh.jointNames.isNotEmpty() &&
+            avatar.bodySegmentEntities.size > 1
+        ) {
+            applySkinningToEntity(rm, avatar.bodySegmentEntities[1],
+                skeleton, headMesh.jointNames)
+        }
+    }
+
+    private fun applySkinningToEntity(
+        rm: RenderableManager,
+        entity: Int,
+        skeleton: com.linkpoint.avatar.AvatarSkeleton,
+        jointNames: List<String>
+    ) {
+        val instance = rm.getInstance(entity)
+        if (instance == 0) return
+        // Build a flat float[16 * boneCount] of skinning matrices in the
+        // LL joint order (matches the BONE_INDICES values in the mesh).
+        val boneCount = jointNames.size
+        val matrices = FloatArray(boneCount * 16)
+        for (i in 0 until boneCount) {
+            val bone = skeleton.getBone(jointNames[i])
+            val src = bone?.skinningMatrix
+            if (src != null && src.size == 16) {
+                System.arraycopy(src, 0, matrices, i * 16, 16)
+            } else {
+                // Identity for missing bones — safe fallback (vertex
+                // doesn't move) instead of a NaN that would explode the
+                // mesh.
+                identityInto(matrices, i * 16)
+            }
+        }
+        try {
+            rm.setBonesAsMatrices(instance, java.nio.FloatBuffer.wrap(matrices), boneCount, 0)
+        } catch (e: Exception) {
+            Log.v(TAG, "setBonesAsMatrices failed for $entity: ${e.message}")
+        }
+    }
+
+    private fun identityInto(out: FloatArray, offset: Int) {
+        for (i in 0 until 16) out[offset + i] = 0f
+        out[offset] = 1f
+        out[offset + 5] = 1f
+        out[offset + 10] = 1f
+        out[offset + 15] = 1f
     }
 
     /**
@@ -600,6 +837,108 @@ class SceneManager(
      * 33 (avatar height). 1.0 = LL default; the slider's 0..1 maps to a
      * roughly 0.85..1.20 multiplier to match the LL viewer's scaling.
      */
+    /**
+     * Apply the full VisualParams blob from AvatarAppearance to the
+     * avatar's morphable system mesh. Re-uploads positions + normals to
+     * the avatar's body and head VertexBuffers so the morphs are visible
+     * immediately.
+     *
+     * No-op if the system avatar mesh isn't loaded, the avatar isn't
+     * tracked, or [VisualParamLoader] hasn't been populated yet.
+     */
+    fun applyAvatarMorphs(
+        agentId: UUID,
+        visualParams: ByteArray,
+        params: List<com.linkpoint.avatar.VisualParamLoader.VisualParam>
+    ) {
+        if (visualParams.isEmpty() || params.isEmpty()) return
+        val avatar = avatars[agentId] ?: return
+        val baseBody = systemAvatarBodyBaseLLMesh ?: return
+        val baseBodyMesh = systemAvatarBodyMesh ?: return
+
+        // Lazily create per-avatar morphed buffers on first appearance
+        // update. Avatars at default appearance never need their own
+        // buffers — they share the system mesh.
+        val morphed = perAvatarMorphed.getOrPut(agentId) {
+            MorphedMesh(
+                bodyMesh = baseBodyMesh,
+                bodyEntity = avatar.bodySegmentEntities.getOrNull(0) ?: 0,
+                headMesh = systemAvatarHeadMesh,
+                headEntity = avatar.bodySegmentEntities.getOrNull(1) ?: 0,
+                morphedPositions = FloatArray(baseBody.positions.size),
+                morphedNormals = FloatArray(baseBody.normals.size),
+                headMorphedPositions = FloatArray(systemAvatarHeadBaseLLMesh?.positions?.size ?: 0),
+                headMorphedNormals = FloatArray(systemAvatarHeadBaseLLMesh?.normals?.size ?: 0)
+            )
+        }
+
+        // Apply morphs to the body mesh and re-upload.
+        com.linkpoint.avatar.MorphApplier.apply(
+            base = baseBody,
+            visualParams = visualParams,
+            params = params,
+            outPositions = morphed.morphedPositions,
+            outNormals = morphed.morphedNormals
+        )
+        reuploadInterleavedPositions(
+            mesh = baseBodyMesh,
+            positions = morphed.morphedPositions,
+            normals = morphed.morphedNormals,
+            uvs = baseBody.uvs
+        )
+
+        // And the head, if we have one and an entity is bound.
+        val baseHead = systemAvatarHeadBaseLLMesh
+        val headMesh = systemAvatarHeadMesh
+        if (baseHead != null && headMesh != null && morphed.headMorphedPositions.isNotEmpty()) {
+            com.linkpoint.avatar.MorphApplier.apply(
+                base = baseHead,
+                visualParams = visualParams,
+                params = params,
+                outPositions = morphed.headMorphedPositions,
+                outNormals = morphed.headMorphedNormals
+            )
+            reuploadInterleavedPositions(
+                mesh = headMesh,
+                positions = morphed.headMorphedPositions,
+                normals = morphed.headMorphedNormals,
+                uvs = baseHead.uvs
+            )
+        }
+    }
+
+    /**
+     * Re-upload interleaved POS+NORMAL+UV bytes to an existing Filament
+     * VertexBuffer in place. Used by morph application — mesh topology
+     * (vertex count, index list) doesn't change; only positions/normals do.
+     */
+    private fun reuploadInterleavedPositions(
+        mesh: AvatarMesh,
+        positions: FloatArray,
+        normals: FloatArray,
+        uvs: FloatArray
+    ) {
+        val n = positions.size / 3
+        val stride = 8
+        val data = ByteBuffer.allocateDirect(n * stride * 4).order(ByteOrder.nativeOrder())
+        for (i in 0 until n) {
+            data.putFloat(positions[i * 3])
+            data.putFloat(positions[i * 3 + 1])
+            data.putFloat(positions[i * 3 + 2])
+            data.putFloat(normals[i * 3])
+            data.putFloat(normals[i * 3 + 1])
+            data.putFloat(normals[i * 3 + 2])
+            data.putFloat(uvs[i * 2])
+            data.putFloat(uvs[i * 2 + 1])
+        }
+        data.flip()
+        try {
+            mesh.vertexBuffer.setBufferAt(engine, 0, data)
+        } catch (e: Exception) {
+            Log.w(TAG, "morph re-upload failed: ${e.message}")
+        }
+    }
+
     fun setAvatarHeightScale(agentId: UUID, scale: Float) {
         val avatar = avatars[agentId] ?: return
         avatar.heightScale = scale.coerceIn(0.5f, 2.0f)

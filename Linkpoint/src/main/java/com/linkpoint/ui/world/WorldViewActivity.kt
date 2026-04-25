@@ -746,7 +746,15 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                     for (avatar in app.avatarManager.getAllAvatars()) {
                         avatar.animator.update(dt)
                         avatar.skeleton.updateBoneMatrices()
+                        // Pose path: drives the articulated capsule
+                        // segment transforms (no-op for system-mesh
+                        // avatars whose bodySegmentBones list is empty).
                         sm.applyAvatarPose(avatar.agentId, avatar.skeleton)
+                        // Skinning path: pushes per-bone skinning matrices
+                        // to Filament so system-mesh avatars deform on
+                        // the GPU. No-op for capsule avatars (the segments
+                        // have no BONE_INDICES attribute).
+                        sm.applyAvatarSkinning(avatar.agentId, avatar.skeleton)
                     }
                 }
             } catch (e: Exception) {

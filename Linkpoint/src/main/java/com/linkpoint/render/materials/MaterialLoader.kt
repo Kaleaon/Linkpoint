@@ -41,21 +41,51 @@ class MaterialLoader(
             }
         """
 
-        // Simple lit material for prims with basic lighting
+        // Lit material with per-face PBR + optional base color texture +
+        // texture transform (scale / offset / rotation from TextureEntry).
+        //
+        //   baseColor      tint applied to the texture sample
+        //   baseColorMap   diffuse texture (defaults to a 1×1 white via
+        //                  hasTexture=0 -> we just skip the sample)
+        //   hasTexture     0 = ignore baseColorMap; 1 = sample it
+        //   texScale       (sx, sy) UV repeat
+        //   texOffset      (ox, oy) UV offset
+        //   texRotation    rotation around (0.5, 0.5)
+        //   metallic, roughness
         private const val LIT_MATERIAL_SOURCE = """
             material {
                 name : LitDefault,
                 shadingModel : lit,
+                requires : [ uv0 ],
                 parameters : [
-                    { type : float4, name : baseColor },
-                    { type : float, name : metallic },
-                    { type : float, name : roughness }
+                    { type : float4,    name : baseColor },
+                    { type : sampler2d, name : baseColorMap },
+                    { type : float,     name : hasTexture },
+                    { type : float2,    name : texScale },
+                    { type : float2,    name : texOffset },
+                    { type : float,     name : texRotation },
+                    { type : float,     name : metallic },
+                    { type : float,     name : roughness }
                 ]
             }
             fragment {
                 void material(inout MaterialInputs material) {
                     prepareMaterial(material);
-                    material.baseColor = materialParams.baseColor;
+                    float2 uv = getUV0();
+                    // Apply rotation around (0.5, 0.5), then scale, then offset.
+                    float c = cos(materialParams.texRotation);
+                    float s = sin(materialParams.texRotation);
+                    float2 centred = uv - float2(0.5, 0.5);
+                    float2 rotated = float2(centred.x * c - centred.y * s,
+                                            centred.x * s + centred.y * c);
+                    uv = rotated + float2(0.5, 0.5);
+                    uv = uv * materialParams.texScale + materialParams.texOffset;
+
+                    float4 sampled = float4(1.0, 1.0, 1.0, 1.0);
+                    if (materialParams.hasTexture > 0.5) {
+                        sampled = texture(materialParams_baseColorMap, uv);
+                    }
+                    material.baseColor = materialParams.baseColor * sampled;
                     material.metallic = materialParams.metallic;
                     material.roughness = materialParams.roughness;
                 }
@@ -302,6 +332,11 @@ class MaterialLoader(
         instance.setParameter("baseColor", r, g, b, a)
         instance.setParameter("metallic", metallic)
         instance.setParameter("roughness", roughness)
+        // Default: no texture, identity UV transform.
+        instance.setParameter("hasTexture", 0f)
+        instance.setParameter("texScale", 1f, 1f)
+        instance.setParameter("texOffset", 0f, 0f)
+        instance.setParameter("texRotation", 0f)
         return instance
     }
 
