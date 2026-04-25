@@ -98,7 +98,11 @@ internal object Etc1Fallback : Etc2Compressor {
         val dst = ByteBuffer.allocateDirect(compressedSize).order(ByteOrder.nativeOrder())
         ETC1.encodeImage(src, width, height, 3, width * 3, dst)
         val out = ByteArray(compressedSize)
-        dst.position(0).get(out)
+        // Android's java.nio.Buffer.position(int) returns Buffer (not the
+        // covariant ByteBuffer the JDK 9+ desktop API returns), so chaining
+        // .get(ByteArray) off it fails to resolve. Split the calls.
+        dst.position(0)
+        dst.get(out)
         return Etc2Compressor.Result(
             data = out,
             format = Etc2Compressor.GpuFormat.ETC1_RGB,

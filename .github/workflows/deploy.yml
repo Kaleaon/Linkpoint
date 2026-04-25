@@ -44,13 +44,27 @@ jobs:
         java-version: ${{ env.JAVA_VERSION }}
         cache: 'gradle'
     
+    # setup-android@v3 only accepts `packages` / `cmdline-tools-version` /
+    # license toggles. The legacy api-level/build-tools/cmake/ndk inputs are
+    # silently dropped, which previously meant deploys ran without an NDK.
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
       with:
-        api-level: ${{ env.ANDROID_SDK_VERSION }}
-        build-tools: 35.0.0
-        cmake: 3.22.1
-        ndk: ${{ env.NDK_VERSION }}
+        packages: >-
+          platform-tools
+          platforms;android-${{ env.ANDROID_SDK_VERSION }}
+          build-tools;35.0.0
+          cmake;3.22.1
+          ndk;${{ env.NDK_VERSION }}
+
+    - name: Verify Android SDK install
+      run: |
+        set -euo pipefail
+        echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+        test -d "$ANDROID_SDK_ROOT/platforms/android-${{ env.ANDROID_SDK_VERSION }}"
+        test -d "$ANDROID_SDK_ROOT/build-tools/35.0.0"
+        test -d "$ANDROID_SDK_ROOT/cmake/3.22.1"
+        test -d "$ANDROID_SDK_ROOT/ndk/${{ env.NDK_VERSION }}"
     
     - name: Cache Gradle packages
       uses: actions/cache@v4
