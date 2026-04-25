@@ -4,6 +4,7 @@ import android.content.Context
 import android.opengl.GLSurfaceView
 import android.util.AttributeSet
 import android.util.Log
+import com.linkpoint.render.RenderDiagnostics
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
@@ -36,11 +37,13 @@ class LumiyaGLSurfaceView @JvmOverloads constructor(
         setRenderer(object : Renderer {
             override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
                 Log.i(TAG, "onSurfaceCreated")
+                RenderDiagnostics.glSurfaceCreated()
                 // Surface object isn't available here; init deferred to onSurfaceChanged
             }
 
             override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
                 Log.i(TAG, "onSurfaceChanged ${width}x${height}")
+                RenderDiagnostics.glSurfaceChanged(width, height)
                 if (!lumiyaRenderer.isInitialized) {
                     val surface = holder.surface
                     lumiyaRenderer.initialize(context, surface, width, height)
@@ -53,6 +56,7 @@ class LumiyaGLSurfaceView @JvmOverloads constructor(
             override fun onDrawFrame(gl: GL10?) {
                 if (!surfaceReady) return
                 lumiyaRenderer.renderFrame()
+                RenderDiagnostics.glFrame()
             }
         })
 
@@ -74,6 +78,7 @@ class LumiyaGLSurfaceView @JvmOverloads constructor(
     }
 
     fun shutdown() {
+        RenderDiagnostics.glShutdown("LumiyaGLSurfaceView.shutdown()")
         queueEvent {
             lumiyaRenderer.shutdown()
         }

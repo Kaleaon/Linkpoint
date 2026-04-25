@@ -191,29 +191,37 @@ class GroupsManager(
     }
     
     /**
-     * Send group chat message
+     * Send group chat message via the ChatSessionRequest capability.
+     *
+     * Group chat in SL is session-based: the client first joins the
+     * session ("start session"/"accept" methods on ChatSessionRequest),
+     * then posts each message with method=sendchat. Previously this
+     * function built a UDP payload that was never actually sent — the
+     * payload buffer was discarded and a "Sent group chat" log line
+     * lied to the caller. The user-reported "groups don't work" failure
+     * captured in the 2026-04-25 Athanasia debug capture.
      */
     suspend fun sendGroupChat(groupId: UUID, message: String): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                val messageBytes = message.toByteArray(Charsets.UTF_8)
-                val payload = ByteBuffer.allocate(100 + messageBytes.size).order(ByteOrder.LITTLE_ENDIAN)
-                
-                // AgentData - UUIDs use big-endian per SL protocol
-                payload.putUUID(agentId)
-                payload.putUUID(udpConnection.getSessionId())
-                
-                // ChatData
-                payload.putUUID(groupId)
-                
-                // Message
-                payload.putShort(messageBytes.size.toShort())
-                payload.put(messageBytes)
-                
-                // For group chat, we use the chat session via capabilities
-                val sessionId = getOrCreateGroupChatSession(groupId)
-                
-                Log.i(TAG, "Sent group chat to $groupId: $message")
+                // Ensure the session is open server-side. For group chat
+                // the session id IS the group id (Lumiya parity doc 08 §3).
+                val sessionId = getOrCreateGroupChatSession(groupId) ?: groupId
+
+                val request = LLSDMap().apply {
+                    this["method"] = LLSDString("sendchat")
+                    this["session-id"] = LLSDString(sessionId.toString())
+                    this["params"] = LLSDMap().apply {
+                        this["text"] = LLSDString(message)
+                        this["type"] = LLSDInteger(0)
+                    }
+                }
+                val response = capabilityManager.request(CapabilityManager.CAP_CHAT_PASS, request)
+                if (response == null) {
+                    Log.w(TAG, "sendGroupChat: ChatSessionRequest unavailable or failed for $groupId")
+                    return@withContext false
+                }
+                Log.i(TAG, "Sent group chat to $groupId (session=$sessionId)")
                 true
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to send group chat", e)

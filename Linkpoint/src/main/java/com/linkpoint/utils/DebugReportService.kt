@@ -1310,7 +1310,7 @@ class DebugReportService private constructor(private val context: Context) {
             appendLine("│ APPEARANCE PIPELINE                                               │")
             appendLine("└──────────────────────────────────────────────────────────────────┘")
             appendLine()
-            if (app != null && app.isOutfitManagerInitialized()) {
+            if (app != null && app.isAppearanceManagerInitialized()) {
                 try {
                     val ad = app.appearanceManager.getDiagnostics()
                     appendLine("AgentSetAppearance updates sent: ${ad.updatesSent}")
@@ -1329,7 +1329,11 @@ class DebugReportService private constructor(private val context: Context) {
                     appendLine("AppearanceManager diagnostics unavailable: ${e.message}")
                 }
             } else {
-                appendLine("AppearanceManager: not yet initialized (no login or no outfit)")
+                val connected = try { app?.isConnected() == true } catch (_: Exception) { false }
+                appendLine(
+                    if (connected) "AppearanceManager: not yet initialized (local Avatar not ready — waiting on simulator)"
+                    else "AppearanceManager: not yet initialized (not logged in)"
+                )
             }
             appendLine()
 

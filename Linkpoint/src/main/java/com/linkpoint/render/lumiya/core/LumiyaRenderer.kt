@@ -6,6 +6,7 @@ import android.opengl.Matrix
 import android.util.Log
 import android.view.Surface
 import com.linkpoint.avatar.AttachmentPoints
+import com.linkpoint.render.RenderDiagnostics
 import com.linkpoint.render.lumiya.drawable.*
 
 /**
@@ -67,12 +68,25 @@ class LumiyaRenderer : RenderEngineProvider {
         if (isInitialized) return true
         Log.i(TAG, "Initialising Lumiya renderer ($width x $height)")
 
+        val initStartedAt = System.currentTimeMillis()
         try {
             ctx = LumiyaRenderContext()
             if (!ctx.initialize()) {
                 Log.e(TAG, "Render context initialisation failed")
+                RenderDiagnostics.glInitFailed(
+                    RuntimeException("LumiyaRenderContext.initialize returned false")
+                )
                 return false
             }
+            // Surface the GPU vendor/renderer/version strings the context
+            // captured during queryGPUCapabilities() — useful for spotting
+            // device-specific driver issues from the session log alone.
+            RenderDiagnostics.glContextInfo(
+                vendor = ctx.gpuVendor,
+                renderer = ctx.gpuRenderer,
+                version = "GL ES ${ctx.glVersion}",
+                maxTextureSize = ctx.maxTextureSize
+            )
 
             viewportWidth = width
             viewportHeight = height
@@ -112,9 +126,11 @@ class LumiyaRenderer : RenderEngineProvider {
 
             isInitialized = true
             Log.i(TAG, "Lumiya renderer initialised  (GPU: ${ctx.gpuRenderer})")
+            RenderDiagnostics.glInitDone(System.currentTimeMillis() - initStartedAt)
             return true
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialise Lumiya renderer", e)
+            RenderDiagnostics.glInitFailed(e)
             return false
         }
     }
@@ -132,6 +148,7 @@ class LumiyaRenderer : RenderEngineProvider {
     override fun onSurfaceDestroyed() {
         // Surface lost but engine not destroyed – resources remain valid
         Log.w(TAG, "Surface destroyed")
+        RenderDiagnostics.glSurfaceDestroyed()
     }
 
     // =====================================================================
@@ -252,6 +269,9 @@ class LumiyaRenderer : RenderEngineProvider {
     override fun shutdown() {
         if (!isInitialized) return
         Log.i(TAG, "Shutting down Lumiya renderer")
+        RenderDiagnostics.glShutdown(
+            "frames=$frameCount viewport=${viewportWidth}x${viewportHeight}"
+        )
         terrainDrawable?.destroy()
         waterDrawable?.destroy()
         skyDrawable?.destroy()

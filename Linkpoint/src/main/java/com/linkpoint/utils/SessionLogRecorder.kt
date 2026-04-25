@@ -109,7 +109,9 @@ object SessionLogRecorder {
         /** General info */
         INFO,
         /** Debug detail */
-        DEBUG
+        DEBUG,
+        /** Renderer lifecycle / OpenGL / Filament event */
+        RENDER
     }
     
     /**
@@ -440,6 +442,26 @@ object SessionLogRecorder {
         log(EntryType.CAPABILITY, "CAP", message)
     }
     
+    /**
+     * Log a renderer lifecycle / OpenGL / Filament event. Convenience
+     * wrapper used by [com.linkpoint.render.RenderDiagnostics] so every
+     * render-relevant moment from app start through frame loop ends up
+     * in the same session-log timeline as packets, HTTP, and connection
+     * state changes.
+     *
+     * @param subsystem human-readable engine label, e.g. "Filament",
+     *   "OpenGL", "Lumiya". Becomes the entry's tag.
+     * @param event short event id, e.g. "engine_create",
+     *   "swapchain_create", "surface_changed", "first_frame", "stall".
+     * @param details optional free-form detail (sizes, error codes,
+     *   GPU vendor strings, etc.).
+     */
+    fun logRender(subsystem: String, event: String, details: String? = null) {
+        if (!isRecording.get()) return
+        val message = if (details.isNullOrBlank()) event else "$event — $details"
+        log(EntryType.RENDER, "RENDER/$subsystem", message)
+    }
+
     /**
      * Log login event
      */

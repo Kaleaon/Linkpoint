@@ -166,6 +166,83 @@ class LinkpointApp : Application() {
     
     // Application-wide coroutine scope for background operations
     val applicationScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+
+    /**
+     * Last AgentThrottle band sent to the simulator. Tracked so we only
+     * re-send when the band actually changes (hysteresis), and so the
+     * post-reconnect path can re-advertise the current band — the simulator
+     * resets to its default throttle on a fresh circuit. See Lumiya parity
+     * doc segment 02 §3.4 (L02-L / L02-M).
+     */
+    private enum class ThrottleBand { HIGH, LOW }
+    @Volatile private var currentThrottleBand: ThrottleBand? = null
+    @Volatile private var adaptiveThrottleStarted = false
+
+    /**
+     * Send an AgentThrottle whose budget is matched to the current network
+     * quality. POOR/FAIR/UNKNOWN → LOW band (~310 kbps total, with texture
+     * and task bandwidth heavily reduced). EXCELLENT/GOOD → HIGH band
+     * (Linkpoint's desktop default). Lumiya advertises a single throttle at
+     * circuit-ready and never adapts; Linkpoint adapts because it actually
+     * downloads textures/meshes (Lumiya is a thin client) and a desktop
+     * budget on cellular saturates the link, which the user observed as
+     * "Lumiya worked on 2G/3G but Linkpoint won't run on 5G".
+     *
+     * @param force re-send even if the band hasn't changed (used after a
+     *   socket reconnect, since the simulator forgot our previous throttle).
+     */
+    private fun applyAdaptiveAgentThrottle(force: Boolean = false) {
+        if (!::udpConnection.isInitialized || !udpConnection.isConnected.value) return
+        val q = try { protocol.qualityManager.quality.value } catch (_: Exception) { null }
+        val targetBand = when (q) {
+            com.linkpoint.network.core.ConnectionQualityManager.Quality.EXCELLENT,
+            com.linkpoint.network.core.ConnectionQualityManager.Quality.GOOD -> ThrottleBand.HIGH
+            else -> ThrottleBand.LOW
+        }
+        if (!force && targetBand == currentThrottleBand) return
+        try {
+            if (targetBand == ThrottleBand.LOW) {
+                // ~310 kbps total. Wind/cloud reduced to a token amount;
+                // texture/asset deeply cut so foreground work (chat, IM,
+                // group, object updates) keeps flowing.
+                udpConnection.sendAgentThrottle(
+                    resend = 50_000f,
+                    land = 50_000f,
+                    wind = 5_000f,
+                    cloud = 5_000f,
+                    task = 100_000f,
+                    texture = 50_000f,
+                    asset = 50_000f
+                )
+                Log.i(TAG, "🐢 AgentThrottle: LOW band (quality=$q, force=$force)")
+            } else {
+                // Linkpoint default — see UDPConnectionFixed.sendAgentThrottle.
+                udpConnection.sendAgentThrottle()
+                Log.i(TAG, "🐇 AgentThrottle: HIGH band (quality=$q, force=$force)")
+            }
+            currentThrottleBand = targetBand
+        } catch (e: Exception) {
+            Log.w(TAG, "applyAdaptiveAgentThrottle failed: ${e.message}")
+        }
+    }
+
+    /**
+     * Start a one-shot coroutine that observes connection-quality changes
+     * and re-sends AgentThrottle when the band crosses HIGH↔LOW. Idempotent.
+     */
+    private fun ensureAdaptiveThrottleObserver() {
+        if (adaptiveThrottleStarted) return
+        adaptiveThrottleStarted = true
+        applicationScope.launch {
+            try {
+                protocol.qualityManager.quality.collect {
+                    applyAdaptiveAgentThrottle(force = false)
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Adaptive throttle observer ended: ${e.message}")
+            }
+        }
+    }
     
     /**
      * Single-threaded dispatcher for serialized messaging work (MessageThread).
@@ -419,9 +496,15 @@ class LinkpointApp : Application() {
             }
         }
         
-        // Initialize session log recorder for comprehensive packet logging
+        // Initialize and AUTO-START the session log recorder so every
+        // packet, HTTP request, capability event, and render-pipeline
+        // moment from app launch onward is captured. Without this the
+        // recorder was initialized but never actually recording, so
+        // SessionLogRecorder.log* calls (including the new
+        // RenderDiagnostics events) silently no-op'd.
         com.linkpoint.utils.SessionLogRecorder.initialize(this)
-        Log.i(TAG, "Session log recorder initialized")
+        com.linkpoint.utils.SessionLogRecorder.startRecording()
+        Log.i(TAG, "Session log recorder initialized and recording")
         
         // Initialize Linkpoint circuit integration (device-adaptive settings, DNS, IPv4)
         com.linkpoint.protocol.circuit.LinkpointCircuitIntegration.initialize(this)
@@ -589,6 +672,14 @@ class LinkpointApp : Application() {
                     protocol.stateManager.setStatus(
                         com.linkpoint.network.core.NetworkStateManager.ConnectionStatus.CONNECTED
                     )
+                    // Re-advertise AgentThrottle: a fresh circuit on the
+                    // simulator side has reset to the default budget.
+                    // Without this, the cellular-friendly low-band throttle
+                    // we sent originally would be silently lost on every
+                    // socket reconnect (the live debug report had four
+                    // reconnects in 2.3 minutes — see segment 02 §3.7
+                    // L02-U).
+                    applicationScope.launch { applyAdaptiveAgentThrottle(force = true) }
                 }
                 UDPConnectionFixed.NetworkStateTransition.FAULTED -> {
                     Log.e(TAG, "✗ UDP watchdog: FAULTED (socket reconnect failed)")
@@ -651,8 +742,19 @@ class LinkpointApp : Application() {
         objectManager = ObjectManager(udpConnection)
         buildTools = BuildTools(objectManager)
 
-        // Outfit manager (needs baker from avatar manager)
+        // Outfit manager (needs baker from avatar manager).
+        //
+        // AvatarManager.setMyAgentId() above proactively creates the local
+        // Avatar entry so getMyAvatar() must be non-null here. If it is null
+        // it means the agent ID never made it into AvatarManager — bail loudly
+        // rather than silently leaving outfitManager/appearanceManager
+        // uninitialized for the entire session (the failure mode captured in
+        // the 2026-04-25 Athanasia debug report, where Force Refresh
+        // Appearance reported "not logged in" despite a healthy session).
         val myAvatar = avatarManager.getMyAvatar()
+        if (myAvatar == null) {
+            Log.e(TAG, "❌ AvatarManager.getMyAvatar() == null after setMyAgentId — outfit/appearance pipeline NOT initialized for $agentId")
+        }
         if (myAvatar != null) {
             outfitManager = OutfitManager(
                 inventoryManager,
@@ -1353,8 +1455,11 @@ class LinkpointApp : Application() {
                         udpConnection.sendCompleteAgentMovement()
                         Log.i(TAG, "✓ CompleteAgentMovement SENT - server should now send RegionHandshake")
 
-                        udpConnection.sendAgentThrottle()
-                        Log.i(TAG, "✓ AgentThrottle SENT - bandwidth configured")
+                        // Send AgentThrottle adapted to the current network
+                        // band; a desktop-default throttle saturates cellular
+                        // links and starves chat/IM/group traffic.
+                        applyAdaptiveAgentThrottle(force = true)
+                        ensureAdaptiveThrottleObserver()
                     } catch (e: Exception) {
                         Log.e(TAG, "✗ Error sending CompleteAgentMovement/AgentThrottle", e)
                         completeAgentMovementSent.set(false)
@@ -5260,7 +5365,14 @@ class LinkpointApp : Application() {
      * Check if outfit manager is initialized (for debug reports)
      */
     fun isOutfitManagerInitialized(): Boolean = ::outfitManager.isInitialized
-    
+
+    /**
+     * Check if appearance manager is initialized. Distinct from outfit manager
+     * because callers like the Force Refresh debug action operate on
+     * AppearanceManager directly.
+     */
+    fun isAppearanceManagerInitialized(): Boolean = ::appearanceManager.isInitialized
+
     /**
      * Check if groups manager is initialized (for debug reports)
      */
