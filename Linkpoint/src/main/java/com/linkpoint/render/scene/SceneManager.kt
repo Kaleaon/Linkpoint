@@ -17,7 +17,11 @@ import kotlin.math.sin
 /**
  * Manages the 3D scene graph for the world
  */
-class SceneManager(private val engine: Engine, private val scene: Scene) {
+class SceneManager(
+    private val engine: Engine,
+    private val scene: Scene,
+    private val context: android.content.Context? = null
+) {
 
     companion object {
         private const val TAG = "SceneManager"
@@ -58,19 +62,61 @@ class SceneManager(private val engine: Engine, private val scene: Scene) {
     private var lowerLegMesh: AvatarMesh? = null
 
     /**
+     * If non-null, the system-avatar body is rendered as a single
+     * Filament entity using the actual LL `.llm` mesh data bundled in
+     * `assets/character/`. The articulated capsule body is then skipped
+     * for those avatars. Built lazily from setAvatarMaterial when assets
+     * are available.
+     */
+    private var systemAvatarBodyMesh: AvatarMesh? = null
+    private var systemAvatarHeadMesh: AvatarMesh? = null
+
+    /**
      * Provide the lit material used to render avatar placeholder geometry.
      * Should be called once after MaterialLoader.initialize() returns success.
      * Existing avatars receive the renderable retroactively.
      */
     fun setAvatarMaterial(material: Material) {
         avatarMaterial = material.createInstance()
+        // Articulated capsule fallback (kept around for when the system
+        // avatar .llm assets are missing or fail to parse).
         headMesh = buildSphereMesh(AVATAR_HEAD_RADIUS)
         torsoMesh = buildCapsuleMesh(AVATAR_TORSO_RADIUS, AVATAR_TORSO_HEIGHT)
         upperArmMesh = buildCapsuleMesh(AVATAR_LIMB_RADIUS, AVATAR_UPPER_ARM_LEN)
         lowerArmMesh = buildCapsuleMesh(AVATAR_LIMB_RADIUS, AVATAR_LOWER_ARM_LEN)
         upperLegMesh = buildCapsuleMesh(AVATAR_LIMB_RADIUS * 1.3f, AVATAR_UPPER_LEG_LEN)
         lowerLegMesh = buildCapsuleMesh(AVATAR_LIMB_RADIUS * 1.2f, AVATAR_LOWER_LEG_LEN)
-        Log.i(TAG, "Avatar material set; articulated body meshes ready")
+
+        // Try the real LL system avatar meshes from assets/character/. We
+        // bundle three: upper_body (torso + arms), lower_body (legs),
+        // and head. If any of them parse OK we render that geometry
+        // instead of the placeholder capsules.
+        val ctx = context
+        if (ctx != null) {
+            val upper: com.linkpoint.avatar.LLMeshLoader.LLMesh? =
+                com.linkpoint.avatar.LLMeshLoader.load(ctx, "avatar_upper_body.llm")
+            val lower: com.linkpoint.avatar.LLMeshLoader.LLMesh? =
+                com.linkpoint.avatar.LLMeshLoader.load(ctx, "avatar_lower_body.llm")
+            val headLL: com.linkpoint.avatar.LLMeshLoader.LLMesh? =
+                com.linkpoint.avatar.LLMeshLoader.load(ctx, "avatar_head.llm")
+            if (upper != null && lower != null) {
+                val parts: List<com.linkpoint.avatar.LLMeshLoader.LLMesh> = listOf(upper, lower)
+                systemAvatarBodyMesh = uploadAvatarMesh(
+                    interleaveLLMesh(combineLLMeshes(parts)),
+                    combineIndices(parts)
+                )
+                Log.i(TAG, "Loaded SL system avatar body mesh (${upper.vertexCount + lower.vertexCount} vertices)")
+            }
+            if (headLL != null) {
+                val parts: List<com.linkpoint.avatar.LLMeshLoader.LLMesh> = listOf(headLL)
+                systemAvatarHeadMesh = uploadAvatarMesh(
+                    interleaveLLMesh(combineLLMeshes(parts)),
+                    combineIndices(parts)
+                )
+                Log.i(TAG, "Loaded SL system avatar head mesh (${headLL.vertexCount} vertices)")
+            }
+        }
+        Log.i(TAG, "Avatar material set; body meshes ready (system mesh=${systemAvatarBodyMesh != null})")
 
         // Retroactively attach renderables to any avatars that came in before
         // the material was wired up.
@@ -181,6 +227,28 @@ class SceneManager(private val engine: Engine, private val scene: Scene) {
      */
     private fun attachAvatarRenderable(avatar: AvatarObject) {
         val material = avatarMaterial ?: return
+
+        // Preferred path: render the actual SL system avatar mesh from the
+        // bundled .llm files. Falls through to the articulated capsule
+        // fallback if those failed to load (the LLM parser logs why).
+        val sysBody = systemAvatarBodyMesh
+        val sysHead = systemAvatarHeadMesh
+        if (sysBody != null) {
+            try {
+                engine.transformManager.create(avatar.entity)
+                attachLLMeshSegment(avatar, sysBody, material,
+                    bound = 1.0f, zOffset = 0f)
+                if (sysHead != null) {
+                    attachLLMeshSegment(avatar, sysHead, material,
+                        bound = 0.4f, zOffset = 0f)
+                }
+                avatar.renderable = avatar.entity
+                return
+            } catch (e: Exception) {
+                Log.w(TAG, "System avatar mesh attach failed for ${avatar.agentId}; falling back: ${e.message}")
+            }
+        }
+
         val head = headMesh ?: return
         val torso = torsoMesh ?: return
         val upArm = upperArmMesh ?: return
@@ -254,6 +322,16 @@ class SceneManager(private val engine: Engine, private val scene: Scene) {
                 scene.addEntity(child)
                 avatar.bodySegmentEntities.add(child)
             }
+            // Order matches the segments list above; each entry binds the
+            // corresponding body segment to a skeleton bone so
+            // applyAvatarPose() can drive segment transforms from animation.
+            avatar.bodySegmentBones.addAll(listOf(
+                "mHead", "mTorso",
+                "mShoulderLeft", "mShoulderRight",
+                "mElbowLeft", "mElbowRight",
+                "mHipLeft", "mHipRight",
+                "mKneeLeft", "mKneeRight"
+            ))
             avatar.renderable = avatar.entity // mark as built
         } catch (e: Exception) {
             Log.w(TAG, "Failed to attach articulated avatar for ${avatar.agentId}", e)
@@ -264,6 +342,50 @@ class SceneManager(private val engine: Engine, private val scene: Scene) {
      * Build a sphere mesh of the given radius. Same vertex layout
      * (POSITION+TANGENTS+UV0) as PrimRenderer so it shares the lit material.
      */
+    /**
+     * Attach the supplied AvatarMesh as a child entity of the avatar root,
+     * inheriting the avatar's world transform via TransformManager parenting.
+     * Used for the LL system-avatar `.llm` paths (one entity per body part)
+     * so we don't have to merge head + body into a single buffer.
+     */
+    private fun attachLLMeshSegment(
+        avatar: AvatarObject,
+        mesh: AvatarMesh,
+        material: MaterialInstance,
+        bound: Float,
+        zOffset: Float
+    ) {
+        val child = entityManager.create()
+        RenderableManager.Builder(1)
+            .boundingBox(Box(-bound, -bound, -bound, bound, bound, bound))
+            .geometry(0, RenderableManager.PrimitiveType.TRIANGLES,
+                mesh.vertexBuffer, mesh.indexBuffer)
+            .material(0, material)
+            .culling(true)
+            .receiveShadows(true)
+            .castShadows(true)
+            .build(engine, child)
+
+        val tm = engine.transformManager
+        val ti = tm.create(child)
+        val rootInstance = tm.getInstance(avatar.entity)
+        if (rootInstance != 0 && ti != 0) {
+            tm.setParent(ti, rootInstance)
+        }
+        if (zOffset != 0f && ti != 0) {
+            val xform = floatArrayOf(
+                1f, 0f, 0f, 0f,
+                0f, 1f, 0f, 0f,
+                0f, 0f, 1f, 0f,
+                0f, 0f, zOffset, 1f
+            )
+            tm.setTransform(ti, xform)
+        }
+
+        scene.addEntity(child)
+        avatar.bodySegmentEntities.add(child)
+    }
+
     private fun buildSphereMesh(radius: Float): AvatarMesh {
         val rings = 12
         val segments = 18
@@ -354,6 +476,65 @@ class SceneManager(private val engine: Engine, private val scene: Scene) {
         return uploadAvatarMesh(verts.toFloatArray(), idx.toShortArray())
     }
 
+    /**
+     * Concatenate several LLMesh-loaded meshes into a single combined vertex
+     * list. Returned array is laid out [pos pos pos normal normal normal uv uv]
+     * per vertex, ready to be uploaded by uploadAvatarMesh().
+     *
+     * Index lists are concatenated separately by combineIndices() — they need
+     * to be offset by the cumulative vertex count of preceding meshes.
+     */
+    private fun combineLLMeshes(meshes: List<com.linkpoint.avatar.LLMeshLoader.LLMesh>): com.linkpoint.avatar.LLMeshLoader.LLMesh {
+        if (meshes.size == 1) return meshes[0]
+        val totalVerts = meshes.sumOf { it.vertexCount }
+        val pos = FloatArray(totalVerts * 3)
+        val nor = FloatArray(totalVerts * 3)
+        val uvs = FloatArray(totalVerts * 2)
+        var v = 0
+        for (m in meshes) {
+            System.arraycopy(m.positions, 0, pos, v * 3, m.vertexCount * 3)
+            System.arraycopy(m.normals,   0, nor, v * 3, m.vertexCount * 3)
+            System.arraycopy(m.uvs,       0, uvs, v * 2, m.vertexCount * 2)
+            v += m.vertexCount
+        }
+        return com.linkpoint.avatar.LLMeshLoader.LLMesh(
+            name = "combined", positions = pos, normals = nor, uvs = uvs,
+            indices = ShortArray(0)
+        )
+    }
+
+    private fun combineIndices(meshes: List<com.linkpoint.avatar.LLMeshLoader.LLMesh>): ShortArray {
+        val total = meshes.sumOf { it.indexCount }
+        val out = ShortArray(total)
+        var p = 0
+        var vOff = 0
+        for (m in meshes) {
+            for (i in 0 until m.indexCount) {
+                val idx = (m.indices[i].toInt() and 0xFFFF) + vOff
+                out[p + i] = idx.toShort()
+            }
+            p += m.indexCount
+            vOff += m.vertexCount
+        }
+        return out
+    }
+
+    /** Build the interleaved POS+NORMAL+UV float buffer Filament expects. */
+    private fun interleaveLLMesh(m: com.linkpoint.avatar.LLMeshLoader.LLMesh): FloatArray {
+        val out = FloatArray(m.vertexCount * 8)
+        for (i in 0 until m.vertexCount) {
+            out[i * 8]     = m.positions[i * 3]
+            out[i * 8 + 1] = m.positions[i * 3 + 1]
+            out[i * 8 + 2] = m.positions[i * 3 + 2]
+            out[i * 8 + 3] = m.normals[i * 3]
+            out[i * 8 + 4] = m.normals[i * 3 + 1]
+            out[i * 8 + 5] = m.normals[i * 3 + 2]
+            out[i * 8 + 6] = m.uvs[i * 2]
+            out[i * 8 + 7] = m.uvs[i * 2 + 1]
+        }
+        return out
+    }
+
     private fun uploadAvatarMesh(verts: FloatArray, idx: ShortArray): AvatarMesh {
         val stride = 8 * 4
         val vertexCount = verts.size / 8
@@ -386,6 +567,45 @@ class SceneManager(private val engine: Engine, private val scene: Scene) {
     /**
      * Remove an avatar from the scene
      */
+    /**
+     * Drive each body segment's local transform from the avatar's skeleton.
+     * Call this every frame for the local agent (and for nearby avatars,
+     * once we wire AvatarAnimator into a per-frame tick) so bone
+     * rotations from the animator translate into visible motion.
+     *
+     * No-op if the segment-to-bone bindings list is empty (e.g. avatar
+     * created before the material was ready).
+     */
+    fun applyAvatarPose(agentId: UUID, skeleton: com.linkpoint.avatar.AvatarSkeleton) {
+        val avatar = avatars[agentId] ?: return
+        if (avatar.bodySegmentEntities.size != avatar.bodySegmentBones.size) return
+        val tm = engine.transformManager
+        for (i in avatar.bodySegmentEntities.indices) {
+            val boneName = avatar.bodySegmentBones[i]
+            val bone = skeleton.getBone(boneName) ?: continue
+            val ti = tm.getInstance(avatar.bodySegmentEntities[i])
+            if (ti == 0) continue
+            // Use the bone's worldMatrix directly as the segment's parent-
+            // local transform. Since segments are children of the avatar
+            // root (which already carries the avatar's world transform),
+            // this places each segment at the bone's skeleton-local pose
+            // and inherits the avatar's world position automatically.
+            tm.setTransform(ti, bone.worldMatrix)
+        }
+    }
+
+    /**
+     * Set the avatar's overall height multiplier, applied as a uniform Z
+     * scale on the root transform. Driven from AvatarAppearance VisualParam
+     * 33 (avatar height). 1.0 = LL default; the slider's 0..1 maps to a
+     * roughly 0.85..1.20 multiplier to match the LL viewer's scaling.
+     */
+    fun setAvatarHeightScale(agentId: UUID, scale: Float) {
+        val avatar = avatars[agentId] ?: return
+        avatar.heightScale = scale.coerceIn(0.5f, 2.0f)
+        updateTransform(avatar)
+    }
+
     fun removeAvatar(agentId: UUID) {
         avatars.remove(agentId)?.let { avatar ->
             avatar.bodySegmentEntities.forEach { child ->
@@ -506,7 +726,14 @@ class SceneManager(private val engine: Engine, private val scene: Scene) {
         val instance = transformManager.getInstance(avatar.entity)
         if (instance != 0) {
             val matrix = FloatArray(16)
-            buildTransformMatrix(avatar.position, avatar.rotation, LLVector3.one(), matrix)
+            // Apply heightScale uniformly so VisualParam 33 (height) scales
+            // the avatar without rebuilding the body meshes.
+            buildTransformMatrix(
+                avatar.position,
+                avatar.rotation,
+                LLVector3(avatar.heightScale, avatar.heightScale, avatar.heightScale),
+                matrix
+            )
             transformManager.setTransform(instance, matrix)
         }
     }
@@ -593,7 +820,20 @@ data class AvatarObject(
      * (head/torso/arms/legs). Tracked here so removeAvatar() can detach
      * and destroy them along with the root entity.
      */
-    val bodySegmentEntities: MutableList<Int> = mutableListOf()
+    val bodySegmentEntities: MutableList<Int> = mutableListOf(),
+    /**
+     * Skeletal bone name each body segment is bound to, in the same order
+     * as bodySegmentEntities. Used by applyAvatarPose() to drive the
+     * segment's local transform from the bone's world matrix each frame.
+     * Empty if the avatar has no skeleton wired up.
+     */
+    val bodySegmentBones: MutableList<String> = mutableListOf(),
+    /**
+     * Optional uniform Z scale applied to the avatar's root transform.
+     * Drives "height" visual param 33 from AvatarAppearance: 0..1 maps to
+     * a 0.85x..1.20x range to roughly match the LL viewer's scaling.
+     */
+    var heightScale: Float = 1f
 )
 
 internal data class AvatarMesh(

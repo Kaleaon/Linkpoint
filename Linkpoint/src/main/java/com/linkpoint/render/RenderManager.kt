@@ -12,6 +12,7 @@ import com.google.android.filament.android.UiHelper
 import com.linkpoint.render.environment.SLDefaultEnvironment
 import com.linkpoint.diagnostics.ScenePopulationDiagnostics
 import com.linkpoint.render.materials.MaterialLoader
+import com.linkpoint.render.prims.MeshPrimRenderer
 import com.linkpoint.render.prims.PrimRenderer
 import com.linkpoint.render.scene.SceneManager
 import com.linkpoint.render.terrain.TerrainRenderer
@@ -60,6 +61,7 @@ class RenderManager(private val context: Context) {
     // Material and prim rendering
     private var materialLoader: MaterialLoader? = null
     private var primRenderer: PrimRenderer? = null
+    private var meshPrimRenderer: MeshPrimRenderer? = null
     private var terrainRenderer: TerrainRenderer? = null
 
     // Helpers
@@ -90,6 +92,16 @@ class RenderManager(private val context: Context) {
     // can attach gesture detectors and the agent-position updater.
     val cameraController: CameraController = CameraController()
     private val cameraEye = FloatArray(6)
+
+    /**
+     * Optional per-frame hook invoked just before render(). The app installs
+     * a callback that ticks AvatarAnimator + pushes bone matrices into
+     * SceneManager.applyAvatarPose() for each visible avatar. Kept as a
+     * pluggable lambda so RenderManager doesn't depend on AvatarManager
+     * directly — the dependency points the right way.
+     */
+    @Volatile
+    var avatarPoseProvider: (() -> Unit)? = null
     
     /**
      * Initialize the rendering engine
@@ -125,7 +137,7 @@ class RenderManager(private val context: Context) {
             
             // Initialize scene manager
             val filamentScene = scene ?: throw IllegalStateException("Failed to create Filament Scene")
-            sceneManager = SceneManager(filamentEngine, filamentScene)
+            sceneManager = SceneManager(filamentEngine, filamentScene, context)
             Log.d(TAG, "SceneManager initialized")
 
             // Initialize material loader
@@ -141,6 +153,13 @@ class RenderManager(private val context: Context) {
                     primRenderer = PrimRenderer(filamentEngine, filamentScene)
                     primRenderer?.initialize(litMaterial)
                     Log.d(TAG, "PrimRenderer initialized")
+
+                    // Mesh-asset prim renderer: shares the lit material with
+                    // PrimRenderer for now; per-face material binding (TextureEntry,
+                    // BoM substitution) is a follow-up.
+                    meshPrimRenderer = MeshPrimRenderer(filamentEngine, filamentScene).also {
+                        it.initialize(litMaterial)
+                    }
 
                     // Wire avatar placeholder geometry. Without this avatar
                     // entities have no RenderableComponent and stay invisible
@@ -764,6 +783,7 @@ class RenderManager(private val context: Context) {
 
         applyRenderUpdates()
         applyCameraController()
+        avatarPoseProvider?.invoke()
 
         val engine = this.engine ?: return
         val renderer = this.renderer ?: return
@@ -866,6 +886,33 @@ class RenderManager(private val context: Context) {
      * Get the prim renderer for rendering Second Life primitives
      */
     fun getPrimRenderer(): PrimRenderer? = primRenderer
+
+    fun getMeshPrimRenderer(): MeshPrimRenderer? = meshPrimRenderer
+
+    /**
+     * Compile a parsed [com.linkpoint.assets.MeshData] and attach it to the
+     * existing prim entity for [localId], replacing the path/profile
+     * fallback geometry. Must run on the render thread.
+     *
+     * No-op if either renderer is not initialised, the mesh has no usable
+     * faces, or the prim doesn't exist (the prim may have been deleted in
+     * the time between fetch start and parse complete).
+     */
+    fun attachMeshAsset(localId: Int, meshData: com.linkpoint.assets.MeshData) {
+        requireRenderThread("attachMeshAsset")
+        val mp = meshPrimRenderer ?: return
+        val pr = primRenderer ?: return
+        val compiled = mp.getOrCompile(meshData) ?: return
+        pr.replaceGeometry(localId) { entity ->
+            // Destroy any existing renderable component first; Filament
+            // requires the slot be free before Builder.build re-attaches.
+            engine?.renderableManager?.let { rm ->
+                val inst = rm.getInstance(entity)
+                if (inst != 0) rm.destroy(entity)
+            }
+            mp.attach(entity, compiled)
+        }
+    }
 
     /**
      * Get the material loader for creating material instances

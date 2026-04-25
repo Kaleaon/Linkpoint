@@ -123,6 +123,32 @@ class PrimRenderer(
     /**
      * Remove a prim
      */
+    /**
+     * Replace the geometry on an existing prim entity. Used by the
+     * mesh-asset path: when MeshManager finishes parsing the LLM asset,
+     * RenderManager hands us the entity back so we can swap its
+     * RenderableComponent for the parsed mesh primitives. Caller's
+     * [attach] block is invoked with the prim's entity ID and is
+     * responsible for destroying the existing renderable and building the
+     * new one (we don't know the new geometry's shape from here).
+     *
+     * No-op if no prim with this localId is tracked.
+     */
+    fun replaceGeometry(localId: Int, attach: (entity: Int) -> Unit) {
+        val prim = prims[localId] ?: return
+        try {
+            attach(prim.entity)
+            // Mark the prim's effective shape as MESH so subsequent
+            // updatePrim calls don't re-create the path/profile geometry.
+            // (We can't mutate `shape` on the data class, so just leave it;
+            // updatePrim's getOrPut won't fire because the prim is already
+            // tracked. If a future updatePrim ever needed to rebuild we'd
+            // route back through replaceGeometry as well.)
+        } catch (e: Exception) {
+            Log.w(TAG, "replaceGeometry failed for $localId", e)
+        }
+    }
+
     fun removePrim(localId: Int) {
         prims.remove(localId)?.let { prim ->
             scene.removeEntity(prim.entity)
@@ -183,16 +209,228 @@ class PrimRenderer(
     private fun getOrCreateMesh(key: PrimShapeKey): PrimMesh {
         return primMeshes.getOrPut(key) {
             when (key.kind) {
-                PrimShape.BOX -> generateBoxMesh(key)
+                // Path-line shapes (box / cylinder / prism) all share the
+                // same extrude topology, so they go through the unified
+                // generator that honours profile cuts + hollow + taper.
+                // Falling back to the legacy box/cyl/prism generators only
+                // when params are at their defaults keeps the well-tested
+                // legacy geometry on the common case.
+                PrimShape.BOX -> if (needsExtrudeGenerator(key)) {
+                    generateExtrudedProfile(key)
+                } else generateBoxMesh(key)
+                PrimShape.CYLINDER -> if (needsExtrudeGenerator(key)) {
+                    generateExtrudedProfile(key)
+                } else generateCylinderMesh(key)
+                PrimShape.PRISM -> if (needsExtrudeGenerator(key)) {
+                    generateExtrudedProfile(key)
+                } else generatePrismMesh(key)
                 PrimShape.SPHERE -> generateSphereMesh(key)
-                PrimShape.CYLINDER -> generateCylinderMesh(key)
                 PrimShape.TORUS -> generateTorusMesh(key)
-                PrimShape.PRISM -> generatePrismMesh(key)
                 PrimShape.RING -> generateRingMesh(key)
                 PrimShape.TUBE -> generateTubeMesh(key)
             }
         }
     }
+
+    private fun needsExtrudeGenerator(key: PrimShapeKey): Boolean {
+        val p = key.params
+        return p.profileBegin > 0.0001f || p.profileEnd < 0.9999f ||
+               p.pathBegin > 0.0001f || p.pathEnd < 0.9999f ||
+               p.profileHollow > 0.0001f ||
+               kotlin.math.abs(p.pathTaperX) > 0.0001f ||
+               kotlin.math.abs(p.pathTaperY) > 0.0001f
+    }
+
+    /**
+     * Generic path-line profile extrusion with cuts, hollow, and taper.
+     *
+     * Builds two profile rings (bottom and top, in entity-local Z) with a
+     * tapered scale on the top ring, plus optional inner rings if hollow > 0.
+     * The wall is two triangles per profile segment per direction; the open
+     * ends are capped with a fan unless profileBegin/End cut leaves them
+     * open (the cuts produce visible cross-sections, matching SL's
+     * "carved" look).
+     *
+     * Path twist / taper-X-vs-Y / radius offset / revolutions are NOT
+     * applied yet — twist would need rotating the top profile around Z,
+     * radius-offset/revolutions only apply to PATH_CIRCLE shapes.
+     */
+    private fun generateExtrudedProfile(key: PrimShapeKey): PrimMesh {
+        val p = key.params
+        val profile = buildProfile2D(key.kind, p)
+        if (profile.size < 6) return generateBoxMesh(key) // fewer than 3 points
+
+        // Path: line from z=-0.5 to z=+0.5, but cut to [-0.5+pBegin, -0.5+pEnd].
+        val zBottom = -0.5f + p.pathBegin
+        val zTop = -0.5f + p.pathEnd
+
+        // Taper: top profile is scaled by (1 - taper) on each axis. SL's
+        // "taper" = 1 means a knife-edge cone; "taper" = -1 expands the top.
+        val taperX = (1f - p.pathTaperX).coerceAtLeast(0.001f)
+        val taperY = (1f - p.pathTaperY).coerceAtLeast(0.001f)
+
+        val verts = mutableListOf<Float>()
+        val idx = mutableListOf<Short>()
+
+        fun pushVertex(x: Float, y: Float, z: Float, nx: Float, ny: Float, nz: Float, u: Float, v: Float) {
+            verts += floatArrayOf(x, y, z, nx, ny, nz, u, v).toList()
+        }
+
+        // Outer wall: bottom ring then top ring, then triangle strip between them.
+        val n = profile.size / 2
+        val bottomStart = 0
+        for (i in 0 until n) {
+            val px = profile[i * 2]; val py = profile[i * 2 + 1]
+            // Outward-pointing normal in XY plane (rough; for a square this
+            // is per-side — close enough for placeholder geometry).
+            val nl = kotlin.math.sqrt(px * px + py * py).coerceAtLeast(0.0001f)
+            pushVertex(px, py, zBottom, px / nl, py / nl, 0f, i.toFloat() / n, 0f)
+        }
+        val topStart = n
+        for (i in 0 until n) {
+            val px = profile[i * 2] * taperX
+            val py = profile[i * 2 + 1] * taperY
+            val nl = kotlin.math.sqrt(px * px + py * py).coerceAtLeast(0.0001f)
+            pushVertex(px, py, zTop, px / nl, py / nl, 0f, i.toFloat() / n, 1f)
+        }
+        // Wall triangles. If profileBegin/End cut the loop, we don't connect
+        // the last vertex back to the first.
+        val closesProfile = p.profileBegin <= 0.0001f && p.profileEnd >= 0.9999f
+        val wallSegments = if (closesProfile) n else n - 1
+        for (i in 0 until wallSegments) {
+            val i0 = (bottomStart + i).toShort()
+            val i1 = (bottomStart + (i + 1) % n).toShort()
+            val i2 = (topStart + i).toShort()
+            val i3 = (topStart + (i + 1) % n).toShort()
+            idx += listOf(i0, i2, i1, i1, i2, i3)
+        }
+
+        // Caps. If hollow > 0, the cap is a ring between the outer and inner
+        // profile rather than a fan to centre. If the profile is cut open
+        // (profileBegin/End), the caps are still drawn but the cross-section
+        // is open by virtue of the missing wall segment.
+        val hollow = p.profileHollow.coerceIn(0f, 0.95f)
+        if (hollow > 0.001f) {
+            val innerProfile = scaleProfile(profile, 1f - hollow)
+            val innerBottomStart = verts.size / 8
+            for (i in 0 until n) {
+                val px = innerProfile[i * 2]; val py = innerProfile[i * 2 + 1]
+                val nl = kotlin.math.sqrt(px * px + py * py).coerceAtLeast(0.0001f)
+                pushVertex(px, py, zBottom, -px / nl, -py / nl, 0f, i.toFloat() / n, 0f)
+            }
+            val innerTopStart = verts.size / 8
+            for (i in 0 until n) {
+                val px = innerProfile[i * 2] * taperX
+                val py = innerProfile[i * 2 + 1] * taperY
+                val nl = kotlin.math.sqrt(px * px + py * py).coerceAtLeast(0.0001f)
+                pushVertex(px, py, zTop, -px / nl, -py / nl, 0f, i.toFloat() / n, 1f)
+            }
+            // Inner wall (normals flipped).
+            for (i in 0 until wallSegments) {
+                val i0 = (innerBottomStart + i).toShort()
+                val i1 = (innerBottomStart + (i + 1) % n).toShort()
+                val i2 = (innerTopStart + i).toShort()
+                val i3 = (innerTopStart + (i + 1) % n).toShort()
+                idx += listOf(i0, i1, i2, i1, i3, i2)
+            }
+            // Bottom ring cap (outer to inner).
+            for (i in 0 until wallSegments) {
+                val o0 = (bottomStart + i).toShort()
+                val o1 = (bottomStart + (i + 1) % n).toShort()
+                val n0 = (innerBottomStart + i).toShort()
+                val n1 = (innerBottomStart + (i + 1) % n).toShort()
+                idx += listOf(o0, n0, o1, o1, n0, n1)
+            }
+            // Top ring cap (outer to inner, flipped winding).
+            for (i in 0 until wallSegments) {
+                val o0 = (topStart + i).toShort()
+                val o1 = (topStart + (i + 1) % n).toShort()
+                val n0 = (innerTopStart + i).toShort()
+                val n1 = (innerTopStart + (i + 1) % n).toShort()
+                idx += listOf(o0, o1, n0, o1, n1, n0)
+            }
+        } else {
+            // Solid caps via fan to centre.
+            val centerBottom = (verts.size / 8).toShort()
+            pushVertex(0f, 0f, zBottom, 0f, 0f, -1f, 0.5f, 0.5f)
+            val centerTop = (verts.size / 8).toShort()
+            pushVertex(0f, 0f, zTop, 0f, 0f, 1f, 0.5f, 0.5f)
+            for (i in 0 until wallSegments) {
+                val a = (bottomStart + i).toShort()
+                val b = (bottomStart + (i + 1) % n).toShort()
+                idx += listOf(centerBottom, b, a)
+                val c = (topStart + i).toShort()
+                val d = (topStart + (i + 1) % n).toShort()
+                idx += listOf(centerTop, c, d)
+            }
+        }
+
+        return createMesh(verts.toFloatArray(), idx.toShortArray())
+    }
+
+    /**
+     * 2D profile loop in entity-local XY plane, scaled to fit a 1×1 box.
+     * Returns flat (x, y) pairs for each vertex around the loop.
+     *
+     * Honours profileBegin / profileEnd by clipping the parameter range:
+     * - PROFILE_CIRCLE: the loop becomes an arc from begin*2π to end*2π.
+     * - PROFILE_SQUARE: 4 corners walked from begin to end, treating the
+     *   square's perimeter as a 0..1 parameter.
+     * - PROFILE_TRIANGLE / HALF_CIRCLE: same idea.
+     */
+    private fun buildProfile2D(kind: PrimShape, p: PrimShapeParams): FloatArray {
+        val begin = p.profileBegin.coerceIn(0f, 0.99f)
+        val end = p.profileEnd.coerceIn(begin + 0.01f, 1f)
+        return when (kind) {
+            PrimShape.CYLINDER -> circularArc(begin, end, segments = 24, radius = 0.5f)
+            PrimShape.PRISM -> polygonArc(begin, end, sides = 3)
+            PrimShape.BOX -> polygonArc(begin, end, sides = 4)
+            else -> polygonArc(begin, end, sides = 4)
+        }
+    }
+
+    /** N points along a circle of [radius] from angle begin*2π to end*2π. */
+    private fun circularArc(begin: Float, end: Float, segments: Int, radius: Float): FloatArray {
+        val n = (segments * (end - begin)).toInt().coerceAtLeast(3)
+        val out = FloatArray(n * 2)
+        for (i in 0 until n) {
+            val t = begin + (end - begin) * (i.toFloat() / (n - 1))
+            val theta = t * 2.0 * PI
+            out[i * 2] = (cos(theta) * radius).toFloat()
+            out[i * 2 + 1] = (sin(theta) * radius).toFloat()
+        }
+        return out
+    }
+
+    /** Walk a regular [sides]-gon's perimeter from t=begin to t=end. */
+    private fun polygonArc(begin: Float, end: Float, sides: Int): FloatArray {
+        // Each side spans 1/sides of the perimeter parameter.
+        // Walk densely (4× sample density) to keep wall segments short.
+        val samples = (sides * 8 * (end - begin)).toInt().coerceAtLeast(sides + 1)
+        val out = FloatArray(samples * 2)
+        for (i in 0 until samples) {
+            val t = begin + (end - begin) * (i.toFloat() / (samples - 1))
+            // Map parameter to (sideIndex, sideT).
+            val st = (t * sides) % 1f
+            val sideIdx = (t * sides).toInt() % sides
+            val a0 = sideIdx * (2.0 * PI / sides) - PI / 4
+            val a1 = (sideIdx + 1) * (2.0 * PI / sides) - PI / 4
+            val x0 = cos(a0).toFloat() * 0.5f * kotlin.math.sqrt(2f)
+            val y0 = sin(a0).toFloat() * 0.5f * kotlin.math.sqrt(2f)
+            val x1 = cos(a1).toFloat() * 0.5f * kotlin.math.sqrt(2f)
+            val y1 = sin(a1).toFloat() * 0.5f * kotlin.math.sqrt(2f)
+            out[i * 2] = x0 + (x1 - x0) * st
+            out[i * 2 + 1] = y0 + (y1 - y0) * st
+        }
+        return out
+    }
+
+    private fun scaleProfile(profile: FloatArray, factor: Float): FloatArray {
+        val out = FloatArray(profile.size)
+        for (i in profile.indices) out[i] = profile[i] * factor
+        return out
+    }
+
     
     /**
      * Box mesh. Honours `key.params.profileBegin/profileEnd` (cuts out the

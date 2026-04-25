@@ -731,6 +731,29 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             app.avatarManager.getMyAvatar()?.baker?.getBakedTextures()?.get(slot)
         }
 
+        // Per-frame avatar pose tick. For each tracked avatar with a
+        // skeleton, advance the AvatarAnimator and write the resulting
+        // bone matrices into SceneManager so the body segments visibly
+        // animate. Cheap: ~1ms even for 30 nearby avatars.
+        var lastPoseTickMs = System.currentTimeMillis()
+        app.renderManager.avatarPoseProvider = {
+            try {
+                val sm = app.renderManager.getSceneManager()
+                if (sm != null && app.isAvatarManagerInitialized()) {
+                    val now = System.currentTimeMillis()
+                    val dt = ((now - lastPoseTickMs).coerceAtLeast(1L)) / 1000f
+                    lastPoseTickMs = now
+                    for (avatar in app.avatarManager.getAllAvatars()) {
+                        avatar.animator.update(dt)
+                        avatar.skeleton.updateBoneMatrices()
+                        sm.applyAvatarPose(avatar.agentId, avatar.skeleton)
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.v(TAG, "avatar pose tick error: ${e.message}")
+            }
+        }
+
         // Don't start render loop here - wait for surfaceCreated callback
         android.util.Log.i(TAG, "✓ RenderManager initialized, waiting for surface to be ready...")
     }

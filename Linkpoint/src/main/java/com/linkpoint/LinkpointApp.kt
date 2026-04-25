@@ -982,7 +982,28 @@ class LinkpointApp : Application() {
                     if (::renderManager.isInitialized) {
                         renderManager.enqueueUpdate(RenderableUpdate.PrimUpdate(update))
                     }
-                    
+
+                    // Mesh-asset prims: kick off MeshManager fetch and ask
+                    // PrimRenderer to swap the path/profile fallback geometry
+                    // for the parsed mesh once it lands. Failures fall back
+                    // gracefully to the path/profile box already rendered.
+                    val meshAssetId = update.getMeshAssetId()
+                    if (meshAssetId != null && ::meshManager.isInitialized && ::renderManager.isInitialized) {
+                        applicationScope.launch {
+                            val meshData = try {
+                                meshManager.getMesh(meshAssetId)
+                            } catch (e: Exception) {
+                                Log.w(TAG, "Mesh fetch failed for ${update.localId}: ${e.message}")
+                                null
+                            }
+                            if (meshData != null) {
+                                renderManager.dispatcher.post(Runnable {
+                                    renderManager.attachMeshAsset(update.localId, meshData)
+                                })
+                            }
+                        }
+                    }
+
                     // Extract and prefetch textures from the object's TextureEntry
                     if (::textureManager.isInitialized && update.textureEntry.isNotEmpty()) {
                         val textureIds = TextureEntryParser.extractTextureIds(update.textureEntry)
@@ -1914,6 +1935,21 @@ class LinkpointApp : Application() {
                     if (data != null && ::avatarManager.isInitialized) {
                         Log.d(TAG, "👤 AvatarAppearance: ${data.senderID} (${data.visualParams.size} params)")
                         avatarManager.handleAvatarAppearance(data.senderID, data.textureEntries, data.visualParams)
+
+                        // Apply VisualParam 33 (height) to the rendered
+                        // avatar so different avatars have visibly different
+                        // statures. The full set of 254 visual params (body
+                        // shape, head shape, etc.) is a separate task; just
+                        // height is the most-noticed one and easy to wire.
+                        if (::renderManager.isInitialized && data.visualParams.isNotEmpty()) {
+                            val heightByte = data.visualParams.firstOrNull()?.toInt()?.and(0xFF) ?: 128
+                            // Visual param 33 spans 0..255; LL maps to a
+                            // ~0.85x..1.20x avatar Z scale.
+                            val heightScale = 0.85f + (heightByte / 255f) * (1.20f - 0.85f)
+                            renderManager.dispatcher.post(Runnable {
+                                renderManager.getSceneManager()?.setAvatarHeightScale(data.senderID, heightScale)
+                            })
+                        }
                     }
                 }
             } catch (e: Exception) {

@@ -133,6 +133,17 @@ class MaterialLoader(
                     } else {
                         col = mix(c2, c3, (t - 0.6666) * 3.0);
                     }
+
+                    // Slope-based blend: cliff faces (vertical normal -> low
+                    // normal.z) bias toward detail3 (typically rock in the
+                    // SL ground texture set), matching how cliffs look on
+                    // the desktop viewer.
+                    float3 wn = getWorldGeometricNormalVector();
+                    float slope = clamp(1.0 - abs(wn.z), 0.0, 1.0);
+                    // Smooth threshold so flat areas keep the elevation blend.
+                    slope = smoothstep(0.4, 0.85, slope);
+                    col = mix(col, c3, slope);
+
                     material.baseColor = col;
                     material.metallic = 0.0;
                     material.roughness = 0.95;
