@@ -578,11 +578,14 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             
             override fun surfaceChanged(holder: android.view.SurfaceHolder, format: Int, width: Int, height: Int) {
                 android.util.Log.d(TAG, "Surface changed: ${width}x${height}")
-                // Recreate SwapChain to handle new dimensions or format changes
-                // This ensures viewport is updated immediately rather than waiting for next render frame
+                // Recreate SwapChain to handle new dimensions or format changes.
+                // Pass the known width/height so the Filament View viewport is
+                // applied from the surface's real dimensions instead of
+                // surfaceView.width (which can still be 0 here on the first
+                // surfaceChanged before the View has been laid out).
                 if (isSurfaceReady) {
                     app.renderManager.dispatcher.post(
-                        Runnable { app.renderManager.recreateSwapChain() }
+                        Runnable { app.renderManager.recreateSwapChain(width, height) }
                     )
                 }
             }

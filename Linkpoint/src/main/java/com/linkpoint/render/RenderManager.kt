@@ -338,10 +338,10 @@ class RenderManager(private val context: Context) {
     private fun updateProjection(width: Int, height: Int) {
         val aspect = width.toFloat() / height.toFloat()
         camera?.setProjection(
-            45.0,           // FOV in degrees
+            SLDefaultEnvironment.Render.DEFAULT_FOV.toDouble(),
             aspect.toDouble(),
-            0.1,            // near plane
-            1000.0,         // far plane
+            SLDefaultEnvironment.Render.DEFAULT_NEAR_CLIP.toDouble(),
+            SLDefaultEnvironment.Render.DEFAULT_FAR_CLIP.toDouble(),
             Camera.Fov.VERTICAL
         )
     }
@@ -366,16 +366,77 @@ class RenderManager(private val context: Context) {
             if (swapChain != null) {
                 Log.i(TAG, "✓ SwapChain created eagerly during initialize")
                 attachDisplayHelper()
-                val width = sv.width
-                val height = sv.height
-                if (width > 0 && height > 0) {
-                    view?.viewport = Viewport(0, 0, width, height)
-                    viewportWidth = width
-                    viewportHeight = height
-                    updateProjection(width, height)
-                }
+                applyViewportFromSurface("rebuildSwapChainForCurrentSurface")
             }
         }
+    }
+
+    /**
+     * Apply the current SurfaceView dimensions to the Filament `View` viewport.
+     *
+     * Resolves dimensions in priority order:
+     *   1. `surfaceView.width` / `height`        (post-layout View bounds)
+     *   2. `surfaceView.holder.surfaceFrame`     (always set once the surface
+     *                                             is sized by SurfaceFlinger,
+     *                                             even before View layout)
+     *
+     * If both yield 0 (surface created but not yet sized) we log a warning and
+     * post a deferred retry via `surfaceView.post {}` so the next layout pass
+     * re-runs the viewport apply. Previously this code returned silently on
+     * 0×0, leaving Filament's `View` with the default `Viewport(0,0,0,0)` so
+     * frames rendered into nothing — visible to the user as a black screen
+     * even though `renderer.beginFrame()` succeeded at full FPS.
+     *
+     * @return true if a non-zero viewport was applied, false if a retry was scheduled.
+     */
+    private fun applyViewportFromSurface(callSite: String): Boolean {
+        val sv = surfaceView ?: return false
+        var width = sv.width
+        var height = sv.height
+        var source = "View.width/height"
+        if (width <= 0 || height <= 0) {
+            val frame = sv.holder?.surfaceFrame
+            if (frame != null && frame.width() > 0 && frame.height() > 0) {
+                width = frame.width()
+                height = frame.height()
+                source = "SurfaceHolder.surfaceFrame"
+            }
+        }
+        if (width > 0 && height > 0) {
+            view?.viewport = Viewport(0, 0, width, height)
+            viewportWidth = width
+            viewportHeight = height
+            updateProjection(width, height)
+            Log.d(TAG, "Viewport applied (${source}) from $callSite: ${width}x${height}")
+            return true
+        }
+        Log.w(TAG, "⚠ Viewport not applied from $callSite (size 0×0); deferring until SurfaceView layout")
+        sv.post {
+            dispatcher.post(Runnable {
+                if (!applyViewportFromSurface("$callSite/post")) {
+                    Log.w(TAG, "Viewport retry from $callSite still 0×0 — UiHelper.onResized will need to set it")
+                }
+            })
+        }
+        return false
+    }
+
+    /**
+     * Apply an explicitly known viewport size (e.g. from
+     * SurfaceHolder.Callback.surfaceChanged) without relying on
+     * `surfaceView.width`, which lags actual surface size during the very
+     * first frames after the activity is created.
+     */
+    private fun applyViewportSize(width: Int, height: Int, callSite: String) {
+        if (width <= 0 || height <= 0) {
+            Log.w(TAG, "applyViewportSize($callSite): refusing to set ${width}x${height}")
+            return
+        }
+        view?.viewport = Viewport(0, 0, width, height)
+        viewportWidth = width
+        viewportHeight = height
+        updateProjection(width, height)
+        Log.d(TAG, "Viewport applied explicitly from $callSite: ${width}x${height}")
     }
 
     private fun ensureSwapChain(engine: Engine): SwapChain? {
@@ -404,15 +465,7 @@ class RenderManager(private val context: Context) {
                     Log.i(TAG, "║ Frame count: ${frameCount.get()}")
                     Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
                     attachDisplayHelper()
-                    val width = surfaceView?.width ?: 0
-                    val height = surfaceView?.height ?: 0
-                    if (width > 0 && height > 0) {
-                        view?.viewport = Viewport(0, 0, width, height)
-                        viewportWidth = width
-                        viewportHeight = height
-                        updateProjection(width, height)
-                        Log.d(TAG, "Viewport set to ${width}x${height}")
-                    }
+                    applyViewportFromSurface("ensureSwapChain")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "SwapChain creation threw exception", e)
@@ -435,18 +488,32 @@ class RenderManager(private val context: Context) {
      *   already handles this automatically via the synchronized block.
      */
     fun recreateSwapChain() {
+        recreateSwapChainInternal(explicitWidth = -1, explicitHeight = -1)
+    }
+
+    /**
+     * Variant that accepts the known dimensions from a
+     * SurfaceHolder.Callback.surfaceChanged() event so the viewport reflects
+     * the actual surface size even before the SurfaceView itself has been
+     * laid out.
+     */
+    fun recreateSwapChain(width: Int, height: Int) {
+        recreateSwapChainInternal(explicitWidth = width, explicitHeight = height)
+    }
+
+    private fun recreateSwapChainInternal(explicitWidth: Int, explicitHeight: Int) {
         requireRenderThread("recreateSwapChain")
         val engine = this.engine ?: return
         val surface = surfaceView?.holder?.surface ?: return
-        
+
         if (!surface.isValid) {
             Log.w(TAG, "Cannot recreate SwapChain - surface not valid")
             return
         }
-        
+
         Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ 🔄 Recreating SwapChain (manual call)...")
-        
+
         // Use swapChainLock for synchronization with UiHelper callbacks
         synchronized(swapChainLock) {
             // Destroy old SwapChain if it exists (it might be stale from a previous surface)
@@ -459,23 +526,17 @@ class RenderManager(private val context: Context) {
                 }
                 swapChain = null
             }
-            
+
             // Create new swap chain
             try {
                 swapChain = engine.createSwapChain(surface)
                 if (swapChain != null) {
                     Log.i(TAG, "║ ✓ SwapChain recreated successfully")
                     attachDisplayHelper()
-                    val width = surfaceView?.width ?: 0
-                    val height = surfaceView?.height ?: 0
-                    if (width > 0 && height > 0) {
-                        view?.viewport = Viewport(0, 0, width, height)
-                        viewportWidth = width
-                        viewportHeight = height
-                        updateProjection(width, height)
-                        Log.i(TAG, "║ Viewport: ${width}x${height}")
+                    if (explicitWidth > 0 && explicitHeight > 0) {
+                        applyViewportSize(explicitWidth, explicitHeight, "recreateSwapChain(explicit)")
                     } else {
-                        Log.w(TAG, "║ Viewport size invalid: ${width}x${height}")
+                        applyViewportFromSurface("recreateSwapChain")
                     }
                 } else {
                     Log.e(TAG, "║ ✗ SwapChain recreation failed - createSwapChain returned null")
