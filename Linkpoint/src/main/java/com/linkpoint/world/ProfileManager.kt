@@ -137,27 +137,32 @@ class ProfileManager(
     }
     
     /**
-     * Get multiple display names via batch GetDisplayNames capability request.
+     * Get multiple display names via the GetDisplayNames capability.
+     *
+     * The cap is HTTP GET with repeated `ids=<uuid>` query parameters,
+     * not a POST LLSD body. Previously this function POSTed LLSD which
+     * the simulator silently dropped, so friend names stayed on the
+     * `Resident (xxxx)` placeholder forever (2026-04-25 Athanasia debug
+     * capture). Now uses [CapabilityRequester.requestWithQuery] and
+     * chunks IDs at the SL server limit.
      */
     suspend fun getDisplayNames(agentIds: List<UUID>): Map<UUID, String> {
         return withContext(Dispatchers.IO) {
             val results = mutableMapOf<UUID, String>()
             val missing = mutableListOf<UUID>()
-            
+
             for (id in agentIds) {
                 displayNames[id]?.let { results[id] = it } ?: missing.add(id)
             }
-            
-            if (missing.isNotEmpty()) {
+            if (missing.isEmpty()) return@withContext results
+
+            // SL caps a single GetDisplayNames request at ~90 ids.
+            for (batch in missing.chunked(80)) {
                 try {
-                    val request = LLSDMap().apply {
-                        this["ids"] = LLSDArray().apply {
-                            missing.forEach { add(LLSDString(it.toString())) }
-                        }
-                    }
-                    
-                    val response = capabilityManager.request(CapabilityManager.CAP_GET_DISPLAY_NAMES, request)
-                    
+                    val response = capabilityManager.requestWithQuery(
+                        CapabilityManager.CAP_GET_DISPLAY_NAMES,
+                        batch.map { "ids" to it.toString() }
+                    )
                     if (response is LLSDMap) {
                         val agents = response.getArray("agents")
                         if (agents != null) {
@@ -166,23 +171,25 @@ class ProfileManager(
                                 val idStr = agentData.getString("id") ?: continue
                                 val name = agentData.getString("display_name")?.takeIf { it.isNotBlank() }
                                     ?: agentData.getString("username")?.takeIf { it.isNotBlank() }
+                                    ?: run {
+                                        val first = agentData.getString("legacy_first_name") ?: ""
+                                        val last = agentData.getString("legacy_last_name") ?: ""
+                                        "$first $last".trim().takeIf { it.isNotBlank() }
+                                    }
                                     ?: continue
                                 try {
                                     val uuid = UUID.fromString(idStr)
                                     displayNames[uuid] = name
                                     results[uuid] = name
-                                } catch (e: Exception) {
-                                    // Invalid UUID, skip
-                                }
+                                } catch (_: Exception) { /* invalid UUID */ }
                             }
                         }
                     }
-                    Log.d(TAG, "Retrieved ${results.size} display names")
                 } catch (e: Exception) {
-                    Log.w(TAG, "Failed to batch retrieve display names: ${e.message}")
+                    Log.w(TAG, "Batch display-name lookup failed: ${e.message}")
                 }
             }
-            
+            Log.d(TAG, "Retrieved ${results.size} display names (requested ${agentIds.size})")
             results
         }
     }

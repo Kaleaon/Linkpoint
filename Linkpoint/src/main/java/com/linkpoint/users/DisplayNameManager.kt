@@ -156,29 +156,23 @@ class DisplayNameManager(
     }
     
     /**
-     * Fetch a batch of display names.
+     * Fetch a batch of display names. GetDisplayNames is HTTP GET with
+     * repeated `ids=<uuid>` query parameters; the previous LLSD POST
+     * was silently dropped by the simulator and left names unresolved.
      */
     private suspend fun fetchBatch(agentIds: List<UUID>): Map<UUID, DisplayName> {
         val result = mutableMapOf<UUID, DisplayName>()
-        
         try {
-            val request = LLSDMap().apply {
-                this["ids"] = LLSDArray().apply {
-                    agentIds.forEach { add(LLSDString(it.toString())) }
-                }
-            }
-            
-            // Make request
-            val response = capabilityManager.request(CapabilityManager.CAP_GET_DISPLAY_NAMES, request)
-            
+            val response = capabilityManager.requestWithQuery(
+                CapabilityManager.CAP_GET_DISPLAY_NAMES,
+                agentIds.map { "ids" to it.toString() }
+            )
             if (response is LLSDMap) {
                 parseDisplayNamesResponse(response, result)
             }
-            
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching display name batch", e)
         }
-        
         return result
     }
 

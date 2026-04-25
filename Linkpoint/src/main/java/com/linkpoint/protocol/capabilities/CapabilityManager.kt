@@ -10,6 +10,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import okhttp3.*
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.EOFException
@@ -23,6 +24,18 @@ interface CapabilityRequester {
     suspend fun request(capName: String, body: LLSDValue? = null): LLSDValue?
     fun getCapability(name: String): String?
     fun hasCapability(name: String): Boolean
+
+    /**
+     * Issue an HTTP GET against [capName] with the given repeated query
+     * parameters. Required by capabilities that follow the
+     * `<base_url>?key=v1&key=v2&...` shape rather than a POST LLSD body —
+     * notably `GetDisplayNames` (`?ids=<uuid>&ids=<uuid>...`). Default
+     * implementation falls back to the body-less `request()` for fakes.
+     */
+    suspend fun requestWithQuery(
+        capName: String,
+        queryParams: List<Pair<String, String>>
+    ): LLSDValue? = request(capName, null)
 }
 
 /**
@@ -714,7 +727,86 @@ class CapabilityManager : CapabilityRequester {
         Log.e(TAG, "All retries exhausted for $capName", lastException)
         null
     }
-    
+
+    /**
+     * GET against [capName] with repeated query parameters appended to the
+     * cap URL. Used by capabilities whose wire shape is HTTP GET rather
+     * than POST-LLSD — primarily `GetDisplayNames`. Reuses the same retry
+     * / parse pipeline as [request].
+     *
+     * Previously callers (`ProfileManager.getDisplayNames`,
+     * `DisplayNameManager.fetchBatch`) POSTed an LLSD body to
+     * GetDisplayNames; the simulator returned nothing useful and friend
+     * names stayed on the `Resident (xxxx)` placeholder forever — the
+     * symptom in the 2026-04-25 Athanasia debug capture.
+     */
+    override suspend fun requestWithQuery(
+        capName: String,
+        queryParams: List<Pair<String, String>>
+    ): LLSDValue? = withContext(Dispatchers.IO) {
+        val baseUrl = getCapability(capName) ?: return@withContext null
+        val httpUrl = baseUrl.toHttpUrlOrNull() ?: run {
+            Log.w(TAG, "requestWithQuery: invalid URL for $capName")
+            return@withContext null
+        }
+        val urlBuilder = httpUrl.newBuilder()
+        queryParams.forEach { (k, v) -> urlBuilder.addQueryParameter(k, v) }
+        val url = urlBuilder.build()
+
+        val options = getOptionsForCapability(capName)
+        val client = getClientForCapability(capName)
+
+        var lastException: Exception? = null
+        var retryAfterSeconds: Int? = null
+
+        repeat(options.retries + 1) { attempt ->
+            try {
+                if (attempt > 0) {
+                    val delayMs = options.calculateRetryDelay(attempt - 1, retryAfterSeconds)
+                    Log.d(TAG, "Retrying GET $capName (attempt ${attempt + 1}/${options.retries + 1}) after ${delayMs}ms")
+                    delay(delayMs)
+                }
+                val response = client.newCall(Request.Builder().url(url).get().build()).execute()
+                if (response.code in RETRYABLE_HTTP_CODES) {
+                    retryAfterSeconds = parseRetryAfterHeader(response)
+                    if (attempt < options.retries) {
+                        response.close()
+                        throw RetryableException("HTTP ${response.code}")
+                    }
+                }
+                val contentType = response.header("Content-Type")
+                val responseBytes = response.body?.bytes()
+                response.close()
+                if (responseBytes == null || responseBytes.isEmpty()) {
+                    if (attempt < options.retries) throw RetryableException("Empty body")
+                    return@withContext null
+                }
+                return@withContext LLSDParser.parseAuto(responseBytes, contentType)
+            } catch (e: RetryableException) {
+                lastException = e
+            } catch (e: SocketTimeoutException) {
+                Log.w(TAG, "Timeout for GET $capName (attempt ${attempt + 1})")
+                lastException = e
+            } catch (e: EOFException) {
+                Log.w(TAG, "EOF for GET $capName (attempt ${attempt + 1})")
+                lastException = e
+            } catch (e: IOException) {
+                if (isRetryableIOException(e)) {
+                    Log.w(TAG, "Retryable IO for GET $capName: ${e.message}")
+                    lastException = e
+                } else {
+                    Log.e(TAG, "Non-retryable IO for GET $capName", e)
+                    throw e
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "GET capability request failed: $capName", e)
+                throw e
+            }
+        }
+        Log.e(TAG, "All retries exhausted for GET $capName", lastException)
+        null
+    }
+
     /**
      * Exception to signal that a request should be retried.
      */
