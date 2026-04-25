@@ -156,18 +156,6 @@ class AgentCircuit(
         }
     }
 
-    suspend fun registerHandler(msgId: Int, handler: MessageRouter.Handler) {
-        messageRouter.registerHandler(msgId, handler)
-    }
-
-    suspend fun sendMessage(msgId: Int, payload: ByteArray, reliable: Boolean = false) {
-        if (!isConnected) return
-        try {
-            udpConnection.sendPacket(msgId, payload, reliable)
-        } catch (e: Exception) {
-            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Send error: ${e.message}")
-        }
-    }
 
     fun getStatistics() = mapOf(
         "state" to _circuitState.value.name,
