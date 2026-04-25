@@ -668,6 +668,12 @@ class RenderManager(private val context: Context) {
     fun getDiagnostics(): RenderManagerDiagnostics {
         // Use synchronized to get consistent swapchain status
         val hasSwapChainNow = synchronized(swapChainLock) { swapChain != null }
+        // A SwapChain only makes sense when the SurfaceView is actually attached
+        // and the underlying Surface is valid. When the user is on Settings (or any
+        // non-WorldView screen), the SurfaceView is detached and `surface` is null
+        // or invalid - that is normal, not an error.
+        val surface = surfaceView?.holder?.surface
+        val surfaceReady = surface != null && surface.isValid
         return RenderManagerDiagnostics(
             isInitialized = isInitialized,
             isXRMode = isXRMode,
@@ -677,6 +683,7 @@ class RenderManager(private val context: Context) {
             hasView = view != null,
             hasCamera = camera != null,
             hasSwapChain = hasSwapChainNow,
+            isSurfaceReady = surfaceReady,
             viewportWidth = viewportWidth,
             viewportHeight = viewportHeight,
             frameCount = frameCount.get(),
@@ -686,7 +693,7 @@ class RenderManager(private val context: Context) {
             scenePopulationSnapshot = ScenePopulationDiagnostics.snapshot()
         )
     }
-    
+
     /**
      * Diagnostic data class for render manager state
      */
@@ -699,6 +706,7 @@ class RenderManager(private val context: Context) {
         val hasView: Boolean,
         val hasCamera: Boolean,
         val hasSwapChain: Boolean,
+        val isSurfaceReady: Boolean,
         val viewportWidth: Int,
         val viewportHeight: Int,
         val frameCount: Long,

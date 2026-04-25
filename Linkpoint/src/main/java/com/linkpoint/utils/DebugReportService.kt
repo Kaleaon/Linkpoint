@@ -824,6 +824,19 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("  Error States: ${texDiag.textureErrorStateCount}")
                         val decoderStatus = com.linkpoint.assets.JPEG2000Decoder.getStartupStatus()
                         appendLine("  Backend: ${decoderStatus.activeBackend}")
+                        appendLine("  Native Loaded: ${if (decoderStatus.nativeLoaded) "✓" else "✗"}")
+                        appendLine("  Native Healthy: ${if (decoderStatus.nativeHealthy) "✓" else "✗"}")
+                        appendLine("  JP2ForAndroid Fallback: ${if (decoderStatus.jp2ForAndroidAvailable) "✓" else "✗"}")
+                        // Surface the underlying load/health failure when the backend
+                        // ended up as "none" - this is the difference between "we don't
+                        // know why" and "UnsatisfiedLinkError: dlopen failed: cannot
+                        // locate symbol opj_create_decompress" (NDK / OpenJPEG mismatch).
+                        decoderStatus.nativeError?.let {
+                            appendLine("  Native Load Error: $it")
+                        }
+                        decoderStatus.nativeHealthError?.let {
+                            appendLine("  Native Health Error: $it")
+                        }
                         if (decoderStatus.warningMessage != null) {
                             appendLine("  Warning: ${decoderStatus.warningMessage}")
                         }
@@ -879,22 +892,28 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("  View: ${if (renderDiag.hasView) "✓" else "✗"}")
                         appendLine("  Camera: ${if (renderDiag.hasCamera) "✓" else "✗"}")
                         appendLine("  SwapChain: ${if (renderDiag.hasSwapChain) "✓" else "✗"}")
-                        
+                        appendLine("  Surface Ready: ${if (renderDiag.isSurfaceReady) "✓" else "✗ (e.g. on Settings, app backgrounded)"}")
+
                         if (renderDiag.initializationTime > 0) {
                             appendLine()
                             appendLine("Initialization Time: ${formatTimestamp(renderDiag.initializationTime)}")
                         }
-                        
+
                         if (renderDiag.lastInitializationError != null) {
                             appendLine()
                             appendLine("⚠️ INITIALIZATION ERROR: ${renderDiag.lastInitializationError}")
                         }
-                        
+
                         if (!renderDiag.isInitialized) {
                             appendLine()
                             appendLine("⚠️ RENDERER NOT INITIALIZED - No 3D rendering!")
                         }
-                        if (renderDiag.isInitialized && !renderDiag.hasSwapChain) {
+                        // Only flag a missing SwapChain as a problem when the Surface is
+                        // actually attached and ready - otherwise it just means the world
+                        // view isn't on screen right now (Settings, backgrounded, etc.),
+                        // which is the normal state when capturing a debug report from
+                        // any non-WorldView screen.
+                        if (renderDiag.isInitialized && !renderDiag.hasSwapChain && renderDiag.isSurfaceReady) {
                             appendLine()
                             appendLine("⚠️ NO SWAP CHAIN - Rendering not visible!")
                         }
