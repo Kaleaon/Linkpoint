@@ -123,13 +123,19 @@ class RenderManager(private val context: Context) {
             return true
         }
         this.surfaceView = surfaceView
-        
+
+        val initStartedAt = System.currentTimeMillis()
+        RenderDiagnostics.filamentInitStart(
+            "surfaceSize=${surfaceView.width}x${surfaceView.height}"
+        )
+
         try {
             Log.d(TAG, "Initializing Filament engine...")
-            
+
             engine = Engine.create()
             val filamentEngine = engine ?: throw IllegalStateException("Failed to create Filament Engine")
-            
+            RenderDiagnostics.filamentEngineCreated("backend=default")
+
             renderer = filamentEngine.createRenderer()
             scene = filamentEngine.createScene()
             view = filamentEngine.createView()
@@ -191,32 +197,47 @@ class RenderManager(private val context: Context) {
                             Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
                             Log.i(TAG, "║ ⭐ UiHelper.onNativeWindowChanged - Surface available")
                             Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+                            RenderDiagnostics.filamentSurfaceAttached(
+                                surfaceView.width, surfaceView.height
+                            )
                             // Use synchronized to prevent race conditions with recreateSwapChain()
                             synchronized(swapChainLock) {
-                                swapChain?.let { 
+                                swapChain?.let {
                                     Log.d(TAG, "Destroying old SwapChain")
-                                    engine?.destroySwapChain(it) 
+                                    engine?.destroySwapChain(it)
+                                    RenderDiagnostics.filamentSwapChainDestroyed("native_window_changed")
                                 }
                                 swapChain = engine?.createSwapChain(surface)
                                 Log.i(TAG, "✓ SwapChain created: ${swapChain != null}")
+                                if (swapChain != null) {
+                                    RenderDiagnostics.filamentSwapChainCreated(
+                                        surfaceView.width, surfaceView.height
+                                    )
+                                } else {
+                                    RenderDiagnostics.filamentSwapChainFailed(
+                                        "engine?.createSwapChain returned null"
+                                    )
+                                }
                             }
                             attachDisplayHelper()
                         })
                     }
-                    
+
                     override fun onDetachedFromSurface() {
                         dispatcher.post(Runnable {
                             Log.w(TAG, "UiHelper.onDetachedFromSurface - Surface lost")
+                            RenderDiagnostics.filamentSurfaceDetached("UiHelper.onDetachedFromSurface")
                             displayHelper?.detach()
                             synchronized(swapChainLock) {
                                 swapChain?.let {
                                     engine?.destroySwapChain(it)
                                     swapChain = null
+                                    RenderDiagnostics.filamentSwapChainDestroyed("surface_lost")
                                 }
                             }
                         })
                     }
-                    
+
                     override fun onResized(width: Int, height: Int) {
                         dispatcher.post(Runnable {
                             Log.d(TAG, "onResized: ${width}x${height}")
@@ -224,6 +245,7 @@ class RenderManager(private val context: Context) {
                             viewportWidth = width
                             viewportHeight = height
                             updateProjection(width, height)
+                            RenderDiagnostics.filamentSurfaceChanged(width, height)
                         })
                     }
                 }
@@ -270,11 +292,19 @@ class RenderManager(private val context: Context) {
             isInitialized = true
             initializationTime = System.currentTimeMillis()
             Log.i(TAG, "Filament engine initialized successfully with SL defaults")
+            RenderDiagnostics.filamentInitDone(
+                durationMs = initializationTime - initStartedAt,
+                components = "engine,renderer,scene,view,camera,sceneManager," +
+                        (if (materialLoader != null) "materialLoader," else "") +
+                        (if (primRenderer != null) "primRenderer," else "") +
+                        (if (meshPrimRenderer != null) "meshPrimRenderer" else "")
+            )
             return true
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize Filament", e)
             lastInitializationError = "${e.javaClass.simpleName}: ${e.message}"
+            RenderDiagnostics.filamentInitFailed("initialize", e)
             shutdown()
             return false
         }
@@ -628,6 +658,7 @@ class RenderManager(private val context: Context) {
     private fun applyViewportSize(width: Int, height: Int, callSite: String) {
         if (width <= 0 || height <= 0) {
             Log.w(TAG, "applyViewportSize($callSite): refusing to set ${width}x${height}")
+            RenderDiagnostics.filamentViewport(width, height, "$callSite/refused")
             return
         }
         view?.viewport = Viewport(0, 0, width, height)
@@ -635,6 +666,7 @@ class RenderManager(private val context: Context) {
         viewportHeight = height
         updateProjection(width, height)
         Log.d(TAG, "Viewport applied explicitly from $callSite: ${width}x${height}")
+        RenderDiagnostics.filamentViewport(width, height, callSite)
     }
 
     private fun ensureSwapChain(engine: Engine): SwapChain? {
@@ -702,10 +734,14 @@ class RenderManager(private val context: Context) {
     private fun recreateSwapChainInternal(explicitWidth: Int, explicitHeight: Int) {
         requireRenderThread("recreateSwapChain")
         val engine = this.engine ?: return
-        val surface = surfaceView?.holder?.surface ?: return
+        val surface = surfaceView?.holder?.surface ?: run {
+            RenderDiagnostics.filamentSwapChainFailed("no surface")
+            return
+        }
 
         if (!surface.isValid) {
             Log.w(TAG, "Cannot recreate SwapChain - surface not valid")
+            RenderDiagnostics.filamentSwapChainFailed("surface invalid")
             return
         }
 
@@ -719,8 +755,10 @@ class RenderManager(private val context: Context) {
                 Log.i(TAG, "║ Destroying existing SwapChain before recreation")
                 try {
                     engine.destroySwapChain(oldSwapChain)
+                    RenderDiagnostics.filamentSwapChainDestroyed("recreate")
                 } catch (e: Exception) {
                     Log.w(TAG, "║ Warning: Error destroying old SwapChain: ${e.message}")
+                    RenderDiagnostics.filamentSwapChainFailed("destroy: ${e.message}")
                 }
                 swapChain = null
             }
@@ -730,6 +768,7 @@ class RenderManager(private val context: Context) {
                 swapChain = engine.createSwapChain(surface)
                 if (swapChain != null) {
                     Log.i(TAG, "║ ✓ SwapChain recreated successfully")
+                    RenderDiagnostics.filamentSwapChainCreated(explicitWidth, explicitHeight)
                     attachDisplayHelper()
                     if (explicitWidth > 0 && explicitHeight > 0) {
                         applyViewportSize(explicitWidth, explicitHeight, "recreateSwapChain(explicit)")
@@ -738,9 +777,11 @@ class RenderManager(private val context: Context) {
                     }
                 } else {
                     Log.e(TAG, "║ ✗ SwapChain recreation failed - createSwapChain returned null")
+                    RenderDiagnostics.filamentSwapChainFailed("createSwapChain returned null")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "║ ✗ SwapChain recreation threw exception: ${e.message}", e)
+                RenderDiagnostics.filamentSwapChainFailed("create exception: ${e.message}")
             }
         }
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
@@ -795,7 +836,8 @@ class RenderManager(private val context: Context) {
             renderer.endFrame()
             val count = frameCount.incrementAndGet()
             lastFrameTime = System.currentTimeMillis()
-            
+            RenderDiagnostics.filamentFrame()
+
             // Log successful rendering milestone exactly once (thread-safe with compareAndSet)
             if (count == FIRST_FRAME_COUNT && firstFrameLogged.compareAndSet(false, true)) {
                 Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
@@ -1055,6 +1097,9 @@ class RenderManager(private val context: Context) {
     fun shutdown() {
         requireRenderThread("shutdown")
         Log.i(TAG, "Shutting down render manager")
+        RenderDiagnostics.filamentShutdown(
+            "frames=${frameCount.get()} viewport=${viewportWidth}x${viewportHeight}"
+        )
 
         // Shutdown prim renderer first (depends on materials)
         primRenderer?.shutdown()

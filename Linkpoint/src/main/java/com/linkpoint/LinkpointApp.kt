@@ -496,9 +496,15 @@ class LinkpointApp : Application() {
             }
         }
         
-        // Initialize session log recorder for comprehensive packet logging
+        // Initialize and AUTO-START the session log recorder so every
+        // packet, HTTP request, capability event, and render-pipeline
+        // moment from app launch onward is captured. Without this the
+        // recorder was initialized but never actually recording, so
+        // SessionLogRecorder.log* calls (including the new
+        // RenderDiagnostics events) silently no-op'd.
         com.linkpoint.utils.SessionLogRecorder.initialize(this)
-        Log.i(TAG, "Session log recorder initialized")
+        com.linkpoint.utils.SessionLogRecorder.startRecording()
+        Log.i(TAG, "Session log recorder initialized and recording")
         
         // Initialize Linkpoint circuit integration (device-adaptive settings, DNS, IPv4)
         com.linkpoint.protocol.circuit.LinkpointCircuitIntegration.initialize(this)
