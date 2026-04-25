@@ -724,6 +724,13 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             }
         }
 
+        // Bakes-on-Mesh: install a resolver on PrimRenderer so mesh
+        // attachments referencing IMG_USE_BAKED_* sentinels get rewritten to
+        // the local agent's actual baked texture UUIDs.
+        app.renderManager.getPrimRenderer()?.setBomResolver { slot ->
+            app.avatarManager.getMyAvatar()?.baker?.getBakedTextures()?.get(slot)
+        }
+
         // Don't start render loop here - wait for surfaceCreated callback
         android.util.Log.i(TAG, "✓ RenderManager initialized, waiting for surface to be ready...")
     }

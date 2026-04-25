@@ -92,9 +92,10 @@ internal object ObjectMessageParsers {
 
             val parentId = buffer.int
             val updateFlags = buffer.int
-            buffer.get(); buffer.get(); buffer.short; buffer.short
-            repeat(11) { buffer.get() }
-            buffer.short; buffer.short; buffer.short
+            // Path/profile shape params: 23 bytes that determine the prim's
+            // base geometry (box / cylinder / sphere / torus / ...). Previously
+            // skipped, which is why every non-mesh prim rendered as a box.
+            val shapeParams = PrimShapeParams.readFrom(buffer)
 
             val textureEntry = ByteArray(buffer.short.toInt() and 0xFFFF).also(buffer::get)
             val textureAnim = ByteArray(buffer.get().toInt() and 0xFF).also(buffer::get)
@@ -125,7 +126,7 @@ internal object ObjectMessageParsers {
                 localId, fullId, parentId, position, rotation, velocity, scale, pcode, material,
                 clickAction, updateFlags, textureEntry, text, textColor, mediaUrl, soundId, ownerId,
                 gain, soundFlags, soundRadius, jointType, jointPivot, jointAxisOrAnchor,
-                String(nameValueBytes, Charsets.UTF_8), regionHandle, extraParams
+                String(nameValueBytes, Charsets.UTF_8), regionHandle, extraParams, shapeParams
             )
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse object block", e)

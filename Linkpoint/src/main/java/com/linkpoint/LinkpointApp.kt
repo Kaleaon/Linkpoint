@@ -767,6 +767,39 @@ class LinkpointApp : Application() {
                         terrainManager.reset()  // Reset terrain for new region
                         Log.d(TAG, "Terrain manager reset for new region, water height: ${regionData.waterHeight}")
                     }
+
+                    // Wire RegionHandshake terrain texture UUIDs + elevation
+                    // bounds into the renderer. terrainTextures is in the
+                    // order [Base0..3, Detail0..3]; the splatting material
+                    // uses the four detail textures.
+                    if (::renderManager.isInitialized) {
+                        val tr = renderManager.getTerrainRenderer()
+                        if (tr != null) {
+                            val starts = regionData.terrainStartHeights
+                            val ranges = regionData.terrainHeightRanges
+                            if (starts.size == 4 && ranges.size == 4) {
+                                tr.setHeightBlendParams(starts.toFloatArray(), ranges.toFloatArray())
+                            }
+                            // Resolve detail texture UUIDs through TextureManager;
+                            // each setDetailTexture() call will fire as soon as
+                            // the JPEG2000 decode lands.
+                            if (::textureManager.isInitialized && regionData.terrainTextures.size >= 8) {
+                                val detailIds = regionData.terrainTextures.subList(4, 8)
+                                detailIds.forEachIndexed { idx, uuid ->
+                                    applicationScope.launch {
+                                        val bmp = try {
+                                            textureManager.getTexture(uuid)
+                                        } catch (e: Exception) { null }
+                                        if (bmp != null) {
+                                            renderManager.dispatcher.post(Runnable {
+                                                renderManager.uploadTerrainDetailTexture(idx, bmp)
+                                            })
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                     
                     // Send RegionHandshakeReply DIRECTLY from I/O thread (non-suspend now)
                     try {

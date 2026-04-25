@@ -22,11 +22,19 @@ class SceneManager(private val engine: Engine, private val scene: Scene) {
     companion object {
         private const val TAG = "SceneManager"
 
-        // Avatar placeholder dimensions (humanoid capsule approximation, in meters).
-        // Real skinned meshes are a separate, much larger task; until then this
-        // makes avatars visible at the right height/footprint.
-        private const val AVATAR_PLACEHOLDER_HEIGHT = 1.85f
-        private const val AVATAR_PLACEHOLDER_RADIUS = 0.35f
+        // Articulated humanoid placeholder dimensions (meters).
+        // Eight body segments (head, torso, two upper arms, two upper legs,
+        // two lower legs) approximate the standard SL avatar silhouette
+        // until proper skinned LL meshes land.
+        private const val AVATAR_TOTAL_HEIGHT = 1.85f
+        private const val AVATAR_HEAD_RADIUS = 0.13f
+        private const val AVATAR_TORSO_HEIGHT = 0.62f
+        private const val AVATAR_TORSO_RADIUS = 0.18f
+        private const val AVATAR_LIMB_RADIUS = 0.07f
+        private const val AVATAR_UPPER_ARM_LEN = 0.32f
+        private const val AVATAR_LOWER_ARM_LEN = 0.28f
+        private const val AVATAR_UPPER_LEG_LEN = 0.42f
+        private const val AVATAR_LOWER_LEG_LEN = 0.42f
     }
 
     // Object tracking
@@ -40,11 +48,14 @@ class SceneManager(private val engine: Engine, private val scene: Scene) {
     private var cameraPosition = LLVector3(128f, 128f, 30f)
     private var cameraTarget = LLVector3(128f, 128f, 0f)
 
-    // Avatar placeholder rendering. Set via setAvatarMaterial() once the
-    // MaterialLoader has compiled the lit material; until then avatars are
-    // tracked but invisible (same behaviour as the previous code).
+    // Avatar segment meshes (built once and shared across all avatars).
     private var avatarMaterial: MaterialInstance? = null
-    private var avatarMesh: AvatarMesh? = null
+    private var headMesh: AvatarMesh? = null
+    private var torsoMesh: AvatarMesh? = null
+    private var upperArmMesh: AvatarMesh? = null
+    private var lowerArmMesh: AvatarMesh? = null
+    private var upperLegMesh: AvatarMesh? = null
+    private var lowerLegMesh: AvatarMesh? = null
 
     /**
      * Provide the lit material used to render avatar placeholder geometry.
@@ -53,8 +64,13 @@ class SceneManager(private val engine: Engine, private val scene: Scene) {
      */
     fun setAvatarMaterial(material: Material) {
         avatarMaterial = material.createInstance()
-        avatarMesh = buildAvatarPlaceholderMesh()
-        Log.i(TAG, "Avatar material set; placeholder mesh ready")
+        headMesh = buildSphereMesh(AVATAR_HEAD_RADIUS)
+        torsoMesh = buildCapsuleMesh(AVATAR_TORSO_RADIUS, AVATAR_TORSO_HEIGHT)
+        upperArmMesh = buildCapsuleMesh(AVATAR_LIMB_RADIUS, AVATAR_UPPER_ARM_LEN)
+        lowerArmMesh = buildCapsuleMesh(AVATAR_LIMB_RADIUS, AVATAR_LOWER_ARM_LEN)
+        upperLegMesh = buildCapsuleMesh(AVATAR_LIMB_RADIUS * 1.3f, AVATAR_UPPER_LEG_LEN)
+        lowerLegMesh = buildCapsuleMesh(AVATAR_LIMB_RADIUS * 1.2f, AVATAR_LOWER_LEG_LEN)
+        Log.i(TAG, "Avatar material set; articulated body meshes ready")
 
         // Retroactively attach renderables to any avatars that came in before
         // the material was wired up.
@@ -149,72 +165,111 @@ class SceneManager(private val engine: Engine, private val scene: Scene) {
     }
 
     /**
-     * Build the RenderableComponent for an avatar entity using the shared
-     * placeholder capsule mesh and lit material. Called from updateAvatar()
-     * for new avatars, and from setAvatarMaterial() for any avatars that
-     * arrived before the material was ready.
+     * Build the RenderableComponents for an avatar's articulated body.
+     * Each avatar gets a root entity (the existing `avatar.entity`) plus
+     * 8 child entities: head, torso, two upper arms, two upper legs, two
+     * lower legs. The root holds the avatar's world transform (from the
+     * AvatarUpdate); each child has a fixed local offset under the root.
      *
-     * If the avatar material hasn't been wired up yet (MaterialLoader still
-     * compiling, or compilation failed), this is a no-op — the entity is
-     * still added to the scene but won't render until the material lands.
-     * Real skinned-mesh avatar rendering is a separate follow-up.
+     * Skipping the avatar (no-op) is fine if the material isn't ready yet —
+     * the entity is still in the scene; child renderables get attached
+     * retroactively from setAvatarMaterial().
+     *
+     * Real skinned skeletal animation would replace the fixed local offsets
+     * with the AvatarSkeleton.Bone.worldMatrix per frame; the structure here
+     * is set up to take that swap.
      */
     private fun attachAvatarRenderable(avatar: AvatarObject) {
-        val mesh = avatarMesh ?: return
         val material = avatarMaterial ?: return
+        val head = headMesh ?: return
+        val torso = torsoMesh ?: return
+        val upArm = upperArmMesh ?: return
+        val loArm = lowerArmMesh ?: return
+        val upLeg = upperLegMesh ?: return
+        val loLeg = lowerLegMesh ?: return
         try {
-            RenderableManager.Builder(1)
-                .boundingBox(
-                    Box(
-                        -AVATAR_PLACEHOLDER_RADIUS,
-                        -AVATAR_PLACEHOLDER_RADIUS,
-                        0f,
-                        AVATAR_PLACEHOLDER_RADIUS,
-                        AVATAR_PLACEHOLDER_RADIUS,
-                        AVATAR_PLACEHOLDER_HEIGHT
-                    )
-                )
-                .geometry(0, RenderableManager.PrimitiveType.TRIANGLES, mesh.vertexBuffer, mesh.indexBuffer)
-                .material(0, material)
-                .culling(true)
-                .receiveShadows(true)
-                .castShadows(true)
-                .build(engine, avatar.entity)
-            avatar.renderable = avatar.entity
+            // Root entity: already in `avatar.entity`. Give it a transform so
+            // child segments inherit the avatar's world position/rotation.
             engine.transformManager.create(avatar.entity)
+
+            // Body segment offsets (entity-local, meters). Z is up; the avatar
+            // root sits at the feet so segments stack upward from z=0.
+            data class Seg(val mesh: AvatarMesh, val z: Float, val x: Float = 0f, val height: Float = 0f, val radius: Float = 0f)
+            val bottomOfTorso = AVATAR_LOWER_LEG_LEN + AVATAR_UPPER_LEG_LEN
+            val segments = listOf(
+                Seg(head,  bottomOfTorso + AVATAR_TORSO_HEIGHT + AVATAR_HEAD_RADIUS,
+                    radius = AVATAR_HEAD_RADIUS),
+                Seg(torso, bottomOfTorso, height = AVATAR_TORSO_HEIGHT, radius = AVATAR_TORSO_RADIUS),
+                Seg(upArm, bottomOfTorso + AVATAR_TORSO_HEIGHT - AVATAR_UPPER_ARM_LEN,
+                    x = AVATAR_TORSO_RADIUS + AVATAR_LIMB_RADIUS,
+                    height = AVATAR_UPPER_ARM_LEN, radius = AVATAR_LIMB_RADIUS),
+                Seg(upArm, bottomOfTorso + AVATAR_TORSO_HEIGHT - AVATAR_UPPER_ARM_LEN,
+                    x = -(AVATAR_TORSO_RADIUS + AVATAR_LIMB_RADIUS),
+                    height = AVATAR_UPPER_ARM_LEN, radius = AVATAR_LIMB_RADIUS),
+                Seg(loArm, bottomOfTorso + AVATAR_TORSO_HEIGHT - AVATAR_UPPER_ARM_LEN - AVATAR_LOWER_ARM_LEN,
+                    x = AVATAR_TORSO_RADIUS + AVATAR_LIMB_RADIUS,
+                    height = AVATAR_LOWER_ARM_LEN, radius = AVATAR_LIMB_RADIUS),
+                Seg(loArm, bottomOfTorso + AVATAR_TORSO_HEIGHT - AVATAR_UPPER_ARM_LEN - AVATAR_LOWER_ARM_LEN,
+                    x = -(AVATAR_TORSO_RADIUS + AVATAR_LIMB_RADIUS),
+                    height = AVATAR_LOWER_ARM_LEN, radius = AVATAR_LIMB_RADIUS),
+                Seg(upLeg, AVATAR_LOWER_LEG_LEN, x = AVATAR_LIMB_RADIUS,
+                    height = AVATAR_UPPER_LEG_LEN, radius = AVATAR_LIMB_RADIUS * 1.3f),
+                Seg(upLeg, AVATAR_LOWER_LEG_LEN, x = -AVATAR_LIMB_RADIUS,
+                    height = AVATAR_UPPER_LEG_LEN, radius = AVATAR_LIMB_RADIUS * 1.3f),
+                Seg(loLeg, 0f, x = AVATAR_LIMB_RADIUS,
+                    height = AVATAR_LOWER_LEG_LEN, radius = AVATAR_LIMB_RADIUS * 1.2f),
+                Seg(loLeg, 0f, x = -AVATAR_LIMB_RADIUS,
+                    height = AVATAR_LOWER_LEG_LEN, radius = AVATAR_LIMB_RADIUS * 1.2f)
+            )
+
+            for (seg in segments) {
+                val child = entityManager.create()
+                val r = if (seg.radius > 0f) seg.radius else 0.2f
+                val h = if (seg.height > 0f) seg.height else (seg.radius * 2f)
+                RenderableManager.Builder(1)
+                    .boundingBox(Box(-r, -r, 0f, r, r, h.coerceAtLeast(r * 2f)))
+                    .geometry(0, RenderableManager.PrimitiveType.TRIANGLES,
+                        seg.mesh.vertexBuffer, seg.mesh.indexBuffer)
+                    .material(0, material)
+                    .culling(true)
+                    .receiveShadows(true)
+                    .castShadows(true)
+                    .build(engine, child)
+
+                val ti = engine.transformManager.create(child)
+                val tm = engine.transformManager
+                val rootInstance = tm.getInstance(avatar.entity)
+                if (rootInstance != 0 && ti != 0) {
+                    tm.setParent(ti, rootInstance)
+                }
+                // Local offset: x sideways, z height (Z up).
+                val localTransform = floatArrayOf(
+                    1f, 0f, 0f, 0f,
+                    0f, 1f, 0f, 0f,
+                    0f, 0f, 1f, 0f,
+                    seg.x, 0f, seg.z, 1f
+                )
+                if (ti != 0) tm.setTransform(ti, localTransform)
+
+                scene.addEntity(child)
+                avatar.bodySegmentEntities.add(child)
+            }
+            avatar.renderable = avatar.entity // mark as built
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to attach avatar renderable for ${avatar.agentId}", e)
+            Log.w(TAG, "Failed to attach articulated avatar for ${avatar.agentId}", e)
         }
     }
 
     /**
-     * Build a single shared capsule-ish mesh used as the placeholder body for
-     * every avatar. The geometry is positioned with feet at z=0 and head at
-     * z=AVATAR_PLACEHOLDER_HEIGHT in entity-local space, so the avatar's
-     * world-space transform from the protocol layer can be applied directly.
-     *
-     * Capsule = lower hemisphere + cylinder + upper hemisphere. We re-use the
-     * same vertex layout (FLOAT3 position, FLOAT3 normal, FLOAT2 UV) as
-     * PrimRenderer so it consumes the same lit material.
+     * Build a sphere mesh of the given radius. Same vertex layout
+     * (POSITION+TANGENTS+UV0) as PrimRenderer so it shares the lit material.
      */
-    private fun buildAvatarPlaceholderMesh(): AvatarMesh {
+    private fun buildSphereMesh(radius: Float): AvatarMesh {
         val rings = 12
-        val segments = 16
-        val radius = AVATAR_PLACEHOLDER_RADIUS
-        val cylinderHeight = (AVATAR_PLACEHOLDER_HEIGHT - 2f * radius).coerceAtLeast(0.01f)
-
-        val vertices = mutableListOf<Float>()
-        val indices = mutableListOf<Short>()
-
-        fun pushVertex(x: Float, y: Float, z: Float, nx: Float, ny: Float, nz: Float, u: Float, v: Float) {
-            vertices.add(x); vertices.add(y); vertices.add(z)
-            vertices.add(nx); vertices.add(ny); vertices.add(nz)
-            vertices.add(u); vertices.add(v)
-        }
-
-        // Lower hemisphere: from y = -PI/2 to 0 (capsule bottom), centered at z=radius
-        var rowStart = 0
-        for (ring in 0..rings / 2) {
+        val segments = 18
+        val verts = mutableListOf<Float>()
+        val idx = mutableListOf<Short>()
+        for (ring in 0..rings) {
             val phi = -PI / 2.0 + PI * ring / rings
             val cp = cos(phi).toFloat()
             val sp = sin(phi).toFloat()
@@ -222,36 +277,70 @@ class SceneManager(private val engine: Engine, private val scene: Scene) {
                 val theta = 2.0 * PI * seg / segments
                 val ct = cos(theta).toFloat()
                 val st = sin(theta).toFloat()
-                val nx = cp * ct
-                val ny = cp * st
-                val nz = sp
-                val px = nx * radius
-                val py = ny * radius
+                val nx = cp * ct; val ny = cp * st; val nz = sp
+                val px = nx * radius; val py = ny * radius
                 val pz = nz * radius + radius
-                pushVertex(px, py, pz, nx, ny, nz, seg.toFloat() / segments, ring.toFloat() / rings * 0.5f)
+                verts += floatArrayOf(
+                    px, py, pz, nx, ny, nz,
+                    seg.toFloat() / segments, ring.toFloat() / rings
+                ).toList()
             }
         }
-        // Upper hemisphere: from 0 to PI/2, centered at z = radius + cylinderHeight
+        val verticesPerRing = segments + 1
+        for (r in 0 until rings) {
+            for (s in 0 until segments) {
+                val i0 = (r * verticesPerRing + s).toShort()
+                val i1 = (i0 + 1).toShort()
+                val i2 = ((r + 1) * verticesPerRing + s).toShort()
+                val i3 = (i2 + 1).toShort()
+                idx += listOf(i0, i2, i1, i1, i2, i3)
+            }
+        }
+        return uploadAvatarMesh(verts.toFloatArray(), idx.toShortArray())
+    }
+
+    /**
+     * Build a capsule (cylinder + two hemispherical caps) of the given
+     * radius and height. Capsule's bottom hemisphere centre sits at z=0,
+     * cylinder spans z=0..height, top hemisphere on top.
+     */
+    private fun buildCapsuleMesh(radius: Float, height: Float): AvatarMesh {
+        val rings = 8
+        val segments = 14
+        val verts = mutableListOf<Float>()
+        val idx = mutableListOf<Short>()
+        // Lower hemisphere
         for (ring in 0..rings / 2) {
-            val phi = PI * ring / rings
-            val cp = cos(phi).toFloat()
-            val sp = sin(phi).toFloat()
+            val phi = -PI / 2.0 + PI * ring / rings
+            val cp = cos(phi).toFloat(); val sp = sin(phi).toFloat()
             for (seg in 0..segments) {
                 val theta = 2.0 * PI * seg / segments
-                val ct = cos(theta).toFloat()
-                val st = sin(theta).toFloat()
-                val nx = cp * ct
-                val ny = cp * st
-                val nz = sp
-                val px = nx * radius
-                val py = ny * radius
-                val pz = nz * radius + radius + cylinderHeight
-                pushVertex(px, py, pz, nx, ny, nz, seg.toFloat() / segments, 0.5f + ring.toFloat() / rings * 0.5f)
+                val ct = cos(theta).toFloat(); val st = sin(theta).toFloat()
+                val nx = cp * ct; val ny = cp * st; val nz = sp
+                val px = nx * radius; val py = ny * radius; val pz = nz * radius
+                verts += floatArrayOf(
+                    px, py, pz, nx, ny, nz,
+                    seg.toFloat() / segments, ring.toFloat() / rings * 0.5f
+                ).toList()
             }
         }
-
-        // Build indices spanning both hemispheres + the cylindrical seam between them.
-        val ringsTotal = rings + 1 // (rings/2 + 1) bottom + (rings/2 + 1) top - 0 (no shared row)
+        // Upper hemisphere offset by `height`
+        for (ring in 0..rings / 2) {
+            val phi = PI * ring / rings
+            val cp = cos(phi).toFloat(); val sp = sin(phi).toFloat()
+            for (seg in 0..segments) {
+                val theta = 2.0 * PI * seg / segments
+                val ct = cos(theta).toFloat(); val st = sin(theta).toFloat()
+                val nx = cp * ct; val ny = cp * st; val nz = sp
+                val px = nx * radius; val py = ny * radius
+                val pz = nz * radius + height
+                verts += floatArrayOf(
+                    px, py, pz, nx, ny, nz,
+                    seg.toFloat() / segments, 0.5f + ring.toFloat() / rings * 0.5f
+                ).toList()
+            }
+        }
+        val ringsTotal = rings + 1
         val verticesPerRing = segments + 1
         for (r in 0 until ringsTotal - 1) {
             for (s in 0 until segments) {
@@ -259,12 +348,10 @@ class SceneManager(private val engine: Engine, private val scene: Scene) {
                 val i1 = (i0 + 1).toShort()
                 val i2 = ((r + 1) * verticesPerRing + s).toShort()
                 val i3 = (i2 + 1).toShort()
-                indices.add(i0); indices.add(i2); indices.add(i1)
-                indices.add(i1); indices.add(i2); indices.add(i3)
+                idx += listOf(i0, i2, i1, i1, i2, i3)
             }
         }
-
-        return uploadAvatarMesh(vertices.toFloatArray(), indices.toShortArray())
+        return uploadAvatarMesh(verts.toFloatArray(), idx.toShortArray())
     }
 
     private fun uploadAvatarMesh(verts: FloatArray, idx: ShortArray): AvatarMesh {
@@ -301,6 +388,11 @@ class SceneManager(private val engine: Engine, private val scene: Scene) {
      */
     fun removeAvatar(agentId: UUID) {
         avatars.remove(agentId)?.let { avatar ->
+            avatar.bodySegmentEntities.forEach { child ->
+                scene.removeEntity(child)
+                entityManager.destroy(child)
+            }
+            avatar.bodySegmentEntities.clear()
             scene.removeEntity(avatar.entity)
             entityManager.destroy(avatar.entity)
             Log.d(TAG, "Removed avatar: $agentId")
@@ -386,6 +478,11 @@ class SceneManager(private val engine: Engine, private val scene: Scene) {
         sceneObjects.clear()
         
         avatars.values.forEach { avatar ->
+            avatar.bodySegmentEntities.forEach { child ->
+                scene.removeEntity(child)
+                entityManager.destroy(child)
+            }
+            avatar.bodySegmentEntities.clear()
             scene.removeEntity(avatar.entity)
             entityManager.destroy(avatar.entity)
         }
@@ -490,7 +587,13 @@ data class AvatarObject(
     var displayName: String = "",
     var isTyping: Boolean = false,
     var isSitting: Boolean = false,
-    var renderable: Int = 0
+    var renderable: Int = 0,
+    /**
+     * Per-avatar child entities for the articulated body segments
+     * (head/torso/arms/legs). Tracked here so removeAvatar() can detach
+     * and destroy them along with the root entity.
+     */
+    val bodySegmentEntities: MutableList<Int> = mutableListOf()
 )
 
 internal data class AvatarMesh(

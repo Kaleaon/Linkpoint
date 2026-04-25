@@ -147,15 +147,15 @@ class RenderManager(private val context: Context) {
                     // even after AvatarUpdate flow runs.
                     sceneManager?.setAvatarMaterial(litMaterial)
 
-                    // Instantiate terrain renderer using the same lit material.
-                    // The TerrainRenderer uses standard PBR params (baseColor /
-                    // metallic / roughness) rather than the unused detail0..3
-                    // splatting parameters, so the lit material works fine
-                    // until per-region terrain detail textures land.
+                    // Use the dedicated terrain splatting material if it
+                    // compiled; otherwise fall back to the lit material so we
+                    // still get visible (untextured) terrain rather than
+                    // black geometry.
+                    val terrainMat = materialLoader?.getTerrainMaterial() ?: litMaterial
                     terrainRenderer = TerrainRenderer(filamentEngine, filamentScene).also {
-                        it.initialize(litMaterial)
+                        it.initialize(terrainMat)
                     }
-                    Log.d(TAG, "TerrainRenderer initialized")
+                    Log.d(TAG, "TerrainRenderer initialized with ${if (terrainMat === litMaterial) "lit fallback" else "splat material"}")
                 } else {
                     Log.w(TAG, "No lit material available - PrimRenderer not initialized")
                 }
@@ -433,6 +433,49 @@ class RenderManager(private val context: Context) {
      * (TerrainManager.setTerrainRenderer).
      */
     fun getTerrainRenderer(): TerrainRenderer? = terrainRenderer
+
+    /**
+     * Upload a Bitmap as a Filament Texture and hand it to the TerrainRenderer
+     * as detail texture [index] (0..3). Must run on the render thread.
+     * Bitmap pixels are copied into a native byte buffer; the Bitmap can be
+     * recycled by the caller after this returns.
+     */
+    fun uploadTerrainDetailTexture(index: Int, bitmap: android.graphics.Bitmap) {
+        requireRenderThread("uploadTerrainDetailTexture")
+        val eng = engine ?: return
+        val tr = terrainRenderer ?: return
+        try {
+            val w = bitmap.width
+            val h = bitmap.height
+            val pixels = IntArray(w * h)
+            bitmap.getPixels(pixels, 0, w, 0, 0, w, h)
+            val rgba = java.nio.ByteBuffer.allocateDirect(w * h * 4)
+                .order(java.nio.ByteOrder.nativeOrder())
+            for (i in 0 until w * h) {
+                val argb = pixels[i]
+                rgba.put(((argb shr 16) and 0xFF).toByte()) // R
+                rgba.put(((argb shr 8) and 0xFF).toByte())  // G
+                rgba.put((argb and 0xFF).toByte())          // B
+                rgba.put(((argb shr 24) and 0xFF).toByte()) // A
+            }
+            rgba.flip()
+            val tex = Texture.Builder()
+                .width(w).height(h)
+                .levels(1)
+                .sampler(Texture.Sampler.SAMPLER_2D)
+                .format(Texture.InternalFormat.RGBA8)
+                .build(eng)
+            val pixelBuffer = Texture.PixelBufferDescriptor(
+                rgba, Texture.Format.RGBA, Texture.Type.UBYTE
+            )
+            tex.setImage(eng, 0, pixelBuffer)
+            tex.generateMipmaps(eng)
+            tr.setDetailTexture(index, tex, scale = 16f)
+            Log.d(TAG, "Uploaded terrain detail texture $index (${w}x${h})")
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to upload terrain detail $index: ${e.message}", e)
+        }
+    }
     
     private fun updateProjection(width: Int, height: Int) {
         val aspect = width.toFloat() / height.toFloat()

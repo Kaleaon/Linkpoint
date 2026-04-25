@@ -62,6 +62,84 @@ class MaterialLoader(
             }
         """
 
+        // Terrain material with 4-channel splatting and elevation-based blending.
+        //
+        // SL terrain blends between four detail textures based on the vertex's
+        // world Z (height) using two interpolated thresholds per region
+        // corner ("low" and "high"). Each corner of the 256m region has its
+        // own [start, range] pair (4 floats each, packed into two float4
+        // params); we pick the blend bounds at each fragment by bilinearly
+        // interpolating the corner params from the world-space XY position.
+        //
+        // The four detail textures are tiled at a fixed UV scale (~16m) and
+        // blended into a single base colour. This is the minimum-viable
+        // splatting: full LL parity would also include slope-based blending,
+        // bump maps, and per-region overrides, but elevation-only is what
+        // actually shows up at typical viewer settings.
+        private const val TERRAIN_MATERIAL_SOURCE = """
+            material {
+                name : TerrainSplat,
+                shadingModel : lit,
+                requires : [ uv0, uv1 ],
+                parameters : [
+                    { type : sampler2d, name : detail0 },
+                    { type : sampler2d, name : detail1 },
+                    { type : sampler2d, name : detail2 },
+                    { type : sampler2d, name : detail3 },
+                    { type : float4,    name : startHeights },
+                    { type : float4,    name : heightRanges },
+                    { type : float,     name : detailScale }
+                ]
+            }
+            fragment {
+                void material(inout MaterialInputs material) {
+                    prepareMaterial(material);
+
+                    // UV0 is normalised region position (0..1 in X and Y).
+                    float2 uv = getUV0();
+                    // UV1.x carries the vertex's world-space Z (height).
+                    float h = getUV1().x;
+
+                    // Bilinearly interpolate corner blend params from XY in
+                    // the region. corner order: (0,0) (1,0) (0,1) (1,1).
+                    float wx = clamp(uv.x, 0.0, 1.0);
+                    float wy = clamp(uv.y, 0.0, 1.0);
+                    float s00 = materialParams.startHeights.x;
+                    float s10 = materialParams.startHeights.y;
+                    float s01 = materialParams.startHeights.z;
+                    float s11 = materialParams.startHeights.w;
+                    float r00 = materialParams.heightRanges.x;
+                    float r10 = materialParams.heightRanges.y;
+                    float r01 = materialParams.heightRanges.z;
+                    float r11 = materialParams.heightRanges.w;
+                    float startHeight = mix(mix(s00, s10, wx), mix(s01, s11, wx), wy);
+                    float heightRange = mix(mix(r00, r10, wx), mix(r01, r11, wx), wy);
+                    float t = clamp((h - startHeight) / max(heightRange, 0.001), 0.0, 1.0);
+
+                    // Three blend zones: detail0 -> detail1 -> detail2 -> detail3
+                    // mapped to t in [0, 1/3, 2/3, 1].
+                    float scale = max(materialParams.detailScale, 0.001);
+                    float2 dUV = uv * (256.0 / scale);
+                    float4 c0 = texture(materialParams_detail0, dUV);
+                    float4 c1 = texture(materialParams_detail1, dUV);
+                    float4 c2 = texture(materialParams_detail2, dUV);
+                    float4 c3 = texture(materialParams_detail3, dUV);
+
+                    float4 col;
+                    if (t < 0.3333) {
+                        col = mix(c0, c1, t * 3.0);
+                    } else if (t < 0.6666) {
+                        col = mix(c1, c2, (t - 0.3333) * 3.0);
+                    } else {
+                        col = mix(c2, c3, (t - 0.6666) * 3.0);
+                    }
+                    material.baseColor = col;
+                    material.metallic = 0.0;
+                    material.roughness = 0.95;
+                }
+            }
+        """
+
         init {
             // Initialize MaterialBuilder (required before any material compilation)
             MaterialBuilder.init()
@@ -70,6 +148,7 @@ class MaterialLoader(
 
     private var unlitMaterial: Material? = null
     private var litMaterial: Material? = null
+    private var terrainMaterial: Material? = null
     private val customMaterials = mutableMapOf<String, Material>()
 
     /**
@@ -92,6 +171,14 @@ class MaterialLoader(
             if (litMaterial == null) {
                 Log.e(TAG, "Failed to create lit material")
                 return false
+            }
+
+            // Terrain splatting material; non-fatal if it fails to compile —
+            // TerrainRenderer will fall back to the lit material with no
+            // detail textures.
+            terrainMaterial = compileMaterial(TERRAIN_MATERIAL_SOURCE, "TerrainSplat")
+            if (terrainMaterial == null) {
+                Log.w(TAG, "Failed to compile terrain material; falling back to lit material")
             }
 
             Log.i(TAG, "MaterialLoader initialized successfully")
@@ -173,6 +260,12 @@ class MaterialLoader(
      * Get the default lit material.
      */
     fun getLitMaterial(): Material? = litMaterial
+
+    /**
+     * Get the terrain splatting material. May be null if compilation failed;
+     * callers should fall back to the lit material in that case.
+     */
+    fun getTerrainMaterial(): Material? = terrainMaterial
 
     /**
      * Create a material instance with a specific color.
