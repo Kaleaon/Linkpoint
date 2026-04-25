@@ -12,6 +12,7 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.*
 
 /**
@@ -65,6 +66,19 @@ object NetworkLogger {
     
     // In-memory log buffer for export/debugging
     private val logBuffer = ConcurrentLinkedQueue<LogEntry>()
+
+    // Monotonic counters for the lifetime of the process. The buffer above is
+    // bounded at MAX_LOG_ENTRIES, so deriving statistics from it under-reports
+    // (e.g. UDP debug spam evicts older HTTP_REQUEST entries and the count
+    // collapses to 0). These atomics keep accurate totals regardless of buffer
+    // turnover.
+    private val httpRequestCount = AtomicLong(0)
+    private val httpResponseCount = AtomicLong(0)
+    private val errorCount = AtomicLong(0)
+    private val warningCount = AtomicLong(0)
+    private val retryCount = AtomicLong(0)
+    private val timeoutCount = AtomicLong(0)
+    private val redirectCount = AtomicLong(0)
     
     // Date formatter for timestamps
     private val timestampFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
@@ -939,6 +953,22 @@ object NetworkLogger {
         while (logBuffer.size > MAX_LOG_ENTRIES) {
             logBuffer.poll()
         }
+
+        // Bump monotonic statistics counters - kept independent of the bounded
+        // buffer so they don't silently regress when old entries are evicted.
+        when (level) {
+            Level.ERROR -> errorCount.incrementAndGet()
+            Level.WARN -> warningCount.incrementAndGet()
+            else -> {}
+        }
+        when (category) {
+            Category.HTTP_REQUEST -> httpRequestCount.incrementAndGet()
+            Category.HTTP_RESPONSE -> httpResponseCount.incrementAndGet()
+            Category.RETRY -> retryCount.incrementAndGet()
+            Category.TIMEOUT -> timeoutCount.incrementAndGet()
+            Category.REDIRECT -> redirectCount.incrementAndGet()
+            else -> {}
+        }
         
         // Format for logcat
         val timestamp = timestampFormat.format(Date(entry.timestamp))
@@ -989,46 +1019,45 @@ object NetworkLogger {
      */
     fun clearLogs() {
         logBuffer.clear()
+        httpRequestCount.set(0)
+        httpResponseCount.set(0)
+        errorCount.set(0)
+        warningCount.set(0)
+        retryCount.set(0)
+        timeoutCount.set(0)
+        redirectCount.set(0)
         Log.i(TAG, "Network logs cleared")
     }
-    
+
     /**
-     * Get statistics about logged network activity
+     * Get statistics about logged network activity. Counts are monotonic for the
+     * lifetime of the process (or until [clearLogs] is called) and are NOT
+     * derived from the bounded log buffer, so they remain accurate even after
+     * thousands of UDP debug entries have rolled the buffer.
      */
     fun getStatistics(): NetworkStatistics {
-        val stats = NetworkStatistics()
-        
-        logBuffer.forEach { entry ->
-            when (entry.level) {
-                Level.ERROR -> stats.errorCount++
-                Level.WARN -> stats.warningCount++
-                else -> {}
-            }
-            
-            when (entry.category) {
-                Category.HTTP_REQUEST -> stats.requestCount++
-                Category.HTTP_RESPONSE -> stats.responseCount++
-                Category.RETRY -> stats.retryCount++
-                Category.TIMEOUT -> stats.timeoutCount++
-                Category.REDIRECT -> stats.redirectCount++
-                else -> {}
-            }
-        }
-        
-        return stats
+        return NetworkStatistics(
+            requestCount = httpRequestCount.get(),
+            responseCount = httpResponseCount.get(),
+            errorCount = errorCount.get(),
+            warningCount = warningCount.get(),
+            retryCount = retryCount.get(),
+            timeoutCount = timeoutCount.get(),
+            redirectCount = redirectCount.get()
+        )
     }
     
     /**
      * Statistics about network activity
      */
     data class NetworkStatistics(
-        var requestCount: Int = 0,
-        var responseCount: Int = 0,
-        var errorCount: Int = 0,
-        var warningCount: Int = 0,
-        var retryCount: Int = 0,
-        var timeoutCount: Int = 0,
-        var redirectCount: Int = 0
+        var requestCount: Long = 0,
+        var responseCount: Long = 0,
+        var errorCount: Long = 0,
+        var warningCount: Long = 0,
+        var retryCount: Long = 0,
+        var timeoutCount: Long = 0,
+        var redirectCount: Long = 0
     ) {
         override fun toString(): String {
             return buildString {
