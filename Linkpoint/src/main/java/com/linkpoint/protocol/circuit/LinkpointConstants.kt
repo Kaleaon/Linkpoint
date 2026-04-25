@@ -34,9 +34,14 @@ object LinkpointConstants {
     const val TRACK_HANDLED_PACKETS = 1024
     
     /** Number of unanswered pings before declaring connection dead.
-     *  Increased from 3 to 5 for mobile network tolerance (LTE/5G can have
-     *  high latency spikes where 3 pings is too aggressive). */
-    const val UNANSWERED_PINGS_DISCONNECT = 5
+     *  Matches Lumiya's `SLCircuit.UNANSWERED_PINGS = 3`. With PING_INTERVAL_MS=5000 and
+     *  NEED_PING_TIMEOUT_MS=10000, the worst-case dead-time before reconnect is ~25s
+     *  (10s receive-silence + 3 * 5s ping intervals). Bumping this to 5 (a previous
+     *  experiment) extended dead-time to ~35s for no benefit on LTE — pings are
+     *  unreliable, so once 3 in a row are lost the path is dead and waiting longer
+     *  doesn't help. The 2026-04-25 Athanasia capture sat at 4 unanswered pings,
+     *  one short of the 5-threshold, with no recovery — restoring 3 closes that gap. */
+    const val UNANSWERED_PINGS_DISCONNECT = 3
     
     // ==================== HTTP CONNECTION SETTINGS (SLHTTPSConnection.java) ====================
     

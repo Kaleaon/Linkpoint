@@ -81,28 +81,37 @@ the receive side**, not state-based on the send side.
 
 ---
 
-## 3. Ping packets must be reliable
+## 3. Reliable-vs-unreliable matrix
 
-`SLCircuit.java:311-338` calls `SendMessage(startPingCheck)`. Default
-`SLMessage.isReliable` is `false`, **but** `SLAgentCircuit.SendUseCode()` and
-many auth-critical messages explicitly set `useCircuitCode.isReliable = true`
-(`SLAgentCircuit.java:1772`). For pings the reliability is implicit: the
-*reply* (`CompletePingCheck`) arrives unreliably from the sim, but the
-**outbound `StartPingCheck` carries `OldestUnacked`**, which is part of the
-sim's flow-control protocol. If we lose the outbound ping the sim has no
-chance to retransmit unacked packets, and our `unackedQueue` will never drain.
+`SLCircuit.java:311-338` calls `SendMessage(startPingCheck)`. `SendMessage`
+does **not** auto-set the reliable flag — it just enqueues. `StartPingCheck`
+inherits `SLMessage.isReliable = false` and stays unreliable. The "reliability"
+of pings comes from a parallel mechanism: the watchdog itself sends a fresh
+ping every `PING_INTERVAL` (5 s) until either a `CompletePingCheck` arrives
+(implicitly via the receive path resetting `pingSentCount`) or 3 unanswered
+pings trip `ProcessTimeout()`. Pings are **not** retransmitted via the
+`unackedQueue`.
 
-Recommendation:
-- Mark `StartPingCheck` reliable (matches Linkpoint debug-report finding —
-  `UDPConnectionFixed.kt:1138` currently sends `reliable=false`).
-- Mark `UseCircuitCode`, `CompleteAgentMovement`, `LogoutRequest`,
-  `TeleportLocationRequest`, `TeleportLandmarkRequest`, `TeleportLureRequest`,
-  `RegionHandshakeReply`, `AgentThrottle`, `AgentSetAppearance`,
-  `Inventory*Item`, `*Friendship`, `Object*` (modify/delete/select), and
-  `MoneyTransferRequest` reliable. (Lumiya sets all of these explicitly —
-  search `isReliable = true` across `slproto/`.)
-- Keep `AgentUpdate`, `AgentAnimation`, `ObjectGrab*` (per Lumiya), and
-  `ChatFromViewer` unreliable. The protocol expects them to be lossy.
+The `OldestUnacked` field packed into outbound `StartPingCheck` is purely
+informational — it tells the sim our oldest pending sequence number so it can
+retransmit anything below that. Loss of the outbound ping itself is benign
+because the watchdog will send another in 5 s.
+
+**Do not** mark `StartPingCheck` reliable: doing so would put it on the
+unacked queue, where it would be retransmitted by the resend lifecycle as
+well as by the watchdog — duplicate work and no benefit. (An earlier draft
+of this segment recommended otherwise; that was wrong.)
+
+Reliability matrix to apply to the rest of the message set:
+
+- **Must be reliable** — `UseCircuitCode`, `CompleteAgentMovement`,
+  `LogoutRequest`, `TeleportLocationRequest`, `TeleportLandmarkRequest`,
+  `TeleportLureRequest`, `RegionHandshakeReply`, `AgentThrottle`,
+  `AgentSetAppearance`, `Inventory*Item`, `*Friendship`, `Object*`
+  (modify/delete/select), and `MoneyTransferRequest`. Lumiya sets each of
+  these explicitly — search `isReliable = true` across `slproto/`.
+- **Must be unreliable** — `AgentUpdate`, `AgentAnimation`, `ObjectGrab*`,
+  `ChatFromViewer`, `StartPingCheck`. The protocol expects them to be lossy.
 
 ---
 
@@ -258,17 +267,18 @@ debug report sat dead at 1.6 minutes. That gap is the bug.
 
 ## 8. Concrete Linkpoint work items
 
-| ID | Item | Lumiya ref | Linkpoint ref |
-|---|---|---|---|
-| L01-A | Time-based receive-idle watchdog (10 s no inbound → ping) | `SLCircuit.java:311-338` | `UDPConnectionFixed.kt:1089` `checkPingHealth` (rewrite trigger) |
-| L01-B | `StartPingCheck.isReliable = true` and pack `OldestUnacked` | `SLCircuit.java:326-335` | `UDPConnectionFixed.kt:1128-1138` |
-| L01-C | Reset `pingSentCount`/`unansweredPings` on every inbound packet | `SLCircuit.ProcessReceive()` | `UDPConnectionFixed.kt:1977` |
-| L01-D | Mark all auth/teleport/inventory/object-edit/money messages reliable | grep `isReliable = true` in `slproto/` | sweep call sites |
-| L01-E | After 3 unanswered pings → `processDisconnect("Connection has timed out.")` → `Reconnect()` with 3 s pre-sleep | `SLAgentCircuit.java:1503-1512`, `SLGridConnection.java:121-213` | `NetworkStateManager.kt:56,61,83` (wire `setStatus(RECONNECTING)`) |
-| L01-F | `SLReconnectingEvent`-equivalent published per attempt; UI shows "Reconnecting #N" | `SLGridConnection.java:129` | new event type + UI subscriber |
-| L01-G | `getMaxReconnectAttempts` setting in preferences | `GlobalOptions.getMaxReconnectAttempts` | add to settings + read |
-| L01-H | Verify selector keeps `OP_READ` set at all times the circuit is open | `SLCircuit.java:347-359` | review write-only paths |
-| L01-I | Single disconnect funnel: all paths go through `processDisconnect` → `reconnectOrDrop` | `SLGridConnection.java:142-154,295-313` | audit Linkpoint disconnect call sites |
+| ID | Item | Lumiya ref | Linkpoint ref | Status |
+|---|---|---|---|---|
+| L01-A | Time-based receive-idle watchdog (10 s no inbound → ping) | `SLCircuit.java:311-338` | `UDPConnectionFixed.kt:1118-1121` | ✅ already in place |
+| L01-C | Reset `pingSentCount`/`unansweredPings` on every inbound packet | `SLCircuit.ProcessReceive()` | `UDPConnectionFixed.kt:847-848` | ✅ already in place |
+| L01-D | Mark all auth/teleport/inventory/object-edit/money messages reliable | grep `isReliable = true` in `slproto/` | sweep call sites | open |
+| L01-E | After N unanswered pings → reconnect → publish `RECONNECTING`/`CONNECTED`/`FAULTED` | `SLAgentCircuit.java:1503-1512`, `SLGridConnection.java:121-213` | `UDPConnectionFixed.NetworkStateTransition` + `LinkpointApp.setNetworkStateListener` | ✅ landed (this branch) |
+| L01-F | UI subscriber that shows "Reconnecting…" pill; reads `protocol.stateManager.connectionStatus` | `SLGridConnection.java:129` | new Compose subscriber | open |
+| L01-G | `getMaxReconnectAttempts` setting in preferences | `GlobalOptions.getMaxReconnectAttempts` | add to settings + read | open |
+| L01-H | Verify selector keeps `OP_READ` set at all times the circuit is open | `SLCircuit.java:347-359` | review write-only paths | open |
+| L01-I | Single disconnect funnel: all paths go through one `processDisconnect` → reconnect ladder | `SLGridConnection.java:142-154,295-313` | audit `LinkpointApp.kt:605` + `GridConnection.kt:279` (latter is dead code) | open |
+| L01-J | Lower `UNANSWERED_PINGS_DISCONNECT` 5 → 3 to match Lumiya | `SLCircuit.UNANSWERED_PINGS = 3` | `LinkpointConstants.UNANSWERED_PINGS_DISCONNECT` | ✅ landed (this branch) |
+| L01-K | Delete dead `GridConnection`/`GridConnectionManager` reconnect path or wire it to runtime | `SLGridConnection.java:121` | `network/core/GridConnection.kt:279`, `GridConnectionManager.kt` | open |
 
 See segment 02 for the cellular-specific reasoning behind why these
 particular numbers (10 s, 5 s, 3 retries, 3 s pre-sleep) work on mobile.

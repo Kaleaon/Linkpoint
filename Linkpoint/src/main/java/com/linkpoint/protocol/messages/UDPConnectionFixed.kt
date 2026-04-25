@@ -387,13 +387,45 @@ class UDPConnectionFixed {
      * Set by LinkpointApp to trigger the reconnection flow.
      */
     private var reconnectionCallback: (() -> Unit)? = null
-    
+
     /**
      * Set a callback to be invoked when reconnection is needed.
      * This is called when consecutive send errors exceed the threshold.
      */
     fun setReconnectionCallback(callback: () -> Unit) {
         reconnectionCallback = callback
+    }
+
+    /**
+     * Network-state transitions emitted by the watchdog and the in-line socket
+     * reconnect path. Drives [NetworkStateManager] bookkeeping so the live
+     * diagnostic counter (`Reconnect Count`) reflects reality.
+     *
+     * Without this, the only signal a higher layer got was the hard
+     * [reconnectionCallback], which only fires AFTER socket reconnect has
+     * already failed and we've torn the circuit down — way too late to
+     * surface "Reconnecting…" to the user or to bump the diagnostic.
+     */
+    enum class NetworkStateTransition { RECONNECTING, CONNECTED, FAULTED }
+
+    private var networkStateListener: ((NetworkStateTransition) -> Unit)? = null
+
+    /**
+     * Set a listener for fine-grained network-state transitions emitted by the
+     * watchdog. Single-listener; last writer wins. LinkpointApp wires this to
+     * `protocol.stateManager.setStatus(...)`.
+     */
+    fun setNetworkStateListener(listener: (NetworkStateTransition) -> Unit) {
+        networkStateListener = listener
+    }
+
+    private fun emitNetworkState(transition: NetworkStateTransition) {
+        try {
+            networkStateListener?.invoke(transition)
+        } catch (e: Exception) {
+            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                "networkStateListener threw on $transition: ${e.message}")
+        }
     }
     
     // ==================== PACKET HISTORY FOR RAW DATA LOGGING ====================
@@ -955,15 +987,19 @@ class UDPConnectionFixed {
                 NetworkLogger.Category.UDP,
                 "Receive loop ended unexpectedly: $disconnectReason - attempting socket reconnect"
             )
+            emitNetworkState(NetworkStateTransition.RECONNECTING)
             // Attempt socket reconnect from a coroutine (can't call suspend from plain thread)
             scope.launch {
                 val reconnected = try { reconnect() } catch (e: Exception) { false }
-                if (!reconnected) {
+                if (reconnected) {
+                    emitNetworkState(NetworkStateTransition.CONNECTED)
+                } else {
                     NetworkLogger.log(
                         NetworkLogger.Level.ERROR,
                         NetworkLogger.Category.UDP,
                         "Socket reconnect failed after receive loop exit, triggering full reconnection"
                     )
+                    emitNetworkState(NetworkStateTransition.FAULTED)
                     reconnectionCallback?.invoke()
                     disconnect()
                 }
@@ -1094,15 +1130,22 @@ class UDPConnectionFixed {
                 NetworkLogger.Category.UDP,
                 "No response from server (${unansweredPings.get()} unanswered pings) - attempting socket reconnect before full disconnect"
             )
+            // Surface the transition so the diagnostic counter and any UI
+            // observer (e.g. a "Reconnecting…" pill) can react immediately —
+            // not only after socket reconnect has already failed.
+            emitNetworkState(NetworkStateTransition.RECONNECTING)
             // Try socket reconnect first before triggering full reconnection
             scope.launch {
                 val reconnected = try { reconnect() } catch (e: Exception) { false }
-                if (!reconnected) {
+                if (reconnected) {
+                    emitNetworkState(NetworkStateTransition.CONNECTED)
+                } else {
                     NetworkLogger.log(
                         NetworkLogger.Level.ERROR,
                         NetworkLogger.Category.UDP,
                         "Socket reconnect failed, triggering full reconnection"
                     )
+                    emitNetworkState(NetworkStateTransition.FAULTED)
                     reconnectionCallback?.invoke()
                     disconnect()
                 }
@@ -1775,11 +1818,15 @@ class UDPConnectionFixed {
                     NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
                         "🔄 Too many consecutive send errors ($errorCount), attempting socket reconnect")
                     consecutiveSendErrors.set(0)
+                    emitNetworkState(NetworkStateTransition.RECONNECTING)
                     scope.launch {
                         val reconnected = try { reconnect() } catch (ex: Exception) { false }
-                        if (!reconnected) {
+                        if (reconnected) {
+                            emitNetworkState(NetworkStateTransition.CONNECTED)
+                        } else {
                             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
                                 "Socket reconnect failed after send errors, triggering full reconnection")
+                            emitNetworkState(NetworkStateTransition.FAULTED)
                             reconnectionCallback?.invoke()
                         }
                     }
