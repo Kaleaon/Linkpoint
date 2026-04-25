@@ -436,10 +436,9 @@ class UDPConnectionFixed {
      * must handle itself, such as PacketAck for reliable messaging.
      */
     private fun registerInternalHandlers() {
-        // Register PacketAck handler - CRITICAL for reliable messaging
-        // Without this, ACK callbacks are never invoked, breaking circuit establishment
-        // NOTE: Direct call instead of runBlocking to avoid main thread deadlock
-        messageRouter.registerHandlerSync(MessageIds.PACKET_ACK, object : MessageRouter.Handler {
+        // Register PacketAck handler - CRITICAL for reliable messaging.
+        // Without this, ACK callbacks are never invoked, breaking circuit establishment.
+        messageRouter.registerHandler(MessageIds.PACKET_ACK, object : MessageRouter.Handler {
             override fun handleMessage(messageId: Int, data: ByteArray): Boolean {
                 return handlePacketAck(data)
             }
@@ -1136,9 +1135,7 @@ class UDPConnectionFixed {
             .putInt(0)
             .array()
 
-        scope.launch {
-            sendPacket(MessageIds.START_PING_CHECK, payload, reliable = false)
-        }
+        sendPacket(MessageIds.START_PING_CHECK, payload, reliable = false)
 
         NetworkLogger.log(
             NetworkLogger.Level.DEBUG,
@@ -1351,36 +1348,26 @@ class UDPConnectionFixed {
      * Handler is ready immediately when this method returns.
      */
     fun registerHandler(messageId: Int, handler: (Int, ByteArray) -> Unit) {
-        registerHandler(messageId, false, handler)
-    }
-
-    /**
-     * Register a message handler using a lambda, optionally marking it as heavy.
-     */
-    fun registerHandler(messageId: Int, isHeavy: Boolean, handler: (Int, ByteArray) -> Unit) {
         // Register in messageHandlers for diagnostics (using SAM conversion for functional interface)
         messageHandlers[messageId] = MessageHandler { msgId, data ->
             handler(msgId, data)
         }
 
-        // Log handler registration with EnhancedPacketLogger for debug reports
         val messageName = MessageIds.getMessageName(messageId)
         EnhancedPacketLogger.logHandlerRegistered(messageId, messageName)
 
-        // Register with messageRouter synchronously (no runBlocking to avoid main thread deadlock)
-        messageRouter.registerHandlerSync(messageId, object : MessageRouter.Handler {
+        messageRouter.registerHandler(messageId, object : MessageRouter.Handler {
             override fun handleMessage(messageId: Int, data: ByteArray): Boolean {
                 handler(messageId, data)
                 return true
             }
-
-            override fun isHeavy(): Boolean = isHeavy
         })
-        
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, 
+
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
             "Registered handler for message $messageId (total: ${messageHandlers.size})")
     }
-    
+
+
 
     fun registerParsedHandler(messageId: Int, handler: (Int, Any?) -> Unit) {
         registerHandler(messageId) { msgId, rawPacket ->
@@ -1389,13 +1376,6 @@ class UDPConnectionFixed {
         }
     }
 
-    /**
-     * Register a message handler with MessageRouter.Handler interface
-     */
-    suspend fun registerHandlerWithPriority(messageId: Int, handler: MessageRouter.Handler) {
-        messageRouter.registerHandler(messageId, handler)
-    }
-    
     /**
      * Send UseCircuitCode message
      * Uses mobile-optimized packet construction
