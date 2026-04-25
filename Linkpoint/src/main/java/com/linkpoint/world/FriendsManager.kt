@@ -34,11 +34,17 @@ class FriendsManager(
     
     companion object {
         private const val TAG = "FriendsManager"
-        
+
         // Friendship rights
         const val RIGHTS_ONLINE_STATUS = 0x01
         const val RIGHTS_MAP_LOCATION = 0x02
         const val RIGHTS_MODIFY_OBJECTS = 0x04
+
+        // Name synthesised by [addFriendFromLogin] when the buddy-list lacks
+        // a name (which is always — the login response only carries UUIDs).
+        // Used by [getUnresolvedNameAgentIds] to identify friends whose
+        // display-name lookup never completed so the UI can retry.
+        private const val PLACEHOLDER_NAME_PREFIX = "Resident ("
     }
     
     private val scope = CoroutineScope(EventQueueDispatcher.dispatcher + SupervisorJob())
@@ -741,6 +747,18 @@ class FriendsManager(
         }
     }
     
+    /**
+     * Return the agent IDs of friends whose display name has not been
+     * resolved yet (i.e. still on the synthesised placeholder). Callers
+     * can feed this back into [ProfileManager.getDisplayNames] when the
+     * Friends screen opens so login-time lookup failures don't leave the
+     * list permanently stuck on placeholders.
+     */
+    fun getUnresolvedNameAgentIds(): List<UUID> =
+        friends.values
+            .filter { it.name.startsWith(PLACEHOLDER_NAME_PREFIX) || it.name.isBlank() }
+            .map { it.agentId }
+
     /**
      * Update a friend's display name after resolution.
      */

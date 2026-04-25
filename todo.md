@@ -1,40 +1,35 @@
 # Linkpoint - Task Tracking
 
-## Current Priority (January 2026)
-
-### 🔴 Critical - Fix World Loading
-
-- [ ] **RegionHandshake parsing** - Extract and store region name from SimName field
-- [ ] **Object scene population** - Wire OBJECT_UPDATE handler to ObjectManager
-- [ ] **Avatar scene population** - Wire avatar updates to AvatarManager
-- [ ] **Swap chain init** - Create SwapChain when SurfaceView is available
+## Current Priority (April 2026)
 
 ### 🟡 High Priority - Stability
 
 - [ ] **ACK timing** - Improve reliability on high-latency networks (7+ second latency seen)
 - [ ] **Error handling** - Add graceful recovery for packet parsing failures
 - [ ] **Reconnection** - Auto-reconnect on connection drop
+- [ ] **Swap chain cold-start lifecycle** - PR #454 fixed the eager-create race; verify cold start on first run
 
 ### 🟢 Medium Priority - Features
 
-- [ ] **Texture loading** - Implement actual texture fetch from SL asset system
+- [ ] **Texture pipeline (Lumiya port)** - Wire `LinkpointTexture` / `MmappedTextureCache` through `TextureManager.decodeTexture` (see docs/lumiya-port/README.md "Wiring follow-ups")
+- [ ] **etcpak ETC2/EAC** - Vendor native entry point so `Etc2Compressor` stops falling back to ETC1 opaque-only
 - [ ] **Mesh loading** - Load mesh assets via GetMesh capability
-- [ ] **Inventory** - Fetch inventory tree from server
-- [ ] **Chat** - Send/receive local and IM chat
+- [ ] **Inventory** - Fetch full inventory tree (warm-fetch at FULLY_CONNECTED already lands the skeleton)
 
 ---
 
-## ✅ Recently Completed (PRs #218-227)
+## ✅ Recently Completed
 
-- [x] ACK byte order fix (big-endian for header)
-- [x] Connection sequence timing (wait for UseCircuitCode ACK)
-- [x] Missing message handlers (PING_CHECK, TERSE_UPDATE, etc.)
-- [x] UUID byte order standardization
-- [x] Build infrastructure (AGP 8.6.1, Kotlin 2.1.0)
-- [x] Theme crash fix (MD3 color attributes)
-- [x] PacketAck format (count byte)
-- [x] RegionHandshake terrain textures
-- [x] ChatFromViewer AgentData block
+- [x] World-data wiring: `OBJECT_UPDATE` / `OBJECT_UPDATE_COMPRESSED` / `IMPROVED_TERSE_OBJECT_UPDATE` route into `ObjectManager` and `AvatarManager` (LinkpointApp.kt:933,950,1112)
+- [x] RegionHandshake → `sessionManager.updateRegionName` flow (LinkpointApp.kt:731)
+- [x] Friends list display-name resolution: don't poison `ProfileManager` cache with UUID-prefix fallbacks; retry on Friends screen open
+- [x] Friend tap → ProfileActivity (was a no-op fetch); IM tap already wired
+- [x] TextureMemoryTracker surfaced in DebugReportService
+- [x] JPEG2000 sub-resolution decode bug + SwapChain attach race + LOCAL chat tab population (PR #454)
+- [x] `UseCircuitCode` seq fix preventing world bootstrap (PR #453)
+- [x] UDP receive loop hardening (PRs #450 / #451)
+- [x] CI: NDK r26 pin + supported `packages` input (PRs #458 / #459)
+- [x] Honest debug report (HTTP counters, SwapChain, JPEG2000 backend reasons) (PR #460)
 
 ---
 

@@ -291,6 +291,19 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Texture manager: App not initialized")
             }
             appendLine()
+
+            // LinkpointTexture / mmap accounting (populated once the
+            // LinkpointTexture path is on the hot path; until then values
+            // stay at zero, which is the honest signal that the new
+            // pipeline isn't carrying any traffic yet).
+            val textureMemSnap = com.linkpoint.assets.TextureMemoryTracker.snapshot()
+            appendLine("Texture Memory Tracker:")
+            appendLine("  Live Textures: ${textureMemSnap.liveTextures}")
+            appendLine("  Native Heap: ${formatBytes(textureMemSnap.nativeHeapBytes)}")
+            appendLine("  Mmapped: ${formatBytes(textureMemSnap.mmappedBytes)}")
+            appendLine("  GPU: ${formatBytes(textureMemSnap.gpuBytes)}")
+            appendLine("  Total: ${formatBytes(textureMemSnap.totalBytes)}")
+            appendLine()
             
             // ==================== NEW DETAILED DIAGNOSTIC SECTIONS ====================
             
