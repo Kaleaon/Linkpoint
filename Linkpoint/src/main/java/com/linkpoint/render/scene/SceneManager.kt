@@ -652,13 +652,26 @@ class SceneManager(
     ): AvatarMesh? {
         val boneIndices = m.deriveBoneIndices() ?: return null
         val boneWeights = m.deriveBoneWeights() ?: return null
-        val verts = interleaveLLMesh(m)
+        val tangents = com.linkpoint.render.TangentBuilder.build(
+            m.positions, m.normals, m.uvs, m.indices
+        )
         val vertexCount = m.vertexCount
-        val stride0 = 8 * 4 // POS + NORMAL + UV0
+        // POS(3) + TANGENTS(4 quaternion) + UV0(2) = 9 floats per vertex.
+        val stride0 = 9 * 4
         val stride1 = 4 + 16 // UBYTE4 indices + FLOAT4 weights
 
-        val vBytes0 = ByteBuffer.allocateDirect(verts.size * 4).order(ByteOrder.nativeOrder())
-        verts.forEach { vBytes0.putFloat(it) }
+        val vBytes0 = ByteBuffer.allocateDirect(vertexCount * stride0).order(ByteOrder.nativeOrder())
+        for (i in 0 until vertexCount) {
+            vBytes0.putFloat(m.positions[i * 3])
+            vBytes0.putFloat(m.positions[i * 3 + 1])
+            vBytes0.putFloat(m.positions[i * 3 + 2])
+            vBytes0.putFloat(tangents[i * 4])
+            vBytes0.putFloat(tangents[i * 4 + 1])
+            vBytes0.putFloat(tangents[i * 4 + 2])
+            vBytes0.putFloat(tangents[i * 4 + 3])
+            vBytes0.putFloat(m.uvs[i * 2])
+            vBytes0.putFloat(m.uvs[i * 2 + 1])
+        }
         vBytes0.flip()
 
         val vBytes1 = ByteBuffer.allocateDirect(vertexCount * stride1).order(ByteOrder.nativeOrder())
@@ -678,12 +691,10 @@ class SceneManager(
             .vertexCount(vertexCount)
             .bufferCount(2)
             .attribute(VertexAttribute.POSITION, 0, AttributeType.FLOAT3, 0, stride0)
-            .attribute(VertexAttribute.TANGENTS, 0, AttributeType.FLOAT3, 12, stride0)
-            .attribute(VertexAttribute.UV0,      0, AttributeType.FLOAT2, 24, stride0)
+            .attribute(VertexAttribute.TANGENTS, 0, AttributeType.FLOAT4, 12, stride0)
+            .attribute(VertexAttribute.UV0,      0, AttributeType.FLOAT2, 28, stride0)
             .attribute(VertexAttribute.BONE_INDICES, 1, AttributeType.UBYTE4, 0, stride1)
             .attribute(VertexAttribute.BONE_WEIGHTS, 1, AttributeType.FLOAT4, 4, stride1)
-            // BONE_INDICES is integer; explicitly disable normalisation so
-            // joint index 5 stays as 5 (not 5/255).
             .normalized(VertexAttribute.BONE_INDICES, false)
             .build(engine)
         vb.setBufferAt(engine, 0, vBytes0)

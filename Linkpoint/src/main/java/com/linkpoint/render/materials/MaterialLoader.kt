@@ -61,6 +61,8 @@ class MaterialLoader(
                     { type : float4,    name : baseColor },
                     { type : sampler2d, name : baseColorMap },
                     { type : float,     name : hasTexture },
+                    { type : sampler2d, name : normalMap },
+                    { type : float,     name : hasNormalMap },
                     { type : float2,    name : texScale },
                     { type : float2,    name : texOffset },
                     { type : float,     name : texRotation },
@@ -86,6 +88,14 @@ class MaterialLoader(
                         sampled = texture(materialParams_baseColorMap, uv);
                     }
                     material.baseColor = materialParams.baseColor * sampled;
+                    if (materialParams.hasNormalMap > 0.5) {
+                        // Tangent-space normal: read [0,1], remap to [-1,1].
+                        // Filament's TBN is rebuilt from the packed
+                        // TANGENTS quaternion attribute (a real
+                        // tangent/bitangent/normal frame).
+                        float3 n = texture(materialParams_normalMap, uv).xyz * 2.0 - 1.0;
+                        material.normal = n;
+                    }
                     material.metallic = materialParams.metallic;
                     material.roughness = materialParams.roughness;
                 }
@@ -334,6 +344,7 @@ class MaterialLoader(
         instance.setParameter("roughness", roughness)
         // Default: no texture, identity UV transform.
         instance.setParameter("hasTexture", 0f)
+        instance.setParameter("hasNormalMap", 0f)
         instance.setParameter("texScale", 1f, 1f)
         instance.setParameter("texOffset", 0f, 0f)
         instance.setParameter("texRotation", 0f)

@@ -191,16 +191,26 @@ class MeshPrimRenderer(
         if (face.positions.size != face.vertexCount * 3) return null
         if (face.normals.size  != face.vertexCount * 3) return null
         if (face.uvs.size      != face.vertexCount * 2) return null
-        val stride = 8 * 4
+        // Compute a real tangent-frame quaternion per vertex so Filament's
+        // lit shading model gets a proper TBN basis. Without this, the
+        // TANGENTS attribute slot held a 3-float normal and Filament had
+        // to invent a tangent direction, which silently broke any
+        // material that sampled normalMap.
+        val tangentQuats = com.linkpoint.render.TangentBuilder.build(
+            face.positions, face.normals, face.uvs, face.indices
+        )
+        // POS(3) + TANGENTS(4 quaternion) + UV0(2) = 9 floats per vertex.
+        val stride = 9 * 4
         val vBytes = ByteBuffer.allocateDirect(face.vertexCount * stride)
             .order(ByteOrder.nativeOrder())
         for (i in 0 until face.vertexCount) {
             vBytes.putFloat(face.positions[i * 3])
             vBytes.putFloat(face.positions[i * 3 + 1])
             vBytes.putFloat(face.positions[i * 3 + 2])
-            vBytes.putFloat(face.normals[i * 3])
-            vBytes.putFloat(face.normals[i * 3 + 1])
-            vBytes.putFloat(face.normals[i * 3 + 2])
+            vBytes.putFloat(tangentQuats[i * 4])
+            vBytes.putFloat(tangentQuats[i * 4 + 1])
+            vBytes.putFloat(tangentQuats[i * 4 + 2])
+            vBytes.putFloat(tangentQuats[i * 4 + 3])
             vBytes.putFloat(face.uvs[i * 2])
             vBytes.putFloat(face.uvs[i * 2 + 1])
         }
@@ -209,8 +219,8 @@ class MeshPrimRenderer(
             .vertexCount(face.vertexCount)
             .bufferCount(1)
             .attribute(VertexAttribute.POSITION, 0, AttributeType.FLOAT3, 0, stride)
-            .attribute(VertexAttribute.TANGENTS, 0, AttributeType.FLOAT3, 12, stride)
-            .attribute(VertexAttribute.UV0, 0, AttributeType.FLOAT2, 24, stride)
+            .attribute(VertexAttribute.TANGENTS, 0, AttributeType.FLOAT4, 12, stride)
+            .attribute(VertexAttribute.UV0,      0, AttributeType.FLOAT2, 28, stride)
             .build(engine)
         vb.setBufferAt(engine, 0, vBytes)
 

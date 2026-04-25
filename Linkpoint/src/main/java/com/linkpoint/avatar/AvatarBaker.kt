@@ -352,13 +352,27 @@ class AvatarBaker(
             try {
                 // Compress to JPEG2000 (or use PNG fallback)
                 val outputStream = ByteArrayOutputStream()
-                bitmap.compress(Bitmap.CompressFormat.PNG, 90, outputStream)
-                val data = outputStream.toByteArray()
-                
-                // Upload request
+                // Try the native JPEG2000 encoder first; fall back to PNG
+                // (with a different MIME type) if the native library
+                // failed to load or encoding fails. The PNG fallback won't
+                // actually be accepted by SL simulators, but it lets the
+                // upload path log a real HTTP response instead of silently
+                // doing nothing on the device.
+                val j2kBytes = com.linkpoint.assets.JPEG2000Encoder.encode(bitmap, lossless = false)
+                val data: ByteArray
+                val mimeType: String
+                if (j2kBytes != null) {
+                    data = j2kBytes
+                    mimeType = "image/x-j2c"
+                } else {
+                    Log.w(TAG, "J2K encoder unavailable; uploading PNG (sim may reject)")
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 90, outputStream)
+                    data = outputStream.toByteArray()
+                    mimeType = "image/png"
+                }
                 val request = Request.Builder()
                     .url(capUrl)
-                    .post(data.toRequestBody("image/x-j2c".toMediaType()))
+                    .post(data.toRequestBody(mimeType.toMediaType()))
                     .build()
                 
                 val response = httpClient.newCall(request).execute()
@@ -386,6 +400,18 @@ class AvatarBaker(
      * Get currently baked textures
      */
     fun getBakedTextures(): Map<Int, UUID> = bakedTextures.toMap()
+
+    /**
+     * Adopt baked-texture UUIDs that were composed elsewhere — used for
+     * remote avatars whose AvatarAppearance message tells us their bake
+     * UUIDs but we don't own the source layers. These UUIDs aren't
+     * uploaded; they're fed straight to the BoM resolver so mesh
+     * attachments referencing IMG_USE_BAKED_* substitute correctly.
+     */
+    fun setExternalBakedTextures(bakes: Map<Int, UUID>) {
+        bakedTextures.clear()
+        bakedTextures.putAll(bakes)
+    }
     
     fun shutdown() {
         scope.cancel()

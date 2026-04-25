@@ -238,7 +238,9 @@ class PrimRenderer(
                p.pathBegin > 0.0001f || p.pathEnd < 0.9999f ||
                p.profileHollow > 0.0001f ||
                kotlin.math.abs(p.pathTaperX) > 0.0001f ||
-               kotlin.math.abs(p.pathTaperY) > 0.0001f
+               kotlin.math.abs(p.pathTaperY) > 0.0001f ||
+               kotlin.math.abs(p.pathTwist) > 0.0001f ||
+               kotlin.math.abs(p.pathTwistBegin) > 0.0001f
     }
 
     /**
@@ -258,110 +260,147 @@ class PrimRenderer(
     private fun generateExtrudedProfile(key: PrimShapeKey): PrimMesh {
         val p = key.params
         val profile = buildProfile2D(key.kind, p)
-        if (profile.size < 6) return generateBoxMesh(key) // fewer than 3 points
+        if (profile.size < 6) return generateBoxMesh(key)
 
-        // Path: line from z=-0.5 to z=+0.5, but cut to [-0.5+pBegin, -0.5+pEnd].
+        // Path is a line from z = -0.5 to z = +0.5, cut to
+        // [-0.5 + pathBegin, -0.5 + pathEnd]. We emit several rings along
+        // it so per-ring twist + taper varies smoothly along the prim.
         val zBottom = -0.5f + p.pathBegin
         val zTop = -0.5f + p.pathEnd
 
-        // Taper: top profile is scaled by (1 - taper) on each axis. SL's
-        // "taper" = 1 means a knife-edge cone; "taper" = -1 expands the top.
+        // SL "taper": top profile scaled by (1 - taper) on each axis.
+        // taper = +1 => knife-edge cone; -1 => expand outward.
         val taperX = (1f - p.pathTaperX).coerceAtLeast(0.001f)
         val taperY = (1f - p.pathTaperY).coerceAtLeast(0.001f)
 
+        // Twist: pathTwistBegin at the bottom, pathTwist at the top.
+        // LL convention is "revolutions" (1.0 = 360°), so multiply by 2π.
+        val twistBeginRad = p.pathTwistBegin * 2f * PI.toFloat()
+        val twistEndRad = p.pathTwist * 2f * PI.toFloat()
+        val twistDelta = kotlin.math.abs(twistEndRad - twistBeginRad)
+
+        // Choose intermediate ring count: more rings make twist + taper
+        // look smooth; flat extrusions only need 2 (begin + end).
+        val pathRings = when {
+            twistDelta < 0.05f -> 2
+            else -> (4 + (twistDelta / (PI.toFloat() / 6f)).toInt()).coerceAtMost(24)
+        }
+
+        val n = profile.size / 2
         val verts = mutableListOf<Float>()
         val idx = mutableListOf<Short>()
+        val ringStart = IntArray(pathRings)
 
         fun pushVertex(x: Float, y: Float, z: Float, nx: Float, ny: Float, nz: Float, u: Float, v: Float) {
             verts += floatArrayOf(x, y, z, nx, ny, nz, u, v).toList()
         }
 
-        // Outer wall: bottom ring then top ring, then triangle strip between them.
-        val n = profile.size / 2
-        val bottomStart = 0
-        for (i in 0 until n) {
-            val px = profile[i * 2]; val py = profile[i * 2 + 1]
-            // Outward-pointing normal in XY plane (rough; for a square this
-            // is per-side — close enough for placeholder geometry).
-            val nl = kotlin.math.sqrt(px * px + py * py).coerceAtLeast(0.0001f)
-            pushVertex(px, py, zBottom, px / nl, py / nl, 0f, i.toFloat() / n, 0f)
-        }
-        val topStart = n
-        for (i in 0 until n) {
-            val px = profile[i * 2] * taperX
-            val py = profile[i * 2 + 1] * taperY
-            val nl = kotlin.math.sqrt(px * px + py * py).coerceAtLeast(0.0001f)
-            pushVertex(px, py, zTop, px / nl, py / nl, 0f, i.toFloat() / n, 1f)
-        }
-        // Wall triangles. If profileBegin/End cut the loop, we don't connect
-        // the last vertex back to the first.
-        val closesProfile = p.profileBegin <= 0.0001f && p.profileEnd >= 0.9999f
-        val wallSegments = if (closesProfile) n else n - 1
-        for (i in 0 until wallSegments) {
-            val i0 = (bottomStart + i).toShort()
-            val i1 = (bottomStart + (i + 1) % n).toShort()
-            val i2 = (topStart + i).toShort()
-            val i3 = (topStart + (i + 1) % n).toShort()
-            idx += listOf(i0, i2, i1, i1, i2, i3)
+        // Outer rings.
+        for (r in 0 until pathRings) {
+            val t = if (pathRings == 1) 0f else r.toFloat() / (pathRings - 1)
+            val z = zBottom + (zTop - zBottom) * t
+            val sx = 1f + (taperX - 1f) * t
+            val sy = 1f + (taperY - 1f) * t
+            val twist = twistBeginRad + (twistEndRad - twistBeginRad) * t
+            val ct = kotlin.math.cos(twist); val st = kotlin.math.sin(twist)
+            ringStart[r] = verts.size / 8
+            for (i in 0 until n) {
+                val rx0 = profile[i * 2] * sx
+                val ry0 = profile[i * 2 + 1] * sy
+                val px = rx0 * ct - ry0 * st
+                val py = rx0 * st + ry0 * ct
+                val nl = kotlin.math.sqrt(px * px + py * py).coerceAtLeast(1e-4f)
+                pushVertex(px, py, z, px / nl, py / nl, 0f, i.toFloat() / n, t)
+            }
         }
 
-        // Caps. If hollow > 0, the cap is a ring between the outer and inner
-        // profile rather than a fan to centre. If the profile is cut open
-        // (profileBegin/End), the caps are still drawn but the cross-section
-        // is open by virtue of the missing wall segment.
+        val closesProfile = p.profileBegin <= 0.0001f && p.profileEnd >= 0.9999f
+        val wallSegments = if (closesProfile) n else n - 1
+        for (r in 0 until pathRings - 1) {
+            val a = ringStart[r]
+            val b = ringStart[r + 1]
+            for (i in 0 until wallSegments) {
+                val i0 = (a + i).toShort()
+                val i1 = (a + (i + 1) % n).toShort()
+                val i2 = (b + i).toShort()
+                val i3 = (b + (i + 1) % n).toShort()
+                idx += listOf(i0, i2, i1, i1, i2, i3)
+            }
+        }
+
+        // Hollow path: emit inner rings, walls, and ring caps that connect
+        // outer to inner profiles at top and bottom.
         val hollow = p.profileHollow.coerceIn(0f, 0.95f)
         if (hollow > 0.001f) {
             val innerProfile = scaleProfile(profile, 1f - hollow)
-            val innerBottomStart = verts.size / 8
-            for (i in 0 until n) {
-                val px = innerProfile[i * 2]; val py = innerProfile[i * 2 + 1]
-                val nl = kotlin.math.sqrt(px * px + py * py).coerceAtLeast(0.0001f)
-                pushVertex(px, py, zBottom, -px / nl, -py / nl, 0f, i.toFloat() / n, 0f)
+            val innerRingStart = IntArray(pathRings)
+            for (r in 0 until pathRings) {
+                val t = if (pathRings == 1) 0f else r.toFloat() / (pathRings - 1)
+                val z = zBottom + (zTop - zBottom) * t
+                val sx = 1f + (taperX - 1f) * t
+                val sy = 1f + (taperY - 1f) * t
+                val twist = twistBeginRad + (twistEndRad - twistBeginRad) * t
+                val ct = kotlin.math.cos(twist); val st = kotlin.math.sin(twist)
+                innerRingStart[r] = verts.size / 8
+                for (i in 0 until n) {
+                    val rx0 = innerProfile[i * 2] * sx
+                    val ry0 = innerProfile[i * 2 + 1] * sy
+                    val px = rx0 * ct - ry0 * st
+                    val py = rx0 * st + ry0 * ct
+                    val nl = kotlin.math.sqrt(px * px + py * py).coerceAtLeast(1e-4f)
+                    pushVertex(px, py, z, -px / nl, -py / nl, 0f, i.toFloat() / n, t)
+                }
             }
-            val innerTopStart = verts.size / 8
-            for (i in 0 until n) {
-                val px = innerProfile[i * 2] * taperX
-                val py = innerProfile[i * 2 + 1] * taperY
-                val nl = kotlin.math.sqrt(px * px + py * py).coerceAtLeast(0.0001f)
-                pushVertex(px, py, zTop, -px / nl, -py / nl, 0f, i.toFloat() / n, 1f)
+            // Inner walls (flipped winding).
+            for (r in 0 until pathRings - 1) {
+                val a = innerRingStart[r]
+                val b = innerRingStart[r + 1]
+                for (i in 0 until wallSegments) {
+                    val i0 = (a + i).toShort()
+                    val i1 = (a + (i + 1) % n).toShort()
+                    val i2 = (b + i).toShort()
+                    val i3 = (b + (i + 1) % n).toShort()
+                    idx += listOf(i0, i1, i2, i1, i3, i2)
+                }
             }
-            // Inner wall (normals flipped).
-            for (i in 0 until wallSegments) {
-                val i0 = (innerBottomStart + i).toShort()
-                val i1 = (innerBottomStart + (i + 1) % n).toShort()
-                val i2 = (innerTopStart + i).toShort()
-                val i3 = (innerTopStart + (i + 1) % n).toShort()
-                idx += listOf(i0, i1, i2, i1, i3, i2)
+            // Bottom ring cap.
+            run {
+                val o = ringStart[0]; val n0 = innerRingStart[0]
+                for (i in 0 until wallSegments) {
+                    val o0 = (o + i).toShort()
+                    val o1 = (o + (i + 1) % n).toShort()
+                    val ni0 = (n0 + i).toShort()
+                    val ni1 = (n0 + (i + 1) % n).toShort()
+                    idx += listOf(o0, ni0, o1, o1, ni0, ni1)
+                }
             }
-            // Bottom ring cap (outer to inner).
-            for (i in 0 until wallSegments) {
-                val o0 = (bottomStart + i).toShort()
-                val o1 = (bottomStart + (i + 1) % n).toShort()
-                val n0 = (innerBottomStart + i).toShort()
-                val n1 = (innerBottomStart + (i + 1) % n).toShort()
-                idx += listOf(o0, n0, o1, o1, n0, n1)
-            }
-            // Top ring cap (outer to inner, flipped winding).
-            for (i in 0 until wallSegments) {
-                val o0 = (topStart + i).toShort()
-                val o1 = (topStart + (i + 1) % n).toShort()
-                val n0 = (innerTopStart + i).toShort()
-                val n1 = (innerTopStart + (i + 1) % n).toShort()
-                idx += listOf(o0, o1, n0, o1, n1, n0)
+            // Top ring cap (flipped winding).
+            run {
+                val o = ringStart[pathRings - 1]; val n0 = innerRingStart[pathRings - 1]
+                for (i in 0 until wallSegments) {
+                    val o0 = (o + i).toShort()
+                    val o1 = (o + (i + 1) % n).toShort()
+                    val ni0 = (n0 + i).toShort()
+                    val ni1 = (n0 + (i + 1) % n).toShort()
+                    idx += listOf(o0, o1, ni0, o1, ni1, ni0)
+                }
             }
         } else {
-            // Solid caps via fan to centre.
+            // Solid caps: fan to centre. Twist is constant within the cap
+            // (the cap's z is fixed) so we don't need to rotate the centre.
             val centerBottom = (verts.size / 8).toShort()
             pushVertex(0f, 0f, zBottom, 0f, 0f, -1f, 0.5f, 0.5f)
             val centerTop = (verts.size / 8).toShort()
             pushVertex(0f, 0f, zTop, 0f, 0f, 1f, 0.5f, 0.5f)
+            val a = ringStart[0]
+            val b = ringStart[pathRings - 1]
             for (i in 0 until wallSegments) {
-                val a = (bottomStart + i).toShort()
-                val b = (bottomStart + (i + 1) % n).toShort()
-                idx += listOf(centerBottom, b, a)
-                val c = (topStart + i).toShort()
-                val d = (topStart + (i + 1) % n).toShort()
-                idx += listOf(centerTop, c, d)
+                val a0 = (a + i).toShort()
+                val a1 = (a + (i + 1) % n).toShort()
+                idx += listOf(centerBottom, a1, a0)
+                val b0 = (b + i).toShort()
+                val b1 = (b + (i + 1) % n).toShort()
+                idx += listOf(centerTop, b0, b1)
             }
         }
 

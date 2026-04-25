@@ -226,6 +226,8 @@ class LinkpointApp : Application() {
         private set
     lateinit var outfitManager: OutfitManager
         private set
+    lateinit var appearanceManager: com.linkpoint.avatar.AppearanceManager
+        private set
     lateinit var gestureManager: GestureManager
         private set
     
@@ -672,6 +674,24 @@ class LinkpointApp : Application() {
                     }
             }
             avatarManager.setOutfitManager(outfitManager)
+
+            // Wire the local-agent appearance pipeline. AppearanceManager
+            // bakes (via AvatarBaker), uploads each baked texture via the
+            // UploadBakedTexture capability, then sends AgentSetAppearance.
+            // The trigger lambda is called from AvatarManager whenever
+            // AgentWearablesUpdate has been applied so the simulator
+            // gets fresh bakes without an explicit user "save outfit" action.
+            appearanceManager = com.linkpoint.avatar.AppearanceManager(
+                udpConnection, myAvatar.baker
+            )
+            appearanceManager.setSessionInfo(agentId, udpConnection.getSessionId())
+            avatarManager.appearanceUpdateTrigger = {
+                try {
+                    appearanceManager.sendAppearanceUpdate()
+                } catch (e: Exception) {
+                    Log.w(TAG, "sendAppearanceUpdate failed: ${e.message}")
+                }
+            }
         }
         
         // Modern features: Animesh and Bakes on Mesh
