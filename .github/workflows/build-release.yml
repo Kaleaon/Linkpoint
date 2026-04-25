@@ -29,22 +29,30 @@ jobs:
       - name: Cache Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      # setup-android@v3 dropped the api-level/build-tools/cmake/ndk inputs;
+      # only `packages`, `cmdline-tools-version`, and the license toggles are
+      # accepted now. Pass the full package list here so we get one source of
+      # truth for what the build needs (compile SDK 35 + build-tools 35.0.0,
+      # NDK r26 to match Linkpoint/build.gradle.kts ndkVersion, and CMake
+      # 3.22.1 for src/main/cpp).
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          api-level: 35
-          build-tools: 35.0.0
-          cmake: 3.22.1
-          ndk: 26.3.11579264
+          packages: >-
+            platform-tools
+            platforms;android-35
+            build-tools;35.0.0
+            cmake;3.22.1
+            ndk;26.3.11579264
 
-      - name: Install SDK components
+      - name: Verify Android SDK install
         run: |
-          sdkmanager --install \
-            "platform-tools" \
-            "platforms;android-35" \
-            "build-tools;35.0.0" \
-            "cmake;3.22.1" \
-            "ndk;26.3.11579264"
+          set -euo pipefail
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          test -d "$ANDROID_SDK_ROOT/platforms/android-35"
+          test -d "$ANDROID_SDK_ROOT/build-tools/35.0.0"
+          test -d "$ANDROID_SDK_ROOT/cmake/3.22.1"
+          test -d "$ANDROID_SDK_ROOT/ndk/26.3.11579264"
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
