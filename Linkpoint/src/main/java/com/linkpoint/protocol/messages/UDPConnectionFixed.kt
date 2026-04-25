@@ -219,31 +219,16 @@ class UDPConnectionFixed {
     // Message routing
     private val messageRouter = MessageRouter()
     
-    // Coroutine scope
+    // Coroutine scope. Used for off-thread suspending work (reconnect retry,
+    // periodic AgentUpdate scheduler, EventBus publishes). The I/O thread owns
+    // the DatagramChannel; nothing in this scope writes to the channel directly.
     private val scope = CoroutineScope(CircuitDispatcher.dispatcher + SupervisorJob())
 
-    // Circuit threading and queues (Linkpoint deterministic ordering)
-    private val circuitThread = CircuitThread("CircuitThread")
-    private val circuitTaskQueue = CircuitTaskQueue(
-        circuitThread.scope,
-        SELECTOR_TIMEOUT_MS,
-        "CircuitQueue"
-    )
-    private val heavyThread = CircuitThread("CircuitWorker")
-    private val heavyTaskQueue = CircuitTaskQueue(
-        heavyThread.scope,
-        SELECTOR_TIMEOUT_MS,
-        "CircuitHeavyQueue"
-    )
-    
-    // Receive job
-    private var receiveJob: Job? = null
 
-    // Dedicated I/O thread for blocking receive operations
-    // This is the KEY fix: Lumiya uses a single dedicated thread for all I/O.
-    // The previous code used withContext(CircuitDispatcher.dispatcher) for select(),
-    // which BLOCKED the CircuitDispatcher single thread, permanently starving the
-    // ACK sender, ping sender, and AgentUpdate sender from ever executing.
+    // Dedicated I/O thread for blocking receive operations.
+    // Following Lumiya's SLConnection pattern: a single thread owns the
+    // selector and the DatagramChannel. All reads, writes, ACK flushes,
+    // pings, and timeout checks happen on this thread.
     @Volatile private var ioThread: Thread? = null
 
     // Agent update job
@@ -260,12 +245,6 @@ class UDPConnectionFixed {
     private val AGENT_UPDATE_IDLE_THRESHOLD_MS = 2_000L
     @Volatile private var lastAgentInputAtMs: Long = 0L
 
-    init {
-        circuitTaskQueue.setIdleHandler {
-            processCircuitIdle()
-        }
-    }
-    
     // ==================== STATISTICS & DIAGNOSTICS ====================
     // These fields track packet activity for debug reports and diagnostic purposes.
     // Raw packet data including hex dumps are captured to enable protocol debugging.
@@ -322,7 +301,22 @@ class UDPConnectionFixed {
      * ACKs can be piggy-backed on outgoing packets or sent as standalone PacketAck messages.
      */
     private val pendingAcksToSend = java.util.concurrent.ConcurrentLinkedQueue<Int>()
-    
+
+    /**
+     * Outbound packet awaiting transmission on the I/O thread.
+     * The Lumiya pattern: producers build the packet, drop it here, and call
+     * `selector.wakeup()`. The single I/O thread owns all DatagramChannel writes.
+     */
+    private data class OutboundPacket(
+        val data: ByteArray,
+        val messageId: Int,
+        val seqNum: Int,
+        val reliable: Boolean,
+        val zerocoded: Boolean
+    )
+
+    private val outgoingQueue = java.util.concurrent.ConcurrentLinkedQueue<OutboundPacket>()
+
     /**
      * Track callbacks for reliable messages by sequence number.
      * This allows callers to receive notifications when their messages are acknowledged.
@@ -367,17 +361,7 @@ class UDPConnectionFixed {
      * Last time ACKs were sent (for throttling standalone ACK packets).
      */
     private var lastAckSendTime = 0L
-    
-    /**
-     * Job for the ACK sender coroutine.
-     */
-    private var ackSenderJob: Job? = null
-    
-    /**
-     * Job for the timeout checker coroutine.
-     */
-    private var timeoutCheckerJob: Job? = null
-    
+
     // ==================== SEND ERROR TRACKING FOR RECONNECTION ====================
     // Track consecutive send failures to detect socket invalidation (e.g., network change)
     
@@ -647,11 +631,9 @@ class UDPConnectionFixed {
             lastConnectionError = null
             recentPacketHistory.clear()
             
-            // ==================== CRITICAL: RESET SEQUENCE NUMBER ====================
-            // The Second Life protocol requires UseCircuitCode to be sent with sequence 0
-            // to establish a new circuit. Without resetting, the server will ignore our
-            // packets because the sequence numbers are from a previous session.
-            // This was the root cause of "packets sent but none received" bugs.
+            // Reset the sequence counter for a new circuit. The first packet
+            // sent (UseCircuitCode) will then go out at seq=1 via incrementAndGet,
+            // matching Lumiya's SLCircuit pattern.
             sequenceNumber.set(0)
             
             // Reset packet statistics for accurate per-session tracking
@@ -672,7 +654,10 @@ class UDPConnectionFixed {
             
             // Clear pending ACKs from previous session (they're no longer valid)
             pendingAcksToSend.clear()
-            
+
+            // Clear queued outbound packets — old session's bytes are stale.
+            outgoingQueue.clear()
+
             // Clear pending callbacks (they won't be satisfied by new circuit)
             pendingCallbacks.clear()
             
@@ -763,20 +748,6 @@ class UDPConnectionFixed {
             }
 
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ Receive loop started on dedicated I/O thread")
-            
-            // Start ACK sender loop for reliable packet acknowledgments
-            ackSenderJob = scope.launch {
-                ackSenderLoop()
-            }
-            
-            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ ACK sender loop started")
-            
-            // Start timeout checker for message timeouts
-            timeoutCheckerJob = scope.launch {
-                timeoutCheckerLoop()
-            }
-            
-            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ Timeout checker loop started")
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== UDP CONNECTION ESTABLISHED ===")
             
             // Send initial messages
@@ -797,168 +768,6 @@ class UDPConnectionFixed {
         }
     }
     
-    /**
-     * Receive loop with proper selector usage
-     */
-    private suspend fun receiveLoop() {
-        val buffer = ByteBuffer.allocate(BUFFER_SIZE)
-        
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== RECEIVE LOOP STARTED ===")
-        var disconnectReason: String? = null
-        
-        while (_isConnected.value) {
-            try {
-                val localSelector = selector
-                val localChannel = datagramChannel
-                
-                if (localSelector == null || localChannel == null) {
-                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Selector or channel is null, exiting loop")
-                    disconnectReason = "Selector or channel missing"
-                    break
-                }
-                
-                if (!localSelector.isOpen || !localChannel.isOpen) {
-                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Selector or channel closed, exiting loop")
-                    disconnectReason = "Selector or channel closed"
-                    break
-                }
-                
-                // Check if the selection key is still valid - it can become invalid after
-                // network changes on mobile devices without the channel/selector being closed
-                val key = selectionKey
-                if (key == null || !key.isValid) {
-                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Selection key invalid (network may have changed), exiting loop")
-                    disconnectReason = "Selection key invalid"
-                    break
-                }
-                
-                // DatagramChannel.isConnected is intentionally NOT checked here (see
-                // receiveLoopBlocking for the full rationale). It only reports whether
-                // connect() was called, not real network liveness.
-
-                // Wait for packets with timeout
-                val readyKeys = withContext(CircuitDispatcher.dispatcher) {
-                    localSelector.select(SELECTOR_TIMEOUT_MS)
-                }
-                
-                if (readyKeys > 0) {
-                    val iterator = localSelector.selectedKeys().iterator()
-                    while (iterator.hasNext()) {
-                        val key = iterator.next()
-                        iterator.remove()
-                        
-                        if (key.isReadable) {
-                            buffer.clear()
-                            
-                            val bytesRead = withContext(CircuitDispatcher.dispatcher) {
-                                localChannel.read(buffer)
-                            }
-                            
-                            if (bytesRead > 0) {
-                                packetsReceived.incrementAndGet()
-                                bytesReceived.addAndGet(bytesRead.toLong())
-                                lastReceiveTime = System.currentTimeMillis()
-                                unansweredPings.set(0)
-                                
-                                buffer.flip()
-                                val rawData = ByteArray(bytesRead)
-                                buffer.get(rawData)
-                                
-                                // Check if packet is zero-coded and decode if needed
-                                val isZerocoded = (rawData[0].toInt() and 0x80) != 0
-                                val data = if (isZerocoded) zeroDecode(rawData) else rawData
-                                
-                                // Extract message info for logging
-                                val messageId = extractMessageId(data)
-                                val messageName = getMessageName(messageId)
-                                val seqNum = extractSequenceNumber(data)
-                                // Generate full hex dump of all packet bytes
-                                val fullHexDump = data.joinToString(" ") { "%02X".format(it) }
-                                
-                                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "📦 PACKET RECEIVED #${packetsReceived.get()}: $bytesRead bytes${if (isZerocoded) " (decoded to ${data.size})" else ""}")
-                                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "   Message: $messageName (ID: 0x${messageId.toString(16).uppercase()}, seq: $seqNum)")
-                                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "   Full packet data: $fullHexDump")
-                                
-                                // Record in packet history for debug reports
-                                recordPacketEvent(
-                                    type = PacketHistoryEntry.PacketEventType.RECEIVE,
-                                    messageId = messageId,
-                                    data = data,
-                                    sequenceNumber = seqNum,
-                                    success = true
-                                )
-                                
-                                // Extract packet flags once for reuse
-                                val packetFlags = extractPacketFlags(data)
-                                
-                                // Log to EnhancedPacketLogger for comprehensive tracking
-                                EnhancedPacketLogger.logPacketReceived(
-                                    messageId = messageId,
-                                    messageName = messageName,
-                                    sequenceNumber = seqNum,
-                                    data = data,
-                                    flags = packetFlags,
-                                    handlerFound = messageHandlers.containsKey(messageId)
-                                )
-                                
-                                // Log to SessionLogRecorder for full session recording
-                                SessionLogRecorder.logPacketReceived(
-                                    messageId = messageId,
-                                    messageName = messageName,
-                                    sequenceNumber = seqNum,
-                                    data = data,
-                                    handlerFound = messageHandlers.containsKey(messageId)
-                                )
-                                
-                                // ==================== RELIABLE PACKET ACK HANDLING ====================
-                                // CRITICAL: If this packet has the reliable flag (0x40), we MUST ACK it.
-                                // Failure to ACK reliable packets causes the server to resend, timeout, or drop connection.
-                                if (packetFlags.reliable && seqNum >= 0) {
-                                    pendingAcksToSend.offer(seqNum)
-                                    NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "🔔 Queued ACK for reliable packet seq=$seqNum, pending ACKs: ${pendingAcksToSend.size}")
-                                }
-                                
-                                // Publish message received event
-                                EventBus.publish(MessageReceivedEvent(messageId, data))
-                                
-                                // Track message for statistics (fixes "RegionHandshake never received" bug)
-                                trackMessageReceived(messageName)
-                                
-                                // Process any appended ACKs (piggy-backed) before routing
-                                processAppendedAcks(data)
-
-                                // Route message through router
-                                circuitTaskQueue.enqueue {
-                                    routeMessage(data)
-                                }
-                            }
-                        }
-                    }
-                }
-                
-            } catch (e: Exception) {
-                if (_isConnected.value) {
-                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "✗ Receive error: ${e.message}")
-                }
-            }
-        }
-        
-        if (_isConnected.value && disconnectReason != null) {
-            NetworkLogger.log(
-                NetworkLogger.Level.WARN,
-                NetworkLogger.Category.UDP,
-                "Receive loop ended unexpectedly: $disconnectReason - disconnecting and signaling reconnection"
-            )
-            reconnectionCallback?.invoke()
-            disconnect()
-        }
-
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== RECEIVE LOOP STOPPED ===")
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Total packets: ${packetsReceived.get()}")
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Total bytes: ${bytesReceived.get()}")
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Messages routed: ${messagesRouted.get()}")
-    }
-
     /**
      * Blocking receive loop that runs on a dedicated thread (Lumiya pattern).
      *
@@ -1011,9 +820,14 @@ class UDPConnectionFixed {
                 // usable. Real disconnects manifest as channel close (guarded above) or
                 // as read()/select() exceptions (caught below).
 
+                // Drain any packets queued by producers since the last cycle.
+                // sendPacket() calls selector.wakeup() after enqueueing, so this
+                // runs without waiting for the select timeout when traffic exists.
+                drainOutgoingQueueOnIOThread()
+
                 // BLOCKING select on THIS thread (not on CircuitDispatcher!)
                 // This is the key fix: the select() call blocks only the I/O thread,
-                // leaving CircuitDispatcher free for ACK sending, ping sending, etc.
+                // leaving the rest of the app free.
                 val readyKeys = localSelector.select(SELECTOR_TIMEOUT_MS)
 
                 if (readyKeys > 0) {
@@ -1108,8 +922,9 @@ class UDPConnectionFixed {
                     }
                 }
 
-                // Idle processing: send pending ACKs and check health
-                // This runs between select() calls, same as Lumiya's ProcessIdle()
+                // Idle processing — Lumiya's ProcessIdle() pattern. Runs between
+                // select() calls on the same thread that owns the channel, so
+                // there is no contention with the read path.
                 val now = System.currentTimeMillis()
                 if (now - lastAckCheckTime >= ACK_SEND_INTERVAL_MS) {
                     if (pendingAcksToSend.isNotEmpty()) {
@@ -1119,6 +934,7 @@ class UDPConnectionFixed {
                 }
                 if (now - lastTimeoutCheckTime >= 1000L) {
                     checkPingHealth()
+                    checkMessageTimeouts()
                     lastTimeoutCheckTime = now
                 }
 
@@ -1163,10 +979,8 @@ class UDPConnectionFixed {
 
     /**
      * Synchronous message dispatch called directly from the I/O thread.
-     * Follows Lumiya's pattern where messages are handled immediately on the circuit thread.
-     *
-     * This replaces the async circuitTaskQueue.enqueue { routeMessage(data) } pattern
-     * which required coroutine context and added unnecessary latency.
+     * Follows Lumiya's pattern where messages are handled immediately on the
+     * circuit thread.
      */
     private fun dispatchMessageDirect(messageId: Int, data: ByteArray) {
         try {
@@ -1205,10 +1019,8 @@ class UDPConnectionFixed {
     }
 
     /**
-     * Send pending ACKs directly from the I/O thread.
-     * This is called from the blocking receive loop's idle processing.
-     * Unlike sendPendingAcks() which uses withContext(CircuitDispatcher),
-     * this writes directly to the DatagramChannel from the I/O thread.
+     * Drain queued ACKs into a single PacketAck and write it directly to the
+     * DatagramChannel. Runs on the I/O thread from the receive loop's idle pass.
      */
     private fun sendPendingAcksFromIOThread() {
         val acksToSend = mutableListOf<Int>()
@@ -1265,95 +1077,6 @@ class UDPConnectionFixed {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
                 "Failed to send PacketAck from I/O thread: ${e.message}")
             acksToSend.forEach { pendingAcksToSend.offer(it) }
-        }
-    }
-
-    /**
-     * Circuit idle processing that runs on the serialized circuit queue.
-     */
-    private suspend fun processCircuitIdle() {
-        if (!_isConnected.value) {
-            return
-        }
-
-        checkPingHealth()
-    }
-    
-    /**
-     * ACK sender loop - periodically sends pending ACKs to the simulator.
-     * 
-     * CRITICAL FOR RELIABLE MESSAGING:
-     * The Second Life protocol requires clients to ACK reliable packets.
-     * Without ACKs, the server will:
-     * 1. Keep resending packets (wasting bandwidth)
-     * 2. Eventually timeout the connection
-     * 3. Not send subsequent reliable data (like chat, objects, terrain)
-     * 
-     * This follows the SL protocol where ACKs are sent either:
-     * - Piggy-backed on outgoing packets (optimization)
-     * - As standalone PacketAck messages (when no other traffic)
-     */
-    private suspend fun ackSenderLoop() {
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== ACK SENDER LOOP STARTED ===")
-
-        while (_isConnected.value) {
-            try {
-                // Wait for ACK interval before checking for pending ACKs
-                delay(ACK_SEND_INTERVAL_MS)
-
-                // Send any pending ACKs
-                if (pendingAcksToSend.isNotEmpty()) {
-                    sendPendingAcks()
-                }
-            } catch (e: CancellationException) {
-                // Coroutine was cancelled (disconnect/reconnect) — this is expected, not an error.
-                // Matches the pattern used by timeoutCheckerLoop().
-                if (_isConnected.value) {
-                    NetworkLogger.log(
-                        NetworkLogger.Level.DEBUG,
-                        NetworkLogger.Category.UDP,
-                        "ACK sender cancelled: ${e.message}"
-                    )
-                }
-                break
-            } catch (e: Exception) {
-                if (_isConnected.value) {
-                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "ACK sender error: ${e.message}")
-                }
-            }
-        }
-
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== ACK SENDER LOOP STOPPED ===")
-    }
-    
-    /**
-     * Timeout checker loop - periodically checks for message timeouts.
-     * Runs every 1 second to check if any reliable messages have timed out.
-     */
-    private suspend fun timeoutCheckerLoop() {
-        while (_isConnected.value && timeoutCheckerJob?.isActive == true) {
-            try {
-                checkMessageTimeouts()
-                checkPingHealth()
-                delay(1000L) // Check every second
-            } catch (e: CancellationException) {
-                if (_isConnected.value) {
-                    NetworkLogger.log(
-                        NetworkLogger.Level.DEBUG,
-                        NetworkLogger.Category.UDP,
-                        "Timeout checker cancelled: ${e.message}"
-                    )
-                }
-                break
-            } catch (e: Exception) {
-                if (_isConnected.value) {
-                    NetworkLogger.log(
-                        NetworkLogger.Level.ERROR,
-                        NetworkLogger.Category.UDP,
-                        "Error in timeout checker: ${e.message}"
-                    )
-                }
-            }
         }
     }
 
@@ -1425,88 +1148,6 @@ class UDPConnectionFixed {
     }
 
     /**
-     * Send pending ACKs as a PacketAck message.
-     * 
-     * PacketAck message format (High Frequency, ID = -5 / 0xFB):
-     * - Header: flags (1) + seq (4) + extra (1)
-     * - Message ID: 1 byte (0xFB = -5)
-     * - Packets block count: 1 byte
-     * - For each packet:
-     *   - ID: 4 bytes (unsigned int, little-endian) - the sequence number being ACKed
-     */
-    private suspend fun sendPendingAcks() = withContext(CircuitDispatcher.dispatcher) {
-        val acksToSend = mutableListOf<Int>()
-        
-        // Drain up to MAX_ACKS_PER_PACKET from the queue
-        while (acksToSend.size < MAX_ACKS_PER_PACKET) {
-            val ack = pendingAcksToSend.poll() ?: break
-            acksToSend.add(ack)
-        }
-        
-        if (acksToSend.isEmpty()) return@withContext
-        
-        try {
-            // Build PacketAck message
-            // Header (6 bytes) + MessageID (1 byte) + Count (1 byte) + (4 bytes per ACK)
-            val packetSize = PACKET_HEADER_SIZE + 1 + 1 + (acksToSend.size * 4)
-            val packet = ByteBuffer.allocate(packetSize).order(ByteOrder.BIG_ENDIAN)
-            
-            // Packet header
-            val seqNum = sequenceNumber.incrementAndGet()
-            packet.put(0x00.toByte()) // Flags: not reliable, not zerocoded
-            packet.putInt(seqNum)
-            packet.put(0x00.toByte()) // Extra byte
-            
-            // Message ID: PacketAck is high frequency -5 (0xFB as signed byte)
-            packet.put(0xFB.toByte())
-            
-            // Block count - use bitwise AND to ensure unsigned byte representation
-            packet.put((acksToSend.size and 0xFF).toByte())
-            
-            // Each ACKed sequence number (4 bytes, little-endian for the data)
-            packet.order(ByteOrder.LITTLE_ENDIAN)
-            for (ackSeq in acksToSend) {
-                packet.putInt(ackSeq)
-            }
-            
-            // Send the packet
-            packet.flip()
-            val bytes = ByteArray(packet.remaining())
-            packet.get(bytes)
-            
-            val channel = datagramChannel ?: return@withContext
-            val buffer = ByteBuffer.wrap(bytes)
-            channel.write(buffer)
-            
-            packetsSent.incrementAndGet()
-            bytesSent.addAndGet(bytes.size.toLong())
-            lastSendTime = System.currentTimeMillis()
-            lastAckSendTime = lastSendTime
-            
-            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✅ Sent PacketAck for ${acksToSend.size} packets: $acksToSend (remaining pending: ${pendingAcksToSend.size})")
-            
-            // Record in packet history
-            recordPacketEvent(
-                type = PacketHistoryEntry.PacketEventType.SEND_SUCCESS,
-                messageId = MessageIds.PACKET_ACK,
-                data = bytes,
-                sequenceNumber = seqNum,
-                success = true
-            )
-            
-            // Log ACKs sent to EnhancedPacketLogger for statistics
-            acksToSend.forEach { ackSeq ->
-                EnhancedPacketLogger.logAckSent(ackSeq)
-            }
-            
-        } catch (e: Exception) {
-            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Failed to send PacketAck: ${e.message}")
-            // Re-queue the ACKs we couldn't send
-            acksToSend.forEach { pendingAcksToSend.offer(it) }
-        }
-    }
-    
-    /**
      * Handle PacketAck message from server
      * 
      * PacketAck message format (High Frequency, ID = -5 / 0xFB):
@@ -1564,7 +1205,7 @@ class UDPConnectionFixed {
      * This should be called periodically to handle message timeouts.
      * Based on the reference viewer's timeout and retry logic.
      */
-    private suspend fun checkMessageTimeouts() {
+    private fun checkMessageTimeouts() {
         val now = System.currentTimeMillis()
         val timeout = MESSAGE_TIMEOUT_MS
         val maxRetries = MESSAGE_MAX_RETRIES
@@ -1615,18 +1256,6 @@ class UDPConnectionFixed {
         }
     }
     
-    /**
-     * Route message through message router
-     */
-    private suspend fun routeMessage(data: ByteArray) {
-        val messageId = extractMessageId(data)
-        val routed = messageRouter.routeMessage(messageId, data, heavyTaskQueue)
-
-        if (routed) {
-            messagesRouted.incrementAndGet()
-        }
-    }
-
     /**
      * Route a message by ID to the registered app-level handlers.
      * Called by LinkpointThreadedCircuit to forward received packets.
@@ -2011,12 +1640,14 @@ class UDPConnectionFixed {
      * @param zerocoded Whether to use zero-coding
      */
     /**
-     * Send a packet. This is now a regular (non-suspend) function so it can be called
-     * from ANY thread, including the I/O thread's message handlers.
-     * DatagramChannel.write() on a connected channel is thread-safe.
+     * Build a packet from this circuit's outbound message and queue it for the
+     * I/O thread to write. Lumiya pattern (`SLCircuit.SendMessage`): producers
+     * never touch the DatagramChannel directly; they enqueue and wake the
+     * selector. The single I/O thread drains the queue between select cycles,
+     * so wire access is always serialized to one thread.
      *
-     * The suspend keyword is kept for binary compatibility with existing callers
-     * but the function never actually suspends.
+     * Safe to call from any thread. Returns the assigned sequence number
+     * (≥ 1) or -1 if the connection isn't up.
      */
     fun sendPacket(
         messageId: Int,
@@ -2030,140 +1661,140 @@ class UDPConnectionFixed {
             return -1
         }
 
-        // Lumiya uses incrementAndGet() — first packet gets seq=1, not 0.
-        // This matches all other send paths (sendPendingAcks, sendPendingAcksFromIOThread).
-        val seqNum = sequenceNumber.incrementAndGet()
-
-        try {
-            // Build packet header (big-endian per SL protocol)
+        val seqNum: Int
+        val finalPacket: ByteArray
+        // Synchronize seq assignment with enqueue so wire order matches seq order.
+        // Without this, two producers can interleave incrementAndGet vs offer().
+        synchronized(outgoingQueue) {
+            seqNum = sequenceNumber.incrementAndGet()
             val flags = (if (reliable) 0x40 else 0) or (if (zerocoded) 0x80 else 0)
 
-            // Track callback if this is a reliable message with listener
-            if (reliable && listener != null) {
-                val callbackInfo = MessageCallbackInfo(
-                    sequenceNumber = seqNum,
-                    messageId = messageId,
-                    listener = listener,
-                    sentTime = System.currentTimeMillis(),
-                    retryCount = 0
-                )
-                pendingCallbacks[seqNum] = callbackInfo
-                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-                    "Registered callback for seqNum=$seqNum, messageId=$messageId")
-            }
-            
             val header = ByteBuffer.allocate(6).order(ByteOrder.BIG_ENDIAN)
             header.put(flags.toByte())
             header.putInt(seqNum)
             header.put(0.toByte()) // Extra header byte
-            
-            // Encode message ID (Linkpoint)
-            val messageIdBytes = encodeMessageId(messageId)
-            
-            // Combine header, message ID, and payload
-            val packet = header.array() + messageIdBytes + payload
-            
-            // Zero-code if requested
-            val finalPacket = if (zerocoded) zeroEncode(packet) else packet
-            
-            // Get message name and full hex dump for logging
-            val messageName = getMessageName(messageId)
-            // Generate full hex dump of all packet bytes
-            val fullHexDump = finalPacket.joinToString(" ") { "%02X".format(it) }
-            
-            // Send via DatagramChannel
-            val buffer = ByteBuffer.wrap(finalPacket)
-            val bytesWritten = datagramChannel?.write(buffer) ?: 0
-            
-            if (bytesWritten > 0) {
-                packetsSent.incrementAndGet()
-                bytesSent.addAndGet(bytesWritten.toLong())
-                lastSendTime = System.currentTimeMillis()
-                
-                // Reset consecutive error counter on successful send
-                consecutiveSendErrors.set(0)
-                
-                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sent packet: ${finalPacket.size} bytes (ID: $messageId, reliable: $reliable)")
-                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "   Message: $messageName (seq: $seqNum)")
-                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "   Full packet data: $fullHexDump")
-                
-                // Record in packet history for debug reports
-                recordPacketEvent(
-                    type = PacketHistoryEntry.PacketEventType.SEND_SUCCESS,
-                    messageId = messageId,
-                    data = finalPacket,
-                    sequenceNumber = seqNum,
-                    success = true
-                )
-                
-                // Log to EnhancedPacketLogger for comprehensive tracking
-                EnhancedPacketLogger.logPacketSent(
-                    messageId = messageId,
-                    messageName = messageName,
-                    sequenceNumber = seqNum,
-                    data = finalPacket,
-                    flags = EnhancedPacketLogger.PacketFlags(
-                        reliable = reliable,
-                        resent = false,
-                        zerocoded = zerocoded,
-                        hasAcks = false
-                    )
-                )
-                
-                // Log to SessionLogRecorder for full session recording
-                SessionLogRecorder.logPacketSent(
-                    messageId = messageId,
-                    messageName = messageName,
-                    sequenceNumber = seqNum,
-                    data = finalPacket,
-                    reliable = reliable
-                )
-            } else {
-                // Record failed send
-                recordPacketEvent(
-                    type = PacketHistoryEntry.PacketEventType.SEND_FAILED,
-                    messageId = messageId,
-                    data = finalPacket,
-                    sequenceNumber = seqNum,
-                    success = false,
-                    errorMessage = "DatagramChannel.write() returned 0 bytes"
-                )
-                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "→ Send may have failed: 0 bytes written (ID: $messageId)")
-            }
-            
-        } catch (e: Exception) {
-            NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "✗ Send error: ${e.message}")
-            // Record failed send with error
-            recordPacketEvent(
-                type = PacketHistoryEntry.PacketEventType.SEND_FAILED,
+
+            val packet = header.array() + encodeMessageId(messageId) + payload
+            finalPacket = if (zerocoded) zeroEncode(packet) else packet
+
+            outgoingQueue.offer(OutboundPacket(
+                data = finalPacket,
                 messageId = messageId,
-                data = payload,
+                seqNum = seqNum,
+                reliable = reliable,
+                zerocoded = zerocoded
+            ))
+        }
+
+        if (reliable && listener != null) {
+            pendingCallbacks[seqNum] = MessageCallbackInfo(
                 sequenceNumber = seqNum,
-                success = false,
-                errorMessage = e.message
+                messageId = messageId,
+                listener = listener,
+                sentTime = System.currentTimeMillis(),
+                retryCount = 0
             )
-            
-            // Track consecutive send errors for reconnection detection
-            val errorCount = consecutiveSendErrors.incrementAndGet()
-            NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, 
-                "Consecutive send errors: $errorCount (threshold: $CONSECUTIVE_ERROR_THRESHOLD)")
-            
-            // Check for critical errors that indicate socket invalidation
-            val errorMessage = e.message?.lowercase() ?: ""
-            val isSocketInvalidationError = SOCKET_INVALIDATION_ERRORS.any { errorMessage.contains(it) }
-            
-            if (isSocketInvalidationError) {
-                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
-                    "⚠️ Critical socket error detected: ${e.message}")
+        }
 
-                if (errorCount >= CONSECUTIVE_ERROR_THRESHOLD) {
-                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
-                        "🔄 Too many consecutive send errors ($errorCount), attempting socket reconnect")
+        // Wake the I/O thread so it drains the queue immediately rather than
+        // waiting for the next select() timeout.
+        selector?.wakeup()
 
-                    // Reset counter before attempting reconnect
+        return seqNum
+    }
+
+    /**
+     * Drain queued outbound packets to the DatagramChannel. Runs on the I/O
+     * thread (Lumiya `ProcessTransmit`). All write-path bookkeeping —
+     * counters, packet history, EnhancedPacketLogger, SessionLogRecorder, and
+     * socket-invalidation detection — is performed here so it stays on the
+     * thread that actually owns the channel.
+     */
+    private fun drainOutgoingQueueOnIOThread() {
+        val channel = datagramChannel ?: return
+
+        while (true) {
+            val pkt = outgoingQueue.poll() ?: break
+            val messageName = getMessageName(pkt.messageId)
+
+            try {
+                val written = channel.write(ByteBuffer.wrap(pkt.data))
+                if (written > 0) {
+                    packetsSent.incrementAndGet()
+                    bytesSent.addAndGet(written.toLong())
+                    lastSendTime = System.currentTimeMillis()
                     consecutiveSendErrors.set(0)
 
-                    // Try socket reconnect first, fall back to full reconnection
+                    NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
+                        "→ Sent packet: ${pkt.data.size} bytes (ID: ${pkt.messageId}, reliable: ${pkt.reliable})")
+                    NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
+                        "   Message: $messageName (seq: ${pkt.seqNum})")
+                    NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
+                        "   Full packet data: ${pkt.data.joinToString(" ") { "%02X".format(it) }}")
+
+                    recordPacketEvent(
+                        type = PacketHistoryEntry.PacketEventType.SEND_SUCCESS,
+                        messageId = pkt.messageId,
+                        data = pkt.data,
+                        sequenceNumber = pkt.seqNum,
+                        success = true
+                    )
+
+                    EnhancedPacketLogger.logPacketSent(
+                        messageId = pkt.messageId,
+                        messageName = messageName,
+                        sequenceNumber = pkt.seqNum,
+                        data = pkt.data,
+                        flags = EnhancedPacketLogger.PacketFlags(
+                            reliable = pkt.reliable,
+                            resent = false,
+                            zerocoded = pkt.zerocoded,
+                            hasAcks = false
+                        )
+                    )
+
+                    SessionLogRecorder.logPacketSent(
+                        messageId = pkt.messageId,
+                        messageName = messageName,
+                        sequenceNumber = pkt.seqNum,
+                        data = pkt.data,
+                        reliable = pkt.reliable
+                    )
+                } else {
+                    recordPacketEvent(
+                        type = PacketHistoryEntry.PacketEventType.SEND_FAILED,
+                        messageId = pkt.messageId,
+                        data = pkt.data,
+                        sequenceNumber = pkt.seqNum,
+                        success = false,
+                        errorMessage = "DatagramChannel.write() returned 0 bytes"
+                    )
+                    NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
+                        "→ Send may have failed: 0 bytes written (ID: ${pkt.messageId})")
+                }
+            } catch (e: Exception) {
+                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                    "✗ Send error: ${e.message}")
+                recordPacketEvent(
+                    type = PacketHistoryEntry.PacketEventType.SEND_FAILED,
+                    messageId = pkt.messageId,
+                    data = pkt.data,
+                    sequenceNumber = pkt.seqNum,
+                    success = false,
+                    errorMessage = e.message
+                )
+
+                val errorCount = consecutiveSendErrors.incrementAndGet()
+                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
+                    "Consecutive send errors: $errorCount (threshold: $CONSECUTIVE_ERROR_THRESHOLD)")
+
+                val errorMessage = e.message?.lowercase() ?: ""
+                val isSocketInvalidationError = SOCKET_INVALIDATION_ERRORS.any { errorMessage.contains(it) }
+
+                if (isSocketInvalidationError && errorCount >= CONSECUTIVE_ERROR_THRESHOLD) {
+                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                        "🔄 Too many consecutive send errors ($errorCount), attempting socket reconnect")
+                    consecutiveSendErrors.set(0)
                     scope.launch {
                         val reconnected = try { reconnect() } catch (ex: Exception) { false }
                         if (!reconnected) {
@@ -2173,10 +1804,11 @@ class UDPConnectionFixed {
                         }
                     }
                 }
+                // Stop draining on error — the I/O thread will retry on the next
+                // select cycle once the socket is healthy again.
+                break
             }
-            return -1
         }
-        return seqNum
     }
 
     /**
@@ -2287,16 +1919,13 @@ class UDPConnectionFixed {
         ioThread?.interrupt()
         ioThread = null
 
-        receiveJob?.cancel()
         agentUpdateJob?.cancel()
-        ackSenderJob?.cancel()
-        timeoutCheckerJob?.cancel()
-
-        circuitTaskQueue.clearPending()
-        heavyTaskQueue.clearPending()
 
         // Clear pending ACKs since we're disconnecting
         pendingAcksToSend.clear()
+
+        // Drop any outbound packets that didn't get out before disconnect
+        outgoingQueue.clear()
 
         // Clear pending callbacks since we're disconnecting
         pendingCallbacks.clear()
@@ -2350,10 +1979,8 @@ class UDPConnectionFixed {
         _isConnected.value = false
         ioThread?.interrupt()
         ioThread = null
-        receiveJob?.cancel()
-        ackSenderJob?.cancel()
-        timeoutCheckerJob?.cancel()
         pendingAcksToSend.clear()
+        outgoingQueue.clear()
 
         try {
             selectionKey?.cancel()
@@ -2400,19 +2027,15 @@ class UDPConnectionFixed {
 
             _isConnected.value = true
 
-            // Start receive loop on dedicated I/O thread
+            // Start receive loop on dedicated I/O thread.
+            // It also drives ACK flushing, ping checks, and timeout retries
+            // via its idle pass — no separate coroutines needed.
             ioThread = Thread({
                 receiveLoopBlocking()
             }, "SLCircuitIO-reconnect").apply {
                 isDaemon = true
                 start()
             }
-
-            // Restart ACK sender
-            ackSenderJob = scope.launch { ackSenderLoop() }
-
-            // Restart timeout checker
-            timeoutCheckerJob = scope.launch { timeoutCheckerLoop() }
 
             // Re-send UseCircuitCode so the server maps our new source port
             sendUseCircuitCode()
