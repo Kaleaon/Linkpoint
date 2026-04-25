@@ -386,6 +386,11 @@
             android:summary="Capture current app state for debugging" />
 
         <Preference
+            android:key="force_appearance_refresh"
+            android:title="Force Refresh Appearance"
+            android:summary="Re-bake all 11 channels and resend AgentSetAppearance to the simulator (debug)" />
+
+        <Preference
             android:key="view_debug_reports"
             android:title="View Debug Reports"
             android:summary="View saved debug reports" />
