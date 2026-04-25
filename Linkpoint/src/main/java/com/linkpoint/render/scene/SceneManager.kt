@@ -2,30 +2,68 @@ package com.linkpoint.render.scene
 
 import android.util.Log
 import com.google.android.filament.*
+import com.google.android.filament.VertexBuffer.AttributeType
+import com.google.android.filament.VertexBuffer.VertexAttribute
 import com.linkpoint.protocol.types.LLQuaternion
 import com.linkpoint.protocol.types.LLVector3
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
  * Manages the 3D scene graph for the world
  */
 class SceneManager(private val engine: Engine, private val scene: Scene) {
-    
+
     companion object {
         private const val TAG = "SceneManager"
+
+        // Avatar placeholder dimensions (humanoid capsule approximation, in meters).
+        // Real skinned meshes are a separate, much larger task; until then this
+        // makes avatars visible at the right height/footprint.
+        private const val AVATAR_PLACEHOLDER_HEIGHT = 1.85f
+        private const val AVATAR_PLACEHOLDER_RADIUS = 0.35f
     }
-    
+
     // Object tracking
     private val sceneObjects = ConcurrentHashMap<UUID, SceneObject>()
     private val avatars = ConcurrentHashMap<UUID, AvatarObject>()
-    
+
     // Entity manager
     private val entityManager = EntityManager.get()
-    
+
     // Current camera position
     private var cameraPosition = LLVector3(128f, 128f, 30f)
     private var cameraTarget = LLVector3(128f, 128f, 0f)
+
+    // Avatar placeholder rendering. Set via setAvatarMaterial() once the
+    // MaterialLoader has compiled the lit material; until then avatars are
+    // tracked but invisible (same behaviour as the previous code).
+    private var avatarMaterial: MaterialInstance? = null
+    private var avatarMesh: AvatarMesh? = null
+
+    /**
+     * Provide the lit material used to render avatar placeholder geometry.
+     * Should be called once after MaterialLoader.initialize() returns success.
+     * Existing avatars receive the renderable retroactively.
+     */
+    fun setAvatarMaterial(material: Material) {
+        avatarMaterial = material.createInstance()
+        avatarMesh = buildAvatarPlaceholderMesh()
+        Log.i(TAG, "Avatar material set; placeholder mesh ready")
+
+        // Retroactively attach renderables to any avatars that came in before
+        // the material was wired up.
+        avatars.values.forEach { avatar ->
+            if (avatar.renderable == 0) {
+                attachAvatarRenderable(avatar)
+            }
+        }
+    }
     
     /**
      * Add or update an object in the scene
@@ -87,7 +125,7 @@ class SceneManager(private val engine: Engine, private val scene: Scene) {
         animations: List<UUID> = emptyList()
     ) {
         val existing = avatars[agentId]
-        
+
         if (existing != null) {
             existing.position = position
             existing.rotation = rotation
@@ -103,9 +141,159 @@ class SceneManager(private val engine: Engine, private val scene: Scene) {
                 animations = animations
             )
             avatars[agentId] = avatar
+            attachAvatarRenderable(avatar)
             scene.addEntity(entity)
+            updateTransform(avatar)
             Log.d(TAG, "Added avatar: $agentId at $position")
         }
+    }
+
+    /**
+     * Build the RenderableComponent for an avatar entity using the shared
+     * placeholder capsule mesh and lit material. Called from updateAvatar()
+     * for new avatars, and from setAvatarMaterial() for any avatars that
+     * arrived before the material was ready.
+     *
+     * If the avatar material hasn't been wired up yet (MaterialLoader still
+     * compiling, or compilation failed), this is a no-op — the entity is
+     * still added to the scene but won't render until the material lands.
+     * Real skinned-mesh avatar rendering is a separate follow-up.
+     */
+    private fun attachAvatarRenderable(avatar: AvatarObject) {
+        val mesh = avatarMesh ?: return
+        val material = avatarMaterial ?: return
+        try {
+            RenderableManager.Builder(1)
+                .boundingBox(
+                    Box(
+                        -AVATAR_PLACEHOLDER_RADIUS,
+                        -AVATAR_PLACEHOLDER_RADIUS,
+                        0f,
+                        AVATAR_PLACEHOLDER_RADIUS,
+                        AVATAR_PLACEHOLDER_RADIUS,
+                        AVATAR_PLACEHOLDER_HEIGHT
+                    )
+                )
+                .geometry(0, RenderableManager.PrimitiveType.TRIANGLES, mesh.vertexBuffer, mesh.indexBuffer)
+                .material(0, material)
+                .culling(true)
+                .receiveShadows(true)
+                .castShadows(true)
+                .build(engine, avatar.entity)
+            avatar.renderable = avatar.entity
+            engine.transformManager.create(avatar.entity)
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to attach avatar renderable for ${avatar.agentId}", e)
+        }
+    }
+
+    /**
+     * Build a single shared capsule-ish mesh used as the placeholder body for
+     * every avatar. The geometry is positioned with feet at z=0 and head at
+     * z=AVATAR_PLACEHOLDER_HEIGHT in entity-local space, so the avatar's
+     * world-space transform from the protocol layer can be applied directly.
+     *
+     * Capsule = lower hemisphere + cylinder + upper hemisphere. We re-use the
+     * same vertex layout (FLOAT3 position, FLOAT3 normal, FLOAT2 UV) as
+     * PrimRenderer so it consumes the same lit material.
+     */
+    private fun buildAvatarPlaceholderMesh(): AvatarMesh {
+        val rings = 12
+        val segments = 16
+        val radius = AVATAR_PLACEHOLDER_RADIUS
+        val cylinderHeight = (AVATAR_PLACEHOLDER_HEIGHT - 2f * radius).coerceAtLeast(0.01f)
+
+        val vertices = mutableListOf<Float>()
+        val indices = mutableListOf<Short>()
+
+        fun pushVertex(x: Float, y: Float, z: Float, nx: Float, ny: Float, nz: Float, u: Float, v: Float) {
+            vertices.add(x); vertices.add(y); vertices.add(z)
+            vertices.add(nx); vertices.add(ny); vertices.add(nz)
+            vertices.add(u); vertices.add(v)
+        }
+
+        // Lower hemisphere: from y = -PI/2 to 0 (capsule bottom), centered at z=radius
+        var rowStart = 0
+        for (ring in 0..rings / 2) {
+            val phi = -PI / 2.0 + PI * ring / rings
+            val cp = cos(phi).toFloat()
+            val sp = sin(phi).toFloat()
+            for (seg in 0..segments) {
+                val theta = 2.0 * PI * seg / segments
+                val ct = cos(theta).toFloat()
+                val st = sin(theta).toFloat()
+                val nx = cp * ct
+                val ny = cp * st
+                val nz = sp
+                val px = nx * radius
+                val py = ny * radius
+                val pz = nz * radius + radius
+                pushVertex(px, py, pz, nx, ny, nz, seg.toFloat() / segments, ring.toFloat() / rings * 0.5f)
+            }
+        }
+        // Upper hemisphere: from 0 to PI/2, centered at z = radius + cylinderHeight
+        for (ring in 0..rings / 2) {
+            val phi = PI * ring / rings
+            val cp = cos(phi).toFloat()
+            val sp = sin(phi).toFloat()
+            for (seg in 0..segments) {
+                val theta = 2.0 * PI * seg / segments
+                val ct = cos(theta).toFloat()
+                val st = sin(theta).toFloat()
+                val nx = cp * ct
+                val ny = cp * st
+                val nz = sp
+                val px = nx * radius
+                val py = ny * radius
+                val pz = nz * radius + radius + cylinderHeight
+                pushVertex(px, py, pz, nx, ny, nz, seg.toFloat() / segments, 0.5f + ring.toFloat() / rings * 0.5f)
+            }
+        }
+
+        // Build indices spanning both hemispheres + the cylindrical seam between them.
+        val ringsTotal = rings + 1 // (rings/2 + 1) bottom + (rings/2 + 1) top - 0 (no shared row)
+        val verticesPerRing = segments + 1
+        for (r in 0 until ringsTotal - 1) {
+            for (s in 0 until segments) {
+                val i0 = (r * verticesPerRing + s).toShort()
+                val i1 = (i0 + 1).toShort()
+                val i2 = ((r + 1) * verticesPerRing + s).toShort()
+                val i3 = (i2 + 1).toShort()
+                indices.add(i0); indices.add(i2); indices.add(i1)
+                indices.add(i1); indices.add(i2); indices.add(i3)
+            }
+        }
+
+        return uploadAvatarMesh(vertices.toFloatArray(), indices.toShortArray())
+    }
+
+    private fun uploadAvatarMesh(verts: FloatArray, idx: ShortArray): AvatarMesh {
+        val stride = 8 * 4
+        val vertexCount = verts.size / 8
+        val vertexBytes = ByteBuffer.allocateDirect(verts.size * 4).order(ByteOrder.nativeOrder())
+        verts.forEach { vertexBytes.putFloat(it) }
+        vertexBytes.flip()
+
+        val indexBytes = ByteBuffer.allocateDirect(idx.size * 2).order(ByteOrder.nativeOrder())
+        idx.forEach { indexBytes.putShort(it) }
+        indexBytes.flip()
+
+        val vb = VertexBuffer.Builder()
+            .vertexCount(vertexCount)
+            .bufferCount(1)
+            .attribute(VertexAttribute.POSITION, 0, AttributeType.FLOAT3, 0, stride)
+            .attribute(VertexAttribute.TANGENTS, 0, AttributeType.FLOAT3, 12, stride)
+            .attribute(VertexAttribute.UV0, 0, AttributeType.FLOAT2, 24, stride)
+            .build(engine)
+        vb.setBufferAt(engine, 0, vertexBytes)
+
+        val ib = IndexBuffer.Builder()
+            .indexCount(idx.size)
+            .bufferType(IndexBuffer.Builder.IndexType.USHORT)
+            .build(engine)
+        ib.setBuffer(engine, indexBytes)
+
+        return AvatarMesh(vb, ib)
     }
     
     /**
@@ -301,5 +489,11 @@ data class AvatarObject(
     var animations: List<UUID> = emptyList(),
     var displayName: String = "",
     var isTyping: Boolean = false,
-    var isSitting: Boolean = false
+    var isSitting: Boolean = false,
+    var renderable: Int = 0
+)
+
+internal data class AvatarMesh(
+    val vertexBuffer: VertexBuffer,
+    val indexBuffer: IndexBuffer
 )

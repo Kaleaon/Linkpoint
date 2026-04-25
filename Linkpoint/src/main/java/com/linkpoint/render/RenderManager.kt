@@ -5,6 +5,8 @@ import android.util.Log
 import android.view.Surface
 import android.view.SurfaceView
 import com.google.android.filament.*
+import com.google.android.filament.VertexBuffer.AttributeType
+import com.google.android.filament.VertexBuffer.VertexAttribute
 import com.google.android.filament.android.DisplayHelper
 import com.google.android.filament.android.UiHelper
 import com.linkpoint.render.environment.SLDefaultEnvironment
@@ -12,8 +14,11 @@ import com.linkpoint.diagnostics.ScenePopulationDiagnostics
 import com.linkpoint.render.materials.MaterialLoader
 import com.linkpoint.render.prims.PrimRenderer
 import com.linkpoint.render.scene.SceneManager
+import com.linkpoint.render.terrain.TerrainRenderer
 import com.linkpoint.protocol.messages.ObjectUpdateData
 import com.linkpoint.xr.XRFrameData
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 
@@ -55,14 +60,18 @@ class RenderManager(private val context: Context) {
     // Material and prim rendering
     private var materialLoader: MaterialLoader? = null
     private var primRenderer: PrimRenderer? = null
-    
+    private var terrainRenderer: TerrainRenderer? = null
+
     // Helpers
     private var uiHelper: UiHelper? = null
     private var displayHelper: DisplayHelper? = null
     private var surfaceView: SurfaceView? = null
-    
+
     // Ground plane entity for fallback rendering
     private var groundPlaneEntity: Int = 0
+    private var groundPlaneVertexBuffer: VertexBuffer? = null
+    private var groundPlaneIndexBuffer: IndexBuffer? = null
+    private var groundPlaneMaterial: MaterialInstance? = null
     
     // State
     private var isInitialized = false
@@ -71,10 +80,16 @@ class RenderManager(private val context: Context) {
 
     val dispatcher = RenderThreadDispatcher()
     private val renderQueue = RenderQueue()
-    
+
     // Camera matrices
     private val viewMatrix = FloatArray(16)
     private val projectionMatrix = FloatArray(16)
+
+    // Camera controller drives the lookAt every frame in renderFrame() based
+    // on user input (gestures) and agent position. Exposed so WorldViewActivity
+    // can attach gesture detectors and the agent-position updater.
+    val cameraController: CameraController = CameraController()
+    private val cameraEye = FloatArray(6)
     
     /**
      * Initialize the rendering engine
@@ -126,6 +141,21 @@ class RenderManager(private val context: Context) {
                     primRenderer = PrimRenderer(filamentEngine, filamentScene)
                     primRenderer?.initialize(litMaterial)
                     Log.d(TAG, "PrimRenderer initialized")
+
+                    // Wire avatar placeholder geometry. Without this avatar
+                    // entities have no RenderableComponent and stay invisible
+                    // even after AvatarUpdate flow runs.
+                    sceneManager?.setAvatarMaterial(litMaterial)
+
+                    // Instantiate terrain renderer using the same lit material.
+                    // The TerrainRenderer uses standard PBR params (baseColor /
+                    // metallic / roughness) rather than the unused detail0..3
+                    // splatting parameters, so the lit material works fine
+                    // until per-region terrain detail textures land.
+                    terrainRenderer = TerrainRenderer(filamentEngine, filamentScene).also {
+                        it.initialize(litMaterial)
+                    }
+                    Log.d(TAG, "TerrainRenderer initialized")
                 } else {
                     Log.w(TAG, "No lit material available - PrimRenderer not initialized")
                 }
@@ -270,35 +300,92 @@ class RenderManager(private val context: Context) {
     private fun setupFallbackGroundPlane() {
         val eng = engine ?: return
         val sc = scene ?: return
-        
+        val loader = materialLoader
+
         try {
-            // Create a simple quad for the ground
             val groundColor = SLDefaultEnvironment.GroundPlane.DEFAULT_COLOR
             val groundSize = SLDefaultEnvironment.GroundPlane.DEFAULT_SIZE
             val halfSize = groundSize / 2f
-            
-            // Create ground plane entity
+            val z = SLDefaultEnvironment.GroundPlane.DEFAULT_HEIGHT
+
+            // Two triangles spanning the standard SL region at water level.
+            // Position + normal (Z up) + UV; same vertex layout as PrimRenderer
+            // / TerrainRenderer so the lit material consumes it directly.
+            val vertices = floatArrayOf(
+                -halfSize, -halfSize, 0f, 0f, 0f, 1f, 0f, 0f,
+                 halfSize, -halfSize, 0f, 0f, 0f, 1f, 1f, 0f,
+                 halfSize,  halfSize, 0f, 0f, 0f, 1f, 1f, 1f,
+                -halfSize,  halfSize, 0f, 0f, 0f, 1f, 0f, 1f
+            )
+            val indices = shortArrayOf(0, 1, 2, 0, 2, 3)
+            val stride = 8 * 4
+            val vBytes = ByteBuffer.allocateDirect(vertices.size * 4).order(ByteOrder.nativeOrder())
+            vertices.forEach { vBytes.putFloat(it) }; vBytes.flip()
+            val iBytes = ByteBuffer.allocateDirect(indices.size * 2).order(ByteOrder.nativeOrder())
+            indices.forEach { iBytes.putShort(it) }; iBytes.flip()
+
+            val vb = VertexBuffer.Builder()
+                .vertexCount(4)
+                .bufferCount(1)
+                .attribute(VertexAttribute.POSITION, 0, AttributeType.FLOAT3, 0, stride)
+                .attribute(VertexAttribute.TANGENTS, 0, AttributeType.FLOAT3, 12, stride)
+                .attribute(VertexAttribute.UV0, 0, AttributeType.FLOAT2, 24, stride)
+                .build(eng)
+            vb.setBufferAt(eng, 0, vBytes)
+            val ib = IndexBuffer.Builder()
+                .indexCount(indices.size)
+                .bufferType(IndexBuffer.Builder.IndexType.USHORT)
+                .build(eng)
+            ib.setBuffer(eng, iBytes)
+            groundPlaneVertexBuffer = vb
+            groundPlaneIndexBuffer = ib
+
+            // Tinted material instance so the void-fallback shows SL grass green
+            // instead of the lit material's default light grey.
+            val matInstance = loader?.createLitInstance(
+                groundColor.r, groundColor.g, groundColor.b, groundColor.a,
+                metallic = 0f,
+                roughness = 0.95f
+            )
+            if (matInstance == null) {
+                Log.w(TAG, "Ground plane material unavailable; using untinted lit material")
+            }
+            groundPlaneMaterial = matInstance
+
             groundPlaneEntity = EntityManager.get().create()
-            
-            // Build a simple lit material for the ground
-            // Note: In a full implementation, this would use a proper grass texture
-            // For now, we create a simple colored ground plane
-            
-            // Position the ground plane at the center of the region
+            val builder = RenderableManager.Builder(1)
+                .boundingBox(Box(-halfSize, -halfSize, -0.1f, halfSize, halfSize, 0.1f))
+                .geometry(0, RenderableManager.PrimitiveType.TRIANGLES, vb, ib)
+                .culling(false)
+                .receiveShadows(true)
+                .castShadows(false)
+            if (matInstance != null) {
+                builder.material(0, matInstance)
+            } else {
+                val fallbackMat = loader?.getLitMaterial()
+                    ?: throw IllegalStateException("No material available for ground plane")
+                builder.material(0, fallbackMat.defaultInstance)
+            }
+            builder.build(eng, groundPlaneEntity)
+
+            // Centre on standard SL region (128, 128) at water level so the
+            // user lands on visible ground until terrain LayerData arrives.
             val tm = eng.transformManager
             tm.create(groundPlaneEntity)
             val ti = tm.getInstance(groundPlaneEntity)
-            // Position at center of standard SL region (128, 128) at water level
-            tm.setTransform(ti, floatArrayOf(
-                1f, 0f, 0f, 0f,
-                0f, 1f, 0f, 0f,
-                0f, 0f, 1f, 0f,
-                128f, 128f, SLDefaultEnvironment.Water.DEFAULT_WATER_HEIGHT, 1f
-            ))
-            
-            Log.d(TAG, "Fallback ground plane created at water level (${SLDefaultEnvironment.Water.DEFAULT_WATER_HEIGHT}m)")
+            tm.setTransform(
+                ti, floatArrayOf(
+                    1f, 0f, 0f, 0f,
+                    0f, 1f, 0f, 0f,
+                    0f, 0f, 1f, 0f,
+                    128f, 128f, z, 1f
+                )
+            )
+
+            sc.addEntity(groundPlaneEntity)
+            Log.d(TAG, "Fallback ground plane created at z=$z")
         } catch (e: Exception) {
-            Log.w(TAG, "Could not create fallback ground plane: ${e.message}")
+            Log.w(TAG, "Could not create fallback ground plane: ${e.message}", e)
         }
     }
     
@@ -306,20 +393,21 @@ class RenderManager(private val context: Context) {
      * Setup default camera position for initial view.
      */
     private fun setupDefaultCamera() {
-        // Position camera at a reasonable height looking at the center of the region
-        // Standard SL avatar spawn position is often around (128, 128, 25)
+        // Position camera at a reasonable height looking at the center of the
+        // region. Standard SL avatar spawn position is often around (128,128,25);
+        // the controller will take over once the protocol layer pushes the
+        // first agent-position update.
         camera?.lookAt(
-            128.0, 128.0, 30.0,    // Camera position
-            128.0, 140.0, 20.0,    // Look at point (slightly ahead and down)
-            0.0, 0.0, 1.0         // Up vector (Z-up for SL)
+            128.0, 128.0, 30.0,
+            128.0, 140.0, 20.0,
+            0.0, 0.0, 1.0
         )
-        
-        // Set default FOV
+
         camera?.setProjection(
-            SLDefaultEnvironment.Render.DEFAULT_FOV.toDouble(),
+            currentFovDegrees.toDouble(),
             1.0, // Will be updated when viewport is set
             SLDefaultEnvironment.Render.DEFAULT_NEAR_CLIP.toDouble(),
-            SLDefaultEnvironment.Render.DEFAULT_FAR_CLIP.toDouble(),
+            currentFarClip.toDouble(),
             Camera.Fov.VERTICAL
         )
     }
@@ -330,21 +418,69 @@ class RenderManager(private val context: Context) {
      */
     fun onWorldDataLoaded() {
         hasWorldData = true
-        // In the future, this could hide the fallback ground plane
-        // once actual terrain is loaded
-        Log.i(TAG, "World data loaded - fallback elements can be hidden")
+        // Once terrain is rendered we no longer want the flat fallback bleeding
+        // through gaps between terrain patches. Removing the entity from the
+        // scene is cheap and reversible if the user teleports to a region whose
+        // LayerData is still pending.
+        if (groundPlaneEntity != 0) {
+            scene?.removeEntity(groundPlaneEntity)
+        }
+        Log.i(TAG, "World data loaded - fallback ground plane removed")
     }
+
+    /**
+     * Get the terrain renderer for protocol-side wiring
+     * (TerrainManager.setTerrainRenderer).
+     */
+    fun getTerrainRenderer(): TerrainRenderer? = terrainRenderer
     
     private fun updateProjection(width: Int, height: Int) {
         val aspect = width.toFloat() / height.toFloat()
         camera?.setProjection(
-            SLDefaultEnvironment.Render.DEFAULT_FOV.toDouble(),
+            currentFovDegrees.toDouble(),
             aspect.toDouble(),
             SLDefaultEnvironment.Render.DEFAULT_NEAR_CLIP.toDouble(),
-            SLDefaultEnvironment.Render.DEFAULT_FAR_CLIP.toDouble(),
+            currentFarClip.toDouble(),
             Camera.Fov.VERTICAL
         )
     }
+
+    /**
+     * Push the camera controller's computed eye/target into the Filament
+     * camera each frame so user input (gestures, mode toggle) and agent
+     * movement propagate visibly. Cheap: 12 floats and one lookAt() call.
+     */
+    private fun applyCameraController() {
+        val cam = camera ?: return
+        cameraController.computeView(cameraEye)
+        cam.lookAt(
+            cameraEye[0].toDouble(), cameraEye[1].toDouble(), cameraEye[2].toDouble(),
+            cameraEye[3].toDouble(), cameraEye[4].toDouble(), cameraEye[5].toDouble(),
+            0.0, 0.0, 1.0
+        )
+    }
+
+    /**
+     * Update the FOV and far-clip used for the projection matrix and refresh
+     * the projection if the viewport is already known. Called from the
+     * Settings screen when the user moves the FOV / draw-distance sliders.
+     */
+    fun setFieldOfView(fovDegrees: Float) {
+        currentFovDegrees = fovDegrees.coerceIn(30f, 120f)
+        if (viewportWidth > 0 && viewportHeight > 0) {
+            dispatcher.post(Runnable { updateProjection(viewportWidth, viewportHeight) })
+        }
+    }
+
+    fun setFarClip(meters: Float) {
+        currentFarClip = meters.coerceIn(32f, 4096f)
+        if (viewportWidth > 0 && viewportHeight > 0) {
+            dispatcher.post(Runnable { updateProjection(viewportWidth, viewportHeight) })
+        }
+    }
+
+    @Volatile private var currentFovDegrees: Float = SLDefaultEnvironment.Render.DEFAULT_FOV
+    @Volatile private var currentFarClip: Float = SLDefaultEnvironment.Render.DEFAULT_FAR_CLIP
 
     private fun rebuildSwapChainForCurrentSurface() {
         val eng = engine ?: return
@@ -584,12 +720,13 @@ class RenderManager(private val context: Context) {
         if (!isInitialized) return
 
         applyRenderUpdates()
-        
+        applyCameraController()
+
         val engine = this.engine ?: return
         val renderer = this.renderer ?: return
         val view = this.view ?: return
         val swapChain = ensureSwapChain(engine) ?: return
-        
+
         if (renderer.beginFrame(swapChain, System.nanoTime())) {
             renderer.render(view)
             renderer.endFrame()

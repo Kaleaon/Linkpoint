@@ -927,6 +927,14 @@ class LinkpointApp : Application() {
                                 rotation = update.rotation
                             )
                         )
+                        // Drive the follow / mouselook camera off the local
+                        // agent's position so user input doesn't fight the
+                        // avatar's actual world location every frame.
+                        if (::avatarManager.isInitialized &&
+                            avatarManager.getMyAvatar()?.agentId == update.fullId
+                        ) {
+                            renderManager.cameraController.setAgentPosition(update.position)
+                        }
                     } else {
                         ScenePopulationDiagnostics.markRendererSubmitted(ScenePopulationDiagnostics.EntityType.AVATAR, false)
                     }
@@ -5040,7 +5048,13 @@ class LinkpointApp : Application() {
      * Note: RenderManager is initialized early, so this is always true after app init
      */
     fun isRenderManagerInitialized(): Boolean = ::renderManager.isInitialized
-    
+
+    /**
+     * Check if terrain manager is initialized (for late-binding the
+     * TerrainRenderer once the render thread is up).
+     */
+    fun isTerrainManagerInitialized(): Boolean = ::terrainManager.isInitialized
+
     /**
      * Check if animation manager is initialized (for debug reports)
      */

@@ -89,6 +89,44 @@
 
     </PreferenceCategory>
 
+    <!-- Camera Settings -->
+    <PreferenceCategory android:title="Camera">
+
+        <SeekBarPreference
+            android:key="camera_fov"
+            android:title="Field of View"
+            android:summary="Vertical field of view in degrees (default 60)"
+            android:min="45"
+            android:max="90"
+            android:defaultValue="60"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:key="camera_follow_distance"
+            android:title="Follow Distance"
+            android:summary="Distance behind the avatar in follow mode (meters)"
+            android:min="1"
+            android:max="30"
+            android:defaultValue="5"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:key="camera_orbit_sensitivity"
+            android:title="Orbit Sensitivity"
+            android:summary="How fast the camera rotates per drag pixel (×0.05 deg/px)"
+            android:min="1"
+            android:max="20"
+            android:defaultValue="5"
+            app:showSeekBarValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="camera_invert_y"
+            android:title="Invert Y Axis"
+            android:summary="Flip vertical drag direction"
+            android:defaultValue="false" />
+
+    </PreferenceCategory>
+
     <!-- Audio Settings -->
     <PreferenceCategory android:title="Audio">
 
