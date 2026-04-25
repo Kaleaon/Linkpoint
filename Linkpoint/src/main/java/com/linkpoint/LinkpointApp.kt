@@ -1999,13 +1999,43 @@ class LinkpointApp : Application() {
                                 com.linkpoint.avatar.VisualParamLoader.load(applicationContext)
                             }
                             val morphParams = com.linkpoint.avatar.VisualParamLoader.allMorphParams()
+                            val skeletonParams = com.linkpoint.avatar.VisualParamLoader.allSkeletonParams()
+                            val colorParams = com.linkpoint.avatar.VisualParamLoader.allColorParams()
+                            val visualParamsCopy = data.visualParams.copyOf()
+
                             if (morphParams.isNotEmpty()) {
-                                val visualParamsCopy = data.visualParams.copyOf()
                                 renderManager.dispatcher.post(Runnable {
                                     renderManager.getSceneManager()?.applyAvatarMorphs(
                                         data.senderID, visualParamsCopy, morphParams
                                     )
                                 })
+                            }
+
+                            // Skeleton params: per-bone scale offsets that
+                            // accumulate onto the AvatarSkeleton's rest pose.
+                            // Affects mesh deformation through the GPU
+                            // skinning path on the next frame.
+                            if (skeletonParams.isNotEmpty() && ::avatarManager.isInitialized) {
+                                val a = avatarManager.getAvatar(data.senderID)
+                                a?.skeleton?.applySkeletonParams(visualParamsCopy, skeletonParams)
+                            }
+
+                            // Color params: blend a palette by param weight to
+                            // produce a per-channel tint (skin colour, hair
+                            // colour, etc.). For now we just pull skin (the
+                            // wearable="skin" subset) and feed it as a
+                            // baseColor tint on the avatar material — which
+                            // is the most-visible LL bake-time tint.
+                            if (colorParams.isNotEmpty()) {
+                                val skinTint = blendSkinColorParams(visualParamsCopy, colorParams)
+                                if (skinTint != null) {
+                                    renderManager.dispatcher.post(Runnable {
+                                        renderManager.getSceneManager()?.setAvatarSkinTint(
+                                            data.senderID,
+                                            skinTint[0], skinTint[1], skinTint[2], skinTint[3]
+                                        )
+                                    })
+                                }
                             }
                         }
                     }
@@ -5142,6 +5172,35 @@ class LinkpointApp : Application() {
      * Check if avatar manager is initialized (for debug reports)
      */
     fun isAvatarManagerInitialized(): Boolean = ::avatarManager.isInitialized
+
+    /**
+     * Combine all `wearable="skin"` colour-palette params into a single
+     * baseColor tint by sampling each param's palette at the visual-params
+     * byte and averaging the results. Returns null if no skin colour
+     * params apply (avatar at default appearance).
+     *
+     * This is a deliberate simplification: the LL bake compositor blends
+     * many colour layers across head / upper / lower / eyes channels
+     * separately. Without that channel split we get a single tint that's
+     * roughly "the skin colour the user picked" — visibly close to the
+     * intended look on the system avatar without the full bake pipeline.
+     */
+    private fun blendSkinColorParams(
+        visualParams: ByteArray,
+        params: List<com.linkpoint.avatar.VisualParamLoader.VisualParam>
+    ): FloatArray? {
+        var r = 0f; var g = 0f; var b = 0f; var a = 0f; var n = 0
+        val maxIdx = minOf(visualParams.size, params.size)
+        for (i in 0 until maxIdx) {
+            val p = params[i]
+            if (p.wearable != "skin" || p.colorPalette.isEmpty()) continue
+            val w = p.weightForByte(visualParams[i].toInt())
+            val sample = p.sampleColor(w) ?: continue
+            r += sample[0]; g += sample[1]; b += sample[2]; a += sample[3]; n++
+        }
+        if (n == 0) return null
+        return floatArrayOf(r / n, g / n, b / n, a / n)
+    }
     
     /**
      * Check if inventory manager is initialized (for debug reports)

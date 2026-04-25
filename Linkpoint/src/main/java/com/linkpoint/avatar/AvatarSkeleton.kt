@@ -266,11 +266,50 @@ class AvatarSkeleton(context: Context?) {
     }
     
     /**
-     * Update bone matrices (call after modifying poses)
+     * Apply VisualParam-driven bone scale offsets to the rest pose.
+     *
+     * For each `<param_skeleton>` in avatar_lad.xml, the LL viewer multiplies
+     * the param's weight by the per-bone scale offsets and adds the result
+     * to that bone's bind-pose scale (LLPolySkeletalDistortion in LL terms).
+     * The accumulated effect is what makes "Male_Skeleton", "BodyMass",
+     * "Heel_Height" etc. visibly change the avatar's silhouette.
+     *
+     * Resets every bone's scale to (1, 1, 1) before re-applying so this is
+     * idempotent across AvatarAppearance updates.
      */
+    fun applySkeletonParams(
+        visualParams: ByteArray,
+        params: List<VisualParamLoader.VisualParam>
+    ) {
+        // Reset to bind-pose scale.
+        for (bone in boneArray) {
+            bone.scale = LLVector3(1f, 1f, 1f)
+        }
+        if (visualParams.isEmpty() || params.isEmpty()) return
+
+        val maxIdx = minOf(visualParams.size, params.size)
+        for (i in 0 until maxIdx) {
+            val param = params[i]
+            if (param.boneScales.isEmpty()) continue
+            val w = param.weightForByte(visualParams[i].toInt())
+            // Skip params at their default — no contribution.
+            if (kotlin.math.abs(w - param.valueDefault) < 1e-4f) continue
+            for ((boneName, offset) in param.boneScales) {
+                val bone = bones[boneName] ?: continue
+                bone.scale = LLVector3(
+                    bone.scale.x + offset[0] * w,
+                    bone.scale.y + offset[1] * w,
+                    bone.scale.z + offset[2] * w
+                )
+            }
+        }
+        updateBoneMatrices()
+    }
+
+    /** Recompute every bone's worldMatrix + skinningMatrix from the rest pose. */
     fun updateBoneMatrices() {
-        rootBone?.let { calculateBoneMatrix(it, FloatArray(16).apply { 
-            this[0] = 1f; this[5] = 1f; this[10] = 1f; this[15] = 1f 
+        rootBone?.let { calculateBoneMatrix(it, FloatArray(16).apply {
+            this[0] = 1f; this[5] = 1f; this[10] = 1f; this[15] = 1f
         }) }
     }
     

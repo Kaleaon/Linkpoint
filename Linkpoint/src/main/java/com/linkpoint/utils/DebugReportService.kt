@@ -1301,7 +1301,38 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Friends manager: App not initialized")
             }
             appendLine()
-            
+
+            // ==================== APPEARANCE PIPELINE ====================
+            // Surfaces the local agent's bake → upload → AgentSetAppearance
+            // round trip so it's visible whether the pipeline ran at all,
+            // how many channels were baked, and whether any error fell out.
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ APPEARANCE PIPELINE                                               │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            if (app != null && app.isOutfitManagerInitialized()) {
+                try {
+                    val ad = app.appearanceManager.getDiagnostics()
+                    appendLine("AgentSetAppearance updates sent: ${ad.updatesSent}")
+                    appendLine("Updates failed: ${ad.updatesFailed}")
+                    appendLine("Last serial: ${ad.lastSerialSent}")
+                    appendLine("Last bake channel count: ${ad.lastBakedTextureCount}")
+                    if (ad.lastUpdateAgoMs != null) {
+                        appendLine("Last update: ${formatDuration(ad.lastUpdateAgoMs)} ago (took ${ad.lastUpdateDurationMs}ms)")
+                    } else {
+                        appendLine("Last update: never (no AgentWearablesUpdate or manual trigger yet)")
+                    }
+                    if (ad.lastUpdateError != null) {
+                        appendLine("Last error: ${ad.lastUpdateError}")
+                    }
+                } catch (e: Exception) {
+                    appendLine("AppearanceManager diagnostics unavailable: ${e.message}")
+                }
+            } else {
+                appendLine("AppearanceManager: not yet initialized (no login or no outfit)")
+            }
+            appendLine()
+
             // ==================== ENHANCED PACKET LOGGER STATISTICS ====================
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ ENHANCED PACKET LOGGER STATISTICS                                 │")

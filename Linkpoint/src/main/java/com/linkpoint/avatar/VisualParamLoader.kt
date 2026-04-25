@@ -10,30 +10,39 @@ import java.io.StringReader
  * Loads the Linden Lab system avatar's VisualParam table from
  * `assets/avatar/avatar_lad.xml`.
  *
- * Each `<param>` element in avatar_lad.xml describes a slider in the avatar
- * editor: a numeric `id`, a `name` (used to look up the matching morph
- * target in each `.llm` mesh), a `wearable` slot (shape / hair / shirt /
- * pants / etc.), and `value_min` / `value_max` defining the slider range.
- * For "morph" params (`<param_morph/>`), the child element is empty —
- * the morph data lives in the per-mesh `.llm` files keyed by [name].
+ * Each `<param>` element describes a slider in the avatar editor: numeric
+ * `id`, a `name` (used to look up the matching morph target in each `.llm`
+ * mesh, or the name of the skeletal/colour parameter), a `wearable` slot
+ * (shape / hair / shirt / pants / skin / eyes / etc.), `value_min` /
+ * `value_max` defining the slider range, and a single child element that
+ * picks the parameter type:
+ *
+ *   <param_morph/>      drives a sparse vertex delta in the LL meshes
+ *   <param_skeleton>    per-bone scale offsets blended by the param weight
+ *   <param_color>       a colour palette the param weight indexes into
+ *   <param_driver>      composite param that drives multiple sub-params
  *
  * AvatarAppearance message payload: a sequence of bytes, one per param,
- * in the order that the viewer + sim agree on. Following the LL reference
- * viewer (`indra/llcharacter/llvisualparam.cpp`), that order is the
- * "param list" iteration order — params sorted by [id]. Each byte 0..255
- * is interpolated as `value_min + (byte/255) * (value_max - value_min)`.
+ * in the order viewer + sim agree on (params sorted by id). Each byte
+ * 0..255 maps to a param weight via `weightForByte(byte)`.
  *
- * This loader skips skeleton params (`<param_skeleton>`) and color params
- * (`<param_color>`); only morph params drive mesh deformation, which is
- * what we need for body-shape morphing.
+ * This loader retains the data needed to apply each param type at render
+ * time:
+ *   - morph: just the name (mesh deltas live in the .llm files)
+ *   - skeleton: the per-bone (name, scale) offsets; applied by adding
+ *     `scale * weight` to each bone's scale on the AvatarSkeleton
+ *   - color: the palette of (r, g, b, a) values; the param weight 0..1
+ *     interpolates linearly across the palette to produce one colour
+ *     (used for the lit material's baseColor tint on the affected
+ *     wearable channel)
  */
 object VisualParamLoader {
     private const val TAG = "VisualParamLoader"
 
-    /**
-     * One row of the visual-param table. Order in [allMorphParams] matches
-     * the byte order in AvatarAppearance.visualParams (by [byteIndex]).
-     */
+    /** Param type marker. */
+    enum class Kind { MORPH, SKELETON, COLOR, DRIVER }
+
+    /** One row of the visual-param table. */
     data class VisualParam(
         val id: Int,
         val byteIndex: Int,
@@ -42,59 +51,87 @@ object VisualParamLoader {
         val valueMin: Float,
         val valueMax: Float,
         val valueDefault: Float,
-        val isMorph: Boolean
+        val kind: Kind,
+        /** Skeleton params: per-bone (name → 3-float scale offset). Empty otherwise. */
+        val boneScales: Map<String, FloatArray> = emptyMap(),
+        /** Color params: ordered list of RGBA tuples (each FloatArray size 4). Empty otherwise. */
+        val colorPalette: List<FloatArray> = emptyList()
     ) {
+        /** True for morph params (kept for backwards compat). */
+        val isMorph: Boolean get() = kind == Kind.MORPH
+
         /** Map a byte 0..255 from AvatarAppearance to a real param weight. */
         fun weightForByte(byte: Int): Float {
             val t = (byte and 0xFF) / 255f
             return valueMin + t * (valueMax - valueMin)
         }
+
+        /**
+         * Sample the colour palette at the supplied weight. Returns null for
+         * non-colour params. Weight is normalised against [valueMin,
+         * valueMax] internally so callers can pass the raw byte's
+         * interpolated weight from [weightForByte] directly.
+         */
+        fun sampleColor(weight: Float): FloatArray? {
+            if (kind != Kind.COLOR || colorPalette.isEmpty()) return null
+            if (colorPalette.size == 1) return colorPalette[0].copyOf()
+            // Map weight from [valueMin, valueMax] back to [0, 1] across the palette.
+            val span = (valueMax - valueMin).takeIf { kotlin.math.abs(it) > 1e-6f } ?: 1f
+            val t = ((weight - valueMin) / span).coerceIn(0f, 1f)
+            val pos = t * (colorPalette.size - 1)
+            val i0 = pos.toInt().coerceIn(0, colorPalette.size - 1)
+            val i1 = (i0 + 1).coerceAtMost(colorPalette.size - 1)
+            val frac = pos - i0
+            val a = colorPalette[i0]
+            val b = colorPalette[i1]
+            return floatArrayOf(
+                a[0] + (b[0] - a[0]) * frac,
+                a[1] + (b[1] - a[1]) * frac,
+                a[2] + (b[2] - a[2]) * frac,
+                a[3] + (b[3] - a[3]) * frac
+            )
+        }
     }
 
-    /** All loaded params (morph and non-morph), sorted by id. */
-    @Volatile
-    private var allParamsCached: List<VisualParam> = emptyList()
-    /** Subset of [allParamsCached] that drives morphs. */
-    @Volatile
-    private var morphParamsCached: List<VisualParam> = emptyList()
+    @Volatile private var allParamsCached: List<VisualParam> = emptyList()
+    @Volatile private var morphParamsCached: List<VisualParam> = emptyList()
+    @Volatile private var skeletonParamsCached: List<VisualParam> = emptyList()
+    @Volatile private var colorParamsCached: List<VisualParam> = emptyList()
+    @Volatile private var byMorphNameCached: Map<String, VisualParam> = emptyMap()
 
-    /** Lookup table from morph name to morph param. */
-    @Volatile
-    private var byMorphNameCached: Map<String, VisualParam> = emptyMap()
-
-    /** Has the loader been successfully populated from XML? */
     val isReady: Boolean get() = allParamsCached.isNotEmpty()
 
     fun allMorphParams(): List<VisualParam> = morphParamsCached
+    fun allSkeletonParams(): List<VisualParam> = skeletonParamsCached
+    fun allColorParams(): List<VisualParam> = colorParamsCached
     fun byMorphName(name: String): VisualParam? = byMorphNameCached[name]
 
-    /**
-     * Parse `assets/avatar/avatar_lad.xml`. Idempotent — subsequent calls
-     * are no-ops if the table is already populated. Returns the count of
-     * params loaded (morph + non-morph) for logging.
-     */
     fun load(context: Context): Int {
         if (isReady) return allParamsCached.size
         return try {
             val xml = context.assets.open("avatar/avatar_lad.xml").bufferedReader().use { it.readText() }
-            val params = parse(xml)
-            allParamsCached = params.sortedBy { it.id }
-            // Morph param byte-indices follow the sorted-by-id order. We
-            // re-emit each morph param with its position in that filtered
-            // sequence so the AvatarAppearance handler can index directly.
-            val morphs = mutableListOf<VisualParam>()
-            allParamsCached.forEach { p ->
-                if (p.isMorph) morphs += p.copy(byteIndex = morphs.size)
-            }
-            morphParamsCached = morphs
-            byMorphNameCached = morphs.associateBy { it.name }
-            Log.i(TAG, "Loaded ${allParamsCached.size} visual params (${morphs.size} morphs)")
+            val params = parse(xml).sortedBy { it.id }
+            allParamsCached = params
+
+            // The byte index for each kind is its position within the
+            // filtered list (the AvatarAppearance handler walks each kind
+            // separately for application; the morph subset's order matches
+            // the wire-format byte stream).
+            morphParamsCached = renumber(params.filter { it.kind == Kind.MORPH })
+            skeletonParamsCached = renumber(params.filter { it.kind == Kind.SKELETON })
+            colorParamsCached = renumber(params.filter { it.kind == Kind.COLOR })
+            byMorphNameCached = morphParamsCached.associateBy { it.name }
+            Log.i(TAG, "Loaded ${allParamsCached.size} visual params " +
+                "(morph=${morphParamsCached.size} skeleton=${skeletonParamsCached.size} color=${colorParamsCached.size})")
             allParamsCached.size
         } catch (e: Exception) {
             Log.w(TAG, "Failed to load avatar_lad.xml: ${e.message}")
             0
         }
     }
+
+    private fun renumber(list: List<VisualParam>): List<VisualParam> =
+        list.mapIndexed { i, p -> p.copy(byteIndex = i) }
 
     private fun parse(xml: String): List<VisualParam> {
         val out = mutableListOf<VisualParam>()
@@ -103,20 +140,37 @@ object VisualParamLoader {
         val parser = factory.newPullParser()
         parser.setInput(StringReader(xml))
 
-        // Track the currently-open <param> element so we can finalise it
-        // when we see the type-marker child (param_morph / param_color /
-        // param_skeleton / param_driver).
         var currentId: Int? = null
         var currentName = ""
         var currentWearable = ""
         var currentMin = 0f
         var currentMax = 1f
         var currentDefault = 0f
+        var currentKind: Kind? = null
+        var pendingBones = mutableMapOf<String, FloatArray>()
+        var pendingColors = mutableListOf<FloatArray>()
+
+        fun finalise() {
+            val id = currentId ?: return
+            val kind = currentKind ?: return
+            out += VisualParam(
+                id = id, byteIndex = -1,
+                name = currentName, wearable = currentWearable,
+                valueMin = currentMin, valueMax = currentMax,
+                valueDefault = currentDefault,
+                kind = kind,
+                boneScales = if (kind == Kind.SKELETON) pendingBones.toMap() else emptyMap(),
+                colorPalette = if (kind == Kind.COLOR) pendingColors.toList() else emptyList()
+            )
+            currentKind = null
+            pendingBones = mutableMapOf()
+            pendingColors = mutableListOf()
+        }
 
         var event = parser.eventType
         while (event != XmlPullParser.END_DOCUMENT) {
-            if (event == XmlPullParser.START_TAG) {
-                when (parser.name) {
+            when (event) {
+                XmlPullParser.START_TAG -> when (parser.name) {
                     "param" -> {
                         currentId = parser.getAttributeValue(null, "id")?.toIntOrNull()
                         currentName = parser.getAttributeValue(null, "name") ?: ""
@@ -126,32 +180,57 @@ object VisualParamLoader {
                         currentDefault = parser.getAttributeValue(null, "value_default")?.toFloatOrNull()
                             ?: ((currentMin + currentMax) * 0.5f)
                     }
-                    "param_morph" -> {
-                        val id = currentId ?: run { event = parser.next(); continue }
-                        out += VisualParam(
-                            id = id, byteIndex = -1,
-                            name = currentName,
-                            wearable = currentWearable,
-                            valueMin = currentMin, valueMax = currentMax,
-                            valueDefault = currentDefault,
-                            isMorph = true
-                        )
+                    "param_morph" -> currentKind = Kind.MORPH
+                    "param_skeleton" -> currentKind = Kind.SKELETON
+                    "param_color" -> currentKind = Kind.COLOR
+                    "param_driver" -> currentKind = Kind.DRIVER
+                    "bone" -> {
+                        if (currentKind == Kind.SKELETON) {
+                            val name = parser.getAttributeValue(null, "name") ?: ""
+                            val scaleStr = parser.getAttributeValue(null, "scale")
+                            val scale = parseFloat3(scaleStr)
+                            if (name.isNotEmpty() && scale != null) pendingBones[name] = scale
+                        }
                     }
-                    "param_skeleton", "param_color", "param_driver" -> {
-                        val id = currentId ?: run { event = parser.next(); continue }
-                        out += VisualParam(
-                            id = id, byteIndex = -1,
-                            name = currentName,
-                            wearable = currentWearable,
-                            valueMin = currentMin, valueMax = currentMax,
-                            valueDefault = currentDefault,
-                            isMorph = false
-                        )
+                    "value" -> {
+                        if (currentKind == Kind.COLOR) {
+                            val colorStr = parser.getAttributeValue(null, "color")
+                            val rgba = parseColor(colorStr)
+                            if (rgba != null) pendingColors += rgba
+                        }
                     }
                 }
+                XmlPullParser.END_TAG -> if (parser.name == "param") finalise()
             }
             event = parser.next()
         }
         return out
+    }
+
+    private fun parseFloat3(s: String?): FloatArray? {
+        if (s.isNullOrBlank()) return null
+        val parts = s.trim().split(Regex("\\s+"))
+        if (parts.size < 3) return null
+        return try {
+            floatArrayOf(parts[0].toFloat(), parts[1].toFloat(), parts[2].toFloat())
+        } catch (e: NumberFormatException) {
+            null
+        }
+    }
+
+    /** Parse a "r, g, b, a" 0..255 colour string into 0..1 floats. */
+    private fun parseColor(s: String?): FloatArray? {
+        if (s.isNullOrBlank()) return null
+        val parts = s.split(",").map { it.trim() }
+        if (parts.size < 3) return null
+        return try {
+            val r = parts[0].toInt() / 255f
+            val g = parts[1].toInt() / 255f
+            val b = parts[2].toInt() / 255f
+            val a = if (parts.size >= 4) parts[3].toInt() / 255f else 1f
+            floatArrayOf(r, g, b, a)
+        } catch (e: NumberFormatException) {
+            null
+        }
     }
 }

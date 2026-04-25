@@ -895,7 +895,8 @@ class SceneManager(
             mesh = baseBodyMesh,
             positions = morphed.morphedPositions,
             normals = morphed.morphedNormals,
-            uvs = baseBody.uvs
+            uvs = baseBody.uvs,
+            indices = baseBody.indices
         )
 
         // And the head, if we have one and an entity is bound.
@@ -913,32 +914,48 @@ class SceneManager(
                 mesh = headMesh,
                 positions = morphed.headMorphedPositions,
                 normals = morphed.headMorphedNormals,
-                uvs = baseHead.uvs
+                uvs = baseHead.uvs,
+                indices = baseHead.indices
             )
         }
     }
 
     /**
-     * Re-upload interleaved POS+NORMAL+UV bytes to an existing Filament
-     * VertexBuffer in place. Used by morph application — mesh topology
-     * (vertex count, index list) doesn't change; only positions/normals do.
+     * Re-upload an interleaved POS + TANGENTS(quat) + UV0 vertex stream to
+     * an existing Filament VertexBuffer in place. Used by morph application
+     * — mesh topology (vertex count, index list) doesn't change, but the
+     * morphed positions shift normals and therefore the tangent frame
+     * subtly. We rebuild the full TBN quaternion per morph application so
+     * normal-mapped lighting stays correct as visual params interpolate.
+     *
+     * Caller supplies the morphed [positions] / [normals]; we invoke
+     * [TangentBuilder.build] against the original [indices] (topology is
+     * stable across morphs) and pack the result alongside [uvs].
      */
     private fun reuploadInterleavedPositions(
         mesh: AvatarMesh,
         positions: FloatArray,
         normals: FloatArray,
-        uvs: FloatArray
+        uvs: FloatArray,
+        indices: ShortArray
     ) {
         val n = positions.size / 3
-        val stride = 8
+        // Recompute tangents against the morphed positions/normals — without
+        // this the normal-mapped portions of normalMap-using materials would
+        // shade against stale tangents and look "off" as the user adjusts
+        // shape sliders.
+        val tangents = com.linkpoint.render.TangentBuilder.build(positions, normals, uvs, indices)
+        // POS(3) + TANGENTS(4 quat) + UV0(2) = 9 floats per vertex.
+        val stride = 9
         val data = ByteBuffer.allocateDirect(n * stride * 4).order(ByteOrder.nativeOrder())
         for (i in 0 until n) {
             data.putFloat(positions[i * 3])
             data.putFloat(positions[i * 3 + 1])
             data.putFloat(positions[i * 3 + 2])
-            data.putFloat(normals[i * 3])
-            data.putFloat(normals[i * 3 + 1])
-            data.putFloat(normals[i * 3 + 2])
+            data.putFloat(tangents[i * 4])
+            data.putFloat(tangents[i * 4 + 1])
+            data.putFloat(tangents[i * 4 + 2])
+            data.putFloat(tangents[i * 4 + 3])
             data.putFloat(uvs[i * 2])
             data.putFloat(uvs[i * 2 + 1])
         }
@@ -947,6 +964,30 @@ class SceneManager(
             mesh.vertexBuffer.setBufferAt(engine, 0, data)
         } catch (e: Exception) {
             Log.w(TAG, "morph re-upload failed: ${e.message}")
+        }
+    }
+
+    /**
+     * Apply a baseColor tint to every body-segment material instance for
+     * the given avatar. Driven by the wearable="skin" colour-palette
+     * VisualParams in AvatarAppearance (see LinkpointApp.blendSkinColorParams).
+     *
+     * The tint is multiplied with the lit material's baseColorMap sample,
+     * so for system avatars (no per-face texture yet) the avatar picks up
+     * the skin colour directly; for mesh attachments using BoM the tint
+     * is layered with the texture sample.
+     */
+    fun setAvatarSkinTint(agentId: UUID, r: Float, g: Float, b: Float, a: Float = 1f) {
+        val avatar = avatars[agentId] ?: return
+        val rm = engine.renderableManager
+        for (entity in avatar.bodySegmentEntities) {
+            val instance = rm.getInstance(entity)
+            if (instance == 0) continue
+            val primCount = rm.getPrimitiveCount(instance)
+            for (p in 0 until primCount) {
+                val mat = rm.getMaterialInstanceAt(instance, p) ?: continue
+                try { mat.setParameter("baseColor", r, g, b, a) } catch (_: Exception) {}
+            }
         }
     }
 
