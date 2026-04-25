@@ -26,6 +26,7 @@ import com.linkpoint.BuildConfig
 import com.linkpoint.R
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.service.BackgroundResumeScheduler
+import com.linkpoint.ui.theme.ThemeManager
 import com.linkpoint.ui.tos.TosActivity
 import com.linkpoint.ui.world.WorldViewActivity
 import com.linkpoint.utils.CodexUploadService
@@ -109,6 +110,7 @@ class SettingsActivity : AppCompatActivity() {
 
             // Interface settings
             setupInterfaceSettings()
+            setupKthemeThemeMenu()
             
             // Graphics settings
             findPreference<ListPreference>("graphics_quality")?.setOnPreferenceChangeListener { _, newValue ->
@@ -200,6 +202,53 @@ class SettingsActivity : AppCompatActivity() {
                 BackgroundResumeScheduler.schedule(requireContext(), immediate = false)
                 true
             }
+        }
+
+        private fun setupKthemeThemeMenu() {
+            val themePreference = findPreference<Preference>("open_ktheme_theme_menu") ?: return
+
+            val themeManager = ThemeManager.getInstance(requireContext())
+            updateKthemeThemeSummary(themePreference, themeManager)
+
+            themePreference.setOnPreferenceClickListener {
+                val availableThemes = themeManager.availableThemes.value
+                if (availableThemes.isEmpty()) {
+                    Toast.makeText(requireContext(), "No Ktheme themes are available yet", Toast.LENGTH_SHORT).show()
+                    return@setOnPreferenceClickListener true
+                }
+
+                val themeNames = availableThemes.map { it.name }.toTypedArray()
+                val activeThemeId = themeManager.activeTheme.value.id
+                val activeThemeIndex = availableThemes.indexOfFirst { it.id == activeThemeId }.coerceAtLeast(0)
+                var selectedIndex = activeThemeIndex
+
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Select Ktheme Theme")
+                    .setSingleChoiceItems(themeNames, activeThemeIndex) { _, which ->
+                        selectedIndex = which
+                    }
+                    .setPositiveButton("Apply") { _, _ ->
+                        availableThemes.getOrNull(selectedIndex)?.let { selectedTheme ->
+                            themeManager.setActiveTheme(selectedTheme)
+                            updateKthemeThemeSummary(themePreference, themeManager)
+                            Toast.makeText(
+                                requireContext(),
+                                "Theme applied: ${selectedTheme.name}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+
+                true
+            }
+        }
+
+        private fun updateKthemeThemeSummary(themePreference: Preference, themeManager: ThemeManager) {
+            val activeThemeName = themeManager.activeTheme.value.name
+            val themeCount = themeManager.availableThemes.value.size
+            themePreference.summary = "Current: $activeThemeName ($themeCount available)"
         }
 
         /**

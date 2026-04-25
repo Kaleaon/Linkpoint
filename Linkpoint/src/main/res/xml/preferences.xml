@@ -47,6 +47,11 @@
             android:title="Customize Layout"
             android:summary="Reposition on-screen controls" />
 
+        <Preference
+            android:key="open_ktheme_theme_menu"
+            android:title="Ktheme Themes"
+            android:summary="Choose from built-in and shared Ktheme themes" />
+
     </PreferenceCategory>
 
     <!-- Graphics Settings -->
