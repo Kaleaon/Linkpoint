@@ -626,8 +626,17 @@ class SettingsActivity : AppCompatActivity() {
                 Toast.makeText(requireContext(), "App not initialized", Toast.LENGTH_SHORT).show()
                 return
             }
-            if (!app.isOutfitManagerInitialized()) {
-                Toast.makeText(requireContext(), "Not logged in (no AppearanceManager)", Toast.LENGTH_SHORT).show()
+            // Check the appearance pipeline directly. Previously this checked
+            // outfitManager and reported "Not logged in" when the real cause
+            // was that the local Avatar wasn't ready yet — confusing users
+            // with an active session (see 2026-04-25 Athanasia debug report).
+            if (!app.isAppearanceManagerInitialized()) {
+                val msg = if (app.isConnected()) {
+                    "Avatar not ready yet — wait for the simulator to send your avatar data, then try again"
+                } else {
+                    "Not logged in (UDP circuit not connected)"
+                }
+                Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
                 return
             }
             Toast.makeText(requireContext(), "Refreshing appearance — see logcat / debug report", Toast.LENGTH_SHORT).show()

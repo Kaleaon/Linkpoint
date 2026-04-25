@@ -59,10 +59,25 @@ class AvatarManager(
     val avatarCount: StateFlow<Int> = _avatarCount
     
     /**
-     * Set the local agent ID
+     * Set the local agent ID and proactively create the local Avatar entry.
+     *
+     * The local avatar (with skeleton, animator, baker) must exist as soon as
+     * the agent ID is known so that downstream managers — OutfitManager and
+     * AppearanceManager in particular — can wire to `myAvatar.baker` during
+     * `LinkpointApp.initializeAgentManagers()`. Previously `myAvatar` was
+     * only populated when the simulator's first ObjectUpdate for the local
+     * agent arrived, which races with manager initialization and on cellular
+     * loses outright (the 2026-04-25 Athanasia debug report had Force
+     * Refresh Appearance reporting "not logged in" for this reason).
      */
     fun setMyAgentId(agentId: UUID) {
         myAgentId = agentId
+        // Pre-create the local avatar so getMyAvatar() is non-null immediately.
+        // Position/rotation default to zero and will be overwritten by the
+        // first ObjectUpdate / TerseUpdate for this agent.
+        val avatar = avatars.getOrPut(agentId) { createAvatar(agentId) }
+        myAvatar = avatar
+        _avatarCount.value = avatars.size
         // Initialize movement controller with session info
         if (udpConnection != null) {
             movementController.setSessionInfo(agentId, UUID(0, 0)) // Session ID would be set from login
