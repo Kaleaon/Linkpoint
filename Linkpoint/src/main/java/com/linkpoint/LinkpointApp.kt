@@ -1023,12 +1023,38 @@ class LinkpointApp : Application() {
         
         // Teleport manager
         teleportManager = TeleportManager(udpConnection, capabilityManager, agentId)
+        // Wire region-name lookup so TeleportFinish/CrossedRegion event
+        // payloads carry the actual sim name. Prefer the current session
+        // (most-recent RegionHandshake) for the active region; otherwise
+        // ask the WorldMap cache (populated by MapBlockReply / EQG cap).
+        teleportManager.regionNameForHandle = { handle ->
+            val current = sessionManager.currentRegion.value
+            if (current != null && current.handle == handle && current.name.isNotEmpty()) {
+                current.name
+            } else {
+                worldMap.getCachedRegionName(handle)
+            }
+        }
         
         // HUD manager
         hudManager = HUDManager(this, objectManager, udpConnection, agentId)
         
         // NEW: Landmark Manager
-        landmarkManager = LandmarkManager(capabilityManager, transferManager, inventoryManager, udpConnection, agentId)
+        landmarkManager = LandmarkManager(
+            capabilityManager,
+            transferManager,
+            inventoryManager,
+            udpConnection,
+            agentId,
+            regionNameForHandle = { handle ->
+                val current = sessionManager.currentRegion.value
+                if (current != null && current.handle == handle && current.name.isNotEmpty()) {
+                    current.name
+                } else {
+                    worldMap.getCachedRegionName(handle)
+                }
+            }
+        )
         
         // NEW: Estate Manager
         estateManager = EstateManager(udpConnection, capabilityManager, agentId)
@@ -1715,31 +1741,50 @@ class LinkpointApp : Application() {
         // These are sent when a script plays a sound that should be heard by nearby avatars.
         // We register a handler to prevent "No handler registered" warnings.
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.SOUND_TRIGGER) { _, rawPacket ->
-            // SoundTrigger format:
-            // - SoundID (UUID, 16 bytes) - The sound asset to play
-            // - OwnerID (UUID, 16 bytes) - Owner of the object playing the sound  
-            // - ObjectID (UUID, 16 bytes) - The object triggering the sound
-            // - ParentID (UUID, 16 bytes) - Parent object (if linked)
-            // - Handle (U64, 8 bytes) - Region handle
-            // - Position (Vector3, 12 bytes) - Position of the sound
-            // - Gain (F32, 4 bytes) - Volume (0.0 to 1.0)
+            // SoundTrigger payload (LL message_template `SoundTrigger`,
+            // medium-freq 29; Lumiya parity `slproto/messages/SoundTrigger.java`):
+            //   SoundID(LLUUID), OwnerID(LLUUID), ObjectID(LLUUID),
+            //   ParentID(LLUUID), Handle(U64), Position(LLVector3), Gain(F32)
+            //
+            // Total payload = 16*4 + 8 + 12 + 4 = 88 bytes. Native Android
+            // codecs decode the OGG/Vorbis asset; SoundManager.playSound
+            // does the actual SoundPool fetch + spatial mix.
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload == null) return@registerHandler
-                
-                if (payload.size >= 16) {
-                    val soundIdBytes = payload.copyOfRange(0, 16)
-                    val soundId = java.util.UUID(
-                        java.nio.ByteBuffer.wrap(soundIdBytes.copyOfRange(0, 8)).long,
-                        java.nio.ByteBuffer.wrap(soundIdBytes.copyOfRange(8, 16)).long
-                    )
-                    
-                    // Pass to SoundManager for potential playback
-                    // Note: Full sound playback implementation would require:
-                    // 1. Downloading the sound asset
-                    // 2. Decoding the OGG/Vorbis audio
-                    // 3. Playing at the appropriate volume/position
-                    Log.d(TAG, "SoundTrigger received: soundId=$soundId")
+                if (payload == null || payload.size < 88) return@registerHandler
+
+                val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+
+                // SoundID, OwnerID, ObjectID, ParentID — 4 UUIDs
+                val soundId = buffer.getUUID()
+                val ownerId = buffer.getUUID()
+                val objectId = buffer.getUUID()
+                buffer.getUUID() // ParentID — not used for trigger playback
+
+                // Region handle (sound is anchored to the sim sending it)
+                buffer.long
+
+                // Position (LLVector3) and Gain (F32)
+                val px = buffer.float
+                val py = buffer.float
+                val pz = buffer.float
+                val gain = buffer.float.coerceIn(0f, 1f)
+
+                Log.d(TAG, "SoundTrigger soundId=$soundId from objectId=$objectId pos=($px,$py,$pz) gain=$gain")
+
+                if (::soundManager.isInitialized) {
+                    applicationScope.launch {
+                        try {
+                            soundManager.playSound(
+                                soundId = soundId,
+                                position = com.linkpoint.protocol.types.LLVector3(px, py, pz),
+                                gain = gain,
+                                loop = false
+                            )
+                        } catch (e: Exception) {
+                            Log.w(TAG, "SoundTrigger playback failed for $soundId: ${e.message}")
+                        }
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling SoundTrigger", e)

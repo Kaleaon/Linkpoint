@@ -414,6 +414,32 @@ class UDPConnectionFixed {
     private val pendingCallbacks = java.util.concurrent.ConcurrentHashMap<Int, MessageCallbackInfo>()
 
     /**
+     * Inflight reliable packets keyed by sequence number. Mirrors Lumiya's
+     * `SLCircuit.unackedQueue` (`slproto/SLCircuit.java:56`) — every reliable
+     * send stays here until the simulator ACKs it. On timeout the bytes are
+     * re-queued with the RESENT flag set; matches Lumiya's `ProcessResends`.
+     *
+     * Storing the fully-encoded packet (post-header, post-zerocoding) means
+     * resends are byte-identical aside from the flag bit, which is what the
+     * SL simulator uses to deduplicate. A previous "would resend"
+     * stub at this site (`checkMessageTimeouts`) only tracked seq+callback,
+     * so no reliable message ever actually went back on the wire — captured
+     * during the 2026-04-26 Athanasia silence where `RequestMultipleObjects`
+     * never made it to the simulator.
+     */
+    private data class InflightPacket(
+        val sequenceNumber: Int,
+        val messageId: Int,
+        val data: ByteArray, // already-encoded packet (header + body); resend OR-ins FLAG_RESENT
+        @Volatile var lastSentTime: Long,
+        @Volatile var retries: Int,
+        val listener: MessageEventListener?
+    )
+
+    private val inflightReliablePackets =
+        java.util.concurrent.ConcurrentHashMap<Int, InflightPacket>()
+
+    /**
      * Sequence number used for the most recent UseCircuitCode send, or -1 if not sent yet.
      * The login handshake's PacketAck handler uses this to know which ACK signals that
      * the circuit is established so CompleteAgentMovement can be sent.
@@ -802,7 +828,12 @@ class UDPConnectionFixed {
 
             // Clear pending callbacks (they won't be satisfied by new circuit)
             pendingCallbacks.clear()
-            
+
+            // Clear inflight reliable resends — the new circuit assigns its
+            // own seq numbers; resending bytes from the prior circuit would
+            // either be dropped (wrong circuit code) or be misinterpreted.
+            inflightReliablePackets.clear()
+
             // Clear message statistics for accurate per-session tracking
             messageTypeCounts.clear()
             lastMessageTimes.clear()
@@ -1536,6 +1567,12 @@ class UDPConnectionFixed {
      * @param sequenceNumber The sequence number being acknowledged
      */
     private fun processReceivedAck(sequenceNumber: Int) {
+        // Drop the packet from the inflight resend queue first — Lumiya
+        // `SLCircuit.ProcessReceivedAck` pulls the matching SLMessage out of
+        // unackedQueue. Without this the resend watchdog would keep retrying
+        // an already-acknowledged packet up to MESSAGE_MAX_RETRIES times.
+        inflightReliablePackets.remove(sequenceNumber)
+
         // Check if we have a callback for this sequence number
         val callbackInfo = pendingCallbacks.remove(sequenceNumber)
         val ackedMessageName = callbackInfo?.let { getMessageName(it.messageId) }
@@ -1607,50 +1644,75 @@ class UDPConnectionFixed {
         val now = System.currentTimeMillis()
         val timeout = MESSAGE_TIMEOUT_MS
         val maxRetries = MESSAGE_MAX_RETRIES
-        
-        // Process all pending callbacks
-        pendingCallbacks.entries.removeIf { (seqNum, callbackInfo) ->
-            val age = now - callbackInfo.sentTime
-            
-            if (age > timeout) {
-                callbackInfo.retryCount++
-                
-                if (callbackInfo.retryCount > maxRetries) {
-                    // Max retries exceeded - invoke timeout callback
-                    try {
-                        callbackInfo.listener.onMessageTimeout(
-                            seqNum,
-                            callbackInfo.messageId
-                        )
-                        
-                        NetworkLogger.log(
-                            NetworkLogger.Level.WARN,
-                            NetworkLogger.Category.UDP,
-                            "✗ Message timeout: seqNum=$seqNum, messageId=${callbackInfo.messageId}, retries=${callbackInfo.retryCount}"
-                        )
-                    } catch (e: Exception) {
-                        NetworkLogger.log(
-                            NetworkLogger.Level.ERROR,
-                            NetworkLogger.Category.UDP,
-                            "Error in timeout callback for seqNum=$seqNum: ${e.message}"
-                        )
-                    }
-                    
-                    return@removeIf true // Remove from pending callbacks
-                } else {
-                    // Resend the packet (Note: This would require tracking the packet data)
+
+        // Reliable packet resend (Lumiya `SLCircuit.ProcessResends` parity,
+        // slproto/SLCircuit.java:116). For each inflight reliable packet
+        // older than MESSAGE_TIMEOUT_MS:
+        //  - retries < MESSAGE_MAX_RETRIES → set FLAG_RESENT (0x20) on the
+        //    packet's flag byte, requeue the bytes for the I/O thread, bump
+        //    retries+lastSentTime; the simulator dedupes via seq num.
+        //  - retries >= MESSAGE_MAX_RETRIES → drop, invoke optional timeout
+        //    listener, also drop the legacy pendingCallbacks entry so the
+        //    callback API gets a single onMessageTimeout instead of looping.
+        var resends = 0
+        var giveups = 0
+        inflightReliablePackets.entries.removeIf { (seqNum, inflight) ->
+            val age = now - inflight.lastSentTime
+            if (age <= timeout) return@removeIf false
+
+            if (inflight.retries >= maxRetries) {
+                giveups++
+                pendingCallbacks.remove(seqNum)
+                try {
+                    inflight.listener?.onMessageTimeout(seqNum, inflight.messageId)
+                } catch (e: Exception) {
                     NetworkLogger.log(
-                        NetworkLogger.Level.WARN,
+                        NetworkLogger.Level.ERROR,
                         NetworkLogger.Category.UDP,
-                        "⚠ Message timeout, would resend: seqNum=$seqNum, retry ${callbackInfo.retryCount}"
+                        "Error in timeout listener for seqNum=$seqNum: ${e.message}"
                     )
-                    
-                    // Update sent time to avoid immediate timeout
-                    callbackInfo.sentTime = now
                 }
+                NetworkLogger.log(
+                    NetworkLogger.Level.WARN,
+                    NetworkLogger.Category.UDP,
+                    "✗ Reliable message timed out after $maxRetries resends: " +
+                        "seqNum=$seqNum, messageId=0x${inflight.messageId.toString(16)} " +
+                        "(${getMessageName(inflight.messageId)})"
+                )
+                true // remove from inflight
+            } else {
+                inflight.retries++
+                inflight.lastSentTime = now
+                // Set FLAG_RESENT (0x20) on the cached packet bytes. Lumiya
+                // `SLMessage.Pack` writes the resent bit through `isResent`;
+                // we're operating on the already-packed bytes so OR it in.
+                val data = inflight.data
+                data[0] = (data[0].toInt() or 0x20).toByte()
+
+                outgoingQueue.offer(OutboundPacket(
+                    data = data,
+                    messageId = inflight.messageId,
+                    seqNum = seqNum,
+                    reliable = true,
+                    zerocoded = (data[0].toInt() and 0x80) != 0
+                ))
+                resends++
+                NetworkLogger.log(
+                    NetworkLogger.Level.WARN,
+                    NetworkLogger.Category.UDP,
+                    "⟳ Reliable resend (${inflight.retries}/$maxRetries): " +
+                        "seqNum=$seqNum, messageId=0x${inflight.messageId.toString(16)} " +
+                        "(${getMessageName(inflight.messageId)})"
+                )
+                false // keep in inflight; ACK will remove, or next pass times out again
             }
-            
-            false // Keep in pending callbacks
+        }
+
+        if (resends > 0 || giveups > 0) {
+            // Wake the I/O thread to drain the requeued packets without
+            // waiting for the next select() timeout.
+            selector?.wakeup()
+            packetsResentCount.addAndGet(resends)
         }
     }
     
@@ -2132,6 +2194,21 @@ class UDPConnectionFixed {
                 reliable = reliable,
                 zerocoded = zerocoded
             ))
+
+            // Track every reliable send for resend (Lumiya unackedQueue
+            // parity). Also track the optional listener for ACK callbacks.
+            // The pendingCallbacks map is kept for the legacy callback API;
+            // inflightReliablePackets is the source of truth for resends.
+            if (reliable) {
+                inflightReliablePackets[seqNum] = InflightPacket(
+                    sequenceNumber = seqNum,
+                    messageId = messageId,
+                    data = finalPacket,
+                    lastSentTime = System.currentTimeMillis(),
+                    retries = 0,
+                    listener = listener
+                )
+            }
         }
 
         if (reliable && listener != null) {
@@ -2416,6 +2493,10 @@ class UDPConnectionFixed {
 
         // Clear pending callbacks since we're disconnecting
         pendingCallbacks.clear()
+
+        // Drop the inflight resend queue — circuit is gone, resending would
+        // either time out or hit a stale sim-side circuit lookup.
+        inflightReliablePackets.clear()
 
         try {
             selectionKey?.cancel()

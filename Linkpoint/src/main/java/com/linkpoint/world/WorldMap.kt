@@ -280,6 +280,19 @@ class WorldMap(
         val y = (regionHandle and 0xFFFF).toInt()
         return x to y
     }
+
+    /**
+     * Synchronous cache lookup for `regionHandle → simulator name`. Returns
+     * null when nothing is cached so callers can pick a fallback (grid coord
+     * string, "Unknown", etc) instead of blocking on the simulator query in
+     * `getRegionInfo`. Used by [com.linkpoint.teleport.TeleportManager] so
+     * `TeleportEvent.Completed` can ship the real region name when the
+     * MapBlockReply / EQG cap has already cached one for that grid square.
+     */
+    fun getCachedRegionName(regionHandle: Long): String? {
+        val (gridX, gridY) = getGridFromHandle(regionHandle)
+        return regions["$gridX-$gridY"]?.name?.takeIf { it.isNotEmpty() }
+    }
     
     /**
      * Get nearby regions
