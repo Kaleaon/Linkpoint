@@ -376,6 +376,34 @@ class UDPConnectionFixed {
     /** Timestamp of last packet sent (for timing diagnostics) */
     @Volatile private var lastSendTime = 0L
 
+    /** Timestamp of the first inbound packet seen after connect() started (0 = none yet). */
+    @Volatile private var firstInboundPacketTime = 0L
+
+    /**
+     * Number of reliable resends that happened before the first inbound packet
+     * arrived after connect() started.
+     */
+    private val startupResendCount = AtomicInteger(0)
+
+    /**
+     * Tracks whether we are still in the "startup" window for diagnostics:
+     * from connect() until first inbound simulator packet.
+     */
+    @Volatile private var startupPhaseActive = false
+
+    /** Most recent reliable send bookkeeping (for timeout/deadline diagnostics). */
+    @Volatile private var lastReliableSendSequence: Int = -1
+    @Volatile private var lastReliableSendAt: Long = 0L
+    @Volatile private var lastReliableSendDeadlineAt: Long = 0L
+
+    /** Selector activity counters for diagnosing I/O loop liveness. */
+    private val selectorWakeupCount = AtomicLong(0)
+    private val selectorReadyKeyCount = AtomicLong(0)
+    private val selectorReadableKeyCount = AtomicLong(0)
+
+    /** Bounded list of receive-loop exceptions for fast diagnosis. */
+    private val receiveLoopExceptions = java.util.concurrent.ConcurrentLinkedQueue<String>()
+
     /**
      * Inbound-flow watchdog state. Catches "send-only zombie circuits" — the
      * 2026-04-25 Athanasia capture showed 4+ minutes of pings + AgentUpdate
@@ -873,6 +901,16 @@ class UDPConnectionFixed {
             val now = System.currentTimeMillis()
             lastReceiveTime = now
             lastSendTime = 0L
+            firstInboundPacketTime = 0L
+            startupResendCount.set(0)
+            startupPhaseActive = true
+            lastReliableSendSequence = -1
+            lastReliableSendAt = 0L
+            lastReliableSendDeadlineAt = 0L
+            selectorWakeupCount.set(0)
+            selectorReadyKeyCount.set(0)
+            selectorReadableKeyCount.set(0)
+            receiveLoopExceptions.clear()
             lastAckSendTime = 0L
             lastPingTime.set(now)
             unansweredPings.set(0)
@@ -1096,6 +1134,10 @@ class UDPConnectionFixed {
                 // This is the key fix: the select() call blocks only the I/O thread,
                 // leaving the rest of the app free.
                 val readyKeys = localSelector.select(SELECTOR_TIMEOUT_MS)
+                selectorWakeupCount.incrementAndGet()
+                if (readyKeys > 0) {
+                    selectorReadyKeyCount.addAndGet(readyKeys.toLong())
+                }
 
                 if (readyKeys > 0) {
                     val iterator = localSelector.selectedKeys().iterator()
@@ -1104,6 +1146,7 @@ class UDPConnectionFixed {
                         iterator.remove()
 
                         if (selKey.isReadable) {
+                            selectorReadableKeyCount.incrementAndGet()
                             buffer.clear()
 
                             // BLOCKING read on THIS thread
@@ -1114,7 +1157,12 @@ class UDPConnectionFixed {
                                 postReconnectPacketsReceived.incrementAndGet()
                                 bytesReceived.addAndGet(bytesRead.toLong())
                                 inboundRateTracker.record(bytesRead)
-                                lastReceiveTime = System.currentTimeMillis()
+                                val receiveNow = System.currentTimeMillis()
+                                lastReceiveTime = receiveNow
+                                if (firstInboundPacketTime == 0L) {
+                                    firstInboundPacketTime = receiveNow
+                                    startupPhaseActive = false
+                                }
                                 unansweredPings.set(0)
 
                                 buffer.flip()
@@ -1210,6 +1258,7 @@ class UDPConnectionFixed {
                 }
 
             } catch (e: java.nio.channels.ClosedSelectorException) {
+                recordReceiveLoopException(e)
                 // The selector was closed under us. With the Lumiya-style
                 // reconnect (which keeps the selector open), this should
                 // only happen on a real disconnect. If we're still nominally
@@ -1224,25 +1273,30 @@ class UDPConnectionFixed {
                 }
                 break
             } catch (e: java.nio.channels.AsynchronousCloseException) {
+                recordReceiveLoopException(e)
                 // The DatagramChannel was closed (typically reconnect()).
                 // The next iteration will read the new channel via the
                 // @Volatile field and resume normally.
                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
                     "Channel closed asynchronously — picking up replacement next iteration")
             } catch (e: java.nio.channels.ClosedByInterruptException) {
+                recordReceiveLoopException(e)
                 // Same idea — happens if a blocking I/O operation is
                 // interrupted. Treat as transient; loop will re-check state.
                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
                     "I/O interrupted — re-checking selector/channel")
             } catch (e: java.nio.channels.ClosedChannelException) {
+                recordReceiveLoopException(e)
                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
                     "Channel closed — re-checking selector/channel")
             } catch (e: java.nio.channels.CancelledKeyException) {
+                recordReceiveLoopException(e)
                 // Stale key — reconnect cancelled it. The next iteration
                 // re-reads selectionKey and sees the new one.
                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
                     "Selection key cancelled — re-checking next iteration")
             } catch (e: Exception) {
+                recordReceiveLoopException(e)
                 if (_isConnected.value) {
                     val msg = e.message ?: e.javaClass.simpleName
                     NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
@@ -1280,6 +1334,14 @@ class UDPConnectionFixed {
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Total packets: ${packetsReceived.get()}")
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Total bytes: ${bytesReceived.get()}")
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Messages routed: ${messagesRouted.get()}")
+    }
+
+    private fun recordReceiveLoopException(error: Throwable) {
+        val entry = "${System.currentTimeMillis()} ${error.javaClass.simpleName}: ${error.message ?: "no-message"}"
+        receiveLoopExceptions.offer(entry)
+        while (receiveLoopExceptions.size > 20) {
+            receiveLoopExceptions.poll()
+        }
     }
 
     /**
@@ -1740,6 +1802,9 @@ class UDPConnectionFixed {
             } else {
                 inflight.retries++
                 inflight.lastSentTime = now
+                lastReliableSendSequence = seqNum
+                lastReliableSendAt = now
+                lastReliableSendDeadlineAt = now + timeout
                 // Set FLAG_RESENT (0x20) on the cached packet bytes. Lumiya
                 // `SLMessage.Pack` writes the resent bit through `isResent`;
                 // we're operating on the already-packed bytes so OR it in.
@@ -1754,6 +1819,9 @@ class UDPConnectionFixed {
                     zerocoded = (data[0].toInt() and 0x80) != 0
                 ))
                 resends++
+                if (startupPhaseActive) {
+                    startupResendCount.incrementAndGet()
+                }
                 NetworkLogger.log(
                     NetworkLogger.Level.WARN,
                     NetworkLogger.Category.UDP,
@@ -2695,14 +2763,18 @@ class UDPConnectionFixed {
             // The pendingCallbacks map is kept for the legacy callback API;
             // inflightReliablePackets is the source of truth for resends.
             if (reliable) {
+                val sentAt = System.currentTimeMillis()
                 inflightReliablePackets[seqNum] = InflightPacket(
                     sequenceNumber = seqNum,
                     messageId = messageId,
                     data = finalPacket,
-                    lastSentTime = System.currentTimeMillis(),
+                    lastSentTime = sentAt,
                     retries = 0,
                     listener = listener
                 )
+                lastReliableSendSequence = seqNum
+                lastReliableSendAt = sentAt
+                lastReliableSendDeadlineAt = sentAt + MESSAGE_TIMEOUT_MS
             }
         }
 
@@ -3459,7 +3531,18 @@ class UDPConnectionFixed {
             socketOpen = datagramChannel?.isOpen ?: false,
             receiveLoopActive = ioThread?.isAlive == true,
             lastPingTime = lastPingTime.get(),
-            unansweredPings = unansweredPings.get()
+            unansweredPings = unansweredPings.get(),
+            firstInboundPacketTime = firstInboundPacketTime,
+            connectToFirstInboundMs = if (connectionAttemptTime > 0L && firstInboundPacketTime > 0L) {
+                firstInboundPacketTime - connectionAttemptTime
+            } else {
+                null
+            },
+            startupResendCount = startupResendCount.get(),
+            selectorWakeupCount = selectorWakeupCount.get(),
+            selectorReadyKeyCount = selectorReadyKeyCount.get(),
+            selectorReadableKeyCount = selectorReadableKeyCount.get(),
+            receiveLoopExceptions = receiveLoopExceptions.toList()
         )
     }
     
@@ -3493,7 +3576,14 @@ class UDPConnectionFixed {
         val socketOpen: Boolean,
         val receiveLoopActive: Boolean,
         val lastPingTime: Long,
-        val unansweredPings: Int
+        val unansweredPings: Int,
+        val firstInboundPacketTime: Long,
+        val connectToFirstInboundMs: Long?,
+        val startupResendCount: Int,
+        val selectorWakeupCount: Long,
+        val selectorReadyKeyCount: Long,
+        val selectorReadableKeyCount: Long,
+        val receiveLoopExceptions: List<String>
     )
     
     /**
@@ -3546,7 +3636,16 @@ class UDPConnectionFixed {
         val lastReceiveTime: Long,
         val lastConnectionError: String?,
         val lastPingTime: Long,
-        val unansweredPings: Int
+        val unansweredPings: Int,
+        val firstInboundPacketTime: Long,
+        val connectToFirstInboundMs: Long?,
+        val startupResendCount: Int,
+        val lastReliableSendSequence: Int,
+        val lastReliableSendAt: Long,
+        val lastReliableSendDeadlineAt: Long,
+        val selectorWakeupCount: Long,
+        val selectorReadableKeyCount: Long,
+        val receiveLoopExceptions: List<String>
     )
     
     /**
@@ -3644,7 +3743,20 @@ class UDPConnectionFixed {
             lastReceiveTime = lastReceiveTime,
             lastConnectionError = lastConnectionError,
             lastPingTime = lastPingTime.get(),
-            unansweredPings = unansweredPings.get()
+            unansweredPings = unansweredPings.get(),
+            firstInboundPacketTime = firstInboundPacketTime,
+            connectToFirstInboundMs = if (connectionAttemptTime > 0L && firstInboundPacketTime > 0L) {
+                firstInboundPacketTime - connectionAttemptTime
+            } else {
+                null
+            },
+            startupResendCount = startupResendCount.get(),
+            lastReliableSendSequence = lastReliableSendSequence,
+            lastReliableSendAt = lastReliableSendAt,
+            lastReliableSendDeadlineAt = lastReliableSendDeadlineAt,
+            selectorWakeupCount = selectorWakeupCount.get(),
+            selectorReadableKeyCount = selectorReadableKeyCount.get(),
+            receiveLoopExceptions = receiveLoopExceptions.toList()
         )
     }
 }
