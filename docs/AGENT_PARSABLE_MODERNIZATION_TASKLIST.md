@@ -63,15 +63,16 @@ Agents should parse each task block using the following fields:
 ### task_id: LP-P0-001
 - title: Pin SL master message template SHA and gate CI on drift
 - priority: P0
-- status: todo
+- status: done
 - labels: [PROTO-TEMPLATE, PROTO-CONFORMANCE]
 - depends_on: []
-- owner: unassigned
+- owner: claude/plan-modernization-fixes-8NRUg
 - repo_paths:
-  - tools/protocol/sync_master_template.sh
-  - tools/protocol/message_template_mismatches.txt
-  - .github/workflows/
-  - src/test/resources/protocol/message_template.msg
+  - Linkpoint/tools/protocol/sync_master_template.sh
+  - Linkpoint/tools/protocol/message_template.msg.sha1
+  - Linkpoint/tools/protocol/message_template_mismatches.txt
+  - .github/workflows/protocol-conformance.yml
+  - Linkpoint/src/test/resources/protocol/message_template.msg
 - external_refs:
   - https://github.com/secondlife/master-message-template
   - https://raw.githubusercontent.com/secondlife/master-message-template/master/message_template.msg
@@ -87,17 +88,17 @@ Agents should parse each task block using the following fields:
 ### task_id: LP-P0-002
 - title: Unified protocol conformance runner
 - priority: P0
-- status: todo
+- status: in_progress
 - labels: [PROTO-CONFORMANCE]
 - depends_on: [LP-P0-001]
-- owner: unassigned
+- owner: claude/plan-modernization-fixes-8NRUg
 - repo_paths:
-  - tools/protocol/run_conformance.sh
-  - tools/protocol/verify_message_template_conformance.py
-  - tools/protocol/verify_llsd_conformance.py
-  - tools/protocol/verify_protocol_docs.py
-  - tools/protocol/verify_model_mapping_conformance.py
-  - .github/workflows/
+  - Linkpoint/tools/protocol/run_conformance.sh
+  - Linkpoint/tools/protocol/verify_message_template_conformance.py
+  - Linkpoint/tools/protocol/verify_protocol_docs.py
+  - Linkpoint/tools/protocol/verify_llsd_conformance.py
+  - Linkpoint/tools/protocol/verify_model_mapping_conformance.py
+  - .github/workflows/protocol-conformance.yml
 - external_refs:
   - https://github.com/Kaleaon/Lumiya-Redux/tree/main/tools/protocol
 - deliverables:

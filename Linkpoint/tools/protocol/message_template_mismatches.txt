@@ -1,0 +1,24 @@
+# Linkpoint <-> SL master-message-template intentional mismatch allowlist.
+#
+# Each non-comment line declares one intentional difference between the
+# committed Linkpoint template (src/test/resources/protocol/message_template.msg)
+# and the upstream Second Life master-message-template
+# (https://github.com/secondlife/master-message-template/blob/master/message_template.msg).
+#
+# Format (one per line, '|' separated):
+#   <category>|<symbol>|<rationale>
+#
+# Categories:
+#   added      -- message exists in Linkpoint but not in upstream master template
+#   removed    -- message exists in upstream master template but is intentionally absent
+#   modified   -- message exists in both but a block/field intentionally differs
+#   header     -- intentional difference in the file's High/Medium/Low frontier counters
+#
+# Adding entries here is the ONLY approved way to bypass the CI drift gate
+# enforced by sync_master_template.sh --check and run_conformance.sh.
+#
+# When upstream changes, run:
+#   tools/protocol/sync_master_template.sh --fetch
+# and reconcile any reported drift either by updating
+# tools/protocol/message_template.msg.sha1 (and the committed template),
+# or by appending a justified entry to this file.
