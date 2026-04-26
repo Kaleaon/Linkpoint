@@ -327,6 +327,10 @@ class DebugReportService private constructor(private val context: Context) {
                     appendLine("  Sequence Number (packets sent): ${udpDiag.sequenceNumber}")
                     appendLine("  Pending ACKs: ${udpDiag.pendingAckCount}")
                     appendLine("  Registered Handlers: ${udpDiag.registeredHandlerCount}")
+                    appendLine("  Startup Resends (before first inbound): ${udpDiag.startupResendCount}")
+                    appendLine("  Selector Wakeups: ${udpDiag.selectorWakeupCount}")
+                    appendLine("  Selector Ready Keys: ${udpDiag.selectorReadyKeyCount}")
+                    appendLine("  Selector Readable Keys: ${udpDiag.selectorReadableKeyCount}")
                     appendLine()
                     if (udpDiag.registeredHandlers.isNotEmpty()) {
                         appendLine("Registered Message Handlers:")
@@ -393,6 +397,11 @@ class DebugReportService private constructor(private val context: Context) {
                     } else {
                         appendLine("  Last Packet Received: Never ⚠️")
                     }
+                    if (socketDetails.connectToFirstInboundMs != null) {
+                        appendLine("  UDP Connect → First Inbound: ${formatDuration(socketDetails.connectToFirstInboundMs)}")
+                    } else {
+                        appendLine("  UDP Connect → First Inbound: Not observed yet")
+                    }
                     if (socketDetails.lastPingTime > 0) {
                         val pingAge = System.currentTimeMillis() - socketDetails.lastPingTime
                         appendLine("  Last Ping Check: ${formatDuration(pingAge)} ago")
@@ -403,6 +412,31 @@ class DebugReportService private constructor(private val context: Context) {
                     if (socketDetails.lastConnectionError != null) {
                         appendLine()
                         appendLine("  ⚠️ Last Connection Error: ${socketDetails.lastConnectionError}")
+                    }
+                    appendLine("  Last Reliable Send: ${
+                        if (socketDetails.lastReliableSendAt > 0L) {
+                            "${formatDuration(System.currentTimeMillis() - socketDetails.lastReliableSendAt)} ago " +
+                                "(seq=${socketDetails.lastReliableSendSequence})"
+                        } else {
+                            "Never"
+                        }
+                    }")
+                    appendLine("  Last Reliable Deadline: ${
+                        if (socketDetails.lastReliableSendDeadlineAt > 0L) {
+                            "${formatDuration(
+                                kotlin.math.abs(System.currentTimeMillis() - socketDetails.lastReliableSendDeadlineAt)
+                            )} ${if (System.currentTimeMillis() <= socketDetails.lastReliableSendDeadlineAt) "from now" else "ago"}"
+                        } else {
+                            "N/A"
+                        }
+                    }")
+
+                    if (socketDetails.receiveLoopExceptions.isNotEmpty()) {
+                        appendLine()
+                        appendLine("Receive Loop Exceptions (recent):")
+                        socketDetails.receiveLoopExceptions.takeLast(5).forEach { ex ->
+                            appendLine("  - $ex")
+                        }
                     }
 
                     // Reconnect health — surfaces the dead-socket-after-reconnect
