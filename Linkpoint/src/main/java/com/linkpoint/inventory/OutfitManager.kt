@@ -272,39 +272,40 @@ class OutfitManager(
     }
     
     private suspend fun sendRezSingleAttachmentFromInv(item: InventoryItem, point: Int, replace: Boolean) {
-        val nameBytes = item.name.toByteArray(Charsets.UTF_8)
-        val descBytes = item.description.toByteArray(Charsets.UTF_8)
+        // Wire format (LL message_template `RezSingleAttachmentFromInv`,
+        // low-freq 395; Lumiya:
+        // slproto/messages/RezSingleAttachmentFromInv.java PackPayload):
+        //   AgentData:  AgentID(LLUUID), SessionID(LLUUID)
+        //   ObjectData: ItemID(LLUUID), OwnerID(LLUUID), AttachmentPt(U8),
+        //               ItemFlags(U32), GroupMask(U32), EveryoneMask(U32),
+        //               NextOwnerMask(U32), Name(Variable 1 NUL-term),
+        //               Description(Variable 1 NUL-term)
+        //
+        // The previous encoder appended CreationDate(4) + CRC(4) trailing
+        // fields that belong to UpdateInventoryItem, not this message; the
+        // simulator strict-parser would either reject the packet or treat
+        // the extra 8 bytes as the start of a phantom block. Lumiya stops
+        // after Description.
+        val nameRaw = item.name.toByteArray(Charsets.UTF_8)
+        val descRaw = item.description.toByteArray(Charsets.UTF_8)
+        val cappedName = if (nameRaw.size > 254) nameRaw.copyOf(254) else nameRaw
+        val cappedDesc = if (descRaw.size > 254) descRaw.copyOf(254) else descRaw
+        val safeNameBytes = cappedName + 0.toByte()
+        val safeDescBytes = cappedDesc + 0.toByte()
 
-        // Ensure name/desc are within limits (1 byte length max 255)
-        val safeNameBytes = if (nameBytes.size > 255) nameBytes.copyOf(255) else nameBytes
-        val safeDescBytes = if (descBytes.size > 255) descBytes.copyOf(255) else descBytes
-
-        // Calculate size:
-        // AgentData: 16 (AgentID) + 16 (SessionID) = 32
-        // ObjectData:
-        //   ItemID (16)
-        //   OwnerID (16)
-        //   AttachmentPt (1)
-        //   ItemFlags (4)
-        //   GroupMask (4)
-        //   EveryoneMask (4)
-        //   NextOwnerMask (4)
-        //   Name (1 + len)
-        //   Description (1 + len)
-        //   CreationDate (4)
-        //   CRC (4)
-
-        val payloadSize = 32 + 16 + 16 + 1 + 4 + 4 + 4 + 4 +
-                          1 + safeNameBytes.size + 1 + safeDescBytes.size + 4 + 4
+        val payloadSize = 32 /* AgentData */ +
+                          16 + 16 + 1 + 4 + 4 + 4 + 4 +
+                          1 + safeNameBytes.size +
+                          1 + safeDescBytes.size
 
         val payload = ByteBuffer.allocate(payloadSize).order(ByteOrder.LITTLE_ENDIAN)
 
         // AgentData - Validate required fields
-        val agentIdValue = agentId 
+        val agentIdValue = agentId
             ?: throw IllegalStateException("Agent ID not initialized in OutfitManager")
-        val sessionIdValue = sessionId 
+        val sessionIdValue = sessionId
             ?: throw IllegalStateException("Session ID not initialized in OutfitManager")
-        
+
         payload.putUUID(agentIdValue)
         payload.putUUID(sessionIdValue)
 
@@ -322,16 +323,13 @@ class OutfitManager(
         payload.putInt(item.permissions.everyoneMask)
         payload.putInt(item.permissions.nextOwnerMask)
 
-        // Name (Variable 1)
+        // Name (Variable 1, NUL-terminated)
         payload.put(safeNameBytes.size.toByte())
         payload.put(safeNameBytes)
 
-        // Description (Variable 1)
+        // Description (Variable 1, NUL-terminated)
         payload.put(safeDescBytes.size.toByte())
         payload.put(safeDescBytes)
-
-        payload.putInt(item.creationDate)
-        payload.putInt(0) // CRC
 
         // Validate UDP connection before sending
         val connection = udpConnection 

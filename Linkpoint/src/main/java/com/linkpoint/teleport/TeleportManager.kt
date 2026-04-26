@@ -227,22 +227,45 @@ class TeleportManager(
     suspend fun sendTeleportLure(targetAgentId: UUID, message: String = "Join me!"): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                val messageBytes = message.toByteArray(Charsets.UTF_8)
-                val payload = ByteBuffer.allocate(80 + messageBytes.size).order(ByteOrder.LITTLE_ENDIAN)
-                
-                // AgentData - UUIDs use big-endian per SL protocol
+                // Wire format (LL message_template `StartLure`, low-freq 70,
+                // Lumiya: slproto/messages/StartLure.java PackPayload):
+                //   AgentData:  AgentID(LLUUID), SessionID(LLUUID)
+                //   Info:       LureType(U8), Message(Variable 1, null-terminated)
+                //   TargetData (Variable, U8 count): TargetID(LLUUID)
+                //
+                // The previous encoder put TargetID before Message, dropped
+                // LureType, treated Message as Variable 2, and skipped the
+                // TargetData count, so the simulator rejected the lure.
+
+                // Lumiya parity: stringToVariableUTF (slproto/SLMessage.java
+                // line 212) appends a NUL byte and includes it in the U8
+                // length prefix. Cap raw text at 254 bytes so the trailing
+                // NUL still fits the U8 prefix.
+                val rawBytes = message.toByteArray(Charsets.UTF_8)
+                val cappedBytes = if (rawBytes.size > 254) rawBytes.copyOf(254) else rawBytes
+                val safeMessageBytes = cappedBytes + 0.toByte()
+                val nameLen = safeMessageBytes.size
+
+                val payload = ByteBuffer
+                    .allocate(36 /* AgentData */ + 1 /* LureType */ + 1 + nameLen /* Message */ +
+                              1 /* target count */ + 16 /* TargetID */)
+                    .order(ByteOrder.LITTLE_ENDIAN)
+
+                // AgentData
                 payload.putUUID(agentId)
                 payload.putUUID(sessionId)
-                
-                // Info - target agent
+
+                // Info
+                payload.put(0.toByte()) // LureType = 0 (TELEPORT_LURE_NORMAL)
+                payload.put(nameLen.toByte())
+                payload.put(safeMessageBytes)
+
+                // TargetData (Variable u8 count + entries)
+                payload.put(1.toByte())
                 payload.putUUID(targetAgentId)
-                
-                // Message
-                payload.putShort(messageBytes.size.toShort())
-                payload.put(messageBytes)
-                
+
                 udpConnection.sendPacket(MessageIds.START_LURE, payload.array().copyOf(payload.position()), reliable = true)
-                
+
                 Log.i(TAG, "Sent teleport lure to $targetAgentId")
                 true
             } catch (e: Exception) {

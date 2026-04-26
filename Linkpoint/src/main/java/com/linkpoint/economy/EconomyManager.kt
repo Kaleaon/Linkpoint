@@ -269,19 +269,42 @@ class EconomyManager(
         transactionType: Int
     ): Boolean {
         try {
-            val descBytes = description.toByteArray(Charsets.UTF_8)
-            val payload = ByteBuffer.allocate(68 + descBytes.size).order(ByteOrder.LITTLE_ENDIAN)
-            
+            // Wire format (LL message_template `MoneyTransferRequest`,
+            // low-freq 311; Lumiya: slproto/messages/MoneyTransferRequest.java
+            // PackPayload):
+            //   AgentData: AgentID(LLUUID), SessionID(LLUUID)
+            //   MoneyData: SourceID(LLUUID), DestID(LLUUID), Flags(U8),
+            //              Amount(S32), AggregatePermNextOwner(U8),
+            //              AggregatePermInventory(U8), TransactionType(S32),
+            //              Description(Variable 1, NUL-terminated)
+            //
+            // The previous encoder dropped SourceID entirely, used U32 for
+            // both Aggregate fields (Lumiya uses U8 each), and shipped the
+            // description without the trailing NUL. The simulator silently
+            // rejected the malformed packet.
+
+            val rawDesc = description.toByteArray(Charsets.UTF_8)
+            val cappedDesc = if (rawDesc.size > 254) rawDesc.copyOf(254) else rawDesc
+            val descBytes = cappedDesc + 0.toByte()
+
+            val payload = ByteBuffer
+                .allocate(36 /* AgentData */ + 16 /* SourceID */ + 16 /* DestID */ +
+                          1 /* Flags */ + 4 /* Amount */ + 1 /* AggregatePermNextOwner */ +
+                          1 /* AggregatePermInventory */ + 4 /* TransactionType */ +
+                          1 + descBytes.size /* Description Variable 1 */)
+                .order(ByteOrder.LITTLE_ENDIAN)
+
             // AgentData
             writeUUID(payload, agentId)
             writeUUID(payload, udpConnection.getSessionId())
-            
+
             // MoneyData
+            writeUUID(payload, agentId) // SourceID = self for outbound payments
             writeUUID(payload, destinationId)
-            payload.put(0) // DestinationGroup (false)
+            payload.put(0.toByte()) // Flags (e.g. DestinationGroup); 0 for ordinary user-to-user
             payload.putInt(amount)
-            payload.putInt(0) // AggregatePermNextOwner
-            payload.putInt(0) // AggregatePermInventory
+            payload.put(0.toByte()) // AggregatePermNextOwner (U8)
+            payload.put(0.toByte()) // AggregatePermInventory (U8)
             payload.putInt(transactionType)
             payload.put(descBytes.size.toByte())
             payload.put(descBytes)
