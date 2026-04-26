@@ -209,6 +209,27 @@ class UDPConnectionFixed {
          * outage rather than NAT eviction).
          */
         const val SOCKET_REBIND_COOLDOWN_MS = 30_000L
+
+        /**
+         * After an in-place socket reconnect, we expect the simulator to
+         * answer our re-sent UseCircuitCode within this window — either with
+         * a PacketAck or with any object/animation/coarse-location traffic
+         * resumed from the live circuit.
+         *
+         * If `postReconnectPacketsReceived` stays at 0 past this window, the
+         * simulator-side circuit is gone (typical 60s server-side timeout
+         * already fired, or a cellular NAT mapping flap killed both
+         * directions). Re-sending UseCircuitCode on yet another fresh source
+         * port won't resurrect a circuit the simulator has already torn
+         * down, so the inbound-stall watchdog would just thrash. Escalate to
+         * the higher-level reconnect path (full re-login) instead.
+         *
+         * Sized just above the typical UseCircuitCode round-trip on poor
+         * cellular (~5–8s seen in capture) so legitimate slow paths still
+         * recover, but well under the 30s rebind cooldown that would
+         * otherwise mask a dead circuit.
+         */
+        const val POST_RECONNECT_VERIFY_MS = 12_000L
     }
     
     // Connection parameters
@@ -1073,6 +1094,7 @@ class UDPConnectionFixed {
                 if (now - lastTimeoutCheckTime >= 1000L) {
                     checkPingHealth()
                     checkInboundFlow()
+                    checkPostReconnectSilence()
                     checkMessageTimeouts()
                     lastTimeoutCheckTime = now
                 }
@@ -1391,6 +1413,53 @@ class UDPConnectionFixed {
         }
     }
     
+
+    /**
+     * Detect the "silent socket after reconnect" pathology described in
+     * docs/2026-04-25 Athanasia capture: socket reconnect succeeds (new
+     * source port bound, UseCircuitCode resent), but no packet ever arrives
+     * because the simulator-side circuit has already timed out. Without
+     * this check, the inbound-stall watchdog defers for [SOCKET_REBIND_COOLDOWN_MS]
+     * + [INBOUND_DATA_STALL_MS] = 75s before reacting, and even then it
+     * would just rebind again on a new source port — also pointless against
+     * a dead server-side circuit.
+     *
+     * Escalation path: trip [reconnectionCallback] so [LinkpointApp] can
+     * tear the circuit down and either re-login or hand the user back to
+     * the login screen with a meaningful error. [lastSocketReconnectTime]
+     * is cleared so we don't fire again on the same reconnect.
+     */
+    private fun checkPostReconnectSilence() {
+        if (!_isConnected.value) return
+        if (lastSocketReconnectTime == 0L) return
+        if (!lastSocketReconnectSucceeded) return
+        if (postReconnectPacketsReceived.get() > 0) return
+
+        val now = System.currentTimeMillis()
+        if (now - lastSocketReconnectTime < POST_RECONNECT_VERIFY_MS) return
+
+        NetworkLogger.log(
+            NetworkLogger.Level.WARN,
+            NetworkLogger.Category.UDP,
+            "Post-reconnect silence: no inbound packets ${now - lastSocketReconnectTime}ms after socket rebind " +
+                "(sent=${packetsSent.get()}). Simulator-side circuit likely dead — escalating to full reconnect."
+        )
+
+        // Clear so this only fires once per reconnect attempt; the next
+        // successful reconnect() will set it again.
+        lastSocketReconnectTime = 0L
+
+        emitNetworkState(NetworkStateTransition.FAULTED)
+        try {
+            reconnectionCallback?.invoke()
+        } catch (e: Exception) {
+            NetworkLogger.log(
+                NetworkLogger.Level.ERROR,
+                NetworkLogger.Category.UDP,
+                "reconnectionCallback threw during post-reconnect escalation: ${e.message}"
+            )
+        }
+    }
 
     /**
      * Send an explicit StartPingCheck packet so unanswered-ping tracking maps to real ping requests.

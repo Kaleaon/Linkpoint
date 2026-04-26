@@ -111,9 +111,18 @@ class CacheManager(private val context: Context) {
         
         // Cache location options
         const val LOCATION_INTERNAL = "internal"
+        // Public (legacy) external storage. Kept for users who previously opted in via
+        // MANAGE_EXTERNAL_STORAGE; on targetSdk 30+ without that permission, writes to
+        // Environment.getExternalStorageDirectory() silently fail — that was the cause
+        // of the "0 B disk cache" observation in the 2026-04-25 capture.
         const val LOCATION_EXTERNAL = "external"
         const val LOCATION_CUSTOM = "custom"
-        
+        // App-scoped external Documents — the default. Resolves to
+        // /storage/emulated/0/Android/data/<pkg>/files/Documents/Linkpoint/, which is
+        // visible in Files apps as "Documents/Linkpoint" on the device, and writable
+        // without WRITE_EXTERNAL_STORAGE on every supported Android version.
+        const val LOCATION_DOCUMENTS = "documents"
+
         // Default external path for Linkpoint Cache
         val DEFAULT_EXTERNAL_CACHE_PATH: String
             get() = "${Environment.getExternalStorageDirectory().absolutePath}/$LINKPOINT_CACHE_ROOT"
@@ -279,20 +288,21 @@ class CacheManager(private val context: Context) {
     
     /**
      * Get the configured cache location.
-     * Returns "internal", "external", or "custom".
+     * Returns "documents" (default), "internal", "external", or "custom".
      */
     fun getCacheLocation(): String {
-        return prefs.getString(KEY_CACHE_LOCATION, LOCATION_EXTERNAL) ?: LOCATION_EXTERNAL
+        return prefs.getString(KEY_CACHE_LOCATION, LOCATION_DOCUMENTS) ?: LOCATION_DOCUMENTS
     }
-    
+
     /**
      * Set the cache location.
      * Note: Changing this requires app restart to take effect.
      */
     fun setCacheLocation(location: String) {
-        if (location != LOCATION_INTERNAL && location != LOCATION_EXTERNAL && location != LOCATION_CUSTOM) {
-            Log.w(TAG, "Invalid cache location: $location, using external")
-            prefs.edit().putString(KEY_CACHE_LOCATION, LOCATION_EXTERNAL).apply()
+        if (location != LOCATION_INTERNAL && location != LOCATION_EXTERNAL &&
+            location != LOCATION_CUSTOM && location != LOCATION_DOCUMENTS) {
+            Log.w(TAG, "Invalid cache location: $location, using documents")
+            prefs.edit().putString(KEY_CACHE_LOCATION, LOCATION_DOCUMENTS).apply()
             return
         }
         prefs.edit().putString(KEY_CACHE_LOCATION, location).apply()
@@ -325,16 +335,26 @@ class CacheManager(private val context: Context) {
     /**
      * Get the Linkpoint Cache root directory.
      * Structure: <root>/Linkpoint/
+     *
+     * Default ([LOCATION_DOCUMENTS]) is `Android/data/<pkg>/files/Documents/Linkpoint/`,
+     * which appears in the device Files app as `Documents/Linkpoint`. This is the only
+     * external-visible location writable without [android.Manifest.permission.MANAGE_EXTERNAL_STORAGE]
+     * on Android 11+, and it's where the existing crash/log subsystem already lives
+     * (see CrashReporter / NetworkLogger).
      */
     fun getLinkpointCacheRoot(): File {
         val rootDir = when (getCacheLocation()) {
             LOCATION_CUSTOM -> File(getCustomCachePath())
+            LOCATION_DOCUMENTS -> getDocumentsCacheRoot()
             LOCATION_EXTERNAL -> {
+                // Legacy path for users who previously toggled "external" with the
+                // MANAGE_EXTERNAL_STORAGE permission. Falls back to the documents
+                // directory rather than internal so the user keeps a visible cache.
                 if (isExternalStorageAvailable()) {
                     File(Environment.getExternalStorageDirectory(), LINKPOINT_CACHE_ROOT)
                 } else {
-                    Log.w(TAG, "External storage not available, falling back to internal")
-                    File(context.filesDir, LINKPOINT_CACHE_ROOT)
+                    Log.w(TAG, "External storage not available, falling back to Documents")
+                    getDocumentsCacheRoot()
                 }
             }
             else -> File(context.filesDir, LINKPOINT_CACHE_ROOT)
@@ -343,6 +363,22 @@ class CacheManager(private val context: Context) {
             rootDir.mkdirs()
         }
         return rootDir
+    }
+
+    /**
+     * Resolve the app-scoped Documents/Linkpoint directory. Falls back to internal
+     * storage only if [Context.getExternalFilesDir] returns null (the device has no
+     * usable external volume — extremely rare but possible during boot or with a
+     * removed SD card).
+     */
+    private fun getDocumentsCacheRoot(): File {
+        val docsDir = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+        return if (docsDir != null) {
+            File(docsDir, LINKPOINT_CACHE_ROOT)
+        } else {
+            Log.w(TAG, "External files dir unavailable; using internal storage for cache")
+            File(context.filesDir, LINKPOINT_CACHE_ROOT)
+        }
     }
     
     /**
@@ -424,7 +460,23 @@ class CacheManager(private val context: Context) {
      */
     fun getAvailableCacheLocations(): List<CacheLocationInfo> {
         val locations = mutableListOf<CacheLocationInfo>()
-        
+
+        // Documents (default): Android/data/<pkg>/files/Documents/Linkpoint
+        try {
+            val docsDir = getDocumentsCacheRoot()
+            val docsStatFs = android.os.StatFs(docsDir.parentFile?.path ?: context.filesDir.path)
+            locations.add(CacheLocationInfo(
+                id = LOCATION_DOCUMENTS,
+                name = "Documents/Linkpoint (recommended)",
+                path = docsDir.absolutePath,
+                availableBytes = docsStatFs.availableBytes,
+                totalBytes = docsStatFs.totalBytes,
+                isAvailable = true
+            ))
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to get Documents storage stats", e)
+        }
+
         // Internal storage
         val internalDir = File(context.filesDir, LINKPOINT_CACHE_ROOT)
         try {

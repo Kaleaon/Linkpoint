@@ -99,12 +99,14 @@
 
     <!-- Cache location options -->
     <string-array name="cache_location_entries">
+        <item>Documents/Linkpoint (recommended)</item>
         <item>Internal Storage</item>
-        <item>External Storage (Lumiya Cache)</item>
+        <item>External Storage (legacy, requires permission)</item>
         <item>Custom Location</item>
     </string-array>
 
     <string-array name="cache_location_values">
+        <item>documents</item>
         <item>internal</item>
         <item>external</item>
         <item>custom</item>

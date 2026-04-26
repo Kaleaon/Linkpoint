@@ -204,7 +204,12 @@ class AssetCache(private val context: Context) {
     }
     
     private fun getCacheKey(assetId: UUID, assetType: AssetType): String {
-        return "${assetType.name}_${assetId}"
+        // Include the grid in the memory key so the in-process LRU cache can't return a
+        // payload from a previously-connected grid for the same UUID. Disk paths already
+        // segregate by grid via CacheManager.getPublicAssetDirectory(), but the memory
+        // cache shared one keyspace before this change — fine for Second Life (UUIDs are
+        // globally unique) but unsafe across OpenSim grids where UUIDs can collide.
+        return "${cacheManager.getCurrentGridName()}_${assetType.name}_${assetId}"
     }
     
     /**
