@@ -1039,6 +1039,7 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("  Camera: ${if (renderDiag.hasCamera) "✓" else "✗"}")
                         appendLine("  SwapChain: ${if (renderDiag.hasSwapChain) "✓" else "✗"}")
                         appendLine("  Surface Ready: ${if (renderDiag.isSurfaceReady) "✓" else "✗ (e.g. on Settings, app backgrounded)"}")
+                        appendLine("  Drawing Enabled: ${if (renderDiag.isDrawingEnabled) "✓" else "✗ (paused — panel open / activity backgrounded)"}")
 
                         if (renderDiag.initializationTime > 0) {
                             appendLine()
