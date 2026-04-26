@@ -116,36 +116,38 @@ object MessageParser {
      * @return The message ID (may be negative), or Int.MIN_VALUE if packet is malformed
      */
     fun extractMessageId(rawPacket: ByteArray): Int {
-        if (rawPacket.size < PACKET_HEADER_SIZE + 1) return Int.MIN_VALUE
-        
-        var offset = PACKET_HEADER_SIZE
-        
+        if (rawPacket.size < PACKET_HEADER_SIZE) return Int.MIN_VALUE
+
+        val extraHeaderLen = rawPacket[5].toInt() and 0xFF
+        var offset = PACKET_HEADER_SIZE + extraHeaderLen
+        if (offset >= rawPacket.size) return Int.MIN_VALUE
+
         // Signed byte interpretation - intentional for SL protocol compatibility
         val b1 = rawPacket[offset].toInt()
         offset++
-        
+
         if (b1 != -1) {
             // High frequency message - return signed byte value directly
             // Examples: 4 = AgentUpdate, 12 = ObjectUpdate, -5 (0xFB) = PacketAck
             return b1
         }
-        
-        if (rawPacket.size < offset + 1) return Int.MIN_VALUE
+
+        if (offset >= rawPacket.size) return Int.MIN_VALUE
         val b2 = rawPacket[offset].toInt()
         offset++
-        
+
         if (b2 != -1) {
             // Medium frequency: byte | 65280
             return b2 or 65280
         }
-        
+
         // Low frequency: next two bytes as short | -65536
-        if (rawPacket.size < offset + 2) return Int.MIN_VALUE
-        
+        if (offset + 1 >= rawPacket.size) return Int.MIN_VALUE
+
         val byte3 = rawPacket[offset].toInt() and 0xFF
         val byte4 = rawPacket[offset + 1].toInt() and 0xFF
         val shortValue = ((byte3 shl 8) or byte4).toShort().toInt()
-        
+
         return shortValue or -65536
     }
     

@@ -22,5 +22,29 @@
     "rawPacketHex": "000000000000FFFF01",
     "expectedMessageId": -2147483648,
     "expectedPayloadHex": null
+  },
+  {
+    "name": "high-frequency-with-extra-header",
+    "rawPacketHex": "000000000003AABBCC0C1122",
+    "expectedMessageId": 12,
+    "expectedPayloadHex": "1122"
+  },
+  {
+    "name": "medium-frequency-with-extra-header",
+    "rawPacketHex": "0000000000020102FF063344",
+    "expectedMessageId": 65286,
+    "expectedPayloadHex": "3344"
+  },
+  {
+    "name": "low-frequency-with-extra-header",
+    "rawPacketHex": "0000000000017FFFFFFF0094A1",
+    "expectedMessageId": -65388,
+    "expectedPayloadHex": "A1"
+  },
+  {
+    "name": "malformed-truncated-after-extra-header",
+    "rawPacketHex": "000000000002AABB",
+    "expectedMessageId": -2147483648,
+    "expectedPayloadHex": null
   }
 ]
