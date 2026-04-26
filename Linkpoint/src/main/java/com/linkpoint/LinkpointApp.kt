@@ -455,6 +455,14 @@ class LinkpointApp : Application() {
     
     // Protocol layer
     lateinit var capabilityManager: CapabilityManager
+    /**
+     * Per-region SimulatorFeatures snapshot. Populated after the seed cap
+     * is fetched and re-fetched on region change. Renderer / inventory /
+     * UI code should consult `simulatorFeatures.features.value` rather
+     * than assume the protocol baseline — modern sims advertise PBR,
+     * BoM, animated objects, raised attachment limits, etc. via this cap.
+     */
+    lateinit var simulatorFeatures: com.linkpoint.world.SimulatorFeaturesManager
         private set
     lateinit var udpConnection: UDPConnectionFixed
         private set
@@ -653,7 +661,30 @@ class LinkpointApp : Application() {
         super.onCreate()
         instance = this
         Log.i(TAG, "Linkpoint application starting...")
-        
+
+        // Install Conscrypt as the highest-priority JCA provider before any
+        // SSL handshake fires. Conscrypt's BoringSSL backend negotiates
+        // ALPN reliably, which is what makes OkHttp's HTTP/2 upgrade
+        // actually take effect — the platform SSL stack on many Android
+        // devices fails ALPN silently and leaves us on HTTP/1.1 (the
+        // 2026-04-25 Athanasia capture showed 0/73 H2 on textures despite
+        // OkHttp.Builder().protocols(HTTP_2, HTTP_1_1)). Inserting at
+        // position 1 makes Conscrypt the default for all subsequent
+        // SSLSocketFactory.getDefault() calls and any explicitly built
+        // SSL contexts.
+        try {
+            java.security.Security.insertProviderAt(
+                org.conscrypt.Conscrypt.newProvider(), 1
+            )
+            Log.i(TAG, "Conscrypt installed as primary JCA provider — HTTP/2 ALPN should now work")
+        } catch (e: Throwable) {
+            // UnsatisfiedLinkError on a device without the Conscrypt
+            // native library, or NoClassDefFoundError if the dep is
+            // somehow stripped — fall through to platform SSL. We log
+            // loudly because this silently degrades H2 → H1.1.
+            Log.e(TAG, "Conscrypt install failed; HTTP/2 will fall back to platform ALPN: ${e.message}", e)
+        }
+
         // Initialize crash reporter first for early crash capture
         try {
             crashReporter = CrashReporter.initialize(this)
@@ -720,6 +751,7 @@ class LinkpointApp : Application() {
         
         // Protocol components
         capabilityManager = CapabilityManager()
+        simulatorFeatures = com.linkpoint.world.SimulatorFeaturesManager(capabilityManager)
         udpConnection = UDPConnectionFixed()
         
         // Protocol handler

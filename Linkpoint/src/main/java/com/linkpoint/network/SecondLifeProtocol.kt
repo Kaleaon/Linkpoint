@@ -420,7 +420,20 @@ class SecondLifeProtocol(private val context: Context) {
                             Log.i(TAG, "[STEP 2/2] Capabilities loaded: ${app.capabilityManager.getCapabilityCount()}")
                             // Connect texture manager to capability-based fetching
                             app.textureManager.onCapabilitiesReady()
-                            
+
+                            // Fetch SimulatorFeatures so renderer / inventory / UI
+                            // can feature-gate (PBR, BoM, animated objects, max
+                            // attachments, etc.). Best-effort and async — we
+                            // don't block login on it. Result lands on
+                            // app.simulatorFeatures.features StateFlow.
+                            app.applicationScope.launch {
+                                try {
+                                    app.simulatorFeatures.fetchSimulatorFeatures()
+                                } catch (e: Exception) {
+                                    Log.w(TAG, "SimulatorFeatures background fetch failed: ${e.message}")
+                                }
+                            }
+
                             // Parse login response for buddy-list, inventory, etc.
                             // This populates FriendsManager and InventoryManager with initial data
                             parseAndPopulateLoginData(result.responseXml, agentId)

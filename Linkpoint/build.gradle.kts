@@ -229,6 +229,16 @@ dependencies {
     // Networking - OkHttp
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    // Conscrypt — required for reliable HTTP/2 ALPN negotiation on Android.
+    // Without it, OkHttp's H2 upgrade silently falls back to HTTP/1.1 on
+    // many devices/CDN combinations (the 2026-04-25 Athanasia capture
+    // showed 0/73 = 100% HTTP/1.1 on textures despite OkHttp being
+    // configured with Protocol.HTTP_2). Linden's own 2026 mobile viewer
+    // ships Cysharp.Net.Http.YetAnotherHttpHandler for the same reason —
+    // platform HTTP/2 isn't reliable. Conscrypt installs a hardened
+    // BoringSSL-backed security provider so ALPN works correctly.
+    implementation("org.conscrypt:conscrypt-android:2.5.2")
     
     // gRPC - Modern networking based on official SL app patterns
     implementation("io.grpc:grpc-okhttp:1.62.2")
