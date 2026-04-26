@@ -1300,27 +1300,37 @@ class UDPConnectionFixed {
             NetworkLogger.log(
                 NetworkLogger.Level.WARN,
                 NetworkLogger.Category.UDP,
-                "No response from server (${unansweredPings.get()} unanswered pings) - attempting socket reconnect before full disconnect"
+                "No response from server (${unansweredPings.get()} unanswered pings) — circuit is dead, escalating to full re-login"
             )
-            // Surface the transition so the diagnostic counter and any UI
-            // observer (e.g. a "Reconnecting…" pill) can react immediately —
-            // not only after socket reconnect has already failed.
-            emitNetworkState(NetworkStateTransition.RECONNECTING)
-            // Try socket reconnect first before triggering full reconnection
+            // Escalate directly to the higher-level reconnection callback
+            // (auto re-login). Previously we tried socket-rebind first, but
+            // the 2026-04-25 Athanasia capture shows that pattern produces
+            // a silent loop on cellular: every rebind "succeeds" at the
+            // socket layer but no packets ever come back because the
+            // simulator-side circuit has already timed us out. The LLUDP
+            // protocol has no in-band recovery for that — only a fresh
+            // login can resurrect the session. This matches Lumiya's
+            // `ProcessTimeout()` (3 unanswered pings → tear down circuit
+            // → full re-login via `SLGridConnection.Reconnect()`).
+            //
+            // The inbound-stall watchdog (`checkInboundDataStall`) and
+            // post-reconnect-silence watchdog (`checkPostReconnectSilence`)
+            // still call `reconnect()` for transient socket failures — we
+            // only short-circuit the unanswered-ping path here, since that
+            // signal specifically means the simulator is no longer hearing
+            // us (or we're no longer hearing it).
+            emitNetworkState(NetworkStateTransition.FAULTED)
             scope.launch {
-                val reconnected = try { reconnect() } catch (e: Exception) { false }
-                if (reconnected) {
-                    emitNetworkState(NetworkStateTransition.CONNECTED)
-                } else {
+                try {
+                    reconnectionCallback?.invoke()
+                } catch (e: Exception) {
                     NetworkLogger.log(
                         NetworkLogger.Level.ERROR,
                         NetworkLogger.Category.UDP,
-                        "Socket reconnect failed, triggering full reconnection"
+                        "reconnectionCallback threw during ping-watchdog escalation: ${e.message}"
                     )
-                    emitNetworkState(NetworkStateTransition.FAULTED)
-                    reconnectionCallback?.invoke()
-                    disconnect()
                 }
+                disconnect()
             }
             return
         }

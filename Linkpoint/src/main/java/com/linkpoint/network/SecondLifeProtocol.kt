@@ -467,6 +467,19 @@ class SecondLifeProtocol(private val context: Context) {
                 )
                 
                 NetworkLogger.logProtocol("Login Complete", "Successfully connected to ${result.simIp}:${result.simPort}")
+
+                // Cache credentials so the auto re-login coordinator can
+                // re-drive a full HTTP login when the UDP layer reports a
+                // dead circuit. See LinkpointApp.attemptAutoRelogin().
+                app.rememberLoginCredentials(
+                    firstName = firstName,
+                    lastName = lastName,
+                    password = password,
+                    loginUri = loginUri,
+                    startLocation = startLocation,
+                    mfaHash = result.mfaHash
+                )
+
                 LoginResult.Success(agentId, result.sessionId, result.mfaHash)
             }
             is CoreNetworkingService.LoginResult.MFARequired -> {
@@ -940,6 +953,10 @@ class SecondLifeProtocol(private val context: Context) {
      */
     fun disconnect() {
         Log.i(TAG, "Disconnecting from grid")
+        // Clear cached login credentials so the auto re-login coordinator
+        // doesn't fire after a user-initiated logout. Mirrors Lumiya's
+        // `userWantsConnected = false` in `SLGridConnection.disconnect()`.
+        LinkpointApp.getInstance().forgetLoginCredentials()
         networkingService.disconnect()
         LinkpointApp.getInstance().sessionManager.disconnect()
     }
