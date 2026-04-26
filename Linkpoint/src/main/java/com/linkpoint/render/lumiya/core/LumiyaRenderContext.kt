@@ -1,11 +1,16 @@
 package com.linkpoint.render.lumiya.core
 
 import android.opengl.GLES32
+import android.opengl.GLES31Ext
 import android.opengl.Matrix
 import android.util.Log
+import com.linkpoint.render.RenderDiagnostics
 import com.linkpoint.render.lumiya.shaders.*
 import com.linkpoint.render.lumiya.glres.GLResourceManager
 import com.linkpoint.render.lumiya.spatial.FrustumCuller
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.nio.FloatBuffer
 
 /**
  * Central render-state container – the Lumiya equivalent of Filament's Engine + View.
@@ -121,6 +126,11 @@ class LumiyaRenderContext {
 
     var globalUBO = 0; private set
     private val globalUBOData = FloatArray(16 + 16 + 16 + 4 + 4) // proj + view + model + camPos(4) + sunDir(4)
+    private val globalUBOSizeBytes = globalUBOData.size * 4
+    private val globalUBOUploadBuffer: FloatBuffer = ByteBuffer.allocateDirect(globalUBOSizeBytes)
+        .order(ByteOrder.nativeOrder())
+        .asFloatBuffer()
+    private var globalUBOPersistentFloatBuffer: FloatBuffer? = null
 
     // =====================================================================
     // Initialisation
@@ -200,18 +210,54 @@ class LumiyaRenderContext {
         GLES32.glGenBuffers(1, buf, 0)
         globalUBO = buf[0]
         GLES32.glBindBuffer(GLES32.GL_UNIFORM_BUFFER, globalUBO)
-        GLES32.glBufferData(
-            GLES32.GL_UNIFORM_BUFFER,
-            globalUBOData.size * 4,
-            null,
-            GLES32.GL_DYNAMIC_DRAW
-        )
+        if (!tryCreatePersistentMappedUBO()) {
+            GLES32.glBufferData(
+                GLES32.GL_UNIFORM_BUFFER,
+                globalUBOSizeBytes,
+                null,
+                GLES32.GL_DYNAMIC_DRAW
+            )
+        }
         GLES32.glBindBuffer(GLES32.GL_UNIFORM_BUFFER, 0)
         // Bind to binding point 0
         GLES32.glBindBufferBase(GLES32.GL_UNIFORM_BUFFER, 0, globalUBO)
     }
 
+    private fun tryCreatePersistentMappedUBO(): Boolean {
+        val extensions = GLES32.glGetString(GLES32.GL_EXTENSIONS).orEmpty()
+        if (!extensions.contains("GL_EXT_buffer_storage")) {
+            return false
+        }
+        return try {
+            val flags = GLES31Ext.GL_MAP_WRITE_BIT_EXT or
+                GLES31Ext.GL_MAP_PERSISTENT_BIT_EXT or
+                GLES31Ext.GL_MAP_COHERENT_BIT_EXT or
+                GLES31Ext.GL_DYNAMIC_STORAGE_BIT_EXT
+            GLES31Ext.glBufferStorageExt(GLES32.GL_UNIFORM_BUFFER, globalUBOSizeBytes, null, flags)
+            val mapped = GLES32.glMapBufferRange(
+                GLES32.GL_UNIFORM_BUFFER,
+                0,
+                globalUBOSizeBytes,
+                GLES32.GL_MAP_WRITE_BIT or GLES31Ext.GL_MAP_PERSISTENT_BIT_EXT or GLES31Ext.GL_MAP_COHERENT_BIT_EXT
+            )
+            if (mapped is ByteBuffer) {
+                mapped.order(ByteOrder.nativeOrder())
+                globalUBOPersistentFloatBuffer = mapped.asFloatBuffer()
+                Log.i(TAG, "Using persistent mapped global UBO")
+                true
+            } else {
+                globalUBOPersistentFloatBuffer = null
+                false
+            }
+        } catch (t: Throwable) {
+            globalUBOPersistentFloatBuffer = null
+            Log.w(TAG, "Persistent mapped global UBO unavailable, using reusable upload buffer", t)
+            false
+        }
+    }
+
     fun uploadGlobalUBO() {
+        val uploadStartNs = System.nanoTime()
         System.arraycopy(projectionMatrix, 0, globalUBOData, 0, 16)
         System.arraycopy(viewMatrix, 0, globalUBOData, 16, 16)
         System.arraycopy(modelMatrix, 0, globalUBOData, 32, 16)
@@ -225,13 +271,22 @@ class LumiyaRenderContext {
         globalUBOData[55] = 0.0f
 
         GLES32.glBindBuffer(GLES32.GL_UNIFORM_BUFFER, globalUBO)
-        val buffer = java.nio.ByteBuffer.allocateDirect(globalUBOData.size * 4)
-            .order(java.nio.ByteOrder.nativeOrder())
-            .asFloatBuffer()
-            .put(globalUBOData)
-        buffer.flip()
-        GLES32.glBufferSubData(GLES32.GL_UNIFORM_BUFFER, 0, globalUBOData.size * 4, buffer)
+        val persistentBuffer = globalUBOPersistentFloatBuffer
+        if (persistentBuffer != null) {
+            persistentBuffer.clear()
+            persistentBuffer.put(globalUBOData)
+            persistentBuffer.flip()
+        } else {
+            globalUBOUploadBuffer.clear()
+            globalUBOUploadBuffer.put(globalUBOData)
+            globalUBOUploadBuffer.flip()
+            GLES32.glBufferSubData(GLES32.GL_UNIFORM_BUFFER, 0, globalUBOSizeBytes, globalUBOUploadBuffer)
+        }
         GLES32.glBindBuffer(GLES32.GL_UNIFORM_BUFFER, 0)
+        RenderDiagnostics.glGlobalUboUpload(
+            uploadTimeNs = System.nanoTime() - uploadStartNs,
+            frameAllocations = 0
+        )
     }
 
     // ── FXAA framebuffer ─────────────────────────────────────────────────
