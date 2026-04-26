@@ -100,7 +100,11 @@ class OutfitManagerTest {
         val parsed = WearableAssetParser.parse(raw, WearableType.SHIRT, assetId)
         assertNotNull(parsed)
         parsed!!
-        assertEquals(WearableType.GLOVES, parsed.type)
+        // Asset declares `type 13` which is ALPHA per the SL wearable
+        // type table (GLOVES is 9). The parser correctly trusts the
+        // asset's self-declaration over the caller's hint, so the
+        // expected type is ALPHA, not GLOVES.
+        assertEquals(WearableType.ALPHA, parsed.type)
         assertEquals(4, parsed.params.size)
         assertEquals(0.75f, parsed.params[31] ?: -1f, 0.0001f)
         assertEquals(includedTexture, parsed.textures[1])

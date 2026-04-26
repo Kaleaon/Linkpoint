@@ -93,9 +93,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Main Application class for Linkpoint - Second Life viewer for Android and XR
@@ -243,7 +247,188 @@ class LinkpointApp : Application() {
             }
         }
     }
-    
+
+    // ─── Auto re-login coordinator ────────────────────────────────────────
+    //
+    // When the UDP circuit is detected as dead (post-reconnect-silence
+    // escalation, or a 3-unanswered-ping watchdog trip), the LLUDP protocol
+    // gives us no in-band way to revive it: the simulator-side circuit has
+    // already timed us out (typically because cellular NAT rotated our public
+    // source port). The only correct recovery is a full HTTP re-login, which
+    // gets us a fresh circuit code and a new sim handoff.
+    //
+    // Architecture matches Lumiya's `SLGridConnection.Reconnect()` (3s
+    // backoff, max 10 attempts) and the official SL mobile viewer's
+    // `CoreNetworkingService` (`_alwaysReconnect`, `IsReconnecting`,
+    // `MaxReconnectTime`, `_currentLogin`-style cached login response). The
+    // SL mobile viewer abandoned LLUDP for gRPC so its transport is not a
+    // model for us, but its lifecycle pattern is transport-agnostic and
+    // correct.
+
+    private data class LoginCredentials(
+        val firstName: String,
+        val lastName: String,
+        val password: String,
+        val loginUri: String,
+        val startLocation: String,
+        val mfaHash: String
+    )
+
+    @Volatile private var cachedLoginCredentials: LoginCredentials? = null
+    private val userWantsConnected = AtomicBoolean(false)
+    private val isReconnecting = AtomicBoolean(false)
+    private val reconnectAttempts = AtomicInteger(0)
+    @Volatile private var firstReconnectAttemptAt: Long = 0L
+    private val reloginMutex = Mutex()
+
+    /** 3 seconds — Lumiya's `Reconnect()` sleep before each attempt. */
+    private val reloginBackoffMs: Long = 3_000L
+    /** 10 — Lumiya's `GlobalOptions.MaxReconnectAttempts`. */
+    private val reloginMaxAttempts: Int = 10
+    /** 120s deadline — mirrors SL mobile's `MaxReconnectTime` so we surrender if a recovery cycle is dragging on. */
+    private val reloginMaxWindowMs: Long = 120_000L
+
+    /**
+     * Called by [SecondLifeProtocol.login] on Success. We cache enough to
+     * re-drive a full login from the auto-reconnect path without bouncing
+     * through the login UI. MFA hash is updated each time so the next
+     * resume can skip the prompt.
+     */
+    internal fun rememberLoginCredentials(
+        firstName: String, lastName: String, password: String,
+        loginUri: String, startLocation: String, mfaHash: String?
+    ) {
+        cachedLoginCredentials = LoginCredentials(
+            firstName, lastName, password, loginUri, startLocation, mfaHash ?: ""
+        )
+        userWantsConnected.set(true)
+        reconnectAttempts.set(0)
+        firstReconnectAttemptAt = 0L
+        Log.d(TAG, "Cached login credentials for auto re-login")
+    }
+
+    /**
+     * Called from [SecondLifeProtocol.disconnect] (user-initiated logout)
+     * so we don't auto re-login after an explicit logout. Mirrors Lumiya's
+     * `userWantsConnected = false` in `disconnect()`.
+     */
+    internal fun forgetLoginCredentials() {
+        userWantsConnected.set(false)
+        cachedLoginCredentials = null
+        reconnectAttempts.set(0)
+        firstReconnectAttemptAt = 0L
+        Log.d(TAG, "Cleared cached login credentials (user logout)")
+    }
+
+    /**
+     * Drive the auto-reconnect loop. Safe to call from anywhere; a single
+     * coordinator runs at a time (gated by [reloginMutex]). Bails when:
+     *   - the user explicitly logged out (`userWantsConnected == false`),
+     *   - we have no cached credentials (no login yet, or already cleared),
+     *   - we've exhausted [reloginMaxAttempts], OR
+     *   - cumulative recovery time exceeds [reloginMaxWindowMs].
+     */
+    internal fun attemptAutoRelogin() {
+        applicationScope.launch {
+            reloginMutex.withLock {
+                runReloginLoop()
+            }
+        }
+    }
+
+    private suspend fun runReloginLoop() {
+        if (!userWantsConnected.get()) {
+            Log.i(TAG, "Auto re-login skipped: user is not connected (manual logout)")
+            return
+        }
+        val creds = cachedLoginCredentials ?: run {
+            Log.w(TAG, "Auto re-login skipped: no cached credentials")
+            return
+        }
+
+        if (firstReconnectAttemptAt == 0L) firstReconnectAttemptAt = System.currentTimeMillis()
+        isReconnecting.set(true)
+
+        try {
+            while (userWantsConnected.get()) {
+                val attempt = reconnectAttempts.incrementAndGet()
+                val elapsed = System.currentTimeMillis() - firstReconnectAttemptAt
+
+                if (attempt > reloginMaxAttempts) {
+                    Log.e(TAG, "Auto re-login: exceeded $reloginMaxAttempts attempts — giving up")
+                    sessionManager.setConnectionState(
+                        com.linkpoint.network.events.ConnectionState.DISCONNECTED
+                    )
+                    return
+                }
+                if (elapsed >= reloginMaxWindowMs) {
+                    Log.e(TAG, "Auto re-login: ${elapsed}ms exceeds ${reloginMaxWindowMs}ms window — giving up")
+                    sessionManager.setConnectionState(
+                        com.linkpoint.network.events.ConnectionState.DISCONNECTED
+                    )
+                    return
+                }
+
+                Log.i(TAG, "🔄 Auto re-login attempt $attempt/$reloginMaxAttempts (elapsed=${elapsed}ms)")
+                protocol.stateManager.setStatus(
+                    com.linkpoint.network.core.NetworkStateManager.ConnectionStatus.RECONNECTING
+                )
+
+                // Tear down the dead UDP socket cleanly so the new login
+                // doesn't fight with stale I/O thread state.
+                try { udpConnection.disconnect() } catch (e: Exception) {
+                    Log.w(TAG, "udpConnection.disconnect() during re-login: ${e.message}")
+                }
+
+                delay(reloginBackoffMs)
+
+                val result = try {
+                    protocol.login(
+                        firstName = creds.firstName,
+                        lastName = creds.lastName,
+                        password = creds.password,
+                        loginUri = creds.loginUri,
+                        startLocation = creds.startLocation,
+                        mfaToken = "",
+                        mfaHash = creds.mfaHash
+                    )
+                } catch (e: Exception) {
+                    Log.w(TAG, "Auto re-login attempt $attempt threw: ${e.message}")
+                    null
+                }
+
+                when (result) {
+                    is com.linkpoint.network.LoginResult.Success -> {
+                        Log.i(TAG, "✓ Auto re-login succeeded on attempt $attempt")
+                        // Refresh cached MFA hash — Linden rotates these.
+                        cachedLoginCredentials = creds.copy(mfaHash = result.mfaHash ?: creds.mfaHash)
+                        reconnectAttempts.set(0)
+                        firstReconnectAttemptAt = 0L
+                        return
+                    }
+                    is com.linkpoint.network.LoginResult.MFARequired -> {
+                        Log.w(TAG, "Auto re-login: server now requires MFA — cannot proceed automatically")
+                        userWantsConnected.set(false)
+                        sessionManager.setConnectionState(
+                            com.linkpoint.network.events.ConnectionState.DISCONNECTED
+                        )
+                        return
+                    }
+                    is com.linkpoint.network.LoginResult.Failure -> {
+                        Log.w(TAG, "Auto re-login attempt $attempt failed: ${result.message} [${result.errorCode}]")
+                        // Loop continues; next iteration applies backoff.
+                    }
+                    null -> {
+                        // Exception path — treat like failure, retry.
+                    }
+                }
+            }
+            Log.i(TAG, "Auto re-login loop exited: user no longer wants connected")
+        } finally {
+            isReconnecting.set(false)
+        }
+    }
+
     /**
      * Single-threaded dispatcher for serialized messaging work (MessageThread).
      */
@@ -270,6 +455,14 @@ class LinkpointApp : Application() {
     
     // Protocol layer
     lateinit var capabilityManager: CapabilityManager
+    /**
+     * Per-region SimulatorFeatures snapshot. Populated after the seed cap
+     * is fetched and re-fetched on region change. Renderer / inventory /
+     * UI code should consult `simulatorFeatures.features.value` rather
+     * than assume the protocol baseline — modern sims advertise PBR,
+     * BoM, animated objects, raised attachment limits, etc. via this cap.
+     */
+    lateinit var simulatorFeatures: com.linkpoint.world.SimulatorFeaturesManager
         private set
     lateinit var udpConnection: UDPConnectionFixed
         private set
@@ -468,7 +661,30 @@ class LinkpointApp : Application() {
         super.onCreate()
         instance = this
         Log.i(TAG, "Linkpoint application starting...")
-        
+
+        // Install Conscrypt as the highest-priority JCA provider before any
+        // SSL handshake fires. Conscrypt's BoringSSL backend negotiates
+        // ALPN reliably, which is what makes OkHttp's HTTP/2 upgrade
+        // actually take effect — the platform SSL stack on many Android
+        // devices fails ALPN silently and leaves us on HTTP/1.1 (the
+        // 2026-04-25 Athanasia capture showed 0/73 H2 on textures despite
+        // OkHttp.Builder().protocols(HTTP_2, HTTP_1_1)). Inserting at
+        // position 1 makes Conscrypt the default for all subsequent
+        // SSLSocketFactory.getDefault() calls and any explicitly built
+        // SSL contexts.
+        try {
+            java.security.Security.insertProviderAt(
+                org.conscrypt.Conscrypt.newProvider(), 1
+            )
+            Log.i(TAG, "Conscrypt installed as primary JCA provider — HTTP/2 ALPN should now work")
+        } catch (e: Throwable) {
+            // UnsatisfiedLinkError on a device without the Conscrypt
+            // native library, or NoClassDefFoundError if the dep is
+            // somehow stripped — fall through to platform SSL. We log
+            // loudly because this silently degrades H2 → H1.1.
+            Log.e(TAG, "Conscrypt install failed; HTTP/2 will fall back to platform ALPN: ${e.message}", e)
+        }
+
         // Initialize crash reporter first for early crash capture
         try {
             crashReporter = CrashReporter.initialize(this)
@@ -534,7 +750,8 @@ class LinkpointApp : Application() {
         avatarSelectionManager = AvatarSelectionManager(this)
         
         // Protocol components
-        capabilityManager = CapabilityManager()
+        capabilityManager = CapabilityManager().apply { androidContext = this@LinkpointApp }
+        simulatorFeatures = com.linkpoint.world.SimulatorFeaturesManager(capabilityManager)
         udpConnection = UDPConnectionFixed()
         
         // Protocol handler
@@ -552,7 +769,7 @@ class LinkpointApp : Application() {
         // Asset system
         assetCache = AssetCache(this)
         textureManager = TextureManager(this, assetCache, capabilityManager)
-        meshManager = MeshManager(assetCache, capabilityManager)
+        meshManager = MeshManager(this, assetCache, capabilityManager)
         animationManager = AnimationManager(this, assetCache)
         soundManager = SoundManager(this, assetCache)
         
@@ -690,16 +907,20 @@ class LinkpointApp : Application() {
             }
         }
 
-        // Hard-failure callback: fires only after the in-line socket reconnect
-        // has already failed. The status listener above has already marked the
-        // session FAULTED; this side-channel notifies the keep-alive manager
-        // for any cleanup/UI it owns. A full auto re-login is a separate
-        // workstream (see segment 01 §6).
+        // Hard-failure callback: fires when the UDP layer concludes the
+        // simulator-side circuit is dead (post-reconnect-silence escalation,
+        // or 3-unanswered-pings watchdog trip). The simulator no longer has
+        // a circuit slot for us, so socket-level rebinds are pointless —
+        // the only protocol-correct recovery is a full HTTP re-login. The
+        // coordinator here matches Lumiya's `Reconnect()` (3s backoff,
+        // 10 attempts) and the SL-mobile `CoreNetworkingService` lifecycle
+        // (cached LoginResponse, IsReconnecting flag, MaxReconnectTime
+        // deadline). See `attemptAutoRelogin()` above.
         udpConnection.setReconnectionCallback {
-            Log.w(TAG, "⚠️ Hard reconnect callback — socket reconnect already failed")
-            applicationScope.launch {
-                connectionKeepAlive.notifyConnectionIssue()
-            }
+            Log.w(TAG, "⚠️ UDP layer reports dead circuit — escalating to auto re-login")
+            // Notify the keep-alive manager for any UI/cleanup it owns.
+            applicationScope.launch { connectionKeepAlive.notifyConnectionIssue() }
+            attemptAutoRelogin()
         }
         
         // Start background service for connection persistence

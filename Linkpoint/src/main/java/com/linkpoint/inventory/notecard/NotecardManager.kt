@@ -468,9 +468,18 @@ class NotecardManager(
                     return@withContext false
                 }
 
-                val normalizedUploader = if (uploaderUrl.startsWith("http://", ignoreCase = true)) {
-                    uploaderUrl.replaceFirst("http://", "https://", ignoreCase = true)
-                } else uploaderUrl
+                // Force-upgrade plain HTTP uploader URLs to HTTPS for
+                // production safety (cap responses occasionally come
+                // back with the wrong scheme). Skip the upgrade for
+                // loopback addresses so unit tests using MockWebServer
+                // (which serves plain HTTP on 127.0.0.1) can still
+                // round-trip without setting up TLS in the test harness.
+                val normalizedUploader = when {
+                    !uploaderUrl.startsWith("http://", ignoreCase = true) -> uploaderUrl
+                    uploaderUrl.startsWith("http://127.0.0.1", ignoreCase = true) ||
+                        uploaderUrl.startsWith("http://localhost", ignoreCase = true) -> uploaderUrl
+                    else -> uploaderUrl.replaceFirst("http://", "https://", ignoreCase = true)
+                }
 
                 val uploadRequest = Request.Builder()
                     .url(normalizedUploader)

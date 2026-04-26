@@ -78,6 +78,38 @@ object LLSDParser {
         }
     }
 
+    /**
+     * Parse LLSD Binary and report how many bytes the parser actually
+     * consumed. Required by mesh-asset readers, where the LLSD header is
+     * followed by zlib-compressed LOD blobs at byte offsets relative to
+     * the end of the header — and the header may itself contain
+     * `LLSDBinary` values whose payloads happen to include `0x7d` (`}`)
+     * bytes, which made the previous "scan for first `}`" approach
+     * silently truncate headers and return garbage.
+     */
+    fun parseBinaryAndConsumed(data: ByteArray): Pair<LLSDValue, Int> {
+        val backing = ByteArrayInputStream(data)
+        val stream = PushbackInputStream(backing, 1)
+        val limits = ParseLimits()
+        val state = ParseLimitsState()
+        val value = try {
+            parseBinaryValue(stream, state, limits)
+        } catch (_: LLSDParseException) {
+            return LLSDUndefined to -1
+        } catch (_: IllegalArgumentException) {
+            return LLSDUndefined to -1
+        }
+        // ByteArrayInputStream.available() is the count not yet consumed.
+        // The PushbackInputStream sits in front of it but only buffers
+        // single bytes (size=1), so the byte count it might be holding
+        // is at most one. Compensating for it keeps us conservative —
+        // mesh format only requires that the offset is at-or-past the
+        // real end of the header (header bytes are addressed via the
+        // header itself, not by the absolute offset).
+        val consumed = data.size - backing.available()
+        return value to consumed
+    }
+
     private fun parseBinaryValue(
         stream: PushbackInputStream,
         state: ParseLimitsState,

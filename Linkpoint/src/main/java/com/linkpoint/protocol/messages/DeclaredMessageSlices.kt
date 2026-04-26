@@ -134,7 +134,11 @@ object DeclaredMessageSlices {
 
     fun writeDirFindQuery(message: DirFindQueryMessage): ByteArray {
         val queryBytes = message.queryText.toByteArray(Charsets.UTF_8)
-        val buffer = ByteBuffer.allocate(32 + 16 + 1 + queryBytes.size + 4 + 4).order(ByteOrder.LITTLE_ENDIAN)
+        // `putString1` writes 1 length byte + content + 1 null terminator
+        // = `2 + content.size` total. Same off-by-one bug as the original
+        // writeMapNameRequest budget — fixed in lockstep so both writers
+        // agree on the framing size.
+        val buffer = ByteBuffer.allocate(32 + 16 + 2 + queryBytes.size + 4 + 4).order(ByteOrder.LITTLE_ENDIAN)
         buffer.putUUID(message.agentId)
         buffer.putUUID(message.sessionId)
         buffer.putUUID(message.queryId)
@@ -176,7 +180,10 @@ object DeclaredMessageSlices {
 
     fun writeMapNameRequest(message: MapNameRequestMessage): ByteArray {
         val nameBytes = message.name.toByteArray(Charsets.UTF_8)
-        val buffer = ByteBuffer.allocate(32 + 4 + 4 + 1 + 1 + nameBytes.size).order(ByteOrder.LITTLE_ENDIAN)
+        // `putString1` writes 1 length byte + content + 1 null terminator
+        // = `2 + content.size`. The previous `1 + nameBytes.size` budget
+        // was off by one and overflowed the buffer for any non-empty name.
+        val buffer = ByteBuffer.allocate(32 + 4 + 4 + 1 + 2 + nameBytes.size).order(ByteOrder.LITTLE_ENDIAN)
         buffer.putUUID(message.agentId)
         buffer.putUUID(message.sessionId)
         buffer.putInt(message.flags.toInt())
