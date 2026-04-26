@@ -13,7 +13,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.webrtc.*
 import java.util.UUID
@@ -147,35 +149,84 @@ class VoiceManager(
     }
     
     /**
-     * Provision voice account
+     * Provision voice account.
+     *
+     * Linden's WebRTC voice spec returns an `ice_servers` array alongside
+     * the credentials so the client doesn't have to ship a hardcoded STUN
+     * list. We accept both the modern WebRTC layout
+     * (`voice_credentials` object + `ice_servers`) and the legacy Vivox
+     * layout (`username` / `password` / `voice_sip_uri_hostname`) so this
+     * works against sims that haven't migrated yet.
      */
     suspend fun provisionVoiceAccount(): VoiceAccountInfo? = withContext(voiceDispatcher) {
         val response = capabilityManager.request(CapabilityManager.CAP_PROVISION_VOICE)
-        if (response is LLSDMap) {
-            VoiceAccountInfo(
-                username = response.getString("username") ?: "",
-                password = response.getString("password") ?: "",
-                voiceServerUri = response.getString("voice_sip_uri_hostname") ?: ""
+        if (response !is LLSDMap) return@withContext null
+
+        // Modern WebRTC layout nests credentials under `voice_credentials`.
+        val credsMap = response.getMap("voice_credentials")
+        val username = credsMap?.getString("username")
+            ?: response.getString("username") ?: ""
+        val password = credsMap?.getString("password")
+            ?: response.getString("password") ?: ""
+        val serverUri = response.getString("voice_server_url")
+            ?: response.getString("voice_sip_uri_hostname")
+            ?: ""
+
+        val iceServers = parseIceServers(response.getArray("ice_servers"))
+
+        VoiceAccountInfo(
+            username = username,
+            password = password,
+            voiceServerUri = serverUri,
+            iceServers = iceServers
+        )
+    }
+
+    /**
+     * Parse the `ice_servers` LLSD array into [IceServerSpec]s. The wire
+     * shape per server is `{urls: [string|string[]], username?, credential?}`,
+     * matching the W3C RTCIceServer dictionary that Linden exposes.
+     */
+    private fun parseIceServers(arr: LLSDArray?): List<IceServerSpec> {
+        if (arr == null) return emptyList()
+        val out = mutableListOf<IceServerSpec>()
+        for (entry in arr.value) {
+            val map = entry as? LLSDMap ?: continue
+            val urls: List<String> = when (val raw = map["urls"]) {
+                is LLSDString -> listOf(raw.value)
+                is LLSDArray -> raw.value.mapNotNull { (it as? LLSDString)?.value }
+                else -> map.getString("url")?.let { listOf(it) } ?: emptyList()
+            }
+            if (urls.isEmpty()) continue
+            out += IceServerSpec(
+                urls = urls,
+                username = map.getString("username"),
+                credential = map.getString("credential") ?: map.getString("password")
             )
-        } else null
+        }
+        return out
     }
     
     /**
-     * Join parcel voice
+     * Join parcel voice. Fetches `ParcelVoiceInfoRequest` for the channel
+     * URI and `ProvisionVoiceAccountRequest` for credentials + ICE
+     * servers, then builds a [VoiceSession] configured with the
+     * sim-provided ICE servers (instead of the previous hardcoded
+     * Google STUN). The signaling layer that POSTs SDP to the channel
+     * URI is still TODO — see the [VoiceSession] class doc.
      */
     suspend fun joinParcelVoice(): Boolean = withContext(voiceDispatcher) {
         val voiceInfo = requestParcelVoiceInfo() ?: return@withContext false
+        val account = provisionVoiceAccount() // best-effort; may be null on Vivox sims
 
-        Log.i(TAG, "[${Thread.currentThread().name}] Joining voice channel: ${voiceInfo.channelUri}")
+        Log.i(TAG, "Joining voice channel: ${voiceInfo.channelUri} " +
+            "(${account?.iceServers?.size ?: 0} ICE servers from sim)")
 
-        // Create WebRTC session
-        val session = createSession(voiceInfo.channelUri)
+        val session = createSession(voiceInfo.channelUri, account?.iceServers ?: emptyList())
         currentParcelSession = session
         activeSessions[voiceInfo.channelUri] = session
 
-        // Start connection
         session.connect(voiceInfo.channelUri, voiceInfo.channelCredentials)
-
         _isConnected.value = true
         true
     }
@@ -498,30 +549,52 @@ class VoiceManager(
     
     // =====================================================================
     
-    private fun createSession(channelUri: String): VoiceSession {
-        val iceServers = listOf(
-            PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer()
-        )
-        
+    private fun createSession(
+        channelUri: String,
+        iceServerSpecs: List<IceServerSpec> = emptyList()
+    ): VoiceSession {
+        // Build the WebRTC IceServer list from the simulator-provided
+        // specs, falling back to a public STUN if the sim returned none
+        // (legacy Vivox flow or older OpenSim). Hardcoded fallback should
+        // only ever apply in OpenSim test environments — production SL
+        // sims always advertise ICE servers via ProvisionVoiceAccountRequest.
+        val iceServers = if (iceServerSpecs.isEmpty()) {
+            listOf(PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer())
+        } else iceServerSpecs.map { spec ->
+            PeerConnection.IceServer.builder(spec.urls).apply {
+                spec.username?.let { setUsername(it) }
+                spec.credential?.let { setPassword(it) }
+            }.createIceServer()
+        }
+
         val config = PeerConnection.RTCConfiguration(iceServers).apply {
             sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
         }
-        
+
+        val session = VoiceSession(
+            channelUri = channelUri,
+            peerConnection = null,
+            dispatcher = voiceDispatcher
+        )
+
         val peerConnection = peerConnectionFactory?.createPeerConnection(
             config,
-            PeerConnectionObserver()
+            session.observer
         )
-        
-        // Add local audio track
+
+        // Late-bind so the observer above can refer to the session before
+        // the peerConnection actually exists. The observer surfaces ICE
+        // candidates, signaling state, and remote tracks via session
+        // flows; signaling layer (which is still TODO — see VoiceSession
+        // doc) is responsible for draining those flows and relaying.
+        session.attachPeerConnection(peerConnection)
+
+        // Add local audio track so the offer includes our mic
         localAudioTrack?.let { track ->
             peerConnection?.addTrack(track)
         }
-        
-        return VoiceSession(
-            channelUri = channelUri,
-            peerConnection = peerConnection,
-            dispatcher = voiceDispatcher
-        )
+
+        return session
     }
     
     fun shutdown() {
@@ -539,99 +612,186 @@ class VoiceManager(
     }
 }
 
-private class PeerConnectionObserver : PeerConnection.Observer {
-    override fun onSignalingChange(state: PeerConnection.SignalingState) {}
-    override fun onIceConnectionChange(state: PeerConnection.IceConnectionState) {}
+/**
+ * A real PeerConnection.Observer that surfaces WebRTC events as
+ * coroutine-friendly flows on its owning [VoiceSession]. The previous
+ * implementation was an empty-override stub which meant ICE candidates
+ * were silently dropped — voice could not have established even if SDP
+ * had worked.
+ */
+private class SessionObserver(private val session: VoiceSession) : PeerConnection.Observer {
+    override fun onSignalingChange(state: PeerConnection.SignalingState) {
+        session.onSignalingState(state)
+    }
+    override fun onIceConnectionChange(state: PeerConnection.IceConnectionState) {
+        session.onIceConnectionState(state)
+    }
     override fun onIceConnectionReceivingChange(receiving: Boolean) {}
     override fun onIceGatheringChange(state: PeerConnection.IceGatheringState) {}
-    override fun onIceCandidate(candidate: IceCandidate) {}
+    override fun onIceCandidate(candidate: IceCandidate) {
+        // Push to the session's local-candidate flow so the signaling
+        // layer (still TODO; see VoiceSession class doc) can relay them
+        // to the remote peer over the ParcelVoiceInfo / WebRTC
+        // signaling channel.
+        session.onLocalIceCandidate(candidate)
+    }
     override fun onIceCandidatesRemoved(candidates: Array<out IceCandidate>) {}
     override fun onAddStream(stream: MediaStream) {}
     override fun onRemoveStream(stream: MediaStream) {}
     override fun onDataChannel(dataChannel: DataChannel) {}
     override fun onRenegotiationNeeded() {}
-    override fun onAddTrack(receiver: RtpReceiver, streams: Array<out MediaStream>) {}
+    override fun onAddTrack(receiver: RtpReceiver, streams: Array<out MediaStream>) {
+        session.onRemoteTrack(receiver)
+    }
 }
 
+/**
+ * One WebRTC peer connection's worth of state for a voice channel.
+ *
+ * **What works after this change:** SDP offer/answer creation through
+ * proper coroutine-suspending wrappers around WebRTC's callback API,
+ * setLocalDescription / setRemoteDescription plumbing, ICE candidate
+ * gathering surfaced via [localIceCandidates] flow, and remote ICE
+ * candidate application via [addRemoteIceCandidate].
+ *
+ * **What is still TODO** (the signaling layer):
+ *   1. POST the local SDP offer to the simulator's WebRTC voice channel
+ *      endpoint (`channelUri`) and read back the SDP answer.
+ *   2. Trickle local ICE candidates from [localIceCandidates] to the
+ *      same endpoint.
+ *   3. Receive remote ICE candidates from the same endpoint and feed
+ *      them via [addRemoteIceCandidate].
+ *
+ * That signaling layer needs Linden's WebRTC voice REST shape — easy
+ * to add once we can test against a live voice server with a real
+ * device. For now the WebRTC primitives are correctly wired so that
+ * work can be a focused REST glue layer rather than re-doing SDP/ICE.
+ */
 class VoiceSession(
     val channelUri: String,
-    private val peerConnection: PeerConnection?,
+    @Volatile private var peerConnection: PeerConnection?,
     private val dispatcher: CoroutineDispatcher
 ) {
     private var isConnected = false
     private var outputGain = 1.0f
     private var localAudioTrack: org.webrtc.AudioTrack? = null
-    
-    /**
-     * Connect to voice server with signaling
-     */
+
+    val observer: PeerConnection.Observer = SessionObserver(this)
+
+    private val _signalingState = MutableStateFlow(PeerConnection.SignalingState.STABLE)
+    val signalingState: StateFlow<PeerConnection.SignalingState> = _signalingState
+
+    private val _iceConnectionState = MutableStateFlow(PeerConnection.IceConnectionState.NEW)
+    val iceConnectionState: StateFlow<PeerConnection.IceConnectionState> = _iceConnectionState
+
+    private val _localIceCandidates = MutableSharedFlow<IceCandidate>(
+        replay = 0,
+        extraBufferCapacity = 32,
+        onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST
+    )
+    /** ICE candidates gathered locally that the signaling layer must relay. */
+    val localIceCandidates: SharedFlow<IceCandidate> = _localIceCandidates
+
+    fun attachPeerConnection(pc: PeerConnection?) {
+        peerConnection = pc
+    }
+
+    internal fun onSignalingState(state: PeerConnection.SignalingState) {
+        _signalingState.value = state
+    }
+    internal fun onIceConnectionState(state: PeerConnection.IceConnectionState) {
+        _iceConnectionState.value = state
+        isConnected = state == PeerConnection.IceConnectionState.CONNECTED ||
+            state == PeerConnection.IceConnectionState.COMPLETED
+    }
+    internal fun onLocalIceCandidate(candidate: IceCandidate) {
+        _localIceCandidates.tryEmit(candidate)
+    }
+    internal fun onRemoteTrack(receiver: RtpReceiver) {
+        // Remote audio track arrived — WebRTC plays it through the
+        // default audio output device automatically. We only surface
+        // it for diagnostics / future per-peer volume control.
+        android.util.Log.d("VoiceSession", "Remote track arrived: ${receiver.track()?.kind()}")
+    }
+
     fun connect(uri: String, credentials: String) {
         try {
-            // Parse the SIP URI for Vivox connection
-            // Format typically: sip:confctl-g-xxxx@mt1v.livem.vivox.com
-            
-            // For WebRTC-based implementation:
-            // 1. Parse credentials
-            // 2. Create offer/answer exchange
-            // 3. Establish ICE connection
-            
-            android.util.Log.i("VoiceSession", "[${Thread.currentThread().name}] Connecting to voice channel: $uri")
+            android.util.Log.i("VoiceSession",
+                "Connecting to voice channel: $uri (signaling layer not yet wired — see class doc)")
             isConnected = true
         } catch (e: Exception) {
-            android.util.Log.e("VoiceSession", "[${Thread.currentThread().name}] Failed to connect to voice channel", e)
+            android.util.Log.e("VoiceSession", "Failed to connect to voice channel", e)
             isConnected = false
         }
     }
-    
+
     fun disconnect() {
         try {
             localAudioTrack?.setEnabled(false)
             peerConnection?.close()
             isConnected = false
-            android.util.Log.i("VoiceSession", "[${Thread.currentThread().name}] Disconnected from voice channel")
+            android.util.Log.i("VoiceSession", "Disconnected from voice channel")
         } catch (e: Exception) {
-            android.util.Log.e("VoiceSession", "[${Thread.currentThread().name}] Error during disconnect", e)
+            android.util.Log.e("VoiceSession", "Error during disconnect", e)
         }
     }
-    
-    suspend fun createOffer(): String {
-        return withContext(dispatcher) {
-            try {
-                // Create SDP offer for WebRTC peer connection
-                peerConnection?.let { pc ->
-                    val constraints = org.webrtc.MediaConstraints().apply {
-                        mandatory.add(org.webrtc.MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"))
-                        mandatory.add(org.webrtc.MediaConstraints.KeyValuePair("OfferToReceiveVideo", "false"))
-                    }
-                    
-                    // Note: In a real implementation, we'd use a CompletableFuture or
-                    // coroutine-based SDP observer
-                    android.util.Log.d("VoiceSession", "[${Thread.currentThread().name}] Creating SDP offer")
-                    ""
-                } ?: ""
-            } catch (e: Exception) {
-                android.util.Log.e("VoiceSession", "[${Thread.currentThread().name}] Failed to create offer", e)
-                ""
-            }
+
+    /**
+     * Create a real SDP offer using the suspend-friendly WebRTC wrappers.
+     * Caller is responsible for shipping the resulting SDP to the remote
+     * peer via the (still TODO) signaling layer.
+     */
+    suspend fun createOffer(): String = withContext(dispatcher) {
+        val pc = peerConnection ?: return@withContext ""
+        val constraints = MediaConstraints().apply {
+            mandatory.add(MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"))
+            mandatory.add(MediaConstraints.KeyValuePair("OfferToReceiveVideo", "false"))
+        }
+        try {
+            val offer = pc.createOfferSuspend(constraints)
+            pc.setLocalDescriptionSuspend(offer)
+            offer.description
+        } catch (e: SdpException) {
+            android.util.Log.e("VoiceSession", "createOffer: ${e.message}")
+            ""
         }
     }
-    
-    suspend fun handleOffer(offer: String): String {
-        return withContext(dispatcher) {
-            try {
-                // Parse remote SDP offer and create answer
-                peerConnection?.let { pc ->
-                    // Set remote description from offer
-                    // Create and return answer SDP
-                    android.util.Log.d("VoiceSession", "[${Thread.currentThread().name}] Handling remote offer")
-                    ""
-                } ?: ""
-            } catch (e: Exception) {
-                android.util.Log.e("VoiceSession", "[${Thread.currentThread().name}] Failed to handle offer", e)
-                ""
-            }
+
+    /**
+     * Apply a remote SDP offer and return our SDP answer. The reverse
+     * direction of [createOffer] — used when the simulator pushes an
+     * offer rather than expecting one from us.
+     */
+    suspend fun handleOffer(offer: String): String = withContext(dispatcher) {
+        val pc = peerConnection ?: return@withContext ""
+        try {
+            pc.setRemoteDescriptionSuspend(SessionDescription(SessionDescription.Type.OFFER, offer))
+            val answer = pc.createAnswerSuspend(MediaConstraints())
+            pc.setLocalDescriptionSuspend(answer)
+            answer.description
+        } catch (e: SdpException) {
+            android.util.Log.e("VoiceSession", "handleOffer: ${e.message}")
+            ""
         }
     }
+
+    /**
+     * Apply a remote SDP answer (the reverse path from [createOffer]).
+     */
+    suspend fun handleAnswer(answer: String): Boolean = withContext(dispatcher) {
+        val pc = peerConnection ?: return@withContext false
+        try {
+            pc.setRemoteDescriptionSuspend(SessionDescription(SessionDescription.Type.ANSWER, answer))
+            true
+        } catch (e: SdpException) {
+            android.util.Log.e("VoiceSession", "handleAnswer: ${e.message}")
+            false
+        }
+    }
+
+    /** Apply a remote ICE candidate received from the signaling channel. */
+    fun addRemoteIceCandidate(sdpMid: String, sdpMLineIndex: Int, candidate: String): Boolean =
+        peerConnection?.addRemoteIceCandidate(sdpMid, sdpMLineIndex, candidate) ?: false
     
     /**
      * Set output audio gain (volume)
@@ -666,7 +826,20 @@ data class VoiceInfo(
 data class VoiceAccountInfo(
     val username: String,
     val password: String,
-    val voiceServerUri: String
+    val voiceServerUri: String,
+    /**
+     * STUN/TURN servers advertised by the simulator. Linden's WebRTC
+     * voice spec returns these in the ProvisionVoiceAccountRequest
+     * response so the client doesn't have to ship hardcoded ICE servers.
+     * Empty list = legacy / Vivox flow that doesn't supply them.
+     */
+    val iceServers: List<IceServerSpec> = emptyList()
+)
+
+data class IceServerSpec(
+    val urls: List<String>,
+    val username: String? = null,
+    val credential: String? = null
 )
 
 /**
