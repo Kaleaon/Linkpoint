@@ -1,6 +1,7 @@
 package com.linkpoint.render
 
 import android.util.Log
+import com.linkpoint.network.NetworkLogger
 import com.linkpoint.utils.SessionLogRecorder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -148,14 +149,19 @@ object RenderDiagnostics {
 
     fun filamentSurfaceAttached(width: Int, height: Int) {
         SessionLogRecorder.logRender("Filament", "surface_attached", "${width}x${height}")
+        logLifecycle(NetworkLogger.Level.INFO, "🖼️ Filament surface attached ${width}x${height}")
     }
 
     fun filamentSurfaceDetached(reason: String) {
         SessionLogRecorder.logRender("Filament", "surface_detached", reason)
+        // WARN level so it's visible at default log filter — surface loss
+        // is the strongest correlate with the inbound-stall/reconnect bug.
+        logLifecycle(NetworkLogger.Level.WARN, "🖼️ Filament surface detached: $reason")
     }
 
     fun filamentSurfaceChanged(width: Int, height: Int) {
         SessionLogRecorder.logRender("Filament", "surface_changed", "${width}x${height}")
+        logLifecycle(NetworkLogger.Level.DEBUG, "🖼️ Filament surface changed ${width}x${height}")
     }
 
     fun filamentSwapChainCreated(width: Int, height: Int) {
@@ -164,14 +170,28 @@ object RenderDiagnostics {
             "swapchain_created",
             if (width > 0 && height > 0) "${width}x${height}" else null
         )
+        val dims = if (width > 0 && height > 0) " (${width}x${height})" else ""
+        logLifecycle(NetworkLogger.Level.INFO, "🖼️ Filament SwapChain created$dims")
     }
 
     fun filamentSwapChainDestroyed(reason: String) {
         SessionLogRecorder.logRender("Filament", "swapchain_destroyed", reason)
+        logLifecycle(NetworkLogger.Level.WARN, "🖼️ Filament SwapChain destroyed: $reason")
     }
 
     fun filamentSwapChainFailed(reason: String) {
         SessionLogRecorder.logRender("Filament", "swapchain_failed", reason)
+        logLifecycle(NetworkLogger.Level.ERROR, "🖼️ Filament SwapChain FAILED: $reason")
+    }
+
+    /**
+     * Mirror render-lifecycle events into [NetworkLogger] under the LIFECYCLE
+     * category so they appear interleaved with UDP/HTTP traffic in
+     * `network_log_*.txt`. SessionLogRecorder still gets the structured
+     * record for the render-focused timeline; this is purely additional.
+     */
+    private fun logLifecycle(level: NetworkLogger.Level, message: String) {
+        NetworkLogger.log(level, NetworkLogger.Category.LIFECYCLE, message)
     }
 
     fun filamentViewport(width: Int, height: Int, callSite: String) {

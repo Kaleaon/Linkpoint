@@ -300,9 +300,16 @@ class UDPConnectionFixed {
     
     /** Total bytes received from simulator */
     private val bytesReceived = AtomicLong(0)
-    
+
     /** Total bytes sent to simulator */
     private val bytesSent = AtomicLong(0)
+
+    /**
+     * Rolling per-second buckets of inbound packet count and byte volume.
+     * Cumulative counters can't tell you whether `bytesReceived = 30 MB` came
+     * in steadily or as a burst followed by silence — these can.
+     */
+    private val inboundRateTracker = InboundRateTracker()
     
     /** Count of messages successfully routed to handlers */
     private val messagesRouted = AtomicInteger(0)
@@ -764,6 +771,7 @@ class UDPConnectionFixed {
             bytesSent.set(0)
             messagesRouted.set(0)
             packetsResentCount.set(0)
+            inboundRateTracker.reset()
             
             // Reset timing information
             val now = System.currentTimeMillis()
@@ -1004,6 +1012,7 @@ class UDPConnectionFixed {
                                 packetsReceived.incrementAndGet()
                                 postReconnectPacketsReceived.incrementAndGet()
                                 bytesReceived.addAndGet(bytesRead.toLong())
+                                inboundRateTracker.record(bytesRead)
                                 lastReceiveTime = System.currentTimeMillis()
                                 unansweredPings.set(0)
 
@@ -2754,7 +2763,8 @@ class UDPConnectionFixed {
             totalBytesReceived = bytesReceived.get(),
             packetsResent = packetsResentCount.get(),
             messageTypeCounts = messageTypeCounts.mapValues { it.value.get() },
-            lastMessageTimes = lastMessageTimes.toMap()
+            lastMessageTimes = lastMessageTimes.toMap(),
+            inboundRateBuckets = inboundRateTracker.snapshot()
         )
     }
     
@@ -2826,7 +2836,8 @@ class UDPConnectionFixed {
         val totalBytesReceived: Long,
         val packetsResent: Int,
         val messageTypeCounts: Map<String, Int>,
-        val lastMessageTimes: Map<String, Long>
+        val lastMessageTimes: Map<String, Long>,
+        val inboundRateBuckets: List<InboundRateTracker.RateBucket> = emptyList()
     )
     
     /**

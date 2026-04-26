@@ -25,6 +25,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
+import com.linkpoint.network.NetworkLogger
 import com.linkpoint.core.ConnectionState
 import com.linkpoint.ui.chat.ChatActivity
 import com.linkpoint.ui.friends.FriendsActivity
@@ -987,15 +988,25 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     
     override fun onPause() {
         super.onPause()
+        NetworkLogger.log(
+            NetworkLogger.Level.INFO,
+            NetworkLogger.Category.LIFECYCLE,
+            "🌐 WorldViewActivity onPause (renderer=${if (useSecondaryRenderer) "lumiya" else "filament"})"
+        )
         if (useSecondaryRenderer) {
             lumiyaSurfaceView?.onPause()
         } else {
             isRendering = false
         }
     }
-    
+
     override fun onResume() {
         super.onResume()
+        NetworkLogger.log(
+            NetworkLogger.Level.INFO,
+            NetworkLogger.Category.LIFECYCLE,
+            "🌐 WorldViewActivity onResume (renderer=${if (useSecondaryRenderer) "lumiya" else "filament"})"
+        )
         applyScreenOrientation() // Reapply orientation in case user changed setting
         updateDebugFloaterVisibility() // Update debug floater visibility based on settings
         applyInterfacePreferences()

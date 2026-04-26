@@ -306,6 +306,13 @@ object NetworkLogger {
         const val UDP = "UDP"
         const val UDP_MALFORMED = "UDP_MALFORMED"
         const val UDP_PACKET = "UDP_PKT"
+        // App-level events interleaved with UDP/HTTP traffic so a single log
+        // file shows whether the activity was paused, the surface was lost,
+        // or the OS network interface dropped at the moment inbound traffic
+        // stopped. Investigated after the 2026-04-26 Athanasia capture
+        // showed 24s of inbound silence with no contextual signal.
+        const val LIFECYCLE = "LIFECYCLE"
+        const val CONNECTIVITY = "CONNECTIVITY"
     }
     
     // ==================== HTTP/2 PROTOCOL TRACKING ====================
