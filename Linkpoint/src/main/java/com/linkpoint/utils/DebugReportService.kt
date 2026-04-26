@@ -44,6 +44,7 @@ class DebugReportService private constructor(private val context: Context) {
         
         // Number of recent malformed packets to show in debug reports
         private const val MALFORMED_PACKET_HISTORY_COUNT = 5
+        private const val EARLY_WARNING_GRACE_MS = 15_000L
         
         @Volatile
         private var instance: DebugReportService? = null
@@ -83,6 +84,14 @@ class DebugReportService private constructor(private val context: Context) {
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var reportDirectory: File? = null
+
+    private fun udpConnectedElapsedMs(): Long? {
+        return InitializationTracker.getElapsedSincePhase(InitializationTracker.Phase.UDP_CONNECTED)
+    }
+
+    private fun formatUdpConnectedElapsed(elapsedMs: Long?): String {
+        return if (elapsedMs != null) "${formatDuration(elapsedMs)} since UDP_CONNECTED" else "UDP_CONNECTED time unavailable"
+    }
     
     init {
         initializeStorage()
@@ -587,8 +596,15 @@ class DebugReportService private constructor(private val context: Context) {
                             sendSuccessCount
                         }
                         if (totalReceivedEver == 0 && totalSentEver > 0) {
+                            val udpElapsedMs = udpConnectedElapsedMs()
+                            val isProvisional = udpElapsedMs != null && udpElapsedMs < EARLY_WARNING_GRACE_MS
+                            val timing = formatUdpConnectedElapsed(udpElapsedMs)
                             appendLine()
-                            appendLine("⚠️ PACKETS SENT BUT NONE RECEIVED!")
+                            if (isProvisional) {
+                                appendLine("⚠️ PROVISIONAL: PACKETS SENT BUT NONE RECEIVED ($timing)")
+                            } else {
+                                appendLine("⚠️ PACKETS SENT BUT NONE RECEIVED ($timing)")
+                            }
                             appendLine("   Possible causes:")
                             appendLine("   - Firewall blocking UDP")
                             appendLine("   - NAT traversal issue")
@@ -1323,7 +1339,14 @@ class DebugReportService private constructor(private val context: Context) {
                     val agentMovementTime = msgStats.lastMessageTimes["AgentMovementComplete"]
                     
                     if (regionHandshakeTime == null || regionHandshakeTime == 0L) {
-                        appendLine("⚠️ RegionHandshake never received - world data won't load!")
+                        val udpElapsedMs = udpConnectedElapsedMs()
+                        val isProvisional = udpElapsedMs != null && udpElapsedMs < EARLY_WARNING_GRACE_MS
+                        val timing = formatUdpConnectedElapsed(udpElapsedMs)
+                        if (isProvisional) {
+                            appendLine("⚠️ PROVISIONAL: RegionHandshake never received ($timing) - world data may not load yet.")
+                        } else {
+                            appendLine("⚠️ RegionHandshake never received ($timing) - world data won't load!")
+                        }
                     }
                     if (agentMovementTime == null || agentMovementTime == 0L) {
                         appendLine("⚠️ AgentMovementComplete never received - agent not in world!")
@@ -1487,8 +1510,15 @@ class DebugReportService private constructor(private val context: Context) {
                 }
                 
                 if (packetStats.packetsSent > 0 && packetStats.packetsReceived == 0L) {
+                    val udpElapsedMs = udpConnectedElapsedMs()
+                    val isProvisional = udpElapsedMs != null && udpElapsedMs < EARLY_WARNING_GRACE_MS
+                    val timing = formatUdpConnectedElapsed(udpElapsedMs)
                     appendLine()
-                    appendLine("⚠️ PACKETS SENT BUT NONE RECEIVED!")
+                    if (isProvisional) {
+                        appendLine("⚠️ PROVISIONAL: PACKETS SENT BUT NONE RECEIVED ($timing)")
+                    } else {
+                        appendLine("⚠️ PACKETS SENT BUT NONE RECEIVED ($timing)")
+                    }
                     appendLine("   Possible causes:")
                     appendLine("   - Firewall blocking UDP")
                     appendLine("   - NAT traversal issue")

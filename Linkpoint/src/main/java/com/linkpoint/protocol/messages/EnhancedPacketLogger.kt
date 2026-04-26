@@ -1,6 +1,7 @@
 package com.linkpoint.protocol.messages
 
 import android.util.Log
+import com.linkpoint.utils.InitializationTracker
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -26,6 +27,7 @@ import java.util.concurrent.atomic.AtomicLong
 object EnhancedPacketLogger {
     
     private const val TAG = "PacketLogger"
+    private const val EARLY_WARNING_GRACE_MS = 15_000L
     
     // Message names that should not count as handler misses
     // These are internal protocol messages or handled specially
@@ -90,6 +92,13 @@ object EnhancedPacketLogger {
     // Session tracking
     @Volatile
     private var sessionStartTime: Long = 0
+
+    private fun formatUdpConnectedWarningContext(): Pair<Boolean, String> {
+        val elapsedMs = InitializationTracker.getElapsedSincePhase(InitializationTracker.Phase.UDP_CONNECTED)
+        val timing = if (elapsedMs != null) "${formatDuration(elapsedMs)} since UDP_CONNECTED" else "UDP_CONNECTED time unavailable"
+        val provisional = elapsedMs != null && elapsedMs < EARLY_WARNING_GRACE_MS
+        return provisional to timing
+    }
     
     @Volatile
     private var lastPacketSentTime: Long = 0
@@ -880,7 +889,12 @@ object EnhancedPacketLogger {
             
             // Warning checks
             if (stats.packetsSent > 0 && stats.packetsReceived == 0L) {
-                appendLine("⚠️ PACKETS SENT BUT NONE RECEIVED!")
+                val (provisional, timing) = formatUdpConnectedWarningContext()
+                if (provisional) {
+                    appendLine("⚠️ PROVISIONAL: PACKETS SENT BUT NONE RECEIVED ($timing)")
+                } else {
+                    appendLine("⚠️ PACKETS SENT BUT NONE RECEIVED ($timing)")
+                }
                 appendLine("   Possible causes:")
                 appendLine("   - Firewall blocking UDP")
                 appendLine("   - NAT traversal issue")
