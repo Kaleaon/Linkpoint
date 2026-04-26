@@ -1,0 +1,115 @@
+name: Protocol Conformance
+
+on:
+  push:
+    branches: [ main, develop, 'claude/**', 'cursor/**', 'copilot/**' ]
+    paths:
+      - 'Linkpoint/src/**'
+      - 'Linkpoint/tools/protocol/**'
+      - 'docs/AGENT_PARSABLE_MODERNIZATION_TASKLIST.md'
+      - '.github/workflows/protocol-conformance.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'Linkpoint/src/**'
+      - 'Linkpoint/tools/protocol/**'
+      - 'docs/AGENT_PARSABLE_MODERNIZATION_TASKLIST.md'
+      - '.github/workflows/protocol-conformance.yml'
+  workflow_dispatch:
+
+# Implements LP-P0-001 (template SHA drift gate) and LP-P0-002 (unified
+# protocol conformance runner) from docs/AGENT_PARSABLE_MODERNIZATION_TASKLIST.md.
+#
+# The fast offline gate runs on every push without provisioning the
+# Android SDK. The full Gradle conformance suite runs as a follow-up
+# job that fans out from the offline gate, so a SHA drift fails CI in
+# under a minute even when the SDK download is slow.
+
+jobs:
+  offline-gate:
+    name: Offline conformance gate (no JDK)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run offline conformance layers
+        run: |
+          set -euo pipefail
+          chmod +x Linkpoint/tools/protocol/sync_master_template.sh \
+                   Linkpoint/tools/protocol/run_conformance.sh \
+                   Linkpoint/tools/protocol/verify_message_template_conformance.py \
+                   Linkpoint/tools/protocol/verify_protocol_docs.py
+          Linkpoint/tools/protocol/run_conformance.sh --skip-gradle
+
+      - name: Upload offline conformance reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: protocol-conformance-offline
+          path: Linkpoint/build/reports/protocol/
+          if-no-files-found: warn
+
+  jvm-suite:
+    name: JVM conformance suite
+    needs: offline-gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      JAVA_VERSION: '17'
+      ANDROID_SDK_VERSION: '35'
+      NDK_VERSION: '26.3.11579264'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: >-
+            platform-tools
+            platforms;android-${{ env.ANDROID_SDK_VERSION }}
+            build-tools;35.0.0
+            cmake;3.22.1
+            ndk;${{ env.NDK_VERSION }}
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.android/build-cache
+            .gradle
+          key: ${{ runner.os }}-gradle-conformance-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-conformance-
+            ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for tooling
+        run: |
+          chmod +x gradlew Linkpoint/gradlew
+          chmod +x Linkpoint/tools/protocol/*.sh Linkpoint/tools/protocol/*.py
+
+      - name: Run unified conformance suite
+        env:
+          GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
+        run: Linkpoint/tools/protocol/run_conformance.sh
+
+      - name: Upload conformance reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: protocol-conformance-full
+          path: |
+            Linkpoint/build/reports/protocol/
+            Linkpoint/build/reports/tests/
+          if-no-files-found: warn
