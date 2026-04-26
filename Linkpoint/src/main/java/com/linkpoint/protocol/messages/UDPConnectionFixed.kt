@@ -1926,32 +1926,41 @@ class UDPConnectionFixed {
     /**
      * Send AgentThrottle message to set bandwidth allocations.
      * Tells the simulator how much bandwidth we want for different data types.
+     *
+     * Wire format (LL message_template `AgentThrottle`, low-freq 81):
+     *   AgentData: AgentID (LLUUID) + SessionID (LLUUID) + CircuitCode (U32)
+     *   Throttle:  GenCounter (U32) + Throttles (Variable 1: u8 length + bytes)
+     *
+     * The Throttles field is a `Variable 1` block, so its 28 bytes of seven
+     * little-endian floats must be preceded by a 1-byte length prefix. Lumiya
+     * encodes this via `packVariable(buf, throttles, 1)` in
+     * `slproto/messages/AgentThrottle.java`. Without the prefix, the simulator
+     * parses the first throttle byte as the length, the message is structurally
+     * wrong, and the agent ends up on default throttle settings (or worse, a
+     * silent reject), which contributed to the post-login data stall in the
+     * 2026-04-26 Athanasia capture.
      */
     fun sendAgentThrottle(
-        resend: Float = 50000f,
-        land: Float = 100000f,
-        wind: Float = 10000f,
-        cloud: Float = 10000f,
-        task: Float = 200000f,
-        texture: Float = 200000f,
-        asset: Float = 100000f
+        resend: Float = 150_000f,
+        land: Float = 170_000f,
+        wind: Float = 12_500f,
+        cloud: Float = 12_500f,
+        task: Float = 446_000f,
+        texture: Float = 446_000f,
+        asset: Float = 220_000f
     ) {
         val identity = outboundIdentity("UDPConnectionFixed.sendAgentThrottle")
-        val payload = ByteBuffer.allocate(36 + 4 + 28).order(ByteOrder.LITTLE_ENDIAN)
-        
-        // Agent ID
+        // 36 (AgentData) + 4 (GenCounter) + 1 (Throttles length prefix) + 28 (7 floats)
+        val payload = ByteBuffer.allocate(36 + 4 + 1 + 28).order(ByteOrder.LITTLE_ENDIAN)
+
+        // AgentData block
         payload.putUUID(identity.agentId)
-        
-        // Session ID
         payload.putUUID(identity.sessionId)
-        
-        // Circuit code
         payload.putInt(identity.circuitCode ?: 0)
-        
-        // GenCounter
-        payload.putInt(1)
-        
-        // Throttles - 7 float values for bandwidth allocation
+
+        // Throttle block
+        payload.putInt(1) // GenCounter
+        payload.put(28.toByte()) // Variable 1 length prefix for Throttles
         payload.putFloat(resend)
         payload.putFloat(land)
         payload.putFloat(wind)
@@ -1959,7 +1968,7 @@ class UDPConnectionFixed {
         payload.putFloat(task)
         payload.putFloat(texture)
         payload.putFloat(asset)
-        
+
         Log.d(TAG, "Sending AgentThrottle")
         sendPacket(MessageIds.AGENT_THROTTLE, payload.array(), reliable = true)
     }
