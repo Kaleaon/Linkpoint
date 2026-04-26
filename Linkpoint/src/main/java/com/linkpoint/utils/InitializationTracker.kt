@@ -278,6 +278,15 @@ object InitializationTracker {
             }
         }
     }
+
+    /**
+     * Returns elapsed milliseconds since the given phase was first recorded
+     * for the current session, or null if the phase has not started/reached.
+     */
+    fun getElapsedSincePhase(phase: Phase, nowMs: Long = System.currentTimeMillis()): Long? {
+        val phaseStart = phaseTimings[phase] ?: return null
+        return (nowMs - phaseStart).coerceAtLeast(0L)
+    }
     
     private fun formatTimestamp(timestamp: Long): String {
         if (timestamp == 0L) return "Not started"
