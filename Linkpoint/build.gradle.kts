@@ -239,6 +239,18 @@ dependencies {
     // platform HTTP/2 isn't reliable. Conscrypt installs a hardened
     // BoringSSL-backed security provider so ALPN works correctly.
     implementation("org.conscrypt:conscrypt-android:2.5.2")
+
+    // Cronet — Chromium's HTTP stack with HTTP/3 (QUIC) support. Used as
+    // the primary asset transport with OkHttp+Conscrypt as fallback.
+    // The killer feature for our cellular use case is QUIC connection
+    // migration: a Cronet H3 connection survives 5G ↔ LTE ↔ Wi-Fi
+    // hand-offs because the connection ID isn't tied to the IP/port
+    // tuple, which would otherwise force a re-handshake on every NAT
+    // rotation (the failure mode the 2026-04-25 Athanasia auto-relogin
+    // landed in commit dbf38561 ultimately recovers from). Embedded
+    // variant ships its own native libs so it works on devices without
+    // Play Services. ~5-8 MB APK growth per ABI.
+    implementation("org.chromium.net:cronet-embedded:119.6045.31")
     
     // gRPC - Modern networking based on official SL app patterns
     implementation("io.grpc:grpc-okhttp:1.62.2")

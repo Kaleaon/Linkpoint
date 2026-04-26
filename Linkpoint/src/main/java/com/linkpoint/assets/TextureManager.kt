@@ -3,6 +3,8 @@ package com.linkpoint.assets
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import com.linkpoint.network.CronetHttpClient
+import com.linkpoint.network.CronetResult
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.SSLHelper
 import com.linkpoint.protocol.types.getUUID
@@ -239,12 +241,52 @@ class TextureManager(
             
             Log.d(TAG, "🖼️ Starting texture download: $textureId")
             NetworkLogger.logTextureRequest(textureId.toString(), url, "NORMAL")
-            
+
+            // Cronet primary path: HTTP/3 (QUIC) when the CDN advertises
+            // it via Alt-Svc or our preseeded QUIC hints. Falls back to
+            // OkHttp+Conscrypt+H2 below if Cronet's engine isn't ready
+            // or the request fails for any reason. Per-request fallback
+            // (rather than circuit-breaker-style permanent fallback) is
+            // intentional: Cronet may temporarily fail for one host
+            // while still being healthy for others.
+            val cronet = CronetHttpClient.getOrCreate(context)
+            if (cronet.isAvailable) {
+                val cronetResult = cronet.get(
+                    url,
+                    headers = mapOf("Accept" to "image/x-j2c, image/jp2, image/jpeg, image/*"),
+                    timeoutMs = timeoutMs
+                )
+                if (cronetResult is CronetResult.Success && cronetResult.code in 200..299) {
+                    val durationMs = System.currentTimeMillis() - startTime
+                    Log.d(TAG, "🖼️ Texture downloaded via Cronet/${cronetResult.protocol}: " +
+                        "$textureId (${cronetResult.body.size} bytes, ${durationMs}ms)")
+                    NetworkLogger.logTextureResult(
+                        textureId = textureId.toString(),
+                        success = true,
+                        durationMs = durationMs,
+                        sizeBytes = cronetResult.body.size,
+                        protocol = cronetResult.protocol
+                    )
+                    updateStats { it.copy(
+                        downloadedCount = it.downloadedCount + 1,
+                        downloadedBytes = it.downloadedBytes + cronetResult.body.size
+                    )}
+                    return@withContext cronetResult.body
+                }
+                // Cronet failed (engine error, non-2xx, etc.) — log and
+                // fall through to the OkHttp branch. We don't treat this
+                // as a hard failure for stats; only the final OkHttp
+                // outcome counts in success/fail counters.
+                if (cronetResult is CronetResult.Failure) {
+                    Log.d(TAG, "🖼️ Cronet path failed for $textureId (${cronetResult.message}); falling back to OkHttp")
+                }
+            }
+
             val request = Request.Builder()
                 .url(url)
                 .header("Accept", "image/x-j2c, image/jp2, image/jpeg, image/*")
                 .build()
-            
+
             val response = httpClient.newCall(request).execute()
             val durationMs = System.currentTimeMillis() - startTime
             val protocol = response.protocol.toString()
