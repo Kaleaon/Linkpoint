@@ -218,10 +218,16 @@ class UDPConnectionFixed {
     private var sessionId: UUID = UUID(0, 0)
     private var agentId: UUID = UUID(0, 0)
     
-    // NIO components
-    private var datagramChannel: DatagramChannel? = null
-    private var selector: Selector? = null
-    private var selectionKey: SelectionKey? = null
+    // NIO components.
+    //
+    // @Volatile is required so the I/O thread (which re-reads these fields
+    // every iteration) sees writes from reconnect()/disconnect() running on
+    // CircuitDispatcher without us having to take a lock on every iteration.
+    // Without @Volatile the JIT can hoist the load out of the loop and the
+    // I/O thread would never observe a swapped selector/channel.
+    @Volatile private var datagramChannel: DatagramChannel? = null
+    @Volatile private var selector: Selector? = null
+    @Volatile private var selectionKey: SelectionKey? = null
     
     // State
     private val _isConnected = MutableStateFlow(false)
@@ -281,10 +287,10 @@ class UDPConnectionFixed {
     private val messagesRouted = AtomicInteger(0)
     
     /** Timestamp of last packet received (for timing diagnostics) */
-    private var lastReceiveTime = 0L
+    @Volatile private var lastReceiveTime = 0L
 
     /** Timestamp of last packet sent (for timing diagnostics) */
-    private var lastSendTime = 0L
+    @Volatile private var lastSendTime = 0L
 
     /**
      * Inbound-flow watchdog state. Catches "send-only zombie circuits" — the
@@ -298,6 +304,26 @@ class UDPConnectionFixed {
     private var lastInboundFlowSnapshot = 0
     private var lastInboundFlowGrowthTime = 0L
     private var lastSocketRebindTime = 0L
+
+    /**
+     * Total number of in-place socket reconnects performed during this circuit's
+     * lifetime (UseCircuitCode reissued on a fresh source port). Distinct from
+     * `connectAttemptCount`, which counts full circuit (re)establishments.
+     */
+    private val socketReconnectCount = AtomicInteger(0)
+
+    /** Timestamp of the most recent socket reconnect (0 = never). */
+    @Volatile private var lastSocketReconnectTime: Long = 0L
+
+    /** Whether the most recent socket reconnect succeeded. */
+    @Volatile private var lastSocketReconnectSucceeded: Boolean = true
+
+    /**
+     * Number of received packets observed AFTER the most recent socket
+     * reconnect started. Used by the debug report and inbound watchdog to
+     * tell "the new socket is healthy" from "the new socket is silent".
+     */
+    private val postReconnectPacketsReceived = AtomicInteger(0)
     
     /** Timestamp when connection was attempted (for connection duration) */
     private var connectionAttemptTime = 0L
@@ -703,6 +729,13 @@ class UDPConnectionFixed {
             lastInboundFlowGrowthTime = 0L
             lastSocketRebindTime = 0L
 
+            // Reset per-circuit reconnect tracking — a fresh connect() is a
+            // new circuit, so the in-place reconnect history doesn't apply.
+            socketReconnectCount.set(0)
+            lastSocketReconnectTime = 0L
+            lastSocketReconnectSucceeded = true
+            postReconnectPacketsReceived.set(0)
+
             // Reset packet statistics for accurate per-session tracking
             packetsReceived.set(0)
             packetsSent.set(0)
@@ -856,29 +889,66 @@ class UDPConnectionFixed {
         var lastAckCheckTime = System.currentTimeMillis()
         var lastTimeoutCheckTime = System.currentTimeMillis()
 
+        // Tracks consecutive iterations where selector/channel/key looked
+        // bad. A reconnect() running on CircuitDispatcher swaps these fields
+        // sequentially with @Volatile writes, so this thread can briefly see
+        // an inconsistent state mid-swap. Exiting the loop and triggering a
+        // second reconnect for that transient was the dead-socket-after-
+        // reconnect bug.
+        var consecutiveBadStateIters = 0
+        // ~20 iterations × tiny sleep ≈ 1 s, well over reconnect's typical
+        // tens-of-ms duration. If the state is still bad after that we treat
+        // it as real and break for recovery.
+        val badStateBreakThreshold = 20
+
         while (_isConnected.value && !Thread.currentThread().isInterrupted) {
             try {
                 val localSelector = selector
                 val localChannel = datagramChannel
 
-                if (localSelector == null || localChannel == null) {
-                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Selector or channel is null, exiting loop")
-                    disconnectReason = "Selector or channel missing"
+                // Selector being null/closed is the only true "this loop
+                // can't run any more" condition — Selector lifetime is owned
+                // by connect()/disconnect(). reconnect() never closes the
+                // selector, so we treat null/closed selector as a hard exit.
+                if (localSelector == null) {
+                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Selector is null, exiting loop")
+                    disconnectReason = "Selector missing"
+                    break
+                }
+                if (!localSelector.isOpen) {
+                    NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Selector closed, exiting loop")
+                    disconnectReason = "Selector closed"
                     break
                 }
 
-                if (!localSelector.isOpen || !localChannel.isOpen) {
-                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Selector or channel closed, exiting loop")
-                    disconnectReason = "Selector or channel closed"
-                    break
-                }
-
+                // Channel and selectionKey, in contrast, are owned by the
+                // circuit lifetime and are swapped on every reconnect. A
+                // brief null/closed/cancelled view here just means reconnect
+                // is mid-swap; sleep a moment and re-read.
                 val key = selectionKey
-                if (key == null || !key.isValid) {
-                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Selection key invalid (network may have changed), exiting loop")
-                    disconnectReason = "Selection key invalid"
-                    break
+                if (localChannel == null || !localChannel.isOpen ||
+                    key == null || !key.isValid) {
+                    consecutiveBadStateIters++
+                    if (consecutiveBadStateIters >= badStateBreakThreshold) {
+                        NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                            "Channel/key still invalid after $consecutiveBadStateIters iterations — exiting loop for recovery")
+                        disconnectReason = "Channel/key persistently invalid"
+                        break
+                    }
+                    // Short backoff so reconnect (running on a different
+                    // thread) gets CPU time to publish the new state. We
+                    // don't call select() because the key is invalid; that
+                    // would either no-op or throw.
+                    try {
+                        Thread.sleep(50)
+                    } catch (ie: InterruptedException) {
+                        // disconnect() interrupts us; the while-condition
+                        // re-check on the next iteration handles teardown.
+                        Thread.currentThread().interrupt()
+                    }
+                    continue
                 }
+                consecutiveBadStateIters = 0
 
                 // DatagramChannel.isConnected is intentionally NOT checked here: it only
                 // reflects whether connect() was called on the channel, not real network
@@ -911,6 +981,7 @@ class UDPConnectionFixed {
 
                             if (bytesRead > 0) {
                                 packetsReceived.incrementAndGet()
+                                postReconnectPacketsReceived.incrementAndGet()
                                 bytesReceived.addAndGet(bytesRead.toLong())
                                 lastReceiveTime = System.currentTimeMillis()
                                 unansweredPings.set(0)
@@ -1007,13 +1078,43 @@ class UDPConnectionFixed {
                 }
 
             } catch (e: java.nio.channels.ClosedSelectorException) {
+                // The selector was closed under us. With the Lumiya-style
+                // reconnect (which keeps the selector open), this should
+                // only happen on a real disconnect. If we're still nominally
+                // connected, set disconnectReason so the post-loop recovery
+                // path triggers a reconnect — previously we just logged and
+                // broke, leaving _isConnected=true with no I/O thread, which
+                // is the dead-socket-after-reconnect bug.
                 if (_isConnected.value) {
-                    NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Selector closed, exiting receive loop")
+                    NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
+                        "Selector closed while connected — recovering")
+                    disconnectReason = "Selector closed unexpectedly"
                 }
                 break
+            } catch (e: java.nio.channels.AsynchronousCloseException) {
+                // The DatagramChannel was closed (typically reconnect()).
+                // The next iteration will read the new channel via the
+                // @Volatile field and resume normally.
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
+                    "Channel closed asynchronously — picking up replacement next iteration")
+            } catch (e: java.nio.channels.ClosedByInterruptException) {
+                // Same idea — happens if a blocking I/O operation is
+                // interrupted. Treat as transient; loop will re-check state.
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
+                    "I/O interrupted — re-checking selector/channel")
+            } catch (e: java.nio.channels.ClosedChannelException) {
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
+                    "Channel closed — re-checking selector/channel")
+            } catch (e: java.nio.channels.CancelledKeyException) {
+                // Stale key — reconnect cancelled it. The next iteration
+                // re-reads selectionKey and sees the new one.
+                NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
+                    "Selection key cancelled — re-checking next iteration")
             } catch (e: Exception) {
                 if (_isConnected.value) {
-                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "✗ Receive error: ${e.message}")
+                    val msg = e.message ?: e.javaClass.simpleName
+                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                        "✗ Receive error: $msg")
                 }
             }
         }
@@ -1145,9 +1246,21 @@ class UDPConnectionFixed {
                 EnhancedPacketLogger.logAckSent(ackSeq)
             }
 
+        } catch (e: java.nio.channels.AsynchronousCloseException) {
+            // Channel was swapped under us by reconnect(). Re-queue the ACKs;
+            // the new channel will pick them up next idle pass.
+            NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
+                "PacketAck deferred — channel swapped during reconnect")
+            acksToSend.forEach { pendingAcksToSend.offer(it) }
+        } catch (e: java.nio.channels.ClosedChannelException) {
+            NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
+                "PacketAck deferred — channel closed during reconnect")
+            acksToSend.forEach { pendingAcksToSend.offer(it) }
         } catch (e: Exception) {
+            // Surface the exception class when message is null so the log
+            // doesn't read "Failed to send PacketAck: null".
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
-                "Failed to send PacketAck from I/O thread: ${e.message}")
+                "Failed to send PacketAck from I/O thread: ${e.message ?: e.javaClass.simpleName}")
             acksToSend.forEach { pendingAcksToSend.offer(it) }
         }
     }
@@ -1967,23 +2080,58 @@ class UDPConnectionFixed {
                     NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
                         "→ Send may have failed: 0 bytes written (ID: ${pkt.messageId})")
                 }
-            } catch (e: Exception) {
-                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
-                    "✗ Send error: ${e.message}")
+            } catch (e: java.nio.channels.AsynchronousCloseException) {
+                // The channel was closed mid-write — almost always reconnect()
+                // swapping our DatagramChannel out from under us. The packet
+                // we just popped is lost, but if it was reliable it's still
+                // in pendingCallbacks and will be resent. Don't count this
+                // as a send error and don't escalate; just bail out of the
+                // drain so the next iteration picks up the new channel.
+                NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
+                    "Channel closed during send (${getMessageName(pkt.messageId)} seq=${pkt.seqNum}) — will resume on new channel")
                 recordPacketEvent(
                     type = PacketHistoryEntry.PacketEventType.SEND_FAILED,
                     messageId = pkt.messageId,
                     data = pkt.data,
                     sequenceNumber = pkt.seqNum,
                     success = false,
-                    errorMessage = e.message
+                    errorMessage = "AsynchronousCloseException (channel swap)"
+                )
+                break
+            } catch (e: java.nio.channels.ClosedChannelException) {
+                NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
+                    "Channel closed during send (${getMessageName(pkt.messageId)} seq=${pkt.seqNum}) — will resume on new channel")
+                recordPacketEvent(
+                    type = PacketHistoryEntry.PacketEventType.SEND_FAILED,
+                    messageId = pkt.messageId,
+                    data = pkt.data,
+                    sequenceNumber = pkt.seqNum,
+                    success = false,
+                    errorMessage = "ClosedChannelException (channel swap)"
+                )
+                break
+            } catch (e: Exception) {
+                // Use the exception class name when the message is null —
+                // otherwise the log just says "Send error: null", which
+                // hides AsynchronousCloseException etc. behind a useless
+                // string and leaves consecutiveSendErrors silently growing.
+                val errorDetail = e.message ?: e.javaClass.simpleName
+                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                    "✗ Send error: $errorDetail")
+                recordPacketEvent(
+                    type = PacketHistoryEntry.PacketEventType.SEND_FAILED,
+                    messageId = pkt.messageId,
+                    data = pkt.data,
+                    sequenceNumber = pkt.seqNum,
+                    success = false,
+                    errorMessage = errorDetail
                 )
 
                 val errorCount = consecutiveSendErrors.incrementAndGet()
                 NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
                     "Consecutive send errors: $errorCount (threshold: $CONSECUTIVE_ERROR_THRESHOLD)")
 
-                val errorMessage = e.message?.lowercase() ?: ""
+                val errorMessage = errorDetail.lowercase()
                 val isSocketInvalidationError = SOCKET_INVALIDATION_ERRORS.any { errorMessage.contains(it) }
 
                 if (isSocketInvalidationError && errorCount >= CONSECUTIVE_ERROR_THRESHOLD) {
@@ -2174,24 +2322,52 @@ class UDPConnectionFixed {
         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
             "Recreating socket to $simIP:$simPort (circuit=$circuitCode)")
 
-        // Tear down the old socket and threads without publishing disconnect events
-        _isConnected.value = false
-        ioThread?.interrupt()
-        ioThread = null
-        pendingAcksToSend.clear()
-        outgoingQueue.clear()
+        val reconnectAttempt = socketReconnectCount.incrementAndGet()
+        val now = System.currentTimeMillis()
+        lastSocketReconnectTime = now
+        lastSocketReconnectSucceeded = false
+        postReconnectPacketsReceived.set(0)
+
+        // Lumiya pattern (SLConnection / SLCircuit): keep the I/O thread and
+        // the Selector alive across reconnects — only swap the DatagramChannel
+        // and SelectionKey. This avoids the dead-socket race where:
+        //   1. We close the old selector here on CircuitDispatcher.
+        //   2. Meanwhile the I/O thread is mid-iteration with the OLD selector
+        //      captured in a local variable, plus its own write that's about
+        //      to fire. The write throws AsynchronousCloseException (no msg);
+        //      its select() throws ClosedSelectorException; the receive loop
+        //      exits while _isConnected has just been set back to true.
+        //   3. The new I/O thread we'd just spawned then races the dying old
+        //      one, sometimes succeeding and sometimes ending up with a closed
+        //      selector before it can do anything useful.
+        // By preserving the same selector + thread, the swap is observed
+        // atomically by the I/O thread on its next iteration.
+        //
+        // Also: we deliberately do NOT clear `outgoingQueue` here. Reliable
+        // packets that haven't been acked are still meaningful and the
+        // simulator will accept them on the new source port once
+        // UseCircuitCode lands. Pending ACKs are likewise preserved — they
+        // refer to received seqnums, not sockets.
+        //
+        // _isConnected stays true throughout. emitNetworkState() handles UI
+        // signalling separately.
+
+        val oldChannel = datagramChannel
+        val oldKey = selectionKey
 
         try {
-            selectionKey?.cancel()
-            selector?.close()
-            datagramChannel?.close()
+            oldKey?.cancel()
+        } catch (e: Exception) {
+            // Cancelling an already-cancelled key is harmless; keep going.
+        }
+        try {
+            oldChannel?.close()
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
                 "Error closing old socket during reconnect: ${e.message}")
         }
 
-        // Reset ping state so we don't immediately disconnect again
-        val now = System.currentTimeMillis()
+        // Reset ping state so we don't immediately disconnect again.
         lastReceiveTime = now
         lastPingTime.set(now)
         unansweredPings.set(0)
@@ -2206,12 +2382,12 @@ class UDPConnectionFixed {
 
         try {
             val address = InetSocketAddress(simIP, simPort)
-            datagramChannel = try {
+            val newChannel = try {
                 DatagramChannel.open(java.net.StandardProtocolFamily.INET)
             } catch (e: Exception) {
                 DatagramChannel.open()
             }
-            datagramChannel!!.apply {
+            newChannel.apply {
                 configureBlocking(false)
                 setOption(StandardSocketOptions.SO_RCVBUF, 65536)
                 setOption(StandardSocketOptions.SO_SNDBUF, 65536)
@@ -2219,44 +2395,76 @@ class UDPConnectionFixed {
             }
 
             try {
-                val localAddr = datagramChannel?.localAddress as? InetSocketAddress
+                val localAddr = newChannel.localAddress as? InetSocketAddress
                 localBindAddress = localAddr?.address?.hostAddress
                 localBindPort = localAddr?.port ?: 0
                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-                    "✓ Reconnect local bind: $localBindAddress:$localBindPort")
+                    "✓ Reconnect local bind: $localBindAddress:$localBindPort (attempt #$reconnectAttempt)")
             } catch (e: Exception) {
                 // Non-fatal
             }
 
-            selector = Selector.open()
-            selectionKey = datagramChannel?.register(selector, SelectionKey.OP_READ)
+            // Reuse the existing Selector if it's still open; otherwise open
+            // a new one. The first branch is the hot path for in-place
+            // reconnects; the second covers the cold case where a previous
+            // disconnect closed the selector.
+            val activeSelector = selector?.takeIf { it.isOpen } ?: Selector.open()
+            val newKey = newChannel.register(activeSelector, SelectionKey.OP_READ)
 
-            _isConnected.value = true
+            // Publish the new state before waking the I/O thread so it picks
+            // up consistent fields on its next iteration.
+            datagramChannel = newChannel
+            selector = activeSelector
+            selectionKey = newKey
 
-            // Start receive loop on dedicated I/O thread.
-            // It also drives ACK flushing, ping checks, and timeout retries
-            // via its idle pass — no separate coroutines needed.
-            ioThread = Thread({
-                receiveLoopBlocking()
-            }, "SLCircuitIO-reconnect").apply {
-                isDaemon = true
-                start()
+            // Make sure there's an I/O thread to drive the new state. The
+            // thread that was running before reconnect should still be alive
+            // and will see the new selector/channel via @Volatile reads, but
+            // if it died (e.g. an earlier ClosedSelectorException), restart it.
+            val existing = ioThread
+            if (existing == null || !existing.isAlive) {
+                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
+                    "I/O thread not alive at reconnect — starting a fresh one")
+                ioThread = Thread({
+                    receiveLoopBlocking()
+                }, "SLCircuitIO-reconnect-$reconnectAttempt").apply {
+                    isDaemon = true
+                    start()
+                }
+            } else {
+                // Wake the existing I/O thread out of select() so it observes
+                // the new selector/channel right away rather than waiting for
+                // SELECTOR_TIMEOUT_MS.
+                activeSelector.wakeup()
             }
 
             // Re-send UseCircuitCode so the server maps our new source port
+            // to this circuit. The I/O thread will drain it from outgoingQueue.
             sendUseCircuitCode()
 
+            lastSocketReconnectSucceeded = true
             NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
-                "=== UDP SOCKET RECONNECT SUCCEEDED ===")
+                "=== UDP SOCKET RECONNECT SUCCEEDED (attempt #$reconnectAttempt) ===")
             true
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
                 "UDP socket reconnect failed: ${e.message}")
             lastConnectionError = "Reconnect failed: ${e.message}"
-            _isConnected.value = false
+            lastSocketReconnectSucceeded = false
+            // We deliberately do NOT flip _isConnected to false here — the
+            // higher-level reconnectionCallback or disconnect() will handle
+            // session-level recovery if this socket reconnect can't be
+            // retried. Flipping it would also wedge LinkpointApp's UI into a
+            // disconnected state when the next attempt may succeed.
             false
         }
     }
+
+    fun getSocketReconnectCount(): Int = socketReconnectCount.get()
+    fun getLastSocketReconnectTime(): Long = lastSocketReconnectTime
+    fun getLastSocketReconnectSucceeded(): Boolean = lastSocketReconnectSucceeded
+    fun getPostReconnectPacketsReceived(): Int = postReconnectPacketsReceived.get()
+    fun getIoThreadName(): String? = ioThread?.name
 
     /**
      * Get statistics
