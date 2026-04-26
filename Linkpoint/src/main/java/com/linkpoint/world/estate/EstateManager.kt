@@ -376,39 +376,54 @@ class EstateManager(
     }
     
     private suspend fun sendEstateAccessChange(targetAgentId: UUID, add: Boolean, banned: Boolean) {
-        val payload = ByteBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN)
-        
-        // AgentData
-        payload.putUUID(agentId)
-        payload.putUUID(udpConnection.getSessionId())
-        payload.putUUID(UUID.randomUUID()) // TransactionID
-        
-        // Method
-        val method = "estateaccessdelta".toByteArray()
-        payload.put(method.size.toByte())
-        payload.put(method)
-        
-        // ParamList: operation, agent_id
-        payload.put(2) // 2 params
-        
-        // Operation flags:
-        // 1 = add to allowed, 2 = remove from allowed
-        // 4 = add to banned, 8 = remove from banned
+        // Wire format (LL message_template `EstateOwnerMessage`, low-freq 260;
+        // Lumiya: slproto/messages/EstateOwnerMessage.java PackPayload):
+        //   AgentData:  AgentID(LLUUID), SessionID(LLUUID), TransactionID(LLUUID)
+        //   MethodData: Method(Variable 1 NUL-terminated), Invoice(LLUUID)
+        //   ParamList (Variable, U8 count):
+        //     Parameter(Variable 1 NUL-terminated)
+        //
+        // The previous encoder skipped the Invoice UUID and shipped the
+        // Method/Parameter strings without trailing NULs, so the simulator
+        // silently rejected the access-list update.
+
+        val methodRaw = "estateaccessdelta".toByteArray(Charsets.UTF_8)
+        val methodBytes = methodRaw + 0.toByte()
+
+        // Operation flags: 1=add allowed, 2=remove allowed, 4=add banned, 8=remove banned
         val opFlag = when {
             add && !banned -> 1
             !add && !banned -> 2
             add && banned -> 4
             else -> 8
         }
-        
-        val op = opFlag.toString().toByteArray()
-        payload.put(op.size.toByte())
-        payload.put(op)
-        
-        val agentStr = targetAgentId.toString().toByteArray()
-        payload.put(agentStr.size.toByte())
-        payload.put(agentStr)
-        
+        val opRaw = opFlag.toString().toByteArray(Charsets.UTF_8)
+        val opBytes = opRaw + 0.toByte()
+        val agentRaw = targetAgentId.toString().toByteArray(Charsets.UTF_8)
+        val agentBytes = agentRaw + 0.toByte()
+
+        val payload = ByteBuffer
+            .allocate(48 /* AgentData */ + 1 + methodBytes.size + 16 /* Invoice */ +
+                      1 /* param count */ + 1 + opBytes.size + 1 + agentBytes.size)
+            .order(ByteOrder.LITTLE_ENDIAN)
+
+        // AgentData
+        payload.putUUID(agentId)
+        payload.putUUID(udpConnection.getSessionId())
+        payload.putUUID(UUID.randomUUID()) // TransactionID
+
+        // MethodData
+        payload.put(methodBytes.size.toByte())
+        payload.put(methodBytes)
+        payload.putUUID(UUID.randomUUID()) // Invoice (echoed in EstateOwnerMessageReply)
+
+        // ParamList (Variable u8 count + entries)
+        payload.put(2.toByte())
+        payload.put(opBytes.size.toByte())
+        payload.put(opBytes)
+        payload.put(agentBytes.size.toByte())
+        payload.put(agentBytes)
+
         udpConnection.sendPacket(MessageIds.ESTATE_OWNER_MESSAGE, payload.array(), reliable = true)
     }
     

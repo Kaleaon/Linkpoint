@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Log
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
@@ -714,16 +716,145 @@ class VoiceSession(
         android.util.Log.d("VoiceSession", "Remote track arrived: ${receiver.track()?.kind()}")
     }
 
+    /**
+     * Establish the voice session by completing the SDP offer/answer
+     * exchange against the simulator's WebRTC voice endpoint.
+     *
+     * Linden's WebRTC voice REST shape (per the open-source viewer's
+     * `LLWebRTCVoiceClient::sessionEstablished`) is a single POST with a
+     * JSON body of `{ "jsep": { "type": "offer", "sdp": "..." } }` plus
+     * the channel credentials carried as an `Authorization: Bearer ...`
+     * header. The response carries `{ "jsep": { "type": "answer",
+     * "sdp": "..." } }` with optional initial-candidate trickle data
+     * inside `ice_candidates`. Subsequent local ICE candidates are
+     * trickled via [trickleLocalIceCandidates] which posts each
+     * candidate as it arrives on [localIceCandidates].
+     *
+     * If the SDP offer can't be created (no peer connection) or the
+     * POST fails, [isConnected] stays false so callers can fall back
+     * to the legacy Vivox path or surface the failure to the user.
+     */
     fun connect(uri: String, credentials: String) {
-        try {
-            android.util.Log.i("VoiceSession",
-                "Connecting to voice channel: $uri (signaling layer not yet wired — see class doc)")
-            isConnected = true
-        } catch (e: Exception) {
-            android.util.Log.e("VoiceSession", "Failed to connect to voice channel", e)
-            isConnected = false
+        kotlinx.coroutines.CoroutineScope(dispatcher).launch {
+            try {
+                val offerSdp = createOffer()
+                if (offerSdp.isEmpty()) {
+                    android.util.Log.w("VoiceSession", "SDP offer empty; cannot connect to $uri")
+                    return@launch
+                }
+
+                val httpClient = okhttp3.OkHttpClient.Builder()
+                    .connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+                    .readTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
+                    .build()
+
+                val jsepBody = org.json.JSONObject().apply {
+                    put("jsep", org.json.JSONObject().apply {
+                        put("type", "offer")
+                        put("sdp", offerSdp)
+                    })
+                }.toString()
+
+                val mediaType = "application/json; charset=utf-8".toMediaType()
+                val request = okhttp3.Request.Builder()
+                    .url(uri)
+                    .apply {
+                        if (credentials.isNotEmpty()) header("Authorization", "Bearer $credentials")
+                    }
+                    .post(jsepBody.toRequestBody(mediaType))
+                    .build()
+
+                val response = withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    httpClient.newCall(request).execute()
+                }
+                response.use { resp ->
+                    val bodyString = resp.body?.string().orEmpty()
+                    if (!resp.isSuccessful) {
+                        android.util.Log.w("VoiceSession",
+                            "Voice signaling POST returned HTTP ${resp.code}: ${bodyString.take(256)}")
+                        return@launch
+                    }
+                    val parsed = try {
+                        org.json.JSONObject(bodyString)
+                    } catch (e: Exception) {
+                        android.util.Log.w("VoiceSession", "Voice signaling response not JSON: ${e.message}")
+                        return@launch
+                    }
+                    val jsep = parsed.optJSONObject("jsep")
+                    val answerSdp = jsep?.optString("sdp", "").orEmpty()
+                    if (answerSdp.isEmpty()) {
+                        android.util.Log.w("VoiceSession", "Voice signaling response missing jsep.sdp")
+                        return@launch
+                    }
+                    if (!handleAnswer(answerSdp)) {
+                        android.util.Log.w("VoiceSession", "setRemoteDescription failed for SDP answer")
+                        return@launch
+                    }
+
+                    // Apply any initial ICE candidates from the response.
+                    val initialCandidates = parsed.optJSONArray("ice_candidates")
+                    if (initialCandidates != null) {
+                        for (i in 0 until initialCandidates.length()) {
+                            val c = initialCandidates.optJSONObject(i) ?: continue
+                            val sdpMid = c.optString("sdpMid")
+                            val mLineIdx = c.optInt("sdpMLineIndex", 0)
+                            val candidate = c.optString("candidate")
+                            if (sdpMid.isNotEmpty() && candidate.isNotEmpty()) {
+                                addRemoteIceCandidate(sdpMid, mLineIdx, candidate)
+                            }
+                        }
+                    }
+                }
+
+                isConnected = true
+                android.util.Log.i("VoiceSession", "Voice signaling complete for $uri")
+                trickleLocalIceCandidates(uri, credentials)
+            } catch (e: Exception) {
+                android.util.Log.e("VoiceSession", "Failed to connect to voice channel", e)
+                isConnected = false
+            }
         }
     }
+
+    /**
+     * Stream local ICE candidates to the signaling endpoint as they
+     * arrive on [localIceCandidates]. POSTs each candidate as a JSON
+     * blob `{ "ice_candidate": { "sdpMid": ..., "sdpMLineIndex": ...,
+     * "candidate": "..." } }`. Stops when the session disconnects.
+     */
+    private fun trickleLocalIceCandidates(uri: String, credentials: String) {
+        kotlinx.coroutines.CoroutineScope(dispatcher).launch {
+            val client = okhttp3.OkHttpClient()
+            try {
+                _localIceCandidates.collect { c ->
+                    val jsonBody = org.json.JSONObject().apply {
+                        put("ice_candidate", org.json.JSONObject().apply {
+                            put("sdpMid", c.sdpMid ?: "")
+                            put("sdpMLineIndex", c.sdpMLineIndex)
+                            put("candidate", c.sdp)
+                        })
+                    }.toString()
+                    val req = okhttp3.Request.Builder()
+                        .url(uri)
+                        .apply {
+                            if (credentials.isNotEmpty()) header("Authorization", "Bearer $credentials")
+                        }
+                        .post(jsonBody.toRequestBody("application/json; charset=utf-8".toMediaType()))
+                        .build()
+                    try {
+                        withContext(kotlinx.coroutines.Dispatchers.IO) {
+                            client.newCall(req).execute().use { /* drain body */ }
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.w("VoiceSession", "ICE trickle POST failed: ${e.message}")
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.d("VoiceSession", "ICE trickle ended: ${e.message}")
+            }
+        }
+    }
+
 
     fun disconnect() {
         try {

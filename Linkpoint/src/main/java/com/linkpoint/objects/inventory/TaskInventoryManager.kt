@@ -144,11 +144,19 @@ class TaskInventoryManager(
      * Send RequestTaskInventory message.
      */
     private suspend fun sendRequestTaskInventory(localId: Int, objectId: UUID) {
-        val payload = ByteBuffer.allocate(20).order(ByteOrder.LITTLE_ENDIAN)
-        
+        // Wire format (LL message_template `RequestTaskInventory`, low-freq 289):
+        //   AgentData:     AgentID(LLUUID), SessionID(LLUUID)
+        //   InventoryData: LocalID(U32)
+        // The previous payload omitted SessionID, leaving the simulator-side
+        // parser to read LocalID from the SessionID slot, which made the
+        // request silently no-op (Lumiya parity:
+        // slproto/messages/RequestTaskInventory.java).
+        val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
+
         // AgentData block
         writeUUID(payload, agentId)
-        
+        writeUUID(payload, udpConnection.getSessionId())
+
         // InventoryData block
         payload.putInt(localId)
         

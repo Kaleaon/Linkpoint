@@ -578,10 +578,15 @@ object LifecycleAwareScopeManager {
     }
     
     /**
-     * Process lifecycle observer for application-level events.
+     * Process lifecycle observer for application-level events. Notifies
+     * the simulator that the agent has paused or resumed so the sim can
+     * reduce non-essential traffic (object updates, ImprovedTerseObjectUpdate
+     * spam, etc.) while the viewer is backgrounded — this is the same hook
+     * Lumiya wires (`SLAgentCircuit` calls AgentPause/AgentResume on the
+     * Android `onStart`/`onStop` boundary).
      */
     private class ProcessLifecycleObserver : DefaultLifecycleObserver {
-        
+
         override fun onStop(owner: LifecycleOwner) {
             android.util.Log.d(TAG, "Application moved to background")
             NetworkLogger.log(
@@ -589,6 +594,7 @@ object LifecycleAwareScopeManager {
                 NetworkLogger.Category.LIFECYCLE,
                 "📱 App → background (process onStop)"
             )
+            sendAgentPauseIfConnected()
         }
 
         override fun onStart(owner: LifecycleOwner) {
@@ -598,6 +604,27 @@ object LifecycleAwareScopeManager {
                 NetworkLogger.Category.LIFECYCLE,
                 "📱 App → foreground (process onStart)"
             )
+            sendAgentResumeIfConnected()
+        }
+
+        private fun sendAgentPauseIfConnected() {
+            try {
+                val app = com.linkpoint.LinkpointApp.getInstanceOrNull() ?: return
+                val udp = app.udpConnection
+                if (udp.isConnected.value) udp.sendAgentPause()
+            } catch (e: Throwable) {
+                android.util.Log.w(TAG, "AgentPause on background failed: ${e.message}")
+            }
+        }
+
+        private fun sendAgentResumeIfConnected() {
+            try {
+                val app = com.linkpoint.LinkpointApp.getInstanceOrNull() ?: return
+                val udp = app.udpConnection
+                if (udp.isConnected.value) udp.sendAgentResume()
+            } catch (e: Throwable) {
+                android.util.Log.w(TAG, "AgentResume on foreground failed: ${e.message}")
+            }
         }
     }
 }

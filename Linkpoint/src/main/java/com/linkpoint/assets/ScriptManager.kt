@@ -6,7 +6,10 @@ import com.linkpoint.protocol.llsd.*
 import com.linkpoint.protocol.transfer.TransferManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -322,24 +325,93 @@ class ScriptManager(
     }
     
     /**
-     * Handle script control change notification.
-     * This is called when a script takes or releases control of the avatar.
-     * 
-     * @param controls The control flags being taken/released
-     * @param takeControls Whether the script is taking controls (true) or releasing (false)
-     * @param passToAgent Whether input should still be passed to the agent
+     * Bitmask of controls currently captured by an in-world script
+     * (`AGENT_CONTROL_*` flags from llmessagesystem.h: FORWARD,
+     * NEG/POS for fwd/back/left/right/up/down, NUDGE_AT_POS, etc.).
+     * Movement-input layers (`MovementController`) AND the camera /
+     * touch-input UI subscribe to [scriptControlEvents] to know which
+     * channels to drop on the floor when [passToAgent] is false.
+     */
+    private val _capturedControls = MutableStateFlow(0)
+    val capturedControls: StateFlow<Int> = _capturedControls
+
+    /**
+     * Whether the script with control wants viewer input also passed
+     * through to the agent. When false, MovementController suppresses
+     * the matching AgentUpdate ControlFlags; when true the avatar still
+     * walks/turns alongside the script's commands.
+     */
+    private val _passInputsToAgent = MutableStateFlow(true)
+    val passInputsToAgent: StateFlow<Boolean> = _passInputsToAgent
+
+    private val _scriptControlEvents = MutableSharedFlow<ScriptControlEvent>(
+        replay = 1, extraBufferCapacity = 4
+    )
+    val scriptControlEvents: SharedFlow<ScriptControlEvent> = _scriptControlEvents.asSharedFlow()
+
+    /**
+     * Handle ScriptControlChange notification (UDP message_template
+     * `ScriptControlChange`). Updates [capturedControls] /
+     * [passInputsToAgent] state flows and emits a [ScriptControlEvent]
+     * so subscribers (movement controller, HUD, action bar) can apply
+     * the new input contract. When taking controls we OR the new
+     * flags into the captured mask; releasing clears the matching
+     * bits and falls back to passInputsToAgent=true once nothing is
+     * captured (Lumiya `RLVController` follows the same merge rule).
+     *
+     * @param controls Bitmask of AGENT_CONTROL_* flags being taken/released
+     * @param takeControls true if script grabs controls; false if releasing
+     * @param passToAgent  whether viewer input is still routed to the agent
+     *                     while a script holds the controls
      */
     fun handleScriptControlChange(controls: Int, takeControls: Boolean, passToAgent: Boolean) {
-        if (takeControls) {
-            Log.d(TAG, "Script taking controls: 0x${controls.toString(16)} (pass to agent: $passToAgent)")
-            // In a full implementation, this would:
-            // 1. Update UI to show script is controlling avatar
-            // 2. Modify input handling to respect passToAgent flag
-            // 3. Track which controls are captured (movement, mouse, etc.)
+        val previous = _capturedControls.value
+        val updated = if (takeControls) {
+            previous or controls
         } else {
-            Log.d(TAG, "Script releasing controls: 0x${controls.toString(16)}")
-            // Would restore normal avatar control
+            previous and controls.inv()
         }
+        _capturedControls.value = updated
+        _passInputsToAgent.value = if (updated == 0) true else passToAgent
+
+        Log.d(TAG, if (takeControls) {
+            "Script taking controls 0x${controls.toString(16)} → captured=0x${updated.toString(16)} passToAgent=$passToAgent"
+        } else {
+            "Script releasing controls 0x${controls.toString(16)} → captured=0x${updated.toString(16)} passToAgent=${_passInputsToAgent.value}"
+        })
+
+        scope.launch {
+            _scriptControlEvents.emit(ScriptControlEvent(
+                controls = controls,
+                takeControls = takeControls,
+                passToAgent = passToAgent,
+                capturedAfter = updated
+            ))
+        }
+    }
+
+    /**
+     * Snapshot of a single ScriptControlChange event. UI consumers use
+     * the `take/release + controls` pair to render an indicator and
+     * gate input; movement consumers use [capturedAfter] to know which
+     * AGENT_CONTROL_* flags to suppress in outbound AgentUpdates.
+     */
+    data class ScriptControlEvent(
+        val controls: Int,
+        val takeControls: Boolean,
+        val passToAgent: Boolean,
+        val capturedAfter: Int,
+    )
+
+    /**
+     * Convenience query for movement / camera layers: should this
+     * AGENT_CONTROL_* bit be applied to the local agent right now?
+     * Returns true when no script holds the bit, OR when the script
+     * granted passToAgent.
+     */
+    fun shouldApplyAgentControl(controlBit: Int): Boolean {
+        val captured = _capturedControls.value
+        return (captured and controlBit) == 0 || _passInputsToAgent.value
     }
     
     fun shutdown() {

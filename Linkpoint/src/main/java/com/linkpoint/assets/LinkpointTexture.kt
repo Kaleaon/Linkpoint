@@ -2,8 +2,11 @@ package com.linkpoint.assets
 
 import android.graphics.Bitmap
 import android.util.Log
+import com.google.android.filament.Engine
+import com.google.android.filament.Texture
 import java.lang.ref.Cleaner
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -58,6 +61,18 @@ class LinkpointTexture private constructor(
     @Volatile private var cacheHandle: MmappedTextureCache.CachedTexture? = null
 
     /**
+     * Filament `Texture` produced by [uploadToFilament]. Held here only so
+     * [releaseFilamentTexture] can run on the render thread; [close] does
+     * NOT touch this field, because the JDK [Cleaner] thread can invoke
+     * close-paths and Filament resources MUST be freed on the engine
+     * thread (see class kdoc).
+     */
+    @Volatile private var filamentTexture: Texture? = null
+
+    /** Bytes accounted against [TextureMemoryTracker.allocGpu]; 0 when not on GPU. */
+    @Volatile private var gpuBytes: Long = 0L
+
+    /**
      * Bytes accounted against [TextureMemoryTracker] on the native-heap line.
      * Held in a separate object so the [Cleaner] callback can read it without
      * capturing a reference to the outer [LinkpointTexture] (which would
@@ -100,17 +115,150 @@ class LinkpointTexture private constructor(
     }
 
     /**
-     * Upload the compressed payload (or RGBA, if no compression succeeded)
-     * to Filament. Not yet implemented — see class kdoc.
+     * Upload the held RGBA8 buffer to Filament as a 2D texture with
+     * mipmaps. Returns the Filament `Texture` (also stashed for
+     * [releaseFilamentTexture]) or null on failure (closed handle, no
+     * pixels, engine refused).
+     *
+     * MUST be called on the Filament render thread — Filament `Engine`
+     * methods are not threadsafe. The companion call site,
+     * `RenderManager.uploadTerrainDetailTexture`, follows the same
+     * constraint and is the template for this implementation.
+     *
+     * Format selection:
+     *   - If [compressed] holds an ETC2/EAC payload (etcpak path),
+     *     uploads the compressed blob via the matching Filament
+     *     `Texture.InternalFormat`. ETC1 fallback is opaque-only and
+     *     cannot be consumed by Filament's `Texture.setImage` directly
+     *     (Filament only accepts the OpenGL-compatible compressed
+     *     formats listed in `Texture.InternalFormat.*COMPRESSED*`), so
+     *     for ETC1 we ignore the compressed buffer and fall through to
+     *     the RGBA8 path on [rgba].
+     *   - Otherwise uploads RGBA8.
+     *
+     * VRAM accounting estimates the GPU footprint as `width*height*4`
+     * for RGBA8 (worst-case for the renderer's working set). For ETC2
+     * we use the compressed payload size, since that's what the GPU
+     * driver will actually allocate.
      */
-    fun uploadToFilament(/* engine: com.google.android.filament.Engine */): Any? {
+    fun uploadToFilament(engine: Engine): Texture? {
         check(!closed.get()) { "LinkpointTexture[$uuid] is closed" }
-        // TODO(item 1): build Texture via Texture.Builder, pick format from
-        //   compressed.format if non-null else Texture.InternalFormat.RGBA8,
-        //   call setImage with PixelBufferDescriptor. Account against
-        //   TextureMemoryTracker.allocGpu / freeGpu.
-        Log.w(TAG, "uploadToFilament not yet implemented (uuid=$uuid)")
-        return null
+
+        // Already uploaded — return the existing handle so callers can
+        // call this idempotently from material rebinds.
+        filamentTexture?.let { return it }
+
+        val compressedResult = compressed
+        val compressedBlob = compressedResult?.data
+        val canUseCompressed = compressedResult != null &&
+            compressedBlob != null && compressedBlob.isNotEmpty() &&
+            (compressedResult.format == Etc2Compressor.GpuFormat.ETC2_RGB ||
+             compressedResult.format == Etc2Compressor.GpuFormat.ETC2_EAC_RGBA)
+
+        return try {
+            if (canUseCompressed) {
+                uploadCompressed(engine, compressedResult!!, compressedBlob!!)
+            } else {
+                uploadRgba8(engine)
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "uploadToFilament[$uuid] failed: ${e.message}", e)
+            null
+        }
+    }
+
+    private fun uploadRgba8(engine: Engine): Texture? {
+        val pixels = rgba ?: run {
+            Log.w(TAG, "uploadToFilament[$uuid]: no RGBA buffer (already released?)")
+            return null
+        }
+
+        val direct = ByteBuffer.allocateDirect(pixels.size).order(ByteOrder.nativeOrder())
+        direct.put(pixels)
+        direct.flip()
+
+        val tex = Texture.Builder()
+            .width(width).height(height)
+            .levels(mipLevelsFor(width, height))
+            .sampler(Texture.Sampler.SAMPLER_2D)
+            .format(Texture.InternalFormat.RGBA8)
+            .build(engine)
+
+        val descriptor = Texture.PixelBufferDescriptor(
+            direct, Texture.Format.RGBA, Texture.Type.UBYTE
+        )
+        tex.setImage(engine, 0, descriptor)
+        tex.generateMipmaps(engine)
+
+        filamentTexture = tex
+        val approxBytes = (width.toLong() * height.toLong() * 4L * 4L) / 3L // mip pyramid ≈ 1.33×
+        gpuBytes = approxBytes
+        TextureMemoryTracker.allocGpu(approxBytes)
+        return tex
+    }
+
+    private fun uploadCompressed(
+        engine: Engine,
+        result: Etc2Compressor.Result,
+        blob: ByteArray
+    ): Texture? {
+        val internalFormat = when (result.format) {
+            Etc2Compressor.GpuFormat.ETC2_RGB -> Texture.InternalFormat.ETC2_RGB8
+            Etc2Compressor.GpuFormat.ETC2_EAC_RGBA -> Texture.InternalFormat.ETC2_EAC_RGBA8
+            else -> return null
+        }
+        val pixelFormat = when (result.format) {
+            Etc2Compressor.GpuFormat.ETC2_RGB -> Texture.CompressedFormat.ETC2_RGB8
+            Etc2Compressor.GpuFormat.ETC2_EAC_RGBA -> Texture.CompressedFormat.ETC2_EAC_RGBA8
+            else -> return null
+        }
+
+        val direct = ByteBuffer.allocateDirect(blob.size).order(ByteOrder.nativeOrder())
+        direct.put(blob)
+        direct.flip()
+
+        val tex = Texture.Builder()
+            .width(result.width).height(result.height)
+            .levels(1) // ETC2 mipmap chains require pre-built levels; skip until etcpak emits them
+            .sampler(Texture.Sampler.SAMPLER_2D)
+            .format(internalFormat)
+            .build(engine)
+
+        val descriptor = Texture.PixelBufferDescriptor(direct, pixelFormat, blob.size)
+        tex.setImage(engine, 0, descriptor)
+
+        filamentTexture = tex
+        gpuBytes = blob.size.toLong()
+        TextureMemoryTracker.allocGpu(blob.size.toLong())
+        return tex
+    }
+
+    /**
+     * Release the Filament `Texture` produced by [uploadToFilament]. MUST
+     * be called on the render thread. Decoupled from [close] so callers
+     * can manage lifetime: the engine resource lives until the renderer
+     * unbinds the texture from all materials, while the CPU-side RGBA
+     * buffer can be freed earlier.
+     */
+    fun releaseFilamentTexture(engine: Engine) {
+        val tex = filamentTexture ?: return
+        try {
+            engine.destroyTexture(tex)
+        } catch (e: Exception) {
+            Log.w(TAG, "destroyTexture[$uuid] threw: ${e.message}")
+        }
+        filamentTexture = null
+        if (gpuBytes > 0) {
+            TextureMemoryTracker.freeGpu(gpuBytes)
+            gpuBytes = 0L
+        }
+    }
+
+    private fun mipLevelsFor(w: Int, h: Int): Int {
+        var d = maxOf(w, h).coerceAtLeast(1)
+        var levels = 1
+        while (d > 1) { d = d shr 1; levels++ }
+        return levels
     }
 
     override fun close() {

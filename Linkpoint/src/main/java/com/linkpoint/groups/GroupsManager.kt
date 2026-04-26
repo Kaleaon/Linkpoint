@@ -578,50 +578,157 @@ class GroupsManager(
     // ==================== UDP MESSAGE HANDLERS ====================
     
     /**
-     * Handle GroupRoleDataReply UDP message.
-     * Parses role data for a group.
+     * Cached group roles keyed by groupId. Updated by [handleGroupRoleData]
+     * (UDP `GroupRoleDataReply`); read by UI via [getGroupRoles] and the
+     * [GroupEvent.RolesUpdated] event flow.
+     */
+    private val groupRoles = ConcurrentHashMap<UUID, List<GroupRole>>()
+
+    /**
+     * Cached group titles keyed by groupId. Updated by [handleGroupTitles]
+     * (UDP `GroupTitlesReply`); read by UI via [getGroupTitles] and the
+     * [GroupEvent.TitlesUpdated] event flow.
+     */
+    private val groupTitles = ConcurrentHashMap<UUID, List<GroupTitle>>()
+
+    fun getGroupRoles(groupId: UUID): List<GroupRole> = groupRoles[groupId].orEmpty()
+    fun getGroupTitles(groupId: UUID): List<GroupTitle> = groupTitles[groupId].orEmpty()
+
+    /**
+     * Handle GroupRoleDataReply UDP message. Wire format
+     * (Lumiya parity, slproto/messages/GroupRoleDataReply.java PackPayload):
+     *   AgentData: AgentID(LLUUID)
+     *   GroupData: GroupID(LLUUID), RequestID(LLUUID), RoleCount(S32)
+     *   RoleData (Variable, U8 count):
+     *     RoleID(LLUUID), Name(Variable 1), Title(Variable 1),
+     *     Description(Variable 1), Powers(U64), Members(S32)
      */
     fun handleGroupRoleData(payload: ByteArray) {
         try {
-            val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
-            
-            // AgentData block
-            buffer.position(buffer.position() + 32) // Skip AgentID and GroupID
-            
-            // Role count
-            if (buffer.remaining() < 4) return
-            val roleCount = buffer.int
-            
-            Log.d(TAG, "📋 Parsing $roleCount group roles")
-            
-            // Note: Full parsing would extract role names, powers, etc.
-            // For now we just acknowledge receipt
+            val buffer = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
+
+            // AgentData
+            if (buffer.remaining() < 16) return
+            buffer.position(buffer.position() + 16) // skip AgentID
+
+            // GroupData
+            if (buffer.remaining() < 16 + 16 + 4) return
+            val groupId = buffer.getUUID()
+            val requestId = buffer.getUUID()
+            val totalRoleCount = buffer.int
+
+            // RoleData block (Variable u8 count + entries)
+            if (buffer.remaining() < 1) return
+            val entryCount = buffer.get().toInt() and 0xFF
+
+            val parsed = ArrayList<GroupRole>(entryCount)
+            for (i in 0 until entryCount) {
+                if (buffer.remaining() < 16 + 1) break
+                val roleId = buffer.getUUID()
+                val name = readVariable1String(buffer) ?: break
+                val title = readVariable1String(buffer) ?: break
+                val description = readVariable1String(buffer) ?: break
+                if (buffer.remaining() < 8 + 4) break
+                val powers = buffer.long
+                val members = buffer.int
+                parsed += GroupRole(
+                    roleId = roleId,
+                    name = name,
+                    title = title,
+                    description = description,
+                    powers = powers,
+                    members = members
+                )
+            }
+
+            // GroupRoleDataReply is paged: each packet carries a slice of
+            // the full role list. Merge keyed by RoleID so an in-progress
+            // multi-packet reply doesn't overwrite earlier slices, but
+            // start fresh when we see a new RequestID for this group.
+            val previous = groupRoles[groupId].orEmpty()
+            val carried =
+                if (previous.isNotEmpty() && lastGroupRoleRequestId[groupId] == requestId) {
+                    previous
+                } else {
+                    emptyList()
+                }
+            lastGroupRoleRequestId[groupId] = requestId
+            val merged = (carried + parsed).distinctBy { it.roleId }
+            groupRoles[groupId] = merged
+
+            Log.d(TAG, "📋 GroupRoleDataReply: groupId=$groupId, +${parsed.size} roles " +
+                "(cached=${merged.size}, declared=$totalRoleCount)")
+
+            scope.launch {
+                _groupEvents.emit(GroupEvent.RolesUpdated(groupId, merged))
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing GroupRoleDataReply", e)
         }
     }
-    
+
+    private val lastGroupRoleRequestId = ConcurrentHashMap<UUID, UUID>()
+
     /**
-     * Handle GroupTitlesReply UDP message.
-     * Parses available titles for a group.
+     * Handle GroupTitlesReply UDP message. Wire format
+     * (Lumiya parity, slproto/messages/GroupTitlesReply.java PackPayload):
+     *   AgentData: AgentID(LLUUID), GroupID(LLUUID), RequestID(LLUUID)
+     *   GroupData (Variable, U8 count):
+     *     Title(Variable 1), RoleID(LLUUID), Selected(BOOL)
      */
     fun handleGroupTitles(payload: ByteArray) {
         try {
-            val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
-            
-            // AgentData block
-            buffer.position(buffer.position() + 48) // Skip AgentID, GroupID, RequestID
-            
-            // Title count
+            val buffer = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
+
+            // AgentData: AgentID, GroupID, RequestID
+            if (buffer.remaining() < 16 + 16 + 16) return
+            buffer.position(buffer.position() + 16) // skip AgentID
+            val groupId = buffer.getUUID()
+            buffer.getUUID() // RequestID — unused; titles aren't paged, sim sends one reply
+
             if (buffer.remaining() < 1) return
-            val titleCount = buffer.get().toInt() and 0xFF
-            
-            Log.d(TAG, "📋 Parsing $titleCount group titles")
-            
-            // Note: Full parsing would extract title names and IDs
+            val count = buffer.get().toInt() and 0xFF
+
+            val parsed = ArrayList<GroupTitle>(count)
+            for (i in 0 until count) {
+                val title = readVariable1String(buffer) ?: break
+                if (buffer.remaining() < 16 + 1) break
+                val roleId = buffer.getUUID()
+                val selected = buffer.get() != 0.toByte()
+                parsed += GroupTitle(
+                    title = title,
+                    roleId = roleId,
+                    selected = selected
+                )
+            }
+
+            groupTitles[groupId] = parsed
+            Log.d(TAG, "📋 GroupTitlesReply: groupId=$groupId, ${parsed.size} titles")
+
+            scope.launch {
+                _groupEvents.emit(GroupEvent.TitlesUpdated(groupId, parsed))
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing GroupTitlesReply", e)
         }
+    }
+
+    /**
+     * Read a `Variable 1` string field — 1-byte u8 length prefix followed by
+     * UTF-8 bytes (with the SL convention that the length includes the
+     * trailing NUL). Returns null if the buffer is short. The returned
+     * String trims the trailing NUL.
+     */
+    private fun readVariable1String(buffer: ByteBuffer): String? {
+        if (buffer.remaining() < 1) return null
+        val len = buffer.get().toInt() and 0xFF
+        if (buffer.remaining() < len) return null
+        if (len == 0) return ""
+        val bytes = ByteArray(len)
+        buffer.get(bytes)
+        // Strip the NUL terminator that the SL `Variable 1` convention includes.
+        val effective = if (bytes[len - 1] == 0.toByte()) len - 1 else len
+        return String(bytes, 0, effective, Charsets.UTF_8)
     }
     
     /**
@@ -747,7 +854,35 @@ sealed class GroupEvent {
     data class NoticeReceived(val notice: GroupNotice) : GroupEvent()
     data class ChatReceived(val message: GroupChatMessage) : GroupEvent()
     data class ActiveGroupChanged(val groupId: UUID, val groupTitle: String) : GroupEvent()
+    data class RolesUpdated(val groupId: UUID, val roles: List<GroupRole>) : GroupEvent()
+    data class TitlesUpdated(val groupId: UUID, val titles: List<GroupTitle>) : GroupEvent()
 }
+
+/**
+ * A single role within a group, parsed from `GroupRoleDataReply`. The
+ * `powers` long is a bitmask against the `GP_*` constants on
+ * [GroupsManager] (e.g. `GP_NOTICE_SEND`, `GP_MEMBER_INVITE`).
+ */
+@Parcelize
+data class GroupRole(
+    val roleId: UUID,
+    val name: String,
+    val title: String,
+    val description: String,
+    val powers: Long,
+    val members: Int
+) : Parcelable
+
+/**
+ * A title (display label) the agent can wear within a group, parsed from
+ * `GroupTitlesReply`. Exactly one title is `selected` per group at any time.
+ */
+@Parcelize
+data class GroupTitle(
+    val title: String,
+    val roleId: UUID,
+    val selected: Boolean
+) : Parcelable
 
 // ==================== GROUP ACCOUNTING DATA CLASSES ====================
 

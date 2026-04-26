@@ -479,14 +479,18 @@ object SessionLogRecorder {
     }
     
     /**
-     * Log region change
+     * Log region change. `regionHandle` is null when invoked from RegionHandshake
+     * (the LL message body does not carry it — only EnableSimulator and
+     * AgentMovementComplete do), in which case the line is omitted instead of
+     * printed as `Handle: 0`, which previously made captures look like a parser
+     * bug (2026-04-26 Athanasia capture).
      */
-    fun logRegionChange(regionName: String, regionHandle: Long, position: String? = null) {
+    fun logRegionChange(regionName: String, regionHandle: Long?, position: String? = null) {
         if (!isRecording.get()) return
-        
+
         val message = buildString {
             append("REGION: $regionName")
-            append("\n  Handle: $regionHandle")
+            if (regionHandle != null) append("\n  Handle: $regionHandle")
             position?.let { append("\n  Position: $it") }
         }
         log(EntryType.REGION, "REGION", message)

@@ -28,6 +28,56 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 
 /**
+ * SL Variable-1 string field: 1-byte length prefix + UTF-8 bytes + NUL.
+ * Mirrors Lumiya's `stringToVariableUTF` (slproto/SLMessage.java:212)
+ * which appends a NUL byte and includes it in the U8 length prefix.
+ * Callers should use this for any `Variable 1` string field.
+ *
+ * If the encoded length would exceed 255 (the U8 max), the raw text is
+ * truncated to 254 bytes so the trailing NUL still fits the prefix.
+ */
+private fun ByteBuffer.putVariable1String(text: String): ByteBuffer {
+    val raw = text.toByteArray(Charsets.UTF_8)
+    val capped = if (raw.size > 254) raw.copyOf(254) else raw
+    put((capped.size + 1).toByte())
+    put(capped)
+    put(0.toByte())
+    return this
+}
+
+/** Variant for already-encoded byte payloads (binary `Variable 1`). */
+private fun ByteBuffer.putVariable1Bytes(bytes: ByteArray): ByteBuffer {
+    val capped = if (bytes.size > 255) bytes.copyOf(255) else bytes
+    put(capped.size.toByte())
+    put(capped)
+    return this
+}
+
+/**
+ * SL Variable-2 string field: 2-byte little-endian length prefix +
+ * UTF-8 bytes + NUL. Used for fields that exceed 255 bytes
+ * (e.g. AvatarProperties.AboutText, ChatFromViewer.Message).
+ *
+ * Cap raw text at 65534 so the NUL fits.
+ */
+private fun ByteBuffer.putVariable2String(text: String): ByteBuffer {
+    val raw = text.toByteArray(Charsets.UTF_8)
+    val capped = if (raw.size > 65534) raw.copyOf(65534) else raw
+    putShort((capped.size + 1).toShort())
+    put(capped)
+    put(0.toByte())
+    return this
+}
+
+/** Variant for already-encoded binary `Variable 2`. */
+private fun ByteBuffer.putVariable2Bytes(bytes: ByteArray): ByteBuffer {
+    val capped = if (bytes.size > 65535) bytes.copyOf(65535) else bytes
+    putShort(capped.size.toShort())
+    put(capped)
+    return this
+}
+
+/**
  * Extension function to convert UUID to byte array
  * Used in packet construction
  */
@@ -412,6 +462,32 @@ class UDPConnectionFixed {
      * Critical for implementing circuit establishment state machine.
      */
     private val pendingCallbacks = java.util.concurrent.ConcurrentHashMap<Int, MessageCallbackInfo>()
+
+    /**
+     * Inflight reliable packets keyed by sequence number. Mirrors Lumiya's
+     * `SLCircuit.unackedQueue` (`slproto/SLCircuit.java:56`) — every reliable
+     * send stays here until the simulator ACKs it. On timeout the bytes are
+     * re-queued with the RESENT flag set; matches Lumiya's `ProcessResends`.
+     *
+     * Storing the fully-encoded packet (post-header, post-zerocoding) means
+     * resends are byte-identical aside from the flag bit, which is what the
+     * SL simulator uses to deduplicate. A previous "would resend"
+     * stub at this site (`checkMessageTimeouts`) only tracked seq+callback,
+     * so no reliable message ever actually went back on the wire — captured
+     * during the 2026-04-26 Athanasia silence where `RequestMultipleObjects`
+     * never made it to the simulator.
+     */
+    private data class InflightPacket(
+        val sequenceNumber: Int,
+        val messageId: Int,
+        val data: ByteArray, // already-encoded packet (header + body); resend OR-ins FLAG_RESENT
+        @Volatile var lastSentTime: Long,
+        @Volatile var retries: Int,
+        val listener: MessageEventListener?
+    )
+
+    private val inflightReliablePackets =
+        java.util.concurrent.ConcurrentHashMap<Int, InflightPacket>()
 
     /**
      * Sequence number used for the most recent UseCircuitCode send, or -1 if not sent yet.
@@ -802,7 +878,12 @@ class UDPConnectionFixed {
 
             // Clear pending callbacks (they won't be satisfied by new circuit)
             pendingCallbacks.clear()
-            
+
+            // Clear inflight reliable resends — the new circuit assigns its
+            // own seq numbers; resending bytes from the prior circuit would
+            // either be dropped (wrong circuit code) or be misinterpreted.
+            inflightReliablePackets.clear()
+
             // Clear message statistics for accurate per-session tracking
             messageTypeCounts.clear()
             lastMessageTimes.clear()
@@ -1536,6 +1617,12 @@ class UDPConnectionFixed {
      * @param sequenceNumber The sequence number being acknowledged
      */
     private fun processReceivedAck(sequenceNumber: Int) {
+        // Drop the packet from the inflight resend queue first — Lumiya
+        // `SLCircuit.ProcessReceivedAck` pulls the matching SLMessage out of
+        // unackedQueue. Without this the resend watchdog would keep retrying
+        // an already-acknowledged packet up to MESSAGE_MAX_RETRIES times.
+        inflightReliablePackets.remove(sequenceNumber)
+
         // Check if we have a callback for this sequence number
         val callbackInfo = pendingCallbacks.remove(sequenceNumber)
         val ackedMessageName = callbackInfo?.let { getMessageName(it.messageId) }
@@ -1607,50 +1694,75 @@ class UDPConnectionFixed {
         val now = System.currentTimeMillis()
         val timeout = MESSAGE_TIMEOUT_MS
         val maxRetries = MESSAGE_MAX_RETRIES
-        
-        // Process all pending callbacks
-        pendingCallbacks.entries.removeIf { (seqNum, callbackInfo) ->
-            val age = now - callbackInfo.sentTime
-            
-            if (age > timeout) {
-                callbackInfo.retryCount++
-                
-                if (callbackInfo.retryCount > maxRetries) {
-                    // Max retries exceeded - invoke timeout callback
-                    try {
-                        callbackInfo.listener.onMessageTimeout(
-                            seqNum,
-                            callbackInfo.messageId
-                        )
-                        
-                        NetworkLogger.log(
-                            NetworkLogger.Level.WARN,
-                            NetworkLogger.Category.UDP,
-                            "✗ Message timeout: seqNum=$seqNum, messageId=${callbackInfo.messageId}, retries=${callbackInfo.retryCount}"
-                        )
-                    } catch (e: Exception) {
-                        NetworkLogger.log(
-                            NetworkLogger.Level.ERROR,
-                            NetworkLogger.Category.UDP,
-                            "Error in timeout callback for seqNum=$seqNum: ${e.message}"
-                        )
-                    }
-                    
-                    return@removeIf true // Remove from pending callbacks
-                } else {
-                    // Resend the packet (Note: This would require tracking the packet data)
+
+        // Reliable packet resend (Lumiya `SLCircuit.ProcessResends` parity,
+        // slproto/SLCircuit.java:116). For each inflight reliable packet
+        // older than MESSAGE_TIMEOUT_MS:
+        //  - retries < MESSAGE_MAX_RETRIES → set FLAG_RESENT (0x20) on the
+        //    packet's flag byte, requeue the bytes for the I/O thread, bump
+        //    retries+lastSentTime; the simulator dedupes via seq num.
+        //  - retries >= MESSAGE_MAX_RETRIES → drop, invoke optional timeout
+        //    listener, also drop the legacy pendingCallbacks entry so the
+        //    callback API gets a single onMessageTimeout instead of looping.
+        var resends = 0
+        var giveups = 0
+        inflightReliablePackets.entries.removeIf { (seqNum, inflight) ->
+            val age = now - inflight.lastSentTime
+            if (age <= timeout) return@removeIf false
+
+            if (inflight.retries >= maxRetries) {
+                giveups++
+                pendingCallbacks.remove(seqNum)
+                try {
+                    inflight.listener?.onMessageTimeout(seqNum, inflight.messageId)
+                } catch (e: Exception) {
                     NetworkLogger.log(
-                        NetworkLogger.Level.WARN,
+                        NetworkLogger.Level.ERROR,
                         NetworkLogger.Category.UDP,
-                        "⚠ Message timeout, would resend: seqNum=$seqNum, retry ${callbackInfo.retryCount}"
+                        "Error in timeout listener for seqNum=$seqNum: ${e.message}"
                     )
-                    
-                    // Update sent time to avoid immediate timeout
-                    callbackInfo.sentTime = now
                 }
+                NetworkLogger.log(
+                    NetworkLogger.Level.WARN,
+                    NetworkLogger.Category.UDP,
+                    "✗ Reliable message timed out after $maxRetries resends: " +
+                        "seqNum=$seqNum, messageId=0x${inflight.messageId.toString(16)} " +
+                        "(${getMessageName(inflight.messageId)})"
+                )
+                true // remove from inflight
+            } else {
+                inflight.retries++
+                inflight.lastSentTime = now
+                // Set FLAG_RESENT (0x20) on the cached packet bytes. Lumiya
+                // `SLMessage.Pack` writes the resent bit through `isResent`;
+                // we're operating on the already-packed bytes so OR it in.
+                val data = inflight.data
+                data[0] = (data[0].toInt() or 0x20).toByte()
+
+                outgoingQueue.offer(OutboundPacket(
+                    data = data,
+                    messageId = inflight.messageId,
+                    seqNum = seqNum,
+                    reliable = true,
+                    zerocoded = (data[0].toInt() and 0x80) != 0
+                ))
+                resends++
+                NetworkLogger.log(
+                    NetworkLogger.Level.WARN,
+                    NetworkLogger.Category.UDP,
+                    "⟳ Reliable resend (${inflight.retries}/$maxRetries): " +
+                        "seqNum=$seqNum, messageId=0x${inflight.messageId.toString(16)} " +
+                        "(${getMessageName(inflight.messageId)})"
+                )
+                false // keep in inflight; ACK will remove, or next pass times out again
             }
-            
-            false // Keep in pending callbacks
+        }
+
+        if (resends > 0 || giveups > 0) {
+            // Wake the I/O thread to drain the requeued packets without
+            // waiting for the next select() timeout.
+            selector?.wakeup()
+            packetsResentCount.addAndGet(resends)
         }
     }
     
@@ -1926,32 +2038,41 @@ class UDPConnectionFixed {
     /**
      * Send AgentThrottle message to set bandwidth allocations.
      * Tells the simulator how much bandwidth we want for different data types.
+     *
+     * Wire format (LL message_template `AgentThrottle`, low-freq 81):
+     *   AgentData: AgentID (LLUUID) + SessionID (LLUUID) + CircuitCode (U32)
+     *   Throttle:  GenCounter (U32) + Throttles (Variable 1: u8 length + bytes)
+     *
+     * The Throttles field is a `Variable 1` block, so its 28 bytes of seven
+     * little-endian floats must be preceded by a 1-byte length prefix. Lumiya
+     * encodes this via `packVariable(buf, throttles, 1)` in
+     * `slproto/messages/AgentThrottle.java`. Without the prefix, the simulator
+     * parses the first throttle byte as the length, the message is structurally
+     * wrong, and the agent ends up on default throttle settings (or worse, a
+     * silent reject), which contributed to the post-login data stall in the
+     * 2026-04-26 Athanasia capture.
      */
     fun sendAgentThrottle(
-        resend: Float = 50000f,
-        land: Float = 100000f,
-        wind: Float = 10000f,
-        cloud: Float = 10000f,
-        task: Float = 200000f,
-        texture: Float = 200000f,
-        asset: Float = 100000f
+        resend: Float = 150_000f,
+        land: Float = 170_000f,
+        wind: Float = 12_500f,
+        cloud: Float = 12_500f,
+        task: Float = 446_000f,
+        texture: Float = 446_000f,
+        asset: Float = 220_000f
     ) {
         val identity = outboundIdentity("UDPConnectionFixed.sendAgentThrottle")
-        val payload = ByteBuffer.allocate(36 + 4 + 28).order(ByteOrder.LITTLE_ENDIAN)
-        
-        // Agent ID
+        // 36 (AgentData) + 4 (GenCounter) + 1 (Throttles length prefix) + 28 (7 floats)
+        val payload = ByteBuffer.allocate(36 + 4 + 1 + 28).order(ByteOrder.LITTLE_ENDIAN)
+
+        // AgentData block
         payload.putUUID(identity.agentId)
-        
-        // Session ID
         payload.putUUID(identity.sessionId)
-        
-        // Circuit code
         payload.putInt(identity.circuitCode ?: 0)
-        
-        // GenCounter
-        payload.putInt(1)
-        
-        // Throttles - 7 float values for bandwidth allocation
+
+        // Throttle block
+        payload.putInt(1) // GenCounter
+        payload.put(28.toByte()) // Variable 1 length prefix for Throttles
         payload.putFloat(resend)
         payload.putFloat(land)
         payload.putFloat(wind)
@@ -1959,7 +2080,7 @@ class UDPConnectionFixed {
         payload.putFloat(task)
         payload.putFloat(texture)
         payload.putFloat(asset)
-        
+
         Log.d(TAG, "Sending AgentThrottle")
         sendPacket(MessageIds.AGENT_THROTTLE, payload.array(), reliable = true)
     }
@@ -2071,6 +2192,428 @@ class UDPConnectionFixed {
     }
 
     /**
+     * Outbound serial number for AgentPause/AgentResume. The simulator
+     * uses this to discard out-of-order pause/resume messages
+     * (Lumiya parity: `AgentPause`/`AgentResume` `SerialNum` field).
+     */
+    private val agentPauseSerial = java.util.concurrent.atomic.AtomicInteger(0)
+
+    /**
+     * AgentPause — tells the simulator to stop sending non-essential
+     * data (object updates, terse updates, etc.) while the viewer is
+     * backgrounded. Pair with [sendAgentResume] when the viewer comes
+     * back to the foreground. Wire format (LL message_template
+     * `AgentPause`, low-freq 78; Lumiya parity
+     * `slproto/messages/AgentPause.java`):
+     *   AgentData: AgentID(LLUUID), SessionID(LLUUID), SerialNum(U32)
+     */
+    fun sendAgentPause() {
+        val identity = outboundIdentity("UDPConnectionFixed.sendAgentPause")
+        val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putInt(agentPauseSerial.incrementAndGet())
+        sendPacket(MessageIds.AGENT_PAUSE, payload.array(), reliable = true)
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sent AgentPause")
+    }
+
+    /**
+     * AgentResume — counterpart to [sendAgentPause]. Wire format
+     * (LL message_template `AgentResume`, low-freq 79; Lumiya parity).
+     */
+    fun sendAgentResume() {
+        val identity = outboundIdentity("UDPConnectionFixed.sendAgentResume")
+        val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putInt(agentPauseSerial.incrementAndGet())
+        sendPacket(MessageIds.AGENT_RESUME, payload.array(), reliable = true)
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sent AgentResume")
+    }
+
+    /**
+     * AgentWearablesRequest — asks the simulator to send the agent's
+     * current wearables list (replied as `AgentWearablesUpdate`, which
+     * also kicks off appearance baking). Wire format (LL message_template
+     * `AgentWearablesRequest`, low-freq 381; Lumiya parity
+     * `slproto/messages/AgentWearablesRequest.java`):
+     *   AgentData: AgentID(LLUUID), SessionID(LLUUID)
+     */
+    fun sendAgentWearablesRequest() {
+        val identity = outboundIdentity("UDPConnectionFixed.sendAgentWearablesRequest")
+        val payload = ByteBuffer.allocate(32).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        sendPacket(MessageIds.AGENT_WEARABLES_REQUEST, payload.array(), reliable = true)
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sent AgentWearablesRequest")
+    }
+
+    /**
+     * GroupRoleDataRequest — requests the role list for a group. The
+     * simulator replies with one or more paged `GroupRoleDataReply`
+     * messages, parsed by [com.linkpoint.groups.GroupsManager]. Wire
+     * format (LL message_template `GroupRoleDataRequest`, low-freq 371;
+     * Lumiya parity `slproto/messages/GroupRoleDataRequest.java`):
+     *   AgentData: AgentID(LLUUID), SessionID(LLUUID)
+     *   GroupData: GroupID(LLUUID), RequestID(LLUUID)
+     *
+     * @return the RequestID, so callers can correlate the paged reply.
+     */
+    fun sendGroupRoleDataRequest(groupId: UUID): UUID {
+        val identity = outboundIdentity("UDPConnectionFixed.sendGroupRoleDataRequest")
+        val requestId = UUID.randomUUID()
+        val payload = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putUUID(groupId)
+        payload.putUUID(requestId)
+        sendPacket(MessageIds.GROUP_ROLE_DATA_REQUEST, payload.array(), reliable = true)
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
+            "→ Sent GroupRoleDataRequest groupId=$groupId requestId=$requestId")
+        return requestId
+    }
+
+    /**
+     * GroupTitlesRequest — requests the title list for a group. Reply is
+     * `GroupTitlesReply`, parsed by [com.linkpoint.groups.GroupsManager].
+     * Wire format (LL message_template `GroupTitlesRequest`, low-freq
+     * 375; Lumiya parity `slproto/messages/GroupTitlesRequest.java`):
+     *   AgentData: AgentID(LLUUID), SessionID(LLUUID),
+     *              GroupID(LLUUID), RequestID(LLUUID)
+     */
+    fun sendGroupTitlesRequest(groupId: UUID): UUID {
+        val identity = outboundIdentity("UDPConnectionFixed.sendGroupTitlesRequest")
+        val requestId = UUID.randomUUID()
+        val payload = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putUUID(groupId)
+        payload.putUUID(requestId)
+        sendPacket(MessageIds.GROUP_TITLES_REQUEST, payload.array(), reliable = true)
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
+            "→ Sent GroupTitlesRequest groupId=$groupId requestId=$requestId")
+        return requestId
+    }
+
+    /**
+     * GenericMessage — generic command-shaped envelope used by sims and
+     * scripts (e.g. RLV relay, region restart announcements). Wire format
+     * (Lumiya parity, slproto/messages/GenericMessage.java PackPayload):
+     *   AgentData:  AgentID, SessionID, TransactionID
+     *   MethodData: Method (Variable 1 NUL-term), Invoice (LLUUID)
+     *   ParamList (Variable, U8 count): Parameter (Variable 1)
+     */
+    fun sendGenericMessage(
+        method: String,
+        invoice: UUID = UUID(0L, 0L),
+        params: List<String> = emptyList(),
+        transactionId: UUID = UUID.randomUUID(),
+        reliable: Boolean = true,
+    ) {
+        val identity = outboundIdentity("UDPConnectionFixed.sendGenericMessage")
+        val methodBytes = method.toByteArray(Charsets.UTF_8) + 0.toByte()
+        val paramBlobs = params.map { it.toByteArray(Charsets.UTF_8) + 0.toByte() }
+        val paramSize = paramBlobs.sumOf { 1 + it.size.coerceAtMost(255) }
+
+        val payload = ByteBuffer
+            .allocate(48 + 1 + methodBytes.size + 16 + 1 + paramSize)
+            .order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putUUID(transactionId)
+        payload.putVariable1Bytes(methodBytes)
+        payload.putUUID(invoice)
+        payload.put(paramBlobs.size.coerceAtMost(255).toByte())
+        for (blob in paramBlobs.take(255)) {
+            payload.putVariable1Bytes(blob)
+        }
+        sendPacket(MessageIds.GENERIC_MESSAGE, payload.array().copyOf(payload.position()), reliable = reliable)
+    }
+
+    /**
+     * FetchInventory — UDP fallback for inventory-item fetch when the
+     * FetchInventory2 capability isn't available. Wire format
+     * (Lumiya parity, slproto/messages/FetchInventory.java PackPayload):
+     *   AgentData:  AgentID, SessionID
+     *   InventoryData (Variable, U8 count): OwnerID(LLUUID), ItemID(LLUUID)
+     */
+    fun sendFetchInventory(items: List<Pair<UUID, UUID>>) {
+        if (items.isEmpty()) return
+        val identity = outboundIdentity("UDPConnectionFixed.sendFetchInventory")
+        // 32 bytes per entry; cap at 255 per packet (U8 count). Sender batches.
+        for (chunk in items.chunked(255)) {
+            val payload = ByteBuffer.allocate(32 + 1 + chunk.size * 32).order(ByteOrder.LITTLE_ENDIAN)
+            payload.putUUID(identity.agentId)
+            payload.putUUID(identity.sessionId)
+            payload.put(chunk.size.toByte())
+            for ((ownerId, itemId) in chunk) {
+                payload.putUUID(ownerId)
+                payload.putUUID(itemId)
+            }
+            sendPacket(MessageIds.FETCH_INVENTORY, payload.array(), reliable = true)
+        }
+    }
+
+    /**
+     * FetchInventoryDescendents — UDP fallback for folder enumeration.
+     * Wire format (Lumiya parity,
+     * slproto/messages/FetchInventoryDescendents.java PackPayload):
+     *   AgentData:    AgentID, SessionID
+     *   InventoryData: FolderID(LLUUID), OwnerID(LLUUID), SortOrder(S32),
+     *                  FetchFolders(BOOL), FetchItems(BOOL)
+     */
+    fun sendFetchInventoryDescendents(
+        folderId: UUID,
+        ownerId: UUID,
+        sortOrder: Int = 0,
+        fetchFolders: Boolean = true,
+        fetchItems: Boolean = true,
+    ) {
+        val identity = outboundIdentity("UDPConnectionFixed.sendFetchInventoryDescendents")
+        val payload = ByteBuffer.allocate(32 + 16 + 16 + 4 + 1 + 1).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putUUID(folderId)
+        payload.putUUID(ownerId)
+        payload.putInt(sortOrder)
+        payload.put(if (fetchFolders) 1.toByte() else 0.toByte())
+        payload.put(if (fetchItems) 1.toByte() else 0.toByte())
+        sendPacket(MessageIds.FETCH_INVENTORY_DESCENDENTS, payload.array(), reliable = true)
+    }
+
+    /**
+     * AvatarPropertiesUpdate — write the agent's profile fields.
+     * Wire format (Lumiya parity,
+     * slproto/messages/AvatarPropertiesUpdate.java PackPayload):
+     *   AgentData:      AgentID, SessionID
+     *   PropertiesData: ImageID(LLUUID), FLImageID(LLUUID),
+     *                   AboutText(Variable 2), FLAboutText(Variable 1),
+     *                   AllowPublish(BOOL), MaturePublish(BOOL),
+     *                   ProfileURL(Variable 1)
+     */
+    fun sendAvatarPropertiesUpdate(
+        imageId: UUID,
+        flImageId: UUID,
+        aboutText: String,
+        firstLifeAboutText: String,
+        allowPublish: Boolean,
+        maturePublish: Boolean,
+        profileUrl: String,
+    ) {
+        val identity = outboundIdentity("UDPConnectionFixed.sendAvatarPropertiesUpdate")
+        val aboutBytes = aboutText.toByteArray(Charsets.UTF_8)
+        val flBytes = firstLifeAboutText.toByteArray(Charsets.UTF_8)
+        val urlBytes = profileUrl.toByteArray(Charsets.UTF_8)
+
+        val payload = ByteBuffer
+            .allocate(32 + 16 + 16 +
+                      2 + aboutBytes.size + 1 +
+                      1 + flBytes.size.coerceAtMost(254) + 1 +
+                      1 + 1 +
+                      1 + urlBytes.size.coerceAtMost(254) + 1)
+            .order(ByteOrder.LITTLE_ENDIAN)
+
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putUUID(imageId)
+        payload.putUUID(flImageId)
+        payload.putVariable2String(aboutText)
+        payload.putVariable1String(firstLifeAboutText)
+        payload.put(if (allowPublish) 1.toByte() else 0.toByte())
+        payload.put(if (maturePublish) 1.toByte() else 0.toByte())
+        payload.putVariable1String(profileUrl)
+        sendPacket(MessageIds.AVATAR_PROPERTIES_UPDATE, payload.array().copyOf(payload.position()), reliable = true)
+    }
+
+    /**
+     * AvatarPickerRequest — search for residents by partial name.
+     * Returns the QueryID so callers can correlate the AvatarPickerReply.
+     * Wire format (Lumiya parity,
+     * slproto/messages/AvatarPickerRequest.java PackPayload):
+     *   AgentData: AgentID, SessionID, QueryID
+     *   Data:      Name (Variable 1 NUL-term)
+     */
+    fun sendAvatarPickerRequest(name: String): UUID {
+        val identity = outboundIdentity("UDPConnectionFixed.sendAvatarPickerRequest")
+        val queryId = UUID.randomUUID()
+        val nameBytes = name.toByteArray(Charsets.UTF_8)
+        val payload = ByteBuffer
+            .allocate(48 + 1 + nameBytes.size.coerceAtMost(254) + 1)
+            .order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putUUID(queryId)
+        payload.putVariable1String(name)
+        sendPacket(MessageIds.AVATAR_PICKER_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
+        return queryId
+    }
+
+    /**
+     * JoinGroupRequest — accept a group invitation by GroupID. Reply is
+     * `JoinGroupReply` (carries success bool). Wire format
+     * (Lumiya parity, slproto/messages/JoinGroupRequest.java).
+     */
+    fun sendJoinGroupRequest(groupId: UUID) {
+        val identity = outboundIdentity("UDPConnectionFixed.sendJoinGroupRequest")
+        val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putUUID(groupId)
+        sendPacket(MessageIds.JOIN_GROUP_REQUEST, payload.array(), reliable = true)
+    }
+
+    /**
+     * LeaveGroupReply — confirm a leave-group request from the simulator.
+     * In SL this is normally simulator → viewer (per the message_template),
+     * but Lumiya also packs it for replay / RLV-style purposes. Wire
+     * format (Lumiya parity, slproto/messages/LeaveGroupReply.java):
+     *   AgentData: AgentID
+     *   GroupData: GroupID, Success(BOOL)
+     */
+    fun sendLeaveGroupReply(groupId: UUID, success: Boolean) {
+        val identity = outboundIdentity("UDPConnectionFixed.sendLeaveGroupReply")
+        val payload = ByteBuffer.allocate(16 + 16 + 1).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(groupId)
+        payload.put(if (success) 1.toByte() else 0.toByte())
+        sendPacket(MessageIds.LEAVE_GROUP_REPLY, payload.array(), reliable = true)
+    }
+
+    /**
+     * InviteGroupRequest — invite one or more residents to a group.
+     * Wire format (Lumiya parity,
+     * slproto/messages/InviteGroupRequest.java PackPayload):
+     *   AgentData: AgentID, SessionID
+     *   GroupData: GroupID
+     *   InviteData (Variable, U8 count): InviteeID, RoleID
+     */
+    fun sendInviteGroupRequest(groupId: UUID, invites: List<Pair<UUID, UUID>>) {
+        if (invites.isEmpty()) return
+        val identity = outboundIdentity("UDPConnectionFixed.sendInviteGroupRequest")
+        for (chunk in invites.chunked(255)) {
+            val payload = ByteBuffer
+                .allocate(48 + 1 + chunk.size * 32)
+                .order(ByteOrder.LITTLE_ENDIAN)
+            payload.putUUID(identity.agentId)
+            payload.putUUID(identity.sessionId)
+            payload.putUUID(groupId)
+            payload.put(chunk.size.toByte())
+            for ((inviteeId, roleId) in chunk) {
+                payload.putUUID(inviteeId)
+                payload.putUUID(roleId)
+            }
+            sendPacket(MessageIds.INVITE_GROUP_REQUEST, payload.array(), reliable = true)
+        }
+    }
+
+    /**
+     * EjectGroupMemberRequest — kick one or more residents from a group.
+     * Wire format (Lumiya parity,
+     * slproto/messages/EjectGroupMemberRequest.java PackPayload):
+     *   AgentData: AgentID, SessionID
+     *   GroupData: GroupID
+     *   EjectData (Variable, U8 count): EjecteeID
+     */
+    fun sendEjectGroupMemberRequest(groupId: UUID, ejecteeIds: List<UUID>) {
+        if (ejecteeIds.isEmpty()) return
+        val identity = outboundIdentity("UDPConnectionFixed.sendEjectGroupMemberRequest")
+        for (chunk in ejecteeIds.chunked(255)) {
+            val payload = ByteBuffer
+                .allocate(48 + 1 + chunk.size * 16)
+                .order(ByteOrder.LITTLE_ENDIAN)
+            payload.putUUID(identity.agentId)
+            payload.putUUID(identity.sessionId)
+            payload.putUUID(groupId)
+            payload.put(chunk.size.toByte())
+            for (id in chunk) payload.putUUID(id)
+            sendPacket(MessageIds.EJECT_GROUP_MEMBER_REQUEST, payload.array(), reliable = true)
+        }
+    }
+
+    /**
+     * AssetUploadRequest — small-asset upload via the legacy UDP path
+     * (modern viewers go through HTTP `UploadBakedTexture` /
+     * `NewFileAgentInventory` capabilities; this is for grids / sims that
+     * still accept the UDP fallback). Wire format (Lumiya parity,
+     * slproto/messages/AssetUploadRequest.java PackPayload):
+     *   AssetBlock: TransactionID(LLUUID), Type(S8), Tempfile(BOOL),
+     *               StoreLocal(BOOL), AssetData(Variable 2)
+     */
+    fun sendAssetUploadRequest(
+        transactionId: UUID,
+        assetType: Int,
+        tempFile: Boolean,
+        storeLocal: Boolean,
+        assetData: ByteArray,
+    ) {
+        val payload = ByteBuffer
+            .allocate(16 + 1 + 1 + 1 + 2 + assetData.size)
+            .order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(transactionId)
+        payload.put(assetType.toByte())
+        payload.put(if (tempFile) 1.toByte() else 0.toByte())
+        payload.put(if (storeLocal) 1.toByte() else 0.toByte())
+        payload.putVariable2Bytes(assetData)
+        sendPacket(MessageIds.ASSET_UPLOAD_REQUEST, payload.array(), reliable = true)
+    }
+
+    /**
+     * DirPlacesQuery — search the in-world places directory. Returns the
+     * QueryID so callers can correlate the DirPlacesReply pages. Wire
+     * format (Lumiya parity, slproto/messages/DirPlacesQuery.java).
+     */
+    fun sendDirPlacesQuery(
+        queryText: String,
+        queryFlags: Int = 0,
+        category: Int = 0,
+        simName: String = "",
+        queryStart: Int = 0,
+    ): UUID {
+        val identity = outboundIdentity("UDPConnectionFixed.sendDirPlacesQuery")
+        val queryId = UUID.randomUUID()
+        val payload = ByteBuffer
+            .allocate(48 + 1 + queryText.length.coerceAtMost(254) + 1 +
+                      4 + 1 +
+                      1 + simName.length.coerceAtMost(254) + 1 + 4)
+            .order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putUUID(queryId)
+        payload.putVariable1String(queryText)
+        payload.putInt(queryFlags)
+        payload.put(category.toByte())
+        payload.putVariable1String(simName)
+        payload.putInt(queryStart)
+        sendPacket(MessageIds.DIR_PLACES_QUERY, payload.array().copyOf(payload.position()), reliable = true)
+        return queryId
+    }
+
+    /**
+     * DirFindQuery — search the people / events / classifieds directory
+     * (queryFlags selects the table). Wire format
+     * (Lumiya parity, slproto/messages/DirFindQuery.java).
+     */
+    fun sendDirFindQuery(
+        queryText: String,
+        queryFlags: Int = 0,
+        queryStart: Int = 0,
+    ): UUID {
+        val identity = outboundIdentity("UDPConnectionFixed.sendDirFindQuery")
+        val queryId = UUID.randomUUID()
+        val payload = ByteBuffer
+            .allocate(48 + 1 + queryText.length.coerceAtMost(254) + 1 + 4 + 4)
+            .order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putUUID(queryId)
+        payload.putVariable1String(queryText)
+        payload.putInt(queryFlags)
+        payload.putInt(queryStart)
+        sendPacket(MessageIds.DIR_FIND_QUERY, payload.array().copyOf(payload.position()), reliable = true)
+        return queryId
+    }
+
+    /**
      * Send a packet with proper SL protocol encoding
      * 
      * @param messageId The message ID
@@ -2123,6 +2666,21 @@ class UDPConnectionFixed {
                 reliable = reliable,
                 zerocoded = zerocoded
             ))
+
+            // Track every reliable send for resend (Lumiya unackedQueue
+            // parity). Also track the optional listener for ACK callbacks.
+            // The pendingCallbacks map is kept for the legacy callback API;
+            // inflightReliablePackets is the source of truth for resends.
+            if (reliable) {
+                inflightReliablePackets[seqNum] = InflightPacket(
+                    sequenceNumber = seqNum,
+                    messageId = messageId,
+                    data = finalPacket,
+                    lastSentTime = System.currentTimeMillis(),
+                    retries = 0,
+                    listener = listener
+                )
+            }
         }
 
         if (reliable && listener != null) {
@@ -2407,6 +2965,10 @@ class UDPConnectionFixed {
 
         // Clear pending callbacks since we're disconnecting
         pendingCallbacks.clear()
+
+        // Drop the inflight resend queue — circuit is gone, resending would
+        // either time out or hit a stale sim-side circuit lookup.
+        inflightReliablePackets.clear()
 
         try {
             selectionKey?.cancel()

@@ -92,21 +92,28 @@ class GestureManager(
      * Send ActivateGestures packet
      */
     private suspend fun sendActivateGesture(assetId: UUID, itemId: UUID) {
-        // Packet layout:
-        // Header (handled by sendPacket)
-        // AgentData: AgentID(16), SessionID(16), Flags(4)
-        // GestureData: AssetID(16), ItemID(16)
+        // Wire format (LL message_template `ActivateGestures`, low-freq 316,
+        // Lumiya: slproto/messages/ActivateGestures.java PackPayload):
+        //   AgentData: AgentID(LLUUID), SessionID(LLUUID), Flags(U32)
+        //   Data (Variable, U8 count):
+        //     ItemID(LLUUID), AssetID(LLUUID), GestureFlags(U32)
+        //
+        // The previous encoder skipped the U8 count byte and the per-entry
+        // GestureFlags U32, *and* swapped ItemID/AssetID order, so the
+        // simulator parsed garbage and silently dropped the activation.
 
-        val payload = ByteBuffer.allocate(36 + 32).order(ByteOrder.LITTLE_ENDIAN)
+        val payload = ByteBuffer.allocate(36 + 1 + 36).order(ByteOrder.LITTLE_ENDIAN)
 
         // AgentData
         payload.putUUID(agentId)
         payload.putUUID(sessionId)
         payload.putInt(0) // Flags
 
-        // GestureData
-        payload.putUUID(assetId)
+        // Data (Variable u8 count + entries)
+        payload.put(1.toByte())
         payload.putUUID(itemId)
+        payload.putUUID(assetId)
+        payload.putInt(0) // GestureFlags
 
         udpConnection.sendPacket(MessageIds.ACTIVATE_GESTURES, payload.array(), reliable = true)
         Log.d(TAG, "Sent ActivateGestures for item $itemId (asset $assetId)")
@@ -116,20 +123,23 @@ class GestureManager(
      * Send DeactivateGestures packet
      */
     private suspend fun sendDeactivateGesture(itemId: UUID) {
-        // Packet layout:
-        // Header
-        // AgentData: AgentID(16), SessionID(16), Flags(4)
-        // GestureData: GestureID(16) -> This is actually the ItemID
+        // Wire format (LL message_template `DeactivateGestures`, low-freq 317,
+        // Lumiya: slproto/messages/DeactivateGestures.java PackPayload):
+        //   AgentData: AgentID(LLUUID), SessionID(LLUUID), Flags(U32)
+        //   Data (Variable, U8 count):
+        //     ItemID(LLUUID), GestureFlags(U32)
 
-        val payload = ByteBuffer.allocate(36 + 16).order(ByteOrder.LITTLE_ENDIAN)
+        val payload = ByteBuffer.allocate(36 + 1 + 20).order(ByteOrder.LITTLE_ENDIAN)
 
         // AgentData
         payload.putUUID(agentId)
         payload.putUUID(sessionId)
         payload.putInt(0) // Flags
 
-        // GestureData
+        // Data
+        payload.put(1.toByte())
         payload.putUUID(itemId)
+        payload.putInt(0) // GestureFlags
 
         udpConnection.sendPacket(MessageIds.DEACTIVATE_GESTURES, payload.array(), reliable = true)
         Log.d(TAG, "Sent DeactivateGestures for item $itemId")

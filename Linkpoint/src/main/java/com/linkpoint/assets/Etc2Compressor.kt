@@ -8,13 +8,29 @@ import java.nio.ByteOrder
 /**
  * CPU-side ETC2/EAC compressor for [LinkpointTexture].
  *
- * The target encoder is `etcpak` compiled into `liblinkpoint-j2k.so` (see
- * docs/lumiya-port/README.md item 2 + item 3). Until that lands, the
- * [Etc1Fallback] implementation below uses the AOSP `android.opengl.ETC1`
- * encoder for opaque inputs only — it exists to prove the upload path
- * end-to-end and MUST NOT be enabled as the default once any alpha textures
- * flow through `LinkpointTexture`, because dropping alpha silently is worse
- * than uncompressed RGBA.
+ * Uses two implementations under the hood:
+ *
+ *  - **RGB path** ([Etc1AsEtc2Rgb]): wraps Android's
+ *    `android.opengl.ETC1` encoder. ETC2_RGB8 is a strict superset of
+ *    ETC1: every valid ETC1 4×4 block is a valid ETC2_RGB8 block (the
+ *    GPU decoder selects the matching mode). So we encode with ETC1
+ *    and tag the output as `ETC2_RGB` so Filament uploads it via
+ *    `Texture.InternalFormat.ETC2_RGB8`. No quality loss vs ETC1; we
+ *    just gain access to the modern compressed-texture format.
+ *
+ *  - **RGBA path** ([Etc1PlusEacRgba]): runs the ETC1 RGB encoder for
+ *    the colour channels, runs [EacAlphaEncoder] for the alpha
+ *    channel, and interleaves them into ETC2_EAC_RGBA8 layout — 8
+ *    bytes alpha + 8 bytes RGB per 4×4 block, alpha first per the
+ *    Khronos spec (ARB_ES3_compatibility, "ETC2_EAC_RGBA8" layout).
+ *    Standards-compliant; decoded by every GPU that advertises
+ *    ETC2_EAC_RGBA8 (every GLES 3.0+ device, which is every Android
+ *    device Linkpoint targets).
+ *
+ * Quality is moderate (per-block exhaustive search inside
+ * EacAlphaEncoder; ETC1 inherits Android's encoder quality). When that
+ * becomes a bottleneck, swap in `etcpak` via the JNI scaffold below
+ * — same calling contract.
  */
 interface Etc2Compressor {
     /**
@@ -25,9 +41,6 @@ interface Etc2Compressor {
      * @param width   pixel width, must be a multiple of 4.
      * @param height  pixel height, must be a multiple of 4.
      * @param hasAlpha whether the source uses the alpha channel meaningfully.
-     *                Implementations MAY refuse to compress alpha inputs (the
-     *                ETC1 fallback does); callers must check the returned
-     *                [Result.format].
      */
     fun compress(rgba: ByteArray, width: Int, height: Int, hasAlpha: Boolean): Result?
 
@@ -53,38 +66,52 @@ interface Etc2Compressor {
     }
 
     enum class GpuFormat {
-        ETC1_RGB,        // android.opengl.ETC1, opaque only — fallback path
-        ETC2_RGB,        // not yet wired
-        ETC2_EAC_RGBA,   // target — implemented by NativeEtcpak once etcpak is in CMake
+        ETC1_RGB,        // raw ETC1 (kept for diagnostic / tests)
+        ETC2_RGB,        // bit-identical to ETC1; tag-only difference for Filament upload
+        ETC2_EAC_RGBA,   // ETC2 RGB + EAC alpha, 16 bytes/block
     }
 }
 
 /**
- * Temporary fallback that lets the upload path be exercised before etcpak
- * lands. Refuses alpha inputs to make the asymmetry loud at the call site.
+ * Encode an opaque RGBA buffer as ETC2_RGB8 by deferring to Android's
+ * ETC1 encoder and re-tagging. The bytes are bit-identical to ETC1
+ * output; the ETC2 GPU decoder accepts them unchanged.
  */
-internal object Etc1Fallback : Etc2Compressor {
-    private const val TAG = "Etc1Fallback"
+internal object Etc1AsEtc2Rgb : Etc2Compressor {
+    private const val TAG = "Etc1AsEtc2Rgb"
 
     override fun compress(
         rgba: ByteArray,
         width: Int,
         height: Int,
-        hasAlpha: Boolean
+        hasAlpha: Boolean,
     ): Etc2Compressor.Result? {
-        if (hasAlpha) {
-            Log.w(TAG, "ETC1 fallback cannot compress alpha textures (${width}x$height); skipping")
+        val rgbBlocks = encodeEtc1Rgb(rgba, width, height) ?: return null
+        return Etc2Compressor.Result(
+            data = rgbBlocks,
+            format = if (hasAlpha) Etc2Compressor.GpuFormat.ETC2_RGB
+                     else Etc2Compressor.GpuFormat.ETC2_RGB,
+            width = width,
+            height = height,
+        )
+    }
+
+    /**
+     * Run Android's ETC1 encoder over an RGBA buffer (alpha discarded
+     * by the deinterleave step). Returns null on validation failure.
+     */
+    fun encodeEtc1Rgb(rgba: ByteArray, width: Int, height: Int): ByteArray? {
+        if (width <= 0 || height <= 0 || width % 4 != 0 || height % 4 != 0) {
+            Log.w(TAG, "ETC1 requires multiple-of-4 dimensions; got ${width}x$height")
             return null
         }
-        if (width <= 0 || height <= 0 || width % 4 != 0 || height % 4 != 0) return null
         val expected = width * height * 4
         if (rgba.size != expected) {
             Log.w(TAG, "rgba size ${rgba.size} != expected $expected for ${width}x$height")
             return null
         }
-
-        // ETC1.encodeImage takes RGB (3 bytes/px); deinterleave straight into
-        // the direct buffer instead of going through a heap intermediate.
+        // ETC1.encodeImage takes RGB (3 bytes/px); deinterleave straight
+        // into the direct buffer instead of going through a heap copy.
         val rgbBytes = width * height * 3
         val src = ByteBuffer.allocateDirect(rgbBytes).order(ByteOrder.nativeOrder())
         var i = 0
@@ -98,14 +125,77 @@ internal object Etc1Fallback : Etc2Compressor {
         val dst = ByteBuffer.allocateDirect(compressedSize).order(ByteOrder.nativeOrder())
         ETC1.encodeImage(src, width, height, 3, width * 3, dst)
         val out = ByteArray(compressedSize)
-        // Android's java.nio.Buffer.position(int) returns Buffer (not the
-        // covariant ByteBuffer the JDK 9+ desktop API returns), so chaining
-        // .get(ByteArray) off it fails to resolve. Split the calls.
+        // Cast through java.nio.Buffer to dodge the JDK 9 covariant-return
+        // mismatch (Android's java.nio.Buffer.position(int) returns
+        // Buffer, not the covariant ByteBuffer).
         dst.position(0)
         dst.get(out)
+        return out
+    }
+}
+
+/**
+ * Encode an RGBA buffer as ETC2_EAC_RGBA8 — alpha block (8 bytes) +
+ * RGB block (8 bytes) per 4×4 pixel tile, alpha-first per the spec.
+ * Each component is encoded independently (ETC1 for RGB, EAC for
+ * alpha) and then interleaved.
+ */
+internal object Etc1PlusEacRgba : Etc2Compressor {
+    private const val TAG = "Etc1PlusEacRgba"
+
+    override fun compress(
+        rgba: ByteArray,
+        width: Int,
+        height: Int,
+        hasAlpha: Boolean,
+    ): Etc2Compressor.Result? {
+        if (!hasAlpha) {
+            // Caller knows the texture is opaque; route to the ETC2_RGB
+            // path so the output is half the size.
+            return Etc1AsEtc2Rgb.compress(rgba, width, height, hasAlpha = false)
+        }
+        if (width <= 0 || height <= 0 || width % 4 != 0 || height % 4 != 0) {
+            Log.w(TAG, "ETC2_EAC requires multiple-of-4 dimensions; got ${width}x$height")
+            return null
+        }
+        val expected = width * height * 4
+        if (rgba.size != expected) {
+            Log.w(TAG, "rgba size ${rgba.size} != expected $expected for ${width}x$height")
+            return null
+        }
+
+        // 1. Encode the RGB channels via ETC1 (same path as Etc1AsEtc2Rgb).
+        val rgbBlocks = Etc1AsEtc2Rgb.encodeEtc1Rgb(rgba, width, height) ?: return null
+
+        // 2. Extract the alpha plane and encode it via EAC.
+        val alphaPlane = ByteArray(width * height)
+        var i = 0
+        var j = 0
+        while (i < rgba.size) {
+            alphaPlane[j++] = rgba[i + 3]
+            i += 4
+        }
+        val alphaBlocks = EacAlphaEncoder.encode(alphaPlane, width, height)
+
+        // 3. Interleave: ETC2_EAC_RGBA8 layout puts alpha (8 bytes) FIRST
+        //    in each 16-byte block, then RGB (8 bytes). Both block streams
+        //    are in the same raster order so we just zip them.
+        val blockCount = (width / 4) * (height / 4)
+        val expectedRgbSize = blockCount * 8
+        val expectedAlphaSize = blockCount * 8
+        if (rgbBlocks.size != expectedRgbSize || alphaBlocks.size != expectedAlphaSize) {
+            Log.w(TAG, "block size mismatch: rgb=${rgbBlocks.size}/${expectedRgbSize}, " +
+                "alpha=${alphaBlocks.size}/${expectedAlphaSize}")
+            return null
+        }
+        val out = ByteArray(blockCount * 16)
+        for (b in 0 until blockCount) {
+            System.arraycopy(alphaBlocks, b * 8, out, b * 16, 8)
+            System.arraycopy(rgbBlocks, b * 8, out, b * 16 + 8, 8)
+        }
         return Etc2Compressor.Result(
             data = out,
-            format = Etc2Compressor.GpuFormat.ETC1_RGB,
+            format = Etc2Compressor.GpuFormat.ETC2_EAC_RGBA,
             width = width,
             height = height,
         )
@@ -113,10 +203,15 @@ internal object Etc1Fallback : Etc2Compressor {
 }
 
 /**
- * Real implementation backed by `etcpak` inside `liblinkpoint-j2k.so`.
- * The native entry point does not exist yet — see CMakeLists.txt TODO.
- * Calling [compress] today will throw [UnsatisfiedLinkError]; callers should
- * gate on availability via [isAvailable].
+ * JNI scaffold for an `etcpak`-backed encoder. Currently always
+ * returns "not available" because the native entry point is gated on
+ * `LINKPOINT_HAVE_ETCPAK` in `cpp/CMakeLists.txt`, which is only
+ * defined when the etcpak source is vendored. The Kotlin
+ * [Etc1AsEtc2Rgb] / [Etc1PlusEacRgba] paths above produce
+ * standards-compliant output without it; this hook stays so a future
+ * commit can drop in the SIMD-accelerated implementation by simply
+ * adding the etcpak source files and the CMake define — no Kotlin
+ * changes required.
  */
 internal object NativeEtcpak : Etc2Compressor {
     @Volatile private var probed = false
@@ -145,7 +240,7 @@ internal object NativeEtcpak : Etc2Compressor {
         rgba: ByteArray,
         width: Int,
         height: Int,
-        hasAlpha: Boolean
+        hasAlpha: Boolean,
     ): Etc2Compressor.Result? {
         if (!isAvailable()) return null
         if (width <= 0 || height <= 0 || width % 4 != 0 || height % 4 != 0) return null
@@ -172,10 +267,18 @@ internal object NativeEtcpak : Etc2Compressor {
 }
 
 /**
- * Picks the best available compressor at call time. Prefer etcpak when the
- * native entry point is wired up; fall back to ETC1 otherwise.
+ * Picks the best available compressor at call time. Order:
+ *   1. `etcpak` JNI bridge, when vendored (best quality, fastest).
+ *   2. Pure-Kotlin ETC1+EAC path: standards-compliant and works on
+ *      every device. Routes opaque inputs to the half-size ETC2_RGB
+ *      path automatically.
+ *
+ * The previous fallback (`Etc1Fallback`, opaque-only, ETC1-tagged) is
+ * gone — it dropped alpha silently, which the [LinkpointTexture]
+ * upload path treated as "fall through to RGBA8". That worked but
+ * defeated the whole point of compression on alpha textures.
  */
 object Etc2CompressorFactory {
     fun get(): Etc2Compressor =
-        if (NativeEtcpak.isAvailable()) NativeEtcpak else Etc1Fallback
+        if (NativeEtcpak.isAvailable()) NativeEtcpak else Etc1PlusEacRgba
 }

@@ -960,10 +960,42 @@ class RenderManager(private val context: Context) {
     }
 
     /**
+     * Tracked overload of [uploadBitmapAsTexture] that routes through
+     * [com.linkpoint.assets.LinkpointTexture] so the upload participates
+     * in the LinkpointTexture lifecycle: native+GPU memory accounting
+     * (TextureMemoryTracker), Cleaner-driven leak detection, and a
+     * stable `releaseFilamentTexture(engine)` teardown path. Callers
+     * with a UUID (which is everyone going through TextureManager)
+     * should prefer this path. Returns both the Filament `Texture` (so
+     * existing render binding code keeps working) and the wrapping
+     * `LinkpointTexture` (so the caller can drive teardown via
+     * `releaseFilamentTexture` rather than leaking the Filament handle).
+     */
+    fun uploadBitmapAsLinkpointTexture(
+        uuid: java.util.UUID,
+        bitmap: android.graphics.Bitmap
+    ): Pair<Texture, com.linkpoint.assets.LinkpointTexture>? {
+        requireRenderThread("uploadBitmapAsLinkpointTexture")
+        val eng = engine ?: return null
+        val lpTex = com.linkpoint.assets.LinkpointTexture.fromBitmap(uuid, bitmap)
+        val tex = lpTex.uploadToFilament(eng) ?: run {
+            lpTex.close()
+            return null
+        }
+        return tex to lpTex
+    }
+
+    /**
      * Upload an Android Bitmap as a Filament Texture. Used by the
      * TextureBinder when fetching per-face mesh-prim textures via
      * TextureManager. Must run on the render thread (Filament resource
      * creation is single-threaded).
+     *
+     * NOTE: This path does NOT participate in LinkpointTexture
+     * lifecycle/accounting — prefer [uploadBitmapAsLinkpointTexture]
+     * when you have a stable UUID for the texture (every caller from
+     * TextureManager does). Kept for the Bitmap-only paths that don't
+     * have a UUID (HUD, snapshot preview).
      */
     fun uploadBitmapAsTexture(bitmap: android.graphics.Bitmap): Texture? {
         requireRenderThread("uploadBitmapAsTexture")
@@ -971,6 +1003,17 @@ class RenderManager(private val context: Context) {
         return try {
             val w = bitmap.width
             val h = bitmap.height
+            // Generate a full mipmap chain (1.33× pixel count) — Lumiya's
+            // Filament wrapper does the same, and Filament has been
+            // observed to render the highest-priority world textures only
+            // when mips are present (otherwise lower-LOD samplers fall
+            // back to undefined data).
+            val levels = run {
+                var d = maxOf(w, h).coerceAtLeast(1)
+                var n = 1
+                while (d > 1) { d = d shr 1; n++ }
+                n
+            }
             val pixels = IntArray(w * h)
             bitmap.getPixels(pixels, 0, w, 0, 0, w, h)
             val rgba = java.nio.ByteBuffer.allocateDirect(w * h * 4)
@@ -985,7 +1028,7 @@ class RenderManager(private val context: Context) {
             rgba.flip()
             val tex = Texture.Builder()
                 .width(w).height(h)
-                .levels(1)
+                .levels(levels)
                 .sampler(Texture.Sampler.SAMPLER_2D)
                 .format(Texture.InternalFormat.RGBA8)
                 .build(eng)
@@ -994,6 +1037,11 @@ class RenderManager(private val context: Context) {
             )
             tex.setImage(eng, 0, pixelBuffer)
             tex.generateMipmaps(eng)
+            // Track GPU memory so the debug report's `GPU` line and the
+            // VRAM-pressure heuristics in TextureMemoryTracker reflect
+            // the live working set instead of always reading 0 B.
+            val approxBytes = (w.toLong() * h.toLong() * 4L * 4L) / 3L
+            com.linkpoint.assets.TextureMemoryTracker.allocGpu(approxBytes)
             tex
         } catch (e: Exception) {
             Log.w(TAG, "uploadBitmapAsTexture failed: ${e.message}", e)

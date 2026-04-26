@@ -38,10 +38,39 @@ class TeleportManager(
     private val capabilityManager: CapabilityManager,
     private val agentId: UUID
 ) : EventHandler {
-    
+
     // Get session ID from UDP connection
     private val sessionId: UUID
         get() = udpConnection.getSessionId()
+
+    /**
+     * Optional lookup that maps a regionHandle to a known region name. Wired
+     * from [com.linkpoint.LinkpointApp] using [com.linkpoint.world.WorldMap]
+     * (which caches simulator-name responses) and the current
+     * [com.linkpoint.core.SessionManager] state. May be null before the app
+     * has wired the dependency, in which case [resolveRegionName] falls back
+     * to formatting the simulator grid coordinates.
+     */
+    @Volatile
+    var regionNameForHandle: ((Long) -> String?)? = null
+
+    /**
+     * Resolve a regionHandle to a human-readable name. Tries
+     * [regionNameForHandle] first; if no callback or no cached entry, falls
+     * back to the canonical SL grid-coordinate string used by viewers when
+     * a name has not yet resolved.
+     *
+     * SL packs the handle as `(globalX << 32) | globalY`, where each axis is
+     * the *meter-precision* global coord. Region grid index is the meter
+     * coord divided by 256 (region size).
+     */
+    private fun resolveRegionName(regionHandle: Long): String {
+        if (regionHandle == 0L) return "Unknown"
+        regionNameForHandle?.invoke(regionHandle)?.let { return it }
+        val gridX = ((regionHandle ushr 32) and 0xFFFFFFFFL) / 256
+        val gridY = (regionHandle and 0xFFFFFFFFL) / 256
+        return "Region ($gridX, $gridY)"
+    }
     
     companion object {
         private const val TAG = "TeleportManager"
@@ -227,22 +256,45 @@ class TeleportManager(
     suspend fun sendTeleportLure(targetAgentId: UUID, message: String = "Join me!"): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                val messageBytes = message.toByteArray(Charsets.UTF_8)
-                val payload = ByteBuffer.allocate(80 + messageBytes.size).order(ByteOrder.LITTLE_ENDIAN)
-                
-                // AgentData - UUIDs use big-endian per SL protocol
+                // Wire format (LL message_template `StartLure`, low-freq 70,
+                // Lumiya: slproto/messages/StartLure.java PackPayload):
+                //   AgentData:  AgentID(LLUUID), SessionID(LLUUID)
+                //   Info:       LureType(U8), Message(Variable 1, null-terminated)
+                //   TargetData (Variable, U8 count): TargetID(LLUUID)
+                //
+                // The previous encoder put TargetID before Message, dropped
+                // LureType, treated Message as Variable 2, and skipped the
+                // TargetData count, so the simulator rejected the lure.
+
+                // Lumiya parity: stringToVariableUTF (slproto/SLMessage.java
+                // line 212) appends a NUL byte and includes it in the U8
+                // length prefix. Cap raw text at 254 bytes so the trailing
+                // NUL still fits the U8 prefix.
+                val rawBytes = message.toByteArray(Charsets.UTF_8)
+                val cappedBytes = if (rawBytes.size > 254) rawBytes.copyOf(254) else rawBytes
+                val safeMessageBytes = cappedBytes + 0.toByte()
+                val nameLen = safeMessageBytes.size
+
+                val payload = ByteBuffer
+                    .allocate(36 /* AgentData */ + 1 /* LureType */ + 1 + nameLen /* Message */ +
+                              1 /* target count */ + 16 /* TargetID */)
+                    .order(ByteOrder.LITTLE_ENDIAN)
+
+                // AgentData
                 payload.putUUID(agentId)
                 payload.putUUID(sessionId)
-                
-                // Info - target agent
+
+                // Info
+                payload.put(0.toByte()) // LureType = 0 (TELEPORT_LURE_NORMAL)
+                payload.put(nameLen.toByte())
+                payload.put(safeMessageBytes)
+
+                // TargetData (Variable u8 count + entries)
+                payload.put(1.toByte())
                 payload.putUUID(targetAgentId)
-                
-                // Message
-                payload.putShort(messageBytes.size.toShort())
-                payload.put(messageBytes)
-                
+
                 udpConnection.sendPacket(MessageIds.START_LURE, payload.array().copyOf(payload.position()), reliable = true)
-                
+
                 Log.i(TAG, "Sent teleport lure to $targetAgentId")
                 true
             } catch (e: Exception) {
@@ -447,13 +499,49 @@ class TeleportManager(
     }
     
     private fun handleEstablishAgentCommunication(body: LLSDMap) {
-        // This event is sent when we need to connect to a new sim
+        // EstablishAgentCommunication is the EventQueue notification that a
+        // neighboring (or destination) simulator is ready to accept this
+        // agent's child-agent traffic. The full Lumiya/SL viewer flow then
+        // performs a `UseCircuitCode` against the new sim and starts the
+        // child-agent throttle so neighboring sims stream object data while
+        // the avatar is near a border.
+        //
+        // Linkpoint does not yet maintain multiple parallel circuits, so
+        // here we capture the seed-cap + sim address into the in-flight
+        // teleport context. `handleTeleportFinish` (UDP) consumes them when
+        // the simulator actually requests the move; the WorldMap cache also
+        // gets a hint so neighbor names render before object data arrives.
         val simHost = body.getString("sim-ip-and-port")
         val seedCap = body.getString("seed-capability")
-        
-        Log.d(TAG, "Establishing agent communication with $simHost")
-        // This would trigger region crossing/teleport completion
+
+        if (simHost.isNullOrBlank()) {
+            Log.w(TAG, "EstablishAgentCommunication: missing sim-ip-and-port; ignoring")
+            return
+        }
+
+        pendingNeighborSim = NeighborSim(
+            address = simHost,
+            seedCapability = seedCap.orEmpty(),
+            announcedAt = System.currentTimeMillis()
+        )
+
+        Log.i(TAG, "EstablishAgentCommunication: neighbor sim queued $simHost (seed cap ${if (seedCap.isNullOrBlank()) "absent" else "present"})")
     }
+
+    /**
+     * Most-recent neighbor sim announcement from
+     * `EstablishAgentCommunication`. Read by the UDP teleport-finish path so
+     * the seed cap doesn't get lost between the EventQueue notification and
+     * the simulator's TeleportFinish packet.
+     */
+    private data class NeighborSim(
+        val address: String,
+        val seedCapability: String,
+        val announcedAt: Long
+    )
+
+    @Volatile
+    private var pendingNeighborSim: NeighborSim? = null
     
     // ==================== UDP MESSAGE HANDLERS ====================
     // These are called from LinkpointApp when UDP messages are received
@@ -464,11 +552,16 @@ class TeleportManager(
     fun handleTeleportFinish(data: com.linkpoint.protocol.messages.TeleportFinishData) {
         Log.i(TAG, "UDP TeleportFinish: ${data.simIP}:${data.simPort}, handle=${data.regionHandle}")
         _teleportState.value = TeleportState.COMPLETED
-        _progressMessage.value = "Connected to new region"
-        
+        val regionName = resolveRegionName(data.regionHandle)
+        _progressMessage.value = "Connected to $regionName"
+
+        // Consume the EventQueue neighbor-sim hint so a stale entry doesn't
+        // leak into the next teleport.
+        pendingNeighborSim = null
+
         scope.launch {
             _teleportEvents.emit(TeleportEvent.Completed(
-                regionName = "Region",  // Would need to resolve from handle
+                regionName = regionName,
                 x = 128f,
                 y = 128f,
                 z = 25f
@@ -510,12 +603,13 @@ class TeleportManager(
      * Handle CrossedRegion UDP message - region crossing
      */
     fun handleCrossedRegion(data: com.linkpoint.protocol.messages.CrossedRegionData) {
-        Log.i(TAG, "UDP CrossedRegion: ${data.simIP}:${data.simPort}, position=${data.position}")
-        _progressMessage.value = "Crossing region boundary..."
-        
+        Log.i(TAG, "UDP CrossedRegion: ${data.simIP}:${data.simPort}, position=${data.position}, handle=${data.regionHandle}")
+        val regionName = resolveRegionName(data.regionHandle)
+        _progressMessage.value = "Crossing into $regionName..."
+
         scope.launch {
             _teleportEvents.emit(TeleportEvent.Completed(
-                regionName = "New Region",
+                regionName = regionName,
                 x = data.position.x,
                 y = data.position.y,
                 z = data.position.z
