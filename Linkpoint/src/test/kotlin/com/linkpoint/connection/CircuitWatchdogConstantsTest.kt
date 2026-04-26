@@ -39,6 +39,20 @@ class CircuitWatchdogConstantsTest {
     }
 
     @Test
+    fun `POST_RECONNECT_VERIFY_MS escalates faster than the inbound stall watchdog`() {
+        // The post-reconnect silence check must fire before the (rebind cooldown +
+        // inbound stall) path; otherwise the user sits 75s on a dead circuit.
+        // It also needs slack over typical UseCircuitCode RTT on cellular (~5–8s
+        // observed in capture) to avoid false escalations on slow handshakes.
+        val verifyMs = UDPConnectionFixed.POST_RECONNECT_VERIFY_MS
+        assertTrue("POST_RECONNECT_VERIFY_MS must be > 8s slack", verifyMs > 8_000L)
+        assertTrue(
+            "POST_RECONNECT_VERIFY_MS must be < SOCKET_REBIND_COOLDOWN_MS to escalate first",
+            verifyMs < UDPConnectionFixed.SOCKET_REBIND_COOLDOWN_MS
+        )
+    }
+
+    @Test
     fun `NetworkStateTransition exposes the three transitions LinkpointApp wires`() {
         // The enum is the contract between the UDP layer's watchdog and the
         // NetworkStateManager. Removing or renaming any of these values breaks

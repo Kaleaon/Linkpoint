@@ -306,15 +306,18 @@ class SecondLifeProtocol(private val context: Context) {
                     regionInfo = regionInfo
                 )
                 
-                // Configure cache manager with grid and user info for Linkpoint Cache structure
-                // Grid name determines public cache path: Linkpoint Cache/Public/<Grid>/
-                // User ID determines private cache path: Linkpoint Cache/Private/<Grid>/<UserID>/
-                val gridName = app.gridManager.getSelectedGrid().gridNick.ifEmpty { 
-                    app.gridManager.getSelectedGrid().name 
-                }
-                app.cacheManager.setCurrentGrid(gridName)
+                // Configure cache manager with grid and user info for Linkpoint Cache structure.
+                // Grid path:  Documents/Linkpoint/Public/<gridId>/<assetType>/...
+                // User path:  Documents/Linkpoint/Private/<gridId>/<userId>/...
+                //
+                // Use GridInfo.id (always present, e.g. "secondlife", "secondlife_beta",
+                // "kitely") rather than gridNick — gridNick is the in-protocol display
+                // label and may be empty for user-added custom grids, which would collapse
+                // distinct grids into the same cache directory and corrupt assets.
+                val grid = app.gridManager.getSelectedGrid()
+                app.cacheManager.setCurrentGrid(grid.id)
                 app.cacheManager.setCurrentUser(result.agentId)
-                Log.i(TAG, "Cache configured for grid: $gridName, user: ${result.agentId}")
+                Log.i(TAG, "Cache configured for grid: ${grid.id} (${grid.name}), user: ${result.agentId}")
                 
                 // Initialize agent-specific managers (sets app.agentId)
                 app.initializeAgentManagers(agentId)

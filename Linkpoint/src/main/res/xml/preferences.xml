@@ -194,7 +194,7 @@
             android:summary="Where to store cached assets"
             android:entries="@array/cache_location_entries"
             android:entryValues="@array/cache_location_values"
-            android:defaultValue="external" />
+            android:defaultValue="documents" />
 
         <EditTextPreference
             android:key="custom_cache_path"

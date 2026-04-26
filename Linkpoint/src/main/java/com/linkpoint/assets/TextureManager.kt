@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import okhttp3.OkHttpClient
+import okhttp3.Protocol
 import okhttp3.Request
 import java.io.ByteArrayOutputStream
 import java.util.UUID
@@ -66,12 +67,20 @@ class TextureManager(
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     
-    // HTTP client configured for CDN access with custom hostname verification
-    // This handles Akamai CDN certificate hostname mismatch for asset-cdn.glb.agni.lindenlab.com
+    // HTTP client configured for CDN access with custom hostname verification.
+    // Akamai serves the SL asset CDN under *.akamaized.net certs — SSLHelper.configureForCdn
+    // adds the per-host trust dance to make that work without disabling verification.
+    //
+    // HTTP/2 is enabled (with HTTP/1.1 fallback) because the SL texture CDN supports it
+    // and the bulk of texture downloads happen as many small concurrent requests to the
+    // same host — exactly the workload H2 multiplexing helps with. The 2026-04-25 capture
+    // showed 56/56 texture requests on HTTP/1.1 because OkHttp's default protocol list
+    // wasn't being explicitly set on this builder.
     private val httpClient = SSLHelper.configureForCdn(
         OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
+            .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
     ).build()
     
     // Download queue with priority

@@ -6,6 +6,7 @@ import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
 import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
+import okhttp3.Protocol
 import okhttp3.Request
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -31,12 +32,14 @@ class MeshManager(
         private const val TAG = "MeshManager"
     }
     
-    // HTTP client configured for CDN access with custom hostname verification
-    // This handles Akamai CDN certificate hostname mismatch for mesh downloads
+    // HTTP client configured for CDN access with custom hostname verification.
+    // HTTP/2 enabled (with HTTP/1.1 fallback) — see TextureManager for rationale; meshes
+    // come from the same Akamai CDN and benefit from the same H2 multiplexing.
     private val httpClient = SSLHelper.configureForCdn(
         OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
+            .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
     ).build()
     
     private val pendingMeshes = ConcurrentHashMap<UUID, Deferred<MeshData?>>()
