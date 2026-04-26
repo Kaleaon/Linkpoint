@@ -1017,6 +1017,21 @@ class LinkpointApp : Application() {
                         inventoryManager.warmFetch()
                     }
 
+                    // Request own avatar profile so the Profile tab is populated
+                    // by the time the user opens it. Without this request the
+                    // sim never volunteers AvatarPropertiesReply for self and
+                    // the profile sits blank (2026-04-25 Athanasia capture).
+                    val myId = this@LinkpointApp.agentId
+                    if (myId != null && ::userProfileManager.isInitialized) {
+                        applicationScope.launch {
+                            try {
+                                userProfileManager.requestProfile(myId)
+                            } catch (e: Exception) {
+                                Log.w(TAG, "Failed to request own profile: ${e.message}")
+                            }
+                        }
+                    }
+
                     Log.i(TAG, "✓ Connection state set to CONNECTED - agent is in world")
                 } else {
                     com.linkpoint.utils.InitializationTracker.logWarning("AgentMovementComplete parse returned null")
@@ -2752,9 +2767,17 @@ class LinkpointApp : Application() {
                     val data = com.linkpoint.protocol.messages.AdditionalMessageParsers.parseUUIDNameReply(payload)
                     if (data != null) {
                         Log.d(TAG, "🏷️ UUIDNameReply: ${data.entries.size} names")
+                        // Feed legacy names into FriendsManager so the friends
+                        // list stops showing `Resident (xxxx)` placeholders
+                        // when GetDisplayNames cap silently fails (the 2026-04-25
+                        // Athanasia capture). Capability path remains primary;
+                        // this is the UDP fallback wired by sendUUIDNameRequest.
+                        val friendsReady = ::friendsManager.isInitialized
                         data.entries.forEach { entry ->
-                            // Cache names for display
-                            Log.d(TAG, "  ${entry.id} -> ${entry.firstName} ${entry.lastName}")
+                            val resolved = "${entry.firstName} ${entry.lastName}".trim()
+                            if (resolved.isNotBlank() && friendsReady) {
+                                friendsManager.updateFriendName(entry.id, resolved)
+                            }
                         }
                     }
                 }
