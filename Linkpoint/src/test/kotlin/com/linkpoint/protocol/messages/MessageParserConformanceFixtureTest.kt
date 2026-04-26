@@ -31,6 +31,39 @@ class MessageParserConformanceFixtureTest {
         }
     }
 
+
+    @Test
+    fun `message id extraction matches UDPConnectionFixed decoder`() {
+        val text = javaClass.classLoader!!.getResource("fixtures/messages/parser_conformance_fixtures.json")!!.readText()
+        val fixtures = JSONArray(text)
+        val udpConnection = UDPConnectionFixed()
+
+        val getMessageStartOffset = UDPConnectionFixed::class.java.getDeclaredMethod("getMessageStartOffset", ByteArray::class.java)
+            .apply { isAccessible = true }
+        val decodeMessageIdSLProtocol = UDPConnectionFixed::class.java
+            .getDeclaredMethod("decodeMessageIdSLProtocol", ByteArray::class.java, Int::class.javaPrimitiveType)
+            .apply { isAccessible = true }
+
+        for (i in 0 until fixtures.length()) {
+            val fixture = fixtures.getJSONObject(i)
+            val packet = fixture.getString("rawPacketHex").hexToBytes()
+
+            val startOffset = getMessageStartOffset.invoke(udpConnection, packet) as Int?
+            val decodedId = if (startOffset == null) {
+                Int.MIN_VALUE
+            } else {
+                val result = decodeMessageIdSLProtocol.invoke(udpConnection, packet, startOffset) as Pair<*, *>?
+                (result?.first as Int?) ?: Int.MIN_VALUE
+            }
+
+            assertEquals(
+                fixture.getString("name"),
+                decodedId,
+                MessageParser.extractMessageId(packet)
+            )
+        }
+    }
+
     @Test
     fun `registry parses chat payload`() {
         val payload = buildList<Byte> {
