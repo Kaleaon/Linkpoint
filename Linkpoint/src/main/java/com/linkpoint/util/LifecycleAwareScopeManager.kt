@@ -11,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.linkpoint.network.NetworkLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -583,10 +584,20 @@ object LifecycleAwareScopeManager {
         
         override fun onStop(owner: LifecycleOwner) {
             android.util.Log.d(TAG, "Application moved to background")
+            NetworkLogger.log(
+                NetworkLogger.Level.INFO,
+                NetworkLogger.Category.LIFECYCLE,
+                "📱 App → background (process onStop)"
+            )
         }
-        
+
         override fun onStart(owner: LifecycleOwner) {
             android.util.Log.d(TAG, "Application moved to foreground")
+            NetworkLogger.log(
+                NetworkLogger.Level.INFO,
+                NetworkLogger.Category.LIFECYCLE,
+                "📱 App → foreground (process onStart)"
+            )
         }
     }
 }

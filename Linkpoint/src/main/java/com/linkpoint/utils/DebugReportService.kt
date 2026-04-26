@@ -1256,6 +1256,33 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine()
                     }
                     
+                    if (msgStats.inboundRateBuckets.isNotEmpty()) {
+                        appendLine("Inbound Rate (last ${msgStats.inboundRateBuckets.size}s, oldest first):")
+                        appendLine("  second  packets    bytes")
+                        val nowSec = System.currentTimeMillis() / 1000L
+                        msgStats.inboundRateBuckets.forEach { bucket ->
+                            val ago = nowSec - bucket.epochSecond
+                            // Mark the silent buckets so a 24-second hole jumps out visually.
+                            val marker = if (bucket.packets == 0L) " ⚠" else ""
+                            appendLine(
+                                "  -%3ds  %7d  %7s%s".format(
+                                    ago,
+                                    bucket.packets,
+                                    formatBytes(bucket.bytes),
+                                    marker
+                                )
+                            )
+                        }
+                        val totalPackets = msgStats.inboundRateBuckets.sumOf { it.packets }
+                        val totalBytes = msgStats.inboundRateBuckets.sumOf { it.bytes }
+                        val silentBuckets = msgStats.inboundRateBuckets.count { it.packets == 0L }
+                        appendLine(
+                            "  window total: $totalPackets pkts / ${formatBytes(totalBytes)} " +
+                                "($silentBuckets silent seconds)"
+                        )
+                        appendLine()
+                    }
+
                     // Warning if critical messages haven't been received
                     val regionHandshakeTime = msgStats.lastMessageTimes["RegionHandshake"]
                     val agentMovementTime = msgStats.lastMessageTimes["AgentMovementComplete"]
