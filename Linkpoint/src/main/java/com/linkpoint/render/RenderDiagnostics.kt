@@ -218,6 +218,39 @@ object RenderDiagnostics {
         SessionLogRecorder.logRender("Filament", "shutdown", reason)
     }
 
+    /**
+     * Drawing paused — render thread is alive and the Filament Engine is
+     * intact, but `renderFrame` is gated and skips the GPU portion. Used
+     * when an Activity/panel covers the world view so the renderer goes
+     * to background instead of being torn down (Lumiya parity).
+     */
+    fun filamentDrawingPaused(reason: String) {
+        SessionLogRecorder.logRender("Filament", "drawing_paused", reason)
+        logLifecycle(NetworkLogger.Level.INFO, "🖼️ Filament drawing paused: $reason")
+    }
+
+    fun filamentDrawingResumed(reason: String) {
+        SessionLogRecorder.logRender("Filament", "drawing_resumed", reason)
+        logLifecycle(NetworkLogger.Level.INFO, "🖼️ Filament drawing resumed: $reason")
+    }
+
+    /**
+     * A `renderFrame` body threw. Captured-and-swallowed so the render
+     * thread keeps running instead of dying with an uncaught exception
+     * (which previously crashed the app and looped via auto-restart).
+     */
+    fun filamentFrameError(error: Throwable) {
+        SessionLogRecorder.logRender(
+            "Filament",
+            "frame_error",
+            "${error.javaClass.simpleName}: ${error.message}"
+        )
+        logLifecycle(
+            NetworkLogger.Level.ERROR,
+            "🖼️ Filament frame error (swallowed): ${error.javaClass.simpleName}: ${error.message}"
+        )
+    }
+
     // ────────────────────────────────────────────────────────────────────
     // OpenGL / Lumiya events
     // ────────────────────────────────────────────────────────────────────

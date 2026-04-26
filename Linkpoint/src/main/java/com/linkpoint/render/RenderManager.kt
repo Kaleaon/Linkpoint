@@ -83,6 +83,20 @@ class RenderManager(private val context: Context) {
     val dispatcher = RenderThreadDispatcher()
     private val renderQueue = RenderQueue()
 
+    /**
+     * Drawing gate — when false, [renderFrame] / [renderXRFrame] skip the
+     * Filament `beginFrame/render/endFrame` calls but the render thread
+     * stays alive and the Filament Engine is preserved. The gate is the
+     * Lumiya parity for "the world view is covered by a panel": the 3D
+     * renderer goes to background instead of being torn down and
+     * re-initialized (which previously raced the SwapChain lifecycle and
+     * crash-looped on every panel open).
+     *
+     * Mirrors `WorldViewRenderer.drawingEnabled` from the original Lumiya
+     * source (see `lumiya_decompiled_source/.../render/WorldViewRenderer.java`).
+     */
+    private val drawingEnabled = AtomicBoolean(true)
+
     // Camera matrices
     private val viewMatrix = FloatArray(16)
     private val projectionMatrix = FloatArray(16)
@@ -816,38 +830,62 @@ class RenderManager(private val context: Context) {
     }
     
     /**
-     * Render a frame
+     * Render a frame.
+     *
+     * Wrapped in try/catch because this runs on the dispatcher's
+     * HandlerThread: an uncaught exception here previously killed the
+     * render thread, which let `Thread.setDefaultUncaughtExceptionHandler`
+     * tear down the process — observed as the "open any panel and the
+     * app crash-restarts forever" loop. Errors are surfaced to
+     * [RenderDiagnostics] and the next frame retries.
+     *
+     * Honors [drawingEnabled]: when the activity is covered by a panel
+     * the gate is closed and we skip the Filament `beginFrame/render/
+     * endFrame` triplet, but the queue draining + camera/avatar pose
+     * tick still run so the world keeps simulating in the background.
      */
     fun renderFrame() {
         requireRenderThread("renderFrame")
         if (!isInitialized) return
 
-        applyRenderUpdates()
-        applyCameraController()
-        avatarPoseProvider?.invoke()
+        try {
+            applyRenderUpdates()
+            applyCameraController()
+            avatarPoseProvider?.invoke()
 
-        val engine = this.engine ?: return
-        val renderer = this.renderer ?: return
-        val view = this.view ?: return
-        val swapChain = ensureSwapChain(engine) ?: return
+            if (!drawingEnabled.get()) return
 
-        if (renderer.beginFrame(swapChain, System.nanoTime())) {
-            renderer.render(view)
-            renderer.endFrame()
-            val count = frameCount.incrementAndGet()
-            lastFrameTime = System.currentTimeMillis()
-            RenderDiagnostics.filamentFrame()
+            val engine = this.engine ?: return
+            val renderer = this.renderer ?: return
+            val view = this.view ?: return
+            val swapChain = ensureSwapChain(engine) ?: return
 
-            // Log successful rendering milestone exactly once (thread-safe with compareAndSet)
-            if (count == FIRST_FRAME_COUNT && firstFrameLogged.compareAndSet(false, true)) {
-                Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
-                Log.i(TAG, "║ 🎉 FIRST FRAME RENDERED!")
-                Log.i(TAG, "║ SwapChain is working correctly")
-                Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+            if (renderer.beginFrame(swapChain, System.nanoTime())) {
+                renderer.render(view)
+                renderer.endFrame()
+                val count = frameCount.incrementAndGet()
+                lastFrameTime = System.currentTimeMillis()
+                RenderDiagnostics.filamentFrame()
+
+                // Log successful rendering milestone exactly once (thread-safe with compareAndSet)
+                if (count == FIRST_FRAME_COUNT && firstFrameLogged.compareAndSet(false, true)) {
+                    Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+                    Log.i(TAG, "║ 🎉 FIRST FRAME RENDERED!")
+                    Log.i(TAG, "║ SwapChain is working correctly")
+                    Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+                }
             }
+        } catch (e: Throwable) {
+            // Don't let a transient Filament/JNI failure (e.g. the surface
+            // disappeared mid-frame because a panel just opened) propagate
+            // out of the render thread. Log via diagnostics so the timeline
+            // still shows the failure, then return so the loop can try the
+            // next frame after the surface stabilizes.
+            Log.e(TAG, "renderFrame threw: ${e.message}", e)
+            RenderDiagnostics.filamentFrameError(e)
         }
     }
-    
+
     /**
      * Render a frame in XR mode (stereo rendering)
      */
@@ -855,33 +893,72 @@ class RenderManager(private val context: Context) {
         requireRenderThread("renderXRFrame")
         if (!isInitialized) return
 
-        applyRenderUpdates()
-        
-        val engine = this.engine ?: return
-        val renderer = this.renderer ?: return
-        val view = this.view ?: return
-        val swapChain = ensureSwapChain(engine) ?: return
-        
-        if (renderer.beginFrame(swapChain, xrData.predictedDisplayTime)) {
-            // Left eye
-            camera?.setCustomProjection(
-                xrData.leftProjection.toDoubleArray(),
-                0.1, 1000.0
-            )
-            camera?.setModelMatrix(xrData.leftEyeMatrix)
-            renderer.render(view)
-            
-            // Right eye
-            camera?.setCustomProjection(
-                xrData.rightProjection.toDoubleArray(),
-                0.1, 1000.0
-            )
-            camera?.setModelMatrix(xrData.rightEyeMatrix)
-            renderer.render(view)
-            
-            renderer.endFrame()
+        try {
+            applyRenderUpdates()
+
+            if (!drawingEnabled.get()) return
+
+            val engine = this.engine ?: return
+            val renderer = this.renderer ?: return
+            val view = this.view ?: return
+            val swapChain = ensureSwapChain(engine) ?: return
+
+            if (renderer.beginFrame(swapChain, xrData.predictedDisplayTime)) {
+                // Left eye
+                camera?.setCustomProjection(
+                    xrData.leftProjection.toDoubleArray(),
+                    0.1, 1000.0
+                )
+                camera?.setModelMatrix(xrData.leftEyeMatrix)
+                renderer.render(view)
+
+                // Right eye
+                camera?.setCustomProjection(
+                    xrData.rightProjection.toDoubleArray(),
+                    0.1, 1000.0
+                )
+                camera?.setModelMatrix(xrData.rightEyeMatrix)
+                renderer.render(view)
+
+                renderer.endFrame()
+            }
+        } catch (e: Throwable) {
+            Log.e(TAG, "renderXRFrame threw: ${e.message}", e)
+            RenderDiagnostics.filamentFrameError(e)
         }
     }
+
+    /**
+     * Pause the GPU-facing portion of the frame loop. The render thread
+     * keeps ticking — queue draining, camera follow, avatar pose tick all
+     * still run — but Filament `beginFrame` is skipped, so no GPU work is
+     * issued and the SurfaceView can be hidden / detached without racing
+     * the swap chain.
+     *
+     * Safe to call from any thread (the gate is an [AtomicBoolean]).
+     * Idempotent.
+     */
+    fun pauseDrawing(reason: String = "panel_open") {
+        if (drawingEnabled.compareAndSet(true, false)) {
+            Log.i(TAG, "Drawing paused: $reason")
+            RenderDiagnostics.filamentDrawingPaused(reason)
+        }
+    }
+
+    /**
+     * Re-enable the GPU portion of the frame loop. Counterpart to
+     * [pauseDrawing]. Resets the first-frame log flag so the resume is
+     * visible in the diagnostics timeline.
+     */
+    fun resumeDrawing(reason: String = "panel_close") {
+        if (drawingEnabled.compareAndSet(false, true)) {
+            Log.i(TAG, "Drawing resumed: $reason")
+            RenderDiagnostics.filamentDrawingResumed(reason)
+        }
+    }
+
+    /** True iff [renderFrame] is currently issuing GPU work. */
+    fun isDrawingEnabled(): Boolean = drawingEnabled.get()
     
     /**
      * Set camera position and orientation
@@ -1107,6 +1184,7 @@ class RenderManager(private val context: Context) {
             hasCamera = camera != null,
             hasSwapChain = hasSwapChainNow,
             isSurfaceReady = surfaceReady,
+            isDrawingEnabled = drawingEnabled.get(),
             viewportWidth = viewportWidth,
             viewportHeight = viewportHeight,
             frameCount = frameCount.get(),
@@ -1130,6 +1208,7 @@ class RenderManager(private val context: Context) {
         val hasCamera: Boolean,
         val hasSwapChain: Boolean,
         val isSurfaceReady: Boolean,
+        val isDrawingEnabled: Boolean,
         val viewportWidth: Int,
         val viewportHeight: Int,
         val frameCount: Long,

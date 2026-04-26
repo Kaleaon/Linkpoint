@@ -987,6 +987,16 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     }
     
     override fun onPause() {
+        // Lumiya parity: flip the drawing gate FIRST so any in-flight frame on
+        // the render thread short-circuits before we stop the loop or the OS
+        // tears down our SurfaceView. Without this, a frame that beat us to
+        // `Renderer.beginFrame` could touch a SwapChain that is about to be
+        // destroyed by `UiHelper.onDetachedFromSurface`, which threw a native
+        // crash and tripped the auto-restart loop the user observed when
+        // opening any panel.
+        if (!useSecondaryRenderer && app.isRenderManagerInitialized()) {
+            app.renderManager.pauseDrawing("activity_paused")
+        }
         super.onPause()
         NetworkLogger.log(
             NetworkLogger.Level.INFO,
@@ -996,6 +1006,9 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         if (useSecondaryRenderer) {
             lumiyaSurfaceView?.onPause()
         } else {
+            // Stop the loop too. The drawing gate is the load-bearing guard,
+            // but we don't want the dispatcher posting empty-noop frames at
+            // 60 Hz while the activity is in the background.
             isRendering = false
         }
     }
@@ -1022,7 +1035,19 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             lumiyaSurfaceView?.onResume()
             return
         }
-        
+
+        // Re-open the drawing gate. Posted to the render thread so it
+        // happens AFTER any pending `recreateSwapChain` from the surface
+        // callback drained, mirroring Lumiya's `queueEvent { enableDrawing() }`
+        // ordering. If the surface isn't back yet, the gate flips here but
+        // `ensureSwapChain` will still no-op until `surfaceCreated` fires —
+        // both paths are safe.
+        if (app.isRenderManagerInitialized()) {
+            app.renderManager.dispatcher.post(
+                Runnable { app.renderManager.resumeDrawing("activity_resumed") }
+            )
+        }
+
         // Only restart rendering if surface is ready (synchronized to avoid race)
         synchronized(this) {
             if (isSurfaceReady && !isRendering) {
