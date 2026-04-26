@@ -960,10 +960,42 @@ class RenderManager(private val context: Context) {
     }
 
     /**
+     * Tracked overload of [uploadBitmapAsTexture] that routes through
+     * [com.linkpoint.assets.LinkpointTexture] so the upload participates
+     * in the LinkpointTexture lifecycle: native+GPU memory accounting
+     * (TextureMemoryTracker), Cleaner-driven leak detection, and a
+     * stable `releaseFilamentTexture(engine)` teardown path. Callers
+     * with a UUID (which is everyone going through TextureManager)
+     * should prefer this path. Returns both the Filament `Texture` (so
+     * existing render binding code keeps working) and the wrapping
+     * `LinkpointTexture` (so the caller can drive teardown via
+     * `releaseFilamentTexture` rather than leaking the Filament handle).
+     */
+    fun uploadBitmapAsLinkpointTexture(
+        uuid: java.util.UUID,
+        bitmap: android.graphics.Bitmap
+    ): Pair<Texture, com.linkpoint.assets.LinkpointTexture>? {
+        requireRenderThread("uploadBitmapAsLinkpointTexture")
+        val eng = engine ?: return null
+        val lpTex = com.linkpoint.assets.LinkpointTexture.fromBitmap(uuid, bitmap)
+        val tex = lpTex.uploadToFilament(eng) ?: run {
+            lpTex.close()
+            return null
+        }
+        return tex to lpTex
+    }
+
+    /**
      * Upload an Android Bitmap as a Filament Texture. Used by the
      * TextureBinder when fetching per-face mesh-prim textures via
      * TextureManager. Must run on the render thread (Filament resource
      * creation is single-threaded).
+     *
+     * NOTE: This path does NOT participate in LinkpointTexture
+     * lifecycle/accounting — prefer [uploadBitmapAsLinkpointTexture]
+     * when you have a stable UUID for the texture (every caller from
+     * TextureManager does). Kept for the Bitmap-only paths that don't
+     * have a UUID (HUD, snapshot preview).
      */
     fun uploadBitmapAsTexture(bitmap: android.graphics.Bitmap): Texture? {
         requireRenderThread("uploadBitmapAsTexture")

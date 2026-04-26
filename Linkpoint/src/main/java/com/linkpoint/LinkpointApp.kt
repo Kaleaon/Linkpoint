@@ -1411,8 +1411,11 @@ class LinkpointApp : Application() {
                                         val bmp = try { textureManager.getTexture(resolvedId) } catch (_: Exception) { null }
                                         if (bmp != null) {
                                             renderManager.dispatcher.post(Runnable {
-                                                val tex = renderManager.uploadBitmapAsTexture(bmp)
-                                                if (tex != null) onLoaded(tex)
+                                                // Route through the LinkpointTexture-tracked path so
+                                                // every per-face mesh texture participates in VRAM
+                                                // accounting and gets a clean Filament release path.
+                                                val pair = renderManager.uploadBitmapAsLinkpointTexture(resolvedId, bmp)
+                                                if (pair != null) onLoaded(pair.first)
                                             })
                                         }
                                     }

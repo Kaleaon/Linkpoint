@@ -360,10 +360,71 @@ class CardboardSession(private val context: Context) : XRSession {
     }
 }
 
+/**
+ * OpenXR-backed session for headsets exposing the OpenXR runtime
+ * (Quest, Pico, Steam Link, etc.).
+ *
+ * `initialize()` performs a real availability check before returning
+ * — the body of the OpenXR session loop is not implemented in this
+ * Kotlin layer because OpenXR is a C ABI, and the Linkpoint codebase
+ * does not currently link the OpenXR loader (`libopenxr_loader.so`)
+ * or hold a JNI bridge for the swapchain / pose APIs. We surface the
+ * availability state via [isRuntimeAvailable] so the
+ * [DeviceCapabilityDetector] gives an honest answer ("device has the
+ * runtime; viewer is not yet wired") instead of a silent stub.
+ *
+ * Wiring path (left as a follow-up): build `libopenxr_loader.so` into
+ * `app/src/main/jniLibs/`, add the OpenXR Android loader package to
+ * `AndroidManifest.xml` (`org.khronos.openxr.OpenXRRuntime` queries
+ * action), then thread JNI calls for `xrCreateInstance`,
+ * `xrCreateSession`, and the per-frame `xrWaitFrame` /
+ * `xrLocateViews` / `xrEndFrame` cycle.
+ */
 class OpenXRSession(private val context: Context) : XRSession {
+
+    /**
+     * True when this device exposes an OpenXR runtime (the queries-tag
+     * for `org.khronos.openxr.OpenXRRuntime` resolves to a system
+     * package, OR the `libopenxr_loader.so` lookup succeeds).
+     */
+    val isRuntimeAvailable: Boolean by lazy { detectOpenXrRuntime() }
+
+    private fun detectOpenXrRuntime(): Boolean {
+        // PackageManager query: every OpenXR runtime declares an
+        // `org.khronos.openxr.OpenXRRuntime` content provider so apps
+        // can locate it without dlopen-ing the loader directly.
+        return try {
+            val pm = context.packageManager
+            val intent = android.content.Intent("org.khronos.openxr.OpenXRRuntimeService")
+            val resolved = pm.queryIntentServices(intent, 0)
+            if (resolved.isNotEmpty()) {
+                Log.d("OpenXRSession", "OpenXR runtime detected: ${resolved.first().serviceInfo.packageName}")
+                return true
+            }
+            // Fallback: probe the loader native lib.
+            try {
+                System.loadLibrary("openxr_loader")
+                Log.d("OpenXRSession", "OpenXR loader dlopen succeeded")
+                true
+            } catch (_: UnsatisfiedLinkError) {
+                false
+            }
+        } catch (e: Exception) {
+            Log.d("OpenXRSession", "OpenXR runtime detection failed: ${e.message}")
+            false
+        }
+    }
+
     override fun initialize(): Boolean {
-        Log.d("OpenXRSession", "Initializing OpenXR session")
-        return false // Not implemented yet
+        if (!isRuntimeAvailable) {
+            Log.i("OpenXRSession", "OpenXR runtime absent — falling back (no headset / no loader)")
+            return false
+        }
+        Log.w("OpenXRSession",
+            "OpenXR runtime available but Linkpoint's JNI bridge is not yet wired " +
+                "(libopenxr_loader.so + xrCreateInstance/Session/Views chain). " +
+                "Refusing to claim a session we cannot drive — see class kdoc.")
+        return false
     }
     override fun beginFrame(): XRFrameData? = null
     override fun endFrame() {}
@@ -372,10 +433,48 @@ class OpenXRSession(private val context: Context) : XRSession {
     override fun shutdown() {}
 }
 
+/**
+ * Android XR (Jetpack XR) session for the Android 15+ device class.
+ * Like [OpenXRSession], real session wiring requires linking against
+ * the Jetpack XR runtime libraries (`androidx.xr.runtime:runtime-*`)
+ * and the AndroidX scene model — none of which are currently on the
+ * Linkpoint classpath. This class detects platform availability and
+ * reports honestly.
+ */
 class AndroidXRSession(private val context: Context) : XRSession {
+
+    /**
+     * True when this device runs Android 14+ AND exposes the
+     * `android.software.xr.api.openxr` system feature (Pixel XR
+     * companion devices). Earlier Android versions can host the
+     * Jetpack XR libraries but only emulate the runtime; we treat
+     * those as not available so we don't end up driving a
+     * software-only path that would compete with [CardboardSession].
+     */
+    val isPlatformAvailable: Boolean by lazy { detectAndroidXr() }
+
+    private fun detectAndroidXr(): Boolean {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) return false
+        return try {
+            context.packageManager.hasSystemFeature("android.software.xr.api.openxr")
+        } catch (e: Exception) {
+            Log.d("AndroidXRSession", "Android XR feature query failed: ${e.message}")
+            false
+        }
+    }
+
     override fun initialize(): Boolean {
-        Log.d("AndroidXRSession", "Initializing Android XR session")
-        return false // Not implemented yet - requires Android 15+
+        if (!isPlatformAvailable) {
+            Log.i("AndroidXRSession",
+                "Android XR not available — sdk=${android.os.Build.VERSION.SDK_INT}, " +
+                    "openxr feature absent. Falling back.")
+            return false
+        }
+        Log.w("AndroidXRSession",
+            "Android XR platform available but Jetpack XR runtime " +
+                "dependencies (androidx.xr.runtime:runtime-openxr, " +
+                "androidx.xr.scenecore) are not yet on the classpath. See class kdoc.")
+        return false
     }
     override fun beginFrame(): XRFrameData? = null
     override fun endFrame() {}

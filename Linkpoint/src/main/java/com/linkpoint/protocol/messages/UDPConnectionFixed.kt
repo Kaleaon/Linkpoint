@@ -28,6 +28,56 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 
 /**
+ * SL Variable-1 string field: 1-byte length prefix + UTF-8 bytes + NUL.
+ * Mirrors Lumiya's `stringToVariableUTF` (slproto/SLMessage.java:212)
+ * which appends a NUL byte and includes it in the U8 length prefix.
+ * Callers should use this for any `Variable 1` string field.
+ *
+ * If the encoded length would exceed 255 (the U8 max), the raw text is
+ * truncated to 254 bytes so the trailing NUL still fits the prefix.
+ */
+private fun ByteBuffer.putVariable1String(text: String): ByteBuffer {
+    val raw = text.toByteArray(Charsets.UTF_8)
+    val capped = if (raw.size > 254) raw.copyOf(254) else raw
+    put((capped.size + 1).toByte())
+    put(capped)
+    put(0.toByte())
+    return this
+}
+
+/** Variant for already-encoded byte payloads (binary `Variable 1`). */
+private fun ByteBuffer.putVariable1Bytes(bytes: ByteArray): ByteBuffer {
+    val capped = if (bytes.size > 255) bytes.copyOf(255) else bytes
+    put(capped.size.toByte())
+    put(capped)
+    return this
+}
+
+/**
+ * SL Variable-2 string field: 2-byte little-endian length prefix +
+ * UTF-8 bytes + NUL. Used for fields that exceed 255 bytes
+ * (e.g. AvatarProperties.AboutText, ChatFromViewer.Message).
+ *
+ * Cap raw text at 65534 so the NUL fits.
+ */
+private fun ByteBuffer.putVariable2String(text: String): ByteBuffer {
+    val raw = text.toByteArray(Charsets.UTF_8)
+    val capped = if (raw.size > 65534) raw.copyOf(65534) else raw
+    putShort((capped.size + 1).toShort())
+    put(capped)
+    put(0.toByte())
+    return this
+}
+
+/** Variant for already-encoded binary `Variable 2`. */
+private fun ByteBuffer.putVariable2Bytes(bytes: ByteArray): ByteBuffer {
+    val capped = if (bytes.size > 65535) bytes.copyOf(65535) else bytes
+    putShort(capped.size.toShort())
+    put(capped)
+    return this
+}
+
+/**
  * Extension function to convert UUID to byte array
  * Used in packet construction
  */
@@ -2243,6 +2293,324 @@ class UDPConnectionFixed {
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
             "→ Sent GroupTitlesRequest groupId=$groupId requestId=$requestId")
         return requestId
+    }
+
+    /**
+     * GenericMessage — generic command-shaped envelope used by sims and
+     * scripts (e.g. RLV relay, region restart announcements). Wire format
+     * (Lumiya parity, slproto/messages/GenericMessage.java PackPayload):
+     *   AgentData:  AgentID, SessionID, TransactionID
+     *   MethodData: Method (Variable 1 NUL-term), Invoice (LLUUID)
+     *   ParamList (Variable, U8 count): Parameter (Variable 1)
+     */
+    fun sendGenericMessage(
+        method: String,
+        invoice: UUID = UUID(0L, 0L),
+        params: List<String> = emptyList(),
+        transactionId: UUID = UUID.randomUUID(),
+        reliable: Boolean = true,
+    ) {
+        val identity = outboundIdentity("UDPConnectionFixed.sendGenericMessage")
+        val methodBytes = method.toByteArray(Charsets.UTF_8) + 0.toByte()
+        val paramBlobs = params.map { it.toByteArray(Charsets.UTF_8) + 0.toByte() }
+        val paramSize = paramBlobs.sumOf { 1 + it.size.coerceAtMost(255) }
+
+        val payload = ByteBuffer
+            .allocate(48 + 1 + methodBytes.size + 16 + 1 + paramSize)
+            .order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putUUID(transactionId)
+        payload.putVariable1Bytes(methodBytes)
+        payload.putUUID(invoice)
+        payload.put(paramBlobs.size.coerceAtMost(255).toByte())
+        for (blob in paramBlobs.take(255)) {
+            payload.putVariable1Bytes(blob)
+        }
+        sendPacket(MessageIds.GENERIC_MESSAGE, payload.array().copyOf(payload.position()), reliable = reliable)
+    }
+
+    /**
+     * FetchInventory — UDP fallback for inventory-item fetch when the
+     * FetchInventory2 capability isn't available. Wire format
+     * (Lumiya parity, slproto/messages/FetchInventory.java PackPayload):
+     *   AgentData:  AgentID, SessionID
+     *   InventoryData (Variable, U8 count): OwnerID(LLUUID), ItemID(LLUUID)
+     */
+    fun sendFetchInventory(items: List<Pair<UUID, UUID>>) {
+        if (items.isEmpty()) return
+        val identity = outboundIdentity("UDPConnectionFixed.sendFetchInventory")
+        // 32 bytes per entry; cap at 255 per packet (U8 count). Sender batches.
+        for (chunk in items.chunked(255)) {
+            val payload = ByteBuffer.allocate(32 + 1 + chunk.size * 32).order(ByteOrder.LITTLE_ENDIAN)
+            payload.putUUID(identity.agentId)
+            payload.putUUID(identity.sessionId)
+            payload.put(chunk.size.toByte())
+            for ((ownerId, itemId) in chunk) {
+                payload.putUUID(ownerId)
+                payload.putUUID(itemId)
+            }
+            sendPacket(MessageIds.FETCH_INVENTORY, payload.array(), reliable = true)
+        }
+    }
+
+    /**
+     * FetchInventoryDescendents — UDP fallback for folder enumeration.
+     * Wire format (Lumiya parity,
+     * slproto/messages/FetchInventoryDescendents.java PackPayload):
+     *   AgentData:    AgentID, SessionID
+     *   InventoryData: FolderID(LLUUID), OwnerID(LLUUID), SortOrder(S32),
+     *                  FetchFolders(BOOL), FetchItems(BOOL)
+     */
+    fun sendFetchInventoryDescendents(
+        folderId: UUID,
+        ownerId: UUID,
+        sortOrder: Int = 0,
+        fetchFolders: Boolean = true,
+        fetchItems: Boolean = true,
+    ) {
+        val identity = outboundIdentity("UDPConnectionFixed.sendFetchInventoryDescendents")
+        val payload = ByteBuffer.allocate(32 + 16 + 16 + 4 + 1 + 1).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putUUID(folderId)
+        payload.putUUID(ownerId)
+        payload.putInt(sortOrder)
+        payload.put(if (fetchFolders) 1.toByte() else 0.toByte())
+        payload.put(if (fetchItems) 1.toByte() else 0.toByte())
+        sendPacket(MessageIds.FETCH_INVENTORY_DESCENDENTS, payload.array(), reliable = true)
+    }
+
+    /**
+     * AvatarPropertiesUpdate — write the agent's profile fields.
+     * Wire format (Lumiya parity,
+     * slproto/messages/AvatarPropertiesUpdate.java PackPayload):
+     *   AgentData:      AgentID, SessionID
+     *   PropertiesData: ImageID(LLUUID), FLImageID(LLUUID),
+     *                   AboutText(Variable 2), FLAboutText(Variable 1),
+     *                   AllowPublish(BOOL), MaturePublish(BOOL),
+     *                   ProfileURL(Variable 1)
+     */
+    fun sendAvatarPropertiesUpdate(
+        imageId: UUID,
+        flImageId: UUID,
+        aboutText: String,
+        firstLifeAboutText: String,
+        allowPublish: Boolean,
+        maturePublish: Boolean,
+        profileUrl: String,
+    ) {
+        val identity = outboundIdentity("UDPConnectionFixed.sendAvatarPropertiesUpdate")
+        val aboutBytes = aboutText.toByteArray(Charsets.UTF_8)
+        val flBytes = firstLifeAboutText.toByteArray(Charsets.UTF_8)
+        val urlBytes = profileUrl.toByteArray(Charsets.UTF_8)
+
+        val payload = ByteBuffer
+            .allocate(32 + 16 + 16 +
+                      2 + aboutBytes.size + 1 +
+                      1 + flBytes.size.coerceAtMost(254) + 1 +
+                      1 + 1 +
+                      1 + urlBytes.size.coerceAtMost(254) + 1)
+            .order(ByteOrder.LITTLE_ENDIAN)
+
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putUUID(imageId)
+        payload.putUUID(flImageId)
+        payload.putVariable2String(aboutText)
+        payload.putVariable1String(firstLifeAboutText)
+        payload.put(if (allowPublish) 1.toByte() else 0.toByte())
+        payload.put(if (maturePublish) 1.toByte() else 0.toByte())
+        payload.putVariable1String(profileUrl)
+        sendPacket(MessageIds.AVATAR_PROPERTIES_UPDATE, payload.array().copyOf(payload.position()), reliable = true)
+    }
+
+    /**
+     * AvatarPickerRequest — search for residents by partial name.
+     * Returns the QueryID so callers can correlate the AvatarPickerReply.
+     * Wire format (Lumiya parity,
+     * slproto/messages/AvatarPickerRequest.java PackPayload):
+     *   AgentData: AgentID, SessionID, QueryID
+     *   Data:      Name (Variable 1 NUL-term)
+     */
+    fun sendAvatarPickerRequest(name: String): UUID {
+        val identity = outboundIdentity("UDPConnectionFixed.sendAvatarPickerRequest")
+        val queryId = UUID.randomUUID()
+        val nameBytes = name.toByteArray(Charsets.UTF_8)
+        val payload = ByteBuffer
+            .allocate(48 + 1 + nameBytes.size.coerceAtMost(254) + 1)
+            .order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putUUID(queryId)
+        payload.putVariable1String(name)
+        sendPacket(MessageIds.AVATAR_PICKER_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
+        return queryId
+    }
+
+    /**
+     * JoinGroupRequest — accept a group invitation by GroupID. Reply is
+     * `JoinGroupReply` (carries success bool). Wire format
+     * (Lumiya parity, slproto/messages/JoinGroupRequest.java).
+     */
+    fun sendJoinGroupRequest(groupId: UUID) {
+        val identity = outboundIdentity("UDPConnectionFixed.sendJoinGroupRequest")
+        val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putUUID(groupId)
+        sendPacket(MessageIds.JOIN_GROUP_REQUEST, payload.array(), reliable = true)
+    }
+
+    /**
+     * LeaveGroupReply — confirm a leave-group request from the simulator.
+     * In SL this is normally simulator → viewer (per the message_template),
+     * but Lumiya also packs it for replay / RLV-style purposes. Wire
+     * format (Lumiya parity, slproto/messages/LeaveGroupReply.java):
+     *   AgentData: AgentID
+     *   GroupData: GroupID, Success(BOOL)
+     */
+    fun sendLeaveGroupReply(groupId: UUID, success: Boolean) {
+        val identity = outboundIdentity("UDPConnectionFixed.sendLeaveGroupReply")
+        val payload = ByteBuffer.allocate(16 + 16 + 1).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(groupId)
+        payload.put(if (success) 1.toByte() else 0.toByte())
+        sendPacket(MessageIds.LEAVE_GROUP_REPLY, payload.array(), reliable = true)
+    }
+
+    /**
+     * InviteGroupRequest — invite one or more residents to a group.
+     * Wire format (Lumiya parity,
+     * slproto/messages/InviteGroupRequest.java PackPayload):
+     *   AgentData: AgentID, SessionID
+     *   GroupData: GroupID
+     *   InviteData (Variable, U8 count): InviteeID, RoleID
+     */
+    fun sendInviteGroupRequest(groupId: UUID, invites: List<Pair<UUID, UUID>>) {
+        if (invites.isEmpty()) return
+        val identity = outboundIdentity("UDPConnectionFixed.sendInviteGroupRequest")
+        for (chunk in invites.chunked(255)) {
+            val payload = ByteBuffer
+                .allocate(48 + 1 + chunk.size * 32)
+                .order(ByteOrder.LITTLE_ENDIAN)
+            payload.putUUID(identity.agentId)
+            payload.putUUID(identity.sessionId)
+            payload.putUUID(groupId)
+            payload.put(chunk.size.toByte())
+            for ((inviteeId, roleId) in chunk) {
+                payload.putUUID(inviteeId)
+                payload.putUUID(roleId)
+            }
+            sendPacket(MessageIds.INVITE_GROUP_REQUEST, payload.array(), reliable = true)
+        }
+    }
+
+    /**
+     * EjectGroupMemberRequest — kick one or more residents from a group.
+     * Wire format (Lumiya parity,
+     * slproto/messages/EjectGroupMemberRequest.java PackPayload):
+     *   AgentData: AgentID, SessionID
+     *   GroupData: GroupID
+     *   EjectData (Variable, U8 count): EjecteeID
+     */
+    fun sendEjectGroupMemberRequest(groupId: UUID, ejecteeIds: List<UUID>) {
+        if (ejecteeIds.isEmpty()) return
+        val identity = outboundIdentity("UDPConnectionFixed.sendEjectGroupMemberRequest")
+        for (chunk in ejecteeIds.chunked(255)) {
+            val payload = ByteBuffer
+                .allocate(48 + 1 + chunk.size * 16)
+                .order(ByteOrder.LITTLE_ENDIAN)
+            payload.putUUID(identity.agentId)
+            payload.putUUID(identity.sessionId)
+            payload.putUUID(groupId)
+            payload.put(chunk.size.toByte())
+            for (id in chunk) payload.putUUID(id)
+            sendPacket(MessageIds.EJECT_GROUP_MEMBER_REQUEST, payload.array(), reliable = true)
+        }
+    }
+
+    /**
+     * AssetUploadRequest — small-asset upload via the legacy UDP path
+     * (modern viewers go through HTTP `UploadBakedTexture` /
+     * `NewFileAgentInventory` capabilities; this is for grids / sims that
+     * still accept the UDP fallback). Wire format (Lumiya parity,
+     * slproto/messages/AssetUploadRequest.java PackPayload):
+     *   AssetBlock: TransactionID(LLUUID), Type(S8), Tempfile(BOOL),
+     *               StoreLocal(BOOL), AssetData(Variable 2)
+     */
+    fun sendAssetUploadRequest(
+        transactionId: UUID,
+        assetType: Int,
+        tempFile: Boolean,
+        storeLocal: Boolean,
+        assetData: ByteArray,
+    ) {
+        val payload = ByteBuffer
+            .allocate(16 + 1 + 1 + 1 + 2 + assetData.size)
+            .order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(transactionId)
+        payload.put(assetType.toByte())
+        payload.put(if (tempFile) 1.toByte() else 0.toByte())
+        payload.put(if (storeLocal) 1.toByte() else 0.toByte())
+        payload.putVariable2Bytes(assetData)
+        sendPacket(MessageIds.ASSET_UPLOAD_REQUEST, payload.array(), reliable = true)
+    }
+
+    /**
+     * DirPlacesQuery — search the in-world places directory. Returns the
+     * QueryID so callers can correlate the DirPlacesReply pages. Wire
+     * format (Lumiya parity, slproto/messages/DirPlacesQuery.java).
+     */
+    fun sendDirPlacesQuery(
+        queryText: String,
+        queryFlags: Int = 0,
+        category: Int = 0,
+        simName: String = "",
+        queryStart: Int = 0,
+    ): UUID {
+        val identity = outboundIdentity("UDPConnectionFixed.sendDirPlacesQuery")
+        val queryId = UUID.randomUUID()
+        val payload = ByteBuffer
+            .allocate(48 + 1 + queryText.length.coerceAtMost(254) + 1 +
+                      4 + 1 +
+                      1 + simName.length.coerceAtMost(254) + 1 + 4)
+            .order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putUUID(queryId)
+        payload.putVariable1String(queryText)
+        payload.putInt(queryFlags)
+        payload.put(category.toByte())
+        payload.putVariable1String(simName)
+        payload.putInt(queryStart)
+        sendPacket(MessageIds.DIR_PLACES_QUERY, payload.array().copyOf(payload.position()), reliable = true)
+        return queryId
+    }
+
+    /**
+     * DirFindQuery — search the people / events / classifieds directory
+     * (queryFlags selects the table). Wire format
+     * (Lumiya parity, slproto/messages/DirFindQuery.java).
+     */
+    fun sendDirFindQuery(
+        queryText: String,
+        queryFlags: Int = 0,
+        queryStart: Int = 0,
+    ): UUID {
+        val identity = outboundIdentity("UDPConnectionFixed.sendDirFindQuery")
+        val queryId = UUID.randomUUID()
+        val payload = ByteBuffer
+            .allocate(48 + 1 + queryText.length.coerceAtMost(254) + 1 + 4 + 4)
+            .order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putUUID(queryId)
+        payload.putVariable1String(queryText)
+        payload.putInt(queryFlags)
+        payload.putInt(queryStart)
+        sendPacket(MessageIds.DIR_FIND_QUERY, payload.array().copyOf(payload.position()), reliable = true)
+        return queryId
     }
 
     /**
