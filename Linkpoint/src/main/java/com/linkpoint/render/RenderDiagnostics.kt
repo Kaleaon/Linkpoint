@@ -61,6 +61,9 @@ object RenderDiagnostics {
     private val heartbeatStarted = AtomicBoolean(false)
     private val heartbeatScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var heartbeatJob: Job? = null
+    private val lumiyaUboUploadTimeNsTotal = AtomicLong(0L)
+    private val lumiyaUboUploadSamples = AtomicLong(0L)
+    private val lumiyaFrameAllocations = AtomicLong(0L)
 
     /**
      * Mark a render subsystem as active and ensure the heartbeat ticker
@@ -100,6 +103,14 @@ object RenderDiagnostics {
                 append(" Δ=${delta}/${HEARTBEAT_INTERVAL_MS}ms")
                 append(" fps=${"%.1f".format(fps)}")
                 if (sinceLastFrame >= 0) append(" sinceLast=${sinceLastFrame}ms")
+                if (subsystem == "Lumiya") {
+                    val samples = lumiyaUboUploadSamples.get()
+                    if (samples > 0) {
+                        val avgUs = (lumiyaUboUploadTimeNsTotal.get() / samples) / 1_000.0
+                        append(" uboAvgUs=${"%.1f".format(avgUs)}")
+                    }
+                    append(" frameAllocs=${lumiyaFrameAllocations.get()}")
+                }
             }
             SessionLogRecorder.logRender(subsystem, "heartbeat", details)
             // Stall: we expect a frame at least every STALL_THRESHOLD_MS
@@ -299,6 +310,12 @@ object RenderDiagnostics {
         }
     }
 
+    fun glGlobalUboUpload(uploadTimeNs: Long, frameAllocations: Int) {
+        lumiyaUboUploadTimeNsTotal.addAndGet(uploadTimeNs.coerceAtLeast(0L))
+        lumiyaUboUploadSamples.incrementAndGet()
+        lumiyaFrameAllocations.addAndGet(frameAllocations.toLong().coerceAtLeast(0L))
+    }
+
     fun glError(code: Int, location: String) {
         SessionLogRecorder.logRender(
             "Lumiya",
@@ -349,6 +366,9 @@ object RenderDiagnostics {
         frameCounters.clear()
         lastFrameWallClock.clear()
         lastReportedFrameCount.clear()
+        lumiyaUboUploadTimeNsTotal.set(0L)
+        lumiyaUboUploadSamples.set(0L)
+        lumiyaFrameAllocations.set(0L)
         Log.d(TAG, "Render diagnostics reset (test hook)")
     }
 }
