@@ -62,12 +62,12 @@ class GroupDetailsDialog : DialogFragment() {
 }
 
 /**
- * Open the group chat session for [group]. Starts the chat session via
- * the ChatSessionRequest capability (IMManager.startGroupSession) and
- * launches ChatActivity scoped to that session id. This is the wire that
- * was missing in the live debug capture — the buttons existed but had
- * empty handlers, so users tapping "Group Chat" saw the dialog dismiss
- * with nothing happening.
+ * Open the group chat session for [group]. Creates the local session
+ * record (`IMManager.startGroupSessionLocal`) so the chat panel binds
+ * to the right `sessionId`, then launches `ChatActivity`. The chatterbox
+ * session itself is brought up lazily on the first send via the UDP
+ * `ImprovedInstantMessage(Dialog=15)` flow — Lumiya parity, see
+ * `IMManager.sendSessionChat`.
  */
 private fun DialogFragment.openGroupChat(group: Group) {
     val app = LinkpointApp.getInstance()
@@ -75,17 +75,12 @@ private fun DialogFragment.openGroupChat(group: Group) {
     Toast.makeText(ctx, "Joining group chat…", Toast.LENGTH_SHORT).show()
     lifecycleScope.launch {
         val sessionId = try {
-            app.imManager.startGroupSession(group.groupId, group.name)
+            app.imManager.startGroupSessionLocal(group.groupId, group.name)
         } catch (e: Exception) {
-            null
+            group.groupId
         }
-        // Even if startGroupSession fails (e.g. the cap isn't available
-        // yet), fall back to opening the screen with the group id —
-        // ChatActivity tolerates a missing session and the user can
-        // retry once the session is established.
-        val effectiveSessionId = sessionId ?: group.groupId
         val intent = Intent(ctx, ChatActivity::class.java).apply {
-            putExtra(ChatActivity.EXTRA_IM_SESSION_ID, effectiveSessionId.toString())
+            putExtra(ChatActivity.EXTRA_IM_SESSION_ID, sessionId.toString())
         }
         ctx.startActivity(intent)
     }

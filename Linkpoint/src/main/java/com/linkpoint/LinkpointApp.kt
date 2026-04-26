@@ -971,7 +971,15 @@ class LinkpointApp : Application() {
         
         // IM manager
         imManager = IMManager(udpConnection, capabilityManager, agentId)
-        
+
+        // Wire IMManager into GroupsManager so `sendGroupChat` routes
+        // through the IM session state machine (Dialog=15 bring-up +
+        // pending queue + Dialog=17 drain). Without this, GroupsManager
+        // falls back to a stateless Dialog=15+17 send pair.
+        if (::groupsManager.isInitialized) {
+            groupsManager.setIMManager(imManager)
+        }
+
         // Inventory
         inventoryManager = InventoryManager(capabilityManager, udpConnection, agentId)
         

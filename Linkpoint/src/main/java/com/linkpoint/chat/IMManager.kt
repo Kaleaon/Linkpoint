@@ -6,8 +6,10 @@ import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.core.AgentIdentity
 import com.linkpoint.protocol.llsd.*
+import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.SLMessagePackers
 import com.linkpoint.protocol.messages.UDPConnectionFixed
-import com.linkpoint.protocol.types.putUUID
+import com.linkpoint.protocol.types.LLVector3
 import com.linkpoint.push.PushEvent
 import com.linkpoint.push.PushEventBus
 import com.linkpoint.push.PushEventType
@@ -105,6 +107,27 @@ class IMManager(
     private val processedPushIds = ConcurrentHashMap.newKeySet<String>()
     private val pendingSyncSessions = MutableStateFlow<Set<UUID>>(emptySet())
     val syncNeededSessions: StateFlow<Set<UUID>> = pendingSyncSessions
+
+    /**
+     * Groups for which we have already received `ChatterBoxSessionStartReply`
+     * (or for which we sent the first `ImprovedInstantMessage(Dialog=15)` and
+     * are willing to send subsequent Dialog=17 messages without re-bootstrap).
+     *
+     * Mirrors Lumiya's `SLAgentCircuit.startedGroupSessions`
+     * (`lumiya_decompiled_source/.../slproto/SLAgentCircuit.java:1671-1696`).
+     */
+    private val startedGroupSessions = ConcurrentHashMap.newKeySet<UUID>()
+
+    /**
+     * Group chat lines queued while we wait for the simulator to ack the
+     * Dialog=15 session-start. Drained from [handleSessionStart] when the
+     * `ChatterBoxSessionStartReply` event arrives.
+     *
+     * Mirrors Lumiya's `pendingGroupMessages`. Without this queue the very
+     * first message to a fresh group is dropped server-side because the
+     * chatterbox session isn't established yet.
+     */
+    private val pendingGroupMessages = ConcurrentHashMap<UUID, MutableList<String>>()
 
     private fun outboundIdentity(): AgentIdentity = AgentIdentity(
         agentId = agentId,
@@ -268,7 +291,7 @@ class IMManager(
         val sessionIdStr = body.getString("session_id") ?: return
         val sessionId = try { UUID.fromString(sessionIdStr) } catch (e: Exception) { return }
         val success = body.getInt("success") == 1
-        
+
         if (success) {
             val session = sessions[sessionId]
             if (session != null) {
@@ -278,11 +301,24 @@ class IMManager(
                 }
                 Log.d(TAG, "Session $sessionId started successfully")
             }
+            // For groups, mark the chatterbox as live and drain any messages
+            // that were queued while we waited for the Dialog=15 reply.
+            // Mirrors `SLAgentCircuit.HandleChatterBoxSessionStartReply:368-392`.
+            if (startedGroupSessions.add(sessionId)) {
+                val queued = pendingGroupMessages.remove(sessionId)
+                if (queued != null && queued.isNotEmpty()) {
+                    Log.d(TAG, "Draining ${queued.size} pending group messages for $sessionId")
+                    queued.forEach { sendGroupChatDialog17(sessionId, it) }
+                }
+            }
             updateSessionList()
         } else {
             val error = body.getString("error") ?: "Unknown error"
             Log.e(TAG, "Failed to start session $sessionId: $error")
-            // Remove failed session
+            // Drop the queued group lines too — the session never came up,
+            // and resending them would loop on the Dialog=15 path.
+            pendingGroupMessages.remove(sessionId)
+            startedGroupSessions.remove(sessionId)
             sessions.remove(sessionId)
             scope.launch {
                 _sessionFlow.emit(IMSessionEvent.Left(sessionId))
@@ -345,18 +381,23 @@ class IMManager(
     /**
      * Send an IM in the given session.
      *
-     * P2P sessions go over UDP via ImprovedInstantMessage with dialog
-     * IM_NOTHING_SPECIAL (0); this is what the SL protocol expects for
-     * 1:1 messages and what the simulator routes to inbox / online
-     * delivery. Group / conference sessions go over the ChatSessionRequest
-     * capability with method=sendchat (per Lumiya parity doc segment 08
-     * §3 and the dialog-code table in §2).
+     * All three SL chat dispatch types (P2P, GROUP, CONFERENCE) ride on
+     * the **UDP `ImprovedInstantMessage`** message — there is no
+     * sendchat-via-cap path in real Second Life. (Lumiya enumerates the
+     * `ChatSessionRequest` cap but only its voice module reads the URL;
+     * `lumiya_decompiled_source/.../slproto/caps/SLCaps.java:45`,
+     * `slproto/modules/voice/SLVoice.java:102` — no chat POSTs go to it.)
      *
-     * Previously every IM — including 1:1 — was POSTed to the
-     * ChatSessionRequest capability, which silently dropped on the server
-     * for sessions that the client hadn't joined via "start session" first.
-     * This was the user-reported "I can't message anyone on login" failure
-     * captured in the 2026-04-25 Athanasia debug capture.
+     * - P2P: `Dialog=0 (IM_NOTHING_SPECIAL)`, `ID = self ⊕ other`,
+     *   `BinaryBucket` empty.
+     * - GROUP: first call to a fresh group sends `Dialog=15` and queues
+     *   the line in [pendingGroupMessages]; on `ChatterBoxSessionStartReply`
+     *   the queue drains as `Dialog=17` messages. Subsequent calls send
+     *   `Dialog=17` directly. `ID = ToAgentID = groupId`,
+     *   `BinaryBucket = byteArrayOf(0)`.
+     * - CONFERENCE: cap brings up the session via [startConferenceSession]
+     *   (the only path that legitimately uses the cap), then chat lines
+     *   ride `Dialog=17` UDP IM the same as groups.
      *
      * The local-history entry is appended before the network call so the
      * UI shows the user's own message immediately; on send failure we
@@ -412,9 +453,13 @@ class IMManager(
     }
 
     /**
-     * Build and send a 1:1 IM as an ImprovedInstantMessage UDP packet.
-     * Mirrors the layout used by sendTypingStart/sendTypingStop, with a
-     * non-empty FromAgentName and Message and dialog IM_NOTHING_SPECIAL.
+     * Build and send a 1:1 IM as an `ImprovedInstantMessage` UDP packet.
+     *
+     * Wire format is produced by [SLMessagePackers.packImprovedInstantMessage]
+     * — the canonical builder also used by typing indicators and group chat,
+     * so a wire-format regression in any one of those three call sites is
+     * impossible. Reliability flag mirrors Lumiya
+     * (`SLAgentCircuit.SendInstantMessage:737`: `isReliable = true`).
      */
     private fun sendP2PInstantMessage(session: IMSession, message: String): Boolean {
         val targetId = session.participants.firstOrNull()
@@ -422,46 +467,19 @@ class IMManager(
             Log.w(TAG, "sendP2PInstantMessage: session ${session.sessionId} has no participants")
             return false
         }
-
-        val identity = outboundIdentity()
-        val fromNameBytes = "You".toByteArray(Charsets.UTF_8)  // server replaces with our resolved name
-        val messageBytes = message.toByteArray(Charsets.UTF_8)
-
-        // 32 (AgentData) + 1 + 16 + 4 + 16 + 12 + 1 + 1 + 16 + 4 (MessageBlock fixed) +
-        // 1 + name + 1 + 2 + msg + 2 (Variables) + 4 (EstateBlock) + 1 (MetaData count) + slack
-        val payload = java.nio.ByteBuffer.allocate(160 + fromNameBytes.size + messageBytes.size)
-            .order(java.nio.ByteOrder.LITTLE_ENDIAN)
-
-        payload.putUUID(identity.agentId)
-        payload.putUUID(identity.sessionId)
-
-        payload.put(0)                          // FromGroup (BOOL)
-        payload.putUUID(targetId)               // ToAgentID
-        payload.putInt(0)                       // ParentEstateID
-        payload.putUUID(UUID(0, 0))             // RegionID
-        payload.putFloat(0f); payload.putFloat(0f); payload.putFloat(0f)  // Position
-        payload.put(0)                          // Offline
-        payload.put(IM_NOTHING_SPECIAL.toByte()) // Dialog
-        payload.putUUID(session.sessionId)      // ID (session/transaction id)
-        payload.putInt((System.currentTimeMillis() / 1000).toInt())
-
-        // FromAgentName (Variable 1: byte length + bytes + nul)
-        payload.put((fromNameBytes.size + 1).toByte())
-        payload.put(fromNameBytes)
-        payload.put(0)
-        // Message (Variable 2: short length + bytes + nul)
-        payload.putShort((messageBytes.size + 1).toShort())
-        payload.put(messageBytes)
-        payload.put(0)
-        // BinaryBucket (Variable 2)
-        payload.putShort(0)
-
-        payload.putInt(0)                       // EstateID
-        payload.put(0)                          // MetaData variable block count
-
+        val payload = SLMessagePackers.packImprovedInstantMessage(
+            identity = outboundIdentity(),
+            fromGroup = false,
+            toAgentId = targetId,
+            dialog = IM_NOTHING_SPECIAL,
+            id = session.sessionId,
+            timestamp = (System.currentTimeMillis() / 1000).toInt(),
+            fromAgentName = "You",  // server replaces with our resolved name
+            message = message
+        )
         udpConnection.sendPacket(
-            com.linkpoint.protocol.messages.MessageIds.IMPROVED_INSTANT_MESSAGE,
-            payload.array().copyOf(payload.position()),
+            MessageIds.IMPROVED_INSTANT_MESSAGE,
+            payload,
             reliable = true
         )
         Log.d(TAG, "P2P IM sent to $targetId (session=${session.sessionId})")
@@ -469,23 +487,93 @@ class IMManager(
     }
 
     /**
-     * Send a group/conference message via the ChatSessionRequest cap.
-     * Uses method=sendchat per the SL chat-session protocol.
+     * Send a group chat line. Group chat in SL is **UDP** — Lumiya does not
+     * use the `ChatSessionRequest` HTTP cap for chat at all (see
+     * `lumiya_decompiled_source/.../slproto/caps/SLCaps.java:45` — the cap
+     * URL is read but only by the voice module).
+     *
+     * Two-stage flow, copied from
+     * `SLAgentCircuit.SendGroupInstantMessage:1671-1696`:
+     *
+     * 1. **First message to a fresh group**: enqueue the line in
+     *    [pendingGroupMessages], send `ImprovedInstantMessage(Dialog=15)`
+     *    with `BinaryBucket = byteArrayOf(0)` to bring up the chatterbox
+     *    session. The simulator replies on EventQueue with
+     *    `ChatterBoxSessionStartReply`, which [handleSessionStart] processes
+     *    by adding the group to [startedGroupSessions] and draining the
+     *    pending queue.
+     * 2. **Subsequent messages**: send `ImprovedInstantMessage(Dialog=17)`
+     *    with `ID = ToAgentID = groupId` and `BinaryBucket = byteArrayOf(0)`
+     *    directly.
+     *
+     * Conferences (ad-hoc multi-user) use a different bring-up path
+     * (`startConferenceSession` POSTs to the cap with `method=start
+     * conference`) but once started, chat lines also go via Dialog=17 UDP IM.
      */
-    private suspend fun sendSessionChat(session: IMSession, message: String): Boolean {
-        val request = LLSDMap().apply {
-            this["method"] = LLSDString("sendchat")
-            this["session-id"] = LLSDString(session.sessionId.toString())
-            this["params"] = LLSDMap().apply {
-                this["text"] = LLSDString(message)
-                this["type"] = LLSDInteger(0)
-            }
+    private fun sendSessionChat(session: IMSession, message: String): Boolean {
+        val sessionId = session.sessionId
+        if (session.type == SessionType.GROUP && sessionId !in startedGroupSessions) {
+            // Queue the line first so handleSessionStart can flush it on
+            // ChatterBoxSessionStartReply, then trigger Dialog=15 bring-up.
+            pendingGroupMessages
+                .computeIfAbsent(sessionId) { mutableListOf() }
+                .add(message)
+            sendGroupSessionStart(sessionId)
+            Log.d(TAG, "Group chat queued for $sessionId (waiting for session-start reply)")
+            return true
         }
-        val response = capabilityManager.request(CapabilityManager.CAP_CHAT_PASS, request)
-        if (response == null) {
-            Log.w(TAG, "ChatSessionRequest unavailable or failed for session ${session.sessionId}")
-            return false
-        }
+        return sendGroupChatDialog17(sessionId, message)
+    }
+
+    /**
+     * Send `ImprovedInstantMessage(Dialog=15)` to bring up a group chatterbox
+     * session. Called from [sendSessionChat] when the group has not yet been
+     * acknowledged by the simulator. Reliable (Lumiya
+     * `SLAgentCircuit.SendGroupSessionStart:736-737`).
+     */
+    private fun sendGroupSessionStart(groupId: UUID) {
+        val payload = SLMessagePackers.packImprovedInstantMessage(
+            identity = outboundIdentity(),
+            fromGroup = false,
+            toAgentId = groupId,        // group UUID, per Lumiya
+            dialog = IM_SESSION_GROUP_START,
+            id = groupId,                // session UUID == group UUID
+            timestamp = (System.currentTimeMillis() / 1000).toInt(),
+            fromAgentName = "You",
+            message = "",
+            // SL rejects empty buckets on Dialog=15; Lumiya sends new byte[1]
+            binaryBucket = byteArrayOf(0)
+        )
+        udpConnection.sendPacket(
+            MessageIds.IMPROVED_INSTANT_MESSAGE,
+            payload,
+            reliable = true
+        )
+        Log.d(TAG, "Group session-start (Dialog=15) sent for $groupId")
+    }
+
+    /**
+     * Send a `ImprovedInstantMessage(Dialog=17)` group chat line to a
+     * group/conference session that's already established server-side.
+     */
+    private fun sendGroupChatDialog17(sessionId: UUID, message: String): Boolean {
+        val payload = SLMessagePackers.packImprovedInstantMessage(
+            identity = outboundIdentity(),
+            fromGroup = false,
+            toAgentId = sessionId,       // for groups, ToAgentID = groupId
+            dialog = IM_SESSION_SEND,    // Dialog=17
+            id = sessionId,
+            timestamp = (System.currentTimeMillis() / 1000).toInt(),
+            fromAgentName = "You",
+            message = message,
+            binaryBucket = byteArrayOf(0)
+        )
+        udpConnection.sendPacket(
+            MessageIds.IMPROVED_INSTANT_MESSAGE,
+            payload,
+            reliable = true
+        )
+        Log.d(TAG, "Group chat (Dialog=17) sent to session $sessionId")
         return true
     }
     
@@ -510,33 +598,29 @@ class IMManager(
     }
     
     /**
-     * Start group chat session
+     * Create or look up the local group-chat session record.
+     *
+     * Group chat in SL doesn't require a cap call to bring up the
+     * chatterbox session — the first `ImprovedInstantMessage(Dialog=15)`
+     * does that, and the simulator confirms via the EventQueue
+     * `ChatterBoxSessionStartReply`. So this function is purely local:
+     * it ensures `sessions[groupId]` exists with `type=GROUP` so that
+     * subsequent calls to [sendIM] dispatch to the group path.
+     *
+     * Idempotent. Safe to call from any thread.
      */
-    suspend fun startGroupSession(groupId: UUID, groupName: String): UUID? {
-        val request = LLSDMap().apply {
-            this["method"] = LLSDString("start session")
-            this["session-id"] = LLSDString(groupId.toString())
-            this["params"] = LLSDMap().apply {
-                this["type"] = LLSDInteger(0) // Group chat
-                this["session-id"] = LLSDString(groupId.toString())
-            }
-        }
-        
-        val response = capabilityManager.request(CapabilityManager.CAP_CHAT_PASS, request)
-        if (response is LLSDMap && response.getInt("success") == 1) {
-            val session = IMSession(
+    fun startGroupSessionLocal(groupId: UUID, groupName: String): UUID {
+        sessions.getOrPut(groupId) {
+            IMSession(
                 sessionId = groupId,
                 type = SessionType.GROUP,
                 name = groupName,
                 participants = mutableListOf(),
-                isActive = true
+                isActive = false  // Activated when ChatterBoxSessionStartReply arrives.
             )
-            sessions[groupId] = session
-            updateSessionList()
-            return groupId
         }
-        
-        return null
+        updateSessionList()
+        return groupId
     }
     
     /**
@@ -594,120 +678,46 @@ class IMManager(
      * Send typing indicator
      */
     fun sendTypingStart(sessionId: UUID) {
-        scope.launch {
-            try {
-                // Send typing indicator via ImprovedInstantMessage with dialog type
-                val session = sessions[sessionId] ?: return@launch
-                
-                // Get the target - for P2P use first participant, for groups use session ID
-                val targetId = if (session.type == SessionType.P2P && session.participants.isNotEmpty()) {
-                    session.participants.first()
-                } else {
-                    sessionId
-                }
-                
-                val payload = java.nio.ByteBuffer.allocate(100).order(java.nio.ByteOrder.LITTLE_ENDIAN)
-                
-                // AgentData block - UUIDs are big-endian per SL protocol
-                val identity = outboundIdentity()
-                payload.putUUID(identity.agentId)
-                payload.putUUID(identity.sessionId)
-                
-                // MessageBlock
-                payload.put(0)  // FromGroup (BOOL)
-                payload.putUUID(targetId)  // ToAgentID
-                payload.putInt(0)  // ParentEstateID
-                payload.putUUID(UUID(0, 0))  // RegionID (empty)
-                payload.putFloat(0f)  // Position X
-                payload.putFloat(0f)  // Position Y
-                payload.putFloat(0f)  // Position Z
-                payload.put(0)  // Offline
-                payload.put(IM_TYPING_START.toByte())  // Dialog
-                payload.putUUID(sessionId)  // ID (session/IM ID)
-                payload.putInt((System.currentTimeMillis() / 1000).toInt())  // Timestamp
-                
-                // FromAgentName (Variable 1)
-                payload.put(0)  // Empty name
-                // Message (Variable 2)
-                payload.putShort(0)
-                // BinaryBucket (Variable 2)
-                payload.putShort(0)
-                
-                // EstateBlock
-                payload.putInt(0)  // EstateID
-                
-                // MetaData Variable block - count = 0
-                payload.put(0)
-                
-                udpConnection.sendPacket(
-                    com.linkpoint.protocol.messages.MessageIds.IMPROVED_INSTANT_MESSAGE,
-                    payload.array().copyOf(payload.position()),
-                    reliable = false
-                )
-                Log.d(TAG, "Sent typing start to session $sessionId")
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to send typing start", e)
-            }
-        }
+        scope.launch { sendTypingPacket(sessionId, IM_TYPING_START) }
     }
-    
+
     /**
      * Stop typing indicator
      */
     fun sendTypingStop(sessionId: UUID) {
-        scope.launch {
-            try {
-                val session = sessions[sessionId] ?: return@launch
-                
-                // Get the target - for P2P use first participant, for groups use session ID
-                val targetId = if (session.type == SessionType.P2P && session.participants.isNotEmpty()) {
-                    session.participants.first()
-                } else {
-                    sessionId
-                }
-                
-                val payload = java.nio.ByteBuffer.allocate(100).order(java.nio.ByteOrder.LITTLE_ENDIAN)
-                
-                // AgentData block - UUIDs are big-endian per SL protocol
-                val identity = outboundIdentity()
-                payload.putUUID(identity.agentId)
-                payload.putUUID(identity.sessionId)
-                
-                // MessageBlock
-                payload.put(0)  // FromGroup (BOOL)
-                payload.putUUID(targetId)  // ToAgentID
-                payload.putInt(0)  // ParentEstateID
-                payload.putUUID(UUID(0, 0))  // RegionID (empty)
-                payload.putFloat(0f)  // Position X
-                payload.putFloat(0f)  // Position Y
-                payload.putFloat(0f)  // Position Z
-                payload.put(0)  // Offline
-                payload.put(IM_TYPING_STOP.toByte())  // Dialog
-                payload.putUUID(sessionId)  // ID (session/IM ID)
-                payload.putInt((System.currentTimeMillis() / 1000).toInt())  // Timestamp
-                
-                // FromAgentName (Variable 1)
-                payload.put(0)  // Empty name
-                // Message (Variable 2)
-                payload.putShort(0)
-                // BinaryBucket (Variable 2)
-                payload.putShort(0)
-                
-                // EstateBlock
-                payload.putInt(0)  // EstateID
-                
-                // MetaData Variable block - count = 0
-                payload.put(0)
-                
-                udpConnection.sendPacket(
-                    com.linkpoint.protocol.messages.MessageIds.IMPROVED_INSTANT_MESSAGE,
-                    payload.array().copyOf(payload.position()),
-                    reliable = false
-                )
-                Log.d(TAG, "Sent typing stop to session $sessionId")
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to send typing stop", e)
+        scope.launch { sendTypingPacket(sessionId, IM_TYPING_STOP) }
+    }
+
+    private fun sendTypingPacket(sessionId: UUID, dialog: Int) {
+        try {
+            val session = sessions[sessionId] ?: return
+            // For P2P use the first participant; for groups/conferences the
+            // session UUID is the target (and the ID).
+            val targetId = if (session.type == SessionType.P2P && session.participants.isNotEmpty()) {
+                session.participants.first()
+            } else {
+                sessionId
             }
+            val payload = SLMessagePackers.packImprovedInstantMessage(
+                identity = outboundIdentity(),
+                fromGroup = false,
+                toAgentId = targetId,
+                dialog = dialog,
+                id = sessionId,
+                timestamp = (System.currentTimeMillis() / 1000).toInt(),
+                // Lumiya sends an empty FromAgentName here; SL accepts a
+                // single-NUL Variable 1 (the packer enforces the NUL).
+                fromAgentName = "",
+                message = ""
+            )
+            udpConnection.sendPacket(
+                MessageIds.IMPROVED_INSTANT_MESSAGE,
+                payload,
+                reliable = false
+            )
+            Log.d(TAG, "Sent typing dialog=$dialog to session $sessionId")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to send typing packet (dialog=$dialog)", e)
         }
     }
     

@@ -47,11 +47,24 @@ object MessageParser {
             Log.w(TAG, "Packet too small to contain header: ${rawPacket.size} bytes")
             return null
         }
-        
-        var offset = PACKET_HEADER_SIZE
-        
+
+        // LLUDP packets carry an "extra header" of 0..255 bytes after the
+        // 6-byte fixed header (flags + 4-byte seq + 1-byte extra-header
+        // length). The message-ID prefix follows those bytes, not byte 6.
+        // Skipping the extra-header is what `getMessageStartOffset` /
+        // `extractMessageId` in UDPConnectionFixed already do (commit
+        // 3cf9fad4 hardened those paths); applying the same skip here so
+        // `registerParsedHandler` receives the right body for packets
+        // where the simulator chose to include extra-header bytes.
+        val extraHeaderLen = rawPacket[5].toInt() and 0xFF
+        var offset = PACKET_HEADER_SIZE + extraHeaderLen
+        if (offset + 1 > rawPacket.size) {
+            Log.w(TAG, "Packet truncated past extra header (size=${rawPacket.size}, extra=$extraHeaderLen)")
+            return null
+        }
+
         // Decode message ID to determine its length
-        // 
+        //
         // SL Protocol Message ID Encoding (matching SL protocol):
         // - Byte.toInt() in Kotlin preserves sign: 0xFF becomes -1, 0xFB becomes -5, etc.
         // - This is INTENTIONAL because SL message IDs use signed interpretation:

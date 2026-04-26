@@ -6,7 +6,10 @@ import com.linkpoint.messaging.MessagingDispatcher
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.llsd.*
+import com.linkpoint.chat.IMManager
+import com.linkpoint.protocol.core.AgentIdentity
 import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.SLMessagePackers
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.getUUID
 import com.linkpoint.protocol.types.putUUID
@@ -191,73 +194,117 @@ class GroupsManager(
     }
     
     /**
-     * Send group chat message via the ChatSessionRequest capability.
-     *
-     * Group chat in SL is session-based: the client first joins the
-     * session ("start session"/"accept" methods on ChatSessionRequest),
-     * then posts each message with method=sendchat. Previously this
-     * function built a UDP payload that was never actually sent — the
-     * payload buffer was discarded and a "Sent group chat" log line
-     * lied to the caller. The user-reported "groups don't work" failure
-     * captured in the 2026-04-25 Athanasia debug capture.
+     * Optional reference to [IMManager]. When wired (via [setIMManager]),
+     * `sendGroupChat` delegates the bring-up + queueing to the IM session
+     * state machine in IMManager (single source of truth). When null —
+     * e.g. early in initialization, before IMManager exists — we fall
+     * back to a self-contained Dialog=15+17 send pair. Both paths produce
+     * identical bytes-on-wire via [SLMessagePackers].
      */
-    suspend fun sendGroupChat(groupId: UUID, message: String): Boolean {
-        return withContext(Dispatchers.IO) {
-            try {
-                // Ensure the session is open server-side. For group chat
-                // the session id IS the group id (Lumiya parity doc 08 §3).
-                val sessionId = getOrCreateGroupChatSession(groupId) ?: groupId
+    @Volatile
+    private var imManager: IMManager? = null
 
-                val request = LLSDMap().apply {
-                    this["method"] = LLSDString("sendchat")
-                    this["session-id"] = LLSDString(sessionId.toString())
-                    this["params"] = LLSDMap().apply {
-                        this["text"] = LLSDString(message)
-                        this["type"] = LLSDInteger(0)
-                    }
-                }
-                val response = capabilityManager.request(CapabilityManager.CAP_CHAT_PASS, request)
-                if (response == null) {
-                    Log.w(TAG, "sendGroupChat: ChatSessionRequest unavailable or failed for $groupId")
-                    return@withContext false
-                }
-                Log.i(TAG, "Sent group chat to $groupId (session=$sessionId)")
+    fun setIMManager(manager: IMManager) {
+        imManager = manager
+    }
+
+    /**
+     * Send a group chat message.
+     *
+     * Group chat in Second Life is **UDP `ImprovedInstantMessage`**, not
+     * the `ChatSessionRequest` HTTP cap. (Lumiya enumerates the cap but
+     * only its voice module reads the URL —
+     * `lumiya_decompiled_source/.../slproto/caps/SLCaps.java:45`,
+     * `slproto/modules/voice/SLVoice.java:102`. There is no Lumiya call
+     * that POSTs `method=sendchat` to that cap.)
+     *
+     * Wire: Dialog=15 (IM_SESSION_GROUP_START) brings up the chatterbox
+     * session, then Dialog=17 (IM_SESSION_SEND) carries each line. Both
+     * use `ID = ToAgentID = groupId` and `BinaryBucket = byte[1]` (single
+     * zero byte; SL rejects empty buckets on Dialog=15). See
+     * `SLAgentCircuit.SendGroupSessionStart:721-739` and
+     * `SendGroupInstantMessage:1671-1696`.
+     *
+     * Suspend signature retained for API compatibility with existing
+     * callers; the body is now non-blocking.
+     */
+    @Suppress("RedundantSuspendModifier")
+    suspend fun sendGroupChat(groupId: UUID, message: String): Boolean {
+        // If IMManager is wired, route through it so the queue + start-reply
+        // state machine runs there instead of duplicating it. The local
+        // session record will be lazily created on first send.
+        imManager?.let { im ->
+            return try {
+                im.startGroupSessionLocal(groupId, groups[groupId]?.name ?: "Group")
+                im.sendIM(groupId, message)
                 true
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to send group chat", e)
+                Log.e(TAG, "sendGroupChat via IMManager failed", e)
                 false
             }
         }
+        // Fallback path — self-contained, no shared state. Sends the
+        // session-start and the chat line back-to-back. The simulator is
+        // idempotent on Dialog=15 (a duplicate session-start is a no-op),
+        // so this is safe even when the session is already up.
+        return try {
+            val identity = AgentIdentity(
+                agentId = agentId,
+                sessionId = udpConnection.getSessionId(),
+                circuitCode = udpConnection.getCircuitCode()
+            ).requireValid("GroupsManager.sendGroupChat")
+            val ts = (System.currentTimeMillis() / 1000).toInt()
+
+            udpConnection.sendPacket(
+                MessageIds.IMPROVED_INSTANT_MESSAGE,
+                SLMessagePackers.packImprovedInstantMessage(
+                    identity = identity,
+                    fromGroup = false,
+                    toAgentId = groupId,
+                    dialog = IMManager.IM_SESSION_GROUP_START,
+                    id = groupId,
+                    timestamp = ts,
+                    fromAgentName = "You",
+                    message = "",
+                    binaryBucket = byteArrayOf(0)
+                ),
+                reliable = true
+            )
+            udpConnection.sendPacket(
+                MessageIds.IMPROVED_INSTANT_MESSAGE,
+                SLMessagePackers.packImprovedInstantMessage(
+                    identity = identity,
+                    fromGroup = false,
+                    toAgentId = groupId,
+                    dialog = IMManager.IM_SESSION_SEND,
+                    id = groupId,
+                    timestamp = ts,
+                    fromAgentName = "You",
+                    message = message,
+                    binaryBucket = byteArrayOf(0)
+                ),
+                reliable = true
+            )
+            Log.i(TAG, "Sent group chat (Dialog=15+17) to $groupId via fallback path")
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to send group chat", e)
+            false
+        }
     }
-    
+
     /**
-     * Start or join a group chat session
+     * Start or join a group chat session (lazy — no server round-trip).
+     *
+     * In Lumiya, group sessions come up implicitly on the first Dialog=15
+     * IM. This function exists only so existing callers that "open" a
+     * group chat panel before sending can pre-create the local session
+     * record in [IMManager]. Returns the group UUID (which is also the
+     * session UUID by convention).
      */
     suspend fun startGroupChatSession(groupId: UUID): UUID? {
-        return getOrCreateGroupChatSession(groupId)
-    }
-    
-    private suspend fun getOrCreateGroupChatSession(groupId: UUID): UUID? {
-        return withContext(Dispatchers.IO) {
-            try {
-                val request = LLSDMap().apply {
-                    this["method"] = LLSDString("start conference")
-                    this["session-id"] = LLSDUUID(groupId)
-                }
-                
-                val response = capabilityManager.request(CapabilityManager.CAP_CHAT_PASS, request)
-                if (response is LLSDMap) {
-                    UUID.fromString(response.getString("session_id"))
-                } else {
-                    Log.w(TAG, "Using groupId as fallback session ID for group $groupId")
-                    groupId // Fallback: use group ID as session ID
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to create chat session", e)
-                Log.w(TAG, "Using groupId as fallback session ID for group $groupId")
-                groupId
-            }
-        }
+        imManager?.startGroupSessionLocal(groupId, groups[groupId]?.name ?: "Group")
+        return groupId
     }
     
     /**
