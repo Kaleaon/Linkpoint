@@ -156,7 +156,19 @@ class CapabilityManager : CapabilityRequester {
     
     // Request throttler for rate limiting
     private val throttler = RequestThrottler.getInstance()
-    
+
+    /**
+     * Optional Android Context, set by the application after construction
+     * (LinkpointApp wires this in initializeManagers). When present, the
+     * request path tries [com.linkpoint.network.CronetHttpClient] first
+     * for HTTP/3 (QUIC) — which gives capability traffic the same
+     * connection-migration win that asset traffic got in commit 163af1df.
+     * When absent (no-arg unit-test constructor, GridConnection, etc.),
+     * Cronet is skipped and OkHttp is the only path. Either way the
+     * fallback chain is H3 → H2 → H1.1.
+     */
+    @Volatile var androidContext: android.content.Context? = null
+
     // Default HTTP client for general requests
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(45, TimeUnit.SECONDS)
@@ -664,15 +676,50 @@ class CapabilityManager : CapabilityRequester {
                     delay(delayMs)
                 }
                 
+                // Cronet primary path (H3/QUIC when the cap host advertises
+                // it; otherwise H2 over Cronet's TLS stack). Falls through
+                // to OkHttp+Conscrypt (H2/H1.1) on any non-2xx, network
+                // failure, or when the engine isn't available (no Android
+                // context wired, native lib missing, etc.). Keeps the
+                // exact same retry / Retry-After / throttle behaviour.
+                val xmlBody: ByteArray? = body?.let { LLSDXmlUtils.wrap(it).toByteArray(Charsets.UTF_8) }
+                val ctx = androidContext
+                if (ctx != null) {
+                    val cronet = com.linkpoint.network.CronetHttpClient.getOrCreate(ctx)
+                    if (cronet.isAvailable) {
+                        val cronetResult = if (xmlBody != null) {
+                            cronet.post(url, xmlBody, "application/llsd+xml", timeoutMs = options.timeoutSeconds * 1000L)
+                        } else {
+                            cronet.get(url, timeoutMs = options.timeoutSeconds * 1000L)
+                        }
+                        if (cronetResult is com.linkpoint.network.CronetResult.Success && cronetResult.code in 200..299) {
+                            Log.d(TAG, "Cap $capName via Cronet/${cronetResult.protocol} (${cronetResult.body.size} bytes)")
+                            return@withContext LLSDParser.parseAuto(cronetResult.body, "application/llsd+xml")
+                        }
+                        if (cronetResult is com.linkpoint.network.CronetResult.Success && cronetResult.code in RETRYABLE_HTTP_CODES) {
+                            // Honour Retry-After parsing path by routing
+                            // through OkHttp on retryable codes — Cronet's
+                            // negotiatedProtocol is enough info for one
+                            // attempt; OkHttp's response object exposes
+                            // the headers our retry policy reads.
+                            Log.d(TAG, "Cap $capName Cronet got ${cronetResult.code}; falling through to OkHttp for retry semantics")
+                        } else if (cronetResult is com.linkpoint.network.CronetResult.Failure) {
+                            Log.d(TAG, "Cap $capName Cronet failed (${cronetResult.message}); falling through to OkHttp")
+                        }
+                        // Fall through to OkHttp on any other Cronet outcome
+                    }
+                }
+
                 val requestBuilder = Request.Builder().url(url)
-                
-                if (body != null) {
-                    val xml = LLSDXmlUtils.wrap(body)
-                    requestBuilder.post(xml.toRequestBody("application/llsd+xml".toMediaType()))
+
+                if (xmlBody != null) {
+                    requestBuilder.post(
+                        String(xmlBody, Charsets.UTF_8).toRequestBody("application/llsd+xml".toMediaType())
+                    )
                 } else {
                     requestBuilder.get()
                 }
-                
+
                 val response = client.newCall(requestBuilder.build()).execute()
                 
                 // Check for retryable HTTP errors

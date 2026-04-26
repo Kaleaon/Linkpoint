@@ -750,7 +750,7 @@ class LinkpointApp : Application() {
         avatarSelectionManager = AvatarSelectionManager(this)
         
         // Protocol components
-        capabilityManager = CapabilityManager()
+        capabilityManager = CapabilityManager().apply { androidContext = this@LinkpointApp }
         simulatorFeatures = com.linkpoint.world.SimulatorFeaturesManager(capabilityManager)
         udpConnection = UDPConnectionFixed()
         

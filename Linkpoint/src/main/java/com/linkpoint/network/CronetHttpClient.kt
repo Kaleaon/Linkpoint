@@ -5,6 +5,7 @@ import android.util.Log
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.chromium.net.CronetEngine
 import org.chromium.net.CronetException
+import org.chromium.net.UploadDataProviders
 import org.chromium.net.UrlRequest
 import org.chromium.net.UrlResponseInfo
 import java.nio.ByteBuffer
@@ -56,16 +57,45 @@ class CronetHttpClient private constructor(
         url: String,
         headers: Map<String, String> = emptyMap(),
         timeoutMs: Long = 15_000L
+    ): CronetResult = execute("GET", url, headers, body = null, contentType = null, timeoutMs = timeoutMs)
+
+    /**
+     * POST a request with an in-memory byte body. Used by capability
+     * traffic — the LLSD-XML payload comes from `LLSDXmlUtils.wrap` and
+     * is small enough that an UploadDataProvider over a single ByteBuffer
+     * is the right fit (no streaming). Returns [CronetResult] in the same
+     * shape as [get].
+     */
+    suspend fun post(
+        url: String,
+        body: ByteArray,
+        contentType: String,
+        headers: Map<String, String> = emptyMap(),
+        timeoutMs: Long = 15_000L
+    ): CronetResult = execute("POST", url, headers, body = body, contentType = contentType, timeoutMs = timeoutMs)
+
+    private suspend fun execute(
+        method: String,
+        url: String,
+        headers: Map<String, String>,
+        body: ByteArray?,
+        contentType: String?,
+        timeoutMs: Long
     ): CronetResult {
         val pinnedEngine = engine ?: return CronetResult.EngineUnavailable
         return suspendCancellableCoroutine { cont ->
             val callback = AccumulatingCallback(cont, url)
-            val request = pinnedEngine.newUrlRequestBuilder(url, callback, executor)
-                .setHttpMethod("GET")
-                .apply {
-                    headers.forEach { (k, v) -> addHeader(k, v) }
-                }
-                .build()
+            val builder = pinnedEngine.newUrlRequestBuilder(url, callback, executor)
+                .setHttpMethod(method)
+            headers.forEach { (k, v) -> builder.addHeader(k, v) }
+            if (body != null) {
+                if (contentType != null) builder.addHeader("Content-Type", contentType)
+                builder.setUploadDataProvider(
+                    UploadDataProviders.create(ByteBuffer.wrap(body)),
+                    executor
+                )
+            }
+            val request = builder.build()
             cont.invokeOnCancellation {
                 try { request.cancel() } catch (_: Throwable) {}
             }
