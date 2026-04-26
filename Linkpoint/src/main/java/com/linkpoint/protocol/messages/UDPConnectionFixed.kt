@@ -666,8 +666,15 @@ class UDPConnectionFixed {
      */
     private fun handlePacketAck(data: ByteArray): Boolean {
         try {
+            val messageStartOffset = getMessageStartOffset(data)
+            if (messageStartOffset == null) {
+                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
+                    "PacketAck: Invalid packet header (size=${data.size})")
+                return false
+            }
+
             // Use the same message ID decoder to find where the payload starts
-            val decodeResult = decodeMessageIdSLProtocol(data, PACKET_HEADER_SIZE)
+            val decodeResult = decodeMessageIdSLProtocol(data, messageStartOffset)
             if (decodeResult == null) {
                 NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
                     "PacketAck: Failed to decode message ID")
@@ -1792,10 +1799,26 @@ class UDPConnectionFixed {
      * - Low frequency: 4 bytes (0xFF, 0xFF, then 2-byte big-endian short) - short | -65536
      */
     private fun extractMessageId(data: ByteArray): Int {
-        if (data.size < PACKET_HEADER_SIZE + 1) return INVALID_MESSAGE_ID
-        
-        val result = decodeMessageIdSLProtocol(data, PACKET_HEADER_SIZE)
+        val messageStartOffset = getMessageStartOffset(data) ?: return INVALID_MESSAGE_ID
+        val result = decodeMessageIdSLProtocol(data, messageStartOffset)
         return result?.first ?: INVALID_MESSAGE_ID
+    }
+
+    /**
+     * Resolve start offset of message ID by honoring LLUDP extra header length.
+     *
+     * Header layout:
+     * - byte 0   flags
+     * - bytes 1-4 sequence
+     * - byte 5   extra header length (N)
+     * - bytes 6..(6+N-1) extra header bytes
+     * - byte 6+N first message ID byte
+     */
+    private fun getMessageStartOffset(data: ByteArray): Int? {
+        if (data.size < PACKET_HEADER_SIZE) return null
+        val extraHeaderLength = data[5].toInt() and 0xFF
+        val messageStart = PACKET_HEADER_SIZE + extraHeaderLength
+        return if (messageStart < data.size) messageStart else null
     }
     
     /**
@@ -2915,9 +2938,15 @@ class UDPConnectionFixed {
     private fun zeroDecode(data: ByteArray): ByteArray {
         val result = mutableListOf<Byte>()
         var i = 0
-        
-        // Copy header unchanged (first PACKET_HEADER_SIZE bytes are not zero-coded)
-        while (i < PACKET_HEADER_SIZE && i < data.size) {
+
+        // Copy fixed header plus any "extra header" bytes unchanged.
+        val headerBytes = if (data.size >= PACKET_HEADER_SIZE) {
+            PACKET_HEADER_SIZE + (data[5].toInt() and 0xFF)
+        } else {
+            PACKET_HEADER_SIZE
+        }
+
+        while (i < headerBytes && i < data.size) {
             result.add(data[i])
             i++
         }
@@ -3319,7 +3348,8 @@ class UDPConnectionFixed {
      * - These are piggybacked on the server's outgoing packets as an optimization
      */
     private fun processAppendedAcks(data: ByteArray) {
-        if (data.size < PACKET_HEADER_SIZE + 2) return
+        val messageStartOffset = getMessageStartOffset(data) ?: return
+        if (data.size < messageStartOffset + 2) return
 
         // Verify the appended ACK flag is set (0x10) before processing
         val flags = data[0].toInt() and 0xFF
@@ -3329,7 +3359,7 @@ class UDPConnectionFixed {
         if (count == 0) return
 
         val acksStart = data.size - 1 - (count * 4)
-        if (acksStart < PACKET_HEADER_SIZE) return
+        if (acksStart < messageStartOffset) return
 
         var pos = acksStart
         for (i in 0 until count) {
