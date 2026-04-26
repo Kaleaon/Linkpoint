@@ -35,6 +35,9 @@ class RenderEngineSwitcher(private val context: Context) {
     private var activeType: EngineType = EngineType.FILAMENT
     private var active: RenderEngineProvider? = null
     private var pendingSwitch: EngineType? = null
+    private var lastSurface: Surface? = null
+    private var lastWidth: Int = 0
+    private var lastHeight: Int = 0
 
     // ── Registration ─────────────────────────────────────────────────────
 
@@ -62,6 +65,10 @@ class RenderEngineSwitcher(private val context: Context) {
     // ── Lifecycle ────────────────────────────────────────────────────────
 
     fun initialize(surface: Surface, width: Int, height: Int): Boolean {
+        lastSurface = surface
+        lastWidth = width
+        lastHeight = height
+
         val engine = engines[activeType]
         if (engine == null) {
             Log.e(TAG, "No engine registered for ${activeType.name}")
@@ -85,11 +92,14 @@ class RenderEngineSwitcher(private val context: Context) {
     }
 
     fun onSurfaceChanged(width: Int, height: Int) {
+        lastWidth = width
+        lastHeight = height
         active?.onSurfaceChanged(width, height)
     }
 
     fun onSurfaceDestroyed() {
         active?.onSurfaceDestroyed()
+        lastSurface = null
     }
 
     fun shutdown() {
@@ -123,20 +133,34 @@ class RenderEngineSwitcher(private val context: Context) {
             return
         }
 
+        val previousType = activeType
         Log.i(TAG, "Performing engine switch: ${activeType.name} → ${newType.name}")
 
         // Shutdown old engine
         active?.shutdown()
-
-        // Initialise new engine with current surface dimensions
-        val width = active?.viewportWidth ?: 0
-        val height = active?.viewportHeight ?: 0
         active = null
         activeType = newType
 
-        if (width > 0 && height > 0) {
-            // Re-initialisation will happen on next surface callback
-            Log.i(TAG, "Engine switch complete; new engine needs surface re-init")
+        val surface = lastSurface
+        val canInitialize = surface != null && lastWidth > 0 && lastHeight > 0
+        if (!canInitialize) {
+            Log.i(TAG, "Engine switch complete; awaiting valid surface lifecycle callbacks")
+            return
+        }
+
+        val initialized = try {
+            newEngine.initialize(context, surface, lastWidth, lastHeight)
+        } catch (t: Throwable) {
+            Log.e(TAG, "Failed to initialize ${newType.name} after switch", t)
+            false
+        }
+
+        if (initialized) {
+            active = newEngine
+            Log.i(TAG, "Engine switch complete; active=${newEngine.engineName}")
+        } else {
+            activeType = previousType
+            Log.e(TAG, "Engine switch failed; reverted active type to ${previousType.name}")
         }
     }
 }
