@@ -2180,10 +2180,17 @@ object MessageIds {
             MEAN_COLLISION_ALERT to "MeanCollisionAlert",
             UUID_NAME_REPLY to "UUIDNameReply",
             UUID_GROUP_NAME_REPLY to "UUIDGroupNameReply",
+            UUID_NAME_REQUEST to "UUIDNameRequest",
+            UUID_GROUP_NAME_REQUEST to "UUIDGroupNameRequest",
             CLOSE_CIRCUIT to "CloseCircuit",
             OPEN_CIRCUIT to "OpenCircuit",
             ADD_CIRCUIT_CODE to "AddCircuitCode",
-            SIM_CRASHED to "SimCrashed"
+            SIM_CRASHED to "SimCrashed",
+            CHAT_PASS to "ChatPass",
+            CHAT_EVENT to "ChatEvent",
+            CIRCUIT_READY to "CircuitReady",
+            DATA_HOME_LOCATION_REQUEST to "DataHomeLocationRequest",
+            GLOBAL_OPTIONS_CHANGE to "GlobalOptionsChange"
         )
     }
 

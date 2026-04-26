@@ -1098,7 +1098,7 @@ class LinkpointApp : Application() {
                         sessionManager.updateRegionName(regionName)
                         Log.d(TAG, "Session region name updated to: $regionName")
                         com.linkpoint.utils.SessionLogRecorder.logRegionChange(
-                            regionName, 0L, null
+                            regionName, null, null
                         )
                     } else {
                         Log.w(TAG, "RegionHandshake simName was empty after trimming")
@@ -1213,6 +1213,11 @@ class LinkpointApp : Application() {
                         y = moveData.position.y.toInt()
                     )
                     Log.i(TAG, "✓ Region handle registered: ${moveData.regionHandle}")
+                    com.linkpoint.utils.SessionLogRecorder.logRegionChange(
+                        regionName = sessionManager.currentRegion.value?.name ?: "Unknown",
+                        regionHandle = moveData.regionHandle,
+                        position = "(${moveData.position.x.toInt()}, ${moveData.position.y.toInt()}, ${moveData.position.z.toInt()})"
+                    )
                     
                     // Update connection state to fully connected
                     sessionManager.setConnectionState(com.linkpoint.core.ConnectionState.CONNECTED)
