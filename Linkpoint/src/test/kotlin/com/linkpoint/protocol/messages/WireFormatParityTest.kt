@@ -334,4 +334,88 @@ class WireFormatParityTest {
         assertEquals(0x34.toByte(), body[38])
         assertEquals(0x12.toByte(), body[39])
     }
+
+    // ─────────────────────────────────────────────────────────────────
+    // Inbound parser regression — every IM from the simulator was
+    // arriving as garbage because the parser skipped both AgentData.SessionID
+    // (16 bytes) and MessageBlock.FromGroup (1 byte). Test fields land at the
+    // correct offsets, and that the simulator's trailing 5 bytes
+    // (EstateBlock + MetaData) don't break the parse.
+    // ─────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `inbound IIM parser places ToAgentID at the correct offset`() {
+        // Build a known-shape IIM via the same canonical packer the sim's
+        // outbound path matches. Then run our inbound parser over it and
+        // assert each field comes back at the right byte offset.
+        val message = "test inbound 1:1"
+        val payload = SLMessagePackers.packImprovedInstantMessage(
+            identity = identity,
+            fromGroup = false,
+            toAgentId = targetId,
+            dialog = 0,
+            id = sessionId,
+            timestamp = 0,
+            fromAgentName = "Sender",
+            message = message
+        )
+        val parsed = MessageParser.parseImprovedInstantMessage(payload)
+        assertEquals("FromAgentID must be the actual sender", agentId, parsed?.fromAgentId)
+        assertEquals("ToAgentID must NOT be aliased to SessionID", targetId, parsed?.toAgentId)
+        assertEquals("Dialog must land at the right offset (was off by 17 before fix)",
+            0, parsed?.dialog)
+        assertEquals("Session/IM ID must round-trip", sessionId, parsed?.sessionId)
+        assertEquals("Message text must round-trip cleanly", message, parsed?.message)
+        assertEquals("Sender name must round-trip cleanly", "Sender", parsed?.fromAgentName)
+    }
+
+    @Test
+    fun `inbound IIM parser tolerates EstateBlock and MetaData trailers`() {
+        // Live SL simulators stamp 5 trailing bytes (EstateBlock U32 +
+        // MetaData U8 count) onto every inbound IIM. The viewer must
+        // skip them silently — never reject the packet.
+        val msg = "with trailing bytes"
+        val core = SLMessagePackers.packImprovedInstantMessage(
+            identity = identity,
+            fromGroup = false,
+            toAgentId = targetId,
+            dialog = 17,                  // group session-send
+            id = groupId,
+            timestamp = 0,
+            fromAgentName = "GroupMember",
+            message = msg,
+            binaryBucket = byteArrayOf(0)
+        )
+        // Append the simulator-stamped EstateBlock(4) + MetaData(1=count 0) trailer.
+        val withTrailer = core + byteArrayOf(0, 0, 0, 0, 0)
+        val parsed = MessageParser.parseImprovedInstantMessage(withTrailer)
+        assertEquals(targetId, parsed?.toAgentId)
+        assertEquals(17, parsed?.dialog)
+        assertEquals(groupId, parsed?.sessionId)
+        assertEquals(msg, parsed?.message)
+    }
+
+    @Test
+    fun `inbound IIM parser handles typing-start with empty message and bucket`() {
+        // Real captures show inbound typing-start at body length ~91 bytes
+        // (no message, single-byte bucket). Common case the sim sends often.
+        val payload = SLMessagePackers.packImprovedInstantMessage(
+            identity = identity,
+            fromGroup = false,
+            toAgentId = targetId,
+            dialog = 41,                  // IM_TYPING_START
+            id = sessionId,
+            timestamp = 0,
+            fromAgentName = "Cheshyr Pontchartrain",
+            message = "",
+            binaryBucket = byteArrayOf(0)
+        )
+        // Sim trailer.
+        val parsed = MessageParser.parseImprovedInstantMessage(
+            payload + byteArrayOf(0, 0, 0, 0, 0)
+        )
+        assertEquals(41, parsed?.dialog)
+        assertEquals("", parsed?.message)
+        assertEquals("Cheshyr Pontchartrain", parsed?.fromAgentName)
+    }
 }

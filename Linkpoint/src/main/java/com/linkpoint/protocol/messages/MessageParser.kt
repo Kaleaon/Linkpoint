@@ -1499,41 +1499,81 @@ fun MessageParser.parseCrossedRegion(data: ByteArray): CrossedRegionData? = Tele
 /**
  * Parse ImprovedInstantMessage message.
  * Handles instant messages, group notices, typing indicators, etc.
+ *
+ * Wire format (`message_template.msg:5613-5644`, verified against Lumiya
+ * `messages/ImprovedInstantMessage.java:51-70` AND a live capture from
+ * the production simulator):
+ *
+ * ```
+ * AgentData    { AgentID(16 BE)  SessionID(16 BE) }
+ * MessageBlock { FromGroup(1)  ToAgentID(16)  ParentEstateID(4 LE)
+ *                RegionID(16)  Position(12)  Offline(1)  Dialog(1)
+ *                ID(16)  Timestamp(4 LE)  FromAgentName(var-1+NUL)
+ *                Message(var-2+NUL)  BinaryBucket(var-2) }
+ * EstateBlock  { EstateID(4 LE) }       // INBOUND ONLY — sim emits, viewer ignores
+ * MetaData     { count(1) [...] }       // INBOUND ONLY — sim emits, viewer ignores
+ * ```
+ *
+ * **Inbound packets from the simulator carry the trailing `EstateBlock`
+ * (4 bytes) and `MetaData` (1+ bytes) blocks** — confirmed via a live
+ * capture where every inbound IIM had exactly 5 trailing bytes after
+ * BinaryBucket. The viewer's outbound IIMs do NOT include those blocks
+ * (Lumiya / LL viewer / Firestorm / LibreMetaverse all stop at
+ * BinaryBucket); the sim stamps them on its way back. We tolerate them
+ * by simply not reading past `BinaryBucket`.
+ *
+ * Previously this parser skipped both `AgentData.SessionID` (16 bytes)
+ * and `MessageBlock.FromGroup` (1 byte), so every field after offset 16
+ * was off by 17 bytes — every inbound IM, group chat line, and typing
+ * indicator decoded to garbage. That's why the user observed "I never
+ * see IMs come in" in addition to the outbound bugs already fixed in
+ * commit 83184418.
  */
 fun MessageParser.parseImprovedInstantMessage(data: ByteArray): ImprovedInstantMessageData? {
     val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-    
+
     try {
-        // FromAgentID (UUID - 16 bytes)
+        // AgentData.AgentID (16 bytes BE) — the sender.
         val fromAgentIdBytes = ByteArray(16)
         buffer.get(fromAgentIdBytes)
         val fromAgentId = bytesToUUID(fromAgentIdBytes)
-        
-        // ToAgentID (UUID - 16 bytes)
+
+        // AgentData.SessionID (16 bytes BE) — server reflects our session
+        // ID back; not useful to inbound dispatch but it's on the wire.
+        // Skip without consuming as a UUID we surface upward.
+        buffer.position(buffer.position() + 16)
+
+        // MessageBlock.FromGroup (BOOL — 1 byte). Captured for future use;
+        // current data class doesn't expose it.
+        @Suppress("UNUSED_VARIABLE")
+        val fromGroup = buffer.get().toInt() != 0
+
+        // MessageBlock.ToAgentID (16 bytes BE)
         val toAgentIdBytes = ByteArray(16)
         buffer.get(toAgentIdBytes)
         val toAgentId = bytesToUUID(toAgentIdBytes)
-        
-        // ParentEstateID (U32 - 4 bytes)
+
+        // MessageBlock.ParentEstateID (U32 LE)
         val parentEstateId = buffer.int
-        
-        // RegionID (UUID - 16 bytes)
+
+        // MessageBlock.RegionID (16 bytes BE)
         val regionIdBytes = ByteArray(16)
         buffer.get(regionIdBytes)
         val regionId = bytesToUUID(regionIdBytes)
-        
-        // Position (Vector3 - 12 bytes)
+
+        // MessageBlock.Position (Vector3 = 3 LE floats = 12 bytes)
         val posBytes = ByteArray(12)
         buffer.get(posBytes)
         val position = LLVector3.fromBytes(posBytes)
-        
-        // Offline (U8 - 1 byte)
+
+        // MessageBlock.Offline (U8)
         val offline = buffer.get().toInt() and 0xFF
-        
-        // Dialog (U8 - 1 byte)
+
+        // MessageBlock.Dialog (U8) — IM type (0=normal, 17=group send,
+        // 41/42=typing, etc.).
         val dialog = buffer.get().toInt() and 0xFF
-        
-        // ID (UUID - 16 bytes) - IM session ID
+
+        // MessageBlock.ID (16 bytes BE) — IM session UUID
         val sessionIdBytes = ByteArray(16)
         buffer.get(sessionIdBytes)
         val sessionId = bytesToUUID(sessionIdBytes)
@@ -1559,7 +1599,9 @@ fun MessageParser.parseImprovedInstantMessage(data: ByteArray): ImprovedInstantM
         if (binaryBucketLen > 0) {
             buffer.get(binaryBucket)
         }
-        
+        // Trailing EstateBlock + MetaData blocks (sim → client only) are
+        // intentionally not read; the parser stops at BinaryBucket.
+
         return ImprovedInstantMessageData(
             fromAgentId = fromAgentId,
             toAgentId = toAgentId,
