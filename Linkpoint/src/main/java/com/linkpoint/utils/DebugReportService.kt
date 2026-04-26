@@ -404,6 +404,54 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine()
                         appendLine("  ⚠️ Last Connection Error: ${socketDetails.lastConnectionError}")
                     }
+
+                    // Reconnect health — surfaces the dead-socket-after-reconnect
+                    // failure mode that previously hid behind "Connected: true".
+                    appendLine()
+                    appendLine("Reconnect Health:")
+                    val socketReconnects = app.udpConnection.getSocketReconnectCount()
+                    appendLine("  Socket Reconnects (this circuit): $socketReconnects")
+                    val lastReconnect = app.udpConnection.getLastSocketReconnectTime()
+                    if (lastReconnect > 0) {
+                        val ageMs = System.currentTimeMillis() - lastReconnect
+                        val ok = app.udpConnection.getLastSocketReconnectSucceeded()
+                        appendLine("  Last Reconnect: ${formatDuration(ageMs)} ago (${if (ok) "succeeded" else "failed"})")
+                        val postRx = app.udpConnection.getPostReconnectPacketsReceived()
+                        appendLine("  Packets Received Since Last Reconnect: $postRx")
+                        // The classic dead-socket-after-reconnect signature:
+                        // we report Connected, the reconnect "succeeded", but
+                        // not a single packet has come back.
+                        if (udpDiag.isConnected && ok && postRx == 0 && ageMs > 5_000L) {
+                            appendLine("  ⚠️ No packets received since reconnect — socket may be silently dead.")
+                        }
+                    } else {
+                        appendLine("  Last Reconnect: Never")
+                    }
+
+                    // I/O thread liveness. The receive loop name encodes which
+                    // generation we're on (initial vs. reconnected), which is
+                    // useful when chasing zombie threads.
+                    val ioName = app.udpConnection.getIoThreadName()
+                    val ioAlive = udpDiag.receiveLoopActive
+                    appendLine()
+                    appendLine("I/O Thread:")
+                    appendLine("  Alive: $ioAlive")
+                    appendLine("  Name: ${ioName ?: "(none)"}")
+                    if (udpDiag.isConnected && !ioAlive) {
+                        appendLine("  ⚠️ Connected but I/O thread is dead — packets won't be processed!")
+                    }
+
+                    // "Connected but silent" check. When the receive loop is
+                    // alive but no packet has come in for >10s while we're
+                    // still firing AgentUpdates, something is wrong on the
+                    // network path even though _isConnected reads true.
+                    if (udpDiag.isConnected && socketDetails.lastReceiveTime > 0) {
+                        val rxAge = System.currentTimeMillis() - socketDetails.lastReceiveTime
+                        if (rxAge > 10_000L) {
+                            appendLine()
+                            appendLine("⚠️ Connected but no packet received for ${formatDuration(rxAge)} — circuit may be one-way (NAT idle / dead receive loop).")
+                        }
+                    }
                 } catch (e: Exception) {
                     appendLine("UDP diagnostics unavailable: ${e.message}")
                 }
@@ -411,7 +459,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("UDP connection: App not initialized")
             }
             appendLine()
-            
+
             // NEW: Packet History section for detailed packet tracing
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ UDP PACKET HISTORY (Recent Activity)                              │")
