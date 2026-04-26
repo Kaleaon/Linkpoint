@@ -117,10 +117,19 @@ class LinkpointApp : Application() {
         
         @Volatile
         private var instance: LinkpointApp? = null
-        
+
         fun getInstance(): LinkpointApp {
             return instance ?: throw IllegalStateException("Application not initialized")
         }
+
+        /**
+         * Variant of [getInstance] that returns null instead of throwing
+         * when the Application has not finished `onCreate` yet. Used by
+         * lifecycle observers that may fire before the Application is up
+         * (e.g. ProcessLifecycleObserver on cold-launch racing the
+         * Application class loader).
+         */
+        fun getInstanceOrNull(): LinkpointApp? = instance
 
         /**
          * Explicit list of UDP message names that have runtime parser/handler coverage in LinkpointApp.

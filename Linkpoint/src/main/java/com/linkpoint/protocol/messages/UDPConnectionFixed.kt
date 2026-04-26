@@ -2142,6 +2142,110 @@ class UDPConnectionFixed {
     }
 
     /**
+     * Outbound serial number for AgentPause/AgentResume. The simulator
+     * uses this to discard out-of-order pause/resume messages
+     * (Lumiya parity: `AgentPause`/`AgentResume` `SerialNum` field).
+     */
+    private val agentPauseSerial = java.util.concurrent.atomic.AtomicInteger(0)
+
+    /**
+     * AgentPause — tells the simulator to stop sending non-essential
+     * data (object updates, terse updates, etc.) while the viewer is
+     * backgrounded. Pair with [sendAgentResume] when the viewer comes
+     * back to the foreground. Wire format (LL message_template
+     * `AgentPause`, low-freq 78; Lumiya parity
+     * `slproto/messages/AgentPause.java`):
+     *   AgentData: AgentID(LLUUID), SessionID(LLUUID), SerialNum(U32)
+     */
+    fun sendAgentPause() {
+        val identity = outboundIdentity("UDPConnectionFixed.sendAgentPause")
+        val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putInt(agentPauseSerial.incrementAndGet())
+        sendPacket(MessageIds.AGENT_PAUSE, payload.array(), reliable = true)
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sent AgentPause")
+    }
+
+    /**
+     * AgentResume — counterpart to [sendAgentPause]. Wire format
+     * (LL message_template `AgentResume`, low-freq 79; Lumiya parity).
+     */
+    fun sendAgentResume() {
+        val identity = outboundIdentity("UDPConnectionFixed.sendAgentResume")
+        val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putInt(agentPauseSerial.incrementAndGet())
+        sendPacket(MessageIds.AGENT_RESUME, payload.array(), reliable = true)
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sent AgentResume")
+    }
+
+    /**
+     * AgentWearablesRequest — asks the simulator to send the agent's
+     * current wearables list (replied as `AgentWearablesUpdate`, which
+     * also kicks off appearance baking). Wire format (LL message_template
+     * `AgentWearablesRequest`, low-freq 381; Lumiya parity
+     * `slproto/messages/AgentWearablesRequest.java`):
+     *   AgentData: AgentID(LLUUID), SessionID(LLUUID)
+     */
+    fun sendAgentWearablesRequest() {
+        val identity = outboundIdentity("UDPConnectionFixed.sendAgentWearablesRequest")
+        val payload = ByteBuffer.allocate(32).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        sendPacket(MessageIds.AGENT_WEARABLES_REQUEST, payload.array(), reliable = true)
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sent AgentWearablesRequest")
+    }
+
+    /**
+     * GroupRoleDataRequest — requests the role list for a group. The
+     * simulator replies with one or more paged `GroupRoleDataReply`
+     * messages, parsed by [com.linkpoint.groups.GroupsManager]. Wire
+     * format (LL message_template `GroupRoleDataRequest`, low-freq 371;
+     * Lumiya parity `slproto/messages/GroupRoleDataRequest.java`):
+     *   AgentData: AgentID(LLUUID), SessionID(LLUUID)
+     *   GroupData: GroupID(LLUUID), RequestID(LLUUID)
+     *
+     * @return the RequestID, so callers can correlate the paged reply.
+     */
+    fun sendGroupRoleDataRequest(groupId: UUID): UUID {
+        val identity = outboundIdentity("UDPConnectionFixed.sendGroupRoleDataRequest")
+        val requestId = UUID.randomUUID()
+        val payload = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putUUID(groupId)
+        payload.putUUID(requestId)
+        sendPacket(MessageIds.GROUP_ROLE_DATA_REQUEST, payload.array(), reliable = true)
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
+            "→ Sent GroupRoleDataRequest groupId=$groupId requestId=$requestId")
+        return requestId
+    }
+
+    /**
+     * GroupTitlesRequest — requests the title list for a group. Reply is
+     * `GroupTitlesReply`, parsed by [com.linkpoint.groups.GroupsManager].
+     * Wire format (LL message_template `GroupTitlesRequest`, low-freq
+     * 375; Lumiya parity `slproto/messages/GroupTitlesRequest.java`):
+     *   AgentData: AgentID(LLUUID), SessionID(LLUUID),
+     *              GroupID(LLUUID), RequestID(LLUUID)
+     */
+    fun sendGroupTitlesRequest(groupId: UUID): UUID {
+        val identity = outboundIdentity("UDPConnectionFixed.sendGroupTitlesRequest")
+        val requestId = UUID.randomUUID()
+        val payload = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
+        payload.putUUID(groupId)
+        payload.putUUID(requestId)
+        sendPacket(MessageIds.GROUP_TITLES_REQUEST, payload.array(), reliable = true)
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
+            "→ Sent GroupTitlesRequest groupId=$groupId requestId=$requestId")
+        return requestId
+    }
+
+    /**
      * Send a packet with proper SL protocol encoding
      * 
      * @param messageId The message ID

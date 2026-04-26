@@ -32,6 +32,9 @@ object MessageTemplateCatalog {
         "AttachedSoundGainChange",
         "AvatarAnimation",
         "AvatarAppearance",
+        "AgentPause",
+        "AgentResume",
+        "AgentWearablesRequest",
         "AvatarGroupsReply",
         "AvatarInterestsReply",
         "AvatarPropertiesReply",
@@ -77,7 +80,9 @@ object MessageTemplateCatalog {
         "GroupProfileReply",
         "GroupProfileRequest",
         "GroupRoleDataReply",
+        "GroupRoleDataRequest",
         "GroupTitlesReply",
+        "GroupTitlesRequest",
         "HealthMessage",
         "ImageData",
         "ImagePacket",
@@ -180,10 +185,12 @@ object MessageTemplateCatalog {
         "AgentDataUpdateRequest" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
         "AgentFOV" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
         "AgentHeightWidth" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
-        "AgentPause" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
+        // AgentPause moved to supportedParserOrWriterMessages: writer
+        // implemented in UDPConnectionFixed.sendAgentPause; lifecycle hook
+        // wires it from ProcessLifecycleObserver.onStop.
         "AgentQuitCopy" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
-        "AgentResume" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
-        "AgentWearablesRequest" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
+        // AgentResume / AgentWearablesRequest writers implemented in
+        // UDPConnectionFixed (sendAgentResume / sendAgentWearablesRequest).
         "AssetUploadComplete" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
         "AssetUploadRequest" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
         "AvatarClassifiedReply" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
@@ -275,12 +282,16 @@ object MessageTemplateCatalog {
         "GroupNoticesListReply" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
         "GroupNoticesListRequest" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
         "GroupRoleChanges" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
-        "GroupRoleDataRequest" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
+        // GroupRoleDataRequest writer implemented in
+        // UDPConnectionFixed.sendGroupRoleDataRequest; reply parser in
+        // GroupsManager.handleGroupRoleData.
         "GroupRoleMembersReply" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
         "GroupRoleMembersRequest" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
         "GroupRoleUpdate" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
         "GroupTitleUpdate" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
-        "GroupTitlesRequest" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
+        // GroupTitlesRequest writer implemented in
+        // UDPConnectionFixed.sendGroupTitlesRequest; reply parser in
+        // GroupsManager.handleGroupTitles.
         "GroupVoteHistoryItemReply" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
         "GroupVoteHistoryRequest" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
         "ImageNotInDatabase" to "Declared for protocol ID parity; parser/writer support is not implemented yet.",
