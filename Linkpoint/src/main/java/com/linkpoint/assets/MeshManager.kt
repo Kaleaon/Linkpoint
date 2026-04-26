@@ -1,6 +1,9 @@
 package com.linkpoint.assets
 
+import android.content.Context
 import android.util.Log
+import com.linkpoint.network.CronetHttpClient
+import com.linkpoint.network.CronetResult
 import com.linkpoint.network.SSLHelper
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
@@ -25,6 +28,7 @@ import java.util.zip.Inflater
  * hostname mismatch securely.
  */
 class MeshManager(
+    private val context: Context,
     private val cache: AssetCache,
     private val capabilityManager: CapabilityManager
 ) {
@@ -42,83 +46,114 @@ class MeshManager(
             .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
     ).build()
     
-    private val pendingMeshes = ConcurrentHashMap<UUID, Deferred<MeshData?>>()
+    /**
+     * Pending downloads keyed by (meshId, lod). Previously this was
+     * keyed only by meshId, which meant two concurrent callers asking
+     * for different LODs of the same mesh would have the second one
+     * await the first's Deferred and receive the FIRST caller's LOD —
+     * silently wrong geometry. Cache lookup uses raw bytes so the LOD
+     * caching path stays correct.
+     */
+    private val pendingMeshes = ConcurrentHashMap<Pair<UUID, MeshLOD>, Deferred<MeshData?>>()
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     // Meshes queued for retry when capability becomes available
     private data class PendingMeshRequest(val meshId: UUID, val lod: MeshLOD)
     private val capabilityPendingMeshes = java.util.concurrent.ConcurrentLinkedQueue<PendingMeshRequest>()
     @Volatile private var capabilityRetryJob: Job? = null
-    
+
     /**
-     * Get mesh data (cached or download)
+     * Get mesh data (cached or download).
      */
     suspend fun getMesh(meshId: UUID, lod: MeshLOD = MeshLOD.HIGH): MeshData? {
-        // Check cache
+        // Check cache (raw bytes cache is LOD-independent — parsing happens per call)
         cache.get(meshId, AssetType.MESH)?.let { data ->
             return parseMesh(meshId, data, lod)
         }
-        
-        // Check pending
-        pendingMeshes[meshId]?.let { return it.await() }
-        
-        // Download
+
+        val key = meshId to lod
+        // Check pending — keyed by (mesh, lod) so concurrent different-LOD
+        // requests don't share a Deferred from a different LOD.
+        pendingMeshes[key]?.let { return it.await() }
+
         val deferred = scope.async {
             downloadAndParseMesh(meshId, lod)
         }
-        pendingMeshes[meshId] = deferred
-        
+        pendingMeshes[key] = deferred
+
         return try {
             deferred.await()
         } finally {
-            pendingMeshes.remove(meshId)
+            pendingMeshes.remove(key)
         }
     }
-    
+
     private suspend fun downloadAndParseMesh(meshId: UUID, lod: MeshLOD): MeshData? {
         val meshUrl = capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH2)
             ?: capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH)
-        
+
         if (meshUrl == null) {
             Log.w(TAG, "Mesh download queued for retry: $meshId - No mesh capability available yet")
             lastError = "No mesh capability available"
             lastErrorTime = System.currentTimeMillis()
             downloadFailCount.incrementAndGet()
-            // Queue for retry when capability becomes available
             capabilityPendingMeshes.offer(PendingMeshRequest(meshId, lod))
             ensureMeshCapabilityRetryStarted()
             return null
         }
-        
+
         val url = "$meshUrl?mesh_id=$meshId"
-        
+
+        // Cronet primary path: gets us HTTP/3 (QUIC) for the bulk of mesh
+        // transfer when the CDN advertises it. Falls through to OkHttp
+        // on per-request failure or engine-unavailable. Same pattern as
+        // TextureManager.downloadTexture.
+        val cronet = CronetHttpClient.getOrCreate(context)
+        if (cronet.isAvailable) {
+            val cronetResult = cronet.get(url, timeoutMs = 60_000L)
+            if (cronetResult is CronetResult.Success && cronetResult.code in 200..299) {
+                Log.d(TAG, "Mesh downloaded via Cronet/${cronetResult.protocol}: $meshId (${cronetResult.body.size} bytes)")
+                downloadCount.incrementAndGet()
+                downloadedBytes.addAndGet(cronetResult.body.size.toLong())
+                cache.put(meshId, AssetType.MESH, cronetResult.body)
+                return parseMesh(meshId, cronetResult.body, lod)
+            }
+            if (cronetResult is CronetResult.Failure) {
+                Log.d(TAG, "Cronet path failed for mesh $meshId (${cronetResult.message}); falling back to OkHttp")
+            }
+        }
+
         try {
             val request = Request.Builder().url(url).build()
             val response = httpClient.newCall(request).execute()
-            
-            if (!response.isSuccessful) {
-                Log.w(TAG, "Mesh download failed: ${response.code}")
-                lastError = "HTTP ${response.code}: ${response.message}"
-                lastErrorTime = System.currentTimeMillis()
-                downloadFailCount.incrementAndGet()
-                return null
+
+            try {
+                if (!response.isSuccessful) {
+                    Log.w(TAG, "Mesh download failed: ${response.code}")
+                    lastError = "HTTP ${response.code}: ${response.message}"
+                    lastErrorTime = System.currentTimeMillis()
+                    downloadFailCount.incrementAndGet()
+                    return null
+                }
+
+                val data = response.body?.bytes()
+                if (data == null) {
+                    lastError = "Empty response body"
+                    lastErrorTime = System.currentTimeMillis()
+                    downloadFailCount.incrementAndGet()
+                    return null
+                }
+
+                downloadCount.incrementAndGet()
+                downloadedBytes.addAndGet(data.size.toLong())
+                cache.put(meshId, AssetType.MESH, data)
+                return parseMesh(meshId, data, lod)
+            } finally {
+                // Always close to release the connection back to the pool —
+                // matches the TextureManager fix for "ProtocolException:
+                // Unexpected status line" caused by leaked connections.
+                response.close()
             }
-            
-            val data = response.body?.bytes()
-            if (data == null) {
-                lastError = "Empty response body"
-                lastErrorTime = System.currentTimeMillis()
-                downloadFailCount.incrementAndGet()
-                return null
-            }
-            
-            downloadCount.incrementAndGet()
-            downloadedBytes.addAndGet(data.size.toLong())
-            
-            // Cache raw data
-            cache.put(meshId, AssetType.MESH, data)
-            
-            return parseMesh(meshId, data, lod)
         } catch (e: Exception) {
             Log.e(TAG, "Mesh download error: $meshId", e)
             lastError = "${e.javaClass.simpleName}: ${e.message}"
@@ -130,14 +165,22 @@ class MeshManager(
     
     private fun parseMesh(meshId: UUID, data: ByteArray, lod: MeshLOD): MeshData? {
         try {
-            // Parse mesh header (LLSD)
-            val headerEnd = findHeaderEnd(data)
-            if (headerEnd < 0) return null
-            
-            val headerBytes = data.copyOfRange(0, headerEnd)
-            val header = LLSDParser.parseBinary(headerBytes)
-            
-            if (header !is LLSDMap) {
+            // Parse the mesh header. The previous implementation scanned
+            // for the first '}' (0x7D) byte in the first 64KB and treated
+            // that position as the header boundary — which is wrong any
+            // time the header itself contains an LLSDBinary value whose
+            // payload happens to include 0x7D (very common, e.g. UUIDs
+            // or quantised binary blobs). This version uses the LLSD
+            // parser's own consumed-byte count, which is the only
+            // correct way to find the boundary.
+            val (headerValue, headerEnd) = LLSDParser.parseBinaryAndConsumed(data)
+            if (headerEnd <= 0) {
+                lastError = "Mesh header parse failed"
+                lastErrorTime = System.currentTimeMillis()
+                parseFailCount.incrementAndGet()
+                return null
+            }
+            val header = headerValue as? LLSDMap ?: run {
                 lastError = "Invalid mesh header - not an LLSDMap"
                 lastErrorTime = System.currentTimeMillis()
                 parseFailCount.incrementAndGet()
@@ -184,31 +227,32 @@ class MeshManager(
         }
     }
     
-    private fun findHeaderEnd(data: ByteArray): Int {
-        // Find end of LLSD header (binary LLSD ends with specific markers)
-        for (i in 0 until minOf(data.size, 65536)) {
-            if (data[i] == '}' .code.toByte()) {
-                return i + 1
-            }
-        }
-        return -1
-    }
-    
     private fun decompress(data: ByteArray): ByteArray {
+        // Stream into a fixed-size chunk buffer rather than pre-allocating
+        // `compressedSize * 10` upfront. Mesh LOD blobs commonly have a
+        // 5-15× compression ratio so a 16 KB buffer keeps the working
+        // set bounded even for the largest assets, while still allowing
+        // unbounded output via ByteArrayOutputStream growth.
         val inflater = Inflater()
-        inflater.setInput(data)
-        
-        val buffer = ByteArray(data.size * 10) // Estimate
-        val resultStream = java.io.ByteArrayOutputStream()
-        
-        while (!inflater.finished()) {
-            val count = inflater.inflate(buffer)
-            if (count == 0) break
-            resultStream.write(buffer, 0, count)
+        try {
+            inflater.setInput(data)
+            val buffer = ByteArray(16 * 1024)
+            val resultStream = java.io.ByteArrayOutputStream(data.size * 4)
+            while (!inflater.finished()) {
+                val count = inflater.inflate(buffer)
+                if (count == 0) {
+                    // Either inflater needs more input (shouldn't happen
+                    // here since we provided the full payload) or we hit
+                    // the end of the stream — break either way to avoid
+                    // an infinite loop on malformed assets.
+                    break
+                }
+                resultStream.write(buffer, 0, count)
+            }
+            return resultStream.toByteArray()
+        } finally {
+            inflater.end()
         }
-        
-        inflater.end()
-        return resultStream.toByteArray()
     }
     
     private fun parseMeshGeometry(meshId: UUID, data: ByteArray, header: LLSDMap): MeshData {
@@ -373,18 +417,34 @@ class MeshManager(
     
     private fun parseSkinData(skinMap: LLSDMap): SkinData? {
         try {
-            val jointNames = skinMap.getArray("joint_names")?.value?.mapNotNull { 
-                (it as? LLSDString)?.value 
+            val jointNames = skinMap.getArray("joint_names")?.value?.mapNotNull {
+                (it as? LLSDString)?.value
             } ?: return null
-            
+
             val bindShapeMatrix = skinMap.getArray("bind_shape_matrix")?.value?.mapNotNull {
                 (it as? LLSDReal)?.value?.toFloat()
             }?.toFloatArray() ?: FloatArray(16)
-            
-            val inverseBindMatrices = skinMap.getArray("inverse_bind_matrix")?.value?.mapNotNull { row ->
-                (row as? LLSDArray)?.value?.mapNotNull { (it as? LLSDReal)?.value?.toFloat() }?.toFloatArray()
-            } ?: emptyList()
-            
+
+            // Inverse bind matrices arrive in two layouts depending on the
+            // simulator / asset: either an array-of-arrays where each
+            // inner is 16 floats (one matrix per joint), or a single flat
+            // array of jointCount × 16 floats. The previous implementation
+            // only handled the array-of-arrays case and silently produced
+            // an empty list (= no skinning) for the flat case. Handle both.
+            val ibmArrayRaw = skinMap.getArray("inverse_bind_matrix")?.value ?: emptyList()
+            val inverseBindMatrices: List<FloatArray> = when {
+                // Array-of-arrays: each row is its own matrix
+                ibmArrayRaw.firstOrNull() is LLSDArray -> ibmArrayRaw.mapNotNull { row ->
+                    (row as? LLSDArray)?.value?.mapNotNull { (it as? LLSDReal)?.value?.toFloat() }?.toFloatArray()
+                }
+                // Flat array: chunk into 16-float matrices, one per joint
+                ibmArrayRaw.firstOrNull() is LLSDReal -> {
+                    val flat = ibmArrayRaw.mapNotNull { (it as? LLSDReal)?.value?.toFloat() }
+                    flat.chunked(16).filter { it.size == 16 }.map { it.toFloatArray() }
+                }
+                else -> emptyList()
+            }
+
             return SkinData(
                 jointNames = jointNames,
                 bindShapeMatrix = bindShapeMatrix,

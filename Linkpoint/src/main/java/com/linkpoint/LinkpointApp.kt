@@ -769,7 +769,7 @@ class LinkpointApp : Application() {
         // Asset system
         assetCache = AssetCache(this)
         textureManager = TextureManager(this, assetCache, capabilityManager)
-        meshManager = MeshManager(assetCache, capabilityManager)
+        meshManager = MeshManager(this, assetCache, capabilityManager)
         animationManager = AnimationManager(this, assetCache)
         soundManager = SoundManager(this, assetCache)
         
