@@ -88,8 +88,13 @@ class UserProfileManager(
      */
     private suspend fun fetchProfileViaCap(avatarId: UUID) {
         try {
+            // AgentProfile cap takes the *target* avatar id (which the
+            // requester is asking about) under the key `avatar_id`, as
+            // an LLSDUUID. The previous code sent it as `agent_id` of
+            // type LLSDString, which doesn't match the cap's expected
+            // wire format and was caught by UserProfileManagerTest.
             val request = LLSDMap().apply {
-                this["agent_id"] = LLSDString(avatarId.toString())
+                this["avatar_id"] = LLSDUUID(avatarId)
             }
             val response = capabilityRequest(CapabilityManager.CAP_AGENT_PROFILE, request)
 

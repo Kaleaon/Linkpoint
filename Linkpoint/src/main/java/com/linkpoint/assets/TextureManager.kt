@@ -59,7 +59,14 @@ class TextureManager(
             val distanceBias = when {
                 distanceMeters == null -> 0
                 distanceMeters < 20f -> 0
-                distanceMeters < 64f -> 1
+                // Band widened from 64f to 80f so HIGH-priority textures
+                // at typical visible-but-not-near distances (~70m) get
+                // bias=1 (final discard 2) rather than bias=2 (final 3).
+                // The previous threshold caused a perceptible drop in
+                // texture quality just outside the immediate radius,
+                // and broke the "discard policy prioritizes visibility
+                // and distance" test that codifies the intended curve.
+                distanceMeters < 80f -> 1
                 distanceMeters < 128f -> 2
                 else -> 3
             }

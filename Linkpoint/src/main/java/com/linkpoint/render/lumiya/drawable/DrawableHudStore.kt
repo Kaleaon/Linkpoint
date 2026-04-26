@@ -29,7 +29,15 @@ class DrawableHudStore {
         var colorR: Float = 1f, var colorG: Float = 1f, var colorB: Float = 1f, var colorA: Float = 1f,
         var textureHandle: Int = 0,
         var screenX: Float = 0f,
-        var screenY: Float = 0f
+        var screenY: Float = 0f,
+        // Z translation cached separately from [modelMatrix]. The matrix
+        // is built via android.opengl.Matrix which is stubbed in JVM
+        // unit tests and won't actually populate the matrix entries —
+        // so reading modelMatrix[14] returned 0 for every prim and
+        // broke the HUD-z-order test. Caching the value at the source
+        // keeps render and diagnostics agreeing without forcing tests
+        // onto Robolectric.
+        var zTranslation: Float = 0f
     )
 
     private val hudPrims = linkedMapOf<Long, HudPrimInstance>()
@@ -69,7 +77,7 @@ class DrawableHudStore {
 
     internal fun debugSortedIds(): List<Long> = sortedHudPrims().map { it.id }
     internal fun debugScreenPosition(id: Long): Pair<Float, Float>? = hudPrims[id]?.let { it.screenX to it.screenY }
-    internal fun debugModelZ(id: Long): Float? = hudPrims[id]?.modelMatrix?.get(14)
+    internal fun debugModelZ(id: Long): Float? = hudPrims[id]?.zTranslation
 
     fun setViewportSize(width: Int, height: Int) {
         viewportWidth = width.coerceAtLeast(1)
@@ -124,13 +132,14 @@ class DrawableHudStore {
 
         hud.screenX = baseX + hud.offsetX
         hud.screenY = baseY + hud.offsetY
+        hud.zTranslation = hud.offsetZ + zBias
         Matrix.setIdentityM(hud.modelMatrix, 0)
         Matrix.translateM(
             hud.modelMatrix,
             0,
             hud.screenX,
             hud.screenY,
-            hud.offsetZ + zBias
+            hud.zTranslation
         )
     }
 
