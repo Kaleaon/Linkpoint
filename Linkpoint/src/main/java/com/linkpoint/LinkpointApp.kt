@@ -331,16 +331,36 @@ class LinkpointApp : Application() {
 
     /**
      * Drive the auto-reconnect loop. Safe to call from anywhere; a single
-     * coordinator runs at a time (gated by [reloginMutex]). Bails when:
+     * coordinator runs at a time (gated by [isReconnecting] CAS, which
+     * also coalesces duplicate triggers). Bails when:
      *   - the user explicitly logged out (`userWantsConnected == false`),
      *   - we have no cached credentials (no login yet, or already cleared),
      *   - we've exhausted [reloginMaxAttempts], OR
      *   - cumulative recovery time exceeds [reloginMaxWindowMs].
+     *
+     * Coalescing is load-bearing: every watchdog in [UDPConnectionFixed]
+     * (unanswered-pings, post-reconnect-silence, inbound-stall, send-error,
+     * receive-loop-exit) fires `reconnectionCallback` independently. Without
+     * this gate, a single dead-circuit event triggers all five callbacks,
+     * each launching a coroutine that queues on [reloginMutex]. The mutex
+     * serialises them but does not dedupe — so each one runs its own
+     * `disconnect()` + `login()` cycle, tearing down whatever the previous
+     * iteration just established (visible in the 2026-04-26 Athanasia
+     * capture as UseCircuitCode resends every ~5-6s = 3s backoff + 2s HTTP
+     * login + connect).
      */
     internal fun attemptAutoRelogin() {
+        if (!isReconnecting.compareAndSet(false, true)) {
+            Log.d(TAG, "Auto re-login already in progress — ignoring duplicate trigger")
+            return
+        }
         applicationScope.launch {
-            reloginMutex.withLock {
-                runReloginLoop()
+            try {
+                reloginMutex.withLock {
+                    runReloginLoop()
+                }
+            } finally {
+                isReconnecting.set(false)
             }
         }
     }
@@ -356,86 +376,85 @@ class LinkpointApp : Application() {
         }
 
         if (firstReconnectAttemptAt == 0L) firstReconnectAttemptAt = System.currentTimeMillis()
-        isReconnecting.set(true)
+        // [isReconnecting] is owned by [attemptAutoRelogin], which performs
+        // the CAS that gates entry to this loop and clears the flag in its
+        // own finally block. Setting it again here would mask a future bug
+        // where someone calls runReloginLoop directly without the gate.
 
-        try {
-            while (userWantsConnected.get()) {
-                val attempt = reconnectAttempts.incrementAndGet()
-                val elapsed = System.currentTimeMillis() - firstReconnectAttemptAt
+        while (userWantsConnected.get()) {
+            val attempt = reconnectAttempts.incrementAndGet()
+            val elapsed = System.currentTimeMillis() - firstReconnectAttemptAt
 
-                if (attempt > reloginMaxAttempts) {
-                    Log.e(TAG, "Auto re-login: exceeded $reloginMaxAttempts attempts — giving up")
-                    sessionManager.setConnectionState(
-                        com.linkpoint.network.events.ConnectionState.DISCONNECTED
-                    )
-                    return
-                }
-                if (elapsed >= reloginMaxWindowMs) {
-                    Log.e(TAG, "Auto re-login: ${elapsed}ms exceeds ${reloginMaxWindowMs}ms window — giving up")
-                    sessionManager.setConnectionState(
-                        com.linkpoint.network.events.ConnectionState.DISCONNECTED
-                    )
-                    return
-                }
-
-                Log.i(TAG, "🔄 Auto re-login attempt $attempt/$reloginMaxAttempts (elapsed=${elapsed}ms)")
-                protocol.stateManager.setStatus(
-                    com.linkpoint.network.core.NetworkStateManager.ConnectionStatus.RECONNECTING
+            if (attempt > reloginMaxAttempts) {
+                Log.e(TAG, "Auto re-login: exceeded $reloginMaxAttempts attempts — giving up")
+                sessionManager.setConnectionState(
+                    com.linkpoint.network.events.ConnectionState.DISCONNECTED
                 )
+                return
+            }
+            if (elapsed >= reloginMaxWindowMs) {
+                Log.e(TAG, "Auto re-login: ${elapsed}ms exceeds ${reloginMaxWindowMs}ms window — giving up")
+                sessionManager.setConnectionState(
+                    com.linkpoint.network.events.ConnectionState.DISCONNECTED
+                )
+                return
+            }
 
-                // Tear down the dead UDP socket cleanly so the new login
-                // doesn't fight with stale I/O thread state.
-                try { udpConnection.disconnect() } catch (e: Exception) {
-                    Log.w(TAG, "udpConnection.disconnect() during re-login: ${e.message}")
+            Log.i(TAG, "🔄 Auto re-login attempt $attempt/$reloginMaxAttempts (elapsed=${elapsed}ms)")
+            protocol.stateManager.setStatus(
+                com.linkpoint.network.core.NetworkStateManager.ConnectionStatus.RECONNECTING
+            )
+
+            // Tear down the dead UDP socket cleanly so the new login
+            // doesn't fight with stale I/O thread state.
+            try { udpConnection.disconnect() } catch (e: Exception) {
+                Log.w(TAG, "udpConnection.disconnect() during re-login: ${e.message}")
+            }
+
+            delay(reloginBackoffMs)
+
+            val result = try {
+                protocol.login(
+                    firstName = creds.firstName,
+                    lastName = creds.lastName,
+                    password = creds.password,
+                    loginUri = creds.loginUri,
+                    startLocation = creds.startLocation,
+                    mfaToken = "",
+                    mfaHash = creds.mfaHash
+                )
+            } catch (e: Exception) {
+                Log.w(TAG, "Auto re-login attempt $attempt threw: ${e.message}")
+                null
+            }
+
+            when (result) {
+                is com.linkpoint.network.LoginResult.Success -> {
+                    Log.i(TAG, "✓ Auto re-login succeeded on attempt $attempt")
+                    // Refresh cached MFA hash — Linden rotates these.
+                    cachedLoginCredentials = creds.copy(mfaHash = result.mfaHash ?: creds.mfaHash)
+                    reconnectAttempts.set(0)
+                    firstReconnectAttemptAt = 0L
+                    return
                 }
-
-                delay(reloginBackoffMs)
-
-                val result = try {
-                    protocol.login(
-                        firstName = creds.firstName,
-                        lastName = creds.lastName,
-                        password = creds.password,
-                        loginUri = creds.loginUri,
-                        startLocation = creds.startLocation,
-                        mfaToken = "",
-                        mfaHash = creds.mfaHash
+                is com.linkpoint.network.LoginResult.MFARequired -> {
+                    Log.w(TAG, "Auto re-login: server now requires MFA — cannot proceed automatically")
+                    userWantsConnected.set(false)
+                    sessionManager.setConnectionState(
+                        com.linkpoint.network.events.ConnectionState.DISCONNECTED
                     )
-                } catch (e: Exception) {
-                    Log.w(TAG, "Auto re-login attempt $attempt threw: ${e.message}")
-                    null
+                    return
                 }
-
-                when (result) {
-                    is com.linkpoint.network.LoginResult.Success -> {
-                        Log.i(TAG, "✓ Auto re-login succeeded on attempt $attempt")
-                        // Refresh cached MFA hash — Linden rotates these.
-                        cachedLoginCredentials = creds.copy(mfaHash = result.mfaHash ?: creds.mfaHash)
-                        reconnectAttempts.set(0)
-                        firstReconnectAttemptAt = 0L
-                        return
-                    }
-                    is com.linkpoint.network.LoginResult.MFARequired -> {
-                        Log.w(TAG, "Auto re-login: server now requires MFA — cannot proceed automatically")
-                        userWantsConnected.set(false)
-                        sessionManager.setConnectionState(
-                            com.linkpoint.network.events.ConnectionState.DISCONNECTED
-                        )
-                        return
-                    }
-                    is com.linkpoint.network.LoginResult.Failure -> {
-                        Log.w(TAG, "Auto re-login attempt $attempt failed: ${result.message} [${result.errorCode}]")
-                        // Loop continues; next iteration applies backoff.
-                    }
-                    null -> {
-                        // Exception path — treat like failure, retry.
-                    }
+                is com.linkpoint.network.LoginResult.Failure -> {
+                    Log.w(TAG, "Auto re-login attempt $attempt failed: ${result.message} [${result.errorCode}]")
+                    // Loop continues; next iteration applies backoff.
+                }
+                null -> {
+                    // Exception path — treat like failure, retry.
                 }
             }
-            Log.i(TAG, "Auto re-login loop exited: user no longer wants connected")
-        } finally {
-            isReconnecting.set(false)
         }
+        Log.i(TAG, "Auto re-login loop exited: user no longer wants connected")
     }
 
     /**
