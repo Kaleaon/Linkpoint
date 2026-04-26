@@ -1,7 +1,7 @@
-# Capability gap analysis (Lumiya vs Linkpoint)
+# Capability gap analysis (Lumiya / SL Official Viewer / Firestorm vs Linkpoint)
 
-**Last verified:** 2026-04-09 (UTC)  
-**Commit:** `a9982607`  
+**Last verified:** 2026-04-26 (UTC)  
+**Commit:** `HEAD`  
 **Static inventory scope:** `Linkpoint/src/main/java/**/*.kt`
 
 ---
@@ -60,3 +60,26 @@ These claims were present in prior comparisons but are now historical and should
 - “GroupProfile is not requested from seed capabilities.” → **Historical** (present in `getReferenceCapabilityNames()`).
 - “No swap chain initialization path exists.” → **Historical** (exists in `WorldViewActivity` + `RenderManager`).
 
+---
+
+## 4) Cross-viewer parity snapshot
+
+This matrix uses the existing Linkpoint static inventory and the viewer-reference expectations already tracked in this repo (Lumiya decompile notes + Firestorm/SL capability references used by the protocol docs).
+
+| Capability / flow | Lumiya | Second Life official viewer | Firestorm | Linkpoint (2026-04-26) |
+|---|---|---|---|---|
+| Agent profile (`AgentProfile`) | Implemented | Implemented | Implemented | Implemented |
+| Group profile (`GroupProfile`) | Implemented | Implemented | Implemented | Implemented |
+| Script upload/update (`UpdateScriptAgent` / `UpdateScriptTask`) | Implemented | Implemented | Implemented | Implemented |
+| Task notecard save (`UpdateNotecardTaskInventory`) | Implemented | Implemented | Implemented | **Gap** (agent notecard path only) |
+| Display name write (`SetDisplayName`) | Implemented | Implemented | Implemented | **Declared constant, no request callsite** |
+| Agent preferences (`AgentPreferences`) | Implemented | Implemented | Implemented | **Declared constant, no request callsite** |
+| Simulator features (`SimulatorFeatures`) | Implemented | Implemented | Implemented | **Declared constant, no request callsite** |
+| PBR/material fetch (`RenderMaterials`) | Implemented | Implemented | Implemented | **Declared constant, no request callsite** |
+| Inventory move (`MoveInventoryItem`) | Implemented | Implemented | Implemented | **Declared constant, no request callsite** |
+
+### Practical interpretation
+
+- Linkpoint is functionally aligned on baseline identity and script flows that previously blocked parity checks.
+- Remaining capability parity gaps are concentrated in **task-notecard writes** and **declared-but-unwired capability constants**.
+- Compared to Lumiya, SL official viewer, and Firestorm, Linkpoint now looks like a mostly wired capability core with a smaller set of missing callsite integrations rather than a protocol bootstrap gap.

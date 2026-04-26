@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.io.File
@@ -37,6 +38,7 @@ class SessionLogRecorder(private val context: Context) {
         private const val MAX_LOG_SIZE = 5 * 1024 * 1024 // 5MB
         private const val LOG_RETENTION_DAYS = 7
         private const val DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS"
+        private const val LOG_CHANNEL_CAPACITY = 2048
     }
     
     // Log entry data class
@@ -49,7 +51,10 @@ class SessionLogRecorder(private val context: Context) {
     )
     
     // Channel for thread-safe log submission
-    private val logChannel = Channel<LogEntry>(capacity = Channel.UNLIMITED)
+    private val logChannel = Channel<LogEntry>(
+        capacity = LOG_CHANNEL_CAPACITY,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
     
     // Coroutine scope for log processing
     private val scope = CoroutineScope(
@@ -145,13 +150,9 @@ class SessionLogRecorder(private val context: Context) {
             threadName = Thread.currentThread().name
         )
         
-        // Non-blocking send to channel
-        scope.launch {
-            try {
-                logChannel.send(entry)
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to send log to channel", e)
-            }
+        val result = logChannel.trySend(entry)
+        if (!result.isSuccess) {
+            Log.w(TAG, "Dropped log entry due to channel backpressure")
         }
     }
     

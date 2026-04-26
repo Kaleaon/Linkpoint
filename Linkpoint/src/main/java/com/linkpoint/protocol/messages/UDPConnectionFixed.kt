@@ -187,6 +187,12 @@ class UDPConnectionFixed {
         
         /** Unanswered pings before disconnect from the reference viewer (3) */
         private val UNANSWERED_PINGS_DISCONNECT = LinkpointConstants.UNANSWERED_PINGS_DISCONNECT
+
+        /**
+         * Suppress identical RequestMultipleObjects bursts caused by duplicate
+         * ObjectUpdateCached notifications arriving in the same render tick.
+         */
+        private const val REQUEST_MULTIPLE_OBJECTS_DEDUP_WINDOW_MS = 250L
         
         /**
          * Threshold for triggering reconnection due to consecutive send errors.
@@ -537,6 +543,13 @@ class UDPConnectionFixed {
     
     // Registered message handlers
     private val messageHandlers = java.util.concurrent.ConcurrentHashMap<Int, MessageHandler>()
+
+    // Keep a small LRU-ish set of recent RequestMultipleObjects signatures so we
+    // can suppress immediate duplicates and avoid flooding the simulator.
+    private val recentRequestMultipleObjects = object : LinkedHashMap<String, Long>(64, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Long>?): Boolean = size > 64
+    }
+    private val requestMultipleObjectsLock = Any()
     
     // ==================== INTERNAL HANDLER REGISTRATION ====================
     // Register internal handlers that must be processed by UDPConnectionFixed itself.
@@ -1963,9 +1976,37 @@ class UDPConnectionFixed {
     fun sendRequestMultipleObjects(objectIds: List<Int>, cacheMissType: Int = 0) {
         if (objectIds.isEmpty()) return
         val identity = outboundIdentity("UDPConnectionFixed.sendRequestMultipleObjects")
-        
+
+        // Wire format stores object count in one byte; enforce protocol-safe chunking.
+        val normalizedIds = objectIds.distinct()
+        val now = System.currentTimeMillis()
+        val requestKey = buildString(normalizedIds.size * 10 + 16) {
+            append(cacheMissType)
+            append(':')
+            normalizedIds.forEach {
+                append(it)
+                append(',')
+            }
+        }
+        val isDuplicateBurst = synchronized(requestMultipleObjectsLock) {
+            val previousTs = recentRequestMultipleObjects[requestKey]
+            val duplicate = previousTs != null && now - previousTs < REQUEST_MULTIPLE_OBJECTS_DEDUP_WINDOW_MS
+            if (!duplicate) {
+                recentRequestMultipleObjects[requestKey] = now
+            }
+            duplicate
+        }
+        if (isDuplicateBurst) {
+            NetworkLogger.log(
+                NetworkLogger.Level.DEBUG,
+                NetworkLogger.Category.UDP,
+                "↺ Suppressed duplicate RequestMultipleObjects burst (${normalizedIds.size} objects)"
+            )
+            return
+        }
+
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, 
-            "→ Sending RequestMultipleObjects for ${objectIds.size} objects")
+            "→ Sending RequestMultipleObjects for ${normalizedIds.size} objects")
         
         // RequestMultipleObjects message format:
         // AgentData:
@@ -1980,23 +2021,25 @@ class UDPConnectionFixed {
         val objectCountSize = 1   // Object count byte
         val objectEntrySize = 5   // CacheMissType (1) + ID (4)
         
-        val payloadSize = agentDataSize + objectCountSize + (objectIds.size * objectEntrySize)
-        val payload = ByteBuffer.allocate(payloadSize).order(ByteOrder.LITTLE_ENDIAN)
-        
-        // AgentData block
-        payload.put(identity.agentId.asBytes())
-        payload.put(identity.sessionId.asBytes())
-        
-        // ObjectData count
-        payload.put(objectIds.size.toByte())
-        
-        // ObjectData blocks
-        for (objectId in objectIds) {
-            payload.put(cacheMissType.toByte())
-            payload.putInt(objectId)
+        for (chunk in normalizedIds.chunked(255)) {
+            val payloadSize = agentDataSize + objectCountSize + (chunk.size * objectEntrySize)
+            val payload = ByteBuffer.allocate(payloadSize).order(ByteOrder.LITTLE_ENDIAN)
+
+            // AgentData block
+            payload.put(identity.agentId.asBytes())
+            payload.put(identity.sessionId.asBytes())
+
+            // ObjectData count (u8)
+            payload.put(chunk.size.toByte())
+
+            // ObjectData blocks
+            for (objectId in chunk) {
+                payload.put(cacheMissType.toByte())
+                payload.putInt(objectId)
+            }
+
+            sendPacket(MessageIds.REQUEST_MULTIPLE_OBJECTS, payload.array(), reliable = true)
         }
-        
-        sendPacket(MessageIds.REQUEST_MULTIPLE_OBJECTS, payload.array(), reliable = true)
     }
 
     /**
