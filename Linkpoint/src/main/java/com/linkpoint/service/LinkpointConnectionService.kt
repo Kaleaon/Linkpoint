@@ -44,6 +44,39 @@ class LinkpointConnectionService : Service() {
         private val _isRunning = MutableStateFlow(false)
         val isRunning: StateFlow<Boolean> = _isRunning
 
+        /**
+         * Process-wide callback the foreground service uses to drive UDP
+         * keepalive pings and to notify the app of dead-circuit conditions.
+         *
+         * This is a static slot rather than a per-instance binder so the
+         * [com.linkpoint.LinkpointApp] can register the callback once at
+         * Application.onCreate without having to bindService() (binding
+         * adds Context+lifecycle plumbing for no benefit when the only
+         * caller is the singleton Application). The service reads this
+         * each time it ticks; reassigning is safe.
+         */
+        @Volatile
+        private var processCallback: ConnectionCallback? = null
+
+        /**
+         * Process-wide flag for whether the UDP circuit is currently up.
+         * The Application toggles this when [com.linkpoint.protocol.messages.UDPConnectionFixed.isConnected]
+         * transitions; the service uses it to decide whether to ping (no
+         * point pinging a dead socket) and to phrase the notification.
+         */
+        @Volatile
+        private var processConnected: Boolean = false
+
+        /** Set by [com.linkpoint.LinkpointApp]; called from the service tick. */
+        fun setProcessCallback(callback: ConnectionCallback?) {
+            processCallback = callback
+        }
+
+        /** Toggled by [com.linkpoint.LinkpointApp]'s networkStateListener. */
+        fun setProcessConnected(connected: Boolean) {
+            processConnected = connected
+        }
+
         fun start(context: Context) {
             val intent = Intent(context, LinkpointConnectionService::class.java).apply {
                 action = ACTION_START
@@ -114,8 +147,16 @@ class LinkpointConnectionService : Service() {
     }
 
     private fun startForegroundService() {
-        val profile = BackgroundRuntimeConfig.getIntensityProfile(this)
-        val notification = createNotification("Connected to Second Life")
+        // Use the effective profile so cellular automatically gets the
+        // tighter 20s NAT-keepalive cadence. Wi-Fi falls through to the
+        // user's selection.
+        val profile = BackgroundRuntimeConfig.getEffectiveProfile(this)
+        Log.i(TAG, "Foreground service starting with profile=$profile (keepAlive=${profile.keepAliveIntervalMs}ms)")
+        // Mirror the process-wide flag onto the instance flag so isConnected
+        // queries stay consistent for callers that come in through the
+        // binder (notification text, isConnected getter).
+        if (processConnected) isConnected = true
+        val notification = createNotification(if (processConnected) "Connected to Second Life" else "Connecting…")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
@@ -238,7 +279,19 @@ class LinkpointConnectionService : Service() {
 
     private suspend fun performKeepAlive() {
         lastPingTime = System.currentTimeMillis()
-        connectionCallback?.onSendPing()
+        // Skip when the circuit is known down — pinging into a dead socket
+        // races with the auto re-login coordinator and just spams logs.
+        if (!processConnected && !isConnected) {
+            return
+        }
+        // Process-wide callback (LinkpointApp) takes priority; the per-
+        // instance binder callback is only used by tests / future bound
+        // clients. Without this wiring, performKeepAlive was a no-op
+        // because nothing ever called setConnectionCallback — see the
+        // 2026-04-26 Athanasia capture, where the foreground service
+        // was running but never drove a single ping.
+        val cb = processCallback ?: connectionCallback
+        cb?.onSendPing()
     }
 
     private fun performPing() {
@@ -247,8 +300,10 @@ class LinkpointConnectionService : Service() {
 
     private fun checkConnection(profile: BackgroundRuntimeConfig.IntensityProfile) {
         val timeSinceLastPing = System.currentTimeMillis() - lastPingTime
-        if (isConnected && timeSinceLastPing > profile.keepAliveIntervalMs * 3) {
-            connectionCallback?.onConnectionStale()
+        val effectivelyConnected = processConnected || isConnected
+        if (effectivelyConnected && timeSinceLastPing > profile.keepAliveIntervalMs * 3) {
+            val cb = processCallback ?: connectionCallback
+            cb?.onConnectionStale()
             BackgroundResumeScheduler.schedule(this, immediate = true)
         }
     }
