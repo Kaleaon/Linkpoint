@@ -27,6 +27,7 @@ import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.core.ConnectionState
+import com.linkpoint.render.FrameScheduler
 import com.linkpoint.ui.chat.ChatActivity
 import com.linkpoint.ui.friends.FriendsActivity
 import com.linkpoint.ui.inventory.InventoryActivity
@@ -113,11 +114,20 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     @Volatile private var isRendering = false
     @Volatile private var isSurfaceReady = false
     private var useSecondaryRenderer: Boolean = false
+    private val frameScheduler = FrameScheduler()
     private var hudsVisibleFromManager: Boolean = true
     private var isLayoutEditorMode: Boolean = false
     
     // Track current orientation setting to avoid unnecessary changes
     private var currentOrientationPref: String? = null
+    private var lastPoseTickMs: Long = System.currentTimeMillis()
+    private val filamentPreRenderCallback: (Long) -> Unit = { frameTimeNanos ->
+        if (!useSecondaryRenderer && isRendering) {
+            app.renderManager.dispatcher.post(
+                Runnable { app.renderManager.runPreRenderPhase(frameTimeNanos) }
+            )
+        }
+    }
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -129,6 +139,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         
         initViews()
         initDebugFloater()
+        frameScheduler.addPreRenderCallback(filamentPreRenderCallback)
         initRenderer()
         setupNavigation()
         setupBackPressHandler()
@@ -681,7 +692,8 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                     if (!isRendering) {
                         android.util.Log.i(TAG, "✓ Starting render loop now that surface is ready")
                         isRendering = true
-                        startRenderLoop()
+                        configureSchedulerDispatcher()
+                        frameScheduler.start()
                     }
                 }
             }
@@ -708,6 +720,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                     isSurfaceReady = false
                     isRendering = false
                 }
+                frameScheduler.stop()
             }
         })
         
@@ -736,7 +749,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         // skeleton, advance the AvatarAnimator and write the resulting
         // bone matrices into SceneManager so the body segments visibly
         // animate. Cheap: ~1ms even for 30 nearby avatars.
-        var lastPoseTickMs = System.currentTimeMillis()
+        lastPoseTickMs = System.currentTimeMillis()
         app.renderManager.avatarPoseProvider = {
             try {
                 val sm = app.renderManager.getSceneManager()
@@ -777,20 +790,29 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         lumiyaSurfaceView = glView
         renderContainer.removeAllViews()
         renderContainer.addView(glView)
+        glView.setSchedulerDrivenRendering(true)
         isSurfaceReady = true
-        isRendering = false
+        isRendering = true
+        configureSchedulerDispatcher()
+        frameScheduler.start()
         android.util.Log.i(TAG, "✓ Secondary Lumiya renderer enabled")
     }
-    
-    private fun startRenderLoop() {
-        app.renderManager.dispatcher.post(object : Runnable {
-            override fun run() {
+
+    private fun configureSchedulerDispatcher() {
+        if (useSecondaryRenderer) {
+            frameScheduler.setBackendDispatcher { frameTimeNanos ->
                 if (isRendering) {
-                    app.renderManager.renderFrame()
-                    app.renderManager.dispatcher.postDelayed(this, 16) // ~60fps
+                    lumiyaSurfaceView?.dispatchScheduledFrame(frameTimeNanos)
                 }
             }
-        })
+            return
+        }
+        frameScheduler.setBackendDispatcher { frameTimeNanos ->
+            if (!isRendering) return@setBackendDispatcher
+            app.renderManager.dispatcher.post(
+                Runnable { app.renderManager.renderFrame(frameTimeNanos) }
+            )
+        }
     }
     
     private fun setupNavigation() {
@@ -1011,6 +1033,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             // 60 Hz while the activity is in the background.
             isRendering = false
         }
+        frameScheduler.stop()
     }
 
     override fun onResume() {
@@ -1033,6 +1056,9 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
 
         if (useSecondaryRenderer) {
             lumiyaSurfaceView?.onResume()
+            isRendering = true
+            configureSchedulerDispatcher()
+            frameScheduler.start()
             return
         }
 
@@ -1058,7 +1084,8 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                     Runnable { app.renderManager.recreateSwapChain() }
                 )
                 isRendering = true
-                startRenderLoop()
+                configureSchedulerDispatcher()
+                frameScheduler.start()
             } else if (!isSurfaceReady) {
                 android.util.Log.w(TAG, "onResume: Surface not ready yet, will start when ready")
             }
@@ -1073,5 +1100,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         } else {
             isRendering = false
         }
+        frameScheduler.stop()
+        frameScheduler.removePreRenderCallback(filamentPreRenderCallback)
     }
 }

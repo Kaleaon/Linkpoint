@@ -844,15 +844,19 @@ class RenderManager(private val context: Context) {
      * endFrame` triplet, but the queue draining + camera/avatar pose
      * tick still run so the world keeps simulating in the background.
      */
-    fun renderFrame() {
+    fun runPreRenderPhase(frameTimeNanos: Long) {
+        requireRenderThread("runPreRenderPhase")
+        if (!isInitialized) return
+        applyRenderUpdates()
+        applyCameraController()
+        avatarPoseProvider?.invoke()
+    }
+
+    fun renderFrame(frameTimeNanos: Long = System.nanoTime()) {
         requireRenderThread("renderFrame")
         if (!isInitialized) return
 
         try {
-            applyRenderUpdates()
-            applyCameraController()
-            avatarPoseProvider?.invoke()
-
             if (!drawingEnabled.get()) return
 
             val engine = this.engine ?: return
@@ -860,7 +864,7 @@ class RenderManager(private val context: Context) {
             val view = this.view ?: return
             val swapChain = ensureSwapChain(engine) ?: return
 
-            if (renderer.beginFrame(swapChain, System.nanoTime())) {
+            if (renderer.beginFrame(swapChain, frameTimeNanos)) {
                 renderer.render(view)
                 renderer.endFrame()
                 val count = frameCount.incrementAndGet()

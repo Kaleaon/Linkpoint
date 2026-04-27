@@ -26,6 +26,7 @@ class LumiyaGLSurfaceView @JvmOverloads constructor(
 
     private val lumiyaRenderer = LumiyaRenderer()
     private var surfaceReady = false
+    private var schedulerDriven = false
 
     init {
         // Request GL ES 3.2 context
@@ -66,6 +67,22 @@ class LumiyaGLSurfaceView @JvmOverloads constructor(
     fun getRenderer(): LumiyaRenderer = lumiyaRenderer
 
     fun getEngineProvider(): RenderEngineProvider = lumiyaRenderer
+
+    /**
+     * Switch between legacy continuous GLSurfaceView pacing and scheduler-
+     * driven pacing where each tick maps to [requestRender].
+     */
+    fun setSchedulerDrivenRendering(enabled: Boolean) {
+        schedulerDriven = enabled
+        renderMode = if (enabled) RENDERMODE_WHEN_DIRTY else RENDERMODE_CONTINUOUSLY
+    }
+
+    fun dispatchScheduledFrame(@Suppress("UNUSED_PARAMETER") frameTimeNanos: Long) {
+        if (!surfaceReady) return
+        if (schedulerDriven) {
+            requestRender()
+        }
+    }
 
     override fun onPause() {
         super.onPause()
