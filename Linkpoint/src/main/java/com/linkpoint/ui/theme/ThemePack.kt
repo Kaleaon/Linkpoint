@@ -72,7 +72,16 @@ data class ThemePack(
     val colorSuccess: String = "#4CAF50",
     
     /** Optional: Warning color */
-    val colorWarning: String = "#FFC107"
+    val colorWarning: String = "#FFC107",
+
+    /** Optional profile that tunes UI density/spacing */
+    val densityProfile: DensityProfile? = null,
+
+    /** Optional profile that tunes shape corner radius */
+    val cornerProfile: CornerProfile? = null,
+
+    /** Optional profile that tunes motion/animation duration */
+    val motionProfile: MotionProfile? = null
 ) {
     companion object {
         private val json = Json { 
@@ -111,7 +120,10 @@ data class ThemePack(
                 colorBackground = "#1A1A1A",
                 colorSurface = "#2D2D2D",
                 colorOnSurface = "#FFFFFF",
-                colorOnSurfaceVariant = "#B0B0B0"
+                colorOnSurfaceVariant = "#B0B0B0",
+                densityProfile = DensityProfile.STANDARD,
+                cornerProfile = CornerProfile.ROUNDED,
+                motionProfile = MotionProfile.STANDARD
             )
         }
     }
