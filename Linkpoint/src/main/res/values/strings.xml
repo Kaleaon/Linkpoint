@@ -145,8 +145,13 @@
     <string name="no_nearby_friends">No nearby friends</string>
     <string name="no_nearby_strangers">No nearby strangers</string>
     <string name="error_loading_nearby_people">Error loading nearby people: %s</string>
+    <string name="nearby_friendship_offer_sent">Friendship offer sent to %s</string>
+    <string name="nearby_failed_to_add_friend">Unable to add %s right now</string>
     <string name="distance_meters">%sm away</string>
     <string name="user_avatar">User avatar</string>
+    <string name="back">Back</string>
+    <string name="refresh">Refresh</string>
+    <string name="more_options">More options</string>
 
     <!-- Movement Controls -->
     <string name="fly">Fly</string>

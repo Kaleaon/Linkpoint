@@ -90,6 +90,9 @@ jobs:
       - name: Validate parity snapshot clean-tree guards
         run: bash scripts/check_parity_snapshot_guards.sh
 
+      - name: Validate no decompilation artifacts in production source
+        run: bash scripts/check_no_decompilation_artifacts.sh
+
       - name: Run UI route/theme coverage checks
         run: |
           bash scripts/ui/check-route-coverage.sh
