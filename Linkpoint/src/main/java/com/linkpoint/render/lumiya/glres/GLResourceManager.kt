@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
  * cleaned up even if the owner is garbage-collected without an explicit
  * `destroy()` call.  Deferred cleanup runs once per frame on the GL thread.
  */
-class GLResourceManager {
+class GLResourceManager(private val glThreadGuard: ((String) -> Unit)? = null) {
 
     companion object {
         private const val TAG = "GLResourceManager"
@@ -39,30 +39,35 @@ class GLResourceManager {
     // ── Allocation helpers ───────────────────────────────────────────────
 
     fun createTexture(): Int {
+        requireGlThread("createTexture")
         val buf = IntArray(1)
         GLES32.glGenTextures(1, buf, 0)
         return buf[0]
     }
 
     fun createBuffer(): Int {
+        requireGlThread("createBuffer")
         val buf = IntArray(1)
         GLES32.glGenBuffers(1, buf, 0)
         return buf[0]
     }
 
     fun createVAO(): Int {
+        requireGlThread("createVAO")
         val buf = IntArray(1)
         GLES32.glGenVertexArrays(1, buf, 0)
         return buf[0]
     }
 
     fun createFramebuffer(): Int {
+        requireGlThread("createFramebuffer")
         val buf = IntArray(1)
         GLES32.glGenFramebuffers(1, buf, 0)
         return buf[0]
     }
 
     fun createRenderbuffer(): Int {
+        requireGlThread("createRenderbuffer")
         val buf = IntArray(1)
         GLES32.glGenRenderbuffers(1, buf, 0)
         return buf[0]
@@ -89,6 +94,7 @@ class GLResourceManager {
     // ── Per-frame cleanup (call on GL thread) ────────────────────────────
 
     fun cleanup() {
+        requireGlThread("cleanup")
         drainQueue(pendingTextureDeletes) { GLES32.glDeleteTextures(1, intArrayOf(it), 0) }
         drainQueue(pendingBufferDeletes)  { GLES32.glDeleteBuffers(1, intArrayOf(it), 0) }
         drainQueue(pendingVAODeletes)     { GLES32.glDeleteVertexArrays(1, intArrayOf(it), 0) }
@@ -101,12 +107,21 @@ class GLResourceManager {
 
     /** Full flush – destroy everything pending. */
     fun flush() {
+        requireGlThread("flush")
         cleanup()
         synchronized(trackedRefs) { trackedRefs.clear() }
         Log.i(TAG, "Resource manager flushed (allocated ≈ ${allocatedBytes / 1024} KB)")
     }
 
     // ── Internals ────────────────────────────────────────────────────────
+
+    fun assertGlThread(apiName: String) {
+        requireGlThread(apiName)
+    }
+
+    private fun requireGlThread(apiName: String) {
+        glThreadGuard?.invoke("GLResourceManager.$apiName")
+    }
 
     private inline fun drainQueue(queue: ConcurrentLinkedQueue<Int>, delete: (Int) -> Unit) {
         var handle = queue.poll()
