@@ -1,34 +1,21 @@
 package com.linkpoint.react
 
-import com.linkpoint.react.-$Lambda$SNlq3T7EFvfEVtJpS5BhPof2E2o.AnonymousClass1
 import java.util.concurrent.Executor
-import javax.annotation.Nonnull
 
-class AsyncRequestHandler<K> : RequestHandler<K> {
-    private val RequestHandler<K> baseHandler
-    private val Executor executor
+open class AsyncRequestHandler<K>(
+    private val executor: Executor,
+    private val baseHandler: RequestHandler<K>
+) : RequestHandler<K> {
 
-    public AsyncRequestHandler(Executor executor, RequestHandler<K> requestHandler) {
-        this.executor = executor
-        this.baseHandler = requestHandler
+    override fun onRequest(request: K) {
+        executor.execute { 
+            baseHandler.onRequest(request) 
+        }
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: handleAsyncRequestInternal */
-    public /* synthetic */ Unit m17lambda$com_lumiyaviewer_lumiya_react_AsyncRequestHandler_553(Object obj) {
-        this.baseHandler.onRequest(obj)
-    }
-
-    /* renamed from: handleAsyncRequestCancelled */
-    /* synthetic */ Unit handleAsyncRequestCancelled(Object obj) {
-        this.baseHandler.onRequestCancelled(obj)
-    }
-
-    fun onRequest(K k) {
-        this.executor.execute(() -> { // Lambda implementation })
-    }
-
-    fun onRequestCancelled(K k) {
-        this.executor.execute(AnonymousClass1(this, k))
+    override fun onRequestCancelled(request: K) {
+        executor.execute { 
+            baseHandler.onRequestCancelled(request) 
+        }
     }
 }
