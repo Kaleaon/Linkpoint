@@ -13,8 +13,14 @@ import com.linkpoint.world.NearbyUser
 import java.text.DecimalFormat
 
 /**
- * Adapter for displaying nearby people
+ * Adapter for displaying nearby people.
+ *
+ * Legacy entry point retained during Compose migration.
+ * Removal target: 2026.09.
  */
+@Deprecated(
+    message = "Legacy RecyclerView adapter. Use NearbyPeopleScreen list composables."
+)
 class NearbyPeopleAdapter(
     private val onUserClick: (NearbyUser) -> Unit,
     private val onUserLongClick: (NearbyUser) -> Unit

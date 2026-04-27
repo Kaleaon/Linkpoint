@@ -170,6 +170,24 @@ fun NavHostController.navigateBack() {
     popBackStack()
 }
 
+/**
+ * Main navigation composable that can be used as the app's navigation structure.
+ *
+ * Compose-first note:
+ * - Compose navigation is the default path for new UI flows.
+ * - Legacy Activity/Fragment bridges are temporary compatibility shims and are
+ *   tracked for removal in docs/ui-refactor/cutover-plan.md.
+ * 
+ * Usage in MainActivity:
+ * ```kotlin
+ * setContent {
+ *     LinkpointTheme {
+ *         val navController = rememberNavController()
+ *         LinkpointNavHost(navController = navController)
+ *     }
+ * }
+ * ```
+ */
 fun resolveRouteMetadata(route: String?): RouteMetadata {
     val normalizedRoute = route ?: Routes.WORLD
     return routeMetadata[normalizedRoute]

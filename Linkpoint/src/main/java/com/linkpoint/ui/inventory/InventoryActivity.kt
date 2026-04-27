@@ -23,7 +23,13 @@ import com.linkpoint.ui.notecard.NotecardEditorActivity
 /**
  * Inventory Activity - Browse and manage inventory
  * Based on the reference viewer's InventoryActivity
+ *
+ * Legacy entry point retained during Compose migration.
+ * Removal target: 2026.09.
  */
+@Deprecated(
+    message = "Legacy Activity entry point. Use InventoryScreen-based Compose navigation."
+)
 class InventoryActivity : AppCompatActivity() {
     
     companion object {

@@ -21,8 +21,14 @@ import com.linkpoint.world.FriendsManager
 import kotlinx.coroutines.launch
 
 /**
- * Fragment for managing friends list
+ * Fragment for managing friends list.
+ *
+ * Legacy entry point retained during Compose migration.
+ * Removal target: 2026.09.
  */
+@Deprecated(
+    message = "Legacy Fragment entry point. Use FriendsScreen-based Compose navigation."
+)
 class FriendsListFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView

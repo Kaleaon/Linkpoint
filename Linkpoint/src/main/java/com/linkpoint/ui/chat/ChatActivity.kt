@@ -24,7 +24,13 @@ import java.util.*
 /**
  * Chat Activity - Local chat, IMs, and group chat
  * Based on the reference viewer's ChatNewActivity
+ *
+ * Legacy entry point retained during Compose migration.
+ * Removal target: 2026.09.
  */
+@Deprecated(
+    message = "Legacy Activity entry point. Use ChatScreen-based Compose navigation."
+)
 class ChatActivity : AppCompatActivity() {
     
     companion object {
