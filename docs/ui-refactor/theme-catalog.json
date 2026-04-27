@@ -1,0 +1,7 @@
+{
+  "themes": [
+    { "name": "light", "status": "migrated" },
+    { "name": "dark", "status": "migrated" },
+    { "name": "high-contrast", "status": "in-progress" }
+  ]
+}
