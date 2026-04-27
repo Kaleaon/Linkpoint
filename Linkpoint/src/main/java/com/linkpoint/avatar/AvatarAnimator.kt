@@ -170,7 +170,9 @@ class AvatarAnimator(
     
     private fun interpolateRotation(keys: List<AnimationKey>, time: Float): LLQuaternion {
         if (keys.isEmpty()) return LLQuaternion.identity()
-        if (keys.size == 1) return LLQuaternion(keys[0].value[0], keys[0].value[1], keys[0].value[2], keys[0].value[3])
+        if (keys.size == 1) {
+            return LLQuaternion(keys[0].value[0], keys[0].value[1], keys[0].value[2], keys[0].value[3]).normalize()
+        }
         
         // Find surrounding keys
         var prevKey = keys[0]
@@ -187,7 +189,7 @@ class AvatarAnimator(
         }
         
         if (prevKey == nextKey) {
-            return LLQuaternion(prevKey.value[0], prevKey.value[1], prevKey.value[2], prevKey.value[3])
+            return LLQuaternion(prevKey.value[0], prevKey.value[1], prevKey.value[2], prevKey.value[3]).normalize()
         }
         
         val t = (time - prevKey.time) / (nextKey.time - prevKey.time)

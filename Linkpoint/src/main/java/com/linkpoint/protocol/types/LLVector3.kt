@@ -4,6 +4,13 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import kotlin.math.abs
+import kotlin.math.acos
+import kotlin.math.asin
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sign
+import kotlin.math.sin
 import kotlin.math.sqrt
 
 /**
@@ -16,6 +23,7 @@ data class LLVector3(
     val z: Float = 0f
 ) : Parcelable {
     companion object {
+        private const val NORMALIZE_EPSILON_SQUARED = 1.0e-12f
         fun zero() = LLVector3(0f, 0f, 0f)
         fun one() = LLVector3(1f, 1f, 1f)
         fun unitX() = LLVector3(1f, 0f, 0f)
@@ -49,10 +57,15 @@ data class LLVector3(
     
     fun length(): Float = sqrt(x * x + y * y + z * z)
     fun lengthSquared(): Float = x * x + y * y + z * z
+
+    fun isFinite(): Boolean = x.isFinite() && y.isFinite() && z.isFinite()
     
     fun normalize(): LLVector3 {
-        val len = length()
-        return if (len > 0f) LLVector3(x / len, y / len, z / len) else zero()
+        if (!isFinite()) return zero()
+        val lenSq = lengthSquared()
+        if (!lenSq.isFinite() || lenSq <= NORMALIZE_EPSILON_SQUARED) return zero()
+        val invLen = 1f / sqrt(lenSq)
+        return LLVector3(x * invLen, y * invLen, z * invLen)
     }
     
     fun dot(other: LLVector3): Float = x * other.x + y * other.y + z * other.z
@@ -100,6 +113,7 @@ data class LLQuaternion(
     val w: Float = 1f
 ) : Parcelable {
     companion object {
+        private const val NORMALIZE_EPSILON_SQUARED = 1.0e-12f
         fun identity() = LLQuaternion(0f, 0f, 0f, 1f)
         
         fun fromBytes(bytes: ByteArray, offset: Int = 0): LLQuaternion {
@@ -110,7 +124,7 @@ data class LLQuaternion(
             // W is calculated to normalize
             val wSquared = 1f - x * x - y * y - z * z
             val w = if (wSquared > 0f) sqrt(wSquared) else 0f
-            return LLQuaternion(x, y, z, w)
+            return LLQuaternion(x, y, z, w).normalize()
         }
         
         /**
@@ -123,23 +137,36 @@ data class LLQuaternion(
             val z = buffer.short / 32768f
             val wSquared = 1f - x * x - y * y - z * z
             val w = if (wSquared > 0f) sqrt(wSquared) else 0f
-            return LLQuaternion(x, y, z, w)
+            return LLQuaternion(x, y, z, w).normalize()
         }
         
         fun fromEuler(pitch: Float, roll: Float, yaw: Float): LLQuaternion {
-            val cy = kotlin.math.cos(yaw * 0.5f)
-            val sy = kotlin.math.sin(yaw * 0.5f)
-            val cp = kotlin.math.cos(pitch * 0.5f)
-            val sp = kotlin.math.sin(pitch * 0.5f)
-            val cr = kotlin.math.cos(roll * 0.5f)
-            val sr = kotlin.math.sin(roll * 0.5f)
+            val cy = cos(yaw * 0.5f)
+            val sy = sin(yaw * 0.5f)
+            val cp = cos(pitch * 0.5f)
+            val sp = sin(pitch * 0.5f)
+            val cr = cos(roll * 0.5f)
+            val sr = sin(roll * 0.5f)
             
             return LLQuaternion(
                 x = sr * cp * cy - cr * sp * sy,
                 y = cr * sp * cy + sr * cp * sy,
                 z = cr * cp * sy - sr * sp * cy,
                 w = cr * cp * cy + sr * sp * sy
-            )
+            ).normalize()
+        }
+
+        fun fromAngleAxis(angle: Float, axis: LLVector3): LLQuaternion {
+            val normalizedAxis = axis.normalize()
+            if (!normalizedAxis.isFinite()) return identity()
+            val halfAngle = angle * 0.5f
+            val s = sin(halfAngle)
+            return LLQuaternion(
+                x = normalizedAxis.x * s,
+                y = normalizedAxis.y * s,
+                z = normalizedAxis.z * s,
+                w = cos(halfAngle)
+            ).normalize()
         }
     }
     
@@ -151,9 +178,14 @@ data class LLQuaternion(
         return buffer.array()
     }
     
+    fun isFinite(): Boolean = x.isFinite() && y.isFinite() && z.isFinite() && w.isFinite()
+
     fun normalize(): LLQuaternion {
-        val len = sqrt(x * x + y * y + z * z + w * w)
-        return if (len > 0f) LLQuaternion(x / len, y / len, z / len, w / len) else identity()
+        if (!isFinite()) return identity()
+        val lenSq = x * x + y * y + z * z + w * w
+        if (!lenSq.isFinite() || lenSq <= NORMALIZE_EPSILON_SQUARED) return identity()
+        val invLen = 1f / sqrt(lenSq)
+        return LLQuaternion(x * invLen, y * invLen, z * invLen, w * invLen)
     }
     
     fun conjugate() = LLQuaternion(-x, -y, -z, w)
@@ -168,8 +200,10 @@ data class LLQuaternion(
     }
     
     fun rotate(v: LLVector3): LLVector3 {
+        if (!v.isFinite()) return LLVector3.zero()
+        val rotation = normalize()
         val qv = LLQuaternion(v.x, v.y, v.z, 0f)
-        val result = this * qv * conjugate()
+        val result = rotation * qv * rotation.conjugate()
         return LLVector3(result.x, result.y, result.z)
     }
     
@@ -218,15 +252,16 @@ data class LLQuaternion(
      * Convert to 4x4 rotation matrix (column-major for OpenGL/Filament)
      */
     fun toMatrix(out: FloatArray = FloatArray(16)): FloatArray {
-        val xx = x * x
-        val yy = y * y
-        val zz = z * z
-        val xy = x * y
-        val xz = x * z
-        val yz = y * z
-        val wx = w * x
-        val wy = w * y
-        val wz = w * z
+        val q = normalize()
+        val xx = q.x * q.x
+        val yy = q.y * q.y
+        val zz = q.z * q.z
+        val xy = q.x * q.y
+        val xz = q.x * q.z
+        val yz = q.y * q.z
+        val wx = q.w * q.x
+        val wy = q.w * q.y
+        val wz = q.w * q.z
         
         out[0] = 1f - 2f * (yy + zz)
         out[1] = 2f * (xy + wz)
@@ -255,25 +290,34 @@ data class LLQuaternion(
      * Convert to Euler angles (pitch, roll, yaw in radians)
      */
     fun toEuler(): LLVector3 {
+        val q = normalize()
         // Roll (x-axis rotation)
-        val sinrCosp = 2f * (w * x + y * z)
-        val cosrCosp = 1f - 2f * (x * x + y * y)
-        val roll = kotlin.math.atan2(sinrCosp, cosrCosp)
+        val sinrCosp = 2f * (q.w * q.x + q.y * q.z)
+        val cosrCosp = 1f - 2f * (q.x * q.x + q.y * q.y)
+        val roll = atan2(sinrCosp, cosrCosp)
         
         // Pitch (y-axis rotation)
-        val sinp = 2f * (w * y - z * x)
-        val pitch = if (kotlin.math.abs(sinp) >= 1f) {
-            kotlin.math.PI.toFloat() / 2f * kotlin.math.sign(sinp)
+        val sinp = 2f * (q.w * q.y - q.z * q.x)
+        val pitch = if (abs(sinp) >= 1f) {
+            Math.PI.toFloat() / 2f * sign(sinp)
         } else {
-            kotlin.math.asin(sinp)
+            asin(sinp)
         }
         
         // Yaw (z-axis rotation)
-        val sinyCosp = 2f * (w * z + x * y)
-        val cosyCosp = 1f - 2f * (y * y + z * z)
-        val yaw = kotlin.math.atan2(sinyCosp, cosyCosp)
+        val sinyCosp = 2f * (q.w * q.z + q.x * q.y)
+        val cosyCosp = 1f - 2f * (q.y * q.y + q.z * q.z)
+        val yaw = atan2(sinyCosp, cosyCosp)
         
         return LLVector3(pitch, roll, yaw)
+    }
+
+    fun toAngleAxis(): Pair<Float, LLVector3> {
+        val q = normalize()
+        val angle = 2f * acos(q.w.coerceIn(-1f, 1f))
+        val axisScale = sqrt((1f - q.w * q.w).coerceAtLeast(0f))
+        if (axisScale <= 1e-6f) return 0f to LLVector3.unitX()
+        return angle to LLVector3(q.x / axisScale, q.y / axisScale, q.z / axisScale).normalize()
     }
     
     override fun toString() = "($x, $y, $z, $w)"
