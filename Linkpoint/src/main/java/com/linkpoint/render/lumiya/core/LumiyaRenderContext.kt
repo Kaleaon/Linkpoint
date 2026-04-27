@@ -20,7 +20,7 @@ import java.nio.FloatBuffer
  * Design lineage:  Lumiya `RenderContext.java`, modernised to GL ES 3.2 with
  * UBOs, VAOs, and structured buffer bindings.
  */
-class LumiyaRenderContext {
+class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null) {
 
     companion object {
         private const val TAG = "LumiyaRenderContext"
@@ -136,9 +136,10 @@ class LumiyaRenderContext {
     // =====================================================================
 
     fun initialize(): Boolean {
+        glThreadGuard?.invoke("initialize")
         return try {
             queryGPUCapabilities()
-            resourceManager = GLResourceManager()
+            resourceManager = GLResourceManager(glThreadGuard)
             frustumCuller = FrustumCuller()
             createGlobalUBO()
             compileShaders()

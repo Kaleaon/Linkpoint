@@ -41,11 +41,8 @@ class GLTextureCache(
     }
 
     /** Upload a bitmap and cache the resulting texture. */
-    fun put(
-        id: UUID,
-        bitmap: Bitmap,
-        semantic: TextureFormatPolicy.TextureSemantic = TextureFormatPolicy.TextureSemantic.ALBEDO
-    ): Int {
+    fun put(id: UUID, bitmap: Bitmap): Int {
+        resourceManager.assertGlThread("GLTextureCache.put")
         // If already cached, return existing
         cache.get(id)?.let { return it.handle }
 
@@ -86,10 +83,12 @@ class GLTextureCache(
     }
 
     fun remove(id: UUID) {
+        resourceManager.assertGlThread("GLTextureCache.remove")
         cache.remove(id)
     }
 
     fun clear() {
+        resourceManager.assertGlThread("GLTextureCache.clear")
         cache.evictAll()
     }
 
