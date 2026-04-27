@@ -63,8 +63,6 @@ class RenderManager(private val context: Context) {
     private var primRenderer: PrimRenderer? = null
     private var meshPrimRenderer: MeshPrimRenderer? = null
     private var terrainRenderer: TerrainRenderer? = null
-    private var primMeshDataRequester: PrimRenderer.MeshDataRequester? = null
-    private var primMeshGeometryBuilder: PrimRenderer.MeshGeometryBuilder? = null
 
     // Helpers
     private var uiHelper: UiHelper? = null
@@ -123,7 +121,7 @@ class RenderManager(private val context: Context) {
      * Initialize the rendering engine
      */
     fun initialize(surfaceView: SurfaceView): Boolean {
-        requireFilamentThread("initialize")
+        requireRenderThread("initialize")
         if (isInitialized) {
             // Activity may have created a fresh SurfaceView (e.g. after a renderer
             // toggle or configuration change) while we're already initialized.
@@ -174,8 +172,6 @@ class RenderManager(private val context: Context) {
                 if (litMaterial != null) {
                     primRenderer = PrimRenderer(filamentEngine, filamentScene)
                     primRenderer?.initialize(litMaterial)
-                    primRenderer?.setMeshDataRequester(primMeshDataRequester)
-                    primRenderer?.setMeshGeometryBuilder(primMeshGeometryBuilder)
                     Log.d(TAG, "PrimRenderer initialized")
 
                     // Mesh-asset prim renderer: shares the lit material with
@@ -222,7 +218,6 @@ class RenderManager(private val context: Context) {
                             synchronized(swapChainLock) {
                                 swapChain?.let {
                                     Log.d(TAG, "Destroying old SwapChain")
-                                    waitForGpuIdle("native_window_changed")
                                     engine?.destroySwapChain(it)
                                     RenderDiagnostics.filamentSwapChainDestroyed("native_window_changed")
                                 }
@@ -249,7 +244,6 @@ class RenderManager(private val context: Context) {
                             displayHelper?.detach()
                             synchronized(swapChainLock) {
                                 swapChain?.let {
-                                    waitForGpuIdle("surface_lost")
                                     engine?.destroySwapChain(it)
                                     swapChain = null
                                     RenderDiagnostics.filamentSwapChainDestroyed("surface_lost")
@@ -510,7 +504,7 @@ class RenderManager(private val context: Context) {
      * recycled by the caller after this returns.
      */
     fun uploadTerrainDetailTexture(index: Int, bitmap: android.graphics.Bitmap) {
-        requireFilamentThread("uploadTerrainDetailTexture")
+        requireRenderThread("uploadTerrainDetailTexture")
         val eng = engine ?: return
         val tr = terrainRenderer ?: return
         try {
@@ -603,10 +597,7 @@ class RenderManager(private val context: Context) {
         }
         synchronized(swapChainLock) {
             swapChain?.let {
-                try {
-                    waitForGpuIdle("rebuildSwapChainForCurrentSurface")
-                    eng.destroySwapChain(it)
-                } catch (_: Exception) {}
+                try { eng.destroySwapChain(it) } catch (_: Exception) {}
             }
             swapChain = try {
                 eng.createSwapChain(surface)
@@ -755,7 +746,7 @@ class RenderManager(private val context: Context) {
     }
 
     private fun recreateSwapChainInternal(explicitWidth: Int, explicitHeight: Int) {
-        requireFilamentThread("recreateSwapChain")
+        requireRenderThread("recreateSwapChain")
         val engine = this.engine ?: return
         val surface = surfaceView?.holder?.surface ?: run {
             RenderDiagnostics.filamentSwapChainFailed("no surface")
@@ -777,7 +768,6 @@ class RenderManager(private val context: Context) {
             swapChain?.let { oldSwapChain ->
                 Log.i(TAG, "║ Destroying existing SwapChain before recreation")
                 try {
-                    waitForGpuIdle("recreateSwapChain")
                     engine.destroySwapChain(oldSwapChain)
                     RenderDiagnostics.filamentSwapChainDestroyed("recreate")
                 } catch (e: Exception) {
@@ -854,15 +844,19 @@ class RenderManager(private val context: Context) {
      * endFrame` triplet, but the queue draining + camera/avatar pose
      * tick still run so the world keeps simulating in the background.
      */
-    fun renderFrame() {
-        requireFilamentThread("renderFrame")
+    fun runPreRenderPhase(frameTimeNanos: Long) {
+        requireRenderThread("runPreRenderPhase")
+        if (!isInitialized) return
+        applyRenderUpdates()
+        applyCameraController()
+        avatarPoseProvider?.invoke()
+    }
+
+    fun renderFrame(frameTimeNanos: Long = System.nanoTime()) {
+        requireRenderThread("renderFrame")
         if (!isInitialized) return
 
         try {
-            applyRenderUpdates()
-            applyCameraController()
-            avatarPoseProvider?.invoke()
-
             if (!drawingEnabled.get()) return
 
             val engine = this.engine ?: return
@@ -870,7 +864,7 @@ class RenderManager(private val context: Context) {
             val view = this.view ?: return
             val swapChain = ensureSwapChain(engine) ?: return
 
-            if (renderer.beginFrame(swapChain, System.nanoTime())) {
+            if (renderer.beginFrame(swapChain, frameTimeNanos)) {
                 renderer.render(view)
                 renderer.endFrame()
                 val count = frameCount.incrementAndGet()
@@ -900,7 +894,7 @@ class RenderManager(private val context: Context) {
      * Render a frame in XR mode (stereo rendering)
      */
     fun renderXRFrame(xrData: XRFrameData) {
-        requireFilamentThread("renderXRFrame")
+        requireRenderThread("renderXRFrame")
         if (!isInitialized) return
 
         try {
@@ -969,15 +963,6 @@ class RenderManager(private val context: Context) {
 
     /** True iff [renderFrame] is currently issuing GPU work. */
     fun isDrawingEnabled(): Boolean = drawingEnabled.get()
-
-    /**
-     * Drain and apply all currently queued [RenderableUpdate] items immediately.
-     * Must run on the render thread.
-     */
-    fun flushPendingRenderUpdates() {
-        requireRenderThread("flushPendingRenderUpdates")
-        applyRenderUpdates()
-    }
     
     /**
      * Set camera position and orientation
@@ -1027,16 +1012,6 @@ class RenderManager(private val context: Context) {
 
     fun getMeshPrimRenderer(): MeshPrimRenderer? = meshPrimRenderer
 
-    fun configurePrimMeshPipeline(
-        requester: PrimRenderer.MeshDataRequester?,
-        geometryBuilder: PrimRenderer.MeshGeometryBuilder?
-    ) {
-        primMeshDataRequester = requester
-        primMeshGeometryBuilder = geometryBuilder
-        primRenderer?.setMeshDataRequester(requester)
-        primRenderer?.setMeshGeometryBuilder(geometryBuilder)
-    }
-
     /**
      * Compile a parsed [com.linkpoint.assets.MeshData] and attach it to the
      * existing prim entity for [localId], replacing the path/profile
@@ -1050,10 +1025,9 @@ class RenderManager(private val context: Context) {
         localId: Int,
         meshData: com.linkpoint.assets.MeshData,
         textureEntry: ByteArray? = null,
-        binder: com.linkpoint.render.prims.MeshPrimRenderer.TextureBinder? = null,
-        bomResolver: ((java.util.UUID) -> java.util.UUID)? = null
+        binder: com.linkpoint.render.prims.MeshPrimRenderer.TextureBinder? = null
     ) {
-        requireFilamentThread("attachMeshAsset")
+        requireRenderThread("attachMeshAsset")
         val mp = meshPrimRenderer ?: return
         val pr = primRenderer ?: return
         val compiled = mp.getOrCompile(meshData) ?: return
@@ -1062,7 +1036,7 @@ class RenderManager(private val context: Context) {
                 val inst = rm.getInstance(entity)
                 if (inst != 0) rm.destroy(entity)
             }
-            mp.attach(entity, compiled, textureEntry, binder, bomResolver)
+            mp.attach(entity, compiled, textureEntry, binder)
         }
     }
 
@@ -1082,7 +1056,7 @@ class RenderManager(private val context: Context) {
         uuid: java.util.UUID,
         bitmap: android.graphics.Bitmap
     ): Pair<Texture, com.linkpoint.assets.LinkpointTexture>? {
-        requireFilamentThread("uploadBitmapAsLinkpointTexture")
+        requireRenderThread("uploadBitmapAsLinkpointTexture")
         val eng = engine ?: return null
         val lpTex = com.linkpoint.assets.LinkpointTexture.fromBitmap(uuid, bitmap)
         val tex = lpTex.uploadToFilament(eng) ?: run {
@@ -1105,7 +1079,7 @@ class RenderManager(private val context: Context) {
      * have a UUID (HUD, snapshot preview).
      */
     fun uploadBitmapAsTexture(bitmap: android.graphics.Bitmap): Texture? {
-        requireFilamentThread("uploadBitmapAsTexture")
+        requireRenderThread("uploadBitmapAsTexture")
         val eng = engine ?: return null
         return try {
             val w = bitmap.width
@@ -1115,7 +1089,12 @@ class RenderManager(private val context: Context) {
             // observed to render the highest-priority world textures only
             // when mips are present (otherwise lower-LOD samplers fall
             // back to undefined data).
-            val levels = com.linkpoint.assets.TextureFormatPolicy.mipLevelsFor(w, h)
+            val levels = run {
+                var d = maxOf(w, h).coerceAtLeast(1)
+                var n = 1
+                while (d > 1) { d = d shr 1; n++ }
+                n
+            }
             val pixels = IntArray(w * h)
             bitmap.getPixels(pixels, 0, w, 0, 0, w, h)
             val rgba = java.nio.ByteBuffer.allocateDirect(w * h * 4)
@@ -1132,7 +1111,7 @@ class RenderManager(private val context: Context) {
                 .width(w).height(h)
                 .levels(levels)
                 .sampler(Texture.Sampler.SAMPLER_2D)
-                .format(Texture.InternalFormat.SRGB8_A8)
+                .format(Texture.InternalFormat.RGBA8)
                 .build(eng)
             val pixelBuffer = Texture.PixelBufferDescriptor(
                 rgba, Texture.Format.RGBA, Texture.Type.UBYTE
@@ -1161,7 +1140,7 @@ class RenderManager(private val context: Context) {
      * This is the primary entry point for rendering prims from the network.
      */
     fun updatePrim(data: ObjectUpdateData): Boolean {
-        requireFilamentThread("updatePrim")
+        requireRenderThread("updatePrim")
         val renderer = primRenderer ?: return false
         return renderer.updatePrim(data)
     }
@@ -1170,7 +1149,7 @@ class RenderManager(private val context: Context) {
      * Remove a prim by its local ID.
      */
     fun removePrim(localId: Int) {
-        requireFilamentThread("removePrim")
+        requireRenderThread("removePrim")
         primRenderer?.removePrim(localId)
     }
     
@@ -1216,9 +1195,6 @@ class RenderManager(private val context: Context) {
             timeSinceLastFrame = if (lastFrameTime > 0) System.currentTimeMillis() - lastFrameTime else null,
             initializationTime = initializationTime,
             lastInitializationError = lastInitializationError,
-            visiblePrimCount = sceneManager?.getVisibleObjects()?.size ?: 0,
-            visibleAvatarCount = sceneManager?.getVisibleAvatars()?.size ?: 0,
-            visibleTerrainPatchCount = terrainRenderer?.getDiagnostics()?.visiblePatchCount ?: 0,
             scenePopulationSnapshot = ScenePopulationDiagnostics.snapshot()
         )
     }
@@ -1243,9 +1219,6 @@ class RenderManager(private val context: Context) {
         val timeSinceLastFrame: Long?,
         val initializationTime: Long,
         val lastInitializationError: String?,
-        val visiblePrimCount: Int,
-        val visibleAvatarCount: Int,
-        val visibleTerrainPatchCount: Int,
         val scenePopulationSnapshot: ScenePopulationDiagnostics.Snapshot
     )
     
@@ -1253,7 +1226,7 @@ class RenderManager(private val context: Context) {
      * Shutdown rendering
      */
     fun shutdown() {
-        requireFilamentThread("shutdown")
+        requireRenderThread("shutdown")
         Log.i(TAG, "Shutting down render manager")
         RenderDiagnostics.filamentShutdown(
             "frames=${frameCount.get()} viewport=${viewportWidth}x${viewportHeight}"
@@ -1272,10 +1245,7 @@ class RenderManager(private val context: Context) {
 
         engine?.let { eng ->
             synchronized(swapChainLock) {
-                swapChain?.let {
-                    waitForGpuIdle("shutdown")
-                    eng.destroySwapChain(it)
-                }
+                swapChain?.let { eng.destroySwapChain(it) }
                 swapChain = null
             }
             view?.let { eng.destroyView(it) }
@@ -1338,22 +1308,12 @@ class RenderManager(private val context: Context) {
         }
     }
 
-    private fun requireFilamentThread(apiName: String) {
+    private fun requireRenderThread(apiName: String) {
         if (!dispatcher.isRenderThread()) {
-            val message = "RenderManager.$apiName must run on Filament render thread (${dispatcher.renderThreadName}); " +
+            val message = "RenderManager.$apiName must run on render thread (${dispatcher.renderThreadName}); " +
                 "current=${Thread.currentThread().name}"
             Log.e(TAG, message)
             throw IllegalStateException(message)
-        }
-    }
-
-    private fun waitForGpuIdle(reason: String) {
-        val eng = engine ?: return
-        try {
-            eng.flushAndWait()
-            Log.d(TAG, "Filament GPU queue drained before teardown: $reason")
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to flush Filament GPU queue ($reason): ${e.message}")
         }
     }
     

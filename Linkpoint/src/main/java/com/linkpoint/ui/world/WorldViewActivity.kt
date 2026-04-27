@@ -15,35 +15,30 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import com.linkpoint.render.CameraController
-import com.linkpoint.render.backend.FilamentBackend
-import com.linkpoint.render.backend.OpenGLES3Backend
-import com.linkpoint.render.backend.RenderBackend
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.core.ConnectionState
+import com.linkpoint.render.FrameScheduler
+import com.linkpoint.ui.chat.ChatActivity
 import com.linkpoint.ui.friends.FriendsActivity
+import com.linkpoint.ui.inventory.InventoryActivity
 import com.linkpoint.ui.minimap.MinimapActivity
 import com.linkpoint.ui.avatar.MyAvatarActivity
-import com.linkpoint.ui.navigation.LegacyFeatureBridge
 import com.linkpoint.ui.people.NearbyPeopleActivity
 import com.linkpoint.render.lumiya.core.LumiyaGLSurfaceView
+import com.linkpoint.ui.settings.SettingsActivity
 import com.linkpoint.ui.xr.XRWorldActivity
 import com.linkpoint.utils.DebugReportService
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
@@ -68,11 +63,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private lateinit var navigationView: NavigationView
     private lateinit var surfaceView: SurfaceView
     private var lumiyaSurfaceView: LumiyaGLSurfaceView? = null
-    private var renderBackend: RenderBackend? = null
-    private lateinit var worldViewportHost: WorldViewportHost
-    private lateinit var worldOverlayCompose: ComposeView
-    private lateinit var rendererHandoffManager: RendererHandoffManager
-    private val worldUiState = MutableStateFlow(WorldUiState())
+    private lateinit var renderContainer: FrameLayout
     
     // HUD elements
     private lateinit var regionNameText: TextView
@@ -104,7 +95,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private lateinit var btnNearby: ImageButton
     private lateinit var btnCameraMode: ImageButton
 
-    // Camera gesture detectors. The world viewport host (the empty area between
+    // Camera gesture detectors. The renderContainer (the empty area between
     // the joysticks and action button rails) feeds touches here so drag
     // becomes orbit and pinch becomes zoom; both are consumed by the
     // CameraController in RenderManager.
@@ -123,11 +114,20 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     @Volatile private var isRendering = false
     @Volatile private var isSurfaceReady = false
     private var useSecondaryRenderer: Boolean = false
+    private val frameScheduler = FrameScheduler()
     private var hudsVisibleFromManager: Boolean = true
     private var isLayoutEditorMode: Boolean = false
     
     // Track current orientation setting to avoid unnecessary changes
     private var currentOrientationPref: String? = null
+    private var lastPoseTickMs: Long = System.currentTimeMillis()
+    private val filamentPreRenderCallback: (Long) -> Unit = { frameTimeNanos ->
+        if (!useSecondaryRenderer && isRendering) {
+            app.renderManager.dispatcher.post(
+                Runnable { app.renderManager.runPreRenderPhase(frameTimeNanos) }
+            )
+        }
+    }
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -138,8 +138,8 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         setContentView(R.layout.activity_world_view)
         
         initViews()
-        initRendererHandoffManager()
         initDebugFloater()
+        frameScheduler.addPreRenderCallback(filamentPreRenderCallback)
         initRenderer()
         setupNavigation()
         setupBackPressHandler()
@@ -220,8 +220,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private fun initViews() {
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
-        worldViewportHost = findViewById(R.id.worldViewportHost)
-        worldOverlayCompose = findViewById(R.id.worldOverlayCompose)
+        renderContainer = findViewById(R.id.renderContainer)
         
         regionNameText = findViewById(R.id.textRegionName)
         avatarNameText = findViewById(R.id.textAvatarName)
@@ -241,7 +240,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         
         // Setup quick action buttons
         btnChat.setOnClickListener {
-            startActivity(LegacyFeatureBridge.chatIntent(this))
+            startActivity(Intent(this, ChatActivity::class.java))
         }
         
         btnMinimap.setOnClickListener {
@@ -249,7 +248,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         }
         
         btnInventory.setOnClickListener {
-            startActivity(LegacyFeatureBridge.inventoryIntent(this))
+            startActivity(Intent(this, InventoryActivity::class.java))
         }
         
         btnXR.setOnClickListener {
@@ -263,46 +262,6 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         // Show/hide XR button based on runtime and build availability
         btnXR.visibility = if (app.isXREntryAvailable()) View.VISIBLE else View.GONE
         navigationView.menu.findItem(R.id.nav_xr_mode)?.isVisible = app.isXREntryAvailable()
-
-        worldOverlayCompose.setContent {
-            val state by worldUiState.collectAsStateWithLifecycle()
-            WorldOverlay(
-                state = state,
-                movementJoystickFactory = {
-                    joystickMove.apply {
-                        (parent as? android.view.ViewGroup)?.removeView(this)
-                    }
-                },
-                cameraJoystickFactory = {
-                    joystickCamera.apply {
-                        (parent as? android.view.ViewGroup)?.removeView(this)
-                    }
-                },
-                onMenu = { drawerLayout.openDrawer(GravityCompat.START) },
-                onChat = { startActivity(Intent(this, ChatActivity::class.java)) },
-                onMinimap = { startActivity(Intent(this, MinimapActivity::class.java)) },
-                onInventory = { startActivity(Intent(this, InventoryActivity::class.java)) },
-                onXr = {
-                    if (app.isXREntryAvailable()) {
-                        startActivity(Intent(this, XRWorldActivity::class.java))
-                    } else {
-                        Toast.makeText(this, "XR mode is unavailable in this build", Toast.LENGTH_SHORT).show()
-                    }
-                },
-                onGestures = { showGesturesPopup() },
-                onFriends = { startActivity(Intent(this, FriendsActivity::class.java)) },
-                onNearby = { startActivity(Intent(this, NearbyPeopleActivity::class.java)) },
-                onCameraMode = {
-                    val controller = app.renderManager.cameraController
-                    controller.toggleMode()
-                    updateCameraModeButton(controller.mode)
-                },
-                onFly = { btnFly.performClick() },
-                onRun = { btnRun.performClick() },
-                onJump = { btnJump.performClick() },
-                onSit = { btnSit.performClick() }
-            )
-        }
         
         // Initialize HUD overlay for Second Life HUD attachments
         initHudOverlay()
@@ -326,7 +285,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
      * Initialize the HUD overlay for displaying Second Life HUD attachments.
      */
     private fun initHudOverlay() {
-        hudOverlay = worldViewportHost.hudOverlay
+        hudOverlay = findViewById(R.id.hudOverlay)
         
         // Connect to HUD manager if available
         if (app.isHudManagerInitialized()) {
@@ -356,9 +315,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     }
 
     private fun updateHudOverlayVisibility(showHud: Boolean) {
-        val visible = showHud && hudsVisibleFromManager
-        worldViewportHost.setHudAttachmentsVisible(visible)
-        worldUiState.update { it.copy(overlaysVisibility = it.overlaysVisibility.copy(hudAttachments = visible)) }
+        hudOverlay.visibility = if (showHud && hudsVisibleFromManager) View.VISIBLE else View.GONE
     }
 
     private fun applyInterfacePreferences() {
@@ -373,17 +330,6 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         joystickCamera.visibility = if (showJoysticks) View.VISIBLE else View.GONE
         actionButtonsGroup.visibility = if (showActionButtons) View.VISIBLE else View.GONE
         movementButtonsGroup.visibility = if (showMovementButtons) View.VISIBLE else View.GONE
-        worldUiState.update {
-            it.copy(
-                overlaysVisibility = it.overlaysVisibility.copy(
-                    topStatusHud = showHud,
-                    rightActionStack = showActionButtons,
-                    bottomChatPreview = showHud,
-                    movementJoystick = showJoysticks,
-                    cameraJoystick = showJoysticks
-                )
-            )
-        }
 
         applyCameraPreferences()
     }
@@ -607,20 +553,12 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             CameraController.Mode.MOUSELOOK -> 1.0f
         }
         btnCameraMode.isSelected = (mode == CameraController.Mode.MOUSELOOK)
-        worldUiState.update {
-            it.copy(
-                interactionMode = when (mode) {
-                    CameraController.Mode.FOLLOW -> WorldUiState.InteractionMode.FOLLOW
-                    CameraController.Mode.MOUSELOOK -> WorldUiState.InteractionMode.MOUSELOOK
-                }
-            )
-        }
     }
 
     /**
-     * Hook the world viewport host up to a GestureDetector + ScaleGestureDetector
+     * Hook the renderContainer up to a GestureDetector + ScaleGestureDetector
      * so single-finger drag orbits the camera and pinch zooms it. Joysticks
-     * already consume their own touches; the world viewport host only sees
+     * already consume their own touches; the renderContainer only sees
      * events that fall outside the joystick / action-button rail areas, so
      * the two input systems can't conflict.
      */
@@ -652,9 +590,9 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             }
         })
 
-        // Single onTouchListener feeds both detectors; the viewport host
+        // Single onTouchListener feeds both detectors; the renderContainer
         // is otherwise non-interactive so swallowing every event is fine.
-        worldViewportHost.setOnTouchListener { _, ev ->
+        renderContainer.setOnTouchListener { _, ev ->
             cameraScaleDetector?.onTouchEvent(ev)
             cameraGestureDetector?.onTouchEvent(ev)
             true
@@ -715,179 +653,81 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     }
     
     private fun initRenderer() {
-        val targetBackend = preferredRendererBackend()
-        if (rendererHandoffManager.currentState() == RendererHandoffManager.State.IDLE) {
-            rendererHandoffManager.activateInitialBackend(targetBackend, "activity_create")
-        } else {
-            rendererHandoffManager.switchBackend(targetBackend, "renderer_preference_changed")
-        }
-    }
-
-    private fun initRendererHandoffManager() {
-        rendererHandoffManager = RendererHandoffManager(
-            onPauseActiveBackendDrawing = { backend ->
-                when (backend) {
-                    RendererHandoffManager.RendererBackend.FILAMENT -> {
-                        if (app.isRenderManagerInitialized()) {
-                            app.renderManager.pauseDrawing("backend_switch")
-                        }
-                        isRendering = false
-                        isSurfaceReady = false
-                    }
-                    RendererHandoffManager.RendererBackend.LUMIYA -> {
-                        lumiyaSurfaceView?.onPause()
-                    }
-                }
-            },
-            onFlushPendingRenderUpdates = { backend ->
-                if (backend == RendererHandoffManager.RendererBackend.FILAMENT && app.isRenderManagerInitialized()) {
-                    app.renderManager.dispatcher.runBlocking {
-                        app.renderManager.flushPendingRenderUpdates()
-                    }
-                }
-            },
-            onDisposeBackendOwnedGpuResources = { backend ->
-                when (backend) {
-                    RendererHandoffManager.RendererBackend.FILAMENT -> {
-                        if (app.isRenderManagerInitialized()) {
-                            app.renderManager.dispatcher.runBlocking {
-                                app.renderManager.shutdown()
-                            }
-                        }
-                    }
-                    RendererHandoffManager.RendererBackend.LUMIYA -> {
-                        lumiyaSurfaceView?.shutdown()
-                        lumiyaSurfaceView = null
-                    }
-                }
-                worldViewportHost.clearViewport()
-            },
-            onAttachTargetBackendAndReplaySnapshot = { backend, snapshot ->
-                useSecondaryRenderer = backend == RendererHandoffManager.RendererBackend.LUMIYA
-                when (backend) {
-                    RendererHandoffManager.RendererBackend.FILAMENT -> attachFilamentRenderer(snapshot)
-                    RendererHandoffManager.RendererBackend.LUMIYA -> attachSecondaryRenderer(snapshot)
-                }
-            },
-            snapshotProvider = { captureSceneSnapshot() }
-        )
-    }
-
-    private fun preferredRendererBackend(): RendererHandoffManager.RendererBackend {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        return if (prefs.getBoolean("enable_secondary_renderer", false)) {
-            RendererHandoffManager.RendererBackend.LUMIYA
-        } else {
-            RendererHandoffManager.RendererBackend.FILAMENT
-        }
-    }
+        useSecondaryRenderer = prefs.getBoolean("enable_secondary_renderer", false)
 
-    private fun captureSceneSnapshot(): RendererHandoffManager.SceneStateSnapshot {
-        val controller = app.renderManager.cameraController
-        return RendererHandoffManager.SceneStateSnapshot(
-            cameraMode = controller.mode,
-            cameraYawDeg = controller.yawDeg,
-            cameraPitchDeg = controller.pitchDeg,
-            cameraFollowDistance = controller.followDistance
-        )
-    }
-
-    private fun attachFilamentRenderer(snapshot: RendererHandoffManager.SceneStateSnapshot) {
-        val controller = app.renderManager.cameraController
-        controller.setMode(snapshot.cameraMode)
-        controller.yawDeg = snapshot.cameraYawDeg
-        controller.pitchDeg = snapshot.cameraPitchDeg
-        controller.followDistance = snapshot.cameraFollowDistance
-
-        val renderView: View = if (useSecondaryRenderer) {
-            LumiyaGLSurfaceView(this).also { glView ->
-                glView.layoutParams = FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.MATCH_PARENT
-                )
-                lumiyaSurfaceView = glView
-                renderBackend = OpenGLES3Backend(glView)
-                android.util.Log.i(TAG, "✓ Secondary Lumiya renderer enabled")
-            }
-        } else {
-            SurfaceView(this).also { filamentSurface ->
-                filamentSurface.layoutParams = FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.MATCH_PARENT
-                )
-                surfaceView = filamentSurface
-                lumiyaSurfaceView = null
-                renderBackend = FilamentBackend(app.renderManager, filamentSurface)
-                android.util.Log.i(TAG, "Initializing RenderManager...")
-            }
+        if (useSecondaryRenderer) {
+            initSecondaryRenderer()
+            return
         }
 
-        worldViewportHost.attachViewport(renderView)
-
-        renderView.holderOrNull()?.addCallback(object : android.view.SurfaceHolder.Callback {
+        surfaceView = SurfaceView(this).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        }
+        renderContainer.removeAllViews()
+        renderContainer.addView(surfaceView)
+        
+        // Add a callback to ensure SwapChain is created when surface is available
+        surfaceView.holder.addCallback(object : android.view.SurfaceHolder.Callback {
             override fun surfaceCreated(holder: android.view.SurfaceHolder) {
-                if (rendererHandoffManager.currentBackend() != RendererHandoffManager.RendererBackend.FILAMENT ||
-                    rendererHandoffManager.currentState() != RendererHandoffManager.State.ACTIVE) {
-                    android.util.Log.w(TAG, "Ignoring surfaceCreated while backend state is ${rendererHandoffManager.currentState()}")
-                    return
-                }
                 android.util.Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
                 android.util.Log.i(TAG, "║ ⭐ Surface created - Surface is now ready")
                 android.util.Log.i(TAG, "║ Surface valid: ${holder.surface.isValid}")
                 android.util.Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
-
+                
+                // Mark surface as ready (volatile ensures visibility across threads)
                 isSurfaceReady = true
-                renderBackend?.attachSurface(holder)
-
+                
+                // Eagerly create SwapChain now that surface is available
+                // This is more efficient than waiting for ensureSwapChain() to detect it on first render frame
+                app.renderManager.dispatcher.post(
+                    Runnable { app.renderManager.recreateSwapChain() }
+                )
+                
+                // Start render loop only if not already rendering (synchronized to avoid race)
                 synchronized(this@WorldViewActivity) {
                     if (!isRendering) {
                         android.util.Log.i(TAG, "✓ Starting render loop now that surface is ready")
                         isRendering = true
-                        startRenderLoop()
+                        configureSchedulerDispatcher()
+                        frameScheduler.start()
                     }
                 }
             }
-
+            
             override fun surfaceChanged(holder: android.view.SurfaceHolder, format: Int, width: Int, height: Int) {
-                if (rendererHandoffManager.currentBackend() != RendererHandoffManager.RendererBackend.FILAMENT ||
-                    rendererHandoffManager.currentState() != RendererHandoffManager.State.ACTIVE) {
-                    android.util.Log.w(TAG, "Ignoring surfaceChanged while backend state is ${rendererHandoffManager.currentState()}")
-                    return
-                }
                 android.util.Log.d(TAG, "Surface changed: ${width}x${height}")
+                // Recreate SwapChain to handle new dimensions or format changes.
+                // Pass the known width/height so the Filament View viewport is
+                // applied from the surface's real dimensions instead of
+                // surfaceView.width (which can still be 0 here on the first
+                // surfaceChanged before the View has been laid out).
                 if (isSurfaceReady) {
-                    renderBackend?.onSurfaceChanged(width, height)
+                    app.renderManager.dispatcher.post(
+                        Runnable { app.renderManager.recreateSwapChain(width, height) }
+                    )
                 }
             }
-
+            
             override fun surfaceDestroyed(holder: android.view.SurfaceHolder) {
-                if (rendererHandoffManager.currentBackend() != RendererHandoffManager.RendererBackend.FILAMENT) {
-                    return
-                }
                 android.util.Log.w(TAG, "⚠ Surface destroyed - stopping render loop")
+                // Mark surface as not ready first to prevent new render operations
+                // Then stop rendering (volatile + synchronized ensures atomicity)
                 synchronized(this@WorldViewActivity) {
                     isSurfaceReady = false
                     isRendering = false
                 }
-                renderBackend?.onSurfaceDestroyed()
+                frameScheduler.stop()
             }
         })
+        
+        // Initialize RenderManager with the SurfaceView
+        android.util.Log.i(TAG, "Initializing RenderManager...")
+        app.renderManager.initializeOnRenderThread(surfaceView)
 
-        if (!useSecondaryRenderer) {
-            wireFilamentDataPipelines()
-            android.util.Log.i(TAG, "✓ RenderManager initialized, waiting for surface to be ready...")
-        }
-    }
-
-    private fun View.holderOrNull(): android.view.SurfaceHolder? {
-        return when (this) {
-            is SurfaceView -> this.holder
-            is LumiyaGLSurfaceView -> this.holder
-            else -> null
-        }
-    }
-
-    private fun wireFilamentDataPipelines() {
         // Connect protocol-side TerrainManager to the now-instantiated
         // TerrainRenderer so incoming LayerData packets actually mesh into
         // visible terrain. No-op if either side isn't ready yet.
@@ -909,7 +749,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         // skeleton, advance the AvatarAnimator and write the resulting
         // bone matrices into SceneManager so the body segments visibly
         // animate. Cheap: ~1ms even for 30 nearby avatars.
-        var lastPoseTickMs = System.currentTimeMillis()
+        lastPoseTickMs = System.currentTimeMillis()
         app.renderManager.avatarPoseProvider = {
             try {
                 val sm = app.renderManager.getSceneManager()
@@ -920,7 +760,14 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                     for (avatar in app.avatarManager.getAllAvatars()) {
                         avatar.animator.update(dt)
                         avatar.skeleton.updateBoneMatrices()
+                        // Pose path: drives the articulated capsule
+                        // segment transforms (no-op for system-mesh
+                        // avatars whose bodySegmentBones list is empty).
                         sm.applyAvatarPose(avatar.agentId, avatar.skeleton)
+                        // Skinning path: pushes per-bone skinning matrices
+                        // to Filament so system-mesh avatars deform on
+                        // the GPU. No-op for capsule avatars (the segments
+                        // have no BONE_INDICES attribute).
                         sm.applyAvatarSkinning(avatar.agentId, avatar.skeleton)
                     }
                 }
@@ -928,9 +775,12 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 android.util.Log.v(TAG, "avatar pose tick error: ${e.message}")
             }
         }
+
+        // Don't start render loop here - wait for surfaceCreated callback
+        android.util.Log.i(TAG, "✓ RenderManager initialized, waiting for surface to be ready...")
     }
 
-    private fun attachSecondaryRenderer(snapshot: RendererHandoffManager.SceneStateSnapshot) {
+    private fun initSecondaryRenderer() {
         val glView = LumiyaGLSurfaceView(this).apply {
             layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
@@ -938,23 +788,31 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             )
         }
         lumiyaSurfaceView = glView
-        app.bindGlesRenderEngine(glView.getEngineProvider())
-        worldViewportHost.attachViewport(glView)
+        renderContainer.removeAllViews()
+        renderContainer.addView(glView)
+        glView.setSchedulerDrivenRendering(true)
         isSurfaceReady = true
-        isRendering = false
-        android.util.Log.i(TAG, "Replayed snapshot into Lumiya backend (camera mode=${snapshot.cameraMode})")
+        isRendering = true
+        configureSchedulerDispatcher()
+        frameScheduler.start()
         android.util.Log.i(TAG, "✓ Secondary Lumiya renderer enabled")
     }
-    
-    private fun startRenderLoop() {
-        app.renderManager.dispatcher.post(object : Runnable {
-            override fun run() {
+
+    private fun configureSchedulerDispatcher() {
+        if (useSecondaryRenderer) {
+            frameScheduler.setBackendDispatcher { frameTimeNanos ->
                 if (isRendering) {
-                    renderBackend?.renderFrame(System.nanoTime())
-                    app.renderManager.dispatcher.postDelayed(this, 16) // ~60fps
+                    lumiyaSurfaceView?.dispatchScheduledFrame(frameTimeNanos)
                 }
             }
-        })
+            return
+        }
+        frameScheduler.setBackendDispatcher { frameTimeNanos ->
+            if (!isRendering) return@setBackendDispatcher
+            app.renderManager.dispatcher.post(
+                Runnable { app.renderManager.renderFrame(frameTimeNanos) }
+            )
+        }
     }
     
     private fun setupNavigation() {
@@ -966,15 +824,11 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         val headerRegion = headerView.findViewById<TextView>(R.id.navHeaderRegion)
         
         headerName.text = app.sessionManager.getAvatarName()
-        worldUiState.update { it.copy(avatarName = app.sessionManager.getAvatarName()) }
         
         lifecycleScope.launch {
             app.sessionManager.currentRegion.collectLatest { region ->
                 headerRegion.text = region?.name ?: "Not connected"
                 regionNameText.text = region?.name ?: ""
-                worldUiState.update { current ->
-                    current.copy(regionName = region?.name ?: "Not connected")
-                }
             }
         }
     }
@@ -985,7 +839,6 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 when (state) {
                     ConnectionState.CONNECTED -> {
                         avatarNameText.text = app.sessionManager.getAvatarName()
-                        worldUiState.update { it.copy(avatarName = app.sessionManager.getAvatarName()) }
                         
                         // Cache landmarks from inventory after first successful login
                         if (app.startLocationManager.isFirstLoginComplete()) {
@@ -1003,7 +856,6 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         lifecycleScope.launch {
             app.sessionManager.currentRegion.collectLatest { region ->
                 regionNameText.text = region?.name ?: "Unknown Region"
-                worldUiState.update { it.copy(regionName = region?.name ?: "Unknown Region") }
             }
         }
     }
@@ -1062,8 +914,8 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.nav_chat -> startActivity(LegacyFeatureBridge.chatIntent(this))
-            R.id.nav_inventory -> startActivity(LegacyFeatureBridge.inventoryIntent(this))
+            R.id.nav_chat -> startActivity(Intent(this, ChatActivity::class.java))
+            R.id.nav_inventory -> startActivity(Intent(this, InventoryActivity::class.java))
             R.id.nav_minimap -> startActivity(Intent(this, MinimapActivity::class.java))
             R.id.nav_avatar -> startActivity(Intent(this, MyAvatarActivity::class.java))
             R.id.nav_friends -> startActivity(Intent(this, FriendsActivity::class.java))
@@ -1073,7 +925,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             R.id.nav_search -> startActivity(Intent(this, com.linkpoint.ui.search.SearchActivity::class.java))
             R.id.nav_world_map -> startActivity(Intent(this, com.linkpoint.ui.map.MapActivity::class.java))
             R.id.nav_teleport_home -> teleportHome()
-            R.id.nav_settings -> startActivity(LegacyFeatureBridge.settingsIntent(this))
+            R.id.nav_settings -> startActivity(Intent(this, SettingsActivity::class.java))
             R.id.nav_xr_mode -> {
                 if (app.isXREntryAvailable()) {
                     startActivity(Intent(this, XRWorldActivity::class.java))
@@ -1164,15 +1016,24 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         // destroyed by `UiHelper.onDetachedFromSurface`, which threw a native
         // crash and tripped the auto-restart loop the user observed when
         // opening any panel.
-        renderBackend?.onPause()
+        if (!useSecondaryRenderer && app.isRenderManagerInitialized()) {
+            app.renderManager.pauseDrawing("activity_paused")
+        }
         super.onPause()
         NetworkLogger.log(
             NetworkLogger.Level.INFO,
             NetworkLogger.Category.LIFECYCLE,
             "🌐 WorldViewActivity onPause (renderer=${if (useSecondaryRenderer) "lumiya" else "filament"})"
         )
-        // Stop the loop while paused; backend-specific pause has already been delegated.
-        isRendering = false
+        if (useSecondaryRenderer) {
+            lumiyaSurfaceView?.onPause()
+        } else {
+            // Stop the loop too. The drawing gate is the load-bearing guard,
+            // but we don't want the dispatcher posting empty-noop frames at
+            // 60 Hz while the activity is in the background.
+            isRendering = false
+        }
+        frameScheduler.stop()
     }
 
     override fun onResume() {
@@ -1187,17 +1048,17 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         applyInterfacePreferences()
 
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val preferredBackend = if (prefs.getBoolean("enable_secondary_renderer", false)) {
-            RendererHandoffManager.RendererBackend.LUMIYA
-        } else {
-            RendererHandoffManager.RendererBackend.FILAMENT
-        }
-        if (preferredBackend != rendererHandoffManager.currentBackend()) {
-            rendererHandoffManager.switchBackend(preferredBackend, "on_resume_preferences")
+        val preferredSecondaryRenderer = prefs.getBoolean("enable_secondary_renderer", false)
+        if (preferredSecondaryRenderer != useSecondaryRenderer) {
+            useSecondaryRenderer = preferredSecondaryRenderer
+            initRenderer()
         }
 
-        if (rendererHandoffManager.currentBackend() == RendererHandoffManager.RendererBackend.LUMIYA) {
+        if (useSecondaryRenderer) {
             lumiyaSurfaceView?.onResume()
+            isRendering = true
+            configureSchedulerDispatcher()
+            frameScheduler.start()
             return
         }
 
@@ -1217,8 +1078,14 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         synchronized(this) {
             if (isSurfaceReady && !isRendering) {
                 android.util.Log.i(TAG, "onResume: Restarting render loop")
+                // Ensure SwapChain is recreated - it may have been destroyed when activity was paused
+                // The UiHelper may have called onDetachedFromSurface() while we were paused
+                app.renderManager.dispatcher.post(
+                    Runnable { app.renderManager.recreateSwapChain() }
+                )
                 isRendering = true
-                startRenderLoop()
+                configureSchedulerDispatcher()
+                frameScheduler.start()
             } else if (!isSurfaceReady) {
                 android.util.Log.w(TAG, "onResume: Surface not ready yet, will start when ready")
             }
@@ -1228,11 +1095,12 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     override fun onDestroy() {
         super.onDestroy()
         if (useSecondaryRenderer) {
-            app.bindGlesRenderEngine(null)
             lumiyaSurfaceView?.shutdown()
             lumiyaSurfaceView = null
         } else {
             isRendering = false
         }
+        frameScheduler.stop()
+        frameScheduler.removePreRenderCallback(filamentPreRenderCallback)
     }
 }
