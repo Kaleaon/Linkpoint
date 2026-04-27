@@ -1044,7 +1044,8 @@ class RenderManager(private val context: Context) {
         localId: Int,
         meshData: com.linkpoint.assets.MeshData,
         textureEntry: ByteArray? = null,
-        binder: com.linkpoint.render.prims.MeshPrimRenderer.TextureBinder? = null
+        binder: com.linkpoint.render.prims.MeshPrimRenderer.TextureBinder? = null,
+        bomResolver: ((java.util.UUID) -> java.util.UUID)? = null
     ) {
         requireRenderThread("attachMeshAsset")
         val mp = meshPrimRenderer ?: return
@@ -1055,7 +1056,7 @@ class RenderManager(private val context: Context) {
                 val inst = rm.getInstance(entity)
                 if (inst != 0) rm.destroy(entity)
             }
-            mp.attach(entity, compiled, textureEntry, binder)
+            mp.attach(entity, compiled, textureEntry, binder, bomResolver)
         }
     }
 
