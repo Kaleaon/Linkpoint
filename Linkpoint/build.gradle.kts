@@ -380,6 +380,8 @@ dependencies {
     testImplementation("org.json:json:20240303")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("androidx.test:core-ktx:1.5.0")
 }
 
 // Helper function to get git commit hash
