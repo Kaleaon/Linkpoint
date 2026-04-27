@@ -546,21 +546,28 @@ class GroupsManager {
    */
   updateCharter(groupUUID, charter) {
     const group = this.groups.get(groupUUID);
-    if (group) {
-      group.charter = charter;
-      this.notifyChange('group-updated', groupUUID);
+    if (!group) return;
 
-      if (window.app && window.app.protocol) {
-        window.app.protocol.sendMessage('UpdateGroupInfo', {
-          uuid: group.uuid,
-          charter: group.charter,
-          showInList: group.showInList,
-          insigniaID: group.insigniaID,
-          membershipFee: group.membershipFee,
-          openEnrollment: group.openEnrollment,
-          allowPublish: group.allowPublish,
-          maturePublish: group.maturePublish
-        });
+    group.charter = charter;
+    this.notifyChange('group-updated', groupUUID);
+    
+    // Send UpdateGroupInfo message
+    if (window.app && window.app.agentId && window.app.sessionId) {
+      const MsgClass = window.SLMessageTypes ? window.SLMessageTypes.UpdateGroupInfoMessage : (typeof UpdateGroupInfoMessage !== 'undefined' ? UpdateGroupInfoMessage : null);
+      if (MsgClass && window.app.protocolManager) {
+        const msg = new MsgClass(
+          window.app.agentId,
+          window.app.sessionId,
+          groupUUID,
+          charter,
+          group.showInList !== undefined ? group.showInList : true,
+          group.insigniaID || '00000000-0000-0000-0000-000000000000',
+          group.membershipFee || 0,
+          group.openEnrollment !== undefined ? group.openEnrollment : true,
+          group.allowPublish !== undefined ? group.allowPublish : true,
+          group.maturePublish !== undefined ? group.maturePublish : false
+        );
+        window.app.protocolManager.sendMessage(msg);
       }
     }
   }
@@ -572,21 +579,28 @@ class GroupsManager {
    */
   setInsignia(groupUUID, insigniaID) {
     const group = this.groups.get(groupUUID);
-    if (group) {
-      group.insigniaID = insigniaID;
-      this.notifyChange('group-updated', groupUUID);
+    if (!group) return;
 
-      if (window.app && window.app.protocol) {
-        window.app.protocol.sendMessage('UpdateGroupInfo', {
-          uuid: group.uuid,
-          charter: group.charter,
-          showInList: group.showInList,
-          insigniaID: group.insigniaID,
-          membershipFee: group.membershipFee,
-          openEnrollment: group.openEnrollment,
-          allowPublish: group.allowPublish,
-          maturePublish: group.maturePublish
-        });
+    group.insigniaID = insigniaID;
+    this.notifyChange('group-updated', groupUUID);
+    
+    // Send UpdateGroupInfo message
+    if (window.app && window.app.agentId && window.app.sessionId) {
+      const MsgClass = window.SLMessageTypes ? window.SLMessageTypes.UpdateGroupInfoMessage : (typeof UpdateGroupInfoMessage !== 'undefined' ? UpdateGroupInfoMessage : null);
+      if (MsgClass && window.app.protocolManager) {
+        const msg = new MsgClass(
+          window.app.agentId,
+          window.app.sessionId,
+          groupUUID,
+          group.charter || '',
+          group.showInList !== undefined ? group.showInList : true,
+          insigniaID,
+          group.membershipFee || 0,
+          group.openEnrollment !== undefined ? group.openEnrollment : true,
+          group.allowPublish !== undefined ? group.allowPublish : true,
+          group.maturePublish !== undefined ? group.maturePublish : false
+        );
+        window.app.protocolManager.sendMessage(msg);
       }
     }
   }
@@ -674,14 +688,7 @@ class GroupsManager {
       else proposal.votesAgainst++;
     });
     
-    if (window.app?.protocol?.sendMessage) {
-      window.app.protocol.sendMessage('VoteOnProposal', {
-        groupUUID,
-        proposalID,
-        vote: vote ? 'Yes' : 'No',
-        voterUUID
-      });
-    }
+    // TODO: Send VoteOnProposal message
   }
   
   /**
