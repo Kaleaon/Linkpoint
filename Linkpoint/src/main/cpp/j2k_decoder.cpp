@@ -8,6 +8,11 @@
 #include <openjpeg-2.5/openjpeg.h>
 #include <cstdlib>
 #include <cstring>
+#include <vector>
+
+#ifdef LINKPOINT_HAVE_ETCPAK
+#include "ProcessRGB.hpp"
+#endif
 
 #define LOG_TAG "J2KDecoder"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
@@ -443,6 +448,80 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeHealthCheck(
     opj_destroy_codec(codec);
     return JNI_TRUE;
 }
+
+
+#ifdef LINKPOINT_HAVE_ETCPAK
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_linkpoint_assets_NativeEtcpak_nativeHasEtcpak(
+    JNIEnv* env,
+    jclass clazz
+) {
+    (void)env;
+    (void)clazz;
+    return JNI_TRUE;
+}
+
+extern "C" JNIEXPORT jbyteArray JNICALL
+Java_com_linkpoint_assets_NativeEtcpak_nativeCompressEtc2Rgba(
+    JNIEnv* env,
+    jclass clazz,
+    jbyteArray jrgba,
+    jint width,
+    jint height,
+    jboolean hasAlpha
+) {
+    (void)clazz;
+
+    if (width <= 0 || height <= 0 || (width % 4) != 0 || (height % 4) != 0) {
+        return nullptr;
+    }
+
+    const jsize inSize = env->GetArrayLength(jrgba);
+    const jsize expected = width * height * 4;
+    if (inSize != expected) {
+        return nullptr;
+    }
+
+    jbyte* rgba = env->GetByteArrayElements(jrgba, nullptr);
+    if (!rgba) {
+        return nullptr;
+    }
+
+    const size_t pixelCount = static_cast<size_t>(width) * static_cast<size_t>(height);
+    std::vector<uint32_t> src(pixelCount);
+    const uint8_t* in = reinterpret_cast<const uint8_t*>(rgba);
+    for (size_t i = 0; i < pixelCount; ++i) {
+        const uint8_t r = in[i * 4 + 0];
+        const uint8_t g = in[i * 4 + 1];
+        const uint8_t b = in[i * 4 + 2];
+        const uint8_t a = in[i * 4 + 3];
+        src[i] = static_cast<uint32_t>(b)
+               | (static_cast<uint32_t>(g) << 8)
+               | (static_cast<uint32_t>(r) << 16)
+               | (static_cast<uint32_t>(a) << 24);
+    }
+    env->ReleaseByteArrayElements(jrgba, rgba, JNI_ABORT);
+
+    const uint32_t blocks = static_cast<uint32_t>((width / 4) * (height / 4));
+    const size_t blockBytes = hasAlpha ? 16 : 8;
+    const size_t outSize = static_cast<size_t>(blocks) * blockBytes;
+    std::vector<uint64_t> dst((outSize + 7) / 8);
+
+    if (hasAlpha) {
+        CompressEtc2Rgba(src.data(), dst.data(), blocks, static_cast<size_t>(width), true);
+    } else {
+        CompressEtc2Rgb(src.data(), dst.data(), blocks, static_cast<size_t>(width), true);
+    }
+
+    jbyteArray out = env->NewByteArray(static_cast<jsize>(outSize));
+    if (!out) {
+        return nullptr;
+    }
+    env->SetByteArrayRegion(out, 0, static_cast<jsize>(outSize),
+                            reinterpret_cast<const jbyte*>(dst.data()));
+    return out;
+}
+#endif
 
 // ===================================================================
 // JPEG2000 ENCODER

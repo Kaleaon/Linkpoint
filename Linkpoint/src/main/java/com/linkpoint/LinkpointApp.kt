@@ -826,6 +826,59 @@ class LinkpointApp : Application() {
         meshManager = MeshManager(this, assetCache, capabilityManager)
         animationManager = AnimationManager(this, assetCache)
         soundManager = SoundManager(this, assetCache)
+        renderManager.configurePrimMeshPipeline(
+            requester = com.linkpoint.render.prims.PrimRenderer.MeshDataRequester { localId, meshId, lod, onResolved ->
+                applicationScope.launch {
+                    val meshData = try {
+                        meshManager.getMesh(meshId, lod)
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Mesh load parse failure localId=$localId meshId=$meshId: ${e.message}")
+                        onResolved(com.linkpoint.render.prims.PrimRenderer.MeshLoadResult.ParseFailure(e.message))
+                        return@launch
+                    }
+                    if (meshData != null) {
+                        onResolved(com.linkpoint.render.prims.PrimRenderer.MeshLoadResult.Success(meshData))
+                    } else {
+                        val diagnostics = meshManager.getDiagnostics()
+                        val detail = diagnostics.lastError ?: "mesh not found"
+                        val parseFailure = detail.startsWith("Parse:") ||
+                            detail.contains("parse", ignoreCase = true)
+                        if (parseFailure) {
+                            onResolved(com.linkpoint.render.prims.PrimRenderer.MeshLoadResult.ParseFailure(detail))
+                        } else {
+                            onResolved(com.linkpoint.render.prims.PrimRenderer.MeshLoadResult.MissingAsset(detail))
+                        }
+                    }
+                }
+            },
+            geometryBuilder = com.linkpoint.render.prims.PrimRenderer.MeshGeometryBuilder { entity, meshData, textureEntry ->
+                val binder = com.linkpoint.render.prims.MeshPrimRenderer.TextureBinder { _, texId, onLoaded ->
+                    val resolvedId = if (::avatarManager.isInitialized) {
+                        com.linkpoint.avatar.BakesOnMesh.resolve(texId) { slot ->
+                            avatarManager.getMyAvatar()?.baker?.getBakedTextures()?.get(slot)
+                        }
+                    } else texId
+                    if (!com.linkpoint.protocol.textures.TextureEntryParser.shouldDownload(resolvedId)) return@TextureBinder
+                    if (!::textureManager.isInitialized) return@TextureBinder
+                    applicationScope.launch {
+                        val bmp = try { textureManager.getTexture(resolvedId) } catch (_: Exception) { null }
+                        if (bmp != null) {
+                            renderManager.dispatcher.post(Runnable {
+                                val pair = renderManager.uploadBitmapAsLinkpointTexture(resolvedId, bmp)
+                                if (pair != null) onLoaded(pair.first)
+                            })
+                        }
+                    }
+                }
+                renderManager.engine?.renderableManager?.let { rm ->
+                    val inst = rm.getInstance(entity)
+                    if (inst != 0) rm.destroy(entity)
+                }
+                renderManager.getMeshPrimRenderer()?.getOrCompile(meshData)?.let { compiled ->
+                    renderManager.getMeshPrimRenderer()?.attach(entity, compiled, textureEntry, binder)
+                }
+            }
+        )
         
         // World features
         worldMap = WorldMap(capabilityManager)
@@ -1496,6 +1549,7 @@ class LinkpointApp : Application() {
                                 )
                             }
                         }
+                        renderManager.enqueueUpdate(RenderableUpdate.PrimUpdate(update))
                     }
 
                     // Extract and prefetch textures from the object's TextureEntry
