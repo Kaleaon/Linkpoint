@@ -4,6 +4,8 @@ import android.opengl.GLES32
 import android.opengl.Matrix
 import com.linkpoint.render.lumiya.core.LumiyaRenderContext
 import com.linkpoint.render.lumiya.glres.GLBufferManager
+import com.linkpoint.render.materials.GlesMaterialTranslator
+import com.linkpoint.render.materials.MaterialDescriptor
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -76,14 +78,11 @@ class DrawablePrimStore {
         for (prim in prims.values) {
             if (prim.isTransparent) continue
             program.setModelMatrix(prim.modelMatrix)
-            program.setTexMatrix(prim.texMatrix)
-            program.setColor(prim.colorR, prim.colorG, prim.colorB, prim.colorA)
-            program.setUseTexture(prim.textureHandle != 0)
-            if (prim.textureHandle != 0) {
-                GLES32.glActiveTexture(GLES32.GL_TEXTURE0)
-                GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, prim.textureHandle)
-                program.setTextureSampler(0)
-            }
+            GlesMaterialTranslator.apply(
+                program,
+                prim.toMaterialDescriptor(),
+                GlesMaterialTranslator.TextureBindings(baseColorHandle = prim.textureHandle)
+            )
             GLES32.glDrawElements(GLES32.GL_TRIANGLES, boxVAO.indexCount, GLES32.GL_UNSIGNED_SHORT, 0)
         }
         GLES32.glBindVertexArray(0)
@@ -108,17 +107,28 @@ class DrawablePrimStore {
         GLES32.glBindVertexArray(boxVAO.vao)
         for (prim in sorted) {
             program.setModelMatrix(prim.modelMatrix)
-            program.setTexMatrix(prim.texMatrix)
-            program.setColor(prim.colorR, prim.colorG, prim.colorB, prim.colorA)
-            program.setUseTexture(prim.textureHandle != 0)
-            if (prim.textureHandle != 0) {
-                GLES32.glActiveTexture(GLES32.GL_TEXTURE0)
-                GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, prim.textureHandle)
-                program.setTextureSampler(0)
-            }
+            GlesMaterialTranslator.apply(
+                program,
+                prim.toMaterialDescriptor(),
+                GlesMaterialTranslator.TextureBindings(baseColorHandle = prim.textureHandle)
+            )
             GLES32.glDrawElements(GLES32.GL_TRIANGLES, boxVAO.indexCount, GLES32.GL_UNSIGNED_SHORT, 0)
         }
         GLES32.glBindVertexArray(0)
+    }
+
+    private fun PrimInstance.toMaterialDescriptor(): MaterialDescriptor {
+        return MaterialDescriptor(
+            baseColor = MaterialDescriptor.Float4(colorR, colorG, colorB, colorA),
+            baseColorTexture = if (textureHandle != 0) {
+                // GLES path receives GL handles, not UUIDs.
+                MaterialDescriptor.TextureRef(
+                    java.util.UUID(0L, 0L),
+                    java.util.UUID(0L, 0L),
+                    isDownloadable = true
+                )
+            } else null
+        )
     }
 
     // ── Shared shape geometry ────────────────────────────────────────────

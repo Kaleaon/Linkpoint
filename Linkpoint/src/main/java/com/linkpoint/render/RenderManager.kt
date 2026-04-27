@@ -63,6 +63,8 @@ class RenderManager(private val context: Context) {
     private var primRenderer: PrimRenderer? = null
     private var meshPrimRenderer: MeshPrimRenderer? = null
     private var terrainRenderer: TerrainRenderer? = null
+    private var primMeshDataRequester: PrimRenderer.MeshDataRequester? = null
+    private var primMeshGeometryBuilder: PrimRenderer.MeshGeometryBuilder? = null
 
     // Helpers
     private var uiHelper: UiHelper? = null
@@ -172,6 +174,8 @@ class RenderManager(private val context: Context) {
                 if (litMaterial != null) {
                     primRenderer = PrimRenderer(filamentEngine, filamentScene)
                     primRenderer?.initialize(litMaterial)
+                    primRenderer?.setMeshDataRequester(primMeshDataRequester)
+                    primRenderer?.setMeshGeometryBuilder(primMeshGeometryBuilder)
                     Log.d(TAG, "PrimRenderer initialized")
 
                     // Mesh-asset prim renderer: shares the lit material with
@@ -965,6 +969,15 @@ class RenderManager(private val context: Context) {
 
     /** True iff [renderFrame] is currently issuing GPU work. */
     fun isDrawingEnabled(): Boolean = drawingEnabled.get()
+
+    /**
+     * Drain and apply all currently queued [RenderableUpdate] items immediately.
+     * Must run on the render thread.
+     */
+    fun flushPendingRenderUpdates() {
+        requireRenderThread("flushPendingRenderUpdates")
+        applyRenderUpdates()
+    }
     
     /**
      * Set camera position and orientation
@@ -1014,6 +1027,16 @@ class RenderManager(private val context: Context) {
 
     fun getMeshPrimRenderer(): MeshPrimRenderer? = meshPrimRenderer
 
+    fun configurePrimMeshPipeline(
+        requester: PrimRenderer.MeshDataRequester?,
+        geometryBuilder: PrimRenderer.MeshGeometryBuilder?
+    ) {
+        primMeshDataRequester = requester
+        primMeshGeometryBuilder = geometryBuilder
+        primRenderer?.setMeshDataRequester(requester)
+        primRenderer?.setMeshGeometryBuilder(geometryBuilder)
+    }
+
     /**
      * Compile a parsed [com.linkpoint.assets.MeshData] and attach it to the
      * existing prim entity for [localId], replacing the path/profile
@@ -1027,7 +1050,8 @@ class RenderManager(private val context: Context) {
         localId: Int,
         meshData: com.linkpoint.assets.MeshData,
         textureEntry: ByteArray? = null,
-        binder: com.linkpoint.render.prims.MeshPrimRenderer.TextureBinder? = null
+        binder: com.linkpoint.render.prims.MeshPrimRenderer.TextureBinder? = null,
+        bomResolver: ((java.util.UUID) -> java.util.UUID)? = null
     ) {
         requireFilamentThread("attachMeshAsset")
         val mp = meshPrimRenderer ?: return
@@ -1038,7 +1062,7 @@ class RenderManager(private val context: Context) {
                 val inst = rm.getInstance(entity)
                 if (inst != 0) rm.destroy(entity)
             }
-            mp.attach(entity, compiled, textureEntry, binder)
+            mp.attach(entity, compiled, textureEntry, binder, bomResolver)
         }
     }
 
@@ -1091,12 +1115,7 @@ class RenderManager(private val context: Context) {
             // observed to render the highest-priority world textures only
             // when mips are present (otherwise lower-LOD samplers fall
             // back to undefined data).
-            val levels = run {
-                var d = maxOf(w, h).coerceAtLeast(1)
-                var n = 1
-                while (d > 1) { d = d shr 1; n++ }
-                n
-            }
+            val levels = com.linkpoint.assets.TextureFormatPolicy.mipLevelsFor(w, h)
             val pixels = IntArray(w * h)
             bitmap.getPixels(pixels, 0, w, 0, 0, w, h)
             val rgba = java.nio.ByteBuffer.allocateDirect(w * h * 4)
@@ -1113,7 +1132,7 @@ class RenderManager(private val context: Context) {
                 .width(w).height(h)
                 .levels(levels)
                 .sampler(Texture.Sampler.SAMPLER_2D)
-                .format(Texture.InternalFormat.RGBA8)
+                .format(Texture.InternalFormat.SRGB8_A8)
                 .build(eng)
             val pixelBuffer = Texture.PixelBufferDescriptor(
                 rgba, Texture.Format.RGBA, Texture.Type.UBYTE
