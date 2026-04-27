@@ -130,9 +130,9 @@ class MovementController(
      * Update current rotation (from simulator).
      */
     fun updateRotation(rot: LLQuaternion) {
-        rotation = rot
+        rotation = rot.normalize()
         // Extract yaw from quaternion
-        heading = rot.getYaw()
+        heading = rotation.getYaw()
     }
     
     /**
