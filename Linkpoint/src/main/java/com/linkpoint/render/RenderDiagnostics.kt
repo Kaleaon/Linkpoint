@@ -10,6 +10,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.util.ArrayDeque
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 
@@ -47,6 +48,7 @@ object RenderDiagnostics {
 
     private const val HEARTBEAT_INTERVAL_MS = 5_000L
     private const val STALL_THRESHOLD_MS = 2_000L
+    private const val FRAME_INTERVAL_HISTORY_LIMIT = 512
 
     /**
      * Last frame-rendered timestamp per subsystem ("Filament", "Lumiya").
@@ -57,6 +59,7 @@ object RenderDiagnostics {
     private val frameCounters = mutableMapOf<String, AtomicLong>()
     private val lastReportedFrameCount = mutableMapOf<String, AtomicLong>()
     private val activeSubsystems = mutableSetOf<String>()
+    private val frameIntervalHistoryMs = mutableMapOf<String, ArrayDeque<Long>>()
 
     private val heartbeatStarted = AtomicBoolean(false)
     private val heartbeatScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -64,6 +67,10 @@ object RenderDiagnostics {
     private val lumiyaUboUploadTimeNsTotal = AtomicLong(0L)
     private val lumiyaUboUploadSamples = AtomicLong(0L)
     private val lumiyaFrameAllocations = AtomicLong(0L)
+    private val filamentSwapChainCreateCount = AtomicLong(0L)
+    private val filamentSwapChainDestroyCount = AtomicLong(0L)
+    private val filamentSwapChainFailureCount = AtomicLong(0L)
+    private val lumiyaContextCreateCount = AtomicLong(0L)
 
     /**
      * Mark a render subsystem as active and ensure the heartbeat ticker
@@ -75,8 +82,24 @@ object RenderDiagnostics {
         lastFrameWallClock.getOrPut(subsystem) { AtomicLong(0) }
         frameCounters.getOrPut(subsystem) { AtomicLong(0) }
         lastReportedFrameCount.getOrPut(subsystem) { AtomicLong(0) }
+        frameIntervalHistoryMs.getOrPut(subsystem) { ArrayDeque() }
         if (heartbeatStarted.compareAndSet(false, true)) {
             startHeartbeat()
+        }
+    }
+
+    @Synchronized
+    private fun recordFrame(subsystem: String) {
+        trackSubsystem(subsystem)
+        val now = System.currentTimeMillis()
+        val previous = lastFrameWallClock[subsystem]?.getAndSet(now) ?: 0L
+        frameCounters[subsystem]?.incrementAndGet()
+        if (previous <= 0L) return
+        val deltaMs = (now - previous).coerceAtLeast(0L)
+        val history = frameIntervalHistoryMs.getOrPut(subsystem) { ArrayDeque() }
+        history.addLast(deltaMs)
+        while (history.size > FRAME_INTERVAL_HISTORY_LIMIT) {
+            history.removeFirst()
         }
     }
 
@@ -176,6 +199,7 @@ object RenderDiagnostics {
     }
 
     fun filamentSwapChainCreated(width: Int, height: Int) {
+        filamentSwapChainCreateCount.incrementAndGet()
         SessionLogRecorder.logRender(
             "Filament",
             "swapchain_created",
@@ -186,11 +210,13 @@ object RenderDiagnostics {
     }
 
     fun filamentSwapChainDestroyed(reason: String) {
+        filamentSwapChainDestroyCount.incrementAndGet()
         SessionLogRecorder.logRender("Filament", "swapchain_destroyed", reason)
         logLifecycle(NetworkLogger.Level.WARN, "🖼️ Filament SwapChain destroyed: $reason")
     }
 
     fun filamentSwapChainFailed(reason: String) {
+        filamentSwapChainFailureCount.incrementAndGet()
         SessionLogRecorder.logRender("Filament", "swapchain_failed", reason)
         logLifecycle(NetworkLogger.Level.ERROR, "🖼️ Filament SwapChain FAILED: $reason")
     }
@@ -214,12 +240,8 @@ object RenderDiagnostics {
     }
 
     fun filamentFrame() {
-        val counter = frameCounters["Filament"]
-            ?: AtomicLong(0).also {
-                trackSubsystem("Filament")
-            }
-        val total = (frameCounters["Filament"] ?: counter).incrementAndGet()
-        lastFrameWallClock["Filament"]?.set(System.currentTimeMillis())
+        recordFrame("Filament")
+        val total = frameCounters["Filament"]?.get() ?: 0L
         if (total == 1L) {
             SessionLogRecorder.logRender("Filament", "first_frame", "frameCount=1")
         }
@@ -267,6 +289,7 @@ object RenderDiagnostics {
     // ────────────────────────────────────────────────────────────────────
 
     fun glSurfaceCreated() {
+        lumiyaContextCreateCount.incrementAndGet()
         trackSubsystem("Lumiya")
         SessionLogRecorder.logRender("Lumiya", "surface_created")
     }
@@ -299,12 +322,8 @@ object RenderDiagnostics {
     }
 
     fun glFrame() {
-        val counter = frameCounters["Lumiya"]
-            ?: AtomicLong(0).also {
-                trackSubsystem("Lumiya")
-            }
-        val total = (frameCounters["Lumiya"] ?: counter).incrementAndGet()
-        lastFrameWallClock["Lumiya"]?.set(System.currentTimeMillis())
+        recordFrame("Lumiya")
+        val total = frameCounters["Lumiya"]?.get() ?: 0L
         if (total == 1L) {
             SessionLogRecorder.logRender("Lumiya", "first_frame", "frameCount=1")
         }
@@ -351,6 +370,60 @@ object RenderDiagnostics {
         }
     }
 
+    data class Percentiles(val p50Ms: Long?, val p90Ms: Long?, val p99Ms: Long?)
+    data class DiagnosticsSnapshot(
+        val activeBackend: String,
+        val frameTimePercentiles: Map<String, Percentiles>,
+        val swapChainCreateCount: Long,
+        val swapChainDestroyCount: Long,
+        val swapChainFailureCount: Long,
+        val swapChainRestartCount: Long,
+        val glContextCreateCount: Long,
+        val glContextRestartCount: Long
+    )
+
+    @Synchronized
+    fun diagnosticsSnapshot(): DiagnosticsSnapshot {
+        val now = System.currentTimeMillis()
+        val activeBackends = activeSubsystems.filter { subsystem ->
+            val lastFrame = lastFrameWallClock[subsystem]?.get() ?: 0L
+            lastFrame > 0L && (now - lastFrame) <= (STALL_THRESHOLD_MS * 2)
+        }
+        val activeBackend = when (activeBackends.size) {
+            0 -> "none"
+            1 -> activeBackends.first()
+            else -> activeBackends.joinToString("+")
+        }
+
+        val percentiles = frameIntervalHistoryMs.mapValues { (_, values) ->
+            val sorted = values.toList().sorted()
+            Percentiles(
+                p50Ms = percentile(sorted, 0.50),
+                p90Ms = percentile(sorted, 0.90),
+                p99Ms = percentile(sorted, 0.99)
+            )
+        }
+
+        val swapCreates = filamentSwapChainCreateCount.get()
+        val contextCreates = lumiyaContextCreateCount.get()
+        return DiagnosticsSnapshot(
+            activeBackend = activeBackend,
+            frameTimePercentiles = percentiles,
+            swapChainCreateCount = swapCreates,
+            swapChainDestroyCount = filamentSwapChainDestroyCount.get(),
+            swapChainFailureCount = filamentSwapChainFailureCount.get(),
+            swapChainRestartCount = (swapCreates - 1L).coerceAtLeast(0L),
+            glContextCreateCount = contextCreates,
+            glContextRestartCount = (contextCreates - 1L).coerceAtLeast(0L)
+        )
+    }
+
+    private fun percentile(sortedValues: List<Long>, q: Double): Long? {
+        if (sortedValues.isEmpty()) return null
+        val idx = ((sortedValues.size - 1) * q).toInt().coerceIn(0, sortedValues.lastIndex)
+        return sortedValues[idx]
+    }
+
     /**
      * Test hook: stop the heartbeat ticker. Production callers should
      * not need this — the ticker lives for the app's lifetime.
@@ -369,6 +442,11 @@ object RenderDiagnostics {
         lumiyaUboUploadTimeNsTotal.set(0L)
         lumiyaUboUploadSamples.set(0L)
         lumiyaFrameAllocations.set(0L)
+        frameIntervalHistoryMs.clear()
+        filamentSwapChainCreateCount.set(0L)
+        filamentSwapChainDestroyCount.set(0L)
+        filamentSwapChainFailureCount.set(0L)
+        lumiyaContextCreateCount.set(0L)
         Log.d(TAG, "Render diagnostics reset (test hook)")
     }
 }
