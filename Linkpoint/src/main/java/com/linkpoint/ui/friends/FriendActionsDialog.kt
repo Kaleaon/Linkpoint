@@ -13,6 +13,8 @@ import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.ui.chat.ChatActivity
 import com.linkpoint.ui.profile.ProfileActivity
+import com.linkpoint.users.DisplayName
+import com.linkpoint.users.DisplayNameOutputMode
 import com.linkpoint.world.Friend
 import kotlinx.coroutines.launch
 
@@ -22,6 +24,18 @@ import kotlinx.coroutines.launch
 class FriendActionsDialog : DialogFragment() {
 
     private lateinit var friend: Friend
+
+    private fun formattedFriendName(): String {
+        val app = LinkpointApp.getInstance()
+        val policy = app.displayNameFormattingPolicy.policy
+        return DisplayName(
+            agentId = friend.agentId,
+            username = friend.name,
+            displayName = null,
+            isDefault = true,
+            nextUpdate = 0L
+        ).format(policy.copy(outputMode = DisplayNameOutputMode.LEGACY_FALLBACK))
+    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         friend = requireArguments().getParcelable<Friend>("friend")
@@ -35,7 +49,7 @@ class FriendActionsDialog : DialogFragment() {
         )
 
         return MaterialAlertDialogBuilder(requireContext())
-            .setTitle(friend.name)
+            .setTitle(formattedFriendName())
             .setItems(options) { _, which ->
                 when (which) {
                     0 -> sendIM()
@@ -50,7 +64,7 @@ class FriendActionsDialog : DialogFragment() {
 
     private fun sendIM() {
         val app = LinkpointApp.getInstance()
-        val sessionId = app.imManager.startP2PSession(friend.agentId, friend.name)
+        val sessionId = app.imManager.startP2PSession(friend.agentId, formattedFriendName())
         app.imManager.markAsRead(sessionId)
 
         val intent = Intent(requireContext(), ChatActivity::class.java).apply {

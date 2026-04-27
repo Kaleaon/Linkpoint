@@ -64,6 +64,7 @@ import com.linkpoint.service.BackgroundResumeScheduler
 import com.linkpoint.service.IdleHandler
 import com.linkpoint.service.LinkpointConnectionService
 import com.linkpoint.users.DisplayNameManager
+import com.linkpoint.users.DisplayNameFormattingPolicyHolder
 import com.linkpoint.chat.MuteManager
 import com.linkpoint.users.UserProfileManager
 import com.linkpoint.voice.VoiceManager
@@ -607,6 +608,7 @@ class LinkpointApp : Application() {
     // Display names (NEW)
     lateinit var displayNameManager: DisplayNameManager
         private set
+    val displayNameFormattingPolicy = DisplayNameFormattingPolicyHolder()
     
     // Mute list (NEW)
     lateinit var muteManager: MuteManager

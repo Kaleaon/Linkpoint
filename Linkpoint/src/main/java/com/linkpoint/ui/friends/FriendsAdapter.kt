@@ -8,7 +8,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.linkpoint.LinkpointApp
 import com.linkpoint.R
+import com.linkpoint.users.DisplayName
+import com.linkpoint.users.DisplayNameOutputMode
+import com.linkpoint.users.DisplayNameFormattingPolicy
 import com.linkpoint.world.Friend
 import java.text.SimpleDateFormat
 import java.util.*
@@ -52,7 +56,17 @@ class FriendsAdapter(
         private val lastSeen: TextView = itemView.findViewById(R.id.last_seen)
 
         fun bind(friend: Friend) {
-            friendName.text = friend.name
+            val policy = (itemView.context.applicationContext as? LinkpointApp)
+                ?.displayNameFormattingPolicy
+                ?.policy
+                ?: DisplayNameFormattingPolicy(outputMode = DisplayNameOutputMode.LEGACY_FALLBACK)
+            friendName.text = DisplayName(
+                agentId = friend.agentId,
+                username = friend.name,
+                displayName = null,
+                isDefault = true,
+                nextUpdate = 0L
+            ).format(policy)
             
             if (friend.isOnline) {
                 friendStatus.text = itemView.context.getString(R.string.online)
