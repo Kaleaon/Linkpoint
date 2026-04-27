@@ -210,6 +210,13 @@
             android:windowSoftInputMode="adjustResize"
             android:parentActivityName=".ui.world.WorldViewActivity" />
 
+
+        <!-- Compose migration host for Nav + AppShell rollout -->
+        <activity
+            android:name=".ui.navigation.NavigationMigrationActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Linkpoint.NoActionBar" />
+
         <!-- Grid Connection Service -->
         <service
             android:name=".services.GridConnectionService"
