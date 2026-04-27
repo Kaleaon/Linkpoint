@@ -362,76 +362,202 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     /* renamed from: syncMoreMessages */
     /* Code decompiled incorrectly, please refer to instructions dump. */
     public void m360com_lumiyaviewer_lumiya_slproto_users_manager_SyncManagermthref4() {
-        if (!this.syncMessageSent.getAndSet(true)) {
-            boolean keepSyncMessageSent = false;
-            String myName = null;
-            if (this.myNameRetriever == null) {
-                this.myNameRetriever = new ChatterNameRetriever(ChatterID.getUserChatterID(this.userManager.getUserID(), this.userManager.getUserID()), new ChatterNameRetriever.OnChatterNameUpdated() {
-                    @Override
-                    public void onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
-                        SyncManager.this.m368x9b8293a7(chatterNameRetriever);
-                    }
-                }, this.dbExecutor, true);
-            }
-            myName = this.myNameRetriever.getResolvedName();
-            if (myName != null) {
-                Query<ChatMessage> query = this.messagesQuery.forCurrentThread();
-                query.setParameter(0, Long.valueOf(this.lastConfirmedMessageID));
-                de.greenrobot.dao.query.LazyList<ChatMessage> messages = query.listLazy();
-                ImmutableList.Builder<com.lumiyaviewer.lumiya.cloud.common.LogChatMessage> builder = ImmutableList.builder();
-                int count = 0;
-                long lastMessageId = 0;
-                for (ChatMessage chatMessage : messages) {
-                    com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent chatEvent = com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.loadFromDatabaseObject(chatMessage, this.userManager.getUserID());
-                    if (chatEvent != null) {
-                        Chatter chatter = this.chatterDao.load(Long.valueOf(chatMessage.getChatterID()));
-                        if (chatter != null) {
-                            String chatterName = resolveChatterName(chatter);
-                            if (chatterName == null) {
-                                break;
-                            }
-                            CharSequence text = chatEvent.getPlainTextMessage(this.context, this.userManager, false);
-                            com.lumiyaviewer.lumiya.cloud.common.LogChatMessage logChatMessage = new com.lumiyaviewer.lumiya.cloud.common.LogChatMessage(chatter.getType(), chatter.getUuid(), chatMessage.getId().longValue(), chatterName, "[" + this.dateFormat.format(chatMessage.getTimestamp()) + "] " + text);
-                            builder.add(logChatMessage);
-                            lastMessageId = logChatMessage.messageID;
-                            count++;
-                            if (count >= 100) {
-                                break;
-                            }
-                        }
-                    }
-                }
-                messages.close();
-                if (count > 0) {
-                    com.lumiyaviewer.lumiya.cloud.common.LogMessageBatch batch = new com.lumiyaviewer.lumiya.cloud.common.LogMessageBatch(this.userManager.getUserID(), myName, builder.build(), lastMessageId);
-                    CloudSyncServiceConnection connection = this.syncServiceConnection.get();
-                    if (connection != null) {
-                        keepSyncMessageSent = connection.sendMessage(com.lumiyaviewer.lumiya.cloud.common.MessageType.LogMessageBatch, batch);
-                    }
-                }
-                if (!this.flushChatterNames.isEmpty()) {
-                    CloudSyncServiceConnection connection2 = this.syncServiceConnection.get();
-                    if (connection2 != null) {
-                        java.util.Iterator<String> iterator = this.flushChatterNames.iterator();
-                        if (iterator.hasNext()) {
-                            String chatterName2 = iterator.next();
-                            iterator.remove();
-                            connection2.sendMessage(com.lumiyaviewer.lumiya.cloud.common.MessageType.LogFlushMessages, new com.lumiyaviewer.lumiya.cloud.common.LogFlushMessages(this.userManager.getUserID(), myName, chatterName2));
-                        }
-                    }
-                }
-            }
-            this.syncMessageSent.set(keepSyncMessageSent);
-        }
-        if (this.needsStopSyncing.getAndSet(false)) {
-            this.syncingEnabled.set(false);
-            CloudSyncServiceConnection connection3 = this.syncServiceConnection.getAndSet(null);
-            this.syncMessageSent.set(false);
-            if (connection3 != null) {
-                connection3.sendMessage(com.lumiyaviewer.lumiya.cloud.common.MessageType.LogFlushMessages, new com.lumiyaviewer.lumiya.cloud.common.LogFlushMessages(this.userManager.getUserID(), null, null));
-                connection3.disconnect();
-            }
-        }
+        /*
+            r18 = this;
+            r0 = r18
+            java.util.concurrent.atomic.AtomicBoolean r2 = r0.syncMessageSent
+            r3 = 1
+            boolean r2 = r2.getAndSet(r3)
+            if (r2 != 0) goto L_0x0171
+            r11 = 0
+            r0 = r18
+            com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever r2 = r0.myNameRetriever
+            if (r2 != 0) goto L_0x003b
+            com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever r2 = new com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever
+            r0 = r18
+            com.lumiyaviewer.lumiya.slproto.users.manager.UserManager r3 = r0.userManager
+            java.util.UUID r3 = r3.getUserID()
+            r0 = r18
+            com.lumiyaviewer.lumiya.slproto.users.manager.UserManager r4 = r0.userManager
+            java.util.UUID r4 = r4.getUserID()
+            com.lumiyaviewer.lumiya.slproto.users.ChatterID$ChatterIDUser r3 = com.lumiyaviewer.lumiya.slproto.users.ChatterID.getUserChatterID(r3, r4)
+            com.lumiyaviewer.lumiya.slproto.users.manager.-$Lambda$AZwop9CtlZWAAgrWZJSwnA0FdZ8$2 r4 = new com.lumiyaviewer.lumiya.slproto.users.manager.-$Lambda$AZwop9CtlZWAAgrWZJSwnA0FdZ8$2
+            r0 = r18
+            r4.<init>(r0)
+            r0 = r18
+            java.util.concurrent.Executor r5 = r0.dbExecutor
+            r6 = 1
+            r2.<init>(r3, r4, r5, r6)
+            r0 = r18
+            r0.myNameRetriever = r2
+        L_0x003b:
+            r0 = r18
+            com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever r2 = r0.myNameRetriever
+            java.lang.String r12 = r2.getResolvedName()
+            if (r12 == 0) goto L_0x01ba
+            r0 = r18
+            de.greenrobot.dao.query.Query<com.lumiyaviewer.lumiya.dao.ChatMessage> r2 = r0.messagesQuery
+            de.greenrobot.dao.query.Query r2 = r2.forCurrentThread()
+            r0 = r18
+            long r4 = r0.lastConfirmedMessageID
+            java.lang.Long r3 = java.lang.Long.valueOf(r4)
+            r4 = 0
+            r2.setParameter(r4, r3)
+            de.greenrobot.dao.query.LazyList r13 = r2.listLazy()
+            com.google.common.collect.ImmutableList$Builder r14 = com.google.common.collect.ImmutableList.builder()
+            r4 = 0
+            r2 = 0
+            java.util.Iterator r15 = r13.iterator()
+            r6 = r2
+            r10 = r4
+        L_0x006a:
+            boolean r2 = r15.hasNext()
+            if (r2 == 0) goto L_0x0101
+            java.lang.Object r2 = r15.next()
+            com.lumiyaviewer.lumiya.dao.ChatMessage r2 = (com.lumiyaviewer.lumiya.dao.ChatMessage) r2
+            r0 = r18
+            com.lumiyaviewer.lumiya.slproto.users.manager.UserManager r3 = r0.userManager
+            java.util.UUID r3 = r3.getUserID()
+            com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent r4 = com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.loadFromDatabaseObject(r2, r3)
+            if (r4 == 0) goto L_0x01b1
+            r0 = r18
+            com.lumiyaviewer.lumiya.dao.ChatterDao r3 = r0.chatterDao
+            long r8 = r2.getChatterID()
+            java.lang.Long r5 = java.lang.Long.valueOf(r8)
+            java.lang.Object r3 = r3.load(r5)
+            r5 = r3
+            com.lumiyaviewer.lumiya.dao.Chatter r5 = (com.lumiyaviewer.lumiya.dao.Chatter) r5
+            if (r5 == 0) goto L_0x01b1
+            r0 = r18
+            java.lang.String r8 = r0.resolveChatterName(r5)
+            if (r8 == 0) goto L_0x0101
+            r0 = r18
+            android.content.Context r3 = r0.context
+            r0 = r18
+            com.lumiyaviewer.lumiya.slproto.users.manager.UserManager r6 = r0.userManager
+            r7 = 0
+            java.lang.CharSequence r9 = r4.getPlainTextMessage(r3, r6, r7)
+            com.lumiyaviewer.lumiya.cloud.common.LogChatMessage r3 = new com.lumiyaviewer.lumiya.cloud.common.LogChatMessage
+            int r4 = r5.getType()
+            java.util.UUID r5 = r5.getUuid()
+            java.lang.Long r6 = r2.getId()
+            long r6 = r6.longValue()
+            java.lang.StringBuilder r16 = new java.lang.StringBuilder
+            r16.<init>()
+            java.lang.String r17 = "["
+            java.lang.StringBuilder r16 = r16.append(r17)
+            r0 = r18
+            java.text.DateFormat r0 = r0.dateFormat
+            r17 = r0
+            java.util.Date r2 = r2.getTimestamp()
+            r0 = r17
+            java.lang.String r2 = r0.format(r2)
+            r0 = r16
+            java.lang.StringBuilder r2 = r0.append(r2)
+            java.lang.String r16 = "] "
+            r0 = r16
+            java.lang.StringBuilder r2 = r2.append(r0)
+            java.lang.StringBuilder r2 = r2.append(r9)
+            java.lang.String r9 = r2.toString()
+            r3.<init>(r4, r5, r6, r8, r9)
+            r14.add((java.lang.Object) r3)
+            long r6 = r3.messageID
+            int r10 = r10 + 1
+            r2 = 100
+            if (r10 < r2) goto L_0x01b1
+        L_0x0101:
+            r13.close()
+            if (r10 == 0) goto L_0x01b7
+            com.lumiyaviewer.lumiya.cloud.common.LogMessageBatch r2 = new com.lumiyaviewer.lumiya.cloud.common.LogMessageBatch
+            r0 = r18
+            com.lumiyaviewer.lumiya.slproto.users.manager.UserManager r3 = r0.userManager
+            java.util.UUID r3 = r3.getUserID()
+            com.google.common.collect.ImmutableList r5 = r14.build()
+            r4 = r12
+            r2.<init>(r3, r4, r5, r6)
+            r0 = r18
+            java.util.concurrent.atomic.AtomicReference<com.lumiyaviewer.lumiya.sync.CloudSyncServiceConnection> r3 = r0.syncServiceConnection
+            java.lang.Object r3 = r3.get()
+            com.lumiyaviewer.lumiya.sync.CloudSyncServiceConnection r3 = (com.lumiyaviewer.lumiya.sync.CloudSyncServiceConnection) r3
+            if (r3 == 0) goto L_0x01b7
+            com.lumiyaviewer.lumiya.cloud.common.MessageType r4 = com.lumiyaviewer.lumiya.cloud.common.MessageType.LogMessageBatch
+            boolean r2 = r3.sendMessage(r4, r2)
+            r4 = r2
+        L_0x012b:
+            r0 = r18
+            java.util.Set<java.lang.String> r2 = r0.flushChatterNames
+            boolean r2 = r2.isEmpty()
+            if (r2 != 0) goto L_0x016a
+            r0 = r18
+            java.util.concurrent.atomic.AtomicReference<com.lumiyaviewer.lumiya.sync.CloudSyncServiceConnection> r2 = r0.syncServiceConnection
+            java.lang.Object r2 = r2.get()
+            com.lumiyaviewer.lumiya.sync.CloudSyncServiceConnection r2 = (com.lumiyaviewer.lumiya.sync.CloudSyncServiceConnection) r2
+            if (r2 == 0) goto L_0x016a
+            r0 = r18
+            java.util.Set<java.lang.String> r3 = r0.flushChatterNames
+            java.util.Iterator r5 = r3.iterator()
+            boolean r3 = r5.hasNext()
+            if (r3 == 0) goto L_0x016a
+            java.lang.Object r3 = r5.next()
+            java.lang.String r3 = (java.lang.String) r3
+            r5.remove()
+            com.lumiyaviewer.lumiya.cloud.common.MessageType r5 = com.lumiyaviewer.lumiya.cloud.common.MessageType.LogFlushMessages
+            com.lumiyaviewer.lumiya.cloud.common.LogFlushMessages r6 = new com.lumiyaviewer.lumiya.cloud.common.LogFlushMessages
+            r0 = r18
+            com.lumiyaviewer.lumiya.slproto.users.manager.UserManager r7 = r0.userManager
+            java.util.UUID r7 = r7.getUserID()
+            r6.<init>(r7, r12, r3)
+            r2.sendMessage(r5, r6)
+        L_0x016a:
+            r0 = r18
+            java.util.concurrent.atomic.AtomicBoolean r2 = r0.syncMessageSent
+            r2.set(r4)
+        L_0x0171:
+            r0 = r18
+            java.util.concurrent.atomic.AtomicBoolean r2 = r0.needsStopSyncing
+            r3 = 0
+            boolean r2 = r2.getAndSet(r3)
+            if (r2 == 0) goto L_0x01b0
+            r0 = r18
+            java.util.concurrent.atomic.AtomicBoolean r2 = r0.syncingEnabled
+            r3 = 0
+            r2.set(r3)
+            r0 = r18
+            java.util.concurrent.atomic.AtomicReference<com.lumiyaviewer.lumiya.sync.CloudSyncServiceConnection> r2 = r0.syncServiceConnection
+            r3 = 0
+            java.lang.Object r2 = r2.getAndSet(r3)
+            com.lumiyaviewer.lumiya.sync.CloudSyncServiceConnection r2 = (com.lumiyaviewer.lumiya.sync.CloudSyncServiceConnection) r2
+            r0 = r18
+            java.util.concurrent.atomic.AtomicBoolean r3 = r0.syncMessageSent
+            r4 = 0
+            r3.set(r4)
+            if (r2 == 0) goto L_0x01b0
+            com.lumiyaviewer.lumiya.cloud.common.MessageType r3 = com.lumiyaviewer.lumiya.cloud.common.MessageType.LogFlushMessages
+            com.lumiyaviewer.lumiya.cloud.common.LogFlushMessages r4 = new com.lumiyaviewer.lumiya.cloud.common.LogFlushMessages
+            r0 = r18
+            com.lumiyaviewer.lumiya.slproto.users.manager.UserManager r5 = r0.userManager
+            java.util.UUID r5 = r5.getUserID()
+            r6 = 0
+            r7 = 0
+            r4.<init>(r5, r6, r7)
+            r2.sendMessage(r3, r4)
+            r2.disconnect()
+        L_0x01b0:
+            return
+        L_0x01b1:
+            r2 = r6
+            r4 = r10
+            r6 = r2
+            r10 = r4
+            goto L_0x006a
+        L_0x01b7:
+            r4 = r11
+            goto L_0x012b
+        L_0x01ba:
+            r4 = r11
+            goto L_0x016a
+        */
+        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.users.manager.SyncManager.m360com_lumiyaviewer_lumiya_slproto_users_manager_SyncManagermthref4():void");
     }
 
     /* access modifiers changed from: package-private */

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel name="item properties" title="物件屬性">
+	<panel.string name="loading_experience">
+		（載入中）
+	</panel.string>
+	<panel.string name="unknown">
+		（未知）
+	</panel.string>
+	<panel.string name="unknown_multiple">
+		（未知 / 多項）
+	</panel.string>
+	<panel.string name="public">
+		（公開）
+	</panel.string>
+	<panel.string name="you_can">
+		你可以：
+	</panel.string>
+	<panel.string name="owner_can">
+		所有者可以：
+	</panel.string>
+	<panel.string name="acquiredDate">
+		[wkday,datetime,slt]. [day,datetime,slt]. [mth,datetime,slt]. [year,datetime,slt], [hour,datetime,slt]:[min,datetime,slt]:[second,datetime,slt]
+	</panel.string>
+	<panel.string name="origin_inventory">
+		（庫存）
+	</panel.string>
+	<panel.string name="origin_inworld">
+		（在虛擬世界）
+	</panel.string>
+	<layout_stack name="main_stack">
+		<layout_panel name="layout_item_name">
+			<line_editor name="LabelItemName" tool_tip="名稱限制為63個字元。較長的正式名稱將被縮短。名稱只能由（非擴充）ASCII-7字元集的可列印字元組成，除了豎線「|」。" />
+		</layout_panel>
+		<layout_panel name="layout_item_details">
+			<text name="LabelOwnerTitle">
+				所有者：
+			</text>
+			<text name="LabelCreatorTitle">
+				創造者：
+			</text>
+			<text name="LabelAcquiredTitle">
+				取得時間：
+			</text>
+			<button label="圖像..." name="change_thumbnail_btn" />
+		</layout_panel>
+		<layout_panel name="layout_item_description">
+			<text name="LabelItemDescTitle">
+				描述：
+			</text>
+			<line_editor name="LabelItemDesc" tool_tip="在檢視器設定中選擇「所有物件的懸停提示」選項時，所有物件的描述都會在滑鼠指標下的彈出視窗中顯示。正式描述限制為127位元組，所有更長的字串將被縮短。" />
+			<text name="LabelItemExperienceTitle">
+				體驗：
+			</text>
+		</layout_panel>
+		<layout_panel name="layout_item_permissions_sale">
+			<text name="perm_modify">
+				權限
+			</text>
+			<text name="you_perm_modify">
+				你可以：
+			</text>
+			<check_box label="修改" name="CheckOwnerModify" />
+			<check_box label="複製" name="CheckOwnerCopy" />
+			<check_box label="轉讓" name="CheckOwnerTransfer" />
+			<text name="AnyoneLabel">
+				任何人：
+			</text>
+			<check_box label="複製" name="CheckEveryoneCopy" tool_tip="任何人都可取用本物件的副本。 物件和其所有內容都必須允許複製和轉讓。" />
+			<text name="GroupLabel">
+				群組：
+			</text>
+			<check_box label="分享" name="CheckShareWithGroup" tool_tip="允許此群組所有成員共享你修改此物件的權限。 你必須轉讓才能啟用角色限制。" />
+			<text name="NextOwnerLabel">
+				下一個所有者：
+			</text>
+			<check_box label="修改" name="CheckNextOwnerModify" tool_tip="下一個所有者可以編輯本物件的性質，如名稱或尺寸。" />
+			<check_box label="複製" name="CheckNextOwnerCopy" tool_tip="下一個所有者可無限複製本物件。 副本將保留創作人的資料，其允許設定不能比原本物件更加放寬。" />
+			<check_box label="轉讓" name="CheckNextOwnerTransfer" tool_tip="下一個所有者可贈送或轉售這個物件。" />
+			<check_box label="出售" name="CheckPurchase" tool_tip="允許別人在虛擬世界裡以特定的價格購買此物件、其內容或其副本。" />
+			<combo_box name="ComboBoxSaleType" tool_tip="決定購買者會收到物件副本、物件內容副本、還是物件本身。">
+				<combo_box.item label="複製" name="Copy" />
+				<combo_box.item label="內容" name="Contents" />
+				<combo_box.item label="原件" name="Original" />
+			</combo_box>
+			<spinner label="價格： L$" name="Edit Cost" tool_tip="物件成本。" />
+		</layout_panel>
+		<layout_panel name="layout_debug_permissions">
+			<text name="BaseMaskDebug">
+				B:
+			</text>
+			<text name="OwnerMaskDebug">
+				O:
+			</text>
+			<text name="GroupMaskDebug">
+				G:
+			</text>
+			<text name="EveryoneMaskDebug">
+				E:
+			</text>
+			<text name="NextMaskDebug">
+				N:
+			</text>
+		</layout_panel>
+	</layout_stack>
+</panel>

@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="Model Preview" title="Загрузка модели">
+  <string name="no_havok">загрузка меша с физикой</string>
+  <string name="status_parse_error">Ошибка: Проблема при анализе файла DAE – см. подробности в журнале.</string>
+  <string name="status_bind_shape_orientation">Предупреждение: форма матрицы стандартно не ориентирована по координате X.</string>
+  <string name="status_material_mismatch">Ошибка: Материал модели не входит в эталонную модель.</string>
+  <string name="status_lod_model_mismatch">Ошибка: Уровень детализации модели не имеет родителя.</string>
+  <string name="status_reading_file">Загрузка...</string>
+  <string name="status_generating_meshes">Создаются меши...</string>
+  <string name="status_vertex_number_overflow">Ошибка: Число вершин превышает 65535, Прервано!</string>
+  <string name="bad_element">Ошибка: недопустимый элемент</string>
+  <string name="high">Высокий</string>
+  <string name="medium">Средний</string>
+  <string name="low">Низкий</string>
+  <string name="lowest">Нижайший</string>
+  <string name="mesh_status_good">Можно загружать!</string>
+  <string name="mesh_status_na">Н/Д</string>
+  <string name="mesh_status_none">Нет</string>
+  <string name="mesh_status_submesh_mismatch">Отличается число текстурируемых граней на уровнях детализации.</string>
+  <string name="mesh_status_mesh_mismatch">Отличается число экземпляров меша на уровнях детализации.</string>
+  <string name="mesh_status_too_many_vertices">Слишком много вершин на уровне детализации.</string>
+  <string name="mesh_status_missing_lod">Отсутствует необходимый уровень детализации.</string>
+  <string name="mesh_status_invalid_material_list">Материалы уровня детализации не входят в эталонную модель.</string>
+  <string name="phys_status_vertex_limit_exceeded">Для некоторых физических оболочек превышен лимит вершин(256); попробуйте другой 'Метод Анализа'.</string>
+  <string name="phys_status_hull_limit_exceeded">Некоторые модели превышают предел оболочек (256); попробуйте 'Упрощение'.</string>
+  <string name="phys_status_degenerate_triangles">Физика меша слишком плотная или содержит вырожденные треугольники. Используйте Анализ/Упрощение для решения.</string>
+  <string name="phys_status_no_havok">Эта версия не поддерживает Havok и не рекомендуется для загрузки физики в Second Life. Результаты могут быть непредсказуемыми.</string>
+  <string name="phys_status_too_thin">Один или несколько размеров меньше 0,5м, корректно будут работать только физические формы, основанные на корпусе (проанализированные).</string>
+  <string name="phys_status_unknown_error">Обнаружена нераспознанная ошибка.</string>
+  <string name="layer_all">Все</string>
+  <string name="decomposing">Анализ...</string>
+  <string name="simplifying">Упрощение...</string>
+  <string name="tbd">Позже</string>
+
+  <!-- Warnings and info from model loader-->
+  <string name="TooManyJoint">Текстурирование отключено, слишком много суставов: [JOINTS], максимум: [MAX]</string>
+  <string name="UnrecognizedJoint">Подстроено под неизвестный сустав [NAME]</string>
+  <string name="UnknownJoints">Текстурирование отключено, слишком много [COUNT] неизвестных суставов</string>
+  <string name="ModelLoaded">Модель [MODEL_NAME] загружена</string>
+  <string name="IncompleteTC">Данные координат текстуры не полны.</string>
+  <string name="PositionNaN">Обнаружен NaN при загрузке данных о местоположении из DAE-модели, недопустимая модель.</string>
+  <string name="NormalsNaN">Найдено NaN при загрузке нормалей из DAE-модели, недопустимая модель.</string>
+  <string name="NegativeScaleTrans">Обнаружен отрицательный масштаб, неподдерживаемое преобразование. domInstance_geometry: [LABEL]</string>
+  <string name="NegativeScaleNormTrans">Обнаружен отрицательный масштаб, неподдерживаемое преобразование после нормализации. domInstance_geometry: [LABEL]</string>
+  <string name="CantResolveGeometryUrl">Не удается разрешить геометрию URL.</string>
+  <string name="ParsingErrorBadElement">Плохой элемент</string>
+  <string name="ParsingErrorCantParseScene">Сцена не может быть проанализирована</string>
+  <string name="ParsingErrorCorrupt">Ошибка с dae - традиционно указывает на поврежденный файл.</string>
+  <string name="ParsingErrorNoController">Не удалось проверить контроллер</string>
+  <string name="ParsingErrorNoDoc">Не удается найти внутренние документы</string>
+  <string name="ParsingErrorNoRoot">Документ не имеет корня</string>
+  <string name="ParsingErrorNoScene">Документ не имеет visual_scene</string>
+  <string name="ParsingErrorPositionInvalidModel">Невозможно обработать сетку без данных о местоположении. Недопустимая модель.</string>
+  <string name="ParsingErrorEmptyInvBindInvalidModel">Невозможно обработать оснастку без данных InvBind. Недопустимая модель.</string>
+
+  <panel name="left_panel">
+    <panel name="model_name_representation_panel">
+      <text name="name_label">Имя модели:</text>
+    </panel>
+    <tab_container name="import_tab">
+      <panel label="Уровень детализации" name="lod_panel" title="Уровень детализации">
+        <text initial_value="Источник" name="source" value="Источник"/>
+        <text initial_value="Треугольники" name="triangles" value="Треугольники"/>
+        <text initial_value="Вершины" name="vertices" value="Вершины"/>
+        <text initial_value="Высокий" name="high_label" value="Высокий"/>
+        <combo_box name="lod_source_high">
+          <item name="Load from file" label="Загрузка из файла"/>
+          <item name="MeshOpt Auto" label="Генерировать Авто"/>
+          <item name="MeshOptCombine" label="Генерировать Точно"/>
+          <item name="MeshOptSloppy" label="Генерировать Небрежно"/>
+          <item name="Generate" label="Генерировать Надежный"/>
+        </combo_box>
+        <button label="Обзор..." name="lod_browse_high"/>
+        <combo_box name="lod_mode_high">
+          <item label="Лимит треугольников" name="Triangle Limit"/>
+          <item label="Порог ошибки" name="Error Threshold"/>
+        </combo_box>
+        <text initial_value="Средний" name="medium_label" value="Средний"/>
+        <combo_box name="lod_source_medium">
+          <item name="Load from file" label="Загрузка из файла"/>
+          <item name="MeshOpt Auto" label="Генерировать Авто"/>
+          <item name="MeshOptCombine" label="Генерировать Точно"/>
+          <item name="MeshOptSloppy" label="Генерировать Небрежно"/>
+          <item name="Generate" label="Генерировать Надежный"/>
+          <item name="Use LoD above" label="Использовать сверху"/>
+        </combo_box>
+        <button label="Обзор..." name="lod_browse_medium"/>
+        <combo_box name="lod_mode_medium">
+          <item label="Лимит треугольников" name="Triangle Limit"/>
+          <item label="Порог ошибки" name="Error Threshold"/>
+        </combo_box>
+        <text initial_value="Низкий" name="low_label" value="Низкий"/>
+        <combo_box name="lod_source_low">
+          <item name="Load from file" label="Загрузка из файла"/>
+          <item name="MeshOpt Auto" label="Генерировать Авто"/>
+          <item name="MeshOptCombine" label="Генерировать Точно"/>
+          <item name="MeshOptSloppy" label="Генерировать Небрежно"/>
+          <item name="Generate" label="Генерировать Надежный"/>
+          <item name="Use LoD above" label="Использовать сверху"/>
+        </combo_box>
+        <button label="Обзор..." name="lod_browse_low"/>
+        <combo_box name="lod_mode_low">
+          <item label="Лимит треугольников" name="Triangle Limit"/>
+          <item label="Порог ошибки" name="Error Threshold"/>
+        </combo_box>
+        <text initial_value="Низший" name="lowest_label" value="Низший"/>
+        <combo_box name="lod_source_lowest">
+          <item name="Load from file" label="Загрузка из файла"/>
+          <item name="MeshOpt Auto" label="Генерировать Авто"/>
+          <item name="MeshOptCombine" label="Генерировать Точно"/>
+          <item name="MeshOptSloppy" label="Генерировать Небрежно"/>
+          <item name="Generate" label="Генерировать Надежный"/>
+          <item name="Use LoD above" label="Использовать сверху"/>
+        </combo_box>
+        <button label="Обзор..." name="lod_browse_lowest"/>
+        <combo_box name="lod_mode_lowest">
+          <item label="Лимит треугольников" name="Triangle Limit"/>
+          <item label="Порог ошибки" name="Error Threshold"/>
+        </combo_box>
+        <check_box label="Генерировать нормали" name="gen_normals"/>
+        <text initial_value="Угол сгиба:" name="crease_label" value="Угол сгиба:"/>
+      </panel>
+
+      <!-- PHYSYCS PANEL -->
+      <panel label="Физика" name="physics_panel">
+        <panel name="physics geometry">
+          <text name="first_step_name">Шаг 1. Уровень детализации</text>
+          <combo_box name="physics_lod_combo" tool_tip="Уровень детализации для физической формы">
+            <combo_item name="choose_one">Выберите вариант...</combo_item>
+            <combo_item name="physics_high">Высокое</combo_item>
+            <combo_item name="physics_medium">Средний</combo_item>
+            <combo_item name="physics_low">Низкий</combo_item>
+            <combo_item name="physics_lowest">Низший</combo_item>
+            <combo_item name="physics_cube">Куб</combo_item>
+            <combo_item name="physics_hex">Шестиугольник</combo_item>
+            <combo_item name="physics_ud">Определенные</combo_item>
+            <combo_item name="physics_bounding_box">Ограничительная рамка</combo_item>
+            <combo_item name="load_from_file">Из файла</combo_item>
+          </combo_box>
+          <button label="Обзор..." name="physics_browse"/>
+        </panel>
+        <panel name="physics analysis">
+          <text name="method_label">2 этап. Анализ</text>
+          <text name="analysis_method_label">Метод:</text>
+          <text name="quality_label">Качество:</text>
+          <text name="smooth_method_label">Гладкость:</text>
+          <check_box label="Закрыть отверстия" name="Close Holes (Slow)"/>
+          <button label="Анализ" name="Decompose"/>
+          <button label="Отмена" name="decompose_cancel"/>
+        </panel>
+        <panel name="physics simplification">
+          <text name="second_step_label">Шаг 3. Упрощение</text>
+          <text name="simp_method_header">Метод:</text>
+          <text name="pass_method_header">Проходов:</text>
+          <text name="Detail Scale label" left_pad="30" width="100">Масштаб деталей:</text>
+          <text name="Retain%_label">Сохранять:</text>
+          <combo_box name="Combine Quality" value="1"/>
+          <button label="Упрощение" name="Simplify"/>
+          <button label="Отмена" name="simplify_cancel"/>
+        </panel>
+        <panel name="physics info">
+          <text name="results_text" width="70">Результаты:</text>
+          <text name="physics_triangles" width="150">Треугольников: [TRIANGLES],</text>
+          <text name="physics_points" width="120">Вершин: [POINTS],</text>
+          <text name="physics_hulls" width="120">Оболочек: [HULLS]</text>
+        </panel>
+      </panel>
+      <!-- MODIFIERS PANEL -->
+      <panel label="Параметры загрузки" name="modifiers_panel">
+        <text name="scale_label" width="195">Масштаб (1=не масштабировать):</text>
+        <text name="dimensions_label">Размеры:</text>
+        <check_box label="Включить текстуры" name="upload_textures"/>
+      </panel>
+
+      <panel label="Переопределения" name="rigging_panel" title="Оснастка">
+        <check_box label="Включая вес кожи" name="upload_skin"/>
+        <check_box label="Включая позицию суставов" name="upload_joints"/>
+        <check_box label="Блокировать масштаб, если задана позиция сустава" name="lock_scale_if_joint_position"/>
+        <text name="pelvis_offset_label">Сдвиг Z (поднять/опустить):</text>
+        <text name="skin_too_many_joints">Слишком много кожных суставов</text>
+        <text name="skin_unknown_joint">Модель имеет неизвестный сустав(ы)</text>
+        <text name="joints_descr">Суставы:</text>
+        <text name="conflicts_description">[CONFLICTS] конфликтов в [JOINTS_COUNT] суставах</text>
+        <text name="pos_overrides_descr">Переопределения положения для сустава '[JOINT]':</text>
+        <scroll_list name="pos_overrides_list">
+          <scroll_list.columns label="Модель" name="model_name"/>
+        </scroll_list>
+      </panel>
+      <panel label="Журнал" name="logs_panel">
+        <check_box label="Показать подробно журнал" name="verbose_logging" width="80"/>
+      </panel>
+      <panel label="Настройки просмотра" name="mesh_preview_settings_panel">
+        <text name="mesh_upload_behaviour_label">
+         Параметры поведения при загрузке модели:
+        </text>
+        <check_box label="Автоматическое включение весов"
+         tool_tip="Автоматическая установка включения весов для ригованых мешей"
+         name="mesh_preview_auto_weights"/>
+        <check_box label="Автоматический просмотр весов"
+         tool_tip="Автоматически показывать веса в предпросмотре для ригованых мешей"
+         name="mesh_preview_auto_show_weights"/>
+        <check_box name="mesh_upload_default_to_reliable"
+         label="По умолчанию установлены «надежные» уровни детализации"
+         tool_tip="Использовать «Надежный» метод (GLOD) по умолчанию"/>
+        <text name="lod_suffix_label" width="110">
+            LOD суффиксы:
+        </text>
+        <combo_box name="lod_suffix_combo" width="250" tool_tip="Выберите предустановку или установите свой собственный">
+            <combo_item name="choose_one">Выберите стандарт или отредактируйте вручную...</combo_item>
+            <combo_item name="suff_sl">Стандарт SL (Низший=LOD0)</combo_item>
+            <combo_item name="suff_unity">Стандарт игровых движков (Низший=LOD3)</combo_item>
+            <combo_item name="suff_descriptive">Слова (high,med...)</combo_item>
+        </combo_box>
+        <text name="suf_lowest_lab" width="60">
+            Низший:
+        </text>
+        <line_editor name="suf_lowest" tool_tip="Суффикс, используемый для идентификации файла с низшим уровнем детализации на диске и моделей в файле."/>
+        <text name="suf_low_lab" width="60">
+            Низкий:
+        </text>
+        <line_editor name="suf_low" tool_tip="Суффикс, используемый для идентификации файла с низким уровнем детализации на диске и моделей в файле."/>
+        <text name="suf_medium_lab" width="60">
+            Средний:
+        </text>
+        <line_editor name="suf_medium" tool_tip="Суффикс, используемый для идентификации файла со средним уровнем детализации на диске и моделей в файле."/>
+        <text name="suf_high_lab" width="60">
+            Высокий:
+        </text>
+        <line_editor name="suf_high" tool_tip="Суффикс, используемый для идентификации файла с высоким уровнем детализации на диске и моделей в файле."/>
+        <text name="suf_physics_lab" width="60">
+            Физика:
+        </text>
+        <line_editor name="suf_physics" tool_tip="Суффикс, используемый для идентификации файла физики на диске и моделей в файле."/>
+        <text name="mesh_preview_ud_preset_label">
+          Предустановки физики:
+        </text>
+        <line_editor name="ud_physics" tool_tip="Полный системный путь к простому определению сетки Collada для использования в физике."/>
+        <button label="Просмотр" label_selected="Просмотр" name="set_user_def_phys"/>
+        <text name="mesh_preview_colors_label">
+         Цвета предварительного просмотра:
+        </text>
+        <text name="user_label">
+         Основной:
+        </text>
+        <color_swatch label="Задний план" tool_tip="Цвет холста для окна предварительного просмотра"
+         name="mesh_preview_canvas_color"/>
+        <color_swatch label="Грани модели" tool_tip="Цвет граней модели в окне предварительного просмотра"
+         name="mesh_preview_edge_color"/>
+        <color_swatch label="Окружающий свет" tool_tip="Уровень окружающего освещения в окне предварительного просмотра (также влияет на предварительный просмотр анимации и т.д.)"
+         name="preview_ambient_color"/>
+        <text name="physics_settings_label">
+         Физика:
+        </text>
+        <color_swatch label="Грани физики"
+         tool_tip="Цвет граней для физических треугольников в окне предварительного просмотра"
+         name="mesh_preview_physics_edge_color"/>
+        <color_swatch label="Заливка физики"
+         tool_tip="Цвет заливки для физической модели в окне предварительного просмотра"
+         name="mesh_preview_physics_fill_color"/>
+        <text name="physics_issues_setting_label" width="110">
+         Проблемы физики:
+        </text>
+        <color_swatch label="Плохие грани"
+         tool_tip="Цвет граней вырожденных (тонких) треугольников в окне предварительного просмотра"
+         name="mesh_preview_degenerate_edge_color"/>
+        <color_swatch label="Плохая заливка"
+         tool_tip="Цвет заливки вырожденных (тонких) треугольников в окне предварительного просмотра"
+         name="mesh_degenerate_fill_color"/>
+      </panel>
+    </tab_container>
+    <panel name="weights_and_warning_panel">
+      <button label="Рассчитать вес и плату" name="calculate_btn" tool_tip="Рассчитать вес и плату"/>
+      <button label="Отмена" name="cancel_btn"/>
+      <button label="Загрузить" name="ok_btn" tool_tip="Загрузить в симулятор"/>
+      <button label="Очистить настройки и сбросить форму" name="reset_btn"/>
+      <!-- ========== WEIGHTS ==========-->
+      <text name="upload_fee">Стоимость: L$ [FEE]</text>
+      <text name="prim_weight" width="140">Влияет на землю: [EQ]</text>
+      <text name="download_weight">Загрузка: [ST]</text>
+      <text name="physics_weight">Физика: [PH]</text>
+      <text name="server_weight">Сервер: [SIM]</text>
+      <!-- =========== Cost breakdown ======== -->
+      <panel name="price_breakdown_panel">
+        <text name="price_breakdown_title">Ценовая разбивка</text>
+        <text name="price_breakdown_labels">
+Загрузка:
+Физика:
+Экземпляры:
+Текстуры:
+Модель:
+        </text>
+      </panel>
+      <panel name="physics_costs_panel">
+        <text name="physics_breakdown_title">Расходы на физику</text>
+        <text name="physics_breakdown_labels">
+Каркас:
+Меш:
+Анализ:
+        </text>
+      </panel>
+      <panel name="preview_controls_panel">
+        <panel name="preview_controls_inner_panel">
+          <text name="preview_controls_title">Предпросмотр</text>
+          <combo_box name="preview_lod_combo" tool_tip="Уровень детализации при предварительном просмотре">
+            <combo_item name="high">Высокий</combo_item>
+            <combo_item name="medium">Средний</combo_item>
+            <combo_item name="low">Низкий</combo_item>
+            <combo_item name="lowest">Низший</combo_item>
+          </combo_box>
+        </panel>
+        <check_box label="Грани" name="show_edges"/>
+        <check_box label="Текстуры" name="show_textures"/>
+        <check_box label="Развертка" name="show_uv_guide"/>
+        <check_box label="Физика" name="show_physics"/>
+        <text name="exploder_label">Диапазон</text>
+        <check_box label="Веса" name="show_skin_weight"/>
+        <check_box label="Суставы" name="show_joint_positions"/>
+        <check_box label="Изменение Суставов" name="show_joint_overrides"/>
+      </panel>
+
+      <!-- ========== NOTE MESSAGE ========== -->
+      <text name="warning_title">ПРИМЕЧАНИЕ:</text>
+      <text name="warning_message">У вас нет прав на загрузку меш моделей. [[VURL] Узнайте, как] получить их.</text>
+    </panel>
+  </panel>
+  <text name="lod_label">Просмотр:</text>
+</floater>

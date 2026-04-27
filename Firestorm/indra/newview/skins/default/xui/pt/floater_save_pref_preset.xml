@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<floater name="save_pref_preset" title="SALVAR PREDEFINIÇÃO PREF">
+	<text name="Preset">
+		Digite um nome para a predefinição ou escolha uma predefinição existente.
+	</text>
+	<button label="Salvar" name="save"/>
+	<button label="Cancelar" name="cancel"/>
+</floater>

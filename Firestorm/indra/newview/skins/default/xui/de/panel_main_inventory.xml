@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Sonstiges" name="main inventory panel">
+	<panel.string name="ItemcountFetching">
+		Inventar ([ITEM_COUNT] Elemente werden abgerufen... [FILTER]
+	</panel.string>
+	<panel.string name="ItemcountCompleted">
+		[ITEM_COUNT] Elemente [FILTER]
+	</panel.string>
+	<panel.string name="ItemcountUnknown">
+		[ITEM_COUNT] Elemente abgerufen [FILTER]
+	</panel.string>
+	<panel.string name="inventory_title">Inventar</panel.string>
+	<layout_stack name="top_stack">
+		<layout_panel name="nav_buttons">
+			<button name="back_btn" tool_tip="Zurück"/>
+			<button name="forward_btn" tool_tip="Vor"/>
+			<button name="up_btn" tool_tip="Eine Ebene nach oben"/>
+		</layout_panel>
+		<layout_panel name="filter_panel">
+			<filter_editor label="Inventar filtern" name="inventory search editor" tool_tip="Einen oder mehrere Suchbegriffe eingeben, getrennt durch '+'"/>
+		</layout_panel>
+	</layout_stack>
+	<layout_stack name="ctrl_stack">
+		<layout_panel name="collapse_expand_buttons">
+			<button name="collapse_btn" label="Einklappen" />
+			<button name="expand_btn" label="Aufklappen" />
+		</layout_panel>
+		<layout_panel name="filter_ctrls">
+			<text name="filter_label" value="Filter:"/>
+			<combo_box name="filter_combo_box" width="100">
+				<combo_box.item value="filter_type_all" label="Alle Typen" />
+				<combo_box.item value="filter_separator" label="------------" enabled="false" />
+				<combo_box.item value="filter_type_animations" label="Animationen" />
+				<combo_box.item value="filter_type_calling_cards" label="Visitenkarten" />
+				<combo_box.item value="filter_type_clothing" label="Kleidung / Körperteile" />
+				<combo_box.item value="filter_type_gestures" label="Gesten" />
+				<combo_box.item value="filter_type_landmarks" label="Landmarken" />
+				<combo_box.item value="filter_type_notecards" label="Notizkarten" />
+				<combo_box.item value="filter_type_objects" label="Objekte" />
+				<combo_box.item value="filter_type_scripts" label="Skripte" />
+				<combo_box.item value="filter_type_sounds" label="Sounds" />
+				<combo_box.item value="filter_type_textures" label="Texturen" />
+				<combo_box.item value="filter_type_snapshots" label="Fotos" />
+				<combo_box.item value="filter_type_materials" label="Materialien" />
+				<combo_box.item value="filter_type_settings" label="Einstellungen" />
+				<combo_box.item value="filter_type_folders" label="Ordner" />
+				<combo_box.item value="filter_type_coalesced" label="Nur verbundene Objekte"/>
+				<combo_box.item value="filter_type_custom" label="Benutzerdefiniert..." />
+			</combo_box>
+			<menu_button name="options_visibility_btn" tool_tip="Sichtbarkeitseinstellungen für Suchergebnisse anzeigen"/>
+		</layout_panel>
+	</layout_stack>
+	<panel name="default_inventory_panel">
+		<tab_container name="inventory filter tabs">
+			<inventory_panel label="Inventar" name="All Items"/>
+			<recent_inventory_panel label="Aktuell" name="Recent Items"/>
+			<worn_inventory_panel label="Angezogen" name="Worn Items"/>
+			<favorites_inventory_panel label="Favoriten" name="Favorites"/>
+		</tab_container>
+	</panel>
+	<panel name="bottom_panel">
+		<panel name="options_gear_btn_panel">
+			<menu_button name="options_gear_btn" tool_tip="Zusätzliche Optionen anzeigen"/>
+		</panel>
+		<panel name="add_btn_panel">
+			<button name="add_btn" tool_tip="Neues Objekt hinzufügen"/>
+		</panel>
+		<panel name="new_inventory_panel">
+			<button name="new_inv_btn" tool_tip="Zusätzliches Inventar-Fenster"/>
+		</panel>
+		<panel name="show_filters_panel">
+			<button name="show_filters_inv_btn" tool_tip="Filter anzeigen - Zeigt Filter-Fenster wenn ausgewählt. Wird hervorgehoben, wenn ein Filter aktiv ist."/>
+		</panel>
+		<panel name="view_mode_panel">
+			<button name="view_mode_btn" tool_tip="Zwischen Ansichten umschalten"/>
+		</panel>
+		<panel name="dummy_panel">
+			<text name="ItemcountText" tool_tip="[ITEMS] Objekte, [CATEGORIES] Ordner">
+				Elemente
+			</text>
+		</panel>
+		<panel name="trash_btn_panel">
+			<dnd_button name="trash_btn" tool_tip="Auswahl löschen"/>
+		</panel>
+	</panel>
+</panel>

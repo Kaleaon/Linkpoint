@@ -1,142 +1,169 @@
-# Linkpoint
+# Second Life Open Source Portal Integration - Documentation Index
 
-A modern Android viewer for Second Life and OpenSimulator virtual worlds.
+## Overview
 
-> ⚠️ **Disclaimer:** Linkpoint is not provided or supported by Linden Lab. This is an independent, community-developed third-party viewer that complies with [Linden Lab's Third-Party Viewer Policy](https://secondlife.com/corporate/third-party-viewers).
+This documentation provides comprehensive guidance for using the Linkpoint mobile application with Second Life's open source ecosystem. Based on research from the Second Life Open Source Portal and integration with leading virtual world technologies, these guides enable developers and users to fully leverage the power of open source virtual world technologies on mobile platforms.
+
+## Quick Start Guide
+
+### For Users
+1. **[Second Life Open Source Portal Integration Guide](Second_Life_Open_Source_Portal_Integration_Guide.md)** - Start here for comprehensive usage documentation
+2. **[Troubleshooting Second Life Integration](Troubleshooting_Second_Life_Integration.md)** - Common issues and solutions
+
+### For Developers
+1. **[LibreMetaverse Integration](LibreMetaverse_Integration.md)** - Modern protocol implementation patterns
+2. **[OpenSimulator Compatibility](OpenSimulator_Compatibility.md)** - OpenSim-specific development guidance
+
+## Primary Documentation
+
+### Main Integration Guide
+**[Second Life Open Source Portal Integration Guide](Second_Life_Open_Source_Portal_Integration_Guide.md)**
+
+This is the **primary comprehensive guide** that covers:
+- Complete overview of the Second Life open source ecosystem
+- Integration with OpenSimulator grids
+- LibreMetaverse protocol implementation
+- Asset format compatibility across platforms
+- Mobile-specific considerations for virtual world access
+- Authentication and security best practices
+- Extensive code examples and implementation details
+- Contributing to the SL open source community
+
+### Platform-Specific Guides
+
+#### OpenSimulator Integration
+**[OpenSimulator Compatibility](OpenSimulator_Compatibility.md)**
+
+Detailed guide for OpenSimulator users covering:
+- Variable region size support (256x256 to 4096x4096)
+- Enhanced physics materials (BulletSim, ODE, ubODE)
+- NPC (Non-Player Character) management
+- Hypergrid travel and inter-grid connectivity
+- Grid selection and connection management
+- Performance optimizations for OpenSim
+
+#### LibreMetaverse Protocol Implementation  
+**[LibreMetaverse Integration](LibreMetaverse_Integration.md)**
+
+Java implementation of LibreMetaverse patterns:
+- Event-driven architecture translation from C# to Java
+- Modern network management with HTTP/2 and WebSocket support
+- Comprehensive agent management system
+- Advanced object manipulation and interaction
+- Asset management with universal format support
+- Complete protocol message handling
+
+### Support and Troubleshooting
+
+#### Comprehensive Troubleshooting Guide
+**[Troubleshooting Second Life Integration](Troubleshooting_Second_Life_Integration.md)**
+
+Complete troubleshooting resource covering:
+- Connection issues and authentication problems
+- Asset loading and performance optimization
+- OpenSimulator-specific issue resolution
+- Network and firewall configuration
+- Mobile-specific problems and solutions
+- Developer tools and debugging techniques
+- Automated error reporting and recovery
+
+## Integration with Existing Documentation
+
+### Core Technical Documentation
+- **[Second Life Integration Guide](Second_Life_Integration_Guide.md)** - Technical implementation details
+- **[API Analysis and Improvements](API_Analysis_and_Improvements.md)** - LibreMetaverse API analysis
+- **[Graphics Engine Roadmap](Graphics_Engine_Roadmap.md)** - 3D rendering improvements
+- **[Implementation Roadmap](Implementation_Roadmap.md)** - Step-by-step modernization plan
+
+### Development and Modernization
+- **[Lumiya Modernization Guide](Lumiya_Modernization_Guide.md)** - Overall modernization strategy
+- **[Broken Code Analysis and Fixes](Broken_Code_Analysis_and_Fixes.md)** - Known issues and solutions
+- **[CPP Integration Guide](CPP_Integration_Guide.md)** - Native C++ component integration
+- **[Basis Universal Integration](Basis_Universal_Integration.md)** - Modern texture compression
+
+## Key Features Covered
+
+### Virtual World Connectivity
+- **Second Life Main Grid** - Official Linden Lab grid connectivity
+- **Second Life Beta Grid** - Testing environment support  
+- **OpenSimulator Grids** - OSGrid, Kitely, InWorldz, and custom grids
+- **Hypergrid Support** - Inter-grid teleportation and connectivity
+
+### Protocol Support
+- **Legacy UDP Messages** - Full Second Life protocol compatibility
+- **Modern HTTP CAPS** - Enhanced capability-based services
+- **LLSD Serialization** - Linden Lab Structured Data formats
+- **WebSocket Events** - Real-time communication support
+
+### Asset Format Support  
+- **Legacy Formats** - JPEG2000 textures, Second Life meshes
+- **Modern Formats** - Basis Universal, glTF 2.0, KTX2, WebP
+- **Cross-Platform Assets** - VRM avatars, OMI extensions
+- **Universal Compatibility** - Automatic format detection and conversion
+
+### Mobile Optimization
+- **Battery-Aware Rendering** - Dynamic quality adjustment
+- **Network-Adaptive Streaming** - Bandwidth-conscious asset loading
+- **Touch-Optimized Controls** - Advanced gesture recognition
+- **Performance Monitoring** - Real-time optimization
+
+## Development Philosophy
+
+### Open Source Integration
+This documentation emphasizes integration with the broader Second Life open source ecosystem:
+
+- **LibreMetaverse** - Modern .NET protocol library patterns translated to Java
+- **OpenSimulator** - Full compatibility with the leading open source virtual world server
+- **Community Standards** - Following established patterns from the virtual world community
+- **Cross-Platform Interoperability** - Supporting asset exchange between platforms
+
+### Modern Mobile Development
+The guides incorporate contemporary mobile development practices:
+
+- **Reactive Architecture** - Event-driven, asynchronous programming patterns
+- **Material Design** - Following Android UI/UX best practices
+- **Performance-First** - Mobile-specific optimization strategies
+- **Security-Focused** - Modern authentication and data protection
+
+### Future-Proof Design
+Documentation covers emerging standards and technologies:
+
+- **WebXR Integration** - Preparation for AR/VR support
+- **OMI Standards** - Open Metaverse Interoperability compliance
+- **Modern Graphics APIs** - Vulkan and compute shader support
+- **Cloud Services** - Integration with modern cloud infrastructure
+
+## Getting Started
+
+### For New Users
+1. Read the **[Second Life Open Source Portal Integration Guide](Second_Life_Open_Source_Portal_Integration_Guide.md)**
+2. Follow the setup instructions for your target platform (Second Life vs OpenSim)
+3. Use the **[Troubleshooting Guide](Troubleshooting_Second_Life_Integration.md)** if you encounter issues
+
+### For Developers
+1. Review **[LibreMetaverse Integration](LibreMetaverse_Integration.md)** for protocol implementation patterns
+2. Study **[OpenSimulator Compatibility](OpenSimulator_Compatibility.md)** for platform-specific features
+3. Consult existing technical documentation for implementation details
+
+### For Contributors
+1. Understand the architecture from **[API Analysis and Improvements](API_Analysis_and_Improvements.md)**
+2. Follow the **[Implementation Roadmap](Implementation_Roadmap.md)** for modernization tasks
+3. Use **[Broken Code Analysis and Fixes](Broken_Code_Analysis_and_Fixes.md)** to identify areas for improvement
+
+## Community and Support
+
+### Getting Help
+- **GitHub Issues** - For bug reports and feature requests
+- **GitHub Discussions** - For questions and community support
+- **Second Life Forums** - For SL-specific questions
+- **OpenSimulator Community** - For OpenSim-related support
+
+### Contributing
+- **Code Contributions** - Follow the patterns established in these guides
+- **Documentation** - Help improve and expand these guides
+- **Testing** - Test with various grids and configurations
+- **Community** - Share your experiences and solutions
 
 ---
 
-## Current Status (January 2026)
-
-| Component | Status | Notes |
-|-----------|--------|-------|
-| Build | ✅ Working | APK builds successfully |
-| Login | ✅ Working | Connects to SL grid |
-| UDP Connection | ✅ Working | Socket connected |
-| Capabilities | ✅ Working | 12 caps loaded |
-| Event Queue | ✅ Working | 18 handlers active |
-| World Loading | ⚠️ In Progress | Objects/avatars not populating |
-| 3D Rendering | ⚠️ In Progress | Swap chain issues |
-
-**See [docs/FIXES_AND_STATUS.md](docs/FIXES_AND_STATUS.md) for detailed fix history and remaining issues.**
-
----
-
-## Quick Start
-
-### Prerequisites
-- Android Studio Arctic Fox or later
-- JDK 17+
-- Android SDK 35
-
-### Build
-```bash
-./gradlew assembleDebug
-```
-
-### Install
-```bash
-adb install -r Linkpoint/build/outputs/apk/debug/Linkpoint-debug.apk
-```
-
----
-
-## Features
-
-- **Grid Support:** Second Life, Beta Grid, OpenSimulator
-- **Modern UI:** Jetpack Compose with Material Design 3
-- **3D Rendering:** Filament-based rendering engine
-- **Voice Chat:** WebRTC integration
-- **Full Protocol:** UDP messages + HTTP capabilities
-
----
-
-## XR Support & Runtime Requirements
-
-- **Stable builds (`stableDebug` / `stableRelease`)** expose only XR paths marked **Ready** at runtime.
-- **Experimental builds (`xrExperimentalDebug` / `xrExperimentalRelease`)** enable OpenXR/Android XR paths marked **Experimental**.
-- **Device/runtime checks:**
-  - Cardboard mode requires `android.software.vr.mode` or `android.hardware.vr.high_performance`.
-  - Android XR requires **Android 15+ (API 35)** and `android.hardware.xr.immersive`.
-  - OpenXR requires an available OpenXR runtime class on-device.
-- If XR init/rendering fails, the app exits XR and returns to the standard world view.
-
-### Building XR variants
-
-```bash
-./gradlew assembleStableDebug
-./gradlew assembleXrExperimentalDebug
-```
-
-## Documentation
-
-| Document | Description |
-|----------|-------------|
-| [FIXES_AND_STATUS.md](docs/FIXES_AND_STATUS.md) | Fix history and current issues |
-| [Broken_Code_Analysis_and_Fixes.md](docs/Broken_Code_Analysis_and_Fixes.md) | Technical analysis |
-| [QUICK_START_GUIDE.md](QUICK_START_GUIDE.md) | Setup instructions |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute |
-| [PRIVACY_POLICY.md](PRIVACY_POLICY.md) | Privacy practices |
-| [THIRD_PARTY_VIEWER_POLICY_COMPLIANCE.md](THIRD_PARTY_VIEWER_POLICY_COMPLIANCE.md) | TPV compliance |
-
----
-
-## Recent Fixes (PRs #222-227)
-
-### ✅ What Worked
-- **ACK byte order fix** - Changed appended ACKs from little-endian to big-endian
-- **Connection sequence** - Wait for UseCircuitCode ACK before CompleteAgentMovement
-- **Missing message handlers** - Added PING_CHECK, TERSE_UPDATE, COARSE_LOCATION, KILL_OBJECT
-- **UUID byte order** - Centralized big-endian UUID writes
-- **Build infrastructure** - AGP 8.6.1, Kotlin 2.1.0, compileSdk 35
-- **Theme crash** - Added missing MD3 color attributes
-
-### ⚠️ Still In Progress
-- RegionHandshake name parsing
-- Object/avatar scene population
-- Swap chain initialization
-- ACK timing on high-latency networks
-
----
-
-## Architecture
-
-```
-Linkpoint/src/main/kotlin/com/linkpoint/
-├── slproto/          # Second Life protocol implementation
-│   ├── udp/          # UDP packet handling
-│   ├── caps/         # HTTP capabilities
-│   ├── llsd/         # LLSD serialization
-│   └── messages/     # Message handlers
-├── modern/           # Modern architecture components
-│   ├── connection/   # Connection management
-│   ├── graphics/     # Texture/rendering
-│   └── protocol/     # Protocol abstractions
-├── ui/               # User interface
-│   └── compose/      # Jetpack Compose screens
-└── render/           # 3D rendering (Filament)
-```
-
----
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
-
----
-
-## Support
-
-- **Issues:** [GitHub Issues](https://github.com/Kaleaon/Linkpoint/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/Kaleaon/Linkpoint/discussions)
-
----
-
-## License
-
-See [LICENSE](LICENSE) file for details.
+This documentation represents a comprehensive effort to bridge modern mobile development with the rich ecosystem of Second Life's open source technologies. Whether you're a user looking to connect to virtual worlds, a developer implementing new features, or a contributor to the open source community, these guides provide the foundation for successful integration with the Second Life open source ecosystem.

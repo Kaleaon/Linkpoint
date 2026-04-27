@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="floater_translation_settings" title="Impostazioni Traduzione Chat">
+	<string name="azure_api_key_not_verified">Non è stato possibile verificare l'ID Azure. Stato: [STATUS]. Verifica le impostazioni e riprova.</string>
+	<string name="google_api_key_not_verified">Non è stato possibile verificare la chiave API di Google. Stato: [STATUS]. Verifica la chiave e riprova.</string>
+	<string name="deepl_api_key_not_verified">Impossibile verificare la chiave DeepL. Stato: [STATUS]. Verifica la chiave e riprova.</string>
+	<string name="azure_api_key_verified">ID di Azure verificato.</string>
+	<string name="google_api_key_verified">Chiave API di Google verificata.</string>
+	<string name="deepl_api_key_verified">Chiave di DeepL verificata.</string>
+	<check_box label="Attiva la traduzione automatica della chat" name="translate_chat_checkbox"/>
+	<text name="translate_language_label">
+		Traduci chat in:
+	</text>
+	<combo_box name="translate_language_combo">
+		<combo_box.item label="Predefinito di sistema" name="System Default Language"/>
+		<combo_box.item label="English (Inglese)" name="English"/>
+		<combo_box.item label="Dansk (Danese)" name="Danish"/>
+		<combo_box.item label="Deutsch (Tedesco)" name="German"/>
+		<combo_box.item label="Español (Spagnolo)" name="Spanish"/>
+		<combo_box.item label="Français (Francese)" name="French"/>
+		<combo_box.item label="Italiano" name="Italian"/>
+		<combo_box.item label="Magyar (Ungherese)" name="Hungarian"/>
+		<combo_box.item label="Nederlands (Olandese)" name="Dutch"/>
+		<combo_box.item label="Polski (Polacco)" name="Polish"/>
+		<combo_box.item label="Português (Portoghese)" name="Portugese"/>
+		<combo_box.item label="Русский (Russo)" name="Russian"/>
+		<combo_box.item label="Türkçe (Turco)" name="Turkish"/>
+		<combo_box.item label="Українська (Ucraino)" name="Ukrainian"/>
+		<combo_box.item label="中文 (正體) (Cinese)" name="Chinese"/>
+		<combo_box.item label="日本語 (Giapponese)" name="Japanese"/>
+		<combo_box.item label="한국어 (Coreano)" name="Korean"/>
+	</combo_box>
+	<text name="tip">
+		Seleziona il servizio di traduzione:
+	</text>
+	<text name="azure_links_text">
+		[https://learn.microsoft.com/en-us/azure/cognitive-services/translator/create-translator-resource Setup]
+	</text>
+	<!-- <text name="azure_api_key_label">
+		Chiave Azure:
+	</text> -->
+	<line_editor default_text="Inserisci la tua chiave di Azure" name="azure_api_key" />
+	<text name="azure_api_region_label">
+		Regione:
+	</text>
+	<line_editor default_text="Puoi lasciare vuoto per i servizi globali" name="azure_api_region" />
+	<button label="Verifica" name="verify_azure_api_key_btn" />
+	<line_editor default_text="Inserisci la tua chiave API di Google" name="google_api_key" />
+	<button label="Verifica" name="verify_google_api_key_btn" />
+	<text name="google_links_text">
+		[http://code.google.com/apis/language/translate/v2/pricing.html Prezzi] | [https://code.google.com/apis/console Statistiche]
+	</text>
+	<!-- <text name="deepl_api_key_label">
+		Chiave DeepL:
+	</text> -->
+	<line_editor default_text="Inserisci la tua chiave di DeepL" name="deepl_api_key" />
+	<button label="Verifica" name="verify_deepl_api_key_btn" />
+	<text name="deepl_links_text">
+		[https://www.deepl.com/pro/select-country?cta=header-prices Prezzi]
+	</text>
+	<button label="Annulla" name="cancel_btn"/>
+</floater>

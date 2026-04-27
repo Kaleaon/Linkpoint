@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="preview_sound" width="350">
+	<floater.string name="Title">Son : [NAME]</floater.string>
+	<text name="desc txt">Description :</text>
+	<line_editor name="desc" width="230" />
+	<button label="Jouer devant tout le monde"  width="160" label_selected="Jouer devant tout le monde" name="Sound play btn" tool_tip="Jouer ce son de façon à ce que les autres puissent l'entendre"/>
+	<button label="Jouer localement"  width="160" label_selected="Jouer localement" name="Sound audition btn" tool_tip="Jouer ce son de façon à ce que vous soyez la seule personne à pouvoir l'entendre"/>
+</floater>

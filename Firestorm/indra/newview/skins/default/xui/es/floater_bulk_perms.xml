@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="floaterbulkperms" title="Ajustar los permisos del contenido">
+	<floater.string name="nothing_to_modify_text">
+		Lo seleccionado tiene contenidos no editables.
+	</floater.string>
+	<floater.string name="status_text">
+		Configurando los permisos de [NAME]
+	</floater.string>
+	<floater.string name="start_text">
+		Iniciando el cambio de permisos solicitado...
+	</floater.string>
+	<floater.string name="done_text">
+		Finalizado el cambio de permisos solicitado.
+	</floater.string>
+	<check_box label="Animación" name="check_animation"/>
+	<icon name="icon_animation" tool_tip="Animaciones"/>
+	<check_box label="Partes del cuerpo" name="check_bodypart" top_pad="5"/>
+	<icon name="icon_bodypart" tool_tip="Partes del cuerpo"/>
+	<check_box label="Ropa" name="check_clothing"/>
+	<icon name="icon_clothing" tool_tip="Ropa"/>
+	<check_box label="Gestos" name="check_gesture"/>
+	<icon name="icon_gesture" tool_tip="Gestos"/>
+	<check_box label="Notas" name="check_notecard"/>
+	<icon name="icon_notecard" tool_tip="Notas"/>
+	<check_box label="Objetos" name="check_object"/>
+	<icon name="icon_object" tool_tip="Objetos"/>
+	<check_box label="Scripts" name="check_script"/>
+	<icon name="icon_script" tool_tip="Scripts"/>
+	<check_box label="Sonidos" name="check_sound"/>
+	<icon name="icon_sound" tool_tip="Sonidos"/>
+	<check_box label="Texturas" name="check_texture"/>
+	<icon name="icon_texture" tool_tip="Texturas"/>
+	<icon name="icon_setting" tool_tip="Configuración de entorno"/>
+	<button label="√ Todos" label_selected="Todo" name="check_all"/>
+	<button label="Limpiar" label_selected="Ninguno" name="check_none"/>
+	<text name="newperms">
+		Permisos nuevos del contenido
+	</text>
+	<text name="GroupLabel" height="34">
+		Grupo:
+	</text>
+	<check_box label="Compartir" name="share_with_group" tool_tip="Permite que todos los miembros del grupo compartan tus permisos de modificación de este objeto. Debes transferirlo para activar las restricciones según los roles."/>
+	<text name="AnyoneLabel" height="34">
+		Cualquiera:
+	</text>
+	<check_box label="Copiarlo" name="everyone_copy" tool_tip="Todos pueden tomar una copia del objeto. El objeto y todos sus contenidos deben tener un permiso para copiar y transferir."/>
+	<text name="NextOwnerLabel" height="34">
+		Próximo propietario:
+	</text>
+	<check_box label="Modificarlo" name="next_owner_modify" tool_tip="El próximo propietario puede editar ciertas propiedades como el nombre o la escala del objeto."/>
+	<check_box label="Copiarlo" name="next_owner_copy" tool_tip="El próximo propietario puede realizar copias ilimitadas de este objeto. Las copias mantienen la información del creador y nunca pueden ser más permisivas que el objeto que se está copiando."/>
+	<check_box initial_value="true" label="Transferirlo" name="next_owner_transfer" tool_tip="El próximo propietario puede dar o revender este objeto."/>
+	<scroll_list height="76" name="queue output"/>
+	<button label="Aceptar" name="ok"/>
+	<button label="Aplicar" name="apply"/>
+	<button label="Cancelar" name="close"/>
+</floater>

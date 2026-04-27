@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<panel label="Geräteeinstellungen" name="device_settings_panel">
+	<panel.string name="default_text">
+		Standard
+	</panel.string>
+	<string name="name_no_device">
+		Kein Gerät
+	</string>
+	<string name="name_default_system_device">
+		Standardsystemgerät
+	</string>
+	<text name="Input">
+		Eingabe
+	</text>
+	<text name="Output">
+		Ausgabe
+	</text>
+	<text name="My volume label">
+		Mikrofonlautstärke:
+	</text>
+	<slider_bar initial_value="1,0" name="mic_volume_slider" tool_tip="Mit diesem Schieberegler können Sie den Mikrofonpegel ändern"/>
+	<text name="wait_text">
+		Bitte warten
+	</text>
+</panel>

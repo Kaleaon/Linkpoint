@@ -1,0 +1,23 @@
+package com.linkpoint.slproto.modules.rlv.commands
+
+import com.linkpoint.Debug
+import com.linkpoint.slproto.modules.rlv.RLVController
+import com.linkpoint.slproto.modules.rlv.RLVRestrictionType
+import java.util.UUID
+
+class RLVCmdSit : RLVCmdGenericRestriction() {
+    public RLVCmdSit() {
+        super(RLVRestrictionType.sit, false)
+    }
+
+    /* access modifiers changed from: protected */
+    fun HandleForce(rLVController: RLVController, uuid: UUID, str: String) {
+        if (str != null) {
+            try {
+                rLVController.getModules().avatarControl.ForceSitOnObject(UUID.fromString(str))
+            } catch (Exception e) {
+                Debug.Warning(e)
+            }
+        }
+    }
+}

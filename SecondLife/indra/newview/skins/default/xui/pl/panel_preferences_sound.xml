@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel label="Dźwięki" name="Preference Media panel">
+	<panel.string name="middle_mouse">
+		Środkowy przycisk myszy
+	</panel.string>
+	<slider label="Głośność ogólna" name="System Volume" />
+	<text name="mute_chb_label">
+		Wycisz gdy zminimalizowane
+	</text>
+	<slider label="Interfejs" name="UI Volume" />
+	<slider label="Otoczenie" name="Wind Volume" />
+	<slider label="Efekty dźwiękowe" name="SFX Volume" />
+	<slider label="Muz. strumieniowa" name="Music Volume" />
+	<check_box label="Włączona" name="enable_music" />
+	<check_box label="Włączone" name="enable_media" />
+	<slider label="Rozmowy głosowe" name="Voice Volume" />
+	<check_box label="Włączone" name="enable_voice_check" />
+	<check_box name="media_auto_play_btn" tool_tip="Zaznacz tę funkcję, aby automatycznie uruchamiać media" label="Automatycznie odtwarzaj media" />
+	<check_box name="media_show_on_others_btn" tool_tip="Odznacz tę funkcję by ukryć media załączone do awatarów w pobliżu" label="Uruchamiaj media dołączone do innych awatarów" />
+	<check_box name="gesture_audio_play_btn" tool_tip="Zaznacz, aby słyszeć dźwięki gestów" label="Odtwarzaj dźwięki gestów" />
+	<text name="voice_chat_settings">
+		Rozmowy głosowe
+	</text>
+	<text name="Listen from">
+		Odtwarzaj głos z:
+	</text>
+	<radio_group name="ear_location">
+		<radio_item label="Pozycji mojej kamery" name="0" />
+		<radio_item label="Pozycji mojego awatara" name="1" />
+	</radio_group>
+	<check_box label="Poruszaj ustami awatara podczas mówienia" name="enable_lip_sync" />
+	<check_box label="Włącz/wyłącz mikrofon kiedy naciskam:" name="push_to_talk_toggle_check" tool_tip="Kiedy aktywny jest tryb przełączania wciśnij i zwolnij przełącznik RAZ, aby włączyć lub wyłączyć mikrofon. Kiedy tryb przełączania nie jest aktywny mikrofon nadaje głos tylko wtedy, gdy przełącznik jest wciśnięty." />
+	<line_editor name="modifier_combo" label="Przełącznik naciśnij-by-mówić" />
+	<button label="Ustaw klawisz" name="set_voice_hotkey_button" />
+	<button tool_tip="Zresetuj do środkowego przycisku myszy" name="set_voice_middlemouse_button" />
+	<button label="Ustawienia sprzętowe audio" name="device_settings_btn" />
+</panel>

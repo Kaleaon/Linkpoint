@@ -18,12 +18,10 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        // AGP 8.6.1 required for latest AndroidX Compose BOM dependencies
-        classpath 'com.android.tools.build:gradle:8.6.1'
-        // Kotlin Gradle plugin - Use stable 1.9.22 for broad library compatibility
+        // AGP 8.1.4 - Compatible with Gradle 8.5 and Java 21
+        classpath 'com.android.tools.build:gradle:8.1.4'
+        // Kotlin Gradle plugin - Updated to 1.9.22 for latest features
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22'
-        // Hilt dependency injection - Disabled (not currently used)
-        // classpath 'com.google.dagger:hilt-android-gradle-plugin:2.48'
     }
 }
 
@@ -35,11 +33,6 @@ allprojects {
         maven {
             name = "Clojars"
             url = "https://repo.clojars.org/"
-        }
-        // Add JitPack for compose-code-editor
-        maven {
-            name = "JitPack"
-            url = "https://jitpack.io"
         }
     }
 }

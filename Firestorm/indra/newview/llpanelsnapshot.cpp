@@ -1,0 +1,282 @@
+/**
+ * @file llpanelsnapshot.cpp
+ * @brief Snapshot panel base class
+ *
+ * $LicenseInfo:firstyear=2011&license=viewerlgpl$
+ * Second Life Viewer Source Code
+ * Copyright (C) 2011, Linden Research, Inc.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation;
+ * version 2.1 of the License only.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Linden Research, Inc., 945 Battery Street, San Francisco, CA  94111  USA
+ * $/LicenseInfo$
+ */
+
+#include "llviewerprecompiledheaders.h"
+#include "llpanelsnapshot.h"
+
+// libs
+#include "llcombobox.h"
+#include "llfloater.h"
+#include "llfloatersnapshot.h"
+#include "llsliderctrl.h"
+#include "llspinctrl.h"
+#include "lltrans.h"
+
+// newview
+#include "llsidetraypanelcontainer.h"
+#include "llsnapshotlivepreview.h"
+#include "llviewercontrol.h" // gSavedSettings
+
+#include "llagentbenefits.h"
+
+constexpr S32 MAX_TEXTURE_SIZE = 2048 ; //max upload texture size 2048 * 2048
+
+S32 power_of_two(S32 sz, S32 upper)
+{
+    S32 res = upper;
+    while( upper >= sz)
+    {
+        res = upper;
+        upper >>= 1;
+    }
+    return res;
+}
+
+LLPanelSnapshot::LLPanelSnapshot()
+    : mSnapshotFloater(NULL)
+{}
+
+// virtual
+bool LLPanelSnapshot::postBuild()
+{
+    // <FS:Ansariel> Fix XUI parser warning
+    //S32 w = getTypedPreviewWidth();
+    //S32 h = getTypedPreviewHeight();
+    //getChild<LLUICtrl>("save_btn")->setLabelArg("[UPLOAD_COST]", std::to_string(LLAgentBenefitsMgr::current().getTextureUploadCost(w, h)));
+    LLUICtrl* save_btn = findChild<LLUICtrl>("save_btn");
+    if (save_btn)
+    {
+        S32 w = getTypedPreviewWidth();
+        S32 h = getTypedPreviewHeight();
+        save_btn->setLabelArg("[UPLOAD_COST]", std::to_string(LLAgentBenefitsMgr::current().getTextureUploadCost(w, h)));
+    }
+    // </FS:Ansariel>
+    getChild<LLUICtrl>(getImageSizeComboName())->setCommitCallback(boost::bind(&LLPanelSnapshot::onResolutionComboCommit, this, _1));
+    if (!getWidthSpinnerName().empty())
+    {
+        getChild<LLUICtrl>(getWidthSpinnerName())->setCommitCallback(boost::bind(&LLPanelSnapshot::onCustomResolutionCommit, this));
+    }
+    if (!getHeightSpinnerName().empty())
+    {
+        getChild<LLUICtrl>(getHeightSpinnerName())->setCommitCallback(boost::bind(&LLPanelSnapshot::onCustomResolutionCommit, this));
+    }
+    if (!getAspectRatioCBName().empty())
+    {
+        getChild<LLUICtrl>(getAspectRatioCBName())->setCommitCallback(boost::bind(&LLPanelSnapshot::onKeepAspectRatioCommit, this, _1));
+    }
+    updateControls(LLSD());
+
+    mSnapshotFloater = getParentByType<LLFloaterSnapshotBase>();
+    return true;
+}
+
+// virtual
+void LLPanelSnapshot::onOpen(const LLSD& key)
+{
+    S32 old_format = gSavedSettings.getS32("SnapshotFormat");
+    S32 new_format = (S32) getImageFormat();
+
+    gSavedSettings.setS32("SnapshotFormat", new_format);
+    setCtrlsEnabled(true);
+
+    // Switching panels will likely change image format.
+    // Not updating preview right away may lead to errors,
+    // e.g. attempt to send a large BMP image by email.
+    if (old_format != new_format)
+    {
+        getParentByType<LLFloater>()->notify(LLSD().with("image-format-change", true));
+    }
+
+    // If resolution is set to "Current Window", force a snapshot update
+    // each time a snapshot panel is opened to determine the correct
+    // image size (and upload fee) depending on the snapshot type.
+    if (mSnapshotFloater && getChild<LLUICtrl>(getImageSizeComboName())->getValue().asString() == "[i0,i0]")
+    {
+        if (LLSnapshotLivePreview* preview = mSnapshotFloater->getPreviewView())
+        {
+            preview->mForceUpdateSnapshot = true;
+        }
+    }
+}
+
+LLSnapshotModel::ESnapshotFormat LLPanelSnapshot::getImageFormat() const
+{
+    return LLSnapshotModel::SNAPSHOT_FORMAT_JPEG;
+}
+
+void LLPanelSnapshot::enableControls(bool enable)
+{
+    setCtrlsEnabled(enable);
+}
+
+LLSpinCtrl* LLPanelSnapshot::getWidthSpinner()
+{
+    llassert(!getWidthSpinnerName().empty());
+    return getChild<LLSpinCtrl>(getWidthSpinnerName());
+}
+
+LLSpinCtrl* LLPanelSnapshot::getHeightSpinner()
+{
+    llassert(!getHeightSpinnerName().empty());
+    return getChild<LLSpinCtrl>(getHeightSpinnerName());
+}
+
+// <FS:Ansariel> Store settings at logout
+LLComboBox* LLPanelSnapshot::getImageSizeComboBox()
+{
+    return getChild<LLComboBox>(getImageSizeComboName());
+}
+// </FS:Ansariel>
+
+S32 LLPanelSnapshot::getTypedPreviewWidth() const
+{
+    llassert(!getWidthSpinnerName().empty());
+    return getChild<LLUICtrl>(getWidthSpinnerName())->getValue().asInteger();
+}
+
+S32 LLPanelSnapshot::getTypedPreviewHeight() const
+{
+    llassert(!getHeightSpinnerName().empty());
+    return getChild<LLUICtrl>(getHeightSpinnerName())->getValue().asInteger();
+}
+
+void LLPanelSnapshot::enableAspectRatioCheckbox(bool enable)
+{
+    llassert(!getAspectRatioCBName().empty());
+    getChild<LLUICtrl>(getAspectRatioCBName())->setEnabled(enable);
+}
+
+LLSideTrayPanelContainer* LLPanelSnapshot::getParentContainer()
+{
+    LLSideTrayPanelContainer* parent = dynamic_cast<LLSideTrayPanelContainer*>(getParent());
+    if (!parent)
+    {
+        LL_WARNS() << "Cannot find panel container" << LL_ENDL;
+        return NULL;
+    }
+
+    return parent;
+}
+
+void LLPanelSnapshot::updateImageQualityLevel()
+{
+    LLSliderCtrl* quality_slider = getChild<LLSliderCtrl>("image_quality_slider");
+    S32 quality_val = llfloor((F32) quality_slider->getValue().asReal());
+
+    std::string quality_lvl;
+
+    if (quality_val < 20)
+    {
+        quality_lvl = LLTrans::getString("snapshot_quality_very_low");
+    }
+    else if (quality_val < 40)
+    {
+        quality_lvl = LLTrans::getString("snapshot_quality_low");
+    }
+    else if (quality_val < 60)
+    {
+        quality_lvl = LLTrans::getString("snapshot_quality_medium");
+    }
+    else if (quality_val < 80)
+    {
+        quality_lvl = LLTrans::getString("snapshot_quality_high");
+    }
+    else
+    {
+        quality_lvl = LLTrans::getString("snapshot_quality_very_high");
+    }
+
+    // <FS:Ansariel> Only update if it really exists
+    //getChild<LLTextBox>("image_quality_level")->setTextArg("[QLVL]", quality_lvl);
+    LLTextBox* image_quality_level_textbox = findChild<LLTextBox>("image_quality_level");
+    if (image_quality_level_textbox)
+    {
+        image_quality_level_textbox->setTextArg("[QLVL]", quality_lvl);
+    }
+    // </FS:Ansariel>
+}
+
+void LLPanelSnapshot::goBack()
+{
+    LLSideTrayPanelContainer* parent = getParentContainer();
+    if (parent)
+    {
+        parent->openPreviousPanel();
+        parent->getCurrentPanel()->onOpen(LLSD());
+    }
+}
+
+void LLPanelSnapshot::cancel()
+{
+    goBack();
+    getParentByType<LLFloater>()->notify(LLSD().with("set-ready", true));
+}
+
+void LLPanelSnapshot::onCustomResolutionCommit()
+{
+    LLSD info;
+    std::string widthSpinnerName = getWidthSpinnerName();
+    std::string heightSpinnerName = getHeightSpinnerName();
+    llassert(!widthSpinnerName.empty() && !heightSpinnerName.empty());
+    LLSpinCtrl *widthSpinner = getChild<LLSpinCtrl>(widthSpinnerName);
+    LLSpinCtrl *heightSpinner = getChild<LLSpinCtrl>(heightSpinnerName);
+    if (getName() == "panel_snapshot_inventory")
+    {
+        S32 width = widthSpinner->getValue().asInteger();
+        width = power_of_two(width, MAX_TEXTURE_SIZE);
+        info["w"] = width;
+        widthSpinner->setIncrement((F32)(width >> 1));
+        widthSpinner->forceSetValue(width);
+        S32 height =  heightSpinner->getValue().asInteger();
+        height = power_of_two(height, MAX_TEXTURE_SIZE);
+        heightSpinner->setIncrement((F32)(height >> 1));
+        heightSpinner->forceSetValue((F32)height);
+        info["h"] = height;
+    }
+    else
+    {
+        info["w"] = widthSpinner->getValue().asInteger();
+        info["h"] = heightSpinner->getValue().asInteger();
+    }
+    getParentByType<LLFloater>()->notify(LLSD().with("custom-res-change", info));
+}
+
+void LLPanelSnapshot::onResolutionComboCommit(LLUICtrl* ctrl)
+{
+    LLSD info;
+    info["combo-res-change"]["control-name"] = ctrl->getName();
+    getParentByType<LLFloater>()->notify(info);
+}
+
+void LLPanelSnapshot::onKeepAspectRatioCommit(LLUICtrl* ctrl)
+{
+    getParentByType<LLFloater>()->notify(LLSD().with("keep-aspect-change", ctrl->getValue().asBoolean()));
+}
+
+LLSnapshotModel::ESnapshotType LLPanelSnapshot::getSnapshotType()
+{
+    return LLSnapshotModel::SNAPSHOT_WEB;
+}

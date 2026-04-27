@@ -219,7 +219,7 @@ class LLSDBinaryParser {
         val marker = reader.readByte()
         
         return when (marker) {
-            UNDEF_MARKER -> null // Undefined value represented as null
+            UNDEF_MARKER -> "" // Undefined value represented as empty string
             TRUE_MARKER -> true
             FALSE_MARKER -> false
             INTEGER_MARKER -> reader.readInt32()

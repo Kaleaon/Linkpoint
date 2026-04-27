@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+
+<!-- <FS:Zi> This floater's height changes at runtime when display of advanced info changes:
+
+    collapsed:
+    floater height = basic_info_panel.top + basic_info_panel.height      25 + 60
+
+    expanded:
+    floater height = basic_info_panel.top + basic_info_panel.height + advanced_info_panel.height  25 + 60 + 56
+
+-->
+
+<floater
+ legacy_header_height="18"
+ height="141"
+ layout="topleft"
+ name="preview_anim"
+ help_topic="fs_animation_inventory_preview"
+ positioning="centered"
+ save_rect="true"
+ width="320">
+    <floater.string
+     name="Title">
+        Animation: [NAME]
+    </floater.string>
+
+    <!-- <FS:Zi> panel that holds the basic animation info and gives size hints to the code -->
+    <panel
+     follows="left|top|right"
+     height="60"
+     layout="topleft"
+     left="0"
+     name="basic_info_panel"
+     top="25"
+     width="320">
+
+    <text
+     type="string"
+     length="1"
+     follows="left|top"
+     font="SansSerif"
+     height="19"
+     layout="topleft"
+     left="10"
+     name="desc txt"
+     width="80">
+        Description:
+    </text>
+    <line_editor
+     border_style="line"
+     border_thickness="1"
+     follows="left|top|right"
+     font="SansSerifSmall"
+     height="19"
+     layout="topleft"
+     left_pad="5"
+     max_length_bytes="127"
+     name="desc"
+     top_delta="-2"
+     right="-10" />
+    <button
+     follows="left|top"
+     height="20"
+     label="Play Inworld"
+     label_selected="Stop"
+     layout="topleft"
+     left="8"
+     name="Inworld"
+     tool_tip="Play this animation so that others can see it"
+     top_pad="8"
+     width="132">
+       <button.commit_callback
+        function="PreviewAnim.Play"
+        parameter="Inworld" /> 
+    </button>
+    <button
+     follows="left|top"
+     height="20"
+     label="Play Locally"
+     label_selected="Stop"
+     layout="topleft"
+     left_pad="6"
+     name="Locally"
+     tool_tip="Play this animation so that only you can see it"
+     top_delta="0"
+     width="132">
+       <button.commit_callback
+        function="PreviewAnim.Play"
+        parameter="Locally" /> 
+    </button>
+
+    <button
+     follows="left|top"
+     height="20"
+     image_overlay="DisclosureArrow_Opened_Off"
+     layout="topleft"
+     left_pad="5"
+     name="btn_expand"
+     toggle="true"
+     tool_tip="Expand to see advanced information about this animation"
+     top_delta="0"
+     width="32">
+       <button.commit_callback
+        function="PreviewAnim.Expand" />
+    </button>
+</panel>
+
+<!-- <FS:Zi> panel that holds the (optional) advanced animation info and gives size hints to the code -->
+<panel
+ follows="left|top|right"
+ height="56"
+ layout="topleft"
+ name="advanced_info_panel"
+ top_pad="0"
+ visible="true">
+
+    <text
+     type="string"
+     length="1"
+     follows="left|top"
+     font="SansSerif"
+     height="52"
+     layout="topleft"
+     left="10"
+     name="AdvancedStatsLeft"
+     top_pad="0"
+     width="150">
+Priority: [PRIORITY]
+Duration: [DURATION]s
+Loop: [IS_LOOP]
+    </text>
+    <text
+     type="string"
+     length="1"
+     follows="left|top"
+     font="SansSerif"
+     height="52"
+     layout="topleft"
+     left_pad="10"
+     name="AdvancedStatsRight"
+     top_delta="0"
+     width="150">
+Ease In: [EASE_IN]s
+Ease Out: [EASE_OUT]s
+Joints: [NUM_JOINTS]
+    </text>
+</panel>
+</floater>

@@ -1,0 +1,206 @@
+package com.linkpoint.ui.inventory
+
+import android.graphics.Bitmap
+import android.graphics.Typeface
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.BaseAdapter
+import android.widget.CheckBox
+import android.widget.ImageView
+import android.widget.TextView
+import com.google.common.base.Objects
+import com.google.common.collect.ImmutableMap
+import com.google.common.collect.Table
+import com.linkpoint.R
+import com.linkpoint.orm.InventoryDB
+import com.linkpoint.orm.InventoryEntryList
+import com.linkpoint.slproto.assets.SLWearable
+import com.linkpoint.slproto.assets.SLWearableType
+import com.linkpoint.slproto.inventory.SLAssetType
+import com.linkpoint.slproto.inventory.SLInventoryEntry
+import com.linkpoint.slproto.inventory.SLInventoryType
+import com.linkpoint.slproto.modules.SLAvatarAppearance
+import java.util.UUID
+import javax.annotation.Nonnull
+import javax.annotation.Nullable
+
+class InventoryFolderAdapter : BaseAdapter(), View.OnClickListener {
+    private SLAvatarAppearance avatarAppearance = null
+    private InventoryEntryList data = InventoryEntryList()
+    private InventoryDB database
+    private val LayoutInflater inflater
+    private OnItemCheckboxClickListener onItemCheckboxClickListener = null
+    private ImmutableMap<UUID, String> wornAttachments = null
+    private val Boolean wornCheckboxes
+    private UUID wornOutfitFolder
+    private Table<SLWearableType, UUID, SLWearable> wornWearables = null
+
+    interface OnItemCheckboxClickListener {
+         fun onItemCheckboxClicked(sLInventoryEntry: SLInventoryEntry)
+    }
+
+    public InventoryFolderAdapter(LayoutInflater layoutInflater, Boolean z) {
+        this.inflater = layoutInflater
+        this.wornCheckboxes = z
+    }
+
+     private fun isItemWorn(sLInventoryEntry: SLInventoryEntry): Boolean {
+        return sLInventoryEntry.whatIsItemWornOn(this.wornAttachments, this.wornWearables, false) != null
+    }
+
+     public fun getCount(): Int {
+        return this.data.size()
+    }
+
+     public fun getItem(i: Int): SLInventoryEntry {
+        return this.data.get(i)
+    }
+
+     public fun getItemId(i: Int): Long {
+        val item: SLInventoryEntry = getItem(i)
+        if (item != null) {
+            return item.getId()
+        }
+        return -1
+    }
+
+     public fun getView(i: Int, view: View, viewGroup: ViewGroup): View {
+        SLInventoryEntry sLInventoryEntry
+        val z: Boolean = true
+        val i4: Int = 0
+        if (view == null) {
+            view = this.inflater.inflate(R.layout.inventory_item, viewGroup, false)
+        }
+        val item: SLInventoryEntry = getItem(i)
+        if (item != null) {
+            val textView: TextView = (TextView) view.findViewById(R.id.itemNameTextView)
+            textView.setText(item.name)
+            val i5: Int = -1
+            val i6: Int = -1
+            if (item.assetType != SLAssetType.AT_LINK.getTypeCode() || this.database == null) {
+                sLInventoryEntry = item
+            } else {
+                val resolveLink: SLInventoryEntry = this.database.resolveLink(item)
+                if (resolveLink != null) {
+                    i5 = resolveLink.getDrawableResource()
+                    i6 = R.drawable.inv_link
+                    sLInventoryEntry = resolveLink
+                } else {
+                    sLInventoryEntry = item
+                }
+            }
+            if (i5 < 0) {
+                i2 = item.getDrawableResource()
+                i3 = item.getSubtypeDrawableResource()
+            } else {
+                i2 = i5
+                i3 = i6
+            }
+            if (i2 >= 0) {
+                ((ImageView) view.findViewById(R.id.itemTypeIconView)).setImageResource(i2)
+                if (i3 >= 0) {
+                    ((ImageView) view.findViewById(R.id.itemSubTypeIconView)).setImageResource(i3)
+                } else {
+                    ((ImageView) view.findViewById(R.id.itemSubTypeIconView)).setImageBitmap((Bitmap) null)
+                }
+            } else {
+                ((ImageView) view.findViewById(R.id.itemTypeIconView)).setImageBitmap((Bitmap) null)
+                ((ImageView) view.findViewById(R.id.itemSubTypeIconView)).setImageBitmap((Bitmap) null)
+            }
+            if (this.wornOutfitFolder == null || !Objects.equal(this.wornOutfitFolder, item.uuid)) {
+                textView.setTypeface((Typeface) null, 0)
+            } else {
+                textView.setTypeface((Typeface) null, 1)
+            }
+            if (this.wornCheckboxes) {
+                if ((item.assetType == SLAssetType.AT_OBJECT.getTypeCode() || (item.isLink() && item.invType == SLInventoryType.IT_OBJECT.getTypeCode()) || item.isWearable() || sLInventoryEntry.assetType == SLAssetType.AT_OBJECT.getTypeCode()) ? true : sLInventoryEntry.isWearable()) {
+                    val whatIsItemWornOn: Object = sLInventoryEntry.whatIsItemWornOn(this.wornAttachments, this.wornWearables, false)
+                    val z2: Boolean = whatIsItemWornOn != null
+                    val isBodyPart: Boolean = whatIsItemWornOn instanceof SLWearableType ? ((SLWearableType) whatIsItemWornOn).isBodyPart() : false
+                    if (this.avatarAppearance != null) {
+                        if (z2) {
+                            if (!sLInventoryEntry.isWearable()) {
+                                z = this.avatarAppearance.canDetachItem(sLInventoryEntry)
+                            } else if (this.avatarAppearance.canTakeItemOff(sLInventoryEntry)) {
+                                z = !isBodyPart
+                            }
+                        }
+                        view.findViewById(R.id.item_worn_checkbox).setVisibility(0)
+                        view.findViewById(R.id.item_worn_checkbox).setTag(R.id.tag_outfit_object, item)
+                        ((CheckBox) view.findViewById(R.id.item_worn_checkbox)).setChecked(z2)
+                        view.findViewById(R.id.item_worn_checkbox).setEnabled(z)
+                        view.findViewById(R.id.item_worn_checkbox).setOnClickListener(this)
+                    }
+                    z = false
+                    view.findViewById(R.id.item_worn_checkbox).setVisibility(0)
+                    view.findViewById(R.id.item_worn_checkbox).setTag(R.id.tag_outfit_object, item)
+                    ((CheckBox) view.findViewById(R.id.item_worn_checkbox)).setChecked(z2)
+                    view.findViewById(R.id.item_worn_checkbox).setEnabled(z)
+                    view.findViewById(R.id.item_worn_checkbox).setOnClickListener(this)
+                } else {
+                    view.findViewById(R.id.item_worn_checkbox).setVisibility(8)
+                    view.findViewById(R.id.item_worn_checkbox).setTag(R.id.tag_outfit_object, (Object) null)
+                }
+            } else {
+                view.findViewById(R.id.item_worn_checkbox).setVisibility(8)
+                val findViewById: View = view.findViewById(R.id.itemWornIcon)
+                if (!isItemWorn(item)) {
+                    i4 = 8
+                }
+                findViewById.setVisibility(i4)
+            }
+        }
+        return view
+    }
+
+     public fun hasStableIds(): Boolean {
+        return true
+    }
+
+    override fun onClick(view: View) {
+        if (this.onItemCheckboxClickListener != null) {
+            val tag: Object = view.getTag(R.id.tag_outfit_object)
+            if (tag instanceof SLInventoryEntry) {
+                this.onItemCheckboxClickListener.onItemCheckboxClicked((SLInventoryEntry) tag)
+            }
+        }
+    }
+
+    fun setAvatarAppearance(sLAvatarAppearance: SLAvatarAppearance) {
+        this.avatarAppearance = sLAvatarAppearance
+        notifyDataSetChanged()
+    }
+
+    fun setData(inventoryEntryList: InventoryEntryList) {
+        if (inventoryEntryList == null) {
+            inventoryEntryList = InventoryEntryList()
+        }
+        this.data = inventoryEntryList
+        notifyDataSetChanged()
+    }
+
+    fun setDatabase(inventoryDB: InventoryDB) {
+        this.database = inventoryDB
+        notifyDataSetChanged()
+    }
+
+    fun setOnItemCheckboxClickListener(onItemCheckboxClickListener2: OnItemCheckboxClickListener) {
+        this.onItemCheckboxClickListener = onItemCheckboxClickListener2
+    }
+
+    fun setWornAttachments(immutableMap: ImmutableMap<UUID, String>) {
+        this.wornAttachments = immutableMap
+        notifyDataSetChanged()
+    }
+
+    fun setWornOutfitFolder(uuid: UUID) {
+        this.wornOutfitFolder = uuid
+        notifyDataSetChanged()
+    }
+
+    fun setWornWearables(table: Table<SLWearableType, UUID, SLWearable>) {
+        this.wornWearables = table
+        notifyDataSetChanged()
+    }
+}

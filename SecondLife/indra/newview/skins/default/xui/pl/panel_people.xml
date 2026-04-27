@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel label="Ludzie" name="people_panel">
+	<string name="no_recent_people" value="Brak ostatnich rozmówców. Chcesz spotkać ludzi? Spróbuj użyć [secondlife:///app/search/people Wyszukiwarki] lub [secondlife:///app/worldmap Mapy Świata]." />
+	<string name="no_filtered_recent_people" value="Nie znalazłeś/aś tego czego szukasz? Spróbuj użyć [secondlife:///app/search/people/[SEARCH_TERM] Wyszukiwarki]." />
+	<string name="no_one_near" value="Nie ma nikogo w pobliżu. Chcesz spotkać ludzi? Spróbuj użyć [secondlife:///app/search/people Wyszukiwarki] lub [secondlife:///app/worldmap Mapy Świata]." />
+	<string name="no_one_filtered_near" value="Nie znalazłeś/aś tego czego szukasz? Spróbuj użyć [secondlife:///app/search/people/[SEARCH_TERM] Wyszukiwarki]." />
+	<string name="no_friends_online" value="Brak dostępnych znajomych" />
+	<string name="no_friends" value="Brak znajomych" />
+	<string name="no_friends_msg">
+		Wyszukaj znajomych poprzez [secondlife:///app/search/people Wyszukiwarkę] lub kliknij prawym przyciskiem myszki na Rezydencie i zaproponuj znajomość.
+Chcesz spotkać ludzi? Spróbuj użyć [secondlife:///app/worldmap Mapy Świata].
+	</string>
+	<string name="no_filtered_friends_msg">
+		Nie znalazłeś/aś tego czego szukasz? Spróbuj użyć [secondlife:///app/search/people/[SEARCH_TERM] Wyszukiwarki].
+	</string>
+	<string name="no_filtered_groups_msg" value="Nie znalazłeś/aś tego czego szukasz? Spróbuj użyć [secondlife:///app/search/groups/[SEARCH_TERM] Wyszukiwarki]." />
+	<string name="no_groups_msg" value="Chcesz dołączyć do jakiejś grupy? Spróbuj użyć [secondlife:///app/search/groups Wyszukiwarki]." />
+	<string name="MiniMapToolTipMsg" value="[REGION] (Podwójne kliknięcie otwiera mapę, przeciąganie z Shiftem przesuwa)" />
+	<string name="AltMiniMapToolTipMsg" value="[REGION] (Podwójne kliknięcie teleportuje, przeciąganie z Shiftem przesuwa)" />
+	<tab_container name="tabs">
+		<panel label="W POBLIŻU" name="nearby_panel">
+			<panel name="nearby_buttons_panel">
+				<filter_editor label="Filtruj ludzi" name="nearby_filter_input" />
+				<button name="gear_btn" tool_tip="Akcje dotyczące wybranej osoby" />
+				<menu_button name="nearby_view_btn" tool_tip="Opcje widoku/sortowania" />
+				<button name="add_friend_btn" tool_tip="Dodaj wybranego Rezydenta do znajomych" />
+				<dnd_button name="nearby_del_btn" tool_tip="Usuń zaznaczoną osobę ze swojej listy znajomych" />
+			</panel>
+		</panel>
+		<panel label="ZNAJOMI" name="friends_panel">
+			<panel name="friends_buttons_panel">
+				<filter_editor label="Filtruj ludzi" name="friends_filter_input" />
+				<button name="gear_btn" tool_tip="Akcje dotyczące wybranej osoby" />
+				<menu_button name="friends_view_btn" tool_tip="Opcje widoku/sortowania" />
+				<button name="friends_add_btn" tool_tip="Dodaj wybranego Rezydenta do znajomych" />
+				<dnd_button name="friends_del_btn" tool_tip="Usuń zaznaczoną osobę ze swojej listy znajomych" />
+			</panel>
+			<accordion name="friends_accordion">
+				<accordion_tab name="tab_online" title="Dostępni" />
+				<accordion_tab name="tab_all" title="Wszyscy" />
+				<accordion_tab name="tab_suggested_friends" title="Sugerowani" />
+			</accordion>
+		</panel>
+		<panel label="GRUPY" name="groups_panel">
+			<panel name="groups_buttons_panel">
+				<filter_editor label="Filtruj grupy" name="groups_filter_input" />
+				<menu_button name="groups_gear_btn" tool_tip="Akcje dotyczące wybranej grupy" />
+				<menu_button name="groups_view_btn" tool_tip="Opcje widoku/sortowania" />
+				<menu_button name="plus_btn" tool_tip="Dołącz do grupy / Stwórz nową grupę" />
+				<dnd_button name="minus_btn" tool_tip="Opuść wybraną grupę" />
+			</panel>
+			<text name="groupcount">
+				Należysz do [COUNT] grup ([REMAINING] pozostało).
+			</text>
+		</panel>
+		<panel label="OSTATNIE" name="recent_panel">
+			<panel name="recent_buttons_panel">
+				<filter_editor label="Filtruj ludzi" name="recent_filter_input" />
+				<button name="gear_btn" tool_tip="Akcje dotyczące wybranej osoby" />
+				<menu_button name="recent_view_btn" tool_tip="Opcje widoku/sortowania" />
+				<button name="add_friend_btn" tool_tip="Dodaj wybranego Rezydenta do znajomych" />
+				<dnd_button name="recent_del_btn" tool_tip="Usuń zaznaczoną osobę ze swojej listy znajomych" />
+			</panel>
+		</panel>
+		<panel label="ZABLOKOWANI" name="blocked_panel">
+			<panel name="panel_block_list_sidetray" label="Zablokowani Rezydenci i obiekty" />
+		</panel>
+	</tab_container>
+</panel>

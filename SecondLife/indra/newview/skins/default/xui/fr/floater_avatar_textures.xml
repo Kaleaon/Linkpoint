@@ -1,0 +1,58 @@
+<?xml version="1.0" ?>
+<floater name="avatar_texture_debug" title="TEXTURES DES AVATARS">
+	<floater.string name="InvalidAvatar">AVATAR NON VALIDE</floater.string>
+	<scroll_container name="profile_scroll">
+		<panel name="scroll_content_panel">
+			<text name="label">Textures figées</text>
+			<text name="composite_label">Textures composites</text>
+			<button label="Vider les ID dans la console" label_selected="Vider" name="Dump"/>
+			<panel name="scroll_content_panel2">
+				<texture_picker label="Cheveux" name="hair-baked"/>
+				<texture_picker label="Cheveux" name="hair_grain"/>
+				<texture_picker label="Alpha cheveux" name="hair_alpha"/>
+				<texture_picker label="Tête" name="head-baked"/>
+				<texture_picker label="Maquillage" name="head_bodypaint"/>
+				<texture_picker label="Alpha tête" name="head_alpha"/>
+				<texture_picker label="Tatouage tête" name="head_tattoo"/>
+				<texture_picker label="Yeux" name="eyes-baked"/>
+				<texture_picker label="Œil" name="eyes_iris"/>
+				<texture_picker label="Alpha yeux" name="eyes_alpha"/>
+				<texture_picker label="Haut du corps" name="upper-baked"/>
+				<texture_picker label="Peinture sur corps (haut)" name="upper_bodypaint"/>
+				<texture_picker label="Débardeur" name="upper_undershirt"/>
+				<texture_picker label="Gants" name="upper_gloves"/>
+				<texture_picker label="Chemise" name="upper_shirt"/>
+				<texture_picker label="Veste (haut)" name="upper_jacket"/>
+				<texture_picker label="Alpha haut" name="upper_alpha"/>
+				<texture_picker label="Tatouage haut" name="upper_tattoo"/>
+				<texture_picker label="Bas du corps" name="lower-baked"/>
+				<texture_picker label="Peinture sur corps (bas)" name="lower_bodypaint"/>
+				<texture_picker label="Caleçon" name="lower_underpants"/>
+				<texture_picker label="Chaussettes" name="lower_socks"/>
+				<texture_picker label="Chaussures" name="lower_shoes"/>
+				<texture_picker label="Pantalon" name="lower_pants"/>
+				<texture_picker label="Veste" name="lower_jacket"/>
+				<texture_picker label="Alpha bas" name="lower_alpha"/>
+				<texture_picker label="Tatouage bas" name="lower_tattoo"/>
+				<texture_picker label="Jupe" name="skirt-baked"/>
+				<texture_picker label="Jupe" name="skirt"/>
+			</panel>
+		</panel>
+		<texture_picker name="upper_universal_tattoo" label="Tatouage Unv supérieur"/>
+		<texture_picker name="aux1_tattoo" label="Tatouage AUX 1"/>
+		<texture_picker name="leftarm-baked" label="Bras gauche"/>
+		<texture_picker name="aux1-baked" label="AUX 1"/>
+		<texture_picker name="skirt_tattoo" label="Tatouage de la jupe"/>
+		<texture_picker name="aux2_tattoo" label="Tatouage AUX 2"/>
+		<texture_picker name="eyes_tattoo" label="Tatouage des yeux"/>
+		<texture_picker name="head_universal_tattoo" label="Tatouage de la tête Unv"/>
+		<texture_picker name="leftleg_tattoo" label="Tatouage de la jambe gauche"/>
+		<texture_picker name="aux3-baked" label="AUX 3"/>
+		<texture_picker name="hair_tattoo" label="Tatouage de cheveux"/>
+		<texture_picker name="leftleg-baked" label="Jambe gauche"/>
+		<texture_picker name="aux2-baked" label="AUX 2"/>
+		<texture_picker name="aux3_tattoo" label="Tatouage AUX 3"/>
+		<texture_picker name="leftarm_tattoo" label="Tatouage du bras gauche"/>
+		<texture_picker name="lower_universal_tattoo" label="Tatouage Unv inférieur"/>
+	</scroll_container>
+</floater>

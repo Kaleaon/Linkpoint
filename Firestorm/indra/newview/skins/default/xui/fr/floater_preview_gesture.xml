@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="gesture_preview">
+	<floater.string name="step_anim">Animations à jouer :</floater.string>
+	<floater.string name="step_sound">Son à jouer :</floater.string>
+	<floater.string name="step_chat">Message :</floater.string>
+	<floater.string name="step_wait">Faire une pause :</floater.string>
+	<floater.string name="stop_txt">Stop</floater.string>
+	<floater.string name="preview_txt">Aperçu</floater.string>
+	<floater.string name="none_text">-- Aucun --</floater.string>
+	<floater.string name="Title">Geste : [NAME]</floater.string>
+	<text name="desc_label">Description :</text>
+	<text name="trigger_label">Déclencheur :</text>
+	<text name="replace_text" tool_tip="Remplacer le mot déclencheur avec ces mots. Par exemple, déclencheur 'hello' remplacer par 'Salut' fera tourner le chat 'Je voulais dire hello' dans 'Je dirai Salut' aussi bien pour jouer le geste !">Substitution :</text>
+	<line_editor name="replace_editor" tool_tip="Remplacer le mot déclencheur avec ces mots. Par exemple, déclencheur 'hello' remplacer par 'Salut' fera tourner le chat 'Je voulais dire hello' dans 'Je dirai Salut' aussi bien pour jouer le geste"/>
+	<text name="key_label">Raccourci :</text>
+	<combo_box label="Non" name="modifier_combo"/>
+	<combo_box label="Non" name="key_combo"/>
+	<text name="library_label">Bibliothèque :</text>
+	<button label="Ajouter &gt;&gt;" name="add_btn"/>
+	<text name="steps_label">Étapes:</text>
+	<button label="Haut" name="up_btn"/>
+	<button label="Bas" name="down_btn"/>
+	<button label="Supprimer" name="delete_btn"/>
+	<text name="options_text">(options)</text>
+	<radio_group name="animation_trigger_type">
+		<radio_item label="Démarrer" name="start"/>
+		<radio_item label="Arrêter" name="stop"/>
+	</radio_group>
+	<check_box label="jusqu'au relâchement de la touche" name="wait_key_release_check"/>
+	<check_box label="Jusqu'à ce que les anims. soient jouées" name="wait_anim_check"/>
+	<check_box label="Durée en secondes :" name="wait_time_check"/>
+	<text name="help_label">Toutes les étapes se produisent simultanément, sauf si vous insérez des pauses.</text>
+	<check_box label="Actif" name="active_check" tool_tip="Les gestes peuvent être déclenchés par le chat par un mot déclencheur ou en appuyant sur une touches de raccourci. Les gestes deviennent habituellement inactifs quand il y a un conflit de liaison de mot clé."/>
+	<button label="Aperçu" name="preview_btn"/>
+	<button label="Enregistrer" name="save_btn"/>
+</floater>

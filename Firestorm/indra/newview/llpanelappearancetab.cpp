@@ -1,0 +1,84 @@
+/**
+ * @file llpanelappearancetab.h
+ * @brief Tabs interface for Side Bar "My Appearance" panel
+ *
+ * $LicenseInfo:firstyear=2010&license=viewerlgpl$
+ * Second Life Viewer Source Code
+ * Copyright (C) 2010, Linden Research, Inc.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation;
+ * version 2.1 of the License only.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Linden Research, Inc., 945 Battery Street, San Francisco, CA  94111  USA
+ * $/LicenseInfo$
+ */
+
+#include "llviewerprecompiledheaders.h"
+
+#include "llpanelappearancetab.h"
+
+#include "llinventoryfunctions.h"
+#include "llinventorymodel.h"
+#include "llviewerinventory.h"
+// [RLVa:KB] - Checked: 2012-07-08 (RLVa-1.4.7)
+#include "rlvcommon.h"
+#include "rlvhandler.h"
+// [/RLVa:KB]
+
+std::string LLPanelAppearanceTab::sRecentFilterSubString;
+
+void LLPanelAppearanceTab::setFilterSubString(const std::string& new_string)
+{
+    if (new_string != mFilterSubString)
+    {
+        std::string old_string = mFilterSubString;
+        mFilterSubString = new_string;
+        onFilterSubStringChanged(mFilterSubString, old_string);
+    }
+
+    sRecentFilterSubString = new_string;
+}
+
+void LLPanelAppearanceTab::checkFilterSubString()
+{
+    if (sRecentFilterSubString != mFilterSubString)
+    {
+        std::string old_string = mFilterSubString;
+        mFilterSubString = sRecentFilterSubString;
+        onFilterSubStringChanged(mFilterSubString, old_string);
+    }
+}
+
+// virtual
+bool LLPanelAppearanceTab::canTakeOffSelected()
+{
+    uuid_vec_t selected_uuids;
+    getSelectedItemsUUIDs(selected_uuids);
+
+    LLFindWearablesEx is_worn(/*is_worn=*/ true, /*include_body_parts=*/ false);
+
+    for (uuid_vec_t::const_iterator it=selected_uuids.begin(); it != selected_uuids.end(); ++it)
+    {
+        LLViewerInventoryItem* item = gInventory.getItem(*it);
+        if (!item) continue;
+
+// [RLVa:KB] - Checked: 2012-07-08 (RLVa-1.4.7)
+        if ( (rlv_handler_t::isEnabled()) && (rlvPredCanNotRemoveItem(item)) )
+            return false;
+// [/RLVa:KB]
+
+        if (is_worn(NULL, item)) return true;
+    }
+    return false;
+}

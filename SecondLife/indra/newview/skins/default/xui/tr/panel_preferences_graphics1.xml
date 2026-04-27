@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Grafikler" name="Display panel">
+	<text name="preset_text">
+		(Hiçbiri)
+	</text>
+	<text name="QualitySpeed">
+		Kalite &amp; hız:
+	</text>
+	<text name="ShadersPrefText">
+		Düşük
+	</text>
+	<text name="ShadersPrefText2">
+		Orta
+	</text>
+	<text name="ShadersPrefText3">
+		Yüksek
+	</text>
+	<text name="ShadersPrefText4">
+		Ultra
+	</text>
+	<text name="FasterText">
+		Daha hızlı
+	</text>
+	<text name="BetterText">
+		Daha iyi
+	</text>
+	<check_box initial_value="true" label="Atmosferik gölgeleyiciler" name="WindLightUseAtmosShaders"/>
+	<check_box initial_value="true" label="Gelişmiş Aydınlatma Modeli" name="UseLightShaders"/>
+	<slider label="Avatarın Maksimum Karmaşıklığı:" name="IndirectMaxComplexity" tool_tip="Görsel olarak karmaşık bir avatarın ne zaman JellyDoll olarak çizileceğini belirler"/>
+	<text name="IndirectMaxComplexityText">
+		0
+	</text>
+	<check_box initial_value="true" label="Arkadaşları Her Zaman İşle" name="AlwaysRenderFriends"/>
+	<button label="İstisnalar..." name="RenderExceptionsButton"/>
+	<button label="Ayarları ön ayar olarak kaydet..." name="PrefSaveButton"/>
+	<button label="Ön ayarı yükle..." name="PrefLoadButton"/>
+	min_val=&quot;0,125&quot;
+	<button label="Ön ayarı sil..." name="PrefDeleteButton"/>
+	<button label="Önerilen ayarlara dön" name="Defaults"/>
+	<button label="Gelişmiş Ayarlar..." name="AdvancedSettings"/>
+</panel>

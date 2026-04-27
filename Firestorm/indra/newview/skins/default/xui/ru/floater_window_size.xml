@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="window_size" title="Размеры окна">
+	<text name="windowsize_text">
+		Установите размер окна:
+	</text>
+	<combo_box name="window_size_combo" tool_tip="ширина x высота">
+		<combo_box.item label="1000 x 700 (по умолчанию)" name="item1"/>
+	</combo_box>
+	<button label="Задать" name="set_btn"/>
+	<button label="Отмена" name="cancel_btn"/>
+</floater>

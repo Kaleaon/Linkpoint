@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<menu_bar name="Main Menu">
+	<menu label="Ben" name="Me">
+		<menu_item_call label="Profil..." name="Profile"/>
+		<menu_item_check label="Görünüm..." name="ChangeOutfit"/>
+		<menu_item_call label="Bir avatar seçin..." name="Avatar Picker"/>
+		<menu_item_check label="Envanter..." name="Inventory"/>
+		<menu_item_call label="Yeni Envanter Penceresi" name="NewInventoryWindow"/>
+		<menu_item_call label="Yerler..." name="Places"/>
+		<menu_item_call label="Favoriler..." name="Picks"/>
+		<menu_item_call label="Deneyimler..." name="Experiences"/>
+		<menu_item_call label="Komut Dosyalarım..." name="MyScripts"/>
+		<menu_item_call label="Kamera Denetimleri..." name="Camera Controls"/>
+		<menu label="Hareket" name="Movement">
+			<menu_item_call label="Otur" name="Sit Down Here"/>
+			<menu_item_call label="Kalk" name="Stand up"/>
+			<menu_item_check label="Uç" name="Fly"/>
+			<menu_item_check label="Daima Koş" name="Always Run"/>
+			<menu_item_call label="Beni Anime Etmeyi Durdur" name="Stop Animating My Avatar"/>
+			<menu_item_call label="Yürü / koş / uç..." name="WalkRunFly"/>
+		</menu>
+		<menu label="Durum" name="Status">
+			<menu_item_check label="Uzakta" name="Away"/>
+			<menu_item_check label="Rahatsız Etme" name="Do Not Disturb"/>
+		</menu>
+		<menu_item_call label="L$ Satın Al..." name="Buy and Sell L$"/>
+		<menu_item_call label="Pazaryeri ilanları..." name="MarketplaceListings"/>
+		<menu_item_call label="Hesap kontrol paneli..." name="Manage My Account"/>
+		<menu_item_call label="Tercihler..." name="Preferences"/>
+		<menu_item_call label="Araç çubuğu düğmeleri..." name="Toolbars"/>
+		<menu_item_call label="Tüm denetimleri sakla" name="Hide UI"/>
+		<menu_item_check label="BÜG Aksesuarlarını Göster" name="Show HUD Attachments"/>
+		<menu_item_call label="[APP_NAME]&apos;den Çık" name="Quit"/>
+	</menu>
+	<menu label="İletişim Kur" name="Communicate">
+		<menu_item_check label="Sohbetler..." name="Conversations"/>
+		<menu_item_check label="Yakındaki Sohbet..." name="Nearby Chat"/>
+		<menu_item_check label="Konuş" name="Speak"/>
+		<menu_item_check label="Sohbet Günlüğü..." name="Conversation Log..."/>
+		<menu_item_check label="Mimikler..." name="Gestures"/>
+		<menu_item_check label="Arkadaşlar" name="My Friends"/>
+		<menu_item_check label="Gruplar" name="My Groups"/>
+		<menu_item_check label="Yakındaki kişiler" name="Active Speakers"/>
+		<menu_item_check label="Engelleme Listesi" name="Block List"/>
+		<menu_item_check label="Rahatsız Etme" name="Do Not Disturb"/>
+	</menu>
+	<menu label="Dünya" name="World">
+		<menu_item_call label="Bu Yeri Yer İmlerine Ekle" name="Create Landmark Here"/>
+		<menu_item_call label="Hedef Konumlar..." name="Destinations"/>
+		<menu_item_check label="Dünya haritası" name="World Map"/>
+		<menu_item_check label="Mini-harita" name="Mini-Map"/>
+		<menu_item_call label="Etkinlikler" name="Events"/>
+		<menu_item_check label="Ara..." name="Search"/>
+		<menu_item_call label="Ana konuma ışınlan" name="Teleport Home"/>
+		<menu_item_call label="Ana konumu burası olarak seç" name="Set Home to Here"/>
+		<menu_item_call label="Anlık Görüntü" name="Take Snapshot"/>
+		<menu_item_call label="Profili yerleştir" name="Place Profile"/>
+		<menu_item_call label="Arazi hakkında" name="About Land"/>
+		<menu_item_call label="Bölge / Gayrimenkul" name="RegionEstate"/>
+		<menu_item_call label="Sahip olduğum arazi parçaları..." name="My Land"/>
+		<menu_item_call label="Bu araziyi satın al" name="Buy Land"/>
+		<menu label="Göster" name="LandShow">
+			<menu_item_check label="Yasaklama Çizgileri" name="Ban Lines"/>
+			<menu_item_check label="İşaretler" name="beacons"/>
+			<menu_item_check label="Mülkiyet Çizgileri" name="Property Lines"/>
+			<menu_item_check label="Arazi Sahipleri" name="Land Owners"/>
+			<menu_item_check label="Koordinatlar" name="Coordinates"/>
+			<menu_item_check label="Parsel Özellikleri" name="Parcel Properties"/>
+			<menu_item_check label="Gelişmiş Menü" name="Show Advanced Menu"/>
+		</menu>
+		<menu label="Ortam" name="Environment">
+			<menu_item_check label="Gün doğumu" name="Sunrise"/>
+			<menu_item_check label="Öğle" name="Noon"/>
+			<menu_item_check label="Gün batımı" name="Sunset"/>
+			<menu_item_check label="Gece yarısı" name="Midnight"/>
+			<menu_item_check label="Ortak Ortam Kullan" name="Use Shared Environment"/>
+			<menu_item_call label="Ortamlarım..." name="my_environs"/>
+			<menu_item_call label="Kişisel Aydınlatma..." name="adjustment_tool"/>
+			<menu_item_check label="Bulutları Duraklat" name="pause_clouds"/>
+		</menu>
+	</menu>
+	<menu label="İnşa Et" name="BuildTools">
+		<menu_item_check label="İnşa Et" name="Show Build Tools"/>
+		<menu label="İnşa Et Aracını Seç" name="Select Tool">
+			<menu_item_call label="Odaklanma Aracı" name="Focus"/>
+			<menu_item_call label="Hareket Ettirme Aracı" name="Move"/>
+			<menu_item_call label="Düzenleme Aracı" name="Edit"/>
+			<menu_item_call label="Oluşturma Aracı" name="Create"/>
+			<menu_item_call label="Arazi Aracı" name="Land"/>
+		</menu>
+		<menu_item_call label="Bağla" name="Link"/>
+		<menu_item_call label="Bağlnty. Kopar" name="Unlink"/>
+		<menu_item_check label="Bağlantılı Parçaları Düzenle" name="Edit Linked Parts"/>
+		<menu label="Öğeleri Seçin" name="Select Elements">
+			<menu_item_call label="Sonraki Parçayı veya Yüzü Seçin" name="Select Next Part or Face"/>
+			<menu_item_call label="Önceki Parçayı veya Yüzü Seçin" name="Select Previous Part or Face"/>
+			<menu_item_call label="Sonraki Parçayı veya Yüzü Dahil Et" name="Include Next Part or Face"/>
+			<menu_item_call label="Önceki Parçayı veya Yüzü Dahil Et" name="Include Previous Part or Face"/>
+		</menu>
+		<menu_item_call label="Bölge Nesneleri" name="pathfinding_linkset_menu_item"/>
+		<menu_item_call label="Seçime Odaklan" name="Focus on Selection"/>
+		<menu_item_call label="Seçimi Yakınlaştır" name="Zoom to Selection"/>
+		<menu label="Nesne" name="Object">
+			<menu_item_call label="Satın Al" name="Menu Object Buy"/>
+			<menu_item_call label="Al" name="Menu Object Take"/>
+			<menu_item_call label="Kopya Al" name="Take Copy"/>
+			<menu_item_call label="Nesne İçeriklerine Geri Kaydet" name="Save Object Back to Object Contents"/>
+			<menu_item_call label="Nesneyi İade Et" name="Return Object back to Owner"/>
+			<menu_item_call label="Çoğalt" name="DuplicateObject"/>
+		</menu>
+		<menu label="Komut Dosyaları" name="Scripts">
+			<menu_item_check label="Komut dosyası uyarıları/hataları..." name="Script debug"/>
+			<menu_item_call label="Komut Dosyalarını Tekrar Derle (Mono)" name="Mono"/>
+			<menu_item_call label="Komut Dosyalarını Tekrar Derle (LSL)" name="LSL"/>
+			<menu_item_call label="Komut Dosyalarını Sıfırla" name="Reset Scripts"/>
+			<menu_item_call label="Komut Dosyalarını Çalışıyor Olarak Ayarla" name="Set Scripts to Running"/>
+			<menu_item_call label="Komut Dosyalarını Çalışmıyor Olarak Ayarla" name="Set Scripts to Not Running"/>
+		</menu>
+		<menu label="Yol bulma" name="Pathfinding">
+			<menu_item_call label="Bölge Nesneleri" name="pathfinding_linksets_menu_item"/>
+			<menu_item_call label="Karakterler..." name="pathfinding_characters_menu_item"/>
+			<menu_item_call label="Görüntüleme / test..." name="pathfinding_console_menu_item"/>
+			<menu_item_call label="Bölgeyi tekrar kaydet" name="pathfinding_rebake_navmesh_item"/>
+		</menu>
+		<menu label="Seçenklr." name="Options">
+			<menu_item_check label="Gelişmiş İzinleri Göster" name="DebugPermissions"/>
+			<menu_item_check label="Sadece Nesnelerimi Seç" name="Select Only My Objects"/>
+			<menu_item_check label="Sadece Hareket Ettirilebilir Nesneleri Seç" name="Select Only Movable Objects"/>
+			<menu_item_check label="Çevreleyerek Seç" name="Select By Surrounding"/>
+			<menu_item_check label="Seçim Ana Hatlarını Göster" name="Show Selection Outlines"/>
+			<menu_item_check label="Gizli Seçimi Göster" name="Show Hidden Selection"/>
+			<menu_item_check label="Seçim İçin Işık Yarı Çapını Göster" name="Show Light Radius for Selection"/>
+			<menu_item_check label="Seçim Işınını Göster" name="Show Selection Beam"/>
+			<menu_item_check label="Saydamı Vurgula" name="Highlight Transparent"/>
+			<menu_item_check label="Ağa Uydur" name="Snap to Grid"/>
+			<menu_item_call label="XY Nesnesini Ağa Uydur" name="Snap Object XY to Grid"/>
+			<menu_item_call label="Ağ İçin Seçimi Kullan" name="Use Selection for Grid"/>
+			<menu_item_call label="Ağ Seçenekleri..." name="Grid Options"/>
+			<menu_item_call label="Varsayılan İzinlerini Ayarla..." name="Set default permissions"/>
+		</menu>
+		<menu label="Karşıya Yükle" name="Upload">
+			<menu_item_call label="Görüntü..." name="Upload Image"/>
+			<menu_item_call label="Ses (L$[COST])..." name="Upload Sound"/>
+			<menu_item_call label="Animasyon (L$[COST])..." name="Upload Animation"/>
+			<menu_item_call label="Model..." name="Upload Model"/>
+			<menu_item_call label="Toplu..." name="Bulk Upload"/>
+		</menu>
+		<menu_item_call label="Geri Al" name="Undo"/>
+		<menu_item_call label="Yinele" name="Redo"/>
+	</menu>
+	<menu label="Yardım" name="Help">
+		<menu_item_check label="Nasıl yapılır..." name="How To"/>
+		<menu_item_call label="Hızlı Başlangıç" name="Quickstart"/>
+		<menu_item_call label="Bilgi Bankası" name="Knowledge Base"/>
+		<menu_item_call label="Wiki" name="Wiki"/>
+		<menu_item_call label="Topluluk Forumları" name="Community Forums"/>
+		<menu_item_call label="Destek portalı" name="Support portal"/>
+		<menu_item_call label="[SECOND_LIFE] Haberleri" name="Second Life News"/>
+		<menu_item_call label="[SECOND_LIFE] Blogları" name="Second Life Blogs"/>
+		<menu_item_call label="Kötüye Kullanımı Bildir" name="Report Abuse"/>
+		<menu_item_call label="Hata Bildir" name="Report Bug"/>
+        <menu_item_call label="Toslamalar, İtmeler ve Vurmalar" name="Bumps, Pushes &amp;amp; Hits"/>
+		<menu_item_call label="[APP_NAME] Hakkında" name="About Second Life"/>
+	</menu>
+	<menu label="Gelişmiş" name="Advanced">
+		<menu_item_call label="Dokuları Tekrar Kaydet" name="Rebake Texture"/>
+		<menu_item_call label="KA Büyüklüğünü Varsayılana Ayarla" name="Set UI Size to Default"/>
+		<menu_item_call label="Pencere Büyüklüğünü Ayarla..." name="Set Window Size..."/>
+		<menu_item_check label="Seçim Mesafesini Sınırla" name="Limit Select Distance"/>
+		<menu_item_check label="Kamera Kısıtlarını Devredışı Bırak" name="Disable Camera Distance"/>
+		<menu_item_check label="Yüksek Çöz. Anlık Görüntü" name="HighResSnapshot"/>
+		<menu_item_check label="Sessiz ve Animasyonsuz Anlık Görüntüleri Diske Kaydet" name="QuietSnapshotsToDisk"/>
+		<menu label="Performans Araçları" name="Performance Tools">
+			<menu_item_call label="Gecikme Ölçer" name="Lag Meter"/>
+			<menu_item_check label="İstatistik Çubuğu" name="Statistics Bar"/>
+			<menu_item_call label="Sahne Yükleme İstatistikleri" name="Scene Load Statistics"/>
+			<menu_item_check label="Avatarın karmaşıklık bilgisini göster" name="Avatar Draw Info"/>
+		</menu>
+		<menu label="Vurgulama ve Görünürlük" name="Highlighting and Visibility">
+			<menu_item_check label="Yanıp Sönen İşaret" name="Cheesy Beacon"/>
+			<menu_item_check label="Parçacıkları Gizle" name="Hide Particles"/>
+			<menu_item_check label="Seçilenleri Gizle" name="Hide Selected"/>
+			<menu_item_check label="Fare Üzerinden Görünüm Artı İşaretini Göster" name="ShowCrosshairs"/>
+		</menu>
+		<menu label="İşleme Türleri" name="Rendering Types">
+			<menu_item_check label="Basit" name="Rendering Type Simple"/>
+			<menu_item_check label="Alfa" name="Rendering Type Alpha"/>
+			<menu_item_check label="Ağaç" name="Rendering Type Tree"/>
+			<menu_item_check label="Avatarlar" name="Rendering Type Character"/>
+			<menu_item_check label="Yüzey Yaması" name="Rendering Type Surface Patch"/>
+			<menu_item_check label="Gökyüzü" name="Rendering Type Sky"/>
+			<menu_item_check label="Su" name="Rendering Type Water"/>
+			<menu_item_check label="Toprak" name="Rendering Type Ground"/>
+			<menu_item_check label="Hacim" name="Rendering Type Volume"/>
+			<menu_item_check label="Çimen" name="Rendering Type Grass"/>
+			<menu_item_check label="Bulutlar" name="Rendering Type Clouds"/>
+			<menu_item_check label="Parçacıklar" name="Rendering Type Particles"/>
+			<menu_item_check label="Tümsek" name="Rendering Type Bump"/>
+		</menu>
+		<menu label="İşleme Özellikleri" name="Rendering Features">
+			<menu_item_check label="KA" name="ToggleUI"/>
+			<menu_item_check label="Seçili" name="Selected"/>
+			<menu_item_check label="Vurgulanmış" name="Highlighted"/>
+			<menu_item_check label="Dinamik Dokular" name="Dynamic Textures"/>
+			<menu_item_check label="Ayak Hizası Gölgeleri" name="Foot Shadows"/>
+			<menu_item_check label="Pus" name="Fog"/>
+			<menu_item_check label="FRInfo Testi" name="Test FRInfo"/>
+			<menu_item_check label="Esnek Nesneler" name="Flexible Objects"/>
+		</menu>
+		<menu_item_check label="İş Parçacığı Okuma Eklentisini Kullan" name="Use Plugin Read Thread"/>
+		<menu_item_call label="Grup Ön Belleğini Temizle" name="ClearGroupCache"/>
+		<menu_item_check label="Fare Düzleştirme" name="Mouse Smoothing"/>
+		<menu_item_call label="Bırakma Anahtarları" name="Release Keys"/>
+		<menu label="Kısa Yollar" name="Shortcuts">
+			<menu_item_check label="Gelişmiş Menüyü Göster - eski kısayol" name="Show Advanced Menu - legacy shortcut"/>
+			<menu_item_call label="Pencereyi Kapat" name="Close Window"/>
+			<menu_item_call label="Tüm Pencereleri Kapat" name="Close All Windows"/>
+			<menu_item_call label="Diske Anlık Görüntü" name="Snapshot to Disk"/>
+			<menu_item_call label="Fare Üzerinden Görünüm" name="Mouselook"/>
+			<menu_item_check label="Oyun Çubuğu Flycam" name="Joystick Flycam"/>
+			<menu_item_call label="Görünümü Sıfırla" name="Reset View"/>
+			<menu_item_call label="Son Sohbet Edene Bak" name="Look at Last Chatter"/>
+			<menu_item_call label="Yakınlaştır" name="Zoom In"/>
+			<menu_item_call label="Varsayılan Yakınlaştırma" name="Zoom Default"/>
+			<menu_item_call label="Uzaklaştırma" name="Zoom Out"/>
+		</menu>
+		<menu_item_call label="Hata Ayıklama Ayarlarını Göster" name="Debug Settings"/>
+		<menu_item_check label="Geliştirme Menüsünü Göster" name="Debug Mode"/>
+	</menu>
+	<menu label="Geliştir" name="Develop">
+		<menu label="Konsollar" name="Consoles">
+			<menu_item_check label="Doku Konsolu" name="Texture Console"/>
+			<menu_item_check label="Hata Ayıklama Konsolu" name="Debug Console"/>
+			<menu_item_call label="Bildirimler Konsolu" name="Notifications"/>
+			<menu_item_check label="Bölge Hata Ayıklama Konsolu" name="Region Debug Console"/>
+			<menu_item_check label="Hızlı Zamanlayıcılar" name="Fast Timers"/>
+			<menu_item_check label="Bellek" name="Memory"/>
+			<menu_item_check label="Sahne İstatistikleri" name="Scene Statistics"/>
+			<menu_item_check label="Sahne Yükleme Ekranı" name="Scene Loading Monitor"/>
+			<menu_item_call label="Doku Alınması Hata Ayıklama Konsolu" name="Texture Fetch Debug Console"/>
+			<menu_item_call label="Hata Ayıklama Konsoluna giden Bölge Bilgisi" name="Region Info to Debug Console"/>
+			<menu_item_call label="Hata Ayıklama Konsoluna giden Grup Bilgisi" name="Group Info to Debug Console"/>
+			<menu_item_call label="Hata Ayıklama Konsoluna giden Özellikler Bilgisi" name="Capabilities Info to Debug Console"/>
+			<menu_item_check label="Kamera" name="Camera"/>
+			<menu_item_check label="Rüzgar" name="Wind"/>
+			<menu_item_check label="Görünüm Alanı" name="FOV"/>
+			<menu_item_check label="Rozet" name="Badge"/>
+		</menu>
+		<menu label="Bilgiyi Göster" name="Display Info">
+			<menu_item_check label="Zamanı Göster" name="Show Time"/>
+			<menu_item_check label="Karşıya Yükleme Maliyetini Göster" name="Show Upload Cost"/>
+			<menu_item_check label="İşleme Bilgisini Göster" name="Show Render Info"/>
+			<menu_item_check label="Doku Bilgisini Göster" name="Show Texture Info"/>
+			<menu_item_check label="Matrisleri Göster" name="Show Matrices"/>
+			<menu_item_check label="İmlecin Altındaki Rengi Göster" name="Show Color Under Cursor"/>
+			<menu_item_check label="Belleği Göster" name="Show Memory"/>
+			<menu_item_check label="Nesneler İçin Güncelleştirmeleri Göster" name="Show Updates"/>
+		</menu>
+		<menu label="Bir Hatayı Zorla" name="Force Errors">
+			<menu_item_call label="Kesme Noktasını Zorla" name="Force Breakpoint"/>
+			<menu_item_call label="LLError ve Çökme Zorla" name="Force LLError And Crash"/>
+			<menu_item_call label="Hatalı Bellek Erişimini Zorla" name="Force Bad Memory Access"/>
+			<menu_item_call label="Sonsuz Döngüyü Zorla" name="Force Infinite Loop"/>
+			<menu_item_call label="Sürücü Çökmesini Zorla" name="Force Driver Carsh"/>
+			<menu_item_call label="Yazılım Özel Durumunu Zorla" name="Force Software Exception"/>
+			<menu_item_call label="Görüntüleyici Bağlantısının Kesilmesini Zorla" name="Force Disconnect Viewer"/>
+			<menu_item_call label="Bir Bellek Sızıntısı Benzetimini Gerçekleştir" name="Memory Leaking Simulation"/>
+		</menu>
+		<menu label="İşleme Testleri" name="Render Tests">
+			<menu_item_check label="Kamera Kayması" name="Camera Offset"/>
+			<menu_item_check label="Çerçeve Hızını Rastgele Seç" name="Randomize Framerate"/>
+			<menu_item_check label="Düzenli Yavaş Çerçeve" name="Periodic Slow Frame"/>
+			<menu_item_check label="Çerçeve Testi" name="Frame Test"/>
+			<menu_item_call label="Çerçeve Profili..." name="Frame Profile"/>
+			<menu_item_call label="Değerlendirme" name="Benchmark"/>
+		</menu>
+		<menu label="Meta Verileri İşle" name="Render Metadata">
+			<menu_item_check label="Sınırlama Kutuları" name="Bounding Boxes"/>
+			<menu_item_check label="Normaller" name="Normals"/>
+			<menu_item_check label="Gölgeleme Ağacı" name="Octree"/>
+			<menu_item_check label="Gölge Kesik Koni" name="Shadow Frusta"/>
+			<menu_item_check label="Fizik Şekilleri" name="Physics Shapes"/>
+			<menu_item_check label="Gölgeleme" name="Occlusion"/>
+			<menu_item_check label="Toplu İşleri İşle" name="Render Batches"/>
+			<menu_item_check label="Güncelleştirme Türü" name="Update Type"/>
+			<menu_item_check label="Doku Animasyonu" name="Texture Anim"/>
+			<menu_item_check label="Doku Önceliği" name="Texture Priority"/>
+			<menu_item_check label="Doku Alanı" name="Texture Area"/>
+			<menu_item_check label="Yüz Alanı" name="Face Area"/>
+			<menu_item_check label="Ayrıntı Seviyesi Bilgisi" name="LOD Info"/>
+			<menu_item_check label="Üçgen Sayısı" name="Triangle Count"/>
+			<menu_item_check label="İnşa Kuyruğu" name="Build Queue"/>
+			<menu_item_check label="Işıklar" name="Lights"/>
+			<menu_item_check label="Çarpışma İskeleti" name="Collision Skeleton"/>
+			<menu_item_check label="Eklemler" name="Joints"/>
+			<menu_item_check label="Işın Yayını" name="Raycast"/>
+			<menu_item_check label="Rüzgar Vektörleri" name="Wind Vectors"/>
+			<menu_item_check label="Şekillendir" name="Sculpt"/>
+			<menu label="Doku Yoğunluğu" name="Texture Density">
+				<menu_item_check label="Yok" name="None"/>
+				<menu_item_check label="Mevcut" name="Current"/>
+				<menu_item_check label="Arzulanan" name="Desired"/>
+				<menu_item_check label="Tam" name="Full"/>
+			</menu>
+		</menu>
+		<menu label="İşleme" name="Rendering">
+			<menu_item_check label="Eksenler" name="Axes"/>
+			<menu_item_check label="Tanjant Temeli" name="Tangent Basis"/>
+			<menu_item_call label="Seçilen Doku Bilgi Temeli" name="Selected Texture Info Basis"/>
+			<menu_item_call label="Seçilen Malzeme Bilgisi" name="Selected Material Info"/>
+			<menu_item_check label="Telkafes" name="Wireframe"/>
+			<menu_item_check label="Görünen Nesneler İçin Gölgeleme" name="Object-Object Occlusion"/>
+			<menu_item_check label="Gelişmiş Aydınlatma Modeli" name="Advanced Lighting Model"/>
+			<menu_item_check label="Güneş/Ay/Projektörlerden Gelen Gölgeler" name="Shadows from Sun/Moon/Projectors"/>
+			<menu_item_check label="SSAO ve Gölge Yumuşatma" name="SSAO and Shadow Smoothing"/>
+			<menu_item_check label="GL Hata Ayıklama" name="Debug GL"/>
+			<menu_item_check label="Ardışık Hata Ayıklama" name="Debug Pipeline"/>
+			<menu_item_check label="Otomatik Alfa Maskeleri (ertelenmiş)" name="Automatic Alpha Masks (deferred)"/>
+			<menu_item_check label="Otomatik Alfa Maskeleri (ertelenmemiş)" name="Automatic Alpha Masks (non-deferred)"/>
+			<menu_item_check label="Animasyon Dokuları" name="Animation Textures"/>
+			<menu_item_check label="Dokuları Devre Dışı Bırak" name="Disable Textures"/>
+			<menu_item_check label="Ortamı Devre Dışı Bırak" name="Disable Ambient"/>
+			<menu_item_check label="Güneş Işığını Devre Dışı Bırak" name="Disable Sunlight"/>
+			<menu_item_check label="Yerel Işıkları Devre Dışı Bırak" name="Disable Local Lights"/>
+			<menu_item_check label="Tam Çöz. Dokular" name="Rull Res Textures"/>
+			<menu_item_check label="Eklenmiş Işıkları İşle" name="Render Attached Lights"/>
+			<menu_item_check label="Eklenmiş Parçacıkları İşle" name="Render Attached Particles"/>
+			<menu_item_check label="Parıldayan Nesneler Üzerine Gel" name="Hover Glow Objects"/>
+			<menu_item_call label="Önbelleği Hemen Temizle" name="Cache Clear"/>
+		</menu>
+		<menu label="Ağ" name="Network">
+			<menu_item_check label="Aracıyı Durdur" name="AgentPause"/>
+			<menu_item_call label="İleti Günlüğünü Etkinleştir" name="Enable Message Log"/>
+			<menu_item_call label="İleti Günlüğünü Devre Dışı Bırak" name="Disable Message Log"/>
+			<menu_item_check label="Nesnelerin Hızını İnterpole Edin" name="Velocity Interpolate Objects"/>
+			<menu_item_check label="Nesne Konumlarını Ping İle İnterpole Edin" name="Ping Interpolate Object Positions"/>
+			<menu_item_call label="Paket Bırakın" name="Drop a Packet"/>
+		</menu>
+		<menu_item_call label="Komut Dosyalı Kameranın Dökümünü Al" name="Dump Scripted Camera"/>
+		<menu label="Kaydedici" name="Recorder">
+			<menu_item_call label="Oynatmayı Başlat" name="Start Playback"/>
+			<menu_item_call label="Oynatmayı Durdur" name="Stop Playback"/>
+			<menu_item_check label="Döngü Oynatma" name="Loop Playback"/>
+			<menu_item_call label="Kaydı Başlat" name="Start Record"/>
+			<menu_item_call label="Kaydı Durdur" name="Stop Record"/>
+		</menu>
+		<menu label="Dünya" name="DevelopWorld">
+			<menu_item_check label="Sim Güneşi Geçersiz Kıl" name="Sim Sun Override"/>
+			<menu_item_check label="Sabit Hava Durumu" name="Fixed Weather"/>
+			<menu_item_call label="Bölge Nesne Önbelleğinin Dökümünü Al" name="Dump Region Object Cache"/>
+		</menu>
+		<menu label="KA" name="UI">
+			<menu_item_call label="Ortam Tarayıcı" name="Media Browser"/>
+			<menu_item_call label="SelectMgr&apos;i Dökümünü Al" name="Dump SelectMgr"/>
+			<menu_item_call label="Envanterin Dökümünü Al" name="Dump Inventory"/>
+			<menu_item_call label="Zamanlayıcıların Dökümünü Al" name="Dump Timers"/>
+			<menu_item_call label="Odaklayıcı Tutucunun Dökümünü Al" name="Dump Focus Holder"/>
+			<menu_item_call label="Seçilen Nesne Bilgisini Yazdır" name="Print Selected Object Info"/>
+			<menu_item_call label="Aracı Bilgisini Yazdır" name="Print Agent Info"/>
+			<menu_item_check label="SelectMgr İçin Hata Ayıklama" name="Debug SelectMgr"/>
+			<menu_item_check label="Tıklamalar İçin Hata Ayıklama" name="Debug Clicks"/>
+			<menu_item_check label="Görünümler için Hata Ayıklama" name="Debug Views"/>
+			<menu_item_check label="Ad Araç İpuçları İçin Hata Ayıklama" name="Debug Name Tooltips"/>
+			<menu_item_check label="Fare Etkinlikleri İçin Hata Ayıklama" name="Debug Mouse Events"/>
+			<menu_item_check label="Anahtarlar İçin Hata Ayıklama" name="Debug Keys"/>
+			<menu_item_check label="WindowProc İçin Hata Ayıklama" name="Debug WindowProc"/>
+		</menu>
+		<menu label="XUI" name="XUI">
+			<menu_item_call label="Renk Ayarlarını Tekrar Yükle" name="Reload Color Settings"/>
+			<menu_item_call label="Fon Testini Göster" name="Show Font Test"/>
+			<menu_item_check label="XUI Adlarını Göster" name="Show XUI Names"/>
+			<menu_item_call label="XKA Önizleme Aracı" name="UI Preview Tool"/>
+			<menu_item_call label="Test Amaçlı Aİ&apos;ler Gönder" name="Send Test IMs"/>
+			<menu_item_call label="Ad Önbelleklerini Temizle" name="Flush Names Caches"/>
+		</menu>
+		<menu label="Avatar" name="Character">
+			<menu label="Kaydedilmiş Dokuyu Al" name="Grab Baked Texture">
+				<menu_item_call label="İris" name="Grab Iris"/>
+				<menu_item_call label="Baş" name="Grab Head"/>
+				<menu_item_call label="Üst Gövde" name="Grab Upper Body"/>
+				<menu_item_call label="Alt Gövde" name="Grab Lower Body"/>
+				<menu_item_call label="Etek" name="Grab Skirt"/>
+			</menu>
+			<menu label="Karakter Testleri" name="Character Tests">
+				<menu_item_call label="XML&apos;de Görünüm" name="Appearance To XML"/>
+				<menu_item_call label="Karakter Geometrisini Aç/Kapa" name="Toggle Character Geometry"/>
+				<menu_item_call label="Test Erkeği" name="Test Male"/>
+				<menu_item_call label="Test Dişisi" name="Test Female"/>
+				<menu_item_check label="Avatar Seçimine İzin Ver" name="Allow Select Avatar"/>
+			</menu>
+			<menu label="Animasyon Hızı" name="Animation Speed">
+				<menu_item_call label="Tüm Animasyonlar %10 Daha Hızlı" name="All Animations 10 Faster"/>
+				<menu_item_call label="Tüm Animasyonlar %10 Daha Yavaş" name="All Animations 10 Slower"/>
+				<menu_item_call label="Tüm Animasyon Hızlarını Sıfırla" name="Reset All Animation Speed"/>
+				<menu_item_check label="Yavaş Hareket Animasyonları" name="Slow Motion Animations"/>
+			</menu>
+			<menu_item_call label="Parametreleri Varsayılana Zorla" name="Force Params to Default"/>
+			<menu_item_check label="Animasyon Bilgisi" name="Animation Info"/>
+			<menu_item_check label="Şuraya Bak&apos;ı Göster" name="Show Look At"/>
+			<menu_item_check label="Şuraya İşaret Et&apos;i Göster" name="Show Point At"/>
+			<menu_item_check label="Eklem Güncelleştirmeleri İçin Hata Ayıklama" name="Debug Joint Updates"/>
+			<menu_item_check label="Ayrıntı Seviyesi Bilgisini Devre Dışı Bırak" name="Disable LOD"/>
+			<menu_item_check label="Debug Character Vis" name="Debug Character Vis"/>
+			<menu_item_check label="Çarpışma İskeletini Göster" name="Show Collision Skeleton"/>
+			<menu_item_check label="Kemikleri Göster" name="Show Bones"/>
+			<menu_item_check label="Aracı Hedefini Göster" name="Display Agent Target"/>
+			<menu_item_check label="Düşük Grafik Özellikli Avatar Kapsamını Göster" name="Show Impostor Extents"/>
+			<menu_item_call label="Aksesuarların Dökümünü Al" name="Dump Attachments"/>
+			<menu_item_call label="Avatar Dokuları İçin Hata Ayıklama" name="Debug Avatar Textures"/>
+			<menu_item_call label="Yerel Dokuların Dökümünü Al" name="Dump Local Textures"/>
+		</menu>
+		<menu_item_check label="HTTP Dokuları" name="HTTP Textures"/>
+		<menu_item_call label="Görüntüleri Sıkıştır" name="Compress Images"/>
+		<menu_item_call label="Visual Leak Detector&apos;ı Etkinleştir" name="Enable Visual Leak Detector"/>
+		<menu_item_check label="Mini Döküm Dosyası Hata Ayıklama Çıktısı" name="Output Debug Minidump"/>
+		<menu_item_check label="Sonraki Çalışmada Konsol Penceresi" name="Console Window"/>
+		<menu label="Günlük Tutma Seviyesini Seç" name="Set Logging Level">
+			<menu_item_check label="Hata ayıkla" name="Debug"/>
+			<menu_item_check label="Bilgi" name="Info"/>
+			<menu_item_check label="Uyarı" name="Warning"/>
+			<menu_item_check label="Hata" name="Error"/>
+			<menu_item_check label="Hiçbiri" name="None"/>
+		</menu>
+		<menu_item_call label="Yönetici Durumu Talep Et" name="Request Admin Options"/>
+		<menu_item_call label="Yönetici Durumundan Ayrıl" name="Leave Admin Options"/>
+		<menu_item_check label="Yönetici Menüsünü Göster" name="View Admin Options"/>
+	</menu>
+	<menu label="Yönetici" name="Admin">
+		<menu label="Nesne" name="AdminObject">
+			<menu_item_call label="Kopya Al" name="Admin Take Copy"/>
+			<menu_item_call label="Zorunlu Olarak Mülkiyetime Geçir" name="Force Owner To Me"/>
+			<menu_item_call label="Sahibin İzinlerini Zorunlu Kıl" name="Force Owner Permissive"/>
+			<menu_item_call label="Sil" name="Delete"/>
+			<menu_item_call label="Kilitle" name="Lock"/>
+			<menu_item_call label="Varlık Kimliklerini Al" name="Get Assets IDs"/>
+		</menu>
+		<menu label="Parsel" name="Parcel">
+			<menu_item_call label="Mülkiyetime Geçir" name="Owner To Me"/>
+			<menu_item_call label="Linden İçeriğine Ayarla" name="Set to Linden Content"/>
+			<menu_item_call label="Kamu Arazisi Üzerinde Hak Talep Et" name="Claim Public Land"/>
+		</menu>
+		<menu label="Bölge" name="Region">
+			<menu_item_call label="Geçici Varlık Verilerinin Dökümünü Al" name="Dump Temp Asset Data"/>
+			<menu_item_call label="Bölge Durumunu Kaydet" name="Save Region State"/>
+		</menu>
+		<menu_item_call label="Yönetici Araçları" name="God Tools"/>
+	</menu>
+	<menu label="Yönetici" name="Deprecated">
+		<menu label="Nesneyi Ekle" name="Attach Object"/>
+		<menu label="Nesneyi Ayır" name="Detach Object"/>
+		<menu label="Giysiyi Çıkar" name="Take Off Clothing">
+			<menu_item_call label="Gömlek" name="Shirt"/>
+			<menu_item_call label="Pantolon" name="Pants"/>
+			<menu_item_call label="Ayakkabılar" name="Shoes"/>
+			<menu_item_call label="Çoraplar" name="Socks"/>
+			<menu_item_call label="Ceket" name="Jacket"/>
+			<menu_item_call label="Eldivenler" name="Gloves"/>
+			<menu_item_call label="Fanila" name="Menu Undershirt"/>
+			<menu_item_call label="Külot" name="Menu Underpants"/>
+			<menu_item_call label="Etek" name="Skirt"/>
+			<menu_item_call label="Alfa" name="Alpha"/>
+			<menu_item_call label="Dövme" name="Tattoo"/>
+			<menu_item_call label="Evrensel" name="Universal"/>
+			<menu_item_call label="Fizik" name="Physics"/>
+			<menu_item_call label="Tüm Giysiler" name="All Clothes"/>
+		</menu>
+		<menu label="Yardım" name="DeprecatedHelp">
+			<menu_item_call label="Resmi Linden Blog&apos;u" name="Official Linden Blog"/>
+			<menu_item_call label="Komut Dosyası Portalı" name="Scripting Portal"/>
+			<menu label="Hata Raporlama" name="Bug Reporting">
+				<menu_item_call label="Kamuya Açık Sorun İzleyicisi" name="Public Issue Tracker"/>
+				<menu_item_call label="Kamuya Açık Sorun İzleyicisi Yardımı" name="Publc Issue Tracker Help"/>
+				<menu_item_call label="Hata Raporlama 101" name="Bug Reporing 101"/>
+				<menu_item_call label="Güvenlik Sorunları" name="Security Issues"/>
+				<menu_item_call label="Soru ve Yanıt Wiki Sayfası" name="QA Wiki"/>
+			</menu>
+		</menu>
+	</menu>
+</menu_bar>

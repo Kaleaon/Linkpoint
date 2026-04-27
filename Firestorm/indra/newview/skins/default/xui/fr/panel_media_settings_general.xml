@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Général" name="Media Settings General">
+	<text name="home_label">Page d'accueil :</text>
+	<text name="home_fails_whitelist_label">(Cette page ne satisfait pas les critères de la liste blanche)</text>
+	<line_editor name="home_url" tool_tip="La page d'accueil pour cette source multimédia"/>
+	<text name="preview_label">Prévisualiser</text>
+	<text name="current_url_label">Page actuelle :</text>
+	<text name="current_url" tool_tip="La page actuelle pour cette source multimédia"/>
+	<button label="Réinitialiser" name="current_url_reset_btn"/>
+	<check_box label="Lecture en boucle" name="auto_loop"/>
+	<check_box label="Interaction lors du premier clic" name="first_click_interact"/>
+	<check_box label="Zoom automatique" name="auto_zoom"/>
+	<check_box label="Jouer automatiquement le média" name="auto_play"/>
+	<text name="media_setting_note">Note : Les résidents peuvent ignorer ce paramètre</text>
+	<check_box label="Redimensionnement automatique du média à la taille de la face de l'objet" name="auto_scale"/>
+	<text name="size_label">Taille :</text>
+</panel>

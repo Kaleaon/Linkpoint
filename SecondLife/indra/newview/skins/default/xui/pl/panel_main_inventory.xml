@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel label="Rzeczy" name="main inventory panel">
+	<panel.string name="ItemcountFetching">
+		Pobieranie [ITEM_COUNT] obiektów... [FILTER]
+	</panel.string>
+	<panel.string name="ItemcountCompleted">
+		[ITEM_COUNT] obiekty [FILTER]
+	</panel.string>
+    <panel.string name="inventory_title">MOJA SZAFA</panel.string>
+	<text name="ItemcountText">
+		Obiekty:
+	</text>
+    <layout_stack name="top_stack">
+        <layout_panel name="filter_layout_panel">
+            <filter_editor label="Filtruj Szafę" name="inventory search editor" />
+            <menu_button tool_tip="Pokaż dodatkowe opcje" name="options_gear_btn" />
+            <button name="add_btn" tool_tip="Dodaj nowy obiekt" />
+        </layout_panel>
+    </layout_stack>
+    <panel name="default_inventory_panel">
+        <tab_container name="inventory filter tabs">
+            <inventory_panel label="MOJA SZAFA" name="All Items" />
+            <recent_inventory_panel label="OSTATNIE" name="Recent Items" />
+        </tab_container>
+    </panel>
+</panel>

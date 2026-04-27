@@ -58,8 +58,6 @@ lint/tmp/
 *.zip
 *.tar.gz
 *.jar
-# Exception: Keep gradle wrapper jar for builds
-!**/gradle-wrapper.jar
 *.idsig
 *.args
 classes.dex.xml
@@ -128,22 +126,11 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
-# Android SDK files (should not be committed)
-android-sdk/
-test_xml_format.kt
-test_xml_simple.sh
-
-# Decompiled Lumiya reference code (keep only README)
-docs/lumiya_reference/lumiyaviewer/
-
-# Decompiled Lumiya sources (reference only)
-lumiya_decompiled/
-
-# Protocol conformance tooling (LP-P0-001 / LP-P0-002).
-# These un-ignore rules counteract the repo-wide tools/, *.sh, and *.py
-# blocks above so the conformance scripts can live in version control.
-!Linkpoint/tools/
-!Linkpoint/tools/**
-!Linkpoint/tools/protocol/
-!Linkpoint/tools/protocol/**
+-e 
+# Environment files
+*.env
+*.env.*
+-e 
+# Environment files
+*.env
+*.env.*

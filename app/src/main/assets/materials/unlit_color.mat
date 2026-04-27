@@ -1,0 +1,29 @@
+material {
+    name : UnlitColor,
+    shadingModel : unlit,
+    
+    parameters : [
+        {
+            type : float3,
+            name : baseColor,
+            default : [1.0, 1.0, 1.0]
+        }
+    ],
+    
+    requires : [
+        color
+    ],
+}
+
+vertex {
+    void materialVertex(inout MaterialVertexInputs material) {
+        // Pass through vertex attributes
+    }
+}
+
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        material.baseColor = vec4(getColor().rgb, 1.0);
+    }
+}

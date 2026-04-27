@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="abc_action_bar_home_description">ਹੋਮ ਨੈਵੀਗੇਟ ਕਰੋ</string>
+    <string name="abc_action_bar_home_description_format">%1$s, %2$s</string>
+    <string name="abc_action_bar_home_subtitle_description_format">%1$s, %2$s, %3$s</string>
+    <string name="abc_action_bar_up_description">ਉੱਪਰ ਨੈਵੀਗੇਟ ਕਰੋ</string>
+    <string name="abc_action_menu_overflow_description">ਹੋਰ ਚੋਣਾਂ</string>
+    <string name="abc_action_mode_done">ਹੋ ਗਿਆ</string>
+    <string name="abc_activity_chooser_view_see_all">ਸਭ ਦੇਖੋ</string>
+    <string name="abc_activitychooserview_choose_application">ਇੱਕ ਐਪ ਚੁਣੋ</string>
+    <string name="abc_capital_off">ਬੰਦ</string>
+    <string name="abc_capital_on">ਤੇ</string>
+    <string name="abc_search_hint">ਖੋਜ…</string>
+    <string name="abc_searchview_description_clear">ਸਵਾਲ ਹਟਾਓ</string>
+    <string name="abc_searchview_description_query">ਸਵਾਲ ਖੋਜੋ</string>
+    <string name="abc_searchview_description_search">ਖੋਜੋ</string>
+    <string name="abc_searchview_description_submit">ਸਵਾਲ ਪ੍ਰਸਤੁਤ ਕਰੋ</string>
+    <string name="abc_searchview_description_voice">ਵੌਇਸ ਖੋਜ</string>
+    <string name="abc_shareactionprovider_share_with">ਇਸ ਨਾਲ ਸਾਂਝਾ ਕਰੋ</string>
+    <string name="abc_shareactionprovider_share_with_application">%s ਨਾਲ ਸਾਂਝਾ ਕਰੋ</string>
+    <string name="abc_toolbar_collapse_description">ਨਸ਼ਟ ਕਰੋ</string>
+    <string name="back_button_content_description">ਪਿੱਛੇ</string>
+    <string name="cancel_button">ਰੱਦ ਕਰੋ</string>
+    <string name="dialog_button_got_it">ਸਮਝ ਗਿਆ</string>
+    <string name="dialog_button_open_help_center">ਮਦਦ ਕੇਂਦਰ ਖੋਲ੍ਹੋ</string>
+    <string name="dialog_message_incompatible_phone">ਇੱਕ Daydream-ਸਮਰਥਿਤ ਫ਼ੋਨ ਲੋੜੀਂਦਾ ਹੈ। ਹੋਰ ਜਾਣਕਾਰੀ ਲਈ Daydream ਮਦਦ ਕੇਂਦਰ \'ਤੇ ਜਾਓ।</string>
+    <string name="dialog_message_no_cardboard">ਆਪਣੇ ਵਿਊਅਰ ਦਾ ਸੰਰੂਪਣ ਕਰਨ ਲਈ Cardboard ਐਪ ਪ੍ਰਾਪਤ ਕਰੋ।</string>
+    <string name="dialog_message_setup">ਸਰਵੋਤਮ ਅਨੁਭਵ ਲਈ ਆਪਣਾ ਵਿਊਅਰ ਸਥਾਪਤ ਕਰੋ।</string>
+    <string name="dialog_title">ਸੰਰੂਪਣ ਕਰੋ</string>
+    <string name="dialog_title_incompatible_phone">ਗੈਰ-ਅਨੁਰੂਪ ਫ਼ੋਨ</string>
+    <string name="dialog_title_vr_core_not_enabled">ਸਥਾਪਨਾ ਲੋੜੀਂਦੀ ਹੈ</string>
+    <string name="dialog_title_vr_core_not_installed">ਸਥਾਪਤ ਕਰਨਾ ਲੋੜੀਂਦਾ ਹੈ</string>
+    <string name="dialog_title_warning">ਚੇਤਾਵਨੀ</string>
+    <string name="dialog_vr_core_not_enabled">ਹੋ ਸਕਦਾ ਹੈ ਕਿ Google VR ਸੇਵਾਵਾਂ ਯੋਗ ਬਣਾਏ ਜਾਣ ਬਿਨਾਂ ਇਹ ਐਪਲੀਕੇਸ਼ਨ ਚੰਗੀ ਤਰ੍ਹਾਂ ਕੰਮ ਨਾ ਕਰੇ। ਜਾਰੀ ਰੱਖਣ ਤੋਂ ਪਹਿਲਾਂ ਕਿਰਪਾ ਕਰਕੇ ਫ਼ੋਨ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਇਸ ਨੂੰ ਯੋਗ ਬਣਾਓ।</string>
+    <string name="dialog_vr_core_not_installed">ਹੋ ਸਕਦਾ ਹੈ ਕਿ Google VR ਸੇਵਾਵਾਂ ਦੇ ਬਿਨਾਂ ਇਹ ਐਪਲੀਕੇਸ਼ਨ ਚੰਗੀ ਤਰ੍ਹਾਂ ਕੰਮ ਨਾ ਕਰੇ। ਜਾਰੀ ਰੱਖਣ ਤੋਂ ਪਹਿਲਾਂ ਕਿਰਪਾ ਕਰਕੇ Play ਸਟੋਰ ਤੋਂ Google VR ਸੇਵਾਵਾਂ ਸਥਾਪਤ ਕਰੋ।</string>
+    <string name="go_to_playstore_button">Play ਸਟੋਰ \'ਤੇ ਜਾਓ</string>
+    <string name="go_to_vr_listeners_settings_button">ਸੈਟਿੰਗਾਂ \'ਤੇ ਜਾਓ</string>
+    <string name="no_browser_text">ਵੈੱਬਸਾਈਟ ਖੋਲ੍ਹਣ ਲਈ ਕੋਈ ਬ੍ਰਾਊਜ਼ਰ ਨਹੀਂ ਹੈ</string>
+    <string name="place_your_phone_into_cardboard">ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਆਪਣੇ Cardboard ਵਿਊਅਰ ਵਿੱਚ ਰੱਖੋ</string>
+    <string name="place_your_viewer_into_viewer_format">ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਆਪਣੇ %s ਵਿਊਅਰ ਵਿੱਚ ਰੱਖੋ</string>
+    <string name="search_menu_title">ਖੋਜ</string>
+    <string name="settings_button_content_description">ਸੈਟਿੰਗਾਂ</string>
+    <string name="setup_button">ਸਥਾਪਤ ਕਰੋ</string>
+    <string name="status_bar_notification_info_overflow">999+</string>
+    <string name="switch_viewer_action">ਬਦਲੀ ਕਰੋ</string>
+    <string name="switch_viewer_prompt">ਕੀ ਤੁਸੀਂ ਅੱਡ ਵਿਊਅਰ ਵਰਤ ਰਹੇ ਹੋ?</string>
+</resources>

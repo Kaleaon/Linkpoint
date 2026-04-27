@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Opsætning" name="Input panel">
+	<tab_container name="tabs">
+		<panel label="Netværk" name="tab-conn">
+			<text name="Maximum bandwidth">
+				Maksimum båndbredde ([https://wiki.firestormviewer.org/fs_speedtest need a suggestion?]):
+			</text>
+			<check_box label="Speciel port" name="connection_port_enabled"/>
+			<spinner label="Port nummer:" name="connection_port"/>
+			<check_box label="Acceptér cookies" name="cookies_enabled"/>
+			<check_box label="Aktivér Javascript" name="browser_javascript_enabled"/>
+			<check_box label="Tilad media browser pop-ups" name="media_popup_enabled"/>
+		</panel>
+		<panel label="Placering" name="tab-dir">
+			<text name="cache_size_label_l">
+				Cache størrelse ([https://wiki.firestormviewer.org/cache need a suggestion?]):
+			</text>
+			<text name="Cache location">
+				Cache placering:
+			</text>
+			<button label="Vælg" label_selected="Vælg" name="set_cache"/>
+			<button label="Nulstil" label_selected="Nulstil" name="reset_cache"/>
+			<button label="Vælg" label_selected="Vælg" name="set_sound_cache"/>
+			<button label="Nulstil" label_selected="Nulstil" name="reset_sound_cache"/>
+			<button label="Vælg" label_selected="Vælg" name="log_path_button-panelsetup"/>
+			<button label="Nulstil" label_selected="Nulstil" name="reset_logpath"/>
+		</panel>
+	</tab_container>
+</panel>

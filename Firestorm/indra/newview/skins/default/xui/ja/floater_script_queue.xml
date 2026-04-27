@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="queue" title="進行のリセット">
+	<floater.string name="Starting">
+		[COUNT]件の項目の[START]を開始します。
+	</floater.string>
+	<floater.string name="Done">
+		完了しました。
+	</floater.string>
+	<floater.string name="Resetting">
+		リセットしています…
+	</floater.string>
+	<floater.string name="Running">
+		実行しています。
+	</floater.string>
+	<floater.string name="NotRunning">
+		実行されていません
+	</floater.string>
+	<floater.string name="Deleting">
+		削除しています。
+	</floater.string>
+	<floater.string name="Timeout">
+		タイムアウト：[OBJECT_NAME]
+	</floater.string>
+	<floater.string name="LoadingObjInv">
+		以下のインベントリを読み込んでいます：[OBJECT_NAME]
+	</floater.string>
+	<floater.string name="SkippingPermissions">
+		[OBJECT_NAME]（権）限をスキップしています。
+	</floater.string>
+	<floater.string name="Compiling">
+		"[OBJECT_NAME]"をコンパイルしています。
+	</floater.string>
+	<floater.string name="CompileSuccess">
+		"[OBJECT_NAME]"のコンパイルに成功しました。
+	</floater.string>
+	<floater.string name="CompileFailure">
+		"[OBJECT_NAME]"のコンパイルに失敗しました：
+	</floater.string>
+	<button label="閉じる" label_selected="閉じる" name="close"/>
+</floater>

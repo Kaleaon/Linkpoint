@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel name="groups">
+	<filter_editor label="Фильтр групп" name="group_filter_input"/>
+	<button label="ЛС/Звонок" name="chat_btn" tool_tip="Открыть сессию ЛС"/>
+	<button label="Профиль" name="info_btn"/>
+	<button label="Титулы" name="titles_btn"/>
+	<button label="Выбрать" name="activate_btn"/>
+	<button label="Покинуть" name="leave_btn"/>
+	<button label="Создать..." name="create_btn"/>
+	<button label="Поиск..." name="search_btn"/>
+	<button label="Пригласить..." name="invite_btn"/>
+</panel>

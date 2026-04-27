@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Bewegen" name="move_panel">
+	<tab_container label="Move and View" name="tabs">
+		<!--View-->
+		<panel label="Ansicht" name="tab-view">
+			<slider label="Sichtwinkel" name="camera_fov" tool_tip="In der echten Welt handelt es sich hierbei um ein Zoom-Feature. Es ändert den Sichtwinkel innerhalb des Viewer-Fensters. Er hat dieselbe Funktion wie das Drücken von Strg-0 oder Strg-8. HINWEIS: Diese Funktion funktioniert nicht, wenn Flycam aktiviert ist (3D SpaceNavigator)."/>
+			<button name="Def_CameraAngle" label="S" tool_tip="Auf Standardwert zurücksetzen." />
+			<slider label="Abstand" name="camera_offset_scale"/>
+			<button name="Def_CameraOffsetScale" label="S" tool_tip="Auf Standardwert zurücksetzen." />
+			<slider label="Übergangszeit" name="camera_transition_time"/>
+			<button name="Def_ZoomTime" label="S" tool_tip="Auf Standardwert zurücksetzen." />
+			<slider label="Glättung" name="camera_position_smoothing"/>
+			<button name="Def_CameraPositionSmoothing" label="S" tool_tip="Auf Standardwert zurücksetzen." />
+			<check_box label="Kamerabeschränkungen aufheben" name="DisableCameraConstraints" tool_tip="Erlaubt die Bewegungen der Kamera außerhalb der normalen Grenzen und der Erdoberfläche"/>
+			<check_box label="Mausrad nicht zum Zoomen verwenden" name="FSDisableMouseWheelCameraZoom"/>
+			<text name="heading2">
+				Automatische Position für:
+			</text>
+			<check_box label="Bauen/Bearbeiten" name="edit_camera_movement" tool_tip="Automatische Kamerapositionierung bei Wechsel in und aus dem Bearbeitungsmodus verwenden"/>
+			<check_box label="Aussehen" name="appearance_camera_movement" tool_tip="Automatische Kamerapositionierung im Bearbeitenmodus verwenden"/>
+			<check_box label="Visuelle Hilfen" name="FSAppearanceShowHints" tool_tip="Aktiviert die visuellen Hilfen, die die Teile des Avatars anzeigen, die modifiziert werden."/>
+			<check_box label="Klick auf Avatar hält Kameraposition" name="clickonavatarkeepscamera" tool_tip="Normalerweise wird die Kameraposition beim Anklicken des Avatars zurückgesetzt. Diese Option verhindert dieses Verhalten."/>
+			<check_box label="Kameraposition nach Teleport zurücksetzen (innerhalb einer Region)" name="FSResetCameraOnTP" tool_tip="Normalerweise wird die Kameraposition beim Teleportieren zurückgesetzt. Diese Option verhindert dieses Verhalten."/>
+			<check_box label="Kameraposition bei Avatarbewegung zurücksetzen" name="FSResetCameraOnMovement"/>
+			<check_box label="Beim Zurücksetzen der Ansicht Avatar in Blickrichtung der Kamera drehen" name="resetviewturnsavatar" tool_tip="Behält die Blickrichtung der Kamera bei und dreht den Avatar, wenn die Ansicht zurückgesetzt wird (Beim Drücken von ESC)."/>
+			<check_box label="Kamerabewegung durch primitive Objekte erlauben" name="ignorecameraconstraints" tool_tip="Ignoriert die Beschränkung, dass die Kamera nicht durch primitive Objekte bewegt werden kann." width="305"/>
+			<text name="ignorecameraconstraints_requires_restart">
+				(Erfordert Neustart)
+			</text>
+			<check_box label="Kamera-Kontrollen auf undurchsichtigem Hintergrund anzeigen" name="FSAlwaysOpaqueCameraControls"/>
+			<check_box label="Temporär nicht-angezeigte Objekte nach Teleport wieder darstellen" name="FSTempDerenderUntilTeleport" tool_tip="Falls aktiviert, werden temporär nicht-angezeigte Objekte nach einem Teleport wieder dargestellt. Falls deaktiviert, werden diese bis zum Ende der Sitzung nicht dargestellt, sofern sie nicht manuell mit Hilfe des Asset-Blacklist-Fensters wieder dargestellt werden sollen."/>
+		</panel>
+
+		<!--Mouselook-->
+		<panel label="Mouselook" name="tab-mouselook">
+			<check_box label="Mouselook-Funktionalität aktivieren" name="EnableMouselook" tool_tip="Aktiviert die Ego-Perspektive und -Steuerung mit der Maus."/>
+			<check_box label="Mich im Mouselook anzeigen" name="first_person_avatar_visible"/>
+			<check_box label="Benutzerinterface im Mouselook anzeigen" name="first_person_ui_visible"/>
+			<check_box label="Gespräche und Radar beim Wechsel in Mouselook nicht schließen" name="FSShowConvoAndRadarInML"/>
+			<check_box label="Kontextmenüs im Mouselook aktivieren" name="FSEnableRightclickMenuInMouselook" tool_tip="Öffnet das Pie-/Kontextmenü im Mouselook-Modus beim drücken von ALT + rechter Maustaste."/>
+			<check_box label="Mouselook mit Scrollrad verlassen" name="FSScrollWheelExitsMouselook" tool_tip="Falls aktiviert, kann der Mouselook durch das Drehen des Scrollrads nach unten verlassen werden."/>
+			<check_box label="Zeige Mouselook-Hilfestellungen" name="mouselook_instructions_visible" tool_tip="Zeigt Hilfestellungen zum Mouselook-Modus an."/>
+			<check_box label="Zeige Fadenkreuz im Mouselook" name="ShowCrosshairs" tool_tip="Aktiviert die Fadenkreuz-Funktion innerhalb des Mouselook-Modus."/>
+			<check_box label="Combat-Funktionen aktivieren" name="FSMouselookCombatFeatures"/>
+			<check_box label="Ziel-Markierungen aktivieren" name="ExodusMouselookIFF"/>
+			<slider label="Reichweite (m)" name="ExodusMouselookIFFRange"/>
+			<text name="Mouse Sensitivity" width="195">
+				Mausempfindlichkeit für Mouselook:
+			</text>
+			<check_box label="Umkehren" name="invert_mouse"/>
+		</panel>
+
+		<!--Movement-->
+		<panel label="Bewegung" name="tab-movement">
+			<check_box label="Mit Pfeiltasten bewegen" name="arrow_keys_move_avatar_check" tool_tip="Gilt ausschließlich für das „Chat in der Nähe“-Fenster am unteren Bildrand des Viewers, nicht für den entsprechenden Reiter im „Gespräche“-Fenster."/>
+			<check_box label="Buchstabeneingabe beeinflusst Bewegung (z.B. WASD)" name="LetterKeysAffectsMovementNotFocusChatBar"/>
+			<check_box label="Drücken-drücken-halten, um zu rennen" name="tap_tap_hold_to_run"/>
+			<check_box label="Fliegen/Landen beim Drücken von auf (springen) / ab (kriechen)" name="automatic_fly" />
+			<check_box label="Kriech-Umschaltmodus aktivieren" name="crouch_toggle_mode"/>
+			<check_box label="Warten auf Vor-Sprung- und Lande-Animationen deaktivieren" name="FSIgnoreFinishAnimation"/>
+			<check_box label="Avataren des Rückwärtsgehen in der lokalen Ansicht erlauben (SL-Standard)" name="FSDisableTurningAroundWhenWalkingBackwards" tool_tip="Falls aktiviert, gehen Avatare auf dem eigenen Bildschirm beim Rückwärtsgehen rückwärts, anstatt sich umzudrehen und anschließend vorwärts zu gehen. Diese Option hat nur lokalen Effekt und hat keinen Einfluss auf was andere sehen. Dies ist die Standardeinstellung im Second Life Viewer und kann u.U. durch den AO des Avatars übersteuert werden."/>
+			<check_box label="Avatar zum ausgewählten Objekt drehen" name="FSTurnAvatarToSelectedObject" tool_tip="Dreht den Avatar mit dem Gesicht zum aktuell ausgewählten Objekt."/>
+			<slider label_width="180" label="Avatar-Rotationsgeschwindigkeit:" name="av_turn_spd" tool_tip="Veränderte die Rate, mit der der Avatar sich dreht. 0 - 100 als geschätzte Prozent der maximalen Rotationsrate (Standard: 0). Hohe Werte führen zu zackigen und ruckartigen Bewegungen." width="305" />
+			<check_box label="Verbindung zu Nachbarregionen deaktivieren (Achtung: Tooltip lesen!)" name="FSDisableNeighbourRegionConnections" tool_tip="Zeigt/lädt nur die Region, in der Sie sich befinden. Dies kann die Performance und Netzwerkstabilität verbessern, jedoch sind Regionswechsel zu Fuß oder in Fahrzeugen weniger verlässlich und es kann ein manueller Teleport notwendig sein." />
+			<text name="Region_Crossing_Movement_Label" width="245">
+				Bewegungsvorhersage beim Regionswechsel:
+			</text>
+			<radio_group name="Region_Crossing_Movement">
+				<radio_item label="Unbegrenzt" name="move_predict" width="85" />
+				<radio_item label="Stoppen, wenn Fehler zu groß" name="move_stop" width="85" />
+			</radio_group>
+			<text name="movelock_lbl">
+				Falls Movelock in der LSL-Brücke aktiviert ist...
+			</text>
+			<check_box label="Movelock nach Teleport erneut aktivieren, falls zuvor aktiv" name="RelockMoveLockAfterRegionChange"/>
+			<check_box label="Nachdem eine Bewegung gestoppt oder gestartet ist, Position sperren oder entsperren" name="RelockMoveLockAfterMovement"/>
+			<text name="single_click_action_lbl">
+				Einfacher Klick auf Land:
+			</text>
+			<combo_box name="single_click_action_combo">
+				<combo_box.item label="Keine Aktion" name="0"/>
+				<combo_box.item label="Zur Position gehen" name="1"/>
+			</combo_box>
+			<text name="double_click_action_lbl">
+				Doppelklick auf Land:
+			</text>
+			<combo_box name="double_click_action_combo">
+				<combo_box.item label="Keine Aktion" name="0"/>
+				<combo_box.item label="Zur Position gehen" name="1"/>
+				<combo_box.item label="Zur Position teleportieren" name="2"/>
+			</combo_box>
+			<check_box label="Doppelklick-Aktion auf geskripteten Objekten zulassen" name="FSAllowDoubleClickOnScriptedObjects"/>
+			<button label="Joystick-Konfiguration" name="joystick_setup_button"/>
+		</panel>
+
+		<!-- Teleports -->
+		<panel label="Teleports" name="tab-teleports">
+			<check_box label="Soundeffekte beim Teleportieren abspielen" name="PlayTeleportSound"/>
+			<check_box label="Nach einem Teleport immer fliegen" name="FSFlyAfterTeleport"/>
+			<check_box label="Bei Teleports immer „Abbrechen“-Button anzeigen" name="FSAlwaysShowTPCancel" tool_tip="Falls aktiviert, wird immer der „Abbrechen“-Button bei einem Teleport anzeigt, auch wenn der Simulator anderweitiges behauptet. Der Simulator weiß zu jeder Zeit, ob ein Teleport abgebrochen werden kann und ignoriert einen Abbruch-Befehl bei Gott- und Todes-TPs sowieso. RestrainedLoveAPI-Restriktionen können diese Einstellung übersteuern."/>
+			<check_box label="Deaktiviere Teleport-Leitstrahl" name="tp_beam_toggle" tool_tip="Deaktiviert den Leitstrahl zum Teleportziel nach Teleports."/>
+			<check_box label="Deaktiviere Teleport-Anzeige" name="tp_screen_toggle" tool_tip="Deaktiviert den schwarzen Teleport-Bildschirm während eines Teleports."/>
+			<check_box label="Karte bei Teleports nicht schließen" name="FSDoNotHideMapOnTeleport" tool_tip="Deaktiviert das automatische Schließen der Karte während eines Teleports."/>
+			<check_box label="Nach Teleports „Nur Freunde anzeigen“ aktiviert lassen" name="FSRenderFriendsOnlyPersistsTP" tool_tip="Falls aktiviert bleibt die Einstellung „Nur Freunde anzeigen“ nach einem Teleport aktiviert (Standard: deaktiviert)"/>
+			<check_box label="SLurl der Region ausgeben, aus der ein Teleport stattgefunden hat" name="FSShowBackSLURL"/>
+		</panel>
+
+		<!-- Map & Minimap -->
+		<panel label="Weltkarte &amp; Minikarte" name="tab-maps">
+			<text name="minimap_options_label">
+			   Minikarte-Optionen:
+			</text>
+			<check_box label="Rotation der Minikarte aktivieren" name="minimaprotate" tool_tip="Aktiviert die Rotation der Minikarte bei Drehung des Avatars."/>
+			<text name="netmap_double_click_action_lbl">
+				Doppelklick auf Minikarte:
+			</text>
+			<combo_box name="netmap_double_click_action_combo">
+				<combo_box.item label="Keine Aktion" name="0"/>
+				<combo_box.item label="Weltkarte öffnen" name="1"/>
+				<combo_box.item label="Zur Position teleportieren" name="2"/>
+			</combo_box>
+			<slider label="Selektionsradius-Größe:" tool_tip="Steuert den Radius für den Selektionsbereich auf der Minikarte. Die Farbe und Deckkraft können über die Selektionsradius-Farbe- und Deckkraft-Einstellungen konfiguriert werden." name="FSMinimapPickScale"/>
+			<text name="world_map_options_label">
+			   Weltkarte-Optionen:
+			</text>
+			<check_box label="Doppelte Landmarken auf der Weltkarte filtern" name="WorldmapFilterDuplicateLandmarks" tool_tip="Filtert doppelte (identische) Landmarken in der Übersicht der Landmarken auf der Weltkarte."/>
+			<check_box label="Erweiterte Regionsinformationen auf der Weltkarte anzeigen" name="FSAdvancedWorldmapRegionInfo" tool_tip="Zeigt erweiterte Regionsinformationen (Anzahl Avatare und Alterseinstufung) auf der Weltkarte an."/>
+			<check_box label="Grid-Koordinaten auf der Weltkarte anzeigen" name="FSShowRegionGridCoordinates" tool_tip="Zeigt die Gridkoordinaten (mit Region als Einheit) auf der Weltkarte an."/>
+			<check_box label="Aktiviere Teleport via Doppelklick auf der Weltkarte" name="FSWorldMapDoubleclickTeleport" tool_tip="Aktiviert das Teleportieren zu einem Ziel auf der Weltkarte mittels Doppelklick."/>
+		</panel>
+	</tab_container>
+</panel>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="fs_asset_blacklist" title="Asset-Blacklist">
+	<floater.string name="asset_object">
+		Objekt
+	</floater.string>
+	<floater.string name="asset_texture">
+		Textur
+	</floater.string>
+	<floater.string name="asset_sound">
+		Sound
+	</floater.string>
+	<floater.string name="asset_animation">
+		Animation
+	</floater.string>
+	<floater.string name="asset_resident">
+		Einwohner
+	</floater.string>
+	<floater.string name="blacklist_flag_mute_avatar_worn_objects_sounds">
+		Von Avatar getragene Objekt-Sounds
+	</floater.string>
+	<floater.string name="blacklist_flag_mute_avatar_rezzed_objects_sounds">
+		Von Avatar gerezzte Objekt-Sounds
+	</floater.string>
+	<floater.string name="blacklist_flag_mute_avatar_gestures_sounds">
+		Avatar Gesten-Sounds
+	</floater.string>
+	<floater.string name="blacklist_flag_unknown">
+		Unbekanntes Kennzeichen
+	</floater.string>
+	<floater.string name="asset_unknown">
+		Unbekannt
+	</floater.string>
+	<floater.string name="unknown_object">
+		Unbekanntes Objekt
+	</floater.string>
+	<floater.string name="unknown_region">
+		Unbekannte Region
+	</floater.string>
+	<floater.string name="DateFormatString">
+		[day,datetime,local].[mthnum,datetime,local].[year,datetime,local] [hour,datetime,local]:[min,datetime,local]:[second,datetime,local]
+	</floater.string>
+	<filter_editor label="Asset-Blacklist filtern" name="filter_input"/>
+	<fs_scroll_list name="result_list">
+		<columns name="name" label="Name"/>
+		<columns name="region" label="Region"/>
+		<columns name="type" label="Typ"/>
+		<columns name="flags" label="Kennzeichen"/>
+		<columns name="date" label="Datum"/>
+		<columns name="permanent" label="Permanent"/>
+	</fs_scroll_list>
+	<button name="remove_btn" label="Ausgewählte Objekte entfernen" width="210"/>
+	<button name="remove_temp_btn" label="Alle Temporären entfernen" width="180"/>
+	<button name="play_btn" label="Sound abspielen" tool_tip="Spielt den selektierten Sound; nur ein einzelner Eintrag kann zur Wiedergabe ausgewählt werden." width="120"/>
+	<button name="stop_btn" label="Sound stoppen" tool_tip="Stoppt die Wiedergabe des aktuell abgespielten Sounds." width="120"/>
+	<button name="close_btn" label="Schließen"/>
+</floater>

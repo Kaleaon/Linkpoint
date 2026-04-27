@@ -209,17 +209,12 @@ impl LLSDUtils {
     /// Count the total number of elements in an LLSD structure
     pub fn count_elements(value: &LLSDValue) -> usize {
         match value {
-            // Treat the root container as structural context, but count nested containers.
-            LLSDValue::Map(map) => map.values().map(Self::count_elements_including_self).sum::<usize>(),
-            LLSDValue::Array(arr) => arr.iter().map(Self::count_elements_including_self).sum::<usize>(),
-            _ => 1,
-        }
-    }
-
-    fn count_elements_including_self(value: &LLSDValue) -> usize {
-        match value {
-            LLSDValue::Map(map) => 1 + map.values().map(Self::count_elements_including_self).sum::<usize>(),
-            LLSDValue::Array(arr) => 1 + arr.iter().map(Self::count_elements_including_self).sum::<usize>(),
+            LLSDValue::Map(map) => {
+                1 + map.values().map(|v| Self::count_elements(v)).sum::<usize>()
+            }
+            LLSDValue::Array(arr) => {
+                1 + arr.iter().map(|v| Self::count_elements(v)).sum::<usize>()
+            }
             _ => 1,
         }
     }

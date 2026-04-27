@@ -1,0 +1,129 @@
+/**
+ * @file llpaneloutfitsinventory.h
+ * @brief Outfits inventory panel
+ * class definition
+ *
+ * $LicenseInfo:firstyear=2009&license=viewerlgpl$
+ * Second Life Viewer Source Code
+ * Copyright (C) 2010, Linden Research, Inc.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation;
+ * version 2.1 of the License only.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Linden Research, Inc., 945 Battery Street, San Francisco, CA  94111  USA
+ * $/LicenseInfo$
+ */
+
+#ifndef LL_LLPANELOUTFITSINVENTORY_H
+#define LL_LLPANELOUTFITSINVENTORY_H
+
+#include "llpanel.h"
+
+class LLButton;
+class LLOutfitGallery;
+class LLOutfitsList;
+class LLOutfitListGearMenuBase;
+class LLPanelAppearanceTab;
+class LLPanelWearing;
+class LLMenuButton;
+class LLMenuGL;
+class LLSidepanelAppearance;
+class LLTabContainer;
+
+class LLPanelOutfitsInventory : public LLPanel
+{
+    LOG_CLASS(LLPanelOutfitsInventory);
+public:
+    LLPanelOutfitsInventory();
+    virtual ~LLPanelOutfitsInventory();
+
+    /*virtual*/ bool postBuild();
+    /*virtual*/ void onOpen(const LLSD& key);
+
+    void onSearchEdit(const std::string& string);
+    void onSave();
+    void saveOutfit(bool as_new = false);
+
+    bool onSaveCommit(const LLSD& notification, const LLSD& response);
+
+    static LLSidepanelAppearance* getAppearanceSP();
+
+    static LLPanelOutfitsInventory* findInstance();
+
+    void openApearanceTab(const std::string& tab_name);
+
+    bool isCOFPanelActive() const;
+
+    void setMenuButtons(
+        LLMenuButton* gear_menu,
+        LLMenuButton* sort_menu,
+        LLButton* trash_btn,
+        LLPanel* sort_menu_panel,
+        LLPanel* trash_menu_panel);
+
+protected:
+    void updateVerbs();
+
+private:
+    LLTabContainer*         mAppearanceTabs;
+
+    //////////////////////////////////////////////////////////////////////////////////
+    // tab panels                                                                   //
+protected:
+    void                    initTabPanels();
+    void                    onTabChange();
+    bool                    isOutfitsListPanelActive() const;
+    bool                    isOutfitsGalleryPanelActive() const;
+
+private:
+    LLPanelAppearanceTab*   mActivePanel;
+    LLOutfitsList*          mMyOutfitsPanel;
+    LLOutfitGallery*        mOutfitGalleryPanel;
+    LLPanelWearing*         mCurrentOutfitPanel;
+
+    // tab panels                                                                   //
+    //////////////////////////////////////////////////////////////////////////////////
+
+    //////////////////////////////////////////////////////////////////////////////////
+    // List Commands                                                                //
+protected:
+    void initListCommandsHandlers();
+    void updateListCommands();
+    void onWearButtonClick();
+    void onTrashButtonClick();
+    void onGearMouseDown();
+    bool isActionEnabled(const LLSD& userdata);
+    void setWearablesLoading(bool val);
+    void onWearablesLoaded();
+    void onWearablesLoading();
+private:
+    LLPanel*                    mListCommands;
+    LLButton*                   mWearBtn = nullptr;
+    // List Commands                                                                //
+    //////////////////////////////////////////////////////////////////////////////////
+
+    bool mInitialized;
+
+    // not owned items
+    LLMenuButton* mGearMenu;
+    LLMenuButton* mSortMenu;
+    LLButton* mTrashBtn;
+    LLPanel* mSortMenuPanel;
+    LLPanel* mTrashMenuPanel;
+    boost::signals2::connection mGearMenuConnection;
+    boost::signals2::connection mSortMenuConnection;
+    boost::signals2::connection mTrashMenuConnection;
+};
+
+#endif //LL_LLPANELOUTFITSINVENTORY_H

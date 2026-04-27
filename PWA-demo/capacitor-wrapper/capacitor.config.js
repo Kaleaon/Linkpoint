@@ -1,0 +1,40 @@
+const config = {
+  appId: 'com.linkpoint.pwa',
+  appName: 'Linkpoint',
+  webDir: 'www',
+  server: {
+    androidScheme: 'https',
+    iosScheme: 'https',
+    hostname: 'linkpoint.app',
+    allowNavigation: [
+      'https://login.agni.lindenlab.com',
+      'https://login.aditi.lindenlab.com',
+      'http://login.osgrid.org',
+      'https://*.lindenlab.com',
+      'https://*.secondlife.com',
+      '*'
+    ]
+  },
+  plugins: {
+    CapacitorHttp: {
+      enabled: true
+    },
+    SplashScreen: {
+      launchShowDuration: 2000,
+      backgroundColor: '#1a1a1a',
+      showSpinner: true,
+      spinnerColor: '#4a9eff'
+    }
+  },
+  android: {
+    allowMixedContent: true,
+    captureInput: true,
+    webContentsDebuggingEnabled: true
+  },
+  ios: {
+    contentInset: 'automatic',
+    scrollEnabled: true
+  }
+};
+
+module.exports = config;

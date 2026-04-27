@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<menu name="hide_navbar_menu">
+	<menu_item_check label="Показать панель навигации и поиска" name="ShowNavbarNavigationPanel"/>
+	<menu_item_check label="Показать панель избранного" name="ShowNavbarFavoritesPanel"/>
+	<menu_item_check label="Показать панель поиска" name="ShowSearchTopBar"/>
+	<menu_item_check label="Показать расположение в верхнем меню" name="ShowMenuBarLocation"/>
+	<menu_item_check label="Показать канал симулятора в строке состояния" name="FSStatusbarShowSimulatorVersion"/>
+	<menu_item_check label="Показать поиск разделов в меню" name="FSMenuSearch"/>
+	<menu_item_check label="Показать Денежки" name="FSShowCurrencyBalanceInStatusbar"/>
+	<menu_item_check label="Показать Управление Медиа" name="FSEnableVolumeControls"/>
+	<menu_item_check label="Показать FPS" name="FSStatusBarShowFPS"/>
+	<menu_item_check label="Показать цветной индикатор количества кадров в секунду" name="FSStatusBarShowFPSColors"/>
+	<menu_item_check label="Показать Индикатор трафика" name="ShowNetStats"/>
+	<menu_item_check label="Показать Координаты" name="Coordinates"/>
+	<menu_item_check label="Показать Разрешения Участка" name="Parcel Properties"/>
+</menu>

@@ -92,7 +92,7 @@ class InventoryOperations {
         throw new Error('Cannot delete non-empty folder');
       }
       
-      this.core.deleteFolder(id);
+      // TODO: Actually delete from core
       console.log(`[InventoryOps] Deleted folder: ${id}`);
     } else {
       const item = this.core.getItem(id);
@@ -100,7 +100,7 @@ class InventoryOperations {
         throw new Error(`Item not found: ${id}`);
       }
       
-      this.core.deleteItem(id);
+      // TODO: Actually delete from core
       console.log(`[InventoryOps] Deleted item: ${id}`);
     }
     

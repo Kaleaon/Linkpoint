@@ -1,299 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.linkpoint">
 
-    <!-- Network Permissions -->
+    <!-- Network permissions -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
     
-    <!-- Storage Permissions for log file saving -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
-    <!-- For Android 13+ (API 33+) - scoped storage -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
+    <!-- Storage -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     
-    <!-- Media Permissions -->
+    <!-- WebRTC Voice -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
-    <uses-permission android:name="android.permission.CAMERA" android:required="false"/>
-    
-    <!-- System Permissions -->
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.VIBRATE"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     
-    <!-- Bluetooth (for voice chat) -->
-    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
-
     <!-- Features -->
-    <uses-feature android:name="android.hardware.camera" android:required="false"/>
     <uses-feature android:name="android.hardware.microphone" android:required="false"/>
-    <uses-feature android:glEsVersion="0x00030000" android:required="true"/>
-    
-    <!-- VR Features (optional) -->
-    <uses-feature android:name="android.software.vr.mode" android:required="false"/>
-    <uses-feature android:name="android.hardware.vr.high_performance" android:required="false"/>
+    <uses-feature android:glEsVersion="0x00020000" android:required="true"/>
 
     <application
         android:name=".LinkpointApp"
-        android:allowBackup="true"
-        android:fullBackupContent="@xml/backup_rules"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
+        android:icon="@mipmap/ic_lumiya_launcher"
         android:theme="@style/Theme.Linkpoint"
+        android:allowBackup="true"
+        android:supportsRtl="true"
         android:hardwareAccelerated="true"
-        android:largeHeap="true"
-        android:enableOnBackInvokedCallback="true"
-        android:networkSecurityConfig="@xml/network_security_config"
-        android:usesCleartextTraffic="false">
+        android:largeHeap="true">
 
-        <!-- Main Login Activity -->
         <activity
-            android:name=".ui.login.LoginActivity"
-            android:exported="true"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize">
+            android:name=".ui.login.CleanLoginActivity"
+            android:label="@string/app_name"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-
-        <!-- Compose migration host entry (world/home) -->
+        <!-- All other activities from Lumiya -->
+        <activity android:name=".ui.chat.ChatNewActivity" android:exported="false"/>
+        <activity android:name=".ui.inventory.InventoryActivity" android:exported="false"/>
+        <activity android:name=".ui.objects.ObjectListNewActivity" android:exported="false"/>
+        <activity android:name=".ui.settings.SettingsActivity" android:exported="false"/>
+        <activity android:name=".ui.render.WorldViewActivity" android:exported="false"/>
+        
+        <!-- Filament Rendering Activities -->
         <activity
-            android:name=".ui.navigation.WorldHomeHostActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.Linkpoint.NoActionBar"/>
-
-        <!-- Main World View Activity with Filament Rendering -->
-        <activity
-            android:name=".ui.world.WorldViewActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|screenSize|keyboardHidden"
-            android:theme="@style/Theme.Linkpoint.NoActionBar"/>
-
-        <!-- XR World View Activity -->
-        <activity
-            android:name=".ui.xr.XRWorldActivity"
-            android:exported="false"
-            android:screenOrientation="landscape"
-            android:configChanges="orientation|screenSize|keyboardHidden|screenLayout|uiMode"
-            android:theme="@style/Theme.Linkpoint.Fullscreen"
-            android:launchMode="singleTask"
-            android:resizeableActivity="false">
-            <meta-data android:name="com.google.android.vr.primary" android:value="true"/>
-        </activity>
-
-        <!-- Chat Activity -->
-        <activity
-            android:name=".ui.chat.ChatActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize"
-            android:parentActivityName=".ui.world.WorldViewActivity" />
-
-        <!-- Inventory Activity -->
-        <activity
-            android:name=".ui.inventory.InventoryActivity"
-            android:exported="false"
-            android:parentActivityName=".ui.world.WorldViewActivity" />
-
-        <!-- Minimap Activity -->
-        <activity
-            android:name=".ui.minimap.MinimapActivity"
-            android:exported="false"
-            android:parentActivityName=".ui.world.WorldViewActivity" />
-
-        <!-- My Avatar Activity -->
-        <activity
-            android:name=".ui.avatar.MyAvatarActivity"
-            android:exported="false"
-            android:parentActivityName=".ui.world.WorldViewActivity" />
-
-        <!-- Settings Activity -->
-        <activity
-            android:name=".ui.settings.SettingsActivity"
-            android:exported="false"
-            android:parentActivityName=".ui.world.WorldViewActivity" />
-
-        <!-- Terms of Service Activity -->
-        <activity
-            android:name=".ui.tos.TosActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Linkpoint" />
-
-        <!-- SLURL Handler -->
-        <activity
-            android:name=".ui.slurl.SLURLActivity"
-            android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.Dialog">
+            android:name=".ui.render.FilamentTestActivity"
+            android:label="Filament Test"
+            android:theme="@style/Theme.Linkpoint"
+            android:exported="true">
+            <!-- Make it launchable for testing -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="secondlife"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="http" android:host="maps.secondlife.com" android:pathPrefix="/secondlife"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="https" android:host="maps.secondlife.com" android:pathPrefix="/secondlife"/>
             </intent-filter>
         </activity>
-
-        <!-- Profile Activity -->
+        
         <activity
-            android:name=".ui.profile.ProfileActivity"
-            android:exported="false"
-            android:parentActivityName=".ui.world.WorldViewActivity" />
-
-        <!-- World Map Activity -->
-        <activity
-            android:name=".ui.map.MapActivity"
-            android:exported="false"
-            android:screenOrientation="landscape"
-            android:parentActivityName=".ui.world.WorldViewActivity" />
-
-        <!-- Search Activity -->
-        <activity
-            android:name=".ui.search.SearchActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize"
-            android:parentActivityName=".ui.world.WorldViewActivity" />
-
-        <!-- Friends Activity -->
-        <activity
-            android:name=".ui.friends.FriendsActivity"
-            android:exported="false"
-            android:parentActivityName=".ui.world.WorldViewActivity" />
-
-        <!-- Groups Activity -->
-        <activity
-            android:name=".ui.groups.GroupsActivity"
-            android:exported="false"
-            android:parentActivityName=".ui.world.WorldViewActivity" />
-
-        <!-- Nearby People Activity -->
-        <activity
-            android:name=".ui.people.NearbyPeopleActivity"
-            android:exported="false"
-            android:parentActivityName=".ui.world.WorldViewActivity" />
-
-        <!-- Teleport History Activity -->
-        <activity
-            android:name=".ui.teleport.TeleportHistoryActivity"
-            android:exported="false"
-            android:parentActivityName=".ui.world.WorldViewActivity" />
-
-        <!-- Radar Activity -->
-        <activity
-            android:name=".ui.radar.RadarActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"
-            android:parentActivityName=".ui.world.WorldViewActivity" />
-
-        <!-- Build/Edit Activity -->
-        <activity
-            android:name=".ui.build.BuildActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize"
-            android:parentActivityName=".ui.world.WorldViewActivity" />
-
-
-        <!-- Compose migration host for Nav + AppShell rollout -->
-        <activity
-            android:name=".ui.navigation.NavigationMigrationActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Linkpoint.NoActionBar" />
-
-        <!-- Grid Connection Service -->
-        <service
-            android:name=".services.GridConnectionService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="connectedDevice" />
-
-        <!-- Streaming Media Service -->
-        <service
-            android:name=".services.StreamingMediaService"
-            android:enabled="true"
-            android:exported="false" />
-
-        <!-- Background Connection Service - Keeps SL connected when app is in background -->
-        <service
-            android:name=".service.LinkpointConnectionService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="dataSync"
-            android:stopWithTask="false" />
-
-        <!-- Script Editor Activity - LSL syntax highlighting -->
-        <activity
-            android:name=".ui.scripts.ScriptEditorActivity"
-            android:label="Script Editor"
+            android:name=".ui.render.FilamentWorldViewActivity"
+            android:label="Filament World View"
             android:theme="@style/Theme.Linkpoint"
-            android:exported="false"
-            android:parentActivityName=".ui.inventory.InventoryActivity" />
-
-        <!-- Notecard Editor Activity -->
-        <activity
-            android:name=".ui.notecard.NotecardEditorActivity"
-            android:label="Notecard Editor"
-            android:theme="@style/Theme.Linkpoint"
-            android:exported="false"
-            android:parentActivityName=".ui.inventory.InventoryActivity" />
-
-        <!-- Push delivery channel (FCM-compatible relay wakeups) -->
-        <service
-            android:name=".push.LinkpointFirebaseMessagingService"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-
-        <!-- Boot/background resume orchestration -->
-        <receiver
-            android:name=".service.BootResumeReceiver"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-            </intent-filter>
-        </receiver>
-
-        <!-- File Provider for sharing -->
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"/>
-        </provider>
+            android:exported="false"/>
+        
+        <!-- Services -->
+        <service android:name=".GridConnectionService" android:exported="false"/>
+        <service android:name=".StreamingMediaService" android:exported="false"/>
+        <service android:name=".voice.VoiceService" android:exported="false"/>
 
     </application>
-
 </manifest>

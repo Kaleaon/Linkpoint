@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater
+ name="region_tracker"
+ title="Region Tracker"
+ help_topic="floater_region_tracker"
+ save_rect="true"
+ save_visibility="true"
+ single_instance="true"
+ reuse_instance="true"
+ layout="topleft"
+ height="250"
+ width="408"
+ min_height="150"
+ min_width="300"
+ can_resize="true">
+  <icon
+   follows="left|top|right"
+   image_name="Toolbar_Middle_Off"
+   left="5"
+   name="dummy_icon"
+   top="2"
+   height="25"
+   right="-104"/>
+  <text
+   follows="left|top|right" 
+   height="31" 
+   font="SansSerifBig" 
+   left="10" 
+   top_delta="-4" 
+   right="-110"
+   layout="topleft" 
+   valign="center"
+   name="region_label_text"
+   use_ellipses="true"
+   value="Add regions from the World Map" />
+  <button
+   top="2"
+   right="-71"
+   halign="center" 
+   height="25" 
+   layout="topleft" 
+   follows="top|right"
+   width="31" 
+   mouse_opaque="true" 
+   name="refresh"
+   tool_tip="Refresh"
+   image_selected="Toolbar_Middle_Selected"
+   image_unselected="Toolbar_Middle_Off"
+   image_overlay="Refresh_Off" />
+  <button
+   left_pad="2"
+   halign="center" 
+   height="25" 
+   layout="topleft" 
+   follows="top|right"
+   width="31" 
+   mouse_opaque="true" 
+   name="remove"
+   tool_tip="Remove region(s)"
+   image_selected="Toolbar_Middle_Selected"
+   image_unselected="Toolbar_Middle_Off"
+   image_overlay="TrashItem_Off" />
+  <button
+   left_pad="2"
+   halign="center" 
+   height="25" 
+   layout="topleft" 
+   follows="top|right"
+   width="31" 
+   mouse_opaque="true" 
+   name="open_map"
+   tool_tip="Open map"
+   image_selected="Toolbar_Middle_Selected"
+   image_unselected="Toolbar_Middle_Off"
+   image_overlay="Command_Map_Icon" />
+  <scroll_list
+   name="region_list"
+   tool_tip="Double click an entry to open it on the world map."
+   height="216"
+   right="-5"
+   layout="topleft"
+   follows="all" 
+   top_pad="1"
+   left="5"
+   multi_select="true"
+   draw_heading="true"
+   persist_sort_order="true"
+   primary_sort_only="true"
+   sort_column="0"
+   column_padding="0"
+   search_column="0">
+   <scroll_list.columns
+    name="region_label"
+    label="Label"
+    dynamic_width="true"/>
+   <scroll_list.columns
+    name="region_maturity_icon"
+    width="26" />
+   <scroll_list.columns
+    name="region_name"
+    label="Region"
+    width="150"/>
+   <scroll_list.columns
+    name="region_agent_count"
+    label="#"
+    width="30" />
+  </scroll_list>
+ </floater>

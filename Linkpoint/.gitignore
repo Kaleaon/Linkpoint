@@ -1,5 +1,5 @@
 # Android Build Files
-/build/
+build/
 .gradle/
 local.properties
 *.apk
@@ -25,7 +25,3 @@ signing.properties
 
 # Logs
 *.log
-
-# Test credentials (NEVER COMMIT!)
-test-credentials.properties
-.linkpoint/

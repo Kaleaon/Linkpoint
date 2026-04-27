@@ -1,0 +1,32 @@
+package com.linkpoint.ui.myava
+
+import android.support.annotation.CallSuper
+import android.support.annotation.UiThread
+import android.support.v7.widget.RecyclerView
+import android.view.View
+import butterknife.Unbinder
+import butterknife.internal.Utils
+import com.linkpoint.R
+import com.linkpoint.ui.common.LoadingLayout
+
+class TransactionLogFragment_ViewBinding : Unbinder {
+    private TransactionLogFragment target
+
+    @UiThread
+    public TransactionLogFragment_ViewBinding(TransactionLogFragment transactionLogFragment, View view) {
+        this.target = transactionLogFragment
+        transactionLogFragment.transactionLogView = (RecyclerView) Utils.findRequiredViewAsType(view, R.id.transactionLogView, "field 'transactionLogView'", RecyclerView.class)
+        transactionLogFragment.loadingLayout = (LoadingLayout) Utils.findRequiredViewAsType(view, R.id.loading_layout, "field 'loadingLayout'", LoadingLayout.class)
+    }
+
+    @CallSuper
+    fun unbind() {
+        val transactionLogFragment: TransactionLogFragment = this.target
+        if (transactionLogFragment == null) {
+            throw IllegalStateException("Bindings already cleared.")
+        }
+        this.target = null
+        transactionLogFragment.transactionLogView = null
+        transactionLogFragment.loadingLayout = null
+    }
+}

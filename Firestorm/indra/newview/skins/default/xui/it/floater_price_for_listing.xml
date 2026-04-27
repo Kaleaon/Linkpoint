@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="price_for_listing" title="Pubblica Annuncio Pubblicitario">
+	<text name="explanation_text">
+		La tua inserzione sarà visibile per una settimana dal giorno della sua pubblicazione.
+
+La posizione del tuo annuncio nella lista delle inserzioni è determinata dalla somma pagata.
+
+Le inserzioni con un pagamento più alto saranno più visibili nella lista dei risultati della ricerca.
+	</text>
+	<text name="price_text">
+		Prezzo per inserzione:
+	</text>
+	<button label="Annulla" name="cancel_btn"/>
+</floater>

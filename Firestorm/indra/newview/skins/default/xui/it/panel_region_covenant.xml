@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Regolamento" name="Covenant">
+	<panel.string name="can_resell">
+		La terra in questa regione non può essere rivenduta.
+	</panel.string>
+	<panel.string name="can_not_resell">
+		La terra in questa regione non può essere rivenduta.
+	</panel.string>
+	<panel.string name="can_change">
+		La terra in questa regione può essere unita/suddivisa.
+	</panel.string>
+	<panel.string name="can_not_change">
+		La terra in questa regione non può essere unita/suddivisa.
+	</panel.string>
+	<text name="estate_section_lbl" width="150">
+		Proprietà Immobiliare
+	</text>
+	<text name="estate_name_lbl">
+		Nome:
+	</text>
+	<text name="estate_owner_lbl">
+		Proprietario:
+	</text>
+	<text name="estate_owner_text">
+		(nessuno)
+	</text>
+	<text name="estate_cov_lbl">
+		Regolamento:
+	</text>
+	<text name="covenant_timestamp_text">
+		Ultima modifica Merc 31 Dic 1969 16:00:00
+	</text>
+	<text_editor bottom="-247" height="162" name="covenant_editor">
+		Per questa proprietà non è stato emesso alcun regolamento.
+	</text_editor>
+	<button label="Ripristina" name="reset_covenant"/>
+	<text bottom="-25" name="covenant_help_text">
+		Le modifiche nel regolamento saranno visibili su tutti i terreni
+      della proprietà.
+	</text>
+	<text bottom_delta="-36" name="covenant_instructions">
+		Trascina e incolla un&apos;annotazione per cambiare il Regolamento di questa proprietà.
+	</text>
+	<text name="region_section_lbl">
+		Regione
+	</text>
+	<text name="region_name_lbl">
+		Nome:
+	</text>
+	<text name="region_landtype_lbl">
+		Tipo:
+	</text>
+	<text name="region_landtype_text" width="230">
+		Mainland / Homestead
+	</text>
+	<text name="region_maturity_lbl" width="115">
+		Categoria di accesso:
+	</text>
+	<text left="126" name="region_maturity_text">
+		Adulti
+	</text>
+	<text name="resellable_lbl">
+		Rivendita:
+	</text>
+	<text left="126" name="resellable_clause">
+		La terra in questa regione non può essere rivenduta.
+	</text>
+	<text name="changeable_lbl">
+		Suddividi:
+	</text>
+	<text left="126" name="changeable_clause">
+		La terra in questa regione non può essere unita/suddivisa.
+	</text>
+</panel>

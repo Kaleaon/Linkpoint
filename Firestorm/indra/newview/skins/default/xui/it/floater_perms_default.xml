@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="perms default" title="Permessi predefiniti di creazione">
+	<panel label="Permessi predefiniti" name="default permissions">
+		<text name="label_1">
+			Successivo:
+		</text>
+		<text name="label_2">
+			Copia
+		</text>
+		<text name="label_3">
+			Modifica
+		</text>
+		<text name="label_4">
+			Trasferisci
+		</text>
+		<text name="label_5">
+			Condividi con il gruppo
+		</text>
+		<text name="label_6">
+			Consenti a chiunque di copiare
+		</text>
+		<text name="label_7" tool_tip="Imposta autorizzazioni predefinite per la creazione degli oggetti">
+			Oggetti
+		</text>
+		<text name="label_8" tool_tip="Imposta autorizzazioni predefinite per gli elementi caricati dal PC">
+			Caricamenti
+		</text>
+		<text name="label_9" tool_tip="Imposta autorizzazioni predefinite per la creazione degli script">
+			Script
+		</text>
+		<text name="label_10" tool_tip="Imposta autorizzazioni predefinite per la creazione dei biglietti">
+			Annotazioni
+		</text>
+		<text name="label_11" tool_tip="Imposta autorizzazioni predefinite per la creazione dei gesti">
+			Gesti
+		</text>
+		<text name="label_12" tool_tip="Imposta autorizzazioni predefinite per la creazione di vestiti o parti del corpo">
+			Indossabili
+		</text>
+		<text name="label_13" tool_tip="Imposta autorizzazioni predefinite per la creazione degli ambienti">
+			Ambienti
+		</text>
+		<text name="label_14" tool_tip="Imposta autorizzazioni predefinite per la creazione dei materiali GLTF">
+			Materiali
+		</text>
+	</panel>
+	<button label="Annulla" label_selected="Annulla" name="cancel"/>
+</floater>

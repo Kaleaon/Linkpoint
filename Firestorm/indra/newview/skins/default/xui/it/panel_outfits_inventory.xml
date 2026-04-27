@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Abiti" name="Outfits">
+	<panel.string name="wear_outfit_tooltip">
+		Indossa l&apos;abito selezionato
+	</panel.string>
+	<panel.string name="wear_items_tooltip">
+		Indossa indumenti selezionati
+	</panel.string>
+	<panel.string name="cof_tab_label">
+		Indossati (ora: [COUNT]/[MAX])
+	</panel.string>
+	<tab_container name="appearance_tabs">
+		<panel name="outfit_gallery_tab" label="Galleria"/>
+		<panel label="I miei abiti" name="outfitslist_tab"/>
+		<panel label="Indossati" name="cof_tab"/>
+	</tab_container>
+	<panel name="bottom_panel">
+		<layout_stack name="bottom_panel_ls">
+			<layout_panel name="save_btn_lp">
+				<button label="Salva" name="save_btn"/>
+			</layout_panel>
+			<layout_panel name="save_as_btn_lp">
+				<button label="Salva con nome" name="save_as_btn"/>
+			</layout_panel>
+			<layout_panel name="wear_btn_lp">
+				<button label="Indossa" name="wear_btn"/>
+			</layout_panel>
+		</layout_stack>
+	</panel>
+</panel>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="Give Money">
+	<string name="payee_group">
+		支付群組
+	</string>
+	<string name="payee_resident">
+		支付居民
+	</string>
+	<text name="payee_name">
+		測試一個長度非常非常非常長的名稱，檢查是否被切斷
+	</text>
+	<button label="1 L$" label_selected="1 L$" name="fastpay 1" />
+	<button label="5 L$" label_selected="5 L$" name="fastpay 5" />
+	<button label="10 L$" label_selected="10 L$" name="fastpay 10" />
+	<button label="20 L$" label_selected="20 L$" name="fastpay 20" />
+	<text name="amount text">
+		選擇其他金額：
+	</text>
+	<text name="payment_message_label">
+		說明（可留空）：
+	</text>
+	<button label="支付" label_selected="支付" name="pay btn" />
+	<button label="取消" label_selected="取消" name="cancel btn" />
+</floater>

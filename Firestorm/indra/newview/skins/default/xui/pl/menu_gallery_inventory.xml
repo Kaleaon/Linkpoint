@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<context_menu name="Gallery">
+	<menu_item_call label="Udostępnij" name="Share" />
+	<menu_item_call label="Opróżnij Kosz" name="Empty Trash" />
+	<menu_item_call label="Opróżnij Zagubione i odnalezione" name="Empty Lost And Found" />
+	<menu_item_call label="Teleportuj" name="Landmark Open" />
+	<menu_item_call label="Zastąp strój" name="Replace Outfit" />
+	<menu_item_call label="Dodaj do stroju" name="Add To Outfit" />
+	<menu_item_call label="Usuń ze stroju" name="Remove From Outfit" />
+	<menu_item_call label="Kopiuj listę stroju do schowka" name="Copy outfit list to clipboard" />
+	<menu_item_call label="Znajdź oryginał" name="Find Original" />
+	<menu_item_call label="Usuń obiekt" name="Purge Item" />
+	<menu_item_call label="Przywróć obiekt" name="Restore Item" />
+	<menu_item_call label="Otwórz" name="Open" />
+	<menu_item_call label="Otwórz oryginał" name="Open Original" />
+	<menu_item_call label="Właściwości" name="Properties" />
+	<menu_item_call label="Zdjęcie..." name="thumbnail" />
+	<menu_item_call label="Kopiuj identyfikator UUID" name="Copy Asset UUID" />
+	<menu_item_call label="Otwórz" name="open_in_current_window" />
+	<menu_item_call label="Otwórz w nowym oknie" name="open_in_new_window" />
+	<menu_item_call label="Zmień nazwę" name="Rename" />
+	<menu_item_call label="Wytnij" name="Cut" />
+	<menu_item_call label="Kopiuj" name="Copy" />
+	<menu_item_call label="Wklej" name="Paste" />
+	<menu_item_call label="Wklej jako link" name="Paste As Link" />
+	<menu_item_call label="Zastępowanie linków" name="Replace Links" />
+	<menu_item_call label="Usuń" name="Delete" />
+	<menu_item_call label="Usuń folder systemowy" name="Delete System Folder" />
+	<menu_item_call label="Odtwarzaj" name="Sound Play" />
+	<menu_item_call label="Kopiuj SLurl" name="url_copy" />
+	<menu_item_call label="O miejscu" name="About Landmark" />
+	<menu_item_call label="Pokaż na mapie" name="show_on_map" />
+	<menu_item_call label="Odtwórz publicznie" name="Animation Play" />
+	<menu_item_call label="Odtwórz prywatnie" name="Animation Audition" />
+	<menu_item_call label="Wyślij wiadomość IM" name="Send Instant Message" />
+	<menu_item_call label="Proponuj teleport" name="Offer Teleport..." />
+	<menu_item_call label="Poproś o teleport" name="Request Teleport..." />
+	<menu_item_call label="Aktywuj" name="Activate" />
+	<menu_item_call label="Dezaktywuj" name="Deactivate" />
+	<menu_item_call label="Zapisz jako" name="Save As" />
+	<menu_item_call label="Zapisz do" name="Save Selected As" />
+	<menu_item_call label="Załóż" name="Wearable And Object Wear" />
+	<menu label="Dołącz do" name="Attach To" />
+	<menu label="Dołącz do HUD-a" name="Attach To HUD" />
+	<menu_item_call label="Dotknij" name="Attachment Touch" />
+	<menu_item_call label="Edytuj" name="Wearable Edit" />
+	<menu_item_call label="Dodaj/dołącz" name="Wearable Add" />
+	<menu_item_call label="Odłącz od siebie" name="Detach From Yourself" />
+	<menu_item_call label="Zdejmij" name="Take Off" />
+	<menu_item_call name="Settings Apply Local" label="Stosuj tylko dla mnie" />
+	<menu_item_call name="Settings Apply Parcel" label="Stosuj dla działki" />
+	<menu label="Utwórz nowe" name="create_new">
+		<menu_item_call label="Nowy folder" name="New Folder" />
+		<menu_item_call label="Nowy skrypt" name="New Script" />
+		<menu_item_call label="Nowa nota" name="New Note" />
+		<menu_item_call label="Nowy gest" name="New Gesture" />
+		<menu_item_call label="Nowy materiał" name="New Material" />
+		<menu label="Nowe ubranie" name="New Clothes">
+			<menu_item_call label="Nowa koszula" name="New Shirt" />
+			<menu_item_call label="Nowe spodnie" name="New Pants" />
+			<menu_item_call label="Nowe buty" name="New Shoes" />
+			<menu_item_call label="Nowe skarpety" name="New Socks" />
+			<menu_item_call label="Nowa kurtka" name="New Jacket" />
+			<menu_item_call label="Nowa spódnica" name="New Skirt" />
+			<menu_item_call label="Nowe rękawiczki" name="New Gloves" />
+			<menu_item_call label="Nowy podkoszulek" name="New Undershirt" />
+			<menu_item_call label="Nowa bielizna" name="New Underpants" />
+			<menu_item_call label="Nowa warstwa alpha" name="New Alpha Mask" />
+			<menu_item_call label="Nowy tatuaż" name="New Tattoo" />
+			<menu_item_call label="Nowa warstwa uniwersalna" name="New Universal" />
+			<menu_item_call label="Nowa fizyka" name="New Physics" />
+		</menu>
+		<menu label="Nowa część ciała" name="New Body Parts">
+			<menu_item_call label="Nowy kształt" name="New Shape" />
+			<menu_item_call label="Nowa skórka" name="New Skin" />
+			<menu_item_call label="Nowe włosy" name="New Hair" />
+			<menu_item_call label="Nowe oczy" name="New Eyes" />
+		</menu>
+		<menu label="Nowe otoczenie" name="New Settings">
+			<menu_item_call label="Nowe niebo" name="New Sky" />
+			<menu_item_call label="Nowa woda" name="New Water" />
+			<menu_item_call label="Nowy cykl dnia" name="New Day Cycle" />
+		</menu>
+	</menu>
+	<menu_item_call label="Utwórz folder z wybranych" name="New folder from selected" />
+	<menu_item_call label="Rozgrupuj elementy folderu" name="Ungroup folder items" />
+	<menu_item_call label="Dodaj do ulubionych" name="Add to Favorites" />
+	<menu_item_call label="Usuń z ulubionych" name="Remove from Favorites" />
+	<menu label="Prześlij do folderu" name="upload_options">
+		<menu_item_call label="Teksturę..." name="Upload Image" />
+		<menu_item_call label="Dźwięk ([COST]L$)..." name="Upload Sound" />
+		<menu_item_call label="Animację ([COST]L$)..." name="Upload Animation" />
+		<menu_item_call label="Model meszowy..." name="Upload Model" />
+		<menu_item_call label="Materiał..." name="Upload Material" />
+		<menu_item_call label="Zbiór wielu plików..." name="Bulk Upload" />
+	</menu>
+	<menu label="Ustaw jako domyślne" name="upload_def">
+		<menu_item_call label="Dla nowych obrazów" name="Image uploads" />
+		<menu_item_call label="Dla nowych dźwięków" name="Sound uploads" />
+		<menu_item_call label="Dla nowych animacji" name="Animation uploads" />
+		<menu_item_call label="Dla nowych modeli" name="Model uploads" />
+		<menu_item_call label="Dla nowych materiałów PBR" name="PBR uploads" />
+	</menu>
+	<menu_item_call label="Kopiuj do rzeczy Marketplace" name="Marketplace Copy" />
+	<menu_item_call label="Przenieś do rzeczy Marketplace" name="Marketplace Move" />
+	<menu_item_call label="--brak opcji--" name="--no options--" />
+</context_menu>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Ventanas emergentes" name="popups" title="Ventanas emergentes">
+	<text name="tell_me_label">
+		Avisarme:
+	</text>
+	<check_box label="Cuando gaste L$" name="notify_money_spend_checkbox"/>
+	<check_box label="Cuando mis amigos se conecten o desconecten" name="friends_online_notify_checkbox"/>
+	<check_box label="Cuando gane L$" name="notify_money_received_checkbox"/>
+	<text name="show_label" width="300">
+		Mostrar siempre:
+	</text>
+	<text name="dont_show_label">
+		No mostrar nunca:
+	</text>
+</panel>

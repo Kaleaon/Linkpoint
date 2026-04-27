@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="window_size" title="Dimensione Finestra">
+	<text name="windowsize_text">
+		Imposta dimensione finestra:
+	</text>
+	<combo_box name="window_size_combo" tool_tip="larghezza x altezza">
+		<combo_box.item label="1000 x 700 (predefinito)" name="item1"/>
+	</combo_box>
+	<button label="Imposta" name="set_btn"/>
+	<button label="Annulla" name="cancel_btn"/>
+</floater>

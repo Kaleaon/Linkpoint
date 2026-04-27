@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="BeamCreator" title="Créateur de formes">
+	<text name="beamcreator_text" width="330">
+ 		Pour créer une nouvelle forme, cliquez sur le tableau pour
+dessiner de point à point celle-ci de la couleur sélectionnée
+ou faites un clic droit pour supprimer le faisceau en question.
+Appuyez sur Enregistrer une fois terminé.
+	</text>
+	<color_swatch left_delta="335" width="60" label="Couleur" name="beam_color_swatch" tool_tip="Cliquez pour ouvrir le sélecteur de couleur afin de changer la couleur des points"/>
+	<button label="Enregistrer" name="beamshape_save"/>
+	<button label="Charger" name="beamshape_load"/>
+	<button label="Effacer" name="beamshape_clear"/>
+</floater>

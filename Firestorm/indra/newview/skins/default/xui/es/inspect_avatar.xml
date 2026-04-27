@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="inspect_avatar">
+	<string name="Subtitle">
+		[AGE]
+	</string>
+	<string name="Details">
+		[SL_PROFILE]
+	</string>
+	<text name="user_details">
+		Ésta es mi descripción de Second Life que, por cierto, me encanta. Pero, por lo que sea, me he enrollado más de la cuenta y la descripción es larguísima.
+	</text>
+	<slider name="volume_slider" tool_tip="Volumen de la voz"/>
+	<button label="Ofrecer amistad" name="add_friend_btn" width="100"/>
+	<button label="MI" name="im_btn" width="90"/>
+	<button label="Perfil" name="view_profile_btn" left_delta="106"/>
+	<panel name="moderator_panel">
+		<button label="Desactivar voz" name="disable_voice"/>
+		<button label="Activar voz" name="enable_voice"/>
+	</panel>
+</floater>

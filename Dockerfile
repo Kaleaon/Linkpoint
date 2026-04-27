@@ -8,24 +8,24 @@ RUN apt-get update && apt-get install -y wget unzip curl git && \
 RUN mkdir -p /opt/android-sdk
 WORKDIR /opt/android-sdk
 RUN wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip && \
-    unzip -q commandlinetools-linux-11076708_latest.zip -d /tmp/android-cmdline-tools && \
+    unzip -q commandlinetools-linux-11076708_latest.zip && \
     mkdir -p cmdline-tools && \
-    mv /tmp/android-cmdline-tools/cmdline-tools cmdline-tools/latest && \
-    rm -rf /tmp/android-cmdline-tools && \
+    mv cmdline-tools latest && \
+    mv latest cmdline-tools/ && \
     rm commandlinetools-linux-11076708_latest.zip
 
 # Set environment variables
 ENV ANDROID_HOME=/opt/android-sdk
 ENV JAVA_HOME=/usr/local/openjdk-17
-ENV PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/35.0.0
+ENV PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/34.0.0
 
 # Accept licenses and install Android SDK components
 RUN yes | sdkmanager --licenses 2>/dev/null || true
 RUN sdkmanager --update && \
     sdkmanager \
     "platform-tools" \
-    "platforms;android-35" \
-    "build-tools;35.0.0" \
+    "platforms;android-34" \
+    "build-tools;34.0.0" \
     "ndk;25.2.9519653" \
     "cmake;3.22.1"
 

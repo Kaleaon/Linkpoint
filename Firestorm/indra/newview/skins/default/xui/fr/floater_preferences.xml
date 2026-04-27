@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="Preferences" title="Préférences">
+	<button label="OK" label_selected="OK" name="OK"/>
+	<button label="Annuler" label_selected="Annuler" name="Cancel"/>
+	<panel name="search_panel">
+		<search_editor label="Paramètres de recherche" name="search_prefs_edit" tool_tip="Tapez le terme de recherche qui vous intéresse ici. Les résultats seront affichés pour les correspondances partielles de texte intégral dans le nom ou le commentaire du paramètre."/>
+	</panel>
+	<tab_container name="pref core">
+		<panel label="Général" name="general"/>
+		<panel label="Conversations" name="chat"/>
+		<panel label="Couleurs" name="colors"/>
+		<panel label="Graphiques" name="display"/>
+		<panel label="Son et Média" name="audio"/>
+		<panel label="Réseau &amp; fichiers" name="input"/>
+		<panel label="Affichage/Dépl." name="move"/>
+		<panel label="Contrôles" name="controls" />
+		<panel label="Notifications" name="msgs"/>
+		<panel label="Confidentialité" name="im"/>
+		<panel label="Avancées" name="advanced1"/>
+		<panel label="Interface" name="ui"/>
+		<panel label="Thèmes" name="skins"/>
+		<panel label="Rapports d'erreurs" name="crashreports"/>
+		<panel label="Sauvegarde" name="backup"/>
+	</tab_container>
+</floater>

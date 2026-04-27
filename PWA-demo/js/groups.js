@@ -325,21 +325,15 @@ class GroupsManager {
   /**
    * Send group notice
    * @param {string} groupUUID - UUID of the group
-   * @param {string} senderUUID - UUID of the sender
    * @param {string} subject - Notice subject
    * @param {string} message - Notice message
    * @param {Object} attachment - Optional inventory attachment
    */
-  sendGroupNotice(groupUUID, senderUUID, subject, message, attachment = null) {
+  sendGroupNotice(groupUUID, subject, message, attachment = null) {
     console.log(`Sending group notice to ${groupUUID}: ${subject}`);
     
-    // Validate permissions (ALLOW_SEND_NOTICE)
-    if (!this.hasPower(groupUUID, senderUUID, GroupPowers.ALLOW_SEND_NOTICE)) {
-      console.warn(`User ${senderUUID} missing ALLOW_SEND_NOTICE permission for group ${groupUUID}`);
-      throw new Error("You do not have permission to send notices to this group.");
-    }
-
     // TODO: Send GroupNoticeRequest capability request
+    // TODO: Validate permissions (ALLOW_SEND_NOTICE)
   }
   
   /**
@@ -546,30 +540,12 @@ class GroupsManager {
    */
   updateCharter(groupUUID, charter) {
     const group = this.groups.get(groupUUID);
-    if (!group) return;
-
-    group.charter = charter;
-    this.notifyChange('group-updated', groupUUID);
-    
-    // Send UpdateGroupInfo message
-    if (window.app && window.app.agentId && window.app.sessionId) {
-      const MsgClass = window.SLMessageTypes ? window.SLMessageTypes.UpdateGroupInfoMessage : (typeof UpdateGroupInfoMessage !== 'undefined' ? UpdateGroupInfoMessage : null);
-      if (MsgClass && window.app.protocolManager) {
-        const msg = new MsgClass(
-          window.app.agentId,
-          window.app.sessionId,
-          groupUUID,
-          charter,
-          group.showInList !== undefined ? group.showInList : true,
-          group.insigniaID || '00000000-0000-0000-0000-000000000000',
-          group.membershipFee || 0,
-          group.openEnrollment !== undefined ? group.openEnrollment : true,
-          group.allowPublish !== undefined ? group.allowPublish : true,
-          group.maturePublish !== undefined ? group.maturePublish : false
-        );
-        window.app.protocolManager.sendMessage(msg);
-      }
+    if (group) {
+      group.charter = charter;
+      this.notifyChange('group-updated', groupUUID);
     }
+    
+    // TODO: Send UpdateGroupInfo message
   }
   
   /**
@@ -579,30 +555,12 @@ class GroupsManager {
    */
   setInsignia(groupUUID, insigniaID) {
     const group = this.groups.get(groupUUID);
-    if (!group) return;
-
-    group.insigniaID = insigniaID;
-    this.notifyChange('group-updated', groupUUID);
-    
-    // Send UpdateGroupInfo message
-    if (window.app && window.app.agentId && window.app.sessionId) {
-      const MsgClass = window.SLMessageTypes ? window.SLMessageTypes.UpdateGroupInfoMessage : (typeof UpdateGroupInfoMessage !== 'undefined' ? UpdateGroupInfoMessage : null);
-      if (MsgClass && window.app.protocolManager) {
-        const msg = new MsgClass(
-          window.app.agentId,
-          window.app.sessionId,
-          groupUUID,
-          group.charter || '',
-          group.showInList !== undefined ? group.showInList : true,
-          insigniaID,
-          group.membershipFee || 0,
-          group.openEnrollment !== undefined ? group.openEnrollment : true,
-          group.allowPublish !== undefined ? group.allowPublish : true,
-          group.maturePublish !== undefined ? group.maturePublish : false
-        );
-        window.app.protocolManager.sendMessage(msg);
-      }
+    if (group) {
+      group.insigniaID = insigniaID;
+      this.notifyChange('group-updated', groupUUID);
     }
+    
+    // TODO: Send UpdateGroupInfo message
   }
   
   /**
@@ -743,4 +701,4 @@ class GroupsManager {
 // Export singleton instance
 const groupsManager = new GroupsManager();
 export default groupsManager;
-export { GroupsManager };
+export { GroupsManager, GroupPowers };

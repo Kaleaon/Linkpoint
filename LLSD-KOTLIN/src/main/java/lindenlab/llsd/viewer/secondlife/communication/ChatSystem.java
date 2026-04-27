@@ -570,20 +570,19 @@ public class ChatSystem {
     
     public CompletableFuture<Boolean> sendChatMessage(String message, ChatType type, int channel, Vector3 position) {
         return CompletableFuture.supplyAsync(() -> {
-            String processedMessage = message;
             try {
-                if (processedMessage == null || processedMessage.trim().isEmpty()) {
+                if (message == null || message.trim().isEmpty()) {
                     return false;
                 }
                 
-                if (processedMessage.length() > MAX_MESSAGE_LENGTH) {
-                    processedMessage = processedMessage.substring(0, MAX_MESSAGE_LENGTH);
+                if (message.length() > MAX_MESSAGE_LENGTH) {
+                    message = message.substring(0, MAX_MESSAGE_LENGTH);
                 }
                 
                 UUID currentUserId = getCurrentUserId();
                 String currentUserName = getCurrentUserName();
                 ChatMessage chatMessage = new ChatMessage(
-                    currentUserId, currentUserName, processedMessage.trim(),
+                    currentUserId, currentUserName, message.trim(), 
                     type, channel, position, null
                 );
                 

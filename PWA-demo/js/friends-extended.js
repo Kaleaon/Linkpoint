@@ -127,20 +127,9 @@ class FriendsExtended {
   declineFriendRequest(fromUUID) {
     console.log(`Declining friend request from ${fromUUID}`);
     
-    // Get session ID before deleting the request
-    const request = this.pendingRequests.get(fromUUID);
-    const sessionID = request ? request.sessionID : null;
-
     this.pendingRequests.delete(fromUUID);
     
-    // Send DeclineFriendship message via protocol manager
-    if (window.app && window.app.protocol) {
-      window.app.protocol.sendMessage('DeclineFriendship', {
-        agent_id: window.app.auth.user.id,
-        session_id: window.app.protocol.sessionId,
-        transaction_id: sessionID || '00000000-0000-0000-0000-000000000000'
-      });
-    }
+    // TODO: Send DeclineFriendship message
   }
   
   /**
@@ -317,38 +306,7 @@ class FriendsExtended {
       friend.rightsGiven = rights;
     }
     
-    // Send GrantUserRights message
-    if (window.app && window.app.protocolManager) {
-      const pm = window.app.protocolManager;
-      if (window.SLMessageTypes && window.SLMessageTypes.GrantUserRightsMessage) {
-        const msg = new window.SLMessageTypes.GrantUserRightsMessage(
-          pm.agentId,
-          pm.sessionId,
-          friendUUID,
-          rights
-        );
-
-        // Allocate buffer (AgentData=32 + Count=1 + Rights=20 = 53 bytes)
-        const buffer = new ArrayBuffer(64);
-        const length = msg.packPayload(buffer);
-        const payload = new Uint8Array(buffer, 0, length);
-
-        // Since ProtocolManager might use WebSockets and JSON wrapping in the PWA demo,
-        // we'll try to send it in a way it expects or just simulate if it's not a full implementation
-        if (pm.sendMessage) {
-          pm.sendMessage('GrantUserRights', {
-            friend_id: friendUUID,
-            rights: rights,
-            // Provide payload for low-level protocol adapters
-            payload: Array.from(payload)
-          });
-        }
-      } else {
-        console.warn('SLMessageTypes.GrantUserRightsMessage not available');
-      }
-    } else {
-      console.warn('window.app.protocolManager not available to send GrantUserRights');
-    }
+    // TODO: Send GrantUserRights message
   }
   
   /**

@@ -1,0 +1,49 @@
+package com.lumiyaviewer.lumiya.slproto.messages
+
+import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.types.LLVector3
+import java.nio.ByteBuffer
+import java.util.UUID
+
+class TeleportLocal : SLMessage {
+    Info Info_Field = Info()
+
+    class Info {
+        UUID AgentID
+        Int LocationID
+        LLVector3 LookAt
+        LLVector3 Position
+        Int TeleportFlags
+    }
+
+    TeleportLocal() {
+        this.zeroCoded = false
+    }
+
+    Int CalcPayloadSize() {
+        return 52
+    }
+
+    Unit Handle(SLMessageHandler sLMessageHandler) {
+        sLMessageHandler.HandleTeleportLocal(this)
+    }
+
+    Unit PackPayload(ByteBuffer byteBuffer) {
+        byteBuffer.putShort(-1)
+        byteBuffer.put((Byte) 0)
+        byteBuffer.put((Byte) 64)
+        packUUID(byteBuffer, this.Info_Field.AgentID)
+        packInt(byteBuffer, this.Info_Field.LocationID)
+        packLLVector3(byteBuffer, this.Info_Field.Position)
+        packLLVector3(byteBuffer, this.Info_Field.LookAt)
+        packInt(byteBuffer, this.Info_Field.TeleportFlags)
+    }
+
+    Unit UnpackPayload(ByteBuffer byteBuffer) {
+        this.Info_Field.AgentID = unpackUUID(byteBuffer)
+        this.Info_Field.LocationID = unpackInt(byteBuffer)
+        this.Info_Field.Position = unpackLLVector3(byteBuffer)
+        this.Info_Field.LookAt = unpackLLVector3(byteBuffer)
+        this.Info_Field.TeleportFlags = unpackInt(byteBuffer)
+    }
+}

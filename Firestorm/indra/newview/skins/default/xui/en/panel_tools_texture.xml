@@ -1,0 +1,1138 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel
+         border="false"
+         follows="all"
+         height="500"
+         label="Texture"
+         layout="topleft"
+         left="0"
+         mouse_opaque="false"
+         help_topic="toolbox_texture_tab"
+         name="Texture"
+         top="0"
+         width="295">
+            <panel.string
+             name="paste_error_face_selection_mismatch">
+              When multiple faces are copied, the target object must have the same number of faces selected.
+            </panel.string>
+            <panel.string
+             name="paste_error_object_face_count_mismatch">
+              When all faces of an object are copied, the target object must have the same number of faces.
+            </panel.string>
+            <panel.string
+             name="paste_error_inventory_not_found">
+              One or more textures not found in inventory.
+            </panel.string>
+            <panel.string
+             name="paste_options">
+              Copy Texture Parameters to Clipboard
+            </panel.string>
+            <text
+             type="string"
+             length="1"
+             follows="left|top"
+             height="10"
+             layout="topleft"
+             left="10"
+             name="color label"
+             text_readonly_color="LabelDisabledColor"
+             top="6"
+             width="64">
+                Color
+            </text>
+            <!-- label is blank because control places it below the box -->
+            <color_swatch
+             can_apply_immediately="true"
+             follows="left|top"
+             height="22"
+             label=""
+             label_height="0"
+             layout="topleft"
+             left="10"
+             name="colorswatch"
+             tool_tip="Click to open color picker"
+             top="20"
+             width="64" />
+            <text
+             type="string"
+             length="1"
+             follows="left|top"
+             height="10"
+             layout="topleft"
+             left_pad="15"
+             name="color trans"
+             text_readonly_color="LabelDisabledColor"
+             top="6"
+             width="110">
+                Transparency %
+            </text>
+            <spinner
+             decimal_digits="0"
+             follows="left|top"
+             height="19"
+             increment="2"
+             initial_value="0"
+             layout="topleft"
+             left_delta="0"
+             max_val="100"
+             name="ColorTrans"
+             top_pad="4"
+             width="80" />
+            <text
+             type="string"
+             length="1"
+             follows="left|top"
+             height="10"
+             layout="topleft"
+             left_pad="15"
+             name="glow label"
+             text_readonly_color="LabelDisabledColor"
+             top="6"
+             width="80">
+                Glow
+            </text>
+            <spinner
+             decimal_digits="2"
+             follows="left|top"
+             height="19"
+             initial_value="0"
+             layout="topleft"
+             left_delta="0"
+             name="glow"
+             top_pad="4"
+             width="70" />
+            <check_box
+             height="19"
+             label="Full bright"
+             layout="topleft"
+             left="7"
+             name="checkbox fullbright"
+             top_pad="4"
+             width="81" />
+            <check_box
+             height="17"
+             label="Hide water"
+             layout="topleft"
+             left="7"
+             name="checkbox_hide_water"
+             top_pad="0"
+             width="81" />
+            <button
+             follows="top|right"
+             height="23"
+             image_overlay="Copy"
+             image_hover_unselected="Toolbar_Middle_Over"
+             image_selected="Toolbar_Middle_Selected"
+             image_unselected="Toolbar_Middle_Off"
+             layout="topleft"
+             left="265"
+             name="copy_face_btn"
+             tool_tip="Copy Texture Parameters to Clipboard"
+             top="6"
+             width="25">
+            </button>
+            <button
+             follows="top|right"
+             height="23"
+             image_overlay="Paste"
+             image_hover_unselected="Toolbar_Middle_Over"
+             image_selected="Toolbar_Middle_Selected"
+             image_unselected="Toolbar_Middle_Off"
+             layout="topleft"
+             name="paste_face_btn"
+             tool_tip="Paste Texture Parameters from Clipboard"
+             top_pad="5"
+             width="25">
+            </button>
+            <!-- FS:Ansariel: Removed to make enough room
+            <text
+             type="string"
+             length="1"
+             follows="left|top"
+             height="10"
+             layout="topleft"
+             left="12"
+             top_pad="8"
+             name="label_matmedia"
+             width="90">
+                Material
+            </text>
+            -->
+            <combo_box
+             height="23"
+             layout="topleft"
+             left="10"
+             name="combobox matmedia"
+             top="80"
+             width="100">
+                <combo_box.item
+                 label="Textures"
+                 name="Materials"
+                 value="Materials" />
+                <combo_box.item
+                 label="PBR Metallic Roughness"
+                 name="PBR"
+                 value="PBR" />
+                <combo_box.item
+                 label="Media"
+                 name="Media"
+                 value="Media" />
+            </combo_box>
+            <radio_group
+            height="50"
+            layout="topleft"
+            left_pad="10"
+            top_delta="-30"
+            width="150"
+            visible = "false"
+            name="radio_material_type">
+                <radio_item
+                label="Texture (diffuse)"
+                name="Texture (diffuse)"
+                top="0" 
+                layout="topleft"
+                height="16" 
+                value="0"/>
+                <radio_item
+                label="Bumpiness (normal)"
+                layout="topleft"
+                top_pad="1" 
+                height="16" 
+                name="Bumpiness (normal)"
+                value="1"/>
+                <radio_item
+                label="Shininess (specular)"
+                name="Shininess (specular)"
+                height="16"
+                layout="topleft"
+                top_pad="1"
+                value="2"/>
+            </radio_group>
+            <radio_group
+            height="84"
+            layout="topleft"
+            left_delta="0"
+            top_delta="0"
+            width="150"
+            visible = "false"
+            name="radio_pbr_type">
+                <radio_item
+                label="Complete material"
+                name="Complete material"
+                top="0"
+                layout="topleft"
+                height="16"
+                value="0"/>
+                <radio_item
+                label="Base color"
+                name="Base color"
+                layout="topleft"
+                top_pad="1" 
+                height="16" 
+                value="1"/>
+                <radio_item
+                label="Metallic/roughness"
+                name="Metallic/roughness"
+                height="16"
+                layout="topleft"
+                top_pad="1"
+                value="2"/>
+                <radio_item
+                label="Emissive"
+                name="Emissive"
+                layout="topleft"
+                top_pad="1" 
+                height="16" 
+                value="3"/>
+                <radio_item
+                label="Normal"
+                layout="topleft"
+                top_pad="1" 
+                height="16" 
+                name="Normal"
+                value="4"/>
+            </radio_group>
+            <!-- Removed (again) to prefer the name and location of the FS control
+            <check_box
+             control_name="SyncMaterialSettings"
+             follows="top|left"
+             height="20"
+             initial_value="false"
+             label="Lock repeat"
+             layout="topleft"
+             left="8"
+             name="checkbox_sync_settings"
+             tool_tip="Adjust all maps repeats simultaneously"
+             top_pad="-16"
+             width="160" />
+             -->
+            <texture_picker
+             can_apply_immediately="true"
+             allow_no_texture="true"
+             follows="left|top"
+             height="80"
+             label="Material"
+             layout="topleft"
+             left="10"
+             name="pbr_control"
+             tool_tip="Click to choose a pbr material"
+             top_pad="-29"
+             width="64" />
+
+<!-- <FS:Zi> We don't need this button, clicking the texture picker does the same thing
+            <button
+             follows="left|top"
+             height="23"
+             layout="topleft"
+             left_pad="10"
+             top_delta="0"
+             name="pbr_from_inventory"
+             label="Choose from inventory"
+             width="140"/>
+-->
+            <text
+             visible="false"
+             type="string"
+             length="1"
+             follows="left|top"
+             height="10"
+             layout="topleft"
+             top_delta="40"
+             left_pad="10"
+             name="material_permissions_loading_label"
+             text_readonly_color="LabelDisabledColor"
+             width="160">
+                Loading contents...
+            </text>
+            <button
+             follows="left|top"
+             height="23"
+             layout="topleft"
+             left_delta="0"
+             top_delta="0"
+             name="edit_selected_pbr"
+             label="Edit"
+             width="100"/>
+            <button
+             follows="left|top"
+             height="23"
+             layout="topleft"
+             left_delta="0"
+             left_pad="4"
+             name="save_selected_pbr"
+             label="Save"
+             width="100"/>
+            <texture_picker
+             can_apply_immediately="true"
+             default_image_name="Default"
+             fallback_image="materials_ui_x_24.png"
+             follows="left|top"
+             height="80"
+             label="Texture       "
+             layout="topleft"
+             left="10"
+             name="texture control"
+             tool_tip="Click to choose a picture"
+             top_delta="-40"
+             width="64" />
+            <text
+             type="string"
+             length="1"
+             follows="left|top"
+             height="10"
+             layout="topleft"
+             left_pad="30"
+             name="label alphamode"
+             text_readonly_color="LabelDisabledColor"
+             top_delta="0"
+             width="90">
+                Alpha mode
+            </text>
+            <combo_box
+             height="23"
+             layout="topleft"
+             left_delta="0"
+             name="combobox alphamode"
+             top_pad="4"
+             width="120">
+                <combo_box.item
+                 label="None"
+                 name="None"
+                 value="None" />
+                <combo_box.item
+                 label="Alpha blending"
+                 name="Alpha blending"
+                 value="Alpha blending" />
+                <combo_box.item
+                 label="Alpha masking"
+                 name="Alpha masking"
+                 value="Alpha masking" />
+                <combo_box.item
+                 label="Emissive mask"
+                 name="Emissive mask"
+                 value="Emissive mask" />
+            </combo_box>
+            <text
+             type="string"
+             length="1"
+             follows="left|top"
+             height="10"
+             layout="topleft"
+             left_delta="0"
+             name="label maskcutoff"
+             text_readonly_color="LabelDisabledColor"
+             top_pad="4"
+             width="150">
+                Mask cutoff
+            </text>
+            <spinner
+             decimal_digits="0"
+             min_val="0"
+             max_val="255"
+             follows="left|top"
+             height="19"
+             initial_value="55"
+             layout="topleft"
+             top_pad="4"
+             left_delta="0"
+             increment="1"
+             name="maskcutoff"
+             width="80" />
+            <texture_picker
+             allow_no_texture="true"
+             can_apply_immediately="true"
+             default_image_name="Default"
+             fallback_image="materials_ui_x_24.png"
+             follows="left|top"
+             height="80"
+             label="Texture"
+             layout="topleft"
+             left="10"
+             name="bumpytexture control"
+             tool_tip="Click to choose a picture"
+             top_delta="-55"
+             width="64" />
+            <text
+             type="string"
+             length="1"
+             follows="left|top"
+             height="10"
+             layout="topleft"
+             left_pad="30"
+             name="label bumpiness"
+             text_readonly_color="LabelDisabledColor"
+             top_delta="0"
+             width="90">
+                Bumpiness
+            </text>
+            <combo_box
+             height="23"
+             layout="topleft"
+             left_delta="0"
+             name="combobox bumpiness"
+             top_pad="4"
+             width="150">
+                <combo_box.item
+                 label="None"
+                 name="None"
+                 value="None" />
+                <combo_box.item
+                 label="Brightness"
+                 name="Brightness"
+                 value="Brightness" />
+                <combo_box.item
+                 label="Darkness"
+                 name="Darkness"
+                 value="Darkness" />
+                <combo_box.item
+                 label="woodgrain"
+                 name="woodgrain"
+                 value="woodgrain" />
+                <combo_box.item
+                 label="bark"
+                 name="bark"
+                 value="bark" />
+                <combo_box.item
+                 label="bricks"
+                 name="bricks"
+                 value="bricks" />
+                <combo_box.item
+                 label="checker"
+                 name="checker"
+                 value="checker" />
+                <combo_box.item
+                 label="concrete"
+                 name="concrete"
+                 value="concrete" />
+                <combo_box.item
+                 label="crustytile"
+                 name="crustytile"
+                 value="crustytile" />
+                <combo_box.item
+                 label="cutstone"
+                 name="cutstone"
+                 value="cutstone" />
+                <combo_box.item
+                 label="discs"
+                 name="discs"
+                 value="discs" />
+                <combo_box.item
+                 label="gravel"
+                 name="gravel"
+                 value="gravel" />
+                <combo_box.item
+                 label="petridish"
+                 name="petridish"
+                 value="petridish" />
+                <combo_box.item
+                 label="siding"
+                 name="siding"
+                 value="siding" />
+                <combo_box.item
+                 label="stonetile"
+                 name="stonetile"
+                 value="stonetile" />
+                <combo_box.item
+                 label="stucco"
+                 name="stucco"
+                 value="stucco" />
+                <combo_box.item
+                 label="suction"
+                 name="suction"
+                 value="suction" />
+                <combo_box.item
+                 label="weave"
+                 name="weave"
+                 value="weave" />
+              <!--
+                 NORSPEC-182, ensure item doesn't show up in menu until it should
+                <combo_box.item
+                 label="Use texture"
+                 name="Use texture"
+                 value="Use texture" />
+                 -->
+            </combo_box>
+            <texture_picker
+             allow_no_texture="true"
+             can_apply_immediately="true"
+             default_image_name="Default"
+             fallback_image="materials_ui_x_24.png"
+             follows="left|top"
+             height="80"
+             label="Texture"
+             layout="topleft"
+             left="10"
+             name="shinytexture control"
+             tool_tip="Click to choose a picture"
+             top_delta="-14"
+             width="64" />
+            <text
+             type="string"
+             length="1"
+             follows="left|top"
+             height="10"
+             layout="topleft"
+             name="label shininess"
+             left_pad="30"
+             text_readonly_color="LabelDisabledColor"
+             top_delta="6"
+             width="70">
+                Shininess
+            </text>
+            <combo_box
+             height="23"
+             layout="topleft"
+             left_pad="10"
+             name="combobox shininess"
+             top_delta="-6"
+             width="90">
+                <combo_box.item
+                 label="None"
+                 name="None"
+                 value="None" />
+                <combo_box.item
+                 label="Low"
+                 name="Low"
+                 value="Low" />
+                <combo_box.item
+                 label="Medium"
+                 name="Medium"
+                 value="Medium" />
+                <combo_box.item
+                 label="High"
+                 name="High"
+                 value="High" />
+              <!--
+                 NORSPEC-182, ensure item doesn't show up in menu until it should
+                <combo_box.item
+                 label="Use texture"
+                 name="Use texture"
+                 value="Use texture" />
+                 -->
+            </combo_box>
+            <text
+             type="string"
+             length="1"
+             follows="left|top"
+             height="10"
+             layout="topleft"
+             left_delta="-80"
+             name="label glossiness"
+             text_readonly_color="LabelDisabledColor"
+             top_pad="8"
+             width="76">
+                Glossiness
+            </text>
+            <spinner
+             decimal_digits="0"
+             min_val="0"
+             max_val="255"
+             follows="left|top"
+             height="19"
+             initial_value="51"
+             increment="1"
+             layout="topleft"
+             top_delta="-4"
+             left_pad="30"
+             name="glossiness"
+             width="64" />
+            <text
+             type="string"
+             length="1"
+             follows="left|top"
+             height="10"
+             layout="topleft"
+             left_delta="-106"
+             name="label environment"
+             text_readonly_color="LabelDisabledColor"
+             top_pad="8"
+             width="96">
+                Environment
+            </text>
+            <spinner
+             decimal_digits="0"
+             min_val="0"
+             max_val="255"
+             increment="1"
+             follows="left|top"
+             height="19"
+             initial_value="0"
+             layout="topleft"
+             top_delta="-4"
+             left_pad="10"
+             name="environment"
+             width="64" />
+            <text
+             type="string"
+             length="1"
+             follows="left|top"
+             height="10"
+             layout="topleft"
+             left_delta="-106"
+             name="label shinycolor"
+             text_readonly_color="LabelDisabledColor"
+             top_pad="8"
+             width="96">
+                Color
+            </text>
+            <!-- label is blank because control places it below the box -->
+            <color_swatch
+             can_apply_immediately="true"
+             follows="left|top"
+             height="45"
+             label=""
+             layout="topleft"
+             left_pad="10"
+             name="shinycolorswatch"
+             tool_tip="Click to open color picker"
+             top_delta="-4"
+             width="64" />
+            <text
+			 follows="left|top|right"
+			 height="9"
+			 layout="topleft"
+			 left="10"
+			 top_delta="-50"
+             use_ellipses="true"
+			 read_only="true"
+			 name="media_info"
+			 width="280">
+			 URL of chosen media, if any, goes here
+			 </text>
+			<button
+			 follows="top|left"
+			 height="18"
+			 layout="topleft"
+			 left="10"
+			 name="add_media"
+			 top_pad="4"
+			 tool_tip="Add Media"
+			 label="Choose..."
+			 width="85"/>
+			<button
+			 follows="top|left"
+			 height="18"
+			 layout="topleft"
+			 left_pad="5"
+			 name="delete_media"
+			 tool_tip="Delete this media texture"
+			 top_delta="0"
+			 label="Remove"
+			 width="85"/>
+            <button
+			 follows="left|top"
+			 height="18"
+			 label="Align"
+			 label_selected="Align Media"
+			 layout="topleft"
+			 left_pad="5"
+			 name="button align"
+			 top_delta="0"
+			 tool_tip="Align media texture (must load first)"
+			 width="85" />
+            <text
+             type="string"
+             length="1"
+             follows="left|top"
+             height="10"
+             layout="topleft"
+             left="10"
+             name="tex gen"
+             text_readonly_color="LabelDisabledColor"
+             top_pad="49"
+             width="140">
+                Mapping
+            </text>
+            <combo_box
+             height="23"
+             layout="topleft"
+             left_pad="0"
+             name="combobox texgen"
+             top_pad="-13"
+             width="125">
+                <combo_box.item
+                 label="Default"
+                 name="Default"
+                 value="Default" />
+                <combo_box.item
+                 label="Planar"
+                 name="Planar"
+                 value="Planar" />
+            </combo_box>
+            <spinner
+             follows="left|top"
+             height="19"
+             initial_value="0"
+             label="Horizontal scale"
+             label_width="195"
+             layout="topleft"
+             left="10"
+             min_val="-10000"
+             max_val="10000"
+             decimal_digits="5"
+             name="TexScaleU"
+             top_pad="5"
+             width="265" />
+            <button
+             follows="top|left"
+             height="18"
+             layout="topleft"
+             left_pad="0"
+             image_overlay="Edit_Flip_X"
+             image_hover_unselected="Toolbar_Middle_Over"
+             image_selected="Toolbar_Middle_Selected"
+             image_unselected="Toolbar_Middle_Off"
+             name="flipTextureScaleU"
+             top_delta="1"
+             tool_tip="Flip"
+             width="16">
+               <button.commit_callback
+				function="BuildTool.Flip"
+                parameter="U"/>
+            </button>
+            <spinner
+             follows="left|top"
+             height="19"
+             initial_value="0"
+             label="Vertical scale"
+             label_width="195"
+             layout="topleft"
+             left="10"
+             min_val="-10000"
+             max_val="10000"
+             decimal_digits="5"
+             name="TexScaleV"
+             width="265" />
+            <button
+             follows="top|left"
+             height="18"
+             layout="topleft"
+             left_pad="0"
+             image_overlay="Edit_Flip_X"
+             image_hover_unselected="Toolbar_Middle_Over"
+             image_selected="Toolbar_Middle_Selected"
+             image_unselected="Toolbar_Middle_Off"
+             name="flipTextureScaleV"
+             top_delta="1"
+             tool_tip="Flip"
+             width="16">
+               <button.commit_callback
+				function="BuildTool.Flip"
+                parameter="V"/>
+            </button>
+            <spinner
+             decimal_digits="1"
+             follows="left|top"
+             height="19"
+             initial_value=""
+			 label="Repeats per meter"
+             layout="topleft"
+			 label_width="195"
+             left="10"
+             max_val="100"
+             min_val="-100"
+             name="rptctrl"
+             width="265" />
+           <spinner
+             decimal_digits="2"
+             follows="left|top"
+             height="19"
+             increment="1"
+             initial_value="0"
+			 label="Rotation degrees"
+             layout="topleft"
+			 label_width="195"
+             left="10"
+             max_val="360"
+             min_val="-360"
+             name="TexRot"
+             width="265" />
+            <spinner
+             follows="left|top"
+             height="19"
+             initial_value="0"
+             label="Horizontal offset"
+             label_width="195"
+             layout="topleft"
+             left="10"
+             min_val="-1"
+             max_val="1"
+             decimal_digits="5"
+             name="TexOffsetU"
+             width="265" />
+            <spinner
+             follows="left|top"
+             height="19"
+             initial_value="0"
+             label="Vertical offset"
+             label_width="195"
+             layout="topleft"
+             left="10"
+             min_val="-1"
+             max_val="1"
+             decimal_digits="5"
+             name="TexOffsetV"
+             width="265" />
+            <spinner
+             follows="left|top"
+             height="19"
+             initial_value="0"
+             label="Horizontal scale"
+             label_width="195"
+             layout="topleft"
+             left="10"
+             min_val="-10000"
+             max_val="10000"
+             decimal_digits="5"
+             name="bumpyScaleU"
+             top_delta="-115"
+             width="265" />
+            <spinner
+             follows="left|top"
+             height="19"
+             initial_value="0"
+             label="Vertical scale"
+             label_width="195"
+             layout="topleft"
+             left="10"
+             min_val="-10000"
+             max_val="10000"
+             decimal_digits="5"
+             name="bumpyScaleV"
+             width="265" />
+           <spinner
+             decimal_digits="2"
+             follows="left|top"
+             height="19"
+             top_pad="27"
+             increment="1"
+             initial_value="0"
+			 label="Rotation degrees"
+             layout="topleft"
+			 label_width="195"
+             left="10"
+             max_val="360"
+             min_val="-360"
+             name="bumpyRot"
+             width="265" />
+            <spinner
+             follows="left|top"
+             height="19"
+             initial_value="0"
+             label="Horizontal offset"
+             label_width="195"
+             layout="topleft"
+             left="10"
+             min_val="-1"
+             max_val="1"
+             decimal_digits="5"
+             name="bumpyOffsetU"
+             width="265" />
+            <spinner
+             follows="left|top"
+             height="19"
+             initial_value="0"
+             label="Vertical offset"
+             label_width="195"
+             layout="topleft"
+             left="10"
+             min_val="-1"
+             max_val="1"
+             decimal_digits="5"
+             name="bumpyOffsetV"
+             width="265" />
+            <spinner
+             follows="left|top"
+             height="19"
+             initial_value="0"
+             label="Horizontal scale"
+             label_width="195"
+             layout="topleft"
+             left="10"
+             min_val="-10000"
+             max_val="10000"
+             decimal_digits="5"
+             name="shinyScaleU"
+             top_delta="-115"
+             width="265" />
+            <spinner
+             follows="left|top"
+             height="19"
+             initial_value="0"
+             label="Vertical scale"
+             label_width="195"
+             layout="topleft"
+             left="10"
+             min_val="-10000"
+             max_val="10000"
+             decimal_digits="5"
+             name="shinyScaleV"
+             width="265" />
+           <spinner
+             decimal_digits="2"
+             follows="left|top"
+             height="19"
+             top_pad="27"
+             increment="1"
+             initial_value="0"
+			 label="Rotation degrees"
+             layout="topleft"
+			 label_width="195"
+             left="10"
+             max_val="360"
+             min_val="-360"
+             name="shinyRot"
+             width="265" />
+            <spinner
+             follows="left|top"
+             height="19"
+             initial_value="0"
+             label="Horizontal offset"
+             label_width="195"
+             layout="topleft"
+             left="10"
+             min_val="-1"
+             max_val="1"
+             decimal_digits="5"
+             name="shinyOffsetU"
+             width="265" />
+            <spinner
+             follows="left|top"
+             height="19"
+             initial_value="0"
+             label="Vertical offset"
+             label_width="195"
+             layout="topleft"
+             left="10"
+             min_val="-1"
+             max_val="1"
+             decimal_digits="5"
+             name="shinyOffsetV"
+             width="265" />
+            <!-- BEGIN PBR Material texture transform parameters -->
+            <spinner
+             follows="left|top"
+             height="19"
+             initial_value="1"
+             label="Scale u"
+             label_width="195"
+             layout="topleft"
+             left="10"
+             min_val="-10000"
+             max_val="10000"
+             name="gltfTextureScaleU"
+             top_delta="-115"
+             width="265" />
+            <spinner
+             follows="left|top"
+             height="19"
+             initial_value="1"
+             label="Scale v"
+             label_width="195"
+             layout="topleft"
+             left="10"
+             min_val="-10000"
+             max_val="10000"
+             name="gltfTextureScaleV"
+             width="265" />
+            <spinner
+             decimal_digits="1"
+             follows="left|top"
+             height="19"
+             initial_value=""
+			 label="Repeats per meter"
+             layout="topleft"
+			 label_width="195"
+             left="10"
+             max_val="100"
+             min_val="-100"
+             name="gltfRptctrl"
+             width="265" />
+            <spinner
+             follows="left|top"
+             height="19"
+             initial_value="0"
+             label="Rotation"
+             label_width="195"
+             layout="topleft"
+             left="10"
+             min_val="-360"
+             max_val="360"
+             name="gltfTextureRotation"
+             width="265" />
+            <spinner
+             follows="left|top"
+             height="19"
+             initial_value="0"
+             label="Offset u"
+             label_width="195"
+             layout="topleft"
+             left="10"
+             min_val="-999"
+             max_val="999"
+             name="gltfTextureOffsetU"
+             width="265" />
+            <spinner
+             follows="left|top"
+             height="19"
+             initial_value="0"
+             label="Offset v"
+             label_width="195"
+             layout="topleft"
+             left="10"
+             min_val="-999"
+             max_val="999"
+             name="gltfTextureOffsetV"
+             width="265" />
+            <!-- END PBR Material texture transform parameters -->
+            <check_box
+             follows="top|left"
+             height="16"
+             initial_value="false"
+             label="Align planar faces"
+             layout="topleft"
+             left="7"
+             name="checkbox planar align"
+             tool_tip="Align textures on all selected faces with the last selected face. Requires Planar texture mapping."
+             top_pad="2"
+             width="203" />
+            <!-- FS:Beq use Linden Lab control_name with FS control definition (also removes the typo in "syncronize" yay )-->
+            <check_box
+             control_name="SyncMaterialSettings"
+             follows="top|left"
+             height="16"
+             label="Synchronize materials"
+             layout="topleft"
+             left="7"
+             top_pad="0"
+             name="checkbox_sync_settings"
+             tool_tip="Synchronize texture map parameters"
+             width="199" />
+            <button
+             layout="topleft"
+             follows="right|top"
+             height="23"
+             left_pad="0"
+             top_delta="-10"
+             label="Align"
+             name="button align textures"
+             tool_tip="Align current texture layers"
+             width="84" />
+            <web_browser
+             visible="false"
+             enabled="false"
+             border_visible="true"
+             bottom_delta="0"
+             follows="top|left"
+             left="0"
+             name="title_media"
+             width="4"
+             height="4"
+             start_url="about:blank"
+             decouple_texture_size="true" />
+            <!-- <FS:Zi> Find all faces with same texture -->
+            <button
+             enabled="false"
+             layout="topleft"
+             follows="right|top"
+             height="23"
+             left="8"
+             top="178"
+             label="Find All"
+             name="btn_select_same_diff"
+             tool_tip="Select all faces with the same diffuse texture as this one"
+             width="90">
+             <button.commit_callback
+               function="BuildTool.SelectSameTexture"
+               parameter="diffuse"/>
+            </button>
+            <button
+             enabled="false"
+             layout="topleft"
+             follows="right|top"
+             height="23"
+             left_delta="0"
+             label="Find All"
+             name="btn_select_same_norm"
+             tool_tip="Select all faces with the same normal map as this one"
+             width="90">
+             <button.commit_callback
+               function="BuildTool.SelectSameTexture"
+               parameter="normal"/>
+            </button>
+            <button
+             enabled="false"
+             layout="topleft"
+             follows="right|top"
+             height="23"
+             left_delta="0"
+             label="Find All"
+             name="btn_select_same_spec"
+             tool_tip="Select all faces with the same specular map as this one"
+             width="90">
+             <button.commit_callback
+               function="BuildTool.SelectSameTexture"
+               parameter="specular"/>
+            </button>
+            <!-- </FS:Zi> -->
+</panel>

@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Grafik" name="Display panel">
+<tab_container label="Graphics Prefs" name="tabs">
+	<panel label="Allgemein" name="General">
+		<text name="preset_label">
+			Aktuelle Voreinstellung:
+		</text>
+		<text name="QualitySpeed">
+			Qualität und Geschwindigkeit:
+		</text>
+		<text name="FasterText">
+			Schneller
+		</text>
+		<text name="BetterText">
+			Besser
+		</text>
+		<text name="ShadersPrefText">
+			Niedrig
+		</text>
+		<text name="ShadersPrefText2">
+			Mittel
+		</text>
+		<text name="ShadersPrefText3">
+			Hoch
+		</text>
+		<text name="ShadersPrefText4">
+			Ultra
+		</text>
+		<text name="ShadersText">
+			Shader:
+		</text>
+		<check_box label="Transparentes Wasser" name="TransparentWater"/>
+		<check_box label="Ambient Occlusion" name="UseSSAO"/>
+		<check_box label="Screen Space Reflections" name="ScreenSpaceReflections"/>
+		<check_box label="Spiegelung" name="Mirrors"/>
+		<text name="shadows_label">
+			Schatten:
+		</text>
+		<combo_box name="ShadowDetail">
+			<combo_box.item label="Keine" name="0"/>
+			<combo_box.item label="Sonne/Mond" name="1"/>
+			<combo_box.item label="Sonne/Mond + Projektoren" name="2"/>
+		</combo_box>
+		<text name="ReflectionDetailText">
+			Reflexionsdetail:
+		</text>
+		<combo_box name="ReflectionDetail">
+			<combo_box.item label="Nur statisch" name="0"/>
+			<combo_box.item label="Statisch &amp; Dynamisch" name="1"/>
+			<combo_box.item label="Echtzeit" name="2"/>
+		</combo_box>
+		<text name="ReflectionProbeText">
+			Reflexionsumfang:
+		</text>
+		<combo_box name="ReflectionLevel">
+			<combo_box.item label="Keiner" name="0"/>
+			<combo_box.item label="Nur manuelle" name="1"/>
+			<combo_box.item label="Manuelle &amp; Terrain" name="2"/>
+			<combo_box.item label="Komplette Szene" name="3"/>
+		</combo_box>
+		<text name="reflection_label">
+			Wasserreflexionen:
+		</text>
+		<combo_box label="Wasserreflexionen" name="Reflections">
+			<combo_box.item label="Keine (undurchsichtig)" name="-2"/>
+			<combo_box.item label="Keine (transparent)" name="-1"/>
+			<combo_box.item label="Minimal" name="0"/>
+			<combo_box.item label="Terrain und Bäume" name="1"/>
+			<combo_box.item label="Alle statischen Objekte" name="2"/>
+			<combo_box.item label="Alle Avatare und Objekte" name="3"/>
+			<combo_box.item label="Alles" name="4"/>
+		</combo_box>
+		<text name="local lights_label" tool_tip="Beeinflusst die Anzahl an dargestellten Lichtquellen (Neustart erforderlich).">
+			Punkt. Beleucht. (Neustart erf.):
+		</text>
+		<combo_box name="LocalLightsDetail">
+			<combo_box.item label="Vollständig (Standard)" name="3"/>
+			<combo_box.item label="Reduziert" name="2"/>
+			<combo_box.item label="Nur Sonne/Mond" name="1"/>
+		</combo_box>
+		<text name="MirrorResolutionText">
+			Spiegelungsauflösung:
+		</text>
+		<combo_box name="MirrorResolution">
+			<combo_box.item label="256" name="0"/>
+			<combo_box.item label="512" name="1"/>
+			<combo_box.item label="1024" name="2"/>
+			<combo_box.item label="2048" name="3"/>
+		</combo_box>
+		<text name="HeroProbeUpdateText">
+			Aktualisierung Spiegelung:
+		</text>
+		<combo_box name="HeroProbeUpdateRate">
+			<combo_box.item label="Niedrig" name="6"/>
+			<combo_box.item label="Mittel" name="3"/>
+			<combo_box.item label="Hoch" name="1"/>
+			<combo_box.item label="Ultra" name="0"/>
+		</combo_box>
+		<check_box label="Vollbildmodus" name="Fullscreen Mode" tool_tip="Firestorm im Vollbildmodus ausführen. (Erfordert Neustart)"/>
+		<slider label="Sichtweite:" name="DrawDistance"/>
+		<text name="DrawDistanceMeterText2">
+			m
+		</text>
+		<slider label="Max. Partikelanzahl:" name="MaxParticleCount"/>
+		<text  width="125" name="AvatarComplexityModeLabel">
+			Avatar-Anzeige:
+		</text>
+		<combo_box name="AvatarComplexityMode" width="175">
+			<combo_box.item label="Komplexitätsbegrenzung" name="0"/>
+			<combo_box.item label="Freunde immer anzeigen" name="1"/>
+			<combo_box.item label="Nur Freunde anzeigen" name="2"/>
+		</combo_box>
+		<slider label="Max. Komplexität:" name="IndirectMaxComplexity" tool_tip="Legt fest, ab welchem Wert ein visuell komplexer Avatar als JellyDoll dargestellt wird."/>
+		<slider label="Max. voll dargestellte Avatare:" name="IndirectMaxNonImpostors"/>
+		<slider label="Post-Processing-Qualität:" name="RenderPostProcess"/>
+		<text name="PostProcessText">
+			Niedrig
+		</text>
+		<slider label="Max. Lichter in der Nähe:" name="MaxLights"/>
+		<slider label="Avatar-Physik:" name="AvatarPhysicsDetail"/>
+		<slider label="Exponierung:" name="RenderExposure"/>
+		<text name="MeshDetailText">
+			Darstellungsgrad:
+		</text>
+		<slider label="   Objekte:" name="ObjectMeshDetail" tool_tip="Legt fest, wann ein niedrigerer Detailgrad von Objekten verwendet wird, um Renderkosten zu reduzieren. Bitte mit Vorsicht verwenden: Höhere Werte verschlechtern die Performance."/>
+		<slider label="   Flexiprimitiva:" name="FlexibleMeshDetail"/>
+		<slider label="   Bäume:" name="TreeMeshDetail"/>
+		<slider label="   Avatare:" name="AvatarMeshDetail"/>
+		<slider label="   Terrain:" name="TerrainMeshDetail"/>
+		<slider label="   Himmel:" name="SkyMeshDetail"/>
+		<text name="Presets_Label" width="200">
+			Voreinstellungen:
+		</text>
+		<button label="Speichern" left="300" name="PrefSaveButton" width="72"/>
+		<button label="Laden" left_pad="5" name="PrefLoadButton" width="72"/>
+		<button label="Löschen" left_pad="5" name="PrefDeleteButton" width="72"/>
+		<button tool_tip="Standardeinstellungen neu laden" name="Defaults"/>
+	</panel>
+
+	<panel label="Hardware" name="Hardware Settings">
+		<check_box label="Anisotropische Filterung (langsamer, wenn aktiviert)" name="ani" tool_tip="Aktiviert anisotropischen Filter, wodurch die Qualität von Texturen verbessert wird, wenn sie im relativ großen Winkel in Abhängigkeit der Kameraposition betrachtet werden. Üblicherweise erscheinen sie dadurch in größerer Entfernung weniger verwaschen."/>
+		<text name="tc label">
+			S3TC aktivieren:
+		</text>
+		<check_box label="Textur-Komprimierung aktivieren (Erfordert Neustart)" name="texture compression" tool_tip="Komprimiert Texturen im Videospeicher und erlaubt dadurch eine höhrere Auflösung und/oder Laden von mehr Texturen auf Kosten der Textqualität."/>
+		<check_box label="Unterstützung für HiDPI-Displays aktivieren (nur macOS; erfordert Neustart)" name="use HiDPI" tool_tip="Aktiviert OpenGL für High-Resolution Drawing."/>
+		<text name="antialiasing label" tool_tip="Eine Änderung dieser Einstellung kann auf bestimmter Hardware einen Neustart erfordern.">
+			Antialiasing (Neustart empfohlen):
+		</text>
+		<text name="antialiasing quality label" tool_tip="Eine Änderung dieser Einstellung kann auf bestimmter Hardware einen Neustart erfordern.">
+			Antialiasing-Qualität:
+		</text>
+		<combo_box name="fsaa">
+			<combo_box.item label="Deaktiviert" name="FSAADisabled"/>
+			<combo_box.item label="FXAA" name="FXAA"/>
+			<combo_box.item label="SMAA" name="SMAA"/>
+		</combo_box>
+		<combo_box name="fsaa quality">
+			<combo_box.item label="Niedrig" name="Low"/>
+			<combo_box.item label="Mittel" name="Medium"/>
+			<combo_box.item label="Hoch" name="High"/>
+			<combo_box.item label="Ultra" name="Ultra"/>
+		</combo_box>
+		<text name="advanced_settings">
+			Erweiterte Einstellungen (Neustart erforderlich):
+		</text>
+		<check_box label="VRAM-Speicher für Texturen begrenzen (MB)" name="FSLimitTextureVRAMUsage" tool_tip="Begrenzt die Nutzung von VRAM-Speicher für Texturen. Der gesamte Speicherverbrauch kann höher sein, da andere Elemente ebenfalls VRAM-Speicher nutzen."/>
+		<slider name="RenderMaxVRAMBudget" tool_tip="Maximaler VRAM-Speicher in Megabytes, der für Texturen verwendet wird."/>
+		<check_box label="VRAM-Erkennung übersteuern" name="FSOverrideVRAMDetection" tool_tip="Erlaubt die Übersteuerung der VRAM-Erkennung (mit extreme Vorsicht verwenden)" />
+		<slider label="Dedizierter GPU-VRAM(GB):" name="FSForcedVideoMemory" tool_tip="Wichtig: Mit extremer Vorsicht verwenden. Übersteuert den erkannten VRAM der GPU. Dieser Wert darf nicht den geteilten VRAM enthalten, der Teil des Systemspeichers ist. Falls Sie den Unterschied nicht kennen, verändern Sie diese Einstellung bitte nicht!" />
+		<text name="automatic_texture_downscale_settings">
+			Automatische Textur-Herunterskalierung:
+		</text>
+		<text name="TextureDiscardBackgroundedTime_label" tool_tip="Texturen herunterskalieren nach Anzahl Sekunden, wenn der Viewer nicht den Fokus besitzt.">
+			Im Hintergrund (0 zum deaktivieren)
+		</text>
+		<spinner name="TextureDiscardBackgroundedTime" tool_tip="Texturen herunterskalieren nach Anzahl Sekunden, wenn der Viewer nicht den Fokus besitzt."/>
+		<text name="TextureDiscardBackgroundedTime_seconds">
+			Sekunde(n)
+		</text>
+		<text name="TextureDiscardMinimizedTime_label" tool_tip="Texturen herunterskalieren nach Anzahl Sekunden, wenn der Viewer minimiert ist.">
+			Minimiert (0 zum deaktivieren)
+		</text>
+		<spinner name="TextureDiscardMinimizedTime" tool_tip="Texturen herunterskalieren nach Anzahl Sekunden, wenn der Viewer minimiert ist."/>
+		<text name="TextureDiscardMinimizedTime_seconds">
+			Sekunde(n)
+		</text>
+	</panel>
+
+	<panel label="Darstellung" name="Rendering">
+		<text name="World Updating">
+			Welt-Aktualisierung:
+		</text>
+		<check_box label="Aktualisierung der Welt einfrieren (alles pausieren)" tool_tip="Aktivieren, um alle Aktualisierungen durch den Server einzufrieren - stoppt alle Aktionen Inworld, hat aber keine Auswirkungen auf Chat, IMs und Voice-Chat." name="WorldPause"/>
+		<check_box label="Framerate begrenzen" name="FSLimitFramerate"/>
+		<slider name="MaxFPS" label="FPS:"/>
+		<check_box label="VSync aktivieren" name="vsync" tool_tip="Synchronisiert die Bilder pro Sekunde mit der Bildwiederholrate des Monitors, was in einer gleichmäßigeren Performance resultiert."/>
+		<text name="Texture Rendering">
+			Textur-Darstellung:
+		</text>
+		<check_box label="Minimale Texturen laden" tool_tip="Diese Einstellung setzt den 'TextureDisable'-Parameter - lädt Texturen extrem langsam, eventuell nützlich für Computer mit langsamer GPU" name="TexturesLoaded"/>
+		<check_box label="HTTP für Laden von Texturen verwenden" tool_tip="Aktiviert das Laden von Texturen über das HTTP-Protokoll - deaktivieren wenn es Probleme mit schlecht oder nicht korrekt ladenden Texturen gibt und das veraltete UDP-Protokoll verwendet werden soll." name="TexturesHTTP"/>
+		<text name="FSRestrictMaxTextureSize">
+			Maximale Auflösung für Texturen:
+		</text>
+		<combo_box tool_tip="Beschränkt die maximale Auflösung für Inworld-Texturen. Dies erlaubt die Darstellung von mehreren Texturen bevor der vorhandene Texturspeicher aufgebraucht ist und unscharfe Texturen dargestellt werden." name="FSRestrictMaxTexturePixels">
+			<combo_box.item label="512 Pixel" name="512"/>
+			<combo_box.item label="1024 Pixel" name="1024"/>
+			<combo_box.item label="2048 Pixel" name="2048"/>
+		</combo_box>
+		<slider label="Max. Anzahl gleichzeitiger HTTP-GET-Anfragen" name="HTTPFetchMaxRequests"/>
+		<text name="TextureDetailLabel" width="215">
+			Maximales Qualitätslevel für Texturen:
+		</text>
+		<combo_box tool_tip="Qualitätslevel, auf das Texturen geladen werden. Beeinflusst die Einstellung TextureDiscardLevel" name="TextureDetail">
+			<combo_box.item label="Normale (0) Qualität" name="0"/>
+			<combo_box.item label="Mittlere (3) Qualität" name="3"/>
+			<combo_box.item label="Geringe (4) Qualität" name="4"/>
+			<combo_box.item label="Keine (5) Texturen" name="5"/>
+		</combo_box>
+		<text name="Miscellaneous Rendering">
+			Sonstige Darstellungsoptionen:
+		</text>
+		<check_box label="HDR und Emissive" tool_tip="Aktiviert zusätzliche Features der Rendering-Pipeline auf neueren Maschinen, wie HDR und Emissive-Texturen auf PBR-Materialien." name="VintageMode"/>
+		<combo_box tool_tip="Erlaubt es, dass Animesh Benutzer- oder Kontroll-Avatar immer vollständig angezeigt werden." name="FSImpostorAvatarExclude">
+			<combo_box.item label="Keine" name="0"/>
+			<combo_box.item label="Benutzer" name="1"/>
+			<combo_box.item label="Kontrolle"  name="2"/>
+			<combo_box.item label="Beide" name="3"/>
+		</combo_box>
+		<check_box label="Alpha-Masken verwenden" tool_tip="Falls aktiviert werden Alpha-Masken korrekt dargestellt." name="RenderAutoMaskAlphaDeferred"/>
+		<check_box label="Leuchten anzeigen" tool_tip="Stellt Leuchteffekte dar. Stärke muss auf 0 gesetzt werden, um Leuchteffekte zu deaktiveren, falls Schatten aktiviert sind." name="RenderGlow"/>
+		<slider label="Stärke:" tool_tip="Leuchtstärke. Größer = Breitere und weichere Darstellung (Standardwert: 2)" name="glow_strength"/>
+		<check_box label="Avatare anzeigen, die nicht vollständig geladen sind" name="RenderUnloadedAvatars"/>
+		<check_box label="Szene als Wireframe darstellen" name="Wireframe"/>
+		<check_box label="Angehängte Lichter rendern" tool_tip="Diese Option aktiviert alle Lichtquellen, die Avatare angehängt haben, wie z.B. Facelights. Nützlich, um beispielsweise Facelights zu deaktivieren falls notwendig." name="Render Attached Lights"/>
+		<check_box label="Angehängte Partikel rendern" name="Render Attached Particles"/>
+		<check_box label="Sichtweite reduzieren, falls VRAM voll" tool_tip="Falls aktiviert wird automatisch die Sichtweite reduziert, wenn kein VRAM mehr verfügbar ist." name="Reduce Draw Distance when VRAM is full"/>
+		<text name="ExcludeAnimeshImposterLabel" width="255">
+			Animesh-Avatare immer vollständig anzeigen:
+		</text>
+		<slider label="Pre-Caching-Verzögerung bevor die Welt angezeigt wird." tool_tip="Setzt die Verzögerung, nach der die Welt angezeigt wird, nachdem man selbst als Online gemeldet wird. (Standard: 6 Sekunden)" name="PrecachingDelay"/>
+		<text name="PrecachingDelayText" width="60">
+			Sekunden
+		</text>
+		<slider label="Schattenqualität" tool_tip="Qualität der Schattendarstellung (Standard: 1)" name="ShadowResolution"/>
+		<slider label="Skalierung der Bodentexturen (Erfordert Neustart)" name="RenderTerrainScale" tool_tip="Setzt die Skalierung der Bodentexturen - niedriger bedeutet höhere Kompression"/>
+		<slider label="Schärfung" name="RenderSharpness"/>
+		<text name="ReflectionProbeCount">
+			Max Anzahl Reflexionstests:
+		</text>
+		<combo_box name="ProbeCount">
+			<combo_box.item label="Keine" name="1"/>
+			<combo_box.item label="Niedrig" name="32"/>
+			<combo_box.item label="Mittel" name="64"/>
+			<combo_box.item label="Hoch" name="128"/>
+			<combo_box.item label="Ultra" name="256"/>
+		</combo_box>
+		<text name="TonemapTypeText">
+			Tone Mapper:
+		</text>
+		<combo_box name="TonemapType">
+			<combo_box.item label="Khronos Neutral" name="0"/>
+			<combo_box.item label="ACES" name="1"/>
+		</combo_box>
+		<slider label="Tone Mapping Mix:" tool_tip="Mix zwischen linearen und tone-gemappten Farben" name="TonemapMix"/>
+	</panel>
+	
+	<panel label="Schärfentiefe" name="DOF panel">
+		<check_box label="Schärfentiefe aktivieren (Bereiche außerhalb des Kamerafokus erscheinen unscharf)" name="UseDoF"/>
+		<check_box label="Im Editier-Modus aktivieren" name="RenderDepthOfFieldInEditMode"/>
+		<check_box label="Schärfentiefe-Fokus folgt Mauszeiger" name="FSFocusPointFollowsPointer" tool_tip="Der Fokus der Schärfentiefe folgt der Maus, ähnlich dem Verhalten bei der Verwendung einer Flycam. In Verbindung mit fixiertem Schärfentiefe-Fokus verwenden."/>
+		<slider label="Kamera-Blendenzahl (k-Wert):" name="CameraFNum" tool_tip="Kamera-Blendenzahl (k-Wert) für die Schärfentiefe" label_width="195" width="409"/>
+		<slider label="Kamera-Brennweite in mm:" name="CameraFocal" tool_tip="Kamera-Brennweite für die Schärfentiefe (in Millimeter)" label_width="195" width="409"/>
+		<slider label="Kamera-Sichtfeld (Grad):" name="Camera FOV" tool_tip="Vertikales Kamera-Sichtfeld für die Schärfentiefe (in Grad)" label_width="195" width="409"/>
+		<slider label="Kamera-Bildseitenverhältnis:" name="CameraAspectRatio" tool_tip="Kamera-Bildseitenverhältnis für die Schärfentiefe" label_width="195" width="409"/>
+		<slider label="Fokus-Übergangszeit:" name="CameraFocusTrans" tool_tip="Zeit, die benötigt wird, um den Focus neu einzustellen" label_width="195" width="409"/>
+		<slider label="Schärfentiefe-Darstellungsqualität:" name="CameraDoFResScale" tool_tip="Beeinflusst die Qualität der Unschärfe und Geschwindigkeit der Darstellung (höher = bessere Qualität, niedriger = höhere Geschwindigkeit" label_width="195" width="409"/>
+	</panel>
+	
+</tab_container>
+</panel>

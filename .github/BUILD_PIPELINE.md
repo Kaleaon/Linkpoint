@@ -11,7 +11,7 @@ This document describes the GitHub Actions CI/CD pipeline for the Linkpoint Andr
 **Primary build workflow for the Kotlin-based Linkpoint app.**
 
 #### Triggers
-- Push to `main`, `develop`, `cursor/**`, or `copilot/**` branches
+- Push to `main`, `develop`, or `cursor/**` branches
 - Pull requests to `main` or `develop`
 - Manual workflow dispatch
 - Changes to `Linkpoint/**` directory
@@ -82,7 +82,7 @@ Handles GitHub releases for tagged commits.
 
 ```yaml
 JAVA_VERSION: '17'
-ANDROID_SDK_VERSION: '35'
+ANDROID_SDK_VERSION: '34'
 NDK_VERSION: '25.2.9519653'
 KOTLIN_VERSION: '1.9.22'
 ```
@@ -156,7 +156,7 @@ Linkpoint/
 - **JDK:** 17 or higher
 - **Android SDK:** API 34
 - **NDK:** 25.2.9519653
-- **Gradle:** 8.7+
+- **Gradle:** 8.5+
 - **Memory:** 8GB RAM recommended
 - **Disk Space:** 10GB free
 
@@ -170,32 +170,32 @@ Linkpoint/
 
 ### Local Build
 ```bash
-# From repository root (recommended)
-./gradlew :Linkpoint:clean :Linkpoint:assembleDebug
-
-# Or from Linkpoint directory
 cd Linkpoint
 ./gradlew clean assembleDebug
 ```
 
 ### Run Tests
 ```bash
-./gradlew :Linkpoint:testDebugUnitTest
+cd Linkpoint
+./gradlew testDebugUnitTest
 ```
 
 ### Run Lint
 ```bash
-./gradlew :Linkpoint:lintDebug
+cd Linkpoint
+./gradlew lintDebug
 ```
 
 ### Generate Coverage Report
 ```bash
-./gradlew :Linkpoint:jacocoTestReport
+cd Linkpoint
+./gradlew jacocoTestReport
 ```
 
 ### Full CI Build
 ```bash
-./gradlew :Linkpoint:clean :Linkpoint:assembleDebug :Linkpoint:assembleRelease :Linkpoint:testDebugUnitTest :Linkpoint:lintDebug
+cd Linkpoint
+./gradlew clean assembleDebug assembleRelease testDebugUnitTest lintDebug
 ```
 
 ## Kotlin Migration

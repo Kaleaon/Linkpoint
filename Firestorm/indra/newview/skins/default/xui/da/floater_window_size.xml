@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="window_size" title="VINDUE STØRRELSE">
+	<string name="resolution_format">
+		[RES_X] x [RES_Y]
+	</string>
+	<text name="windowsize_text">
+		Sæt størrelse på vindue:
+	</text>
+	<combo_box name="window_size_combo" tool_tip="bredde x højde">
+	</combo_box>
+	<button label="Sæt" name="set_btn"/>
+	<button label="Annullér" name="cancel_btn"/>
+</floater>

@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Modern Progressive Web App for Second Life and OpenSimulator virtual worlds with 3D graphics">
+  <meta name="keywords" content="second life, opensimulator, virtual world, pwa, progressive web app, 3d graphics, webgl">
+  <meta name="author" content="Linkpoint Team">
+  <meta name="theme-color" content="#16213e">
+  
+  <!-- Apple iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Linkpoint">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192x192.png">
+  
+  <!-- Microsoft -->
+  <meta name="msapplication-TileColor" content="#16213e">
+  <meta name="msapplication-TileImage" content="assets/icons/icon-144x144.png">
+  
+  <!-- Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/icon-72x72.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192x192.png">
+  
+  <!-- Preload critical assets -->
+  <link rel="preload" href="css/styles.css" as="style">
+  <link rel="preload" href="js/utils.js" as="script">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+  
+  <title>Linkpoint - Virtual World Viewer</title>
+</head>
+<body>
+  <!-- App Container -->
+  <div class="app-container">
+    
+    <!-- Header -->
+    <header class="app-header">
+      <button id="menu-toggle" class="menu-button" aria-label="Toggle menu">
+        <span class="hamburger"></span>
+      </button>
+      <h1 class="app-title">Linkpoint</h1>
+      <div class="header-actions">
+        <div id="connection-status" class="status-indicator offline">
+          <span class="status-dot"></span>
+          <span class="status-text">Offline</span>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="app-main">
+      
+      <!-- Sidebar Navigation -->
+      <nav id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+          <h2>Navigation</h2>
+          <button id="sidebar-close" class="close-button" aria-label="Close sidebar">&times;</button>
+        </div>
+        <ul class="nav-menu">
+          <li><a href="#" data-view="login" class="nav-item active">
+            <span class="nav-icon">🔑</span>
+            <span class="nav-text">Login</span>
+          </a></li>
+          <li><a href="#" data-view="world" class="nav-item">
+            <span class="nav-icon">🌍</span>
+            <span class="nav-text">World Viewer</span>
+          </a></li>
+          <li><a href="#" data-view="chat" class="nav-item">
+            <span class="nav-icon">💬</span>
+            <span class="nav-text">Chat</span>
+          </a></li>
+          <li><a href="#" data-view="inventory" class="nav-item">
+            <span class="nav-icon">🎒</span>
+            <span class="nav-text">Inventory</span>
+          </a></li>
+          <li><a href="#" data-view="friends" class="nav-item">
+            <span class="nav-icon">👥</span>
+            <span class="nav-text">Friends</span>
+          </a></li>
+          <li><a href="#" data-view="groups" class="nav-item">
+            <span class="nav-icon">👨‍👨‍👧‍👦</span>
+            <span class="nav-text">Groups</span>
+          </a></li>
+          <li><a href="#" data-view="teleport" class="nav-item">
+            <span class="nav-icon">📍</span>
+            <span class="nav-text">Teleport</span>
+          </a></li>
+          <li><a href="#" data-view="search" class="nav-item">
+            <span class="nav-icon">🔍</span>
+            <span class="nav-text">Search</span>
+          </a></li>
+          <li><a href="#" data-view="preferences" class="nav-item">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-text">Settings</span>
+          </a></li>
+        </ul>
+      </nav>
+      
+      <!-- Content Area -->
+      <div class="content-area">
+        
+        <!-- Login View -->
+        <section id="login-view" class="view-container active">
+          <div class="view-content centered">
+            <div class="login-card">
+              <div class="logo-container">
+                <img src="assets/icons/icon-192x192.png" alt="Linkpoint Logo" class="app-logo">
+                <h2>Welcome to Linkpoint</h2>
+                <p>Connect to virtual worlds</p>
+              </div>
+              
+              <form id="login-form" class="login-form">
+                <div class="form-group">
+                  <label for="grid-select">Grid</label>
+                  <select id="grid-select" class="form-control" required>
+                    <option value="agni">Second Life (Agni)</option>
+                    <option value="aditi">Second Life Beta (Aditi)</option>
+                    <option value="osgrid">OSGrid</option>
+                    <option value="custom">Custom Grid</option>
+                  </select>
+                </div>
+                
+                <div id="custom-grid-group" class="form-group" style="display: none;">
+                  <label for="custom-grid-url">Login URL</label>
+                  <input type="url" id="custom-grid-url" class="form-control" placeholder="https://login.yourgrid.com/cgi-bin/login.cgi">
+                </div>
+                
+                <div class="form-group">
+                  <label for="username">Username</label>
+                  <input type="text" id="username" class="form-control" placeholder="FirstName LastName" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="password">Password</label>
+                  <input type="password" id="password" class="form-control" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block" id="login-button">
+                  <span>Login</span>
+                </button>
+              </form>
+              
+              <div class="help-text">
+                <p><small>Don't have an account? <a href="https://secondlife.com/my/account/request.php" target="_blank" rel="noopener">Sign up for Second Life</a></small></p>
+              </div>
+              
+              <!-- CORS Status Info -->
+              <div class="cors-status-info" id="cors-status-info" style="margin-top: 1rem;">
+                <details>
+                  <summary style="cursor: pointer; color: var(--text-secondary); font-size: 0.875rem;">
+                    <span id="cors-env-name">Connection Status</span> ▼
+                  </summary>
+                  <div style="margin-top: 0.5rem; padding: 0.75rem; background: var(--surface-light); border-radius: 0.5rem; font-size: 0.875rem;">
+                    <p><strong>Environment:</strong> <span id="cors-env-type">Detecting...</span></p>
+                    <p><strong>CORS Support:</strong> <span id="cors-support-type">Checking...</span></p>
+                    <p><strong>Status:</strong> <span id="cors-status-message">Ready</span></p>
+                    <div id="cors-recommendations" style="margin-top: 0.5rem;"></div>
+                  </div>
+                </details>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- World View -->
+        <section id="world-view" class="view-container">
+          <div class="view-content">
+            <div id="world-container" class="world-container">
+              <canvas id="world-canvas"></canvas>
+              
+              <!-- World Controls -->
+              <div class="world-controls">
+                <div class="control-group">
+                  <button class="control-btn" data-action="move-forward" title="Move Forward (W)">↑</button>
+                </div>
+                <div class="control-group">
+                  <button class="control-btn" data-action="move-left" title="Move Left (A)">←</button>
+                  <button class="control-btn" data-action="move-backward" title="Move Back (S)">↓</button>
+                  <button class="control-btn" data-action="move-right" title="Move Right (D)">→</button>
+                </div>
+                <div class="control-group">
+                  <button class="control-btn" data-action="move-up" title="Move Up (E)">⬆️</button>
+                  <button class="control-btn" data-action="move-down" title="Move Down (C)">⬇️</button>
+                </div>
+              </div>
+              
+              <!-- Stats Overlay -->
+              <div class="stats-overlay">
+                <div class="stat-item">
+                  <span class="stat-label">FPS:</span>
+                  <span id="fps-counter" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Ping:</span>
+                  <span id="ping-counter" class="stat-value">0ms</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Objects:</span>
+                  <span id="object-counter" class="stat-value">0</span>
+                </div>
+              </div>
+              
+              <!-- Voice Controls Overlay -->
+              <div class="voice-controls-overlay">
+                <div class="voice-status" id="voice-status">
+                  <span class="voice-icon" id="voice-icon">🔇</span>
+                  <span class="voice-text" id="voice-text">Voice: Off</span>
+                </div>
+                <div class="voice-buttons">
+                  <button class="voice-btn" id="voice-toggle-btn" title="Enable Voice">
+                    <span>🎤</span>
+                  </button>
+                  <button class="voice-btn" id="voice-mute-btn" title="Mute" style="display: none;">
+                    <span id="mute-icon">🔇</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Chat View -->
+        <section id="chat-view" class="view-container">
+          <div class="view-content chat-layout">
+            <!-- Chat Tabs -->
+            <div class="chat-tabs">
+              <button class="chat-tab active" data-chat-type="local">Local</button>
+              <button class="chat-tab" data-chat-type="group">Group</button>
+              <button class="chat-tab" data-chat-type="im">IM</button>
+            </div>
+            
+            <!-- Chat Messages Area -->
+            <div id="chat-messages" class="chat-messages">
+              <div class="chat-message system">
+                <span class="chat-timestamp">[00:00]</span>
+                <span class="chat-text">Welcome to Linkpoint! Chat will appear here.</span>
+              </div>
+            </div>
+            
+            <!-- Chat Input Form -->
+            <form id="chat-form" class="chat-input-form">
+              <input type="text" id="chat-input" class="chat-input" placeholder="Type a message..." autocomplete="off">
+              <button type="submit" class="btn btn-primary">Send</button>
+            </form>
+          </div>
+        </section>
+        
+        <!-- Inventory View -->
+        <section id="inventory-view" class="view-container">
+          <div class="view-content">
+            <div class="inventory-header">
+              <h2>Inventory</h2>
+              <div class="inventory-actions">
+                <input type="text" id="inventory-search" class="form-control" placeholder="Search inventory...">
+                <button class="btn btn-small" id="inventory-refresh">Refresh</button>
+              </div>
+            </div>
+            
+            <div id="inventory-container" class="inventory-container">
+              <!-- Inventory Folders -->
+              <div class="inventory-tree">
+                <div class="inventory-folder" data-folder="root">
+                  <span class="folder-icon">📁</span>
+                  <span class="folder-name">My Inventory</span>
+                  <div class="folder-children">
+                    <div class="inventory-folder" data-folder="objects">
+                      <span class="folder-icon">📦</span>
+                      <span class="folder-name">Objects</span>
+                    </div>
+                    <div class="inventory-folder" data-folder="clothing">
+                      <span class="folder-icon">👕</span>
+                      <span class="folder-name">Clothing</span>
+                    </div>
+                    <div class="inventory-folder" data-folder="landmarks">
+                      <span class="folder-icon">📍</span>
+                      <span class="folder-name">Landmarks</span>
+                    </div>
+                    <div class="inventory-folder" data-folder="notecards">
+                      <span class="folder-icon">📄</span>
+                      <span class="folder-name">Notecards</span>
+                    </div>
+                    <div class="inventory-folder" data-folder="scripts">
+                      <span class="folder-icon">📜</span>
+                      <span class="folder-name">Scripts</span>
+                    </div>
+                    <div class="inventory-folder" data-folder="textures">
+                      <span class="folder-icon">🖼️</span>
+                      <span class="folder-name">Textures</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Inventory Items -->
+              <div id="inventory-items" class="inventory-items">
+                <p class="placeholder-text">Select a folder to view items</p>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Friends View -->
+        <section id="friends-view" class="view-container">
+          <div class="view-content">
+            <div class="friends-header">
+              <h2>Friends</h2>
+              <button class="btn btn-small" id="add-friend-btn">Add Friend</button>
+            </div>
+            
+            <div id="friends-container" class="friends-container">
+              <!-- Online Friends -->
+              <div class="friends-section">
+                <h3 class="section-title">Online</h3>
+                <div id="friends-online" class="friends-list">
+                  <p class="placeholder-text">No friends online</p>
+                </div>
+              </div>
+              
+              <!-- Offline Friends -->
+              <div class="friends-section">
+                <h3 class="section-title">Offline</h3>
+                <div id="friends-offline" class="friends-list">
+                  <p class="placeholder-text">No offline friends</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Groups View -->
+        <section id="groups-view" class="view-container">
+          <div class="view-content">
+            <div class="groups-header">
+              <h2>Groups</h2>
+              <button class="btn btn-small" id="create-group-btn">Create Group</button>
+            </div>
+            
+            <div id="groups-container" class="groups-container">
+              <!-- My Groups List -->
+              <div class="groups-section">
+                <h3 class="section-title">My Groups</h3>
+                <div id="groups-list" class="groups-list">
+                  <p class="placeholder-text">No groups</p>
+                </div>
+              </div>
+              
+              <!-- Group Details -->
+              <div id="group-details" class="group-details" style="display: none;">
+                <div class="group-detail-header">
+                  <h3 id="group-detail-name">Group Name</h3>
+                  <button class="btn btn-small" id="leave-group-btn">Leave Group</button>
+                </div>
+                
+                <div class="group-tabs">
+                  <button class="group-tab active" data-tab="info">Info</button>
+                  <button class="group-tab" data-tab="members">Members</button>
+                  <button class="group-tab" data-tab="roles">Roles</button>
+                  <button class="group-tab" data-tab="notices">Notices</button>
+                </div>
+                
+                <div class="group-tab-content">
+                  <!-- Group Info Tab -->
+                  <div id="group-info-tab" class="group-tab-panel active">
+                    <div class="group-info-content">
+                      <p><strong>Charter:</strong></p>
+                      <p id="group-charter" class="group-charter">Loading...</p>
+                      <p><strong>Founder:</strong> <span id="group-founder">Loading...</span></p>
+                      <p><strong>Membership Fee:</strong> L$<span id="group-fee">0</span></p>
+                      <p><strong>Open Enrollment:</strong> <span id="group-enrollment">No</span></p>
+                    </div>
+                  </div>
+                  
+                  <!-- Group Members Tab -->
+                  <div id="group-members-tab" class="group-tab-panel">
+                    <div id="group-members-list" class="members-list">
+                      <p class="placeholder-text">Loading members...</p>
+                    </div>
+                  </div>
+                  
+                  <!-- Group Roles Tab -->
+                  <div id="group-roles-tab" class="group-tab-panel">
+                    <div id="group-roles-list" class="roles-list">
+                      <p class="placeholder-text">Loading roles...</p>
+                    </div>
+                  </div>
+                  
+                  <!-- Group Notices Tab -->
+                  <div id="group-notices-tab" class="group-tab-panel">
+                    <div id="group-notices-list" class="notices-list">
+                      <p class="placeholder-text">No notices</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Teleport View -->
+        <section id="teleport-view" class="view-container">
+          <div class="view-content">
+            <h2>Teleport</h2>
+            
+            <div id="teleport-container" class="teleport-container">
+              <!-- Direct Teleport -->
+              <div class="teleport-section">
+                <h3>Direct Teleport</h3>
+                <div class="form-group">
+                  <label for="teleport-location">Location (Region/X/Y/Z)</label>
+                  <input type="text" id="teleport-location" class="form-control" placeholder="Ahern/128/128/24">
+                </div>
+                <button id="teleport-button" class="btn btn-primary">Teleport</button>
+              </div>
+              
+              <!-- Recent Locations -->
+              <div class="teleport-section">
+                <h3>Recent Locations</h3>
+                <div id="recent-locations" class="location-list">
+                  <p class="placeholder-text">No recent locations</p>
+                </div>
+              </div>
+              
+              <!-- Landmarks -->
+              <div class="teleport-section">
+                <h3>Landmarks</h3>
+                <div id="landmarks-list" class="location-list">
+                  <p class="placeholder-text">No landmarks found</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Search View -->
+        <section id="search-view" class="view-container">
+          <div class="view-content">
+            <h2>Search</h2>
+            
+            <div id="search-container" class="search-container">
+              <!-- Search Form -->
+              <div class="search-form">
+                <div class="form-group">
+                  <select id="search-type" class="form-control">
+                    <option value="all">All</option>
+                    <option value="places">Places</option>
+                    <option value="people">People</option>
+                    <option value="events">Events</option>
+                    <option value="groups">Groups</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <input type="text" id="search-input" class="form-control" placeholder="Search...">
+                  <button id="search-button" class="btn btn-primary">Search</button>
+                </div>
+              </div>
+              
+              <!-- Search Results -->
+              <div id="search-results" class="search-results">
+                <p class="placeholder-text">Enter a search term to find places, people, events, and groups</p>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Preferences View -->
+        <section id="preferences-view" class="view-container">
+          <div class="view-content">
+            <h2>Settings</h2>
+            
+            <div id="preferences-container" class="preferences-container">
+              <!-- Graphics Settings -->
+              <div class="settings-section">
+                <h3>Graphics</h3>
+                <div class="form-group">
+                  <label for="graphics-quality">Quality</label>
+                  <select id="graphics-quality" class="form-control">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                    <option value="ultra">Ultra</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="draw-distance">Draw Distance</label>
+                  <input type="range" id="draw-distance" min="64" max="512" value="256" step="64">
+                  <span id="draw-distance-value">256m</span>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="shadows-enabled" checked>
+                    Enable Shadows
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="reflections-enabled">
+                    Enable Water Reflections
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Audio Settings -->
+              <div class="settings-section">
+                <h3>Audio</h3>
+                <div class="form-group">
+                  <label for="master-volume">Master Volume</label>
+                  <input type="range" id="master-volume" min="0" max="100" value="75">
+                  <span id="master-volume-value">75%</span>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="voice-enabled">
+                    Enable Voice Chat
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Notifications Settings -->
+              <div class="settings-section">
+                <h3>Notifications</h3>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="notifications-enabled" checked>
+                    Enable Notifications
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="chat-notifications" checked>
+                    Chat Messages
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="friend-notifications" checked>
+                    Friends Online/Offline
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="group-notifications">
+                    Group Notices
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Privacy Settings -->
+              <div class="settings-section">
+                <h3>Privacy</h3>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="show-online-status" checked>
+                    Show Online Status
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="accept-friend-requests" checked>
+                    Accept Friend Requests
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Storage Settings -->
+              <div class="settings-section">
+                <h3>Storage</h3>
+                <div class="storage-info">
+                  <div class="storage-stat">
+                    <span class="stat-label">Cache Usage:</span>
+                    <span id="cache-usage" class="stat-value">0 MB</span>
+                  </div>
+                  <div class="storage-stat">
+                    <span class="stat-label">Available:</span>
+                    <span id="cache-available" class="stat-value">0 GB</span>
+                  </div>
+                  <div class="storage-stat">
+                    <span class="stat-label">Persistent:</span>
+                    <span id="cache-persistent" class="stat-value">No</span>
+                  </div>
+                </div>
+                <button id="clear-cache-btn" class="btn btn-secondary">Clear Cache</button>
+              </div>
+              
+              <!-- About -->
+              <div class="settings-section">
+                <h3>About</h3>
+                <p><strong>Linkpoint PWA</strong> v1.0.0</p>
+                <p>A modern Progressive Web App for Second Life and OpenSimulator virtual worlds.</p>
+                <p><small>Not affiliated with Linden Lab or Second Life™</small></p>
+                <p><small>Open source software - <a href="https://github.com/Kaleaon/Linkpoint" target="_blank">GitHub</a></small></p>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+      </div>
+      
+    </main>
+    
+    <!-- Footer/Status Bar -->
+    <footer class="app-footer">
+      <div class="footer-content">
+        <span id="status-message">Ready</span>
+      </div>
+    </footer>
+    
+  </div>
+  
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+  
+  <!-- PWA Install Banner -->
+  <div id="install-banner" class="install-banner" style="display: none;">
+    <div class="banner-content">
+      <span>Install Linkpoint for a better experience</span>
+      <button id="install-button" class="btn btn-small">Install</button>
+      <button id="install-dismiss" class="btn btn-small btn-text">Not now</button>
+    </div>
+  </div>
+  
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner"></div>
+    <p id="loading-message">Loading...</p>
+  </div>
+  
+  <!-- Scripts - Load in dependency order -->
+  <!-- Utilities first -->
+  <script src="js/utils.js"></script>
+  <script src="js/storage-manager.js"></script>
+  <script src="js/cors-handler.js"></script>
+  
+  <!-- Core protocol and SL implementation -->
+  <script src="js/protocol.js"></script>
+  <script src="js/sl-xmlrpc.js"></script>
+  <script src="js/sl-messages.js"></script>
+  <script src="js/sl-circuit.js"></script>
+  <script src="js/sl-protocol-real.js"></script>
+  <script src="js/sl-connection-full.js"></script>
+  
+  <!-- 3D Graphics system -->
+  <script src="js/primitives3d.js"></script>
+  <script src="js/camera3d.js"></script>
+  <script src="js/graphics3d.js"></script>
+  <script src="js/scene3d.js"></script>
+  <script src="js/sl-mesh-loader.js"></script>
+  <script src="js/sl-object-manager.js"></script>
+  
+  <!-- Advanced SL features (ported from Android) - Phase 1 -->
+  <script src="js/terrain.js"></script>
+  <script src="js/windlight.js"></script>
+  <script src="js/displaynames.js"></script>
+  <script src="js/assets.js"></script>
+  
+  <!-- Protocol extensions (ported from Android) - Phase 2 -->
+  <script src="js/eventqueue.js"></script>
+  <script src="js/capabilities.js"></script>
+  
+  <!-- Feature managers -->
+  <script src="js/preferences.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/world.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/voice.js"></script>
+  <script src="js/sl-voice-bridge.js"></script>
+  <script src="js/inventory.js"></script>
+  <script src="js/friends.js"></script>
+  <script src="js/phase2/groups.js"></script>
+  <script src="js/groups-ui.js"></script>
+  <script src="js/teleport.js"></script>
+  <script src="js/search.js"></script>
+  <script src="js/notifications.js"></script>
+  
+  <!-- Main app - must be last -->
+  <script src="js/app.js"></script>
+  
+  <!-- Initialize app -->
+  <script>
+    // Initialize app when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+    
+    function initApp() {
+      // Create and initialize app
+      window.app = new LinkpointApp();
+      window.app.init().catch(err => {
+        console.error('Failed to initialize app:', err);
+        Utils.showToast('Failed to initialize app. Please refresh the page.', 'error');
+      });
+    }
+  </script>
+</body>
+</html>

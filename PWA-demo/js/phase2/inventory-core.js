@@ -142,53 +142,6 @@ class InventoryCore {
   }
 
   /**
-   * Delete item from inventory
-   * @param {string} itemId - Item UUID
-   * @returns {boolean} Success status
-   */
-  deleteItem(itemId) {
-    if (!itemId) return false;
-
-    const item = this.items.get(itemId);
-    if (!item) return false;
-
-    if (item.folderId) {
-      const folder = this.folders.get(item.folderId);
-      if (folder) {
-        folder.items = folder.items.filter(id => id !== itemId);
-      }
-    }
-
-    return this.items.delete(itemId);
-  }
-
-  /**
-   * Delete empty folder from inventory
-   * @param {string} folderId - Folder UUID
-   * @returns {boolean} Success status
-   */
-  deleteFolder(folderId) {
-    if (!folderId) return false;
-
-    const folder = this.folders.get(folderId);
-    if (!folder) return false;
-
-    // Only delete empty folders
-    if (folder.children.length > 0 || folder.items.length > 0) {
-      return false;
-    }
-
-    if (folder.parentId) {
-      const parent = this.folders.get(folder.parentId);
-      if (parent) {
-        parent.children = parent.children.filter(id => id !== folderId);
-      }
-    }
-
-    return this.folders.delete(folderId);
-  }
-
-  /**
    * Get item by ID
    * @param {string} itemId - Item UUID
    * @returns {Object|null}

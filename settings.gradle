@@ -1,2 +1,7 @@
+<<<<<<< HEAD
 // Linkpoint is the only project - clean Kotlin Second Life viewer
 includeBuild('Linkpoint')
+=======
+include ':app'
+include ':legacy-java'
+>>>>>>> origin/cursor/research-and-propose-second-life-framework-extensions-56f5

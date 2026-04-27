@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="市場" name="Marketplace Panel">
+	<panel name="tool_panel">
+		<menu_button name="sort_btn" tool_tip="檢查/排序的選項" />
+		<button name="add_btn" tool_tip="建立一個刊登檔案夾" />
+		<button name="audit_btn" label="檢查是否有誤" tool_tip="檢查你的市場刊登" />
+	</panel>
+	<panel name="tab_container_panel">
+		<filter_editor label="在市場中過濾列表" name="filter_editor" />
+	</panel>
+	<panel name="marketplace_drop_zone">
+		<text name="drop_zone_label">
+			拖放檔案夾以建立清單
+		</text>
+	</panel>
+</panel>

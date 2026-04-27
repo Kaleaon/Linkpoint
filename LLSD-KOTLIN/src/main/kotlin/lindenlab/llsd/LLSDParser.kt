@@ -13,10 +13,8 @@ import org.xml.sax.SAXException
 import java.io.IOException
 import java.io.InputStream
 import java.net.URI
-import java.time.Instant
-import java.time.format.DateTimeParseException
+import java.text.SimpleDateFormat
 import java.util.*
-import java.util.logging.Logger
 import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.ParserConfigurationException
@@ -94,7 +92,7 @@ class LLSDParser @Throws(ParserConfigurationException::class) constructor() {
         
         val childNodesTrimmed = extractElements(llsdNode.childNodes)
         if (childNodesTrimmed.isEmpty()) {
-            LOGGER.warning("Empty LLSD tag found. This might indicate a malformed or empty response.")
+            // XXX: Warn?
             return LLSD(null)
         }
         
@@ -133,8 +131,12 @@ class LLSDParser @Throws(ParserConfigurationException::class) constructor() {
         }
         
         return try {
-            Date.from(Instant.parse(elementContents))
-        } catch (e: DateTimeParseException) {
+            // Create a new DateFormat instance for thread safety
+            val dateFormat = SimpleDateFormat(ISO8601_PATTERN).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+            }
+            dateFormat.parse(elementContents)
+        } catch (e: java.text.ParseException) {
             throw LLSDException("Unable to parse LLSD date value, received \"$elementContents\".", e)
         }
     }
@@ -177,9 +179,6 @@ class LLSDParser @Throws(ParserConfigurationException::class) constructor() {
             }
             
             val value = parseNode(valueNode)
-            if (key == null) {
-                throw LLSDException("Key for map cannot be null.")
-            }
             valueMap[key] = value
             
             nodeIdx += 2
@@ -245,7 +244,7 @@ class LLSDParser @Throws(ParserConfigurationException::class) constructor() {
         }
         
         return when (nodeName) {
-            "undef" -> null
+            "undef" -> ""
             "boolean" -> if (isUndefined) LLSDUndefined.BOOLEAN else parseBoolean(nodeText.toString())
             "date" -> if (isUndefined) LLSDUndefined.DATE else parseDate(nodeText.toString())
             "integer" -> if (isUndefined) LLSDUndefined.INTEGER else parseInteger(nodeText.toString())
@@ -263,15 +262,14 @@ class LLSDParser @Throws(ParserConfigurationException::class) constructor() {
             return 0.0
         }
         
-        return when (elementContents.lowercase(java.util.Locale.ROOT)) {
-            "nan" -> Double.NaN
-            "inf", "infinity" -> Double.POSITIVE_INFINITY
-            "-inf", "-infinity" -> Double.NEGATIVE_INFINITY
-            else -> try {
-                elementContents.toDouble()
-            } catch (e: NumberFormatException) {
-                throw LLSDException("Unable to parse LLSD real value, received \"$elementContents\".", e)
-            }
+        if (elementContents == "nan") {
+            return Double.NaN
+        }
+        
+        return try {
+            elementContents.toDouble()
+        } catch (e: NumberFormatException) {
+            throw LLSDException("Unable to parse LLSD real value, received \"$elementContents\".", e)
         }
     }
     
@@ -303,6 +301,6 @@ class LLSDParser @Throws(ParserConfigurationException::class) constructor() {
     }
     
     companion object {
-        private val LOGGER = Logger.getLogger(LLSDParser::class.java.name)
+        private const val ISO8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'"
     }
 }

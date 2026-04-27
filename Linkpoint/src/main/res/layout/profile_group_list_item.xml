@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:orientation="vertical" android:id="@+id/contactListItemLayout" android:background="@android:drawable/list_selector_background" android:paddingLeft="10sp" android:paddingTop="5sp" android:paddingRight="10sp" android:paddingBottom="5sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_weight="1">
+    <TextView android:textSize="16sp" android:ellipsize="end" android:layout_gravity="center_vertical" android:id="@+id/groupNameTextView" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="User name here" android:singleLine="true"/>
+    <TextView android:textSize="12sp" android:ellipsize="end" android:layout_gravity="center_vertical" android:id="@+id/groupTitleTextView" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Last message from this user maybe very long and endless and on and on" android:singleLine="true"/>
+</LinearLayout>

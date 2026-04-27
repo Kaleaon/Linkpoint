@@ -1,0 +1,39 @@
+package com.lumiyaviewer.lumiya.slproto.messages
+
+import com.lumiyaviewer.lumiya.slproto.SLMessage
+import java.nio.ByteBuffer
+import java.util.UUID
+
+class CreateTrustedCircuit : SLMessage {
+    DataBlock DataBlock_Field = DataBlock()
+
+    class DataBlock {
+        byte[] Digest
+        UUID EndPointID
+    }
+
+    CreateTrustedCircuit() {
+        this.zeroCoded = false
+    }
+
+    Int CalcPayloadSize() {
+        return 52
+    }
+
+    Unit Handle(SLMessageHandler sLMessageHandler) {
+        sLMessageHandler.HandleCreateTrustedCircuit(this)
+    }
+
+    Unit PackPayload(ByteBuffer byteBuffer) {
+        byteBuffer.putShort(-1)
+        byteBuffer.put((byte) 1)
+        byteBuffer.put((byte) -120)
+        packUUID(byteBuffer, this.DataBlock_Field.EndPointID)
+        packFixed(byteBuffer, this.DataBlock_Field.Digest, 32)
+    }
+
+    Unit UnpackPayload(ByteBuffer byteBuffer) {
+        this.DataBlock_Field.EndPointID = unpackUUID(byteBuffer)
+        this.DataBlock_Field.Digest = unpackFixed(byteBuffer, 32)
+    }
+}

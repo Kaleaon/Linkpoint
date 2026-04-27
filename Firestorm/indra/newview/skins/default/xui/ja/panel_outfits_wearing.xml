@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel name="Wearing">
+	<panel.string name="no_attachments">
+		着用している装着物はありません。
+	</panel.string>
+	<accordion name="wearables_accordion">
+		<accordion_tab name="tab_wearables" title="着用物"/>
+		<accordion_tab name="tab_temp_attachments" title="一時的な装着物"/>
+	</accordion>
+	<panel name="bottom_panel">
+		<text name="avatar_complexity_label">
+			複雑度：[WEIGHT]
+		</text>
+	</panel>
+</panel>

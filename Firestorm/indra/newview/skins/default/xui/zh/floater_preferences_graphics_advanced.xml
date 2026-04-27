@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="prefs_graphics_advanced" title="進階顯示偏好設定">
+	<text name="GeneralText">
+		一般
+	</text>
+	<slider label="描繪距離：" name="DrawDistance" />
+	<text name="DrawDistanceMeterText2">
+		米
+	</text>
+	<slider label="最大粒子效果數量：" name="MaxParticleCount" />
+	<slider label="後處理品質：" name="RenderPostProcess" />
+	<text name="PostProcessText">
+		低
+	</text>
+	<slider label="最大鄰近光源數：" name="MaxLights" />
+	<text name="MaxTextureResolutionLabel">
+		最大細節層次解析度：
+	</text>
+	<combo_box name="MaxTextureResolution" tool_tip="「細節層次(LOD)」紋理的最大解析度"/>
+	<check_box label="啟用垂直同步" tool_tip="將影格速率與顯示器的更新率同步，可能會導致更多的卡頓和輸入延遲。" name="vsync" />
+	<text name="AvatarText">
+		化身
+	</text>
+	<text name="AvatarComplexityModeLabel">
+		化身顯示：
+	</text>
+	<combo_box name="AvatarComplexityMode">
+		<combo_box.item label="按複雜度限制" name="0" />
+		<combo_box.item label="優先示好友" name="1" />
+		<combo_box.item label="僅顯示好友" name="2" />
+	</combo_box>
+	<slider label="最大複雜度：" name="IndirectMaxComplexity" tool_tip="控制在何時下讓複雜化身彩現為「果凍娃娃」" />
+	<text name="IndirectMaxComplexityText">
+		0
+	</text>
+	<slider label="動態化身數目上限：" name="IndirectMaxNonImpostors" />
+	<text name="IndirectMaxNonImpostorsText">
+		0
+	</text>
+	<slider label="細節：" name="AvatarMeshDetail" />
+	<text name="AvatarMeshDetailText">
+		低
+	</text>
+	<slider label="身體物理：" name="AvatarPhysicsDetail" />
+	<text name="AvatarPhysicsDetailText">
+		低
+	</text>
+	<text name="HardwareText">
+		硬體
+	</text>
+	<check_box label="各向異性過濾（若啟用會變慢）" name="ani" />
+	<check_box label="啟用 OpenGL 頂點緩衝物件(VBO)" name="vbo" tool_tip="在較新硬體上啟用，可提升效能。  但是，較舊硬體的 VBO 實作不佳，若啟用可能導致當機。" />
+	<check_box label="啟用紋理壓縮（須重新啟動）" name="texture compression" tool_tip="在視訊記憶體中壓縮紋理，讓高解析度紋理可以載入，但色彩品質稍差。" />
+	<check_box label="啟用HiDPI顯示支援（須重新啟動）" name="use HiDPI" tool_tip="啟用OpenGL高解析度繪圖。" />
+	<text name="antialiasing label">
+		反鋸齒：
+	</text>
+	<combo_box label="反鋸齒" name="fsaa">
+		<combo_box.item label="禁用" name="FSAADisabled" />
+		<combo_box.item label="FXAA" name="FXAA" />
+		<combo_box.item label="SMAA" name="SMAA"/>
+	</combo_box>
+	<text name="antialiasing quality label">
+		反鋸齒品質：
+	</text>
+	<combo_box label="反鋸齒" name="fsaa quality">
+		<combo_box.item label="低" name="Low"/>
+		<combo_box.item label="中" name="Medium"/>
+		<combo_box.item label="高" name="High"/>
+		<combo_box.item label="超高" name="Ultra"/>
+	</combo_box>
+	<text name="MeshText">
+		網格模型
+	</text>
+	<slider label="地形網格細節：" name="TerrainMeshDetail" />
+	<text name="TerrainMeshDetailText">
+		低
+	</text>
+	<slider label="樹木：" name="TreeMeshDetail" />
+	<text name="TreeMeshDetailText">
+		低
+	</text>
+	<slider label="物件：" name="ObjectMeshDetail" />
+	<text name="ObjectMeshDetailText">
+		低
+	</text>
+	<slider label="彈性元素：" name="FlexibleMeshDetail" />
+	<text name="FlexibleMeshDetailText">
+		低
+	</text>
+	<text name="antialiasing restart">
+		（須重新啟動）
+	</text>
+	<text name="ShadersText">
+		著色器
+	</text>
+	<check_box label="清澈透明的水" name="TransparentWater" />
+	<slider label="天空：" name="SkyMeshDetail" />
+	<text name="SkyMeshDetailText">
+		低
+	</text>
+	<check_box label="環境光遮蔽" name="UseSSAO" />
+	<check_box label="景深" name="UseDoF" />
+	<check_box label="HDR和自發光" name="VintageMode"/>
+	<text name="RenderShadowDetailText">
+		陰影：
+	</text>
+	<combo_box name="ShadowDetail">
+		<combo_box.item label="無" name="0" />
+		<combo_box.item label="日 / 月" name="1" />
+		<combo_box.item label="日 / 月 + 投影物" name="2" />
+	</combo_box>
+	<check_box label="螢幕空間反射" name="ScreenSpaceReflections" />
+	<text name="ReflectionDetailText">
+		反射細節:
+	</text>
+	<combo_box name="ReflectionDetail">
+		<combo_box.item label="僅靜態" name="0" />
+		<combo_box.item label="靜態+動態" name="1" />
+		<combo_box.item label="即時" name="2" />
+	</combo_box>
+	<text name="ReflectionProbeText">
+			反射覆蓋率:
+	</text>
+	<combo_box name="ReflectionLevel">
+		<combo_box.item label="無" name="0" />
+		<combo_box.item label="僅手動" name="1" />
+		<combo_box.item label="手動 + 地形" name="2" />
+		<combo_box.item label="全景" name="3" />
+	</combo_box>
+	<text name="ReflectionProbeCount">
+		反射探針數量：
+	</text>
+	<combo_box label="反射探針數量：" name="ProbeCount">
+		<combo_box.item label="無" name="1" />
+		<combo_box.item label="少量" name="32" />
+		<combo_box.item label="中等" name="64" />
+		<combo_box.item label="很多" name="128" />
+		<combo_box.item label="超多" name="256" />
+	</combo_box>
+	<slider label="曝光度:" name="RenderExposure" />
+	<check_box label="鏡面" name="Mirrors" />
+	<text name="MirrorResolutionText">
+		鏡面解析度:
+	</text>
+	<text name="HeroProbeUpdateText">
+		鏡面更新頻率：
+	</text>
+	<combo_box name="HeroProbeUpdateRate">
+		<combo_box.item label="低" name="6" />
+		<combo_box.item label="中" name="3" />
+		<combo_box.item label="高" name="1" />
+		<combo_box.item label="超高" name="0" />
+	</combo_box>
+	<slider label="銳化：" name="RenderSharpness"/>
+	<text name="TonemapTypeText">
+		色調映射器：
+	</text>
+	<combo_box name="TonemapType">
+		<combo_box.item label="Khronos 中性" name="0"/>
+		<combo_box.item label="ACES" name="1"/>
+	</combo_box>
+	<slider label="色調映射混合：" tool_tip="在線性與色調映射顏色之間進行混合" name="TonemapMix"/>
+	<button label="重設為我們建議的設定" name="Defaults" />
+	<button label="確定" label_selected="確定" name="OK" />
+	<button label="取消" label_selected="取消" name="Cancel" />
+	<check_box label="化身最大複雜度" name="RenderAvatarMaxComplexity" />
+	<check_box label="非精簡化身最大複雜度" name="RenderAvatarMaxNonImpostors" />
+</floater>

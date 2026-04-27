@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Grundbesitz" name="Estate">
+	<text name="estate_help_text">
+		Änderungen wirken sich auf alle Regionen des Grundbesitzes aus.
+	</text>
+	<text name="estate_text">
+		Grundbesitz:
+	</text>
+	<text name="estate_name">
+		(unbekannt)
+	</text>
+	<text name="owner_text">
+		Grundbesitzer:
+	</text>
+	<text name="estate_owner">
+		(unbekannt)
+	</text>
+	
+	<radio_group name="externally_visible_radio" width="310">
+		<radio_item label="Nur Einwohner und Gruppen zulassen, die im Reiter &quot;Zugang&quot; aufgelistet sind" name="estate_restricted_access"/>
+		<radio_item label="Zugang für jeden" name="estate_public_access"/>
+	</radio_group>
+	<check_box label="18 Jahre oder älter sind" name="limit_age_verified" tool_tip="Um diesen Grundbesitz besuchen zu können, müssen Einwohner mindestens 18 Jahre oder älter sein. Weitere Informationen finden Sie auf [SUPPORT_SITE]."/>
+	<check_box label="Zahlungsinformationen hinterlegt haben" name="limit_payment" tool_tip="Um diesen Grundbesitz besuchen zu können, müssen Einwohner Zahlungsinformationen hinterlegt haben. Weitere Informationen finden Sie auf [SUPPORT_SITE]."/>
+	<check_box label="Darf kein geskripteter Agent (Bot) sein" name="limit_bots" tool_tip="Um diesen Grundbesitz besuchen zu können, dürfen Einwohner keine geskripteten Agenten (Bots) sein. Weitere Informationen finden Sie auf [SUPPORT_SITE]."/>
+	<check_box label="Parzellen-Eigentümer können restriktiver sein" name="parcel_access_override"/>
+	<check_box label="Voice-Chat erlauben" name="voice_chat_check"/>
+	<check_box label="Direktteleport zulassen" name="allow_direct_teleport"/>
+	<button label="Nachricht an Grundbesitz" name="message_estate_btn"/>
+	<button label="Einwohner hinauswerfen" name="kick_user_from_estate_btn"/>
+</panel>

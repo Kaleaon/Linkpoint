@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Proprietà immobiliare" name="Estate">
+	<text name="estate_help_text">
+		Le impostazioni in questa scheda saranno valide per tutte le regioni in questa proprietà.
+	</text>
+	<text name="estate_text">
+		Proprietà immobiliare:
+	</text>
+	<text name="estate_name">
+		(sconosciuto)
+	</text>
+	<text name="owner_text">
+		Proprietario:
+	</text>
+	<text name="estate_owner">
+		(sconosciuto)
+	</text>
+	<radio_group name="externally_visible_radio">
+		<radio_item label="Consenti accesso solo ai residenti e ai gruppi elencati nella scheda Accesso" name="estate_restricted_access"/>
+		<radio_item label="Accesso libero" name="estate_public_access" />
+	</radio_group>
+	<check_box label="Deve avere almeno 18 anni" name="limit_age_verified" tool_tip="Per poter visitare questa proprietà immobiliare gli utenti devono avere almeno 18 anni. Visita il [SUPPORT_SITE] per maggiori informazioni."/>
+	<check_box label="Deve avere le informazioni di pagamento" name="limit_payment" tool_tip="Per poter visitare questa proprietà immobiliare gli utenti devono aver fornito informazioni di pagamento a Linden Lab.  Visita il [SUPPORT_SITE] per maggiori informazioni."/>
+	<check_box label="Non deve essere un agente scriptato (bot)" name="limit_bots" tool_tip="Gli agenti scriptati (bot) non possono accedere a questa proprietà immobiliare. Visita il [SUPPORT_SITE] per maggiori informazioni." />
+	<check_box label="I proprietari dei lotti possono restringere i permessi" name="parcel_access_override"/>
+	<check_box label="Permetti la chat vocale" name="voice_chat_check"/>
+	<check_box label="Permetti il teleport diretto" name="allow_direct_teleport"/>
+	<button label="Applica" name="apply_btn"/>
+	<button label="Manda messaggio alla proprietà" name="message_estate_btn"/>
+	<button label="Espelli utente dalla proprietà" name="kick_user_from_estate_btn"/>
+</panel>

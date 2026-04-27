@@ -182,17 +182,14 @@ impl LLSDXmlParser {
     /// Parse an array element
     fn parse_array(&self, reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>) -> LLSDResult<LLSDValue> {
         let mut array = Vec::new();
-
+        
         loop {
             match reader.read_event() {
-                Ok(Event::Start(ref e)) => {
-                    let tag_name = String::from_utf8_lossy(e.name().as_ref()).to_string();
-                    let element = self.parse_typed_element(&tag_name, reader, buf)?;
-                    array.push(element);
-                }
-                Ok(Event::Empty(ref e)) => {
-                    let tag_name = String::from_utf8_lossy(e.name().as_ref()).to_string();
-                    let element = self.parse_empty_element(&tag_name)?;
+                Ok(Event::Start(_)) | Ok(Event::Empty(_)) => {
+                    // Step back one event to re-parse the element
+                    // Skip to end of this element
+                    // TODO: Implement proper position tracking
+                    let element = self.parse_element(reader, buf)?;
                     array.push(element);
                 }
                 Ok(Event::End(ref e)) if e.name().as_ref() == b"array" => break,
@@ -201,7 +198,7 @@ impl LLSDXmlParser {
                 _ => {}
             }
         }
-
+        
         Ok(LLSDValue::Array(array))
     }
 
@@ -355,7 +352,7 @@ impl LLSDXmlSerializer {
             }
             LLSDValue::String(s) => {
                 writer.write_event(Event::Start(BytesStart::new("string")))?;
-                writer.write_event(Event::Text(BytesText::new(s)))?;
+                writer.write_event(Event::Text(BytesText::from_escaped(s)))?;
                 writer.write_event(Event::End(BytesEnd::new("string")))?;
             }
             LLSDValue::UUID(u) => {
@@ -370,7 +367,7 @@ impl LLSDXmlSerializer {
             }
             LLSDValue::URI(u) => {
                 writer.write_event(Event::Start(BytesStart::new("uri")))?;
-                writer.write_event(Event::Text(BytesText::new(u)))?;
+                writer.write_event(Event::Text(BytesText::from_escaped(u)))?;
                 writer.write_event(Event::End(BytesEnd::new("uri")))?;
             }
             LLSDValue::Binary(b) => {
@@ -408,7 +405,7 @@ impl LLSDXmlSerializer {
                     }
                     
                     writer.write_event(Event::Start(BytesStart::new("key")))?;
-                    writer.write_event(Event::Text(BytesText::new(key)))?;
+                    writer.write_event(Event::Text(BytesText::from_escaped(key)))?;
                     writer.write_event(Event::End(BytesEnd::new("key")))?;
                     
                     if self.pretty_print {

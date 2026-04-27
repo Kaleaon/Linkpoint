@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="floater_report_abuse" title="檢舉違規">
+	<floater.string name="Screenshot">
+		快照
+	</floater.string>
+	<floater.string name="chat_report_format">
+時間: [MSG_TIME]
+文字: [MSG_DESCRIPTION]
+	</floater.string>
+	<button name="refresh_screenshot" tool_tip="更新相片" />
+	<check_box label="使用這張快照" name="screen_check" />
+	<text name="reporter_title">
+		檢舉者：
+	</text>
+	<text name="sim_title">
+		區域：
+	</text>
+	<text name="sim_field">
+		區域名稱
+	</text>
+	<text name="pos_title">
+		位置：
+	</text>
+	<text name="pos_field">
+		{128.1, 128.1, 15.4}
+	</text>
+	<text name="select_object_label">
+		點擊按鈕，再點擊違規的物件：
+	</text>
+	<button name="pick_btn" tool_tip="物件選擇器 - 指明檢舉的物件" />
+	<text name="object_name_label">
+		物件：
+	</text>
+	<text name="owner_name_label">
+		所有者：
+	</text>
+	<combo_box name="category_combo" tool_tip="類別 -- 選擇最符合此報告的類別">
+		<combo_box.item label="選擇類別" name="Select_category" />
+		<combo_box.item label="年齡 &gt; 年齡遊戲" name="Age__Age_play" />
+		<combo_box.item label="攻擊 &gt; 在安全區域射擊、推搡或撞擊其他居民" name="Assault__Safe_area" />
+		<combo_box.item label="資訊洩露 &gt; 現實世界的資訊" name="Disclosure__Real_world_information" />
+		<combo_box.item label="擾亂秩序 &gt; 過度使用指令碼物件" name="Disturbing_the_peace__Excessive_scripted_objects" />
+		<combo_box.item label="擾亂秩序 &gt; 隨意產生物件" name="Disturbing_the_peace__Object_littering" />
+		<combo_box.item label="擾亂秩序 &gt; 持續的垃圾資訊" name="Disturbing_the_peace__Repetitive_spam" />
+		<combo_box.item label="欺詐 &gt; L$ 或 US$" name="Fraud__US$" />
+		<combo_box.item label="騷擾 &gt; 惡意破壞行為" name="Harassment__Solicting_inciting_others_to_violate_ToS" />
+		<combo_box.item label="猥褻 &gt; 在公共場合的冒犯性內容或行為" name="Indecency__Broadly_offensive_content_or_conduct" />
+		<combo_box.item label="猥褻 &gt; 不當的化身名稱" name="Indecency__Inappropriate_avatar_name" />
+		<combo_box.item label="不當行為 &gt; 不適合區域評級的內容/行為" name="Indecency__Mature_content_in_PG_region" />
+		<combo_box.item label="歧視" name="Intolerance" />
+		<combo_box.item label="土地 &gt; 非法使用 &gt; 物件或紋理" name="Land__Encroachment__Objects_textures" />
+		<combo_box.item label="違反技巧遊戲政策" name="Wagering_gambling" />
+	</combo_box>
+	<text name="abuser_name_title">
+		違規者名稱：
+	</text>
+	<button label="選擇" name="select_abuser" tool_tip="從清單中選擇違規使用者姓名" />
+	<text name="abuser_name_title2">
+		違規位置：
+	</text>
+	<text name="sum_title">
+		摘要：
+	</text>
+	<text name="dscr_title">
+		細節：
+	</text>
+	<text name="bug_aviso">
+		請盡可能提供具體細節
+	</text>
+	<text name="incomplete_title">
+		* 不完整的檢舉內容概不受理調查
+	</text>
+	<button label="違規檢舉" label_selected="違規舉報" name="send_btn" />
+	<button label="取消" label_selected="取消" name="cancel_btn" />
+</floater>

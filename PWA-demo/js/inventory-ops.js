@@ -57,34 +57,9 @@ class InventoryOps {
     // Generate new UUID for folder
     const folderUUID = this.generateUUID();
     
-    // Send CreateInventoryFolder message to server
-    if (this.protocol) {
-      const agentId = this.protocol.agentId;
-      const sessionId = this.protocol.sessionId;
-
-      if (agentId && sessionId && window.SLMessageTypes) {
-        try {
-          const msg = new window.SLMessageTypes.CreateInventoryFolderMessage(
-            agentId,
-            sessionId,
-            folderUUID,
-            parentUUID,
-            type,
-            name
-          );
-
-          if (this.protocol.circuit && typeof this.protocol.circuit.sendMessage === 'function') {
-            this.protocol.circuit.sendMessage(msg);
-          } else if (typeof this.protocol.sendMessage === 'function') {
-            // Fallback for mock/websocket protocol
-            // Note: ProtocolManager expects (type, data), but we log the packet creation
-            console.log('Generated CreateInventoryFolder packet:', msg);
-          }
-        } catch (e) {
-          console.error('Error sending CreateInventoryFolder packet:', e);
-        }
-      }
-    }
+    // TODO: Send CreateInventoryFolder message to server
+    // TODO: Wait for server confirmation
+    // TODO: Update inventory core with new folder
     
     // Placeholder - would normally wait for server response
     if (this.inventoryCore) {

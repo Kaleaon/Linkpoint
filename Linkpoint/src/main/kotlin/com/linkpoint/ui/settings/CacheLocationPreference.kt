@@ -1,0 +1,40 @@
+package com.linkpoint.ui.settings
+
+import android.content.Context
+import android.support.v7.preference.Preference
+import android.util.AttributeSet
+import com.google.common.base.Strings
+import com.linkpoint.R
+
+class CacheLocationPreference : Preference() {
+    public CacheLocationPreference(Context context) {
+        super(context)
+    }
+
+    public CacheLocationPreference(Context context, AttributeSet attributeSet) {
+        super(context, attributeSet)
+    }
+
+    public CacheLocationPreference(Context context, AttributeSet attributeSet, Int i) {
+        super(context, attributeSet, i)
+    }
+
+    public CacheLocationPreference(Context context, AttributeSet attributeSet, Int i, Int i2) {
+        super(context, attributeSet, i, i2)
+    }
+
+    @JvmStatic
+     fun makeDisplayableCacheLocation(str: String): String {
+        val indexOf: Int = str.indexOf("/Android")
+        if (indexOf >= 0) {
+            str = str.substring(0, indexOf)
+        }
+        val indexOf2: Int = str.indexOf("/com.lumiyaviewer.lumiya")
+        return indexOf2 >= 0 ? str.substring(0, indexOf2) : str
+    }
+
+     public fun getSummary(): CharSequence {
+        val persistedString: String = getPersistedString((String) null)
+        return Strings.isNullOrEmpty(persistedString) ? getContext().getString(R.string.default_cache_location) : makeDisplayableCacheLocation(persistedString)
+    }
+}

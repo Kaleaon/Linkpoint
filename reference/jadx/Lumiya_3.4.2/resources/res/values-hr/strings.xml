@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="abc_action_bar_home_description">Idi na početnu</string>
+    <string name="abc_action_bar_home_description_format">%1$s, %2$s</string>
+    <string name="abc_action_bar_home_subtitle_description_format">%1$s, %2$s, %3$s</string>
+    <string name="abc_action_bar_up_description">Idi gore</string>
+    <string name="abc_action_menu_overflow_description">Dodatne opcije</string>
+    <string name="abc_action_mode_done">Gotovo</string>
+    <string name="abc_activity_chooser_view_see_all">Prikaži sve</string>
+    <string name="abc_activitychooserview_choose_application">Odabir aplikacije</string>
+    <string name="abc_capital_off">ISKLJUČENO</string>
+    <string name="abc_capital_on">UKLJUČENO</string>
+    <string name="abc_search_hint">Pretražite…</string>
+    <string name="abc_searchview_description_clear">Izbriši upit</string>
+    <string name="abc_searchview_description_query">Upit za pretraživanje</string>
+    <string name="abc_searchview_description_search">Pretraživanje</string>
+    <string name="abc_searchview_description_submit">Pošalji upit</string>
+    <string name="abc_searchview_description_voice">Glasovno pretraživanje</string>
+    <string name="abc_shareactionprovider_share_with">Dijeljenje sa</string>
+    <string name="abc_shareactionprovider_share_with_application">Dijeljenje sa: %s</string>
+    <string name="abc_toolbar_collapse_description">Sažmi</string>
+    <string name="back_button_content_description">natrag</string>
+    <string name="cancel_button">Odustani</string>
+    <string name="dialog_button_got_it">SHVAĆAM</string>
+    <string name="dialog_button_open_help_center">OTVORI CENTAR ZA POMOĆ</string>
+    <string name="dialog_message_incompatible_phone">Potreban je telefon kompatibilan sa značajkom Daydream. Dodatne informacije potražite u centru za pomoć za Daydream.</string>
+    <string name="dialog_message_no_cardboard">Nabavite aplikaciju Cardboard da biste konfigurirali masku za virtualnu stvarnost.</string>
+    <string name="dialog_message_setup">Postavite masku za virtualnu stvarnost da biste u potpunosti iskoristili sve značajke.</string>
+    <string name="dialog_title">Konfiguracija</string>
+    <string name="dialog_title_incompatible_phone">Telefon nije kompatibilan</string>
+    <string name="dialog_title_vr_core_not_enabled">Potrebno je postavljanje</string>
+    <string name="dialog_title_vr_core_not_installed">Potrebna je instalacija</string>
+    <string name="dialog_title_warning">Upozorenje</string>
+    <string name="dialog_vr_core_not_enabled">Ta aplikacija možda neće ispravno funkcionirati ako ne omogućite Googleove VR usluge. Prije nego što nastavite omogućite ih u Postavkama telefona.</string>
+    <string name="dialog_vr_core_not_installed">Ta aplikacija možda neće ispravno funkcionirati bez Googleovih VR usluga. Prije nego što nastavite instalirajte Googleove VR usluge iz Trgovine Play.</string>
+    <string name="go_to_playstore_button">Idi na Trgovinu Play</string>
+    <string name="go_to_vr_listeners_settings_button">Idi na postavke</string>
+    <string name="no_browser_text">Nema preglednika za otvaranje web-lokacije</string>
+    <string name="place_your_phone_into_cardboard">Stavite telefon u masku za Cardboard</string>
+    <string name="place_your_viewer_into_viewer_format">Stavite svoj telefon u masku %s</string>
+    <string name="search_menu_title">Pretraživanje</string>
+    <string name="settings_button_content_description">postavke</string>
+    <string name="setup_button">Postavi</string>
+    <string name="status_bar_notification_info_overflow">999+</string>
+    <string name="switch_viewer_action">Promjena</string>
+    <string name="switch_viewer_prompt">Upotrebljavate li drugu masku?</string>
+</resources>

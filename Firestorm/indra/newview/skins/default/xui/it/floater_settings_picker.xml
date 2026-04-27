@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="settings picker" title="Seleziona Ambiente">
+	<floater.string name="pick title">
+		Seleziona
+	</floater.string>
+	<floater.string name="pick_track">
+		Traccia
+	</floater.string>
+	<floater.string name="pick_settings">
+		Ambiente
+	</floater.string>
+	<floater.string name="track_water">
+		Acqua
+	</floater.string>
+	<floater.string name="track_ground">
+		Suolo
+	</floater.string>
+	<floater.string name="track_sky">
+		Cielo[NUM]
+	</floater.string>
+	<layout_stack name="test_stack">
+		<layout_panel name="inv_list">
+			<filter_editor label="Filtra ambienti" name="flt_inventory_search"/>
+		</layout_panel>
+		<layout_panel name="temp">
+			<button label="Ok" label_selected="Ok" name="btn_select"/>
+			<button label="Annulla" label_selected="Annulla" name="btn_cancel"/>
+		</layout_panel>
+	</layout_stack>
+</floater>

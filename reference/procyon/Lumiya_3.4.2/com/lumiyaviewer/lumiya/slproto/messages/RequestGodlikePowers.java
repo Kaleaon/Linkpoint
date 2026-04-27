@@ -1,0 +1,62 @@
+// 
+// Decompiled by Procyon v0.6.0
+// 
+
+package com.lumiyaviewer.lumiya.slproto.messages;
+
+import java.util.UUID;
+import java.nio.ByteBuffer;
+import com.lumiyaviewer.lumiya.slproto.SLMessage;
+
+public class RequestGodlikePowers extends SLMessage
+{
+    public AgentData AgentData_Field;
+    public RequestBlock RequestBlock_Field;
+    
+    public RequestGodlikePowers() {
+        this.zeroCoded = false;
+        this.AgentData_Field = new AgentData();
+        this.RequestBlock_Field = new RequestBlock();
+    }
+    
+    @Override
+    public int CalcPayloadSize() {
+        return 53;
+    }
+    
+    @Override
+    public void Handle(final SLMessageHandler slMessageHandler) {
+        slMessageHandler.HandleRequestGodlikePowers(this);
+    }
+    
+    @Override
+    public void PackPayload(final ByteBuffer byteBuffer) {
+        byteBuffer.putShort((short)(-1));
+        byteBuffer.put((byte)1);
+        byteBuffer.put((byte)1);
+        this.packUUID(byteBuffer, this.AgentData_Field.AgentID);
+        this.packUUID(byteBuffer, this.AgentData_Field.SessionID);
+        this.packBoolean(byteBuffer, this.RequestBlock_Field.Godlike);
+        this.packUUID(byteBuffer, this.RequestBlock_Field.Token);
+    }
+    
+    @Override
+    public void UnpackPayload(final ByteBuffer byteBuffer) {
+        this.AgentData_Field.AgentID = this.unpackUUID(byteBuffer);
+        this.AgentData_Field.SessionID = this.unpackUUID(byteBuffer);
+        this.RequestBlock_Field.Godlike = this.unpackBoolean(byteBuffer);
+        this.RequestBlock_Field.Token = this.unpackUUID(byteBuffer);
+    }
+    
+    public static class AgentData
+    {
+        public UUID AgentID;
+        public UUID SessionID;
+    }
+    
+    public static class RequestBlock
+    {
+        public boolean Godlike;
+        public UUID Token;
+    }
+}

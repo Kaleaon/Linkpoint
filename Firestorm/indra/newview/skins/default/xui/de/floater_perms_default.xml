@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="perms default" title="Standard-Erstellungsberechtigungen">
+	<panel name="default permissions" label="Standardberechtigungen">
+		<text name="label_1">
+			Nächster Eigentümer:
+		</text>
+		<text name="label_2">
+			Kopieren
+		</text>
+		<text name="label_3">
+			Bearbeiten
+		</text>
+		<text name="label_4">
+			Transferieren
+		</text>
+		<text name="label_5">
+			Mit Gruppe teilen
+		</text>
+		<text name="label_6">
+			Kopieren allen erlauben
+		</text>
+		<text name="label_7" tool_tip="Standardberechtigungen für die Erstellung von Objekten festlegen">
+			Objekte
+		</text>
+		<text name="label_8" tool_tip="Standardberechtigungen für hochgeladene Objekte">
+			Uploads
+		</text>
+		<text name="label_9" tool_tip="Standardberechtigungen für Skripte, die erzeugt werden">
+			Skripte
+		</text>
+		<text name="label_10" tool_tip="Standardberechtigungen für die Erstellung von Notizkarten festlegen">
+			Notizkarten
+		</text>
+		<text name="label_11" tool_tip="Standardberechtigungen für die Erstellung von Gesten festlegen">
+			Gesten
+		</text>
+		<text name="label_12" tool_tip="Standardberechtigungen für die Erstellung von Kleidungsstücken und Körperteilen festlegen">
+			Tragbare Objekte
+		</text>
+		<text name="label_13" tool_tip="Standardberechtigungen für die Erstellung von Umgebungseinstellungen festlegen">
+			Einstellungen
+		</text>
+		<text name="label_14" tool_tip="Standardberechtigungen für die Erstellung von GLTF-Materialien festlegen">
+			Materialien
+		</text>
+	</panel>
+	<button label="OK" label_selected="OK" name="ok"/>
+	<button label="Abbrechen" label_selected="Abbrechen" name="cancel"/>
+</floater>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="beacons" title="Метки">
+	<panel name="beacons_panel">
+		<text name="label_show">
+			Показать:
+		</text>
+		<check_box label="Границы для освещения в сцене" name="lights_bounding_boxes"/>
+		<check_box label="Углы региона" name="fsregioncornerbeacons"/>
+		<check_box label="Метки" name="beacons"/>
+		<check_box label="Подсветку" name="highlights"/>
+		<check_box label="Информацию Маяка на экране" name="FSRenderBeaconText"/>
+		<text name="beacon_width_label" tool_tip="Ширина меток">
+			Ширина:
+		</text>
+		<text name="label_objects">
+			Для этих объектов:
+		</text>
+		<check_box label="Физический" name="physical"/>
+		<check_box label="Со скриптами" name="scripted"/>
+		<check_box label="Только касание" name="touch_only"/>
+		<check_box label="Источники звука" name="sounds"/>
+		<check_box label="Источники частиц" name="particles"/>
+		<check_box label="Источники медиа" name="moapbeacon"/>
+		<text name="label_direction">
+			Показать направление на:
+		</text>
+		<check_box label="Солнце" name="sun"/>
+		<check_box label="Луна" name="moon"/>
+	</panel>
+</floater>

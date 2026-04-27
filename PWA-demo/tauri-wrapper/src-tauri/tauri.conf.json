@@ -1,0 +1,71 @@
+{
+  "build": {
+    "beforeDevCommand": "",
+    "beforeBuildCommand": "",
+    "devPath": "../..",
+    "distDir": "../..",
+    "withGlobalTauri": false
+  },
+  "package": {
+    "productName": "Linkpoint PWA",
+    "version": "1.0.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": false,
+      "shell": {
+        "all": false,
+        "open": true
+      }
+    },
+    "bundle": {
+      "active": true,
+      "targets": "all",
+      "identifier": "com.linkpoint.pwa",
+      "icon": [
+        "../../assets/icons/icon-512x512.png"
+      ],
+      "resources": [
+        "../../index.html",
+        "../../css/**/*",
+        "../../js/**/*",
+        "../../assets/**/*",
+        "../../manifest.json"
+      ],
+      "externalBin": [],
+      "copyright": "",
+      "category": "Network",
+      "shortDescription": "Second Life PWA Client",
+      "longDescription": "Progressive Web App for Second Life and OpenSimulator",
+      "deb": {
+        "depends": []
+      },
+      "macOS": {
+        "frameworks": [],
+        "minimumSystemVersion": "",
+        "exceptionDomain": "",
+        "signingIdentity": null,
+        "entitlements": null
+      },
+      "windows": {
+        "certificateThumbprint": null,
+        "digestAlgorithm": "sha256",
+        "timestampUrl": ""
+      }
+    },
+    "security": {
+      "csp": null
+    },
+    "windows": [
+      {
+        "fullscreen": false,
+        "resizable": true,
+        "title": "Linkpoint PWA",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 800,
+        "minHeight": 600
+      }
+    ]
+  }
+}

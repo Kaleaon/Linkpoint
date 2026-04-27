@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="camera_floater" title="Contrôles de la caméra">
+	<floater.string name="rotate_tooltip">Fait tourner la caméra autour du point central</floater.string>
+	<floater.string name="zoom_tooltip">Zoom en direction du point central</floater.string>
+	<floater.string name="move_tooltip">Déplace la caméra vers le haut et le bas, la gauche et la droite</floater.string>
+	<floater.string name="free_mode_title">Voir l'objet</floater.string>
+	<string name="inactive_combo_text">Utiliser réglage</string>
+	<panel name="buttons_panel">
+		<panel_camera_item name="front_view" tool_tip="Vue frontale"/>
+		<panel_camera_item name="group_view" tool_tip="Vue latérale"/>
+		<panel_camera_item name="rear_view" tool_tip="Vue arrière"/>
+		<panel_camera_item name="object_view" tool_tip="Centre l'objet sélectionné"/>
+		<panel_camera_item name="mouselook_view" tool_tip="Vue subjective"/>
+		<panel_camera_item name="reset_view" tool_tip="Réinitialiser la vue"/>
+	</panel>
+	<panel name="zoom">
+		<layout_stack name="camera_view_layout_stack">
+			<layout_panel name="camera_rotate_layout_panel">
+				<joystick_rotate name="cam_rotate_stick" tool_tip="Faire tourner la caméra autour du point central"/>
+				<button name="roll_left" tool_tip="Faire pivoter la caméra vers la gauche"/>
+				<button name="roll_right" tool_tip="Faire pivoter la caméra vers la droite"/>
+			</layout_panel>
+			<layout_panel name="camera_zoom_layout_panel">
+				<slider_bar name="zoom_slider" tool_tip="Zoomer en direction du point central"/>
+			</layout_panel>
+			<layout_panel name="panel_track">
+				<joystick_track name="cam_track_stick" tool_tip="Déplacer la caméra vers le haut et le bas, la gauche et la droite"/>
+			</layout_panel>
+		</layout_stack>
+	</panel>
+	<panel name="preset_buttons_panel">
+		<button label="Position..." name="camera_position_btn"/>
+		<button name="save_preset_btn" tool_tip="Enregistrer comme préréglage"/>
+		<combo_box name="preset_combo">
+			<combo_box.item label="Utiliser réglage" name="Use preset"/>
+		</combo_box>
+		<button name="gear_btn" tool_tip="Préréglages de la caméra"/>
+	</panel>
+</floater>

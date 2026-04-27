@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="avatarpicker" title="Choisissez un Résident">
+	<floater.string name="not_found">'[TEXT]' pas trouvé</floater.string>
+	<floater.string name="no_one_near">Personne a proximité</floater.string>
+	<floater.string name="no_results">Aucun résultat</floater.string>
+	<floater.string name="searching">Recherche...</floater.string>
+	<string name="Select">Sélectionner</string>
+	<string name="Close">Fermer</string>
+	<tab_container name="ResidentChooserTabs">
+		<panel label="Recherche" name="SearchPanel">
+			<text name="InstructSearchResidentName">Saisissez une partie du nom d'une personne :</text>
+			<button label="Aller" label_selected="Aller" name="Find"/>
+			<fs_scroll_list name="SearchResults">
+				<columns label="Nom" name="name"/>
+				<columns label="Nom d'utilisateur" name="username"/>
+			</fs_scroll_list>
+		</panel>
+		<panel label="Amis" name="FriendsPanel">
+			<text name="InstructSelectFriend">Sélectionnez une personne :</text>
+			<fs_scroll_list name="Friends">
+				<columns label="Nom" name="name"/>
+				<columns label="Nom d'utilisateur" name="username"/>
+			</fs_scroll_list>
+		</panel>
+		<panel label="À proximité" name="NearMePanel">
+			<text name="InstructSelectResident">Sélectionnez une personne à proximité :</text>
+			<slider label="Distance" name="near_me_range"/>
+			<text name="meters">Mètres</text>
+			<fs_scroll_list name="NearMe">
+				<columns label="Nom" name="name"/>
+				<columns label="Nom d'utilisateur" name="username"/>
+			</fs_scroll_list>
+		</panel>
+		<panel label="Recherche par l'UUID" name="SearchPanelUUID">
+			<text name="SearchByUUIDLabel">Saisissez l'UUID d'une personne :</text>
+			<button label="Aller" label_selected="Aller" name="FindUUID"/>
+			<fs_scroll_list name="SearchResultsUUID">
+				<columns label="Nom" name="nameUUID"/>
+				<columns label="Nom d'utilisateur" name="usernameUUID"/>
+			</fs_scroll_list>
+		</panel>
+	</tab_container>
+	<button label="Annuler" label_selected="Annuler" name="cancel_btn"/>
+</floater>

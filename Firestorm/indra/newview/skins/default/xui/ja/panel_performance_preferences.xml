@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel name="panel_performance_preferences">
+	<text name="back_lbl">
+		戻る
+	</text>
+	<text name="settings_title">
+		グラフィック設定
+	</text>
+	<button label="高度な設定を開く" name="advanced_btn"/>
+	<button label="推奨設定にリセット" name="defaults_btn"/>
+	<text name="quality_lbl">
+		品質と速度
+	</text>
+	<text name="fastest_lbl">
+		距離と速度
+	</text>
+	<text name="best_quality_lbl">
+		最高品位
+	</text>
+	<text name="quality_desc">
+		ショートカットを選択すると、手動で行った変更がすべてリセットされます。
+	</text>
+	<text name="distance_lbl">
+		距離
+	</text>
+	<text name="faster_lbl">
+		速度
+	</text>
+	<text name="draw_distance_m">
+		ｍ
+	</text>
+	<text name="farther_lbl">
+		遠景
+	</text>
+	<text name="distance_desc1">
+		ズームアウト時に遠くまで見たい場合は、距離を長く設定してください。
+	</text>
+	<text name="environment_lbl">
+		影
+	</text>
+	<text name="enhancements_desc">
+		影により視覚的な品質は大幅に向上しますが、速度低下する可能性があります。
+	</text>
+	<text name="RenderShadowDetailText">
+		影の詳細：
+	</text>
+	<combo_box name="ShadowDetail">
+		<combo_box.item label="なし" name="0"/>
+		<combo_box.item label="太陽／月" name="1"/>
+		<combo_box.item label="太陽／月＋プロジェクター" name="2"/>
+	</combo_box>
+	<text name="water_lbl">
+		水面
+	</text>
+	<text name="water_desc">
+		水面の透明効果を減らしたり切ると、フレームレートが向上するかもしれません。
+	</text>
+	<check_box label="透明な水" name="TransparentWater"/>
+	<text name="photo_lbl">
+		写真
+	</text>
+	<text name="photo_desc">
+		詳細度を最大にすると撮影に適した画像になりますが、フレームレートが下がります。
+	</text>
+	<spinner label="距離の詳細：" name="render_volume_lod"/>
+	<text name="photo_dist_det_desc">
+		（0.0～4.0の値を入れてください）
+	</text>
+</panel>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="ColorPicker" title="Seleziona colore">
+	<tab_container name="scale_type_container">
+		<panel name="RGB">
+			<text name="r_val_text">
+				Rosso:
+			</text>
+			<text name="g_val_text">
+				Verde:
+			</text>
+			<text name="b_val_text">
+				Blu:
+			</text>
+		</panel>
+		<panel name="LSL">
+			<text name="r_val_text_lsl">
+				Rosso:
+			</text>
+			<text name="g_val_text_lsl">
+				Verde
+			</text>
+			<text name="b_val_text_lsl">
+				Blu:
+			</text>
+		</panel>
+		<panel name="Hex">
+			<text name="hex_text">
+				Codice Hex (#rrggbb):
+			</text>
+		</panel>
+	</tab_container>
+	<text name="h_val_text">
+		Ton.:
+	</text>
+	<text name="s_val_text">
+		Sat.:
+	</text>
+	<text name="l_val_text">
+		Lum.:
+	</text>
+	<check_box label="Applica subito" name="apply_immediate"/>
+	<button label="Copia LSL" name="copy_lsl_btn" tool_tip="Copia il codice del colore in formato vettoriale LSL-color &lt;r, g, b&gt;."/>
+	<button label="Annulla" label_selected="Annulla" name="cancel_btn"/>
+	<text name="Current color:">
+		^ Colore attuale ^
+	</text>
+	<text name="(Drag below to save.)">
+		(trascina per salvare)
+	</text>
+</floater>

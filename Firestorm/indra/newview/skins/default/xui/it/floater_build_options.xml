@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="build options floater" title="Opzioni Griglia">
+	<spinner label="Unità (metri)" name="GridResolution"/>
+	<spinner label="Ampiezza (metri)" name="GridDrawSize"/>
+	<spinner label="Numero decimali" name="DecimalPrecision"/>
+	<spinner label="Angolo (gradi)" name="RotationStep" tool_tip="Tutte le rotazioni sono bloccate a multipli di questa unità. [Predefinito: 1.0]"/>
+	<check_box label="Usa sottounità" name="GridSubUnit"/>
+	<check_box label="Vedi sezioni trasversali" name="GridCrossSection"/>
+	<text name="grid_opacity_label" tool_tip="Opacità della griglia">
+		Opacità:
+	</text>
+</floater>

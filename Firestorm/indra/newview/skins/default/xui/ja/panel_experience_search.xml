@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel name="panel_experience_search" label="検索">
+	<string name="not_found">
+		「[TEXT]」は見つかりませんでした。
+	</string>
+	<string name="no_results">
+		検索結果：なし
+	</string>
+	<string name="searching">
+		検索しています…。
+	</string>
+	<string name="loading">
+		読み込みんでいます…。
+	</string>
+	<panel name="search_panel">
+		<text name="lbl name part">
+			名前の一部を入力してください：
+		</text>
+		<button label="進む" name="find"/>
+		<text name="lbl max content rating">
+			コンテンツの最大レーティング：
+		</text>
+		<scroll_list name="search_results">
+			<columns name="experience_name" label="名前"/>
+			<columns name="owner" label="所有者"/>
+		</scroll_list>
+		<button label="ＯＫ" label_selected="ＯＫ" name="ok_btn"/>
+		<button label="キャンセル" name="cancel_btn"/>
+		<button label="プロフィール表示" name="profile_btn"/>
+		<button label="⇦" name="left_btn"/>
+		<button label="⇨" name="right_btn"/>
+	</panel>
+</panel>

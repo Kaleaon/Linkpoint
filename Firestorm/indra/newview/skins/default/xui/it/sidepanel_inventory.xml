@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Cose" name="objects panel">
+	<panel label="" name="sidepanel_inventory_panel">
+		<layout_stack name="inventory_layout_stack">
+			<layout_panel name="inbox_layout_panel">
+				<panel label="" name="marketplace_inbox">
+					<string name="InboxLabelWithArg">
+						Oggetti ricevuti ([NUM])
+					</string>
+					<string name="InboxLabelNoArg">
+						Oggetti ricevuti
+					</string>
+					<button label="Oggetti ricevuti" name="inbox_btn"/>
+					<button name="reload_received_items_btn" tool_tip="Ricarica la lista degli Oggetti ricevuti." />
+					<text name="inbox_fresh_new_count">
+						[NUM] nuovi
+					</text>
+					<panel name="inbox_inventory_placeholder_panel" tool_tip="Trascina gli elementi nell'inventario per usarli">
+						<text name="inbox_inventory_placeholder">
+							Gli articoli acquistati dal Marketplace verranno mostrati qui.
+						</text>
+					</panel>
+				</panel>
+			</layout_panel>
+		</layout_stack>
+	</panel>
+</panel>

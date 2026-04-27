@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel name="Wearing">
+	<panel.string name="no_attachments">
+		Нет прикрепленных объектов.
+	</panel.string>
+	<accordion name="wearables_accordion">
+		<accordion_tab name="tab_wearables" title="Носимые вещи"/>
+		<accordion_tab name="tab_temp_attachments" title="Временные прикрепленные объекты"/>
+	</accordion>
+	<panel name="bottom_panel">
+		<text name="avatar_complexity_label">
+			Сложность: [WEIGHT]
+		</text>
+	</panel>
+</panel>

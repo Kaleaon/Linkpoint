@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<toggleable_menu
+ name="menu_group_plus">
+	<menu_item_check
+	 label="Show Minimap above Radar"
+	 name="ShowRadarMinimap">
+		<menu_item_check.on_check
+		 control="ShowRadarMinimap"/>
+		<menu_item_check.on_click
+		 function="ToggleControl"
+		 parameter="ShowRadarMinimap"/>
+		<menu_item_check.on_enable
+		 function="RLV.EnableIfNot"
+		 parameter="showminimap"/>
+	</menu_item_check>
+	<menu_item_check
+	 label="Limit Results to specific Radius"
+	 name="LimitRadarByRange">
+		<menu_item_check.on_check
+		 control="LimitRadarByRange"/>
+		<menu_item_check.on_click
+		 function="ToggleControl"
+		 parameter="LimitRadarByRange"/>
+	</menu_item_check>
+	<menu_item_check
+	 label="Show muted and blacklisted Avatars"
+	 name="FSRadarShowMutedAndDerendered">
+		<menu_item_check.on_check
+		 control="FSRadarShowMutedAndDerendered"/>
+		<menu_item_check.on_click
+		 function="ToggleControl"
+		 parameter="FSRadarShowMutedAndDerendered"/>
+	</menu_item_check>
+	<context_menu
+	 label="Radar Name Format"
+	 name="radarNameFormat">
+		<menu_item_check
+		 label="Display Name"
+		 name="radarFmtDN"
+		 enabled_control="UseDisplayNames">
+			<menu_item_check.on_check
+			 function="Radar.NameFmtCheck"
+			 parameter="DN"/>
+			<menu_item_check.on_click
+			 function="Radar.NameFmt"
+			 parameter="DN"/>
+		</menu_item_check>
+		<menu_item_check
+		 label="Username"
+		 name="radarFmtUN">
+			<menu_item_check.on_check
+			 function="Radar.NameFmtCheck"
+			 parameter="UN"/>
+			<menu_item_check.on_click
+			 function="Radar.NameFmt"
+			 parameter="UN"/>
+		</menu_item_check>
+		<menu_item_check
+		 label="Display Name (Username)"
+		 name="radarFmtDNUN"
+		 enabled_control="UseDisplayNames">
+			<menu_item_check.on_check
+			 function="Radar.NameFmtCheck"
+			 parameter="DNUN"/>
+			<menu_item_check.on_click
+			 function="Radar.NameFmt"
+			 parameter="DNUN"/>
+		</menu_item_check>
+		<menu_item_check
+		 label="Username (Display Name)"
+		 name="radarFmtUNDN"
+		 enabled_control="UseDisplayNames">
+			<menu_item_check.on_check
+			 function="Radar.NameFmtCheck"
+			 parameter="UNDN"/>
+			<menu_item_check.on_click
+			 function="Radar.NameFmt"
+			 parameter="UNDN"/>
+		</menu_item_check>
+	</context_menu>
+	<context_menu
+	 label="Displayed Columns"
+	 name="visible_columns">
+		<menu_item_check
+		 label="Voice"
+		 name="voice_level">
+			<menu_item_check.on_check
+			 function="Radar.EnableColumn"
+			 parameter="voice_level"/>
+			<menu_item_check.on_click
+			 function="Radar.ToggleColumn"
+			 parameter="voice_level"/>
+		</menu_item_check>
+		<menu_item_check
+		 label="Same Region"
+		 name="in_region">
+			<menu_item_check.on_check
+			 function="Radar.EnableColumn"
+			 parameter="in_region"/>
+			<menu_item_check.on_click
+			 function="Radar.ToggleColumn"
+			 parameter="in_region"/>
+		</menu_item_check>
+		<menu_item_check
+		 label="Typing Status"
+		 name="typing_status">
+			<menu_item_check.on_check
+			 function="Radar.EnableColumn"
+			 parameter="typing_status"/>
+			<menu_item_check.on_click
+			 function="Radar.ToggleColumn"
+			 parameter="typing_status"/>
+		</menu_item_check>
+		<menu_item_check
+		 label="Sitting Status"
+		 name="sitting_status">
+			<menu_item_check.on_check
+			 function="Radar.EnableColumn"
+			 parameter="sitting_status"/>
+			<menu_item_check.on_click
+			 function="Radar.ToggleColumn"
+			 parameter="sitting_status"/>
+		</menu_item_check>
+		<menu_item_check
+		 label="Flags"
+		 name="flags">
+			<menu_item_check.on_check
+			 function="Radar.EnableColumn"
+			 parameter="flags"/>
+			<menu_item_check.on_click
+			 function="Radar.ToggleColumn"
+			 parameter="flags"/>
+		</menu_item_check>
+		<menu_item_check
+		 label="Notes"
+		 name="has_notes">
+			<menu_item_check.on_check
+			 function="Radar.EnableColumn"
+			 parameter="has_notes"/>
+			<menu_item_check.on_click
+			 function="Radar.ToggleColumn"
+			 parameter="has_notes"/>
+		</menu_item_check>
+		<menu_item_check
+		 label="Age"
+		 name="age">
+			<menu_item_check.on_check
+			 function="Radar.EnableColumn"
+			 parameter="age"/>
+			<menu_item_check.on_click
+			 function="Radar.ToggleColumn"
+			 parameter="age"/>
+		</menu_item_check>
+		<menu_item_check
+		 label="Seen"
+		 name="seen">
+			<menu_item_check.on_check
+			 function="Radar.EnableColumn"
+			 parameter="seen"/>
+			<menu_item_check.on_click
+			 function="Radar.ToggleColumn"
+			 parameter="seen"/>
+		</menu_item_check>
+	</context_menu>
+	<menu_item_check
+	 label="Color names based on distance"
+	 name="radarColorNamesBasedOnDistance">
+		<menu_item_check.on_check
+		 control="FSRadarColorNamesByDistance"/>
+		<menu_item_check.on_click
+		 function="ToggleControl"
+		 parameter="FSRadarColorNamesByDistance"/>
+	</menu_item_check>
+	<menu_item_separator layout="topleft"/>
+	<context_menu
+	 label="Report To"
+	 name="report_to_menu">
+		<menu_item_check
+		 label="Nearby Chat"
+		 name="radar_nearby_chat">
+			<menu_item_check.on_check
+			 function="Radar.ReportToCheck"
+			 parameter="radar_nearby_chat"/>
+			<menu_item_check.on_click
+			 function="Radar.ReportTo"
+			 parameter="radar_nearby_chat"/>
+		</menu_item_check>
+		<menu_item_check
+		 label="Notification Toasts"
+		 name="radar_nearby_chat">
+			<menu_item_check.on_check
+			 function="Radar.ReportToCheck"
+			 parameter="radar_toasts"/>
+			<menu_item_check.on_click
+			 function="Radar.ReportTo"
+			 parameter="radar_toasts"/>
+		</menu_item_check>
+	</context_menu>
+	<menu_item_check
+	 label="Nearby chat distance ring in Minimap"
+	 name="MiniMapChatRing">
+		<menu_item_check.on_check
+		 control="MiniMapChatRing"/>
+		<menu_item_check.on_click
+		 function="ToggleControl"
+		 parameter="MiniMapChatRing"/>
+		<menu_item_check.on_visible
+		 function="CheckControl"
+		 parameter="ShowRadarMinimap"/>
+	</menu_item_check>
+	<menu_item_check
+	 label="Report Entering Draw Range"
+	 name="RadarReportDrawRangeEnter">
+		<menu_item_check.on_check
+		 control="RadarReportDrawRangeEnter"/>
+		<menu_item_check.on_click
+		 function="ToggleControl"
+		 parameter="RadarReportDrawRangeEnter"/>
+	</menu_item_check>
+	<menu_item_check
+	 label="Report Leaving Draw Range"
+	 name="RadarReportDrawRangeLeave">
+		<menu_item_check.on_check
+		 control="RadarReportDrawRangeLeave"/>
+		<menu_item_check.on_click
+		 function="ToggleControl"
+		 parameter="RadarReportDrawRangeLeave"/>
+	</menu_item_check>
+	<menu_item_check
+	 label="Report Entering Chat Range"
+	 name="RadarReportChatRangeEnter">
+		<menu_item_check.on_check
+		 control="RadarReportChatRangeEnter"/>
+		<menu_item_check.on_click
+		 function="ToggleControl"
+		 parameter="RadarReportChatRangeEnter"/>
+	</menu_item_check>
+	<menu_item_check
+	 label="Report Leaving Chat Range"
+	 name="RadarReportChatRangeLeave">
+		<menu_item_check.on_check
+		 control="RadarReportChatRangeLeave"/>
+		<menu_item_check.on_click
+		 function="ToggleControl"
+		 parameter="RadarReportChatRangeLeave"/>
+	</menu_item_check>
+	<menu_item_check
+	 label="Report Entering your Region"
+	 name="RadarReportSimRangeEnter">
+		<menu_item_check.on_check
+		 control="RadarReportSimRangeEnter"/>
+		<menu_item_check.on_click
+		 function="ToggleControl"
+		 parameter="RadarReportSimRangeEnter"/>
+	</menu_item_check>
+	<menu_item_check
+	 label="Report Leaving your Region"
+	 name="RadarReportSimRangeLeave">
+		<menu_item_check.on_check
+		 control="RadarReportSimRangeLeave"/>
+		<menu_item_check.on_click
+		 function="ToggleControl"
+		 parameter="RadarReportSimRangeLeave"/>
+	</menu_item_check>
+	<menu_item_check
+	 label="Report Avatar Age Alert"
+	 name="RadarReportAgeAlert">
+		<menu_item_check.on_check
+		 control="RadarAvatarAgeAlert"/>
+		<menu_item_check.on_click
+		 function="ToggleControl"
+		 parameter="RadarAvatarAgeAlert"/>
+	</menu_item_check>
+	<menu_item_check
+	 label="Report Enter Alerts to Scripts"
+	 name="RadarEnterChannelAlert">
+		<menu_item_check.on_check
+		 control="RadarEnterChannelAlert"/>
+		<menu_item_check.on_click
+		 function="ToggleControl"
+		 parameter="RadarEnterChannelAlert"/>
+	</menu_item_check>
+	<menu_item_check
+	 label="Report Exit Alerts to Scripts"
+	 name="RadarLeaveChannelAlert">
+		<menu_item_check.on_check
+		 control="RadarLeaveChannelAlert"/>
+		<menu_item_check.on_click
+		 function="ToggleControl"
+		 parameter="RadarLeaveChannelAlert"/>
+		<menu_item_check.on_enable
+		 function="RLV.EnableIfNot"
+		 parameter="showminimap"/>
+	</menu_item_check>
+	<menu_item_check
+	 label="Enhance Radar with LSL-Client Bridge"
+	 name="FSRadarEnhanceByBridge"
+	 enabled_control="UseLSLBridge">
+		<menu_item_check.on_check
+		 control="FSRadarEnhanceByBridge"/>
+		<menu_item_check.on_click
+		 function="ToggleControl"
+		 parameter="FSRadarEnhanceByBridge"/>
+	</menu_item_check>
+	<menu_item_separator layout="topleft"/>
+	<menu_item_call
+	 name="show_blocked_list"
+	 label="Open Blocked Residents &amp; Objects">
+		<menu_item_call.on_click
+		 function="Radar.Option.Action"
+		 userdata="panel_block_list_sidetray"/>
+	</menu_item_call>
+</toggleable_menu>

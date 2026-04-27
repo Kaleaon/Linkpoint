@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel name="panel_login">
+	<string name="ServerComboTooltip">
+		Существующая сетка или URI сетки
+	</string>
+	<layout_stack name="login_widgets">
+		<layout_panel name="login">
+			<text name="log_in_text">
+				Вход
+			</text>
+			<text name="username_text">
+				Имя пользователя:
+			</text>
+			<button tool_tip="Удалить имя пользователя" name="remove_user_btn"/>
+			<combo_box name="username_combo" tool_tip="Имя пользователя выбирается при регистрации, например bobsmith12 или Steller Sunshine"/>
+			<text name="password_text">
+				Пароль:
+			</text>
+		</layout_panel>
+		<layout_panel name="start_location_panel">
+			<text name="start_location_text">
+				Место запуска:
+			</text>
+			<combo_box name="start_location_combo">
+				<combo_box.item label="Последнее место" name="MyLastLocation"/>
+				<combo_box.item label="Мой дом" name="MyHome"/>
+				<combo_box.item label="&lt;Написать название региона&gt;" name="Typeregionname"/>
+			</combo_box>
+		</layout_panel>
+		<layout_panel name="grid_panel">
+			<text name="grid_builder_text" width="300">
+				+ Нажмите чтобы добавить больше сеток
+			</text>
+			<text name="grid_login_text">
+				Подключиться к сетке:
+			</text>
+		</layout_panel>
+		<layout_panel name="links_login_panel">
+			<text name="create_new_account_text">
+				Создать аккаунт
+			</text>
+			<text name="forgot_password_text">
+				Забыли имя пользователя или пароль?
+			</text>
+			<button label="Войти" name="connect_btn"/>
+			<check_box label="Запомнить пользователя" name="remember_username_check" />
+			<check_box label="Запомнить пароль" name="remember_check"/>
+			<button name="password_show_btn" tool_tip="Показать текст пароля"/>
+			<button name="password_hide_btn" tool_tip="Скрыть текст пароляt"/>
+		</layout_panel>
+		<layout_panel name="mode_selection">
+			<text name="mode_selection_text">
+				Выбор режима
+			</text>
+			<combo_box name="mode_combo" tool_tip="Выберите режим настройки, с которой вы наиболее знакомы. По умолчанию будет установлен режим Firestorm">
+				<combo_box.item label="Гибридный" name="Hybrid"/>
+			</combo_box>
+		</layout_panel>
+	</layout_stack>
+</panel>
