@@ -8,6 +8,11 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,6 +24,9 @@ import com.linkpoint.teleport.TeleportResult
 import java.util.UUID
 import android.content.Intent
 import com.linkpoint.ui.notecard.NotecardEditorActivity
+import com.linkpoint.ui.navigation.RouteArgs
+import com.linkpoint.ui.navigation.finishOrPopBackStack
+import com.linkpoint.ui.theme.LinkpointTheme
 
 /**
  * Inventory Activity - Browse and manage inventory
@@ -48,6 +56,11 @@ class InventoryActivity : AppCompatActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (intent.getBooleanExtra(RouteArgs.EXTRA_USE_COMPOSE, false)) {
+            renderCompose()
+            return
+        }
+
         setContentView(R.layout.activity_inventory)
         
         supportActionBar?.apply {
@@ -59,6 +72,22 @@ class InventoryActivity : AppCompatActivity() {
         loadRootInventory()
     }
     
+    private fun renderCompose() {
+        setContent {
+            LinkpointTheme(darkTheme = true) {
+                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                    InventoryScreen(
+                        items = emptyList(),
+                        breadcrumb = listOf("My Inventory"),
+                        onItemClick = { },
+                        onNavigateBack = { finishOrPopBackStack(navController = null, finish = ::finish) },
+                        onNavigateUp = { }
+                    )
+                }
+            }
+        }
+    }
+
     private fun initViews() {
         recyclerView = findViewById(R.id.inventoryRecyclerView)
         breadcrumbText = findViewById(R.id.breadcrumbText)

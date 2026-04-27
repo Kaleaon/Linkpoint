@@ -28,9 +28,10 @@ import com.linkpoint.network.NetworkDiagnostics
 import com.linkpoint.network.NetworkExceptionUtils.ErrorCategory
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.SSLHelper
-import com.linkpoint.ui.settings.SettingsActivity
+import com.linkpoint.ui.navigation.LegacyFeatureBridge
+import com.linkpoint.ui.navigation.RouteArgs
 import com.linkpoint.ui.tos.TosActivity
-import com.linkpoint.ui.navigation.WorldHomeHostActivity
+import com.linkpoint.ui.world.WorldViewActivity
 import com.linkpoint.utils.PermissionManager
 import com.linkpoint.utils.SecurePreferences
 import kotlinx.coroutines.Dispatchers
@@ -170,6 +171,11 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
         
         setupGridSpinner()
         setupListeners()
+
+        val slurlArgs = pendingSlurlArgs()
+        if (slurlArgs.slurlRegion != null) {
+            statusText.text = "SLURL queued: ${slurlArgs.slurlRegion} (${slurlArgs.x.toInt()}, ${slurlArgs.y.toInt()}, ${slurlArgs.z.toInt()})"
+        }
         
         // Request all essential permissions on startup after UI is fully initialized
         requestAllStartupPermissions()
@@ -316,7 +322,7 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
      * Open Settings activity. Can be accessed before login.
      */
     private fun openSettings() {
-        startActivity(Intent(this, SettingsActivity::class.java))
+        startActivity(LegacyFeatureBridge.settingsIntent(this))
     }
     
     private fun loadSavedCredentials() {
@@ -830,6 +836,20 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
         }
     }
     
+
+    private fun pendingSlurlArgs(): RouteArgs.Login {
+        val routeArgs = RouteArgs.loginFromIntent(intent)
+        if (routeArgs.slurlRegion == null) {
+            return RouteArgs.Login(
+                slurlRegion = intent.getStringExtra("slurl_region"),
+                x = intent.getFloatExtra("slurl_x", 128f),
+                y = intent.getFloatExtra("slurl_y", 128f),
+                z = intent.getFloatExtra("slurl_z", 0f)
+            )
+        }
+        return routeArgs
+    }
+
     private fun handleLoginResult(result: LoginResult, shouldSaveCredentials: Boolean = true) {
         setLoginInProgress(false)
         
@@ -847,8 +867,7 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
                 }
                 
                 // Navigate to world view
-                val intent = Intent(this, WorldHomeHostActivity::class.java)
-                startActivity(intent)
+                startActivity(Intent(this, WorldViewActivity::class.java))
                 finish()
             }
             is LoginResult.MFARequired -> {

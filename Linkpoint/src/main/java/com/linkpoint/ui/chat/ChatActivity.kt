@@ -8,6 +8,11 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.activity.compose.setContent
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,6 +21,9 @@ import com.google.android.material.tabs.TabLayout
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.network.ChatType
+import com.linkpoint.ui.navigation.RouteArgs
+import com.linkpoint.ui.navigation.finishOrPopBackStack
+import com.linkpoint.ui.theme.LinkpointTheme
 import com.linkpoint.chat.SessionType
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -35,7 +43,6 @@ class ChatActivity : AppCompatActivity() {
     
     companion object {
         private const val TAG = "ChatActivity"
-        const val EXTRA_IM_SESSION_ID = "extra_im_session_id"
     }
     
     private lateinit var tabLayout: TabLayout
@@ -53,6 +60,11 @@ class ChatActivity : AppCompatActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (intent.getBooleanExtra(RouteArgs.EXTRA_USE_COMPOSE, false)) {
+            renderCompose()
+            return
+        }
+
         setContentView(R.layout.activity_chat)
 
         supportActionBar?.apply {
@@ -121,7 +133,7 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun handleIntent() {
-        val sessionId = intent.getStringExtra(EXTRA_IM_SESSION_ID)
+        val sessionId = RouteArgs.chatFromIntent(intent).sessionId
             ?.let { runCatching { UUID.fromString(it) }.getOrNull() }
         if (sessionId != null) {
             val session = app.imManager.activeSessions.value.firstOrNull { it.sessionId == sessionId }
@@ -133,6 +145,23 @@ class ChatActivity : AppCompatActivity() {
                 else -> {
                     activeImSessionId = sessionId
                     tabLayout.getTabAt(ActivityChatChannel.IM.ordinal)?.select()
+                }
+            }
+        }
+    }
+
+    private fun renderCompose() {
+        setContent {
+            LinkpointTheme(darkTheme = true) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    ChatScreen(
+                        messages = emptyList(),
+                        onSendMessage = { _, _ -> },
+                        onNavigateBack = { finishOrPopBackStack(navController = null, finish = ::finish) }
+                    )
                 }
             }
         }
@@ -319,7 +348,7 @@ class ChatActivity : AppCompatActivity() {
     
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            finish()
+            finishOrPopBackStack(navController = null, finish = ::finish)
             return true
         }
         return super.onOptionsItemSelected(item)

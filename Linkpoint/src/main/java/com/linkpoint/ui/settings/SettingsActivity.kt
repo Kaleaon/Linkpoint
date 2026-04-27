@@ -11,6 +11,11 @@ import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -27,6 +32,9 @@ import com.linkpoint.R
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.service.BackgroundResumeScheduler
 import com.linkpoint.ui.theme.ThemeManager
+import com.linkpoint.ui.navigation.RouteArgs
+import com.linkpoint.ui.navigation.finishOrPopBackStack
+import com.linkpoint.ui.theme.LinkpointTheme
 import com.linkpoint.ui.tos.TosActivity
 import com.linkpoint.ui.world.WorldViewActivity
 import com.linkpoint.utils.CodexUploadService
@@ -67,6 +75,11 @@ class SettingsActivity : AppCompatActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (intent.getBooleanExtra(RouteArgs.EXTRA_USE_COMPOSE, false)) {
+            renderCompose()
+            return
+        }
+
         setContentView(R.layout.activity_settings)
         
         supportActionBar?.apply {
@@ -84,12 +97,34 @@ class SettingsActivity : AppCompatActivity() {
     
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            finish()
+            finishOrPopBackStack(navController = null, finish = ::finish)
             return true
         }
         return super.onOptionsItemSelected(item)
     }
     
+    private fun renderCompose() {
+        setContent {
+            LinkpointTheme(darkTheme = true) {
+                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                    SettingsScreen(
+                        settings = SettingsState(),
+                        appVersion = BuildConfig.VERSION_NAME,
+                        onSettingsChange = { },
+                        onNavigateBack = { finishOrPopBackStack(navController = null, finish = ::finish) },
+                        onOpenThemePicker = { },
+                        onOpenAccount = { },
+                        onOpenPrivacy = { },
+                        onOpenAbout = { },
+                        onOpenLayoutEditor = {
+                            startActivity(WorldViewActivity.createLayoutEditorIntent(this@SettingsActivity))
+                        }
+                    )
+                }
+            }
+        }
+    }
+
     class SettingsFragment : PreferenceFragmentCompat() {
         override fun onResume() {
             super.onResume()

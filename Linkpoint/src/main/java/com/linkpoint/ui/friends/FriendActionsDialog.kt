@@ -11,7 +11,8 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
-import com.linkpoint.ui.chat.ChatActivity
+import com.linkpoint.ui.navigation.LegacyFeatureBridge
+import com.linkpoint.ui.navigation.RouteArgs
 import com.linkpoint.ui.profile.ProfileActivity
 import com.linkpoint.world.Friend
 import kotlinx.coroutines.launch
@@ -53,10 +54,7 @@ class FriendActionsDialog : DialogFragment() {
         val sessionId = app.imManager.startP2PSession(friend.agentId, friend.name)
         app.imManager.markAsRead(sessionId)
 
-        val intent = Intent(requireContext(), ChatActivity::class.java).apply {
-            putExtra(ChatActivity.EXTRA_IM_SESSION_ID, sessionId.toString())
-        }
-        startActivity(intent)
+        startActivity(LegacyFeatureBridge.chatIntent(requireContext(), RouteArgs.Chat(sessionId.toString())))
     }
 
     private fun viewProfile() {

@@ -14,7 +14,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.groups.Group
-import com.linkpoint.ui.chat.ChatActivity
+import com.linkpoint.ui.navigation.LegacyFeatureBridge
+import com.linkpoint.ui.navigation.RouteArgs
 import kotlinx.coroutines.launch
 
 /**
@@ -79,10 +80,7 @@ private fun DialogFragment.openGroupChat(group: Group) {
         } catch (e: Exception) {
             group.groupId
         }
-        val intent = Intent(ctx, ChatActivity::class.java).apply {
-            putExtra(ChatActivity.EXTRA_IM_SESSION_ID, sessionId.toString())
-        }
-        ctx.startActivity(intent)
+        ctx.startActivity(LegacyFeatureBridge.chatIntent(ctx, RouteArgs.Chat(sessionId.toString())))
     }
 }
 
