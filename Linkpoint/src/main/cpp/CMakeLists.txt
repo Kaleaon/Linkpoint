@@ -18,8 +18,11 @@ target_link_libraries(lumiya-native android log EGL GLESv3)
 # expose the nativeHasEtcpak / nativeCompressEtc2Rgba JNI entry points
 # consumed by com.linkpoint.assets.NativeEtcpak. Without this define the
 # Kotlin side falls back to android.opengl.ETC1 (opaque-only).
-set(LINKPOINT_ETCPAK_SOURCES "")
-# set(LINKPOINT_ETCPAK_SOURCES etcpak/ProcessRGB.cpp etcpak/Tables.cpp ...)
+set(LINKPOINT_ETCPAK_SOURCES
+    etcpak/ProcessRGB.cpp
+    etcpak/Tables.cpp
+    etcpak/Dither.cpp
+)
 
 # Add the native library
 add_library(
@@ -31,7 +34,9 @@ add_library(
 
 if(LINKPOINT_ETCPAK_SOURCES)
     target_compile_definitions(linkpoint-j2k PRIVATE LINKPOINT_HAVE_ETCPAK=1)
-    target_include_directories(linkpoint-j2k PRIVATE etcpak)
+    target_include_directories(linkpoint-j2k PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/etcpak
+    )
 endif()
 
 # Link libraries - OpenJPEG includes are set via INTERFACE_INCLUDE_DIRECTORIES

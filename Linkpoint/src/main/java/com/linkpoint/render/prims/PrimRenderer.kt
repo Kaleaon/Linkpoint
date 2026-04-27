@@ -4,6 +4,8 @@ import android.util.Log
 import com.google.android.filament.*
 import com.google.android.filament.VertexBuffer.AttributeType
 import com.google.android.filament.VertexBuffer.VertexAttribute
+import com.linkpoint.assets.MeshData
+import com.linkpoint.assets.MeshLOD
 import com.linkpoint.avatar.BakesOnMesh
 import com.linkpoint.diagnostics.ScenePopulationDiagnostics
 import com.linkpoint.protocol.messages.ObjectUpdateData
@@ -46,6 +48,8 @@ class PrimRenderer(
 
     private var defaultMaterial: Material? = null
     private val transformManager = engine.transformManager
+    private val pendingMeshLoads = ConcurrentHashMap<Int, UUID>()
+    private val loadedMeshIds = ConcurrentHashMap<Int, UUID>()
 
     /**
      * Optional Bakes-on-Mesh resolver. When set, a TextureEntry face that
@@ -56,6 +60,10 @@ class PrimRenderer(
      */
     @Volatile
     private var bomResolver: ((Int) -> UUID?)? = null
+    @Volatile
+    private var meshDataRequester: MeshDataRequester? = null
+    @Volatile
+    private var meshGeometryBuilder: MeshGeometryBuilder? = null
 
     fun interface TextureBinder {
         fun bind(textureId: UUID, onLoaded: (Texture) -> Unit)
@@ -70,6 +78,26 @@ class PrimRenderer(
 
     fun setTextureBinder(binder: TextureBinder?) {
         textureBinder = binder
+    fun interface MeshDataRequester {
+        fun request(localId: Int, meshId: UUID, lod: MeshLOD, onResolved: (MeshLoadResult) -> Unit)
+    }
+
+    fun interface MeshGeometryBuilder {
+        fun attach(entity: Int, meshData: MeshData, textureEntry: ByteArray)
+    }
+
+    sealed class MeshLoadResult {
+        data class Success(val meshData: MeshData) : MeshLoadResult()
+        data class ParseFailure(val reason: String? = null) : MeshLoadResult()
+        data class MissingAsset(val reason: String? = null) : MeshLoadResult()
+    }
+
+    fun setMeshDataRequester(requester: MeshDataRequester?) {
+        meshDataRequester = requester
+    }
+
+    fun setMeshGeometryBuilder(builder: MeshGeometryBuilder?) {
+        meshGeometryBuilder = builder
     }
     
     /**
@@ -98,17 +126,67 @@ class PrimRenderer(
             return false
         }
 
-        // Mesh-asset prims (extraParams type 0x30, sculptType 5) currently
-        // fall through to the path/profile path so they render as a box
-        // until MeshManager.parseMesh() lands. Logged so we can size the
-        // mesh-prim work later — most modern SL builds are mesh-heavy.
         val meshId = data.getMeshAssetId()
         if (meshId != null) {
-            // TODO: route through MeshManager.getMesh(meshId, LOD), parse
-            //       LLMesh format, build vertex/index buffers, attach via
-            //       RenderableManager.Builder. Tracked as a follow-up.
-            if (data.localId % 50 == 0) {
-                Log.d(TAG, "Mesh-asset prim ${data.localId} (mesh=$meshId) — falling back to path/profile box")
+            val requestChanged = pendingMeshLoads[data.localId] != meshId && loadedMeshIds[data.localId] != meshId
+            if (requestChanged) {
+                pendingMeshLoads[data.localId] = meshId
+                logMeshResolution(
+                    event = "pending_load",
+                    localId = data.localId,
+                    meshId = meshId
+                )
+                val requester = meshDataRequester
+                if (requester == null) {
+                    pendingMeshLoads.remove(data.localId, meshId)
+                    logMeshResolution(
+                        event = "missing_asset",
+                        localId = data.localId,
+                        meshId = meshId,
+                        detail = "mesh_requester_unavailable"
+                    )
+                } else {
+                    val textureEntrySnapshot = data.textureEntry.copyOf()
+                    requester.request(data.localId, meshId, MeshLOD.HIGH) { result ->
+                        when (result) {
+                            is MeshLoadResult.Success -> {
+                                pendingMeshLoads.remove(data.localId, meshId)
+                                loadedMeshIds[data.localId] = meshId
+                                replaceGeometry(data.localId) { entity ->
+                                    val builder = meshGeometryBuilder
+                                    if (builder == null) {
+                                        logMeshResolution(
+                                            event = "missing_asset",
+                                            localId = data.localId,
+                                            meshId = meshId,
+                                            detail = "mesh_geometry_builder_unavailable"
+                                        )
+                                    } else {
+                                        builder.attach(entity, result.meshData, textureEntrySnapshot)
+                                    }
+                                }
+                            }
+                            is MeshLoadResult.ParseFailure -> {
+                                pendingMeshLoads.remove(data.localId, meshId)
+                                logMeshResolution(
+                                    event = "parse_failure",
+                                    localId = data.localId,
+                                    meshId = meshId,
+                                    detail = result.reason
+                                )
+                            }
+                            is MeshLoadResult.MissingAsset -> {
+                                pendingMeshLoads.remove(data.localId, meshId)
+                                logMeshResolution(
+                                    event = "missing_asset",
+                                    localId = data.localId,
+                                    meshId = meshId,
+                                    detail = result.reason
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -162,11 +240,18 @@ class PrimRenderer(
     }
 
     fun removePrim(localId: Int) {
+        pendingMeshLoads.remove(localId)
+        loadedMeshIds.remove(localId)
         prims.remove(localId)?.let { prim ->
             scene.removeEntity(prim.entity)
             engine.destroyMaterialInstance(prim.materialInstance)
             engine.destroyEntity(prim.entity)
         }
+    }
+
+    private fun logMeshResolution(event: String, localId: Int, meshId: UUID, detail: String? = null) {
+        val suffix = detail?.let { """, "detail":"$it"""" } ?: ""
+        Log.i(TAG, """{"event":"mesh_asset_resolution","state":"$event","localId":$localId,"meshId":"$meshId"$suffix}""")
     }
     
     /**
