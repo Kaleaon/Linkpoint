@@ -30,7 +30,7 @@ import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.SSLHelper
 import com.linkpoint.ui.settings.SettingsActivity
 import com.linkpoint.ui.tos.TosActivity
-import com.linkpoint.ui.world.WorldViewActivity
+import com.linkpoint.ui.navigation.WorldHomeHostActivity
 import com.linkpoint.utils.PermissionManager
 import com.linkpoint.utils.SecurePreferences
 import kotlinx.coroutines.Dispatchers
@@ -847,7 +847,7 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
                 }
                 
                 // Navigate to world view
-                val intent = Intent(this, WorldViewActivity::class.java)
+                val intent = Intent(this, WorldHomeHostActivity::class.java)
                 startActivity(intent)
                 finish()
             }
