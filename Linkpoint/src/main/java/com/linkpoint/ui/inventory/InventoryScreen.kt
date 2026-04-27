@@ -37,15 +37,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.linkpoint.ui.common.UiLoadState
-import com.linkpoint.ui.common.UiTelemetryEvents
-import com.linkpoint.ui.common.logUiTelemetry
 import com.linkpoint.ui.components.state.EmptyState
 import com.linkpoint.ui.components.state.ErrorState
 import com.linkpoint.ui.components.state.LoadingState
-import com.linkpoint.ui.components.state.ReconnectingBanner
+import com.linkpoint.ui.components.state.ScreenState
 import java.util.UUID
 
+/**
+ * Inventory item types with icons
+ */
 enum class InventoryItemType(val displayName: String, val icon: ImageVector) {
     FOLDER("Folder", Icons.Default.Folder),
     TEXTURE("Texture", Icons.Default.Image),
@@ -62,6 +62,9 @@ enum class InventoryItemType(val displayName: String, val icon: ImageVector) {
     UNKNOWN("Unknown", Icons.Default.InsertDriveFile)
 }
 
+/**
+ * Inventory item data
+ */
 data class InventoryItemData(
     val id: UUID,
     val name: String,
@@ -71,16 +74,26 @@ data class InventoryItemData(
     val creatorId: UUID? = null
 )
 
+/**
+ * Compose version of InventoryActivity.
+ * 
+ * Features:
+ * - Hierarchical folder navigation
+ * - Breadcrumb display
+ * - Item type icons
+ * - Click to open folders or view items
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InventoryScreen(
     items: List<InventoryItemData>,
     breadcrumb: List<String>,
-    uiLoadState: UiLoadState = UiLoadState.Content,
-    onRetry: () -> Unit,
     onItemClick: (InventoryItemData) -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateUp: () -> Unit,
+    state: ScreenState<List<InventoryItemData>> = if (items.isEmpty()) ScreenState.Empty else ScreenState.Content(items),
+    onRetry: () -> Unit = {},
+    onTelemetry: (eventName: String, metadata: Map<String, String>) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -100,10 +113,7 @@ fun InventoryScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (uiLoadState is UiLoadState.Reconnecting) {
-                ReconnectingBanner(message = uiLoadState.message)
-            }
-
+            // Breadcrumb
             if (breadcrumb.isNotEmpty()) {
                 Text(
                     text = breadcrumb.joinToString(" > "),
@@ -115,39 +125,30 @@ fun InventoryScreen(
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 )
             }
-
-            when (uiLoadState) {
-                is UiLoadState.Loading -> LoadingState(message = uiLoadState.message)
-                is UiLoadState.Error -> ErrorState(
-                    title = uiLoadState.title,
-                    message = uiLoadState.message,
-                    retryLabel = uiLoadState.retryLabel,
-                    onRetry = {
-                        logUiTelemetry(UiTelemetryEvents.RETRY_TAPPED, "inventory", uiLoadState)
-                        onRetry()
-                    }
+            
+            when (state) {
+                ScreenState.Loading -> LoadingState(message = "Loading inventory...")
+                ScreenState.Empty -> EmptyState(
+                    title = "Inventory is empty",
+                    message = "This folder has no items yet."
                 )
-                is UiLoadState.Empty -> EmptyState(
-                    title = uiLoadState.title,
-                    message = uiLoadState.message,
-                    actionLabel = uiLoadState.actionLabel,
-                    onAction = onRetry
+                is ScreenState.Error -> ErrorState(
+                    message = state.message,
+                    onRetry = onRetry,
+                    telemetryContext = state.telemetryContext,
+                    onTelemetry = onTelemetry
                 )
-                UiLoadState.Content, is UiLoadState.Reconnecting, is UiLoadState.LowBandwidth -> {
-                    if (items.isEmpty()) {
-                        EmptyState(
-                            title = "This folder is empty",
-                            message = "Try navigating up or refreshing this folder."
-                        )
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(items, key = { it.id }) { item ->
-                                InventoryItemCard(item = item, onClick = { onItemClick(item) })
-                            }
+                is ScreenState.Content -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(items, key = { it.id }) { item ->
+                            InventoryItemCard(
+                                item = item,
+                                onClick = { onItemClick(item) }
+                            )
                         }
                     }
                 }
@@ -156,6 +157,9 @@ fun InventoryScreen(
     }
 }
 
+/**
+ * Individual inventory item card
+ */
 @Composable
 fun InventoryItemCard(
     item: InventoryItemData,
@@ -166,7 +170,9 @@ fun InventoryItemCard(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Row(
             modifier = Modifier
@@ -175,16 +181,27 @@ fun InventoryItemCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = if (item.type == InventoryItemType.FOLDER) Icons.Default.FolderOpen else item.type.icon,
+                imageVector = if (item.type == InventoryItemType.FOLDER) {
+                    Icons.Default.FolderOpen
+                } else {
+                    item.type.icon
+                },
                 contentDescription = item.type.displayName,
-                tint = if (item.type == InventoryItemType.FOLDER) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = if (item.type == InventoryItemType.FOLDER) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
                 modifier = Modifier.size(32.dp)
             )
-
+            
             Spacer(modifier = Modifier.width(12.dp))
-
+            
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = item.name, style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = item.name,
+                    style = MaterialTheme.typography.bodyLarge
+                )
                 if (item.type != InventoryItemType.FOLDER) {
                     Text(
                         text = item.type.displayName,

@@ -44,15 +44,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
-import com.linkpoint.ui.common.UiLoadState
-import com.linkpoint.ui.common.UiTelemetryEvents
-import com.linkpoint.ui.common.logUiTelemetry
 import com.linkpoint.ui.components.state.EmptyState
 import com.linkpoint.ui.components.state.ErrorState
 import com.linkpoint.ui.components.state.LoadingState
 import com.linkpoint.ui.components.state.LowBandwidthOverlay
 import com.linkpoint.ui.components.state.ReconnectingBanner
+import com.linkpoint.ui.components.state.ScreenState
 
+/**
+ * Region data for map display
+ */
 data class MapRegion(
     val name: String,
     val x: Int,
@@ -67,6 +68,9 @@ enum class RegionAccess {
     ADULT
 }
 
+/**
+ * Map marker for points of interest
+ */
 data class MapMarker(
     val id: String,
     val name: String,
@@ -82,6 +86,16 @@ enum class MarkerType {
     TELEPORT_HISTORY
 }
 
+/**
+ * Compose version of MapActivity.
+ * 
+ * Features:
+ * - Grid map display
+ * - Pan and zoom gestures
+ * - Region info on tap
+ * - Teleport to location
+ * - Search by region name
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(
@@ -89,19 +103,22 @@ fun MapScreen(
     currentPosition: Offset,
     regions: List<MapRegion> = emptyList(),
     markers: List<MapMarker> = emptyList(),
-    uiLoadState: UiLoadState = UiLoadState.Content,
-    onRetry: () -> Unit,
     onNavigateBack: () -> Unit,
     onTeleportTo: (MapRegion) -> Unit,
     onTeleportHome: () -> Unit,
     onSearch: (String) -> Unit,
+    state: ScreenState<List<MapRegion>> = if (regions.isEmpty()) ScreenState.Empty else ScreenState.Content(regions),
+    onRetry: () -> Unit = {},
+    onTelemetry: (eventName: String, metadata: Map<String, String>) -> Unit = { _, _ -> },
+    isLowBandwidth: Boolean = false,
+    isReconnecting: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var zoom by remember { mutableFloatStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
     var selectedRegion by remember { mutableStateOf<MapRegion?>(null) }
-
+    
     Scaffold(
         topBar = {
             TopAppBar(
@@ -119,32 +136,24 @@ fun MapScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (uiLoadState is UiLoadState.Reconnecting) {
-                ReconnectingBanner(
-                    message = uiLoadState.message,
-                    modifier = Modifier.align(Alignment.TopCenter)
-                )
-            }
+            Column(modifier = Modifier.fillMaxSize()) {
+                if (isReconnecting) {
+                    ReconnectingBanner()
+                }
 
-            when (uiLoadState) {
-                is UiLoadState.Loading -> LoadingState(message = uiLoadState.message)
-                is UiLoadState.Error -> ErrorState(
-                    title = uiLoadState.title,
-                    message = uiLoadState.message,
-                    retryLabel = uiLoadState.retryLabel,
-                    onRetry = {
-                        logUiTelemetry(UiTelemetryEvents.RETRY_TAPPED, "map", uiLoadState)
-                        onRetry()
-                    }
-                )
-                is UiLoadState.Empty -> EmptyState(
-                    title = uiLoadState.title,
-                    message = uiLoadState.message,
-                    actionLabel = uiLoadState.actionLabel,
-                    onAction = onRetry
-                )
-                UiLoadState.Content, is UiLoadState.Reconnecting, is UiLoadState.LowBandwidth -> {
-                    Canvas(
+                when (state) {
+                    ScreenState.Loading -> LoadingState(message = "Loading world map...")
+                    ScreenState.Empty -> EmptyState(
+                        title = "Map data unavailable",
+                        message = "No regions are currently loaded."
+                    )
+                    is ScreenState.Error -> ErrorState(
+                        message = state.message,
+                        onRetry = onRetry,
+                        telemetryContext = state.telemetryContext,
+                        onTelemetry = onTelemetry
+                    )
+                    is ScreenState.Content -> Canvas(
                         modifier = Modifier
                             .fillMaxSize()
                             .pointerInput(Unit) {
@@ -155,14 +164,18 @@ fun MapScreen(
                             }
                             .pointerInput(Unit) {
                                 detectTapGestures { tapOffset ->
+                                    // Convert tap to world coordinates
                                     val worldX = ((tapOffset.x - offset.x) / zoom / 256f).toInt()
                                     val worldY = ((tapOffset.y - offset.y) / zoom / 256f).toInt()
+
                                     selectedRegion = regions.find { it.x == worldX && it.y == worldY }
                                 }
                             }
                     ) {
                         val gridSize = 256f * zoom
+
                         translate(offset.x, offset.y) {
+                            // Draw grid
                             val startX = (-offset.x / gridSize).toInt() - 1
                             val endX = ((size.width - offset.x) / gridSize).toInt() + 1
                             val startY = (-offset.y / gridSize).toInt() - 1
@@ -172,12 +185,13 @@ fun MapScreen(
                                 for (y in startY..endY) {
                                     val region = regions.find { it.x == x && it.y == y }
                                     val color = when {
-                                        region == null -> Color(0xFF1A1A1A)
-                                        !region.isOnline -> Color(0xFF333333)
+                                        region == null -> Color(0xFF1A1A1A)  // No region
+                                        !region.isOnline -> Color(0xFF333333)  // Offline
                                         region.access == RegionAccess.ADULT -> Color(0xFF442222)
                                         region.access == RegionAccess.MODERATE -> Color(0xFF334422)
-                                        else -> Color(0xFF224444)
+                                        else -> Color(0xFF224444)  // General
                                     }
+
                                     drawRect(
                                         color = color,
                                         topLeft = Offset(x * gridSize, y * gridSize),
@@ -186,6 +200,7 @@ fun MapScreen(
                                 }
                             }
 
+                            // Draw markers
                             markers.forEach { marker ->
                                 val markerColor = when (marker.type) {
                                     MarkerType.SELF -> Color.Green
@@ -193,6 +208,7 @@ fun MapScreen(
                                     MarkerType.LANDMARK -> Color.Cyan
                                     MarkerType.TELEPORT_HISTORY -> Color.Magenta
                                 }
+
                                 drawCircle(
                                     color = markerColor,
                                     radius = 8f * zoom,
@@ -201,98 +217,128 @@ fun MapScreen(
                             }
                         }
                     }
-
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = {
-                            searchQuery = it
-                            onSearch(it)
-                        },
-                        label = { Text("Search Region") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                            .align(Alignment.TopCenter),
-                        singleLine = true
+                }
+            }
+            
+            // Search bar
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { 
+                    searchQuery = it
+                    onSearch(it)
+                },
+                label = { Text("Search Region") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .align(Alignment.TopCenter),
+                singleLine = true
+            )
+            
+            // Zoom controls
+            Column(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(16.dp)
+            ) {
+                SmallFloatingActionButton(
+                    onClick = { zoom = (zoom * 1.5f).coerceAtMost(4f) }
+                ) {
+                    Icon(Icons.Default.ZoomIn, contentDescription = "Zoom In")
+                }
+                
+                Spacer(modifier = Modifier.size(8.dp))
+                
+                SmallFloatingActionButton(
+                    onClick = { zoom = (zoom / 1.5f).coerceAtLeast(0.5f) }
+                ) {
+                    Icon(Icons.Default.ZoomOut, contentDescription = "Zoom Out")
+                }
+                
+                Spacer(modifier = Modifier.size(16.dp))
+                
+                SmallFloatingActionButton(
+                    onClick = { 
+                        // Center on current position
+                        offset = Offset.Zero
+                        zoom = 1f
+                    }
+                ) {
+                    Icon(Icons.Default.MyLocation, contentDescription = "My Location")
+                }
+                
+                Spacer(modifier = Modifier.size(8.dp))
+                
+                SmallFloatingActionButton(
+                    onClick = onTeleportHome
+                ) {
+                    Icon(Icons.Default.Home, contentDescription = "Teleport Home")
+                }
+            }
+            
+            // Current location info
+            Card(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
                     )
-
-                    Column(
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .padding(16.dp)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "$currentRegion (${currentPosition.x.toInt()}, ${currentPosition.y.toInt()})",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+            
+            // Selected region info
+            selectedRegion?.let { region ->
+                Card(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        SmallFloatingActionButton(onClick = { zoom = (zoom * 1.5f).coerceAtMost(4f) }) {
-                            Icon(Icons.Default.ZoomIn, contentDescription = "Zoom In")
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = region.name,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "(${region.x}, ${region.y}) - ${region.access.name}",
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
-                        Spacer(modifier = Modifier.size(8.dp))
-                        SmallFloatingActionButton(onClick = { zoom = (zoom / 1.5f).coerceAtLeast(0.5f) }) {
-                            Icon(Icons.Default.ZoomOut, contentDescription = "Zoom Out")
-                        }
-                        Spacer(modifier = Modifier.size(16.dp))
-                        SmallFloatingActionButton(onClick = {
-                            offset = Offset.Zero
-                            zoom = 1f
-                        }) {
-                            Icon(Icons.Default.MyLocation, contentDescription = "My Location")
-                        }
-                        Spacer(modifier = Modifier.size(8.dp))
-                        SmallFloatingActionButton(onClick = onTeleportHome) {
-                            Icon(Icons.Default.Home, contentDescription = "Teleport Home")
-                        }
-                    }
-
-                    Card(
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f))
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                        
+                        FloatingActionButton(
+                            onClick = { onTeleportTo(region) },
+                            containerColor = MaterialTheme.colorScheme.primary
                         ) {
-                            Icon(Icons.Default.LocationOn, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = "$currentRegion (${currentPosition.x.toInt()}, ${currentPosition.y.toInt()})")
-                        }
-                    }
-
-                    selectedRegion?.let { region ->
-                        Card(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(text = region.name, style = MaterialTheme.typography.titleMedium)
-                                    Text(text = "(${region.x}, ${region.y}) - ${region.access.name}")
-                                }
-
-                                FloatingActionButton(
-                                    onClick = { onTeleportTo(region) },
-                                    containerColor = MaterialTheme.colorScheme.primary
-                                ) {
-                                    Icon(Icons.Default.LocationOn, contentDescription = "Teleport")
-                                }
-                            }
+                            Icon(Icons.Default.LocationOn, contentDescription = "Teleport")
                         }
                     }
                 }
             }
 
-            if (uiLoadState is UiLoadState.LowBandwidth) {
-                LowBandwidthOverlay(
-                    message = uiLoadState.message,
-                    onRetry = {
-                        logUiTelemetry(UiTelemetryEvents.RETRY_TAPPED, "map", uiLoadState)
-                        onRetry()
-                    }
-                )
+            if (isLowBandwidth) {
+                LowBandwidthOverlay(message = "Low bandwidth mode: map updates are throttled.")
             }
         }
     }

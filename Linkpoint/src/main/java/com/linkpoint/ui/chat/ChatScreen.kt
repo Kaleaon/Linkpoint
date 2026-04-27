@@ -2,6 +2,7 @@ package com.linkpoint.ui.chat
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -38,17 +39,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
-import com.linkpoint.ui.common.UiLoadState
-import com.linkpoint.ui.common.UiTelemetryEvents
-import com.linkpoint.ui.common.logUiTelemetry
 import com.linkpoint.ui.components.state.EmptyState
 import com.linkpoint.ui.components.state.ErrorState
 import com.linkpoint.ui.components.state.LoadingState
+import com.linkpoint.ui.components.state.LowBandwidthOverlay
 import com.linkpoint.ui.components.state.ReconnectingBanner
+import com.linkpoint.ui.components.state.ScreenState
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * Chat channel types
+ */
 enum class ChatChannel(val displayName: String) {
     LOCAL("Local"),
     IM("IMs"),
@@ -56,6 +59,9 @@ enum class ChatChannel(val displayName: String) {
     NEARBY("Nearby")
 }
 
+/**
+ * Message types for styling
+ */
 enum class MessageType {
     NORMAL,
     WHISPER,
@@ -65,6 +71,9 @@ enum class MessageType {
     OBJECT
 }
 
+/**
+ * Chat message data
+ */
 data class ChatMessage(
     val id: String,
     val sender: String,
@@ -74,31 +83,47 @@ data class ChatMessage(
     val channel: ChatChannel
 )
 
+/**
+ * Compose version of ChatActivity.
+ * 
+ * Features:
+ * - Tab-based channel switching (Local, IMs, Groups, Nearby)
+ * - Message list with auto-scroll
+ * - Message input with send button
+ * - Support for /shout, /whisper, /me commands
+ * - Color-coded message types
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
     messages: List<ChatMessage>,
     currentAvatarName: String = "You",
-    uiLoadState: UiLoadState = UiLoadState.Content,
-    onRetry: () -> Unit,
     onSendMessage: (String, ChatChannel) -> Unit,
     onNavigateBack: () -> Unit,
+    state: ScreenState<List<ChatMessage>> = if (messages.isEmpty()) ScreenState.Empty else ScreenState.Content(messages),
+    onRetry: () -> Unit = {},
+    onTelemetry: (eventName: String, metadata: Map<String, String>) -> Unit = { _, _ -> },
+    isLowBandwidth: Boolean = false,
+    isReconnecting: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     var selectedChannel by remember { mutableIntStateOf(0) }
     var messageInput by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
-
+    
     val channels = ChatChannel.entries
     val currentChannel = channels[selectedChannel]
+    
+    // Filter messages by current channel
     val filteredMessages = messages.filter { it.channel == currentChannel }
-
+    
+    // Auto-scroll to bottom when new messages arrive
     LaunchedEffect(filteredMessages.size) {
         if (filteredMessages.isNotEmpty()) {
             listState.animateScrollToItem(filteredMessages.size - 1)
         }
     }
-
+    
     Scaffold(
         topBar = {
             TopAppBar(
@@ -116,10 +141,7 @@ fun ChatScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (uiLoadState is UiLoadState.Reconnecting) {
-                ReconnectingBanner(message = uiLoadState.message)
-            }
-
+            // Channel tabs
             ScrollableTabRow(
                 selectedTabIndex = selectedChannel,
                 modifier = Modifier.fillMaxWidth()
@@ -132,50 +154,55 @@ fun ChatScreen(
                     )
                 }
             }
+            
+            if (isReconnecting) {
+                ReconnectingBanner()
+            }
 
-            when (uiLoadState) {
-                is UiLoadState.Loading -> LoadingState(message = uiLoadState.message, modifier = Modifier.weight(1f))
-                is UiLoadState.Error -> ErrorState(
-                    title = uiLoadState.title,
-                    message = uiLoadState.message,
-                    retryLabel = uiLoadState.retryLabel,
-                    modifier = Modifier.weight(1f),
-                    onRetry = {
-                        logUiTelemetry(UiTelemetryEvents.RETRY_TAPPED, "chat", uiLoadState)
-                        onRetry()
-                    }
-                )
-                is UiLoadState.Empty -> EmptyState(
-                    title = uiLoadState.title,
-                    message = uiLoadState.message,
-                    actionLabel = uiLoadState.actionLabel,
-                    onAction = onRetry,
-                    modifier = Modifier.weight(1f)
-                )
-                UiLoadState.Content, is UiLoadState.Reconnecting, is UiLoadState.LowBandwidth -> {
-                    if (filteredMessages.isEmpty()) {
-                        EmptyState(
-                            title = "No messages yet",
-                            message = "Start chatting in ${currentChannel.displayName}",
-                            modifier = Modifier.weight(1f)
-                        )
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth(),
-                            state = listState,
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(filteredMessages, key = { it.id }) { message ->
-                                ChatMessageItem(message = message)
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                when (state) {
+                    ScreenState.Loading -> LoadingState(message = "Loading chat...")
+                    ScreenState.Empty -> EmptyState(
+                        title = "No messages yet",
+                        message = "Start the conversation in this channel."
+                    )
+                    is ScreenState.Error -> ErrorState(
+                        message = state.message,
+                        onRetry = onRetry,
+                        telemetryContext = state.telemetryContext,
+                        onTelemetry = onTelemetry
+                    )
+                    is ScreenState.Content -> {
+                        if (filteredMessages.isEmpty()) {
+                            EmptyState(
+                                title = "No messages yet",
+                                message = "Start the conversation in this channel."
+                            )
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                state = listState,
+                                contentPadding = PaddingValues(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(filteredMessages, key = { it.id }) { message ->
+                                    ChatMessageItem(message = message)
+                                }
                             }
                         }
                     }
                 }
-            }
 
+                if (isLowBandwidth) {
+                    LowBandwidthOverlay()
+                }
+            }
+            
+            // Message input
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -186,13 +213,13 @@ fun ChatScreen(
                 OutlinedTextField(
                     value = messageInput,
                     onValueChange = { messageInput = it },
-                    placeholder = { Text("Type a message as $currentAvatarName…") },
+                    placeholder = { Text("Type a message...") },
                     modifier = Modifier.weight(1f),
                     singleLine = true
                 )
-
+                
                 Spacer(modifier = Modifier.width(8.dp))
-
+                
                 IconButton(
                     onClick = {
                         if (messageInput.isNotBlank()) {
@@ -205,9 +232,9 @@ fun ChatScreen(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Send,
                         contentDescription = "Send",
-                        tint = if (messageInput.isNotBlank())
-                            MaterialTheme.colorScheme.primary
-                        else
+                        tint = if (messageInput.isNotBlank()) 
+                            MaterialTheme.colorScheme.primary 
+                        else 
                             MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -216,13 +243,16 @@ fun ChatScreen(
     }
 }
 
+/**
+ * Individual chat message display
+ */
 @Composable
 fun ChatMessageItem(
     message: ChatMessage,
     modifier: Modifier = Modifier
 ) {
     val dateFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
-
+    
     val textColor = when (message.type) {
         MessageType.SYSTEM -> MaterialTheme.colorScheme.onSurfaceVariant
         MessageType.WHISPER -> Color(0xFF9999FF)
@@ -231,7 +261,7 @@ fun ChatMessageItem(
         MessageType.OBJECT -> Color(0xFFFFAA00)
         MessageType.NORMAL -> MaterialTheme.colorScheme.onSurface
     }
-
+    
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -248,7 +278,7 @@ fun ChatMessageItem(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-
+        
         Text(
             text = message.content,
             style = MaterialTheme.typography.bodyMedium,

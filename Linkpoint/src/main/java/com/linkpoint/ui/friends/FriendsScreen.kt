@@ -2,6 +2,7 @@ package com.linkpoint.ui.friends
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -30,6 +31,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -45,15 +47,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.linkpoint.ui.common.UiLoadState
-import com.linkpoint.ui.common.UiTelemetryEvents
-import com.linkpoint.ui.common.logUiTelemetry
 import com.linkpoint.ui.components.state.EmptyState
 import com.linkpoint.ui.components.state.ErrorState
 import com.linkpoint.ui.components.state.LoadingState
 import com.linkpoint.ui.components.state.ReconnectingBanner
+import com.linkpoint.ui.components.state.ScreenState
 import java.util.UUID
 
+/**
+ * Friend online status
+ */
 enum class FriendStatus {
     ONLINE,
     OFFLINE,
@@ -61,6 +64,9 @@ enum class FriendStatus {
     BUSY
 }
 
+/**
+ * Friend data for display
+ */
 data class FriendData(
     val id: UUID,
     val name: String,
@@ -71,30 +77,42 @@ data class FriendData(
     val canModifyObjects: Boolean = false
 )
 
+/**
+ * Compose version of FriendsActivity.
+ * 
+ * Features:
+ * - Friends list with online status
+ * - IM, teleport, profile actions
+ * - Add friend dialog
+ * - Friend permissions
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FriendsScreen(
     friends: List<FriendData>,
-    uiLoadState: UiLoadState = UiLoadState.Content,
-    onRetry: () -> Unit,
     onNavigateBack: () -> Unit,
     onOpenIM: (FriendData) -> Unit,
     onTeleportTo: (FriendData) -> Unit,
     onViewProfile: (FriendData) -> Unit,
     onRemoveFriend: (FriendData) -> Unit,
     onAddFriend: (String) -> Unit,
+    state: ScreenState<List<FriendData>> = if (friends.isEmpty()) ScreenState.Empty else ScreenState.Content(friends),
+    onRetry: () -> Unit = {},
+    onTelemetry: (eventName: String, metadata: Map<String, String>) -> Unit = { _, _ -> },
+    isReconnecting: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     var addFriendName by remember { mutableStateOf("") }
-
+    
+    // Sort friends: online first, then alphabetically
     val sortedFriends = remember(friends) {
         friends.sortedWith(
             compareBy<FriendData> { it.status != FriendStatus.ONLINE }
                 .thenBy { it.name.lowercase() }
         )
     }
-
+    
     Scaffold(
         topBar = {
             TopAppBar(
@@ -107,7 +125,9 @@ fun FriendsScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showAddDialog = true }) {
+            FloatingActionButton(
+                onClick = { showAddDialog = true }
+            ) {
                 Icon(Icons.Default.PersonAdd, contentDescription = "Add Friend")
             }
         }
@@ -117,58 +137,45 @@ fun FriendsScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (uiLoadState is UiLoadState.Reconnecting) {
-                ReconnectingBanner(message = uiLoadState.message)
+            if (isReconnecting) {
+                ReconnectingBanner()
             }
-
-            when (uiLoadState) {
-                is UiLoadState.Loading -> LoadingState(message = uiLoadState.message)
-                is UiLoadState.Error -> ErrorState(
-                    title = uiLoadState.title,
-                    message = uiLoadState.message,
-                    retryLabel = uiLoadState.retryLabel,
-                    onRetry = {
-                        logUiTelemetry(UiTelemetryEvents.RETRY_TAPPED, "friends", uiLoadState)
-                        onRetry()
-                    }
+            when (state) {
+                ScreenState.Loading -> LoadingState(message = "Loading friends...")
+                ScreenState.Empty -> EmptyState(
+                    title = "No friends yet",
+                    message = "Use the add button to send your first friend request.",
+                    icon = Icons.Default.Person
                 )
-                is UiLoadState.Empty -> EmptyState(
-                    title = uiLoadState.title,
-                    message = uiLoadState.message,
-                    actionLabel = uiLoadState.actionLabel,
-                    onAction = onRetry
+                is ScreenState.Error -> ErrorState(
+                    message = state.message,
+                    onRetry = onRetry,
+                    telemetryContext = state.telemetryContext,
+                    onTelemetry = onTelemetry
                 )
-                UiLoadState.Content, is UiLoadState.Reconnecting, is UiLoadState.LowBandwidth -> {
-                    if (sortedFriends.isEmpty()) {
-                        EmptyState(
-                            title = "No friends yet",
-                            message = "Add a friend to start messaging and teleporting together."
+                is ScreenState.Content -> LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(sortedFriends, key = { it.id }) { friend ->
+                        FriendCard(
+                            friend = friend,
+                            onOpenIM = { onOpenIM(friend) },
+                            onTeleportTo = { onTeleportTo(friend) },
+                            onViewProfile = { onViewProfile(friend) },
+                            onRemove = { onRemoveFriend(friend) }
                         )
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(sortedFriends, key = { it.id }) { friend ->
-                                FriendCard(
-                                    friend = friend,
-                                    onOpenIM = { onOpenIM(friend) },
-                                    onTeleportTo = { onTeleportTo(friend) },
-                                    onViewProfile = { onViewProfile(friend) },
-                                    onRemove = { onRemoveFriend(friend) }
-                                )
-                            }
-                        }
                     }
                 }
             }
         }
     }
-
+    
+    // Add Friend Dialog
     if (showAddDialog) {
         AlertDialog(
-            onDismissRequest = {
+            onDismissRequest = { 
                 showAddDialog = false
                 addFriendName = ""
             },
@@ -198,7 +205,7 @@ fun FriendsScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = {
+                TextButton(onClick = { 
                     showAddDialog = false
                     addFriendName = ""
                 }) {
@@ -209,6 +216,9 @@ fun FriendsScreen(
     }
 }
 
+/**
+ * Individual friend card with actions
+ */
 @Composable
 fun FriendCard(
     friend: FriendData,
@@ -219,19 +229,21 @@ fun FriendCard(
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
-
+    
     val statusColor = when (friend.status) {
-        FriendStatus.ONLINE -> Color(0xFF4CAF50)
-        FriendStatus.AWAY -> Color(0xFFFFC107)
-        FriendStatus.BUSY -> Color(0xFFFF5722)
-        FriendStatus.OFFLINE -> Color(0xFF9E9E9E)
+        FriendStatus.ONLINE -> Color(0xFF4CAF50)  // Green
+        FriendStatus.AWAY -> Color(0xFFFFC107)    // Yellow
+        FriendStatus.BUSY -> Color(0xFFFF5722)    // Orange
+        FriendStatus.OFFLINE -> Color(0xFF9E9E9E) // Gray
     }
-
+    
     Card(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onViewProfile),
-        colors = CardDefaults.cardColors()
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Row(
             modifier = Modifier
@@ -239,7 +251,23 @@ fun FriendCard(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            androidx.compose.foundation.layout.Box(
+            // Status indicator
+            Box(
+                modifier = Modifier
+                    .size(12.dp)
+                    .clip(CircleShape)
+                    .padding(2.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(CircleShape)
+                        .padding(0.dp)
+                )
+            }
+            
+            // Avatar placeholder
+            Box(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape),
@@ -252,11 +280,14 @@ fun FriendCard(
                     tint = statusColor
                 )
             }
-
+            
             Spacer(modifier = Modifier.width(12.dp))
-
+            
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = friend.name)
+                Text(
+                    text = friend.name,
+                    style = MaterialTheme.typography.bodyLarge
+                )
                 Text(
                     text = when (friend.status) {
                         FriendStatus.ONLINE -> friend.location ?: "Online"
@@ -264,27 +295,38 @@ fun FriendCard(
                         FriendStatus.BUSY -> "Busy"
                         FriendStatus.OFFLINE -> "Offline"
                     },
+                    style = MaterialTheme.typography.bodySmall,
                     color = statusColor
                 )
             }
-
+            
+            // Quick actions
             if (friend.status == FriendStatus.ONLINE) {
                 IconButton(onClick = onOpenIM) {
-                    Icon(Icons.AutoMirrored.Filled.Message, contentDescription = "Message")
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Message,
+                        contentDescription = "Message",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 }
-
+                
                 if (friend.canSeeMap) {
                     IconButton(onClick = onTeleportTo) {
-                        Icon(Icons.Default.LocationOn, contentDescription = "Teleport")
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = "Teleport",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     }
                 }
             }
-
-            androidx.compose.foundation.layout.Box {
+            
+            // More menu
+            Box {
                 IconButton(onClick = { showMenu = true }) {
                     Icon(Icons.Default.MoreVert, contentDescription = "More options")
                 }
-
+                
                 DropdownMenu(
                     expanded = showMenu,
                     onDismissRequest = { showMenu = false }
