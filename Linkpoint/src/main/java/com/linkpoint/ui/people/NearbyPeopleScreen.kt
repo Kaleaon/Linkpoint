@@ -32,6 +32,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -42,8 +44,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.linkpoint.R
 import java.util.UUID
 
 /**
@@ -52,24 +56,27 @@ import java.util.UUID
 data class NearbyPerson(
     val id: UUID,
     val name: String,
-    val distance: Float,  // In meters
+    val distance: Float,
     val isFriend: Boolean = false
 )
 
+enum class NearbyPeopleFilter {
+    ALL,
+    FRIENDS,
+    STRANGERS
+}
+
 /**
  * Compose version of NearbyPeopleActivity.
- * 
- * Features:
- * - List of avatars nearby sorted by distance
- * - Distance indicator
- * - Quick actions (IM, Add Friend, Profile)
- * - Refresh button
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NearbyPeopleScreen(
     people: List<NearbyPerson>,
+    selectedFilter: NearbyPeopleFilter,
+    onFilterChange: (NearbyPeopleFilter) -> Unit,
     isLoading: Boolean = false,
+    emptyMessage: String? = null,
     onRefresh: () -> Unit,
     onSendIM: (NearbyPerson) -> Unit,
     onAddFriend: (NearbyPerson) -> Unit,
@@ -77,18 +84,22 @@ fun NearbyPeopleScreen(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Sort by distance
-    val sortedPeople = remember(people) {
-        people.sortedBy { it.distance }
+    val filteredPeople = remember(people, selectedFilter) {
+        val filtered = when (selectedFilter) {
+            NearbyPeopleFilter.ALL -> people
+            NearbyPeopleFilter.FRIENDS -> people.filter { it.isFriend }
+            NearbyPeopleFilter.STRANGERS -> people.filterNot { it.isFriend }
+        }
+        filtered.sortedBy { it.distance }
     }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Nearby People") },
+                title = { Text(stringResource(R.string.nearby_people)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 actions = {
@@ -99,59 +110,91 @@ fun NearbyPeopleScreen(
                                 strokeWidth = 2.dp
                             )
                         } else {
-                            Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                            Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.refresh))
                         }
                     }
                 }
             )
         }
     ) { paddingValues ->
-        if (sortedPeople.isEmpty() && !isLoading) {
-            Box(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "No one nearby",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            NearbyPeopleTabs(selectedFilter = selectedFilter, onFilterChange = onFilterChange)
+
+            if (filteredPeople.isEmpty() && !isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = emptyMessage ?: defaultEmptyMessage(selectedFilter),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
-            }
-        } else {
-            LazyColumn(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(sortedPeople, key = { it.id }) { person ->
-                    NearbyPersonCard(
-                        person = person,
-                        onClick = { onViewProfile(person) },
-                        onSendIM = { onSendIM(person) },
-                        onAddFriend = { onAddFriend(person) },
-                        onViewProfile = { onViewProfile(person) }
-                    )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(filteredPeople, key = { it.id }) { person ->
+                        NearbyPersonCard(
+                            person = person,
+                            onClick = { onViewProfile(person) },
+                            onSendIM = { onSendIM(person) },
+                            onAddFriend = { onAddFriend(person) },
+                            onViewProfile = { onViewProfile(person) }
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-/**
- * Nearby person card
- */
+@Composable
+private fun NearbyPeopleTabs(
+    selectedFilter: NearbyPeopleFilter,
+    onFilterChange: (NearbyPeopleFilter) -> Unit
+) {
+    val tabs = listOf(
+        NearbyPeopleFilter.ALL to stringResource(R.string.all),
+        NearbyPeopleFilter.FRIENDS to stringResource(R.string.friends),
+        NearbyPeopleFilter.STRANGERS to stringResource(R.string.strangers)
+    )
+
+    TabRow(selectedTabIndex = tabs.indexOfFirst { it.first == selectedFilter }) {
+        tabs.forEach { (filter, title) ->
+            Tab(
+                selected = selectedFilter == filter,
+                onClick = { onFilterChange(filter) },
+                text = { Text(title) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun defaultEmptyMessage(filter: NearbyPeopleFilter): String {
+    return when (filter) {
+        NearbyPeopleFilter.ALL -> stringResource(R.string.no_nearby_people)
+        NearbyPeopleFilter.FRIENDS -> stringResource(R.string.no_nearby_friends)
+        NearbyPeopleFilter.STRANGERS -> stringResource(R.string.no_nearby_strangers)
+    }
+}
+
 @Composable
 fun NearbyPersonCard(
     person: NearbyPerson,
@@ -162,7 +205,7 @@ fun NearbyPersonCard(
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
-    
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -177,7 +220,6 @@ fun NearbyPersonCard(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Avatar placeholder
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -195,9 +237,9 @@ fun NearbyPersonCard(
                     }
                 )
             }
-            
+
             Spacer(modifier = Modifier.width(12.dp))
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -221,35 +263,33 @@ fun NearbyPersonCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            
-            // Quick IM button
+
             IconButton(onClick = onSendIM) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.Message,
-                    contentDescription = "Message",
+                    contentDescription = stringResource(R.string.send_im),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
-            
-            // More menu
+
             Box {
                 IconButton(onClick = { showMenu = true }) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "More options")
+                    Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more_options))
                 }
-                
+
                 DropdownMenu(
                     expanded = showMenu,
                     onDismissRequest = { showMenu = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("View Profile") },
+                        text = { Text(stringResource(R.string.view_profile)) },
                         onClick = {
                             showMenu = false
                             onViewProfile()
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("Send IM") },
+                        text = { Text(stringResource(R.string.send_im)) },
                         onClick = {
                             showMenu = false
                             onSendIM()
@@ -257,7 +297,7 @@ fun NearbyPersonCard(
                     )
                     if (!person.isFriend) {
                         DropdownMenuItem(
-                            text = { Text("Add Friend") },
+                            text = { Text(stringResource(R.string.add_friend)) },
                             leadingIcon = { Icon(Icons.Default.PersonAdd, contentDescription = null) },
                             onClick = {
                                 showMenu = false
@@ -271,9 +311,6 @@ fun NearbyPersonCard(
     }
 }
 
-/**
- * Format distance for display
- */
 private fun formatDistance(meters: Float): String {
     return when {
         meters < 1 -> "< 1m"

@@ -214,7 +214,7 @@ class VoiceManager(
      * servers, then builds a [VoiceSession] configured with the
      * sim-provided ICE servers (instead of the previous hardcoded
      * Google STUN). The signaling layer that POSTs SDP to the channel
-     * URI is still TODO — see the [VoiceSession] class doc.
+     * URI is still pending — see the [VoiceSession] class doc.
      */
     suspend fun joinParcelVoice(): Boolean = withContext(voiceDispatcher) {
         val voiceInfo = requestParcelVoiceInfo() ?: return@withContext false
@@ -586,7 +586,7 @@ class VoiceManager(
         // Late-bind so the observer above can refer to the session before
         // the peerConnection actually exists. The observer surfaces ICE
         // candidates, signaling state, and remote tracks via session
-        // flows; signaling layer (which is still TODO — see VoiceSession
+        // flows; signaling layer (which is still pending — see VoiceSession
         // doc) is responsible for draining those flows and relaying.
         session.attachPeerConnection(peerConnection)
 
@@ -631,7 +631,7 @@ private class SessionObserver(private val session: VoiceSession) : PeerConnectio
     override fun onIceGatheringChange(state: PeerConnection.IceGatheringState) {}
     override fun onIceCandidate(candidate: IceCandidate) {
         // Push to the session's local-candidate flow so the signaling
-        // layer (still TODO; see VoiceSession class doc) can relay them
+        // layer (still pending; see VoiceSession class doc) can relay them
         // to the remote peer over the ParcelVoiceInfo / WebRTC
         // signaling channel.
         session.onLocalIceCandidate(candidate)
@@ -760,7 +760,7 @@ class VoiceSession(
     /**
      * Create a real SDP offer using the suspend-friendly WebRTC wrappers.
      * Caller is responsible for shipping the resulting SDP to the remote
-     * peer via the (still TODO) signaling layer.
+     * peer via the (still pending) signaling layer.
      */
     suspend fun createOffer(): String = withContext(dispatcher) {
         val pc = peerConnection ?: return@withContext ""

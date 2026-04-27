@@ -8,11 +8,7 @@ jobs:
   quick-release:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    
-    defaults:
-      run:
-        working-directory: Linkpoint
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,25 +18,37 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+          cache: 'gradle'
 
       - name: Cache Gradle
         uses: gradle/actions/setup-gradle@v4
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          packages: >-
+            platform-tools
+            platforms;android-35
+            build-tools;35.0.0
+            cmake;3.22.1
+            ndk;26.3.11579264
 
-      - name: Install SDK components
+      - name: Verify Android SDK install
         run: |
-          sdkmanager --install \
-            "platform-tools" \
-            "platforms;android-35" \
-            "build-tools;35.0.0"
+          set -euo pipefail
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          test -d "$ANDROID_SDK_ROOT/platforms/android-35"
+          test -d "$ANDROID_SDK_ROOT/build-tools/35.0.0"
+          test -d "$ANDROID_SDK_ROOT/cmake/3.22.1"
+          test -d "$ANDROID_SDK_ROOT/ndk/26.3.11579264"
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Build Release
-        run: ./gradlew assembleRelease --stacktrace
+        run: ./gradlew :Linkpoint:assembleRelease --stacktrace
+        env:
+          GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError"
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4

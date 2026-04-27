@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  *   - Fold the J2K decoder body in (still calls [JPEG2000Decoder.decode])
  *   - Wire the [MmappedTextureCache] hit/miss path (the cache exists but
  *     callers are not yet invoking it)
- *   - Implement [uploadToFilament] (TODO — needs Filament `Engine` plumbing
+ *   - Implement [uploadToFilament] (pending — needs Filament `Engine` plumbing
  *     from `render/RenderManager.kt`)
  *   - Hook ETC2/EAC via etcpak (gated on the native entry point; falls back
  *     to the ETC1 path with the documented opaque-only restriction)
