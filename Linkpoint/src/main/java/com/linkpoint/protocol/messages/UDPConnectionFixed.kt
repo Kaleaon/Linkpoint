@@ -28,76 +28,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 
 /**
- * SL Variable-1 string field: 1-byte length prefix + UTF-8 bytes + NUL.
- * Mirrors Lumiya's `stringToVariableUTF` (slproto/SLMessage.java:212)
- * which appends a NUL byte and includes it in the U8 length prefix.
- * Callers should use this for any `Variable 1` string field.
- *
- * If the encoded length would exceed 255 (the U8 max), the raw text is
- * truncated to 254 bytes so the trailing NUL still fits the prefix.
- */
-private fun ByteBuffer.putVariable1String(text: String): ByteBuffer {
-    val raw = text.toByteArray(Charsets.UTF_8)
-    val capped = if (raw.size > 254) raw.copyOf(254) else raw
-    put((capped.size + 1).toByte())
-    put(capped)
-    put(0.toByte())
-    return this
-}
-
-/** Variant for already-encoded byte payloads (binary `Variable 1`). */
-private fun ByteBuffer.putVariable1Bytes(bytes: ByteArray): ByteBuffer {
-    val capped = if (bytes.size > 255) bytes.copyOf(255) else bytes
-    put(capped.size.toByte())
-    put(capped)
-    return this
-}
-
-/**
- * SL Variable-2 string field: 2-byte little-endian length prefix +
- * UTF-8 bytes + NUL. Used for fields that exceed 255 bytes
- * (e.g. AvatarProperties.AboutText, ChatFromViewer.Message).
- *
- * Cap raw text at 65534 so the NUL fits.
- */
-private fun ByteBuffer.putVariable2String(text: String): ByteBuffer {
-    val raw = text.toByteArray(Charsets.UTF_8)
-    val capped = if (raw.size > 65534) raw.copyOf(65534) else raw
-    putShort((capped.size + 1).toShort())
-    put(capped)
-    put(0.toByte())
-    return this
-}
-
-/** Variant for already-encoded binary `Variable 2`. */
-private fun ByteBuffer.putVariable2Bytes(bytes: ByteArray): ByteBuffer {
-    val capped = if (bytes.size > 65535) bytes.copyOf(65535) else bytes
-    putShort(capped.size.toShort())
-    put(capped)
-    return this
-}
-
-/**
- * Extension function to convert UUID to byte array
- * Used in packet construction
- */
-private fun UUID.asBytes(): ByteArray {
-    val bytes = ByteArray(16)
-    val mostSignificantBits = this.mostSignificantBits
-    val leastSignificantBits = this.leastSignificantBits
-    
-    // Write MSB and LSB in big-endian order
-    for (i in 7 downTo 0) {
-        bytes[7 - i] = (mostSignificantBits shr (i * 8)).toByte()
-    }
-    for (i in 7 downTo 0) {
-        bytes[15 - i] = (leastSignificantBits shr (i * 8)).toByte()
-    }
-    
-    return bytes
-}
-
-/**
  * Fixed UDP Connection Handler for Second Life Protocol
  * 
  * This is the primary UDP connection implementation used throughout Linkpoint.
@@ -2124,8 +2054,8 @@ class UDPConnectionFixed {
         // - AgentID (16 bytes, UUID)
         val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
         payload.putInt(identity.circuitCode ?: 0)
-        payload.put(identity.sessionId.asBytes())
-        payload.put(identity.agentId.asBytes())
+        payload.putUUID(identity.sessionId)
+        payload.putUUID(identity.agentId)
 
         val seq = sendPacket(MessageIds.USE_CIRCUIT_CODE, payload.array(), reliable = true)
         if (seq >= 0) {
@@ -2146,8 +2076,8 @@ class UDPConnectionFixed {
         // - SessionID (16 bytes, UUID)
         // - CircuitCode (4 bytes, little-endian)
         val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
-        payload.put(identity.agentId.asBytes())
-        payload.put(identity.sessionId.asBytes())
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
         payload.putInt(identity.circuitCode ?: 0)
         
         // Message ID for CompleteAgentMovement (low frequency message)
@@ -2183,8 +2113,8 @@ class UDPConnectionFixed {
         val payload = ByteBuffer.allocate(114).order(ByteOrder.LITTLE_ENDIAN)
         
         // AgentID and SessionID
-        payload.put(identity.agentId.asBytes())
-        payload.put(identity.sessionId.asBytes())
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
         
         // Body rotation (identity quaternion: x=0, y=0, z=0, w computed by server)
         payload.putFloat(0f)
@@ -2368,8 +2298,8 @@ class UDPConnectionFixed {
             val payload = ByteBuffer.allocate(payloadSize).order(ByteOrder.LITTLE_ENDIAN)
 
             // AgentData block
-            payload.put(identity.agentId.asBytes())
-            payload.put(identity.sessionId.asBytes())
+            payload.putUUID(identity.agentId)
+            payload.putUUID(identity.sessionId)
 
             // ObjectData count (u8)
             payload.put(chunk.size.toByte())
@@ -2404,7 +2334,7 @@ class UDPConnectionFixed {
             val payload = ByteBuffer.allocate(1 + batch.size * 16).order(ByteOrder.LITTLE_ENDIAN)
             payload.put(batch.size.toByte())
             for (id in batch) {
-                payload.put(id.asBytes())
+                payload.putUUID(id)
             }
             sendPacket(MessageIds.UUID_NAME_REQUEST, payload.array(), reliable = true)
         }
@@ -2542,11 +2472,11 @@ class UDPConnectionFixed {
         payload.putUUID(identity.agentId)
         payload.putUUID(identity.sessionId)
         payload.putUUID(transactionId)
-        payload.putVariable1Bytes(methodBytes)
+        PacketCodec.fromBuffer(payload).writeVariable1Bytes(methodBytes)
         payload.putUUID(invoice)
         payload.put(paramBlobs.size.coerceAtMost(255).toByte())
         for (blob in paramBlobs.take(255)) {
-            payload.putVariable1Bytes(blob)
+            PacketCodec.fromBuffer(payload).writeVariable1Bytes(blob)
         }
         sendPacket(MessageIds.GENERIC_MESSAGE, payload.array().copyOf(payload.position()), reliable = reliable)
     }
@@ -2638,11 +2568,11 @@ class UDPConnectionFixed {
         payload.putUUID(identity.sessionId)
         payload.putUUID(imageId)
         payload.putUUID(flImageId)
-        payload.putVariable2String(aboutText)
-        payload.putVariable1String(firstLifeAboutText)
+        PacketCodec.fromBuffer(payload).writeVariable2String(aboutText)
+        PacketCodec.fromBuffer(payload).writeVariable1String(firstLifeAboutText)
         payload.put(if (allowPublish) 1.toByte() else 0.toByte())
         payload.put(if (maturePublish) 1.toByte() else 0.toByte())
-        payload.putVariable1String(profileUrl)
+        PacketCodec.fromBuffer(payload).writeVariable1String(profileUrl)
         sendPacket(MessageIds.AVATAR_PROPERTIES_UPDATE, payload.array().copyOf(payload.position()), reliable = true)
     }
 
@@ -2664,7 +2594,7 @@ class UDPConnectionFixed {
         payload.putUUID(identity.agentId)
         payload.putUUID(identity.sessionId)
         payload.putUUID(queryId)
-        payload.putVariable1String(name)
+        PacketCodec.fromBuffer(payload).writeVariable1String(name)
         sendPacket(MessageIds.AVATAR_PICKER_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
         return queryId
     }
@@ -2774,7 +2704,7 @@ class UDPConnectionFixed {
         payload.put(assetType.toByte())
         payload.put(if (tempFile) 1.toByte() else 0.toByte())
         payload.put(if (storeLocal) 1.toByte() else 0.toByte())
-        payload.putVariable2Bytes(assetData)
+        PacketCodec.fromBuffer(payload).writeVariable2Bytes(assetData)
         sendPacket(MessageIds.ASSET_UPLOAD_REQUEST, payload.array(), reliable = true)
     }
 
@@ -2800,10 +2730,10 @@ class UDPConnectionFixed {
         payload.putUUID(identity.agentId)
         payload.putUUID(identity.sessionId)
         payload.putUUID(queryId)
-        payload.putVariable1String(queryText)
+        PacketCodec.fromBuffer(payload).writeVariable1String(queryText)
         payload.putInt(queryFlags)
         payload.put(category.toByte())
-        payload.putVariable1String(simName)
+        PacketCodec.fromBuffer(payload).writeVariable1String(simName)
         payload.putInt(queryStart)
         sendPacket(MessageIds.DIR_PLACES_QUERY, payload.array().copyOf(payload.position()), reliable = true)
         return queryId
@@ -2827,7 +2757,7 @@ class UDPConnectionFixed {
         payload.putUUID(identity.agentId)
         payload.putUUID(identity.sessionId)
         payload.putUUID(queryId)
-        payload.putVariable1String(queryText)
+        PacketCodec.fromBuffer(payload).writeVariable1String(queryText)
         payload.putInt(queryFlags)
         payload.putInt(queryStart)
         sendPacket(MessageIds.DIR_FIND_QUERY, payload.array().copyOf(payload.position()), reliable = true)

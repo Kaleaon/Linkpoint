@@ -2,6 +2,7 @@ package com.linkpoint.protocol.transfer
 
 import android.util.Log
 import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.PacketCodec
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -227,7 +228,7 @@ class TransferManager(
         try {
             val buffer = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
             
-            val transferId = readUUID(buffer)
+            val transferId = PacketCodec.fromBuffer(buffer).readUuid()
             val channelType = buffer.int
             val targetType = buffer.int
             val status = buffer.int
@@ -281,7 +282,7 @@ class TransferManager(
         try {
             val buffer = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
             
-            val transferId = readUUID(buffer)
+            val transferId = PacketCodec.fromBuffer(buffer).readUuid()
             val channelType = buffer.int
             val packetNum = buffer.int
             val status = buffer.int
@@ -351,7 +352,7 @@ class TransferManager(
         val payload = ByteBuffer.allocate(34 + params.size).order(ByteOrder.LITTLE_ENDIAN)
         
         // TransferInfo block
-        writeUUID(payload, transfer.transferId)
+        PacketCodec.fromBuffer(payload).writeUuid(transfer.transferId)
         payload.putInt(transfer.channelType)
         payload.putInt(transfer.sourceType)
         payload.putFloat(transfer.priority)
@@ -375,7 +376,7 @@ class TransferManager(
     private suspend fun sendTransferAbort(transfer: Transfer) {
         val payload = ByteBuffer.allocate(20).order(ByteOrder.LITTLE_ENDIAN)
         
-        writeUUID(payload, transfer.transferId)
+        PacketCodec.fromBuffer(payload).writeUuid(transfer.transferId)
         payload.putInt(transfer.channelType)
         
         try {
@@ -394,22 +395,24 @@ class TransferManager(
             SOURCE_ASSET -> {
                 // Asset transfer params: AgentID (16) + SessionID (16) + OwnerID (16) + AssetID (16) + AssetType (4)
                 val params = ByteBuffer.allocate(68).order(ByteOrder.LITTLE_ENDIAN)
-                writeUUID(params, transfer.agentId)
-                writeUUID(params, transfer.sessionId)
-                writeUUID(params, transfer.ownerId ?: transfer.agentId)
-                writeUUID(params, transfer.assetKey.assetId)
+                val codec = PacketCodec.fromBuffer(params)
+                codec.writeUuid(transfer.agentId)
+                codec.writeUuid(transfer.sessionId)
+                codec.writeUuid(transfer.ownerId ?: transfer.agentId)
+                codec.writeUuid(transfer.assetKey.assetId)
                 params.putInt(transfer.assetKey.assetType.code)
                 params.array()
             }
             SOURCE_SIM_INV_ITEM -> {
                 // Sim inventory item params: AgentID + SessionID + OwnerID + TaskID + ItemID + AssetID + AssetType
                 val params = ByteBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN)
-                writeUUID(params, transfer.agentId)
-                writeUUID(params, transfer.sessionId)
-                writeUUID(params, transfer.ownerId ?: transfer.agentId)
-                writeUUID(params, transfer.taskId ?: UUID(0, 0))
-                writeUUID(params, transfer.itemId ?: UUID(0, 0))
-                writeUUID(params, transfer.assetKey.assetId)
+                val codec = PacketCodec.fromBuffer(params)
+                codec.writeUuid(transfer.agentId)
+                codec.writeUuid(transfer.sessionId)
+                codec.writeUuid(transfer.ownerId ?: transfer.agentId)
+                codec.writeUuid(transfer.taskId ?: UUID(0, 0))
+                codec.writeUuid(transfer.itemId ?: UUID(0, 0))
+                codec.writeUuid(transfer.assetKey.assetId)
                 params.putInt(transfer.assetKey.assetType.code)
                 params.array()
             }
@@ -459,17 +462,6 @@ class TransferManager(
             STATUS_ASSET_NOT_FOUND -> "Asset not found"
             else -> "Unknown status: $status"
         }
-    }
-    
-    private fun readUUID(buffer: ByteBuffer): UUID {
-        val msb = buffer.long
-        val lsb = buffer.long
-        return UUID(msb, lsb)
-    }
-    
-    private fun writeUUID(buffer: ByteBuffer, uuid: UUID) {
-        buffer.putLong(uuid.mostSignificantBits)
-        buffer.putLong(uuid.leastSignificantBits)
     }
     
     private inline fun updateStats(update: (TransferStats) -> TransferStats) {
