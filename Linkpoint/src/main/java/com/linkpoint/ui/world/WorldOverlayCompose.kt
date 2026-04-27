@@ -23,7 +23,9 @@ import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.EventSeat
 import androidx.compose.material.icons.filled.ViewInAr
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,12 +44,14 @@ private object WorldOverlayZ {
     const val RIGHT_ACTIONS = 2f
     const val BOTTOM_CHAT = 3f
     const val MOVEMENT = 4f
+    const val CAMERA = 4f
 }
 
 @Composable
 fun WorldOverlay(
     state: WorldUiState,
-    joystickFactory: () -> JoystickView,
+    movementJoystickFactory: () -> JoystickView,
+    cameraJoystickFactory: () -> JoystickView,
     onMenu: () -> Unit,
     onChat: () -> Unit,
     onMinimap: () -> Unit,
@@ -101,7 +105,7 @@ fun WorldOverlay(
             ) {
                 ActionButton(Icons.Default.Chat, onChat, "Chat")
                 ActionButton(Icons.Default.Map, onMinimap, "Minimap")
-                ActionButton(Icons.Default.Menu, onInventory, "Inventory")
+                ActionButton(Icons.Default.Work, onInventory, "Inventory")
                 ActionButton(Icons.Default.ViewInAr, onXr, "XR")
                 ActionButton(Icons.Default.SportsEsports, onGestures, "Gestures")
                 ActionButton(Icons.Default.Group, onFriends, "Friends")
@@ -110,7 +114,7 @@ fun WorldOverlay(
                 ActionButton(Icons.Default.FlightTakeoff, onFly, "Fly")
                 ActionButton(Icons.Default.DirectionsRun, onRun, "Run")
                 ActionButton(Icons.Default.ArrowUpward, onJump, "Jump")
-                ActionButton(Icons.Default.Group, onSit, "Sit")
+                ActionButton(Icons.Default.EventSeat, onSit, "Sit")
             }
         }
 
@@ -139,7 +143,18 @@ fun WorldOverlay(
                     .padding(start = 16.dp, bottom = 24.dp)
                     .zIndex(WorldOverlayZ.MOVEMENT)
                     .size(150.dp),
-                factory = { joystickFactory() }
+                factory = { movementJoystickFactory() }
+            )
+        }
+
+        if (state.overlaysVisibility.cameraJoystick) {
+            AndroidView(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 16.dp, bottom = 24.dp)
+                    .zIndex(WorldOverlayZ.CAMERA)
+                    .size(120.dp),
+                factory = { cameraJoystickFactory() }
             )
         }
     }

@@ -270,7 +270,16 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             val state by worldUiState.collectAsStateWithLifecycle()
             WorldOverlay(
                 state = state,
-                joystickFactory = { joystickMove },
+                movementJoystickFactory = {
+                    joystickMove.apply {
+                        (parent as? android.view.ViewGroup)?.removeView(this)
+                    }
+                },
+                cameraJoystickFactory = {
+                    joystickCamera.apply {
+                        (parent as? android.view.ViewGroup)?.removeView(this)
+                    }
+                },
                 onMenu = { drawerLayout.openDrawer(GravityCompat.START) },
                 onChat = { startActivity(Intent(this, ChatActivity::class.java)) },
                 onMinimap = { startActivity(Intent(this, MinimapActivity::class.java)) },
@@ -371,8 +380,9 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 overlaysVisibility = it.overlaysVisibility.copy(
                     topStatusHud = showHud,
                     rightActionStack = showActionButtons,
-                    bottomChatPreview = true,
-                    movementJoystick = showJoysticks
+                    bottomChatPreview = showHud,
+                    movementJoystick = showJoysticks,
+                    cameraJoystick = showJoysticks
                 )
             )
         }

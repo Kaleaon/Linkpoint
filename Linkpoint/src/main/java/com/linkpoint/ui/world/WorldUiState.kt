@@ -13,6 +13,7 @@ data class WorldUiState(
         val rightActionStack: Boolean = true,
         val bottomChatPreview: Boolean = true,
         val movementJoystick: Boolean = true,
+        val cameraJoystick: Boolean = true,
         val hudAttachments: Boolean = true
     )
 
