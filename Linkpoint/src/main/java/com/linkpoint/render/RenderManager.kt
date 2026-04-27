@@ -1108,12 +1108,7 @@ class RenderManager(private val context: Context) {
             // observed to render the highest-priority world textures only
             // when mips are present (otherwise lower-LOD samplers fall
             // back to undefined data).
-            val levels = run {
-                var d = maxOf(w, h).coerceAtLeast(1)
-                var n = 1
-                while (d > 1) { d = d shr 1; n++ }
-                n
-            }
+            val levels = com.linkpoint.assets.TextureFormatPolicy.mipLevelsFor(w, h)
             val pixels = IntArray(w * h)
             bitmap.getPixels(pixels, 0, w, 0, 0, w, h)
             val rgba = java.nio.ByteBuffer.allocateDirect(w * h * 4)
@@ -1130,7 +1125,7 @@ class RenderManager(private val context: Context) {
                 .width(w).height(h)
                 .levels(levels)
                 .sampler(Texture.Sampler.SAMPLER_2D)
-                .format(Texture.InternalFormat.RGBA8)
+                .format(Texture.InternalFormat.SRGB8_A8)
                 .build(eng)
             val pixelBuffer = Texture.PixelBufferDescriptor(
                 rgba, Texture.Format.RGBA, Texture.Type.UBYTE
