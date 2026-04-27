@@ -1216,6 +1216,9 @@ class RenderManager(private val context: Context) {
             timeSinceLastFrame = if (lastFrameTime > 0) System.currentTimeMillis() - lastFrameTime else null,
             initializationTime = initializationTime,
             lastInitializationError = lastInitializationError,
+            visiblePrimCount = sceneManager?.getVisibleObjects()?.size ?: 0,
+            visibleAvatarCount = sceneManager?.getVisibleAvatars()?.size ?: 0,
+            visibleTerrainPatchCount = terrainRenderer?.getDiagnostics()?.visiblePatchCount ?: 0,
             scenePopulationSnapshot = ScenePopulationDiagnostics.snapshot()
         )
     }
@@ -1240,6 +1243,9 @@ class RenderManager(private val context: Context) {
         val timeSinceLastFrame: Long?,
         val initializationTime: Long,
         val lastInitializationError: String?,
+        val visiblePrimCount: Int,
+        val visibleAvatarCount: Int,
+        val visibleTerrainPatchCount: Int,
         val scenePopulationSnapshot: ScenePopulationDiagnostics.Snapshot
     )
     
