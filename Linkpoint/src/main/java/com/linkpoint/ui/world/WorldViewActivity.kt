@@ -24,6 +24,9 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import com.linkpoint.LinkpointApp
@@ -41,6 +44,8 @@ import com.linkpoint.ui.settings.SettingsActivity
 import com.linkpoint.ui.xr.XRWorldActivity
 import com.linkpoint.utils.DebugReportService
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
@@ -66,8 +71,10 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private lateinit var surfaceView: SurfaceView
     private var lumiyaSurfaceView: LumiyaGLSurfaceView? = null
     private var renderBackend: RenderBackend? = null
-    private lateinit var renderContainer: FrameLayout
+    private lateinit var worldViewportHost: WorldViewportHost
+    private lateinit var worldOverlayCompose: ComposeView
     private lateinit var rendererHandoffManager: RendererHandoffManager
+    private val worldUiState = MutableStateFlow(WorldUiState())
     
     // HUD elements
     private lateinit var regionNameText: TextView
@@ -99,7 +106,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private lateinit var btnNearby: ImageButton
     private lateinit var btnCameraMode: ImageButton
 
-    // Camera gesture detectors. The renderContainer (the empty area between
+    // Camera gesture detectors. The world viewport host (the empty area between
     // the joysticks and action button rails) feeds touches here so drag
     // becomes orbit and pinch becomes zoom; both are consumed by the
     // CameraController in RenderManager.
@@ -215,7 +222,8 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private fun initViews() {
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
-        renderContainer = findViewById(R.id.renderContainer)
+        worldViewportHost = findViewById(R.id.worldViewportHost)
+        worldOverlayCompose = findViewById(R.id.worldOverlayCompose)
         
         regionNameText = findViewById(R.id.textRegionName)
         avatarNameText = findViewById(R.id.textAvatarName)
@@ -257,6 +265,37 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         // Show/hide XR button based on runtime and build availability
         btnXR.visibility = if (app.isXREntryAvailable()) View.VISIBLE else View.GONE
         navigationView.menu.findItem(R.id.nav_xr_mode)?.isVisible = app.isXREntryAvailable()
+
+        worldOverlayCompose.setContent {
+            val state by worldUiState.collectAsStateWithLifecycle()
+            WorldOverlay(
+                state = state,
+                joystickFactory = { joystickMove },
+                onMenu = { drawerLayout.openDrawer(GravityCompat.START) },
+                onChat = { startActivity(Intent(this, ChatActivity::class.java)) },
+                onMinimap = { startActivity(Intent(this, MinimapActivity::class.java)) },
+                onInventory = { startActivity(Intent(this, InventoryActivity::class.java)) },
+                onXr = {
+                    if (app.isXREntryAvailable()) {
+                        startActivity(Intent(this, XRWorldActivity::class.java))
+                    } else {
+                        Toast.makeText(this, "XR mode is unavailable in this build", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                onGestures = { showGesturesPopup() },
+                onFriends = { startActivity(Intent(this, FriendsActivity::class.java)) },
+                onNearby = { startActivity(Intent(this, NearbyPeopleActivity::class.java)) },
+                onCameraMode = {
+                    val controller = app.renderManager.cameraController
+                    controller.toggleMode()
+                    updateCameraModeButton(controller.mode)
+                },
+                onFly = { btnFly.performClick() },
+                onRun = { btnRun.performClick() },
+                onJump = { btnJump.performClick() },
+                onSit = { btnSit.performClick() }
+            )
+        }
         
         // Initialize HUD overlay for Second Life HUD attachments
         initHudOverlay()
@@ -280,7 +319,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
      * Initialize the HUD overlay for displaying Second Life HUD attachments.
      */
     private fun initHudOverlay() {
-        hudOverlay = findViewById(R.id.hudOverlay)
+        hudOverlay = worldViewportHost.hudOverlay
         
         // Connect to HUD manager if available
         if (app.isHudManagerInitialized()) {
@@ -310,7 +349,9 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     }
 
     private fun updateHudOverlayVisibility(showHud: Boolean) {
-        hudOverlay.visibility = if (showHud && hudsVisibleFromManager) View.VISIBLE else View.GONE
+        val visible = showHud && hudsVisibleFromManager
+        worldViewportHost.setHudAttachmentsVisible(visible)
+        worldUiState.update { it.copy(overlaysVisibility = it.overlaysVisibility.copy(hudAttachments = visible)) }
     }
 
     private fun applyInterfacePreferences() {
@@ -325,6 +366,16 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         joystickCamera.visibility = if (showJoysticks) View.VISIBLE else View.GONE
         actionButtonsGroup.visibility = if (showActionButtons) View.VISIBLE else View.GONE
         movementButtonsGroup.visibility = if (showMovementButtons) View.VISIBLE else View.GONE
+        worldUiState.update {
+            it.copy(
+                overlaysVisibility = it.overlaysVisibility.copy(
+                    topStatusHud = showHud,
+                    rightActionStack = showActionButtons,
+                    bottomChatPreview = true,
+                    movementJoystick = showJoysticks
+                )
+            )
+        }
 
         applyCameraPreferences()
     }
@@ -548,12 +599,20 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             CameraController.Mode.MOUSELOOK -> 1.0f
         }
         btnCameraMode.isSelected = (mode == CameraController.Mode.MOUSELOOK)
+        worldUiState.update {
+            it.copy(
+                interactionMode = when (mode) {
+                    CameraController.Mode.FOLLOW -> WorldUiState.InteractionMode.FOLLOW
+                    CameraController.Mode.MOUSELOOK -> WorldUiState.InteractionMode.MOUSELOOK
+                }
+            )
+        }
     }
 
     /**
-     * Hook the renderContainer up to a GestureDetector + ScaleGestureDetector
+     * Hook the world viewport host up to a GestureDetector + ScaleGestureDetector
      * so single-finger drag orbits the camera and pinch zooms it. Joysticks
-     * already consume their own touches; the renderContainer only sees
+     * already consume their own touches; the world viewport host only sees
      * events that fall outside the joystick / action-button rail areas, so
      * the two input systems can't conflict.
      */
@@ -585,9 +644,9 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             }
         })
 
-        // Single onTouchListener feeds both detectors; the renderContainer
+        // Single onTouchListener feeds both detectors; the viewport host
         // is otherwise non-interactive so swallowing every event is fine.
-        renderContainer.setOnTouchListener { _, ev ->
+        worldViewportHost.setOnTouchListener { _, ev ->
             cameraScaleDetector?.onTouchEvent(ev)
             cameraGestureDetector?.onTouchEvent(ev)
             true
@@ -693,7 +752,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                         lumiyaSurfaceView = null
                     }
                 }
-                renderContainer.removeAllViews()
+                worldViewportHost.clearViewport()
             },
             onAttachTargetBackendAndReplaySnapshot = { backend, snapshot ->
                 useSecondaryRenderer = backend == RendererHandoffManager.RendererBackend.LUMIYA
@@ -755,8 +814,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             }
         }
 
-        renderContainer.removeAllViews()
-        renderContainer.addView(renderView)
+        worldViewportHost.attachViewport(renderView)
 
         renderView.holderOrNull()?.addCallback(object : android.view.SurfaceHolder.Callback {
             override fun surfaceCreated(holder: android.view.SurfaceHolder) {
@@ -873,8 +931,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         }
         lumiyaSurfaceView = glView
         app.bindGlesRenderEngine(glView.getEngineProvider())
-        renderContainer.removeAllViews()
-        renderContainer.addView(glView)
+        worldViewportHost.attachViewport(glView)
         isSurfaceReady = true
         isRendering = false
         android.util.Log.i(TAG, "Replayed snapshot into Lumiya backend (camera mode=${snapshot.cameraMode})")
@@ -901,11 +958,15 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         val headerRegion = headerView.findViewById<TextView>(R.id.navHeaderRegion)
         
         headerName.text = app.sessionManager.getAvatarName()
+        worldUiState.update { it.copy(avatarName = app.sessionManager.getAvatarName()) }
         
         lifecycleScope.launch {
             app.sessionManager.currentRegion.collectLatest { region ->
                 headerRegion.text = region?.name ?: "Not connected"
                 regionNameText.text = region?.name ?: ""
+                worldUiState.update { current ->
+                    current.copy(regionName = region?.name ?: "Not connected")
+                }
             }
         }
     }
@@ -916,6 +977,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 when (state) {
                     ConnectionState.CONNECTED -> {
                         avatarNameText.text = app.sessionManager.getAvatarName()
+                        worldUiState.update { it.copy(avatarName = app.sessionManager.getAvatarName()) }
                         
                         // Cache landmarks from inventory after first successful login
                         if (app.startLocationManager.isFirstLoginComplete()) {
@@ -933,6 +995,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         lifecycleScope.launch {
             app.sessionManager.currentRegion.collectLatest { region ->
                 regionNameText.text = region?.name ?: "Unknown Region"
+                worldUiState.update { it.copy(regionName = region?.name ?: "Unknown Region") }
             }
         }
     }
