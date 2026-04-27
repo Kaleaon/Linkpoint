@@ -136,6 +136,9 @@ class RenderEngineSwitcher(private val context: Context) {
         val previousType = activeType
         Log.i(TAG, "Performing engine switch: ${activeType.name} → ${newType.name}")
 
+        // Drain backend GPU queues before tearing down contexts/surfaces.
+        active?.waitForGpuIdle("switch ${activeType.name} -> ${newType.name}")
+
         // Shutdown old engine
         active?.shutdown()
         active = null

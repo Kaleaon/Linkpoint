@@ -7,6 +7,8 @@ import com.google.android.filament.VertexBuffer.VertexAttribute
 import com.linkpoint.assets.MeshData
 import com.linkpoint.assets.MeshFace
 import com.linkpoint.protocol.textures.TextureEntryParser
+import com.linkpoint.render.materials.FilamentMaterialTranslator
+import com.linkpoint.render.materials.MaterialDescriptor
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
@@ -53,7 +55,7 @@ class MeshPrimRenderer(
      * frames; the binder doesn't need to hold the reference.
      */
     fun interface TextureBinder {
-        fun bind(face: Int, textureId: UUID, onLoaded: (Texture) -> Unit)
+        fun bind(face: Int, textureId: UUID, onLoaded: (Texture?) -> Unit)
     }
 
     private val compiled = ConcurrentHashMap<UUID, CompiledMesh>()
@@ -108,7 +110,8 @@ class MeshPrimRenderer(
         entity: Int,
         mesh: CompiledMesh,
         textureEntry: ByteArray? = null,
-        binder: TextureBinder? = null
+        binder: TextureBinder? = null,
+        bomResolver: ((UUID) -> UUID)? = null
     ) {
         val mat = litMaterial ?: return
         // Drop any prior per-face material instances for this entity so
@@ -129,26 +132,9 @@ class MeshPrimRenderer(
             .receiveShadows(true)
             .castShadows(true)
         for (i in 0 until faceCount) {
-            val faceProps = perFace?.getOrNull(i)
+            val descriptor = buildDescriptor(perFace?.getOrNull(i), bomResolver)
             val instance = mat.createInstance().apply {
-                if (faceProps != null) {
-                    setParameter("baseColor",
-                        faceProps.colorR, faceProps.colorG,
-                        faceProps.colorB, faceProps.colorA)
-                    setParameter("texScale", faceProps.scaleS, faceProps.scaleT)
-                    setParameter("texOffset", faceProps.offsetS, faceProps.offsetT)
-                    setParameter("texRotation", faceProps.rotation)
-                } else {
-                    setParameter("baseColor", 0.8f, 0.8f, 0.8f, 1f)
-                    setParameter("texScale", 1f, 1f)
-                    setParameter("texOffset", 0f, 0f)
-                    setParameter("texRotation", 0f)
-                }
-                setParameter("metallic", 0f)
-                setParameter("roughness", 0.5f)
-                // Default to "no texture"; the binder flips this to 1.0 when
-                // it sets the actual sampler.
-                setParameter("hasTexture", 0f)
+                FilamentMaterialTranslator.apply(this, descriptor)
             }
             instances.add(instance)
             builder.geometry(
@@ -166,25 +152,61 @@ class MeshPrimRenderer(
         if (perFace != null && binder != null) {
             for (i in 0 until faceCount) {
                 val faceProps = perFace[i] ?: continue
-                val texId = faceProps.textureId
-                if (texId == UUID(0L, 0L)) continue
+                val descriptor = buildDescriptor(faceProps, bomResolver)
+                val texRef = descriptor.baseColorTexture ?: continue
+                if (!texRef.isDownloadable) continue
                 val instance = instances[i]
-                binder.bind(i, texId) { tex ->
+                binder.bind(i, texRef.resolvedId) { tex ->
                     try {
-                        instance.setParameter("baseColorMap", tex,
-                            TextureSampler(
-                                TextureSampler.MinFilter.LINEAR_MIPMAP_LINEAR,
-                                TextureSampler.MagFilter.LINEAR,
-                                TextureSampler.WrapMode.REPEAT
-                            )
+                        FilamentMaterialTranslator.apply(
+                            instance,
+                            descriptor,
+                            FilamentMaterialTranslator.TextureBindings(baseColor = tex)
                         )
-                        instance.setParameter("hasTexture", 1f)
                     } catch (e: Exception) {
                         Log.w(TAG, "bind face $i failed: ${e.message}")
                     }
                 }
             }
         }
+    }
+
+    private fun buildDescriptor(
+        faceProps: TextureEntryParser.FaceProperties?,
+        bomResolver: ((UUID) -> UUID)?
+    ): MaterialDescriptor {
+        if (faceProps == null) {
+            return MaterialDescriptor(
+                baseColor = MaterialDescriptor.Float4(0.8f, 0.8f, 0.8f, 1f),
+                uvTransform = MaterialDescriptor.UvTransform.IDENTITY,
+                metallicFactor = 0f,
+                roughnessFactor = 0.5f
+            )
+        }
+        val declared = faceProps.textureId
+        val textureRef = if (declared != UUID(0L, 0L)) {
+            val resolved = bomResolver?.invoke(declared) ?: declared
+            MaterialDescriptor.TextureRef(declaredId = declared, resolvedId = resolved)
+        } else null
+        return MaterialDescriptor(
+            baseColor = MaterialDescriptor.Float4(
+                faceProps.colorR, faceProps.colorG, faceProps.colorB, faceProps.colorA
+            ),
+            baseColorTexture = textureRef,
+            alphaMode = if (faceProps.colorA < 0.999f) {
+                MaterialDescriptor.AlphaMode.BLEND
+            } else {
+                MaterialDescriptor.AlphaMode.OPAQUE
+            },
+            metallicFactor = 0f,
+            roughnessFactor = 0.5f,
+            emissiveFactor = MaterialDescriptor.Float3.ZERO,
+            uvTransform = MaterialDescriptor.UvTransform(
+                faceProps.scaleS, faceProps.scaleT,
+                faceProps.offsetS, faceProps.offsetT,
+                faceProps.rotation
+            )
+        )
     }
 
     private fun uploadFace(face: MeshFace): Pair<VertexBuffer, IndexBuffer>? {

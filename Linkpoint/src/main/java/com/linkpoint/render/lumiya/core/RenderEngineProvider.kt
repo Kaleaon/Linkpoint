@@ -42,6 +42,12 @@ interface RenderEngineProvider {
     /** Render a single frame.  Must be called on the render thread. */
     fun renderFrame()
 
+    /**
+     * Block until outstanding GPU work completes for this backend.
+     * Must be called on the backend render thread.
+     */
+    fun waitForGpuIdle(reason: String = "unspecified") {}
+
     /** Release all GPU resources.  Must be called on the render thread. */
     fun shutdown()
 

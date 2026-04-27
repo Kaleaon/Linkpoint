@@ -10,6 +10,7 @@ import com.linkpoint.network.core.ConnectionQualityManager
 import com.linkpoint.network.core.NetworkStateManager
 import com.linkpoint.protocol.messages.EnhancedPacketLogger
 import com.linkpoint.protocol.messages.UDPConnectionFixed
+import com.linkpoint.render.RenderDiagnostics
 import kotlinx.coroutines.*
 import java.io.File
 import java.text.SimpleDateFormat
@@ -1018,6 +1019,12 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("  Attempts: ${texDiag.j2kDecodeAttempts}")
                         appendLine("  Successes: ${texDiag.j2kDecodeSuccesses}")
                         appendLine("  Error States: ${texDiag.textureErrorStateCount}")
+                        val decodeFailureCount = (texDiag.j2kDecodeAttempts - texDiag.j2kDecodeSuccesses).coerceAtLeast(0)
+                        appendLine("  Success Rate: ${formatRate(texDiag.j2kDecodeSuccesses, texDiag.j2kDecodeAttempts)}")
+                        appendLine("  Failure Rate: ${formatRate(decodeFailureCount, texDiag.j2kDecodeAttempts)}")
+                        val transferAttempts = texDiag.downloadedCount + texDiag.failedCount
+                        appendLine("  Transfer Success Rate: ${formatRate(texDiag.downloadedCount, transferAttempts)}")
+                        appendLine("  Transfer Failure Rate: ${formatRate(texDiag.failedCount, transferAttempts)}")
                         val decoderStatus = com.linkpoint.assets.JPEG2000Decoder.getStartupStatus()
                         appendLine("  Backend: ${decoderStatus.activeBackend}")
                         appendLine("  Native Loaded: ${if (decoderStatus.nativeLoaded) "✓" else "✗"}")
@@ -1080,6 +1087,8 @@ class DebugReportService private constructor(private val context: Context) {
                         renderDiag.timeSinceLastFrame?.let {
                             appendLine("Time Since Last Frame: ${formatDuration(it)}")
                         }
+                        val renderTimeline = RenderDiagnostics.diagnosticsSnapshot()
+                        appendLine("Active Backend: ${renderTimeline.activeBackend}")
                         appendLine()
                         appendLine("Filament Components:")
                         appendLine("  Engine: ${if (renderDiag.hasEngine) "✓" else "✗"}")
@@ -1090,6 +1099,30 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("  SwapChain: ${if (renderDiag.hasSwapChain) "✓" else "✗"}")
                         appendLine("  Surface Ready: ${if (renderDiag.isSurfaceReady) "✓" else "✗ (e.g. on Settings, app backgrounded)"}")
                         appendLine("  Drawing Enabled: ${if (renderDiag.isDrawingEnabled) "✓" else "✗ (paused — panel open / activity backgrounded)"}")
+                        appendLine()
+                        appendLine("Visible Entity Counts:")
+                        appendLine("  Avatars: ${renderDiag.visibleAvatarCount}")
+                        appendLine("  Prims: ${renderDiag.visiblePrimCount}")
+                        appendLine("  Terrain Patches: ${renderDiag.visibleTerrainPatchCount}")
+                        appendLine()
+                        appendLine("Frame Time Percentiles (ms):")
+                        if (renderTimeline.frameTimePercentiles.isEmpty()) {
+                            appendLine("  (insufficient frame history)")
+                        } else {
+                            renderTimeline.frameTimePercentiles.forEach { (backend, p) ->
+                                appendLine(
+                                    "  $backend: p50=${p.p50Ms ?: "-"} p90=${p.p90Ms ?: "-"} p99=${p.p99Ms ?: "-"}"
+                                )
+                            }
+                        }
+                        appendLine()
+                        appendLine("Swapchain / Context Restarts:")
+                        appendLine("  Filament SwapChain Creates: ${renderTimeline.swapChainCreateCount}")
+                        appendLine("  Filament SwapChain Destroys: ${renderTimeline.swapChainDestroyCount}")
+                        appendLine("  Filament SwapChain Failures: ${renderTimeline.swapChainFailureCount}")
+                        appendLine("  Filament SwapChain Restarts: ${renderTimeline.swapChainRestartCount}")
+                        appendLine("  Lumiya Context Creates: ${renderTimeline.glContextCreateCount}")
+                        appendLine("  Lumiya Context Restarts: ${renderTimeline.glContextRestartCount}")
 
                         if (renderDiag.initializationTime > 0) {
                             appendLine()
@@ -1726,6 +1759,12 @@ class DebugReportService private constructor(private val context: Context) {
             ms < 3600000 -> String.format(Locale.US, "%.1fm", ms / 60000.0)
             else -> String.format(Locale.US, "%.1fh", ms / 3600000.0)
         }
+    }
+
+    private fun formatRate(successes: Int, attempts: Int): String {
+        if (attempts <= 0) return "n/a (0/0)"
+        val pct = (successes.toDouble() * 100.0) / attempts.toDouble()
+        return String.format(Locale.US, "%.1f%% (%d/%d)", pct, successes, attempts)
     }
     
     fun shutdown() {
