@@ -6,10 +6,13 @@ on:
     paths:
       - 'Linkpoint/**'
       - '.github/workflows/build-linkpoint.yml'
+      - 'docs/ui-refactor/**'
   pull_request:
     branches: [ main, develop ]
     paths:
       - 'Linkpoint/**'
+      - '.github/workflows/build-linkpoint.yml'
+      - 'docs/ui-refactor/**'
   workflow_dispatch:
 
 env:
@@ -250,6 +253,67 @@ jobs:
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "*Built from commit: \`${{ github.sha }}\`*" >> $GITHUB_STEP_SUMMARY
 
+
+  ui-refactor:
+    runs-on: ubuntu-latest
+    needs: build
+    if: success()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run ui-refactor gate
+        run: |
+          set -euo pipefail
+
+          ROUTE_COVERAGE_FILE="${UI_REFACTOR_ROUTE_COVERAGE_FILE:-docs/ui-refactor/route-coverage.json}"
+          THEME_CATALOG_FILE="${UI_REFACTOR_THEME_CATALOG_FILE:-docs/ui-refactor/theme-catalog.json}"
+          MIGRATION_MATRIX_FILE="${UI_REFACTOR_MIGRATION_MATRIX_FILE:-docs/ui-refactor/migration-matrix.json}"
+
+          for required_file in "$ROUTE_COVERAGE_FILE" "$THEME_CATALOG_FILE" "$MIGRATION_MATRIX_FILE"; do
+            test -f "$required_file" || { echo "Missing required ui-refactor gate input: $required_file" >&2; exit 1; }
+          done
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          route = json.loads(Path("docs/ui-refactor/route-coverage.json").read_text(encoding="utf-8"))
+          covered = float(route["covered_routes"])
+          total = float(route["total_routes"])
+          minimum = float(route["minimum_percent"])
+          assert total > 0, "total_routes must be > 0"
+          percent = (covered / total) * 100.0
+          if percent < minimum:
+              raise SystemExit(f"Route coverage check failed: {percent:.2f}% < required {minimum:.2f}%")
+          print(f"Route coverage check passed: {percent:.2f}% (required {minimum:.2f}%)")
+
+          themes = json.loads(Path("docs/ui-refactor/theme-catalog.json").read_text(encoding="utf-8"))["themes"]
+          if not isinstance(themes, list) or not themes:
+              raise SystemExit("Theme catalog validation failed: themes[] missing or empty")
+          for idx, theme in enumerate(themes):
+              if not isinstance(theme, dict) or "name" not in theme or "status" not in theme:
+                  raise SystemExit(f"Theme catalog validation failed at index {idx}; expected name+status")
+          print(f"Theme catalog validation passed: {len(themes)} theme entries")
+
+          slices = json.loads(Path("docs/ui-refactor/migration-matrix.json").read_text(encoding="utf-8"))["slices"]
+          for slice_name in ("A", "B", "C", "D"):
+              if slice_name not in slices or "completion_percent" not in slices[slice_name]:
+                  raise SystemExit(f"Migration matrix validation failed: missing completion_percent for slice {slice_name}")
+              completion = float(slices[slice_name]["completion_percent"])
+              if completion < 0 or completion > 100:
+                  raise SystemExit(f"Migration matrix validation failed: invalid completion_percent for slice {slice_name}")
+          print("Migration matrix validation passed for slices A/B/C/D")
+          PY
+
+          if [ -n "${UI_REFACTOR_GOLDEN_DIFF_CMD:-}" ]; then
+            echo "Running compose screenshot/golden diff command: ${UI_REFACTOR_GOLDEN_DIFF_CMD}"
+            eval "${UI_REFACTOR_GOLDEN_DIFF_CMD}"
+          else
+            echo "UI_REFACTOR_GOLDEN_DIFF_CMD not set; compose screenshot/golden diffs skipped by configuration"
+          fi
+
   code-quality:
     runs-on: ubuntu-latest
     needs: build
@@ -285,7 +349,7 @@ jobs:
           echo "- **Total lines of code:** $TOTAL_LINES" >> $GITHUB_STEP_SUMMARY
 
   release:
-    needs: [build, code-quality]
+    needs: [build, ui-refactor, code-quality]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
     
