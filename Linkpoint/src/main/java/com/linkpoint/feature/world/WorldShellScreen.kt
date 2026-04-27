@@ -3,11 +3,11 @@ package com.linkpoint.feature.world
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 
-enum class WorldShellUiState {
-    Loading,
-    Error,
-    Empty,
-    Connected
+sealed interface WorldShellUiState {
+    data object LoadingRegion : WorldShellUiState
+    data object Error : WorldShellUiState
+    data object EmptySession : WorldShellUiState
+    data object Connected : WorldShellUiState
 }
 
 @Composable

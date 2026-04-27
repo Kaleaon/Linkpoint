@@ -3,11 +3,11 @@ package com.linkpoint.feature.communication
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 
-enum class ChatImUiState {
-    Loading,
-    Error,
-    Empty,
-    Connected
+sealed interface ChatImUiState {
+    data object Loading : ChatImUiState
+    data object Error : ChatImUiState
+    data object EmptyConversations : ChatImUiState
+    data object Connected : ChatImUiState
 }
 
 @Composable
