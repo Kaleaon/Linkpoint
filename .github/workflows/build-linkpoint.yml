@@ -87,6 +87,12 @@ jobs:
       - name: Validate parity snapshot clean-tree guards
         run: bash scripts/check_parity_snapshot_guards.sh
 
+      - name: Run UI route/theme coverage checks
+        run: |
+          bash scripts/ui/check-route-coverage.sh
+          bash scripts/ui/check-theme-coverage.sh
+          bash scripts/ui/check-migration-matrix.sh
+
       
       - name: Display Gradle version
         run: ./gradlew --version
@@ -126,6 +132,9 @@ jobs:
       - name: Run unit tests
         run: ./gradlew :Linkpoint:testStableDebugUnitTest --stacktrace --continue
         continue-on-error: true
+
+      - name: Enforce UI coverage validator tests
+        run: ./gradlew :Linkpoint:testStableDebugUnitTest --tests "com.linkpoint.ui.coverage.UiCoverageValidatorTest" --stacktrace
 
       - name: Run LLSD parser fuzz target
         run: ./gradlew :Linkpoint:testStableDebugUnitTest --tests "com.linkpoint.protocol.llsd.LLSDParserFuzzTargetTest" --stacktrace
