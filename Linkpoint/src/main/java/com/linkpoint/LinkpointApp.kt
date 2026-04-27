@@ -811,6 +811,59 @@ class LinkpointApp : Application() {
         meshManager = MeshManager(this, assetCache, capabilityManager)
         animationManager = AnimationManager(this, assetCache)
         soundManager = SoundManager(this, assetCache)
+        renderManager.configurePrimMeshPipeline(
+            requester = com.linkpoint.render.prims.PrimRenderer.MeshDataRequester { localId, meshId, lod, onResolved ->
+                applicationScope.launch {
+                    val meshData = try {
+                        meshManager.getMesh(meshId, lod)
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Mesh load parse failure localId=$localId meshId=$meshId: ${e.message}")
+                        onResolved(com.linkpoint.render.prims.PrimRenderer.MeshLoadResult.ParseFailure(e.message))
+                        return@launch
+                    }
+                    if (meshData != null) {
+                        onResolved(com.linkpoint.render.prims.PrimRenderer.MeshLoadResult.Success(meshData))
+                    } else {
+                        val diagnostics = meshManager.getDiagnostics()
+                        val detail = diagnostics.lastError ?: "mesh not found"
+                        val parseFailure = detail.startsWith("Parse:") ||
+                            detail.contains("parse", ignoreCase = true)
+                        if (parseFailure) {
+                            onResolved(com.linkpoint.render.prims.PrimRenderer.MeshLoadResult.ParseFailure(detail))
+                        } else {
+                            onResolved(com.linkpoint.render.prims.PrimRenderer.MeshLoadResult.MissingAsset(detail))
+                        }
+                    }
+                }
+            },
+            geometryBuilder = com.linkpoint.render.prims.PrimRenderer.MeshGeometryBuilder { entity, meshData, textureEntry ->
+                val binder = com.linkpoint.render.prims.MeshPrimRenderer.TextureBinder { _, texId, onLoaded ->
+                    val resolvedId = if (::avatarManager.isInitialized) {
+                        com.linkpoint.avatar.BakesOnMesh.resolve(texId) { slot ->
+                            avatarManager.getMyAvatar()?.baker?.getBakedTextures()?.get(slot)
+                        }
+                    } else texId
+                    if (!com.linkpoint.protocol.textures.TextureEntryParser.shouldDownload(resolvedId)) return@TextureBinder
+                    if (!::textureManager.isInitialized) return@TextureBinder
+                    applicationScope.launch {
+                        val bmp = try { textureManager.getTexture(resolvedId) } catch (_: Exception) { null }
+                        if (bmp != null) {
+                            renderManager.dispatcher.post(Runnable {
+                                val pair = renderManager.uploadBitmapAsLinkpointTexture(resolvedId, bmp)
+                                if (pair != null) onLoaded(pair.first)
+                            })
+                        }
+                    }
+                }
+                renderManager.engine?.renderableManager?.let { rm ->
+                    val inst = rm.getInstance(entity)
+                    if (inst != 0) rm.destroy(entity)
+                }
+                renderManager.getMeshPrimRenderer()?.getOrCompile(meshData)?.let { compiled ->
+                    renderManager.getMeshPrimRenderer()?.attach(entity, compiled, textureEntry, binder)
+                }
+            }
+        )
         
         // World features
         worldMap = WorldMap(capabilityManager)
@@ -1460,56 +1513,26 @@ class LinkpointApp : Application() {
                     // Add object to scene for rendering using PrimRenderer
                     // PrimRenderer creates actual renderable meshes (box, sphere, etc.)
                     if (::renderManager.isInitialized) {
-                        renderManager.enqueueUpdate(RenderableUpdate.PrimUpdate(update))
-                    }
-
-                    // Mesh-asset prims: kick off MeshManager fetch and ask
-                    // PrimRenderer to swap the path/profile fallback geometry
-                    // for the parsed mesh once it lands. Failures fall back
-                    // gracefully to the path/profile box already rendered.
-                    val meshAssetId = update.getMeshAssetId()
-                    if (meshAssetId != null && ::meshManager.isInitialized && ::renderManager.isInitialized) {
-                        val textureEntrySnapshot = update.textureEntry
-                        applicationScope.launch {
-                            val meshData = try {
-                                meshManager.getMesh(meshAssetId)
-                            } catch (e: Exception) {
-                                Log.w(TAG, "Mesh fetch failed for ${update.localId}: ${e.message}")
-                                null
+                        renderManager.getPrimRenderer()?.apply {
+                            setBomResolver { slot ->
+                                if (::avatarManager.isInitialized) {
+                                    avatarManager.getMyAvatar()?.baker?.getBakedTextures()?.get(slot)
+                                } else null
                             }
-                            if (meshData != null) {
-                                // TextureBinder: per face, BoM-resolve the
-                                // texture UUID, fetch via TextureManager,
-                                // hop to the render thread and call onLoaded.
-                                val binder = com.linkpoint.render.prims.MeshPrimRenderer.TextureBinder { _, texId, onLoaded ->
-                                    val resolvedId = if (::avatarManager.isInitialized) {
-                                        com.linkpoint.avatar.BakesOnMesh.resolve(texId) { slot ->
-                                            avatarManager.getMyAvatar()?.baker?.getBakedTextures()?.get(slot)
-                                        }
-                                    } else texId
-                                    if (!com.linkpoint.protocol.textures.TextureEntryParser.shouldDownload(resolvedId)) return@TextureBinder
-                                    if (!::textureManager.isInitialized) return@TextureBinder
-                                    applicationScope.launch {
-                                        val bmp = try { textureManager.getTexture(resolvedId) } catch (_: Exception) { null }
-                                        if (bmp != null) {
-                                            renderManager.dispatcher.post(Runnable {
-                                                // Route through the LinkpointTexture-tracked path so
-                                                // every per-face mesh texture participates in VRAM
-                                                // accounting and gets a clean Filament release path.
-                                                val pair = renderManager.uploadBitmapAsLinkpointTexture(resolvedId, bmp)
-                                                if (pair != null) onLoaded(pair.first)
-                                            })
-                                        }
+                            setTextureBinder(com.linkpoint.render.prims.PrimRenderer.TextureBinder { texId, onLoaded ->
+                                if (!::textureManager.isInitialized) return@TextureBinder
+                                applicationScope.launch {
+                                    val bmp = try { textureManager.getTexture(texId) } catch (_: Exception) { null }
+                                    if (bmp != null) {
+                                        renderManager.dispatcher.post(Runnable {
+                                            val pair = renderManager.uploadBitmapAsLinkpointTexture(texId, bmp)
+                                            if (pair != null) onLoaded(pair.first)
+                                        })
                                     }
                                 }
-                                renderManager.dispatcher.post(Runnable {
-                                    renderManager.attachMeshAsset(
-                                        update.localId, meshData,
-                                        textureEntrySnapshot, binder
-                                    )
-                                })
-                            }
+                            })
                         }
+                        renderManager.enqueueUpdate(RenderableUpdate.PrimUpdate(update))
                     }
 
                     // Extract and prefetch textures from the object's TextureEntry

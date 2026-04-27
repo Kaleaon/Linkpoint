@@ -63,6 +63,8 @@ class RenderManager(private val context: Context) {
     private var primRenderer: PrimRenderer? = null
     private var meshPrimRenderer: MeshPrimRenderer? = null
     private var terrainRenderer: TerrainRenderer? = null
+    private var primMeshDataRequester: PrimRenderer.MeshDataRequester? = null
+    private var primMeshGeometryBuilder: PrimRenderer.MeshGeometryBuilder? = null
 
     // Helpers
     private var uiHelper: UiHelper? = null
@@ -172,6 +174,8 @@ class RenderManager(private val context: Context) {
                 if (litMaterial != null) {
                     primRenderer = PrimRenderer(filamentEngine, filamentScene)
                     primRenderer?.initialize(litMaterial)
+                    primRenderer?.setMeshDataRequester(primMeshDataRequester)
+                    primRenderer?.setMeshGeometryBuilder(primMeshGeometryBuilder)
                     Log.d(TAG, "PrimRenderer initialized")
 
                     // Mesh-asset prim renderer: shares the lit material with
@@ -1016,6 +1020,16 @@ class RenderManager(private val context: Context) {
     fun getPrimRenderer(): PrimRenderer? = primRenderer
 
     fun getMeshPrimRenderer(): MeshPrimRenderer? = meshPrimRenderer
+
+    fun configurePrimMeshPipeline(
+        requester: PrimRenderer.MeshDataRequester?,
+        geometryBuilder: PrimRenderer.MeshGeometryBuilder?
+    ) {
+        primMeshDataRequester = requester
+        primMeshGeometryBuilder = geometryBuilder
+        primRenderer?.setMeshDataRequester(requester)
+        primRenderer?.setMeshGeometryBuilder(geometryBuilder)
+    }
 
     /**
      * Compile a parsed [com.linkpoint.assets.MeshData] and attach it to the
