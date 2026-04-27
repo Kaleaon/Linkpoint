@@ -1,33 +1,49 @@
 # Screen Migration Matrix
 
-This matrix tracks activity-to-destination handoff work for the UI cluster refactor.
+This matrix tracks handoff from legacy `ui/*` implementations to feature-oriented composables.
 
-## Priority Order
+## Status legend
+- `NOT_STARTED`: No destination scaffold exists.
+- `STUBBED`: Destination composable stub exists.
+- `IN_PROGRESS`: Migration started in a PR.
+- `DONE`: Legacy handoff complete and verified.
 
-1. **Phase 1 (first):** auth + world shell + chat + inventory + settings
-2. **Phase 2 (next):** social/discovery/system advanced surfaces
+## Cluster execution order
+1. Auth + World shell
+2. Chat/IM
+3. Friends/Groups/Profile
+4. Inventory/Outfits
+5. Map/Places/Events
+6. Wallet/Build/Settings/Notifications
 
-## Matrix
+## Handoff screens
 
-| Handoff screen name | Current implementation file | Target destination | Status |
-| --- | --- | --- | --- |
-| Login | `ui/login/LoginScreen.kt` | `ui/auth/LoginDestination` | in progress |
-| Start Location | `ui/login/StartLocationDialog.kt` | `ui/onboarding/StartLocationDestination` | not started |
-| World Shell | `ui/world/WorldViewActivity.kt` | `ui/world/WorldShellDestination` | in progress |
-| Chat | `ui/chat/ChatScreen.kt` | `ui/communication/ChatDestination` | in progress |
-| Inventory | `ui/inventory/InventoryScreen.kt` | `ui/inventory/InventoryDestination` | in progress |
-| Settings | `ui/settings/SettingsScreen.kt` | `ui/system/SettingsDestination` | in progress |
-| Friends | `ui/friends/FriendsScreen.kt` | `ui/social/FriendsDestination` | not started |
-| Groups | `ui/groups/GroupsScreen.kt` | `ui/social/GroupsDestination` | not started |
-| Profile | `ui/profile/ProfileScreen.kt` | `ui/social/ProfileDestination` | not started |
-| My Profile | `ui/profile/ProfileScreen.kt` | `ui/social/MyProfileDestination` | not started |
-| Nearby People | `ui/people/NearbyPeopleScreen.kt` | `ui/social/NearbyPeopleDestination` | not started |
-| My Avatar | `ui/avatar/MyAvatarScreen.kt` | `ui/social/MyAvatarDestination` | not started |
-| Search | `ui/search/SearchScreen.kt` | `ui/discovery/SearchDestination` | not started |
-| Teleport History | `ui/teleport/TeleportHistoryScreen.kt` | `ui/discovery/TeleportHistoryDestination` | not started |
-| SLURL | `ui/slurl/SLURLScreen.kt` | `ui/discovery/SlurlDestination` | not started |
-| Map | `ui/map/MapScreen.kt` | `ui/world/MapDestination` | not started |
-| Minimap | `ui/minimap/MinimapScreen.kt` | `ui/world/MinimapDestination` | not started |
-| XR World | `ui/xr/XRWorldActivity.kt` | `ui/world/XrWorldDestination` | not started |
-| Terms of Service | `ui/tos/TosScreen.kt` | `ui/system/TosDestination` | not started |
-| Theme Picker | `ui/theme/ThemePickerScreen.kt` | `ui/system/ThemePickerDestination` | not started |
+| Cluster | Existing file(s) | Target composable file | Required states | Owner | Date | Status |
+|---|---|---|---|---|---|---|
+| Auth + World shell | `Linkpoint/src/main/java/com/linkpoint/ui/login/LoginScreen.kt`, `.../LoginActivity.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/auth/AuthGatewayScreen.kt` | Loading, Error, EmptyGridList, Authenticated | @unassigned | 2026-04-27 | STUBBED |
+| Auth + World shell | `Linkpoint/src/main/java/com/linkpoint/ui/login/StartLocationDialog.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/onboarding/OnboardingEntryScreen.kt` | Loading, Error, EmptyStartLocations, Ready | @unassigned | 2026-04-27 | STUBBED |
+| Auth + World shell | `Linkpoint/src/main/java/com/linkpoint/ui/world/WorldViewActivity.kt`, `.../navigation/Navigation.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/world/WorldShellScreen.kt` | LoadingRegion, Error, EmptySession, Connected | @unassigned | 2026-04-27 | STUBBED |
+| Chat/IM | `Linkpoint/src/main/java/com/linkpoint/ui/chat/ChatScreen.kt`, `.../ChatActivity.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/communication/ChatImScreen.kt` | Loading, Error, EmptyConversations, Connected | @unassigned | 2026-04-27 | STUBBED |
+| Friends/Groups/Profile | `Linkpoint/src/main/java/com/linkpoint/ui/friends/FriendsScreen.kt`, `.../FriendsActivity.kt`, `.../FriendsListFragment.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/social/FriendsGroupsProfileScreen.kt` | Loading, Error, EmptyFriends, Ready | @unassigned | 2026-04-27 | STUBBED |
+| Friends/Groups/Profile | `Linkpoint/src/main/java/com/linkpoint/ui/groups/GroupsScreen.kt`, `.../GroupsActivity.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/social/FriendsGroupsProfileScreen.kt` | Loading, Error, EmptyGroups, Ready | @unassigned | 2026-04-27 | STUBBED |
+| Friends/Groups/Profile | `Linkpoint/src/main/java/com/linkpoint/ui/profile/ProfileScreen.kt`, `.../ProfileActivity.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/social/FriendsGroupsProfileScreen.kt` | Loading, Error, EmptyProfile, Ready | @unassigned | 2026-04-27 | STUBBED |
+| Friends/Groups/Profile | `Linkpoint/src/main/java/com/linkpoint/ui/people/NearbyPeopleScreen.kt`, `.../NearbyPeopleActivity.kt`, `.../NearbyPeopleFragment.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/social/FriendsGroupsProfileScreen.kt` | Loading, Error, EmptyNearby, Ready | @unassigned | 2026-04-27 | STUBBED |
+| Inventory/Outfits | `Linkpoint/src/main/java/com/linkpoint/ui/inventory/InventoryScreen.kt`, `.../InventoryActivity.kt`, `.../InventoryFragment.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/inventory/InventoryOutfitsScreen.kt` | Loading, Error, EmptyInventory, Ready | @unassigned | 2026-04-27 | STUBBED |
+| Inventory/Outfits | `Linkpoint/src/main/java/com/linkpoint/ui/avatar/MyAvatarScreen.kt`, `.../MyAvatarActivity.kt`, `.../AppearanceEditorFragment.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/inventory/InventoryOutfitsScreen.kt` | Loading, Error, EmptyWearables, Ready | @unassigned | 2026-04-27 | STUBBED |
+| Inventory/Outfits | `Linkpoint/src/main/java/com/linkpoint/ui/notecard/NotecardEditorScreen.kt`, `.../NotecardEditorActivity.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/inventory/InventoryOutfitsScreen.kt` | Loading, Error, EmptyDocument, Edited | @unassigned | 2026-04-27 | STUBBED |
+| Inventory/Outfits | `Linkpoint/src/main/java/com/linkpoint/ui/scripts/ScriptEditorScreen.kt`, `.../ScriptEditorActivity.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/inventory/InventoryOutfitsScreen.kt` | Loading, Error, EmptyScript, Edited | @unassigned | 2026-04-27 | STUBBED |
+| Map/Places/Events | `Linkpoint/src/main/java/com/linkpoint/ui/map/MapScreen.kt`, `.../MapActivity.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/discovery/MapPlacesEventsScreen.kt` | Loading, Error, EmptyRegionResults, Ready | @unassigned | 2026-04-27 | STUBBED |
+| Map/Places/Events | `Linkpoint/src/main/java/com/linkpoint/ui/search/SearchScreen.kt`, `.../SearchActivity.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/discovery/MapPlacesEventsScreen.kt` | Loading, Error, EmptySearchResults, Ready | @unassigned | 2026-04-27 | STUBBED |
+| Map/Places/Events | `Linkpoint/src/main/java/com/linkpoint/ui/slurl/SLURLScreen.kt`, `.../SLURLActivity.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/discovery/MapPlacesEventsScreen.kt` | Loading, Error, InvalidLocation, Ready | @unassigned | 2026-04-27 | STUBBED |
+| Map/Places/Events | `Linkpoint/src/main/java/com/linkpoint/ui/teleport/TeleportHistoryScreen.kt`, `.../TeleportHistoryActivity.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/discovery/MapPlacesEventsScreen.kt` | Loading, Error, EmptyHistory, Ready | @unassigned | 2026-04-27 | STUBBED |
+| Map/Places/Events | `Linkpoint/src/main/java/com/linkpoint/ui/minimap/MinimapScreen.kt`, `.../MinimapActivity.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/discovery/MapPlacesEventsScreen.kt` | Loading, Error, EmptySurroundings, Ready | @unassigned | 2026-04-27 | STUBBED |
+| Map/Places/Events | `Linkpoint/src/main/java/com/linkpoint/ui/radar/RadarCompose.kt`, `.../RadarActivity.kt`, `.../RadarView.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/discovery/MapPlacesEventsScreen.kt` | Loading, Error, EmptyNearbyAgents, Ready | @unassigned | 2026-04-27 | STUBBED |
+| Wallet/Build/Settings/Notifications | `Linkpoint/src/main/java/com/linkpoint/ui/settings/SettingsScreen.kt`, `.../SettingsActivity.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/system/WalletBuildSettingsNotificationsScreen.kt` | Loading, Error, EmptySettings, Ready | @unassigned | 2026-04-27 | STUBBED |
+| Wallet/Build/Settings/Notifications | `Linkpoint/src/main/java/com/linkpoint/ui/build/` (legacy layout: `Linkpoint/src/main/res/layout/activity_build.xml`) | `Linkpoint/src/main/java/com/linkpoint/feature/system/WalletBuildSettingsNotificationsScreen.kt` | Loading, Error, EmptySelection, Ready | @unassigned | 2026-04-27 | STUBBED |
+| Wallet/Build/Settings/Notifications | `Linkpoint/src/main/java/com/linkpoint/economy/EconomyManager.kt` (wallet entrypoint), `Linkpoint/src/main/res/layout/activity_world_view.xml` actions | `Linkpoint/src/main/java/com/linkpoint/feature/system/WalletBuildSettingsNotificationsScreen.kt` | Loading, Error, EmptyTransactions, Ready | @unassigned | 2026-04-27 | STUBBED |
+| Wallet/Build/Settings/Notifications | `Linkpoint/src/main/java/com/linkpoint/notifications/NotificationManager.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/system/WalletBuildSettingsNotificationsScreen.kt` | Loading, Error, EmptyNotifications, Ready | @unassigned | 2026-04-27 | STUBBED |
+| Wallet/Build/Settings/Notifications | `Linkpoint/src/main/java/com/linkpoint/ui/tos/TosScreen.kt`, `.../TosActivity.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/system/WalletBuildSettingsNotificationsScreen.kt` | Loading, Error, EmptyDocument, Accepted | @unassigned | 2026-04-27 | STUBBED |
+| Wallet/Build/Settings/Notifications | `Linkpoint/src/main/java/com/linkpoint/ui/xr/XRWorldActivity.kt` | `Linkpoint/src/main/java/com/linkpoint/feature/system/WalletBuildSettingsNotificationsScreen.kt` | Loading, Error, UnsupportedDevice, Ready | @unassigned | 2026-04-27 | STUBBED |
+
+## PR requirement
+Every PR that migrates a listed screen **must** update at least one corresponding matrix row (`Owner`, `Date`, and `Status`).
