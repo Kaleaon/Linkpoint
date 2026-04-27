@@ -294,33 +294,82 @@ data class DisplayName(
     val legacyFirstName: String = "",
     val legacyLastName: String = ""
 ) {
+    fun format(policy: DisplayNameFormattingPolicy = DisplayNameFormattingPolicy()): String {
+        val effectiveDisplay = displayName?.takeIf { it.isNotBlank() }
+        val effectiveUsername = username.takeIf { it.isNotBlank() }
+        val legacy = buildLegacyName(policy)
+
+        return when (policy.outputMode) {
+            DisplayNameOutputMode.DISPLAY_ONLY -> effectiveDisplay
+                ?: effectiveUsername
+                ?: legacy
+
+            DisplayNameOutputMode.DISPLAY_AND_USERNAME -> {
+                if (effectiveDisplay != null && effectiveUsername != null && effectiveDisplay != effectiveUsername) {
+                    "$effectiveDisplay ($effectiveUsername)"
+                } else {
+                    effectiveDisplay ?: effectiveUsername ?: legacy
+                }
+            }
+
+            DisplayNameOutputMode.LEGACY_FALLBACK -> {
+                if (effectiveDisplay != null && !isDefault) {
+                    effectiveDisplay
+                } else {
+                    legacy
+                }
+            }
+        }
+    }
+
+    private fun buildLegacyName(policy: DisplayNameFormattingPolicy): String {
+        val first = legacyFirstName.ifBlank { extractLegacyFirstFromUsername(username) }
+        val last = legacyLastName.ifBlank { extractLegacyLastFromUsername(username) }
+        if (first.isBlank() && last.isBlank()) {
+            return username.ifBlank { "Resident" }
+        }
+        if (policy.hideResidentLastName && last.equals("Resident", ignoreCase = true)) {
+            return first.ifBlank {
+                if (policy.fallbackToUsernameWhenLegacyIncomplete) username else "Resident"
+            }
+        }
+        return listOf(first, last)
+            .filter { it.isNotBlank() }
+            .joinToString(" ")
+            .ifBlank {
+                if (policy.fallbackToUsernameWhenLegacyIncomplete) username.ifBlank { "Resident" } else "Resident"
+            }
+    }
+
+    private fun extractLegacyFirstFromUsername(rawUsername: String): String {
+        val tokenized = rawUsername.replace('.', ' ').trim().split(" ").filter { it.isNotBlank() }
+        return tokenized.firstOrNull() ?: ""
+    }
+
+    private fun extractLegacyLastFromUsername(rawUsername: String): String {
+        val tokenized = rawUsername.replace('.', ' ').trim().split(" ").filter { it.isNotBlank() }
+        return if (tokenized.size >= 2) tokenized.drop(1).joinToString(" ") else ""
+    }
+
     /**
      * Get the name to display (display name if set, otherwise username).
      */
     fun getEffectiveName(): String {
-        return displayName ?: username
+        return format(DisplayNameFormattingPolicy(outputMode = DisplayNameOutputMode.DISPLAY_ONLY))
     }
     
     /**
      * Get the full display with both names.
      */
     fun getFullDisplay(): String {
-        return if (displayName != null && !isDefault) {
-            "$displayName ($username)"
-        } else {
-            username
-        }
+        return format(DisplayNameFormattingPolicy(outputMode = DisplayNameOutputMode.DISPLAY_AND_USERNAME))
     }
     
     /**
      * Get legacy full name.
      */
     fun getLegacyName(): String {
-        return if (legacyLastName.isNotEmpty() && legacyLastName != "Resident") {
-            "$legacyFirstName $legacyLastName"
-        } else {
-            legacyFirstName.ifEmpty { username }
-        }
+        return format(DisplayNameFormattingPolicy(outputMode = DisplayNameOutputMode.LEGACY_FALLBACK))
     }
 }
 

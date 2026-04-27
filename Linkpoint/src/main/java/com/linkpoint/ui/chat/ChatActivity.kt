@@ -17,6 +17,8 @@ import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.network.ChatType
 import com.linkpoint.chat.SessionType
+import com.linkpoint.users.DisplayName
+import com.linkpoint.users.DisplayNameOutputMode
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -50,6 +52,17 @@ class ChatActivity : AppCompatActivity() {
     private var activeGroupSessionId: UUID? = null
     
     private val app by lazy { LinkpointApp.getInstance() }
+
+    private fun formatSender(rawName: String, sourceId: UUID? = null): String {
+        val policy = app.displayNameFormattingPolicy.policy
+        return DisplayName(
+            agentId = sourceId ?: UUID(0L, 0L),
+            username = rawName,
+            displayName = null,
+            isDefault = true,
+            nextUpdate = 0L
+        ).format(policy.copy(outputMode = DisplayNameOutputMode.LEGACY_FALLBACK))
+    }
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -275,7 +288,7 @@ class ChatActivity : AppCompatActivity() {
     private fun com.linkpoint.chat.IMMessage.toActivityMessage(channel: ActivityChatChannel): ActivityChatMessage {
         return ActivityChatMessage(
             id = id.toString(),
-            sender = fromName,
+            sender = formatSender(fromName, fromAgentId),
             content = message,
             timestamp = timestamp,
             type = ActivityMessageType.NORMAL,
@@ -293,7 +306,7 @@ class ChatActivity : AppCompatActivity() {
         }
         return ActivityChatMessage(
             id = id.toString(),
-            sender = fromName,
+            sender = formatSender(fromName, sourceId),
             content = message,
             timestamp = timestamp,
             type = activityType,
