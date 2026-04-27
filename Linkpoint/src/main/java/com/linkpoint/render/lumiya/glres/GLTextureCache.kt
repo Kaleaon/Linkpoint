@@ -5,6 +5,7 @@ import android.opengl.GLES32
 import android.opengl.GLUtils
 import android.util.Log
 import android.util.LruCache
+import com.linkpoint.assets.TextureFormatPolicy
 import java.util.UUID
 
 /**
@@ -40,7 +41,11 @@ class GLTextureCache(
     }
 
     /** Upload a bitmap and cache the resulting texture. */
-    fun put(id: UUID, bitmap: Bitmap): Int {
+    fun put(
+        id: UUID,
+        bitmap: Bitmap,
+        semantic: TextureFormatPolicy.TextureSemantic = TextureFormatPolicy.TextureSemantic.ALBEDO
+    ): Int {
         // If already cached, return existing
         cache.get(id)?.let { return it.handle }
 
@@ -50,8 +55,8 @@ class GLTextureCache(
         // Use immutable storage where possible (GL ES 3.0+)
         GLES32.glTexStorage2D(
             GLES32.GL_TEXTURE_2D,
-            calculateMipLevels(bitmap.width, bitmap.height),
-            GLES32.GL_RGBA8,
+            TextureFormatPolicy.mipLevelsFor(bitmap.width, bitmap.height),
+            if (semantic == TextureFormatPolicy.TextureSemantic.ALBEDO) GLES32.GL_SRGB8_ALPHA8 else GLES32.GL_RGBA8,
             bitmap.width,
             bitmap.height
         )
@@ -89,13 +94,6 @@ class GLTextureCache(
     }
 
     val size: Int get() = cache.size()
-
-    private fun calculateMipLevels(w: Int, h: Int): Int {
-        var levels = 1
-        var s = maxOf(w, h)
-        while (s > 1) { s = s shr 1; levels++ }
-        return levels
-    }
 
     data class TextureEntry(
         val handle: Int,

@@ -453,7 +453,7 @@ Linkpoint/src/test/kotlin/com/linkpoint/utils/DiagnosticsLoggingConfigTest.kt,kt
 Linkpoint/src/test/kotlin/com/linkpoint/utils/InitializationTrackerTest.kt,kt,OK,,not-checked,SecondLifeViewer|FirestormViewer
 Linkpoint/src/test/kotlin/com/linkpoint/world/DeferredCapabilityConsumersTest.kt,kt,OK,,not-checked,LLSD|LibreMetaverse|SecondLifeViewer|FirestormViewer
 Linkpoint/src/test/kotlin/com/linkpoint/world/WorldMapBenchmark.kt,kt,OK,,not-checked,LibreMetaverse|SecondLifeViewer|FirestormViewer
-Linkpoint/tools/generate_parser_scaffolding.py,py,BROKEN,todo-call,ok,LibreMetaverse|SecondLifeViewer|FirestormViewer
+Linkpoint/tools/generate_parser_scaffolding.py,py,OK,,ok,LibreMetaverse|SecondLifeViewer|FirestormViewer
 app/src/main/java/com/lumiyaviewer/lumiya/test/LLSDTest.java,java,OK,,not-checked,LLSD|LibreMetaverse|SecondLifeViewer|FirestormViewer
 app/src/main/kotlin/com/lumiyaviewer/lumiya/slproto/messages/ObjectLinkKt.kt,kt,OK,,not-checked,LLSD|LibreMetaverse|SecondLifeViewer|FirestormViewer
 cleanup-branches.sh,sh,OK,,ok,SecondLifeViewer|FirestormViewer

@@ -53,8 +53,11 @@ import com.linkpoint.protocol.transfer.XferManager
 import com.linkpoint.render.DrawDistanceManager
 import com.linkpoint.render.HoverTextManager
 import com.linkpoint.render.RenderManager
-import com.linkpoint.render.RenderableUpdate
 import com.linkpoint.render.particles.ParticleSystem
+import com.linkpoint.render.scene.commands.FilamentRenderCommandConsumer
+import com.linkpoint.render.scene.commands.Gles3RenderCommandConsumer
+import com.linkpoint.render.scene.commands.RenderCommandStream
+import com.linkpoint.render.scene.commands.SceneRenderCommand
 import com.linkpoint.rlv.RLVController
 import com.linkpoint.service.ConnectionKeepAliveManager
 import com.linkpoint.service.BackgroundResumeScheduler
@@ -487,6 +490,9 @@ class LinkpointApp : Application() {
         private set
     lateinit var renderManager: RenderManager
         private set
+    val renderCommandStream = RenderCommandStream()
+    private lateinit var filamentCommandConsumer: FilamentRenderCommandConsumer
+    private lateinit var gles3CommandConsumer: Gles3RenderCommandConsumer
     lateinit var xrManager: XRManager
         private set
     lateinit var protocol: SecondLifeProtocol
@@ -798,6 +804,15 @@ class LinkpointApp : Application() {
         
         // Rendering (Filament-based)
         renderManager = RenderManager(this)
+        filamentCommandConsumer = FilamentRenderCommandConsumer(
+            renderManager = renderManager,
+            stream = renderCommandStream,
+            scope = applicationScope
+        ).also { it.start() }
+        gles3CommandConsumer = Gles3RenderCommandConsumer(
+            stream = renderCommandStream,
+            scope = applicationScope
+        ).also { it.start() }
         
         // XR/VR support
         xrManager = XRManager(this)
@@ -811,6 +826,59 @@ class LinkpointApp : Application() {
         meshManager = MeshManager(this, assetCache, capabilityManager)
         animationManager = AnimationManager(this, assetCache)
         soundManager = SoundManager(this, assetCache)
+        renderManager.configurePrimMeshPipeline(
+            requester = com.linkpoint.render.prims.PrimRenderer.MeshDataRequester { localId, meshId, lod, onResolved ->
+                applicationScope.launch {
+                    val meshData = try {
+                        meshManager.getMesh(meshId, lod)
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Mesh load parse failure localId=$localId meshId=$meshId: ${e.message}")
+                        onResolved(com.linkpoint.render.prims.PrimRenderer.MeshLoadResult.ParseFailure(e.message))
+                        return@launch
+                    }
+                    if (meshData != null) {
+                        onResolved(com.linkpoint.render.prims.PrimRenderer.MeshLoadResult.Success(meshData))
+                    } else {
+                        val diagnostics = meshManager.getDiagnostics()
+                        val detail = diagnostics.lastError ?: "mesh not found"
+                        val parseFailure = detail.startsWith("Parse:") ||
+                            detail.contains("parse", ignoreCase = true)
+                        if (parseFailure) {
+                            onResolved(com.linkpoint.render.prims.PrimRenderer.MeshLoadResult.ParseFailure(detail))
+                        } else {
+                            onResolved(com.linkpoint.render.prims.PrimRenderer.MeshLoadResult.MissingAsset(detail))
+                        }
+                    }
+                }
+            },
+            geometryBuilder = com.linkpoint.render.prims.PrimRenderer.MeshGeometryBuilder { entity, meshData, textureEntry ->
+                val binder = com.linkpoint.render.prims.MeshPrimRenderer.TextureBinder { _, texId, onLoaded ->
+                    val resolvedId = if (::avatarManager.isInitialized) {
+                        com.linkpoint.avatar.BakesOnMesh.resolve(texId) { slot ->
+                            avatarManager.getMyAvatar()?.baker?.getBakedTextures()?.get(slot)
+                        }
+                    } else texId
+                    if (!com.linkpoint.protocol.textures.TextureEntryParser.shouldDownload(resolvedId)) return@TextureBinder
+                    if (!::textureManager.isInitialized) return@TextureBinder
+                    applicationScope.launch {
+                        val bmp = try { textureManager.getTexture(resolvedId) } catch (_: Exception) { null }
+                        if (bmp != null) {
+                            renderManager.dispatcher.post(Runnable {
+                                val pair = renderManager.uploadBitmapAsLinkpointTexture(resolvedId, bmp)
+                                if (pair != null) onLoaded(pair.first)
+                            })
+                        }
+                    }
+                }
+                renderManager.engine?.renderableManager?.let { rm ->
+                    val inst = rm.getInstance(entity)
+                    if (inst != 0) rm.destroy(entity)
+                }
+                renderManager.getMeshPrimRenderer()?.getOrCompile(meshData)?.let { compiled ->
+                    renderManager.getMeshPrimRenderer()?.attach(entity, compiled, textureEntry, binder)
+                }
+            }
+        )
         
         // World features
         worldMap = WorldMap(capabilityManager)
@@ -1432,24 +1500,19 @@ class LinkpointApp : Application() {
                         ScenePopulationDiagnostics.markManagerApplied(ScenePopulationDiagnostics.EntityType.AVATAR, false)
                     }
                     // Add avatar to scene for rendering
-                    if (::renderManager.isInitialized) {
-                        renderManager.enqueueUpdate(
-                            RenderableUpdate.AvatarUpdate(
-                                agentId = update.fullId,
+                    val avatarSubmitted = publishRenderCommand(SceneRenderCommand.UpsertPrim(update))
+                    ScenePopulationDiagnostics.markRendererSubmitted(ScenePopulationDiagnostics.EntityType.AVATAR, avatarSubmitted)
+
+                    // Drive camera from local-avatar updates via command stream.
+                    if (::avatarManager.isInitialized &&
+                        avatarManager.getMyAvatar()?.agentId == update.fullId
+                    ) {
+                        publishRenderCommand(
+                            SceneRenderCommand.SetCamera(
                                 position = update.position,
-                                rotation = update.rotation
+                                target = update.position.copy(z = update.position.z + 1.7f)
                             )
                         )
-                        // Drive the follow / mouselook camera off the local
-                        // agent's position so user input doesn't fight the
-                        // avatar's actual world location every frame.
-                        if (::avatarManager.isInitialized &&
-                            avatarManager.getMyAvatar()?.agentId == update.fullId
-                        ) {
-                            renderManager.cameraController.setAgentPosition(update.position)
-                        }
-                    } else {
-                        ScenePopulationDiagnostics.markRendererSubmitted(ScenePopulationDiagnostics.EntityType.AVATAR, false)
                     }
                 }
                 else -> {
@@ -1459,16 +1522,15 @@ class LinkpointApp : Application() {
                     }
                     // Add object to scene for rendering using PrimRenderer
                     // PrimRenderer creates actual renderable meshes (box, sphere, etc.)
-                    if (::renderManager.isInitialized) {
-                        renderManager.enqueueUpdate(RenderableUpdate.PrimUpdate(update))
-                    }
+                    val objectSubmitted = publishRenderCommand(SceneRenderCommand.UpsertPrim(update))
+                    ScenePopulationDiagnostics.markRendererSubmitted(ScenePopulationDiagnostics.EntityType.OBJECT, objectSubmitted)
 
                     // Mesh-asset prims: kick off MeshManager fetch and ask
                     // PrimRenderer to swap the path/profile fallback geometry
                     // for the parsed mesh once it lands. Failures fall back
                     // gracefully to the path/profile box already rendered.
                     val meshAssetId = update.getMeshAssetId()
-                    if (meshAssetId != null && ::meshManager.isInitialized && ::renderManager.isInitialized) {
+                    if (meshAssetId != null && ::meshManager.isInitialized) {
                         val textureEntrySnapshot = update.textureEntry
                         applicationScope.launch {
                             val meshData = try {
@@ -1513,9 +1575,10 @@ class LinkpointApp : Application() {
                                         update.localId, meshData,
                                         textureEntrySnapshot, binder, bomResolver
                                     )
-                                })
+                                )
                             }
                         }
+                        renderManager.enqueueUpdate(RenderableUpdate.PrimUpdate(update))
                     }
 
                     // Extract and prefetch textures from the object's TextureEntry
@@ -1683,6 +1746,9 @@ class LinkpointApp : Application() {
                         if (::terrainManager.isInitialized) {
                             terrainManager.processLayerData(result)
                         }
+                        result.patches.forEach { patch ->
+                            publishRenderCommand(SceneRenderCommand.SetTerrainPatch(patch))
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -1747,13 +1813,12 @@ class LinkpointApp : Application() {
                             // Get UUID before removal so we can remove from scene
                             val obj = objectManager.getObject(localId)
                             objectManager.removeObject(localId)
-                            // Remove from PrimRenderer and SceneManager
-                            if (::renderManager.isInitialized) {
-                                renderManager.removePrim(localId)
-                                if (obj != null) {
-                                    renderManager.getSceneManager()?.removeObject(obj.fullId)
-                                }
-                            }
+                            publishRenderCommand(
+                                SceneRenderCommand.RemoveEntity(
+                                    localId = localId,
+                                    fullId = obj?.fullId
+                                )
+                            )
                         }
                     }
                 }
@@ -5659,6 +5724,20 @@ class LinkpointApp : Application() {
      * Get the current region name
      */
     fun getCurrentRegion(): String? = sessionManager.currentRegion.value?.name
+
+    fun bindGlesRenderEngine(provider: com.linkpoint.render.lumiya.core.RenderEngineProvider?) {
+        if (::gles3CommandConsumer.isInitialized) {
+            gles3CommandConsumer.bindEngine(provider)
+        }
+    }
+
+    private fun publishRenderCommand(command: SceneRenderCommand): Boolean {
+        val accepted = renderCommandStream.publish(command)
+        if (!accepted) {
+            Log.w(TAG, "Render command dropped due to backpressure: $command")
+        }
+        return accepted
+    }
     
     // ==================== DIAGNOSTIC HELPER METHODS ====================
     

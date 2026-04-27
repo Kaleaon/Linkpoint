@@ -45,6 +45,7 @@ class LinkpointTexture private constructor(
     val width: Int,
     val height: Int,
     private val source: Source,
+    private val semantic: TextureFormatPolicy.TextureSemantic = TextureFormatPolicy.TextureSemantic.ALBEDO,
 ) : AutoCloseable {
 
     enum class Source { J2K_DECODE, CACHE_HIT_MMAP, CACHE_HIT_HEAP }
@@ -179,9 +180,15 @@ class LinkpointTexture private constructor(
 
         val tex = Texture.Builder()
             .width(width).height(height)
-            .levels(mipLevelsFor(width, height))
+            .levels(TextureFormatPolicy.mipLevelsFor(width, height))
             .sampler(Texture.Sampler.SAMPLER_2D)
-            .format(Texture.InternalFormat.RGBA8)
+            .format(
+                if (semantic == TextureFormatPolicy.TextureSemantic.ALBEDO) {
+                    Texture.InternalFormat.SRGB8_A8
+                } else {
+                    Texture.InternalFormat.RGBA8
+                }
+            )
             .build(engine)
 
         val descriptor = Texture.PixelBufferDescriptor(
@@ -254,13 +261,6 @@ class LinkpointTexture private constructor(
         }
     }
 
-    private fun mipLevelsFor(w: Int, h: Int): Int {
-        var d = maxOf(w, h).coerceAtLeast(1)
-        var levels = 1
-        while (d > 1) { d = d shr 1; levels++ }
-        return levels
-    }
-
     override fun close() {
         if (!closed.compareAndSet(false, true)) return
         rgba = null
@@ -331,7 +331,8 @@ class LinkpointTexture private constructor(
         fun fromBitmap(
             uuid: UUID,
             bitmap: Bitmap,
-            source: Source = Source.J2K_DECODE
+            source: Source = Source.J2K_DECODE,
+            semantic: TextureFormatPolicy.TextureSemantic = TextureFormatPolicy.TextureSemantic.ALBEDO
         ): LinkpointTexture {
             val width = bitmap.width
             val height = bitmap.height
@@ -339,7 +340,7 @@ class LinkpointTexture private constructor(
             val buf = ByteBuffer.wrap(rgba)
             bitmap.copyPixelsToBuffer(buf)
             if (!bitmap.isRecycled) bitmap.recycle()
-            val tex = LinkpointTexture(uuid, width, height, source)
+            val tex = LinkpointTexture(uuid, width, height, source, semantic)
             tex.setRgbaAccounted(rgba)
             return tex
         }
@@ -351,10 +352,11 @@ class LinkpointTexture private constructor(
          */
         fun fromCache(
             uuid: UUID,
-            handle: MmappedTextureCache.CachedTexture
+            handle: MmappedTextureCache.CachedTexture,
+            semantic: TextureFormatPolicy.TextureSemantic = TextureFormatPolicy.TextureSemantic.ALBEDO
         ): LinkpointTexture {
             val source = if (handle.mmapped) Source.CACHE_HIT_MMAP else Source.CACHE_HIT_HEAP
-            val tex = LinkpointTexture(uuid, handle.width, handle.height, source)
+            val tex = LinkpointTexture(uuid, handle.width, handle.height, source, semantic)
             tex.cacheHandle = handle
             tex.compressed = Etc2Compressor.Result(
                 data = ByteArray(0), // payload lives in handle.buffer
