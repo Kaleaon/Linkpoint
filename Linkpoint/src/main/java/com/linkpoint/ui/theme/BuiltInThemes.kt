@@ -24,7 +24,10 @@ object BuiltInThemes {
         colorBackground = "#1A1A1A",
         colorSurface = "#2D2D2D",
         colorOnSurface = "#FFFFFF",
-        colorOnSurfaceVariant = "#B0B0B0"
+        colorOnSurfaceVariant = "#B0B0B0",
+        densityProfile = DensityProfile.STANDARD,
+        cornerProfile = CornerProfile.ROUNDED,
+        motionProfile = MotionProfile.STANDARD
     )
     
     /**
@@ -217,7 +220,10 @@ object BuiltInThemes {
         colorBackground = "#121212",
         colorSurface = "#1E1E1E",
         colorOnSurface = "#F5F5F5",
-        colorOnSurfaceVariant = "#BDBDBD"
+        colorOnSurfaceVariant = "#BDBDBD",
+        densityProfile = DensityProfile.COMPACT,
+        cornerProfile = CornerProfile.SHARP,
+        motionProfile = MotionProfile.EXPRESSIVE
     )
 
     /**

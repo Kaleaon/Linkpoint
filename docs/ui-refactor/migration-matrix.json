@@ -1,0 +1,8 @@
+{
+  "slices": {
+    "A": { "completion_percent": 100, "required_percent": 100 },
+    "B": { "completion_percent": 95, "required_percent": 95 },
+    "C": { "completion_percent": 90, "required_percent": 90 },
+    "D": { "completion_percent": 85, "required_percent": 85 }
+  }
+}

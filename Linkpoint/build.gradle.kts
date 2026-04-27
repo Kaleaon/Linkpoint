@@ -9,6 +9,63 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.21"
 }
 
+data class UiBoundaryRule(
+    val moduleName: String,
+    val packagePrefixes: Set<String>,
+    val allowedUiDependencies: Set<String>
+)
+
+val sharedUiModules = setOf("theme", "navigation", "components", "common", "dialogs")
+val uiBoundaryRules = listOf(
+    UiBoundaryRule(
+        moduleName = "ui-theme",
+        packagePrefixes = setOf("com.linkpoint.ui.theme"),
+        allowedUiDependencies = emptySet()
+    ),
+    UiBoundaryRule(
+        moduleName = "ui-common-components",
+        packagePrefixes = setOf(
+            "com.linkpoint.ui.components",
+            "com.linkpoint.ui.common",
+            "com.linkpoint.ui.dialogs"
+        ),
+        allowedUiDependencies = setOf("theme")
+    ),
+    UiBoundaryRule(
+        moduleName = "ui-navigation",
+        packagePrefixes = setOf("com.linkpoint.ui.navigation"),
+        allowedUiDependencies = setOf("theme", "components", "common", "dialogs")
+    ),
+    UiBoundaryRule(
+        moduleName = "ui/chat",
+        packagePrefixes = setOf("com.linkpoint.ui.chat"),
+        allowedUiDependencies = sharedUiModules
+    ),
+    UiBoundaryRule(
+        moduleName = "ui/inventory",
+        packagePrefixes = setOf("com.linkpoint.ui.inventory"),
+        allowedUiDependencies = sharedUiModules
+    ),
+    UiBoundaryRule(
+        moduleName = "ui/world",
+        packagePrefixes = setOf("com.linkpoint.ui.world"),
+        allowedUiDependencies = sharedUiModules
+    )
+)
+
+val runtimePackagesForbiddenInUi = listOf(
+    "com.linkpoint.protocol",
+    "com.linkpoint.network",
+    "com.linkpoint.render"
+)
+val runtimeInterfaceGateSegments = listOf(
+    ".api.",
+    ".interfaces.",
+    ".adapter.",
+    ".adapters.",
+    ".contract."
+)
+
 // Configuration for libGDX native libraries
 val natives by configurations.creating
 
@@ -378,8 +435,11 @@ dependencies {
     testImplementation("com.squareup.okhttp3:okhttp:4.12.0")  // For integration tests
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testImplementation("org.json:json:20240303")
+    testImplementation("app.cash.paparazzi:paparazzi:1.3.5")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("androidx.test:core-ktx:1.5.0")
 }
 
 // Helper function to get git commit hash
@@ -442,3 +502,84 @@ val verifyNoPlaceholderOnlyEntities by tasks.registering {
 
 tasks.matching { it.name == "assembleRelease" || it.name == "bundleRelease" || it.name == "lintVitalRelease" }
     .configureEach { dependsOn(verifyNoPlaceholderOnlyEntities) }
+
+val verifyUiArchitectureBoundaries by tasks.registering {
+    group = "verification"
+    description = "Enforces one-way UI dependencies and runtime/service boundary rules."
+    doLast {
+        val sourceRoot = file("src/main/java")
+        val kotlinFiles = sourceRoot.walkTopDown()
+            .filter { it.isFile && it.extension == "kt" }
+            .toList()
+
+        val packageRegex = Regex("""^\s*package\s+([A-Za-z0-9_.]+)""", RegexOption.MULTILINE)
+        val importRegex = Regex("""^\s*import\s+([A-Za-z0-9_.]+)""", RegexOption.MULTILINE)
+
+        fun resolveRule(pkg: String): UiBoundaryRule? = uiBoundaryRules.firstOrNull { rule ->
+            rule.packagePrefixes.any { pkg == it || pkg.startsWith("$it.") }
+        }
+
+        val violations = mutableListOf<String>()
+
+        kotlinFiles.forEach { file ->
+            val relative = file.relativeTo(projectDir).path
+            val text = file.readText()
+            val pkg = packageRegex.find(text)?.groupValues?.get(1) ?: return@forEach
+            val imports = importRegex.findAll(text).map { it.groupValues[1] }.toList()
+
+            val inUiPackage = pkg == "com.linkpoint.ui" || pkg.startsWith("com.linkpoint.ui.")
+
+            if (inUiPackage) {
+                // Rule 1: UI should only touch runtime/service/protocol through interfaces/adapters.
+                imports.filter { imp ->
+                    runtimePackagesForbiddenInUi.any { prefix -> imp == prefix || imp.startsWith("$prefix.") }
+                }.forEach { imp ->
+                    val allowedByInterface = runtimeInterfaceGateSegments.any { segment -> imp.contains(segment) } ||
+                        imp.endsWith(".Api") || imp.endsWith("Api") || imp.endsWith("Adapter") || imp.endsWith("Port")
+                    if (!allowedByInterface) {
+                        violations += "$relative imports forbidden runtime package dependency: $imp"
+                    }
+                }
+
+                // Rule 2: Feature packages are one-way: shared UI modules can be consumed,
+                // but feature-to-feature imports are blocked.
+                val ownerRule = resolveRule(pkg)
+                if (ownerRule != null) {
+                    imports.filter { it.startsWith("com.linkpoint.ui.") }.forEach { imp ->
+                        val segment = imp.removePrefix("com.linkpoint.ui.").substringBefore(".")
+                        val isSameFeature = ownerRule.packagePrefixes.any { own ->
+                            val ownSegment = own.removePrefix("com.linkpoint.ui.").substringBefore(".")
+                            ownSegment == segment
+                        }
+                        val allowed = segment in ownerRule.allowedUiDependencies
+                        if (!isSameFeature && !allowed) {
+                            violations += "$relative has disallowed UI dependency from ${ownerRule.moduleName} -> com.linkpoint.ui.$segment"
+                        }
+                    }
+                }
+            } else {
+                // Rule 3: Domain/service/runtime modules must not depend on UI packages.
+                imports.filter { it == "com.linkpoint.ui" || it.startsWith("com.linkpoint.ui.") }
+                    .forEach { imp ->
+                        violations += "$relative creates reverse dependency on UI package: $imp"
+                    }
+            }
+        }
+
+        if (violations.isNotEmpty()) {
+            throw GradleException(
+                buildString {
+                    appendLine("UI architecture boundary check failed (${violations.size} violation(s)):")
+                    violations.sorted().forEach { appendLine(" - $it") }
+                    appendLine()
+                    appendLine("Fix imports to keep dependency direction one-way:")
+                    appendLine("UI -> domain/service adapters/interfaces, never reverse.")
+                }
+            )
+        }
+    }
+}
+
+tasks.named("check") {
+    dependsOn(verifyUiArchitectureBoundaries)
+}

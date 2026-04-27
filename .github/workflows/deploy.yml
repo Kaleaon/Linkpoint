@@ -265,6 +265,11 @@ jobs:
           # Generate changelog from commits
           git log --pretty=format:"- %s (%h)" $(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")..HEAD > release_notes.md
         fi
+
+        if ! grep -Eiq '^[#]{2,3}[[:space:]]+UI migration deltas' release_notes.md; then
+          echo "" >> release_notes.md
+          cat docs/ui-refactor/changelog-template.md >> release_notes.md
+        fi
     
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
