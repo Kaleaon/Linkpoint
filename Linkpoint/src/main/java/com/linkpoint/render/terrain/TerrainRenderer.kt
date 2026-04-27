@@ -17,6 +17,11 @@ class TerrainRenderer(
     private val engine: Engine,
     private val scene: Scene
 ) {
+    data class Diagnostics(
+        val visiblePatchCount: Int,
+        val dirtyPatchCount: Int
+    )
+
     companion object {
         private const val TAG = "TerrainRenderer"
         
@@ -359,6 +364,15 @@ class TerrainRenderer(
         vertexBuffer?.let { engine.destroyVertexBuffer(it) }
         indexBuffer?.let { engine.destroyIndexBuffer(it) }
         materialInstance?.let { engine.destroyMaterialInstance(it) }
+    }
+
+    fun getDiagnostics(): Diagnostics {
+        val dirty = patches.count { it.dirty }
+        val visible = if (terrainEntity != 0) PATCHES_PER_SIDE * PATCHES_PER_SIDE else 0
+        return Diagnostics(
+            visiblePatchCount = visible,
+            dirtyPatchCount = dirty
+        )
     }
 }
 

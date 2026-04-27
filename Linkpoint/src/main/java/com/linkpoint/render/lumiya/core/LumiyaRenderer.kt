@@ -44,6 +44,9 @@ class LumiyaRenderer : RenderEngineProvider {
 
     private lateinit var ctx: LumiyaRenderContext
 
+    @Volatile private var glThreadId: Long = Long.MIN_VALUE
+    @Volatile private var glThreadName: String = "<unset>"
+
     // Drawable subsystems
     private var terrainDrawable: DrawableTerrain? = null
     private var waterDrawable: DrawableWater? = null
@@ -65,12 +68,13 @@ class LumiyaRenderer : RenderEngineProvider {
     // =====================================================================
 
     override fun initialize(context: Context, surface: Surface, width: Int, height: Int): Boolean {
+        requireGlThread("initialize")
         if (isInitialized) return true
         Log.i(TAG, "Initialising Lumiya renderer ($width x $height)")
 
         val initStartedAt = System.currentTimeMillis()
         try {
-            ctx = LumiyaRenderContext()
+            ctx = LumiyaRenderContext { apiName -> requireGlThread("LumiyaRenderContext.$apiName") }
             if (!ctx.initialize()) {
                 Log.e(TAG, "Render context initialisation failed")
                 RenderDiagnostics.glInitFailed(
@@ -136,6 +140,7 @@ class LumiyaRenderer : RenderEngineProvider {
     }
 
     override fun onSurfaceChanged(width: Int, height: Int) {
+        requireGlThread("onSurfaceChanged")
         viewportWidth = width
         viewportHeight = height
         ctx.aspectRatio = width.toFloat() / height.toFloat()
@@ -146,6 +151,7 @@ class LumiyaRenderer : RenderEngineProvider {
     }
 
     override fun onSurfaceDestroyed() {
+        requireGlThread("onSurfaceDestroyed")
         // Surface lost but engine not destroyed – resources remain valid
         Log.w(TAG, "Surface destroyed")
         RenderDiagnostics.glSurfaceDestroyed()
@@ -156,6 +162,7 @@ class LumiyaRenderer : RenderEngineProvider {
     // =====================================================================
 
     override fun renderFrame() {
+        requireGlThread("renderFrame")
         if (!isInitialized) return
 
         // ── 1. Preparation ───────────────────────────────────────────────
@@ -266,7 +273,15 @@ class LumiyaRenderer : RenderEngineProvider {
     // Shutdown
     // =====================================================================
 
+
+    override fun waitForGpuIdle(reason: String) {
+        requireGlThread("waitForGpuIdle")
+        GLES32.glFinish()
+        Log.d(TAG, "GL queue drained before backend transition: $reason")
+    }
+
     override fun shutdown() {
+        requireGlThread("shutdown")
         if (!isInitialized) return
         Log.i(TAG, "Shutting down Lumiya renderer")
         RenderDiagnostics.glShutdown(
@@ -282,6 +297,22 @@ class LumiyaRenderer : RenderEngineProvider {
         destroyFullScreenQuad()
         ctx.shutdown()
         isInitialized = false
+    }
+
+
+    private fun requireGlThread(apiName: String) {
+        val current = Thread.currentThread()
+        if (glThreadId == Long.MIN_VALUE) {
+            glThreadId = current.id
+            glThreadName = current.name
+            Log.i(TAG, "Bound GL thread affinity to ${current.name} (${current.id})")
+            return
+        }
+        if (current.id != glThreadId) {
+            val message = "LumiyaRenderer.$apiName must run on GL thread $glThreadName ($glThreadId); current=${current.name} (${current.id})"
+            Log.e(TAG, message)
+            throw IllegalStateException(message)
+        }
     }
 
     // =====================================================================

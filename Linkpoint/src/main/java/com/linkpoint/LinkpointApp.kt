@@ -1540,11 +1540,40 @@ class LinkpointApp : Application() {
                                 null
                             }
                             if (meshData != null) {
-                                publishRenderCommand(
-                                    SceneRenderCommand.UpsertMesh(
-                                        localId = update.localId,
-                                        meshData = meshData,
-                                        textureEntry = textureEntrySnapshot
+                                // TextureBinder: fetch already-resolved per-face
+                                // texture UUID and return Texture? (null keeps
+                                // the same baseColor/alpha fallback in both backends).
+                                val binder = com.linkpoint.render.prims.MeshPrimRenderer.TextureBinder { _, texId, onLoaded ->
+                                    if (!::textureManager.isInitialized) {
+                                        onLoaded(null)
+                                        return@TextureBinder
+                                    }
+                                    applicationScope.launch {
+                                        val bmp = try { textureManager.getTexture(texId) } catch (_: Exception) { null }
+                                        if (bmp != null) {
+                                            renderManager.dispatcher.post(Runnable {
+                                                // Route through the LinkpointTexture-tracked path so
+                                                // every per-face mesh texture participates in VRAM
+                                                // accounting and gets a clean Filament release path.
+                                                val pair = renderManager.uploadBitmapAsLinkpointTexture(texId, bmp)
+                                                onLoaded(pair?.first)
+                                            })
+                                        } else {
+                                            renderManager.dispatcher.post(Runnable { onLoaded(null) })
+                                        }
+                                    }
+                                }
+                                val bomResolver: (UUID) -> UUID = { declaredId ->
+                                    if (::avatarManager.isInitialized) {
+                                        com.linkpoint.avatar.BakesOnMesh.resolve(declaredId) { slot ->
+                                            avatarManager.getMyAvatar()?.baker?.getBakedTextures()?.get(slot)
+                                        }
+                                    } else declaredId
+                                }
+                                renderManager.dispatcher.post(Runnable {
+                                    renderManager.attachMeshAsset(
+                                        update.localId, meshData,
+                                        textureEntrySnapshot, binder, bomResolver
                                     )
                                 )
                             }

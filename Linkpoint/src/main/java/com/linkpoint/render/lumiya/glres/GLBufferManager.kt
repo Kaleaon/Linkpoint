@@ -45,6 +45,7 @@ class GLBufferManager(private val resourceManager: GLResourceManager) {
      * @return GL buffer handle.
      */
     fun uploadVertexBuffer(data: FloatArray, usage: Int = GLES32.GL_STATIC_DRAW): Int {
+        resourceManager.assertGlThread("GLBufferManager.uploadVertexBuffer")
         val handle = resourceManager.createBuffer()
         val fb = createFloatBuffer(data)
         GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, handle)
@@ -59,6 +60,7 @@ class GLBufferManager(private val resourceManager: GLResourceManager) {
      * @return GL buffer handle.
      */
     fun uploadIndexBuffer(data: ShortArray, usage: Int = GLES32.GL_STATIC_DRAW): Int {
+        resourceManager.assertGlThread("GLBufferManager.uploadIndexBuffer(short)")
         val handle = resourceManager.createBuffer()
         val sb = createShortBuffer(data)
         GLES32.glBindBuffer(GLES32.GL_ELEMENT_ARRAY_BUFFER, handle)
@@ -69,6 +71,7 @@ class GLBufferManager(private val resourceManager: GLResourceManager) {
     }
 
     fun uploadIndexBuffer(data: IntArray, usage: Int = GLES32.GL_STATIC_DRAW): Int {
+        resourceManager.assertGlThread("GLBufferManager.uploadIndexBuffer(int)")
         val handle = resourceManager.createBuffer()
         val ib = createIntBuffer(data)
         GLES32.glBindBuffer(GLES32.GL_ELEMENT_ARRAY_BUFFER, handle)
@@ -81,6 +84,7 @@ class GLBufferManager(private val resourceManager: GLResourceManager) {
     // ── UBO creation ─────────────────────────────────────────────────────
 
     fun createUniformBuffer(sizeBytes: Int, usage: Int = GLES32.GL_DYNAMIC_DRAW): Int {
+        resourceManager.assertGlThread("GLBufferManager.createUniformBuffer")
         val handle = resourceManager.createBuffer()
         GLES32.glBindBuffer(GLES32.GL_UNIFORM_BUFFER, handle)
         GLES32.glBufferData(GLES32.GL_UNIFORM_BUFFER, sizeBytes, null, usage)
@@ -105,6 +109,7 @@ class GLBufferManager(private val resourceManager: GLResourceManager) {
         indexData: ShortArray,
         attributes: List<Pair<Int, Int>>  // (location, size)
     ): MeshVAO {
+        resourceManager.assertGlThread("GLBufferManager.buildVAO")
         val vao = resourceManager.createVAO()
         val vbo = uploadVertexBuffer(vertexData)
         val ebo = uploadIndexBuffer(indexData)
@@ -131,6 +136,7 @@ class GLBufferManager(private val resourceManager: GLResourceManager) {
         indexData: IntArray,
         attributes: List<Pair<Int, Int>>
     ): MeshVAO {
+        resourceManager.assertGlThread("GLBufferManager.buildVAOInt")
         val vao = resourceManager.createVAO()
         val vbo = uploadVertexBuffer(vertexData)
         val ebo = uploadIndexBuffer(indexData)
@@ -155,6 +161,7 @@ class GLBufferManager(private val resourceManager: GLResourceManager) {
     // ── Cleanup ──────────────────────────────────────────────────────────
 
     fun destroyVAO(mesh: MeshVAO) {
+        resourceManager.assertGlThread("GLBufferManager.destroyVAO")
         resourceManager.deleteVAO(mesh.vao)
         resourceManager.deleteBuffer(mesh.vbo)
         resourceManager.deleteBuffer(mesh.ebo)
