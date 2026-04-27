@@ -70,6 +70,14 @@
             </intent-filter>
         </activity>
 
+
+        <!-- Compose migration host entry (world/home) -->
+        <activity
+            android:name=".ui.navigation.WorldHomeHostActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Linkpoint.NoActionBar"/>
+
         <!-- Main World View Activity with Filament Rendering -->
         <activity
             android:name=".ui.world.WorldViewActivity"
