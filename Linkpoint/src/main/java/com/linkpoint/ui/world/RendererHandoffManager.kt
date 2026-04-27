@@ -122,4 +122,32 @@ class RendererHandoffManager(
             throw t
         }
     }
+
+
+    fun onHostPaused() {
+        val backend = currentBackend() ?: return
+        if (currentState() != State.ACTIVE) return
+        onPauseActiveBackendDrawing(backend)
+    }
+
+    fun onHostResumed() {
+        // Surface re-attachment and frame-loop restart remain owned by concrete backend hosts.
+        // This callback intentionally marks the lifecycle transition for handoff sequencing.
+        if (currentState() == State.IDLE) {
+            Log.d(TAG, "Host resumed while handoff manager is IDLE")
+        }
+    }
+
+    fun onHostDisposed() {
+        val backend = currentBackend() ?: return
+        try {
+            onDisposeBackendOwnedGpuResources(backend)
+        } finally {
+            synchronized(lock) {
+                activeBackend = null
+                state = State.IDLE
+            }
+        }
+    }
+
 }
