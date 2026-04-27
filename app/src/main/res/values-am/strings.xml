@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="abc_action_bar_home_description">ወደ መነሻ ይዳስሱ</string>
+    <string name="abc_action_bar_home_description_format">%1$s፣ %2$s</string>
+    <string name="abc_action_bar_home_subtitle_description_format">%1$s፣ %2$s፣ %3$s</string>
+    <string name="abc_action_bar_up_description">ወደ ላይ ይዳስሱ</string>
+    <string name="abc_action_menu_overflow_description">ተጨማሪ አማራጮች</string>
+    <string name="abc_action_mode_done">ተከናውኗል</string>
+    <string name="abc_activity_chooser_view_see_all">ሁሉንም ይመልከቱ</string>
+    <string name="abc_activitychooserview_choose_application">መተግበሪያ ይምረጡ</string>
+    <string name="abc_capital_off">ጠፍቷል</string>
+    <string name="abc_capital_on">በርቷል</string>
+    <string name="abc_search_hint">ፈልግ…</string>
+    <string name="abc_searchview_description_clear">መጠይቅ አጽዳ</string>
+    <string name="abc_searchview_description_query">የፍለጋ ጥያቄ</string>
+    <string name="abc_searchview_description_search">ፍለጋ</string>
+    <string name="abc_searchview_description_submit">መጠይቅ ያስረክቡ</string>
+    <string name="abc_searchview_description_voice">የድምፅ ፍለጋ</string>
+    <string name="abc_shareactionprovider_share_with">ከሚከተለው ጋር ያጋሩ</string>
+    <string name="abc_shareactionprovider_share_with_application">ከ%s ጋር ያጋሩ</string>
+    <string name="abc_toolbar_collapse_description">ሰብስብ</string>
+    <string name="back_button_content_description">ተመለስ</string>
+    <string name="cancel_button">ይቅር</string>
+    <string name="dialog_button_got_it">እሺ ገባኝ</string>
+    <string name="dialog_button_open_help_center">የእገዛ ማዕከልን ክፈት</string>
+    <string name="dialog_message_incompatible_phone">ለቀን ህልም ዝግጁ የሆነ ስልክ ያስፈልጋል። ተጨማሪ መረጃ ለማግኘት የቀን ህልም እገዛ ማዕከሉን ይጎብኙ።</string>
+    <string name="dialog_message_no_cardboard">የእርስዎን መመልከቻ ለማዋቀር የCardboard መተግበሪያውን ያግኙ።</string>
+    <string name="dialog_message_setup">ምርጥ ተሞክሮውን ለማግኘት መመልከቻዎን ያዋቅሩ።</string>
+    <string name="dialog_title">አዋቅር</string>
+    <string name="dialog_title_incompatible_phone">ተኳሃኝ ያልሆነ ስልክ</string>
+    <string name="dialog_title_vr_core_not_enabled">ማዋቀር ያስፈልጋል</string>
+    <string name="dialog_title_vr_core_not_installed">መጫን ያስፈልጋል</string>
+    <string name="dialog_title_warning">ማስጠንቀቂያ</string>
+    <string name="dialog_vr_core_not_enabled">ይህ መተግበሪያ Google ቪአር አገልግሎቶች ካልነቃ በአግባቡ ላይሰራ ይችላል። ከመቀጠልዎ በፊት እባክዎ ይህን በስልክ ቅንብሮች ውስጥ ያንቁ።</string>
+    <string name="dialog_vr_core_not_installed">ይህ መተግበሪያ ያለ Google ቪአር አገልግሎቶች በአግባቡ ላይሰራ ይችላል። ከመቀጠልዎ በፊት እባክዎ Google ቪአር አገልግሎቶችን ከPlay መደብር ይጫኑ።</string>
+    <string name="go_to_playstore_button">ወደ Play መደብር ሂድ</string>
+    <string name="go_to_vr_listeners_settings_button">ወደ ቅንብሮች ሂድ</string>
+    <string name="no_browser_text">ድር ጣቢያውን የሚከፍት አሳሽ የለም</string>
+    <string name="place_your_phone_into_cardboard">ስልክዎን በCardboard መመልከቻዎ ውስጥ ያስቀምጡት</string>
+    <string name="place_your_viewer_into_viewer_format">የእርስዎን ስልክ በ%s መመልከቻዎ ውስጥ ያስቀምጡት</string>
+    <string name="search_menu_title">ፈልግ</string>
+    <string name="settings_button_content_description">ቅንብሮች</string>
+    <string name="setup_button">አዋቅር</string>
+    <string name="status_bar_notification_info_overflow">999+</string>
+    <string name="switch_viewer_action">ማብሪያ/ማጥፊያ</string>
+    <string name="switch_viewer_prompt">የተለየ መመልከቻ እየተጠቀሙ ነው?</string>
+</resources>

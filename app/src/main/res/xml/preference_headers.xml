@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt">
+    <header android:title="@string/prefs_category_connection" android:fragment="com.lumiyaviewer.lumiya.ui.settings.SettingsFragment">
+        <extra android:name="preferenceKey" android:value="preferences_connection"/>
+    </header>
+    <header android:title="@string/prefs_category_appearance" android:fragment="com.lumiyaviewer.lumiya.ui.settings.SettingsFragment">
+        <extra android:name="preferenceKey" android:value="preferences_appearance"/>
+    </header>
+</preference-headers>

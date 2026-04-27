@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:orientation="horizontal" android:paddingLeft="8sp" android:paddingTop="4sp" android:paddingRight="8sp" android:paddingBottom="4sp" android:layout_width="match_parent" android:layout_height="wrap_content">
+    <com.lumiyaviewer.lumiya.ui.chat.ChatterPicView android:layout_gravity="center_vertical" android:id="@+id/userPicView" android:layout_width="32dp" android:layout_height="32dp" android:layout_marginTop="2dp" android:layout_marginRight="10dp" android:layout_marginBottom="2dp"/>
+    <TextView android:textSize="16sp" android:ellipsize="end" android:layout_gravity="center_vertical" android:id="@+id/userNameTextView" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1"/>
+    <ImageButton android:id="@+id/role_member_remove_button" android:paddingLeft="1dp" android:paddingRight="1dp" android:layout_width="wrap_content" android:layout_height="match_parent" android:src="?attr/MenuIconCloseThemed" android:scaleType="fitCenter" android:contentDescription="@string/remove_member_button_hint" style="@style/BorderlessCardButton"/>
+</LinearLayout>

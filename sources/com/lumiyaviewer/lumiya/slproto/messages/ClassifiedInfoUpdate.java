@@ -1,0 +1,102 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
+package com.lumiyaviewer.lumiya.slproto.messages;
+
+import com.lumiyaviewer.lumiya.slproto.SLMessage;
+import com.lumiyaviewer.lumiya.slproto.types.LLVector3d;
+import java.nio.ByteBuffer;
+import java.util.UUID;
+
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
+
+public class ClassifiedInfoUpdate extends SLMessage
+{
+    public static class AgentData
+    {
+
+        public UUID AgentID;
+        public UUID SessionID;
+
+        public AgentData()
+        {
+        }
+    }
+
+    public static class Data
+    {
+
+        public int Category;
+        public int ClassifiedFlags;
+        public UUID ClassifiedID;
+        public byte Desc[];
+        public byte Name[];
+        public UUID ParcelID;
+        public int ParentEstate;
+        public LLVector3d PosGlobal;
+        public int PriceForListing;
+        public UUID SnapshotID;
+
+        public Data()
+        {
+        }
+    }
+
+
+    public AgentData AgentData_Field;
+    public Data Data_Field;
+
+    public ClassifiedInfoUpdate()
+    {
+        zeroCoded = false;
+        AgentData_Field = new AgentData();
+        Data_Field = new Data();
+    }
+
+    public int CalcPayloadSize()
+    {
+        return Data_Field.Name.length + 21 + 2 + Data_Field.Desc.length + 16 + 4 + 16 + 24 + 1 + 4 + 36;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleClassifiedInfoUpdate(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)45);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packUUID(bytebuffer, Data_Field.ClassifiedID);
+        packInt(bytebuffer, Data_Field.Category);
+        packVariable(bytebuffer, Data_Field.Name, 1);
+        packVariable(bytebuffer, Data_Field.Desc, 2);
+        packUUID(bytebuffer, Data_Field.ParcelID);
+        packInt(bytebuffer, Data_Field.ParentEstate);
+        packUUID(bytebuffer, Data_Field.SnapshotID);
+        packLLVector3d(bytebuffer, Data_Field.PosGlobal);
+        packByte(bytebuffer, (byte)Data_Field.ClassifiedFlags);
+        packInt(bytebuffer, Data_Field.PriceForListing);
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        Data_Field.ClassifiedID = unpackUUID(bytebuffer);
+        Data_Field.Category = unpackInt(bytebuffer);
+        Data_Field.Name = unpackVariable(bytebuffer, 1);
+        Data_Field.Desc = unpackVariable(bytebuffer, 2);
+        Data_Field.ParcelID = unpackUUID(bytebuffer);
+        Data_Field.ParentEstate = unpackInt(bytebuffer);
+        Data_Field.SnapshotID = unpackUUID(bytebuffer);
+        Data_Field.PosGlobal = unpackLLVector3d(bytebuffer);
+        Data_Field.ClassifiedFlags = unpackByte(bytebuffer) & 0xff;
+        Data_Field.PriceForListing = unpackInt(bytebuffer);
+    }
+}

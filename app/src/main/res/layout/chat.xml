@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent">
+    <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_weight="1">
+        <android.support.v7.widget.RecyclerView android:id="@+id/chatLogView" android:layout_width="match_parent" android:layout_height="match_parent" android:divider="#000000" android:dividerHeight="0px"/>
+        <com.lumiyaviewer.lumiya.ui.voice.VoiceStatusView android:id="@+id/voice_status_view" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="0dp" android:layout_marginTop="0dp" android:layout_marginRight="0dp" android:layout_alignParentLeft="true" android:layout_alignParentTop="true" android:layout_alignParentRight="true"/>
+        <android.support.design.widget.FloatingActionButton android:id="@+id/scroll_to_bottom_btn" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginRight="@dimen/fab_button_margin_right" android:layout_marginBottom="@dimen/fab_button_margin_bottom" android:src="?attr/IconExpandMore" android:scaleType="fitCenter" android:layout_alignParentRight="true" android:layout_alignParentBottom="true" android:contentDescription="@string/scroll_to_the_bottom"/>
+    </RelativeLayout>
+    <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_weight="0">
+        <LinearLayout android:orientation="horizontal" android:id="@+id/chat_vr_mode_controls" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true">
+            <Button android:id="@+id/chat_speak_button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chat_speak_button_title"/>
+            <Button android:id="@+id/chat_voice_call_button" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chat_voice_call_button_title"/>
+        </LinearLayout>
+        <EditText android:layout_gravity="center_vertical" android:id="@+id/sendMessageText" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_toLeftOf="@+id/sendMessageButton" android:layout_centerVertical="true" android:inputType="textAutoCorrect" android:imeOptions="actionSend"/>
+        <ImageButton android:layout_gravity="center_vertical" android:id="@+id/sendMessageButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="?attr/IconSendMessage" android:minWidth="48dp" android:minHeight="48dp" android:layout_alignParentRight="true" android:contentDescription="@string/send_message_content_description" style="@style/Base.Widget.AppCompat.Button.Borderless"/>
+        <com.lumiyaviewer.lumiya.ui.chat.TypingIndicatorView android:id="@+id/typing_indicator" android:padding="3dp" android:visibility="invisible" android:layout_width="24dp" android:layout_height="12dp" android:layout_marginLeft="8dp" android:src="@drawable/typing_contact_list_indicator" android:scaleType="fitCenter" android:layout_alignParentLeft="true" android:layout_alignParentTop="true"/>
+    </RelativeLayout>
+</LinearLayout>

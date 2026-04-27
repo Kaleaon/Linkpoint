@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="abc_action_bar_home_description">Evə naviqasiya et</string>
+    <string name="abc_action_bar_home_description_format">%1$s, %2$s</string>
+    <string name="abc_action_bar_home_subtitle_description_format">%1$s, %2$s, %3$s</string>
+    <string name="abc_action_bar_up_description">Yuxarı get</string>
+    <string name="abc_action_menu_overflow_description">Digər variantlar</string>
+    <string name="abc_action_mode_done">Hazırdır</string>
+    <string name="abc_activity_chooser_view_see_all">Hamısına baxın</string>
+    <string name="abc_activitychooserview_choose_application">Tətbiq seçin</string>
+    <string name="abc_capital_off">DEAKTİV</string>
+    <string name="abc_capital_on">AKTİV</string>
+    <string name="abc_search_hint">Axtarış...</string>
+    <string name="abc_searchview_description_clear">Sorğunu təmizlə</string>
+    <string name="abc_searchview_description_query">Axtarış sorğusu</string>
+    <string name="abc_searchview_description_search">Axtarış</string>
+    <string name="abc_searchview_description_submit">Sorğunu göndərin</string>
+    <string name="abc_searchview_description_voice">Səsli axtarış</string>
+    <string name="abc_shareactionprovider_share_with">Bununla paylaşın</string>
+    <string name="abc_toolbar_collapse_description">Dağıt</string>
+    <string name="back_button_content_description">geri</string>
+    <string name="cancel_button">Ləğv edin</string>
+    <string name="dialog_button_got_it">ANLADIM</string>
+    <string name="dialog_button_open_help_center">YARDIM MƏRKƏZİNİ AÇIN</string>
+    <string name="dialog_message_incompatible_phone">Daydream hazır telefonu tələb olunur. Ətraflı məlumat üçün Daydream Yardım Mərkəzinə daxil olun.</string>
+    <string name="dialog_message_no_cardboard">İzləyicinizi konfiqurasiya etmək üçün Cardboard tətbiqi əldə edin.</string>
+    <string name="dialog_message_setup">Ən yaxşı təcrübə üçün izləyicinizi ayarlayın.</string>
+    <string name="dialog_title">Konfiqurasiya edin</string>
+    <string name="dialog_title_incompatible_phone">Uyğun olmayan telefon</string>
+    <string name="dialog_title_vr_core_not_enabled">Ayarlama tələb olunur</string>
+    <string name="dialog_title_vr_core_not_installed">Quraşdırma tələb olunur</string>
+    <string name="dialog_title_warning">Xəbərdarlıq</string>
+    <string name="dialog_vr_core_not_enabled">Google VR Xidmətləri aktiv olmadığı halda, bu tətbiq düzgün işləməyə bilər. Davam etməmişdən əvvəl telefonun Ayarlarında aktiv edin.</string>
+    <string name="dialog_vr_core_not_installed">Google VR Xidmətləri olmada bu tətbiq düzgün işləməyə bilər. Davam etməmişdən əvvəl Play Store\'dan Google VR Xidmətlərini quraşdırın.</string>
+    <string name="go_to_playstore_button">Play Store\'a keçin</string>
+    <string name="go_to_vr_listeners_settings_button">Ayarlara gedin</string>
+    <string name="no_browser_text">Veb saytı açmaq üçün brauzer yoxdur</string>
+    <string name="place_your_phone_into_cardboard">Telefonunuzu Cardboard izləyicisinə yerləşdirin</string>
+    <string name="place_your_viewer_into_viewer_format">Telefonu %s izləyicinizə yerləşdirin</string>
+    <string name="search_menu_title">Axtarış</string>
+    <string name="settings_button_content_description">ayarlar</string>
+    <string name="setup_button">Quraşdırma</string>
+    <string name="status_bar_notification_info_overflow">999+</string>
+    <string name="switch_viewer_action">Keçid</string>
+    <string name="switch_viewer_prompt">Fərqli izləyici istifadə edirsiniz?</string>
+</resources>

@@ -1,0 +1,23 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
+package com.lumiyaviewer.lumiya.slproto.messages;
+
+
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            RegionInfo
+
+public static class 
+{
+
+    public int HardMaxAgents;
+    public int HardMaxObjects;
+    public int MaxAgents32;
+    public byte ProductName[];
+    public byte ProductSKU[];
+
+    public ()
+    {
+    }
+}

@@ -1,0 +1,88 @@
+// Top-level build file where you can add configuration options common to all sub-modules/projects.
+// Universal Architecture Support - Auto-detects and configures for any machine
+
+/*
+Universal Build System Features:
+- Auto-detects architecture (x86_64, ARM64, ARMv7, x86)
+- Downloads appropriate AAPT2 binary from JonForShort/android-tools
+- Configures Gradle automatically for any machine
+- Fallback mechanisms for unsupported architectures
+*/
+
+// Apply universal AAPT2 configuration
+apply from: 'gradle/scripts/universal-aapt2.gradle'
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // AGP 8.6.0 with universal ARM64 support
+        classpath 'com.android.tools.build:gradle:8.6.0'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+// Universal clean task
+tasks.register('clean', Delete) {
+    delete rootProject.buildDir
+}
+
+// Architecture information task
+tasks.register('archInfo') {
+    doLast {
+        def arch = System.getProperty("os.arch")
+        def osName = System.getProperty("os.name")
+        def javaHome = System.getProperty("java.home")
+        def androidHome = System.getenv("ANDROID_HOME")
+        
+        println """
+🌍 Universal Build Environment Information:
+   OS: $osName
+   Architecture: $arch  
+   Java: $javaHome
+   Android SDK: ${androidHome ?: 'Not set'}
+   Gradle: ${gradle.gradleVersion}
+        """.stripIndent()
+        
+        // Check for custom AAPT2
+        if (project.hasProperty('customAapt2Path')) {
+            println "   AAPT2 Override: ${project.ext.customAapt2Path}"
+        } else {
+            println "   AAPT2: Standard Android SDK"
+        }
+    }
+}
+
+// Pre-build architecture check
+tasks.register('prebuildCheck') {
+    doFirst {
+        println "🔍 Pre-build architecture compatibility check..."
+        
+        def arch = System.getProperty("os.arch")
+        def supportedArchs = ['amd64', 'x86_64', 'aarch64', 'arm64', 'armv7l', 'i386', 'i686']
+        
+        if (arch in supportedArchs) {
+            println "✅ Architecture $arch is supported"
+        } else {
+            println "⚠️  Architecture $arch may not be fully supported"
+            println "   Supported: ${supportedArchs.join(', ')}"
+        }
+    }
+}
+
+// Make all builds depend on prebuild check
+allprojects {
+    tasks.whenTaskAdded { task ->
+        if (task.name == 'preBuild') {
+            task.dependsOn prebuildCheck
+        }
+    }
+}
