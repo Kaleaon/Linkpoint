@@ -26,6 +26,9 @@ const MessageIDs = {
   REGION_HANDSHAKE: 0x94,
   REGION_HANDSHAKE_REPLY: 0x95,
   
+  // Inventory Messages
+  CREATE_INVENTORY_FOLDER: 0xFFFF0111,
+
   // System Messages
   PACKET_ACK: 0xFB,
   START_PING_CHECK: 0x01,
@@ -36,9 +39,6 @@ const MessageIDs = {
   TELEPORT_PROGRESS: 0x56,
   TELEPORT_FINISH: 0x57,
   TELEPORT_FAILED: 0x58,
-
-  // Friend Messages
-  GRANT_USER_RIGHTS: 0xFFFF0140,
 };
 
 /**
@@ -240,64 +240,8 @@ class ChatFromViewerMessage extends SLMessage {
   }
 
   packPayload(buffer) {
-    const view = new DataView(buffer);
-    let offset = 0;
-
-    // AgentData Block
-    // AgentID (LLUUID - big-endian per SL protocol)
-    offset = this.uuidToBytes(this.agentId, view, offset);
-
-    // SessionID (LLUUID - big-endian per SL protocol)
-    offset = this.uuidToBytes(this.sessionId, view, offset);
-
-    // ChatData Block
-    // Message (Variable 2 - U16 length (including null) + bytes + null terminator)
-    const msgBytes = new TextEncoder().encode(this.message);
-    view.setUint16(offset, msgBytes.length + 1, true); // Little Endian, include null terminator
-    offset += 2;
-    for (let i = 0; i < msgBytes.length; i++) {
-      view.setUint8(offset++, msgBytes[i]);
-    }
-    // Null terminator required by Second Life protocol
-    view.setUint8(offset++, 0);
-
-    // Type (U8)
-    view.setUint8(offset++, this.type);
-
-    // Channel (S32)
-    view.setInt32(offset, this.channel, true); // Little Endian
-    offset += 4;
-
-    return offset;
-  }
-
-  uuidToBytes(uuid, view, offset) {
-    // Handle null/undefined/empty - write zero-filled UUID
-    if (!uuid) {
-      for (let i = 0; i < 16; i++) {
-        view.setUint8(offset++, 0);
-      }
-      return offset;
-    }
-
-    const hex = uuid.replace(/-/g, '');
-
-    // Basic UUID validation: must be 32 hex characters after removing dashes
-    if (hex.length !== 32 || !/^[0-9a-fA-F]+$/.test(hex)) {
-      throw new Error(`Invalid UUID format: ${uuid}`);
-    }
-
-    // Parse UUID to get MSB and LSB (big-endian per SL protocol)
-    const msb = BigInt('0x' + hex.substring(0, 16));
-    const lsb = BigInt('0x' + hex.substring(16, 32));
-    
-    // Write as big-endian (network byte order) per SL protocol specification
-    view.setBigUint64(offset, msb, false); // big-endian
-    offset += 8;
-    view.setBigUint64(offset, lsb, false); // big-endian
-    offset += 8;
-
-    return offset;
+    // TODO: Implement message packing
+    // This would be used to send chat to simulator
   }
 }
 
@@ -371,78 +315,6 @@ class ObjectUpdateMessage extends SLMessage {
   }
 }
 
-
-/**
- * GrantUserRights message
- */
-class GrantUserRightsMessage extends SLMessage {
-  constructor(agentId, sessionId, friendId, rights) {
-    super();
-    this.agentId = agentId;
-    this.sessionId = sessionId;
-    this.friendId = friendId;
-    this.rights = rights;
-    this.isReliable = true;
-  }
-
-  getMessageID() {
-    return MessageIDs.GRANT_USER_RIGHTS;
-  }
-
-  getMessageName() {
-    return 'GrantUserRights';
-  }
-
-  packPayload(buffer) {
-    const view = new DataView(buffer);
-    let offset = 0;
-
-    // AgentData Block
-    // AgentID (LLUUID - big-endian per SL protocol)
-    offset = this.uuidToBytes(this.agentId, view, offset);
-
-    // SessionID (LLUUID - big-endian per SL protocol)
-    offset = this.uuidToBytes(this.sessionId, view, offset);
-
-    // Rights block count (1 block)
-    view.setUint8(offset++, 1);
-
-    // Rights Block
-    // AgentRelated (LLUUID - big-endian per SL protocol)
-    offset = this.uuidToBytes(this.friendId, view, offset);
-
-    // RelatedRights (S32)
-    view.setInt32(offset, this.rights, true); // Little Endian
-    offset += 4;
-
-    return offset;
-  }
-
-  uuidToBytes(uuid, view, offset) {
-    if (!uuid) {
-      for (let i = 0; i < 16; i++) {
-        view.setUint8(offset++, 0);
-      }
-      return offset;
-    }
-
-    const hex = uuid.replace(/-/g, '');
-    if (hex.length !== 32 || !/^[0-9a-fA-F]+$/.test(hex)) {
-      throw new Error(`Invalid UUID format: ${uuid}`);
-    }
-
-    const msb = BigInt('0x' + hex.substring(0, 16));
-    const lsb = BigInt('0x' + hex.substring(16, 32));
-
-    view.setBigUint64(offset, msb, false); // big-endian
-    offset += 8;
-    view.setBigUint64(offset, lsb, false); // big-endian
-    offset += 8;
-
-    return offset;
-  }
-}
-
 /**
  * AgentUpdate message
  */
@@ -477,6 +349,65 @@ class AgentUpdateMessage extends SLMessage {
   }
 }
 
+/**
+ * CreateInventoryFolder message
+ */
+class CreateInventoryFolderMessage extends SLMessage {
+  constructor(agentId, sessionId, folderId, parentId, type, name) {
+    super();
+    this.agentId = agentId;
+    this.sessionId = sessionId;
+    this.folderId = folderId;
+    this.parentId = parentId;
+    this.type = type;
+    this.name = name;
+    this.isReliable = true;
+  }
+
+  getMessageID() {
+    return MessageIDs.CREATE_INVENTORY_FOLDER;
+  }
+
+  getMessageName() {
+    return 'CreateInventoryFolder';
+  }
+
+  packPayload(buffer) {
+    const view = new DataView(buffer);
+    let offset = 0;
+
+    // AgentData Block
+    // AgentID
+    offset = this.packUUID(view, offset, this.agentId);
+    // SessionID
+    offset = this.packUUID(view, offset, this.sessionId);
+
+    // FolderData Block
+    // FolderID
+    offset = this.packUUID(view, offset, this.folderId);
+    // ParentID
+    offset = this.packUUID(view, offset, this.parentId);
+    // Type (S8)
+    view.setInt8(offset++, this.type);
+    // Name (Variable 1) - length (1 byte) + bytes
+    const nameBytes = new TextEncoder().encode(this.name);
+    view.setUint8(offset++, nameBytes.length);
+    for (let i = 0; i < nameBytes.length; i++) {
+      view.setUint8(offset++, nameBytes[i]);
+    }
+
+    return offset;
+  }
+
+  packUUID(view, offset, uuidStr) {
+    const hex = uuidStr.replace(/-/g, '');
+    for (let i = 0; i < 16; i++) {
+      view.setUint8(offset + i, parseInt(hex.substring(i*2, i*2+2), 16));
+    }
+    return offset + 16;
+  }
+}
+
 // Export all message types
 window.SLMessageTypes = {
   MessageIDs,
@@ -487,5 +418,5 @@ window.SLMessageTypes = {
   ChatFromViewerMessage,
   ObjectUpdateMessage,
   AgentUpdateMessage,
-  GrantUserRightsMessage
+  CreateInventoryFolderMessage
 };
