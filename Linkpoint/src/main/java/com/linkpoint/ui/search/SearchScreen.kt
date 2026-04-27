@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,11 +24,9 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
@@ -48,11 +45,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.linkpoint.ui.common.UiLoadState
+import com.linkpoint.ui.common.UiTelemetryEvents
+import com.linkpoint.ui.common.logUiTelemetry
+import com.linkpoint.ui.components.state.EmptyState
+import com.linkpoint.ui.components.state.ErrorState
+import com.linkpoint.ui.components.state.LoadingState
+import com.linkpoint.ui.components.state.ReconnectingBanner
 import java.util.UUID
 
-/**
- * Search result types
- */
 enum class SearchCategory(val displayName: String, val icon: ImageVector) {
     PEOPLE("People", Icons.Default.Person),
     PLACES("Places", Icons.Default.LocationOn),
@@ -60,21 +61,18 @@ enum class SearchCategory(val displayName: String, val icon: ImageVector) {
     EVENTS("Events", Icons.Default.Event)
 }
 
-/**
- * Generic search result
- */
 sealed class ComposeSearchResult {
     abstract val id: UUID
     abstract val name: String
     abstract val description: String
-    
+
     data class PersonResult(
         override val id: UUID,
         override val name: String,
         override val description: String = "",
         val isOnline: Boolean = false
     ) : ComposeSearchResult()
-    
+
     data class PlaceResult(
         override val id: UUID,
         override val name: String,
@@ -82,7 +80,7 @@ sealed class ComposeSearchResult {
         val traffic: Int = 0,
         val slurl: String = ""
     ) : ComposeSearchResult()
-    
+
     data class GroupResult(
         override val id: UUID,
         override val name: String,
@@ -90,7 +88,7 @@ sealed class ComposeSearchResult {
         val memberCount: Int = 0,
         val isOpen: Boolean = true
     ) : ComposeSearchResult()
-    
+
     data class EventResult(
         override val id: UUID,
         override val name: String,
@@ -100,20 +98,12 @@ sealed class ComposeSearchResult {
     ) : ComposeSearchResult()
 }
 
-/**
- * Compose version of SearchActivity.
- * 
- * Features:
- * - Tabbed search categories (People, Places, Groups, Events)
- * - Search input
- * - Results list with category-specific displays
- * - Click to view details
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     results: List<ComposeSearchResult>,
-    isLoading: Boolean = false,
+    uiLoadState: UiLoadState = UiLoadState.Content,
+    onRetry: () -> Unit,
     onSearch: (String, SearchCategory) -> Unit,
     onResultClick: (ComposeSearchResult) -> Unit,
     onNavigateBack: () -> Unit,
@@ -121,10 +111,10 @@ fun SearchScreen(
 ) {
     var selectedCategory by remember { mutableIntStateOf(0) }
     var searchQuery by remember { mutableStateOf("") }
-    
+
     val categories = SearchCategory.entries
     val currentCategory = categories[selectedCategory]
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -142,7 +132,10 @@ fun SearchScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Search input
+            if (uiLoadState is UiLoadState.Reconnecting) {
+                ReconnectingBanner(message = uiLoadState.message)
+            }
+
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
@@ -160,8 +153,7 @@ fun SearchScreen(
                     .padding(16.dp),
                 singleLine = true
             )
-            
-            // Category tabs
+
             ScrollableTabRow(
                 selectedTabIndex = selectedCategory,
                 modifier = Modifier.fillMaxWidth()
@@ -175,50 +167,40 @@ fun SearchScreen(
                     )
                 }
             }
-            
-            // Results
-            when {
-                isLoading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
+
+            when (uiLoadState) {
+                is UiLoadState.Loading -> LoadingState(message = uiLoadState.message)
+                is UiLoadState.Error -> ErrorState(
+                    title = uiLoadState.title,
+                    message = uiLoadState.message,
+                    retryLabel = uiLoadState.retryLabel,
+                    onRetry = {
+                        logUiTelemetry(UiTelemetryEvents.RETRY_TAPPED, "search", uiLoadState)
+                        onRetry()
                     }
-                }
-                results.isEmpty() -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = null,
-                                modifier = Modifier.size(64.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = if (searchQuery.isBlank()) "Enter a search term"
-                                       else "No results found",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(results, key = { it.id }) { result ->
-                            SearchResultCard(
-                                result = result,
-                                onClick = { onResultClick(result) }
-                            )
+                )
+                is UiLoadState.Empty -> EmptyState(
+                    title = uiLoadState.title,
+                    message = uiLoadState.message,
+                    actionLabel = uiLoadState.actionLabel,
+                    onAction = onRetry
+                )
+                UiLoadState.Content, is UiLoadState.Reconnecting, is UiLoadState.LowBandwidth -> {
+                    if (results.isEmpty()) {
+                        EmptyState(
+                            title = if (searchQuery.isBlank()) "Start searching" else "No results found",
+                            message = if (searchQuery.isBlank()) "Enter a term to search avatars, places, groups, or events."
+                            else "Try another keyword or switch category."
+                        )
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(results, key = { it.id }) { result ->
+                                SearchResultCard(result = result, onClick = { onResultClick(result) })
+                            }
                         }
                     }
                 }
@@ -227,9 +209,6 @@ fun SearchScreen(
     }
 }
 
-/**
- * Search result card
- */
 @Composable
 fun SearchResultCard(
     result: ComposeSearchResult,
@@ -240,9 +219,7 @@ fun SearchResultCard(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        colors = CardDefaults.cardColors()
     ) {
         Row(
             modifier = Modifier
@@ -250,7 +227,6 @@ fun SearchResultCard(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Icon
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -265,41 +241,24 @@ fun SearchResultCard(
                         is ComposeSearchResult.EventResult -> Icons.Default.Event
                     },
                     contentDescription = null,
-                    modifier = Modifier.size(28.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    modifier = Modifier.size(28.dp)
                 )
             }
-            
+
             Spacer(modifier = Modifier.width(12.dp))
-            
+
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = result.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                
-                // Type-specific subtitle
+                Text(text = result.name, maxLines = 1, overflow = TextOverflow.Ellipsis)
+
                 val subtitle = when (result) {
-                    is ComposeSearchResult.PersonResult -> 
-                        if (result.isOnline) "Online" else result.description.ifBlank { "Offline" }
-                    is ComposeSearchResult.PlaceResult -> 
-                        if (result.traffic > 0) "Traffic: ${result.traffic}" else result.description
-                    is ComposeSearchResult.GroupResult -> 
-                        "${result.memberCount} members" + if (result.isOpen) " • Open" else ""
-                    is ComposeSearchResult.EventResult -> 
-                        result.dateTime.ifBlank { result.location }
+                    is ComposeSearchResult.PersonResult -> if (result.isOnline) "Online" else result.description.ifBlank { "Offline" }
+                    is ComposeSearchResult.PlaceResult -> if (result.traffic > 0) "Traffic: ${result.traffic}" else result.description
+                    is ComposeSearchResult.GroupResult -> "${result.memberCount} members" + if (result.isOpen) " • Open" else ""
+                    is ComposeSearchResult.EventResult -> result.dateTime.ifBlank { result.location }
                 }
-                
+
                 if (subtitle.isNotBlank()) {
-                    Text(
-                        text = subtitle,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Text(text = subtitle, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
         }
