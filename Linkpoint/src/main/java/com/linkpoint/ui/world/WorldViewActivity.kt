@@ -30,14 +30,12 @@ import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.core.ConnectionState
-import com.linkpoint.ui.chat.ChatActivity
 import com.linkpoint.ui.friends.FriendsActivity
-import com.linkpoint.ui.inventory.InventoryActivity
 import com.linkpoint.ui.minimap.MinimapActivity
 import com.linkpoint.ui.avatar.MyAvatarActivity
+import com.linkpoint.ui.navigation.LegacyFeatureBridge
 import com.linkpoint.ui.people.NearbyPeopleActivity
 import com.linkpoint.render.lumiya.core.LumiyaGLSurfaceView
-import com.linkpoint.ui.settings.SettingsActivity
 import com.linkpoint.ui.xr.XRWorldActivity
 import com.linkpoint.utils.DebugReportService
 import kotlinx.coroutines.flow.collectLatest
@@ -235,7 +233,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         
         // Setup quick action buttons
         btnChat.setOnClickListener {
-            startActivity(Intent(this, ChatActivity::class.java))
+            startActivity(LegacyFeatureBridge.chatIntent(this))
         }
         
         btnMinimap.setOnClickListener {
@@ -243,7 +241,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         }
         
         btnInventory.setOnClickListener {
-            startActivity(Intent(this, InventoryActivity::class.java))
+            startActivity(LegacyFeatureBridge.inventoryIntent(this))
         }
         
         btnXR.setOnClickListener {
@@ -991,8 +989,8 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.nav_chat -> startActivity(Intent(this, ChatActivity::class.java))
-            R.id.nav_inventory -> startActivity(Intent(this, InventoryActivity::class.java))
+            R.id.nav_chat -> startActivity(LegacyFeatureBridge.chatIntent(this))
+            R.id.nav_inventory -> startActivity(LegacyFeatureBridge.inventoryIntent(this))
             R.id.nav_minimap -> startActivity(Intent(this, MinimapActivity::class.java))
             R.id.nav_avatar -> startActivity(Intent(this, MyAvatarActivity::class.java))
             R.id.nav_friends -> startActivity(Intent(this, FriendsActivity::class.java))
@@ -1002,7 +1000,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             R.id.nav_search -> startActivity(Intent(this, com.linkpoint.ui.search.SearchActivity::class.java))
             R.id.nav_world_map -> startActivity(Intent(this, com.linkpoint.ui.map.MapActivity::class.java))
             R.id.nav_teleport_home -> teleportHome()
-            R.id.nav_settings -> startActivity(Intent(this, SettingsActivity::class.java))
+            R.id.nav_settings -> startActivity(LegacyFeatureBridge.settingsIntent(this))
             R.id.nav_xr_mode -> {
                 if (app.isXREntryAvailable()) {
                     startActivity(Intent(this, XRWorldActivity::class.java))
