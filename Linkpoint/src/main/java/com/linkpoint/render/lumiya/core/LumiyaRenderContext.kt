@@ -1,7 +1,6 @@
 package com.linkpoint.render.lumiya.core
 
 import android.opengl.GLES32
-import android.opengl.GLES31Ext
 import android.opengl.Matrix
 import android.util.Log
 import com.linkpoint.render.RenderDiagnostics
@@ -228,17 +227,22 @@ class LumiyaRenderContext {
         if (!extensions.contains("GL_EXT_buffer_storage")) {
             return false
         }
+        if (!GlExtHelper.isAvailable()) {
+            return false
+        }
         return try {
-            val flags = GLES31Ext.GL_MAP_WRITE_BIT_EXT or
-                GLES31Ext.GL_MAP_PERSISTENT_BIT_EXT or
-                GLES31Ext.GL_MAP_COHERENT_BIT_EXT or
-                GLES31Ext.GL_DYNAMIC_STORAGE_BIT_EXT
-            GLES31Ext.glBufferStorageExt(GLES32.GL_UNIFORM_BUFFER, globalUBOSizeBytes, null, flags)
+            val flags = GlExtHelper.GL_MAP_WRITE_BIT_EXT or
+                GlExtHelper.GL_MAP_PERSISTENT_BIT_EXT or
+                GlExtHelper.GL_MAP_COHERENT_BIT_EXT or
+                GlExtHelper.GL_DYNAMIC_STORAGE_BIT_EXT
+            GlExtHelper.glBufferStorageExt(GLES32.GL_UNIFORM_BUFFER, globalUBOSizeBytes, null, flags)
             val mapped = GLES32.glMapBufferRange(
                 GLES32.GL_UNIFORM_BUFFER,
                 0,
                 globalUBOSizeBytes,
-                GLES32.GL_MAP_WRITE_BIT or GLES31Ext.GL_MAP_PERSISTENT_BIT_EXT or GLES31Ext.GL_MAP_COHERENT_BIT_EXT
+                GLES32.GL_MAP_WRITE_BIT or
+                    GlExtHelper.GL_MAP_PERSISTENT_BIT_EXT or
+                    GlExtHelper.GL_MAP_COHERENT_BIT_EXT
             )
             if (mapped is ByteBuffer) {
                 mapped.order(ByteOrder.nativeOrder())
