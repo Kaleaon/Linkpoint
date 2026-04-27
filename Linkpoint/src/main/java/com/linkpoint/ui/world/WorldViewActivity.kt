@@ -775,6 +775,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             )
         }
         lumiyaSurfaceView = glView
+        app.bindGlesRenderEngine(glView.getEngineProvider())
         renderContainer.removeAllViews()
         renderContainer.addView(glView)
         isSurfaceReady = true
@@ -1068,6 +1069,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     override fun onDestroy() {
         super.onDestroy()
         if (useSecondaryRenderer) {
+            app.bindGlesRenderEngine(null)
             lumiyaSurfaceView?.shutdown()
             lumiyaSurfaceView = null
         } else {
