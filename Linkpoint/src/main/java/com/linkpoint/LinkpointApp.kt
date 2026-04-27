@@ -91,6 +91,7 @@ import com.linkpoint.protocol.types.getUUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -287,6 +288,16 @@ class LinkpointApp : Application() {
     private val userWantsConnected = AtomicBoolean(false)
     private val isReconnecting = AtomicBoolean(false)
     private val reconnectAttempts = AtomicInteger(0)
+
+    /**
+     * The collector job that mirrors `udpConnection.isConnected` into the
+     * foreground service. Owned by [initializeAgentManagers], which can run
+     * multiple times per process (one per login). Re-running the collector
+     * launch without cancelling the previous one would leak a coroutine
+     * per re-login — one observed Athanasia recovery cycle was 4 re-logins
+     * in 2 minutes, so the leak compounds quickly.
+     */
+    @Volatile private var fgsConnectStateMirrorJob: Job? = null
     @Volatile private var firstReconnectAttemptAt: Long = 0L
     private val reloginMutex = Mutex()
 
@@ -950,7 +961,51 @@ class LinkpointApp : Application() {
             applicationScope.launch { connectionKeepAlive.notifyConnectionIssue() }
             attemptAutoRelogin()
         }
-        
+
+        // Wire the foreground service's keepalive callback to the actual UDP
+        // ping. Without this, LinkpointConnectionService.performKeepAlive()
+        // is a no-op (its internal `connectionCallback` is never set
+        // anywhere — see the 2026-04-26 Athanasia capture, where the
+        // service was running with a wake lock for 2.3 minutes but never
+        // drove a single keepalive packet, letting the cellular NAT mapping
+        // expire). StartPingCheck is the right tool: it's a 12-byte packet,
+        // the simulator auto-replies with CompletePingCheck, and it
+        // refreshes the carrier NAT mapping in both directions.
+        com.linkpoint.service.LinkpointConnectionService.setProcessCallback(
+            object : com.linkpoint.service.ConnectionCallback {
+                override fun onSendPing() {
+                    if (!::udpConnection.isInitialized) return
+                    if (!udpConnection.isConnected.value) return
+                    try {
+                        udpConnection.sendStartPingCheck()
+                    } catch (e: Throwable) {
+                        Log.w(TAG, "FGS keepalive ping failed: ${e.message}")
+                    }
+                }
+                override fun onConnectionStale() {
+                    Log.w(TAG, "FGS reports connection stale (3× keepalive no inbound) — escalating to auto re-login")
+                    attemptAutoRelogin()
+                }
+            }
+        )
+        // Mirror the UDP up/down state into the service so it knows when to
+        // ping (no point pinging a dead socket) and what to put in the
+        // notification text. The networkStateListener above already fires
+        // on reconnect cycles; this catches the initial connect too.
+        // Cancel any prior collector — initializeAgentManagers re-runs on
+        // every re-login (see [attemptAutoRelogin]), and we don't want
+        // every re-login to leak another collector.
+        fgsConnectStateMirrorJob?.cancel()
+        fgsConnectStateMirrorJob = applicationScope.launch {
+            try {
+                udpConnection.isConnected.collect { connected ->
+                    com.linkpoint.service.LinkpointConnectionService.setProcessConnected(connected)
+                }
+            } catch (e: Throwable) {
+                Log.w(TAG, "FGS connect-state mirror collector ended: ${e.message}")
+            }
+        }
+
         // Start background service for connection persistence
         LinkpointConnectionService.start(this)
         

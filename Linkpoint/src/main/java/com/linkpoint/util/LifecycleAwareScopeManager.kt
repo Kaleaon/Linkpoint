@@ -611,7 +611,16 @@ object LifecycleAwareScopeManager {
             try {
                 val app = com.linkpoint.LinkpointApp.getInstanceOrNull() ?: return
                 val udp = app.udpConnection
-                if (udp.isConnected.value) udp.sendAgentPause()
+                if (udp.isConnected.value) {
+                    udp.sendAgentPause()
+                    // Make sure the foreground service knows we're connected
+                    // so its keepalive loop runs at full cadence while the
+                    // app is backgrounded — this is the load-bearing piece
+                    // for keeping the cellular NAT mapping alive across
+                    // exit/resume.
+                    com.linkpoint.service.LinkpointConnectionService.setProcessConnected(true)
+                    com.linkpoint.service.LinkpointConnectionService.start(app)
+                }
             } catch (e: Throwable) {
                 android.util.Log.w(TAG, "AgentPause on background failed: ${e.message}")
             }
@@ -621,7 +630,19 @@ object LifecycleAwareScopeManager {
             try {
                 val app = com.linkpoint.LinkpointApp.getInstanceOrNull() ?: return
                 val udp = app.udpConnection
-                if (udp.isConnected.value) udp.sendAgentResume()
+                if (udp.isConnected.value) {
+                    udp.sendAgentResume()
+                    // Drive an immediate StartPingCheck so we discover a
+                    // dead path (cellular NAT change while we were away)
+                    // within ~1s, instead of waiting for the next FGS
+                    // keepalive tick or the 5-second in-circuit ping
+                    // cadence. Cheap: 12 bytes out, ~12 bytes back.
+                    try {
+                        udp.sendStartPingCheck()
+                    } catch (e: Throwable) {
+                        android.util.Log.w(TAG, "Immediate post-resume ping failed: ${e.message}")
+                    }
+                }
             } catch (e: Throwable) {
                 android.util.Log.w(TAG, "AgentResume on foreground failed: ${e.message}")
             }

@@ -521,6 +521,24 @@ class UDPConnectionFixed {
      * ACKs are typically sent every 100ms or piggy-backed on outgoing packets.
      */
     private val ACK_SEND_INTERVAL_MS = 100L
+
+    /**
+     * Pending-ACK queue depth that forces an immediate drain regardless of
+     * [ACK_SEND_INTERVAL_MS]. The 100ms timer is a coalescing optimisation,
+     * but the simulator's reliable-retransmit timer is tighter than ours
+     * (~3-5s on the LL grid, but its first retry can fire as fast as 1s when
+     * it's reading a low-RTT path). On burst packets — region handshake,
+     * landing teleport, parcel-overlay batch — letting acks queue for the
+     * full 100ms window puts us right at the sim's first-retry edge, which
+     * triggers the duplicate-receive cascade visible in the 2026-04-26
+     * Athanasia capture (ParcelOverlay seq 14-17 received twice, full
+     * RegionHandshake/AgentMovementComplete pair retransmitted).
+     *
+     * 8 is conservative: ObjectUpdate batches in a busy region routinely
+     * cross this, while normal idle traffic (1-2 reliable per second)
+     * doesn't trip it and stays on the 100ms coalescing path.
+     */
+    private val ACK_FLUSH_QUEUE_THRESHOLD = 8
     
     /**
      * Last time ACKs were sent (for throttling standalone ACK packets).
@@ -1121,9 +1139,28 @@ class UDPConnectionFixed {
                                 val rawData = ByteArray(bytesRead)
                                 buffer.get(rawData)
 
-                                // Zero-decode if needed
-                                val isZerocoded = (rawData[0].toInt() and 0x80) != 0
-                                val data = if (isZerocoded) zeroDecode(rawData) else rawData
+                                // SL wire format: the trailing ACK appendix is appended
+                                // AFTER zero-coding (see OpenSimulator LLClientView.OutPacket
+                                // and Lumiya `AppendPendingAcks`), so we must strip the
+                                // appendix from the wire bytes BEFORE zeroDecode runs.
+                                // Otherwise the appendix bytes get fed into the zero-decoder
+                                // (where 0x00 means "next byte is run-length") and the
+                                // decoded payload is corrupted, while the ACKs at the end
+                                // are read from garbage bytes — which is the silent
+                                // dropped-ACK pathology that lets the simulator's reliable
+                                // queue retransmit forever.
+                                val (wireBody, trailingAcks) = stripTrailingAcksFromWire(rawData)
+                                val isZerocoded = (wireBody[0].toInt() and 0x80) != 0
+                                val data = if (isZerocoded) zeroDecode(wireBody) else wireBody
+
+                                // Process appendix ACKs immediately (they were extracted
+                                // from the wire, not from the decoded body, so endianness
+                                // and offsets are correct regardless of zero-coding).
+                                if (trailingAcks.isNotEmpty()) {
+                                    trailingAcks.forEach { processReceivedAck(it) }
+                                    NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
+                                        "📎 Processed ${trailingAcks.size} appended ACKs from wire (pre-zerocode)")
+                                }
 
                                 // Extract message info
                                 val messageId = extractMessageId(data)
@@ -1175,12 +1212,11 @@ class UDPConnectionFixed {
                                 // Track message stats
                                 trackMessageReceived(messageName)
 
-                                // Process appended ACKs ONLY when the flag is set (0x10)
-                                // CRITICAL FIX: Previously this was called unconditionally,
-                                // which read garbage from the end of normal packets as ACK data
-                                if (packetFlags.hasAcks) {
-                                    processAppendedAcks(data)
-                                }
+                                // Appendix ACKs are now extracted from the wire bytes
+                                // BEFORE zero-decoding (above). Don't re-process them here
+                                // from `data` — that path read LE bytes (wrong endianness)
+                                // and indexed into the zero-decoded buffer (wrong offset
+                                // for zero-coded packets), silently discarding most ACKs.
 
                                 // SYNCHRONOUS message dispatch from I/O thread.
                                 // This follows Lumiya's pattern where HandleMessage() is called
@@ -1195,10 +1231,13 @@ class UDPConnectionFixed {
                 // select() calls on the same thread that owns the channel, so
                 // there is no contention with the read path.
                 val now = System.currentTimeMillis()
-                if (now - lastAckCheckTime >= ACK_SEND_INTERVAL_MS) {
-                    if (pendingAcksToSend.isNotEmpty()) {
-                        sendPendingAcksFromIOThread()
-                    }
+                val queueDepth = pendingAcksToSend.size
+                val intervalElapsed = now - lastAckCheckTime >= ACK_SEND_INTERVAL_MS
+                val burstThresholdHit = queueDepth >= ACK_FLUSH_QUEUE_THRESHOLD
+                if (queueDepth > 0 && (intervalElapsed || burstThresholdHit)) {
+                    sendPendingAcksFromIOThread()
+                    lastAckCheckTime = now
+                } else if (intervalElapsed) {
                     lastAckCheckTime = now
                 }
                 if (now - lastTimeoutCheckTime >= 1000L) {
@@ -1398,6 +1437,91 @@ class UDPConnectionFixed {
     }
 
     /**
+     * Cap on how many acks we'll piggyback onto a single outgoing packet.
+     * Each ack is 5 bytes on the wire (4-byte seq + amortised 1/N count
+     * byte), so 64 acks = ~320 bytes — well under [PIGGYBACK_AVAILABLE_HEADROOM]
+     * and large enough that we drain the queue in one packet for typical
+     * burst loads (region handshake, parcel overlay batch).
+     */
+    private val MAX_PIGGYBACKED_ACKS = 64
+
+    /**
+     * Bytes we keep in reserve below [LinkpointConstants.MAX_TRANSMIT_SIZE]
+     * before we'll consider piggybacking acks. SL's MTU budget is 1024 and
+     * AgentUpdate is 121 bytes, so this leaves 200+ bytes headroom for the
+     * appendix on small packets and skips piggyback on already-fat packets
+     * (ObjectAdd, AgentSetAppearance) where a separate PacketAck is cheaper
+     * than risking fragmentation.
+     */
+    private val PIGGYBACK_AVAILABLE_HEADROOM = 256
+
+    /** Result of a piggyback attempt — the wire bytes to send and the
+     *  acks popped from [pendingAcksToSend] (so the catch path can requeue
+     *  them if the write fails). */
+    private data class PiggybackResult(val wireBytes: ByteArray, val consumedAcks: List<Int>)
+
+    /**
+     * Append a trailing ACK appendix to an outgoing packet's wire bytes if
+     * there are pending acks AND the packet has room. Returns the
+     * (possibly enlarged) wire bytes plus the list of consumed acks (empty
+     * when nothing was piggybacked). Called from the I/O thread, just
+     * before [DatagramChannel.write].
+     *
+     * Wire format matches OpenSimulator `LLClientView.OutPacket` and
+     * Lumiya `AppendPendingAcks`:
+     *
+     *   [original packet body] [seq1 BE u32] ... [seqN BE u32] [N: u8]
+     *
+     * The header's FLAG_ACK (0x10) bit is set in the returned bytes.
+     * Acks are popped from [pendingAcksToSend] before write — if the write
+     * later fails the call site MUST requeue [PiggybackResult.consumedAcks].
+     */
+    private fun maybeAppendAcksToOutgoing(pkt: OutboundPacket): PiggybackResult {
+        if (pendingAcksToSend.isEmpty()) return PiggybackResult(pkt.data, emptyList())
+
+        val headroom = LinkpointConstants.MAX_TRANSMIT_SIZE - pkt.data.size - PIGGYBACK_AVAILABLE_HEADROOM
+        if (headroom < 5) return PiggybackResult(pkt.data, emptyList())  // not enough room for even 1 ack + count byte
+
+        val maxByHeadroom = (headroom - 1) / 4
+        val maxThisPacket = minOf(maxByHeadroom, MAX_PIGGYBACKED_ACKS, pendingAcksToSend.size)
+        if (maxThisPacket <= 0) return PiggybackResult(pkt.data, emptyList())
+
+        val acks = ArrayList<Int>(maxThisPacket)
+        while (acks.size < maxThisPacket) {
+            val ack = pendingAcksToSend.poll() ?: break
+            acks.add(ack)
+        }
+        if (acks.isEmpty()) return PiggybackResult(pkt.data, emptyList())
+
+        val appendixSize = acks.size * 4 + 1
+        val out = ByteArray(pkt.data.size + appendixSize)
+        System.arraycopy(pkt.data, 0, out, 0, pkt.data.size)
+
+        // Set FLAG_ACK on the wire copy. (We deliberately don't mutate
+        // pkt.data — it's still in inflightReliablePackets and needs to
+        // re-encode the same way on retransmit if this send fails.)
+        out[0] = (out[0].toInt() or 0x10).toByte()
+
+        var pos = pkt.data.size
+        for (ack in acks) {
+            // BIG-endian per SL/OpenSim wire format.
+            out[pos] = (ack ushr 24).toByte()
+            out[pos + 1] = (ack ushr 16).toByte()
+            out[pos + 2] = (ack ushr 8).toByte()
+            out[pos + 3] = ack.toByte()
+            pos += 4
+        }
+        out[pos] = (acks.size and 0xFF).toByte()
+
+        // Bookkeeping mirror of sendPendingAcksFromIOThread so the live
+        // diagnostics still show where acks went.
+        acks.forEach { ackSeq -> EnhancedPacketLogger.logAckSent(ackSeq) }
+        lastAckSendTime = System.currentTimeMillis()
+
+        return PiggybackResult(out, acks)
+    }
+
+    /**
      * Check whether the connection needs a ping or should disconnect due to inactivity.
      *
      * IMPORTANT: The disconnect check runs BEFORE sending a new ping to avoid a race
@@ -1583,8 +1707,14 @@ class UDPConnectionFixed {
 
     /**
      * Send an explicit StartPingCheck packet so unanswered-ping tracking maps to real ping requests.
+     *
+     * Public so [com.linkpoint.service.LinkpointConnectionService] can drive
+     * NAT-keepalive pings from the foreground service when the app is
+     * backgrounded — see the wire-up in [com.linkpoint.LinkpointApp].
+     * Calling this off-thread is safe (sendPacket goes through the
+     * outgoingQueue + selector wakeup path).
      */
-    private fun sendStartPingCheck() {
+    fun sendStartPingCheck() {
         val pingId = (nextPingId.incrementAndGet() and 0xFF)
         lastPingTime.set(System.currentTimeMillis())
         val unanswered = unansweredPings.incrementAndGet()
@@ -2737,20 +2867,34 @@ class UDPConnectionFixed {
             val pkt = outgoingQueue.poll() ?: break
             val messageName = getMessageName(pkt.messageId)
 
+            // Opportunistic ACK piggyback — Lumiya's `AppendPendingAcks`.
+            // Cheaper than a separate PacketAck (no extra header, no extra
+            // selector wakeup, no extra UDP datagram) and tightens our ack
+            // latency so the simulator's reliable-retransmit timer doesn't
+            // fire on packets we've already received.
+            //
+            // The appendix sits AFTER the message body on the wire and is NOT
+            // zero-coded, so we can splice it onto the already-encoded packet
+            // bytes without touching the message body.
+            val piggyback = maybeAppendAcksToOutgoing(pkt)
+            val wireBytes = piggyback.wireBytes
+
             try {
-                val written = channel.write(ByteBuffer.wrap(pkt.data))
+                val written = channel.write(ByteBuffer.wrap(wireBytes))
                 if (written > 0) {
                     packetsSent.incrementAndGet()
                     bytesSent.addAndGet(written.toLong())
                     lastSendTime = System.currentTimeMillis()
                     consecutiveSendErrors.set(0)
 
+                    val piggybackedAcks = wireBytes.size - pkt.data.size
                     NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-                        "→ Sent packet: ${pkt.data.size} bytes (ID: ${pkt.messageId}, reliable: ${pkt.reliable})")
+                        "→ Sent packet: ${wireBytes.size} bytes (ID: ${pkt.messageId}, reliable: ${pkt.reliable}" +
+                            (if (piggybackedAcks > 0) ", +${piggybackedAcks}B ACK appendix" else "") + ")")
                     NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
                         "   Message: $messageName (seq: ${pkt.seqNum})")
                     NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-                        "   Full packet data: ${pkt.data.joinToString(" ") { "%02X".format(it) }}")
+                        "   Full packet data: ${wireBytes.joinToString(" ") { "%02X".format(it) }}")
 
                     recordPacketEvent(
                         type = PacketHistoryEntry.PacketEventType.SEND_SUCCESS,
@@ -2781,6 +2925,9 @@ class UDPConnectionFixed {
                         reliable = pkt.reliable
                     )
                 } else {
+                    // Requeue any acks we piggybacked — the wire bytes never left
+                    // the host, so the simulator hasn't seen them.
+                    piggyback.consumedAcks.forEach { pendingAcksToSend.offer(it) }
                     recordPacketEvent(
                         type = PacketHistoryEntry.PacketEventType.SEND_FAILED,
                         messageId = pkt.messageId,
@@ -2799,6 +2946,7 @@ class UDPConnectionFixed {
                 // in pendingCallbacks and will be resent. Don't count this
                 // as a send error and don't escalate; just bail out of the
                 // drain so the next iteration picks up the new channel.
+                piggyback.consumedAcks.forEach { pendingAcksToSend.offer(it) }
                 NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
                     "Channel closed during send (${getMessageName(pkt.messageId)} seq=${pkt.seqNum}) — will resume on new channel")
                 recordPacketEvent(
@@ -2811,6 +2959,7 @@ class UDPConnectionFixed {
                 )
                 break
             } catch (e: java.nio.channels.ClosedChannelException) {
+                piggyback.consumedAcks.forEach { pendingAcksToSend.offer(it) }
                 NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
                     "Channel closed during send (${getMessageName(pkt.messageId)} seq=${pkt.seqNum}) — will resume on new channel")
                 recordPacketEvent(
@@ -2823,6 +2972,7 @@ class UDPConnectionFixed {
                 )
                 break
             } catch (e: Exception) {
+                piggyback.consumedAcks.forEach { pendingAcksToSend.offer(it) }
                 // Use the exception class name when the message is null —
                 // otherwise the log just says "Send error: null", which
                 // hides AsynchronousCloseException etc. behind a useless
@@ -3335,42 +3485,59 @@ class UDPConnectionFixed {
     }
 
     /**
-     * Process ACKs appended to a received packet.
+     * Strip the trailing ACK appendix from a wire packet and return the
+     * appendix-stripped body alongside the parsed ACK seq numbers.
      *
-     * IMPORTANT: This should ONLY be called when the packet's flags byte has
-     * bit 0x10 set (hasAcks flag). Calling this on packets without appended ACKs
-     * will read garbage from the end of the payload as ACK sequence numbers,
-     * potentially corrupting the ACK state.
+     * SL wire format for the appendix (matches OpenSimulator
+     * `LLClientView.OutPacket` and Lumiya `AppendPendingAcks`):
      *
-     * SL Protocol appended ACK format:
-     * - The last byte of the packet is the count of appended ACKs
-     * - Before that are count * 4 bytes of ACKed sequence numbers (little-endian)
-     * - These are piggybacked on the server's outgoing packets as an optimization
+     *   [...packet body...] [seq1 BE u32] [seq2 BE u32] ... [seqN BE u32] [N: u8]
+     *
+     * - The last byte of the wire packet is the count N.
+     * - Immediately before it are N × 4 bytes of acked sequence numbers in
+     *   BIG-ENDIAN order (NOT little-endian — the previous implementation
+     *   here read them as LE, so every appendix-acked seq was decoded as
+     *   garbage and silently dropped, leaving our `inflightReliablePackets`
+     *   to retransmit forever).
+     * - The appendix is appended AFTER zero-coding, so the appendix bytes
+     *   themselves are NEVER zero-coded. The receiver must therefore strip
+     *   the appendix from the raw wire bytes before invoking [zeroDecode].
+     *
+     * Returns the original `wire` array unchanged and an empty list if the
+     * FLAG_ACK bit is clear or the appendix doesn't fit. Defensive — silent
+     * no-op on garbage rather than throwing into the I/O loop.
+     *
+     * The returned body has FLAG_ACK cleared so that downstream
+     * [extractPacketFlags] doesn't claim the (now-removed) appendix is still
+     * present.
      */
-    private fun processAppendedAcks(data: ByteArray) {
-        val messageStartOffset = getMessageStartOffset(data) ?: return
-        if (data.size < messageStartOffset + 2) return
+    private fun stripTrailingAcksFromWire(wire: ByteArray): Pair<ByteArray, List<Int>> {
+        if (wire.size < PACKET_HEADER_SIZE + 1) return wire to emptyList()
+        val flags = wire[0].toInt() and 0xFF
+        if ((flags and 0x10) == 0) return wire to emptyList()
 
-        // Verify the appended ACK flag is set (0x10) before processing
-        val flags = data[0].toInt() and 0xFF
-        if ((flags and 0x10) == 0) return
+        val count = wire[wire.size - 1].toInt() and 0xFF
+        if (count == 0) return wire to emptyList()
 
-        val count = data[data.size - 1].toInt() and 0xFF
-        if (count == 0) return
+        val appendixSize = 1 + (count * 4)
+        // Need at least header + 1 message-id byte + appendix to be coherent.
+        if (wire.size < PACKET_HEADER_SIZE + 1 + appendixSize) return wire to emptyList()
 
-        val acksStart = data.size - 1 - (count * 4)
-        if (acksStart < messageStartOffset) return
-
+        val acksStart = wire.size - appendixSize
+        val acks = ArrayList<Int>(count)
         var pos = acksStart
         for (i in 0 until count) {
-            if (pos + 4 > data.size - 1) break
-            val ackedSeq = ByteBuffer.wrap(data, pos, 4).order(ByteOrder.LITTLE_ENDIAN).int
+            val seq = ((wire[pos].toInt() and 0xFF) shl 24) or
+                      ((wire[pos + 1].toInt() and 0xFF) shl 16) or
+                      ((wire[pos + 2].toInt() and 0xFF) shl 8) or
+                      (wire[pos + 3].toInt() and 0xFF)
+            acks.add(seq)
             pos += 4
-            processReceivedAck(ackedSeq)
         }
 
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-            "Processed $count appended ACKs from packet")
+        val body = wire.copyOfRange(0, acksStart)
+        body[0] = (body[0].toInt() and 0x10.inv()).toByte()
+        return body to acks
     }
     
     /**
