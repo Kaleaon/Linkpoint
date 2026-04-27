@@ -72,26 +72,6 @@ class InventoryCore {
   }
 
   /**
-   * Delete folder from inventory
-   * @param {string} folderId - Folder UUID
-   */
-  deleteFolder(folderId) {
-    const folder = this.folders.get(folderId);
-    if (!folder) return;
-
-    // Remove from parent's children array
-    if (folder.parentId) {
-      const parent = this.folders.get(folder.parentId);
-      if (parent) {
-        parent.children = parent.children.filter(id => id !== folderId);
-      }
-    }
-
-    this.folders.delete(folderId);
-    console.log(`[Inventory] Deleted folder: ${folder.name}`);
-  }
-
-  /**
    * Get folder by ID
    * @param {string} folderId - Folder UUID
    * @returns {Object|null}
@@ -164,12 +144,14 @@ class InventoryCore {
   /**
    * Delete item from inventory
    * @param {string} itemId - Item UUID
+   * @returns {boolean} Success status
    */
   deleteItem(itemId) {
-    const item = this.items.get(itemId);
-    if (!item) return;
+    if (!itemId) return false;
 
-    // Remove from folder's items array
+    const item = this.items.get(itemId);
+    if (!item) return false;
+
     if (item.folderId) {
       const folder = this.folders.get(item.folderId);
       if (folder) {
@@ -177,8 +159,33 @@ class InventoryCore {
       }
     }
 
-    this.items.delete(itemId);
-    console.log(`[Inventory] Deleted item: ${item.name}`);
+    return this.items.delete(itemId);
+  }
+
+  /**
+   * Delete empty folder from inventory
+   * @param {string} folderId - Folder UUID
+   * @returns {boolean} Success status
+   */
+  deleteFolder(folderId) {
+    if (!folderId) return false;
+
+    const folder = this.folders.get(folderId);
+    if (!folder) return false;
+
+    // Only delete empty folders
+    if (folder.children.length > 0 || folder.items.length > 0) {
+      return false;
+    }
+
+    if (folder.parentId) {
+      const parent = this.folders.get(folder.parentId);
+      if (parent) {
+        parent.children = parent.children.filter(id => id !== folderId);
+      }
+    }
+
+    return this.folders.delete(folderId);
   }
 
   /**
