@@ -1478,34 +1478,40 @@ class LinkpointApp : Application() {
                                 null
                             }
                             if (meshData != null) {
-                                // TextureBinder: per face, BoM-resolve the
-                                // texture UUID, fetch via TextureManager,
-                                // hop to the render thread and call onLoaded.
+                                // TextureBinder: fetch already-resolved per-face
+                                // texture UUID and return Texture? (null keeps
+                                // the same baseColor/alpha fallback in both backends).
                                 val binder = com.linkpoint.render.prims.MeshPrimRenderer.TextureBinder { _, texId, onLoaded ->
-                                    val resolvedId = if (::avatarManager.isInitialized) {
-                                        com.linkpoint.avatar.BakesOnMesh.resolve(texId) { slot ->
-                                            avatarManager.getMyAvatar()?.baker?.getBakedTextures()?.get(slot)
-                                        }
-                                    } else texId
-                                    if (!com.linkpoint.protocol.textures.TextureEntryParser.shouldDownload(resolvedId)) return@TextureBinder
-                                    if (!::textureManager.isInitialized) return@TextureBinder
+                                    if (!::textureManager.isInitialized) {
+                                        onLoaded(null)
+                                        return@TextureBinder
+                                    }
                                     applicationScope.launch {
-                                        val bmp = try { textureManager.getTexture(resolvedId) } catch (_: Exception) { null }
+                                        val bmp = try { textureManager.getTexture(texId) } catch (_: Exception) { null }
                                         if (bmp != null) {
                                             renderManager.dispatcher.post(Runnable {
                                                 // Route through the LinkpointTexture-tracked path so
                                                 // every per-face mesh texture participates in VRAM
                                                 // accounting and gets a clean Filament release path.
-                                                val pair = renderManager.uploadBitmapAsLinkpointTexture(resolvedId, bmp)
-                                                if (pair != null) onLoaded(pair.first)
+                                                val pair = renderManager.uploadBitmapAsLinkpointTexture(texId, bmp)
+                                                onLoaded(pair?.first)
                                             })
+                                        } else {
+                                            renderManager.dispatcher.post(Runnable { onLoaded(null) })
                                         }
                                     }
+                                }
+                                val bomResolver: (UUID) -> UUID = { declaredId ->
+                                    if (::avatarManager.isInitialized) {
+                                        com.linkpoint.avatar.BakesOnMesh.resolve(declaredId) { slot ->
+                                            avatarManager.getMyAvatar()?.baker?.getBakedTextures()?.get(slot)
+                                        }
+                                    } else declaredId
                                 }
                                 renderManager.dispatcher.post(Runnable {
                                     renderManager.attachMeshAsset(
                                         update.localId, meshData,
-                                        textureEntrySnapshot, binder
+                                        textureEntrySnapshot, binder, bomResolver
                                     )
                                 })
                             }
