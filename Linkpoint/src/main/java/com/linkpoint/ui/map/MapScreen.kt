@@ -1,7 +1,6 @@
 package com.linkpoint.ui.map
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
@@ -45,6 +44,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import com.linkpoint.ui.components.state.EmptyState
+import com.linkpoint.ui.components.state.ErrorState
+import com.linkpoint.ui.components.state.LoadingState
+import com.linkpoint.ui.components.state.LowBandwidthOverlay
+import com.linkpoint.ui.components.state.ReconnectingBanner
+import com.linkpoint.ui.components.state.ScreenState
 
 /**
  * Region data for map display
@@ -102,6 +107,11 @@ fun MapScreen(
     onTeleportTo: (MapRegion) -> Unit,
     onTeleportHome: () -> Unit,
     onSearch: (String) -> Unit,
+    state: ScreenState<List<MapRegion>> = if (regions.isEmpty()) ScreenState.Empty else ScreenState.Content(regions),
+    onRetry: () -> Unit = {},
+    onTelemetry: (eventName: String, metadata: Map<String, String>) -> Unit = { _, _ -> },
+    isLowBandwidth: Boolean = false,
+    isReconnecting: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     var searchQuery by remember { mutableStateOf("") }
@@ -126,68 +136,86 @@ fun MapScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Map canvas
-            Canvas(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pointerInput(Unit) {
-                        detectTransformGestures { _, pan, gestureZoom, _ ->
-                            zoom = (zoom * gestureZoom).coerceIn(0.5f, 4f)
-                            offset += pan
-                        }
-                    }
-                    .pointerInput(Unit) {
-                        detectTapGestures { tapOffset ->
-                            // Convert tap to world coordinates
-                            val worldX = ((tapOffset.x - offset.x) / zoom / 256f).toInt()
-                            val worldY = ((tapOffset.y - offset.y) / zoom / 256f).toInt()
-                            
-                            selectedRegion = regions.find { it.x == worldX && it.y == worldY }
-                        }
-                    }
-            ) {
-                val gridSize = 256f * zoom
-                
-                translate(offset.x, offset.y) {
-                    // Draw grid
-                    val startX = (-offset.x / gridSize).toInt() - 1
-                    val endX = ((size.width - offset.x) / gridSize).toInt() + 1
-                    val startY = (-offset.y / gridSize).toInt() - 1
-                    val endY = ((size.height - offset.y) / gridSize).toInt() + 1
-                    
-                    for (x in startX..endX) {
-                        for (y in startY..endY) {
-                            val region = regions.find { it.x == x && it.y == y }
-                            val color = when {
-                                region == null -> Color(0xFF1A1A1A)  // No region
-                                !region.isOnline -> Color(0xFF333333)  // Offline
-                                region.access == RegionAccess.ADULT -> Color(0xFF442222)
-                                region.access == RegionAccess.MODERATE -> Color(0xFF334422)
-                                else -> Color(0xFF224444)  // General
+            Column(modifier = Modifier.fillMaxSize()) {
+                if (isReconnecting) {
+                    ReconnectingBanner()
+                }
+
+                when (state) {
+                    ScreenState.Loading -> LoadingState(message = "Loading world map...")
+                    ScreenState.Empty -> EmptyState(
+                        title = "Map data unavailable",
+                        message = "No regions are currently loaded."
+                    )
+                    is ScreenState.Error -> ErrorState(
+                        message = state.message,
+                        onRetry = onRetry,
+                        telemetryContext = state.telemetryContext,
+                        onTelemetry = onTelemetry
+                    )
+                    is ScreenState.Content -> Canvas(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pointerInput(Unit) {
+                                detectTransformGestures { _, pan, gestureZoom, _ ->
+                                    zoom = (zoom * gestureZoom).coerceIn(0.5f, 4f)
+                                    offset += pan
+                                }
                             }
-                            
-                            drawRect(
-                                color = color,
-                                topLeft = Offset(x * gridSize, y * gridSize),
-                                size = androidx.compose.ui.geometry.Size(gridSize - 1, gridSize - 1)
-                            )
+                            .pointerInput(Unit) {
+                                detectTapGestures { tapOffset ->
+                                    // Convert tap to world coordinates
+                                    val worldX = ((tapOffset.x - offset.x) / zoom / 256f).toInt()
+                                    val worldY = ((tapOffset.y - offset.y) / zoom / 256f).toInt()
+
+                                    selectedRegion = regions.find { it.x == worldX && it.y == worldY }
+                                }
+                            }
+                    ) {
+                        val gridSize = 256f * zoom
+
+                        translate(offset.x, offset.y) {
+                            // Draw grid
+                            val startX = (-offset.x / gridSize).toInt() - 1
+                            val endX = ((size.width - offset.x) / gridSize).toInt() + 1
+                            val startY = (-offset.y / gridSize).toInt() - 1
+                            val endY = ((size.height - offset.y) / gridSize).toInt() + 1
+
+                            for (x in startX..endX) {
+                                for (y in startY..endY) {
+                                    val region = regions.find { it.x == x && it.y == y }
+                                    val color = when {
+                                        region == null -> Color(0xFF1A1A1A)  // No region
+                                        !region.isOnline -> Color(0xFF333333)  // Offline
+                                        region.access == RegionAccess.ADULT -> Color(0xFF442222)
+                                        region.access == RegionAccess.MODERATE -> Color(0xFF334422)
+                                        else -> Color(0xFF224444)  // General
+                                    }
+
+                                    drawRect(
+                                        color = color,
+                                        topLeft = Offset(x * gridSize, y * gridSize),
+                                        size = androidx.compose.ui.geometry.Size(gridSize - 1, gridSize - 1)
+                                    )
+                                }
+                            }
+
+                            // Draw markers
+                            markers.forEach { marker ->
+                                val markerColor = when (marker.type) {
+                                    MarkerType.SELF -> Color.Green
+                                    MarkerType.FRIEND -> Color.Yellow
+                                    MarkerType.LANDMARK -> Color.Cyan
+                                    MarkerType.TELEPORT_HISTORY -> Color.Magenta
+                                }
+
+                                drawCircle(
+                                    color = markerColor,
+                                    radius = 8f * zoom,
+                                    center = Offset(marker.x * gridSize, marker.y * gridSize)
+                                )
+                            }
                         }
-                    }
-                    
-                    // Draw markers
-                    markers.forEach { marker ->
-                        val markerColor = when (marker.type) {
-                            MarkerType.SELF -> Color.Green
-                            MarkerType.FRIEND -> Color.Yellow
-                            MarkerType.LANDMARK -> Color.Cyan
-                            MarkerType.TELEPORT_HISTORY -> Color.Magenta
-                        }
-                        
-                        drawCircle(
-                            color = markerColor,
-                            radius = 8f * zoom,
-                            center = Offset(marker.x * gridSize, marker.y * gridSize)
-                        )
                     }
                 }
             }
@@ -307,6 +335,10 @@ fun MapScreen(
                         }
                     }
                 }
+            }
+
+            if (isLowBandwidth) {
+                LowBandwidthOverlay(message = "Low bandwidth mode: map updates are throttled.")
             }
         }
     }

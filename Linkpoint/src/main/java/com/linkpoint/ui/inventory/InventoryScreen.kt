@@ -2,7 +2,6 @@ package com.linkpoint.ui.inventory
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -38,6 +37,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.linkpoint.ui.components.state.EmptyState
+import com.linkpoint.ui.components.state.ErrorState
+import com.linkpoint.ui.components.state.LoadingState
+import com.linkpoint.ui.components.state.ScreenState
 import java.util.UUID
 
 /**
@@ -88,6 +91,9 @@ fun InventoryScreen(
     onItemClick: (InventoryItemData) -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateUp: () -> Unit,
+    state: ScreenState<List<InventoryItemData>> = if (items.isEmpty()) ScreenState.Empty else ScreenState.Content(items),
+    onRetry: () -> Unit = {},
+    onTelemetry: (eventName: String, metadata: Map<String, String>) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -120,29 +126,30 @@ fun InventoryScreen(
                 )
             }
             
-            // Items list
-            if (items.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "This folder is empty",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(items, key = { it.id }) { item ->
-                        InventoryItemCard(
-                            item = item,
-                            onClick = { onItemClick(item) }
-                        )
+            when (state) {
+                ScreenState.Loading -> LoadingState(message = "Loading inventory...")
+                ScreenState.Empty -> EmptyState(
+                    title = "Inventory is empty",
+                    message = "This folder has no items yet."
+                )
+                is ScreenState.Error -> ErrorState(
+                    message = state.message,
+                    onRetry = onRetry,
+                    telemetryContext = state.telemetryContext,
+                    onTelemetry = onTelemetry
+                )
+                is ScreenState.Content -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(items, key = { it.id }) { item ->
+                            InventoryItemCard(
+                                item = item,
+                                onClick = { onItemClick(item) }
+                            )
+                        }
                     }
                 }
             }

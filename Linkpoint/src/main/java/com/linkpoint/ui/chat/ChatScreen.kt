@@ -39,6 +39,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
+import com.linkpoint.ui.components.state.EmptyState
+import com.linkpoint.ui.components.state.ErrorState
+import com.linkpoint.ui.components.state.LoadingState
+import com.linkpoint.ui.components.state.LowBandwidthOverlay
+import com.linkpoint.ui.components.state.ReconnectingBanner
+import com.linkpoint.ui.components.state.ScreenState
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -94,6 +100,11 @@ fun ChatScreen(
     currentAvatarName: String = "You",
     onSendMessage: (String, ChatChannel) -> Unit,
     onNavigateBack: () -> Unit,
+    state: ScreenState<List<ChatMessage>> = if (messages.isEmpty()) ScreenState.Empty else ScreenState.Content(messages),
+    onRetry: () -> Unit = {},
+    onTelemetry: (eventName: String, metadata: Map<String, String>) -> Unit = { _, _ -> },
+    isLowBandwidth: Boolean = false,
+    isReconnecting: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     var selectedChannel by remember { mutableIntStateOf(0) }
@@ -144,17 +155,50 @@ fun ChatScreen(
                 }
             }
             
-            // Message list
-            LazyColumn(
+            if (isReconnecting) {
+                ReconnectingBanner()
+            }
+
+            Box(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth(),
-                state = listState,
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .fillMaxWidth()
             ) {
-                items(filteredMessages, key = { it.id }) { message ->
-                    ChatMessageItem(message = message)
+                when (state) {
+                    ScreenState.Loading -> LoadingState(message = "Loading chat...")
+                    ScreenState.Empty -> EmptyState(
+                        title = "No messages yet",
+                        message = "Start the conversation in this channel."
+                    )
+                    is ScreenState.Error -> ErrorState(
+                        message = state.message,
+                        onRetry = onRetry,
+                        telemetryContext = state.telemetryContext,
+                        onTelemetry = onTelemetry
+                    )
+                    is ScreenState.Content -> {
+                        if (filteredMessages.isEmpty()) {
+                            EmptyState(
+                                title = "No messages yet",
+                                message = "Start the conversation in this channel."
+                            )
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                state = listState,
+                                contentPadding = PaddingValues(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(filteredMessages, key = { it.id }) { message ->
+                                    ChatMessageItem(message = message)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (isLowBandwidth) {
+                    LowBandwidthOverlay()
                 }
             }
             

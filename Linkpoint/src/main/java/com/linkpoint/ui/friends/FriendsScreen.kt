@@ -47,6 +47,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.linkpoint.ui.components.state.EmptyState
+import com.linkpoint.ui.components.state.ErrorState
+import com.linkpoint.ui.components.state.LoadingState
+import com.linkpoint.ui.components.state.ReconnectingBanner
+import com.linkpoint.ui.components.state.ScreenState
 import java.util.UUID
 
 /**
@@ -91,6 +96,10 @@ fun FriendsScreen(
     onViewProfile: (FriendData) -> Unit,
     onRemoveFriend: (FriendData) -> Unit,
     onAddFriend: (String) -> Unit,
+    state: ScreenState<List<FriendData>> = if (friends.isEmpty()) ScreenState.Empty else ScreenState.Content(friends),
+    onRetry: () -> Unit = {},
+    onTelemetry: (eventName: String, metadata: Map<String, String>) -> Unit = { _, _ -> },
+    isReconnecting: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
@@ -123,43 +132,41 @@ fun FriendsScreen(
             }
         }
     ) { paddingValues ->
-        if (sortedFriends.isEmpty()) {
-            Box(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "No friends yet",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            if (isReconnecting) {
+                ReconnectingBanner()
             }
-        } else {
-            LazyColumn(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(sortedFriends, key = { it.id }) { friend ->
-                    FriendCard(
-                        friend = friend,
-                        onOpenIM = { onOpenIM(friend) },
-                        onTeleportTo = { onTeleportTo(friend) },
-                        onViewProfile = { onViewProfile(friend) },
-                        onRemove = { onRemoveFriend(friend) }
-                    )
+            when (state) {
+                ScreenState.Loading -> LoadingState(message = "Loading friends...")
+                ScreenState.Empty -> EmptyState(
+                    title = "No friends yet",
+                    message = "Use the add button to send your first friend request.",
+                    icon = Icons.Default.Person
+                )
+                is ScreenState.Error -> ErrorState(
+                    message = state.message,
+                    onRetry = onRetry,
+                    telemetryContext = state.telemetryContext,
+                    onTelemetry = onTelemetry
+                )
+                is ScreenState.Content -> LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(sortedFriends, key = { it.id }) { friend ->
+                        FriendCard(
+                            friend = friend,
+                            onOpenIM = { onOpenIM(friend) },
+                            onTeleportTo = { onTeleportTo(friend) },
+                            onViewProfile = { onViewProfile(friend) },
+                            onRemove = { onRemoveFriend(friend) }
+                        )
+                    }
                 }
             }
         }
