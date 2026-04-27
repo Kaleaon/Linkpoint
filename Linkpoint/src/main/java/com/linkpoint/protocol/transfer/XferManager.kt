@@ -2,6 +2,7 @@ package com.linkpoint.protocol.transfer
 
 import android.util.Log
 import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.PacketCodec
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
 import java.nio.ByteBuffer
@@ -79,10 +80,10 @@ class XferManager(
         try {
             val buffer = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
             
-            val xferId = buffer.long
+            val xferId = PacketCodec.fromBuffer(buffer).readLeLong()
             
             // Read filename (variable length string)
-            val filenameLen = buffer.get().toInt() and 0xFF
+            val filenameLen = PacketCodec.fromBuffer(buffer).readLeByte().toInt() and 0xFF
             val filenameBytes = ByteArray(filenameLen)
             buffer.get(filenameBytes)
             val filename = String(filenameBytes, Charsets.UTF_8).trim('\u0000')
@@ -110,11 +111,12 @@ class XferManager(
         try {
             val buffer = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
             
-            val xferId = buffer.long
-            val packetNum = buffer.int
+            val codec = PacketCodec.fromBuffer(buffer)
+            val xferId = codec.readLeLong()
+            val packetNum = codec.readLeInt()
             
             // Read data (variable length)
-            val dataLen = buffer.short.toInt() and 0xFFFF
+            val dataLen = codec.readLeShort().toInt() and 0xFFFF
             val data = ByteArray(dataLen)
             buffer.get(data)
             
@@ -163,8 +165,9 @@ class XferManager(
         try {
             val buffer = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
             
-            val xferId = buffer.long
-            val result = buffer.int
+            val codec = PacketCodec.fromBuffer(buffer)
+            val xferId = codec.readLeLong()
+            val result = codec.readLeInt()
             
             Log.w(TAG, "AbortXfer: id=$xferId result=$result")
             
@@ -183,8 +186,9 @@ class XferManager(
      */
     private suspend fun sendConfirmXferPacket(xferId: Long, packetNum: Int) {
         val payload = ByteBuffer.allocate(12).order(ByteOrder.LITTLE_ENDIAN)
-        payload.putLong(xferId)
-        payload.putInt(packetNum)
+        PacketCodec.fromBuffer(payload)
+            .writeLeLong(xferId)
+            .writeLeInt(packetNum)
         
         try {
             udpConnection.sendPacket(MessageIds.CONFIRM_XFER_PACKET, payload.array(), reliable = false)
@@ -253,10 +257,10 @@ class XferManager(
             .order(ByteOrder.LITTLE_ENDIAN)
         
         // XferID block
-        payload.putLong(xferId)
+        PacketCodec.fromBuffer(payload).writeLeLong(xferId)
         
         // VFile block
-        writeUUID(payload, vFileId)
+        PacketCodec.fromBuffer(payload).writeUuid(vFileId)
         payload.putShort(vFileType.toShort())
         
         // FilePath block
@@ -280,11 +284,6 @@ class XferManager(
         Log.d(TAG, "Requested xfer for file: $filename xferId=$xferId")
         
         return xferId
-    }
-    
-    private fun writeUUID(buffer: ByteBuffer, uuid: UUID) {
-        buffer.putLong(uuid.mostSignificantBits)
-        buffer.putLong(uuid.leastSignificantBits)
     }
     
     /**

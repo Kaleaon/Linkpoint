@@ -4,6 +4,7 @@ import android.util.Log
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.events.ConnectionState
 import com.linkpoint.network.events.ConnectionStateChangedEvent
+import com.linkpoint.protocol.messages.PacketCodec
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.net.DatagramPacket
@@ -1039,8 +1040,7 @@ class LinkpointThreadedCircuit(
      * Put UUID into ByteBuffer
      */
     private fun putUUID(buffer: ByteBuffer, uuid: UUID) {
-        buffer.putLong(uuid.mostSignificantBits)
-        buffer.putLong(uuid.leastSignificantBits)
+        PacketCodec.fromBuffer(buffer).writeUuid(uuid)
     }
     
     /**
