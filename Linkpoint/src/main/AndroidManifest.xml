@@ -70,14 +70,6 @@
             </intent-filter>
         </activity>
 
-
-        <!-- Compose migration host entry (world/home) -->
-        <activity
-            android:name=".ui.navigation.WorldHomeHostActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.Linkpoint.NoActionBar"/>
-
         <!-- Main World View Activity with Filament Rendering -->
         <activity
             android:name=".ui.world.WorldViewActivity"
@@ -210,6 +202,20 @@
             android:exported="false"
             android:screenOrientation="portrait"
             android:parentActivityName=".ui.world.WorldViewActivity" />
+
+        <!-- Build/Edit Activity -->
+        <activity
+            android:name=".ui.build.BuildActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".ui.world.WorldViewActivity" />
+
+
+        <!-- Compose migration host for Nav + AppShell rollout -->
+        <activity
+            android:name=".ui.navigation.NavigationMigrationActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Linkpoint.NoActionBar" />
 
         <!-- Grid Connection Service -->
         <service
