@@ -1,5 +1,5 @@
 path,lang,inventory_status,broken_signals,task_group,assignee_team,state,pr_link,verification_status,verification_inventory_refresh,notes
-Linkpoint/tools/generate_parser_scaffolding.py,py,BROKEN,todo-call,Tooling TODO Call Remediation,Tooling & Developer Experience Team,TODO,,PENDING,,
+Linkpoint/tools/generate_parser_scaffolding.py,py,OK,,Tooling TODO Call Remediation,Tooling & Developer Experience Team,DONE,,VERIFIED,2026-04-27,Confirmed no todo-call in refreshed static inventory.
 file_bundle/ActiveChattersManager.java,java,BROKEN,decompilation-stub|unsupported-operation,Android Core Recovery,Android Core Recovery Team,TODO,,PENDING,,
 file_bundle/GroupMainProfileTab.java,java,BROKEN,decompilation-stub|unsupported-operation,Android Core Recovery,Android Core Recovery Team,TODO,,PENDING,,
 file_bundle/SyncManager.java,java,BROKEN,decompilation-stub|unsupported-operation,Android Core Recovery,Android Core Recovery Team,TODO,,PENDING,,
