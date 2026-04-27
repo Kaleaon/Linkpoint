@@ -7,27 +7,26 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+env:
+  JAVA_VERSION: '17'
+  ANDROID_SDK_VERSION: '35'
+  NDK_VERSION: '26.3.11579264'
+
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    
-    defaults:
-      run:
-        working-directory: Linkpoint
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
-
-      - name: Cache Gradle
-        uses: gradle/actions/setup-gradle@v4
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
 
       # setup-android@v3 dropped the api-level/build-tools/cmake/ndk inputs;
       # only `packages`, `cmdline-tools-version`, and the license toggles are
@@ -40,28 +39,50 @@ jobs:
         with:
           packages: >-
             platform-tools
-            platforms;android-35
+            platforms;android-${{ env.ANDROID_SDK_VERSION }}
             build-tools;35.0.0
             cmake;3.22.1
-            ndk;26.3.11579264
+            ndk;${{ env.NDK_VERSION }}
 
       - name: Verify Android SDK install
         run: |
           set -euo pipefail
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          test -d "$ANDROID_SDK_ROOT/platforms/android-35"
+          test -d "$ANDROID_SDK_ROOT/platforms/android-${{ env.ANDROID_SDK_VERSION }}"
           test -d "$ANDROID_SDK_ROOT/build-tools/35.0.0"
           test -d "$ANDROID_SDK_ROOT/cmake/3.22.1"
-          test -d "$ANDROID_SDK_ROOT/ndk/26.3.11579264"
+          test -d "$ANDROID_SDK_ROOT/ndk/${{ env.NDK_VERSION }}"
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.android/build-cache
+            .gradle
+          key: ${{ runner.os }}-gradle-release-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-release-
+            ${{ runner.os }}-gradle-
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # Run via the root composite build (settings.gradle :: includeBuild('Linkpoint'))
+      # so we use the same Gradle wrapper / classpath path as build-linkpoint.yml,
+      # which is the proven-passing CI invocation. Running `./gradlew assembleDebug`
+      # from inside `Linkpoint/` uses a different wrapper version and skips the
+      # composite build setup, which has been failing at the Build Debug step.
       - name: Build Debug
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew :Linkpoint:assembleDebug --stacktrace
+        env:
+          GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError"
 
       - name: Build Release
-        run: ./gradlew assembleRelease --stacktrace
+        run: ./gradlew :Linkpoint:assembleRelease --stacktrace
+        env:
+          GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError"
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
