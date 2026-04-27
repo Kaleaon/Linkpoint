@@ -24,8 +24,7 @@ import kotlinx.coroutines.launch
  * Removal target: 2026.09.
  */
 @Deprecated(
-    message = "Legacy Fragment entry point. Use NearbyPeopleScreen-based Compose navigation.",
-    replaceWith = ReplaceWith("NearbyPeopleScreen")
+    message = "Legacy Fragment entry point. Use NearbyPeopleScreen-based Compose navigation."
 )
 class NearbyPeopleFragment : Fragment() {
 

@@ -20,8 +20,7 @@ import java.util.UUID
  * Removal target: 2026.09.
  */
 @Deprecated(
-    message = "Legacy RecyclerView adapter. Use InventoryScreen list composables.",
-    replaceWith = ReplaceWith("InventoryScreen")
+    message = "Legacy RecyclerView adapter. Use InventoryScreen list composables."
 )
 class InventoryAdapter(
     private val onItemClick: (InventoryItem) -> Unit,

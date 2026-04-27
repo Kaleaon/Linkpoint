@@ -13,8 +13,7 @@ import com.linkpoint.R
  * Removal target: 2026.09.
  */
 @Deprecated(
-    message = "Legacy View/Fragment entry point. Use FriendsScreen-based Compose navigation.",
-    replaceWith = ReplaceWith("FriendsScreen")
+    message = "Legacy View/Fragment entry point. Use FriendsScreen-based Compose navigation."
 )
 class FriendsActivity : AppCompatActivity() {
 

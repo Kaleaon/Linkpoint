@@ -18,8 +18,7 @@ import com.linkpoint.groups.Group
  * Removal target: 2026.09.
  */
 @Deprecated(
-    message = "Legacy RecyclerView adapter. Use GroupsScreen list composables.",
-    replaceWith = ReplaceWith("GroupsScreen")
+    message = "Legacy RecyclerView adapter. Use GroupsScreen list composables."
 )
 class GroupsAdapter(
     private val onGroupClick: (Group) -> Unit,

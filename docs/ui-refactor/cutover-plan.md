@@ -53,7 +53,7 @@ for root,_,files in os.walk('Linkpoint/src/main'):
         if fn.endswith(('.kt','.java','.xml')):
             p=os.path.join(root,fn)
             txt=open(p,errors='ignore').read()
-            refs.update(re.findall(r'R\\.layout\\.([A-Za-z0-9_]+)',txt))
+            refs.update(re.findall(r'R\.layout\.([A-Za-z0-9_]+)',txt))
             refs.update(re.findall(r'@layout/([A-Za-z0-9_]+)',txt))
 for name in sorted(n for n in all_layouts if n not in refs):
     print(name)

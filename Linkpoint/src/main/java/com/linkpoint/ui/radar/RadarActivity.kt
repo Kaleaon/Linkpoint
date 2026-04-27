@@ -24,8 +24,7 @@ import kotlinx.coroutines.launch
  * Removal target: 2026.09.
  */
 @Deprecated(
-    message = "Legacy Activity entry point. Use RadarCompose-based Compose navigation.",
-    replaceWith = ReplaceWith("RadarCompose")
+    message = "Legacy Activity entry point. Use RadarCompose-based Compose navigation."
 )
 class RadarActivity : AppCompatActivity() {
 

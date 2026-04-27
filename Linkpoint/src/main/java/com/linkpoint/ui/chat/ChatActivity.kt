@@ -29,8 +29,7 @@ import java.util.*
  * Removal target: 2026.09.
  */
 @Deprecated(
-    message = "Legacy Activity entry point. Use ChatScreen-based Compose navigation.",
-    replaceWith = ReplaceWith("ChatScreen")
+    message = "Legacy Activity entry point. Use ChatScreen-based Compose navigation."
 )
 class ChatActivity : AppCompatActivity() {
     

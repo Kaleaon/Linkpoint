@@ -25,8 +25,7 @@ import kotlinx.coroutines.launch
  * Removal target: 2026.09.
  */
 @Deprecated(
-    message = "Legacy View/Fragment entry point. Use GroupsScreen-based Compose navigation.",
-    replaceWith = ReplaceWith("GroupsScreen")
+    message = "Legacy View/Fragment entry point. Use GroupsScreen-based Compose navigation."
 )
 class GroupsActivity : AppCompatActivity() {
 
@@ -64,8 +63,7 @@ class GroupsActivity : AppCompatActivity() {
  * Removal target: 2026.09.
  */
 @Deprecated(
-    message = "Legacy Fragment entry point. Use GroupsScreen-based Compose navigation.",
-    replaceWith = ReplaceWith("GroupsScreen")
+    message = "Legacy Fragment entry point. Use GroupsScreen-based Compose navigation."
 )
 class GroupsListFragment : Fragment() {
 

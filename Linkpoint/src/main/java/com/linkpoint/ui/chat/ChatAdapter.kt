@@ -19,8 +19,7 @@ import java.util.*
  * Removal target: 2026.09.
  */
 @Deprecated(
-    message = "Legacy RecyclerView adapter. Use ChatScreen list composables.",
-    replaceWith = ReplaceWith("ChatScreen")
+    message = "Legacy RecyclerView adapter. Use ChatScreen list composables."
 )
 class ChatAdapter(
     private val onMessageClick: (ChatMessage) -> Unit = {}

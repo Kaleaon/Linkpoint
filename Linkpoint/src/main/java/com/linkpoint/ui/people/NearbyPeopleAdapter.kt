@@ -19,8 +19,7 @@ import java.text.DecimalFormat
  * Removal target: 2026.09.
  */
 @Deprecated(
-    message = "Legacy RecyclerView adapter. Use NearbyPeopleScreen list composables.",
-    replaceWith = ReplaceWith("NearbyPeopleScreen")
+    message = "Legacy RecyclerView adapter. Use NearbyPeopleScreen list composables."
 )
 class NearbyPeopleAdapter(
     private val onUserClick: (NearbyUser) -> Unit,

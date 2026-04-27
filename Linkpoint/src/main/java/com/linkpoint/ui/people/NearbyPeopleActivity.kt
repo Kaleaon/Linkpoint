@@ -13,8 +13,7 @@ import com.linkpoint.R
  * Removal target: 2026.09.
  */
 @Deprecated(
-    message = "Legacy View/Fragment entry point. Use NearbyPeopleScreen-based Compose navigation.",
-    replaceWith = ReplaceWith("NearbyPeopleScreen")
+    message = "Legacy View/Fragment entry point. Use NearbyPeopleScreen-based Compose navigation."
 )
 class NearbyPeopleActivity : AppCompatActivity() {
 

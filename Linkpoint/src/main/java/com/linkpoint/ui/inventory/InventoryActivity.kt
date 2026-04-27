@@ -28,8 +28,7 @@ import com.linkpoint.ui.notecard.NotecardEditorActivity
  * Removal target: 2026.09.
  */
 @Deprecated(
-    message = "Legacy Activity entry point. Use InventoryScreen-based Compose navigation.",
-    replaceWith = ReplaceWith("InventoryScreen")
+    message = "Legacy Activity entry point. Use InventoryScreen-based Compose navigation."
 )
 class InventoryActivity : AppCompatActivity() {
     

@@ -26,8 +26,7 @@ import java.util.UUID
  * Removal target: 2026.09.
  */
 @Deprecated(
-    message = "Legacy Fragment entry point. Use InventoryScreen-based Compose navigation.",
-    replaceWith = ReplaceWith("InventoryScreen")
+    message = "Legacy Fragment entry point. Use InventoryScreen-based Compose navigation."
 )
 class InventoryFragment : Fragment() {
 

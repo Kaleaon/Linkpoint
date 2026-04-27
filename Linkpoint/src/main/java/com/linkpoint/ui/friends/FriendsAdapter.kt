@@ -20,8 +20,7 @@ import java.util.*
  * Removal target: 2026.09.
  */
 @Deprecated(
-    message = "Legacy RecyclerView adapter. Use FriendsScreen list composables.",
-    replaceWith = ReplaceWith("FriendsScreen")
+    message = "Legacy RecyclerView adapter. Use FriendsScreen list composables."
 )
 class FriendsAdapter(
     private val onFriendClick: (Friend) -> Unit,
