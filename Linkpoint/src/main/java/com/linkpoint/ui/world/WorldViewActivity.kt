@@ -63,6 +63,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private lateinit var surfaceView: SurfaceView
     private var lumiyaSurfaceView: LumiyaGLSurfaceView? = null
     private lateinit var renderContainer: FrameLayout
+    private lateinit var rendererHandoffManager: RendererHandoffManager
     
     // HUD elements
     private lateinit var regionNameText: TextView
@@ -128,6 +129,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         setContentView(R.layout.activity_world_view)
         
         initViews()
+        initRendererHandoffManager()
         initDebugFloater()
         initRenderer()
         setupNavigation()
@@ -642,13 +644,89 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     }
     
     private fun initRenderer() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        useSecondaryRenderer = prefs.getBoolean("enable_secondary_renderer", false)
-
-        if (useSecondaryRenderer) {
-            initSecondaryRenderer()
-            return
+        val targetBackend = preferredRendererBackend()
+        if (rendererHandoffManager.currentState() == RendererHandoffManager.State.IDLE) {
+            rendererHandoffManager.activateInitialBackend(targetBackend, "activity_create")
+        } else {
+            rendererHandoffManager.switchBackend(targetBackend, "renderer_preference_changed")
         }
+    }
+
+    private fun initRendererHandoffManager() {
+        rendererHandoffManager = RendererHandoffManager(
+            onPauseActiveBackendDrawing = { backend ->
+                when (backend) {
+                    RendererHandoffManager.RendererBackend.FILAMENT -> {
+                        if (app.isRenderManagerInitialized()) {
+                            app.renderManager.pauseDrawing("backend_switch")
+                        }
+                        isRendering = false
+                        isSurfaceReady = false
+                    }
+                    RendererHandoffManager.RendererBackend.LUMIYA -> {
+                        lumiyaSurfaceView?.onPause()
+                    }
+                }
+            },
+            onFlushPendingRenderUpdates = { backend ->
+                if (backend == RendererHandoffManager.RendererBackend.FILAMENT && app.isRenderManagerInitialized()) {
+                    app.renderManager.dispatcher.runBlocking {
+                        app.renderManager.flushPendingRenderUpdates()
+                    }
+                }
+            },
+            onDisposeBackendOwnedGpuResources = { backend ->
+                when (backend) {
+                    RendererHandoffManager.RendererBackend.FILAMENT -> {
+                        if (app.isRenderManagerInitialized()) {
+                            app.renderManager.dispatcher.runBlocking {
+                                app.renderManager.shutdown()
+                            }
+                        }
+                    }
+                    RendererHandoffManager.RendererBackend.LUMIYA -> {
+                        lumiyaSurfaceView?.shutdown()
+                        lumiyaSurfaceView = null
+                    }
+                }
+                renderContainer.removeAllViews()
+            },
+            onAttachTargetBackendAndReplaySnapshot = { backend, snapshot ->
+                useSecondaryRenderer = backend == RendererHandoffManager.RendererBackend.LUMIYA
+                when (backend) {
+                    RendererHandoffManager.RendererBackend.FILAMENT -> attachFilamentRenderer(snapshot)
+                    RendererHandoffManager.RendererBackend.LUMIYA -> attachSecondaryRenderer(snapshot)
+                }
+            },
+            snapshotProvider = { captureSceneSnapshot() }
+        )
+    }
+
+    private fun preferredRendererBackend(): RendererHandoffManager.RendererBackend {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        return if (prefs.getBoolean("enable_secondary_renderer", false)) {
+            RendererHandoffManager.RendererBackend.LUMIYA
+        } else {
+            RendererHandoffManager.RendererBackend.FILAMENT
+        }
+    }
+
+    private fun captureSceneSnapshot(): RendererHandoffManager.SceneStateSnapshot {
+        val controller = app.renderManager.cameraController
+        return RendererHandoffManager.SceneStateSnapshot(
+            cameraMode = controller.mode,
+            cameraYawDeg = controller.yawDeg,
+            cameraPitchDeg = controller.pitchDeg,
+            cameraFollowDistance = controller.followDistance
+        )
+    }
+
+    private fun attachFilamentRenderer(snapshot: RendererHandoffManager.SceneStateSnapshot) {
+        val controller = app.renderManager.cameraController
+        controller.setMode(snapshot.cameraMode)
+        controller.yawDeg = snapshot.cameraYawDeg
+        controller.pitchDeg = snapshot.cameraPitchDeg
+        controller.followDistance = snapshot.cameraFollowDistance
 
         surfaceView = SurfaceView(this).apply {
             layoutParams = FrameLayout.LayoutParams(
@@ -662,6 +740,11 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         // Add a callback to ensure SwapChain is created when surface is available
         surfaceView.holder.addCallback(object : android.view.SurfaceHolder.Callback {
             override fun surfaceCreated(holder: android.view.SurfaceHolder) {
+                if (rendererHandoffManager.currentBackend() != RendererHandoffManager.RendererBackend.FILAMENT ||
+                    rendererHandoffManager.currentState() != RendererHandoffManager.State.ACTIVE) {
+                    android.util.Log.w(TAG, "Ignoring surfaceCreated while backend state is ${rendererHandoffManager.currentState()}")
+                    return
+                }
                 android.util.Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
                 android.util.Log.i(TAG, "║ ⭐ Surface created - Surface is now ready")
                 android.util.Log.i(TAG, "║ Surface valid: ${holder.surface.isValid}")
@@ -687,6 +770,11 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             }
             
             override fun surfaceChanged(holder: android.view.SurfaceHolder, format: Int, width: Int, height: Int) {
+                if (rendererHandoffManager.currentBackend() != RendererHandoffManager.RendererBackend.FILAMENT ||
+                    rendererHandoffManager.currentState() != RendererHandoffManager.State.ACTIVE) {
+                    android.util.Log.w(TAG, "Ignoring surfaceChanged while backend state is ${rendererHandoffManager.currentState()}")
+                    return
+                }
                 android.util.Log.d(TAG, "Surface changed: ${width}x${height}")
                 // Recreate SwapChain to handle new dimensions or format changes.
                 // Pass the known width/height so the Filament View viewport is
@@ -701,6 +789,9 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             }
             
             override fun surfaceDestroyed(holder: android.view.SurfaceHolder) {
+                if (rendererHandoffManager.currentBackend() != RendererHandoffManager.RendererBackend.FILAMENT) {
+                    return
+                }
                 android.util.Log.w(TAG, "⚠ Surface destroyed - stopping render loop")
                 // Mark surface as not ready first to prevent new render operations
                 // Then stop rendering (volatile + synchronized ensures atomicity)
@@ -767,7 +858,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         android.util.Log.i(TAG, "✓ RenderManager initialized, waiting for surface to be ready...")
     }
 
-    private fun initSecondaryRenderer() {
+    private fun attachSecondaryRenderer(snapshot: RendererHandoffManager.SceneStateSnapshot) {
         val glView = LumiyaGLSurfaceView(this).apply {
             layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
@@ -779,6 +870,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         renderContainer.addView(glView)
         isSurfaceReady = true
         isRendering = false
+        android.util.Log.i(TAG, "Replayed snapshot into Lumiya backend (camera mode=${snapshot.cameraMode})")
         android.util.Log.i(TAG, "✓ Secondary Lumiya renderer enabled")
     }
     
@@ -1025,13 +1117,16 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         applyInterfacePreferences()
 
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val preferredSecondaryRenderer = prefs.getBoolean("enable_secondary_renderer", false)
-        if (preferredSecondaryRenderer != useSecondaryRenderer) {
-            useSecondaryRenderer = preferredSecondaryRenderer
-            initRenderer()
+        val preferredBackend = if (prefs.getBoolean("enable_secondary_renderer", false)) {
+            RendererHandoffManager.RendererBackend.LUMIYA
+        } else {
+            RendererHandoffManager.RendererBackend.FILAMENT
+        }
+        if (preferredBackend != rendererHandoffManager.currentBackend()) {
+            rendererHandoffManager.switchBackend(preferredBackend, "on_resume_preferences")
         }
 
-        if (useSecondaryRenderer) {
+        if (rendererHandoffManager.currentBackend() == RendererHandoffManager.RendererBackend.LUMIYA) {
             lumiyaSurfaceView?.onResume()
             return
         }
@@ -1067,7 +1162,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     
     override fun onDestroy() {
         super.onDestroy()
-        if (useSecondaryRenderer) {
+        if (rendererHandoffManager.currentBackend() == RendererHandoffManager.RendererBackend.LUMIYA) {
             lumiyaSurfaceView?.shutdown()
             lumiyaSurfaceView = null
         } else {

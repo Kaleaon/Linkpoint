@@ -959,6 +959,15 @@ class RenderManager(private val context: Context) {
 
     /** True iff [renderFrame] is currently issuing GPU work. */
     fun isDrawingEnabled(): Boolean = drawingEnabled.get()
+
+    /**
+     * Drain and apply all currently queued [RenderableUpdate] items immediately.
+     * Must run on the render thread.
+     */
+    fun flushPendingRenderUpdates() {
+        requireRenderThread("flushPendingRenderUpdates")
+        applyRenderUpdates()
+    }
     
     /**
      * Set camera position and orientation
