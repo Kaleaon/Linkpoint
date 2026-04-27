@@ -8,6 +8,7 @@ import com.linkpoint.avatar.BakesOnMesh
 import com.linkpoint.diagnostics.ScenePopulationDiagnostics
 import com.linkpoint.protocol.messages.ObjectUpdateData
 import com.linkpoint.protocol.messages.PrimShapeParams
+import com.linkpoint.protocol.textures.TextureEntryParser
 import com.linkpoint.protocol.types.LLQuaternion
 import com.linkpoint.protocol.types.LLVector3
 import java.nio.ByteBuffer
@@ -43,7 +44,7 @@ class PrimRenderer(
     // cardinality. Treat them as a uniform-scale or post-process for now.
     private val primMeshes = ConcurrentHashMap<PrimShapeKey, PrimMesh>()
 
-    private var defaultMaterial: MaterialInstance? = null
+    private var defaultMaterial: Material? = null
     private val transformManager = engine.transformManager
 
     /**
@@ -56,15 +57,26 @@ class PrimRenderer(
     @Volatile
     private var bomResolver: ((Int) -> UUID?)? = null
 
+    fun interface TextureBinder {
+        fun bind(textureId: UUID, onLoaded: (Texture) -> Unit)
+    }
+
+    @Volatile
+    private var textureBinder: TextureBinder? = null
+
     fun setBomResolver(resolver: ((Int) -> UUID?)?) {
         bomResolver = resolver
+    }
+
+    fun setTextureBinder(binder: TextureBinder?) {
+        textureBinder = binder
     }
     
     /**
      * Initialize with default material
      */
     fun initialize(material: Material) {
-        defaultMaterial = material.createInstance()
+        defaultMaterial = material
         // Pre-generate the default-shape mesh for each base shape kind so the
         // common case (no path/profile customisation) doesn't tessellate on
         // the first frame after each prim arrives.
@@ -152,6 +164,7 @@ class PrimRenderer(
     fun removePrim(localId: Int) {
         prims.remove(localId)?.let { prim ->
             scene.removeEntity(prim.entity)
+            engine.destroyMaterialInstance(prim.materialInstance)
             engine.destroyEntity(prim.entity)
         }
     }
@@ -173,9 +186,16 @@ class PrimRenderer(
         val shapeKey = PrimShapeKey.from(data.shapeParams)
         val mesh = getOrCreateMesh(shapeKey)
 
-        val material = defaultMaterial ?: throw IllegalStateException(
+        val material = defaultMaterial?.createInstance() ?: throw IllegalStateException(
             "Default material not initialized. Call initialize() first."
         )
+        material.setParameter("baseColor", 1f, 1f, 1f, 1f)
+        material.setParameter("texScale", 1f, 1f)
+        material.setParameter("texOffset", 0f, 0f)
+        material.setParameter("texRotation", 0f)
+        material.setParameter("metallic", 0f)
+        material.setParameter("roughness", 0.5f)
+        material.setParameter("hasTexture", 0f)
 
         // The base mesh is built in unit space (-0.5..0.5 cube envelope). The
         // prim's actual scale comes from the protocol's `scale` vector, so the
@@ -202,7 +222,8 @@ class PrimRenderer(
             position = data.position,
             rotation = data.rotation,
             scale = data.scale,
-            textureEntry = data.textureEntry
+            textureEntry = data.textureEntry,
+            materialInstance = material
         )
     }
 
@@ -1050,9 +1071,28 @@ class PrimRenderer(
                     } else if (BakesOnMesh.isBakeSentinel(defaultTextureId)) {
                         Log.v(TAG, "Prim ${prim.localId} BoM sentinel $defaultTextureId — no resolver")
                     }
-                    // TODO: feed `resolved` into TextureManager.getTexture()
-                    // and bind to the lit material's baseColorMap once that
-                    // sampler param is added to the lit material source.
+                    if (TextureEntryParser.shouldDownload(resolved)) {
+                        textureBinder?.bind(resolved) { tex ->
+                            try {
+                                prim.materialInstance.setParameter(
+                                    "baseColorMap", tex,
+                                    TextureSampler(
+                                        TextureSampler.MinFilter.LINEAR_MIPMAP_LINEAR,
+                                        TextureSampler.MagFilter.LINEAR,
+                                        TextureSampler.WrapMode.REPEAT
+                                    )
+                                )
+                                prim.materialInstance.setParameter("hasTexture", 1f)
+                            } catch (e: Exception) {
+                                prim.materialInstance.setParameter("hasTexture", 0f)
+                                Log.w(TAG, "Failed to bind prim texture ${prim.localId} ($resolved)", e)
+                            }
+                        } ?: run {
+                            prim.materialInstance.setParameter("hasTexture", 0f)
+                        }
+                    } else {
+                        prim.materialInstance.setParameter("hasTexture", 0f)
+                    }
                 }
             }
             
@@ -1072,6 +1112,7 @@ class PrimRenderer(
     fun shutdown() {
         for (prim in prims.values) {
             scene.removeEntity(prim.entity)
+            engine.destroyMaterialInstance(prim.materialInstance)
             engine.destroyEntity(prim.entity)
         }
         prims.clear()
@@ -1082,7 +1123,6 @@ class PrimRenderer(
         }
         primMeshes.clear()
         
-        defaultMaterial?.let { engine.destroyMaterialInstance(it) }
     }
 }
 
@@ -1148,5 +1188,6 @@ data class PrimInstance(
     var position: LLVector3,
     var rotation: LLQuaternion,
     var scale: LLVector3,
-    var textureEntry: ByteArray
+    var textureEntry: ByteArray,
+    val materialInstance: MaterialInstance
 )

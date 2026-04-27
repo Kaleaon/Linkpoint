@@ -1460,6 +1460,25 @@ class LinkpointApp : Application() {
                     // Add object to scene for rendering using PrimRenderer
                     // PrimRenderer creates actual renderable meshes (box, sphere, etc.)
                     if (::renderManager.isInitialized) {
+                        renderManager.getPrimRenderer()?.apply {
+                            setBomResolver { slot ->
+                                if (::avatarManager.isInitialized) {
+                                    avatarManager.getMyAvatar()?.baker?.getBakedTextures()?.get(slot)
+                                } else null
+                            }
+                            setTextureBinder(com.linkpoint.render.prims.PrimRenderer.TextureBinder { texId, onLoaded ->
+                                if (!::textureManager.isInitialized) return@TextureBinder
+                                applicationScope.launch {
+                                    val bmp = try { textureManager.getTexture(texId) } catch (_: Exception) { null }
+                                    if (bmp != null) {
+                                        renderManager.dispatcher.post(Runnable {
+                                            val pair = renderManager.uploadBitmapAsLinkpointTexture(texId, bmp)
+                                            if (pair != null) onLoaded(pair.first)
+                                        })
+                                    }
+                                }
+                            })
+                        }
                         renderManager.enqueueUpdate(RenderableUpdate.PrimUpdate(update))
                     }
 
