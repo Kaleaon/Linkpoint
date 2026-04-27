@@ -16,9 +16,6 @@ const MessageIDs = {
   CHAT_FROM_VIEWER: 0x50,
   IMPROVED_IM: 0x12,
   
-  // Group Messages
-  UPDATE_GROUP_INFO: 0xFFFF0155,
-
   // Object Messages
   OBJECT_UPDATE: 0x0C,
   OBJECT_UPDATE_COMPRESSED: 0x0D,
@@ -39,6 +36,9 @@ const MessageIDs = {
   TELEPORT_PROGRESS: 0x56,
   TELEPORT_FINISH: 0x57,
   TELEPORT_FAILED: 0x58,
+
+  // Friend Messages
+  GRANT_USER_RIGHTS: 0xFFFF0140,
 };
 
 /**
@@ -371,6 +371,78 @@ class ObjectUpdateMessage extends SLMessage {
   }
 }
 
+
+/**
+ * GrantUserRights message
+ */
+class GrantUserRightsMessage extends SLMessage {
+  constructor(agentId, sessionId, friendId, rights) {
+    super();
+    this.agentId = agentId;
+    this.sessionId = sessionId;
+    this.friendId = friendId;
+    this.rights = rights;
+    this.isReliable = true;
+  }
+
+  getMessageID() {
+    return MessageIDs.GRANT_USER_RIGHTS;
+  }
+
+  getMessageName() {
+    return 'GrantUserRights';
+  }
+
+  packPayload(buffer) {
+    const view = new DataView(buffer);
+    let offset = 0;
+
+    // AgentData Block
+    // AgentID (LLUUID - big-endian per SL protocol)
+    offset = this.uuidToBytes(this.agentId, view, offset);
+
+    // SessionID (LLUUID - big-endian per SL protocol)
+    offset = this.uuidToBytes(this.sessionId, view, offset);
+
+    // Rights block count (1 block)
+    view.setUint8(offset++, 1);
+
+    // Rights Block
+    // AgentRelated (LLUUID - big-endian per SL protocol)
+    offset = this.uuidToBytes(this.friendId, view, offset);
+
+    // RelatedRights (S32)
+    view.setInt32(offset, this.rights, true); // Little Endian
+    offset += 4;
+
+    return offset;
+  }
+
+  uuidToBytes(uuid, view, offset) {
+    if (!uuid) {
+      for (let i = 0; i < 16; i++) {
+        view.setUint8(offset++, 0);
+      }
+      return offset;
+    }
+
+    const hex = uuid.replace(/-/g, '');
+    if (hex.length !== 32 || !/^[0-9a-fA-F]+$/.test(hex)) {
+      throw new Error(`Invalid UUID format: ${uuid}`);
+    }
+
+    const msb = BigInt('0x' + hex.substring(0, 16));
+    const lsb = BigInt('0x' + hex.substring(16, 32));
+
+    view.setBigUint64(offset, msb, false); // big-endian
+    offset += 8;
+    view.setBigUint64(offset, lsb, false); // big-endian
+    offset += 8;
+
+    return offset;
+  }
+}
+
 /**
  * AgentUpdate message
  */
@@ -405,101 +477,6 @@ class AgentUpdateMessage extends SLMessage {
   }
 }
 
-
-/**
- * UpdateGroupInfo message
- */
-class UpdateGroupInfoMessage extends SLMessage {
-  constructor(agentId, sessionId, groupId, charter = '', showInList = true, insigniaId = '00000000-0000-0000-0000-000000000000', membershipFee = 0, openEnrollment = true, allowPublish = true, maturePublish = false) {
-    super();
-    this.agentId = agentId;
-    this.sessionId = sessionId;
-    this.groupId = groupId;
-    this.charter = charter;
-    this.showInList = showInList;
-    this.insigniaId = insigniaId;
-    this.membershipFee = membershipFee;
-    this.openEnrollment = openEnrollment;
-    this.allowPublish = allowPublish;
-    this.maturePublish = maturePublish;
-    this.isReliable = true;
-    this.zeroCoded = true;
-  }
-
-  getMessageID() {
-    return MessageIDs.UPDATE_GROUP_INFO;
-  }
-
-  getMessageName() {
-    return 'UpdateGroupInfo';
-  }
-
-  packPayload(buffer) {
-    const view = new DataView(buffer);
-    let offset = 0;
-
-    // AgentData block
-    offset = this.uuidToBytes(this.agentId, view, offset);
-    offset = this.uuidToBytes(this.sessionId, view, offset);
-
-    // GroupData block
-    offset = this.uuidToBytes(this.groupId, view, offset);
-
-    // Charter (Variable 2)
-    const charterBytes = new TextEncoder().encode(this.charter);
-    view.setUint16(offset, charterBytes.length, true); // Little Endian
-    offset += 2;
-    for (let i = 0; i < charterBytes.length; i++) {
-      view.setUint8(offset++, charterBytes[i]);
-    }
-
-    // ShowInList (BOOL)
-    view.setUint8(offset++, this.showInList ? 1 : 0);
-
-    // InsigniaID (UUID)
-    offset = this.uuidToBytes(this.insigniaId, view, offset);
-
-    // MembershipFee (S32)
-    view.setInt32(offset, this.membershipFee, true); // Little Endian
-    offset += 4;
-
-    // OpenEnrollment (BOOL)
-    view.setUint8(offset++, this.openEnrollment ? 1 : 0);
-
-    // AllowPublish (BOOL)
-    view.setUint8(offset++, this.allowPublish ? 1 : 0);
-
-    // MaturePublish (BOOL)
-    view.setUint8(offset++, this.maturePublish ? 1 : 0);
-
-    return offset;
-  }
-
-  uuidToBytes(uuid, view, offset) {
-    if (!uuid) {
-      for (let i = 0; i < 16; i++) {
-        view.setUint8(offset++, 0);
-      }
-      return offset;
-    }
-
-    const hex = uuid.replace(/-/g, '');
-    if (hex.length !== 32 || !/^[0-9a-fA-F]+$/.test(hex)) {
-      throw new Error('Invalid UUID format: ' + uuid);
-    }
-
-    const msb = BigInt('0x' + hex.substring(0, 16));
-    const lsb = BigInt('0x' + hex.substring(16, 32));
-
-    view.setBigUint64(offset, msb, false); // big-endian
-    offset += 8;
-    view.setBigUint64(offset, lsb, false); // big-endian
-    offset += 8;
-
-    return offset;
-  }
-}
-
 // Export all message types
 window.SLMessageTypes = {
   MessageIDs,
@@ -510,5 +487,5 @@ window.SLMessageTypes = {
   ChatFromViewerMessage,
   ObjectUpdateMessage,
   AgentUpdateMessage,
-  UpdateGroupInfoMessage
+  GrantUserRightsMessage
 };

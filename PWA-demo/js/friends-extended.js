@@ -317,7 +317,38 @@ class FriendsExtended {
       friend.rightsGiven = rights;
     }
     
-    // TODO: Send GrantUserRights message
+    // Send GrantUserRights message
+    if (window.app && window.app.protocolManager) {
+      const pm = window.app.protocolManager;
+      if (window.SLMessageTypes && window.SLMessageTypes.GrantUserRightsMessage) {
+        const msg = new window.SLMessageTypes.GrantUserRightsMessage(
+          pm.agentId,
+          pm.sessionId,
+          friendUUID,
+          rights
+        );
+
+        // Allocate buffer (AgentData=32 + Count=1 + Rights=20 = 53 bytes)
+        const buffer = new ArrayBuffer(64);
+        const length = msg.packPayload(buffer);
+        const payload = new Uint8Array(buffer, 0, length);
+
+        // Since ProtocolManager might use WebSockets and JSON wrapping in the PWA demo,
+        // we'll try to send it in a way it expects or just simulate if it's not a full implementation
+        if (pm.sendMessage) {
+          pm.sendMessage('GrantUserRights', {
+            friend_id: friendUUID,
+            rights: rights,
+            // Provide payload for low-level protocol adapters
+            payload: Array.from(payload)
+          });
+        }
+      } else {
+        console.warn('SLMessageTypes.GrantUserRightsMessage not available');
+      }
+    } else {
+      console.warn('window.app.protocolManager not available to send GrantUserRights');
+    }
   }
   
   /**
