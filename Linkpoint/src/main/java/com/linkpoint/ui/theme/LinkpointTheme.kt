@@ -41,15 +41,32 @@ val LocalThemePack = staticCompositionLocalOf { BuiltInThemes.LINKPOINT_DEFAULT 
 @Composable
 fun LinkpointTheme(
     themePack: ThemePack? = null,
+    densityMode: ThemePack.DensityMode? = null,
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
     val themeManager = remember(context) { ThemeManager.getInstance(context) }
+    val densitySettingsStore = remember(context) { DensitySettingsStore(context) }
     val activeTheme by themeManager.activeTheme.collectAsState()
+    val persistedDensityMode by densitySettingsStore.densityMode.collectAsState(initial = ThemePack.DensityMode.BALANCED)
     val resolvedThemePack = themePack ?: activeTheme
+    val resolvedDensityMode = densityMode
+        ?: persistedDensityMode
+        .takeIf { it != ThemePack.DensityMode.BALANCED }
+        ?: resolvedThemePack.resolvedDensityDefault()
     val linkpointColors = resolvedThemePack.toComposeColors()
-    
+    val designTokens = remember(resolvedDensityMode) { linkpointDesignTokensFor(resolvedDensityMode) }
+    val typographyTokens = remember(resolvedThemePack.id) {
+        linkpointTypographyFor(resolvedThemePack.resolvedThemeFamily())
+    }
+    val shapeTokens = remember(resolvedThemePack.id, resolvedDensityMode) {
+        linkpointShapesFor(
+            cornerStyle = resolvedThemePack.resolvedCornerStyleProfile(),
+            designTokens = designTokens
+        )
+    }
+
     // Create Material 3 color scheme from ThemePack colors
     // Support both dark and light themes based on system preference
     val colorScheme = if (darkTheme) {
@@ -95,10 +112,16 @@ fun LinkpointTheme(
     
     CompositionLocalProvider(
         LocalLinkpointColors provides linkpointColors,
-        LocalThemePack provides resolvedThemePack
+        LocalThemePack provides resolvedThemePack,
+        LocalDensityMode provides resolvedDensityMode,
+        LocalDesignTokens provides designTokens,
+        LocalLinkpointTypography provides typographyTokens,
+        LocalLinkpointShapes provides shapeTokens
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
+            typography = typographyTokens.materialTypography,
+            shapes = shapeTokens.materialShapes,
             content = content
         )
     }
@@ -129,4 +152,9 @@ object LinkpointTheme {
         @Composable
         @ReadOnlyComposable
         get() = LocalThemePack.current
+
+    val density: ThemePack.DensityMode
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalDensityMode.current
 }

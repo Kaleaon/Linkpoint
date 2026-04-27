@@ -72,8 +72,40 @@ data class ThemePack(
     val colorSuccess: String = "#4CAF50",
     
     /** Optional: Warning color */
-    val colorWarning: String = "#FFC107"
+    val colorWarning: String = "#FFC107",
+
+    /** Optional: semantic family to drive typography defaults */
+    val themeFamily: ThemeFamily? = null,
+
+    /** Optional: default density mode for this theme */
+    val densityModeDefault: DensityMode? = null,
+
+    /** Optional: default corner style profile */
+    val cornerStyleProfile: CornerStyleProfile? = null
 ) {
+    @Serializable
+    enum class ThemeFamily {
+        DEFAULT,
+        CLASSIC,
+        MODERN,
+        ELEGANT,
+        INDUSTRIAL
+    }
+
+    @Serializable
+    enum class DensityMode {
+        COMPACT,
+        BALANCED,
+        SPACIOUS
+    }
+
+    @Serializable
+    enum class CornerStyleProfile {
+        STANDARD,
+        SHARP,
+        ORGANIC
+    }
+
     companion object {
         private val json = Json { 
             prettyPrint = true 
@@ -111,10 +143,40 @@ data class ThemePack(
                 colorBackground = "#1A1A1A",
                 colorSurface = "#2D2D2D",
                 colorOnSurface = "#FFFFFF",
-                colorOnSurfaceVariant = "#B0B0B0"
+                colorOnSurfaceVariant = "#B0B0B0",
+                themeFamily = ThemeFamily.DEFAULT,
+                densityModeDefault = DensityMode.BALANCED,
+                cornerStyleProfile = CornerStyleProfile.STANDARD
             )
         }
+
+        private val metadataFallbacks: Map<String, ThemeMetadataProfile> = mapOf(
+            "firestorm" to ThemeMetadataProfile(ThemeFamily.MODERN, DensityMode.COMPACT, CornerStyleProfile.SHARP),
+            "sl_classic" to ThemeMetadataProfile(ThemeFamily.CLASSIC, DensityMode.BALANCED, CornerStyleProfile.STANDARD),
+            "royal_silver" to ThemeMetadataProfile(ThemeFamily.ELEGANT, DensityMode.SPACIOUS, CornerStyleProfile.ORGANIC),
+            "slate_gunmetal" to ThemeMetadataProfile(ThemeFamily.INDUSTRIAL, DensityMode.COMPACT, CornerStyleProfile.SHARP)
+        )
     }
+
+    data class ThemeMetadataProfile(
+        val family: ThemeFamily,
+        val densityMode: DensityMode,
+        val cornerStyle: CornerStyleProfile
+    )
+
+    fun resolvedThemeFamily(): ThemeFamily {
+        return themeFamily ?: companionMetadataFallback()?.family ?: ThemeFamily.DEFAULT
+    }
+
+    fun resolvedDensityDefault(): DensityMode {
+        return densityModeDefault ?: companionMetadataFallback()?.densityMode ?: DensityMode.BALANCED
+    }
+
+    fun resolvedCornerStyleProfile(): CornerStyleProfile {
+        return cornerStyleProfile ?: companionMetadataFallback()?.cornerStyle ?: CornerStyleProfile.STANDARD
+    }
+
+    private fun companionMetadataFallback(): ThemeMetadataProfile? = metadataFallbacks[id]
     
     /**
      * Convert this theme pack to a JSON string

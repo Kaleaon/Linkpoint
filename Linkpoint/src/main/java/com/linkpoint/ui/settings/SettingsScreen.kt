@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,15 +37,21 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.linkpoint.ui.theme.DensitySettingsStore
+import com.linkpoint.ui.theme.LinkpointTokens
+import com.linkpoint.ui.theme.ThemePack
+import kotlinx.coroutines.launch
 
 /**
  * Settings state
@@ -91,6 +98,11 @@ fun SettingsScreen(
     modifier: Modifier = Modifier
 ) {
     var currentSettings by remember { mutableStateOf(settings) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val densityStore = remember(context) { DensitySettingsStore(context) }
+    val densityMode by densityStore.densityMode.collectAsState(initial = ThemePack.DensityMode.BALANCED)
+    val spacing = LinkpointTokens.design.spacing
     
     Scaffold(
         topBar = {
@@ -109,8 +121,8 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(spacing.md),
+            verticalArrangement = Arrangement.spacedBy(spacing.md)
         ) {
             // Account Section
             SettingsSection(title = "Account") {
@@ -131,6 +143,17 @@ fun SettingsScreen(
                     onClick = onOpenThemePicker
                 )
                 
+                HorizontalDivider()
+
+                DensityModeSetting(
+                    selectedDensity = densityMode,
+                    onDensitySelected = { selected ->
+                        scope.launch {
+                            densityStore.setDensityMode(selected)
+                        }
+                    }
+                )
+
                 HorizontalDivider()
                 
                 SettingsSliderItem(
@@ -306,6 +329,30 @@ fun SettingsScreen(
                     title = "About Linkpoint",
                     subtitle = "Version $appVersion",
                     onClick = onOpenAbout
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DensityModeSetting(
+    selectedDensity: ThemePack.DensityMode,
+    onDensitySelected: (ThemePack.DensityMode) -> Unit
+) {
+    Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(text = "Density", style = MaterialTheme.typography.bodyLarge)
+        Text(
+            text = "Controls global spacing and component compactness",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ThemePack.DensityMode.entries.forEach { mode ->
+                FilterChip(
+                    selected = selectedDensity == mode,
+                    onClick = { onDensitySelected(mode) },
+                    label = { Text(mode.name.lowercase().replaceFirstChar { it.uppercase() }) }
                 )
             }
         }
