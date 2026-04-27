@@ -1,6 +1,7 @@
 package com.lumiyaviewer.lumiya.slproto.users.manager;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.EventBus;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.dao.ChatMessage;
@@ -95,41 +96,20 @@ public class ActiveChattersManager implements MessageSourceNameResolver.OnMessag
         this.messageSourceNameResolver = new MessageSourceNameResolver(userManager2, this);
         new RequestFinalProcessor<ChatterID, UnreadMessageInfo>(this.unreadCountsPool, userManager2.getDatabaseExecutor()) {
             /* access modifiers changed from: protected */
-            /* JADX WARNING: Code restructure failed: missing block: B:4:0x000f, code lost:
-                r0 = (com.lumiyaviewer.lumiya.dao.ChatMessage) com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager.m269get0(r4.this$0).load(r2.getLastMessageID());
-             */
-            /* Code decompiled incorrectly, please refer to instructions dump. */
-            public com.lumiyaviewer.lumiya.slproto.users.manager.UnreadMessageInfo processRequest(@javax.annotation.Nonnull com.lumiyaviewer.lumiya.slproto.users.ChatterID r5) throws java.lang.Throwable {
-                /*
-                    r4 = this;
-                    r1 = 0
-                    com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager r0 = com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager.this
-                    com.lumiyaviewer.lumiya.dao.Chatter r2 = r0.getChatter(r5)
-                    if (r2 == 0) goto L_0x0034
-                    java.lang.Long r0 = r2.getLastMessageID()
-                    if (r0 == 0) goto L_0x003a
-                    com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager r0 = com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager.this
-                    com.lumiyaviewer.lumiya.dao.ChatMessageDao r0 = r0.chatMessageDao
-                    java.lang.Long r3 = r2.getLastMessageID()
-                    java.lang.Object r0 = r0.load(r3)
-                    com.lumiyaviewer.lumiya.dao.ChatMessage r0 = (com.lumiyaviewer.lumiya.dao.ChatMessage) r0
-                    if (r0 == 0) goto L_0x003a
-                    com.lumiyaviewer.lumiya.slproto.users.manager.UserManager r1 = r9
-                    java.util.UUID r1 = r1.getUserID()
-                    com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent r0 = com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.loadFromDatabaseObject(r0, r1)
-                L_0x002b:
-                    int r1 = r2.getUnreadCount()
-                    com.lumiyaviewer.lumiya.slproto.users.manager.UnreadMessageInfo r0 = com.lumiyaviewer.lumiya.slproto.users.manager.UnreadMessageInfo.create(r1, r0)
-                    return r0
-                L_0x0034:
-                    r0 = 0
-                    com.lumiyaviewer.lumiya.slproto.users.manager.UnreadMessageInfo r0 = com.lumiyaviewer.lumiya.slproto.users.manager.UnreadMessageInfo.create(r0, r1)
-                    return r0
-                L_0x003a:
-                    r0 = r1
-                    goto L_0x002b
-                */
-                throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager.AnonymousClass2.processRequest(com.lumiyaviewer.lumiya.slproto.users.ChatterID):com.lumiyaviewer.lumiya.slproto.users.manager.UnreadMessageInfo");
+            public UnreadMessageInfo processRequest(@Nonnull ChatterID chatterID) throws Throwable {
+                Chatter chatter = ActiveChattersManager.this.getChatter(chatterID);
+                if (chatter == null) {
+                    return UnreadMessageInfo.create(0, (SLChatEvent) null);
+                }
+                SLChatEvent lastMessageEvent = null;
+                Long lastMessageId = chatter.getLastMessageID();
+                if (lastMessageId != null) {
+                    ChatMessage lastMessage = (ChatMessage) ActiveChattersManager.this.chatMessageDao.load(lastMessageId);
+                    if (lastMessage != null) {
+                        lastMessageEvent = SLChatEvent.loadFromDatabaseObject(lastMessage, userManager2.getUserID());
+                    }
+                }
+                return UnreadMessageInfo.create(chatter.getUnreadCount(), lastMessageEvent);
             }
         };
     }
@@ -200,259 +180,137 @@ public class ActiveChattersManager implements MessageSourceNameResolver.OnMessag
     }
 
     /* access modifiers changed from: private */
-    /* JADX WARNING: Removed duplicated region for block: B:48:0x00d2  */
     /* renamed from: handleChatEventInternal */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    public void m273lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_13379(com.lumiyaviewer.lumiya.slproto.users.ChatterID r12, com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent r13, boolean r14) {
-        /*
-            r11 = this;
-            r8 = 0
-            r7 = 1
-            r5 = 0
-            boolean r2 = r13.isObjectPopup()
-            if (r2 == 0) goto L_0x0025
-            com.lumiyaviewer.lumiya.slproto.users.manager.UserManager r2 = r11.userManager
-            com.lumiyaviewer.lumiya.slproto.users.manager.ObjectPopupsManager r2 = r2.getObjectPopupsManager()
-            r2.addObjectPopup(r13)
-        L_0x0012:
-            com.lumiyaviewer.lumiya.slproto.users.manager.UserManager r2 = r11.userManager
-            com.lumiyaviewer.lumiya.slproto.users.manager.SyncManager r2 = r2.getSyncManager()
-            r2.syncNewMessages()
-            com.lumiyaviewer.lumiya.slproto.users.manager.UserManager r2 = r11.userManager
-            com.lumiyaviewer.lumiya.slproto.users.manager.UnreadNotificationManager r2 = r2.getUnreadNotificationManager()
-            r2.updateUnreadNotifications()
-            return
-        L_0x0025:
-            com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource r4 = r13.getSource()
-            com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource$ChatMessageSourceType r2 = r4.getSourceType()
-            com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource$ChatMessageSourceType r3 = com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource.ChatMessageSourceType.Object
-            if (r2 != r3) goto L_0x0079
-            java.lang.Object r3 = r11.objectMessageListenersLock
-            monitor-enter(r3)
-            java.util.Map<com.lumiyaviewer.lumiya.slproto.chat.generic.OnChatEventListener, java.util.concurrent.Executor> r2 = r11.objectMessageListeners     // Catch:{ all -> 0x0072 }
-            boolean r2 = r2.isEmpty()     // Catch:{ all -> 0x0072 }
-            if (r2 != 0) goto L_0x0070
-            java.util.Map<com.lumiyaviewer.lumiya.slproto.chat.generic.OnChatEventListener, java.util.concurrent.Executor> r2 = r11.objectMessageListeners     // Catch:{ all -> 0x0072 }
-            java.util.Set r2 = r2.entrySet()     // Catch:{ all -> 0x0072 }
-            com.google.common.collect.ImmutableList r2 = com.google.common.collect.ImmutableList.copyOf(r2)     // Catch:{ all -> 0x0072 }
-        L_0x0046:
-            monitor-exit(r3)
-            if (r2 == 0) goto L_0x0079
-            java.util.Iterator r6 = r2.iterator()
-        L_0x004d:
-            boolean r2 = r6.hasNext()
-            if (r2 == 0) goto L_0x0079
-            java.lang.Object r2 = r6.next()
-            java.util.Map$Entry r2 = (java.util.Map.Entry) r2
-            java.lang.Object r3 = r2.getKey()
-            com.lumiyaviewer.lumiya.slproto.chat.generic.OnChatEventListener r3 = (com.lumiyaviewer.lumiya.slproto.chat.generic.OnChatEventListener) r3
-            java.lang.Object r2 = r2.getValue()
-            java.util.concurrent.Executor r2 = (java.util.concurrent.Executor) r2
-            if (r2 == 0) goto L_0x0075
-            com.lumiyaviewer.lumiya.slproto.users.manager.-$Lambda$bC26PUjVA14BMgZPIZxiNFWFltI$2 r9 = new com.lumiyaviewer.lumiya.slproto.users.manager.-$Lambda$bC26PUjVA14BMgZPIZxiNFWFltI$2
-            r9.<init>(r3, r13)
-            r2.execute(r9)
-            goto L_0x004d
-        L_0x0070:
-            r2 = r5
-            goto L_0x0046
-        L_0x0072:
-            r2 = move-exception
-            monitor-exit(r3)
-            throw r2
-        L_0x0075:
-            r3.onChatEvent(r13)
-            goto L_0x004d
-        L_0x0079:
-            com.lumiyaviewer.lumiya.slproto.users.manager.UserManager r2 = r11.userManager
-            com.lumiyaviewer.lumiya.slproto.SLAgentCircuit r2 = r2.getActiveAgentCircuit()
-            if (r2 == 0) goto L_0x01d2
-            java.util.UUID r2 = r2.getSessionID()
-            r6 = r2
-        L_0x0086:
-            java.lang.Object r10 = r11.chatEventLock
-            monitor-enter(r10)
-            com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource$ChatMessageSourceType r2 = r4.getSourceType()     // Catch:{ all -> 0x01da }
-            com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource$ChatMessageSourceType r3 = com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource.ChatMessageSourceType.User     // Catch:{ all -> 0x01da }
-            if (r2 != r3) goto L_0x01d5
-            boolean r2 = r4 instanceof com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUser     // Catch:{ all -> 0x01da }
-            if (r2 == 0) goto L_0x01f0
-            com.lumiyaviewer.lumiya.slproto.users.manager.UserManager r2 = r11.userManager     // Catch:{ all -> 0x01da }
-            com.lumiyaviewer.lumiya.dao.DaoSession r2 = r2.getDaoSession()     // Catch:{ all -> 0x01da }
-            com.lumiyaviewer.lumiya.dao.UserNameDao r2 = r2.getUserNameDao()     // Catch:{ all -> 0x01da }
-            java.util.UUID r3 = r4.getSourceUUID()     // Catch:{ all -> 0x01da }
-            java.lang.Object r2 = r2.load(r3)     // Catch:{ all -> 0x01da }
-            com.lumiyaviewer.lumiya.dao.UserName r2 = (com.lumiyaviewer.lumiya.dao.UserName) r2     // Catch:{ all -> 0x01da }
-            if (r2 == 0) goto L_0x01f3
-            r0 = r4
-            com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUser r0 = (com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUser) r0     // Catch:{ all -> 0x01da }
-            r3 = r0
-            java.lang.String r9 = r2.getDisplayName()     // Catch:{ all -> 0x01da }
-            if (r9 == 0) goto L_0x00bc
-            java.lang.String r9 = r2.getDisplayName()     // Catch:{ all -> 0x01da }
-            r3.setDisplayName(r9)     // Catch:{ all -> 0x01da }
-        L_0x00bc:
-            java.lang.String r9 = r2.getUserName()     // Catch:{ all -> 0x01da }
-            if (r9 == 0) goto L_0x00c9
-            java.lang.String r9 = r2.getUserName()     // Catch:{ all -> 0x01da }
-            r3.setLegacyName(r9)     // Catch:{ all -> 0x01da }
-        L_0x00c9:
-            boolean r2 = r2.isComplete()     // Catch:{ all -> 0x01da }
-            if (r2 == 0) goto L_0x01f3
-            r2 = r7
-        L_0x00d0:
-            if (r2 != 0) goto L_0x01f0
-            java.util.UUID r2 = r4.getSourceUUID()     // Catch:{ all -> 0x01da }
-            r9 = r2
-        L_0x00d7:
-            boolean r2 = r13.opensNewChatter()     // Catch:{ all -> 0x01da }
-            if (r2 != 0) goto L_0x01ed
-            com.lumiyaviewer.lumiya.slproto.users.ChatterID$ChatterType r2 = r12.getChatterType()     // Catch:{ all -> 0x01da }
-            com.lumiyaviewer.lumiya.slproto.users.ChatterID$ChatterType r3 = com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterType.Local     // Catch:{ all -> 0x01da }
-            if (r2 == r3) goto L_0x01ed
-            com.lumiyaviewer.lumiya.dao.Chatter r2 = r11.getChatter(r12)     // Catch:{ all -> 0x01da }
-            if (r2 == 0) goto L_0x01ea
-            boolean r3 = r2.getActive()     // Catch:{ all -> 0x01da }
-            if (r3 != 0) goto L_0x01ea
-        L_0x00f1:
-            if (r5 != 0) goto L_0x01e7
-            com.lumiyaviewer.lumiya.slproto.users.ChatterID r12 = r11.localChatterID     // Catch:{ all -> 0x01da }
-            r2 = r5
-        L_0x00f6:
-            java.util.Set<com.lumiyaviewer.lumiya.slproto.users.ChatterID> r3 = r11.displayedChatters     // Catch:{ all -> 0x01da }
-            boolean r5 = r3.contains(r12)     // Catch:{ all -> 0x01da }
-            if (r2 != 0) goto L_0x01e4
-            com.lumiyaviewer.lumiya.dao.Chatter r2 = r11.getChatter(r12)     // Catch:{ all -> 0x01da }
-            if (r2 != 0) goto L_0x01e4
-            com.lumiyaviewer.lumiya.dao.Chatter r2 = new com.lumiyaviewer.lumiya.dao.Chatter     // Catch:{ all -> 0x01da }
-            r3 = 0
-            r2.<init>(r3)     // Catch:{ all -> 0x01da }
-            r12.toDatabaseObject(r2)     // Catch:{ all -> 0x01da }
-            com.lumiyaviewer.lumiya.dao.ChatterDao r3 = r11.chatterDao     // Catch:{ all -> 0x01da }
-            r3.insert(r2)     // Catch:{ all -> 0x01da }
-            r4 = r2
-        L_0x0113:
-            if (r6 == 0) goto L_0x0135
-            java.util.UUID r2 = r4.getLastSessionID()     // Catch:{ all -> 0x01da }
-            boolean r2 = com.google.common.base.Objects.equal(r6, r2)     // Catch:{ all -> 0x01da }
-            r2 = r2 ^ 1
-            if (r2 == 0) goto L_0x0135
-            java.util.UUID r2 = r4.getLastSessionID()     // Catch:{ all -> 0x01da }
-            if (r2 == 0) goto L_0x0132
-            java.lang.Long r2 = r4.getId()     // Catch:{ all -> 0x01da }
-            long r2 = r2.longValue()     // Catch:{ all -> 0x01da }
-            r11.makeSessionMark(r12, r2)     // Catch:{ all -> 0x01da }
-        L_0x0132:
-            r4.setLastSessionID(r6)     // Catch:{ all -> 0x01da }
-        L_0x0135:
-            com.lumiyaviewer.lumiya.dao.ChatMessage r6 = r13.getDatabaseObject()     // Catch:{ all -> 0x01da }
-            java.lang.Long r2 = r4.getId()     // Catch:{ all -> 0x01da }
-            long r2 = r2.longValue()     // Catch:{ all -> 0x01da }
-            r6.setChatterID(r2)     // Catch:{ all -> 0x01da }
-            com.lumiyaviewer.lumiya.dao.ChatMessageDao r2 = r11.chatMessageDao     // Catch:{ all -> 0x01da }
-            r2.insert(r6)     // Catch:{ all -> 0x01da }
-            boolean r2 = r4.getActive()     // Catch:{ all -> 0x01da }
-            if (r2 != 0) goto L_0x01d8
-            boolean r2 = r4.getMuted()     // Catch:{ all -> 0x01da }
-            r2 = r2 ^ 1
-            if (r2 == 0) goto L_0x01e1
-            r2 = 1
-            r4.setActive(r2)     // Catch:{ all -> 0x01da }
-            r3 = r7
-        L_0x015c:
-            if (r14 == 0) goto L_0x01df
-            if (r5 != 0) goto L_0x01df
-            int r2 = r4.getUnreadCount()     // Catch:{ all -> 0x01da }
-            int r2 = r2 + 1
-            r4.setUnreadCount(r2)     // Catch:{ all -> 0x01da }
-            r2 = r7
-        L_0x016a:
-            java.lang.Long r5 = r6.getId()     // Catch:{ all -> 0x01da }
-            r4.setLastMessageID(r5)     // Catch:{ all -> 0x01da }
-            com.lumiyaviewer.lumiya.dao.ChatterDao r5 = r11.chatterDao     // Catch:{ all -> 0x01da }
-            r5.update(r4)     // Catch:{ all -> 0x01da }
-            monitor-exit(r10)
-            boolean r5 = r4.getMuted()
-            if (r5 != 0) goto L_0x019f
-            if (r2 == 0) goto L_0x019f
-            com.lumiyaviewer.lumiya.slproto.users.manager.UserManager r2 = r11.userManager
-            com.lumiyaviewer.lumiya.slproto.users.manager.UnreadNotificationManager r2 = r2.getUnreadNotificationManager()
-            r2.addFreshMessage(r4)
-            com.google.common.eventbus.EventBus r5 = r11.chatEventBus
-            com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager$ChatMessageEvent r10 = new com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager$ChatMessageEvent
-            int r2 = r4.getType()
-            com.lumiyaviewer.lumiya.slproto.users.ChatterID$ChatterType r4 = com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterType.User
-            int r4 = r4.ordinal()
-            if (r2 != r4) goto L_0x01dd
-            r2 = r7
-        L_0x0199:
-            r10.<init>(r6, r7, r2)
-            r5.post(r10)
-        L_0x019f:
-            if (r9 == 0) goto L_0x01aa
-            com.lumiyaviewer.lumiya.slproto.users.manager.MessageSourceNameResolver r2 = r11.messageSourceNameResolver
-            java.lang.Long r4 = r6.getId()
-            r2.requestResolve(r9, r4)
-        L_0x01aa:
-            com.lumiyaviewer.lumiya.react.SubscriptionPool<com.lumiyaviewer.lumiya.slproto.users.ChatterID, com.lumiyaviewer.lumiya.slproto.users.manager.UnreadMessageInfo> r2 = r11.unreadCountsPool
-            r2.requestUpdate(r12)
-            if (r3 == 0) goto L_0x01b8
-            com.lumiyaviewer.lumiya.slproto.users.manager.ChatterList r2 = r11.chatterList
-            com.lumiyaviewer.lumiya.slproto.users.manager.ChatterListType r3 = com.lumiyaviewer.lumiya.slproto.users.manager.ChatterListType.Active
-            r2.updateList(r3)
-        L_0x01b8:
-            java.util.List r2 = r11.getLoaders(r12)
-            if (r2 == 0) goto L_0x0012
-            java.util.Iterator r3 = r2.iterator()
-        L_0x01c2:
-            boolean r2 = r3.hasNext()
-            if (r2 == 0) goto L_0x0012
-            java.lang.Object r2 = r3.next()
-            com.lumiyaviewer.lumiya.slproto.users.manager.ChatMessageLoader r2 = (com.lumiyaviewer.lumiya.slproto.users.manager.ChatMessageLoader) r2
-            r2.addElement(r6)
-            goto L_0x01c2
-        L_0x01d2:
-            r6 = r5
-            goto L_0x0086
-        L_0x01d5:
-            r9 = r5
-            goto L_0x00d7
-        L_0x01d8:
-            r3 = r8
-            goto L_0x015c
-        L_0x01da:
-            r2 = move-exception
-            monitor-exit(r10)
-            throw r2
-        L_0x01dd:
-            r2 = r8
-            goto L_0x0199
-        L_0x01df:
-            r2 = r8
-            goto L_0x016a
-        L_0x01e1:
-            r3 = r8
-            goto L_0x015c
-        L_0x01e4:
-            r4 = r2
-            goto L_0x0113
-        L_0x01e7:
-            r2 = r5
-            goto L_0x00f6
-        L_0x01ea:
-            r5 = r2
-            goto L_0x00f1
-        L_0x01ed:
-            r2 = r5
-            goto L_0x00f6
-        L_0x01f0:
-            r9 = r5
-            goto L_0x00d7
-        L_0x01f3:
-            r2 = r8
-            goto L_0x00d0
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager.m273lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_13379(com.lumiyaviewer.lumiya.slproto.users.ChatterID, com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent, boolean):void");
+    public void m273lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_13379(ChatterID chatterID, final SLChatEvent chatEvent, boolean countAsUnread) {
+        if (chatEvent.isObjectPopup()) {
+            this.userManager.getObjectPopupsManager().addObjectPopup(chatEvent);
+            this.userManager.getSyncManager().syncNewMessages();
+            this.userManager.getUnreadNotificationManager().updateUnreadNotifications();
+            return;
+        }
+
+        final com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource source = chatEvent.getSource();
+        if (source.getSourceType() == com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource.ChatMessageSourceType.Object) {
+            List<Map.Entry<OnChatEventListener, Executor>> listeners;
+            synchronized (this.objectMessageListenersLock) {
+                listeners = this.objectMessageListeners.isEmpty() ? null : ImmutableList.copyOf(this.objectMessageListeners.entrySet());
+            }
+            if (listeners != null) {
+                for (final Map.Entry<OnChatEventListener, Executor> listener : listeners) {
+                    Executor executor = listener.getValue();
+                    if (executor != null) {
+                        executor.execute(new Runnable() {
+                            public void run() {
+                                listener.getKey().onChatEvent(chatEvent);
+                            }
+                        });
+                    } else {
+                        listener.getKey().onChatEvent(chatEvent);
+                    }
+                }
+            }
+        }
+
+        SLAgentCircuit activeCircuit = this.userManager.getActiveAgentCircuit();
+        UUID sessionId = activeCircuit != null ? activeCircuit.getSessionID() : null;
+        UUID sourceToResolve = null;
+        ChatMessage insertedMessage;
+        Chatter actualChatter;
+        boolean chatterStateChanged;
+        boolean isNewUnread;
+
+        synchronized (this.chatEventLock) {
+            if (source.getSourceType() == com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource.ChatMessageSourceType.User
+                    && (source instanceof com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUser)) {
+                UserName userName = this.userManager.getDaoSession().getUserNameDao().load(source.getSourceUUID());
+                boolean hasCompleteName = false;
+                if (userName != null) {
+                    com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUser userSource =
+                            (com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUser) source;
+                    if (userName.getDisplayName() != null) {
+                        userSource.setDisplayName(userName.getDisplayName());
+                    }
+                    if (userName.getUserName() != null) {
+                        userSource.setLegacyName(userName.getUserName());
+                    }
+                    hasCompleteName = userName.isComplete();
+                }
+                if (!hasCompleteName) {
+                    sourceToResolve = source.getSourceUUID();
+                }
+            }
+
+            Chatter chatter = null;
+            if (chatEvent.opensNewChatter()
+                    || chatterID.getChatterType() == ChatterID.ChatterType.Local
+                    || ((chatter = getChatter(chatterID)) != null && chatter.getActive())) {
+                chatter = getChatter(chatterID);
+            } else {
+                chatterID = this.localChatterID;
+                chatter = getChatter(chatterID);
+            }
+
+            boolean isDisplayed = this.displayedChatters.contains(chatterID);
+            if (chatter == null) {
+                chatter = new Chatter((Long) null);
+                chatterID.toDatabaseObject(chatter);
+                this.chatterDao.insert(chatter);
+            }
+
+            if (sessionId != null && !Objects.equal(sessionId, chatter.getLastSessionID())) {
+                if (chatter.getLastSessionID() != null) {
+                    makeSessionMark(chatterID, chatter.getId().longValue());
+                }
+                chatter.setLastSessionID(sessionId);
+            }
+
+            insertedMessage = chatEvent.getDatabaseObject();
+            insertedMessage.setChatterID(chatter.getId().longValue());
+            this.chatMessageDao.insert(insertedMessage);
+
+            chatterStateChanged = false;
+            if (!chatter.getActive() && !chatter.getMuted()) {
+                chatter.setActive(true);
+                chatterStateChanged = true;
+            }
+
+            isNewUnread = false;
+            if (countAsUnread && !isDisplayed) {
+                chatter.setUnreadCount(chatter.getUnreadCount() + 1);
+                isNewUnread = true;
+            }
+
+            chatter.setLastMessageID(insertedMessage.getId());
+            this.chatterDao.update(chatter);
+            actualChatter = chatter;
+        }
+
+        if (!actualChatter.getMuted() && isNewUnread) {
+            this.userManager.getUnreadNotificationManager().addFreshMessage(actualChatter);
+            this.chatEventBus.post(new ChatMessageEvent(
+                    insertedMessage,
+                    true,
+                    actualChatter.getType() == ChatterID.ChatterType.User.ordinal()));
+        }
+
+        if (sourceToResolve != null) {
+            this.messageSourceNameResolver.requestResolve(sourceToResolve, insertedMessage.getId());
+        }
+
+        this.unreadCountsPool.requestUpdate(chatterID);
+        if (chatterStateChanged) {
+            this.chatterList.updateList(ChatterListType.Active);
+        }
+
+        List<ChatMessageLoader> loaders = getLoaders(chatterID);
+        if (loaders != null) {
+            for (ChatMessageLoader loader : loaders) {
+                loader.addElement(insertedMessage);
+            }
+        }
+
+        this.userManager.getSyncManager().syncNewMessages();
+        this.userManager.getUnreadNotificationManager().updateUnreadNotifications();
     }
 
     private void makeSessionMark(@Nonnull ChatterID chatterID, long j) {

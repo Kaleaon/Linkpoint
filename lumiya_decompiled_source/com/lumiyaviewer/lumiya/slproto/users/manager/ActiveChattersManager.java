@@ -1,6 +1,7 @@
 package com.lumiyaviewer.lumiya.slproto.users.manager;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.EventBus;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.dao.ChatMessage;
@@ -180,12 +181,134 @@ public class ActiveChattersManager implements MessageSourceNameResolver.OnMessag
         Code decompiled incorrectly, please refer to instructions dump.
         To view partially-correct add '--show-bad-code' argument
     */
-    public void m284x2a96bcb8(com.lumiyaviewer.lumiya.slproto.users.ChatterID r12, final com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent r13, boolean r14) {
-        /*
-            Method dump skipped, instructions count: 502
-            To view this dump add '--comments-level debug' option
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager.m284x2a96bcb8(com.lumiyaviewer.lumiya.slproto.users.ChatterID, com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent, boolean):void");
+    public void m284x2a96bcb8(ChatterID chatterID, final SLChatEvent chatEvent, boolean countAsUnread) {
+        if (chatEvent.isObjectPopup()) {
+            this.userManager.getObjectPopupsManager().addObjectPopup(chatEvent);
+            this.userManager.getSyncManager().syncNewMessages();
+            this.userManager.getUnreadNotificationManager().updateUnreadNotifications();
+            return;
+        }
+
+        final com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource source = chatEvent.getSource();
+        if (source.getSourceType() == com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource.ChatMessageSourceType.Object) {
+            List<Map.Entry<OnChatEventListener, Executor>> listeners;
+            synchronized (this.objectMessageListenersLock) {
+                listeners = this.objectMessageListeners.isEmpty() ? null : ImmutableList.copyOf(this.objectMessageListeners.entrySet());
+            }
+            if (listeners != null) {
+                for (final Map.Entry<OnChatEventListener, Executor> listener : listeners) {
+                    Executor executor = listener.getValue();
+                    if (executor != null) {
+                        executor.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.getKey().onChatEvent(chatEvent);
+                            }
+                        });
+                    } else {
+                        listener.getKey().onChatEvent(chatEvent);
+                    }
+                }
+            }
+        }
+
+        SLAgentCircuit activeCircuit = this.userManager.getActiveAgentCircuit();
+        UUID sessionId = activeCircuit != null ? activeCircuit.getSessionID() : null;
+        UUID sourceToResolve = null;
+        ChatMessage insertedMessage;
+        Chatter actualChatter;
+        boolean chatterStateChanged;
+        boolean isNewUnread;
+
+        synchronized (this.chatEventLock) {
+            if (source.getSourceType() == com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource.ChatMessageSourceType.User
+                    && (source instanceof com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUser)) {
+                UserName userName = this.userManager.getDaoSession().getUserNameDao().load(source.getSourceUUID());
+                boolean hasCompleteName = false;
+                if (userName != null) {
+                    com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUser userSource =
+                            (com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUser) source;
+                    if (userName.getDisplayName() != null) {
+                        userSource.setDisplayName(userName.getDisplayName());
+                    }
+                    if (userName.getUserName() != null) {
+                        userSource.setLegacyName(userName.getUserName());
+                    }
+                    hasCompleteName = userName.isComplete();
+                }
+                if (!hasCompleteName) {
+                    sourceToResolve = source.getSourceUUID();
+                }
+            }
+
+            Chatter chatter = null;
+            if (chatEvent.opensNewChatter()
+                    || chatterID.getChatterType() == ChatterID.ChatterType.Local
+                    || ((chatter = getChatter(chatterID)) != null && chatter.getActive())) {
+                chatter = getChatter(chatterID);
+            } else {
+                chatterID = this.localChatterID;
+                chatter = getChatter(chatterID);
+            }
+
+            boolean isDisplayed = this.displayedChatters.contains(chatterID);
+            if (chatter == null) {
+                chatter = new Chatter(null);
+                chatterID.toDatabaseObject(chatter);
+                this.chatterDao.insert(chatter);
+            }
+
+            if (sessionId != null && !Objects.equal(sessionId, chatter.getLastSessionID())) {
+                if (chatter.getLastSessionID() != null) {
+                    makeSessionMark(chatterID, chatter.getId().longValue());
+                }
+                chatter.setLastSessionID(sessionId);
+            }
+
+            insertedMessage = chatEvent.getDatabaseObject();
+            insertedMessage.setChatterID(chatter.getId().longValue());
+            this.chatMessageDao.insert(insertedMessage);
+
+            chatterStateChanged = false;
+            if (!chatter.getActive() && !chatter.getMuted()) {
+                chatter.setActive(true);
+                chatterStateChanged = true;
+            }
+
+            isNewUnread = false;
+            if (countAsUnread && !isDisplayed) {
+                chatter.setUnreadCount(chatter.getUnreadCount() + 1);
+                isNewUnread = true;
+            }
+
+            chatter.setLastMessageID(insertedMessage.getId());
+            this.chatterDao.update(chatter);
+            actualChatter = chatter;
+        }
+
+        if (!actualChatter.getMuted() && isNewUnread) {
+            this.userManager.getUnreadNotificationManager().addFreshMessage(actualChatter);
+            this.chatEventBus.post(new ChatMessageEvent(insertedMessage, true, actualChatter.getType() == ChatterID.ChatterType.User.ordinal()));
+        }
+
+        if (sourceToResolve != null) {
+            this.messageSourceNameResolver.requestResolve(sourceToResolve, insertedMessage.getId());
+        }
+
+        this.unreadCountsPool.requestUpdate(chatterID);
+        if (chatterStateChanged) {
+            this.chatterList.updateList(ChatterListType.Active);
+        }
+
+        List<ChatMessageLoader> loaders = getLoaders(chatterID);
+        if (loaders != null) {
+            for (ChatMessageLoader loader : loaders) {
+                loader.addElement(insertedMessage);
+            }
+        }
+
+        this.userManager.getSyncManager().syncNewMessages();
+        this.userManager.getUnreadNotificationManager().updateUnreadNotifications();
     }
 
     private void makeSessionMark(@Nonnull ChatterID chatterID, long j) {
