@@ -14,8 +14,15 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * Adapter for displaying friends in a RecyclerView
+ * Adapter for displaying friends in a RecyclerView.
+ *
+ * Legacy entry point retained during Compose migration.
+ * Removal target: 2026.09.
  */
+@Deprecated(
+    message = "Legacy RecyclerView adapter. Use FriendsScreen list composables.",
+    replaceWith = ReplaceWith("FriendsScreen")
+)
 class FriendsAdapter(
     private val onFriendClick: (Friend) -> Unit,
     private val onFriendLongClick: (Friend) -> Unit

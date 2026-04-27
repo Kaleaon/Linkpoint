@@ -14,8 +14,15 @@ import com.linkpoint.inventory.InventoryFolder
 import java.util.UUID
 
 /**
- * Adapter for displaying inventory items in a RecyclerView
+ * Adapter for displaying inventory items in a RecyclerView.
+ *
+ * Legacy entry point retained during Compose migration.
+ * Removal target: 2026.09.
  */
+@Deprecated(
+    message = "Legacy RecyclerView adapter. Use InventoryScreen list composables.",
+    replaceWith = ReplaceWith("InventoryScreen")
+)
 class InventoryAdapter(
     private val onItemClick: (InventoryItem) -> Unit,
     private val onFolderClick: (InventoryFolder) -> Unit,

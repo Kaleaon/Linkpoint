@@ -8,7 +8,14 @@ import com.linkpoint.R
 /**
  * Activity for viewing nearby people (avatars in the current region).
  * Hosts NearbyPeopleFragment and provides navigation.
+ *
+ * Legacy entry point retained during Compose migration.
+ * Removal target: 2026.09.
  */
+@Deprecated(
+    message = "Legacy View/Fragment entry point. Use NearbyPeopleScreen-based Compose navigation.",
+    replaceWith = ReplaceWith("NearbyPeopleScreen")
+)
 class NearbyPeopleActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

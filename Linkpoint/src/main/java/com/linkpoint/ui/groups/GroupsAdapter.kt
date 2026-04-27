@@ -13,7 +13,14 @@ import com.linkpoint.groups.Group
 
 /**
  * Adapter for displaying groups in a RecyclerView.
+ *
+ * Legacy entry point retained during Compose migration.
+ * Removal target: 2026.09.
  */
+@Deprecated(
+    message = "Legacy RecyclerView adapter. Use GroupsScreen list composables.",
+    replaceWith = ReplaceWith("GroupsScreen")
+)
 class GroupsAdapter(
     private val onGroupClick: (Group) -> Unit,
     private val onGroupLongClick: (Group) -> Unit

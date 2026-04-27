@@ -20,7 +20,14 @@ import kotlinx.coroutines.launch
 
 /**
  * Activity for managing groups list.
+ *
+ * Legacy entry point retained during Compose migration.
+ * Removal target: 2026.09.
  */
+@Deprecated(
+    message = "Legacy View/Fragment entry point. Use GroupsScreen-based Compose navigation.",
+    replaceWith = ReplaceWith("GroupsScreen")
+)
 class GroupsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,7 +59,14 @@ class GroupsActivity : AppCompatActivity() {
 
 /**
  * Fragment for displaying groups list.
+ *
+ * Legacy entry point retained during Compose migration.
+ * Removal target: 2026.09.
  */
+@Deprecated(
+    message = "Legacy Fragment entry point. Use GroupsScreen-based Compose navigation.",
+    replaceWith = ReplaceWith("GroupsScreen")
+)
 class GroupsListFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView

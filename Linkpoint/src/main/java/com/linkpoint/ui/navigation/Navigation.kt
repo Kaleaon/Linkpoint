@@ -54,11 +54,11 @@ fun NavHostController.navigateBack() {
 
 /**
  * Main navigation composable that can be used as the app's navigation structure.
- * 
- * Note: This is a framework that can be used when migrating from Activities to 
- * single-Activity + Compose Navigation architecture. Currently the app still uses
- * Activity-based navigation, but these routes and NavHost setup can be adopted
- * incrementally.
+ *
+ * Compose-first note:
+ * - Compose navigation is the default path for new UI flows.
+ * - Legacy Activity/Fragment bridges are temporary compatibility shims and are
+ *   tracked for removal in docs/ui-refactor/cutover-plan.md.
  * 
  * Usage in MainActivity:
  * ```kotlin
