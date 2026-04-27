@@ -1,47 +1,36 @@
 package com.linkpoint.ui.theme
 
 import androidx.compose.material3.Typography
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.sp
 
-@Immutable
-data class LinkpointTypographyTokens(
-    val materialTypography: Typography,
-    val coordinateText: TextStyle,
-    val lindenDollarText: TextStyle
-)
-
-val LocalLinkpointTypography = staticCompositionLocalOf {
-    linkpointTypographyFor(ThemePack.ThemeFamily.DEFAULT)
-}
-
-fun linkpointTypographyFor(family: ThemePack.ThemeFamily): LinkpointTypographyTokens {
-    val baseFamily = when (family) {
-        ThemePack.ThemeFamily.CLASSIC -> FontFamily.Serif
-        ThemePack.ThemeFamily.ELEGANT -> FontFamily.Serif
-        ThemePack.ThemeFamily.MODERN -> FontFamily.SansSerif
-        ThemePack.ThemeFamily.INDUSTRIAL -> FontFamily.SansSerif
-        ThemePack.ThemeFamily.DEFAULT -> FontFamily.SansSerif
+fun ThemePack.toMaterialTypography(): Typography {
+    val scale = when (resolvedDensityProfile()) {
+        DensityProfile.COMPACT -> 0.95f
+        DensityProfile.STANDARD -> 1f
+        DensityProfile.COMFORTABLE -> 1.08f
     }
 
-    val typography = Typography().run {
-        copy(
-            displayLarge = displayLarge.copy(fontFamily = baseFamily),
-            displayMedium = displayMedium.copy(fontFamily = baseFamily),
-            titleLarge = titleLarge.copy(fontFamily = baseFamily),
-            titleMedium = titleMedium.copy(fontFamily = baseFamily),
-            bodyLarge = bodyLarge.copy(fontFamily = baseFamily),
-            bodyMedium = bodyMedium.copy(fontFamily = baseFamily),
-            labelLarge = labelLarge.copy(fontFamily = baseFamily)
-        )
-    }
+    fun scaled(size: Int) = (size * scale).sp
 
-    val mono = typography.bodyMedium.copy(fontFamily = FontFamily.Monospace)
-    return LinkpointTypographyTokens(
-        materialTypography = typography,
-        coordinateText = mono,
-        lindenDollarText = mono
+    return Typography(
+        displayLarge = TextStyle(fontSize = scaled(57), lineHeight = scaled(64)),
+        displayMedium = TextStyle(fontSize = scaled(45), lineHeight = scaled(52)),
+        displaySmall = TextStyle(fontSize = scaled(36), lineHeight = scaled(44)),
+        headlineLarge = TextStyle(fontSize = scaled(32), lineHeight = scaled(40)),
+        headlineMedium = TextStyle(fontSize = scaled(28), lineHeight = scaled(36)),
+        headlineSmall = TextStyle(fontSize = scaled(24), lineHeight = scaled(32)),
+        titleLarge = TextStyle(fontSize = scaled(22), lineHeight = scaled(28)),
+        titleMedium = TextStyle(fontSize = scaled(16), lineHeight = scaled(24)),
+        titleSmall = TextStyle(fontSize = scaled(14), lineHeight = scaled(20)),
+        bodyLarge = TextStyle(fontSize = scaled(16), lineHeight = scaled(24)),
+        bodyMedium = TextStyle(fontSize = scaled(14), lineHeight = scaled(20)),
+        bodySmall = TextStyle(fontSize = scaled(12), lineHeight = scaled(16)),
+        labelLarge = TextStyle(fontSize = scaled(14), lineHeight = scaled(20)),
+        labelMedium = TextStyle(fontSize = scaled(12), lineHeight = scaled(16)),
+        labelSmall = TextStyle(fontSize = scaled(11), lineHeight = scaled(16))
     )
 }
+
+val LocalLinkpointTypography = staticCompositionLocalOf { BuiltInThemes.LINKPOINT_DEFAULT.toMaterialTypography() }

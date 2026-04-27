@@ -41,90 +41,82 @@ val LocalThemePack = staticCompositionLocalOf { BuiltInThemes.LINKPOINT_DEFAULT 
 @Composable
 fun LinkpointTheme(
     themePack: ThemePack? = null,
-    densityMode: ThemePack.DensityMode? = null,
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
     val themeManager = remember(context) { ThemeManager.getInstance(context) }
-    val densitySettingsStore = remember(context) { DensitySettingsStore(context) }
     val activeTheme by themeManager.activeTheme.collectAsState()
-    val persistedDensityMode by densitySettingsStore.densityMode.collectAsState(initial = ThemePack.DensityMode.BALANCED)
     val resolvedThemePack = themePack ?: activeTheme
-    val resolvedDensityMode = densityMode
-        ?: persistedDensityMode
-        .takeIf { it != ThemePack.DensityMode.BALANCED }
-        ?: resolvedThemePack.resolvedDensityDefault()
     val linkpointColors = resolvedThemePack.toComposeColors()
-    val designTokens = remember(resolvedDensityMode) { linkpointDesignTokensFor(resolvedDensityMode) }
-    val typographyTokens = remember(resolvedThemePack.id) {
-        linkpointTypographyFor(resolvedThemePack.resolvedThemeFamily())
-    }
-    val shapeTokens = remember(resolvedThemePack.id, resolvedDensityMode) {
-        linkpointShapesFor(
-            cornerStyle = resolvedThemePack.resolvedCornerStyleProfile(),
-            designTokens = designTokens
-        )
-    }
 
-    // Create Material 3 color scheme from ThemePack colors
-    // Support both dark and light themes based on system preference
-    val colorScheme = if (darkTheme) {
-        darkColorScheme(
-            primary = linkpointColors.primary,
-            onPrimary = linkpointColors.onPrimary,
-            primaryContainer = linkpointColors.primaryVariant,
-            onPrimaryContainer = linkpointColors.onPrimary,
-            secondary = linkpointColors.secondary,
-            onSecondary = linkpointColors.onSecondary,
-            secondaryContainer = linkpointColors.secondary,
-            onSecondaryContainer = linkpointColors.onSecondary,
-            background = linkpointColors.background,
-            onBackground = linkpointColors.onSurface,
-            surface = linkpointColors.surface,
-            onSurface = linkpointColors.onSurface,
-            surfaceVariant = linkpointColors.surfaceVariant,
-            onSurfaceVariant = linkpointColors.onSurfaceVariant,
-            error = linkpointColors.error,
-            onError = linkpointColors.onError
-        )
-    } else {
-        // Light theme - invert some colors for better contrast
-        lightColorScheme(
-            primary = linkpointColors.primary,
-            onPrimary = linkpointColors.onPrimary,
-            primaryContainer = linkpointColors.primaryVariant,
-            onPrimaryContainer = linkpointColors.onPrimary,
-            secondary = linkpointColors.secondary,
-            onSecondary = linkpointColors.onSecondary,
-            secondaryContainer = linkpointColors.secondary,
-            onSecondaryContainer = linkpointColors.onSecondary,
-            background = linkpointColors.onSurface,  // Inverted for light
-            onBackground = linkpointColors.background,
-            surface = linkpointColors.onSurface,  // Inverted for light
-            onSurface = linkpointColors.background,
-            surfaceVariant = linkpointColors.onSurfaceVariant,
-            onSurfaceVariant = linkpointColors.surface,
-            error = linkpointColors.error,
-            onError = linkpointColors.onError
-        )
-    }
-    
+    val colorScheme = resolvedThemePack.toMaterialColorScheme(
+        linkpointColors = linkpointColors,
+        darkTheme = darkTheme
+    )
+    val typography = resolvedThemePack.toMaterialTypography()
+    val shapes = resolvedThemePack.toMaterialShapes()
+    val spacing = resolvedThemePack.toSpacing()
+    val motion = resolvedThemePack.toMotion()
+
     CompositionLocalProvider(
         LocalLinkpointColors provides linkpointColors,
         LocalThemePack provides resolvedThemePack,
-        LocalDensityMode provides resolvedDensityMode,
-        LocalDesignTokens provides designTokens,
-        LocalLinkpointTypography provides typographyTokens,
-        LocalLinkpointShapes provides shapeTokens
+        LocalLinkpointTypography provides typography,
+        LocalLinkpointShapes provides shapes,
+        LocalLinkpointSpacing provides spacing,
+        LocalLinkpointMotion provides motion
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
-            typography = typographyTokens.materialTypography,
-            shapes = shapeTokens.materialShapes,
+            typography = typography,
+            shapes = shapes,
             content = content
         )
     }
+}
+
+private fun ThemePack.toMaterialColorScheme(
+    linkpointColors: LinkpointColors,
+    darkTheme: Boolean
+) = if (darkTheme) {
+    darkColorScheme(
+        primary = linkpointColors.primary,
+        onPrimary = linkpointColors.onPrimary,
+        primaryContainer = linkpointColors.primaryVariant,
+        onPrimaryContainer = linkpointColors.onPrimary,
+        secondary = linkpointColors.secondary,
+        onSecondary = linkpointColors.onSecondary,
+        secondaryContainer = linkpointColors.secondary,
+        onSecondaryContainer = linkpointColors.onSecondary,
+        background = linkpointColors.background,
+        onBackground = linkpointColors.onSurface,
+        surface = linkpointColors.surface,
+        onSurface = linkpointColors.onSurface,
+        surfaceVariant = linkpointColors.surfaceVariant,
+        onSurfaceVariant = linkpointColors.onSurfaceVariant,
+        error = linkpointColors.error,
+        onError = linkpointColors.onError
+    )
+} else {
+    lightColorScheme(
+        primary = linkpointColors.primary,
+        onPrimary = linkpointColors.onPrimary,
+        primaryContainer = linkpointColors.primaryVariant,
+        onPrimaryContainer = linkpointColors.onPrimary,
+        secondary = linkpointColors.secondary,
+        onSecondary = linkpointColors.onSecondary,
+        secondaryContainer = linkpointColors.secondary,
+        onSecondaryContainer = linkpointColors.onSecondary,
+        background = linkpointColors.onSurface,
+        onBackground = linkpointColors.background,
+        surface = linkpointColors.onSurface,
+        onSurface = linkpointColors.background,
+        surfaceVariant = linkpointColors.onSurfaceVariant,
+        onSurfaceVariant = linkpointColors.surface,
+        error = linkpointColors.error,
+        onError = linkpointColors.onError
+    )
 }
 
 /**
@@ -153,8 +145,23 @@ object LinkpointTheme {
         @ReadOnlyComposable
         get() = LocalThemePack.current
 
-    val density: ThemePack.DensityMode
+    val spacing: LinkpointSpacing
         @Composable
         @ReadOnlyComposable
-        get() = LocalDensityMode.current
+        get() = LocalLinkpointSpacing.current
+
+    val motion: LinkpointMotion
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalLinkpointMotion.current
+
+    val typography: androidx.compose.material3.Typography
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalLinkpointTypography.current
+
+    val shapes: androidx.compose.material3.Shapes
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalLinkpointShapes.current
 }
