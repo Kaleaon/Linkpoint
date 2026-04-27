@@ -8,6 +8,16 @@ import com.ktheme.models.ThemeMetadata
  * Map a Ktheme theme into Linkpoint's ThemePack format.
  */
 fun Theme.toThemePack(): ThemePack {
+    val densityProfile = metadata.tags.firstNotNullOfOrNull { tag ->
+        tag.removePrefix("density:").takeIf { it != tag }?.let { runCatching { DensityProfile.valueOf(it.uppercase()) }.getOrNull() }
+    }
+    val cornerProfile = metadata.tags.firstNotNullOfOrNull { tag ->
+        tag.removePrefix("corner:").takeIf { it != tag }?.let { runCatching { CornerProfile.valueOf(it.uppercase()) }.getOrNull() }
+    }
+    val motionProfile = metadata.tags.firstNotNullOfOrNull { tag ->
+        tag.removePrefix("motion:").takeIf { it != tag }?.let { runCatching { MotionProfile.valueOf(it.uppercase()) }.getOrNull() }
+    }
+
     return ThemePack(
         id = metadata.id,
         name = metadata.name,
@@ -25,7 +35,10 @@ fun Theme.toThemePack(): ThemePack {
         colorOnSurface = colorScheme.onSurface,
         colorOnSurfaceVariant = colorScheme.onSurfaceVariant,
         colorSurfaceVariant = colorScheme.surfaceVariant,
-        colorError = colorScheme.error
+        colorError = colorScheme.error,
+        densityProfile = densityProfile,
+        cornerProfile = cornerProfile,
+        motionProfile = motionProfile
     )
 }
 
@@ -41,7 +54,12 @@ fun ThemePack.toKthemeTheme(): Theme {
             description = description.ifBlank { "Linkpoint theme" },
             author = author,
             version = version,
-            tags = listOf("linkpoint"),
+            tags = buildList {
+                add("linkpoint")
+                densityProfile?.let { add("density:${it.name.lowercase()}") }
+                cornerProfile?.let { add("corner:${it.name.lowercase()}") }
+                motionProfile?.let { add("motion:${it.name.lowercase()}") }
+            },
             createdAt = now,
             updatedAt = now
         ),
