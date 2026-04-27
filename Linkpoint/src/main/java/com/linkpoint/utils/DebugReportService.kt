@@ -8,7 +8,9 @@ import com.linkpoint.assets.CacheManager
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.core.ConnectionQualityManager
 import com.linkpoint.network.core.NetworkStateManager
+import com.linkpoint.protocol.messages.EnhancedPacketLogger
 import com.linkpoint.protocol.messages.UDPConnectionFixed
+import com.linkpoint.render.RenderDiagnostics
 import kotlinx.coroutines.*
 import java.io.File
 import java.text.SimpleDateFormat
@@ -43,6 +45,7 @@ class DebugReportService private constructor(private val context: Context) {
         
         // Number of recent malformed packets to show in debug reports
         private const val MALFORMED_PACKET_HISTORY_COUNT = 5
+        private const val EARLY_WARNING_GRACE_MS = 15_000L
         
         @Volatile
         private var instance: DebugReportService? = null
@@ -82,6 +85,14 @@ class DebugReportService private constructor(private val context: Context) {
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var reportDirectory: File? = null
+
+    private fun udpConnectedElapsedMs(): Long? {
+        return InitializationTracker.getElapsedSincePhase(InitializationTracker.Phase.UDP_CONNECTED)
+    }
+
+    private fun formatUdpConnectedElapsed(elapsedMs: Long?): String {
+        return if (elapsedMs != null) "${formatDuration(elapsedMs)} since UDP_CONNECTED" else "UDP_CONNECTED time unavailable"
+    }
     
     init {
         initializeStorage()
@@ -291,6 +302,19 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Texture manager: App not initialized")
             }
             appendLine()
+
+            // LinkpointTexture / mmap accounting (populated once the
+            // LinkpointTexture path is on the hot path; until then values
+            // stay at zero, which is the honest signal that the new
+            // pipeline isn't carrying any traffic yet).
+            val textureMemSnap = com.linkpoint.assets.TextureMemoryTracker.snapshot()
+            appendLine("Texture Memory Tracker:")
+            appendLine("  Live Textures: ${textureMemSnap.liveTextures}")
+            appendLine("  Native Heap: ${formatBytes(textureMemSnap.nativeHeapBytes)}")
+            appendLine("  Mmapped: ${formatBytes(textureMemSnap.mmappedBytes)}")
+            appendLine("  GPU: ${formatBytes(textureMemSnap.gpuBytes)}")
+            appendLine("  Total: ${formatBytes(textureMemSnap.totalBytes)}")
+            appendLine()
             
             // ==================== NEW DETAILED DIAGNOSTIC SECTIONS ====================
             
@@ -313,6 +337,10 @@ class DebugReportService private constructor(private val context: Context) {
                     appendLine("  Sequence Number (packets sent): ${udpDiag.sequenceNumber}")
                     appendLine("  Pending ACKs: ${udpDiag.pendingAckCount}")
                     appendLine("  Registered Handlers: ${udpDiag.registeredHandlerCount}")
+                    appendLine("  Startup Resends (before first inbound): ${udpDiag.startupResendCount}")
+                    appendLine("  Selector Wakeups: ${udpDiag.selectorWakeupCount}")
+                    appendLine("  Selector Ready Keys: ${udpDiag.selectorReadyKeyCount}")
+                    appendLine("  Selector Readable Keys: ${udpDiag.selectorReadableKeyCount}")
                     appendLine()
                     if (udpDiag.registeredHandlers.isNotEmpty()) {
                         appendLine("Registered Message Handlers:")
@@ -379,6 +407,11 @@ class DebugReportService private constructor(private val context: Context) {
                     } else {
                         appendLine("  Last Packet Received: Never ⚠️")
                     }
+                    if (socketDetails.connectToFirstInboundMs != null) {
+                        appendLine("  UDP Connect → First Inbound: ${formatDuration(socketDetails.connectToFirstInboundMs)}")
+                    } else {
+                        appendLine("  UDP Connect → First Inbound: Not observed yet")
+                    }
                     if (socketDetails.lastPingTime > 0) {
                         val pingAge = System.currentTimeMillis() - socketDetails.lastPingTime
                         appendLine("  Last Ping Check: ${formatDuration(pingAge)} ago")
@@ -390,6 +423,79 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine()
                         appendLine("  ⚠️ Last Connection Error: ${socketDetails.lastConnectionError}")
                     }
+                    appendLine("  Last Reliable Send: ${
+                        if (socketDetails.lastReliableSendAt > 0L) {
+                            "${formatDuration(System.currentTimeMillis() - socketDetails.lastReliableSendAt)} ago " +
+                                "(seq=${socketDetails.lastReliableSendSequence})"
+                        } else {
+                            "Never"
+                        }
+                    }")
+                    appendLine("  Last Reliable Deadline: ${
+                        if (socketDetails.lastReliableSendDeadlineAt > 0L) {
+                            "${formatDuration(
+                                kotlin.math.abs(System.currentTimeMillis() - socketDetails.lastReliableSendDeadlineAt)
+                            )} ${if (System.currentTimeMillis() <= socketDetails.lastReliableSendDeadlineAt) "from now" else "ago"}"
+                        } else {
+                            "N/A"
+                        }
+                    }")
+
+                    if (socketDetails.receiveLoopExceptions.isNotEmpty()) {
+                        appendLine()
+                        appendLine("Receive Loop Exceptions (recent):")
+                        socketDetails.receiveLoopExceptions.takeLast(5).forEach { ex ->
+                            appendLine("  - $ex")
+                        }
+                    }
+
+                    // Reconnect health — surfaces the dead-socket-after-reconnect
+                    // failure mode that previously hid behind "Connected: true".
+                    appendLine()
+                    appendLine("Reconnect Health:")
+                    val socketReconnects = app.udpConnection.getSocketReconnectCount()
+                    appendLine("  Socket Reconnects (this circuit): $socketReconnects")
+                    val lastReconnect = app.udpConnection.getLastSocketReconnectTime()
+                    if (lastReconnect > 0) {
+                        val ageMs = System.currentTimeMillis() - lastReconnect
+                        val ok = app.udpConnection.getLastSocketReconnectSucceeded()
+                        appendLine("  Last Reconnect: ${formatDuration(ageMs)} ago (${if (ok) "succeeded" else "failed"})")
+                        val postRx = app.udpConnection.getPostReconnectPacketsReceived()
+                        appendLine("  Packets Received Since Last Reconnect: $postRx")
+                        // The classic dead-socket-after-reconnect signature:
+                        // we report Connected, the reconnect "succeeded", but
+                        // not a single packet has come back.
+                        if (udpDiag.isConnected && ok && postRx == 0 && ageMs > 5_000L) {
+                            appendLine("  ⚠️ No packets received since reconnect — socket may be silently dead.")
+                        }
+                    } else {
+                        appendLine("  Last Reconnect: Never")
+                    }
+
+                    // I/O thread liveness. The receive loop name encodes which
+                    // generation we're on (initial vs. reconnected), which is
+                    // useful when chasing zombie threads.
+                    val ioName = app.udpConnection.getIoThreadName()
+                    val ioAlive = udpDiag.receiveLoopActive
+                    appendLine()
+                    appendLine("I/O Thread:")
+                    appendLine("  Alive: $ioAlive")
+                    appendLine("  Name: ${ioName ?: "(none)"}")
+                    if (udpDiag.isConnected && !ioAlive) {
+                        appendLine("  ⚠️ Connected but I/O thread is dead — packets won't be processed!")
+                    }
+
+                    // "Connected but silent" check. When the receive loop is
+                    // alive but no packet has come in for >10s while we're
+                    // still firing AgentUpdates, something is wrong on the
+                    // network path even though _isConnected reads true.
+                    if (udpDiag.isConnected && socketDetails.lastReceiveTime > 0) {
+                        val rxAge = System.currentTimeMillis() - socketDetails.lastReceiveTime
+                        if (rxAge > 10_000L) {
+                            appendLine()
+                            appendLine("⚠️ Connected but no packet received for ${formatDuration(rxAge)} — circuit may be one-way (NAT idle / dead receive loop).")
+                        }
+                    }
                 } catch (e: Exception) {
                     appendLine("UDP diagnostics unavailable: ${e.message}")
                 }
@@ -397,7 +503,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("UDP connection: App not initialized")
             }
             appendLine()
-            
+
             // NEW: Packet History section for detailed packet tracing
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ UDP PACKET HISTORY (Recent Activity)                              │")
@@ -409,15 +515,15 @@ class DebugReportService private constructor(private val context: Context) {
                     if (packetHistory.isNotEmpty()) {
                         appendLine("Recent Packet Events (last ${packetHistory.size}):")
                         appendLine()
-                        val recentEntries = packetHistory.takeLast(20)
-                        recentEntries.forEachIndexed { index, entry ->
+
+                        fun renderEntry(entry: UDPConnectionFixed.PacketHistoryEntry) {
                             val relativeTime = System.currentTimeMillis() - entry.timestamp
                             val icon = when (entry.type) {
                                 UDPConnectionFixed.PacketHistoryEntry.PacketEventType.SEND_SUCCESS -> "→"
                                 UDPConnectionFixed.PacketHistoryEntry.PacketEventType.SEND_FAILED -> "✗→"
                                 UDPConnectionFixed.PacketHistoryEntry.PacketEventType.RECEIVE -> "←"
                                 UDPConnectionFixed.PacketHistoryEntry.PacketEventType.RESEND -> "⟳"
-                                UDPConnectionFixed.PacketHistoryEntry.PacketEventType.ACK_RECEIVED -> "✓"
+                                UDPConnectionFixed.PacketHistoryEntry.PacketEventType.ACK_RECEIVED -> "✓←"
                                 UDPConnectionFixed.PacketHistoryEntry.PacketEventType.ACK_TIMEOUT -> "⏱"
                             }
                             val statusIcon = if (entry.success) "" else " ⚠️"
@@ -426,25 +532,80 @@ class DebugReportService private constructor(private val context: Context) {
                                 appendLine("     Error: ${entry.errorMessage}")
                             }
                             // Show full hex dump for all packets (complete packet data for diagnosis)
-                            appendLine("     Full packet: ${entry.fullHexDump}")
+                            if (entry.fullHexDump.isNotEmpty()) {
+                                appendLine("     Full packet: ${entry.fullHexDump}")
+                            }
+                        }
+
+                        // Show incoming events first so they're never drowned
+                        // out by the 10-Hz AgentUpdate stream that dominates
+                        // the bounded history window.
+                        val incomingEntries = packetHistory.filter {
+                            it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.RECEIVE ||
+                            it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.ACK_RECEIVED ||
+                            it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.ACK_TIMEOUT
+                        }.takeLast(15)
+                        if (incomingEntries.isNotEmpty()) {
+                            appendLine("Incoming (last ${incomingEntries.size}):")
+                            incomingEntries.forEach(::renderEntry)
+                            appendLine()
+                        } else {
+                            appendLine("Incoming: none in history window ⚠️")
+                            appendLine()
+                        }
+
+                        val outgoingEntries = packetHistory.filter {
+                            it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.SEND_SUCCESS ||
+                            it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.SEND_FAILED ||
+                            it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.RESEND
+                        }.takeLast(15)
+                        if (outgoingEntries.isNotEmpty()) {
+                            appendLine("Outgoing (last ${outgoingEntries.size}):")
+                            outgoingEntries.forEach(::renderEntry)
                         }
                         
-                        // Summary statistics
+                        // Summary statistics (counted within the bounded history window)
                         val sendSuccessCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.SEND_SUCCESS }
                         val sendFailedCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.SEND_FAILED }
                         val receiveCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.RECEIVE }
                         val resendCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.RESEND }
-                        
+                        val ackReceivedCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.ACK_RECEIVED }
+                        val ackTimeoutCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.ACK_TIMEOUT }
+
                         appendLine()
-                        appendLine("History Summary:")
+                        appendLine("History Summary (recent ${packetHistory.size}-packet window):")
                         appendLine("  Sent Successfully: $sendSuccessCount")
                         appendLine("  Send Failures: $sendFailedCount")
                         appendLine("  Received: $receiveCount")
+                        appendLine("  ACKs Received: $ackReceivedCount")
+                        appendLine("  ACK Timeouts: $ackTimeoutCount")
                         appendLine("  Resends: $resendCount")
-                        
-                        if (receiveCount == 0 && sendSuccessCount > 0) {
+
+                        // Determine whether any packets have EVER been received using the
+                        // absolute counter, not the bounded history window. AgentUpdate
+                        // sends ~10/sec quickly evict receive entries from a 50-entry
+                        // buffer, which previously produced a false "none received"
+                        // warning even after a successful handshake.
+                        val totalReceivedEver = try {
+                            app.udpConnection.getMessageStatistics().totalPacketsReceived
+                        } catch (e: Exception) {
+                            receiveCount
+                        }
+                        val totalSentEver = try {
+                            app.udpConnection.getDiagnostics().sequenceNumber
+                        } catch (e: Exception) {
+                            sendSuccessCount
+                        }
+                        if (totalReceivedEver == 0 && totalSentEver > 0) {
+                            val udpElapsedMs = udpConnectedElapsedMs()
+                            val isProvisional = udpElapsedMs != null && udpElapsedMs < EARLY_WARNING_GRACE_MS
+                            val timing = formatUdpConnectedElapsed(udpElapsedMs)
                             appendLine()
-                            appendLine("⚠️ PACKETS SENT BUT NONE RECEIVED!")
+                            if (isProvisional) {
+                                appendLine("⚠️ PROVISIONAL: PACKETS SENT BUT NONE RECEIVED ($timing)")
+                            } else {
+                                appendLine("⚠️ PACKETS SENT BUT NONE RECEIVED ($timing)")
+                            }
                             appendLine("   Possible causes:")
                             appendLine("   - Firewall blocking UDP")
                             appendLine("   - NAT traversal issue")
@@ -461,7 +622,58 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Packet history: App not initialized")
             }
             appendLine()
-            
+
+            // ==================== INCOMING PACKET DETAILS ====================
+            // Pulls from EnhancedPacketLogger's 200-entry history filtered to
+            // inbound only, so you can actually see what the simulator sent us
+            // even when 10 Hz AgentUpdate sends would otherwise dominate the
+            // smaller per-connection history window.
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ INCOMING PACKET DETAILS (Receives + ACKs)                         │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            try {
+                val incoming = EnhancedPacketLogger.getIncomingPacketHistory(30)
+                if (incoming.isEmpty()) {
+                    appendLine("No incoming packets recorded yet.")
+                } else {
+                    val receiveCount = incoming.count { it.direction == EnhancedPacketLogger.PacketLogEntry.Direction.RECEIVED }
+                    val ackCount = incoming.count { it.direction == EnhancedPacketLogger.PacketLogEntry.Direction.ACK_RECEIVED }
+                    appendLine("Showing last ${incoming.size} inbound entries (receives=$receiveCount, acks=$ackCount):")
+                    appendLine()
+                    incoming.forEach { entry ->
+                        val ago = System.currentTimeMillis() - entry.timestamp
+                        val arrow = when (entry.direction) {
+                            EnhancedPacketLogger.PacketLogEntry.Direction.RECEIVED -> "←"
+                            EnhancedPacketLogger.PacketLogEntry.Direction.ACK_RECEIVED -> "✓←"
+                            else -> "?"
+                        }
+                        val handlerInfo = if (entry.direction == EnhancedPacketLogger.PacketLogEntry.Direction.RECEIVED && !entry.handlerDispatched) " [NO HANDLER]" else ""
+                        val flagStr = entry.flags.toShortString().let { if (it == "-") "" else " [$it]" }
+                        appendLine("  [${formatDuration(ago)} ago] $arrow ${entry.messageName} (seq=${entry.sequenceNumber}, ${entry.size}B)$flagStr$handlerInfo")
+                        entry.hexPreview?.let { hex ->
+                            if (hex.isNotBlank()) appendLine("     Hex: $hex")
+                        }
+                        entry.error?.let { appendLine("     Error: $it") }
+                    }
+                }
+
+                // Recent ACK sequence list — quick at-a-glance view of which
+                // sends the simulator has confirmed.
+                val recentAckSeqs = EnhancedPacketLogger.getIncomingPacketHistory(60)
+                    .filter { it.direction == EnhancedPacketLogger.PacketLogEntry.Direction.ACK_RECEIVED }
+                    .takeLast(20)
+                    .map { it.sequenceNumber }
+                if (recentAckSeqs.isNotEmpty()) {
+                    appendLine()
+                    appendLine("Recently ACK'd sequence numbers (last ${recentAckSeqs.size}):")
+                    appendLine("  ${recentAckSeqs.joinToString(", ")}")
+                }
+            } catch (e: Exception) {
+                appendLine("Incoming packet details unavailable: ${e.message}")
+            }
+            appendLine()
+
             // Capability Manager Status - CRITICAL for texture/mesh/inventory loading
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ CAPABILITY STATUS (HTTP Services)                                 │")
@@ -806,6 +1018,31 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("JPEG2000 Decoding:")
                         appendLine("  Attempts: ${texDiag.j2kDecodeAttempts}")
                         appendLine("  Successes: ${texDiag.j2kDecodeSuccesses}")
+                        appendLine("  Error States: ${texDiag.textureErrorStateCount}")
+                        val decodeFailureCount = (texDiag.j2kDecodeAttempts - texDiag.j2kDecodeSuccesses).coerceAtLeast(0)
+                        appendLine("  Success Rate: ${formatRate(texDiag.j2kDecodeSuccesses, texDiag.j2kDecodeAttempts)}")
+                        appendLine("  Failure Rate: ${formatRate(decodeFailureCount, texDiag.j2kDecodeAttempts)}")
+                        val transferAttempts = texDiag.downloadedCount + texDiag.failedCount
+                        appendLine("  Transfer Success Rate: ${formatRate(texDiag.downloadedCount, transferAttempts)}")
+                        appendLine("  Transfer Failure Rate: ${formatRate(texDiag.failedCount, transferAttempts)}")
+                        val decoderStatus = com.linkpoint.assets.JPEG2000Decoder.getStartupStatus()
+                        appendLine("  Backend: ${decoderStatus.activeBackend}")
+                        appendLine("  Native Loaded: ${if (decoderStatus.nativeLoaded) "✓" else "✗"}")
+                        appendLine("  Native Healthy: ${if (decoderStatus.nativeHealthy) "✓" else "✗"}")
+                        appendLine("  JP2ForAndroid Fallback: ${if (decoderStatus.jp2ForAndroidAvailable) "✓" else "✗"}")
+                        // Surface the underlying load/health failure when the backend
+                        // ended up as "none" - this is the difference between "we don't
+                        // know why" and "UnsatisfiedLinkError: dlopen failed: cannot
+                        // locate symbol opj_create_decompress" (NDK / OpenJPEG mismatch).
+                        decoderStatus.nativeError?.let {
+                            appendLine("  Native Load Error: $it")
+                        }
+                        decoderStatus.nativeHealthError?.let {
+                            appendLine("  Native Health Error: $it")
+                        }
+                        if (decoderStatus.warningMessage != null) {
+                            appendLine("  Warning: ${decoderStatus.warningMessage}")
+                        }
                         
                         if (texDiag.lastError != null) {
                             appendLine()
@@ -850,6 +1087,8 @@ class DebugReportService private constructor(private val context: Context) {
                         renderDiag.timeSinceLastFrame?.let {
                             appendLine("Time Since Last Frame: ${formatDuration(it)}")
                         }
+                        val renderTimeline = RenderDiagnostics.diagnosticsSnapshot()
+                        appendLine("Active Backend: ${renderTimeline.activeBackend}")
                         appendLine()
                         appendLine("Filament Components:")
                         appendLine("  Engine: ${if (renderDiag.hasEngine) "✓" else "✗"}")
@@ -858,22 +1097,53 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("  View: ${if (renderDiag.hasView) "✓" else "✗"}")
                         appendLine("  Camera: ${if (renderDiag.hasCamera) "✓" else "✗"}")
                         appendLine("  SwapChain: ${if (renderDiag.hasSwapChain) "✓" else "✗"}")
-                        
+                        appendLine("  Surface Ready: ${if (renderDiag.isSurfaceReady) "✓" else "✗ (e.g. on Settings, app backgrounded)"}")
+                        appendLine("  Drawing Enabled: ${if (renderDiag.isDrawingEnabled) "✓" else "✗ (paused — panel open / activity backgrounded)"}")
+                        appendLine()
+                        appendLine("Visible Entity Counts:")
+                        appendLine("  Avatars: ${renderDiag.visibleAvatarCount}")
+                        appendLine("  Prims: ${renderDiag.visiblePrimCount}")
+                        appendLine("  Terrain Patches: ${renderDiag.visibleTerrainPatchCount}")
+                        appendLine()
+                        appendLine("Frame Time Percentiles (ms):")
+                        if (renderTimeline.frameTimePercentiles.isEmpty()) {
+                            appendLine("  (insufficient frame history)")
+                        } else {
+                            renderTimeline.frameTimePercentiles.forEach { (backend, p) ->
+                                appendLine(
+                                    "  $backend: p50=${p.p50Ms ?: "-"} p90=${p.p90Ms ?: "-"} p99=${p.p99Ms ?: "-"}"
+                                )
+                            }
+                        }
+                        appendLine()
+                        appendLine("Swapchain / Context Restarts:")
+                        appendLine("  Filament SwapChain Creates: ${renderTimeline.swapChainCreateCount}")
+                        appendLine("  Filament SwapChain Destroys: ${renderTimeline.swapChainDestroyCount}")
+                        appendLine("  Filament SwapChain Failures: ${renderTimeline.swapChainFailureCount}")
+                        appendLine("  Filament SwapChain Restarts: ${renderTimeline.swapChainRestartCount}")
+                        appendLine("  Lumiya Context Creates: ${renderTimeline.glContextCreateCount}")
+                        appendLine("  Lumiya Context Restarts: ${renderTimeline.glContextRestartCount}")
+
                         if (renderDiag.initializationTime > 0) {
                             appendLine()
                             appendLine("Initialization Time: ${formatTimestamp(renderDiag.initializationTime)}")
                         }
-                        
+
                         if (renderDiag.lastInitializationError != null) {
                             appendLine()
                             appendLine("⚠️ INITIALIZATION ERROR: ${renderDiag.lastInitializationError}")
                         }
-                        
+
                         if (!renderDiag.isInitialized) {
                             appendLine()
                             appendLine("⚠️ RENDERER NOT INITIALIZED - No 3D rendering!")
                         }
-                        if (renderDiag.isInitialized && !renderDiag.hasSwapChain) {
+                        // Only flag a missing SwapChain as a problem when the Surface is
+                        // actually attached and ready - otherwise it just means the world
+                        // view isn't on screen right now (Settings, backgrounded, etc.),
+                        // which is the normal state when capturing a debug report from
+                        // any non-WorldView screen.
+                        if (renderDiag.isInitialized && !renderDiag.hasSwapChain && renderDiag.isSurfaceReady) {
                             appendLine()
                             appendLine("⚠️ NO SWAP CHAIN - Rendering not visible!")
                         }
@@ -1070,12 +1340,46 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine()
                     }
                     
+                    if (msgStats.inboundRateBuckets.isNotEmpty()) {
+                        appendLine("Inbound Rate (last ${msgStats.inboundRateBuckets.size}s, oldest first):")
+                        appendLine("  second  packets    bytes")
+                        val nowSec = System.currentTimeMillis() / 1000L
+                        msgStats.inboundRateBuckets.forEach { bucket ->
+                            val ago = nowSec - bucket.epochSecond
+                            // Mark the silent buckets so a 24-second hole jumps out visually.
+                            val marker = if (bucket.packets == 0L) " ⚠" else ""
+                            appendLine(
+                                "  -%3ds  %7d  %7s%s".format(
+                                    ago,
+                                    bucket.packets,
+                                    formatBytes(bucket.bytes),
+                                    marker
+                                )
+                            )
+                        }
+                        val totalPackets = msgStats.inboundRateBuckets.sumOf { it.packets }
+                        val totalBytes = msgStats.inboundRateBuckets.sumOf { it.bytes }
+                        val silentBuckets = msgStats.inboundRateBuckets.count { it.packets == 0L }
+                        appendLine(
+                            "  window total: $totalPackets pkts / ${formatBytes(totalBytes)} " +
+                                "($silentBuckets silent seconds)"
+                        )
+                        appendLine()
+                    }
+
                     // Warning if critical messages haven't been received
                     val regionHandshakeTime = msgStats.lastMessageTimes["RegionHandshake"]
                     val agentMovementTime = msgStats.lastMessageTimes["AgentMovementComplete"]
                     
                     if (regionHandshakeTime == null || regionHandshakeTime == 0L) {
-                        appendLine("⚠️ RegionHandshake never received - world data won't load!")
+                        val udpElapsedMs = udpConnectedElapsedMs()
+                        val isProvisional = udpElapsedMs != null && udpElapsedMs < EARLY_WARNING_GRACE_MS
+                        val timing = formatUdpConnectedElapsed(udpElapsedMs)
+                        if (isProvisional) {
+                            appendLine("⚠️ PROVISIONAL: RegionHandshake never received ($timing) - world data may not load yet.")
+                        } else {
+                            appendLine("⚠️ RegionHandshake never received ($timing) - world data won't load!")
+                        }
                     }
                     if (agentMovementTime == null || agentMovementTime == 0L) {
                         appendLine("⚠️ AgentMovementComplete never received - agent not in world!")
@@ -1163,7 +1467,42 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Friends manager: App not initialized")
             }
             appendLine()
-            
+
+            // ==================== APPEARANCE PIPELINE ====================
+            // Surfaces the local agent's bake → upload → AgentSetAppearance
+            // round trip so it's visible whether the pipeline ran at all,
+            // how many channels were baked, and whether any error fell out.
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ APPEARANCE PIPELINE                                               │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            if (app != null && app.isAppearanceManagerInitialized()) {
+                try {
+                    val ad = app.appearanceManager.getDiagnostics()
+                    appendLine("AgentSetAppearance updates sent: ${ad.updatesSent}")
+                    appendLine("Updates failed: ${ad.updatesFailed}")
+                    appendLine("Last serial: ${ad.lastSerialSent}")
+                    appendLine("Last bake channel count: ${ad.lastBakedTextureCount}")
+                    if (ad.lastUpdateAgoMs != null) {
+                        appendLine("Last update: ${formatDuration(ad.lastUpdateAgoMs)} ago (took ${ad.lastUpdateDurationMs}ms)")
+                    } else {
+                        appendLine("Last update: never (no AgentWearablesUpdate or manual trigger yet)")
+                    }
+                    if (ad.lastUpdateError != null) {
+                        appendLine("Last error: ${ad.lastUpdateError}")
+                    }
+                } catch (e: Exception) {
+                    appendLine("AppearanceManager diagnostics unavailable: ${e.message}")
+                }
+            } else {
+                val connected = try { app?.isConnected() == true } catch (_: Exception) { false }
+                appendLine(
+                    if (connected) "AppearanceManager: not yet initialized (local Avatar not ready — waiting on simulator)"
+                    else "AppearanceManager: not yet initialized (not logged in)"
+                )
+            }
+            appendLine()
+
             // ==================== ENHANCED PACKET LOGGER STATISTICS ====================
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ ENHANCED PACKET LOGGER STATISTICS                                 │")
@@ -1204,8 +1543,15 @@ class DebugReportService private constructor(private val context: Context) {
                 }
                 
                 if (packetStats.packetsSent > 0 && packetStats.packetsReceived == 0L) {
+                    val udpElapsedMs = udpConnectedElapsedMs()
+                    val isProvisional = udpElapsedMs != null && udpElapsedMs < EARLY_WARNING_GRACE_MS
+                    val timing = formatUdpConnectedElapsed(udpElapsedMs)
                     appendLine()
-                    appendLine("⚠️ PACKETS SENT BUT NONE RECEIVED!")
+                    if (isProvisional) {
+                        appendLine("⚠️ PROVISIONAL: PACKETS SENT BUT NONE RECEIVED ($timing)")
+                    } else {
+                        appendLine("⚠️ PACKETS SENT BUT NONE RECEIVED ($timing)")
+                    }
                     appendLine("   Possible causes:")
                     appendLine("   - Firewall blocking UDP")
                     appendLine("   - NAT traversal issue")
@@ -1413,6 +1759,12 @@ class DebugReportService private constructor(private val context: Context) {
             ms < 3600000 -> String.format(Locale.US, "%.1fm", ms / 60000.0)
             else -> String.format(Locale.US, "%.1fh", ms / 3600000.0)
         }
+    }
+
+    private fun formatRate(successes: Int, attempts: Int): String {
+        if (attempts <= 0) return "n/a (0/0)"
+        val pct = (successes.toDouble() * 100.0) / attempts.toDouble()
+        return String.format(Locale.US, "%.1f%% (%d/%d)", pct, successes, attempts)
     }
     
     fun shutdown() {

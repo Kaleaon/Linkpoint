@@ -1,0 +1,115 @@
+{
+  "metadata": {
+    "last_verified_utc": "2026-04-24",
+    "commit": "e2011834a08d4888abd75beee10b772d7d0793a3",
+    "tracker_policy": "Any PR touching protocol/assets/render paths must update docs/MASTER_TRACKING.md and docs/MASTER_TRACKING.json"
+  },
+  "allowed_status_values": [
+    "NOT_STARTED",
+    "IN_PROGRESS",
+    "BLOCKED",
+    "DONE"
+  ],
+  "tasks": [
+    {
+      "task_id": "MP-001",
+      "acceptance_criterion": "Script update capability flow exists end-to-end and uses task/agent update caps",
+      "owner": "@protocol-assets",
+      "status": "DONE",
+      "blocking_deps": [],
+      "acceptance_tests": [
+        "./gradlew :app:testDebugUnitTest --tests \"*ScriptManager*\""
+      ]
+    },
+    {
+      "task_id": "MP-002",
+      "acceptance_criterion": "Group profile capability request + runtime consumer is wired",
+      "owner": "@protocol",
+      "status": "DONE",
+      "blocking_deps": [],
+      "acceptance_tests": [
+        "./gradlew :app:testDebugUnitTest --tests \"*ProfileManager*\""
+      ]
+    },
+    {
+      "task_id": "MP-003",
+      "acceptance_criterion": "Scene/update routing forwards object/avatar updates to renderer queue",
+      "owner": "@render-runtime",
+      "status": "DONE",
+      "blocking_deps": [],
+      "acceptance_tests": [
+        "./gradlew :app:testDebugUnitTest --tests \"*ObjectManager*\""
+      ]
+    },
+    {
+      "task_id": "MP-004",
+      "acceptance_criterion": "Swap-chain recreation is invoked from Android surface lifecycle",
+      "owner": "@render-runtime",
+      "status": "DONE",
+      "blocking_deps": [
+        "Android instrumented harness for WorldViewActivity"
+      ],
+      "acceptance_tests": [
+        "./gradlew :app:testDebugUnitTest --tests \"*RenderManager*\""
+      ]
+    },
+    {
+      "task_id": "MP-005",
+      "acceptance_criterion": "Deferred caps are either implemented or explicitly tracked with owning backlog item",
+      "owner": "@protocol",
+      "status": "DONE",
+      "blocking_deps": [],
+      "acceptance_tests": [
+        "./gradlew :app:testDebugUnitTest --tests \"*DeferredCapabilityConsumersTest*\""
+      ]
+    },
+    {
+      "task_id": "MP-006",
+      "acceptance_criterion": "Renderer feature parity includes HUD pass support",
+      "owner": "@render-runtime",
+      "status": "IN_PROGRESS",
+      "blocking_deps": [
+        "HUD scene graph + compositor pass integration"
+      ],
+      "acceptance_tests": [
+        "./gradlew :app:testDebugUnitTest --tests \"*LumiyaRenderer*\""
+      ]
+    },
+    {
+      "task_id": "MP-007",
+      "acceptance_criterion": "Outfit pipeline returns real wearable resolution (no placeholder path)",
+      "owner": "@assets-avatar",
+      "status": "DONE",
+      "blocking_deps": [],
+      "acceptance_tests": [
+        "./gradlew :app:testDebugUnitTest --tests \"*OutfitManager*\""
+      ]
+    }
+  ],
+  "parity_debt": {
+    "last_verified_utc": "2026-04-24",
+    "commit": "e2011834a08d4888abd75beee10b772d7d0793a3",
+    "items": [
+      {
+        "debt_id": "PD-001",
+        "gap": "Object media navigate capability exists in reference capability set but app lacks user-facing media navigation implementation",
+        "status": "DONE"
+      },
+      {
+        "debt_id": "PD-002",
+        "gap": "Region experience capability is requested for parity but no runtime consumer path is enabled",
+        "status": "DONE"
+      },
+      {
+        "debt_id": "PD-003",
+        "gap": "HUD pass code path is implemented, but parity closure is pending green renderer tests in the current branch state",
+        "status": "OPEN"
+      },
+      {
+        "debt_id": "PD-004",
+        "gap": "Outfit manager fallback path now uses typed failure reasons + telemetry counters and unit tests enforce parser threshold/bake-channel parity",
+        "status": "CLOSED"
+      }
+    ]
+  }
+}

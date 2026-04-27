@@ -45,12 +45,12 @@ public final class TypeAdapters {
         /* JADX WARN: Can't rename method to resolve collision */
         @Override // com.google.gson.TypeAdapter
         public Class read(JsonReader jsonReader) throws IOException {
-            throw new UnsupportedOperationException("Attempted to deserialize a java.lang.Class. Forgot to register a type adapter?");
+            throw new IllegalStateException("Attempted to deserialize a java.lang.Class. Forgot to register a type adapter?");
         }
 
         @Override // com.google.gson.TypeAdapter
         public void write(JsonWriter jsonWriter, Class cls) throws IOException {
-            throw new UnsupportedOperationException("Attempted to serialize java.lang.Class: " + cls.getName() + ". Forgot to register a type adapter?");
+            throw new IllegalStateException("Attempted to serialize java.lang.Class: " + cls.getName() + ". Forgot to register a type adapter?");
         }
     }.nullSafe();
     public static final TypeAdapterFactory CLASS_FACTORY = newFactory(Class.class, CLASS);
@@ -836,7 +836,7 @@ public final class TypeAdapters {
     }
 
     private TypeAdapters() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     public static <TT> TypeAdapterFactory newFactory(final TypeToken<TT> typeToken, final TypeAdapter<TT> typeAdapter) {

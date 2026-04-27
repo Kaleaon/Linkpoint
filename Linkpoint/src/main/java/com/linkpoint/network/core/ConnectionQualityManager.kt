@@ -8,6 +8,7 @@ import android.net.NetworkRequest
 import android.os.Build
 import android.util.Log
 import com.linkpoint.network.NetworkDiagnostics
+import com.linkpoint.network.NetworkLogger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -108,24 +109,35 @@ class ConnectionQualityManager(private val context: Context) {
         networkCallback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 Log.d(TAG, "Network available")
+                NetworkLogger.log(
+                    NetworkLogger.Level.INFO,
+                    NetworkLogger.Category.CONNECTIVITY,
+                    "🟢 Network available (handle=${network.networkHandle})"
+                )
                 _isConnected.value = true
                 updateNetworkInfo()
                 // Notify listeners of network change (for DNS cache clearing, etc.)
                 notifyNetworkChange()
             }
-            
+
             override fun onLost(network: Network) {
                 Log.d(TAG, "Network lost")
+                NetworkLogger.log(
+                    NetworkLogger.Level.WARN,
+                    NetworkLogger.Category.CONNECTIVITY,
+                    "🔴 Network lost (handle=${network.networkHandle})"
+                )
                 _isConnected.value = false
                 _quality.value = Quality.UNKNOWN
                 // Notify listeners of network change
                 notifyNetworkChange()
             }
-            
+
             override fun onCapabilitiesChanged(
                 network: Network,
                 capabilities: NetworkCapabilities
             ) {
+                logCapabilitiesChanged(network, capabilities)
                 updateFromCapabilities(capabilities)
             }
         }
@@ -215,6 +227,41 @@ class ConnectionQualityManager(private val context: Context) {
     }
     
     /**
+     * Emit a structured CONNECTIVITY log entry every time capabilities change.
+     * Capability churn (validated flips off, downstream bandwidth drops) often
+     * precedes the inbound-data stalls we've been chasing — surfacing it in
+     * the same log as UDP send/recv lets us correlate.
+     */
+    private fun logCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
+        val transports = buildList {
+            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) add("WIFI")
+            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) add("CELLULAR")
+            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) add("ETHERNET")
+            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) add("VPN")
+        }.joinToString(",").ifEmpty { "?" }
+        val internet = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        val validated = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+        val notMetered = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+        val downstream = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            capabilities.linkDownstreamBandwidthKbps
+        } else {
+            -1
+        }
+        val upstream = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            capabilities.linkUpstreamBandwidthKbps
+        } else {
+            -1
+        }
+        NetworkLogger.log(
+            NetworkLogger.Level.DEBUG,
+            NetworkLogger.Category.CONNECTIVITY,
+            "Capabilities (handle=${network.networkHandle}): transport=$transports " +
+                "internet=$internet validated=$validated notMetered=$notMetered " +
+                "down=${downstream}kbps up=${upstream}kbps"
+        )
+    }
+
+    /**
      * Update from network capabilities
      * 
      * IMPORTANT: We only require NET_CAPABILITY_INTERNET, NOT NET_CAPABILITY_VALIDATED.
@@ -225,7 +272,7 @@ class ConnectionQualityManager(private val context: Context) {
      * - Networks where Google's connectivity check is blocked
      * 
      * The actual HTTP request will determine if connectivity works.
-     * This matches Lumiya's behavior (which logs in instantly on the same networks).
+     * This matches the reference viewer's behavior (which logs in instantly on the same networks).
      */
     private fun updateFromCapabilities(capabilities: NetworkCapabilities) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Handles scene data messages from Second Life server.
- * Based on Lumiya's scene data handlers in SLAgentCircuit.
+ * Based on the reference viewer's scene data handlers in SLAgentCircuit.
  * 
  * This class processes scene data messages including:
  * - LayerData: Terrain heightmap data

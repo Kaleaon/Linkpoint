@@ -9,7 +9,6 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
 
-private val MESSAGE_BYTE_ORDER = ByteOrder.LITTLE_ENDIAN
 
 /**
  * Parses Second Life UDP message payloads.
@@ -48,12 +47,25 @@ object MessageParser {
             Log.w(TAG, "Packet too small to contain header: ${rawPacket.size} bytes")
             return null
         }
-        
-        var offset = PACKET_HEADER_SIZE
-        
+
+        // LLUDP packets carry an "extra header" of 0..255 bytes after the
+        // 6-byte fixed header (flags + 4-byte seq + 1-byte extra-header
+        // length). The message-ID prefix follows those bytes, not byte 6.
+        // Skipping the extra-header is what `getMessageStartOffset` /
+        // `extractMessageId` in UDPConnectionFixed already do (commit
+        // 3cf9fad4 hardened those paths); applying the same skip here so
+        // `registerParsedHandler` receives the right body for packets
+        // where the simulator chose to include extra-header bytes.
+        val extraHeaderLen = rawPacket[5].toInt() and 0xFF
+        var offset = PACKET_HEADER_SIZE + extraHeaderLen
+        if (offset + 1 > rawPacket.size) {
+            Log.w(TAG, "Packet truncated past extra header (size=${rawPacket.size}, extra=$extraHeaderLen)")
+            return null
+        }
+
         // Decode message ID to determine its length
-        // 
-        // SL Protocol Message ID Encoding (matching Lumiya implementation):
+        //
+        // SL Protocol Message ID Encoding (matching SL protocol):
         // - Byte.toInt() in Kotlin preserves sign: 0xFF becomes -1, 0xFB becomes -5, etc.
         // - This is INTENTIONAL because SL message IDs use signed interpretation:
         //   * High frequency: single byte, values 0-254 (or -128 to 127 signed where 0xFF/-1 means "continue")
@@ -104,65 +116,49 @@ object MessageParser {
      * @return The message ID (may be negative), or Int.MIN_VALUE if packet is malformed
      */
     fun extractMessageId(rawPacket: ByteArray): Int {
-        if (rawPacket.size < PACKET_HEADER_SIZE + 1) return Int.MIN_VALUE
-        
-        var offset = PACKET_HEADER_SIZE
-        
+        if (rawPacket.size < PACKET_HEADER_SIZE) return Int.MIN_VALUE
+
+        val extraHeaderLen = rawPacket[5].toInt() and 0xFF
+        var offset = PACKET_HEADER_SIZE + extraHeaderLen
+        if (offset >= rawPacket.size) return Int.MIN_VALUE
+
         // Signed byte interpretation - intentional for SL protocol compatibility
         val b1 = rawPacket[offset].toInt()
         offset++
-        
+
         if (b1 != -1) {
             // High frequency message - return signed byte value directly
             // Examples: 4 = AgentUpdate, 12 = ObjectUpdate, -5 (0xFB) = PacketAck
             return b1
         }
-        
-        if (rawPacket.size < offset + 1) return Int.MIN_VALUE
+
+        if (offset >= rawPacket.size) return Int.MIN_VALUE
         val b2 = rawPacket[offset].toInt()
         offset++
-        
+
         if (b2 != -1) {
             // Medium frequency: byte | 65280
             return b2 or 65280
         }
-        
+
         // Low frequency: next two bytes as short | -65536
-        if (rawPacket.size < offset + 2) return Int.MIN_VALUE
-        
+        if (offset + 1 >= rawPacket.size) return Int.MIN_VALUE
+
         val byte3 = rawPacket[offset].toInt() and 0xFF
         val byte4 = rawPacket[offset + 1].toInt() and 0xFF
         val shortValue = ((byte3 shl 8) or byte4).toShort().toInt()
-        
+
         return shortValue or -65536
     }
     
+
+    fun parseByMessageId(messageId: Int, payload: ByteArray): Any? =
+        MessageParserRegistry.parse(messageId, payload)
+
     /**
      * Parse ObjectUpdate message
      */
-    fun parseObjectUpdate(data: ByteArray): List<ObjectUpdateData> {
-        val results = mutableListOf<ObjectUpdateData>()
-        val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-        
-        try {
-            val regionHandle = buffer.long
-            val timeDilation = buffer.short.toInt() and 0xFFFF
-            
-            // Number of object blocks
-            val numBlocks = buffer.get().toInt() and 0xFF
-            
-            for (i in 0 until numBlocks) {
-                val update = parseObjectBlock(buffer, regionHandle)
-                if (update != null) {
-                    results.add(update)
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse ObjectUpdate", e)
-        }
-        
-        return results
-    }
+    fun parseObjectUpdate(data: ByteArray): List<ObjectUpdateData> = ObjectMessageParsers.parseObjectUpdate(data)
     
     private fun parseObjectBlock(buffer: ByteBuffer, regionHandle: Long): ObjectUpdateData? {
         try {
@@ -285,7 +281,7 @@ object MessageParser {
             val extraParams = ByteArray(extraParamsLen)
             buffer.get(extraParams)
 
-            // Sound UUID (per Lumiya's ObjectUpdate.java - this comes BEFORE OwnerID)
+            // Sound UUID (per SL ObjectUpdate.java - this comes BEFORE OwnerID)
             val soundIdBytes = ByteArray(16)
             buffer.get(soundIdBytes)
             val soundId = bytesToUUID(soundIdBytes)
@@ -354,27 +350,7 @@ object MessageParser {
     /**
      * Parse ObjectUpdateCompressed message
      */
-    fun parseObjectUpdateCompressed(data: ByteArray): List<ObjectUpdateData> {
-        val results = mutableListOf<ObjectUpdateData>()
-        val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-        
-        try {
-            val regionHandle = buffer.long
-            val timeDilation = buffer.short.toInt() and 0xFFFF
-            val numBlocks = buffer.get().toInt() and 0xFF
-            
-            for (i in 0 until numBlocks) {
-                val update = parseCompressedBlock(buffer, regionHandle)
-                if (update != null) {
-                    results.add(update)
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse ObjectUpdateCompressed", e)
-        }
-        
-        return results
-    }
+    fun parseObjectUpdateCompressed(data: ByteArray): List<ObjectUpdateData> = ObjectMessageParsers.parseObjectUpdateCompressed(data)
     
     private fun parseCompressedBlock(buffer: ByteBuffer, regionHandle: Long): ObjectUpdateData? {
         try {
@@ -459,33 +435,7 @@ object MessageParser {
     /**
      * Parse ImprovedTerseObjectUpdate (fast position updates)
      */
-    fun parseTerseObjectUpdate(data: ByteArray): List<TerseUpdateData> {
-        val results = mutableListOf<TerseUpdateData>()
-        val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-        
-        try {
-            val regionHandle = buffer.long
-            val timeDilation = buffer.short.toInt() and 0xFFFF
-            val numBlocks = buffer.get().toInt() and 0xFF
-            
-            for (i in 0 until numBlocks) {
-                val dataLen = buffer.get().toInt() and 0xFF
-                if (dataLen == 0) continue
-                
-                val blockData = ByteArray(dataLen)
-                buffer.get(blockData)
-                
-                val update = parseTerseBlock(blockData)
-                if (update != null) {
-                    results.add(update)
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse TerseObjectUpdate", e)
-        }
-        
-        return results
-    }
+    fun parseTerseObjectUpdate(data: ByteArray): List<TerseUpdateData> = ObjectMessageParsers.parseTerseObjectUpdate(data)
     
     private fun parseTerseBlock(data: ByteArray): TerseUpdateData? {
         if (data.size < 30) return null
@@ -532,100 +482,13 @@ object MessageParser {
     /**
      * Parse AvatarAnimation message
      */
-    fun parseAvatarAnimation(data: ByteArray): AvatarAnimationData? {
-        val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-        
-        try {
-            val agentIdBytes = ByteArray(16)
-            buffer.get(agentIdBytes)
-            val agentId = bytesToUUID(agentIdBytes)
-            
-            val numAnimations = buffer.get().toInt() and 0xFF
-            val animations = mutableListOf<Pair<UUID, Int>>()
-            
-            for (i in 0 until numAnimations) {
-                val animIdBytes = ByteArray(16)
-                buffer.get(animIdBytes)
-                val animId = bytesToUUID(animIdBytes)
-                val sequenceId = buffer.int
-                animations.add(animId to sequenceId)
-            }
-            
-            val numSources = buffer.get().toInt() and 0xFF
-            val sources = mutableListOf<UUID>()
-            
-            for (i in 0 until numSources) {
-                val sourceIdBytes = ByteArray(16)
-                buffer.get(sourceIdBytes)
-                sources.add(bytesToUUID(sourceIdBytes))
-            }
-            
-            return AvatarAnimationData(agentId, animations, sources)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse AvatarAnimation", e)
-            return null
-        }
-    }
+    fun parseAvatarAnimation(data: ByteArray): AvatarAnimationData? = AvatarMessageParsers.parseAvatarAnimation(data)
     
     /**
      * Parse ChatFromSimulator message
      */
-    fun parseChatFromSimulator(data: ByteArray): ChatData? {
-        val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-        
-        try {
-            // From name (variable)
-            val fromNameLen = buffer.get().toInt() and 0xFF
-            val fromNameBytes = ByteArray(fromNameLen)
-            buffer.get(fromNameBytes)
-            val fromName = String(fromNameBytes, Charsets.UTF_8).trimEnd('\u0000')
-            
-            // Source ID
-            val sourceIdBytes = ByteArray(16)
-            buffer.get(sourceIdBytes)
-            val sourceId = bytesToUUID(sourceIdBytes)
-            
-            // Owner ID
-            val ownerIdBytes = ByteArray(16)
-            buffer.get(ownerIdBytes)
-            val ownerId = bytesToUUID(ownerIdBytes)
-            
-            // Source type
-            val sourceType = buffer.get().toInt() and 0xFF
-            
-            // Chat type
-            val chatType = buffer.get().toInt() and 0xFF
-            
-            // Audible
-            val audible = buffer.get().toInt() and 0xFF
-            
-            // Position
-            val posBytes = ByteArray(12)
-            buffer.get(posBytes)
-            val position = LLVector3.fromBytes(posBytes)
-            
-            // Message (variable)
-            val messageLen = buffer.short.toInt() and 0xFFFF
-            val messageBytes = ByteArray(messageLen)
-            buffer.get(messageBytes)
-            val message = String(messageBytes, Charsets.UTF_8).trimEnd('\u0000')
-            
-            return ChatData(
-                fromName = fromName,
-                sourceId = sourceId,
-                ownerId = ownerId,
-                sourceType = ChatSourceType.fromValue(sourceType),
-                chatType = ChatType.fromValue(chatType),
-                audible = audible,
-                position = position,
-                message = message
-            )
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse ChatFromSimulator", e)
-            return null
-        }
-    }
-    
+    fun parseChatFromSimulator(data: ByteArray): ChatData? = ChatMessageParsers.parseChatFromSimulator(data)
+
     private fun bytesToUUID(bytes: ByteArray): UUID {
         val bb = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN)
         return UUID(bb.long, bb.long)
@@ -650,17 +513,24 @@ data class ObjectUpdateData(
     val hoverText: String,
     val hoverTextColor: LLColor4,
     val mediaUrl: String,
-    val soundId: UUID? = null,           // Sound attached to object (Lumiya: Sound field)
+    val soundId: UUID? = null,           // Sound attached to object 
     val ownerId: UUID?,
-    val soundGain: Float = 0f,           // Sound volume (Lumiya: Gain field)
-    val soundFlags: Int = 0,             // Sound flags (Lumiya: Flags field)
-    val soundRadius: Float = 0f,         // Sound radius (Lumiya: Radius field)
-    val jointType: Int = 0,              // Joint type (Lumiya: JointType field)
+    val soundGain: Float = 0f,           // Sound volume 
+    val soundFlags: Int = 0,             // Sound flags 
+    val soundRadius: Float = 0f,         // Sound radius 
+    val jointType: Int = 0,              // Joint type 
     val jointPivot: LLVector3 = LLVector3.zero(),  // Joint pivot point
     val jointAxisOrAnchor: LLVector3 = LLVector3.zero(),  // Joint axis or anchor
     val nameValue: String,
     val regionHandle: Long = 0L,  // For computing global position
-    val extraParams: ByteArray = ByteArray(0)  // Extra params containing mesh/sculpt data
+    val extraParams: ByteArray = ByteArray(0),  // Extra params containing mesh/sculpt data
+    /**
+     * Path/profile shape parameters from the ObjectUpdate. Drives real prim
+     * geometry instead of the previous hardcoded box. Defaulted so the
+     * compressed/cached/terse paths (which don't carry these bytes inline)
+     * keep working unchanged.
+     */
+    val shapeParams: PrimShapeParams = PrimShapeParams.DEFAULT
 ) {
     /**
      * Compute global X position from region handle and local position
@@ -958,6 +828,8 @@ fun MessageParser.parseRegionHandshake(data: ByteArray): RegionHandshakeData? {
             billableFactor = billableFactor,
             cacheId = cacheId,
             terrainTextures = terrainTextures,
+            terrainStartHeights = terrainStartHeight,
+            terrainHeightRanges = terrainHeightRange,
             regionId = regionId,
             cpuClassId = cpuClassId,
             cpuRatio = cpuRatio,
@@ -1061,6 +933,10 @@ data class RegionHandshakeData(
     val billableFactor: Float,
     val cacheId: UUID,
     val terrainTextures: List<UUID>,  // 8 textures: 4 base + 4 detail
+    /** Per-corner elevation blend start heights (0,0 / 1,0 / 0,1 / 1,1). */
+    val terrainStartHeights: List<Float> = emptyList(),
+    /** Per-corner elevation blend ranges (matches startHeights ordering). */
+    val terrainHeightRanges: List<Float> = emptyList(),
     // RegionInfo2 block
     val regionId: UUID? = null,
     // RegionInfo3 block (optional)
@@ -1115,41 +991,9 @@ data class CachedObjectData(
  * - RegionData: RegionHandle (U64), TimeDilation (U16)
  * - ObjectData (variable): ID (U32), CRC (U32), UpdateFlags (U32)
  */
-fun MessageParser.parseObjectUpdateCached(data: ByteArray): ObjectUpdateCachedData? {
-    try {
-        val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
-        
-        // RegionData block
-        val regionHandle = buffer.long
-        val timeDilation = buffer.short.toInt() and 0xFFFF
-        
-        // Count of object blocks
-        val numObjects = buffer.get().toInt() and 0xFF
-        
-        val objects = mutableListOf<CachedObjectData>()
-        
-        for (i in 0 until numObjects) {
-            val localId = buffer.int
-            val crc = buffer.int
-            val updateFlags = buffer.int
-            
-            objects.add(CachedObjectData(
-                localId = localId,
-                crc = crc,
-                updateFlags = updateFlags
-            ))
-        }
-        
-        return ObjectUpdateCachedData(
-            regionHandle = regionHandle,
-            timeDilation = timeDilation,
-            objects = objects
-        )
-    } catch (e: Exception) {
-        Log.e("MessageParser", "Failed to parse ObjectUpdateCached", e)
-        return null
-    }
-}
+fun MessageParser.parseObjectUpdateCached(data: ByteArray): ObjectUpdateCachedData? = ObjectMessageParsers.parseObjectUpdateCached(data)
+
+
 
 /**
  * Data from ScriptControlChange message (message ID -65347 / 0xFFFF00BD)
@@ -1543,118 +1387,23 @@ data class CrossedRegionData(
 /**
  * Parse TeleportFinish message
  */
-fun MessageParser.parseTeleportFinish(data: ByteArray): TeleportFinishData? {
-    try {
-        val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
-        
-        // AgentID (16 bytes)
-        val agentIdBytes = ByteArray(16)
-        buffer.get(agentIdBytes)
-        val agentId = bytesToUUID(agentIdBytes)
-        
-        // LocationID (4 bytes)
-        val locationId = buffer.int
-        
-        // SimIP (4 bytes as IPv4)
-        val ipBytes = ByteArray(4)
-        buffer.get(ipBytes)
-        val simIP = "${ipBytes[0].toInt() and 0xFF}.${ipBytes[1].toInt() and 0xFF}.${ipBytes[2].toInt() and 0xFF}.${ipBytes[3].toInt() and 0xFF}"
-        
-        // SimPort (2 bytes unsigned)
-        val simPort = buffer.short.toInt() and 0xFFFF
-        
-        // RegionHandle (8 bytes)
-        val regionHandle = buffer.long
-        
-        // SeedCapability (variable, 2-byte length prefix)
-        val seedCapLen = buffer.short.toInt() and 0xFFFF
-        val seedCapability = if (seedCapLen > 0 && buffer.remaining() >= seedCapLen) {
-            val seedCapBytes = ByteArray(seedCapLen)
-            buffer.get(seedCapBytes)
-            String(seedCapBytes, Charsets.UTF_8).trimEnd('\u0000')
-        } else ""
-        
-        // SimAccess (1 byte)
-        val simAccess = buffer.get().toInt() and 0xFF
-        
-        // TeleportFlags (4 bytes)
-        val teleportFlags = buffer.int
-        
-        Log.d("MessageParser", "Parsed TeleportFinish: simIP=$simIP:$simPort, handle=$regionHandle")
-        return TeleportFinishData(
-            agentId = agentId,
-            locationId = locationId,
-            simIP = simIP,
-            simPort = simPort,
-            regionHandle = regionHandle,
-            seedCapability = seedCapability,
-            simAccess = simAccess,
-            teleportFlags = teleportFlags
-        )
-    } catch (e: Exception) {
-        Log.e("MessageParser", "Failed to parse TeleportFinish", e)
-        return null
-    }
-}
+fun MessageParser.parseTeleportFinish(data: ByteArray): TeleportFinishData? = TeleportMessageParsers.parseTeleportFinish(data)
+
+
 
 /**
  * Parse TeleportFailed message
  */
-fun MessageParser.parseTeleportFailed(data: ByteArray): TeleportFailedData? {
-    try {
-        val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
-        
-        // AgentID (16 bytes)
-        val agentIdBytes = ByteArray(16)
-        buffer.get(agentIdBytes)
-        val agentId = bytesToUUID(agentIdBytes)
-        
-        // Reason (variable, 1-byte length prefix)
-        val reasonLen = buffer.get().toInt() and 0xFF
-        val reason = if (reasonLen > 0 && buffer.remaining() >= reasonLen) {
-            val reasonBytes = ByteArray(reasonLen)
-            buffer.get(reasonBytes)
-            String(reasonBytes, Charsets.UTF_8).trimEnd('\u0000')
-        } else "Unknown error"
-        
-        Log.d("MessageParser", "Parsed TeleportFailed: reason=$reason")
-        return TeleportFailedData(agentId = agentId, reason = reason)
-    } catch (e: Exception) {
-        Log.e("MessageParser", "Failed to parse TeleportFailed", e)
-        return null
-    }
-}
+fun MessageParser.parseTeleportFailed(data: ByteArray): TeleportFailedData? = TeleportMessageParsers.parseTeleportFailed(data)
+
+
 
 /**
  * Parse TeleportProgress message
  */
-fun MessageParser.parseTeleportProgress(data: ByteArray): TeleportProgressData? {
-    try {
-        val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
-        
-        // AgentID (16 bytes)
-        val agentIdBytes = ByteArray(16)
-        buffer.get(agentIdBytes)
-        val agentId = bytesToUUID(agentIdBytes)
-        
-        // TeleportFlags (4 bytes)
-        val teleportFlags = buffer.int
-        
-        // Message (variable, 1-byte length prefix)
-        val msgLen = buffer.get().toInt() and 0xFF
-        val message = if (msgLen > 0 && buffer.remaining() >= msgLen) {
-            val msgBytes = ByteArray(msgLen)
-            buffer.get(msgBytes)
-            String(msgBytes, Charsets.UTF_8).trimEnd('\u0000')
-        } else ""
-        
-        Log.d("MessageParser", "Parsed TeleportProgress: message=$message")
-        return TeleportProgressData(agentId = agentId, teleportFlags = teleportFlags, message = message)
-    } catch (e: Exception) {
-        Log.e("MessageParser", "Failed to parse TeleportProgress", e)
-        return null
-    }
-}
+fun MessageParser.parseTeleportProgress(data: ByteArray): TeleportProgressData? = TeleportMessageParsers.parseTeleportProgress(data)
+
+
 
 /**
  * Parse AlertMessage
@@ -1738,132 +1487,95 @@ fun MessageParser.parseAgentAlertMessage(data: ByteArray): AgentAlertMessageData
 /**
  * Parse EnableSimulator
  */
-fun MessageParser.parseEnableSimulator(data: ByteArray): EnableSimulatorData? {
-    try {
-        val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
-        
-        // Handle (8 bytes)
-        val handle = buffer.long
-        
-        // IP (4 bytes as IPv4)
-        val ipBytes = ByteArray(4)
-        buffer.get(ipBytes)
-        val ip = "${ipBytes[0].toInt() and 0xFF}.${ipBytes[1].toInt() and 0xFF}.${ipBytes[2].toInt() and 0xFF}.${ipBytes[3].toInt() and 0xFF}"
-        
-        // Port (2 bytes unsigned)
-        val port = buffer.short.toInt() and 0xFFFF
-        
-        Log.d("MessageParser", "Parsed EnableSimulator: handle=$handle, ip=$ip:$port")
-        return EnableSimulatorData(handle = handle, ip = ip, port = port)
-    } catch (e: Exception) {
-        Log.e("MessageParser", "Failed to parse EnableSimulator", e)
-        return null
-    }
-}
+fun MessageParser.parseEnableSimulator(data: ByteArray): EnableSimulatorData? = TeleportMessageParsers.parseEnableSimulator(data)
+
+
 
 /**
  * Parse CrossedRegion (medium frequency)
  */
-fun MessageParser.parseCrossedRegion(data: ByteArray): CrossedRegionData? {
-    try {
-        val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
-        
-        // AgentID (16 bytes)
-        val agentIdBytes = ByteArray(16)
-        buffer.get(agentIdBytes)
-        val agentId = bytesToUUID(agentIdBytes)
-        
-        // SessionID (16 bytes)
-        val sessionIdBytes = ByteArray(16)
-        buffer.get(sessionIdBytes)
-        val sessionId = bytesToUUID(sessionIdBytes)
-        
-        // SimIP (4 bytes as IPv4)
-        val ipBytes = ByteArray(4)
-        buffer.get(ipBytes)
-        val simIP = "${ipBytes[0].toInt() and 0xFF}.${ipBytes[1].toInt() and 0xFF}.${ipBytes[2].toInt() and 0xFF}.${ipBytes[3].toInt() and 0xFF}"
-        
-        // SimPort (2 bytes unsigned)
-        val simPort = buffer.short.toInt() and 0xFFFF
-        
-        // RegionHandle (8 bytes)
-        val regionHandle = buffer.long
-        
-        // SeedCapability (variable, 2-byte length prefix)
-        val seedCapLen = buffer.short.toInt() and 0xFFFF
-        val seedCapability = if (seedCapLen > 0 && buffer.remaining() >= seedCapLen) {
-            val seedCapBytes = ByteArray(seedCapLen)
-            buffer.get(seedCapBytes)
-            String(seedCapBytes, Charsets.UTF_8).trimEnd('\u0000')
-        } else ""
-        
-        // Position (12 bytes - 3 floats)
-        val posX = buffer.float
-        val posY = buffer.float
-        val posZ = buffer.float
-        val position = LLVector3(posX, posY, posZ)
-        
-        // LookAt (12 bytes - 3 floats)
-        val lookX = buffer.float
-        val lookY = buffer.float
-        val lookZ = buffer.float
-        val lookAt = LLVector3(lookX, lookY, lookZ)
-        
-        Log.d("MessageParser", "Parsed CrossedRegion: simIP=$simIP:$simPort, position=$position")
-        return CrossedRegionData(
-            agentId = agentId,
-            sessionId = sessionId,
-            simIP = simIP,
-            simPort = simPort,
-            regionHandle = regionHandle,
-            seedCapability = seedCapability,
-            position = position,
-            lookAt = lookAt
-        )
-    } catch (e: Exception) {
-        Log.e("MessageParser", "Failed to parse CrossedRegion", e)
-        return null
-    }
-}
+fun MessageParser.parseCrossedRegion(data: ByteArray): CrossedRegionData? = TeleportMessageParsers.parseCrossedRegion(data)
+
+
 
 /**
  * Parse ImprovedInstantMessage message.
  * Handles instant messages, group notices, typing indicators, etc.
+ *
+ * Wire format (`message_template.msg:5613-5644`, verified against Lumiya
+ * `messages/ImprovedInstantMessage.java:51-70` AND a live capture from
+ * the production simulator):
+ *
+ * ```
+ * AgentData    { AgentID(16 BE)  SessionID(16 BE) }
+ * MessageBlock { FromGroup(1)  ToAgentID(16)  ParentEstateID(4 LE)
+ *                RegionID(16)  Position(12)  Offline(1)  Dialog(1)
+ *                ID(16)  Timestamp(4 LE)  FromAgentName(var-1+NUL)
+ *                Message(var-2+NUL)  BinaryBucket(var-2) }
+ * EstateBlock  { EstateID(4 LE) }       // INBOUND ONLY — sim emits, viewer ignores
+ * MetaData     { count(1) [...] }       // INBOUND ONLY — sim emits, viewer ignores
+ * ```
+ *
+ * **Inbound packets from the simulator carry the trailing `EstateBlock`
+ * (4 bytes) and `MetaData` (1+ bytes) blocks** — confirmed via a live
+ * capture where every inbound IIM had exactly 5 trailing bytes after
+ * BinaryBucket. The viewer's outbound IIMs do NOT include those blocks
+ * (Lumiya / LL viewer / Firestorm / LibreMetaverse all stop at
+ * BinaryBucket); the sim stamps them on its way back. We tolerate them
+ * by simply not reading past `BinaryBucket`.
+ *
+ * Previously this parser skipped both `AgentData.SessionID` (16 bytes)
+ * and `MessageBlock.FromGroup` (1 byte), so every field after offset 16
+ * was off by 17 bytes — every inbound IM, group chat line, and typing
+ * indicator decoded to garbage. That's why the user observed "I never
+ * see IMs come in" in addition to the outbound bugs already fixed in
+ * commit 83184418.
  */
 fun MessageParser.parseImprovedInstantMessage(data: ByteArray): ImprovedInstantMessageData? {
     val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-    
+
     try {
-        // FromAgentID (UUID - 16 bytes)
+        // AgentData.AgentID (16 bytes BE) — the sender.
         val fromAgentIdBytes = ByteArray(16)
         buffer.get(fromAgentIdBytes)
         val fromAgentId = bytesToUUID(fromAgentIdBytes)
-        
-        // ToAgentID (UUID - 16 bytes)
+
+        // AgentData.SessionID (16 bytes BE) — server reflects our session
+        // ID back; not useful to inbound dispatch but it's on the wire.
+        // Skip without consuming as a UUID we surface upward.
+        buffer.position(buffer.position() + 16)
+
+        // MessageBlock.FromGroup (BOOL — 1 byte). Captured for future use;
+        // current data class doesn't expose it.
+        @Suppress("UNUSED_VARIABLE")
+        val fromGroup = buffer.get().toInt() != 0
+
+        // MessageBlock.ToAgentID (16 bytes BE)
         val toAgentIdBytes = ByteArray(16)
         buffer.get(toAgentIdBytes)
         val toAgentId = bytesToUUID(toAgentIdBytes)
-        
-        // ParentEstateID (U32 - 4 bytes)
+
+        // MessageBlock.ParentEstateID (U32 LE)
         val parentEstateId = buffer.int
-        
-        // RegionID (UUID - 16 bytes)
+
+        // MessageBlock.RegionID (16 bytes BE)
         val regionIdBytes = ByteArray(16)
         buffer.get(regionIdBytes)
         val regionId = bytesToUUID(regionIdBytes)
-        
-        // Position (Vector3 - 12 bytes)
+
+        // MessageBlock.Position (Vector3 = 3 LE floats = 12 bytes)
         val posBytes = ByteArray(12)
         buffer.get(posBytes)
         val position = LLVector3.fromBytes(posBytes)
-        
-        // Offline (U8 - 1 byte)
+
+        // MessageBlock.Offline (U8)
         val offline = buffer.get().toInt() and 0xFF
-        
-        // Dialog (U8 - 1 byte)
+
+        // MessageBlock.Dialog (U8) — IM type (0=normal, 17=group send,
+        // 41/42=typing, etc.).
         val dialog = buffer.get().toInt() and 0xFF
-        
-        // ID (UUID - 16 bytes) - IM session ID
+
+        // MessageBlock.ID (16 bytes BE) — IM session UUID
         val sessionIdBytes = ByteArray(16)
         buffer.get(sessionIdBytes)
         val sessionId = bytesToUUID(sessionIdBytes)
@@ -1889,7 +1601,9 @@ fun MessageParser.parseImprovedInstantMessage(data: ByteArray): ImprovedInstantM
         if (binaryBucketLen > 0) {
             buffer.get(binaryBucket)
         }
-        
+        // Trailing EstateBlock + MetaData blocks (sim → client only) are
+        // intentionally not read; the parser stops at BinaryBucket.
+
         return ImprovedInstantMessageData(
             fromAgentId = fromAgentId,
             toAgentId = toAgentId,

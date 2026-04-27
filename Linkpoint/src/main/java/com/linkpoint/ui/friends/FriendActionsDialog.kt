@@ -12,6 +12,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.ui.chat.ChatActivity
+import com.linkpoint.ui.profile.ProfileActivity
 import com.linkpoint.world.Friend
 import kotlinx.coroutines.launch
 
@@ -59,11 +60,11 @@ class FriendActionsDialog : DialogFragment() {
     }
 
     private fun viewProfile() {
-        // View friend's profile
-        val profileManager = LinkpointApp.getInstance().profileManager
-        lifecycleScope.launch {
-            profileManager.getAvatarProfile(friend.agentId)
+        val intent = Intent(requireContext(), ProfileActivity::class.java).apply {
+            putExtra(ProfileActivity.EXTRA_AGENT_ID, friend.agentId.toString())
+            putExtra(ProfileActivity.EXTRA_IS_OWN, false)
         }
+        startActivity(intent)
     }
 
     private fun teleportTo() {

@@ -27,6 +27,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     
     <!-- Bluetooth (for voice chat) -->
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30"/>
@@ -68,6 +69,14 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+
+        <!-- Compose migration host entry (world/home) -->
+        <activity
+            android:name=".ui.navigation.WorldHomeHostActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Linkpoint.NoActionBar"/>
 
         <!-- Main World View Activity with Filament Rendering -->
         <activity
@@ -202,13 +211,6 @@
             android:screenOrientation="portrait"
             android:parentActivityName=".ui.world.WorldViewActivity" />
 
-        <!-- Build/Edit Activity -->
-        <activity
-            android:name=".ui.build.BuildActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize"
-            android:parentActivityName=".ui.world.WorldViewActivity" />
-
         <!-- Grid Connection Service -->
         <service
             android:name=".services.GridConnectionService"
@@ -245,6 +247,27 @@
             android:theme="@style/Theme.Linkpoint"
             android:exported="false"
             android:parentActivityName=".ui.inventory.InventoryActivity" />
+
+        <!-- Push delivery channel (FCM-compatible relay wakeups) -->
+        <service
+            android:name=".push.LinkpointFirebaseMessagingService"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- Boot/background resume orchestration -->
+        <receiver
+            android:name=".service.BootResumeReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
 
         <!-- File Provider for sharing -->
         <provider

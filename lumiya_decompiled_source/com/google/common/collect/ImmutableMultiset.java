@@ -246,7 +246,7 @@ public abstract class ImmutableMultiset<E> extends ImmutableCollection<E> implem
     @Override // com.google.common.collect.Multiset
     @Deprecated
     public final int add(E e, int i) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.ImmutableCollection, java.util.AbstractCollection, java.util.Collection, java.util.Set
@@ -318,19 +318,19 @@ public abstract class ImmutableMultiset<E> extends ImmutableCollection<E> implem
     @Override // com.google.common.collect.Multiset
     @Deprecated
     public final int remove(Object obj, int i) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.Multiset
     @Deprecated
     public final int setCount(E e, int i) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.Multiset
     @Deprecated
     public final boolean setCount(E e, int i, int i2) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.AbstractCollection, com.google.common.collect.Multiset

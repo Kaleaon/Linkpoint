@@ -61,7 +61,7 @@ class AppCompatTextHelper {
             if (!context.isRestricted()) {
                 try {
                     this.mFontTypeface = tintTypedArray.getFont(i, this.mStyle, this.mView);
-                } catch (Resources.NotFoundException | UnsupportedOperationException e) {
+                } catch (Resources.NotFoundException | IllegalStateException e) {
                 }
             }
             if (this.mFontTypeface != null) {

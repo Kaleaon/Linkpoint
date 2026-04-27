@@ -1,10 +1,7 @@
 package com.linkpoint.utils
 
-import android.content.ContentValues
 import android.content.Context
 import android.os.Build
-import android.os.Environment
-import android.provider.MediaStore
 import android.util.Log
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.protocol.messages.EnhancedPacketLogger
@@ -12,8 +9,6 @@ import kotlinx.coroutines.*
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
-import java.io.OutputStream
-import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -35,9 +30,8 @@ import java.util.concurrent.atomic.AtomicLong
  * 
  * Designed for full diagnostic output to help debug connection and protocol issues.
  * 
- * IMPORTANT: Logs are saved to the PUBLIC Documents folder at:
- *   /storage/emulated/0/Documents/Linkpoint Logs/
- * This ensures logs are accessible via file manager outside the app.
+ * IMPORTANT: Logs are saved to app-private internal storage by default.
+ * Public sharing is only done through an explicit export action.
  * 
  * Usage:
  * - Call `startRecording()` at app startup or when diagnostic logging is needed
@@ -115,7 +109,9 @@ object SessionLogRecorder {
         /** General info */
         INFO,
         /** Debug detail */
-        DEBUG
+        DEBUG,
+        /** Renderer lifecycle / OpenGL / Filament event */
+        RENDER
     }
     
     /**
@@ -188,6 +184,14 @@ object SessionLogRecorder {
                 Log.e(TAG, "Could not get log directory")
                 isRecording.set(false)
                 return false
+            }
+
+            val context = appContext
+            if (context != null) {
+                DiagnosticsLoggingConfig.purgeExpiredLogs(
+                    logDir = logDir,
+                    retentionDays = DiagnosticsLoggingConfig.getRetentionDays(context)
+                )
             }
             
             val timestamp = fileNameFormat.format(Date())
@@ -294,7 +298,9 @@ object SessionLogRecorder {
     fun logWithHex(type: EntryType, tag: String, message: String, data: ByteArray) {
         if (!isRecording.get()) return
         
-        val hexDump = data.joinToString(" ") { "%02X".format(it) }
+        val context = appContext
+        val includeHexDump = context != null && DiagnosticsLoggingConfig.isVerbosePacketLoggingEnabled(context)
+        val hexDump = if (includeHexDump) data.joinToString(" ") { "%02X".format(it) } else null
         val entry = LogEntry(
             timestamp = System.currentTimeMillis(),
             type = type,
@@ -384,9 +390,10 @@ object SessionLogRecorder {
                         "auth", "authorization", "cookie", "token", "bearer",
                         "api-key", "apikey", "secret", "password", "credential"
                     )
-                    val safeValue = if (sensitiveHeaders.any { sensitive -> 
-                        k.contains(sensitive, ignoreCase = true) 
-                    }) "***REDACTED***" else v
+                    val safeValue = if (sensitiveHeaders.any { sensitive ->
+                            k.contains(sensitive, ignoreCase = true)
+                        }
+                    ) "***REDACTED***" else v
                     append("\n  $k: $safeValue")
                 }
             }
@@ -436,6 +443,26 @@ object SessionLogRecorder {
     }
     
     /**
+     * Log a renderer lifecycle / OpenGL / Filament event. Convenience
+     * wrapper used by [com.linkpoint.render.RenderDiagnostics] so every
+     * render-relevant moment from app start through frame loop ends up
+     * in the same session-log timeline as packets, HTTP, and connection
+     * state changes.
+     *
+     * @param subsystem human-readable engine label, e.g. "Filament",
+     *   "OpenGL", "Lumiya". Becomes the entry's tag.
+     * @param event short event id, e.g. "engine_create",
+     *   "swapchain_create", "surface_changed", "first_frame", "stall".
+     * @param details optional free-form detail (sizes, error codes,
+     *   GPU vendor strings, etc.).
+     */
+    fun logRender(subsystem: String, event: String, details: String? = null) {
+        if (!isRecording.get()) return
+        val message = if (details.isNullOrBlank()) event else "$event — $details"
+        log(EntryType.RENDER, "RENDER/$subsystem", message)
+    }
+
+    /**
      * Log login event
      */
     fun logLogin(success: Boolean, grid: String, username: String, error: String? = null) {
@@ -452,14 +479,18 @@ object SessionLogRecorder {
     }
     
     /**
-     * Log region change
+     * Log region change. `regionHandle` is null when invoked from RegionHandshake
+     * (the LL message body does not carry it — only EnableSimulator and
+     * AgentMovementComplete do), in which case the line is omitted instead of
+     * printed as `Handle: 0`, which previously made captures look like a parser
+     * bug (2026-04-26 Athanasia capture).
      */
-    fun logRegionChange(regionName: String, regionHandle: Long, position: String? = null) {
+    fun logRegionChange(regionName: String, regionHandle: Long?, position: String? = null) {
         if (!isRecording.get()) return
-        
+
         val message = buildString {
             append("REGION: $regionName")
-            append("\n  Handle: $regionHandle")
+            if (regionHandle != null) append("\n  Handle: $regionHandle")
             position?.let { append("\n  Position: $it") }
         }
         log(EntryType.REGION, "REGION", message)
@@ -481,17 +512,21 @@ object SessionLogRecorder {
     }
     
     /**
-     * Get the path where logs are stored.
-     * Returns the expected public Documents path.
+     * Get the app-private path where logs are stored.
      */
     fun getLogDirectoryPath(): String {
-        return getExpectedLogPath()
+        return getLogDirectory()?.absolutePath ?: "unavailable"
     }
     
     // ==================== PRIVATE METHODS ====================
     
     private fun addEntry(entry: LogEntry) {
-        logBuffer.offer(entry)
+        val sanitizedEntry = entry.copy(
+            message = DiagnosticsLogSanitizer.sanitize(entry.message),
+            hexDump = entry.hexDump,
+            stackTrace = entry.stackTrace?.let { DiagnosticsLogSanitizer.sanitize(it) }
+        )
+        logBuffer.offer(sanitizedEntry)
         entryCount.incrementAndGet()
         
         // Trigger flush if buffer is getting large
@@ -595,88 +630,23 @@ object SessionLogRecorder {
     }
     
     /**
-     * Get the log directory in the PUBLIC Documents folder.
-     * 
-     * Target location: /storage/emulated/0/Documents/Linkpoint Logs/
-     * This ensures logs are accessible via file manager outside the app.
-     * 
-     * For Android 10+ (API 29+), we use legacy external storage which still works
-     * for the Documents directory. If that fails, we'll need to use MediaStore.
+     * Get the app-private diagnostics directory.
      */
     private fun getLogDirectory(): File? {
-        // Use the public Documents directory on external storage
-        // Path: /storage/emulated/0/Documents/Linkpoint Logs/
-        @Suppress("DEPRECATION")
-        val documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-        val logDir = File(documentsDir, LOG_DIR_NAME)
-        
-        Log.d(TAG, "Attempting to use public Documents: ${logDir.absolutePath}")
-        
+        val context = appContext ?: return null
+        val logDir = File(DiagnosticsLoggingConfig.diagnosticsDirectory(context), LOG_DIR_NAME)
+
         try {
-            // Ensure parent Documents directory exists
-            if (!documentsDir.exists()) {
-                Log.w(TAG, "Public Documents directory doesn't exist: ${documentsDir.absolutePath}")
-                // On some devices, we may need to create it
-                if (!documentsDir.mkdirs()) {
-                    Log.e(TAG, "Failed to create public Documents directory")
-                }
-            }
-            
-            // Create our log subdirectory
             if (!logDir.exists()) {
-                val created = logDir.mkdirs()
-                if (created) {
-                    Log.i(TAG, "Created log directory: ${logDir.absolutePath}")
-                } else {
-                    Log.w(TAG, "Failed to create log directory via mkdirs: ${logDir.absolutePath}")
-                    // Try alternative approach - create parent first
-                    logDir.parentFile?.mkdirs()
-                    if (!logDir.mkdir()) {
-                        Log.e(TAG, "All attempts to create log directory failed")
-                        return null
-                    }
-                }
+                logDir.mkdirs()
             }
-            
-            // Verify we can write
-            if (logDir.canWrite()) {
-                Log.i(TAG, "Using public log directory: ${logDir.absolutePath}")
-                return logDir
-            } else {
-                Log.w(TAG, "Cannot write to log directory: ${logDir.absolutePath}")
-                // Try to create a test file to verify
-                try {
-                    val testFile = File(logDir, ".write_test")
-                    if (testFile.createNewFile()) {
-                        testFile.delete()
-                        Log.i(TAG, "Write test passed for: ${logDir.absolutePath}")
-                        return logDir
-                    }
-                } catch (e: Exception) {
-                    Log.w(TAG, "Write test failed: ${e.message}")
-                }
-            }
+
+            return logDir
         } catch (e: Exception) {
-            Log.e(TAG, "Error accessing public documents: ${e.message}", e)
+            Log.e(TAG, "Error accessing app-private diagnostics directory: ${e.message}", e)
         }
-        
-        // If we get here, direct file access failed - this shouldn't happen for Documents
-        // but log the failure clearly
-        Log.e(TAG, "FAILED to access public Documents folder!")
-        Log.e(TAG, "Session logs will NOT be accessible outside the app.")
-        Log.e(TAG, "This may be a permissions issue. Ensure WRITE_EXTERNAL_STORAGE is granted.")
-        
+
         return null
-    }
-    
-    /**
-     * Get the expected public log directory path for display purposes.
-     * Returns the expected path regardless of whether we can actually write there.
-     */
-    fun getExpectedLogPath(): String {
-        @Suppress("DEPRECATION")
-        val documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-        return File(documentsDir, LOG_DIR_NAME).absolutePath
     }
     
     private fun formatDuration(ms: Long): String {

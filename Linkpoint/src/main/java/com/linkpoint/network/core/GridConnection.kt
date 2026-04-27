@@ -1,7 +1,6 @@
 package com.linkpoint.network.core
 
 import android.content.Context
-import android.util.Log
 import com.linkpoint.auth.CrashTracker
 import com.linkpoint.auth.DeviceIdentifier
 import com.linkpoint.network.NetworkLogger
@@ -14,13 +13,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.security.MessageDigest
+import com.linkpoint.network.events.ConnectionState
+import com.linkpoint.protocol.messages.UDPConnectionFixed
 import java.util.UUID
 
 /**
  * Grid Connection
  * 
  * Represents a connection to a Second Life grid.
- * Based on Lumiya's SLGridConnection implementation with mobile-first optimizations.
+ * Based on the reference viewer's SLGridConnection implementation with mobile-first optimizations.
  * 
  * Features:
  * - Connection state management
@@ -37,6 +38,7 @@ import java.util.UUID
  */
 class GridConnection(
     private val context: Context,
+    private val sharedUdpConnection: UDPConnectionFixed,
     private val connectionId: UUID = UUID.randomUUID(),
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 ) {
@@ -47,21 +49,12 @@ class GridConnection(
         private const val MAX_RECONNECT_ATTEMPTS = 5
 
         // Viewer identification
-        private const val VIEWER_NAME = "Lumiya"
+        private const val VIEWER_NAME = "Linkpoint"
         private const val VIEWER_VERSION = "1.0.0"
     }
     
-    /**
-     * Connection states based on Lumiya's ConnectionState enum
-     */
-    enum class ConnectionState {
-        IDLE,
-        CONNECTING,
-        CONNECTED,
-        DISCONNECTING,
-        ERROR,
-        MFA_REQUIRED
-    }
+    // ConnectionState is imported from the canonical definition in EventBus.kt
+    // This class references it as GridConnection.Companion.ConnectionState via typealias
     
     /**
      * Connection state flow for reactive updates
@@ -247,7 +240,7 @@ class GridConnection(
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
                 "Establishing agent circuit to ${reply.simIP}:${reply.simPort} (Circuit: ${reply.circuitCode})")
 
-            agentCircuit = AgentCircuit(reply, scope = scope)
+            agentCircuit = AgentCircuit(reply, sharedConnection = sharedUdpConnection, scope = scope)
 
             // Wait for circuit to be ready (optional, but good for robust startup)
             // AgentCircuit initiates connection in its init block
@@ -258,17 +251,39 @@ class GridConnection(
                 val capManager = CapabilityManager()
                 capabilityManager = capManager
 
-                // Initialize capabilities asynchronously
+                // Initialize capabilities asynchronously, passing loginUrl to enable
+                // LinkpointTranslationLayer URL repair (critical for Agni grid)
+                val loginUrl = params.gridUrl
                 scope.launch {
-                    val capsReady = capManager.initialize(reply.seedCapability)
+                    val capsReady = capManager.initialize(reply.seedCapability, loginUrl)
                     if (capsReady) {
                         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP, "Capabilities initialized")
                     } else {
-                        NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Capability initialization failed or partial")
+                        NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
+                            "Capability initialization failed, starting background retry loop...")
+                        // Start background retry loop instead of a single retry.
+                        // On mobile networks (especially cellular), the seed capability
+                        // often returns empty responses during initial connection.
+                        // The background retry uses exponential backoff (10s, 20s, 40s...)
+                        // and will keep trying until capabilities are loaded or max attempts reached.
+                        capManager.startBackgroundRetry(reply.seedCapability, loginUrl)
                     }
                 }
             } else {
                 NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "No seed capability provided, skipping caps init")
+            }
+
+            // Step 4: Set up UDP reconnection callback
+            // When the UDP connection detects it's dead (e.g. 5 unanswered pings,
+            // socket errors), this callback triggers reconnection of the full session.
+            sharedUdpConnection.setReconnectionCallback {
+                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
+                    "UDP reconnection callback triggered - attempting to reconnect")
+                scope.launch {
+                    if (shouldReconnect()) {
+                        attemptReconnection()
+                    }
+                }
             }
             
             _connectionState.value = ConnectionState.CONNECTED
@@ -376,7 +391,7 @@ class GridConnection(
      * @return The created temp circuit
      */
     fun createTempCircuit(authReply: AuthReply): TempCircuit {
-        val tempCircuit = TempCircuit(authReply)
+        val tempCircuit = TempCircuit(authReply, sharedConnection = sharedUdpConnection)
         tempCircuits[authReply] = tempCircuit
         return tempCircuit
     }

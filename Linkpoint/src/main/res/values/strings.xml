@@ -157,6 +157,9 @@
     <string name="crouch">Crouch</string>
     <string name="gestures">Gestures</string>
     <string name="nearby">Nearby</string>
+    <string name="camera_mode_toggle">Toggle camera mode (follow / mouselook)</string>
+    <string name="camera_mode_follow">Follow camera</string>
+    <string name="camera_mode_mouselook">Mouselook camera</string>
     <string name="flying_enabled">Flying enabled</string>
     <string name="flying_disabled">Flying disabled</string>
     <string name="running_enabled">Running enabled</string>

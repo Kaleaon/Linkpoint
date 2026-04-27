@@ -461,11 +461,11 @@ public abstract class MediaBrowserServiceCompat extends Service {
         }
 
         void onErrorSent(Bundle bundle) {
-            throw new UnsupportedOperationException("It is not supported to send an error for " + this.mDebug);
+            throw new IllegalStateException("It is not supported to send an error for " + this.mDebug);
         }
 
         void onProgressUpdateSent(Bundle bundle) {
-            throw new UnsupportedOperationException("It is not supported to send an interim update for " + this.mDebug);
+            throw new IllegalStateException("It is not supported to send an interim update for " + this.mDebug);
         }
 
         void onResultSent(T t) {

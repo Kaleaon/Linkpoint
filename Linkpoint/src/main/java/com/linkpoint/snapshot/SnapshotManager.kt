@@ -33,7 +33,7 @@ import java.util.*
  * - Share to profile feed
  * - Screenshot of 3D view
  * 
- * Based on Lumiya/Firestorm snapshot functionality.
+ * Based on reference viewer/Firestorm snapshot functionality.
  */
 class SnapshotManager(
     private val context: Context,
@@ -198,7 +198,7 @@ class SnapshotManager(
                 val imageBytes = outputStream.toByteArray()
                 
                 // Use NewFileAgentInventory capability
-                val uploadCap = capabilityManager.getCapability("NewFileAgentInventory")
+                val uploadCap = capabilityManager.getCapability(CapabilityManager.CAP_NEW_FILE_AGENT_INVENTORY)
                 if (uploadCap == null) {
                     return@withContext UploadResult.Error("Upload capability not available")
                 }
@@ -212,7 +212,7 @@ class SnapshotManager(
                     this["expected_upload_cost"] = LLSDInteger(UPLOAD_COST)
                 }
                 
-                val response = capabilityManager.request("NewFileAgentInventory", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_NEW_FILE_AGENT_INVENTORY, request)
                 
                 if (response is LLSDMap) {
                     val uploaderUrl = response.getString("uploader")
@@ -278,14 +278,14 @@ class SnapshotManager(
                 
                 if (uploadResult is UploadResult.Success) {
                     // Then post to profile feed using ProfileImage capability
-                    val postCap = capabilityManager.getCapability("UploadAgentProfileImage")
+                    val postCap = capabilityManager.getCapability(CapabilityManager.CAP_UPLOAD_AGENT_PROFILE_IMAGE)
                     if (postCap != null) {
                         val request = LLSDMap().apply {
                             this["texture_id"] = LLSDUUID(uploadResult.assetId)
                             this["caption"] = LLSDString(caption)
                         }
                         
-                        capabilityManager.request("UploadAgentProfileImage", request)
+                        capabilityManager.request(CapabilityManager.CAP_UPLOAD_AGENT_PROFILE_IMAGE, request)
                         Log.i(TAG, "Snapshot shared to profile")
                         return@withContext true
                     }

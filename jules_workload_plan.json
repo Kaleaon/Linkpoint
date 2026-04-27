@@ -8,22 +8,8 @@
         "platforms/iOS/Views/MainTabView.swift",
         "platforms/iOS/ViewModels/AuthViewModel.swift"
       ],
-      "instructions": "\nImprove the iOS platform implementation:\n1. Add a ChatView.swift component similar to platforms/PWA/components/ChatView.tsx\n2. Add an InventoryView.swift component similar to platforms/PWA/components/InventoryView.tsx\n3. Enhance AuthViewModel.swift with better error handling and state management\n4. Add SwiftUI animations and transitions to improve UX\n5. Ensure all views follow iOS Human Interface Guidelines\n",
+      "instructions": "\nImprove the iOS platform implementation:\n1. Add a ChatView.swift component for in-world and IM chat\n2. Add an InventoryView.swift component with folder navigation\n3. Enhance AuthViewModel.swift with better error handling and state management\n4. Add SwiftUI animations and transitions to improve UX\n5. Ensure all views follow iOS Human Interface Guidelines\n",
       "priority": 1,
-      "task_id": null,
-      "status": "PENDING"
-    },
-    {
-      "title": "Improve PWA Demo Test Coverage",
-      "description": "Add comprehensive tests for the PWA-demo JavaScript modules",
-      "target_files": [
-        "PWA-demo/tests/auth-test.js",
-        "PWA-demo/tests/chat-test.js",
-        "PWA-demo/tests/inventory-test.js",
-        "PWA-demo/tests/protocol-test.js"
-      ],
-      "instructions": "\nImprove the PWA-demo test suite:\n1. Add unit tests for authentication flow in PWA-demo/js/auth/\n2. Add tests for chat functionality in PWA-demo/js/chat/\n3. Add tests for inventory management in PWA-demo/js/inventory/\n4. Add tests for LLSD protocol handling in PWA-demo/js/protocol/\n5. Ensure tests can run standalone without external dependencies\n6. Add mock data for testing grid connections\n",
-      "priority": 2,
       "task_id": null,
       "status": "PENDING"
     },
@@ -63,18 +49,6 @@
       "priority": 2,
       "task_id": null,
       "status": "PENDING"
-    },
-    {
-      "title": "Enhance PWA Platform Components",
-      "description": "Improve the Next.js PWA platform components",
-      "target_files": [
-        "platforms/PWA/components/ProfileView.tsx",
-        "platforms/PWA/components/WorldView.tsx"
-      ],
-      "instructions": "\nEnhance the PWA platform components:\n1. Add better TypeScript types to ProfileView.tsx\n2. Improve accessibility in ProfileView.tsx (aria labels, keyboard navigation)\n3. Add loading states and error boundaries to WorldView.tsx\n4. Improve responsive design for mobile devices\n5. Add unit tests for the components\n6. Follow React best practices for hooks and state management\n",
-      "priority": 1,
-      "task_id": null,
-      "status": "PENDING"
     }
   ],
   "repo_context": {
@@ -84,12 +58,10 @@
     "description": "Linkpoint - Modern Second Life/OpenSim mobile viewer",
     "language": "Kotlin",
     "additionalLanguages": [
-      "TypeScript",
       "Swift",
-      "JavaScript",
       "Python"
     ]
   },
-  "total_files": 16,
+  "total_files": 10,
   "generated_at": "2026-01-06 14:29:46"
 }

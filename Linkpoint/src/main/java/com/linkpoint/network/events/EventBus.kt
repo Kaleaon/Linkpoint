@@ -17,7 +17,7 @@ import kotlin.reflect.KClass
  * Event Bus
  * 
  * Centralized event distribution system for reactive programming.
- * Based on Lumiya's EventBus implementation.
+ * Based on the reference viewer's EventBus implementation.
  * 
  * Features:
  * - Type-safe event publishing and subscribing
@@ -245,11 +245,20 @@ data class MeshDownloadEvent(
 )
 
 /**
- * Connection states
+ * Connection states - unified across the codebase.
+ * This is the canonical ConnectionState enum. Do not create duplicates elsewhere.
+ *
+ * Used by: EventBus events, UDPConnectionFixed, AgentCircuit, LinkpointThreadedCircuit,
+ *          LinkpointCircuitIntegration, SessionManager, SecondLifeProtocol,
+ *          ConnectionKeepAliveManager, GridConnectionService, WorldViewActivity
  */
 enum class ConnectionState {
     DISCONNECTED,
+    IDLE,
     CONNECTING,
     CONNECTED,
-    ERROR
+    RECONNECTING,
+    DISCONNECTING,
+    ERROR,
+    MFA_REQUIRED
 }

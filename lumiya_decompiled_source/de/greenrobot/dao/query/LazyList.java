@@ -33,7 +33,7 @@ public class LazyList<E> implements List<E>, Closeable {
 
         @Override // java.util.ListIterator
         public void add(E e) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // java.io.Closeable, java.lang.AutoCloseable
@@ -85,12 +85,12 @@ public class LazyList<E> implements List<E>, Closeable {
 
         @Override // java.util.ListIterator, java.util.Iterator
         public void remove() {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // java.util.ListIterator
         public void set(E e) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
     }
 
@@ -115,22 +115,22 @@ public class LazyList<E> implements List<E>, Closeable {
 
     @Override // java.util.List
     public void add(int i, E e) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.List, java.util.Collection
     public boolean add(E e) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.List
     public boolean addAll(int i, Collection<? extends E> collection) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.List, java.util.Collection
     public boolean addAll(Collection<? extends E> collection) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     protected void checkCached() {
@@ -141,7 +141,7 @@ public class LazyList<E> implements List<E>, Closeable {
 
     @Override // java.util.List, java.util.Collection
     public void clear() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.io.Closeable, java.lang.AutoCloseable
@@ -265,27 +265,27 @@ public class LazyList<E> implements List<E>, Closeable {
 
     @Override // java.util.List
     public E remove(int i) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.List, java.util.Collection
     public boolean remove(Object obj) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.List, java.util.Collection
     public boolean removeAll(Collection<?> collection) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.List, java.util.Collection
     public boolean retainAll(Collection<?> collection) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.List
     public E set(int i, E e) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.List, java.util.Collection

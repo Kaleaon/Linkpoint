@@ -19,7 +19,13 @@ import kotlinx.coroutines.launch
 
 /**
  * Activity that displays a radar showing nearby avatars and objects.
+ *
+ * Legacy entry point retained during Compose migration.
+ * Removal target: 2026.09.
  */
+@Deprecated(
+    message = "Legacy Activity entry point. Use RadarCompose-based Compose navigation."
+)
 class RadarActivity : AppCompatActivity() {
 
     private lateinit var radarView: RadarView

@@ -271,7 +271,7 @@ public class ImmutableListMultimap<K, V> extends ImmutableMultimap<K, V> impleme
     @Override // com.google.common.collect.ImmutableMultimap, com.google.common.collect.Multimap
     @Deprecated
     public ImmutableList<V> removeAll(Object obj) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     /* JADX WARN: Multi-variable type inference failed */
@@ -283,7 +283,7 @@ public class ImmutableListMultimap<K, V> extends ImmutableMultimap<K, V> impleme
     @Override // com.google.common.collect.ImmutableMultimap, com.google.common.collect.AbstractMultimap, com.google.common.collect.Multimap
     @Deprecated
     public ImmutableList<V> replaceValues(K k, Iterable<? extends V> iterable) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     /* JADX WARN: Multi-variable type inference failed */

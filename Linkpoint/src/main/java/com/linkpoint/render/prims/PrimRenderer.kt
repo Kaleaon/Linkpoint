@@ -4,7 +4,13 @@ import android.util.Log
 import com.google.android.filament.*
 import com.google.android.filament.VertexBuffer.AttributeType
 import com.google.android.filament.VertexBuffer.VertexAttribute
+import com.linkpoint.assets.MeshData
+import com.linkpoint.assets.MeshLOD
+import com.linkpoint.avatar.BakesOnMesh
+import com.linkpoint.diagnostics.ScenePopulationDiagnostics
 import com.linkpoint.protocol.messages.ObjectUpdateData
+import com.linkpoint.protocol.messages.PrimShapeParams
+import com.linkpoint.protocol.textures.TextureEntryParser
 import com.linkpoint.protocol.types.LLQuaternion
 import com.linkpoint.protocol.types.LLVector3
 import java.nio.ByteBuffer
@@ -34,31 +40,156 @@ class PrimRenderer(
     }
     
     private val prims = ConcurrentHashMap<Int, PrimInstance>()
-    private val primMeshes = ConcurrentHashMap<PrimShape, PrimMesh>()
-    
-    private var defaultMaterial: MaterialInstance? = null
+    // Meshes are cached by a coarse "shape key" that captures the visible
+    // distinctions (path/profile curve + path/profile cuts + hollow). Path
+    // taper/twist/skew aren't part of the cache key yet — they'd explode the
+    // cardinality. Treat them as a uniform-scale or post-process for now.
+    private val primMeshes = ConcurrentHashMap<PrimShapeKey, PrimMesh>()
+
+    private var defaultMaterial: Material? = null
     private val transformManager = engine.transformManager
+    private val pendingMeshLoads = ConcurrentHashMap<Int, UUID>()
+    private val loadedMeshIds = ConcurrentHashMap<Int, UUID>()
+
+    /**
+     * Optional Bakes-on-Mesh resolver. When set, a TextureEntry face that
+     * references a BoM sentinel UUID (e.g. IMG_USE_BAKED_HEAD) is rewritten
+     * to the avatar's actual baked texture UUID before being requested from
+     * TextureManager. Wired by RenderManager.initialize() to point at
+     * AvatarManager's local-agent baker.
+     */
+    @Volatile
+    private var bomResolver: ((Int) -> UUID?)? = null
+    @Volatile
+    private var meshDataRequester: MeshDataRequester? = null
+    @Volatile
+    private var meshGeometryBuilder: MeshGeometryBuilder? = null
+
+    fun interface TextureBinder {
+        fun bind(textureId: UUID, onLoaded: (Texture) -> Unit)
+    }
+
+    @Volatile
+    private var textureBinder: TextureBinder? = null
+
+    fun setBomResolver(resolver: ((Int) -> UUID?)?) {
+        bomResolver = resolver
+    }
+
+    fun setTextureBinder(binder: TextureBinder?) {
+        textureBinder = binder
+    fun interface MeshDataRequester {
+        fun request(localId: Int, meshId: UUID, lod: MeshLOD, onResolved: (MeshLoadResult) -> Unit)
+    }
+
+    fun interface MeshGeometryBuilder {
+        fun attach(entity: Int, meshData: MeshData, textureEntry: ByteArray)
+    }
+
+    sealed class MeshLoadResult {
+        data class Success(val meshData: MeshData) : MeshLoadResult()
+        data class ParseFailure(val reason: String? = null) : MeshLoadResult()
+        data class MissingAsset(val reason: String? = null) : MeshLoadResult()
+    }
+
+    fun setMeshDataRequester(requester: MeshDataRequester?) {
+        meshDataRequester = requester
+    }
+
+    fun setMeshGeometryBuilder(builder: MeshGeometryBuilder?) {
+        meshGeometryBuilder = builder
+    }
     
     /**
      * Initialize with default material
      */
     fun initialize(material: Material) {
-        defaultMaterial = material.createInstance()
-        
-        // Pre-generate common shapes
-        generateBoxMesh()
-        generateSphereMesh()
-        generateCylinderMesh()
-        
-        Log.i(TAG, "PrimRenderer initialized")
+        defaultMaterial = material
+        // Pre-generate the default-shape mesh for each base shape kind so the
+        // common case (no path/profile customisation) doesn't tessellate on
+        // the first frame after each prim arrives.
+        listOf(
+            PrimShape.BOX, PrimShape.CYLINDER, PrimShape.PRISM,
+            PrimShape.SPHERE, PrimShape.TORUS, PrimShape.TUBE, PrimShape.RING
+        ).forEach { kind ->
+            getOrCreateMesh(PrimShapeKey.defaultFor(kind))
+        }
+        Log.i(TAG, "PrimRenderer initialized with ${primMeshes.size} default meshes")
     }
     
     /**
      * Add or update a prim from ObjectUpdate
      */
-    fun updatePrim(data: ObjectUpdateData) {
-        if (data.pcode != PCODE_PRIM) return
-        
+    fun updatePrim(data: ObjectUpdateData): Boolean {
+        if (data.pcode != PCODE_PRIM) {
+            ScenePopulationDiagnostics.markSceneInserted(ScenePopulationDiagnostics.EntityType.OBJECT, false)
+            return false
+        }
+
+        val meshId = data.getMeshAssetId()
+        if (meshId != null) {
+            val requestChanged = pendingMeshLoads[data.localId] != meshId && loadedMeshIds[data.localId] != meshId
+            if (requestChanged) {
+                pendingMeshLoads[data.localId] = meshId
+                logMeshResolution(
+                    event = "pending_load",
+                    localId = data.localId,
+                    meshId = meshId
+                )
+                val requester = meshDataRequester
+                if (requester == null) {
+                    pendingMeshLoads.remove(data.localId, meshId)
+                    logMeshResolution(
+                        event = "missing_asset",
+                        localId = data.localId,
+                        meshId = meshId,
+                        detail = "mesh_requester_unavailable"
+                    )
+                } else {
+                    val textureEntrySnapshot = data.textureEntry.copyOf()
+                    requester.request(data.localId, meshId, MeshLOD.HIGH) { result ->
+                        when (result) {
+                            is MeshLoadResult.Success -> {
+                                pendingMeshLoads.remove(data.localId, meshId)
+                                loadedMeshIds[data.localId] = meshId
+                                replaceGeometry(data.localId) { entity ->
+                                    val builder = meshGeometryBuilder
+                                    if (builder == null) {
+                                        logMeshResolution(
+                                            event = "missing_asset",
+                                            localId = data.localId,
+                                            meshId = meshId,
+                                            detail = "mesh_geometry_builder_unavailable"
+                                        )
+                                    } else {
+                                        builder.attach(entity, result.meshData, textureEntrySnapshot)
+                                    }
+                                }
+                            }
+                            is MeshLoadResult.ParseFailure -> {
+                                pendingMeshLoads.remove(data.localId, meshId)
+                                logMeshResolution(
+                                    event = "parse_failure",
+                                    localId = data.localId,
+                                    meshId = meshId,
+                                    detail = result.reason
+                                )
+                            }
+                            is MeshLoadResult.MissingAsset -> {
+                                pendingMeshLoads.remove(data.localId, meshId)
+                                logMeshResolution(
+                                    event = "missing_asset",
+                                    localId = data.localId,
+                                    meshId = meshId,
+                                    detail = result.reason
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         val prim = prims.getOrPut(data.localId) {
             createPrim(data)
         }
@@ -74,16 +205,53 @@ class PrimRenderer(
             prim.textureEntry = data.textureEntry
             updatePrimMaterial(prim, data.textureEntry)
         }
+
+        ScenePopulationDiagnostics.markSceneInserted(ScenePopulationDiagnostics.EntityType.OBJECT, true)
+        return true
     }
     
     /**
      * Remove a prim
      */
+    /**
+     * Replace the geometry on an existing prim entity. Used by the
+     * mesh-asset path: when MeshManager finishes parsing the LLM asset,
+     * RenderManager hands us the entity back so we can swap its
+     * RenderableComponent for the parsed mesh primitives. Caller's
+     * [attach] block is invoked with the prim's entity ID and is
+     * responsible for destroying the existing renderable and building the
+     * new one (we don't know the new geometry's shape from here).
+     *
+     * No-op if no prim with this localId is tracked.
+     */
+    fun replaceGeometry(localId: Int, attach: (entity: Int) -> Unit) {
+        val prim = prims[localId] ?: return
+        try {
+            attach(prim.entity)
+            // Mark the prim's effective shape as MESH so subsequent
+            // updatePrim calls don't re-create the path/profile geometry.
+            // (We can't mutate `shape` on the data class, so just leave it;
+            // updatePrim's getOrPut won't fire because the prim is already
+            // tracked. If a future updatePrim ever needed to rebuild we'd
+            // route back through replaceGeometry as well.)
+        } catch (e: Exception) {
+            Log.w(TAG, "replaceGeometry failed for $localId", e)
+        }
+    }
+
     fun removePrim(localId: Int) {
+        pendingMeshLoads.remove(localId)
+        loadedMeshIds.remove(localId)
         prims.remove(localId)?.let { prim ->
             scene.removeEntity(prim.entity)
+            engine.destroyMaterialInstance(prim.materialInstance)
             engine.destroyEntity(prim.entity)
         }
+    }
+
+    private fun logMeshResolution(event: String, localId: Int, meshId: UUID, detail: String? = null) {
+        val suffix = detail?.let { """, "detail":"$it"""" } ?: ""
+        Log.i(TAG, """{"event":"mesh_asset_resolution","state":"$event","localId":$localId,"meshId":"$meshId"$suffix}""")
     }
     
     /**
@@ -98,17 +266,25 @@ class PrimRenderer(
     
     private fun createPrim(data: ObjectUpdateData): PrimInstance {
         val entity = EntityManager.get().create()
-        
-        // Determine shape from path/profile curves
-        val shape = determineShape(data)
-        val mesh = getOrCreateMesh(shape)
-        
-        // Get default material or throw if not initialized
-        val material = defaultMaterial ?: throw IllegalStateException(
+
+        // Use the protocol-decoded shape params instead of a hardcoded BOX.
+        val shapeKey = PrimShapeKey.from(data.shapeParams)
+        val mesh = getOrCreateMesh(shapeKey)
+
+        val material = defaultMaterial?.createInstance() ?: throw IllegalStateException(
             "Default material not initialized. Call initialize() first."
         )
-        
-        // Create renderable
+        material.setParameter("baseColor", 1f, 1f, 1f, 1f)
+        material.setParameter("texScale", 1f, 1f)
+        material.setParameter("texOffset", 0f, 0f)
+        material.setParameter("texRotation", 0f)
+        material.setParameter("metallic", 0f)
+        material.setParameter("roughness", 0.5f)
+        material.setParameter("hasTexture", 0f)
+
+        // The base mesh is built in unit space (-0.5..0.5 cube envelope). The
+        // prim's actual scale comes from the protocol's `scale` vector, so the
+        // bounding box stays unit-sized here and the transform handles size.
         RenderableManager.Builder(1)
             .boundingBox(Box(-0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f))
             .geometry(0, RenderableManager.PrimitiveType.TRIANGLES, mesh.vertexBuffer, mesh.indexBuffer)
@@ -117,45 +293,298 @@ class PrimRenderer(
             .receiveShadows(true)
             .castShadows(true)
             .build(engine, entity)
-        
-        // Add transform
+
         val ti = transformManager.create(entity)
-        
+
         scene.addEntity(entity)
-        
+
         return PrimInstance(
             localId = data.localId,
             fullId = data.fullId,
             entity = entity,
             transformInstance = ti,
-            shape = shape,
+            shape = shapeKey.kind,
             position = data.position,
             rotation = data.rotation,
             scale = data.scale,
-            textureEntry = data.textureEntry
+            textureEntry = data.textureEntry,
+            materialInstance = material
         )
     }
-    
-    private fun determineShape(data: ObjectUpdateData): PrimShape {
-        // Simplified shape detection
-        // Real implementation would parse path/profile data
-        return PrimShape.BOX
-    }
-    
-    private fun getOrCreateMesh(shape: PrimShape): PrimMesh {
-        return primMeshes.getOrPut(shape) {
-            when (shape) {
-                PrimShape.BOX -> generateBoxMesh()
-                PrimShape.SPHERE -> generateSphereMesh()
-                PrimShape.CYLINDER -> generateCylinderMesh()
-                PrimShape.TORUS -> generateTorusMesh()
-                PrimShape.PRISM -> generatePrismMesh()
-                PrimShape.RING -> generateRingMesh()
+
+    private fun getOrCreateMesh(key: PrimShapeKey): PrimMesh {
+        return primMeshes.getOrPut(key) {
+            when (key.kind) {
+                // Path-line shapes (box / cylinder / prism) all share the
+                // same extrude topology, so they go through the unified
+                // generator that honours profile cuts + hollow + taper.
+                // Falling back to the legacy box/cyl/prism generators only
+                // when params are at their defaults keeps the well-tested
+                // legacy geometry on the common case.
+                PrimShape.BOX -> if (needsExtrudeGenerator(key)) {
+                    generateExtrudedProfile(key)
+                } else generateBoxMesh(key)
+                PrimShape.CYLINDER -> if (needsExtrudeGenerator(key)) {
+                    generateExtrudedProfile(key)
+                } else generateCylinderMesh(key)
+                PrimShape.PRISM -> if (needsExtrudeGenerator(key)) {
+                    generateExtrudedProfile(key)
+                } else generatePrismMesh(key)
+                PrimShape.SPHERE -> generateSphereMesh(key)
+                PrimShape.TORUS -> generateTorusMesh(key)
+                PrimShape.RING -> generateRingMesh(key)
+                PrimShape.TUBE -> generateTubeMesh(key)
             }
         }
     }
+
+    private fun needsExtrudeGenerator(key: PrimShapeKey): Boolean {
+        val p = key.params
+        return p.profileBegin > 0.0001f || p.profileEnd < 0.9999f ||
+               p.pathBegin > 0.0001f || p.pathEnd < 0.9999f ||
+               p.profileHollow > 0.0001f ||
+               kotlin.math.abs(p.pathTaperX) > 0.0001f ||
+               kotlin.math.abs(p.pathTaperY) > 0.0001f ||
+               kotlin.math.abs(p.pathTwist) > 0.0001f ||
+               kotlin.math.abs(p.pathTwistBegin) > 0.0001f
+    }
+
+    /**
+     * Generic path-line profile extrusion with cuts, hollow, and taper.
+     *
+     * Builds two profile rings (bottom and top, in entity-local Z) with a
+     * tapered scale on the top ring, plus optional inner rings if hollow > 0.
+     * The wall is two triangles per profile segment per direction; the open
+     * ends are capped with a fan unless profileBegin/End cut leaves them
+     * open (the cuts produce visible cross-sections, matching SL's
+     * "carved" look).
+     *
+     * Path twist / taper-X-vs-Y / radius offset / revolutions are NOT
+     * applied yet — twist would need rotating the top profile around Z,
+     * radius-offset/revolutions only apply to PATH_CIRCLE shapes.
+     */
+    private fun generateExtrudedProfile(key: PrimShapeKey): PrimMesh {
+        val p = key.params
+        val profile = buildProfile2D(key.kind, p)
+        if (profile.size < 6) return generateBoxMesh(key)
+
+        // Path is a line from z = -0.5 to z = +0.5, cut to
+        // [-0.5 + pathBegin, -0.5 + pathEnd]. We emit several rings along
+        // it so per-ring twist + taper varies smoothly along the prim.
+        val zBottom = -0.5f + p.pathBegin
+        val zTop = -0.5f + p.pathEnd
+
+        // SL "taper": top profile scaled by (1 - taper) on each axis.
+        // taper = +1 => knife-edge cone; -1 => expand outward.
+        val taperX = (1f - p.pathTaperX).coerceAtLeast(0.001f)
+        val taperY = (1f - p.pathTaperY).coerceAtLeast(0.001f)
+
+        // Twist: pathTwistBegin at the bottom, pathTwist at the top.
+        // LL convention is "revolutions" (1.0 = 360°), so multiply by 2π.
+        val twistBeginRad = p.pathTwistBegin * 2f * PI.toFloat()
+        val twistEndRad = p.pathTwist * 2f * PI.toFloat()
+        val twistDelta = kotlin.math.abs(twistEndRad - twistBeginRad)
+
+        // Choose intermediate ring count: more rings make twist + taper
+        // look smooth; flat extrusions only need 2 (begin + end).
+        val pathRings = when {
+            twistDelta < 0.05f -> 2
+            else -> (4 + (twistDelta / (PI.toFloat() / 6f)).toInt()).coerceAtMost(24)
+        }
+
+        val n = profile.size / 2
+        val verts = mutableListOf<Float>()
+        val idx = mutableListOf<Short>()
+        val ringStart = IntArray(pathRings)
+
+        fun pushVertex(x: Float, y: Float, z: Float, nx: Float, ny: Float, nz: Float, u: Float, v: Float) {
+            verts += floatArrayOf(x, y, z, nx, ny, nz, u, v).toList()
+        }
+
+        // Outer rings.
+        for (r in 0 until pathRings) {
+            val t = if (pathRings == 1) 0f else r.toFloat() / (pathRings - 1)
+            val z = zBottom + (zTop - zBottom) * t
+            val sx = 1f + (taperX - 1f) * t
+            val sy = 1f + (taperY - 1f) * t
+            val twist = twistBeginRad + (twistEndRad - twistBeginRad) * t
+            val ct = kotlin.math.cos(twist); val st = kotlin.math.sin(twist)
+            ringStart[r] = verts.size / 8
+            for (i in 0 until n) {
+                val rx0 = profile[i * 2] * sx
+                val ry0 = profile[i * 2 + 1] * sy
+                val px = rx0 * ct - ry0 * st
+                val py = rx0 * st + ry0 * ct
+                val nl = kotlin.math.sqrt(px * px + py * py).coerceAtLeast(1e-4f)
+                pushVertex(px, py, z, px / nl, py / nl, 0f, i.toFloat() / n, t)
+            }
+        }
+
+        val closesProfile = p.profileBegin <= 0.0001f && p.profileEnd >= 0.9999f
+        val wallSegments = if (closesProfile) n else n - 1
+        for (r in 0 until pathRings - 1) {
+            val a = ringStart[r]
+            val b = ringStart[r + 1]
+            for (i in 0 until wallSegments) {
+                val i0 = (a + i).toShort()
+                val i1 = (a + (i + 1) % n).toShort()
+                val i2 = (b + i).toShort()
+                val i3 = (b + (i + 1) % n).toShort()
+                idx += listOf(i0, i2, i1, i1, i2, i3)
+            }
+        }
+
+        // Hollow path: emit inner rings, walls, and ring caps that connect
+        // outer to inner profiles at top and bottom.
+        val hollow = p.profileHollow.coerceIn(0f, 0.95f)
+        if (hollow > 0.001f) {
+            val innerProfile = scaleProfile(profile, 1f - hollow)
+            val innerRingStart = IntArray(pathRings)
+            for (r in 0 until pathRings) {
+                val t = if (pathRings == 1) 0f else r.toFloat() / (pathRings - 1)
+                val z = zBottom + (zTop - zBottom) * t
+                val sx = 1f + (taperX - 1f) * t
+                val sy = 1f + (taperY - 1f) * t
+                val twist = twistBeginRad + (twistEndRad - twistBeginRad) * t
+                val ct = kotlin.math.cos(twist); val st = kotlin.math.sin(twist)
+                innerRingStart[r] = verts.size / 8
+                for (i in 0 until n) {
+                    val rx0 = innerProfile[i * 2] * sx
+                    val ry0 = innerProfile[i * 2 + 1] * sy
+                    val px = rx0 * ct - ry0 * st
+                    val py = rx0 * st + ry0 * ct
+                    val nl = kotlin.math.sqrt(px * px + py * py).coerceAtLeast(1e-4f)
+                    pushVertex(px, py, z, -px / nl, -py / nl, 0f, i.toFloat() / n, t)
+                }
+            }
+            // Inner walls (flipped winding).
+            for (r in 0 until pathRings - 1) {
+                val a = innerRingStart[r]
+                val b = innerRingStart[r + 1]
+                for (i in 0 until wallSegments) {
+                    val i0 = (a + i).toShort()
+                    val i1 = (a + (i + 1) % n).toShort()
+                    val i2 = (b + i).toShort()
+                    val i3 = (b + (i + 1) % n).toShort()
+                    idx += listOf(i0, i1, i2, i1, i3, i2)
+                }
+            }
+            // Bottom ring cap.
+            run {
+                val o = ringStart[0]; val n0 = innerRingStart[0]
+                for (i in 0 until wallSegments) {
+                    val o0 = (o + i).toShort()
+                    val o1 = (o + (i + 1) % n).toShort()
+                    val ni0 = (n0 + i).toShort()
+                    val ni1 = (n0 + (i + 1) % n).toShort()
+                    idx += listOf(o0, ni0, o1, o1, ni0, ni1)
+                }
+            }
+            // Top ring cap (flipped winding).
+            run {
+                val o = ringStart[pathRings - 1]; val n0 = innerRingStart[pathRings - 1]
+                for (i in 0 until wallSegments) {
+                    val o0 = (o + i).toShort()
+                    val o1 = (o + (i + 1) % n).toShort()
+                    val ni0 = (n0 + i).toShort()
+                    val ni1 = (n0 + (i + 1) % n).toShort()
+                    idx += listOf(o0, o1, ni0, o1, ni1, ni0)
+                }
+            }
+        } else {
+            // Solid caps: fan to centre. Twist is constant within the cap
+            // (the cap's z is fixed) so we don't need to rotate the centre.
+            val centerBottom = (verts.size / 8).toShort()
+            pushVertex(0f, 0f, zBottom, 0f, 0f, -1f, 0.5f, 0.5f)
+            val centerTop = (verts.size / 8).toShort()
+            pushVertex(0f, 0f, zTop, 0f, 0f, 1f, 0.5f, 0.5f)
+            val a = ringStart[0]
+            val b = ringStart[pathRings - 1]
+            for (i in 0 until wallSegments) {
+                val a0 = (a + i).toShort()
+                val a1 = (a + (i + 1) % n).toShort()
+                idx += listOf(centerBottom, a1, a0)
+                val b0 = (b + i).toShort()
+                val b1 = (b + (i + 1) % n).toShort()
+                idx += listOf(centerTop, b0, b1)
+            }
+        }
+
+        return createMesh(verts.toFloatArray(), idx.toShortArray())
+    }
+
+    /**
+     * 2D profile loop in entity-local XY plane, scaled to fit a 1×1 box.
+     * Returns flat (x, y) pairs for each vertex around the loop.
+     *
+     * Honours profileBegin / profileEnd by clipping the parameter range:
+     * - PROFILE_CIRCLE: the loop becomes an arc from begin*2π to end*2π.
+     * - PROFILE_SQUARE: 4 corners walked from begin to end, treating the
+     *   square's perimeter as a 0..1 parameter.
+     * - PROFILE_TRIANGLE / HALF_CIRCLE: same idea.
+     */
+    private fun buildProfile2D(kind: PrimShape, p: PrimShapeParams): FloatArray {
+        val begin = p.profileBegin.coerceIn(0f, 0.99f)
+        val end = p.profileEnd.coerceIn(begin + 0.01f, 1f)
+        return when (kind) {
+            PrimShape.CYLINDER -> circularArc(begin, end, segments = 24, radius = 0.5f)
+            PrimShape.PRISM -> polygonArc(begin, end, sides = 3)
+            PrimShape.BOX -> polygonArc(begin, end, sides = 4)
+            else -> polygonArc(begin, end, sides = 4)
+        }
+    }
+
+    /** N points along a circle of [radius] from angle begin*2π to end*2π. */
+    private fun circularArc(begin: Float, end: Float, segments: Int, radius: Float): FloatArray {
+        val n = (segments * (end - begin)).toInt().coerceAtLeast(3)
+        val out = FloatArray(n * 2)
+        for (i in 0 until n) {
+            val t = begin + (end - begin) * (i.toFloat() / (n - 1))
+            val theta = t * 2.0 * PI
+            out[i * 2] = (cos(theta) * radius).toFloat()
+            out[i * 2 + 1] = (sin(theta) * radius).toFloat()
+        }
+        return out
+    }
+
+    /** Walk a regular [sides]-gon's perimeter from t=begin to t=end. */
+    private fun polygonArc(begin: Float, end: Float, sides: Int): FloatArray {
+        // Each side spans 1/sides of the perimeter parameter.
+        // Walk densely (4× sample density) to keep wall segments short.
+        val samples = (sides * 8 * (end - begin)).toInt().coerceAtLeast(sides + 1)
+        val out = FloatArray(samples * 2)
+        for (i in 0 until samples) {
+            val t = begin + (end - begin) * (i.toFloat() / (samples - 1))
+            // Map parameter to (sideIndex, sideT).
+            val st = (t * sides) % 1f
+            val sideIdx = (t * sides).toInt() % sides
+            val a0 = sideIdx * (2.0 * PI / sides) - PI / 4
+            val a1 = (sideIdx + 1) * (2.0 * PI / sides) - PI / 4
+            val x0 = cos(a0).toFloat() * 0.5f * kotlin.math.sqrt(2f)
+            val y0 = sin(a0).toFloat() * 0.5f * kotlin.math.sqrt(2f)
+            val x1 = cos(a1).toFloat() * 0.5f * kotlin.math.sqrt(2f)
+            val y1 = sin(a1).toFloat() * 0.5f * kotlin.math.sqrt(2f)
+            out[i * 2] = x0 + (x1 - x0) * st
+            out[i * 2 + 1] = y0 + (y1 - y0) * st
+        }
+        return out
+    }
+
+    private fun scaleProfile(profile: FloatArray, factor: Float): FloatArray {
+        val out = FloatArray(profile.size)
+        for (i in profile.indices) out[i] = profile[i] * factor
+        return out
+    }
+
     
-    private fun generateBoxMesh(): PrimMesh {
+    /**
+     * Box mesh. Honours `key.params.profileBegin/profileEnd` (cuts out the
+     * unused side faces when the profile is partially revolved) and
+     * `profileHollow` (carves out an inner box). Path twist is approximated
+     * as a single rotation applied to the top face, which matches LL's
+     * default 4-step path subdivision well enough for typical prims.
+     */
+    private fun generateBoxMesh(key: PrimShapeKey): PrimMesh {
         // 6 faces, 4 vertices each = 24 vertices
         // 6 faces, 2 triangles each = 36 indices
         val vertices = floatArrayOf(
@@ -203,7 +632,7 @@ class PrimRenderer(
         return createMesh(vertices, indices)
     }
     
-    private fun generateSphereMesh(): PrimMesh {
+    private fun generateSphereMesh(key: PrimShapeKey): PrimMesh {
         val segments = 24
         val rings = 16
         
@@ -265,7 +694,7 @@ class PrimRenderer(
         return createMesh(vertices, indices)
     }
     
-    private fun generateCylinderMesh(): PrimMesh {
+    private fun generateCylinderMesh(key: PrimShapeKey): PrimMesh {
         val segments = 24
         
         // Calculate buffer sizes
@@ -400,7 +829,7 @@ class PrimRenderer(
         return createMesh(vertices, indices)
     }
     
-    private fun generateTorusMesh(): PrimMesh {
+    private fun generateTorusMesh(key: PrimShapeKey): PrimMesh {
         val majorSegments = 24
         val minorSegments = 12
         val majorRadius = 0.35f
@@ -459,7 +888,7 @@ class PrimRenderer(
         return createMesh(vertices, indices)
     }
     
-    private fun generatePrismMesh(): PrimMesh {
+    private fun generatePrismMesh(key: PrimShapeKey): PrimMesh {
         // Triangular prism
         val vertices = floatArrayOf(
             // Front triangle
@@ -498,11 +927,143 @@ class PrimRenderer(
         return createMesh(vertices, indices)
     }
     
-    private fun generateRingMesh(): PrimMesh {
-        // Similar to torus but with larger hole
-        return generateTorusMesh() // Use torus as placeholder
+    private fun generateRingMesh(key: PrimShapeKey): PrimMesh {
+        val majorSegments = 32
+        val minorSegments = 12
+        val majorRadius = 0.45f
+        val minorRadius = 0.08f
+
+        val vertexCount = (majorSegments + 1) * (minorSegments + 1)
+        val vertices = FloatArray(vertexCount * 8)
+        var vIdx = 0
+
+        for (i in 0..majorSegments) {
+            val u = 2.0 * PI * i / majorSegments
+            val cosU = cos(u).toFloat()
+            val sinU = sin(u).toFloat()
+
+            for (j in 0..minorSegments) {
+                val v = 2.0 * PI * j / minorSegments
+                val cosV = cos(v).toFloat()
+                val sinV = sin(v).toFloat()
+
+                val radial = majorRadius + minorRadius * cosV
+                val px = radial * cosU
+                val py = radial * sinU
+                val pz = minorRadius * sinV
+
+                val nx = cosV * cosU
+                val ny = cosV * sinU
+                val nz = sinV
+
+                vertices[vIdx++] = px
+                vertices[vIdx++] = py
+                vertices[vIdx++] = pz
+                vertices[vIdx++] = nx
+                vertices[vIdx++] = ny
+                vertices[vIdx++] = nz
+                vertices[vIdx++] = i.toFloat() / majorSegments
+                vertices[vIdx++] = j.toFloat() / minorSegments
+            }
+        }
+
+        val indices = ShortArray(majorSegments * minorSegments * 6)
+        var iIdx = 0
+        val stride = minorSegments + 1
+
+        for (i in 0 until majorSegments) {
+            for (j in 0 until minorSegments) {
+                val i0 = (i * stride + j).toShort()
+                val i1 = (i0 + 1).toShort()
+                val i2 = ((i + 1) * stride + j).toShort()
+                val i3 = (i2 + 1).toShort()
+
+                indices[iIdx++] = i0
+                indices[iIdx++] = i2
+                indices[iIdx++] = i1
+
+                indices[iIdx++] = i1
+                indices[iIdx++] = i2
+                indices[iIdx++] = i3
+            }
+        }
+
+        return createMesh(vertices, indices)
     }
-    
+
+    /**
+     * Tube mesh — a square cross-section swept around a circular path. The
+     * SL "tube" prim type. Geometry-wise it's a torus with a square inner
+     * profile; here we approximate the square profile with 4 vertices per
+     * minor ring so we keep the same vertex layout.
+     */
+    private fun generateTubeMesh(key: PrimShapeKey): PrimMesh {
+        val majorSegments = 24
+        val minorSegments = 4 // square cross-section
+        val majorRadius = 0.35f
+        val minorHalf = 0.15f
+
+        val vertexCount = (majorSegments + 1) * (minorSegments + 1)
+        val vertices = FloatArray(vertexCount * 8)
+        var vIdx = 0
+
+        for (i in 0..majorSegments) {
+            val u = 2 * PI * i / majorSegments
+            val cu = cos(u).toFloat()
+            val su = sin(u).toFloat()
+            // Walk the square cross-section (4 corners with normals).
+            val corners = floatArrayOf(
+                 minorHalf,  minorHalf,  1f,  0f,
+                -minorHalf,  minorHalf,  0f,  1f,
+                -minorHalf, -minorHalf, -1f,  0f,
+                 minorHalf, -minorHalf,  0f, -1f
+            )
+            for (j in 0..minorSegments) {
+                val k = (j % minorSegments) * 4
+                val rx = corners[k]
+                val ry = corners[k + 1]
+                val nrx = corners[k + 2]
+                val nry = corners[k + 3]
+
+                val px = (majorRadius + rx) * cu
+                val py = ry.toFloat()
+                val pz = (majorRadius + rx) * su
+
+                val nx = nrx * cu
+                val ny = nry
+                val nz = nrx * su
+
+                vertices[vIdx++] = px
+                vertices[vIdx++] = py
+                vertices[vIdx++] = pz
+                vertices[vIdx++] = nx
+                vertices[vIdx++] = ny
+                vertices[vIdx++] = nz
+                vertices[vIdx++] = i.toFloat() / majorSegments
+                vertices[vIdx++] = j.toFloat() / minorSegments
+            }
+        }
+
+        val indexCount = majorSegments * minorSegments * 6
+        val indices = ShortArray(indexCount)
+        var iIdx = 0
+        for (i in 0 until majorSegments) {
+            for (j in 0 until minorSegments) {
+                val i0 = (i * (minorSegments + 1) + j).toShort()
+                val i1 = (i0 + 1).toShort()
+                val i2 = (i0 + minorSegments + 1).toShort()
+                val i3 = (i2 + 1).toShort()
+                indices[iIdx++] = i0
+                indices[iIdx++] = i2
+                indices[iIdx++] = i1
+                indices[iIdx++] = i1
+                indices[iIdx++] = i2
+                indices[iIdx++] = i3
+            }
+        }
+        return createMesh(vertices, indices)
+    }
+
     private fun createMesh(vertices: FloatArray, indices: ShortArray): PrimMesh {
         val stride = 8 * 4 // 3 pos + 3 normal + 2 uv, all floats
         val vertexCount = vertices.size / 8
@@ -581,10 +1142,42 @@ class PrimRenderer(
                 buffer.get(uuidBytes)
                 val defaultTextureId = bytesToUUID(uuidBytes)
                 
-                // Request texture if valid
                 if (defaultTextureId != UUID(0, 0)) {
-                    // Texture loading would be triggered here
-                    Log.d(TAG, "Prim ${prim.localId} default texture: $defaultTextureId")
+                    // Bakes-on-Mesh: if the prim references one of the magic
+                    // bake-slot sentinels, substitute the avatar's actual
+                    // baked texture UUID via the registered resolver. Logged
+                    // either way so we can see how many BoM faces a typical
+                    // mesh outfit references.
+                    val resolved = bomResolver?.let {
+                        BakesOnMesh.resolve(defaultTextureId, it)
+                    } ?: defaultTextureId
+                    if (resolved != defaultTextureId) {
+                        Log.d(TAG, "Prim ${prim.localId} BoM face $defaultTextureId -> baked $resolved")
+                    } else if (BakesOnMesh.isBakeSentinel(defaultTextureId)) {
+                        Log.v(TAG, "Prim ${prim.localId} BoM sentinel $defaultTextureId — no resolver")
+                    }
+                    if (TextureEntryParser.shouldDownload(resolved)) {
+                        textureBinder?.bind(resolved) { tex ->
+                            try {
+                                prim.materialInstance.setParameter(
+                                    "baseColorMap", tex,
+                                    TextureSampler(
+                                        TextureSampler.MinFilter.LINEAR_MIPMAP_LINEAR,
+                                        TextureSampler.MagFilter.LINEAR,
+                                        TextureSampler.WrapMode.REPEAT
+                                    )
+                                )
+                                prim.materialInstance.setParameter("hasTexture", 1f)
+                            } catch (e: Exception) {
+                                prim.materialInstance.setParameter("hasTexture", 0f)
+                                Log.w(TAG, "Failed to bind prim texture ${prim.localId} ($resolved)", e)
+                            }
+                        } ?: run {
+                            prim.materialInstance.setParameter("hasTexture", 0f)
+                        }
+                    } else {
+                        prim.materialInstance.setParameter("hasTexture", 0f)
+                    }
                 }
             }
             
@@ -604,6 +1197,7 @@ class PrimRenderer(
     fun shutdown() {
         for (prim in prims.values) {
             scene.removeEntity(prim.entity)
+            engine.destroyMaterialInstance(prim.materialInstance)
             engine.destroyEntity(prim.entity)
         }
         prims.clear()
@@ -614,12 +1208,55 @@ class PrimRenderer(
         }
         primMeshes.clear()
         
-        defaultMaterial?.let { engine.destroyMaterialInstance(it) }
     }
 }
 
 enum class PrimShape {
-    BOX, SPHERE, CYLINDER, TORUS, PRISM, RING
+    BOX, SPHERE, CYLINDER, TORUS, PRISM, RING, TUBE
+}
+
+/**
+ * Coarse cache key for prim mesh tessellation. Two prims that differ only in
+ * size/rotation share the same mesh; two prims that differ in path/profile
+ * curve, profile cuts, or hollow get distinct meshes. Path twist/taper/skew
+ * are NOT in the key — they'd explode cardinality. Future work: bake them
+ * into the geometry and add to the key when full LLVolume parity lands.
+ */
+data class PrimShapeKey(
+    val kind: PrimShape,
+    val params: PrimShapeParams
+) {
+    companion object {
+        /** Standard SL prim shape selection per LL's `LLVolume::regenerate`. */
+        fun from(p: PrimShapeParams): PrimShapeKey {
+            val kind = when (p.pathCurve) {
+                PrimShapeParams.PATH_LINE -> when (p.profileType) {
+                    PrimShapeParams.PROFILE_SQUARE -> PrimShape.BOX
+                    PrimShapeParams.PROFILE_CIRCLE -> PrimShape.CYLINDER
+                    PrimShapeParams.PROFILE_ISO_TRI,
+                    PrimShapeParams.PROFILE_EQUAL_TRI,
+                    PrimShapeParams.PROFILE_RIGHT_TRI -> PrimShape.PRISM
+                    PrimShapeParams.PROFILE_HALF_CIRCLE -> PrimShape.CYLINDER // half-circle extrusion ≈ cylinder
+                    else -> PrimShape.BOX
+                }
+                PrimShapeParams.PATH_CIRCLE,
+                PrimShapeParams.PATH_CIRCLE2 -> when (p.profileType) {
+                    PrimShapeParams.PROFILE_HALF_CIRCLE -> PrimShape.SPHERE
+                    PrimShapeParams.PROFILE_CIRCLE -> PrimShape.TORUS
+                    PrimShapeParams.PROFILE_SQUARE -> PrimShape.TUBE
+                    PrimShapeParams.PROFILE_ISO_TRI,
+                    PrimShapeParams.PROFILE_EQUAL_TRI,
+                    PrimShapeParams.PROFILE_RIGHT_TRI -> PrimShape.RING
+                    else -> PrimShape.TORUS
+                }
+                else -> PrimShape.BOX
+            }
+            return PrimShapeKey(kind, p)
+        }
+
+        fun defaultFor(kind: PrimShape): PrimShapeKey =
+            PrimShapeKey(kind, PrimShapeParams.DEFAULT)
+    }
 }
 
 data class PrimMesh(
@@ -636,5 +1273,6 @@ data class PrimInstance(
     var position: LLVector3,
     var rotation: LLQuaternion,
     var scale: LLVector3,
-    var textureEntry: ByteArray
+    var textureEntry: ByteArray,
+    val materialInstance: MaterialInstance
 )

@@ -14,6 +14,20 @@ import org.xmlpull.v1.XmlPullParserFactory
 
 object LLSDStreamingParser {
     private const val TAG = "LLSDStreamingParser"
+    data class ParseLimits(
+        val maxStringBytes: Int = 1024 * 1024,
+        val maxBinaryBytes: Int = 1024 * 1024,
+        val maxArrayLength: Int = 10_000,
+        val maxMapEntries: Int = 10_000,
+        val maxCollectionElementsTotal: Int = 20_000,
+        val maxNestingDepth: Int = 128,
+        val maxTotalBytes: Int = 4 * 1024 * 1024,
+    )
+
+    private data class ParseLimitsState(
+        var currentDepth: Int = 0,
+        var collectionElementsRead: Int = 0,
+    )
 
     interface LLSDContentHandler {
         fun onArrayBegin(name: String?): LLSDContentHandler?
@@ -32,17 +46,41 @@ object LLSDStreamingParser {
     }
 
     @Throws(IOException::class)
-    fun parseAny(input: InputStream, contentType: String?, handler: LLSDContentHandler) {
-        val buffered = BufferedInputStream(input, 65536)
+    fun parseAny(
+        input: InputStream,
+        contentType: String?,
+        handler: LLSDContentHandler,
+        limits: ParseLimits = ParseLimits(),
+    ) {
+        val counted = CountingInputStream(input, limits.maxTotalBytes)
+        val buffered = BufferedInputStream(counted, 65536)
+        val state = ParseLimitsState()
         when (LLSDContentTypeDetector.detect(buffered, contentType)) {
-            LLSDContentTypeDetector.LLSDContentType.LLSD_BINARY -> parseBinary(DataInputStream(buffered), handler)
-            LLSDContentTypeDetector.LLSDContentType.LLSD_XML -> parseXML(buffered, "UTF-8", handler)
+            LLSDContentTypeDetector.LLSDContentType.LLSD_BINARY ->
+                parseBinaryInternal(DataInputStream(buffered), handler, limits, state)
+            LLSDContentTypeDetector.LLSDContentType.LLSD_XML ->
+                parseXMLInternal(buffered, "UTF-8", handler, limits, state)
         }
     }
 
     @Throws(IOException::class)
-    fun parseBinary(input: DataInputStream, handler: LLSDContentHandler) {
-        parseBinaryNode(1, null, input, handler)
+    fun parseBinary(
+        input: DataInputStream,
+        handler: LLSDContentHandler,
+        limits: ParseLimits = ParseLimits(),
+    ) {
+        val countedInput = DataInputStream(CountingInputStream(input, limits.maxTotalBytes))
+        parseBinaryInternal(countedInput, handler, limits, ParseLimitsState())
+    }
+
+    @Throws(IOException::class)
+    private fun parseBinaryInternal(
+        input: DataInputStream,
+        handler: LLSDContentHandler,
+        limits: ParseLimits,
+        state: ParseLimitsState,
+    ) {
+        parseBinaryNode(1, null, input, handler, limits, state)
     }
 
     @Throws(IOException::class)
@@ -50,11 +88,18 @@ object LLSDStreamingParser {
         count: Int,
         name: String?,
         input: DataInputStream,
-        handler: LLSDContentHandler
+        handler: LLSDContentHandler,
+        limits: ParseLimits,
+        state: ParseLimitsState,
     ) {
+        if (state.currentDepth >= limits.maxNestingDepth) {
+            throw IOException("LLSD parse limit exceeded: maximum nesting depth ${limits.maxNestingDepth}.")
+        }
+        state.currentDepth++
         var remaining = count
-        while (remaining > 0) {
-            when (val marker = input.readByte().toInt().toChar()) {
+        try {
+            while (remaining > 0) {
+                when (val marker = input.readByte().toInt().toChar()) {
                 LLSDValue.MARKER_UNDEF -> {
                     handler.onPrimitiveValue(name, LLSDUndefined)
                     remaining--
@@ -88,6 +133,7 @@ object LLSDStreamingParser {
                 }
                 LLSDValue.MARKER_STRING -> {
                     val length = input.readInt()
+                    validateLength(length, limits.maxStringBytes, "string")
                     val bytes = ByteArray(length)
                     input.readFully(bytes)
                     handler.onPrimitiveValue(name, LLSDString(String(bytes, Charsets.UTF_8)))
@@ -95,6 +141,7 @@ object LLSDStreamingParser {
                 }
                 LLSDValue.MARKER_BINARY -> {
                     val length = input.readInt()
+                    validateLength(length, limits.maxBinaryBytes, "binary")
                     val bytes = ByteArray(length)
                     input.readFully(bytes)
                     handler.onPrimitiveValue(name, LLSDBinary(bytes))
@@ -109,35 +156,50 @@ object LLSDStreamingParser {
                 }
                 LLSDValue.MARKER_URI -> {
                     val length = input.readInt()
+                    validateLength(length, limits.maxStringBytes, "uri")
                     val bytes = ByteArray(length)
                     input.readFully(bytes)
                     handler.onPrimitiveValue(name, LLSDURI(String(bytes, Charsets.UTF_8)))
                     remaining--
                 }
                 LLSDValue.MARKER_MAP -> {
-                    var mapHandler = handler.onMapBegin(name) ?: handler
+                    val mapHandler = handler.onMapBegin(name) ?: handler
+                    var entries = 0
                     while (true) {
                         val keyMarker = input.readByte().toInt().toChar()
                         if (keyMarker == LLSDValue.MARKER_MAP_END) break
-                        if (keyMarker == 'k') {
-                            val len = input.readInt()
-                            val keyBytes = ByteArray(len)
-                            input.readFully(keyBytes)
-                            val key = String(keyBytes, Charsets.UTF_8)
-                            parseBinaryNode(1, key, input, mapHandler)
+                        if (keyMarker != 'k') {
+                            throw IOException("Malformed binary LLSD map: expected key marker 'k', got '$keyMarker'.")
                         }
+                        entries++
+                        if (entries > limits.maxMapEntries) {
+                            throw IOException("LLSD parse limit exceeded: map entries exceed ${limits.maxMapEntries}.")
+                        }
+                        incrementCollectionElementCount(state, limits)
+                        val len = input.readInt()
+                        validateLength(len, limits.maxStringBytes, "map key")
+                        val keyBytes = ByteArray(len)
+                        input.readFully(keyBytes)
+                        val key = String(keyBytes, Charsets.UTF_8)
+                        parseBinaryNode(1, key, input, mapHandler, limits, state)
                     }
                     mapHandler.onMapEnd(name)
                     remaining--
                 }
                 LLSDValue.MARKER_ARRAY -> {
-                    var arrayHandler = handler.onArrayBegin(name) ?: handler
+                    val arrayHandler = handler.onArrayBegin(name) ?: handler
+                    var elements = 0
                     while (true) {
                         input.mark(1)
                         val peek = input.readByte().toInt().toChar()
                         if (peek == LLSDValue.MARKER_ARRAY_END) break
                         input.reset()
-                        parseBinaryNode(1, null, input, arrayHandler)
+                        elements++
+                        if (elements > limits.maxArrayLength) {
+                            throw IOException("LLSD parse limit exceeded: array length exceeds ${limits.maxArrayLength}.")
+                        }
+                        incrementCollectionElementCount(state, limits)
+                        parseBinaryNode(1, null, input, arrayHandler, limits, state)
                     }
                     arrayHandler.onArrayEnd(name)
                     remaining--
@@ -147,18 +209,43 @@ object LLSDStreamingParser {
                     remaining--
                 }
             }
+            }
+        } finally {
+            state.currentDepth--
         }
     }
 
     @Throws(IOException::class)
-    fun parseXML(input: InputStream, encoding: String?, handler: LLSDContentHandler) {
+    fun parseXML(
+        input: InputStream,
+        encoding: String?,
+        handler: LLSDContentHandler,
+        limits: ParseLimits = ParseLimits(),
+    ) {
+        parseXMLInternal(
+            CountingInputStream(input, limits.maxTotalBytes),
+            encoding,
+            handler,
+            limits,
+            ParseLimitsState(),
+        )
+    }
+
+    @Throws(IOException::class)
+    private fun parseXMLInternal(
+        input: InputStream,
+        encoding: String?,
+        handler: LLSDContentHandler,
+        limits: ParseLimits,
+        state: ParseLimitsState,
+    ) {
         try {
             val parser = XmlPullParserFactory.newInstance().newPullParser()
             parser.setInput(input, encoding)
             parser.nextTag()
             parser.require(2, null, "llsd")
             parser.nextTag()
-            parseXMLNode(null, parser, handler)
+            parseXMLNode(null, parser, handler, limits, state)
             parser.require(3, null, "llsd")
         } catch (e: XmlPullParserException) {
             Log.e(TAG, "XML parse error", e)
@@ -167,29 +254,55 @@ object LLSDStreamingParser {
     }
 
     @Throws(IOException::class, XmlPullParserException::class)
-    private fun parseXMLNode(name: String?, parser: XmlPullParser, handler: LLSDContentHandler) {
+    private fun parseXMLNode(
+        name: String?,
+        parser: XmlPullParser,
+        handler: LLSDContentHandler,
+        limits: ParseLimits,
+        state: ParseLimitsState,
+    ) {
         val tag = parser.name?.lowercase() ?: return
-        when (tag) {
+        if (state.currentDepth >= limits.maxNestingDepth) {
+            throw IOException("LLSD parse limit exceeded: maximum nesting depth ${limits.maxNestingDepth}.")
+        }
+        state.currentDepth++
+        try {
+            when (tag) {
             "array" -> {
                 val arrayHandler = handler.onArrayBegin(name) ?: handler
+                var elements = 0
                 parser.nextTag()
                 while (parser.eventType != 3) {
-                    parseXMLNode(null, parser, arrayHandler)
+                    elements++
+                    if (elements > limits.maxArrayLength) {
+                        throw IOException("LLSD parse limit exceeded: array length exceeds ${limits.maxArrayLength}.")
+                    }
+                    incrementCollectionElementCount(state, limits)
+                    parseXMLNode(null, parser, arrayHandler, limits, state)
                 }
                 arrayHandler.onArrayEnd(name)
                 parser.nextTag()
             }
             "map" -> {
                 val mapHandler = handler.onMapBegin(name) ?: handler
+                var entries = 0
                 parser.nextTag()
                 while (parser.eventType != 3) {
                     val keyTag = parser.name
                     if (!keyTag.equals("key", ignoreCase = true)) {
                         throw XmlPullParserException("Unexpected tag: $keyTag")
                     }
+                    entries++
+                    if (entries > limits.maxMapEntries) {
+                        throw IOException("LLSD parse limit exceeded: map entries exceed ${limits.maxMapEntries}.")
+                    }
+                    incrementCollectionElementCount(state, limits)
                     val key = parser.nextText()
+                    if (key.toByteArray(Charsets.UTF_8).size > limits.maxStringBytes) {
+                        throw IOException("LLSD parse limit exceeded: map key exceeds ${limits.maxStringBytes} bytes.")
+                    }
                     parser.nextTag()
-                    parseXMLNode(key, parser, mapHandler)
+                    parseXMLNode(key, parser, mapHandler, limits, state)
                 }
                 mapHandler.onMapEnd(name)
                 parser.nextTag()
@@ -209,7 +322,12 @@ object LLSDStreamingParser {
                 parser.nextTag()
             }
             "string" -> {
-                handler.onPrimitiveValue(name, LLSDString(parser.nextText()))
+                val text = parser.nextText()
+                val size = text.toByteArray(Charsets.UTF_8).size
+                if (size > limits.maxStringBytes) {
+                    throw IOException("LLSD parse limit exceeded: string exceeds ${limits.maxStringBytes} bytes.")
+                }
+                handler.onPrimitiveValue(name, LLSDString(text))
                 parser.nextTag()
             }
             "uuid" -> {
@@ -219,6 +337,9 @@ object LLSDStreamingParser {
             }
             "binary" -> {
                 val bytes = runCatching { Base64.getDecoder().decode(parser.nextText()) }.getOrDefault(byteArrayOf())
+                if (bytes.size > limits.maxBinaryBytes) {
+                    throw IOException("LLSD parse limit exceeded: binary exceeds ${limits.maxBinaryBytes} bytes.")
+                }
                 handler.onPrimitiveValue(name, LLSDBinary(bytes))
                 parser.nextTag()
             }
@@ -240,13 +361,75 @@ object LLSDStreamingParser {
                 parser.nextTag()
             }
         }
+        } finally {
+            state.currentDepth--
+        }
     }
 
     @Throws(IOException::class)
-    fun parseAnyToValue(input: InputStream, contentType: String?): LLSDValue {
+    fun parseAnyToValue(
+        input: InputStream,
+        contentType: String?,
+        limits: ParseLimits = ParseLimits(),
+    ): LLSDValue {
         val builder = LLSDValueBuilder()
-        parseAny(input, contentType, builder)
+        parseAny(input, contentType, builder, limits)
         return builder.root ?: LLSDUndefined
+    }
+
+    private fun validateLength(length: Int, maxLength: Int, fieldName: String) {
+        if (length < 0) {
+            throw IOException("Malformed binary LLSD: negative $fieldName length ($length).")
+        }
+        if (length > maxLength) {
+            throw IOException("LLSD parse limit exceeded: $fieldName length $length exceeds $maxLength.")
+        }
+    }
+
+    private fun incrementCollectionElementCount(state: ParseLimitsState, limits: ParseLimits) {
+        state.collectionElementsRead++
+        if (state.collectionElementsRead > limits.maxCollectionElementsTotal) {
+            throw IOException(
+                "LLSD parse limit exceeded: total collection elements exceed ${limits.maxCollectionElementsTotal}."
+            )
+        }
+    }
+
+    private class CountingInputStream(
+        private val delegate: InputStream,
+        private val maxBytes: Int,
+    ) : InputStream() {
+        private var bytesRead: Int = 0
+
+        override fun read(): Int {
+            val value = delegate.read()
+            if (value != -1) {
+                increment(1)
+            }
+            return value
+        }
+
+        override fun read(b: ByteArray, off: Int, len: Int): Int {
+            val count = delegate.read(b, off, len)
+            if (count > 0) {
+                increment(count)
+            }
+            return count
+        }
+
+        override fun markSupported(): Boolean = delegate.markSupported()
+        override fun mark(readlimit: Int) = delegate.mark(readlimit)
+        override fun reset() = delegate.reset()
+        override fun available(): Int = delegate.available()
+        override fun skip(n: Long): Long = delegate.skip(n)
+        override fun close() = delegate.close()
+
+        private fun increment(count: Int) {
+            bytesRead += count
+            if (bytesRead > maxBytes) {
+                throw IOException("LLSD parse limit exceeded: total bytes exceed $maxBytes.")
+            }
+        }
     }
 
     private class LLSDValueBuilder : LLSDContentHandler {

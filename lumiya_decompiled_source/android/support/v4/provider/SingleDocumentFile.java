@@ -28,12 +28,12 @@ class SingleDocumentFile extends DocumentFile {
 
     @Override // android.support.v4.provider.DocumentFile
     public DocumentFile createDirectory(String str) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.support.v4.provider.DocumentFile
     public DocumentFile createFile(String str, String str2) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.support.v4.provider.DocumentFile
@@ -88,11 +88,11 @@ class SingleDocumentFile extends DocumentFile {
 
     @Override // android.support.v4.provider.DocumentFile
     public DocumentFile[] listFiles() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.support.v4.provider.DocumentFile
     public boolean renameTo(String str) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 }

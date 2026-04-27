@@ -13,8 +13,14 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * Adapter for displaying chat messages in a RecyclerView
+ * Adapter for displaying chat messages in a RecyclerView.
+ *
+ * Legacy entry point retained during Compose migration.
+ * Removal target: 2026.09.
  */
+@Deprecated(
+    message = "Legacy RecyclerView adapter. Use ChatScreen list composables."
+)
 class ChatAdapter(
     private val onMessageClick: (ChatMessage) -> Unit = {}
 ) : ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(DiffCallback()) {

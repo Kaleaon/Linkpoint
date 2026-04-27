@@ -12,39 +12,39 @@ public abstract class JsonElement {
     public abstract JsonElement deepCopy();
 
     public BigDecimal getAsBigDecimal() {
-        throw new UnsupportedOperationException(getClass().getSimpleName());
+        throw new IllegalStateException(getClass().getSimpleName());
     }
 
     public BigInteger getAsBigInteger() {
-        throw new UnsupportedOperationException(getClass().getSimpleName());
+        throw new IllegalStateException(getClass().getSimpleName());
     }
 
     public boolean getAsBoolean() {
-        throw new UnsupportedOperationException(getClass().getSimpleName());
+        throw new IllegalStateException(getClass().getSimpleName());
     }
 
     Boolean getAsBooleanWrapper() {
-        throw new UnsupportedOperationException(getClass().getSimpleName());
+        throw new IllegalStateException(getClass().getSimpleName());
     }
 
     public byte getAsByte() {
-        throw new UnsupportedOperationException(getClass().getSimpleName());
+        throw new IllegalStateException(getClass().getSimpleName());
     }
 
     public char getAsCharacter() {
-        throw new UnsupportedOperationException(getClass().getSimpleName());
+        throw new IllegalStateException(getClass().getSimpleName());
     }
 
     public double getAsDouble() {
-        throw new UnsupportedOperationException(getClass().getSimpleName());
+        throw new IllegalStateException(getClass().getSimpleName());
     }
 
     public float getAsFloat() {
-        throw new UnsupportedOperationException(getClass().getSimpleName());
+        throw new IllegalStateException(getClass().getSimpleName());
     }
 
     public int getAsInt() {
-        throw new UnsupportedOperationException(getClass().getSimpleName());
+        throw new IllegalStateException(getClass().getSimpleName());
     }
 
     public JsonArray getAsJsonArray() {
@@ -76,19 +76,19 @@ public abstract class JsonElement {
     }
 
     public long getAsLong() {
-        throw new UnsupportedOperationException(getClass().getSimpleName());
+        throw new IllegalStateException(getClass().getSimpleName());
     }
 
     public Number getAsNumber() {
-        throw new UnsupportedOperationException(getClass().getSimpleName());
+        throw new IllegalStateException(getClass().getSimpleName());
     }
 
     public short getAsShort() {
-        throw new UnsupportedOperationException(getClass().getSimpleName());
+        throw new IllegalStateException(getClass().getSimpleName());
     }
 
     public String getAsString() {
-        throw new UnsupportedOperationException(getClass().getSimpleName());
+        throw new IllegalStateException(getClass().getSimpleName());
     }
 
     public boolean isJsonArray() {

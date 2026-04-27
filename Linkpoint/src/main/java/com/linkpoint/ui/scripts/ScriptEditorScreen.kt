@@ -20,6 +20,8 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -31,6 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -66,7 +69,7 @@ import java.util.UUID
  * - Toggle running state (for object scripts)
  * - Dark theme optimized for code editing
  * 
- * Based on Firestorm/Lumiya script editor design.
+ * Based on Firestorm/reference viewer script editor design.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,6 +80,7 @@ fun ScriptEditorScreen(
     objectId: UUID?,
     isReadOnly: Boolean = true,
     onLoadScript: suspend (UUID) -> String?,
+    onSaveScript: suspend (itemId: UUID, objectId: UUID?, scriptText: String) -> Pair<Boolean, String?>,
     onResetScript: suspend (UUID, UUID) -> Boolean,
     onToggleRunning: suspend (UUID, UUID) -> Pair<Boolean, Boolean>?, // Returns (success, newState)
     onNavigateBack: () -> Unit,
@@ -91,6 +95,13 @@ fun ScriptEditorScreen(
     var isLoading by remember { mutableStateOf(true) }
     var isRunning by remember { mutableStateOf(false) }
     var showMenu by remember { mutableStateOf(false) }
+    var originalScriptContent by remember { mutableStateOf("") }
+    var hasUnsavedChanges by remember { mutableStateOf(false) }
+    var showUnsavedDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(scriptContent, isReadOnly) {
+        hasUnsavedChanges = !isReadOnly && scriptContent != originalScriptContent
+    }
     
     // Load script on mount
     LaunchedEffect(assetId) {
@@ -100,16 +111,62 @@ fun ScriptEditorScreen(
             if (content != null) {
                 scriptContent = content
                 highlightedContent = LSLLanguage.highlight(content)
+                originalScriptContent = content
             } else {
                 scriptContent = "// Failed to load script\n// Asset ID: $assetId"
                 highlightedContent = AnnotatedString(scriptContent)
+                originalScriptContent = scriptContent
             }
             isLoading = false
         } else {
             scriptContent = LSLLanguage.DEFAULT_SCRIPT
             highlightedContent = LSLLanguage.highlight(scriptContent)
+            originalScriptContent = scriptContent
             isLoading = false
         }
+    }
+
+    fun handleBack() {
+        if (hasUnsavedChanges) {
+            showUnsavedDialog = true
+        } else {
+            onNavigateBack()
+        }
+    }
+
+    if (showUnsavedDialog) {
+        AlertDialog(
+            onDismissRequest = { showUnsavedDialog = false },
+            title = { Text("Unsaved Changes") },
+            text = { Text("You have unsaved script changes. Save before closing?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showUnsavedDialog = false
+                    scope.launch {
+                        if (itemId != null) {
+                            val (success, message) = onSaveScript(itemId, objectId, scriptContent)
+                            if (success) {
+                                originalScriptContent = scriptContent
+                                hasUnsavedChanges = false
+                            } else {
+                                snackbarHostState.showSnackbar(message ?: "Failed to save script")
+                                return@launch
+                            }
+                        }
+                        onNavigateBack()
+                    }
+                }) { Text("Save") }
+            },
+            dismissButton = {
+                Row {
+                    TextButton(onClick = { showUnsavedDialog = false }) { Text("Cancel") }
+                    TextButton(onClick = {
+                        showUnsavedDialog = false
+                        onNavigateBack()
+                    }) { Text("Discard") }
+                }
+            }
+        )
     }
     
     Scaffold(
@@ -119,14 +176,18 @@ fun ScriptEditorScreen(
                     Column {
                         Text(scriptName, maxLines = 1)
                         Text(
-                            text = if (isReadOnly) "Read Only" else "Editing",
+                            text = when {
+                                hasUnsavedChanges -> "Unsaved changes"
+                                isReadOnly -> "Read Only"
+                                else -> "Editing"
+                            },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = { handleBack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -141,6 +202,26 @@ fun ScriptEditorScreen(
                         Icon(Icons.Default.ContentCopy, contentDescription = "Copy")
                     }
                     
+                    if (!isReadOnly && itemId != null) {
+                        IconButton(
+                            onClick = {
+                                scope.launch {
+                                    val (success, message) = onSaveScript(itemId, objectId, scriptContent)
+                                    if (success) {
+                                        originalScriptContent = scriptContent
+                                        hasUnsavedChanges = false
+                                        snackbarHostState.showSnackbar("Script saved")
+                                    } else {
+                                        snackbarHostState.showSnackbar(message ?: "Failed to save script")
+                                    }
+                                }
+                            },
+                            enabled = hasUnsavedChanges
+                        ) {
+                            Icon(Icons.Default.Save, contentDescription = "Save")
+                        }
+                    }
+
                     // More options menu
                     if (objectId != null && itemId != null) {
                         IconButton(onClick = { showMenu = true }) {
@@ -340,6 +421,7 @@ fun ScriptEditorScreenPreview() {
         objectId = null,
         isReadOnly = true,
         onLoadScript = { null },
+        onSaveScript = { _, _, _ -> Pair(true, null) },
         onResetScript = { _, _ -> true },
         onToggleRunning = { _, _ -> Pair(true, true) },
         onNavigateBack = {}

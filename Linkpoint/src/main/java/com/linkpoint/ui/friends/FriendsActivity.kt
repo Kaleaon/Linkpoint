@@ -8,7 +8,13 @@ import com.linkpoint.R
 /**
  * Activity for managing friends list.
  * Hosts FriendsListFragment and provides navigation.
+ *
+ * Legacy entry point retained during Compose migration.
+ * Removal target: 2026.09.
  */
+@Deprecated(
+    message = "Legacy View/Fragment entry point. Use FriendsScreen-based Compose navigation."
+)
 class FriendsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

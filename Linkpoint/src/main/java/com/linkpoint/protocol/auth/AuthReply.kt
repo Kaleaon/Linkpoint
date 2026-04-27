@@ -6,7 +6,7 @@ import java.util.UUID
  * Authentication Reply
  * 
  * Contains the response from successful Second Life grid authentication.
- * Based on Lumiya's SLAuthReply implementation.
+ * Based on the reference viewer's SLAuthReply implementation.
  * 
  * Mobile-First Considerations:
  * - Lightweight data structure

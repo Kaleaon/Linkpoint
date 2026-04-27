@@ -5,6 +5,7 @@ import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
 import android.util.Log
+import com.linkpoint.protocol.capabilities.CapabilityRequester
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.world.ParcelInfo
 import kotlinx.coroutines.*
@@ -23,12 +24,15 @@ import java.util.concurrent.ConcurrentHashMap
  * - Volume control per media type
  * - Auto-play based on parcel settings
  * 
- * Based on Lumiya's media implementation.
+ * Based on the reference viewer's media implementation.
  */
 class MediaManager(
     private val context: Context,
-    private val udpConnection: UDPConnectionFixed
+    private val udpConnection: UDPConnectionFixed,
+    private val capabilityRequester: CapabilityRequester? = null
 ) {
+    private val mediaNavigationService: InWorldMediaNavigationService? =
+        capabilityRequester?.let { InWorldMediaNavigationService(it) }
     companion object {
         private const val TAG = "MediaManager"
         
@@ -264,6 +268,26 @@ class MediaManager(
         Log.d(TAG, "Set MOAP on object $objectId face $face: $url")
     }
     
+
+
+    /**
+     * Navigate an in-world media surface via ObjectMediaNavigate capability.
+     */
+    suspend fun navigateMoapSurface(objectId: UUID, face: Int, url: String): Boolean {
+        return mediaNavigationService?.navigateSurface(objectId, face, url) ?: false
+    }
+
+    /**
+     * Fire-and-forget helper for UI action handlers.
+     */
+    fun navigateMoapSurfaceAsync(objectId: UUID, face: Int, url: String) {
+        scope.launch {
+            val ok = navigateMoapSurface(objectId, face, url)
+            if (!ok) {
+                Log.w(TAG, "ObjectMediaNavigate request failed for object=$objectId face=$face")
+            }
+        }
+    }
     /**
      * Get MOAP surface for object.
      */

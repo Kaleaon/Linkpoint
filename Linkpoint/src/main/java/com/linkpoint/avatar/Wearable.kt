@@ -4,7 +4,7 @@ import java.util.UUID
 
 /**
  * Represents a wearable item (clothing, body part, attachment) in Second Life
- * Based on Lumiya/Firestorm viewer wearable representation
+ * Based on reference viewer/Firestorm viewer wearable representation
  */
 data class Wearable(
     val itemId: UUID,

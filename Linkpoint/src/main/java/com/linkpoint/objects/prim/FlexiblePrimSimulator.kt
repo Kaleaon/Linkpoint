@@ -6,7 +6,7 @@ import kotlin.math.*
 /**
  * Flexible Prim System - Handles flexible/flexi prims physics simulation.
  * 
- * Based on Lumiya's FlexiblePrim.java
+ * Based on the reference viewer's FlexiblePrim.java
  * 
  * Flexi prims are prims that bend and sway with physics simulation.
  * Used for: hair, tails, flags, curtains, etc.

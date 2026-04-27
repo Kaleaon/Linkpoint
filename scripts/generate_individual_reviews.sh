@@ -6,6 +6,9 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+"$SCRIPT_DIR/require_clean_worktree.sh"
+
 # Colors
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'

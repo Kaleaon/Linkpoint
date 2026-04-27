@@ -25,7 +25,7 @@ import java.util.UUID
  * - Toggle running state (for object scripts)
  * - Dark theme optimized for code editing
  * 
- * Based on Firestorm/Lumiya script editor design.
+ * Based on Firestorm/reference viewer script editor design.
  */
 class ScriptEditorActivity : ComponentActivity() {
     
@@ -62,6 +62,15 @@ class ScriptEditorActivity : ComponentActivity() {
                         isReadOnly = isReadOnly,
                         onLoadScript = { assetUuid ->
                             app.scriptManager.getScriptSource(assetUuid)
+                        },
+                        onSaveScript = { scriptItemId, scriptObjectId, scriptText ->
+                            val saveResult = app.scriptManager.saveScript(
+                                itemId = scriptItemId,
+                                scriptText = scriptText,
+                                taskId = scriptObjectId
+                            )
+                            val message = saveResult.error ?: saveResult.compileErrors.firstOrNull()
+                            Pair(saveResult.success, message)
                         },
                         onResetScript = { objId, itmId ->
                             app.scriptManager.resetScript(objId, itmId)

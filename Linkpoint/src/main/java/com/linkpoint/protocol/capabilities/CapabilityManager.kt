@@ -5,11 +5,12 @@ import com.linkpoint.network.core.HttpRequestOptions
 import com.linkpoint.network.core.PolicyClass
 import com.linkpoint.network.core.RequestThrottler
 import com.linkpoint.protocol.llsd.*
-import com.linkpoint.protocol.translation.LumiyaTranslationLayer
+import com.linkpoint.protocol.translation.LinkpointTranslationLayer
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import okhttp3.*
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.EOFException
@@ -18,6 +19,24 @@ import java.net.SocketTimeoutException
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
+
+interface CapabilityRequester {
+    suspend fun request(capName: String, body: LLSDValue? = null): LLSDValue?
+    fun getCapability(name: String): String?
+    fun hasCapability(name: String): Boolean
+
+    /**
+     * Issue an HTTP GET against [capName] with the given repeated query
+     * parameters. Required by capabilities that follow the
+     * `<base_url>?key=v1&key=v2&...` shape rather than a POST LLSD body —
+     * notably `GetDisplayNames` (`?ids=<uuid>&ids=<uuid>...`). Default
+     * implementation falls back to the body-less `request()` for fakes.
+     */
+    suspend fun requestWithQuery(
+        capName: String,
+        queryParams: List<Pair<String, String>>
+    ): LLSDValue? = request(capName, null)
+}
 
 /**
  * Manages Second Life Capabilities (Caps)
@@ -28,9 +47,9 @@ import java.util.concurrent.TimeUnit
  * - Request throttling for inventory operations
  * - Retry-After header support
  * - Per-capability request options
- * - Lumiya-compatible URL repair for Agni grid
+ * - Linkpoint-compatible URL repair for Agni grid
  */
-class CapabilityManager {
+class CapabilityManager : CapabilityRequester {
     
     companion object {
         private const val TAG = "CapabilityManager"
@@ -43,7 +62,6 @@ class CapabilityManager {
         private const val UTF8_BOM = '\uFEFF'
         
         // Common capability names
-        const val CAP_SEED = "Seed"
         const val CAP_EVENT_QUEUE = "EventQueueGet"
         const val CAP_FETCH_INVENTORY = "FetchInventory2"
         const val CAP_FETCH_LIB_INVENTORY = "FetchLib2"
@@ -53,6 +71,7 @@ class CapabilityManager {
         const val CAP_GET_MESH2 = "GetMesh2"
         const val CAP_VIEW_STATS = "ViewerStats"
         const val CAP_AGENT_STATE = "AgentState"
+        const val CAP_AGENT_PROFILE = "AgentProfile"
         const val CAP_UPDATE_AGENT_INFO = "UpdateAgentInformation"
         const val CAP_UPLOAD_BAKED_TEXTURE = "UploadBakedTexture"
         const val CAP_OBJECT_MEDIA = "ObjectMedia"
@@ -93,6 +112,19 @@ class CapabilityManager {
         
         // Render materials (PBR)
         const val CAP_RENDER_MATERIALS = "RenderMaterials"
+        const val CAP_GROUP_MEMBER_DATA = "GroupMemberData"
+        const val CAP_CHAT_SEND = "ChatSend"
+        const val CAP_FRIENDSHIP_TERMINATE = "FriendshipTerminate"
+
+        const val CAP_TELEPORT_LOCATION = "TeleportLocation"
+        const val CAP_SEARCH_LAND = "SearchLand"
+        const val CAP_GET_SCRIPT_RUNNING = "GetScriptRunning"
+        const val CAP_SET_SCRIPT_RUNNING = "SetScriptRunning"
+        const val CAP_GET_SCRIPT_TASK_INFO = "GetScriptTaskInfo"
+        const val CAP_CREATE_INVENTORY_ITEM = "CreateInventoryItem"
+        const val CAP_NEW_FILE_AGENT_INVENTORY = "NewFileAgentInventory"
+        const val CAP_UPLOAD_AGENT_PROFILE_IMAGE = "UploadAgentProfileImage"
+        const val CAP_UPLOAD_AGENT_BAKED_TEXTURE = "UploadAgentBakedTexture"
         
         // Capabilities that are inventory-related (for throttling)
         private val INVENTORY_CAPS = setOf(
@@ -115,11 +147,28 @@ class CapabilityManager {
         
         // Retryable message patterns for IOException detection
         private val RETRYABLE_MESSAGE_PATTERNS = listOf("EOF", "reset", "closed", "timeout", "ECONNRESET")
+        
+        // Background retry constants
+        private const val BACKGROUND_RETRY_INITIAL_DELAY_MS = 10_000L  // 10 seconds
+        private const val BACKGROUND_RETRY_MAX_DELAY_MS = 60_000L     // 60 seconds
+        private const val BACKGROUND_RETRY_MAX_ATTEMPTS = 10
     }
     
     // Request throttler for rate limiting
     private val throttler = RequestThrottler.getInstance()
-    
+
+    /**
+     * Optional Android Context, set by the application after construction
+     * (LinkpointApp wires this in initializeManagers). When present, the
+     * request path tries [com.linkpoint.network.CronetHttpClient] first
+     * for HTTP/3 (QUIC) — which gives capability traffic the same
+     * connection-migration win that asset traffic got in commit 163af1df.
+     * When absent (no-arg unit-test constructor, GridConnection, etc.),
+     * Cronet is skipped and OkHttp is the only path. Either way the
+     * fallback chain is H3 → H2 → H1.1.
+     */
+    @Volatile var androidContext: android.content.Context? = null
+
     // Default HTTP client for general requests
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(45, TimeUnit.SECONDS)
@@ -182,29 +231,34 @@ class CapabilityManager {
     
     private val _isReady = MutableStateFlow(false)
     val isReady: StateFlow<Boolean> = _isReady
-    
+
     private data class EventHandlerRegistration(
         val handler: EventHandler,
         val dispatcher: CoroutineDispatcher
     )
-    
+
     // Event handlers
     private val eventHandlers = ConcurrentHashMap<String, MutableList<EventHandlerRegistration>>()
-    
+
     // Initialization tracking for diagnostics (volatile for thread safety)
     @Volatile private var initializationStartTime: Long = 0
     @Volatile private var initializationEndTime: Long = 0
     @Volatile private var lastInitializationError: String? = null
     @Volatile private var lastInitializationAttempts: Int = 0
     @Volatile private var lastSeedCapabilityUsed: String? = null
-    
-    // Lumiya translation layer support
+
+    // Linkpoint translation layer support
     @Volatile private var loginUrl: String? = null
+
+    // Background retry for capability initialization
+    private var backgroundRetryJob: Job? = null
+    @Volatile private var backgroundRetryCount: Int = 0
+
     
     /**
-     * Initialize capabilities from seed with Lumiya translation layer support.
+     * Initialize capabilities from seed with Linkpoint translation layer support.
      * 
-     * This overload accepts the login URL to enable Lumiya-compatible capability URL
+     * This overload accepts the login URL to enable Linkpoint-compatible capability URL
      * repair and grid-specific handling.
      * 
      * @param seedCap The seed capability URL
@@ -214,13 +268,13 @@ class CapabilityManager {
     suspend fun initialize(seedCap: String, loginUrlParam: String): Boolean {
         this.loginUrl = loginUrlParam
         
-        // Apply Lumiya URL repair to seed capability
-        val repairedSeedCap = LumiyaTranslationLayer.prepareSeedCapability(loginUrlParam, seedCap)
+        // Apply URL repair to seed capability
+        val repairedSeedCap = LinkpointTranslationLayer.prepareSeedCapability(loginUrlParam, seedCap)
         
         if (repairedSeedCap != seedCap) {
             Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
             Log.i(TAG, "║ LUMIYA TRANSLATION: Seed capability URL repaired")
-            Log.i(TAG, "║ Grid Type: ${LumiyaTranslationLayer.detectGridType(loginUrlParam)}")
+            Log.i(TAG, "║ Grid Type: ${LinkpointTranslationLayer.detectGridType(loginUrlParam)}")
             Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
         }
         
@@ -242,16 +296,16 @@ class CapabilityManager {
         Log.i(TAG, "╠══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ Seed URL: ${seedCap.take(80)}...")
         val currentLoginUrl = loginUrl
-        Log.i(TAG, "║ Lumiya Mode: ${if (currentLoginUrl != null) "ENABLED" else "DISABLED"}")
+        Log.i(TAG, "║ Translation Mode: ${if (currentLoginUrl != null) "ENABLED" else "DISABLED"}")
         if (currentLoginUrl != null) {
-            Log.i(TAG, "║ Grid Type: ${LumiyaTranslationLayer.detectGridType(currentLoginUrl)}")
+            Log.i(TAG, "║ Grid Type: ${LinkpointTranslationLayer.detectGridType(currentLoginUrl)}")
         }
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
         
-        // Use Lumiya capability list when enabled for better compatibility
-        val capNames = if (currentLoginUrl != null && LumiyaTranslationLayer.config.useLumiyaCapabilityList) {
-            Log.d(TAG, "Using Lumiya-compatible capability list")
-            LumiyaTranslationLayer.getLumiyaCapabilityNames()
+        // Use reference capability list when enabled for better compatibility
+        val capNames = if (currentLoginUrl != null && LinkpointTranslationLayer.config.useReferenceCapabilityList) {
+            Log.d(TAG, "Using Linkpoint-compatible capability list")
+            LinkpointTranslationLayer.getReferenceCapabilityNames()
         } else {
             listOf(
                 CAP_EVENT_QUEUE,
@@ -272,7 +326,8 @@ class CapabilityManager {
                 CAP_ENVIRONMENT,
                 CAP_EXT_ENVIRONMENT,
                 CAP_AVATAR_PICKER,
-                CAP_SEARCH_STATIC
+                CAP_SEARCH_STATIC,
+                CAP_GROUP_PROFILE
             )
         }
         
@@ -326,13 +381,13 @@ class CapabilityManager {
             return@withContext false
         }
         
-        // Apply Lumiya URL repair to each capability URL if enabled
-        val shouldRepairUrls = loginUrl != null && LumiyaTranslationLayer.config.repairCapabilityUrls
+        // Apply URL repair to each capability URL if enabled
+        val shouldRepairUrls = loginUrl != null && LinkpointTranslationLayer.config.repairCapabilityUrls
         var repairedCount = 0
         
         resolvedCaps.forEach { (name, url) ->
             val finalUrl = if (shouldRepairUrls) {
-                val repairedUrl = LumiyaTranslationLayer.repairUrl(loginUrl ?: "", url)
+                val repairedUrl = LinkpointTranslationLayer.repairUrl(loginUrl ?: "", url)
                 if (repairedUrl != url) {
                     repairedCount++
                     Log.d(TAG, "Repaired URL for $name")
@@ -346,7 +401,7 @@ class CapabilityManager {
         }
         
         if (repairedCount > 0) {
-            Log.i(TAG, "Lumiya translation: Repaired $repairedCount capability URLs")
+            Log.i(TAG, "Linkpoint translation: Repaired $repairedCount capability URLs")
         }
         
         // Start event queue
@@ -374,7 +429,60 @@ class CapabilityManager {
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
         true
     }
-    
+
+    /**
+     * Start a background retry loop for capability initialization.
+     *
+     * When the initial seed capability request fails (e.g. empty response on mobile networks),
+     * this launches a coroutine that periodically retries with exponential backoff.
+     * The loop stops as soon as capabilities are successfully loaded or the manager is shut down.
+     *
+     * @param seedCap The seed capability URL to retry
+     * @param loginUrlParam The login URL for URL repair
+     */
+    fun startBackgroundRetry(seedCap: String, loginUrlParam: String) {
+        // Don't start if already ready or already retrying
+        if (_isReady.value) return
+        backgroundRetryJob?.cancel()
+        backgroundRetryCount = 0
+
+        backgroundRetryJob = scope.launch {
+            while (isActive && !_isReady.value && backgroundRetryCount < BACKGROUND_RETRY_MAX_ATTEMPTS) {
+                backgroundRetryCount++
+                val delayMs = minOf(
+                    BACKGROUND_RETRY_INITIAL_DELAY_MS * (1L shl minOf(backgroundRetryCount - 1, 4)),
+                    BACKGROUND_RETRY_MAX_DELAY_MS
+                )
+                Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+                Log.i(TAG, "║ BACKGROUND CAPABILITY RETRY $backgroundRetryCount/$BACKGROUND_RETRY_MAX_ATTEMPTS")
+                Log.i(TAG, "║ Waiting ${delayMs}ms before retry...")
+                Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+                delay(delayMs)
+
+                if (_isReady.value) break
+
+                val success = try {
+                    initialize(seedCap, loginUrlParam)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Background capability retry $backgroundRetryCount failed: ${e.message}")
+                    false
+                }
+
+                if (success) {
+                    Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+                    Log.i(TAG, "║ BACKGROUND RETRY SUCCEEDED on attempt $backgroundRetryCount")
+                    Log.i(TAG, "║ Capabilities now available: ${capabilities.size}")
+                    Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+                    break
+                }
+            }
+
+            if (!_isReady.value) {
+                Log.e(TAG, "Background capability retry exhausted all $BACKGROUND_RETRY_MAX_ATTEMPTS attempts")
+            }
+        }
+    }
+
     /**
      * Request capabilities from seed
      * 
@@ -439,7 +547,7 @@ class CapabilityManager {
             Log.d(TAG, "Response body length: ${bodyBytes.size} bytes")
             
             // Log first few chars for debugging (don't log full body for security)
-            val isXmlContentType = contentType.contains("xml", ignoreCase = true)
+            val isXmlContentType = contentType?.contains("xml", ignoreCase = true) == true
             val previewSize = minOf(bodyBytes.size, SEED_CAP_HEADER_PREVIEW_BYTES)
             val headerBytes = bodyBytes.copyOfRange(0, previewSize)
             val asciiCheckSize = minOf(headerBytes.size, SEED_CAP_ASCII_CHECK_BYTES)
@@ -524,12 +632,12 @@ class CapabilityManager {
     /**
      * Get a capability URL
      */
-    fun getCapability(name: String): String? = capabilities[name]
+    override fun getCapability(name: String): String? = capabilities[name]
     
     /**
      * Check if a capability is available
      */
-    fun hasCapability(name: String): Boolean = capabilities.containsKey(name)
+    override fun hasCapability(name: String): Boolean = capabilities.containsKey(name)
     
     /**
      * Make a capability request with Firestorm-style retry logic.
@@ -540,9 +648,9 @@ class CapabilityManager {
      * - Request throttling for inventory caps
      * - Appropriate timeouts per capability type
      */
-    suspend fun request(
+    override suspend fun request(
         capName: String,
-        body: LLSDValue? = null
+        body: LLSDValue?
     ): LLSDValue? = withContext(Dispatchers.IO) {
         val url = getCapability(capName) ?: return@withContext null
         val options = getOptionsForCapability(capName)
@@ -568,15 +676,50 @@ class CapabilityManager {
                     delay(delayMs)
                 }
                 
+                // Cronet primary path (H3/QUIC when the cap host advertises
+                // it; otherwise H2 over Cronet's TLS stack). Falls through
+                // to OkHttp+Conscrypt (H2/H1.1) on any non-2xx, network
+                // failure, or when the engine isn't available (no Android
+                // context wired, native lib missing, etc.). Keeps the
+                // exact same retry / Retry-After / throttle behaviour.
+                val xmlBody: ByteArray? = body?.let { LLSDXmlUtils.wrap(it).toByteArray(Charsets.UTF_8) }
+                val ctx = androidContext
+                if (ctx != null) {
+                    val cronet = com.linkpoint.network.CronetHttpClient.getOrCreate(ctx)
+                    if (cronet.isAvailable) {
+                        val cronetResult = if (xmlBody != null) {
+                            cronet.post(url, xmlBody, "application/llsd+xml", timeoutMs = options.timeoutSeconds * 1000L)
+                        } else {
+                            cronet.get(url, timeoutMs = options.timeoutSeconds * 1000L)
+                        }
+                        if (cronetResult is com.linkpoint.network.CronetResult.Success && cronetResult.code in 200..299) {
+                            Log.d(TAG, "Cap $capName via Cronet/${cronetResult.protocol} (${cronetResult.body.size} bytes)")
+                            return@withContext LLSDParser.parseAuto(cronetResult.body, "application/llsd+xml")
+                        }
+                        if (cronetResult is com.linkpoint.network.CronetResult.Success && cronetResult.code in RETRYABLE_HTTP_CODES) {
+                            // Honour Retry-After parsing path by routing
+                            // through OkHttp on retryable codes — Cronet's
+                            // negotiatedProtocol is enough info for one
+                            // attempt; OkHttp's response object exposes
+                            // the headers our retry policy reads.
+                            Log.d(TAG, "Cap $capName Cronet got ${cronetResult.code}; falling through to OkHttp for retry semantics")
+                        } else if (cronetResult is com.linkpoint.network.CronetResult.Failure) {
+                            Log.d(TAG, "Cap $capName Cronet failed (${cronetResult.message}); falling through to OkHttp")
+                        }
+                        // Fall through to OkHttp on any other Cronet outcome
+                    }
+                }
+
                 val requestBuilder = Request.Builder().url(url)
-                
-                if (body != null) {
-                    val xml = LLSDXmlUtils.wrap(body)
-                    requestBuilder.post(xml.toRequestBody("application/llsd+xml".toMediaType()))
+
+                if (xmlBody != null) {
+                    requestBuilder.post(
+                        String(xmlBody, Charsets.UTF_8).toRequestBody("application/llsd+xml".toMediaType())
+                    )
                 } else {
                     requestBuilder.get()
                 }
-                
+
                 val response = client.newCall(requestBuilder.build()).execute()
                 
                 // Check for retryable HTTP errors
@@ -631,7 +774,86 @@ class CapabilityManager {
         Log.e(TAG, "All retries exhausted for $capName", lastException)
         null
     }
-    
+
+    /**
+     * GET against [capName] with repeated query parameters appended to the
+     * cap URL. Used by capabilities whose wire shape is HTTP GET rather
+     * than POST-LLSD — primarily `GetDisplayNames`. Reuses the same retry
+     * / parse pipeline as [request].
+     *
+     * Previously callers (`ProfileManager.getDisplayNames`,
+     * `DisplayNameManager.fetchBatch`) POSTed an LLSD body to
+     * GetDisplayNames; the simulator returned nothing useful and friend
+     * names stayed on the `Resident (xxxx)` placeholder forever — the
+     * symptom in the 2026-04-25 Athanasia debug capture.
+     */
+    override suspend fun requestWithQuery(
+        capName: String,
+        queryParams: List<Pair<String, String>>
+    ): LLSDValue? = withContext(Dispatchers.IO) {
+        val baseUrl = getCapability(capName) ?: return@withContext null
+        val httpUrl = baseUrl.toHttpUrlOrNull() ?: run {
+            Log.w(TAG, "requestWithQuery: invalid URL for $capName")
+            return@withContext null
+        }
+        val urlBuilder = httpUrl.newBuilder()
+        queryParams.forEach { (k, v) -> urlBuilder.addQueryParameter(k, v) }
+        val url = urlBuilder.build()
+
+        val options = getOptionsForCapability(capName)
+        val client = getClientForCapability(capName)
+
+        var lastException: Exception? = null
+        var retryAfterSeconds: Int? = null
+
+        repeat(options.retries + 1) { attempt ->
+            try {
+                if (attempt > 0) {
+                    val delayMs = options.calculateRetryDelay(attempt - 1, retryAfterSeconds)
+                    Log.d(TAG, "Retrying GET $capName (attempt ${attempt + 1}/${options.retries + 1}) after ${delayMs}ms")
+                    delay(delayMs)
+                }
+                val response = client.newCall(Request.Builder().url(url).get().build()).execute()
+                if (response.code in RETRYABLE_HTTP_CODES) {
+                    retryAfterSeconds = parseRetryAfterHeader(response)
+                    if (attempt < options.retries) {
+                        response.close()
+                        throw RetryableException("HTTP ${response.code}")
+                    }
+                }
+                val contentType = response.header("Content-Type")
+                val responseBytes = response.body?.bytes()
+                response.close()
+                if (responseBytes == null || responseBytes.isEmpty()) {
+                    if (attempt < options.retries) throw RetryableException("Empty body")
+                    return@withContext null
+                }
+                return@withContext LLSDParser.parseAuto(responseBytes, contentType)
+            } catch (e: RetryableException) {
+                lastException = e
+            } catch (e: SocketTimeoutException) {
+                Log.w(TAG, "Timeout for GET $capName (attempt ${attempt + 1})")
+                lastException = e
+            } catch (e: EOFException) {
+                Log.w(TAG, "EOF for GET $capName (attempt ${attempt + 1})")
+                lastException = e
+            } catch (e: IOException) {
+                if (isRetryableIOException(e)) {
+                    Log.w(TAG, "Retryable IO for GET $capName: ${e.message}")
+                    lastException = e
+                } else {
+                    Log.e(TAG, "Non-retryable IO for GET $capName", e)
+                    throw e
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "GET capability request failed: $capName", e)
+                throw e
+            }
+        }
+        Log.e(TAG, "All retries exhausted for GET $capName", lastException)
+        null
+    }
+
     /**
      * Exception to signal that a request should be retried.
      */
@@ -785,6 +1007,7 @@ class CapabilityManager {
      * Stop the capability manager
      */
     fun shutdown() {
+        backgroundRetryJob?.cancel()
         eventQueueJob?.cancel()
         scope.cancel()
         capabilities.clear()

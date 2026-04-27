@@ -10,10 +10,10 @@ public abstract class UnsafeAllocator {
     static void assertInstantiable(Class<?> cls) {
         int modifiers = cls.getModifiers();
         if (Modifier.isInterface(modifiers)) {
-            throw new UnsupportedOperationException("Interface can't be instantiated! Interface name: " + cls.getName());
+            throw new IllegalStateException("Interface can't be instantiated! Interface name: " + cls.getName());
         }
         if (Modifier.isAbstract(modifiers)) {
-            throw new UnsupportedOperationException("Abstract class can't be instantiated! Class name: " + cls.getName());
+            throw new IllegalStateException("Abstract class can't be instantiated! Class name: " + cls.getName());
         }
     }
 
@@ -60,7 +60,7 @@ public abstract class UnsafeAllocator {
                     return new UnsafeAllocator() { // from class: com.google.gson.internal.UnsafeAllocator.4
                         @Override // com.google.gson.internal.UnsafeAllocator
                         public <T> T newInstance(Class<T> cls2) {
-                            throw new UnsupportedOperationException("Cannot allocate " + cls2);
+                            throw new IllegalStateException("Cannot allocate " + cls2);
                         }
                     };
                 }

@@ -3,6 +3,8 @@ package com.linkpoint.assets
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import com.linkpoint.network.CronetHttpClient
+import com.linkpoint.network.CronetResult
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.SSLHelper
 import com.linkpoint.protocol.types.getUUID
@@ -12,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import okhttp3.OkHttpClient
+import okhttp3.Protocol
 import okhttp3.Request
 import java.io.ByteArrayOutputStream
 import java.util.UUID
@@ -42,16 +45,51 @@ class TextureManager(
         private const val TAG = "TextureManager"
         private const val MAX_CONCURRENT_DOWNLOADS = 4
         private const val TEXTURE_FETCH_TIMEOUT_MS = 30000L
+        private const val MAX_DECODE_RETRIES = 2
+        private const val MAX_DECODE_MEMORY_BYTES = 64 * 1024 * 1024
+
+        internal fun computeDiscardLevelForRequest(priority: TexturePriority, distanceMeters: Float? = null): Int {
+            val base = when (priority) {
+                TexturePriority.CRITICAL -> 0
+                TexturePriority.HIGH -> 1
+                TexturePriority.NORMAL -> 2
+                TexturePriority.LOW -> 3
+                TexturePriority.PREFETCH -> 4
+            }
+            val distanceBias = when {
+                distanceMeters == null -> 0
+                distanceMeters < 20f -> 0
+                // Band widened from 64f to 80f so HIGH-priority textures
+                // at typical visible-but-not-near distances (~70m) get
+                // bias=1 (final discard 2) rather than bias=2 (final 3).
+                // The previous threshold caused a perceptible drop in
+                // texture quality just outside the immediate radius,
+                // and broke the "discard policy prioritizes visibility
+                // and distance" test that codifies the intended curve.
+                distanceMeters < 80f -> 1
+                distanceMeters < 128f -> 2
+                else -> 3
+            }
+            return (base + distanceBias).coerceIn(0, 5)
+        }
     }
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     
-    // HTTP client configured for CDN access with custom hostname verification
-    // This handles Akamai CDN certificate hostname mismatch for asset-cdn.glb.agni.lindenlab.com
+    // HTTP client configured for CDN access with custom hostname verification.
+    // Akamai serves the SL asset CDN under *.akamaized.net certs — SSLHelper.configureForCdn
+    // adds the per-host trust dance to make that work without disabling verification.
+    //
+    // HTTP/2 is enabled (with HTTP/1.1 fallback) because the SL texture CDN supports it
+    // and the bulk of texture downloads happen as many small concurrent requests to the
+    // same host — exactly the workload H2 multiplexing helps with. The 2026-04-25 capture
+    // showed 56/56 texture requests on HTTP/1.1 because OkHttp's default protocol list
+    // wasn't being explicitly set on this builder.
     private val httpClient = SSLHelper.configureForCdn(
         OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
+            .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
     ).build()
     
     // Download queue with priority
@@ -61,6 +99,7 @@ class TextureManager(
     
     // Decoded texture cache
     private val textureCache = ConcurrentHashMap<UUID, Bitmap>()
+    private val textureErrorStates = ConcurrentHashMap<UUID, TextureDecodeErrorState>()
     
     // Statistics
     private val _stats = MutableStateFlow(TextureStats())
@@ -81,8 +120,10 @@ class TextureManager(
     suspend fun getTexture(
         textureId: UUID,
         priority: TexturePriority = TexturePriority.NORMAL,
-        discard: Int = 0
+        discard: Int = -1,
+        distanceMeters: Float? = null
     ): Bitmap? {
+        val effectiveDiscard = if (discard >= 0) discard else computeDiscardLevel(priority, distanceMeters)
         // Check decoded cache
         textureCache[textureId]?.let { return it }
         
@@ -91,7 +132,7 @@ class TextureManager(
         
         // Create new request
         val deferred = scope.async {
-            fetchTexture(textureId, priority, discard)
+            fetchTexture(textureId, priority, effectiveDiscard)
         }
         pendingTextures[textureId] = deferred
         
@@ -106,9 +147,10 @@ class TextureManager(
      * Prefetch textures in background
      */
     fun prefetch(textureIds: List<UUID>, priority: TexturePriority = TexturePriority.LOW) {
+        val discard = computeDiscardLevel(priority, distanceMeters = 256f)
         textureIds.forEach { id ->
             if (!textureCache.containsKey(id)) {
-                downloadQueue.offer(TextureRequest(id, priority, 0))
+                downloadQueue.offer(TextureRequest(id, priority, discard))
             }
         }
     }
@@ -133,10 +175,18 @@ class TextureManager(
         priority: TexturePriority,
         discard: Int
     ): Bitmap? {
+        val effectiveDiscard = discard.coerceIn(0, 5)
         // Check raw data cache
         val cachedData = cache.get(textureId, AssetType.TEXTURE)
         if (cachedData != null) {
-            return decodeTexture(textureId, cachedData)
+            val decoded = decodeTexture(textureId, cachedData, effectiveDiscard)
+            if (decoded != null) return decoded
+
+            // Deterministic retry: cached payload may be corrupt/truncated, force one re-download.
+            cache.remove(textureId, AssetType.TEXTURE)
+            val redownloaded = downloadTexture(textureId, effectiveDiscard, timeoutMs = 15000L) ?: return null
+            cache.put(textureId, AssetType.TEXTURE, redownloaded)
+            return decodeTexture(textureId, redownloaded, effectiveDiscard)
         }
         
         // Use priority to determine download timeout and retry behavior
@@ -155,7 +205,7 @@ class TextureManager(
         cache.put(textureId, AssetType.TEXTURE, data)
         
         // Decode and cache
-        return decodeTexture(textureId, data)
+        return decodeTexture(textureId, data, effectiveDiscard)
     }
     
     private suspend fun downloadTexture(
@@ -174,9 +224,8 @@ class TextureManager(
             val url = capUrl?.let { buildTextureUrl(it, textureId) }
             
             if (url == null) {
-                // No capability URL available - texture fetching requires GetTexture capability
-                // The asset CDN fallback doesn't work without authentication
-                Log.w(TAG, "🖼️ Texture download skipped: $textureId - GetTexture capability not available")
+                // No capability URL available - queue for retry when capabilities load
+                Log.w(TAG, "🖼️ Texture queued for retry: $textureId - GetTexture capability not yet available")
                 NetworkLogger.logTextureResult(
                     textureId = textureId.toString(),
                     success = false,
@@ -185,21 +234,66 @@ class TextureManager(
                     protocol = null,
                     error = "GetTexture capability not available"
                 )
-                
+
                 lastError = "GetTexture capability not available"
                 lastErrorTime = System.currentTimeMillis()
                 updateStats { it.copy(failedCount = it.failedCount + 1) }
+
+                // Queue for retry instead of permanent failure
+                capabilityPendingTextures.offer(TextureRequest(textureId, TexturePriority.NORMAL, discard))
+                ensureCapabilityRetryLoopStarted()
+
                 return@withContext null
             }
             
             Log.d(TAG, "🖼️ Starting texture download: $textureId")
             NetworkLogger.logTextureRequest(textureId.toString(), url, "NORMAL")
-            
+
+            // Cronet primary path: HTTP/3 (QUIC) when the CDN advertises
+            // it via Alt-Svc or our preseeded QUIC hints. Falls back to
+            // OkHttp+Conscrypt+H2 below if Cronet's engine isn't ready
+            // or the request fails for any reason. Per-request fallback
+            // (rather than circuit-breaker-style permanent fallback) is
+            // intentional: Cronet may temporarily fail for one host
+            // while still being healthy for others.
+            val cronet = CronetHttpClient.getOrCreate(context)
+            if (cronet.isAvailable) {
+                val cronetResult = cronet.get(
+                    url,
+                    headers = mapOf("Accept" to "image/x-j2c, image/jp2, image/jpeg, image/*"),
+                    timeoutMs = timeoutMs
+                )
+                if (cronetResult is CronetResult.Success && cronetResult.code in 200..299) {
+                    val durationMs = System.currentTimeMillis() - startTime
+                    Log.d(TAG, "🖼️ Texture downloaded via Cronet/${cronetResult.protocol}: " +
+                        "$textureId (${cronetResult.body.size} bytes, ${durationMs}ms)")
+                    NetworkLogger.logTextureResult(
+                        textureId = textureId.toString(),
+                        success = true,
+                        durationMs = durationMs,
+                        sizeBytes = cronetResult.body.size,
+                        protocol = cronetResult.protocol
+                    )
+                    updateStats { it.copy(
+                        downloadedCount = it.downloadedCount + 1,
+                        downloadedBytes = it.downloadedBytes + cronetResult.body.size
+                    )}
+                    return@withContext cronetResult.body
+                }
+                // Cronet failed (engine error, non-2xx, etc.) — log and
+                // fall through to the OkHttp branch. We don't treat this
+                // as a hard failure for stats; only the final OkHttp
+                // outcome counts in success/fail counters.
+                if (cronetResult is CronetResult.Failure) {
+                    Log.d(TAG, "🖼️ Cronet path failed for $textureId (${cronetResult.message}); falling back to OkHttp")
+                }
+            }
+
             val request = Request.Builder()
                 .url(url)
                 .header("Accept", "image/x-j2c, image/jp2, image/jpeg, image/*")
                 .build()
-            
+
             val response = httpClient.newCall(request).execute()
             val durationMs = System.currentTimeMillis() - startTime
             val protocol = response.protocol.toString()
@@ -303,6 +397,10 @@ class TextureManager(
     
     // Track textures that are known to be missing
     private val missingTextures = java.util.concurrent.ConcurrentHashMap.newKeySet<UUID>()
+
+    // Track textures that failed due to missing capability (eligible for retry)
+    private val capabilityPendingTextures = java.util.concurrent.ConcurrentLinkedQueue<TextureRequest>()
+    @Volatile private var capabilityRetryJob: Job? = null
     
     // Track in-progress UDP texture transfers
     private val udpTextureTransfers = java.util.concurrent.ConcurrentHashMap<UUID, ByteArrayOutputStream>()
@@ -388,7 +486,7 @@ class TextureManager(
     private fun processTextureData(textureId: UUID, data: ByteArray) {
         scope.launch(Dispatchers.IO) {
             try {
-                val bitmap = decodeTexture(textureId, data)
+                val bitmap = decodeTexture(textureId, data, discardLevel = 0)
                 if (bitmap != null) {
                     textureCache[textureId] = bitmap
                     updateStats { it.copy(downloadedCount = it.downloadedCount + 1) }
@@ -425,63 +523,77 @@ class TextureManager(
         return "$secureUrl?texture_id=$textureId"
     }
     
-    private fun decodeTexture(textureId: UUID, data: ByteArray): Bitmap? {
+    private fun decodeTexture(textureId: UUID, data: ByteArray, discardLevel: Int): Bitmap? {
         val startTime = System.currentTimeMillis()
-        
+
         return try {
-            // Determine format
             val isJ2k = isJPEG2000(data)
             val format = if (isJ2k) "JPEG2000" else "Standard (PNG/JPEG)"
-            
-            Log.d(TAG, "🖼️ Decoding texture: $textureId (${data.size} bytes, $format)")
-            
-            // Check if it's JPEG2000 (J2K/JP2)
-            val bitmap = if (isJ2k) {
-                j2kDecodeAttempts.incrementAndGet()
-                val result = decodeJPEG2000(data)
-                if (result != null) {
-                    j2kDecodeSuccesses.incrementAndGet()
+            val targetSize = if (isJ2k) JPEG2000Decoder.getImageSize(data) else null
+
+            if (targetSize != null) {
+                val expectedBytes = targetSize.first.toLong() * targetSize.second.toLong() * 4L
+                if (expectedBytes > MAX_DECODE_MEMORY_BYTES) {
+                    val reason = "Texture exceeds decode budget: ${targetSize.first}x${targetSize.second} (${expectedBytes / (1024 * 1024)}MB)"
+                    return recordDecodeFailure(textureId, format, startTime, reason)
                 }
-                result
-            } else {
-                // Try standard formats (PNG, JPEG)
-                BitmapFactory.decodeByteArray(data, 0, data.size)
             }
-            
+
+            Log.d(TAG, "🖼️ Decoding texture: $textureId (${data.size} bytes, $format)")
+
+            var decodeError: String? = null
+            var bitmap: Bitmap? = null
+            for (attempt in 1..MAX_DECODE_RETRIES) {
+                bitmap = if (isJ2k) {
+                    j2kDecodeAttempts.incrementAndGet()
+                    decodeJPEG2000(data, discardLevel)
+                } else {
+                    BitmapFactory.decodeByteArray(data, 0, data.size)
+                }
+                if (bitmap != null) {
+                    if (isJ2k) j2kDecodeSuccesses.incrementAndGet()
+                    break
+                }
+                decodeError = "Decode returned null (attempt $attempt/$MAX_DECODE_RETRIES)"
+                if (attempt < MAX_DECODE_RETRIES) {
+                    Thread.sleep(35L * attempt)
+                }
+            }
+
             val durationMs = System.currentTimeMillis() - startTime
-            
-            bitmap?.let {
-                Log.d(TAG, "🖼️ Texture decoded: $textureId (${it.width}x${it.height}, ${durationMs}ms)")
+
+            if (bitmap != null) {
+                textureErrorStates.remove(textureId)
+                textureCache[textureId] = bitmap
+                updateStats { st -> st.copy(decodedCount = st.decodedCount + 1) }
+                Log.d(TAG, "🖼️ Texture decoded: $textureId (${bitmap.width}x${bitmap.height}, ${durationMs}ms)")
                 NetworkLogger.logTextureDecode(textureId.toString(), true, format, durationMs)
-                
-                textureCache[textureId] = it
-                updateStats { s -> s.copy(decodedCount = s.decodedCount + 1) }
+                bitmap
+            } else {
+                recordDecodeFailure(textureId, format, startTime, decodeError ?: "Decoder returned null")
             }
-            
-            if (bitmap == null) {
-                Log.w(TAG, "🖼️ Texture decode returned null: $textureId")
-                NetworkLogger.logTextureDecode(textureId.toString(), false, format, durationMs, "Decoder returned null")
-            }
-            
-            bitmap
         } catch (e: Exception) {
-            val durationMs = System.currentTimeMillis() - startTime
-            Log.e(TAG, "🖼️ Texture decode error: $textureId - ${e.javaClass.simpleName}: ${e.message}")
-            NetworkLogger.logTextureDecode(
-                textureId.toString(), 
-                false, 
-                if (isJPEG2000(data)) "JPEG2000" else "Standard",
-                durationMs,
-                "${e.javaClass.simpleName}: ${e.message}"
-            )
-            
-            lastError = "Decode: ${e.javaClass.simpleName}: ${e.message}"
-            lastErrorTime = System.currentTimeMillis()
-            updateStats { it.copy(decodeFailedCount = it.decodeFailedCount + 1) }
-            null
+            recordDecodeFailure(textureId, if (isJPEG2000(data)) "JPEG2000" else "Standard", startTime, "${e.javaClass.simpleName}: ${e.message}")
         }
     }
-    
+
+    private fun recordDecodeFailure(textureId: UUID, format: String, startTime: Long, error: String): Bitmap? {
+        val durationMs = System.currentTimeMillis() - startTime
+        val state = textureErrorStates.compute(textureId) { _, prev ->
+            val attempts = (prev?.attempts ?: 0) + 1
+            TextureDecodeErrorState(textureId, error, attempts, System.currentTimeMillis())
+        }!!
+
+        Log.w(TAG, "🖼️ Texture decode failed: $textureId - $error")
+        NetworkLogger.logTextureDecode(textureId.toString(), false, format, durationMs, "$error; attempts=${state.attempts}")
+        lastError = "Decode: $error"
+        lastErrorTime = System.currentTimeMillis()
+        updateStats { it.copy(decodeFailedCount = it.decodeFailedCount + 1) }
+        return null
+    }
+
+    fun getTextureErrorState(textureId: UUID): TextureDecodeErrorState? = textureErrorStates[textureId]
+
     private fun isJPEG2000(data: ByteArray): Boolean {
         if (data.size < 12) return false
         // JPEG2000 magic bytes
@@ -491,13 +603,17 @@ class TextureManager(
                (data[0] == 0xFF.toByte() && data[1] == 0x4F.toByte())
     }
     
-    private fun decodeJPEG2000(data: ByteArray): Bitmap? {
+    private fun decodeJPEG2000(data: ByteArray, discardLevel: Int): Bitmap? {
         return try {
-            JPEG2000Decoder.decode(data)
+            JPEG2000Decoder.decode(data, discardLevel)
         } catch (e: Exception) {
             Log.e(TAG, "JPEG2000 decode failed", e)
             null
         }
+    }
+
+    internal fun computeDiscardLevel(priority: TexturePriority, distanceMeters: Float? = null): Int {
+        return computeDiscardLevelForRequest(priority, distanceMeters)
     }
     
     private suspend fun downloadWorker() {
@@ -531,19 +647,59 @@ class TextureManager(
     
     /**
      * Called when capabilities are ready after login.
-     * 
-     * Note: The TextureManager already uses capability-based fetching dynamically
-     * via the capabilityUrl property (see buildTextureUrl). This method is primarily
-     * for logging and notification purposes, similar to Lumiya's TextureCache.setFetcher()
-     * pattern where the fetcher is set but the actual fetching logic already supports
-     * the capability URL when available.
+     *
+     * Retriggers any texture downloads that were queued because the GetTexture capability
+     * was not yet available during the initial loading phase.
      */
     fun onCapabilitiesReady() {
         val textureCapUrl = capabilityUrl
         if (textureCapUrl != null) {
             Log.i(TAG, "Texture fetching enabled via capability: ${textureCapUrl.take(50)}...")
+            retryCapabilityPendingTextures()
         } else {
             Log.w(TAG, "GetTexture capability not available - using fallback asset server")
+        }
+    }
+
+    /**
+     * Re-download textures that were queued because GetTexture capability was unavailable.
+     */
+    private fun retryCapabilityPendingTextures() {
+        val pendingCount = capabilityPendingTextures.size
+        if (pendingCount == 0) return
+
+        Log.i(TAG, "🖼️ Retrying $pendingCount textures now that GetTexture capability is available")
+        val retryList = mutableListOf<TextureRequest>()
+        while (true) {
+            val req = capabilityPendingTextures.poll() ?: break
+            retryList.add(req)
+        }
+
+        retryList.forEach { req ->
+            if (!textureCache.containsKey(req.textureId)) {
+                downloadQueue.offer(req)
+            }
+        }
+    }
+
+    /**
+     * Start a background loop that periodically checks if capabilities have loaded
+     * and retries queued textures. Stops once capabilities are available or queue is empty.
+     */
+    private fun ensureCapabilityRetryLoopStarted() {
+        if (capabilityRetryJob?.isActive == true) return
+        capabilityRetryJob = scope.launch {
+            var attempts = 0
+            while (isActive && capabilityPendingTextures.isNotEmpty() && attempts < 30) {
+                attempts++
+                delay(5_000L)  // Check every 5 seconds
+
+                if (capabilityUrl != null) {
+                    Log.i(TAG, "🖼️ GetTexture capability now available, retrying queued textures")
+                    retryCapabilityPendingTextures()
+                    break
+                }
+            }
         }
     }
     
@@ -572,10 +728,15 @@ class TextureManager(
             downloadQueueSize = downloadQueue.size,
             activeDownloads = activeDownloads.get(),
             hasTextureCapability = capabilityUrl != null,
+            j2kNativeDecoderLoaded = JPEG2000Decoder.getStartupStatus().nativeLoaded,
+            j2kNativeDecoderHealthy = JPEG2000Decoder.getStartupStatus().nativeHealthy,
+            j2kNativeDecoderError = JPEG2000Decoder.getStartupStatus().nativeError
+                ?: JPEG2000Decoder.getStartupStatus().nativeHealthError,
             j2kDecodeAttempts = j2kDecodeAttempts.get(),
             j2kDecodeSuccesses = j2kDecodeSuccesses.get(),
             lastError = lastError,
-            lastErrorTimeAgo = if (lastErrorTime > 0) System.currentTimeMillis() - lastErrorTime else null
+            lastErrorTimeAgo = if (lastErrorTime > 0) System.currentTimeMillis() - lastErrorTime else null,
+            textureErrorStateCount = textureErrorStates.size
         )
     }
     
@@ -594,12 +755,24 @@ class TextureManager(
         val downloadQueueSize: Int,
         val activeDownloads: Int,
         val hasTextureCapability: Boolean,
+        val j2kNativeDecoderLoaded: Boolean,
+        val j2kNativeDecoderHealthy: Boolean,
+        val j2kNativeDecoderError: String?,
         val j2kDecodeAttempts: Int,
         val j2kDecodeSuccesses: Int,
         val lastError: String?,
-        val lastErrorTimeAgo: Long?
+        val lastErrorTimeAgo: Long?,
+        val textureErrorStateCount: Int
     )
 }
+
+data class TextureDecodeErrorState(
+    val textureId: UUID,
+    val reason: String,
+    val attempts: Int,
+    val lastFailedAt: Long
+)
+
 
 enum class TexturePriority(val value: Int) {
     CRITICAL(0),    // Avatar skin, UI elements

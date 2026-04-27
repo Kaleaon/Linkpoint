@@ -3,7 +3,7 @@ package com.google.gson.internal;
 /* loaded from: classes.dex */
 public final class C$Gson$Preconditions {
     private C$Gson$Preconditions() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     public static void checkArgument(boolean z) {

@@ -62,6 +62,6 @@ abstract class AbstractIterator<T> implements Iterator<T> {
 
     @Override // java.util.Iterator
     public final void remove() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 }

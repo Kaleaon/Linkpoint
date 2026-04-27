@@ -5,6 +5,7 @@ import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.capabilities.EventQueueDispatcher
 import com.linkpoint.protocol.llsd.LLSDMap
+import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -18,7 +19,7 @@ import java.util.UUID
 /**
  * Economy Manager - Handles L$ balance and transactions.
  * 
- * Based on Lumiya's SLFinancialInfo.java
+ * Based on the reference viewer's SLFinancialInfo.java
  * 
  * Manages:
  * - L$ balance tracking
@@ -34,14 +35,7 @@ class EconomyManager(
     
     companion object {
         private const val TAG = "EconomyManager"
-        
-        // Message IDs
-        const val MSG_MONEY_BALANCE_REQUEST = 0xFF00CE
-        const val MSG_MONEY_BALANCE_REPLY = 0xFF00CF
-        const val MSG_MONEY_TRANSFER_REQUEST = 0xFF00D0
-        const val MSG_ECONOMY_DATA_REQUEST = 0xFF00D1
-        const val MSG_ECONOMY_DATA = 0xFF00D2
-        
+
         // Transaction types
         const val TRANS_OBJECT_SALE = 5000
         const val TRANS_GIFT = 5001
@@ -204,7 +198,7 @@ class EconomyManager(
             // MoneyData
             writeUUID(payload, UUID.randomUUID()) // TransactionID
             
-            udpConnection.sendPacket(MSG_MONEY_BALANCE_REQUEST, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIds.MONEY_BALANCE_REQUEST, payload.array(), reliable = true)
             Log.d(TAG, "Requested balance")
             
         } catch (e: Exception) {
@@ -223,7 +217,7 @@ class EconomyManager(
             writeUUID(payload, agentId)
             writeUUID(payload, udpConnection.getSessionId())
             
-            udpConnection.sendPacket(MSG_ECONOMY_DATA_REQUEST, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIds.ECONOMY_DATA_REQUEST, payload.array(), reliable = true)
             Log.d(TAG, "Requested economy data")
             
         } catch (e: Exception) {
@@ -275,24 +269,47 @@ class EconomyManager(
         transactionType: Int
     ): Boolean {
         try {
-            val descBytes = description.toByteArray(Charsets.UTF_8)
-            val payload = ByteBuffer.allocate(68 + descBytes.size).order(ByteOrder.LITTLE_ENDIAN)
-            
+            // Wire format (LL message_template `MoneyTransferRequest`,
+            // low-freq 311; Lumiya: slproto/messages/MoneyTransferRequest.java
+            // PackPayload):
+            //   AgentData: AgentID(LLUUID), SessionID(LLUUID)
+            //   MoneyData: SourceID(LLUUID), DestID(LLUUID), Flags(U8),
+            //              Amount(S32), AggregatePermNextOwner(U8),
+            //              AggregatePermInventory(U8), TransactionType(S32),
+            //              Description(Variable 1, NUL-terminated)
+            //
+            // The previous encoder dropped SourceID entirely, used U32 for
+            // both Aggregate fields (Lumiya uses U8 each), and shipped the
+            // description without the trailing NUL. The simulator silently
+            // rejected the malformed packet.
+
+            val rawDesc = description.toByteArray(Charsets.UTF_8)
+            val cappedDesc = if (rawDesc.size > 254) rawDesc.copyOf(254) else rawDesc
+            val descBytes = cappedDesc + 0.toByte()
+
+            val payload = ByteBuffer
+                .allocate(36 /* AgentData */ + 16 /* SourceID */ + 16 /* DestID */ +
+                          1 /* Flags */ + 4 /* Amount */ + 1 /* AggregatePermNextOwner */ +
+                          1 /* AggregatePermInventory */ + 4 /* TransactionType */ +
+                          1 + descBytes.size /* Description Variable 1 */)
+                .order(ByteOrder.LITTLE_ENDIAN)
+
             // AgentData
             writeUUID(payload, agentId)
             writeUUID(payload, udpConnection.getSessionId())
-            
+
             // MoneyData
+            writeUUID(payload, agentId) // SourceID = self for outbound payments
             writeUUID(payload, destinationId)
-            payload.put(0) // DestinationGroup (false)
+            payload.put(0.toByte()) // Flags (e.g. DestinationGroup); 0 for ordinary user-to-user
             payload.putInt(amount)
-            payload.putInt(0) // AggregatePermNextOwner
-            payload.putInt(0) // AggregatePermInventory
+            payload.put(0.toByte()) // AggregatePermNextOwner (U8)
+            payload.put(0.toByte()) // AggregatePermInventory (U8)
             payload.putInt(transactionType)
             payload.put(descBytes.size.toByte())
             payload.put(descBytes)
             
-            udpConnection.sendPacket(MSG_MONEY_TRANSFER_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
+            udpConnection.sendPacket(MessageIds.MONEY_TRANSFER_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
             
             Log.i(TAG, "Sent payment: $amount L$ to $destinationId")
             

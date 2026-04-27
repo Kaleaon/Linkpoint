@@ -139,3 +139,11 @@ docs/lumiya_reference/lumiyaviewer/
 
 # Decompiled Lumiya sources (reference only)
 lumiya_decompiled/
+
+# Protocol conformance tooling (LP-P0-001 / LP-P0-002).
+# These un-ignore rules counteract the repo-wide tools/, *.sh, and *.py
+# blocks above so the conformance scripts can live in version control.
+!Linkpoint/tools/
+!Linkpoint/tools/**
+!Linkpoint/tools/protocol/
+!Linkpoint/tools/protocol/**

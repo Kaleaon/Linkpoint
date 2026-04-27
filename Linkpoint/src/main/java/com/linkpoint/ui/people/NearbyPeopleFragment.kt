@@ -18,8 +18,14 @@ import com.linkpoint.world.WorldMap
 import kotlinx.coroutines.launch
 
 /**
- * Fragment for displaying nearby people
+ * Fragment for displaying nearby people.
+ *
+ * Legacy entry point retained during Compose migration.
+ * Removal target: 2026.09.
  */
+@Deprecated(
+    message = "Legacy Fragment entry point. Use NearbyPeopleScreen-based Compose navigation."
+)
 class NearbyPeopleFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView

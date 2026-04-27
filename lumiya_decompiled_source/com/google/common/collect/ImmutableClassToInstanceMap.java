@@ -75,7 +75,7 @@ public final class ImmutableClassToInstanceMap<B> extends ForwardingMap<Class<? 
     @Override // com.google.common.collect.ClassToInstanceMap
     @Deprecated
     public <T extends B> T putInstance(Class<T> cls, T t) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     Object readResolve() {

@@ -19,11 +19,11 @@ The workflow runs on:
 - **Runner**: `ubuntu-latest`
 - **Timeout**: 45 minutes
 - **Java**: OpenJDK 17 (Temurin distribution)
-- **Android SDK**: API 34 (Android 14)
-- **Build Tools**: 34.0.0
+- **Android SDK**: compileSdk 35, targetSdk 34
+- **Build Tools**: 35.0.0
 - **NDK**: 25.2.9519653
 - **Kotlin**: 1.9.22
-- **Gradle**: 8.5 (via wrapper)
+- **Gradle**: 8.7 (via wrapper)
 
 ### Build Process
 

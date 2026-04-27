@@ -84,5 +84,4 @@ The iOS client is designed to work with existing OpenSimulator/Second Life backe
 ## Related Documentation
 
 - See `../Android/` for Android implementation
-- See `../PWA/` for Progressive Web App implementation
 - See main repository README for overall project documentation

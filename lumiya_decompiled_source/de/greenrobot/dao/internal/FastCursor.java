@@ -21,17 +21,17 @@ public final class FastCursor implements Cursor {
 
     @Override // android.database.Cursor, java.io.Closeable, java.lang.AutoCloseable
     public void close() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
     public void copyStringToBuffer(int i, CharArrayBuffer charArrayBuffer) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
     public void deactivate() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
@@ -41,27 +41,27 @@ public final class FastCursor implements Cursor {
 
     @Override // android.database.Cursor
     public int getColumnCount() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
     public int getColumnIndex(String str) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
     public int getColumnIndexOrThrow(String str) throws IllegalArgumentException {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
     public String getColumnName(int i) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
     public String[] getColumnNames() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
@@ -76,7 +76,7 @@ public final class FastCursor implements Cursor {
 
     @Override // android.database.Cursor
     public Bundle getExtras() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
@@ -116,27 +116,27 @@ public final class FastCursor implements Cursor {
 
     @Override // android.database.Cursor
     public int getType(int i) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
     public boolean getWantsAllOnMoveCalls() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
     public boolean isAfterLast() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
     public boolean isBeforeFirst() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
     public boolean isClosed() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
@@ -203,41 +203,41 @@ public final class FastCursor implements Cursor {
 
     @Override // android.database.Cursor
     public void registerContentObserver(ContentObserver contentObserver) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
     public void registerDataSetObserver(DataSetObserver dataSetObserver) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
     public boolean requery() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
     public Bundle respond(Bundle bundle) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
     public void setExtras(Bundle bundle) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
     public void setNotificationUri(ContentResolver contentResolver, Uri uri) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
     public void unregisterContentObserver(ContentObserver contentObserver) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.database.Cursor
     public void unregisterDataSetObserver(DataSetObserver dataSetObserver) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 }

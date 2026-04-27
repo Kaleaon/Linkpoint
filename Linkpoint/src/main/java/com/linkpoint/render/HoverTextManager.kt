@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Hover Text Manager - Manages floating text above objects.
  * 
- * Based on Lumiya's HoverText.java and DrawableHoverText.java
+ * Based on the reference viewer's HoverText.java and DrawableHoverText.java
  * 
  * Hover text is set by scripts using llSetText() and appears
  * floating above objects.

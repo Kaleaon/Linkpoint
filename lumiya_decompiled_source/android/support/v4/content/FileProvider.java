@@ -254,7 +254,7 @@ public class FileProvider extends ContentProvider {
 
     @Override // android.content.ContentProvider
     public Uri insert(Uri uri, ContentValues contentValues) {
-        throw new UnsupportedOperationException("No external inserts");
+        throw new IllegalStateException("No external inserts");
     }
 
     @Override // android.content.ContentProvider
@@ -296,6 +296,6 @@ public class FileProvider extends ContentProvider {
 
     @Override // android.content.ContentProvider
     public int update(Uri uri, ContentValues contentValues, String str, String[] strArr) {
-        throw new UnsupportedOperationException("No external updates");
+        throw new IllegalStateException("No external updates");
     }
 }

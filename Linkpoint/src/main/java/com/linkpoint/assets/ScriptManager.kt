@@ -6,9 +6,17 @@ import com.linkpoint.protocol.llsd.*
 import com.linkpoint.protocol.transfer.TransferManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
 
 /**
  * ScriptManager - Handles LSL/Mono script viewing and basic management.
@@ -21,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap
  * - Script memory/time usage
  * 
  * Note: Full script editing requires a desktop viewer. This provides
- * viewing and basic management functionality like Lumiya.
+ * viewing and basic management functionality like the reference viewer.
  */
 class ScriptManager(
     private val capabilityManager: CapabilityManager,
@@ -29,6 +37,7 @@ class ScriptManager(
 ) {
     companion object {
         private const val TAG = "ScriptManager"
+        private const val SCRIPT_UPLOAD_CONTENT_TYPE = "application/octet-stream"
         
         // Script types
         const val SCRIPT_TYPE_LSL = 0
@@ -41,6 +50,12 @@ class ScriptManager(
     }
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val httpClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .retryOnConnectionFailure(true)
+        .build()
     
     // Cached script data
     private val scriptCache = ConcurrentHashMap<UUID, ScriptData>()
@@ -93,7 +108,7 @@ class ScriptManager(
                     this["item_id"] = LLSDUUID(itemId)
                 }
                 
-                val response = capabilityManager.request("GetScriptRunning", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_GET_SCRIPT_RUNNING, request)
                 
                 if (response is LLSDMap) {
                     ScriptRunningInfo(
@@ -122,7 +137,7 @@ class ScriptManager(
                     this["running"] = LLSDBoolean(running)
                 }
                 
-                val response = capabilityManager.request("SetScriptRunning", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_SET_SCRIPT_RUNNING, request)
                 
                 if (response is LLSDMap) {
                     val success = response.getBoolean("success") ?: false
@@ -168,7 +183,7 @@ class ScriptManager(
                     this["object_id"] = LLSDUUID(objectId)
                 }
                 
-                val response = capabilityManager.request("GetScriptTaskInfo", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_GET_SCRIPT_TASK_INFO, request)
                 
                 if (response is LLSDMap) {
                     val scripts = response.getArray("scripts")
@@ -196,6 +211,111 @@ class ScriptManager(
             }
         }
     }
+
+    /**
+     * Save script source via UpdateScriptAgent/UpdateScriptTask capabilities.
+     */
+    suspend fun saveScript(itemId: UUID, scriptText: String, taskId: UUID? = null): ScriptSaveResult {
+        return withContext(Dispatchers.IO) {
+            try {
+                val capability = if (taskId == null) {
+                    CapabilityManager.CAP_UPDATE_SCRIPT_AGENT
+                } else {
+                    CapabilityManager.CAP_UPDATE_SCRIPT_TASK
+                }
+
+                val request = LLSDMap().apply {
+                    this["item_id"] = LLSDUUID(itemId)
+                    taskId?.let { this["task_id"] = LLSDUUID(it) }
+                    this["target"] = LLSDString("mono")
+                    if (taskId != null) {
+                        this["is_script_running"] = LLSDInteger(1)
+                    }
+                }
+
+                val capResponse = capabilityManager.request(capability, request) as? LLSDMap
+                    ?: return@withContext ScriptSaveResult(false, "$capability returned no payload")
+
+                val capState = capResponse.getString("state")
+                if (capState.equals("complete", ignoreCase = true)) {
+                    val completedResult = buildScriptSaveResult(capResponse)
+                    if (completedResult.success) {
+                        Log.i(TAG, "Saved script $itemId (${scriptText.length} chars) without uploader step")
+                    }
+                    return@withContext completedResult
+                }
+
+                val uploaderUrl = capResponse.getString("uploader")?.takeIf { it.isNotBlank() }
+                    ?: return@withContext ScriptSaveResult(false, "Uploader URL missing from capability response")
+
+                val normalizedUploader = if (uploaderUrl.startsWith("http://", ignoreCase = true)) {
+                    uploaderUrl.replaceFirst("http://", "https://", ignoreCase = true)
+                } else uploaderUrl
+
+                val uploadRequest = Request.Builder()
+                    .url(normalizedUploader)
+                    .addHeader("Accept", "application/llsd+xml")
+                    .post(scriptText.toByteArray(Charsets.UTF_8).toRequestBody(SCRIPT_UPLOAD_CONTENT_TYPE.toMediaType()))
+                    .build()
+
+                httpClient.newCall(uploadRequest).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        return@withContext ScriptSaveResult(false, "Script upload failed (HTTP ${response.code})")
+                    }
+
+                    val responseBody = response.body?.bytes()
+                        ?: return@withContext ScriptSaveResult(false, "Script upload returned empty response")
+
+                    val uploadResponse = LLSDParser.parseAuto(
+                        responseBody,
+                        response.header("Content-Type")
+                    ) as? LLSDMap ?: return@withContext ScriptSaveResult(
+                        false,
+                        "Script upload response was not LLSD map"
+                    )
+
+                    val saveResult = buildScriptSaveResult(uploadResponse)
+                    if (!saveResult.success) return@withContext saveResult
+
+                    Log.i(TAG, "Saved script $itemId (${scriptText.length} chars)")
+                    saveResult
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to save script $itemId", e)
+                ScriptSaveResult(success = false, error = e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    private fun buildScriptSaveResult(response: LLSDMap): ScriptSaveResult {
+        if (!response.getString("state").equals("complete", ignoreCase = true)) {
+            return ScriptSaveResult(
+                success = false,
+                error = "Upload state was ${response.getString("state") ?: "unknown"}"
+            )
+        }
+
+        val compileErrors = response.getArray("errors")
+            ?.value
+            ?.map { errorNode ->
+                when (errorNode) {
+                    is LLSDString -> errorNode.value
+                    is LLSDURI -> errorNode.value
+                    else -> errorNode.toXML()
+                }
+            }
+            .orEmpty()
+
+        if (response.getBoolean("compiled") == false) {
+            return ScriptSaveResult(
+                success = false,
+                error = compileErrors.firstOrNull() ?: "Script failed to compile",
+                compileErrors = compileErrors
+            )
+        }
+
+        return ScriptSaveResult(success = true, compileErrors = compileErrors)
+    }
     
     /**
      * Clear script cache.
@@ -205,24 +325,93 @@ class ScriptManager(
     }
     
     /**
-     * Handle script control change notification.
-     * This is called when a script takes or releases control of the avatar.
-     * 
-     * @param controls The control flags being taken/released
-     * @param takeControls Whether the script is taking controls (true) or releasing (false)
-     * @param passToAgent Whether input should still be passed to the agent
+     * Bitmask of controls currently captured by an in-world script
+     * (`AGENT_CONTROL_*` flags from llmessagesystem.h: FORWARD,
+     * NEG/POS for fwd/back/left/right/up/down, NUDGE_AT_POS, etc.).
+     * Movement-input layers (`MovementController`) AND the camera /
+     * touch-input UI subscribe to [scriptControlEvents] to know which
+     * channels to drop on the floor when [passToAgent] is false.
+     */
+    private val _capturedControls = MutableStateFlow(0)
+    val capturedControls: StateFlow<Int> = _capturedControls
+
+    /**
+     * Whether the script with control wants viewer input also passed
+     * through to the agent. When false, MovementController suppresses
+     * the matching AgentUpdate ControlFlags; when true the avatar still
+     * walks/turns alongside the script's commands.
+     */
+    private val _passInputsToAgent = MutableStateFlow(true)
+    val passInputsToAgent: StateFlow<Boolean> = _passInputsToAgent
+
+    private val _scriptControlEvents = MutableSharedFlow<ScriptControlEvent>(
+        replay = 1, extraBufferCapacity = 4
+    )
+    val scriptControlEvents: SharedFlow<ScriptControlEvent> = _scriptControlEvents.asSharedFlow()
+
+    /**
+     * Handle ScriptControlChange notification (UDP message_template
+     * `ScriptControlChange`). Updates [capturedControls] /
+     * [passInputsToAgent] state flows and emits a [ScriptControlEvent]
+     * so subscribers (movement controller, HUD, action bar) can apply
+     * the new input contract. When taking controls we OR the new
+     * flags into the captured mask; releasing clears the matching
+     * bits and falls back to passInputsToAgent=true once nothing is
+     * captured (Lumiya `RLVController` follows the same merge rule).
+     *
+     * @param controls Bitmask of AGENT_CONTROL_* flags being taken/released
+     * @param takeControls true if script grabs controls; false if releasing
+     * @param passToAgent  whether viewer input is still routed to the agent
+     *                     while a script holds the controls
      */
     fun handleScriptControlChange(controls: Int, takeControls: Boolean, passToAgent: Boolean) {
-        if (takeControls) {
-            Log.d(TAG, "Script taking controls: 0x${controls.toString(16)} (pass to agent: $passToAgent)")
-            // In a full implementation, this would:
-            // 1. Update UI to show script is controlling avatar
-            // 2. Modify input handling to respect passToAgent flag
-            // 3. Track which controls are captured (movement, mouse, etc.)
+        val previous = _capturedControls.value
+        val updated = if (takeControls) {
+            previous or controls
         } else {
-            Log.d(TAG, "Script releasing controls: 0x${controls.toString(16)}")
-            // Would restore normal avatar control
+            previous and controls.inv()
         }
+        _capturedControls.value = updated
+        _passInputsToAgent.value = if (updated == 0) true else passToAgent
+
+        Log.d(TAG, if (takeControls) {
+            "Script taking controls 0x${controls.toString(16)} → captured=0x${updated.toString(16)} passToAgent=$passToAgent"
+        } else {
+            "Script releasing controls 0x${controls.toString(16)} → captured=0x${updated.toString(16)} passToAgent=${_passInputsToAgent.value}"
+        })
+
+        scope.launch {
+            _scriptControlEvents.emit(ScriptControlEvent(
+                controls = controls,
+                takeControls = takeControls,
+                passToAgent = passToAgent,
+                capturedAfter = updated
+            ))
+        }
+    }
+
+    /**
+     * Snapshot of a single ScriptControlChange event. UI consumers use
+     * the `take/release + controls` pair to render an indicator and
+     * gate input; movement consumers use [capturedAfter] to know which
+     * AGENT_CONTROL_* flags to suppress in outbound AgentUpdates.
+     */
+    data class ScriptControlEvent(
+        val controls: Int,
+        val takeControls: Boolean,
+        val passToAgent: Boolean,
+        val capturedAfter: Int,
+    )
+
+    /**
+     * Convenience query for movement / camera layers: should this
+     * AGENT_CONTROL_* bit be applied to the local agent right now?
+     * Returns true when no script holds the bit, OR when the script
+     * granted passToAgent.
+     */
+    fun shouldApplyAgentControl(controlBit: Int): Boolean {
+        val captured = _capturedControls.value
+        return (captured and controlBit) == 0 || _passInputsToAgent.value
     }
     
     fun shutdown() {
@@ -266,3 +455,9 @@ data class ScriptInfo(
     val memoryPercentage: Float get() = (memoryUsed.toFloat() / memoryLimit) * 100f
     val memoryDisplay: String get() = "${memoryUsed / 1024}KB / ${memoryLimit / 1024}KB"
 }
+
+data class ScriptSaveResult(
+    val success: Boolean,
+    val error: String? = null,
+    val compileErrors: List<String> = emptyList()
+)

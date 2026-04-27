@@ -1,6 +1,7 @@
 package com.linkpoint.protocol.translation
 
 import android.util.Log
+import com.linkpoint.utils.InitializationTracker
 import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
 import java.util.*
@@ -25,6 +26,7 @@ import java.util.concurrent.atomic.AtomicLong
 object ProtocolDiagnostics {
     
     private const val TAG = "ProtocolDiag"
+    private const val EARLY_WARNING_GRACE_MS = 15_000L
     
     // Packet statistics
     private val packetsSent = AtomicLong(0)
@@ -56,6 +58,13 @@ object ProtocolDiagnostics {
     @Volatile
     var connectionPhase: String = "DISCONNECTED"
         private set
+
+    private fun formatUdpConnectedWarningContext(): Pair<Boolean, String> {
+        val elapsedMs = InitializationTracker.getElapsedSincePhase(InitializationTracker.Phase.UDP_CONNECTED)
+        val timing = if (elapsedMs != null) "${formatDuration(elapsedMs)} since UDP_CONNECTED" else "UDP_CONNECTED time unavailable"
+        val provisional = elapsedMs != null && elapsedMs < EARLY_WARNING_GRACE_MS
+        return provisional to timing
+    }
     
     /**
      * Record for a single packet event.
@@ -167,7 +176,7 @@ object ProtocolDiagnostics {
         
         addToHistory(record)
         
-        if (LumiyaTranslationLayer.config.verboseLogging) {
+        if (LinkpointTranslationLayer.config.verboseLogging) {
             Log.v(TAG, "→ ${record.messageName} (seq=$sequenceNumber, ${size}B)")
         }
     }
@@ -199,7 +208,7 @@ object ProtocolDiagnostics {
         
         addToHistory(record)
         
-        if (LumiyaTranslationLayer.config.verboseLogging) {
+        if (LinkpointTranslationLayer.config.verboseLogging) {
             Log.v(TAG, "← ${record.messageName} (seq=$sequenceNumber, ${size}B)")
         }
     }
@@ -218,12 +227,12 @@ object ProtocolDiagnostics {
             val hexPreview = formatHexPreview(rawBytes, 16)
             Log.d(TAG, "  Raw header: $hexPreview")
             
-            // Try Lumiya-style decoding for comparison
-            val lumiyaDecoded = MessageTranslation.decodeMessageId(rawBytes, 0)
-            if (lumiyaDecoded != null) {
-                val (decodedId, _) = lumiyaDecoded
-                Log.d(TAG, "  Lumiya decode: $decodedId (0x${decodedId.toString(16).uppercase()})")
-                Log.d(TAG, "  Lumiya name: ${MessageTranslation.KnownMessages.getName(decodedId)}")
+            // Try Linkpoint decoding for comparison
+            val protocolDecoded = MessageTranslation.decodeMessageId(rawBytes, 0)
+            if (protocolDecoded != null) {
+                val (decodedId, _) = protocolDecoded
+                Log.d(TAG, "  SL protocol decode: $decodedId (0x${decodedId.toString(16).uppercase()})")
+                Log.d(TAG, "  SL protocol name: ${MessageTranslation.KnownMessages.getName(decodedId)}")
             }
         }
     }
@@ -286,7 +295,12 @@ object ProtocolDiagnostics {
         
         // Check for common issues
         if (packetsSent.get() > 0 && packetsReceived.get() == 0L) {
-            sb.appendLine("⚠️ PACKETS SENT BUT NONE RECEIVED!")
+            val (provisional, timing) = formatUdpConnectedWarningContext()
+            if (provisional) {
+                sb.appendLine("⚠️ PROVISIONAL: PACKETS SENT BUT NONE RECEIVED ($timing)")
+            } else {
+                sb.appendLine("⚠️ PACKETS SENT BUT NONE RECEIVED ($timing)")
+            }
             sb.appendLine("   Possible causes:")
             sb.appendLine("   - Firewall blocking UDP")
             sb.appendLine("   - NAT traversal issue")

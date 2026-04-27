@@ -99,15 +99,45 @@
 
     <!-- Cache location options -->
     <string-array name="cache_location_entries">
+        <item>Documents/Linkpoint (recommended)</item>
         <item>Internal Storage</item>
-        <item>External Storage (Lumiya Cache)</item>
+        <item>External Storage (legacy, requires permission)</item>
         <item>Custom Location</item>
     </string-array>
 
     <string-array name="cache_location_values">
+        <item>documents</item>
         <item>internal</item>
         <item>external</item>
         <item>custom</item>
+    </string-array>
+
+
+
+    <string-array name="background_profile_entries">
+        <item>Conservative (best battery life)</item>
+        <item>Balanced (recommended)</item>
+        <item>Aggressive (lowest latency)</item>
+    </string-array>
+
+    <string-array name="background_profile_values">
+        <item>conservative</item>
+        <item>balanced</item>
+        <item>aggressive</item>
+    </string-array>
+
+    <string-array name="diagnostic_retention_entries">
+        <item>3 days</item>
+        <item>7 days</item>
+        <item>14 days</item>
+        <item>30 days</item>
+    </string-array>
+
+    <string-array name="diagnostic_retention_values">
+        <item>3</item>
+        <item>7</item>
+        <item>14</item>
+        <item>30</item>
     </string-array>
 
 </resources>

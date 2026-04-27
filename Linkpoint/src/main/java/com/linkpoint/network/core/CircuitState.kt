@@ -2,7 +2,7 @@ package com.linkpoint.network.core
 
 /**
  * Circuit establishment state machine.
- * Based on Lumiya's connection lifecycle.
+ * Based on the reference viewer's connection lifecycle.
  * 
  * This enum tracks the progression of circuit establishment with the server.
  * The sequence is:

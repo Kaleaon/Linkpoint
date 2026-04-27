@@ -1,6 +1,7 @@
 package com.linkpoint.protocol.transfer
 
 import android.util.Log
+import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Transfer Manager - Handles asset transfers via UDP protocol.
  * 
- * Based on Lumiya's SLTransferManager.java
+ * Based on the reference viewer's SLTransferManager.java
  * 
  * Transfer types:
  * - Asset transfers (textures, animations, sounds, etc.)
@@ -55,12 +56,6 @@ class TransferManager(
         
         // Default priority for transfers
         const val DEFAULT_PRIORITY = 10000.0f
-        
-        // Message IDs for transfer protocol
-        const val MSG_TRANSFER_REQUEST = 0xFF0099  // High frequency message
-        const val MSG_TRANSFER_INFO = 0xFF009A
-        const val MSG_TRANSFER_PACKET = 0x11
-        const val MSG_TRANSFER_ABORT = 0xFF009B
     }
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -366,7 +361,7 @@ class TransferManager(
         payload.put(params)
         
         try {
-            udpConnection.sendPacket(MSG_TRANSFER_REQUEST, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIds.TRANSFER_REQUEST, payload.array(), reliable = true)
             Log.d(TAG, "Sent TransferRequest for ${transfer.assetKey.assetId}")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send TransferRequest", e)
@@ -384,7 +379,7 @@ class TransferManager(
         payload.putInt(transfer.channelType)
         
         try {
-            udpConnection.sendPacket(MSG_TRANSFER_ABORT, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIds.TRANSFER_ABORT, payload.array(), reliable = true)
             Log.d(TAG, "Sent TransferAbort for ${transfer.transferId}")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send TransferAbort", e)

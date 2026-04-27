@@ -25,14 +25,23 @@ import java.util.concurrent.ConcurrentHashMap
  * - Store favorite landmarks
  * - Teleport to landmarks
  * 
- * Based on Lumiya's landmark implementation.
+ * Based on the reference viewer's landmark implementation.
  */
 class LandmarkManager(
     private val capabilityManager: CapabilityManager,
     private val transferManager: TransferManager,
     private val inventoryManager: InventoryManager,
     private val udpConnection: UDPConnectionFixed,
-    private val agentId: UUID
+    private val agentId: UUID,
+    /**
+     * Optional `regionHandle -> name` resolver. Wired by [LinkpointApp] using
+     * the same lookup that powers `TeleportManager.regionNameForHandle`
+     * (current session region + WorldMap cache populated by MapBlockReply).
+     * When null, the parsed landmark keeps the empty placeholder name and
+     * UI/UX surfaces should fall back to grid coordinates derived from the
+     * regionHandle.
+     */
+    private val regionNameForHandle: ((Long) -> String?)? = null
 ) {
     companion object {
         private const val TAG = "LandmarkManager"
@@ -70,7 +79,7 @@ class LandmarkManager(
                 val assetData = buildLandmarkAsset(regionHandle, position)
                 
                 // Create the inventory item via CreateInventoryItem capability
-                val createCap = capabilityManager.getCapability("CreateInventoryItem")
+                val createCap = capabilityManager.getCapability(CapabilityManager.CAP_CREATE_INVENTORY_ITEM)
                 if (createCap != null) {
                     val request = LLSDMap().apply {
                         this["type"] = LLSDInteger(3) // Landmark asset type
@@ -84,7 +93,7 @@ class LandmarkManager(
                         }
                     }
                     
-                    val response = capabilityManager.request("CreateInventoryItem", request)
+                    val response = capabilityManager.request(CapabilityManager.CAP_CREATE_INVENTORY_ITEM, request)
                     if (response is LLSDMap) {
                         val itemId = response.getUUID("item_id")
                         if (itemId != null) {
@@ -203,12 +212,13 @@ class LandmarkManager(
                 }
             }
             
+            val resolvedName = regionNameForHandle?.invoke(regionHandle).orEmpty()
             val landmark = Landmark(
                 itemId = assetId,
                 assetId = assetId,
                 name = "Landmark",
                 description = "",
-                regionName = "", // Would need to resolve from region handle
+                regionName = resolvedName,
                 regionHandle = regionHandle,
                 position = position
             )

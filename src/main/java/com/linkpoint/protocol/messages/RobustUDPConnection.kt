@@ -3,6 +3,7 @@ package com.linkpoint.protocol.messages
 import android.util.Log
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.net.InetSocketAddress
@@ -41,7 +42,9 @@ class RobustUDPConnection(
         
         // Heartbeat settings
         private const val HEARTBEAT_INTERVAL_MS = 30000L
-        private const val HEARTBEAT_TIMEOUT_MS = 5000L
+
+        // Packet buffering
+        private const val PACKET_CHANNEL_CAPACITY = 512
     }
     
     // Connection state
@@ -77,7 +80,10 @@ class RobustUDPConnection(
     )
     
     // Packet handling
-    private val packetChannel = Channel<PacketData>(capacity = Channel.UNLIMITED)
+    private val packetChannel = Channel<PacketData>(
+        capacity = PACKET_CHANNEL_CAPACITY,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
     
     data class PacketData(
         val data: ByteArray,
@@ -103,14 +109,12 @@ class RobustUDPConnection(
             datagramChannel?.configureBlocking(true)
             datagramChannel?.connect(address)
             
-            // Start receive loop
-            startReceiveLoop()
-            
-            // Start heartbeat
-            startHeartbeat()
-            
             _connectionState.value = ConnectionState.CONNECTED
             reconnectAttempts.set(0)
+
+            // Start loops after state is CONNECTED so their guards are true
+            startReceiveLoop()
+            startHeartbeat()
             
             Log.i(TAG, "✓ Connected to $simIP:$simPort")
             true
@@ -204,8 +208,10 @@ class RobustUDPConnection(
                         buffer.get(data)
                         
                         // Send to packet channel
-                        packetChannel.trySend(PacketData(data, System.currentTimeMillis()))
-                            .isSuccess
+                        val sendResult = packetChannel.trySend(PacketData(data, System.currentTimeMillis()))
+                        if (!sendResult.isSuccess) {
+                            Log.w(TAG, "Dropped incoming packet due to channel backpressure")
+                        }
                     }
                     
                 } catch (e: Exception) {
@@ -238,22 +244,15 @@ class RobustUDPConnection(
      * Send heartbeat packet
      */
     private suspend fun sendHeartbeat() {
-        // Send a simple heartbeat packet
-        val heartbeatPacket = createHeartbeatPacket()
-        val success = sendData(heartbeatPacket)
-        
-        if (!success && !isShuttingDown.get()) {
-            handleConnectionError("Heartbeat failed")
+        val channel = datagramChannel
+        if (channel == null || !channel.isConnected) {
+            if (!isShuttingDown.get()) {
+                handleConnectionError("Heartbeat check failed: socket not connected")
+            }
+            return
         }
-    }
-    
-    /**
-     * Create heartbeat packet (implement based on protocol)
-     */
-    private fun createHeartbeatPacket(): ByteArray {
-        // This should be implemented based on the SL protocol
-        // For now, return empty array
-        return ByteArray(0)
+
+        Log.v(TAG, "Heartbeat check ok")
     }
     
     /**
@@ -289,15 +288,15 @@ class RobustUDPConnection(
         _connectionState.value = ConnectionState.RECONNECTING
         
         // Calculate exponential backoff delay
-        val delay = minOf(
+        val reconnectDelayMs = minOf(
             INITIAL_RECONNECT_DELAY_MS * (1 shl (currentAttempts - 1)),
             MAX_RECONNECT_DELAY_MS
         )
         
-        Log.i(TAG, "Reconnecting in ${delay}ms (attempt $currentAttempts/$MAX_RECONNECT_ATTEMPTS)")
+        Log.i(TAG, "Reconnecting in ${reconnectDelayMs}ms (attempt $currentAttempts/$MAX_RECONNECT_ATTEMPTS)")
         
         scope.launch {
-            delay(delay)
+            delay(reconnectDelayMs)
             
             if (!isShuttingDown.get()) {
                 Log.i(TAG, "Attempting reconnection...")

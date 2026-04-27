@@ -34,11 +34,17 @@ class FriendsManager(
     
     companion object {
         private const val TAG = "FriendsManager"
-        
+
         // Friendship rights
         const val RIGHTS_ONLINE_STATUS = 0x01
         const val RIGHTS_MAP_LOCATION = 0x02
         const val RIGHTS_MODIFY_OBJECTS = 0x04
+
+        // Name synthesised by [addFriendFromLogin] when the buddy-list lacks
+        // a name (which is always — the login response only carries UUIDs).
+        // Used by [getUnresolvedNameAgentIds] to identify friends whose
+        // display-name lookup never completed so the UI can retry.
+        private const val PLACEHOLDER_NAME_PREFIX = "Resident ("
     }
     
     private val scope = CoroutineScope(EventQueueDispatcher.dispatcher + SupervisorJob())
@@ -283,13 +289,44 @@ class FriendsManager(
     suspend fun sendIM(friendAgentId: UUID, message: String) {
         withContext(Dispatchers.IO) {
             try {
-                val messageBytes = message.toByteArray(Charsets.UTF_8)
-                val payload = ByteBuffer.allocate(200 + messageBytes.size).order(ByteOrder.LITTLE_ENDIAN)
-                
+                // Wire format (LL message_template `ImprovedInstantMessage`,
+                // low-freq 254; Lumiya:
+                // slproto/messages/ImprovedInstantMessage.java PackPayload):
+                //   AgentData:    AgentID(LLUUID), SessionID(LLUUID)
+                //   MessageBlock: FromGroup(BOOL), ToAgentID(LLUUID),
+                //                 ParentEstateID(U32), RegionID(LLUUID),
+                //                 Position(LLVector3), Offline(U8),
+                //                 Dialog(U8), ID(LLUUID), Timestamp(U32),
+                //                 FromAgentName(Variable 1 NUL-term),
+                //                 Message(Variable 2 NUL-term),
+                //                 BinaryBucket(Variable 2)
+                //
+                // Lumiya's stringToVariableUTF (slproto/SLMessage.java line 212)
+                // appends a NUL byte and includes it in the length prefix.
+                // The previous encoder shipped FromAgentName and Message
+                // without the NUL, so the simulator's UTF parser would walk
+                // past the field boundary into adjacent fields.
+
+                val nameRaw = "User".toByteArray(Charsets.UTF_8)
+                val nameBytes = nameRaw + 0.toByte()
+
+                val messageRaw = message.toByteArray(Charsets.UTF_8)
+                val cappedMessage = if (messageRaw.size > 1023) messageRaw.copyOf(1023) else messageRaw
+                val messageBytes = cappedMessage + 0.toByte()
+
+                val payload = ByteBuffer
+                    .allocate(36 /* AgentData */ + 1 /* FromGroup */ + 16 /* ToAgentID */ +
+                              4 /* ParentEstateID */ + 16 /* RegionID */ + 12 /* Position */ +
+                              1 /* Offline */ + 1 /* Dialog */ + 16 /* ID */ + 4 /* Timestamp */ +
+                              1 + nameBytes.size /* FromAgentName V1 */ +
+                              2 + messageBytes.size /* Message V2 */ +
+                              2 /* BinaryBucket length only, empty */)
+                    .order(ByteOrder.LITTLE_ENDIAN)
+
                 // AgentData block
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
-                
+
                 // MessageBlock
                 payload.put(0)  // FromGroup = false
                 payload.putUUID(friendAgentId)  // ToAgentID
@@ -300,23 +337,22 @@ class FriendsManager(
                 payload.putFloat(0f)  // Position Z
                 payload.put(0)  // Offline
                 payload.put(0)  // Dialog = IM_NOTHING_SPECIAL (regular IM)
-                
+
                 val transactionId = UUID.randomUUID()
                 payload.putUUID(transactionId)
                 payload.putInt((System.currentTimeMillis() / 1000).toInt())
-                
-                // FromAgentName
-                val nameBytes = "User".toByteArray(Charsets.UTF_8)
+
+                // FromAgentName (Variable 1, NUL-terminated)
                 payload.put(nameBytes.size.toByte())
                 payload.put(nameBytes)
-                
-                // Message text
+
+                // Message (Variable 2, NUL-terminated)
                 payload.putShort(messageBytes.size.toShort())
-                if (messageBytes.isNotEmpty()) payload.put(messageBytes)
-                
-                // BinaryBucket - empty for regular IM
+                payload.put(messageBytes)
+
+                // BinaryBucket (Variable 2) - empty for regular IM
                 payload.putShort(0)
-                
+
                 udpConnection.sendPacket(MessageIds.IMPROVED_INSTANT_MESSAGE, payload.array().copyOf(payload.position()), reliable = true)
                 Log.i(TAG, "Sent IM to friend $friendAgentId")
             } catch (e: Exception) {
@@ -725,14 +761,34 @@ class FriendsManager(
     fun addFriendFromLogin(agentId: UUID, name: String, rightsGiven: Int, rightsHas: Int) {
         val resolvedName = name.ifBlank { "Resident (${agentId.toString().take(8)})" }
         Log.d(TAG, "Adding friend from login: $resolvedName ($agentId)")
-        friends[agentId] = Friend(
+        val friend = Friend(
             agentId = agentId,
             name = resolvedName,
             rightsGiven = rightsGiven,
             rightsHas = rightsHas
         )
+        val isNew = friends.put(agentId, friend) == null
+        // Emit so any UI that's already observing the flow refreshes once buddy-list
+        // parsing completes after the user has opened the Friends screen.
+        if (isNew) {
+            scope.launch {
+                _friendsFlow.emit(FriendEvent.Added(friend))
+            }
+        }
     }
     
+    /**
+     * Return the agent IDs of friends whose display name has not been
+     * resolved yet (i.e. still on the synthesised placeholder). Callers
+     * can feed this back into [ProfileManager.getDisplayNames] when the
+     * Friends screen opens so login-time lookup failures don't leave the
+     * list permanently stuck on placeholders.
+     */
+    fun getUnresolvedNameAgentIds(): List<UUID> =
+        friends.values
+            .filter { it.name.startsWith(PLACEHOLDER_NAME_PREFIX) || it.name.isBlank() }
+            .map { it.agentId }
+
     /**
      * Update a friend's display name after resolution.
      */

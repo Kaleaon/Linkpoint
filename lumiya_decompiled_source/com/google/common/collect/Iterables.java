@@ -342,7 +342,7 @@ public final class Iterables {
                 if (i2 > i) {
                     try {
                         list.set(i, t);
-                    } catch (UnsupportedOperationException e) {
+                    } catch (IllegalStateException e) {
                         slowRemoveIfForRemainingElements(list, predicate, i, i2);
                         return true;
                     }

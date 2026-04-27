@@ -17,6 +17,7 @@ import android.os.SystemClock;
 import androidx.preference.PreferenceManager;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.view.GestureDetectorCompat;
@@ -884,27 +885,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     /* access modifiers changed from: private */
-    /* JADX WARNING: Code restructure failed: missing block: B:2:0x0006, code lost:
-        r0 = r0.findFragmentById(com.lumiyaviewer.lumiya.R.id.details);
-     */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
     public boolean detailsVisible() {
-        /*
-            r2 = this;
-            android.support.v4.app.FragmentManager r0 = r2.getSupportFragmentManager()
-            if (r0 == 0) goto L_0x0017
-            r1 = 2131755284(0x7f100114, float:1.9141443E38)
-            android.support.v4.app.Fragment r0 = r0.findFragmentById(r1)
-            if (r0 == 0) goto L_0x0017
-            boolean r0 = r0.isVisible()
-            if (r0 == 0) goto L_0x0017
-            r0 = 1
-            return r0
-        L_0x0017:
-            r0 = 0
-            return r0
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.ui.render.WorldViewActivity.detailsVisible():boolean");
+        FragmentManager supportFragmentManager = getSupportFragmentManager();
+        if (supportFragmentManager == null) {
+            return false;
+        }
+        Fragment findFragmentById = supportFragmentManager.findFragmentById(R.id.details);
+        return findFragmentById != null && findFragmentById.isVisible();
     }
 
     private void displayHUD(int i) {
@@ -1278,390 +1265,72 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     /* JADX WARNING: Removed duplicated region for block: B:99:0x013b  */
     /* Code decompiled incorrectly, please refer to instructions dump. */
     private void updateObjectPanel() {
-        /*
-            r12 = this;
-            com.lumiyaviewer.lumiya.react.SubscriptionData<com.lumiyaviewer.lumiya.react.SubscriptionSingleKey, com.lumiyaviewer.lumiya.slproto.users.manager.MyAvatarState> r0 = r12.myAvatarState
-            java.lang.Object r0 = r0.getData()
-            com.lumiyaviewer.lumiya.slproto.users.manager.MyAvatarState r0 = (com.lumiyaviewer.lumiya.slproto.users.manager.MyAvatarState) r0
-            com.lumiyaviewer.lumiya.react.SubscriptionData<java.util.UUID, com.lumiyaviewer.lumiya.slproto.SLAgentCircuit> r1 = r12.agentCircuit
-            java.lang.Object r1 = r1.getData()
-            com.lumiyaviewer.lumiya.slproto.SLAgentCircuit r1 = (com.lumiyaviewer.lumiya.slproto.SLAgentCircuit) r1
-            if (r1 == 0) goto L_0x0143
-            r2 = 1
-            r8 = r2
-        L_0x0014:
-            if (r0 == 0) goto L_0x0147
-            boolean r2 = r0.isSitting()
-            r7 = r2
-        L_0x001b:
-            if (r0 == 0) goto L_0x014b
-            boolean r2 = r0.hasHUDs()
-            r6 = r2
-        L_0x0022:
-            if (r0 == 0) goto L_0x014f
-            boolean r2 = r0.isFlying()
-            r5 = r2
-        L_0x0029:
-            if (r1 == 0) goto L_0x0153
-            com.lumiyaviewer.lumiya.slproto.modules.SLModules r2 = r1.getModules()
-            com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVController r2 = r2.rlvController
-            boolean r2 = r2.canStandUp()
-            r4 = r2
-        L_0x0036:
-            if (r1 == 0) goto L_0x0157
-            com.lumiyaviewer.lumiya.slproto.modules.SLModules r1 = r1.getModules()
-            com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVController r1 = r1.rlvController
-            boolean r1 = r1.canSit()
-        L_0x0042:
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r2 = r12.pickedObject
-            if (r2 == 0) goto L_0x015a
-            r2 = 1
-        L_0x0047:
-            java.lang.String r3 = "isSitting %b, isFlying %b, hasHUDs %b, isDragging %b"
-            r9 = 4
-            java.lang.Object[] r9 = new java.lang.Object[r9]
-            java.lang.Boolean r10 = java.lang.Boolean.valueOf(r7)
-            r11 = 0
-            r9[r11] = r10
-            java.lang.Boolean r10 = java.lang.Boolean.valueOf(r5)
-            r11 = 1
-            r9[r11] = r10
-            java.lang.Boolean r10 = java.lang.Boolean.valueOf(r6)
-            r11 = 2
-            r9[r11] = r10
-            boolean r10 = r12.isDragging
-            java.lang.Boolean r10 = java.lang.Boolean.valueOf(r10)
-            r11 = 3
-            r9[r11] = r10
-            com.lumiyaviewer.lumiya.Debug.Printf(r3, r9)
-            android.view.ViewGroup r9 = r12.dragPointerLayout
-            boolean r3 = r12.isDragging
-            if (r3 == 0) goto L_0x015d
-            r3 = 0
-        L_0x0075:
-            r9.setVisibility(r3)
-            android.view.View r9 = r12.dragPointer
-            boolean r3 = r12.isDragging
-            if (r3 == 0) goto L_0x0160
-            r3 = 0
-        L_0x007f:
-            r9.setVisibility(r3)
-            android.widget.LinearLayout r9 = r12.flyButtonsLayout
-            if (r7 != 0) goto L_0x008a
-            r3 = r8 ^ 1
-            if (r3 == 0) goto L_0x0094
-        L_0x008a:
-            boolean r3 = r12.camButtonEnabled
-            if (r3 == 0) goto L_0x0163
-            boolean r3 = r12.manualCamMode
-        L_0x0090:
-            r3 = r3 ^ 1
-            if (r3 != 0) goto L_0x009a
-        L_0x0094:
-            boolean r3 = r12.isDragging
-            if (r3 != 0) goto L_0x009a
-            if (r2 == 0) goto L_0x0166
-        L_0x009a:
-            r3 = 8
-        L_0x009c:
-            r9.setVisibility(r3)
-            android.view.View r9 = r12.moveButtonsLayout
-            if (r7 != 0) goto L_0x00a7
-            r3 = r8 ^ 1
-            if (r3 == 0) goto L_0x00b1
-        L_0x00a7:
-            boolean r3 = r12.camButtonEnabled
-            if (r3 == 0) goto L_0x0169
-            boolean r3 = r12.manualCamMode
-        L_0x00ad:
-            r3 = r3 ^ 1
-            if (r3 != 0) goto L_0x00b7
-        L_0x00b1:
-            boolean r3 = r12.isDragging
-            if (r3 != 0) goto L_0x00b7
-            if (r2 == 0) goto L_0x016c
-        L_0x00b7:
-            r3 = 4
-        L_0x00b8:
-            r9.setVisibility(r3)
-            android.widget.ImageButton r9 = r12.buttonStandUp
-            if (r4 == 0) goto L_0x016f
-            if (r7 == 0) goto L_0x016f
-            boolean r3 = r12.isDragging
-            r3 = r3 ^ 1
-            if (r3 == 0) goto L_0x016f
-            r3 = 0
-        L_0x00c8:
-            r9.setVisibility(r3)
-            android.widget.Button r9 = r12.buttonHUD
-            if (r6 == 0) goto L_0x0173
-            boolean r3 = r12.isDragging
-            r3 = r3 ^ 1
-            if (r3 == 0) goto L_0x0173
-            if (r8 == 0) goto L_0x0173
-            r3 = 0
-        L_0x00d8:
-            r9.setVisibility(r3)
-            android.widget.ImageButton r6 = r12.buttonFlyDownward
-            if (r5 == 0) goto L_0x00e1
-            if (r8 != 0) goto L_0x00e9
-        L_0x00e1:
-            boolean r3 = r12.camButtonEnabled
-            if (r3 == 0) goto L_0x0177
-            boolean r3 = r12.manualCamMode
-            if (r3 == 0) goto L_0x0177
-        L_0x00e9:
-            r3 = 0
-        L_0x00ea:
-            r6.setVisibility(r3)
-            android.widget.ImageButton r6 = r12.buttonStopFlying
-            if (r5 == 0) goto L_0x017e
-            if (r8 == 0) goto L_0x017e
-            boolean r3 = r12.camButtonEnabled
-            if (r3 == 0) goto L_0x017b
-            boolean r3 = r12.manualCamMode
-        L_0x00f9:
-            r3 = r3 ^ 1
-            if (r3 == 0) goto L_0x017e
-            r3 = 0
-        L_0x00fe:
-            r6.setVisibility(r3)
-            android.widget.ImageButton r5 = r12.buttonCamOn
-            boolean r3 = r12.camButtonEnabled
-            if (r3 == 0) goto L_0x0182
-            boolean r3 = r12.manualCamMode
-            r3 = r3 ^ 1
-            if (r3 == 0) goto L_0x0182
-            boolean r3 = r12.isDragging
-            r3 = r3 ^ 1
-            if (r3 == 0) goto L_0x0182
-            r3 = r2 ^ 1
-            if (r3 == 0) goto L_0x0182
-            r3 = 0
-        L_0x0118:
-            r5.setVisibility(r3)
-            android.widget.ImageButton r3 = r12.buttonCamOff
-            boolean r5 = r12.camButtonEnabled
-            if (r5 == 0) goto L_0x0185
-            boolean r5 = r12.manualCamMode
-            if (r5 == 0) goto L_0x0185
-            boolean r5 = r12.isDragging
-            r5 = r5 ^ 1
-            if (r5 == 0) goto L_0x0185
-            r2 = r2 ^ 1
-            if (r2 == 0) goto L_0x0185
-            r2 = 0
-        L_0x0130:
-            r3.setVisibility(r2)
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r2 = r12.pickedObject
-            if (r2 == 0) goto L_0x013b
-            r2 = r8 ^ 1
-            if (r2 == 0) goto L_0x0188
-        L_0x013b:
-            android.view.View r0 = r12.objectControlsPanel
-            r1 = 8
-            r0.setVisibility(r1)
-        L_0x0142:
-            return
-        L_0x0143:
-            r2 = 0
-            r8 = r2
-            goto L_0x0014
-        L_0x0147:
-            r2 = 0
-            r7 = r2
-            goto L_0x001b
-        L_0x014b:
-            r2 = 0
-            r6 = r2
-            goto L_0x0022
-        L_0x014f:
-            r2 = 0
-            r5 = r2
-            goto L_0x0029
-        L_0x0153:
-            r2 = 0
-            r4 = r2
-            goto L_0x0036
-        L_0x0157:
-            r1 = 0
-            goto L_0x0042
-        L_0x015a:
-            r2 = 0
-            goto L_0x0047
-        L_0x015d:
-            r3 = 4
-            goto L_0x0075
-        L_0x0160:
-            r3 = 4
-            goto L_0x007f
-        L_0x0163:
-            r3 = 0
-            goto L_0x0090
-        L_0x0166:
-            r3 = 0
-            goto L_0x009c
-        L_0x0169:
-            r3 = 0
-            goto L_0x00ad
-        L_0x016c:
-            r3 = 0
-            goto L_0x00b8
-        L_0x016f:
-            r3 = 8
-            goto L_0x00c8
-        L_0x0173:
-            r3 = 8
-            goto L_0x00d8
-        L_0x0177:
-            r3 = 8
-            goto L_0x00ea
-        L_0x017b:
-            r3 = 0
-            goto L_0x00f9
-        L_0x017e:
-            r3 = 8
-            goto L_0x00fe
-        L_0x0182:
-            r3 = 8
-            goto L_0x0118
-        L_0x0185:
-            r2 = 8
-            goto L_0x0130
-        L_0x0188:
-            android.view.View r2 = r12.objectControlsPanel
-            r3 = 0
-            r2.setVisibility(r3)
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r2 = r12.pickedObject
-            boolean r2 = r2.isTouchable()
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r3 = r12.pickedObject
-            boolean r3 = r3.isAvatar()
-            if (r3 == 0) goto L_0x01a3
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r3 = r12.pickedObject
-            boolean r3 = r3.hasTouchableChildren()
-            r2 = r2 | r3
-        L_0x01a3:
-            android.widget.ImageButton r3 = r12.objectTouchButton
-            if (r2 == 0) goto L_0x021f
-            r2 = 0
-        L_0x01a8:
-            r3.setVisibility(r2)
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r2 = r12.pickedObject
-            boolean r3 = r2.isAvatar()
-            if (r7 == 0) goto L_0x0222
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r2 = r12.pickedObject
-            int r2 = r2.localID
-            int r0 = r0.sittingOn()
-            if (r2 != r0) goto L_0x0222
-            r0 = 1
-        L_0x01be:
-            if (r3 != 0) goto L_0x0224
-            r2 = r0 ^ 1
-        L_0x01c2:
-            if (r3 != 0) goto L_0x0226
-        L_0x01c4:
-            android.widget.ImageButton r5 = r12.objectSitButton
-            if (r2 == 0) goto L_0x0228
-            if (r1 == 0) goto L_0x0228
-            r1 = 0
-        L_0x01cb:
-            r5.setVisibility(r1)
-            android.widget.ImageButton r1 = r12.objectStandButton
-            if (r0 == 0) goto L_0x022b
-            if (r4 == 0) goto L_0x022b
-            r0 = 0
-        L_0x01d5:
-            r1.setVisibility(r0)
-            android.widget.ImageButton r1 = r12.objectChatButton
-            if (r3 == 0) goto L_0x022e
-            r0 = 0
-        L_0x01dd:
-            r1.setVisibility(r0)
-            android.widget.ImageView r1 = r12.avatarIconView
-            if (r3 == 0) goto L_0x0231
-            r0 = 0
-        L_0x01e5:
-            r1.setVisibility(r0)
-            android.widget.ImageButton r1 = r12.objectPayButton
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r0 = r12.pickedObject
-            boolean r0 = r0.isPayable()
-            if (r0 != 0) goto L_0x01f8
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r0 = r12.pickedObject
-            byte r0 = r0.saleType
-            if (r0 == 0) goto L_0x0234
-        L_0x01f8:
-            r0 = 0
-        L_0x01f9:
-            r1.setVisibility(r0)
-            r1 = 0
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r0 = r12.pickedObject
-            boolean r0 = r0.isAvatar()
-            if (r0 == 0) goto L_0x0237
-            com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever r0 = r12.pickedAvatarNameRetriever
-            if (r0 == 0) goto L_0x0264
-            com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever r0 = r12.pickedAvatarNameRetriever
-            java.lang.String r0 = r0.getResolvedName()
-        L_0x020f:
-            if (r0 != 0) goto L_0x0218
-            r0 = 2131296825(0x7f090239, float:1.8211578E38)
-            java.lang.String r0 = r12.getString(r0)
-        L_0x0218:
-            android.widget.TextView r1 = r12.objectNameTextView
-            r1.setText(r0)
-            goto L_0x0142
-        L_0x021f:
-            r2 = 8
-            goto L_0x01a8
-        L_0x0222:
-            r0 = 0
-            goto L_0x01be
-        L_0x0224:
-            r2 = 0
-            goto L_0x01c2
-        L_0x0226:
-            r0 = 0
-            goto L_0x01c4
-        L_0x0228:
-            r1 = 8
-            goto L_0x01cb
-        L_0x022b:
-            r0 = 8
-            goto L_0x01d5
-        L_0x022e:
-            r0 = 8
-            goto L_0x01dd
-        L_0x0231:
-            r0 = 8
-            goto L_0x01e5
-        L_0x0234:
-            r0 = 8
-            goto L_0x01f9
-        L_0x0237:
-            com.lumiyaviewer.lumiya.react.SubscriptionData<java.lang.Integer, com.lumiyaviewer.lumiya.slproto.objects.SLObjectProfileData> r0 = r12.selectedObjectProfile
-            java.lang.Object r0 = r0.getData()
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectProfileData r0 = (com.lumiyaviewer.lumiya.slproto.objects.SLObjectProfileData) r0
-            if (r0 == 0) goto L_0x0262
-            java.util.UUID r2 = r0.objectUUID()
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r3 = r12.pickedObject
-            java.util.UUID r3 = r3.getId()
-            boolean r2 = com.google.common.base.Objects.equal(r2, r3)
-            if (r2 == 0) goto L_0x0262
-            com.google.common.base.Optional r0 = r0.name()
-            java.lang.Object r0 = r0.orNull()
-            java.lang.String r0 = (java.lang.String) r0
-        L_0x025b:
-            if (r0 != 0) goto L_0x020f
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r0 = r12.pickedObject
-            java.lang.String r0 = r0.name
-            goto L_0x020f
-        L_0x0262:
-            r0 = r1
-            goto L_0x025b
-        L_0x0264:
-            r0 = r1
-            goto L_0x020f
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.ui.render.WorldViewActivity.updateObjectPanel():void");
+        MyAvatarState myAvatarState2 = this.myAvatarState.getData();
+        SLAgentCircuit circuit = this.agentCircuit.getData();
+        boolean isConnected = circuit != null;
+        boolean isSitting = myAvatarState2 != null && myAvatarState2.isSitting();
+        boolean hasHUDs = myAvatarState2 != null && myAvatarState2.hasHUDs();
+        boolean isFlying = myAvatarState2 != null && myAvatarState2.isFlying();
+        boolean canStandUp = circuit != null && circuit.getModules().rlvController.canStandUp();
+        boolean canSit = circuit != null && circuit.getModules().rlvController.canSit();
+        boolean hasPickedObject = this.pickedObject != null;
+        boolean cameraLocked = this.camButtonEnabled ? this.manualCamMode : false;
+
+        this.dragPointerLayout.setVisibility(this.isDragging ? 0 : 4);
+        this.dragPointer.setVisibility(this.isDragging ? 0 : 4);
+
+        boolean hideMovement = isSitting || !isConnected || cameraLocked || this.isDragging || hasPickedObject;
+        this.flyButtonsLayout.setVisibility(hideMovement ? 8 : 0);
+        this.moveButtonsLayout.setVisibility(hideMovement ? 4 : 0);
+
+        this.buttonStandUp.setVisibility((canStandUp && isSitting && !this.isDragging) ? 0 : 8);
+        this.buttonHUD.setVisibility((hasHUDs && !this.isDragging && isConnected) ? 0 : 8);
+        this.buttonFlyDownward.setVisibility((isFlying || !isConnected || cameraLocked) ? 0 : 8);
+        this.buttonStopFlying.setVisibility((isFlying && isConnected && !cameraLocked) ? 0 : 8);
+
+        this.buttonCamOn.setVisibility((this.camButtonEnabled && !this.manualCamMode && !this.isDragging && !hasPickedObject) ? 0 : 8);
+        this.buttonCamOff.setVisibility((this.camButtonEnabled && this.manualCamMode && !this.isDragging && !hasPickedObject) ? 0 : 8);
+
+        if (this.pickedObject == null || !isConnected) {
+            this.objectControlsPanel.setVisibility(8);
+            return;
+        }
+
+        this.objectControlsPanel.setVisibility(0);
+        boolean canTouch = this.pickedObject.isTouchable();
+        boolean isAvatar = this.pickedObject.isAvatar();
+        if (isAvatar) {
+            canTouch |= this.pickedObject.hasTouchableChildren();
+        }
+        this.objectTouchButton.setVisibility(canTouch ? 0 : 8);
+
+        boolean sittingOnPicked = isSitting && myAvatarState2 != null && this.pickedObject.localID == myAvatarState2.sittingOn();
+        boolean canSitOnPicked = !isAvatar && !sittingOnPicked;
+        this.objectSitButton.setVisibility((canSitOnPicked && canSit) ? 0 : 8);
+        this.objectStandButton.setVisibility((sittingOnPicked && canStandUp) ? 0 : 8);
+        this.objectChatButton.setVisibility(isAvatar ? 0 : 8);
+        this.avatarIconView.setVisibility(isAvatar ? 0 : 8);
+
+        this.objectPayButton.setVisibility((this.pickedObject.isPayable() || this.pickedObject.saleType != 0) ? 0 : 8);
+
+        String name = null;
+        if (isAvatar) {
+            if (this.pickedAvatarNameRetriever != null) {
+                name = this.pickedAvatarNameRetriever.getResolvedName();
+            }
+            if (name == null) {
+                name = getString(R.string.unknown_avatar);
+            }
+        } else {
+            SLObjectProfileData profileData = this.selectedObjectProfile.getData();
+            if (profileData != null && Objects.equal(profileData.objectUUID(), this.pickedObject.getId())) {
+                name = profileData.name().orNull();
+            }
+            if (name == null) {
+                name = this.pickedObject.name;
+            }
+        }
+        this.objectNameTextView.setText(name);
     }
 
     private void updateSimTimeOverride() {

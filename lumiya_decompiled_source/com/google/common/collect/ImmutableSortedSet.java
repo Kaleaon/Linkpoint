@@ -321,14 +321,14 @@ public abstract class ImmutableSortedSet<E> extends ImmutableSortedSetFauxveride
     @GwtIncompatible("NavigableSet")
     @Deprecated
     public final E pollFirst() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.NavigableSet
     @GwtIncompatible("NavigableSet")
     @Deprecated
     public final E pollLast() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.NavigableSet, java.util.SortedSet

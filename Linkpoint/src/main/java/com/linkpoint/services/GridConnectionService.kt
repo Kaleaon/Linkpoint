@@ -20,13 +20,13 @@ import kotlinx.coroutines.flow.collectLatest
 
 /**
  * Background service to maintain grid connection
- * Based on Lumiya's GridConnectionService
+ * Based on the reference viewer's GridConnectionService
  */
 class GridConnectionService : Service() {
     
     companion object {
         private const val TAG = "GridConnectionService"
-        private const val NOTIFICATION_ID = 1001
+        private const val NOTIFICATION_ID = 1002  // Unique ID (LinkpointConnectionService uses 1001)
         private const val CHANNEL_ID = "linkpoint_connection"
         
         fun start(context: Context) {
@@ -149,11 +149,14 @@ class GridConnectionService : Service() {
                     }
                     ConnectionState.CONNECTING -> "Connecting..."
                     ConnectionState.RECONNECTING -> "Reconnecting..."
+                    ConnectionState.IDLE -> "Idle"
+                    ConnectionState.DISCONNECTING -> "Disconnecting..."
                     ConnectionState.DISCONNECTED -> {
                         stopSelf()
                         "Disconnected"
                     }
                     ConnectionState.ERROR -> "Connection error"
+                    ConnectionState.MFA_REQUIRED -> "MFA required"
                 }
                 updateNotification(status)
             }

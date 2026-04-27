@@ -140,7 +140,7 @@ class BakesOnMeshManager(
                     this["agent_id"] = LLSDUUID(avatarId)
                 }
                 
-                val response = capabilityManager.request("UploadAgentBakedTexture", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_UPLOAD_AGENT_BAKED_TEXTURE, request)
                 
                 if (response is LLSDMap) {
                     // Server will send new baked textures via AgentCachedTexture

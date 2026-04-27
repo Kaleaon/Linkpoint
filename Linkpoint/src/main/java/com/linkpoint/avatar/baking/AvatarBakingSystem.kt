@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Avatar Baking System - Bakes multiple texture layers into final avatar textures.
  * 
- * Based on Lumiya's BakeProcess.java, BakeLayer.java, BakeLayers.java
+ * Based on the reference viewer's BakeProcess.java, BakeLayer.java, BakeLayers.java
  * 
  * Baking combines:
  * - Skin texture (base layer)

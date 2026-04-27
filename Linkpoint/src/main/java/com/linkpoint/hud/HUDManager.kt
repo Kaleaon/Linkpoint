@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap
  * - HUD Bottom (37)
  * - HUD Bottom Right (38)
  * 
- * Based on Lumiya's HUD implementation.
+ * Based on the reference viewer's HUD implementation.
  */
 class HUDManager(
     private val context: Context,

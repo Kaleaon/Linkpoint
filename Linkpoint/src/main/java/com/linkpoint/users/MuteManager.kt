@@ -1,6 +1,7 @@
 package com.linkpoint.users
 
 import android.util.Log
+import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.transfer.XferManager
 import com.linkpoint.protocol.transfer.XferResult
@@ -16,7 +17,7 @@ import java.util.zip.CRC32
 /**
  * Mute List Manager - Handles blocking/muting of avatars, objects, and groups.
  * 
- * Based on Lumiya's SLMuteList.java
+ * Based on the reference viewer's SLMuteList.java
  * 
  * Mute types:
  * - AGENT: Block an avatar
@@ -37,14 +38,7 @@ class MuteManager(
 ) {
     companion object {
         private const val TAG = "MuteManager"
-        
-        // Message IDs
-        const val MSG_MUTE_LIST_REQUEST = 0xFF00D5
-        const val MSG_UPDATE_MUTE_LIST_ENTRY = 0xFF00D8
-        const val MSG_REMOVE_MUTE_LIST_ENTRY = 0xFF00D9
-        const val MSG_MUTE_LIST_UPDATE = 0xFF00D6
-        const val MSG_USE_CACHED_MUTE_LIST = 0xFF00D7
-        
+
         // Mute flags
         const val MUTE_CHAT = 0x00000001
         const val MUTE_VOICE = 0x00000002
@@ -86,7 +80,7 @@ class MuteManager(
             // MuteData block
             payload.putInt(cachedCRC)
             
-            udpConnection.sendPacket(MSG_MUTE_LIST_REQUEST, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIds.MUTE_LIST_REQUEST, payload.array(), reliable = true)
             Log.d(TAG, "Requested mute list (CRC: ${cachedCRC.toString(16)})")
             
         } catch (e: Exception) {
@@ -188,7 +182,7 @@ class MuteManager(
             payload.putInt(entry.type.ordinal)
             payload.putInt(entry.flags)
             
-            udpConnection.sendPacket(MSG_UPDATE_MUTE_LIST_ENTRY, payload.array().copyOf(payload.position()), reliable = true)
+            udpConnection.sendPacket(MessageIds.UPDATE_MUTE_LIST_ENTRY, payload.array().copyOf(payload.position()), reliable = true)
             Log.i(TAG, "Added mute entry: ${entry.name} (${entry.type})")
             
         } catch (e: Exception) {
@@ -217,7 +211,7 @@ class MuteManager(
             payload.put(nameBytes.size.toByte())
             payload.put(nameBytes)
             
-            udpConnection.sendPacket(MSG_REMOVE_MUTE_LIST_ENTRY, payload.array().copyOf(payload.position()), reliable = true)
+            udpConnection.sendPacket(MessageIds.REMOVE_MUTE_LIST_ENTRY, payload.array().copyOf(payload.position()), reliable = true)
             Log.i(TAG, "Removed mute entry: ${entry.name} (${entry.type})")
             
         } catch (e: Exception) {

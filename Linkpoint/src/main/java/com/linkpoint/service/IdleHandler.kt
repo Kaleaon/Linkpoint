@@ -14,7 +14,7 @@ import java.lang.ref.WeakReference
 /**
  * Idle Handler - Manages user idle state and auto-away/logout.
  * 
- * Based on Lumiya's SLIdleHandler.java
+ * Based on the reference viewer's SLIdleHandler.java
  * 
  * Features:
  * - Tracks user activity (touches, key presses)

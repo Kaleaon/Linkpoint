@@ -11,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.linkpoint.network.NetworkLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -577,16 +578,74 @@ object LifecycleAwareScopeManager {
     }
     
     /**
-     * Process lifecycle observer for application-level events.
+     * Process lifecycle observer for application-level events. Notifies
+     * the simulator that the agent has paused or resumed so the sim can
+     * reduce non-essential traffic (object updates, ImprovedTerseObjectUpdate
+     * spam, etc.) while the viewer is backgrounded — this is the same hook
+     * Lumiya wires (`SLAgentCircuit` calls AgentPause/AgentResume on the
+     * Android `onStart`/`onStop` boundary).
      */
     private class ProcessLifecycleObserver : DefaultLifecycleObserver {
-        
+
         override fun onStop(owner: LifecycleOwner) {
             android.util.Log.d(TAG, "Application moved to background")
+            NetworkLogger.log(
+                NetworkLogger.Level.INFO,
+                NetworkLogger.Category.LIFECYCLE,
+                "📱 App → background (process onStop)"
+            )
+            sendAgentPauseIfConnected()
         }
-        
+
         override fun onStart(owner: LifecycleOwner) {
             android.util.Log.d(TAG, "Application moved to foreground")
+            NetworkLogger.log(
+                NetworkLogger.Level.INFO,
+                NetworkLogger.Category.LIFECYCLE,
+                "📱 App → foreground (process onStart)"
+            )
+            sendAgentResumeIfConnected()
+        }
+
+        private fun sendAgentPauseIfConnected() {
+            try {
+                val app = com.linkpoint.LinkpointApp.getInstanceOrNull() ?: return
+                val udp = app.udpConnection
+                if (udp.isConnected.value) {
+                    udp.sendAgentPause()
+                    // Make sure the foreground service knows we're connected
+                    // so its keepalive loop runs at full cadence while the
+                    // app is backgrounded — this is the load-bearing piece
+                    // for keeping the cellular NAT mapping alive across
+                    // exit/resume.
+                    com.linkpoint.service.LinkpointConnectionService.setProcessConnected(true)
+                    com.linkpoint.service.LinkpointConnectionService.start(app)
+                }
+            } catch (e: Throwable) {
+                android.util.Log.w(TAG, "AgentPause on background failed: ${e.message}")
+            }
+        }
+
+        private fun sendAgentResumeIfConnected() {
+            try {
+                val app = com.linkpoint.LinkpointApp.getInstanceOrNull() ?: return
+                val udp = app.udpConnection
+                if (udp.isConnected.value) {
+                    udp.sendAgentResume()
+                    // Drive an immediate StartPingCheck so we discover a
+                    // dead path (cellular NAT change while we were away)
+                    // within ~1s, instead of waiting for the next FGS
+                    // keepalive tick or the 5-second in-circuit ping
+                    // cadence. Cheap: 12 bytes out, ~12 bytes back.
+                    try {
+                        udp.sendStartPingCheck()
+                    } catch (e: Throwable) {
+                        android.util.Log.w(TAG, "Immediate post-resume ping failed: ${e.message}")
+                    }
+                }
+            } catch (e: Throwable) {
+                android.util.Log.w(TAG, "AgentResume on foreground failed: ${e.message}")
+            }
         }
     }
 }

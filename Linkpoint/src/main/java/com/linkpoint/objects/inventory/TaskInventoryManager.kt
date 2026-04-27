@@ -1,6 +1,7 @@
 package com.linkpoint.objects.inventory
 
 import android.util.Log
+import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.transfer.*
 import kotlinx.coroutines.*
@@ -14,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Task Inventory Manager - Handles object inventory (contents).
  * 
- * Based on Lumiya's SLTaskInventory.java
+ * Based on the reference viewer's SLTaskInventory.java
  * 
  * Task inventory is the inventory inside objects (prims).
  * It includes scripts, notecards, textures, and other items
@@ -33,14 +34,7 @@ class TaskInventoryManager(
 ) {
     companion object {
         private const val TAG = "TaskInventoryManager"
-        
-        // Message IDs
-        const val MSG_REQUEST_TASK_INVENTORY = 0xFF00C3
-        const val MSG_REPLY_TASK_INVENTORY = 0xFF00C4
-        const val MSG_UPDATE_TASK_INVENTORY = 0xFF00B6
-        const val MSG_REMOVE_TASK_INVENTORY = 0xFF00B7
-        const val MSG_MOVE_TASK_INVENTORY = 0xFF00B8
-        
+
         // Task inventory markers
         const val INVENTORY_HEADER = "inv_object"
         const val ITEM_HEADER = "inv_item"
@@ -150,16 +144,24 @@ class TaskInventoryManager(
      * Send RequestTaskInventory message.
      */
     private suspend fun sendRequestTaskInventory(localId: Int, objectId: UUID) {
-        val payload = ByteBuffer.allocate(20).order(ByteOrder.LITTLE_ENDIAN)
-        
+        // Wire format (LL message_template `RequestTaskInventory`, low-freq 289):
+        //   AgentData:     AgentID(LLUUID), SessionID(LLUUID)
+        //   InventoryData: LocalID(U32)
+        // The previous payload omitted SessionID, leaving the simulator-side
+        // parser to read LocalID from the SessionID slot, which made the
+        // request silently no-op (Lumiya parity:
+        // slproto/messages/RequestTaskInventory.java).
+        val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
+
         // AgentData block
         writeUUID(payload, agentId)
-        
+        writeUUID(payload, udpConnection.getSessionId())
+
         // InventoryData block
         payload.putInt(localId)
         
         try {
-            udpConnection.sendPacket(MSG_REQUEST_TASK_INVENTORY, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIds.REQUEST_TASK_INVENTORY, payload.array(), reliable = true)
             Log.d(TAG, "Sent RequestTaskInventory for object $localId")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send RequestTaskInventory", e)

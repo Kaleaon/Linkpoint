@@ -4,6 +4,7 @@ import android.os.Parcelable
 import android.util.Log
 import com.linkpoint.assets.AssetType
 import com.linkpoint.protocol.capabilities.CapabilityManager
+import com.linkpoint.protocol.core.AgentIdentity
 import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.getUUID
@@ -52,6 +53,10 @@ class InventoryManager(
         const val FOLDER_TYPE_ANIMATION = 20
         const val FOLDER_TYPE_GESTURE = 21
         const val FOLDER_TYPE_FAVORITES = 23
+        // SL protocol folder types that other Linkpoint constants gloss over but that
+        // actually appear in inventory-skeleton responses. Needed for warm-fetch.
+        const val FOLDER_TYPE_CURRENT_OUTFIT = 46
+        const val FOLDER_TYPE_INBOX = 50
         const val FOLDER_TYPE_MESH = 49
         const val FOLDER_TYPE_OUTBOX = 52
         const val FOLDER_TYPE_OUTFIT = 54
@@ -75,6 +80,12 @@ class InventoryManager(
     
     private val _currentFolder = MutableStateFlow<UUID?>(null)
     val currentFolder: StateFlow<UUID?> = _currentFolder
+
+    private fun outboundIdentity(): AgentIdentity = AgentIdentity(
+        agentId = agentId,
+        sessionId = udpConnection.getSessionId(),
+        circuitCode = udpConnection.getCircuitCode()
+    ).requireValid("InventoryManager outbound packet")
     
     /**
      * Set root folder ID
@@ -399,11 +410,11 @@ class InventoryManager(
                     // Total payload: 70 bytes
 
                     val payload = ByteBuffer.allocate(70).order(ByteOrder.LITTLE_ENDIAN)
-                    val sessionId = udpConnection.getSessionId()
+                    val identity = outboundIdentity()
 
                     // AgentData
-                    payload.putUUID(agentId)
-                    payload.putUUID(sessionId)
+                    payload.putUUID(identity.agentId)
+                    payload.putUUID(identity.sessionId)
                     payload.putInt(0) // Stamp = 0 (false/default)
 
                     // InventoryData count (Variable block)
@@ -525,8 +536,9 @@ class InventoryManager(
                     val payload = ByteBuffer.allocate(payloadSize).order(ByteOrder.LITTLE_ENDIAN)
 
                     // AgentData block
-                    payload.putUUID(agentId)
-                    payload.putUUID(udpConnection.getSessionId())
+                    val identity = outboundIdentity()
+                    payload.putUUID(identity.agentId)
+                    payload.putUUID(identity.sessionId)
 
                     // FolderData block
                     payload.putUUID(folderId)
@@ -673,8 +685,9 @@ class InventoryManager(
         val buffer = ByteBuffer.allocate(payloadSize).order(ByteOrder.LITTLE_ENDIAN)
 
         // AgentData Block
-        buffer.putUUID(agentId)
-        buffer.putUUID(udpConnection.getSessionId())
+        val identity = outboundIdentity()
+        buffer.putUUID(identity.agentId)
+        buffer.putUUID(identity.sessionId)
         buffer.putUUID(UUID.randomUUID()) // TransactionID
 
         // InventoryData Block Count
@@ -772,8 +785,9 @@ class InventoryManager(
         val payload = ByteBuffer.allocate(payloadSize).order(ByteOrder.LITTLE_ENDIAN)
 
         // AgentData
-        payload.putUUID(agentId)
-        payload.putUUID(udpConnection.getSessionId())
+        val identity = outboundIdentity()
+        payload.putUUID(identity.agentId)
+        payload.putUUID(identity.sessionId)
 
         // InventoryData Block Count
         payload.put(1.toByte())
@@ -880,6 +894,53 @@ class InventoryManager(
             fetchFolderContents(landmarkFolder, fetchFolders = false, fetchItems = true)
         }
         return getLandmarks()
+    }
+
+    /**
+     * Warm-fetch a curated set of high-value system folders in parallel.
+     *
+     * The inventory-skeleton from login only gives us the folder tree; items
+     * are populated lazily when a folder is opened. For a just-connected
+     * session that leaves every folder at 0 items - including Current Outfit,
+     * which determines what the avatar is wearing. This pulls the small set
+     * of folders a viewer actually needs before the UI is touched, so the
+     * user sees landmarks/favorites/outfits immediately and appearance
+     * resolution has the data it needs.
+     *
+     * Launched on the internal IO scope; returns immediately. Per-folder
+     * failures are logged but never propagate - the UI can still lazy-fetch
+     * anything that was missed.
+     */
+    fun warmFetch() {
+        val priorityTypes = listOf(
+            FOLDER_TYPE_CURRENT_OUTFIT,
+            FOLDER_TYPE_FAVORITES,
+            FOLDER_TYPE_LANDMARK,
+            FOLDER_TYPE_MYOUTFITS,
+            FOLDER_TYPE_INBOX
+        )
+        val toFetch = priorityTypes.mapNotNull { type ->
+            systemFolders[type]?.let { type to it }
+        }
+        if (toFetch.isEmpty()) {
+            Log.i(TAG, "Warm-fetch skipped: no priority system folders registered yet")
+            return
+        }
+
+        scope.launch {
+            Log.i(TAG, "Warm-fetch starting for ${toFetch.size} folders: ${toFetch.map { it.first }}")
+            toFetch.map { (type, folderId) ->
+                async {
+                    try {
+                        val ok = fetchFolderContents(folderId, fetchFolders = false, fetchItems = true)
+                        Log.i(TAG, "Warm-fetch folder type=$type id=$folderId ok=$ok")
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Warm-fetch folder type=$type id=$folderId failed: ${e.message}")
+                    }
+                }
+            }.awaitAll()
+            Log.i(TAG, "Warm-fetch complete: items cached = ${items.size}")
+        }
     }
     
     fun shutdown() {

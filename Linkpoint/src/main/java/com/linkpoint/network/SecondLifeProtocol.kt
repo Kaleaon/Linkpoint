@@ -49,15 +49,15 @@ import java.util.UUID
  * - MFA hash storage
  * - Pre-hashed password support
  * 
- * Based on patterns from the official Second Life app and Lumiya viewer compatibility.
+ * Based on patterns from the official Second Life app and reference viewer compatibility.
  */
 class SecondLifeProtocol(private val context: Context) {
     
     companion object {
         private const val TAG = "SLProtocol"
-        // NOTE: Identifying as "Lumiya" for compatibility with grids that recognize it.
-        // Linkpoint is based on Lumiya's protocol implementation.
-        private const val VIEWER_NAME = "Lumiya"
+        // NOTE: Identifying as "Linkpoint" for grid compatibility.
+        // Linkpoint is based on the reference viewer's protocol implementation.
+        private const val VIEWER_NAME = "Linkpoint"
         private const val VIEWER_VERSION = "1.0.0"
     }
     
@@ -168,7 +168,7 @@ class SecondLifeProtocol(private val context: Context) {
         
         // Start initialization tracking
         com.linkpoint.utils.InitializationTracker.startSession()
-        com.linkpoint.utils.InitializationTracker.startPhase(
+        com.linkpoint.utils.InitializationTracker.reachPhase(
             com.linkpoint.utils.InitializationTracker.Phase.LOGIN_STARTING,
             "Login for $firstName $lastName"
         )
@@ -182,7 +182,7 @@ class SecondLifeProtocol(private val context: Context) {
         // Log network diagnostics before login
         networkingService.logNetworkDiagnostics()
         
-        // Create password hash - IMPORTANT: Must truncate to 16 chars like Lumiya does
+        // Create password hash - IMPORTANT: Must truncate to 16 chars like the reference viewer does
         // This is a Second Life protocol requirement
         val truncatedPassword = password.trim().take(16)
         val passwordHash = createPasswordHash(password)
@@ -197,7 +197,7 @@ class SecondLifeProtocol(private val context: Context) {
             "hashFormat" to "\$1\$MD5"
         ))
         
-        // Build XMLRPC request with MFA support and Lumiya/Modern Viewer compatibility
+        // Build XMLRPC request with MFA support and Modern Viewer compatibility
         val xmlRequest = buildLoginXml(
             firstName = firstName,
             lastName = lastName,
@@ -306,15 +306,18 @@ class SecondLifeProtocol(private val context: Context) {
                     regionInfo = regionInfo
                 )
                 
-                // Configure cache manager with grid and user info for Lumiya Cache structure
-                // Grid name determines public cache path: Lumiya Cache/Public/<Grid>/
-                // User ID determines private cache path: Lumiya Cache/Private/<Grid>/<UserID>/
-                val gridName = app.gridManager.getSelectedGrid().gridNick.ifEmpty { 
-                    app.gridManager.getSelectedGrid().name 
-                }
-                app.cacheManager.setCurrentGrid(gridName)
+                // Configure cache manager with grid and user info for Linkpoint Cache structure.
+                // Grid path:  Documents/Linkpoint/Public/<gridId>/<assetType>/...
+                // User path:  Documents/Linkpoint/Private/<gridId>/<userId>/...
+                //
+                // Use GridInfo.id (always present, e.g. "secondlife", "secondlife_beta",
+                // "kitely") rather than gridNick — gridNick is the in-protocol display
+                // label and may be empty for user-added custom grids, which would collapse
+                // distinct grids into the same cache directory and corrupt assets.
+                val grid = app.gridManager.getSelectedGrid()
+                app.cacheManager.setCurrentGrid(grid.id)
                 app.cacheManager.setCurrentUser(result.agentId)
-                Log.i(TAG, "Cache configured for grid: $gridName, user: ${result.agentId}")
+                Log.i(TAG, "Cache configured for grid: ${grid.id} (${grid.name}), user: ${result.agentId}")
                 
                 // Initialize agent-specific managers (sets app.agentId)
                 app.initializeAgentManagers(agentId)
@@ -366,7 +369,7 @@ class SecondLifeProtocol(private val context: Context) {
                         com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTING,
                         "UDP connected"
                     )
-                    com.linkpoint.utils.InitializationTracker.startPhase(
+                    com.linkpoint.utils.InitializationTracker.reachPhase(
                         com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTED,
                         "Waiting for simulator messages"
                     )
@@ -387,7 +390,7 @@ class SecondLifeProtocol(private val context: Context) {
                 }
                 
                 // Initialize capabilities from seed capability (for textures, meshes, etc.)
-                // This is critical for rendering - like Lumiya's SLCaps.GetCapabilities()
+                // This is critical for rendering - like the reference viewer's SLCaps.GetCapabilities()
                 // IMPORTANT: We now wait for capabilities initialization before returning success
                 var capsInitialized = false
                 val seedCap = result.seedCapability
@@ -398,18 +401,18 @@ class SecondLifeProtocol(private val context: Context) {
                     )
                     Log.i(TAG, "[STEP 2/2] Initializing capabilities from seed...")
                     Log.d(TAG, "[STEP 2/2] Seed URL: ${seedCap.take(80)}...")
-                    Log.d(TAG, "[STEP 2/2] Using Lumiya translation layer with login URL: ${loginUri.take(60)}...")
+                    Log.d(TAG, "[STEP 2/2] Using Linkpoint translation layer with login URL: ${loginUri.take(60)}...")
                     
                     try {
-                        Log.d(TAG, "[STEP 2/2] capabilityManager.initialize() starting with Lumiya translation...")
-                        // Use the overload that accepts loginUri for Lumiya-compatible URL repair
+                        Log.d(TAG, "[STEP 2/2] capabilityManager.initialize() starting with Linkpoint translation...")
+                        // Use the overload that accepts loginUri for Linkpoint-compatible URL repair
                         capsInitialized = app.capabilityManager.initialize(seedCap, loginUri)
                         if (capsInitialized) {
                             com.linkpoint.utils.InitializationTracker.completePhase(
                                 com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_FETCHING,
                                 "${app.capabilityManager.getCapabilityCount()} capabilities loaded"
                             )
-                            com.linkpoint.utils.InitializationTracker.startPhase(
+                            com.linkpoint.utils.InitializationTracker.reachPhase(
                                 com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_READY,
                                 "Capabilities available for use"
                             )
@@ -417,7 +420,20 @@ class SecondLifeProtocol(private val context: Context) {
                             Log.i(TAG, "[STEP 2/2] Capabilities loaded: ${app.capabilityManager.getCapabilityCount()}")
                             // Connect texture manager to capability-based fetching
                             app.textureManager.onCapabilitiesReady()
-                            
+
+                            // Fetch SimulatorFeatures so renderer / inventory / UI
+                            // can feature-gate (PBR, BoM, animated objects, max
+                            // attachments, etc.). Best-effort and async — we
+                            // don't block login on it. Result lands on
+                            // app.simulatorFeatures.features StateFlow.
+                            app.applicationScope.launch {
+                                try {
+                                    app.simulatorFeatures.fetchSimulatorFeatures()
+                                } catch (e: Exception) {
+                                    Log.w(TAG, "SimulatorFeatures background fetch failed: ${e.message}")
+                                }
+                            }
+
                             // Parse login response for buddy-list, inventory, etc.
                             // This populates FriendsManager and InventoryManager with initial data
                             parseAndPopulateLoginData(result.responseXml, agentId)
@@ -464,6 +480,19 @@ class SecondLifeProtocol(private val context: Context) {
                 )
                 
                 NetworkLogger.logProtocol("Login Complete", "Successfully connected to ${result.simIp}:${result.simPort}")
+
+                // Cache credentials so the auto re-login coordinator can
+                // re-drive a full HTTP login when the UDP layer reports a
+                // dead circuit. See LinkpointApp.attemptAutoRelogin().
+                app.rememberLoginCredentials(
+                    firstName = firstName,
+                    lastName = lastName,
+                    password = password,
+                    loginUri = loginUri,
+                    startLocation = startLocation,
+                    mfaHash = result.mfaHash
+                )
+
                 LoginResult.Success(agentId, result.sessionId, result.mfaHash)
             }
             is CoreNetworkingService.LoginResult.MFARequired -> {
@@ -503,7 +532,7 @@ class SecondLifeProtocol(private val context: Context) {
      * - buddy-list: Friends list from login response
      * - inventory-skeleton: Initial inventory folder structure
      * 
-     * Based on Lumiya's login response parsing logic.
+     * Based on the reference viewer's login response parsing logic.
      */
     private fun parseAndPopulateLoginData(responseXml: String, agentId: UUID) {
         try {
@@ -541,7 +570,12 @@ class SecondLifeProtocol(private val context: Context) {
                                         app.capabilityManager.isReady.filter { it }.first()
                                     } ?: false
                                     if (!ready) {
-                                        Log.w(TAG, "[LOGIN DATA] Display name lookup skipped: capabilities not ready")
+                                        Log.w(TAG, "[LOGIN DATA] Capabilities not ready in 10s; using UDP UUIDNameRequest for ${friendIds.size} friends")
+                                        try {
+                                            app.udpConnection.sendUUIDNameRequest(friendIds)
+                                        } catch (e: Exception) {
+                                            Log.w(TAG, "[LOGIN DATA] UUIDNameRequest fallback failed: ${e.message}")
+                                        }
                                         return@launch
                                     }
 
@@ -549,9 +583,32 @@ class SecondLifeProtocol(private val context: Context) {
                                     displayNames.forEach { (agentId, displayName) ->
                                         app.friendsManager.updateFriendName(agentId, displayName)
                                     }
-                                    Log.i(TAG, "[LOGIN DATA] ✓ Resolved display names for ${displayNames.size} friends")
+                                    Log.i(TAG, "[LOGIN DATA] ✓ Resolved display names for ${displayNames.size}/${friendIds.size} friends via cap")
+
+                                    // UDP fallback: anything the GetDisplayNames cap
+                                    // didn't resolve is asked over UDP UUIDNameRequest.
+                                    // The cap silently failed in the 2026-04-25 Athanasia
+                                    // capture (851 friends stuck on `Resident (xxxx)`);
+                                    // UDP UUIDNameRequest is `NotTrusted Unencoded` and
+                                    // works even when the HTTP cap pipeline is broken.
+                                    val unresolved = friendIds - displayNames.keys
+                                    if (unresolved.isNotEmpty()) {
+                                        Log.i(TAG, "[LOGIN DATA] Falling back to UUIDNameRequest for ${unresolved.size} unresolved friends")
+                                        try {
+                                            app.udpConnection.sendUUIDNameRequest(unresolved.toList())
+                                        } catch (e: Exception) {
+                                            Log.w(TAG, "[LOGIN DATA] UUIDNameRequest fallback failed: ${e.message}")
+                                        }
+                                    }
                                 } catch (e: Exception) {
                                     Log.w(TAG, "[LOGIN DATA] Failed to resolve some display names: ${e.message}")
+                                    // If the whole HTTP batch threw, still try the UDP
+                                    // fallback so the friends list isn't all placeholders.
+                                    try {
+                                        app.udpConnection.sendUUIDNameRequest(friendIds)
+                                    } catch (udpErr: Exception) {
+                                        Log.w(TAG, "[LOGIN DATA] UUIDNameRequest fallback also failed: ${udpErr.message}")
+                                    }
                                 }
                             }
                         } catch (e: Exception) {
@@ -663,7 +720,7 @@ class SecondLifeProtocol(private val context: Context) {
             // Required by official protocol, all desktop viewers send this
             append("<member><name>last_exec_event</name><value><i4>$lastExecEvent</i4></value></member>")
             
-            // Options array - comprehensive list matching official viewers and Lumiya
+            // Options array - comprehensive list matching official viewers
             append("<member><name>options</name><value><array><data>")
             // Core inventory options
             append("<value><string>inventory-root</string></value>")
@@ -909,6 +966,10 @@ class SecondLifeProtocol(private val context: Context) {
      */
     fun disconnect() {
         Log.i(TAG, "Disconnecting from grid")
+        // Clear cached login credentials so the auto re-login coordinator
+        // doesn't fire after a user-initiated logout. Mirrors Lumiya's
+        // `userWantsConnected = false` in `SLGridConnection.disconnect()`.
+        LinkpointApp.getInstance().forgetLoginCredentials()
         networkingService.disconnect()
         LinkpointApp.getInstance().sessionManager.disconnect()
     }

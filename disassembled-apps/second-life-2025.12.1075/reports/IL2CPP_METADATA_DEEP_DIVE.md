@@ -1,0 +1,373 @@
+# IL2CPP Metadata Deep Dive (Second Life 2025.12.1075)
+
+Generated: 2026-02-05T04:10:23.469130Z
+
+## Source Artifacts
+- APK: `/workspace/Linkpoint/secondlife_decompiled/Second Life 2025.12.1075.apk`
+- Metadata: `assets/bin/Data/Managed/Metadata/global-metadata.dat`
+
+## Managed Assembly Inventory
+ScriptingAssemblies.json lists 200 assemblies:
+- UnityEngine.dll
+- UnityEngine.AIModule.dll
+- UnityEngine.ARModule.dll
+- UnityEngine.AccessibilityModule.dll
+- UnityEngine.AndroidJNIModule.dll
+- UnityEngine.AnimationModule.dll
+- UnityEngine.AssetBundleModule.dll
+- UnityEngine.AudioModule.dll
+- UnityEngine.ClothModule.dll
+- UnityEngine.ContentLoadModule.dll
+- UnityEngine.CoreModule.dll
+- UnityEngine.CrashReportingModule.dll
+- UnityEngine.DSPGraphModule.dll
+- UnityEngine.DirectorModule.dll
+- UnityEngine.GIModule.dll
+- UnityEngine.GameCenterModule.dll
+- UnityEngine.GraphicsStateCollectionSerializerModule.dll
+- UnityEngine.GridModule.dll
+- UnityEngine.HierarchyCoreModule.dll
+- UnityEngine.HotReloadModule.dll
+- UnityEngine.IMGUIModule.dll
+- UnityEngine.ImageConversionModule.dll
+- UnityEngine.InputModule.dll
+- UnityEngine.InputForUIModule.dll
+- UnityEngine.InputLegacyModule.dll
+- UnityEngine.JSONSerializeModule.dll
+- UnityEngine.LocalizationModule.dll
+- UnityEngine.MarshallingModule.dll
+- UnityEngine.MultiplayerModule.dll
+- UnityEngine.ParticleSystemModule.dll
+- UnityEngine.PerformanceReportingModule.dll
+- UnityEngine.PhysicsModule.dll
+- UnityEngine.Physics2DModule.dll
+- UnityEngine.PropertiesModule.dll
+- UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll
+- UnityEngine.ScreenCaptureModule.dll
+- UnityEngine.ShaderVariantAnalyticsModule.dll
+- UnityEngine.SharedInternalsModule.dll
+- UnityEngine.SpriteMaskModule.dll
+- UnityEngine.SpriteShapeModule.dll
+- UnityEngine.StreamingModule.dll
+- UnityEngine.SubstanceModule.dll
+- UnityEngine.SubsystemsModule.dll
+- UnityEngine.TLSModule.dll
+- UnityEngine.TerrainModule.dll
+- UnityEngine.TerrainPhysicsModule.dll
+- UnityEngine.TextCoreFontEngineModule.dll
+- UnityEngine.TextCoreTextEngineModule.dll
+- UnityEngine.TextRenderingModule.dll
+- UnityEngine.TilemapModule.dll
+- UnityEngine.UIModule.dll
+- UnityEngine.UIElementsModule.dll
+- UnityEngine.UmbraModule.dll
+- UnityEngine.UnityAnalyticsModule.dll
+- UnityEngine.UnityAnalyticsCommonModule.dll
+- UnityEngine.UnityConnectModule.dll
+- UnityEngine.UnityCurlModule.dll
+- UnityEngine.UnityTestProtocolModule.dll
+- UnityEngine.UnityWebRequestModule.dll
+- UnityEngine.UnityWebRequestAssetBundleModule.dll
+- UnityEngine.UnityWebRequestAudioModule.dll
+- UnityEngine.UnityWebRequestTextureModule.dll
+- UnityEngine.UnityWebRequestWWWModule.dll
+- UnityEngine.VFXModule.dll
+- UnityEngine.VRModule.dll
+- UnityEngine.VehiclesModule.dll
+- UnityEngine.VideoModule.dll
+- UnityEngine.WindModule.dll
+- UnityEngine.XRModule.dll
+- AppsFlyer.dll
+- Assembly-CSharp.dll
+- BugSplat.Unity.Runtime.dll
+- Cinemachine.dll
+- Cysharp.Net.Http.YetAnotherHttpHandler.dll
+- Draco.dll
+- EPO.dll
+- EPODemo.dll
+- EPOHDRP.dll
+- EPOURP.dll
+- EPOUtilities.dll
+- Gilzoide.SqliteNet.dll
+- Ktx.dll
+- LottiePlugin.Runtime.dll
+- MagicOnion.Unity.dll
+- NativeShare.Runtime.dll
+- NLayer.dll
+- NVorbis.dll
+- OneSignal.Android.dll
+- OneSignal.Core.dll
+- PriorityQueue.dll
+- Purchasing.Common.dll
+- SineWave.Common.dll
+- SineWave.PluginManager.dll
+- SineWave.ResourceManager.dll
+- UDE.dll
+- UniTask.Addressables.dll
+- UniTask.dll
+- UniTask.DOTween.dll
+- UniTask.Linq.dll
+- UniTask.TextMeshPro.dll
+- Unity.AdaptivePerformance.dll
+- Unity.AdaptivePerformance.Google.Android.dll
+- Unity.AdaptivePerformance.Samsung.Android.dll
+- Unity.Addressables.dll
+- Unity.AI.Navigation.dll
+- Unity.Burst.dll
+- Unity.Collections.dll
+- Unity.InputSystem.dll
+- Unity.InputSystem.ForUI.dll
+- Unity.Mathematics.dll
+- Unity.MemoryProfiler.dll
+- Unity.Multiplayer.Center.Common.dll
+- Unity.Profiling.Core.dll
+- Unity.Rendering.LightTransport.Runtime.dll
+- Unity.RenderPipeline.Universal.ShaderLibrary.dll
+- Unity.RenderPipelines.Core.Runtime.dll
+- Unity.RenderPipelines.Core.Runtime.Shared.dll
+- Unity.RenderPipelines.Core.ShaderLibrary.dll
+- Unity.RenderPipelines.GPUDriven.Runtime.dll
+- Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.dll
+- Unity.RenderPipelines.Universal.2D.Runtime.dll
+- Unity.RenderPipelines.Universal.Config.Runtime.dll
+- Unity.RenderPipelines.Universal.Runtime.dll
+- Unity.RenderPipelines.Universal.Shaders.dll
+- Unity.ResourceManager.dll
+- Unity.ScriptableBuildPipeline.dll
+- Unity.Services.Core.Analytics.dll
+- Unity.Services.Core.Components.dll
+- Unity.Services.Core.Configuration.dll
+- Unity.Services.Core.Device.dll
+- Unity.Services.Core.dll
+- Unity.Services.Core.Environments.dll
+- Unity.Services.Core.Environments.Internal.dll
+- Unity.Services.Core.Internal.dll
+- Unity.Services.Core.Networking.dll
+- Unity.Services.Core.Registration.dll
+- Unity.Services.Core.Scheduler.dll
+- Unity.Services.Core.Telemetry.dll
+- Unity.Services.Core.Threading.dll
+- Unity.TextMeshPro.dll
+- Unity.Timeline.dll
+- UnityEngine.Purchasing.AppleCore.dll
+- UnityEngine.Purchasing.AppleMacosStub.dll
+- UnityEngine.Purchasing.AppleStub.dll
+- UnityEngine.Purchasing.Codeless.dll
+- UnityEngine.Purchasing.dll
+- UnityEngine.Purchasing.Security.dll
+- UnityEngine.Purchasing.SecurityCore.dll
+- UnityEngine.Purchasing.Stores.dll
+- UnityEngine.Purchasing.WinRTCore.dll
+- UnityEngine.Purchasing.WinRTStub.dll
+- UnityEngine.SpatialTracking.dll
+- UnityEngine.UI.dll
+- UnityEngine.XR.LegacyInputHelpers.dll
+- VorbisPluginImpl.dll
+- MessagePack.Annotations.dll
+- System.Threading.Channels.dll
+- I18N.MidEast.dll
+- System.Collections.Immutable.dll
+- Firebase.Analytics.dll
+- Grpc.Net.Common.dll
+- Unity.Collections.LowLevel.ILSupport.dll
+- MagicOnion.Client.dll
+- Microsoft.Extensions.DependencyInjection.Abstractions.dll
+- BugSplatDotNetStandard.dll
+- Grpc.Core.dll
+- Firebase.App.dll
+- I18N.Rare.dll
+- I18N.Other.dll
+- System.Diagnostics.DiagnosticSource.dll
+- Microsoft.CodeAnalysis.dll
+- System.Reflection.Metadata.dll
+- Microsoft.Extensions.Caching.Memory.dll
+- Firebase.TaskExtension.dll
+- System.IO.Pipelines.dll
+- System.Text.Encoding.CodePages.dll
+- Microsoft.Extensions.Logging.Abstractions.dll
+- Google.Protobuf.dll
+- I18N.CJK.dll
+- Microsoft.Extensions.Primitives.dll
+- MagicOnion.Serialization.MessagePack.dll
+- Microsoft.Extensions.Caching.Abstractions.dll
+- Grpc.Core.Api.dll
+- Microsoft.Bcl.AsyncInterfaces.dll
+- Unity.Burst.Unsafe.dll
+- System.Runtime.CompilerServices.Unsafe.dll
+- I18N.West.dll
+- I18N.dll
+- Microsoft.NET.StringTools.dll
+- MagicOnion.Abstractions.dll
+- LazyCache.dll
+- MessagePack.dll
+- Newtonsoft.Json.dll
+- Microsoft.Bcl.TimeProvider.dll
+- Grpc.Net.Client.dll
+- Firebase.Platform.dll
+- Microsoft.CodeAnalysis.CSharp.dll
+- Google.MiniJson.dll
+- Microsoft.Extensions.Options.dll
+- MagicOnion.Shared.dll
+
+Managed DLLs found in APK (0):
+
+## IL2CPP Metadata Header
+- Magic: `0xFAB11BAF`
+- Version: `31`
+- stringLiteralOffset: 256
+- stringLiteralCount: 184680
+- stringLiteralDataOffset: 184936
+- stringLiteralDataCount: 888992
+- stringOffset: 1073928
+- stringCount: 2228952
+- eventsOffset: 3302880
+- eventsCount: 9240
+- propertiesOffset: 3312120
+- propertiesCount: 442940
+- methodsOffset: 3755060
+- methodsCount: 4155480
+- parameterDefaultValuesOffset: 7910540
+- parameterDefaultValuesCount: 40896
+- fieldDefaultValuesOffset: 7951436
+- fieldDefaultValuesCount: 206256
+
+## Metadata String Sample (first 80)
+- Assembly-CSharp
+- Assembly-CSharp.dll
+- <Module>
+- <>f__AnonymousType0`2
+- get_rp
+- get_station
+- rp
+- station
+- .ctor
+- value
+- Equals
+- GetHashCode
+- ToString
+- <rp>i__Field
+- <station>i__Field
+- <rp>j__TPar
+- <station>j__TPar
+- <>f__AnonymousType1`2
+- get_eventName
+- get_eventData
+- eventName
+- eventData
+- <eventName>i__Field
+- <eventData>i__Field
+- <eventName>j__TPar
+- <eventData>j__TPar
+- <>f__AnonymousType2`1
+- get_NeedConsentScreen
+- NeedConsentScreen
+- <NeedConsentScreen>i__Field
+- <NeedConsentScreen>j__TPar
+- <>f__AnonymousType3`2
+- get_UserConsentedToTracking
+- get_UserConsentedToTargetedAds
+- UserConsentedToTracking
+- UserConsentedToTargetedAds
+- <UserConsentedToTracking>i__Field
+- <UserConsentedToTargetedAds>i__Field
+- <UserConsentedToTracking>j__TPar
+- <UserConsentedToTargetedAds>j__TPar
+- <>f__AnonymousType4`4
+- get_xMin
+- get_yMin
+- get_width
+- get_height
+- xMin
+- yMin
+- width
+- height
+- <xMin>i__Field
+- <yMin>i__Field
+- <width>i__Field
+- <height>i__Field
+- <xMin>j__TPar
+- <yMin>j__TPar
+- <width>j__TPar
+- <height>j__TPar
+- <>f__AnonymousType5`1
+- get_amount
+- amount
+- <amount>i__Field
+- <amount>j__TPar
+- <>f__AnonymousType6`2
+- get_agent_id
+- get_allowed
+- agent_id
+- allowed
+- <agent_id>i__Field
+- <allowed>i__Field
+- <agent_id>j__TPar
+- <allowed>j__TPar
+- <>f__AnonymousType7`2
+- get_invoice
+- get_line_item
+- invoice
+- line_item
+- <invoice>i__Field
+- <line_item>i__Field
+- <invoice>j__TPar
+- <line_item>j__TPar
+
+## Network Indicators in Metadata
+### URL strings (top 25)
+- http://www.w3.org/1999/xhtml (x8)
+- http://www.w3.org/2000/svg (x6)
+- https://assetstore.unity.com/packages/slug/98713?aid=1011lNGT (x4)
+- https://reactjs.org/docs/error-decoder.html?invariant= (x4)
+- http://www.w3.org/XML/1998/namespace (x4)
+- http://www.w3.org/1998/Math/MathML (x4)
+- https://fb.me/react-polyfills (x4)
+- https://developer.vuplex.com/webview/IWithPopups (x3)
+- https://developer.vuplex.com/webview/StandaloneWebView (x3)
+- https://developer.vuplex.com/webview/AndroidWebView (x3)
+- https://developer.vuplex.com/webview/AndroidGeckoWebView (x3)
+- https://developer.vuplex.com/webview/IWebView#SetFocusedI    2The (x3)
+- https://developer.vuplex.com/webview/IWebView#SetRenderingEnabledI    *EnableViewUpdates() (x3)
+- https://developer.vuplex.com/webview/IWebView#SetRenderingEnabledI    IWebView.Focus() (x3)
+- https://developer.vuplex.com/webview/IWebView#SetFocusedI    bThe (x3)
+- https://support.vuplex.com/articles/v4-changes#initI    IWebView.Init(Texture2D, (x3)
+- https://support.vuplex.com/articles/v4-changes#resolution~I    IWebView.SizeInPixels (x3)
+- https://developer.vuplex.com/webview/IWebView#SizeI    @IWebView.VideoTexture (x3)
+- https://www.nuget.org/packages/Newtonsoft.Json.Bson (x3)
+- https://support.vuplex.com/articles/native-2d-mode (x2)
+- http://www.w3.org/1999/xlink (x2)
+- http://www.w3.org/2001/XMLSchema (x2)
+- http://www.w3.org/2000/xmlns/ (x2)
+- https://support.vuplex.com/articles/v4-changes#init*b     I    IWebView.SetResolution() (x2)
+- https://developer.vuplex.com/webview/IWithFallbackVideo#VideoRectChangedI    XIWebView.VideoRectChanged (x2)
+
+### Hostnames from metadata (top 25)
+- BUnity.InternalAPIEngineBridge (x797)
+- com.unity.render-pipelines.core (x263)
+- UnityEngine.Rendering (x259)
+- 6UnityEditor.UIBuilderModule (x253)
+- com.unity.inputsystem (x247)
+- com.unity.render-pipelines.universal (x222)
+- UnityEngine.UIElements.IStyle (x168)
+- HUnity.InternalAPIEngineBridgeDev (x165)
+- 8UnityEngine.UIElementsModule (x153)
+- i.a.createElement (x124)
+- com.unity.cinemachine (x108)
+- UnityEngine.UI (x101)
+- System.Collections.Generic.IEnumerator (x96)
+- UnityEngine.Rendering.Universal (x93)
+- com.unity.ugui (x81)
+- e.type (x80)
+- UnityEngine.UIElements.IResolvedStyle (x80)
+- t.effectTag (x78)
+- UnityEngine.InputSystem (x75)
+- t.child (x74)
+- System.Collections.Generic.ICollection (x72)
+- com.unity.addressables (x71)
+- Unity.RuntimeTests (x66)
+- e.expirationTime (x64)
+- developer.vuplex.com (x62)
+
+## Notes
+- This report inspects the IL2CPP metadata blob directly; it does not attempt full type reconstruction.
+- Unity IL2CPP metadata layouts can vary by version; fields are best-effort parsed.

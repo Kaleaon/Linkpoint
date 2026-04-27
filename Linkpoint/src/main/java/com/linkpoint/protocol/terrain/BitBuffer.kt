@@ -5,7 +5,7 @@ import java.nio.ByteBuffer
 /**
  * Bit-level buffer reader for terrain patch decompression.
  * 
- * Based on Lumiya's BitBuffer implementation for reading DCT-compressed
+ * Based on the reference viewer's BitBuffer implementation for reading DCT-compressed
  * terrain heightmap data from the Second Life protocol.
  */
 class BitBuffer(data: ByteArray) {

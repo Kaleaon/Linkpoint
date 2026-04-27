@@ -1,14 +1,21 @@
 package com.linkpoint.ui.groups
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.groups.Group
+import com.linkpoint.ui.chat.ChatActivity
+import kotlinx.coroutines.launch
 
 /**
  * Dialog for showing group details.
@@ -40,7 +47,7 @@ class GroupDetailsDialog : DialogFragment() {
         
         closeButton.setOnClickListener { dismiss() }
         chatButton.setOnClickListener {
-            // Start group chat
+            openGroupChat(group)
             dismiss()
         }
     }
@@ -51,6 +58,31 @@ class GroupDetailsDialog : DialogFragment() {
                 this.group = group
             }
         }
+    }
+}
+
+/**
+ * Open the group chat session for [group]. Creates the local session
+ * record (`IMManager.startGroupSessionLocal`) so the chat panel binds
+ * to the right `sessionId`, then launches `ChatActivity`. The chatterbox
+ * session itself is brought up lazily on the first send via the UDP
+ * `ImprovedInstantMessage(Dialog=15)` flow — Lumiya parity, see
+ * `IMManager.sendSessionChat`.
+ */
+private fun DialogFragment.openGroupChat(group: Group) {
+    val app = LinkpointApp.getInstance()
+    val ctx = requireContext()
+    Toast.makeText(ctx, "Joining group chat…", Toast.LENGTH_SHORT).show()
+    lifecycleScope.launch {
+        val sessionId = try {
+            app.imManager.startGroupSessionLocal(group.groupId, group.name)
+        } catch (e: Exception) {
+            group.groupId
+        }
+        val intent = Intent(ctx, ChatActivity::class.java).apply {
+            putExtra(ChatActivity.EXTRA_IM_SESSION_ID, sessionId.toString())
+        }
+        ctx.startActivity(intent)
     }
 }
 
@@ -81,20 +113,43 @@ class GroupOptionsDialog : DialogFragment() {
         titleView.text = group.name
         
         setActiveButton.setOnClickListener {
-            // Set as active group
+            val app = LinkpointApp.getInstance()
+            lifecycleScope.launch {
+                val ok = try { app.groupsManager.setActiveGroup(group.groupId) } catch (e: Exception) { false }
+                Toast.makeText(
+                    requireContext(),
+                    if (ok) "${group.name} set as active" else "Failed to set active group",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
             dismiss()
         }
-        
+
         groupChatButton.setOnClickListener {
-            // Open group chat
+            openGroupChat(group)
             dismiss()
         }
-        
+
         leaveButton.setOnClickListener {
-            // Leave group - show confirmation
-            dismiss()
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Leave ${group.name}?")
+                .setMessage("You'll need a new invitation to rejoin.")
+                .setPositiveButton(R.string.ok) { _, _ ->
+                    val app = LinkpointApp.getInstance()
+                    lifecycleScope.launch {
+                        val ok = try { app.groupsManager.leaveGroup(group.groupId) } catch (e: Exception) { false }
+                        Toast.makeText(
+                            requireContext(),
+                            if (ok) "Left ${group.name}" else "Failed to leave group",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    dismiss()
+                }
+                .setNegativeButton(R.string.cancel, null)
+                .show()
         }
-        
+
         cancelButton.setOnClickListener { dismiss() }
     }
 

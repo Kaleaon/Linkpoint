@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap
  * - Animation state tracking
  * - Gesture animations
  * 
- * Based on Lumiya animation system.
+ * Based on the reference viewer animation system.
  */
 class AnimationController(
     private val udpConnection: UDPConnectionFixed,

@@ -24,13 +24,15 @@ import java.util.UUID
  * - Save changes back to inventory
  * - Unsaved changes confirmation dialog
  * 
- * Based on Lumiya/Firestorm notecard viewer design.
+ * Based on reference viewer/Firestorm notecard viewer design.
  */
 class NotecardEditorActivity : ComponentActivity() {
     
     companion object {
         const val EXTRA_ASSET_ID = "asset_id"
         const val EXTRA_ITEM_ID = "item_id"
+        const val EXTRA_TASK_ID = "task_id"
+        const val EXTRA_OBJECT_ID = "object_id"
         const val EXTRA_NOTECARD_NAME = "notecard_name"
         const val EXTRA_READ_ONLY = "read_only"
     }
@@ -40,6 +42,8 @@ class NotecardEditorActivity : ComponentActivity() {
         
         val assetId = intent.getStringExtra(EXTRA_ASSET_ID)?.let { UUID.fromString(it) }
         val itemId = intent.getStringExtra(EXTRA_ITEM_ID)?.let { UUID.fromString(it) }
+        val taskId = intent.getStringExtra(EXTRA_TASK_ID)?.let { UUID.fromString(it) }
+        val objectId = intent.getStringExtra(EXTRA_OBJECT_ID)?.let { UUID.fromString(it) }
         val notecardName = intent.getStringExtra(EXTRA_NOTECARD_NAME) ?: "Notecard"
         val isReadOnly = intent.getBooleanExtra(EXTRA_READ_ONLY, true)
         
@@ -60,7 +64,7 @@ class NotecardEditorActivity : ComponentActivity() {
                             app.notecardManager.fetchNotecard(assetUuid)
                         },
                         onSaveNotecard = { itmId, newText ->
-                            app.notecardManager.saveNotecard(itmId, newText)
+                            app.notecardManager.saveNotecard(itmId, newText, taskId = taskId, objectId = objectId)
                         },
                         onNavigateBack = { finish() }
                     )

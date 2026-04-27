@@ -228,12 +228,12 @@ public class Joiner {
 
             @Override // com.google.common.base.Joiner
             public Joiner useForNull(String str) {
-                throw new UnsupportedOperationException("already specified skipNulls");
+                throw new IllegalStateException("already specified skipNulls");
             }
 
             @Override // com.google.common.base.Joiner
             public MapJoiner withKeyValueSeparator(String str) {
-                throw new UnsupportedOperationException("can't use .skipNulls() with maps");
+                throw new IllegalStateException("can't use .skipNulls() with maps");
             }
         };
     }
@@ -249,7 +249,7 @@ public class Joiner {
         return new Joiner(this) { // from class: com.google.common.base.Joiner.1
             @Override // com.google.common.base.Joiner
             public Joiner skipNulls() {
-                throw new UnsupportedOperationException("already specified useForNull");
+                throw new IllegalStateException("already specified useForNull");
             }
 
             @Override // com.google.common.base.Joiner
@@ -259,7 +259,7 @@ public class Joiner {
 
             @Override // com.google.common.base.Joiner
             public Joiner useForNull(String str2) {
-                throw new UnsupportedOperationException("already specified useForNull");
+                throw new IllegalStateException("already specified useForNull");
             }
         };
     }

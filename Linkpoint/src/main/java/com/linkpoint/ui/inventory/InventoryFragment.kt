@@ -20,8 +20,14 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 /**
- * Fragment for browsing inventory
+ * Fragment for browsing inventory.
+ *
+ * Legacy entry point retained during Compose migration.
+ * Removal target: 2026.09.
  */
+@Deprecated(
+    message = "Legacy Fragment entry point. Use InventoryScreen-based Compose navigation."
+)
 class InventoryFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView

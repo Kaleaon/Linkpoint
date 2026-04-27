@@ -158,12 +158,12 @@ public final class Tables {
 
         @Override // com.google.common.collect.AbstractTable, com.google.common.collect.Table
         public V2 put(R r, C c, V2 v2) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.AbstractTable, com.google.common.collect.Table
         public void putAll(Table<? extends R, ? extends C, ? extends V2> table) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.AbstractTable, com.google.common.collect.Table
@@ -352,7 +352,7 @@ public final class Tables {
 
         @Override // com.google.common.collect.ForwardingTable, com.google.common.collect.Table
         public void clear() {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.ForwardingTable, com.google.common.collect.Table
@@ -378,17 +378,17 @@ public final class Tables {
 
         @Override // com.google.common.collect.ForwardingTable, com.google.common.collect.Table
         public V put(@Nullable R r, @Nullable C c, @Nullable V v) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.ForwardingTable, com.google.common.collect.Table
         public void putAll(Table<? extends R, ? extends C, ? extends V> table) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.ForwardingTable, com.google.common.collect.Table
         public V remove(@Nullable Object obj, @Nullable Object obj2) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.ForwardingTable, com.google.common.collect.Table

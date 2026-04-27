@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * RLV (Restrained Love Viewer) Controller - Handles RLV/RLVa commands.
  * 
- * Based on Lumiya's RLVController.java
+ * Based on the reference viewer's RLVController.java
  * 
  * RLV is an API that allows in-world objects to restrict viewer behavior.
  * Common uses: roleplay, BDSM content, furniture systems, combat systems.

@@ -2,6 +2,7 @@ package com.linkpoint.world
 
 import android.util.Log
 import com.linkpoint.protocol.capabilities.CapabilityManager
+import com.linkpoint.protocol.capabilities.CapabilityRequester
 import com.linkpoint.protocol.llsd.*
 import kotlinx.coroutines.*
 import java.util.UUID
@@ -11,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Manages avatar and group profiles
  */
 class ProfileManager(
-    private val capabilityManager: CapabilityManager
+    private val capabilityManager: CapabilityRequester
 ) {
     companion object {
         private const val TAG = "ProfileManager"
@@ -39,7 +40,7 @@ class ProfileManager(
                     this["agent_id"] = LLSDString(agentId.toString())
                 }
                 
-                val response = capabilityManager.request("AgentProfile", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_AGENT_PROFILE, request)
                 
                 if (response is LLSDMap) {
                     val profile = AvatarProfile(
@@ -96,10 +97,15 @@ class ProfileManager(
     
     /**
      * Get display name via GetDisplayNames capability.
+     *
+     * Returns null when the lookup did not resolve a name from the simulator.
+     * We deliberately do not synthesise a UUID-prefix fallback here, because
+     * caching that would prevent any later retry from ever updating the
+     * friends list / chat headers with the real name.
      */
-    suspend fun getDisplayName(agentId: UUID): String {
+    suspend fun getDisplayName(agentId: UUID): String? {
         displayNames[agentId]?.let { return it }
-        
+
         return withContext(Dispatchers.IO) {
             try {
                 val request = LLSDMap().apply {
@@ -107,77 +113,83 @@ class ProfileManager(
                         add(LLSDString(agentId.toString()))
                     }
                 }
-                
+
                 val response = capabilityManager.request(CapabilityManager.CAP_GET_DISPLAY_NAMES, request)
-                
+
                 if (response is LLSDMap) {
                     val agents = response.getArray("agents")
                     if (agents != null && agents.size > 0) {
                         val agentData = agents.get(0) as? LLSDMap
-                        val name = agentData?.getString("display_name") 
-                            ?: agentData?.getString("username")
-                            ?: agentId.toString().substring(0, 8)
-                        displayNames[agentId] = name
-                        return@withContext name
+                        val name = agentData?.getString("display_name")?.takeIf { it.isNotBlank() }
+                            ?: agentData?.getString("username")?.takeIf { it.isNotBlank() }
+                        if (name != null) {
+                            displayNames[agentId] = name
+                            return@withContext name
+                        }
                     }
                 }
-                
-                // Fallback
-                agentId.toString().substring(0, 8)
+                null
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to get display name for $agentId: ${e.message}")
-                agentId.toString().substring(0, 8)
+                null
             }
         }
     }
     
     /**
-     * Get multiple display names via batch GetDisplayNames capability request.
+     * Get multiple display names via the GetDisplayNames capability.
+     *
+     * The cap is HTTP GET with repeated `ids=<uuid>` query parameters,
+     * not a POST LLSD body. Previously this function POSTed LLSD which
+     * the simulator silently dropped, so friend names stayed on the
+     * `Resident (xxxx)` placeholder forever (2026-04-25 Athanasia debug
+     * capture). Now uses [CapabilityRequester.requestWithQuery] and
+     * chunks IDs at the SL server limit.
      */
     suspend fun getDisplayNames(agentIds: List<UUID>): Map<UUID, String> {
         return withContext(Dispatchers.IO) {
             val results = mutableMapOf<UUID, String>()
             val missing = mutableListOf<UUID>()
-            
+
             for (id in agentIds) {
                 displayNames[id]?.let { results[id] = it } ?: missing.add(id)
             }
-            
-            if (missing.isNotEmpty()) {
+            if (missing.isEmpty()) return@withContext results
+
+            // SL caps a single GetDisplayNames request at ~90 ids.
+            for (batch in missing.chunked(80)) {
                 try {
-                    val request = LLSDMap().apply {
-                        this["ids"] = LLSDArray().apply {
-                            missing.forEach { add(LLSDString(it.toString())) }
-                        }
-                    }
-                    
-                    val response = capabilityManager.request(CapabilityManager.CAP_GET_DISPLAY_NAMES, request)
-                    
+                    val response = capabilityManager.requestWithQuery(
+                        CapabilityManager.CAP_GET_DISPLAY_NAMES,
+                        batch.map { "ids" to it.toString() }
+                    )
                     if (response is LLSDMap) {
                         val agents = response.getArray("agents")
                         if (agents != null) {
                             for (i in 0 until agents.size) {
                                 val agentData = agents.get(i) as? LLSDMap ?: continue
                                 val idStr = agentData.getString("id") ?: continue
-                                val name = agentData.getString("display_name") 
-                                    ?: agentData.getString("username")
+                                val name = agentData.getString("display_name")?.takeIf { it.isNotBlank() }
+                                    ?: agentData.getString("username")?.takeIf { it.isNotBlank() }
+                                    ?: run {
+                                        val first = agentData.getString("legacy_first_name") ?: ""
+                                        val last = agentData.getString("legacy_last_name") ?: ""
+                                        "$first $last".trim().takeIf { it.isNotBlank() }
+                                    }
                                     ?: continue
                                 try {
                                     val uuid = UUID.fromString(idStr)
                                     displayNames[uuid] = name
                                     results[uuid] = name
-                                } catch (e: Exception) {
-                                    // Invalid UUID, skip
-                                }
+                                } catch (_: Exception) { /* invalid UUID */ }
                             }
                         }
                     }
-                    Log.d(TAG, "Retrieved ${results.size} display names")
                 } catch (e: Exception) {
-                    Log.w(TAG, "Failed to batch retrieve display names: ${e.message}")
+                    Log.w(TAG, "Batch display-name lookup failed: ${e.message}")
                 }
             }
-            
+            Log.d(TAG, "Retrieved ${results.size} display names (requested ${agentIds.size})")
             results
         }
     }
@@ -212,7 +224,7 @@ class ProfileManager(
                 }
                 
                 // Use AgentProfile capability
-                val response = capabilityManager.request("AgentProfile", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_AGENT_PROFILE, request)
                 response != null
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to update profile", e)
@@ -234,7 +246,7 @@ class ProfileManager(
                     this["group_id"] = LLSDString(groupId.toString())
                 }
                 
-                val response = capabilityManager.request("GroupProfile", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_GROUP_PROFILE, request)
                 
                 if (response is LLSDMap) {
                     val profile = GroupProfile(
@@ -305,7 +317,7 @@ class ProfileManager(
                     this["action"] = LLSDString("join")
                 }
                 
-                val response = capabilityManager.request("GroupMemberData", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_GROUP_MEMBER_DATA, request)
                 if (response != null) {
                     Log.i(TAG, "Successfully joined group $groupId")
                     true
@@ -332,7 +344,7 @@ class ProfileManager(
                     this["action"] = LLSDString("leave")
                 }
                 
-                val response = capabilityManager.request("GroupMemberData", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_GROUP_MEMBER_DATA, request)
                 if (response != null) {
                     Log.i(TAG, "Successfully left group $groupId")
                     true
@@ -361,7 +373,7 @@ class ProfileManager(
                     this["message"] = LLSDString(message)
                 }
                 
-                val response = capabilityManager.request("ChatSend", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_CHAT_SEND, request)
                 Log.i(TAG, "Sent friendship offer to $agentId")
                 response != null
             } catch (e: Exception) {
@@ -384,7 +396,7 @@ class ProfileManager(
                     this["dialog"] = LLSDInteger(39)  // IM_FRIENDSHIP_ACCEPTED
                 }
                 
-                val response = capabilityManager.request("ChatSend", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_CHAT_SEND, request)
                 Log.i(TAG, "Accepted friendship from $agentId")
                 response != null
             } catch (e: Exception) {
@@ -407,7 +419,7 @@ class ProfileManager(
                     this["dialog"] = LLSDInteger(40)  // IM_FRIENDSHIP_DECLINED
                 }
                 
-                val response = capabilityManager.request("ChatSend", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_CHAT_SEND, request)
                 Log.i(TAG, "Declined friendship from $agentId")
                 response != null
             } catch (e: Exception) {
@@ -428,7 +440,7 @@ class ProfileManager(
                     this["friend_id"] = LLSDString(agentId.toString())
                 }
                 
-                val response = capabilityManager.request("FriendshipTerminate", request)
+                val response = capabilityManager.request(CapabilityManager.CAP_FRIENDSHIP_TERMINATE, request)
                 Log.i(TAG, "Removed friend $agentId")
                 response != null
             } catch (e: Exception) {

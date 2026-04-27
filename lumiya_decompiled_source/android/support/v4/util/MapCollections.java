@@ -64,7 +64,7 @@ public abstract class MapCollections<K, V> {
         }
 
         public boolean add(Map.Entry<K, V> entry) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // java.util.Set, java.util.Collection
@@ -135,17 +135,17 @@ public abstract class MapCollections<K, V> {
 
         @Override // java.util.Set, java.util.Collection
         public boolean remove(Object obj) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // java.util.Set, java.util.Collection
         public boolean removeAll(Collection<?> collection) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // java.util.Set, java.util.Collection
         public boolean retainAll(Collection<?> collection) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // java.util.Set, java.util.Collection
@@ -155,12 +155,12 @@ public abstract class MapCollections<K, V> {
 
         @Override // java.util.Set, java.util.Collection
         public Object[] toArray() {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // java.util.Set, java.util.Collection
         public <T> T[] toArray(T[] tArr) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
     }
 
@@ -171,12 +171,12 @@ public abstract class MapCollections<K, V> {
 
         @Override // java.util.Set, java.util.Collection
         public boolean add(K k) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // java.util.Set, java.util.Collection
         public boolean addAll(Collection<? extends K> collection) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // java.util.Set, java.util.Collection
@@ -349,12 +349,12 @@ public abstract class MapCollections<K, V> {
 
         @Override // java.util.Collection
         public boolean add(V v) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // java.util.Collection
         public boolean addAll(Collection<? extends V> collection) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // java.util.Collection

@@ -8,16 +8,17 @@ import android.widget.FrameLayout
 import android.util.Log
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import com.linkpoint.BuildConfig
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
-import com.linkpoint.xr.XRManager
 import com.linkpoint.xr.ControllerState
+import com.linkpoint.xr.XRSessionCapability
 import com.linkpoint.protocol.types.LLVector3
 import com.linkpoint.protocol.types.LLQuaternion
 
 /**
  * XR World Activity - Immersive VR/AR mode
- * Based on Lumiya's CardboardActivity but modernized for Android XR
+ * Based on the reference viewer's CardboardActivity but modernized for Android XR
  */
 class XRWorldActivity : AppCompatActivity() {
     
@@ -70,23 +71,33 @@ class XRWorldActivity : AppCompatActivity() {
     }
     
     private fun initXR() {
-        // Initialize XR session
         val xrManager = app.xrManager
+        val entryCapability = xrManager.getEntryCapability()
+
+        when (entryCapability) {
+            is XRSessionCapability.Unsupported -> {
+                exitToStandardWorld("XR unavailable: ${entryCapability.reason}")
+                return
+            }
+            is XRSessionCapability.Experimental -> {
+                if (!BuildConfig.XR_EXPERIMENTAL_MODE) {
+                    exitToStandardWorld("XR experimental mode is disabled in this build")
+                    return
+                }
+                Log.w(TAG, "Launching experimental XR path: ${entryCapability.reason}")
+            }
+            is XRSessionCapability.Ready -> Unit
+        }
+
         val mode = xrManager.getBestMode()
-        
+
         if (xrManager.initSession(mode)) {
             // Initialize renderer for XR
             app.renderManager.initializeOnRenderThread(surfaceView)
             isRendering = true
             startXRRenderLoop()
         } else {
-            // Fallback to non-XR mode
-            android.widget.Toast.makeText(
-                this,
-                "XR mode not available, using standard view",
-                android.widget.Toast.LENGTH_SHORT
-            ).show()
-            finish()
+            exitToStandardWorld("XR session failed to initialize")
         }
     }
     
@@ -109,7 +120,14 @@ class XRWorldActivity : AppCompatActivity() {
         
         if (frameData != null) {
             // Render in stereo
-            app.renderManager.renderXRFrame(frameData)
+            runCatching {
+                app.renderManager.renderXRFrame(frameData)
+            }.onFailure { throwable ->
+                Log.e(TAG, "XR render failed, returning to world view", throwable)
+                app.reportException(throwable, "XR render frame")
+                exitToStandardWorld("XR rendering failed; returning to standard view")
+                return
+            }
         } else {
             // Fallback to mono rendering
             app.renderManager.renderFrame()
@@ -236,5 +254,17 @@ class XRWorldActivity : AppCompatActivity() {
                 finish()
             }
         })
+    }
+
+    private fun exitToStandardWorld(message: String) {
+        if (!isFinishing) {
+            android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_SHORT).show()
+        }
+        isRendering = false
+        app.xrManager.shutdown()
+        startActivity(android.content.Intent(this, com.linkpoint.ui.world.WorldViewActivity::class.java).apply {
+            addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        })
+        finish()
     }
 }

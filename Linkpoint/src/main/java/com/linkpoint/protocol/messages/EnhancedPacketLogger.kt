@@ -1,6 +1,7 @@
 package com.linkpoint.protocol.messages
 
 import android.util.Log
+import com.linkpoint.utils.InitializationTracker
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -26,6 +27,7 @@ import java.util.concurrent.atomic.AtomicLong
 object EnhancedPacketLogger {
     
     private const val TAG = "PacketLogger"
+    private const val EARLY_WARNING_GRACE_MS = 15_000L
     
     // Message names that should not count as handler misses
     // These are internal protocol messages or handled specially
@@ -90,6 +92,13 @@ object EnhancedPacketLogger {
     // Session tracking
     @Volatile
     private var sessionStartTime: Long = 0
+
+    private fun formatUdpConnectedWarningContext(): Pair<Boolean, String> {
+        val elapsedMs = InitializationTracker.getElapsedSincePhase(InitializationTracker.Phase.UDP_CONNECTED)
+        val timing = if (elapsedMs != null) "${formatDuration(elapsedMs)} since UDP_CONNECTED" else "UDP_CONNECTED time unavailable"
+        val provisional = elapsedMs != null && elapsedMs < EARLY_WARNING_GRACE_MS
+        return provisional to timing
+    }
     
     @Volatile
     private var lastPacketSentTime: Long = 0
@@ -391,9 +400,27 @@ object EnhancedPacketLogger {
      */
     fun logAckReceived(sequenceNumber: Int, messageName: String?) {
         if (!isEnabled) return
-        
+
         acksReceived.incrementAndGet()
-        
+        lastPacketReceivedTime = System.currentTimeMillis()
+
+        // Record the ACK in the packet history so it surfaces in debug reports
+        // alongside sends/receives. Previously the counter was incremented but
+        // history showed zero ACK_RECEIVED entries, making it impossible to see
+        // which sequence numbers the simulator was acknowledging.
+        val entry = PacketLogEntry(
+            timestamp = lastPacketReceivedTime,
+            direction = PacketLogEntry.Direction.ACK_RECEIVED,
+            messageId = -1,
+            messageName = messageName ?: "ACK",
+            sequenceNumber = sequenceNumber,
+            size = 4,
+            flags = PacketFlags(reliable = false, resent = false, zerocoded = false, hasAcks = true),
+            hexPreview = null,
+            handlerDispatched = true
+        )
+        addToHistory(entry)
+
         if (verboseMode) {
             val msgInfo = messageName?.let { " ($it)" } ?: ""
             Log.v(TAG, "✓← ACK received for seq=$sequenceNumber$msgInfo")
@@ -760,6 +787,26 @@ object EnhancedPacketLogger {
     fun getPacketHistory(count: Int = 50): List<PacketLogEntry> {
         return packetHistory.toList().takeLast(count)
     }
+
+    /**
+     * Get only inbound packet history (RECEIVED + ACK_RECEIVED) for debug
+     * reports. This is needed because the bounded packet history is
+     * dominated by outbound AgentUpdates at ~10/sec, which evicts incoming
+     * entries from any small "tail" view. Filtering to inbound first lets
+     * the debug report show real receive activity even under heavy send load.
+     */
+    fun getIncomingPacketHistory(count: Int = 30): List<PacketLogEntry> {
+        return packetHistory.toList()
+            .asReversed()
+            .asSequence()
+            .filter {
+                it.direction == PacketLogEntry.Direction.RECEIVED ||
+                it.direction == PacketLogEntry.Direction.ACK_RECEIVED
+            }
+            .take(count)
+            .toList()
+            .asReversed()
+    }
     
     /**
      * Get registered handlers.
@@ -842,7 +889,12 @@ object EnhancedPacketLogger {
             
             // Warning checks
             if (stats.packetsSent > 0 && stats.packetsReceived == 0L) {
-                appendLine("⚠️ PACKETS SENT BUT NONE RECEIVED!")
+                val (provisional, timing) = formatUdpConnectedWarningContext()
+                if (provisional) {
+                    appendLine("⚠️ PROVISIONAL: PACKETS SENT BUT NONE RECEIVED ($timing)")
+                } else {
+                    appendLine("⚠️ PACKETS SENT BUT NONE RECEIVED ($timing)")
+                }
                 appendLine("   Possible causes:")
                 appendLine("   - Firewall blocking UDP")
                 appendLine("   - NAT traversal issue")

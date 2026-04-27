@@ -35,10 +35,10 @@ jobs:
     - name: Install required Android SDK packages
       run: |
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-35" "build-tools;35.0.0" "platform-tools"
         echo "Installed SDK packages:"
         $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list_installed
-        
+
     - name: Cache Gradle packages
       uses: actions/cache@v4
       with:
@@ -48,10 +48,10 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
-          
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-      
+
     - name: Compile project
       id: compile
       run: |
@@ -148,8 +148,8 @@ jobs:
     - name: Install required Android SDK packages
       run: |
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
-        
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-35" "build-tools;35.0.0" "platform-tools"
+
     - name: Cache Gradle packages
       uses: actions/cache@v4
       with:

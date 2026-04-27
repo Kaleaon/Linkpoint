@@ -14,7 +14,7 @@ public abstract class PagerAdapter {
 
     @Deprecated
     public void destroyItem(View view, int i, Object obj) {
-        throw new UnsupportedOperationException("Required method destroyItem was not overridden");
+        throw new IllegalStateException("Required method destroyItem was not overridden");
     }
 
     public void destroyItem(ViewGroup viewGroup, int i, Object obj) {
@@ -45,7 +45,7 @@ public abstract class PagerAdapter {
 
     @Deprecated
     public Object instantiateItem(View view, int i) {
-        throw new UnsupportedOperationException("Required method instantiateItem was not overridden");
+        throw new IllegalStateException("Required method instantiateItem was not overridden");
     }
 
     public Object instantiateItem(ViewGroup viewGroup, int i) {

@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
@@ -33,7 +34,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -86,7 +86,15 @@ fun ThemePickerScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Theme Packs") }
+                title = { Text("Theme Packs") },
+                navigationIcon = {
+                    AccessibleIconActionButton(
+                        contentDescription = "Back",
+                        onClick = onNavigateBack
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                    }
+                }
             )
         },
         floatingActionButton = {
@@ -272,29 +280,29 @@ fun ThemeCard(
                 
                 // Action buttons
                 Row {
-                    IconButton(onClick = onShare) {
+                    AccessibleIconActionButton(contentDescription = "Share theme", onClick = onShare) {
                         Icon(
                             imageVector = Icons.Default.Share,
-                            contentDescription = "Share",
+                            contentDescription = null,
                             tint = colors.onSurfaceVariant
                         )
                     }
                     
                     onEdit?.let { edit ->
-                        IconButton(onClick = edit) {
+                        AccessibleIconActionButton(contentDescription = "Edit theme", onClick = edit) {
                             Icon(
                                 imageVector = Icons.Default.Edit,
-                                contentDescription = "Edit",
+                                contentDescription = null,
                                 tint = colors.onSurfaceVariant
                             )
                         }
                     }
                     
                     onDelete?.let { delete ->
-                        IconButton(onClick = delete) {
+                        AccessibleIconActionButton(contentDescription = "Delete theme", onClick = delete) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete",
+                                contentDescription = null,
                                 tint = colors.error
                             )
                         }

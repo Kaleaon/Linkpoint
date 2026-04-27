@@ -1,6 +1,7 @@
 package com.linkpoint.protocol.transfer
 
 import android.util.Log
+import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
 import java.nio.ByteBuffer
@@ -12,7 +13,7 @@ import java.util.concurrent.atomic.AtomicLong
 /**
  * Xfer Manager - Handles file transfers via the Xfer protocol.
  * 
- * Based on Lumiya's SLXferManager.java
+ * Based on the reference viewer's SLXferManager.java
  * 
  * Xfer is used for:
  * - Task inventory listings
@@ -32,13 +33,7 @@ class XferManager(
 ) {
     companion object {
         private const val TAG = "XferManager"
-        
-        // Message IDs
-        const val MSG_REQUEST_XFER = 0xFF009C
-        const val MSG_CONFIRM_XFER_PACKET = 0x12
-        const val MSG_SEND_XFER_PACKET = 0x13
-        const val MSG_ABORT_XFER = 0xFF009D
-        
+
         // Xfer type
         const val XFER_FILE = 1
         const val XFER_ASSET = 2
@@ -192,7 +187,7 @@ class XferManager(
         payload.putInt(packetNum)
         
         try {
-            udpConnection.sendPacket(MSG_CONFIRM_XFER_PACKET, payload.array(), reliable = false)
+            udpConnection.sendPacket(MessageIds.CONFIRM_XFER_PACKET, payload.array(), reliable = false)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send ConfirmXferPacket", e)
         }
@@ -280,7 +275,7 @@ class XferManager(
         val xfer = Xfer(xferId, filename)
         activeXfers[xferId] = xfer
         
-        udpConnection.sendPacket(MSG_REQUEST_XFER, payload.array(), reliable = true)
+        udpConnection.sendPacket(MessageIds.REQUEST_XFER, payload.array(), reliable = true)
         
         Log.d(TAG, "Requested xfer for file: $filename xferId=$xferId")
         

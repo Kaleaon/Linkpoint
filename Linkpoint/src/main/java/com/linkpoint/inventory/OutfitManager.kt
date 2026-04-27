@@ -15,6 +15,8 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.roundToInt
 
 /**
  * Manages outfits and wearables
@@ -27,7 +29,8 @@ class OutfitManager(
     private val udpConnection: UDPConnectionFixed? = null,
     private val agentId: UUID? = null,
     private val sessionId: UUID? = null,
-    private val objectManager: ObjectManager? = null
+    private val objectManager: ObjectManager? = null,
+    private val wearableAssetFetcher: (suspend (InventoryItem) -> ByteArray?)? = null
 ) {
     companion object {
         private const val TAG = "OutfitManager"
@@ -136,37 +139,115 @@ class OutfitManager(
     
     private suspend fun wearWearable(item: InventoryItem, replace: Boolean): Boolean {
         val wearableType = WearableType.fromValue(item.flags and 0xFF)
-        
-        if (replace) {
-            wornWearables[wearableType] = item.itemId
-        } else {
-            // Multi-wear for some types
-            wornWearables[wearableType] = item.itemId
-        }
+        applyWearableSelection(wornWearables, wearableType, item.itemId, replace)
         
         // Load wearable data
         val wearableData = loadWearableData(item)
         if (wearableData != null) {
             baker.setWearable(wearableType, wearableData)
+            rebakeWearableLayers(wearableType)
+        } else {
+            // Keep previous wearable state if parse/fetch failed to avoid dropping appearance.
+            Log.w(TAG, "Skipping wearable apply for ${item.itemId} (${item.name}) due to missing/corrupt asset data")
         }
-        
-        // Trigger rebake
-        baker.bakeAll()
-        
+
         updateCurrentOutfit()
         return true
     }
-    
+
     private suspend fun loadWearableData(item: InventoryItem): WearableData? {
-        // Would load wearable asset and parse it
-        // For now, return a placeholder
+        val wearableType = WearableType.fromValue(item.flags and 0xFF)
+        val fetcher = wearableAssetFetcher
+
+        if (fetcher == null) {
+            return fallbackWearableData(
+                type = wearableType,
+                item = item,
+                reason = WearableLoadFailureReason.MISSING_FETCHER,
+                detail = "No wearable asset fetcher configured"
+            )
+        }
+
+        return try {
+            val bytes = fetcher(item)
+            if (bytes == null) {
+                fallbackWearableData(
+                    type = wearableType,
+                    item = item,
+                    reason = WearableLoadFailureReason.MISSING_ASSET_BYTES,
+                    detail = "Wearable asset fetch returned null bytes"
+                )
+            } else {
+                val parseResult = WearableAssetParser.parseWithDiagnostics(
+                    raw = bytes,
+                    defaultType = wearableType,
+                    assetId = item.assetId
+                )
+                val parsed = parseResult.data
+                if (parsed == null) {
+                    fallbackWearableData(
+                        type = wearableType,
+                        item = item,
+                        reason = WearableLoadFailureReason.CORRUPT_ASSET_PAYLOAD,
+                        detail =
+                            "Wearable parse failed (${parseResult.error ?: "unknown parse error"}, ${bytes.size} bytes)"
+                    )
+                } else {
+                    parsed
+                }
+            }
+        } catch (e: Exception) {
+            fallbackWearableData(
+                type = wearableType,
+                item = item,
+                reason = WearableLoadFailureReason.FETCH_EXCEPTION,
+                detail = "Failed to load wearable asset: ${e.message}",
+                throwable = e
+            )
+        }
+    }
+
+    private fun fallbackWearableData(
+        type: WearableType,
+        item: InventoryItem,
+        reason: WearableLoadFailureReason,
+        detail: String,
+        throwable: Throwable? = null
+    ): WearableData {
+        WearableAssetTelemetry.recordFallback(reason)
+        if (throwable != null) {
+            Log.e(
+                TAG,
+                "Using fallback wearable for item=${item.itemId} asset=${item.assetId} reason=$reason detail=$detail",
+                throwable
+            )
+        } else {
+            Log.w(
+                TAG,
+                "Using fallback wearable for item=${item.itemId} asset=${item.assetId} reason=$reason detail=$detail"
+            )
+        }
         return WearableData(
-            type = WearableType.fromValue(item.flags and 0xFF),
+            type = type,
             assetId = item.assetId,
             textures = emptyMap(),
             params = emptyMap()
         )
     }
+
+    private suspend fun rebakeWearableLayers(wearableType: WearableType) {
+        val channels = affectedBakeChannels(wearableType)
+        if (channels.isEmpty()) {
+            baker.bakeAll()
+            return
+        }
+
+        channels.forEach { channel ->
+            baker.bakeChannel(channel)
+        }
+    }
+
+    internal fun affectedBakeChannels(wearableType: WearableType): Set<Int> = affectedBakeChannelsForType(wearableType)
     
     private suspend fun attachObject(item: InventoryItem, point: Int, replace: Boolean): Boolean {
         if (replace) {
@@ -191,39 +272,40 @@ class OutfitManager(
     }
     
     private suspend fun sendRezSingleAttachmentFromInv(item: InventoryItem, point: Int, replace: Boolean) {
-        val nameBytes = item.name.toByteArray(Charsets.UTF_8)
-        val descBytes = item.description.toByteArray(Charsets.UTF_8)
+        // Wire format (LL message_template `RezSingleAttachmentFromInv`,
+        // low-freq 395; Lumiya:
+        // slproto/messages/RezSingleAttachmentFromInv.java PackPayload):
+        //   AgentData:  AgentID(LLUUID), SessionID(LLUUID)
+        //   ObjectData: ItemID(LLUUID), OwnerID(LLUUID), AttachmentPt(U8),
+        //               ItemFlags(U32), GroupMask(U32), EveryoneMask(U32),
+        //               NextOwnerMask(U32), Name(Variable 1 NUL-term),
+        //               Description(Variable 1 NUL-term)
+        //
+        // The previous encoder appended CreationDate(4) + CRC(4) trailing
+        // fields that belong to UpdateInventoryItem, not this message; the
+        // simulator strict-parser would either reject the packet or treat
+        // the extra 8 bytes as the start of a phantom block. Lumiya stops
+        // after Description.
+        val nameRaw = item.name.toByteArray(Charsets.UTF_8)
+        val descRaw = item.description.toByteArray(Charsets.UTF_8)
+        val cappedName = if (nameRaw.size > 254) nameRaw.copyOf(254) else nameRaw
+        val cappedDesc = if (descRaw.size > 254) descRaw.copyOf(254) else descRaw
+        val safeNameBytes = cappedName + 0.toByte()
+        val safeDescBytes = cappedDesc + 0.toByte()
 
-        // Ensure name/desc are within limits (1 byte length max 255)
-        val safeNameBytes = if (nameBytes.size > 255) nameBytes.copyOf(255) else nameBytes
-        val safeDescBytes = if (descBytes.size > 255) descBytes.copyOf(255) else descBytes
-
-        // Calculate size:
-        // AgentData: 16 (AgentID) + 16 (SessionID) = 32
-        // ObjectData:
-        //   ItemID (16)
-        //   OwnerID (16)
-        //   AttachmentPt (1)
-        //   ItemFlags (4)
-        //   GroupMask (4)
-        //   EveryoneMask (4)
-        //   NextOwnerMask (4)
-        //   Name (1 + len)
-        //   Description (1 + len)
-        //   CreationDate (4)
-        //   CRC (4)
-
-        val payloadSize = 32 + 16 + 16 + 1 + 4 + 4 + 4 + 4 +
-                          1 + safeNameBytes.size + 1 + safeDescBytes.size + 4 + 4
+        val payloadSize = 32 /* AgentData */ +
+                          16 + 16 + 1 + 4 + 4 + 4 + 4 +
+                          1 + safeNameBytes.size +
+                          1 + safeDescBytes.size
 
         val payload = ByteBuffer.allocate(payloadSize).order(ByteOrder.LITTLE_ENDIAN)
 
         // AgentData - Validate required fields
-        val agentIdValue = agentId 
+        val agentIdValue = agentId
             ?: throw IllegalStateException("Agent ID not initialized in OutfitManager")
-        val sessionIdValue = sessionId 
+        val sessionIdValue = sessionId
             ?: throw IllegalStateException("Session ID not initialized in OutfitManager")
-        
+
         payload.putUUID(agentIdValue)
         payload.putUUID(sessionIdValue)
 
@@ -241,16 +323,13 @@ class OutfitManager(
         payload.putInt(item.permissions.everyoneMask)
         payload.putInt(item.permissions.nextOwnerMask)
 
-        // Name (Variable 1)
+        // Name (Variable 1, NUL-terminated)
         payload.put(safeNameBytes.size.toByte())
         payload.put(safeNameBytes)
 
-        // Description (Variable 1)
+        // Description (Variable 1, NUL-terminated)
         payload.put(safeDescBytes.size.toByte())
         payload.put(safeDescBytes)
-
-        payload.putInt(item.creationDate)
-        payload.putInt(0) // CRC
 
         // Validate UDP connection before sending
         val connection = udpConnection 
@@ -269,7 +348,7 @@ class OutfitManager(
     suspend fun removeWearable(type: WearableType): Boolean {
         wornWearables.remove(type)
         baker.removeWearable(type)
-        baker.bakeAll()
+        rebakeWearableLayers(type)
         updateCurrentOutfit()
         return true
     }
@@ -464,6 +543,132 @@ class OutfitManager(
     }
 }
 
+internal object WearableAssetParser {
+    private const val NULL_UUID = "00000000-0000-0000-0000-000000000000"
+    internal data class ParseResult(val data: WearableData?, val error: String? = null)
+
+    fun parse(raw: ByteArray, defaultType: WearableType, assetId: UUID): WearableData? {
+        return parseWithDiagnostics(raw, defaultType, assetId).data
+    }
+
+    fun parseWithDiagnostics(raw: ByteArray, defaultType: WearableType, assetId: UUID): ParseResult {
+        val text = raw.toString(Charsets.UTF_8)
+        val lines = text.lineSequence().map { it.trim() }.filter { it.isNotEmpty() }.toList()
+        if (lines.isEmpty()) return ParseResult(null, "wearable asset is empty")
+
+        var declaredType: WearableType? = null
+        val params = mutableMapOf<Int, Float>()
+        val textures = mutableMapOf<Int, UUID>()
+
+        var index = 0
+        while (index < lines.size) {
+            val line = lines[index]
+            when {
+                line.startsWith("type ", ignoreCase = true) -> {
+                    val value = line.substringAfter("type").trim().toIntOrNull()
+                    if (value != null) {
+                        declaredType = WearableType.fromValue(value)
+                    }
+                    index++
+                }
+                line.startsWith("parameters ", ignoreCase = true) -> {
+                    val count = line.substringAfter("parameters").trim().toIntOrNull()
+                        ?: return ParseResult(null, "invalid parameters count line: '$line'")
+                    index++
+                    repeat(count) {
+                        if (index >= lines.size) {
+                            return ParseResult(
+                                null,
+                                "parameters section truncated at entry ${it + 1} of $count"
+                            )
+                        }
+                        val tokens = lines[index].split(Regex("\\s+"))
+                        if (tokens.size < 2) {
+                            return ParseResult(null, "invalid parameter row: '${lines[index]}'")
+                        }
+                        val paramId = tokens[0].toIntOrNull()
+                            ?: return ParseResult(null, "invalid parameter id: '${tokens[0]}'")
+                        val value = tokens[1].toFloatOrNull()
+                            ?: return ParseResult(null, "invalid parameter value: '${tokens[1]}'")
+                        params[paramId] = value
+                        index++
+                    }
+                }
+                line.startsWith("textures ", ignoreCase = true) -> {
+                    val count = line.substringAfter("textures").trim().toIntOrNull()
+                        ?: return ParseResult(null, "invalid textures count line: '$line'")
+                    index++
+                    repeat(count) {
+                        if (index >= lines.size) {
+                            return ParseResult(
+                                null,
+                                "textures section truncated at entry ${it + 1} of $count"
+                            )
+                        }
+                        val tokens = lines[index].split(Regex("\\s+"))
+                        if (tokens.size < 2) {
+                            return ParseResult(null, "invalid texture row: '${lines[index]}'")
+                        }
+                        val textureIndex = tokens[0].toIntOrNull()
+                            ?: return ParseResult(null, "invalid texture index: '${tokens[0]}'")
+                        val uuid = runCatching { UUID.fromString(tokens[1]) }.getOrNull()
+                            ?: return ParseResult(null, "invalid texture uuid: '${tokens[1]}'")
+                        if (uuid.toString() != NULL_UUID) {
+                            textures[textureIndex] = uuid
+                        }
+                        index++
+                    }
+                }
+                else -> index++
+            }
+        }
+
+        val type = declaredType ?: defaultType
+        val tintColor = extractTintColor(params)
+        return ParseResult(
+            data = WearableData(type, assetId, textures.toMap(), params.toMap(), tintColor)
+        )
+    }
+
+    private fun extractTintColor(params: Map<Int, Float>): IntArray? {
+        // Common wearable color visual params (R/G/B) in normalized float range [0..1].
+        val r = params[80] ?: return null
+        val g = params[81] ?: return null
+        val b = params[82] ?: return null
+        return intArrayOf(
+            (r.coerceIn(0f, 1f) * 255f).roundToInt(),
+            (g.coerceIn(0f, 1f) * 255f).roundToInt(),
+            (b.coerceIn(0f, 1f) * 255f).roundToInt()
+        )
+    }
+}
+
+internal enum class WearableLoadFailureReason {
+    MISSING_FETCHER,
+    MISSING_ASSET_BYTES,
+    CORRUPT_ASSET_PAYLOAD,
+    FETCH_EXCEPTION
+}
+
+internal object WearableAssetTelemetry {
+    private val fallbackCounts: MutableMap<WearableLoadFailureReason, AtomicInteger> =
+        WearableLoadFailureReason.entries.associateWith { AtomicInteger(0) }.toMutableMap()
+
+    fun recordFallback(reason: WearableLoadFailureReason) {
+        fallbackCounts.getValue(reason).incrementAndGet()
+    }
+
+    fun count(reason: WearableLoadFailureReason): Int = fallbackCounts.getValue(reason).get()
+
+    fun snapshot(): Map<WearableLoadFailureReason, Int> {
+        return fallbackCounts.mapValues { (_, value) -> value.get() }
+    }
+
+    fun reset() {
+        fallbackCounts.values.forEach { it.set(0) }
+    }
+}
+
 object InventoryType {
     const val TEXTURE = 0
     const val SOUND = 1
@@ -484,4 +689,51 @@ object InventoryType {
     const val MESH = 22
     const val SETTINGS = 25
     const val MATERIAL = 26
+}
+
+internal fun applyWearableSelection(
+    wearableMap: MutableMap<WearableType, UUID>,
+    type: WearableType,
+    itemId: UUID,
+    _replace: Boolean
+) {
+    // Current behavior is consistent for replace and multi-wear:
+    // one active wearable per type, newest choice wins.
+    wearableMap[type] = itemId
+}
+
+internal fun affectedBakeChannelsForType(wearableType: WearableType): Set<Int> {
+    return when (wearableType) {
+        WearableType.SKIN -> setOf(
+            AvatarBaker.BAKE_HEAD,
+            AvatarBaker.BAKE_UPPER,
+            AvatarBaker.BAKE_LOWER,
+            AvatarBaker.BAKE_LEFTARM,
+            AvatarBaker.BAKE_LEFTLEG,
+            AvatarBaker.BAKE_AUX1,
+            AvatarBaker.BAKE_AUX2,
+            AvatarBaker.BAKE_AUX3
+        )
+        WearableType.TATTOO -> setOf(
+            AvatarBaker.BAKE_HEAD,
+            AvatarBaker.BAKE_LEFTARM,
+            AvatarBaker.BAKE_LEFTLEG,
+            AvatarBaker.BAKE_AUX1
+        )
+        WearableType.HAIR -> setOf(AvatarBaker.BAKE_HAIR)
+        WearableType.EYES -> setOf(AvatarBaker.BAKE_EYES)
+        WearableType.SHIRT, WearableType.UNDERSHIRT, WearableType.JACKET -> setOf(
+            AvatarBaker.BAKE_UPPER,
+            AvatarBaker.BAKE_AUX2
+        )
+        WearableType.PANTS, WearableType.UNDERPANTS -> setOf(
+            AvatarBaker.BAKE_LOWER,
+            AvatarBaker.BAKE_AUX3
+        )
+        else -> setOf(
+            AvatarBaker.BAKE_HEAD,
+            AvatarBaker.BAKE_UPPER,
+            AvatarBaker.BAKE_LOWER
+        )
+    }
 }

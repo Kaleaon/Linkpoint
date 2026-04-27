@@ -217,7 +217,7 @@ public class PriorityBinQueue<T> implements BlockingQueue<T> {
 
     @Override // java.util.Collection, java.lang.Iterable
     public Iterator<T> iterator() {
-        throw new UnsupportedOperationException("Iterator not supported");
+        throw new IllegalStateException("Iterator not supported");
     }
 
     @Override // java.util.concurrent.BlockingQueue, java.util.Queue

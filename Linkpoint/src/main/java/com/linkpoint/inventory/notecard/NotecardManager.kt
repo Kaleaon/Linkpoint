@@ -1,17 +1,25 @@
 package com.linkpoint.inventory.notecard
 
 import android.util.Log
+import com.linkpoint.protocol.capabilities.CapabilityManager
+import com.linkpoint.protocol.capabilities.CapabilityRequester
+import com.linkpoint.protocol.llsd.LLSDMap
+import com.linkpoint.protocol.llsd.LLSDUUID
 import com.linkpoint.protocol.transfer.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.MediaType.Companion.toMediaType
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Notecard Manager - Handles reading and writing notecards.
  * 
- * Based on Lumiya's SLNotecard.java
+ * Based on the reference viewer's SLNotecard.java
  * 
  * Notecards in Second Life contain:
  * - Text content
@@ -30,7 +38,12 @@ import java.util.concurrent.ConcurrentHashMap
  * }
  */
 class NotecardManager(
-    private val transferManager: TransferManager
+    private val transferManager: TransferManager?,
+    private val capabilityManager: CapabilityRequester,
+    private val httpClient: OkHttpClient = OkHttpClient(),
+    private val capabilityRequest: suspend (String, LLSDMap) -> com.linkpoint.protocol.llsd.LLSDValue? = { capName, body ->
+        capabilityManager.request(capName, body)
+    }
 ) {
     companion object {
         private const val TAG = "NotecardManager"
@@ -68,7 +81,11 @@ class NotecardManager(
         
         // Only start transfer if this is the first request
         if (callbacks.size == 1) {
-            transferManager.requestAssetTransfer(
+            val transfer = transferManager ?: run {
+                callback?.onNotecardError("Transfer manager unavailable")
+                return
+            }
+            transfer.requestAssetTransfer(
                 assetId = assetId,
                 assetType = AssetType.NOTECARD,
                 callback = { key, result ->
@@ -98,7 +115,11 @@ class NotecardManager(
         callback?.let { callbacks.add(it) }
         
         if (callbacks.size == 1) {
-            transferManager.requestInventoryItemTransfer(
+            val transfer = transferManager ?: run {
+                callback?.onNotecardError("Transfer manager unavailable")
+                return
+            }
+            transfer.requestInventoryItemTransfer(
                 itemId = itemId,
                 assetId = assetId,
                 ownerId = ownerId,
@@ -376,7 +397,8 @@ class NotecardManager(
             }
             
             // Fetch via transfer
-            val data = transferManager.fetchAsset(assetId, AssetType.NOTECARD.code) ?: return@withContext null
+            val transfer = transferManager ?: return@withContext null
+            val data = transfer.fetchAsset(assetId, AssetType.NOTECARD.code) ?: return@withContext null
             
             try {
                 val notecard = parseNotecard(assetId, data)
@@ -407,23 +429,130 @@ class NotecardManager(
      * Note: Full implementation requires UpdateNotecardAgentInventory capability.
      */
     suspend fun saveNotecard(itemId: UUID, newText: String): Boolean {
+        return saveNotecard(itemId = itemId, newText = newText, taskId = null, objectId = null)
+    }
+
+    /**
+     * Save a notecard with optional task/object context.
+     */
+    suspend fun saveNotecard(
+        itemId: UUID,
+        newText: String,
+        taskId: UUID?,
+        objectId: UUID? = null
+    ): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                // Create new notecard data
                 val notecardData = createNotecardData(newText)
-                
-                // Upload via capability - requires UpdateNotecardAgentInventory
-                Log.w(TAG, "Notecard save not fully implemented - data prepared but upload pending capability implementation")
-                Log.d(TAG, "Prepared notecard $itemId: ${newText.length} chars, ${notecardData.size} bytes")
-                
-                // Return false to indicate save is not yet complete
-                // This will show user that the feature is not yet fully implemented
-                false
+                val isTaskInventory = (taskId != null || objectId != null)
+                val capability = if (isTaskInventory) {
+                    CapabilityManager.CAP_UPDATE_NOTECARD_TASK
+                } else {
+                    CapabilityManager.CAP_UPDATE_NOTECARD_AGENT
+                }
+                val request = LLSDMap().apply {
+                    this["item_id"] = LLSDUUID(itemId)
+                    taskId?.let { this["task_id"] = LLSDUUID(it) }
+                    objectId?.let { this["object_id"] = LLSDUUID(it) }
+                }
+                val capResponse = capabilityRequest(capability, request) as? LLSDMap
+
+                if (capResponse == null) {
+                    Log.w(TAG, "Notecard save failed: $capability returned no payload")
+                    return@withContext false
+                }
+
+                val uploaderUrl = capResponse.getString("uploader")?.takeIf { it.isNotBlank() }
+                if (uploaderUrl == null) {
+                    Log.w(TAG, "Notecard save failed: cap response missing uploader URL")
+                    return@withContext false
+                }
+
+                // Force-upgrade plain HTTP uploader URLs to HTTPS for
+                // production safety (cap responses occasionally come
+                // back with the wrong scheme). Skip the upgrade for
+                // loopback addresses so unit tests using MockWebServer
+                // (which serves plain HTTP on 127.0.0.1) can still
+                // round-trip without setting up TLS in the test harness.
+                val normalizedUploader = when {
+                    !uploaderUrl.startsWith("http://", ignoreCase = true) -> uploaderUrl
+                    uploaderUrl.startsWith("http://127.0.0.1", ignoreCase = true) ||
+                        uploaderUrl.startsWith("http://localhost", ignoreCase = true) -> uploaderUrl
+                    else -> uploaderUrl.replaceFirst("http://", "https://", ignoreCase = true)
+                }
+
+                val uploadRequest = Request.Builder()
+                    .url(normalizedUploader)
+                    .addHeader("Accept", "application/llsd+xml")
+                    .post(notecardData.toRequestBody("application/vnd.ll.notecard".toMediaType()))
+                    .build()
+
+                httpClient.newCall(uploadRequest).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        Log.w(TAG, "Notecard upload failed for $itemId: HTTP ${response.code}")
+                        return@withContext false
+                    }
+
+                    val responseBody = response.body?.bytes()
+                    if (responseBody == null || responseBody.isEmpty()) {
+                        Log.w(TAG, "Notecard upload returned empty response for $itemId")
+                        return@withContext false
+                    }
+
+                    val uploadResponse = com.linkpoint.protocol.llsd.LLSDParser.parseAuto(
+                        responseBody,
+                        response.header("Content-Type")
+                    ) as? LLSDMap
+
+                    val state = uploadResponse?.getString("state")
+                    val completed = state.equals("complete", ignoreCase = true)
+                    if (!completed) {
+                        val errors = uploadResponse?.getString("errors")
+                        Log.w(TAG, "Notecard upload incomplete for $itemId: state=$state errors=$errors")
+                        return@withContext false
+                    }
+                }
+
+                Log.i(TAG, "Notecard $itemId saved successfully (${newText.length} chars, taskInventory=$isTaskInventory)")
+                true
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to prepare notecard $itemId", e)
+                Log.e(TAG, "Failed to save notecard $itemId", e)
                 false
             }
         }
+    }
+
+    /**
+     * Copy an embedded inventory item from notecard contents into destination folder.
+     */
+    suspend fun copyInventoryFromNotecard(
+        notecardItemId: UUID,
+        objectId: UUID?,
+        destinationFolderId: UUID,
+        embeddedItemId: UUID
+    ): Boolean = withContext(Dispatchers.IO) {
+        val request = LLSDMap().apply {
+            this["notecard-id"] = LLSDUUID(notecardItemId)
+            this["folder-id"] = LLSDUUID(destinationFolderId)
+            this["item-id"] = LLSDUUID(embeddedItemId)
+            objectId?.let { this["object-id"] = LLSDUUID(it) }
+        }
+        capabilityManager.request(CapabilityManager.CAP_COPY_INVENTORY_FROM_NOTECARD, request) != null
+    }
+
+    /**
+     * Move an inventory item produced from notecard interactions (trash/move endpoint).
+     */
+    suspend fun moveInventoryItem(itemId: UUID, destinationFolderId: UUID): Boolean = withContext(Dispatchers.IO) {
+        val request = LLSDMap().apply {
+            this["items"] = com.linkpoint.protocol.llsd.LLSDArray().apply {
+                add(LLSDMap().apply {
+                    this["item_id"] = LLSDUUID(itemId)
+                    this["folder_id"] = LLSDUUID(destinationFolderId)
+                })
+            }
+        }
+        capabilityManager.request(CapabilityManager.CAP_MOVE_INVENTORY_ITEM, request) != null
     }
     
     /**

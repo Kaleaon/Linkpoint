@@ -25,11 +25,16 @@ import androidx.preference.SeekBarPreference
 import com.linkpoint.BuildConfig
 import com.linkpoint.R
 import com.linkpoint.network.NetworkLogger
+import com.linkpoint.service.BackgroundResumeScheduler
+import com.linkpoint.ui.theme.ThemeManager
 import com.linkpoint.ui.tos.TosActivity
 import com.linkpoint.ui.world.WorldViewActivity
 import com.linkpoint.utils.CodexUploadService
 import com.linkpoint.utils.CrashReporter
 import com.linkpoint.utils.DebugReportService
+import com.linkpoint.utils.DiagnosticsLoggingConfig
+import com.linkpoint.utils.SessionLogRecorder
+import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -39,7 +44,7 @@ import java.util.Locale
 
 /**
  * Settings Activity
- * Based on Lumiya's SettingsActivity
+ * Based on the reference viewer's SettingsActivity
  * 
  * Includes required disclosures per Third-Party Viewer Policy Section 1.g:
  * - Viewer name and version displayed in About section
@@ -86,6 +91,15 @@ class SettingsActivity : AppCompatActivity() {
     }
     
     class SettingsFragment : PreferenceFragmentCompat() {
+        override fun onResume() {
+            super.onResume()
+            // Refresh the live row so the user can see entry count / size
+            // tick up without leaving the screen.
+            findPreference<Preference>("session_log_status")?.let {
+                updateSessionLogStatusSummary(it)
+            }
+        }
+
         
         // ActivityResultLauncher for saving the exported log file
         private var pendingLogContent: String? = null
@@ -107,17 +121,37 @@ class SettingsActivity : AppCompatActivity() {
 
             // Interface settings
             setupInterfaceSettings()
+            setupKthemeThemeMenu()
             
             // Graphics settings
             findPreference<ListPreference>("graphics_quality")?.setOnPreferenceChangeListener { _, newValue ->
                 updateGraphicsQuality(newValue as String)
                 true
             }
+
+            findPreference<SwitchPreferenceCompat>("enable_secondary_renderer")?.setOnPreferenceChangeListener { _, newValue ->
+                val enabled = newValue as Boolean
+                Toast.makeText(
+                    requireContext(),
+                    if (enabled) "Secondary renderer enabled. Reopen world view to apply."
+                    else "Primary renderer enabled. Reopen world view to apply.",
+                    Toast.LENGTH_LONG
+                ).show()
+                true
+            }
             
             // XR settings
+            val xrManager = com.linkpoint.LinkpointApp.getInstance().xrManager
+            val xrCapability = xrManager.getEntryCapability()
             findPreference<SwitchPreferenceCompat>("enable_xr")?.apply {
-                isEnabled = com.linkpoint.LinkpointApp.getInstance().isXRAvailable()
+                isEnabled = xrManager.isUiEntryAvailable()
+                summary = when (xrCapability) {
+                    is com.linkpoint.xr.XRSessionCapability.Ready -> "Ready: ${xrCapability.detail}"
+                    is com.linkpoint.xr.XRSessionCapability.Experimental -> "Experimental build required: ${xrCapability.reason}"
+                    is com.linkpoint.xr.XRSessionCapability.Unsupported -> "Unavailable: ${xrCapability.reason}"
+                }
             }
+            findPreference<ListPreference>("xr_mode")?.isEnabled = xrManager.isUiEntryAvailable()
             
             // Voice settings
             findPreference<SwitchPreferenceCompat>("enable_voice")?.setOnPreferenceChangeListener { _, newValue ->
@@ -146,6 +180,9 @@ class SettingsActivity : AppCompatActivity() {
             
             // Cache settings
             setupCacheSettings()
+
+            setupBackgroundRuntimeSettings()
+
             
             // ToS viewing
             findPreference<Preference>("view_tos")?.setOnPreferenceClickListener {
@@ -157,8 +194,76 @@ class SettingsActivity : AppCompatActivity() {
             setupNetworkBufferSettings()
         }
         
+        private fun setupBackgroundRuntimeSettings() {
+            findPreference<SwitchPreferenceCompat>("background_resume_enabled")?.setOnPreferenceChangeListener { _, newValue ->
+                val enabled = newValue as Boolean
+                if (enabled) {
+                    BackgroundResumeScheduler.schedule(requireContext(), immediate = true)
+                } else {
+                    BackgroundResumeScheduler.cancel(requireContext())
+                }
+                true
+            }
+
+            findPreference<SwitchPreferenceCompat>("push_wakeups_enabled")?.setOnPreferenceChangeListener { _, _ ->
+                true
+            }
+
+            findPreference<ListPreference>("background_intensity_profile")?.setOnPreferenceChangeListener { _, _ ->
+                BackgroundResumeScheduler.schedule(requireContext(), immediate = false)
+                true
+            }
+        }
+
+        private fun setupKthemeThemeMenu() {
+            val themePreference = findPreference<Preference>("open_ktheme_theme_menu") ?: return
+
+            val themeManager = ThemeManager.getInstance(requireContext())
+            updateKthemeThemeSummary(themePreference, themeManager)
+
+            themePreference.setOnPreferenceClickListener {
+                val availableThemes = themeManager.availableThemes.value
+                if (availableThemes.isEmpty()) {
+                    Toast.makeText(requireContext(), "No Ktheme themes are available yet", Toast.LENGTH_SHORT).show()
+                    return@setOnPreferenceClickListener true
+                }
+
+                val themeNames = availableThemes.map { it.name }.toTypedArray()
+                val activeThemeId = themeManager.activeTheme.value.id
+                val activeThemeIndex = availableThemes.indexOfFirst { it.id == activeThemeId }.coerceAtLeast(0)
+                var selectedIndex = activeThemeIndex
+
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Select Ktheme Theme")
+                    .setSingleChoiceItems(themeNames, activeThemeIndex) { _, which ->
+                        selectedIndex = which
+                    }
+                    .setPositiveButton("Apply") { _, _ ->
+                        availableThemes.getOrNull(selectedIndex)?.let { selectedTheme ->
+                            themeManager.setActiveTheme(selectedTheme)
+                            updateKthemeThemeSummary(themePreference, themeManager)
+                            Toast.makeText(
+                                requireContext(),
+                                "Theme applied: ${selectedTheme.name}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+
+                true
+            }
+        }
+
+        private fun updateKthemeThemeSummary(themePreference: Preference, themeManager: ThemeManager) {
+            val activeThemeName = themeManager.activeTheme.value.name
+            val themeCount = themeManager.availableThemes.value.size
+            themePreference.summary = "Current: $activeThemeName ($themeCount available)"
+        }
+
         /**
-         * Setup cache settings - Lumiya-style configurable caches
+         * Setup cache settings - Linkpoint configurable caches
          */
         private fun setupCacheSettings() {
             val cacheManager = com.linkpoint.assets.CacheManager(requireContext())
@@ -443,6 +548,16 @@ class SettingsActivity : AppCompatActivity() {
                 captureDebugReportNow()
                 true
             }
+
+            // Force Refresh Appearance
+            // Manual trigger for the bake → upload → AgentSetAppearance
+            // pipeline. Useful for testing without waiting for the next
+            // AgentWearablesUpdate, and for re-asserting appearance after
+            // edits to wearables/visual params from the device.
+            findPreference<Preference>("force_appearance_refresh")?.setOnPreferenceClickListener {
+                forceAppearanceRefresh()
+                true
+            }
             
             // View Debug Reports
             findPreference<Preference>("view_debug_reports")?.setOnPreferenceClickListener {
@@ -477,9 +592,62 @@ class SettingsActivity : AppCompatActivity() {
                 true
             }
             
-            // Export Log
+            findPreference<SwitchPreferenceCompat>(DiagnosticsLoggingConfig.PREF_VERBOSE_PACKET_LOGGING)?.setOnPreferenceChangeListener { _, _ ->
+                Toast.makeText(requireContext(), "Verbose packet logging setting updated", Toast.LENGTH_SHORT).show()
+                true
+            }
+
+            findPreference<SwitchPreferenceCompat>(DiagnosticsLoggingConfig.PREF_VERBOSE_BODY_LOGGING)?.setOnPreferenceChangeListener { _, _ ->
+                Toast.makeText(requireContext(), "Verbose HTTP body logging setting updated", Toast.LENGTH_SHORT).show()
+                true
+            }
+
+            findPreference<ListPreference>(DiagnosticsLoggingConfig.PREF_LOG_RETENTION_DAYS)?.apply {
+                summary = "Keep private diagnostics for ${value ?: DiagnosticsLoggingConfig.DEFAULT_RETENTION_DAYS} days"
+                setOnPreferenceChangeListener { preference, newValue ->
+                    preference.summary = "Keep private diagnostics for $newValue days"
+                    Toast.makeText(requireContext(), "Diagnostics retention updated", Toast.LENGTH_SHORT).show()
+                    true
+                }
+            }
+
+            // Combined log: copy / export / share. The combined log is the
+            // most-recent debug report + crash logs glued into one text
+            // blob, generated by generateCombinedLog().
+            findPreference<Preference>("copy_log")?.setOnPreferenceClickListener {
+                confirmCopyCombinedLog()
+                true
+            }
             findPreference<Preference>("export_log")?.setOnPreferenceClickListener {
-                exportLog()
+                confirmExportDiagnostics()
+                true
+            }
+            findPreference<Preference>("share_log")?.setOnPreferenceClickListener {
+                confirmShareCombinedLog()
+                true
+            }
+
+            // Session Log Recorder controls — see preferences.xml for the
+            // matching <Preference> entries. Status summary refreshes on
+            // every screen resume via updateSessionLogStatusSummary().
+            findPreference<Preference>("session_log_status")?.apply {
+                updateSessionLogStatusSummary(this)
+                setOnPreferenceClickListener {
+                    updateSessionLogStatusSummary(this)
+                    showSessionLogStatusDialog()
+                    true
+                }
+            }
+            findPreference<Preference>("session_log_copy")?.setOnPreferenceClickListener {
+                copySessionLogToClipboard()
+                true
+            }
+            findPreference<Preference>("session_log_export")?.setOnPreferenceClickListener {
+                exportSessionLogToFile()
+                true
+            }
+            findPreference<Preference>("session_log_share")?.setOnPreferenceClickListener {
+                shareSessionLog()
                 true
             }
         }
@@ -487,6 +655,56 @@ class SettingsActivity : AppCompatActivity() {
         /**
          * Capture a debug report immediately
          */
+        /**
+         * Manual trigger for the local agent's appearance pipeline:
+         * AvatarBaker.bakeAll → uploadBakedTexture (J2K) →
+         * AgentSetAppearance. Used for testing without waiting for the
+         * next AgentWearablesUpdate.
+         *
+         * Reports the result via Toast so the user can see whether
+         * anything actually happened. The full per-step state is in the
+         * debug report's APPEARANCE PIPELINE section.
+         */
+        private fun forceAppearanceRefresh() {
+            val app = requireContext().applicationContext as? com.linkpoint.LinkpointApp
+            if (app == null) {
+                Toast.makeText(requireContext(), "App not initialized", Toast.LENGTH_SHORT).show()
+                return
+            }
+            // Check the appearance pipeline directly. Previously this checked
+            // outfitManager and reported "Not logged in" when the real cause
+            // was that the local Avatar wasn't ready yet — confusing users
+            // with an active session (see 2026-04-25 Athanasia debug report).
+            if (!app.isAppearanceManagerInitialized()) {
+                val msg = if (app.isConnected()) {
+                    "Avatar not ready yet — wait for the simulator to send your avatar data, then try again"
+                } else {
+                    "Not logged in (UDP circuit not connected)"
+                }
+                Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
+                return
+            }
+            Toast.makeText(requireContext(), "Refreshing appearance — see logcat / debug report", Toast.LENGTH_SHORT).show()
+            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Default).launch {
+                try {
+                    app.appearanceManager.sendAppearanceUpdate()
+                    val diag = app.appearanceManager.getDiagnostics()
+                    requireActivity().runOnUiThread {
+                        val msg = if (diag.lastUpdateError != null) {
+                            "Appearance refresh failed: ${diag.lastUpdateError}"
+                        } else {
+                            "Appearance refresh OK — baked ${diag.lastBakedTextureCount} channels in ${diag.lastUpdateDurationMs}ms"
+                        }
+                        Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
+                    }
+                } catch (e: Exception) {
+                    requireActivity().runOnUiThread {
+                        Toast.makeText(requireContext(), "Refresh threw: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
+
         private fun captureDebugReportNow() {
             val debugService = com.linkpoint.utils.DebugReportService.getInstance(requireContext())
             debugService.captureDebugReportAsync("Manual capture from Settings") { file ->
@@ -783,31 +1001,147 @@ class SettingsActivity : AppCompatActivity() {
                 .show()
         }
         
+        // ──────────────────────────────────────────────────────────────
+        // Combined log: Copy / Share. Export is the older confirm dialog
+        // immediately below; both copy and share funnel through the same
+        // privacy confirmation so the user is told once where the data
+        // lives and once when it's about to leave the device.
+        // ──────────────────────────────────────────────────────────────
+
+        private fun confirmCopyCombinedLog() {
+            val retentionDays = DiagnosticsLoggingConfig.getRetentionDays(requireContext())
+            AlertDialog.Builder(requireContext())
+                .setTitle("Copy combined log")
+                .setMessage(
+                    "The log lives in app-private storage and is auto-purged after " +
+                        "$retentionDays days.\n\nCopying may include sanitized network metadata. " +
+                        "Only paste it into a trusted destination."
+                )
+                .setPositiveButton("Copy") { _, _ -> copyCombinedLogToClipboard() }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
+        private fun copyCombinedLogToClipboard() {
+            viewLifecycleOwner.lifecycleScope.launch {
+                Toast.makeText(requireContext(), "Generating combined log…", Toast.LENGTH_SHORT).show()
+                val full = withContext(Dispatchers.IO) { generateCombinedLog() }
+                // Android's clipboard is bounded by IPC payload size; cap
+                // at ~512 KB and keep the tail (most recent entries are
+                // typically what the user is reporting). The full file is
+                // still reachable via Export / Share.
+                val maxChars = 512_000
+                val text = if (full.length <= maxChars) {
+                    full
+                } else {
+                    val tail = full.substring(full.length - maxChars)
+                    "… (truncated, copied last ${maxChars / 1024} KB of ${full.length / 1024} KB. " +
+                        "Use Export or Share for the full log)\n\n$tail"
+                }
+                val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                clipboard.setPrimaryClip(ClipData.newPlainText("Linkpoint combined log", text))
+                Toast.makeText(
+                    requireContext(),
+                    "Combined log copied (${text.length / 1024} KB)",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        private fun confirmShareCombinedLog() {
+            val retentionDays = DiagnosticsLoggingConfig.getRetentionDays(requireContext())
+            AlertDialog.Builder(requireContext())
+                .setTitle("Share combined log")
+                .setMessage(
+                    "The log lives in app-private storage and is auto-purged after " +
+                        "$retentionDays days.\n\nSharing sends a text file to the app you " +
+                        "choose. Only share with trusted support staff."
+                )
+                .setPositiveButton("Share") { _, _ -> shareCombinedLog() }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
+        /**
+         * Materialise the combined log into a temp file under cache-path
+         * (covered by the project FileProvider config) and hand it off
+         * via ACTION_SEND. The temp file is named with a timestamp so
+         * the receiver sees something meaningful, and lives in the app
+         * cache so the OS can reclaim it.
+         */
+        private fun shareCombinedLog() {
+            viewLifecycleOwner.lifecycleScope.launch {
+                Toast.makeText(requireContext(), "Generating combined log…", Toast.LENGTH_SHORT).show()
+                val ctx = requireContext()
+                val tempFile = withContext(Dispatchers.IO) {
+                    runCatching {
+                        val content = generateCombinedLog()
+                        val timestamp = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US).format(Date())
+                        val dir = java.io.File(ctx.cacheDir, "shared-logs").apply { mkdirs() }
+                        val file = java.io.File(dir, "linkpoint_diagnostics_$timestamp.txt")
+                        file.writeText(content)
+                        file
+                    }.getOrNull()
+                }
+                if (tempFile == null) {
+                    Toast.makeText(ctx, "Failed to prepare log for sharing", Toast.LENGTH_LONG).show()
+                    return@launch
+                }
+                val authority = ctx.packageName + ".fileprovider"
+                val uri = try {
+                    FileProvider.getUriForFile(ctx, authority, tempFile)
+                } catch (e: Exception) {
+                    Toast.makeText(ctx, "Cannot share log: ${e.message}", Toast.LENGTH_LONG).show()
+                    return@launch
+                }
+                val send = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    putExtra(Intent.EXTRA_SUBJECT, "Linkpoint combined log: ${tempFile.name}")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                try {
+                    startActivity(Intent.createChooser(send, "Share combined log"))
+                } catch (e: Exception) {
+                    Toast.makeText(ctx, "No share target available", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        private fun confirmExportDiagnostics() {
+            val retentionDays = DiagnosticsLoggingConfig.getRetentionDays(requireContext())
+            AlertDialog.Builder(requireContext())
+                .setTitle("Export diagnostics")
+                .setMessage(
+                    "Diagnostics are kept in app-private storage and automatically purged after $retentionDays days.\n\n" +
+                        "Exporting may include sanitized network metadata and should only be shared with trusted support staff. Continue?"
+                )
+                .setPositiveButton("Export") { _, _ -> exportLog() }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
         /**
          * Export combined log to a user-selected location in the file system
          */
         private fun exportLog() {
             viewLifecycleOwner.lifecycleScope.launch {
                 Toast.makeText(requireContext(), "Generating combined log...", Toast.LENGTH_SHORT).show()
-                
+
                 val logContent = withContext(Dispatchers.IO) {
                     generateCombinedLog()
                 }
-                
-                // Store the content for use by the result callback
+
                 pendingLogContent = logContent
-                
-                // Generate a default filename with timestamp
                 val timestamp = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US).format(Date())
-                val defaultFilename = "linkpoint_log_$timestamp.txt"
-                
-                // Use Storage Access Framework to let user choose location
+                val defaultFilename = "linkpoint_diagnostics_$timestamp.txt"
+
                 val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
                     type = "text/plain"
                     putExtra(Intent.EXTRA_TITLE, defaultFilename)
                 }
-                
+
                 try {
                     createDocumentLauncher.launch(intent)
                 } catch (e: Exception) {
@@ -854,6 +1188,191 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
         
+        // ──────────────────────────────────────────────────────────────
+        // Session Log Recorder controls
+        //
+        // The recorder is auto-started at app launch and writes a
+        // per-session text log under context.filesDir. These helpers
+        // surface that file in Settings — copy a chunk to the clipboard,
+        // save the raw file to a user-chosen location, share it via
+        // ACTION_SEND, or open a status / restart dialog.
+        // ──────────────────────────────────────────────────────────────
+
+        private fun updateSessionLogStatusSummary(pref: Preference) {
+            val stats = SessionLogRecorder.getStats()
+            val state = if (stats.isRecording) "Recording" else "Stopped"
+            val size = formatBytesCompat(stats.logFileSizeBytes)
+            val durationSec = stats.durationMs / 1000
+            pref.summary = "$state · ${stats.totalEntries} entries · $size · ${durationSec}s"
+        }
+
+        private fun showSessionLogStatusDialog() {
+            val stats = SessionLogRecorder.getStats()
+            val msg = buildString {
+                appendLine("State: ${if (stats.isRecording) "Recording" else "Stopped"}")
+                appendLine("Entries: ${stats.totalEntries}")
+                appendLine("In-memory buffered: ${stats.entriesInMemory}")
+                appendLine("Log file size: ${formatBytesCompat(stats.logFileSizeBytes)}")
+                appendLine("Duration: ${stats.durationMs / 1000}s")
+                appendLine()
+                appendLine("Path:")
+                appendLine(stats.currentLogFile ?: SessionLogRecorder.getLogDirectoryPath())
+            }
+            val builder = AlertDialog.Builder(requireContext())
+                .setTitle("Session Log Recorder")
+                .setMessage(msg)
+                .setPositiveButton("Close", null)
+            if (stats.isRecording) {
+                builder.setNeutralButton("Restart") { _, _ ->
+                    SessionLogRecorder.stopRecording()
+                    if (SessionLogRecorder.startRecording()) {
+                        Toast.makeText(requireContext(), "Session log restarted", Toast.LENGTH_SHORT).show()
+                    }
+                    findPreference<Preference>("session_log_status")?.let {
+                        updateSessionLogStatusSummary(it)
+                    }
+                }
+                builder.setNegativeButton("Stop") { _, _ ->
+                    SessionLogRecorder.stopRecording()
+                    Toast.makeText(requireContext(), "Session log stopped", Toast.LENGTH_SHORT).show()
+                    findPreference<Preference>("session_log_status")?.let {
+                        updateSessionLogStatusSummary(it)
+                    }
+                }
+            } else {
+                builder.setNegativeButton("Start") { _, _ ->
+                    if (SessionLogRecorder.startRecording()) {
+                        Toast.makeText(requireContext(), "Session log started", Toast.LENGTH_SHORT).show()
+                    }
+                    findPreference<Preference>("session_log_status")?.let {
+                        updateSessionLogStatusSummary(it)
+                    }
+                }
+            }
+            builder.show()
+        }
+
+        /**
+         * Resolve the current session log file. exportLog() flushes any
+         * in-memory buffer to disk and returns the active file when
+         * recording, or the most recently finalised file otherwise.
+         */
+        private fun currentSessionLogFile(): java.io.File? = SessionLogRecorder.exportLog()
+
+        /**
+         * Copy the latest portion of the session log to the system
+         * clipboard. Capped because the OS imposes a soft IPC limit of
+         * roughly 1 MB on ClipData and the log is allowed to grow.
+         */
+        private fun copySessionLogToClipboard() {
+            val file = currentSessionLogFile()
+            if (file == null || !file.exists()) {
+                Toast.makeText(requireContext(), "No session log available yet", Toast.LENGTH_SHORT).show()
+                return
+            }
+            viewLifecycleOwner.lifecycleScope.launch {
+                val text = withContext(Dispatchers.IO) {
+                    runCatching {
+                        val maxBytes = 512_000L
+                        val total = file.length()
+                        if (total <= maxBytes) {
+                            file.readText()
+                        } else {
+                            // Read the *tail* — the most recent activity is
+                            // what callers usually want; the head is in the
+                            // file itself if they need it.
+                            file.inputStream().use { input ->
+                                input.skip(total - maxBytes)
+                                input.bufferedReader().readText()
+                                    .let { "… (truncated, showing last ${maxBytes / 1024} KB of ${total / 1024} KB)\n\n$it" }
+                            }
+                        }
+                    }.getOrElse { e -> "Failed to read log: ${e.message}" }
+                }
+                val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                clipboard.setPrimaryClip(ClipData.newPlainText("Linkpoint session log", text))
+                Toast.makeText(
+                    requireContext(),
+                    "Session log copied (${text.length / 1024} KB)",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        /**
+         * Save the raw session log file to a user-chosen destination via
+         * SAF. Reuses the same createDocumentLauncher / pendingLogContent
+         * plumbing as the combined-log export.
+         */
+        private fun exportSessionLogToFile() {
+            val file = currentSessionLogFile()
+            if (file == null || !file.exists()) {
+                Toast.makeText(requireContext(), "No session log available yet", Toast.LENGTH_SHORT).show()
+                return
+            }
+            viewLifecycleOwner.lifecycleScope.launch {
+                val content = withContext(Dispatchers.IO) {
+                    runCatching { file.readText() }.getOrElse { e ->
+                        "Failed to read session log: ${e.message}"
+                    }
+                }
+                pendingLogContent = content
+                val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TITLE, file.name)
+                }
+                try {
+                    createDocumentLauncher.launch(intent)
+                } catch (e: Exception) {
+                    pendingLogContent = null
+                    Toast.makeText(
+                        requireContext(),
+                        "Could not open file picker: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
+
+        /**
+         * Share the session log file via ACTION_SEND. Uses the project's
+         * already-configured FileProvider authority so the receiving app
+         * sees a real file URI it can read.
+         */
+        private fun shareSessionLog() {
+            val file = currentSessionLogFile()
+            if (file == null || !file.exists()) {
+                Toast.makeText(requireContext(), "No session log available yet", Toast.LENGTH_SHORT).show()
+                return
+            }
+            val ctx = requireContext()
+            val authority = ctx.packageName + ".fileprovider"
+            val uri = try {
+                FileProvider.getUriForFile(ctx, authority, file)
+            } catch (e: Exception) {
+                Toast.makeText(ctx, "Cannot share log: ${e.message}", Toast.LENGTH_LONG).show()
+                return
+            }
+            val send = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                putExtra(Intent.EXTRA_SUBJECT, "Linkpoint session log: ${file.name}")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            try {
+                startActivity(Intent.createChooser(send, "Share session log"))
+            } catch (e: Exception) {
+                Toast.makeText(ctx, "No share target available", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        private fun formatBytesCompat(bytes: Long): String = when {
+            bytes < 1024 -> "$bytes B"
+            bytes < 1024 * 1024 -> "%.1f KB".format(Locale.US, bytes / 1024.0)
+            else -> "%.2f MB".format(Locale.US, bytes / (1024.0 * 1024.0))
+        }
+
         /**
          * Generate a combined log from all log sources
          */

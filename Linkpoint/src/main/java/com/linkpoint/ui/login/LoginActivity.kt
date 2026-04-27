@@ -30,7 +30,7 @@ import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.SSLHelper
 import com.linkpoint.ui.settings.SettingsActivity
 import com.linkpoint.ui.tos.TosActivity
-import com.linkpoint.ui.world.WorldViewActivity
+import com.linkpoint.ui.navigation.WorldHomeHostActivity
 import com.linkpoint.utils.PermissionManager
 import com.linkpoint.utils.SecurePreferences
 import kotlinx.coroutines.Dispatchers
@@ -47,9 +47,9 @@ import javax.crypto.spec.GCMParameterSpec
 /**
  * Login Activity - Entry point for the app
  * 
- * Based on Lumiya's LoginActivity structure with enhancements:
+ * Based on the reference viewer's LoginActivity structure with enhancements:
  * - Terms of Service acceptance check before first login
- * - Secure password storage with encryption (like Lumiya)
+ * - Secure password storage with encryption (like the reference viewer)
  * - Quick login with saved credentials
  * - Better network error handling
  * - Start location selection with cached landmarks and themed destinations
@@ -82,7 +82,6 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
     private lateinit var passwordEdit: EditText
     private lateinit var gridSpinner: Spinner
     private lateinit var startLocationSpinner: Spinner
-    private lateinit var startLocationButton: Button
     private lateinit var savePasswordCheck: CheckBox
     private lateinit var loginButton: Button
     private lateinit var progressBar: ProgressBar
@@ -160,7 +159,7 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
         permissionManager = PermissionManager(this)
         permissionManager.registerPermissionLauncher(allPermissionsLauncher)
         
-        // Check ToS acceptance first (like Lumiya does)
+        // Check ToS acceptance first (like the reference viewer does)
         if (!TosActivity.hasAcceptedTos(this)) {
             // Show ToS activity
             tosLauncher.launch(TosActivity.createIntent(this, requireAcceptance = true))
@@ -335,7 +334,7 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
     }
     
     /**
-     * Save credentials including encrypted password (like Lumiya)
+     * Save credentials including encrypted password (like the reference viewer)
      */
     private fun saveCredentials() {
         val prefs = loginPrefs.edit()
@@ -357,7 +356,7 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
     
     /**
      * Encrypt and save password using Android Keystore
-     * This is how Lumiya securely stores passwords
+     * This is how the viewer securely stores passwords
      */
     private fun savePasswordSecurely(password: String) {
         loginPrefs.edit().putString(KEY_SAVED_PASSWORD, password).apply()
@@ -639,7 +638,7 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
             
             // OPTIMIZATION: Skip server reachability test - go straight to login
             // The old code did a HEAD request before POST login, which added latency.
-            // Lumiya goes straight to login, which is why it's instant.
+            // The reference viewer goes straight to login, which is why it's instant.
             // The login request itself will fail with appropriate errors if server is down.
             statusText.text = "Logging into ${grid.name}..."
             Log.d(TAG, "Starting login to ${grid.loginUri} via ${networkStatus.networkType}")
@@ -848,7 +847,7 @@ class LoginActivity : AppCompatActivity(), StartLocationDialog.StartLocationList
                 }
                 
                 // Navigate to world view
-                val intent = Intent(this, WorldViewActivity::class.java)
+                val intent = Intent(this, WorldHomeHostActivity::class.java)
                 startActivity(intent)
                 finish()
             }

@@ -199,11 +199,11 @@ public class QueryBuilder<T> {
     }
 
     public <J> QueryBuilder<J> join(Class<J> cls, Property property) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     public <J> QueryBuilder<J> joinToMany(Class<J> cls, Property property) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     public QueryBuilder<T> limit(int i) {

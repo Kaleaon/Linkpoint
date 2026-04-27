@@ -3,6 +3,9 @@ package com.linkpoint
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
 import com.linkpoint.assets.*
 import com.linkpoint.utils.CrashReporter
 import com.linkpoint.avatar.AvatarManager
@@ -50,10 +53,14 @@ import com.linkpoint.protocol.transfer.XferManager
 import com.linkpoint.render.DrawDistanceManager
 import com.linkpoint.render.HoverTextManager
 import com.linkpoint.render.RenderManager
-import com.linkpoint.render.RenderableUpdate
 import com.linkpoint.render.particles.ParticleSystem
+import com.linkpoint.render.scene.commands.FilamentRenderCommandConsumer
+import com.linkpoint.render.scene.commands.Gles3RenderCommandConsumer
+import com.linkpoint.render.scene.commands.RenderCommandStream
+import com.linkpoint.render.scene.commands.SceneRenderCommand
 import com.linkpoint.rlv.RLVController
 import com.linkpoint.service.ConnectionKeepAliveManager
+import com.linkpoint.service.BackgroundResumeScheduler
 import com.linkpoint.service.IdleHandler
 import com.linkpoint.service.LinkpointConnectionService
 import com.linkpoint.users.DisplayNameManager
@@ -63,6 +70,7 @@ import com.linkpoint.voice.VoiceManager
 import com.linkpoint.world.FriendsManager
 import com.linkpoint.world.ParcelManager
 import com.linkpoint.world.ProfileManager
+import com.linkpoint.world.RegionExperienceManager
 import com.linkpoint.world.SearchManager
 import com.linkpoint.world.WorldMap
 import com.linkpoint.world.environment.EnvironmentManager
@@ -70,6 +78,7 @@ import com.linkpoint.world.minimap.MinimapManager
 import com.linkpoint.groups.GroupsManager
 import com.linkpoint.animesh.AnimeshManager
 import com.linkpoint.avatar.AnimationController
+import com.linkpoint.diagnostics.ScenePopulationDiagnostics
 import com.linkpoint.bom.BakesOnMeshManager
 import com.linkpoint.inventory.LandmarkManager
 import com.linkpoint.media.MediaManager
@@ -85,16 +94,21 @@ import com.linkpoint.protocol.types.getUUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Main Application class for Linkpoint - Second Life viewer for Android and XR
  * 
- * Based on Lumiya's architecture, modernized for:
+ * Based on the reference viewer's architecture, modernized for:
  * - Kotlin
  * - Filament rendering
  * - Android XR / VR support
@@ -107,15 +121,356 @@ class LinkpointApp : Application() {
         
         @Volatile
         private var instance: LinkpointApp? = null
-        
+
         fun getInstance(): LinkpointApp {
             return instance ?: throw IllegalStateException("Application not initialized")
         }
+
+        /**
+         * Variant of [getInstance] that returns null instead of throwing
+         * when the Application has not finished `onCreate` yet. Used by
+         * lifecycle observers that may fire before the Application is up
+         * (e.g. ProcessLifecycleObserver on cold-launch racing the
+         * Application class loader).
+         */
+        fun getInstanceOrNull(): LinkpointApp? = instance
+
+        /**
+         * Explicit list of UDP message names that have runtime parser/handler coverage in LinkpointApp.
+         * Used by protocol conformance tests to keep handler registration parity visible in CI reports.
+         */
+        val parserSupportedMessageNamesForConformance: Set<String> = setOf(
+            "AgentAlertMessage",
+            "AgentDataUpdate",
+            "AgentMovementComplete",
+            "AvatarAnimation",
+            "ChangeUserRights",
+            "ChatFromSimulator",
+            "CoarseLocationUpdate",
+            "CrossedRegion",
+            "EnableSimulator",
+            "FetchInventory",
+            "FetchInventoryDescendents",
+            "GroupTitlesRequest",
+            "HealthMessage",
+            "ImprovedInstantMessage",
+            "ImprovedTerseObjectUpdate",
+            "KillObject",
+            "LayerData",
+            "MapNameRequest",
+            "ObjectProperties",
+            "ObjectUpdate",
+            "ObjectUpdateCached",
+            "ObjectUpdateCompressed",
+            "OfflineNotification",
+            "OnlineNotification",
+            "PacketAck",
+            "ParcelOverlay",
+            "RequestPayPrice",
+            "RegionHandshake",
+            "ScriptControlChange",
+            "SoundTrigger",
+            "StartPingCheck",
+            "TeleportFailed",
+            "TeleportFinish",
+            "TeleportProgress",
+            "TeleportStart",
+            "AgentPause",
+            "AgentResume",
+            "DirFindQuery",
+        )
     }
     
     // Application-wide coroutine scope for background operations
     val applicationScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    
+
+    /**
+     * Last AgentThrottle band sent to the simulator. Tracked so we only
+     * re-send when the band actually changes (hysteresis), and so the
+     * post-reconnect path can re-advertise the current band — the simulator
+     * resets to its default throttle on a fresh circuit. See Lumiya parity
+     * doc segment 02 §3.4 (L02-L / L02-M).
+     */
+    private enum class ThrottleBand { HIGH, LOW }
+    @Volatile private var currentThrottleBand: ThrottleBand? = null
+    @Volatile private var adaptiveThrottleStarted = false
+
+    /**
+     * Send an AgentThrottle whose budget is matched to the current network
+     * quality. POOR/FAIR/UNKNOWN → LOW band (~310 kbps total, with texture
+     * and task bandwidth heavily reduced). EXCELLENT/GOOD → HIGH band
+     * (Linkpoint's desktop default). Lumiya advertises a single throttle at
+     * circuit-ready and never adapts; Linkpoint adapts because it actually
+     * downloads textures/meshes (Lumiya is a thin client) and a desktop
+     * budget on cellular saturates the link, which the user observed as
+     * "Lumiya worked on 2G/3G but Linkpoint won't run on 5G".
+     *
+     * @param force re-send even if the band hasn't changed (used after a
+     *   socket reconnect, since the simulator forgot our previous throttle).
+     */
+    private fun applyAdaptiveAgentThrottle(force: Boolean = false) {
+        if (!::udpConnection.isInitialized || !udpConnection.isConnected.value) return
+        val q = try { protocol.qualityManager.quality.value } catch (_: Exception) { null }
+        val targetBand = when (q) {
+            com.linkpoint.network.core.ConnectionQualityManager.Quality.EXCELLENT,
+            com.linkpoint.network.core.ConnectionQualityManager.Quality.GOOD -> ThrottleBand.HIGH
+            else -> ThrottleBand.LOW
+        }
+        if (!force && targetBand == currentThrottleBand) return
+        try {
+            if (targetBand == ThrottleBand.LOW) {
+                // ~310 kbps total. Wind/cloud reduced to a token amount;
+                // texture/asset deeply cut so foreground work (chat, IM,
+                // group, object updates) keeps flowing.
+                udpConnection.sendAgentThrottle(
+                    resend = 50_000f,
+                    land = 50_000f,
+                    wind = 5_000f,
+                    cloud = 5_000f,
+                    task = 100_000f,
+                    texture = 50_000f,
+                    asset = 50_000f
+                )
+                Log.i(TAG, "🐢 AgentThrottle: LOW band (quality=$q, force=$force)")
+            } else {
+                // Linkpoint default — see UDPConnectionFixed.sendAgentThrottle.
+                udpConnection.sendAgentThrottle()
+                Log.i(TAG, "🐇 AgentThrottle: HIGH band (quality=$q, force=$force)")
+            }
+            currentThrottleBand = targetBand
+        } catch (e: Exception) {
+            Log.w(TAG, "applyAdaptiveAgentThrottle failed: ${e.message}")
+        }
+    }
+
+    /**
+     * Start a one-shot coroutine that observes connection-quality changes
+     * and re-sends AgentThrottle when the band crosses HIGH↔LOW. Idempotent.
+     */
+    private fun ensureAdaptiveThrottleObserver() {
+        if (adaptiveThrottleStarted) return
+        adaptiveThrottleStarted = true
+        applicationScope.launch {
+            try {
+                protocol.qualityManager.quality.collect {
+                    applyAdaptiveAgentThrottle(force = false)
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Adaptive throttle observer ended: ${e.message}")
+            }
+        }
+    }
+
+    // ─── Auto re-login coordinator ────────────────────────────────────────
+    //
+    // When the UDP circuit is detected as dead (post-reconnect-silence
+    // escalation, or a 3-unanswered-ping watchdog trip), the LLUDP protocol
+    // gives us no in-band way to revive it: the simulator-side circuit has
+    // already timed us out (typically because cellular NAT rotated our public
+    // source port). The only correct recovery is a full HTTP re-login, which
+    // gets us a fresh circuit code and a new sim handoff.
+    //
+    // Architecture matches Lumiya's `SLGridConnection.Reconnect()` (3s
+    // backoff, max 10 attempts) and the official SL mobile viewer's
+    // `CoreNetworkingService` (`_alwaysReconnect`, `IsReconnecting`,
+    // `MaxReconnectTime`, `_currentLogin`-style cached login response). The
+    // SL mobile viewer abandoned LLUDP for gRPC so its transport is not a
+    // model for us, but its lifecycle pattern is transport-agnostic and
+    // correct.
+
+    private data class LoginCredentials(
+        val firstName: String,
+        val lastName: String,
+        val password: String,
+        val loginUri: String,
+        val startLocation: String,
+        val mfaHash: String
+    )
+
+    @Volatile private var cachedLoginCredentials: LoginCredentials? = null
+    private val userWantsConnected = AtomicBoolean(false)
+    private val isReconnecting = AtomicBoolean(false)
+    private val reconnectAttempts = AtomicInteger(0)
+
+    /**
+     * The collector job that mirrors `udpConnection.isConnected` into the
+     * foreground service. Owned by [initializeAgentManagers], which can run
+     * multiple times per process (one per login). Re-running the collector
+     * launch without cancelling the previous one would leak a coroutine
+     * per re-login — one observed Athanasia recovery cycle was 4 re-logins
+     * in 2 minutes, so the leak compounds quickly.
+     */
+    @Volatile private var fgsConnectStateMirrorJob: Job? = null
+    @Volatile private var firstReconnectAttemptAt: Long = 0L
+    private val reloginMutex = Mutex()
+
+    /** 3 seconds — Lumiya's `Reconnect()` sleep before each attempt. */
+    private val reloginBackoffMs: Long = 3_000L
+    /** 10 — Lumiya's `GlobalOptions.MaxReconnectAttempts`. */
+    private val reloginMaxAttempts: Int = 10
+    /** 120s deadline — mirrors SL mobile's `MaxReconnectTime` so we surrender if a recovery cycle is dragging on. */
+    private val reloginMaxWindowMs: Long = 120_000L
+
+    /**
+     * Called by [SecondLifeProtocol.login] on Success. We cache enough to
+     * re-drive a full login from the auto-reconnect path without bouncing
+     * through the login UI. MFA hash is updated each time so the next
+     * resume can skip the prompt.
+     */
+    internal fun rememberLoginCredentials(
+        firstName: String, lastName: String, password: String,
+        loginUri: String, startLocation: String, mfaHash: String?
+    ) {
+        cachedLoginCredentials = LoginCredentials(
+            firstName, lastName, password, loginUri, startLocation, mfaHash ?: ""
+        )
+        userWantsConnected.set(true)
+        reconnectAttempts.set(0)
+        firstReconnectAttemptAt = 0L
+        Log.d(TAG, "Cached login credentials for auto re-login")
+    }
+
+    /**
+     * Called from [SecondLifeProtocol.disconnect] (user-initiated logout)
+     * so we don't auto re-login after an explicit logout. Mirrors Lumiya's
+     * `userWantsConnected = false` in `disconnect()`.
+     */
+    internal fun forgetLoginCredentials() {
+        userWantsConnected.set(false)
+        cachedLoginCredentials = null
+        reconnectAttempts.set(0)
+        firstReconnectAttemptAt = 0L
+        Log.d(TAG, "Cleared cached login credentials (user logout)")
+    }
+
+    /**
+     * Drive the auto-reconnect loop. Safe to call from anywhere; a single
+     * coordinator runs at a time (gated by [isReconnecting] CAS, which
+     * also coalesces duplicate triggers). Bails when:
+     *   - the user explicitly logged out (`userWantsConnected == false`),
+     *   - we have no cached credentials (no login yet, or already cleared),
+     *   - we've exhausted [reloginMaxAttempts], OR
+     *   - cumulative recovery time exceeds [reloginMaxWindowMs].
+     *
+     * Coalescing is load-bearing: every watchdog in [UDPConnectionFixed]
+     * (unanswered-pings, post-reconnect-silence, inbound-stall, send-error,
+     * receive-loop-exit) fires `reconnectionCallback` independently. Without
+     * this gate, a single dead-circuit event triggers all five callbacks,
+     * each launching a coroutine that queues on [reloginMutex]. The mutex
+     * serialises them but does not dedupe — so each one runs its own
+     * `disconnect()` + `login()` cycle, tearing down whatever the previous
+     * iteration just established (visible in the 2026-04-26 Athanasia
+     * capture as UseCircuitCode resends every ~5-6s = 3s backoff + 2s HTTP
+     * login + connect).
+     */
+    internal fun attemptAutoRelogin() {
+        if (!isReconnecting.compareAndSet(false, true)) {
+            Log.d(TAG, "Auto re-login already in progress — ignoring duplicate trigger")
+            return
+        }
+        applicationScope.launch {
+            try {
+                reloginMutex.withLock {
+                    runReloginLoop()
+                }
+            } finally {
+                isReconnecting.set(false)
+            }
+        }
+    }
+
+    private suspend fun runReloginLoop() {
+        if (!userWantsConnected.get()) {
+            Log.i(TAG, "Auto re-login skipped: user is not connected (manual logout)")
+            return
+        }
+        val creds = cachedLoginCredentials ?: run {
+            Log.w(TAG, "Auto re-login skipped: no cached credentials")
+            return
+        }
+
+        if (firstReconnectAttemptAt == 0L) firstReconnectAttemptAt = System.currentTimeMillis()
+        // [isReconnecting] is owned by [attemptAutoRelogin], which performs
+        // the CAS that gates entry to this loop and clears the flag in its
+        // own finally block. Setting it again here would mask a future bug
+        // where someone calls runReloginLoop directly without the gate.
+
+        while (userWantsConnected.get()) {
+            val attempt = reconnectAttempts.incrementAndGet()
+            val elapsed = System.currentTimeMillis() - firstReconnectAttemptAt
+
+            if (attempt > reloginMaxAttempts) {
+                Log.e(TAG, "Auto re-login: exceeded $reloginMaxAttempts attempts — giving up")
+                sessionManager.setConnectionState(
+                    com.linkpoint.network.events.ConnectionState.DISCONNECTED
+                )
+                return
+            }
+            if (elapsed >= reloginMaxWindowMs) {
+                Log.e(TAG, "Auto re-login: ${elapsed}ms exceeds ${reloginMaxWindowMs}ms window — giving up")
+                sessionManager.setConnectionState(
+                    com.linkpoint.network.events.ConnectionState.DISCONNECTED
+                )
+                return
+            }
+
+            Log.i(TAG, "🔄 Auto re-login attempt $attempt/$reloginMaxAttempts (elapsed=${elapsed}ms)")
+            protocol.stateManager.setStatus(
+                com.linkpoint.network.core.NetworkStateManager.ConnectionStatus.RECONNECTING
+            )
+
+            // Tear down the dead UDP socket cleanly so the new login
+            // doesn't fight with stale I/O thread state.
+            try { udpConnection.disconnect() } catch (e: Exception) {
+                Log.w(TAG, "udpConnection.disconnect() during re-login: ${e.message}")
+            }
+
+            delay(reloginBackoffMs)
+
+            val result = try {
+                protocol.login(
+                    firstName = creds.firstName,
+                    lastName = creds.lastName,
+                    password = creds.password,
+                    loginUri = creds.loginUri,
+                    startLocation = creds.startLocation,
+                    mfaToken = "",
+                    mfaHash = creds.mfaHash
+                )
+            } catch (e: Exception) {
+                Log.w(TAG, "Auto re-login attempt $attempt threw: ${e.message}")
+                null
+            }
+
+            when (result) {
+                is com.linkpoint.network.LoginResult.Success -> {
+                    Log.i(TAG, "✓ Auto re-login succeeded on attempt $attempt")
+                    // Refresh cached MFA hash — Linden rotates these.
+                    cachedLoginCredentials = creds.copy(mfaHash = result.mfaHash ?: creds.mfaHash)
+                    reconnectAttempts.set(0)
+                    firstReconnectAttemptAt = 0L
+                    return
+                }
+                is com.linkpoint.network.LoginResult.MFARequired -> {
+                    Log.w(TAG, "Auto re-login: server now requires MFA — cannot proceed automatically")
+                    userWantsConnected.set(false)
+                    sessionManager.setConnectionState(
+                        com.linkpoint.network.events.ConnectionState.DISCONNECTED
+                    )
+                    return
+                }
+                is com.linkpoint.network.LoginResult.Failure -> {
+                    Log.w(TAG, "Auto re-login attempt $attempt failed: ${result.message} [${result.errorCode}]")
+                    // Loop continues; next iteration applies backoff.
+                }
+                null -> {
+                    // Exception path — treat like failure, retry.
+                }
+            }
+        }
+        Log.i(TAG, "Auto re-login loop exited: user no longer wants connected")
+    }
+
     /**
      * Single-threaded dispatcher for serialized messaging work (MessageThread).
      */
@@ -135,6 +490,9 @@ class LinkpointApp : Application() {
         private set
     lateinit var renderManager: RenderManager
         private set
+    val renderCommandStream = RenderCommandStream()
+    private lateinit var filamentCommandConsumer: FilamentRenderCommandConsumer
+    private lateinit var gles3CommandConsumer: Gles3RenderCommandConsumer
     lateinit var xrManager: XRManager
         private set
     lateinit var protocol: SecondLifeProtocol
@@ -142,6 +500,14 @@ class LinkpointApp : Application() {
     
     // Protocol layer
     lateinit var capabilityManager: CapabilityManager
+    /**
+     * Per-region SimulatorFeatures snapshot. Populated after the seed cap
+     * is fetched and re-fetched on region change. Renderer / inventory /
+     * UI code should consult `simulatorFeatures.features.value` rather
+     * than assume the protocol baseline — modern sims advertise PBR,
+     * BoM, animated objects, raised attachment limits, etc. via this cap.
+     */
+    lateinit var simulatorFeatures: com.linkpoint.world.SimulatorFeaturesManager
         private set
     lateinit var udpConnection: UDPConnectionFixed
         private set
@@ -175,6 +541,8 @@ class LinkpointApp : Application() {
         private set
     lateinit var outfitManager: OutfitManager
         private set
+    lateinit var appearanceManager: com.linkpoint.avatar.AppearanceManager
+        private set
     lateinit var gestureManager: GestureManager
         private set
     
@@ -184,6 +552,8 @@ class LinkpointApp : Application() {
     lateinit var searchManager: SearchManager
         private set
     lateinit var profileManager: ProfileManager
+        private set
+    lateinit var regionExperienceManager: RegionExperienceManager
         private set
     lateinit var parcelManager: ParcelManager
         private set
@@ -326,17 +696,40 @@ class LinkpointApp : Application() {
     var agentId: UUID? = null
         private set
     
-    // Flag to track if CompleteAgentMovement has been sent
-    // Per Lumiya protocol: This must be sent immediately when UseCircuitCode (seq 0) is ACKed
-    // The server won't send RegionHandshake until we send this
-    // Using AtomicBoolean to prevent race conditions with concurrent PacketAck messages
+    // Flag to track if CompleteAgentMovement has been sent.
+    // Per SL protocol: This must be sent immediately once UseCircuitCode is ACKed;
+    // the server won't send RegionHandshake until it receives CompleteAgentMovement.
+    // Using AtomicBoolean to prevent race conditions with concurrent PacketAck messages.
     private val completeAgentMovementSent = AtomicBoolean(false)
     
     override fun onCreate() {
         super.onCreate()
         instance = this
         Log.i(TAG, "Linkpoint application starting...")
-        
+
+        // Install Conscrypt as the highest-priority JCA provider before any
+        // SSL handshake fires. Conscrypt's BoringSSL backend negotiates
+        // ALPN reliably, which is what makes OkHttp's HTTP/2 upgrade
+        // actually take effect — the platform SSL stack on many Android
+        // devices fails ALPN silently and leaves us on HTTP/1.1 (the
+        // 2026-04-25 Athanasia capture showed 0/73 H2 on textures despite
+        // OkHttp.Builder().protocols(HTTP_2, HTTP_1_1)). Inserting at
+        // position 1 makes Conscrypt the default for all subsequent
+        // SSLSocketFactory.getDefault() calls and any explicitly built
+        // SSL contexts.
+        try {
+            java.security.Security.insertProviderAt(
+                org.conscrypt.Conscrypt.newProvider(), 1
+            )
+            Log.i(TAG, "Conscrypt installed as primary JCA provider — HTTP/2 ALPN should now work")
+        } catch (e: Throwable) {
+            // UnsatisfiedLinkError on a device without the Conscrypt
+            // native library, or NoClassDefFoundError if the dep is
+            // somehow stripped — fall through to platform SSL. We log
+            // loudly because this silently degrades H2 → H1.1.
+            Log.e(TAG, "Conscrypt install failed; HTTP/2 will fall back to platform ALPN: ${e.message}", e)
+        }
+
         // Initialize crash reporter first for early crash capture
         try {
             crashReporter = CrashReporter.initialize(this)
@@ -352,13 +745,34 @@ class LinkpointApp : Application() {
         // Initialize network logger first for early debugging
         NetworkLogger.initialize(this)
         Log.i(TAG, "Network logger initialized with auto-save to Documents/Linkpoint Logs/")
+
+        val decoderStatus = JPEG2000Decoder.runStartupSelfTest()
+        if (!decoderStatus.available) {
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(
+                    this,
+                    "JPEG2000 support unavailable. Some textures may use placeholders.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
         
-        // Initialize session log recorder for comprehensive packet logging
+        // Initialize and AUTO-START the session log recorder so every
+        // packet, HTTP request, capability event, and render-pipeline
+        // moment from app launch onward is captured. Without this the
+        // recorder was initialized but never actually recording, so
+        // SessionLogRecorder.log* calls (including the new
+        // RenderDiagnostics events) silently no-op'd.
         com.linkpoint.utils.SessionLogRecorder.initialize(this)
-        Log.i(TAG, "Session log recorder initialized")
+        com.linkpoint.utils.SessionLogRecorder.startRecording()
+        Log.i(TAG, "Session log recorder initialized and recording")
         
+        // Initialize Linkpoint circuit integration (device-adaptive settings, DNS, IPv4)
+        com.linkpoint.protocol.circuit.LinkpointCircuitIntegration.initialize(this)
+
         initializeManagers()
-        
+        BackgroundResumeScheduler.schedule(this, immediate = false)
+
         Log.i(TAG, "Linkpoint initialized successfully")
     }
     
@@ -381,7 +795,8 @@ class LinkpointApp : Application() {
         avatarSelectionManager = AvatarSelectionManager(this)
         
         // Protocol components
-        capabilityManager = CapabilityManager()
+        capabilityManager = CapabilityManager().apply { androidContext = this@LinkpointApp }
+        simulatorFeatures = com.linkpoint.world.SimulatorFeaturesManager(capabilityManager)
         udpConnection = UDPConnectionFixed()
         
         // Protocol handler
@@ -389,24 +804,87 @@ class LinkpointApp : Application() {
         
         // Rendering (Filament-based)
         renderManager = RenderManager(this)
+        filamentCommandConsumer = FilamentRenderCommandConsumer(
+            renderManager = renderManager,
+            stream = renderCommandStream,
+            scope = applicationScope
+        ).also { it.start() }
+        gles3CommandConsumer = Gles3RenderCommandConsumer(
+            stream = renderCommandStream,
+            scope = applicationScope
+        ).also { it.start() }
         
         // XR/VR support
         xrManager = XRManager(this)
         
-        // Cache management system (Lumiya Cache structure)
+        // Cache management system (Linkpoint Cache structure)
         cacheManager = CacheManager(this)
         
         // Asset system
         assetCache = AssetCache(this)
         textureManager = TextureManager(this, assetCache, capabilityManager)
-        meshManager = MeshManager(assetCache, capabilityManager)
+        meshManager = MeshManager(this, assetCache, capabilityManager)
         animationManager = AnimationManager(this, assetCache)
         soundManager = SoundManager(this, assetCache)
+        renderManager.configurePrimMeshPipeline(
+            requester = com.linkpoint.render.prims.PrimRenderer.MeshDataRequester { localId, meshId, lod, onResolved ->
+                applicationScope.launch {
+                    val meshData = try {
+                        meshManager.getMesh(meshId, lod)
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Mesh load parse failure localId=$localId meshId=$meshId: ${e.message}")
+                        onResolved(com.linkpoint.render.prims.PrimRenderer.MeshLoadResult.ParseFailure(e.message))
+                        return@launch
+                    }
+                    if (meshData != null) {
+                        onResolved(com.linkpoint.render.prims.PrimRenderer.MeshLoadResult.Success(meshData))
+                    } else {
+                        val diagnostics = meshManager.getDiagnostics()
+                        val detail = diagnostics.lastError ?: "mesh not found"
+                        val parseFailure = detail.startsWith("Parse:") ||
+                            detail.contains("parse", ignoreCase = true)
+                        if (parseFailure) {
+                            onResolved(com.linkpoint.render.prims.PrimRenderer.MeshLoadResult.ParseFailure(detail))
+                        } else {
+                            onResolved(com.linkpoint.render.prims.PrimRenderer.MeshLoadResult.MissingAsset(detail))
+                        }
+                    }
+                }
+            },
+            geometryBuilder = com.linkpoint.render.prims.PrimRenderer.MeshGeometryBuilder { entity, meshData, textureEntry ->
+                val binder = com.linkpoint.render.prims.MeshPrimRenderer.TextureBinder { _, texId, onLoaded ->
+                    val resolvedId = if (::avatarManager.isInitialized) {
+                        com.linkpoint.avatar.BakesOnMesh.resolve(texId) { slot ->
+                            avatarManager.getMyAvatar()?.baker?.getBakedTextures()?.get(slot)
+                        }
+                    } else texId
+                    if (!com.linkpoint.protocol.textures.TextureEntryParser.shouldDownload(resolvedId)) return@TextureBinder
+                    if (!::textureManager.isInitialized) return@TextureBinder
+                    applicationScope.launch {
+                        val bmp = try { textureManager.getTexture(resolvedId) } catch (_: Exception) { null }
+                        if (bmp != null) {
+                            renderManager.dispatcher.post(Runnable {
+                                val pair = renderManager.uploadBitmapAsLinkpointTexture(resolvedId, bmp)
+                                if (pair != null) onLoaded(pair.first)
+                            })
+                        }
+                    }
+                }
+                renderManager.engine?.renderableManager?.let { rm ->
+                    val inst = rm.getInstance(entity)
+                    if (inst != 0) rm.destroy(entity)
+                }
+                renderManager.getMeshPrimRenderer()?.getOrCompile(meshData)?.let { compiled ->
+                    renderManager.getMeshPrimRenderer()?.attach(entity, compiled, textureEntry, binder)
+                }
+            }
+        )
         
         // World features
         worldMap = WorldMap(capabilityManager)
         searchManager = SearchManager(capabilityManager)
         profileManager = ProfileManager(capabilityManager)
+        regionExperienceManager = RegionExperienceManager(capabilityManager)
         parcelManager = ParcelManager(udpConnection)
         
         // Voice
@@ -455,7 +933,7 @@ class LinkpointApp : Application() {
         idleHandler = IdleHandler(connectionKeepAlive)
         
         // NEW: Media Manager
-        mediaManager = MediaManager(this, udpConnection)
+        mediaManager = MediaManager(this, udpConnection, capabilityManager)
         
         // NEW: Snapshot Manager
         snapshotManager = SnapshotManager(this, capabilityManager)
@@ -487,7 +965,7 @@ class LinkpointApp : Application() {
         transferManager = TransferManager(udpConnection, agentId, udpConnection.getSessionId())
         
         // NEW: Notecard manager
-        notecardManager = NotecardManager(transferManager)
+        notecardManager = NotecardManager(transferManager, capabilityManager)
         
         // NEW: Task inventory manager
         taskInventoryManager = TaskInventoryManager(udpConnection, xferManager, agentId)
@@ -501,21 +979,101 @@ class LinkpointApp : Application() {
         // NEW: Initialize connection keep-alive with credentials
         connectionKeepAlive.initialize(agentId, udpConnection.getSessionId())
         
-        // Register reconnection callback for socket invalidation
-        // This is triggered when consecutive send errors indicate the socket is dead
-        // (e.g., "Operation not permitted" errors after network changes on mobile)
-        udpConnection.setReconnectionCallback {
-            Log.w(TAG, "🔄 Socket invalidation detected - triggering reconnection flow")
-            applicationScope.launch {
-                // Set connection state to reconnecting
-                connectionKeepAlive.notifyConnectionIssue()
-                
-                // For now, disconnect and notify - the user will need to reconnect
-                // A full auto-reconnect would require re-login which is complex
-                Log.e(TAG, "⚠️ UDP socket invalidated - please reconnect")
+        // Drive NetworkStateManager status transitions from the UDP layer's
+        // watchdog. Without this, the live diagnostic counter stays at 0 even
+        // when the watchdog has fired and a socket reconnect is in flight.
+        // Captured by the 2026-04-25 Athanasia debug report.
+        udpConnection.setNetworkStateListener { transition ->
+            when (transition) {
+                UDPConnectionFixed.NetworkStateTransition.RECONNECTING -> {
+                    Log.i(TAG, "🔄 UDP watchdog: RECONNECTING (socket reconnect in flight)")
+                    protocol.stateManager.setStatus(
+                        com.linkpoint.network.core.NetworkStateManager.ConnectionStatus.RECONNECTING
+                    )
+                }
+                UDPConnectionFixed.NetworkStateTransition.CONNECTED -> {
+                    Log.i(TAG, "✓ UDP watchdog: CONNECTED (socket reconnect succeeded)")
+                    protocol.stateManager.setStatus(
+                        com.linkpoint.network.core.NetworkStateManager.ConnectionStatus.CONNECTED
+                    )
+                    // Re-advertise AgentThrottle: a fresh circuit on the
+                    // simulator side has reset to the default budget.
+                    // Without this, the cellular-friendly low-band throttle
+                    // we sent originally would be silently lost on every
+                    // socket reconnect (the live debug report had four
+                    // reconnects in 2.3 minutes — see segment 02 §3.7
+                    // L02-U).
+                    applicationScope.launch { applyAdaptiveAgentThrottle(force = true) }
+                }
+                UDPConnectionFixed.NetworkStateTransition.FAULTED -> {
+                    Log.e(TAG, "✗ UDP watchdog: FAULTED (socket reconnect failed)")
+                    protocol.stateManager.setStatus(
+                        com.linkpoint.network.core.NetworkStateManager.ConnectionStatus.FAULTED
+                    )
+                }
             }
         }
-        
+
+        // Hard-failure callback: fires when the UDP layer concludes the
+        // simulator-side circuit is dead (post-reconnect-silence escalation,
+        // or 3-unanswered-pings watchdog trip). The simulator no longer has
+        // a circuit slot for us, so socket-level rebinds are pointless —
+        // the only protocol-correct recovery is a full HTTP re-login. The
+        // coordinator here matches Lumiya's `Reconnect()` (3s backoff,
+        // 10 attempts) and the SL-mobile `CoreNetworkingService` lifecycle
+        // (cached LoginResponse, IsReconnecting flag, MaxReconnectTime
+        // deadline). See `attemptAutoRelogin()` above.
+        udpConnection.setReconnectionCallback {
+            Log.w(TAG, "⚠️ UDP layer reports dead circuit — escalating to auto re-login")
+            // Notify the keep-alive manager for any UI/cleanup it owns.
+            applicationScope.launch { connectionKeepAlive.notifyConnectionIssue() }
+            attemptAutoRelogin()
+        }
+
+        // Wire the foreground service's keepalive callback to the actual UDP
+        // ping. Without this, LinkpointConnectionService.performKeepAlive()
+        // is a no-op (its internal `connectionCallback` is never set
+        // anywhere — see the 2026-04-26 Athanasia capture, where the
+        // service was running with a wake lock for 2.3 minutes but never
+        // drove a single keepalive packet, letting the cellular NAT mapping
+        // expire). StartPingCheck is the right tool: it's a 12-byte packet,
+        // the simulator auto-replies with CompletePingCheck, and it
+        // refreshes the carrier NAT mapping in both directions.
+        com.linkpoint.service.LinkpointConnectionService.setProcessCallback(
+            object : com.linkpoint.service.ConnectionCallback {
+                override fun onSendPing() {
+                    if (!::udpConnection.isInitialized) return
+                    if (!udpConnection.isConnected.value) return
+                    try {
+                        udpConnection.sendStartPingCheck()
+                    } catch (e: Throwable) {
+                        Log.w(TAG, "FGS keepalive ping failed: ${e.message}")
+                    }
+                }
+                override fun onConnectionStale() {
+                    Log.w(TAG, "FGS reports connection stale (3× keepalive no inbound) — escalating to auto re-login")
+                    attemptAutoRelogin()
+                }
+            }
+        )
+        // Mirror the UDP up/down state into the service so it knows when to
+        // ping (no point pinging a dead socket) and what to put in the
+        // notification text. The networkStateListener above already fires
+        // on reconnect cycles; this catches the initial connect too.
+        // Cancel any prior collector — initializeAgentManagers re-runs on
+        // every re-login (see [attemptAutoRelogin]), and we don't want
+        // every re-login to leak another collector.
+        fgsConnectStateMirrorJob?.cancel()
+        fgsConnectStateMirrorJob = applicationScope.launch {
+            try {
+                udpConnection.isConnected.collect { connected ->
+                    com.linkpoint.service.LinkpointConnectionService.setProcessConnected(connected)
+                }
+            } catch (e: Throwable) {
+                Log.w(TAG, "FGS connect-state mirror collector ended: ${e.message}")
+            }
+        }
+
         // Start background service for connection persistence
         LinkpointConnectionService.start(this)
         
@@ -536,7 +1094,15 @@ class LinkpointApp : Application() {
         
         // IM manager
         imManager = IMManager(udpConnection, capabilityManager, agentId)
-        
+
+        // Wire IMManager into GroupsManager so `sendGroupChat` routes
+        // through the IM session state machine (Dialog=15 bring-up +
+        // pending queue + Dialog=17 drain). Without this, GroupsManager
+        // falls back to a stateless Dialog=15+17 send pair.
+        if (::groupsManager.isInitialized) {
+            groupsManager.setIMManager(imManager)
+        }
+
         // Inventory
         inventoryManager = InventoryManager(capabilityManager, udpConnection, agentId)
         
@@ -556,8 +1122,19 @@ class LinkpointApp : Application() {
         objectManager = ObjectManager(udpConnection)
         buildTools = BuildTools(objectManager)
 
-        // Outfit manager (needs baker from avatar manager)
+        // Outfit manager (needs baker from avatar manager).
+        //
+        // AvatarManager.setMyAgentId() above proactively creates the local
+        // Avatar entry so getMyAvatar() must be non-null here. If it is null
+        // it means the agent ID never made it into AvatarManager — bail loudly
+        // rather than silently leaving outfitManager/appearanceManager
+        // uninitialized for the entire session (the failure mode captured in
+        // the 2026-04-25 Athanasia debug report, where Force Refresh
+        // Appearance reported "not logged in" despite a healthy session).
         val myAvatar = avatarManager.getMyAvatar()
+        if (myAvatar == null) {
+            Log.e(TAG, "❌ AvatarManager.getMyAvatar() == null after setMyAgentId — outfit/appearance pipeline NOT initialized for $agentId")
+        }
         if (myAvatar != null) {
             outfitManager = OutfitManager(
                 inventoryManager,
@@ -567,8 +1144,36 @@ class LinkpointApp : Application() {
                 agentId,
                 udpConnection.getSessionId(),
                 objectManager
-            )
+            ) { item ->
+                val cacheType = when (item.assetType) {
+                    AssetType.CLOTHING.value -> AssetType.CLOTHING
+                    AssetType.BODYPART.value -> AssetType.BODYPART
+                    else -> AssetType.CLOTHING
+                }
+                assetCache.get(item.assetId, cacheType)
+                    ?: transferManager.fetchAsset(item.assetId, item.assetType)?.also { fetched ->
+                        assetCache.put(item.assetId, cacheType, fetched)
+                    }
+            }
             avatarManager.setOutfitManager(outfitManager)
+
+            // Wire the local-agent appearance pipeline. AppearanceManager
+            // bakes (via AvatarBaker), uploads each baked texture via the
+            // UploadBakedTexture capability, then sends AgentSetAppearance.
+            // The trigger lambda is called from AvatarManager whenever
+            // AgentWearablesUpdate has been applied so the simulator
+            // gets fresh bakes without an explicit user "save outfit" action.
+            appearanceManager = com.linkpoint.avatar.AppearanceManager(
+                udpConnection, myAvatar.baker
+            )
+            appearanceManager.setSessionInfo(agentId, udpConnection.getSessionId())
+            avatarManager.appearanceUpdateTrigger = {
+                try {
+                    appearanceManager.sendAppearanceUpdate()
+                } catch (e: Exception) {
+                    Log.w(TAG, "sendAppearanceUpdate failed: ${e.message}")
+                }
+            }
         }
         
         // Modern features: Animesh and Bakes on Mesh
@@ -577,12 +1182,38 @@ class LinkpointApp : Application() {
         
         // Teleport manager
         teleportManager = TeleportManager(udpConnection, capabilityManager, agentId)
+        // Wire region-name lookup so TeleportFinish/CrossedRegion event
+        // payloads carry the actual sim name. Prefer the current session
+        // (most-recent RegionHandshake) for the active region; otherwise
+        // ask the WorldMap cache (populated by MapBlockReply / EQG cap).
+        teleportManager.regionNameForHandle = { handle ->
+            val current = sessionManager.currentRegion.value
+            if (current != null && current.handle == handle && current.name.isNotEmpty()) {
+                current.name
+            } else {
+                worldMap.getCachedRegionName(handle)
+            }
+        }
         
         // HUD manager
         hudManager = HUDManager(this, objectManager, udpConnection, agentId)
         
         // NEW: Landmark Manager
-        landmarkManager = LandmarkManager(capabilityManager, transferManager, inventoryManager, udpConnection, agentId)
+        landmarkManager = LandmarkManager(
+            capabilityManager,
+            transferManager,
+            inventoryManager,
+            udpConnection,
+            agentId,
+            regionNameForHandle = { handle ->
+                val current = sessionManager.currentRegion.value
+                if (current != null && current.handle == handle && current.name.isNotEmpty()) {
+                    current.name
+                } else {
+                    worldMap.getCachedRegionName(handle)
+                }
+            }
+        )
         
         // NEW: Estate Manager
         estateManager = EstateManager(udpConnection, capabilityManager, agentId)
@@ -652,7 +1283,7 @@ class LinkpointApp : Application() {
                         sessionManager.updateRegionName(regionName)
                         Log.d(TAG, "Session region name updated to: $regionName")
                         com.linkpoint.utils.SessionLogRecorder.logRegionChange(
-                            regionName, 0L, null
+                            regionName, null, null
                         )
                     } else {
                         Log.w(TAG, "RegionHandshake simName was empty after trimming")
@@ -664,30 +1295,60 @@ class LinkpointApp : Application() {
                         terrainManager.reset()  // Reset terrain for new region
                         Log.d(TAG, "Terrain manager reset for new region, water height: ${regionData.waterHeight}")
                     }
-                    
-                    // Send RegionHandshakeReply to acknowledge - THIS IS REQUIRED!
-                    // NOTE: CompleteAgentMovement and AgentThrottle are sent earlier in PacketAck
-                    // handler when UseCircuitCode is acknowledged (per Lumiya protocol)
-                    applicationScope.launch {
-                        try {
-                            Log.d(TAG, "Sending RegionHandshakeReply...")
-                            udpConnection.sendRegionHandshakeReply()
-                            com.linkpoint.utils.InitializationTracker.completePhase(
-                                com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
-                                "Reply sent to ${regionData.simName}"
-                            )
-                            com.linkpoint.utils.InitializationTracker.startPhase(
-                                com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_REPLIED,
-                                "Waiting for world data"
-                            )
-                            Log.i(TAG, "✓ RegionHandshakeReply SENT - world data should start loading")
-                        } catch (e: Exception) {
-                            com.linkpoint.utils.InitializationTracker.failPhase(
-                                com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
-                                "Failed to send reply: ${e.message}"
-                            )
-                            Log.e(TAG, "✗ Error sending RegionHandshakeReply", e)
+
+                    // Wire RegionHandshake terrain texture UUIDs + elevation
+                    // bounds into the renderer. terrainTextures is in the
+                    // order [Base0..3, Detail0..3]; the splatting material
+                    // uses the four detail textures.
+                    if (::renderManager.isInitialized) {
+                        val tr = renderManager.getTerrainRenderer()
+                        if (tr != null) {
+                            val starts = regionData.terrainStartHeights
+                            val ranges = regionData.terrainHeightRanges
+                            if (starts.size == 4 && ranges.size == 4) {
+                                tr.setHeightBlendParams(starts.toFloatArray(), ranges.toFloatArray())
+                            }
+                            // Resolve detail texture UUIDs through TextureManager;
+                            // each setDetailTexture() call will fire as soon as
+                            // the JPEG2000 decode lands.
+                            if (::textureManager.isInitialized && regionData.terrainTextures.size >= 8) {
+                                val detailIds = regionData.terrainTextures.subList(4, 8)
+                                detailIds.forEachIndexed { idx, uuid ->
+                                    applicationScope.launch {
+                                        val bmp = try {
+                                            textureManager.getTexture(uuid)
+                                        } catch (e: Exception) { null }
+                                        if (bmp != null) {
+                                            renderManager.dispatcher.post(Runnable {
+                                                renderManager.uploadTerrainDetailTexture(idx, bmp)
+                                            })
+                                        }
+                                    }
+                                }
+                            }
                         }
+                    }
+                    
+                    // Send RegionHandshakeReply DIRECTLY from I/O thread (non-suspend now)
+                    try {
+                        Log.d(TAG, "Sending RegionHandshakeReply...")
+                        udpConnection.sendRegionHandshakeReply()
+                        com.linkpoint.utils.InitializationTracker.completePhase(
+                            com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
+                            "Reply sent to ${regionData.simName}"
+                        )
+                        com.linkpoint.utils.InitializationTracker.reachPhase(
+                            com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_REPLIED,
+                            "Waiting for world data"
+                        )
+                        Log.i(TAG, "✓ RegionHandshakeReply SENT - world data should start loading")
+                        ScenePopulationDiagnostics.markRegionHandshakeComplete()
+                    } catch (e: Exception) {
+                        com.linkpoint.utils.InitializationTracker.failPhase(
+                            com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
+                            "Failed to send reply: ${e.message}"
+                        )
+                        Log.e(TAG, "✗ Error sending RegionHandshakeReply", e)
                     }
                 } else {
                     com.linkpoint.utils.InitializationTracker.logWarning("RegionHandshake parse returned null")
@@ -725,8 +1386,23 @@ class LinkpointApp : Application() {
                 
                 val moveData = com.linkpoint.protocol.messages.MessageParser.parseAgentMovementComplete(payload)
                 if (moveData != null) {
-                    Log.i(TAG, "AgentMovementComplete: position=${moveData.position}")
+                    Log.i(TAG, "AgentMovementComplete: position=${moveData.position}, regionHandle=${moveData.regionHandle}")
                     com.linkpoint.utils.InitializationTracker.logInfo("Position: ${moveData.position}")
+                    
+                    // Update region info with region handle and position from AgentMovementComplete
+                    // This is critical for proper sim registration - the region handle identifies
+                    // which simulator region we're connected to
+                    sessionManager.updateRegionInfo(
+                        regionHandle = moveData.regionHandle,
+                        x = moveData.position.x.toInt(),
+                        y = moveData.position.y.toInt()
+                    )
+                    Log.i(TAG, "✓ Region handle registered: ${moveData.regionHandle}")
+                    com.linkpoint.utils.SessionLogRecorder.logRegionChange(
+                        regionName = sessionManager.currentRegion.value?.name ?: "Unknown",
+                        regionHandle = moveData.regionHandle,
+                        position = "(${moveData.position.x.toInt()}, ${moveData.position.y.toInt()}, ${moveData.position.z.toInt()})"
+                    )
                     
                     // Update connection state to fully connected
                     sessionManager.setConnectionState(com.linkpoint.core.ConnectionState.CONNECTED)
@@ -737,14 +1413,36 @@ class LinkpointApp : Application() {
                         com.linkpoint.utils.InitializationTracker.Phase.AGENT_MOVEMENT_COMPLETE,
                         "Agent at ${moveData.position}"
                     )
-                    com.linkpoint.utils.InitializationTracker.startPhase(
+                    com.linkpoint.utils.InitializationTracker.reachPhase(
                         com.linkpoint.utils.InitializationTracker.Phase.FULLY_CONNECTED,
                         "Agent is now in world"
                     )
                     com.linkpoint.utils.InitializationTracker.logCritical(
                         "FULLY CONNECTED - World loading should begin"
                     )
-                    
+
+                    // Warm-fetch priority inventory folders so Current Outfit /
+                    // Favorites / Landmarks / My Outfits / Inbox are already
+                    // populated by the time the UI opens them. Fire-and-forget.
+                    if (::inventoryManager.isInitialized) {
+                        inventoryManager.warmFetch()
+                    }
+
+                    // Request own avatar profile so the Profile tab is populated
+                    // by the time the user opens it. Without this request the
+                    // sim never volunteers AvatarPropertiesReply for self and
+                    // the profile sits blank (2026-04-25 Athanasia capture).
+                    val myId = this@LinkpointApp.agentId
+                    if (myId != null && ::userProfileManager.isInitialized) {
+                        applicationScope.launch {
+                            try {
+                                userProfileManager.requestProfile(myId)
+                            } catch (e: Exception) {
+                                Log.w(TAG, "Failed to request own profile: ${e.message}")
+                            }
+                        }
+                    }
+
                     Log.i(TAG, "✓ Connection state set to CONNECTED - agent is in world")
                 } else {
                     com.linkpoint.utils.InitializationTracker.logWarning("AgentMovementComplete parse returned null")
@@ -760,14 +1458,9 @@ class LinkpointApp : Application() {
         }
         
         // Chat from simulator (nearby chat)
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.CHAT_FROM_SIMULATOR) { _, rawPacket ->
+        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIds.CHAT_FROM_SIMULATOR) { _, parsed ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload == null) {
-                    Log.w(TAG, "Failed to extract ChatFromSimulator payload")
-                    return@registerHandler
-                }
-                val chatData = com.linkpoint.protocol.messages.MessageParser.parseChatFromSimulator(payload)
+                val chatData = parsed as? com.linkpoint.protocol.messages.ChatData
                 if (chatData != null && ::chatManager.isInitialized) {
                     chatManager.handleChatFromSimulator(chatData)
                 }
@@ -781,7 +1474,7 @@ class LinkpointApp : Application() {
         var compressedObjectUpdateCount = 0
         var avatarUpdateCount = 0
         
-        // PCode constants (from Lumiya)
+        // PCode constants (from the reference viewer)
         val PCODE_PRIM = 9
         val PCODE_AVATAR = 47
         
@@ -790,6 +1483,8 @@ class LinkpointApp : Application() {
             when (update.pcode) {
                 PCODE_AVATAR -> {
                     avatarUpdateCount++
+                    ScenePopulationDiagnostics.markPacketReceived(ScenePopulationDiagnostics.EntityType.AVATAR)
+                    ScenePopulationDiagnostics.markParsed(ScenePopulationDiagnostics.EntityType.AVATAR)
                     if (avatarUpdateCount <= 5 || avatarUpdateCount % 50 == 0) {
                         Log.d(TAG, "Avatar update: localId=${update.localId}, fullId=${update.fullId} (total: $avatarUpdateCount)")
                     }
@@ -800,14 +1495,22 @@ class LinkpointApp : Application() {
                             rotation = update.rotation,
                             velocity = update.velocity
                         )
+                        ScenePopulationDiagnostics.markManagerApplied(ScenePopulationDiagnostics.EntityType.AVATAR, true)
+                    } else {
+                        ScenePopulationDiagnostics.markManagerApplied(ScenePopulationDiagnostics.EntityType.AVATAR, false)
                     }
                     // Add avatar to scene for rendering
-                    if (::renderManager.isInitialized) {
-                        renderManager.enqueueUpdate(
-                            RenderableUpdate.AvatarUpdate(
-                                agentId = update.fullId,
+                    val avatarSubmitted = publishRenderCommand(SceneRenderCommand.UpsertPrim(update))
+                    ScenePopulationDiagnostics.markRendererSubmitted(ScenePopulationDiagnostics.EntityType.AVATAR, avatarSubmitted)
+
+                    // Drive camera from local-avatar updates via command stream.
+                    if (::avatarManager.isInitialized &&
+                        avatarManager.getMyAvatar()?.agentId == update.fullId
+                    ) {
+                        publishRenderCommand(
+                            SceneRenderCommand.SetCamera(
                                 position = update.position,
-                                rotation = update.rotation
+                                target = update.position.copy(z = update.position.z + 1.7f)
                             )
                         )
                     }
@@ -819,10 +1522,65 @@ class LinkpointApp : Application() {
                     }
                     // Add object to scene for rendering using PrimRenderer
                     // PrimRenderer creates actual renderable meshes (box, sphere, etc.)
-                    if (::renderManager.isInitialized) {
+                    val objectSubmitted = publishRenderCommand(SceneRenderCommand.UpsertPrim(update))
+                    ScenePopulationDiagnostics.markRendererSubmitted(ScenePopulationDiagnostics.EntityType.OBJECT, objectSubmitted)
+
+                    // Mesh-asset prims: kick off MeshManager fetch and ask
+                    // PrimRenderer to swap the path/profile fallback geometry
+                    // for the parsed mesh once it lands. Failures fall back
+                    // gracefully to the path/profile box already rendered.
+                    val meshAssetId = update.getMeshAssetId()
+                    if (meshAssetId != null && ::meshManager.isInitialized) {
+                        val textureEntrySnapshot = update.textureEntry
+                        applicationScope.launch {
+                            val meshData = try {
+                                meshManager.getMesh(meshAssetId)
+                            } catch (e: Exception) {
+                                Log.w(TAG, "Mesh fetch failed for ${update.localId}: ${e.message}")
+                                null
+                            }
+                            if (meshData != null) {
+                                // TextureBinder: fetch already-resolved per-face
+                                // texture UUID and return Texture? (null keeps
+                                // the same baseColor/alpha fallback in both backends).
+                                val binder = com.linkpoint.render.prims.MeshPrimRenderer.TextureBinder { _, texId, onLoaded ->
+                                    if (!::textureManager.isInitialized) {
+                                        onLoaded(null)
+                                        return@TextureBinder
+                                    }
+                                    applicationScope.launch {
+                                        val bmp = try { textureManager.getTexture(texId) } catch (_: Exception) { null }
+                                        if (bmp != null) {
+                                            renderManager.dispatcher.post(Runnable {
+                                                // Route through the LinkpointTexture-tracked path so
+                                                // every per-face mesh texture participates in VRAM
+                                                // accounting and gets a clean Filament release path.
+                                                val pair = renderManager.uploadBitmapAsLinkpointTexture(texId, bmp)
+                                                onLoaded(pair?.first)
+                                            })
+                                        } else {
+                                            renderManager.dispatcher.post(Runnable { onLoaded(null) })
+                                        }
+                                    }
+                                }
+                                val bomResolver: (UUID) -> UUID = { declaredId ->
+                                    if (::avatarManager.isInitialized) {
+                                        com.linkpoint.avatar.BakesOnMesh.resolve(declaredId) { slot ->
+                                            avatarManager.getMyAvatar()?.baker?.getBakedTextures()?.get(slot)
+                                        }
+                                    } else declaredId
+                                }
+                                renderManager.dispatcher.post(Runnable {
+                                    renderManager.attachMeshAsset(
+                                        update.localId, meshData,
+                                        textureEntrySnapshot, binder, bomResolver
+                                    )
+                                )
+                            }
+                        }
                         renderManager.enqueueUpdate(RenderableUpdate.PrimUpdate(update))
                     }
-                    
+
                     // Extract and prefetch textures from the object's TextureEntry
                     if (::textureManager.isInitialized && update.textureEntry.isNotEmpty()) {
                         val textureIds = TextureEntryParser.extractTextureIds(update.textureEntry)
@@ -835,11 +1593,11 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE) { _, rawPacket ->
+        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE) { _, parsed ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload == null) return@registerHandler
-                val updates = com.linkpoint.protocol.messages.MessageParser.parseObjectUpdate(payload)
+                val updates = (parsed as? List<*>)?.filterIsInstance<com.linkpoint.protocol.messages.ObjectUpdateData>() ?: emptyList()
+                ScenePopulationDiagnostics.markPacketReceived(ScenePopulationDiagnostics.EntityType.OBJECT, updates.size)
+                ScenePopulationDiagnostics.markParsed(ScenePopulationDiagnostics.EntityType.OBJECT, updates.size)
                 objectUpdateCount += updates.size
                 // Log occasionally to avoid spam
                 if (objectUpdateCount <= 5 || objectUpdateCount % 100 == 0) {
@@ -852,11 +1610,11 @@ class LinkpointApp : Application() {
         }
         
         // Compressed object updates
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE_COMPRESSED) { _, rawPacket ->
+        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE_COMPRESSED) { _, parsed ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload == null) return@registerHandler
-                val updates = com.linkpoint.protocol.messages.MessageParser.parseObjectUpdateCompressed(payload)
+                val updates = (parsed as? List<*>)?.filterIsInstance<com.linkpoint.protocol.messages.ObjectUpdateData>() ?: emptyList()
+                ScenePopulationDiagnostics.markPacketReceived(ScenePopulationDiagnostics.EntityType.OBJECT, updates.size)
+                ScenePopulationDiagnostics.markParsed(ScenePopulationDiagnostics.EntityType.OBJECT, updates.size)
                 compressedObjectUpdateCount += updates.size
                 // Log occasionally to avoid spam
                 if (compressedObjectUpdateCount <= 5 || compressedObjectUpdateCount % 100 == 0) {
@@ -884,12 +1642,10 @@ class LinkpointApp : Application() {
                     }
                     
                     // Request full object data for all cached objects
-                    // Per Lumiya protocol: respond with RequestMultipleObjects with CacheMissType=0
+                    // Per SL protocol: respond with RequestMultipleObjects with CacheMissType=0
                     if (cachedData.objects.isNotEmpty()) {
                         val objectIds = cachedData.objects.map { it.localId }
-                        applicationScope.launch {
-                            udpConnection.sendRequestMultipleObjects(objectIds, cacheMissType = 0)
-                        }
+                        udpConnection.sendRequestMultipleObjects(objectIds, cacheMissType = 0)
                     }
                 }
             } catch (e: Exception) {
@@ -990,6 +1746,9 @@ class LinkpointApp : Application() {
                         if (::terrainManager.isInitialized) {
                             terrainManager.processLayerData(result)
                         }
+                        result.patches.forEach { patch ->
+                            publishRenderCommand(SceneRenderCommand.SetTerrainPatch(patch))
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -1007,10 +1766,8 @@ class LinkpointApp : Application() {
                 if (payload != null && payload.isNotEmpty()) {
                     val pingId = payload[0]
                     Log.d(TAG, "StartPingCheck received: pingId=$pingId")
-                    applicationScope.launch {
-                        // handleStartPingCheck computes our own OldestUnacked for the response
-                        udpConnection.handleStartPingCheck(pingId, 0)
-                    }
+                    // Send ping response directly (non-suspend now)
+                    udpConnection.handleStartPingCheck(pingId, 0)
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling StartPingCheck", e)
@@ -1056,13 +1813,12 @@ class LinkpointApp : Application() {
                             // Get UUID before removal so we can remove from scene
                             val obj = objectManager.getObject(localId)
                             objectManager.removeObject(localId)
-                            // Remove from PrimRenderer and SceneManager
-                            if (::renderManager.isInitialized) {
-                                renderManager.removePrim(localId)
-                                if (obj != null) {
-                                    renderManager.getSceneManager()?.removeObject(obj.fullId)
-                                }
-                            }
+                            publishRenderCommand(
+                                SceneRenderCommand.RemoveEntity(
+                                    localId = localId,
+                                    fullId = obj?.fullId
+                                )
+                            )
                         }
                     }
                 }
@@ -1087,11 +1843,10 @@ class LinkpointApp : Application() {
             }
         }
         
-        // PacketAck - Acknowledgment messages for reliable packets
+        // PacketAck - Acknowledgment messages for reliable packets.
         // These are sent by the simulator to confirm receipt of our reliable packets.
-        // CRITICAL: When UseCircuitCode (seq 0) is acknowledged, we MUST immediately send
-        // CompleteAgentMovement. This follows Lumiya's protocol behavior - the server
-        // won't send RegionHandshake until it receives CompleteAgentMovement.
+        // CRITICAL: When UseCircuitCode is acknowledged, we MUST immediately send
+        // CompleteAgentMovement - the simulator won't send RegionHandshake until then.
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.PACKET_ACK) { _, rawPacket ->
             // PacketAck format: Count (1 byte), then list of acknowledged sequence numbers (4 bytes each)
             try {
@@ -1099,45 +1854,47 @@ class LinkpointApp : Application() {
                 if (payload == null) return@registerHandler
                 val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
                 val count = buffer.get().toInt() and 0xFF
-                
-                // Parse the acknowledged sequence numbers and check for seq 0 during parsing
-                // (optimization: avoid extra contains() call on the list)
+
+                // Match the ACK list against the exact sequence number we used for
+                // UseCircuitCode, not a hardcoded value. Lumiya sends UseCircuitCode
+                // with the counter's first increment (seq=1), and any reconnect uses
+                // a larger number — so we must match on what the sender recorded.
+                val useCircuitCodeSeq = udpConnection.useCircuitCodeSequence
                 val ackedSequences = mutableListOf<Int>()
-                var containsSeq0 = false
+                var containsUseCircuitCodeAck = false
                 for (i in 0 until count) {
                     if (buffer.remaining() >= 4) {
                         val seq = buffer.int
                         ackedSequences.add(seq)
-                        if (seq == 0) containsSeq0 = true
+                        if (useCircuitCodeSeq >= 0 && seq == useCircuitCodeSeq) {
+                            containsUseCircuitCodeAck = true
+                        }
                     }
                 }
-                
+
                 Log.d(TAG, "PacketAck received: $count packets acknowledged - sequences: $ackedSequences")
-                
-                // Check if UseCircuitCode (sequence 0) was acknowledged
-                // This is CRITICAL - per Lumiya's protocol, we must send CompleteAgentMovement
-                // immediately when UseCircuitCode is ACKed. The server waits for this before
-                // sending RegionHandshake and other world data.
-                // Using compareAndSet for thread-safe, atomic check-and-set operation
-                if (containsSeq0 && completeAgentMovementSent.compareAndSet(false, true)) {
+
+                if (containsUseCircuitCodeAck && completeAgentMovementSent.compareAndSet(false, true)) {
                     Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
                     Log.i(TAG, "║ ⭐ UseCircuitCode ACKNOWLEDGED - Sending CompleteAgentMovement")
                     Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
-                    
-                    applicationScope.launch {
-                        try {
-                            // Send CompleteAgentMovement to signal we're ready to enter the region
-                            udpConnection.sendCompleteAgentMovement()
-                            Log.i(TAG, "✓ CompleteAgentMovement SENT - server should now send RegionHandshake")
-                            
-                            // Also send AgentThrottle to configure bandwidth
-                            udpConnection.sendAgentThrottle()
-                            Log.i(TAG, "✓ AgentThrottle SENT - bandwidth configured")
-                        } catch (e: Exception) {
-                            Log.e(TAG, "✗ Error sending CompleteAgentMovement/AgentThrottle", e)
-                            // Reset flag atomically to allow retry on next ACK
-                            completeAgentMovementSent.set(false)
-                        }
+
+                    // CRITICAL FIX: Send CompleteAgentMovement DIRECTLY from the I/O thread.
+                    // Previously this was wrapped in applicationScope.launch which added latency
+                    // and could fail if the dispatcher was starved. The send methods are now
+                    // non-suspend and thread-safe, matching Lumiya's synchronous approach.
+                    try {
+                        udpConnection.sendCompleteAgentMovement()
+                        Log.i(TAG, "✓ CompleteAgentMovement SENT - server should now send RegionHandshake")
+
+                        // Send AgentThrottle adapted to the current network
+                        // band; a desktop-default throttle saturates cellular
+                        // links and starves chat/IM/group traffic.
+                        applyAdaptiveAgentThrottle(force = true)
+                        ensureAdaptiveThrottleObserver()
+                    } catch (e: Exception) {
+                        Log.e(TAG, "✗ Error sending CompleteAgentMovement/AgentThrottle", e)
+                        completeAgentMovementSent.set(false)
                     }
                 }
             } catch (e: Exception) {
@@ -1149,31 +1906,50 @@ class LinkpointApp : Application() {
         // These are sent when a script plays a sound that should be heard by nearby avatars.
         // We register a handler to prevent "No handler registered" warnings.
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.SOUND_TRIGGER) { _, rawPacket ->
-            // SoundTrigger format:
-            // - SoundID (UUID, 16 bytes) - The sound asset to play
-            // - OwnerID (UUID, 16 bytes) - Owner of the object playing the sound  
-            // - ObjectID (UUID, 16 bytes) - The object triggering the sound
-            // - ParentID (UUID, 16 bytes) - Parent object (if linked)
-            // - Handle (U64, 8 bytes) - Region handle
-            // - Position (Vector3, 12 bytes) - Position of the sound
-            // - Gain (F32, 4 bytes) - Volume (0.0 to 1.0)
+            // SoundTrigger payload (LL message_template `SoundTrigger`,
+            // medium-freq 29; Lumiya parity `slproto/messages/SoundTrigger.java`):
+            //   SoundID(LLUUID), OwnerID(LLUUID), ObjectID(LLUUID),
+            //   ParentID(LLUUID), Handle(U64), Position(LLVector3), Gain(F32)
+            //
+            // Total payload = 16*4 + 8 + 12 + 4 = 88 bytes. Native Android
+            // codecs decode the OGG/Vorbis asset; SoundManager.playSound
+            // does the actual SoundPool fetch + spatial mix.
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload == null) return@registerHandler
-                
-                if (payload.size >= 16) {
-                    val soundIdBytes = payload.copyOfRange(0, 16)
-                    val soundId = java.util.UUID(
-                        java.nio.ByteBuffer.wrap(soundIdBytes.copyOfRange(0, 8)).long,
-                        java.nio.ByteBuffer.wrap(soundIdBytes.copyOfRange(8, 16)).long
-                    )
-                    
-                    // Pass to SoundManager for potential playback
-                    // Note: Full sound playback implementation would require:
-                    // 1. Downloading the sound asset
-                    // 2. Decoding the OGG/Vorbis audio
-                    // 3. Playing at the appropriate volume/position
-                    Log.d(TAG, "SoundTrigger received: soundId=$soundId")
+                if (payload == null || payload.size < 88) return@registerHandler
+
+                val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+
+                // SoundID, OwnerID, ObjectID, ParentID — 4 UUIDs
+                val soundId = buffer.getUUID()
+                val ownerId = buffer.getUUID()
+                val objectId = buffer.getUUID()
+                buffer.getUUID() // ParentID — not used for trigger playback
+
+                // Region handle (sound is anchored to the sim sending it)
+                buffer.long
+
+                // Position (LLVector3) and Gain (F32)
+                val px = buffer.float
+                val py = buffer.float
+                val pz = buffer.float
+                val gain = buffer.float.coerceIn(0f, 1f)
+
+                Log.d(TAG, "SoundTrigger soundId=$soundId from objectId=$objectId pos=($px,$py,$pz) gain=$gain")
+
+                if (::soundManager.isInitialized) {
+                    applicationScope.launch {
+                        try {
+                            soundManager.playSound(
+                                soundId = soundId,
+                                position = com.linkpoint.protocol.types.LLVector3(px, py, pz),
+                                gain = gain,
+                                loop = false
+                            )
+                        } catch (e: Exception) {
+                            Log.w(TAG, "SoundTrigger playback failed for $soundId: ${e.message}")
+                        }
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling SoundTrigger", e)
@@ -1400,12 +2176,9 @@ class LinkpointApp : Application() {
         // =====================================
         
         // TeleportFinish - Teleport completed successfully
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.TELEPORT_FINISH) { _, rawPacket ->
+        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIds.TELEPORT_FINISH) { _, parsed ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload == null) return@registerHandler
-                
-                val data = com.linkpoint.protocol.messages.MessageParser.parseTeleportFinish(payload)
+                val data = parsed as? com.linkpoint.protocol.messages.TeleportFinishData
                 if (data != null) {
                     Log.i(TAG, "🚀 TeleportFinish: Connecting to ${data.simIP}:${data.simPort}, handle=${data.regionHandle}")
                     
@@ -1420,12 +2193,9 @@ class LinkpointApp : Application() {
         }
         
         // TeleportFailed - Teleport failed with reason
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.TELEPORT_FAILED) { _, rawPacket ->
+        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIds.TELEPORT_FAILED) { _, parsed ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload == null) return@registerHandler
-                
-                val data = com.linkpoint.protocol.messages.MessageParser.parseTeleportFailed(payload)
+                val data = parsed as? com.linkpoint.protocol.messages.TeleportFailedData
                 if (data != null) {
                     Log.e(TAG, "❌ TeleportFailed: ${data.reason}")
                     
@@ -1440,12 +2210,9 @@ class LinkpointApp : Application() {
         }
         
         // TeleportProgress - Teleport status update
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.TELEPORT_PROGRESS) { _, rawPacket ->
+        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIds.TELEPORT_PROGRESS) { _, parsed ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload == null) return@registerHandler
-                
-                val data = com.linkpoint.protocol.messages.MessageParser.parseTeleportProgress(payload)
+                val data = parsed as? com.linkpoint.protocol.messages.TeleportProgressData
                 if (data != null) {
                     Log.i(TAG, "🔄 TeleportProgress: ${data.message}")
                     
@@ -1769,6 +2536,64 @@ class LinkpointApp : Application() {
                     if (data != null && ::avatarManager.isInitialized) {
                         Log.d(TAG, "👤 AvatarAppearance: ${data.senderID} (${data.visualParams.size} params)")
                         avatarManager.handleAvatarAppearance(data.senderID, data.textureEntries, data.visualParams)
+
+                        // Apply VisualParam 33 (height) to the rendered
+                        // avatar so different avatars have visibly different
+                        // statures. Drives the avatar root's Z scale.
+                        if (::renderManager.isInitialized && data.visualParams.isNotEmpty()) {
+                            val heightByte = data.visualParams.firstOrNull()?.toInt()?.and(0xFF) ?: 128
+                            val heightScale = 0.85f + (heightByte / 255f) * (1.20f - 0.85f)
+                            renderManager.dispatcher.post(Runnable {
+                                renderManager.getSceneManager()?.setAvatarHeightScale(data.senderID, heightScale)
+                            })
+
+                            // Full body-shape morphing. Lazily populate the
+                            // VisualParam table from avatar_lad.xml on the
+                            // first AvatarAppearance, then drive system
+                            // avatar mesh morphs.
+                            if (!com.linkpoint.avatar.VisualParamLoader.isReady) {
+                                com.linkpoint.avatar.VisualParamLoader.load(applicationContext)
+                            }
+                            val morphParams = com.linkpoint.avatar.VisualParamLoader.allMorphParams()
+                            val skeletonParams = com.linkpoint.avatar.VisualParamLoader.allSkeletonParams()
+                            val colorParams = com.linkpoint.avatar.VisualParamLoader.allColorParams()
+                            val visualParamsCopy = data.visualParams.copyOf()
+
+                            if (morphParams.isNotEmpty()) {
+                                renderManager.dispatcher.post(Runnable {
+                                    renderManager.getSceneManager()?.applyAvatarMorphs(
+                                        data.senderID, visualParamsCopy, morphParams
+                                    )
+                                })
+                            }
+
+                            // Skeleton params: per-bone scale offsets that
+                            // accumulate onto the AvatarSkeleton's rest pose.
+                            // Affects mesh deformation through the GPU
+                            // skinning path on the next frame.
+                            if (skeletonParams.isNotEmpty() && ::avatarManager.isInitialized) {
+                                val a = avatarManager.getAvatar(data.senderID)
+                                a?.skeleton?.applySkeletonParams(visualParamsCopy, skeletonParams)
+                            }
+
+                            // Color params: blend a palette by param weight to
+                            // produce a per-channel tint (skin colour, hair
+                            // colour, etc.). For now we just pull skin (the
+                            // wearable="skin" subset) and feed it as a
+                            // baseColor tint on the avatar material — which
+                            // is the most-visible LL bake-time tint.
+                            if (colorParams.isNotEmpty()) {
+                                val skinTint = blendSkinColorParams(visualParamsCopy, colorParams)
+                                if (skinTint != null) {
+                                    renderManager.dispatcher.post(Runnable {
+                                        renderManager.getSceneManager()?.setAvatarSkinTint(
+                                            data.senderID,
+                                            skinTint[0], skinTint[1], skinTint[2], skinTint[3]
+                                        )
+                                    })
+                                }
+                            }
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -2378,9 +3203,17 @@ class LinkpointApp : Application() {
                     val data = com.linkpoint.protocol.messages.AdditionalMessageParsers.parseUUIDNameReply(payload)
                     if (data != null) {
                         Log.d(TAG, "🏷️ UUIDNameReply: ${data.entries.size} names")
+                        // Feed legacy names into FriendsManager so the friends
+                        // list stops showing `Resident (xxxx)` placeholders
+                        // when GetDisplayNames cap silently fails (the 2026-04-25
+                        // Athanasia capture). Capability path remains primary;
+                        // this is the UDP fallback wired by sendUUIDNameRequest.
+                        val friendsReady = ::friendsManager.isInitialized
                         data.entries.forEach { entry ->
-                            // Cache names for display
-                            Log.d(TAG, "  ${entry.id} -> ${entry.firstName} ${entry.lastName}")
+                            val resolved = "${entry.firstName} ${entry.lastName}".trim()
+                            if (resolved.isNotBlank() && friendsReady) {
+                                friendsManager.updateFriendName(entry.id, resolved)
+                            }
                         }
                     }
                 }
@@ -2496,15 +3329,19 @@ class LinkpointApp : Application() {
         // --- Agent Messages ---
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.AGENT_PAUSE) { _, rawPacket ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload != null) Log.d(TAG, "⏸️ AgentPause (${payload.size} bytes)")
+                com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
+                    com.linkpoint.protocol.messages.MessageIds.AGENT_PAUSE,
+                    rawPacket
+                ) { summary -> Log.d(TAG, "⏸️ $summary") }
             } catch (e: Exception) { Log.e(TAG, "Error handling AgentPause", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.AGENT_RESUME) { _, rawPacket ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload != null) Log.d(TAG, "▶️ AgentResume (${payload.size} bytes)")
+                com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
+                    com.linkpoint.protocol.messages.MessageIds.AGENT_RESUME,
+                    rawPacket
+                ) { summary -> Log.d(TAG, "▶️ $summary") }
             } catch (e: Exception) { Log.e(TAG, "Error handling AgentResume", e) }
         }
         
@@ -2703,19 +3540,19 @@ class LinkpointApp : Application() {
         // --- Inventory Messages (Extended) ---
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.FETCH_INVENTORY_DESCENDENTS) { _, rawPacket ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload != null && ::inventoryManager.isInitialized) {
-                    Log.d(TAG, "📦 FetchInventoryDescendents (${payload.size} bytes)")
-                }
+                com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
+                    com.linkpoint.protocol.messages.MessageIds.FETCH_INVENTORY_DESCENDENTS,
+                    rawPacket
+                ) { summary -> Log.d(TAG, "📦 $summary") }
             } catch (e: Exception) { Log.e(TAG, "Error handling FetchInventoryDescendents", e) }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.FETCH_INVENTORY) { _, rawPacket ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload != null && ::inventoryManager.isInitialized) {
-                    Log.d(TAG, "📦 FetchInventory (${payload.size} bytes)")
-                }
+                com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
+                    com.linkpoint.protocol.messages.MessageIds.FETCH_INVENTORY,
+                    rawPacket
+                ) { summary -> Log.d(TAG, "📦 $summary") }
             } catch (e: Exception) { Log.e(TAG, "Error handling FetchInventory", e) }
         }
         
@@ -3113,8 +3950,10 @@ class LinkpointApp : Application() {
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.MAP_NAME_REQUEST) { _, rawPacket ->
             try {
-                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
-                if (payload != null) Log.d(TAG, "🗺️ MapNameRequest (${payload.size} bytes)")
+                com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
+                    com.linkpoint.protocol.messages.MessageIds.MAP_NAME_REQUEST,
+                    rawPacket
+                ) { summary -> Log.d(TAG, "🗺️ $summary") }
             } catch (e: Exception) { Log.e(TAG, "Error handling MapNameRequest", e) }
         }
         
@@ -3630,7 +4469,10 @@ class LinkpointApp : Application() {
         
         // --- Directory Query Messages ---
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.DIR_FIND_QUERY) { _, rawPacket ->
-            Log.d(TAG, "🔍 DirFindQuery received")
+            com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
+                com.linkpoint.protocol.messages.MessageIds.DIR_FIND_QUERY,
+                rawPacket
+            ) { summary -> Log.d(TAG, "🔍 $summary") }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.DIR_PLACES_QUERY) { _, rawPacket ->
@@ -3696,7 +4538,10 @@ class LinkpointApp : Application() {
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.GROUP_TITLES_REQUEST) { _, rawPacket ->
-            Log.d(TAG, "👥 GroupTitlesRequest received")
+            com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
+                com.linkpoint.protocol.messages.MessageIds.GROUP_TITLES_REQUEST,
+                rawPacket
+            ) { summary -> Log.d(TAG, "👥 $summary") }
         }
         
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.GROUP_MEMBERS_REQUEST) { _, rawPacket ->
@@ -4181,6 +5026,7 @@ class LinkpointApp : Application() {
         
         // Register additional message handlers (split for Kotlin compiler)
         registerLateMessageHandlers()
+        registerOutboundOnlyMessageHandlers()
 
         
         // Mark handlers as ready and process any buffered packets
@@ -4191,6 +5037,33 @@ class LinkpointApp : Application() {
         Log.i(TAG, "║ UDP MESSAGE HANDLERS REGISTERED: ${udpConnection.getRegisteredHandlerCount()}")
         Log.i(TAG, "║ Handlers: ${udpConnection.getRegisteredHandlerIds().joinToString(", ")}")
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+    }
+
+    /**
+     * Register no-op handlers for messages we currently only send outbound.
+     * This makes parity decisions explicit and gives diagnostics if simulators send these unexpectedly.
+     */
+    private fun registerOutboundOnlyMessageHandlers() {
+        val outboundOnlyIds = listOf(
+            com.linkpoint.protocol.messages.MessageIds.MOVE_INVENTORY_ITEM,
+            com.linkpoint.protocol.messages.MessageIds.UPDATE_TASK_INVENTORY,
+            com.linkpoint.protocol.messages.MessageIds.PARCEL_BUY,
+            com.linkpoint.protocol.messages.MessageIds.OBJECT_GRAB,
+            com.linkpoint.protocol.messages.MessageIds.OBJECT_DEGRAB,
+            com.linkpoint.protocol.messages.MessageIds.KICK_USER,
+            com.linkpoint.protocol.messages.MessageIds.UPDATE_USER_INFO,
+            com.linkpoint.protocol.messages.MessageIds.FIND_AGENT
+        )
+
+        outboundOnlyIds.forEach { messageId ->
+            udpConnection.registerHandler(messageId) { _, rawPacket ->
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                Log.w(
+                    TAG,
+                    "⚠️ Received outbound-only message id=$messageId payloadBytes=${payload?.size ?: 0}; no inbound parser wired."
+                )
+            }
+        }
     }
     
     /**
@@ -4680,7 +5553,10 @@ class LinkpointApp : Application() {
         
         // --- Pay Price ---
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.REQUEST_PAY_PRICE) { _: Int, rawPacket: ByteArray ->
-            Log.d(TAG, "💰 RequestPayPrice received")
+            com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
+                com.linkpoint.protocol.messages.MessageIds.REQUEST_PAY_PRICE,
+                rawPacket
+            ) { summary -> Log.d(TAG, "💰 $summary") }
         }
         
         // --- Rez Extended ---
@@ -4836,6 +5712,8 @@ class LinkpointApp : Application() {
      * Check if XR mode is available on this device
      */
     fun isXRAvailable(): Boolean = xrManager.isAvailable()
+
+    fun isXREntryAvailable(): Boolean = xrManager.isUiEntryAvailable()
     
     /**
      * Check if currently connected to a grid
@@ -4846,6 +5724,20 @@ class LinkpointApp : Application() {
      * Get the current region name
      */
     fun getCurrentRegion(): String? = sessionManager.currentRegion.value?.name
+
+    fun bindGlesRenderEngine(provider: com.linkpoint.render.lumiya.core.RenderEngineProvider?) {
+        if (::gles3CommandConsumer.isInitialized) {
+            gles3CommandConsumer.bindEngine(provider)
+        }
+    }
+
+    private fun publishRenderCommand(command: SceneRenderCommand): Boolean {
+        val accepted = renderCommandStream.publish(command)
+        if (!accepted) {
+            Log.w(TAG, "Render command dropped due to backpressure: $command")
+        }
+        return accepted
+    }
     
     // ==================== DIAGNOSTIC HELPER METHODS ====================
     
@@ -4858,6 +5750,35 @@ class LinkpointApp : Application() {
      * Check if avatar manager is initialized (for debug reports)
      */
     fun isAvatarManagerInitialized(): Boolean = ::avatarManager.isInitialized
+
+    /**
+     * Combine all `wearable="skin"` colour-palette params into a single
+     * baseColor tint by sampling each param's palette at the visual-params
+     * byte and averaging the results. Returns null if no skin colour
+     * params apply (avatar at default appearance).
+     *
+     * This is a deliberate simplification: the LL bake compositor blends
+     * many colour layers across head / upper / lower / eyes channels
+     * separately. Without that channel split we get a single tint that's
+     * roughly "the skin colour the user picked" — visibly close to the
+     * intended look on the system avatar without the full bake pipeline.
+     */
+    private fun blendSkinColorParams(
+        visualParams: ByteArray,
+        params: List<com.linkpoint.avatar.VisualParamLoader.VisualParam>
+    ): FloatArray? {
+        var r = 0f; var g = 0f; var b = 0f; var a = 0f; var n = 0
+        val maxIdx = minOf(visualParams.size, params.size)
+        for (i in 0 until maxIdx) {
+            val p = params[i]
+            if (p.wearable != "skin" || p.colorPalette.isEmpty()) continue
+            val w = p.weightForByte(visualParams[i].toInt())
+            val sample = p.sampleColor(w) ?: continue
+            r += sample[0]; g += sample[1]; b += sample[2]; a += sample[3]; n++
+        }
+        if (n == 0) return null
+        return floatArrayOf(r / n, g / n, b / n, a / n)
+    }
     
     /**
      * Check if inventory manager is initialized (for debug reports)
@@ -4891,7 +5812,13 @@ class LinkpointApp : Application() {
      * Note: RenderManager is initialized early, so this is always true after app init
      */
     fun isRenderManagerInitialized(): Boolean = ::renderManager.isInitialized
-    
+
+    /**
+     * Check if terrain manager is initialized (for late-binding the
+     * TerrainRenderer once the render thread is up).
+     */
+    fun isTerrainManagerInitialized(): Boolean = ::terrainManager.isInitialized
+
     /**
      * Check if animation manager is initialized (for debug reports)
      */
@@ -4911,7 +5838,14 @@ class LinkpointApp : Application() {
      * Check if outfit manager is initialized (for debug reports)
      */
     fun isOutfitManagerInitialized(): Boolean = ::outfitManager.isInitialized
-    
+
+    /**
+     * Check if appearance manager is initialized. Distinct from outfit manager
+     * because callers like the Force Refresh debug action operate on
+     * AppearanceManager directly.
+     */
+    fun isAppearanceManagerInitialized(): Boolean = ::appearanceManager.isInitialized
+
     /**
      * Check if groups manager is initialized (for debug reports)
      */
@@ -5025,4 +5959,11 @@ class LinkpointApp : Application() {
     fun getSessionLogDirectoryPath(): String {
         return com.linkpoint.utils.SessionLogRecorder.getLogDirectoryPath()
     }
+
+    fun runScenePopulationSmokeCheck(): ScenePopulationDiagnostics.SmokeCheckResult {
+        val objectCount = if (::objectManager.isInitialized) objectManager.getAllObjects().size else 0
+        val avatarCount = if (::avatarManager.isInitialized) avatarManager.getAllAvatars().size else 0
+        return ScenePopulationDiagnostics.runSmokeCheck(objectCount, avatarCount)
+    }
+
 }

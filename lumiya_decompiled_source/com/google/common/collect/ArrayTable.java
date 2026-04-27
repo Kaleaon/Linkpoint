@@ -39,7 +39,7 @@ public final class ArrayTable<R, C, V> extends AbstractTable<R, C, V> implements
 
         @Override // com.google.common.collect.Maps.IteratorBasedAbstractMap, java.util.AbstractMap, java.util.Map
         public void clear() {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // java.util.AbstractMap, java.util.Map
@@ -113,7 +113,7 @@ public final class ArrayTable<R, C, V> extends AbstractTable<R, C, V> implements
 
         @Override // java.util.AbstractMap, java.util.Map
         public V remove(Object obj) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Nullable
@@ -174,7 +174,7 @@ public final class ArrayTable<R, C, V> extends AbstractTable<R, C, V> implements
         }
 
         public Map<R, V> put(C c, Map<R, V> map) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.ArrayTable.ArrayMap
@@ -183,7 +183,7 @@ public final class ArrayTable<R, C, V> extends AbstractTable<R, C, V> implements
         }
 
         Map<R, V> setValue(int i, Map<R, V> map) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
     }
 
@@ -236,7 +236,7 @@ public final class ArrayTable<R, C, V> extends AbstractTable<R, C, V> implements
         }
 
         public Map<C, V> put(R r, Map<C, V> map) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
 
         @Override // com.google.common.collect.ArrayTable.ArrayMap
@@ -245,7 +245,7 @@ public final class ArrayTable<R, C, V> extends AbstractTable<R, C, V> implements
         }
 
         Map<C, V> setValue(int i, Map<C, V> map) {
-            throw new UnsupportedOperationException();
+            throw new IllegalStateException();
         }
     }
 
@@ -335,7 +335,7 @@ public final class ArrayTable<R, C, V> extends AbstractTable<R, C, V> implements
     @Override // com.google.common.collect.AbstractTable, com.google.common.collect.Table
     @Deprecated
     public void clear() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.Table
@@ -452,7 +452,7 @@ public final class ArrayTable<R, C, V> extends AbstractTable<R, C, V> implements
     @Override // com.google.common.collect.AbstractTable, com.google.common.collect.Table
     @Deprecated
     public V remove(Object obj, Object obj2) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.Table

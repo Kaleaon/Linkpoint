@@ -479,63 +479,18 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     /* access modifiers changed from: private */
-    /* JADX WARNING: Code restructure failed: missing block: B:5:0x000c, code lost:
-        r1 = r8.groupProfile.get().GroupData_Field.GroupID;
-     */
     /* renamed from: onInviteClicked */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    public void m446com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref9(android.view.View r9) {
-        /*
-            r8 = this;
-            com.lumiyaviewer.lumiya.slproto.users.ChatterID r0 = r8.chatterID     // Catch:{ DataNotReadyException -> 0x0067 }
-            if (r0 == 0) goto L_0x0066
-            com.lumiyaviewer.lumiya.react.SubscriptionData<java.util.UUID, com.lumiyaviewer.lumiya.slproto.SLAgentCircuit> r0 = r8.agentCircuit     // Catch:{ DataNotReadyException -> 0x0067 }
-            boolean r0 = r0.hasData()     // Catch:{ DataNotReadyException -> 0x0067 }
-            if (r0 == 0) goto L_0x0066
-            com.lumiyaviewer.lumiya.react.SubscriptionData<java.util.UUID, com.lumiyaviewer.lumiya.slproto.messages.GroupProfileReply> r0 = r8.groupProfile     // Catch:{ DataNotReadyException -> 0x0067 }
-            java.lang.Object r0 = r0.get()     // Catch:{ DataNotReadyException -> 0x0067 }
-            com.lumiyaviewer.lumiya.slproto.messages.GroupProfileReply r0 = (com.lumiyaviewer.lumiya.slproto.messages.GroupProfileReply) r0     // Catch:{ DataNotReadyException -> 0x0067 }
-            com.lumiyaviewer.lumiya.slproto.messages.GroupProfileReply$GroupData r0 = r0.GroupData_Field     // Catch:{ DataNotReadyException -> 0x0067 }
-            java.util.UUID r1 = r0.GroupID     // Catch:{ DataNotReadyException -> 0x0067 }
-            com.lumiyaviewer.lumiya.react.SubscriptionData<java.util.UUID, com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList> r0 = r8.myGroupList     // Catch:{ DataNotReadyException -> 0x0067 }
-            java.lang.Object r0 = r0.get()     // Catch:{ DataNotReadyException -> 0x0067 }
-            com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList r0 = (com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList) r0     // Catch:{ DataNotReadyException -> 0x0067 }
-            com.google.common.collect.ImmutableMap<java.util.UUID, com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList$AvatarGroupEntry> r0 = r0.Groups     // Catch:{ DataNotReadyException -> 0x0067 }
-            java.lang.Object r0 = r0.get(r1)     // Catch:{ DataNotReadyException -> 0x0067 }
-            com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList$AvatarGroupEntry r0 = (com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList.AvatarGroupEntry) r0     // Catch:{ DataNotReadyException -> 0x0067 }
-            if (r0 == 0) goto L_0x0066
-            long r2 = r0.GroupPowers     // Catch:{ DataNotReadyException -> 0x0067 }
-            r4 = 2
-            long r2 = r2 & r4
-            r4 = 0
-            int r0 = (r2 > r4 ? 1 : (r2 == r4 ? 0 : -1))
-            if (r0 == 0) goto L_0x0066
-            android.support.v4.app.FragmentActivity r6 = r8.getActivity()     // Catch:{ DataNotReadyException -> 0x0067 }
-            java.lang.Class<com.lumiyaviewer.lumiya.ui.chat.AvatarPickerForInvite> r7 = com.lumiyaviewer.lumiya.ui.chat.AvatarPickerForInvite.class
-            com.lumiyaviewer.lumiya.slproto.users.ChatterID r0 = r8.chatterID     // Catch:{ DataNotReadyException -> 0x0067 }
-            java.util.UUID r0 = r0.agentUUID     // Catch:{ DataNotReadyException -> 0x0067 }
-            com.lumiyaviewer.lumiya.react.SubscriptionData<java.util.UUID, com.lumiyaviewer.lumiya.slproto.messages.GroupProfileReply> r2 = r8.groupProfile     // Catch:{ DataNotReadyException -> 0x0067 }
-            java.lang.Object r2 = r2.get()     // Catch:{ DataNotReadyException -> 0x0067 }
-            com.lumiyaviewer.lumiya.slproto.messages.GroupProfileReply r2 = (com.lumiyaviewer.lumiya.slproto.messages.GroupProfileReply) r2     // Catch:{ DataNotReadyException -> 0x0067 }
-            com.lumiyaviewer.lumiya.react.SubscriptionData<java.util.UUID, com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList> r3 = r8.myGroupList     // Catch:{ DataNotReadyException -> 0x0067 }
-            java.lang.Object r3 = r3.get()     // Catch:{ DataNotReadyException -> 0x0067 }
-            com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList r3 = (com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList) r3     // Catch:{ DataNotReadyException -> 0x0067 }
-            com.lumiyaviewer.lumiya.react.SubscriptionData<java.util.UUID, com.lumiyaviewer.lumiya.slproto.messages.GroupTitlesReply> r4 = r8.groupTitles     // Catch:{ DataNotReadyException -> 0x0067 }
-            java.lang.Object r4 = r4.get()     // Catch:{ DataNotReadyException -> 0x0067 }
-            com.lumiyaviewer.lumiya.slproto.messages.GroupTitlesReply r4 = (com.lumiyaviewer.lumiya.slproto.messages.GroupTitlesReply) r4     // Catch:{ DataNotReadyException -> 0x0067 }
-            com.lumiyaviewer.lumiya.react.SubscriptionData<java.util.UUID, com.lumiyaviewer.lumiya.slproto.messages.GroupRoleDataReply> r5 = r8.groupRoles     // Catch:{ DataNotReadyException -> 0x0067 }
-            java.lang.Object r5 = r5.get()     // Catch:{ DataNotReadyException -> 0x0067 }
-            com.lumiyaviewer.lumiya.slproto.messages.GroupRoleDataReply r5 = (com.lumiyaviewer.lumiya.slproto.messages.GroupRoleDataReply) r5     // Catch:{ DataNotReadyException -> 0x0067 }
-            android.os.Bundle r0 = com.lumiyaviewer.lumiya.ui.chat.AvatarPickerForInvite.makeArguments(r0, r1, r2, r3, r4, r5)     // Catch:{ DataNotReadyException -> 0x0067 }
-            com.lumiyaviewer.lumiya.ui.common.DetailsActivity.showEmbeddedDetails(r6, r7, r0)     // Catch:{ DataNotReadyException -> 0x0067 }
-        L_0x0066:
-            return
-        L_0x0067:
-            r0 = move-exception
-            com.lumiyaviewer.lumiya.Debug.Warning(r0)
-            goto L_0x0066
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.ui.chat.profiles.GroupMainProfileTab.m446com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref9(android.view.View):void");
+    public void m446com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref9(View view) {
+        try {
+            UUID uuid;
+            AvatarGroupList.AvatarGroupEntry avatarGroupEntry;
+            if (this.chatterID == null || !this.agentCircuit.hasData() || (avatarGroupEntry = this.myGroupList.get().Groups.get((uuid = this.groupProfile.get().GroupData_Field.GroupID))) == null || (avatarGroupEntry.GroupPowers & 2) == 0) {
+                return;
+            }
+            DetailsActivity.showEmbeddedDetails(getActivity(), AvatarPickerForInvite.class, AvatarPickerForInvite.makeArguments(this.chatterID.agentUUID, uuid, this.groupProfile.get(), this.myGroupList.get(), this.groupTitles.get(), this.groupRoles.get()));
+        } catch (SubscriptionData.DataNotReadyException e) {
+            Debug.Warning(e);
+        }
     }
 
     /* access modifiers changed from: private */

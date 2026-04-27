@@ -21,8 +21,8 @@ on:
 
 env:
   JAVA_VERSION: '17'
-  ANDROID_SDK_VERSION: '34'
-  NDK_VERSION: '25.2.9519653'
+  ANDROID_SDK_VERSION: '35'
+  NDK_VERSION: '26.3.11579264'
 
 jobs:
   build-release:
@@ -44,13 +44,27 @@ jobs:
         java-version: ${{ env.JAVA_VERSION }}
         cache: 'gradle'
     
+    # setup-android@v3 only accepts `packages` / `cmdline-tools-version` /
+    # license toggles. The legacy api-level/build-tools/cmake/ndk inputs are
+    # silently dropped, which previously meant deploys ran without an NDK.
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
       with:
-        api-level: ${{ env.ANDROID_SDK_VERSION }}
-        build-tools: 34.0.0
-        cmake: 3.22.1
-        ndk: ${{ env.NDK_VERSION }}
+        packages: >-
+          platform-tools
+          platforms;android-${{ env.ANDROID_SDK_VERSION }}
+          build-tools;35.0.0
+          cmake;3.22.1
+          ndk;${{ env.NDK_VERSION }}
+
+    - name: Verify Android SDK install
+      run: |
+        set -euo pipefail
+        echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+        test -d "$ANDROID_SDK_ROOT/platforms/android-${{ env.ANDROID_SDK_VERSION }}"
+        test -d "$ANDROID_SDK_ROOT/build-tools/35.0.0"
+        test -d "$ANDROID_SDK_ROOT/cmake/3.22.1"
+        test -d "$ANDROID_SDK_ROOT/ndk/${{ env.NDK_VERSION }}"
     
     - name: Cache Gradle packages
       uses: actions/cache@v4
@@ -187,7 +201,7 @@ jobs:
         echo "- **Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         
-        if [ -f Linkpoint/build/outputs/apk/release/*.apk ]; then
+        if compgen -G "Linkpoint/build/outputs/apk/release/*.apk" > /dev/null; then
           echo "## 📦 APK Details" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
@@ -235,10 +249,26 @@ jobs:
       run: |
         if [ -f CHANGELOG.md ]; then
           # Extract changelog for this version
-          awk '/## \[${{ steps.version.outputs.version }}\]/,/## \[/{if(/## \[/ && !/## \[${{ steps.version.outputs.version }}\]/)exit;print}' CHANGELOG.md > release_notes.md
+          VERSION_ESCAPED=$(printf '%s\n' "${{ steps.version.outputs.version }}" | sed 's/[][\\.^$*+?(){}|/-]/\\&/g')
+          awk -v version="$VERSION_ESCAPED" '
+            $0 ~ "^## \\[" version "\\]" { in_section=1; print; next }
+            in_section && $0 ~ "^## \\[" { exit }
+            in_section { print }
+          ' CHANGELOG.md > release_notes.md
+          if [ ! -s release_notes.md ]; then
+            echo "## ${{ steps.version.outputs.version }}" > release_notes.md
+            echo "" >> release_notes.md
+            echo "- No dedicated changelog section found; using generated commit summary." >> release_notes.md
+            git log --pretty=format:"- %s (%h)" $(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")..HEAD >> release_notes.md
+          fi
         else
           # Generate changelog from commits
           git log --pretty=format:"- %s (%h)" $(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")..HEAD > release_notes.md
+        fi
+
+        if ! grep -Eiq '^[#]{2,3}[[:space:]]+UI migration deltas' release_notes.md; then
+          echo "" >> release_notes.md
+          cat docs/ui-refactor/changelog-template.md >> release_notes.md
         fi
     
     - name: Create GitHub Release

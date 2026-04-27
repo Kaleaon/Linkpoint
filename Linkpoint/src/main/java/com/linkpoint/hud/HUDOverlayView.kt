@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap
  * - Handles touch events for HUD interaction
  * - Supports HUD visibility toggling
  * 
- * Based on Lumiya's HUD rendering.
+ * Based on the reference viewer's HUD rendering.
  */
 class HUDOverlayView @JvmOverloads constructor(
     context: Context,
@@ -182,14 +182,32 @@ class HUDOverlayView @JvmOverloads constructor(
         // Draw HUD background
         canvas.drawRoundRect(rect, 8f, 8f, hudBackgroundPaint)
         canvas.drawRoundRect(rect, 8f, 8f, hudBorderPaint)
-        
-        // Draw HUD name/label
-        canvas.drawText(
-            hud.name.take(15),
-            rect.centerX(),
-            rect.centerY() + hudTextPaint.textSize / 3,
-            hudTextPaint
-        )
+
+        // Try to load and draw the HUD texture; fall back to name label
+        val textureId = hudManager?.getPrimaryTextureId(hud)
+        if (textureId != null) {
+            requestTexture(textureId)
+            val bitmap = textureCache[textureId]
+            if (bitmap != null) {
+                canvas.drawBitmap(bitmap, null, rect, hudTexturePaint)
+            } else {
+                // Texture not yet loaded - show name as placeholder
+                canvas.drawText(
+                    hud.name.take(15),
+                    rect.centerX(),
+                    rect.centerY() + hudTextPaint.textSize / 3,
+                    hudTextPaint
+                )
+            }
+        } else {
+            // No texture available - show name as placeholder
+            canvas.drawText(
+                hud.name.take(15),
+                rect.centerX(),
+                rect.centerY() + hudTextPaint.textSize / 3,
+                hudTextPaint
+            )
+        }
 
         if (hud.localId == activeHudId) {
             drawResizeHandle(canvas, rect)

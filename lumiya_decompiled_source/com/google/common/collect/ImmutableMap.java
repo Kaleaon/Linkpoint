@@ -339,7 +339,7 @@ public abstract class ImmutableMap<K, V> implements Map<K, V>, Serializable {
     @Override // java.util.Map
     @Deprecated
     public final void clear() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.Map
@@ -426,19 +426,19 @@ public abstract class ImmutableMap<K, V> implements Map<K, V>, Serializable {
     @Override // java.util.Map
     @Deprecated
     public final V put(K k, V v) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.Map
     @Deprecated
     public final void putAll(Map<? extends K, ? extends V> map) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // java.util.Map
     @Deprecated
     public final V remove(Object obj) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     public String toString() {

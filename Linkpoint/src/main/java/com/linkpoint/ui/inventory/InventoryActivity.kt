@@ -22,8 +22,14 @@ import com.linkpoint.ui.notecard.NotecardEditorActivity
 
 /**
  * Inventory Activity - Browse and manage inventory
- * Based on Lumiya's InventoryActivity
+ * Based on the reference viewer's InventoryActivity
+ *
+ * Legacy entry point retained during Compose migration.
+ * Removal target: 2026.09.
  */
+@Deprecated(
+    message = "Legacy Activity entry point. Use InventoryScreen-based Compose navigation."
+)
 class InventoryActivity : AppCompatActivity() {
     
     companion object {
@@ -138,6 +144,8 @@ class InventoryActivity : AppCompatActivity() {
             putExtra(NotecardEditorActivity.EXTRA_ITEM_ID, item.id.toString())
             putExtra(NotecardEditorActivity.EXTRA_NOTECARD_NAME, item.name)
             item.assetId?.let { putExtra(NotecardEditorActivity.EXTRA_ASSET_ID, it.toString()) }
+            item.taskId?.let { putExtra(NotecardEditorActivity.EXTRA_TASK_ID, it.toString()) }
+            item.objectId?.let { putExtra(NotecardEditorActivity.EXTRA_OBJECT_ID, it.toString()) }
 
             // Allow editing by default for now
             putExtra(NotecardEditorActivity.EXTRA_READ_ONLY, false)
@@ -229,6 +237,8 @@ data class ActivityInventoryItem(
     val parentId: UUID?,
     val type: InventoryType,
     val assetId: UUID? = null,
+    val taskId: UUID? = null,
+    val objectId: UUID? = null,
     val creatorId: UUID? = null,
     val permissions: Int = 0
 ) {

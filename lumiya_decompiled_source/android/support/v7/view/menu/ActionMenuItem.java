@@ -85,7 +85,7 @@ public class ActionMenuItem implements SupportMenuItem {
 
     @Override // android.view.MenuItem
     public ActionProvider getActionProvider() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.support.v4.internal.view.SupportMenuItem, android.view.MenuItem
@@ -226,17 +226,17 @@ public class ActionMenuItem implements SupportMenuItem {
 
     @Override // android.view.MenuItem
     public MenuItem setActionProvider(ActionProvider actionProvider) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.support.v4.internal.view.SupportMenuItem, android.view.MenuItem
     public SupportMenuItem setActionView(int i) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.support.v4.internal.view.SupportMenuItem, android.view.MenuItem
     public SupportMenuItem setActionView(View view) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.view.MenuItem
@@ -334,7 +334,7 @@ public class ActionMenuItem implements SupportMenuItem {
 
     @Override // android.view.MenuItem
     public MenuItem setOnActionExpandListener(MenuItem.OnActionExpandListener onActionExpandListener) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.view.MenuItem
@@ -371,7 +371,7 @@ public class ActionMenuItem implements SupportMenuItem {
 
     @Override // android.support.v4.internal.view.SupportMenuItem
     public SupportMenuItem setSupportActionProvider(android.support.v4.view.ActionProvider actionProvider) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // android.view.MenuItem

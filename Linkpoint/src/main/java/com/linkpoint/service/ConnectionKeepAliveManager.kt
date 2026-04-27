@@ -344,15 +344,9 @@ class ConnectionKeepAliveManager(
     }
 }
 
-/**
- * Connection state enum.
- */
-enum class ConnectionState {
-    CONNECTED,
-    RECONNECTING,
-    DISCONNECTED,
-    ERROR  // Socket invalidated, needs full reconnection
-}
+// ConnectionState is now unified in com.linkpoint.network.events.ConnectionState
+// typealias provided for backwards compatibility with existing imports.
+typealias ConnectionState = com.linkpoint.network.events.ConnectionState
 
 /**
  * Connection state change listener.

@@ -23,8 +23,14 @@ import java.util.*
 
 /**
  * Chat Activity - Local chat, IMs, and group chat
- * Based on Lumiya's ChatNewActivity
+ * Based on the reference viewer's ChatNewActivity
+ *
+ * Legacy entry point retained during Compose migration.
+ * Removal target: 2026.09.
  */
+@Deprecated(
+    message = "Legacy Activity entry point. Use ChatScreen-based Compose navigation."
+)
 class ChatActivity : AppCompatActivity() {
     
     companion object {
@@ -48,18 +54,19 @@ class ChatActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
-        
+
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             title = "Chat"
         }
-        
+
         initViews()
         setupTabs()
         setupChat()
         handleIntent()
         observeImMessages()
         observeSessionUpdates()
+        observeLocalChat()
     }
     
     private fun initViews() {
@@ -105,9 +112,12 @@ class ChatActivity : AppCompatActivity() {
                 messageInput.text.clear()
             }
         }
-        
-        // Add welcome message
-        addSystemMessage("Connected to local chat")
+
+        // Seed the LOCAL tab with whatever nearby-chat history we already have
+        // so the screen doesn't look empty / "stuck loading" when it's opened
+        // mid-session. loadMessages will fall back to a system banner if there
+        // is no history yet.
+        loadMessages()
     }
 
     private fun handleIntent() {
@@ -160,12 +170,28 @@ class ChatActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun observeLocalChat() {
+        if (!app.isChatManagerInitialized()) return
+        lifecycleScope.launch {
+            app.chatManager.chatFlow.collect { chat ->
+                // Local + Nearby tabs both show simulator-driven nearby chat.
+                if (currentChannel != ActivityChatChannel.LOCAL && currentChannel != ActivityChatChannel.NEARBY) {
+                    return@collect
+                }
+                val activityMessage = chat.toActivityMessage(currentChannel)
+                messages.add(activityMessage)
+                adapter.notifyItemInserted(messages.size - 1)
+                recyclerView.scrollToPosition(messages.size - 1)
+            }
+        }
+    }
     
     private fun loadMessages() {
         // Load messages for current channel
         messages.clear()
         adapter.notifyDataSetChanged()
-        
+
         if (currentChannel == ActivityChatChannel.IM || currentChannel == ActivityChatChannel.GROUP) {
             val sessionId = resolveSessionIdForChannel(currentChannel)
             if (sessionId == null) {
@@ -187,8 +213,21 @@ class ChatActivity : AppCompatActivity() {
                 recyclerView.scrollToPosition(messages.size - 1)
             }
         } else {
-            // Add channel info
-            addSystemMessage("Switched to ${currentChannel.name.lowercase()} chat")
+            // LOCAL / NEARBY: replay nearby-chat history so the screen doesn't
+            // appear empty when it's opened mid-session. Without this the only
+            // thing the user ever saw was the synthetic welcome line.
+            if (app.isChatManagerInitialized()) {
+                val history = app.chatManager.getHistory()
+                messages.addAll(history.map { it.toActivityMessage(currentChannel) })
+                adapter.notifyDataSetChanged()
+                if (messages.isNotEmpty()) {
+                    recyclerView.scrollToPosition(messages.size - 1)
+                } else {
+                    addSystemMessage("Switched to ${currentChannel.name.lowercase()} chat")
+                }
+            } else {
+                addSystemMessage("Switched to ${currentChannel.name.lowercase()} chat")
+            }
         }
     }
     
@@ -210,25 +249,10 @@ class ChatActivity : AppCompatActivity() {
             text.startsWith("/me ") -> ChatType.NORMAL to text // Emotes
             else -> ChatType.NORMAL to text
         }
-        
-        val message = ActivityChatMessage(
-            id = UUID.randomUUID().toString(),
-            sender = app.sessionManager.getAvatarName().ifEmpty { "You" },
-            content = displayText,
-            timestamp = System.currentTimeMillis(),
-            type = when (chatType) {
-                ChatType.SHOUT -> ActivityMessageType.SHOUT
-                ChatType.WHISPER -> ActivityMessageType.WHISPER
-                else -> if (text.startsWith("/me ")) ActivityMessageType.EMOTE else ActivityMessageType.NORMAL
-            },
-            channel = currentChannel
-        )
-        
-        messages.add(message)
-        adapter.notifyItemInserted(messages.size - 1)
-        recyclerView.scrollToPosition(messages.size - 1)
-        
-        // Send to server
+
+        // ChatManager echoes outgoing messages back through chatFlow, so just
+        // send and let observeLocalChat() append the row. Adding it here too
+        // produced duplicate "You: ..." entries on every send.
         lifecycleScope.launch {
             app.protocol.sendChat(displayText, 0, chatType)
         }
@@ -255,6 +279,24 @@ class ChatActivity : AppCompatActivity() {
             content = message,
             timestamp = timestamp,
             type = ActivityMessageType.NORMAL,
+            channel = channel
+        )
+    }
+
+    private fun com.linkpoint.chat.ChatMessage.toActivityMessage(channel: ActivityChatChannel): ActivityChatMessage {
+        val activityType = when {
+            chatType == com.linkpoint.protocol.messages.ChatType.SHOUT -> ActivityMessageType.SHOUT
+            chatType == com.linkpoint.protocol.messages.ChatType.WHISPER -> ActivityMessageType.WHISPER
+            sourceType == com.linkpoint.protocol.messages.ChatSourceType.OBJECT -> ActivityMessageType.OBJECT
+            message.startsWith("/me ") -> ActivityMessageType.EMOTE
+            else -> ActivityMessageType.NORMAL
+        }
+        return ActivityChatMessage(
+            id = id.toString(),
+            sender = fromName,
+            content = message,
+            timestamp = timestamp,
+            type = activityType,
             channel = channel
         )
     }

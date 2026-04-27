@@ -2,20 +2,19 @@ package com.linkpoint.chat
 
 import android.util.Log
 import com.linkpoint.messaging.MessagingDispatcher
+import com.linkpoint.protocol.core.AgentIdentity
 import com.linkpoint.protocol.messages.ChatData
 import com.linkpoint.protocol.messages.ChatSourceType
 import com.linkpoint.protocol.messages.ChatType
 import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.SLMessagePackers
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLVector3
-import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -89,13 +88,29 @@ class ChatManager(
      * Send chat message
      */
     /**
-     * Send chat message
+     * Send a local-chat line.
+     *
+     * Marked **reliable** to mirror Lumiya
+     * (`SLAgentCircuit.SendLocalChatMessage:1724`: `chatFromViewer.isReliable = true`).
+     * On lossy networks an unreliable ChatFromViewer is silently dropped
+     * with no resend and no failure callback — the user types and sees
+     * nothing land in nearby chat.
      */
     fun sendChat(message: String, type: ChatType = ChatType.NORMAL, channel: Int = 0) {
         scope.launch {
-            val data = buildChatPacket(message, type, channel)
-            udpConnection.sendPacket(MessageIds.CHAT_FROM_VIEWER, data)
-            
+            val identity = AgentIdentity(
+                agentId = agentId,
+                sessionId = udpConnection.getSessionId(),
+                circuitCode = udpConnection.getCircuitCode()
+            ).requireValid("ChatManager.sendChat")
+            val data = SLMessagePackers.packChatFromViewer(
+                identity = identity,
+                message = message,
+                type = type.value,
+                channel = channel
+            )
+            udpConnection.sendPacket(MessageIds.CHAT_FROM_VIEWER, data, reliable = true)
+
             // Add to local history
             val localMessage = ChatMessage(
                 id = UUID.randomUUID(),
@@ -112,77 +127,35 @@ class ChatManager(
             addMessage(localMessage)
         }
     }
-    
+
     /**
      * Whisper
      */
     fun whisper(message: String, channel: Int = 0) {
         sendChat(message, ChatType.WHISPER, channel)
     }
-    
+
     /**
      * Shout
      */
     fun shout(message: String, channel: Int = 0) {
         sendChat(message, ChatType.SHOUT, channel)
     }
-    
+
     /**
-     * Start typing indicator
+     * Typing indicators in nearby chat are deprecated. Lumiya does not
+     * route them through `ChatFromViewer` (the legacy `Type=4/5` path is
+     * inert in modern SL), and per-conversation typing is delivered via
+     * `ImprovedInstantMessage` Dialog=41/42 in [IMManager]. Kept here as a
+     * no-op so existing UI bindings compile; remove the call sites once
+     * the IM-based path is wired through.
      */
     fun startTyping() {
-        scope.launch {
-            val data = buildChatPacket("", ChatType.START_TYPING, 0)
-            udpConnection.sendPacket(MessageIds.CHAT_FROM_VIEWER, data)
-        }
+        Log.v(TAG, "startTyping: nearby-chat typing is deprecated — use IMManager.sendTypingStart")
     }
-    
-    /**
-     * Stop typing indicator
-     */
+
     fun stopTyping() {
-        scope.launch {
-            val data = buildChatPacket("", ChatType.STOP_TYPING, 0)
-            udpConnection.sendPacket(MessageIds.CHAT_FROM_VIEWER, data)
-        }
-    }
-    
-    private fun buildChatPacket(message: String, type: ChatType, channel: Int): ByteArray {
-        val messageBytes = message.toByteArray(Charsets.UTF_8)
-        
-        // ChatFromViewer message format per SL protocol:
-        // AgentData block:
-        //   - AgentID (LLUUID, 16 bytes) - big-endian UUID
-        //   - SessionID (LLUUID, 16 bytes) - big-endian UUID
-        // ChatData block:
-        //   - Message (Variable 2) - 2-byte length prefix, then message bytes + null terminator
-        //   - Type (U8)
-        //   - Channel (S32, little-endian)
-        
-        // Total: 16 + 16 + 2 + message.length + 1 (null) + 1 (type) + 4 = 40 + message.length
-        val buffer = ByteBuffer.allocate(40 + messageBytes.size)
-            .order(ByteOrder.LITTLE_ENDIAN)
-        
-        // AgentData block - UUIDs use big-endian per SL protocol
-        buffer.putUUID(agentId)
-        
-        // SessionID - get from UDPConnection
-        val sessionId = udpConnection.getSessionId()
-        buffer.putUUID(sessionId)
-        
-        // ChatData block
-        // Message - Variable 2 (2-byte length prefix + string + null terminator)
-        buffer.putShort((messageBytes.size + 1).toShort())
-        buffer.put(messageBytes)
-        buffer.put(0) // Null terminator
-        
-        // Type (U8)
-        buffer.put(type.value.toByte())
-        
-        // Channel (S32, little-endian)
-        buffer.putInt(channel)
-        
-        return buffer.array()
+        Log.v(TAG, "stopTyping: nearby-chat typing is deprecated — use IMManager.sendTypingStop")
     }
     
     private fun addMessage(message: ChatMessage) {

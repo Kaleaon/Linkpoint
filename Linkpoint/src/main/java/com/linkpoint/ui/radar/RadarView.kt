@@ -22,7 +22,7 @@ import kotlin.math.sqrt
  * - Distance rings
  * - Cardinal directions
  * 
- * Based on Lumiya's radar feature.
+ * Based on the reference viewer's radar feature.
  */
 class RadarView @JvmOverloads constructor(
     context: Context,

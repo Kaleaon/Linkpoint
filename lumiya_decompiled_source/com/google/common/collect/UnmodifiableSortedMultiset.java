@@ -68,12 +68,12 @@ public final class UnmodifiableSortedMultiset<E> extends Multisets.UnmodifiableM
 
     @Override // com.google.common.collect.SortedMultiset
     public Multiset.Entry<E> pollFirstEntry() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.SortedMultiset
     public Multiset.Entry<E> pollLastEntry() {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override // com.google.common.collect.SortedMultiset

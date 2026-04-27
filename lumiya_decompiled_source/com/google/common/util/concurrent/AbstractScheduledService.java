@@ -61,7 +61,7 @@ public abstract class AbstractScheduledService implements Service {
             /* JADX INFO: Access modifiers changed from: protected */
             @Override // com.google.common.util.concurrent.ForwardingFuture, com.google.common.collect.ForwardingObject
             public Future<Void> delegate() {
-                throw new UnsupportedOperationException("Only cancel and isCancelled is supported by this future");
+                throw new IllegalStateException("Only cancel and isCancelled is supported by this future");
             }
 
             @Override // com.google.common.util.concurrent.ForwardingFuture, java.util.concurrent.Future

@@ -7,16 +7,17 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.linkpoint.R
 
 /**
  * Terms of Service Activity
  * 
- * Based on Lumiya's approach: Users must accept Second Life's
+ * Based on the reference viewer's approach: Users must accept Second Life's
  * Terms of Service before their first login.
  * 
- * This is similar to how Lumiya handles ToS acceptance - it shows
+ * This is similar to how the reference viewer handles ToS acceptance - it shows
  * the ToS inline and requires explicit acceptance before proceeding.
  */
 class TosActivity : AppCompatActivity() {
@@ -84,11 +85,24 @@ class TosActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tos)
-        
+
         requireAcceptance = intent.getBooleanExtra("require_acceptance", true)
-        
+
         setupViews()
         loadTos()
+        setupBackPressHandler()
+    }
+
+    private fun setupBackPressHandler() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (requireAcceptance) {
+                    declineTos()
+                } else {
+                    finish()
+                }
+            }
+        })
     }
     
     private fun setupViews() {
@@ -295,13 +309,5 @@ class TosActivity : AppCompatActivity() {
         }
         finish()
         return true
-    }
-    
-    override fun onBackPressed() {
-        if (requireAcceptance) {
-            declineTos()
-        } else {
-            super.onBackPressed()
-        }
     }
 }

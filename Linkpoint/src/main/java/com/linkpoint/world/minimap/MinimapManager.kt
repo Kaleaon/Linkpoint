@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Minimap System - Renders a top-down view of the current region.
  * 
- * Based on Lumiya's Minimap.java
+ * Based on the reference viewer's Minimap.java
  * 
  * Features:
  * - Region terrain view

@@ -129,7 +129,7 @@ public final class MenuItemImpl implements SupportMenuItem {
 
     @Override // android.view.MenuItem
     public android.view.ActionProvider getActionProvider() {
-        throw new UnsupportedOperationException("This is not supported, use MenuItemCompat.getActionProvider()");
+        throw new IllegalStateException("This is not supported, use MenuItemCompat.getActionProvider()");
     }
 
     @Override // android.support.v4.internal.view.SupportMenuItem, android.view.MenuItem
@@ -365,7 +365,7 @@ public final class MenuItemImpl implements SupportMenuItem {
 
     @Override // android.view.MenuItem
     public MenuItem setActionProvider(android.view.ActionProvider actionProvider) {
-        throw new UnsupportedOperationException("This is not supported, use MenuItemCompat.setActionProvider()");
+        throw new IllegalStateException("This is not supported, use MenuItemCompat.setActionProvider()");
     }
 
     @Override // android.support.v4.internal.view.SupportMenuItem, android.view.MenuItem

@@ -6,7 +6,6 @@ import android.util.LruCache
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.security.MessageDigest
 import java.util.UUID
 
 /**
@@ -28,14 +27,28 @@ class AssetCache(private val context: Context) {
     
     // Memory cache (LRU) - uses configured size from CacheManager
     private val memoryCache: LruCache<String, ByteArray> by lazy {
-        val maxMemoryMB = cacheManager.getMemoryCacheSizeMB()
-        Log.i(TAG, "Initializing memory cache: ${maxMemoryMB}MB")
-        object : LruCache<String, ByteArray>(maxMemoryMB * 1024 * 1024) {
+        val configuredMB = cacheManager.getMemoryCacheSizeMB()
+        // Clamp the MB value in case a persisted preference is outside the supported range,
+        // then compute bytes in Long to avoid Int overflow. LruCache's maxSize is an Int,
+        // so at >= 2048 MB the naive Int multiplication wraps to <= 0 and crashes the
+        // constructor with "maxSize <= 0".
+        val clampedMB = configuredMB.coerceIn(
+            CacheManager.MIN_MEMORY_CACHE_MB,
+            CacheManager.MAX_MEMORY_CACHE_MB
+        )
+        val maxBytes = (clampedMB.toLong() * 1024L * 1024L)
+            .coerceAtMost(Int.MAX_VALUE.toLong())
+            .toInt()
+        if (clampedMB != configuredMB) {
+            Log.w(TAG, "Memory cache size ${configuredMB}MB out of range; clamped to ${clampedMB}MB")
+        }
+        Log.i(TAG, "Initializing memory cache: ${maxBytes / 1024 / 1024}MB")
+        object : LruCache<String, ByteArray>(maxBytes) {
             override fun sizeOf(key: String, value: ByteArray): Int = value.size
         }
     }
     
-    // Disk cache directory
+    // Fallback disk cache directory for asset types without CacheManager mapping
     private val diskCacheDir: File by lazy {
         File(context.cacheDir, DISK_CACHE_DIR).also { it.mkdirs() }
     }
@@ -58,7 +71,7 @@ class AssetCache(private val context: Context) {
         
         // Check disk cache
         return withContext(Dispatchers.IO) {
-            val file = getDiskFile(key)
+            val file = getDiskFile(assetId, assetType)
             if (file.exists()) {
                 try {
                     val data = file.readBytes()
@@ -85,10 +98,10 @@ class AssetCache(private val context: Context) {
         // Store in memory
         memoryCache.put(key, data)
         
-        // Store on disk
+        // Store on disk using Public/<Grid>/<assetType>/<uuid> structure
         withContext(Dispatchers.IO) {
             try {
-                val file = getDiskFile(key)
+                val file = getDiskFile(assetId, assetType)
                 file.writeBytes(data)
                 Log.d(TAG, "Cached asset: $assetId (${data.size} bytes)")
             } catch (e: Exception) {
@@ -104,7 +117,7 @@ class AssetCache(private val context: Context) {
         val key = getCacheKey(assetId, assetType)
         if (memoryCache.get(key) != null) return true
         return withContext(Dispatchers.IO) {
-            getDiskFile(key).exists()
+            getDiskFile(assetId, assetType).exists()
         }
     }
     
@@ -115,7 +128,7 @@ class AssetCache(private val context: Context) {
         val key = getCacheKey(assetId, assetType)
         memoryCache.remove(key)
         withContext(Dispatchers.IO) {
-            getDiskFile(key).delete()
+            getDiskFile(assetId, assetType).delete()
         }
     }
     
@@ -125,17 +138,35 @@ class AssetCache(private val context: Context) {
     suspend fun clear() {
         memoryCache.evictAll()
         withContext(Dispatchers.IO) {
+            // Clear all CacheManager asset directories
+            CacheableAssetType.values().forEach { type ->
+                cacheManager.getPublicAssetDirectory(type).listFiles()?.forEach { it.delete() }
+            }
+            // Clear fallback directory
             diskCacheDir.listFiles()?.forEach { it.delete() }
         }
         Log.i(TAG, "Cache cleared")
     }
     
     /**
+     * Collect all disk cache files across CacheManager directories and fallback.
+     */
+    private fun allDiskFiles(): List<File> {
+        val files = mutableListOf<File>()
+        CacheableAssetType.values().forEach { type ->
+            cacheManager.getPublicAssetDirectory(type).listFiles()?.let { files.addAll(it) }
+        }
+        diskCacheDir.listFiles()?.let { files.addAll(it) }
+        return files
+    }
+    
+    /**
      * Get cache statistics
      */
     fun getStats(): CacheStats {
-        val diskSize = diskCacheDir.listFiles()?.sumOf { it.length() } ?: 0
-        val diskCount = diskCacheDir.listFiles()?.size ?: 0
+        val allFiles = allDiskFiles()
+        val diskSize = allFiles.sumOf { it.length() }
+        val diskCount = allFiles.size
         return CacheStats(
             memorySizeBytes = memoryCache.size().toLong(),
             memoryMaxBytes = memoryCache.maxSize().toLong(),
@@ -152,14 +183,15 @@ class AssetCache(private val context: Context) {
      */
     suspend fun pruneIfNeeded() = withContext(Dispatchers.IO) {
         val maxBytes = maxDiskCacheBytes
-        var totalSize = diskCacheDir.listFiles()?.sumOf { it.length() } ?: 0
+        val allFiles = allDiskFiles()
+        var totalSize = allFiles.sumOf { it.length() }
         
         if (totalSize > maxBytes) {
             Log.i(TAG, "Cache over limit: ${totalSize / 1024 / 1024}MB > ${maxBytes / 1024 / 1024}MB, pruning...")
             // Delete oldest files first
-            diskCacheDir.listFiles()
-                ?.sortedBy { it.lastModified() }
-                ?.forEach { file ->
+            allFiles
+                .sortedBy { it.lastModified() }
+                .forEach { file ->
                     if (totalSize > maxBytes * 0.8) { // Prune to 80%
                         val size = file.length()
                         if (file.delete()) {
@@ -172,15 +204,41 @@ class AssetCache(private val context: Context) {
     }
     
     private fun getCacheKey(assetId: UUID, assetType: AssetType): String {
-        return "${assetType.name}_${assetId}"
+        // Include the grid in the memory key so the in-process LRU cache can't return a
+        // payload from a previously-connected grid for the same UUID. Disk paths already
+        // segregate by grid via CacheManager.getPublicAssetDirectory(), but the memory
+        // cache shared one keyspace before this change — fine for Second Life (UUIDs are
+        // globally unique) but unsafe across OpenSim grids where UUIDs can collide.
+        return "${cacheManager.getCurrentGridName()}_${assetType.name}_${assetId}"
     }
     
-    private fun getDiskFile(key: String): File {
-        // Hash the key for safe filename
-        val hash = MessageDigest.getInstance("SHA-1")
-            .digest(key.toByteArray())
-            .joinToString("") { "%02x".format(it) }
-        return File(diskCacheDir, hash)
+    /**
+     * Map AssetType to CacheableAssetType for directory routing.
+     */
+    private fun toCacheableAssetType(assetType: AssetType): CacheableAssetType? {
+        return when (assetType) {
+            AssetType.TEXTURE, AssetType.TEXTURE_TGA, AssetType.IMAGE_TGA,
+            AssetType.IMAGE_JPEG, AssetType.SNAPSHOT -> CacheableAssetType.TEXTURES
+            AssetType.MESH, AssetType.GLTF, AssetType.GLTF_BIN -> CacheableAssetType.MESHES
+            AssetType.SOUND, AssetType.SOUND_WAV -> CacheableAssetType.SOUNDS
+            AssetType.ANIMATION -> CacheableAssetType.ANIMATIONS
+            else -> null
+        }
+    }
+    
+    /**
+     * Get the disk file for an asset using the Public/<Grid>/<assetType>/<uuid> structure.
+     * Assets with a known cacheable type are stored in CacheManager directories;
+     * other asset types fall back to the general disk cache.
+     */
+    private fun getDiskFile(assetId: UUID, assetType: AssetType): File {
+        val cacheableType = toCacheableAssetType(assetType)
+        val dir = if (cacheableType != null) {
+            cacheManager.getPublicAssetDirectory(cacheableType)
+        } else {
+            diskCacheDir.also { it.mkdirs() }
+        }
+        return File(dir, assetId.toString())
     }
 }
 
