@@ -1,0 +1,91 @@
+{
+  "metadata": {
+    "id": "stargate-sg1",
+    "name": "Stargate SG-1",
+    "description": "Iris-bronze and event-horizon teal — warm gate-room console feel with restrained neon accents",
+    "author": "Linkpoint",
+    "version": "1.0.0",
+    "tags": [
+      "dark",
+      "sci-fi",
+      "stargate",
+      "console",
+      "metallic"
+    ],
+    "createdAt": "2026-04-27T00:00:00.000Z",
+    "updatedAt": "2026-04-27T00:00:00.000Z"
+  },
+  "darkMode": true,
+  "colorScheme": {
+    "primary": "#FFC15A",
+    "onPrimary": "#1A0E04",
+    "primaryContainer": "#B07820",
+    "onPrimaryContainer": "#FFF1D6",
+    "secondary": "#4FE0FF",
+    "onSecondary": "#001E2B",
+    "secondaryContainer": "#0E5D78",
+    "onSecondaryContainer": "#D6F4FF",
+    "tertiary": "#B85AFF",
+    "onTertiary": "#1B0033",
+    "tertiaryContainer": "#5C2B80",
+    "onTertiaryContainer": "#F0DAFF",
+    "error": "#FF6B6B",
+    "onError": "#2A0A0A",
+    "errorContainer": "#7A1F1F",
+    "onErrorContainer": "#FFD9D9",
+    "background": "#04141C",
+    "onBackground": "#E8F4FF",
+    "surface": "#0E2C3E",
+    "onSurface": "#E8F4FF",
+    "surfaceVariant": "#143A52",
+    "onSurfaceVariant": "#94B5C9",
+    "outline": "#2D6580",
+    "outlineVariant": "#1A4359",
+    "scrim": "#000000",
+    "inverseSurface": "#E8F4FF",
+    "inverseOnSurface": "#04141C",
+    "inversePrimary": "#8A6128"
+  },
+  "effects": {
+    "metallic": {
+      "enabled": true,
+      "variant": "GOLD",
+      "gradient": {
+        "base": "#FFC15A",
+        "highlight": "#FFD789",
+        "shadow": "#8A5F28",
+        "shimmer": "#FFE9B0"
+      },
+      "intensity": 0.7
+    },
+    "shadows": {
+      "enabled": true,
+      "elevation": 4,
+      "blur": 10,
+      "color": "#00000077"
+    },
+    "blur": {
+      "enabled": true,
+      "radius": 14
+    },
+    "shimmer": {
+      "enabled": true,
+      "speed": 4,
+      "intensity": 0.35,
+      "angle": 130
+    },
+    "overlays": {
+      "enabled": true,
+      "color": "#4FE0FF",
+      "opacity": 0.12,
+      "blendMode": "screen"
+    }
+  },
+  "typography": {
+    "fontFamily": "'Inter', system-ui, sans-serif",
+    "fontSize": { "small": 12, "medium": 16, "large": 20, "xlarge": 28 },
+    "fontWeight": { "light": 300, "regular": 400, "medium": 500, "bold": 700 },
+    "lineHeight": 1.5,
+    "letterSpacing": 0
+  }
+}

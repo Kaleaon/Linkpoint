@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Linkpoint 2.0 — Mobile Second Life</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body data-theme="aurora" data-density="balanced">
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="primitives.jsx"></script>
+<script type="text/babel" src="screens-1.jsx"></script>
+<script type="text/babel" src="screens-2.jsx"></script>
+<script type="text/babel" src="screens-3.jsx"></script>
+<script type="text/babel" src="screens-4.jsx"></script>
+<script type="text/babel" src="screens-5.jsx"></script>
+<script type="text/babel" src="screens-states.jsx"></script>
+<script type="text/babel" src="screens-extra.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "theme": "emerald-silver",
+  "density": "balanced",
+  "accent": "default"
+}/*EDITMODE-END*/;
+
+function App() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+  React.useEffect(() => {
+    document.body.dataset.theme = tweaks.theme;
+    document.body.dataset.density = tweaks.density;
+    if (tweaks.accent && tweaks.accent !== 'default') {
+      document.documentElement.style.setProperty('--primary', tweaks.accent);
+    } else {
+      document.documentElement.style.removeProperty('--primary');
+    }
+  }, [tweaks]);
+
+  // Each artboard wraps a screen in our phone shell
+  const Phone = ({ children }) => <div className="phone">{children}</div>;
+
+  const screens = [
+    { id: 'login', label: '01 Login', el: <LoginScreen /> },
+    { id: 'home', label: '02 Home / Conversations', el: <HomeScreen /> },
+    { id: 'chat', label: '03 Chat thread', el: <ChatThreadScreen /> },
+    { id: 'world', label: '04 World view (HUDs on)', el: <WorldScreen hudVisible /> },
+    { id: 'world-clean', label: '05 World view (HUDs hidden)', el: <WorldScreen hudVisible={false} /> },
+    { id: 'map', label: '06 Map & teleport', el: <MapScreen /> },
+    { id: 'inv', label: '07 Inventory', el: <InventoryScreen /> },
+    { id: 'avatar', label: '08 Avatar / outfit', el: <AvatarScreen /> },
+    { id: 'friends', label: '09 Friends', el: <FriendsScreen /> },
+    { id: 'profile', label: '10 Resident profile', el: <ProfileScreen /> },
+    { id: 'search', label: '11 Search', el: <SearchScreen /> },
+    { id: 'notifs', label: '12 Notifications', el: <NotificationsScreen /> },
+    { id: 'objects', label: '13 Nearby objects', el: <ObjectListScreen /> },
+    { id: 'voice', label: '14 Voice chat', el: <VoiceScreen /> },
+    { id: 'media', label: '15 Parcel media', el: <MediaScreen /> },
+    { id: 'notecard', label: '16 Notecard', el: <NotecardScreen /> },
+    { id: 'texture', label: '17 Texture preview', el: <TextureScreen /> },
+    { id: 'settings', label: '18 Settings', el: <SettingsScreen /> },
+    { id: 'grids', label: '19 Manage grids', el: <GridManagementScreen /> },
+    { id: 'login-err', label: '20 Login error', el: <LoginErrorScreen /> },
+    { id: 'chat-states', label: '21 Chat states (typing/failed/read)', el: <ChatStatesScreen /> },
+    { id: 'tp-offer', label: '22 Teleport offer', el: <TPOfferScreen /> },
+    { id: 'low-bw', label: '23 Low bandwidth', el: <LowBandwidthScreen /> },
+    { id: 'toasts', label: '24 Notification toasts', el: <NotificationsToastScreen /> },
+    { id: 'onb-welcome', label: '25 Onboarding · Welcome', el: <OnboardingWelcomeScreen /> },
+    { id: 'onb-avatar', label: '26 Onboarding · Pick avatar', el: <OnboardingAvatarScreen /> },
+    { id: 'onb-perms', label: '27 Onboarding · Permissions', el: <OnboardingPermissionsScreen /> },
+    { id: 'wallet', label: '28 Wallet · L$', el: <WalletScreen /> },
+    { id: 'groups', label: '29 Groups list', el: <GroupsListScreen /> },
+    { id: 'group', label: '30 Group profile', el: <GroupProfileScreen /> },
+    { id: 'outfit', label: '31 Outfit composer', el: <OutfitComposerScreen /> },
+    { id: 'build', label: '32 Build tools', el: <BuildToolsScreen /> },
+    { id: 'perm-dlg', label: '33 Permission dialog (debit)', el: <PermissionDialogScreen /> },
+    { id: 'voice-deep', label: '34 Voice · spatial', el: <VoiceDeepScreen /> },
+    { id: 'minimap', label: '35 Minimap overlay', el: <MinimapOverlayScreen /> },
+    { id: 'empty', label: '36 Empty states', el: <EmptyStatesScreen /> },
+  ];
+
+  return (
+    <>
+      <DesignCanvas title="Linkpoint 2.0 — Mobile Second Life">
+        <DCSection id="all" title="All screens — Pixel 10 XL · 412×916">
+          {screens.map(s => (
+            <DCArtboard key={s.id} id={s.id} label={s.label} width={432} height={936}>
+              <div data-screen-label={s.label} style={{ padding: 10, display: 'flex', justifyContent: 'center' }}>
+                <Phone>{s.el}</Phone>
+              </div>
+            </DCArtboard>
+          ))}
+        </DCSection>
+      </DesignCanvas>
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection title="Theme">
+          <TweakSelect
+            label="Palette"
+            value={tweaks.theme}
+            onChange={v => setTweak('theme', v)}
+            options={[
+              { value: 'aurora', label: 'Aurora' },
+              { value: 'navy-gold', label: 'Navy/Gold' },
+              { value: 'frutiger', label: 'Frutiger' },
+              { value: 'lcars', label: 'LCARS' },
+              { value: 'metro', label: 'Metro' },
+              { value: 'stargate', label: 'Stargate' },
+              { value: 'atlantis', label: 'Atlantis' },
+              { value: 'emerald-silver', label: 'Emerald' },
+              { value: 'rose-gold', label: 'Rose Gold' },
+              { value: 'royal-bronze', label: 'Royal Bronze' },
+              { value: 'midnight-amber', label: 'Midnight Amber' },
+              { value: 'obsidian-crimson', label: 'Obsidian Crimson' },
+              { value: 'slate-cyan', label: 'Slate Cyan' },
+              { value: 'royal-silver', label: 'Royal Silver' },
+              { value: 'forest-copper', label: 'Forest Copper' },
+              { value: 'burgundy-rose-gold', label: 'Burgundy Rose' },
+              { value: 'charcoal-champagne', label: 'Charcoal Champagne' },
+              { value: 'slate-gunmetal', label: 'Slate Gunmetal' },
+              { value: 'deep-purple-platinum', label: 'Deep Purple Platinum' },
+              { value: 'paper-ink', label: 'Paper & Ink' },
+              { value: 'solarpunk-civic', label: 'Solarpunk' },
+              { value: 'neo-noir-neon', label: 'Neo-Noir Neon' },
+              { value: 'calm-clinical', label: 'Calm Clinical' },
+              { value: 'ink-terminal', label: 'Ink Terminal' },
+              { value: 'art-nouveau', label: 'Art Nouveau' },
+              { value: 'art-deco', label: 'Art Deco' },
+            ]}
+          />
+          <TweakRadio
+            label="Density"
+            value={tweaks.density}
+            onChange={v => setTweak('density', v)}
+            options={[
+              { value: 'compact', label: 'Compact' },
+              { value: 'balanced', label: 'Balanced' },
+            ]}
+          />
+        </TweakSection>
+        <TweakSection title="Accent override">
+          <TweakRadio
+            label="Accent"
+            value={tweaks.accent}
+            onChange={v => setTweak('accent', v)}
+            options={[
+              { value: 'default', label: 'Default' },
+              { value: '#FF8FB1', label: 'Pink' },
+              { value: '#7CFFD8', label: 'Mint' },
+              { value: '#FFD56D', label: 'Amber' },
+            ]}
+          />
+        </TweakSection>
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
