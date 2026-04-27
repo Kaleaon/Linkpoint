@@ -78,7 +78,12 @@ android {
     
     kotlinOptions {
         jvmTarget = "1.8"
-        freeCompilerArgs += listOf("-opt-in=kotlin.RequiresOptIn")
+        freeCompilerArgs += listOf(
+            "-opt-in=kotlin.RequiresOptIn",
+            "-Xjvm-default=all",
+            "-Xno-call-assertions",
+            "-Xno-param-assertions"
+        )
     }
     
     buildFeatures {
