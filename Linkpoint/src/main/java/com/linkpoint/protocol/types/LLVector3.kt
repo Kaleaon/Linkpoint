@@ -24,12 +24,17 @@ data class LLVector3(
 ) : Parcelable {
     companion object {
         private const val NORMALIZE_EPSILON_SQUARED = 1.0e-12f
+        private const val APPROXIMATELY_ZERO = 1.0e-12f
+        private const val MAG_THRESHOLD = 1.0e-6f
         fun zero() = LLVector3(0f, 0f, 0f)
         fun one() = LLVector3(1f, 1f, 1f)
         fun unitX() = LLVector3(1f, 0f, 0f)
         fun unitY() = LLVector3(0f, 1f, 0f)
         fun unitZ() = LLVector3(0f, 0f, 1f)
-        
+        fun negativeX() = LLVector3(-1f, 0f, 0f)
+        fun negativeY() = LLVector3(0f, -1f, 0f)
+        fun negativeZ() = LLVector3(0f, 0f, -1f)
+
         fun fromBytes(bytes: ByteArray, offset: Int = 0): LLVector3 {
             val buffer = ByteBuffer.wrap(bytes, offset, 12).order(ByteOrder.LITTLE_ENDIAN)
             return LLVector3(buffer.float, buffer.float, buffer.float)
@@ -98,9 +103,81 @@ data class LLVector3(
             z + (target.z - z) * t
         )
     }
-    
+
+    fun isNull(): Boolean = (x * x + y * y + z * z) < APPROXIMATELY_ZERO
+
+    fun clamp(min: Float, max: Float): LLVector3 = LLVector3(
+        x.coerceIn(min, max),
+        y.coerceIn(min, max),
+        z.coerceIn(min, max)
+    )
+
+    fun clamp(minVec: LLVector3, maxVec: LLVector3): LLVector3 = LLVector3(
+        x.coerceIn(minVec.x, maxVec.x),
+        y.coerceIn(minVec.y, maxVec.y),
+        z.coerceIn(minVec.z, maxVec.z)
+    )
+
+    fun clampLength(limit: Float): LLVector3 {
+        val magSq = lengthSquared()
+        return if (magSq > limit * limit) this * (limit / sqrt(magSq)) else this
+    }
+
+    fun snap(sigDigits: Int): LLVector3 {
+        val pow = Math.pow(10.0, sigDigits.toDouble()).toFloat()
+        return LLVector3(
+            kotlin.math.round(x * pow) / pow,
+            kotlin.math.round(y * pow) / pow,
+            kotlin.math.round(z * pow) / pow
+        )
+    }
+
+    operator fun rem(other: LLVector3): LLVector3 = cross(other)
+
     override fun toString() = "($x, $y, $z)"
 }
+
+operator fun Float.times(v: LLVector3): LLVector3 = LLVector3(v.x * this, v.y * this, v.z * this)
+
+fun angleBetween(a: LLVector3, b: LLVector3): Float {
+    val dotProduct = a.dot(b)
+    val crossLen = a.cross(b).length()
+    return atan2(crossLen, dotProduct)
+}
+
+fun areParallel(a: LLVector3, b: LLVector3, epsilon: Float = 1.0e-12f): Boolean {
+    val an = a.normalize()
+    val bn = b.normalize()
+    val d = an.dot(bn)
+    return 1f - abs(d) < epsilon
+}
+
+fun distVec(a: LLVector3, b: LLVector3): Float = a.distance(b)
+
+fun distVecSquared(a: LLVector3, b: LLVector3): Float = a.distanceSquared(b)
+
+fun distVecSquared2D(a: LLVector3, b: LLVector3): Float {
+    val dx = a.x - b.x
+    val dy = a.y - b.y
+    return dx * dx + dy * dy
+}
+
+fun projectedVec(a: LLVector3, b: LLVector3): LLVector3 {
+    val bb = b.dot(b)
+    return if (bb > 1.0e-12f) b * (a.dot(b) / bb) else LLVector3.zero()
+}
+
+fun inverseProjVec(a: LLVector3, b: LLVector3): LLVector3 {
+    val normalizedA = a.normalize()
+    val bLength = b.length()
+    val bNormalized = if (bLength > 0f) b / bLength else LLVector3.zero()
+    val d = normalizedA.dot(bNormalized)
+    return if (abs(d) > 1.0e-12f) normalizedA * (bLength / d) else LLVector3.zero()
+}
+
+fun parallelComponent(a: LLVector3, b: LLVector3): LLVector3 = projectedVec(a, b)
+
+fun orthogonalComponent(a: LLVector3, b: LLVector3): LLVector3 = a - projectedVec(a, b)
 
 /**
  * Second Life Quaternion type
@@ -189,6 +266,13 @@ data class LLQuaternion(
     }
     
     fun conjugate() = LLQuaternion(-x, -y, -z, w)
+
+    fun length(): Float = sqrt(x * x + y * y + z * z + w * w)
+
+    fun lengthSquared(): Float = x * x + y * y + z * z + w * w
+
+    fun dot(other: LLQuaternion): Float =
+        x * other.x + y * other.y + z * other.z + w * other.w
     
     operator fun times(other: LLQuaternion): LLQuaternion {
         return LLQuaternion(
