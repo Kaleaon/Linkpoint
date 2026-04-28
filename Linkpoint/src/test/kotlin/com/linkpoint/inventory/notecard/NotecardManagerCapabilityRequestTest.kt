@@ -1,5 +1,8 @@
 package com.linkpoint.inventory.notecard
 
+import org.junit.runner.RunWith
+import androidx.test.ext.junit.runners.AndroidJUnit4
+
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.FakeCapabilityRequester
 import com.linkpoint.protocol.llsd.LLSDMap
@@ -10,6 +13,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.UUID
 
+@RunWith(AndroidJUnit4::class)
 class NotecardManagerCapabilityRequestTest {
 
     @Test

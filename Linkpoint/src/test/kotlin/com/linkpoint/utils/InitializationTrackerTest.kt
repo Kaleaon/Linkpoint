@@ -1,10 +1,14 @@
 package com.linkpoint.utils
 
+import org.junit.runner.RunWith
+import androidx.test.ext.junit.runners.AndroidJUnit4
+
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+@RunWith(AndroidJUnit4::class)
 class InitializationTrackerTest {
 
     @Test
