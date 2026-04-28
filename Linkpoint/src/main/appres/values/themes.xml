@@ -15,4 +15,52 @@
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
     </style>
+
+    <!-- LCARS TNG: amber rail on black, compact density, no window decoration -->
+    <style name="Theme.Linkpoint.LCARS" parent="Theme.Linkpoint">
+        <item name="colorPrimary">@color/lcars_primary</item>
+        <item name="colorPrimaryVariant">@color/lcars_primary_dark</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorSecondary">@color/lcars_secondary</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <item name="android:colorBackground">@color/lcars_background</item>
+        <item name="android:statusBarColor">@color/lcars_primary</item>
+        <item name="android:navigationBarColor">@color/black</item>
+    </style>
+
+    <!-- Metro Cyan: flat cyan tiles on black -->
+    <style name="Theme.Linkpoint.Metro" parent="Theme.Linkpoint">
+        <item name="colorPrimary">@color/metro_primary</item>
+        <item name="colorPrimaryVariant">@color/metro_primary_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/metro_secondary</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="android:colorBackground">@color/metro_background</item>
+        <item name="android:statusBarColor">@color/black</item>
+        <item name="android:navigationBarColor">@color/black</item>
+    </style>
+
+    <!-- Stargate Atlantis: Atlantean bronze and blue glass -->
+    <style name="Theme.Linkpoint.StargateAtlantis" parent="Theme.Linkpoint">
+        <item name="colorPrimary">@color/atlantis_primary</item>
+        <item name="colorPrimaryVariant">@color/atlantis_primary_dark</item>
+        <item name="colorOnPrimary">@color/atlantis_background</item>
+        <item name="colorSecondary">@color/atlantis_secondary</item>
+        <item name="colorOnSecondary">@color/atlantis_background</item>
+        <item name="android:colorBackground">@color/atlantis_background</item>
+        <item name="android:statusBarColor">@color/atlantis_background</item>
+        <item name="android:navigationBarColor">@color/atlantis_background</item>
+    </style>
+
+    <!-- Stargate SG-1: iris-bronze gold and event-horizon teal -->
+    <style name="Theme.Linkpoint.StargateSG1" parent="Theme.Linkpoint">
+        <item name="colorPrimary">@color/sg1_primary</item>
+        <item name="colorPrimaryVariant">@color/sg1_primary_dark</item>
+        <item name="colorOnPrimary">@color/sg1_background</item>
+        <item name="colorSecondary">@color/sg1_secondary</item>
+        <item name="colorOnSecondary">@color/sg1_background</item>
+        <item name="android:colorBackground">@color/sg1_background</item>
+        <item name="android:statusBarColor">@color/sg1_background</item>
+        <item name="android:navigationBarColor">@color/sg1_background</item>
+    </style>
 </resources>

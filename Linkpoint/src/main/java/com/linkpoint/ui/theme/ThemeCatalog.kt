@@ -4,10 +4,11 @@ package com.linkpoint.ui.theme
  * Catalog of built-in themes grouped by visual family.
  */
 object ThemeCatalog {
-    enum class ThemeFamily {
-        LINKPOINT,
-        VIEWER_INSPIRED,
-        CLEVERFERRET
+    enum class ThemeFamily(val displayName: String) {
+        LINKPOINT("Linkpoint"),
+        VIEWER_INSPIRED("Viewer-Inspired"),
+        CLEVERFERRET("CleverFerret"),
+        COMMUNITY("Community & Sci-Fi")
     }
 
     private val familyToThemes: Map<ThemeFamily, List<ThemePack>> = mapOf(
@@ -24,6 +25,12 @@ object ThemeCatalog {
             BuiltInThemes.BURGUNDY_ROSEGOLD,
             BuiltInThemes.CHARCOAL_CHAMPAGNE,
             BuiltInThemes.SLATE_GUNMETAL
+        ),
+        ThemeFamily.COMMUNITY to listOf(
+            BuiltInThemes.LCARS_TNG,
+            BuiltInThemes.METRO_CYAN,
+            BuiltInThemes.STARGATE_ATLANTIS,
+            BuiltInThemes.STARGATE_SG1
         )
     )
 

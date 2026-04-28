@@ -22,4 +22,36 @@
     <color name="chat_shout">#FF5722</color>
     <color name="chat_emote">#4CAF50</color>
     <color name="chat_im">#03A9F4</color>
+
+    <!-- LCARS TNG -->
+    <color name="lcars_primary">#F2A65A</color>
+    <color name="lcars_primary_dark">#CC7A2B</color>
+    <color name="lcars_secondary">#C5678D</color>
+    <color name="lcars_background">#000000</color>
+    <color name="lcars_surface">#1A1A1A</color>
+    <color name="lcars_on_surface">#FFCC99</color>
+
+    <!-- Metro Cyan -->
+    <color name="metro_primary">#00AEEF</color>
+    <color name="metro_primary_dark">#0078D7</color>
+    <color name="metro_secondary">#2D89EF</color>
+    <color name="metro_background">#000000</color>
+    <color name="metro_surface">#1A1A1A</color>
+    <color name="metro_on_surface">#FFFFFF</color>
+
+    <!-- Stargate Atlantis -->
+    <color name="atlantis_primary">#C4A062</color>
+    <color name="atlantis_primary_dark">#8A6E3D</color>
+    <color name="atlantis_secondary">#6FCFE8</color>
+    <color name="atlantis_background">#0B1B2E</color>
+    <color name="atlantis_surface">#133355</color>
+    <color name="atlantis_on_surface">#E8EFF7</color>
+
+    <!-- Stargate SG-1 -->
+    <color name="sg1_primary">#FFC15A</color>
+    <color name="sg1_primary_dark">#B07820</color>
+    <color name="sg1_secondary">#4FE0FF</color>
+    <color name="sg1_background">#04141C</color>
+    <color name="sg1_surface">#0E2C3E</color>
+    <color name="sg1_on_surface">#E8F4FF</color>
 </resources>

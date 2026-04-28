@@ -113,48 +113,49 @@ fun ThemePickerScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Built-in themes section
-            item {
-                Text(
-                    text = "Built-in Themes",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
+            // Built-in themes grouped by family
+            ThemeCatalog.families().forEach { family ->
+                val familyThemes = ThemeCatalog.themesInFamily(family)
+                    .filter { catalogTheme -> availableThemes.any { it.id == catalogTheme.id } }
+                if (familyThemes.isEmpty()) return@forEach
+
+                item(key = "header_${family.name}") {
+                    Spacer(modifier = Modifier.height(if (family.ordinal == 0) 0.dp else 8.dp))
+                    Text(
+                        text = family.displayName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                items(items = familyThemes, key = { it.id }) { theme ->
+                    ThemeCard(
+                        theme = theme,
+                        isSelected = theme.id == activeTheme.id,
+                        onSelect = {
+                            themeManager.setActiveTheme(theme)
+                            onThemeSelected(theme)
+                        },
+                        onShare = { onShareTheme(theme) },
+                        onEdit = null,
+                        onDelete = null
+                    )
+                }
             }
-            
-            items(
-                items = availableThemes.filter { it.isBuiltIn },
-                key = { it.id }
-            ) { theme ->
-                ThemeCard(
-                    theme = theme,
-                    isSelected = theme.id == activeTheme.id,
-                    onSelect = {
-                        themeManager.setActiveTheme(theme)
-                        onThemeSelected(theme)
-                    },
-                    onShare = { onShareTheme(theme) },
-                    onEdit = null,  // Can't edit built-in themes
-                    onDelete = null  // Can't delete built-in themes
-                )
-            }
-            
+
             // User themes section
             val userThemes = availableThemes.filter { !it.isBuiltIn }
             if (userThemes.isNotEmpty()) {
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
+                item(key = "header_user") {
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "My Themes",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                 }
-                
-                items(
-                    items = userThemes,
-                    key = { it.id }
-                ) { theme ->
+
+                items(items = userThemes, key = { it.id }) { theme ->
                     ThemeCard(
                         theme = theme,
                         isSelected = theme.id == activeTheme.id,

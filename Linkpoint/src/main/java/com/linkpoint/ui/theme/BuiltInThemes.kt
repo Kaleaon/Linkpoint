@@ -226,6 +226,116 @@ object BuiltInThemes {
         motionProfile = MotionProfile.EXPRESSIVE
     )
 
+    // ── Community / Sci-Fi themes ──────────────────────────────────────────────
+
+    /**
+     * LCARS TNG — Authentic TNG-era amber rail palette with strict pill geometry.
+     * Full-height orange left rail, Antonio font, bottom elbow connector.
+     */
+    val LCARS_TNG = ThemePack(
+        id = "lcars-tng",
+        name = "LCARS — TNG",
+        description = "Warm amber/lilac LCARS palette tuned for TNG-era consoles",
+        author = "Linkpoint",
+        version = "1.0.0",
+        isBuiltIn = true,
+        colorPrimary = "#F2A65A",
+        colorPrimaryDark = "#CC7A2B",
+        colorOnPrimary = "#000000",
+        colorSecondary = "#C5678D",
+        colorOnSecondary = "#000000",
+        colorBackground = "#000000",
+        colorSurface = "#000000",
+        colorOnSurface = "#FFCC99",
+        colorOnSurfaceVariant = "#CC99CC",
+        colorSurfaceVariant = "#1A1A1A",
+        colorError = "#CC6666",
+        densityProfile = DensityProfile.COMPACT,
+        cornerProfile = CornerProfile.PILLED,
+        motionProfile = MotionProfile.STANDARD
+    )
+
+    /**
+     * Metro Cyan — Windows Phone 7 / Zune panorama layout.
+     * Segoe UI weight-100 display, flat tiles, no shadows, vivid cyan accent on black.
+     */
+    val METRO_CYAN = ThemePack(
+        id = "metro-cyan",
+        name = "Metro Cyan",
+        description = "High-contrast Windows Phone Metro variant — vivid cyan on deep black",
+        author = "Linkpoint",
+        version = "1.0.0",
+        isBuiltIn = true,
+        colorPrimary = "#00AEEF",
+        colorPrimaryDark = "#0078D7",
+        colorOnPrimary = "#FFFFFF",
+        colorSecondary = "#2D89EF",
+        colorOnSecondary = "#001021",
+        colorBackground = "#000000",
+        colorSurface = "#000000",
+        colorOnSurface = "#FFFFFF",
+        colorOnSurfaceVariant = "#B8CAD6",
+        colorSurfaceVariant = "#1A1A1A",
+        colorError = "#E81123",
+        densityProfile = DensityProfile.COMFORTABLE,
+        cornerProfile = CornerProfile.SHARP,
+        motionProfile = MotionProfile.STANDARD
+    )
+
+    /**
+     * Stargate Atlantis — Atlantean blue glass and bronze with Art Deco geometry.
+     * Frank Lloyd Wright prairie banding, Cinzel display font, bronze metallic.
+     */
+    val STARGATE_ATLANTIS = ThemePack(
+        id = "stargate-atlantis",
+        name = "Stargate Atlantis",
+        description = "Atlantean blue glass and bronze — Art Deco geometry, prairie banding",
+        author = "Linkpoint",
+        version = "1.0.0",
+        isBuiltIn = true,
+        colorPrimary = "#C4A062",
+        colorPrimaryDark = "#8A6E3D",
+        colorOnPrimary = "#0B1B2E",
+        colorSecondary = "#6FCFE8",
+        colorOnSecondary = "#001E2B",
+        colorBackground = "#0B1B2E",
+        colorSurface = "#133355",
+        colorOnSurface = "#E8EFF7",
+        colorOnSurfaceVariant = "#8FB0CC",
+        colorSurfaceVariant = "#1A4068",
+        colorError = "#C46462",
+        densityProfile = DensityProfile.COMFORTABLE,
+        cornerProfile = CornerProfile.SHARP,
+        motionProfile = MotionProfile.STANDARD
+    )
+
+    /**
+     * Stargate SG-1 — Iris-bronze and event-horizon teal.
+     * Warm gate-room console feel with restrained neon accents.
+     */
+    val STARGATE_SG1 = ThemePack(
+        id = "stargate-sg1",
+        name = "Stargate SG-1",
+        description = "Iris-bronze and event-horizon teal — gate-room console feel",
+        author = "Linkpoint",
+        version = "1.0.0",
+        isBuiltIn = true,
+        colorPrimary = "#FFC15A",
+        colorPrimaryDark = "#B07820",
+        colorOnPrimary = "#1A0E04",
+        colorSecondary = "#4FE0FF",
+        colorOnSecondary = "#001E2B",
+        colorBackground = "#04141C",
+        colorSurface = "#0E2C3E",
+        colorOnSurface = "#E8F4FF",
+        colorOnSurfaceVariant = "#94B5C9",
+        colorSurfaceVariant = "#143A52",
+        colorError = "#FF6B6B",
+        densityProfile = DensityProfile.STANDARD,
+        cornerProfile = CornerProfile.SHARP,
+        motionProfile = MotionProfile.EXPRESSIVE
+    )
+
     /**
      * Get all built-in themes as a list
      */
@@ -239,7 +349,11 @@ object BuiltInThemes {
         FOREST_COPPER,
         BURGUNDY_ROSEGOLD,
         CHARCOAL_CHAMPAGNE,
-        SLATE_GUNMETAL
+        SLATE_GUNMETAL,
+        LCARS_TNG,
+        METRO_CYAN,
+        STARGATE_ATLANTIS,
+        STARGATE_SG1
     )
     
     /**
