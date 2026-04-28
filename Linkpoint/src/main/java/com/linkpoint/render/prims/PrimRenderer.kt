@@ -78,6 +78,8 @@ class PrimRenderer(
 
     fun setTextureBinder(binder: TextureBinder?) {
         textureBinder = binder
+    }
+
     fun interface MeshDataRequester {
         fun request(localId: Int, meshId: UUID, lod: MeshLOD, onResolved: (MeshLoadResult) -> Unit)
     }

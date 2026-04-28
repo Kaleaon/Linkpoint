@@ -54,6 +54,10 @@ fun LinkpointTheme(
     val motionPolicy = remember(context) {
         MotionPolicy(readSystemAnimatorDurationScale(context))
     }
+    val typography = resolvedThemePack.toMaterialTypography()
+    val shapes = resolvedThemePack.toMaterialShapes()
+    val spacing = resolvedThemePack.toSpacing()
+    val motion = resolvedThemePack.toMotion()
     
     // Create Material 3 color scheme from ThemePack colors
     // Support both dark and light themes based on system preference
@@ -107,7 +111,7 @@ fun LinkpointTheme(
     CompositionLocalProvider(
         LocalLinkpointColors provides linkpointColors,
         LocalThemePack provides resolvedThemePack,
-        LocalMotionPolicy provides motionPolicy
+        LocalMotionPolicy provides motionPolicy,
         LocalLinkpointTypography provides typography,
         LocalLinkpointShapes provides shapes,
         LocalLinkpointSpacing provides spacing,

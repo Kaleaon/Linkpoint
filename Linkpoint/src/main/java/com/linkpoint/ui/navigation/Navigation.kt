@@ -23,7 +23,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.linkpoint.LinkpointApp
 import com.linkpoint.ui.avatar.MyAvatarActivity
-import com.linkpoint.ui.build.BuildActivity
 import com.linkpoint.ui.chat.ChatActivity
 import com.linkpoint.ui.friends.FriendsActivity
 import com.linkpoint.ui.groups.GroupsActivity
@@ -149,7 +148,7 @@ val routeMetadata: Map<String, RouteMetadata> = mapOf(
     Routes.SLURL to RouteMetadata(MenuPlacement.NONE, "SLURL handoff"),
     Routes.XR_WORLD to RouteMetadata(MenuPlacement.OVERFLOW, "XR world", legacyActivity = XRWorldActivity::class),
     Routes.WALLET to RouteMetadata(MenuPlacement.DRAWER, "Wallet", "L$ balance and transactions"),
-    Routes.BUILD_TOOLS to RouteMetadata(MenuPlacement.DRAWER, "Build tools", legacyActivity = BuildActivity::class),
+    Routes.BUILD_TOOLS to RouteMetadata(MenuPlacement.DRAWER, "Build tools"),
     Routes.NOTIFICATIONS_FEED to RouteMetadata(MenuPlacement.DRAWER, "Notifications", "Messages and system notices"),
     Routes.VOICE_DEEP to RouteMetadata(MenuPlacement.DRAWER, "Voice", "Channel and diagnostics"),
     Routes.PLACES_DETAIL to RouteMetadata(MenuPlacement.NONE, "Place details", backBehavior = BackBehavior.ALWAYS_TO_WORLD),
