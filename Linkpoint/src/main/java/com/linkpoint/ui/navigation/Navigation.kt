@@ -52,6 +52,7 @@ object Routes {
     const val SETTINGS = "settings"
     const val MAP = "map"
     const val MINIMAP = "minimap"
+    const val RADAR = "radar"
     const val SEARCH = "search"
     const val TELEPORT_HISTORY = "teleport_history"
     const val NEARBY_PEOPLE = "nearby_people"
@@ -67,9 +68,23 @@ object Routes {
     const val VOICE_DEEP = "voice_deep"
     const val PLACES_DETAIL = "places/{placeId}"
     const val PLACES_EVENTS = "places/events"
+    const val PLACES_SEARCH = "places/search"
     const val ONBOARDING_WELCOME = "onboarding/welcome"
     const val ONBOARDING_PERMISSIONS = "onboarding/permissions"
     const val ONBOARDING_AVATAR = "onboarding/avatar"
+
+    // Linkpoint 2.0 additions wired through LinkpointNavHost.
+    const val IM_LIST = "im_list"
+    const val OUTFIT_PICKER = "outfit_picker"
+    const val OUTFIT_COMPOSER = "outfit_composer"
+    const val GROUP_PROFILE = "group_profile/{groupId}"
+    const val CAMERA_MODE = "camera_mode"
+    const val GRAPHICS_SETTINGS = "settings/graphics"
+    const val PRIVACY_SETTINGS = "settings/privacy"
+    const val GRID_MANAGEMENT = "settings/grids"
+    const val EMPTY_STATES_REF = "dev/empty_states"
+
+    fun groupProfile(groupId: String) = "group_profile/$groupId"
 
     fun profile(userId: String) = "profile/$userId"
     fun slurl(slurl: String) = "slurl/$slurl"
@@ -93,10 +108,11 @@ data class LinkpointDrawerSection(val title: String, val items: List<LinkpointMe
 
 object LinkpointMenus {
     val bottomTabs = listOf(
-        LinkpointMenuDestination(Routes.WORLD, "World"),
         LinkpointMenuDestination(Routes.CHAT, "Chat"),
+        LinkpointMenuDestination(Routes.WORLD, "World"),
+        LinkpointMenuDestination(Routes.MAP, "Map"),
         LinkpointMenuDestination(Routes.INVENTORY, "Inventory"),
-        LinkpointMenuDestination(Routes.FRIENDS, "Friends")
+        LinkpointMenuDestination(Routes.MY_PROFILE, "Me"),
     )
 
     val drawerSections = listOf(
@@ -104,26 +120,43 @@ object LinkpointMenus {
             title = "Explore",
             items = listOf(
                 LinkpointMenuDestination(Routes.MAP, "Map"),
+                LinkpointMenuDestination(Routes.PLACES_SEARCH, "Places"),
+                LinkpointMenuDestination(Routes.PLACES_EVENTS, "Events"),
                 LinkpointMenuDestination(Routes.SEARCH, "Search"),
-                LinkpointMenuDestination(Routes.PLACES_EVENTS, "Events")
-            )
+            ),
+        ),
+        LinkpointDrawerSection(
+            title = "Social",
+            items = listOf(
+                LinkpointMenuDestination(Routes.FRIENDS, "Friends"),
+                LinkpointMenuDestination(Routes.IM_LIST, "Messages"),
+                LinkpointMenuDestination(Routes.GROUPS, "Groups"),
+                LinkpointMenuDestination(Routes.VOICE_DEEP, "Voice"),
+            ),
         ),
         LinkpointDrawerSection(
             title = "Tools",
             items = listOf(
-                LinkpointMenuDestination(Routes.BUILD_TOOLS, "Build Tools"),
+                LinkpointMenuDestination(Routes.BUILD_TOOLS, "Build tools"),
+                LinkpointMenuDestination(Routes.OUTFIT_PICKER, "Outfits"),
+                LinkpointMenuDestination(Routes.OUTFIT_COMPOSER, "Outfit composer"),
+                LinkpointMenuDestination(Routes.CAMERA_MODE, "Camera"),
                 LinkpointMenuDestination(Routes.NOTIFICATIONS_FEED, "Notifications"),
-                LinkpointMenuDestination(Routes.VOICE_DEEP, "Voice")
-            )
+            ),
         ),
         LinkpointDrawerSection(
             title = "Account",
             items = listOf(
-                LinkpointMenuDestination(Routes.MY_PROFILE, "My Profile"),
+                LinkpointMenuDestination(Routes.MY_PROFILE, "My profile"),
+                LinkpointMenuDestination(Routes.MY_AVATAR, "My avatar"),
                 LinkpointMenuDestination(Routes.WALLET, "Wallet"),
-                LinkpointMenuDestination(Routes.SETTINGS, "Settings")
-            )
-        )
+                LinkpointMenuDestination(Routes.SETTINGS, "Settings"),
+                LinkpointMenuDestination(Routes.GRAPHICS_SETTINGS, "Graphics"),
+                LinkpointMenuDestination(Routes.PRIVACY_SETTINGS, "Privacy"),
+                LinkpointMenuDestination(Routes.GRID_MANAGEMENT, "Grids"),
+                LinkpointMenuDestination(Routes.THEME_PICKER, "Theme"),
+            ),
+        ),
     )
 }
 
@@ -139,6 +172,7 @@ val routeMetadata: Map<String, RouteMetadata> = mapOf(
     Routes.SETTINGS to RouteMetadata(MenuPlacement.DRAWER, "Settings", legacyActivity = SettingsActivity::class),
     Routes.MAP to RouteMetadata(MenuPlacement.DRAWER, "Map", legacyActivity = MapActivity::class),
     Routes.MINIMAP to RouteMetadata(MenuPlacement.OVERFLOW, "Minimap", legacyActivity = MinimapActivity::class),
+    Routes.RADAR to RouteMetadata(MenuPlacement.OVERFLOW, "Radar", legacyActivity = com.linkpoint.ui.radar.RadarActivity::class),
     Routes.SEARCH to RouteMetadata(MenuPlacement.DRAWER, "Search", legacyActivity = SearchActivity::class),
     Routes.TELEPORT_HISTORY to RouteMetadata(MenuPlacement.OVERFLOW, "Teleport history", legacyActivity = TeleportHistoryActivity::class),
     Routes.NEARBY_PEOPLE to RouteMetadata(MenuPlacement.OVERFLOW, "Nearby", legacyActivity = NearbyPeopleActivity::class),
@@ -153,9 +187,19 @@ val routeMetadata: Map<String, RouteMetadata> = mapOf(
     Routes.VOICE_DEEP to RouteMetadata(MenuPlacement.DRAWER, "Voice", "Channel and diagnostics"),
     Routes.PLACES_DETAIL to RouteMetadata(MenuPlacement.NONE, "Place details", backBehavior = BackBehavior.ALWAYS_TO_WORLD),
     Routes.PLACES_EVENTS to RouteMetadata(MenuPlacement.DRAWER, "Events", "Places and happenings"),
+    Routes.PLACES_SEARCH to RouteMetadata(MenuPlacement.DRAWER, "Places", "Discover regions"),
     Routes.ONBOARDING_WELCOME to RouteMetadata(MenuPlacement.NONE, "Welcome", requiresAuth = false),
     Routes.ONBOARDING_PERMISSIONS to RouteMetadata(MenuPlacement.NONE, "Permissions", requiresAuth = false),
-    Routes.ONBOARDING_AVATAR to RouteMetadata(MenuPlacement.NONE, "Starter avatar", requiresAuth = false)
+    Routes.ONBOARDING_AVATAR to RouteMetadata(MenuPlacement.NONE, "Starter avatar", requiresAuth = false),
+    Routes.IM_LIST to RouteMetadata(MenuPlacement.OVERFLOW, "Messages", "All conversations"),
+    Routes.OUTFIT_PICKER to RouteMetadata(MenuPlacement.OVERFLOW, "Outfits", "Saved looks"),
+    Routes.OUTFIT_COMPOSER to RouteMetadata(MenuPlacement.OVERFLOW, "Outfit composer", "Mix and match wearables"),
+    Routes.GROUP_PROFILE to RouteMetadata(MenuPlacement.NONE, "Group", backBehavior = BackBehavior.DEFAULT),
+    Routes.CAMERA_MODE to RouteMetadata(MenuPlacement.NONE, "Camera", backBehavior = BackBehavior.ALWAYS_TO_WORLD),
+    Routes.GRAPHICS_SETTINGS to RouteMetadata(MenuPlacement.OVERFLOW, "Graphics", "Quality & performance"),
+    Routes.PRIVACY_SETTINGS to RouteMetadata(MenuPlacement.OVERFLOW, "Privacy", "Visibility & blocking"),
+    Routes.GRID_MANAGEMENT to RouteMetadata(MenuPlacement.OVERFLOW, "Grids", "Configured worlds"),
+    Routes.EMPTY_STATES_REF to RouteMetadata(MenuPlacement.NONE, "Empty states", "Reference"),
 )
 
 fun NavHostController.navigateTo(route: String) {
@@ -193,6 +237,7 @@ fun resolveRouteMetadata(route: String?): RouteMetadata {
         ?: when {
             normalizedRoute.startsWith("profile/") -> routeMetadata.getValue(Routes.PROFILE)
             normalizedRoute.startsWith("slurl/") -> routeMetadata.getValue(Routes.SLURL)
+            normalizedRoute.startsWith("group_profile/") -> routeMetadata.getValue(Routes.GROUP_PROFILE)
             normalizedRoute.startsWith("places/") -> routeMetadata.getValue(Routes.PLACES_DETAIL)
             else -> routeMetadata.getValue(Routes.WORLD)
         }
@@ -223,7 +268,12 @@ fun LinkpointNavHost(
             routeMetadata.forEach { (routePattern, _) ->
                 composable(routePattern) { entry ->
                     val resolved = resolveRouteMetadata(entry.destination.route)
-                    GuardedRoute(navController = navController, route = routePattern, metadata = resolved)
+                    GuardedRoute(
+                        navController = navController,
+                        route = routePattern,
+                        entry = entry,
+                        metadata = resolved,
+                    )
                 }
             }
         }
@@ -234,6 +284,7 @@ fun LinkpointNavHost(
 private fun GuardedRoute(
     navController: NavHostController,
     route: String,
+    entry: androidx.navigation.NavBackStackEntry,
     metadata: RouteMetadata
 ) {
     val isAuthenticated = LinkpointApp.getInstanceOrNull()?.sessionManager?.isConnected() == true
@@ -246,6 +297,15 @@ private fun GuardedRoute(
         return
     }
 
+    // 1. Try the Linkpoint 2.0 Compose graph first.
+    val l2Handled = com.linkpoint.ui.linkpoint2.Linkpoint2RouteHost(
+        route = route,
+        entry = entry,
+        navController = navController,
+    )
+    if (l2Handled) return
+
+    // 2. Fall back to a legacy Activity bridge if available.
     val legacyActivity = metadata.legacyActivity
     if (legacyActivity != null && route != Routes.LOGIN) {
         LegacyActivityRoute(activityClass = legacyActivity, title = metadata.title)

@@ -31,6 +31,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import com.linkpoint.ui.components.linkpoint2.primitives.L2TopBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -104,13 +105,14 @@ fun MapScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("World Map") },
-                navigationIcon = {
+            L2TopBar(
+                title = "World map",
+                subtitle = "Pan & teleport",
+                leading = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
             )
         }
     ) { paddingValues ->

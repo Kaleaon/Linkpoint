@@ -69,17 +69,18 @@ fun TeleportHistoryScreen(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Teleport History") },
-                navigationIcon = {
+            com.linkpoint.ui.components.linkpoint2.primitives.L2TopBar(
+                title = "Teleport history",
+                subtitle = "Recent destinations",
+                leading = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
-                actions = {
+                trailing = {
                     if (history.isNotEmpty()) {
                         IconButton(onClick = onClearHistory) {
-                            Icon(Icons.Default.Delete, contentDescription = "Clear History")
+                            Icon(Icons.Default.Delete, contentDescription = "Clear history")
                         }
                     }
                 }

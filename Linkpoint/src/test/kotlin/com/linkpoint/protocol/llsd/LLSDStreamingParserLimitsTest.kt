@@ -1,5 +1,8 @@
 package com.linkpoint.protocol.llsd
 
+import org.junit.runner.RunWith
+import androidx.test.ext.junit.runners.AndroidJUnit4
+
 import java.io.ByteArrayInputStream
 import java.io.DataInputStream
 import java.io.IOException
@@ -9,6 +12,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
 
+@RunWith(AndroidJUnit4::class)
 class LLSDStreamingParserLimitsTest {
 
     @Test

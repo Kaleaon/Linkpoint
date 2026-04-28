@@ -1,19 +1,26 @@
 package com.linkpoint.render.lumiya.core
 
+import org.junit.runner.RunWith
+import androidx.test.ext.junit.runners.AndroidJUnit4
+
 import android.content.Context
-import android.graphics.SurfaceTexture
-import android.test.mock.MockContext
 import android.view.Surface
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.mockito.kotlin.mock
 
+@RunWith(AndroidJUnit4::class)
 class RenderEngineSwitcherTest {
 
     @Test
     fun `switch from filament to lumiya initializes new engine and renders frames`() {
-        val context: Context = MockContext()
+        // Both Context and Surface are passed through opaquely to the
+        // FakeRenderEngine, so mocks suffice. `SurfaceTexture(int)` is a
+        // native call that fails on the JVM unit test classpath.
+        val context: Context = mock()
+        val surface: Surface = mock()
         val switcher = RenderEngineSwitcher(context)
         val filamentEngine = FakeRenderEngine("Filament")
         val lumiyaEngine = FakeRenderEngine("Lumiya")
@@ -21,24 +28,17 @@ class RenderEngineSwitcherTest {
         switcher.registerEngine(RenderEngineSwitcher.EngineType.FILAMENT, filamentEngine)
         switcher.registerEngine(RenderEngineSwitcher.EngineType.LUMIYA, lumiyaEngine)
 
-        val surfaceTexture = SurfaceTexture(0)
-        val surface = Surface(surfaceTexture)
-        try {
-            assertTrue(switcher.initialize(surface, 640, 480))
-            assertEquals(1, filamentEngine.initializeCalls)
+        assertTrue(switcher.initialize(surface, 640, 480))
+        assertEquals(1, filamentEngine.initializeCalls)
 
-            switcher.setActiveEngine(RenderEngineSwitcher.EngineType.LUMIYA)
-            switcher.renderFrame()
+        switcher.setActiveEngine(RenderEngineSwitcher.EngineType.LUMIYA)
+        switcher.renderFrame()
 
-            val activeEngine = switcher.getActiveEngine()
-            assertNotNull(activeEngine)
-            assertEquals(RenderEngineSwitcher.EngineType.LUMIYA, switcher.getActiveType())
-            assertEquals(1, lumiyaEngine.initializeCalls)
-            assertEquals(1L, lumiyaEngine.frameCount)
-        } finally {
-            surface.release()
-            surfaceTexture.release()
-        }
+        val activeEngine = switcher.getActiveEngine()
+        assertNotNull(activeEngine)
+        assertEquals(RenderEngineSwitcher.EngineType.LUMIYA, switcher.getActiveType())
+        assertEquals(1, lumiyaEngine.initializeCalls)
+        assertEquals(1L, lumiyaEngine.frameCount)
     }
 
     private class FakeRenderEngine(

@@ -79,18 +79,19 @@ fun MyAvatarScreen(
     
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("My Avatar") },
-                navigationIcon = {
+            com.linkpoint.ui.components.linkpoint2.primitives.L2TopBar(
+                title = "My avatar",
+                subtitle = "Outfit & wearables",
+                leading = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
-                actions = {
+                trailing = {
                     IconButton(onClick = onRebakeTextures) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Rebake Textures")
+                        Icon(Icons.Default.Refresh, contentDescription = "Rebake textures")
                     }
-                }
+                },
             )
         }
     ) { paddingValues ->

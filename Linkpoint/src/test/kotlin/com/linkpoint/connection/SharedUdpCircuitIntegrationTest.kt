@@ -1,5 +1,8 @@
 package com.linkpoint.connection
 
+import org.junit.runner.RunWith
+import androidx.test.ext.junit.runners.AndroidJUnit4
+
 import com.linkpoint.network.core.AgentCircuit
 import com.linkpoint.network.core.CircuitState
 import com.linkpoint.network.core.TempCircuit
@@ -12,6 +15,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.UUID
 
+@RunWith(AndroidJUnit4::class)
 class SharedUdpCircuitIntegrationTest {
 
     @Test

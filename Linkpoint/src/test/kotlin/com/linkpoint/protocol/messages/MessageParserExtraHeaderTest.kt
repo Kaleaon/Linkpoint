@@ -1,5 +1,8 @@
 package com.linkpoint.protocol.messages
 
+import org.junit.runner.RunWith
+import androidx.test.ext.junit.runners.AndroidJUnit4
+
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -20,6 +23,7 @@ import org.junit.Test
  * include extra-header bytes had their ID misread and their payload
  * silently dropped from the parsed handler chain.
  */
+@RunWith(AndroidJUnit4::class)
 class MessageParserExtraHeaderTest {
 
     @Test

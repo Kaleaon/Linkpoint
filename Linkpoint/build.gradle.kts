@@ -7,6 +7,17 @@ plugins {
     id("org.jetbrains.kotlin.plugin.parcelize") version "2.2.21"
     id("org.jetbrains.kotlin.plugin.compose") version "2.2.21"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.21"
+    // NOTE: Paparazzi's Gradle plugin (`app.cash.paparazzi`) is intentionally
+    // *not* applied here. The project's production classpath bundles
+    // `org.conscrypt:conscrypt-android` whose AAR ships an `org.conscrypt.R`
+    // class signed differently from `org.conscrypt:conscrypt-openjdk-uber`
+    // (the Robolectric/Paparazzi-friendly variant). Paparazzi's resource
+    // bootstrap loads every R class on the test classpath, hitting a
+    // SecurityException for org.conscrypt.R. Until upstream Paparazzi adds
+    // a way to exclude library-AAR R classes, the existing
+    // StateComponentsSnapshotTest is annotated with @Ignore so Robolectric
+    // tests remain green; the snapshots will move to the AndroidJUnit4
+    // instrumented suite.
 }
 
 data class UiBoundaryRule(
@@ -431,15 +442,62 @@ dependencies {
 
     // Testing
     testImplementation("junit:junit:4.13.2")
+    // Pinned to mockito 4.x — newer mockito 5.x is JVM 11 only and the project
+    // still targets Java 1.8.
+    testImplementation("org.mockito:mockito-core:4.11.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     testImplementation("com.squareup.okhttp3:okhttp:4.12.0")  // For integration tests
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testImplementation("org.json:json:20240303")
     testImplementation("app.cash.paparazzi:paparazzi:1.3.5")
+
+    // ── Robolectric + AndroidX test stack ────────────────────────────────
+    // Robolectric provides JVM-friendly Android framework stubs (android.util.Log,
+    // SharedPreferences, Context, Resources, etc.) so unit tests under
+    // `src/test` can exercise Android-touching code without a device.
+    // Pinned to 4.11.x — versions 4.12+ require JVM target 11; this project
+    // is still on JVM 1.8.
+    testImplementation("org.robolectric:robolectric:4.11.1")
+    testImplementation("androidx.test:core-ktx:1.5.0")
+    testImplementation("androidx.test:runner:1.5.2")
+    testImplementation("androidx.test:rules:1.5.0")
+    testImplementation("androidx.test.ext:junit-ktx:1.1.5")
+    // Turbine for testing Flow / StateFlow emissions in Robolectric tests.
+    testImplementation("app.cash.turbine:turbine:1.0.0")
+    // Robolectric needs Conscrypt's OpenJDK-flavoured native library — the
+    // `conscrypt-android` artifact pulled in for production only ships
+    // libconscrypt_jni for arm/x86-android, not desktop JVM. We replace it
+    // on the unit-test classpath with `conscrypt-openjdk-uber`, which
+    // bundles the same provider compiled against the host JVM. Without
+    // this Robolectric crashes during AndroidTestEnvironment.setUpApplicationState.
+    testImplementation("org.conscrypt:conscrypt-openjdk-uber:2.5.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation("androidx.test:core-ktx:1.5.0")
+}
+
+// The production classpath uses `org.conscrypt:conscrypt-android` (which only
+// ships its native lib for ARM/x86 Android) but the JVM unit-test classpath
+// needs `org.conscrypt:conscrypt-openjdk-uber`. They share the same
+// `org.conscrypt` package but are signed by different entities — keeping
+// both on the same classpath triggers a `SecurityException: signer
+// information does not match`. Substitute the Android variant on every
+// unit-test configuration so Robolectric/Paparazzi see a single, JVM-friendly
+// Conscrypt provider.
+configurations.matching {
+    it.name.contains("UnitTest", ignoreCase = true) ||
+        it.name.startsWith("test")
+}.configureEach {
+    exclude(group = "org.conscrypt", module = "conscrypt-android")
+    resolutionStrategy {
+        dependencySubstitution {
+            substitute(module("org.conscrypt:conscrypt-android"))
+                .using(module("org.conscrypt:conscrypt-openjdk-uber:2.5.2"))
+                .because("conscrypt-android lacks a JVM native lib; openjdk-uber works on Robolectric/Paparazzi")
+        }
+    }
 }
 
 // Helper function to get git commit hash

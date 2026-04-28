@@ -8,10 +8,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeOff
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
-import androidx.compose.material.icons.filled.VolumeOff
-import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -73,7 +73,7 @@ fun VoiceControl(
                 onClick = { onVoiceToggle(!connected) }
             ) {
                 Icon(
-                    imageVector = if (connected) Icons.Default.VolumeUp else Icons.Default.VolumeOff,
+                    imageVector = if (connected) Icons.AutoMirrored.Filled.VolumeUp else Icons.AutoMirrored.Filled.VolumeOff,
                     contentDescription = if (connected) "Disconnect voice" else "Connect voice",
                     tint = if (connected) connectedColor else disconnectedColor,
                     modifier = Modifier.size(28.dp)
@@ -166,7 +166,7 @@ fun VoiceIndicator(
     ) {
         Icon(
             imageVector = when {
-                !isConnected -> Icons.Default.VolumeOff
+                !isConnected -> Icons.AutoMirrored.Filled.VolumeOff
                 isMuted -> Icons.Default.MicOff
                 else -> Icons.Default.Mic
             },

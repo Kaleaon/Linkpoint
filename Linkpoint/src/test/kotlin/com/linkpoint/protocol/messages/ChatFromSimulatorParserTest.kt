@@ -1,5 +1,8 @@
 package com.linkpoint.protocol.messages
 
+import org.junit.runner.RunWith
+import androidx.test.ext.junit.runners.AndroidJUnit4
+
 import com.linkpoint.protocol.types.LLVector3
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -34,6 +37,7 @@ import java.util.UUID
  * Message     (Variable 2: u16 LE len + bytes incl NUL)
  * ```
  */
+@RunWith(AndroidJUnit4::class)
 class ChatFromSimulatorParserTest {
 
     private val sourceId = UUID.fromString("a1b2c3d4-0000-4000-8000-000000000001")
