@@ -71,6 +71,15 @@
         </activity>
 
 
+        <!-- Linkpoint 2.0 Compose login entry point. Drive from a deep link or
+             alternative launcher. Once stable this replaces LoginActivity. -->
+        <activity
+            android:name=".ui.login.ComposeLoginActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Linkpoint.NoActionBar"
+            android:windowSoftInputMode="adjustResize"/>
+
         <!-- Compose migration host entry (world/home) -->
         <activity
             android:name=".ui.navigation.WorldHomeHostActivity"

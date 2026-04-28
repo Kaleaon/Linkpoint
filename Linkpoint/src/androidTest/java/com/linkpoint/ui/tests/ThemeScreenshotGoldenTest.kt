@@ -65,6 +65,7 @@ class ThemeScreenshotGoldenTest {
                             channel = ChatChannel.LOCAL
                         )
                     ),
+                    onRetry = {},
                     onSendMessage = { _, _ -> },
                     onNavigateBack = {}
                 )
@@ -75,6 +76,7 @@ class ThemeScreenshotGoldenTest {
                     friends = listOf(
                         FriendData(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Alex", FriendStatus.ONLINE, "Sandbox")
                     ),
+                    onRetry = {},
                     onNavigateBack = {},
                     onOpenIM = {},
                     onTeleportTo = {},
