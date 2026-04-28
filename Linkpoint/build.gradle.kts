@@ -431,6 +431,10 @@ dependencies {
 
     // Testing
     testImplementation("junit:junit:4.13.2")
+    // Pinned to mockito 4.x — newer mockito 5.x is JVM 11 only and the project
+    // still targets Java 1.8.
+    testImplementation("org.mockito:mockito-core:4.11.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     testImplementation("com.squareup.okhttp3:okhttp:4.12.0")  // For integration tests
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")

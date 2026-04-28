@@ -1,6 +1,7 @@
 package com.linkpoint.ui.linkpoint2.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -96,13 +98,17 @@ fun NotificationsScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .height(64.dp)
-                        .padding(8.dp)
+                        .size(80.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .padding(16.dp),
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Icon(Icons.Default.Notifications, contentDescription = null, tint = tokens.onSurfaceDim)
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = null,
+                        tint = tokens.onSurfaceDim,
+                        modifier = Modifier.size(36.dp),
+                    )
                 }
                 Spacer(Modifier.height(12.dp))
                 Text("All caught up", fontWeight = FontWeight.SemiBold)
@@ -136,29 +142,36 @@ private fun NotificationCard(
 ) {
     val tokens = Linkpoint2.tokens
     val (icon, variant) = iconFor(item.kind)
+    val (iconTint, iconBg) = when (variant) {
+        L2ChipVariant.Success -> tokens.success to tokens.success.copy(alpha = 0.18f)
+        L2ChipVariant.Warn -> tokens.warning to tokens.warning.copy(alpha = 0.18f)
+        L2ChipVariant.Error -> MaterialTheme.colorScheme.error to MaterialTheme.colorScheme.error.copy(alpha = 0.18f)
+        L2ChipVariant.Primary, L2ChipVariant.Neutral ->
+            MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
+    }
     L2GlassSurface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onTap),
         contentPadding = PaddingValues(12.dp),
     ) {
-        Row {
+        Row(verticalAlignment = Alignment.Top) {
             Box(
                 modifier = Modifier
-                    .height(40.dp)
+                    .size(40.dp)
                     .clip(RoundedCornerShape(tokens.radii.md))
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.18f))
-                    .padding(8.dp),
+                    .background(iconBg),
+                contentAlignment = Alignment.Center,
             ) {
-                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Icon(icon, contentDescription = null, tint = iconTint)
             }
-            Spacer(Modifier.height(0.dp))
             Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
                     Text(item.title, fontWeight = FontWeight.SemiBold)
                     if (item.mentioned) {
-                        Spacer(Modifier.height(0.dp))
                         L2Chip(label = "@you", variant = L2ChipVariant.Primary)
                     }
-                    Spacer(Modifier.height(0.dp))
                 }
                 Text(item.body, style = MaterialTheme.typography.bodySmall, color = tokens.onSurfaceDim)
                 Text(item.timestamp, style = MaterialTheme.typography.labelSmall, color = tokens.onSurfaceDim)

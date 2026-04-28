@@ -16,9 +16,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.EventSeat
 import androidx.compose.material.icons.filled.FlightTakeoff
 import androidx.compose.material.icons.filled.Group
@@ -134,7 +134,7 @@ fun WorldOverlay(
                 contentPadding = PaddingValues(6.dp),
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    HudActionButton(Icons.Default.Chat, onChat, "Chat")
+                    HudActionButton(Icons.AutoMirrored.Filled.Chat, onChat, "Chat")
                     HudActionButton(Icons.Default.Map, onMinimap, "Minimap")
                     HudActionButton(Icons.Default.Work, onInventory, "Inventory")
                     HudActionButton(Icons.Default.ViewInAr, onXr, "XR")
@@ -143,7 +143,7 @@ fun WorldOverlay(
                     HudActionButton(Icons.Default.NearMe, onNearby, "Nearby")
                     HudActionButton(Icons.Default.PhotoCamera, onCameraMode, "Camera")
                     HudActionButton(Icons.Default.FlightTakeoff, onFly, "Fly")
-                    HudActionButton(Icons.Default.DirectionsRun, onRun, "Run")
+                    HudActionButton(Icons.AutoMirrored.Filled.DirectionsRun, onRun, "Run")
                     HudActionButton(Icons.Default.ArrowUpward, onJump, "Jump")
                     HudActionButton(Icons.Default.EventSeat, onSit, "Sit")
                 }
@@ -166,7 +166,7 @@ fun WorldOverlay(
                         .background(Color.Transparent),
                 ) {
                     Icon(
-                        Icons.Default.Chat,
+                        Icons.AutoMirrored.Filled.Chat,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp),

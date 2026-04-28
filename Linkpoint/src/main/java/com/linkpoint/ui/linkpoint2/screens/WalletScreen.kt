@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -164,12 +165,13 @@ fun WalletScreen(
                     leading = {
                         Box(
                             modifier = Modifier
+                                .size(40.dp)
                                 .clip(RoundedCornerShape(tokens.radii.md))
                                 .background(
                                     if (tx.isIncome) tokens.success.copy(alpha = 0.18f)
                                     else MaterialTheme.colorScheme.surfaceVariant,
-                                )
-                                .padding(8.dp),
+                                ),
+                            contentAlignment = Alignment.Center,
                         ) {
                             Icon(
                                 if (tx.isIncome) Icons.Default.ArrowDownward else Icons.Default.ArrowUpward,

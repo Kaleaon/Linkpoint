@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -162,9 +163,10 @@ fun PermissionDialog(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
+                            .size(40.dp)
                             .clip(RoundedCornerShape(tokens.radii.md))
-                            .background(MaterialTheme.colorScheme.error.copy(alpha = 0.18f))
-                            .padding(8.dp),
+                            .background(MaterialTheme.colorScheme.error.copy(alpha = 0.18f)),
+                        contentAlignment = Alignment.Center,
                     ) {
                         Icon(Icons.Default.Payments, contentDescription = null, tint = MaterialTheme.colorScheme.error)
                     }

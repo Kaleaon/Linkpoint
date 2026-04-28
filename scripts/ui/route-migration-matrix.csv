@@ -10,6 +10,7 @@ MY_PROFILE,profile/me,MyProfileScreen,
 SETTINGS,settings,SettingsActivity,nav_settings
 MAP,map,MapActivity,nav_world_map
 MINIMAP,minimap,MinimapActivity,nav_minimap
+RADAR,radar,RadarActivity,nav_radar
 SEARCH,search,SearchActivity,nav_search
 TELEPORT_HISTORY,teleport_history,TeleportHistoryScreen,
 NEARBY_PEOPLE,nearby_people,NearbyPeopleActivity,nav_nearby

@@ -16,15 +16,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
+import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.StickyNote2
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -65,11 +65,11 @@ enum class InventoryItemType(val displayName: String, val icon: ImageVector) {
     LANDMARK("Landmark", Icons.Default.LocationOn),
     CLOTHING("Clothing", Icons.Default.Person),
     BODYPART("Body Part", Icons.Default.Person),
-    OBJECT("Object", Icons.Default.InsertDriveFile),
-    NOTECARD("Notecard", Icons.Default.StickyNote2),
-    SCRIPT("Script", Icons.Default.InsertDriveFile),
+    OBJECT("Object", Icons.AutoMirrored.Filled.InsertDriveFile),
+    NOTECARD("Notecard", Icons.AutoMirrored.Filled.StickyNote2),
+    SCRIPT("Script", Icons.AutoMirrored.Filled.InsertDriveFile),
     CALLING_CARD("Calling Card", Icons.Default.Person),
-    UNKNOWN("Unknown", Icons.Default.InsertDriveFile),
+    UNKNOWN("Unknown", Icons.AutoMirrored.Filled.InsertDriveFile),
 }
 
 data class InventoryItemData(

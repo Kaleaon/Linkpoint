@@ -3,16 +3,23 @@ package com.linkpoint.ui.coverage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+
+// Helpers: project compiles against Java 1.8, so the JDK 11+ extension
+// Files.readString isn't available. These shims keep the validator
+// readable while staying source-compatible.
+private fun readText(path: Path): String =
+    String(Files.readAllBytes(path), StandardCharsets.UTF_8)
 
 class UiCoverageValidatorTest {
 
     @Test
     fun `no duplicate built-in theme ids`() {
         val themeFile = sourcePath("src/main/java/com/linkpoint/ui/theme/BuiltInThemes.kt")
-        val text = Files.readString(themeFile)
+        val text = readText(themeFile)
 
         val ids = Regex("""id\s*=\s*\"([^\"]+)\"""")
             .findAll(text)
@@ -25,8 +32,8 @@ class UiCoverageValidatorTest {
 
     @Test
     fun `no orphaned menu routes`() {
-        val navDrawer = Files.readString(sourcePath("src/main/res/menu/nav_drawer.xml"))
-        val worldView = Files.readString(sourcePath("src/main/java/com/linkpoint/ui/world/WorldViewActivity.kt"))
+        val navDrawer = readText(sourcePath("src/main/res/menu/nav_drawer.xml"))
+        val worldView = readText(sourcePath("src/main/java/com/linkpoint/ui/world/WorldViewActivity.kt"))
         val matrixRows = readRouteMatrixRows()
 
         val menuIds = Regex("""@\+id/(nav_[a-z_]+)""")
@@ -51,7 +58,7 @@ class UiCoverageValidatorTest {
 
     @Test
     fun `route metadata is complete for all routes`() {
-        val navigationText = Files.readString(sourcePath("src/main/java/com/linkpoint/ui/navigation/Navigation.kt"))
+        val navigationText = readText(sourcePath("src/main/java/com/linkpoint/ui/navigation/Navigation.kt"))
         val routes = Regex("""const\s+val\s+([A-Z_]+)\s*=\s*\"([^\"]+)\"""")
             .findAll(navigationText)
             .associate { it.groupValues[1] to it.groupValues[2] }

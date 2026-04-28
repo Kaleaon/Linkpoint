@@ -52,6 +52,7 @@ object Routes {
     const val SETTINGS = "settings"
     const val MAP = "map"
     const val MINIMAP = "minimap"
+    const val RADAR = "radar"
     const val SEARCH = "search"
     const val TELEPORT_HISTORY = "teleport_history"
     const val NEARBY_PEOPLE = "nearby_people"
@@ -171,6 +172,7 @@ val routeMetadata: Map<String, RouteMetadata> = mapOf(
     Routes.SETTINGS to RouteMetadata(MenuPlacement.DRAWER, "Settings", legacyActivity = SettingsActivity::class),
     Routes.MAP to RouteMetadata(MenuPlacement.DRAWER, "Map", legacyActivity = MapActivity::class),
     Routes.MINIMAP to RouteMetadata(MenuPlacement.OVERFLOW, "Minimap", legacyActivity = MinimapActivity::class),
+    Routes.RADAR to RouteMetadata(MenuPlacement.OVERFLOW, "Radar", legacyActivity = com.linkpoint.ui.radar.RadarActivity::class),
     Routes.SEARCH to RouteMetadata(MenuPlacement.DRAWER, "Search", legacyActivity = SearchActivity::class),
     Routes.TELEPORT_HISTORY to RouteMetadata(MenuPlacement.OVERFLOW, "Teleport history", legacyActivity = TeleportHistoryActivity::class),
     Routes.NEARBY_PEOPLE to RouteMetadata(MenuPlacement.OVERFLOW, "Nearby", legacyActivity = NearbyPeopleActivity::class),

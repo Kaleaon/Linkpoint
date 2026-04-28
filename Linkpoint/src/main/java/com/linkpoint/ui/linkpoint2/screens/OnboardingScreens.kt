@@ -428,8 +428,10 @@ private fun PermissionRow(
             Spacer(Modifier.width(8.dp))
             Column(horizontalAlignment = Alignment.End) {
                 L2TonalButton(text = "Allow", onClick = onAllow)
-                Spacer(Modifier.height(4.dp))
-                L2GhostButton(text = if (p.required) "—" else "Skip", onClick = onSkip, enabled = !p.required)
+                if (!p.required) {
+                    Spacer(Modifier.height(4.dp))
+                    L2GhostButton(text = "Skip", onClick = onSkip)
+                }
             }
         }
     }

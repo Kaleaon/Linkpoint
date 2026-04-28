@@ -3,7 +3,6 @@ package com.linkpoint.ui.components.linkpoint2.primitives
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -76,13 +75,12 @@ fun L2Avatar(
     }
     val total = size.dp
 
-    BoxWithConstraints(
+    Box(
         modifier = modifier
             .size(total)
             .clip(shape)
             .background(bgBrush),
     ) {
-        val px = with(androidx.compose.ui.platform.LocalDensity.current) { total.toPx() }
         // Head — circle ~38% of avatar, sitting around 22% from the top
         Box(
             modifier = Modifier

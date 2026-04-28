@@ -20,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Message
+import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Group
@@ -28,7 +29,6 @@ import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Public
-import androidx.compose.material.icons.filled.VolumeOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -141,10 +141,11 @@ fun ProfileScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(96.dp)
+                        .size(104.dp)
                         .clip(CircleShape)
                         .background(cs.surface)
                         .padding(4.dp),
+                    contentAlignment = Alignment.Center,
                 ) {
                     L2Avatar(
                         name = profile.displayName,
@@ -198,7 +199,7 @@ fun ProfileScreen(
                         }
                     }
                     L2GhostButton(onClick = { /* mute */ }) {
-                        Icon(Icons.Default.VolumeOff, contentDescription = "Mute")
+                        Icon(Icons.AutoMirrored.Filled.VolumeOff, contentDescription = "Mute")
                     }
                 }
             }
