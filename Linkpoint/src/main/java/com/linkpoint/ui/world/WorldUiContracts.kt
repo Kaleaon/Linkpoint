@@ -8,7 +8,7 @@ import com.linkpoint.LinkpointApp
  * The interface intentionally mirrors existing manager/service backed values so
  * callers can adapt whatever backing implementation they currently use.
  */
-interface WorldUiState {
+interface WorldComposeUiState {
     val regionName: String
     val avatarName: String
     val isHudVisible: Boolean
@@ -22,7 +22,7 @@ interface WorldUiState {
 /**
  * Compose-facing world UI actions.
  */
-interface WorldUiActions {
+interface WorldComposeUiActions {
     fun openChat()
     fun openActionStack()
     fun openMinimap()
@@ -34,14 +34,14 @@ interface WorldUiActions {
 /**
  * Adapter backed by existing app/service managers.
  */
-class ManagerBackedWorldUiState(
+class ManagerBackedWorldComposeUiState(
     private val app: LinkpointApp,
     override val isHudVisible: Boolean = true,
     override val isFlying: Boolean = false,
     override val chatPreviewText: String? = null,
     override val toastMessage: String? = null,
     override val activeModalTag: String? = null
-) : WorldUiState {
+) : WorldComposeUiState {
     override val regionName: String
         get() = app.sessionManager.currentRegion.value?.name ?: "Unknown Region"
 
@@ -52,14 +52,14 @@ class ManagerBackedWorldUiState(
         get() = app.isMinimapManagerInitialized()
 }
 
-class ManagerBackedWorldUiActions(
+class ManagerBackedWorldComposeUiActions(
     private val onOpenChat: () -> Unit,
     private val onOpenActionStack: () -> Unit,
     private val onOpenMinimap: () -> Unit,
     private val onToggleFly: () -> Unit,
     private val onDismissToast: () -> Unit = {},
     private val onDismissModal: () -> Unit = {}
-) : WorldUiActions {
+) : WorldComposeUiActions {
     override fun openChat() = onOpenChat()
     override fun openActionStack() = onOpenActionStack()
     override fun openMinimap() = onOpenMinimap()

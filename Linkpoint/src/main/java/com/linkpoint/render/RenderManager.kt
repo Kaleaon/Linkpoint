@@ -975,7 +975,9 @@ class RenderManager(private val context: Context) {
      * Must run on the render thread.
      */
     fun flushPendingRenderUpdates() {
-        requireRenderThread("flushPendingRenderUpdates")
+        check(dispatcher.isRenderThread()) {
+            "flushPendingRenderUpdates must run on the render thread"
+        }
         applyRenderUpdates()
     }
     

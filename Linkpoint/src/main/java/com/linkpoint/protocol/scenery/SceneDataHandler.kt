@@ -2,6 +2,7 @@ package com.linkpoint.protocol.scenery
 
 import android.util.Log
 import com.linkpoint.network.NetworkLogger
+import com.linkpoint.protocol.messages.PacketCodec
 import com.linkpoint.render.RenderQueue
 import com.linkpoint.render.RenderableUpdate
 import com.linkpoint.render.SceneGraph
@@ -198,9 +199,10 @@ class SceneDataHandler(
             val objectCount = buffer.get().toInt() and 0xFF
             
             for (i in 0 until objectCount) {
-                val objectId = readUUID(buffer)
-                val name = readVariableString(buffer)
-                val description = readVariableString(buffer)
+                val codec = PacketCodec.fromBuffer(buffer)
+                val objectId = codec.readUuid()
+                val name = codec.readVariable1String()
+                val description = codec.readVariable1String()
                 
                 // Update object properties
                 val obj = objects[objectId]
@@ -248,7 +250,7 @@ class SceneDataHandler(
     private fun parseObjectUpdate(buffer: ByteBuffer, pCode: Int): SceneObject? {
         return try {
             // Parse object ID
-            val objectId = readUUID(buffer)
+            val objectId = PacketCodec.fromBuffer(buffer).readUuid()
             
             // Parse state
             val state = buffer.get().toInt() and 0xFF
@@ -276,21 +278,6 @@ class SceneDataHandler(
                 "Failed to parse object: ${e.message}")
             null
         }
-    }
-    
-    private fun readUUID(buffer: ByteBuffer): UUID {
-        val msb = buffer.long
-        val lsb = buffer.long
-        return UUID(msb, lsb)
-    }
-    
-    private fun readVariableString(buffer: ByteBuffer): String {
-        val length = buffer.get().toInt() and 0xFF
-        if (length == 0) return ""
-        
-        val bytes = ByteArray(length)
-        buffer.get(bytes)
-        return String(bytes, Charsets.UTF_8)
     }
     
     /**

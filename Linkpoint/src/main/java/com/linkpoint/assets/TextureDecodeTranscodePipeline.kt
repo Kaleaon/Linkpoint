@@ -1,7 +1,6 @@
 package com.linkpoint.assets
 
 import android.graphics.Bitmap
-import android.util.Log
 import java.nio.ByteBuffer
 import java.util.UUID
 
@@ -14,7 +13,6 @@ import java.util.UUID
  * conventions come from one place.
  */
 object TextureDecodeTranscodePipeline {
-    private const val TAG = "TextureDecodePipeline"
 
     data class Request(
         val backend: TextureFormatPolicy.Backend,
@@ -79,44 +77,13 @@ object TextureDecodeTranscodePipeline {
 }
 
 /**
- * Lightweight Basis transcoder wrapper. Returns null when the runtime has no
- * Basis native support so callers naturally fall back to the J2K path.
+ * Basis transcoder shim. The native Basis Universal bridge has not been
+ * vendored or wired into CMake, so callers naturally fall back to the J2K
+ * pipeline. To enable real transcoding, vendor basis_universal, restore the
+ * basis_transcoder_jni.cpp / openjpeg_basis_integration.cpp sources, list
+ * them in src/main/cpp/CMakeLists.txt, and reintroduce the JNI bindings.
  */
 internal object BasisTranscoder {
-    private const val TAG = "BasisTranscoder"
-    @Volatile private var probed = false
-    @Volatile private var available = false
-
-    private fun isAvailable(): Boolean {
-        if (probed) return available
-        synchronized(this) {
-            if (probed) return available
-            available = try {
-                System.loadLibrary("linkpoint-j2k")
-                nativeHasBasisTranscoder()
-            } catch (_: Throwable) {
-                false
-            }
-            probed = true
-            if (!available) Log.i(TAG, "Basis transcoder not available; using J2K pipeline")
-            return available
-        }
-    }
-
-    fun tryReadDimensions(ktx2Data: ByteArray): Pair<Int, Int>? {
-        if (!isAvailable()) return null
-        val dims = nativeReadDimensionsRaw(ktx2Data) ?: return null
-        if (dims.size < 2) return null
-        if (dims[0] <= 0 || dims[1] <= 0) return null
-        return dims[0] to dims[1]
-    }
-
-    fun tryTranscodeToRgba32(ktx2Data: ByteArray): ByteArray? {
-        if (!isAvailable()) return null
-        return nativeTranscodeRgba32(ktx2Data)
-    }
-
-    private external fun nativeHasBasisTranscoder(): Boolean
-    private external fun nativeReadDimensionsRaw(ktx2Data: ByteArray): IntArray?
-    private external fun nativeTranscodeRgba32(ktx2Data: ByteArray): ByteArray?
+    fun tryReadDimensions(ktx2Data: ByteArray): Pair<Int, Int>? = null
+    fun tryTranscodeToRgba32(ktx2Data: ByteArray): ByteArray? = null
 }

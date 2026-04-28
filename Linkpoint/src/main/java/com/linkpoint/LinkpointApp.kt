@@ -53,6 +53,7 @@ import com.linkpoint.protocol.transfer.XferManager
 import com.linkpoint.render.DrawDistanceManager
 import com.linkpoint.render.HoverTextManager
 import com.linkpoint.render.RenderManager
+import com.linkpoint.render.RenderableUpdate
 import com.linkpoint.render.particles.ParticleSystem
 import com.linkpoint.render.scene.commands.FilamentRenderCommandConsumer
 import com.linkpoint.render.scene.commands.Gles3RenderCommandConsumer
@@ -64,6 +65,7 @@ import com.linkpoint.service.BackgroundResumeScheduler
 import com.linkpoint.service.IdleHandler
 import com.linkpoint.service.LinkpointConnectionService
 import com.linkpoint.users.DisplayNameManager
+import com.linkpoint.users.DisplayNameFormattingPolicyHolder
 import com.linkpoint.chat.MuteManager
 import com.linkpoint.users.UserProfileManager
 import com.linkpoint.voice.VoiceManager
@@ -607,6 +609,7 @@ class LinkpointApp : Application() {
     // Display names (NEW)
     lateinit var displayNameManager: DisplayNameManager
         private set
+    val displayNameFormattingPolicy = DisplayNameFormattingPolicyHolder()
     
     // Mute list (NEW)
     lateinit var muteManager: MuteManager
@@ -870,7 +873,7 @@ class LinkpointApp : Application() {
                         }
                     }
                 }
-                renderManager.engine?.renderableManager?.let { rm ->
+                renderManager.getEngine()?.renderableManager?.let { rm ->
                     val inst = rm.getInstance(entity)
                     if (inst != 0) rm.destroy(entity)
                 }
@@ -1575,7 +1578,7 @@ class LinkpointApp : Application() {
                                         update.localId, meshData,
                                         textureEntrySnapshot, binder, bomResolver
                                     )
-                                )
+                                })
                             }
                         }
                         renderManager.enqueueUpdate(RenderableUpdate.PrimUpdate(update))
@@ -5885,7 +5888,12 @@ class LinkpointApp : Application() {
      * Check if HUD manager is initialized (for debug reports)
      */
     fun isHudManagerInitialized(): Boolean = ::hudManager.isInitialized
-    
+
+    /**
+     * Check if minimap manager is initialized (for debug reports)
+     */
+    fun isMinimapManagerInitialized(): Boolean = ::minimapManager.isInitialized
+
     // ==================== GENERIC MESSAGE HANDLING ====================
     
     /**

@@ -8,6 +8,8 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.tabs.TabLayout
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
+import com.linkpoint.users.DisplayName
+import com.linkpoint.users.DisplayNameOutputMode
 import com.linkpoint.world.AvatarProfile
 import com.linkpoint.world.GroupMembership
 import com.linkpoint.world.ProfilePick
@@ -128,15 +130,33 @@ class ProfileActivity : AppCompatActivity() {
     }
     
     private fun updateUI(profile: AvatarProfile) {
-        displayName.text = profile.displayName.ifEmpty { "Unknown" }
+        val app = application as LinkpointApp
+        val policy = app.displayNameFormattingPolicy.policy
+        val formattedPrimaryName = DisplayName(
+            agentId = profile.agentId,
+            username = profile.userName,
+            displayName = profile.displayName,
+            isDefault = profile.displayName.isBlank(),
+            nextUpdate = 0L
+        ).format(policy)
+        displayName.text = formattedPrimaryName.ifEmpty { "Unknown" }
         userName.text = profile.userName
         bornDate.text = "Born: ${profile.bornOn}"
         
         if (profile.partner != null) {
             partnerName.text = "Partner: (loading...)"
             lifecycleScope.launch {
-                val name = (application as LinkpointApp).profileManager.getDisplayName(profile.partner)
-                partnerName.text = "Partner: ${name ?: "(unknown)"}"
+                val rawName = app.profileManager.getDisplayName(profile.partner)
+                val formattedName = rawName?.let {
+                    DisplayName(
+                        agentId = profile.partner,
+                        username = it,
+                        displayName = null,
+                        isDefault = true,
+                        nextUpdate = 0L
+                    ).format(policy.copy(outputMode = DisplayNameOutputMode.LEGACY_FALLBACK))
+                }
+                partnerName.text = "Partner: ${formattedName ?: "(unknown)"}"
             }
         } else {
             partnerName.visibility = View.GONE
