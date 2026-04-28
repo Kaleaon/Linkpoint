@@ -16,8 +16,9 @@ object BuiltInThemes {
         author = "Linkpoint",
         version = "1.0.0",
         isBuiltIn = true,
-        colorPrimary = "#4A90D9",
-        colorPrimaryDark = "#2E6AB0",
+        // Primary darkened from #4A90D9 to satisfy WCAG AA (4.5:1) against #FFFFFF onPrimary.
+        colorPrimary = "#1976D2",
+        colorPrimaryDark = "#0D47A1",
         colorOnPrimary = "#FFFFFF",
         colorSecondary = "#00BCD4",
         colorOnSecondary = "#000000",
