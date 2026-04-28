@@ -659,7 +659,7 @@ private class SessionObserver(private val session: VoiceSession) : PeerConnectio
  * and remote ICE ingest/polling) is delegated to a dedicated layer so
  * transport + REST parsing remain separate from peer-connection state.
  */
-class VoiceSession(
+internal class VoiceSession(
     val channelUri: String,
     @Volatile private var peerConnection: PeerConnection?,
     private val dispatcher: CoroutineDispatcher,

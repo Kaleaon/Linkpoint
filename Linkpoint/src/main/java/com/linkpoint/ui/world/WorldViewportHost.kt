@@ -77,8 +77,8 @@ class WorldViewportHost @JvmOverloads constructor(
  */
 @Composable
 fun WorldViewportHost(
-    uiState: WorldUiState,
-    uiActions: WorldUiActions,
+    uiState: WorldComposeUiState,
+    uiActions: WorldComposeUiActions,
     rendererHandoffManager: RendererHandoffManager? = null,
     modifier: Modifier = Modifier,
     rendererSurface: @Composable BoxScope.() -> Unit
@@ -113,8 +113,8 @@ fun WorldViewportHost(
  */
 @Composable
 fun WorldOverlayContainer(
-    uiState: WorldUiState,
-    uiActions: WorldUiActions,
+    uiState: WorldComposeUiState,
+    uiActions: WorldComposeUiActions,
     modifier: Modifier = Modifier
 ) {
     val radarBlips = remember {

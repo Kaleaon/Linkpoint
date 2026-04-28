@@ -9,8 +9,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.linkpoint.ui.world.RendererHandoffManager
-import com.linkpoint.ui.world.WorldUiActions
-import com.linkpoint.ui.world.WorldUiState
+import com.linkpoint.ui.world.WorldComposeUiActions
+import com.linkpoint.ui.world.WorldComposeUiState
 import com.linkpoint.ui.world.WorldViewportHost
 
 /**
@@ -33,7 +33,7 @@ fun WorldScreen(
         cameraTarget = worldStateData.cameraTarget
     }
 
-    val uiState = object : WorldUiState {
+    val uiState = object : WorldComposeUiState {
         override val regionName: String = "Unknown Region"
         override val avatarName: String = "Resident"
         override val isHudVisible: Boolean = true
@@ -44,7 +44,7 @@ fun WorldScreen(
         override val activeModalTag: String? = null
     }
 
-    val uiActions = object : WorldUiActions {
+    val uiActions = object : WorldComposeUiActions {
         override fun openChat() {}
         override fun openActionStack() = onOpenInventory()
         override fun openMinimap() = onOpenMap()
