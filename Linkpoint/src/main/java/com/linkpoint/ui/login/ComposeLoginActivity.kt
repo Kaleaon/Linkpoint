@@ -1,133 +1,82 @@
 package com.linkpoint.ui.login
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.lifecycleScope
-import com.linkpoint.LinkpointApp
-import com.linkpoint.network.LoginResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.linkpoint.ui.navigation.WorldHomeHostActivity
-import com.linkpoint.ui.settings.SettingsActivity
 import com.linkpoint.ui.theme.LinkpointTheme
-import kotlinx.coroutines.launch
+import com.linkpoint.ui.tos.TosActivity
+import com.linkpoint.utils.PermissionManager
 
 /**
- * Linkpoint 2.0 Compose-first login entry point.
+ * Linkpoint 2.0 Compose-first launcher.
  *
- * Drives the same `app.protocol.login(...)` flow as [LoginActivity] but
- * renders the modern aurora + glass form via [LoginScreen]. Use this in
- * place of LoginActivity when launching from the app shell:
- * `setLauncherActivity = ComposeLoginActivity::class.java`.
+ * Replaces the legacy XML LoginActivity. Drives:
+ * - First-run Terms of Service acceptance gate
+ * - Runtime permission requests (notifications, microphone, storage, etc.)
+ * - The same `protocol.login(...)` flow via [L2LoginRoute] embedded in
+ *   the Linkpoint 2.0 nav graph at [WorldHomeHostActivity].
  */
-class ComposeLoginActivity : ComponentActivity() {
+class ComposeLoginActivity : AppCompatActivity() {
+
+    private lateinit var permissionManager: PermissionManager
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { /* results surface in PermissionManager state; no-op here */ }
+
+    private val tosLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            renderShell()
+        } else {
+            finishAffinity()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        permissionManager = PermissionManager(this).also {
+            it.registerPermissionLauncher(permissionLauncher)
+        }
+
+        if (!TosActivity.hasAcceptedTos(this)) {
+            tosLauncher.launch(TosActivity.createIntent(this, requireAcceptance = true))
+            return
+        }
+
+        renderShell()
+        requestStartupPermissions()
+    }
+
+    private fun renderShell() {
         setContent {
-            LinkpointTheme {
-                ComposeLoginRoot(
+            LinkpointTheme(darkTheme = true) {
+                L2LoginRoute(
                     onLoginSuccess = {
                         startActivity(Intent(this, WorldHomeHostActivity::class.java))
                         finish()
                     },
                     onOpenSettings = {
-                        startActivity(Intent(this, SettingsActivity::class.java))
+                        startActivity(
+                            Intent(this, com.linkpoint.ui.settings.SettingsActivity::class.java)
+                        )
                     },
-                    onPerformLogin = ::performLogin,
                 )
             }
         }
     }
 
-    private suspend fun performLogin(
-        credentials: LoginCredentials,
-        statusState: MutableState<String>,
-        loadingState: MutableState<Boolean>,
-        errorState: MutableState<Boolean>,
-    ): Boolean {
-        val app = LinkpointApp.getInstance()
-        loadingState.value = true
-        errorState.value = false
-        statusState.value = "Logging in to ${app.gridManager.getSelectedGrid().name}…"
-
-        val grid = app.gridManager.getAvailableGrids().getOrNull(credentials.selectedGridIndex)
-            ?: app.gridManager.getSelectedGrid()
-        val result = app.protocol.login(
-            firstName = credentials.firstName.trim(),
-            lastName = credentials.lastName.trim().ifBlank { "Resident" },
-            password = credentials.password,
-            loginUri = grid.loginUri,
-            startLocation = credentials.startLocation.lowercase().replace(' ', '_'),
-        )
-
-        loadingState.value = false
-        return when (result) {
-            is LoginResult.Success -> {
-                statusState.value = "Welcome to ${grid.name}"
-                true
-            }
-            is LoginResult.MFARequired -> {
-                statusState.value = "MFA required — open the app for the full prompt."
-                errorState.value = true
-                false
-            }
-            is LoginResult.Failure -> {
-                statusState.value = result.message
-                errorState.value = true
-                false
-            }
+    private fun requestStartupPermissions() {
+        val pending = PermissionManager.getAllPermissions().filter { p ->
+            ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED
+        }
+        if (pending.isNotEmpty()) {
+            permissionLauncher.launch(pending.toTypedArray())
         }
     }
-}
-
-@Composable
-private fun ComposeLoginRoot(
-    onLoginSuccess: () -> Unit,
-    onOpenSettings: () -> Unit,
-    onPerformLogin: suspend (
-        LoginCredentials,
-        MutableState<String>,
-        MutableState<Boolean>,
-        MutableState<Boolean>,
-    ) -> Boolean,
-) {
-    val app = LinkpointApp.getInstance()
-    val grids = remember {
-        app.gridManager.getAvailableGrids().map { GridDisplayInfo(it.id, it.name) }
-    }
-    val statusState = remember { mutableStateOf("") }
-    val loadingState = remember { mutableStateOf(false) }
-    val errorState = remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-    val isConnected by app.sessionManager.connectionState
-        .collectAsState(initial = app.sessionManager.connectionState.value)
-
-    LaunchedEffect(isConnected) {
-        if (app.sessionManager.isConnected()) onLoginSuccess()
-    }
-
-    LoginScreen(
-        grids = grids,
-        statusMessage = statusState.value,
-        isLoading = loadingState.value,
-        isError = errorState.value,
-        onLogin = { credentials ->
-            scope.launch {
-                if (onPerformLogin(credentials, statusState, loadingState, errorState)) {
-                    onLoginSuccess()
-                }
-            }
-        },
-        onOpenSettings = onOpenSettings,
-    )
 }
