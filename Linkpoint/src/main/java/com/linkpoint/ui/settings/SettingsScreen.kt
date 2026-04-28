@@ -34,6 +34,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import com.linkpoint.ui.components.linkpoint2.primitives.L2TopBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -98,16 +99,17 @@ fun SettingsScreen(
     
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Settings") },
-                navigationIcon = {
+            L2TopBar(
+                title = "Settings",
+                subtitle = "Account, graphics, audio, privacy",
+                leading = {
                     AccessibleIconActionButton(
                         contentDescription = "Back",
-                        onClick = onNavigateBack
+                        onClick = onNavigateBack,
                     ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
-                }
+                },
             )
         }
     ) { paddingValues ->

@@ -36,6 +36,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import com.linkpoint.ui.components.linkpoint2.primitives.L2TopBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -95,14 +96,15 @@ fun NearbyPeopleScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.nearby_people)) },
-                navigationIcon = {
+            L2TopBar(
+                title = stringResource(R.string.nearby_people),
+                subtitle = "People around you",
+                leading = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
-                actions = {
+                trailing = {
                     IconButton(onClick = onRefresh, enabled = !isLoading) {
                         if (isLoading) {
                             CircularProgressIndicator(

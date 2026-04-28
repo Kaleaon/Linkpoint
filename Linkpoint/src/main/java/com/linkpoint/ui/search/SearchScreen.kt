@@ -117,13 +117,14 @@ fun SearchScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Search") },
-                navigationIcon = {
+            com.linkpoint.ui.components.linkpoint2.primitives.L2TopBar(
+                title = "Search",
+                subtitle = "Residents · Places · Events",
+                leading = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
             )
         }
     ) { paddingValues ->

@@ -1,13 +1,16 @@
 package com.linkpoint.ui.profile
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -19,35 +22,42 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Public
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.VolumeOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.background
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.linkpoint.ui.components.linkpoint2.primitives.AvatarSize
+import com.linkpoint.ui.components.linkpoint2.primitives.L2Avatar
+import com.linkpoint.ui.components.linkpoint2.primitives.L2Card
+import com.linkpoint.ui.components.linkpoint2.primitives.L2Chip
+import com.linkpoint.ui.components.linkpoint2.primitives.L2ChipVariant
+import com.linkpoint.ui.components.linkpoint2.primitives.L2FilledButton
+import com.linkpoint.ui.components.linkpoint2.primitives.L2GhostButton
+import com.linkpoint.ui.components.linkpoint2.primitives.L2GlassSurface
+import com.linkpoint.ui.components.linkpoint2.primitives.L2TonalButton
+import com.linkpoint.ui.components.linkpoint2.primitives.L2TopBar
+import com.linkpoint.ui.components.linkpoint2.tokens.Linkpoint2
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
-/**
- * Profile data for display
- */
 data class ProfileData(
     val id: UUID,
     val displayName: String,
@@ -61,18 +71,13 @@ data class ProfileData(
     val isOnline: Boolean = false,
     val location: String? = null,
     val isFriend: Boolean = false,
-    val isOwnProfile: Boolean = false
+    val isOwnProfile: Boolean = false,
 )
 
 /**
- * Compose version of ProfileActivity.
- * 
- * Features:
- * - Avatar display
- * - About and First Life text
- * - Born date and partner
- * - Groups list
- * - IM, friend request, teleport actions
+ * Linkpoint 2.0 avatar profile — banner gradient, generative avatar,
+ * action row (IM/TP/Pay/Befriend/Mute), about/groups/picks. Matches
+ * design/screens-3.jsx → ProfileScreen.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,263 +89,219 @@ fun ProfileScreen(
     onTeleportTo: () -> Unit,
     onEditProfile: () -> Unit,
     onOpenWeb: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val dateFormat = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault())
-    
+    val tokens = Linkpoint2.tokens
+    val cs = MaterialTheme.colorScheme
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(profile.displayName) },
-                navigationIcon = {
+            L2TopBar(
+                title = profile.displayName,
+                subtitle = profile.username,
+                leading = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
-                actions = {
+                trailing = {
                     if (profile.isOwnProfile) {
                         IconButton(onClick = onEditProfile) {
-                            Icon(Icons.Default.Edit, contentDescription = "Edit Profile")
+                            Icon(Icons.Default.Edit, contentDescription = "Edit profile")
                         }
                     }
-                }
+                },
             )
-        }
-    ) { paddingValues ->
+        },
+    ) { padding ->
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(padding)
+                .verticalScroll(rememberScrollState()),
         ) {
-            // Avatar placeholder
+            // Banner
             Box(
                 modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .height(160.dp)
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(cs.primary, cs.tertiary, cs.secondary),
+                        ),
+                    ),
+            )
+            // Avatar overlapping banner
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .offset(y = (-48).dp),
+                verticalAlignment = Alignment.Bottom,
             ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null,
-                    modifier = Modifier.size(80.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Name and username
-            Text(
-                text = profile.displayName,
-                style = MaterialTheme.typography.headlineSmall
-            )
-            Text(
-                text = profile.username,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            
-            // Online status
-            if (profile.isOnline) {
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = profile.location ?: "Online",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary
+                Box(
+                    modifier = Modifier
+                        .size(96.dp)
+                        .clip(CircleShape)
+                        .background(cs.surface)
+                        .padding(4.dp),
+                ) {
+                    L2Avatar(
+                        name = profile.displayName,
+                        size = AvatarSize.XL,
+                        online = profile.isOnline,
                     )
                 }
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.padding(bottom = 12.dp)) {
+                    Text(
+                        profile.displayName,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                    Text(profile.username, color = tokens.onSurfaceDim, style = MaterialTheme.typography.bodySmall)
+                    if (profile.isOnline) {
+                        L2Chip(
+                            label = profile.location ?: "Online",
+                            variant = L2ChipVariant.Success,
+                        )
+                    }
+                }
             }
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // Action buttons
+            // Action row (offset compensated)
             if (!profile.isOwnProfile) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .offset(y = (-32).dp)
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Button(
-                        onClick = onSendIM,
-                        modifier = Modifier.weight(1f)
-                    ) {
+                    L2FilledButton(onClick = onSendIM, modifier = Modifier.weight(1f)) {
                         Icon(Icons.AutoMirrored.Filled.Message, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(Modifier.width(6.dp))
                         Text("Message")
                     }
-                    
+                    if (profile.isOnline) {
+                        L2TonalButton(onClick = onTeleportTo, modifier = Modifier.weight(1f)) {
+                            Icon(Icons.Default.LocationOn, contentDescription = null)
+                            Spacer(Modifier.width(6.dp))
+                            Text("Teleport")
+                        }
+                    }
+                    L2TonalButton(onClick = { /* pay */ }) {
+                        Icon(Icons.Default.Payments, contentDescription = "Pay")
+                    }
                     if (!profile.isFriend) {
-                        OutlinedButton(
-                            onClick = onAddFriend,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Icon(Icons.Default.PersonAdd, contentDescription = null)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Add Friend")
+                        L2GhostButton(onClick = onAddFriend) {
+                            Icon(Icons.Default.PersonAdd, contentDescription = "Befriend")
                         }
                     }
+                    L2GhostButton(onClick = { /* mute */ }) {
+                        Icon(Icons.Default.VolumeOff, contentDescription = "Mute")
+                    }
                 }
-                
-                if (profile.isOnline && profile.isFriend) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedButton(
-                        onClick = onTeleportTo,
-                        modifier = Modifier.fillMaxWidth()
+            }
+            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                if (profile.aboutText.isNotBlank()) {
+                    L2GlassSurface(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(14.dp),
                     ) {
-                        Icon(Icons.Default.LocationOn, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Teleport To")
+                        Column {
+                            Text("About", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.height(4.dp))
+                            Text(profile.aboutText, style = MaterialTheme.typography.bodyMedium)
+                        }
                     }
+                    Spacer(Modifier.height(12.dp))
                 }
-                
-                Spacer(modifier = Modifier.height(24.dp))
-            }
-            
-            // About section
-            if (profile.aboutText.isNotBlank()) {
-                ProfileSection(
-                    title = "About",
-                    content = profile.aboutText
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-            
-            // First Life section
-            if (profile.firstLifeText.isNotBlank()) {
-                ProfileSection(
-                    title = "First Life",
-                    content = profile.firstLifeText
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-            
-            // Info card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                if (profile.firstLifeText.isNotBlank()) {
+                    L2GlassSurface(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(14.dp),
+                    ) {
+                        Column {
+                            Text("First life", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.height(4.dp))
+                            Text(profile.firstLifeText, style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+                    Spacer(Modifier.height(12.dp))
+                }
+                L2Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(16.dp),
                 ) {
-                    // Born date
-                    profile.bornDate?.let { date ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Cake,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        profile.bornDate?.let { date ->
+                            ProfileInfoRow(
+                                icon = Icons.Default.Cake,
+                                label = "Born",
+                                value = dateFormat.format(date),
                             )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Column {
-                                Text(
-                                    text = "Born",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    text = dateFormat.format(date),
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
                         }
-                    }
-                    
-                    // Partner
-                    profile.partner?.let { partner ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        profile.partner?.let { partner ->
+                            ProfileInfoRow(
+                                icon = Icons.Default.Person,
+                                label = "Partner",
+                                value = partner,
                             )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Column {
-                                Text(
-                                    text = "Partner",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    text = partner,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
                         }
-                    }
-                    
-                    // Web URL
-                    profile.webUrl?.let { url ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Public,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = url,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.weight(1f)
+                        profile.webUrl?.let { url ->
+                            ProfileInfoRow(
+                                icon = Icons.Default.Public,
+                                label = "Web",
+                                value = url,
+                                onClick = { onOpenWeb(url) },
                             )
                         }
                     }
                 }
-            }
-            
-            // Groups
-            if (profile.groups.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
-                ProfileSection(
-                    title = "Groups (${profile.groups.size})",
-                    content = profile.groups.joinToString("\n")
-                )
+                if (profile.groups.isNotEmpty()) {
+                    Spacer(Modifier.height(12.dp))
+                    L2Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(16.dp),
+                    ) {
+                        Column {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Group, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                Spacer(Modifier.width(8.dp))
+                                Text("Groups (${profile.groups.size})", fontWeight = FontWeight.SemiBold)
+                            }
+                            Spacer(Modifier.height(8.dp))
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                profile.groups.forEach { g ->
+                                    Text(g, style = MaterialTheme.typography.bodyMedium)
+                                }
+                            }
+                        }
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
             }
         }
     }
 }
 
-/**
- * Profile section card
- */
 @Composable
-private fun ProfileSection(
-    title: String,
-    content: String,
-    modifier: Modifier = Modifier
+private fun ProfileInfoRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    value: String,
+    onClick: (() -> Unit)? = null,
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+    val tokens = Linkpoint2.tokens
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, contentDescription = null, tint = tokens.onSurfaceDim)
+        Spacer(Modifier.width(12.dp))
+        Column {
+            Text(label, style = MaterialTheme.typography.labelSmall, color = tokens.onSurfaceDim)
             Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = content,
-                style = MaterialTheme.typography.bodyMedium
+                value,
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (onClick != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             )
         }
     }

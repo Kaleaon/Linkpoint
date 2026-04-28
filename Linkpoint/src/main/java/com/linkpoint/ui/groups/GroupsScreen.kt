@@ -38,6 +38,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import com.linkpoint.ui.components.linkpoint2.primitives.L2TopBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -92,13 +93,14 @@ fun GroupsScreen(
     
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Groups") },
-                navigationIcon = {
+            L2TopBar(
+                title = "Groups",
+                subtitle = "Communities & roles",
+                leading = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
             )
         }
     ) { paddingValues ->

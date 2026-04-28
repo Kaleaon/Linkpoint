@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import com.linkpoint.BuildConfig
+import com.linkpoint.ui.components.linkpoint2.tokens.ProvideLinkpoint2Tokens
 
 /**
  * CompositionLocal for providing LinkpointColors throughout the app
@@ -120,9 +121,10 @@ fun LinkpointTheme(
         MaterialTheme(
             colorScheme = colorScheme,
             typography = typography,
-            shapes = shapes,
-            content = content
-        )
+            shapes = shapes
+        ) {
+            ProvideLinkpoint2Tokens(content = content)
+        }
     }
 }
 
