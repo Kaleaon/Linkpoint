@@ -58,27 +58,18 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:usesCleartextTraffic="false">
 
-        <!-- Main Login Activity -->
+        <!-- Linkpoint 2.0 Compose login entry point — primary launcher. -->
         <activity
-            android:name=".ui.login.LoginActivity"
+            android:name=".ui.login.ComposeLoginActivity"
             android:exported="true"
             android:screenOrientation="portrait"
+            android:theme="@style/Theme.Linkpoint.NoActionBar"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
-
-        <!-- Linkpoint 2.0 Compose login entry point. Drive from a deep link or
-             alternative launcher. Once stable this replaces LoginActivity. -->
-        <activity
-            android:name=".ui.login.ComposeLoginActivity"
-            android:exported="true"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.Linkpoint.NoActionBar"
-            android:windowSoftInputMode="adjustResize"/>
 
         <!-- Compose migration host entry (world/home) -->
         <activity

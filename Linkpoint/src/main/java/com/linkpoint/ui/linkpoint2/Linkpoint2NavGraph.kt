@@ -1,14 +1,10 @@
 package com.linkpoint.ui.linkpoint2
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
@@ -50,9 +46,16 @@ import com.linkpoint.ui.linkpoint2.screens.PlacesScreen
 import com.linkpoint.ui.linkpoint2.screens.PrivacySettingsScreen
 import com.linkpoint.ui.linkpoint2.screens.VoiceDeepScreen
 import com.linkpoint.ui.linkpoint2.screens.WalletScreen
+import com.linkpoint.ui.login.L2LoginRoute
 import com.linkpoint.ui.navigation.Routes
 import com.linkpoint.ui.navigation.navigateBack
 import com.linkpoint.ui.navigation.navigateTo
+import com.linkpoint.ui.slurl.L2SlurlRoute
+import com.linkpoint.ui.theme.ThemeManager
+import com.linkpoint.ui.theme.ThemePickerScreen
+import com.linkpoint.ui.tos.L2TosRoute
+import com.linkpoint.ui.world.L2WorldRoute
+import com.linkpoint.ui.xr.L2XrWorldRoute
 
 /**
  * Renders the Linkpoint 2.0 Compose screen for the given navigation route.
@@ -77,6 +80,46 @@ fun Linkpoint2RouteHost(
     val baseRoute = route.substringBeforeLast('/').takeIf { it.isNotEmpty() } ?: route
 
     when {
+        route == Routes.LOGIN -> L2LoginRoute(
+            onLoginSuccess = {
+                navController.navigate(Routes.WORLD) {
+                    popUpTo(Routes.LOGIN) { inclusive = true }
+                    launchSingleTop = true
+                }
+            },
+            onOpenSettings = { navController.navigateTo(Routes.SETTINGS) },
+            modifier = modifier,
+        )
+        route == Routes.WORLD -> L2WorldRoute(
+            onOpenChat = { navController.navigateTo(Routes.CHAT) },
+            onOpenMinimap = { navController.navigateTo(Routes.MINIMAP) },
+            onOpenInventory = { navController.navigateTo(Routes.INVENTORY) },
+            onOpenMap = { navController.navigateTo(Routes.MAP) },
+            modifier = modifier,
+        )
+        route == Routes.XR_WORLD -> L2XrWorldRoute(
+            onBack = back,
+            modifier = modifier,
+        )
+        route == Routes.TOS -> L2TosRoute(
+            onAccepted = { navController.navigateTo(Routes.LOGIN) },
+            onDeclined = back,
+            modifier = modifier,
+        )
+        route == Routes.THEME_PICKER -> {
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val themeManager = remember(context) { ThemeManager.getInstance(context) }
+            ThemePickerScreen(
+                themeManager = themeManager,
+                onNavigateBack = back,
+            )
+        }
+        route.startsWith("slurl/") -> L2SlurlRoute(
+            slurl = entry.arguments?.getString("slurl").orEmpty(),
+            onDismiss = back,
+            onLogin = { navController.navigateTo(Routes.LOGIN) },
+            modifier = modifier,
+        )
         route == Routes.ONBOARDING_WELCOME -> OnboardingWelcomeScreen(
             onBegin = { navController.navigateTo(Routes.ONBOARDING_AVATAR) },
             onIHaveAnAccount = { navController.navigateTo(Routes.LOGIN) },
@@ -382,15 +425,7 @@ fun Linkpoint2RouteHost(
                 modifier = modifier,
             )
         }
-        else -> {
-            Box(
-                modifier = modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text("L2 route not yet wired: $route")
-            }
-            return false
-        }
+        else -> return false
     }
     return true
 }

@@ -10,7 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.network.TeleportResult
-import com.linkpoint.ui.login.LoginActivity
+import com.linkpoint.ui.login.ComposeLoginActivity
 import kotlinx.coroutines.launch
 
 /**
@@ -112,7 +112,7 @@ class SLURLActivity : AppCompatActivity() {
     private fun performTeleport(slurl: SLURLData) {
         if (!app.isConnected()) {
             // Not logged in - go to login first
-            val loginIntent = Intent(this, LoginActivity::class.java).apply {
+            val loginIntent = Intent(this, ComposeLoginActivity::class.java).apply {
                 putExtra("slurl_region", slurl.regionName)
                 putExtra("slurl_x", slurl.x)
                 putExtra("slurl_y", slurl.y)
