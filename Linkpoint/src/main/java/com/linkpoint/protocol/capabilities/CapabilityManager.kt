@@ -169,20 +169,30 @@ class CapabilityManager : CapabilityRequester {
      */
     @Volatile var androidContext: android.content.Context? = null
 
-    // Default HTTP client for general requests
+    // Default HTTP client for general requests.
+    //
+    // We explicitly request `[HTTP_2, HTTP_1_1]` even though that's OkHttp's
+    // documented default, because (a) future OkHttp version bumps could
+    // change the default and (b) being explicit lets the build flag a
+    // problem if HTTP_2 is ever removed from `okhttp3.Protocol`. ALPN
+    // negotiation happens at the TLS layer; on Android 10+ the platform
+    // SSL engine handles this directly. Conscrypt (installed as the
+    // primary JCA provider in `LinkpointApp.onCreate`) is the fallback
+    // for older devices where the platform ALPN is unreliable.
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(45, TimeUnit.SECONDS)
         .readTimeout(90, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
         .retryOnConnectionFailure(true)
+        .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
         .build()
-    
+
     // Optimized client for inventory requests
     private val inventoryClient = createClientForOptions(HttpRequestOptions.forInventory())
-    
+
     // Optimized client for event queue (long polling)
     private val eventQueueClient = createClientForOptions(HttpRequestOptions.forEventQueue())
-    
+
     /**
      * Create an HTTP client with specific options.
      */
@@ -190,13 +200,16 @@ class CapabilityManager : CapabilityRequester {
         return OkHttpClient.Builder()
             .connectTimeout(options.timeoutSeconds, TimeUnit.SECONDS)
             .readTimeout(
-                if (options.transferTimeoutSeconds > 0) options.transferTimeoutSeconds 
-                else options.timeoutSeconds * 2, 
+                if (options.transferTimeoutSeconds > 0) options.transferTimeoutSeconds
+                else options.timeoutSeconds * 2,
                 TimeUnit.SECONDS
             )
             .writeTimeout(options.timeoutSeconds, TimeUnit.SECONDS)
             .retryOnConnectionFailure(true)
             .followRedirects(options.followRedirects)
+            // Same explicit-protocols rationale as `httpClient` above —
+            // every cap client should attempt H2 ALPN.
+            .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
             .build()
     }
     
@@ -519,9 +532,21 @@ class CapabilityManager : CapabilityRequester {
             val startTime = System.currentTimeMillis()
             val response = httpClient.newCall(request).execute()
             val elapsed = System.currentTimeMillis() - startTime
-            
-            Log.d(TAG, "Seed capability response: HTTP ${response.code} in ${elapsed}ms")
-            
+            val negotiatedProtocol = response.protocol.toString()
+
+            Log.d(TAG, "Seed capability response: HTTP ${response.code} (${negotiatedProtocol}) in ${elapsed}ms")
+            // Feed the protocol stat tracker so the Settings → Debug Report
+            // "HTTP/2 Requests" counter actually reflects capability traffic.
+            // Previously this was 0/0 because nothing called the tracker for
+            // cap requests, making the report look like H2 was broken even
+            // when it wasn't.
+            com.linkpoint.network.NetworkLogger.logCapabilityResponse(
+                capName = "SeedCapability",
+                success = response.isSuccessful,
+                durationMs = elapsed,
+                protocol = negotiatedProtocol
+            )
+
             if (!response.isSuccessful) {
                 Log.e(TAG, "Seed capability request failed with HTTP ${response.code}: ${response.message}")
                 lastInitializationError = "HTTP ${response.code}: ${response.message}"
@@ -687,6 +712,7 @@ class CapabilityManager : CapabilityRequester {
                 if (ctx != null) {
                     val cronet = com.linkpoint.network.CronetHttpClient.getOrCreate(ctx)
                     if (cronet.isAvailable) {
+                        val cronetStart = System.currentTimeMillis()
                         val cronetResult = if (xmlBody != null) {
                             cronet.post(url, xmlBody, "application/llsd+xml", timeoutMs = options.timeoutSeconds * 1000L)
                         } else {
@@ -694,6 +720,12 @@ class CapabilityManager : CapabilityRequester {
                         }
                         if (cronetResult is com.linkpoint.network.CronetResult.Success && cronetResult.code in 200..299) {
                             Log.d(TAG, "Cap $capName via Cronet/${cronetResult.protocol} (${cronetResult.body.size} bytes)")
+                            com.linkpoint.network.NetworkLogger.logCapabilityResponse(
+                                capName = capName,
+                                success = true,
+                                durationMs = System.currentTimeMillis() - cronetStart,
+                                protocol = cronetResult.protocol
+                            )
                             return@withContext LLSDParser.parseAuto(cronetResult.body, "application/llsd+xml")
                         }
                         if (cronetResult is com.linkpoint.network.CronetResult.Success && cronetResult.code in RETRYABLE_HTTP_CODES) {
@@ -720,21 +752,35 @@ class CapabilityManager : CapabilityRequester {
                     requestBuilder.get()
                 }
 
+                val okhttpStart = System.currentTimeMillis()
                 val response = client.newCall(requestBuilder.build()).execute()
-                
+                val okhttpProto = response.protocol.toString()
+
                 // Check for retryable HTTP errors
                 if (response.code in RETRYABLE_HTTP_CODES) {
                     retryAfterSeconds = parseRetryAfterHeader(response)
-                    
+
                     if (attempt < options.retries) {
-                        Log.w(TAG, "HTTP ${response.code} for $capName, will retry")
+                        Log.w(TAG, "HTTP ${response.code} for $capName ($okhttpProto), will retry")
+                        com.linkpoint.network.NetworkLogger.logCapabilityResponse(
+                            capName = capName,
+                            success = false,
+                            durationMs = System.currentTimeMillis() - okhttpStart,
+                            protocol = okhttpProto
+                        )
                         response.close()
                         throw RetryableException("HTTP ${response.code}")
                     }
                 }
-                
+
                 val contentType = response.header("Content-Type")
                 val responseBytes = response.body?.bytes()
+                com.linkpoint.network.NetworkLogger.logCapabilityResponse(
+                    capName = capName,
+                    success = response.isSuccessful,
+                    durationMs = System.currentTimeMillis() - okhttpStart,
+                    protocol = okhttpProto
+                )
                 response.close()
                 
                 if (responseBytes == null || responseBytes.isEmpty()) {
@@ -813,16 +859,30 @@ class CapabilityManager : CapabilityRequester {
                     Log.d(TAG, "Retrying GET $capName (attempt ${attempt + 1}/${options.retries + 1}) after ${delayMs}ms")
                     delay(delayMs)
                 }
+                val getStart = System.currentTimeMillis()
                 val response = client.newCall(Request.Builder().url(url).get().build()).execute()
+                val getProto = response.protocol.toString()
                 if (response.code in RETRYABLE_HTTP_CODES) {
                     retryAfterSeconds = parseRetryAfterHeader(response)
                     if (attempt < options.retries) {
+                        com.linkpoint.network.NetworkLogger.logCapabilityResponse(
+                            capName = capName,
+                            success = false,
+                            durationMs = System.currentTimeMillis() - getStart,
+                            protocol = getProto
+                        )
                         response.close()
                         throw RetryableException("HTTP ${response.code}")
                     }
                 }
                 val contentType = response.header("Content-Type")
                 val responseBytes = response.body?.bytes()
+                com.linkpoint.network.NetworkLogger.logCapabilityResponse(
+                    capName = capName,
+                    success = response.isSuccessful,
+                    durationMs = System.currentTimeMillis() - getStart,
+                    protocol = getProto
+                )
                 response.close()
                 if (responseBytes == null || responseBytes.isEmpty()) {
                     if (attempt < options.retries) throw RetryableException("Empty body")

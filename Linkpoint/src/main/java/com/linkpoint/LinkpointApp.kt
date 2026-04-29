@@ -1048,6 +1048,26 @@ class LinkpointApp : Application() {
             attemptAutoRelogin()
         }
 
+        // Tell the UDP watchdog when the device is on cellular so it
+        // can use the longer disconnect threshold and force NAT-keepalive
+        // pings on a 20s cadence. The qualityManager's networkType flow
+        // is already kept fresh by ConnectivityManager callbacks.
+        udpConnection.setCellularProvider {
+            val type = try {
+                protocol.qualityManager.networkType.value
+            } catch (_: Exception) {
+                com.linkpoint.network.NetworkDiagnostics.NetworkType.UNKNOWN
+            }
+            when (type) {
+                com.linkpoint.network.NetworkDiagnostics.NetworkType.CELLULAR_5G,
+                com.linkpoint.network.NetworkDiagnostics.NetworkType.CELLULAR_LTE,
+                com.linkpoint.network.NetworkDiagnostics.NetworkType.CELLULAR_4G,
+                com.linkpoint.network.NetworkDiagnostics.NetworkType.CELLULAR_3G,
+                com.linkpoint.network.NetworkDiagnostics.NetworkType.CELLULAR_2G -> true
+                else -> false
+            }
+        }
+
         // Wire the foreground service's keepalive callback to the actual UDP
         // ping. Without this, LinkpointConnectionService.performKeepAlive()
         // is a no-op (its internal `connectionCallback` is never set

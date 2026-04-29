@@ -18,15 +18,19 @@ import kotlin.coroutines.resume
  * Chromium Cronet wrapper for asset traffic — primary path for textures
  * and meshes, with the existing OkHttp+Conscrypt client as fallback.
  *
- * **Why Cronet:** the QUIC (HTTP/3) connection-migration feature is the
- * single biggest win for our cellular use case. A QUIC connection's
- * identity is the *connection ID*, not the IP/port tuple, so when the
- * phone rotates between 5G ↔ LTE ↔ Wi-Fi (or the carrier-side NAT
- * rotates the public-side mapping under us — exactly what the
- * 2026-04-25 Athanasia capture caught) the connection survives without
- * a re-handshake. HTTP/2 over TCP would die. HTTP/3 also gives us
- * stream-level head-of-line blocking immunity, which is the right
- * shape for the small-files-many-of-them texture workload.
+ * **Why Cronet:** Cronet gives us a single client that speaks HTTP/2
+ * reliably (Chromium's BoringSSL handles ALPN where some Android-platform
+ * SSL stacks fail) plus HTTP/3 *if and when the server advertises it via
+ * Alt-Svc*. Today (2026-04 check) `login.agni.lindenlab.com`,
+ * `asset-cdn.glb.agni.lindenlab.com`, and the simhost capability hosts
+ * return no `alt-svc` header, so QUIC negotiation never engages and we
+ * stay on H2 over TCP. Leaving QUIC enabled is still worthwhile: when
+ * LL flips the switch (or for OpenSim grids that already serve H3),
+ * connection-migration kicks in for free — a QUIC connection is keyed by
+ * connection ID, not the IP/port tuple, so the cellular CGNAT rebinds
+ * we keep seeing in pcap captures wouldn't tear the connection down.
+ * Until then the cellular UDP-rebind problem stays a UDP-protocol
+ * problem (see `LinkpointConstants.CELLULAR_KEEPALIVE_INTERVAL_MS`).
  *
  * **Default-on with graceful fallback:** [isAvailable] reflects whether
  * the engine actually built. If Cronet's native lib is missing, blocked
@@ -197,7 +201,12 @@ class CronetHttpClient private constructor(
                             addQuicHint("asset-cdn.glb.aditi.lindenlab.com", 443, 443)
                         }
                         .build()
-                        .also { Log.i(TAG, "✓ Cronet engine ready (HTTP/3 + HTTP/2 + Brotli)") }
+                        .also {
+                            // H3 is *enabled* but only used when the server returns
+                            // Alt-Svc; agni hosts do not as of 2026-04. Don't claim
+                            // otherwise in the log.
+                            Log.i(TAG, "✓ Cronet engine ready (HTTP/2 + Brotli; HTTP/3 enabled, awaits server Alt-Svc)")
+                        }
                 } catch (e: Throwable) {
                     Log.e(TAG, "Cronet engine init failed — falling back to OkHttp permanently: ${e.message}", e)
                     null
