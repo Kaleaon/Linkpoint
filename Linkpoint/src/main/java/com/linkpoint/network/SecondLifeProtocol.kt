@@ -565,17 +565,36 @@ class SecondLifeProtocol(private val context: Context) {
                             // Use ProfileManager's batch display name lookup (which uses capabilities)
                             // Using app.applicationScope for proper lifecycle management
                             app.applicationScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                                // Bulk UDP UUIDNameRequest fallbacks must wait
+                                // until AgentMovementComplete — otherwise we
+                                // ship 15 × ~971-byte reliable packets at the
+                                // simulator while UseCircuitCode hasn't even
+                                // been ACKed (2026-04-29 Athanasia capture).
+                                // Helper closes over `friendIds` and the app.
+                                suspend fun sendBulkUUIDNameRequest(label: String, ids: List<UUID>) {
+                                    if (ids.isEmpty()) return
+                                    val inWorld = withTimeoutOrNull(120_000L) {
+                                        app.isAgentInWorld.filter { it }.first()
+                                    } ?: false
+                                    if (!inWorld) {
+                                        Log.w(TAG, "[LOGIN DATA] Skipping $label UUIDNameRequest — agent never reached AgentMovementComplete in 120s")
+                                        return
+                                    }
+                                    try {
+                                        Log.i(TAG, "[LOGIN DATA] Sending $label UUIDNameRequest for ${ids.size} ids (agent in-world)")
+                                        app.udpConnection.sendUUIDNameRequest(ids)
+                                    } catch (e: Exception) {
+                                        Log.w(TAG, "[LOGIN DATA] $label UUIDNameRequest fallback failed: ${e.message}")
+                                    }
+                                }
+
                                 try {
                                     val ready = withTimeoutOrNull(10000L) {
                                         app.capabilityManager.isReady.filter { it }.first()
                                     } ?: false
                                     if (!ready) {
-                                        Log.w(TAG, "[LOGIN DATA] Capabilities not ready in 10s; using UDP UUIDNameRequest for ${friendIds.size} friends")
-                                        try {
-                                            app.udpConnection.sendUUIDNameRequest(friendIds)
-                                        } catch (e: Exception) {
-                                            Log.w(TAG, "[LOGIN DATA] UUIDNameRequest fallback failed: ${e.message}")
-                                        }
+                                        Log.w(TAG, "[LOGIN DATA] Capabilities not ready in 10s; deferring UDP UUIDNameRequest for ${friendIds.size} friends until in-world")
+                                        sendBulkUUIDNameRequest("caps-timeout", friendIds)
                                         return@launch
                                     }
 
@@ -593,22 +612,14 @@ class SecondLifeProtocol(private val context: Context) {
                                     // works even when the HTTP cap pipeline is broken.
                                     val unresolved = friendIds - displayNames.keys
                                     if (unresolved.isNotEmpty()) {
-                                        Log.i(TAG, "[LOGIN DATA] Falling back to UUIDNameRequest for ${unresolved.size} unresolved friends")
-                                        try {
-                                            app.udpConnection.sendUUIDNameRequest(unresolved.toList())
-                                        } catch (e: Exception) {
-                                            Log.w(TAG, "[LOGIN DATA] UUIDNameRequest fallback failed: ${e.message}")
-                                        }
+                                        Log.i(TAG, "[LOGIN DATA] Will fall back to UUIDNameRequest for ${unresolved.size} unresolved friends once in-world")
+                                        sendBulkUUIDNameRequest("cap-unresolved", unresolved.toList())
                                     }
                                 } catch (e: Exception) {
                                     Log.w(TAG, "[LOGIN DATA] Failed to resolve some display names: ${e.message}")
                                     // If the whole HTTP batch threw, still try the UDP
                                     // fallback so the friends list isn't all placeholders.
-                                    try {
-                                        app.udpConnection.sendUUIDNameRequest(friendIds)
-                                    } catch (udpErr: Exception) {
-                                        Log.w(TAG, "[LOGIN DATA] UUIDNameRequest fallback also failed: ${udpErr.message}")
-                                    }
+                                    sendBulkUUIDNameRequest("cap-error", friendIds)
                                 }
                             }
                         } catch (e: Exception) {
