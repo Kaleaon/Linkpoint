@@ -78,6 +78,18 @@ class CapabilityManager : CapabilityRequester {
         const val CAP_OBJECT_MEDIA_NAVIGATE = "ObjectMediaNavigate"
         const val CAP_PARCEL_VOICE = "ParcelVoiceInfoRequest"
         const val CAP_PROVISION_VOICE = "ProvisionVoiceAccountRequest"
+
+        /**
+         * VoiceSignalingRequest — paired with [CAP_PROVISION_VOICE] for the
+         * new WebRTC spatial voice path. Used solely for trickling ICE
+         * candidates after the SDP answer has been received. POST takes
+         * an LLSD body; see [com.linkpoint.voice.WebRtcVoiceSession] for
+         * payload shapes. Per the LL "WebRTC on Second Life, a
+         * Developer's View" document the cap is region-scoped (the
+         * simulator forwards the candidates to its bundled
+         * Second Life Voice Server).
+         */
+        const val CAP_VOICE_SIGNALING_REQUEST = "VoiceSignalingRequest"
         const val CAP_CHAT_PASS = "ChatSessionRequest"
         const val CAP_COPY_INVENTORY_FROM_NOTECARD = "CopyInventoryFromNotecard"
         const val CAP_UPDATE_NOTECARD_AGENT = "UpdateNotecardAgentInventory"
@@ -335,6 +347,7 @@ class CapabilityManager : CapabilityRequester {
                 CAP_OBJECT_MEDIA,
                 CAP_PARCEL_VOICE,
                 CAP_PROVISION_VOICE,
+                CAP_VOICE_SIGNALING_REQUEST,
                 CAP_CHAT_PASS,
                 CAP_ENVIRONMENT,
                 CAP_EXT_ENVIRONMENT,
