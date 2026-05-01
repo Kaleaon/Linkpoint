@@ -423,6 +423,26 @@ class UDPConnectionFixed {
     private val outgoingQueue = java.util.concurrent.ConcurrentLinkedQueue<OutboundPacket>()
 
     /**
+     * Recent inbound sequence numbers, used to suppress double-dispatch
+     * of resent packets. Capacity matches
+     * `LinkpointConstants.TRACK_HANDLED_PACKETS = 1024` and the
+     * libremetaverse default
+     * (`Simulator.IncomingPacketIDCollection`, capacity 1024). Reads
+     * and writes happen only on the I/O thread, so no synchronisation
+     * is required — but we use the same insertion-order ring-buffer
+     * shape as libremetaverse so the eviction policy is identical
+     * (oldest sequence falls out when the buffer wraps).
+     *
+     * Without this dedup, a reliable packet whose original ACK was
+     * lost and then retransmitted with FLAG_RESENT was dispatched
+     * twice through the message-router. For idempotent updates
+     * (ObjectUpdate, terse) that's harmless; for chat / IM / money
+     * / inventory transactions the user sees the message twice.
+     */
+    private val recentInboundSequences =
+        InboundSequenceArchive(LinkpointConstants.TRACK_HANDLED_PACKETS)
+
+    /**
      * Track callbacks for reliable messages by sequence number.
      * This allows callers to receive notifications when their messages are acknowledged.
      * Critical for implementing circuit establishment state machine.
@@ -1211,7 +1231,10 @@ class UDPConnectionFixed {
                                     handlerFound = messageHandlers.containsKey(messageId)
                                 )
 
-                                // Queue ACK for reliable packets
+                                // Queue ACK for reliable packets — even duplicates.
+                                // The sender retransmits BECAUSE its ACK was lost; if
+                                // we suppress the ACK on duplicates we leave the
+                                // sender's NeedAck queue spinning until MAX_RESEND.
                                 if (packetFlags.reliable && seqNum >= 0) {
                                     pendingAcksToSend.offer(seqNum)
                                     NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
@@ -1227,10 +1250,30 @@ class UDPConnectionFixed {
                                 // and indexed into the zero-decoded buffer (wrong offset
                                 // for zero-coded packets), silently discarding most ACKs.
 
-                                // SYNCHRONOUS message dispatch from I/O thread.
-                                // This follows Lumiya's pattern where HandleMessage() is called
-                                // directly from the circuit's receive processing, not queued.
-                                dispatchMessageDirect(messageId, data)
+                                // Drop duplicate-sequence packets BEFORE handler dispatch.
+                                // libremetaverse `Simulator.cs` does this via
+                                // `IncomingPacketIDCollection.TryEnqueue`. The ACK above
+                                // still tells the sender "we got it" so the inflight
+                                // queue clears; the dedup just prevents firing chat /
+                                // IM / money / inventory handlers a second time when a
+                                // resend slipped through. If the sequence is already in
+                                // the archive we either saw the original (FLAG_RESENT
+                                // case — expected, log at DEBUG) or got a duplicate
+                                // without the resent bit (sim-side glitch — log at WARN
+                                // so we notice).
+                                if (seqNum >= 0 && !recentInboundSequences.tryEnqueue(seqNum)) {
+                                    val level =
+                                        if (packetFlags.resent) NetworkLogger.Level.DEBUG
+                                        else NetworkLogger.Level.WARN
+                                    val tag = if (packetFlags.resent) "↻ duplicate-resend" else "⚠ duplicate-not-marked-resend"
+                                    NetworkLogger.log(level, NetworkLogger.Category.UDP,
+                                        "$tag seq=$seqNum messageId=0x${messageId.toString(16)} ($messageName) — skipping handler dispatch")
+                                } else {
+                                    // SYNCHRONOUS message dispatch from I/O thread.
+                                    // This follows Lumiya's pattern where HandleMessage() is called
+                                    // directly from the circuit's receive processing, not queued.
+                                    dispatchMessageDirect(messageId, data)
+                                }
                             }
                         }
                     }
@@ -3917,5 +3960,38 @@ class UDPConnectionFixed {
             selectorReadableKeyCount = selectorReadableKeyCount.get(),
             receiveLoopExceptions = receiveLoopExceptions.toList()
         )
+    }
+
+    /**
+     * Fixed-capacity ring buffer + hash set for inbound sequence-number
+     * deduplication. Direct port of libremetaverse's
+     * `IncomingPacketIDCollection`. Single-threaded by contract:
+     * accessed only from the I/O thread (the receive loop), so no
+     * synchronisation. When the buffer fills, the oldest sequence
+     * number is evicted from both the ring and the set in one step.
+     *
+     * `tryEnqueue` returns `true` when the sequence is NEW (caller
+     * should dispatch the packet) and `false` when it's already in
+     * the archive (caller should drop the packet).
+     */
+    private class InboundSequenceArchive(private val capacity: Int) {
+        private val items = IntArray(capacity)
+        private val seen = HashSet<Int>(capacity)
+        private var head = 0
+        private var tail = 0
+        private var size = 0
+
+        fun tryEnqueue(seq: Int): Boolean {
+            if (!seen.add(seq)) return false
+            if (size == capacity) {
+                seen.remove(items[head])
+                head = (head + 1) % capacity
+                size--
+            }
+            items[tail] = seq
+            tail = (tail + 1) % capacity
+            size++
+            return true
+        }
     }
 }
