@@ -1,0 +1,4 @@
+{
+  "name": "scalar_uri",
+  "description": "URI (LLSD distinguishes URI from String)"
+}

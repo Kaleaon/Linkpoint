@@ -1,0 +1,4 @@
+{
+  "name": "realistic_jsep_offer",
+  "description": "JSEP offer (matches WebRtcVoiceSession.exchangeOffer payload)"
+}

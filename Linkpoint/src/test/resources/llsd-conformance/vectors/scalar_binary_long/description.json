@@ -1,0 +1,4 @@
+{
+  "name": "scalar_binary_long",
+  "description": "1024-byte binary blob (covers every byte value)"
+}

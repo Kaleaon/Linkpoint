@@ -1,0 +1,4 @@
+{
+  "name": "scalar_date",
+  "description": "fixed UTC date (matches the latest debug capture timestamp)"
+}

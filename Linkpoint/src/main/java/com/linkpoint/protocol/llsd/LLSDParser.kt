@@ -62,10 +62,19 @@ object LLSDParser {
     }
 
     /**
-     * Parse LLSD Binary format
+     * Parse LLSD Binary format.
+     *
+     * Skips the optional `<?llsd/binary?>\n` magic header that
+     * `python-llsd` (and `libremetaverse.StructuredData`) emit at the
+     * top of binary streams. Without that skip, the first byte the
+     * inner parser sees is `<` (0x3C), which doesn't map to any LLSD
+     * binary marker and silently drops the entire payload as
+     * `LLSDUndefined`. The header is optional in the spec — both forms
+     * are valid wire input — so we accept both.
      */
     fun parseBinary(data: ByteArray): LLSDValue {
-        val stream = PushbackInputStream(ByteArrayInputStream(data), 1)
+        val stripped = stripBinaryMagicHeader(data)
+        val stream = PushbackInputStream(ByteArrayInputStream(stripped), 1)
         val limits = ParseLimits()
         val state = ParseLimitsState()
 
@@ -108,6 +117,31 @@ object LLSDParser {
         // header itself, not by the absolute offset).
         val consumed = data.size - backing.available()
         return value to consumed
+    }
+
+    /**
+     * Optional `<?llsd/binary?>\n` magic header that `python-llsd` and
+     * `libremetaverse.StructuredData` prepend to standalone binary
+     * payloads. The spec considers it advisory and either form is valid
+     * over the wire. Strip it if present; otherwise return the input
+     * unchanged.
+     *
+     * Intentionally NOT applied in [parseBinaryAndConsumed] — mesh asset
+     * headers are embedded inside larger binary files and never carry
+     * this magic, and the caller's byte-offset accounting depends on
+     * the input being read from byte 0 of the LLSD body.
+     */
+    private fun stripBinaryMagicHeader(data: ByteArray): ByteArray {
+        val magic = "<?llsd/binary?>".toByteArray(Charsets.US_ASCII)
+        if (data.size < magic.size + 1) return data
+        for (i in magic.indices) {
+            if (data[i] != magic[i]) return data
+        }
+        // Tolerate either `\n` (unix) or `\r\n` (line-folded) terminator.
+        var idx = magic.size
+        if (idx < data.size && data[idx] == '\r'.code.toByte()) idx++
+        if (idx < data.size && data[idx] == '\n'.code.toByte()) idx++ else return data
+        return data.copyOfRange(idx, data.size)
     }
 
     private fun parseBinaryValue(

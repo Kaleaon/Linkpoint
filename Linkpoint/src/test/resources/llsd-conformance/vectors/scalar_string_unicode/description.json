@@ -1,0 +1,4 @@
+{
+  "name": "scalar_string_unicode",
+  "description": "non-ASCII + 4-byte BMP-supplementary char"
+}
