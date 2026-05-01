@@ -168,6 +168,14 @@ class UDPConnectionFixed {
         /** Unanswered pings before disconnect from the reference viewer (3) */
         private val UNANSWERED_PINGS_DISCONNECT = LinkpointConstants.UNANSWERED_PINGS_DISCONNECT
 
+        /** Cellular-tolerant unanswered-ping threshold (12). See constant. */
+        private val CELLULAR_UNANSWERED_PINGS_DISCONNECT =
+            LinkpointConstants.CELLULAR_UNANSWERED_PINGS_DISCONNECT
+
+        /** Cellular NAT-keepalive interval (20s). See constant. */
+        private val CELLULAR_KEEPALIVE_INTERVAL_MS =
+            LinkpointConstants.CELLULAR_KEEPALIVE_INTERVAL_MS
+
         /**
          * Suppress identical RequestMultipleObjects bursts caused by duplicate
          * ObjectUpdateCached notifications arriving in the same render tick.
@@ -535,6 +543,29 @@ class UDPConnectionFixed {
      */
     fun setReconnectionCallback(callback: () -> Unit) {
         reconnectionCallback = callback
+    }
+
+    /**
+     * Provider that tells the watchdog whether the device is currently on
+     * cellular. When true, the unanswered-ping disconnect threshold and
+     * the keepalive cadence shift to cellular-tolerant values
+     * ([CELLULAR_UNANSWERED_PINGS_DISCONNECT],
+     * [CELLULAR_KEEPALIVE_INTERVAL_MS]).
+     *
+     * Wired up by `LinkpointApp` against `qualityManager.networkType`.
+     * Polled (not observed) so the watchdog stays lock-free; the value
+     * changes infrequently (network-type transition) so the cost is fine.
+     */
+    @Volatile private var isCellularProvider: (() -> Boolean)? = null
+
+    fun setCellularProvider(provider: () -> Boolean) {
+        isCellularProvider = provider
+    }
+
+    private fun isCellular(): Boolean = try {
+        isCellularProvider?.invoke() == true
+    } catch (_: Exception) {
+        false
     }
 
     /**
@@ -1521,12 +1552,22 @@ class UDPConnectionFixed {
      * threshold is immediately hit in the same call, giving the server zero time to respond.
      */
     private fun checkPingHealth() {
-        // Check for connection death FIRST, based on pings already sent
-        if (unansweredPings.get() >= UNANSWERED_PINGS_DISCONNECT) {
+        // Check for connection death FIRST, based on pings already sent.
+        // On cellular use the more tolerant threshold — single missed
+        // ping bursts are common on CGNAT (NAT remap, RAT switch, signal
+        // dip) and tearing the circuit down forces a fresh ephemeral
+        // source port, which is the very thing breaking the simulator's
+        // return path. See [CELLULAR_UNANSWERED_PINGS_DISCONNECT].
+        val disconnectThreshold = if (isCellular()) {
+            CELLULAR_UNANSWERED_PINGS_DISCONNECT
+        } else {
+            UNANSWERED_PINGS_DISCONNECT
+        }
+        if (unansweredPings.get() >= disconnectThreshold) {
             NetworkLogger.log(
                 NetworkLogger.Level.WARN,
                 NetworkLogger.Category.UDP,
-                "No response from server (${unansweredPings.get()} unanswered pings) — circuit is dead, escalating to full re-login"
+                "No response from server (${unansweredPings.get()}/${disconnectThreshold} unanswered pings, cellular=${isCellular()}) — circuit is dead, escalating to full re-login"
             )
             // Escalate directly to the higher-level reconnection callback
             // (auto re-login). Previously we tried socket-rebind first, but
@@ -1561,13 +1602,27 @@ class UDPConnectionFixed {
             return
         }
 
-        // Then check if we need to send a new ping
+        // Then check if we need to send a new ping.
+        // The default rule fires a ping only when inbound has been quiet
+        // (timeSinceReceive > NEED_PING_TIMEOUT_MS). On cellular that's
+        // not enough — we also need to *refresh the NAT pinhole* on a
+        // strict cadence regardless of inbound activity, because the
+        // carrier NAT will evict the inbound mapping after ~60s of
+        // unidirectional traffic even though we're sending plenty
+        // outbound. So on cellular, also fire a keepalive whenever
+        // [CELLULAR_KEEPALIVE_INTERVAL_MS] has elapsed since the last
+        // ping, regardless of receive timing.
         val now = System.currentTimeMillis()
         val timeSinceReceive = now - lastReceiveTime
         val timeSincePing = now - lastPingTime.get()
 
-        if (timeSinceReceive > NEED_PING_TIMEOUT_MS &&
-            timeSincePing > LinkpointConstants.PING_INTERVAL_MS) {
+        val needPingForReceiveSilence =
+            timeSinceReceive > NEED_PING_TIMEOUT_MS &&
+                timeSincePing > LinkpointConstants.PING_INTERVAL_MS
+        val needPingForCellularKeepalive =
+            isCellular() && timeSincePing > CELLULAR_KEEPALIVE_INTERVAL_MS
+
+        if (needPingForReceiveSilence || needPingForCellularKeepalive) {
             sendStartPingCheck()
         }
     }
@@ -1618,8 +1673,15 @@ class UDPConnectionFixed {
         // packet through the freshly-allocated NAT mapping).
         if (now - lastSocketRebindTime < SOCKET_REBIND_COOLDOWN_MS) return
 
+        // Cellular CGNs typically hold UDP mappings 60-90s (RFC 6888 mandates
+        // 120s, IMC 2016 measured median 65s). Rebinding the socket at 45s
+        // breaks the mapping the simulator just learned and resets the
+        // ephemeral source port — which is exactly the thrash pattern the
+        // 2026-04-29 Athanasia pcap showed (15 source-port changes in 13
+        // minutes). Use 90s on cellular so transient stalls clear naturally.
+        val stallThresholdMs = if (isCellular()) 90_000L else INBOUND_DATA_STALL_MS
         val stallMs = now - lastInboundFlowGrowthTime
-        if (stallMs < INBOUND_DATA_STALL_MS) return
+        if (stallMs < stallThresholdMs) return
 
         // Require evidence we're actually sending. If `packetsSent` isn't
         // growing either, the unanswered-ping path will handle it; firing a
@@ -1629,7 +1691,7 @@ class UDPConnectionFixed {
         NetworkLogger.log(
             NetworkLogger.Level.WARN,
             NetworkLogger.Category.UDP,
-            "Inbound stalled for ${stallMs}ms (received=$received, sent=${packetsSent.get()}) - forcing socket rebind"
+            "Inbound stalled for ${stallMs}ms (received=$received, sent=${packetsSent.get()}, cellular=${isCellular()}) - forcing socket rebind"
         )
         lastSocketRebindTime = now
         emitNetworkState(NetworkStateTransition.RECONNECTING)

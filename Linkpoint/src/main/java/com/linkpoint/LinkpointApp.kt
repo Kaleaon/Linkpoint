@@ -704,6 +704,20 @@ class LinkpointApp : Application() {
     // the server won't send RegionHandshake until it receives CompleteAgentMovement.
     // Using AtomicBoolean to prevent race conditions with concurrent PacketAck messages.
     private val completeAgentMovementSent = AtomicBoolean(false)
+
+    // True once AgentMovementComplete has been received for the current
+    // circuit (the simulator confirmed the avatar is in-region). Latency-
+    // sensitive bootstrap code (UseCircuitCode, CompleteAgentMovement,
+    // RegionHandshakeReply, AgentThrottle) runs before this flag flips;
+    // anything else that hits the simulator with reliable traffic — bulk
+    // UUIDNameRequests, profile lookups, inventory warm-fetches — should
+    // wait on this. The 2026-04-29 Athanasia capture showed the viewer
+    // firing 15 × ~971-byte UUIDNameRequest packets (851 friend UUIDs)
+    // while the very first UseCircuitCode ACK hadn't even come back; that
+    // floods cellular uplinks and pollutes the reliable-resend queue
+    // during the most fragile window of the connect.
+    private val _isAgentInWorld = kotlinx.coroutines.flow.MutableStateFlow(false)
+    val isAgentInWorld: kotlinx.coroutines.flow.StateFlow<Boolean> = _isAgentInWorld
     
     override fun onCreate() {
         super.onCreate()
@@ -955,7 +969,8 @@ class LinkpointApp : Application() {
         
         // Reset connection state tracking for new session
         completeAgentMovementSent.set(false)
-        
+        _isAgentInWorld.value = false
+
         // Initialize friendsManager here since it requires agentId
         friendsManager = FriendsManager(udpConnection, capabilityManager, agentId)
         
@@ -1031,6 +1046,26 @@ class LinkpointApp : Application() {
             // Notify the keep-alive manager for any UI/cleanup it owns.
             applicationScope.launch { connectionKeepAlive.notifyConnectionIssue() }
             attemptAutoRelogin()
+        }
+
+        // Tell the UDP watchdog when the device is on cellular so it
+        // can use the longer disconnect threshold and force NAT-keepalive
+        // pings on a 20s cadence. The qualityManager's networkType flow
+        // is already kept fresh by ConnectivityManager callbacks.
+        udpConnection.setCellularProvider {
+            val type = try {
+                protocol.qualityManager.networkType.value
+            } catch (_: Exception) {
+                com.linkpoint.network.NetworkDiagnostics.NetworkType.UNKNOWN
+            }
+            when (type) {
+                com.linkpoint.network.NetworkDiagnostics.NetworkType.CELLULAR_5G,
+                com.linkpoint.network.NetworkDiagnostics.NetworkType.CELLULAR_LTE,
+                com.linkpoint.network.NetworkDiagnostics.NetworkType.CELLULAR_4G,
+                com.linkpoint.network.NetworkDiagnostics.NetworkType.CELLULAR_3G,
+                com.linkpoint.network.NetworkDiagnostics.NetworkType.CELLULAR_2G -> true
+                else -> false
+            }
         }
 
         // Wire the foreground service's keepalive callback to the actual UDP
@@ -1447,6 +1482,11 @@ class LinkpointApp : Application() {
                     }
 
                     Log.i(TAG, "✓ Connection state set to CONNECTED - agent is in world")
+
+                    // Release any bootstrap-deferred traffic (e.g. UDP
+                    // UUIDNameRequest fallback for friends whose display
+                    // names didn't resolve via cap). See [isAgentInWorld].
+                    _isAgentInWorld.value = true
                 } else {
                     com.linkpoint.utils.InitializationTracker.logWarning("AgentMovementComplete parse returned null")
                     Log.w(TAG, "AgentMovementComplete parse returned null")
@@ -5678,7 +5718,8 @@ class LinkpointApp : Application() {
         
         // Reset connection state tracking
         completeAgentMovementSent.set(false)
-        
+        _isAgentInWorld.value = false
+
         udpConnection.disconnect()
         
         xrManager.shutdown()

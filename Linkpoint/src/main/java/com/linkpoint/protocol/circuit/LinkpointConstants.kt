@@ -42,6 +42,30 @@ object LinkpointConstants {
      *  doesn't help. The 2026-04-25 Athanasia capture sat at 4 unanswered pings,
      *  one short of the 5-threshold, with no recovery — restoring 3 closes that gap. */
     const val UNANSWERED_PINGS_DISCONNECT = 3
+
+    /** Number of unanswered pings before declaring the circuit dead while on
+     *  cellular. Higher than the Wi-Fi threshold because mobile CGNs have
+     *  60-90s UDP idle timeouts (RFC 6888 mandates 120s, IMC 2016 measured
+     *  cellular median 65s) and a single ping burst lost to a transient NAT
+     *  reshuffle should NOT trigger a full re-login — the simulator's
+     *  circuit lifetime is several minutes, so soft recovery on the next
+     *  inbound packet is preferable. 12 × 5s = 60s tolerance, which sits
+     *  just below the typical NAT TTL. The 2026-04-29 Athanasia pcap
+     *  showed the local source port rebinding every ~28s (3 × 5s ping +
+     *  10s receive-timeout = ~25s, just below the NAT timeout) — that
+     *  thrashing is exactly what this constant prevents. */
+    const val CELLULAR_UNANSWERED_PINGS_DISCONNECT = 12
+
+    /** Force a UDP keepalive (StartPingCheck) every 20s on cellular even
+     *  when other traffic is flowing. The default ping path only fires when
+     *  `timeSinceReceive > NEED_PING_TIMEOUT_MS`, which means a busy
+     *  outbound flow of e.g. AgentUpdates will suppress pings entirely.
+     *  On cellular that's a problem: outbound-only traffic doesn't refresh
+     *  the inbound NAT pinhole, so the simulator's replies start landing
+     *  on a stale port. A short, regular ping forces the NAT to keep the
+     *  return path alive (RFC 6886 / industry NAT-keepalive consensus is
+     *  20-25s, well below the 60-65s carrier UDP TTL). */
+    const val CELLULAR_KEEPALIVE_INTERVAL_MS = 20_000L
     
     // ==================== HTTP CONNECTION SETTINGS (SLHTTPSConnection.java) ====================
     
