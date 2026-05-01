@@ -1,0 +1,4 @@
+{
+  "name": "scalar_int_negative",
+  "description": "integer -1 (sign extension)"
+}

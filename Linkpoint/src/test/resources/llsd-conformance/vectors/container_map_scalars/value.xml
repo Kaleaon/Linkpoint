@@ -1,0 +1,1 @@
+<?xml version="1.0" ?><llsd><map><key>a</key><integer>1</integer><key>b</key><string>two</string><key>c</key><real>3.0</real><key>d</key><boolean>true</boolean><key>e</key><undef/></map></llsd>

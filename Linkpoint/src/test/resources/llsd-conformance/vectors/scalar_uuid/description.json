@@ -1,0 +1,4 @@
+{
+  "name": "scalar_uuid",
+  "description": "fixed UUID (matches the avatar in the recent debug captures)"
+}
