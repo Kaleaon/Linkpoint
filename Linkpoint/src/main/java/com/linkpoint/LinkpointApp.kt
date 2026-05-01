@@ -904,8 +904,11 @@ class LinkpointApp : Application() {
         regionExperienceManager = RegionExperienceManager(capabilityManager)
         parcelManager = ParcelManager(udpConnection)
         
-        // Voice
-        voiceManager = VoiceManager(this, capabilityManager)
+        // Voice. simulatorFeatures already exists (initialised earlier in
+        // this method). VoiceManager.joinSpatialVoice consults
+        // `voiceServerType` to pick between Vivox and the new WebRTC
+        // path (`WebRtcVoiceSession`).
+        voiceManager = VoiceManager(this, capabilityManager, simulatorFeatures)
         
         // NEW: Environment/Windlight
         environmentManager = EnvironmentManager(capabilityManager)
