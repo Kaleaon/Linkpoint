@@ -175,16 +175,20 @@ class CapabilityManager : CapabilityRequester {
     // documented default, because (a) future OkHttp version bumps could
     // change the default and (b) being explicit lets the build flag a
     // problem if HTTP_2 is ever removed from `okhttp3.Protocol`. ALPN
-    // negotiation happens at the TLS layer; on Android 10+ the platform
-    // SSL engine handles this directly. Conscrypt (installed as the
-    // primary JCA provider in `LinkpointApp.onCreate`) is the fallback
-    // for older devices where the platform ALPN is unreliable.
+    // negotiation happens at the TLS layer; on most Android 10+ devices
+    // the platform SSL engine handles this fine — but the 2026-05-01
+    // Athanasia capture (alps OEM Phone, Android 12) showed 0/22 H2
+    // requests despite explicit `protocols([HTTP_2, HTTP_1_1])`, which
+    // means the platform's ALPN was failing silently. Forcing
+    // Conscrypt-backed BoringSSL via `applyConscryptIfAvailable` is the
+    // bulletproof fix.
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(45, TimeUnit.SECONDS)
         .readTimeout(90, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
         .retryOnConnectionFailure(true)
         .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
+        .applyConscryptIfAvailable()
         .build()
 
     // Optimized client for inventory requests
@@ -210,8 +214,10 @@ class CapabilityManager : CapabilityRequester {
             // Same explicit-protocols rationale as `httpClient` above —
             // every cap client should attempt H2 ALPN.
             .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
+            .applyConscryptIfAvailable()
             .build()
     }
+
     
     /**
      * Get the appropriate HTTP client for a capability.
@@ -1160,4 +1166,23 @@ class CapabilityManager : CapabilityRequester {
 
 fun interface EventHandler {
     fun onEvent(message: String, body: LLSDMap)
+}
+
+/**
+ * Pin the SSLSocketFactory to a Conscrypt-backed one when Conscrypt
+ * loaded successfully (see [com.linkpoint.network.TlsDiagnostics]).
+ * Inserting Conscrypt into the JCA registry isn't always enough on
+ * Android — OkHttp's `Platform` resolution may still pick the platform
+ * engine, whose ALPN can fail silently and downgrade us to HTTP/1.1
+ * (the 2026-05-01 Athanasia capture showed 0/22 H2 on an "alps OEM"
+ * Android 12 device despite explicit `protocols([HTTP_2, HTTP_1_1])`).
+ * Passing the factory explicitly bypasses that.
+ *
+ * File-level extension so we can call it inside class property
+ * initialisers without dragging in a dispatch receiver.
+ */
+private fun OkHttpClient.Builder.applyConscryptIfAvailable(): OkHttpClient.Builder {
+    val pair = com.linkpoint.network.TlsDiagnostics.buildConscryptSslSocketFactory()
+        ?: return this
+    return sslSocketFactory(pair.first, pair.second)
 }

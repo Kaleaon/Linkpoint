@@ -205,9 +205,11 @@ class CronetHttpClient private constructor(
                             // H3 is *enabled* but only used when the server returns
                             // Alt-Svc; agni hosts do not as of 2026-04. Don't claim
                             // otherwise in the log.
+                            com.linkpoint.network.TlsDiagnostics.recordCronetOk(it.versionString)
                             Log.i(TAG, "✓ Cronet engine ready (HTTP/2 + Brotli; HTTP/3 enabled, awaits server Alt-Svc)")
                         }
                 } catch (e: Throwable) {
+                    com.linkpoint.network.TlsDiagnostics.recordCronetFailure(e)
                     Log.e(TAG, "Cronet engine init failed — falling back to OkHttp permanently: ${e.message}", e)
                     null
                 }

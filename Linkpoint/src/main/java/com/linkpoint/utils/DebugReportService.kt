@@ -1414,13 +1414,23 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("  Mesh Requests: ${protocolStats.lastMeshProtocol}")
                 appendLine("  Capability Requests: ${protocolStats.lastCapabilityProtocol}")
                 
-                if (protocolStats.http2Requests == 0 && (protocolStats.textureHttp11Count > 0 || protocolStats.meshHttp11Count > 0)) {
+                if (protocolStats.http2Requests == 0 && (protocolStats.textureHttp11Count > 0 || protocolStats.meshHttp11Count > 0 || protocolStats.capabilityHttp11Count > 0)) {
                     appendLine()
                     appendLine("ℹ️ HTTP/2 NOT USED - All requests using HTTP/1.1")
                     appendLine("   HTTP/2 provides better performance for asset loading.")
                 }
             } catch (e: Exception) {
                 appendLine("HTTP/2 statistics unavailable: ${e.message}")
+            }
+            appendLine()
+            // TLS-stack health: tells us *why* HTTP/2 is or isn't working.
+            // Without this section the debug report can only say "0/22 H2"
+            // and we have to guess whether Conscrypt loaded or Cronet's
+            // engine built. See TlsDiagnostics for the recorded fields.
+            try {
+                appendLine(com.linkpoint.network.TlsDiagnostics.renderDebugSection())
+            } catch (e: Exception) {
+                appendLine("TLS diagnostics unavailable: ${e.message}")
             }
             appendLine()
             

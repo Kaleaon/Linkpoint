@@ -735,15 +735,26 @@ class LinkpointApp : Application() {
         // SSLSocketFactory.getDefault() calls and any explicitly built
         // SSL contexts.
         try {
-            java.security.Security.insertProviderAt(
-                org.conscrypt.Conscrypt.newProvider(), 1
-            )
+            val provider = org.conscrypt.Conscrypt.newProvider()
+            java.security.Security.insertProviderAt(provider, 1)
+            // Surface in the debug report so we can tell from a capture
+            // alone whether Conscrypt is the reason H2 is/isn't working.
+            // `provider.version` is the legacy double form available on
+            // every JDK; `versionStr` is Java 9+ only and would NoSuchMethod
+            // on older Android targets, so prefer the legacy field.
+            val versionLabel = try {
+                @Suppress("DEPRECATION") provider.version.toString()
+            } catch (_: Throwable) {
+                null
+            }
+            com.linkpoint.network.TlsDiagnostics.recordConscryptOk(versionLabel)
             Log.i(TAG, "Conscrypt installed as primary JCA provider — HTTP/2 ALPN should now work")
         } catch (e: Throwable) {
             // UnsatisfiedLinkError on a device without the Conscrypt
             // native library, or NoClassDefFoundError if the dep is
             // somehow stripped — fall through to platform SSL. We log
             // loudly because this silently degrades H2 → H1.1.
+            com.linkpoint.network.TlsDiagnostics.recordConscryptFailure(e)
             Log.e(TAG, "Conscrypt install failed; HTTP/2 will fall back to platform ALPN: ${e.message}", e)
         }
 
