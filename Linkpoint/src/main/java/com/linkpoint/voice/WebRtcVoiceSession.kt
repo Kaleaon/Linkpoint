@@ -189,6 +189,19 @@ class WebRtcVoiceSession(
         emit(State.NEGOTIATED)
     }
 
+    /**
+     * Reprovisioning (re-running the SDP exchange on the same
+     * PeerConnection to recover from `IceConnectionState.FAILED`)
+     * is NOT YET IMPLEMENTED here. `libremetaverse`'s WebRTC voice
+     * has an `AttemptReprovisionAsync` flow gated by a single-flight
+     * lock that fires `OnReprovisionSucceeded` / `OnReprovisionFailed`
+     * events. When a real cellular roaming scenario starts breaking
+     * voice mid-session, port that flow over: re-run [exchangeOffer]
+     * with a renegotiation offer, set the new remote description, and
+     * resume — without tearing down [peerConnection] (which would lose
+     * the SLData channel state).
+     */
+
     /** Tear down. Idempotent. Sends the LLSD `logout` to the cap. */
     fun close() {
         scope.launch {
@@ -386,27 +399,61 @@ class WebRtcVoiceSession(
      * Per LL PDF, the offer's Opus `a=fmtp:` line must be replaced with
      * the server-required attributes for stereo 48 kHz with FEC. Without
      * this the server's answer downgrades the codec.
+     *
+     * Implementation matches `cinderblocks/libremetaverse`'s
+     * `LibreMetaverse.Voice.WebRTC.VoiceSession.ProcessLocalSdp` line for
+     * line: walk the SDP, scope to the `m=audio` block, find the Opus
+     * payload-type number from the `a=rtpmap:<PT> opus/48000` line,
+     * rewrite that rtpmap to force the `/2` stereo channel count, then
+     * replace the matching `a=fmtp:<PT> ...` line with the spec
+     * attributes. fmtp lines for OTHER payload types (e.g. telephone-
+     * event/8000) are left untouched.
      */
     private fun mangleOpusFmtp(sdp: SessionDescription): SessionDescription {
         val want = "minptime=10;useinbandfec=1;stereo=1;sprop-stereo=1;maxplaybackrate=48000"
-        val out = StringBuilder(sdp.description.length + 64)
-        sdp.description.split("\r\n").forEach { line ->
-            if (line.startsWith("a=fmtp:") && line.contains("opus", ignoreCase = true).not()) {
-                // Some Opus fmtp lines use only the payload-type number (no
-                // "opus" string). Detect by cross-referencing the rtpmap
-                // elsewhere — for simplicity in this skeleton we replace
-                // any fmtp following an `m=audio` block. Refinement
-                // welcome.
-                out.append(line)
-            } else if (line.startsWith("a=fmtp:")) {
-                val pt = line.removePrefix("a=fmtp:").substringBefore(' ')
-                out.append("a=fmtp:").append(pt).append(' ').append(want)
-            } else {
-                out.append(line)
+        val rtpmapOpus = Regex("""a=rtpmap:(\d+)\s+opus""")
+        val out = ArrayList<String>(256)
+        var inAudioSection = false
+        var opusPt: String? = null
+
+        sdp.description.split("\r\n", "\n").forEach { line ->
+            when {
+                line.startsWith("m=audio") -> {
+                    inAudioSection = true
+                    out += line
+                }
+                inAudioSection && line.startsWith("m=") -> {
+                    inAudioSection = false
+                    out += line
+                }
+                inAudioSection && line.contains("opus/48000") -> {
+                    val match = rtpmapOpus.find(line)
+                    if (match != null) {
+                        opusPt = match.groupValues[1]
+                        out += "a=rtpmap:$opusPt opus/48000/2"
+                    } else {
+                        out += line
+                    }
+                }
+                inAudioSection && opusPt != null && line.startsWith("a=fmtp:$opusPt") -> {
+                    out += "a=fmtp:$opusPt $want"
+                }
+                else -> out += line
             }
-            out.append("\r\n")
         }
-        return SessionDescription(sdp.type, out.toString())
+        return SessionDescription(sdp.type, out.joinToString("\r\n"))
+    }
+
+    /**
+     * SLData-channel keepalive. `libremetaverse` sends `{"ping": true}`
+     * on a timer to detect dead data channels independently of the
+     * RTCPeerConnection's own ICE health. The server doesn't reply
+     * (it's purely a liveness probe — successful send = channel still
+     * open). VoiceManager should call this every few seconds when the
+     * session is in [State.NEGOTIATED].
+     */
+    fun sendDataChannelPing() {
+        sendSlData(JSONObject().put("ping", true))
     }
 
     private fun audioOnlyConstraints(): MediaConstraints = MediaConstraints().apply {
