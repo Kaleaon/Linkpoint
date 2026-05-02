@@ -141,7 +141,9 @@ class LinkpointApp : Application() {
          * Explicit list of UDP message names that have runtime parser/handler coverage in LinkpointApp.
          * Used by protocol conformance tests to keep handler registration parity visible in CI reports.
          */
-        val parserSupportedMessageNamesForConformance: Set<String> = setOf(
+        // moved to ProtocolHandlerRegistrar
+        val parserSupportedMessageNamesForConformance: Set<String> = com.linkpoint.app.protocol.ProtocolHandlerRegistrar.parserSupportedMessageNamesForConformance
+        /* setOf(
             "AgentAlertMessage",
             "AgentDataUpdate",
             "AgentMovementComplete",
@@ -180,7 +182,7 @@ class LinkpointApp : Application() {
             "AgentPause",
             "AgentResume",
             "DirFindQuery",
-        )
+        ) */
     }
     
     // Application-wide coroutine scope for background operations
@@ -193,9 +195,7 @@ class LinkpointApp : Application() {
      * resets to its default throttle on a fresh circuit. See Lumiya parity
      * doc segment 02 §3.4 (L02-L / L02-M).
      */
-    private enum class ThrottleBand { HIGH, LOW }
-    @Volatile private var currentThrottleBand: ThrottleBand? = null
-    @Volatile private var adaptiveThrottleStarted = false
+    private lateinit var adaptiveThrottleController: com.linkpoint.network.throttle.AdaptiveThrottleController
 
     /**
      * Send an AgentThrottle whose budget is matched to the current network
@@ -211,56 +211,11 @@ class LinkpointApp : Application() {
      *   socket reconnect, since the simulator forgot our previous throttle).
      */
     private fun applyAdaptiveAgentThrottle(force: Boolean = false) {
-        if (!::udpConnection.isInitialized || !udpConnection.isConnected.value) return
-        val q = try { protocol.qualityManager.quality.value } catch (_: Exception) { null }
-        val targetBand = when (q) {
-            com.linkpoint.network.core.ConnectionQualityManager.Quality.EXCELLENT,
-            com.linkpoint.network.core.ConnectionQualityManager.Quality.GOOD -> ThrottleBand.HIGH
-            else -> ThrottleBand.LOW
-        }
-        if (!force && targetBand == currentThrottleBand) return
-        try {
-            if (targetBand == ThrottleBand.LOW) {
-                // ~310 kbps total. Wind/cloud reduced to a token amount;
-                // texture/asset deeply cut so foreground work (chat, IM,
-                // group, object updates) keeps flowing.
-                udpConnection.sendAgentThrottle(
-                    resend = 50_000f,
-                    land = 50_000f,
-                    wind = 5_000f,
-                    cloud = 5_000f,
-                    task = 100_000f,
-                    texture = 50_000f,
-                    asset = 50_000f
-                )
-                Log.i(TAG, "🐢 AgentThrottle: LOW band (quality=$q, force=$force)")
-            } else {
-                // Linkpoint default — see UDPConnectionFixed.sendAgentThrottle.
-                udpConnection.sendAgentThrottle()
-                Log.i(TAG, "🐇 AgentThrottle: HIGH band (quality=$q, force=$force)")
-            }
-            currentThrottleBand = targetBand
-        } catch (e: Exception) {
-            Log.w(TAG, "applyAdaptiveAgentThrottle failed: ${e.message}")
-        }
+        if (::adaptiveThrottleController.isInitialized) adaptiveThrottleController.apply(force)
     }
 
-    /**
-     * Start a one-shot coroutine that observes connection-quality changes
-     * and re-sends AgentThrottle when the band crosses HIGH↔LOW. Idempotent.
-     */
     private fun ensureAdaptiveThrottleObserver() {
-        if (adaptiveThrottleStarted) return
-        adaptiveThrottleStarted = true
-        applicationScope.launch {
-            try {
-                protocol.qualityManager.quality.collect {
-                    applyAdaptiveAgentThrottle(force = false)
-                }
-            } catch (e: Exception) {
-                Log.w(TAG, "Adaptive throttle observer ended: ${e.message}")
-            }
-        }
+        if (::adaptiveThrottleController.isInitialized) adaptiveThrottleController.ensureObserver()
     }
 
     // ─── Auto re-login coordinator ────────────────────────────────────────
@@ -787,13 +742,13 @@ class LinkpointApp : Application() {
         // Initialize Linkpoint circuit integration (device-adaptive settings, DNS, IPv4)
         com.linkpoint.protocol.circuit.LinkpointCircuitIntegration.initialize(this)
 
-        initializeManagers()
+        com.linkpoint.app.bootstrap.ServiceRegistry(this).initializeCoreServices()
         BackgroundResumeScheduler.schedule(this, immediate = false)
 
         Log.i(TAG, "Linkpoint initialized successfully")
     }
     
-    private fun initializeManagers() {
+    internal fun initializeManagers() {
         Log.d(TAG, "Initializing managers...")
         
         // Grid management (login, multiple grids)
@@ -818,6 +773,7 @@ class LinkpointApp : Application() {
         
         // Protocol handler
         protocol = SecondLifeProtocol(this)
+        adaptiveThrottleController = com.linkpoint.network.throttle.AdaptiveThrottleController(applicationScope, protocol, udpConnection)
         
         // Rendering (Filament-based)
         renderManager = RenderManager(this)
@@ -1294,7 +1250,7 @@ class LinkpointApp : Application() {
         worldMap.setFriendsManagerProvider { friendsManager }
         
         // Register UDP message handlers for real-time data
-        registerMessageHandlers()
+        com.linkpoint.app.protocol.ProtocolHandlerRegistrar().registerAll(this, com.linkpoint.app.protocol.ProtocolHandlerRegistrar.Dependencies(udpConnection, ::registerMessageHandlers))
         
         Log.d(TAG, "Agent managers initialized")
     }
@@ -1303,7 +1259,7 @@ class LinkpointApp : Application() {
      * Register message handlers for UDP packet processing.
      * This connects the parsed messages to their respective managers.
      */
-    private fun registerMessageHandlers() {
+    internal fun registerMessageHandlers() {
         Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ REGISTERING UDP MESSAGE HANDLERS")
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
