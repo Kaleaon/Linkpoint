@@ -1,5 +1,6 @@
 package com.linkpoint.protocol.llsd
 
+import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.*
@@ -12,6 +13,9 @@ import java.util.*
 sealed class LLSDValue {
     abstract fun toXML(): String
     abstract fun toBinary(): ByteArray
+
+    fun toNotation(includeHeader: Boolean = false): String =
+        LLSDNotationFormatter.format(this, includeHeader)
     
     companion object {
         // Binary format markers
@@ -190,25 +194,21 @@ data class LLSDMap(val value: MutableMap<String, LLSDValue> = mutableMapOf()) : 
     }
     
     override fun toBinary(): ByteArray {
-        val parts = mutableListOf<ByteArray>()
-        parts.add(byteArrayOf(MARKER_MAP.code.toByte()))
-        
+        val out = ByteArrayOutputStream()
+        out.write(MARKER_MAP.code)
+
         for ((k, v) in value) {
-            // Key as 'k' + length + bytes
             val keyBytes = k.toByteArray(Charsets.UTF_8)
             val keyBuffer = ByteBuffer.allocate(5 + keyBytes.size).order(ByteOrder.BIG_ENDIAN)
             keyBuffer.put('k'.code.toByte())
             keyBuffer.putInt(keyBytes.size)
             keyBuffer.put(keyBytes)
-            parts.add(keyBuffer.array())
-            
-            // Value
-            parts.add(v.toBinary())
+            out.write(keyBuffer.array())
+            out.write(v.toBinary())
         }
-        
-        parts.add(byteArrayOf(MARKER_MAP_END.code.toByte()))
-        
-        return parts.fold(byteArrayOf()) { acc, bytes -> acc + bytes }
+
+        out.write(MARKER_MAP_END.code)
+        return out.toByteArray()
     }
 }
 
@@ -228,15 +228,14 @@ data class LLSDArray(val value: MutableList<LLSDValue> = mutableListOf()) : LLSD
     }
     
     override fun toBinary(): ByteArray {
-        val parts = mutableListOf<ByteArray>()
-        parts.add(byteArrayOf(MARKER_ARRAY.code.toByte()))
-        
+        val out = ByteArrayOutputStream()
+        out.write(MARKER_ARRAY.code)
+
         for (v in value) {
-            parts.add(v.toBinary())
+            out.write(v.toBinary())
         }
-        
-        parts.add(byteArrayOf(MARKER_ARRAY_END.code.toByte()))
-        
-        return parts.fold(byteArrayOf()) { acc, bytes -> acc + bytes }
+
+        out.write(MARKER_ARRAY_END.code)
+        return out.toByteArray()
     }
 }
