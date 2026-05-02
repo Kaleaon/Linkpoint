@@ -1,6 +1,5 @@
 package com.linkpoint.ui.settings
 
-import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -11,8 +10,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -25,16 +22,18 @@ import androidx.preference.SeekBarPreference
 import com.linkpoint.BuildConfig
 import com.linkpoint.R
 import com.linkpoint.network.NetworkLogger
-import com.linkpoint.service.BackgroundResumeScheduler
 import com.linkpoint.ui.theme.ThemeManager
 import com.linkpoint.ui.tos.TosActivity
+import com.linkpoint.ui.settings.config.BackgroundSettingsConfigurator
+import com.linkpoint.ui.settings.config.DebugSettingsConfigurator
+import com.linkpoint.ui.settings.config.DisplaySettingsConfigurator
+import com.linkpoint.ui.settings.config.GraphicsSettingsConfigurator
 import com.linkpoint.ui.world.WorldViewActivity
 import com.linkpoint.utils.CodexUploadService
 import com.linkpoint.utils.CrashReporter
 import com.linkpoint.utils.DebugReportService
 import com.linkpoint.utils.DiagnosticsLoggingConfig
 import com.linkpoint.utils.SessionLogRecorder
-import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -99,46 +98,25 @@ class SettingsActivity : AppCompatActivity() {
                 updateSessionLogStatusSummary(it)
             }
         }
-
-        
-        // ActivityResultLauncher for saving the exported log file
-        private var pendingLogContent: String? = null
-        private val createDocumentLauncher: ActivityResultLauncher<Intent> = 
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == Activity.RESULT_OK) {
-                    result.data?.data?.let { uri ->
-                        writeLogToUri(uri)
-                    }
-                }
-                pendingLogContent = null
-            }
+        private lateinit var logExportCoordinator: LogExportCoordinator
         
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.preferences, rootKey)
-            
-            // Display settings
-            setupDisplaySettings()
+            val context = requireContext()
+            logExportCoordinator = LogExportCoordinator(this, context)
 
-            // Interface settings
+            DisplaySettingsConfigurator(this, context).configure()
             setupInterfaceSettings()
             setupKthemeThemeMenu()
-            
-            // Graphics settings
-            findPreference<ListPreference>("graphics_quality")?.setOnPreferenceChangeListener { _, newValue ->
-                updateGraphicsQuality(newValue as String)
-                true
-            }
-
-            findPreference<SwitchPreferenceCompat>("enable_secondary_renderer")?.setOnPreferenceChangeListener { _, newValue ->
-                val enabled = newValue as Boolean
-                Toast.makeText(
-                    requireContext(),
-                    if (enabled) "Secondary renderer enabled. Reopen world view to apply."
-                    else "Primary renderer enabled. Reopen world view to apply.",
-                    Toast.LENGTH_LONG
-                ).show()
-                true
-            }
+            GraphicsSettingsConfigurator(this, context, ::updateGraphicsQuality).configure()
+            BackgroundSettingsConfigurator(this, context).configure()
+            DebugSettingsConfigurator(
+                this,
+                context,
+                onCopyLog = ::confirmCopyCombinedLog,
+                onExportLog = ::confirmExportDiagnostics,
+                onShareLog = ::confirmShareCombinedLog,
+            ).configure()
             
             // XR settings
             val xrManager = com.linkpoint.LinkpointApp.getInstance().xrManager
@@ -154,7 +132,7 @@ class SettingsActivity : AppCompatActivity() {
             findPreference<ListPreference>("xr_mode")?.isEnabled = xrManager.isUiEntryAvailable()
             
             // Voice settings
-            findPreference<SwitchPreferenceCompat>("enable_voice")?.setOnPreferenceChangeListener { _, newValue ->
+            findPreference<SwitchPreferenceCompat>(SettingsKeys.ENABLE_VOICE)?.setOnPreferenceChangeListener { _, newValue ->
                 updateVoice(newValue as Boolean)
                 true
             }
@@ -181,8 +159,6 @@ class SettingsActivity : AppCompatActivity() {
             // Cache settings
             setupCacheSettings()
 
-            setupBackgroundRuntimeSettings()
-
             
             // ToS viewing
             findPreference<Preference>("view_tos")?.setOnPreferenceClickListener {
@@ -193,28 +169,6 @@ class SettingsActivity : AppCompatActivity() {
             // XML buffer size setting (3-500 MB)
             setupNetworkBufferSettings()
         }
-        
-        private fun setupBackgroundRuntimeSettings() {
-            findPreference<SwitchPreferenceCompat>("background_resume_enabled")?.setOnPreferenceChangeListener { _, newValue ->
-                val enabled = newValue as Boolean
-                if (enabled) {
-                    BackgroundResumeScheduler.schedule(requireContext(), immediate = true)
-                } else {
-                    BackgroundResumeScheduler.cancel(requireContext())
-                }
-                true
-            }
-
-            findPreference<SwitchPreferenceCompat>("push_wakeups_enabled")?.setOnPreferenceChangeListener { _, _ ->
-                true
-            }
-
-            findPreference<ListPreference>("background_intensity_profile")?.setOnPreferenceChangeListener { _, _ ->
-                BackgroundResumeScheduler.schedule(requireContext(), immediate = false)
-                true
-            }
-        }
-
         private fun setupKthemeThemeMenu() {
             val themePreference = findPreference<Preference>("open_ktheme_theme_menu") ?: return
 
@@ -614,18 +568,6 @@ class SettingsActivity : AppCompatActivity() {
             // Combined log: copy / export / share. The combined log is the
             // most-recent debug report + crash logs glued into one text
             // blob, generated by generateCombinedLog().
-            findPreference<Preference>("copy_log")?.setOnPreferenceClickListener {
-                confirmCopyCombinedLog()
-                true
-            }
-            findPreference<Preference>("export_log")?.setOnPreferenceClickListener {
-                confirmExportDiagnostics()
-                true
-            }
-            findPreference<Preference>("share_log")?.setOnPreferenceClickListener {
-                confirmShareCombinedLog()
-                true
-            }
 
             // Session Log Recorder controls — see preferences.xml for the
             // matching <Preference> entries. Status summary refreshes on
@@ -1024,7 +966,7 @@ class SettingsActivity : AppCompatActivity() {
 
         private fun copyCombinedLogToClipboard() {
             viewLifecycleOwner.lifecycleScope.launch {
-                Toast.makeText(requireContext(), "Generating combined log…", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.settings_generating_combined_log), Toast.LENGTH_SHORT).show()
                 val full = withContext(Dispatchers.IO) { generateCombinedLog() }
                 // Android's clipboard is bounded by IPC payload size; cap
                 // at ~512 KB and keep the tail (most recent entries are
@@ -1071,7 +1013,7 @@ class SettingsActivity : AppCompatActivity() {
          */
         private fun shareCombinedLog() {
             viewLifecycleOwner.lifecycleScope.launch {
-                Toast.makeText(requireContext(), "Generating combined log…", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.settings_generating_combined_log), Toast.LENGTH_SHORT).show()
                 val ctx = requireContext()
                 val tempFile = withContext(Dispatchers.IO) {
                     runCatching {
@@ -1084,27 +1026,10 @@ class SettingsActivity : AppCompatActivity() {
                     }.getOrNull()
                 }
                 if (tempFile == null) {
-                    Toast.makeText(ctx, "Failed to prepare log for sharing", Toast.LENGTH_LONG).show()
+                    Toast.makeText(ctx, getString(R.string.settings_failed_prepare_share), Toast.LENGTH_LONG).show()
                     return@launch
                 }
-                val authority = ctx.packageName + ".fileprovider"
-                val uri = try {
-                    FileProvider.getUriForFile(ctx, authority, tempFile)
-                } catch (e: Exception) {
-                    Toast.makeText(ctx, "Cannot share log: ${e.message}", Toast.LENGTH_LONG).show()
-                    return@launch
-                }
-                val send = Intent(Intent.ACTION_SEND).apply {
-                    type = "text/plain"
-                    putExtra(Intent.EXTRA_STREAM, uri)
-                    putExtra(Intent.EXTRA_SUBJECT, "Linkpoint combined log: ${tempFile.name}")
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                }
-                try {
-                    startActivity(Intent.createChooser(send, "Share combined log"))
-                } catch (e: Exception) {
-                    Toast.makeText(ctx, "No share target available", Toast.LENGTH_SHORT).show()
-                }
+                logExportCoordinator.shareFile(tempFile, getString(R.string.settings_share_combined_log), "Linkpoint combined log: ${tempFile.name}")
             }
         }
 
@@ -1125,68 +1050,12 @@ class SettingsActivity : AppCompatActivity() {
          * Export combined log to a user-selected location in the file system
          */
         private fun exportLog() {
-            viewLifecycleOwner.lifecycleScope.launch {
-                Toast.makeText(requireContext(), "Generating combined log...", Toast.LENGTH_SHORT).show()
-
-                val logContent = withContext(Dispatchers.IO) {
-                    generateCombinedLog()
-                }
-
-                pendingLogContent = logContent
-                val timestamp = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US).format(Date())
-                val defaultFilename = "linkpoint_diagnostics_$timestamp.txt"
-
-                val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    type = "text/plain"
-                    putExtra(Intent.EXTRA_TITLE, defaultFilename)
-                }
-
-                try {
-                    createDocumentLauncher.launch(intent)
-                } catch (e: Exception) {
-                    pendingLogContent = null
-                    Toast.makeText(
-                        requireContext(),
-                        "Could not open file picker: ${e.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
+            val timestamp = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US).format(Date())
+            val defaultFilename = "linkpoint_diagnostics_$timestamp.txt"
+            Toast.makeText(requireContext(), getString(R.string.settings_generating_combined_log), Toast.LENGTH_SHORT).show()
+            logExportCoordinator.exportText(defaultFilename) { generateCombinedLog() }
         }
-        
-        /**
-         * Write the log content to the selected URI
-         */
-        private fun writeLogToUri(uri: Uri) {
-            val content = pendingLogContent
-            if (content == null) {
-                Toast.makeText(requireContext(), "No log content to save", Toast.LENGTH_SHORT).show()
-                return
-            }
-            
-            viewLifecycleOwner.lifecycleScope.launch {
-                val success = withContext(Dispatchers.IO) {
-                    try {
-                        requireContext().contentResolver.openOutputStream(uri)?.use { outputStream ->
-                            outputStream.bufferedWriter().use { writer ->
-                                writer.write(content)
-                            }
-                        }
-                        true
-                    } catch (e: Exception) {
-                        android.util.Log.e("SettingsActivity", "Failed to write log file", e)
-                        false
-                    }
-                }
-                
-                if (success) {
-                    Toast.makeText(requireContext(), "Log exported successfully", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(requireContext(), "Failed to export log", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
+
         
         // ──────────────────────────────────────────────────────────────
         // Session Log Recorder controls
@@ -1316,22 +1185,7 @@ class SettingsActivity : AppCompatActivity() {
                         "Failed to read session log: ${e.message}"
                     }
                 }
-                pendingLogContent = content
-                val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    type = "text/plain"
-                    putExtra(Intent.EXTRA_TITLE, file.name)
-                }
-                try {
-                    createDocumentLauncher.launch(intent)
-                } catch (e: Exception) {
-                    pendingLogContent = null
-                    Toast.makeText(
-                        requireContext(),
-                        "Could not open file picker: ${e.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
+                logExportCoordinator.exportText(file.name) { content }
             }
         }
 
@@ -1347,24 +1201,7 @@ class SettingsActivity : AppCompatActivity() {
                 return
             }
             val ctx = requireContext()
-            val authority = ctx.packageName + ".fileprovider"
-            val uri = try {
-                FileProvider.getUriForFile(ctx, authority, file)
-            } catch (e: Exception) {
-                Toast.makeText(ctx, "Cannot share log: ${e.message}", Toast.LENGTH_LONG).show()
-                return
-            }
-            val send = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_STREAM, uri)
-                putExtra(Intent.EXTRA_SUBJECT, "Linkpoint session log: ${file.name}")
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-            try {
-                startActivity(Intent.createChooser(send, "Share session log"))
-            } catch (e: Exception) {
-                Toast.makeText(ctx, "No share target available", Toast.LENGTH_SHORT).show()
-            }
+            logExportCoordinator.shareFile(file, getString(R.string.settings_share_session_log), "Linkpoint session log: ${file.name}")
         }
 
         private fun formatBytesCompat(bytes: Long): String = when {
@@ -1643,7 +1480,7 @@ class SettingsActivity : AppCompatActivity() {
          * Setup Display settings (screen orientation)
          */
         private fun setupDisplaySettings() {
-            findPreference<ListPreference>("screen_orientation")?.apply {
+            findPreference<ListPreference>(SettingsKeys.SCREEN_ORIENTATION)?.apply {
                 // Update summary to show current value - use first entry as fallback if available
                 summary = entry ?: entries?.takeIf { it.isNotEmpty() }?.get(0) ?: "Portrait"
                 setOnPreferenceChangeListener { preference, newValue ->

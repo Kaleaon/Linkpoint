@@ -5,7 +5,7 @@ import android.util.Log
 import com.linkpoint.assets.AssetType
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.core.AgentIdentity
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.getUUID
 import com.linkpoint.protocol.types.putUUID
@@ -425,7 +425,7 @@ class InventoryManager(
                     payload.putUUID(newParentId)
                     payload.put(0.toByte()) // NewName length = 0 (empty string to keep name)
 
-                    udpConnection.sendPacket(MessageIds.MOVE_INVENTORY_ITEM, payload.array(), reliable = true)
+                    udpConnection.sendPacket(MessageIdRegistry.MOVE_INVENTORY_ITEM, payload.array(), reliable = true)
                     Log.d(TAG, "Moved item $itemId to folder $newParentId via UDP")
 
                 } catch (e: Exception) {
@@ -549,7 +549,7 @@ class InventoryManager(
                     payload.put(truncatedNameBytes.size.toByte())
                     payload.put(truncatedNameBytes)
 
-                    udpConnection.sendPacket(MessageIds.CREATE_INVENTORY_FOLDER, payload.array(), reliable = true)
+                    udpConnection.sendPacket(MessageIdRegistry.CREATE_INVENTORY_FOLDER, payload.array(), reliable = true)
                     Log.d(TAG, "Created folder '$name' locally and sent CreateInventoryFolder packet")
                 } catch (e: Exception) {
                     Log.w(TAG, "Failed to send CreateInventoryFolder packet: ${e.message}")
@@ -724,7 +724,7 @@ class InventoryManager(
         buffer.putInt(item.creationDate)
         buffer.putInt(0) // CRC
 
-        udpConnection.sendPacket(MessageIds.UPDATE_INVENTORY_ITEM, buffer.array(), reliable = true)
+        udpConnection.sendPacket(MessageIdRegistry.UPDATE_INVENTORY_ITEM, buffer.array(), reliable = true)
     }
     
     /**
@@ -802,7 +802,7 @@ class InventoryManager(
         payload.put(nameLength.toByte())
         payload.put(nameBytes, 0, nameLength)
 
-        udpConnection.sendPacket(MessageIds.COPY_INVENTORY_ITEM, payload.array(), reliable = true)
+        udpConnection.sendPacket(MessageIdRegistry.COPY_INVENTORY_ITEM, payload.array(), reliable = true)
     }
     
     /**

@@ -1,7 +1,7 @@
 package com.linkpoint.avatar
 
 import android.util.Log
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
@@ -263,7 +263,7 @@ class AppearanceManager(
         Log.d(TAG, "Sending AgentSetAppearance " +
             "(serial=$serial, wearables=$wearableCount, " +
             "textureEntry=${textureEntry.size}B, params=$VISUAL_PARAM_COUNT)")
-        udpConnection.sendPacket(MessageIds.AGENT_SET_APPEARANCE, payload.array(), reliable = true)
+        udpConnection.sendPacket(MessageIdRegistry.AGENT_SET_APPEARANCE, payload.array(), reliable = true)
     }
 
     /**
@@ -378,7 +378,7 @@ class AppearanceManager(
         }
         
         Log.d(TAG, "Sending AgentIsNowWearing (${wearables.size} wearables)")
-        udpConnection.sendPacket(MessageIds.AGENT_IS_NOW_WEARING, payload.array(), reliable = true)
+        udpConnection.sendPacket(MessageIdRegistry.AGENT_IS_NOW_WEARING, payload.array(), reliable = true)
     }
     
     /**

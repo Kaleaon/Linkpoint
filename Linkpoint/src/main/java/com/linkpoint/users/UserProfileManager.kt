@@ -3,7 +3,7 @@ package com.linkpoint.users
 import android.util.Log
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -134,7 +134,7 @@ class UserProfileManager(
             // AvatarData
             writeUUID(payload, avatarId)
             
-            udpConnection.sendPacket(MessageIds.AVATAR_PROPERTIES_REQUEST, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIdRegistry.AVATAR_PROPERTIES_REQUEST, payload.array(), reliable = true)
             Log.d(TAG, "Sent AvatarPropertiesRequest for $avatarId")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send properties request", e)
@@ -211,7 +211,7 @@ class UserProfileManager(
             writeUUID(payload, udpConnection.getSessionId())
             writeUUID(payload, avatarId)
             
-            udpConnection.sendPacket(MessageIds.AVATAR_INTERESTS_REQUEST, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIdRegistry.AVATAR_INTERESTS_REQUEST, payload.array(), reliable = true)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to request interests", e)
         }
@@ -228,7 +228,7 @@ class UserProfileManager(
             writeUUID(payload, udpConnection.getSessionId())
             writeUUID(payload, avatarId)
             
-            udpConnection.sendPacket(MessageIds.AVATAR_NOTES_REQUEST, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIdRegistry.AVATAR_NOTES_REQUEST, payload.array(), reliable = true)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to request notes", e)
         }
@@ -248,7 +248,7 @@ class UserProfileManager(
             payload.putShort(notesBytes.size.toShort())
             payload.put(notesBytes)
             
-            udpConnection.sendPacket(MessageIds.AVATAR_NOTES_UPDATE_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
+            udpConnection.sendPacket(MessageIdRegistry.AVATAR_NOTES_UPDATE_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
             Log.d(TAG, "Updated notes for $avatarId")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to update notes", e)
@@ -266,7 +266,7 @@ class UserProfileManager(
             writeUUID(payload, udpConnection.getSessionId())
             writeUUID(payload, avatarId)
             
-            udpConnection.sendPacket(MessageIds.AVATAR_PICKS_REQUEST, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIdRegistry.AVATAR_PICKS_REQUEST, payload.array(), reliable = true)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to request picks", e)
         }

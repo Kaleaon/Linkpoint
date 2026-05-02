@@ -3,7 +3,7 @@ package com.linkpoint.world.estate
 import android.util.Log
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
@@ -113,7 +113,7 @@ class EstateManager(
                 // Invoice
                 payload.putInt(0)
                 
-                udpConnection.sendPacket(MessageIds.ESTATE_OWNER_MESSAGE, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.ESTATE_OWNER_MESSAGE, payload.array(), reliable = true)
                 Log.d(TAG, "Requested estate info")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to request estate info", e)
@@ -264,7 +264,7 @@ class EstateManager(
                 payload.put(delay.size.toByte())
                 payload.put(delay)
                 
-                udpConnection.sendPacket(MessageIds.ESTATE_OWNER_MESSAGE, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.ESTATE_OWNER_MESSAGE, payload.array(), reliable = true)
                 Log.i(TAG, "Initiated region restart with $delaySeconds second delay")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to restart region", e)
@@ -294,7 +294,7 @@ class EstateManager(
                 
                 payload.put(0) // No params
                 
-                udpConnection.sendPacket(MessageIds.ESTATE_OWNER_MESSAGE, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.ESTATE_OWNER_MESSAGE, payload.array(), reliable = true)
                 Log.i(TAG, "Cancelled region restart")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to cancel region restart", e)
@@ -335,7 +335,7 @@ class EstateManager(
                 payload.put(target.size.toByte())
                 payload.put(target)
                 
-                udpConnection.sendPacket(MessageIds.ESTATE_OWNER_MESSAGE, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.ESTATE_OWNER_MESSAGE, payload.array(), reliable = true)
                 Log.i(TAG, "Kicked user $targetAgentId from region")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to kick user", e)
@@ -361,7 +361,7 @@ class EstateManager(
                 payload.putUUID(targetAgentId)
                 payload.putInt(if (freeze) 1 else 0) // Flags
                 
-                udpConnection.sendPacket(MessageIds.FREEZE_USER, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.FREEZE_USER, payload.array(), reliable = true)
                 Log.i(TAG, "${if (freeze) "Froze" else "Unfroze"} user $targetAgentId")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to freeze/unfreeze user", e)
@@ -424,7 +424,7 @@ class EstateManager(
         payload.put(agentBytes.size.toByte())
         payload.put(agentBytes)
 
-        udpConnection.sendPacket(MessageIds.ESTATE_OWNER_MESSAGE, payload.array(), reliable = true)
+        udpConnection.sendPacket(MessageIdRegistry.ESTATE_OWNER_MESSAGE, payload.array(), reliable = true)
     }
     
     fun shutdown() {

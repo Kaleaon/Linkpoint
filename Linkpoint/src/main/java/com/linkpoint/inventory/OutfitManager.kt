@@ -5,7 +5,7 @@ import com.linkpoint.avatar.AvatarBaker
 import com.linkpoint.avatar.WearableData
 import com.linkpoint.avatar.WearableType
 import com.linkpoint.objects.ObjectManager
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
@@ -334,7 +334,7 @@ class OutfitManager(
         // Validate UDP connection before sending
         val connection = udpConnection 
             ?: throw IllegalStateException("UDP connection not initialized in OutfitManager")
-        connection.sendPacket(MessageIds.REZ_SINGLE_ATTACHMENT_FROM_INV, payload.array(), reliable = true)
+        connection.sendPacket(MessageIdRegistry.REZ_SINGLE_ATTACHMENT_FROM_INV, payload.array(), reliable = true)
         Log.d(TAG, "Sent RezSingleAttachmentFromInv for item ${item.itemId} at point $point (replace=$replace)")
     }
     

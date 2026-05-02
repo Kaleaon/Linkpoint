@@ -1,7 +1,7 @@
 package com.linkpoint.protocol.transfer
 
 import android.util.Log
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.PacketCodec
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
@@ -362,7 +362,7 @@ class TransferManager(
         payload.put(params)
         
         try {
-            udpConnection.sendPacket(MessageIds.TRANSFER_REQUEST, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIdRegistry.TRANSFER_REQUEST, payload.array(), reliable = true)
             Log.d(TAG, "Sent TransferRequest for ${transfer.assetKey.assetId}")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send TransferRequest", e)
@@ -380,7 +380,7 @@ class TransferManager(
         payload.putInt(transfer.channelType)
         
         try {
-            udpConnection.sendPacket(MessageIds.TRANSFER_ABORT, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIdRegistry.TRANSFER_ABORT, payload.array(), reliable = true)
             Log.d(TAG, "Sent TransferAbort for ${transfer.transferId}")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send TransferAbort", e)

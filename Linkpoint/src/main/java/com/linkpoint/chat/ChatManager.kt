@@ -6,7 +6,7 @@ import com.linkpoint.protocol.core.AgentIdentity
 import com.linkpoint.protocol.messages.ChatData
 import com.linkpoint.protocol.messages.ChatSourceType
 import com.linkpoint.protocol.messages.ChatType
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.SLMessagePackers
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLVector3
@@ -109,7 +109,7 @@ class ChatManager(
                 type = type.value,
                 channel = channel
             )
-            udpConnection.sendPacket(MessageIds.CHAT_FROM_VIEWER, data, reliable = true)
+            udpConnection.sendPacket(MessageIdRegistry.CHAT_FROM_VIEWER, data, reliable = true)
 
             // Add to local history
             val localMessage = ChatMessage(

@@ -11,6 +11,12 @@ import com.linkpoint.network.core.NetworkStateManager
 import com.linkpoint.protocol.messages.EnhancedPacketLogger
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.render.RenderDiagnostics
+import com.linkpoint.utils.debugreport.DebugReportContext
+import com.linkpoint.utils.debugreport.DebugReportFormatting
+import com.linkpoint.utils.debugreport.DebugReportStorage
+import com.linkpoint.utils.debugreport.sections.CacheSectionBuilder
+import com.linkpoint.utils.debugreport.sections.ConnectionSectionBuilder
+import com.linkpoint.utils.debugreport.sections.NetworkSectionBuilder
 import kotlinx.coroutines.*
 import java.io.File
 import java.text.SimpleDateFormat
@@ -84,7 +90,7 @@ class DebugReportService private constructor(private val context: Context) {
     }
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private var reportDirectory: File? = null
+    private val storage = DebugReportStorage(context)
 
     private fun udpConnectedElapsedMs(): Long? {
         return InitializationTracker.getElapsedSincePhase(InitializationTracker.Phase.UDP_CONNECTED)
@@ -94,22 +100,11 @@ class DebugReportService private constructor(private val context: Context) {
         return if (elapsedMs != null) "${formatDuration(elapsedMs)} since UDP_CONNECTED" else "UDP_CONNECTED time unavailable"
     }
     
-    init {
-        initializeStorage()
-    }
-    
-    private fun initializeStorage() {
-        try {
-            val dir = File(context.filesDir, DEBUG_REPORT_DIR)
-            if (!dir.exists()) {
-                dir.mkdirs()
-            }
-            reportDirectory = dir
-            Log.i(TAG, "Debug report directory initialized: ${dir.absolutePath}")
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to initialize debug report storage", e)
-        }
-    }
+    private val sectionBuilders = listOf(
+        ConnectionSectionBuilder(),
+        NetworkSectionBuilder(),
+        CacheSectionBuilder()
+    )
     
     /**
      * Capture a debug report of the current app state.
@@ -119,8 +114,7 @@ class DebugReportService private constructor(private val context: Context) {
     suspend fun captureDebugReport(userNote: String = ""): File? {
         return try {
             val report = generateDebugReport(userNote)
-            val file = saveReport(report)
-            cleanupOldReports()
+            val file = storage.save(report)
             Log.i(TAG, "Debug report captured: ${file?.absolutePath}")
             if (file != null) {
                 CodexUploadService.getInstance(context).uploadLatestReportsAsync("debug_report")
@@ -156,7 +150,7 @@ class DebugReportService private constructor(private val context: Context) {
             appendLine("║               LINKPOINT DEBUG REPORT                              ║")
             appendLine("╚══════════════════════════════════════════════════════════════════╝")
             appendLine()
-            appendLine("Timestamp: ${formatTimestamp(timestamp)}")
+            appendLine("Timestamp: ${DebugReportFormatting.formatTimestamp(timestamp)}")
             appendLine("Report ID: ${UUID.randomUUID()}")
             appendLine()
             
@@ -169,87 +163,8 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine()
             }
             
-            appendLine("┌──────────────────────────────────────────────────────────────────┐")
-            appendLine("│ CONNECTION STATUS                                                 │")
-            appendLine("└──────────────────────────────────────────────────────────────────┘")
-            appendLine()
-            if (app != null) {
-                appendLine("Connected: ${app.isConnected()}")
-                appendLine("Current Region: ${app.getCurrentRegion() ?: "None"}")
-                appendLine("Agent ID: ${app.agentId ?: "Not logged in"}")
-                try {
-                    appendLine("Avatar Name: ${app.sessionManager.getAvatarName()}")
-                    appendLine("Connection State: ${app.sessionManager.connectionState.value}")
-                } catch (e: Exception) {
-                    appendLine("Session Info: Unable to retrieve - ${e.message}")
-                }
-            } else {
-                appendLine("App instance not available")
-            }
-            appendLine()
-            
-            // Network activity and potential packet issues
-            appendLine("┌──────────────────────────────────────────────────────────────────┐")
-            appendLine("│ NETWORK ACTIVITY & PACKET STATUS                                  │")
-            appendLine("└──────────────────────────────────────────────────────────────────┘")
-            appendLine()
-            try {
-                val networkStats = NetworkLogger.getStatistics()
-                appendLine("HTTP Requests: ${networkStats.requestCount}")
-                appendLine("HTTP Responses: ${networkStats.responseCount}")
-                appendLine("Errors: ${networkStats.errorCount}")
-                appendLine("Warnings: ${networkStats.warningCount}")
-                appendLine("Retries: ${networkStats.retryCount}")
-                appendLine("Timeouts: ${networkStats.timeoutCount}")
-                appendLine("Redirects: ${networkStats.redirectCount}")
-                appendLine()
-                
-                // Include recent network errors
-                val recentLogs = NetworkLogger.getRecentLogs(20)
-                val errorLines = recentLogs.lines().filter { 
-                    it.contains("ERROR", ignoreCase = true) || 
-                    it.contains("WARN", ignoreCase = true) ||
-                    it.contains("failed", ignoreCase = true) ||
-                    it.contains("timeout", ignoreCase = true)
-                }.take(15)
-                
-                if (errorLines.isNotEmpty()) {
-                    appendLine("Recent Network Issues:")
-                    errorLines.forEach { appendLine("  $it") }
-                } else {
-                    appendLine("No recent network errors detected")
-                }
-            } catch (e: Exception) {
-                appendLine("Network stats unavailable: ${e.message}")
-            }
-            appendLine()
-            
-            // Cache statistics - comprehensive breakdown
-            appendLine("┌──────────────────────────────────────────────────────────────────┐")
-            appendLine("│ CACHE STATISTICS                                                  │")
-            appendLine("└──────────────────────────────────────────────────────────────────┘")
-            appendLine()
-            try {
-                val cacheManager = CacheManager(context)
-                // Get cache stats using withContext since generateDebugReport is now a suspend function
-                val cacheStats = withContext(Dispatchers.IO) {
-                    cacheManager.getCacheStats()
-                }
-                appendLine("Total Cache Size: ${cacheStats.getFormattedTotalSize()} / ${cacheStats.getFormattedMaxSize()} (${cacheStats.usagePercent}%)")
-                appendLine("Total Files: ${cacheStats.totalFileCount}")
-                appendLine("Available Space: ${formatBytes(cacheStats.availableSpaceBytes)}")
-                appendLine("Low Space Warning: ${if (cacheStats.isLowSpace) "YES ⚠️" else "No"}")
-                appendLine()
-                appendLine("Cache Breakdown:")
-                appendLine("  Textures: ${formatBytes(cacheStats.texturesSizeBytes)} (${cacheStats.texturesCount} files)")
-                appendLine("  Meshes: ${formatBytes(cacheStats.meshesSizeBytes)} (${cacheStats.meshesCount} files)")
-                appendLine("  Sounds: ${formatBytes(cacheStats.soundsSizeBytes)} (${cacheStats.soundsCount} files)")
-                appendLine("  Animations: ${formatBytes(cacheStats.animationsSizeBytes)} (${cacheStats.animationsCount} files)")
-                appendLine("  General: ${formatBytes(cacheStats.generalSizeBytes)} (${cacheStats.generalCount} files)")
-            } catch (e: Exception) {
-                appendLine("Cache statistics unavailable: ${e.message}")
-            }
-            appendLine()
+            val debugContext = DebugReportContext(context, app, timestamp)
+            sectionBuilders.forEach { append(it.build(debugContext)) }
             
             // Asset cache memory statistics
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
@@ -922,7 +837,7 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("Sim IP: ${regionInfo.simIP.ifEmpty { "Not set" }}")
                         appendLine("Sim Port: ${if (regionInfo.simPort > 0) regionInfo.simPort else "Not set"}")
                         val seedCapDisplay = regionInfo.seedCapability?.let { 
-                            if (it.length > DIAGNOSTIC_URL_TRUNCATE_LENGTH) it.take(DIAGNOSTIC_URL_TRUNCATE_LENGTH) + "..." else it 
+                            DebugReportFormatting.truncate(it, DIAGNOSTIC_URL_TRUNCATE_LENGTH) 
                         } ?: "Not set"
                         appendLine("Seed Capability: $seedCapDisplay")
                         
@@ -1635,25 +1550,6 @@ class DebugReportService private constructor(private val context: Context) {
         }
     }
     
-    private fun saveReport(content: String): File? {
-        val dir = reportDirectory ?: return null
-        val filename = generateReportFilename()
-        val file = File(dir, filename)
-        
-        return try {
-            file.writeText(content)
-            file
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to save debug report", e)
-            null
-        }
-    }
-    
-    private fun generateReportFilename(): String {
-        val timestamp = System.currentTimeMillis()
-        val dateString = formatDateWithPattern(timestamp, "yyyy-MM-dd_HH-mm-ss")
-        return "$REPORT_PREFIX$dateString$REPORT_SUFFIX"
-    }
     
     /**
      * Get version code from package info, handling API level differences
@@ -1667,28 +1563,11 @@ class DebugReportService private constructor(private val context: Context) {
         }
     }
     
-    private fun cleanupOldReports() {
-        val dir = reportDirectory ?: return
-        val reports = dir.listFiles { file ->
-            file.name.startsWith(REPORT_PREFIX) && file.name.endsWith(REPORT_SUFFIX)
-        }?.sortedByDescending { it.lastModified() } ?: return
-        
-        if (reports.size > MAX_REPORTS) {
-            reports.drop(MAX_REPORTS).forEach { file ->
-                file.delete()
-                Log.d(TAG, "Deleted old debug report: ${file.name}")
-            }
-        }
-    }
-    
     /**
      * Get all stored debug reports
      */
     fun getDebugReports(): List<File> {
-        val dir = reportDirectory ?: return emptyList()
-        return dir.listFiles { file ->
-            file.name.startsWith(REPORT_PREFIX) && file.name.endsWith(REPORT_SUFFIX)
-        }?.sortedByDescending { it.lastModified() } ?: emptyList()
+        return storage.list()
     }
     
     /**
@@ -1707,8 +1586,7 @@ class DebugReportService private constructor(private val context: Context) {
      * Clear all debug reports
      */
     fun clearReports() {
-        val dir = reportDirectory ?: return
-        dir.listFiles()?.forEach { it.delete() }
+        storage.clear()
         Log.i(TAG, "All debug reports cleared")
     }
     

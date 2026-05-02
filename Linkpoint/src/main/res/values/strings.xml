@@ -70,6 +70,24 @@
     <string name="flags">Flags</string>
     
     <!-- Settings -->
+    <string name="settings_orientation_apply_hint">Screen orientation will apply when you return to the world view</string>
+    <string name="settings_secondary_renderer_enabled">Secondary renderer enabled. Reopen world view to apply.</string>
+    <string name="settings_secondary_renderer_disabled">Primary renderer enabled. Reopen world view to apply.</string>
+    <string name="settings_debug_floater_enabled">Debug floater will appear in world view</string>
+    <string name="settings_debug_floater_disabled">Debug floater disabled</string>
+    <string name="settings_codex_auto_upload_enabled">Codex auto-upload enabled</string>
+    <string name="settings_codex_auto_upload_disabled">Codex auto-upload disabled</string>
+    <string name="settings_generating_combined_log">Generating combined log…</string>
+    <string name="settings_failed_prepare_share">Failed to prepare log for sharing</string>
+    <string name="settings_share_combined_log">Share combined log</string>
+    <string name="settings_share_session_log">Share session log</string>
+    <string name="settings_file_picker_failed">Could not open file picker: %1$s</string>
+    <string name="settings_no_log_content">No log content to save</string>
+    <string name="settings_log_export_success">Log exported successfully</string>
+    <string name="settings_log_export_failed">Failed to export log</string>
+    <string name="settings_cannot_share_log">Cannot share log: %1$s</string>
+    <string name="settings_no_share_target">No share target available</string>
+
     <string name="settings_graphics">Graphics</string>
     <string name="settings_audio">Audio</string>
     <string name="settings_network">Network</string>

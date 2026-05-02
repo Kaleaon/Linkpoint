@@ -25,14 +25,14 @@ class DeclaredMessageSlicesTest {
         val parsed = DeclaredMessageSlices.parseFetchInventoryDescendents(payload)
         assertEquals(message, parsed)
 
-        val rawPacket = wrapRawPacket(MessageIds.FETCH_INVENTORY_DESCENDENTS, payload)
+        val rawPacket = wrapRawPacket(MessageIdRegistry.FETCH_INVENTORY_DESCENDENTS, payload)
         var handledSummary = ""
-        val handled = DeclaredMessageSlices.handle(MessageIds.FETCH_INVENTORY_DESCENDENTS, rawPacket) {
+        val handled = DeclaredMessageSlices.handle(MessageIdRegistry.FETCH_INVENTORY_DESCENDENTS, rawPacket) {
             handledSummary = it
         }
         assertTrue(handled)
         assertTrue(handledSummary.contains("FetchInventoryDescendents"))
-        assertTrue(MessageParserRegistry.hasHandler(MessageIds.FETCH_INVENTORY_DESCENDENTS))
+        assertTrue(MessageParserRegistry.hasHandler(MessageIdRegistry.FETCH_INVENTORY_DESCENDENTS))
         assertTrue(MessageTemplateCatalog.supportedParserOrWriterMessages.contains("FetchInventoryDescendents"))
     }
 
@@ -51,14 +51,14 @@ class DeclaredMessageSlicesTest {
         val parsed = DeclaredMessageSlices.parseMapNameRequest(payload)
         assertEquals(message, parsed)
 
-        val rawPacket = wrapRawPacket(MessageIds.MAP_NAME_REQUEST, payload)
+        val rawPacket = wrapRawPacket(MessageIdRegistry.MAP_NAME_REQUEST, payload)
         var handledSummary = ""
-        val handled = DeclaredMessageSlices.handle(MessageIds.MAP_NAME_REQUEST, rawPacket) {
+        val handled = DeclaredMessageSlices.handle(MessageIdRegistry.MAP_NAME_REQUEST, rawPacket) {
             handledSummary = it
         }
         assertTrue(handled)
         assertTrue(handledSummary.contains("MapNameRequest"))
-        assertTrue(MessageParserRegistry.hasHandler(MessageIds.MAP_NAME_REQUEST))
+        assertTrue(MessageParserRegistry.hasHandler(MessageIdRegistry.MAP_NAME_REQUEST))
         assertTrue(MessageTemplateCatalog.supportedParserOrWriterMessages.contains("MapNameRequest"))
     }
 
@@ -74,14 +74,14 @@ class DeclaredMessageSlicesTest {
         val parsed = DeclaredMessageSlices.parseAgentPause(payload)
         assertEquals(message, parsed)
 
-        val rawPacket = wrapRawPacket(MessageIds.AGENT_PAUSE, payload)
+        val rawPacket = wrapRawPacket(MessageIdRegistry.AGENT_PAUSE, payload)
         var handledSummary = ""
-        val handled = DeclaredMessageSlices.handle(MessageIds.AGENT_PAUSE, rawPacket) {
+        val handled = DeclaredMessageSlices.handle(MessageIdRegistry.AGENT_PAUSE, rawPacket) {
             handledSummary = it
         }
         assertTrue(handled)
         assertTrue(handledSummary.contains("AgentPause"))
-        assertTrue(MessageParserRegistry.hasHandler(MessageIds.AGENT_PAUSE))
+        assertTrue(MessageParserRegistry.hasHandler(MessageIdRegistry.AGENT_PAUSE))
         assertTrue(MessageTemplateCatalog.supportedParserOrWriterMessages.contains("AgentPause"))
     }
 

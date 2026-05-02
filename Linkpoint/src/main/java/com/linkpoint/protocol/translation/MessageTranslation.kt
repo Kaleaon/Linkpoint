@@ -28,7 +28,7 @@ import java.nio.ByteOrder
  * ```
  * 
  * @see com.linkpoint.protocol.messages.UDPConnection
- * @see com.linkpoint.protocol.messages.MessageIds
+ * @see com.linkpoint.protocol.messages.ids.MessageIdRegistry
  */
 object MessageTranslation {
     
@@ -225,10 +225,10 @@ object MessageTranslation {
         
         /**
          * Get a human-readable name for a message ID.
-         * Delegates to the centralized MessageIds.getMessageName() for comprehensive coverage.
+         * Delegates to the centralized MessageIdRegistry.getMessageName() for comprehensive coverage.
          */
         fun getName(messageId: Int): String {
-            return com.linkpoint.protocol.messages.MessageIds.getMessageName(messageId)
+            return com.linkpoint.protocol.messages.MessageIdRegistry.getMessageName(messageId)
         }
     }
     

@@ -1,7 +1,7 @@
 package com.linkpoint.chat.dialogs
 
 import android.util.Log
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -265,7 +265,7 @@ class ScriptDialogManager(
             payload.put(buttonBytes.size.toByte())
             payload.put(buttonBytes)
             
-            udpConnection.sendPacket(MessageIds.SCRIPT_DIALOG_REPLY, payload.array().copyOf(payload.position()), reliable = true)
+            udpConnection.sendPacket(MessageIdRegistry.SCRIPT_DIALOG_REPLY, payload.array().copyOf(payload.position()), reliable = true)
             
             activeDialogs.remove(dialog.chatChannel)
             Log.d(TAG, "Sent dialog reply: $buttonText to channel ${dialog.chatChannel}")
@@ -298,7 +298,7 @@ class ScriptDialogManager(
             writeUUID(payload, request.itemId)
             payload.putInt(request.permissions)
             
-            udpConnection.sendPacket(MessageIds.SCRIPT_ANSWER_YES, payload.array().copyOf(payload.position()), reliable = true)
+            udpConnection.sendPacket(MessageIdRegistry.SCRIPT_ANSWER_YES, payload.array().copyOf(payload.position()), reliable = true)
             
             activePermissionRequests.remove(request.taskId)
             Log.d(TAG, "Granted permissions to ${request.objectName}: 0x${request.permissions.toString(16)}")

@@ -748,7 +748,7 @@ class UDPConnectionFixed(
     private fun registerInternalHandlers() {
         // Register PacketAck handler - CRITICAL for reliable messaging.
         // Without this, ACK callbacks are never invoked, breaking circuit establishment.
-        messageRouter.registerHandler(MessageIds.PACKET_ACK, object : MessageRouter.Handler {
+        messageRouter.registerHandler(MessageIdRegistry.PACKET_ACK, object : MessageRouter.Handler {
             override fun handleMessage(messageId: Int, data: ByteArray): Boolean {
                 return handlePacketAck(data)
             }
@@ -1525,7 +1525,7 @@ class UDPConnectionFixed(
     private fun dispatchMessageDirect(messageId: Int, data: ByteArray) {
         try {
             // Internal PacketAck handling (processes ACK callbacks for reliable messaging)
-            if (messageId == MessageIds.PACKET_ACK) {
+            if (messageId == MessageIdRegistry.PACKET_ACK) {
                 handlePacketAck(data)
             }
 
@@ -1539,7 +1539,7 @@ class UDPConnectionFixed(
                         "Handler error for ${getMessageName(messageId)}: ${e.message}")
                 }
                 messagesRouted.incrementAndGet()
-            } else if (messageId != MessageIds.PACKET_ACK) {
+            } else if (messageId != MessageIdRegistry.PACKET_ACK) {
                 // Only log unhandled messages if not PacketAck (which is handled internally)
                 NetworkLogger.log(NetworkLogger.Level.VERBOSE, NetworkLogger.Category.UDP,
                     "No handler for ${getMessageName(messageId)} (ID: $messageId)")
@@ -1961,7 +1961,7 @@ class UDPConnectionFixed(
             .putInt(oldestUnacked)
             .array()
 
-        sendPacket(MessageIds.START_PING_CHECK, payload, reliable = false)
+        sendPacket(MessageIdRegistry.START_PING_CHECK, payload, reliable = false)
 
         NetworkLogger.log(
             NetworkLogger.Level.DEBUG,
@@ -2291,7 +2291,7 @@ class UDPConnectionFixed(
             handler(msgId, data)
         }
 
-        val messageName = MessageIds.getMessageName(messageId)
+        val messageName = MessageIdRegistry.getMessageName(messageId)
         EnhancedPacketLogger.logHandlerRegistered(messageId, messageName)
 
         messageRouter.registerHandler(messageId, object : MessageRouter.Handler {
@@ -2331,7 +2331,7 @@ class UDPConnectionFixed(
         payload.putUUID(identity.sessionId)
         payload.putUUID(identity.agentId)
 
-        val seq = sendPacket(MessageIds.USE_CIRCUIT_CODE, payload.array(), reliable = true)
+        val seq = sendPacket(MessageIdRegistry.USE_CIRCUIT_CODE, payload.array(), reliable = true)
         if (seq >= 0) {
             useCircuitCodeSequence = seq
         }
@@ -2355,7 +2355,7 @@ class UDPConnectionFixed(
         payload.putInt(identity.circuitCode ?: 0)
         
         // Message ID for CompleteAgentMovement (low frequency message)
-        val messageId = MessageIds.COMPLETE_AGENT_MOVEMENT
+        val messageId = MessageIdRegistry.COMPLETE_AGENT_MOVEMENT
         
         // Build packet with header
         sendPacket(messageId, payload.array(), reliable = true)
@@ -2457,7 +2457,7 @@ class UDPConnectionFixed(
         payload.putInt(flags)
         
         Log.d(TAG, "Sending RegionHandshakeReply")
-        sendPacket(MessageIds.REGION_HANDSHAKE_REPLY, payload.array(), reliable = true, zerocoded = true)
+        sendPacket(MessageIdRegistry.REGION_HANDSHAKE_REPLY, payload.array(), reliable = true, zerocoded = true)
     }
     
     /**
@@ -2507,7 +2507,7 @@ class UDPConnectionFixed(
         payload.putFloat(asset)
 
         Log.d(TAG, "Sending AgentThrottle")
-        sendPacket(MessageIds.AGENT_THROTTLE, payload.array(), reliable = true)
+        sendPacket(MessageIdRegistry.AGENT_THROTTLE, payload.array(), reliable = true)
     }
     
     /**
@@ -2584,7 +2584,7 @@ class UDPConnectionFixed(
                 payload.putInt(objectId)
             }
 
-            sendPacket(MessageIds.REQUEST_MULTIPLE_OBJECTS, payload.array(), reliable = true)
+            sendPacket(MessageIdRegistry.REQUEST_MULTIPLE_OBJECTS, payload.array(), reliable = true)
         }
     }
 
@@ -2610,7 +2610,7 @@ class UDPConnectionFixed(
             for (id in batch) {
                 payload.putUUID(id)
             }
-            sendPacket(MessageIds.UUID_NAME_REQUEST, payload.array(), reliable = true)
+            sendPacket(MessageIdRegistry.UUID_NAME_REQUEST, payload.array(), reliable = true)
         }
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
             "→ Sent UUIDNameRequest for ${ids.size} ids")
@@ -2638,7 +2638,7 @@ class UDPConnectionFixed(
         payload.putUUID(identity.agentId)
         payload.putUUID(identity.sessionId)
         payload.putInt(agentPauseSerial.incrementAndGet())
-        sendPacket(MessageIds.AGENT_PAUSE, payload.array(), reliable = true)
+        sendPacket(MessageIdRegistry.AGENT_PAUSE, payload.array(), reliable = true)
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sent AgentPause")
     }
 
@@ -2652,7 +2652,7 @@ class UDPConnectionFixed(
         payload.putUUID(identity.agentId)
         payload.putUUID(identity.sessionId)
         payload.putInt(agentPauseSerial.incrementAndGet())
-        sendPacket(MessageIds.AGENT_RESUME, payload.array(), reliable = true)
+        sendPacket(MessageIdRegistry.AGENT_RESUME, payload.array(), reliable = true)
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sent AgentResume")
     }
 
@@ -2669,7 +2669,7 @@ class UDPConnectionFixed(
         val payload = ByteBuffer.allocate(32).order(ByteOrder.LITTLE_ENDIAN)
         payload.putUUID(identity.agentId)
         payload.putUUID(identity.sessionId)
-        sendPacket(MessageIds.AGENT_WEARABLES_REQUEST, payload.array(), reliable = true)
+        sendPacket(MessageIdRegistry.AGENT_WEARABLES_REQUEST, payload.array(), reliable = true)
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sent AgentWearablesRequest")
     }
 
@@ -2692,7 +2692,7 @@ class UDPConnectionFixed(
         payload.putUUID(identity.sessionId)
         payload.putUUID(groupId)
         payload.putUUID(requestId)
-        sendPacket(MessageIds.GROUP_ROLE_DATA_REQUEST, payload.array(), reliable = true)
+        sendPacket(MessageIdRegistry.GROUP_ROLE_DATA_REQUEST, payload.array(), reliable = true)
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
             "→ Sent GroupRoleDataRequest groupId=$groupId requestId=$requestId")
         return requestId
@@ -2714,7 +2714,7 @@ class UDPConnectionFixed(
         payload.putUUID(identity.sessionId)
         payload.putUUID(groupId)
         payload.putUUID(requestId)
-        sendPacket(MessageIds.GROUP_TITLES_REQUEST, payload.array(), reliable = true)
+        sendPacket(MessageIdRegistry.GROUP_TITLES_REQUEST, payload.array(), reliable = true)
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
             "→ Sent GroupTitlesRequest groupId=$groupId requestId=$requestId")
         return requestId
@@ -2752,7 +2752,7 @@ class UDPConnectionFixed(
         for (blob in paramBlobs.take(255)) {
             PacketCodec.fromBuffer(payload).writeVariable1Bytes(blob)
         }
-        sendPacket(MessageIds.GENERIC_MESSAGE, payload.array().copyOf(payload.position()), reliable = reliable)
+        sendPacket(MessageIdRegistry.GENERIC_MESSAGE, payload.array().copyOf(payload.position()), reliable = reliable)
     }
 
     /**
@@ -2775,7 +2775,7 @@ class UDPConnectionFixed(
                 payload.putUUID(ownerId)
                 payload.putUUID(itemId)
             }
-            sendPacket(MessageIds.FETCH_INVENTORY, payload.array(), reliable = true)
+            sendPacket(MessageIdRegistry.FETCH_INVENTORY, payload.array(), reliable = true)
         }
     }
 
@@ -2803,7 +2803,7 @@ class UDPConnectionFixed(
         payload.putInt(sortOrder)
         payload.put(if (fetchFolders) 1.toByte() else 0.toByte())
         payload.put(if (fetchItems) 1.toByte() else 0.toByte())
-        sendPacket(MessageIds.FETCH_INVENTORY_DESCENDENTS, payload.array(), reliable = true)
+        sendPacket(MessageIdRegistry.FETCH_INVENTORY_DESCENDENTS, payload.array(), reliable = true)
     }
 
     /**
@@ -2847,7 +2847,7 @@ class UDPConnectionFixed(
         payload.put(if (allowPublish) 1.toByte() else 0.toByte())
         payload.put(if (maturePublish) 1.toByte() else 0.toByte())
         PacketCodec.fromBuffer(payload).writeVariable1String(profileUrl)
-        sendPacket(MessageIds.AVATAR_PROPERTIES_UPDATE, payload.array().copyOf(payload.position()), reliable = true)
+        sendPacket(MessageIdRegistry.AVATAR_PROPERTIES_UPDATE, payload.array().copyOf(payload.position()), reliable = true)
     }
 
     /**
@@ -2869,7 +2869,7 @@ class UDPConnectionFixed(
         payload.putUUID(identity.sessionId)
         payload.putUUID(queryId)
         PacketCodec.fromBuffer(payload).writeVariable1String(name)
-        sendPacket(MessageIds.AVATAR_PICKER_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
+        sendPacket(MessageIdRegistry.AVATAR_PICKER_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
         return queryId
     }
 
@@ -2884,7 +2884,7 @@ class UDPConnectionFixed(
         payload.putUUID(identity.agentId)
         payload.putUUID(identity.sessionId)
         payload.putUUID(groupId)
-        sendPacket(MessageIds.JOIN_GROUP_REQUEST, payload.array(), reliable = true)
+        sendPacket(MessageIdRegistry.JOIN_GROUP_REQUEST, payload.array(), reliable = true)
     }
 
     /**
@@ -2901,7 +2901,7 @@ class UDPConnectionFixed(
         payload.putUUID(identity.agentId)
         payload.putUUID(groupId)
         payload.put(if (success) 1.toByte() else 0.toByte())
-        sendPacket(MessageIds.LEAVE_GROUP_REPLY, payload.array(), reliable = true)
+        sendPacket(MessageIdRegistry.LEAVE_GROUP_REPLY, payload.array(), reliable = true)
     }
 
     /**
@@ -2927,7 +2927,7 @@ class UDPConnectionFixed(
                 payload.putUUID(inviteeId)
                 payload.putUUID(roleId)
             }
-            sendPacket(MessageIds.INVITE_GROUP_REQUEST, payload.array(), reliable = true)
+            sendPacket(MessageIdRegistry.INVITE_GROUP_REQUEST, payload.array(), reliable = true)
         }
     }
 
@@ -2951,7 +2951,7 @@ class UDPConnectionFixed(
             payload.putUUID(groupId)
             payload.put(chunk.size.toByte())
             for (id in chunk) payload.putUUID(id)
-            sendPacket(MessageIds.EJECT_GROUP_MEMBER_REQUEST, payload.array(), reliable = true)
+            sendPacket(MessageIdRegistry.EJECT_GROUP_MEMBER_REQUEST, payload.array(), reliable = true)
         }
     }
 
@@ -2979,7 +2979,7 @@ class UDPConnectionFixed(
         payload.put(if (tempFile) 1.toByte() else 0.toByte())
         payload.put(if (storeLocal) 1.toByte() else 0.toByte())
         PacketCodec.fromBuffer(payload).writeVariable2Bytes(assetData)
-        sendPacket(MessageIds.ASSET_UPLOAD_REQUEST, payload.array(), reliable = true)
+        sendPacket(MessageIdRegistry.ASSET_UPLOAD_REQUEST, payload.array(), reliable = true)
     }
 
     /**
@@ -3009,7 +3009,7 @@ class UDPConnectionFixed(
         payload.put(category.toByte())
         PacketCodec.fromBuffer(payload).writeVariable1String(simName)
         payload.putInt(queryStart)
-        sendPacket(MessageIds.DIR_PLACES_QUERY, payload.array().copyOf(payload.position()), reliable = true)
+        sendPacket(MessageIdRegistry.DIR_PLACES_QUERY, payload.array().copyOf(payload.position()), reliable = true)
         return queryId
     }
 
@@ -3034,7 +3034,7 @@ class UDPConnectionFixed(
         PacketCodec.fromBuffer(payload).writeVariable1String(queryText)
         payload.putInt(queryFlags)
         payload.putInt(queryStart)
-        sendPacket(MessageIds.DIR_FIND_QUERY, payload.array().copyOf(payload.position()), reliable = true)
+        sendPacket(MessageIdRegistry.DIR_FIND_QUERY, payload.array().copyOf(payload.position()), reliable = true)
         return queryId
     }
 
@@ -3721,18 +3721,18 @@ class UDPConnectionFixed(
     fun getRegisteredHandlerIds(): List<String> {
         return messageHandlers.keys.map { id ->
             when (id) {
-                MessageIds.REGION_HANDSHAKE -> "REGION_HANDSHAKE"
-                MessageIds.AGENT_MOVEMENT_COMPLETE -> "AGENT_MOVEMENT_COMPLETE"
-                MessageIds.CHAT_FROM_SIMULATOR -> "CHAT_FROM_SIMULATOR"
-                MessageIds.OBJECT_UPDATE -> "OBJECT_UPDATE"
-                MessageIds.OBJECT_UPDATE_COMPRESSED -> "OBJECT_UPDATE_COMPRESSED"
-                MessageIds.AVATAR_ANIMATION -> "AVATAR_ANIMATION"
-                MessageIds.IMPROVED_TERSE_OBJECT_UPDATE -> "IMPROVED_TERSE_OBJECT_UPDATE"
-                MessageIds.KILL_OBJECT -> "KILL_OBJECT"
-                MessageIds.COARSE_LOCATION_UPDATE -> "COARSE_LOCATION_UPDATE"
-                MessageIds.START_PING_CHECK -> "START_PING_CHECK"
-                MessageIds.PACKET_ACK -> "PACKET_ACK"
-                MessageIds.SOUND_TRIGGER -> "SOUND_TRIGGER"
+                MessageIdRegistry.REGION_HANDSHAKE -> "REGION_HANDSHAKE"
+                MessageIdRegistry.AGENT_MOVEMENT_COMPLETE -> "AGENT_MOVEMENT_COMPLETE"
+                MessageIdRegistry.CHAT_FROM_SIMULATOR -> "CHAT_FROM_SIMULATOR"
+                MessageIdRegistry.OBJECT_UPDATE -> "OBJECT_UPDATE"
+                MessageIdRegistry.OBJECT_UPDATE_COMPRESSED -> "OBJECT_UPDATE_COMPRESSED"
+                MessageIdRegistry.AVATAR_ANIMATION -> "AVATAR_ANIMATION"
+                MessageIdRegistry.IMPROVED_TERSE_OBJECT_UPDATE -> "IMPROVED_TERSE_OBJECT_UPDATE"
+                MessageIdRegistry.KILL_OBJECT -> "KILL_OBJECT"
+                MessageIdRegistry.COARSE_LOCATION_UPDATE -> "COARSE_LOCATION_UPDATE"
+                MessageIdRegistry.START_PING_CHECK -> "START_PING_CHECK"
+                MessageIdRegistry.PACKET_ACK -> "PACKET_ACK"
+                MessageIdRegistry.SOUND_TRIGGER -> "SOUND_TRIGGER"
                 else -> "0x${id.toString(16).uppercase()}"
             }
         }
@@ -3758,7 +3758,7 @@ class UDPConnectionFixed(
         val payload = byteArrayOf(pingId)
 
         Log.d(TAG, "Responding to ping check $pingId")
-        sendPacket(MessageIds.COMPLETE_PING_CHECK, payload, reliable = false)
+        sendPacket(MessageIdRegistry.COMPLETE_PING_CHECK, payload, reliable = false)
     }
 
     /**
@@ -3865,7 +3865,7 @@ class UDPConnectionFixed(
      * the message name (when known) plus a stable hex form.
      */
     private fun formatHandlerIdForDiag(id: Int): String {
-        val name = MessageIds.getMessageName(id)
+        val name = MessageIdRegistry.getMessageName(id)
         val hex = when {
             id in 0x01..0xFE -> "0x%02X".format(id)
             id in 0xFF01..0xFFFE -> "0x%04X".format(id)
@@ -4085,10 +4085,10 @@ class UDPConnectionFixed(
     
     /**
      * Get human-readable message name from ID for debugging.
-     * Uses the centralized MessageIds.getMessageName() for comprehensive coverage.
+     * Uses the centralized MessageIdRegistry.getMessageName() for comprehensive coverage.
      */
     private fun getMessageName(messageId: Int): String {
-        return MessageIds.getMessageName(messageId)
+        return MessageIdRegistry.getMessageName(messageId)
     }
     
     /**

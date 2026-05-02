@@ -43,7 +43,7 @@ class ManagerMessageIdUsageTest {
 
         expected.forEach { (name, value) ->
             val actual = MessageIds::class.java.getField(name).getInt(null)
-            assertEquals("Unexpected integer for MessageIds.$name", value, actual)
+            assertEquals("Unexpected integer for MessageIdRegistry.$name", value, actual)
         }
     }
 
@@ -72,7 +72,7 @@ class ManagerMessageIdUsageTest {
         }
 
         if (violations.isNotEmpty()) {
-            fail("Found raw protocol hex literals outside MessageIds.kt:\n${violations.joinToString("\n")}")
+            fail("Found raw protocol hex literals outside MessageIdRegistry.kt:\n${violations.joinToString("\n")}")
         }
     }
 }
