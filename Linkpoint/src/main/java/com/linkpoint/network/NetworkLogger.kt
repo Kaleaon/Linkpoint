@@ -79,6 +79,8 @@ object NetworkLogger {
     private val retryCount = AtomicLong(0)
     private val timeoutCount = AtomicLong(0)
     private val redirectCount = AtomicLong(0)
+    private val entrySequence = AtomicLong(0)
+    private val lastPersistedSequence = AtomicLong(0)
     
     // Date formatter for timestamps
     private val timestampFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
@@ -191,7 +193,9 @@ object NetworkLogger {
             
             // Append new log entries
             logFileWriter?.apply {
+                val persistedAfter = lastPersistedSequence.get()
                 logBuffer.forEach { entry ->
+                    if (entry.sequence <= persistedAfter) return@forEach
                     val timestamp = timestampFormat.format(Date(entry.timestamp))
                     write("[$timestamp] [${entry.level}] [${entry.category}]\n")
                     write("${entry.message}\n")
@@ -200,11 +204,12 @@ object NetworkLogger {
                         write("${e.stackTraceToString()}\n")
                     }
                     write("\n")
+                    lastPersistedSequence.set(entry.sequence)
                 }
                 flush()
             }
             
-            Log.d(TAG, "Saved ${logBuffer.size} log entries to ${currentLogFile?.absolutePath}")
+            Log.d(TAG, "Saved log entries through seq=${lastPersistedSequence.get()} to ${currentLogFile?.absolutePath}")
             return currentLogFile
             
         } catch (e: Exception) {
@@ -230,6 +235,7 @@ object NetworkLogger {
             logFileWriter?.close()
             logFileWriter = null
             currentLogFile = null
+            lastPersistedSequence.set(0)
             Log.i(TAG, "Log file rotated")
         } catch (e: Exception) {
             Log.e(TAG, "Error rotating log file: ${e.message}", e)
@@ -276,6 +282,7 @@ object NetworkLogger {
      * Log entry for in-memory storage
      */
     data class LogEntry(
+        val sequence: Long,
         val timestamp: Long,
         val level: Level,
         val category: String,
@@ -321,99 +328,15 @@ object NetworkLogger {
     /**
      * Protocol statistics for HTTP/2 usage tracking
      */
-    data class ProtocolStatistics(
-        var http2Requests: Int = 0,
-        var http11Requests: Int = 0,
-        var http10Requests: Int = 0,
-        var textureHttp2Count: Int = 0,
-        var textureHttp11Count: Int = 0,
-        var meshHttp2Count: Int = 0,
-        var meshHttp11Count: Int = 0,
-        var capabilityHttp2Count: Int = 0,
-        var capabilityHttp11Count: Int = 0,
-        var lastTextureProtocol: String = "unknown",
-        var lastMeshProtocol: String = "unknown",
-        var lastCapabilityProtocol: String = "unknown"
-    ) {
-        fun getHttp2Percentage(): Float {
-            val total = http2Requests + http11Requests + http10Requests
-            return if (total > 0) (http2Requests.toFloat() / total) * 100 else 0f
-        }
-        
-        override fun toString(): String {
-            return buildString {
-                appendLine("HTTP Protocol Statistics:")
-                appendLine("  HTTP/2 Requests: $http2Requests (${String.format("%.1f", getHttp2Percentage())}%)")
-                appendLine("  HTTP/1.1 Requests: $http11Requests")
-                appendLine("  HTTP/1.0 Requests: $http10Requests")
-                appendLine()
-                appendLine("  By Request Type:")
-                appendLine("    Textures: HTTP/2=$textureHttp2Count, HTTP/1.1=$textureHttp11Count")
-                appendLine("    Meshes: HTTP/2=$meshHttp2Count, HTTP/1.1=$meshHttp11Count")
-                appendLine("    Capabilities: HTTP/2=$capabilityHttp2Count, HTTP/1.1=$capabilityHttp11Count")
-                appendLine()
-                appendLine("  Last Protocols Used:")
-                appendLine("    Texture: $lastTextureProtocol")
-                appendLine("    Mesh: $lastMeshProtocol")
-                appendLine("    Capability: $lastCapabilityProtocol")
-            }
-        }
-    }
-    
-    /**
-     * Request type enum for explicit categorization (avoids URL string matching)
-     */
-    enum class RequestType {
-        TEXTURE,
-        MESH,
-        CAPABILITY,
-        LOGIN,
-        EVENT_QUEUE,
-        INVENTORY,
-        OTHER
-    }
-    
-    // Protocol statistics instance
-    private val protocolStats = ProtocolStatistics()
-    
-    /**
-     * Get HTTP/2 protocol statistics
-     */
-    fun getProtocolStatistics(): ProtocolStatistics = protocolStats.copy()
-    
-    /**
-     * Track protocol usage by explicit request type (preferred over URL matching)
-     */
+    typealias ProtocolStatistics = ProtocolUsageTracker.ProtocolStatistics
+    typealias RequestType = ProtocolUsageTracker.RequestType
+
+    private val protocolUsageTracker = ProtocolUsageTracker()
+
+    fun getProtocolStatistics(): ProtocolStatistics = protocolUsageTracker.getProtocolStatistics()
+
     fun trackProtocolUsageByType(type: RequestType, protocol: String) {
-        val isHttp2 = protocol.contains("h2", ignoreCase = true) || protocol.contains("http/2", ignoreCase = true)
-        val isHttp11 = protocol.contains("1.1")
-        val isHttp10 = protocol.contains("1.0")
-        
-        // Update overall protocol counts
-        when {
-            isHttp2 -> protocolStats.http2Requests++
-            isHttp11 -> protocolStats.http11Requests++
-            isHttp10 -> protocolStats.http10Requests++
-        }
-        
-        // Track by request type
-        when (type) {
-            RequestType.TEXTURE -> {
-                protocolStats.lastTextureProtocol = protocol
-                if (isHttp2) protocolStats.textureHttp2Count++ else protocolStats.textureHttp11Count++
-            }
-            RequestType.MESH -> {
-                protocolStats.lastMeshProtocol = protocol
-                if (isHttp2) protocolStats.meshHttp2Count++ else protocolStats.meshHttp11Count++
-            }
-            RequestType.CAPABILITY, RequestType.LOGIN, RequestType.EVENT_QUEUE, RequestType.INVENTORY -> {
-                protocolStats.lastCapabilityProtocol = protocol
-                if (isHttp2) protocolStats.capabilityHttp2Count++ else protocolStats.capabilityHttp11Count++
-            }
-            RequestType.OTHER -> {
-                // Only update overall counts (already done above)
-            }
-        }
+        protocolUsageTracker.trackByType(type, protocol)
     }
     
     /**
@@ -481,34 +404,7 @@ object NetworkLogger {
      * This method is used as a fallback for the general `logResponse()` function.
      */
     private fun trackProtocolUsage(url: String, protocol: String) {
-        val isHttp2 = protocol.contains("h2", ignoreCase = true) || protocol.contains("http/2", ignoreCase = true)
-        val isHttp11 = protocol.contains("1.1")
-        val isHttp10 = protocol.contains("1.0")
-        
-        // Update overall protocol counts
-        when {
-            isHttp2 -> protocolStats.http2Requests++
-            isHttp11 -> protocolStats.http11Requests++
-            isHttp10 -> protocolStats.http10Requests++
-        }
-        
-        // Track by request type based on URL patterns (best-effort classification)
-        // For more reliable tracking, use trackProtocolUsageByType() instead
-        val urlLower = url.lowercase()
-        when {
-            urlLower.contains("texture") || urlLower.contains("gettexture") -> {
-                protocolStats.lastTextureProtocol = protocol
-                if (isHttp2) protocolStats.textureHttp2Count++ else protocolStats.textureHttp11Count++
-            }
-            urlLower.contains("mesh") || urlLower.contains("getmesh") -> {
-                protocolStats.lastMeshProtocol = protocol
-                if (isHttp2) protocolStats.meshHttp2Count++ else protocolStats.meshHttp11Count++
-            }
-            urlLower.contains("cap") || urlLower.contains("simhost") || urlLower.contains("secondlife.com") -> {
-                protocolStats.lastCapabilityProtocol = protocol
-                if (isHttp2) protocolStats.capabilityHttp2Count++ else protocolStats.capabilityHttp11Count++
-            }
-        }
+        protocolUsageTracker.trackByUrl(url, protocol)
     }
     
     /**
@@ -948,6 +844,7 @@ object NetworkLogger {
         
         // Create log entry
         val entry = LogEntry(
+            sequence = entrySequence.incrementAndGet(),
             timestamp = System.currentTimeMillis(),
             level = level,
             category = category,
@@ -1026,6 +923,7 @@ object NetworkLogger {
      */
     fun clearLogs() {
         logBuffer.clear()
+        lastPersistedSequence.set(0)
         httpRequestCount.set(0)
         httpResponseCount.set(0)
         errorCount.set(0)

@@ -1968,6 +1968,23 @@ object MessageIds {
     // MESSAGE NAME LOOKUP
     // =====================================
 
+
+    private val highFrequencyNameTable: Array<String?> by lazy {
+        arrayOfNulls<String>(255).apply {
+            this[START_PING_CHECK] = "StartPingCheck"
+            this[COMPLETE_PING_CHECK] = "CompletePingCheck"
+            this[AGENT_UPDATE] = "AgentUpdate"
+            this[LAYER_DATA] = "LayerData"
+            this[OBJECT_UPDATE] = "ObjectUpdate"
+            this[OBJECT_UPDATE_COMPRESSED] = "ObjectUpdateCompressed"
+            this[OBJECT_UPDATE_CACHED] = "ObjectUpdateCached"
+            this[IMPROVED_TERSE_OBJECT_UPDATE] = "ImprovedTerseObjectUpdate"
+            this[KILL_OBJECT] = "KillObject"
+            this[AVATAR_ANIMATION] = "AvatarAnimation"
+            this[SOUND_TRIGGER] = "SoundTrigger"
+        }
+    }
+
     /**
      * Get human-readable message name from message ID.
      * This is the canonical lookup function - use this instead of maintaining
@@ -1977,31 +1994,10 @@ object MessageIds {
      * @return Human-readable message name, or "Unknown(0xXXXX)" if not found
      */
     fun getMessageName(messageId: Int): String {
-        return messageNameMap[messageId] ?: formatUnknownMessageId(messageId)
-    }
-
-    /**
-     * Format an unknown message ID for display.
-     * Shows the ID in appropriate format based on frequency band.
-     */
-    private fun formatUnknownMessageId(messageId: Int): String {
-        return when {
-            // High frequency (1-254)
-            messageId in 1..254 -> "Unknown(0x${messageId.toString(16).uppercase().padStart(2, '0')})"
-            // Medium frequency (65280-65535, i.e., 0xFF00-0xFFFF)
-            messageId in 65280..65535 -> {
-                val lowByte = messageId and 0xFF
-                "Unknown(0xFF${lowByte.toString(16).uppercase().padStart(2, '0')})"
-            }
-            // Low frequency (negative values, 0xFFFFxxxx)
-            messageId < 0 -> {
-                // Convert to unsigned representation for display
-                val unsignedVal = messageId.toLong() and 0xFFFFFFFFL
-                "Unknown(0x${unsignedVal.toString(16).uppercase().padStart(8, '0')})"
-            }
-            // PacketAck special case (-5)
-            else -> "Unknown(0x${messageId.toString(16).uppercase()})"
+        if (messageId in 1..254) {
+            highFrequencyNameTable[messageId]?.let { return it }
         }
+        return MessageIdNameRegistry.getMessageName(messageId, messageNameMap)
     }
 
     /**

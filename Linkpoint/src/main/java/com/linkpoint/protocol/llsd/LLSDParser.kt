@@ -52,9 +52,7 @@ object LLSDParser {
         if (startsWithBytes(data, "<?llsd/binary?>")) return parseBinary(data)
 
         return when {
-            data.size >= 2 && data[0] == '<'.code.toByte() -> parseXML(String(data))
-            data.size >= 4 && String(data.sliceArray(0..3)) == "<?xm" -> parseXML(String(data))
-            data.size >= 6 && String(data.sliceArray(0..5)) == "<llsd>" -> parseXML(String(data))
+            looksLikeXml(data) -> parseXML(String(data, Charsets.UTF_8))
             looksLikeNotation(data) -> parseNotation(data)
             else -> parseBinary(data)
         }
@@ -74,6 +72,24 @@ object LLSDParser {
         return true
     }
 
+
+    private fun looksLikeXml(data: ByteArray): Boolean {
+        if (data.isEmpty()) return false
+        var i = 0
+        while (i < data.size && data[i].toInt().toChar().isWhitespace()) i++
+        if (i >= data.size) return false
+        if (data[i] != '<'.code.toByte()) return false
+
+        return startsWithBytesAt(data, i, "<?xml") || startsWithBytesAt(data, i, "<llsd") || data[i] == '<'.code.toByte()
+    }
+
+    private fun startsWithBytesAt(data: ByteArray, start: Int, s: String): Boolean {
+        if (start + s.length > data.size) return false
+        for (idx in s.indices) {
+            if (data[start + idx].toInt().toChar() != s[idx]) return false
+        }
+        return true
+    }
     /**
      * Notation has no required header; the bare form starts with one
      * of the value-marker characters. False positives at this layer
