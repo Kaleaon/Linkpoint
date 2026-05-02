@@ -181,10 +181,22 @@ class AppearanceManager(
     
     /**
      * Send AgentSetAppearance message.
-     * 
+     *
      * This is the UDP message that tells the simulator what your avatar looks like.
      * Other avatars will receive this information and render you accordingly.
      * Message block fields are little-endian; UUID bytes remain big-endian.
+     *
+     * The VisualParam block byte order is the **first 218 params (or 251 with
+     * Physics worn) iterated in numeric ParamID order** across the full
+     * `avatar_lad.xml` set. This matches `cinderblocks/libremetaverse`'s Apr-30
+     * 2026 fix (commit `36288373`, "Fix sorting of params for AgentSetAppearance"
+     * — the previous group-0-only filter under-emitted bytes when the table
+     * happened to have fewer than 218 group-0 params, leaving trailing slots
+     * uninitialised). The current implementation falls back to per-param
+     * `valueDefault` from the loader when no live weight is supplied; once
+     * wearable-asset → weight wiring is in, replace the empty map with the
+     * computed weights from `MakeParamValues` (see libremetaverse
+     * `AppearanceManager.cs:1929`).
      */
     suspend fun sendAgentSetAppearance(bakedTextures: Map<Int, UUID>) {
         val serial = serialNum.incrementAndGet()
@@ -201,11 +213,19 @@ class AppearanceManager(
 
         val wearableCount = bakedTextures.size
         val textureEntry = buildTextureEntryFromBakes(bakedTextures)
+        val visualParamCount = if (com.linkpoint.avatar.VisualParamLoader.isReady) {
+            // Real bound: first 251 if Physics worn, 218 otherwise. Our
+            // wear-detection isn't plumbed yet, so default to 218 like
+            // libremetaverse does for non-Physics avatars.
+            218
+        } else {
+            VISUAL_PARAM_COUNT
+        }
         val payloadSize =
             48 +                                    // AgentData
             1 + wearableCount * (16 + 1) +          // WearableData (count + N×(UUID + U8))
             2 + textureEntry.size +                 // ObjectData TextureEntry (U16 length + bytes)
-            1 + VISUAL_PARAM_COUNT                  // VisualParam
+            1 + visualParamCount                    // VisualParam
 
         val payload = ByteBuffer.allocate(payloadSize).order(MESSAGE_BYTE_ORDER)
 
@@ -228,10 +248,17 @@ class AppearanceManager(
         payload.putShort(textureEntry.size.toShort())
         payload.put(textureEntry)
 
-        // VisualParam — Variable, but with a U8 count we cap at 255 params
-        // (we send 218 — fits comfortably).
-        payload.put(VISUAL_PARAM_COUNT.toByte())
-        payload.put(visualParams)
+        // VisualParam — Variable. U8 count caps at 255; the canonical
+        // SL set is 218 (251 with Physics). Bytes are emitted in
+        // numeric ParamID order via the VisualParamLoader catalogue,
+        // not by walking our `visualParams` ByteArray (which has no
+        // mapping from index ↔ ParamID and was being shipped as 218×0x7F
+        // = "every slider at the middle" regardless of what the avatar
+        // actually wears). Falls back to that legacy buffer if the
+        // loader hasn't populated yet so we always send something.
+        val wireBytes = encodeVisualParamWireBytes()
+        payload.put(wireBytes.size.toByte())
+        payload.put(wireBytes)
 
         Log.d(TAG, "Sending AgentSetAppearance " +
             "(serial=$serial, wearables=$wearableCount, " +
@@ -384,6 +411,56 @@ class AppearanceManager(
         }
     }
     
+    /**
+     * Live ParamID → weight overrides for the next AgentSetAppearance.
+     * Empty by default: every byte falls back to per-param `valueDefault`
+     * from `avatar_lad.xml`. When the wearable-asset → weight pipeline
+     * lands, populate this from the active wearable assets before each
+     * send (mirrors libremetaverse's `MakeParamValues` step).
+     */
+    @Volatile
+    var visualParamWeightOverrides: Map<Int, Float> = emptyMap()
+
+    /**
+     * Encode the AgentSetAppearance VisualParam wire block.
+     *
+     * Strategy mirrors libremetaverse Apr-30 fix
+     * (`AppearanceManager.cs:2326`):
+     *   1. Iterate the catalogue in numeric ParamID order.
+     *   2. Take the first 218 entries (the canonical SL count without
+     *      Physics; 251 with).
+     *   3. For each, use the supplied weight if present, else the
+     *      per-param `valueDefault`. Quantise to 0..255 via the same
+     *      `(weight - min) / (max - min)` map the receiving sim uses
+     *      to invert in `Avatar.DecodeVisualParams`.
+     *
+     * Falls back to the legacy hand-set [visualParams] ByteArray if the
+     * loader hasn't initialised yet (e.g. unit tests, race during
+     * startup) — that path still ships 218 bytes so the simulator
+     * accepts the packet, just with the all-mid defaults.
+     */
+    private fun encodeVisualParamWireBytes(): ByteArray {
+        val catalog = com.linkpoint.avatar.VisualParamLoader
+        if (!catalog.isReady) return visualParams
+        val wire = catalog.wireOrderParams()
+        if (wire.isEmpty()) return visualParams
+        // SL spec: 218 bytes when not wearing Physics, 251 when worn.
+        // Cap to whichever is smaller — the wire-order list size or
+        // 218 — so older avatar_lad.xml files with fewer transmitted
+        // params still produce a valid block.
+        val n = minOf(218, wire.size)
+        val out = ByteArray(n)
+        val weights = visualParamWeightOverrides
+        for (i in 0 until n) {
+            val p = wire[i]
+            val w = weights[p.id] ?: p.valueDefault
+            val span = p.valueMax - p.valueMin
+            val t = if (span > 1e-6f) ((w - p.valueMin) / span).coerceIn(0f, 1f) else 0f
+            out[i] = (t * 255f).toInt().coerceIn(0, 255).toByte()
+        }
+        return out
+    }
+
     fun shutdown() {
         scope.cancel()
     }

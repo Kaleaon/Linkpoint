@@ -1,0 +1,8 @@
+<?xml version="1.0" ?><llsd><map><key>jsep</key><map><key>type</key><string>offer</string><key>sdp</key><string>v=0
+o=- 1 1 IN IP4 0.0.0.0
+s=-
+t=0 0
+m=audio 9 UDP/TLS/RTP/SAVPF 111
+a=rtpmap:111 opus/48000/2
+a=fmtp:111 minptime=10;useinbandfec=1;stereo=1;sprop-stereo=1;maxplaybackrate=48000
+</string></map><key>voice_server_type</key><string>webrtc</string><key>channel_type</key><string>local</string><key>parcel_local_id</key><integer>2</integer></map></llsd>

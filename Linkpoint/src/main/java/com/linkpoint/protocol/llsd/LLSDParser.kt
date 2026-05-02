@@ -35,16 +35,59 @@ object LLSDParser {
     private class MalformedBinaryDataException(message: String) : LLSDParseException(message)
 
     /**
-     * Parse LLSD from bytes (auto-detect format)
+     * Parse LLSD from bytes (auto-detect format).
+     *
+     * Detection priority:
+     *   1. `<?llsd/notation?>` magic header → notation
+     *   2. `<?llsd/binary?>` magic header → binary
+     *   3. Anything starting with `<` → XML (covers `<?xml`, `<llsd>`)
+     *   4. Notation bare-form (first non-whitespace byte is one of
+     *      `{ [ i r u s d b l ! ' " 0 1 T t F f`)
+     *   5. Fallback → binary
      */
     fun parse(data: ByteArray): LLSDValue {
         if (data.isEmpty()) return LLSDUndefined
+
+        if (startsWithBytes(data, "<?llsd/notation?>")) return parseNotation(data)
+        if (startsWithBytes(data, "<?llsd/binary?>")) return parseBinary(data)
 
         return when {
             data.size >= 2 && data[0] == '<'.code.toByte() -> parseXML(String(data))
             data.size >= 4 && String(data.sliceArray(0..3)) == "<?xm" -> parseXML(String(data))
             data.size >= 6 && String(data.sliceArray(0..5)) == "<llsd>" -> parseXML(String(data))
+            looksLikeNotation(data) -> parseNotation(data)
             else -> parseBinary(data)
+        }
+    }
+
+    /**
+     * Parse LLSD Notation (the human-readable form). See
+     * [LLSDNotationParser] for the spec mapping; this wrapper exists
+     * so the auto-detect path and API surface match the binary / XML
+     * forms.
+     */
+    fun parseNotation(data: ByteArray): LLSDValue = LLSDNotationParser.parse(data)
+
+    private fun startsWithBytes(data: ByteArray, s: String): Boolean {
+        if (data.size < s.length) return false
+        for (i in s.indices) if (data[i].toInt().toChar() != s[i]) return false
+        return true
+    }
+
+    /**
+     * Notation has no required header; the bare form starts with one
+     * of the value-marker characters. False positives at this layer
+     * just route to the notation parser, which returns
+     * `LLSDUndefined` if the bytes aren't actually notation.
+     */
+    private fun looksLikeNotation(data: ByteArray): Boolean {
+        var i = 0
+        while (i < data.size && data[i].toInt().toChar().isWhitespace()) i++
+        if (i >= data.size) return false
+        return when (data[i].toInt().toChar()) {
+            '{', '[', '!', '\'', '"', 'i', 'r', 'u', 's', 'd', 'b', 'l',
+            '0', '1', 'T', 't', 'F', 'f' -> true
+            else -> false
         }
     }
 
@@ -62,10 +105,19 @@ object LLSDParser {
     }
 
     /**
-     * Parse LLSD Binary format
+     * Parse LLSD Binary format.
+     *
+     * Skips the optional `<?llsd/binary?>\n` magic header that
+     * `python-llsd` (and `libremetaverse.StructuredData`) emit at the
+     * top of binary streams. Without that skip, the first byte the
+     * inner parser sees is `<` (0x3C), which doesn't map to any LLSD
+     * binary marker and silently drops the entire payload as
+     * `LLSDUndefined`. The header is optional in the spec — both forms
+     * are valid wire input — so we accept both.
      */
     fun parseBinary(data: ByteArray): LLSDValue {
-        val stream = PushbackInputStream(ByteArrayInputStream(data), 1)
+        val stripped = stripBinaryMagicHeader(data)
+        val stream = PushbackInputStream(ByteArrayInputStream(stripped), 1)
         val limits = ParseLimits()
         val state = ParseLimitsState()
 
@@ -108,6 +160,31 @@ object LLSDParser {
         // header itself, not by the absolute offset).
         val consumed = data.size - backing.available()
         return value to consumed
+    }
+
+    /**
+     * Optional `<?llsd/binary?>\n` magic header that `python-llsd` and
+     * `libremetaverse.StructuredData` prepend to standalone binary
+     * payloads. The spec considers it advisory and either form is valid
+     * over the wire. Strip it if present; otherwise return the input
+     * unchanged.
+     *
+     * Intentionally NOT applied in [parseBinaryAndConsumed] — mesh asset
+     * headers are embedded inside larger binary files and never carry
+     * this magic, and the caller's byte-offset accounting depends on
+     * the input being read from byte 0 of the LLSD body.
+     */
+    private fun stripBinaryMagicHeader(data: ByteArray): ByteArray {
+        val magic = "<?llsd/binary?>".toByteArray(Charsets.US_ASCII)
+        if (data.size < magic.size + 1) return data
+        for (i in magic.indices) {
+            if (data[i] != magic[i]) return data
+        }
+        // Tolerate either `\n` (unix) or `\r\n` (line-folded) terminator.
+        var idx = magic.size
+        if (idx < data.size && data[idx] == '\r'.code.toByte()) idx++
+        if (idx < data.size && data[idx] == '\n'.code.toByte()) idx++ else return data
+        return data.copyOfRange(idx, data.size)
     }
 
     private fun parseBinaryValue(

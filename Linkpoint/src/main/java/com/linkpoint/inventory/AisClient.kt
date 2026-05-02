@@ -21,6 +21,64 @@ interface AisOperations {
     suspend fun patchItem(itemId: UUID, patch: InventoryItemPatch)
     suspend fun postFolder(request: CreateFolderRequest): UUID
     suspend fun deleteNode(relativePath: String)
+
+    // Operations modelled on cinderblocks/libremetaverse
+    // `LibreMetaverse.Inventory.InventoryAISClient.cs` — the canonical
+    // surface for AISv3 (cap `InventoryAPIv3`). Default implementations
+    // throw so existing custom AisClient subclasses keep compiling
+    // until they want to opt in.
+
+    /**
+     * PATCH a category (folder) — typical use is renaming a folder or
+     * reparenting it. URL: `category/${folderId}`.
+     */
+    suspend fun patchCategory(folderId: UUID, patch: InventoryFolderPatch): Unit =
+        throw NotImplementedError("patchCategory not implemented")
+
+    /**
+     * Slam (replace) the contents of a folder. URL: `category/${folderId}`,
+     * verb PUT, body is the new folder contents. Used by the LL viewer
+     * during inventory rebuild and outfit replace.
+     */
+    suspend fun slamFolder(folderId: UUID, contents: String): Unit =
+        throw NotImplementedError("slamFolder not implemented")
+
+    /**
+     * Delete every descendant (sub-folders + items) of a category but
+     * leave the category itself. URL: `category/${folderId}/children`,
+     * verb DELETE.
+     */
+    suspend fun purgeDescendents(folderId: UUID): Unit =
+        throw NotImplementedError("purgeDescendents not implemented")
+
+    /**
+     * Copy a category to a new parent. URL: `category/${sourceId}`,
+     * verb COPY (a non-standard HTTP method LL inherits from WebDAV),
+     * `Destination` header carries the new parent UUID.
+     *
+     * `copySubfolders` controls whether the operation walks into nested
+     * folders (default true matches the LL viewer's user-facing
+     * "copy folder" behaviour).
+     */
+    suspend fun copyCategory(sourceId: UUID, destinationParentId: UUID, copySubfolders: Boolean = true): Unit =
+        throw NotImplementedError("copyCategory not implemented")
+
+    /**
+     * Move a category to a new parent. URL: `category/${sourceId}`,
+     * verb MOVE, `Destination` header carries the new parent UUID.
+     * Typical use: drag-and-drop a folder in the inventory UI.
+     */
+    suspend fun moveCategory(sourceId: UUID, destinationParentId: UUID): Unit =
+        throw NotImplementedError("moveCategory not implemented")
+
+    /**
+     * POST an inventory item (or link) under the given parent. The
+     * `createLink` flag controls whether the response is parsed as
+     * an item or a link — the wire shape differs at `_embedded.items`
+     * vs `_embedded.links`. Mirrors libremetaverse `CreateInventory`.
+     */
+    suspend fun postInventory(parentId: UUID, body: String, createLink: Boolean = false): UUID =
+        throw NotImplementedError("postInventory not implemented")
 }
 
 class AisClient(
@@ -66,10 +124,75 @@ class AisClient(
         executeWithRetry(method = "DELETE", relativePath = relativePath)
     }
 
+    override suspend fun patchCategory(folderId: UUID, patch: InventoryFolderPatch) {
+        executeWithRetry(
+            method = "PATCH",
+            relativePath = "category/$folderId",
+            body = json.encodeToString(InventoryFolderPatch.serializer(), patch)
+        )
+    }
+
+    override suspend fun slamFolder(folderId: UUID, contents: String) {
+        executeWithRetry(method = "PUT", relativePath = "category/$folderId", body = contents)
+    }
+
+    override suspend fun purgeDescendents(folderId: UUID) {
+        executeWithRetry(method = "DELETE", relativePath = "category/$folderId/children")
+    }
+
+    override suspend fun copyCategory(sourceId: UUID, destinationParentId: UUID, copySubfolders: Boolean) {
+        // libremetaverse appends `,depth=0` (sic — the comma matches the
+        // LL caps URL convention) to the `tid=` query param when
+        // `copySubfolders` is requested. The "depth=0" is misleading —
+        // it actually enables a full tree copy on the LL server side.
+        val query = if (copySubfolders) "?tid=${UUID.randomUUID()},depth=0" else "?tid=${UUID.randomUUID()}"
+        executeWithRetry(
+            method = "COPY",
+            relativePath = "category/$sourceId$query",
+            headers = mapOf("Destination" to destinationParentId.toString())
+        )
+    }
+
+    override suspend fun moveCategory(sourceId: UUID, destinationParentId: UUID) {
+        executeWithRetry(
+            method = "MOVE",
+            relativePath = "category/$sourceId?tid=${UUID.randomUUID()}",
+            headers = mapOf("Destination" to destinationParentId.toString())
+        )
+    }
+
+    override suspend fun postInventory(parentId: UUID, body: String, createLink: Boolean): UUID {
+        val response = executeWithRetry(
+            method = "POST",
+            relativePath = "category/$parentId?tid=${UUID.randomUUID()}",
+            body = body
+        )
+        // Response shape: {_embedded: {items: {<uuid>: {...}}}} or
+        // {_embedded: {links: {<uuid>: {...}}}}. We parse just enough
+        // to pluck the first key.
+        val key = if (createLink) "links" else "items"
+        return parseEmbeddedFirstId(response.body, key)
+            ?: throw AisHttpException(0, "AIS create response missing _embedded.$key")
+    }
+
+    private fun parseEmbeddedFirstId(body: String, key: String): UUID? {
+        val obj = runCatching { json.parseToJsonElement(body) }.getOrNull() ?: return null
+        val embedded = obj.jsonObjectOrNull()?.get("_embedded")?.jsonObjectOrNull()
+            ?: return null
+        val coll = embedded[key]?.jsonObjectOrNull() ?: return null
+        val firstKey = coll.keys.firstOrNull() ?: return null
+        return runCatching { UUID.fromString(firstKey) }.getOrNull()
+    }
+
+    private fun kotlinx.serialization.json.JsonElement.jsonObjectOrNull():
+            kotlinx.serialization.json.JsonObject? =
+        this as? kotlinx.serialization.json.JsonObject
+
     private suspend fun executeWithRetry(
         method: String,
         relativePath: String,
-        body: String? = null
+        body: String? = null,
+        headers: Map<String, String> = emptyMap()
     ): AisHttpResponse {
         var attempt = 0
         var lastIOException: IOException? = null
@@ -82,7 +205,8 @@ class AisClient(
                     AisHttpRequest(
                         method = method,
                         url = "$url/$relativePath",
-                        body = body
+                        body = body,
+                        headers = headers
                     )
                 )
 
@@ -124,7 +248,13 @@ interface AisTransport {
 data class AisHttpRequest(
     val method: String,
     val url: String,
-    val body: String? = null
+    val body: String? = null,
+    /**
+     * Per-request headers. Used by COPY/MOVE which need a `Destination`
+     * header carrying the target parent UUID. Empty for the common
+     * GET/POST/PATCH/DELETE paths.
+     */
+    val headers: Map<String, String> = emptyMap()
 )
 
 data class AisHttpResponse(
@@ -137,15 +267,24 @@ class OkHttpAisTransport(
 ) : AisTransport {
     override suspend fun execute(request: AisHttpRequest): AisHttpResponse {
         val builder = Request.Builder().url(request.url)
-        val requestBody = request.body?.toRequestBody("application/json".toMediaType())
+        val mediaType = "application/json".toMediaType()
+        val requestBody = request.body?.toRequestBody(mediaType)
 
         when (request.method) {
             "GET" -> builder.get()
-            "POST" -> builder.post(requestBody ?: "{}".toRequestBody("application/json".toMediaType()))
-            "PATCH" -> builder.patch(requestBody ?: "{}".toRequestBody("application/json".toMediaType()))
+            "POST" -> builder.post(requestBody ?: "{}".toRequestBody(mediaType))
+            "PATCH" -> builder.patch(requestBody ?: "{}".toRequestBody(mediaType))
+            "PUT" -> builder.put(requestBody ?: "{}".toRequestBody(mediaType))
             "DELETE" -> if (requestBody != null) builder.delete(requestBody) else builder.delete()
+            // Custom HTTP verbs from the LL AIS / WebDAV inheritance.
+            // OkHttp.method() accepts any verb name; the no-body forms
+            // pass null for the request body.
+            "COPY", "MOVE" -> builder.method(request.method, requestBody)
             else -> throw IllegalArgumentException("Unsupported method ${request.method}")
         }
+
+        // Per-request headers (e.g. Destination on COPY/MOVE).
+        request.headers.forEach { (k, v) -> builder.addHeader(k, v) }
 
         client.newCall(builder.build()).execute().use { response ->
             return AisHttpResponse(
@@ -191,6 +330,23 @@ data class InventoryItemPayload(
 data class InventoryItemPatch(
     val name: String? = null,
     @SerialName("parent_id") val parentId: String? = null
+)
+
+/**
+ * PATCH body for `/category/{id}`. Mirrors libremetaverse's
+ * `UpdateCategory` payload: only fields the caller wants to change
+ * are present; the server merges with existing folder state.
+ */
+@Serializable
+data class InventoryFolderPatch(
+    val name: String? = null,
+    @SerialName("parent_id") val parentId: String? = null,
+    /**
+     * Folder type code per `LLFolderType`. Pass null to leave
+     * unchanged. Type changes are uncommon outside system folder
+     * setup; renames are the typical case.
+     */
+    val type: Int? = null
 )
 
 @Serializable

@@ -37,7 +37,14 @@ import java.util.concurrent.Executors
  */
 class VoiceManager(
     private val context: Context,
-    private val capabilityManager: CapabilityManager
+    private val capabilityManager: CapabilityManager,
+    /**
+     * Optional. When wired up, [joinSpatialVoice] consults
+     * `features.voiceServerType` to pick between the legacy Vivox flow
+     * (`joinParcelVoice`) and the new WebRTC flow ([WebRtcVoiceSession]).
+     * Tests pass null and exercise the legacy flow directly.
+     */
+    private val simulatorFeatures: com.linkpoint.world.SimulatorFeaturesManager? = null,
 ) {
     companion object {
         private const val TAG = "VoiceManager"
@@ -231,7 +238,107 @@ class VoiceManager(
         _isConnected.value = true
         true
     }
-    
+
+    /**
+     * Top-level entry point for spatial voice. Picks the WebRTC flow
+     * for WebRTC-enabled regions and falls back to Vivox for everything
+     * else, based on `SimulatorFeatures.voice_server_type` (the cap's
+     * self-description). LL is rolling WebRTC out gradually — limited
+     * release began 2026-03-18 — so on any single login the same
+     * client must speak both protocols depending on which region the
+     * avatar is in.
+     *
+     * The `parcelLocalId` is only meaningful for spatial voice on a
+     * WebRTC region (LL's protocol scopes a session to a parcel when
+     * provided, region otherwise). Vivox sims ignore it.
+     */
+    suspend fun joinSpatialVoice(parcelLocalId: Int? = null): Boolean = withContext(voiceDispatcher) {
+        if (isWebRtcVoiceRegion()) {
+            joinSpatialVoiceWebRtc(parcelLocalId)
+        } else {
+            joinParcelVoice()
+        }
+    }
+
+    /**
+     * `voice_server_type == "webrtc"` from `SimulatorFeatures` is the
+     * authoritative signal. `null`/missing means the sim hasn't been
+     * upgraded yet and the Vivox path applies.
+     */
+    private fun isWebRtcVoiceRegion(): Boolean {
+        val type = simulatorFeatures?.features?.value?.voiceServerType
+        return type.equals("webrtc", ignoreCase = true)
+    }
+
+    /**
+     * Default STUN list for WebRTC voice. Direct port of the list in
+     * `cinderblocks/libremetaverse`'s `LibreMetaverse.Voice.WebRTC.
+     * VoiceSession` (LL's own STUN endpoints + a few well-known public
+     * servers as resilience fallbacks). Used when the sim doesn't
+     * advertise its own `ice_servers`.
+     */
+    private fun defaultWebRtcIceServers(): List<PeerConnection.IceServer> = listOf(
+        PeerConnection.IceServer.builder("stun:stun1.agni.secondlife.io:3478").createIceServer(),
+        PeerConnection.IceServer.builder("stun:stun2.agni.secondlife.io:3478").createIceServer(),
+        PeerConnection.IceServer.builder("stun:stun3.agni.secondlife.io:3478").createIceServer(),
+        PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer(),
+        PeerConnection.IceServer.builder("stun:stun2.l.google.com:19302").createIceServer(),
+        PeerConnection.IceServer.builder("stun:stun.nextcloud.com:443").createIceServer(),
+        PeerConnection.IceServer.builder("stun:stun.twilio.com:3478").createIceServer(),
+    )
+
+    /**
+     * Track for the active WebRTC voice session — at most one for
+     * spatial voice plus N for cross-region (handled by VoiceManager
+     * one level up; this single-session tracker mirrors the existing
+     * `currentParcelSession` field for symmetry with [leaveVoice]).
+     */
+    @Volatile private var currentWebRtcSession: WebRtcVoiceSession? = null
+
+    private suspend fun joinSpatialVoiceWebRtc(parcelLocalId: Int?): Boolean {
+        val factory = peerConnectionFactory
+        if (factory == null) {
+            Log.w(TAG, "WebRTC voice requested but PeerConnectionFactory failed to initialise")
+            return false
+        }
+
+        // Tear down any previous session before opening a new one. For
+        // cross-region voice (multiple neighbouring regions) the caller
+        // would manage N sessions and toggle which is primary; that
+        // bookkeeping lives outside this helper.
+        currentWebRtcSession?.close()
+
+        val session = WebRtcVoiceSession(
+            capabilityManager = capabilityManager,
+            factory = factory,
+            channelType = WebRtcVoiceSession.ChannelType.SPATIAL,
+            parcelLocalId = parcelLocalId,
+        )
+        currentWebRtcSession = session
+
+        // The localAudioTrack created in [initializeWebRTC] is per-
+        // VoiceManager so it can be shared across cross-region
+        // sessions. Attach it via the PeerConnection that
+        // WebRtcVoiceSession will create — the ICE servers come from
+        // either a sim-advertised list or the libremetaverse-style
+        // default STUN pool.
+        val ice = defaultWebRtcIceServers()
+        return try {
+            session.connect(ice)
+            // Mark this session primary so its audio is streamed back.
+            // Cross-region setups should override after the fact.
+            session.sendJoin(primary = true)
+            _isConnected.value = true
+            Log.i(TAG, "WebRTC spatial voice connected (parcel=$parcelLocalId)")
+            true
+        } catch (e: Exception) {
+            Log.w(TAG, "WebRTC spatial voice connect failed: ${e.message}", e)
+            session.close()
+            currentWebRtcSession = null
+            false
+        }
+    }
+
     /**
      * Leave current voice channel
      */
@@ -241,6 +348,8 @@ class VoiceManager(
             activeSessions.remove(session.channelUri)
         }
         currentParcelSession = null
+        currentWebRtcSession?.close()
+        currentWebRtcSession = null
         _isConnected.value = false
         Log.i(TAG, "[${Thread.currentThread().name}] Left voice channel")
     }

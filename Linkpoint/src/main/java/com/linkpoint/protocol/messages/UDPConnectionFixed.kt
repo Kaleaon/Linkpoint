@@ -1816,9 +1816,19 @@ class UDPConnectionFixed {
         lastPingTime.set(System.currentTimeMillis())
         val unanswered = unansweredPings.incrementAndGet()
 
+        // OldestUnacked is the lowest reliable-send sequence number we
+        // still expect an ACK for. The simulator uses this to drop its
+        // own server-side inflight tracking for any seq < OldestUnacked
+        // (it knows we've given up on those, so it can stop holding ACK
+        // state). libremetaverse `Simulator.SendPing` (Simulator.cs:1347)
+        // computes this from the lowest key in NeedAck. Sending 0
+        // unconditionally — what Linkpoint did before — leaves the sim
+        // wasting a small amount of memory per circuit. Costless to fix.
+        val oldestUnacked = inflightReliablePackets.keys.minOrNull() ?: 0
+
         val payload = ByteBuffer.allocate(5).order(ByteOrder.BIG_ENDIAN)
             .put(pingId.toByte())
-            .putInt(0)
+            .putInt(oldestUnacked)
             .array()
 
         sendPacket(MessageIds.START_PING_CHECK, payload, reliable = false)
@@ -1826,7 +1836,7 @@ class UDPConnectionFixed {
         NetworkLogger.log(
             NetworkLogger.Level.DEBUG,
             NetworkLogger.Category.UDP,
-            "Ping check sent (pingId=$pingId, unanswered: $unanswered)"
+            "Ping check sent (pingId=$pingId, unanswered: $unanswered, oldestUnacked=$oldestUnacked)"
         )
     }
 
