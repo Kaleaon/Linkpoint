@@ -1,7 +1,7 @@
 package com.linkpoint.avatar
 
 import android.util.Log
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLQuaternion
 import com.linkpoint.protocol.types.LLVector3
@@ -106,7 +106,7 @@ class AnimationController(
                 // ObjectIDs - empty for self
                 payload.put(0)
                 
-                udpConnection.sendPacket(MessageIds.AGENT_ANIMATION, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.AGENT_ANIMATION, payload.array(), reliable = true)
                 
                 // Track locally
                 playingAnimations[animationId] = AnimationPlayingState(
@@ -146,7 +146,7 @@ class AnimationController(
                 // ObjectIDs - empty
                 payload.put(0)
                 
-                udpConnection.sendPacket(MessageIds.AGENT_ANIMATION, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.AGENT_ANIMATION, payload.array(), reliable = true)
                 
                 // Remove from tracking
                 playingAnimations.remove(animationId)

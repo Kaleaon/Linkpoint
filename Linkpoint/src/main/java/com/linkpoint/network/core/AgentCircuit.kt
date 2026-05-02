@@ -6,7 +6,7 @@ import com.linkpoint.network.events.ConnectionState
 import com.linkpoint.network.events.ConnectionStateChangedEvent
 import com.linkpoint.protocol.auth.AuthReply
 import com.linkpoint.protocol.messages.CircuitDispatcher
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.messages.MessageRouter
 import com.linkpoint.protocol.scenery.SceneDataHandler
@@ -114,17 +114,17 @@ class AgentCircuit(
     }
 
     private suspend fun registerSceneDataHandlers() {
-        messageRouter.registerHandler(MessageIds.LAYER_DATA, object : MessageRouter.Handler {
+        messageRouter.registerHandler(MessageIdRegistry.LAYER_DATA, object : MessageRouter.Handler {
             override fun handleMessage(msgId: Int, data: ByteArray) = sceneDataHandler.handleLayerData(data)
             override fun getPriority() = 0
         })
 
-        messageRouter.registerHandler(MessageIds.OBJECT_UPDATE, object : MessageRouter.Handler {
+        messageRouter.registerHandler(MessageIdRegistry.OBJECT_UPDATE, object : MessageRouter.Handler {
             override fun handleMessage(msgId: Int, data: ByteArray) = sceneDataHandler.handleObjectUpdate(data)
             override fun getPriority() = 0
         })
 
-        messageRouter.registerHandler(MessageIds.OBJECT_PROPERTIES, object : MessageRouter.Handler {
+        messageRouter.registerHandler(MessageIdRegistry.OBJECT_PROPERTIES, object : MessageRouter.Handler {
             override fun handleMessage(msgId: Int, data: ByteArray) = sceneDataHandler.handleObjectProperties(data)
             override fun getPriority() = 0
         })

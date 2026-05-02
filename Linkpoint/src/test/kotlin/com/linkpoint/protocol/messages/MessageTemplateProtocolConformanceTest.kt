@@ -10,9 +10,9 @@ class MessageTemplateProtocolConformanceTest {
     fun `message template entries have explicit classification`() {
         val templateMessages = parseTemplateMessages()
 
-        val supported = MessageIds.supportedTemplateMessages
-        val declaredOnly = MessageIds.declaredOnlyTemplateMessages
-        val deprecated = MessageIds.deprecatedTemplateMessages
+        val supported = MessageIdRegistry.supportedTemplateMessages
+        val declaredOnly = MessageIdRegistry.declaredOnlyTemplateMessages
+        val deprecated = MessageIdRegistry.deprecatedTemplateMessages
         val declaredUserCritical = MessageTemplateCatalog.declaredOnlyUserCriticalMessagesWithRationale
         val declaredMediumUtility = MessageTemplateCatalog.declaredOnlyMediumUtilityMessagesWithRationale
         val declaredLowPriorityAdmin = MessageTemplateCatalog.declaredOnlyLowPriorityAdminMessagesWithRationale

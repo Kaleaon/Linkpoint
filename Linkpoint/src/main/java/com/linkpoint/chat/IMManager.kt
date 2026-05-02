@@ -6,7 +6,7 @@ import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.core.AgentIdentity
 import com.linkpoint.protocol.llsd.*
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.SLMessagePackers
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLVector3
@@ -478,7 +478,7 @@ class IMManager(
             message = message
         )
         udpConnection.sendPacket(
-            MessageIds.IMPROVED_INSTANT_MESSAGE,
+            MessageIdRegistry.IMPROVED_INSTANT_MESSAGE,
             payload,
             reliable = true
         )
@@ -545,7 +545,7 @@ class IMManager(
             binaryBucket = byteArrayOf(0)
         )
         udpConnection.sendPacket(
-            MessageIds.IMPROVED_INSTANT_MESSAGE,
+            MessageIdRegistry.IMPROVED_INSTANT_MESSAGE,
             payload,
             reliable = true
         )
@@ -569,7 +569,7 @@ class IMManager(
             binaryBucket = byteArrayOf(0)
         )
         udpConnection.sendPacket(
-            MessageIds.IMPROVED_INSTANT_MESSAGE,
+            MessageIdRegistry.IMPROVED_INSTANT_MESSAGE,
             payload,
             reliable = true
         )
@@ -711,7 +711,7 @@ class IMManager(
                 message = ""
             )
             udpConnection.sendPacket(
-                MessageIds.IMPROVED_INSTANT_MESSAGE,
+                MessageIdRegistry.IMPROVED_INSTANT_MESSAGE,
                 payload,
                 reliable = false
             )

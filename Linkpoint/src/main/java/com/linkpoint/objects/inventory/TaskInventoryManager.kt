@@ -1,7 +1,7 @@
 package com.linkpoint.objects.inventory
 
 import android.util.Log
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.transfer.*
 import kotlinx.coroutines.*
@@ -161,7 +161,7 @@ class TaskInventoryManager(
         payload.putInt(localId)
         
         try {
-            udpConnection.sendPacket(MessageIds.REQUEST_TASK_INVENTORY, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIdRegistry.REQUEST_TASK_INVENTORY, payload.array(), reliable = true)
             Log.d(TAG, "Sent RequestTaskInventory for object $localId")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send RequestTaskInventory", e)

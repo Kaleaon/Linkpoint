@@ -2,7 +2,7 @@ package com.linkpoint.world
 
 import android.util.Log
 import com.linkpoint.protocol.core.AgentIdentity
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLVector3
 import kotlinx.coroutines.*
@@ -201,7 +201,7 @@ class ParcelManager(
                 payload.putInt(position.y.toInt())
                 payload.putInt(position.z.toInt())
                 
-                udpConnection.sendPacket(MessageIds.PARCEL_INFO_REQUEST, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.PARCEL_INFO_REQUEST, payload.array(), reliable = true)
                 Log.d(TAG, "Requested parcel info at position: $position")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to request parcel info", e)
@@ -271,7 +271,7 @@ class ParcelManager(
                 payload.putInt(0)  // Price (0 = simulator authoritative price)
                 payload.putInt(0)  // Area
                 
-                udpConnection.sendPacket(MessageIds.PARCEL_BUY, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.PARCEL_BUY, payload.array(), reliable = true)
                 Log.i(TAG, "Sent ParcelBuy for localId=$localId")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to buy land", e)
@@ -295,7 +295,7 @@ class ParcelManager(
                 writeUUID(payload, groupId)
                 payload.putInt(localId)  // LocalID
                 
-                udpConnection.sendPacket(MessageIds.PARCEL_DEED_TO_GROUP, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.PARCEL_DEED_TO_GROUP, payload.array(), reliable = true)
                 Log.i(TAG, "Sent ParcelDeedToGroup for localId=$localId to group $groupId")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to deed land to group", e)
@@ -318,7 +318,7 @@ class ParcelManager(
                 // Data block
                 payload.putInt(localId)
                 
-                udpConnection.sendPacket(MessageIds.PARCEL_RELEASE, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.PARCEL_RELEASE, payload.array(), reliable = true)
                 Log.i(TAG, "Released land localId=$localId")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to release land", e)
@@ -376,7 +376,7 @@ class ParcelManager(
                 payload.put(0)  // TaskIDs count
                 payload.put(0)  // OwnerIDs count
                 
-                udpConnection.sendPacket(MessageIds.PARCEL_RETURN_OBJECTS, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.PARCEL_RETURN_OBJECTS, payload.array(), reliable = true)
                 Log.i(TAG, "Returned objects from parcel $localId, type=${returnType.name}")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to return objects", e)
@@ -495,7 +495,7 @@ class ParcelManager(
                 payload.putInt((hours * 3600).toInt())  // Time in seconds
                 payload.putInt(1)  // Flags - access allowed
                 
-                udpConnection.sendPacket(MessageIds.PARCEL_ACCESS_LIST_UPDATE, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.PARCEL_ACCESS_LIST_UPDATE, payload.array(), reliable = true)
                 Log.i(TAG, "Added $agentId to access list for parcel $localId")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to add to access list", e)
@@ -528,7 +528,7 @@ class ParcelManager(
                 payload.putInt(0)
                 payload.putInt(0)
                 
-                udpConnection.sendPacket(MessageIds.PARCEL_ACCESS_LIST_UPDATE, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.PARCEL_ACCESS_LIST_UPDATE, payload.array(), reliable = true)
                 Log.i(TAG, "Removed $agentId from access list for parcel $localId")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to remove from access list", e)
@@ -561,7 +561,7 @@ class ParcelManager(
                 payload.putInt(0)  // Permanent
                 payload.putInt(1)  // Flags - banned
                 
-                udpConnection.sendPacket(MessageIds.PARCEL_ACCESS_LIST_UPDATE, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.PARCEL_ACCESS_LIST_UPDATE, payload.array(), reliable = true)
                 Log.i(TAG, "Added $agentId to ban list for parcel $localId")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to add to ban list", e)
@@ -594,7 +594,7 @@ class ParcelManager(
                 payload.putInt(0)
                 payload.putInt(0)
                 
-                udpConnection.sendPacket(MessageIds.PARCEL_ACCESS_LIST_UPDATE, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.PARCEL_ACCESS_LIST_UPDATE, payload.array(), reliable = true)
                 Log.i(TAG, "Removed $agentId from ban list for parcel $localId")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to remove from ban list", e)
@@ -661,7 +661,7 @@ class ParcelManager(
         payload.putFloat(parcel.userLookAt.z)
         payload.put(parcel.landingType.toByte())
         
-        udpConnection.sendPacket(MessageIds.PARCEL_PROPERTIES_UPDATE, payload.array(), reliable = true)
+        udpConnection.sendPacket(MessageIdRegistry.PARCEL_PROPERTIES_UPDATE, payload.array(), reliable = true)
     }
     
     // ==================== PARCEL OVERLAY ====================
