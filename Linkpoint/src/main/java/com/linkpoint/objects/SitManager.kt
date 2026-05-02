@@ -1,7 +1,7 @@
 package com.linkpoint.objects
 
 import android.util.Log
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLQuaternion
 import com.linkpoint.protocol.types.LLVector3
@@ -69,7 +69,7 @@ class SitManager(
                 payload.putFloat(0f)
                 payload.putFloat(0f)
                 
-                udpConnection.sendPacket(MessageIds.AGENT_REQUEST_SIT, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.AGENT_REQUEST_SIT, payload.array(), reliable = true)
                 Log.i(TAG, "Requested sit on object $targetId")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to request sit", e)
@@ -96,7 +96,7 @@ class SitManager(
                 // Use AgentRequestSit with object local ID
                 // This requires resolving the UUID
                 
-                udpConnection.sendPacket(MessageIds.AGENT_REQUEST_SIT, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.AGENT_REQUEST_SIT, payload.array(), reliable = true)
                 Log.d(TAG, "Requested sit on local ID $localId")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to sit on local ID", e)
@@ -116,7 +116,7 @@ class SitManager(
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
                 
-                udpConnection.sendPacket(MessageIds.AGENT_SIT, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.AGENT_SIT, payload.array(), reliable = true)
                 Log.d(TAG, "Accepted sit")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to accept sit", e)
@@ -141,7 +141,7 @@ class SitManager(
                 payload.putUUID(udpConnection.getSessionId())
                 payload.putInt(AGENT_CONTROL_STAND_UP)
                 
-                udpConnection.sendPacket(MessageIds.AGENT_SIT, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.AGENT_SIT, payload.array(), reliable = true)
                 
                 Log.i(TAG, "Requested stand up")
             } catch (e: Exception) {
@@ -162,7 +162,7 @@ class SitManager(
                 payload.putUUID(udpConnection.getSessionId())
                 payload.putInt(AGENT_CONTROL_SIT_ON_GROUND)
                 
-                udpConnection.sendPacket(MessageIds.AGENT_SIT, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.AGENT_SIT, payload.array(), reliable = true)
                 
                 _isSitting.value = true
                 _sitTargetId.value = null

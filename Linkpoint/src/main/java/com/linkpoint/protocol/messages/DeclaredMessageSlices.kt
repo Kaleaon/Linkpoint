@@ -232,14 +232,14 @@ object DeclaredMessageSlices {
     fun handle(messageId: Int, rawPacket: ByteArray, onHandled: (String) -> Unit): Boolean {
         val payload = MessageParser.extractPayload(rawPacket) ?: return false
         val summary = when (messageId) {
-            MessageIds.FETCH_INVENTORY_DESCENDENTS -> parseFetchInventoryDescendents(payload).let { "FetchInventoryDescendents folder=${it.folderId}" }
-            MessageIds.FETCH_INVENTORY -> parseFetchInventory(payload).let { "FetchInventory items=${it.entries.size}" }
-            MessageIds.REQUEST_PAY_PRICE -> parseRequestPayPrice(payload).let { "RequestPayPrice object=${it.objectId}" }
-            MessageIds.DIR_FIND_QUERY -> parseDirFindQuery(payload).let { "DirFindQuery text='${it.queryText}'" }
-            MessageIds.GROUP_TITLES_REQUEST -> parseGroupTitlesRequest(payload).let { "GroupTitlesRequest group=${it.groupId}" }
-            MessageIds.MAP_NAME_REQUEST -> parseMapNameRequest(payload).let { "MapNameRequest name='${it.name}'" }
-            MessageIds.AGENT_PAUSE -> parseAgentPause(payload).let { "AgentPause serial=${it.serialNum}" }
-            MessageIds.AGENT_RESUME -> parseAgentResume(payload).let { "AgentResume serial=${it.serialNum}" }
+            MessageIdRegistry.FETCH_INVENTORY_DESCENDENTS -> parseFetchInventoryDescendents(payload).let { "FetchInventoryDescendents folder=${it.folderId}" }
+            MessageIdRegistry.FETCH_INVENTORY -> parseFetchInventory(payload).let { "FetchInventory items=${it.entries.size}" }
+            MessageIdRegistry.REQUEST_PAY_PRICE -> parseRequestPayPrice(payload).let { "RequestPayPrice object=${it.objectId}" }
+            MessageIdRegistry.DIR_FIND_QUERY -> parseDirFindQuery(payload).let { "DirFindQuery text='${it.queryText}'" }
+            MessageIdRegistry.GROUP_TITLES_REQUEST -> parseGroupTitlesRequest(payload).let { "GroupTitlesRequest group=${it.groupId}" }
+            MessageIdRegistry.MAP_NAME_REQUEST -> parseMapNameRequest(payload).let { "MapNameRequest name='${it.name}'" }
+            MessageIdRegistry.AGENT_PAUSE -> parseAgentPause(payload).let { "AgentPause serial=${it.serialNum}" }
+            MessageIdRegistry.AGENT_RESUME -> parseAgentResume(payload).let { "AgentResume serial=${it.serialNum}" }
             else -> return false
         }
         onHandled(summary)

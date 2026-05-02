@@ -7,7 +7,7 @@ import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.capabilities.EventQueueDispatcher
 import com.linkpoint.protocol.llsd.*
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
@@ -353,7 +353,7 @@ class FriendsManager(
                 // BinaryBucket (Variable 2) - empty for regular IM
                 payload.putShort(0)
 
-                udpConnection.sendPacket(MessageIds.IMPROVED_INSTANT_MESSAGE, payload.array().copyOf(payload.position()), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.IMPROVED_INSTANT_MESSAGE, payload.array().copyOf(payload.position()), reliable = true)
                 Log.i(TAG, "Sent IM to friend $friendAgentId")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to send IM to friend", e)
@@ -478,7 +478,7 @@ class FriendsManager(
                 // BinaryBucket - empty for friendship offer
                 payload.putShort(0)
                 
-                udpConnection.sendPacket(MessageIds.IMPROVED_INSTANT_MESSAGE, payload.array().copyOf(payload.position()), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.IMPROVED_INSTANT_MESSAGE, payload.array().copyOf(payload.position()), reliable = true)
                 Log.i(TAG, "✓ Friendship offer sent to $targetAgentId (transaction: $transactionId)")
                 true
             } catch (e: Exception) {
@@ -504,7 +504,7 @@ class FriendsManager(
                 // ExBlock
                 payload.putUUID(friendAgentId)
                 
-                udpConnection.sendPacket(MessageIds.TERMINATE_FRIENDSHIP, payload.array().copyOf(payload.position()), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.TERMINATE_FRIENDSHIP, payload.array().copyOf(payload.position()), reliable = true)
                 
                 friends.remove(friendAgentId)
                 _onlineFriends.value = _onlineFriends.value - friendAgentId
@@ -541,7 +541,7 @@ class FriendsManager(
                 payload.putUUID(friendAgentId)
                 payload.putInt(rights)
                 
-                udpConnection.sendPacket(MessageIds.GRANT_USER_RIGHTS, payload.array().copyOf(payload.position()), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.GRANT_USER_RIGHTS, payload.array().copyOf(payload.position()), reliable = true)
                 
                 friends[friendAgentId] = friend.copy(rightsGiven = rights)
                 
@@ -582,7 +582,7 @@ class FriendsManager(
                 // TargetBlock
                 payload.putUUID(friendAgentId)
                 
-                udpConnection.sendPacket(MessageIds.FIND_AGENT, payload.array().copyOf(payload.position()), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.FIND_AGENT, payload.array().copyOf(payload.position()), reliable = true)
                 Log.d(TAG, "Requested location for friend $friendAgentId")
                 
                 // Response will come asynchronously via event handler
@@ -636,7 +636,7 @@ class FriendsManager(
                 // BinaryBucket - empty
                 payload.putShort(0)
                 
-                udpConnection.sendPacket(MessageIds.IMPROVED_INSTANT_MESSAGE, payload.array().copyOf(payload.position()), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.IMPROVED_INSTANT_MESSAGE, payload.array().copyOf(payload.position()), reliable = true)
                 Log.i(TAG, "Requested teleport to friend $friendAgentId")
                 true
             } catch (e: Exception) {
@@ -684,7 +684,7 @@ class FriendsManager(
                 payload.put(1)  // Number of targets
                 payload.putUUID(friendAgentId)
                 
-                udpConnection.sendPacket(MessageIds.START_LURE, payload.array().copyOf(payload.position()), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.START_LURE, payload.array().copyOf(payload.position()), reliable = true)
                 Log.i(TAG, "Offered teleport to friend $friendAgentId")
                 true
             } catch (e: Exception) {
