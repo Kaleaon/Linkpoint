@@ -26,9 +26,30 @@ class LLCircuit(val host: Host) {
 
     fun nextSequenceNumber(): UInt = seqNum.getAndIncrement().toUInt()
 
-    fun ackPacket(seq: UInt) {
+    /**
+     * Track an inbound packet sequence that must be acknowledged back to the peer.
+     */
+    fun recordInboundSequenceForAck(seq: UInt) {
         pendingAcks.add(seq)
+    }
+
+    /**
+     * Mark an outbound reliable sequence as acknowledged by the peer.
+     */
+    fun handleAckForOutboundSequence(seq: UInt) {
         waitingAcks.remove(seq)
+    }
+
+
+
+    /**
+     * Backwards-compatible helper for older callers that used a single ACK API.
+     * Prefer calling the explicit inbound/outbound methods directly.
+     */
+    @Deprecated("Use recordInboundSequenceForAck() or handleAckForOutboundSequence()")
+    fun ackPacket(seq: UInt) {
+        recordInboundSequenceForAck(seq)
+        handleAckForOutboundSequence(seq)
     }
 
     fun needsResend(seq: UInt): Boolean = seq in waitingAcks
