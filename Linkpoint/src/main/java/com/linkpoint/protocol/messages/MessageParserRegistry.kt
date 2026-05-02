@@ -1,5 +1,7 @@
 package com.linkpoint.protocol.messages
 
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
+
 /**
  * Parser registry mapping message IDs to parser handlers.
  * This replaces large conditional parser blocks with composable per-domain handlers.

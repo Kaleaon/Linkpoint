@@ -191,7 +191,7 @@ android {
     
     kotlinOptions {
         jvmTarget = "1.8"
-        freeCompilerArgs += listOf("-opt-in=kotlin.RequiresOptIn")
+        freeCompilerArgs += listOf("-opt-in=kotlin.RequiresOptIn", "-Xnested-type-aliases")
     }
     
     buildFeatures {

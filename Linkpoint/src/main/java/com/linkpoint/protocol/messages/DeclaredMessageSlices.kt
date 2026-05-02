@@ -1,5 +1,6 @@
 package com.linkpoint.protocol.messages
 
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.types.getUUID
 import com.linkpoint.protocol.types.putUUID
 import java.nio.ByteBuffer

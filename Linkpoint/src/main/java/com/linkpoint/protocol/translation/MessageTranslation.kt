@@ -1,6 +1,7 @@
 package com.linkpoint.protocol.translation
 
 import android.util.Log
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -228,7 +229,7 @@ object MessageTranslation {
          * Delegates to the centralized MessageIdRegistry.getMessageName() for comprehensive coverage.
          */
         fun getName(messageId: Int): String {
-            return com.linkpoint.protocol.messages.MessageIdRegistry.getMessageName(messageId)
+            return MessageIdRegistry.getMessageName(messageId)
         }
     }
     
