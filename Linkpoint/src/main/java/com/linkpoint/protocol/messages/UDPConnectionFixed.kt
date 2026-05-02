@@ -11,6 +11,12 @@ import com.linkpoint.protocol.core.AgentIdentity
 import com.linkpoint.protocol.circuit.LinkpointConstants
 import com.linkpoint.protocol.types.putUUID
 import com.linkpoint.utils.SessionLogRecorder
+import com.linkpoint.protocol.messages.diagnostics.PacketDiagnosticsRecorder
+import com.linkpoint.protocol.messages.diagnostics.DiagnosticsConstants
+import com.linkpoint.protocol.transport.TransportConstants
+import com.linkpoint.protocol.transport.ReliabilityConstants
+import com.linkpoint.protocol.transport.ReliabilitySupervisor
+import com.linkpoint.protocol.transport.nio.UdpDatagramTransport
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -104,22 +110,29 @@ import java.util.concurrent.atomic.AtomicLong
  * @see MessageRouter for message dispatch logic
  * @see DebugReportService for how diagnostics are displayed
  */
-class UDPConnectionFixed {
+class UDPConnectionFixed(
+    private val clock: () -> Long = { System.currentTimeMillis() },
+    private val eventEmitter: EventBus = EventBus.getInstance(),
+    private val logger: (Int, String, String) -> Unit = { priority, tag, message -> Log.println(priority, tag, message) },
+    private val transport: UdpDatagramTransport = UdpDatagramTransport(),
+    private val reliabilitySupervisor: ReliabilitySupervisor = ReliabilitySupervisor(),
+    private val packetDiagnosticsRecorder: PacketDiagnosticsRecorder<PacketHistoryEntry> = PacketDiagnosticsRecorder()
+) {
     
     companion object {
         private const val TAG = "UDPConnectionFixed"
         
         /** Maximum UDP datagram size - from LinkpointConstants */
-        private val BUFFER_SIZE = LinkpointConstants.MAX_MESSAGE_SIZE
+        private val BUFFER_SIZE = TransportConstants.BUFFER_SIZE
         
         /** Timeout for NIO selector operations - from LinkpointConstants (1 second idle interval) */
-        private val SELECTOR_TIMEOUT_MS = LinkpointConstants.DEFAULT_IDLE_INTERVAL_MS
+        private val SELECTOR_TIMEOUT_MS = TransportConstants.SELECTOR_TIMEOUT_MS
         
         /** 
          * Packet header size: flags (1) + sequence (4) + extra (1) = 6 bytes
          * This is constant across all SL UDP packets - from LinkpointConstants
          */
-        private val PACKET_HEADER_SIZE = LinkpointConstants.PACKET_HEADER_SIZE
+        private val PACKET_HEADER_SIZE = TransportConstants.PACKET_HEADER_SIZE
         
         /**
          * Frequency bases for message ID encoding (matching SL protocol)
@@ -144,14 +157,14 @@ class UDPConnectionFixed {
          * Higher values provide more diagnostic data but use more memory.
          * Default of 50 provides sufficient history for debugging connection issues.
          */
-        const val DEFAULT_PACKET_HISTORY_SIZE = 50
+        const val DEFAULT_PACKET_HISTORY_SIZE = DiagnosticsConstants.DEFAULT_PACKET_HISTORY_SIZE
         
         /**
          * Whether to log full packet data or just a preview.
          * When true (default), all packet bytes are logged for complete diagnosis.
          * Set to false to reduce log verbosity in production.
          */
-        const val LOG_FULL_PACKET_DATA = true
+        const val LOG_FULL_PACKET_DATA = DiagnosticsConstants.LOG_FULL_PACKET_DATA
         
         // ==================== LUMIYA TIMING CONSTANTS ====================
         // These critical values come from the reference viewer's proven mobile implementation
@@ -186,7 +199,7 @@ class UDPConnectionFixed {
          * Threshold for triggering reconnection due to consecutive send errors.
          * Android socket errors like "Operation not permitted" indicate socket invalidation.
          */
-        const val CONSECUTIVE_ERROR_THRESHOLD = 5
+        const val CONSECUTIVE_ERROR_THRESHOLD = ReliabilityConstants.CONSECUTIVE_ERROR_THRESHOLD
 
         /**
          * Maximum time without ANY new received packet before we treat the
@@ -195,14 +208,14 @@ class UDPConnectionFixed {
          * watchdog gets first shot, but well below typical user-visible
          * timeouts so a stuck cellular NAT clears within ~45s.
          */
-        const val INBOUND_DATA_STALL_MS = 45_000L
+        const val INBOUND_DATA_STALL_MS = ReliabilityConstants.INBOUND_DATA_STALL_MS
 
         /**
          * Cooldown after a socket rebind. Prevents tight reconnect loops if
          * the rebind itself doesn't restore inbound flow (e.g. carrier-side
          * outage rather than NAT eviction).
          */
-        const val SOCKET_REBIND_COOLDOWN_MS = 30_000L
+        const val SOCKET_REBIND_COOLDOWN_MS = TransportConstants.SOCKET_REBIND_COOLDOWN_MS
 
         /**
          * After an in-place socket reconnect, we expect the simulator to
@@ -223,7 +236,7 @@ class UDPConnectionFixed {
          * recover, but well under the 30s rebind cooldown that would
          * otherwise mask a dead circuit.
          */
-        const val POST_RECONNECT_VERIFY_MS = 12_000L
+        const val POST_RECONNECT_VERIFY_MS = ReliabilityConstants.POST_RECONNECT_VERIFY_MS
     }
     
     // Connection parameters
@@ -2040,7 +2053,7 @@ class UDPConnectionFixed {
      */
     private fun recordAckReceived(sequenceNumber: Int, messageId: Int) {
         val entry = PacketHistoryEntry(
-            timestamp = System.currentTimeMillis(),
+            timestamp = packetDiagnosticsRecorder.now(),
             type = PacketHistoryEntry.PacketEventType.ACK_RECEIVED,
             messageId = messageId,
             messageName = if (messageId >= 0) getMessageName(messageId) else "ACK",
@@ -4023,7 +4036,7 @@ class UDPConnectionFixed {
         val fullHexDump = data.joinToString(" ") { "%02X".format(it) }
         
         val entry = PacketHistoryEntry(
-            timestamp = System.currentTimeMillis(),
+            timestamp = packetDiagnosticsRecorder.now(),
             type = type,
             messageId = messageId,
             messageName = getMessageName(messageId),
@@ -4083,7 +4096,7 @@ class UDPConnectionFixed {
      * Returns the list of recent packet events including raw hex data.
      */
     fun getPacketHistory(): List<PacketHistoryEntry> {
-        return recentPacketHistory.toList()
+        return packetDiagnosticsRecorder.snapshot()
     }
     
     /**
