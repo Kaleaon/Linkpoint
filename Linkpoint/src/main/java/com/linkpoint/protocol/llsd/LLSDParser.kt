@@ -35,16 +35,59 @@ object LLSDParser {
     private class MalformedBinaryDataException(message: String) : LLSDParseException(message)
 
     /**
-     * Parse LLSD from bytes (auto-detect format)
+     * Parse LLSD from bytes (auto-detect format).
+     *
+     * Detection priority:
+     *   1. `<?llsd/notation?>` magic header → notation
+     *   2. `<?llsd/binary?>` magic header → binary
+     *   3. Anything starting with `<` → XML (covers `<?xml`, `<llsd>`)
+     *   4. Notation bare-form (first non-whitespace byte is one of
+     *      `{ [ i r u s d b l ! ' " 0 1 T t F f`)
+     *   5. Fallback → binary
      */
     fun parse(data: ByteArray): LLSDValue {
         if (data.isEmpty()) return LLSDUndefined
+
+        if (startsWithBytes(data, "<?llsd/notation?>")) return parseNotation(data)
+        if (startsWithBytes(data, "<?llsd/binary?>")) return parseBinary(data)
 
         return when {
             data.size >= 2 && data[0] == '<'.code.toByte() -> parseXML(String(data))
             data.size >= 4 && String(data.sliceArray(0..3)) == "<?xm" -> parseXML(String(data))
             data.size >= 6 && String(data.sliceArray(0..5)) == "<llsd>" -> parseXML(String(data))
+            looksLikeNotation(data) -> parseNotation(data)
             else -> parseBinary(data)
+        }
+    }
+
+    /**
+     * Parse LLSD Notation (the human-readable form). See
+     * [LLSDNotationParser] for the spec mapping; this wrapper exists
+     * so the auto-detect path and API surface match the binary / XML
+     * forms.
+     */
+    fun parseNotation(data: ByteArray): LLSDValue = LLSDNotationParser.parse(data)
+
+    private fun startsWithBytes(data: ByteArray, s: String): Boolean {
+        if (data.size < s.length) return false
+        for (i in s.indices) if (data[i].toInt().toChar() != s[i]) return false
+        return true
+    }
+
+    /**
+     * Notation has no required header; the bare form starts with one
+     * of the value-marker characters. False positives at this layer
+     * just route to the notation parser, which returns
+     * `LLSDUndefined` if the bytes aren't actually notation.
+     */
+    private fun looksLikeNotation(data: ByteArray): Boolean {
+        var i = 0
+        while (i < data.size && data[i].toInt().toChar().isWhitespace()) i++
+        if (i >= data.size) return false
+        return when (data[i].toInt().toChar()) {
+            '{', '[', '!', '\'', '"', 'i', 'r', 'u', 's', 'd', 'b', 'l',
+            '0', '1', 'T', 't', 'F', 'f' -> true
+            else -> false
         }
     }
 
