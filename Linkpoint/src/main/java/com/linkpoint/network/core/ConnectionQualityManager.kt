@@ -52,6 +52,32 @@ class ConnectionQualityManager(private val context: Context) {
         const val PUSH_TIMEOUT_MS = 15_000L           // 15 seconds for push operations
         const val READ_TIMEOUT_MS = 60_000L           // 60 seconds for reads
         const val WRITE_TIMEOUT_MS = 30_000L          // 30 seconds for writes
+
+        /**
+         * How long after `onLost` we keep [isInHandoff] = true. Sized to
+         * cover the ~3-8s typical Wi-Fi↔cellular handoff blackout from the
+         * IMC 2016 cellular bufferbloat measurements; longer than that and
+         * the higher-level reconnect path is the right tool. Balakrishnan
+         * et al. 1996: short gaps = wireless loss (don't tear down state),
+         * long gaps = real failure.
+         */
+        const val HANDOFF_GRACE_MS = 8_000L
+    }
+
+    /**
+     * True if the active network was lost within [HANDOFF_GRACE_MS] and we
+     * have not yet seen `onAvailable`. Watchdogs and reconnect coordinators
+     * should treat this window as transient — neither retransmit backoff
+     * (counterproductive on a black hole) nor a full re-login (premature).
+     */
+    fun isInHandoffWindow(): Boolean {
+        if (!_isInHandoff.value) return false
+        val sinceLost = System.currentTimeMillis() - lastNetworkLostAt
+        if (sinceLost > HANDOFF_GRACE_MS) {
+            _isInHandoff.value = false
+            return false
+        }
+        return true
     }
     
     /**
@@ -74,6 +100,30 @@ class ConnectionQualityManager(private val context: Context) {
     
     private val _networkType = MutableStateFlow(NetworkDiagnostics.NetworkType.UNKNOWN)
     val networkType: StateFlow<NetworkDiagnostics.NetworkType> = _networkType.asStateFlow()
+
+    /**
+     * Whether the active network is metered (`!NET_CAPABILITY_NOT_METERED`).
+     * Cellular is almost always metered; Wi-Fi behind a tethered hotspot can
+     * also flip to metered. Used by [com.linkpoint.network.MeteredAssetGate]
+     * to cap concurrent HTTPS asset fetch on cellular — the IEEE 6733597
+     * (TCP-RRE) finding is that a saturated cellular uplink delays return
+     * ACKs enough to stall unrelated downloads, so concurrent download caps
+     * matter more on metered cellular than on Wi-Fi.
+     */
+    private val _isMetered = MutableStateFlow(false)
+    val isMetered: StateFlow<Boolean> = _isMetered.asStateFlow()
+
+    /**
+     * Set when the system has reported `onLost` for the active network and
+     * we are within [HANDOFF_GRACE_MS] of that event. The reliable-resend
+     * watchdog and the auto-relogin coordinator both check this flag so
+     * they don't burn reconnect attempts during a Wi-Fi↔cellular handoff
+     * (Balakrishnan et al. 1996: "treat wireless loss as wireless loss,
+     * not connection failure").
+     */
+    private val _isInHandoff = MutableStateFlow(false)
+    val isInHandoff: StateFlow<Boolean> = _isInHandoff.asStateFlow()
+    @Volatile private var lastNetworkLostAt = 0L
     
     // Latency tracking
     private val latencySamples = ConcurrentLinkedQueue<Long>()
@@ -115,6 +165,10 @@ class ConnectionQualityManager(private val context: Context) {
                     "🟢 Network available (handle=${network.networkHandle})"
                 )
                 _isConnected.value = true
+                // If we're inside the handoff grace window we just transitioned
+                // (e.g. Wi-Fi → cellular). Clear the flag so the resend
+                // watchdog and reconnect coordinator can resume normal cadence.
+                _isInHandoff.value = false
                 updateNetworkInfo()
                 // Notify listeners of network change (for DNS cache clearing, etc.)
                 notifyNetworkChange()
@@ -129,6 +183,14 @@ class ConnectionQualityManager(private val context: Context) {
                 )
                 _isConnected.value = false
                 _quality.value = Quality.UNKNOWN
+                // Mark the start of a possible handoff. If `onAvailable` does
+                // NOT fire within HANDOFF_GRACE_MS the higher-level reconnect
+                // path will eventually take over (existing watchdogs); but
+                // during the grace window we want to suppress retransmit
+                // backoff and reconnect attempts because they're worse than
+                // useless across a handoff.
+                lastNetworkLostAt = System.currentTimeMillis()
+                _isInHandoff.value = true
                 // Notify listeners of network change
                 notifyNetworkChange()
             }
@@ -139,6 +201,12 @@ class ConnectionQualityManager(private val context: Context) {
             ) {
                 logCapabilitiesChanged(network, capabilities)
                 updateFromCapabilities(capabilities)
+                // Mirror the metered bit into the StateFlow — this is the
+                // canonical source ConnectivityManager publishes, and it can
+                // change at runtime (e.g. user toggles "metered" on a Wi-Fi).
+                _isMetered.value = !capabilities.hasCapability(
+                    NetworkCapabilities.NET_CAPABILITY_NOT_METERED
+                )
             }
         }
         
@@ -213,6 +281,7 @@ class ConnectionQualityManager(private val context: Context) {
             val info = NetworkDiagnostics.getNetworkInfo(context)
             _isConnected.value = info.isConnected
             _networkType.value = info.type
+            _isMetered.value = info.isMetered
             estimatedBandwidthKbps = info.estimatedBandwidthKbps
             
             // Update quality based on network type and bandwidth

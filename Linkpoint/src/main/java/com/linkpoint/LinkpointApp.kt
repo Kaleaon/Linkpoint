@@ -1071,6 +1071,27 @@ class LinkpointApp : Application() {
             }
         }
 
+        // Tell the watchdog when the device is in a Wi-Fi↔cellular handoff so
+        // it can suppress reliable-resend backoff and reconnect-attempt
+        // burning during the blackout. Balakrishnan et al. 1996: short gaps
+        // = wireless loss, not connection failure.
+        udpConnection.setHandoffProvider {
+            try { protocol.qualityManager.isInHandoffWindow() } catch (_: Exception) { false }
+        }
+
+        // Collect the metered StateFlow into the shared MeteredAssetGate so
+        // concurrent HTTPS asset fetches drop to METERED_PERMITS on cellular
+        // and back to UNMETERED_PERMITS on Wi-Fi. See [MeteredAssetGate].
+        applicationScope.launch {
+            try {
+                protocol.qualityManager.isMetered.collect { metered ->
+                    com.linkpoint.network.MeteredAssetGate.shared.updateMetered(metered)
+                }
+            } catch (e: Throwable) {
+                Log.w(TAG, "MeteredAssetGate collector ended: ${e.message}")
+            }
+        }
+
         // Wire the foreground service's keepalive callback to the actual UDP
         // ping. Without this, LinkpointConnectionService.performKeepAlive()
         // is a no-op (its internal `connectionCallback` is never set
