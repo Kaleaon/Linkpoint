@@ -8,7 +8,6 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import kotlin.math.atan2
 import kotlin.math.min
 import kotlin.math.sqrt
 
@@ -62,7 +61,12 @@ class JoystickView @JvmOverloads constructor(
         style = Paint.Style.STROKE
         strokeWidth = 3f
     }
-    
+
+    private val indicatorPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.argb(80, 255, 255, 255)
+        style = Paint.Style.FILL
+    }
+
     // Dimensions
     private var centerX = 0f
     private var centerY = 0f
@@ -107,11 +111,6 @@ class JoystickView @JvmOverloads constructor(
     }
     
     private fun drawDirectionIndicators(canvas: Canvas) {
-        val indicatorPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.argb(80, 255, 255, 255)
-            style = Paint.Style.FILL
-        }
-        
         val indicatorSize = baseRadius * 0.15f
         val offset = baseRadius * 0.7f
         
@@ -130,25 +129,26 @@ class JoystickView @JvmOverloads constructor(
         when (event.action) {
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
                 isTouching = true
-                
-                // Calculate distance from center
+
+                val maxDistance = baseRadius - stickRadius
+                if (maxDistance <= 0f) {
+                    // View hasn't been measured yet; nothing meaningful to report.
+                    return true
+                }
+
                 val dx = event.x - centerX
                 val dy = event.y - centerY
                 val distance = sqrt(dx * dx + dy * dy)
-                
-                // Constrain to base circle
-                val maxDistance = baseRadius - stickRadius
+
                 if (distance <= maxDistance) {
                     stickX = event.x
                     stickY = event.y
                 } else {
-                    // Normalize and scale
                     val ratio = maxDistance / distance
                     stickX = centerX + dx * ratio
                     stickY = centerY + dy * ratio
                 }
-                
-                // Calculate normalized values (-1 to 1)
+
                 val normalizedX = (stickX - centerX) / maxDistance
                 val normalizedY = -(stickY - centerY) / maxDistance // Invert Y
                 
@@ -180,14 +180,16 @@ class JoystickView @JvmOverloads constructor(
      */
     fun getXPosition(): Float {
         val maxDistance = baseRadius - stickRadius
+        if (maxDistance <= 0f) return 0f
         return (stickX - centerX) / maxDistance
     }
-    
+
     /**
      * Get current Y position (-1 to 1).
      */
     fun getYPosition(): Float {
         val maxDistance = baseRadius - stickRadius
+        if (maxDistance <= 0f) return 0f
         return -(stickY - centerY) / maxDistance
     }
     
