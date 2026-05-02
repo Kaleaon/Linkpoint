@@ -52,6 +52,17 @@ object VisualParamLoader {
         val valueMax: Float,
         val valueDefault: Float,
         val kind: Kind,
+        /**
+         * SL VisualParam group. 0 = TWEAKABLE (slider in the avatar
+         * editor + transmitted), 1+ = derived (driven by other params),
+         * 3 = TRANSMIT_NOT_TWEAKABLE. Group-0 and group-3 are
+         * interleaved in `avatar_lad.xml` document order to form the
+         * AvatarAppearance / AgentSetAppearance wire byte block —
+         * cinderblocks/libremetaverse calls this `Group0ParamIds`.
+         * Default `-1` for params that didn't carry an explicit group
+         * attribute (treated as non-transmitted).
+         */
+        val group: Int = -1,
         /** Skeleton params: per-bone (name → 3-float scale offset). Empty otherwise. */
         val boneScales: Map<String, FloatArray> = emptyMap(),
         /** Color params: ordered list of RGBA tuples (each FloatArray size 4). Empty otherwise. */
@@ -98,6 +109,15 @@ object VisualParamLoader {
     @Volatile private var skeletonParamsCached: List<VisualParam> = emptyList()
     @Volatile private var colorParamsCached: List<VisualParam> = emptyList()
     @Volatile private var byMorphNameCached: Map<String, VisualParam> = emptyMap()
+    /**
+     * Group-0 + group-3 params in `avatar_lad.xml` document order. This
+     * is the canonical wire byte order for both the AgentSetAppearance
+     * VisualParam block (encode side) and the AvatarAppearance packet
+     * visual_param block (decode side). Mirrors libremetaverse's
+     * `VisualParams.Group0ParamIds`. The `byteIndex` field on each
+     * entry already encodes its position in this list.
+     */
+    @Volatile private var wireOrderCached: List<VisualParam> = emptyList()
 
     val isReady: Boolean get() = allParamsCached.isNotEmpty()
 
@@ -106,23 +126,64 @@ object VisualParamLoader {
     fun allColorParams(): List<VisualParam> = colorParamsCached
     fun byMorphName(name: String): VisualParam? = byMorphNameCached[name]
 
+    /**
+     * Catalogue of every visual param sorted by numeric ID.
+     */
+    fun allParams(): List<VisualParam> = allParamsCached
+
+    /**
+     * Group-0 + group-3 params in `avatar_lad.xml` document order — the
+     * canonical wire byte order for the AvatarAppearance + AgentSet-
+     * Appearance VisualParam blocks. Bytes are emitted in this list's
+     * order; bytes are decoded by indexing into this list. Mirrors
+     * libremetaverse's `VisualParams.Group0ParamIds`.
+     */
+    fun wireOrderParams(): List<VisualParam> = wireOrderCached
+
     fun load(context: Context): Int {
         if (isReady) return allParamsCached.size
         return try {
             val xml = context.assets.open("avatar/avatar_lad.xml").bufferedReader().use { it.readText() }
-            val params = parse(xml).sortedBy { it.id }
-            allParamsCached = params
+            // Parse preserves avatar_lad.xml document order (the parser
+            // appends to a list as it walks the XML). The wire byte
+            // order depends on document order, so we keep it.
+            val docOrder = parse(xml)
+            // `allParams()` is the by-ID-sorted view (used elsewhere
+            // for lookups by paramID).
+            allParamsCached = docOrder.sortedBy { it.id }
 
-            // The byte index for each kind is its position within the
-            // filtered list (the AvatarAppearance handler walks each kind
-            // separately for application; the morph subset's order matches
-            // the wire-format byte stream).
-            morphParamsCached = renumber(params.filter { it.kind == Kind.MORPH })
-            skeletonParamsCached = renumber(params.filter { it.kind == Kind.SKELETON })
-            colorParamsCached = renumber(params.filter { it.kind == Kind.COLOR })
+            // Wire order: group ∈ {0, 3} in document order. Re-stamp
+            // byteIndex to the position in this filtered list so each
+            // param knows its own AvatarAppearance / AgentSetAppearance
+            // byte slot.
+            wireOrderCached = renumber(docOrder.filter { it.group == 0 || it.group == 3 })
+
+            // Map paramID → wire byte index. Used to re-stamp byteIndex
+            // on the kind-filtered render lists below so that
+            // `bytes[p.byteIndex]` in the renderer fetches the correct
+            // wire byte. Params NOT in the wire-order list get -1 and
+            // the renderer should treat them as "use valueDefault" (or
+            // skip).
+            val wireIndexById = wireOrderCached
+                .mapIndexed { i, p -> p.id to i }
+                .toMap()
+
+            // The kind-filtered lists are render conveniences (apply
+            // morph/skeleton/color params separately). Their byteIndex
+            // is now the wire byte slot, NOT the position within the
+            // filtered list — that was the latent bug: render code did
+            // `bytes[p.byteIndex]` and was reading the wrong byte for
+            // every non-leading kind, since morph/skeleton/color
+            // groups are interleaved in wire order.
+            fun reindex(list: List<VisualParam>): List<VisualParam> =
+                list.map { it.copy(byteIndex = wireIndexById[it.id] ?: -1) }
+            morphParamsCached = reindex(allParamsCached.filter { it.kind == Kind.MORPH })
+            skeletonParamsCached = reindex(allParamsCached.filter { it.kind == Kind.SKELETON })
+            colorParamsCached = reindex(allParamsCached.filter { it.kind == Kind.COLOR })
             byMorphNameCached = morphParamsCached.associateBy { it.name }
             Log.i(TAG, "Loaded ${allParamsCached.size} visual params " +
-                "(morph=${morphParamsCached.size} skeleton=${skeletonParamsCached.size} color=${colorParamsCached.size})")
+                "(wire=${wireOrderCached.size} morph=${morphParamsCached.size} " +
+                "skeleton=${skeletonParamsCached.size} color=${colorParamsCached.size})")
             allParamsCached.size
         } catch (e: Exception) {
             Log.w(TAG, "Failed to load avatar_lad.xml: ${e.message}")
@@ -146,6 +207,7 @@ object VisualParamLoader {
         var currentMin = 0f
         var currentMax = 1f
         var currentDefault = 0f
+        var currentGroup = -1
         var currentKind: Kind? = null
         var pendingBones = mutableMapOf<String, FloatArray>()
         var pendingColors = mutableListOf<FloatArray>()
@@ -159,10 +221,12 @@ object VisualParamLoader {
                 valueMin = currentMin, valueMax = currentMax,
                 valueDefault = currentDefault,
                 kind = kind,
+                group = currentGroup,
                 boneScales = if (kind == Kind.SKELETON) pendingBones.toMap() else emptyMap(),
                 colorPalette = if (kind == Kind.COLOR) pendingColors.toList() else emptyList()
             )
             currentKind = null
+            currentGroup = -1
             pendingBones = mutableMapOf()
             pendingColors = mutableListOf()
         }
@@ -179,6 +243,7 @@ object VisualParamLoader {
                         currentMax = parser.getAttributeValue(null, "value_max")?.toFloatOrNull() ?: 1f
                         currentDefault = parser.getAttributeValue(null, "value_default")?.toFloatOrNull()
                             ?: ((currentMin + currentMax) * 0.5f)
+                        currentGroup = parser.getAttributeValue(null, "group")?.toIntOrNull() ?: -1
                     }
                     "param_morph" -> currentKind = Kind.MORPH
                     "param_skeleton" -> currentKind = Kind.SKELETON
