@@ -24,7 +24,6 @@ import org.webrtc.PeerConnectionFactory
 import org.webrtc.RtpReceiver
 import org.webrtc.SessionDescription
 import java.nio.ByteBuffer
-import java.nio.charset.Charsets
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 

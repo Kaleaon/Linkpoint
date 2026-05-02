@@ -17,8 +17,8 @@ data class WorldUiState(
         val hudAttachments: Boolean = true
     )
 
-    enum class InteractionMode {
-        FOLLOW,
-        MOUSELOOK
+    enum class InteractionMode(val shortLabel: String) {
+        FOLLOW("FOLLOW"),
+        MOUSELOOK("LOOK")
     }
 }
