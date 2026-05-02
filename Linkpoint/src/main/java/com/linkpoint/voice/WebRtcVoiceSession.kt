@@ -508,10 +508,11 @@ class WebRtcVoiceSession(
         }
 
         override fun onMessage(buffer: DataChannel.Buffer) {
-            // Server frames are JSON (not binary). LL doc says updates
-            // are batched on a 100 ms cadence: each peer's id maps to
-            // an object with `p` (power), `V` (VAD), `j` (join), `l`
-            // (leave). We forward into [peerEvents].
+            // Server frames are JSON (not binary). LL doc + libremetaverse
+            // `WebRtcTest` reference shows the mixer can also push back
+            // moderator-driven mute / gain maps and (rarely) per-peer
+            // position updates, alongside the per-peer power/VAD/join/leave
+            // batched on a 100 ms cadence.
             val bytes = ByteArray(buffer.data.remaining())
             buffer.data.get(bytes)
             val text = String(bytes, Charsets.UTF_8)
@@ -520,19 +521,37 @@ class WebRtcVoiceSession(
                 val keys = obj.keys()
                 while (keys.hasNext()) {
                     val key = keys.next()
-                    val agentId = runCatching { UUID.fromString(key) }.getOrNull() ?: continue
-                    val peer = obj.optJSONObject(key) ?: continue
                     when {
-                        peer.has("l") -> _peerEvents.tryEmit(PeerEvent.Leave(agentId))
-                        peer.has("j") -> {
-                            val primary = peer.optJSONObject("j")?.optBoolean("p", false) ?: false
-                            _peerEvents.tryEmit(PeerEvent.Join(agentId, primary))
-                        }
+                        // Top-level keys observed in libremetaverse
+                        // WebRtcTest: `m` = moderator-pushed mute map,
+                        // `ug` = moderator-pushed gain map.
+                        key == "m" -> emitMuteMap(obj.optJSONObject("m"))
+                        key == "ug" -> emitGainMap(obj.optJSONObject("ug"))
                         else -> {
-                            val powerRaw = peer.optInt("p", Int.MIN_VALUE)
-                            val vad = peer.optBoolean("V", false)
-                            if (powerRaw != Int.MIN_VALUE || vad) {
-                                _peerEvents.tryEmit(PeerEvent.Level(agentId, powerRaw, vad))
+                            val agentId = runCatching { UUID.fromString(key) }.getOrNull() ?: continue
+                            val peer = obj.optJSONObject(key) ?: continue
+                            when {
+                                peer.has("l") -> _peerEvents.tryEmit(PeerEvent.Leave(agentId))
+                                peer.has("j") -> {
+                                    val primary = peer.optJSONObject("j")?.optBoolean("p", false) ?: false
+                                    _peerEvents.tryEmit(PeerEvent.Join(agentId, primary))
+                                }
+                                peer.has("sp") || peer.has("sh") || peer.has("lp") || peer.has("lh") -> {
+                                    _peerEvents.tryEmit(PeerEvent.Position(
+                                        agentId = agentId,
+                                        senderPos = peer.optJSONObject("sp")?.toIntVec(),
+                                        senderHeading = peer.optJSONObject("sh")?.toIntQuat(),
+                                        listenerPos = peer.optJSONObject("lp")?.toIntVec(),
+                                        listenerHeading = peer.optJSONObject("lh")?.toIntQuat(),
+                                    ))
+                                }
+                                else -> {
+                                    val powerRaw = peer.optInt("p", Int.MIN_VALUE)
+                                    val vad = peer.optBoolean("V", false)
+                                    if (powerRaw != Int.MIN_VALUE || vad) {
+                                        _peerEvents.tryEmit(PeerEvent.Level(agentId, powerRaw, vad))
+                                    }
+                                }
                             }
                         }
                     }
@@ -541,6 +560,39 @@ class WebRtcVoiceSession(
                 Log.w(TAG, "SLData JSON parse failed: ${e.message}; payload=${text.take(120)}")
             }
         }
+
+        private fun emitMuteMap(obj: JSONObject?) {
+            obj ?: return
+            val map = HashMap<UUID, Boolean>(obj.length())
+            val it = obj.keys()
+            while (it.hasNext()) {
+                val k = it.next()
+                runCatching { UUID.fromString(k) }.getOrNull()?.let { id ->
+                    map[id] = obj.optBoolean(k, false)
+                }
+            }
+            if (map.isNotEmpty()) _peerEvents.tryEmit(PeerEvent.MuteMap(map))
+        }
+
+        private fun emitGainMap(obj: JSONObject?) {
+            obj ?: return
+            val map = HashMap<UUID, Int>(obj.length())
+            val it = obj.keys()
+            while (it.hasNext()) {
+                val k = it.next()
+                runCatching { UUID.fromString(k) }.getOrNull()?.let { id ->
+                    map[id] = obj.optInt(k, 200)
+                }
+            }
+            if (map.isNotEmpty()) _peerEvents.tryEmit(PeerEvent.GainMap(map))
+        }
+
+        private fun JSONObject.toIntVec(): IntVec3 = IntVec3(
+            optInt("x", 0), optInt("y", 0), optInt("z", 0)
+        )
+        private fun JSONObject.toIntQuat(): IntQuat = IntQuat(
+            optInt("x", 0), optInt("y", 0), optInt("z", 0), optInt("w", 0)
+        )
     }
 
     private fun emit(s: State) {
@@ -551,6 +603,22 @@ class WebRtcVoiceSession(
         data class Join(val agentId: UUID, val primary: Boolean) : PeerEvent()
         data class Leave(val agentId: UUID) : PeerEvent()
         data class Level(val agentId: UUID, val powerRmsX128: Int, val voiceActive: Boolean) : PeerEvent()
+
+        // The mixer can also push moderator-driven mute/gain map changes
+        // and (rarely) per-peer position updates — observed in
+        // libremetaverse `Programs/WebRtcTest/WebRtcTest.cs` event
+        // handlers `WebRtc_MuteMapReceived`, `WebRtc_GainMapReceived`,
+        // `WebRtc_PeerPositionUpdatedTyped`. Surfaced here so VoiceManager
+        // can update its participant model in response.
+        data class MuteMap(val mutes: Map<UUID, Boolean>) : PeerEvent()
+        data class GainMap(val gains: Map<UUID, Int>) : PeerEvent()
+        data class Position(
+            val agentId: UUID,
+            val senderPos: IntVec3?,
+            val senderHeading: IntQuat?,
+            val listenerPos: IntVec3?,
+            val listenerHeading: IntQuat?,
+        ) : PeerEvent()
     }
 
     /** Integer 3-vector for SLData position payloads (centimetres). */
