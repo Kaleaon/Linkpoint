@@ -87,23 +87,30 @@ class CronetHttpClient private constructor(
         timeoutMs: Long
     ): CronetResult {
         val pinnedEngine = engine ?: return CronetResult.EngineUnavailable
-        return suspendCancellableCoroutine { cont ->
-            val callback = AccumulatingCallback(cont, url)
-            val builder = pinnedEngine.newUrlRequestBuilder(url, callback, executor)
-                .setHttpMethod(method)
-            headers.forEach { (k, v) -> builder.addHeader(k, v) }
-            if (body != null) {
-                if (contentType != null) builder.addHeader("Content-Type", contentType)
-                builder.setUploadDataProvider(
-                    UploadDataProviders.create(ByteBuffer.wrap(body)),
-                    executor
-                )
+        // Throttle concurrent HTTPS fetches on metered cellular. The IEEE
+        // 6733597 (TCP-RRE) finding is that a saturated cellular uplink
+        // delays return ACKs for unrelated downlink streams; capping
+        // concurrent requests is the application-layer mitigation. Wi-Fi
+        // gets 8 permits, cellular gets 2 — see [MeteredAssetGate].
+        return MeteredAssetGate.shared.withPermit {
+            suspendCancellableCoroutine { cont ->
+                val callback = AccumulatingCallback(cont, url)
+                val builder = pinnedEngine.newUrlRequestBuilder(url, callback, executor)
+                    .setHttpMethod(method)
+                headers.forEach { (k, v) -> builder.addHeader(k, v) }
+                if (body != null) {
+                    if (contentType != null) builder.addHeader("Content-Type", contentType)
+                    builder.setUploadDataProvider(
+                        UploadDataProviders.create(ByteBuffer.wrap(body)),
+                        executor
+                    )
+                }
+                val request = builder.build()
+                cont.invokeOnCancellation {
+                    try { request.cancel() } catch (_: Throwable) {}
+                }
+                request.start()
             }
-            val request = builder.build()
-            cont.invokeOnCancellation {
-                try { request.cancel() } catch (_: Throwable) {}
-            }
-            request.start()
         }
     }
 

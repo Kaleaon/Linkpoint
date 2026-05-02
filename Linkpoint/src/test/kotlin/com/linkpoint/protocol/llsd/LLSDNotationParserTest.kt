@@ -76,7 +76,7 @@ class LLSDNotationParserTest {
         assertTrue(v is LLSDDate)
         // Just confirm it parsed to a non-zero epoch — exact ms equality is
         // covered by LLSDParserTest's date format coverage.
-        assertTrue((v as LLSDDate).value > 0L)
+        assertTrue((v as LLSDDate).value.time > 0L)
     }
 
     @Test

@@ -468,12 +468,58 @@ class UDPConnectionFixed {
         val messageId: Int,
         val data: ByteArray, // already-encoded packet (header + body); resend OR-ins FLAG_RESENT
         @Volatile var lastSentTime: Long,
+        // First-send timestamp — never bumped on retransmission. Used by the
+        // RTT estimator to honor Karn's algorithm (only sample ACKs that
+        // resolve a packet sent exactly once; retransmits make the ACK
+        // ambiguous and would skew SRTT downward).
+        val firstSentTime: Long,
         @Volatile var retries: Int,
         val listener: MessageEventListener?
     )
 
     private val inflightReliablePackets =
         java.util.concurrent.ConcurrentHashMap<Int, InflightPacket>()
+
+    /**
+     * Highest inbound sequence number we've seen from the simulator on this
+     * circuit. Used by the inbound-gap detector below.
+     */
+    @Volatile private var highestInboundSeq: Int = -1
+
+    /**
+     * Set by the inbound-gap detector when a hole in the simulator's seq
+     * stream is observed. The I/O loop's idle-tick path checks this on
+     * every iteration and runs [checkMessageTimeouts] immediately rather
+     * than waiting up to a full second.
+     *
+     * **Why this is ELN-equivalent.** Balakrishnan et al. 1996 found that
+     * Explicit Loss Notification — telling the sender "this loss is
+     * wireless, not congestion" — is what lets fast-retransmit work on
+     * cellular without the standard congestion collapse. We don't have a
+     * carrier-side ELN bit, but a gap in inbound seq numbers is a
+     * reasonable proxy for "the path is currently dropping packets."
+     * When that's true, our reliable-resend timer should not lazily wait
+     * 5s (or even one full RTO) to act on packets that have crossed the
+     * RTO already — they were probably dropped on the same path. Bringing
+     * the next `checkMessageTimeouts` forward by up to ~1 second is the
+     * mechanical effect.
+     *
+     * Bounded by Karn's backoff in [RttEstimator.onRetransmit] so this
+     * does NOT cause retransmit storms — every fast-NAK retransmit still
+     * doubles the next RTO until a clean ACK resets the estimator.
+     */
+    @Volatile private var fastTimeoutCheckRequested: Boolean = false
+
+    /**
+     * Karn/Jacobson smoothed-RTT estimator that drives the reliable-resend
+     * timeout. See [RttEstimator] for the algorithm and rationale; the short
+     * version is that a fixed 5s timeout under-fires on cellular when RTT
+     * spikes to multi-second under congestion (false-loss retransmits waste
+     * metered data) and over-waits on Wi-Fi when RTT is ~30ms (slow recovery
+     * from real loss). Fed by [processReceivedAck] for clean (retries == 0)
+     * ACKs only.
+     */
+    private val rttEstimator = com.linkpoint.protocol.circuit.RttEstimator()
 
     /**
      * Sequence number used for the most recent UseCircuitCode send, or -1 if not sent yet.
@@ -580,6 +626,26 @@ class UDPConnectionFixed {
 
     fun setCellularProvider(provider: () -> Boolean) {
         isCellularProvider = provider
+    }
+
+    /**
+     * Provider that tells the watchdog whether the device is currently in a
+     * Wi-Fi↔cellular handoff blackout (ConnectivityManager fired `onLost`
+     * within the last `HANDOFF_GRACE_MS`). When true, the resend watchdog
+     * defers retransmits and the reconnect coordinator does NOT count
+     * failures against `MAX_RECONNECT_ATTEMPTS` — Balakrishnan et al. 1996:
+     * "treat wireless loss as wireless loss, not connection failure."
+     */
+    @Volatile private var isInHandoffProvider: (() -> Boolean)? = null
+
+    fun setHandoffProvider(provider: () -> Boolean) {
+        isInHandoffProvider = provider
+    }
+
+    private fun isInHandoff(): Boolean = try {
+        isInHandoffProvider?.invoke() == true
+    } catch (_: Exception) {
+        false
     }
 
     private fun isCellular(): Boolean = try {
@@ -928,6 +994,19 @@ class UDPConnectionFixed {
             // either be dropped (wrong circuit code) or be misinterpreted.
             inflightReliablePackets.clear()
 
+            // Reset the RTT estimator: the new circuit may be on a different
+            // simulator with a different RTT profile, and the prior Karn
+            // backoff state is meaningless on a fresh connection.
+            rttEstimator.reset()
+
+            // Reset the inbound-seq high-water mark. The simulator restarts
+            // its outbound counter on a new circuit, so any stale value
+            // here would either suppress real gaps (if the new counter
+            // starts low) or fabricate a giant fake gap (if it starts
+            // high). -1 means "no baseline yet."
+            highestInboundSeq = -1
+            fastTimeoutCheckRequested = false
+
             // Clear message statistics for accurate per-session tracking
             messageTypeCounts.clear()
             lastMessageTimes.clear()
@@ -1269,6 +1348,37 @@ class UDPConnectionFixed {
                                     NetworkLogger.log(level, NetworkLogger.Category.UDP,
                                         "$tag seq=$seqNum messageId=0x${messageId.toString(16)} ($messageName) — skipping handler dispatch")
                                 } else {
+                                    // Inbound seq-gap detector (ELN approximation). If the
+                                    // simulator's stream skipped one or more sequence
+                                    // numbers, the path is currently dropping packets — fire
+                                    // the resend watchdog on the next idle pass instead of
+                                    // waiting up to 1s for the regular tick. See
+                                    // [fastTimeoutCheckRequested]. Skip resent packets (they
+                                    // arrive out-of-order by definition) and only act on
+                                    // clean forward progress past the high-water mark.
+                                    if (seqNum >= 0 && !packetFlags.resent) {
+                                        val prev = highestInboundSeq
+                                        if (prev >= 0 && seqNum > prev + 1) {
+                                            val gap = seqNum - prev - 1
+                                            // Cap the log to single-digit gaps so a wraparound
+                                            // (UInt → signed Int rollover after ~2.1 B packets)
+                                            // doesn't spam. Real-world cellular gaps are 1–3
+                                            // packets; anything wider is almost certainly a
+                                            // counter-rollover or dedup-archive eviction.
+                                            if (gap in 1..32) {
+                                                NetworkLogger.log(
+                                                    NetworkLogger.Level.DEBUG,
+                                                    NetworkLogger.Category.UDP,
+                                                    "↯ Inbound seq-gap detected: prev=$prev current=$seqNum (gap=$gap) — fast-NAK requested"
+                                                )
+                                                fastTimeoutCheckRequested = true
+                                            }
+                                        }
+                                        if (seqNum > prev) {
+                                            highestInboundSeq = seqNum
+                                        }
+                                    }
+
                                     // SYNCHRONOUS message dispatch from I/O thread.
                                     // This follows Lumiya's pattern where HandleMessage() is called
                                     // directly from the circuit's receive processing, not queued.
@@ -1292,12 +1402,19 @@ class UDPConnectionFixed {
                 } else if (intervalElapsed) {
                     lastAckCheckTime = now
                 }
-                if (now - lastTimeoutCheckTime >= 1000L) {
+                // Run the watchdogs every second OR immediately if the
+                // inbound-gap detector flagged a possible loss. This is the
+                // ELN fast-NAK path — resend timer fires on observed-loss
+                // signal rather than waiting up to a full 1s tick. See
+                // [fastTimeoutCheckRequested].
+                val timeoutTickDue = now - lastTimeoutCheckTime >= 1000L
+                if (timeoutTickDue || fastTimeoutCheckRequested) {
                     checkPingHealth()
                     checkInboundFlow()
                     checkPostReconnectSilence()
                     checkMessageTimeouts()
                     lastTimeoutCheckTime = now
+                    fastTimeoutCheckRequested = false
                 }
 
             } catch (e: java.nio.channels.ClosedSelectorException) {
@@ -1865,7 +1982,17 @@ class UDPConnectionFixed {
         // `SLCircuit.ProcessReceivedAck` pulls the matching SLMessage out of
         // unackedQueue. Without this the resend watchdog would keep retrying
         // an already-acknowledged packet up to MESSAGE_MAX_RETRIES times.
-        inflightReliablePackets.remove(sequenceNumber)
+        val acked = inflightReliablePackets.remove(sequenceNumber)
+
+        // Karn-clean RTT sample: only feed the estimator if this ACK resolves
+        // a packet that was sent exactly once. Retransmissions make the ACK
+        // ambiguous (we can't tell which copy it acknowledges) and sampling
+        // them would bias SRTT downward — Karn's algorithm explicitly forbids
+        // it. See [RttEstimator] header.
+        if (acked != null && acked.retries == 0) {
+            val rtt = System.currentTimeMillis() - acked.firstSentTime
+            rttEstimator.recordCleanSample(rtt)
+        }
 
         // Check if we have a callback for this sequence number
         val callbackInfo = pendingCallbacks.remove(sequenceNumber)
@@ -1935,8 +2062,21 @@ class UDPConnectionFixed {
      * Based on the reference viewer's timeout and retry logic.
      */
     private fun checkMessageTimeouts() {
+        // Skip the resend pass entirely during a Wi-Fi↔cellular handoff —
+        // packets sent into a network with no current default route are
+        // dropped at the kernel without ever leaving the device, so all
+        // we'd accomplish is burning retries. The handoff window is
+        // short (≤8s, see ConnectionQualityManager.HANDOFF_GRACE_MS); any
+        // resends still needed will fire on the next pass post-handoff.
+        if (isInHandoff()) return
+
         val now = System.currentTimeMillis()
-        val timeout = MESSAGE_TIMEOUT_MS
+        // Adaptive timeout from the Karn/Jacobson estimator. Falls back to
+        // the constant 5s ([MESSAGE_TIMEOUT_MS]) until the first sample
+        // arrives — see [RttEstimator.DEFAULT_RTO_MS]. This replaces the
+        // fixed 5s timeout so we don't false-fire on cellular RTT spikes
+        // (>2s under congestion) and don't over-wait on Wi-Fi (~30ms RTT).
+        val timeout = rttEstimator.currentRtoMs
         val maxRetries = MESSAGE_MAX_RETRIES
 
         // Reliable packet resend (Lumiya `SLCircuit.ProcessResends` parity,
@@ -1977,9 +2117,15 @@ class UDPConnectionFixed {
             } else {
                 inflight.retries++
                 inflight.lastSentTime = now
+                // Karn's exponential backoff: every retransmit doubles the
+                // RTO until the next clean ACK resets the estimator. Without
+                // this a flapping cellular link can drive multiple retries
+                // inside a single fade window for the same packet, burning
+                // metered bytes for nothing. See [RttEstimator.onRetransmit].
+                rttEstimator.onRetransmit()
                 lastReliableSendSequence = seqNum
                 lastReliableSendAt = now
-                lastReliableSendDeadlineAt = now + timeout
+                lastReliableSendDeadlineAt = now + rttEstimator.currentRtoMs
                 // Set FLAG_RESENT (0x20) on the cached packet bytes. Lumiya
                 // `SLMessage.Pack` writes the resent bit through `isResent`;
                 // we're operating on the already-packed bytes so OR it in.
@@ -2944,12 +3090,13 @@ class UDPConnectionFixed {
                     messageId = messageId,
                     data = finalPacket,
                     lastSentTime = sentAt,
+                    firstSentTime = sentAt,
                     retries = 0,
                     listener = listener
                 )
                 lastReliableSendSequence = seqNum
                 lastReliableSendAt = sentAt
-                lastReliableSendDeadlineAt = sentAt + MESSAGE_TIMEOUT_MS
+                lastReliableSendDeadlineAt = sentAt + rttEstimator.currentRtoMs
             }
         }
 
