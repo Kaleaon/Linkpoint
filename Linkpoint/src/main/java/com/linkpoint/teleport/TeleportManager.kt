@@ -6,7 +6,7 @@ import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.capabilities.EventQueueDispatcher
 import com.linkpoint.protocol.llsd.*
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.getUUID
 import com.linkpoint.protocol.types.putUUID
@@ -204,7 +204,7 @@ class TeleportManager(
                 payload.putUUID(landmarkId)
                 payload.putInt(TELEPORT_FLAGS_VIA_LANDMARK)
                 
-                udpConnection.sendPacket(MessageIds.TELEPORT_LANDMARK_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.TELEPORT_LANDMARK_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
                 
                 Log.i(TAG, "Sent teleport landmark request for $landmarkId")
                 TeleportResult.Pending
@@ -238,7 +238,7 @@ class TeleportManager(
                 // Flags
                 payload.putInt(TELEPORT_FLAGS_VIA_HOME)
                 
-                udpConnection.sendPacket(MessageIds.TELEPORT_HOME_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.TELEPORT_HOME_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
                 
                 Log.i(TAG, "Sent teleport home request")
                 TeleportResult.Pending
@@ -293,7 +293,7 @@ class TeleportManager(
                 payload.put(1.toByte())
                 payload.putUUID(targetAgentId)
 
-                udpConnection.sendPacket(MessageIds.START_LURE, payload.array().copyOf(payload.position()), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.START_LURE, payload.array().copyOf(payload.position()), reliable = true)
 
                 Log.i(TAG, "Sent teleport lure to $targetAgentId")
                 true
@@ -324,7 +324,7 @@ class TeleportManager(
                 payload.putUUID(lure.lureId)
                 payload.putInt(TELEPORT_FLAGS_VIA_LURE)
                 
-                udpConnection.sendPacket(MessageIds.TELEPORT_LURE_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.TELEPORT_LURE_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
                 
                 Log.i(TAG, "Accepted teleport lure from ${lure.senderName}")
                 pendingLure = null
@@ -433,7 +433,7 @@ class TeleportManager(
             payload.putShort(regionNameBytes.size.toShort())
             payload.put(regionNameBytes)
             
-            udpConnection.sendPacket(MessageIds.TELEPORT_LOCATION_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
+            udpConnection.sendPacket(MessageIdRegistry.TELEPORT_LOCATION_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
             
             _teleportState.value = TeleportState.IN_PROGRESS
             Log.i(TAG, "Sent UDP teleport request to $regionName ($x, $y, $z)")

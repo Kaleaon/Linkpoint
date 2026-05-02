@@ -5,7 +5,7 @@ import com.linkpoint.assets.AnimationManager
 import com.linkpoint.assets.AssetCache
 import com.linkpoint.assets.AssetType
 import com.linkpoint.assets.SoundManager
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLVector3
 import com.linkpoint.protocol.types.putUUID
@@ -115,7 +115,7 @@ class GestureManager(
         payload.putUUID(assetId)
         payload.putInt(0) // GestureFlags
 
-        udpConnection.sendPacket(MessageIds.ACTIVATE_GESTURES, payload.array(), reliable = true)
+        udpConnection.sendPacket(MessageIdRegistry.ACTIVATE_GESTURES, payload.array(), reliable = true)
         Log.d(TAG, "Sent ActivateGestures for item $itemId (asset $assetId)")
     }
 
@@ -141,7 +141,7 @@ class GestureManager(
         payload.putUUID(itemId)
         payload.putInt(0) // GestureFlags
 
-        udpConnection.sendPacket(MessageIds.DEACTIVATE_GESTURES, payload.array(), reliable = true)
+        udpConnection.sendPacket(MessageIdRegistry.DEACTIVATE_GESTURES, payload.array(), reliable = true)
         Log.d(TAG, "Sent DeactivateGestures for item $itemId")
     }
     

@@ -1,7 +1,7 @@
 package com.linkpoint.protocol.transfer
 
 import android.util.Log
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.PacketCodec
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
@@ -191,7 +191,7 @@ class XferManager(
             .writeLeInt(packetNum)
         
         try {
-            udpConnection.sendPacket(MessageIds.CONFIRM_XFER_PACKET, payload.array(), reliable = false)
+            udpConnection.sendPacket(MessageIdRegistry.CONFIRM_XFER_PACKET, payload.array(), reliable = false)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send ConfirmXferPacket", e)
         }
@@ -279,7 +279,7 @@ class XferManager(
         val xfer = Xfer(xferId, filename)
         activeXfers[xferId] = xfer
         
-        udpConnection.sendPacket(MessageIds.REQUEST_XFER, payload.array(), reliable = true)
+        udpConnection.sendPacket(MessageIdRegistry.REQUEST_XFER, payload.array(), reliable = true)
         
         Log.d(TAG, "Requested xfer for file: $filename xferId=$xferId")
         

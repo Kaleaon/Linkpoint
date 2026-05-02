@@ -79,7 +79,7 @@ class MessageParserConformanceFixtureTest {
             add(5); add(0); addAll("hello".encodeToByteArray().toList())
         }.toByteArray()
 
-        val parsed = MessageParserRegistry.parse(MessageIds.CHAT_FROM_SIMULATOR, payload) as ChatData
+        val parsed = MessageParserRegistry.parse(MessageIdRegistry.CHAT_FROM_SIMULATOR, payload) as ChatData
         assertEquals("Test", parsed.fromName)
         assertEquals("hello", parsed.message)
     }

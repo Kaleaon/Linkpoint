@@ -1,7 +1,7 @@
 package com.linkpoint.users
 
 import android.util.Log
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.transfer.XferManager
 import com.linkpoint.protocol.transfer.XferResult
@@ -80,7 +80,7 @@ class MuteManager(
             // MuteData block
             payload.putInt(cachedCRC)
             
-            udpConnection.sendPacket(MessageIds.MUTE_LIST_REQUEST, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIdRegistry.MUTE_LIST_REQUEST, payload.array(), reliable = true)
             Log.d(TAG, "Requested mute list (CRC: ${cachedCRC.toString(16)})")
             
         } catch (e: Exception) {
@@ -182,7 +182,7 @@ class MuteManager(
             payload.putInt(entry.type.ordinal)
             payload.putInt(entry.flags)
             
-            udpConnection.sendPacket(MessageIds.UPDATE_MUTE_LIST_ENTRY, payload.array().copyOf(payload.position()), reliable = true)
+            udpConnection.sendPacket(MessageIdRegistry.UPDATE_MUTE_LIST_ENTRY, payload.array().copyOf(payload.position()), reliable = true)
             Log.i(TAG, "Added mute entry: ${entry.name} (${entry.type})")
             
         } catch (e: Exception) {
@@ -211,7 +211,7 @@ class MuteManager(
             payload.put(nameBytes.size.toByte())
             payload.put(nameBytes)
             
-            udpConnection.sendPacket(MessageIds.REMOVE_MUTE_LIST_ENTRY, payload.array().copyOf(payload.position()), reliable = true)
+            udpConnection.sendPacket(MessageIdRegistry.REMOVE_MUTE_LIST_ENTRY, payload.array().copyOf(payload.position()), reliable = true)
             Log.i(TAG, "Removed mute entry: ${entry.name} (${entry.type})")
             
         } catch (e: Exception) {

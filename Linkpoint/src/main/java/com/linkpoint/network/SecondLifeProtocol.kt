@@ -17,7 +17,7 @@ import com.linkpoint.protocol.llsd.LLSDArray
 import com.linkpoint.protocol.llsd.LLSDMap
 import com.linkpoint.protocol.llsd.LLSDReal
 import com.linkpoint.protocol.llsd.LLSDString
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.types.putUUID
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -958,7 +958,7 @@ class SecondLifeProtocol(private val context: Context) {
             payload.putInt(teleportFlagsViaLocation)
 
             app.udpConnection.sendPacket(
-                MessageIds.TELEPORT_LOCATION_REQUEST,
+                MessageIdRegistry.TELEPORT_LOCATION_REQUEST,
                 payload.array(),
                 reliable = true
             )

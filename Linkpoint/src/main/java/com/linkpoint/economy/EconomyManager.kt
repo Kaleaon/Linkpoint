@@ -5,7 +5,7 @@ import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.capabilities.EventQueueDispatcher
 import com.linkpoint.protocol.llsd.LLSDMap
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -198,7 +198,7 @@ class EconomyManager(
             // MoneyData
             writeUUID(payload, UUID.randomUUID()) // TransactionID
             
-            udpConnection.sendPacket(MessageIds.MONEY_BALANCE_REQUEST, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIdRegistry.MONEY_BALANCE_REQUEST, payload.array(), reliable = true)
             Log.d(TAG, "Requested balance")
             
         } catch (e: Exception) {
@@ -217,7 +217,7 @@ class EconomyManager(
             writeUUID(payload, agentId)
             writeUUID(payload, udpConnection.getSessionId())
             
-            udpConnection.sendPacket(MessageIds.ECONOMY_DATA_REQUEST, payload.array(), reliable = true)
+            udpConnection.sendPacket(MessageIdRegistry.ECONOMY_DATA_REQUEST, payload.array(), reliable = true)
             Log.d(TAG, "Requested economy data")
             
         } catch (e: Exception) {
@@ -309,7 +309,7 @@ class EconomyManager(
             payload.put(descBytes.size.toByte())
             payload.put(descBytes)
             
-            udpConnection.sendPacket(MessageIds.MONEY_TRANSFER_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
+            udpConnection.sendPacket(MessageIdRegistry.MONEY_TRANSFER_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
             
             Log.i(TAG, "Sent payment: $amount L$ to $destinationId")
             

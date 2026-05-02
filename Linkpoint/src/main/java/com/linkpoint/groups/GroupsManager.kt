@@ -8,7 +8,7 @@ import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.llsd.*
 import com.linkpoint.chat.IMManager
 import com.linkpoint.protocol.core.AgentIdentity
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.SLMessagePackers
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.getUUID
@@ -181,7 +181,7 @@ class GroupsManager(
                     payload.putUUID(UUID(0, 0)) // UUID_ZERO
                 }
                 
-                udpConnection.sendPacket(MessageIds.ACTIVATE_GROUP, payload.array().copyOf(payload.position()), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.ACTIVATE_GROUP, payload.array().copyOf(payload.position()), reliable = true)
                 _activeGroup.value = groupId
                 
                 Log.i(TAG, "Active group set to: $groupId")
@@ -256,7 +256,7 @@ class GroupsManager(
             val ts = (System.currentTimeMillis() / 1000).toInt()
 
             udpConnection.sendPacket(
-                MessageIds.IMPROVED_INSTANT_MESSAGE,
+                MessageIdRegistry.IMPROVED_INSTANT_MESSAGE,
                 SLMessagePackers.packImprovedInstantMessage(
                     identity = identity,
                     fromGroup = false,
@@ -271,7 +271,7 @@ class GroupsManager(
                 reliable = true
             )
             udpConnection.sendPacket(
-                MessageIds.IMPROVED_INSTANT_MESSAGE,
+                MessageIdRegistry.IMPROVED_INSTANT_MESSAGE,
                 SLMessagePackers.packImprovedInstantMessage(
                     identity = identity,
                     fromGroup = false,
@@ -322,7 +322,7 @@ class GroupsManager(
                 // GroupData
                 payload.putUUID(groupId)
                 
-                udpConnection.sendPacket(MessageIds.LEAVE_GROUP_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.LEAVE_GROUP_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
                 
                 groups.remove(groupId)
                 if (_activeGroup.value == groupId) {
@@ -357,7 +357,7 @@ class GroupsManager(
                 // GroupData
                 payload.putUUID(groupId)
                 
-                udpConnection.sendPacket(MessageIds.GROUP_PROFILE_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.GROUP_PROFILE_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
                 Log.d(TAG, "Requested group info for: $groupId")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to request group info", e)

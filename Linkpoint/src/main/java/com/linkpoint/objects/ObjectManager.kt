@@ -4,7 +4,7 @@ import android.os.Parcelable
 import android.util.Log
 import com.linkpoint.diagnostics.ScenePopulationDiagnostics
 import com.linkpoint.protocol.core.AgentIdentity
-import com.linkpoint.protocol.messages.MessageIds
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.ObjectPropertyEntry
 import com.linkpoint.protocol.messages.ObjectUpdateData
 import com.linkpoint.protocol.messages.TerseUpdateData
@@ -318,7 +318,7 @@ class ObjectManager(
             }
             
             try {
-                udpConnection.sendPacket(MessageIds.OBJECT_SELECT, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.OBJECT_SELECT, payload.array(), reliable = true)
                 Log.d(TAG, "Requested properties for ${localIds.size} objects")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to request object properties", e)
@@ -386,7 +386,7 @@ class ObjectManager(
             }
             
             try {
-                udpConnection.sendPacket(MessageIds.MULTIPLE_OBJECT_UPDATE, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.MULTIPLE_OBJECT_UPDATE, payload.array(), reliable = true)
                 Log.d(TAG, "Sent object update for localId=$localId")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to send object update", e)
@@ -427,7 +427,7 @@ class ObjectManager(
             payload.putInt(0)  // RezSelected = false
             
             try {
-                udpConnection.sendPacket(MessageIds.REZ_OBJECT, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.REZ_OBJECT, payload.array(), reliable = true)
                 Log.i(TAG, "Sent RezObject for item $itemId at $position")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to rez object", e)
@@ -457,7 +457,7 @@ class ObjectManager(
             payload.putInt(localId)
             
             try {
-                udpConnection.sendPacket(MessageIds.DEREZ_OBJECT, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.DEREZ_OBJECT, payload.array(), reliable = true)
                 Log.i(TAG, "Sent DeRezObject for localId=$localId to folder $folderId")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to take object", e)
@@ -485,7 +485,7 @@ class ObjectManager(
             payload.putInt(localId)
             
             try {
-                udpConnection.sendPacket(MessageIds.OBJECT_DELETE, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.OBJECT_DELETE, payload.array(), reliable = true)
                 
                 // Remove from local cache
                 objects.remove(localId)?.let { obj ->
@@ -520,7 +520,7 @@ class ObjectManager(
             }
             
             try {
-                udpConnection.sendPacket(MessageIds.OBJECT_LINK, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.OBJECT_LINK, payload.array(), reliable = true)
                 Log.i(TAG, "Linked ${localIds.size} objects")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to link objects", e)
@@ -549,7 +549,7 @@ class ObjectManager(
             }
             
             try {
-                udpConnection.sendPacket(MessageIds.OBJECT_DELINK, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.OBJECT_DELINK, payload.array(), reliable = true)
                 Log.i(TAG, "Unlinked ${localIds.size} objects")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to unlink objects", e)
@@ -579,7 +579,7 @@ class ObjectManager(
             payload.put(nameBytes)
             
             try {
-                udpConnection.sendPacket(MessageIds.OBJECT_NAME, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.OBJECT_NAME, payload.array(), reliable = true)
                 Log.d(TAG, "Set object name: localId=$localId, name=$name")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to set object name", e)
@@ -609,7 +609,7 @@ class ObjectManager(
             payload.put(descBytes)
             
             try {
-                udpConnection.sendPacket(MessageIds.OBJECT_DESCRIPTION, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.OBJECT_DESCRIPTION, payload.array(), reliable = true)
                 Log.d(TAG, "Set object description: localId=$localId")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to set object description", e)
@@ -649,7 +649,7 @@ class ObjectManager(
             grabPayload.putInt(0)
             
             try {
-                udpConnection.sendPacket(MessageIds.OBJECT_GRAB, grabPayload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.OBJECT_GRAB, grabPayload.array(), reliable = true)
                 
                 // Brief delay then release
                 delay(100)
@@ -659,7 +659,7 @@ class ObjectManager(
                 writeAgentData(degrabPayload)
                 degrabPayload.putInt(localId)
                 
-                udpConnection.sendPacket(MessageIds.OBJECT_DEGRAB, degrabPayload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.OBJECT_DEGRAB, degrabPayload.array(), reliable = true)
                 Log.d(TAG, "Touched object localId=$localId")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to touch object", e)
@@ -693,7 +693,7 @@ class ObjectManager(
             payload.putFloat(0f)
             
             try {
-                udpConnection.sendPacket(MessageIds.AGENT_REQUEST_SIT, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.AGENT_REQUEST_SIT, payload.array(), reliable = true)
                 Log.i(TAG, "Requested sit on localId=$localId")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to sit on object", e)
@@ -717,7 +717,7 @@ class ObjectManager(
                 // SitObject - ZERO_UUID indicates stand request
                 payload.put(0)  // Flags = 0 (no sit flags, meaning stand)
                 
-                udpConnection.sendPacket(MessageIds.AGENT_SIT, payload.array(), reliable = true)
+                udpConnection.sendPacket(MessageIdRegistry.AGENT_SIT, payload.array(), reliable = true)
                 Log.i(TAG, "Requested stand up")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to stand up", e)

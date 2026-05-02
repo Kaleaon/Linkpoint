@@ -8,31 +8,31 @@ object MessageParserRegistry {
     private val handlers = mutableMapOf<Int, (ByteArray) -> Any?>()
 
     init {
-        register(MessageIds.OBJECT_UPDATE) { ObjectMessageParsers.parseObjectUpdate(it) }
-        register(MessageIds.OBJECT_UPDATE_COMPRESSED) { ObjectMessageParsers.parseObjectUpdateCompressed(it) }
-        register(MessageIds.OBJECT_UPDATE_CACHED) { ObjectMessageParsers.parseObjectUpdateCached(it) }
-        register(MessageIds.IMPROVED_TERSE_OBJECT_UPDATE) { ObjectMessageParsers.parseTerseObjectUpdate(it) }
-        register(MessageIds.OBJECT_PROPERTIES) { MessageParser.parseObjectProperties(it) }
+        register(MessageIdRegistry.OBJECT_UPDATE) { ObjectMessageParsers.parseObjectUpdate(it) }
+        register(MessageIdRegistry.OBJECT_UPDATE_COMPRESSED) { ObjectMessageParsers.parseObjectUpdateCompressed(it) }
+        register(MessageIdRegistry.OBJECT_UPDATE_CACHED) { ObjectMessageParsers.parseObjectUpdateCached(it) }
+        register(MessageIdRegistry.IMPROVED_TERSE_OBJECT_UPDATE) { ObjectMessageParsers.parseTerseObjectUpdate(it) }
+        register(MessageIdRegistry.OBJECT_PROPERTIES) { MessageParser.parseObjectProperties(it) }
 
-        register(MessageIds.AVATAR_ANIMATION) { AvatarMessageParsers.parseAvatarAnimation(it) }
-        register(MessageIds.CHAT_FROM_SIMULATOR) { ChatMessageParsers.parseChatFromSimulator(it) }
-        register(MessageIds.IMPROVED_INSTANT_MESSAGE) { MessageParser.parseImprovedInstantMessage(it) }
+        register(MessageIdRegistry.AVATAR_ANIMATION) { AvatarMessageParsers.parseAvatarAnimation(it) }
+        register(MessageIdRegistry.CHAT_FROM_SIMULATOR) { ChatMessageParsers.parseChatFromSimulator(it) }
+        register(MessageIdRegistry.IMPROVED_INSTANT_MESSAGE) { MessageParser.parseImprovedInstantMessage(it) }
 
-        register(MessageIds.TELEPORT_FINISH) { TeleportMessageParsers.parseTeleportFinish(it) }
-        register(MessageIds.TELEPORT_FAILED) { TeleportMessageParsers.parseTeleportFailed(it) }
-        register(MessageIds.TELEPORT_PROGRESS) { TeleportMessageParsers.parseTeleportProgress(it) }
-        register(MessageIds.ENABLE_SIMULATOR) { TeleportMessageParsers.parseEnableSimulator(it) }
-        register(MessageIds.CROSSED_REGION) { TeleportMessageParsers.parseCrossedRegion(it) }
+        register(MessageIdRegistry.TELEPORT_FINISH) { TeleportMessageParsers.parseTeleportFinish(it) }
+        register(MessageIdRegistry.TELEPORT_FAILED) { TeleportMessageParsers.parseTeleportFailed(it) }
+        register(MessageIdRegistry.TELEPORT_PROGRESS) { TeleportMessageParsers.parseTeleportProgress(it) }
+        register(MessageIdRegistry.ENABLE_SIMULATOR) { TeleportMessageParsers.parseEnableSimulator(it) }
+        register(MessageIdRegistry.CROSSED_REGION) { TeleportMessageParsers.parseCrossedRegion(it) }
 
-        register(MessageIds.INVENTORY_DESCENDENTS) { AdditionalMessageParsers.parseInventoryDescendents(it) }
-        register(MessageIds.FETCH_INVENTORY_DESCENDENTS) { DeclaredMessageSlices.parseFetchInventoryDescendents(it) }
-        register(MessageIds.FETCH_INVENTORY) { DeclaredMessageSlices.parseFetchInventory(it) }
-        register(MessageIds.REQUEST_PAY_PRICE) { DeclaredMessageSlices.parseRequestPayPrice(it) }
-        register(MessageIds.DIR_FIND_QUERY) { DeclaredMessageSlices.parseDirFindQuery(it) }
-        register(MessageIds.GROUP_TITLES_REQUEST) { DeclaredMessageSlices.parseGroupTitlesRequest(it) }
-        register(MessageIds.MAP_NAME_REQUEST) { DeclaredMessageSlices.parseMapNameRequest(it) }
-        register(MessageIds.AGENT_PAUSE) { DeclaredMessageSlices.parseAgentPause(it) }
-        register(MessageIds.AGENT_RESUME) { DeclaredMessageSlices.parseAgentResume(it) }
+        register(MessageIdRegistry.INVENTORY_DESCENDENTS) { AdditionalMessageParsers.parseInventoryDescendents(it) }
+        register(MessageIdRegistry.FETCH_INVENTORY_DESCENDENTS) { DeclaredMessageSlices.parseFetchInventoryDescendents(it) }
+        register(MessageIdRegistry.FETCH_INVENTORY) { DeclaredMessageSlices.parseFetchInventory(it) }
+        register(MessageIdRegistry.REQUEST_PAY_PRICE) { DeclaredMessageSlices.parseRequestPayPrice(it) }
+        register(MessageIdRegistry.DIR_FIND_QUERY) { DeclaredMessageSlices.parseDirFindQuery(it) }
+        register(MessageIdRegistry.GROUP_TITLES_REQUEST) { DeclaredMessageSlices.parseGroupTitlesRequest(it) }
+        register(MessageIdRegistry.MAP_NAME_REQUEST) { DeclaredMessageSlices.parseMapNameRequest(it) }
+        register(MessageIdRegistry.AGENT_PAUSE) { DeclaredMessageSlices.parseAgentPause(it) }
+        register(MessageIdRegistry.AGENT_RESUME) { DeclaredMessageSlices.parseAgentResume(it) }
     }
 
     fun register(messageId: Int, handler: (ByteArray) -> Any?) {
