@@ -12,6 +12,7 @@ import com.linkpoint.LinkpointApp
 import com.linkpoint.ui.avatar.AvatarAppearance
 import com.linkpoint.ui.avatar.MyAvatarScreen
 import com.linkpoint.ui.chat.ChatScreen
+import com.linkpoint.ui.chat.L2ChatRoute
 import com.linkpoint.ui.common.UiLoadState
 import com.linkpoint.ui.friends.FriendsScreen
 import com.linkpoint.ui.groups.GroupData
@@ -35,6 +36,7 @@ import com.linkpoint.ui.linkpoint2.screens.GraphicsSettingsScreen
 import com.linkpoint.ui.linkpoint2.screens.GridManagementScreen
 import com.linkpoint.ui.linkpoint2.screens.GroupProfileScreen
 import com.linkpoint.ui.linkpoint2.screens.IMListScreen
+import com.linkpoint.ui.linkpoint2.screens.L2IMListRoute
 import com.linkpoint.ui.linkpoint2.screens.NotificationsScreen
 import com.linkpoint.ui.linkpoint2.screens.OnboardingAvatarScreen
 import com.linkpoint.ui.linkpoint2.screens.OnboardingPermissionsScreen
@@ -136,22 +138,13 @@ fun Linkpoint2RouteHost(
             onEnterWorld = { navController.navigateTo(Routes.LOGIN) },
             modifier = modifier,
         )
-        route == Routes.IM_LIST -> IMListScreen(
-            conversations = L2Demo.Conversations,
+        route == Routes.IM_LIST -> L2IMListRoute(
             onBack = back,
             onOpenConversation = { navController.navigateTo(Routes.CHAT) },
             onCompose = { navController.navigateTo(Routes.CHAT) },
             modifier = modifier,
         )
-        route == Routes.CHAT -> ChatScreen(
-            messages = L2Demo.ChatThread,
-            currentAvatarName = app?.sessionManager?.getAvatarName() ?: "You",
-            threadAvatarName = "Echo Nightshade",
-            threadOnline = true,
-            threadLocation = "Crystal Coast (186, 92, 24)",
-            uiLoadState = UiLoadState.Content,
-            onRetry = {},
-            onSendMessage = { _, _ -> },
+        route == Routes.CHAT -> L2ChatRoute(
             onNavigateBack = back,
             modifier = modifier,
         )
