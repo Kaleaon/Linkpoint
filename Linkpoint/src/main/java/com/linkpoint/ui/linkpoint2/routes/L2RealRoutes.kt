@@ -19,6 +19,7 @@ import com.linkpoint.ui.friends.FriendsScreen
 import com.linkpoint.ui.groups.GroupData
 import com.linkpoint.ui.groups.GroupsScreen
 import com.linkpoint.ui.inventory.InventoryItemData
+import com.linkpoint.ui.inventory.InventoryItemType
 import com.linkpoint.ui.inventory.InventoryScreen
 import com.linkpoint.ui.linkpoint2.screens.EventCard
 import com.linkpoint.ui.linkpoint2.screens.GraphicsSettingsScreen
@@ -247,6 +248,8 @@ fun L2InventoryRoute(
     modifier: Modifier = Modifier,
 ) {
     val app = LinkpointApp.getInstanceOrNull()
+    val scope = rememberCoroutineScope()
+
     if (app == null || !app.isInventoryManagerInitialized()) {
         InventoryScreen(
             items = emptyList(),
@@ -263,20 +266,99 @@ fun L2InventoryRoute(
         )
         return
     }
+
     val isLoading by app.inventoryManager.isLoading.collectAsState()
+    val rootId = remember {
+        app.inventoryManager.getSystemFolder(com.linkpoint.inventory.InventoryManager.FOLDER_TYPE_ROOT)
+    }
+
+    // Folder navigation stack. UUID? on top is the folder we're currently
+    // displaying; popping yields the parent. Names are mirrored for the
+    // breadcrumb. Stack is rebuilt each composition so it's stable
+    // across recompositions but starts at root each time the screen opens.
+    val pathStack = remember { mutableStateListOf<Pair<UUID?, String>>(null to "My Inventory") }
+    val refreshTick = remember { mutableStateOf(0) }
+    val currentFolderId = pathStack.last().first ?: rootId
+
+    LaunchedEffect(currentFolderId) {
+        // Trigger a fetch for whatever folder we're viewing. AISv3 cap will
+        // batch the response and the cached InventoryManager.folders/items
+        // maps will fill in. We re-read the snapshot below.
+        currentFolderId?.let {
+            scope.launch { app.inventoryManager.fetchFolderContents(it) }
+        }
+    }
+
+    val nodes = remember(currentFolderId, refreshTick.value) {
+        currentFolderId?.let { app.inventoryManager.getFolderContents(it) }.orEmpty()
+    }
+
+    val items = nodes.map { node ->
+        when (node) {
+            is com.linkpoint.inventory.InventoryNode.Folder -> InventoryItemData(
+                id = node.folder.folderId,
+                name = node.folder.name,
+                type = InventoryItemType.FOLDER,
+                parentId = node.folder.parentId,
+            )
+            is com.linkpoint.inventory.InventoryNode.Item -> InventoryItemData(
+                id = node.item.itemId,
+                name = node.item.name,
+                type = node.item.assetTypeEnum.toUiInventoryItemType(),
+                parentId = node.item.parentId,
+                assetId = node.item.assetId,
+                creatorId = node.item.permissions.creatorId,
+            )
+        }
+    }
+
+    val isEmpty = !isLoading && items.isEmpty()
+
     InventoryScreen(
-        items = emptyList<InventoryItemData>(),
-        breadcrumb = listOf("My Inventory"),
-        uiLoadState = if (isLoading) UiLoadState.Loading() else UiLoadState.Empty(
-            title = "Inventory loading",
-            message = "AISv3 fetch is in progress. Folder rendering is wired in a follow-up.",
-        ),
-        onRetry = { app.applicationScope.launch { app.inventoryManager.warmFetch() } },
-        onItemClick = {},
+        items = items,
+        breadcrumb = pathStack.map { it.second },
+        uiLoadState = when {
+            isLoading && items.isEmpty() -> UiLoadState.Loading()
+            isEmpty -> UiLoadState.Empty(
+                title = "Empty folder",
+                message = "Nothing here. Pull to refresh once items finish syncing.",
+            )
+            else -> UiLoadState.Content
+        },
+        onRetry = {
+            currentFolderId?.let {
+                scope.launch {
+                    app.inventoryManager.fetchFolderContents(it, fetchFolders = true, fetchItems = true)
+                    refreshTick.value++
+                }
+            }
+        },
+        onItemClick = { tapped ->
+            if (tapped.type == InventoryItemType.FOLDER) {
+                pathStack.add(tapped.id to tapped.name)
+            }
+        },
         onNavigateBack = onNavigateBack,
-        onNavigateUp = {},
+        onNavigateUp = {
+            if (pathStack.size > 1) pathStack.removeAt(pathStack.lastIndex)
+        },
         modifier = modifier,
     )
+}
+
+private fun com.linkpoint.assets.AssetType.toUiInventoryItemType(): InventoryItemType = when (this) {
+    com.linkpoint.assets.AssetType.TEXTURE -> InventoryItemType.TEXTURE
+    com.linkpoint.assets.AssetType.SOUND -> InventoryItemType.SOUND
+    com.linkpoint.assets.AssetType.CALLING_CARD -> InventoryItemType.CALLING_CARD
+    com.linkpoint.assets.AssetType.LANDMARK -> InventoryItemType.LANDMARK
+    com.linkpoint.assets.AssetType.SCRIPT -> InventoryItemType.SCRIPT
+    com.linkpoint.assets.AssetType.CLOTHING -> InventoryItemType.CLOTHING
+    com.linkpoint.assets.AssetType.OBJECT -> InventoryItemType.OBJECT
+    com.linkpoint.assets.AssetType.NOTECARD -> InventoryItemType.NOTECARD
+    com.linkpoint.assets.AssetType.BODYPART -> InventoryItemType.BODYPART
+    com.linkpoint.assets.AssetType.ANIMATION -> InventoryItemType.ANIMATION
+    com.linkpoint.assets.AssetType.GESTURE -> InventoryItemType.GESTURE
+    else -> InventoryItemType.UNKNOWN
 }
 
 @Composable
