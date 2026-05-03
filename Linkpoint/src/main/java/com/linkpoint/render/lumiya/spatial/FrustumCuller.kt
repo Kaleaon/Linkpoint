@@ -86,6 +86,55 @@ class FrustumCuller {
     }
 
     /**
+     * Tri-state classification of an AABB against the frustum.
+     *
+     * Lineage: LL viewer `LLVolumeOctree::cull` returns three states so an
+     * octree walk can short-circuit into "draw whole subtree, no further
+     * culling" once a node is fully inside the frustum. Lumiya kept the
+     * binary path because its draw lists were flat and the per-prim test
+     * was cheap; with our octree-backed [SpatialIndex], the savings come
+     * back as soon as the camera looks into a dense region.
+     *
+     * Returns:
+     *  - [FrustumResult.OUTSIDE]   – box is entirely on the negative side
+     *                                of at least one plane; whole subtree
+     *                                can be skipped
+     *  - [FrustumResult.INSIDE]    – box is entirely on the positive side
+     *                                of every plane; subtree can be drawn
+     *                                without further plane tests
+     *  - [FrustumResult.INTERSECTS] – box straddles at least one plane;
+     *                                child boxes must be tested
+     *
+     * Contract: when this returns INSIDE for a node, callers may treat
+     * every contained AABB as visible without re-testing — useful for
+     * tight inner loops over an octree leaf.
+     */
+    fun classifyAABB(
+        minX: Float, minY: Float, minZ: Float,
+        maxX: Float, maxY: Float, maxZ: Float
+    ): FrustumResult {
+        var allInside = true
+        for (p in planes) {
+            // Positive corner: maximises the plane's inside-ness.
+            val px = if (p[0] >= 0) maxX else minX
+            val py = if (p[1] >= 0) maxY else minY
+            val pz = if (p[2] >= 0) maxZ else minZ
+            if (p[0] * px + p[1] * py + p[2] * pz + p[3] < 0f) {
+                return FrustumResult.OUTSIDE
+            }
+            // Negative corner: minimises inside-ness. If it's also on
+            // the positive side, the whole box is on the positive side.
+            val nx = if (p[0] >= 0) minX else maxX
+            val ny = if (p[1] >= 0) minY else maxY
+            val nz = if (p[2] >= 0) minZ else maxZ
+            if (p[0] * nx + p[1] * ny + p[2] * nz + p[3] < 0f) {
+                allInside = false
+            }
+        }
+        return if (allInside) FrustumResult.INSIDE else FrustumResult.INTERSECTS
+    }
+
+    /**
      * Test whether a sphere is at least partially inside the frustum.
      */
     fun isSphereVisible(cx: Float, cy: Float, cz: Float, radius: Float): Boolean {
@@ -104,5 +153,18 @@ class FrustumCuller {
             if (p[0] * x + p[1] * y + p[2] * z + p[3] < 0f) return false
         }
         return true
+    }
+
+    /**
+     * Test seam — install a single plane equation directly so unit
+     * tests don't have to mock the GLES matrix multiply chain in
+     * [extractPlanes]. Production callers should always go through
+     * [extractPlanes].
+     */
+    @androidx.annotation.VisibleForTesting
+    internal fun setPlaneForTest(index: Int, a: Float, b: Float, c: Float, d: Float) {
+        require(index in 0..5) { "plane index out of range: $index" }
+        planes[index][0] = a; planes[index][1] = b
+        planes[index][2] = c; planes[index][3] = d
     }
 }

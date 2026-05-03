@@ -34,6 +34,14 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
 
         /** Default draw distance (metres). */
         const val DEFAULT_DRAW_DISTANCE = 256.0f
+
+        /**
+         * Water FBOs render at viewport / [WATER_FBO_DIVISOR] on each
+         * axis. Half-res (divisor = 2) matches LL viewer
+         * `RenderReflectionDetail` defaults and is invisible at the
+         * pixel level once the wave normal perturbs the sample UV.
+         */
+        const val WATER_FBO_DIVISOR = 2
     }
 
     // ── GPU capability flags ─────────────────────────────────────────────
@@ -129,6 +137,30 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
     var fxaaDepthRenderbuffer = 0; private set
     var fxaaWidth = 0; private set
     var fxaaHeight = 0; private set
+
+    // ── Water reflection / refraction FBOs ───────────────────────────────
+    //
+    // Names mirror the LL viewer's `LLPipeline::mWaterRef` (planar
+    // reflection target) and `mWaterDis` (refraction / "distortion"
+    // target). They are sized to a fraction of the screen — the
+    // reflection texture is sampled through a perturbed UV in the
+    // water shader so a half-resolution target is invisible at the
+    // pixel level and saves substantial fill rate. Disabled by
+    // default; enable via [setWaterPlanarReflectionsEnabled] when the
+    // device is known to handle the extra two passes.
+
+    var waterPlanarReflectionsEnabled: Boolean = false
+        private set
+    /** Planar reflection FBO. Equivalent to LLPipeline::mWaterRef. */
+    var mWaterRef: Int = 0; private set
+    var waterReflectionTexture: Int = 0; private set
+    var waterReflectionDepthRb: Int = 0; private set
+    /** Refraction (under-water) FBO. Equivalent to LLPipeline::mWaterDis. */
+    var mWaterDis: Int = 0; private set
+    var waterRefractionTexture: Int = 0; private set
+    var waterRefractionDepthRb: Int = 0; private set
+    var waterFboWidth: Int = 0; private set
+    var waterFboHeight: Int = 0; private set
 
     // ── Global UBO for shared matrices ───────────────────────────────────
 
@@ -368,6 +400,108 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
         }
     }
 
+    // ── Water reflection / refraction FBOs ───────────────────────────────
+
+    /**
+     * Toggle planar water reflection / refraction passes. When enabled,
+     * the renderer maintains two off-screen FBOs sized to half the
+     * primary viewport ([WATER_FBO_DIVISOR]). Producers (water pass)
+     * sample these textures to produce the mirror-reflection +
+     * underwater-refraction look that LL/Singularity ship.
+     */
+    fun setWaterPlanarReflectionsEnabled(enabled: Boolean, viewportWidth: Int, viewportHeight: Int) {
+        if (waterPlanarReflectionsEnabled == enabled) return
+        waterPlanarReflectionsEnabled = enabled
+        if (enabled) createWaterFramebuffers(viewportWidth, viewportHeight)
+        else destroyWaterFramebuffers()
+    }
+
+    /**
+     * Recreate the water FBOs to match a new viewport. Cheap no-op
+     * when reflections are disabled. Call from [onSurfaceChanged] in
+     * the renderer alongside the FXAA FBO recreation.
+     */
+    fun resizeWaterFramebuffers(viewportWidth: Int, viewportHeight: Int) {
+        if (!waterPlanarReflectionsEnabled) return
+        createWaterFramebuffers(viewportWidth, viewportHeight)
+    }
+
+    private fun createWaterFramebuffers(viewportWidth: Int, viewportHeight: Int) {
+        destroyWaterFramebuffers()
+        val w = (viewportWidth / WATER_FBO_DIVISOR).coerceAtLeast(64)
+        val h = (viewportHeight / WATER_FBO_DIVISOR).coerceAtLeast(64)
+        waterFboWidth = w
+        waterFboHeight = h
+
+        val pair = createOffscreenColorDepth(w, h)
+        mWaterRef = pair.fbo
+        waterReflectionTexture = pair.color
+        waterReflectionDepthRb = pair.depth
+
+        val pair2 = createOffscreenColorDepth(w, h)
+        mWaterDis = pair2.fbo
+        waterRefractionTexture = pair2.color
+        waterRefractionDepthRb = pair2.depth
+
+        Log.i(TAG, "Water FBOs created: ${w}x${h} ref=$mWaterRef dis=$mWaterDis")
+    }
+
+    private fun destroyWaterFramebuffers() {
+        intArrayOf(mWaterRef, mWaterDis).filter { it != 0 }.forEach { fbo ->
+            GLES32.glDeleteFramebuffers(1, intArrayOf(fbo), 0)
+        }
+        intArrayOf(waterReflectionTexture, waterRefractionTexture).filter { it != 0 }.forEach { tex ->
+            GLES32.glDeleteTextures(1, intArrayOf(tex), 0)
+        }
+        intArrayOf(waterReflectionDepthRb, waterRefractionDepthRb).filter { it != 0 }.forEach { rb ->
+            GLES32.glDeleteRenderbuffers(1, intArrayOf(rb), 0)
+        }
+        mWaterRef = 0; waterReflectionTexture = 0; waterReflectionDepthRb = 0
+        mWaterDis = 0; waterRefractionTexture = 0; waterRefractionDepthRb = 0
+        waterFboWidth = 0; waterFboHeight = 0
+    }
+
+    private data class OffscreenAttachments(val fbo: Int, val color: Int, val depth: Int)
+
+    private fun createOffscreenColorDepth(width: Int, height: Int): OffscreenAttachments {
+        val fboBuf = IntArray(1); GLES32.glGenFramebuffers(1, fboBuf, 0)
+        val fbo = fboBuf[0]
+        GLES32.glBindFramebuffer(GLES32.GL_FRAMEBUFFER, fbo)
+
+        val texBuf = IntArray(1); GLES32.glGenTextures(1, texBuf, 0)
+        val color = texBuf[0]
+        GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, color)
+        GLES32.glTexImage2D(
+            GLES32.GL_TEXTURE_2D, 0, GLES32.GL_RGBA8,
+            width, height, 0,
+            GLES32.GL_RGBA, GLES32.GL_UNSIGNED_BYTE, null
+        )
+        GLES32.glTexParameteri(GLES32.GL_TEXTURE_2D, GLES32.GL_TEXTURE_MIN_FILTER, GLES32.GL_LINEAR)
+        GLES32.glTexParameteri(GLES32.GL_TEXTURE_2D, GLES32.GL_TEXTURE_MAG_FILTER, GLES32.GL_LINEAR)
+        GLES32.glTexParameteri(GLES32.GL_TEXTURE_2D, GLES32.GL_TEXTURE_WRAP_S, GLES32.GL_CLAMP_TO_EDGE)
+        GLES32.glTexParameteri(GLES32.GL_TEXTURE_2D, GLES32.GL_TEXTURE_WRAP_T, GLES32.GL_CLAMP_TO_EDGE)
+        GLES32.glFramebufferTexture2D(
+            GLES32.GL_FRAMEBUFFER, GLES32.GL_COLOR_ATTACHMENT0,
+            GLES32.GL_TEXTURE_2D, color, 0
+        )
+
+        val rbBuf = IntArray(1); GLES32.glGenRenderbuffers(1, rbBuf, 0)
+        val depth = rbBuf[0]
+        GLES32.glBindRenderbuffer(GLES32.GL_RENDERBUFFER, depth)
+        GLES32.glRenderbufferStorage(GLES32.GL_RENDERBUFFER, GLES32.GL_DEPTH_COMPONENT16, width, height)
+        GLES32.glFramebufferRenderbuffer(
+            GLES32.GL_FRAMEBUFFER, GLES32.GL_DEPTH_ATTACHMENT,
+            GLES32.GL_RENDERBUFFER, depth
+        )
+
+        val status = GLES32.glCheckFramebufferStatus(GLES32.GL_FRAMEBUFFER)
+        if (status != GLES32.GL_FRAMEBUFFER_COMPLETE) {
+            Log.e(TAG, "Water FBO incomplete: 0x${Integer.toHexString(status)}")
+        }
+        GLES32.glBindFramebuffer(GLES32.GL_FRAMEBUFFER, 0)
+        return OffscreenAttachments(fbo, color, depth)
+    }
+
     // ── Per-frame helpers ────────────────────────────────────────────────
 
     fun beginFrame() {
@@ -418,6 +552,7 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
 
     fun shutdown() {
         destroyFXAAFramebuffer()
+        destroyWaterFramebuffers()
         if (globalUBO != 0) {
             GLES32.glDeleteBuffers(1, intArrayOf(globalUBO), 0)
             globalUBO = 0

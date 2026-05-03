@@ -199,8 +199,21 @@ class LumiyaRenderer : RenderEngineProvider {
         ctx.aspectRatio = width.toFloat() / height.toFloat()
         GLES32.glViewport(0, 0, width, height)
         if (ctx.fxaaEnabled) ctx.createFXAAFramebuffer(width, height)
+        ctx.resizeWaterFramebuffers(width, height)
         rebuildHudMatrices(width, height)
         hudStore.setViewportSize(width, height)
+    }
+
+    /**
+     * Toggle planar water reflection / refraction at runtime. When
+     * enabled, [LumiyaRenderContext.mWaterRef] / [mWaterDis] become
+     * non-zero and the water pass is free to bind them as samplers
+     * for a mirror-reflection look. Mirrors LL viewer's
+     * `RenderWaterReflections` debug setting.
+     */
+    fun setWaterPlanarReflectionsEnabled(enabled: Boolean) {
+        requireGlThread("setWaterPlanarReflectionsEnabled")
+        ctx.setWaterPlanarReflectionsEnabled(enabled, viewportWidth, viewportHeight)
     }
 
     override fun onSurfaceDestroyed() {
@@ -284,6 +297,7 @@ class LumiyaRenderer : RenderEngineProvider {
                     hoverTextStore.draw(ctx, viewportWidth, viewportHeight)
                     GLES32.glDepthMask(true)
                 }
+                LumiyaRenderPass.WORLD_EMISSIVE -> primStore.drawEmissive(ctx)
                 LumiyaRenderPass.WORLD_WATER -> waterDrawable?.draw(ctx)
                 LumiyaRenderPass.WORLD_PARTICLES -> particleManager?.draw(ctx)
                 LumiyaRenderPass.HUD -> renderHudPass()

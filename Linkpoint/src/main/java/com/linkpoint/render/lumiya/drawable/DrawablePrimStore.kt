@@ -50,7 +50,14 @@ class DrawablePrimStore {
         var scaleT: Float = 1f,
         var offsetS: Float = 0f,
         var offsetT: Float = 0f,
-        var rotation: Float = 0f
+        var rotation: Float = 0f,
+        /**
+         * SL emissive "glow" intensity in the range 0..1. Faces with
+         * glow > [GLOW_THRESHOLD] participate in the emissive
+         * double-pass, where they are re-drawn with additive blending
+         * to brighten neighbouring pixels. 0 = no emissive.
+         */
+        var glow: Float = 0f
     )
 
     /** Per-prim instance data. */
@@ -71,6 +78,14 @@ class DrawablePrimStore {
     companion object {
         private val NULL_UUID = UUID(0L, 0L)
         private val IDENTITY_TEX = FloatArray(16).also { Matrix.setIdentityM(it, 0) }
+
+        /**
+         * Faces with [FaceMaterial.glow] strictly greater than this
+         * value are re-drawn in the emissive pass. The LL viewer also
+         * gates on a small epsilon — anything below ~1/255 is an
+         * encoder rounding artefact.
+         */
+        const val GLOW_THRESHOLD = 0.005f
     }
 
     private val prims = ConcurrentHashMap<Long, PrimInstance>()
@@ -117,9 +132,27 @@ class DrawablePrimStore {
         instance.scaleX = scaleX
         instance.scaleY = scaleY
         instance.scaleZ = scaleZ
-        instance.aabbHalfX = scaleX * 0.5f
-        instance.aabbHalfY = scaleY * 0.5f
-        instance.aabbHalfZ = scaleZ * 0.5f
+
+        // AABB: when the prim has a rotation, expand the local
+        // half-extents to a conservative world-space AABB. Spatial
+        // queries (frustum culling, picking) only have axis-aligned
+        // tests — without this widening a rotated long thin prim
+        // pops in/out of view as it crosses cell boundaries.
+        // Lineage: LL viewer LLXformMatrix::updateBoundingBoxes.
+        val localHalfX = scaleX * 0.5f
+        val localHalfY = scaleY * 0.5f
+        val localHalfZ = scaleZ * 0.5f
+        if (rotation != null && rotation.size >= 16) {
+            val (wx, wy, wz) = com.linkpoint.render.lumiya.spatial.SpatialEntry
+                .conservativeWorldHalfExtents(localHalfX, localHalfY, localHalfZ, rotation)
+            instance.aabbHalfX = wx
+            instance.aabbHalfY = wy
+            instance.aabbHalfZ = wz
+        } else {
+            instance.aabbHalfX = localHalfX
+            instance.aabbHalfY = localHalfY
+            instance.aabbHalfZ = localHalfZ
+        }
 
         Matrix.setIdentityM(instance.modelMatrix, 0)
         Matrix.translateM(instance.modelMatrix, 0, posX, posY, posZ)
@@ -361,9 +394,98 @@ class DrawablePrimStore {
             dst.offsetS = src.offsetS
             dst.offsetT = src.offsetT
             dst.rotation = src.rotation
+            dst.glow = src.glow
         }
         // Auto-flip transparent if any face has alpha < 1.
         instance.isTransparent = instance.faces.any { it.colorA < 0.999f }
+    }
+
+    /**
+     * True if [instance] has at least one face that should appear in
+     * the emissive double-pass. Used by [drawEmissive] to skip prims
+     * that have no glowy faces without iterating their face list.
+     */
+    private fun hasEmissive(instance: PrimInstance): Boolean {
+        for (face in instance.faces) {
+            if (face.glow > GLOW_THRESHOLD) return true
+        }
+        return false
+    }
+
+    /**
+     * Emissive / glow pass — re-draws every face with `glow > threshold`
+     * using additive blending so they brighten anything already drawn
+     * underneath. Run after the world's opaque + transparent passes
+     * have committed their colour into the FBO.
+     *
+     * Lineage: Lumiya's `DrawableStore.drawGlow` and the LL viewer's
+     * `LLDrawPoolGlow::render` both walk the live drawables a second
+     * time, multiply the base colour by the per-face glow intensity,
+     * and blend with `glBlendFunc(ONE, ONE)`. Z-write is disabled to
+     * keep the emissive layer from punching out subsequent passes.
+     */
+    fun drawEmissive(ctx: LumiyaRenderContext) {
+        ensureShapes(ctx)
+        val program = ctx.primProgram ?: return
+
+        val emissivePrims = prims.values.filter { primInFrustum(ctx, it) && hasEmissive(it) }
+        if (emissivePrims.isEmpty()) return
+
+        program.use()
+        // No directional / ambient contribution — the emissive value
+        // *is* the lighting. Diffuse + ambient zeroed; sun direction
+        // is irrelevant when nothing diffuses.
+        program.setLighting(0f, 0f, 1f, 0f, 0f, 0f, 1f, 1f, 1f)
+
+        // Additive blend, depth test on, depth write off. Mirrors the
+        // LL viewer LLGLBlend(GL_ONE, GL_ONE) state in LLDrawPoolGlow.
+        GLES32.glEnable(GLES32.GL_BLEND)
+        GLES32.glBlendFunc(GLES32.GL_ONE, GLES32.GL_ONE)
+        GLES32.glDepthMask(false)
+
+        val byShape = emissivePrims.groupBy { it.shape }
+        for ((shape, list) in byShape) {
+            val vao = shapeVAOs?.get(shape) ?: continue
+            GLES32.glBindVertexArray(vao.vao)
+            for (prim in list) {
+                drawPrimEmissive(program, prim, vao.indexCount)
+            }
+        }
+        GLES32.glBindVertexArray(0)
+
+        // Restore the renderer's standard separate-alpha blend so
+        // following passes don't inherit the additive setup.
+        GLES32.glBlendFuncSeparate(
+            GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA,
+            GLES32.GL_ZERO, GLES32.GL_ONE_MINUS_SRC_ALPHA
+        )
+        GLES32.glDepthMask(true)
+    }
+
+    private fun drawPrimEmissive(
+        program: com.linkpoint.render.lumiya.shaders.PrimShaderProgram,
+        prim: PrimInstance,
+        totalIndexCount: Int
+    ) {
+        val face = prim.faces.firstOrNull { it.glow > GLOW_THRESHOLD } ?: return
+        program.setModelMatrix(prim.modelMatrix)
+        program.setTexMatrix(buildTexMatrix(face))
+
+        // Emissive output = base colour (or texture) * glow intensity.
+        // Multiplying alpha by glow so the additive blend's output is
+        // bounded by the face's own opacity — fully transparent
+        // glow=1 face still contributes nothing, matching SL.
+        val g = face.glow
+        program.setColor(face.colorR * g, face.colorG * g, face.colorB * g, face.colorA * g)
+        if (face.textureHandle != 0) {
+            program.setUseTexture(true)
+            GLES32.glActiveTexture(GLES32.GL_TEXTURE0)
+            GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, face.textureHandle)
+            program.setTextureSampler(0)
+        } else {
+            program.setUseTexture(false)
+        }
+        GLES32.glDrawElements(GLES32.GL_TRIANGLES, totalIndexCount, GLES32.GL_UNSIGNED_SHORT, 0)
     }
 
     /**
