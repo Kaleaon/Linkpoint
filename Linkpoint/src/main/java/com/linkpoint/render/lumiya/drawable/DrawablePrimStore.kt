@@ -40,6 +40,12 @@ class DrawablePrimStore {
     // ── Mutation ─────────────────────────────────────────────────────────
 
     fun addPrim(id: Long, posX: Float, posY: Float, posZ: Float) {
+        val existing = prims[id]
+        if (existing != null) {
+            Matrix.setIdentityM(existing.modelMatrix, 0)
+            Matrix.translateM(existing.modelMatrix, 0, posX, posY, posZ)
+            return
+        }
         val instance = PrimInstance(id = id)
         Matrix.setIdentityM(instance.modelMatrix, 0)
         Matrix.translateM(instance.modelMatrix, 0, posX, posY, posZ)
@@ -49,6 +55,35 @@ class DrawablePrimStore {
     fun removePrim(id: Long) {
         prims.remove(id)
     }
+
+    /**
+     * Bind an uploaded GL texture to a prim. Called from the GL thread once
+     * a TextureManager fetch + GLTextureCache upload has completed for the
+     * texture entry referenced by an ObjectUpdate.
+     */
+    fun setPrimTexture(id: Long, textureHandle: Int) {
+        val instance = prims[id] ?: return
+        instance.textureHandle = textureHandle
+    }
+
+    /**
+     * Mark a prim as transparent. Used by the alpha-aware draw split so
+     * back-to-front sorting is only paid for alpha-blended geometry.
+     */
+    fun setPrimTransparent(id: Long, transparent: Boolean) {
+        val instance = prims[id] ?: return
+        instance.isTransparent = transparent
+    }
+
+    /** Update only the model matrix (cheap path for ObjectUpdateCompressed). */
+    fun setPrimTransform(id: Long, matrix4x4: FloatArray) {
+        val instance = prims[id] ?: return
+        if (matrix4x4.size >= 16) {
+            System.arraycopy(matrix4x4, 0, instance.modelMatrix, 0, 16)
+        }
+    }
+
+    fun primCount(): Int = prims.size
 
     fun clear() {
         prims.clear()

@@ -1,8 +1,20 @@
-# Filament Rendering System - Complete Implementation
+# Filament Rendering System - Legacy / Fallback
+
+> **Status: Demoted to opt-in fallback.** As of branch
+> `claude/opengl-rendering-engine-LCKVz`, the primary rendering path
+> is the hand-rolled OpenGL ES 3 engine documented in
+> [`docs/OpenGL_Rendering_Engine.md`](docs/OpenGL_Rendering_Engine.md).
+> Filament remains in-tree and selectable via the
+> `renderer_backend = "filament"` preference, but persistent
+> driver-level crashes on Adreno/Mali devices and friction with the
+> SL/OpenSim asset pipeline pushed us back to a hand-rolled GL
+> renderer modelled on Singularity Viewer / Lumiya / Firestorm.
 
 ## 🎯 Overview
 
-Linkpoint now includes a **complete Filament rendering system** with all critical components implemented and ready to use.
+Linkpoint includes a Filament rendering system. It is no longer the
+default but remains complete and switchable for devices where
+Filament outperforms the GL ES 3 path.
 
 ## 📦 Components (12 Total)
 

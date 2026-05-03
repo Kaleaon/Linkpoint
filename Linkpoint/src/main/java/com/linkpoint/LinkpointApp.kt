@@ -5773,6 +5773,38 @@ class LinkpointApp : Application() {
         }
     }
 
+    /**
+     * Bind the active GL engine along with the GL-thread executor and
+     * texture fetcher so the Lumiya consumer can route texture uploads
+     * through TextureManager + GLTextureCache. The executor must marshal
+     * runnables onto the GLSurfaceView's render thread (typically
+     * `lumiyaSurfaceView.runOnGlThread`).
+     */
+    fun bindGlesRenderEngine(
+        provider: com.linkpoint.render.lumiya.core.RenderEngineProvider?,
+        glThreadExecutor: (Runnable) -> Unit
+    ) {
+        if (!::gles3CommandConsumer.isInitialized) return
+        if (provider == null) {
+            gles3CommandConsumer.bindEngine(null)
+            return
+        }
+        val fetcher = if (::textureManager.isInitialized) {
+            com.linkpoint.render.scene.commands.Gles3RenderCommandConsumer.TextureFetcher { textureId, onResolved ->
+                applicationScope.launch {
+                    val bmp = try {
+                        textureManager.getTexture(textureId)
+                    } catch (e: Exception) {
+                        Log.v(TAG, "GLES texture fetch failed id=$textureId: ${e.message}")
+                        null
+                    }
+                    onResolved(bmp)
+                }
+            }
+        } else null
+        gles3CommandConsumer.bindEngine(provider, glThreadExecutor, fetcher)
+    }
+
     private fun publishRenderCommand(command: SceneRenderCommand): Boolean {
         val accepted = renderCommandStream.publish(command)
         if (!accepted) {

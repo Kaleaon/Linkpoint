@@ -124,7 +124,9 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private val app by lazy { LinkpointApp.getInstance() }
     @Volatile private var isRendering = false
     @Volatile private var isSurfaceReady = false
-    private var useSecondaryRenderer: Boolean = false
+    // OpenGL ES 3 (Lumiya pipeline) is the primary path. Filament remains as
+    // an opt-in fallback gated behind the renderer_backend preference.
+    private var useSecondaryRenderer: Boolean = true
     private var hudsVisibleFromManager: Boolean = true
     private var isLayoutEditorMode: Boolean = false
     
@@ -777,7 +779,22 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
 
     private fun preferredRendererBackend(): RendererHandoffManager.RendererBackend {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        return if (prefs.getBoolean("enable_secondary_renderer", false)) {
+        // Primary renderer is OpenGL ES 3 (Lumiya pipeline). Honour the new
+        // renderer_backend key first, then fall back to the legacy boolean
+        // preference for users upgrading from the Filament-default era.
+        val backendPref = prefs.getString("renderer_backend", "opengl") ?: "opengl"
+        if (backendPref.equals("filament", ignoreCase = true)) {
+            return RendererHandoffManager.RendererBackend.FILAMENT
+        }
+        if (backendPref.equals("opengl", ignoreCase = true) ||
+            backendPref.equals("gles", ignoreCase = true) ||
+            backendPref.equals("lumiya", ignoreCase = true)
+        ) {
+            return RendererHandoffManager.RendererBackend.LUMIYA
+        }
+        // Legacy fallback: the old pref defaulted false=Filament. We invert
+        // semantics so an unset legacy install lands on OpenGL.
+        return if (prefs.getBoolean("enable_secondary_renderer", true)) {
             RendererHandoffManager.RendererBackend.LUMIYA
         } else {
             RendererHandoffManager.RendererBackend.FILAMENT
@@ -940,12 +957,54 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             )
         }
         lumiyaSurfaceView = glView
-        app.bindGlesRenderEngine(glView.getEngineProvider())
+        // Bind the GL engine and hand the consumer a GL-thread executor
+        // (queueEvent on the GLSurfaceView) plus a TextureManager-backed
+        // fetcher so prim faces actually pull their textures.
+        app.bindGlesRenderEngine(
+            glView.getEngineProvider(),
+            glThreadExecutor = { runnable -> glView.runOnGlThread { runnable.run() } }
+        )
+        wireGlesDataPipelines(glView)
         worldViewportHost.attachViewport(glView)
         isSurfaceReady = true
         isRendering = false
         android.util.Log.i(TAG, "Replayed snapshot into Lumiya backend (camera mode=${snapshot.cameraMode})")
-        android.util.Log.i(TAG, "✓ Secondary Lumiya renderer enabled")
+        android.util.Log.i(TAG, "✓ OpenGL ES 3 (Lumiya) primary renderer attached")
+    }
+
+    /**
+     * Install protocol-side callbacks that target the Lumiya GL backend.
+     * Mirrors [wireFilamentDataPipelines] but for the GL pipeline:
+     *
+     *  - Per-frame avatar pose tick: advances each tracked avatar's
+     *    animator and pushes the resulting joint matrices into the
+     *    Lumiya avatar store via [com.linkpoint.render.lumiya.core.LumiyaRenderer.updateAvatarJoints].
+     *  - Bakes-on-Mesh texture resolver: future plumbing for routing
+     *    IMG_USE_BAKED_* sentinel UUIDs to the agent's baked textures.
+     *
+     * Texture binding for prims is handled by the command consumer.
+     */
+    private fun wireGlesDataPipelines(glView: LumiyaGLSurfaceView) {
+        val renderer = glView.getRenderer()
+
+        // Drive avatar animation on each GL frame. The hook fires on the
+        // GL thread inside LumiyaRenderer.renderFrame (before any draws),
+        // so we can upload joint matrices directly without queueing.
+        renderer.onBeforeFrame = { deltaTime ->
+            try {
+                if (app.isAvatarManagerInitialized()) {
+                    for (avatar in app.avatarManager.getAllAvatars()) {
+                        avatar.animator.update(deltaTime)
+                        avatar.skeleton.updateBoneMatrices()
+                        val matrices = avatar.skeleton.getSkinningMatrices()
+                        val count = avatar.skeleton.boneArray.size
+                        renderer.updateAvatarJoints(avatar.agentId, matrices, count)
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.v(TAG, "GL avatar pose tick error: ${e.message}")
+            }
+        }
     }
     
     private fun startRenderLoop() {
@@ -1188,12 +1247,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         updateDebugFloaterVisibility() // Update debug floater visibility based on settings
         applyInterfacePreferences()
 
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val preferredBackend = if (prefs.getBoolean("enable_secondary_renderer", false)) {
-            RendererHandoffManager.RendererBackend.LUMIYA
-        } else {
-            RendererHandoffManager.RendererBackend.FILAMENT
-        }
+        val preferredBackend = preferredRendererBackend()
         if (preferredBackend != rendererHandoffManager.currentBackend()) {
             rendererHandoffManager.switchBackend(preferredBackend, "on_resume_preferences")
         }

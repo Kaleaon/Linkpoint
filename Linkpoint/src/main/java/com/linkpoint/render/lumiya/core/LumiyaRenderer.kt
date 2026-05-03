@@ -1,13 +1,17 @@
 package com.linkpoint.render.lumiya.core
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.opengl.GLES32
 import android.opengl.Matrix
 import android.util.Log
 import android.view.Surface
+import com.linkpoint.assets.TextureFormatPolicy
 import com.linkpoint.avatar.AttachmentPoints
 import com.linkpoint.render.RenderDiagnostics
 import com.linkpoint.render.lumiya.drawable.*
+import com.linkpoint.render.lumiya.glres.GLTextureCache
+import java.util.UUID
 
 /**
  * Main renderer implementing the Lumiya render pipeline on modern GL ES 3.2.
@@ -62,6 +66,15 @@ class LumiyaRenderer : RenderEngineProvider {
     private val hudViewMatrix = FloatArray(16)
     private val hudProjectionMatrix = FloatArray(16)
     private var worldPassEnabled = true
+
+    /**
+     * Hook invoked at the top of every [renderFrame] on the GL thread,
+     * before any draw passes. Receives the seconds elapsed since the
+     * previous frame. Use it for per-frame pose ticks, animation
+     * advances, or scene mutations that need to land before draws.
+     */
+    @Volatile
+    var onBeforeFrame: ((deltaTimeSeconds: Float) -> Unit)? = null
 
     // =====================================================================
     // Lifecycle
@@ -167,6 +180,14 @@ class LumiyaRenderer : RenderEngineProvider {
 
         // ── 1. Preparation ───────────────────────────────────────────────
         ctx.beginFrame()
+        // Producer hook: animator ticks, joint UBO uploads, scene
+        // mutations queued from non-GL threads. Runs before camera/UBO
+        // refresh so pose updates are visible to the first pass.
+        try {
+            onBeforeFrame?.invoke(ctx.deltaTime)
+        } catch (t: Throwable) {
+            Log.v(TAG, "onBeforeFrame hook threw: ${t.message}")
+        }
         ctx.updateCamera()
         ctx.uploadGlobalUBO()
 
@@ -268,6 +289,62 @@ class LumiyaRenderer : RenderEngineProvider {
         avatarStore.clear()
         terrainDrawable?.clear()
     }
+
+    // =====================================================================
+    // Producer-side entry points (called from non-render threads via
+    // LumiyaGLSurfaceView.runOnGlThread { ... }, or directly when already
+    // on the GL thread). These let the protocol layer feed scene state
+    // into the engine without the producer needing to know about VAOs,
+    // UBOs, shaders, or sRGB.
+    // =====================================================================
+
+    /**
+     * Upload [bitmap] keyed by the SL asset [textureId] and bind the
+     * resulting GL handle to [primId]. If the texture is already cached
+     * the upload is skipped. Must be called on the GL thread.
+     */
+    fun uploadTextureForPrim(
+        primId: Long,
+        textureId: UUID,
+        bitmap: Bitmap,
+        semantic: TextureFormatPolicy.TextureSemantic = TextureFormatPolicy.TextureSemantic.ALBEDO
+    ) {
+        requireGlThread("uploadTextureForPrim")
+        if (!isInitialized) return
+        val handle = ctx.textureCache.put(textureId, bitmap, semantic)
+        primStore.setPrimTexture(primId, handle)
+    }
+
+    /** Mark a prim as transparent (flips it into the alpha-sorted draw list). */
+    fun setPrimTransparent(primId: Long, transparent: Boolean) {
+        requireGlThread("setPrimTransparent")
+        primStore.setPrimTransparent(primId, transparent)
+    }
+
+    /**
+     * Push a fresh joint-matrix palette for an avatar. Producers compute
+     * the world-space joint matrices (root motion + animator pose) on a
+     * worker thread and queue this onto the GL thread.
+     */
+    fun updateAvatarJoints(id: UUID, matrices: FloatArray, count: Int) {
+        requireGlThread("updateAvatarJoints")
+        avatarStore.updateJoints(id, matrices, count)
+    }
+
+    /** Insert or update an avatar at a world position. */
+    fun upsertAvatar(id: UUID, posX: Float, posY: Float, posZ: Float) {
+        requireGlThread("upsertAvatar")
+        avatarStore.addAvatar(id, posX, posY, posZ)
+    }
+
+    /** Remove a tracked avatar (also frees its joint UBO). */
+    fun removeAvatar(id: UUID) {
+        requireGlThread("removeAvatar")
+        avatarStore.removeAvatar(id)
+    }
+
+    /** Read-only diagnostic counts for the live scene. */
+    fun primCount(): Int = primStore.primCount()
 
     // =====================================================================
     // Shutdown

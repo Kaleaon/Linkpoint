@@ -67,6 +67,18 @@ class LumiyaGLSurfaceView @JvmOverloads constructor(
 
     fun getEngineProvider(): RenderEngineProvider = lumiyaRenderer
 
+    /**
+     * Run [block] on the GL thread, after the next frame's synchronization
+     * point. Safe to call from any thread. Use this when you need to touch
+     * GL resources (texture uploads, joint UBO writes, drawable mutations)
+     * from outside the Renderer callbacks.
+     *
+     * Mirrors Lumiya's `WorldViewRenderer.queueEvent { ... }` idiom.
+     */
+    fun runOnGlThread(block: () -> Unit) {
+        queueEvent(block)
+    }
+
     override fun onPause() {
         super.onPause()
         Log.d(TAG, "onPause")

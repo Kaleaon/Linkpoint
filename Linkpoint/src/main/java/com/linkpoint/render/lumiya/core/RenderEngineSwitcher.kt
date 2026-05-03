@@ -10,13 +10,15 @@ import android.view.Surface
  * Usage:
  * ```
  *   val switcher = RenderEngineSwitcher(context)
- *   switcher.registerEngine(EngineType.FILAMENT, filamentProvider)
  *   switcher.registerEngine(EngineType.LUMIYA, LumiyaRenderer())
- *   switcher.setActiveEngine(EngineType.LUMIYA)
+ *   switcher.registerEngine(EngineType.FILAMENT, filamentProvider) // optional
+ *   switcher.setActiveEngine(EngineType.LUMIYA) // primary
  *   switcher.initialize(surface, width, height)
  *   // In render loop:
  *   switcher.renderFrame()
  * ```
+ *
+ * Lumiya is the primary engine; Filament is an opt-in fallback.
  */
 class RenderEngineSwitcher(private val context: Context) {
 
@@ -25,14 +27,25 @@ class RenderEngineSwitcher(private val context: Context) {
     }
 
     enum class EngineType {
-        /** Google Filament PBR engine (default). */
-        FILAMENT,
-        /** Lumiya-based GL ES 3.2 engine. */
-        LUMIYA
+        /**
+         * Lumiya-lineage OpenGL ES 3.0+ engine. Primary path. Hand-rolled
+         * forward renderer modelled on Singularity Viewer's LLPipeline /
+         * LLDrawPool architecture, ported through Lumiya Viewer's mobile
+         * GLSurfaceView pipeline.
+         */
+        LUMIYA,
+        /**
+         * Google Filament PBR engine. Retained as an opt-in fallback for
+         * devices that benefit from Filament's pre-baked materials, but no
+         * longer the default — a series of crashes on real-world Adreno /
+         * Mali drivers and incompatibility with the SL/OpenSim asset
+         * pipeline pushed us back to a hand-rolled GL renderer.
+         */
+        FILAMENT
     }
 
     private val engines = mutableMapOf<EngineType, RenderEngineProvider>()
-    private var activeType: EngineType = EngineType.FILAMENT
+    private var activeType: EngineType = EngineType.LUMIYA
     private var active: RenderEngineProvider? = null
     private var pendingSwitch: EngineType? = null
     private var lastSurface: Surface? = null

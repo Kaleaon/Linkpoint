@@ -7,9 +7,13 @@ import android.view.Surface
  * Abstraction over render engine backends.
  *
  * Linkpoint ships with two render engines:
- *   1. **Filament** – Google's PBR engine (default, high quality)
- *   2. **Lumiya** – OpenGL ES 3.2 engine ported from the classic Lumiya Viewer,
- *      modernised to current standards (lower overhead, mobile-optimised)
+ *   1. **Lumiya GL ES 3.0+** – Hand-rolled forward renderer ported from the
+ *      classic Lumiya Viewer and modernised to GL ES 3.2. Mirrors the
+ *      Singularity / Firestorm LL viewer pipeline (LLPipeline + LLDrawPool +
+ *      LLSpatialPartition). **Default and primary path.**
+ *   2. **Filament** – Google's PBR engine. Opt-in fallback only; retired
+ *      from default service after persistent driver-level crashes on
+ *      Adreno/Mali devices and friction with the SL/OpenSim asset pipeline.
  *
  * Any class implementing this interface can be plugged in as the active renderer.
  */
