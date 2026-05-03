@@ -9,6 +9,31 @@ import org.junit.Test
 class LumiyaFramePlannerTest {
 
     @Test
+    fun `emissive pass runs after transparent and before water in normal frames`() {
+        val plan = LumiyaFramePlanner.createPlan(
+            worldPassEnabled = true,
+            hasHudElements = false,
+            interactiveThrottle = false
+        )
+        val emissiveIdx = plan.indexOf(LumiyaRenderPass.WORLD_EMISSIVE)
+        val transparentIdx = plan.indexOf(LumiyaRenderPass.WORLD_TRANSPARENT)
+        val waterIdx = plan.indexOf(LumiyaRenderPass.WORLD_WATER)
+        assertTrue("emissive present", emissiveIdx >= 0)
+        assertTrue("emissive after transparent", emissiveIdx > transparentIdx)
+        assertTrue("emissive before water", emissiveIdx < waterIdx)
+    }
+
+    @Test
+    fun `interactive throttle drops the emissive pass`() {
+        val plan = LumiyaFramePlanner.createPlan(
+            worldPassEnabled = true,
+            hasHudElements = false,
+            interactiveThrottle = true
+        )
+        assertFalse(plan.contains(LumiyaRenderPass.WORLD_EMISSIVE))
+    }
+
+    @Test
     fun `includes HUD pass when world pass is disabled`() {
         val plan = LumiyaFramePlanner.createPlan(
             worldPassEnabled = false,

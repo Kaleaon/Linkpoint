@@ -52,9 +52,27 @@ class OcclusionQuerySet {
 
     private val slots = HashMap<Long, Slot>()
     private var currentEntity: Long = -1L
-    private var enabled: Boolean = true
+    // Off by default to match the class docstring: occlusion query
+    // overhead is a net loss on tile-based mobile GPUs unless the
+    // scene is genuinely overdraw-bound. Producers must
+    // `setEnabled(true)` after confirming
+    // `LumiyaRenderer.featureFlags().occlusionQueries` is true so we
+    // never issue GL_ANY_SAMPLES_PASSED_CONSERVATIVE on a driver
+    // that lacks it.
+    private var enabled: Boolean = false
 
-    /** Toggle the entire system off (reverts to draw-everything). */
+    /**
+     * Toggle the entire system off (reverts to draw-everything).
+     *
+     * Caller responsibility: only flip this true when the driver
+     * actually supports `GL_ANY_SAMPLES_PASSED_CONSERVATIVE`. The
+     * canonical check is
+     * `LumiyaRenderer.featureFlags().occlusionQueries`. Calling
+     * `glBeginQuery` against an unsupported target on some drivers
+     * spams the log with `GL_INVALID_OPERATION` rather than failing
+     * silently, so we don't try to detect support inside this
+     * class — the renderer owns that decision.
+     */
     fun setEnabled(enabled: Boolean) {
         this.enabled = enabled
     }

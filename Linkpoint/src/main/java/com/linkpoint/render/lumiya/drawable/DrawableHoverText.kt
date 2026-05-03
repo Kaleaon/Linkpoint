@@ -25,6 +25,44 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class DrawableHoverText {
 
+    companion object {
+        /**
+         * Distance (m) at which hover text starts to fade. Closer
+         * than this and labels render at full alpha. Mirrors the
+         * LL viewer hover-text dimensions: labels are crisp inside
+         * the conversation radius and fall off past 16m.
+         */
+        const val FADE_START_DISTANCE = 16.0f
+
+        /**
+         * Distance (m) at which hover text reaches zero alpha.
+         * Beyond this we skip the draw entirely. The LL viewer
+         * hard-cuts at the avatar chat radius (32m) to keep
+         * cluttered regions readable; matches our default.
+         */
+        const val FADE_END_DISTANCE = 32.0f
+
+        /**
+         * Linear distance fade in [0, 1]. The geometric scaling in
+         * [draw] keeps text legible up to ~4x the texture pixel size,
+         * but label clutter at long range is unreadable regardless —
+         * this tapers alpha to zero so the screen stays clean.
+         *
+         * Pure math; no Android dependency so it can be called from
+         * unit tests without instantiating a [DrawableHoverText]
+         * (whose `Paint` field requires the Android runtime).
+         */
+        @JvmStatic
+        fun fadeFactorAt(dist: Float): Float {
+            if (dist <= FADE_START_DISTANCE) return 1f
+            if (dist >= FADE_END_DISTANCE) return 0f
+            val span = FADE_END_DISTANCE - FADE_START_DISTANCE
+            return 1f - (dist - FADE_START_DISTANCE) / span
+        }
+
+        private val IDENTITY = FloatArray(16).also { Matrix.setIdentityM(it, 0) }
+    }
+
     private data class Label(
         val primId: Long,
         val text: String,
@@ -112,13 +150,25 @@ class DrawableHoverText {
             ensureLabelTexture(label)
             if (label.textureHandle == 0) continue
 
-            // Scale the billboard so the bitmap maps to a sensible
-            // world-size. 32px text ≈ 0.5m at the prim. Distance scaling
-            // keeps text legible far away (bounded between 0.5x and 4x).
+            // Distance from camera. Drives both geometric scaling
+            // and alpha fade.
             val dx = label.anchorX - ctx.cameraPositionX
             val dy = label.anchorY - ctx.cameraPositionY
             val dz = label.anchorZ - ctx.cameraPositionZ
             val dist = Math.sqrt((dx * dx + dy * dy + dz * dz).toDouble()).toFloat()
+
+            // Distance fade: 1 at FADE_START, 0 at FADE_END, linear
+            // in between. Skip the draw when fully faded — the
+            // texture stays cached so re-entering the radius doesn't
+            // re-rasterise. Mirrors LL viewer LLHUDText::draw which
+            // multiplies LLHUDObject::mUserAlpha by a distance term
+            // before issuing the quad.
+            val fadeAlpha = fadeFactorAt(dist)
+            if (fadeAlpha <= 0f) continue
+
+            // Scale the billboard so the bitmap maps to a sensible
+            // world-size. 32px text ≈ 0.5m at the prim. Distance scaling
+            // keeps text legible far away (bounded between 0.5x and 4x).
             val pixelSize = (dist * 0.0015f).coerceIn(0.4f, 4.0f)
             val halfW = label.textureWidth * pixelSize * 0.5f
             val halfH = label.textureHeight * pixelSize * 0.5f
@@ -135,7 +185,7 @@ class DrawableHoverText {
             m[14] = label.anchorZ
             m[15] = 1f
             program.setModelMatrix(m)
-            program.setColor(label.colorR, label.colorG, label.colorB, label.colorA)
+            program.setColor(label.colorR, label.colorG, label.colorB, label.colorA * fadeAlpha)
             program.setUseTexture(true)
             GLES32.glActiveTexture(GLES32.GL_TEXTURE0)
             GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, label.textureHandle)
@@ -225,7 +275,4 @@ class DrawableHoverText {
         }
     }
 
-    private companion object {
-        private val IDENTITY = FloatArray(16).also { Matrix.setIdentityM(it, 0) }
-    }
 }

@@ -5,6 +5,14 @@ enum class LumiyaRenderPass {
     WORLD_AVATAR,
     WORLD_SKY,
     WORLD_TRANSPARENT,
+    /**
+     * Glow / emissive double-pass. Re-draws faces with a non-zero
+     * SL "glow" value using additive blending so they brighten the
+     * already-composited colour. Skipped during interactive throttle
+     * — the popping under a fling is more distracting than the
+     * absent glow.
+     */
+    WORLD_EMISSIVE,
     WORLD_WATER,
     WORLD_PARTICLES,
     HUD
@@ -29,6 +37,7 @@ object LumiyaFramePlanner {
             passes += LumiyaRenderPass.WORLD_AVATAR
             passes += LumiyaRenderPass.WORLD_SKY
             passes += LumiyaRenderPass.WORLD_TRANSPARENT
+            if (!interactiveThrottle) passes += LumiyaRenderPass.WORLD_EMISSIVE
             passes += LumiyaRenderPass.WORLD_WATER
             if (!interactiveThrottle) passes += LumiyaRenderPass.WORLD_PARTICLES
         }

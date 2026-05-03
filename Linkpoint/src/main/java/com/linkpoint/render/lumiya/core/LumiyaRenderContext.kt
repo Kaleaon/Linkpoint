@@ -4,6 +4,10 @@ import android.opengl.GLES32
 import android.opengl.Matrix
 import android.util.Log
 import com.linkpoint.render.RenderDiagnostics
+import com.linkpoint.render.driver.FeatureFlags
+import com.linkpoint.render.driver.GpuCapabilities
+import com.linkpoint.render.driver.GraphicsDriverProbe
+import com.linkpoint.render.driver.resolveFeatureFlags
 import com.linkpoint.render.lumiya.shaders.*
 import com.linkpoint.render.lumiya.glres.GLResourceManager
 import com.linkpoint.render.lumiya.glres.GLTextureCache
@@ -34,6 +38,14 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
 
         /** Default draw distance (metres). */
         const val DEFAULT_DRAW_DISTANCE = 256.0f
+
+        /**
+         * Water FBOs render at viewport / [WATER_FBO_DIVISOR] on each
+         * axis. Half-res (divisor = 2) matches LL viewer
+         * `RenderReflectionDetail` defaults and is invisible at the
+         * pixel level once the wave normal perturbs the sample UV.
+         */
+        const val WATER_FBO_DIVISOR = 2
     }
 
     // ── GPU capability flags ─────────────────────────────────────────────
@@ -49,6 +61,32 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
     var maxTextureSize: Int = 2048
         private set
     var maxUniformBlockSize: Int = 16384
+        private set
+
+    /**
+     * Pre-context driver profile injected by the renderer at boot.
+     * Defaults to [GraphicsDriverProbe.DriverProfile.UNKNOWN] so the
+     * context degrades gracefully when the renderer hasn't probed
+     * the device yet (e.g. in unit tests). The renderer overrides
+     * this in [LumiyaRenderer.initialize] before [initialize] runs.
+     */
+    var driverProfile: GraphicsDriverProbe.DriverProfile =
+        GraphicsDriverProbe.DriverProfile.UNKNOWN
+
+    /**
+     * Post-context GPU capability snapshot, populated during
+     * [queryGPUCapabilities]. Read by feature gates around the
+     * renderer; never null after [initialize] returns true.
+     */
+    var gpuCapabilities: GpuCapabilities = GpuCapabilities.EMPTY
+        private set
+
+    /**
+     * Resolved feature flags derived from [driverProfile] +
+     * [gpuCapabilities]. Single source of truth for "should we run
+     * the X pass on this device?" decisions.
+     */
+    var featureFlags: FeatureFlags = FeatureFlags.ALL_OFF
         private set
 
     // ── Shader programs ──────────────────────────────────────────────────
@@ -130,6 +168,30 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
     var fxaaWidth = 0; private set
     var fxaaHeight = 0; private set
 
+    // ── Water reflection / refraction FBOs ───────────────────────────────
+    //
+    // Names mirror the LL viewer's `LLPipeline::mWaterRef` (planar
+    // reflection target) and `mWaterDis` (refraction / "distortion"
+    // target). They are sized to a fraction of the screen — the
+    // reflection texture is sampled through a perturbed UV in the
+    // water shader so a half-resolution target is invisible at the
+    // pixel level and saves substantial fill rate. Disabled by
+    // default; enable via [setWaterPlanarReflectionsEnabled] when the
+    // device is known to handle the extra two passes.
+
+    var waterPlanarReflectionsEnabled: Boolean = false
+        private set
+    /** Planar reflection FBO. Equivalent to LLPipeline::mWaterRef. */
+    var mWaterRef: Int = 0; private set
+    var waterReflectionTexture: Int = 0; private set
+    var waterReflectionDepthRb: Int = 0; private set
+    /** Refraction (under-water) FBO. Equivalent to LLPipeline::mWaterDis. */
+    var mWaterDis: Int = 0; private set
+    var waterRefractionTexture: Int = 0; private set
+    var waterRefractionDepthRb: Int = 0; private set
+    var waterFboWidth: Int = 0; private set
+    var waterFboHeight: Int = 0; private set
+
     // ── Global UBO for shared matrices ───────────────────────────────────
 
     var globalUBO = 0; private set
@@ -177,7 +239,72 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
         GLES32.glGetIntegerv(GLES32.GL_MAX_UNIFORM_BLOCK_SIZE, buf, 0)
         maxUniformBlockSize = buf[0]
         supportsComputeShaders = glVersion >= 31
-        Log.i(TAG, "GPU: $gpuVendor $gpuRenderer  GL ES $glVersion  maxTex=$maxTextureSize")
+
+        // Build the structured capability snapshot. We collect
+        // extra per-driver hard limits and parse the extension list
+        // once so feature gates downstream are O(1) lookups.
+        val extensionsString = GLES32.glGetString(GLES32.GL_EXTENSIONS).orEmpty()
+        val extensionSet: Set<String> = if (extensionsString.isNotEmpty()) {
+            extensionsString.split(' ').filter { it.isNotEmpty() }.toHashSet()
+        } else {
+            emptySet()
+        }
+
+        val rbBuf = IntArray(1)
+        GLES32.glGetIntegerv(GLES32.GL_MAX_RENDERBUFFER_SIZE, rbBuf, 0)
+        val msaaBuf = IntArray(1)
+        // GL_MAX_SAMPLES is core in GLES 3.0+. Returns 0 on weird
+        // emulators; downstream callers must coerce >= 1.
+        GLES32.glGetIntegerv(GLES32.GL_MAX_SAMPLES, msaaBuf, 0)
+
+        // Anisotropy is gated behind GL_EXT_texture_filter_anisotropic.
+        // Token value is fixed across drivers (0x84FF). Avoid pulling
+        // an EGL header import for a single int.
+        val maxAniso = if ("GL_EXT_texture_filter_anisotropic" in extensionSet) {
+            val anisoBuf = FloatArray(1)
+            try {
+                GLES32.glGetFloatv(0x84FF, anisoBuf, 0)
+                if (anisoBuf[0] > 1f) anisoBuf[0] else 1f
+            } catch (_: Throwable) { 1f }
+        } else 1f
+
+        val vendor = inferVendorFamily(gpuVendor, gpuRenderer)
+        gpuCapabilities = GpuCapabilities(
+            glVersion = glVersion,
+            vendor = vendor,
+            rendererString = gpuRenderer,
+            vendorString = gpuVendor,
+            versionString = versionStr,
+            extensions = extensionSet,
+            maxTextureSize = maxTextureSize,
+            maxRenderbufferSize = rbBuf[0].coerceAtLeast(0),
+            maxSamples = msaaBuf[0].coerceAtLeast(1),
+            maxUniformBlockSize = maxUniformBlockSize,
+            maxAnisotropy = maxAniso
+        )
+        featureFlags = resolveFeatureFlags(driverProfile, gpuCapabilities)
+        Log.i(TAG, "GPU: ${gpuCapabilities.summary()}; flags=$featureFlags")
+    }
+
+    /**
+     * Refine the pre-context vendor guess once we have the GL strings
+     * — the GL_VENDOR / GL_RENDERER text is more reliable than
+     * Build.HARDWARE on devices where both layers disagree.
+     */
+    private fun inferVendorFamily(
+        vendorStr: String,
+        rendererStr: String
+    ): GraphicsDriverProbe.VendorFamily {
+        val hay = "$vendorStr $rendererStr".lowercase()
+        return when {
+            hay.contains("qualcomm") || hay.contains("adreno") -> GraphicsDriverProbe.VendorFamily.ADRENO
+            hay.contains("arm") || hay.contains("mali") -> GraphicsDriverProbe.VendorFamily.MALI
+            hay.contains("powervr") || hay.contains("imagination") -> GraphicsDriverProbe.VendorFamily.POWERVR
+            hay.contains("nvidia") || hay.contains("tegra") -> GraphicsDriverProbe.VendorFamily.TEGRA
+            hay.contains("intel") -> GraphicsDriverProbe.VendorFamily.INTEL
+            hay.contains("samsung") || hay.contains("xclipse") -> GraphicsDriverProbe.VendorFamily.XCLIPSE
+            else -> driverProfile.vendorFamily
+        }
     }
 
     private fun compileShaders(): Boolean {
@@ -234,8 +361,10 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
     }
 
     private fun tryCreatePersistentMappedUBO(): Boolean {
-        val extensions = GLES32.glGetString(GLES32.GL_EXTENSIONS).orEmpty()
-        if (!extensions.contains("GL_EXT_buffer_storage")) {
+        // Single source of truth: the resolved feature flag already
+        // covers the extension check + per-vendor allow-list (e.g.
+        // PowerVR persistent-map issues). We don't second-guess it.
+        if (!featureFlags.persistentMappedUBO) {
             return false
         }
         if (!GlExtHelper.isAvailable()) {
@@ -368,6 +497,116 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
         }
     }
 
+    // ── Water reflection / refraction FBOs ───────────────────────────────
+
+    /**
+     * Toggle planar water reflection / refraction passes. When enabled,
+     * the renderer maintains two off-screen FBOs sized to half the
+     * primary viewport ([WATER_FBO_DIVISOR]). Producers (water pass)
+     * sample these textures to produce the mirror-reflection +
+     * underwater-refraction look that LL/Singularity ship.
+     */
+    fun setWaterPlanarReflectionsEnabled(enabled: Boolean, viewportWidth: Int, viewportHeight: Int) {
+        if (waterPlanarReflectionsEnabled == enabled) return
+        // Belt-and-braces: even if a producer reaches in directly,
+        // we won't allocate FBOs on a driver that the resolved
+        // feature flag rules out. Mirrors the public guard in
+        // LumiyaRenderer.setWaterPlanarReflectionsEnabled.
+        if (enabled && !featureFlags.waterPlanarReflections) {
+            Log.w(TAG, "Refusing to enable water reflections; feature flag is off for this driver")
+            return
+        }
+        waterPlanarReflectionsEnabled = enabled
+        if (enabled) createWaterFramebuffers(viewportWidth, viewportHeight)
+        else destroyWaterFramebuffers()
+    }
+
+    /**
+     * Recreate the water FBOs to match a new viewport. Cheap no-op
+     * when reflections are disabled. Call from [onSurfaceChanged] in
+     * the renderer alongside the FXAA FBO recreation.
+     */
+    fun resizeWaterFramebuffers(viewportWidth: Int, viewportHeight: Int) {
+        if (!waterPlanarReflectionsEnabled) return
+        createWaterFramebuffers(viewportWidth, viewportHeight)
+    }
+
+    private fun createWaterFramebuffers(viewportWidth: Int, viewportHeight: Int) {
+        destroyWaterFramebuffers()
+        val w = (viewportWidth / WATER_FBO_DIVISOR).coerceAtLeast(64)
+        val h = (viewportHeight / WATER_FBO_DIVISOR).coerceAtLeast(64)
+        waterFboWidth = w
+        waterFboHeight = h
+
+        val pair = createOffscreenColorDepth(w, h)
+        mWaterRef = pair.fbo
+        waterReflectionTexture = pair.color
+        waterReflectionDepthRb = pair.depth
+
+        val pair2 = createOffscreenColorDepth(w, h)
+        mWaterDis = pair2.fbo
+        waterRefractionTexture = pair2.color
+        waterRefractionDepthRb = pair2.depth
+
+        Log.i(TAG, "Water FBOs created: ${w}x${h} ref=$mWaterRef dis=$mWaterDis")
+    }
+
+    private fun destroyWaterFramebuffers() {
+        intArrayOf(mWaterRef, mWaterDis).filter { it != 0 }.forEach { fbo ->
+            GLES32.glDeleteFramebuffers(1, intArrayOf(fbo), 0)
+        }
+        intArrayOf(waterReflectionTexture, waterRefractionTexture).filter { it != 0 }.forEach { tex ->
+            GLES32.glDeleteTextures(1, intArrayOf(tex), 0)
+        }
+        intArrayOf(waterReflectionDepthRb, waterRefractionDepthRb).filter { it != 0 }.forEach { rb ->
+            GLES32.glDeleteRenderbuffers(1, intArrayOf(rb), 0)
+        }
+        mWaterRef = 0; waterReflectionTexture = 0; waterReflectionDepthRb = 0
+        mWaterDis = 0; waterRefractionTexture = 0; waterRefractionDepthRb = 0
+        waterFboWidth = 0; waterFboHeight = 0
+    }
+
+    private data class OffscreenAttachments(val fbo: Int, val color: Int, val depth: Int)
+
+    private fun createOffscreenColorDepth(width: Int, height: Int): OffscreenAttachments {
+        val fboBuf = IntArray(1); GLES32.glGenFramebuffers(1, fboBuf, 0)
+        val fbo = fboBuf[0]
+        GLES32.glBindFramebuffer(GLES32.GL_FRAMEBUFFER, fbo)
+
+        val texBuf = IntArray(1); GLES32.glGenTextures(1, texBuf, 0)
+        val color = texBuf[0]
+        GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, color)
+        GLES32.glTexImage2D(
+            GLES32.GL_TEXTURE_2D, 0, GLES32.GL_RGBA8,
+            width, height, 0,
+            GLES32.GL_RGBA, GLES32.GL_UNSIGNED_BYTE, null
+        )
+        GLES32.glTexParameteri(GLES32.GL_TEXTURE_2D, GLES32.GL_TEXTURE_MIN_FILTER, GLES32.GL_LINEAR)
+        GLES32.glTexParameteri(GLES32.GL_TEXTURE_2D, GLES32.GL_TEXTURE_MAG_FILTER, GLES32.GL_LINEAR)
+        GLES32.glTexParameteri(GLES32.GL_TEXTURE_2D, GLES32.GL_TEXTURE_WRAP_S, GLES32.GL_CLAMP_TO_EDGE)
+        GLES32.glTexParameteri(GLES32.GL_TEXTURE_2D, GLES32.GL_TEXTURE_WRAP_T, GLES32.GL_CLAMP_TO_EDGE)
+        GLES32.glFramebufferTexture2D(
+            GLES32.GL_FRAMEBUFFER, GLES32.GL_COLOR_ATTACHMENT0,
+            GLES32.GL_TEXTURE_2D, color, 0
+        )
+
+        val rbBuf = IntArray(1); GLES32.glGenRenderbuffers(1, rbBuf, 0)
+        val depth = rbBuf[0]
+        GLES32.glBindRenderbuffer(GLES32.GL_RENDERBUFFER, depth)
+        GLES32.glRenderbufferStorage(GLES32.GL_RENDERBUFFER, GLES32.GL_DEPTH_COMPONENT16, width, height)
+        GLES32.glFramebufferRenderbuffer(
+            GLES32.GL_FRAMEBUFFER, GLES32.GL_DEPTH_ATTACHMENT,
+            GLES32.GL_RENDERBUFFER, depth
+        )
+
+        val status = GLES32.glCheckFramebufferStatus(GLES32.GL_FRAMEBUFFER)
+        if (status != GLES32.GL_FRAMEBUFFER_COMPLETE) {
+            Log.e(TAG, "Water FBO incomplete: 0x${Integer.toHexString(status)}")
+        }
+        GLES32.glBindFramebuffer(GLES32.GL_FRAMEBUFFER, 0)
+        return OffscreenAttachments(fbo, color, depth)
+    }
+
     // ── Per-frame helpers ────────────────────────────────────────────────
 
     fun beginFrame() {
@@ -418,6 +657,7 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
 
     fun shutdown() {
         destroyFXAAFramebuffer()
+        destroyWaterFramebuffers()
         if (globalUBO != 0) {
             GLES32.glDeleteBuffers(1, intArrayOf(globalUBO), 0)
             globalUBO = 0

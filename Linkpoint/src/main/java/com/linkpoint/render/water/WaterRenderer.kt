@@ -26,7 +26,7 @@ class WaterRenderer(
     private var vertexBuffer: VertexBuffer? = null
     private var indexBuffer: IndexBuffer? = null
     private var materialInstance: MaterialInstance? = null
-    
+
     // Water settings (Windlight)
     private var waterHeight = 20f
     private var waveDirection1 = LLVector3(1f, 0f, 0f)
@@ -38,7 +38,25 @@ class WaterRenderer(
     private var fresnelOffset = 0.5f
     private var normalScale = LLVector3(2f, 2f, 2f)
     private var normalMapTexture: Texture? = null
-    
+
+    /**
+     * Planar reflection target. Equivalent of LL viewer
+     * `LLPipeline::mWaterRef`. Producers render the world (with the
+     * camera mirrored across the water plane) into this texture, then
+     * the water shader samples it perturbed by the wave normal.
+     * Null when planar reflections are disabled.
+     */
+    private var mWaterRef: Texture? = null
+
+    /**
+     * Refraction / "distortion" target. Equivalent of
+     * `LLPipeline::mWaterDis`. Holds the under-water scene rendered
+     * with a clip plane at the water height. The water shader
+     * samples this with a UV offset to fake refraction. Null when
+     * planar reflections are disabled.
+     */
+    private var mWaterDis: Texture? = null
+
     private var time = 0f
     
     /**
@@ -81,6 +99,24 @@ class WaterRenderer(
      */
     fun setNormalMap(texture: Texture) {
         normalMapTexture = texture
+        updateMaterialParams()
+    }
+
+    /**
+     * Bind planar reflection ([mWaterRef]) and refraction ([mWaterDis])
+     * targets. Pass `null` for either to clear that channel — the
+     * material falls back to a plain Fresnel-tinted base colour, the
+     * same path the renderer takes when planar reflections are
+     * disabled at the device-tier level.
+     *
+     * Lineage: LLPipeline::generateWaterReflection writes mWaterRef
+     * + mWaterDis once per frame and binds them on the next water
+     * draw. Producers should follow the same one-shot-per-frame
+     * cadence; we don't otherwise hold a reference past the draw.
+     */
+    fun setReflectionRefractionTargets(reflection: Texture?, refraction: Texture?) {
+        mWaterRef = reflection
+        mWaterDis = refraction
         updateMaterialParams()
     }
     
@@ -200,6 +236,30 @@ class WaterRenderer(
                     TextureSampler.MagFilter.LINEAR,
                     TextureSampler.WrapMode.REPEAT
                 ))
+            }
+
+            // Planar reflection / refraction samplers. Material is
+            // expected to declare `reflectionMap` / `refractionMap`
+            // optional sampler2D parameters; when not declared the
+            // setParameter call is a silent no-op so older Filament
+            // material packages keep working.
+            mWaterRef?.let {
+                runCatching {
+                    setParameter("reflectionMap", it, TextureSampler(
+                        TextureSampler.MinFilter.LINEAR,
+                        TextureSampler.MagFilter.LINEAR,
+                        TextureSampler.WrapMode.CLAMP_TO_EDGE
+                    ))
+                }
+            }
+            mWaterDis?.let {
+                runCatching {
+                    setParameter("refractionMap", it, TextureSampler(
+                        TextureSampler.MinFilter.LINEAR,
+                        TextureSampler.MagFilter.LINEAR,
+                        TextureSampler.WrapMode.CLAMP_TO_EDGE
+                    ))
+                }
             }
         }
     }

@@ -116,7 +116,16 @@ class LumiyaRenderer : RenderEngineProvider {
 
         val initStartedAt = System.currentTimeMillis()
         try {
+            // Probe the device's graphics drivers before we even
+            // touch GL state. The probe is purely PackageManager /
+            // ActivityManager — no GL calls — so a misconfigured
+            // device can't crash us here. The result is fed into
+            // the context so the resolved feature flags reflect
+            // both the pre-context platform info and the
+            // post-context extension list.
+            val driverProfile = com.linkpoint.render.driver.GraphicsDriverProbe.probe(context)
             ctx = LumiyaRenderContext { apiName -> requireGlThread("LumiyaRenderContext.$apiName") }
+            ctx.driverProfile = driverProfile
             if (!ctx.initialize()) {
                 Log.e(TAG, "Render context initialisation failed")
                 RenderDiagnostics.glInitFailed(
@@ -133,6 +142,28 @@ class LumiyaRenderer : RenderEngineProvider {
                 version = "GL ES ${ctx.glVersion}",
                 maxTextureSize = ctx.maxTextureSize
             )
+            // Detailed driver-capability summary (Vulkan, AEP,
+            // extension count) goes to its own diagnostic so the
+            // session log captures the device profile separately
+            // from the GL context info.
+            RenderDiagnostics.glDriverCapabilities(
+                profileSummary = driverProfile.summary(),
+                capsSummary = ctx.gpuCapabilities.summary(),
+                featureFlags = ctx.featureFlags.toString()
+            )
+
+            // Hard floor: refuse to spin up the renderer on a device
+            // that can't reach our minimum GLES level. The caller
+            // can fall back to a software path or display an
+            // unsupported-device message rather than ship a black
+            // frame.
+            if (ctx.gpuCapabilities.glVersion < 30) {
+                Log.e(TAG, "Device GLES version (${ctx.gpuCapabilities.glVersion}) below required 3.0; aborting")
+                RenderDiagnostics.glInitFailed(
+                    RuntimeException("GLES 3.0+ required; device reports ${ctx.gpuCapabilities.glVersion}")
+                )
+                return false
+            }
 
             viewportWidth = width
             viewportHeight = height
@@ -161,9 +192,19 @@ class LumiyaRenderer : RenderEngineProvider {
             // Clear colour – SL default sky blue
             GLES32.glClearColor(0.24f, 0.44f, 0.76f, 1.0f)
 
-            // Build FXAA FBO
-            if (ctx.fxaaEnabled) {
+            // Build FXAA FBO. The user toggle ([fxaaEnabled]) is the
+            // intent; the resolved feature flag is the floor — on a
+            // driver that can't deliver FXAA (no FBOs, tiny max
+            // texture), we silently disable the user's preference
+            // and leave the buffer never-created. The flag winning
+            // over the user toggle is intentional: enabling FXAA on
+            // a driver that can't do it would produce a black
+            // screen, which is strictly worse than aliased pixels.
+            if (ctx.fxaaEnabled && ctx.featureFlags.fxaa) {
                 ctx.createFXAAFramebuffer(width, height)
+            } else if (ctx.fxaaEnabled && !ctx.featureFlags.fxaa) {
+                Log.i(TAG, "FXAA requested but unsupported on this driver; running without")
+                ctx.fxaaEnabled = false
             }
 
             // Build full-screen quad for post-processing
@@ -199,9 +240,48 @@ class LumiyaRenderer : RenderEngineProvider {
         ctx.aspectRatio = width.toFloat() / height.toFloat()
         GLES32.glViewport(0, 0, width, height)
         if (ctx.fxaaEnabled) ctx.createFXAAFramebuffer(width, height)
+        ctx.resizeWaterFramebuffers(width, height)
         rebuildHudMatrices(width, height)
         hudStore.setViewportSize(width, height)
     }
+
+    /**
+     * Toggle planar water reflection / refraction at runtime. When
+     * enabled, [LumiyaRenderContext.mWaterRef] / [mWaterDis] become
+     * non-zero and the water pass is free to bind them as samplers
+     * for a mirror-reflection look. Mirrors LL viewer's
+     * `RenderWaterReflections` debug setting.
+     *
+     * Returns true when the toggle took effect, false when the
+     * device's [com.linkpoint.render.driver.FeatureFlags] floor
+     * blocks the feature. UI surfaces should check the return value
+     * and reflect "unavailable" rather than silently lying to the
+     * user.
+     */
+    fun setWaterPlanarReflectionsEnabled(enabled: Boolean): Boolean {
+        requireGlThread("setWaterPlanarReflectionsEnabled")
+        if (enabled && !ctx.featureFlags.waterPlanarReflections) {
+            Log.i(TAG, "Water planar reflections requested but unsupported on this driver; ignoring")
+            return false
+        }
+        ctx.setWaterPlanarReflectionsEnabled(enabled, viewportWidth, viewportHeight)
+        return true
+    }
+
+    /**
+     * Snapshot of the resolved driver capabilities. Read-only mirror
+     * of [LumiyaRenderContext.featureFlags] / [gpuCapabilities] so
+     * callers (settings UI, telemetry) can introspect what features
+     * are live without reaching into the context directly.
+     */
+    fun driverCapabilities(): com.linkpoint.render.driver.GpuCapabilities = ctx.gpuCapabilities
+
+    /**
+     * Snapshot of the resolved feature flags for this context.
+     * @see setWaterPlanarReflectionsEnabled for an example of how
+     *      a UI gate should consult these.
+     */
+    fun featureFlags(): com.linkpoint.render.driver.FeatureFlags = ctx.featureFlags
 
     override fun onSurfaceDestroyed() {
         requireGlThread("onSurfaceDestroyed")
@@ -284,6 +364,7 @@ class LumiyaRenderer : RenderEngineProvider {
                     hoverTextStore.draw(ctx, viewportWidth, viewportHeight)
                     GLES32.glDepthMask(true)
                 }
+                LumiyaRenderPass.WORLD_EMISSIVE -> primStore.drawEmissive(ctx)
                 LumiyaRenderPass.WORLD_WATER -> waterDrawable?.draw(ctx)
                 LumiyaRenderPass.WORLD_PARTICLES -> particleManager?.draw(ctx)
                 LumiyaRenderPass.HUD -> renderHudPass()

@@ -83,7 +83,14 @@ object TextureEntryParser {
         val offsetS: Float,
         val offsetT: Float,
         val rotation: Float,
-        val materialsId: UUID
+        val materialsId: UUID,
+        /**
+         * SL "glow" (emissive intensity) in the range 0..1. Encoded
+         * on the wire as one U8 per face (LL viewer
+         * `LLTextureEntry::setGlow`). Producers feed this into the
+         * emissive double-pass; 0 means the face is excluded.
+         */
+        val glow: Float = 0f
     )
 
     /**
@@ -139,11 +146,14 @@ object TextureEntryParser {
             applyOverrides(buffer, faces, ::readQuantS16) { f, v -> f.copy(offsetT = v) }
             // 5. Rotation (S16 quantised to ~-2π..2π)
             applyOverrides(buffer, faces, ::readQuantRot) { f, v -> f.copy(rotation = v) }
-            // 6. Skip bumpmap / mediaflags / glow (U8 each, with face overrides).
+            // 6. Skip bumpmap / mediaflags (U8 each, with face overrides).
             skipU8Overrides(buffer)
             skipU8Overrides(buffer)
-            skipU8Overrides(buffer)
-            // 7. MaterialsID (UUID, optional)
+            // 7. Glow (U8 per face, normalised to 0..1). Drives the
+            //    emissive double-pass. LL viewer encodes / decodes it
+            //    via LLTextureEntry::setGlow / packGlow at /255.
+            applyOverrides(buffer, faces, ::readGlowU8) { f, v -> f.copy(glow = v) }
+            // 8. MaterialsID (UUID, optional)
             if (buffer.remaining() >= 16) {
                 applyOverrides(buffer, faces, ::readUUID) { f, v -> f.copy(materialsId = v) }
             }
@@ -200,6 +210,10 @@ object TextureEntryParser {
         val b = ((buffer.get().toInt() and 0xFF) xor 0xFF) / 255f
         val a = ((buffer.get().toInt() and 0xFF) xor 0xFF) / 255f
         return floatArrayOf(r, g, b, a)
+    }
+
+    private fun readGlowU8(buffer: ByteBuffer): Float {
+        return (buffer.get().toInt() and 0xFF) / 255f
     }
 
     private fun readQuantS16(buffer: ByteBuffer): Float {

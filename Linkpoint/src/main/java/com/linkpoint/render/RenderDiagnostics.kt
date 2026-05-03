@@ -310,6 +310,22 @@ object RenderDiagnostics {
         )
     }
 
+    /**
+     * Driver-capability summary, emitted once after [glContextInfo].
+     * Captures the pre-context probe profile (Vulkan presence,
+     * OpenGL ES requested version, vendor family) alongside the
+     * post-context capability snapshot and resolved feature flags
+     * so a session log alone can answer "which optional passes did
+     * the renderer actually run on this device?".
+     */
+    fun glDriverCapabilities(profileSummary: String, capsSummary: String, featureFlags: String) {
+        SessionLogRecorder.logRender(
+            "Lumiya",
+            "driver_caps",
+            "profile=[$profileSummary] caps=[$capsSummary] flags=[$featureFlags]"
+        )
+    }
+
     fun glInitDone(durationMs: Long) {
         SessionLogRecorder.logRender("Lumiya", "init_done", "durationMs=$durationMs")
     }

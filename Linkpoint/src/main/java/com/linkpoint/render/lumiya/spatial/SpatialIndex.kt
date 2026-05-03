@@ -75,6 +75,12 @@ class SpatialIndex {
 
 /**
  * A single spatial entry representing an object's bounding volume.
+ *
+ * The half-extents are always axis-aligned in world space. For prims
+ * with a non-identity rotation, callers should expand the local
+ * half-extents into a conservative world-space AABB via
+ * [SpatialEntry.fromOrientedBox] so a rotated long thin prim doesn't
+ * pop in/out of view as it crosses an octree boundary.
  */
 data class SpatialEntry(
     val id: Long,
@@ -96,6 +102,73 @@ data class SpatialEntry(
     val maxX get() = posX + halfExtentX
     val maxY get() = posY + halfExtentY
     val maxZ get() = posZ + halfExtentZ
+
+    companion object {
+        /**
+         * Build a [SpatialEntry] from an oriented box (local-space half
+         * extents + world rotation). The resulting AABB is the
+         * smallest axis-aligned box that fully contains the rotated
+         * box — an over-estimate, never under-estimate. Inserting
+         * rotated prims this way keeps frustum / octree queries
+         * correct without per-object OBB tests.
+         *
+         * Lineage: LL viewer `LLXformMatrix::updateBoundingBoxes` ->
+         * `LLDrawable::updateXform`. Singularity uses the same trick
+         * and notes "we over-estimate, conservative but works" — the
+         * exact phrase mirrored in the work-list this implements.
+         *
+         * @param posX/Y/Z World-space center of the box.
+         * @param halfX/Y/Z Local-space half-extents along the box's
+         *                  own axes.
+         * @param rotation 4x4 column-major rotation matrix; only the
+         *                 upper-left 3x3 is read. Translation columns
+         *                 are ignored — pass any matrix shaped like a
+         *                 GLES model matrix.
+         */
+        fun fromOrientedBox(
+            id: Long,
+            posX: Float, posY: Float, posZ: Float,
+            halfX: Float, halfY: Float, halfZ: Float,
+            rotation: FloatArray,
+            isAvatar: Boolean = false
+        ): SpatialEntry {
+            val (wx, wy, wz) = conservativeWorldHalfExtents(halfX, halfY, halfZ, rotation)
+            return SpatialEntry(
+                id = id,
+                posX = posX, posY = posY, posZ = posZ,
+                halfExtentX = wx, halfExtentY = wy, halfExtentZ = wz,
+                isAvatar = isAvatar
+            )
+        }
+
+        /**
+         * Conservative world-space half-extents of a local OBB.
+         *
+         * Computed as the absolute-value sum of each axis projected
+         * through the rotation: |R| * h. This is the standard OBB ->
+         * AABB widening: each world axis collects the absolute
+         * contribution from every local axis. It exactly bounds the
+         * rotated box's eight corners (no slack beyond what rotation
+         * introduces).
+         *
+         * Returns (halfX, halfY, halfZ) in world units.
+         */
+        fun conservativeWorldHalfExtents(
+            halfX: Float, halfY: Float, halfZ: Float,
+            rotation: FloatArray
+        ): Triple<Float, Float, Float> {
+            // Column-major: column k = rotation[k*4 .. k*4+2].
+            // World axis i contribution = |R[i,0]|*hx + |R[i,1]|*hy + |R[i,2]|*hz.
+            // R[i,k] in row-i, col-k = rotation[k*4 + i].
+            val ax0 = Math.abs(rotation[0]); val ax1 = Math.abs(rotation[4]); val ax2 = Math.abs(rotation[8])
+            val ay0 = Math.abs(rotation[1]); val ay1 = Math.abs(rotation[5]); val ay2 = Math.abs(rotation[9])
+            val az0 = Math.abs(rotation[2]); val az1 = Math.abs(rotation[6]); val az2 = Math.abs(rotation[10])
+            val wx = ax0 * halfX + ax1 * halfY + ax2 * halfZ
+            val wy = ay0 * halfX + ay1 * halfY + ay2 * halfZ
+            val wz = az0 * halfX + az1 * halfY + az2 * halfZ
+            return Triple(wx, wy, wz)
+        }
+    }
 }
 
 /**
@@ -145,16 +218,35 @@ class OctreeNode(
 
     fun queryFrustum(culler: FrustumCuller, result: MutableList<SpatialEntry>, maxResults: Int) {
         if (result.size >= maxResults) return
-        if (!culler.isAABBVisible(minX, minY, minZ, maxX, maxY, maxZ)) return
-
-        for (obj in objects) {
-            if (result.size >= maxResults) return
-            if (culler.isAABBVisible(obj.minX, obj.minY, obj.minZ, obj.maxX, obj.maxY, obj.maxZ)) {
-                result.add(obj)
+        when (culler.classifyAABB(minX, minY, minZ, maxX, maxY, maxZ)) {
+            FrustumResult.OUTSIDE -> return
+            FrustumResult.INSIDE -> collectAll(result, maxResults)
+            FrustumResult.INTERSECTS -> {
+                for (obj in objects) {
+                    if (result.size >= maxResults) return
+                    if (culler.isAABBVisible(obj.minX, obj.minY, obj.minZ, obj.maxX, obj.maxY, obj.maxZ)) {
+                        result.add(obj)
+                    }
+                }
+                children?.forEach { it?.queryFrustum(culler, result, maxResults) }
             }
         }
+    }
 
-        children?.forEach { it?.queryFrustum(culler, result, maxResults) }
+    /**
+     * Drain every object in this subtree into [result] without further
+     * frustum checks. Called once the parent tri-state classifier has
+     * proven the whole node sits inside the frustum.
+     */
+    private fun collectAll(result: MutableList<SpatialEntry>, maxResults: Int) {
+        for (obj in objects) {
+            if (result.size >= maxResults) return
+            result.add(obj)
+        }
+        children?.forEach { child ->
+            if (result.size >= maxResults) return
+            child?.collectAll(result, maxResults)
+        }
     }
 
     private fun subdivide() {
