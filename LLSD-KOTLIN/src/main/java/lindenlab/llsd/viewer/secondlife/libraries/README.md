@@ -36,6 +36,15 @@ This directory contains Java implementations of all major libraries used by the 
   - `openssl/` - Cryptographic operations
   - `ares/` - Asynchronous DNS resolution
 
+
+### Networking Core (Mobile-first)
+- **`networking/`** now includes foundational implementation classes:
+  - `NetworkOrchestrator.java` - Session state and lifecycle-aware orchestration
+  - `TransportCore.java` - Sequencing, ACK tracking, and retry scheduling
+  - `ReliabilityPolicy.java` - Retry/failover policy model
+  - `LLSDMessageCodec.java` - LLSD JSON packet encode/decode bridge
+  - `NetworkModels.java` - Shared endpoint/frame/state models
+
 ### Media and Content
 - **`media/`** - Media processing and playback
   - `gstreamer/` - Video streaming and playback
@@ -65,6 +74,7 @@ This directory contains Java implementations of all major libraries used by the 
 - OpenGL compatibility layer
 - Bullet physics integration
 - Enhanced media streaming
+- Mobile networking stack integration
 
 ### 📋 Planned
 - Havok physics bindings (requires licensing)
