@@ -59,11 +59,21 @@ class DrawableWater(private val ctx: LumiyaRenderContext) {
         program.setCameraPosition(ctx.cameraPositionX, ctx.cameraPositionY, ctx.cameraPositionZ)
 
         GLES32.glEnable(GLES32.GL_BLEND)
-        GLES32.glBlendFunc(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
+        // LL viewer LLDrawPoolWater uses LLGLDepthTest(GL_TRUE, GL_FALSE)
+        // for transparent water: depth test on, depth write off so any
+        // transparent geometry behind the water plane still composites
+        // correctly. Without disabling depth-write, alpha prims under
+        // water would be punched out by the water's depth.
+        GLES32.glDepthMask(false)
+        GLES32.glBlendFuncSeparate(
+            GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA,
+            GLES32.GL_ZERO, GLES32.GL_ONE_MINUS_SRC_ALPHA
+        )
 
         GLES32.glBindVertexArray(m.vao)
         GLES32.glDrawElements(GLES32.GL_TRIANGLES, m.indexCount, GLES32.GL_UNSIGNED_SHORT, 0)
         GLES32.glBindVertexArray(0)
+        GLES32.glDepthMask(true)
     }
 
     fun destroy() {

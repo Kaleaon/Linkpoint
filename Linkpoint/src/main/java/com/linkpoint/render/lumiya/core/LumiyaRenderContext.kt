@@ -6,6 +6,7 @@ import android.util.Log
 import com.linkpoint.render.RenderDiagnostics
 import com.linkpoint.render.lumiya.shaders.*
 import com.linkpoint.render.lumiya.glres.GLResourceManager
+import com.linkpoint.render.lumiya.glres.GLTextureCache
 import com.linkpoint.render.lumiya.spatial.FrustumCuller
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -105,6 +106,14 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
         private set
     lateinit var frustumCuller: FrustumCuller
         private set
+    /**
+     * UUID-keyed LRU texture cache. Producers (Object/Layer/Asset
+     * managers) hand bitmaps to [LumiyaRenderer.uploadTextureForPrim]
+     * which routes through here so duplicate texture entries across
+     * multiple prims share a single GL handle.
+     */
+    lateinit var textureCache: GLTextureCache
+        private set
 
     // ── Frame metrics ────────────────────────────────────────────────────
 
@@ -141,6 +150,7 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
             queryGPUCapabilities()
             resourceManager = GLResourceManager(glThreadGuard)
             frustumCuller = FrustumCuller()
+            textureCache = GLTextureCache(resourceManager)
             createGlobalUBO()
             compileShaders()
             Matrix.setIdentityM(modelMatrix, 0)
@@ -411,6 +421,9 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
         if (globalUBO != 0) {
             GLES32.glDeleteBuffers(1, intArrayOf(globalUBO), 0)
             globalUBO = 0
+        }
+        if (::textureCache.isInitialized) {
+            textureCache.clear()
         }
         primProgram?.destroy(); primProgram = null
         avatarProgram?.destroy(); avatarProgram = null
