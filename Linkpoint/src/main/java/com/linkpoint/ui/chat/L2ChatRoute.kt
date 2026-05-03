@@ -75,9 +75,10 @@ fun L2ChatRoute(
     // IM sessions and message flow are only available when IMManager is up.
     // When it isn't (e.g. chat initialized before IM completes bootstrapping)
     // we display nearby/local chat only without crashing.
+    // Collect flows unconditionally to obey the Rules of Hooks.
     val imAvailable = app.isIMManagerInitialized()
-    val sessions by if (imAvailable) app.imManager.activeSessions.collectAsState()
-        else remember { kotlinx.coroutines.flow.MutableStateFlow(emptyList<com.linkpoint.chat.IMSession>()) }.collectAsState()
+    val emptySessionFlow = remember { kotlinx.coroutines.flow.MutableStateFlow(emptyList<com.linkpoint.chat.IMSession>()) }
+    val sessions by (if (imAvailable) app.imManager.activeSessions else emptySessionFlow).collectAsState()
 
     LaunchedEffect(sessions) {
         if (!imAvailable) return@LaunchedEffect

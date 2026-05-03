@@ -118,48 +118,45 @@ fun WorldOverlayContainer(
     uiActions: WorldComposeUiActions,
     modifier: Modifier = Modifier
 ) {
+    // Collect flows unconditionally at the top of the composable so Compose
+    // can track dependencies without violating the Rules of Hooks (composable
+    // functions must not be called conditionally).  A no-op fallback flow is
+    // remembered for cases where the manager is not yet initialized.
+    val radarApp = com.linkpoint.LinkpointApp.getInstanceOrNull()
+    val emptyAvatarCountFlow = remember { kotlinx.coroutines.flow.MutableStateFlow(0) }
+    // Subscribe to avatarCount: when it changes (avatars enter/leave the region)
+    // Compose re-runs this composable and recomputes the blips below.
+    val avatarCount by (if (radarApp != null && radarApp.isAvatarManagerInitialized())
+        radarApp.avatarManager.avatarCount else emptyAvatarCountFlow).collectAsState()
+
     // Radar blips derived from the live AvatarManager. Previously hardcoded
     // sample data ("Friend", "Avatar") shipped to production, which made the
     // radar pretend to detect avatars even when nobody else was around.
-    //
-    // Collect avatarCount so the composable recomposes whenever the avatar
-    // set changes.  Without this binding, manager.getNearbyAvatars() would
-    // return a fresh list but Compose would never know to re-run the block.
-    val radarBlips = run {
-        val app = com.linkpoint.LinkpointApp.getInstanceOrNull()
-        if (app == null || !app.isAvatarManagerInitialized()) {
-            emptyList<RadarBlip>()
-        } else {
-            // Subscribing to avatarCount (and onlineFriends) makes this block
-            // reactive: a new avatar entering / leaving causes recomposition.
-            @Suppress("UNUSED_VARIABLE")
-            val avatarCount by app.avatarManager.avatarCount.collectAsState()
-            @Suppress("UNUSED_VARIABLE")
-            val onlineFriends by if (app.isFriendsManagerInitialized())
-                app.friendsManager.onlineFriends.collectAsState()
-            else remember { kotlinx.coroutines.flow.MutableStateFlow(emptySet<java.util.UUID>()) }.collectAsState()
-            val me = app.avatarManager.getMyAvatar()
-            val mePos = me?.position ?: com.linkpoint.protocol.types.LLVector3.zero()
-            val friendIds: Set<java.util.UUID> = if (app.isFriendsManagerInitialized()) {
-                app.friendsManager.getAllFriends().map { it.agentId }.toSet()
-            } else emptySet()
-            app.avatarManager.getNearbyAvatars(mePos, 96f)
-                .filter { me == null || it.agentId != me.agentId }
-                .map { av ->
-                    val dx = av.position.x - mePos.x
-                    val dy = av.position.y - mePos.y
-                    val dz = av.position.z - mePos.z
-                    val dist = kotlin.math.sqrt(dx * dx + dy * dy + dz * dz)
-                    RadarBlip(
-                        id = av.agentId.toString(),
-                        name = av.agentId.toString().take(8),
-                        type = if (av.agentId in friendIds) BlipType.FRIEND else BlipType.STRANGER,
-                        distance = dist,
-                        bearing = kotlin.math.atan2(dx, dy),
-                        altitude = dz,
-                    )
-                }
-        }
+    // avatarCount is read in the condition so Compose re-runs when it changes.
+    val radarBlips = if (radarApp == null || !radarApp.isAvatarManagerInitialized() || avatarCount < 0) {
+        emptyList<RadarBlip>()
+    } else {
+        val me = radarApp.avatarManager.getMyAvatar()
+        val mePos = me?.position ?: com.linkpoint.protocol.types.LLVector3.zero()
+        val friendIds: Set<java.util.UUID> = if (radarApp.isFriendsManagerInitialized()) {
+            radarApp.friendsManager.getAllFriends().map { it.agentId }.toSet()
+        } else emptySet()
+        radarApp.avatarManager.getNearbyAvatars(mePos, 96f)
+            .filter { me == null || it.agentId != me.agentId }
+            .map { av ->
+                val dx = av.position.x - mePos.x
+                val dy = av.position.y - mePos.y
+                val dz = av.position.z - mePos.z
+                val dist = kotlin.math.sqrt(dx * dx + dy * dy + dz * dz)
+                RadarBlip(
+                    id = av.agentId.toString(),
+                    name = av.agentId.toString().take(8),
+                    type = if (av.agentId in friendIds) BlipType.FRIEND else BlipType.STRANGER,
+                    distance = dist,
+                    bearing = kotlin.math.atan2(dx, dy),
+                    altitude = dz,
+                )
+            }
     }
 
     var joystickX by remember { mutableStateOf(0f) }

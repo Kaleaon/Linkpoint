@@ -755,6 +755,12 @@ class IMManager(
     private fun addMessage(sessionId: UUID, message: IMMessage) {
         val messages = sessionMessages.getOrPut(sessionId) { mutableListOf() }
         messages.add(message)
+        // Update the concurrent last-message map immediately after appending
+        // to the list.  There is a tiny window between these two operations
+        // where a concurrent getLastSessionMessage() call would still return
+        // the previous message — this is acceptable because the UI reads are
+        // eventually consistent and the composable will recompose on the next
+        // collectAsState emission.
         lastMessageBySession[sessionId] = message
         
         if (messages.size > MAX_SESSION_HISTORY) {
