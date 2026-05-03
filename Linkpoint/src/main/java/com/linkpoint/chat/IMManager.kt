@@ -88,6 +88,12 @@ class IMManager(
     
     // Session messages
     private val sessionMessages = ConcurrentHashMap<UUID, MutableList<IMMessage>>()
+
+    // Last message per session — ConcurrentHashMap provides thread-safe O(1)
+    // reads for composable callers on the Main thread while addMessage writes
+    // on MessagingDispatcher, avoiding the data race that MutableList.lastOrNull()
+    // would introduce (ArrayList.size + elementData access are not atomic).
+    private val lastMessageBySession = ConcurrentHashMap<UUID, IMMessage>()
     
     // Events
     private val _messageFlow = MutableSharedFlow<IMMessage>(replay = 0, extraBufferCapacity = 64)
@@ -320,6 +326,7 @@ class IMManager(
             pendingGroupMessages.remove(sessionId)
             startedGroupSessions.remove(sessionId)
             sessions.remove(sessionId)
+            lastMessageBySession.remove(sessionId)
             scope.launch {
                 _sessionFlow.emit(IMSessionEvent.Left(sessionId))
             }
@@ -730,10 +737,11 @@ class IMManager(
 
     /**
      * Returns the last message in [sessionId] without copying the full history list.
-     * Prefer this over `getSessionMessages(id).lastOrNull()` in composable contexts.
+     * Thread-safe: backed by a [ConcurrentHashMap] updated in [addMessage] on
+     * MessagingDispatcher; safe to call from the Main/Compose thread.
      */
     fun getLastSessionMessage(sessionId: UUID): IMMessage? {
-        return sessionMessages[sessionId]?.lastOrNull()
+        return lastMessageBySession[sessionId]
     }
     
     /**
@@ -747,6 +755,7 @@ class IMManager(
     private fun addMessage(sessionId: UUID, message: IMMessage) {
         val messages = sessionMessages.getOrPut(sessionId) { mutableListOf() }
         messages.add(message)
+        lastMessageBySession[sessionId] = message
         
         if (messages.size > MAX_SESSION_HISTORY) {
             messages.removeAt(0)

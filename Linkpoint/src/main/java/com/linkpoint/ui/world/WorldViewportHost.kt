@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.linkpoint.hud.HUDOverlayView
 import com.linkpoint.ui.radar.BlipType
@@ -120,11 +121,23 @@ fun WorldOverlayContainer(
     // Radar blips derived from the live AvatarManager. Previously hardcoded
     // sample data ("Friend", "Avatar") shipped to production, which made the
     // radar pretend to detect avatars even when nobody else was around.
+    //
+    // Collect avatarCount so the composable recomposes whenever the avatar
+    // set changes.  Without this binding, manager.getNearbyAvatars() would
+    // return a fresh list but Compose would never know to re-run the block.
     val radarBlips = run {
         val app = com.linkpoint.LinkpointApp.getInstanceOrNull()
         if (app == null || !app.isAvatarManagerInitialized()) {
             emptyList<RadarBlip>()
         } else {
+            // Subscribing to avatarCount (and onlineFriends) makes this block
+            // reactive: a new avatar entering / leaving causes recomposition.
+            @Suppress("UNUSED_VARIABLE")
+            val avatarCount by app.avatarManager.avatarCount.collectAsState()
+            @Suppress("UNUSED_VARIABLE")
+            val onlineFriends by if (app.isFriendsManagerInitialized())
+                app.friendsManager.onlineFriends.collectAsState()
+            else remember { kotlinx.coroutines.flow.MutableStateFlow(emptySet<java.util.UUID>()) }.collectAsState()
             val me = app.avatarManager.getMyAvatar()
             val mePos = me?.position ?: com.linkpoint.protocol.types.LLVector3.zero()
             val friendIds: Set<java.util.UUID> = if (app.isFriendsManagerInitialized()) {

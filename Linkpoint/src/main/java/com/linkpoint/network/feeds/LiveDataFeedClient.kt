@@ -124,8 +124,10 @@ class LiveDataFeedClient(
         }
         if (parsed.isNotEmpty()) {
             _incidents.value = parsed
-            lastStatusFetchAt = now
         }
+        // Always update the timestamp after a successful HTTP GET + parse attempt
+        // so an empty or unchanged feed doesn't bypass the 5-minute cache.
+        lastStatusFetchAt = now
         parsed
     }
 

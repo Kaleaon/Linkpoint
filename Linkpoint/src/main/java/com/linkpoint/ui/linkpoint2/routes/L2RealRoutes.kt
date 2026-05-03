@@ -61,6 +61,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
+import com.linkpoint.economy.TransactionEvent
 
 /**
  * "Real-backend" L2 navigation routes.
@@ -192,7 +193,7 @@ fun L2NearbyPeopleRoute(
     // Re-derive on each refresh tick. Avatars stream in via the UDP path so
     // a manual refresh is mostly cosmetic; we rely on the user reopening
     // the screen to pick up scene changes.
-    val people = remember(refreshTick) {
+    val people = remember(refreshTick, filter) {
         val me = app.avatarManager.getMyAvatar()
         val pos = me?.position ?: com.linkpoint.protocol.types.LLVector3.zero()
         val friendIds: Set<UUID> = if (app.isFriendsManagerInitialized()) {
@@ -293,9 +294,11 @@ fun L2InventoryRoute(
         }
     }
 
-    val nodes = remember(currentFolderId, refreshTick.value) {
-        currentFolderId?.let { app.inventoryManager.getFolderContents(it) }.orEmpty()
-    }
+    // Read directly from the cache without remember() so the list refreshes
+    // on recomposition after the async fetch populates InventoryManager's
+    // internal maps. remember() would memoize the empty result that exists
+    // at composition time and never re-read after the keys stop changing.
+    val nodes = currentFolderId?.let { app.inventoryManager.getFolderContents(it) }.orEmpty()
 
     val items = nodes.map { node ->
         when (node) {
@@ -490,27 +493,53 @@ fun L2WalletRoute(
     LaunchedEffect(Unit) { app.liveDataFeedClient.fetchLindex() }
 
     val transactions = remember { mutableStateListOf<WalletTransaction>() }
+    // Formatter is remembered once per composition — creating SimpleDateFormat
+    // inside the collect lambda would instantiate it on every incoming event.
+    val txTimeFormatter = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
     LaunchedEffect(economyAvailable) {
         if (!economyAvailable) return@LaunchedEffect
         app.economyManager.transactionEvents.collect { tx ->
-            // Project the backend TransactionEvent onto the UI model. The
-            // backend type carries amount/payer/payee/description but the
-            // exact field names vary by event subclass — toString() is a
-            // safe stringification until a per-subtype mapping is wired.
-            transactions.add(
-                0,
-                WalletTransaction(
+            // Map each TransactionEvent subtype to a concrete amount and
+            // direction. Unknown/future subtypes are skipped so the wallet
+            // history only shows rows with real data.
+            val walletTx: WalletTransaction? = when (tx) {
+                is TransactionEvent.PaymentReceived -> WalletTransaction(
                     id = UUID.randomUUID().toString(),
-                    title = tx.toString(),
-                    subtitle = "",
-                    amountLinden = 0L,
-                    timestamp = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
+                    title = "From ${tx.sourceName}",
+                    subtitle = tx.description,
+                    amountLinden = tx.amount.toLong(),
+                    timestamp = txTimeFormatter.format(Date()),
                     isIncome = true,
                 )
-            )
-            // Keep the visible history bounded (same ceiling as IMManager history).
-            if (transactions.size > MAX_TRANSACTION_HISTORY) {
-                transactions.removeAt(transactions.lastIndex)
+                is TransactionEvent.PaymentSent -> WalletTransaction(
+                    id = UUID.randomUUID().toString(),
+                    title = "To ${tx.destinationId.toString().take(8)}",
+                    subtitle = tx.description,
+                    amountLinden = tx.amount.toLong(),
+                    timestamp = txTimeFormatter.format(Date()),
+                    isIncome = false,
+                )
+                is TransactionEvent.BalanceChanged -> {
+                    // BalanceChanged reflects a net balance update (stipend,
+                    // marketplace, etc). Only show it when amount is non-zero
+                    // and we can determine the direction.
+                    val change = tx.change
+                    if (change != 0) WalletTransaction(
+                        id = UUID.randomUUID().toString(),
+                        title = tx.description ?: "Balance update",
+                        subtitle = "",
+                        amountLinden = kotlin.math.abs(change).toLong(),
+                        timestamp = txTimeFormatter.format(Date()),
+                        isIncome = change > 0,
+                    ) else null
+                }
+            }
+            if (walletTx != null) {
+                transactions.add(0, walletTx)
+                // Keep the visible history bounded (same ceiling as IMManager history).
+                if (transactions.size > MAX_TRANSACTION_HISTORY) {
+                    transactions.removeAt(transactions.lastIndex)
+                }
             }
         }
     }

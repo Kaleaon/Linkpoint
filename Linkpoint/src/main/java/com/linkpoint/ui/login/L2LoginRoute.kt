@@ -82,12 +82,12 @@ fun L2LoginRoute(
                     when (result) {
                         is LoginResult.Success -> {
                             status = "Welcome to ${grid.name}"
-                            // SessionManager.connectionState flips to
-                            // CONNECTED inside protocol.login on success;
-                            // the LaunchedEffect above will route to home.
-                            // We still call onLoginSuccess() defensively
-                            // in case the route is still composed.
-                            onLoginSuccess()
+                            // SessionManager.connectionState flips to CONNECTED
+                            // inside protocol.login on success; the
+                            // LaunchedEffect(isConnected) observer above drives
+                            // navigation.  Calling onLoginSuccess() here would
+                            // invoke a composable callback from a non-composition
+                            // coroutine after the route may have left the tree.
                         }
                         is LoginResult.MFARequired -> {
                             status = "MFA required — open the app for the full prompt."

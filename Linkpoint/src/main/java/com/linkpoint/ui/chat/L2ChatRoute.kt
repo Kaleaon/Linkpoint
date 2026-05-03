@@ -72,11 +72,15 @@ fun L2ChatRoute(
         }
     }
 
-    // Resolve the active IM/GROUP session from whatever IMManager currently
-    // has. We don't drive the channel selector from outside, so we stash the
-    // ids and the existing ChatScreen filter picks them up by ChatChannel.
-    val sessions by app.imManager.activeSessions.collectAsState()
+    // IM sessions and message flow are only available when IMManager is up.
+    // When it isn't (e.g. chat initialized before IM completes bootstrapping)
+    // we display nearby/local chat only without crashing.
+    val imAvailable = app.isIMManagerInitialized()
+    val sessions by if (imAvailable) app.imManager.activeSessions.collectAsState()
+        else remember { kotlinx.coroutines.flow.MutableStateFlow(emptyList<com.linkpoint.chat.IMSession>()) }.collectAsState()
+
     LaunchedEffect(sessions) {
+        if (!imAvailable) return@LaunchedEffect
         if (activeImSessionId == null) {
             activeImSessionId = sessions.firstOrNull { it.type == SessionType.P2P }?.sessionId
         }
@@ -96,7 +100,8 @@ fun L2ChatRoute(
 
     // Stream incoming IMs, scoped to the currently-active sessions so an
     // unrelated group doesn't pollute the visible list.
-    LaunchedEffect(activeImSessionId, activeGroupSessionId) {
+    LaunchedEffect(imAvailable, activeImSessionId, activeGroupSessionId) {
+        if (!imAvailable) return@LaunchedEffect
         app.imManager.messageFlow.collect { im ->
             val channel = when (im.sessionId) {
                 activeImSessionId -> ChatChannel.IM
