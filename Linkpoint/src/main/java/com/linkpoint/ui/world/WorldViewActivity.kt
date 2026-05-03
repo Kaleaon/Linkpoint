@@ -644,7 +644,29 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 // rightward drag is negative dx; pass through directly to the
                 // controller which handles inversion.
                 controller.applyOrbit(-distanceX, -distanceY)
+                // Throttle background compute while the user is dragging
+                // — drops particles + lowers terrain LOD until release.
+                lumiyaSurfaceView?.getRenderer()?.beginInteractiveThrottle()
                 return true
+            }
+
+            override fun onSingleTapUp(e: MotionEvent): Boolean {
+                handleWorldTap(e.x, e.y)
+                return true
+            }
+
+            override fun onFling(
+                e1: MotionEvent?, e2: MotionEvent,
+                velocityX: Float, velocityY: Float
+            ): Boolean {
+                // Fling lasts ~200ms after release; keep responsive
+                // throttling on for that window then release.
+                lumiyaSurfaceView?.getRenderer()?.beginInteractiveThrottle()
+                lumiyaSurfaceView?.postDelayed(
+                    { lumiyaSurfaceView?.getRenderer()?.endInteractiveThrottle() },
+                    250L
+                )
+                return false
             }
         })
 
@@ -661,7 +683,47 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         worldViewportHost.setOnTouchListener { _, ev ->
             cameraScaleDetector?.onTouchEvent(ev)
             cameraGestureDetector?.onTouchEvent(ev)
+            if (ev.actionMasked == MotionEvent.ACTION_UP ||
+                ev.actionMasked == MotionEvent.ACTION_CANCEL
+            ) {
+                lumiyaSurfaceView?.getRenderer()?.endInteractiveThrottle()
+            }
             true
+        }
+    }
+
+    /**
+     * Hand a world-space tap to the GL renderer's picking system.
+     * Posted onto the GL thread because picking reads the live view +
+     * projection matrices that drive the current frame.
+     */
+    private fun handleWorldTap(screenX: Float, screenY: Float) {
+        val glView = lumiyaSurfaceView ?: return
+        glView.runOnGlThread {
+            val pickedId = glView.getRenderer().pickPrim(screenX, screenY)
+            if (pickedId != null) {
+                runOnUiThread { onPrimPicked(pickedId) }
+            }
+        }
+    }
+
+    /**
+     * Called on the UI thread when the user taps a prim. Default
+     * behaviour: surface the SL object's UUID via the existing
+     * ObjectManager so downstream components (script dialogs, sit-on,
+     * pay) can react. Logs the local id for now; full LL-viewer-style
+     * "object popup" lives in `ObjectActionsDialog`.
+     */
+    private fun onPrimPicked(localId: Long) {
+        android.util.Log.i(TAG, "Picked object localId=$localId")
+        if (app.isObjectManagerInitialized()) {
+            app.objectManager.getObject(localId.toInt())?.let { obj ->
+                Toast.makeText(
+                    this,
+                    "Selected ${obj.name.ifBlank { "object" }}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
     

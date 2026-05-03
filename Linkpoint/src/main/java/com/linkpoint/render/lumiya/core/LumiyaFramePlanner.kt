@@ -12,9 +12,16 @@ enum class LumiyaRenderPass {
 
 object LumiyaFramePlanner {
 
+    /**
+     * @param interactiveThrottle when true (touch fling, sustained drag),
+     *   skip the particle pass to keep the frame budget under control.
+     *   The FXAA resolve is still controlled separately at the renderer
+     *   level. Mirrors Lumiya's "responsive mode" pause-particles.
+     */
     fun createPlan(
         worldPassEnabled: Boolean,
-        hasHudElements: Boolean
+        hasHudElements: Boolean,
+        interactiveThrottle: Boolean = false
     ): List<LumiyaRenderPass> {
         val passes = mutableListOf<LumiyaRenderPass>()
         if (worldPassEnabled) {
@@ -23,7 +30,7 @@ object LumiyaFramePlanner {
             passes += LumiyaRenderPass.WORLD_SKY
             passes += LumiyaRenderPass.WORLD_TRANSPARENT
             passes += LumiyaRenderPass.WORLD_WATER
-            passes += LumiyaRenderPass.WORLD_PARTICLES
+            if (!interactiveThrottle) passes += LumiyaRenderPass.WORLD_PARTICLES
         }
         if (hasHudElements) {
             passes += LumiyaRenderPass.HUD

@@ -11,6 +11,7 @@ import com.linkpoint.avatar.AttachmentPoints
 import com.linkpoint.render.RenderDiagnostics
 import com.linkpoint.render.lumiya.drawable.*
 import com.linkpoint.render.lumiya.glres.GLTextureCache
+import com.linkpoint.render.lumiya.spatial.OcclusionQuerySet
 import java.util.UUID
 
 /**
@@ -56,7 +57,9 @@ class LumiyaRenderer : RenderEngineProvider {
     private var waterDrawable: DrawableWater? = null
     private var skyDrawable: DrawableSky? = null
     private var primStore = DrawablePrimStore()
+    private var meshStore = DrawableMeshStore()
     private var hudStore = DrawableHudStore()
+    private var hoverTextStore = DrawableHoverText()
     private var avatarStore = DrawableAvatarStore()
     private var particleManager: DrawableParticleManager? = null
 
@@ -75,6 +78,32 @@ class LumiyaRenderer : RenderEngineProvider {
      */
     @Volatile
     var onBeforeFrame: ((deltaTimeSeconds: Float) -> Unit)? = null
+
+    /**
+     * When true, expensive optional passes (particles, FXAA resolve)
+     * are skipped to keep the frame budget under control during touch
+     * gestures. Mirrors Lumiya's "responsive mode" used while flinging.
+     * Toggled by [beginInteractiveThrottle] / [endInteractiveThrottle].
+     */
+    @Volatile
+    private var interactiveThrottle: Boolean = false
+
+    /** Toggle the responsive throttle on. Safe to call from any thread. */
+    fun beginInteractiveThrottle() { interactiveThrottle = true }
+
+    /** Toggle the responsive throttle off. Safe to call from any thread. */
+    fun endInteractiveThrottle() { interactiveThrottle = false }
+
+    /** Read-only diagnostic. */
+    fun isInteractiveThrottling(): Boolean = interactiveThrottle
+
+    /**
+     * Hardware occlusion-query pool. Off by default — the renderer is
+     * already CPU-bound on most mobile GPUs and adding query overhead
+     * to every draw can be a net loss. Toggle on for scenes with heavy
+     * indoor/cluttered geometry where overdraw dominates.
+     */
+    val occlusionQueries = OcclusionQuerySet()
 
     // =====================================================================
     // Lifecycle
@@ -192,7 +221,10 @@ class LumiyaRenderer : RenderEngineProvider {
         ctx.uploadGlobalUBO()
 
         // ── 2. Begin FXAA FBO ────────────────────────────────────────────
-        if (ctx.fxaaEnabled && ctx.fxaaFramebuffer != 0) {
+        // Skip FXAA during interactive throttle so we save the offscreen
+        // pass + resolve cost — aliasing during a fling is barely visible.
+        val fxaaActive = ctx.fxaaEnabled && ctx.fxaaFramebuffer != 0 && !interactiveThrottle
+        if (fxaaActive) {
             GLES32.glBindFramebuffer(GLES32.GL_FRAMEBUFFER, ctx.fxaaFramebuffer)
             GLES32.glViewport(0, 0, ctx.fxaaWidth, ctx.fxaaHeight)
         }
@@ -202,7 +234,8 @@ class LumiyaRenderer : RenderEngineProvider {
 
         val framePlan = LumiyaFramePlanner.createPlan(
             worldPassEnabled = worldPassEnabled,
-            hasHudElements = hudStore.hasElements()
+            hasHudElements = hudStore.hasElements(),
+            interactiveThrottle = interactiveThrottle
         )
         framePlan.forEach { pass ->
             when (pass) {
@@ -210,7 +243,11 @@ class LumiyaRenderer : RenderEngineProvider {
                     GLES32.glDepthMask(true)
                     GLES32.glDisable(GLES32.GL_BLEND)
                     terrainDrawable?.draw(ctx)
-                    primStore.drawOpaque(ctx)
+                    primStore.drawOpaque(
+                        ctx,
+                        occlusion = if (occlusionQueries.isEnabled()) occlusionQueries else null
+                    )
+                    meshStore.drawOpaque(ctx)
                 }
                 LumiyaRenderPass.WORLD_AVATAR -> avatarStore.draw(ctx)
                 LumiyaRenderPass.WORLD_SKY -> {
@@ -224,6 +261,14 @@ class LumiyaRenderer : RenderEngineProvider {
                     GLES32.glEnable(GLES32.GL_BLEND)
                     GLES32.glBlendFunc(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
                     primStore.drawTransparent(ctx)
+                    meshStore.drawTransparent(ctx)
+                    // Hover text overlays the world but underneath HUD;
+                    // depth-test true so labels behind objects partially
+                    // occlude, depth-write false so labels don't break
+                    // following passes.
+                    GLES32.glDepthMask(false)
+                    hoverTextStore.draw(ctx, viewportWidth, viewportHeight)
+                    GLES32.glDepthMask(true)
                 }
                 LumiyaRenderPass.WORLD_WATER -> waterDrawable?.draw(ctx)
                 LumiyaRenderPass.WORLD_PARTICLES -> particleManager?.draw(ctx)
@@ -232,7 +277,7 @@ class LumiyaRenderer : RenderEngineProvider {
         }
 
         // ── 11. FXAA resolve ─────────────────────────────────────────────
-        if (ctx.fxaaEnabled && ctx.fxaaFramebuffer != 0) {
+        if (fxaaActive) {
             GLES32.glBindFramebuffer(GLES32.GL_FRAMEBUFFER, 0)
             GLES32.glViewport(0, 0, viewportWidth, viewportHeight)
             GLES32.glClear(GLES32.GL_COLOR_BUFFER_BIT)
@@ -242,6 +287,9 @@ class LumiyaRenderer : RenderEngineProvider {
         }
 
         // ── 12. Post-frame ───────────────────────────────────────────────
+        // Harvest any occlusion-query results that became available this
+        // frame; the next frame's draw decisions will read them.
+        occlusionQueries.harvest()
         ctx.resourceManager.cleanup()
         frameCount++
     }
@@ -285,9 +333,30 @@ class LumiyaRenderer : RenderEngineProvider {
 
     override fun clearScene() {
         primStore.clear()
+        meshStore.clear()
         hudStore.clear()
+        hoverTextStore.clear()
         avatarStore.clear()
         terrainDrawable?.clear()
+    }
+
+    /** Set / update the hover text shown above [primId]. Empty string clears. */
+    fun setHoverText(primId: Long, text: String, r: Float = 1f, g: Float = 1f, b: Float = 1f, a: Float = 1f) {
+        requireGlThread("setHoverText")
+        if (text.isBlank()) {
+            hoverTextStore.removeLabel(primId)
+            return
+        }
+        val center = primStore.snapshot().firstOrNull { it.id == primId }
+        if (center != null) {
+            hoverTextStore.upsertLabel(
+                primId, text,
+                center.modelMatrix[12],
+                center.modelMatrix[13],
+                center.modelMatrix[14] + center.aabbHalfZ + 0.2f,
+                r, g, b, a
+            )
+        }
     }
 
     // =====================================================================
@@ -300,8 +369,9 @@ class LumiyaRenderer : RenderEngineProvider {
 
     /**
      * Upload [bitmap] keyed by the SL asset [textureId] and bind the
-     * resulting GL handle to [primId]. If the texture is already cached
-     * the upload is skipped. Must be called on the GL thread.
+     * resulting GL handle to every face on [primId] that referenced
+     * this UUID. If the texture is already cached the upload is
+     * skipped. Must be called on the GL thread.
      */
     fun uploadTextureForPrim(
         primId: Long,
@@ -312,7 +382,121 @@ class LumiyaRenderer : RenderEngineProvider {
         requireGlThread("uploadTextureForPrim")
         if (!isInitialized) return
         val handle = ctx.textureCache.put(textureId, bitmap, semantic)
-        primStore.setPrimTexture(primId, handle)
+        primStore.bindTextureToMatchingFaces(primId, textureId, handle)
+        meshStore.bindTextureToMatchingFaces(primId, textureId, handle)
+    }
+
+    /**
+     * Insert / update a prim with full ObjectUpdate metadata. Routes
+     * shape, scale, rotation, and per-face texture entries through to
+     * the prim store so the prim picks up its real geometry instead of
+     * a default unit box.
+     */
+    fun upsertPrim(
+        id: Long,
+        posX: Float, posY: Float, posZ: Float,
+        scaleX: Float, scaleY: Float, scaleZ: Float,
+        rotation: FloatArray? = null,
+        shapeParams: com.linkpoint.protocol.messages.PrimShapeParams =
+            com.linkpoint.protocol.messages.PrimShapeParams.DEFAULT,
+        textureEntry: ByteArray? = null
+    ): Boolean {
+        requireGlThread("upsertPrim")
+        if (!isInitialized) return false
+        primStore.upsertPrim(
+            id = id,
+            posX = posX, posY = posY, posZ = posZ,
+            scaleX = scaleX, scaleY = scaleY, scaleZ = scaleZ,
+            rotation = rotation,
+            shapeParams = shapeParams,
+            textureEntry = textureEntry
+        )
+        return true
+    }
+
+    /**
+     * Insert / update a mesh-asset prim. Compiles the mesh data into
+     * VAOs (cached by mesh UUID so duplicate references share GPU
+     * buffers) and binds per-face texture entries. Returns true if the
+     * mesh was attached, false if compilation failed (e.g. malformed
+     * mesh asset).
+     */
+    fun upsertMeshPrim(
+        id: Long,
+        posX: Float, posY: Float, posZ: Float,
+        scaleX: Float, scaleY: Float, scaleZ: Float,
+        rotation: FloatArray? = null,
+        meshData: com.linkpoint.assets.MeshData,
+        textureEntry: ByteArray? = null
+    ): Boolean {
+        requireGlThread("upsertMeshPrim")
+        if (!isInitialized) return false
+        return meshStore.upsertMeshPrim(
+            id = id,
+            ctx = ctx,
+            posX = posX, posY = posY, posZ = posZ,
+            scaleX = scaleX, scaleY = scaleY, scaleZ = scaleZ,
+            rotation = rotation,
+            meshData = meshData,
+            textureEntry = textureEntry
+        )
+    }
+
+    /** Look up the default-face texture UUID currently bound to a prim. */
+    fun primDefaultTextureId(primId: Long): java.util.UUID =
+        primStore.getDefaultTextureId(primId)
+
+    /** Pick the closest visible prim under [screenX], [screenY] (px). */
+    fun pickPrim(screenX: Float, screenY: Float): Long? {
+        requireGlThread("pickPrim")
+        if (!isInitialized) return null
+        val (origin, dir) = com.linkpoint.render.lumiya.picking.GLRayTrace.screenToWorldRay(
+            screenX, screenY,
+            viewportWidth, viewportHeight,
+            ctx.viewMatrix, ctx.projectionMatrix
+        )
+        var bestId: Long? = null
+        var bestT = Float.MAX_VALUE
+        for (prim in primStore.snapshot()) {
+            val cx = prim.modelMatrix[12]
+            val cy = prim.modelMatrix[13]
+            val cz = prim.modelMatrix[14]
+            val t = rayAabbDistance(
+                origin, dir,
+                cx - prim.aabbHalfX, cy - prim.aabbHalfY, cz - prim.aabbHalfZ,
+                cx + prim.aabbHalfX, cy + prim.aabbHalfY, cz + prim.aabbHalfZ
+            )
+            if (t < bestT) { bestT = t; bestId = prim.id }
+        }
+        return bestId
+    }
+
+    private fun rayAabbDistance(
+        origin: FloatArray, dir: FloatArray,
+        minX: Float, minY: Float, minZ: Float,
+        maxX: Float, maxY: Float, maxZ: Float
+    ): Float {
+        // Slab method.
+        var tMin = -Float.MAX_VALUE
+        var tMax = Float.MAX_VALUE
+        for (axis in 0..2) {
+            val o = origin[axis]
+            val d = dir[axis]
+            val mn = if (axis == 0) minX else if (axis == 1) minY else minZ
+            val mx = if (axis == 0) maxX else if (axis == 1) maxY else maxZ
+            if (Math.abs(d) < 1e-6f) {
+                if (o < mn || o > mx) return Float.MAX_VALUE
+            } else {
+                val inv = 1f / d
+                var t1 = (mn - o) * inv
+                var t2 = (mx - o) * inv
+                if (t1 > t2) { val tmp = t1; t1 = t2; t2 = tmp }
+                if (t1 > tMin) tMin = t1
+                if (t2 < tMax) tMax = t2
+                if (tMin > tMax) return Float.MAX_VALUE
+            }
+        }
+        return if (tMin >= 0f) tMin else if (tMax >= 0f) tMax else Float.MAX_VALUE
     }
 
     /** Mark a prim as transparent (flips it into the alpha-sorted draw list). */
@@ -369,8 +553,11 @@ class LumiyaRenderer : RenderEngineProvider {
         skyDrawable?.destroy()
         particleManager?.destroy()
         primStore.destroy()
+        meshStore.destroy()
         hudStore.destroy()
+        hoverTextStore.destroy()
         avatarStore.destroy()
+        occlusionQueries.destroy()
         destroyFullScreenQuad()
         ctx.shutdown()
         isInitialized = false

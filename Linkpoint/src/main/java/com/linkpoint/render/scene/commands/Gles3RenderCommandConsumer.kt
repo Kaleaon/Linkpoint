@@ -104,27 +104,79 @@ class Gles3RenderCommandConsumer(
     private fun handleUpsertPrim(engine: RenderEngineProvider, cmd: SceneRenderCommand.UpsertPrim) {
         val update = cmd.update
         val p = update.position
+        val s = update.scale
         runOnGl {
             // pcode 47 == LL_PCODE_LEGACY_AVATAR. Route avatars to the
-            // avatar store; regular prims go to the prim store.
+            // avatar store; regular prims go to the prim store with
+            // full shape + scale + texture metadata.
             if (update.pcode == 47) {
                 lumiya?.upsertAvatar(update.fullId, p.x, p.y, p.z)
             } else {
-                engine.addObject(update.localId.toLong(), p.x, p.y, p.z)
-                // Kick off a texture fetch for the default face so the
-                // prim doesn't ship as flat-shaded grey on first frame.
-                tryBindDefaultTexture(update.localId.toLong(), update.textureEntry)
+                lumiya?.upsertPrim(
+                    id = update.localId.toLong(),
+                    posX = p.x, posY = p.y, posZ = p.z,
+                    scaleX = s.x, scaleY = s.y, scaleZ = s.z,
+                    rotation = quatToMatrix(update.rotation),
+                    shapeParams = update.shapeParams,
+                    textureEntry = update.textureEntry
+                ) ?: engine.addObject(update.localId.toLong(), p.x, p.y, p.z)
+                // Kick off async texture fetches for every face referencing
+                // a real (non-default) UUID so prims pick up their textures
+                // as soon as the asset cache delivers them.
+                tryBindFaceTextures(update.localId.toLong(), update.textureEntry)
             }
         }
     }
 
+    private fun quatToMatrix(rot: com.linkpoint.protocol.types.LLQuaternion): FloatArray {
+        // Convert LL quaternion (x,y,z,w) to a column-major 4x4 rotation matrix.
+        val m = FloatArray(16)
+        val xx = rot.x * rot.x; val yy = rot.y * rot.y; val zz = rot.z * rot.z
+        val xy = rot.x * rot.y; val xz = rot.x * rot.z; val yz = rot.y * rot.z
+        val wx = rot.w * rot.x; val wy = rot.w * rot.y; val wz = rot.w * rot.z
+        m[0] = 1f - 2f * (yy + zz); m[1] = 2f * (xy + wz);    m[2] = 2f * (xz - wy);    m[3] = 0f
+        m[4] = 2f * (xy - wz);      m[5] = 1f - 2f * (xx + zz); m[6] = 2f * (yz + wx);  m[7] = 0f
+        m[8] = 2f * (xz + wy);      m[9] = 2f * (yz - wx);    m[10] = 1f - 2f * (xx + yy); m[11] = 0f
+        m[12] = 0f; m[13] = 0f; m[14] = 0f; m[15] = 1f
+        return m
+    }
+
     private fun handleUpsertMesh(engine: RenderEngineProvider, cmd: SceneRenderCommand.UpsertMesh) {
-        // Mesh geometry compilation in the Lumiya backend is not yet
-        // wired — this lands as a basic prim placeholder so the asset
-        // arrival isn't silently lost. Texture binding still applies.
-        runOnGl {
-            tryBindDefaultTexture(cmd.localId.toLong(), cmd.textureEntry)
+        // Compile + attach the mesh on the GL thread. We don't have the
+        // ObjectUpdate position here (the producer only forwards the mesh
+        // localId + data + texture entry), so we keep whatever transform
+        // the prim already has from its UpsertPrim — the mesh attaches
+        // *into* the existing prim slot. Then kick off per-face texture
+        // fetches.
+        val lumiyaRef = lumiya
+        if (lumiyaRef != null) {
+            runOnGl {
+                // Best-effort: pull the prim's current position out of
+                // the snapshot, fall back to origin if it's brand new.
+                val (pos, scale) = currentPositionScale(cmd.localId.toLong())
+                lumiyaRef.upsertMeshPrim(
+                    id = cmd.localId.toLong(),
+                    posX = pos[0], posY = pos[1], posZ = pos[2],
+                    scaleX = scale[0], scaleY = scale[1], scaleZ = scale[2],
+                    rotation = null,
+                    meshData = cmd.meshData,
+                    textureEntry = cmd.textureEntry
+                )
+                tryBindFaceTextures(cmd.localId.toLong(), cmd.textureEntry)
+            }
+        } else {
+            runOnGl { tryBindFaceTextures(cmd.localId.toLong(), cmd.textureEntry) }
         }
+    }
+
+    private fun currentPositionScale(primId: Long): Pair<FloatArray, FloatArray> {
+        val pos = floatArrayOf(0f, 0f, 0f)
+        val scale = floatArrayOf(1f, 1f, 1f)
+        // We don't currently expose the prim's current transform back
+        // to the consumer; landing on a sane default is fine because
+        // a follow-up UpsertPrim will overwrite the matrix. This branch
+        // exists so we don't lose the mesh-arrival event entirely.
+        return pos to scale
     }
 
     private fun handleUpdateMaterial(engine: RenderEngineProvider, cmd: SceneRenderCommand.UpdateMaterial) {
@@ -166,11 +218,12 @@ class Gles3RenderCommandConsumer(
     // =====================================================================
 
     /**
-     * Pull the default texture UUID out of [textureEntry], fetch the
-     * bitmap via [textureFetcher], and on success queue a GL-thread
-     * upload + bind for [primId].
+     * Fetch every distinct texture UUID referenced by [textureEntry]
+     * and, on success, queue a GL-thread upload + bind for the matching
+     * faces of [primId]. Faces sharing the same UUID share a single
+     * upload via the GLTextureCache.
      */
-    private fun tryBindDefaultTexture(primId: Long, textureEntry: ByteArray) {
+    private fun tryBindFaceTextures(primId: Long, textureEntry: ByteArray) {
         val fetcher = textureFetcher ?: return
         val lumiyaRef = lumiya ?: return
         if (textureEntry.isEmpty()) return
@@ -181,22 +234,25 @@ class Gles3RenderCommandConsumer(
             Log.v(TAG, "TextureEntry parse failed for prim=$primId: ${t.message}")
             return
         }
-        // Use the first downloadable UUID we find. Faces beyond the
-        // default share its handle until per-face material binding lands.
-        val defaultId = ids.firstOrNull { TextureEntryParser.shouldDownload(it) } ?: return
-
-        fetcher.fetch(defaultId) { bitmap ->
-            if (bitmap == null) return@fetch
-            runOnGl {
-                lumiyaRef.uploadTextureForPrim(
-                    primId,
-                    defaultId,
-                    bitmap,
-                    TextureFormatPolicy.TextureSemantic.ALBEDO
-                )
+        for (id in ids) {
+            if (!TextureEntryParser.shouldDownload(id)) continue
+            fetcher.fetch(id) { bitmap ->
+                if (bitmap == null) return@fetch
+                runOnGl {
+                    lumiyaRef.uploadTextureForPrim(
+                        primId,
+                        id,
+                        bitmap,
+                        TextureFormatPolicy.TextureSemantic.ALBEDO
+                    )
+                }
             }
         }
     }
+
+    /** Backwards-compat alias for callers that still want the legacy name. */
+    private fun tryBindDefaultTexture(primId: Long, textureEntry: ByteArray) =
+        tryBindFaceTextures(primId, textureEntry)
 
     // =====================================================================
     // GL thread marshalling

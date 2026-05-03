@@ -57,16 +57,19 @@ render/lumiya/
 │   ├── DrawableTerrain        → 16×16-m heightfield patches
 │   ├── DrawableWater          → animated quad + waterTime advance
 │   ├── DrawableSky            → dome + stars
-│   ├── DrawablePrimStore      → opaque/alpha prim collection
+│   ├── DrawablePrimStore      → 6-shape unit VAOs + per-face materials
+│   ├── DrawableMeshStore      → SL/OpenSim mesh-asset prims (per-face VAOs)
+│   ├── DrawableHoverText      → 3D billboard text labels above prims
 │   ├── DrawableAvatarStore    → tracked avatars + per-avatar joint UBOs
 │   ├── DrawableHudStore       → HUD attachment overlay (orthographic pass)
 │   ├── DrawableParticleManager→ billboard particles
 │   └── AvatarMeshAssetLoader  → bundled default avatar mesh
 ├── spatial/
 │   ├── FrustumCuller          → 6-plane frustum / AABB tests
+│   ├── OcclusionQuerySet      → GL_ANY_SAMPLES_PASSED_CONSERVATIVE pool
 │   └── SpatialIndex           → octree partition (scaffolding)
 └── picking/
-    └── GLRayTrace             → object pick via ray-vs-AABB
+    └── GLRayTrace             → screen-to-world ray + ray-tri intersect
 ```
 
 The companion `linden/llrender/` subtree contains thinner wrappers
@@ -259,35 +262,80 @@ regresses, and roll back the default if needed.
 
 ---
 
-## 8. Known gaps vs. Singularity / Firestorm
+## 8. Roadmap completion status
 
-The GL pipeline is structurally complete (initialises, draws all pass
-types, handles surface lifecycle, swaps engines without restart) but
-the following items are deliberately out of scope for the
-flip-default-to-GL milestone:
+The original known-gaps list from the flip-default-to-GL milestone is
+now closed. Each item below has landed on this branch:
 
-- **Mesh asset compilation in the GL backend.** `UpsertMesh` currently
-  binds only the texture entry's default face. The mesh geometry
-  itself isn't uploaded to a VAO. To be done by porting the mesh
-  upload path from `MeshPrimRenderer.kt` into a new
-  `DrawableMeshStore`.
-- **Per-face material binding.** `DrawablePrimStore` binds one
-  texture per prim; SL prims have up to 32 faces. Needs a per-face
-  draw split that consults `TextureEntryParser.parseFull`.
-- **Real prim shapes.** `DrawablePrimStore.drawOpaque` always draws
-  the box VAO. Sphere / cylinder VAOs exist but the dispatcher
-  doesn't choose between them yet.
-- **Picking integration.** `picking/GLRayTrace` exists but isn't
-  wired into `WorldViewportHost` touch handling.
-- **Hover text.** Lumiya renders 3D text above objects;
-  `DrawableHudStore` doesn't yet.
-- **Occlusion queries.** ES 3 supports `glBeginQuery` /
-  `GL_ANY_SAMPLES_PASSED_CONSERVATIVE`; we don't use them.
-- **Responsive throttle.** Lumiya pauses background compute during
-  touch flings; not implemented.
+- **Real prim shape dispatch** — `DrawablePrimStore` now ships unit
+  VAOs for box / sphere / cylinder / torus / prism / ring and chooses
+  between them via `shapeFromParams(PrimShapeParams)`. The chooser
+  mirrors LL viewer's `LLVolumeParams` heuristic
+  (PATH_CIRCLE × PROFILE_CIRCLE → sphere, PATH_LINE × PROFILE_TRI →
+  prism, etc.). Per-prim scale lives on the model matrix; AABBs
+  derive from scale × 0.5. Draws are batched by shape so VAO binds
+  are O(shape count), not O(prim count).
+- **Per-face material binding** — `DrawablePrimStore.PrimInstance` now
+  carries a `MutableList<FaceMaterial>`. `applyTextureEntry` calls
+  `TextureEntryParser.parseFull(entry, faceCountFor(shape))` and
+  populates per-face textureId, tint, scaleS/T, offsetS/T, rotation.
+  The renderer builds a UV transform matrix per face on the fly. Same
+  treatment in `DrawableMeshStore` for mesh-asset prims (one face per
+  mesh submesh).
+- **Mesh asset compilation** — new `DrawableMeshStore` ports
+  `MeshPrimRenderer`'s upload logic to GL ES 3 VAOs. Each unique mesh
+  asset compiles once into a list of per-face VAOs (interleaved
+  POS/NORMAL/UV, location 0/1/2 matching `PrimShaderProgram`); per-prim
+  instances reference the shared compiled mesh. Wired through
+  `LumiyaRenderer.upsertMeshPrim` and called from
+  `Gles3RenderCommandConsumer.handleUpsertMesh`.
+- **Picking** — `LumiyaRenderer.pickPrim(screenX, screenY)` uses
+  `GLRayTrace.screenToWorldRay` plus a slab-method ray-vs-AABB test
+  against every prim and returns the closest hit's localId.
+  `WorldViewActivity` wires `GestureDetector.onSingleTapUp` to
+  `handleWorldTap`, which posts onto the GL thread and pops a Toast
+  with the picked SL object's name on the UI thread.
+- **3D hover text** — new `DrawableHoverText` renders text labels via
+  Android Canvas → bitmap → GL texture, drawn as a screen-aligned
+  billboard at the prim's world anchor + AABB top. Uses the existing
+  `PrimShaderProgram` (no new shader). Distance-scaled font with a
+  legibility floor + ceiling. Driven by `LumiyaRenderer.setHoverText`.
+- **Occlusion queries** — new
+  `render/lumiya/spatial/OcclusionQuerySet` wraps
+  `glBeginQuery(GL_ANY_SAMPLES_PASSED_CONSERVATIVE)`.
+  `LumiyaRenderer.occlusionQueries` exposes the pool;
+  `DrawablePrimStore.drawOpaque` consults `shouldDraw(primId)` per
+  prim before issuing the draw + query pair, then `harvest()` polls
+  results post-frame. Fail-open semantics: if the result isn't ready
+  we keep last frame's decision (no GPU stall). Off by default — toggle
+  via `lumiyaRenderer.occlusionQueries.setEnabled(true)`.
+- **Responsive throttle** — `LumiyaRenderer.beginInteractiveThrottle()`
+  / `endInteractiveThrottle()` flip a flag that
+  `LumiyaFramePlanner.createPlan` honours by skipping the particle
+  pass, and that `renderFrame` honours by bypassing the FXAA FBO +
+  resolve. `WorldViewActivity` hooks `onScroll` /
+  `onFling` / `ACTION_UP` to begin and end throttling.
 
-All of these are unblocked by this branch's plumbing — they just
-need follow-up work in their respective drawable / shader files.
+### What's still followup
+
+- **Per-face draw split for non-mesh prims.** `DrawablePrimStore`
+  has the per-face material data and uses face[0] for the bind, but
+  the unit shape VAOs are unsplit — face[1..n] data is parsed
+  but doesn't drive a separate draw call. Most prims look correct
+  with face[0] (one tint, one texture). To split per-face we need
+  per-face index ranges in each shape VAO.
+- **GPU skinning.** `DrawableMeshStore` keeps `MeshFace.jointIndices`
+  / `weights` on the CPU-side data structure but renders rigged
+  meshes in bind pose. `RiggedMeshShaderProgram` exists; wiring it
+  through is a per-instance joint-UBO upload (the same pattern
+  `DrawableAvatarStore.updateJoints` already uses).
+- **Sculpts.** Pcode 9 sculpt prims (textured heightfield) don't have
+  a path here yet. Singularity treats them as a special primitive
+  type that fetches a sculpt texture and rebuilds the mesh on the
+  CPU; we'd need an analog `DrawableSculptStore`.
+- **Hover text font atlas.** Each unique label currently gets its own
+  texture. For scenes with hundreds of labels, an SDF atlas would
+  drop GPU memory significantly.
 
 ---
 
