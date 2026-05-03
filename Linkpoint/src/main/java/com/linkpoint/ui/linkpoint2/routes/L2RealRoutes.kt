@@ -451,13 +451,24 @@ fun L2NotificationsRoute(
     val app = LinkpointApp.getInstanceOrNull()
     val scope = rememberCoroutineScope()
 
-    // The in-process com.linkpoint.notifications.NotificationManager is not
-    // currently constructed by LinkpointApp.initializeManagers(), so per-
-    // session events (IM offers, friendship offers, money transfers) don't
-    // land here yet. Until that's wired, populate the inbox from the
-    // public Linden Lab status RSS so users see real grid-incident
-    // alerts (maintenance windows, deployments, outages) instead of
-    // staring at an empty screen.
+    val notifAvailable = app != null && app.isNotificationManagerInitialized()
+
+    // Per-session events (IM offers, friendship offers, money transfers,
+    // system messages) come from NotificationManager. Public grid-status
+    // incidents (maintenance, deployments, outages) come from the LL
+    // status RSS. We merge both so the inbox is populated whether or
+    // not a session is live.
+    val sessionItems = remember { mutableStateListOf<NotificationItem>() }
+    LaunchedEffect(notifAvailable) {
+        if (!notifAvailable) return@LaunchedEffect
+        sessionItems.clear()
+        app!!.notificationManager.getAllNotifications().forEach { sessionItems.add(it.toUi()) }
+        app.notificationManager.notificationEvents.collect {
+            sessionItems.clear()
+            app.notificationManager.getAllNotifications().forEach { sessionItems.add(it.toUi()) }
+        }
+    }
+
     val incidents by (app?.liveDataFeedClient?.incidents
         ?: kotlinx.coroutines.flow.MutableStateFlow(emptyList<com.linkpoint.network.feeds.StatusIncident>()))
         .collectAsState()
@@ -467,12 +478,12 @@ fun L2NotificationsRoute(
         app?.let { scope.launch { it.liveDataFeedClient.fetchStatusIncidents() } }
     }
 
-    val items = incidents
-        .filter { it.title !in dismissed.value }
+    val statusItems = incidents
+        .filter { "rss:${it.title}" !in dismissed.value }
         .take(30)
         .map { incident ->
             NotificationItem(
-                id = incident.title,
+                id = "rss:${incident.title}",
                 kind = NotificationKind.Region,
                 title = "Grid status",
                 body = incident.title,
@@ -482,16 +493,60 @@ fun L2NotificationsRoute(
             )
         }
 
+    val items = sessionItems.filter { it.id !in dismissed.value } + statusItems
+
     NotificationsScreen(
         items = items,
         onBack = onBack,
         onClearAll = {
-            dismissed.value = dismissed.value + incidents.map { it.title }
+            if (notifAvailable) app!!.notificationManager.clearAll()
+            sessionItems.clear()
+            dismissed.value = dismissed.value + incidents.map { "rss:${it.title}" }
         },
-        onAccept = { item -> dismissed.value = dismissed.value + item.id },
-        onDecline = { item -> dismissed.value = dismissed.value + item.id },
+        onAccept = { item ->
+            if (notifAvailable && !item.id.startsWith("rss:")) {
+                runCatching { UUID.fromString(item.id) }.getOrNull()?.let {
+                    app!!.notificationManager.markAsRead(it)
+                }
+            }
+            dismissed.value = dismissed.value + item.id
+            sessionItems.removeAll { it.id == item.id }
+        },
+        onDecline = { item ->
+            if (notifAvailable && !item.id.startsWith("rss:")) {
+                runCatching { UUID.fromString(item.id) }.getOrNull()?.let {
+                    app!!.notificationManager.markAsRead(it)
+                }
+            }
+            dismissed.value = dismissed.value + item.id
+            sessionItems.removeAll { it.id == item.id }
+        },
         onTap = {},
         modifier = modifier,
+    )
+}
+
+private fun com.linkpoint.notifications.SLNotification.toUi(): NotificationItem {
+    val kind = when (type) {
+        com.linkpoint.notifications.NotificationType.INSTANT_MESSAGE -> NotificationKind.Im
+        com.linkpoint.notifications.NotificationType.GROUP_CHAT,
+        com.linkpoint.notifications.NotificationType.GROUP_NOTICE -> NotificationKind.GroupPing
+        com.linkpoint.notifications.NotificationType.FRIENDSHIP_OFFER -> NotificationKind.FriendRequest
+        com.linkpoint.notifications.NotificationType.TRANSACTION -> NotificationKind.Money
+        com.linkpoint.notifications.NotificationType.SYSTEM,
+        com.linkpoint.notifications.NotificationType.TELEPORT_OFFER -> NotificationKind.Region
+        com.linkpoint.notifications.NotificationType.SCRIPT_DIALOG,
+        com.linkpoint.notifications.NotificationType.PERMISSION_REQUEST -> NotificationKind.Generic
+    }
+    return NotificationItem(
+        id = id.toString(),
+        kind = kind,
+        title = title,
+        body = message,
+        timestamp = formatAgo(timestamp),
+        acceptable = type == com.linkpoint.notifications.NotificationType.FRIENDSHIP_OFFER ||
+            type == com.linkpoint.notifications.NotificationType.TELEPORT_OFFER,
+        mentioned = false,
     )
 }
 
@@ -790,15 +845,6 @@ fun L2SearchRoute(
                                     description = e.description,
                                 )
                             }
-                        com.linkpoint.ui.search.SearchCategory.ALL -> {
-                            val a = app.searchManager.searchPeople(query).results.map { p ->
-                                ComposeSearchResult.PersonResult(p.agentId, p.displayName, p.userName, p.isOnline) as ComposeSearchResult
-                            }
-                            val b = app.searchManager.searchPlaces(query).results.map { pl ->
-                                ComposeSearchResult.PlaceResult(pl.parcelId, pl.name, pl.description, pl.traffic.toInt(), "secondlife://${pl.region}/${pl.location}") as ComposeSearchResult
-                            }
-                            a + b
-                        }
                     }
                 } catch (_: Exception) {
                     emptyList()
@@ -969,22 +1015,31 @@ fun L2PrivacySettingsRoute(
     modifier: Modifier = Modifier,
 ) {
     val app = LinkpointApp.getInstanceOrNull()
-    val scope = rememberCoroutineScope()
     var state by remember { mutableStateOf(PrivacyState()) }
 
-    val mutes: List<String> = if (app == null || !managerOrNull { app.muteManager }) emptyList() else {
-        val list by app.muteManager.muteListState.collectAsState()
-        list.map { it.name }
+    val muteAvailable = app != null && managerOrNull { app.muteManager }
+    // Recompose whenever the mute list changes so unblock actions reflect
+    // immediately. chat.MuteManager exposes a `muteListChanged` epoch
+    // StateFlow but no list flow, so we read the snapshot list and key
+    // it on the epoch.
+    val muteEpoch: Long = if (!muteAvailable) 0L else {
+        val v by app!!.muteManager.muteListChanged.collectAsState()
+        v
     }
+    val muteList: List<com.linkpoint.chat.MuteManager.MuteEntry> =
+        if (!muteAvailable) emptyList() else remember(muteEpoch) {
+            app!!.muteManager.getAllMutes()
+        }
 
     PrivacySettingsScreen(
         initial = state,
-        blockedUsers = mutes,
+        blockedUsers = muteList.map { it.name },
         onBack = onBack,
         onUnblock = { name ->
-            if (app != null && managerOrNull { app.muteManager }) {
-                val entry = app.muteManager.getMuteList().firstOrNull { it.name == name }
-                if (entry != null) scope.launch { app.muteManager.unmute(entry) }
+            if (muteAvailable) {
+                muteList.firstOrNull { it.name == name }?.let { entry ->
+                    app!!.muteManager.unmute(entry.id)
+                }
             }
         },
         onChange = { state = it },
