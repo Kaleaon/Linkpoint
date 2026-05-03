@@ -51,6 +51,28 @@ class Gles3RenderCommandConsumer(
     private val terrainHeightmap = FloatArray(REGION_SIZE * REGION_SIZE)
 
     /**
+     * Commands that arrived before the GL engine was bound. The simulator
+     * sends the bulk of the scene (ObjectUpdate, LayerData, terrain) in a
+     * single burst right after RegionHandshake; subsequent traffic is
+     * mostly deltas (ImprovedTerseObjectUpdate, KillObject) that assume
+     * the viewer already holds the full state. If the burst arrives before
+     * `WorldViewActivity` has built its `LumiyaGLSurfaceView` and called
+     * `bindEngine`, every command would be silently dropped at the
+     * `engineProvider ?: return` guard in [dispatch] and the scene would
+     * stay empty for the rest of the session — the symptom captured in
+     * the 2026-05-03 debug report (Total Objects: 0, Live Textures: 0
+     * despite a connected circuit).
+     *
+     * Buffer is bounded to keep a stuck pre-bind state from growing
+     * unbounded; oldest commands are evicted first, which is the right
+     * behaviour because newer ObjectUpdates supersede older ones for the
+     * same prim.
+     */
+    private val pendingCommands = ArrayDeque<SceneRenderCommand>()
+    private val pendingLock = Any()
+    private val pendingCapacity = 4096
+
+    /**
      * Bind the active GL engine. [glThreadExecutor] must marshal a Runnable
      * onto the GL render thread (typically `lumiyaGlSurfaceView::queueEvent`).
      * Pass [textureFetcher] to enable real material binding; without it,
@@ -61,15 +83,37 @@ class Gles3RenderCommandConsumer(
         glThreadExecutor: (Runnable) -> Unit = { it.run() },
         textureFetcher: TextureFetcher? = null
     ) {
+        val wasUnbound = this.engineProvider == null
         this.engineProvider = provider
         this.lumiya = provider as? LumiyaRenderer
         this.glThreadExecutor = glThreadExecutor
         this.textureFetcher = textureFetcher
+
+        if (provider != null && wasUnbound) {
+            replayPendingCommands()
+        }
     }
 
     /** Backwards-compatible single-argument bind for callers that don't yet wire texture fetch. */
     fun bindEngine(provider: RenderEngineProvider?) {
         bindEngine(provider, { it.run() }, null)
+    }
+
+    private fun replayPendingCommands() {
+        val drained = synchronized(pendingLock) {
+            val copy = pendingCommands.toList()
+            pendingCommands.clear()
+            copy
+        }
+        if (drained.isEmpty()) return
+        Log.i(TAG, "Replaying ${drained.size} pending render commands after engine bind")
+        for (command in drained) {
+            try {
+                dispatch(command)
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to replay $command: ${e.message}")
+            }
+        }
     }
 
     fun start() {
@@ -90,7 +134,10 @@ class Gles3RenderCommandConsumer(
     // =====================================================================
 
     private fun dispatch(command: SceneRenderCommand) {
-        val engine = engineProvider ?: return
+        val engine = engineProvider ?: run {
+            bufferPending(command)
+            return
+        }
         when (command) {
             is SceneRenderCommand.UpsertPrim -> handleUpsertPrim(engine, command)
             is SceneRenderCommand.UpsertMesh -> handleUpsertMesh(engine, command)
@@ -211,6 +258,15 @@ class Gles3RenderCommandConsumer(
         applyPatch(cmd.patch)
         val heightmap = toRendererHeightmap()
         runOnGl { engine.updateTerrain(heightmap, 257, 257) }
+    }
+
+    private fun bufferPending(command: SceneRenderCommand) {
+        synchronized(pendingLock) {
+            if (pendingCommands.size >= pendingCapacity) {
+                pendingCommands.removeFirst()
+            }
+            pendingCommands.addLast(command)
+        }
     }
 
     // =====================================================================
