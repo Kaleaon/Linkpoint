@@ -5,6 +5,8 @@ import com.linkpoint.protocol.terrain.TerrainPatch
 import com.linkpoint.render.RenderManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class FilamentRenderCommandConsumer(
@@ -15,57 +17,112 @@ class FilamentRenderCommandConsumer(
     companion object {
         private const val TAG = "FilamentCmdConsumer"
         private const val REGION_SIZE = 256
+        private const val READY_POLL_INTERVAL_MS = 100L
+        private const val PENDING_CAPACITY = 4096
     }
 
     private val terrainHeightmap = FloatArray(REGION_SIZE * REGION_SIZE)
     private var consumeJob: Job? = null
+    private var readyWatcherJob: Job? = null
+
+    /**
+     * Commands that landed before [RenderManager.isReady] returned true.
+     * Filament's prim renderer is constructed asynchronously after engine
+     * init, and any UpsertPrim that beats it would fall out of
+     * [RenderManager.updatePrim] at the `primRenderer ?: return false`
+     * guard, silently dropping the simulator's initial scene burst.
+     * Mirrors the buffer in [Gles3RenderCommandConsumer]; oldest commands
+     * are evicted first since newer ObjectUpdates supersede older ones for
+     * the same prim.
+     */
+    private val pendingCommands = ArrayDeque<SceneRenderCommand>()
+    private val pendingLock = Any()
 
     fun start() {
         if (consumeJob != null) return
         consumeJob = scope.launch {
             stream.commands.collect { command ->
                 renderManager.dispatcher.post(Runnable {
-                    try {
-                        when (command) {
-                            is SceneRenderCommand.UpsertPrim -> {
-                                if (command.update.pcode == 47) {
-                                    renderManager.getSceneManager()?.updateAvatar(
-                                        agentId = command.update.fullId,
-                                        position = command.update.position,
-                                        rotation = command.update.rotation
-                                    )
-                                } else {
-                                    renderManager.updatePrim(command.update)
-                                }
-                            }
-                            is SceneRenderCommand.UpsertMesh -> {
-                                renderManager.attachMeshAsset(
-                                    command.localId,
-                                    command.meshData,
-                                    command.textureEntry,
-                                    binder = null
-                                )
-                            }
-                            is SceneRenderCommand.UpdateMaterial -> {
-                                command.fallbackUpdate?.let { renderManager.updatePrim(it) }
-                            }
-                            is SceneRenderCommand.RemoveEntity -> {
-                                renderManager.removePrim(command.localId)
-                                command.fullId?.let { renderManager.getSceneManager()?.removeObject(it) }
-                            }
-                            is SceneRenderCommand.SetCamera -> {
-                                renderManager.cameraController.setAgentPosition(command.position)
-                            }
-                            is SceneRenderCommand.SetTerrainPatch -> {
-                                applyPatch(command.patch)
-                                renderManager.getTerrainRenderer()?.setHeightmap(toRendererHeightmap())
-                            }
-                        }
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Failed to apply command $command: ${e.message}")
+                    if (!renderManager.isReady()) {
+                        bufferPending(command)
+                    } else {
+                        applyCommand(command)
                     }
                 })
             }
+        }
+        // Drain any commands buffered while the prim renderer was still
+        // initialising. Polling is acceptable here — Filament init takes
+        // sub-second on warm caches and the watcher exits as soon as the
+        // first ready check passes. Without this, buffered commands sit
+        // forever because nothing else triggers a flush.
+        readyWatcherJob = scope.launch {
+            while (isActive && !renderManager.isReady()) {
+                delay(READY_POLL_INTERVAL_MS)
+            }
+            renderManager.dispatcher.post(Runnable { drainPending() })
+        }
+    }
+
+    private fun bufferPending(command: SceneRenderCommand) {
+        synchronized(pendingLock) {
+            if (pendingCommands.size >= PENDING_CAPACITY) {
+                pendingCommands.removeFirst()
+            }
+            pendingCommands.addLast(command)
+        }
+    }
+
+    private fun drainPending() {
+        val drained = synchronized(pendingLock) {
+            val copy = pendingCommands.toList()
+            pendingCommands.clear()
+            copy
+        }
+        if (drained.isEmpty()) return
+        Log.i(TAG, "Replaying ${drained.size} pending render commands after primRenderer ready")
+        for (command in drained) applyCommand(command)
+    }
+
+    private fun applyCommand(command: SceneRenderCommand) {
+        try {
+            when (command) {
+                is SceneRenderCommand.UpsertPrim -> {
+                    if (command.update.pcode == 47) {
+                        renderManager.getSceneManager()?.updateAvatar(
+                            agentId = command.update.fullId,
+                            position = command.update.position,
+                            rotation = command.update.rotation
+                        )
+                    } else {
+                        renderManager.updatePrim(command.update)
+                    }
+                }
+                is SceneRenderCommand.UpsertMesh -> {
+                    renderManager.attachMeshAsset(
+                        command.localId,
+                        command.meshData,
+                        command.textureEntry,
+                        binder = null
+                    )
+                }
+                is SceneRenderCommand.UpdateMaterial -> {
+                    command.fallbackUpdate?.let { renderManager.updatePrim(it) }
+                }
+                is SceneRenderCommand.RemoveEntity -> {
+                    renderManager.removePrim(command.localId)
+                    command.fullId?.let { renderManager.getSceneManager()?.removeObject(it) }
+                }
+                is SceneRenderCommand.SetCamera -> {
+                    renderManager.cameraController.setAgentPosition(command.position)
+                }
+                is SceneRenderCommand.SetTerrainPatch -> {
+                    applyPatch(command.patch)
+                    renderManager.getTerrainRenderer()?.setHeightmap(toRendererHeightmap())
+                }
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to apply command $command: ${e.message}")
         }
     }
 

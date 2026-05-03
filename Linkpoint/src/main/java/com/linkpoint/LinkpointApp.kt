@@ -985,6 +985,15 @@ class LinkpointApp : Application() {
                     protocol.stateManager.setStatus(
                         com.linkpoint.network.core.NetworkStateManager.ConnectionStatus.RECONNECTING
                     )
+                    // Arm CompleteAgentMovement to fire again once the new
+                    // UseCircuitCode is ACKed. Without this reset the CAS at
+                    // the PacketAck handler returns false on every reconnect,
+                    // CompleteAgentMovement is never re-sent, the simulator
+                    // never re-emits RegionHandshake, and the world stays
+                    // empty even though the socket is healthy and ping/ack
+                    // traffic is flowing — the symptom in the 2026-05-03
+                    // debug report (Reconnect Count: 3, Total Objects: 0).
+                    completeAgentMovementSent.set(false)
                 }
                 UDPConnectionFixed.NetworkStateTransition.CONNECTED -> {
                     Log.i(TAG, "✓ UDP watchdog: CONNECTED (socket reconnect succeeded)")
