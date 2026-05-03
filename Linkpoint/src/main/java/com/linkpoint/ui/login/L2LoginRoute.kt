@@ -6,12 +6,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.linkpoint.LinkpointApp
 import com.linkpoint.network.LoginResult
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Compose-first LOGIN destination wired into the Linkpoint 2.0 nav graph.
@@ -32,7 +33,6 @@ fun L2LoginRoute(
     var status by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
     val isConnected by app.sessionManager.connectionState
         .collectAsState(initial = app.sessionManager.connectionState.value)
 
@@ -46,13 +46,22 @@ fun L2LoginRoute(
         isLoading = loading,
         isError = error,
         onLogin = { credentials ->
-            scope.launch {
-                loading = true
-                error = false
-                val grid = app.gridManager.getAvailableGrids()
-                    .getOrNull(credentials.selectedGridIndex)
-                    ?: app.gridManager.getSelectedGrid()
-                status = "Logging in to ${grid.name}…"
+            // The login flow runs HTTP login + capability seed fetch + UDP
+            // handshake — easily 5–30s end to end. Launching it on a
+            // composition-bound scope (rememberCoroutineScope) means any
+            // navigation away from this route mid-login (e.g. opening
+            // Settings) tears down the scope and cancels capability
+            // initialization with a "coroutine scope left the composition"
+            // exception. Use the application-wide SupervisorJob scope
+            // instead so the login can complete regardless of UI state;
+            // the SessionManager StateFlow above drives navigation.
+            loading = true
+            error = false
+            val grid = app.gridManager.getAvailableGrids()
+                .getOrNull(credentials.selectedGridIndex)
+                ?: app.gridManager.getSelectedGrid()
+            status = "Logging in to ${grid.name}…"
+            app.applicationScope.launch {
                 val result = app.protocol.login(
                     firstName = credentials.firstName.trim(),
                     lastName = credentials.lastName.trim().ifBlank { "Resident" },
@@ -60,19 +69,26 @@ fun L2LoginRoute(
                     loginUri = grid.loginUri,
                     startLocation = credentials.startLocation.lowercase().replace(' ', '_'),
                 )
-                loading = false
-                when (result) {
-                    is LoginResult.Success -> {
-                        status = "Welcome to ${grid.name}"
-                        onLoginSuccess()
-                    }
-                    is LoginResult.MFARequired -> {
-                        status = "MFA required — open the app for the full prompt."
-                        error = true
-                    }
-                    is LoginResult.Failure -> {
-                        status = result.message
-                        error = true
+                withContext(Dispatchers.Main) {
+                    loading = false
+                    when (result) {
+                        is LoginResult.Success -> {
+                            status = "Welcome to ${grid.name}"
+                            // SessionManager.connectionState flips to
+                            // CONNECTED inside protocol.login on success;
+                            // the LaunchedEffect above will route to home.
+                            // We still call onLoginSuccess() defensively
+                            // in case the route is still composed.
+                            onLoginSuccess()
+                        }
+                        is LoginResult.MFARequired -> {
+                            status = "MFA required — open the app for the full prompt."
+                            error = true
+                        }
+                        is LoginResult.Failure -> {
+                            status = result.message
+                            error = true
+                        }
                     }
                 }
             }
