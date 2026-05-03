@@ -328,14 +328,11 @@ object NetworkLogger {
     /**
      * Protocol statistics for HTTP/2 usage tracking
      */
-    typealias ProtocolStatistics = ProtocolUsageTracker.ProtocolStatistics
-    typealias RequestType = ProtocolUsageTracker.RequestType
-
     private val protocolUsageTracker = ProtocolUsageTracker()
 
-    fun getProtocolStatistics(): ProtocolStatistics = protocolUsageTracker.getProtocolStatistics()
+    fun getProtocolStatistics(): ProtocolUsageTracker.ProtocolStatistics = protocolUsageTracker.getProtocolStatistics()
 
-    fun trackProtocolUsageByType(type: RequestType, protocol: String) {
+    fun trackProtocolUsageByType(type: ProtocolUsageTracker.RequestType, protocol: String) {
         protocolUsageTracker.trackByType(type, protocol)
     }
     
