@@ -120,7 +120,7 @@ object ProtocolDiagnostics {
         parseErrors.set(0)
         unknownMessages.set(0)
         messageTypeCounts.clear()
-        unknownMessageIdRegistry.clear()
+        unknownMessageIds.clear()
         synchronized(historyLock) {
             packetHistory.clear()
         }
@@ -218,7 +218,7 @@ object ProtocolDiagnostics {
      */
     fun recordUnknownMessage(messageId: Int, rawBytes: ByteArray? = null) {
         unknownMessages.incrementAndGet()
-        unknownMessageIdRegistry.getOrPut(messageId) { AtomicInteger(0) }.incrementAndGet()
+        unknownMessageIds.getOrPut(messageId) { AtomicInteger(0) }.incrementAndGet()
         
         Log.w(TAG, "Unknown message ID: $messageId (0x${messageId.toString(16).uppercase()})")
         
@@ -316,10 +316,10 @@ object ProtocolDiagnostics {
         sb.appendLine("Parse Errors: ${parseErrors.get()}")
         sb.appendLine("Unknown Messages: ${unknownMessages.get()}")
         
-        if (unknownMessageIdRegistry.isNotEmpty()) {
+        if (unknownMessageIds.isNotEmpty()) {
             sb.appendLine()
             sb.appendLine("Unknown Message IDs:")
-            unknownMessageIdRegistry.entries
+            unknownMessageIds.entries
                 .sortedByDescending { it.value.get() }
                 .take(10)
                 .forEach { (id, count) ->

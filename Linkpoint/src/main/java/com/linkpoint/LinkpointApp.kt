@@ -1267,7 +1267,7 @@ class LinkpointApp : Application() {
         // RegionHandshake - CRITICAL: Must respond with RegionHandshakeReply for world data to load
         // This is why nothing was loading after login - we weren't acknowledging the region handshake
         // Register handlers for all critical packets
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REGION_HANDSHAKE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REGION_HANDSHAKE) { _, rawPacket ->
             com.linkpoint.utils.InitializationTracker.startPhase(
                 com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
                 "Processing RegionHandshake"
@@ -1382,7 +1382,7 @@ class LinkpointApp : Application() {
         }
         
         // AgentMovementComplete - Confirms agent is fully in region
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_MOVEMENT_COMPLETE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_MOVEMENT_COMPLETE) { _, rawPacket ->
             com.linkpoint.utils.InitializationTracker.startPhase(
                 com.linkpoint.utils.InitializationTracker.Phase.AGENT_MOVEMENT_COMPLETE,
                 "Agent fully in region"
@@ -1481,7 +1481,7 @@ class LinkpointApp : Application() {
         }
         
         // Chat from simulator (nearby chat)
-        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CHAT_FROM_SIMULATOR) { _, parsed ->
+        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CHAT_FROM_SIMULATOR) { _, parsed ->
             try {
                 val chatData = parsed as? com.linkpoint.protocol.messages.ChatData
                 if (chatData != null && ::chatManager.isInitialized) {
@@ -1616,7 +1616,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_UPDATE) { _, parsed ->
+        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_UPDATE) { _, parsed ->
             try {
                 val updates = (parsed as? List<*>)?.filterIsInstance<com.linkpoint.protocol.messages.ObjectUpdateData>() ?: emptyList()
                 ScenePopulationDiagnostics.markPacketReceived(ScenePopulationDiagnostics.EntityType.OBJECT, updates.size)
@@ -1633,7 +1633,7 @@ class LinkpointApp : Application() {
         }
         
         // Compressed object updates
-        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_UPDATE_COMPRESSED) { _, parsed ->
+        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_UPDATE_COMPRESSED) { _, parsed ->
             try {
                 val updates = (parsed as? List<*>)?.filterIsInstance<com.linkpoint.protocol.messages.ObjectUpdateData>() ?: emptyList()
                 ScenePopulationDiagnostics.markPacketReceived(ScenePopulationDiagnostics.EntityType.OBJECT, updates.size)
@@ -1652,7 +1652,7 @@ class LinkpointApp : Application() {
         // ObjectUpdateCached (ID 14) - Server notifies about cached objects
         // We respond with RequestMultipleObjects to get full data
         var cachedObjectUpdateCount = 0
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_UPDATE_CACHED) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_UPDATE_CACHED) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
@@ -1679,7 +1679,7 @@ class LinkpointApp : Application() {
         // ObjectProperties (ID 65289 / 0xFF09) - Object metadata (name, description, owner, etc.)
         // Sent by server in response to ObjectSelect or when properties change
         var objectPropertiesCount = 0
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_PROPERTIES) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_PROPERTIES) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
@@ -1706,7 +1706,7 @@ class LinkpointApp : Application() {
         
         // ScriptControlChange (ID -65347 / 0xFFFF00BD) - Script control permissions
         var scriptControlChangeCount = 0
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SCRIPT_CONTROL_CHANGE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SCRIPT_CONTROL_CHANGE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
@@ -1736,7 +1736,7 @@ class LinkpointApp : Application() {
         }
         
         // Avatar animation updates
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AVATAR_ANIMATION) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AVATAR_ANIMATION) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
@@ -1752,7 +1752,7 @@ class LinkpointApp : Application() {
         // LayerData - Terrain heightmap, wind, and cloud data
         // Type 76 ('L') = terrain, Type 87 ('W') = wind, Type 67 ('C') = cloud
         var layerDataCount = 0
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.LAYER_DATA) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.LAYER_DATA) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
@@ -1783,7 +1783,7 @@ class LinkpointApp : Application() {
         // The simulator sends this periodically to verify the client is still alive
         // Format: PingID (1 byte) + OldestUnacked (4 bytes)
         // We only need PingID to respond; OldestUnacked is for the sim's reference
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.START_PING_CHECK) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.START_PING_CHECK) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && payload.isNotEmpty()) {
@@ -1798,7 +1798,7 @@ class LinkpointApp : Application() {
         }
         
         // ImprovedTerseObjectUpdate - Fast position updates for objects/avatars
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.IMPROVED_TERSE_OBJECT_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.IMPROVED_TERSE_OBJECT_UPDATE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
@@ -1822,7 +1822,7 @@ class LinkpointApp : Application() {
         }
         
         // KillObject - Notification when objects are removed from the scene
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.KILL_OBJECT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.KILL_OBJECT) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
@@ -1851,7 +1851,7 @@ class LinkpointApp : Application() {
         }
         
         // CoarseLocationUpdate - Location updates for nearby avatars
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.COARSE_LOCATION_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.COARSE_LOCATION_UPDATE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
@@ -1870,7 +1870,7 @@ class LinkpointApp : Application() {
         // These are sent by the simulator to confirm receipt of our reliable packets.
         // CRITICAL: When UseCircuitCode is acknowledged, we MUST immediately send
         // CompleteAgentMovement - the simulator won't send RegionHandshake until then.
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PACKET_ACK) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PACKET_ACK) { _, rawPacket ->
             // PacketAck format: Count (1 byte), then list of acknowledged sequence numbers (4 bytes each)
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
@@ -1928,7 +1928,7 @@ class LinkpointApp : Application() {
         // SoundTrigger - Sound triggered by in-world scripts (llTriggerSound)
         // These are sent when a script plays a sound that should be heard by nearby avatars.
         // We register a handler to prevent "No handler registered" warnings.
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SOUND_TRIGGER) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SOUND_TRIGGER) { _, rawPacket ->
             // SoundTrigger payload (LL message_template `SoundTrigger`,
             // medium-freq 29; Lumiya parity `slproto/messages/SoundTrigger.java`):
             //   SoundID(LLUUID), OwnerID(LLUUID), ObjectID(LLUUID),
@@ -1981,7 +1981,7 @@ class LinkpointApp : Application() {
         
         // OnlineNotification - Friend came online (UDP fallback for capability events)
         // The simulator sends this when a friend comes online if event system unavailable
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ONLINE_NOTIFICATION) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ONLINE_NOTIFICATION) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
@@ -2009,7 +2009,7 @@ class LinkpointApp : Application() {
         }
         
         // OfflineNotification - Friend went offline (UDP fallback for capability events)
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OFFLINE_NOTIFICATION) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OFFLINE_NOTIFICATION) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
@@ -2037,7 +2037,7 @@ class LinkpointApp : Application() {
         }
         
         // ChangeUserRights - Friend permissions changed
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CHANGE_USER_RIGHTS) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CHANGE_USER_RIGHTS) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
@@ -2073,7 +2073,7 @@ class LinkpointApp : Application() {
         }
         
         // AgentDataUpdate - Agent data updated (active group, title, etc.)
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_DATA_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_DATA_UPDATE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
@@ -2135,7 +2135,7 @@ class LinkpointApp : Application() {
         }
         
         // HealthMessage - Agent health status
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.HEALTH_MESSAGE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.HEALTH_MESSAGE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
@@ -2158,7 +2158,7 @@ class LinkpointApp : Application() {
         }
         
         // ParcelOverlay - Parcel boundary data for minimap/rendering
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_OVERLAY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_OVERLAY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
@@ -2199,7 +2199,7 @@ class LinkpointApp : Application() {
         // =====================================
         
         // TeleportFinish - Teleport completed successfully
-        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TELEPORT_FINISH) { _, parsed ->
+        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TELEPORT_FINISH) { _, parsed ->
             try {
                 val data = parsed as? com.linkpoint.protocol.messages.TeleportFinishData
                 if (data != null) {
@@ -2216,7 +2216,7 @@ class LinkpointApp : Application() {
         }
         
         // TeleportFailed - Teleport failed with reason
-        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TELEPORT_FAILED) { _, parsed ->
+        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TELEPORT_FAILED) { _, parsed ->
             try {
                 val data = parsed as? com.linkpoint.protocol.messages.TeleportFailedData
                 if (data != null) {
@@ -2233,7 +2233,7 @@ class LinkpointApp : Application() {
         }
         
         // TeleportProgress - Teleport status update
-        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TELEPORT_PROGRESS) { _, parsed ->
+        udpConnection.registerParsedHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TELEPORT_PROGRESS) { _, parsed ->
             try {
                 val data = parsed as? com.linkpoint.protocol.messages.TeleportProgressData
                 if (data != null) {
@@ -2250,7 +2250,7 @@ class LinkpointApp : Application() {
         }
         
         // TeleportStart - Teleport sequence starting
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TELEPORT_START) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TELEPORT_START) { _, rawPacket ->
             try {
                 Log.i(TAG, "🚀 TeleportStart: Teleport sequence beginning")
                 // TeleportStart has minimal payload, just acknowledge it
@@ -2263,7 +2263,7 @@ class LinkpointApp : Application() {
         }
         
         // AlertMessage - System alert
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ALERT_MESSAGE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ALERT_MESSAGE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
@@ -2283,7 +2283,7 @@ class LinkpointApp : Application() {
         }
         
         // AgentAlertMessage - Agent-specific alert
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_ALERT_MESSAGE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_ALERT_MESSAGE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
@@ -2303,7 +2303,7 @@ class LinkpointApp : Application() {
         }
         
         // EnableSimulator - Enable connection to neighbor sim
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ENABLE_SIMULATOR) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ENABLE_SIMULATOR) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
@@ -2321,7 +2321,7 @@ class LinkpointApp : Application() {
         }
         
         // CrossedRegion - Agent crossed into new region (medium frequency)
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CROSSED_REGION) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CROSSED_REGION) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
@@ -2341,7 +2341,7 @@ class LinkpointApp : Application() {
         }
         
         // ParcelProperties - Full parcel information (high frequency)
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_PROPERTIES) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_PROPERTIES) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
@@ -2398,7 +2398,7 @@ class LinkpointApp : Application() {
         // =====================================
         
         // --- Script/Dialog Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SCRIPT_DIALOG) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SCRIPT_DIALOG) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::scriptDialogManager.isInitialized) {
@@ -2409,7 +2409,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SCRIPT_QUESTION) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SCRIPT_QUESTION) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::scriptDialogManager.isInitialized) {
@@ -2420,7 +2420,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.LOAD_URL) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.LOAD_URL) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::scriptDialogManager.isInitialized) {
@@ -2432,7 +2432,7 @@ class LinkpointApp : Application() {
         }
         
         // --- Economy Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MONEY_BALANCE_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MONEY_BALANCE_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::economyManager.isInitialized) {
@@ -2443,7 +2443,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ECONOMY_DATA) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ECONOMY_DATA) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::economyManager.isInitialized) {
@@ -2455,7 +2455,7 @@ class LinkpointApp : Application() {
         }
         
         // --- Inventory Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.INVENTORY_DESCENDENTS) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.INVENTORY_DESCENDENTS) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2473,7 +2473,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.FETCH_INVENTORY_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.FETCH_INVENTORY_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2487,7 +2487,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.BULK_UPDATE_INVENTORY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.BULK_UPDATE_INVENTORY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2499,7 +2499,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UPDATE_CREATE_INVENTORY_ITEM) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UPDATE_CREATE_INVENTORY_ITEM) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2510,7 +2510,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REMOVE_INVENTORY_ITEM) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REMOVE_INVENTORY_ITEM) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::inventoryManager.isInitialized) {
@@ -2530,7 +2530,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REMOVE_INVENTORY_FOLDER) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REMOVE_INVENTORY_FOLDER) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::inventoryManager.isInitialized) {
@@ -2551,7 +2551,7 @@ class LinkpointApp : Application() {
         }
         
         // --- Avatar/Appearance Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AVATAR_APPEARANCE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AVATAR_APPEARANCE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2624,7 +2624,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_WEARABLES_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_WEARABLES_UPDATE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2639,7 +2639,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_CACHED_TEXTURE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_CACHED_TEXTURE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2650,7 +2650,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_CACHED_TEXTURE_RESPONSE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_CACHED_TEXTURE_RESPONSE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2661,7 +2661,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AVATAR_PROPERTIES_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AVATAR_PROPERTIES_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2676,7 +2676,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AVATAR_INTERESTS_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AVATAR_INTERESTS_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2687,7 +2687,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AVATAR_GROUPS_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AVATAR_GROUPS_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2699,7 +2699,7 @@ class LinkpointApp : Application() {
         }
         
         // --- Group Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_PROFILE_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_PROFILE_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2713,7 +2713,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_MEMBERS_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_MEMBERS_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2724,7 +2724,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_ROLE_DATA_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_ROLE_DATA_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::groupsManager.isInitialized) {
@@ -2735,7 +2735,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling GroupRoleDataReply", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_TITLES_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_TITLES_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::groupsManager.isInitialized) {
@@ -2745,7 +2745,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling GroupTitlesReply", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_NOTICE_ADD) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_NOTICE_ADD) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::groupsManager.isInitialized) {
@@ -2755,7 +2755,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling GroupNoticeAdd", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_GROUP_DATA_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_GROUP_DATA_UPDATE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::groupsManager.isInitialized) {
@@ -2766,7 +2766,7 @@ class LinkpointApp : Application() {
         }
         
         // --- Friends Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ACCEPT_FRIENDSHIP) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ACCEPT_FRIENDSHIP) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2781,7 +2781,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DECLINE_FRIENDSHIP) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DECLINE_FRIENDSHIP) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2796,7 +2796,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.FORM_FRIENDSHIP) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.FORM_FRIENDSHIP) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2812,7 +2812,7 @@ class LinkpointApp : Application() {
         }
         
         // --- Map Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MAP_BLOCK_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MAP_BLOCK_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2829,7 +2829,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MAP_ITEM_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MAP_ITEM_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2840,7 +2840,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MAP_LAYER_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MAP_LAYER_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2852,7 +2852,7 @@ class LinkpointApp : Application() {
         }
         
         // --- Search Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DIR_PLACES_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DIR_PLACES_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2866,7 +2866,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DIR_PEOPLE_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DIR_PEOPLE_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2877,7 +2877,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DIR_GROUPS_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DIR_GROUPS_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2888,7 +2888,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DIR_EVENTS_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DIR_EVENTS_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2899,7 +2899,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DIR_LAND_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DIR_LAND_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2910,7 +2910,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DIR_CLASSIFIED_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DIR_CLASSIFIED_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2922,7 +2922,7 @@ class LinkpointApp : Application() {
         }
         
         // --- Region/Estate Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REGION_INFO) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REGION_INFO) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2937,7 +2937,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SIM_STATS) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SIM_STATS) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2949,7 +2949,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling SimStats", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ESTATE_COVENANT_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ESTATE_COVENANT_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2961,7 +2961,7 @@ class LinkpointApp : Application() {
         }
         
         // --- Parcel Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_INFO_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_INFO_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2976,7 +2976,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_ACCESS_LIST_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_ACCESS_LIST_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2987,7 +2987,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_DWELL_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_DWELL_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -2999,7 +2999,7 @@ class LinkpointApp : Application() {
         }
         
         // --- Object Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_PROPERTIES_FAMILY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_PROPERTIES_FAMILY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -3014,7 +3014,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_ADD) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_ADD) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -3026,7 +3026,7 @@ class LinkpointApp : Application() {
         }
         
         // --- Sound Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ATTACHED_SOUND) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ATTACHED_SOUND) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -3041,7 +3041,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ATTACHED_SOUND_GAIN_CHANGE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ATTACHED_SOUND_GAIN_CHANGE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -3052,7 +3052,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PRELOAD_SOUND) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PRELOAD_SOUND) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -3068,7 +3068,7 @@ class LinkpointApp : Application() {
         }
         
         // --- Effect Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.VIEWER_EFFECT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.VIEWER_EFFECT) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -3084,7 +3084,7 @@ class LinkpointApp : Application() {
         }
         
         // --- Transfer/Asset Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TRANSFER_INFO) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TRANSFER_INFO) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -3099,7 +3099,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TRANSFER_PACKET) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TRANSFER_PACKET) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -3114,7 +3114,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ABORT_XFER) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ABORT_XFER) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -3125,7 +3125,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.IMAGE_NOT_IN_DATABASE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.IMAGE_NOT_IN_DATABASE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::textureManager.isInitialized) {
@@ -3142,7 +3142,7 @@ class LinkpointApp : Application() {
         }
         
         // --- Misc Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MEAN_COLLISION_ALERT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MEAN_COLLISION_ALERT) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -3156,7 +3156,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AVATAR_SIT_RESPONSE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AVATAR_SIT_RESPONSE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -3171,7 +3171,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CAMERA_CONSTRAINT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CAMERA_CONSTRAINT) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -3182,7 +3182,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CONFIRM_ENABLE_SIMULATOR) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CONFIRM_ENABLE_SIMULATOR) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -3193,7 +3193,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SIM_STATUS) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SIM_STATUS) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -3204,7 +3204,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.LOGOUT_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.LOGOUT_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -3219,7 +3219,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UUID_NAME_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UUID_NAME_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -3245,7 +3245,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UUID_GROUP_NAME_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UUID_GROUP_NAME_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -3261,7 +3261,7 @@ class LinkpointApp : Application() {
         // =====================================
         
         // --- High Frequency Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.NEIGHBOR_LIST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.NEIGHBOR_LIST) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -3271,14 +3271,14 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling NeighborList", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REQUEST_IMAGE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REQUEST_IMAGE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "🖼️ RequestImage (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling RequestImage", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.IMAGE_DATA) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.IMAGE_DATA) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::textureManager.isInitialized) {
@@ -3288,7 +3288,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling ImageData", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.IMAGE_PACKET) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.IMAGE_PACKET) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::textureManager.isInitialized) {
@@ -3298,42 +3298,42 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling ImagePacket", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.EDGE_DATA_PACKET) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.EDGE_DATA_PACKET) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "🌐 EdgeDataPacket (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling EdgeDataPacket", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CHILD_AGENT_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CHILD_AGENT_UPDATE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "👤 ChildAgentUpdate (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling ChildAgentUpdate", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CHILD_AGENT_ALIVE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CHILD_AGENT_ALIVE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "👤 ChildAgentAlive (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling ChildAgentAlive", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CHILD_AGENT_POSITION_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CHILD_AGENT_POSITION_UPDATE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "👤 ChildAgentPositionUpdate (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling ChildAgentPositionUpdate", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ATOMIC_PASS_OBJECT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ATOMIC_PASS_OBJECT) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📦 AtomicPassObject (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling AtomicPassObject", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SEND_XFER_PACKET) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SEND_XFER_PACKET) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::xferManager.isInitialized) {
@@ -3342,7 +3342,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling SendXferPacket", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CONFIRM_XFER_PACKET) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CONFIRM_XFER_PACKET) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📥 ConfirmXferPacket (${payload.size} bytes)")
@@ -3350,25 +3350,25 @@ class LinkpointApp : Application() {
         }
         
         // --- Agent Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_PAUSE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_PAUSE) { _, rawPacket ->
             try {
                 com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
-                    com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_PAUSE,
+                    com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_PAUSE,
                     rawPacket
                 ) { summary -> Log.d(TAG, "⏸️ $summary") }
             } catch (e: Exception) { Log.e(TAG, "Error handling AgentPause", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_RESUME) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_RESUME) { _, rawPacket ->
             try {
                 com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
-                    com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_RESUME,
+                    com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_RESUME,
                     rawPacket
                 ) { summary -> Log.d(TAG, "▶️ $summary") }
             } catch (e: Exception) { Log.e(TAG, "Error handling AgentResume", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_DROP_GROUP) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_DROP_GROUP) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::groupsManager.isInitialized) {
@@ -3380,7 +3380,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling AgentDropGroup", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_WEARABLES_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_WEARABLES_REQUEST) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "👔 AgentWearablesRequest (${payload.size} bytes)")
@@ -3388,28 +3388,28 @@ class LinkpointApp : Application() {
         }
         
         // --- Avatar Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AVATAR_PICKER_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AVATAR_PICKER_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "👤 AvatarPickerReply (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling AvatarPickerReply", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AVATAR_NOTES_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AVATAR_NOTES_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📝 AvatarNotesReply (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling AvatarNotesReply", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AVATAR_PICKS_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AVATAR_PICKS_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "⭐ AvatarPicksReply (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling AvatarPicksReply", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AVATAR_CLASSIFIED_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AVATAR_CLASSIFIED_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📰 AvatarClassifiedReply (${payload.size} bytes)")
@@ -3417,7 +3417,7 @@ class LinkpointApp : Application() {
         }
         
         // --- Classified Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CLASSIFIED_INFO_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CLASSIFIED_INFO_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📰 ClassifiedInfoReply (${payload.size} bytes)")
@@ -3425,7 +3425,7 @@ class LinkpointApp : Application() {
         }
         
         // --- Pick Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PICK_INFO_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PICK_INFO_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "⭐ PickInfoReply (${payload.size} bytes)")
@@ -3433,7 +3433,7 @@ class LinkpointApp : Application() {
         }
         
         // --- Event Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.EVENT_INFO_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.EVENT_INFO_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📅 EventInfoReply (${payload.size} bytes)")
@@ -3441,28 +3441,28 @@ class LinkpointApp : Application() {
         }
         
         // --- Group Messages (Extended) ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_ROLE_MEMBERS_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_ROLE_MEMBERS_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "👥 GroupRoleMembersReply (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling GroupRoleMembersReply", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_NOTICES_LIST_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_NOTICES_LIST_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📢 GroupNoticesListReply (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling GroupNoticesListReply", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_NOTICE_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_NOTICE_REQUEST) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📢 GroupNoticeRequest (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling GroupNoticeRequest", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CREATE_GROUP_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CREATE_GROUP_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::groupsManager.isInitialized) {
@@ -3471,7 +3471,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling CreateGroupReply", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.JOIN_GROUP_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.JOIN_GROUP_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::groupsManager.isInitialized) {
@@ -3480,7 +3480,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling JoinGroupReply", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.LEAVE_GROUP_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.LEAVE_GROUP_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::groupsManager.isInitialized) {
@@ -3489,49 +3489,49 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling LeaveGroupReply", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.EJECT_GROUP_MEMBER_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.EJECT_GROUP_MEMBER_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "👥 EjectGroupMemberReply (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling EjectGroupMemberReply", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.INVITE_GROUP_RESPONSE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.INVITE_GROUP_RESPONSE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "👥 InviteGroupResponse (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling InviteGroupResponse", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_ACCOUNT_SUMMARY_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_ACCOUNT_SUMMARY_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "💰 GroupAccountSummaryReply (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling GroupAccountSummaryReply", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_ACCOUNT_DETAILS_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_ACCOUNT_DETAILS_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "💰 GroupAccountDetailsReply (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling GroupAccountDetailsReply", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_ACCOUNT_TRANSACTIONS_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_ACCOUNT_TRANSACTIONS_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "💰 GroupAccountTransactionsReply (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling GroupAccountTransactionsReply", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_ACTIVE_PROPOSAL_ITEM_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_ACTIVE_PROPOSAL_ITEM_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📋 GroupActiveProposalItemReply (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling GroupActiveProposalItemReply", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_VOTE_HISTORY_ITEM_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_VOTE_HISTORY_ITEM_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "🗳️ GroupVoteHistoryItemReply (${payload.size} bytes)")
@@ -3539,21 +3539,21 @@ class LinkpointApp : Application() {
         }
         
         // --- Calling Card Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OFFER_CALLING_CARD) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OFFER_CALLING_CARD) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📇 OfferCallingCard (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling OfferCallingCard", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ACCEPT_CALLING_CARD) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ACCEPT_CALLING_CARD) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📇 AcceptCallingCard (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling AcceptCallingCard", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DECLINE_CALLING_CARD) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DECLINE_CALLING_CARD) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📇 DeclineCallingCard (${payload.size} bytes)")
@@ -3561,25 +3561,25 @@ class LinkpointApp : Application() {
         }
         
         // --- Inventory Messages (Extended) ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.FETCH_INVENTORY_DESCENDENTS) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.FETCH_INVENTORY_DESCENDENTS) { _, rawPacket ->
             try {
                 com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
-                    com.linkpoint.protocol.messages.MessageIdRegistry.FETCH_INVENTORY_DESCENDENTS,
+                    com.linkpoint.protocol.messages.ids.MessageIdRegistry.FETCH_INVENTORY_DESCENDENTS,
                     rawPacket
                 ) { summary -> Log.d(TAG, "📦 $summary") }
             } catch (e: Exception) { Log.e(TAG, "Error handling FetchInventoryDescendents", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.FETCH_INVENTORY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.FETCH_INVENTORY) { _, rawPacket ->
             try {
                 com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
-                    com.linkpoint.protocol.messages.MessageIdRegistry.FETCH_INVENTORY,
+                    com.linkpoint.protocol.messages.ids.MessageIdRegistry.FETCH_INVENTORY,
                     rawPacket
                 ) { summary -> Log.d(TAG, "📦 $summary") }
             } catch (e: Exception) { Log.e(TAG, "Error handling FetchInventory", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.INVENTORY_ASSET_RESPONSE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.INVENTORY_ASSET_RESPONSE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::inventoryManager.isInitialized) {
@@ -3588,7 +3588,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling InventoryAssetResponse", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UPDATE_INVENTORY_FOLDER) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UPDATE_INVENTORY_FOLDER) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::inventoryManager.isInitialized) {
@@ -3597,7 +3597,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling UpdateInventoryFolder", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MOVE_INVENTORY_FOLDER) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MOVE_INVENTORY_FOLDER) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::inventoryManager.isInitialized) {
@@ -3606,7 +3606,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling MoveInventoryFolder", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CREATE_INVENTORY_ITEM) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CREATE_INVENTORY_ITEM) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::inventoryManager.isInitialized) {
@@ -3615,7 +3615,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling CreateInventoryItem", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SAVE_ASSET_INTO_INVENTORY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SAVE_ASSET_INTO_INVENTORY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::inventoryManager.isInitialized) {
@@ -3625,23 +3625,23 @@ class LinkpointApp : Application() {
         }
         
         // --- Task/Object Inventory Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REQUEST_TASK_INVENTORY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REQUEST_TASK_INVENTORY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📦 RequestTaskInventory (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling RequestTaskInventory", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REPLY_TASK_INVENTORY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REPLY_TASK_INVENTORY) { _, rawPacket ->
             Log.d(TAG, "📦 ReplyTaskInventory received")
         }
         
         // --- Object Messages (Extended) ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_DUPLICATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_DUPLICATE) { _, rawPacket ->
             Log.d(TAG, "📦 ObjectDuplicate received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_SCALE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_SCALE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::objectManager.isInitialized) {
@@ -3650,7 +3650,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling ObjectScale", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_ROTATION) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_ROTATION) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::objectManager.isInitialized) {
@@ -3659,7 +3659,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling ObjectRotation", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_POSITION) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_POSITION) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::objectManager.isInitialized) {
@@ -3668,7 +3668,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling ObjectPosition", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_FLAG_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_FLAG_UPDATE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::objectManager.isInitialized) {
@@ -3677,119 +3677,119 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling ObjectFlagUpdate", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_CLICK_ACTION) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_CLICK_ACTION) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📦 ObjectClickAction (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling ObjectClickAction", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_IMAGE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_IMAGE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📦 ObjectImage (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling ObjectImage", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_MATERIAL) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_MATERIAL) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📦 ObjectMaterial (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling ObjectMaterial", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_SHAPE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_SHAPE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📦 ObjectShape (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling ObjectShape", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_OWNER) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_OWNER) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📦 ObjectOwner (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling ObjectOwner", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_GROUP) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_GROUP) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📦 ObjectGroup (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling ObjectGroup", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_BUY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_BUY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "💰 ObjectBuy (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling ObjectBuy", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_PERMISSIONS) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_PERMISSIONS) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "🔒 ObjectPermissions (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling ObjectPermissions", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_SALE_INFO) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_SALE_INFO) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "💰 ObjectSaleInfo (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling ObjectSaleInfo", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_DESELECT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_DESELECT) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📦 ObjectDeselect (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling ObjectDeselect", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_ATTACH) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_ATTACH) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📦 ObjectAttach (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling ObjectAttach", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_DETACH) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_DETACH) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📦 ObjectDetach (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling ObjectDetach", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_DROP) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_DROP) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📦 ObjectDrop (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling ObjectDrop", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_SPIN_START) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_SPIN_START) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📦 ObjectSpinStart (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling ObjectSpinStart", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_SPIN_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_SPIN_UPDATE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📦 ObjectSpinUpdate (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling ObjectSpinUpdate", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_SPIN_STOP) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_SPIN_STOP) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📦 ObjectSpinStop (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling ObjectSpinStop", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_GRAB_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_GRAB_UPDATE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "📦 ObjectGrabUpdate (${payload.size} bytes)")
@@ -3797,7 +3797,7 @@ class LinkpointApp : Application() {
         }
         
         // --- Land/Terrain Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MODIFY_LAND) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MODIFY_LAND) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "🏔️ ModifyLand (${payload.size} bytes)")
@@ -3806,111 +3806,111 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UNDO_LAND) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UNDO_LAND) { _, rawPacket ->
             Log.d(TAG, "🏔️ UndoLand received")
         }
         
         // --- Parcel Messages (Extended) ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_PROPERTIES_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_PROPERTIES_REQUEST) { _, rawPacket ->
             Log.d(TAG, "🏠 ParcelPropertiesRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_DISABLE_OBJECTS) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_DISABLE_OBJECTS) { _, rawPacket ->
             Log.d(TAG, "🏠 ParcelDisableObjects received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_SELECT_OBJECTS) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_SELECT_OBJECTS) { _, rawPacket ->
             Log.d(TAG, "🏠 ParcelSelectObjects received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_MEDIA_COMMAND_MESSAGE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_MEDIA_COMMAND_MESSAGE) { _, rawPacket ->
             Log.d(TAG, "🎬 ParcelMediaCommandMessage received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_MEDIA_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_MEDIA_UPDATE) { _, rawPacket ->
             Log.d(TAG, "🎬 ParcelMediaUpdate received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_OBJECT_OWNERS_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_OBJECT_OWNERS_REPLY) { _, rawPacket ->
             Log.d(TAG, "🏠 ParcelObjectOwnersReply received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.FORCE_OBJECT_SELECT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.FORCE_OBJECT_SELECT) { _, rawPacket ->
             Log.d(TAG, "📦 ForceObjectSelect received")
         }
         
         // --- Money/Economy Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MONEY_TRANSFER_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MONEY_TRANSFER_REQUEST) { _, rawPacket ->
             Log.d(TAG, "💰 MoneyTransferRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ROUTED_MONEY_BALANCE_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ROUTED_MONEY_BALANCE_REPLY) { _, rawPacket ->
             Log.d(TAG, "💰 RoutedMoneyBalanceReply received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PAY_PRICE_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PAY_PRICE_REPLY) { _, rawPacket ->
             Log.d(TAG, "💰 PayPriceReply received")
         }
         
         // --- Script Messages (Extended) ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SCRIPT_RUNNING_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SCRIPT_RUNNING_REPLY) { _, rawPacket ->
             Log.d(TAG, "📜 ScriptRunningReply received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SET_SCRIPT_RUNNING) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SET_SCRIPT_RUNNING) { _, rawPacket ->
             Log.d(TAG, "📜 SetScriptRunning received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SCRIPT_RESET) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SCRIPT_RESET) { _, rawPacket ->
             Log.d(TAG, "📜 ScriptReset received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SCRIPT_SENSOR_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SCRIPT_SENSOR_REPLY) { _, rawPacket ->
             Log.d(TAG, "📡 ScriptSensorReply received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SCRIPT_TELEPORT_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SCRIPT_TELEPORT_REQUEST) { _, rawPacket ->
             Log.d(TAG, "🚀 ScriptTeleportRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.FORCE_SCRIPT_CONTROL_RELEASE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.FORCE_SCRIPT_CONTROL_RELEASE) { _, rawPacket ->
             Log.d(TAG, "📜 ForceScriptControlRelease received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REVOKE_PERMISSIONS) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REVOKE_PERMISSIONS) { _, rawPacket ->
             Log.d(TAG, "🔒 RevokePermissions received")
         }
         
         // --- Asset/Transfer Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TRANSFER_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TRANSFER_REQUEST) { _, rawPacket ->
             Log.d(TAG, "📥 TransferRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TRANSFER_ABORT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TRANSFER_ABORT) { _, rawPacket ->
             Log.d(TAG, "❌ TransferAbort received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REQUEST_XFER) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REQUEST_XFER) { _, rawPacket ->
             Log.d(TAG, "📥 RequestXfer received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ASSET_UPLOAD_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ASSET_UPLOAD_REQUEST) { _, rawPacket ->
             Log.d(TAG, "📤 AssetUploadRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ASSET_UPLOAD_COMPLETE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ASSET_UPLOAD_COMPLETE) { _, rawPacket ->
             Log.d(TAG, "📤 AssetUploadComplete received")
         }
         
         // --- Region/Sim Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REQUEST_REGION_INFO) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REQUEST_REGION_INFO) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "🌍 RequestRegionInfo (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling RequestRegionInfo", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SIMULATOR_VIEWER_TIME_MESSAGE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SIMULATOR_VIEWER_TIME_MESSAGE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -3925,7 +3925,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling SimulatorViewerTimeMessage", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TELEPORT_LOCAL) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TELEPORT_LOCAL) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::teleportManager.isInitialized) {
@@ -3934,7 +3934,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling TeleportLocal", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TELEPORT_CANCEL) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TELEPORT_CANCEL) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::teleportManager.isInitialized) {
@@ -3943,14 +3943,14 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling TeleportCancel", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TELEPORT_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TELEPORT_REQUEST) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "🚀 TeleportRequest (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling TeleportRequest", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SIM_CRASHED) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SIM_CRASHED) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -3964,30 +3964,30 @@ class LinkpointApp : Application() {
         }
         
         // --- Map Messages (Extended) ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MAP_BLOCK_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MAP_BLOCK_REQUEST) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "🗺️ MapBlockRequest (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling MapBlockRequest", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MAP_NAME_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MAP_NAME_REQUEST) { _, rawPacket ->
             try {
                 com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
-                    com.linkpoint.protocol.messages.MessageIdRegistry.MAP_NAME_REQUEST,
+                    com.linkpoint.protocol.messages.ids.MessageIdRegistry.MAP_NAME_REQUEST,
                     rawPacket
                 ) { summary -> Log.d(TAG, "🗺️ $summary") }
             } catch (e: Exception) { Log.e(TAG, "Error handling MapNameRequest", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MAP_LAYER_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MAP_LAYER_REQUEST) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "🗺️ MapLayerRequest (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling MapLayerRequest", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MAP_ITEM_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MAP_ITEM_REQUEST) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "🗺️ MapItemRequest (${payload.size} bytes)")
@@ -3995,14 +3995,14 @@ class LinkpointApp : Application() {
         }
         
         // --- Mute Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MUTE_LIST_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MUTE_LIST_REQUEST) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "🔇 MuteListRequest (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling MuteListRequest", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UPDATE_MUTE_LIST_ENTRY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UPDATE_MUTE_LIST_ENTRY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::muteManager.isInitialized) {
@@ -4011,7 +4011,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling UpdateMuteListEntry", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REMOVE_MUTE_LIST_ENTRY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REMOVE_MUTE_LIST_ENTRY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::muteManager.isInitialized) {
@@ -4020,7 +4020,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling RemoveMuteListEntry", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MUTE_LIST_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MUTE_LIST_UPDATE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null && ::muteManager.isInitialized) {
@@ -4029,7 +4029,7 @@ class LinkpointApp : Application() {
             } catch (e: Exception) { Log.e(TAG, "Error handling MuteListUpdate", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.USE_CACHED_MUTE_LIST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.USE_CACHED_MUTE_LIST) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "🔇 UseCachedMuteList (${payload.size} bytes)")
@@ -4037,14 +4037,14 @@ class LinkpointApp : Application() {
         }
         
         // --- User Info Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.USER_INFO_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.USER_INFO_REQUEST) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) Log.d(TAG, "👤 UserInfoRequest (${payload.size} bytes)")
             } catch (e: Exception) { Log.e(TAG, "Error handling UserInfoRequest", e) }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.USER_INFO_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.USER_INFO_REPLY) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -4057,7 +4057,7 @@ class LinkpointApp : Application() {
         }
         
         // --- Generic/System Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GENERIC_MESSAGE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GENERIC_MESSAGE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -4072,7 +4072,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SYSTEM_MESSAGE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SYSTEM_MESSAGE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -4086,7 +4086,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ERROR_MESSAGE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ERROR_MESSAGE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -4100,7 +4100,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.FEATURE_DISABLED) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.FEATURE_DISABLED) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -4111,7 +4111,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.VIEWER_FROZEN_MESSAGE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.VIEWER_FROZEN_MESSAGE) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -4122,7 +4122,7 @@ class LinkpointApp : Application() {
             }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.VIEWER_STATS) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.VIEWER_STATS) { _, rawPacket ->
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
@@ -4134,70 +4134,70 @@ class LinkpointApp : Application() {
         }
         
         // --- Attachment Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REZ_MULTIPLE_ATTACHMENTS_FROM_INV) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REZ_MULTIPLE_ATTACHMENTS_FROM_INV) { _, rawPacket ->
             Log.d(TAG, "📦 RezMultipleAttachmentsFromInv received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DETACH_ATTACHMENT_INTO_INV) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DETACH_ATTACHMENT_INTO_INV) { _, rawPacket ->
             Log.d(TAG, "📦 DetachAttachmentIntoInv received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CREATE_NEW_OUTFIT_ATTACHMENTS) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CREATE_NEW_OUTFIT_ATTACHMENTS) { _, rawPacket ->
             Log.d(TAG, "👔 CreateNewOutfitAttachments received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UPDATE_ATTACHMENT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UPDATE_ATTACHMENT) { _, rawPacket ->
             Log.d(TAG, "📦 UpdateAttachment received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REMOVE_ATTACHMENT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REMOVE_ATTACHMENT) { _, rawPacket ->
             Log.d(TAG, "📦 RemoveAttachment received")
         }
         
         // --- Rez/DeRez Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REZ_OBJECT_FROM_NOTECARD) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REZ_OBJECT_FROM_NOTECARD) { _, rawPacket ->
             Log.d(TAG, "📦 RezObjectFromNotecard received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REZ_RESTORE_TO_WORLD) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REZ_RESTORE_TO_WORLD) { _, rawPacket ->
             Log.d(TAG, "📦 RezRestoreToWorld received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REZ_SCRIPT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REZ_SCRIPT) { _, rawPacket ->
             Log.d(TAG, "📜 RezScript received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DEREZ_ACK) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DEREZ_ACK) { _, rawPacket ->
             Log.d(TAG, "📦 DeRezAck received")
         }
         
         // --- Misc Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UNDO) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UNDO) { _, rawPacket ->
             Log.d(TAG, "↩️ Undo received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REDO) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REDO) { _, rawPacket ->
             Log.d(TAG, "↪️ Redo received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SET_ALWAYS_RUN) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SET_ALWAYS_RUN) { _, rawPacket ->
             Log.d(TAG, "🏃 SetAlwaysRun received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.INITIATE_DOWNLOAD) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.INITIATE_DOWNLOAD) { _, rawPacket ->
             Log.d(TAG, "📥 InitiateDownload received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DATA_HOME_LOCATION_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DATA_HOME_LOCATION_REPLY) { _, rawPacket ->
             Log.d(TAG, "🏠 DataHomeLocationReply received")
         }
         
         // --- Places/Directory Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PLACES_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PLACES_REPLY) { _, rawPacket ->
             Log.d(TAG, "🔍 PlacesReply received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DIR_POPULAR_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DIR_POPULAR_REPLY) { _, rawPacket ->
             Log.d(TAG, "🔍 DirPopularReply received")
         }
         
@@ -4206,565 +4206,565 @@ class LinkpointApp : Application() {
         // =====================================
         
         // --- Circuit/Connection Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CLOSE_CIRCUIT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CLOSE_CIRCUIT) { _, rawPacket ->
             Log.d(TAG, "🔌 CloseCircuit received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OPEN_CIRCUIT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OPEN_CIRCUIT) { _, rawPacket ->
             Log.d(TAG, "🔌 OpenCircuit received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ADD_CIRCUIT_CODE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ADD_CIRCUIT_CODE) { _, rawPacket ->
             Log.d(TAG, "🔌 AddCircuitCode received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CREATE_TRUSTED_CIRCUIT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CREATE_TRUSTED_CIRCUIT) { _, rawPacket ->
             Log.d(TAG, "🔒 CreateTrustedCircuit received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DENY_TRUSTED_CIRCUIT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DENY_TRUSTED_CIRCUIT) { _, rawPacket ->
             Log.d(TAG, "🚫 DenyTrustedCircuit received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REQUEST_TRUSTED_CIRCUIT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REQUEST_TRUSTED_CIRCUIT) { _, rawPacket ->
             Log.d(TAG, "🔒 RequestTrustedCircuit received")
         }
         
         // --- Auction Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CANCEL_AUCTION) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CANCEL_AUCTION) { _, rawPacket ->
             Log.d(TAG, "🏷️ CancelAuction received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.COMPLETE_AUCTION) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.COMPLETE_AUCTION) { _, rawPacket ->
             Log.d(TAG, "🏷️ CompleteAuction received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CONFIRM_AUCTION_START) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CONFIRM_AUCTION_START) { _, rawPacket ->
             Log.d(TAG, "🏷️ ConfirmAuctionStart received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.START_AUCTION) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.START_AUCTION) { _, rawPacket ->
             Log.d(TAG, "🏷️ StartAuction received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.VIEWER_START_AUCTION) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.VIEWER_START_AUCTION) { _, rawPacket ->
             Log.d(TAG, "🏷️ ViewerStartAuction received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CHECK_PARCEL_AUCTIONS) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CHECK_PARCEL_AUCTIONS) { _, rawPacket ->
             Log.d(TAG, "🏷️ CheckParcelAuctions received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CHECK_PARCEL_SALES) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CHECK_PARCEL_SALES) { _, rawPacket ->
             Log.d(TAG, "💰 CheckParcelSales received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_AUCTIONS) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_AUCTIONS) { _, rawPacket ->
             Log.d(TAG, "🏷️ ParcelAuctions received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_SALES) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_SALES) { _, rawPacket ->
             Log.d(TAG, "💰 ParcelSales received")
         }
         
         // --- Parcel Extended Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_BUY_PASS) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_BUY_PASS) { _, rawPacket ->
             Log.d(TAG, "🎫 ParcelBuyPass received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_CLAIM) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_CLAIM) { _, rawPacket ->
             Log.d(TAG, "🏠 ParcelClaim received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_DIVIDE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_DIVIDE) { _, rawPacket ->
             Log.d(TAG, "🏠 ParcelDivide received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_JOIN) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_JOIN) { _, rawPacket ->
             Log.d(TAG, "🏠 ParcelJoin received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_RECLAIM) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_RECLAIM) { _, rawPacket ->
             Log.d(TAG, "🏠 ParcelReclaim received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_RENAME) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_RENAME) { _, rawPacket ->
             Log.d(TAG, "🏠 ParcelRename received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_SET_OTHER_CLEAN_TIME) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_SET_OTHER_CLEAN_TIME) { _, rawPacket ->
             Log.d(TAG, "🏠 ParcelSetOtherCleanTime received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_GOD_FORCE_OWNER) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_GOD_FORCE_OWNER) { _, rawPacket ->
             Log.d(TAG, "👑 ParcelGodForceOwner received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_GOD_MARK_AS_CONTENT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_GOD_MARK_AS_CONTENT) { _, rawPacket ->
             Log.d(TAG, "👑 ParcelGodMarkAsContent received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MERGE_PARCEL) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MERGE_PARCEL) { _, rawPacket ->
             Log.d(TAG, "🏠 MergeParcel received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REMOVE_PARCEL) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REMOVE_PARCEL) { _, rawPacket ->
             Log.d(TAG, "🏠 RemoveParcel received")
         }
         
         // --- Land Statistics Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.LAND_STAT_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.LAND_STAT_REQUEST) { _, rawPacket ->
             Log.d(TAG, "📊 LandStatRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.LAND_STAT_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.LAND_STAT_REPLY) { _, rawPacket ->
             Log.d(TAG, "📊 LandStatReply received")
         }
         
         // --- Simulator Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SIMULATOR_LOAD) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SIMULATOR_LOAD) { _, rawPacket ->
             Log.d(TAG, "🖥️ SimulatorLoad received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SIMULATOR_READY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SIMULATOR_READY) { _, rawPacket ->
             Log.d(TAG, "🖥️ SimulatorReady received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SIMULATOR_SHUTDOWN_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SIMULATOR_SHUTDOWN_REQUEST) { _, rawPacket ->
             Log.d(TAG, "🖥️ SimulatorShutdownRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SIMULATOR_MAP_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SIMULATOR_MAP_UPDATE) { _, rawPacket ->
             Log.d(TAG, "🗺️ SimulatorMapUpdate received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SIMULATOR_SET_MAP) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SIMULATOR_SET_MAP) { _, rawPacket ->
             Log.d(TAG, "🗺️ SimulatorSetMap received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SIMULATOR_PRESENT_AT_LOCATION) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SIMULATOR_PRESENT_AT_LOCATION) { _, rawPacket ->
             Log.d(TAG, "🖥️ SimulatorPresentAtLocation received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UPDATE_SIMULATOR) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UPDATE_SIMULATOR) { _, rawPacket ->
             Log.d(TAG, "🖥️ UpdateSimulator received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SIM_WIDE_DELETES) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SIM_WIDE_DELETES) { _, rawPacket ->
             Log.d(TAG, "🖥️ SimWideDeletes received")
         }
         
         // --- Child Agent Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CHILD_AGENT_DYING) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CHILD_AGENT_DYING) { _, rawPacket ->
             Log.d(TAG, "👤 ChildAgentDying received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CHILD_AGENT_UNKNOWN) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CHILD_AGENT_UNKNOWN) { _, rawPacket ->
             Log.d(TAG, "👤 ChildAgentUnknown received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.KILL_CHILD_AGENTS) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.KILL_CHILD_AGENTS) { _, rawPacket ->
             Log.d(TAG, "👤 KillChildAgents received")
         }
         
         // --- Postcard/Email Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SEND_POSTCARD) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SEND_POSTCARD) { _, rawPacket ->
             Log.d(TAG, "📧 SendPostcard received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.EMAIL_MESSAGE_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.EMAIL_MESSAGE_REQUEST) { _, rawPacket ->
             Log.d(TAG, "📧 EmailMessageRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.EMAIL_MESSAGE_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.EMAIL_MESSAGE_REPLY) { _, rawPacket ->
             Log.d(TAG, "📧 EmailMessageReply received")
         }
         
         // --- RPC Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.RPC_CHANNEL_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.RPC_CHANNEL_REQUEST) { _, rawPacket ->
             Log.d(TAG, "📡 RpcChannelRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.RPC_CHANNEL_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.RPC_CHANNEL_REPLY) { _, rawPacket ->
             Log.d(TAG, "📡 RpcChannelReply received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.RPC_SCRIPT_REQUEST_INBOUND) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.RPC_SCRIPT_REQUEST_INBOUND) { _, rawPacket ->
             Log.d(TAG, "📡 RpcScriptRequestInbound received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.RPC_SCRIPT_REPLY_INBOUND) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.RPC_SCRIPT_REPLY_INBOUND) { _, rawPacket ->
             Log.d(TAG, "📡 RpcScriptReplyInbound received")
         }
         
         // --- Script Messages Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SCRIPT_DATA_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SCRIPT_DATA_REQUEST) { _, rawPacket ->
             Log.d(TAG, "📜 ScriptDataRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SCRIPT_DATA_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SCRIPT_DATA_REPLY) { _, rawPacket ->
             Log.d(TAG, "📜 ScriptDataReply received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SCRIPT_MAIL_REGISTRATION) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SCRIPT_MAIL_REGISTRATION) { _, rawPacket ->
             Log.d(TAG, "📜 ScriptMailRegistration received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SCRIPT_SENSOR_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SCRIPT_SENSOR_REQUEST) { _, rawPacket ->
             Log.d(TAG, "📡 ScriptSensorRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SCRIPT_ANSWER_YES) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SCRIPT_ANSWER_YES) { _, rawPacket ->
             Log.d(TAG, "📜 ScriptAnswerYes received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.INTERNAL_SCRIPT_MAIL) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.INTERNAL_SCRIPT_MAIL) { _, rawPacket ->
             Log.d(TAG, "📜 InternalScriptMail received")
         }
         
         // --- Tracking Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TRACK_AGENT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TRACK_AGENT) { _, rawPacket ->
             Log.d(TAG, "📍 TrackAgent received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.FIND_AGENT_EXTENDED) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.FIND_AGENT_EXTENDED) { _, rawPacket ->
             Log.d(TAG, "📍 FindAgent received")
         }
         
         // --- Region Messages Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REGION_HANDLE_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REGION_HANDLE_REQUEST) { _, rawPacket ->
             Log.d(TAG, "🌍 RegionHandleRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REGION_ID_AND_HANDLE_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REGION_ID_AND_HANDLE_REPLY) { _, rawPacket ->
             Log.d(TAG, "🌍 RegionIDAndHandleReply received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REGION_PRESENCE_REQUEST_BY_HANDLE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REGION_PRESENCE_REQUEST_BY_HANDLE) { _, rawPacket ->
             Log.d(TAG, "🌍 RegionPresenceRequestByHandle received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REGION_PRESENCE_REQUEST_BY_REGION_ID) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REGION_PRESENCE_REQUEST_BY_REGION_ID) { _, rawPacket ->
             Log.d(TAG, "🌍 RegionPresenceRequestByRegionID received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REGION_PRESENCE_RESPONSE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REGION_PRESENCE_RESPONSE) { _, rawPacket ->
             Log.d(TAG, "🌍 RegionPresenceResponse received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TELEHUB_INFO) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TELEHUB_INFO) { _, rawPacket ->
             Log.d(TAG, "🚀 TelehubInfo received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TELEPORT_LANDING_STATUS_CHANGED) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TELEPORT_LANDING_STATUS_CHANGED) { _, rawPacket ->
             Log.d(TAG, "🚀 TeleportLandingStatusChanged received")
         }
         
         // --- User Reports Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.USER_REPORT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.USER_REPORT) { _, rawPacket ->
             Log.d(TAG, "🚨 UserReport received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.USER_REPORT_INTERNAL) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.USER_REPORT_INTERNAL) { _, rawPacket ->
             Log.d(TAG, "🚨 UserReportInternal received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REPORT_AUTOSAVE_CRASH) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REPORT_AUTOSAVE_CRASH) { _, rawPacket ->
             Log.d(TAG, "🚨 ReportAutosaveCrash received")
         }
         
         // --- Event Messages Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.EVENT_LOCATION_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.EVENT_LOCATION_REQUEST) { _, rawPacket ->
             Log.d(TAG, "📅 EventLocationRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.EVENT_LOCATION_REPLY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.EVENT_LOCATION_REPLY) { _, rawPacket ->
             Log.d(TAG, "📅 EventLocationReply received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.EVENT_GOD_DELETE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.EVENT_GOD_DELETE) { _, rawPacket ->
             Log.d(TAG, "👑 EventGodDelete received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CREATE_LANDMARK_FOR_EVENT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CREATE_LANDMARK_FOR_EVENT) { _, rawPacket ->
             Log.d(TAG, "📍 CreateLandmarkForEvent received")
         }
         
         // --- Directory Query Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DIR_FIND_QUERY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DIR_FIND_QUERY) { _, rawPacket ->
             com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
-                com.linkpoint.protocol.messages.MessageIdRegistry.DIR_FIND_QUERY,
+                com.linkpoint.protocol.messages.ids.MessageIdRegistry.DIR_FIND_QUERY,
                 rawPacket
             ) { summary -> Log.d(TAG, "🔍 $summary") }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DIR_PLACES_QUERY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DIR_PLACES_QUERY) { _, rawPacket ->
             Log.d(TAG, "🔍 DirPlacesQuery received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DIR_CLASSIFIED_QUERY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DIR_CLASSIFIED_QUERY) { _, rawPacket ->
             Log.d(TAG, "🔍 DirClassifiedQuery received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DIR_LAND_QUERY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DIR_LAND_QUERY) { _, rawPacket ->
             Log.d(TAG, "🔍 DirLandQuery received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DIR_POPULAR_QUERY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DIR_POPULAR_QUERY) { _, rawPacket ->
             Log.d(TAG, "🔍 DirPopularQuery received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PLACES_QUERY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PLACES_QUERY) { _, rawPacket ->
             Log.d(TAG, "🔍 PlacesQuery received")
         }
         
         // --- Inventory Messages Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.LINK_INVENTORY_ITEM) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.LINK_INVENTORY_ITEM) { _, rawPacket ->
             Log.d(TAG, "📦 LinkInventoryItem received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CHANGE_INVENTORY_ITEM_FLAGS) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CHANGE_INVENTORY_ITEM_FLAGS) { _, rawPacket ->
             Log.d(TAG, "📦 ChangeInventoryItemFlags received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REQUEST_INVENTORY_ASSET) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REQUEST_INVENTORY_ASSET) { _, rawPacket ->
             Log.d(TAG, "📦 RequestInventoryAsset received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TRANSFER_INVENTORY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TRANSFER_INVENTORY) { _, rawPacket ->
             Log.d(TAG, "📦 TransferInventory received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TRANSFER_INVENTORY_ACK) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TRANSFER_INVENTORY_ACK) { _, rawPacket ->
             Log.d(TAG, "📦 TransferInventoryAck received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.RETRIEVE_INSTANT_MESSAGES) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.RETRIEVE_INSTANT_MESSAGES) { _, rawPacket ->
             Log.d(TAG, "💬 RetrieveInstantMessages received")
         }
         
         // --- Group Request Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CREATE_GROUP_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CREATE_GROUP_REQUEST) { _, rawPacket ->
             Log.d(TAG, "👥 CreateGroupRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.JOIN_GROUP_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.JOIN_GROUP_REQUEST) { _, rawPacket ->
             Log.d(TAG, "👥 JoinGroupRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.EJECT_GROUP_MEMBER_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.EJECT_GROUP_MEMBER_REQUEST) { _, rawPacket ->
             Log.d(TAG, "👥 EjectGroupMemberRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.INVITE_GROUP_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.INVITE_GROUP_REQUEST) { _, rawPacket ->
             Log.d(TAG, "👥 InviteGroupRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_TITLES_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_TITLES_REQUEST) { _, rawPacket ->
             com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
-                com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_TITLES_REQUEST,
+                com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_TITLES_REQUEST,
                 rawPacket
             ) { summary -> Log.d(TAG, "👥 $summary") }
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_MEMBERS_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_MEMBERS_REQUEST) { _, rawPacket ->
             Log.d(TAG, "👥 GroupMembersRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_ROLE_MEMBERS_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_ROLE_MEMBERS_REQUEST) { _, rawPacket ->
             Log.d(TAG, "👥 GroupRoleMembersRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_ROLE_DATA_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_ROLE_DATA_REQUEST) { _, rawPacket ->
             Log.d(TAG, "👥 GroupRoleDataRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_NOTICES_LIST_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_NOTICES_LIST_REQUEST) { _, rawPacket ->
             Log.d(TAG, "👥 GroupNoticesListRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_ACTIVE_PROPOSALS_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_ACTIVE_PROPOSALS_REQUEST) { _, rawPacket ->
             Log.d(TAG, "👥 GroupActiveProposalsRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_VOTE_HISTORY_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_VOTE_HISTORY_REQUEST) { _, rawPacket ->
             Log.d(TAG, "🗳️ GroupVoteHistoryRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_ACCOUNT_SUMMARY_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_ACCOUNT_SUMMARY_REQUEST) { _, rawPacket ->
             Log.d(TAG, "💰 GroupAccountSummaryRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_ACCOUNT_DETAILS_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_ACCOUNT_DETAILS_REQUEST) { _, rawPacket ->
             Log.d(TAG, "💰 GroupAccountDetailsRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_ACCOUNT_TRANSACTIONS_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_ACCOUNT_TRANSACTIONS_REQUEST) { _, rawPacket ->
             Log.d(TAG, "💰 GroupAccountTransactionsRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_DATA_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_DATA_UPDATE) { _, rawPacket ->
             Log.d(TAG, "👥 GroupDataUpdate received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_ROLE_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_ROLE_UPDATE) { _, rawPacket ->
             Log.d(TAG, "👥 GroupRoleUpdate received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_ROLE_CHANGES) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_ROLE_CHANGES) { _, rawPacket ->
             Log.d(TAG, "👥 GroupRoleChanges received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_TITLE_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_TITLE_UPDATE) { _, rawPacket ->
             Log.d(TAG, "👥 GroupTitleUpdate received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UPDATE_GROUP_INFO) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UPDATE_GROUP_INFO) { _, rawPacket ->
             Log.d(TAG, "👥 UpdateGroupInfo received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_PROPOSAL_BALLOT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_PROPOSAL_BALLOT) { _, rawPacket ->
             Log.d(TAG, "🗳️ GroupProposalBallot received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.START_GROUP_PROPOSAL) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.START_GROUP_PROPOSAL) { _, rawPacket ->
             Log.d(TAG, "🗳️ StartGroupProposal received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SET_GROUP_ACCEPT_NOTICES) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SET_GROUP_ACCEPT_NOTICES) { _, rawPacket ->
             Log.d(TAG, "👥 SetGroupAcceptNotices received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SET_GROUP_CONTRIBUTION) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SET_GROUP_CONTRIBUTION) { _, rawPacket ->
             Log.d(TAG, "💰 SetGroupContribution received")
         }
         
         // --- Avatar Messages Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AVATAR_NOTES_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AVATAR_NOTES_UPDATE) { _, rawPacket ->
             Log.d(TAG, "📝 AvatarNotesUpdate received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AVATAR_INTERESTS_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AVATAR_INTERESTS_UPDATE) { _, rawPacket ->
             Log.d(TAG, "👤 AvatarInterestsUpdate received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AVATAR_PROPERTIES_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AVATAR_PROPERTIES_UPDATE) { _, rawPacket ->
             Log.d(TAG, "👤 AvatarPropertiesUpdate received")
         }
         
         // --- Velocity Interpolation Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.VELOCITY_INTERPOLATE_ON) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.VELOCITY_INTERPOLATE_ON) { _, rawPacket ->
             Log.d(TAG, "⚡ VelocityInterpolateOn received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.VELOCITY_INTERPOLATE_OFF) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.VELOCITY_INTERPOLATE_OFF) { _, rawPacket ->
             Log.d(TAG, "⚡ VelocityInterpolateOff received")
         }
         
         // --- Object Messages Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_INCLUDE_IN_SEARCH) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_INCLUDE_IN_SEARCH) { _, rawPacket ->
             Log.d(TAG, "📦 ObjectIncludeInSearch received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_EXPORT_SELECTED) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_EXPORT_SELECTED) { _, rawPacket ->
             Log.d(TAG, "📦 ObjectExportSelected received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DEREZ_CONTAINER) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DEREZ_CONTAINER) { _, rawPacket ->
             Log.d(TAG, "📦 DerezContainer received")
         }
         
         // --- Test/Debug Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TEST_MESSAGE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TEST_MESSAGE) { _, rawPacket ->
             Log.d(TAG, "🧪 TestMessage received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.NET_TEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.NET_TEST) { _, rawPacket ->
             Log.d(TAG, "🧪 NetTest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.STATE_SAVE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.STATE_SAVE) { _, rawPacket ->
             Log.d(TAG, "💾 StateSave received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SUBSCRIBE_LOAD) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SUBSCRIBE_LOAD) { _, rawPacket ->
             Log.d(TAG, "📥 SubscribeLoad received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UNSUBSCRIBE_LOAD) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UNSUBSCRIBE_LOAD) { _, rawPacket ->
             Log.d(TAG, "📤 UnsubscribeLoad received")
         }
         
         // --- Logging Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.LOG_TEXT_MESSAGE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.LOG_TEXT_MESSAGE) { _, rawPacket ->
             Log.d(TAG, "📝 LogTextMessage received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.LOG_DWELL_TIME) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.LOG_DWELL_TIME) { _, rawPacket ->
             Log.d(TAG, "📝 LogDwellTime received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.LOG_FAILED_MONEY_TRANSACTION) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.LOG_FAILED_MONEY_TRANSACTION) { _, rawPacket ->
             Log.d(TAG, "📝 LogFailedMoneyTransaction received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.LOG_PARCEL_CHANGES) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.LOG_PARCEL_CHANGES) { _, rawPacket ->
             Log.d(TAG, "📝 LogParcelChanges received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DATA_SERVER_LOGOUT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DATA_SERVER_LOGOUT) { _, rawPacket ->
             Log.d(TAG, "📝 DataServerLogout received")
         }
         
         // --- Parcel Request Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_ACCESS_LIST_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_ACCESS_LIST_REQUEST) { _, rawPacket ->
             Log.d(TAG, "🏠 ParcelAccessListRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_DWELL_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_DWELL_REQUEST) { _, rawPacket ->
             Log.d(TAG, "🏠 ParcelDwellRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_INFO_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_INFO_REQUEST) { _, rawPacket ->
             Log.d(TAG, "🏠 ParcelInfoRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_OBJECT_OWNERS_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_OBJECT_OWNERS_REQUEST) { _, rawPacket ->
             Log.d(TAG, "🏠 ParcelObjectOwnersRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REQUEST_PARCEL_TRANSFER) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REQUEST_PARCEL_TRANSFER) { _, rawPacket ->
             Log.d(TAG, "🏠 RequestParcelTransfer received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UPDATE_PARCEL) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UPDATE_PARCEL) { _, rawPacket ->
             Log.d(TAG, "🏠 UpdateParcel received")
         }
         
         // --- Estate Request Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ESTATE_COVENANT_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ESTATE_COVENANT_REQUEST) { _, rawPacket ->
             Log.d(TAG, "📜 EstateCovenantRequest received")
         }
         
         // --- Name/Value Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.NAME_VALUE_PAIR) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.NAME_VALUE_PAIR) { _, rawPacket ->
             Log.d(TAG, "🏷️ NameValuePair received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REMOVE_NAME_VALUE_PAIR) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REMOVE_NAME_VALUE_PAIR) { _, rawPacket ->
             Log.d(TAG, "🏷️ RemoveNameValuePair received")
         }
         
         // --- CPU/System Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SET_CPU_RATIO) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SET_CPU_RATIO) { _, rawPacket ->
             Log.d(TAG, "🖥️ SetCPURatio received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SET_SIM_PRESENCE_IN_DATABASE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SET_SIM_PRESENCE_IN_DATABASE) { _, rawPacket ->
             Log.d(TAG, "🖥️ SetSimPresenceInDatabase received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SET_SIM_STATUS_IN_DATABASE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SET_SIM_STATUS_IN_DATABASE) { _, rawPacket ->
             Log.d(TAG, "🖥️ SetSimStatusInDatabase received")
         }
         
@@ -4773,277 +4773,277 @@ class LinkpointApp : Application() {
         // =====================================
         
         // --- Agent Movement Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_REQUEST_SIT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_REQUEST_SIT) { _, rawPacket ->
             Log.d(TAG, "🪑 AgentRequestSit received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_SIT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_SIT) { _, rawPacket ->
             Log.d(TAG, "🪑 AgentSit received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_HEIGHT_WIDTH) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_HEIGHT_WIDTH) { _, rawPacket ->
             Log.d(TAG, "📏 AgentHeightWidth received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_SET_APPEARANCE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_SET_APPEARANCE) { _, rawPacket ->
             Log.d(TAG, "👤 AgentSetAppearance received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_QUIT_COPY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_QUIT_COPY) { _, rawPacket ->
             Log.d(TAG, "👤 AgentQuitCopy received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_FOV) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_FOV) { _, rawPacket ->
             Log.d(TAG, "👁️ AgentFOV received")
         }
         
         // --- Object Request Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REQUEST_OBJECT_PROPERTIES_FAMILY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REQUEST_OBJECT_PROPERTIES_FAMILY) { _, rawPacket ->
             Log.d(TAG, "📦 RequestObjectPropertiesFamily received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_SELECT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_SELECT) { _, rawPacket ->
             Log.d(TAG, "📦 ObjectSelect received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_DESELECT_MSG) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_DESELECT_MSG) { _, rawPacket ->
             Log.d(TAG, "📦 ObjectDeselect received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_GRAB_MSG) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_GRAB_MSG) { _, rawPacket ->
             Log.d(TAG, "✊ ObjectGrab received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_GRAB_UPDATE_MSG) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_GRAB_UPDATE_MSG) { _, rawPacket ->
             Log.d(TAG, "✊ ObjectGrabUpdate received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_DE_GRAB) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_DE_GRAB) { _, rawPacket ->
             Log.d(TAG, "✊ ObjectDeGrab received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_SPIN_START_MSG) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_SPIN_START_MSG) { _, rawPacket ->
             Log.d(TAG, "🔄 ObjectSpinStart received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_SPIN_UPDATE_MSG) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_SPIN_UPDATE_MSG) { _, rawPacket ->
             Log.d(TAG, "🔄 ObjectSpinUpdate received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_SPIN_STOP_MSG) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_SPIN_STOP_MSG) { _, rawPacket ->
             Log.d(TAG, "🔄 ObjectSpinStop received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_LINK) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_LINK) { _, rawPacket ->
             Log.d(TAG, "🔗 ObjectLink received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_DELINK) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_DELINK) { _, rawPacket ->
             Log.d(TAG, "🔗 ObjectDelink received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_DESCRIPTION) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_DESCRIPTION) { _, rawPacket ->
             Log.d(TAG, "📝 ObjectDescription received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_NAME) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_NAME) { _, rawPacket ->
             Log.d(TAG, "📝 ObjectName received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_CATEGORY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_CATEGORY) { _, rawPacket ->
             Log.d(TAG, "📦 ObjectCategory received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_EXTRA_PARAMS) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_EXTRA_PARAMS) { _, rawPacket ->
             Log.d(TAG, "📦 ObjectExtraParams received")
         }
         
         // --- Object Update Messages Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MULTIPLE_OBJECT_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MULTIPLE_OBJECT_UPDATE) { _, rawPacket ->
             Log.d(TAG, "📦 MultipleObjectUpdate received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REQUEST_MULTIPLE_OBJECTS) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REQUEST_MULTIPLE_OBJECTS) { _, rawPacket ->
             Log.d(TAG, "📦 RequestMultipleObjects received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_POSITION_MSG) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_POSITION_MSG) { _, rawPacket ->
             Log.d(TAG, "📦 ObjectPosition received")
         }
         
         // --- Disable Simulator ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DISABLE_SIMULATOR) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DISABLE_SIMULATOR) { _, rawPacket ->
             Log.d(TAG, "🌍 DisableSimulator received")
         }
         
         // --- Sound Messages Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.STOP_SOUND) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.STOP_SOUND) { _, rawPacket ->
             Log.d(TAG, "🔊 StopSound received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SOUND_PRELOAD) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SOUND_PRELOAD) { _, rawPacket ->
             Log.d(TAG, "🔊 SoundPreload received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SOUND_GAIN_CHANGE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SOUND_GAIN_CHANGE) { _, rawPacket ->
             Log.d(TAG, "🔊 SoundGainChange received")
         }
         
         // --- Animation Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_ANIMATION) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_ANIMATION) { _, rawPacket ->
             Log.d(TAG, "💃 AgentAnimation received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_REQUEST_ANIMATION) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_REQUEST_ANIMATION) { _, rawPacket ->
             Log.d(TAG, "💃 AgentRequestAnimation received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AVATAR_ANIMATION_DONE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AVATAR_ANIMATION_DONE) { _, rawPacket ->
             Log.d(TAG, "💃 AvatarAnimationDone received")
         }
         
         // --- Gesture Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ACTIVATE_GESTURES) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ACTIVATE_GESTURES) { _, rawPacket ->
             Log.d(TAG, "🖐️ ActivateGestures received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DEACTIVATE_GESTURES) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DEACTIVATE_GESTURES) { _, rawPacket ->
             Log.d(TAG, "🖐️ DeactivateGestures received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GESTURE_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GESTURE_REQUEST) { _, rawPacket ->
             Log.d(TAG, "🖐️ GestureRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GESTURE_RESPONSE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GESTURE_RESPONSE) { _, rawPacket ->
             Log.d(TAG, "🖐️ GestureResponse received")
         }
         
         // --- Appearance Messages Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REBAKE_AVATAR_TEXTURES) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REBAKE_AVATAR_TEXTURES) { _, rawPacket ->
             Log.d(TAG, "👤 RebakeAvatarTextures received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SET_FOLLOW_CAM_PROPERTIES_MSG) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SET_FOLLOW_CAM_PROPERTIES_MSG) { _, rawPacket ->
             Log.d(TAG, "📷 SetFollowCamProperties received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CLEAR_FOLLOW_CAM_PROPERTIES_MSG) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CLEAR_FOLLOW_CAM_PROPERTIES_MSG) { _, rawPacket ->
             Log.d(TAG, "📷 ClearFollowCamProperties received")
         }
         
         // --- Attachment Messages Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_ATTACH_RESPONSE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_ATTACH_RESPONSE) { _, rawPacket ->
             Log.d(TAG, "📎 ObjectAttachResponse received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ATTACHMENT_INTO_INVENTORY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ATTACHMENT_INTO_INVENTORY) { _, rawPacket ->
             Log.d(TAG, "📎 AttachmentIntoInventory received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ATTACH_FROM_INVENTORY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ATTACH_FROM_INVENTORY) { _, rawPacket ->
             Log.d(TAG, "📎 AttachFromInventory received")
         }
         
         // --- User Data Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.USER_INFO_REQ_MSG) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.USER_INFO_REQ_MSG) { _, rawPacket ->
             Log.d(TAG, "👤 UserInfoReqMsg received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.USER_INFO_REPLY_MSG) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.USER_INFO_REPLY_MSG) { _, rawPacket ->
             Log.d(TAG, "👤 UserInfoReplyMsg received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UPDATE_USER_INFO_MSG) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UPDATE_USER_INFO_MSG) { _, rawPacket ->
             Log.d(TAG, "👤 UpdateUserInfoMsg received")
         }
         
         // --- Friendship Messages Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TERMINATE_FRIENDSHIP) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TERMINATE_FRIENDSHIP) { _, rawPacket ->
             Log.d(TAG, "💔 TerminateFriendship received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GRANT_USER_RIGHTS) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GRANT_USER_RIGHTS) { _, rawPacket ->
             Log.d(TAG, "🔑 GrantUserRights received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TRACK_AGENT_SESSION) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TRACK_AGENT_SESSION) { _, rawPacket ->
             Log.d(TAG, "📍 TrackAgentSession received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OFFER_FRIENDSHIP) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OFFER_FRIENDSHIP) { _, rawPacket ->
             Log.d(TAG, "🤝 OfferFriendship received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.FRIENDSHIP_OFFERED) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.FRIENDSHIP_OFFERED) { _, rawPacket ->
             Log.d(TAG, "🤝 FriendshipOffered received")
         }
         
         // --- Group Messages Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.LEAVE_GROUP_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.LEAVE_GROUP_REQUEST) { _, rawPacket ->
             Log.d(TAG, "👥 LeaveGroupRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ACTIVATE_GROUP) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ACTIVATE_GROUP) { _, rawPacket ->
             Log.d(TAG, "👥 ActivateGroup received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_PROFILE_REQUEST) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_PROFILE_REQUEST) { _, rawPacket ->
             Log.d(TAG, "👥 GroupProfileRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_NOTICE_REQUEST_MSG) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_NOTICE_REQUEST_MSG) { _, rawPacket ->
             Log.d(TAG, "📋 GroupNoticeRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GROUP_NOTICES_RESPONSE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GROUP_NOTICES_RESPONSE) { _, rawPacket ->
             Log.d(TAG, "📋 GroupNoticesResponse received")
         }
         
         // --- Script Control Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SCRIPT_CONTROL_CHANGE_MSG) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SCRIPT_CONTROL_CHANGE_MSG) { _, rawPacket ->
             Log.d(TAG, "📜 ScriptControlChange received")
         }
         
         // --- Environment Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SIMULATOR_VIEWER_TIME_MESSAGE_MSG) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SIMULATOR_VIEWER_TIME_MESSAGE_MSG) { _, rawPacket ->
             Log.d(TAG, "🌅 SimulatorViewerTimeMessage received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.WINDLIGHT_SETTINGS_UPDATE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.WINDLIGHT_SETTINGS_UPDATE) { _, rawPacket ->
             Log.d(TAG, "🌤️ WindLightSettingsUpdate received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_ENVIRONMENT_BLOCK) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_ENVIRONMENT_BLOCK) { _, rawPacket ->
             Log.d(TAG, "🌍 ParcelEnvironmentBlock received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SET_ENVIRONMENT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SET_ENVIRONMENT) { _, rawPacket ->
             Log.d(TAG, "🌍 SetEnvironment received")
         }
         
         // --- Notecard/Script Edit Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UPDATE_TASK_INVENTORY_NOTECARD_ITEM) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UPDATE_TASK_INVENTORY_NOTECARD_ITEM) { _, rawPacket ->
             Log.d(TAG, "📝 UpdateTaskInventoryNotecardItem received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UPDATE_NOTECARD_AGENT_INVENTORY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UPDATE_NOTECARD_AGENT_INVENTORY) { _, rawPacket ->
             Log.d(TAG, "📝 UpdateNotecardAgentInventory received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UPDATE_GESTURE_AGENT_INVENTORY) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UPDATE_GESTURE_AGENT_INVENTORY) { _, rawPacket ->
             Log.d(TAG, "🖐️ UpdateGestureAgentInventory received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UPDATE_SCRIPT_AGENT) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UPDATE_SCRIPT_AGENT) { _, rawPacket ->
             Log.d(TAG, "📜 UpdateScriptAgent received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UPDATE_SCRIPT_TASK) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UPDATE_SCRIPT_TASK) { _, rawPacket ->
             Log.d(TAG, "📜 UpdateScriptTask received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SCRIPT_SENSOR_REMOVE) { _, rawPacket ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SCRIPT_SENSOR_REMOVE) { _, rawPacket ->
             Log.d(TAG, "📡 ScriptSensorRemove received")
         }
         
@@ -5068,14 +5068,14 @@ class LinkpointApp : Application() {
      */
     private fun registerOutboundOnlyMessageHandlers() {
         val outboundOnlyIds = listOf(
-            com.linkpoint.protocol.messages.MessageIdRegistry.MOVE_INVENTORY_ITEM,
-            com.linkpoint.protocol.messages.MessageIdRegistry.UPDATE_TASK_INVENTORY,
-            com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_BUY,
-            com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_GRAB,
-            com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_DEGRAB,
-            com.linkpoint.protocol.messages.MessageIdRegistry.KICK_USER,
-            com.linkpoint.protocol.messages.MessageIdRegistry.UPDATE_USER_INFO,
-            com.linkpoint.protocol.messages.MessageIdRegistry.FIND_AGENT
+            com.linkpoint.protocol.messages.ids.MessageIdRegistry.MOVE_INVENTORY_ITEM,
+            com.linkpoint.protocol.messages.ids.MessageIdRegistry.UPDATE_TASK_INVENTORY,
+            com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_BUY,
+            com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_GRAB,
+            com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_DEGRAB,
+            com.linkpoint.protocol.messages.ids.MessageIdRegistry.KICK_USER,
+            com.linkpoint.protocol.messages.ids.MessageIdRegistry.UPDATE_USER_INFO,
+            com.linkpoint.protocol.messages.ids.MessageIdRegistry.FIND_AGENT
         )
 
         outboundOnlyIds.forEach { messageId ->
@@ -5096,228 +5096,228 @@ class LinkpointApp : Application() {
      */
     private fun registerLateMessageHandlers() {
         // --- Autopilot Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AUTOPILOT) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AUTOPILOT) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🚗 Autopilot received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AUTOPILOT_CANCEL) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AUTOPILOT_CANCEL) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🚗 AutopilotCancel received")
         }
         
         // --- Terrain Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TERRAIN_HEIGHT_DATA) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TERRAIN_HEIGHT_DATA) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🏔️ TerrainHeightData received")
         }
         
         // --- God Mode Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GOD_KICK_USER) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GOD_KICK_USER) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "👑 GodKickUser received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GODLIKE_MESSAGE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GODLIKE_MESSAGE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "👑 GodlikeMessage received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GOD_UPDATE_REGION_INFO) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GOD_UPDATE_REGION_INFO) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "👑 GodUpdateRegionInfo received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GOD_DELETE_SIM) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GOD_DELETE_SIM) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "👑 GodDeleteSim received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REQUEST_GODLIKE_POWERS) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REQUEST_GODLIKE_POWERS) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "👑 RequestGodlikePowers received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GRANT_GODLIKE_POWERS) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GRANT_GODLIKE_POWERS) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "👑 GrantGodlikePowers received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SIM_OWNER_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SIM_OWNER_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🏠 SimOwnerRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SIM_OWNER_RESPONSE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SIM_OWNER_RESPONSE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🏠 SimOwnerResponse received")
         }
         
         // --- Estate Manager Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ESTATE_OWNER_MESSAGE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ESTATE_OWNER_MESSAGE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🏰 EstateOwnerMessage received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ESTATE_CHANGE_INFO) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ESTATE_CHANGE_INFO) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🏰 EstateChangeInfo received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ESTATE_EXPERIENCE_REPLY) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ESTATE_EXPERIENCE_REPLY) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🏰 EstateExperienceReply received")
         }
         
         // --- Land Bank Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.LAND_BUY) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.LAND_BUY) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🏠 LandBuy received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.LAND_BUY_PASS) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.LAND_BUY_PASS) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🏠 LandBuyPass received")
         }
         
         // --- Asset/Transfer Messages Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ASSET_INFO_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ASSET_INFO_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📁 AssetInfoRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ASSET_INFO_RESPONSE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ASSET_INFO_RESPONSE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📁 AssetInfoResponse received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MAP_LAYER_REQUEST_MSG) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MAP_LAYER_REQUEST_MSG) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🗺️ MapLayerRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MAP_LAYER_REPLY_MSG) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MAP_LAYER_REPLY_MSG) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🗺️ MapLayerReply received")
         }
         
         // --- Agent Data Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_DATA_UPDATE_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_DATA_UPDATE_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "👤 AgentDataUpdateRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_DATA_UPDATE_MSG) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_DATA_UPDATE_MSG) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "👤 AgentDataUpdate received")
         }
         
         // --- Pick/Classified Messages Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PICK_DELETE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PICK_DELETE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📍 PickDelete received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PICK_UPDATE_INFO) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PICK_UPDATE_INFO) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📍 PickUpdateInfo received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CLASSIFIED_DELETE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CLASSIFIED_DELETE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📰 ClassifiedDelete received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CLASSIFIED_INFO_UPDATE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CLASSIFIED_INFO_UPDATE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📰 ClassifiedInfoUpdate received")
         }
         
         // --- Interest List Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.INTEREST_LIST_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.INTEREST_LIST_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📋 InterestListRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.INTEREST_LIST_REPLY) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.INTEREST_LIST_REPLY) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📋 InterestListReply received")
         }
         
         // --- Object Export Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.EXPORT_DYNA_FILE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.EXPORT_DYNA_FILE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📤 ExportDynaFile received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.EXPORT_DYNA_FILE_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.EXPORT_DYNA_FILE_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📤 ExportDynaFileRequest received")
         }
         
         // --- Upload Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UPLOAD_BAKED_TEXTURE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UPLOAD_BAKED_TEXTURE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📤 UploadBakedTexture received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UPLOAD_BAKED_TEXTURE_RESULT) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UPLOAD_BAKED_TEXTURE_RESULT) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📤 UploadBakedTextureResult received")
         }
         
         // --- Object Permission Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_PERMISSIONS_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_PERMISSIONS_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🔐 ObjectPermissionsRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_PERMISSIONS_REPLY) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_PERMISSIONS_REPLY) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🔐 ObjectPermissionsReply received")
         }
         
         // --- Agent Camera Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_CAMERA_CONSTRAINT) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_CAMERA_CONSTRAINT) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📷 AgentCameraConstraint received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CAMERA_CONSTRAINT_MSG) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CAMERA_CONSTRAINT_MSG) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📷 CameraConstraintMsg received")
         }
         
         // --- Voice Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PROVISION_VOICE_ACCOUNT_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PROVISION_VOICE_ACCOUNT_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🎤 ProvisionVoiceAccountRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PROVISION_VOICE_ACCOUNT_REPLY) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PROVISION_VOICE_ACCOUNT_REPLY) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🎤 ProvisionVoiceAccountReply received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_VOICE_INFO_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_VOICE_INFO_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🎤 ParcelVoiceInfoRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_VOICE_INFO_REPLY) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_VOICE_INFO_REPLY) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🎤 ParcelVoiceInfoReply received")
         }
         
         // --- Experience Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.EXPERIENCE_INFO_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.EXPERIENCE_INFO_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "✨ ExperienceInfoRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.EXPERIENCE_INFO_REPLY) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.EXPERIENCE_INFO_REPLY) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "✨ ExperienceInfoReply received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.EXPERIENCE_PERMISSION_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.EXPERIENCE_PERMISSION_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "✨ ExperiencePermissionRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.EXPERIENCE_PERMISSION_REPLY) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.EXPERIENCE_PERMISSION_REPLY) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "✨ ExperiencePermissionReply received")
         }
         
         // --- Region Object Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REGION_OBJECT_UPDATE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REGION_OBJECT_UPDATE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🌍 RegionObjectUpdate received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REGION_OBJECT_COMPLETE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REGION_OBJECT_COMPLETE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🌍 RegionObjectComplete received")
         }
         
         // --- Pathfinding Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.NAV_MESH_STATUS_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.NAV_MESH_STATUS_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🧭 NavMeshStatusRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.NAV_MESH_STATUS_REPLY) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.NAV_MESH_STATUS_REPLY) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🧭 NavMeshStatusReply received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CHARACTER_PROPERTIES_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CHARACTER_PROPERTIES_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🧭 CharacterPropertiesRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CHARACTER_PROPERTIES_REPLY) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CHARACTER_PROPERTIES_REPLY) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🧭 CharacterPropertiesReply received")
         }
         
         // --- AO (Animation Override) Messages ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_ANIMATION_OVERRIDE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_ANIMATION_OVERRIDE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "💃 AgentAnimationOverride received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CLEAR_ANIMATION_OVERRIDE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CLEAR_ANIMATION_OVERRIDE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "💃 ClearAnimationOverride received")
         }
         
@@ -5326,65 +5326,65 @@ class LinkpointApp : Application() {
         // =====================================
         
         // --- Agent Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_THROTTLE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_THROTTLE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🎛️ AgentThrottle received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AGENT_IS_NOW_WEARING) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AGENT_IS_NOW_WEARING) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "👗 AgentIsNowWearing received")
         }
         
         // --- Avatar Request/Backend ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AVATAR_PICKER_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AVATAR_PICKER_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🔍 AvatarPickerRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AVATAR_PROPERTIES_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AVATAR_PROPERTIES_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📋 AvatarPropertiesRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.AVATAR_TEXTURE_UPDATE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AVATAR_TEXTURE_UPDATE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🖼️ AvatarTextureUpdate received")
         }
         
         // --- Buy/Economy ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.BUY_OBJECT_INVENTORY) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.BUY_OBJECT_INVENTORY) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🛒 BuyObjectInventory received")
         }
         
         // --- Chat Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CHAT_EVENT) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CHAT_EVENT) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "💬 ChatEvent received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CHAT_FROM_VIEWER) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CHAT_FROM_VIEWER) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "💬 ChatFromViewer received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CHAT_PASS) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CHAT_PASS) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "💬 ChatPass received")
         }
         
         // --- Circuit Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CIRCUIT_READY) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CIRCUIT_READY) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "⚡ CircuitReady received")
         }
         
         // --- Classified Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CLASSIFIED_GOD_DELETE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CLASSIFIED_GOD_DELETE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📰 ClassifiedGodDelete received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CLASSIFIED_INFO_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CLASSIFIED_INFO_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📰 ClassifiedInfoRequest received")
         }
         
         // --- Agent Movement Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.COMPLETE_AGENT_MOVEMENT) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.COMPLETE_AGENT_MOVEMENT) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🚶 CompleteAgentMovement received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.COMPLETE_PING_CHECK) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.COMPLETE_PING_CHECK) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📡 CompletePingCheck received")
             if (::connectionKeepAlive.isInitialized) {
                 connectionKeepAlive.onPongReceived()
@@ -5392,74 +5392,74 @@ class LinkpointApp : Application() {
         }
         
         // --- Inventory Copy ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.COPY_INVENTORY_FROM_NOTECARD) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.COPY_INVENTORY_FROM_NOTECARD) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📄 CopyInventoryFromNotecard received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.COPY_INVENTORY_ITEM) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.COPY_INVENTORY_ITEM) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📁 CopyInventoryItem received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.CREATE_INVENTORY_FOLDER) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.CREATE_INVENTORY_FOLDER) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📁 CreateInventoryFolder received")
         }
         
         // --- Data Home Location ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.DATA_HOME_LOCATION_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.DATA_HOME_LOCATION_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🏠 DataHomeLocationRequest received")
         }
         
         // --- Economy Request ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.ECONOMY_DATA_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.ECONOMY_DATA_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "💰 EconomyDataRequest received")
         }
         
         // --- User Management ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.EJECT_USER) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.EJECT_USER) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🚪 EjectUser received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.FREEZE_USER) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.FREEZE_USER) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🥶 FreezeUser received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.KICK_USER_ACK) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.KICK_USER_ACK) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🚪 KickUserAck received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SYSTEM_KICK_USER) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SYSTEM_KICK_USER) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🚪 SystemKickUser received")
         }
         
         // --- Event Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.EVENT_INFO_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.EVENT_INFO_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📅 EventInfoRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.EVENT_NOTIFICATION_ADD_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.EVENT_NOTIFICATION_ADD_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📅 EventNotificationAddRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.EVENT_NOTIFICATION_REMOVE_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.EVENT_NOTIFICATION_REMOVE_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📅 EventNotificationRemoveRequest received")
         }
         
         // --- Script Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GET_SCRIPT_RUNNING) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GET_SCRIPT_RUNNING) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📜 GetScriptRunning received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SCRIPT_DIALOG_REPLY) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SCRIPT_DIALOG_REPLY) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📜 ScriptDialogReply received")
         }
         
         // --- Global Options ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.GLOBAL_OPTIONS_CHANGE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.GLOBAL_OPTIONS_CHANGE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "⚙️ GlobalOptionsChange received")
         }
         
         // --- IM ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.IMPROVED_INSTANT_MESSAGE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.IMPROVED_INSTANT_MESSAGE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "💌 ImprovedInstantMessage received - processing via IM manager")
             val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
             if (payload != null) {
@@ -5480,162 +5480,162 @@ class LinkpointApp : Application() {
         }
         
         // --- Live Help ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.LIVE_HELP_GROUP_REPLY) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.LIVE_HELP_GROUP_REPLY) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "❓ LiveHelpGroupReply received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.LIVE_HELP_GROUP_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.LIVE_HELP_GROUP_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "❓ LiveHelpGroupRequest received")
         }
         
         // --- Logout ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.LOGOUT_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.LOGOUT_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🚪 LogoutRequest received")
         }
         
         // --- Money Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MONEY_BALANCE_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MONEY_BALANCE_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "💰 MoneyBalanceRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MONEY_TRANSFER_BACKEND) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MONEY_TRANSFER_BACKEND) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "💰 MoneyTransferBackend received")
         }
         
         // --- Inventory Move ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.MOVE_TASK_INVENTORY) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.MOVE_TASK_INVENTORY) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📦 MoveTaskInventory received")
         }
         
         // --- Landing Region ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.NEAREST_LANDING_REGION_REPLY) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.NEAREST_LANDING_REGION_REPLY) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🛬 NearestLandingRegionReply received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.NEAREST_LANDING_REGION_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.NEAREST_LANDING_REGION_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🛬 NearestLandingRegionRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.NEAREST_LANDING_REGION_UPDATED) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.NEAREST_LANDING_REGION_UPDATED) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🛬 NearestLandingRegionUpdated received")
         }
         
         // --- Object Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_DELETE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_DELETE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🗑️ ObjectDelete received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.OBJECT_DUPLICATE_ON_RAY) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.OBJECT_DUPLICATE_ON_RAY) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📋 ObjectDuplicateOnRay received")
         }
         
         // --- Parcel Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_ACCESS_LIST_UPDATE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_ACCESS_LIST_UPDATE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🏘️ ParcelAccessListUpdate received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_DEED_TO_GROUP) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_DEED_TO_GROUP) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🏘️ ParcelDeedToGroup received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_PROPERTIES_UPDATE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_PROPERTIES_UPDATE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🏘️ ParcelPropertiesUpdate received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_RELEASE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_RELEASE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🏘️ ParcelRelease received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PARCEL_RETURN_OBJECTS) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PARCEL_RETURN_OBJECTS) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🏘️ ParcelReturnObjects received")
         }
         
         // --- Pick Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PICK_GOD_DELETE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PICK_GOD_DELETE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📌 PickGodDelete received")
         }
         
         // --- Inventory Purge ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.PURGE_INVENTORY_DESCENDENTS) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.PURGE_INVENTORY_DESCENDENTS) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📁 PurgeInventoryDescendents received")
         }
         
         // --- Region Handshake ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REGION_HANDSHAKE_REPLY) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REGION_HANDSHAKE_REPLY) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🌍 RegionHandshakeReply received")
         }
         
         // --- Inventory Remove ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REMOVE_INVENTORY_OBJECTS) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REMOVE_INVENTORY_OBJECTS) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📁 RemoveInventoryObjects received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REMOVE_TASK_INVENTORY) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REMOVE_TASK_INVENTORY) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📦 RemoveTaskInventory received")
         }
         
         // --- Pay Price ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REQUEST_PAY_PRICE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REQUEST_PAY_PRICE) { _: Int, rawPacket: ByteArray ->
             com.linkpoint.protocol.messages.DeclaredMessageSlices.handle(
-                com.linkpoint.protocol.messages.MessageIdRegistry.REQUEST_PAY_PRICE,
+                com.linkpoint.protocol.messages.ids.MessageIdRegistry.REQUEST_PAY_PRICE,
                 rawPacket
             ) { summary -> Log.d(TAG, "💰 $summary") }
         }
         
         // --- Rez Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.REZ_SINGLE_ATTACHMENT_FROM_INV) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.REZ_SINGLE_ATTACHMENT_FROM_INV) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📎 RezSingleAttachmentFromInv received")
         }
         
         // --- Start Location ---
         // Note: SET_START_LOCATION message ID doesn't exist, only SET_START_LOCATION_REQUEST
-        // udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SET_START_LOCATION) { _: Int, rawPacket: ByteArray ->
+        // udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SET_START_LOCATION) { _: Int, rawPacket: ByteArray ->
         //     Log.d(TAG, "🏠 SetStartLocation received")
         // }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.SET_START_LOCATION_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.SET_START_LOCATION_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🏠 SetStartLocationRequest received")
         }
         
         // --- Teleport Lure ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.START_LURE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.START_LURE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🌀 StartLure received")
         }
         
         // --- Voting ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TALLY_VOTES) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TALLY_VOTES) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🗳️ TallyVotes received")
         }
         
         // --- Teleport Extended ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TELEPORT_LANDMARK_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TELEPORT_LANDMARK_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🌀 TeleportLandmarkRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TELEPORT_LOCATION_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TELEPORT_LOCATION_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🌀 TeleportLocationRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.TELEPORT_LURE_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TELEPORT_LURE_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🌀 TeleportLureRequest received")
         }
         
         // --- Inventory Update ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UPDATE_INVENTORY_ITEM) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UPDATE_INVENTORY_ITEM) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "📁 UpdateInventoryItem received")
         }
         
         // --- Circuit Code ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.USE_CIRCUIT_CODE) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.USE_CIRCUIT_CODE) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "⚡ UseCircuitCode received")
         }
         
         // --- UUID Request ---
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UUID_NAME_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UUID_NAME_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🔍 UUIDNameRequest received")
         }
         
-        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIdRegistry.UUID_GROUP_NAME_REQUEST) { _: Int, rawPacket: ByteArray ->
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.UUID_GROUP_NAME_REQUEST) { _: Int, rawPacket: ByteArray ->
             Log.d(TAG, "🔍 UUIDGroupNameRequest received")
         }
     }

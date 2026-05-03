@@ -13,6 +13,7 @@ import com.linkpoint.protocol.types.putUUID
 import com.linkpoint.utils.SessionLogRecorder
 import com.linkpoint.protocol.messages.diagnostics.PacketDiagnosticsRecorder
 import com.linkpoint.protocol.messages.diagnostics.DiagnosticsConstants
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.transport.TransportConstants
 import com.linkpoint.protocol.transport.ReliabilityConstants
 import com.linkpoint.protocol.transport.ReliabilitySupervisor
@@ -840,14 +841,9 @@ class UDPConnectionFixed(
     }
     
     /**
-     * Default constructor
-     */
-    constructor()
-    
-    /**
      * Constructor with connection parameters
      */
-    constructor(simIP: String, simPort: Int, circuitCode: Int) {
+    constructor(simIP: String, simPort: Int, circuitCode: Int) : this() {
         this.simIP = simIP
         this.simPort = simPort
         this.circuitCode = circuitCode

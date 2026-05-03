@@ -1,5 +1,8 @@
 package com.linkpoint.protocol.messages.ids
 
+import com.linkpoint.protocol.messages.MessageIdNameRegistry
+import com.linkpoint.protocol.messages.MessageTemplateCatalog
+
 /**
  * Second Life Protocol Message IDs
  * 
