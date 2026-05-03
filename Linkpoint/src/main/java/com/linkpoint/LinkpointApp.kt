@@ -1018,6 +1018,21 @@ class LinkpointApp : Application() {
             }
         }
 
+        // Feed live circuit RTT samples (Karn-clean ACK round-trips) into
+        // the quality manager. Without this, recordLatency() only fires
+        // once per HTTP login attempt, so the running average is whatever
+        // the slowest login took to authenticate — the 2026-05-03 debug
+        // report showed Average Latency: 30692ms over 4 samples, which
+        // is exactly the login-handshake duration on a slow link, not
+        // anything resembling actual circuit latency.
+        udpConnection.setLatencySampleListener { rttMs ->
+            try {
+                protocol.qualityManager.recordLatency(rttMs)
+            } catch (e: Exception) {
+                Log.v(TAG, "qualityManager.recordLatency threw: ${e.message}")
+            }
+        }
+
         // Hard-failure callback: fires when the UDP layer concludes the
         // simulator-side circuit is dead (post-reconnect-silence escalation,
         // or 3-unanswered-pings watchdog trip). The simulator no longer has

@@ -319,8 +319,14 @@ class CoreNetworkingService(private val context: Context) {
                         // Record success
                         loginRetryPolicy.onSuccess()
                         qualityManager.recordRequestResult(true)
-                        qualityManager.recordLatency(System.currentTimeMillis() - startTime)
-                        
+                        // Intentionally NOT calling qualityManager.recordLatency
+                        // here — the login HTTP round-trip includes server-side
+                        // authentication, region selection, and capability seed
+                        // generation, which is typically tens of seconds and has
+                        // nothing to do with circuit latency. Live latency now
+                        // comes from per-ACK Karn-clean RTT samples wired in
+                        // LinkpointApp via setLatencySampleListener.
+
                         stateManager.setStatus(NetworkStateManager.ConnectionStatus.CONNECTED)
                         emitEvent(ConnectionEvent.Connected)
                         

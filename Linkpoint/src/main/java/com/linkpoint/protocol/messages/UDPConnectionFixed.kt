@@ -683,6 +683,17 @@ class UDPConnectionFixed(
     private var networkStateListener: ((NetworkStateTransition) -> Unit)? = null
 
     /**
+     * Per-sample latency listener, fed by every clean Karn-correct ACK
+     * RTT. Wired by `LinkpointApp` into `qualityManager.recordLatency`
+     * so the network-quality panel reflects live circuit latency
+     * instead of just the one-shot HTTP login round-trip time (which
+     * was producing 30+ second "averages" of 4 samples in the
+     * 2026-05-03 debug report).
+     */
+    @Volatile
+    private var latencySampleListener: ((Long) -> Unit)? = null
+
+    /**
      * Set a listener for fine-grained network-state transitions emitted by the
      * watchdog. Single-listener; last writer wins. LinkpointApp wires this to
      * `protocol.stateManager.setStatus(...)`.
@@ -690,6 +701,23 @@ class UDPConnectionFixed(
     fun setNetworkStateListener(listener: (NetworkStateTransition) -> Unit) {
         networkStateListener = listener
     }
+
+    /**
+     * Subscribe to per-sample circuit latency updates. The listener is
+     * called from the I/O thread for every clean ACK RTT (Karn's algorithm
+     * applies — retransmits don't fire). Single-listener; last writer wins.
+     */
+    fun setLatencySampleListener(listener: (Long) -> Unit) {
+        latencySampleListener = listener
+    }
+
+    /**
+     * Smoothed circuit RTT in milliseconds, or -1 before the first clean
+     * ACK has landed. Mirrors what feeds the retransmit-timeout calc, so
+     * panels surfacing this value match what the Karn-clean estimator
+     * actually drives downstream.
+     */
+    fun getSmoothedRttMs(): Long = rttEstimator.smoothedRttMs
 
     private fun emitNetworkState(transition: NetworkStateTransition) {
         try {
@@ -2001,6 +2029,12 @@ class UDPConnectionFixed(
         if (acked != null && acked.retries == 0) {
             val rtt = System.currentTimeMillis() - acked.firstSentTime
             rttEstimator.recordCleanSample(rtt)
+            try {
+                latencySampleListener?.invoke(rtt)
+            } catch (e: Exception) {
+                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
+                    "latencySampleListener threw on rtt=${rtt}ms: ${e.message}")
+            }
         }
 
         // Check if we have a callback for this sequence number
