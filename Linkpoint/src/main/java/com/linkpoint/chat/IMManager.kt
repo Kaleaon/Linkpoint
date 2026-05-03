@@ -758,9 +758,12 @@ class IMManager(
         // Update the concurrent last-message map immediately after appending
         // to the list.  There is a tiny window between these two operations
         // where a concurrent getLastSessionMessage() call would still return
-        // the previous message — this is acceptable because the UI reads are
-        // eventually consistent and the composable will recompose on the next
-        // collectAsState emission.
+        // the previous message — this is acceptable because:
+        // - For incoming messages: _unreadCounts.value update below triggers
+        //   recomposition of L2IMListRoute, which calls getLastSessionMessage()
+        //   and by then lastMessageBySession already holds the new value.
+        // - For outgoing messages: unreadCounts doesn't change but the new
+        //   last-message is still visible on the next recomposition cycle.
         lastMessageBySession[sessionId] = message
         
         if (messages.size > MAX_SESSION_HISTORY) {

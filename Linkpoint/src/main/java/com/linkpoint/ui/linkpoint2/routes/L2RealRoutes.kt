@@ -296,8 +296,10 @@ fun L2InventoryRoute(
 
     // Read directly from the cache without remember() so the list refreshes
     // on recomposition after the async fetch populates InventoryManager's
-    // internal maps. remember() would memoize the empty result that exists
-    // at composition time and never re-read after the keys stop changing.
+    // internal maps. remember() would memoize the empty result that exists at
+    // composition time and never re-read after the keys stop changing.
+    // Recomposition is triggered naturally when isLoading (collected above)
+    // transitions false → true → false as the fetch completes.
     val nodes = currentFolderId?.let { app.inventoryManager.getFolderContents(it) }.orEmpty()
 
     val items = nodes.map { node ->

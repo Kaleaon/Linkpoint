@@ -132,8 +132,8 @@ fun WorldOverlayContainer(
     // Radar blips derived from the live AvatarManager. Previously hardcoded
     // sample data ("Friend", "Avatar") shipped to production, which made the
     // radar pretend to detect avatars even when nobody else was around.
-    // avatarCount is read in the condition so Compose re-runs when it changes.
-    val radarBlips = if (radarApp == null || !radarApp.isAvatarManagerInitialized() || avatarCount < 0) {
+    // avatarCount is read here — Compose re-runs the block whenever it changes.
+    val radarBlips = if (radarApp == null || !radarApp.isAvatarManagerInitialized() || avatarCount == 0) {
         emptyList<RadarBlip>()
     } else {
         val me = radarApp.avatarManager.getMyAvatar()
