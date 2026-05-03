@@ -101,7 +101,13 @@ android {
     
     defaultConfig {
         applicationId = "com.linkpoint"
-        minSdk = 24
+        // Android 8.0 (Oreo) is the explicit compatibility floor. Notification
+        // channels, foreground-service `startForegroundService`, adaptive
+        // icons, and the modern PendingIntent flag set all require API 26;
+        // every place the codebase touches them is unconditional past this
+        // line. Stay below targetSdk so the SDK_INT > O guards continue to
+        // compile, but anything < 26 is unsupported.
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
