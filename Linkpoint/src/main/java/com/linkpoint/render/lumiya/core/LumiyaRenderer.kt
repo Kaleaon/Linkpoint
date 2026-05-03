@@ -145,7 +145,18 @@ class LumiyaRenderer : RenderEngineProvider {
             GLES32.glCullFace(GLES32.GL_BACK)
             GLES32.glFrontFace(GLES32.GL_CCW)
             GLES32.glEnable(GLES32.GL_BLEND)
-            GLES32.glBlendFunc(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
+            // Use separate alpha blend so rendering to an off-screen
+            // FBO (FXAA, post-process) preserves alpha channel
+            // correctly. Mirrors LLDrawPoolAlpha's blend setup in the
+            // LL viewer / Singularity:
+            //   color: (SRC_ALPHA, ONE_MINUS_SRC_ALPHA)
+            //   alpha: (ZERO,      ONE_MINUS_SRC_ALPHA)
+            // glBlendFunc would clobber the alpha channel and the FXAA
+            // resolve would composite incorrectly.
+            GLES32.glBlendFuncSeparate(
+                GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA,
+                GLES32.GL_ZERO, GLES32.GL_ONE_MINUS_SRC_ALPHA
+            )
 
             // Clear colour – SL default sky blue
             GLES32.glClearColor(0.24f, 0.44f, 0.76f, 1.0f)
@@ -259,7 +270,10 @@ class LumiyaRenderer : RenderEngineProvider {
                 }
                 LumiyaRenderPass.WORLD_TRANSPARENT -> {
                     GLES32.glEnable(GLES32.GL_BLEND)
-                    GLES32.glBlendFunc(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
+                    GLES32.glBlendFuncSeparate(
+                        GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA,
+                        GLES32.GL_ZERO, GLES32.GL_ONE_MINUS_SRC_ALPHA
+                    )
                     primStore.drawTransparent(ctx)
                     meshStore.drawTransparent(ctx)
                     // Hover text overlays the world but underneath HUD;
@@ -674,7 +688,10 @@ class LumiyaRenderer : RenderEngineProvider {
             GLES32.glDisable(GLES32.GL_DEPTH_TEST)
             GLES32.glDepthMask(false)
             GLES32.glEnable(GLES32.GL_BLEND)
-            GLES32.glBlendFunc(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
+            GLES32.glBlendFuncSeparate(
+                GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA,
+                GLES32.GL_ZERO, GLES32.GL_ONE_MINUS_SRC_ALPHA
+            )
             hudStore.draw(ctx)
         } finally {
             System.arraycopy(previousProjection, 0, ctx.projectionMatrix, 0, 16)

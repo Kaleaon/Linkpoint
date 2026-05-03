@@ -339,7 +339,82 @@ now closed. Each item below has landed on this branch:
 
 ---
 
-## 9. Testing
+## 9. Singularity Viewer cross-check
+
+After the §8 roadmap landed we cross-checked the implementation against
+the Singularity Viewer source (https://github.com/siana/SingularityViewer)
+which is a direct LL viewer fork. The findings shaped a follow-up patch:
+
+### Verified-aligned
+
+- **Face counts**. `LLVolume::generate` in
+  `indra/llmath/llvolume.cpp` emits 4 sides for a square profile
+  (box), 3 for a triangle (prism), 1 for a circle (sphere /
+  cylinder / torus); cap count is 2 when the path is open. Our
+  `faceCountFor()` matches. `LLProfile::addHole` doubles cap
+  faces when hollow > 0; we now mirror this.
+- **Hover-text depth state**. `LLHUDText::renderText` wraps the draw
+  in `LLGLDepthTest(GL_TRUE, GL_FALSE)` (test on, write off). Our
+  `DrawableHoverText` sets `glDepthMask(false)` while keeping
+  depth-test enabled — same behavior.
+- **Hover-text billboarding**. `LLHUDText` calls
+  `LLViewerCamera::getPixelVectors(mPositionAgent, y, x)` to derive
+  screen-aligned basis vectors, then offsets `mPositionAgent` by
+  `(x_pixel * dx) + (y_pixel * dy)`. We pull the camera right + up
+  vectors out of the view matrix's first / second rows and build the
+  billboard model matrix from them — equivalent up to an axis swap.
+- **No alpha-to-coverage**. LL viewer / Singularity uses traditional
+  alpha blending exclusively; so do we.
+- **No driver-specific patches**. SingularityViewer has minimal
+  Adreno/Mali workarounds — they rely on the `LLRender` abstraction
+  layer. We follow the same pattern with our `glThreadGuard` +
+  `RenderDiagnostics` capture.
+
+### Patch landed from this cross-check
+
+- **`glBlendFuncSeparate` everywhere we set a blend func.**
+  `LLDrawPoolAlpha` in Singularity uses
+  `(SRC_ALPHA, ONE_MINUS_SRC_ALPHA)` for color and
+  `(ZERO, ONE_MINUS_SRC_ALPHA)` for alpha. We were using
+  `glBlendFunc` (single mode) which clobbers the alpha channel when
+  rendering to the FXAA off-screen FBO — the FXAA resolve pass would
+  then composite against an incorrect alpha. Swapped every site
+  (transparent prims, water, hover text, HUD) to `glBlendFuncSeparate`.
+- **Hollow prim caps doubled.** Per `LLProfile::addHole`,
+  `for (i ...; if (mFaces[i].mCap) mFaces[i].mCount *= 2;)`. Added
+  a `hollow` flag on `PrimInstance` and updated `faceCountFor` to
+  return `sides + (hollow ? caps * 2 : caps)`. Hollow box now
+  returns 8 faces; hollow cylinder returns 5.
+- **Water depth-write off.** `LLDrawPoolWater` uses
+  `LLGLDepthTest(GL_TRUE, GL_FALSE)` for transparent water so alpha
+  geometry behind the water plane composites correctly. We now
+  toggle `glDepthMask(false)` for the water pass and restore it
+  after.
+
+### Deferred (would require larger work)
+
+- **Spatial bridges for rotated geometry.** `LLSpatialPartition` uses
+  a "spatial bridge" when geometry is rotated — instead of expanding
+  the AABB to the rotated bounds, it stores the rotated transform
+  on the bridge and applies it when ray-testing. Our AABBs are
+  scale-derived and over-estimate for rotated prims (acceptable
+  conservative approach for picking + culling).
+- **Tri-state frustum result.** LL viewer's `frustumCheck` returns
+  out / partial / contained, which lets octree culling skip the
+  per-prim test for fully-contained groups. We have a binary
+  visible / not-visible test. Fine for our flat draw list.
+- **Glow / emissive double-pass.** `LLDrawPoolAlpha` renders glowing
+  prims twice — second pass with additive blend `(ONE, ONE)`. Our
+  shader path doesn't yet emit glow.
+- **Reflection / refraction textures for water.** `LLDrawPoolWater`
+  binds `gPipeline.mWaterRef` (reflection FBO) and `mWaterDis`
+  (distortion FBO). We use a simpler procedural water without
+  off-screen reflection.
+- **Distance-fade for hover text.** Singularity fades alpha beyond
+  `mFadeDistance` instead of geometric scaling. We do geometric
+  scaling with floor + ceiling. Either approach is defensible.
+
+## 10. Testing
 
 To force a backend at runtime without changing prefs, use:
 

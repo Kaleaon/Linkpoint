@@ -58,6 +58,7 @@ class DrawablePrimStore {
         val id: Long,
         val modelMatrix: FloatArray = FloatArray(16).also { Matrix.setIdentityM(it, 0) },
         var shape: ShapeKind = ShapeKind.BOX,
+        var hollow: Boolean = false,
         var scaleX: Float = 1f, var scaleY: Float = 1f, var scaleZ: Float = 1f,
         val faces: MutableList<FaceMaterial> = mutableListOf(FaceMaterial()),
         var isTransparent: Boolean = false,
@@ -109,6 +110,10 @@ class DrawablePrimStore {
     ) {
         val instance = prims.getOrPut(id) { PrimInstance(id = id) }
         instance.shape = shapeFromParams(shapeParams)
+        // LL viewer treats any non-zero hollow as hollow; the profile
+        // hollow shape (square / circle / triangle) only changes the
+        // hole geometry, not the face count.
+        instance.hollow = shapeParams.profileHollow > 0f
         instance.scaleX = scaleX
         instance.scaleY = scaleY
         instance.scaleZ = scaleZ
@@ -325,7 +330,7 @@ class DrawablePrimStore {
     // ── Per-face material assembly ───────────────────────────────────────
 
     private fun applyTextureEntry(instance: PrimInstance, textureEntry: ByteArray?) {
-        val faceCount = faceCountFor(instance.shape)
+        val faceCount = faceCountFor(instance.shape, instance.hollow)
         // Resize face list to match shape (preserve any already-uploaded handles).
         while (instance.faces.size < faceCount) instance.faces.add(FaceMaterial())
         while (instance.faces.size > faceCount) instance.faces.removeAt(instance.faces.lastIndex)
@@ -361,14 +366,32 @@ class DrawablePrimStore {
         instance.isTransparent = instance.faces.any { it.colorA < 0.999f }
     }
 
-    /** LLVolume-style fallback face counts for non-sculpt prims. */
-    private fun faceCountFor(shape: ShapeKind): Int = when (shape) {
-        ShapeKind.BOX -> 6
-        ShapeKind.SPHERE -> 1
-        ShapeKind.CYLINDER -> 3
-        ShapeKind.PRISM -> 5
-        ShapeKind.TORUS -> 1
-        ShapeKind.RING -> 3
+    /**
+     * Face counts that match LL viewer `LLVolume::generate` + `addHole`
+     * (indra/llmath/llvolume.cpp). Side count comes from the profile,
+     * cap count comes from the path being open. Hollow doubles the
+     * cap count because `LLProfile::addHole` runs after the base
+     * profile has emitted its caps:
+     *
+     *   for (i=0; i<mFaces.size(); i++) { if (mFaces[i].mCap)
+     *                                     mFaces[i].mCount *= 2; }
+     *
+     * Sides:  box=4   prism=3   cylinder/sphere/torus=1   ring=2
+     * Caps:   box/cylinder/prism = 2 (top + bottom)
+     *         sphere/torus       = 0 (closed sweep)
+     *         ring               = 1 (only the major-axis caps differ)
+     */
+    private fun faceCountFor(shape: ShapeKind, hollow: Boolean): Int {
+        val (sides, caps) = when (shape) {
+            ShapeKind.BOX -> 4 to 2
+            ShapeKind.SPHERE -> 1 to 0
+            ShapeKind.CYLINDER -> 1 to 2
+            ShapeKind.PRISM -> 3 to 2
+            ShapeKind.TORUS -> 1 to 0
+            ShapeKind.RING -> 2 to 1
+        }
+        val effectiveCaps = if (hollow) caps * 2 else caps
+        return sides + effectiveCaps
     }
 
     private fun buildTexMatrix(face: FaceMaterial): FloatArray {

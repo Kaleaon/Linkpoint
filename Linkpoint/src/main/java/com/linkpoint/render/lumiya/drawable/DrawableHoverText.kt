@@ -100,7 +100,13 @@ class DrawableHoverText {
 
         GLES32.glBindVertexArray(vao.vao)
         GLES32.glEnable(GLES32.GL_BLEND)
-        GLES32.glBlendFunc(GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA)
+        // Separate alpha blend matches LL viewer LLDrawPoolAlpha so the
+        // FXAA FBO's alpha channel is preserved across the hover-text
+        // pass.
+        GLES32.glBlendFuncSeparate(
+            GLES32.GL_SRC_ALPHA, GLES32.GL_ONE_MINUS_SRC_ALPHA,
+            GLES32.GL_ZERO, GLES32.GL_ONE_MINUS_SRC_ALPHA
+        )
 
         for (label in labels.values) {
             ensureLabelTexture(label)
