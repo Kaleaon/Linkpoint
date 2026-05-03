@@ -560,7 +560,7 @@ object NetworkLogger {
             protocol?.let { 
                 append("  Protocol: $it\n")
                 // Track HTTP/2 usage for textures using explicit type
-                trackProtocolUsageByType(RequestType.TEXTURE, it)
+                trackProtocolUsageByType(ProtocolUsageTracker.RequestType.TEXTURE, it)
             }
             error?.let { append("  Error: $it") }
         }
@@ -612,7 +612,7 @@ object NetworkLogger {
             sizeBytes?.let { append("  Size: $it bytes\n") }
             protocol?.let {
                 append("  Protocol: $it\n")
-                trackProtocolUsageByType(RequestType.MESH, it)
+                trackProtocolUsageByType(ProtocolUsageTracker.RequestType.MESH, it)
             }
             error?.let { append("  Error: $it") }
         }
@@ -701,7 +701,7 @@ object NetworkLogger {
             append("🔗 Capability $statusIcon: $capName (${durationMs}ms)")
             protocol?.let {
                 append("\n  Protocol: $it")
-                trackProtocolUsageByType(RequestType.CAPABILITY, it)
+                trackProtocolUsageByType(ProtocolUsageTracker.RequestType.CAPABILITY, it)
             }
             error?.let { append("\n  Error: $it") }
         }
