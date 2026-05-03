@@ -1,12 +1,13 @@
 package com.linkpoint.utils.debugreport.sections
 
-import android.test.mock.MockContext
+import android.content.Context
 import com.linkpoint.utils.debugreport.DebugReportContext
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.mockito.Mockito.mock
 
 class DebugReportSectionBuildersTest {
-    private val context = DebugReportContext(MockContext(), null, System.currentTimeMillis())
+    private val context = DebugReportContext(mock(Context::class.java), null, System.currentTimeMillis())
 
     @Test
     fun connectionBuilder_handlesUnavailableApp() {

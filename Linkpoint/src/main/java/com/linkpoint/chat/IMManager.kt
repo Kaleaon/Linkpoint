@@ -88,6 +88,12 @@ class IMManager(
     
     // Session messages
     private val sessionMessages = ConcurrentHashMap<UUID, MutableList<IMMessage>>()
+
+    // Last message per session — ConcurrentHashMap provides thread-safe O(1)
+    // reads for composable callers on the Main thread while addMessage writes
+    // on MessagingDispatcher, avoiding the data race that MutableList.lastOrNull()
+    // would introduce (ArrayList.size + elementData access are not atomic).
+    private val lastMessageBySession = ConcurrentHashMap<UUID, IMMessage>()
     
     // Events
     private val _messageFlow = MutableSharedFlow<IMMessage>(replay = 0, extraBufferCapacity = 64)
@@ -320,6 +326,7 @@ class IMManager(
             pendingGroupMessages.remove(sessionId)
             startedGroupSessions.remove(sessionId)
             sessions.remove(sessionId)
+            lastMessageBySession.remove(sessionId)
             scope.launch {
                 _sessionFlow.emit(IMSessionEvent.Left(sessionId))
             }
@@ -727,6 +734,15 @@ class IMManager(
     fun getSessionMessages(sessionId: UUID): List<IMMessage> {
         return sessionMessages[sessionId]?.toList() ?: emptyList()
     }
+
+    /**
+     * Returns the last message in [sessionId] without copying the full history list.
+     * Thread-safe: backed by a [ConcurrentHashMap] updated in [addMessage] on
+     * MessagingDispatcher; safe to call from the Main/Compose thread.
+     */
+    fun getLastSessionMessage(sessionId: UUID): IMMessage? {
+        return lastMessageBySession[sessionId]
+    }
     
     /**
      * Mark session as read
@@ -739,6 +755,16 @@ class IMManager(
     private fun addMessage(sessionId: UUID, message: IMMessage) {
         val messages = sessionMessages.getOrPut(sessionId) { mutableListOf() }
         messages.add(message)
+        // Update the concurrent last-message map immediately after appending
+        // to the list.  There is a tiny window between these two operations
+        // where a concurrent getLastSessionMessage() call would still return
+        // the previous message — this is acceptable because:
+        // - For incoming messages: _unreadCounts.value update below triggers
+        //   recomposition of L2IMListRoute, which calls getLastSessionMessage()
+        //   and by then lastMessageBySession already holds the new value.
+        // - For outgoing messages: unreadCounts doesn't change but the new
+        //   last-message is still visible on the next recomposition cycle.
+        lastMessageBySession[sessionId] = message
         
         if (messages.size > MAX_SESSION_HISTORY) {
             messages.removeAt(0)

@@ -11,45 +11,41 @@ import androidx.navigation.NavHostController
 import com.linkpoint.LinkpointApp
 import com.linkpoint.ui.avatar.AvatarAppearance
 import com.linkpoint.ui.avatar.MyAvatarScreen
-import com.linkpoint.ui.chat.ChatScreen
-import com.linkpoint.ui.common.UiLoadState
-import com.linkpoint.ui.friends.FriendsScreen
-import com.linkpoint.ui.groups.GroupData
-import com.linkpoint.ui.groups.GroupsScreen
-import com.linkpoint.ui.inventory.InventoryScreen
-import com.linkpoint.ui.map.MapScreen
-import com.linkpoint.ui.minimap.MinimapScreen
-import com.linkpoint.ui.people.NearbyPeopleScreen
-import com.linkpoint.ui.profile.ProfileData
-import com.linkpoint.ui.profile.ProfileScreen
-import com.linkpoint.ui.search.ComposeSearchResult
-import com.linkpoint.ui.search.SearchScreen
-import com.linkpoint.ui.settings.SettingsScreen
-import com.linkpoint.ui.settings.SettingsState
-import com.linkpoint.ui.teleport.TeleportHistoryScreen
+import com.linkpoint.ui.chat.L2ChatRoute
+import com.linkpoint.ui.linkpoint2.routes.L2EventsRoute
+import com.linkpoint.ui.linkpoint2.routes.L2FriendsRoute
+import com.linkpoint.ui.linkpoint2.routes.L2GraphicsSettingsRoute
+import com.linkpoint.ui.linkpoint2.routes.L2GridManagementRoute
+import com.linkpoint.ui.linkpoint2.routes.L2GroupProfileRoute
+import com.linkpoint.ui.linkpoint2.routes.L2GroupsRoute
+import com.linkpoint.ui.linkpoint2.routes.L2InventoryRoute
+import com.linkpoint.ui.linkpoint2.routes.L2MapRoute
+import com.linkpoint.ui.linkpoint2.routes.L2MinimapRoute
+import com.linkpoint.ui.linkpoint2.routes.L2NearbyPeopleRoute
+import com.linkpoint.ui.linkpoint2.routes.L2NotificationsRoute
+import com.linkpoint.ui.linkpoint2.routes.L2OutfitComposerRoute
+import com.linkpoint.ui.linkpoint2.routes.L2OutfitPickerRoute
+import com.linkpoint.ui.linkpoint2.routes.L2PlaceDetailRoute
+import com.linkpoint.ui.linkpoint2.routes.L2PlacesRoute
+import com.linkpoint.ui.linkpoint2.routes.L2PrivacySettingsRoute
+import com.linkpoint.ui.linkpoint2.routes.L2ProfileRoute
+import com.linkpoint.ui.linkpoint2.routes.L2SearchRoute
+import com.linkpoint.ui.linkpoint2.routes.L2TeleportHistoryRoute
+import com.linkpoint.ui.linkpoint2.routes.L2VoiceDeepRoute
+import com.linkpoint.ui.linkpoint2.routes.L2WalletRoute
 import com.linkpoint.ui.linkpoint2.screens.BuildToolsScreen
 import com.linkpoint.ui.linkpoint2.screens.CameraScreen
 import com.linkpoint.ui.linkpoint2.screens.EmptyStatesReferenceScreen
-import com.linkpoint.ui.linkpoint2.screens.EventsScreen
-import com.linkpoint.ui.linkpoint2.screens.GraphicsSettingsScreen
-import com.linkpoint.ui.linkpoint2.screens.GridManagementScreen
-import com.linkpoint.ui.linkpoint2.screens.GroupProfileScreen
-import com.linkpoint.ui.linkpoint2.screens.IMListScreen
-import com.linkpoint.ui.linkpoint2.screens.NotificationsScreen
+import com.linkpoint.ui.linkpoint2.screens.L2IMListRoute
 import com.linkpoint.ui.linkpoint2.screens.OnboardingAvatarScreen
 import com.linkpoint.ui.linkpoint2.screens.OnboardingPermissionsScreen
 import com.linkpoint.ui.linkpoint2.screens.OnboardingWelcomeScreen
-import com.linkpoint.ui.linkpoint2.screens.OutfitComposerScreen
-import com.linkpoint.ui.linkpoint2.screens.OutfitPickerScreen
-import com.linkpoint.ui.linkpoint2.screens.PlaceDetailScreen
-import com.linkpoint.ui.linkpoint2.screens.PlacesScreen
-import com.linkpoint.ui.linkpoint2.screens.PrivacySettingsScreen
-import com.linkpoint.ui.linkpoint2.screens.VoiceDeepScreen
-import com.linkpoint.ui.linkpoint2.screens.WalletScreen
 import com.linkpoint.ui.login.L2LoginRoute
 import com.linkpoint.ui.navigation.Routes
 import com.linkpoint.ui.navigation.navigateBack
 import com.linkpoint.ui.navigation.navigateTo
+import com.linkpoint.ui.settings.SettingsScreen
+import com.linkpoint.ui.settings.SettingsState
 import com.linkpoint.ui.slurl.L2SlurlRoute
 import com.linkpoint.ui.theme.ThemeManager
 import com.linkpoint.ui.theme.ThemePickerScreen
@@ -62,9 +58,14 @@ import com.linkpoint.ui.xr.L2XrWorldRoute
  * Returns true if the route is owned by the L2 graph; the caller should fall
  * back to legacy activity handling otherwise.
  *
- * State sources are deliberately abstracted here — the NavHost wires each
- * screen to a [LinkpointApp] manager when one exists, otherwise to
- * [L2Demo] sample data. As ViewModels land, replace the demo wiring per route.
+ * Each post-login surface is wired to a real [LinkpointApp] manager via the
+ * `L2*Route` composables in [com.linkpoint.ui.linkpoint2.routes]. When a
+ * manager isn't initialised yet (pre-login) the route renders an honest
+ * empty state — never fabricated data. The previous version of this file
+ * passed `L2Demo.*` placeholders into every screen, which made the UI look
+ * populated with sample residents while every action was a silent no-op
+ * (chat, IM, friends, inventory, groups, wallet, teleport history, etc).
+ * That is no longer the case here.
  */
 @Composable
 fun Linkpoint2RouteHost(
@@ -136,282 +137,165 @@ fun Linkpoint2RouteHost(
             onEnterWorld = { navController.navigateTo(Routes.LOGIN) },
             modifier = modifier,
         )
-        route == Routes.IM_LIST -> IMListScreen(
-            conversations = L2Demo.Conversations,
+        route == Routes.IM_LIST -> L2IMListRoute(
             onBack = back,
             onOpenConversation = { navController.navigateTo(Routes.CHAT) },
             onCompose = { navController.navigateTo(Routes.CHAT) },
             modifier = modifier,
         )
-        route == Routes.CHAT -> ChatScreen(
-            messages = L2Demo.ChatThread,
-            currentAvatarName = app?.sessionManager?.getAvatarName() ?: "You",
-            threadAvatarName = "Echo Nightshade",
-            threadOnline = true,
-            threadLocation = "Crystal Coast (186, 92, 24)",
-            uiLoadState = UiLoadState.Content,
-            onRetry = {},
-            onSendMessage = { _, _ -> },
+        route == Routes.CHAT -> L2ChatRoute(
             onNavigateBack = back,
             modifier = modifier,
         )
-        route == Routes.FRIENDS -> FriendsScreen(
-            friends = L2Demo.Friends,
-            uiLoadState = UiLoadState.Content,
-            onRetry = {},
+        route == Routes.FRIENDS -> L2FriendsRoute(
             onNavigateBack = back,
-            onOpenIM = { navController.navigateTo(Routes.CHAT) },
-            onTeleportTo = {},
+            onOpenIM = { _ -> navController.navigateTo(Routes.CHAT) },
             onViewProfile = { friend -> navController.navigateTo(Routes.profile(friend.id.toString())) },
-            onRemoveFriend = {},
-            onAddFriend = {},
             modifier = modifier,
         )
-        route == Routes.WALLET -> WalletScreen(
-            balanceLinden = 14_320,
-            usdEquivalent = 56.45,
-            weeklyIn = 2_180,
-            weeklyOut = 1_499,
-            transactions = L2Demo.WalletTransactions,
+        route == Routes.WALLET -> L2WalletRoute(
             onBack = back,
-            onSend = {},
-            onRequest = {},
-            onBuy = {},
-            onRefresh = {},
             modifier = modifier,
         )
         route == Routes.BUILD_TOOLS -> BuildToolsScreen(
             onClose = back,
+            // Build tools require a full ObjectEdit + selection pipeline
+            // which is not yet implemented; tap is intentionally inert
+            // until ObjectManager.editProperties is wired through.
             onApply = { _, _ -> },
             modifier = modifier,
         )
-        route == Routes.VOICE_DEEP -> VoiceDeepScreen(
-            selfName = app?.sessionManager?.getAvatarName() ?: "You",
-            participants = L2Demo.Voices,
+        route == Routes.VOICE_DEEP -> L2VoiceDeepRoute(
             onBack = back,
-            onTogglePtt = {},
-            onMuteParticipant = {},
             modifier = modifier,
         )
-        route == Routes.PLACES_SEARCH -> PlacesScreen(
-            places = L2Demo.Places,
+        route == Routes.PLACES_SEARCH -> L2PlacesRoute(
             onBack = back,
             onSelect = { p -> navController.navigateTo(Routes.placeDetail(p.id)) },
             modifier = modifier,
         )
         baseRoute == "places" && route != Routes.PLACES_EVENTS && route != Routes.PLACES_SEARCH -> {
-            val placeId = entry.arguments?.getString("placeId")
-            val place = L2Demo.Places.firstOrNull { it.id == placeId } ?: L2Demo.Places.first()
-            PlaceDetailScreen(
-                place = place,
-                description = "A beautiful seaside region with bonfires, mesh terrain and a small live-music venue.",
-                whoIsHere = listOf("Echo", "Aria", "Mira", "Voss"),
+            L2PlaceDetailRoute(
+                placeId = entry.arguments?.getString("placeId"),
                 onBack = back,
-                onTeleport = {},
-                onSave = {},
-                onShare = {},
                 modifier = modifier,
             )
         }
-        route == Routes.PLACES_EVENTS -> EventsScreen(
-            events = L2Demo.Events,
+        route == Routes.PLACES_EVENTS -> L2EventsRoute(
             onBack = back,
-            onSelect = { /* open detail */ },
             modifier = modifier,
         )
-        route == Routes.OUTFIT_PICKER -> OutfitPickerScreen(
-            outfits = L2Demo.Outfits,
+        route == Routes.OUTFIT_PICKER -> L2OutfitPickerRoute(
             onBack = back,
-            onWear = {},
             onEdit = { navController.navigateTo(Routes.OUTFIT_COMPOSER) },
             modifier = modifier,
         )
-        route == Routes.OUTFIT_COMPOSER -> OutfitComposerScreen(
-            avatarName = app?.sessionManager?.getAvatarName() ?: "You",
-            slots = L2Demo.OutfitSlots,
+        route == Routes.OUTFIT_COMPOSER -> L2OutfitComposerRoute(
             onBack = back,
-            onSave = {},
-            onWear = {},
-            onTap = {},
             modifier = modifier,
         )
-        baseRoute == "group_profile" -> {
-            val groupId = entry.arguments?.getString("groupId") ?: "tinkerers"
-            GroupProfileScreen(
-                groupTag = groupId.take(4).uppercase(),
-                groupName = "Tinkerers Guild",
-                description = "A community for builders and scripters.",
-                membersOnline = 12,
-                membersTotal = 87,
-                members = L2Demo.GroupMembers,
-                role = "Member",
-                onBack = back,
-                modifier = modifier,
-            )
-        }
-        route == Routes.NOTIFICATIONS_FEED -> {
-            var items by remember { mutableStateOf(L2Demo.Notifications) }
-            NotificationsScreen(
-                items = items,
-                onBack = back,
-                onClearAll = { items = emptyList() },
-                onAccept = { item -> items = items.filterNot { it.id == item.id } },
-                onDecline = { item -> items = items.filterNot { it.id == item.id } },
-                onTap = {},
-                modifier = modifier,
-            )
-        }
+        baseRoute == "group_profile" -> L2GroupProfileRoute(
+            groupId = entry.arguments?.getString("groupId").orEmpty(),
+            onNavigateBack = back,
+            modifier = modifier,
+        )
+        route == Routes.NOTIFICATIONS_FEED -> L2NotificationsRoute(
+            onBack = back,
+            modifier = modifier,
+        )
         route == Routes.CAMERA_MODE -> CameraScreen(
             onClose = back,
+            // Snapshot capture path (SnapshotManager.capture) isn't wired
+            // to the Compose surface yet; shutter is currently a no-op.
             onShutter = {},
             onSnapToFriends = {},
             onFlip = {},
             modifier = modifier,
         )
-        route == Routes.GRAPHICS_SETTINGS -> {
-            var state by remember { mutableStateOf(L2Demo.DefaultGraphics) }
-            GraphicsSettingsScreen(
-                initial = state,
-                onBack = back,
-                onChange = { state = it },
-                modifier = modifier,
-            )
-        }
-        route == Routes.PRIVACY_SETTINGS -> {
-            var state by remember { mutableStateOf(L2Demo.DefaultPrivacy) }
-            PrivacySettingsScreen(
-                initial = state,
-                blockedUsers = L2Demo.BlockedUsers,
-                onBack = back,
-                onUnblock = {},
-                onChange = { state = it },
-                modifier = modifier,
-            )
-        }
-        route == Routes.GRID_MANAGEMENT -> GridManagementScreen(
-            grids = L2Demo.Grids,
+        route == Routes.GRAPHICS_SETTINGS -> L2GraphicsSettingsRoute(
             onBack = back,
-            onAdd = {},
-            onEdit = {},
-            onDelete = {},
+            modifier = modifier,
+        )
+        route == Routes.PRIVACY_SETTINGS -> L2PrivacySettingsRoute(
+            onBack = back,
+            modifier = modifier,
+        )
+        route == Routes.GRID_MANAGEMENT -> L2GridManagementRoute(
+            onBack = back,
             modifier = modifier,
         )
         route == Routes.EMPTY_STATES_REF -> EmptyStatesReferenceScreen(onBack = back, modifier = modifier)
-        route == Routes.INVENTORY -> InventoryScreen(
-            items = emptyList(),
-            breadcrumb = listOf("My Inventory"),
-            uiLoadState = UiLoadState.Empty(
-                title = "Inventory loading",
-                message = "Connect to a region to see your items.",
-            ),
-            onRetry = {},
-            onItemClick = {},
+        route == Routes.INVENTORY -> L2InventoryRoute(
             onNavigateBack = back,
-            onNavigateUp = {},
             modifier = modifier,
         )
-        route == Routes.MAP -> MapScreen(
-            currentRegion = app?.sessionManager?.currentRegion?.value?.name ?: "Unknown region",
-            currentPosition = androidx.compose.ui.geometry.Offset(128f, 128f),
-            uiLoadState = UiLoadState.Content,
-            onRetry = {},
+        route == Routes.MAP -> L2MapRoute(
             onNavigateBack = back,
-            onTeleportTo = {},
-            onTeleportHome = {},
-            onSearch = {},
             modifier = modifier,
         )
-        route == Routes.GROUPS -> GroupsScreen(
-            myGroups = emptyList<GroupData>(),
-            searchResults = emptyList(),
+        route == Routes.GROUPS -> L2GroupsRoute(
             onNavigateBack = back,
-            onOpenGroupChat = { navController.navigateTo(Routes.CHAT) },
+            onOpenGroupChat = { _ -> navController.navigateTo(Routes.CHAT) },
             onViewGroupInfo = { g -> navController.navigateTo(Routes.groupProfile(g.id.toString())) },
-            onSetActiveGroup = {},
-            onLeaveGroup = {},
-            onJoinGroup = {},
-            onSearch = {},
             modifier = modifier,
         )
         route.startsWith("profile/") -> {
             val userId = entry.arguments?.getString("userId") ?: "me"
-            ProfileScreen(
-                profile = ProfileData(
-                    id = java.util.UUID.randomUUID(),
-                    displayName = if (route == Routes.MY_PROFILE) {
-                        app?.sessionManager?.getAvatarName() ?: "You"
-                    } else "Resident",
-                    username = "$userId.resident",
-                    aboutText = "A Linkpoint 2.0 resident.",
-                    isOwnProfile = userId == "me",
-                    isOnline = true,
-                ),
+            L2ProfileRoute(
+                userId = userId,
+                isMe = userId == "me" || route == Routes.MY_PROFILE,
                 onNavigateBack = back,
                 onSendIM = { navController.navigateTo(Routes.CHAT) },
-                onAddFriend = {},
-                onTeleportTo = {},
-                onEditProfile = { navController.navigateTo(Routes.MY_AVATAR) },
-                onOpenWeb = {},
+                onTeleportToMe = { /* requires friend-tracking; not yet wired here */ },
+                onEditMyProfile = { navController.navigateTo(Routes.MY_AVATAR) },
                 modifier = modifier,
             )
         }
         route == Routes.MY_AVATAR -> {
+            // AvatarAppearance is currently a UI-only model; appearance state
+            // round-trips through avatarManager but the editor surface only
+            // controls visual params locally until AppearanceManager is
+            // wired into the Compose layer.
             var appearance by remember { mutableStateOf(AvatarAppearance()) }
             MyAvatarScreen(
                 appearance = appearance,
                 onAppearanceChange = { appearance = it },
-                onRebakeTextures = {},
+                onRebakeTextures = {
+                    if (app != null) {
+                        runCatching { app.appearanceManager.requestRebake() }
+                    }
+                },
                 onOpenAppearanceEditor = { navController.navigateTo(Routes.OUTFIT_COMPOSER) },
                 onNavigateBack = back,
                 modifier = modifier,
             )
         }
-        route == Routes.SEARCH -> SearchScreen(
-            results = emptyList<ComposeSearchResult>(),
-            uiLoadState = UiLoadState.Content,
-            onRetry = {},
-            onSearch = { _, _ -> },
-            onResultClick = {},
+        route == Routes.SEARCH -> L2SearchRoute(
             onNavigateBack = back,
             modifier = modifier,
         )
-        route == Routes.NEARBY_PEOPLE -> {
-            var filter by remember { mutableStateOf(com.linkpoint.ui.people.NearbyPeopleFilter.ALL) }
-            NearbyPeopleScreen(
-                people = emptyList(),
-                selectedFilter = filter,
-                onFilterChange = { filter = it },
-                isLoading = false,
-                emptyMessage = "Other residents in this region will appear here.",
-                onRefresh = {},
-                onSendIM = { navController.navigateTo(Routes.CHAT) },
-                onAddFriend = {},
-                onViewProfile = { person ->
-                    navController.navigateTo(Routes.profile(person.id.toString()))
-                },
-                onNavigateBack = back,
-                modifier = modifier,
-            )
-        }
-        route == Routes.TELEPORT_HISTORY -> TeleportHistoryScreen(
-            history = emptyList(),
-            onTeleportTo = {},
-            onDeleteEntry = {},
-            onClearHistory = {},
+        route == Routes.NEARBY_PEOPLE -> L2NearbyPeopleRoute(
+            onNavigateBack = back,
+            onSendIM = { _ -> navController.navigateTo(Routes.CHAT) },
+            onViewProfile = { person ->
+                navController.navigateTo(Routes.profile(person.id.toString()))
+            },
+            modifier = modifier,
+        )
+        route == Routes.TELEPORT_HISTORY -> L2TeleportHistoryRoute(
             onNavigateBack = back,
             modifier = modifier,
         )
-        route == Routes.MINIMAP -> MinimapScreen(
-            regionName = app?.sessionManager?.currentRegion?.value?.name ?: "Unknown",
-            avatarPosition = androidx.compose.ui.geometry.Offset(128f, 128f),
-            avatarHeading = 0f,
-            markers = emptyList(),
+        route == Routes.MINIMAP -> L2MinimapRoute(
             onNavigateBack = back,
             onOpenWorldMap = { navController.navigateTo(Routes.MAP) },
-            onMarkerTapped = {},
             modifier = modifier,
         )
         route == Routes.SETTINGS -> {
+            // Settings persistence (SharedPreferences mapping) is not yet
+            // wired into the Compose state holder; for now changes only
+            // affect the in-memory model. The host SettingsActivity has
+            // the full read/write path for the legacy preferences store.
             var s by remember { mutableStateOf(SettingsState()) }
             SettingsScreen(
                 settings = s,

@@ -565,10 +565,21 @@ class LinkpointApp : Application() {
     lateinit var displayNameManager: DisplayNameManager
         private set
     val displayNameFormattingPolicy = DisplayNameFormattingPolicyHolder()
-    
+
+    // Linden Lab Live Data Feeds (LindeX, grid stats, status incidents).
+    // Eagerly constructed so pre-login surfaces (status banner, login
+    // screen footer) can read the feeds without waiting for a session.
+    val liveDataFeedClient = com.linkpoint.network.feeds.LiveDataFeedClient()
+
     // Mute list (NEW)
     lateinit var muteManager: MuteManager
         private set
+
+    // In-process notification inbox (IM offers, friendship offers,
+    // teleport offers, transactions, system messages).
+    lateinit var notificationManager: com.linkpoint.notifications.NotificationManager
+        private set
+    fun isNotificationManagerInitialized(): Boolean = ::notificationManager.isInitialized
     
     // Script dialogs (NEW)
     lateinit var scriptDialogManager: ScriptDialogManager
@@ -949,7 +960,14 @@ class LinkpointApp : Application() {
         
         // NEW: Mute manager
         muteManager = MuteManager(this)
-        
+
+        // NEW: In-process notification inbox. Aggregates IM offers,
+        // friendship offers, teleport offers, money transactions and
+        // generic system messages so the L2 notifications surface has
+        // somewhere to render them. Previously this class was defined
+        // but never constructed, so the inbox was always empty.
+        notificationManager = com.linkpoint.notifications.NotificationManager(this)
+
         // NEW: User Profile Manager
         userProfileManager = UserProfileManager(capabilityManager, udpConnection, agentId)
         

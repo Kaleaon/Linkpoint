@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.linkpoint.hud.HUDOverlayView
 import com.linkpoint.ui.radar.BlipType
@@ -117,11 +118,45 @@ fun WorldOverlayContainer(
     uiActions: WorldComposeUiActions,
     modifier: Modifier = Modifier
 ) {
-    val radarBlips = remember {
-        listOf(
-            RadarBlip("1", "Friend", BlipType.FRIEND, 30f, 0.5f, 0f),
-            RadarBlip("2", "Avatar", BlipType.STRANGER, 50f, 2f, 5f)
-        )
+    // Collect flows unconditionally at the top of the composable so Compose
+    // can track dependencies without violating the Rules of Hooks (composable
+    // functions must not be called conditionally).  A no-op fallback flow is
+    // remembered for cases where the manager is not yet initialized.
+    val radarApp = com.linkpoint.LinkpointApp.getInstanceOrNull()
+    val emptyAvatarCountFlow = remember { kotlinx.coroutines.flow.MutableStateFlow(0) }
+    // Subscribe to avatarCount: when it changes (avatars enter/leave the region)
+    // Compose re-runs this composable and recomputes the blips below.
+    val avatarCount by (if (radarApp != null && radarApp.isAvatarManagerInitialized())
+        radarApp.avatarManager.avatarCount else emptyAvatarCountFlow).collectAsState()
+
+    // Radar blips derived from the live AvatarManager. Previously hardcoded
+    // sample data ("Friend", "Avatar") shipped to production, which made the
+    // radar pretend to detect avatars even when nobody else was around.
+    // avatarCount is read here — Compose re-runs the block whenever it changes.
+    val radarBlips = if (radarApp == null || !radarApp.isAvatarManagerInitialized() || avatarCount == 0) {
+        emptyList<RadarBlip>()
+    } else {
+        val me = radarApp.avatarManager.getMyAvatar()
+        val mePos = me?.position ?: com.linkpoint.protocol.types.LLVector3.zero()
+        val friendIds: Set<java.util.UUID> = if (radarApp.isFriendsManagerInitialized()) {
+            radarApp.friendsManager.getAllFriends().map { it.agentId }.toSet()
+        } else emptySet()
+        radarApp.avatarManager.getNearbyAvatars(mePos, 96f)
+            .filter { me == null || it.agentId != me.agentId }
+            .map { av ->
+                val dx = av.position.x - mePos.x
+                val dy = av.position.y - mePos.y
+                val dz = av.position.z - mePos.z
+                val dist = kotlin.math.sqrt(dx * dx + dy * dy + dz * dz)
+                RadarBlip(
+                    id = av.agentId.toString(),
+                    name = av.agentId.toString().take(8),
+                    type = if (av.agentId in friendIds) BlipType.FRIEND else BlipType.STRANGER,
+                    distance = dist,
+                    bearing = kotlin.math.atan2(dx, dy),
+                    altitude = dz,
+                )
+            }
     }
 
     var joystickX by remember { mutableStateOf(0f) }
