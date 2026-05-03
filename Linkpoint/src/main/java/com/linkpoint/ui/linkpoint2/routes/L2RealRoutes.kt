@@ -80,7 +80,11 @@ import java.util.UUID
  * lying to the user.
  */
 
-private fun managerOrNull(block: () -> Unit): Boolean = try { block(); true } catch (_: Throwable) { false }
+private fun managerOrNull(block: () -> Unit): Boolean =
+    try { block(); true } catch (_: UninitializedPropertyAccessException) { false }
+
+/** Maximum number of wallet transactions kept in the UI list. */
+private const val MAX_TRANSACTION_HISTORY = 200
 
 @Composable
 fun L2FriendsRoute(
@@ -504,6 +508,10 @@ fun L2WalletRoute(
                     isIncome = true,
                 )
             )
+            // Keep the visible history bounded (same ceiling as IMManager history).
+            if (transactions.size > MAX_TRANSACTION_HISTORY) {
+                transactions.removeAt(transactions.lastIndex)
+            }
         }
     }
 
@@ -551,8 +559,12 @@ fun L2NotificationsRoute(
         }
     }
 
-    val incidents by (app?.liveDataFeedClient?.incidents
-        ?: kotlinx.coroutines.flow.MutableStateFlow(emptyList<com.linkpoint.network.feeds.StatusIncident>()))
+    // Stable fallback flow so collectAsState() is never called on a
+    // freshly-allocated instance every recomposition when app == null.
+    val emptyIncidentsFlow = remember {
+        kotlinx.coroutines.flow.MutableStateFlow(emptyList<com.linkpoint.network.feeds.StatusIncident>())
+    }
+    val incidents by (app?.liveDataFeedClient?.incidents ?: emptyIncidentsFlow)
         .collectAsState()
     val dismissed = remember { mutableStateOf<Set<String>>(emptySet()) }
 

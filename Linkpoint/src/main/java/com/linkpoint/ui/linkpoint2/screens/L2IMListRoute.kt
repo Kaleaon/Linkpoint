@@ -3,6 +3,7 @@ package com.linkpoint.ui.linkpoint2.screens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.linkpoint.LinkpointApp
 import com.linkpoint.chat.SessionType
@@ -27,20 +28,22 @@ fun L2IMListRoute(
 ) {
     val app = LinkpointApp.getInstanceOrNull()
 
+    // Shared formatter — one instance per composition, not one per row.
+    val timeFormatter = remember { SimpleDateFormat("h:mm a", Locale.getDefault()) }
+
     val conversations: List<ConversationSummary> = if (app == null || !app.isIMManagerInitialized()) {
         emptyList()
     } else {
         val sessions by app.imManager.activeSessions.collectAsState()
         val unread by app.imManager.unreadCounts.collectAsState()
         sessions.map { session ->
-            val lastMsg = app.imManager.getSessionMessages(session.sessionId).lastOrNull()
+            // getLastSessionMessage avoids copying the full history list.
+            val lastMsg = app.imManager.getLastSessionMessage(session.sessionId)
             ConversationSummary(
                 id = session.sessionId.toString(),
                 name = session.name,
                 lastMessage = lastMsg?.message ?: "",
-                timestamp = lastMsg?.timestamp?.let {
-                    SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(it))
-                } ?: "",
+                timestamp = lastMsg?.timestamp?.let { timeFormatter.format(Date(it)) } ?: "",
                 unread = unread[session.sessionId] ?: 0,
                 online = session.isActive,
                 isGroup = session.type == SessionType.GROUP || session.type == SessionType.CONFERENCE,

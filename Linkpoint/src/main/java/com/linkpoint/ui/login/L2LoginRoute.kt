@@ -62,12 +62,20 @@ fun L2LoginRoute(
                 ?: app.gridManager.getSelectedGrid()
             status = "Logging in to ${grid.name}…"
             app.applicationScope.launch {
+                // Map the UI label to the format expected by the login API:
+                // "last", "home", or "uri:Region&x&y&z" — never a raw
+                // lowercased/space-replaced label string.
+                val startLocation = when (credentials.startLocation.trim().lowercase()) {
+                    "last location", "last" -> "last"
+                    "home" -> "home"
+                    else -> app.startLocationManager.getStartLocationForLogin()
+                }
                 val result = app.protocol.login(
                     firstName = credentials.firstName.trim(),
                     lastName = credentials.lastName.trim().ifBlank { "Resident" },
                     password = credentials.password,
                     loginUri = grid.loginUri,
-                    startLocation = credentials.startLocation.lowercase().replace(' ', '_'),
+                    startLocation = startLocation,
                 )
                 withContext(Dispatchers.Main) {
                     loading = false

@@ -146,7 +146,7 @@ class LiveDataFeedClient(
         }
     }
 
-    private fun parseKeyValueText(body: String): Map<String, String> {
+    internal fun parseKeyValueText(body: String): Map<String, String> {
         // Linden's *.txt feeds are newline-separated `key value` rows where
         // the value may contain spaces. Split on the first whitespace.
         val out = LinkedHashMap<String, String>()
@@ -163,7 +163,7 @@ class LiveDataFeedClient(
         return out
     }
 
-    private fun parseStatusRss(xml: String): List<StatusIncident> {
+    internal fun parseStatusRss(xml: String): List<StatusIncident> {
         val factory = XmlPullParserFactory.newInstance()
         factory.isNamespaceAware = false
         val parser = factory.newPullParser()

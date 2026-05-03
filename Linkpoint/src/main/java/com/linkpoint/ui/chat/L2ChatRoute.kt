@@ -90,7 +90,7 @@ fun L2ChatRoute(
     // Stream incoming nearby chat into the visible list.
     LaunchedEffect(Unit) {
         app.chatManager.chatFlow.collect { chat ->
-            messages.add(chat.toUiMessage(myAgentId))
+            messages.addCapped(chat.toUiMessage(myAgentId))
         }
     }
 
@@ -103,7 +103,7 @@ fun L2ChatRoute(
                 activeGroupSessionId -> ChatChannel.GROUP
                 else -> return@collect
             }
-            messages.add(im.toUiMessage(myAgentId, channel))
+            messages.addCapped(im.toUiMessage(myAgentId, channel))
         }
     }
 
@@ -144,6 +144,18 @@ fun L2ChatRoute(
         onNavigateBack = onNavigateBack,
         modifier = modifier,
     )
+}
+
+/** Maximum number of messages kept in the chat UI list, matching ChatManager.MAX_CHAT_HISTORY. */
+private const val MAX_UI_CHAT_HISTORY = 500
+
+/**
+ * Append [item] to this list and trim the oldest entry if the list exceeds
+ * [MAX_UI_CHAT_HISTORY], keeping memory use and recomposition cost bounded.
+ */
+private fun <T> androidx.compose.runtime.snapshots.SnapshotStateList<T>.addCapped(item: T) {
+    add(item)
+    if (size > MAX_UI_CHAT_HISTORY) removeAt(0)
 }
 
 private fun com.linkpoint.chat.ChatMessage.toUiMessage(myAgentId: UUID): ChatMessage {

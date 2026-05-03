@@ -142,7 +142,7 @@ fun WorldOverlayContainer(
                         name = av.agentId.toString().take(8),
                         type = if (av.agentId in friendIds) BlipType.FRIEND else BlipType.STRANGER,
                         distance = dist,
-                        bearing = kotlin.math.atan2(dy, dx),
+                        bearing = kotlin.math.atan2(dx, dy),
                         altitude = dz,
                     )
                 }

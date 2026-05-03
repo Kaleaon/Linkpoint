@@ -727,6 +727,14 @@ class IMManager(
     fun getSessionMessages(sessionId: UUID): List<IMMessage> {
         return sessionMessages[sessionId]?.toList() ?: emptyList()
     }
+
+    /**
+     * Returns the last message in [sessionId] without copying the full history list.
+     * Prefer this over `getSessionMessages(id).lastOrNull()` in composable contexts.
+     */
+    fun getLastSessionMessage(sessionId: UUID): IMMessage? {
+        return sessionMessages[sessionId]?.lastOrNull()
+    }
     
     /**
      * Mark session as read
