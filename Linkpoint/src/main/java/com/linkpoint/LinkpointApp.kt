@@ -565,7 +565,12 @@ class LinkpointApp : Application() {
     lateinit var displayNameManager: DisplayNameManager
         private set
     val displayNameFormattingPolicy = DisplayNameFormattingPolicyHolder()
-    
+
+    // Linden Lab Live Data Feeds (LindeX, grid stats, status incidents).
+    // Eagerly constructed so pre-login surfaces (status banner, login
+    // screen footer) can read the feeds without waiting for a session.
+    val liveDataFeedClient = com.linkpoint.network.feeds.LiveDataFeedClient()
+
     // Mute list (NEW)
     lateinit var muteManager: MuteManager
         private set

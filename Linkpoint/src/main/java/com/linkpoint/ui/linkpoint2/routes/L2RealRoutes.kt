@@ -397,6 +397,12 @@ fun L2WalletRoute(
         b
     } else 0
 
+    // L$/USD pulled from Linden Lab's published LindeX feed (15-minute
+    // cache). Falls back to a 250:1 estimate if the feed hasn't loaded
+    // yet so the UI doesn't show 0.00 USD on first open.
+    val lindex by app.liveDataFeedClient.lindex.collectAsState()
+    LaunchedEffect(Unit) { app.liveDataFeedClient.fetchLindex() }
+
     val transactions = remember { mutableStateListOf<WalletTransaction>() }
     LaunchedEffect(economyAvailable) {
         if (!economyAvailable) return@LaunchedEffect
@@ -421,7 +427,7 @@ fun L2WalletRoute(
 
     WalletScreen(
         balanceLinden = balance.toLong(),
-        usdEquivalent = balance / 250.0, // approximate L$/USD (~250:1)
+        usdEquivalent = lindex?.lindenToUsd(balance.toLong()) ?: (balance / 250.0),
         weeklyIn = transactions.filter { it.isIncome }.sumOf { it.amountLinden },
         weeklyOut = transactions.filter { !it.isIncome }.sumOf { it.amountLinden },
         transactions = transactions,
@@ -431,6 +437,7 @@ fun L2WalletRoute(
         onBuy = { /* L$ purchase requires LindenLab web checkout */ },
         onRefresh = {
             if (economyAvailable) scope.launch { app.economyManager.requestBalance() }
+            scope.launch { app.liveDataFeedClient.fetchLindex(force = true) }
         },
         modifier = modifier,
     )
@@ -441,20 +448,63 @@ fun L2NotificationsRoute(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // com.linkpoint.notifications.NotificationManager exists as a class but
-    // is not currently constructed by LinkpointApp.initializeManagers().
-    // Until it's wired into the app, the inbox stays empty rather than
-    // backed by fabricated entries — wiring is tracked as a follow-up.
-    val items = remember { mutableStateListOf<NotificationItem>() }
+    val app = LinkpointApp.getInstanceOrNull()
+    val scope = rememberCoroutineScope()
+
+    // The in-process com.linkpoint.notifications.NotificationManager is not
+    // currently constructed by LinkpointApp.initializeManagers(), so per-
+    // session events (IM offers, friendship offers, money transfers) don't
+    // land here yet. Until that's wired, populate the inbox from the
+    // public Linden Lab status RSS so users see real grid-incident
+    // alerts (maintenance windows, deployments, outages) instead of
+    // staring at an empty screen.
+    val incidents by (app?.liveDataFeedClient?.incidents
+        ?: kotlinx.coroutines.flow.MutableStateFlow(emptyList<com.linkpoint.network.feeds.StatusIncident>()))
+        .collectAsState()
+    val dismissed = remember { mutableStateOf<Set<String>>(emptySet()) }
+
+    LaunchedEffect(Unit) {
+        app?.let { scope.launch { it.liveDataFeedClient.fetchStatusIncidents() } }
+    }
+
+    val items = incidents
+        .filter { it.title !in dismissed.value }
+        .take(30)
+        .map { incident ->
+            NotificationItem(
+                id = incident.title,
+                kind = NotificationKind.Region,
+                title = "Grid status",
+                body = incident.title,
+                timestamp = formatAgo(incident.publishedAtMs),
+                acceptable = false,
+                mentioned = false,
+            )
+        }
+
     NotificationsScreen(
         items = items,
         onBack = onBack,
-        onClearAll = { items.clear() },
-        onAccept = { item -> items.removeAll { it.id == item.id } },
-        onDecline = { item -> items.removeAll { it.id == item.id } },
+        onClearAll = {
+            dismissed.value = dismissed.value + incidents.map { it.title }
+        },
+        onAccept = { item -> dismissed.value = dismissed.value + item.id },
+        onDecline = { item -> dismissed.value = dismissed.value + item.id },
         onTap = {},
         modifier = modifier,
     )
+}
+
+private fun formatAgo(epochMs: Long): String {
+    if (epochMs <= 0L) return ""
+    val ageMs = System.currentTimeMillis() - epochMs
+    return when {
+        ageMs < 0L -> "scheduled"
+        ageMs < 60_000L -> "just now"
+        ageMs < 3_600_000L -> "${ageMs / 60_000L}m"
+        ageMs < 86_400_000L -> "${ageMs / 3_600_000L}h"
+        else -> "${ageMs / 86_400_000L}d"
+    }
 }
 
 @Composable
