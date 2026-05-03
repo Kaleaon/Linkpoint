@@ -112,7 +112,7 @@ import java.util.concurrent.atomic.AtomicLong
  */
 class UDPConnectionFixed(
     private val clock: () -> Long = { System.currentTimeMillis() },
-    private val eventEmitter: EventBus = EventBus.getInstance(),
+    private val eventEmitter: EventBus = EventBus,
     private val logger: (Int, String, String) -> Unit = { priority, tag, message -> Log.println(priority, tag, message) },
     private val transport: UdpDatagramTransport = UdpDatagramTransport(),
     private val reliabilitySupervisor: ReliabilitySupervisor = ReliabilitySupervisor(),
