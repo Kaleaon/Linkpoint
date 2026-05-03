@@ -117,11 +117,36 @@ fun WorldOverlayContainer(
     uiActions: WorldComposeUiActions,
     modifier: Modifier = Modifier
 ) {
-    val radarBlips = remember {
-        listOf(
-            RadarBlip("1", "Friend", BlipType.FRIEND, 30f, 0.5f, 0f),
-            RadarBlip("2", "Avatar", BlipType.STRANGER, 50f, 2f, 5f)
-        )
+    // Radar blips derived from the live AvatarManager. Previously hardcoded
+    // sample data ("Friend", "Avatar") shipped to production, which made the
+    // radar pretend to detect avatars even when nobody else was around.
+    val radarBlips = run {
+        val app = com.linkpoint.LinkpointApp.getInstanceOrNull()
+        if (app == null || !app.isAvatarManagerInitialized()) {
+            emptyList<RadarBlip>()
+        } else {
+            val me = app.avatarManager.getMyAvatar()
+            val mePos = me?.position ?: com.linkpoint.protocol.types.LLVector3.zero()
+            val friendIds: Set<java.util.UUID> = if (app.isFriendsManagerInitialized()) {
+                app.friendsManager.getAllFriends().map { it.agentId }.toSet()
+            } else emptySet()
+            app.avatarManager.getNearbyAvatars(mePos, 96f)
+                .filter { me == null || it.agentId != me.agentId }
+                .map { av ->
+                    val dx = av.position.x - mePos.x
+                    val dy = av.position.y - mePos.y
+                    val dz = av.position.z - mePos.z
+                    val dist = kotlin.math.sqrt(dx * dx + dy * dy + dz * dz)
+                    RadarBlip(
+                        id = av.agentId.toString(),
+                        name = av.agentId.toString().take(8),
+                        type = if (av.agentId in friendIds) BlipType.FRIEND else BlipType.STRANGER,
+                        distance = dist,
+                        bearing = kotlin.math.atan2(dy, dx),
+                        altitude = dz,
+                    )
+                }
+        }
     }
 
     var joystickX by remember { mutableStateOf(0f) }
