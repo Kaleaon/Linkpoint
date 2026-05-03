@@ -5888,6 +5888,12 @@ class LinkpointApp : Application() {
     fun isRenderManagerInitialized(): Boolean = ::renderManager.isInitialized
 
     /**
+     * Check if the UDP connection is initialized. Used by HUD telemetry
+     * samplers that may run before [udpConnection] is constructed.
+     */
+    fun isUdpConnectionInitialized(): Boolean = ::udpConnection.isInitialized
+
+    /**
      * Check if terrain manager is initialized (for late-binding the
      * TerrainRenderer once the render thread is up).
      */

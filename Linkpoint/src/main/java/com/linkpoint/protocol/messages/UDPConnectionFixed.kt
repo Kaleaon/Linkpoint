@@ -3624,6 +3624,16 @@ class UDPConnectionFixed(
             "routerStats" to messageRouter.getStatistics()
         )
     }
+
+    /**
+     * Cumulative byte counters since the current circuit was established.
+     * Reset on connect (see [bytesReceived]/[bytesSent] handling in
+     * `connect()`). Exposed so HUD telemetry samplers can compute live
+     * kbps as a delta over a fixed wall-clock interval without having to
+     * reach inside the connection's private state.
+     */
+    fun totalBytesReceived(): Long = bytesReceived.get()
+    fun totalBytesSent(): Long = bytesSent.get()
     
     /**
      * Start sending periodic AgentUpdate messages.

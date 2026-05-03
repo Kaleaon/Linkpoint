@@ -41,11 +41,14 @@ import com.linkpoint.ui.avatar.MyAvatarActivity
 import com.linkpoint.ui.people.NearbyPeopleActivity
 import com.linkpoint.render.lumiya.core.LumiyaGLSurfaceView
 import com.linkpoint.ui.settings.SettingsActivity
+import com.linkpoint.render.RenderDiagnostics
 import com.linkpoint.ui.xr.XRWorldActivity
 import com.linkpoint.utils.DebugReportService
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
@@ -1129,8 +1132,66 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 worldUiState.update { it.copy(regionName = region?.name ?: "Unknown Region") }
             }
         }
+
+        startTelemetrySampler()
     }
-    
+
+    /**
+     * Periodically samples the renderer frame counter and the UDP byte
+     * counters to populate the FPS / kbps fields on the top status pill.
+     *
+     * Both fields default to `null` on `WorldUiState`, which the overlay
+     * renders as "--". Without this sampler nothing else writes them and
+     * the pill stays as "FPS --  ·  -- kbps" indefinitely. Sampling at
+     * 1 Hz is a deliberate trade-off: it's frequent enough to feel live
+     * and slow enough that the integer division to kbps doesn't quantise
+     * to zero on a quiet circuit.
+     *
+     * Tied to lifecycleScope so the sampler stops automatically when the
+     * activity is destroyed; pause/resume don't gate it because the
+     * counters keep advancing across pauses and a stale display is more
+     * confusing than a brief lull when returning to the world view.
+     */
+    private fun startTelemetrySampler() {
+        lifecycleScope.launch {
+            var lastFrameCount = -1L
+            var lastBytes = -1L
+            var lastSampleMs = System.currentTimeMillis()
+            while (isActive) {
+                delay(1000L)
+                val nowMs = System.currentTimeMillis()
+                val intervalMs = (nowMs - lastSampleMs).coerceAtLeast(1L)
+                lastSampleMs = nowMs
+
+                val subsystem = RenderDiagnostics.activeRenderSubsystem()
+                val frameCount = subsystem?.let { RenderDiagnostics.frameCount(it) } ?: 0L
+                val fps: Int? = if (lastFrameCount < 0L || subsystem == null) {
+                    null
+                } else {
+                    val delta = (frameCount - lastFrameCount).coerceAtLeast(0L)
+                    ((delta * 1000L) / intervalMs).toInt()
+                }
+                lastFrameCount = frameCount
+
+                val totalBytes = if (app.isUdpConnectionInitialized()) {
+                    app.udpConnection.totalBytesReceived() + app.udpConnection.totalBytesSent()
+                } else {
+                    0L
+                }
+                val kbps: Int? = if (lastBytes < 0L) {
+                    null
+                } else {
+                    val delta = (totalBytes - lastBytes).coerceAtLeast(0L)
+                    // bytes/interval -> bits/sec -> kbps
+                    ((delta * 8L * 1000L) / intervalMs / 1000L).toInt()
+                }
+                lastBytes = totalBytes
+
+                worldUiState.update { it.copy(fps = fps, bandwidthKbps = kbps) }
+            }
+        }
+    }
+
     /**
      * Fetch landmarks from inventory and cache them for start location selection.
      */
@@ -1346,8 +1407,19 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     override fun onDestroy() {
         super.onDestroy()
         if (useSecondaryRenderer) {
-            app.bindGlesRenderEngine(null)
-            lumiyaSurfaceView?.shutdown()
+            // Skip the renderer teardown when the activity is being recreated
+            // for a configuration change (rotation, theme, locale, etc.).
+            // The new instance immediately spins up a fresh GLSurfaceView,
+            // and full shutdown forces a slow EGL/context/program rebuild —
+            // this is the "takes too long to restart" stall users hit when
+            // rotating or coming back from a panel that triggered a config
+            // change. preserveEGLContextOnPause already keeps state alive
+            // across pause/resume; this guard extends the same intent to
+            // configuration-driven recreation.
+            if (!isChangingConfigurations) {
+                app.bindGlesRenderEngine(null)
+                lumiyaSurfaceView?.shutdown()
+            }
             lumiyaSurfaceView = null
         } else {
             isRendering = false
