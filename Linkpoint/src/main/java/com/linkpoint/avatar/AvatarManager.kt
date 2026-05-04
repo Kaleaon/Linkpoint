@@ -14,7 +14,9 @@ import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLQuaternion
 import com.linkpoint.protocol.types.LLVector3
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -39,6 +41,12 @@ class AvatarManager(
     }
     
     private val avatars = ConcurrentHashMap<UUID, Avatar>()
+
+    sealed class AvatarEvent {
+        data class Added(val agentId: UUID, val localId: Int?) : AvatarEvent()
+        data class Updated(val agentId: UUID, val localId: Int?) : AvatarEvent()
+        data class Removed(val agentId: UUID, val localId: Int?) : AvatarEvent()
+    }
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     
     // Local agent
@@ -57,6 +65,8 @@ class AvatarManager(
     
     private val _avatarCount = MutableStateFlow(0)
     val avatarCount: StateFlow<Int> = _avatarCount
+    private val _avatarEvents = MutableSharedFlow<AvatarEvent>(extraBufferCapacity = 256)
+    val avatarEvents: SharedFlow<AvatarEvent> = _avatarEvents
     
     /**
      * Set the local agent ID and proactively create the local Avatar entry.
@@ -72,12 +82,14 @@ class AvatarManager(
      */
     fun setMyAgentId(agentId: UUID) {
         myAgentId = agentId
+        val existed = avatars.containsKey(agentId)
         // Pre-create the local avatar so getMyAvatar() is non-null immediately.
         // Position/rotation default to zero and will be overwritten by the
         // first ObjectUpdate / TerseUpdate for this agent.
         val avatar = avatars.getOrPut(agentId) { createAvatar(agentId) }
         myAvatar = avatar
         _avatarCount.value = avatars.size
+        _avatarEvents.tryEmit(if (existed) AvatarEvent.Updated(agentId, avatar.localId) else AvatarEvent.Added(agentId, avatar.localId))
         // Initialize movement controller with session info
         if (udpConnection != null) {
             movementController.setSessionInfo(agentId, UUID(0, 0)) // Session ID would be set from login
@@ -101,6 +113,7 @@ class AvatarManager(
         rotation: LLQuaternion,
         velocity: LLVector3 = LLVector3.zero()
     ) {
+        val existed = avatars.containsKey(agentId)
         val avatar = avatars.getOrPut(agentId) {
             createAvatar(agentId)
         }
@@ -115,6 +128,7 @@ class AvatarManager(
         }
         
         _avatarCount.value = avatars.size
+        _avatarEvents.tryEmit(if (existed) AvatarEvent.Updated(agentId, avatar.localId) else AvatarEvent.Added(agentId, avatar.localId))
     }
     
     /**
@@ -157,6 +171,7 @@ class AvatarManager(
      */
     fun removeAvatar(agentId: UUID) {
         avatars.remove(agentId)?.let { avatar ->
+            _avatarEvents.tryEmit(AvatarEvent.Removed(agentId, avatar.localId))
             avatar.animator.stopAll()
             // Clean up localId mapping if present
             avatar.localId?.let { localId ->
@@ -379,6 +394,13 @@ class AvatarManager(
      * Get all avatars
      */
     fun getAllAvatars(): Collection<Avatar> = avatars.values
+
+    fun getAgentIdForLocalId(localId: Int): UUID? = localIdToAgentId[localId]
+
+    fun removeAvatarByLocalId(localId: Int) {
+        val agentId = localIdToAgentId[localId] ?: return
+        removeAvatar(agentId)
+    }
     
     private fun createAvatar(agentId: UUID): Avatar {
         val skeleton = AvatarSkeleton(context)
