@@ -222,8 +222,14 @@ android {
     }
     
     lint {
-        abortOnError = false
-        checkReleaseBuilds = false
+        // Strict release safety gates: release and CI builds must fail on new
+        // error/fatal findings.
+        checkReleaseBuilds = true
+        abortOnError = true
+
+        // Baseline is allowed for legacy debt only. Any additions/changes must
+        // include an owner + expiry in docs/lint-exceptions.md.
+        baseline = file("lint-baseline.xml")
     }
     
     testOptions {
