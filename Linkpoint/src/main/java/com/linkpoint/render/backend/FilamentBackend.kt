@@ -22,17 +22,20 @@ class FilamentBackend(
     }
 
     override fun onSurfaceDestroyed() {
+        renderManager.onSurfaceDestroyed()
         renderManager.pauseDrawing("surface_destroyed")
     }
 
     override fun onResume() {
         renderManager.dispatcher.post(Runnable {
+            renderManager.onAppResumed()
             renderManager.resumeDrawing("activity_resumed")
             renderManager.recreateSwapChain()
         })
     }
 
     override fun onPause() {
+        renderManager.onAppPaused()
         renderManager.pauseDrawing("activity_paused")
     }
 
