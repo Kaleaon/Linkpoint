@@ -6,6 +6,7 @@ import android.opengl.GLUtils
 import android.util.Log
 import android.util.LruCache
 import com.linkpoint.assets.TextureFormatPolicy
+import com.linkpoint.assets.TextureMemoryTracker
 import java.util.UUID
 
 /**
@@ -31,6 +32,12 @@ class GLTextureCache(
             if (evicted && oldValue != null) {
                 resourceManager.deleteTexture(oldValue.handle)
                 resourceManager.removeMemory(oldValue.sizeBytes)
+                // Keep TextureMemoryTracker in sync with the live GL set.
+                // Without this, the HUD/debug-report Live Textures counter
+                // (LinkpointTexture-pipeline only) shows zero even when
+                // GLTextureCache is full of uploaded textures.
+                TextureMemoryTracker.freeGpu(oldValue.sizeBytes)
+                TextureMemoryTracker.textureClosed()
             }
         }
     }
@@ -82,6 +89,12 @@ class GLTextureCache(
         val sizeBytes = (bitmap.width * bitmap.height * 4 * 4L / 3L) // approximate with mipmaps
         resourceManager.addMemory(sizeBytes)
         cache.put(id, TextureEntry(handle, bitmap.width, bitmap.height, sizeBytes))
+        // Mirror the GL upload into TextureMemoryTracker so the HUD /
+        // debug-report counters reflect the actual live GPU set rather
+        // than the LinkpointTexture-only side path. Paired with the
+        // textureClosed/freeGpu calls in entryRemoved above.
+        TextureMemoryTracker.allocGpu(sizeBytes)
+        TextureMemoryTracker.textureOpened()
 
         return handle
     }
