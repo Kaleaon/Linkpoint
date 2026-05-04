@@ -25,6 +25,7 @@ object MessageParser {
     
     /** Packet header size: flags (1) + sequence (4) + extra (1) = 6 bytes */
     private const val PACKET_HEADER_SIZE = 6
+    private const val REGION_HANDSHAKE_MIN_BYTES = 189
     
     /**
      * Extract the payload portion from a raw UDP packet.
@@ -149,6 +150,14 @@ object MessageParser {
         val shortValue = ((byte3 shl 8) or byte4).toShort().toInt()
 
         return shortValue or -65536
+    }
+
+    fun extractSequenceNumber(rawPacket: ByteArray): Int {
+        if (rawPacket.size < 5) return -1
+        return ((rawPacket[1].toInt() and 0xFF) shl 24) or
+            ((rawPacket[2].toInt() and 0xFF) shl 16) or
+            ((rawPacket[3].toInt() and 0xFF) shl 8) or
+            (rawPacket[4].toInt() and 0xFF)
     }
     
 
@@ -700,6 +709,10 @@ enum class ChatType(val value: Int) {
  *   - RegionProtocols (U64)
  */
 fun MessageParser.parseRegionHandshake(data: ByteArray): RegionHandshakeData? {
+    if (data.size < REGION_HANDSHAKE_MIN_BYTES) {
+        Log.w(TAG, "RegionHandshake payload too short: ${data.size} bytes (min=$REGION_HANDSHAKE_MIN_BYTES)")
+        return null
+    }
     val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
     
     try {
@@ -711,7 +724,11 @@ fun MessageParser.parseRegionHandshake(data: ByteArray): RegionHandshakeData? {
         val simNameLen = buffer.get().toInt() and 0xFF
         val simNameBytes = ByteArray(simNameLen)
         buffer.get(simNameBytes)
-        val simName = String(simNameBytes, Charsets.UTF_8).trimEnd('\u0000')
+        val simName = String(simNameBytes, Charsets.UTF_8).trimEnd('\u0000').trim()
+        if (simName.isEmpty()) {
+            Log.w(TAG, "RegionHandshake payload rejected: empty SimName")
+            return null
+        }
         
         // SimOwner UUID
         val simOwnerBytes = ByteArray(16)

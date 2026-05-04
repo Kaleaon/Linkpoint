@@ -2,6 +2,7 @@ package com.linkpoint.protocol.messages
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Test
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -15,6 +16,12 @@ class RegionHandshakeParserTest {
         val parsed = MessageParser.parseRegionHandshake(data)
         assertNotNull(parsed)
         assertEquals("TestRegion", parsed?.simName)
+    }
+
+    @Test
+    fun `parseRegionHandshake rejects partial or empty payload`() {
+        assertNull(MessageParser.parseRegionHandshake(byteArrayOf()))
+        assertNull(MessageParser.parseRegionHandshake(ByteArray(10)))
     }
 
     private fun buildRegionHandshakePayload(simName: String): ByteArray {

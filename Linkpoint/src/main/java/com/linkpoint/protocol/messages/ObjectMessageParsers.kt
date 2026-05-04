@@ -9,16 +9,48 @@ import java.nio.ByteOrder
 
 internal object ObjectMessageParsers {
     private const val TAG = "ObjectMessageParsers"
+    enum class RejectReason {
+        TRUNCATED_PACKET,
+        INVALID_BLOCK_LENGTH,
+        ZERO_LOCAL_ID,
+        ZERO_FULL_ID,
+        EXCEPTION
+    }
+    data class ParseCounters(
+        val packetsReceived: Int,
+        val packetsParsed: Int,
+        val objectsCreatedOrUpdated: Int,
+        val rejected: Map<RejectReason, Int>
+    )
+    private val rejectedCounters = mutableMapOf<RejectReason, Int>()
+    @Volatile private var packetsReceived = 0
+    @Volatile private var packetsParsed = 0
+    @Volatile private var objectsCreatedOrUpdated = 0
+    @Synchronized private fun markRejected(reason: RejectReason) {
+        rejectedCounters[reason] = (rejectedCounters[reason] ?: 0) + 1
+    }
+    private fun validateObjectIds(localId: Int, fullId: java.util.UUID): RejectReason? = when {
+        localId == 0 -> RejectReason.ZERO_LOCAL_ID
+        fullId == java.util.UUID(0L, 0L) -> RejectReason.ZERO_FULL_ID
+        else -> null
+    }
+    fun getCounters(): ParseCounters = synchronized(this) {
+        ParseCounters(packetsReceived, packetsParsed, objectsCreatedOrUpdated, rejectedCounters.toMap())
+    }
 
     fun parseObjectUpdate(data: ByteArray): List<ObjectUpdateData> {
         val results = mutableListOf<ObjectUpdateData>()
+        packetsReceived++
         val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
         try {
             val regionHandle = buffer.long
             buffer.short
             val numBlocks = buffer.get().toInt() and 0xFF
             repeat(numBlocks) { parseObjectBlock(buffer, regionHandle)?.let(results::add) }
+            packetsParsed++
+            objectsCreatedOrUpdated += results.size
         } catch (e: Exception) {
+            markRejected(RejectReason.TRUNCATED_PACKET)
             Log.e(TAG, "Failed to parse ObjectUpdate", e)
         }
         return results
@@ -26,13 +58,17 @@ internal object ObjectMessageParsers {
 
     fun parseObjectUpdateCompressed(data: ByteArray): List<ObjectUpdateData> {
         val results = mutableListOf<ObjectUpdateData>()
+        packetsReceived++
         val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
         try {
             val regionHandle = buffer.long
             buffer.short
             val numBlocks = buffer.get().toInt() and 0xFF
             repeat(numBlocks) { parseCompressedBlock(buffer, regionHandle)?.let(results::add) }
+            packetsParsed++
+            objectsCreatedOrUpdated += results.size
         } catch (e: Exception) {
+            markRejected(RejectReason.TRUNCATED_PACKET)
             Log.e(TAG, "Failed to parse ObjectUpdateCompressed", e)
         }
         return results
@@ -40,6 +76,7 @@ internal object ObjectMessageParsers {
 
     fun parseTerseObjectUpdate(data: ByteArray): List<TerseUpdateData> {
         val results = mutableListOf<TerseUpdateData>()
+        packetsReceived++
         val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
         try {
             buffer.long
@@ -53,7 +90,10 @@ internal object ObjectMessageParsers {
                     parseTerseBlock(blockData)?.let(results::add)
                 }
             }
+            packetsParsed++
+            objectsCreatedOrUpdated += results.size
         } catch (e: Exception) {
+            markRejected(RejectReason.TRUNCATED_PACKET)
             Log.e(TAG, "Failed to parse TerseObjectUpdate", e)
         }
         return results
@@ -64,6 +104,11 @@ internal object ObjectMessageParsers {
             val localId = buffer.int
             buffer.get()
             val fullId = buffer.readUuid()
+            validateObjectIds(localId, fullId)?.let {
+                markRejected(it)
+                Log.w(TAG, "Rejected ObjectUpdate block: reason=$it localId=$localId fullId=$fullId")
+                return null
+            }
             buffer.int
             val pcode = buffer.get().toInt() and 0xFF
             val material = buffer.get().toInt() and 0xFF
@@ -129,6 +174,7 @@ internal object ObjectMessageParsers {
                 String(nameValueBytes, Charsets.UTF_8), regionHandle, extraParams, shapeParams
             )
         } catch (e: Exception) {
+            markRejected(RejectReason.EXCEPTION)
             Log.e(TAG, "Failed to parse object block", e)
             null
         }
@@ -142,6 +188,11 @@ internal object ObjectMessageParsers {
 
             val fullId = cb.readUuid()
             val localId = cb.int
+            validateObjectIds(localId, fullId)?.let {
+                markRejected(it)
+                Log.w(TAG, "Rejected ObjectUpdateCompressed block: reason=$it localId=$localId fullId=$fullId")
+                return null
+            }
             val pcode = cb.get().toInt() and 0xFF
             cb.get(); cb.int
             val material = cb.get().toInt() and 0xFF
@@ -173,13 +224,17 @@ internal object ObjectMessageParsers {
                 regionHandle = regionHandle
             )
         } catch (e: Exception) {
+            markRejected(RejectReason.EXCEPTION)
             Log.e(TAG, "Failed to parse compressed block", e)
             null
         }
     }
 
     private fun parseTerseBlock(data: ByteArray): TerseUpdateData? {
-        if (data.size < 30) return null
+        if (data.size < 30) {
+            markRejected(RejectReason.INVALID_BLOCK_LENGTH)
+            return null
+        }
         val bb = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
         val localId = bb.int
         val state = bb.get().toInt() and 0xFF
@@ -195,6 +250,11 @@ internal object ObjectMessageParsers {
         bb.position(bb.position() + 8)
         val angularVelocity = if (bb.remaining() >= 6) LLVector3.fromTerse(data, bb.position(), 256f) else LLVector3.zero()
 
+        if (localId == 0) {
+            markRejected(RejectReason.ZERO_LOCAL_ID)
+            Log.w(TAG, "Rejected ImprovedTerseObjectUpdate block: reason=ZERO_LOCAL_ID")
+            return null
+        }
         return TerseUpdateData(localId, isAvatar, position, velocity, acceleration, rotation, angularVelocity)
     }
 
