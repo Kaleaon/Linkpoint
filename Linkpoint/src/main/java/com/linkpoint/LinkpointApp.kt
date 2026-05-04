@@ -1554,8 +1554,17 @@ class LinkpointApp : Application() {
                         Log.d(TAG, "Avatar update: localId=${update.localId}, fullId=${update.fullId} (total: $avatarUpdateCount)")
                     }
                     if (::avatarManager.isInitialized) {
+                        // Use the localId-aware overload so the
+                        // localId -> agentId mapping is registered. Without
+                        // this the subsequent ImprovedTerseObjectUpdate
+                        // packets — which only carry localId, no fullId —
+                        // can't be routed to the right avatar and either
+                        // get buffered indefinitely or (under the old
+                        // fallback) silently overwrote the local agent's
+                        // position with strangers' deltas.
                         avatarManager.updateAvatar(
                             agentId = update.fullId,
+                            localId = update.localId,
                             position = update.position,
                             rotation = update.rotation,
                             velocity = update.velocity

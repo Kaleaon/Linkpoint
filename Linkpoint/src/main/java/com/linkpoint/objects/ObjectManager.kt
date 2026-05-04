@@ -137,6 +137,9 @@ class ObjectManager(
         
         objectsByUUID[data.fullId] = obj
         ScenePopulationDiagnostics.markManagerApplied(ScenePopulationDiagnostics.EntityType.OBJECT, true)
+
+        // Apply any ObjectProperties that arrived before this ObjectUpdate.
+        applyPendingObjectProperties(data.fullId)
     }
     
     /**
@@ -155,9 +158,14 @@ class ObjectManager(
     /**
      * Handle object properties update from ObjectProperties message.
      * Updates object name, description, owner, and permissions.
+     *
+     * If the matching ObjectUpdate hasn't arrived yet (properties race
+     * ahead of geometry on busy regions), the entry is buffered in
+     * [pendingObjectProperties] and applied on the next [handleObjectUpdate]
+     * for that fullId — otherwise the name/description silently stays
+     * generic for the rest of the session.
      */
     fun handleObjectProperties(props: ObjectPropertyEntry) {
-        // Find object by UUID
         val obj = objectsByUUID[props.objectId]
         if (obj != null) {
             obj.apply {
@@ -167,9 +175,38 @@ class ObjectManager(
                 lastUpdate = System.currentTimeMillis()
             }
             Log.d(TAG, "Updated properties for object '${props.name}' (${props.objectId})")
-        } else {
-            // Object not in scene yet - this can happen if properties arrive before ObjectUpdate
-            Log.d(TAG, "Received properties for unknown object '${props.name}' (${props.objectId})")
+            return
+        }
+        bufferPendingObjectProperties(props)
+    }
+
+    /**
+     * Per-fullId buffer of object properties that arrived before the
+     * matching ObjectUpdate. Bounded; only the most recent entry per
+     * fullId is kept since newer ObjectProperties supersede older ones.
+     */
+    private val pendingObjectProperties = ConcurrentHashMap<UUID, ObjectPropertyEntry>()
+    private val PENDING_PROPERTIES_LIMIT = 1024
+
+    private fun bufferPendingObjectProperties(props: ObjectPropertyEntry) {
+        if (pendingObjectProperties.size >= PENDING_PROPERTIES_LIMIT &&
+            !pendingObjectProperties.containsKey(props.objectId)
+        ) {
+            pendingObjectProperties.keys.firstOrNull()?.let {
+                pendingObjectProperties.remove(it)
+            }
+        }
+        pendingObjectProperties[props.objectId] = props
+    }
+
+    private fun applyPendingObjectProperties(fullId: UUID) {
+        val pending = pendingObjectProperties.remove(fullId) ?: return
+        val obj = objectsByUUID[fullId] ?: return
+        obj.apply {
+            name = pending.name
+            description = pending.description
+            ownerId = pending.ownerId
+            lastUpdate = System.currentTimeMillis()
         }
     }
     
