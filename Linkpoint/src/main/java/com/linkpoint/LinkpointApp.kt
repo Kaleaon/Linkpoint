@@ -258,6 +258,8 @@ class LinkpointApp : Application() {
      * in 2 minutes, so the leak compounds quickly.
      */
     @Volatile private var fgsConnectStateMirrorJob: Job? = null
+    @Volatile private var avatarEventBridgeJob: Job? = null
+    private val sceneAvatarEntityIds = java.util.concurrent.ConcurrentHashMap.newKeySet<UUID>()
     @Volatile private var firstReconnectAttemptAt: Long = 0L
     private val reloginMutex = Mutex()
 
@@ -1148,6 +1150,19 @@ class LinkpointApp : Application() {
             this, meshManager, textureManager, animationManager, capabilityManager, udpConnection
         )
         avatarManager.setMyAgentId(agentId)
+        avatarEventBridgeJob?.cancel()
+        avatarEventBridgeJob = applicationScope.launch {
+            avatarManager.avatarEvents.collect { event ->
+                when (event) {
+                    is AvatarManager.AvatarEvent.Added -> sceneAvatarEntityIds.add(event.agentId)
+                    is AvatarManager.AvatarEvent.Updated -> sceneAvatarEntityIds.add(event.agentId)
+                    is AvatarManager.AvatarEvent.Removed -> {
+                        sceneAvatarEntityIds.remove(event.agentId)
+                        publishRenderCommand(SceneRenderCommand.RemoveEntity(localId = event.localId ?: 0, fullId = event.agentId))
+                    }
+                }
+            }
+        }
         
         // Chat manager
         chatManager = ChatManager(udpConnection, agentId)
@@ -1318,6 +1333,7 @@ class LinkpointApp : Application() {
             Log.i(TAG, "║ ⭐ REGION_HANDSHAKE RECEIVED (CRITICAL MESSAGE)")
             Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
             Log.d(TAG, "RegionHandshake raw packet size: ${rawPacket.size} bytes")
+            val packetSequence = com.linkpoint.protocol.messages.MessageParser.extractSequenceNumber(rawPacket)
             try {
                 // Extract payload from raw packet (skip header and message ID)
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
@@ -1333,21 +1349,24 @@ class LinkpointApp : Application() {
                 
                 val regionData = com.linkpoint.protocol.messages.MessageParser.parseRegionHandshake(payload)
                 if (regionData != null) {
-                    Log.i(TAG, "RegionHandshake parsed: simName='${regionData.simName}'")
+                    Log.i(
+                        TAG,
+                        "RegionHandshake accepted seq=$packetSequence simName='${regionData.simName}' regionId=${regionData.regionId} flags=${regionData.regionFlags} flagsExt=${regionData.regionFlagsExtended}"
+                    )
                     com.linkpoint.utils.InitializationTracker.logInfo("Region: ${regionData.simName}")
-                    
-                    // Update session with region info
-                    // Parser already trims null padding; trim whitespace for display safety.
-                    val regionName = regionData.simName.trim()
-                    if (regionName.isNotEmpty()) {
-                        sessionManager.updateRegionName(regionName)
-                        Log.d(TAG, "Session region name updated to: $regionName")
-                        com.linkpoint.utils.SessionLogRecorder.logRegionChange(
-                            regionName, null, null
-                        )
-                    } else {
-                        Log.w(TAG, "RegionHandshake simName was empty after trimming")
-                    }
+
+                    // Canonical handshake -> session mapping
+                    sessionManager.updateFromRegionHandshake(
+                        simName = regionData.simName,
+                        regionId = regionData.regionId,
+                        regionFlags = regionData.regionFlags,
+                        regionFlagsExtended = regionData.regionFlagsExtended,
+                        simAccess = regionData.simAccess
+                    )
+                    Log.d(TAG, "Session region state updated from RegionHandshake")
+                    com.linkpoint.utils.SessionLogRecorder.logRegionChange(
+                        regionData.simName, null, null
+                    )
                     
                     // Update terrain manager with water height
                     if (::terrainManager.isInitialized) {
@@ -1412,7 +1431,7 @@ class LinkpointApp : Application() {
                     }
                 } else {
                     com.linkpoint.utils.InitializationTracker.logWarning("RegionHandshake parse returned null")
-                    Log.w(TAG, "RegionHandshake parse returned null - payload may be malformed")
+                    Log.w(TAG, "RegionHandshake rejected seq=$packetSequence payloadBytes=${payload.size}")
                 }
             } catch (e: Exception) {
                 com.linkpoint.utils.InitializationTracker.failPhase(
@@ -1887,6 +1906,9 @@ class LinkpointApp : Application() {
                             // Get UUID before removal so we can remove from scene
                             val obj = objectManager.getObject(localId)
                             objectManager.removeObject(localId)
+                            if (::avatarManager.isInitialized) {
+                                avatarManager.removeAvatarByLocalId(localId)
+                            }
                             publishRenderCommand(
                                 SceneRenderCommand.RemoveEntity(
                                     localId = localId,
@@ -6080,7 +6102,8 @@ class LinkpointApp : Application() {
 
     fun runScenePopulationSmokeCheck(): ScenePopulationDiagnostics.SmokeCheckResult {
         val objectCount = if (::objectManager.isInitialized) objectManager.getAllObjects().size else 0
-        val avatarCount = if (::avatarManager.isInitialized) avatarManager.getAllAvatars().size else 0
+        val managerAvatarCount = if (::avatarManager.isInitialized) avatarManager.getAllAvatars().size else 0
+        val avatarCount = maxOf(managerAvatarCount, sceneAvatarEntityIds.size)
         return ScenePopulationDiagnostics.runSmokeCheck(objectCount, avatarCount)
     }
 

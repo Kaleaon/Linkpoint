@@ -245,6 +245,7 @@ class RenderManager(private val context: Context) {
                     override fun onDetachedFromSurface() {
                         dispatcher.post(Runnable {
                             Log.w(TAG, "UiHelper.onDetachedFromSurface - Surface lost")
+                            setSurfaceState(RenderSurfaceState.DESTROYED, source = "UiHelper.onDetachedFromSurface")
                             RenderDiagnostics.filamentSurfaceDetached("UiHelper.onDetachedFromSurface")
                             displayHelper?.detach()
                             synchronized(swapChainLock) {
@@ -615,7 +616,7 @@ class RenderManager(private val context: Context) {
                 null
             }
             if (swapChain != null) {
-                Log.i(TAG, "✓ SwapChain created eagerly during initialize")
+                Log.i(TAG, "SwapChain created (initialize/eager) dims=${sv.width}x${sv.height} backend=Filament")
                 attachDisplayHelper()
                 applyViewportFromSurface("rebuildSwapChainForCurrentSurface")
             }
@@ -717,6 +718,7 @@ class RenderManager(private val context: Context) {
                     Log.i(TAG, "║ ✓ SwapChain created successfully via ensureSwapChain!")
                     Log.i(TAG, "║ Frame count: ${frameCount.get()}")
                     Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+                    Log.i(TAG, "SwapChain created (ensure) dims=${viewportWidth}x${viewportHeight} backend=Filament")
                     attachDisplayHelper()
                     applyViewportFromSurface("ensureSwapChain")
                 }
@@ -767,6 +769,12 @@ class RenderManager(private val context: Context) {
             RenderDiagnostics.filamentSwapChainFailed("surface invalid")
             return
         }
+        setSurfaceState(
+            if (explicitWidth > 0 && explicitHeight > 0) RenderSurfaceState.RESIZED else RenderSurfaceState.CREATED,
+            explicitWidth,
+            explicitHeight,
+            "recreateSwapChainInternal"
+        )
 
         Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ 🔄 Recreating SwapChain (manual call)...")
@@ -779,6 +787,7 @@ class RenderManager(private val context: Context) {
                 try {
                     waitForGpuIdle("recreateSwapChain")
                     engine.destroySwapChain(oldSwapChain)
+                    Log.i(TAG, "SwapChain destroyed (recreate) dims=${viewportWidth}x${viewportHeight} backend=Filament")
                     RenderDiagnostics.filamentSwapChainDestroyed("recreate")
                 } catch (e: Exception) {
                     Log.w(TAG, "║ Warning: Error destroying old SwapChain: ${e.message}")
@@ -792,6 +801,9 @@ class RenderManager(private val context: Context) {
                 swapChain = engine.createSwapChain(surface)
                 if (swapChain != null) {
                     Log.i(TAG, "║ ✓ SwapChain recreated successfully")
+                    val logWidth = if (explicitWidth > 0) explicitWidth else viewportWidth
+                    val logHeight = if (explicitHeight > 0) explicitHeight else viewportHeight
+                    Log.i(TAG, "SwapChain created (recreate) dims=${logWidth}x${logHeight} backend=Filament")
                     RenderDiagnostics.filamentSwapChainCreated(explicitWidth, explicitHeight)
                     attachDisplayHelper()
                     if (explicitWidth > 0 && explicitHeight > 0) {
@@ -1197,6 +1209,33 @@ class RenderManager(private val context: Context) {
     @Volatile private var displayAttachWarningLogged: Boolean = false
     @Volatile private var lastSwapChainWarningTime: Long = 0
     private val firstFrameLogged = AtomicBoolean(false)
+    @Volatile private var renderSurfaceState: RenderSurfaceState = RenderSurfaceState.DESTROYED
+    @Volatile private var appLifecycleState: AppLifecycleState = AppLifecycleState.RESUMED
+
+    enum class RenderSurfaceState { CREATED, RESIZED, DESTROYED }
+    enum class AppLifecycleState { RESUMED, PAUSED }
+
+    private fun setSurfaceState(state: RenderSurfaceState, width: Int = -1, height: Int = -1, source: String) {
+        renderSurfaceState = state
+        Log.i(
+            TAG,
+            "Surface transition -> $state (${if (width > 0 && height > 0) "${width}x${height}" else "size=unknown"}) source=$source backend=Filament"
+        )
+    }
+
+    fun onAppResumed() {
+        appLifecycleState = AppLifecycleState.RESUMED
+        Log.i(TAG, "App lifecycle transition -> RESUMED backend=Filament")
+    }
+
+    fun onAppPaused() {
+        appLifecycleState = AppLifecycleState.PAUSED
+        Log.i(TAG, "App lifecycle transition -> PAUSED backend=Filament")
+    }
+
+    fun onSurfaceDestroyed() {
+        setSurfaceState(RenderSurfaceState.DESTROYED, source = "backend.onSurfaceDestroyed")
+    }
     
     /**
      * Get comprehensive diagnostic data for debug reports
@@ -1220,6 +1259,8 @@ class RenderManager(private val context: Context) {
             hasCamera = camera != null,
             hasSwapChain = hasSwapChainNow,
             isSurfaceReady = surfaceReady,
+            surfaceState = renderSurfaceState.name,
+            appLifecycleState = appLifecycleState.name,
             isDrawingEnabled = drawingEnabled.get(),
             viewportWidth = viewportWidth,
             viewportHeight = viewportHeight,
@@ -1247,6 +1288,8 @@ class RenderManager(private val context: Context) {
         val hasCamera: Boolean,
         val hasSwapChain: Boolean,
         val isSurfaceReady: Boolean,
+        val surfaceState: String,
+        val appLifecycleState: String,
         val isDrawingEnabled: Boolean,
         val viewportWidth: Int,
         val viewportHeight: Int,
