@@ -1597,7 +1597,13 @@ class UDPConnectionFixed(
         if (acksToSend.isEmpty()) return
 
         try {
-            val packetSize = PACKET_HEADER_SIZE + 1 + 1 + (acksToSend.size * 4)
+            // PacketAck is Fixed-frequency (0xFFFFFFFB) — 4 bytes for the
+            // message ID on the wire, NOT 1. Lumiya's `PacketAck.PackPayload`
+            // writes `putShort(-1); put(-1); put(-5)` (FF FF FF FB) before
+            // the count byte and the ack ids; sending a single 0xFB makes
+            // the simulator parse us as unknown high-freq message 251 and
+            // drop the entire ack packet.
+            val packetSize = PACKET_HEADER_SIZE + 4 + 1 + (acksToSend.size * 4)
             val packet = ByteBuffer.allocate(packetSize).order(ByteOrder.BIG_ENDIAN)
 
             val seqNum = sequenceNumber.incrementAndGet()
@@ -1605,7 +1611,10 @@ class UDPConnectionFixed(
             packet.putInt(seqNum)
             packet.put(0x00.toByte()) // Extra byte
 
-            // Message ID: PacketAck (0xFB)
+            // Message ID: PacketAck (Fixed-frequency 0xFFFFFFFB on the wire)
+            packet.put(0xFF.toByte())
+            packet.put(0xFF.toByte())
+            packet.put(0xFF.toByte())
             packet.put(0xFB.toByte())
 
             // Block count
@@ -3328,12 +3337,36 @@ class UDPConnectionFixed(
     }
 
     /**
-     * Encode message ID for transmission (Linkpoint)
+     * Encode message ID for transmission (Linkpoint).
+     *
+     * Wire format from message_template.msg / Lumiya `SLMessage.PackPayload`:
+     *   - High   (1 byte):  0x01..0xFE
+     *   - Medium (2 bytes): 0xFF + lo
+     *   - Low    (4 bytes): 0xFF 0xFF + 2-byte BE id     -> signed Int 0xFFFF0001..0xFFFFFEFF
+     *   - Fixed  (4 bytes): 0xFF 0xFF 0xFF + lo          -> signed Int 0xFFFFFF00..0xFFFFFFFF (-256..-1)
+     *
+     * The previous version had no Fixed branch: PacketAck (-5), CloseCircuit
+     * (-3), OpenCircuit (-4) all fell through to the High case and went out as
+     * a single 0xFB / 0xFD / 0xFC byte. The simulator parsed that as an
+     * unknown high-frequency message and silently dropped the packet, so every
+     * standalone PacketAck we sent was discarded — the server kept
+     * retransmitting reliable packets forever and the circuit eventually died
+     * from the unanswered-ping watchdog. See PacketAck.PackPayload in
+     * lumiya_decompiled_source: `putShort(-1); put(-1); put(-5); ...`.
      */
     private fun encodeMessageId(messageId: Int): ByteArray {
         return when {
-            // Low frequency: negative values < -128
-            messageId < -128 -> {
+            // Fixed frequency: 0xFFFFFF00..0xFFFFFFFF (-256..-1 as signed Int)
+            messageId in -256..-1 -> {
+                byteArrayOf(
+                    0xFF.toByte(),
+                    0xFF.toByte(),
+                    0xFF.toByte(),
+                    (messageId and 0xFF).toByte()
+                )
+            }
+            // Low frequency: 0xFFFF0001..0xFFFFFEFF (signed Int < -256)
+            messageId < -256 -> {
                 val shortValue = messageId and 0xFFFF
                 byteArrayOf(
                     0xFF.toByte(),
