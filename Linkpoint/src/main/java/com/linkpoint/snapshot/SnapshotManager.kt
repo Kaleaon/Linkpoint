@@ -269,29 +269,35 @@ class SnapshotManager(
     
     /**
      * Share snapshot to profile feed.
+     *
+     * Checks the UploadAgentProfileImage capability up front so we don't
+     * eat the L$10 inventory upload cost when the second-stage profile
+     * post can't fire — the previous flow would upload-to-inventory,
+     * notice the capability missing afterwards, and silently return false
+     * with no user feedback (the user thought their snapshot posted; it
+     * didn't, and they were now $10 lighter).
      */
     suspend fun shareToProfile(bitmap: Bitmap, caption: String = ""): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                // First upload to inventory
-                val uploadResult = uploadToInventory(bitmap, "Profile Snapshot", caption)
-                
-                if (uploadResult is UploadResult.Success) {
-                    // Then post to profile feed using ProfileImage capability
-                    val postCap = capabilityManager.getCapability(CapabilityManager.CAP_UPLOAD_AGENT_PROFILE_IMAGE)
-                    if (postCap != null) {
-                        val request = LLSDMap().apply {
-                            this["texture_id"] = LLSDUUID(uploadResult.assetId)
-                            this["caption"] = LLSDString(caption)
-                        }
-                        
-                        capabilityManager.request(CapabilityManager.CAP_UPLOAD_AGENT_PROFILE_IMAGE, request)
-                        Log.i(TAG, "Snapshot shared to profile")
-                        return@withContext true
-                    }
+                val postCap = capabilityManager.getCapability(CapabilityManager.CAP_UPLOAD_AGENT_PROFILE_IMAGE)
+                if (postCap == null) {
+                    Log.w(TAG, "shareToProfile aborted: UploadAgentProfileImage capability not available")
+                    return@withContext false
                 }
-                
-                false
+
+                val uploadResult = uploadToInventory(bitmap, "Profile Snapshot", caption)
+                if (uploadResult !is UploadResult.Success) {
+                    return@withContext false
+                }
+
+                val request = LLSDMap().apply {
+                    this["texture_id"] = LLSDUUID(uploadResult.assetId)
+                    this["caption"] = LLSDString(caption)
+                }
+                capabilityManager.request(CapabilityManager.CAP_UPLOAD_AGENT_PROFILE_IMAGE, request)
+                Log.i(TAG, "Snapshot shared to profile")
+                true
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to share to profile", e)
                 false

@@ -121,7 +121,11 @@ class CronetHttpClient private constructor(
 
         private val sink = java.io.ByteArrayOutputStream()
         private val readBuffer: ByteBuffer = ByteBuffer.allocateDirect(64 * 1024)
-        @Volatile private var resumed = AtomicBoolean(false)
+        // AtomicBoolean is already internally volatile; the field reference
+        // is also immutable (val), so the @Volatile annotation it used to
+        // carry was redundant (and misleading — it suggested the slot itself
+        // could be written, which it can't).
+        private val resumed = AtomicBoolean(false)
 
         override fun onRedirectReceived(
             request: UrlRequest, info: UrlResponseInfo, newLocationUrl: String
