@@ -30,6 +30,9 @@ class SessionManager(private val context: Context) {
     
     private val _currentRegion = MutableStateFlow<RegionInfo?>(null)
     val currentRegion: StateFlow<RegionInfo?> = _currentRegion
+
+    private val _regionSessionState = MutableStateFlow(RegionSessionState())
+    val regionSessionState: StateFlow<RegionSessionState> = _regionSessionState
     
     // Teleport history
     private val _teleportHistory = MutableStateFlow<List<TeleportHistoryEntry>>(emptyList())
@@ -119,6 +122,30 @@ class SessionManager(private val context: Context) {
             _currentRegion.value = current.copy(name = regionName)
             Log.i(TAG, "Region name updated: ${current.name} -> $regionName")
         }
+        _regionSessionState.value = _regionSessionState.value.copy(simName = regionName)
+    }
+
+    /**
+     * Canonical mapping from RegionHandshake fields into a single session object.
+     */
+    fun updateFromRegionHandshake(
+        simName: String,
+        regionId: UUID?,
+        regionFlags: Int,
+        regionFlagsExtended: Long?,
+        simAccess: Int
+    ) {
+        val trimmedName = simName.trim()
+        if (trimmedName.isNotEmpty()) {
+            updateRegionName(trimmedName)
+        }
+        _regionSessionState.value = _regionSessionState.value.copy(
+            simName = trimmedName,
+            regionId = regionId,
+            regionFlags = regionFlags,
+            regionFlagsExtended = regionFlagsExtended,
+            simAccess = simAccess
+        )
     }
     
     /**
@@ -428,6 +455,14 @@ data class RegionInfo(
     val simPort: Int,
     val seedCapability: String? = null,
     val waterHeight: Float = 20f
+)
+
+data class RegionSessionState(
+    val simName: String = "",
+    val regionId: UUID? = null,
+    val regionFlags: Int = 0,
+    val regionFlagsExtended: Long? = null,
+    val simAccess: Int = 0
 )
 
 data class TeleportHistoryEntry(

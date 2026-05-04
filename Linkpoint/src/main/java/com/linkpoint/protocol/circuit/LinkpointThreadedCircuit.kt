@@ -147,6 +147,8 @@ class LinkpointThreadedCircuit(
     
     /** Registered message handlers by message ID */
     private val messageHandlers = ConcurrentHashMap<Int, MessageHandler>()
+
+    private val transportPolicy = ReliableTransportPolicy()
     
     /** Listener for message ACK/timeout events (proven pattern) */
     interface MessageEventListener {
@@ -180,6 +182,7 @@ class LinkpointThreadedCircuit(
         val messageId: Int,
         val data: ByteArray,
         val sentTime: Long,
+        val firstSentTime: Long = sentTime,
         var retryCount: Int = 0,
         val listener: MessageEventListener? = null
     )
@@ -366,6 +369,9 @@ class LinkpointThreadedCircuit(
      * Check if fully connected (world data flowing)
      */
     fun isFullyConnected(): Boolean = fullyConnected.get()
+
+    fun getTransportMetrics(): TransportMetricsSnapshot =
+        transportPolicy.metrics(pendingReliableMessages.size)
     
     // ==================== MAIN CIRCUIT LOOP ====================
     
@@ -538,8 +544,11 @@ class LinkpointThreadedCircuit(
                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
                     "LinkpointCircuit: ACK received for seq=$ackedSeq msg=${messageIdToName(pending.messageId)}")
                 
-                pending.listener?.onMessageAcknowledged(ackedSeq, pending.messageId)
-                messageEventListener?.onMessageAcknowledged(ackedSeq, pending.messageId)
+                val ackLatency = System.currentTimeMillis() - pending.firstSentTime
+                if (transportPolicy.onAck(ackedSeq, ackLatency)) {
+                    pending.listener?.onMessageAcknowledged(ackedSeq, pending.messageId)
+                    messageEventListener?.onMessageAcknowledged(ackedSeq, pending.messageId)
+                }
                 
                 // Special handling for UseCircuitCode ACK
                 if (pending.messageId == LinkpointConstants.MSG_USE_CIRCUIT_CODE) {
@@ -604,8 +613,11 @@ class LinkpointThreadedCircuit(
             if (pending != null) {
                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
                     "LinkpointCircuit: Appended ACK for seq=$ackedSeq")
-                pending.listener?.onMessageAcknowledged(ackedSeq, pending.messageId)
-                messageEventListener?.onMessageAcknowledged(ackedSeq, pending.messageId)
+                val ackLatency = System.currentTimeMillis() - pending.firstSentTime
+                if (transportPolicy.onAck(ackedSeq, ackLatency)) {
+                    pending.listener?.onMessageAcknowledged(ackedSeq, pending.messageId)
+                    messageEventListener?.onMessageAcknowledged(ackedSeq, pending.messageId)
+                }
             }
         }
     }
@@ -734,19 +746,19 @@ class LinkpointThreadedCircuit(
         val toTimeout = mutableListOf<PendingMessage>()
         
         pendingReliableMessages.values.forEach { pending ->
-            val elapsed = now - pending.sentTime
-            if (elapsed > LinkpointConstants.MESSAGE_TIMEOUT_MS) {
-                if (pending.retryCount < LinkpointConstants.MESSAGE_MAX_RETRIES) {
-                    toRetry.add(pending)
-                } else {
-                    toTimeout.add(pending)
-                }
+            if (transportPolicy.isExpired(pending.firstSentTime) ||
+                pending.retryCount >= LinkpointConstants.MESSAGE_MAX_RETRIES
+            ) {
+                toTimeout.add(pending)
+            } else if (transportPolicy.shouldRetry(pending.sentTime, pending.retryCount)) {
+                toRetry.add(pending)
             }
         }
         
         // Process retries
         for (pending in toRetry) {
             pending.retryCount++
+            transportPolicy.markRetransmit()
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
                 "LinkpointCircuit: Retry ${pending.retryCount}/${LinkpointConstants.MESSAGE_MAX_RETRIES} " +
                 "for seq=${pending.sequenceNumber} msg=${messageIdToName(pending.messageId)}")
@@ -779,6 +791,7 @@ class LinkpointThreadedCircuit(
         // Process timeouts
         for (pending in toTimeout) {
             pendingReliableMessages.remove(pending.sequenceNumber)
+            transportPolicy.markExpiredDrop()
             NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
                 "LinkpointCircuit: Message timeout seq=${pending.sequenceNumber} msg=${messageIdToName(pending.messageId)}")
             

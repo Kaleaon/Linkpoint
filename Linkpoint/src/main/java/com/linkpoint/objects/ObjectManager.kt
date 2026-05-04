@@ -28,6 +28,19 @@ import java.util.concurrent.ConcurrentHashMap
 class ObjectManager(
     private val udpConnection: UDPConnectionFixed
 ) {
+    enum class RejectReason {
+        ZERO_FULL_ID,
+        ZERO_LOCAL_ID,
+        LOCAL_ID_UUID_MISMATCH,
+        UNKNOWN_LOCAL_ID
+    }
+    data class UpdateCounters(
+        val packetsReceived: Long,
+        val packetsParsed: Long,
+        val objectsCreatedOrUpdated: Long,
+        val sceneInsertedOrUpdated: Long,
+        val rejected: Map<RejectReason, Long>
+    )
     companion object {
         private const val TAG = "ObjectManager"
         private val MESSAGE_BYTE_ORDER = ByteOrder.LITTLE_ENDIAN
@@ -68,6 +81,17 @@ class ObjectManager(
     }
     
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    @Volatile private var packetsReceived = 0L
+    @Volatile private var packetsParsed = 0L
+    @Volatile private var objectsCreatedOrUpdated = 0L
+    @Volatile private var sceneInsertedOrUpdated = 0L
+    private val rejected = ConcurrentHashMap<RejectReason, Long>()
+    private fun markRejected(reason: RejectReason) {
+        rejected.compute(reason) { _, v -> (v ?: 0L) + 1L }
+    }
+    fun getUpdateCounters(): UpdateCounters = UpdateCounters(
+        packetsReceived, packetsParsed, objectsCreatedOrUpdated, sceneInsertedOrUpdated, rejected.toMap()
+    )
     
     // All objects in scene
     private val objects = ConcurrentHashMap<Int, SceneObject>()
@@ -103,9 +127,26 @@ class ObjectManager(
      * Handle object update from simulator
      */
     fun handleObjectUpdate(data: ObjectUpdateData) {
-        if (data.fullId == ZERO_UUID) {
+        packetsReceived++
+        packetsParsed++
+        if (data.localId == 0) {
+            markRejected(RejectReason.ZERO_LOCAL_ID)
             ScenePopulationDiagnostics.markManagerApplied(ScenePopulationDiagnostics.EntityType.OBJECT, false)
-            Log.w(TAG, "Dropped object update localId=${data.localId} due to zero fullId")
+            Log.w(TAG, "Rejected object update: reason=ZERO_LOCAL_ID fullId=${data.fullId}")
+            return
+        }
+        if (data.fullId == ZERO_UUID) {
+            markRejected(RejectReason.ZERO_FULL_ID)
+            ScenePopulationDiagnostics.markManagerApplied(ScenePopulationDiagnostics.EntityType.OBJECT, false)
+            Log.w(TAG, "Rejected object update: reason=ZERO_FULL_ID localId=${data.localId}")
+            return
+        }
+
+        val existingByLocal = objects[data.localId]
+        if (existingByLocal != null && existingByLocal.fullId != data.fullId) {
+            markRejected(RejectReason.LOCAL_ID_UUID_MISMATCH)
+            ScenePopulationDiagnostics.markManagerApplied(ScenePopulationDiagnostics.EntityType.OBJECT, false)
+            Log.w(TAG, "Rejected object update: reason=LOCAL_ID_UUID_MISMATCH localId=${data.localId} expected=${existingByLocal.fullId} got=${data.fullId}")
             return
         }
 
@@ -136,6 +177,8 @@ class ObjectManager(
         }
         
         objectsByUUID[data.fullId] = obj
+        objectsCreatedOrUpdated++
+        sceneInsertedOrUpdated++
         ScenePopulationDiagnostics.markManagerApplied(ScenePopulationDiagnostics.EntityType.OBJECT, true)
 
         // Apply any ObjectProperties that arrived before this ObjectUpdate.
@@ -146,12 +189,24 @@ class ObjectManager(
      * Handle terse position update
      */
     fun handleTerseUpdate(data: TerseUpdateData) {
+        packetsReceived++
+        packetsParsed++
+        if (data.localId == 0) {
+            markRejected(RejectReason.ZERO_LOCAL_ID)
+            Log.w(TAG, "Rejected terse update: reason=ZERO_LOCAL_ID")
+            return
+        }
         objects[data.localId]?.apply {
             position = data.position
             rotation = data.rotation
             velocity = data.velocity
             angularVelocity = data.angularVelocity
             lastUpdate = System.currentTimeMillis()
+            objectsCreatedOrUpdated++
+            sceneInsertedOrUpdated++
+        } ?: run {
+            markRejected(RejectReason.UNKNOWN_LOCAL_ID)
+            Log.w(TAG, "Rejected terse update: reason=UNKNOWN_LOCAL_ID localId=${data.localId}")
         }
     }
     
