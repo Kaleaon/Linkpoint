@@ -999,6 +999,7 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("XR Mode: ${renderDiag.isXRMode}")
                         appendLine("Viewport: ${renderDiag.viewportWidth} x ${renderDiag.viewportHeight}")
                         appendLine("Frame Count: ${renderDiag.frameCount}")
+                        appendLine("Lifecycle: app=${renderDiag.appLifecycleState} surface=${renderDiag.surfaceState}")
                         renderDiag.timeSinceLastFrame?.let {
                             appendLine("Time Since Last Frame: ${formatDuration(it)}")
                         }
@@ -1014,6 +1015,11 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("  SwapChain: ${if (renderDiag.hasSwapChain) "✓" else "✗"}")
                         appendLine("  Surface Ready: ${if (renderDiag.isSurfaceReady) "✓" else "✗ (e.g. on Settings, app backgrounded)"}")
                         appendLine("  Drawing Enabled: ${if (renderDiag.isDrawingEnabled) "✓" else "✗ (paused — panel open / activity backgrounded)"}")
+                        appendLine()
+                        appendLine("Smoke Validation:")
+                        appendLine("  Surface Status: ${if (renderDiag.isSurfaceReady) "READY (${renderDiag.surfaceState})" else "NOT_READY (${renderDiag.surfaceState})"}")
+                        appendLine("  SwapChain Status: ${if (renderDiag.hasSwapChain) "READY" else "MISSING"}")
+                        appendLine("  Frame Submit Count: ${renderDiag.frameCount}")
                         appendLine()
                         appendLine("Visible Entity Counts:")
                         appendLine("  Avatars: ${renderDiag.visibleAvatarCount}")
