@@ -1333,6 +1333,7 @@ class LinkpointApp : Application() {
             Log.i(TAG, "║ ⭐ REGION_HANDSHAKE RECEIVED (CRITICAL MESSAGE)")
             Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
             Log.d(TAG, "RegionHandshake raw packet size: ${rawPacket.size} bytes")
+            val packetSequence = com.linkpoint.protocol.messages.MessageParser.extractSequenceNumber(rawPacket)
             try {
                 // Extract payload from raw packet (skip header and message ID)
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
@@ -1348,21 +1349,24 @@ class LinkpointApp : Application() {
                 
                 val regionData = com.linkpoint.protocol.messages.MessageParser.parseRegionHandshake(payload)
                 if (regionData != null) {
-                    Log.i(TAG, "RegionHandshake parsed: simName='${regionData.simName}'")
+                    Log.i(
+                        TAG,
+                        "RegionHandshake accepted seq=$packetSequence simName='${regionData.simName}' regionId=${regionData.regionId} flags=${regionData.regionFlags} flagsExt=${regionData.regionFlagsExtended}"
+                    )
                     com.linkpoint.utils.InitializationTracker.logInfo("Region: ${regionData.simName}")
-                    
-                    // Update session with region info
-                    // Parser already trims null padding; trim whitespace for display safety.
-                    val regionName = regionData.simName.trim()
-                    if (regionName.isNotEmpty()) {
-                        sessionManager.updateRegionName(regionName)
-                        Log.d(TAG, "Session region name updated to: $regionName")
-                        com.linkpoint.utils.SessionLogRecorder.logRegionChange(
-                            regionName, null, null
-                        )
-                    } else {
-                        Log.w(TAG, "RegionHandshake simName was empty after trimming")
-                    }
+
+                    // Canonical handshake -> session mapping
+                    sessionManager.updateFromRegionHandshake(
+                        simName = regionData.simName,
+                        regionId = regionData.regionId,
+                        regionFlags = regionData.regionFlags,
+                        regionFlagsExtended = regionData.regionFlagsExtended,
+                        simAccess = regionData.simAccess
+                    )
+                    Log.d(TAG, "Session region state updated from RegionHandshake")
+                    com.linkpoint.utils.SessionLogRecorder.logRegionChange(
+                        regionData.simName, null, null
+                    )
                     
                     // Update terrain manager with water height
                     if (::terrainManager.isInitialized) {
@@ -1427,7 +1431,7 @@ class LinkpointApp : Application() {
                     }
                 } else {
                     com.linkpoint.utils.InitializationTracker.logWarning("RegionHandshake parse returned null")
-                    Log.w(TAG, "RegionHandshake parse returned null - payload may be malformed")
+                    Log.w(TAG, "RegionHandshake rejected seq=$packetSequence payloadBytes=${payload.size}")
                 }
             } catch (e: Exception) {
                 com.linkpoint.utils.InitializationTracker.failPhase(
