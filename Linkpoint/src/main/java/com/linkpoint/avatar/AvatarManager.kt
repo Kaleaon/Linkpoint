@@ -130,14 +130,17 @@ class AvatarManager(
     ) {
         // Maintain localId -> agentId mapping for terse updates
         localIdToAgentId[localId] = agentId
-        
+
         // Delegate to the standard update
         updateAvatar(agentId, position, rotation, velocity)
-        
+
         // Store localId on the avatar for reference
         avatars[agentId]?.localId = localId
+
+        // Replay any terse update that arrived before this mapping landed.
+        replayPendingTerseUpdate(localId, agentId)
     }
-    
+
     /**
      * Register a localId -> agentId mapping (e.g., from ObjectUpdate for avatars).
      * This enables terse updates to update the correct avatar.
@@ -146,6 +149,7 @@ class AvatarManager(
         localIdToAgentId[localId] = agentId
         avatars[agentId]?.localId = localId
         Log.d(TAG, "Registered localId mapping: $localId -> $agentId")
+        replayPendingTerseUpdate(localId, agentId)
     }
     
     /**
@@ -195,37 +199,75 @@ class AvatarManager(
      * Handle terse position update from ImprovedTerseObjectUpdate message.
      * This is used for fast position updates for avatars (when isAvatar=true).
      * Uses localId -> agentId mapping to update both our own and other avatars.
+     *
+     * If the localId hasn't been mapped to an agentId yet (terse update beat
+     * the initial ObjectUpdate, which happens at region entry), the update
+     * is buffered in [pendingTerseUpdates] and replayed in
+     * [registerLocalIdMapping] / the localId-aware [updateAvatar] overload
+     * when the mapping arrives. Previously the unknown-localId branch
+     * silently overwrote `myAvatar` with whatever data came in — which
+     * could teleport the user to a remote avatar's position during the
+     * brief race window.
      */
     fun handleTerseUpdate(data: TerseUpdateData) {
         if (!data.isAvatar) return
-        
-        // Look up the agentId from localId mapping
+
         val agentId = localIdToAgentId[data.localId]
-        
         if (agentId != null) {
-            // Found the avatar by localId mapping
-            val avatar = avatars[agentId]
-            if (avatar != null) {
-                avatar.position = data.position
-                avatar.rotation = data.rotation
-                avatar.velocity = data.velocity
-                avatar.lastUpdate = System.currentTimeMillis()
-                Log.d(TAG, "TerseUpdate: updated avatar $agentId, localId=${data.localId}, pos=${data.position}")
-                return
-            }
+            applyTerseUpdate(agentId, data)
+            return
         }
-        
-        // Fallback: Try to update our own avatar if we don't have a mapping yet
-        // This handles the case before the localId mapping is established
-        if (myAvatar != null) {
-            myAvatar?.let { avatar ->
-                avatar.position = data.position
-                avatar.rotation = data.rotation
-                avatar.velocity = data.velocity
-                avatar.lastUpdate = System.currentTimeMillis()
-                Log.d(TAG, "TerseUpdate: updated myAvatar (fallback), localId=${data.localId}, pos=${data.position}")
-            }
+
+        // Self-update fast path: if the terse update's localId matches our
+        // own avatar's known localId, it's our position. Otherwise it
+        // belongs to another avatar whose ObjectUpdate hasn't landed yet —
+        // buffer it for replay rather than dropping or misapplying.
+        val mine = myAvatar
+        if (mine != null && mine.localId == data.localId) {
+            applyTerseUpdate(mine.agentId, data)
+            return
         }
+
+        bufferPendingTerseUpdate(data)
+    }
+
+    private fun applyTerseUpdate(agentId: UUID, data: TerseUpdateData) {
+        val avatar = avatars[agentId] ?: return
+        avatar.position = data.position
+        avatar.rotation = data.rotation
+        avatar.velocity = data.velocity
+        avatar.lastUpdate = System.currentTimeMillis()
+    }
+
+    /**
+     * Per-localId pending terse updates. Bounded entry count, only the
+     * most-recent update per localId kept (older deltas are stale once
+     * a fresher one arrives). Cleared on shutdown / region change via
+     * [clearPendingTerseUpdates].
+     */
+    private val pendingTerseUpdates = ConcurrentHashMap<Int, TerseUpdateData>()
+    private val PENDING_TERSE_LIMIT = 256
+
+    private fun bufferPendingTerseUpdate(data: TerseUpdateData) {
+        if (pendingTerseUpdates.size >= PENDING_TERSE_LIMIT &&
+            !pendingTerseUpdates.containsKey(data.localId)
+        ) {
+            // Evict an arbitrary entry to keep the map bounded; a steady
+            // stream of unmapped localIds means the producer is well ahead
+            // of ObjectUpdate and we can't catch them all.
+            val victim = pendingTerseUpdates.keys.firstOrNull()
+            if (victim != null) pendingTerseUpdates.remove(victim)
+        }
+        pendingTerseUpdates[data.localId] = data
+    }
+
+    private fun replayPendingTerseUpdate(localId: Int, agentId: UUID) {
+        val pending = pendingTerseUpdates.remove(localId) ?: return
+        applyTerseUpdate(agentId, pending)
+    }
+
+    fun clearPendingTerseUpdates() {
+        pendingTerseUpdates.clear()
     }
     
     /**

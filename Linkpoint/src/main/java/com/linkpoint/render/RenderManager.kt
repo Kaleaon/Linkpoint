@@ -1027,6 +1027,15 @@ class RenderManager(private val context: Context) {
      */
     fun getPrimRenderer(): PrimRenderer? = primRenderer
 
+    /**
+     * True once the Filament prim renderer is constructed and initialised.
+     * Used by [FilamentRenderCommandConsumer] to gate command application —
+     * commands that arrive before this returns true are silently lost
+     * inside [updatePrim] (the `primRenderer ?: return false` short-circuit)
+     * and the consumer instead buffers them until this flips true.
+     */
+    fun isReady(): Boolean = primRenderer != null
+
     fun getMeshPrimRenderer(): MeshPrimRenderer? = meshPrimRenderer
 
     fun configurePrimMeshPipeline(

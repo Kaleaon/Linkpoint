@@ -985,6 +985,15 @@ class LinkpointApp : Application() {
                     protocol.stateManager.setStatus(
                         com.linkpoint.network.core.NetworkStateManager.ConnectionStatus.RECONNECTING
                     )
+                    // Arm CompleteAgentMovement to fire again once the new
+                    // UseCircuitCode is ACKed. Without this reset the CAS at
+                    // the PacketAck handler returns false on every reconnect,
+                    // CompleteAgentMovement is never re-sent, the simulator
+                    // never re-emits RegionHandshake, and the world stays
+                    // empty even though the socket is healthy and ping/ack
+                    // traffic is flowing — the symptom in the 2026-05-03
+                    // debug report (Reconnect Count: 3, Total Objects: 0).
+                    completeAgentMovementSent.set(false)
                 }
                 UDPConnectionFixed.NetworkStateTransition.CONNECTED -> {
                     Log.i(TAG, "✓ UDP watchdog: CONNECTED (socket reconnect succeeded)")
@@ -1006,6 +1015,21 @@ class LinkpointApp : Application() {
                         com.linkpoint.network.core.NetworkStateManager.ConnectionStatus.FAULTED
                     )
                 }
+            }
+        }
+
+        // Feed live circuit RTT samples (Karn-clean ACK round-trips) into
+        // the quality manager. Without this, recordLatency() only fires
+        // once per HTTP login attempt, so the running average is whatever
+        // the slowest login took to authenticate — the 2026-05-03 debug
+        // report showed Average Latency: 30692ms over 4 samples, which
+        // is exactly the login-handshake duration on a slow link, not
+        // anything resembling actual circuit latency.
+        udpConnection.setLatencySampleListener { rttMs ->
+            try {
+                protocol.qualityManager.recordLatency(rttMs)
+            } catch (e: Exception) {
+                Log.v(TAG, "qualityManager.recordLatency threw: ${e.message}")
             }
         }
 
@@ -1530,8 +1554,17 @@ class LinkpointApp : Application() {
                         Log.d(TAG, "Avatar update: localId=${update.localId}, fullId=${update.fullId} (total: $avatarUpdateCount)")
                     }
                     if (::avatarManager.isInitialized) {
+                        // Use the localId-aware overload so the
+                        // localId -> agentId mapping is registered. Without
+                        // this the subsequent ImprovedTerseObjectUpdate
+                        // packets — which only carry localId, no fullId —
+                        // can't be routed to the right avatar and either
+                        // get buffered indefinitely or (under the old
+                        // fallback) silently overwrote the local agent's
+                        // position with strangers' deltas.
                         avatarManager.updateAvatar(
                             agentId = update.fullId,
+                            localId = update.localId,
                             position = update.position,
                             rotation = update.rotation,
                             velocity = update.velocity
@@ -5886,6 +5919,12 @@ class LinkpointApp : Application() {
      * Note: RenderManager is initialized early, so this is always true after app init
      */
     fun isRenderManagerInitialized(): Boolean = ::renderManager.isInitialized
+
+    /**
+     * Check if the UDP connection is initialized. Used by HUD telemetry
+     * samplers that may run before [udpConnection] is constructed.
+     */
+    fun isUdpConnectionInitialized(): Boolean = ::udpConnection.isInitialized
 
     /**
      * Check if terrain manager is initialized (for late-binding the

@@ -30,11 +30,14 @@ class PermissionManager(private val activity: AppCompatActivity) {
         
         /**
          * Essential permissions required for the app to function properly.
-         * Includes storage permissions for Linkpoint Logs directory.
+         * Includes storage permissions for Linkpoint Logs directory and the
+         * granular media-access permissions Android 13+ uses in place of
+         * the legacy `READ_EXTERNAL_STORAGE` for picking snapshots, sounds,
+         * and animations the user has saved.
          */
         fun getEssentialPermissions(): Array<String> {
             val permissions = mutableListOf<String>()
-            
+
             // Storage permissions for Linkpoint Logs directory (Documents/Linkpoint Logs/)
             // Required for saving crash logs and network logs
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
@@ -45,13 +48,19 @@ class PermissionManager(private val activity: AppCompatActivity) {
                 // Android 10-12: READ permission for compatibility
                 permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
-            // Android 13+ (API 33+): Uses app-specific external directory, no permission needed
-            
-            // Notification permission for Android 13+
+            // Android 13+ (API 33+): the legacy READ_EXTERNAL_STORAGE is a
+            // no-op; replaced by per-media-type permissions. We declare and
+            // ask for all three so users can attach existing snapshots,
+            // import sounds, and load animations from device storage. App-
+            // private cache writes (Documents/Linkpoint Logs/, asset cache
+            // under getExternalFilesDir) need no permission on any version.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                permissions.add(Manifest.permission.READ_MEDIA_IMAGES)
+                permissions.add(Manifest.permission.READ_MEDIA_VIDEO)
+                permissions.add(Manifest.permission.READ_MEDIA_AUDIO)
                 permissions.add(Manifest.permission.POST_NOTIFICATIONS)
             }
-            
+
             return permissions.toTypedArray()
         }
         

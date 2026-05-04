@@ -386,6 +386,29 @@ object RenderDiagnostics {
         }
     }
 
+    /**
+     * Active backend name for the HUD telemetry overlay. Returns the first
+     * subsystem that has produced a frame within the stall threshold, or
+     * `null` if no backend is currently rendering.
+     */
+    fun activeRenderSubsystem(): String? {
+        val now = System.currentTimeMillis()
+        return synchronized(this) {
+            activeSubsystems.firstOrNull { subsystem ->
+                val lastFrame = lastFrameWallClock[subsystem]?.get() ?: 0L
+                lastFrame > 0L && (now - lastFrame) <= (STALL_THRESHOLD_MS * 2)
+            } ?: activeSubsystems.firstOrNull()
+        }
+    }
+
+    /**
+     * Total frames rendered for [subsystem] since process start. Callers
+     * (e.g. the HUD telemetry sampler) compute FPS by reading this twice
+     * and dividing the delta by the elapsed time, which avoids coupling
+     * the UI to the heartbeat cadence.
+     */
+    fun frameCount(subsystem: String): Long = frameCounters[subsystem]?.get() ?: 0L
+
     data class Percentiles(val p50Ms: Long?, val p90Ms: Long?, val p99Ms: Long?)
     data class DiagnosticsSnapshot(
         val activeBackend: String,

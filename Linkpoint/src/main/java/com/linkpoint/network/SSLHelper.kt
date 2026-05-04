@@ -52,10 +52,16 @@ object SSLHelper {
         .build()
     
     /**
-     * Compatible TLS for older servers that don't support modern protocols
+     * Compatible TLS for older servers that don't support TLS 1.3.
+     *
+     * TLS 1.0 / 1.1 are deprecated (RFC 8996, March 2021) and rejected by
+     * every Linden Lab and OpenSim grid we connect to — keeping them in
+     * the spec list only made handshake fingerprints noisier without ever
+     * producing a successful connection. Floor at TLS 1.2 to match modern
+     * server policy and Android 10+'s default platform behaviour.
      */
     private val COMPATIBLE_TLS = ConnectionSpec.Builder(ConnectionSpec.COMPATIBLE_TLS)
-        .tlsVersions(TlsVersion.TLS_1_2, TlsVersion.TLS_1_1, TlsVersion.TLS_1_0)
+        .tlsVersions(TlsVersion.TLS_1_2)
         .allEnabledCipherSuites()
         .build()
     

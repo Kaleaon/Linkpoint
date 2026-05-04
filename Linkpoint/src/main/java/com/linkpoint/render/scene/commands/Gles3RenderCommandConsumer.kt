@@ -51,6 +51,28 @@ class Gles3RenderCommandConsumer(
     private val terrainHeightmap = FloatArray(REGION_SIZE * REGION_SIZE)
 
     /**
+     * Commands that arrived before the GL engine was bound. The simulator
+     * sends the bulk of the scene (ObjectUpdate, LayerData, terrain) in a
+     * single burst right after RegionHandshake; subsequent traffic is
+     * mostly deltas (ImprovedTerseObjectUpdate, KillObject) that assume
+     * the viewer already holds the full state. If the burst arrives before
+     * `WorldViewActivity` has built its `LumiyaGLSurfaceView` and called
+     * `bindEngine`, every command would be silently dropped at the
+     * `engineProvider ?: return` guard in [dispatch] and the scene would
+     * stay empty for the rest of the session — the symptom captured in
+     * the 2026-05-03 debug report (Total Objects: 0, Live Textures: 0
+     * despite a connected circuit).
+     *
+     * Buffer is bounded to keep a stuck pre-bind state from growing
+     * unbounded; oldest commands are evicted first, which is the right
+     * behaviour because newer ObjectUpdates supersede older ones for the
+     * same prim.
+     */
+    private val pendingCommands = ArrayDeque<SceneRenderCommand>()
+    private val pendingLock = Any()
+    private val pendingCapacity = 4096
+
+    /**
      * Bind the active GL engine. [glThreadExecutor] must marshal a Runnable
      * onto the GL render thread (typically `lumiyaGlSurfaceView::queueEvent`).
      * Pass [textureFetcher] to enable real material binding; without it,
@@ -61,15 +83,41 @@ class Gles3RenderCommandConsumer(
         glThreadExecutor: (Runnable) -> Unit = { it.run() },
         textureFetcher: TextureFetcher? = null
     ) {
+        val wasUnbound = this.engineProvider == null
+        val fetcherWasUnbound = this.textureFetcher == null
         this.engineProvider = provider
         this.lumiya = provider as? LumiyaRenderer
         this.glThreadExecutor = glThreadExecutor
         this.textureFetcher = textureFetcher
+
+        if (provider != null && wasUnbound) {
+            replayPendingCommands()
+        }
+        if (textureFetcher != null && provider != null && fetcherWasUnbound) {
+            replayPendingTextureBinds()
+        }
     }
 
     /** Backwards-compatible single-argument bind for callers that don't yet wire texture fetch. */
     fun bindEngine(provider: RenderEngineProvider?) {
         bindEngine(provider, { it.run() }, null)
+    }
+
+    private fun replayPendingCommands() {
+        val drained = synchronized(pendingLock) {
+            val copy = pendingCommands.toList()
+            pendingCommands.clear()
+            copy
+        }
+        if (drained.isEmpty()) return
+        Log.i(TAG, "Replaying ${drained.size} pending render commands after engine bind")
+        for (command in drained) {
+            try {
+                dispatch(command)
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to replay $command: ${e.message}")
+            }
+        }
     }
 
     fun start() {
@@ -90,7 +138,10 @@ class Gles3RenderCommandConsumer(
     // =====================================================================
 
     private fun dispatch(command: SceneRenderCommand) {
-        val engine = engineProvider ?: return
+        val engine = engineProvider ?: run {
+            bufferPending(command)
+            return
+        }
         when (command) {
             is SceneRenderCommand.UpsertPrim -> handleUpsertPrim(engine, command)
             is SceneRenderCommand.UpsertMesh -> handleUpsertMesh(engine, command)
@@ -213,6 +264,15 @@ class Gles3RenderCommandConsumer(
         runOnGl { engine.updateTerrain(heightmap, 257, 257) }
     }
 
+    private fun bufferPending(command: SceneRenderCommand) {
+        synchronized(pendingLock) {
+            if (pendingCommands.size >= pendingCapacity) {
+                pendingCommands.removeFirst()
+            }
+            pendingCommands.addLast(command)
+        }
+    }
+
     // =====================================================================
     // Texture binding
     // =====================================================================
@@ -224,9 +284,19 @@ class Gles3RenderCommandConsumer(
      * upload via the GLTextureCache.
      */
     private fun tryBindFaceTextures(primId: Long, textureEntry: ByteArray) {
-        val fetcher = textureFetcher ?: return
-        val lumiyaRef = lumiya ?: return
         if (textureEntry.isEmpty()) return
+        val fetcher = textureFetcher
+        val lumiyaRef = lumiya
+        if (fetcher == null || lumiyaRef == null) {
+            // Buffer the prim+textureEntry so once the engine is rebound
+            // with a non-null fetcher, the textures get bound retroactively.
+            // Without this, prims that arrive between bindEngine(provider)
+            // (which we may receive before LinkpointApp's textureManager is
+            // wired into a fetcher) and the second bindEngine call get
+            // permanent untextured-white faces.
+            bufferPendingTextureBind(primId, textureEntry)
+            return
+        }
 
         val ids = try {
             TextureEntryParser.extractTextureIds(textureEntry)
@@ -237,7 +307,14 @@ class Gles3RenderCommandConsumer(
         for (id in ids) {
             if (!TextureEntryParser.shouldDownload(id)) continue
             fetcher.fetch(id) { bitmap ->
-                if (bitmap == null) return@fetch
+                if (bitmap == null) {
+                    // Decode/network failure for this UUID. We don't retry
+                    // here (the TextureManager owns its own retry policy);
+                    // log at verbose so the failure is at least greppable
+                    // instead of vanishing into the void.
+                    Log.v(TAG, "Texture fetch returned null id=$id prim=$primId")
+                    return@fetch
+                }
                 runOnGl {
                     lumiyaRef.uploadTextureForPrim(
                         primId,
@@ -247,6 +324,34 @@ class Gles3RenderCommandConsumer(
                     )
                 }
             }
+        }
+    }
+
+    /**
+     * Per-prim pending texture-bind requests captured while the engine /
+     * fetcher was unbound. Bounded by a coarse cap and most-recent-wins
+     * per-prim — newer ObjectUpdates supersede the prior texture entry
+     * for the same prim, so re-binding the latest blob is correct.
+     */
+    private val pendingTextureBinds = java.util.concurrent.ConcurrentHashMap<Long, ByteArray>()
+    private val PENDING_TEXTURE_BIND_LIMIT = 4096
+
+    private fun bufferPendingTextureBind(primId: Long, textureEntry: ByteArray) {
+        if (pendingTextureBinds.size >= PENDING_TEXTURE_BIND_LIMIT &&
+            !pendingTextureBinds.containsKey(primId)
+        ) {
+            pendingTextureBinds.keys.firstOrNull()?.let { pendingTextureBinds.remove(it) }
+        }
+        pendingTextureBinds[primId] = textureEntry
+    }
+
+    private fun replayPendingTextureBinds() {
+        if (pendingTextureBinds.isEmpty()) return
+        val drained = pendingTextureBinds.toMap()
+        pendingTextureBinds.clear()
+        Log.i(TAG, "Replaying ${drained.size} pending texture binds after fetcher ready")
+        for ((primId, textureEntry) in drained) {
+            tryBindFaceTextures(primId, textureEntry)
         }
     }
 

@@ -191,7 +191,10 @@ class InventoryActivity : AppCompatActivity() {
     
     override fun onBackPressed() {
         if (inventoryStack.size > 1) {
-            inventoryStack.removeLast()
+            // Avoid MutableList.removeLast() — it resolves to the Java 21
+            // SequencedCollection default method, which is missing on
+            // Android < 35 and throws NoSuchMethodError at runtime.
+            inventoryStack.removeAt(inventoryStack.lastIndex)
             loadFolderContents(inventoryStack.last())
         } else {
             super.onBackPressed()
