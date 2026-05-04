@@ -370,7 +370,7 @@ class LinkpointThreadedCircuit(
      */
     fun isFullyConnected(): Boolean = fullyConnected.get()
 
-    fun getTransportMetrics(): TransportMetricsSnapshot =
+    internal fun getTransportMetrics(): TransportMetricsSnapshot =
         transportPolicy.metrics(pendingReliableMessages.size)
     
     // ==================== MAIN CIRCUIT LOOP ====================

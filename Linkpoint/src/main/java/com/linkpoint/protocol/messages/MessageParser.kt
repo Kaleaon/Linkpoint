@@ -21,11 +21,11 @@ import java.util.UUID
  */
 object MessageParser {
     
-    private const val TAG = "MessageParser"
+    internal const val TAG = "MessageParser"
     
     /** Packet header size: flags (1) + sequence (4) + extra (1) = 6 bytes */
     private const val PACKET_HEADER_SIZE = 6
-    private const val REGION_HANDSHAKE_MIN_BYTES = 189
+    internal const val REGION_HANDSHAKE_MIN_BYTES = 189
     
     /**
      * Extract the payload portion from a raw UDP packet.
