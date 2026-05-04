@@ -23,6 +23,12 @@ object LinkpointConstants {
     
     /** Message timeout - 5 seconds matches the reference viewer exactly */
     const val MESSAGE_TIMEOUT_MS = 5000L
+
+    /** Max backoff delay for reliable retransmits to stay mobile-friendly */
+    const val MESSAGE_RETRY_BACKOFF_MAX_MS = 30000L
+
+    /** Absolute packet lifetime for reliable sends before forced expiration */
+    const val RELIABLE_PACKET_EXPIRY_MS = 90000L
     
     /** Time without packets before sending a ping to keep connection alive */
     const val NEED_PING_TIMEOUT_MS = 10000L
