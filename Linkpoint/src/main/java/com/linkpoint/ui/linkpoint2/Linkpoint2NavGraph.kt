@@ -145,11 +145,17 @@ fun Linkpoint2RouteHost(
                 mapOf("notif" to Manifest.permission.POST_NOTIFICATIONS)
             } else emptyMap()
 
-            // A single launcher handles one permission at a time.
+            // Track which permission is pending so the result handler can log it.
             var pendingPermission by remember { mutableStateOf<String?>(null) }
             val launcher = rememberLauncherForActivityResult(
                 ActivityResultContracts.RequestPermission()
-            ) { /* result handled by the OS; no UI action required */ }
+            ) { granted ->
+                android.util.Log.d(
+                    "OnboardingPermissions",
+                    "Permission ${pendingPermission ?: "unknown"} granted=$granted",
+                )
+                if (!granted) pendingPermission = null
+            }
 
             OnboardingPermissionsScreen(
                 onAllow = { req ->
