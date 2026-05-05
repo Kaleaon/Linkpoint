@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 
 data class ChatScreenState(
     val title: String = "Chat",
-    val description: String = "Communication destination placeholder."
+    val description: String = "Loading conversations…"
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

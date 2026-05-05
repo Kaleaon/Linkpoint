@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 
 data class InventoryScreenState(
     val title: String = "Inventory",
-    val description: String = "Inventory destination placeholder."
+    val description: String = "Loading inventory…"
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

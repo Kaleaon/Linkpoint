@@ -1,5 +1,7 @@
 package com.linkpoint.ui.linkpoint2.routes
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -11,6 +13,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalContext
 import com.linkpoint.LinkpointApp
 import com.linkpoint.ui.common.UiLoadState
 import com.linkpoint.ui.friends.FriendData
@@ -462,6 +465,14 @@ fun L2WalletRoute(
 ) {
     val app = LinkpointApp.getInstanceOrNull()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    // Opens the given URL in the device's default browser.
+    fun openUrl(url: String) {
+        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        })
+    }
 
     if (app == null) {
         WalletScreen(
@@ -472,8 +483,8 @@ fun L2WalletRoute(
             transactions = emptyList(),
             onBack = onBack,
             onSend = {},
-            onRequest = {},
-            onBuy = {},
+            onRequest = { openUrl("https://secondlife.com/my/lindex/request.php") },
+            onBuy = { openUrl("https://secondlife.com/my/lindex/buy.php") },
             onRefresh = {},
             modifier = modifier,
         )
@@ -554,8 +565,8 @@ fun L2WalletRoute(
         transactions = transactions,
         onBack = onBack,
         onSend = { /* requires recipient picker — not yet implemented */ },
-        onRequest = { /* L$ request flow is not implemented */ },
-        onBuy = { /* L$ purchase requires LindenLab web checkout */ },
+        onRequest = { openUrl("https://secondlife.com/my/lindex/request.php") },
+        onBuy = { openUrl("https://secondlife.com/my/lindex/buy.php") },
         onRefresh = {
             if (economyAvailable) scope.launch { app.economyManager.requestBalance() }
             scope.launch { app.liveDataFeedClient.fetchLindex(force = true) }
