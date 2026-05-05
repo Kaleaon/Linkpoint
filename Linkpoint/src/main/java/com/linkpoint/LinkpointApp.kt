@@ -905,7 +905,28 @@ class LinkpointApp : Application() {
         
         // NEW: Draw Distance Manager
         drawDistanceManager = DrawDistanceManager()
-        
+
+        // Wire DrawDistanceManager + HoverTextManager into the SceneManager
+        // once Filament has constructed it (deferred until the SurfaceView
+        // attaches and renderManager.initialize() runs). Without this the
+        // managers are dead code: visibility queries fall back to the
+        // hard-coded 256m default and hover-text "visible" filtering
+        // returns every label regardless of camera distance.
+        renderManager.sceneManagerReady = { sceneManager ->
+            sceneManager.setDrawDistanceProviders(
+                objectDistance = { drawDistanceManager.drawDistance.value },
+                avatarDistance = { drawDistanceManager.getAvatarDrawDistance() },
+                statsSink = { visible, total, culled ->
+                    drawDistanceManager.reportVisibilityStats(visible, total, culled)
+                }
+            )
+            hoverTextManager.setPositionProvider { localId ->
+                val obj = sceneManager.findByLocalId(localId) ?: return@setPositionProvider null
+                floatArrayOf(obj.position.x, obj.position.y, obj.position.z)
+            }
+            Log.i(TAG, "SceneManager wired to DrawDistanceManager + HoverTextManager")
+        }
+
         // NEW: Minimap
         minimapManager = MinimapManager(udpConnection)
         

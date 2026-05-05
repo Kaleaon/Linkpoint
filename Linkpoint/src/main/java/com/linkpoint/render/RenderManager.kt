@@ -48,6 +48,7 @@ class RenderManager(private val context: Context) {
     private var scene: Scene? = null
     private var view: View? = null
     private var camera: Camera? = null
+    private var cameraEntity: Int = 0
     private var swapChain: SwapChain? = null
     
     // Lock for swapchain synchronization to prevent race conditions
@@ -118,6 +119,18 @@ class RenderManager(private val context: Context) {
      */
     @Volatile
     var avatarPoseProvider: (() -> Unit)? = null
+
+    /**
+     * Optional one-shot callback invoked from [initialize] right after
+     * the [SceneManager] is constructed. Lets the app wire cross-cutting
+     * dependencies (DrawDistanceManager → SceneManager visibility,
+     * HoverTextManager → SceneManager position lookup) without having
+     * to poll `getSceneManager()` until it returns non-null.
+     *
+     * Call sites should set this before [initializeOnRenderThread].
+     */
+    @Volatile
+    var sceneManagerReady: ((SceneManager) -> Unit)? = null
     
     /**
      * Initialize the rendering engine
@@ -155,12 +168,22 @@ class RenderManager(private val context: Context) {
             renderer = filamentEngine.createRenderer()
             scene = filamentEngine.createScene()
             view = filamentEngine.createView()
-            camera = filamentEngine.createCamera(filamentEngine.entityManager.create())
+            cameraEntity = filamentEngine.entityManager.create()
+            camera = filamentEngine.createCamera(cameraEntity)
             
             // Initialize scene manager
             val filamentScene = scene ?: throw IllegalStateException("Failed to create Filament Scene")
-            sceneManager = SceneManager(filamentEngine, filamentScene, context)
+            val sm = SceneManager(filamentEngine, filamentScene, context)
+            sceneManager = sm
             Log.d(TAG, "SceneManager initialized")
+            // Fire the deferred wiring hook so the app can register its
+            // DrawDistanceManager + HoverTextManager position provider
+            // against the freshly-built SceneManager.
+            try {
+                sceneManagerReady?.invoke(sm)
+            } catch (e: Exception) {
+                Log.w(TAG, "sceneManagerReady callback threw: ${e.message}", e)
+            }
 
             // Initialize material loader
             materialLoader = MaterialLoader(context, filamentEngine)
@@ -1334,16 +1357,25 @@ class RenderManager(private val context: Context) {
             }
             view?.let { eng.destroyView(it) }
             scene?.let { eng.destroyScene(it) }
-            camera?.let { eng.destroyCameraComponent(eng.entityManager.create()) }
+            // Destroy the camera component on the entity it was actually
+            // attached to, then release the entity itself. The previous
+            // implementation called destroyCameraComponent on a brand-new
+            // entity, which leaked the original camera entity and never
+            // freed the camera component.
+            if (cameraEntity != 0) {
+                eng.destroyCameraComponent(cameraEntity)
+                eng.entityManager.destroy(cameraEntity)
+            }
             renderer?.let { eng.destroyRenderer(it) }
             eng.destroy()
         }
-        
+
         engine = null
         renderer = null
         scene = null
         view = null
         camera = null
+        cameraEntity = 0
         uiHelper = null
         displayHelper = null
         surfaceView = null

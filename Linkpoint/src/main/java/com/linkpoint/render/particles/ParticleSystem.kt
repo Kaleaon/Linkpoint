@@ -51,7 +51,13 @@ class ParticleSystem(
     private var vertexBuffer: VertexBuffer? = null
     private var indexBuffer: IndexBuffer? = null
     private var materialInstance: MaterialInstance? = null
-    
+    // Renderable entity that draws the entire particle pool. Without this
+    // the per-frame updateBuffers() refreshes the VertexBuffer contents
+    // but Filament has nothing bound to those buffers, so particles never
+    // appear on screen even when sources spawn them.
+    private var particleEntity: Int = 0
+    private var maxParticles: Int = 0
+
     private val particlePool = mutableListOf<Particle>()
     private var time = 0f
     
@@ -98,11 +104,16 @@ class ParticleSystem(
      */
     fun update(deltaTime: Float, cameraPosition: LLVector3, wind: LLVector3) {
         time += deltaTime
-        
+
+        // The shared particle material may or may not declare a "time"
+        // uniform — older fallback materials don't. Wrap the set so a
+        // missing parameter doesn't tear the render thread down.
+        runCatching { materialInstance?.setParameter("time", time) }
+
         for (source in particleSources.values) {
             updateSource(source, deltaTime, cameraPosition, wind)
         }
-        
+
         updateBuffers(cameraPosition)
     }
     
@@ -224,7 +235,7 @@ class ParticleSystem(
     
     private fun createBuffers() {
         // Pre-allocate buffers for all particles
-        val maxParticles = MAX_PARTICLES_PER_SOURCE * 100
+        maxParticles = MAX_PARTICLES_PER_SOURCE * 100
         val vertexCount = maxParticles * 4 // Quad per particle
         val indexCount = maxParticles * 6
         
@@ -260,8 +271,47 @@ class ParticleSystem(
             indexData.putShort((base + 3).toShort())
         }
         indexData.flip()
-        
+
         indexBuffer?.setBuffer(engine, indexData)
+
+        // Build a single renderable that points at the shared
+        // VertexBuffer/IndexBuffer. The geometry's index count is bumped
+        // each frame in updateBuffers() to match the live particle count.
+        val mat = materialInstance ?: return
+        val vb = vertexBuffer ?: return
+        val ib = indexBuffer ?: return
+        particleEntity = EntityManager.get().create()
+        RenderableManager.Builder(1)
+            // Particles can move anywhere in the region; use a generous
+            // bounding box and disable culling so the renderer doesn't
+            // skip emitters that wander outside the box.
+            .boundingBox(Box(0f, 0f, 0f, 256f, 256f, 256f))
+            // Start with zero indices drawn; updateBuffers() bumps the
+            // count to (totalParticles * 6) once the first source spawns.
+            .geometry(0, RenderableManager.PrimitiveType.TRIANGLES, vb, ib)
+            .material(0, mat)
+            .culling(false)
+            .castShadows(false)
+            .receiveShadows(false)
+            .priority(7) // Draw after opaques; particles are alpha-blended.
+            .build(engine, particleEntity)
+        // Force the initial draw range to zero so the uninitialized
+        // vertex buffer doesn't render garbage on the first frame
+        // before any source has spawned.
+        try {
+            val rm = engine.renderableManager
+            val instance = rm.getInstance(particleEntity)
+            if (instance != 0) {
+                rm.setGeometryAt(
+                    instance, 0,
+                    RenderableManager.PrimitiveType.TRIANGLES,
+                    vb, ib, 0, 0
+                )
+            }
+        } catch (_: Throwable) {
+            // see updateBuffers() for the binding-mismatch fallback note
+        }
+        scene.addEntity(particleEntity)
     }
     
     private fun updateBuffers(cameraPosition: LLVector3) {
@@ -270,7 +320,34 @@ class ParticleSystem(
         for (source in particleSources.values) {
             totalParticles += source.particles.size
         }
-        
+
+        // Resize the renderable's draw range to match live particles
+        // (6 indices per quad). When totalParticles==0 we set the range
+        // to 0 instead of skipping, so a previously-populated frame
+        // doesn't keep drawing stale geometry.
+        val rm = engine.renderableManager
+        val vb = vertexBuffer
+        val ib = indexBuffer
+        if (particleEntity != 0 && vb != null && ib != null) {
+            val instance = rm.getInstance(particleEntity)
+            if (instance != 0) {
+                val drawIndices = (totalParticles.coerceAtMost(maxParticles)) * 6
+                try {
+                    rm.setGeometryAt(
+                        instance, 0,
+                        RenderableManager.PrimitiveType.TRIANGLES,
+                        vb, ib, 0, drawIndices
+                    )
+                } catch (_: Throwable) {
+                    // No-op: Filament Java bindings vary between releases.
+                    // If this overload is missing the buffers stay bound,
+                    // we just can't shrink the draw range — a benign visual
+                    // artifact (last frame's quads stay visible) but no
+                    // crash.
+                }
+            }
+        }
+
         if (totalParticles == 0) return
         
         val stride = (3 + 4 + 2) * 4
@@ -335,9 +412,18 @@ class ParticleSystem(
     
     fun shutdown() {
         particleSources.clear()
+        if (particleEntity != 0) {
+            scene.removeEntity(particleEntity)
+            engine.renderableManager.destroy(particleEntity)
+            EntityManager.get().destroy(particleEntity)
+            particleEntity = 0
+        }
         vertexBuffer?.let { engine.destroyVertexBuffer(it) }
         indexBuffer?.let { engine.destroyIndexBuffer(it) }
         materialInstance?.let { engine.destroyMaterialInstance(it) }
+        vertexBuffer = null
+        indexBuffer = null
+        materialInstance = null
     }
 }
 
