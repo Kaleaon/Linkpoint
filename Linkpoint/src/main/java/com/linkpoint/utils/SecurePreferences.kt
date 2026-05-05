@@ -21,29 +21,34 @@ object SecurePreferences {
         legacyName: String,
         migration: ((SharedPreferences, SharedPreferences) -> Unit)? = null
     ): SharedPreferences {
-        val masterKey = MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
+        return try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
 
-        val encryptedPrefs = EncryptedSharedPreferences.create(
-            context,
-            legacyName + ENCRYPTED_SUFFIX,
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+            val encryptedPrefs = EncryptedSharedPreferences.create(
+                context,
+                legacyName + ENCRYPTED_SUFFIX,
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
 
-        if (!encryptedPrefs.getBoolean(MIGRATION_COMPLETE_KEY, false)) {
-            val legacyPrefs = context.getSharedPreferences(legacyName, Context.MODE_PRIVATE)
-            migration?.invoke(legacyPrefs, encryptedPrefs)
-            migrateAll(legacyPrefs, encryptedPrefs)
-            encryptedPrefs.edit().putBoolean(MIGRATION_COMPLETE_KEY, true).apply()
-            if (legacyPrefs.all.isNotEmpty()) {
-                legacyPrefs.edit().clear().apply()
+            if (!encryptedPrefs.getBoolean(MIGRATION_COMPLETE_KEY, false)) {
+                val legacyPrefs = context.getSharedPreferences(legacyName, Context.MODE_PRIVATE)
+                migration?.invoke(legacyPrefs, encryptedPrefs)
+                migrateAll(legacyPrefs, encryptedPrefs)
+                encryptedPrefs.edit().putBoolean(MIGRATION_COMPLETE_KEY, true).apply()
+                if (legacyPrefs.all.isNotEmpty()) {
+                    legacyPrefs.edit().clear().apply()
+                }
             }
-        }
 
-        return encryptedPrefs
+            encryptedPrefs
+        } catch (e: Exception) {
+            Log.w(TAG, "Encrypted storage unavailable, falling back to plain SharedPreferences", e)
+            context.getSharedPreferences(legacyName, Context.MODE_PRIVATE)
+        }
     }
 
     private fun migrateAll(legacyPrefs: SharedPreferences, encryptedPrefs: SharedPreferences) {

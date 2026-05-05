@@ -21,11 +21,11 @@ import java.util.UUID
  */
 object MessageParser {
     
-    internal const val TAG = "MessageParser"
+    private const val TAG = "MessageParser"
     
     /** Packet header size: flags (1) + sequence (4) + extra (1) = 6 bytes */
     private const val PACKET_HEADER_SIZE = 6
-    internal const val REGION_HANDSHAKE_MIN_BYTES = 189
+    private const val REGION_HANDSHAKE_MIN_BYTES = 189
     
     /**
      * Extract the payload portion from a raw UDP packet.
@@ -498,6 +498,191 @@ object MessageParser {
      */
     fun parseChatFromSimulator(data: ByteArray): ChatData? = ChatMessageParsers.parseChatFromSimulator(data)
 
+    /**
+     * Parse RegionHandshake message.
+     * This message is sent by the simulator after CompleteAgentMovement
+     * and must be acknowledged with RegionHandshakeReply.
+     *
+     * Message format per SL protocol (message_template.msg):
+     * RegionInfo block:
+     *   - RegionFlags (U32)
+     *   - SimAccess (U8)
+     *   - SimName (Variable 1)
+     *   - SimOwner (LLUUID)
+     *   - IsEstateManager (BOOL)
+     *   - WaterHeight (F32)
+     *   - BillableFactor (F32)
+     *   - CacheID (LLUUID)
+     *   - TerrainBase0-3 (4 LLUUIDs)
+     *   - TerrainDetail0-3 (4 LLUUIDs)
+     *   - TerrainStartHeight00-11 (4 F32)
+     *   - TerrainHeightRange00-11 (4 F32)
+     * RegionInfo2 block:
+     *   - RegionID (LLUUID)
+     * RegionInfo3 block:
+     *   - CPUClassID (S32)
+     *   - CPURatio (S32)
+     *   - ColoName (Variable 1)
+     *   - ProductSKU (Variable 1)
+     *   - ProductName (Variable 1)
+     * RegionInfo4 block (Variable):
+     *   - RegionFlagsExtended (U64)
+     *   - RegionProtocols (U64)
+     */
+    fun parseRegionHandshake(data: ByteArray): RegionHandshakeData? {
+        if (data.size < REGION_HANDSHAKE_MIN_BYTES) {
+            Log.w(TAG, "RegionHandshake payload too short: ${data.size} bytes (min=$REGION_HANDSHAKE_MIN_BYTES)")
+            return null
+        }
+        val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
+
+        try {
+            // RegionInfo block
+            val regionFlags = buffer.int
+            val simAccess = buffer.get().toInt() and 0xFF
+
+            // SimName - variable length string (1-byte length prefix)
+            val simNameLen = buffer.get().toInt() and 0xFF
+            val simNameBytes = ByteArray(simNameLen)
+            buffer.get(simNameBytes)
+            val simName = String(simNameBytes, Charsets.UTF_8).trimEnd('\u0000').trim()
+            if (simName.isEmpty()) {
+                Log.w(TAG, "RegionHandshake payload rejected: empty SimName")
+                return null
+            }
+
+            // SimOwner UUID
+            val simOwnerBytes = ByteArray(16)
+            buffer.get(simOwnerBytes)
+            val simOwner = bytesToUUID(simOwnerBytes)
+
+            // IsEstateManager (BOOL = 1 byte)
+            val isEstateManager = buffer.get() != 0.toByte()
+
+            // Water height
+            val waterHeight = buffer.float
+
+            // Billable factor
+            val billableFactor = buffer.float
+
+            // Cache ID
+            val cacheIdBytes = ByteArray(16)
+            buffer.get(cacheIdBytes)
+            val cacheId = bytesToUUID(cacheIdBytes)
+
+            // TerrainBase0-3 (4 UUIDs for base terrain textures)
+            val terrainBaseTextures = (0 until 4).map {
+                val texBytes = ByteArray(16)
+                buffer.get(texBytes)
+                bytesToUUID(texBytes)
+            }
+
+            // TerrainDetail0-3 (4 UUIDs for detail terrain textures)
+            val terrainDetailTextures = (0 until 4).map {
+                val texBytes = ByteArray(16)
+                buffer.get(texBytes)
+                bytesToUUID(texBytes)
+            }
+
+            // Combine into single list (8 textures total)
+            val terrainTextures = terrainBaseTextures + terrainDetailTextures
+
+            // Terrain start heights (4 floats: 00, 01, 10, 11)
+            val terrainStartHeight = (0 until 4).map { buffer.float }
+
+            // Terrain height ranges (4 floats: 00, 01, 10, 11)
+            val terrainHeightRange = (0 until 4).map { buffer.float }
+
+            // RegionInfo2 block - RegionID
+            var regionId: UUID? = null
+            if (buffer.remaining() >= 16) {
+                val regionIdBytes = ByteArray(16)
+                buffer.get(regionIdBytes)
+                regionId = bytesToUUID(regionIdBytes)
+            }
+
+            // RegionInfo3 block (optional - may not be present in all messages)
+            var cpuClassId: Int? = null
+            var cpuRatio: Int? = null
+            var coloName: String? = null
+            var productSKU: String? = null
+            var productName: String? = null
+
+            if (buffer.remaining() >= 8) {
+                cpuClassId = buffer.int
+                cpuRatio = buffer.int
+
+                // ColoName - variable string
+                if (buffer.remaining() >= 1) {
+                    val coloNameLen = buffer.get().toInt() and 0xFF
+                    if (buffer.remaining() >= coloNameLen) {
+                        val coloNameBytes = ByteArray(coloNameLen)
+                        buffer.get(coloNameBytes)
+                        coloName = String(coloNameBytes, Charsets.UTF_8).trimEnd('\u0000')
+                    }
+                }
+
+                // ProductSKU - variable string
+                if (buffer.remaining() >= 1) {
+                    val productSKULen = buffer.get().toInt() and 0xFF
+                    if (buffer.remaining() >= productSKULen) {
+                        val productSKUBytes = ByteArray(productSKULen)
+                        buffer.get(productSKUBytes)
+                        productSKU = String(productSKUBytes, Charsets.UTF_8).trimEnd('\u0000')
+                    }
+                }
+
+                // ProductName - variable string
+                if (buffer.remaining() >= 1) {
+                    val productNameLen = buffer.get().toInt() and 0xFF
+                    if (buffer.remaining() >= productNameLen) {
+                        val productNameBytes = ByteArray(productNameLen)
+                        buffer.get(productNameBytes)
+                        productName = String(productNameBytes, Charsets.UTF_8).trimEnd('\u0000')
+                    }
+                }
+            }
+
+            // RegionInfo4 block (Variable block - may have 0 or 1 entries)
+            var regionFlagsExtended: Long? = null
+            var regionProtocols: Long? = null
+
+            // Check for variable block count byte
+            if (buffer.remaining() >= 1) {
+                val numRegionInfo4Blocks = buffer.get().toInt() and 0xFF
+                if (numRegionInfo4Blocks > 0 && buffer.remaining() >= 16) {
+                    regionFlagsExtended = buffer.long
+                    regionProtocols = buffer.long
+                }
+            }
+
+            return RegionHandshakeData(
+                regionFlags = regionFlags,
+                simAccess = simAccess,
+                simName = simName,
+                simOwner = simOwner,
+                isEstateManager = isEstateManager,
+                waterHeight = waterHeight,
+                billableFactor = billableFactor,
+                cacheId = cacheId,
+                terrainTextures = terrainTextures,
+                terrainStartHeights = terrainStartHeight,
+                terrainHeightRanges = terrainHeightRange,
+                regionId = regionId,
+                cpuClassId = cpuClassId,
+                cpuRatio = cpuRatio,
+                coloName = coloName,
+                productSKU = productSKU,
+                productName = productName,
+                regionFlagsExtended = regionFlagsExtended,
+                regionProtocols = regionProtocols
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to parse RegionHandshake", e)
+            return null
+        }
+    }
+
     private fun bytesToUUID(bytes: ByteArray): UUID {
         val bb = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN)
         return UUID(bb.long, bb.long)
@@ -523,14 +708,14 @@ data class ObjectUpdateData(
     val hoverTextColor: LLColor4,
     val mediaUrl: String,
     val soundId: UUID? = null,           // Sound attached to object 
-    val ownerId: UUID?,
+    val ownerId: UUID? = null,
     val soundGain: Float = 0f,           // Sound volume 
     val soundFlags: Int = 0,             // Sound flags 
     val soundRadius: Float = 0f,         // Sound radius 
     val jointType: Int = 0,              // Joint type 
     val jointPivot: LLVector3 = LLVector3.zero(),  // Joint pivot point
     val jointAxisOrAnchor: LLVector3 = LLVector3.zero(),  // Joint axis or anchor
-    val nameValue: String,
+    val nameValue: String = "",
     val regionHandle: Long = 0L,  // For computing global position
     val extraParams: ByteArray = ByteArray(0),  // Extra params containing mesh/sculpt data
     /**
@@ -674,191 +859,6 @@ enum class ChatType(val value: Int) {
     
     companion object {
         fun fromValue(value: Int) = values().find { it.value == value } ?: NORMAL
-    }
-}
-
-/**
- * Parse RegionHandshake message.
- * This message is sent by the simulator after CompleteAgentMovement
- * and must be acknowledged with RegionHandshakeReply.
- * 
- * Message format per SL protocol (message_template.msg):
- * RegionInfo block:
- *   - RegionFlags (U32)
- *   - SimAccess (U8)
- *   - SimName (Variable 1)
- *   - SimOwner (LLUUID)
- *   - IsEstateManager (BOOL)
- *   - WaterHeight (F32)
- *   - BillableFactor (F32)
- *   - CacheID (LLUUID)
- *   - TerrainBase0-3 (4 LLUUIDs)
- *   - TerrainDetail0-3 (4 LLUUIDs)
- *   - TerrainStartHeight00-11 (4 F32)
- *   - TerrainHeightRange00-11 (4 F32)
- * RegionInfo2 block:
- *   - RegionID (LLUUID)
- * RegionInfo3 block:
- *   - CPUClassID (S32)
- *   - CPURatio (S32)
- *   - ColoName (Variable 1)
- *   - ProductSKU (Variable 1)
- *   - ProductName (Variable 1)
- * RegionInfo4 block (Variable):
- *   - RegionFlagsExtended (U64)
- *   - RegionProtocols (U64)
- */
-fun MessageParser.parseRegionHandshake(data: ByteArray): RegionHandshakeData? {
-    if (data.size < REGION_HANDSHAKE_MIN_BYTES) {
-        Log.w(TAG, "RegionHandshake payload too short: ${data.size} bytes (min=$REGION_HANDSHAKE_MIN_BYTES)")
-        return null
-    }
-    val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-    
-    try {
-        // RegionInfo block
-        val regionFlags = buffer.int
-        val simAccess = buffer.get().toInt() and 0xFF
-        
-        // SimName - variable length string (1-byte length prefix)
-        val simNameLen = buffer.get().toInt() and 0xFF
-        val simNameBytes = ByteArray(simNameLen)
-        buffer.get(simNameBytes)
-        val simName = String(simNameBytes, Charsets.UTF_8).trimEnd('\u0000').trim()
-        if (simName.isEmpty()) {
-            Log.w(TAG, "RegionHandshake payload rejected: empty SimName")
-            return null
-        }
-        
-        // SimOwner UUID
-        val simOwnerBytes = ByteArray(16)
-        buffer.get(simOwnerBytes)
-        val simOwner = bytesToUUID(simOwnerBytes)
-        
-        // IsEstateManager (BOOL = 1 byte)
-        val isEstateManager = buffer.get() != 0.toByte()
-        
-        // Water height
-        val waterHeight = buffer.float
-        
-        // Billable factor
-        val billableFactor = buffer.float
-        
-        // Cache ID
-        val cacheIdBytes = ByteArray(16)
-        buffer.get(cacheIdBytes)
-        val cacheId = bytesToUUID(cacheIdBytes)
-        
-        // TerrainBase0-3 (4 UUIDs for base terrain textures)
-        val terrainBaseTextures = (0 until 4).map {
-            val texBytes = ByteArray(16)
-            buffer.get(texBytes)
-            bytesToUUID(texBytes)
-        }
-        
-        // TerrainDetail0-3 (4 UUIDs for detail terrain textures)
-        val terrainDetailTextures = (0 until 4).map {
-            val texBytes = ByteArray(16)
-            buffer.get(texBytes)
-            bytesToUUID(texBytes)
-        }
-        
-        // Combine into single list (8 textures total)
-        val terrainTextures = terrainBaseTextures + terrainDetailTextures
-        
-        // Terrain start heights (4 floats: 00, 01, 10, 11)
-        val terrainStartHeight = (0 until 4).map { buffer.float }
-        
-        // Terrain height ranges (4 floats: 00, 01, 10, 11)
-        val terrainHeightRange = (0 until 4).map { buffer.float }
-        
-        // RegionInfo2 block - RegionID
-        var regionId: UUID? = null
-        if (buffer.remaining() >= 16) {
-            val regionIdBytes = ByteArray(16)
-            buffer.get(regionIdBytes)
-            regionId = bytesToUUID(regionIdBytes)
-        }
-        
-        // RegionInfo3 block (optional - may not be present in all messages)
-        var cpuClassId: Int? = null
-        var cpuRatio: Int? = null
-        var coloName: String? = null
-        var productSKU: String? = null
-        var productName: String? = null
-        
-        if (buffer.remaining() >= 8) {
-            cpuClassId = buffer.int
-            cpuRatio = buffer.int
-            
-            // ColoName - variable string
-            if (buffer.remaining() >= 1) {
-                val coloNameLen = buffer.get().toInt() and 0xFF
-                if (buffer.remaining() >= coloNameLen) {
-                    val coloNameBytes = ByteArray(coloNameLen)
-                    buffer.get(coloNameBytes)
-                    coloName = String(coloNameBytes, Charsets.UTF_8).trimEnd('\u0000')
-                }
-            }
-            
-            // ProductSKU - variable string
-            if (buffer.remaining() >= 1) {
-                val productSKULen = buffer.get().toInt() and 0xFF
-                if (buffer.remaining() >= productSKULen) {
-                    val productSKUBytes = ByteArray(productSKULen)
-                    buffer.get(productSKUBytes)
-                    productSKU = String(productSKUBytes, Charsets.UTF_8).trimEnd('\u0000')
-                }
-            }
-            
-            // ProductName - variable string
-            if (buffer.remaining() >= 1) {
-                val productNameLen = buffer.get().toInt() and 0xFF
-                if (buffer.remaining() >= productNameLen) {
-                    val productNameBytes = ByteArray(productNameLen)
-                    buffer.get(productNameBytes)
-                    productName = String(productNameBytes, Charsets.UTF_8).trimEnd('\u0000')
-                }
-            }
-        }
-        
-        // RegionInfo4 block (Variable block - may have 0 or 1 entries)
-        var regionFlagsExtended: Long? = null
-        var regionProtocols: Long? = null
-        
-        // Check for variable block count byte
-        if (buffer.remaining() >= 1) {
-            val numRegionInfo4Blocks = buffer.get().toInt() and 0xFF
-            if (numRegionInfo4Blocks > 0 && buffer.remaining() >= 16) {
-                regionFlagsExtended = buffer.long
-                regionProtocols = buffer.long
-            }
-        }
-        
-        return RegionHandshakeData(
-            regionFlags = regionFlags,
-            simAccess = simAccess,
-            simName = simName,
-            simOwner = simOwner,
-            isEstateManager = isEstateManager,
-            waterHeight = waterHeight,
-            billableFactor = billableFactor,
-            cacheId = cacheId,
-            terrainTextures = terrainTextures,
-            terrainStartHeights = terrainStartHeight,
-            terrainHeightRanges = terrainHeightRange,
-            regionId = regionId,
-            cpuClassId = cpuClassId,
-            cpuRatio = cpuRatio,
-            coloName = coloName,
-            productSKU = productSKU,
-            productName = productName,
-            regionFlagsExtended = regionFlagsExtended,
-            regionProtocols = regionProtocols
-        )
-    } catch (e: Exception) {
-        Log.e("MessageParser", "Failed to parse RegionHandshake", e)
-        return null
     }
 }
 

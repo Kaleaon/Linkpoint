@@ -1,6 +1,7 @@
 package com.linkpoint.avatar
 
 import android.content.Context
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.linkpoint.assets.AnimationManager
 import com.linkpoint.assets.MeshManager
 import com.linkpoint.assets.TextureManager
@@ -12,14 +13,18 @@ import com.linkpoint.protocol.types.LLVector3
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import java.util.UUID
 
+@RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class AvatarUpdateFixtureTest {
 
@@ -53,7 +58,7 @@ class AvatarUpdateFixtureTest {
                 sceneAvatarCount.value = sceneIds.size
             }
         }
-
+        yield() // allow the collector to subscribe before emitting
         val agentId = UUID.randomUUID()
         val localId = 54321
         val fixture = ObjectUpdateData(
@@ -81,6 +86,7 @@ class AvatarUpdateFixtureTest {
             rotation = fixture.rotation,
             velocity = fixture.velocity
         )
+        advanceUntilIdle()
 
         val avatar = manager.getAvatar(agentId)
         assertNotNull(avatar)

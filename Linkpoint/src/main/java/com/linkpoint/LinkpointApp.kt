@@ -34,7 +34,6 @@ import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventQueueDispatcher
 import com.linkpoint.protocol.messages.CircuitDispatcher
 import com.linkpoint.protocol.messages.UDPConnectionFixed
-import com.linkpoint.protocol.messages.parseRegionHandshake
 import com.linkpoint.protocol.messages.parseAgentMovementComplete
 import com.linkpoint.protocol.messages.parseObjectUpdateCached
 import com.linkpoint.protocol.messages.parseObjectProperties
