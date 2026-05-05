@@ -19,7 +19,7 @@ import kotlin.random.Random
 class ParticleSystem(
     private val engine: Engine,
     private val scene: Scene,
-    private val textureManager: TextureManager
+    @Suppress("unused") private val textureManager: TextureManager? = null
 ) {
     companion object {
         private const val TAG = "ParticleSystem"

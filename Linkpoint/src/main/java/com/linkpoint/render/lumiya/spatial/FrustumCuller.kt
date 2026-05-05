@@ -122,12 +122,17 @@ class FrustumCuller {
             if (p[0] * px + p[1] * py + p[2] * pz + p[3] < 0f) {
                 return FrustumResult.OUTSIDE
             }
-            // Negative corner: minimises inside-ness. If it's also on
-            // the positive side, the whole box is on the positive side.
+            // Negative corner: minimises inside-ness. If it's on or
+            // crosses the plane (≤ 0), the whole box is not strictly on
+            // the positive side. The `≤` (not `<`) catches the tangent
+            // case where the corner sits exactly on the plane — a box
+            // touching a plane must report INTERSECTS, not INSIDE, so
+            // octree subtree-skipping callers don't draw a child on the
+            // outside as if it were guaranteed visible.
             val nx = if (p[0] >= 0) minX else maxX
             val ny = if (p[1] >= 0) minY else maxY
             val nz = if (p[2] >= 0) minZ else maxZ
-            if (p[0] * nx + p[1] * ny + p[2] * nz + p[3] < 0f) {
+            if (p[0] * nx + p[1] * ny + p[2] * nz + p[3] <= 0f) {
                 allInside = false
             }
         }

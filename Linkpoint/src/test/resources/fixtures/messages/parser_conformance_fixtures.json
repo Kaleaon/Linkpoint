@@ -37,7 +37,7 @@
   },
   {
     "name": "low-frequency-with-extra-header",
-    "rawPacketHex": "0000000000017FFFFFFF0094A1",
+    "rawPacketHex": "0000000000017FFFFF0094A1",
     "expectedMessageId": -65388,
     "expectedPayloadHex": "A1"
   },

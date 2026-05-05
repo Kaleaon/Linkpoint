@@ -191,6 +191,90 @@ class MaterialLoader(
             }
         """
 
+        // Particle billboard material — alpha-blended unlit. Vertex
+        // colour modulates a soft circular falloff (dot squared) so
+        // small quads look round without needing a sprite texture.
+        // Particles are double-sided and depth-sorted; we keep depth
+        // writes off to preserve under-water/foreground compositing.
+        private const val PARTICLE_MATERIAL_SOURCE = """
+            material {
+                name : ParticleSprite,
+                shadingModel : unlit,
+                blending : transparent,
+                depthWrite : false,
+                doubleSided : true,
+                requires : [ uv0, color ]
+            }
+            fragment {
+                void material(inout MaterialInputs material) {
+                    prepareMaterial(material);
+                    float2 uv = getUV0() - float2(0.5, 0.5);
+                    float r2 = dot(uv, uv) * 4.0;
+                    float falloff = clamp(1.0 - r2, 0.0, 1.0);
+                    falloff = falloff * falloff;
+                    float4 c = getColor();
+                    material.baseColor = float4(c.rgb, c.a * falloff);
+                }
+            }
+        """
+
+        // Water surface material — minimum-viable wave shader driven by
+        // a `time` uniform. Two phase-shifted sine waves perturb the
+        // surface UV, then a Fresnel term blends a deep-water tint with
+        // a shallow-sky tint so the surface picks up sky colour at
+        // grazing angles. No reflection/refraction sampling — those are
+        // declared in WaterRenderer.setReflectionRefractionTargets but
+        // optional; this material renders correctly without them.
+        private const val WATER_MATERIAL_SOURCE = """
+            material {
+                name : WaterSurface,
+                shadingModel : lit,
+                blending : transparent,
+                depthWrite : false,
+                requires : [ uv0 ],
+                parameters : [
+                    { type : float,  name : time },
+                    { type : float2, name : waveDir1 },
+                    { type : float2, name : waveDir2 },
+                    { type : float,  name : scaleAbove },
+                    { type : float,  name : scaleBelow },
+                    { type : float,  name : blurMultiplier },
+                    { type : float,  name : fresnelScale },
+                    { type : float,  name : fresnelOffset }
+                ]
+            }
+            fragment {
+                void material(inout MaterialInputs material) {
+                    prepareMaterial(material);
+                    float2 uv = getUV0();
+                    float t = materialParams.time;
+                    float w1 = sin(dot(uv, materialParams.waveDir1) * 16.0 + t * 1.7);
+                    float w2 = sin(dot(uv, materialParams.waveDir2) * 24.0 + t * 2.3);
+                    // Distort the normal in tangent space slightly. Even
+                    // without a normal map the lighting picks up the
+                    // wave motion enough to read as "moving water".
+                    float wave = (w1 + w2) * 0.5 * materialParams.scaleAbove;
+                    material.normal = normalize(float3(wave, wave, 1.0));
+
+                    // Deep base colour blended to a brighter sky tint by
+                    // a faked Fresnel term. The exact LL Windlight blend
+                    // requires camera-space data we don't have in the
+                    // unlit fragment context, so fall back to a fixed
+                    // surface-relative coefficient driven by the wave
+                    // amplitude — visually convincing for low-tier
+                    // devices that can't run planar reflections.
+                    float fres = clamp(materialParams.fresnelOffset +
+                        materialParams.fresnelScale * (0.5 + wave),
+                        0.0, 1.0);
+                    float3 deep = float3(0.04, 0.18, 0.34);
+                    float3 sky  = float3(0.55, 0.78, 0.95);
+                    material.baseColor = float4(mix(deep, sky, fres), 0.85);
+                    material.metallic = 0.0;
+                    material.roughness = 0.10;
+                }
+            }
+        """
+
         init {
             // Initialize MaterialBuilder (required before any material compilation)
             MaterialBuilder.init()
@@ -200,6 +284,8 @@ class MaterialLoader(
     private var unlitMaterial: Material? = null
     private var litMaterial: Material? = null
     private var terrainMaterial: Material? = null
+    private var particleMaterial: Material? = null
+    private var waterMaterial: Material? = null
     private val customMaterials = mutableMapOf<String, Material>()
 
     /**
@@ -230,6 +316,18 @@ class MaterialLoader(
             terrainMaterial = compileMaterial(TERRAIN_MATERIAL_SOURCE, "TerrainSplat")
             if (terrainMaterial == null) {
                 Log.w(TAG, "Failed to compile terrain material; falling back to lit material")
+            }
+
+            // Particle and water materials are optional; the renderer
+            // skips wiring those subsystems when compilation fails so we
+            // don't fail the whole MaterialLoader.initialize() over them.
+            particleMaterial = compileMaterial(PARTICLE_MATERIAL_SOURCE, "ParticleSprite")
+            if (particleMaterial == null) {
+                Log.w(TAG, "Failed to compile particle material; particle system disabled")
+            }
+            waterMaterial = compileMaterial(WATER_MATERIAL_SOURCE, "WaterSurface")
+            if (waterMaterial == null) {
+                Log.w(TAG, "Failed to compile water material; water rendering disabled")
             }
 
             Log.i(TAG, "MaterialLoader initialized successfully")
@@ -318,6 +416,12 @@ class MaterialLoader(
      */
     fun getTerrainMaterial(): Material? = terrainMaterial
 
+    /** Particle billboard material — null if compilation failed. */
+    fun getParticleMaterial(): Material? = particleMaterial
+
+    /** Water surface material — null if compilation failed. */
+    fun getWaterMaterial(): Material? = waterMaterial
+
     /**
      * Create a material instance with a specific color.
      * Uses the unlit material for simple colored objects.
@@ -370,9 +474,15 @@ class MaterialLoader(
 
         unlitMaterial?.let { engine.destroyMaterial(it) }
         litMaterial?.let { engine.destroyMaterial(it) }
+        terrainMaterial?.let { engine.destroyMaterial(it) }
+        particleMaterial?.let { engine.destroyMaterial(it) }
+        waterMaterial?.let { engine.destroyMaterial(it) }
 
         unlitMaterial = null
         litMaterial = null
+        terrainMaterial = null
+        particleMaterial = null
+        waterMaterial = null
 
         MaterialBuilder.shutdown()
     }

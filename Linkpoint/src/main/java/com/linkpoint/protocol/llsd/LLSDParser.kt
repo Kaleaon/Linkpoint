@@ -260,7 +260,10 @@ object LLSDParser {
             }
             LLSDValue.MARKER_DATE -> {
                 val bytes = readExact(stream, 8, state, limits)
-                val seconds = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).double
+                // Dates are LITTLE-endian — see the matching note on
+                // LLSDDate.toBinary. Reading as BE produces a denormal
+                // ~0.0 that decodes to the Unix epoch.
+                val seconds = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).double
                 LLSDDate((seconds * 1000).toLong())
             }
             LLSDValue.MARKER_URI, 'l' -> {
@@ -273,6 +276,16 @@ object LLSDParser {
             LLSDValue.MARKER_MAP, '{' -> {
                 val map = LLSDMap()
                 var entries = 0
+
+                // LLSD binary maps carry a 4-byte BE element count after
+                // the open marker. Consume it as an upfront validation
+                // against [ParseLimits.maxMapEntries]; the close marker
+                // `}` still terminates so a count of 0 with no entries
+                // and a count of N with N entries both round-trip.
+                val declaredEntries = readLength(stream, state, limits)
+                if (declaredEntries > limits.maxMapEntries) {
+                    throw ParseLimitExceededException("Map entry count exceeds maxMapEntries.")
+                }
 
                 while (true) {
                     val keyMarker = readByte(stream, state, limits).toChar()
@@ -301,6 +314,12 @@ object LLSDParser {
             LLSDValue.MARKER_ARRAY, '[' -> {
                 val array = LLSDArray()
                 var elements = 0
+
+                // 4-byte BE element count — see LLSDMap parsing above.
+                val declaredElements = readLength(stream, state, limits)
+                if (declaredElements > limits.maxArrayLength) {
+                    throw ParseLimitExceededException("Array length exceeds maxArrayLength.")
+                }
 
                 while (true) {
                     if (peekByte(stream, state, limits).toChar() == LLSDValue.MARKER_ARRAY_END) {
@@ -453,13 +472,27 @@ object LLSDParser {
             }
         }
 
-        // Find content and closing tag
+        // Find content and closing tag.  For tags that can contain
+        // themselves (`<map>` inside `<map>`, `<array>` inside `<array>`),
+        // a naive `indexOf("</tag>")` returns the FIRST close tag, which
+        // for nested input is the inner element's closing tag — so the
+        // outer element's content becomes truncated and nested values
+        // collapse to LLSDUndefined. Walk the substring counting opens
+        // and closes so we land on the matching close tag instead.
         val contentStart = closePos + 1
         val closingTag = "</$tagName>"
-        val closingPos = xml.indexOf(closingTag, contentStart, ignoreCase = true)
+        val closingPos = findMatchingCloseTag(xml, tagName, contentStart)
         if (closingPos == -1) return LLSDUndefined to xml.length
 
-        val content = xml.substring(contentStart, closingPos).trim()
+        // Capture the literal text between tags as well as a trimmed
+        // copy. For numeric/UUID/date/uri tags the trim() is necessary
+        // because LL canonical XML often pads numeric fields with
+        // whitespace; but for `<string>` we must use the raw content,
+        // since SDP / SLURL / message bodies legitimately contain
+        // significant trailing newlines. Trimming the raw form
+        // silently corrupts those payloads.
+        val rawContent = xml.substring(contentStart, closingPos)
+        val content = rawContent.trim()
         val endPos = closingPos + closingTag.length
 
         return when (tagName) {
@@ -468,7 +501,7 @@ object LLSDParser {
             "boolean" -> LLSDBoolean(content == "true" || content == "1") to endPos
             "integer" -> LLSDInteger(content.toIntOrNull() ?: 0) to endPos
             "real" -> LLSDReal(content.toDoubleOrNull() ?: 0.0) to endPos
-            "string" -> LLSDString(unescapeXML(content)) to endPos
+            "string" -> LLSDString(unescapeXML(rawContent)) to endPos
             "uuid" -> {
                 val uuid = try { UUID.fromString(content) } catch (e: Exception) { UUID(0, 0) }
                 LLSDUUID(uuid) to endPos
@@ -527,6 +560,50 @@ object LLSDParser {
         }
     }
 
+    /**
+     * Walk [xml] from [startPos] looking for the close tag matching the
+     * `<tagName>` element that opens immediately before [startPos],
+     * counting nested `<tagName>` opens so siblings of the same name
+     * inside the body don't terminate the search early.
+     *
+     * Recognises both `<tagName>` and `<tagName ` (with attributes) as
+     * an open, and `<tagName/>` (self-closing) as neither open nor
+     * close. Returns the index of the matching `</tagName>`, or -1 if
+     * the document is truncated.
+     */
+    private fun findMatchingCloseTag(xml: String, tagName: String, startPos: Int): Int {
+        val openPrefix = "<$tagName"
+        val closeTag = "</$tagName>"
+        var depth = 1
+        var i = startPos
+        while (i < xml.length) {
+            val nextOpen = xml.indexOf(openPrefix, i, ignoreCase = true)
+            val nextClose = xml.indexOf(closeTag, i, ignoreCase = true)
+            if (nextClose == -1) return -1
+            if (nextOpen != -1 && nextOpen < nextClose) {
+                // Confirm this is a real `<tagName>` or `<tagName ` and
+                // not an unrelated tag like `<tagNameOther>`.
+                val after = nextOpen + openPrefix.length
+                val ch = if (after < xml.length) xml[after] else ' '
+                if (ch == '>' || ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '/') {
+                    // Self-closing? `<tag .../ >`. Find the `>` that
+                    // terminates the open tag and check the prior char.
+                    val tagEnd = xml.indexOf('>', after)
+                    val selfClosing = tagEnd > 0 && xml[tagEnd - 1] == '/'
+                    if (!selfClosing) depth++
+                    i = if (tagEnd >= 0) tagEnd + 1 else after
+                    continue
+                }
+                i = after
+                continue
+            }
+            depth--
+            if (depth == 0) return nextClose
+            i = nextClose + closeTag.length
+        }
+        return -1
+    }
+
     private fun unescapeXML(s: String): String {
         return s
             .replace("&lt;", "<")
@@ -537,16 +614,36 @@ object LLSDParser {
     }
 
     fun parseLlsdDate(value: String): Date? {
+        // Tolerate the variants observed in the wild:
+        //   2026-05-01T07:27:22.123Z         python-llsd default
+        //   2026-05-01T07:27:22Z             second-precision form
+        //   2026-05-01T07:27:22+00:00        plain ISO-8601 offset
+        //   2026-05-01T07:27:22.123+00:00    ISO with millis + offset
+        //   2026-05-01T07:27:22+00:00Z       ill-formed but emitted by
+        //                                    some debug capture tools
+        //                                    (offset *and* trailing Z)
+        // The LLSD spec only mandates the trailing-Z form; everything
+        // else is handled defensively so a malformed date doesn't
+        // collapse to `Date()` (which silently substitutes "now").
+        val normalised = value.trim().let { v ->
+            // Drop a trailing redundant Z if there's already a numeric
+            // offset (e.g. "+00:00Z" → "+00:00"). The two forms encode
+            // the same instant.
+            val tzPattern = Regex("""[+-]\d{2}:?\d{2}""")
+            if (v.endsWith("Z") && tzPattern.containsMatchIn(v.dropLast(1))) v.dropLast(1) else v
+        }
         val patterns = listOf(
             "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-            "yyyy-MM-dd'T'HH:mm:ss'Z'"
+            "yyyy-MM-dd'T'HH:mm:ss'Z'",
+            "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+            "yyyy-MM-dd'T'HH:mm:ssXXX"
         )
         for (pattern in patterns) {
             val formatter = java.text.SimpleDateFormat(pattern, Locale.US).apply {
                 timeZone = TimeZone.getTimeZone("UTC")
             }
             try {
-                return formatter.parse(value)
+                return formatter.parse(normalised)
             } catch (e: Exception) {
                 // Try the next pattern.
             }

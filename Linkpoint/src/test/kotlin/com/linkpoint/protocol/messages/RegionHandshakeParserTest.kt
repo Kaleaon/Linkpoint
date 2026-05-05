@@ -1,13 +1,20 @@
 package com.linkpoint.protocol.messages
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
 
+// parseRegionHandshake calls android.util.Log on rejected payloads,
+// which is a JNI native method that throws UnsatisfiedLinkError under
+// stock JUnit. Robolectric's Log shadow turns those calls into
+// harmless no-ops so the rejection branch stays testable.
+@RunWith(AndroidJUnit4::class)
 class RegionHandshakeParserTest {
 
     @Test
