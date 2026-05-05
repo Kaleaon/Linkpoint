@@ -21,34 +21,41 @@ object SecurePreferences {
         legacyName: String,
         migration: ((SharedPreferences, SharedPreferences) -> Unit)? = null
     ): SharedPreferences {
-        return try {
+        // AndroidKeyStore isn't available under Robolectric (and is
+        // missing on a handful of OEM ROMs / very early Android 6
+        // devices), so the MasterKey + EncryptedSharedPreferences setup
+        // can throw `KeyStoreException("AndroidKeyStore not found")`.
+        // Falling back to plain SharedPreferences keeps the app running
+        // and tests runnable; we still log so the security regression
+        // is visible in production.
+        val encryptedPrefs: SharedPreferences = try {
             val masterKey = MasterKey.Builder(context)
                 .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
                 .build()
 
-            val encryptedPrefs = EncryptedSharedPreferences.create(
+            EncryptedSharedPreferences.create(
                 context,
                 legacyName + ENCRYPTED_SUFFIX,
                 masterKey,
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )
-
-            if (!encryptedPrefs.getBoolean(MIGRATION_COMPLETE_KEY, false)) {
-                val legacyPrefs = context.getSharedPreferences(legacyName, Context.MODE_PRIVATE)
-                migration?.invoke(legacyPrefs, encryptedPrefs)
-                migrateAll(legacyPrefs, encryptedPrefs)
-                encryptedPrefs.edit().putBoolean(MIGRATION_COMPLETE_KEY, true).apply()
-                if (legacyPrefs.all.isNotEmpty()) {
-                    legacyPrefs.edit().clear().apply()
-                }
-            }
-
-            encryptedPrefs
         } catch (e: Exception) {
-            Log.w(TAG, "Encrypted storage unavailable, falling back to plain SharedPreferences", e)
-            context.getSharedPreferences(legacyName, Context.MODE_PRIVATE)
+            Log.w(TAG, "Falling back to plain SharedPreferences (AndroidKeyStore unavailable): ${e.message}")
+            context.getSharedPreferences(legacyName + ENCRYPTED_SUFFIX, Context.MODE_PRIVATE)
         }
+
+        if (!encryptedPrefs.getBoolean(MIGRATION_COMPLETE_KEY, false)) {
+            val legacyPrefs = context.getSharedPreferences(legacyName, Context.MODE_PRIVATE)
+            migration?.invoke(legacyPrefs, encryptedPrefs)
+            migrateAll(legacyPrefs, encryptedPrefs)
+            encryptedPrefs.edit().putBoolean(MIGRATION_COMPLETE_KEY, true).apply()
+            if (legacyPrefs.all.isNotEmpty()) {
+                legacyPrefs.edit().clear().apply()
+            }
+        }
+
+        return encryptedPrefs
     }
 
     private fun migrateAll(legacyPrefs: SharedPreferences, encryptedPrefs: SharedPreferences) {

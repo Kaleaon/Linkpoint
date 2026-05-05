@@ -12,6 +12,9 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
 
+// SessionManager construction touches Android Context plumbing and
+// ApplicationProvider needs an instrumentation; both require the
+// Robolectric runtime that the AndroidJUnit4 runner pulls in.
 @RunWith(AndroidJUnit4::class)
 class RegionHandshakeSessionMappingTest {
 

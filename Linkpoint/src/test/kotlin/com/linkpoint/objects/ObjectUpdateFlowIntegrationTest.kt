@@ -1,5 +1,6 @@
 package com.linkpoint.objects
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.linkpoint.protocol.messages.MESSAGE_BYTE_ORDER
 import com.linkpoint.protocol.messages.ObjectMessageParsers
 import com.linkpoint.protocol.messages.UDPConnectionFixed
@@ -7,9 +8,16 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.UUID
 
+// ObjectMessageParsers / UDPConnectionFixed call android.util.Log on
+// the parse path, which trips UnsatisfiedLinkError under stock JUnit.
+// Robolectric's Log shadow keeps the integration end-to-end runnable
+// off-device.
+@RunWith(AndroidJUnit4::class)
 class ObjectUpdateFlowIntegrationTest {
     @Test
     fun objectUpdateCompressedAndTerse_endToEnd_insertsObjectIntoSceneState() {
@@ -38,9 +46,23 @@ class ObjectUpdateFlowIntegrationTest {
     }
 
     private fun buildObjectUpdateCompressedPacket(localId: Int, fullId: UUID): ByteArray {
-        val compressedBlock = ByteBuffer.allocate(62).order(MESSAGE_BYTE_ORDER).apply {
+        // Layout: UUID(16) + localId(4) + state(1) + crcSeed(1) + crc(4)
+        // + pcode(1) + extraParams(1) + scale(12) + position(12)
+        // + velocity(12) + flags(4) = 68 bytes. The previous 62-byte
+        // allocation under-counted three of the float triplets and
+        // tripped a BufferOverflowException on construction.
+        // SL UUIDs travel as 16 raw bytes in network (big-endian)
+        // order, *regardless* of MESSAGE_BYTE_ORDER on the surrounding
+        // fields. Writing the longs through the LITTLE_ENDIAN buffer
+        // reverses each half and the parser ends up with a mangled
+        // UUID. Build the canonical 16 bytes separately and embed
+        // them.
+        val uuidBytes = ByteBuffer.allocate(16).order(ByteOrder.BIG_ENDIAN).apply {
             putLong(fullId.mostSignificantBits)
             putLong(fullId.leastSignificantBits)
+        }.array()
+        val compressedBlock = ByteBuffer.allocate(68).order(MESSAGE_BYTE_ORDER).apply {
+            put(uuidBytes)
             putInt(localId)
             put(9)
             put(0)
@@ -64,7 +86,10 @@ class ObjectUpdateFlowIntegrationTest {
     }
 
     private fun buildImprovedTersePacket(localId: Int): ByteArray {
-        val block = ByteBuffer.allocate(30).order(MESSAGE_BYTE_ORDER).apply {
+        // Layout: localId(4) + state(1) + payload(26) = 31 bytes.
+        // The previous 30-byte allocation under-counted by one and
+        // tripped a BufferOverflowException on the last `put(0)`.
+        val block = ByteBuffer.allocate(31).order(MESSAGE_BYTE_ORDER).apply {
             putInt(localId)
             put(0)
             repeat(26) { put(0) }

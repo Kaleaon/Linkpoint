@@ -13,7 +13,7 @@ internal object SystemTimeSource : TimeSource {
     override fun nowMs(): Long = System.currentTimeMillis()
 }
 
-internal data class AckLatencyHistogram(
+data class AckLatencyHistogram(
     val under250ms: Int,
     val from250To500ms: Int,
     val from500To1000ms: Int,
@@ -21,7 +21,7 @@ internal data class AckLatencyHistogram(
     val over2000ms: Int
 )
 
-internal data class TransportMetricsSnapshot(
+data class TransportMetricsSnapshot(
     val outstandingReliablePackets: Int,
     val retransmitCount: Long,
     val droppedExpiredPacketCount: Long,

@@ -67,6 +67,15 @@ class RenderEngineSwitcher(private val context: Context) {
      */
     fun setActiveEngine(type: EngineType) {
         if (type == activeType && active != null) return
+        // If no engine is currently active, apply the type immediately
+        // so the next initialize() picks it up. Without this the call
+        // only registers a pending switch which initialize() then
+        // ignores, and the wrong backend gets initialised.
+        if (active == null) {
+            activeType = type
+            Log.i(TAG, "Active engine type set to ${type.name} (no engine active yet)")
+            return
+        }
         pendingSwitch = type
         Log.i(TAG, "Engine switch requested: ${activeType.name} → ${type.name}")
     }

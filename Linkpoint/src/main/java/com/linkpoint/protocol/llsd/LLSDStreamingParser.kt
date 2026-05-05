@@ -150,7 +150,10 @@ object LLSDStreamingParser {
                 LLSDValue.MARKER_DATE -> {
                     val bytes = ByteArray(8)
                     input.readFully(bytes)
-                    val seconds = java.nio.ByteBuffer.wrap(bytes).order(java.nio.ByteOrder.BIG_ENDIAN).double
+                    // LITTLE-endian — see LLSDDate.toBinary and
+                    // LLSDParser.parseBinaryValue MARKER_DATE for the
+                    // python-llsd compatibility note.
+                    val seconds = java.nio.ByteBuffer.wrap(bytes).order(java.nio.ByteOrder.LITTLE_ENDIAN).double
                     handler.onPrimitiveValue(name, LLSDDate((seconds * 1000).toLong()))
                     remaining--
                 }
@@ -163,6 +166,17 @@ object LLSDStreamingParser {
                     remaining--
                 }
                 LLSDValue.MARKER_MAP -> {
+                    // LLSD binary maps carry a 4-byte BE element count
+                    // after `{`. We validate it upfront so adversarial
+                    // payloads claiming millions of entries fail before
+                    // we allocate per-entry handlers.
+                    val declaredEntries = input.readInt()
+                    if (declaredEntries < 0) {
+                        throw IOException("Malformed binary LLSD: negative map entry count ($declaredEntries).")
+                    }
+                    if (declaredEntries > limits.maxMapEntries) {
+                        throw IOException("LLSD parse limit exceeded: map entries exceed ${limits.maxMapEntries}.")
+                    }
                     val mapHandler = handler.onMapBegin(name) ?: handler
                     var entries = 0
                     while (true) {
@@ -187,6 +201,14 @@ object LLSDStreamingParser {
                     remaining--
                 }
                 LLSDValue.MARKER_ARRAY -> {
+                    // 4-byte BE element count — see MARKER_MAP above.
+                    val declaredElements = input.readInt()
+                    if (declaredElements < 0) {
+                        throw IOException("Malformed binary LLSD: negative array length ($declaredElements).")
+                    }
+                    if (declaredElements > limits.maxArrayLength) {
+                        throw IOException("LLSD parse limit exceeded: array length exceeds ${limits.maxArrayLength}.")
+                    }
                     val arrayHandler = handler.onArrayBegin(name) ?: handler
                     var elements = 0
                     while (true) {
