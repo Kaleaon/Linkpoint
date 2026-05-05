@@ -3,7 +3,6 @@ package com.linkpoint.core
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.linkpoint.protocol.messages.MessageParser
-import com.linkpoint.protocol.messages.parseRegionHandshake
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull

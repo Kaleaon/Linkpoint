@@ -13,6 +13,7 @@ import com.linkpoint.protocol.types.LLVector3
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -95,6 +96,7 @@ class AvatarUpdateFixtureTest {
             rotation = fixture.rotation,
             velocity = fixture.velocity
         )
+        advanceUntilIdle()
 
         // Drain the test dispatcher so the avatarEvents collector
         // observes the Add event before we check sceneAvatarCount.
