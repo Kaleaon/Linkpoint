@@ -468,10 +468,18 @@ fun L2WalletRoute(
     val context = LocalContext.current
 
     // Opens the given URL in the device's default browser.
+    // Silently swallows ActivityNotFoundException (no browser installed) and
+    // IllegalArgumentException (malformed URI) rather than crashing the viewer.
     fun openUrl(url: String) {
-        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        })
+        try {
+            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            })
+        } catch (e: android.content.ActivityNotFoundException) {
+            android.util.Log.w("L2WalletRoute", "No browser app available to open: $url", e)
+        } catch (e: IllegalArgumentException) {
+            android.util.Log.w("L2WalletRoute", "Malformed URL: $url", e)
+        }
     }
 
     if (app == null) {
