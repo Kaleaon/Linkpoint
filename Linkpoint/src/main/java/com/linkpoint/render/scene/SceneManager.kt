@@ -52,6 +52,33 @@ class SceneManager(
     private var cameraPosition = LLVector3(128f, 128f, 30f)
     private var cameraTarget = LLVector3(128f, 128f, 0f)
 
+    // Optional DrawDistanceManager. When set, getVisibleObjects /
+    // getVisibleAvatars consult its (live, user-tunable) draw distance
+    // instead of a hard-coded 256m default. Decoupled via lambdas so the
+    // render package doesn't have to take a hard dependency on the manager
+    // API surface.
+    @Volatile private var objectDrawDistanceProvider: (() -> Float)? = null
+    @Volatile private var avatarDrawDistanceProvider: (() -> Float)? = null
+    @Volatile private var visibilityStatsSink: ((visible: Int, total: Int, culled: Int) -> Unit)? = null
+
+    /**
+     * Wire a [DrawDistanceManager] (or any equivalent source) into
+     * visibility queries. Pass nulls to detach.
+     *
+     * Lifecycle: typically called once from the app on init, before the
+     * first frame is rendered, so the SceneManager already has the manager
+     * in place by the time SceneDataHandler starts pushing objects.
+     */
+    fun setDrawDistanceProviders(
+        objectDistance: (() -> Float)?,
+        avatarDistance: (() -> Float)?,
+        statsSink: ((visible: Int, total: Int, culled: Int) -> Unit)? = null
+    ) {
+        objectDrawDistanceProvider = objectDistance
+        avatarDrawDistanceProvider = avatarDistance
+        visibilityStatsSink = statsSink
+    }
+
     // Avatar segment meshes (built once and shared across all avatars).
     private var avatarMaterial: MaterialInstance? = null
     private var headMesh: AvatarMesh? = null
@@ -1034,20 +1061,35 @@ class SceneManager(
     }
     
     /**
-     * Get visible objects within range of camera
+     * Get visible objects within range of camera. If [maxDistance] is not
+     * supplied, falls back to the wired [DrawDistanceManager] (via
+     * [setDrawDistanceProviders]) and ultimately to the historic 256m
+     * default when no provider is attached.
      */
-    fun getVisibleObjects(maxDistance: Float = 256f): List<SceneObject> {
-        return sceneObjects.values.filter { obj ->
-            obj.position.distance(cameraPosition) <= maxDistance
+    fun getVisibleObjects(maxDistance: Float? = null): List<SceneObject> {
+        val effective = maxDistance
+            ?: objectDrawDistanceProvider?.invoke()
+            ?: 256f
+        val all = sceneObjects.values
+        val visible = all.filter { obj ->
+            obj.position.distance(cameraPosition) <= effective
         }.sortedBy { it.position.distance(cameraPosition) }
+        visibilityStatsSink?.invoke(visible.size, all.size, all.size - visible.size)
+        return visible
     }
-    
+
     /**
-     * Get visible avatars within range
+     * Get visible avatars within range. Same provider precedence as
+     * [getVisibleObjects]; the avatar provider is independent so the
+     * caller can apply [DrawDistanceManager.AVATAR_DISTANCE_MULTIPLIER]
+     * to keep nearby avatars visible at lower draw distances.
      */
-    fun getVisibleAvatars(maxDistance: Float = 256f): List<AvatarObject> {
+    fun getVisibleAvatars(maxDistance: Float? = null): List<AvatarObject> {
+        val effective = maxDistance
+            ?: avatarDrawDistanceProvider?.invoke()
+            ?: 256f
         return avatars.values.filter { avatar ->
-            avatar.position.distance(cameraPosition) <= maxDistance
+            avatar.position.distance(cameraPosition) <= effective
         }.sortedBy { it.position.distance(cameraPosition) }
     }
     

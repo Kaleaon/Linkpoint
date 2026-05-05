@@ -30,9 +30,24 @@ class HoverTextManager {
     
     // Hover texts by local ID
     private val hoverTexts = ConcurrentHashMap<Int, HoverText>()
-    
+
     // Hover texts by object UUID
     private val hoverTextsByUUID = ConcurrentHashMap<UUID, HoverText>()
+
+    /**
+     * Optional position lookup. When wired (typically to
+     * SceneManager.findByLocalId(...).position), getVisibleHoverTexts()
+     * filters by camera distance instead of returning every hover text
+     * regardless of where its object is.
+     *
+     * Returns x/y/z floats so HoverTextManager doesn't need a hard
+     * dependency on the protocol's LLVector3.
+     */
+    @Volatile private var positionProvider: ((Int) -> FloatArray?)? = null
+
+    fun setPositionProvider(provider: ((Int) -> FloatArray?)?) {
+        positionProvider = provider
+    }
     
     /**
      * Set or update hover text for an object.
@@ -133,8 +148,11 @@ class HoverTextManager {
     fun getAllHoverTexts(): List<HoverText> = hoverTexts.values.toList()
     
     /**
-     * Get hover texts within a certain distance from a position.
-     * This is used for rendering optimization.
+     * Get hover texts within [maxDistance] of the given camera position.
+     * Used by the renderer to skip rasterising hover text labels for
+     * objects the camera can't see. Falls back to alpha-only filtering
+     * when no [positionProvider] is wired (preserves the previous
+     * behaviour, but logs once so the integration gap is obvious).
      */
     fun getVisibleHoverTexts(
         cameraX: Float,
@@ -142,10 +160,28 @@ class HoverTextManager {
         cameraZ: Float,
         maxDistance: Float
     ): List<HoverText> {
-        // In a real implementation, this would filter by position
-        // For now, return all (filtering would require object positions)
-        return hoverTexts.values.filter { it.alpha > 0.01f }.toList()
+        val provider = positionProvider
+        if (provider == null) {
+            if (!noProviderWarned) {
+                Log.w(TAG, "positionProvider not wired; returning all hover texts ungated by distance")
+                noProviderWarned = true
+            }
+            return hoverTexts.values.filter { it.isVisible() }.toList()
+        }
+        val maxSq = maxDistance * maxDistance
+        return hoverTexts.values.asSequence()
+            .filter { it.isVisible() }
+            .filter { hoverText ->
+                val pos = provider(hoverText.localId) ?: return@filter false
+                val dx = pos[0] - cameraX
+                val dy = pos[1] - cameraY
+                val dz = pos[2] - cameraZ
+                (dx * dx + dy * dy + dz * dz) <= maxSq
+            }
+            .toList()
     }
+
+    @Volatile private var noProviderWarned: Boolean = false
     
     /**
      * Sanitize text for display.

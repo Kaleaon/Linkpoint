@@ -125,8 +125,12 @@ class WaterRenderer(
      */
     fun update(deltaTime: Float) {
         time += deltaTime
-        
-        materialInstance?.setParameter("time", time)
+
+        // "time" is optional on the bound material — wrap so missing
+        // uniforms don't tear the render thread down on devices that
+        // fell back to the lit material because the wave-shader build
+        // failed.
+        runCatching { materialInstance?.setParameter("time", time) }
     }
     
     private fun createWaterMesh() {

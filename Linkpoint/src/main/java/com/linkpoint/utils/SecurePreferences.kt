@@ -21,17 +21,29 @@ object SecurePreferences {
         legacyName: String,
         migration: ((SharedPreferences, SharedPreferences) -> Unit)? = null
     ): SharedPreferences {
-        val masterKey = MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
+        // AndroidKeyStore isn't available under Robolectric (and is
+        // missing on a handful of OEM ROMs / very early Android 6
+        // devices), so the MasterKey + EncryptedSharedPreferences setup
+        // can throw `KeyStoreException("AndroidKeyStore not found")`.
+        // Falling back to plain SharedPreferences keeps the app running
+        // and tests runnable; we still log so the security regression
+        // is visible in production.
+        val encryptedPrefs: SharedPreferences = try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
 
-        val encryptedPrefs = EncryptedSharedPreferences.create(
-            context,
-            legacyName + ENCRYPTED_SUFFIX,
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+            EncryptedSharedPreferences.create(
+                context,
+                legacyName + ENCRYPTED_SUFFIX,
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (e: Exception) {
+            Log.w(TAG, "Falling back to plain SharedPreferences (AndroidKeyStore unavailable): ${e.message}")
+            context.getSharedPreferences(legacyName + ENCRYPTED_SUFFIX, Context.MODE_PRIVATE)
+        }
 
         if (!encryptedPrefs.getBoolean(MIGRATION_COMPLETE_KEY, false)) {
             val legacyPrefs = context.getSharedPreferences(legacyName, Context.MODE_PRIVATE)

@@ -454,9 +454,21 @@ dependencies {
 
     // Testing
     testImplementation("junit:junit:4.13.2")
+    // Used by tests that import `kotlin.test.*` (e.g.
+    // ReliableTransportPolicyTest). Bundled assertions/Test annotations
+    // delegate to JUnit 4 underneath so the existing junit:junit
+    // dependency keeps the test runner unchanged.
+    testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.22")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.22")
     // Pinned to mockito 4.x — newer mockito 5.x is JVM 11 only and the project
     // still targets Java 1.8.
     testImplementation("org.mockito:mockito-core:4.11.0")
+    // mockito-inline replaces the default subclass-based MockMaker with
+    // a bytecode-instrumented one that can mock final Kotlin classes
+    // (e.g. MeshManager, TextureManager). Required by
+    // AvatarUpdateFixtureTest which mocks several final asset managers
+    // — without this, Mockito throws "Cannot mock/spy: final class".
+    testImplementation("org.mockito:mockito-inline:4.11.0")
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     testImplementation("com.squareup.okhttp3:okhttp:4.12.0")  // For integration tests

@@ -5,7 +5,16 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+// LumiyaRenderer's constructor instantiates DrawableHoverText, which
+// builds an android.graphics.Paint — that calls a JNI init under the
+// hood and explodes outside Robolectric. The frame-planner tests are
+// pure-Kotlin and would run on a vanilla JUnit runner, but the
+// last test (`attachment point append flag…`) constructs a full
+// LumiyaRenderer, so the whole class needs the Robolectric runner.
+@RunWith(RobolectricTestRunner::class)
 class LumiyaFramePlannerTest {
 
     @Test

@@ -1,6 +1,7 @@
 package com.linkpoint.avatar
 
 import android.content.Context
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.linkpoint.assets.AnimationManager
 import com.linkpoint.assets.MeshManager
 import com.linkpoint.assets.TextureManager
@@ -17,10 +18,15 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import java.util.UUID
 
+// AvatarManager and the surrounding scene update flow log via
+// android.util.Log; without Robolectric the Log.println_native JNI
+// stub throws UnsatisfiedLinkError before we reach any assertion.
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(AndroidJUnit4::class)
 class AvatarUpdateFixtureTest {
 
     @Test
@@ -53,6 +59,12 @@ class AvatarUpdateFixtureTest {
                 sceneAvatarCount.value = sceneIds.size
             }
         }
+        // Make sure the collector has actually subscribed to avatarEvents
+        // before we start emitting. Without this, the launch{} body is
+        // queued in the test scheduler but hasn't reached `.collect`,
+        // so the SharedFlow's tryEmit drops on the floor (0 subscribers)
+        // and sceneAvatarCount never moves off 0.
+        testScheduler.runCurrent()
 
         val agentId = UUID.randomUUID()
         val localId = 54321
@@ -71,7 +83,9 @@ class AvatarUpdateFixtureTest {
             textureEntry = ByteArray(0),
             hoverText = "",
             hoverTextColor = LLColor4.white(),
-            mediaUrl = ""
+            mediaUrl = "",
+            ownerId = null,
+            nameValue = ""
         )
 
         manager.updateAvatar(
@@ -81,6 +95,12 @@ class AvatarUpdateFixtureTest {
             rotation = fixture.rotation,
             velocity = fixture.velocity
         )
+
+        // Drain the test dispatcher so the avatarEvents collector
+        // observes the Add event before we check sceneAvatarCount.
+        // Without this, the assertion races the flow emission and
+        // sometimes sees 0 even though updateAvatar succeeded.
+        testScheduler.runCurrent()
 
         val avatar = manager.getAvatar(agentId)
         assertNotNull(avatar)

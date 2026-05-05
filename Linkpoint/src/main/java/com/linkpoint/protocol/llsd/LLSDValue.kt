@@ -139,8 +139,17 @@ data class LLSDDate(val value: Date) : LLSDValue() {
     
     override fun toBinary(): ByteArray {
         val seconds = value.time / 1000.0
-        val buffer = ByteBuffer.allocate(9).order(ByteOrder.BIG_ENDIAN)
+        // Date payload is LITTLE-endian per the python-llsd v1.2.4
+        // reference implementation (`struct.pack("<d", seconds)`).
+        // This is the lone exception in LLSD binary — every other
+        // numeric (Integer, Real, length prefixes, UUIDs) is
+        // network-byte-order. Don't "fix" it to BE: the reference
+        // viewer + python-llsd + libremetaverse all emit LE for dates,
+        // and so do every cross-implementation conformance fixture.
+        val buffer = ByteBuffer.allocate(9)
+        buffer.order(ByteOrder.BIG_ENDIAN)
         buffer.put(MARKER_DATE.code.toByte())
+        buffer.order(ByteOrder.LITTLE_ENDIAN)
         buffer.putDouble(seconds)
         return buffer.array()
     }
@@ -196,6 +205,14 @@ data class LLSDMap(val value: MutableMap<String, LLSDValue> = mutableMapOf()) : 
     override fun toBinary(): ByteArray {
         val out = ByteArrayOutputStream()
         out.write(MARKER_MAP.code)
+        // LLSD binary spec mandates a 4-byte BE element count after the
+        // map/array open marker. Emitting it makes round-trips match the
+        // canonical fixture bytes; previously we wrote `{ ... }` without
+        // the count, which the parser then mis-interpreted as 4 bytes
+        // of payload (each null byte read as MARKER_UNDEF), breaking
+        // every map/array round-trip.
+        ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(value.size).array()
+            .also { out.write(it) }
 
         for ((k, v) in value) {
             val keyBytes = k.toByteArray(Charsets.UTF_8)
@@ -230,6 +247,10 @@ data class LLSDArray(val value: MutableList<LLSDValue> = mutableListOf()) : LLSD
     override fun toBinary(): ByteArray {
         val out = ByteArrayOutputStream()
         out.write(MARKER_ARRAY.code)
+        // 4-byte BE element count — required by the LLSD binary spec.
+        // See LLSDMap.toBinary for the matching map serialisation.
+        ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(value.size).array()
+            .also { out.write(it) }
 
         for (v in value) {
             out.write(v.toBinary())

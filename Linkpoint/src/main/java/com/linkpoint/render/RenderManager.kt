@@ -48,6 +48,7 @@ class RenderManager(private val context: Context) {
     private var scene: Scene? = null
     private var view: View? = null
     private var camera: Camera? = null
+    private var cameraEntity: Int = 0
     private var swapChain: SwapChain? = null
     
     // Lock for swapchain synchronization to prevent race conditions
@@ -63,8 +64,11 @@ class RenderManager(private val context: Context) {
     private var primRenderer: PrimRenderer? = null
     private var meshPrimRenderer: MeshPrimRenderer? = null
     private var terrainRenderer: TerrainRenderer? = null
+    private var particleSystem: com.linkpoint.render.particles.ParticleSystem? = null
+    private var waterRenderer: com.linkpoint.render.water.WaterRenderer? = null
     private var primMeshDataRequester: PrimRenderer.MeshDataRequester? = null
     private var primMeshGeometryBuilder: PrimRenderer.MeshGeometryBuilder? = null
+    private var lastFrameNanos: Long = 0L
 
     // Helpers
     private var uiHelper: UiHelper? = null
@@ -118,6 +122,18 @@ class RenderManager(private val context: Context) {
      */
     @Volatile
     var avatarPoseProvider: (() -> Unit)? = null
+
+    /**
+     * Optional one-shot callback invoked from [initialize] right after
+     * the [SceneManager] is constructed. Lets the app wire cross-cutting
+     * dependencies (DrawDistanceManager → SceneManager visibility,
+     * HoverTextManager → SceneManager position lookup) without having
+     * to poll `getSceneManager()` until it returns non-null.
+     *
+     * Call sites should set this before [initializeOnRenderThread].
+     */
+    @Volatile
+    var sceneManagerReady: ((SceneManager) -> Unit)? = null
     
     /**
      * Initialize the rendering engine
@@ -155,12 +171,22 @@ class RenderManager(private val context: Context) {
             renderer = filamentEngine.createRenderer()
             scene = filamentEngine.createScene()
             view = filamentEngine.createView()
-            camera = filamentEngine.createCamera(filamentEngine.entityManager.create())
+            cameraEntity = filamentEngine.entityManager.create()
+            camera = filamentEngine.createCamera(cameraEntity)
             
             // Initialize scene manager
             val filamentScene = scene ?: throw IllegalStateException("Failed to create Filament Scene")
-            sceneManager = SceneManager(filamentEngine, filamentScene, context)
+            val sm = SceneManager(filamentEngine, filamentScene, context)
+            sceneManager = sm
             Log.d(TAG, "SceneManager initialized")
+            // Fire the deferred wiring hook so the app can register its
+            // DrawDistanceManager + HoverTextManager position provider
+            // against the freshly-built SceneManager.
+            try {
+                sceneManagerReady?.invoke(sm)
+            } catch (e: Exception) {
+                Log.w(TAG, "sceneManagerReady callback threw: ${e.message}", e)
+            }
 
             // Initialize material loader
             materialLoader = MaterialLoader(context, filamentEngine)
@@ -199,6 +225,29 @@ class RenderManager(private val context: Context) {
                         it.initialize(terrainMat)
                     }
                     Log.d(TAG, "TerrainRenderer initialized with ${if (terrainMat === litMaterial) "lit fallback" else "splat material"}")
+
+                    // Optional alpha-blended subsystems. Both gracefully
+                    // skip wiring when their dedicated material failed to
+                    // compile (older devices) — the app keeps running
+                    // without particles/water rather than crashing.
+                    val particleMat = materialLoader?.getParticleMaterial()
+                    if (particleMat != null) {
+                        particleSystem = com.linkpoint.render.particles.ParticleSystem(
+                            filamentEngine, filamentScene
+                        ).also { it.initialize(particleMat) }
+                        Log.d(TAG, "ParticleSystem initialized")
+                    } else {
+                        Log.w(TAG, "Particle material unavailable; ParticleSystem disabled")
+                    }
+                    val waterMat = materialLoader?.getWaterMaterial()
+                    if (waterMat != null) {
+                        waterRenderer = com.linkpoint.render.water.WaterRenderer(
+                            filamentEngine, filamentScene
+                        ).also { it.initialize(waterMat) }
+                        Log.d(TAG, "WaterRenderer initialized")
+                    } else {
+                        Log.w(TAG, "Water material unavailable; WaterRenderer disabled")
+                    }
                 } else {
                     Log.w(TAG, "No lit material available - PrimRenderer not initialized")
                 }
@@ -874,6 +923,7 @@ class RenderManager(private val context: Context) {
             applyRenderUpdates()
             applyCameraController()
             avatarPoseProvider?.invoke()
+            tickAnimatedSubsystems()
 
             if (!drawingEnabled.get()) return
 
@@ -1313,6 +1363,14 @@ class RenderManager(private val context: Context) {
             "frames=${frameCount.get()} viewport=${viewportWidth}x${viewportHeight}"
         )
 
+        // Shutdown subsystems that hold MaterialInstances first so the
+        // MaterialLoader.shutdown() below can free their backing
+        // Materials without leaking instances.
+        particleSystem?.shutdown()
+        particleSystem = null
+        waterRenderer?.shutdown()
+        waterRenderer = null
+
         // Shutdown prim renderer first (depends on materials)
         primRenderer?.shutdown()
         primRenderer = null
@@ -1334,16 +1392,25 @@ class RenderManager(private val context: Context) {
             }
             view?.let { eng.destroyView(it) }
             scene?.let { eng.destroyScene(it) }
-            camera?.let { eng.destroyCameraComponent(eng.entityManager.create()) }
+            // Destroy the camera component on the entity it was actually
+            // attached to, then release the entity itself. The previous
+            // implementation called destroyCameraComponent on a brand-new
+            // entity, which leaked the original camera entity and never
+            // freed the camera component.
+            if (cameraEntity != 0) {
+                eng.destroyCameraComponent(cameraEntity)
+                eng.entityManager.destroy(cameraEntity)
+            }
             renderer?.let { eng.destroyRenderer(it) }
             eng.destroy()
         }
-        
+
         engine = null
         renderer = null
         scene = null
         view = null
         camera = null
+        cameraEntity = 0
         uiHelper = null
         displayHelper = null
         surfaceView = null
@@ -1356,6 +1423,37 @@ class RenderManager(private val context: Context) {
             shutdown()
         }
         dispatcher.shutdown()
+    }
+
+    /**
+     * Advance the time-based subsystems (particles, water waves) by the
+     * delta since the previous frame. Called once per frame from
+     * [renderFrame] before Filament `beginFrame`. The first frame uses a
+     * conservative 16 ms (≈60 Hz) since there's no prior timestamp.
+     *
+     * Wrapped in runCatching so a single bad uniform write or an
+     * unexpected NaN can't tear the render thread down.
+     */
+    private fun tickAnimatedSubsystems() {
+        val now = System.nanoTime()
+        val deltaSeconds = if (lastFrameNanos == 0L) {
+            1f / 60f
+        } else {
+            ((now - lastFrameNanos) / 1_000_000_000.0).toFloat().coerceIn(0f, 0.25f)
+        }
+        lastFrameNanos = now
+        runCatching {
+            waterRenderer?.update(deltaSeconds)
+        }
+        runCatching {
+            particleSystem?.update(
+                deltaSeconds,
+                cameraPosition = com.linkpoint.protocol.types.LLVector3(
+                    cameraEye[0], cameraEye[1], cameraEye[2]
+                ),
+                wind = com.linkpoint.protocol.types.LLVector3(0f, 0f, 0f)
+            )
+        }
     }
 
     private fun applyRenderUpdates() {

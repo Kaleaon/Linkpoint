@@ -27,6 +27,11 @@ class RenderEngineSwitcherTest {
 
         switcher.registerEngine(RenderEngineSwitcher.EngineType.FILAMENT, filamentEngine)
         switcher.registerEngine(RenderEngineSwitcher.EngineType.LUMIYA, lumiyaEngine)
+        // Explicit FILAMENT-first start. The default backend was flipped
+        // to LUMIYA when the OpenGL ES path took over as primary; this
+        // test exists specifically to exercise the switch back, so it
+        // pins the starting engine before initialize().
+        switcher.setActiveEngine(RenderEngineSwitcher.EngineType.FILAMENT)
 
         assertTrue(switcher.initialize(surface, 640, 480))
         assertEquals(1, filamentEngine.initializeCalls)
