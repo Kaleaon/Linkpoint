@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 
 data class WorldShellScreenState(
     val title: String = "World",
-    val description: String = "World shell destination placeholder."
+    val description: String = "Loading world…"
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,7 +27,7 @@ fun WorldShellDestination(
 
 data class MapScreenState(
     val title: String = "Map",
-    val description: String = "Map destination placeholder."
+    val description: String = "Loading map…"
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,7 +41,7 @@ fun MapDestination(
 
 data class MinimapScreenState(
     val title: String = "Minimap",
-    val description: String = "Minimap destination placeholder."
+    val description: String = "Loading minimap…"
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,7 +55,7 @@ fun MinimapDestination(
 
 data class XrWorldScreenState(
     val title: String = "XR World",
-    val description: String = "XR world destination placeholder."
+    val description: String = "Loading XR world…"
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

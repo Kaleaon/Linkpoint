@@ -1,5 +1,8 @@
 package com.linkpoint.ui.linkpoint2
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +47,7 @@ import com.linkpoint.ui.login.L2LoginRoute
 import com.linkpoint.ui.navigation.Routes
 import com.linkpoint.ui.navigation.navigateBack
 import com.linkpoint.ui.navigation.navigateTo
+import com.linkpoint.ui.settings.SettingsRepository
 import com.linkpoint.ui.settings.SettingsScreen
 import com.linkpoint.ui.settings.SettingsState
 import com.linkpoint.ui.slurl.L2SlurlRoute
@@ -131,12 +135,41 @@ fun Linkpoint2RouteHost(
             onUploadPhoto = { /* handled via host activity */ },
             modifier = modifier,
         )
-        route == Routes.ONBOARDING_PERMISSIONS -> OnboardingPermissionsScreen(
-            onAllow = { /* delegate to PermissionManager via host */ },
-            onSkip = { /* host */ },
-            onEnterWorld = { navController.navigateTo(Routes.LOGIN) },
-            modifier = modifier,
-        )
+        route == Routes.ONBOARDING_PERMISSIONS -> {
+            // Map PermissionRequest IDs to Android Manifest permissions.
+            val permissionMap = mapOf(
+                "mic" to Manifest.permission.RECORD_AUDIO,
+                "loc" to Manifest.permission.ACCESS_FINE_LOCATION,
+                "cam" to Manifest.permission.CAMERA,
+            ) + if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                mapOf("notif" to Manifest.permission.POST_NOTIFICATIONS)
+            } else emptyMap()
+
+            // Track which permission is pending so the result handler can log it.
+            var pendingPermission by remember { mutableStateOf<String?>(null) }
+            val launcher = rememberLauncherForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { granted ->
+                android.util.Log.d(
+                    "OnboardingPermissions",
+                    "Permission ${pendingPermission ?: "unknown"} granted=$granted",
+                )
+                if (!granted) pendingPermission = null
+            }
+
+            OnboardingPermissionsScreen(
+                onAllow = { req ->
+                    val androidPerm = permissionMap[req.id]
+                    if (androidPerm != null) {
+                        pendingPermission = androidPerm
+                        launcher.launch(androidPerm)
+                    }
+                },
+                onSkip = { /* user opted out; continue without this permission */ },
+                onEnterWorld = { navController.navigateTo(Routes.LOGIN) },
+                modifier = modifier,
+            )
+        }
         route == Routes.IM_LIST -> L2IMListRoute(
             onBack = back,
             onOpenConversation = { navController.navigateTo(Routes.CHAT) },
@@ -292,14 +325,15 @@ fun Linkpoint2RouteHost(
             modifier = modifier,
         )
         route == Routes.SETTINGS -> {
-            // Settings persistence (SharedPreferences mapping) is not yet
-            // wired into the Compose state holder; for now changes only
-            // affect the in-memory model. The host SettingsActivity has
-            // the full read/write path for the legacy preferences store.
-            var s by remember { mutableStateOf(SettingsState()) }
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val settingsRepo = remember(context) { SettingsRepository.getInstance(context) }
+            var s by remember(settingsRepo) { mutableStateOf(settingsRepo.load()) }
             SettingsScreen(
                 settings = s,
-                onSettingsChange = { s = it },
+                onSettingsChange = {
+                    s = it
+                    settingsRepo.save(it)
+                },
                 onNavigateBack = back,
                 onOpenThemePicker = { navController.navigateTo(Routes.THEME_PICKER) },
                 onOpenAccount = { navController.navigateTo(Routes.MY_PROFILE) },
