@@ -1,25 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Backup rules use allowlist (include) mode. Only the files listed below are backed up;
+    everything else (MFA hashes, crash logs, databases, session data, cache, etc.) is
+    automatically excluded because it is not in an <include> entry.
+-->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- Allowlist only non-sensitive user settings/preferences. -->
         <include domain="sharedpref" path="com.linkpoint_preferences.xml"/>
         <include domain="sharedpref" path="theme_manager.xml"/>
         <include domain="sharedpref" path="cache_settings.xml"/>
         <include domain="sharedpref" path="destination_guide.xml"/>
-
-        <!-- Explicitly exclude app-private secrets/session/log/cache data. -->
-        <exclude domain="sharedpref" path="com_linkpoint_mfa_hashes.xml"/>
-        <exclude domain="sharedpref" path="com_linkpoint_mfa_hashes_encrypted.xml"/>
-        <exclude domain="sharedpref" path="device.xml"/>
-
-        <exclude domain="file" path="crash_logs/"/>
-        <exclude domain="file" path="Linkpoint Logs/"/>
-
-        <exclude domain="database" path="inventory.db"/>
-        <exclude domain="database" path="inventory.db-shm"/>
-        <exclude domain="database" path="inventory.db-wal"/>
-
-        <exclude domain="root" path="cache/"/>
     </cloud-backup>
 
     <device-transfer>
@@ -27,18 +17,5 @@
         <include domain="sharedpref" path="theme_manager.xml"/>
         <include domain="sharedpref" path="cache_settings.xml"/>
         <include domain="sharedpref" path="destination_guide.xml"/>
-
-        <exclude domain="sharedpref" path="com_linkpoint_mfa_hashes.xml"/>
-        <exclude domain="sharedpref" path="com_linkpoint_mfa_hashes_encrypted.xml"/>
-        <exclude domain="sharedpref" path="device.xml"/>
-
-        <exclude domain="file" path="crash_logs/"/>
-        <exclude domain="file" path="Linkpoint Logs/"/>
-
-        <exclude domain="database" path="inventory.db"/>
-        <exclude domain="database" path="inventory.db-shm"/>
-        <exclude domain="database" path="inventory.db-wal"/>
-
-        <exclude domain="root" path="cache/"/>
     </device-transfer>
 </data-extraction-rules>
