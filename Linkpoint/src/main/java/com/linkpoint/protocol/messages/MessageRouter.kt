@@ -122,6 +122,21 @@ class MessageRouter {
     }
 
     /**
+     * Drop every handler registered for [messageId]. Used by
+     * UDPConnectionFixed.unregisterMessageHandler() — that API takes only an
+     * id, but the router's per-handler unregister needs the original Handler
+     * reference (which the lambda-wrapping registerHandler() never exposes).
+     * Removing all handlers for the id is the correct one-arg semantics.
+     */
+    @Synchronized
+    fun unregisterAllHandlersFor(messageId: Int) {
+        if (handlers.remove(messageId) != null) {
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
+                "Unregistered all handlers for message $messageId")
+        }
+    }
+
+    /**
      * Route a message to its handlers. Called from the I/O thread; handlers
      * run synchronously on the caller's thread (Lumiya's pattern).
      */

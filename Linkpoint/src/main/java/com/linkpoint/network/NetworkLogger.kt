@@ -729,7 +729,7 @@ object NetworkLogger {
         if (!isVerbosePacketLoggingEnabled()) return
         val message = buildString {
             append("📤 UDP Sent: $messageName\n")
-            append("  Message ID: 0x${messageId.toString(16).uppercase()}\n")
+            append("  Message ID: 0x${com.linkpoint.protocol.messages.MessageIdNameRegistry.formatHex(messageId)}\n")
             append("  Sequence: $sequenceNumber\n")
             append("  Size: $sizeBytes bytes\n")
             append("  Target: $targetAddress:$targetPort")
@@ -753,7 +753,7 @@ object NetworkLogger {
         val handlerInfo = if (hasHandler) "" else " [NO HANDLER]"
         val message = buildString {
             append("📥 UDP Received $statusIcon: $messageName$handlerInfo\n")
-            append("  Message ID: 0x${messageId.toString(16).uppercase()}\n")
+            append("  Message ID: 0x${com.linkpoint.protocol.messages.MessageIdNameRegistry.formatHex(messageId)}\n")
             append("  Sequence: $sequenceNumber\n")
             append("  Size: $sizeBytes bytes")
             sourceAddress?.let { append("\n  Source: $it") }
