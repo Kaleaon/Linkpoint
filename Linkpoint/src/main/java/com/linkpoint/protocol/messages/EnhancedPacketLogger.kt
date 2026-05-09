@@ -203,7 +203,7 @@ object EnhancedPacketLogger {
         fun formatForDisplay(): String {
             val timeStr = SimpleDateFormat("HH:mm:ss.SSS", Locale.US).format(Date(timestamp))
             val seqInfo = sequenceNumber?.let { " seq=$it" } ?: ""
-            val msgIdInfo = messageId?.let { " msgId=0x${it.toString(16).uppercase()}" } ?: ""
+            val msgIdInfo = messageId?.let { " msgId=0x${MessageIdNameRegistry.formatHex(it)}" } ?: ""
             return "[$timeStr] ⚠️ MALFORMED: $reason (${size}B)$seqInfo$msgIdInfo\n    Details: $details\n    Hex: $hexPreview"
         }
     }
@@ -432,7 +432,7 @@ object EnhancedPacketLogger {
      */
     fun logHandlerRegistered(messageId: Int, messageName: String) {
         registeredHandlers[messageId] = messageName
-        Log.d(TAG, "📝 Handler registered: $messageName (0x${messageId.toString(16).uppercase()})")
+        Log.d(TAG, "📝 Handler registered: $messageName (0x${MessageIdNameRegistry.formatHex(messageId)})")
     }
     
     /**
@@ -537,7 +537,7 @@ object EnhancedPacketLogger {
         Log.w(TAG, "  Details: $details")
         rawFlags?.let { Log.w(TAG, "  Raw Flags: 0x${it.toString(16).uppercase().padStart(2, '0')}") }
         sequenceNumber?.let { Log.w(TAG, "  Sequence: $it") }
-        messageId?.let { Log.w(TAG, "  Message ID: 0x${it.toString(16).uppercase()}") }
+        messageId?.let { Log.w(TAG, "  Message ID: 0x${MessageIdNameRegistry.formatHex(it)}") }
         Log.w(TAG, "  Hex Preview: $hexPreview")
     }
     
@@ -913,7 +913,7 @@ object EnhancedPacketLogger {
             appendLine("│ REGISTERED HANDLERS (${stats.registeredHandlerCount})                                     │")
             appendLine("└──────────────────────────────────────────────────────────────────┘")
             registeredHandlers.entries.forEach { (id, name) ->
-                appendLine("  - $name (0x${id.toString(16).uppercase()})")
+                appendLine("  - $name (0x${MessageIdNameRegistry.formatHex(id)})")
             }
             if (registeredHandlers.isEmpty()) {
                 appendLine("  ⚠️ No handlers registered!")

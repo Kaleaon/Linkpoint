@@ -315,7 +315,7 @@ object MessageTranslation {
         val hexEncoded = encoded.joinToString(" ") { "%02X".format(it) }
         
         Log.d(TAG, "Message ID Diagnostics [$operation]:")
-        Log.d(TAG, "  ID: $messageId (0x${messageId.toString(16).uppercase()})")
+        Log.d(TAG, "  ID: $messageId (0x${com.linkpoint.protocol.messages.MessageIdNameRegistry.formatHex(messageId)})")
         Log.d(TAG, "  Name: $name")
         Log.d(TAG, "  Frequency: $frequency")
         Log.d(TAG, "  Encoded: $hexEncoded")

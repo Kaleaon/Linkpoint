@@ -5,6 +5,7 @@ import android.os.Build
 import android.util.Log
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.protocol.messages.EnhancedPacketLogger
+import com.linkpoint.protocol.messages.MessageIdNameRegistry
 import kotlinx.coroutines.*
 import java.io.BufferedWriter
 import java.io.File
@@ -341,13 +342,13 @@ object SessionLogRecorder {
         
         val message = buildString {
             append("→ SENT: $messageName")
-            append(" (ID: 0x${messageId.toString(16).uppercase()}")
+            append(" (ID: 0x${MessageIdNameRegistry.formatHex(messageId)}")
             append(", seq: $sequenceNumber")
             append(", size: ${data.size}B")
             if (reliable) append(", RELIABLE")
             append(")")
         }
-        
+
         logWithHex(EntryType.PACKET_SENT, "UDP", message, data)
     }
     
@@ -366,7 +367,7 @@ object SessionLogRecorder {
         val handlerStatus = if (handlerFound) "✓" else "⚠️ NO HANDLER"
         val message = buildString {
             append("← RECV: $messageName $handlerStatus")
-            append(" (ID: 0x${messageId.toString(16).uppercase()}")
+            append(" (ID: 0x${MessageIdNameRegistry.formatHex(messageId)}")
             append(", seq: $sequenceNumber")
             append(", size: ${data.size}B)")
         }
