@@ -2199,7 +2199,6 @@ class UDPConnectionFixed(
                         NetworkLogger.Category.UDP,
                         "UseCircuitCode timed out; faulting and requesting reconnect"
                     )
-                    _connectionState.value = ConnectionState.FAULTED
                     reconnectionCallback?.invoke()
                     disconnect()
                 }
