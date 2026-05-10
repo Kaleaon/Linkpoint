@@ -1068,7 +1068,7 @@ class LinkpointThreadedCircuit(
             LinkpointConstants.MSG_COMPLETE_AGENT_MOVEMENT -> "CompleteAgentMovement"
             LinkpointConstants.MSG_REGION_HANDSHAKE -> "RegionHandshake"
             LinkpointConstants.MSG_REGION_HANDSHAKE_REPLY -> "RegionHandshakeReply"
-            else -> "0x${messageId.toString(16).uppercase()}"
+            else -> "0x${com.linkpoint.protocol.messages.MessageIdNameRegistry.formatHex(messageId)}"
         }
     }
 }

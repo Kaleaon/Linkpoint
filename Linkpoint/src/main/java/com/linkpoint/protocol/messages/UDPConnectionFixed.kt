@@ -965,6 +965,20 @@ class UDPConnectionFixed(
      */
     suspend fun connect(): Boolean = withContext(CircuitDispatcher.dispatcher) {
         try {
+            // Defensive: if a previous I/O thread is still alive (e.g.
+            // higher-level recovery path called connect() without an
+            // intervening disconnect()), interrupt it before we open a
+            // new socket. Letting two I/O threads race over the same
+            // @Volatile selector/channel/key fields produces the
+            // "I/O Thread Alive: false but selector wakeups still
+            // climbing" inconsistency seen in the 2026-05-07 00:35 capture.
+            ioThread?.takeIf { it.isAlive }?.let { stale ->
+                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
+                    "connect(): previous I/O thread '${stale.name}' still alive — interrupting before re-creating")
+                stale.interrupt()
+            }
+            ioThread = null
+
             connectAttemptCount.incrementAndGet()
             // Record connection attempt time and reset ALL statistics for new session
             connectionAttemptTime = System.currentTimeMillis()
@@ -1315,7 +1329,7 @@ class UDPConnectionFixed(
                                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
                                     "📦 PACKET RECEIVED #${packetsReceived.get()}: $bytesRead bytes${if (isZerocoded) " (decoded to ${data.size})" else ""}")
                                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-                                    "   Message: $messageName (ID: 0x${messageId.toString(16).uppercase()}, seq: $seqNum)")
+                                    "   Message: $messageName (ID: 0x${MessageIdNameRegistry.formatHex(messageId)}, seq: $seqNum)")
 
                                 // Record in packet history
                                 recordPacketEvent(
@@ -1383,7 +1397,7 @@ class UDPConnectionFixed(
                                         else NetworkLogger.Level.WARN
                                     val tag = if (packetFlags.resent) "↻ duplicate-resend" else "⚠ duplicate-not-marked-resend"
                                     NetworkLogger.log(level, NetworkLogger.Category.UDP,
-                                        "$tag seq=$seqNum messageId=0x${messageId.toString(16)} ($messageName) — skipping handler dispatch")
+                                        "$tag seq=$seqNum messageId=0x${MessageIdNameRegistry.formatHex(messageId)} ($messageName) — skipping handler dispatch")
                                 } else {
                                     // Inbound seq-gap detector (ELN approximation). If the
                                     // simulator's stream skipped one or more sequence
@@ -1548,7 +1562,13 @@ class UDPConnectionFixed(
      */
     private fun dispatchMessageDirect(messageId: Int, data: ByteArray) {
         try {
-            // Internal PacketAck handling (processes ACK callbacks for reliable messaging)
+            // Internal PacketAck bookkeeping. This is NOT a public handler —
+            // it walks the inflight-reliable map and the pendingCallbacks map
+            // so reliable sends complete and resends stop. Public app
+            // handlers for PACKET_ACK (e.g. LinkpointApp's
+            // CompleteAgentMovement-after-circuit-ack hook) are dispatched
+            // by the router below; this internal call must always run, even
+            // when no app handler is registered.
             if (messageId == MessageIdRegistry.PACKET_ACK) {
                 handlePacketAck(data)
             }
@@ -1568,6 +1588,17 @@ class UDPConnectionFixed(
             } catch (e: Exception) {
                 NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
                     "Router error for ${getMessageName(messageId)}: ${e.message}")
+                false
+            }
+
+            if (handled) {
+                messagesRouted.incrementAndGet()
+            } else if (messageId != MessageIdRegistry.PACKET_ACK) {
+                // PACKET_ACK handled internally above so absence of an app
+                // handler is fine; everything else with no handler is a
+                // protocol gap worth logging at VERBOSE.
+                NetworkLogger.log(NetworkLogger.Level.VERBOSE, NetworkLogger.Category.UDP,
+                    "No handler for ${getMessageName(messageId)} (ID: 0x${MessageIdNameRegistry.formatHex(messageId)})")
             }
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
@@ -2126,6 +2157,16 @@ class UDPConnectionFixed(
         //    callback API gets a single onMessageTimeout instead of looping.
         var resends = 0
         var giveups = 0
+        // If UseCircuitCode itself runs out of retries we've lost the
+        // handshake — there's no point re-sending CompleteAgentMovement /
+        // AgentUpdate / AgentSetAppearance into a circuit the simulator
+        // never accepted. Capture this and escalate AFTER the iteration so
+        // we don't recurse into reconnect() from inside `removeIf`. Without
+        // this, the 2026-05-07 00:35 capture happens: 4 UseCircuitCode
+        // attempts, then the entry vanishes from inflightReliablePackets,
+        // then the rest of the app keeps sending packets onto a dead circuit
+        // until the ping watchdog finally trips ~25 s later.
+        var useCircuitCodeAbandoned = false
         inflightReliablePackets.entries.removeIf { (seqNum, inflight) ->
             val age = now - inflight.lastSentTime
             if (age <= timeout) return@removeIf false
@@ -2133,6 +2174,9 @@ class UDPConnectionFixed(
             if (inflight.retries >= maxRetries) {
                 giveups++
                 pendingCallbacks.remove(seqNum)
+                if (inflight.messageId == MessageIdRegistry.USE_CIRCUIT_CODE) {
+                    useCircuitCodeAbandoned = true
+                }
                 try {
                     inflight.listener?.onMessageTimeout(seqNum, inflight.messageId)
                 } catch (e: Exception) {
@@ -2146,7 +2190,7 @@ class UDPConnectionFixed(
                     NetworkLogger.Level.WARN,
                     NetworkLogger.Category.UDP,
                     "✗ Reliable message timed out after $maxRetries resends: " +
-                        "seqNum=$seqNum, messageId=0x${inflight.messageId.toString(16)} " +
+                        "seqNum=$seqNum, messageId=0x${MessageIdNameRegistry.formatHex(inflight.messageId)} " +
                         "(${getMessageName(inflight.messageId)})"
                 )
                 if (inflight.messageId == MessageIdRegistry.USE_CIRCUIT_CODE) {
@@ -2193,7 +2237,7 @@ class UDPConnectionFixed(
                     NetworkLogger.Level.WARN,
                     NetworkLogger.Category.UDP,
                     "⟳ Reliable resend (${inflight.retries}/$maxRetries): " +
-                        "seqNum=$seqNum, messageId=0x${inflight.messageId.toString(16)} " +
+                        "seqNum=$seqNum, messageId=0x${MessageIdNameRegistry.formatHex(inflight.messageId)} " +
                         "(${getMessageName(inflight.messageId)})"
                 )
                 false // keep in inflight; ACK will remove, or next pass times out again
@@ -2205,6 +2249,35 @@ class UDPConnectionFixed(
             // waiting for the next select() timeout.
             selector?.wakeup()
             packetsResentCount.addAndGet(resends)
+        }
+
+        if (useCircuitCodeAbandoned) {
+            // Handshake failure. Escalate to the higher-level reconnect
+            // coordinator so the user sees "reconnecting" rather than
+            // "connecting forever", and tear our own circuit down so any
+            // subsequent send() returns immediately instead of pushing
+            // bytes into a sim that doesn't have a circuit for us.
+            NetworkLogger.log(
+                NetworkLogger.Level.ERROR,
+                NetworkLogger.Category.UDP,
+                "✗ UseCircuitCode handshake exhausted retries — circuit faulted, requesting full re-login"
+            )
+            emitNetworkState(NetworkStateTransition.FAULTED)
+            scope.launch {
+                // Fire the higher-level callback first so the app can
+                // start its login flow. disconnect() flips _isConnected
+                // and tears down the channel; doing it second means the
+                // callback can still inspect the previous state if it
+                // wants to (it can read _isConnected.value before
+                // disconnect runs because we're on a different coroutine).
+                try {
+                    reconnectionCallback?.invoke()
+                } catch (e: Exception) {
+                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                        "reconnectionCallback threw: ${e.message}")
+                }
+                disconnect()
+            }
         }
     }
     
@@ -3200,7 +3273,7 @@ class UDPConnectionFixed(
 
                     val piggybackedAcks = wireBytes.size - pkt.data.size
                     NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-                        "→ Sent packet: ${wireBytes.size} bytes (ID: ${pkt.messageId}, reliable: ${pkt.reliable}" +
+                        "→ Sent packet: ${wireBytes.size} bytes (ID: 0x${MessageIdNameRegistry.formatHex(pkt.messageId)}, reliable: ${pkt.reliable}" +
                             (if (piggybackedAcks > 0) ", +${piggybackedAcks}B ACK appendix" else "") + ")")
                     NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
                         "   Message: $messageName (seq: ${pkt.seqNum})")
@@ -3434,7 +3507,19 @@ class UDPConnectionFixed(
     }
     
     /**
-     * Disconnect
+     * Disconnect.
+     *
+     * Idempotent: a CAS on `_isConnected` from true→false guards the body.
+     * Concurrent or repeated calls observe the post-CAS value and return
+     * silently. Pre-fix, the receive-loop exit path called disconnect() on
+     * its way out *and* the higher-level reconnect-failed path called it
+     * again, producing the duplicate `=== DISCONNECTING ===` /
+     * `=== DISCONNECTED ===` log pair plus two
+     * `ConnectionStateChangedEvent(CONNECTED, DISCONNECTED)` publishes seen
+     * in the 2026-05-07 00:35 capture. Doubled events fan out to every
+     * EventBus subscriber; for state-machine subscribers (UI navigator,
+     * autoreconnect, network-state manager) that means doubled re-login
+     * attempts.
      */
     fun disconnect() {
         if (!_isConnected.compareAndSet(true, false)) {
@@ -3727,7 +3812,13 @@ class UDPConnectionFixed(
     }
     
     /**
-     * Unregister a message handler
+     * Unregister a message handler.
+     *
+     * Removes from BOTH the diagnostic shadow map and the canonical router.
+     * Pre-fix this only touched `messageHandlers`, which used to be the
+     * dispatch source — now that dispatch goes through `messageRouter`, the
+     * old behaviour silently kept stale handlers running. See registerHandler
+     * for the dual-bookkeeping rationale.
      */
     fun unregisterMessageHandler(messageId: Int) {
         messageHandlers.remove(messageId)
@@ -3788,7 +3879,7 @@ class UDPConnectionFixed(
                 MessageIdRegistry.START_PING_CHECK -> "START_PING_CHECK"
                 MessageIdRegistry.PACKET_ACK -> "PACKET_ACK"
                 MessageIdRegistry.SOUND_TRIGGER -> "SOUND_TRIGGER"
-                else -> "0x${id.toString(16).uppercase()}"
+                else -> "0x${MessageIdNameRegistry.formatHex(id)}"
             }
         }
     }
@@ -4149,6 +4240,20 @@ class UDPConnectionFixed(
     /**
      * Get packet history for debugging.
      * Returns the list of recent packet events including raw hex data.
+     *
+     * Reads from the live `recentPacketHistory` ConcurrentLinkedQueue that
+     * recordPacketEvent() / recordAckReceived() write to. The previous
+     * implementation read from `packetDiagnosticsRecorder.snapshot()` — a
+     * separate ArrayDeque that nothing in this class ever writes to — so
+     * the debug report's "UDP PACKET HISTORY" and "INCOMING PACKET DETAILS"
+     * sections always rendered "No packet history recorded yet" even when
+     * dozens of packets had moved across the wire. Visible in the
+     * 2026-05-07 00:35 capture.
+     *
+     * Snapshot is taken via `toList()` which copies under
+     * ConcurrentLinkedQueue's weakly-consistent iterator, so concurrent
+     * writes from the I/O thread can't ConcurrentModificationException
+     * us — at worst we miss an entry that arrived mid-snapshot.
      */
     fun getPacketHistory(): List<PacketHistoryEntry> {
         return recentPacketHistory.toList()

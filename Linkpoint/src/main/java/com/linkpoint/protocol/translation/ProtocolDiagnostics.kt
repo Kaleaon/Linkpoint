@@ -220,7 +220,7 @@ object ProtocolDiagnostics {
         unknownMessages.incrementAndGet()
         unknownMessageIds.getOrPut(messageId) { AtomicInteger(0) }.incrementAndGet()
         
-        Log.w(TAG, "Unknown message ID: $messageId (0x${messageId.toString(16).uppercase()})")
+        Log.w(TAG, "Unknown message ID: $messageId (0x${com.linkpoint.protocol.messages.MessageIdNameRegistry.formatHex(messageId)})")
         
         // Log additional context for debugging
         if (rawBytes != null && rawBytes.size >= 4) {
@@ -231,7 +231,7 @@ object ProtocolDiagnostics {
             val protocolDecoded = MessageTranslation.decodeMessageId(rawBytes, 0)
             if (protocolDecoded != null) {
                 val (decodedId, _) = protocolDecoded
-                Log.d(TAG, "  SL protocol decode: $decodedId (0x${decodedId.toString(16).uppercase()})")
+                Log.d(TAG, "  SL protocol decode: $decodedId (0x${com.linkpoint.protocol.messages.MessageIdNameRegistry.formatHex(decodedId)})")
                 Log.d(TAG, "  SL protocol name: ${MessageTranslation.KnownMessages.getName(decodedId)}")
             }
         }
@@ -323,7 +323,7 @@ object ProtocolDiagnostics {
                 .sortedByDescending { it.value.get() }
                 .take(10)
                 .forEach { (id, count) ->
-                    val hex = id.toString(16).uppercase()
+                    val hex = com.linkpoint.protocol.messages.MessageIdNameRegistry.formatHex(id)
                     sb.appendLine("  0x$hex ($id): ${count.get()} occurrences")
                 }
         }
