@@ -1159,8 +1159,17 @@ class UDPConnectionFixed(
         } catch (e: Exception) {
             lastConnectionError = e.message ?: e.javaClass.simpleName
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "✗ Connection failed: ${e.message}")
-            _isConnected.value = false
+            // Do NOT pre-clear _isConnected — disconnect() uses CAS(true→false) to guard the
+            // cleanup path.  Pre-clearing causes disconnect() to no-op and skip
+            // selector/channel teardown.
             disconnect()
+            // Safety-net: if _isConnected was never set to true (exception thrown before the
+            // "connected" flag was raised), disconnect() CAS also no-ops and leaves any
+            // partially-opened channel/selector open.  Close them directly; these calls are
+            // idempotent when disconnect() already ran.
+            try { selectionKey?.cancel() } catch (_: Exception) {}
+            try { selector?.close() } catch (_: Exception) {}
+            try { datagramChannel?.close() } catch (_: Exception) {}
             false
         }
     }
@@ -1562,41 +1571,17 @@ class UDPConnectionFixed(
      */
     private fun dispatchMessageDirect(messageId: Int, data: ByteArray) {
         try {
-            // Internal PacketAck bookkeeping. This is NOT a public handler —
-            // it walks the inflight-reliable map and the pendingCallbacks map
-            // so reliable sends complete and resends stop. Public app
-            // handlers for PACKET_ACK (e.g. LinkpointApp's
-            // CompleteAgentMovement-after-circuit-ack hook) are dispatched
-            // by the router below; this internal call must always run, even
-            // when no app handler is registered.
-            if (messageId == MessageIdRegistry.PACKET_ACK) {
-                handlePacketAck(data)
-            }
-
-            // Route exactly once through MessageRouter; keep messageHandlers as
-            // a diagnostic shadow map used by debug report stats.
-            val hasRegisteredHandler = messageHandlers.containsKey(messageId)
-            if (!hasRegisteredHandler && messageId != MessageIdRegistry.PACKET_ACK) {
-                // Only log unhandled messages if not PacketAck (which is handled internally)
-                NetworkLogger.log(NetworkLogger.Level.VERBOSE, NetworkLogger.Category.UDP,
-                    "No handler for ${getMessageName(messageId)} (ID: $messageId)")
-            }
-
-            try {
-                messageRouter.routeMessageSync(messageId, data)
-                if (hasRegisteredHandler) messagesRouted.incrementAndGet()
-            } catch (e: Exception) {
-                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
-                    "Router error for ${getMessageName(messageId)}: ${e.message}")
-                false
-            }
-
+            // Route all messages through MessageRouter exactly once.
+            // PacketAck internal bookkeeping (inflight-reliable map + pendingCallbacks)
+            // is handled by the high-priority handler registered in registerInternalHandlers();
+            // there is no need for a direct call here, and doing so would process ACKs twice.
+            val handled = messageRouter.routeMessageSync(messageId, data)
             if (handled) {
                 messagesRouted.incrementAndGet()
             } else if (messageId != MessageIdRegistry.PACKET_ACK) {
-                // PACKET_ACK handled internally above so absence of an app
-                // handler is fine; everything else with no handler is a
-                // protocol gap worth logging at VERBOSE.
+                // PACKET_ACK is always handled internally via the router (registered in
+                // registerInternalHandlers()), so an absent app handler is fine. Everything
+                // else with no handler is a protocol gap worth logging at VERBOSE.
                 NetworkLogger.log(NetworkLogger.Level.VERBOSE, NetworkLogger.Category.UDP,
                     "No handler for ${getMessageName(messageId)} (ID: 0x${MessageIdNameRegistry.formatHex(messageId)})")
             }
@@ -2199,8 +2184,11 @@ class UDPConnectionFixed(
                         NetworkLogger.Category.UDP,
                         "UseCircuitCode timed out; faulting and requesting reconnect"
                     )
-                    reconnectionCallback?.invoke()
-                    disconnect()
+                    // useCircuitCodeAbandoned is already set above; the post-loop
+                    // block will emit FAULTED, invoke reconnectionCallback, and
+                    // call disconnect() in the correct order.  Do not duplicate
+                    // those calls here — the double-invoke causes the reconnection
+                    // callback and disconnect() to fire twice.
                 }
                 true // remove from inflight
             } else {
@@ -2391,7 +2379,7 @@ class UDPConnectionFixed(
      * Handler is ready immediately when this method returns.
      */
     fun registerHandler(messageId: Int, handler: (Int, ByteArray) -> Unit) {
-        messageRouter.unregisterHandler(messageId)
+        messageRouter.unregisterAllHandlersFor(messageId)
         // Register in messageHandlers for diagnostics (using SAM conversion for functional interface)
         messageHandlers[messageId] = MessageHandler { msgId, data ->
             handler(msgId, data)
@@ -3798,7 +3786,7 @@ class UDPConnectionFixed(
      * Register a message handler for a specific message ID
      */
     fun registerMessageHandler(messageId: Int, handler: MessageHandler) {
-        messageRouter.unregisterHandler(messageId)
+        messageRouter.unregisterAllHandlersFor(messageId)
         messageHandlers[messageId] = handler
         val messageName = MessageIdRegistry.getMessageName(messageId)
         EnhancedPacketLogger.logHandlerRegistered(messageId, messageName)
@@ -3821,7 +3809,7 @@ class UDPConnectionFixed(
      */
     fun unregisterMessageHandler(messageId: Int) {
         messageHandlers.remove(messageId)
-        messageRouter.unregisterHandler(messageId)
+        messageRouter.unregisterAllHandlersFor(messageId)
     }
     
     /**

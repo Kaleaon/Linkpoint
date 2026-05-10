@@ -315,6 +315,14 @@ class RobustUDPConnection(
             return
         }
 
+        // First inbound was received at some point but we haven't seen any packet
+        // since the last heartbeat tick — count this as a missed inbound and fault
+        // after the same MAX_MISSED_HEARTBEATS threshold.
+        if (misses >= MAX_MISSED_HEARTBEATS) {
+            handleConnectionError("No inbound UDP received; missed heartbeats=$misses")
+            return
+        }
+
         Log.v(TAG, "Heartbeat check ok")
     }
     
