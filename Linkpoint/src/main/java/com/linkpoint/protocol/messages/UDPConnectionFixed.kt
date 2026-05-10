@@ -1553,25 +1553,18 @@ class UDPConnectionFixed(
                 handlePacketAck(data)
             }
 
-            // Dispatch to all registered handlers (from LinkpointApp and managers)
-            val handler = messageHandlers[messageId]
-            if (handler != null) {
-                try {
-                    handler.handle(messageId, data)
-                } catch (e: Exception) {
-                    NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
-                        "Handler error for ${getMessageName(messageId)}: ${e.message}")
-                }
-                messagesRouted.incrementAndGet()
-            } else if (messageId != MessageIdRegistry.PACKET_ACK) {
+            // Route exactly once through MessageRouter; keep messageHandlers as
+            // a diagnostic shadow map used by debug report stats.
+            val hasRegisteredHandler = messageHandlers.containsKey(messageId)
+            if (!hasRegisteredHandler && messageId != MessageIdRegistry.PACKET_ACK) {
                 // Only log unhandled messages if not PacketAck (which is handled internally)
                 NetworkLogger.log(NetworkLogger.Level.VERBOSE, NetworkLogger.Category.UDP,
                     "No handler for ${getMessageName(messageId)} (ID: $messageId)")
             }
 
-            // Also try to route through messageRouter for any handlers only registered there
             try {
                 messageRouter.routeMessageSync(messageId, data)
+                if (hasRegisteredHandler) messagesRouted.incrementAndGet()
             } catch (e: Exception) {
                 NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
                     "Router error for ${getMessageName(messageId)}: ${e.message}")
@@ -2156,6 +2149,16 @@ class UDPConnectionFixed(
                         "seqNum=$seqNum, messageId=0x${inflight.messageId.toString(16)} " +
                         "(${getMessageName(inflight.messageId)})"
                 )
+                if (inflight.messageId == MessageIdRegistry.USE_CIRCUIT_CODE) {
+                    NetworkLogger.log(
+                        NetworkLogger.Level.ERROR,
+                        NetworkLogger.Category.UDP,
+                        "UseCircuitCode timed out; faulting and requesting reconnect"
+                    )
+                    _connectionState.value = ConnectionState.FAULTED
+                    reconnectionCallback?.invoke()
+                    disconnect()
+                }
                 true // remove from inflight
             } else {
                 inflight.retries++
@@ -2316,6 +2319,7 @@ class UDPConnectionFixed(
      * Handler is ready immediately when this method returns.
      */
     fun registerHandler(messageId: Int, handler: (Int, ByteArray) -> Unit) {
+        messageRouter.unregisterHandler(messageId)
         // Register in messageHandlers for diagnostics (using SAM conversion for functional interface)
         messageHandlers[messageId] = MessageHandler { msgId, data ->
             handler(msgId, data)
@@ -3433,9 +3437,10 @@ class UDPConnectionFixed(
      * Disconnect
      */
     fun disconnect() {
+        if (!_isConnected.compareAndSet(true, false)) {
+            return
+        }
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== DISCONNECTING ===")
-
-        _isConnected.value = false
 
         // Stop the dedicated I/O thread first (it checks _isConnected in its loop)
         ioThread?.interrupt()
@@ -3709,7 +3714,16 @@ class UDPConnectionFixed(
      * Register a message handler for a specific message ID
      */
     fun registerMessageHandler(messageId: Int, handler: MessageHandler) {
+        messageRouter.unregisterHandler(messageId)
         messageHandlers[messageId] = handler
+        val messageName = MessageIdRegistry.getMessageName(messageId)
+        EnhancedPacketLogger.logHandlerRegistered(messageId, messageName)
+        messageRouter.registerHandler(messageId, object : MessageRouter.Handler {
+            override fun handleMessage(messageId: Int, data: ByteArray): Boolean {
+                handler.handle(messageId, data)
+                return true
+            }
+        })
     }
     
     /**
@@ -3717,6 +3731,7 @@ class UDPConnectionFixed(
      */
     fun unregisterMessageHandler(messageId: Int) {
         messageHandlers.remove(messageId)
+        messageRouter.unregisterHandler(messageId)
     }
     
     /**
@@ -4136,7 +4151,7 @@ class UDPConnectionFixed(
      * Returns the list of recent packet events including raw hex data.
      */
     fun getPacketHistory(): List<PacketHistoryEntry> {
-        return packetDiagnosticsRecorder.snapshot()
+        return recentPacketHistory.toList()
     }
     
     /**
