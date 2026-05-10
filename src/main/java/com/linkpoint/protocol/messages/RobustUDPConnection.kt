@@ -9,7 +9,8 @@ import kotlinx.coroutines.flow.StateFlow
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.DatagramChannel
-import java.util.concurrent.TimeUnit
+import java.nio.channels.SelectionKey
+import java.nio.channels.Selector
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -42,6 +43,11 @@ class RobustUDPConnection(
         
         // Heartbeat settings
         private const val HEARTBEAT_INTERVAL_MS = 30000L
+        private const val RECEIVE_SELECT_TIMEOUT_MS = 1000L
+        private const val SEND_RETRY_DELAY_MS = 20L
+        private const val MAX_SEND_RETRIES = 3
+        private const val INITIAL_INBOUND_GRACE_MS = 45000L
+        private const val MAX_MISSED_HEARTBEATS = 3
 
         // Packet buffering
         private const val PACKET_CHANNEL_CAPACITY = 512
@@ -71,6 +77,9 @@ class RobustUDPConnection(
     // Reconnection tracking
     private val reconnectAttempts = AtomicInteger(0)
     private val isShuttingDown = AtomicBoolean(false)
+    private val missedHeartbeats = AtomicInteger(0)
+    private val firstInboundReceived = AtomicBoolean(false)
+    @Volatile private var connectedAtMs: Long = 0L
     
     // Coroutine scope
     private val scope = CoroutineScope(
@@ -106,11 +115,14 @@ class RobustUDPConnection(
             
             val address = InetSocketAddress(simIP, simPort)
             datagramChannel = DatagramChannel.open()
-            datagramChannel?.configureBlocking(true)
+            datagramChannel?.configureBlocking(false)
             datagramChannel?.connect(address)
             
             _connectionState.value = ConnectionState.CONNECTED
             reconnectAttempts.set(0)
+            missedHeartbeats.set(0)
+            firstInboundReceived.set(false)
+            connectedAtMs = System.currentTimeMillis()
 
             // Start loops after state is CONNECTED so their guards are true
             startReceiveLoop()
@@ -180,9 +192,24 @@ class RobustUDPConnection(
         }
         
         try {
+            val channel = datagramChannel ?: return@withContext false
             val buffer = ByteBuffer.wrap(data)
-            datagramChannel?.write(buffer)
-            true
+            var attempt = 0
+            while (attempt <= MAX_SEND_RETRIES) {
+                val bytesWritten = channel.write(buffer)
+                if (!buffer.hasRemaining() && bytesWritten > 0) {
+                    return@withContext true
+                }
+
+                if (attempt == MAX_SEND_RETRIES) {
+                    val sent = data.size - buffer.remaining()
+                    Log.w(TAG, "UDP send incomplete after retries: sent $sent of ${data.size} bytes")
+                    return@withContext false
+                }
+                attempt++
+                delay(SEND_RETRY_DELAY_MS)
+            }
+            false
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send data", e)
             handleConnectionError("Send error: ${e.message}")
@@ -196,30 +223,50 @@ class RobustUDPConnection(
     private fun startReceiveLoop() {
         receiveJob = scope.launch {
             val buffer = ByteBuffer.allocate(4096)
-            
-            while (isActive && _connectionState.value == ConnectionState.CONNECTED) {
-                try {
-                    buffer.clear()
-                    val bytesRead = datagramChannel?.read(buffer) ?: -1
-                    
-                    if (bytesRead > 0) {
-                        buffer.flip()
-                        val data = ByteArray(bytesRead)
-                        buffer.get(data)
-                        
-                        // Send to packet channel
-                        val sendResult = packetChannel.trySend(PacketData(data, System.currentTimeMillis()))
-                        if (!sendResult.isSuccess) {
-                            Log.w(TAG, "Dropped incoming packet due to channel backpressure")
+
+            val selector = Selector.open()
+            datagramChannel?.register(selector, SelectionKey.OP_READ)
+
+            try {
+                while (isActive && _connectionState.value == ConnectionState.CONNECTED) {
+                    try {
+                        val ready = selector.select(RECEIVE_SELECT_TIMEOUT_MS)
+                        if (ready <= 0) continue
+
+                        val keys = selector.selectedKeys().iterator()
+                        while (keys.hasNext()) {
+                            val key = keys.next()
+                            keys.remove()
+                            if (!key.isValid || !key.isReadable) continue
+
+                            buffer.clear()
+                            val bytesRead = datagramChannel?.read(buffer) ?: -1
+                            if (bytesRead > 0) {
+                                firstInboundReceived.set(true)
+                                missedHeartbeats.set(0)
+                                buffer.flip()
+                                val data = ByteArray(bytesRead)
+                                buffer.get(data)
+
+                                val sendResult = packetChannel.trySend(PacketData(data, System.currentTimeMillis()))
+                                if (!sendResult.isSuccess) {
+                                    Log.w(TAG, "Dropped incoming packet due to channel backpressure")
+                                }
+                            }
                         }
+
+                    } catch (e: Exception) {
+                        if (!isShuttingDown.get()) {
+                            Log.e(TAG, "Error receiving data", e)
+                            handleConnectionError("Receive error: ${e.message}")
+                        }
+                        break
                     }
-                    
-                } catch (e: Exception) {
-                    if (!isShuttingDown.get()) {
-                        Log.e(TAG, "Error receiving data", e)
-                        handleConnectionError("Receive error: ${e.message}")
-                    }
-                    break
+                }
+            } finally {
+                try {
+                    selector.close()
+                } catch (_: Exception) {
                 }
             }
         }
@@ -249,6 +296,30 @@ class RobustUDPConnection(
             if (!isShuttingDown.get()) {
                 handleConnectionError("Heartbeat check failed: socket not connected")
             }
+            return
+        }
+        val now = System.currentTimeMillis()
+        val elapsedSinceConnect = now - connectedAtMs
+        if (!firstInboundReceived.get() && elapsedSinceConnect < INITIAL_INBOUND_GRACE_MS) {
+            Log.v(TAG, "Heartbeat: waiting for initial inbound (grace ${INITIAL_INBOUND_GRACE_MS}ms)")
+            return
+        }
+
+        val misses = missedHeartbeats.incrementAndGet()
+        if (!firstInboundReceived.get()) {
+            if (misses >= MAX_MISSED_HEARTBEATS) {
+                handleConnectionError("No inbound UDP after connect grace; missed heartbeats=$misses")
+            } else {
+                Log.w(TAG, "No inbound UDP yet (missed heartbeats=$misses/$MAX_MISSED_HEARTBEATS)")
+            }
+            return
+        }
+
+        // First inbound was received at some point but we haven't seen any packet
+        // since the last heartbeat tick — count this as a missed inbound and fault
+        // after the same MAX_MISSED_HEARTBEATS threshold.
+        if (misses >= MAX_MISSED_HEARTBEATS) {
+            handleConnectionError("No inbound UDP received; missed heartbeats=$misses")
             return
         }
 

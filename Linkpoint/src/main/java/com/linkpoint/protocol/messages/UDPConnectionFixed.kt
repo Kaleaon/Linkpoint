@@ -1159,8 +1159,17 @@ class UDPConnectionFixed(
         } catch (e: Exception) {
             lastConnectionError = e.message ?: e.javaClass.simpleName
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "✗ Connection failed: ${e.message}")
-            _isConnected.value = false
+            // Do NOT pre-clear _isConnected — disconnect() uses CAS(true→false) to guard the
+            // cleanup path.  Pre-clearing causes disconnect() to no-op and skip
+            // selector/channel teardown.
             disconnect()
+            // Safety-net: if _isConnected was never set to true (exception thrown before the
+            // "connected" flag was raised), disconnect() CAS also no-ops and leaves any
+            // partially-opened channel/selector open.  Close them directly; these calls are
+            // idempotent when disconnect() already ran.
+            try { selectionKey?.cancel() } catch (_: Exception) {}
+            try { selector?.close() } catch (_: Exception) {}
+            try { datagramChannel?.close() } catch (_: Exception) {}
             false
         }
     }
@@ -1562,46 +1571,17 @@ class UDPConnectionFixed(
      */
     private fun dispatchMessageDirect(messageId: Int, data: ByteArray) {
         try {
-            // Internal PacketAck bookkeeping. This is NOT a public handler —
-            // it walks the inflight-reliable map and the pendingCallbacks map
-            // so reliable sends complete and resends stop. Public app
-            // handlers for PACKET_ACK (e.g. LinkpointApp's
-            // CompleteAgentMovement-after-circuit-ack hook) are dispatched
-            // by the router below; this internal call must always run, even
-            // when no app handler is registered.
-            if (messageId == MessageIdRegistry.PACKET_ACK) {
-                handlePacketAck(data)
-            }
-
-            // Single dispatch path: messageRouter. registerHandler() puts
-            // every callback into both `messageHandlers` (for diagnostics —
-            // counts and the registered-id list in the debug report) AND the
-            // router (for actual dispatch). AgentCircuit.kt registers
-            // LAYER_DATA / OBJECT_UPDATE / OBJECT_PROPERTIES directly with
-            // the router only, so the router is the strict superset and the
-            // canonical dispatch site.
-            //
-            // The previous implementation dispatched through both
-            // `messageHandlers` AND `messageRouter`, which fired every
-            // app-registered handler twice. That's the root cause of the
-            // 2× CompletePingCheck pattern in session_log_2026-05-06_21-55
-            // (822 inbound StartPingCheck → 1348 outbound CompletePingCheck)
-            // and would have silently double-applied chat / IM / money /
-            // inventory handlers as well.
-            val handled = try {
-                messageRouter.routeMessageSync(messageId, data)
-            } catch (e: Exception) {
-                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
-                    "Router error for ${getMessageName(messageId)}: ${e.message}")
-                false
-            }
-
+            // Route all messages through MessageRouter exactly once.
+            // PacketAck internal bookkeeping (inflight-reliable map + pendingCallbacks)
+            // is handled by the high-priority handler registered in registerInternalHandlers();
+            // there is no need for a direct call here, and doing so would process ACKs twice.
+            val handled = messageRouter.routeMessageSync(messageId, data)
             if (handled) {
                 messagesRouted.incrementAndGet()
             } else if (messageId != MessageIdRegistry.PACKET_ACK) {
-                // PACKET_ACK handled internally above so absence of an app
-                // handler is fine; everything else with no handler is a
-                // protocol gap worth logging at VERBOSE.
+                // PACKET_ACK is always handled internally via the router (registered in
+                // registerInternalHandlers()), so an absent app handler is fine. Everything
+                // else with no handler is a protocol gap worth logging at VERBOSE.
                 NetworkLogger.log(NetworkLogger.Level.VERBOSE, NetworkLogger.Category.UDP,
                     "No handler for ${getMessageName(messageId)} (ID: 0x${MessageIdNameRegistry.formatHex(messageId)})")
             }
@@ -2198,6 +2178,18 @@ class UDPConnectionFixed(
                         "seqNum=$seqNum, messageId=0x${MessageIdNameRegistry.formatHex(inflight.messageId)} " +
                         "(${getMessageName(inflight.messageId)})"
                 )
+                if (inflight.messageId == MessageIdRegistry.USE_CIRCUIT_CODE) {
+                    NetworkLogger.log(
+                        NetworkLogger.Level.ERROR,
+                        NetworkLogger.Category.UDP,
+                        "UseCircuitCode timed out; faulting and requesting reconnect"
+                    )
+                    // useCircuitCodeAbandoned is already set above; the post-loop
+                    // block will emit FAULTED, invoke reconnectionCallback, and
+                    // call disconnect() in the correct order.  Do not duplicate
+                    // those calls here — the double-invoke causes the reconnection
+                    // callback and disconnect() to fire twice.
+                }
                 true // remove from inflight
             } else {
                 inflight.retries++
@@ -2387,22 +2379,8 @@ class UDPConnectionFixed(
      * Handler is ready immediately when this method returns.
      */
     fun registerHandler(messageId: Int, handler: (Int, ByteArray) -> Unit) {
-        // Two registrations with intentionally different roles:
-        //
-        //   1. messageHandlers — diagnostic shadow map. Read by
-        //      getRegisteredHandlerIds() and getRegisteredHandlerCount() for
-        //      the debug report's "Registered Message Handlers" section.
-        //      NOT used for dispatch (see dispatchMessageDirect for the
-        //      reason — dispatching through both maps caused every handler
-        //      to fire twice).
-        //
-        //   2. messageRouter — canonical dispatch path. Every inbound packet
-        //      lands here exactly once via dispatchMessageDirect.
-        //
-        // If you ever change this, do NOT also dispatch through
-        // messageHandlers — the duplicate-handler regression is silent for
-        // idempotent updates (ObjectUpdate) but corrupts state for chat /
-        // IM / money / inventory.
+        messageRouter.unregisterAllHandlersFor(messageId)
+        // Register in messageHandlers for diagnostics (using SAM conversion for functional interface)
         messageHandlers[messageId] = MessageHandler { msgId, data ->
             handler(msgId, data)
         }
@@ -3531,17 +3509,12 @@ class UDPConnectionFixed(
      * attempts.
      */
     fun disconnect() {
-        if (!_isConnected.compareAndSet(expect = true, update = false)) {
-            // Either we were never connected, or another caller already
-            // ran the teardown. Either way, nothing to do.
+        if (!_isConnected.compareAndSet(true, false)) {
             return
         }
-
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== DISCONNECTING ===")
 
-        // Stop the dedicated I/O thread first (it re-checks _isConnected
-        // each iteration; flipping it above guarantees the loop exits next
-        // iteration even without the interrupt).
+        // Stop the dedicated I/O thread first (it checks _isConnected in its loop)
         ioThread?.interrupt()
         ioThread = null
 
@@ -3813,7 +3786,16 @@ class UDPConnectionFixed(
      * Register a message handler for a specific message ID
      */
     fun registerMessageHandler(messageId: Int, handler: MessageHandler) {
+        messageRouter.unregisterAllHandlersFor(messageId)
         messageHandlers[messageId] = handler
+        val messageName = MessageIdRegistry.getMessageName(messageId)
+        EnhancedPacketLogger.logHandlerRegistered(messageId, messageName)
+        messageRouter.registerHandler(messageId, object : MessageRouter.Handler {
+            override fun handleMessage(messageId: Int, data: ByteArray): Boolean {
+                handler.handle(messageId, data)
+                return true
+            }
+        })
     }
     
     /**
