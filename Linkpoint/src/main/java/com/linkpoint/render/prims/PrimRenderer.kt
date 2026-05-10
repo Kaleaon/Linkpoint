@@ -43,7 +43,10 @@ class PrimRenderer(
     // cardinality. Treat them as a uniform-scale or post-process for now.
     private val primMeshes = ConcurrentHashMap<PrimShapeKey, PrimMesh>()
 
+    private var materialTemplate: Material? = null
     private var defaultMaterial: MaterialInstance? = null
+    // Per-prim material instances so each prim can have an independent texture.
+    private val perEntityMaterials = ConcurrentHashMap<Int, MaterialInstance>()
     private val transformManager = engine.transformManager
 
     /**
@@ -59,11 +62,27 @@ class PrimRenderer(
     fun setBomResolver(resolver: ((Int) -> UUID?)?) {
         bomResolver = resolver
     }
-    
+
+    /**
+     * Callback invoked when a prim's texture UUID has been resolved (including
+     * BoM substitution). The implementor fetches the bitmap asynchronously and
+     * calls [onLoaded] on the render thread with the Filament Texture.
+     */
+    fun interface TextureBinder {
+        fun bind(uuid: UUID, onLoaded: (com.google.android.filament.Texture) -> Unit)
+    }
+
+    @Volatile private var textureBinder: TextureBinder? = null
+
+    fun setTextureBinder(binder: TextureBinder?) {
+        textureBinder = binder
+    }
+
     /**
      * Initialize with default material
      */
     fun initialize(material: Material) {
+        materialTemplate = material
         defaultMaterial = material.createInstance()
         // Pre-generate the default-shape mesh for each base shape kind so the
         // common case (no path/profile customisation) doesn't tessellate on
@@ -152,6 +171,9 @@ class PrimRenderer(
     fun removePrim(localId: Int) {
         prims.remove(localId)?.let { prim ->
             scene.removeEntity(prim.entity)
+            perEntityMaterials.remove(prim.entity)?.let {
+                try { engine.destroyMaterialInstance(it) } catch (_: Exception) {}
+            }
             engine.destroyEntity(prim.entity)
         }
     }
@@ -173,9 +195,19 @@ class PrimRenderer(
         val shapeKey = PrimShapeKey.from(data.shapeParams)
         val mesh = getOrCreateMesh(shapeKey)
 
-        val material = defaultMaterial ?: throw IllegalStateException(
-            "Default material not initialized. Call initialize() first."
-        )
+        val instance = (materialTemplate?.createInstance() ?: defaultMaterial)
+            ?: throw IllegalStateException("Default material not initialized. Call initialize() first.")
+        // Set initial default parameters (no texture; lit with base colour).
+        try {
+            instance.setParameter("baseColor", 1f, 1f, 1f, 1f)
+            instance.setParameter("texScale", 1f, 1f)
+            instance.setParameter("texOffset", 0f, 0f)
+            instance.setParameter("texRotation", 0f)
+            instance.setParameter("metallic", 0f)
+            instance.setParameter("roughness", 0.5f)
+            instance.setParameter("hasTexture", 0f)
+        } catch (_: Exception) {}
+        perEntityMaterials[entity] = instance
 
         // The base mesh is built in unit space (-0.5..0.5 cube envelope). The
         // prim's actual scale comes from the protocol's `scale` vector, so the
@@ -183,7 +215,7 @@ class PrimRenderer(
         RenderableManager.Builder(1)
             .boundingBox(Box(-0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f))
             .geometry(0, RenderableManager.PrimitiveType.TRIANGLES, mesh.vertexBuffer, mesh.indexBuffer)
-            .material(0, material)
+            .material(0, instance)
             .culling(true)
             .receiveShadows(true)
             .castShadows(true)
@@ -959,40 +991,52 @@ class PrimRenderer(
     }
 
     private fun createMesh(vertices: FloatArray, indices: ShortArray): PrimMesh {
-        val stride = 8 * 4 // 3 pos + 3 normal + 2 uv, all floats
+        // Input layout: 8 floats/vertex = pos(3) + normal(3) + uv(2)
         val vertexCount = vertices.size / 8
-        
-        val vertexData = ByteBuffer.allocateDirect(vertices.size * 4)
-            .order(ByteOrder.nativeOrder())
-        for (v in vertices) {
-            vertexData.putFloat(v)
+
+        // Deinterleave for TangentBuilder.
+        val positions = FloatArray(vertexCount * 3)
+        val normals   = FloatArray(vertexCount * 3)
+        val uvs       = FloatArray(vertexCount * 2)
+        for (i in 0 until vertexCount) {
+            val b = i * 8
+            positions[i * 3]     = vertices[b];     positions[i * 3 + 1] = vertices[b + 1]; positions[i * 3 + 2] = vertices[b + 2]
+            normals[i * 3]       = vertices[b + 3]; normals[i * 3 + 1]   = vertices[b + 4]; normals[i * 3 + 2]   = vertices[b + 5]
+            uvs[i * 2]           = vertices[b + 6]; uvs[i * 2 + 1]       = vertices[b + 7]
+        }
+        val tangentQuats = com.linkpoint.render.TangentBuilder.build(positions, normals, uvs, indices)
+
+        // Output layout: 9 floats/vertex = pos(3) + tangent_quat(4) + uv(2)
+        val stride = 9 * 4
+        val vertexData = ByteBuffer.allocateDirect(vertexCount * stride).order(ByteOrder.nativeOrder())
+        for (i in 0 until vertexCount) {
+            val b = i * 8
+            vertexData.putFloat(vertices[b]);     vertexData.putFloat(vertices[b + 1]); vertexData.putFloat(vertices[b + 2])
+            vertexData.putFloat(tangentQuats[i * 4]);     vertexData.putFloat(tangentQuats[i * 4 + 1])
+            vertexData.putFloat(tangentQuats[i * 4 + 2]); vertexData.putFloat(tangentQuats[i * 4 + 3])
+            vertexData.putFloat(vertices[b + 6]); vertexData.putFloat(vertices[b + 7])
         }
         vertexData.flip()
-        
-        val indexData = ByteBuffer.allocateDirect(indices.size * 2)
-            .order(ByteOrder.nativeOrder())
-        for (i in indices) {
-            indexData.putShort(i)
-        }
+
+        val indexData = ByteBuffer.allocateDirect(indices.size * 2).order(ByteOrder.nativeOrder())
+        for (i in indices) indexData.putShort(i)
         indexData.flip()
-        
+
         val vertexBuffer = VertexBuffer.Builder()
             .vertexCount(vertexCount)
             .bufferCount(1)
             .attribute(VertexAttribute.POSITION, 0, AttributeType.FLOAT3, 0, stride)
-            .attribute(VertexAttribute.TANGENTS, 0, AttributeType.FLOAT3, 12, stride)
-            .attribute(VertexAttribute.UV0, 0, AttributeType.FLOAT2, 24, stride)
+            .attribute(VertexAttribute.TANGENTS, 0, AttributeType.FLOAT4, 12, stride)
+            .attribute(VertexAttribute.UV0,      0, AttributeType.FLOAT2, 28, stride)
             .build(engine)
-        
         vertexBuffer.setBufferAt(engine, 0, vertexData)
-        
+
         val indexBuffer = IndexBuffer.Builder()
             .indexCount(indices.size)
             .bufferType(IndexBuffer.Builder.IndexType.USHORT)
             .build(engine)
-        
         indexBuffer.setBuffer(engine, indexData)
-        
+
         return PrimMesh(vertexBuffer, indexBuffer)
     }
     
@@ -1050,9 +1094,25 @@ class PrimRenderer(
                     } else if (BakesOnMesh.isBakeSentinel(defaultTextureId)) {
                         Log.v(TAG, "Prim ${prim.localId} BoM sentinel $defaultTextureId — no resolver")
                     }
-                    // TODO: feed `resolved` into TextureManager.getTexture()
-                    // and bind to the lit material's baseColorMap once that
-                    // sampler param is added to the lit material source.
+                    val binder = textureBinder
+                    val matInstance = perEntityMaterials[prim.entity]
+                    if (binder != null && matInstance != null && resolved != UUID(0L, 0L)) {
+                        binder.bind(resolved) { tex ->
+                            try {
+                                matInstance.setParameter(
+                                    "baseColorMap", tex,
+                                    com.google.android.filament.TextureSampler(
+                                        com.google.android.filament.TextureSampler.MinFilter.LINEAR_MIPMAP_LINEAR,
+                                        com.google.android.filament.TextureSampler.MagFilter.LINEAR,
+                                        com.google.android.filament.TextureSampler.WrapMode.REPEAT
+                                    )
+                                )
+                                matInstance.setParameter("hasTexture", 1f)
+                            } catch (e: Exception) {
+                                Log.w(TAG, "Texture bind failed for prim ${prim.localId}: ${e.message}")
+                            }
+                        }
+                    }
                 }
             }
             
@@ -1075,13 +1135,18 @@ class PrimRenderer(
             engine.destroyEntity(prim.entity)
         }
         prims.clear()
-        
+
+        perEntityMaterials.values.forEach {
+            try { engine.destroyMaterialInstance(it) } catch (_: Exception) {}
+        }
+        perEntityMaterials.clear()
+
         for (mesh in primMeshes.values) {
             engine.destroyVertexBuffer(mesh.vertexBuffer)
             engine.destroyIndexBuffer(mesh.indexBuffer)
         }
         primMeshes.clear()
-        
+
         defaultMaterial?.let { engine.destroyMaterialInstance(it) }
     }
 }

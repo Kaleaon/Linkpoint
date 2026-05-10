@@ -732,6 +732,25 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             app.avatarManager.getMyAvatar()?.baker?.getBakedTextures()?.get(slot)
         }
 
+        // Wire the default-face texture binder for path/profile prims. When
+        // updatePrimMaterial() resolves a texture UUID it calls here; we fetch
+        // the bitmap via TextureManager and hop back to the render thread for
+        // the Filament upload + material param update.
+        if (app.isTextureManagerInitialized()) {
+            app.renderManager.getPrimRenderer()?.setTextureBinder { uuid, onLoaded ->
+                if (!com.linkpoint.protocol.textures.TextureEntryParser.shouldDownload(uuid)) return@setTextureBinder
+                lifecycleScope.launch {
+                    val bmp = try { app.textureManager.getTexture(uuid) } catch (_: Exception) { null }
+                    if (bmp != null) {
+                        app.renderManager.dispatcher.post(Runnable {
+                            val pair = app.renderManager.uploadBitmapAsLinkpointTexture(uuid, bmp)
+                            if (pair != null) onLoaded(pair.first)
+                        })
+                    }
+                }
+            }
+        }
+
         // Per-frame avatar pose tick. For each tracked avatar with a
         // skeleton, advance the AvatarAnimator and write the resulting
         // bone matrices into SceneManager so the body segments visibly
