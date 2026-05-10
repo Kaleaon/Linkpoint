@@ -18,6 +18,10 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class DrawablePrimStore {
 
+    enum class PrimShape(val vaoKey: String) {
+        BOX("box"), SPHERE("sphere"), CYLINDER("cylinder")
+    }
+
     /** Per-prim instance data. */
     data class PrimInstance(
         val id: Long,
@@ -26,7 +30,8 @@ class DrawablePrimStore {
         var colorR: Float = 1f, var colorG: Float = 1f,
         var colorB: Float = 1f, var colorA: Float = 1f,
         var textureHandle: Int = 0,
-        var isTransparent: Boolean = false
+        var isTransparent: Boolean = false,
+        var shape: PrimShape = PrimShape.BOX
     )
 
     private val prims = ConcurrentHashMap<Long, PrimInstance>()
@@ -42,6 +47,10 @@ class DrawablePrimStore {
         Matrix.setIdentityM(instance.modelMatrix, 0)
         Matrix.translateM(instance.modelMatrix, 0, posX, posY, posZ)
         prims[id] = instance
+    }
+
+    fun setPrimShape(id: Long, shape: PrimShape) {
+        prims[id]?.shape = shape
     }
 
     fun removePrim(id: Long) {
@@ -63,7 +72,7 @@ class DrawablePrimStore {
     fun drawOpaque(ctx: LumiyaRenderContext) {
         ensureShapes(ctx)
         val program = ctx.primProgram ?: return
-        val boxVAO = shapeVAOs?.get("box") ?: return
+        val vaos = shapeVAOs ?: return
 
         program.use()
         program.setLighting(
@@ -72,27 +81,31 @@ class DrawablePrimStore {
             ctx.ambientColorR, ctx.ambientColorG, ctx.ambientColorB
         )
 
-        GLES32.glBindVertexArray(boxVAO.vao)
-        for (prim in prims.values) {
-            if (prim.isTransparent) continue
-            program.setModelMatrix(prim.modelMatrix)
-            program.setTexMatrix(prim.texMatrix)
-            program.setColor(prim.colorR, prim.colorG, prim.colorB, prim.colorA)
-            program.setUseTexture(prim.textureHandle != 0)
-            if (prim.textureHandle != 0) {
-                GLES32.glActiveTexture(GLES32.GL_TEXTURE0)
-                GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, prim.textureHandle)
-                program.setTextureSampler(0)
+        for (shape in PrimShape.entries) {
+            val vao = vaos[shape.vaoKey] ?: continue
+            val batch = prims.values.filter { !it.isTransparent && it.shape == shape }
+            if (batch.isEmpty()) continue
+            GLES32.glBindVertexArray(vao.vao)
+            for (prim in batch) {
+                program.setModelMatrix(prim.modelMatrix)
+                program.setTexMatrix(prim.texMatrix)
+                program.setColor(prim.colorR, prim.colorG, prim.colorB, prim.colorA)
+                program.setUseTexture(prim.textureHandle != 0)
+                if (prim.textureHandle != 0) {
+                    GLES32.glActiveTexture(GLES32.GL_TEXTURE0)
+                    GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, prim.textureHandle)
+                    program.setTextureSampler(0)
+                }
+                GLES32.glDrawElements(GLES32.GL_TRIANGLES, vao.indexCount, GLES32.GL_UNSIGNED_SHORT, 0)
             }
-            GLES32.glDrawElements(GLES32.GL_TRIANGLES, boxVAO.indexCount, GLES32.GL_UNSIGNED_SHORT, 0)
+            GLES32.glBindVertexArray(0)
         }
-        GLES32.glBindVertexArray(0)
     }
 
     fun drawTransparent(ctx: LumiyaRenderContext) {
         ensureShapes(ctx)
         val program = ctx.primProgram ?: return
-        val boxVAO = shapeVAOs?.get("box") ?: return
+        val vaos = shapeVAOs ?: return
 
         program.use()
         program.setLighting(
@@ -101,12 +114,18 @@ class DrawablePrimStore {
             ctx.ambientColorR, ctx.ambientColorG, ctx.ambientColorB
         )
 
-        // Sort back-to-front for correct alpha blending
+        // Sort back-to-front for correct alpha blending across all shapes
         val sorted = prims.values.filter { it.isTransparent }
             .sortedByDescending { distanceToCamera(ctx, it) }
 
-        GLES32.glBindVertexArray(boxVAO.vao)
+        var boundVao = 0
         for (prim in sorted) {
+            val vao = vaos[prim.shape.vaoKey] ?: continue
+            if (vao.vao != boundVao) {
+                if (boundVao != 0) GLES32.glBindVertexArray(0)
+                GLES32.glBindVertexArray(vao.vao)
+                boundVao = vao.vao
+            }
             program.setModelMatrix(prim.modelMatrix)
             program.setTexMatrix(prim.texMatrix)
             program.setColor(prim.colorR, prim.colorG, prim.colorB, prim.colorA)
@@ -116,9 +135,9 @@ class DrawablePrimStore {
                 GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, prim.textureHandle)
                 program.setTextureSampler(0)
             }
-            GLES32.glDrawElements(GLES32.GL_TRIANGLES, boxVAO.indexCount, GLES32.GL_UNSIGNED_SHORT, 0)
+            GLES32.glDrawElements(GLES32.GL_TRIANGLES, vao.indexCount, GLES32.GL_UNSIGNED_SHORT, 0)
         }
-        GLES32.glBindVertexArray(0)
+        if (boundVao != 0) GLES32.glBindVertexArray(0)
     }
 
     // ── Shared shape geometry ────────────────────────────────────────────

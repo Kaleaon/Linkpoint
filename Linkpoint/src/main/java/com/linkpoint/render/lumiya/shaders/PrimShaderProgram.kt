@@ -68,14 +68,6 @@ class PrimShaderProgram : BaseShaderProgram() {
         #version 320 es
         precision mediump float;
 
-        layout(std140, binding = 0) uniform GlobalData {
-            mat4 uProjection;
-            mat4 uView;
-            mat4 _pad_model;
-            vec4 uCameraPos;
-            vec4 uSunDir;
-        };
-
         in vec3 vWorldPos;
         in vec3 vNormal;
         in vec2 vTexCoord;

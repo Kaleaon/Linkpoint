@@ -83,25 +83,66 @@ class ShaderCompiler {
     }
 
     /**
-     * Inject `#define` lines right after the `#version` directive.
-     * If no `#version` is present one is prepended.
+     * Preprocess GLSL source: inject #define lines after #version and evaluate
+     * #ifdef / #ifndef / #else / #endif conditionals against the defines map.
+     * If no #version directive is present one is prepended.
      */
     private fun preprocess(source: String, defines: Map<String, String>): String {
+        // Symbols known at preprocessing time (from caller-supplied defines)
+        val definedSymbols = defines.keys.toMutableSet()
+
+        // Stack-based conditional tracking.
+        // Each frame records (parentIncluding, conditionTrue); effective include =
+        // parentIncluding && conditionTrue for the innermost frame.
+        data class CondFrame(val parentIncluding: Boolean, val conditionTrue: Boolean)
+        val condStack = ArrayDeque<CondFrame>()
+
+        fun isIncluding(): Boolean {
+            val top = condStack.lastOrNull() ?: return true
+            return top.parentIncluding && top.conditionTrue
+        }
+
         val sb = StringBuilder()
-        val lines = source.lines()
         var versionEmitted = false
 
-        for (line in lines) {
-            sb.appendLine(line)
-            if (!versionEmitted && line.trimStart().startsWith("#version")) {
-                versionEmitted = true
-                for ((k, v) in defines) {
-                    sb.appendLine("#define $k $v")
+        for (line in source.lines()) {
+            val trimmed = line.trimStart()
+            when {
+                trimmed.startsWith("#ifdef ") -> {
+                    val sym = trimmed.removePrefix("#ifdef ").trim()
+                    condStack.addLast(CondFrame(isIncluding(), sym in definedSymbols))
+                }
+                trimmed.startsWith("#ifndef ") -> {
+                    val sym = trimmed.removePrefix("#ifndef ").trim()
+                    condStack.addLast(CondFrame(isIncluding(), sym !in definedSymbols))
+                }
+                trimmed == "#else" -> {
+                    val top = condStack.removeLastOrNull()
+                    if (top != null) condStack.addLast(CondFrame(top.parentIncluding, !top.conditionTrue))
+                }
+                trimmed == "#endif" -> condStack.removeLastOrNull()
+                !isIncluding() -> { /* skip excluded line */ }
+                trimmed.startsWith("#define ") -> {
+                    val sym = trimmed.removePrefix("#define ").trim().split("\\s+".toRegex()).firstOrNull().orEmpty()
+                    if (sym.isNotEmpty()) definedSymbols.add(sym)
+                    sb.appendLine(line)
+                }
+                trimmed.startsWith("#undef ") -> {
+                    val sym = trimmed.removePrefix("#undef ").trim()
+                    definedSymbols.remove(sym)
+                    sb.appendLine(line)
+                }
+                else -> {
+                    sb.appendLine(line)
+                    if (!versionEmitted && trimmed.startsWith("#version")) {
+                        versionEmitted = true
+                        for ((k, v) in defines) sb.appendLine("#define $k $v")
+                    }
                 }
             }
         }
+
         if (!versionEmitted) {
-            // Prepend version + defines
             val header = buildString {
                 appendLine("#version 320 es")
                 for ((k, v) in defines) appendLine("#define $k $v")

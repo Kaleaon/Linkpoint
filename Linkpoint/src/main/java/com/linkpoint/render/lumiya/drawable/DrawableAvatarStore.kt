@@ -6,6 +6,7 @@ import android.util.Log
 import com.linkpoint.diagnostics.ScenePopulationDiagnostics
 import com.linkpoint.render.lumiya.core.LumiyaRenderContext
 import com.linkpoint.render.lumiya.glres.GLBufferManager
+import com.linkpoint.render.lumiya.glres.GLResourceManager
 import com.linkpoint.render.lumiya.shaders.AvatarShaderProgram
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -37,6 +38,8 @@ class DrawableAvatarStore internal constructor(
     private val avatars = ConcurrentHashMap<UUID, AvatarInstance>()
     private var avatarMesh: GLBufferManager.MeshVAO? = null
     private var bufferManager: GLBufferManager? = null
+    // Kept so deleteBuffer() can be deferred safely from any thread.
+    private var resourceManager: GLResourceManager? = null
 
     fun addAvatar(id: UUID, posX: Float, posY: Float, posZ: Float) {
         val instance = AvatarInstance(id = id)
@@ -124,6 +127,7 @@ class DrawableAvatarStore internal constructor(
         }
         val bm = GLBufferManager(ctx.resourceManager)
         bufferManager = bm
+        resourceManager = ctx.resourceManager
         avatarMesh = bm.buildVAO(
             asset.vertices,
             asset.indices,
@@ -133,7 +137,8 @@ class DrawableAvatarStore internal constructor(
 
     private fun destroyAvatarResources(avatar: AvatarInstance) {
         if (avatar.jointUBO != 0) {
-            GLES32.glDeleteBuffers(1, intArrayOf(avatar.jointUBO), 0)
+            resourceManager?.deleteBuffer(avatar.jointUBO)
+                ?: GLES32.glDeleteBuffers(1, intArrayOf(avatar.jointUBO), 0)
             avatar.jointUBO = 0
         }
     }

@@ -31,10 +31,13 @@ class DrawableSky(private val ctx: LumiyaRenderContext) {
         buildIcosphere()
         buildStars()
         Matrix.setIdentityM(modelMatrix, 0)
-        Matrix.scaleM(modelMatrix, 0, SKY_RADIUS, SKY_RADIUS, SKY_RADIUS)
     }
 
     fun draw(ctx: LumiyaRenderContext) {
+        // Keep dome and stars centred on the camera each frame
+        Matrix.setIdentityM(modelMatrix, 0)
+        Matrix.translateM(modelMatrix, 0, ctx.cameraPositionX, ctx.cameraPositionY, ctx.cameraPositionZ)
+        Matrix.scaleM(modelMatrix, 0, SKY_RADIUS, SKY_RADIUS, SKY_RADIUS)
         drawSkyDome(ctx)
         drawStars(ctx)
     }
@@ -164,10 +167,12 @@ class DrawableSky(private val ctx: LumiyaRenderContext) {
         for (i in 0 until STAR_COUNT) {
             // Random direction on upper hemisphere
             var x: Float; var y: Float; var z: Float
+            var attempts = 0
             do {
                 x = rng.nextFloat() * 2f - 1f
                 y = rng.nextFloat() * 2f - 1f
                 z = rng.nextFloat()   // upper hemisphere only
+                if (++attempts > 1000) { x = 0f; y = 0f; z = 1f; break }
             } while (x * x + y * y + z * z > 1f || z < 0.1f)
             val len = sqrt((x * x + y * y + z * z).toDouble()).toFloat()
             data[i * 3] = x / len

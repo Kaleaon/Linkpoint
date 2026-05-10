@@ -103,7 +103,6 @@ class RenderEngineSwitcher(private val context: Context) {
     }
 
     fun shutdown() {
-        active?.shutdown()
         active = null
         engines.values.forEach { if (it.isInitialized) it.shutdown() }
         engines.clear()

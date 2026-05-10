@@ -37,11 +37,15 @@ class LumiyaRenderContext {
 
     // ── GPU capability flags ─────────────────────────────────────────────
 
+    enum class GpuTier { LOW, MID, HIGH }
+
     var glVersion: Int = 0
         private set
     var gpuRenderer: String = ""
         private set
     var gpuVendor: String = ""
+        private set
+    var gpuTier: GpuTier = GpuTier.MID
         private set
     var supportsComputeShaders: Boolean = false
         private set
@@ -166,7 +170,40 @@ class LumiyaRenderContext {
         GLES32.glGetIntegerv(GLES32.GL_MAX_UNIFORM_BLOCK_SIZE, buf, 0)
         maxUniformBlockSize = buf[0]
         supportsComputeShaders = glVersion >= 31
-        Log.i(TAG, "GPU: $gpuVendor $gpuRenderer  GL ES $glVersion  maxTex=$maxTextureSize")
+        gpuTier = classifyGpuTier(gpuRenderer, gpuVendor)
+        Log.i(TAG, "GPU: $gpuVendor $gpuRenderer  GL ES $glVersion  tier=$gpuTier  maxTex=$maxTextureSize")
+    }
+
+    private fun classifyGpuTier(renderer: String, vendor: String): GpuTier {
+        // Adreno: parse version number from "Adreno (TM) 640" or "Adreno 640"
+        val adrenoMatch = Regex("""Adreno.*?(\d{3,4})""", RegexOption.IGNORE_CASE).find(renderer)
+        if (adrenoMatch != null) {
+            return when (adrenoMatch.groupValues[1].toIntOrNull() ?: 0) {
+                in 600..Int.MAX_VALUE -> GpuTier.HIGH
+                in 400..599 -> GpuTier.MID
+                else -> GpuTier.LOW
+            }
+        }
+        // Mali: G76+ is HIGH, G51+ is MID, older is LOW
+        val maliMatch = Regex("""Mali-G(\d+)""", RegexOption.IGNORE_CASE).find(renderer)
+        if (maliMatch != null) {
+            return when (maliMatch.groupValues[1].toIntOrNull() ?: 0) {
+                in 76..Int.MAX_VALUE -> GpuTier.HIGH
+                in 51..75 -> GpuTier.MID
+                else -> GpuTier.LOW
+            }
+        }
+        // PowerVR: Series 8 and above is HIGH, Series 7 is MID
+        val pvrMatch = Regex("""PowerVR.*?Series(\d)""", RegexOption.IGNORE_CASE).find(renderer)
+        if (pvrMatch != null) {
+            return when (pvrMatch.groupValues[1].toIntOrNull() ?: 0) {
+                in 8..Int.MAX_VALUE -> GpuTier.HIGH
+                7 -> GpuTier.MID
+                else -> GpuTier.LOW
+            }
+        }
+        // Unknown GPU: default to MID to avoid over-restricting unknown desktop/emulator GPUs
+        return GpuTier.MID
     }
 
     private fun compileShaders(): Boolean {
@@ -223,6 +260,10 @@ class LumiyaRenderContext {
     }
 
     private fun tryCreatePersistentMappedUBO(): Boolean {
+        if (gpuTier == GpuTier.LOW) {
+            Log.i(TAG, "Skipping persistent UBO on LOW-tier GPU")
+            return false
+        }
         val extensions = GLES32.glGetString(GLES32.GL_EXTENSIONS).orEmpty()
         if (!extensions.contains("GL_EXT_buffer_storage")) {
             return false

@@ -73,7 +73,10 @@ class DrawableHudStore {
 
     fun clear() = hudPrims.clear()
 
-    fun destroy() = hudPrims.clear()
+    fun destroy() {
+        hudPrims.clear()
+        DrawableHudMeshCache.reset()
+    }
 
     internal fun debugSortedIds(): List<Long> = sortedHudPrims().map { it.id }
     internal fun debugScreenPosition(id: Long): Pair<Float, Float>? = hudPrims[id]?.let { it.screenX to it.screenY }

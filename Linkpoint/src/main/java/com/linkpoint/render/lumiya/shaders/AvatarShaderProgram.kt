@@ -46,7 +46,9 @@ class AvatarShaderProgram : BaseShaderProgram() {
         layout(location = 1) in vec3 aNormal;
         layout(location = 2) in vec2 aTexCoord;
         layout(location = 3) in vec4 aWeights;   // bone blend weights
-        layout(location = 4) in ivec4 aJoints;   // bone indices
+        // Stored as floats so glVertexAttribPointer (not glVertexAttribIPointer)
+        // is correct. Converted to int inside the shader via floor+0.5 round.
+        layout(location = 4) in vec4 aJoints;
 
         uniform mat4 uModelMatrix;
         uniform int uJointCount;
@@ -58,10 +60,11 @@ class AvatarShaderProgram : BaseShaderProgram() {
         void main() {
             mat4 skin = mat4(0.0);
             if (uJointCount > 0) {
-                skin += aWeights.x * uJointMatrices[aJoints.x];
-                skin += aWeights.y * uJointMatrices[aJoints.y];
-                skin += aWeights.z * uJointMatrices[aJoints.z];
-                skin += aWeights.w * uJointMatrices[aJoints.w];
+                ivec4 ji = ivec4(aJoints + vec4(0.5));
+                skin += aWeights.x * uJointMatrices[ji.x];
+                skin += aWeights.y * uJointMatrices[ji.y];
+                skin += aWeights.z * uJointMatrices[ji.z];
+                skin += aWeights.w * uJointMatrices[ji.w];
             } else {
                 skin = mat4(1.0);
             }

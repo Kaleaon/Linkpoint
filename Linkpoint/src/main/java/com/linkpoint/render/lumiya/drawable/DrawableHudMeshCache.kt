@@ -15,6 +15,12 @@ internal object DrawableHudMeshCache {
         return box
     }
 
+    /** Drop cached handles without issuing GL calls — call after GL context loss. */
+    fun reset() {
+        box = null
+        bufferManager = null
+    }
+
     private fun buildBox(bm: GLBufferManager): GLBufferManager.MeshVAO {
         val h = 0.5f
         val v = floatArrayOf(
