@@ -49,6 +49,21 @@ class LumiyaRenderer : RenderEngineProvider {
 
     private lateinit var ctx: LumiyaRenderContext
 
+    // Camera / projection updates that arrive on the GL thread before
+    // initialize() has constructed the render context. The scene command
+    // consumer replays state via queueEvent { ... } the moment the engine
+    // is bound, which the GL thread will drain before onSurfaceChanged
+    // fires. Without this buffer those calls would hit the lateinit ctx
+    // and crash. Values are flushed into ctx at the end of initialize().
+    private var pendingCameraPosX: Float? = null
+    private var pendingCameraPosY: Float? = null
+    private var pendingCameraPosZ: Float? = null
+    private var pendingCameraTargetX: Float? = null
+    private var pendingCameraTargetY: Float? = null
+    private var pendingCameraTargetZ: Float? = null
+    private var pendingFovDegrees: Float? = null
+    private var pendingDrawDistance: Float? = null
+
     @Volatile private var glThreadId: Long = Long.MIN_VALUE
     @Volatile private var glThreadName: String = "<unset>"
 
@@ -218,6 +233,7 @@ class LumiyaRenderer : RenderEngineProvider {
             skyDrawable = DrawableSky(ctx)
             particleManager = DrawableParticleManager(ctx)
 
+            flushPendingCameraState()
             ctx.updateCamera()
             rebuildHudMatrices(width, height)
             hudStore.setViewportSize(width, height)
@@ -394,19 +410,50 @@ class LumiyaRenderer : RenderEngineProvider {
     // =====================================================================
 
     override fun setCameraPosition(x: Float, y: Float, z: Float) {
+        if (!::ctx.isInitialized) {
+            pendingCameraPosX = x; pendingCameraPosY = y; pendingCameraPosZ = z
+            return
+        }
         ctx.cameraPositionX = x; ctx.cameraPositionY = y; ctx.cameraPositionZ = z
     }
 
     override fun setCameraTarget(x: Float, y: Float, z: Float) {
+        if (!::ctx.isInitialized) {
+            pendingCameraTargetX = x; pendingCameraTargetY = y; pendingCameraTargetZ = z
+            return
+        }
         ctx.cameraTargetX = x; ctx.cameraTargetY = y; ctx.cameraTargetZ = z
     }
 
     override fun setFieldOfView(fovDegrees: Float) {
+        if (!::ctx.isInitialized) {
+            pendingFovDegrees = fovDegrees
+            return
+        }
         ctx.fovDegrees = fovDegrees
     }
 
     override fun setDrawDistance(distance: Float) {
+        if (!::ctx.isInitialized) {
+            pendingDrawDistance = distance
+            return
+        }
         ctx.drawDistance = distance
+    }
+
+    private fun flushPendingCameraState() {
+        pendingCameraPosX?.let { ctx.cameraPositionX = it }
+        pendingCameraPosY?.let { ctx.cameraPositionY = it }
+        pendingCameraPosZ?.let { ctx.cameraPositionZ = it }
+        pendingCameraTargetX?.let { ctx.cameraTargetX = it }
+        pendingCameraTargetY?.let { ctx.cameraTargetY = it }
+        pendingCameraTargetZ?.let { ctx.cameraTargetZ = it }
+        pendingFovDegrees?.let { ctx.fovDegrees = it }
+        pendingDrawDistance?.let { ctx.drawDistance = it }
+        pendingCameraPosX = null; pendingCameraPosY = null; pendingCameraPosZ = null
+        pendingCameraTargetX = null; pendingCameraTargetY = null; pendingCameraTargetZ = null
+        pendingFovDegrees = null
+        pendingDrawDistance = null
     }
 
     // =====================================================================
