@@ -2,6 +2,7 @@ package com.linkpoint.protocol.auth
 
 import android.util.Log
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import java.util.regex.Pattern
 
 /**
@@ -35,6 +36,16 @@ object LoginResponseParser {
     
     /** Null UUID constant for missing parent IDs */
     private val NULL_UUID = UUID(0L, 0L)
+
+    /** Cache for compiled regex patterns to improve performance */
+    private val regexCache = ConcurrentHashMap<String, Regex>()
+
+    /**
+     * Get a compiled Regex from the cache or compile and store it.
+     */
+    private fun getCachedRegex(pattern: String): Regex {
+        return regexCache.computeIfAbsent(pattern) { it.toRegex() }
+    }
     
     /**
      * Parsed login response data.
@@ -262,11 +273,11 @@ object LoginResponseParser {
      */
     private fun extractMemberValue(structXml: String, name: String): String? {
         // Try string type
-        val stringPattern = "<name>$name</name>\\s*<value>\\s*<string>([^<]*)</string>".toRegex()
+        val stringPattern = getCachedRegex("<name>$name</name>\\s*<value>\\s*<string>([^<]*)</string>")
         stringPattern.find(structXml)?.groupValues?.get(1)?.let { return it }
         
         // Try uuid type
-        val uuidPattern = "<name>$name</name>\\s*<value>\\s*<uuid>([^<]*)</uuid>".toRegex()
+        val uuidPattern = getCachedRegex("<name>$name</name>\\s*<value>\\s*<uuid>([^<]*)</uuid>")
         uuidPattern.find(structXml)?.groupValues?.get(1)?.let { return it }
         
         return null
@@ -277,15 +288,15 @@ object LoginResponseParser {
      */
     private fun extractMemberIntValue(structXml: String, name: String): Int? {
         // Try i4 type
-        val i4Pattern = "<name>$name</name>\\s*<value>\\s*<i4>([^<]*)</i4>".toRegex()
+        val i4Pattern = getCachedRegex("<name>$name</name>\\s*<value>\\s*<i4>([^<]*)</i4>")
         i4Pattern.find(structXml)?.groupValues?.get(1)?.toIntOrNull()?.let { return it }
         
         // Try int type
-        val intPattern = "<name>$name</name>\\s*<value>\\s*<int>([^<]*)</int>".toRegex()
+        val intPattern = getCachedRegex("<name>$name</name>\\s*<value>\\s*<int>([^<]*)</int>")
         intPattern.find(structXml)?.groupValues?.get(1)?.toIntOrNull()?.let { return it }
         
         // Try integer type
-        val integerPattern = "<name>$name</name>\\s*<value>\\s*<integer>([^<]*)</integer>".toRegex()
+        val integerPattern = getCachedRegex("<name>$name</name>\\s*<value>\\s*<integer>([^<]*)</integer>")
         integerPattern.find(structXml)?.groupValues?.get(1)?.toIntOrNull()?.let { return it }
         
         return null
@@ -295,7 +306,7 @@ object LoginResponseParser {
      * Extract a simple value from XML by name.
      */
     private fun extractXmlValue(xml: String, name: String): String? {
-        val stringPattern = "<name>$name</name>\\s*<value>\\s*<string>([^<]*)</string>".toRegex()
+        val stringPattern = getCachedRegex("<name>$name</name>\\s*<value>\\s*<string>([^<]*)</string>")
         return stringPattern.find(xml)?.groupValues?.get(1)
     }
 }
