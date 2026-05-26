@@ -182,12 +182,21 @@ class SessionManager(private val context: Context) {
     fun updateRegionInfo(regionHandle: Long, x: Int, y: Int) {
         val current = _currentRegion.value
         if (current != null) {
-            _currentRegion.value = current.copy(handle = regionHandle, x = x, y = y)
-            Log.i(TAG, "Region info updated: handle=$regionHandle, position=($x, $y)")
+            // Preserve any real name already written by updateFromRegionHandshake
+            val name = if (current.name == "Unknown") {
+                val known = _regionSessionState.value.simName
+                if (known.isNotEmpty()) known else current.name
+            } else {
+                current.name
+            }
+            _currentRegion.value = current.copy(name = name, handle = regionHandle, x = x, y = y)
+            Log.i(TAG, "Region info updated: handle=$regionHandle, position=($x, $y), name=$name")
         } else {
-            // Create minimal region info if we don't have any yet
+            // Use the sim name from RegionHandshake if it already arrived; otherwise a
+            // placeholder that will be overwritten once RegionHandshake is processed.
+            val name = _regionSessionState.value.simName.ifEmpty { "Unknown" }
             _currentRegion.value = RegionInfo(
-                name = "Unknown",
+                name = name,
                 handle = regionHandle,
                 x = x,
                 y = y,
@@ -195,7 +204,7 @@ class SessionManager(private val context: Context) {
                 simPort = 0,
                 seedCapability = null
             )
-            Log.i(TAG, "Region info created with handle=$regionHandle, position=($x, $y)")
+            Log.i(TAG, "Region info created with handle=$regionHandle, position=($x, $y), name=$name")
         }
     }
     

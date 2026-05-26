@@ -1348,7 +1348,14 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         // destroyed by `UiHelper.onDetachedFromSurface`, which threw a native
         // crash and tripped the auto-restart loop the user observed when
         // opening any panel.
-        renderBackend?.onPause()
+        // Pause the active backend. Filament path goes through renderBackend (which is
+        // a FilamentBackend). Lumiya path has no renderBackend — the GLSurfaceView must
+        // be paused directly so EGL releases the surface and the GL thread stops.
+        if (rendererHandoffManager.currentBackend() == RendererHandoffManager.RendererBackend.LUMIYA) {
+            lumiyaSurfaceView?.onPause()
+        } else {
+            renderBackend?.onPause()
+        }
         super.onPause()
         NetworkLogger.log(
             NetworkLogger.Level.INFO,

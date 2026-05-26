@@ -2,6 +2,8 @@ package com.linkpoint.protocol.scenery
 
 import android.util.Log
 import com.linkpoint.network.NetworkLogger
+import com.linkpoint.protocol.messages.MessageParser
+import com.linkpoint.protocol.messages.ObjectUpdateData
 import com.linkpoint.protocol.messages.PacketCodec
 import com.linkpoint.render.RenderQueue
 import com.linkpoint.render.RenderableUpdate
@@ -114,63 +116,51 @@ class SceneDataHandler(
      * @param data Raw message payload
      * @return true if handled successfully
      */
-    fun handleObjectUpdate(data: ByteArray): Boolean {
+    fun handleObjectUpdate(rawPacket: ByteArray): Boolean {
         try {
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
-                "Processing ObjectUpdate (${data.size} bytes)")
-            
-            val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
-            
-            // Parse ObjectUpdate message format
-            val regionHandle = buffer.long
-            val timeDilation = buffer.short
-            
-            // Parse each object in the update
-            var objectCount = 0
-            while (buffer.remaining() > 0) {
-                // Parse object header
-                val pCode = buffer.get().toInt() and 0xFF
-                
-                // Only process avatars (pCode=47) and prims (pCode=9)
-                if (pCode == 47 || pCode == 9) {
-                    val obj = parseObjectUpdate(buffer, pCode)
-                    if (obj != null) {
-                        // Check if there are pending properties to apply
-                        val pending = pendingProperties.remove(obj.id)
-                        if (pending != null) {
-                            obj.name = pending.name
-                            obj.description = pending.description
-                        }
-                        
-                        objects[obj.id] = obj
-                        objectCount++
-                        
-                        // Update scene graph
-                        if (renderQueue != null) {
-                            renderQueue.enqueue(RenderableUpdate.SceneObjectUpdate(obj.copy()))
-                        } else {
-                            sceneGraph?.updateObject(obj)
-                        }
-                        
-                        NetworkLogger.log(NetworkLogger.Level.VERBOSE, NetworkLogger.Category.UDP,
-                            "Updated object: ${obj.name} (${obj.id})")
-                    }
-                } else if (pCode == 0) {
-                    // End of objects
-                    break
-                } else {
-                    // Skip unknown object types
-                    NetworkLogger.log(NetworkLogger.Level.VERBOSE, NetworkLogger.Category.UDP,
-                        "Skipping object with pCode=$pCode")
-                    break
-                }
+                "Processing ObjectUpdate (${rawPacket.size} bytes)")
+
+            // rawPacket includes the full LLUDP header; extract the body before parsing.
+            val payload = MessageParser.extractPayload(rawPacket)
+            if (payload == null) {
+                NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
+                    "ObjectUpdate: failed to extract payload")
+                return false
             }
-            
+
+            val updates: List<ObjectUpdateData> = MessageParser.parseObjectUpdate(payload)
+            var objectCount = 0
+            for (update in updates) {
+                val obj = SceneObject(
+                    id = update.fullId,
+                    position = Vector3(update.position.x, update.position.y, update.position.z),
+                    rotation = Quaternion(
+                        update.rotation.w, update.rotation.x,
+                        update.rotation.y, update.rotation.z
+                    ),
+                    pCode = update.pcode
+                )
+                // Merge any pending properties received ahead of this update.
+                val pending = pendingProperties.remove(obj.id)
+                if (pending != null) {
+                    obj.name = pending.name
+                    obj.description = pending.description
+                }
+                objects[obj.id] = obj
+                objectCount++
+                if (renderQueue != null) {
+                    renderQueue.enqueue(RenderableUpdate.SceneObjectUpdate(obj.copy()))
+                } else {
+                    sceneGraph?.updateObject(obj)
+                }
+                NetworkLogger.log(NetworkLogger.Level.VERBOSE, NetworkLogger.Category.UDP,
+                    "Updated object: ${obj.name} (${obj.id})")
+            }
+
             objectUpdateCount++
-            
             NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
                 "✓ Updated $objectCount objects (total: $objectUpdateCount updates)")
-            
             return true
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
@@ -246,39 +236,6 @@ class SceneDataHandler(
     }
     
     // ==================== Helper Methods ====================
-    
-    private fun parseObjectUpdate(buffer: ByteBuffer, pCode: Int): SceneObject? {
-        return try {
-            // Parse object ID
-            val objectId = PacketCodec.fromBuffer(buffer).readUuid()
-            
-            // Parse state
-            val state = buffer.get().toInt() and 0xFF
-            
-            // Parse position (Vector3)
-            val x = buffer.float
-            val y = buffer.float
-            val z = buffer.float
-            
-            // Parse rotation (Quaternion)
-            val rw = buffer.float
-            val rx = buffer.float
-            val ry = buffer.float
-            val rz = buffer.float
-            
-            // Create object
-            SceneObject(
-                id = objectId,
-                position = Vector3(x, y, z),
-                rotation = Quaternion(rw, rx, ry, rz),
-                pCode = pCode
-            )
-        } catch (e: Exception) {
-            NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
-                "Failed to parse object: ${e.message}")
-            null
-        }
-    }
     
     /**
      * Get terrain data for rendering
