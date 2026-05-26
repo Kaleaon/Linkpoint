@@ -122,12 +122,13 @@ class RttEstimator {
         const val MIN_RTO_MS = 300L
 
         /**
-         * Upper bound. Sized to absorb the multi-second fades the M-UDP
-         * paper documents on cellular without giving up entirely. The
-         * unanswered-ping watchdog ([LinkpointConstants.UNANSWERED_PINGS_DISCONNECT])
-         * still backstops at 25–60s.
+         * Upper bound. Sized to absorb multi-second fades on cellular and
+         * satellite links (7+ second RTT spikes observed in the wild) without
+         * triggering premature retransmissions that flood the socket buffers.
+         * The unanswered-ping watchdog ([LinkpointConstants.UNANSWERED_PINGS_DISCONNECT])
+         * still backstops the circuit at 25–60s.
          */
-        const val MAX_RTO_MS = 6_000L
+        const val MAX_RTO_MS = 20_000L
 
         /** Default cold-start RTO before the first sample. Matches Lumiya's 5s. */
         const val DEFAULT_RTO_MS = LinkpointConstants.MESSAGE_TIMEOUT_MS
