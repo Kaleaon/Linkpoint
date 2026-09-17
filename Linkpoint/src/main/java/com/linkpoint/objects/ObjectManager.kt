@@ -1075,6 +1075,21 @@ class ObjectManager(
         val scriptedObjectCount: Int,
         val physicalObjectCount: Int
     )
+
+    fun createPrim(params: PrimCreateParams) {
+        rezObject(UUID.randomUUID(), params.position, params.rotation)
+    }
+
+    fun duplicateObject(localId: Int, offset: LLVector3) {
+        val obj = objects[localId] ?: return
+        rezObject(obj.fullId, obj.position + offset, obj.rotation)
+    }
+
+    fun updateObjectPosition(localId: Int, newPos: LLVector3) {
+        val obj = objects[localId] ?: return
+        moveSelectedObjects(newPos - obj.position)
+    }
+
 }
 
 @Parcelize

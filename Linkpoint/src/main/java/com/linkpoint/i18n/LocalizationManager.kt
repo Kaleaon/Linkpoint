@@ -30,7 +30,7 @@ class LocalizationManager private constructor(private val context: Context) {
         private const val LOCALIZATION_PATH = "localization"
         
         // Supported locales
-        private val SUPPORTED_LOCALES = listOf("en", "es", "fr")
+        private val SUPPORTED_LOCALES = listOf("en", "es", "fr", "de", "ja", "pt", "ru", "zh", "ko", "it", "nl", "pl", "tr")
         
         @Volatile
         private var instance: LocalizationManager? = null

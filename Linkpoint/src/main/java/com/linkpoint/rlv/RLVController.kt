@@ -25,7 +25,9 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class RLVController(
     private val chatManager: (() -> com.linkpoint.chat.ChatManager?)? = null,
-    private val sitManager: (() -> SitManager?)? = null
+    private val sitManager: (() -> SitManager?)? = null,
+    private val outfitManager: (() -> com.linkpoint.inventory.OutfitManager?)? = null,
+    private val teleportManager: (() -> com.linkpoint.teleport.TeleportManager?)? = null
 ) {
     
     companion object {
@@ -282,19 +284,38 @@ class RLVController(
     }
     
     private fun forceTeleport(coords: String?): RLVResult {
-        // Format: regionname/x/y/z
         Log.d(TAG, "Force teleport to: $coords")
-        return RLVResult.Success
+        if (coords == null) return RLVResult.InvalidFormat
+        val parts = coords.split("/")
+        if (parts.size >= 4) {
+            val region = parts[0]
+            val x = parts[1].toFloatOrNull() ?: 128f
+            val y = parts[2].toFloatOrNull() ?: 128f
+            val z = parts[3].toFloatOrNull() ?: 25f
+            scope.launch { teleportManager?.invoke()?.teleportToLocation(region, x, y, z) }
+            return RLVResult.Success
+        }
+        return RLVResult.InvalidFormat
     }
     
     private fun forceAttach(target: String?): RLVResult {
         Log.d(TAG, "Force attach: $target")
-        return RLVResult.Success
+        val uuid = runCatching { UUID.fromString(target ?: "") }.getOrNull() ?: return RLVResult.InvalidFormat
+        outfitManager?.invoke()?.let {
+            scope.launch { it.wearItem(uuid, replace = false) }
+            return RLVResult.Success
+        }
+        return RLVResult.Failed
     }
     
     private fun forceDetach(target: String?): RLVResult {
         Log.d(TAG, "Force detach: $target")
-        return RLVResult.Success
+        val uuid = runCatching { UUID.fromString(target ?: "") }.getOrNull() ?: return RLVResult.InvalidFormat
+        outfitManager?.invoke()?.let {
+            scope.launch { it.detachItem(uuid) }
+            return RLVResult.Success
+        }
+        return RLVResult.Failed
     }
     
     private fun forceRemoveOutfit(layer: String?): RLVResult {
@@ -305,13 +326,14 @@ class RLVController(
     // Query implementations
     
     private fun getOutfitInfo(layer: String?): String {
-        // Return worn items info
-        return ""
+        val worn = outfitManager?.invoke()?.getWornItems() ?: emptyList()
+        return worn.joinToString(",") { it.toString() }
     }
     
     private fun getAttachInfo(point: String?): String {
-        // Return attachment info
-        return ""
+        val pt = point?.toIntOrNull() ?: return ""
+        val item = outfitManager?.invoke()?.getAttachmentAt(pt)
+        return item?.toString() ?: ""
     }
     
     private fun getStatus(filter: String?): String {
