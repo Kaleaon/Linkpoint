@@ -68,14 +68,16 @@ def parse_template_messages(text: str) -> list[tuple[str, bool]]:
 
 
 def parse_kotlin_set(name: str, source: str) -> set[str]:
-    for match in KOTLIN_SET_RE.finditer(source):
+    clean_source = re.sub(r"//.*$", "", source, flags=re.MULTILINE)
+    for match in KOTLIN_SET_RE.finditer(clean_source):
         if match.group(1) == name:
             return {n for n in QUOTED_NAME_RE.findall(match.group(2))}
     return set()
 
 
 def parse_kotlin_map(name: str, source: str) -> dict[str, str]:
-    for match in KOTLIN_MAP_RE.finditer(source):
+    clean_source = re.sub(r"//.*$", "", source, flags=re.MULTILINE)
+    for match in KOTLIN_MAP_RE.finditer(clean_source):
         if match.group(1) == name:
             return {k: v for k, v in MAP_ENTRY_RE.findall(match.group(2))}
     return {}

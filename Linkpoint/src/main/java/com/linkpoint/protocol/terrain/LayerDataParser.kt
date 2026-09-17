@@ -126,13 +126,12 @@ object LayerDataParser {
         val defaultPatches = mutableListOf<TerrainPatch>()
         for (x in 0 until TerrainPatch.PATCHES_PER_SIDE) {
             for (y in 0 until TerrainPatch.PATCHES_PER_SIDE) {
-                val heights = FloatArray(TerrainPatch.DEFAULT_PATCH_SIZE * TerrainPatch.DEFAULT_PATCH_SIZE) { DEFAULT_REGION_HEIGHT }
+                val heights = FloatArray(TerrainPatch.PATCH_SIZE * TerrainPatch.PATCH_SIZE) { DEFAULT_REGION_HEIGHT }
                 defaultPatches.add(
                     TerrainPatch(
                         x = x,
                         y = y,
-                        size = TerrainPatch.DEFAULT_PATCH_SIZE,
-                        heights = heights
+                        heightMap = heights
                     )
                 )
             }
