@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.update
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -89,10 +90,6 @@ class IMManager(
     // Session messages
     private val sessionMessages = ConcurrentHashMap<UUID, MutableList<IMMessage>>()
 
-    // Last message per session — ConcurrentHashMap provides thread-safe O(1)
-    // reads for composable callers on the Main thread while addMessage writes
-    // on MessagingDispatcher, avoiding the data race that MutableList.lastOrNull()
-    // would introduce (ArrayList.size + elementData access are not atomic).
     private val lastMessageBySession = ConcurrentHashMap<UUID, IMMessage>()
     
     // Events
@@ -114,25 +111,8 @@ class IMManager(
     private val pendingSyncSessions = MutableStateFlow<Set<UUID>>(emptySet())
     val syncNeededSessions: StateFlow<Set<UUID>> = pendingSyncSessions
 
-    /**
-     * Groups for which we have already received `ChatterBoxSessionStartReply`
-     * (or for which we sent the first `ImprovedInstantMessage(Dialog=15)` and
-     * are willing to send subsequent Dialog=17 messages without re-bootstrap).
-     *
-     * Mirrors Lumiya's `SLAgentCircuit.startedGroupSessions`
-     * (`lumiya_decompiled_source/.../slproto/SLAgentCircuit.java:1671-1696`).
-     */
     private val startedGroupSessions = ConcurrentHashMap.newKeySet<UUID>()
 
-    /**
-     * Group chat lines queued while we wait for the simulator to ack the
-     * Dialog=15 session-start. Drained from [handleSessionStart] when the
-     * `ChatterBoxSessionStartReply` event arrives.
-     *
-     * Mirrors Lumiya's `pendingGroupMessages`. Without this queue the very
-     * first message to a fresh group is dropped server-side because the
-     * chatterbox session isn't established yet.
-     */
     private val pendingGroupMessages = ConcurrentHashMap<UUID, MutableList<String>>()
 
     private fun outboundIdentity(): AgentIdentity = AgentIdentity(
@@ -142,7 +122,6 @@ class IMManager(
     ).requireValid("IMManager outbound packet")
     
     init {
-        // Register for event queue events
         capabilityManager.registerEventHandler(
             "ChatterBoxInvitation",
             this,
@@ -178,7 +157,7 @@ class IMManager(
         val sessionId = event.sessionId ?: return
         when (event.type) {
             PushEventType.IM, PushEventType.GROUP_NOTICE -> {
-                pendingSyncSessions.value = pendingSyncSessions.value + sessionId
+                pendingSyncSessions.update { it + sessionId }
             }
             PushEventType.UNKNOWN -> Unit
         }
@@ -193,7 +172,7 @@ class IMManager(
      * This allows queue reconciliation with event queue state.
      */
     fun reconcileSessionOnOpen(sessionId: UUID) {
-        pendingSyncSessions.value = pendingSyncSessions.value - sessionId
+        pendingSyncSessions.update { it - sessionId }
     }
 
     override fun onEvent(message: String, body: LLSDMap) {
@@ -215,7 +194,6 @@ class IMManager(
         val message = inviteInfo.getString("message") ?: ""
         val type = inviteInfo.getInt("dialog") ?: 0
         
-        // Create session
         val sessionType = when (type) {
             IM_SESSION_GROUP_START -> SessionType.GROUP
             IM_SESSION_CONFERENCE_START -> SessionType.CONFERENCE
@@ -246,7 +224,6 @@ class IMManager(
         
         when (eventType) {
             "join" -> {
-                // Participant joined
                 val agentId = body.getString("agent_id")?.let { 
                     try { UUID.fromString(it) } catch (e: Exception) { null }
                 }
@@ -259,7 +236,6 @@ class IMManager(
                 }
             }
             "leave" -> {
-                // Participant left
                 val agentId = body.getString("agent_id")?.let { 
                     try { UUID.fromString(it) } catch (e: Exception) { null }
                 }
@@ -272,7 +248,6 @@ class IMManager(
                 }
             }
             "typing" -> {
-                // Typing indicator
                 val agentId = body.getString("agent_id")?.let { 
                     try { UUID.fromString(it) } catch (e: Exception) { null }
                 }
@@ -307,9 +282,6 @@ class IMManager(
                 }
                 Log.d(TAG, "Session $sessionId started successfully")
             }
-            // For groups, mark the chatterbox as live and drain any messages
-            // that were queued while we waited for the Dialog=15 reply.
-            // Mirrors `SLAgentCircuit.HandleChatterBoxSessionStartReply:368-392`.
             if (startedGroupSessions.add(sessionId)) {
                 val queued = pendingGroupMessages.remove(sessionId)
                 if (queued != null && queued.isNotEmpty()) {
@@ -321,8 +293,6 @@ class IMManager(
         } else {
             val error = body.getString("error") ?: "Unknown error"
             Log.e(TAG, "Failed to start session $sessionId: $error")
-            // Drop the queued group lines too — the session never came up,
-            // and resending them would loop on the Dialog=15 path.
             pendingGroupMessages.remove(sessionId)
             startedGroupSessions.remove(sessionId)
             sessions.remove(sessionId)
@@ -334,9 +304,6 @@ class IMManager(
         }
     }
     
-    /**
-     * Handle incoming IM
-     */
     fun handleIncomingIM(
         fromAgentId: UUID,
         fromName: String,
@@ -346,7 +313,6 @@ class IMManager(
         timestamp: Long
     ) {
         scope.launch {
-            // Get or create session
             val session = sessions.getOrPut(sessionId) {
                 IMSession(
                     sessionId = sessionId,
@@ -377,7 +343,7 @@ class IMManager(
                     
                     addMessage(sessionId, imMessage)
                     session.typingParticipants = session.typingParticipants - fromAgentId
-                    pendingSyncSessions.value = pendingSyncSessions.value - sessionId
+                    pendingSyncSessions.update { it - sessionId }
                 }
             }
             
@@ -385,31 +351,6 @@ class IMManager(
         }
     }
     
-    /**
-     * Send an IM in the given session.
-     *
-     * All three SL chat dispatch types (P2P, GROUP, CONFERENCE) ride on
-     * the **UDP `ImprovedInstantMessage`** message — there is no
-     * sendchat-via-cap path in real Second Life. (Lumiya enumerates the
-     * `ChatSessionRequest` cap but only its voice module reads the URL;
-     * `lumiya_decompiled_source/.../slproto/caps/SLCaps.java:45`,
-     * `slproto/modules/voice/SLVoice.java:102` — no chat POSTs go to it.)
-     *
-     * - P2P: `Dialog=0 (IM_NOTHING_SPECIAL)`, `ID = self ⊕ other`,
-     *   `BinaryBucket` empty.
-     * - GROUP: first call to a fresh group sends `Dialog=15` and queues
-     *   the line in [pendingGroupMessages]; on `ChatterBoxSessionStartReply`
-     *   the queue drains as `Dialog=17` messages. Subsequent calls send
-     *   `Dialog=17` directly. `ID = ToAgentID = groupId`,
-     *   `BinaryBucket = byteArrayOf(0)`.
-     * - CONFERENCE: cap brings up the session via [startConferenceSession]
-     *   (the only path that legitimately uses the cap), then chat lines
-     *   ride `Dialog=17` UDP IM the same as groups.
-     *
-     * The local-history entry is appended before the network call so the
-     * UI shows the user's own message immediately; on send failure we
-     * append a system-style error row so the user knows it didn't go.
-     */
     fun sendIM(sessionId: UUID, message: String) {
         val session = sessions[sessionId]
         if (session == null) {
@@ -417,7 +358,6 @@ class IMManager(
             return
         }
 
-        // Show in local history immediately for responsive UX.
         val outgoing = IMMessage(
             id = UUID.randomUUID(),
             sessionId = sessionId,
@@ -459,15 +399,6 @@ class IMManager(
         }
     }
 
-    /**
-     * Build and send a 1:1 IM as an `ImprovedInstantMessage` UDP packet.
-     *
-     * Wire format is produced by [SLMessagePackers.packImprovedInstantMessage]
-     * — the canonical builder also used by typing indicators and group chat,
-     * so a wire-format regression in any one of those three call sites is
-     * impossible. Reliability flag mirrors Lumiya
-     * (`SLAgentCircuit.SendInstantMessage:737`: `isReliable = true`).
-     */
     private fun sendP2PInstantMessage(session: IMSession, message: String): Boolean {
         val targetId = session.participants.firstOrNull()
         if (targetId == null) {
@@ -481,7 +412,7 @@ class IMManager(
             dialog = IM_NOTHING_SPECIAL,
             id = session.sessionId,
             timestamp = (System.currentTimeMillis() / 1000).toInt(),
-            fromAgentName = "You",  // server replaces with our resolved name
+            fromAgentName = "You",
             message = message
         )
         udpConnection.sendPacket(
@@ -493,35 +424,9 @@ class IMManager(
         return true
     }
 
-    /**
-     * Send a group chat line. Group chat in SL is **UDP** — Lumiya does not
-     * use the `ChatSessionRequest` HTTP cap for chat at all (see
-     * `lumiya_decompiled_source/.../slproto/caps/SLCaps.java:45` — the cap
-     * URL is read but only by the voice module).
-     *
-     * Two-stage flow, copied from
-     * `SLAgentCircuit.SendGroupInstantMessage:1671-1696`:
-     *
-     * 1. **First message to a fresh group**: enqueue the line in
-     *    [pendingGroupMessages], send `ImprovedInstantMessage(Dialog=15)`
-     *    with `BinaryBucket = byteArrayOf(0)` to bring up the chatterbox
-     *    session. The simulator replies on EventQueue with
-     *    `ChatterBoxSessionStartReply`, which [handleSessionStart] processes
-     *    by adding the group to [startedGroupSessions] and draining the
-     *    pending queue.
-     * 2. **Subsequent messages**: send `ImprovedInstantMessage(Dialog=17)`
-     *    with `ID = ToAgentID = groupId` and `BinaryBucket = byteArrayOf(0)`
-     *    directly.
-     *
-     * Conferences (ad-hoc multi-user) use a different bring-up path
-     * (`startConferenceSession` POSTs to the cap with `method=start
-     * conference`) but once started, chat lines also go via Dialog=17 UDP IM.
-     */
     private fun sendSessionChat(session: IMSession, message: String): Boolean {
         val sessionId = session.sessionId
         if (session.type == SessionType.GROUP && sessionId !in startedGroupSessions) {
-            // Queue the line first so handleSessionStart can flush it on
-            // ChatterBoxSessionStartReply, then trigger Dialog=15 bring-up.
             pendingGroupMessages
                 .computeIfAbsent(sessionId) { mutableListOf() }
                 .add(message)
@@ -532,23 +437,16 @@ class IMManager(
         return sendGroupChatDialog17(sessionId, message)
     }
 
-    /**
-     * Send `ImprovedInstantMessage(Dialog=15)` to bring up a group chatterbox
-     * session. Called from [sendSessionChat] when the group has not yet been
-     * acknowledged by the simulator. Reliable (Lumiya
-     * `SLAgentCircuit.SendGroupSessionStart:736-737`).
-     */
     private fun sendGroupSessionStart(groupId: UUID) {
         val payload = SLMessagePackers.packImprovedInstantMessage(
             identity = outboundIdentity(),
             fromGroup = false,
-            toAgentId = groupId,        // group UUID, per Lumiya
+            toAgentId = groupId,
             dialog = IM_SESSION_GROUP_START,
-            id = groupId,                // session UUID == group UUID
+            id = groupId,
             timestamp = (System.currentTimeMillis() / 1000).toInt(),
             fromAgentName = "You",
             message = "",
-            // SL rejects empty buckets on Dialog=15; Lumiya sends new byte[1]
             binaryBucket = byteArrayOf(0)
         )
         udpConnection.sendPacket(
@@ -559,16 +457,12 @@ class IMManager(
         Log.d(TAG, "Group session-start (Dialog=15) sent for $groupId")
     }
 
-    /**
-     * Send a `ImprovedInstantMessage(Dialog=17)` group chat line to a
-     * group/conference session that's already established server-side.
-     */
     private fun sendGroupChatDialog17(sessionId: UUID, message: String): Boolean {
         val payload = SLMessagePackers.packImprovedInstantMessage(
             identity = outboundIdentity(),
             fromGroup = false,
-            toAgentId = sessionId,       // for groups, ToAgentID = groupId
-            dialog = IM_SESSION_SEND,    // Dialog=17
+            toAgentId = sessionId,
+            dialog = IM_SESSION_SEND,
             id = sessionId,
             timestamp = (System.currentTimeMillis() / 1000).toInt(),
             fromAgentName = "You",
@@ -584,9 +478,6 @@ class IMManager(
         return true
     }
     
-    /**
-     * Start P2P IM session
-     */
     fun startP2PSession(targetAgentId: UUID, targetName: String): UUID {
         val sessionId = computeP2PSessionId(agentId, targetAgentId)
         
@@ -604,18 +495,6 @@ class IMManager(
         return sessionId
     }
     
-    /**
-     * Create or look up the local group-chat session record.
-     *
-     * Group chat in SL doesn't require a cap call to bring up the
-     * chatterbox session — the first `ImprovedInstantMessage(Dialog=15)`
-     * does that, and the simulator confirms via the EventQueue
-     * `ChatterBoxSessionStartReply`. So this function is purely local:
-     * it ensures `sessions[groupId]` exists with `type=GROUP` so that
-     * subsequent calls to [sendIM] dispatch to the group path.
-     *
-     * Idempotent. Safe to call from any thread.
-     */
     fun startGroupSessionLocal(groupId: UUID, groupName: String): UUID {
         sessions.getOrPut(groupId) {
             IMSession(
@@ -623,16 +502,13 @@ class IMManager(
                 type = SessionType.GROUP,
                 name = groupName,
                 participants = mutableListOf(),
-                isActive = false  // Activated when ChatterBoxSessionStartReply arrives.
+                isActive = false
             )
         }
         updateSessionList()
         return groupId
     }
     
-    /**
-     * Start conference (ad-hoc group) session
-     */
     suspend fun startConferenceSession(participants: List<UUID>, name: String): UUID? {
         val sessionId = UUID.randomUUID()
         
@@ -640,7 +516,7 @@ class IMManager(
             this["method"] = LLSDString("start conference")
             this["session-id"] = LLSDString(sessionId.toString())
             this["params"] = LLSDMap().apply {
-                this["type"] = LLSDInteger(7) // Ad-hoc
+                this["type"] = LLSDInteger(7)
                 this["session-id"] = LLSDString(sessionId.toString())
                 this["caller-id"] = LLSDString(agentId.toString())
                 this["bucket"] = LLSDArray().apply {
@@ -666,9 +542,6 @@ class IMManager(
         return null
     }
     
-    /**
-     * Leave session
-     */
     suspend fun leaveSession(sessionId: UUID) {
         val request = LLSDMap().apply {
             this["method"] = LLSDString("close session")
@@ -681,16 +554,10 @@ class IMManager(
         updateSessionList()
     }
     
-    /**
-     * Send typing indicator
-     */
     fun sendTypingStart(sessionId: UUID) {
         scope.launch { sendTypingPacket(sessionId, IM_TYPING_START) }
     }
 
-    /**
-     * Stop typing indicator
-     */
     fun sendTypingStop(sessionId: UUID) {
         scope.launch { sendTypingPacket(sessionId, IM_TYPING_STOP) }
     }
@@ -698,8 +565,6 @@ class IMManager(
     private fun sendTypingPacket(sessionId: UUID, dialog: Int) {
         try {
             val session = sessions[sessionId] ?: return
-            // For P2P use the first participant; for groups/conferences the
-            // session UUID is the target (and the ID).
             val targetId = if (session.type == SessionType.P2P && session.participants.isNotEmpty()) {
                 session.participants.first()
             } else {
@@ -712,8 +577,6 @@ class IMManager(
                 dialog = dialog,
                 id = sessionId,
                 timestamp = (System.currentTimeMillis() / 1000).toInt(),
-                // Lumiya sends an empty FromAgentName here; SL accepts a
-                // single-NUL Variable 1 (the packer enforces the NUL).
                 fromAgentName = "",
                 message = ""
             )
@@ -728,49 +591,28 @@ class IMManager(
         }
     }
     
-    /**
-     * Get session messages
-     */
     fun getSessionMessages(sessionId: UUID): List<IMMessage> {
         return sessionMessages[sessionId]?.toList() ?: emptyList()
     }
 
-    /**
-     * Returns the last message in [sessionId] without copying the full history list.
-     * Thread-safe: backed by a [ConcurrentHashMap] updated in [addMessage] on
-     * MessagingDispatcher; safe to call from the Main/Compose thread.
-     */
     fun getLastSessionMessage(sessionId: UUID): IMMessage? {
         return lastMessageBySession[sessionId]
     }
     
-    /**
-     * Mark session as read
-     */
     fun markAsRead(sessionId: UUID) {
         _unreadCounts.value = _unreadCounts.value - sessionId
-        pendingSyncSessions.value = pendingSyncSessions.value - sessionId
+        pendingSyncSessions.update { it - sessionId }
     }
     
     private fun addMessage(sessionId: UUID, message: IMMessage) {
         val messages = sessionMessages.getOrPut(sessionId) { mutableListOf() }
         messages.add(message)
-        // Update the concurrent last-message map immediately after appending
-        // to the list.  There is a tiny window between these two operations
-        // where a concurrent getLastSessionMessage() call would still return
-        // the previous message — this is acceptable because:
-        // - For incoming messages: _unreadCounts.value update below triggers
-        //   recomposition of L2IMListRoute, which calls getLastSessionMessage()
-        //   and by then lastMessageBySession already holds the new value.
-        // - For outgoing messages: unreadCounts doesn't change but the new
-        //   last-message is still visible on the next recomposition cycle.
         lastMessageBySession[sessionId] = message
         
         if (messages.size > MAX_SESSION_HISTORY) {
             messages.removeAt(0)
         }
         
-        // Update unread count
         if (!message.isOutgoing) {
             val current = _unreadCounts.value[sessionId] ?: 0
             _unreadCounts.value = _unreadCounts.value + (sessionId to (current + 1))
@@ -788,7 +630,6 @@ class IMManager(
     }
     
     private fun computeP2PSessionId(agent1: UUID, agent2: UUID): UUID {
-        // P2P session ID is XOR of agent IDs
         return UUID(
             agent1.mostSignificantBits xor agent2.mostSignificantBits,
             agent1.leastSignificantBits xor agent2.leastSignificantBits

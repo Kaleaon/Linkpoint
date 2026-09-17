@@ -1,5 +1,6 @@
 package com.linkpoint.protocol.llsd
 
+import android.util.Log
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 import java.io.PushbackInputStream
@@ -12,6 +13,8 @@ import java.util.*
  * See https://wiki.secondlife.com/wiki/LLSD for canonical formatting details.
  */
 object LLSDParser {
+    private const val TAG = "LLSDParser"
+
     private data class ParseLimits(
         val maxStringBytes: Int = 1024 * 1024,
         val maxBinaryBytes: Int = 1024 * 1024,
@@ -90,12 +93,7 @@ object LLSDParser {
         }
         return true
     }
-    /**
-     * Notation has no required header; the bare form starts with one
-     * of the value-marker characters. False positives at this layer
-     * just route to the notation parser, which returns
-     * `LLSDUndefined` if the bytes aren't actually notation.
-     */
+
     private fun looksLikeNotation(data: ByteArray): Boolean {
         var i = 0
         while (i < data.size && data[i].toInt().toChar().isWhitespace()) i++
@@ -107,9 +105,6 @@ object LLSDParser {
         }
     }
 
-    /**
-     * Parse LLSD using content-type detection and BOM handling.
-     */
     fun parseAuto(data: ByteArray, contentType: String?): LLSDValue {
         if (data.isEmpty()) return LLSDUndefined
         val stream = ByteArrayInputStream(data)
@@ -120,17 +115,6 @@ object LLSDParser {
         }
     }
 
-    /**
-     * Parse LLSD Binary format.
-     *
-     * Skips the optional `<?llsd/binary?>\n` magic header that
-     * `python-llsd` (and `libremetaverse.StructuredData`) emit at the
-     * top of binary streams. Without that skip, the first byte the
-     * inner parser sees is `<` (0x3C), which doesn't map to any LLSD
-     * binary marker and silently drops the entire payload as
-     * `LLSDUndefined`. The header is optional in the spec — both forms
-     * are valid wire input — so we accept both.
-     */
     fun parseBinary(data: ByteArray): LLSDValue {
         val stripped = stripBinaryMagicHeader(data)
         val stream = PushbackInputStream(ByteArrayInputStream(stripped), 1)
@@ -139,22 +123,15 @@ object LLSDParser {
 
         return try {
             parseBinaryValue(stream, state, limits)
-        } catch (_: LLSDParseException) {
+        } catch (e: LLSDParseException) {
+            Log.w(TAG, "Failed to parse binary LLSD: ${e.message}", e)
             LLSDUndefined
-        } catch (_: IllegalArgumentException) {
+        } catch (e: IllegalArgumentException) {
+            Log.w(TAG, "Failed to parse binary LLSD due to illegal argument: ${e.message}", e)
             LLSDUndefined
         }
     }
 
-    /**
-     * Parse LLSD Binary and report how many bytes the parser actually
-     * consumed. Required by mesh-asset readers, where the LLSD header is
-     * followed by zlib-compressed LOD blobs at byte offsets relative to
-     * the end of the header — and the header may itself contain
-     * `LLSDBinary` values whose payloads happen to include `0x7d` (`}`)
-     * bytes, which made the previous "scan for first `}`" approach
-     * silently truncate headers and return garbage.
-     */
     fun parseBinaryAndConsumed(data: ByteArray): Pair<LLSDValue, Int> {
         val backing = ByteArrayInputStream(data)
         val stream = PushbackInputStream(backing, 1)
@@ -162,41 +139,23 @@ object LLSDParser {
         val state = ParseLimitsState()
         val value = try {
             parseBinaryValue(stream, state, limits)
-        } catch (_: LLSDParseException) {
+        } catch (e: LLSDParseException) {
+            Log.w(TAG, "Failed in parseBinaryAndConsumed: ${e.message}", e)
             return LLSDUndefined to -1
-        } catch (_: IllegalArgumentException) {
+        } catch (e: IllegalArgumentException) {
+            Log.w(TAG, "Failed in parseBinaryAndConsumed due to illegal argument: ${e.message}", e)
             return LLSDUndefined to -1
         }
-        // ByteArrayInputStream.available() is the count not yet consumed.
-        // The PushbackInputStream sits in front of it but only buffers
-        // single bytes (size=1), so the byte count it might be holding
-        // is at most one. Compensating for it keeps us conservative —
-        // mesh format only requires that the offset is at-or-past the
-        // real end of the header (header bytes are addressed via the
-        // header itself, not by the absolute offset).
         val consumed = data.size - backing.available()
         return value to consumed
     }
 
-    /**
-     * Optional `<?llsd/binary?>\n` magic header that `python-llsd` and
-     * `libremetaverse.StructuredData` prepend to standalone binary
-     * payloads. The spec considers it advisory and either form is valid
-     * over the wire. Strip it if present; otherwise return the input
-     * unchanged.
-     *
-     * Intentionally NOT applied in [parseBinaryAndConsumed] — mesh asset
-     * headers are embedded inside larger binary files and never carry
-     * this magic, and the caller's byte-offset accounting depends on
-     * the input being read from byte 0 of the LLSD body.
-     */
     private fun stripBinaryMagicHeader(data: ByteArray): ByteArray {
         val magic = "<?llsd/binary?>".toByteArray(Charsets.US_ASCII)
         if (data.size < magic.size + 1) return data
         for (i in magic.indices) {
             if (data[i] != magic[i]) return data
         }
-        // Tolerate either `\n` (unix) or `\r\n` (line-folded) terminator.
         var idx = magic.size
         if (idx < data.size && data[idx] == '\r'.code.toByte()) idx++
         if (idx < data.size && data[idx] == '\n'.code.toByte()) idx++ else return data
@@ -260,9 +219,6 @@ object LLSDParser {
             }
             LLSDValue.MARKER_DATE -> {
                 val bytes = readExact(stream, 8, state, limits)
-                // Dates are LITTLE-endian — see the matching note on
-                // LLSDDate.toBinary. Reading as BE produces a denormal
-                // ~0.0 that decodes to the Unix epoch.
                 val seconds = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).double
                 LLSDDate((seconds * 1000).toLong())
             }
@@ -277,11 +233,6 @@ object LLSDParser {
                 val map = LLSDMap()
                 var entries = 0
 
-                // LLSD binary maps carry a 4-byte BE element count after
-                // the open marker. Consume it as an upfront validation
-                // against [ParseLimits.maxMapEntries]; the close marker
-                // `}` still terminates so a count of 0 with no entries
-                // and a count of N with N entries both round-trip.
                 val declaredEntries = readLength(stream, state, limits)
                 if (declaredEntries > limits.maxMapEntries) {
                     throw ParseLimitExceededException("Map entry count exceeds maxMapEntries.")
@@ -315,7 +266,6 @@ object LLSDParser {
                 val array = LLSDArray()
                 var elements = 0
 
-                // 4-byte BE element count — see LLSDMap parsing above.
                 val declaredElements = readLength(stream, state, limits)
                 if (declaredElements > limits.maxArrayLength) {
                     throw ParseLimitExceededException("Array length exceeds maxArrayLength.")
@@ -409,17 +359,13 @@ object LLSDParser {
         }
     }
 
-    /**
-     * Parse LLSD XML format
-     */
     fun parseXML(xml: String): LLSDValue {
-        // Simple XML parser for LLSD
         var cleaned = xml.trim()
 
-        // Strip XML declaration if present so we can parse the <llsd> root element
         if (cleaned.startsWith("<?xml", ignoreCase = true)) {
             val declEnd = cleaned.indexOf("?>")
             if (declEnd == -1) {
+                Log.w(TAG, "Failed to parse XML LLSD: malformed xml header")
                 return LLSDUndefined
             }
             cleaned = cleaned.substring(declEnd + 2).trimStart()
@@ -428,6 +374,7 @@ object LLSDParser {
         return try {
             parseXMLElement(cleaned, 0).first
         } catch (e: Exception) {
+            Log.w(TAG, "Failed to parse XML LLSD: ${e.message}", e)
             LLSDUndefined
         }
     }
@@ -435,14 +382,12 @@ object LLSDParser {
     private fun parseXMLElement(xml: String, startPos: Int): Pair<LLSDValue, Int> {
         var pos = startPos
 
-        // Skip whitespace
         while (pos < xml.length && xml[pos].isWhitespace()) pos++
 
         if (pos >= xml.length || xml[pos] != '<') {
             return LLSDUndefined to pos
         }
 
-        // Find tag name
         val tagStart = pos + 1
         var tagEnd = tagStart
         while (tagEnd < xml.length && xml[tagEnd] != '>' && xml[tagEnd] != ' ' && xml[tagEnd] != '/') {
@@ -451,7 +396,6 @@ object LLSDParser {
 
         val tagName = xml.substring(tagStart, tagEnd).lowercase()
 
-        // Handle self-closing tags
         val closePos = xml.indexOf('>', pos)
         if (closePos == -1) return LLSDUndefined to xml.length
 
@@ -472,25 +416,11 @@ object LLSDParser {
             }
         }
 
-        // Find content and closing tag.  For tags that can contain
-        // themselves (`<map>` inside `<map>`, `<array>` inside `<array>`),
-        // a naive `indexOf("</tag>")` returns the FIRST close tag, which
-        // for nested input is the inner element's closing tag — so the
-        // outer element's content becomes truncated and nested values
-        // collapse to LLSDUndefined. Walk the substring counting opens
-        // and closes so we land on the matching close tag instead.
         val contentStart = closePos + 1
         val closingTag = "</$tagName>"
         val closingPos = findMatchingCloseTag(xml, tagName, contentStart)
         if (closingPos == -1) return LLSDUndefined to xml.length
 
-        // Capture the literal text between tags as well as a trimmed
-        // copy. For numeric/UUID/date/uri tags the trim() is necessary
-        // because LL canonical XML often pads numeric fields with
-        // whitespace; but for `<string>` we must use the raw content,
-        // since SDP / SLURL / message bodies legitimately contain
-        // significant trailing newlines. Trimming the raw form
-        // silently corrupts those payloads.
         val rawContent = xml.substring(contentStart, closingPos)
         val content = rawContent.trim()
         val endPos = closingPos + closingTag.length
@@ -519,18 +449,15 @@ object LLSDParser {
                 val map = LLSDMap()
                 var mapPos = 0
                 while (mapPos < content.length) {
-                    // Skip whitespace
                     while (mapPos < content.length && content[mapPos].isWhitespace()) mapPos++
                     if (mapPos >= content.length) break
 
-                    // Find key
                     val keyStart = content.indexOf("<key>", mapPos, ignoreCase = true)
                     if (keyStart == -1) break
                     val keyEnd = content.indexOf("</key>", keyStart, ignoreCase = true)
                     if (keyEnd == -1) break
                     val key = content.substring(keyStart + 5, keyEnd)
 
-                    // Find value
                     mapPos = keyEnd + 6
                     val (value, newPos) = parseXMLElement(content, mapPos)
                     map[key] = value
@@ -542,7 +469,6 @@ object LLSDParser {
                 val array = LLSDArray()
                 var arrayPos = 0
                 while (arrayPos < content.length) {
-                    // Skip whitespace
                     while (arrayPos < content.length && content[arrayPos].isWhitespace()) arrayPos++
                     if (arrayPos >= content.length) break
                     if (content[arrayPos] != '<') break
@@ -560,17 +486,6 @@ object LLSDParser {
         }
     }
 
-    /**
-     * Walk [xml] from [startPos] looking for the close tag matching the
-     * `<tagName>` element that opens immediately before [startPos],
-     * counting nested `<tagName>` opens so siblings of the same name
-     * inside the body don't terminate the search early.
-     *
-     * Recognises both `<tagName>` and `<tagName ` (with attributes) as
-     * an open, and `<tagName/>` (self-closing) as neither open nor
-     * close. Returns the index of the matching `</tagName>`, or -1 if
-     * the document is truncated.
-     */
     private fun findMatchingCloseTag(xml: String, tagName: String, startPos: Int): Int {
         val openPrefix = "<$tagName"
         val closeTag = "</$tagName>"
@@ -581,13 +496,9 @@ object LLSDParser {
             val nextClose = xml.indexOf(closeTag, i, ignoreCase = true)
             if (nextClose == -1) return -1
             if (nextOpen != -1 && nextOpen < nextClose) {
-                // Confirm this is a real `<tagName>` or `<tagName ` and
-                // not an unrelated tag like `<tagNameOther>`.
                 val after = nextOpen + openPrefix.length
                 val ch = if (after < xml.length) xml[after] else ' '
                 if (ch == '>' || ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '/') {
-                    // Self-closing? `<tag .../ >`. Find the `>` that
-                    // terminates the open tag and check the prior char.
                     val tagEnd = xml.indexOf('>', after)
                     val selfClosing = tagEnd > 0 && xml[tagEnd - 1] == '/'
                     if (!selfClosing) depth++
@@ -614,21 +525,7 @@ object LLSDParser {
     }
 
     fun parseLlsdDate(value: String): Date? {
-        // Tolerate the variants observed in the wild:
-        //   2026-05-01T07:27:22.123Z         python-llsd default
-        //   2026-05-01T07:27:22Z             second-precision form
-        //   2026-05-01T07:27:22+00:00        plain ISO-8601 offset
-        //   2026-05-01T07:27:22.123+00:00    ISO with millis + offset
-        //   2026-05-01T07:27:22+00:00Z       ill-formed but emitted by
-        //                                    some debug capture tools
-        //                                    (offset *and* trailing Z)
-        // The LLSD spec only mandates the trailing-Z form; everything
-        // else is handled defensively so a malformed date doesn't
-        // collapse to `Date()` (which silently substitutes "now").
         val normalised = value.trim().let { v ->
-            // Drop a trailing redundant Z if there's already a numeric
-            // offset (e.g. "+00:00Z" → "+00:00"). The two forms encode
-            // the same instant.
             val tzPattern = Regex("""[+-]\d{2}:?\d{2}""")
             if (v.endsWith("Z") && tzPattern.containsMatchIn(v.dropLast(1))) v.dropLast(1) else v
         }
@@ -645,7 +542,7 @@ object LLSDParser {
             try {
                 return formatter.parse(normalised)
             } catch (e: Exception) {
-                // Try the next pattern.
+                // Try next
             }
         }
         return null
