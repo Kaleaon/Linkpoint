@@ -45,7 +45,7 @@ object ScenePopulationDiagnostics {
     private val objectCounters = CounterSet()
     private val avatarCounters = CounterSet()
 
-    fun markRegionHandshakeComplete() { handshakeComplete.set(true) }
+    fun markRegionHandshakeComplete() { handshakeComplete.set(true); updateFlow() }
     fun markPacketReceived(type: EntityType, count: Int = 1) { counter(type).packetReceived.addAndGet(count.toLong()) }
     fun markParsed(type: EntityType, count: Int = 1) { counter(type).parsed.addAndGet(count.toLong()) }
 
@@ -97,4 +97,12 @@ object ScenePopulationDiagnostics {
         counter.rendererSubmitted.set(0)
         counter.dropped.set(0)
     }
+
+    private val _snapshotFlow = kotlinx.coroutines.flow.MutableStateFlow(snapshot())
+    val snapshotFlow: kotlinx.coroutines.flow.StateFlow<Snapshot> = _snapshotFlow
+
+    private fun updateFlow() {
+        _snapshotFlow.value = snapshot()
+    }
+
 }

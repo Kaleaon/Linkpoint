@@ -127,17 +127,14 @@ jobs:
       
       - name: Build Linkpoint Release APK
         run: ./gradlew :Linkpoint:assembleRelease --stacktrace
-        continue-on-error: true
-        env:
+                env:
           GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError"
       
       - name: Run Kotlin compilation checks
         run: ./gradlew :Linkpoint:compileStableDebugKotlin --stacktrace
-        continue-on-error: true
-      
+
       - name: Run unit tests
         run: ./gradlew :Linkpoint:testStableDebugUnitTest --stacktrace --continue
-        continue-on-error: true
 
       - name: Enforce UI coverage validator tests
         run: ./gradlew :Linkpoint:testStableDebugUnitTest --tests "com.linkpoint.ui.coverage.UiCoverageValidatorTest" --stacktrace
@@ -147,8 +144,7 @@ jobs:
 
       - name: Run lint analysis
         run: ./gradlew :Linkpoint:lintStableDebug --stacktrace
-        continue-on-error: true
-      
+
       - name: Analyze APK size
         if: success()
         run: |
@@ -175,8 +171,7 @@ jobs:
           path: Linkpoint/build/outputs/apk/*/release/*.apk
           retention-days: 30
           compression-level: 9
-        continue-on-error: true
-      
+
       - name: Upload build reports
         uses: actions/upload-artifact@v4
         if: always()
@@ -196,8 +191,7 @@ jobs:
           name: lint-results-${{ github.sha }}
           path: Linkpoint/build/reports/lint-results-debug.html
           retention-days: 7
-        continue-on-error: true
-      
+
       - name: Build Summary
         if: always()
         run: |
@@ -377,8 +371,7 @@ jobs:
         with:
           name: linkpoint-release-${{ github.sha }}
           path: apks/release/
-        continue-on-error: true
-      
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')

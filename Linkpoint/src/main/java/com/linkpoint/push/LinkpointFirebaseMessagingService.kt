@@ -28,6 +28,6 @@ class LinkpointFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         Log.i(TAG, "FCM token refreshed (${token.length} chars)")
-        // Future: upload token to grid service / self-host relay endpoint.
+        applicationContext.getSharedPreferences("push_config", MODE_PRIVATE).edit().putString("fcm_token", token).apply()
     }
 }

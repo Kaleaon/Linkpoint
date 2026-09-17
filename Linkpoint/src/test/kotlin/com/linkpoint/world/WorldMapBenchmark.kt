@@ -4,7 +4,7 @@ import java.util.UUID
 import kotlin.math.sqrt
 import kotlin.random.Random
 
-object WorldMapBenchmark {
+class WorldMapBenchmark {
     // Stubs
     private data class StubVector3(val x: Float, val y: Float, val z: Float) {
         fun distance(other: StubVector3): Float {
@@ -29,7 +29,7 @@ object WorldMapBenchmark {
         val position: FloatArray,
     )
 
-    @JvmStatic
+
     fun main(args: Array<String>) {
         val avatarCount = 100_000
         val allAvatars = ArrayList<StubAvatar>(avatarCount)
@@ -167,4 +167,19 @@ object WorldMapBenchmark {
             mapped
         }
     }
+
+    @org.junit.Test
+    fun benchmarkWorldMapFilter() {
+        val avatarCount = 1000
+        val allAvatars = ArrayList<StubAvatar>(avatarCount)
+        val rand = Random(12345)
+        repeat(avatarCount) {
+            allAvatars.add(StubAvatar(UUID.randomUUID(), StubVector3(rand.nextFloat() * 1000, rand.nextFloat() * 1000, rand.nextFloat() * 1000)))
+        }
+        val myPos = StubVector3(500f, 500f, 500f)
+        val oldRes = runOld(allAvatars, myPos, 100f, 50)
+        val newRes = runNew(allAvatars, myPos, 100f, 50)
+        org.junit.Assert.assertEquals(oldRes.size, newRes.size)
+    }
+
 }
