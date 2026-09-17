@@ -25,6 +25,7 @@ import com.linkpoint.ui.linkpoint2.routes.L2InventoryRoute
 import com.linkpoint.ui.linkpoint2.routes.L2MapRoute
 import com.linkpoint.ui.linkpoint2.routes.L2MinimapRoute
 import com.linkpoint.ui.linkpoint2.routes.L2NearbyPeopleRoute
+import com.linkpoint.ui.linkpoint2.routes.L2NotecardRoute
 import com.linkpoint.ui.linkpoint2.routes.L2NotificationsRoute
 import com.linkpoint.ui.linkpoint2.routes.L2OutfitComposerRoute
 import com.linkpoint.ui.linkpoint2.routes.L2OutfitPickerRoute
@@ -32,6 +33,8 @@ import com.linkpoint.ui.linkpoint2.routes.L2PlaceDetailRoute
 import com.linkpoint.ui.linkpoint2.routes.L2PlacesRoute
 import com.linkpoint.ui.linkpoint2.routes.L2PrivacySettingsRoute
 import com.linkpoint.ui.linkpoint2.routes.L2ProfileRoute
+import com.linkpoint.ui.linkpoint2.routes.L2RadarRoute
+import com.linkpoint.ui.linkpoint2.routes.L2ScriptEditorRoute
 import com.linkpoint.ui.linkpoint2.routes.L2SearchRoute
 import com.linkpoint.ui.linkpoint2.routes.L2TeleportHistoryRoute
 import com.linkpoint.ui.linkpoint2.routes.L2VoiceDeepRoute
@@ -63,13 +66,7 @@ import com.linkpoint.ui.xr.L2XrWorldRoute
  * back to legacy activity handling otherwise.
  *
  * Each post-login surface is wired to a real [LinkpointApp] manager via the
- * `L2*Route` composables in [com.linkpoint.ui.linkpoint2.routes]. When a
- * manager isn't initialised yet (pre-login) the route renders an honest
- * empty state — never fabricated data. The previous version of this file
- * passed `L2Demo.*` placeholders into every screen, which made the UI look
- * populated with sample residents while every action was a silent no-op
- * (chat, IM, friends, inventory, groups, wallet, teleport history, etc).
- * That is no longer the case here.
+ * `L2*Route` composables in [com.linkpoint.ui.linkpoint2.routes].
  */
 @Composable
 fun Linkpoint2RouteHost(
@@ -136,7 +133,6 @@ fun Linkpoint2RouteHost(
             modifier = modifier,
         )
         route == Routes.ONBOARDING_PERMISSIONS -> {
-            // Map PermissionRequest IDs to Android Manifest permissions.
             val permissionMap = mapOf(
                 "mic" to Manifest.permission.RECORD_AUDIO,
                 "loc" to Manifest.permission.ACCESS_FINE_LOCATION,
@@ -145,7 +141,6 @@ fun Linkpoint2RouteHost(
                 mapOf("notif" to Manifest.permission.POST_NOTIFICATIONS)
             } else emptyMap()
 
-            // Track which permission is pending so the result handler can log it.
             var pendingPermission by remember { mutableStateOf<String?>(null) }
             val launcher = rememberLauncherForActivityResult(
                 ActivityResultContracts.RequestPermission()
@@ -192,9 +187,6 @@ fun Linkpoint2RouteHost(
         )
         route == Routes.BUILD_TOOLS -> BuildToolsScreen(
             onClose = back,
-            // Build tools require a full ObjectEdit + selection pipeline
-            // which is not yet implemented; tap is intentionally inert
-            // until ObjectManager.editProperties is wired through.
             onApply = { _, _ -> },
             modifier = modifier,
         )
@@ -238,8 +230,6 @@ fun Linkpoint2RouteHost(
         )
         route == Routes.CAMERA_MODE -> CameraScreen(
             onClose = back,
-            // Snapshot capture path (SnapshotManager.capture) isn't wired
-            // to the Compose surface yet; shutter is currently a no-op.
             onShutter = {},
             onSnapToFriends = {},
             onFlip = {},
@@ -266,6 +256,20 @@ fun Linkpoint2RouteHost(
             onNavigateBack = back,
             modifier = modifier,
         )
+        route == Routes.RADAR -> L2RadarRoute(
+            onNavigateBack = back,
+            modifier = modifier,
+        )
+        baseRoute == "notecard" -> L2NotecardRoute(
+            notecardId = entry.arguments?.getString("notecardId"),
+            onNavigateBack = back,
+            modifier = modifier,
+        )
+        baseRoute == "script_editor" -> L2ScriptEditorRoute(
+            scriptId = entry.arguments?.getString("scriptId"),
+            onNavigateBack = back,
+            modifier = modifier,
+        )
         route == Routes.GROUPS -> L2GroupsRoute(
             onNavigateBack = back,
             onOpenGroupChat = { _ -> navController.navigateTo(Routes.CHAT) },
@@ -285,10 +289,6 @@ fun Linkpoint2RouteHost(
             )
         }
         route == Routes.MY_AVATAR -> {
-            // AvatarAppearance is currently a UI-only model; appearance state
-            // round-trips through avatarManager but the editor surface only
-            // controls visual params locally until AppearanceManager is
-            // wired into the Compose layer.
             var appearance by remember { mutableStateOf(AvatarAppearance()) }
             MyAvatarScreen(
                 appearance = appearance,

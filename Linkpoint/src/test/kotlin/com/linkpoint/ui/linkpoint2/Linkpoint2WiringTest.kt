@@ -45,7 +45,7 @@ class Linkpoint2WiringTest {
             Routes.ONBOARDING_AVATAR, Routes.IM_LIST, Routes.OUTFIT_PICKER,
             Routes.OUTFIT_COMPOSER, Routes.GROUP_PROFILE, Routes.CAMERA_MODE,
             Routes.GRAPHICS_SETTINGS, Routes.PRIVACY_SETTINGS,
-            Routes.GRID_MANAGEMENT, Routes.EMPTY_STATES_REF,
+            Routes.GRID_MANAGEMENT, Routes.EMPTY_STATES_REF, Routes.NOTECARD, Routes.SCRIPT_EDITOR,
         )
         for (route in constants) {
             assertNotNull(

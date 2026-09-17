@@ -1,5 +1,12 @@
 package com.linkpoint.ui.linkpoint2.routes
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
+
+
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.runtime.Composable
@@ -1187,6 +1194,139 @@ fun L2PrivacySettingsRoute(
             }
         },
         onChange = { state = it },
+        modifier = modifier,
+    )
+}
+
+@Composable
+fun L2RadarRoute(
+    onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val app = LinkpointApp.getInstanceOrNull()
+    var refreshTick by remember { mutableStateOf(0) }
+
+    val blips = remember(refreshTick) {
+        if (app == null || !app.isAvatarManagerInitialized()) emptyList() else {
+            val me = app.avatarManager.getMyAvatar()
+            val pos = me?.position ?: com.linkpoint.protocol.types.LLVector3.zero()
+            val friendIds: Set<UUID> = if (app.isFriendsManagerInitialized()) {
+                app.friendsManager.getAllFriends().map { it.agentId }.toSet()
+            } else emptySet()
+            val nameLookup: (UUID) -> String = { id ->
+                val cached = runCatching { app.displayNameManager.getCachedDisplayName(id) }.getOrNull()
+                cached?.displayName?.takeIf { it.isNotBlank() }
+                    ?: cached?.username
+                    ?: "Resident ${id.toString().take(8)}"
+            }
+            app.avatarManager.getNearbyAvatars(pos, 256f)
+                .filter { me == null || it.agentId != me.agentId }
+                .map { av ->
+                    val dx = av.position.x - pos.x
+                    val dy = av.position.y - pos.y
+                    val dz = av.position.z - pos.z
+                    val dist = kotlin.math.sqrt(dx * dx + dy * dy + dz * dz)
+                    val bearing = kotlin.math.atan2(dx.toDouble(), dy.toDouble()).toFloat()
+                    val type = when {
+                        av.agentId in friendIds -> com.linkpoint.ui.radar.BlipType.FRIEND
+                        else -> com.linkpoint.ui.radar.BlipType.STRANGER
+                    }
+                    com.linkpoint.ui.radar.RadarBlip(
+                        id = av.agentId.toString(),
+                        name = nameLookup(av.agentId),
+                        type = type,
+                        distance = dist,
+                        bearing = bearing,
+                        altitude = dz,
+                    )
+                }
+        }
+    }
+
+    androidx.compose.material3.Scaffold(
+        topBar = {
+            com.linkpoint.ui.components.linkpoint2.primitives.L2TopBar(
+                title = "Radar",
+                subtitle = "${blips.size} nearby",
+                leading = {
+                    androidx.compose.material3.IconButton(onClick = onNavigateBack) {
+                        androidx.compose.material3.Icon(
+                            androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+            )
+        }
+    ) { padding ->
+        androidx.compose.foundation.layout.Box(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(padding),
+            contentAlignment = androidx.compose.ui.Alignment.Center,
+        ) {
+            com.linkpoint.ui.radar.Radar(
+                blips = blips,
+                size = 320.dp,
+            )
+        }
+    }
+}
+
+@Composable
+fun L2NotecardRoute(
+    notecardId: String?,
+    onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val app = LinkpointApp.getInstanceOrNull()
+    val id = runCatching { UUID.fromString(notecardId) }.getOrNull()
+
+    com.linkpoint.ui.notecard.NotecardEditorScreen(
+        notecardName = "Notecard",
+        assetId = id,
+        itemId = id,
+        isReadOnly = true,
+        onLoadNotecard = { assetId ->
+            if (app != null && app.isAssetCacheInitialized()) {
+                val bytes = app.assetCache.get(assetId, com.linkpoint.assets.AssetType.NOTECARD)
+                if (bytes != null) {
+                    val text = String(bytes, Charsets.UTF_8)
+                    com.linkpoint.inventory.notecard.NotecardData(assetId = assetId, text = text, embeddedItems = emptyList())
+                } else null
+            } else null
+        },
+        onSaveNotecard = { _, _ -> false },
+        onNavigateBack = onNavigateBack,
+        modifier = modifier,
+    )
+}
+
+@Composable
+fun L2ScriptEditorRoute(
+    scriptId: String?,
+    onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val app = LinkpointApp.getInstanceOrNull()
+    val id = runCatching { UUID.fromString(scriptId) }.getOrNull()
+
+    com.linkpoint.ui.scripts.ScriptEditorScreen(
+        scriptName = "Script",
+        assetId = id,
+        itemId = id,
+        objectId = null,
+        isReadOnly = true,
+        onLoadScript = { assetId ->
+            if (app != null && app.isAssetCacheInitialized()) {
+                val bytes = app.assetCache.get(assetId, com.linkpoint.assets.AssetType.SCRIPT)
+                if (bytes != null) String(bytes, Charsets.UTF_8) else null
+            } else null
+        },
+        onSaveScript = { _, _, _ -> Pair(false, "Read-only") },
+        onResetScript = { _, _ -> false },
+        onToggleRunning = { _, _ -> null },
+        onNavigateBack = onNavigateBack,
         modifier = modifier,
     )
 }

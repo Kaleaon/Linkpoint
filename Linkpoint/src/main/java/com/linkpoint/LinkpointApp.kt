@@ -5948,6 +5948,7 @@ class LinkpointApp : Application() {
      * Check if texture manager is initialized (for debug reports)
      * Note: TextureManager is initialized early, so this is always true after app init
      */
+    fun isAssetCacheInitialized(): Boolean = ::assetCache.isInitialized
     fun isTextureManagerInitialized(): Boolean = ::textureManager.isInitialized
     
     /**

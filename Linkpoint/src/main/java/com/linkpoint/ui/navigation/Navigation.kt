@@ -61,12 +61,16 @@ object Routes {
     const val PRIVACY_SETTINGS = "settings/privacy"
     const val GRID_MANAGEMENT = "settings/grids"
     const val EMPTY_STATES_REF = "dev/empty_states"
+    const val NOTECARD = "notecard/{notecardId}"
+    const val SCRIPT_EDITOR = "script_editor/{scriptId}"
 
     fun groupProfile(groupId: String) = "group_profile/$groupId"
 
     fun profile(userId: String) = "profile/$userId"
     fun slurl(slurl: String) = "slurl/$slurl"
     fun placeDetail(placeId: String) = "places/$placeId"
+    fun notecard(notecardId: String) = "notecard/$notecardId"
+    fun scriptEditor(scriptId: String) = "script_editor/$scriptId"
 }
 
 enum class MenuPlacement { BOTTOM_TAB, DRAWER, OVERFLOW, NONE }
@@ -109,6 +113,7 @@ object LinkpointMenus {
                 LinkpointMenuDestination(Routes.IM_LIST, "Messages"),
                 LinkpointMenuDestination(Routes.GROUPS, "Groups"),
                 LinkpointMenuDestination(Routes.VOICE_DEEP, "Voice"),
+                LinkpointMenuDestination(Routes.RADAR, "Radar"),
             ),
         ),
         LinkpointDrawerSection(
@@ -149,7 +154,7 @@ val routeMetadata: Map<String, RouteMetadata> = mapOf(
     Routes.SETTINGS to RouteMetadata(MenuPlacement.DRAWER, "Settings"),
     Routes.MAP to RouteMetadata(MenuPlacement.DRAWER, "Map"),
     Routes.MINIMAP to RouteMetadata(MenuPlacement.OVERFLOW, "Minimap"),
-    Routes.RADAR to RouteMetadata(MenuPlacement.OVERFLOW, "Radar"),
+    Routes.RADAR to RouteMetadata(MenuPlacement.OVERFLOW, "Radar", "Nearby avatars"),
     Routes.SEARCH to RouteMetadata(MenuPlacement.DRAWER, "Search"),
     Routes.TELEPORT_HISTORY to RouteMetadata(MenuPlacement.OVERFLOW, "Teleport history"),
     Routes.NEARBY_PEOPLE to RouteMetadata(MenuPlacement.OVERFLOW, "Nearby"),
@@ -177,6 +182,8 @@ val routeMetadata: Map<String, RouteMetadata> = mapOf(
     Routes.PRIVACY_SETTINGS to RouteMetadata(MenuPlacement.OVERFLOW, "Privacy", "Visibility & blocking"),
     Routes.GRID_MANAGEMENT to RouteMetadata(MenuPlacement.OVERFLOW, "Grids", "Configured worlds"),
     Routes.EMPTY_STATES_REF to RouteMetadata(MenuPlacement.NONE, "Empty states", "Reference"),
+    Routes.NOTECARD to RouteMetadata(MenuPlacement.NONE, "Notecard", "Notecard reader"),
+    Routes.SCRIPT_EDITOR to RouteMetadata(MenuPlacement.NONE, "Script Editor", "LSL script editor"),
 )
 
 fun NavHostController.navigateTo(route: String) {
@@ -198,6 +205,8 @@ fun resolveRouteMetadata(route: String?): RouteMetadata {
             normalizedRoute.startsWith("slurl/") -> routeMetadata.getValue(Routes.SLURL)
             normalizedRoute.startsWith("group_profile/") -> routeMetadata.getValue(Routes.GROUP_PROFILE)
             normalizedRoute.startsWith("places/") -> routeMetadata.getValue(Routes.PLACES_DETAIL)
+            normalizedRoute.startsWith("notecard/") -> routeMetadata.getValue(Routes.NOTECARD)
+            normalizedRoute.startsWith("script_editor/") -> routeMetadata.getValue(Routes.SCRIPT_EDITOR)
             else -> routeMetadata.getValue(Routes.WORLD)
         }
 }

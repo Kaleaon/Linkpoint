@@ -66,7 +66,7 @@ class RttEstimatorTest {
         assertEquals(minOf(RttEstimator.MAX_RTO_MS, baseline * 4), est.currentRtoMs)
         // Beyond MAX_BACKOFF_SHIFT, further onRetransmit calls don't grow it.
         repeat(10) { est.onRetransmit() }
-        assertEquals(RttEstimator.MAX_RTO_MS, est.currentRtoMs)
+        assertEquals(minOf(RttEstimator.MAX_RTO_MS, baseline shl RttEstimator.MAX_BACKOFF_SHIFT), est.currentRtoMs)
     }
 
     @Test

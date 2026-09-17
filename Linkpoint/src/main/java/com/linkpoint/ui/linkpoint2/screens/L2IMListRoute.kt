@@ -7,17 +7,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.linkpoint.LinkpointApp
 import com.linkpoint.chat.SessionType
+import com.linkpoint.ui.friends.FriendData
+import com.linkpoint.ui.friends.FriendStatus
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 /**
  * Compose-first IM LIST destination wired to the real
- * [com.linkpoint.chat.IMManager] active sessions and unread counts.
- *
- * Replaces the placeholder `L2Demo.Conversations` wiring in the L2 nav graph
- * — that demo data made the UI look populated even when no real IM/group
- * sessions existed, so users couldn't tell whether messaging was working.
+ * [com.linkpoint.chat.IMManager] active sessions and unread counts,
+ * as well as [com.linkpoint.world.FriendsManager] for the "All" friends view.
  */
 @Composable
 fun L2IMListRoute(
@@ -51,10 +50,41 @@ fun L2IMListRoute(
         }
     }
 
+    val friends: List<FriendData> = if (app == null || !app.isFriendsManagerInitialized()) {
+        emptyList()
+    } else {
+        val onlineSet by app.friendsManager.onlineFriends.collectAsState()
+        val rawFriends = app.friendsManager.getAllFriends()
+        rawFriends.map { f ->
+            val isOnline = f.agentId in onlineSet || f.isOnline
+            FriendData(
+                id = f.agentId,
+                name = f.name,
+                status = if (isOnline) FriendStatus.ONLINE else FriendStatus.OFFLINE,
+                location = null,
+                canSeeOnline = f.canSeeOnline,
+                canSeeMap = f.canTrack,
+                canModifyObjects = f.canModifyObjects,
+            )
+        }.sortedWith(compareByDescending<FriendData> { it.status == FriendStatus.ONLINE }.thenBy { it.name })
+    }
+
     IMListScreen(
         conversations = conversations,
+        friends = friends,
         onBack = onBack,
         onOpenConversation = onOpenConversation,
+        onOpenFriendIM = { friend ->
+            onOpenConversation(
+                ConversationSummary(
+                    id = friend.id.toString(),
+                    name = friend.name,
+                    lastMessage = "",
+                    timestamp = "",
+                    online = friend.status == FriendStatus.ONLINE,
+                )
+            )
+        },
         onCompose = onCompose,
         modifier = modifier,
     )
