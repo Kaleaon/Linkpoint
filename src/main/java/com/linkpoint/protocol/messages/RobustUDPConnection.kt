@@ -306,12 +306,14 @@ class RobustUDPConnection(
         }
 
         val misses = missedHeartbeats.incrementAndGet()
+        if (misses >= MAX_MISSED_HEARTBEATS) {
+            val reason = if (firstInboundReceived.get()) "UDP connection lost" else "No inbound UDP after connect grace"
+            handleConnectionError("$reason; missed heartbeats=$misses")
+            return
+        }
+
         if (!firstInboundReceived.get()) {
-            if (misses >= MAX_MISSED_HEARTBEATS) {
-                handleConnectionError("No inbound UDP after connect grace; missed heartbeats=$misses")
-            } else {
-                Log.w(TAG, "No inbound UDP yet (missed heartbeats=$misses/$MAX_MISSED_HEARTBEATS)")
-            }
+            Log.w(TAG, "No inbound UDP yet (missed heartbeats=$misses/$MAX_MISSED_HEARTBEATS)")
             return
         }
 
