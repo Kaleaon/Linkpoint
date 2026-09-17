@@ -15,6 +15,14 @@ import java.util.*
 object LLSDParser {
     private const val TAG = "LLSDParser"
 
+    private fun logWarning(tag: String, message: String, throwable: Throwable? = null) {
+        try {
+            Log.w(tag, message, throwable)
+        } catch (_: Throwable) {
+            System.err.println("[$tag] $message: ${throwable?.message}")
+        }
+    }
+
     private data class ParseLimits(
         val maxStringBytes: Int = 1024 * 1024,
         val maxBinaryBytes: Int = 1024 * 1024,
@@ -124,10 +132,10 @@ object LLSDParser {
         return try {
             parseBinaryValue(stream, state, limits)
         } catch (e: LLSDParseException) {
-            Log.w(TAG, "Failed to parse binary LLSD: ${e.message}", e)
+            logWarning(TAG, "Failed to parse binary LLSD: ${e.message}", e)
             LLSDUndefined
         } catch (e: IllegalArgumentException) {
-            Log.w(TAG, "Failed to parse binary LLSD due to illegal argument: ${e.message}", e)
+            logWarning(TAG, "Failed to parse binary LLSD due to illegal argument: ${e.message}", e)
             LLSDUndefined
         }
     }
@@ -140,10 +148,10 @@ object LLSDParser {
         val value = try {
             parseBinaryValue(stream, state, limits)
         } catch (e: LLSDParseException) {
-            Log.w(TAG, "Failed in parseBinaryAndConsumed: ${e.message}", e)
+            logWarning(TAG, "Failed in parseBinaryAndConsumed: ${e.message}", e)
             return LLSDUndefined to -1
         } catch (e: IllegalArgumentException) {
-            Log.w(TAG, "Failed in parseBinaryAndConsumed due to illegal argument: ${e.message}", e)
+            logWarning(TAG, "Failed in parseBinaryAndConsumed due to illegal argument: ${e.message}", e)
             return LLSDUndefined to -1
         }
         val consumed = data.size - backing.available()
@@ -365,7 +373,7 @@ object LLSDParser {
         if (cleaned.startsWith("<?xml", ignoreCase = true)) {
             val declEnd = cleaned.indexOf("?>")
             if (declEnd == -1) {
-                Log.w(TAG, "Failed to parse XML LLSD: malformed xml header")
+                logWarning(TAG, "Failed to parse XML LLSD: malformed xml header")
                 return LLSDUndefined
             }
             cleaned = cleaned.substring(declEnd + 2).trimStart()
@@ -374,7 +382,7 @@ object LLSDParser {
         return try {
             parseXMLElement(cleaned, 0).first
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to parse XML LLSD: ${e.message}", e)
+            logWarning(TAG, "Failed to parse XML LLSD: ${e.message}", e)
             LLSDUndefined
         }
     }
