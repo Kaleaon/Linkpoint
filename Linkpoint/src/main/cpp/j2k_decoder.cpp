@@ -692,3 +692,52 @@ Java_com_linkpoint_assets_JPEG2000Encoder_nativeEncode(
     free(eb.buf);
     return out;
 }
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_linkpoint_avatar_MorphApplier_nativeApplyMorph(
+    JNIEnv* env,
+    jclass clazz,
+    jfloatArray jpositions,
+    jfloatArray jnormals,
+    jintArray jindices,
+    jfloatArray jcoordDeltas,
+    jfloatArray jnormalDeltas,
+    jfloat weight
+) {
+    (void)clazz;
+
+    if (!jpositions || !jnormals || !jindices || !jcoordDeltas || !jnormalDeltas) {
+        return;
+    }
+
+    jsize numIndices = env->GetArrayLength(jindices);
+    if (numIndices == 0) return;
+
+    jsize posLen = env->GetArrayLength(jpositions);
+
+    jfloat* positions = env->GetFloatArrayElements(jpositions, nullptr);
+    jfloat* normals = env->GetFloatArrayElements(jnormals, nullptr);
+    jint* indices = env->GetIntArrayElements(jindices, nullptr);
+    jfloat* coordDeltas = env->GetFloatArrayElements(jcoordDeltas, nullptr);
+    jfloat* normalDeltas = env->GetFloatArrayElements(jnormalDeltas, nullptr);
+
+    for (jsize i = 0; i < numIndices; i++) {
+        jint v = indices[i];
+        jint pBase = v * 3;
+
+        if (pBase + 2 >= posLen) continue;
+
+        positions[pBase]     += coordDeltas[i * 3]     * weight;
+        positions[pBase + 1] += coordDeltas[i * 3 + 1] * weight;
+        positions[pBase + 2] += coordDeltas[i * 3 + 2] * weight;
+        normals[pBase]     += normalDeltas[i * 3]     * weight;
+        normals[pBase + 1] += normalDeltas[i * 3 + 1] * weight;
+        normals[pBase + 2] += normalDeltas[i * 3 + 2] * weight;
+    }
+
+    env->ReleaseFloatArrayElements(jpositions, positions, 0);
+    env->ReleaseFloatArrayElements(jnormals, normals, 0);
+    env->ReleaseIntArrayElements(jindices, indices, JNI_ABORT);
+    env->ReleaseFloatArrayElements(jcoordDeltas, coordDeltas, JNI_ABORT);
+    env->ReleaseFloatArrayElements(jnormalDeltas, normalDeltas, JNI_ABORT);
+}

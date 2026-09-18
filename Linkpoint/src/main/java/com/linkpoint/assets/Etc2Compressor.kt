@@ -213,7 +213,7 @@ internal object Etc1PlusEacRgba : Etc2Compressor {
  * adding the etcpak source files and the CMake define — no Kotlin
  * changes required.
  */
-internal object NativeEtcpak : Etc2Compressor {
+object NativeEtcpak : Etc2Compressor {
     @Volatile private var probed = false
     @Volatile private var available = false
 
