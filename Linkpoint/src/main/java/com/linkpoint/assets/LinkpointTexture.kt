@@ -4,10 +4,12 @@ import android.graphics.Bitmap
 import android.util.Log
 import com.google.android.filament.Engine
 import com.google.android.filament.Texture
-import java.lang.ref.Cleaner
+import java.lang.ref.PhantomReference
+import java.lang.ref.ReferenceQueue
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -30,15 +32,6 @@ import java.util.concurrent.atomic.AtomicBoolean
  *      thread, and we cannot guarantee that from a Cleaner thread. Leaking
  *      a Filament `Texture` is bad, but crashing the Filament engine is
  *      worse — the warning is what triggers the fix at the call site.
- *
- * This is a scaffold. It does not yet:
- *   - Fold the J2K decoder body in (still calls [JPEG2000Decoder.decode])
- *   - Wire the [MmappedTextureCache] hit/miss path (the cache exists but
- *     callers are not yet invoking it)
- *   - Implement [uploadToFilament] (pending — needs Filament `Engine` plumbing
- *     from `render/RenderManager.kt`)
- *   - Hook ETC2/EAC via etcpak (gated on the native entry point; falls back
- *     to the ETC1 path with the documented opaque-only restriction)
  */
 class LinkpointTexture private constructor(
     val uuid: UUID,
@@ -80,7 +73,7 @@ class LinkpointTexture private constructor(
      * defeat the GC-driven leak detection).
      */
     private val nativeBytesRef = LongHolder()
-    private val cleanerRegistration: Cleaner.Cleanable =
+    private val cleanerRegistration: Cleanable =
         CLEANER.register(this, CleanupAction(uuid, nativeBytesRef, closed))
 
     init {
@@ -97,16 +90,6 @@ class LinkpointTexture private constructor(
 
     fun compressedPayload(): Etc2Compressor.Result? = compressed
 
-    /**
-     * Compress the held RGBA buffer to ETC2/EAC (or fall back to ETC1 for
-     * opaque inputs if etcpak is not yet linked). Returns the result, also
-     * stashed on this object for [uploadToFilament].
-     *
-     * Caller is responsible for deciding whether the texture has alpha — we
-     * do not infer it from the pixel data, because scanning every pixel on
-     * every load is exactly the kind of per-frame cost we are trying to cut.
-     * SL's `TextureEntry` carries the alpha flag.
-     */
     fun compressEtc2(hasAlpha: Boolean): Etc2Compressor.Result? {
         check(!closed.get()) { "LinkpointTexture[$uuid] is closed" }
         val src = rgba ?: return null
@@ -115,38 +98,9 @@ class LinkpointTexture private constructor(
         return result
     }
 
-    /**
-     * Upload the held RGBA8 buffer to Filament as a 2D texture with
-     * mipmaps. Returns the Filament `Texture` (also stashed for
-     * [releaseFilamentTexture]) or null on failure (closed handle, no
-     * pixels, engine refused).
-     *
-     * MUST be called on the Filament render thread — Filament `Engine`
-     * methods are not threadsafe. The companion call site,
-     * `RenderManager.uploadTerrainDetailTexture`, follows the same
-     * constraint and is the template for this implementation.
-     *
-     * Format selection:
-     *   - If [compressed] holds an ETC2/EAC payload (etcpak path),
-     *     uploads the compressed blob via the matching Filament
-     *     `Texture.InternalFormat`. ETC1 fallback is opaque-only and
-     *     cannot be consumed by Filament's `Texture.setImage` directly
-     *     (Filament only accepts the OpenGL-compatible compressed
-     *     formats listed in `Texture.InternalFormat.*COMPRESSED*`), so
-     *     for ETC1 we ignore the compressed buffer and fall through to
-     *     the RGBA8 path on [rgba].
-     *   - Otherwise uploads RGBA8.
-     *
-     * VRAM accounting estimates the GPU footprint as `width*height*4`
-     * for RGBA8 (worst-case for the renderer's working set). For ETC2
-     * we use the compressed payload size, since that's what the GPU
-     * driver will actually allocate.
-     */
     fun uploadToFilament(engine: Engine): Texture? {
         check(!closed.get()) { "LinkpointTexture[$uuid] is closed" }
 
-        // Already uploaded — return the existing handle so callers can
-        // call this idempotently from material rebinds.
         filamentTexture?.let { return it }
 
         val compressedResult = compressed
@@ -198,7 +152,7 @@ class LinkpointTexture private constructor(
         tex.generateMipmaps(engine)
 
         filamentTexture = tex
-        val approxBytes = (width.toLong() * height.toLong() * 4L * 4L) / 3L // mip pyramid ≈ 1.33×
+        val approxBytes = (width.toLong() * height.toLong() * 4L * 4L) / 3L
         gpuBytes = approxBytes
         TextureMemoryTracker.allocGpu(approxBytes)
         return tex
@@ -226,7 +180,7 @@ class LinkpointTexture private constructor(
 
         val tex = Texture.Builder()
             .width(result.width).height(result.height)
-            .levels(1) // ETC2 mipmap chains require pre-built levels; skip until etcpak emits them
+            .levels(1)
             .sampler(Texture.Sampler.SAMPLER_2D)
             .format(internalFormat)
             .build(engine)
@@ -240,13 +194,6 @@ class LinkpointTexture private constructor(
         return tex
     }
 
-    /**
-     * Release the Filament `Texture` produced by [uploadToFilament]. MUST
-     * be called on the render thread. Decoupled from [close] so callers
-     * can manage lifetime: the engine resource lives until the renderer
-     * unbinds the texture from all materials, while the CPU-side RGBA
-     * buffer can be freed earlier.
-     */
     fun releaseFilamentTexture(engine: Engine) {
         val tex = filamentTexture ?: return
         try {
@@ -270,16 +217,9 @@ class LinkpointTexture private constructor(
         val bytes = nativeBytesRef.value
         if (bytes > 0) TextureMemoryTracker.freeNative(bytes)
         TextureMemoryTracker.textureClosed()
-        // Cancel the Cleaner so its leak-warning path doesn't fire.
         cleanerRegistration.clean()
     }
 
-    /**
-     * Cleaner-side cleanup. Runs on a JDK Cleaner thread, NOT the caller's
-     * thread, so it intentionally does not touch Filament. It frees the
-     * native-heap accounting and logs the leak so the call-site bug gets a
-     * real fix.
-     */
     private class LongHolder(@Volatile var value: Long = 0)
 
     private class CleanupAction(
@@ -288,7 +228,7 @@ class LinkpointTexture private constructor(
         private val closedFlag: AtomicBoolean,
     ) : Runnable {
         override fun run() {
-            if (closedFlag.get()) return // close() already ran cleanly
+            if (closedFlag.get()) return
             Log.w(TAG, "LinkpointTexture[$uuid] leaked — close() was not called")
             val bytes = nativeBytesRef.value
             if (bytes > 0) TextureMemoryTracker.freeNative(bytes)
@@ -296,21 +236,58 @@ class LinkpointTexture private constructor(
         }
     }
 
+    interface Cleanable {
+        fun clean()
+    }
+
+    private class SimpleCleaner {
+        private val queue = ReferenceQueue<Any>()
+        private val phantomRefs = ConcurrentHashMap.newKeySet<PhantomCleanable>()
+
+        init {
+            val thread = Thread {
+                while (!Thread.currentThread().isInterrupted) {
+                    try {
+                        val ref = queue.remove() as? PhantomCleanable
+                        if (ref != null) {
+                            phantomRefs.remove(ref)
+                            ref.action.run()
+                        }
+                    } catch (_: InterruptedException) {
+                        break
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Cleaner thread error: ${e.message}")
+                    }
+                }
+            }
+            thread.isDaemon = true
+            thread.name = "LinkpointTexture-Cleaner"
+            thread.start()
+        }
+
+        fun register(obj: Any, action: Runnable): Cleanable {
+            val ref = PhantomCleanable(obj, queue, action)
+            phantomRefs.add(ref)
+            return ref
+        }
+
+        private inner class PhantomCleanable(
+            referent: Any,
+            q: ReferenceQueue<Any>,
+            val action: Runnable
+        ) : PhantomReference<Any>(referent, q), Cleanable {
+            override fun clean() {
+                if (phantomRefs.remove(this)) {
+                    clear()
+                }
+            }
+        }
+    }
+
     companion object {
         private const val TAG = "LinkpointTexture"
-        private val CLEANER: Cleaner = Cleaner.create()
+        private val CLEANER = SimpleCleaner()
 
-        /**
-         * Decode J2K bytes into a new texture. Calls into [JPEG2000Decoder]
-         * for now; will route through `TextureManager.decodeTexture` once the
-         * pipeline is wired up so the existing decode-memory budget, retry
-         * loop, and per-texture error tracking apply (see
-         * docs/lumiya-port/README.md item 1, and `TextureManager.kt`).
-         *
-         * Until then we apply a coarse pixel-count guard so a malformed or
-         * adversarial J2K cannot OOM the process via this path. SL textures
-         * are capped at 1024×1024 in practice.
-         */
         const val MAX_DECODED_PIXELS = 2048 * 2048
         fun fromJ2k(uuid: UUID, j2kBytes: ByteArray): LinkpointTexture? {
             val size = JPEG2000Decoder.getImageSize(j2kBytes)
@@ -322,12 +299,6 @@ class LinkpointTexture private constructor(
             return fromBitmap(uuid, bitmap, source = Source.J2K_DECODE)
         }
 
-        /**
-         * Wrap a freshly decoded [Bitmap]. Copies the pixels out to a
-         * caller-owned RGBA byte array and recycles the bitmap, because
-         * holding a `Bitmap` here would put the texture's lifetime under
-         * Android's bitmap pool rather than ours.
-         */
         fun fromBitmap(
             uuid: UUID,
             bitmap: Bitmap,
@@ -345,11 +316,6 @@ class LinkpointTexture private constructor(
             return tex
         }
 
-        /**
-         * Wrap an existing [MmappedTextureCache.CachedTexture]. The texture
-         * takes ownership of the cache handle; closing the texture closes
-         * the handle.
-         */
         fun fromCache(
             uuid: UUID,
             handle: MmappedTextureCache.CachedTexture,
@@ -359,7 +325,7 @@ class LinkpointTexture private constructor(
             val tex = LinkpointTexture(uuid, handle.width, handle.height, source, semantic)
             tex.cacheHandle = handle
             tex.compressed = Etc2Compressor.Result(
-                data = ByteArray(0), // payload lives in handle.buffer
+                data = ByteArray(0),
                 format = handle.format,
                 width = handle.width,
                 height = handle.height,

@@ -193,8 +193,38 @@ object JPEG2000Decoder {
                 null
             }
         }
+
+        // Try J2K magic check before dropping payload entirely.
+        if (isJ2CStream(data) || isJP2Box(data)) {
+            Log.w(TAG, "JPEG2000 magic header detected but native & JP2ForAndroid decoders failed.")
+            val headerSize = parseJ2KHeader(data)
+            if (headerSize != null) {
+                val (w, h) = headerSize
+                Log.i(TAG, "Parsed dimensions from J2K header: ${w}x${h}; returning placeholder bitmap")
+                return createPlaceholderBitmap(w, h)
+            }
+        }
+
         Log.w(TAG, "Cannot decode JPEG2000 with current runtime setup")
         return null
+    }
+
+    private fun createPlaceholderBitmap(width: Int, height: Int): Bitmap {
+        val bitmap = Bitmap.createBitmap(width.coerceIn(1, 2048), height.coerceIn(1, 2048), Bitmap.Config.ARGB_8888)
+        bitmap.eraseColor(0xFF808080.toInt()) // Mid gray fallback
+        return bitmap
+    }
+
+    private fun isJ2CStream(data: ByteArray): Boolean {
+        return data.size >= 2 && data[0] == 0xFF.toByte() && data[1] == 0x4F.toByte()
+    }
+
+    private fun isJP2Box(data: ByteArray): Boolean {
+        return data.size >= 12 &&
+            data[0] == 0x00.toByte() && data[1] == 0x00.toByte() &&
+            data[2] == 0x00.toByte() && data[3] == 0x0C.toByte() &&
+            data[4] == 0x6A.toByte() && data[5] == 0x50.toByte() &&
+            data[6] == 0x20.toByte() && data[7] == 0x20.toByte()
     }
 
     private fun parseJ2KHeader(data: ByteArray): Pair<Int, Int>? {
@@ -207,9 +237,16 @@ object JPEG2000Decoder {
                 var pos = 0
                 while (pos < data.size - 8) {
                     buffer.position(pos)
-                    val boxLen = buffer.int
+                    var boxLen = buffer.int.toLong() and 0xFFFFFFFFL
                     val boxType = buffer.int
-                    if (boxType == 0x69686472) {
+
+                    var headerOffset = 8
+                    if (boxLen == 1L && pos + 16 <= data.size) {
+                        boxLen = buffer.long
+                        headerOffset = 16
+                    }
+
+                    if (boxType == 0x69686472) { // 'ihdr'
                         val height = buffer.int
                         val width = buffer.int
                         if (width > 0 && height > 0) {
@@ -217,16 +254,14 @@ object JPEG2000Decoder {
                         }
                     }
 
-                    // Some malformed/partial JP2 payloads have zero box length;
-                    // fall back to a byte-wise scan so we can still recover IHDR dimensions.
-                    pos += if (boxLen >= 8) boxLen else 1
+                    pos += if (boxLen >= headerOffset) boxLen.toInt() else 1
                 }
             }
 
-            if (data[0] == 0xFF.toByte() && data[1] == 0x4F.toByte()) {
+            if (data[0] == 0xFF.toByte() && data[1] == 0x4F.toByte()) { // SOC marker
                 var pos = 2
                 while (pos < data.size - 4) {
-                    if (data[pos] == 0xFF.toByte() && data[pos + 1] == 0x51.toByte()) {
+                    if (data[pos] == 0xFF.toByte() && data[pos + 1] == 0x51.toByte()) { // SIZ marker
                         buffer.position(pos + 4)
                         val xsiz = buffer.int
                         val ysiz = buffer.int

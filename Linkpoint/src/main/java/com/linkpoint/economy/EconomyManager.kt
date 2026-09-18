@@ -56,6 +56,25 @@ class EconomyManager(
         // Money flags
         const val MONEY_FLAG_DESTINATION_AGGREGATES = 0x01
         const val MONEY_FLAG_SOURCE_AGGREGATES = 0x02
+
+        fun transactionTypeName(type: Int): String = when (type) {
+            TRANS_OBJECT_SALE -> "Object Sale"
+            TRANS_GIFT -> "Gift / Stipend"
+            TRANS_LAND_SALE -> "Land Sale"
+            TRANS_REFER_BONUS -> "Referral Bonus"
+            TRANS_INVENTORY_SALE -> "Inventory Sale"
+            TRANS_REFUND_PURCHASE -> "Refund"
+            TRANS_LAND_PASS_SALE -> "Land Pass Sale"
+            TRANS_DWELL_BONUS -> "Dwell Bonus"
+            TRANS_PAY_OBJECT -> "Paid Object"
+            TRANS_OBJECT_PAYS -> "Object Paid You"
+            TRANS_GROUP_LAND_DEED -> "Group Land Deed"
+            TRANS_GROUP_OBJECT_DEED -> "Group Object Deed"
+            TRANS_GROUP_LIABILITY -> "Group Liability"
+            TRANS_GROUP_DIVIDEND -> "Group Dividend"
+            TRANS_GROUP_MEMBERSHIP_DUES -> "Group Dues"
+            else -> "Transaction (#$type)"
+        }
     }
     
     private val scope = CoroutineScope(EventQueueDispatcher.dispatcher + SupervisorJob())
@@ -269,20 +288,6 @@ class EconomyManager(
         transactionType: Int
     ): Boolean {
         try {
-            // Wire format (LL message_template `MoneyTransferRequest`,
-            // low-freq 311; Lumiya: slproto/messages/MoneyTransferRequest.java
-            // PackPayload):
-            //   AgentData: AgentID(LLUUID), SessionID(LLUUID)
-            //   MoneyData: SourceID(LLUUID), DestID(LLUUID), Flags(U8),
-            //              Amount(S32), AggregatePermNextOwner(U8),
-            //              AggregatePermInventory(U8), TransactionType(S32),
-            //              Description(Variable 1, NUL-terminated)
-            //
-            // The previous encoder dropped SourceID entirely, used U32 for
-            // both Aggregate fields (Lumiya uses U8 each), and shipped the
-            // description without the trailing NUL. The simulator silently
-            // rejected the malformed packet.
-
             val rawDesc = description.toByteArray(Charsets.UTF_8)
             val cappedDesc = if (rawDesc.size > 254) rawDesc.copyOf(254) else rawDesc
             val descBytes = cappedDesc + 0.toByte()
@@ -299,12 +304,12 @@ class EconomyManager(
             writeUUID(payload, udpConnection.getSessionId())
 
             // MoneyData
-            writeUUID(payload, agentId) // SourceID = self for outbound payments
+            writeUUID(payload, agentId)
             writeUUID(payload, destinationId)
-            payload.put(0.toByte()) // Flags (e.g. DestinationGroup); 0 for ordinary user-to-user
+            payload.put(0.toByte())
             payload.putInt(amount)
-            payload.put(0.toByte()) // AggregatePermNextOwner (U8)
-            payload.put(0.toByte()) // AggregatePermInventory (U8)
+            payload.put(0.toByte())
+            payload.put(0.toByte())
             payload.putInt(transactionType)
             payload.put(descBytes.size.toByte())
             payload.put(descBytes)

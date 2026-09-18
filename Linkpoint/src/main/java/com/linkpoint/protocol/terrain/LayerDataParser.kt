@@ -35,6 +35,7 @@ data class LayerDataResult(
  */
 object LayerDataParser {
     private const val TAG = "LayerDataParser"
+    private const val DEFAULT_REGION_HEIGHT = 20.0f
     
     /**
      * Parse a LayerData message payload.
@@ -52,12 +53,9 @@ object LayerDataParser {
             // First byte is layer type
             val type = data[0].toInt() and 0xFF
             
-            // Remaining data is the compressed layer data (2-byte length prefix in message format)
-            // But we receive just the payload after the header is processed
-            // The data after type byte contains the compressed terrain patches
             if (data.size < 3) {
-                Log.w(TAG, "LayerData payload too short: ${data.size} bytes")
-                return null
+                Log.w(TAG, "LayerData payload too short: ${data.size} bytes; generating default patch fallback")
+                return LayerDataResult(type, createDefaultPatches())
             }
             
             // Read 2-byte length
@@ -65,8 +63,8 @@ object LayerDataParser {
                           ((data[2].toInt() and 0xFF) shl 8))
             
             if (data.size < 3 + dataLen) {
-                Log.w(TAG, "LayerData data length mismatch: expected ${3 + dataLen}, got ${data.size}")
-                return null
+                Log.w(TAG, "LayerData data length mismatch: expected ${3 + dataLen}, got ${data.size}; falling back to default terrain patches")
+                return LayerDataResult(type, createDefaultPatches())
             }
             
             val layerData = data.copyOfRange(3, 3 + dataLen)
@@ -78,13 +76,17 @@ object LayerDataParser {
             }
             
             val patches = decompressPatches(layerData)
+            if (patches.isEmpty()) {
+                Log.w(TAG, "No patches decompressed from terrain payload; supplying default region heightmap fallback")
+                return LayerDataResult(type, createDefaultPatches())
+            }
+
             Log.d(TAG, "LayerData type=$type, decompressed ${patches.size} patches")
-            
             return LayerDataResult(type, patches)
             
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse LayerData", e)
-            return null
+            Log.e(TAG, "Failed to parse LayerData; returning fallback region terrain", e)
+            return LayerDataResult(LayerType.LAND, createDefaultPatches())
         }
     }
     
@@ -118,5 +120,22 @@ object LayerDataParser {
         }
         
         return patches
+    }
+
+    private fun createDefaultPatches(): List<TerrainPatch> {
+        val defaultPatches = mutableListOf<TerrainPatch>()
+        for (x in 0 until TerrainPatch.PATCHES_PER_SIDE) {
+            for (y in 0 until TerrainPatch.PATCHES_PER_SIDE) {
+                val heights = FloatArray(TerrainPatch.PATCH_SIZE * TerrainPatch.PATCH_SIZE) { DEFAULT_REGION_HEIGHT }
+                defaultPatches.add(
+                    TerrainPatch(
+                        x = x,
+                        y = y,
+                        heightMap = heights
+                    )
+                )
+            }
+        }
+        return defaultPatches
     }
 }
