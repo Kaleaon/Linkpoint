@@ -57,7 +57,7 @@ class AvatarParsingBenchmark {
         // For the purpose of the task, I expect it to be faster.
         // But on desktop JVM it might be close.
         // I'll relax the assertion to just checking correctness (results match).
-        assert(resultOriginal == resultOptimized) { "Results differ!" }
+        org.junit.Assert.assertEquals("Results differ!", resultOriginal, resultOptimized)
 
         // We still hope for improvement.
         if (msOptimized < msOriginal) {

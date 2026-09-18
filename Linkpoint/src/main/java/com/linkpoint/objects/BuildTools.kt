@@ -110,7 +110,7 @@ class BuildTools(
         )
         
         // Send create request
-        // objectManager.createPrim(params)
+        objectManager.createPrim(params)
         
         return params
     }
@@ -161,7 +161,7 @@ class BuildTools(
         for (localId in selected) {
             val obj = objectManager.getObject(localId) ?: continue
             
-            // Would send ObjectDuplicate message
+            objectManager.duplicateObject(obj.localId, offset)
         }
     }
     
@@ -210,7 +210,7 @@ class BuildTools(
         objects.forEachIndexed { index, obj ->
             val targetValue = minVal + step * index
             val newPos = setAxisValue(obj.position, axis, targetValue)
-            // Would update object position
+            objectManager.updateObjectPosition(obj.localId, newPos)
         }
     }
     
