@@ -1571,6 +1571,28 @@ class UDPConnectionFixed(
      */
     private fun dispatchMessageDirect(messageId: Int, data: ByteArray) {
         try {
+<<<<<<< HEAD
+            // Internal PacketAck handling (processes ACK callbacks for reliable messaging)
+            if (messageId == MessageIdRegistry.PACKET_ACK) {
+                handlePacketAck(data)
+            }
+
+            // Route exactly once through MessageRouter; keep messageHandlers as
+            // a diagnostic shadow map used by debug report stats.
+            val hasRegisteredHandler = messageHandlers.containsKey(messageId)
+            if (!hasRegisteredHandler && messageId != MessageIdRegistry.PACKET_ACK) {
+                // Only log unhandled messages if not PacketAck (which is handled internally)
+                NetworkLogger.log(NetworkLogger.Level.VERBOSE, NetworkLogger.Category.UDP,
+                    "No handler for ${getMessageName(messageId)} (ID: $messageId)")
+            }
+
+            try {
+                messageRouter.routeMessageSync(messageId, data)
+                if (hasRegisteredHandler) messagesRouted.incrementAndGet()
+            } catch (e: Exception) {
+                NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
+                    "Router error for ${getMessageName(messageId)}: ${e.message}")
+=======
             // Route all messages through MessageRouter exactly once.
             // PacketAck internal bookkeeping (inflight-reliable map + pendingCallbacks)
             // is handled by the high-priority handler registered in registerInternalHandlers();
@@ -1584,6 +1606,7 @@ class UDPConnectionFixed(
                 // else with no handler is a protocol gap worth logging at VERBOSE.
                 NetworkLogger.log(NetworkLogger.Level.VERBOSE, NetworkLogger.Category.UDP,
                     "No handler for ${getMessageName(messageId)} (ID: 0x${MessageIdNameRegistry.formatHex(messageId)})")
+>>>>>>> origin/main
             }
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
