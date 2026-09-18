@@ -55,25 +55,26 @@ object MorphApplier {
         }
     }
 
+    init {
+        System.loadLibrary("linkpoint-j2k")
+    }
+
     private fun applyMorph(
         morph: LLMeshLoader.MorphTarget,
         weight: Float,
         positions: FloatArray,
         normals: FloatArray
     ) {
-        val n = morph.vertexIndices.size
-        for (i in 0 until n) {
-            val v = morph.vertexIndices[i]
-            // Defensive: malformed morph might reference a vertex outside
-            // the base mesh range. Skip silently rather than crash.
-            val pBase = v * 3
-            if (pBase + 2 >= positions.size) continue
-            positions[pBase]     += morph.coordDeltas[i * 3]     * weight
-            positions[pBase + 1] += morph.coordDeltas[i * 3 + 1] * weight
-            positions[pBase + 2] += morph.coordDeltas[i * 3 + 2] * weight
-            normals[pBase]     += morph.normalDeltas[i * 3]     * weight
-            normals[pBase + 1] += morph.normalDeltas[i * 3 + 1] * weight
-            normals[pBase + 2] += morph.normalDeltas[i * 3 + 2] * weight
-        }
+        nativeApplyMorph(
+            positions,
+            normals,
+            morph.vertexIndices,
+            morph.coordDeltas,
+            morph.normalDeltas,
+            weight
+        )
     }
+
+    @JvmStatic
+    private external fun nativeApplyMorph(positions: FloatArray, normals: FloatArray, indices: IntArray, coordDeltas: FloatArray, normalDeltas: FloatArray, weight: Float)
 }

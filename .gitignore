@@ -147,3 +147,4 @@ lumiya_decompiled/
 !Linkpoint/tools/**
 !Linkpoint/tools/protocol/
 !Linkpoint/tools/protocol/**
+build_output.txt
