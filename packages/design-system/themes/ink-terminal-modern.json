@@ -1,0 +1,124 @@
+{
+  "metadata": {
+    "id": "ink-terminal-modern",
+    "name": "Ink Terminal Modern",
+    "description": "Retro-terminal inspired interface with modern accessibility contrast",
+    "author": "Ktheme",
+    "version": "1.0.0",
+    "tags": [
+      "metallic",
+      "industrial",
+      "dark",
+      "terminal",
+      "developer",
+      "mono"
+    ],
+    "createdAt": "2026-02-16T13:00:59.876Z",
+    "updatedAt": "2026-02-16T13:00:59.876Z"
+  },
+  "darkMode": true,
+  "colorScheme": {
+    "primary": "#6CFF9A",
+    "onPrimary": "#03240F",
+    "primaryContainer": "#1F6640",
+    "onPrimaryContainer": "#D7FFE4",
+    "secondary": "#3E4E5E",
+    "onSecondary": "#EAF3FF",
+    "secondaryContainer": "#2A3644",
+    "onSecondaryContainer": "#D8E6F4",
+    "tertiary": "#8AD0B0",
+    "onTertiary": "#0E3021",
+    "tertiaryContainer": "#4A7A63",
+    "onTertiaryContainer": "#D9F2E6",
+    "error": "#CF6679",
+    "onError": "#FFFFFF",
+    "errorContainer": "#93000A",
+    "onErrorContainer": "#FFDAD6",
+    "background": "#0A1112",
+    "onBackground": "#D7F5E6",
+    "surface": "#101A1C",
+    "onSurface": "#D7F5E6",
+    "surfaceVariant": "#1B2A2D",
+    "onSurfaceVariant": "#A7C8BC",
+    "outline": "#6E8D82",
+    "outlineVariant": "#365047",
+    "scrim": "#000000",
+    "inverseSurface": "#D7F5E6",
+    "inverseOnSurface": "#0A1112",
+    "inversePrimary": "#2BAA5F"
+  },
+  "effects": {
+    "metallic": {
+      "enabled": false,
+      "variant": "TITANIUM",
+      "gradient": {
+        "base": "#878681",
+        "highlight": "#BDBBB8",
+        "shadow": "#4A4A48",
+        "shimmer": "#D0CFCC"
+      },
+      "intensity": 0
+    },
+    "shadows": {
+      "enabled": true,
+      "elevation": 3,
+      "blur": 6,
+      "color": "#00000055"
+    }
+  },
+  "typography": {
+    "fontFamily": "\"JetBrains Mono\", \"IBM Plex Mono\", \"SFMono-Regular\", monospace",
+    "fontSize": {
+      "small": 12,
+      "medium": 16,
+      "large": 20,
+      "xlarge": 28
+    },
+    "fontWeight": {
+      "light": 300,
+      "regular": 400,
+      "medium": 500,
+      "bold": 700
+    },
+    "lineHeight": 1.55,
+    "letterSpacing": 0
+  },
+  "adaptation": {
+    "desktopAdaptation": {
+      "windowChrome": {
+        "titleBarHeight": 26,
+        "headerStyle": "terminal-bar",
+        "cornerStyle": "sharp",
+        "panelRadius": 4,
+        "controlRadius": 4,
+        "borderWidth": 1,
+        "shadow": "0 12px 32px rgba(0, 0, 0, 0.6)"
+      },
+      "menuBar": {
+        "height": 28,
+        "fontSize": 11,
+        "letterSpacing": "0.1em",
+        "textTransform": "uppercase",
+        "dropdownRadius": 4,
+        "dropdownShadow": "0 12px 30px rgba(0, 0, 0, 0.6)"
+      },
+      "taskbar": {
+        "height": 40,
+        "buttonRadius": 4,
+        "dockAlignment": "left",
+        "quickChatBorderRadius": 4
+      },
+      "cameraHud": {
+        "panelRadius": 4,
+        "buttonRadius": 4,
+        "shadow": "0 8px 20px rgba(0, 0, 0, 0.5)"
+      },
+      "sweep": {
+        "elbowWidth": 28,
+        "titleCapRadius": "4px",
+        "accentBand": "primary",
+        "showElbowBar": true
+      }
+    }
+  }
+}

@@ -1,0 +1,136 @@
+{
+  "metadata": {
+    "id": "windows-phone-metro",
+    "name": "Windows Phone Metro",
+    "description": "Flat, tile-first Metro-inspired interface theme",
+    "author": "Ktheme",
+    "version": "1.0.0",
+    "tags": [
+      "modern",
+      "dark",
+      "metro",
+      "windows-phone",
+      "flat"
+    ],
+    "createdAt": "2026-02-16T11:46:58.141Z",
+    "updatedAt": "2026-02-16T11:46:58.141Z"
+  },
+  "darkMode": true,
+  "colorScheme": {
+    "primary": "#00AEEF",
+    "onPrimary": "#00151F",
+    "primaryContainer": "#0078D7",
+    "onPrimaryContainer": "#E8F7FF",
+    "secondary": "#005A9E",
+    "onSecondary": "#EAF4FF",
+    "secondaryContainer": "#232930",
+    "onSecondaryContainer": "#E8F0F5",
+    "tertiary": "#2D89EF",
+    "onTertiary": "#001021",
+    "tertiaryContainer": "#547D8F",
+    "onTertiaryContainer": "#D9EDF5",
+    "error": "#CF6679",
+    "onError": "#FFFFFF",
+    "errorContainer": "#93000A",
+    "onErrorContainer": "#FFDAD6",
+    "background": "#001A33",
+    "onBackground": "#F0F8FF",
+    "surface": "#002448",
+    "onSurface": "#F0F8FF",
+    "surfaceVariant": "#3D4854",
+    "onSurfaceVariant": "#B8CAD6",
+    "outline": "#7A8A99",
+    "outlineVariant": "#4D5A66",
+    "scrim": "#000000",
+    "inverseSurface": "#E8F0F5",
+    "inverseOnSurface": "#1A1F24",
+    "inversePrimary": "#0080A0"
+  },
+  "effects": {
+    "metallic": {
+      "enabled": false,
+      "variant": "TITANIUM",
+      "gradient": {
+        "base": "#878681",
+        "highlight": "#BDBBB8",
+        "shadow": "#4A4A48",
+        "shimmer": "#D0CFCC"
+      },
+      "intensity": 0
+    },
+    "shadows": {
+      "enabled": true,
+      "elevation": 3,
+      "blur": 6,
+      "color": "#00000055"
+    }
+  },
+  "adaptation": {
+    "layout": {
+      "density": "spacious",
+      "cornerStyle": "sharp",
+      "spacingScale": 1.25,
+      "panelStyle": "flat",
+      "navigationStyle": "pivot"
+    },
+    "icons": {
+      "family": "fluent",
+      "style": "line",
+      "sizeScale": 1,
+      "strokeWidth": 1.6,
+      "cornerStyle": "sharp"
+    },
+    "componentOverrides": [
+      {
+        "selector": ".tile-grid",
+        "styles": {
+          "gap": 14,
+          "grid-auto-rows": 92
+        }
+      },
+      {
+        "selector": ".tile",
+        "styles": {
+          "border-radius": 0,
+          "text-transform": "uppercase"
+        }
+      }
+    ],
+    "desktopAdaptation": {
+      "windowChrome": {
+        "titleBarHeight": 26,
+        "headerStyle": "flat",
+        "cornerStyle": "sharp",
+        "panelRadius": 0,
+        "controlRadius": 0,
+        "borderWidth": 1,
+        "shadow": "0 10px 24px rgba(0, 0, 0, 0.45)"
+      },
+      "menuBar": {
+        "height": 28,
+        "fontSize": 11,
+        "letterSpacing": "0.02em",
+        "textTransform": "lowercase",
+        "dropdownRadius": 0,
+        "dropdownShadow": "0 10px 24px rgba(0, 0, 0, 0.45)"
+      },
+      "taskbar": {
+        "height": 40,
+        "buttonRadius": 0,
+        "dockAlignment": "left",
+        "quickChatBorderRadius": 0
+      },
+      "cameraHud": {
+        "panelRadius": 0,
+        "buttonRadius": 0,
+        "shadow": "0 6px 18px rgba(0, 0, 0, 0.4)"
+      },
+      "sweep": {
+        "elbowWidth": 26,
+        "titleCapRadius": "0px",
+        "accentBand": "primary",
+        "showElbowBar": false
+      }
+    }
+  }
+}

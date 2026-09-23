@@ -1,0 +1,104 @@
+{
+  "metadata": {
+    "id": "slate-gunmetal",
+    "name": "Slate Gunmetal",
+    "description": "Industrial slate gray with gunmetal metallic accents",
+    "author": "Ktheme",
+    "version": "1.0.0",
+    "tags": [
+      "metallic",
+      "industrial",
+      "dark"
+    ],
+    "createdAt": "2026-02-15T20:42:39.611Z",
+    "updatedAt": "2026-02-15T20:42:39.611Z"
+  },
+  "darkMode": true,
+  "colorScheme": {
+    "primary": "#8F9CA8",
+    "onPrimary": "#1A2029",
+    "primaryContainer": "#6F7D87",
+    "onPrimaryContainer": "#B0BDC9",
+    "secondary": "#2D3844",
+    "onSecondary": "#E6ECF2",
+    "secondaryContainer": "#232C38",
+    "onSecondaryContainer": "#E6ECF2",
+    "tertiary": "#9DAAB6",
+    "onTertiary": "#1A2029",
+    "tertiaryContainer": "#7A8590",
+    "onTertiaryContainer": "#D9E3ED",
+    "error": "#CF6679",
+    "onError": "#FFFFFF",
+    "errorContainer": "#93000A",
+    "onErrorContainer": "#FFDAD6",
+    "background": "#1A2029",
+    "onBackground": "#E6ECF2",
+    "surface": "#232C38",
+    "onSurface": "#E6ECF2",
+    "surfaceVariant": "#3D4854",
+    "onSurfaceVariant": "#B8C5D6",
+    "outline": "#7A8A99",
+    "outlineVariant": "#4D5A66",
+    "scrim": "#000000",
+    "inverseSurface": "#E6ECF2",
+    "inverseOnSurface": "#1A2029",
+    "inversePrimary": "#5A6670"
+  },
+  "effects": {
+    "metallic": {
+      "enabled": true,
+      "variant": "TITANIUM",
+      "gradient": {
+        "base": "#878681",
+        "highlight": "#BDBBB8",
+        "shadow": "#4A4A48",
+        "shimmer": "#D0CFCC"
+      },
+      "intensity": 0.7
+    },
+    "shadows": {
+      "enabled": true,
+      "elevation": 3,
+      "blur": 6,
+      "color": "#00000055"
+    }
+  },
+  "adaptation": {
+    "desktopAdaptation": {
+      "windowChrome": {
+        "titleBarHeight": 26,
+        "headerStyle": "standard",
+        "cornerStyle": "rounded",
+        "panelRadius": 10,
+        "controlRadius": 8,
+        "borderWidth": 1,
+        "shadow": "0 14px 36px rgba(0,0,0,0.5)"
+      },
+      "menuBar": {
+        "height": 28,
+        "fontSize": 11,
+        "letterSpacing": "0.06em",
+        "textTransform": "uppercase",
+        "dropdownRadius": 10,
+        "dropdownShadow": "0 12px 28px rgba(0,0,0,0.4)"
+      },
+      "taskbar": {
+        "height": 40,
+        "buttonRadius": 8,
+        "dockAlignment": "left",
+        "quickChatBorderRadius": 8
+      },
+      "cameraHud": {
+        "panelRadius": 10,
+        "buttonRadius": 8,
+        "shadow": "0 8px 20px rgba(0,0,0,0.3)"
+      },
+      "sweep": {
+        "elbowWidth": 30,
+        "titleCapRadius": "10px",
+        "accentBand": "primary",
+        "showElbowBar": true
+      }
+    }
+  }
+}
