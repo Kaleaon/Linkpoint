@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linkpoint PWA Features Demo</title>
+    <style>
+        body { font-family: sans-serif; background: #1a1a2e; color: white; padding: 20px; }
+        .demo-section { background: #2a2a3e; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        h2 { color: #4a9eff; }
+        button { background: #4a9eff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        .demo-output { background: #1a1a2e; border: 1px solid #333; border-radius: 4px; padding: 15px; margin-top: 10px; font-family: monospace; color: #4a9eff; max-height: 200px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔗 Linkpoint PWA Features Demo</h1>
+    <div class="demo-section">
+        <h2>📱 Device Information</h2>
+        <button onclick="getDeviceInfo()">Get Device Info</button>
+        <div id="device-output" class="demo-output">Click button to test...</div>
+    </div>
+    <div class="demo-section">
+        <h2>🔔 Notifications</h2>
+        <button onclick="requestPermission()">Request Permission</button>
+        <button onclick="showNotification()">Show Notification</button>
+        <div id="notification-output" class="demo-output">Status will appear here...</div>
+    </div>
+
+    <script>
+        function getDeviceInfo() {
+            const info = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                online: navigator.onLine
+            };
+            document.getElementById('device-output').innerText = JSON.stringify(info, null, 2);
+        }
+
+        async function requestPermission() {
+            const permission = await Notification.requestPermission();
+            document.getElementById('notification-output').innerText = 'Permission: ' + permission;
+        }
+
+        function showNotification() {
+            if (Notification.permission === 'granted') {
+                new Notification('Linkpoint PWA', { body: 'This is a test notification!' });
+            } else {
+                alert('Please grant notification permission first.');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+name: Cross-platform workspace
+
+on:
+  pull_request:
+    paths:
+      - "apps/linkpoint/**"
+      - "packages/**"
+      - "crates/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/cross-platform.yml"
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    name: Web checks (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'ubuntu-latest'
+        with:
+          name: linkpoint-web-${{ github.sha }}
+          path: apps/linkpoint/dist
+          if-no-files-found: error
+
+  rust:
+    name: Rust core (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --workspace --locked
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+  native-readiness:
+    name: Native shell readiness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Report native shell status
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f apps/linkpoint/package.json
+          test -f crates/linkpoint-tauri/Cargo.toml
+          if [[ -f apps/linkpoint/src-tauri/tauri.conf.json ]]; then
+            echo "Tauri shell is present; enable platform packaging jobs."
+          else
+            echo "::notice::Web and Rust core are testable, but Android/iOS/desktop native packaging is not enabled until apps/linkpoint/src-tauri is generated."
+          fi

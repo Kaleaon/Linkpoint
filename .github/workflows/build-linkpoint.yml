@@ -127,7 +127,7 @@ jobs:
       
       - name: Build Linkpoint Release APK
         run: ./gradlew :Linkpoint:assembleRelease --stacktrace
-                env:
+        env:
           GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError"
       
       - name: Run Kotlin compilation checks
