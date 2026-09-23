@@ -23,6 +23,12 @@ not imply feature parity with a production viewer.
 
 ## Active next milestones
 
+The ordered implementation and platform validation plan is maintained in
+[`CROSS_PLATFORM_ROADMAP.md`](CROSS_PLATFORM_ROADMAP.md). The cross-platform CI
+workflow currently validates the web application and portable Rust crates on
+Linux, Windows, and macOS; native packaging begins only after the Tauri shell is
+generated.
+
 - [ ] Inject `ViewerClient` into the imported React runtime; remove remaining
   `window.linkpointDesktop` checks from screens and protocol experiments
 - [ ] Generate TypeScript contracts from Rust rather than maintaining both by
