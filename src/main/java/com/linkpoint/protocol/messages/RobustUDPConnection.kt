@@ -320,7 +320,6 @@ class RobustUDPConnection(
         // after the same MAX_MISSED_HEARTBEATS threshold.
         if (misses >= MAX_MISSED_HEARTBEATS) {
             handleConnectionError("No inbound UDP received; missed heartbeats=$misses")
-        }
             return
         }
 
