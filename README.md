@@ -1,22 +1,29 @@
 # Linkpoint
 
-A modern Android viewer for Second Life and OpenSimulator virtual worlds.
+A modern, independent viewer for Second Life and OpenSimulator virtual worlds.
 
 > ⚠️ **Disclaimer:** Linkpoint is not provided or supported by Linden Lab. This is an independent, community-developed third-party viewer that complies with [Linden Lab's Third-Party Viewer Policy](https://secondlife.com/corporate/third-party-viewers).
 
 ---
 
-## Current Status (January 2026)
+## Current status (September 2026)
 
-| Component | Status | Notes |
-|-----------|--------|-------|
-| Build | ✅ Working | APK builds successfully |
-| Login | ✅ Working | Connects to SL grid |
-| UDP Connection | ✅ Working | Socket connected |
-| Capabilities | ✅ Working | 12 caps loaded |
-| Event Queue | ✅ Working | 18 handlers active |
-| World Loading | ⚠️ In Progress | Objects/avatars not populating |
-| 3D Rendering | ⚠️ In Progress | Swap chain issues |
+Linkpoint is migrating incrementally from the legacy Android client to a shared
+React UI with a Rust viewer core and Tauri shell. Status labels describe what is
+verified in this repository; they are not claims of production parity.
+
+| Track | Status | Verified scope |
+|-------|--------|----------------|
+| Legacy Android client | Maintained during migration | Existing Gradle project, protocol stack, and Filament renderer remain available |
+| Linkpoint Next web app | Runnable baseline | Vite production build and imported React-Linkpoint unit suite |
+| Shared UI contract | Foundation complete | Typed commands/events, client boundary, deterministic state projection |
+| Rust viewer core | Foundation only | Workspace boundaries, command serialization, reliable sequence rollover |
+| Tauri native shell | Not started | Planned after the frontend/runtime boundary is stable |
+| Rust login, capabilities, UDP | Not started | Port requires fixture-backed parity tests before replacing legacy behavior |
+| World rendering | Prototype | Imported browser renderer; not yet wired to the Rust scene contract |
+
+See [the overhaul architecture](docs/OVERHAUL_ARCHITECTURE.md) and
+[the live overhaul progress board](docs/OVERHAUL_PROGRESS.md) for exact scope.
 
 **See [docs/FIXES_AND_STATUS.md](docs/FIXES_AND_STATUS.md) for detailed fix history and remaining issues.**
 
@@ -24,17 +31,28 @@ A modern Android viewer for Second Life and OpenSimulator virtual worlds.
 
 ## Quick Start
 
-### Prerequisites
+### Linkpoint Next (web)
+
+```bash
+npm ci --legacy-peer-deps
+npm run dev -w @linkpoint/app
+```
+
+Build and validate it with `npm run check`.
+
+### Legacy Android client
+
+#### Prerequisites
 - Android Studio Arctic Fox or later
 - JDK 17+
 - Android SDK 35
 
-### Build
+#### Build
 ```bash
 ./gradlew assembleDebug
 ```
 
-### Install
+#### Install
 ```bash
 adb install -r Linkpoint/build/outputs/apk/debug/Linkpoint-debug.apk
 ```

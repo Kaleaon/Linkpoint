@@ -1,0 +1,42 @@
+{
+  "name": "@linkpoint/app",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@linkpoint/design-system": "0.1.0",
+    "@linkpoint/viewer-client": "0.1.0",
+    "@linkpoint/viewer-store": "0.1.0",
+    "@linkpoint/viewer-types": "0.1.0",
+    "@xmldom/xmldom": "0.9.12",
+    "crypto-js": "^4.2.0",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.546.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "spark-md5": "^3.0.2",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@types/spark-md5": "^3.0.5",
+    "@vitejs/plugin-react": "^5.0.4",
+    "jsdom": "^29.0.1",
+    "typescript": "~5.8.2",
+    "vite": "7.3.6",
+    "vitest": "4.1.11"
+  },
+  "overrides": {
+    "@xmldom/xmldom": "0.9.12"
+  }
+}

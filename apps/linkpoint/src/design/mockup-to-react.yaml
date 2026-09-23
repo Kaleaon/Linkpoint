@@ -1,0 +1,187 @@
+# mockup-to-react.yaml
+#
+# Translation spec: how an edit to docs/index.html (the x-dc "Design
+# Canvas" mockup) should be carried over to docs/react/ (the hand-authored
+# React port), and vice versa. Written for whoever — human or agent —
+# makes the next edit to either side and wants the other to stay in sync.
+#
+# This is documentation, not a build step: nothing reads this file at
+# build time. Follow "workflow" below by hand (or have an agent follow it)
+# each time one side changes.
+
+version: 1
+
+source:
+  file: docs/index.html
+  format: >
+    A "Design Canvas" artifact: an <x-dc>...</x-dc> block of custom
+    template markup (sc-for/sc-if/{{ }} bindings), plus a
+    <script type="text/x-dc"> block containing a `class Component extends
+    DCLogic { ... }` that support.js (the "dc-runtime", generated from
+    dc-runtime/src/*.ts — not checked into this repo, don't hand-edit
+    support.js) turns into a real React component.
+  sections:
+    template: "everything between <x-dc> and </x-dc>"
+    script: "the <script type=\"text/x-dc\" data-dc-script ...> block, near the end of the file"
+  script_layout:
+    - "top-level `const` tables before `class Component`: SCREENS, GRIDS, LAYOUTS, PALETTES, DEVICES, CBTN, CSUB, CPAD/CPADR, DIALOGS, FLOATERS, FMENU, HUDS, TARGETS, STATES"
+    - "`class Component extends DCLogic`: `state = {...}` initializer, then instance methods (set/setTab/cycle/notify/openSearch/connectLogin/reconnect/cf/cTap/cHold/cPress/flR/flDrag/...)"
+    - "`renderVals()`: one large method that reads `this.state`/`this.props`, computes everything, and returns the flat object the template's {{ }} bindings read from"
+
+target:
+  root: docs/react/
+  entry: src/App.jsx
+  install: npm install
+  build: npm run build   # Vite; catches JSX/import errors
+  dev: npm run dev
+
+# ---------------------------------------------------------------------
+# The DSL's {{ }} binding evaluator (support.js: resolve()/resolvePath())
+# is a small hand-rolled expression parser — NOT a JS eval. Getting this
+# wrong is, empirically, the single most common bug in this file: two
+# confirmed dead-click/dead-onChange bugs (2026-09-17) were both an inline
+# arrow function inside a {{ }} attribute that silently resolved to
+# `undefined` instead of throwing.
+# ---------------------------------------------------------------------
+dsl_binding_rules:
+  syntax: "{{ expression }}"
+  supported:
+    - "dotted / bracket property paths against the renderVals() object, e.g. {{ x.pick }}, {{ items[0].label }}, {{ c.rights }}"
+    - "top-level equality only: ===, !==, ==, !="
+    - "leading negation: {{ !x }}"
+    - "literals: true, false, null, undefined, bare numbers, single- or double-quoted strings"
+    - "one level of wrapping parens: {{ (x) }}"
+  not_supported:
+    - "arrow functions — {{ () => this.set('screen','Settings') }} or {{ e => c.onChange(e.target.value) }} resolve to `undefined`. React then gets `onClick={undefined}` / `onChange={undefined}`: no error, no crash, just an inert control."
+    - "ternaries — {{ a ? b : c }}. resolvePath() stops at the first character it doesn't understand (the '?'), so the WHOLE right-hand side collapses to whatever the path resolved to before the '?', silently. It never throws either."
+    - "any other general JS: method calls, template literals, `&&`/`||`, arithmetic, etc."
+  the_rule: >
+    Every event handler and every non-trivial computed value used in a
+    template attribute MUST be a named property already computed in
+    renderVals() (top-level, or nested one level like `c.pick`/`c.style`)
+    — never written inline in the attribute. If you're tempted to write
+    `{{ () => ... }}` or `{{ a ? b : c }}`, instead add a named field to
+    the object being mapped over (see index.html's `selectChange` and
+    `loginSettingsPick` for the fix pattern) and reference that name.
+  event_attribute_names: >
+    Most native/synthetic events pass straight through as camelCase props
+    (onClick, onChange, onMouseDown, onMouseUp, onMouseMove, onMouseLeave,
+    onKeyDown all appear literally in index.html and just work). One
+    input (`Search` screen's query box) instead uses `sc-camel-on-input`
+    — an older, equivalent spelling from before the rest of the file
+    standardized on plain `onChange`. Both work; prefer plain `onChange`
+    in new markup for consistency with everything else in the file.
+
+binding_translation_table:
+  - dc: "{{ x }}"
+    react: "{x}"
+  - dc: "<sc-for list=\"{{ list }}\" as=\"item\" hint-placeholder-count=\"N\">...</sc-for>"
+    react: "{list.map((item, i) => (<Fragment key={i}>...</Fragment>))}"
+  - dc: "<sc-if value=\"{{ cond }}\" hint-placeholder-val=\"{{ false }}\">...</sc-if>"
+    react: "{cond ? (...) : null}"
+  - dc: "onClick=\"{{ x.pick }}\""
+    react: "onClick={x.pick}"
+  - dc: "onChange=\"{{ x.onChange }}\" (or onKeyDown/onMouseDown/etc.)"
+    react: "onChange={x.onChange}"
+  - dc: "sc-camel-on-input=\"{{ x.onInput }}\""
+    react: "onChange={x.onInput}   # React's onChange already fires per-keystroke for text inputs"
+  - dc: "style=\"{{ x.style }}\"  (x.style is already a JS object literal from renderVals())"
+    react: "style={x.style}"
+  - dc: "data-lucide=\"{{ x.icon }}\""
+    react: "<Icon name={x.icon} size={N} />   # src/components/Icon.jsx wraps lucide"
+
+# ---------------------------------------------------------------------
+# Where a change to one part of index.html's script/template needs a
+# matching change in docs/react/src/.
+# ---------------------------------------------------------------------
+file_map:
+  state_init:
+    dc: "Component's `state = {...}` initializer"
+    react: "src/hooks/useAppState.js — one useState() call per field, near the top of useAppState()"
+  methods:
+    dc: "Component's instance methods"
+    react: "src/hooks/useAppState.js — useCallback()-wrapped functions, each re-exported by name in the returned `actions` object"
+  top_level_constants:
+    dc: "const tables declared before `class Component` (SCREENS, GRIDS, LAYOUTS, PALETTES, DEVICES, CBTN, CSUB, CPAD/CPADR, DIALOGS, FLOATERS, FMENU, HUDS, TARGETS, STATES)"
+    react: "src/theme/constants.js (most tables), layouts.js, palettes.js, dialogs.js — same names, same shape, ported near-verbatim"
+  render_vals_theme_head:
+    dc: "the top of renderVals(): T()/D()/navMode()/cf() and turning layout+palette into V (colour tokens), t (font tokens), C (console geometry)"
+    react: "src/theme/computeTheme.js, src/theme/color.js (ink()/contrast), src/hooks/useAppState.js's T()/D()/navMode()/cf()"
+  render_vals_screen_content:
+    dc: "the per-screen branches of renderVals() (isChat/isFriends/isRadar/... blocks, and the CARDS table)"
+    react: "src/screens/*.jsx for the screens with bespoke layouts; src/data/content.js's buildCards() + src/components/CardList.jsx for the six card-list screens (see screens map below)"
+  screens:
+    Chat: docs/react/src/screens/Chat.jsx
+    Radar: docs/react/src/screens/Radar.jsx
+    Map: docs/react/src/screens/Map.jsx
+    "3D View": docs/react/src/screens/World3D.jsx
+    Inventory: docs/react/src/screens/Inventory.jsx
+    Profile: docs/react/src/screens/Profile.jsx
+    Login: docs/react/src/screens/Login.jsx
+    Search: docs/react/src/screens/Search.jsx
+    Friends: "generic card list — data/content.js buildCards() + components/CardList.jsx + components/Card.jsx"
+    Groups: "same generic card list as Friends"
+    Notices: "same generic card list as Friends"
+    Teleport: "same generic card list as Friends"
+    Settings: "same generic card list as Friends"
+    Diagnostics: "same generic card list as Friends"
+  shell_chrome:
+    sweep_console_frame: docs/react/src/components/ConsoleFrame.jsx
+    desktop_floaters: docs/react/src/components/FloatersDesktop.jsx
+    bottom_tabs_nav: docs/react/src/components/BottomTabs.jsx
+    rail_nav: docs/react/src/components/RailNav.jsx
+    tile_nav: docs/react/src/components/TileNav.jsx
+    header_looks: "docs/react/src/components/Header.jsx (5 looks: stack/sweep/pivot/rule/editorial)"
+    segmented_tabs_and_chips: docs/react/src/components/SegmentedTabs.jsx, docs/react/src/components/ChipRow.jsx
+    system_dialogs: docs/react/src/components/SystemDialog.jsx
+    toast: docs/react/src/components/Toast.jsx
+    device_frame_bezel: docs/react/src/components/DeviceFrame.jsx
+    status_bar: docs/react/src/components/StatusBar.jsx
+    desktop_menu_bar: docs/react/src/components/MenuBar.jsx
+
+# ---------------------------------------------------------------------
+# Step-by-step procedure for carrying one edit across.
+# ---------------------------------------------------------------------
+workflow:
+  - step: 1
+    do: "Make the edit in docs/index.html first (it's the single mockup page — the source of truth for behavior and copy)."
+  - step: 2
+    do: >
+      Classify the edit using file_map above: a new/changed state field, a
+      new/changed method, a new/changed top-level constant table, a
+      new/changed renderVals() computed field, or new/changed template
+      markup (or several of these at once, which is normal — e.g. adding
+      a button is usually a new renderVals() field AND a new template
+      line).
+  - step: 3
+    do: "Find the matching React file(s) and apply the equivalent change, translating {{ }} bindings per binding_translation_table."
+  - step: 4
+    do: >
+      If the change adds or touches an event handler or a computed value
+      referenced from a template attribute, double-check it against
+      dsl_binding_rules — this is the recurring bug class in this file.
+      React itself won't silently swallow an inline arrow function the
+      way the DSL does, but keep the same "named property, not inline
+      expression" discipline anyway for consistency between the two
+      files.
+  - step: 5
+    do: "cd docs/react && npm run build — catches JSX/import/type errors before you run anything."
+  - step: 6
+    do: >
+      Smoke test both docs/index.html and docs/react (npm run dev or the
+      built dist/) with the same interaction. A headless-Chromium pass
+      (Playwright) clicking the affected control and checking for
+      console/page errors is enough for a mechanical port; for a new
+      screen or visual change, also eyeball it across 2-3 layout packs
+      and 2-3 colour packs on both sides — palettes are where the two
+      implementations are most likely to drift without either one
+      throwing an error.
+
+# ---------------------------------------------------------------------
+# Divergences that are intentional — don't "fix" these by making the two
+# files match, they're correct as-is.
+# ---------------------------------------------------------------------
+known_intentional_gaps:
+  - "React omits the dead `isSweep` branch: the source defines isConsole as `nav === 'sweep'` and isSweep as `nav === 'sweep' && !isConsole`, which is always false, so that decorative sidebar markup can never render in index.html either."
+  - "React omits the '1b' module-spec documentation panel (icon modules / shape & density tokens / component anatomy / breakpoints) — that's canvas-authoring reference material about the design system, not a screen or state of the app itself."
+  - "React's desktop floater drag/resize uses window mousemove/mouseup listeners, matching the source's own mouse-only, desktop-only implementation (the floater model only exists on the 'Desktop' device)."

@@ -148,3 +148,9 @@ lumiya_decompiled/
 !Linkpoint/tools/protocol/
 !Linkpoint/tools/protocol/**
 build_output.txt
+
+# Linkpoint Next JavaScript/Rust workspace output
+/node_modules/
+**/node_modules/
+**/dist/
+/target/

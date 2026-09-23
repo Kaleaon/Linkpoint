@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/linkpoint-core",
+    "crates/linkpoint-protocol",
+    "crates/linkpoint-assets",
+    "crates/linkpoint-scene",
+    "crates/linkpoint-cache",
+    "crates/linkpoint-tauri",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "LGPL-3.0-only"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
