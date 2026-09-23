@@ -1,0 +1,96 @@
+{
+  "metadata": {
+    "id": "calm-clinical",
+    "name": "Calm Clinical",
+    "description": "Low-stress healthcare/admin palette with clear status readability",
+    "author": "Ktheme",
+    "version": "1.0.0",
+    "tags": [
+      "minimalist",
+      "light",
+      "reader",
+      "clinical",
+      "accessibility",
+      "calm"
+    ],
+    "createdAt": "2026-02-16T13:00:59.876Z",
+    "updatedAt": "2026-02-16T13:00:59.876Z"
+  },
+  "darkMode": false,
+  "colorScheme": {
+    "primary": "#3A7CA5",
+    "onPrimary": "#F3FAFF",
+    "primaryContainer": "#C4DFF2",
+    "onPrimaryContainer": "#17374D",
+    "secondary": "#4DAA7C",
+    "onSecondary": "#062A1C",
+    "secondaryContainer": "#CBEFDF",
+    "onSecondaryContainer": "#184933",
+    "tertiary": "#7D9AB2",
+    "onTertiary": "#0E2333",
+    "tertiaryContainer": "#D8E6F0",
+    "onTertiaryContainer": "#264256",
+    "error": "#BA1A1A",
+    "onError": "#FFFFFF",
+    "errorContainer": "#FFDAD6",
+    "onErrorContainer": "#410002",
+    "background": "#F5FAFD",
+    "onBackground": "#1F394B",
+    "surface": "#FFFFFF",
+    "onSurface": "#1F394B",
+    "surfaceVariant": "#E5EEF4",
+    "onSurfaceVariant": "#445F72",
+    "outline": "#6D8799",
+    "outlineVariant": "#B5C8D5",
+    "scrim": "#000000",
+    "inverseSurface": "#1F394B",
+    "inverseOnSurface": "#F5FAFD",
+    "inversePrimary": "#295A7A"
+  },
+  "effects": {
+    "shadows": {
+      "enabled": true,
+      "elevation": 1,
+      "blur": 2,
+      "color": "#00000011"
+    }
+  },
+  "adaptation": {
+    "desktopAdaptation": {
+      "windowChrome": {
+        "titleBarHeight": 26,
+        "headerStyle": "standard",
+        "cornerStyle": "rounded",
+        "panelRadius": 10,
+        "controlRadius": 8,
+        "borderWidth": 1,
+        "shadow": "0 10px 26px rgba(0,0,0,0.2)"
+      },
+      "menuBar": {
+        "height": 28,
+        "fontSize": 11,
+        "letterSpacing": "0.06em",
+        "textTransform": "none",
+        "dropdownRadius": 10,
+        "dropdownShadow": "0 8px 20px rgba(0,0,0,0.18)"
+      },
+      "taskbar": {
+        "height": 40,
+        "buttonRadius": 8,
+        "dockAlignment": "left",
+        "quickChatBorderRadius": 8
+      },
+      "cameraHud": {
+        "panelRadius": 10,
+        "buttonRadius": 8,
+        "shadow": "0 8px 20px rgba(0,0,0,0.3)"
+      },
+      "sweep": {
+        "elbowWidth": 30,
+        "titleCapRadius": "10px",
+        "accentBand": "primary",
+        "showElbowBar": true
+      }
+    }
+  }
+}

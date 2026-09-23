@@ -1,0 +1,22 @@
+{
+  "name": "linkpoint-next",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Cross-platform Linkpoint overhaul workspace",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "check": "npm run typecheck && npm test",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.2",
+    "vitest": "4.0.18"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "metadata": {
+    "id": "lcars",
+    "name": "LCARS",
+    "description": "LCARS-inspired interface with warm rails and compact controls",
+    "author": "Ktheme",
+    "version": "1.0.0",
+    "tags": [
+      "regal",
+      "dark",
+      "lcars",
+      "sci-fi",
+      "console"
+    ],
+    "createdAt": "2026-02-16T11:46:58.141Z",
+    "updatedAt": "2026-02-16T11:46:58.141Z"
+  },
+  "darkMode": true,
+  "colorScheme": {
+    "primary": "#F2A65A",
+    "onPrimary": "#1B0E24",
+    "primaryContainer": "#CC7A2B",
+    "onPrimaryContainer": "#FFE6CC",
+    "secondary": "#C5678D",
+    "onSecondary": "#2B1224",
+    "secondaryContainer": "#220D40",
+    "onSecondaryContainer": "#F0E6FF",
+    "tertiary": "#A485F7",
+    "onTertiary": "#170F2E",
+    "tertiaryContainer": "#775D48",
+    "onTertiaryContainer": "#F0E6D9",
+    "error": "#CF6679",
+    "onError": "#FFFFFF",
+    "errorContainer": "#93000A",
+    "onErrorContainer": "#FFDAD6",
+    "background": "#120C1C",
+    "onBackground": "#F3E9FF",
+    "surface": "#1C132A",
+    "onSurface": "#F3E9FF",
+    "surfaceVariant": "#3D1F5C",
+    "onSurfaceVariant": "#D0B3E6",
+    "outline": "#9B7A99",
+    "outlineVariant": "#4D2F5C",
+    "scrim": "#000000",
+    "inverseSurface": "#F0E6FF",
+    "inverseOnSurface": "#1A0A30",
+    "inversePrimary": "#8A5F28"
+  },
+  "effects": {
+    "metallic": {
+      "enabled": false,
+      "variant": "BRONZE",
+      "gradient": {
+        "base": "#CD7F32",
+        "highlight": "#D99952",
+        "shadow": "#6B4423",
+        "shimmer": "#F0D9C0"
+      },
+      "intensity": 0
+    },
+    "shadows": {
+      "enabled": true,
+      "elevation": 4,
+      "blur": 8,
+      "color": "#00000066"
+    }
+  },
+  "adaptation": {
+    "layout": {
+      "density": "compact",
+      "cornerStyle": "pill",
+      "spacingScale": 0.92,
+      "panelStyle": "flat",
+      "navigationStyle": "rail"
+    },
+    "icons": {
+      "family": "custom",
+      "style": "filled",
+      "sizeScale": 0.95,
+      "strokeWidth": 2,
+      "cornerStyle": "rounded"
+    },
+    "componentOverrides": [
+      {
+        "selector": ".lcars-bar",
+        "styles": {
+          "border-top-left-radius": 48,
+          "border-bottom-left-radius": 48,
+          "padding-inline": 16,
+          "letter-spacing": 1.1
+        }
+      },
+      {
+        "selector": ".lcars-panel",
+        "styles": {
+          "display": "grid",
+          "grid-template-columns": "220px 1fr",
+          "gap": 10
+        }
+      }
+    ],
+    "desktopAdaptation": {
+      "windowChrome": {
+        "titleBarHeight": 28,
+        "headerStyle": "lcars-elbow",
+        "cornerStyle": "pill",
+        "panelRadius": 22,
+        "controlRadius": 999,
+        "borderWidth": 1,
+        "shadow": "0 16px 44px rgba(0, 0, 0, 0.65)"
+      },
+      "menuBar": {
+        "height": 28,
+        "fontSize": 11,
+        "letterSpacing": "0.12em",
+        "textTransform": "uppercase",
+        "dropdownRadius": 12,
+        "dropdownShadow": "0 14px 34px rgba(0,0,0,.65)"
+      },
+      "taskbar": {
+        "height": 40,
+        "buttonRadius": 999,
+        "dockAlignment": "left",
+        "quickChatBorderRadius": 999
+      },
+      "cameraHud": {
+        "panelRadius": 16,
+        "buttonRadius": 999,
+        "shadow": "0 8px 24px rgba(0,0,0,0.5)"
+      },
+      "sweep": {
+        "elbowWidth": 36,
+        "titleCapRadius": "999px",
+        "accentBand": "primary",
+        "showElbowBar": true
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+[package]
+name = "linkpoint-protocol"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+linkpoint-core = { path = "../linkpoint-core" }
