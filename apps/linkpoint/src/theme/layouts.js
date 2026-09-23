@@ -1,0 +1,28 @@
+// Ported verbatim from the `LAYOUTS` constant in index.html.
+// Layout packs: geometry, nav model, type, density. No colour.
+export const LAYOUTS = {
+  terminal: { name: "Ink Terminal", nav: "TABS", font: '"JetBrains Mono","IBM Plex Mono",monospace', dfont: '"JetBrains Mono",monospace',
+    s: { rs:"4px", rl:"8px", rp:"4px", navr:"4px", pad:"12px", tls:".26em" },
+    look: { card:"box", head:"stack", seg:"fill", chips:true, gap:"9px", measure:null },
+    note: "Dense terminal grid: mono type, 4px corners, bottom tabs, '>' status lines, 0.26em tracking on titles." },
+  sweep: { name: "Sweep Console", nav: "SWEEP", font: '"Antonio","Jost",sans-serif', dfont: '"Antonio",sans-serif',
+    s: { rs:"999px", rl:"28px", rp:"22px", navr:"0 999px 999px 0", pad:"10px", tls:".16em" },
+    look: { card:"cap", head:"sweep", seg:"fill", chips:true, gap:"6px", measure:null },
+    note: "LCARS-rule console: the swept elbow is the frame, rail segments ARE the buttons, thickness changes at every turn, rounded caps terminate bars, title-bar grammar (cap → bar → title → end cap), one font at three sizes, two text colours, fills only." },
+  tiles: { name: "Metro Tiles", nav: "TILES", font: '"Open Sans","Nunito Sans",sans-serif', dfont: '"Open Sans",sans-serif',
+    s: { rs:"0px", rl:"0px", rp:"0px", navr:"0px", pad:"14px", tls:"0em" },
+    look: { card:"flat", head:"pivot", seg:"pivot", chips:false, gap:"2px", measure:null },
+    note: "Metro: zero radius, light-weight pivot titles, spacious 1.25 scale, lowercase tile nav." },
+  glass: { name: "Aero Glass", nav: "TABS", font: '"Nunito Sans",sans-serif', dfont: '"Nunito Sans",sans-serif',
+    s: { rs:"12px", rl:"18px", rp:"16px", navr:"12px", pad:"14px", tls:".06em" },
+    look: { card:"soft", head:"stack", seg:"fill", chips:true, gap:"11px", measure:null },
+    note: "Glossy Aero: 12-18px rounding, comfortable 1.1 spacing, soft panels, rounded duotone icons." },
+  rules: { name: "Rule & Rail", nav: "RAIL", font: '"Jost",system-ui,sans-serif', dfont: '"Jost",sans-serif',
+    s: { rs:"0px", rl:"0px", rp:"0px", navr:"0px", pad:"11px", tls:".35em" },
+    look: { card:"rule", head:"rule", seg:"text", chips:false, gap:"0px", measure:null },
+    note: "Deco discipline: hairline rules instead of fills, sharp corners, 0.35em tracking, compact scale, rail nav." },
+  press: { name: "Press", nav: "TABS", font: '"Source Serif 4",Georgia,serif', dfont: '"Jost",sans-serif',
+    s: { rs:"2px", rl:"6px", rp:"3px", navr:"2px", pad:"14px", tls:".1em" },
+    look: { card:"quiet", head:"editorial", seg:"text", chips:false, gap:"0px", measure:"58ch" },
+    note: "Editorial: serif body, 2px corners, generous leading — the legibility layout for sunlight and large-type mode." },
+};

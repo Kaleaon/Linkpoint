@@ -8,13 +8,16 @@
     "packages/*"
   ],
   "scripts": {
-    "check": "npm run typecheck && npm test",
+    "check": "npm run typecheck && npm test && npm run typecheck -w @linkpoint/app && npm run test -w @linkpoint/app && npm run build -w @linkpoint/app",
+    "dev": "npm run dev -w @linkpoint/app",
+    "build": "npm run build -w @linkpoint/app",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "typescript": "~5.8.2",
-    "vitest": "4.0.18"
+    "vitest": "4.1.11",
+    "vite": "7.3.6"
   },
   "engines": {
     "node": ">=22"

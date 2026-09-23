@@ -39,7 +39,7 @@ authoritative for session and world state; frontend stores are projections.
 
 | Path | Responsibility |
 | --- | --- |
-| `apps/linkpoint` | React application and Tauri shell (introduced next) |
+| `apps/linkpoint` | Imported React application; Tauri shell follows after boundary cleanup |
 | `packages/viewer-types` | Stable command, event, and snapshot contract |
 | `packages/viewer-client` | Runtime-independent client interface and adapters |
 | `packages/viewer-store` | Deterministic frontend state projection |

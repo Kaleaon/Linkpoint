@@ -1,0 +1,304 @@
+/* Ported from the <style> block inside index.html's helmet.
+   That stylesheet mostly styled the design-canvas chrome (the dv-* picker
+   panels around the prototype) plus four @keyframes the prototype itself
+   uses inline. The dv-* rules are kept because App.jsx reuses the same
+   picker-panel layout for the palette/layout/device/screen controls. */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #100f0e;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  color: #e8e5df;
+}
+
+button,
+input,
+select,
+textare.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+a {
+  font: inherit;
+}
+
+.viewer-app {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.viewer-workspace {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  overflow: hidden;
+}
+
+.login-input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 11px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 4px;
+  outline: none;
+  background: rgba(0, 0, 0, 0.2);
+  color: inherit;
+}
+
+.login-input:focus {
+  border-color: currentColor;
+  box-shadow: 0 0 0 2px rgba(108, 255, 154, 0.14);
+}
+
+.remember-login {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.screen-header {
+  flex: none;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid;
+}
+
+.screen-header h1,
+.screen-header p {
+  margin: 0;
+}
+
+.screen-header h1 { font-size: 22px; letter-spacing: 0.08em; }
+.screen-header p { margin-top: 4px; font-size: 11px; }
+
+.live-screen { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.live-list { flex: 1; min-height: 0; overflow: auto; padding: 12px; }
+.chat-message { max-width: 760px; margin: 0 0 8px; padding: 10px 12px; border: 1px solid; border-radius: 6px; }
+.chat-message.mine { margin-left: auto; }
+.composer { display: flex; gap: 8px; padding: 12px; border-top: 1px solid; }
+.composer input, .filter-field input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: inherit; }
+.composer button { width: 46px; height: 42px; border: 0; border-radius: 5px; display: grid; place-items: center; }
+.composer button:disabled { opacity: 0.4; cursor: not-allowed; }
+.filter-field { margin: 12px 12px 0; min-height: 42px; padding: 0 11px; display: flex; align-items: center; gap: 8px; border: 1px solid; border-radius: 5px; }
+.inventory-row { display: flex; align-items: center; gap: 9px; padding: 11px 4px; border-bottom: 1px solid; }
+.inventory-button { width: 100%; border-width: 0 0 1px; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.record-detail { position: absolute; right: 12px; bottom: 12px; width: min(360px, calc(100% - 24px)); max-height: 60%; overflow: auto; padding: 18px; border: 1px solid; border-radius: 8px; box-shadow: 0 12px 36px rgba(0,0,0,.45); z-index: 10; }
+.record-detail h2 { margin: 10px 0; font-size: 16px; }
+.record-detail dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 11px; }
+.record-detail dt { opacity: .6; text-transform: uppercase; }
+.record-detail dd { margin: 0; overflow-wrap: anywhere; }
+.detail-close { position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; border: 0; background: transparent; color: inherit; font-size: 24px; }
+.honest-empty { flex: 1; min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; opacity: 0.72; }
+.honest-empty h2, .honest-empty p { margin: 8px 0 0; }
+.honest-empty p { max-width: 42ch; font-size: 12px; line-height: 1.5; }
+.settings-screen { flex: 1; overflow: auto; padding: 18px; }
+.settings-screen section { max-width: 760px; margin: 0 auto 24px; }
+.settings-screen h2 { font-size: 13px; letter-spacing: 0.12em; }
+.choice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.choice-grid button { min-height: 44px; border: 1px solid currentColor; border-radius: 5px; background: transparent; color: inherit; opacity: 0.6; }
+.choice-grid button.selected { opacity: 1; box-shadow: inset 3px 0 currentColor; }
+
+a {
+  color: #6cff9a;
+}
+a:hover {
+  color: #a9ffc7;
+}
+
+.app-shell {
+  padding: 28px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.app-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.app-tid {
+  font: 600 10px ui-monospace, monospace;
+  padding: 3px 7px;
+  background: #6cff9a;
+  color: #03240f;
+  border-radius: 4px;
+}
+
+.app-tname {
+  font: 600 13px/1.2 "JetBrains Mono", monospace;
+  color: #e8e5df;
+  letter-spacing: 0.04em;
+}
+
+.app-note {
+  font: 400 11px/1.6 "JetBrains Mono", monospace;
+  color: rgba(255, 255, 255, 0.45);
+  max-width: 720px;
+}
+
+.app-body {
+  display: flex;
+  gap: 26px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.pnl {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 14px;
+  background: #171614;
+}
+
+.pnlh {
+  font: 600 10px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.26em;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 10px;
+}
+
+.pick {
+  padding: 7px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+}
+.pick:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.tag {
+  padding: 6px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 5px;
+  cursor: pointer;
+  font: 500 10.5px/1 "JetBrains Mono", monospace;
+  color: rgba(255, 255, 255, 0.78);
+  background: none;
+}
+.tag:hover {
+  border-color: #6cff9a;
+  color: #6cff9a;
+}
+
+.sidepanels {
+  width: 288px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: none;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: none;
+}
+
+/* Icon module: lucide-react renders inline SVG directly, this just sizes the
+   wrapper the mockup used around each <i data-lucide>. */
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+@keyframes blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes ping {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes wig {
+  0%,
+  100% {
+    transform: rotate(-1.1deg);
+  }
+  50% {
+    transform: rotate(1.1deg);
+  }
+}
+
+.inventory-row small { display: block; margin-top: 3px; opacity: 0.65; }
+.world-runtime { position: relative; flex: 1; min-height: 0; background: #050707; }
+.world-runtime canvas { width: 100%; height: 100%; display: block; }
+.world-overlay { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; opacity: 0.7; pointer-events: none; }
+.screen-action { min-height: 44px; margin: 0 12px 12px; }
+.tool-screen { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.inline-tool { display: flex; gap: 8px; padding: 12px; }
+.inline-tool input { flex: 1; min-width: 0; min-height: 42px; padding: 0 10px; }
+.inline-tool button { min-width: 82px; }
+.tool-status { margin: 0 12px; font-size: 12px; opacity: 0.75; }
+.setting-toggle { display: flex; align-items: center; gap: 9px; min-height: 44px; }
+.danger-action { min-height: 44px; padding: 0 18px; border: 1px solid #d86b6b; border-radius: 5px; background: transparent; color: #e89090; }
+.live-screen { position: relative; }
+.tool-page { flex: 1; min-height: 0; overflow: auto; padding: 16px; }
+.tool-page > h2 { font-size: 14px; letter-spacing: .12em; }
+.runtime-card { display: flex; flex-direction: column; gap: 7px; max-width: 720px; margin: 0 auto 10px; padding: 14px; border: 1px solid rgba(127,127,127,.35); border-radius: 7px; background: rgba(127,127,127,.08); color: inherit; }
+.runtime-card small { display: block; overflow-wrap: anywhere; opacity: .68; }
+.runtime-card-button { width: 100%; flex-direction: row; align-items: center; cursor: pointer; text-align: left; }
+.runtime-card dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0; font-size: 12px; }
+.runtime-card dt { opacity: .6; }
+.runtime-card dd { margin: 0; overflow-wrap: anywhere; }
+.runtime-card pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; }
+.media-player { display: block; width: min(720px, 100%); margin: 14px auto; }
+
+/* Layout packs remain app skins, not mock device frames. */
+.layout-terminal .screen-header h1 { text-transform: uppercase; letter-spacing: .24em; }
+.layout-sweep .screen-header { border-bottom-width: 5px; border-radius: 0 0 28px 0; }
+.layout-sweep .inventory-row, .layout-sweep .runtime-card { border-radius: 22px; }
+.layout-tiles .screen-header, .layout-tiles .runtime-card, .layout-tiles button { border-radius: 0; }
+.layout-tiles .screen-header h1 { font-size: 34px; font-weight: 300; text-transform: lowercase; }
+.layout-glass .runtime-card, .layout-glass .chat-message, .layout-glass .filter-field { backdrop-filter: blur(18px); box-shadow: inset 0 1px rgba(255,255,255,.12), 0 8px 28px rgba(0,0,0,.18); }
+.layout-rules .runtime-card, .layout-rules .chat-message { border-width: 1px 0 0; border-radius: 0; background: transparent !important; }
+.layout-rules .screen-header { border-top: 3px double currentColor; }
+.layout-press .live-list, .layout-press .tool-page { max-width: 900px; width: 100%; margin-inline: auto; }
+.layout-press .chat-message, .layout-press .runtime-card { line-height: 1.65; }

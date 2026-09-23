@@ -1,0 +1,8 @@
+{
+  "android": {
+    "package": "com.reactexample"
+  },
+  "ios": {
+    "bundleIdentifier": "com.reactexample"
+  }
+}
