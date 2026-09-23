@@ -1,5 +1,6 @@
 import java.util.Properties
 import java.io.FileInputStream
+import org.gradle.api.tasks.testing.Test
 
 plugins {
     id("com.android.application") version "8.6.1"
@@ -521,6 +522,26 @@ configurations.matching {
                 .using(module("org.conscrypt:conscrypt-openjdk-uber:2.5.2"))
                 .because("conscrypt-android lacks a JVM native lib; openjdk-uber works on Robolectric/Paparazzi")
         }
+    }
+}
+
+// Gradle's daemon receives proxy system properties, but forked Test JVMs do
+// not inherit them automatically. Robolectric resolves its Android runtime on
+// first use, so forwarding only the standard proxy properties keeps the test
+// suite reliable in proxied CI environments without hard-coding a proxy or
+// changing behavior for developers with direct network access.
+tasks.withType<Test>().configureEach {
+    listOf(
+        "http.proxyHost",
+        "http.proxyPort",
+        "http.nonProxyHosts",
+        "https.proxyHost",
+        "https.proxyPort",
+        "https.nonProxyHosts"
+    ).forEach { propertyName ->
+        System.getProperty(propertyName)
+            ?.takeIf { it.isNotBlank() }
+            ?.let { systemProperty(propertyName, it) }
     }
 }
 
