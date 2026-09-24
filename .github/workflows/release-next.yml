@@ -1,0 +1,34 @@
+name: Release Linkpoint Next preview
+on:
+  push:
+    tags: ["next-v*"]
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+jobs:
+  release-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: dtolnay/rust-toolchain@stable
+      - run: npm ci
+      - run: npm run check
+      - name: Create locked web artifact and inventories
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          VITE_BASE_PATH=/Linkpoint/ npm run build
+          tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner -czf release/linkpoint-web-${GITHUB_REF_NAME}.tar.gz -C apps/linkpoint/dist .
+          npm sbom --sbom-format=cyclonedx > release/linkpoint-web-${GITHUB_REF_NAME}.cdx.json
+          cargo metadata --locked --format-version=1 > release/linkpoint-rust-${GITHUB_REF_NAME}.metadata.json
+          sha256sum release/* > release/SHA256SUMS
+      - uses: actions/attest-build-provenance@v2
+        with: { subject-path: "release/linkpoint-web-*.tar.gz" }
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          prerelease: true
+          files: release/*

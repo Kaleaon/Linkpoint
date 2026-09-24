@@ -27,6 +27,7 @@ pub struct ReliableUdp {
     next: u32,
     pending: BTreeMap<u32, Pending>,
     received: BTreeSet<u32>,
+    pending_acks: BTreeSet<u32>,
     base_timeout: Duration,
     max_attempts: u8,
 }
@@ -43,6 +44,7 @@ impl ReliableUdp {
             next: 0,
             pending: BTreeMap::new(),
             received: BTreeSet::new(),
+            pending_acks: BTreeSet::new(),
             base_timeout,
             max_attempts,
         }
@@ -77,12 +79,25 @@ impl ReliableUdp {
     /// for retransmitted duplicates. A bounded window avoids unbounded growth.
     pub fn accept_incoming(&mut self, sequence: u32) -> bool {
         let fresh = self.received.insert(sequence);
+        if fresh {
+            self.pending_acks.insert(sequence);
+        }
         while self.received.len() > 4096 {
             if let Some(oldest) = self.received.first().copied() {
                 self.received.remove(&oldest);
             }
         }
         fresh
+    }
+
+    /// Drains up to `limit` ACKs for packet-level appended ACKs or a
+    /// PacketAck message. A sorted set makes batches deterministic in tests.
+    pub fn take_ack_batch(&mut self, limit: usize) -> Vec<u32> {
+        let batch: Vec<_> = self.pending_acks.iter().take(limit).copied().collect();
+        for sequence in &batch {
+            self.pending_acks.remove(sequence);
+        }
+        batch
     }
 
     pub fn retransmit_due(&mut self, now: Instant) -> Vec<ReliablePacket> {
@@ -144,5 +159,7 @@ mod tests {
         );
         assert!(udp.accept_incoming(8));
         assert!(!udp.accept_incoming(8));
+        assert_eq!(udp.take_ack_batch(10), vec![8]);
+        assert!(udp.take_ack_batch(10).is_empty());
     }
 }

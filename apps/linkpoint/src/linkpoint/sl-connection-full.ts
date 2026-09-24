@@ -24,15 +24,12 @@ export class SLConnectionFull extends Utils.EventEmitter {
   private lastEventId: number | null = null;
   private eventQueueTimer: ReturnType<typeof setTimeout> | null = null;
   private eventQueueFailures = 0;
-  private removeNativeListener: (() => void) | null = null;
 
   constructor() {
     super();
   }
 
   private resetConnectionState() {
-    this.removeNativeListener?.();
-    this.removeNativeListener = null;
     this.connected = false;
     this.authReply = null;
     this.agentId = null;
@@ -55,35 +52,6 @@ export class SLConnectionFull extends Utils.EventEmitter {
     this.setState('AUTHENTICATING');
 
     try {
-      if (window.linkpointDesktop?.connectViewer) {
-        const loginUrl = SLProtocol.getLoginUrl(gridId);
-        if (!loginUrl) throw new Error('Invalid or insecure grid selected');
-        await window.linkpointDesktop.allowLoginEndpoint(loginUrl);
-        this.removeNativeListener = window.linkpointDesktop.onViewerEvent(({ type, data }) => {
-          if (type === 'chat') this.emit('ChatFromSimulator', data);
-          else if (type === 'disconnected') {
-            this.connected = false;
-            this.emit('disconnected', data);
-          } else {
-            this.emit(`scene:${type}`, data);
-          }
-        });
-        const loginResult = await window.linkpointDesktop.connectViewer({
-          loginUrl,
-          username,
-          password,
-          start: startLocation,
-        });
-        this.authReply = loginResult;
-        this.agentId = String(loginResult.agent_id);
-        this.sessionId = String(loginResult.session_id);
-        this.circuitCode = Number(loginResult.circuit_code);
-        this.setState('CONNECTED');
-        this.connected = true;
-        this.emit('connected', loginResult);
-        return loginResult;
-      }
-
       const protocol = new SLProtocol();
       const loginResult = await protocol.login(gridId, username, password, startLocation);
 
@@ -195,10 +163,6 @@ export class SLConnectionFull extends Utils.EventEmitter {
 
   async sendChat(message: string, channel: number = 0, type: number = 1) {
     if (!this.connected) throw new Error('Not connected to a grid');
-    if (window.linkpointDesktop?.sendChat) {
-      await window.linkpointDesktop.sendChat({ message, channel, type });
-      return;
-    }
     if (!this.capabilities.ChatSessionRequest) throw new Error('This grid did not provide a chat capability');
 
     try {
@@ -226,9 +190,6 @@ export class SLConnectionFull extends Utils.EventEmitter {
     this.eventQueueRunning = false;
     if (this.eventQueueTimer) clearTimeout(this.eventQueueTimer);
     this.eventQueueTimer = null;
-    this.removeNativeListener?.();
-    this.removeNativeListener = null;
-    if (window.linkpointDesktop?.disconnectViewer) await window.linkpointDesktop.disconnectViewer();
     this.connected = false;
     this.setState('IDLE');
     this.emit('disconnected');

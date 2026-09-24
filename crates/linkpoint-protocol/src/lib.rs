@@ -10,9 +10,11 @@ pub mod llsd;
 pub mod login;
 pub mod packet;
 pub mod reliable;
+pub mod transport;
 
 pub use capabilities::{CapabilitySet, Event, EventQueue};
 pub use endpoint::{EndpointPolicy, EndpointPolicyError};
 pub use login::{LoginOutcome, LoginParameters, LoginRedirect, LoginResponse, LoginResponseError};
 pub use packet::{PacketFlags, PacketFrequency, PacketHeader, PacketParseError};
 pub use reliable::{AckResult, ReliablePacket, ReliableUdp};
+pub use transport::{HttpResponse, HttpTransport, TransportError, TransportLimits, UdpCircuit};

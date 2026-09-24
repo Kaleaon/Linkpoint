@@ -2,12 +2,10 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
+import {createViewerClient} from './viewer/bootstrap';
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+const client = await createViewerClient();
+createRoot(document.getElementById('root')!).render(<StrictMode><App client={client} /></StrictMode>);
 
 if ('serviceWorker' in navigator && (import.meta as any).env.PROD) {
   window.addEventListener('load', async () => {

@@ -65,9 +65,6 @@ export class CORSHandler {
    * Detect current environment
    */
   detectEnvironment() {
-    if ((window as any).linkpointDesktop?.request) {
-      return { type: 'electron', name: 'Linkpoint Desktop', corsSupport: 'native', needsProxy: false };
-    }
     // Capacitor mobile app
     if ((window as any).Capacitor && (window as any).Capacitor.Plugins.CapacitorHttp) {
       return {
@@ -115,23 +112,6 @@ export class CORSHandler {
     const env = this.environment;
 
     try {
-      if (env.type === 'electron') {
-        const result = await (window as any).linkpointDesktop.request({
-          url,
-          method: options.method || 'GET',
-          headers: options.headers || {},
-          body: options.body,
-        });
-        return {
-          ok: result.ok,
-          status: result.status,
-          statusText: result.statusText,
-          headers: new Headers(result.headers),
-          text: async () => result.text,
-          json: async () => JSON.parse(result.text),
-        };
-      }
-
       // 1. Capacitor native HTTP (mobile)
       if (env.type === 'capacitor') {
         console.log('[CORS] Using Capacitor native HTTP');

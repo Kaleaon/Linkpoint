@@ -8,6 +8,7 @@ members = [
     "crates/linkpoint-cache",
     "crates/linkpoint-tauri",
 ]
+exclude = ["apps/linkpoint/src-tauri"]
 
 [workspace.package]
 version = "0.1.0"

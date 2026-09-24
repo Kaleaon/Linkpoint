@@ -1,0 +1,1 @@
+{"name":"@linkpoint/renderer","version":"0.1.0","private":true,"type":"module","exports":"./src/index.ts","dependencies":{"@babylonjs/core":"^8.26.0","@linkpoint/viewer-types":"0.1.0"}}

@@ -10,9 +10,12 @@ not imply feature parity with a production viewer.
 
 - [x] npm workspace and runnable Vite/React application at `apps/linkpoint`
 - [x] React-Linkpoint screens, application state, LLSD utilities, protocol
-  experiments, PWA manifest, and 172 passing unit tests
+  experiments, PWA manifest, and automated unit tests
 - [x] refreshed Linkpoint title/login experience and responsive layouts
 - [x] typed TypeScript command/event contract and mockable `ViewerClient`
+- [x] injected `ViewerClient` runtime with web, Tauri, and mock adapters; screens
+  consume projected client state instead of the retired desktop global
+- [x] Rust-owned generated TypeScript contract with drift and serialization tests
 - [x] deterministic UI state projection with disconnect cleanup
 - [x] Rust workspace split into core, protocol, asset, cache, scene, and native
   adapter boundaries
@@ -22,6 +25,12 @@ not imply feature parity with a production viewer.
 - [x] renderer-safe simulator object normalization moved out of the retired
   Electron bridge
 - [x] 24 named themes synchronized from linkpoint-design
+- [x] deterministic core session state machine for login/logout, lifecycle,
+  network loss, reconnect, chat/object command gating, and redacted errors
+- [x] bounded HTTP/UDP transport interfaces, appended ACK codec, ACK batching,
+  scene normalization, asset scheduling, and lazy Babylon renderer boundary
+- [x] least-privilege Tauri 2 shell scaffold and GitHub Pages preview pipeline
+- [x] threat model, secret/dependency gates, CSP, and private-cache exclusions
 - [x] legacy Android tree retained as a parity and rollback implementation
 
 ## Active next milestones
@@ -29,23 +38,24 @@ not imply feature parity with a production viewer.
 The ordered implementation and platform validation plan is maintained in
 [`CROSS_PLATFORM_ROADMAP.md`](CROSS_PLATFORM_ROADMAP.md). The cross-platform CI
 workflow currently validates the web application and portable Rust crates on
-Linux, Windows, and macOS; native packaging begins only after the Tauri shell is
-generated.
+Linux, Windows, and macOS. The Tauri shell is generated, but packaging remains
+disabled until its production transport and platform security plugins land.
 
-- [ ] Inject `ViewerClient` into the imported React runtime; remove remaining
+- [x] Inject `ViewerClient` into the imported React runtime; remove remaining
   `window.linkpointDesktop` checks from screens and protocol experiments
-- [ ] Generate TypeScript contracts from Rust rather than maintaining both by
-  hand
-- [ ] Add a Tauri desktop shell with login-host allowlisting, HTTPS policy,
-  secure credential storage, logout, chat, and lifecycle events
+- [x] Generate TypeScript contracts from the Rust-owned schema rather than
+  maintaining both by hand
+- [ ] Connect the generated Tauri shell to production HTTP/UDP transports and
+  platform secure credential storage (the shell currently fails closed)
 - [x] Port XML-RPC login request construction and endpoint validation to Rust
 - [x] Port LLSD, seed capabilities/event-queue shapes, and transport-independent
   reliable UDP sequencing/retries to Rust
 - [x] Parse XML-RPC login redirects and add UDP header/zero-code framing
-- [ ] Add HTTP/UDP transports, golden login/packet fixtures, message-template
-  codecs, ACK batching, throttling, and circuit recovery
-- [ ] Convert protocol objects into renderer-neutral scene snapshots/deltas
-- [ ] Introduce Babylon.js behind `packages/renderer`
+- [ ] Implement the concrete native HTTP adapter, simulator handshake,
+  message-template codecs, throttling, circuit recovery, and golden fixtures
+- [x] Add renderer-neutral transforms/material/entity kinds and normalization
+- [x] Introduce lazy-loaded Babylon.js behind `packages/renderer`
+- [ ] Feed decoded native object/terrain/avatar updates into that scene boundary
 - [ ] Generate Android and iOS shells only after the desktop boundary is stable
 
 ## Reference policy

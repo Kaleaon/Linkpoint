@@ -9,9 +9,9 @@ Last updated: 2026-09-23
 | Web/PWA | `apps/linkpoint`, npm workspace, Vite | Typecheck, 174 unit tests, production bundle, browser smoke test | Runnable baseline |
 | Android (legacy Kotlin) | root/`Linkpoint` Gradle projects and Android workflows | Gradle unit tests, lint, debug/release APK jobs | Existing application; not the new Tauri shell |
 | Linux/Windows/macOS web runtime | `.github/workflows/cross-platform.yml` OS matrix | npm check/build and Rust tests/clippy | Automated portability checks |
-| Android (Tauri) | Not generated | None | Not runnable yet |
-| iOS (Tauri) | Not generated; requires macOS/Xcode/signing | None | Not runnable yet |
-| Windows/macOS/Linux native (Tauri) | `crates/linkpoint-tauri` is only a boundary crate; no `src-tauri` application | Rust crate tests only | Not packageable yet |
+| Android (Tauri) | Desktop shell exists; mobile project not initialized | None | Not runnable yet |
+| iOS (Tauri) | Desktop shell exists; requires macOS/Xcode/signing | None | Not runnable yet |
+| Windows/macOS/Linux native (Tauri) | `apps/linkpoint/src-tauri` least-privilege shell | Core tests only; transport fails closed | Scaffolded, not release-ready |
 
 The repository therefore does **not** yet support an honest “fully working on
 all platforms” claim. Passing web and core tests proves that the imported UI and
@@ -64,7 +64,7 @@ device-level test record covers:
 - Record sanitized protocol fixtures and prohibit credentials or resident data.
 - Exit gate: every pull request exercises the web app and portable Rust core.
 
-### Phase 1 — enforce the runtime boundary
+### Phase 1 — enforce the runtime boundary (complete)
 
 - Implement `TauriViewerClient`, `WebViewerClient`, and `MockViewerClient`.
 - Inject one client during bootstrap and remove `window.linkpointDesktop` and
@@ -73,7 +73,7 @@ device-level test record covers:
 - Exit gate: UI integration tests run entirely against `MockViewerClient` and a
   contract test proves TypeScript/Rust serialization compatibility.
 
-### Phase 2 — create the desktop Tauri application
+### Phase 2 — create the desktop Tauri application (scaffold complete; transport and packaging remain)
 
 - Generate `apps/linkpoint/src-tauri` with least-privilege capabilities.
 - Implement HTTPS endpoint policy, secure storage, login/logout, event channels,
@@ -109,6 +109,11 @@ device-level test record covers:
 - Compare every parity item against the legacy Android app and Lumiya behavioral
   references, then document rollback and data migration.
 - Exit gate: production-equivalent parity is signed off before legacy removal.
+
+The `next-v*` preview workflow now creates a normalized web archive, npm SBOM,
+Rust dependency inventory, checksums, and GitHub provenance attestation. Native
+code signing, update channels, store metadata, and production parity sign-off
+remain release-environment work and are not implied by that preview artifact.
 
 ## Required test matrix
 

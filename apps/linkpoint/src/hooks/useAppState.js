@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { LAYOUTS } from "../theme/layouts.js";
 import { PALETTES } from "../theme/palettes.js";
 import { DEVICES, FLOATERS, HUD_DEFAULT, HUDS, CBTN, GRIDS } from "../theme/constants.js";
-import { app } from "../linkpoint/app.ts";
+import { useViewerClient } from "../viewer/ViewerClientContext";
 
 // Ported from the mockup's `state = {...}` initializer and its instance
 // methods (flR/flDrag/flFocus/flToggle/flClose, hudDrag/toggleHud, T/D/navMode,
@@ -10,6 +10,7 @@ import { app } from "../linkpoint/app.ts";
 // tick interval in componentDidMount). This hook is the state + actions layer;
 // theme/viewModel.js is the "renderVals()" computation layer that consumes it.
 export function useAppState() {
+  const viewerClient = useViewerClient();
   const [layout, setLayout] = useState("terminal");
   const [palette, setPalette] = useState("ink");
   const [device, setDevice] = useState("ios");
@@ -58,7 +59,9 @@ export function useAppState() {
   const [loginName, setLoginName] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [rememberLogin, setRememberLogin] = useState(true);
-  const [customGrids, setCustomGrids] = useState(() => app.preferences.get("network", "customGrids") || []);
+  const [customGrids, setCustomGrids] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("linkpoint_custom_grids") || "[]"); } catch { return []; }
+  });
   const [addGrid, setAddGrid] = useState(false);
   const [addGridName, setAddGridName] = useState("");
   const [addGridHost, setAddGridHost] = useState("");
@@ -173,16 +176,16 @@ export function useAppState() {
     const grid = allGrids().find((item) => item.key === loginGrid) || GRIDS[0];
     const endpoint = /^https?:\/\//i.test(grid.host) ? grid.host : `https://${grid.host}`;
     try {
-      await app.auth.login(endpoint, loginName.trim(), loginPassword, rememberLogin);
+      await viewerClient.execute({ type: "session.login", payload: { grid: grid.key.startsWith("custom-") ? "opensim" : "second-life", loginUri: endpoint, username: loginName.trim(), password: loginPassword, start: "last" } });
       setLoginPassword("");
       setScreen("Chat");
-      notify(`Welcome, ${app.auth.getUserDisplayName()}`);
+      notify(`Connected as ${loginName.trim()}`);
     } catch (error) {
       setLoginError(error instanceof Error ? error.message : `Unable to reach ${grid.host}.`);
     } finally {
       setLoginBusy(false);
     }
-  }, [loginBusy, loginMode, loginName, loginPassword, rememberLogin, loginGrid, allGrids, notify]);
+  }, [loginBusy, loginMode, loginName, loginPassword, rememberLogin, loginGrid, allGrids, notify, viewerClient]);
 
   // ---- login: add a custom grid ------------------------------------------
   // A resident can point the viewer at any OpenSim grid, not just the
@@ -214,7 +217,7 @@ export function useAppState() {
       (customGrids.length + 1);
     setCustomGrids((grids) => {
       const next = grids.concat([{ key, label: name, host }]);
-      app.preferences.set("network", "customGrids", next);
+      localStorage.setItem("linkpoint_custom_grids", JSON.stringify(next));
       return next;
     });
     setLoginGrid(key);

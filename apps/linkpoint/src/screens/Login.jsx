@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useApp } from "../context/AppContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
-import { app } from "../linkpoint/app";
+import { useViewerClient } from "../viewer/ViewerClientContext";
 import LinkpointLogo from "../components/LinkpointLogo.jsx";
 
 export default function Login() {
   const { state, actions } = useApp();
   const { V, t } = useTheme();
-  const [username, setUsername] = useState(app.auth.credentials?.username || "");
+  const client = useViewerClient();
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [start, setStart] = useState("last");
   const [remember, setRemember] = useState(true);
@@ -23,10 +24,20 @@ export default function Login() {
     setBusy(true);
     setError("");
     try {
-      if (grid.key.startsWith("custom-") && window.linkpointDesktop?.allowLoginEndpoint) {
-        await window.linkpointDesktop.allowLoginEndpoint(grid.host);
-      }
-      await app.auth.login(grid.key.startsWith("custom-") ? grid.host : grid.key, username.trim(), password, remember, start);
+      const custom = grid.key.startsWith("custom-");
+      const knownUri = grid.key === "aditi"
+        ? "https://login.aditi.lindenlab.com/cgi-bin/login.cgi"
+        : "https://login.agni.lindenlab.com/cgi-bin/login.cgi";
+      await client.execute({
+        type: "session.login",
+        payload: {
+          grid: custom ? "opensim" : "second-life",
+          loginUri: custom ? grid.host : knownUri,
+          username: username.trim(),
+          password,
+          start,
+        },
+      });
       setPassword("");
       actions.setScreen("Chat");
     } catch (reason) {

@@ -1,30 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTheme } from "../context/ThemeContext.jsx";
 import Icon from "../components/Icon.jsx";
-import { app } from "../linkpoint/app";
+import { useViewerClient, useViewerState } from "../viewer/ViewerClientContext";
 
 export default function Chat() {
   const { V, t } = useTheme();
-  const [messages, setMessages] = useState(() => [...app.chat.messages]);
+  const client = useViewerClient();
+  const viewer = useViewerState();
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
-  const connected = app.auth.isLoggedIn();
-
-  useEffect(() => {
-    const refresh = () => setMessages([...app.chat.messages]);
-    app.chat.on("message_received", refresh);
-    app.chat.on("message_sent", refresh);
-    return () => {
-      app.chat.off("message_received", refresh);
-      app.chat.off("message_sent", refresh);
-    };
-  }, []);
-
-  const formatted = useMemo(() => messages.map((message) => ({
+  const connected = viewer.connection === "connected";
+  const formatted = useMemo(() => viewer.chat.map((message) => ({
     ...message,
     time: new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-  })), [messages]);
+  })), [viewer.chat]);
 
   const send = async (event) => {
     event.preventDefault();
@@ -34,9 +24,8 @@ export default function Chat() {
     setSending(true);
     setError("");
     try {
-      await app.chat.sendMessage(text, 0, 1);
+      await client.execute({ type: "chat.send", payload: { body: text } });
       setDraft("");
-      setMessages([...app.chat.messages]);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Message could not be sent.");
     } finally {
@@ -47,9 +36,9 @@ export default function Chat() {
   return <>
     <section aria-label="Local chat transcript" aria-live="polite" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
       {!formatted.length && <div style={{ color: V.ink2, margin: "auto", textAlign: "center" }}>No messages in this session.</div>}
-      {formatted.map((m) => <article key={m.id} style={{ alignSelf: m.senderId === app.auth.user?.id ? "flex-end" : "flex-start", maxWidth: "88%", padding: "8px 10px", border: `1px solid ${V.outv}`, borderRadius: V.rp, background: V.surf }}>
-        <header style={{ color: V.pri, font: `600 10px/1.3 ${t.font}` }}>[{m.time}] {m.sender}</header>
-        <div style={{ color: V.ink, font: `400 13px/1.45 ${t.font}`, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{m.text}</div>
+      {formatted.map((m) => <article key={m.id} style={{ alignSelf: m.fromId === viewer.session?.agentId ? "flex-end" : "flex-start", maxWidth: "88%", padding: "8px 10px", border: `1px solid ${V.outv}`, borderRadius: V.rp, background: V.surf }}>
+        <header style={{ color: V.pri, font: `600 10px/1.3 ${t.font}` }}>[{m.time}] {m.fromName}</header>
+        <div style={{ color: V.ink, font: `400 13px/1.45 ${t.font}`, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{m.body}</div>
       </article>)}
     </section>
     <form onSubmit={send} style={{ padding: 12, borderTop: `1px solid ${V.outv}`, background: V.surf }}>
