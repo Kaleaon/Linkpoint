@@ -16,4 +16,6 @@ license = "LGPL-3.0-only"
 
 [workspace.dependencies]
 serde = { version = "1", features = ["derive"] }
+serde-llsd-benthic = "0.0.2"
 thiserror = "2"
+url = "2"
