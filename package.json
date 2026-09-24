@@ -8,10 +8,13 @@
     "packages/*"
   ],
   "scripts": {
-    "check": "npm run typecheck && npm test && npm run typecheck -w @linkpoint/app && npm run test -w @linkpoint/app && npm run build -w @linkpoint/app",
+    "check": "npm run check:web && npm run check:rust",
+    "check:web": "npm run typecheck && npm run test:web && npm run typecheck -w @linkpoint/app && npm run test -w @linkpoint/app && npm run build -w @linkpoint/app",
+    "check:rust": "cargo fmt --all --check && cargo test --workspace --locked && cargo clippy --workspace --all-targets --locked -- -D warnings",
     "dev": "npm run dev -w @linkpoint/app",
     "build": "npm run build -w @linkpoint/app",
-    "test": "vitest run",
+    "test": "npm run test:web",
+    "test:web": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

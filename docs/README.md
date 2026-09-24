@@ -1,5 +1,18 @@
 # Linkpoint Documentation
 
+## Linkpoint Next
+
+The React/Rust viewer is the active application. Start with these documents:
+
+| Document | Description |
+|----------|-------------|
+| [REPOSITORY_LAYOUT.md](REPOSITORY_LAYOUT.md) | Active workspace ownership and reference-code boundaries |
+| [OVERHAUL_ARCHITECTURE.md](OVERHAUL_ARCHITECTURE.md) | Cross-platform dependency rules and migration gates |
+| [OVERHAUL_PROGRESS.md](OVERHAUL_PROGRESS.md) | Current implementation progress and evidence |
+
+The sections below primarily document the legacy Kotlin/Android viewer. They
+remain useful for migration parity but do not describe the default application.
+
 ## 📋 Master Tracking
 
 | Document | Description |

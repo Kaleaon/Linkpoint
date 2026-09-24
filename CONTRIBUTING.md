@@ -1,117 +1,74 @@
-# Contributing to Linkpoint (Lumiya Viewer)
+# Contributing to Linkpoint
 
-Thank you for your interest in contributing to the Linkpoint project! This document provides guidelines for contributing to this Second Life viewer for Android.
+New product work belongs in the React/Rust workspace. Changes to the legacy
+Android client should be limited to migration parity, security, and explicitly
+scoped maintenance work.
 
-## Development Setup
+## Prerequisites
 
-### Prerequisites
-- Android Studio (latest stable version)
-- Android SDK with API level 14+ (minimum) and 34+ (target)
-- Java 8 or higher
+- Node.js 22 or newer and npm
+- The current stable Rust toolchain with `rustfmt` and `clippy`
 - Git
+- JDK 17 and Android SDK 35 only when working in `Linkpoint/`
 
-### Setting up the Development Environment
+## Setup
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Kaleaon/Linkpoint.git
-   cd Linkpoint
-   ```
-
-2. Open the project in Android Studio
-
-3. Let Android Studio sync the Gradle files
-
-4. Build the project to ensure everything is working
-
-## Code Style Guidelines
-
-### Java Code Style
-- Follow standard Java naming conventions
-- Use 4 spaces for indentation (no tabs)
-- Keep line length under 120 characters when possible
-- Use meaningful variable and method names
-- Add JavaDoc comments for public methods and classes
-
-### Android Specific Guidelines
-- Follow Android best practices for lifecycle management
-- Use appropriate Android components (Activities, Services, etc.)
-- Handle configuration changes properly
-- Implement proper error handling and logging
-
-### Performance Considerations
-- This is a 3D graphics application, so performance is critical
-- Be mindful of memory usage and garbage collection
-- Use efficient data structures and algorithms
-- Profile code changes for performance impact
-
-## Testing
-
-### Before Submitting
-- Test on multiple Android devices/versions when possible
-- Ensure the app builds without warnings
-- Test basic functionality (login, navigation, rendering)
-- Check for memory leaks in graphics-intensive operations
-
-### Code Quality
-- Remove unused imports
-- Avoid System.out.println() - use proper logging
-- Handle exceptions appropriately
-- Follow the existing code patterns in the project
-
-## Submitting Changes
-
-### Pull Request Process
-1. Fork the repository
-2. Create a feature branch from `main`
-3. Make your changes with clear, descriptive commit messages
-4. Test thoroughly
-5. Submit a pull request with a clear description
-
-### Commit Messages
-- Use clear, descriptive commit messages
-- Start with a capital letter
-- Use imperative mood ("Add feature" not "Added feature")
-- Keep first line under 50 characters
-- Add detailed description if needed
-
-### Pull Request Description
-- Describe what the change does and why
-- Reference any related issues
-- Include screenshots for UI changes
-- Note any breaking changes
-
-## Code Architecture
-
-### Project Structure
-```
-app/
-├── src/main/java/com/lumiyaviewer/lumiya/
-│   ├── render/          # 3D rendering system
-│   ├── res/             # Resource management
-│   ├── slproto/         # Second Life protocol
-│   ├── ui/              # User interface
-│   └── utils/           # Utility classes
-└── resources/           # Android resources and manifest
+```bash
+git clone https://github.com/Kaleaon/Linkpoint.git
+cd Linkpoint
+npm ci
+npm run check
 ```
 
-### Key Components
-- **Resource Management**: Handles textures, animations, geometry
-- **Network Layer**: Second Life protocol implementation
-- **Rendering System**: OpenGL-based 3D graphics
-- **UI Layer**: Android Activities and UI components
+Start the primary application with `npm run dev`. The Vite app uses the npm
+workspaces in `packages/`; do not install dependencies independently inside a
+workspace.
 
-## Getting Help
+## Where changes belong
 
-- Check existing issues and documentation first
-- Create an issue for bugs or feature requests
-- Be specific about the problem and include relevant details
-- Provide steps to reproduce for bugs
+- Put screens and browser composition in `apps/linkpoint`.
+- Put reusable UI and tokens in `packages/design-system`.
+- Put runtime-neutral commands and events in `packages/viewer-types`.
+- Put frontend transport and projections in `viewer-client` and `viewer-store`.
+- Put protocol, session, asset, scene, and cache behavior in the matching Rust
+  crate under `crates/`.
+- Keep Tauri-specific code inside `crates/linkpoint-tauri` (and the future
+  native shell), behind the client contract.
+- Do not copy decompiled or analyzed source into active application code.
 
-## License
+See [docs/REPOSITORY_LAYOUT.md](docs/REPOSITORY_LAYOUT.md) for ownership details
+and [docs/OVERHAUL_ARCHITECTURE.md](docs/OVERHAUL_ARCHITECTURE.md) for dependency
+rules.
 
-By contributing to this project, you agree that your contributions will be licensed under the MIT License.
+## Validation
 
----
+Run the smallest useful check while iterating, then the complete check before
+submitting:
 
-Thank you for contributing to Linkpoint!
+```bash
+npm run check:web
+npm run check:rust
+npm run check
+```
+
+For a legacy Android change, also run the relevant Gradle task, normally:
+
+```bash
+./gradlew :Linkpoint:testStableDebugUnitTest
+./gradlew :Linkpoint:lintStableDebug
+```
+
+Never commit credentials, local SDK paths, proxy settings, packet captures with
+personal data, generated build output, or dependency directories.
+
+## Code and pull requests
+
+- Keep TypeScript strict and prefer explicit contracts at runtime boundaries.
+- Format Rust with `cargo fmt`; keep `cargo clippy` warning-free.
+- Add tests for behavior and regression fixes.
+- Keep commits focused and use imperative, descriptive subjects.
+- Explain migration or compatibility impact in the pull request.
+- Include a screenshot for visible UI changes.
+- Update documentation when a command, boundary, or project status changes.
+
+Contributions are accepted under the repository's [license](LICENSE).
