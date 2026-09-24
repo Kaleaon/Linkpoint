@@ -6,19 +6,13 @@ import SystemDialog from "./components/SystemDialog.jsx";
 import Toast from "./components/Toast.jsx";
 import BottomTabs from "./components/BottomTabs.jsx";
 import TileNav from "./components/TileNav.jsx";
-import { app } from "./linkpoint/app";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
-
-let startup: Promise<void> | null = null;
+import type { ViewerClient } from "@linkpoint/viewer-client";
+import { ViewerClientProvider } from "./viewer/ViewerClientContext";
 
 function Viewer() {
   const { state, actions } = useApp();
   const { V, t } = useTheme();
-
-  useEffect(() => {
-    startup ||= app.init();
-    void startup;
-  }, []);
 
   useEffect(() => {
     const selectLayout = () => {
@@ -50,14 +44,16 @@ function Viewer() {
   );
 }
 
-export default function App() {
+export default function App({ client }: { client: ViewerClient }) {
   return (
     <ErrorBoundary label="Linkpoint">
-      <AppProvider>
-        <ThemeProvider>
-          <Viewer />
-        </ThemeProvider>
-      </AppProvider>
+      <ViewerClientProvider client={client}>
+        <AppProvider>
+          <ThemeProvider>
+            <Viewer />
+          </ThemeProvider>
+        </AppProvider>
+      </ViewerClientProvider>
     </ErrorBoundary>
   );
 }

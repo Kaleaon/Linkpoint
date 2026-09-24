@@ -1,14 +1,15 @@
 import { useApp } from "../context/AppContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
-import { app } from "../linkpoint/app.ts";
+import { useViewerState } from "../viewer/ViewerClientContext";
 
 /** Runtime header: only reports state that exists in the connection managers. */
 export default function Header() {
   const { state } = useApp();
   const { V, t, scr } = useTheme();
-  const connected = app.auth.isLoggedIn();
+  const viewer = useViewerState();
+  const connected = viewer.connection === "connected";
   const subtitle = connected
-    ? `${app.auth.getUserDisplayName()} · connected`
+    ? `${viewer.session?.regionName || "Grid"} · connected`
     : state.loginMode === "offline"
       ? "Offline session"
       : "Not connected";

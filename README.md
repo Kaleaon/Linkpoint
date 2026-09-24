@@ -56,7 +56,7 @@ allows the same core to support desktop and mobile shells.
 | React application | Runnable with Vite; covered by type checks and unit tests |
 | TypeScript viewer boundary | Typed commands, events, client, and state projection |
 | Rust workspace | Initial crate boundaries and foundational tests |
-| Tauri packaging | Planned; native project has not been generated yet |
+| Tauri packaging | Least-privilege desktop shell scaffolded; production transport/signing remain |
 | Protocol and renderer parity | In progress; legacy behavior is retained for reference |
 
 For design constraints and migration gates, read

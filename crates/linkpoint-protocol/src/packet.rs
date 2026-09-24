@@ -33,6 +33,39 @@ pub enum PacketParseError {
     InvalidZeroCode,
     #[error("packet extra-header length exceeds payload")]
     InvalidExtraHeader,
+    #[error("invalid appended ACK trailer")]
+    InvalidAcks,
+}
+
+/// Appends the simulator ACK trailer: big-endian sequences followed by count.
+pub fn append_acks(packet: &mut Vec<u8>, acks: &[u32]) -> Result<(), PacketParseError> {
+    let count = u8::try_from(acks.len()).map_err(|_| PacketParseError::InvalidAcks)?;
+    for ack in acks {
+        packet.extend(ack.to_be_bytes());
+    }
+    packet.push(count);
+    Ok(())
+}
+
+pub fn split_appended_acks(bytes: &[u8]) -> Result<(&[u8], Vec<u32>), PacketParseError> {
+    let count = usize::from(*bytes.last().ok_or(PacketParseError::InvalidAcks)?);
+    let trailer = count
+        .checked_mul(4)
+        .and_then(|n| n.checked_add(1))
+        .ok_or(PacketParseError::InvalidAcks)?;
+    let payload_len = bytes
+        .len()
+        .checked_sub(trailer)
+        .ok_or(PacketParseError::InvalidAcks)?;
+    let mut acks = Vec::with_capacity(count);
+    for chunk in bytes[payload_len..bytes.len() - 1].chunks_exact(4) {
+        acks.push(u32::from_be_bytes(
+            chunk
+                .try_into()
+                .map_err(|_| PacketParseError::InvalidAcks)?,
+        ));
+    }
+    Ok((&bytes[..payload_len], acks))
 }
 
 impl PacketHeader {
@@ -209,5 +242,13 @@ mod tests {
             zero_decode(&encoded, 10),
             Err(PacketParseError::InvalidZeroCode)
         );
+    }
+    #[test]
+    fn appended_ack_trailer_round_trips() {
+        let mut packet = vec![1, 2, 3];
+        append_acks(&mut packet, &[7, 9]).unwrap();
+        let (payload, acks) = split_appended_acks(&packet).unwrap();
+        assert_eq!(payload, [1, 2, 3]);
+        assert_eq!(acks, [7, 9]);
     }
 }

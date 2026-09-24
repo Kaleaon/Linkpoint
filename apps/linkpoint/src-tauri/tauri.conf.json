@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Linkpoint",
+  "version": "0.1.0",
+  "identifier": "app.linkpoint.viewer",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' asset: data: blob: https:; media-src 'self' blob: https:; connect-src 'self' ipc: http://ipc.localhost https:; style-src 'self' 'unsafe-inline'; script-src 'self'"
+    },
+    "windows": [{ "title": "Linkpoint", "width": 1280, "height": 800, "minWidth": 360, "minHeight": 640 }]
+  },
+  "bundle": { "active": true, "targets": "all", "category": "Entertainment", "shortDescription": "Independent Second Life and OpenSimulator viewer" }
+}

@@ -1,0 +1,17 @@
+[package]
+name = "linkpoint-desktop"
+version = "0.1.0"
+edition = "2024"
+license = "LGPL-3.0-only"
+publish = false
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+linkpoint-core = { path = "../../../crates/linkpoint-core" }
+serde = { version = "1", features = ["derive"] }
+tauri = { version = "2", features = [] }
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]

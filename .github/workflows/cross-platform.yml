@@ -34,6 +34,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: bash scripts/check_viewer_contract.sh
+        if: matrix.os == 'ubuntu-latest'
       - run: npm run check:web
       - uses: actions/upload-artifact@v4
         if: matrix.os == 'ubuntu-latest'
