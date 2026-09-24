@@ -6,3 +6,7 @@ license.workspace = true
 
 [dependencies]
 linkpoint-core = { path = "../linkpoint-core" }
+serde.workspace = true
+serde-llsd-benthic.workspace = true
+thiserror.workspace = true
+url.workspace = true

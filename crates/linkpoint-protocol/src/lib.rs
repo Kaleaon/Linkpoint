@@ -1,28 +1,18 @@
-//! Second Life/OpenSimulator wire-protocol boundary.
+//! Portable Second Life/OpenSimulator wire protocol primitives.
+//!
+//! This crate deliberately contains no sockets or platform APIs. Callers own
+//! HTTP/UDP transport and feed bytes into these deterministic codecs and state
+//! machines, which keeps the protocol testable with sanitized fixtures.
 
-/// Reliable packet sequencing is intentionally independent from sockets so it
-/// can be driven by captured, sanitized Lumiya parity fixtures.
-#[derive(Debug, Default)]
-pub struct ReliableSequence {
-    next: u32,
-}
+pub mod capabilities;
+pub mod endpoint;
+pub mod llsd;
+pub mod login;
+pub mod packet;
+pub mod reliable;
 
-impl ReliableSequence {
-    pub fn take(&mut self) -> u32 {
-        let current = self.next;
-        self.next = self.next.wrapping_add(1);
-        current
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn sequence_wraps_as_the_udp_field_requires() {
-        let mut sequence = ReliableSequence { next: u32::MAX };
-        assert_eq!(sequence.take(), u32::MAX);
-        assert_eq!(sequence.take(), 0);
-    }
-}
+pub use capabilities::{CapabilitySet, Event, EventQueue};
+pub use endpoint::{EndpointPolicy, EndpointPolicyError};
+pub use login::{LoginOutcome, LoginParameters, LoginRedirect, LoginResponse, LoginResponseError};
+pub use packet::{PacketFlags, PacketFrequency, PacketHeader, PacketParseError};
+pub use reliable::{AckResult, ReliablePacket, ReliableUdp};

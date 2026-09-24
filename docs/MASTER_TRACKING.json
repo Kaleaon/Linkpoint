@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "last_verified_utc": "2026-04-24",
-    "commit": "e2011834a08d4888abd75beee10b772d7d0793a3",
+    "last_verified_utc": "2026-09-24",
+    "commit": "current branch (protocol foundation change)",
     "tracker_policy": "Any PR touching protocol/assets/render paths must update docs/MASTER_TRACKING.md and docs/MASTER_TRACKING.json"
   },
   "allowed_status_values": [
@@ -83,6 +83,30 @@
       "blocking_deps": [],
       "acceptance_tests": [
         "./gradlew :app:testDebugUnitTest --tests \"*OutfitManager*\""
+      ]
+    },
+    {
+      "task_id": "XP-001",
+      "acceptance_criterion": "Portable Rust protocol primitives cover LLSD, login request construction, endpoint security, capabilities/event queue, and reliable sequencing/retries",
+      "owner": "@protocol",
+      "status": "DONE",
+      "blocking_deps": [
+        "Socket and HTTP adapters remain a later milestone"
+      ],
+      "acceptance_tests": [
+        "cargo test -p linkpoint-protocol"
+      ]
+    },
+    {
+      "task_id": "XP-002",
+      "acceptance_criterion": "XML-RPC login outcomes and SL UDP header/zero-code framing are portable and bounded",
+      "owner": "@protocol",
+      "status": "DONE",
+      "blocking_deps": [
+        "Message-template body codecs remain a later milestone"
+      ],
+      "acceptance_tests": [
+        "cargo test -p linkpoint-protocol"
       ]
     }
   ],

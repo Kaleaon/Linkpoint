@@ -1,7 +1,7 @@
 # LINKPOINT MASTER TRACKING DOCUMENT (Code-verified snapshot)
 
-**Last verified:** 2026-04-24 (UTC)  
-**Commit:** `e2011834a08d4888abd75beee10b772d7d0793a3`  
+**Last verified:** 2026-09-24 (UTC)
+**Commit:** current branch (protocol foundation change)
 **Machine-readable tracker:** `docs/MASTER_TRACKING.json`  
 **Verification scope:** `Linkpoint/src/main/java/**/*.kt`
 
@@ -35,6 +35,8 @@ This file and `docs/MASTER_TRACKING.json` are the canonical tracker for moderniz
 | `MP-005` | Deferred caps are either implemented or explicitly tracked with owning backlog item | `@protocol` | `DONE` | none | `./gradlew :app:testDebugUnitTest --tests "*DeferredCapabilityConsumersTest*"` |
 | `MP-006` | Renderer feature parity includes HUD pass support | `@render-runtime` | `IN_PROGRESS` | HUD scene graph + compositor pass integration | `./gradlew :app:testDebugUnitTest --tests "*LumiyaRenderer*"` |
 | `MP-007` | Outfit pipeline returns real wearable resolution (no placeholder path) | `@assets-avatar` | `DONE` | none | `./gradlew :app:testDebugUnitTest --tests "*OutfitManager*"` |
+| `XP-001` | Portable Rust protocol primitives cover LLSD, login request construction, endpoint security, capabilities/event queue, and reliable sequencing/retries | `@protocol` | `DONE` | socket/HTTP adapters remain a later milestone | `cargo test -p linkpoint-protocol` |
+| `XP-002` | XML-RPC login outcomes and SL UDP header/zero-code framing are portable and bounded | `@protocol` | `DONE` | message-template body codecs remain a later milestone | `cargo test -p linkpoint-protocol` |
 
 ---
 

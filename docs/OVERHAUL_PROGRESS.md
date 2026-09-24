@@ -16,6 +16,9 @@ not imply feature parity with a production viewer.
 - [x] deterministic UI state projection with disconnect cleanup
 - [x] Rust workspace split into core, protocol, asset, cache, scene, and native
   adapter boundaries
+- [x] portable protocol foundation for LLSD XML/binary/notation, XML-RPC login
+  request construction, endpoint policy, seed capabilities, event queues, and
+  reliable UDP sequencing/retry behavior
 - [x] renderer-safe simulator object normalization moved out of the retired
   Electron bridge
 - [x] 24 named themes synchronized from linkpoint-design
@@ -35,8 +38,12 @@ generated.
   hand
 - [ ] Add a Tauri desktop shell with login-host allowlisting, HTTPS policy,
   secure credential storage, logout, chat, and lifecycle events
-- [ ] Port XML-RPC login and redirect validation to Rust with sanitized fixtures
-- [ ] Port capabilities/event queue and reliable UDP with packet parity fixtures
+- [x] Port XML-RPC login request construction and endpoint validation to Rust
+- [x] Port LLSD, seed capabilities/event-queue shapes, and transport-independent
+  reliable UDP sequencing/retries to Rust
+- [x] Parse XML-RPC login redirects and add UDP header/zero-code framing
+- [ ] Add HTTP/UDP transports, golden login/packet fixtures, message-template
+  codecs, ACK batching, throttling, and circuit recovery
 - [ ] Convert protocol objects into renderer-neutral scene snapshots/deltas
 - [ ] Introduce Babylon.js behind `packages/renderer`
 - [ ] Generate Android and iOS shells only after the desktop boundary is stable
