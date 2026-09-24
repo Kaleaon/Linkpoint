@@ -36,6 +36,7 @@ This file and `docs/MASTER_TRACKING.json` are the canonical tracker for moderniz
 | `MP-006` | Renderer feature parity includes HUD pass support | `@render-runtime` | `IN_PROGRESS` | HUD scene graph + compositor pass integration | `./gradlew :app:testDebugUnitTest --tests "*LumiyaRenderer*"` |
 | `MP-007` | Outfit pipeline returns real wearable resolution (no placeholder path) | `@assets-avatar` | `DONE` | none | `./gradlew :app:testDebugUnitTest --tests "*OutfitManager*"` |
 | `XP-001` | Portable Rust protocol primitives cover LLSD, login request construction, endpoint security, capabilities/event queue, and reliable sequencing/retries | `@protocol` | `DONE` | socket/HTTP adapters remain a later milestone | `cargo test -p linkpoint-protocol` |
+| `XP-002` | XML-RPC login outcomes and SL UDP header/zero-code framing are portable and bounded | `@protocol` | `DONE` | message-template body codecs remain a later milestone | `cargo test -p linkpoint-protocol` |
 
 ---
 

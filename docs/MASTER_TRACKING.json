@@ -96,6 +96,18 @@
       "acceptance_tests": [
         "cargo test -p linkpoint-protocol"
       ]
+    },
+    {
+      "task_id": "XP-002",
+      "acceptance_criterion": "XML-RPC login outcomes and SL UDP header/zero-code framing are portable and bounded",
+      "owner": "@protocol",
+      "status": "DONE",
+      "blocking_deps": [
+        "Message-template body codecs remain a later milestone"
+      ],
+      "acceptance_tests": [
+        "cargo test -p linkpoint-protocol"
+      ]
     }
   ],
   "parity_debt": {

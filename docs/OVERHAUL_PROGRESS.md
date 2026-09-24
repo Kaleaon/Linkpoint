@@ -41,8 +41,9 @@ generated.
 - [x] Port XML-RPC login request construction and endpoint validation to Rust
 - [x] Port LLSD, seed capabilities/event-queue shapes, and transport-independent
   reliable UDP sequencing/retries to Rust
-- [ ] Add HTTP/UDP transports, login response fixture coverage, redirect state,
-  packet codecs, throttling, and circuit recovery
+- [x] Parse XML-RPC login redirects and add UDP header/zero-code framing
+- [ ] Add HTTP/UDP transports, golden login/packet fixtures, message-template
+  codecs, ACK batching, throttling, and circuit recovery
 - [ ] Convert protocol objects into renderer-neutral scene snapshots/deltas
 - [ ] Introduce Babylon.js behind `packages/renderer`
 - [ ] Generate Android and iOS shells only after the desktop boundary is stable
