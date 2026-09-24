@@ -34,11 +34,15 @@ workspace.
   crate under `crates/`.
 - Keep Tauri-specific code inside `crates/linkpoint-tauri` (and the future
   native shell), behind the client contract.
-- Do not copy decompiled or analyzed source into active application code.
+- Do not copy recovered or analyzed source indiscriminately. Small adaptations
+  require file-level provenance, license/notice review, maintainer approval,
+  attribution, and tests; otherwise implement independently from behavior.
 
 See [docs/REPOSITORY_LAYOUT.md](docs/REPOSITORY_LAYOUT.md) for ownership details
 and [docs/OVERHAUL_ARCHITECTURE.md](docs/OVERHAUL_ARCHITECTURE.md) for dependency
-rules.
+rules. For protocol or parity work informed by Lumiya, follow the
+[Lumiya-Redux working guide](docs/LUMIYA_REDUX_WORKING_GUIDE.md) to establish an
+executable oracle, sanitize fixtures, and apply the source-review gate.
 
 ## Validation
 

@@ -128,4 +128,7 @@ remain release-environment work and are not implied by that preview artifact.
 
 Each phase should be delivered in small pull requests with its exit-gate evidence
 linked from `docs/OVERHAUL_PROGRESS.md`; scaffolding alone must never be marked as
-feature complete.
+feature complete. Protocol and parity slices should follow the
+[Lumiya-Redux working guide](LUMIYA_REDUX_WORKING_GUIDE.md), which translates
+the reference project's conformance practices into the Rust-owned protocol and
+React `ViewerClient` boundaries used here.

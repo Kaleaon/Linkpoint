@@ -35,7 +35,11 @@ entry points. CI for these paths lives in `.github/workflows/cross-platform.yml`
 | `file_bundle/`, `kotlin-translations/` | Historical migration inputs |
 
 Reference areas may inform tests and documented behavior. Active TypeScript and
-Rust code must not import them or copy implementation from decompiled sources.
+Rust code must not import legacy Android trees as runtime dependencies. A small
+source adaptation from Lumiya-Redux is permitted only after the provenance,
+license/notice, attribution, and testing gate in the
+[Lumiya-Redux working guide](LUMIYA_REDUX_WORKING_GUIDE.md); otherwise port
+observable behavior independently through synthetic fixtures.
 When behavior is migrated, express it as a clean contract plus independently
 written implementation and fixture-backed tests.
 

@@ -9,6 +9,7 @@ The React/Rust viewer is the active application. Start with these documents:
 | [REPOSITORY_LAYOUT.md](REPOSITORY_LAYOUT.md) | Active workspace ownership and reference-code boundaries |
 | [OVERHAUL_ARCHITECTURE.md](OVERHAUL_ARCHITECTURE.md) | Cross-platform dependency rules and migration gates |
 | [OVERHAUL_PROGRESS.md](OVERHAUL_PROGRESS.md) | Current implementation progress and evidence |
+| [LUMIYA_REDUX_WORKING_GUIDE.md](LUMIYA_REDUX_WORKING_GUIDE.md) | Conformance-first workflow for using Lumiya-Redux as behavioral evidence |
 
 ## Documentation map
 
