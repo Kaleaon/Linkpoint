@@ -13,9 +13,11 @@ them as the new application:
   future work under `apps/linkpoint`.
 * **linkpoint-design** owns visual tokens, layouts, accessibility rules, and
   screen specifications. Visual code moves into `packages/design-system`.
-* **Lumiya-Redux** and the preserved Lumiya analysis in this repository are
-  behavioral references for protocol edge cases and viewer feature parity.
-  Decompiled code is reference material, not code to copy into the product.
+* **Lumiya-Redux** is a buildable, source-complete executable oracle for
+  protocol edge cases and viewer feature parity. Its tests, tooling, and small
+  source adaptations may be used through the provenance, licensing, and notice
+  gate in the [Lumiya-Redux working guide](LUMIYA_REDUX_WORKING_GUIDE.md); its
+  Android architecture is not a replacement for the Rust/React boundaries.
 * The supplied architecture review selects a Tauri 2 shell, a Rust networking
   and session core, a runtime-agnostic React UI, and a renderer-neutral scene
   contract. Babylon.js is the first rendering target once the contract is

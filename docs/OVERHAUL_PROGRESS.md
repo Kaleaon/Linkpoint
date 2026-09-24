@@ -67,7 +67,7 @@ requirements, never as a source of blindly copied code:
 | --- | --- | --- |
 | [Second Life Viewer](https://github.com/secondlife/viewer) | Canonical open-source protocol and viewer behavior | Record the upstream file/commit in parity tests; preserve license notices for adapted code |
 | [Firestorm Viewer](https://github.com/FirestormViewer/phoenix-firestorm) | Widely deployed viewer behavior and OpenSim compatibility | Compare behavior where official code is silent; do not import UI wholesale |
-| Lumiya / Lumiya-Redux | Mobile interaction, lifecycle, protocol edge cases | Treat decompiled material as behavioral evidence only; implement independently |
+| Lumiya / Lumiya-Redux | Executable compatibility oracle, mobile behavior, protocol edge cases, conformance tooling | Pin verified revisions; use synthetic differential fixtures; review provenance, licensing, and notices before any direct source adaptation |
 | [Second Life protocol documentation](https://wiki.secondlife.com/wiki/Category:Protocols) | Message and capability documentation | Prefer documented wire behavior and validate against sanitized fixtures |
 
 No credentials, session identifiers, private chat, inventory names, or other
