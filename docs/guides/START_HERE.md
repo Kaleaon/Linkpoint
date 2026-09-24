@@ -13,8 +13,8 @@
    ```
 
 3. **Check status:**
-   - See [docs/FIXES_AND_STATUS.md](docs/FIXES_AND_STATUS.md) for current issues
-   - See [todo.md](todo.md) for task tracking
+   - See [FIXES_AND_STATUS.md](../FIXES_AND_STATUS.md) for legacy issues
+   - See the [archived task list](../archive/status/todo.md) for historical tracking
 
 ---
 

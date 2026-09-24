@@ -242,13 +242,12 @@ Linkpoint/
 ├── CONTRIBUTING.md              # Contribution guidelines
 ├── PRIVACY_POLICY.md            # Privacy policy
 ├── THIRD_PARTY_VIEWER_POLICY_COMPLIANCE.md
-├── APP_VERSIONS.md              # Version info
-├── START_HERE.md                # Getting started guide
-├── QUICK_START_GUIDE.md         # Quick setup
-├── todo.md                      # Task tracking
 ├── docs/
 │   ├── README.md                # Documentation index
 │   ├── FIXES_AND_STATUS.md      # This file
+│   ├── guides/                  # Legacy setup guides
+│   ├── reference/               # Version and reference material
+│   ├── archive/                 # Completed reports and task lists
 │   └── Broken_Code_Analysis_and_Fixes.md
 └── Linkpoint/                   # Main app source
     └── src/main/kotlin/com/linkpoint/

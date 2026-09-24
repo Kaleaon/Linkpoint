@@ -11,11 +11,15 @@ have been re-verified against current source; items already resolved by merged
 PRs #559–#575 (protocol UDP fixes, renderer ctx init, rendering/UDP errors,
 stub-screen fixes) are marked `[RESOLVED]` and dropped from the active list.
 
-This directory supersedes the ad-hoc earlier notes (`Broken_Code_Analysis_and_Fixes.md`,
-`FIXES_AND_STATUS.md`, `LOG_ANALYSIS_FIX_PLAN.md`, `comprehensive_fixes_complete.md`,
-`linkpoint_issues_analysis.md`, `linkpoint_null_safety_analysis.md`,
-`BROKEN_CODE_AUDIT_2026-04-24.md`) with a single, freshly verified picture of
-what remains broken or incomplete.
+This directory supersedes the ad-hoc earlier notes
+([`Broken_Code_Analysis_and_Fixes.md`](../Broken_Code_Analysis_and_Fixes.md),
+[`FIXES_AND_STATUS.md`](../FIXES_AND_STATUS.md),
+[`LOG_ANALYSIS_FIX_PLAN.md`](../LOG_ANALYSIS_FIX_PLAN.md),
+[`comprehensive_fixes_complete.md`](../archive/project-reports/comprehensive_fixes_complete.md),
+[`linkpoint_issues_analysis.md`](../reports/analysis/linkpoint_issues_analysis.md),
+[`linkpoint_null_safety_analysis.md`](../reports/analysis/linkpoint_null_safety_analysis.md),
+and [`BROKEN_CODE_AUDIT_2026-04-24.md`](../BROKEN_CODE_AUDIT_2026-04-24.md))
+with a single, freshly verified picture of what remains broken or incomplete.
 
 ## How this audit is organised
 

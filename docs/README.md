@@ -10,6 +10,20 @@ The React/Rust viewer is the active application. Start with these documents:
 | [OVERHAUL_ARCHITECTURE.md](OVERHAUL_ARCHITECTURE.md) | Cross-platform dependency rules and migration gates |
 | [OVERHAUL_PROGRESS.md](OVERHAUL_PROGRESS.md) | Current implementation progress and evidence |
 
+## Documentation map
+
+| Directory | Purpose |
+|----------|---------|
+| [architecture/](architecture/) | Architecture diagrams and implementation blueprints |
+| [guides/](guides/) | Setup and operating guides, including legacy Android instructions |
+| [reference/](reference/) | Version and compatibility reference material |
+| [reports/](reports/) | Audit, analysis, and automation output retained as evidence |
+| [archive/](archive/) | Completed reports and historical task/status documents |
+| [fixes/](fixes/) | Current, sector-based legacy broken-code audit |
+
+Project policies and active workspace manifests remain at the repository root;
+supporting documents belong in one of the categories above.
+
 The sections below primarily document the legacy Kotlin/Android viewer. They
 remain useful for migration parity but do not describe the default application.
 

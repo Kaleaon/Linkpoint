@@ -54,6 +54,20 @@ When adding documentation:
    repository root.
 4. State whether instructions target Linkpoint Next or the legacy client.
 
+Documentation is grouped by purpose rather than stored at the repository root:
+
+| Path | Contents |
+| --- | --- |
+| `docs/architecture/` | Architecture diagrams and technical blueprints |
+| `docs/guides/` | Setup and operational guides |
+| `docs/reference/` | Durable version and compatibility references |
+| `docs/reports/` | Analysis output retained for future work |
+| `docs/archive/` | Completed project reports and historical status files |
+
+Keep the repository root limited to workspace manifests, project policies, and
+the primary entry-point documents. Put maintenance automation in
+`scripts/maintenance/` and one-off developer utilities in `tools/`.
+
 ## Dependency direction
 
 Frontend screens depend on stores, clients, and shared types. Native adapters

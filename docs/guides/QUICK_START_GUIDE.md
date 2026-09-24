@@ -95,6 +95,6 @@ adb uninstall com.linkpoint.debug
 
 | Document | Content |
 |----------|---------|
-| [docs/FIXES_AND_STATUS.md](docs/FIXES_AND_STATUS.md) | Fix history, known issues |
-| [todo.md](todo.md) | Current tasks |
-| [README.md](README.md) | Project overview |
+| [FIXES_AND_STATUS.md](../FIXES_AND_STATUS.md) | Legacy fix history and known issues |
+| [archived task list](../archive/status/todo.md) | Historical task tracking |
+| [README.md](../../README.md) | Project overview |
