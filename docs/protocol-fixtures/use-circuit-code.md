@@ -15,10 +15,12 @@ do not come from a resident or a live session.
   `f7de677ed26cf53a12e217764bb48f0ebed21701`,
   `crates/messages/src/udp/core/circuit_code.rs` and its circuit-code test.
 
-The references agree that the packet is Low-frequency message 3, is not
-zero-coded, and contains a little-endian U32 followed by the session and agent
-UUIDs in wire order. No source was copied: Linkpoint uses a newly constructed
-fictional packet to test the public wire behavior.
+The references agree that the packet is reliable, is Low-frequency message 3,
+is not zero-coded, and contains a little-endian U32 followed by the session and
+agent UUIDs in wire order. In particular, Lumiya sets `isReliable` before both
+temporary- and agent-circuit sends, and the legacy Linkpoint transport also
+sends this message with `reliable = true`. No source was copied: Linkpoint uses
+a newly constructed fictional packet to test the public wire behavior.
 
 ## Synthetic values
 
@@ -31,5 +33,7 @@ fictional packet to test the public wire behavior.
 
 The complete expected packet is asserted in the colocated Rust unit test.
 Decoding is intentionally bounded to exactly 36 body bytes and rejects
-truncation, trailing bytes, alternate flags, extra headers, or another message
-identifier.
+truncation, trailing bytes, non-reliable or zero-coded framing, extra headers,
+or another message identifier. The resent flag remains valid because reliable
+UDP retransmissions preserve the message body and sequence while setting that
+flag.
