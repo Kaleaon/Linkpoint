@@ -5,6 +5,7 @@
 //! machines, which keeps the protocol testable with sanitized fixtures.
 
 pub mod capabilities;
+pub mod circuit;
 pub mod endpoint;
 pub mod llsd;
 pub mod login;
@@ -13,6 +14,7 @@ pub mod reliable;
 pub mod transport;
 
 pub use capabilities::{CapabilitySet, Event, EventQueue};
+pub use circuit::{CircuitCodecError, USE_CIRCUIT_CODE_MESSAGE_ID, UseCircuitCode};
 pub use endpoint::{EndpointPolicy, EndpointPolicyError};
 pub use login::{LoginOutcome, LoginParameters, LoginRedirect, LoginResponse, LoginResponseError};
 pub use packet::{PacketFlags, PacketFrequency, PacketHeader, PacketParseError};
