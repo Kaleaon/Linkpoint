@@ -9,6 +9,7 @@ import { AuthManager } from './auth';
 import { corsHandler } from './cors-handler';
 import { slBridge } from './sl-bridge';
 import { localCache } from './local-cache';
+import { AisClient } from './ais';
 
 export class InventoryManager extends Utils.EventEmitter {
   public protocol: SLConnectionFull;
@@ -17,11 +18,21 @@ export class InventoryManager extends Utils.EventEmitter {
   public items: Map<string, any> = new Map();
   public folders: Map<string, any> = new Map();
   public loadedFromCache: boolean = false;
+  public aisClient: AisClient;
 
   constructor(protocolManager: SLConnectionFull, authManager: AuthManager) {
     super();
     this.protocol = protocolManager;
     this.auth = authManager;
+    this.aisClient = new AisClient(
+      () => this.protocol.capabilities || {},
+      async () => {
+        if (typeof this.protocol.fetchCapabilities === 'function') {
+          await this.protocol.fetchCapabilities();
+        }
+        return this.protocol.capabilities || {};
+      }
+    );
   }
 
   async init() {
@@ -223,5 +234,129 @@ export class InventoryManager extends Utils.EventEmitter {
 
   handleInventoryUpdate(data: any) {
     this.emit('inventory_updated', data);
+  }
+
+  public getCurrentOutfitFolderId(): string {
+    for (const [id, folder] of this.folders.entries()) {
+      if (
+        folder.type === 24 ||
+        folder.folderType === 24 ||
+        folder.type_default === 24 ||
+        folder.name === 'Current Outfit' ||
+        folder.preferredType === 'current_outfit'
+      ) {
+        return id;
+      }
+    }
+    const cofId = 'current_outfit_folder';
+    if (!this.folders.has(cofId)) {
+      this.folders.set(cofId, {
+        id: cofId,
+        name: 'Current Outfit',
+        type: 'folder',
+        folderType: 24,
+        parent: this.protocol.inventoryRoot || 'root',
+        children: []
+      });
+    }
+    return cofId;
+  }
+
+  public getFolderItemIds(folderId: string): string[] {
+    const itemIds: string[] = [];
+    for (const [id, item] of this.items.entries()) {
+      if (item.parent === folderId) {
+        itemIds.push(id);
+      }
+    }
+    const folder = this.folders.get(folderId);
+    if (folder && Array.isArray(folder.children)) {
+      for (const childId of folder.children) {
+        if (this.items.has(childId) && !itemIds.includes(childId)) {
+          itemIds.push(childId);
+        }
+      }
+    }
+    return itemIds;
+  }
+
+  async replaceOutfit(outfitFolderId: string): Promise<{ success: boolean; method: string; details?: any }> {
+    const cofId = this.getCurrentOutfitFolderId();
+    const itemIds = this.getFolderItemIds(outfitFolderId);
+
+    if (this.aisClient.hasAisCapability()) {
+      const res = await this.aisClient.replaceOutfit(cofId, outfitFolderId, itemIds);
+      if (res.success) {
+        const cofFolder = this.folders.get(cofId);
+        if (cofFolder) {
+          cofFolder.children = [...itemIds];
+        }
+        this.emit('outfit_changed', { mode: 'replace', method: 'ais_v3', cofId, outfitFolderId, itemIds });
+        this.emit('inventory_updated');
+        return { success: true, method: 'ais_v3', details: res.data };
+      }
+      console.warn('[Inventory] AIS replaceOutfit failed, falling back to batch packet dispatch:', res.error);
+    }
+
+    return this.executeOutfitFallback('replace', cofId, outfitFolderId, itemIds);
+  }
+
+  async addToOutfit(outfitFolderId: string): Promise<{ success: boolean; method: string; details?: any }> {
+    const cofId = this.getCurrentOutfitFolderId();
+    const itemIds = this.getFolderItemIds(outfitFolderId);
+
+    if (this.aisClient.hasAisCapability()) {
+      const res = await this.aisClient.addToOutfit(cofId, outfitFolderId, itemIds);
+      if (res.success) {
+        const cofFolder = this.folders.get(cofId);
+        if (cofFolder) {
+          const currentChildren = Array.isArray(cofFolder.children) ? cofFolder.children : [];
+          cofFolder.children = Array.from(new Set([...currentChildren, ...itemIds]));
+        }
+        this.emit('outfit_changed', { mode: 'append', method: 'ais_v3', cofId, outfitFolderId, itemIds });
+        this.emit('inventory_updated');
+        return { success: true, method: 'ais_v3', details: res.data };
+      }
+      console.warn('[Inventory] AIS addToOutfit failed, falling back to batch packet dispatch:', res.error);
+    }
+
+    return this.executeOutfitFallback('append', cofId, outfitFolderId, itemIds);
+  }
+
+  private async executeOutfitFallback(
+    mode: 'replace' | 'append',
+    cofId: string,
+    outfitFolderId: string,
+    itemIds: string[]
+  ): Promise<{ success: boolean; method: string; details?: any }> {
+    const cofFolder = this.folders.get(cofId);
+
+    if (mode === 'replace') {
+      if (cofFolder) {
+        cofFolder.children = [...itemIds];
+      }
+    } else {
+      if (cofFolder) {
+        const currentChildren = Array.isArray(cofFolder.children) ? cofFolder.children : [];
+        cofFolder.children = Array.from(new Set([...currentChildren, ...itemIds]));
+      }
+    }
+
+    for (const itemId of itemIds) {
+      const item = this.items.get(itemId);
+      if (item && slBridge.connected) {
+        try {
+          await slBridge.sendChat(`/wear ${item.name || itemId}`, 0, 1);
+        } catch {
+          // Ignore individual packet errors during batch fallback
+        }
+      }
+    }
+
+    this.emit('outfit_changed', { mode, method: 'packet_fallback', cofId, outfitFolderId, itemIds });
+    this.emit('outfit_fallback_used', { mode, cofId, outfitFolderId, itemIds });
+    this.emit('inventory_updated');
+
+    return { success: true, method: 'packet_fallback' };
   }
 }
