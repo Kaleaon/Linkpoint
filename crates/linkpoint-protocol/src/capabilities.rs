@@ -36,6 +36,12 @@ impl CapabilitySet {
         self.0.get(name).map(String::as_str)
     }
 
+    /// Return the AgentInventoryService capability URL if available.
+    pub fn agent_inventory_service(&self) -> Option<&str> {
+        self.get("AgentInventoryService")
+            .or_else(|| self.get("AgentInventoryService3"))
+    }
+
     pub fn iter(&self) -> impl Iterator<Item = (&str, &str)> {
         self.0
             .iter()
@@ -107,14 +113,24 @@ mod tests {
 
     #[test]
     fn parses_seed_and_event_queue_shapes() {
-        let caps = CapabilitySet::from_llsd(&Value::Map(HashMap::from([(
-            "EventQueueGet".into(),
-            Value::URI("https://sim.example/cap/event".into()),
-        )])))
+        let caps = CapabilitySet::from_llsd(&Value::Map(HashMap::from([
+            (
+                "EventQueueGet".into(),
+                Value::URI("https://sim.example/cap/event".into()),
+            ),
+            (
+                "AgentInventoryService".into(),
+                Value::URI("https://sim.example/cap/ais3".into()),
+            ),
+        ])))
         .unwrap();
         assert_eq!(
             caps.get("EventQueueGet"),
             Some("https://sim.example/cap/event")
+        );
+        assert_eq!(
+            caps.agent_inventory_service(),
+            Some("https://sim.example/cap/ais3")
         );
 
         let queue = EventQueue::from_llsd(&Value::Map(HashMap::from([
