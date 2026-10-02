@@ -241,6 +241,18 @@ class AisClient(
 
         throw lastIOException ?: AisServerException(599, "AIS retries exhausted")
     }
+
+    companion object {
+        fun createWithCronet(
+            context: android.content.Context,
+            endpointProvider: InventoryApiEndpointProvider
+        ): AisClient {
+            return AisClient(
+                endpointProvider = endpointProvider,
+                transport = com.linkpoint.network.CronetTransportAdapter.create(context)
+            )
+        }
+    }
 }
 
 interface InventoryApiEndpointProvider {

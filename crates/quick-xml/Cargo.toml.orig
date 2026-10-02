@@ -1,0 +1,53 @@
+[package]
+name = "quick-xml"
+version = "0.23.1"
+description = "High performance xml reader and writer"
+edition = "2018"
+
+documentation = "https://docs.rs/quick-xml"
+repository = "https://github.com/tafia/quick-xml"
+
+keywords = ["xml", "serde", "parser", "writer", "html"]
+categories = ["encoding", "parsing", "parser-implementations"]
+license = "MIT"
+
+[dependencies]
+encoding_rs = { version = "0.8", optional = true }
+serde = { version = "1.0", optional = true }
+memchr = "2.5"
+
+[dev-dependencies]
+criterion = "0.3"
+pretty_assertions = "1.2"
+regex = "1"
+serde = { version = "1.0", features = ["derive"] }
+serde-value = "0.7"
+
+[[bench]]
+name = "bench"
+harness = false
+
+[features]
+default = []
+encoding = ["encoding_rs"]
+serialize = ["serde"]
+escape-html = []
+
+[package.metadata.docs.rs]
+features = ["serialize"]
+
+[[test]]
+name = "serde_attrs"
+required-features = ["serialize"]
+
+[[test]]
+name = "serde_roundtrip"
+required-features = ["serialize"]
+
+[[test]]
+name = "serde-de"
+required-features = ["serialize"]
+
+[[test]]
+name = "serde-migrated"
+required-features = ["serialize"]

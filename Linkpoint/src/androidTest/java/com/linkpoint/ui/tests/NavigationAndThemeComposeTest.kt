@@ -3,6 +3,7 @@ package com.linkpoint.ui.tests
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Home
@@ -122,10 +123,10 @@ private fun BottomTabHarness() {
                 }
             }
         }
-    ) {
+    ) { innerPadding ->
         Text(
             text = "Route: $selectedRoute",
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize().padding(innerPadding)
         )
     }
 }
@@ -171,8 +172,8 @@ private fun DrawerHarness() {
                     }
                 )
             }
-        ) {
-            Column(modifier = Modifier.fillMaxSize()) {
+        ) { innerPadding ->
+            Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
                 Text("Section: $selectedSection")
             }
         }

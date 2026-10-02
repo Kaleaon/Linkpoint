@@ -67,13 +67,13 @@ class Vector2(var x: Float, var y: Float) {
     operator fun get(idx: Int): Float = when (idx) {
         0 -> x
         1 -> y
-        else -> throw IndexOutOfBoundsException(idx)
+        else -> throw IndexOutOfBoundsException("Index: $idx")
     }
 
     operator fun set(idx: Int, v: Float) = when (idx) {
         0 -> x = v
         1 -> y = v
-        else -> throw IndexOutOfBoundsException(idx)
+        else -> throw IndexOutOfBoundsException("Index: $idx")
     }
 
     operator fun plus(b: Vector2): Vector2 = Vector2(x + b.x, y + b.y)
