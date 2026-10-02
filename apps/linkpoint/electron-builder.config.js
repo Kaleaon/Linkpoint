@@ -46,14 +46,22 @@ function mainProcessDeps(rootDir) {
 // rollup and esbuild along with it.
 const NOT_ACTUALLY_RUNTIME = new Set(['vitest']);
 
+const rootDir = __dirname;
+const workspaceRoot = path.resolve(rootDir, '../..');
+
+function isSubdirectoryOrSame(child, parent) {
+  const relative = path.relative(parent, child);
+  return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+}
+
 // Resolve a package the way Node does: walk up looking for node_modules.
-function resolvePackageDir(name, fromDir, rootDir) {
+function resolvePackageDir(name, fromDir, stopDir = workspaceRoot) {
   let dir = fromDir;
   for (;;) {
     const candidate = path.join(dir, 'node_modules', name);
     if (fs.existsSync(path.join(candidate, 'package.json'))) return candidate;
     const parent = path.dirname(dir);
-    if (parent === dir || !dir.startsWith(rootDir)) return null;
+    if (parent === dir || !isSubdirectoryOrSame(dir, stopDir)) return null;
     dir = parent;
   }
 }
@@ -66,10 +74,10 @@ function dependencyClosure(rootDir) {
     const [name, fromDir] = stack.pop();
     if (NOT_ACTUALLY_RUNTIME.has(name)) continue;
 
-    const dir = resolvePackageDir(name, fromDir, rootDir);
+    const dir = resolvePackageDir(name, fromDir, workspaceRoot);
     if (!dir) continue; // optional/unmet dependency; nothing to package
 
-    const relative = path.relative(rootDir, dir).split(path.sep).join('/');
+    const relative = path.relative(workspaceRoot, dir).split(path.sep).join('/');
     if (found.has(relative)) continue;
     found.add(relative);
 
@@ -81,25 +89,26 @@ function dependencyClosure(rootDir) {
   return found;
 }
 
-// Every package directly under node_modules, with scopes expanded.
+// Every package directly under node_modules (app or workspace level), with scopes expanded.
 function topLevelPackages(rootDir) {
-  let modulesDir = path.join(rootDir, 'node_modules');
-  if (!fs.existsSync(modulesDir)) {
-    modulesDir = path.join(rootDir, '../../node_modules');
-  }
-  if (!fs.existsSync(modulesDir)) return [];
-  const names = [];
-  for (const entry of fs.readdirSync(modulesDir, { withFileTypes: true })) {
-    if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
-    if (entry.name.startsWith('@')) {
-      for (const scoped of fs.readdirSync(path.join(modulesDir, entry.name), { withFileTypes: true })) {
-        if (scoped.isDirectory()) names.push(`${entry.name}/${scoped.name}`);
+  const names = new Set();
+  for (const modulesDir of [path.join(workspaceRoot, 'node_modules'), path.join(rootDir, 'node_modules')]) {
+    if (!fs.existsSync(modulesDir)) continue;
+    for (const entry of fs.readdirSync(modulesDir, { withFileTypes: true })) {
+      if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
+      if (entry.name.startsWith('@')) {
+        const scopeDir = path.join(modulesDir, entry.name);
+        if (fs.existsSync(scopeDir)) {
+          for (const scoped of fs.readdirSync(scopeDir, { withFileTypes: true })) {
+            if (scoped.isDirectory()) names.add(`${entry.name}/${scoped.name}`);
+          }
+        }
+      } else {
+        names.add(entry.name);
       }
-    } else {
-      names.push(entry.name);
     }
   }
-  return names;
+  return [...names];
 }
 
 // Exclude the top-level packages the main process does not need, rather than
@@ -128,7 +137,6 @@ function unusedTopLevelPackages(rootDir) {
     .sort();
 }
 
-const rootDir = __dirname;
 
 module.exports = {
   appId: 'io.linkpoint.viewer',
