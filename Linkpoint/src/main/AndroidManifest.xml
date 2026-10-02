@@ -98,19 +98,6 @@
             <meta-data android:name="com.google.android.vr.primary" android:value="true"/>
         </activity>
 
-        <!-- Chat Activity -->
-        <activity
-            android:name=".ui.chat.ChatActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize"
-            android:parentActivityName=".ui.world.WorldViewActivity" />
-
-        <!-- Inventory Activity -->
-        <activity
-            android:name=".ui.inventory.InventoryActivity"
-            android:exported="false"
-            android:parentActivityName=".ui.world.WorldViewActivity" />
-
         <!-- Minimap Activity -->
         <activity
             android:name=".ui.minimap.MinimapActivity"
@@ -180,18 +167,6 @@
             android:windowSoftInputMode="adjustResize"
             android:parentActivityName=".ui.world.WorldViewActivity" />
 
-        <!-- Friends Activity -->
-        <activity
-            android:name=".ui.friends.FriendsActivity"
-            android:exported="false"
-            android:parentActivityName=".ui.world.WorldViewActivity" />
-
-        <!-- Groups Activity -->
-        <activity
-            android:name=".ui.groups.GroupsActivity"
-            android:exported="false"
-            android:parentActivityName=".ui.world.WorldViewActivity" />
-
         <!-- Nearby People Activity -->
         <activity
             android:name=".ui.people.NearbyPeopleActivity"
@@ -202,13 +177,6 @@
         <activity
             android:name=".ui.teleport.TeleportHistoryActivity"
             android:exported="false"
-            android:parentActivityName=".ui.world.WorldViewActivity" />
-
-        <!-- Radar Activity -->
-        <activity
-            android:name=".ui.radar.RadarActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"
             android:parentActivityName=".ui.world.WorldViewActivity" />
 
         <!-- Grid Connection Service -->
@@ -238,7 +206,7 @@
             android:label="Script Editor"
             android:theme="@style/Theme.Linkpoint"
             android:exported="false"
-            android:parentActivityName=".ui.inventory.InventoryActivity" />
+            android:parentActivityName=".ui.world.WorldViewActivity" />
 
         <!-- Notecard Editor Activity -->
         <activity
@@ -246,7 +214,7 @@
             android:label="Notecard Editor"
             android:theme="@style/Theme.Linkpoint"
             android:exported="false"
-            android:parentActivityName=".ui.inventory.InventoryActivity" />
+            android:parentActivityName=".ui.world.WorldViewActivity" />
 
         <!-- Push delivery channel (FCM-compatible relay wakeups) -->
         <service

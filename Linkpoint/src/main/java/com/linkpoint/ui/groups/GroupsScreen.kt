@@ -66,7 +66,7 @@ data class GroupData(
 )
 
 /**
- * Compose version of GroupsActivity.
+ * Compose screen for Groups feature.
  * 
  * Features:
  * - My Groups list

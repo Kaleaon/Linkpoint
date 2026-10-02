@@ -14,7 +14,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.groups.Group
-import com.linkpoint.ui.chat.ChatActivity
+import com.linkpoint.ui.navigation.WorldHomeHostActivity
+import com.linkpoint.ui.navigation.Routes
 import kotlinx.coroutines.launch
 
 /**
@@ -64,7 +65,7 @@ class GroupDetailsDialog : DialogFragment() {
 /**
  * Open the group chat session for [group]. Creates the local session
  * record (`IMManager.startGroupSessionLocal`) so the chat panel binds
- * to the right `sessionId`, then launches `ChatActivity`. The chatterbox
+ * to the right `sessionId`, then launches the Compose chat route. The chatterbox
  * session itself is brought up lazily on the first send via the UDP
  * `ImprovedInstantMessage(Dialog=15)` flow — Lumiya parity, see
  * `IMManager.sendSessionChat`.
@@ -79,9 +80,7 @@ private fun DialogFragment.openGroupChat(group: Group) {
         } catch (e: Exception) {
             group.groupId
         }
-        val intent = Intent(ctx, ChatActivity::class.java).apply {
-            putExtra(ChatActivity.EXTRA_IM_SESSION_ID, sessionId.toString())
-        }
+        val intent = WorldHomeHostActivity.createIntent(ctx, Routes.CHAT, sessionId.toString())
         ctx.startActivity(intent)
     }
 }

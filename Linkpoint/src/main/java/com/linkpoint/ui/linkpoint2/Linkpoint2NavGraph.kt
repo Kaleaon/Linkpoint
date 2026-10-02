@@ -319,6 +319,10 @@ fun Linkpoint2RouteHost(
             onNavigateBack = back,
             modifier = modifier,
         )
+        route == Routes.RADAR -> com.linkpoint.ui.linkpoint2.routes.L2RadarRoute(
+            onNavigateBack = back,
+            modifier = modifier,
+        )
         route == Routes.MINIMAP -> L2MinimapRoute(
             onNavigateBack = back,
             onOpenWorldMap = { navController.navigateTo(Routes.MAP) },
