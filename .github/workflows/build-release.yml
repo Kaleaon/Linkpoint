@@ -90,8 +90,9 @@ jobs:
         run: |
           set -euo pipefail
           cd Linkpoint/build/outputs/apk
-          find . -type f \( -name "*.apk" -o -name "*.aab" \) -exec sha256sum {} + > checksums.sha256
-          cat checksums.sha256
+          find . -type f \( -name "*.apk" -o -name "*.aab" \) -exec sha256sum {} + > SHA256SUMS
+          cp SHA256SUMS checksums.sha256
+          cat SHA256SUMS
 
       - name: Attest build provenance (SLSA Level 3)
         uses: actions/attest-build-provenance@520d128f165991a6c774bcb264f323e3d70747f4 # v2.2.0
@@ -110,5 +111,6 @@ jobs:
           name: Linkpoint-${{ matrix.target }}-${{ matrix.arch }}-release-APK
           path: |
             Linkpoint/build/outputs/apk/*/release/*.apk
+            Linkpoint/build/outputs/apk/SHA256SUMS
             Linkpoint/build/outputs/apk/checksums.sha256
 

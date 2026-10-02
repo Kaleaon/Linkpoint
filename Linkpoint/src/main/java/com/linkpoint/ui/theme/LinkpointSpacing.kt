@@ -22,7 +22,15 @@ enum class DensityProfile {
     COMFORTABLE
 }
 
-fun ThemePack.resolvedDensityProfile(): DensityProfile = densityProfile ?: DensityProfile.STANDARD
+fun ThemePack.resolvedDensityProfile(): DensityProfile = densityProfile ?: when (layoutStructure) {
+    com.ktheme.models.LayoutStructure.LCARS,
+    com.ktheme.models.LayoutStructure.ART_DECO,
+    com.ktheme.models.LayoutStructure.TERMINAL,
+    com.ktheme.models.LayoutStructure.CYBERPUNK -> DensityProfile.COMPACT
+    com.ktheme.models.LayoutStructure.METRO,
+    com.ktheme.models.LayoutStructure.FRUTIGER_AERO -> DensityProfile.COMFORTABLE
+    else -> DensityProfile.STANDARD
+}
 
 fun ThemePack.toSpacing(): LinkpointSpacing {
     return when (resolvedDensityProfile()) {

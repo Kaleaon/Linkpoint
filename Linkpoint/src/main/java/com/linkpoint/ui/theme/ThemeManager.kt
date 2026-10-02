@@ -181,6 +181,17 @@ class ThemeManager private constructor(private val context: Context) {
     }
     
     /**
+     * Set the active layout structure on the active theme
+     */
+    fun setActiveLayoutStructure(layoutStructure: com.ktheme.models.LayoutStructure) {
+        val current = _activeTheme.value
+        if (current.layoutStructure != layoutStructure) {
+            val updated = current.copy(layoutStructure = layoutStructure)
+            setActiveTheme(updated)
+        }
+    }
+
+    /**
      * Set the active theme by ID
      */
     fun setActiveThemeById(themeId: String): Boolean {

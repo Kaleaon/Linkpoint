@@ -8,7 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
-import com.linkpoint.ui.chat.ChatActivity
+import com.linkpoint.ui.navigation.WorldHomeHostActivity
+import com.linkpoint.ui.navigation.Routes
 import com.linkpoint.ui.profile.ProfileActivity
 import com.linkpoint.ui.theme.LinkpointTheme
 import androidx.compose.runtime.getValue
@@ -85,9 +86,7 @@ class NearbyPeopleActivity : AppCompatActivity() {
         val sessionId = imManager.startP2PSession(person.id, person.name)
         imManager.markAsRead(sessionId)
 
-        val intent = Intent(this, ChatActivity::class.java).apply {
-            putExtra(ChatActivity.EXTRA_IM_SESSION_ID, sessionId.toString())
-        }
+        val intent = WorldHomeHostActivity.createIntent(this, Routes.CHAT, sessionId.toString())
         startActivity(intent)
     }
 

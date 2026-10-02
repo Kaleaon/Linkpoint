@@ -325,6 +325,7 @@ class LumiyaRenderer : RenderEngineProvider {
 
         // ── 1. Preparation ───────────────────────────────────────────────
         ctx.beginFrame()
+        com.linkpoint.assets.ProgressiveTextureStreamer.processFrameQueue()
         // Producer hook: animator ticks, joint UBO uploads, scene
         // mutations queued from non-GL threads. Runs before camera/UBO
         // refresh so pose updates are visible to the first pass.
@@ -528,11 +529,12 @@ class LumiyaRenderer : RenderEngineProvider {
         primId: Long,
         textureId: UUID,
         bitmap: Bitmap,
-        semantic: TextureFormatPolicy.TextureSemantic = TextureFormatPolicy.TextureSemantic.ALBEDO
+        semantic: TextureFormatPolicy.TextureSemantic = TextureFormatPolicy.TextureSemantic.ALBEDO,
+        isPlaceholder: Boolean = false
     ) {
         requireGlThread("uploadTextureForPrim")
         if (!isInitialized) return
-        val handle = ctx.textureCache.put(textureId, bitmap, semantic)
+        val handle = ctx.textureCache.putOrUpdate(textureId, bitmap, semantic, isPlaceholder)
         primStore.bindTextureToMatchingFaces(primId, textureId, handle)
         meshStore.bindTextureToMatchingFaces(primId, textureId, handle)
     }

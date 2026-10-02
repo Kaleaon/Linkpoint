@@ -42,8 +42,30 @@ data class ColorScheme(
     val inversePrimary: String
 )
 
+enum class LayoutStructure(
+    val id: String,
+    val displayName: String
+) {
+    METRO("metro", "Metro"),
+    LCARS("lcars", "LCARS"),
+    FRUTIGER_AERO("frutiger_aero", "Frutiger Aero"),
+    ART_DECO("art_deco", "Art Deco"),
+    TERMINAL("terminal", "Terminal"),
+    MODERN_GLASS("modern_glass", "Modern Glass"),
+    MATERIAL3("material3", "Material3"),
+    CYBERPUNK("cyberpunk", "Cyberpunk");
+
+    companion object {
+        fun fromId(id: String): LayoutStructure {
+            return entries.firstOrNull { it.id.equals(id, ignoreCase = true) || it.name.equals(id, ignoreCase = true) }
+                ?: MATERIAL3
+        }
+    }
+}
+
 data class Theme(
     val metadata: ThemeMetadata,
     val darkMode: Boolean,
-    val colorScheme: ColorScheme
+    val colorScheme: ColorScheme,
+    val layoutStructure: LayoutStructure = LayoutStructure.MATERIAL3
 )

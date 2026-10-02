@@ -33,9 +33,8 @@ import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.core.ConnectionState
-import com.linkpoint.ui.chat.ChatActivity
-import com.linkpoint.ui.friends.FriendsActivity
-import com.linkpoint.ui.inventory.InventoryActivity
+import com.linkpoint.ui.navigation.WorldHomeHostActivity
+import com.linkpoint.ui.navigation.Routes
 import com.linkpoint.ui.minimap.MinimapActivity
 import com.linkpoint.ui.avatar.MyAvatarActivity
 import com.linkpoint.ui.people.NearbyPeopleActivity
@@ -248,7 +247,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         
         // Setup quick action buttons
         btnChat.setOnClickListener {
-            startActivity(Intent(this, ChatActivity::class.java))
+            startActivity(WorldHomeHostActivity.createIntent(this, Routes.CHAT))
         }
         
         btnMinimap.setOnClickListener {
@@ -256,7 +255,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         }
         
         btnInventory.setOnClickListener {
-            startActivity(Intent(this, InventoryActivity::class.java))
+            startActivity(WorldHomeHostActivity.createIntent(this, Routes.INVENTORY))
         }
         
         btnXR.setOnClickListener {
@@ -286,9 +285,9 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                     }
                 },
                 onMenu = { drawerLayout.openDrawer(GravityCompat.START) },
-                onChat = { startActivity(Intent(this, ChatActivity::class.java)) },
+                onChat = { startActivity(WorldHomeHostActivity.createIntent(this, Routes.CHAT)) },
                 onMinimap = { startActivity(Intent(this, MinimapActivity::class.java)) },
-                onInventory = { startActivity(Intent(this, InventoryActivity::class.java)) },
+                onInventory = { startActivity(WorldHomeHostActivity.createIntent(this, Routes.INVENTORY)) },
                 onXr = {
                     if (app.isXREntryAvailable()) {
                         startActivity(Intent(this, XRWorldActivity::class.java))
@@ -297,7 +296,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                     }
                 },
                 onGestures = { showGesturesPopup() },
-                onFriends = { startActivity(Intent(this, FriendsActivity::class.java)) },
+                onFriends = { startActivity(WorldHomeHostActivity.createIntent(this, Routes.FRIENDS)) },
                 onNearby = { startActivity(Intent(this, NearbyPeopleActivity::class.java)) },
                 onCameraMode = {
                     val controller = app.renderManager.cameraController
@@ -588,7 +587,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         }
 
         btnFriends.setOnClickListener {
-            startActivity(Intent(this, FriendsActivity::class.java))
+            startActivity(WorldHomeHostActivity.createIntent(this, Routes.FRIENDS))
         }
 
         btnNearby.setOnClickListener {
@@ -1246,14 +1245,14 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.nav_chat -> startActivity(Intent(this, ChatActivity::class.java))
-            R.id.nav_inventory -> startActivity(Intent(this, InventoryActivity::class.java))
+            R.id.nav_chat -> startActivity(WorldHomeHostActivity.createIntent(this, Routes.CHAT))
+            R.id.nav_inventory -> startActivity(WorldHomeHostActivity.createIntent(this, Routes.INVENTORY))
             R.id.nav_minimap -> startActivity(Intent(this, MinimapActivity::class.java))
             R.id.nav_avatar -> startActivity(Intent(this, MyAvatarActivity::class.java))
-            R.id.nav_friends -> startActivity(Intent(this, FriendsActivity::class.java))
-            R.id.nav_groups -> startActivity(Intent(this, com.linkpoint.ui.groups.GroupsActivity::class.java))
+            R.id.nav_friends -> startActivity(WorldHomeHostActivity.createIntent(this, Routes.FRIENDS))
+            R.id.nav_groups -> startActivity(WorldHomeHostActivity.createIntent(this, Routes.GROUPS))
             R.id.nav_nearby -> startActivity(Intent(this, NearbyPeopleActivity::class.java))
-            R.id.nav_radar -> startActivity(Intent(this, com.linkpoint.ui.radar.RadarActivity::class.java))
+            R.id.nav_radar -> startActivity(WorldHomeHostActivity.createIntent(this, Routes.RADAR))
             R.id.nav_search -> startActivity(Intent(this, com.linkpoint.ui.search.SearchActivity::class.java))
             R.id.nav_world_map -> startActivity(Intent(this, com.linkpoint.ui.map.MapActivity::class.java))
             R.id.nav_teleport_home -> teleportHome()
