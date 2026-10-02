@@ -1,10 +1,9 @@
 # `@linkpoint/design-system`
 
-This package is the future owner of shared visual primitives. The initial theme
-JSON files are synchronized from `Kaleaon/linkpoint-design`; retain their names
-so the prototype, React app, and migration screenshots can be compared without
-a translation table.
+This package provides shared visual primitives, tokens, and theme definitions for Linkpoint Next, aligned with the **[Linkpoint Design Language](https://github.com/Kaleaon/linkpoint-design)** common reference frame.
 
-Do not edit synchronized JSON here without making the equivalent design-source
-change. Components, accessibility behavior, and typed token adapters belong in
-`src/` as they are migrated.
+- Theme JSON files in `themes/` are synchronized from `linkpoint-design/docs/` and conform to the app-neutral **Ktheme** schema.
+- Community theme contributions live in `ktheme-pr/themes/community/` and follow the upstream contribution pipeline documented in `ktheme-pr/README.md`.
+- Token mapping supports 24 Ktheme palette packs across four aesthetic families (Terminal & Neon, Console & Amber, Metal & Jewel, Daylight) and six interchangeable layout packs.
+
+Do not edit synchronized JSON here without making the equivalent upstream design-source change in `linkpoint-design`. Components, accessibility behavior, and typed token adapters belong in `src/`.
