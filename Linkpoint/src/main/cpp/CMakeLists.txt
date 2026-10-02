@@ -31,6 +31,9 @@ add_library(
     j2k_decoder.cpp
     com_lumiya_viewer_asset_J2kDecoder.cpp
     GestureTriggerEngine.cpp
+    audio/spatial/SpatialAudioEngine.cpp
+    jni/spatial_audio_jni.cpp
+    audio/voice/VivoxVoiceEngine.cpp
     ${LINKPOINT_ETCPAK_SOURCES}
 )
 
