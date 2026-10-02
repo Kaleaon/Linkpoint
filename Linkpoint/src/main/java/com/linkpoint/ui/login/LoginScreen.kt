@@ -72,6 +72,9 @@ data class LoginCredentials(
 data class GridDisplayInfo(
     val id: String,
     val name: String,
+    val status: String = "online",
+    val logoUrl: String? = null,
+    val loginUri: String = ""
 )
 
 /**
@@ -220,9 +223,9 @@ fun LoginScreen(
                         )
                         Spacer(Modifier.weight(1f))
                         Box {
+                            val selectedGridInfo = grids.getOrNull(credentials.selectedGridIndex)
                             L2Chip(
-                                label = (grids.getOrNull(credentials.selectedGridIndex)?.name
-                                    ?: "Second Life · Agni") + " ▾",
+                                label = (selectedGridInfo?.name ?: "Second Life") + " ▾",
                                 variant = L2ChipVariant.Primary,
                                 onClick = { if (!isLoading) gridExpanded = true },
                             )
@@ -232,7 +235,13 @@ fun LoginScreen(
                             ) {
                                 grids.forEachIndexed { index, grid ->
                                     DropdownMenuItem(
-                                        text = { Text(grid.name) },
+                                        text = {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                GridStatusDot(status = grid.status)
+                                                Spacer(Modifier.width(8.dp))
+                                                Text(grid.name)
+                                            }
+                                        },
                                         onClick = {
                                             credentials = credentials.copy(selectedGridIndex = index)
                                             gridExpanded = false
@@ -387,5 +396,18 @@ private fun L2ErrorBanner(message: String) {
                 fontWeight = FontWeight.SemiBold,
             )
         }
+    }
+}
+
+@Composable
+private fun GridStatusDot(status: String, modifier: Modifier = Modifier) {
+    val color = when (status.lowercase()) {
+        "online" -> Color(0xFF4CAF50)   // Green
+        "offline" -> Color(0xFFF44336)  // Red
+        "degraded" -> Color(0xFFFF9800) // Amber
+        else -> Color(0xFF9E9E9E)       // Gray
+    }
+    androidx.compose.foundation.Canvas(modifier = modifier.size(8.dp)) {
+        drawCircle(color = color)
     }
 }

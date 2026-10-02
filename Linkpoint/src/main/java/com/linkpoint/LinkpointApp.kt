@@ -763,8 +763,9 @@ class LinkpointApp : Application() {
     internal fun initializeManagers() {
         Log.d(TAG, "Initializing managers...")
         
-        // Grid management (login, multiple grids)
+        // Grid management (login, multiple grids with SQLite local caching)
         gridManager = GridManager(this)
+        gridManager.syncDirectoryAsync(applicationScope)
         
         // Session management (active connection state)
         sessionManager = SessionManager(this)

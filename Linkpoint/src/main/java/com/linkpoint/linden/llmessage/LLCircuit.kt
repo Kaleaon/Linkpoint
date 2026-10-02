@@ -40,18 +40,6 @@ class LLCircuit(val host: Host) {
         waitingAcks.remove(seq)
     }
 
-
-
-    /**
-     * Backwards-compatible helper for older callers that used a single ACK API.
-     * Prefer calling the explicit inbound/outbound methods directly.
-     */
-    @Deprecated("Use recordInboundSequenceForAck() or handleAckForOutboundSequence()")
-    fun ackPacket(seq: UInt) {
-        recordInboundSequenceForAck(seq)
-        handleAckForOutboundSequence(seq)
-    }
-
     fun needsResend(seq: UInt): Boolean = seq in waitingAcks
 
     fun queueForResend(seq: UInt, packet: ByteArray) {

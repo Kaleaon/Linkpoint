@@ -1,23 +1,20 @@
 package com.linkpoint.render.lumiya.spatial
 
-import android.util.Log
 import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Loose octree spatial index for efficient frustum-culled draw-list generation.
  *
  * Design lineage: Lumiya `SpatialIndex.java` / `SpatialTree.java` /
- * `SpatialObjectIndex.java`, modernised with a proper octree instead of a
- * simple depth-binned linked list.
- *
- * The tree covers the standard SL region (256 × 256 × 4096) and subdivides
- * down to a configurable minimum cell size.
+ * `SpatialObjectIndex.java`, modernised with a proper octree, pre-allocated
+ * node memory pooling, incremental node updates, depth capping at 8 levels,
+ * and a diagnostic safety mechanism toggle.
  */
-class SpatialIndex {
+class SpatialIndex(
+    private val nodePool: OctreeNodePool = OctreeNodePool()
+) {
 
     companion object {
-        private const val TAG = "SpatialIndex"
-
         /** SL region extent. */
         const val REGION_XY = 256.0f
         const val REGION_Z = 4096.0f
@@ -27,60 +24,169 @@ class SpatialIndex {
 
         /** Maximum objects to return per frustum query. */
         const val MAX_RESULTS = 4096
+
+        /** Maximum allowed octree depth to cap memory overhead in dense clusters. */
+        const val MAX_DEPTH = 8
     }
+
+    data class EntryBounds(
+        val minX: Float, val minY: Float, val minZ: Float,
+        val maxX: Float, val maxY: Float, val maxZ: Float
+    )
 
     // All registered entries by ID
     private val entries = ConcurrentHashMap<Long, SpatialEntry>()
+    private val entryBounds = ConcurrentHashMap<Long, EntryBounds>()
+
+    /**
+     * Diagnostic safety mechanism toggle. When [useOctree] is true (default),
+     * frustum culling traverses the 3D bounding volume octree hierarchy.
+     * When set to false, culling falls back to legacy linear scan iteration.
+     */
+    @Volatile
+    var useOctree: Boolean = true
 
     // Root octree node
-    private val root = OctreeNode(
+    private val root = nodePool.acquire(
         minX = 0f, minY = 0f, minZ = 0f,
-        sizeX = REGION_XY, sizeY = REGION_XY, sizeZ = REGION_Z
+        sizeX = REGION_XY, sizeY = REGION_XY, sizeZ = REGION_Z,
+        depth = 1
     )
 
     // ── Mutation ─────────────────────────────────────────────────────────
 
+    /**
+     * Insert a new spatial entry into the octree and entry registry.
+     */
+    @Synchronized
     fun insert(entry: SpatialEntry) {
+        val bounds = EntryBounds(entry.minX, entry.minY, entry.minZ, entry.maxX, entry.maxY, entry.maxZ)
         entries[entry.id] = entry
-        root.insert(entry)
+        entryBounds[entry.id] = bounds
+        root.insert(entry, nodePool)
     }
 
+    /**
+     * Remove an entry by ID from the octree and entry registry.
+     */
+    @Synchronized
     fun remove(id: Long) {
-        entries.remove(id)?.let { root.remove(it) }
+        val entry = entries.remove(id)
+        val bounds = entryBounds.remove(id)
+        if (bounds != null) {
+            root.removeByBounds(id, bounds, nodePool)
+        } else if (entry != null) {
+            root.removeByBounds(
+                id,
+                EntryBounds(entry.minX, entry.minY, entry.minZ, entry.maxX, entry.maxY, entry.maxZ),
+                nodePool
+            )
+        }
     }
 
+    /**
+     * Perform an incremental update for a moved or rotated entry.
+     * If the entry's bounding box has changed, it is removed from its previous
+     * octree node and re-indexed without performing a full tree rebuild.
+     */
+    @Synchronized
     fun update(entry: SpatialEntry) {
-        remove(entry.id)
-        insert(entry)
+        updateIncremental(entry)
     }
 
+    /**
+     * Incremental update implementation.
+     */
+    @Synchronized
+    fun updateIncremental(entry: SpatialEntry) {
+        val newBounds = EntryBounds(entry.minX, entry.minY, entry.minZ, entry.maxX, entry.maxY, entry.maxZ)
+        val oldBounds = entryBounds[entry.id]
+
+        if (oldBounds != null && oldBounds == newBounds && entries.containsKey(entry.id)) {
+            // Position/rotation bounding box hasn't moved across spatial nodes; update entry in-place
+            entries[entry.id] = entry
+            return
+        }
+
+        if (oldBounds != null) {
+            root.removeByBounds(entry.id, oldBounds, nodePool)
+        } else if (entries.containsKey(entry.id)) {
+            val existing = entries[entry.id]!!
+            root.removeByBounds(
+                entry.id,
+                EntryBounds(existing.minX, existing.minY, existing.minZ, existing.maxX, existing.maxY, existing.maxZ),
+                nodePool
+            )
+        }
+
+        entries[entry.id] = entry
+        entryBounds[entry.id] = newBounds
+        root.insert(entry, nodePool)
+    }
+
+    /**
+     * Clear all spatial index entries and reset the octree structure.
+     */
+    @Synchronized
     fun clear() {
         entries.clear()
-        root.clear()
+        entryBounds.clear()
+        root.clearAndRecycle(nodePool)
     }
 
     // ── Queries ──────────────────────────────────────────────────────────
 
     /**
      * Gather all entries whose AABB intersects the frustum, up to [maxResults].
+     * Uses hierarchical octree traversal when [useOctree] is true, or legacy
+     * linear scan when [useOctree] is false.
      */
+    @Synchronized
     fun queryFrustum(culler: FrustumCuller, maxResults: Int = MAX_RESULTS): List<SpatialEntry> {
         val result = mutableListOf<SpatialEntry>()
-        root.queryFrustum(culler, result, maxResults)
+        if (!useOctree) {
+            // Diagnostic fallback: legacy linear scan
+            for (entry in entries.values) {
+                if (result.size >= maxResults) break
+                if (culler.isAABBVisible(entry.minX, entry.minY, entry.minZ, entry.maxX, entry.maxY, entry.maxZ)) {
+                    result.add(entry)
+                }
+            }
+            return result
+        }
+
+        // Hierarchical octree traversal
+        val seenSet = HashSet<Long>(maxResults.coerceAtMost(entries.size + 16))
+        root.queryFrustum(culler, result, seenSet, maxResults)
         return result
     }
 
     val objectCount: Int get() = entries.size
+
+    /**
+     * Count the total number of active nodes currently in the octree.
+     */
+    fun getNodeCount(): Int = root.countNodes()
+
+    /**
+     * Return the maximum depth reached in the octree.
+     */
+    fun getMaxDepth(): Int = root.getMaxDepth()
+
+    /**
+     * Estimate memory footprint of spatial index nodes and tracking structures in bytes.
+     */
+    fun getMemoryFootprintBytes(): Long {
+        val activeNodes = getNodeCount().toLong()
+        val pooledNodes = nodePool.availableCount().toLong()
+        val nodeBytes = (activeNodes + pooledNodes) * 128L // ~128 bytes per OctreeNode object
+        val mapBytes = entries.size * 96L + entryBounds.size * 64L // Map overheads
+        return nodeBytes + mapBytes
+    }
 }
 
 /**
  * A single spatial entry representing an object's bounding volume.
- *
- * The half-extents are always axis-aligned in world space. For prims
- * with a non-identity rotation, callers should expand the local
- * half-extents into a conservative world-space AABB via
- * [SpatialEntry.fromOrientedBox] so a rotated long thin prim doesn't
- * pop in/out of view as it crosses an octree boundary.
  */
 data class SpatialEntry(
     val id: Long,
@@ -104,27 +210,6 @@ data class SpatialEntry(
     val maxZ get() = posZ + halfExtentZ
 
     companion object {
-        /**
-         * Build a [SpatialEntry] from an oriented box (local-space half
-         * extents + world rotation). The resulting AABB is the
-         * smallest axis-aligned box that fully contains the rotated
-         * box — an over-estimate, never under-estimate. Inserting
-         * rotated prims this way keeps frustum / octree queries
-         * correct without per-object OBB tests.
-         *
-         * Lineage: LL viewer `LLXformMatrix::updateBoundingBoxes` ->
-         * `LLDrawable::updateXform`. Singularity uses the same trick
-         * and notes "we over-estimate, conservative but works" — the
-         * exact phrase mirrored in the work-list this implements.
-         *
-         * @param posX/Y/Z World-space center of the box.
-         * @param halfX/Y/Z Local-space half-extents along the box's
-         *                  own axes.
-         * @param rotation 4x4 column-major rotation matrix; only the
-         *                 upper-left 3x3 is read. Translation columns
-         *                 are ignored — pass any matrix shaped like a
-         *                 GLES model matrix.
-         */
         fun fromOrientedBox(
             id: Long,
             posX: Float, posY: Float, posZ: Float,
@@ -141,25 +226,10 @@ data class SpatialEntry(
             )
         }
 
-        /**
-         * Conservative world-space half-extents of a local OBB.
-         *
-         * Computed as the absolute-value sum of each axis projected
-         * through the rotation: |R| * h. This is the standard OBB ->
-         * AABB widening: each world axis collects the absolute
-         * contribution from every local axis. It exactly bounds the
-         * rotated box's eight corners (no slack beyond what rotation
-         * introduces).
-         *
-         * Returns (halfX, halfY, halfZ) in world units.
-         */
         fun conservativeWorldHalfExtents(
             halfX: Float, halfY: Float, halfZ: Float,
             rotation: FloatArray
         ): Triple<Float, Float, Float> {
-            // Column-major: column k = rotation[k*4 .. k*4+2].
-            // World axis i contribution = |R[i,0]|*hx + |R[i,1]|*hy + |R[i,2]|*hz.
-            // R[i,k] in row-i, col-k = rotation[k*4 + i].
             val ax0 = Math.abs(rotation[0]); val ax1 = Math.abs(rotation[4]); val ax2 = Math.abs(rotation[8])
             val ay0 = Math.abs(rotation[1]); val ay1 = Math.abs(rotation[5]); val ay2 = Math.abs(rotation[9])
             val az0 = Math.abs(rotation[2]); val az1 = Math.abs(rotation[6]); val az2 = Math.abs(rotation[10])
@@ -175,103 +245,219 @@ data class SpatialEntry(
  * Octree node for spatial partitioning.
  */
 class OctreeNode(
-    val minX: Float, val minY: Float, val minZ: Float,
-    val sizeX: Float, val sizeY: Float, val sizeZ: Float
+    var minX: Float = 0f,
+    var minY: Float = 0f,
+    var minZ: Float = 0f,
+    var sizeX: Float = 0f,
+    var sizeY: Float = 0f,
+    var sizeZ: Float = 0f,
+    var depth: Int = 1
 ) {
     companion object {
         private const val MAX_OBJECTS_PER_LEAF = 16
+        const val MAX_DEPTH = 8
     }
 
-    private val maxX get() = minX + sizeX
-    private val maxY get() = minY + sizeY
-    private val maxZ get() = minZ + sizeZ
+    var maxX: Float = minX + sizeX
+        private set
+    var maxY: Float = minY + sizeY
+        private set
+    var maxZ: Float = minZ + sizeZ
+        private set
 
-    private var children: Array<OctreeNode?>? = null
-    private val objects = mutableListOf<SpatialEntry>()
+    var children: Array<OctreeNode?>? = null
+    val objects = mutableListOf<SpatialEntry>()
 
-    private val isLeaf: Boolean get() = children == null
+    val isLeaf: Boolean get() = children == null
 
-    fun insert(entry: SpatialEntry) {
-        if (!intersects(entry)) return
+    fun configure(
+        minX: Float, minY: Float, minZ: Float,
+        sizeX: Float, sizeY: Float, sizeZ: Float,
+        depth: Int
+    ) {
+        this.minX = minX
+        this.minY = minY
+        this.minZ = minZ
+        this.sizeX = sizeX
+        this.sizeY = sizeY
+        this.sizeZ = sizeZ
+        this.depth = depth
+        this.maxX = minX + sizeX
+        this.maxY = minY + sizeY
+        this.maxZ = minZ + sizeZ
+        this.children = null
+        this.objects.clear()
+    }
+
+    fun reset() {
+        this.children = null
+        this.objects.clear()
+    }
+
+    fun insert(entry: SpatialEntry, pool: OctreeNodePool? = null) {
+        if (!intersectsEntry(entry)) return
 
         if (isLeaf) {
             objects.add(entry)
-            if (objects.size > MAX_OBJECTS_PER_LEAF && sizeX > SpatialIndex.MIN_CELL_SIZE) {
-                subdivide()
+            if (objects.size > MAX_OBJECTS_PER_LEAF &&
+                sizeX > SpatialIndex.MIN_CELL_SIZE &&
+                depth < MAX_DEPTH
+            ) {
+                subdivide(pool)
             }
         } else {
-            children?.forEach { it?.insert(entry) }
+            children?.forEach { it?.insert(entry, pool) }
         }
     }
 
-    fun remove(entry: SpatialEntry) {
-        if (!intersects(entry)) return
-        objects.remove(entry)
-        children?.forEach { it?.remove(entry) }
+    fun removeByBounds(id: Long, bounds: SpatialIndex.EntryBounds, pool: OctreeNodePool? = null): Boolean {
+        if (!intersectsBounds(bounds)) return false
+
+        var removed = objects.removeIf { it.id == id }
+
+        val ch = children
+        if (ch != null) {
+            for (child in ch) {
+                if (child != null && child.intersectsBounds(bounds)) {
+                    if (child.removeByBounds(id, bounds, pool)) {
+                        removed = true
+                    }
+                }
+            }
+        }
+
+        return removed
+    }
+
+    fun remove(entry: SpatialEntry, pool: OctreeNodePool? = null) {
+        val bounds = SpatialIndex.EntryBounds(entry.minX, entry.minY, entry.minZ, entry.maxX, entry.maxY, entry.maxZ)
+        removeByBounds(entry.id, bounds, pool)
+    }
+
+    fun clearAndRecycle(pool: OctreeNodePool?) {
+        objects.clear()
+        val ch = children
+        if (ch != null) {
+            for (child in ch) {
+                child?.clearAndRecycle(pool)
+                if (child != null && pool != null) {
+                    pool.recycle(child)
+                }
+            }
+            children = null
+        }
     }
 
     fun clear() {
-        objects.clear()
-        children?.forEach { it?.clear() }
-        children = null
+        clearAndRecycle(null)
     }
 
-    fun queryFrustum(culler: FrustumCuller, result: MutableList<SpatialEntry>, maxResults: Int) {
+    fun queryFrustum(
+        culler: FrustumCuller,
+        result: MutableList<SpatialEntry>,
+        seenSet: HashSet<Long>,
+        maxResults: Int
+    ) {
         if (result.size >= maxResults) return
         when (culler.classifyAABB(minX, minY, minZ, maxX, maxY, maxZ)) {
             FrustumResult.OUTSIDE -> return
-            FrustumResult.INSIDE -> collectAll(result, maxResults)
+            FrustumResult.INSIDE -> collectAll(result, seenSet, maxResults)
             FrustumResult.INTERSECTS -> {
                 for (obj in objects) {
                     if (result.size >= maxResults) return
-                    if (culler.isAABBVisible(obj.minX, obj.minY, obj.minZ, obj.maxX, obj.maxY, obj.maxZ)) {
+                    if (!seenSet.contains(obj.id) &&
+                        culler.isAABBVisible(obj.minX, obj.minY, obj.minZ, obj.maxX, obj.maxY, obj.maxZ)
+                    ) {
+                        seenSet.add(obj.id)
                         result.add(obj)
                     }
                 }
-                children?.forEach { it?.queryFrustum(culler, result, maxResults) }
+                children?.forEach { it?.queryFrustum(culler, result, seenSet, maxResults) }
             }
         }
     }
 
-    /**
-     * Drain every object in this subtree into [result] without further
-     * frustum checks. Called once the parent tri-state classifier has
-     * proven the whole node sits inside the frustum.
-     */
-    private fun collectAll(result: MutableList<SpatialEntry>, maxResults: Int) {
+    private fun collectAll(
+        result: MutableList<SpatialEntry>,
+        seenSet: HashSet<Long>,
+        maxResults: Int
+    ) {
         for (obj in objects) {
             if (result.size >= maxResults) return
-            result.add(obj)
+            if (seenSet.add(obj.id)) {
+                result.add(obj)
+            }
         }
         children?.forEach { child ->
             if (result.size >= maxResults) return
-            child?.collectAll(result, maxResults)
+            child?.collectAll(result, seenSet, maxResults)
         }
     }
 
-    private fun subdivide() {
+    private fun subdivide(pool: OctreeNodePool?) {
         val hx = sizeX / 2f; val hy = sizeY / 2f; val hz = sizeZ / 2f
-        children = arrayOf(
-            OctreeNode(minX,      minY,      minZ,      hx, hy, hz),
-            OctreeNode(minX + hx, minY,      minZ,      hx, hy, hz),
-            OctreeNode(minX,      minY + hy, minZ,      hx, hy, hz),
-            OctreeNode(minX + hx, minY + hy, minZ,      hx, hy, hz),
-            OctreeNode(minX,      minY,      minZ + hz, hx, hy, hz),
-            OctreeNode(minX + hx, minY,      minZ + hz, hx, hy, hz),
-            OctreeNode(minX,      minY + hy, minZ + hz, hx, hy, hz),
-            OctreeNode(minX + hx, minY + hy, minZ + hz, hx, hy, hz)
-        )
-        // Re-distribute existing objects
+        val nextDepth = depth + 1
+
+        if (pool != null) {
+            children = arrayOf(
+                pool.acquire(minX,      minY,      minZ,      hx, hy, hz, nextDepth),
+                pool.acquire(minX + hx, minY,      minZ,      hx, hy, hz, nextDepth),
+                pool.acquire(minX,      minY + hy, minZ,      hx, hy, hz, nextDepth),
+                pool.acquire(minX + hx, minY + hy, minZ,      hx, hy, hz, nextDepth),
+                pool.acquire(minX,      minY,      minZ + hz, hx, hy, hz, nextDepth),
+                pool.acquire(minX + hx, minY,      minZ + hz, hx, hy, hz, nextDepth),
+                pool.acquire(minX,      minY + hy, minZ + hz, hx, hy, hz, nextDepth),
+                pool.acquire(minX + hx, minY + hy, minZ + hz, hx, hy, hz, nextDepth)
+            )
+        } else {
+            children = arrayOf(
+                OctreeNode(minX,      minY,      minZ,      hx, hy, hz, nextDepth),
+                OctreeNode(minX + hx, minY,      minZ,      hx, hy, hz, nextDepth),
+                OctreeNode(minX,      minY + hy, minZ,      hx, hy, hz, nextDepth),
+                OctreeNode(minX + hx, minY + hy, minZ,      hx, hy, hz, nextDepth),
+                OctreeNode(minX,      minY,      minZ + hz, hx, hy, hz, nextDepth),
+                OctreeNode(minX + hx, minY,      minZ + hz, hx, hy, hz, nextDepth),
+                OctreeNode(minX,      minY + hy, minZ + hz, hx, hy, hz, nextDepth),
+                OctreeNode(minX + hx, minY + hy, minZ + hz, hx, hy, hz, nextDepth)
+            )
+        }
+
         val toRedistribute = ArrayList(objects)
         objects.clear()
         for (obj in toRedistribute) {
-            children?.forEach { it?.insert(obj) }
+            children?.forEach { it?.insert(obj, pool) }
         }
     }
 
-    private fun intersects(entry: SpatialEntry): Boolean {
+    fun countNodes(): Int {
+        var count = 1
+        children?.forEach { child ->
+            if (child != null) {
+                count += child.countNodes()
+            }
+        }
+        return count
+    }
+
+    fun getMaxDepth(): Int {
+        var maxD = depth
+        children?.forEach { child ->
+            if (child != null) {
+                maxD = maxOf(maxD, child.getMaxDepth())
+            }
+        }
+        return maxD
+    }
+
+    private fun intersectsEntry(entry: SpatialEntry): Boolean {
         return entry.maxX >= minX && entry.minX <= maxX &&
                entry.maxY >= minY && entry.minY <= maxY &&
                entry.maxZ >= minZ && entry.minZ <= maxZ
+    }
+
+    private fun intersectsBounds(b: SpatialIndex.EntryBounds): Boolean {
+        return b.maxX >= minX && b.minX <= maxX &&
+               b.maxY >= minY && b.minY <= maxY &&
+               b.maxZ >= minZ && b.minZ <= maxZ
     }
 }

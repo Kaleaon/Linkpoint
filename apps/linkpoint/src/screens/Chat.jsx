@@ -217,7 +217,7 @@ export default function Chat() {
   };
 
   return (
-    <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", background: V.bg }}>
+    <div className="chat-container" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", background: "var(--chat-bg-scrim, " + V.bg + ")", color: "var(--chat-text, " + V.ink + ")" }}>
       {/* Auto-Reply / Away Message Controls Header */}
       <div style={{ padding: "8px 12px", background: V.surf, borderBottom: `1px solid ${V.outv}`, display: "flex", flexDirection: "column", gap: 6 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
@@ -440,6 +440,7 @@ export default function Chat() {
 
       {/* Messages Transcript */}
       <section
+        className="chat-transcript"
         aria-label={`${activeTab} chat transcript`}
         style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: 12, display: "flex", flexDirection: "column", gap: 8 }}
       >
@@ -462,13 +463,15 @@ export default function Chat() {
           return (
             <article
               key={m.id}
+              className="chat-message-article"
               style={{
                 alignSelf: isMe ? "flex-end" : "flex-start",
                 maxWidth: "88%",
                 padding: "8px 10px",
                 border: `1px solid ${m.isAutoReply ? "#eab308" : V.outv}`,
                 borderRadius: V.rp,
-                background: m.isAutoReply ? "rgba(234, 179, 8, 0.08)" : V.surf,
+                background: m.isAutoReply ? "rgba(234, 179, 8, 0.15)" : "var(--chat-bg-scrim, " + V.surf + ")",
+                color: "var(--chat-text, " + V.ink + ")",
               }}
             >
               <header style={{ color: m.isAutoReply ? "#eab308" : V.pri, font: `600 10px/1.3 ${t.font}`, display: "flex", justifyContent: "space-between", gap: 8 }}>
@@ -480,7 +483,7 @@ export default function Chat() {
                   {m.isAutoReply ? "AUTO-REPLY" : m.type === "im" ? "IM" : m.type === "group" ? "GROUP" : "LOCAL"}
                 </span>
               </header>
-              <div style={{ color: V.ink, font: `400 13px/1.45 ${t.font}`, whiteSpace: "pre-wrap", overflowWrap: "anywhere", marginTop: 2 }}>
+              <div style={{ color: "var(--chat-text, " + V.ink + ")", font: `400 13px/1.45 ${t.font}`, whiteSpace: "pre-wrap", overflowWrap: "anywhere", marginTop: 2 }}>
                 {m.text}
               </div>
             </article>

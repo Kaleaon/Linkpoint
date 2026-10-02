@@ -34,6 +34,10 @@ class SessionManager(private val context: Context) {
     private val _regionSessionState = MutableStateFlow(RegionSessionState())
     val regionSessionState: StateFlow<RegionSessionState> = _regionSessionState
     
+    // Active grid info with resolved endpoints
+    private val _activeGrid = MutableStateFlow<GridInfo?>(null)
+    val activeGrid: StateFlow<GridInfo?> = _activeGrid
+    
     // Teleport history
     private val _teleportHistory = MutableStateFlow<List<TeleportHistoryEntry>>(emptyList())
     val teleportHistory: StateFlow<List<TeleportHistoryEntry>> = _teleportHistory
@@ -60,6 +64,20 @@ class SessionManager(private val context: Context) {
     fun getAgentId(): UUID? = agentId
     fun getSessionId(): String? = sessionId
     fun getAvatarName(): String = "$avatarFirstName $avatarLastName".trim()
+    
+    /**
+     * Update active grid info and dynamic endpoints
+     */
+    fun setActiveGrid(grid: GridInfo) {
+        _activeGrid.value = grid
+        Log.i(TAG, "Active grid state updated: ${grid.name} (loginuri=${grid.loginUri}, helperuri=${grid.helperUri}, economy=${grid.economyUri}, map=${grid.mapUri})")
+    }
+    
+    fun getLoginUri(): String = _activeGrid.value?.loginUri ?: "https://login.agni.lindenlab.com/cgi-bin/login.cgi"
+    fun getHelperUri(): String? = _activeGrid.value?.helperUri
+    fun getEconomyUri(): String? = _activeGrid.value?.economyUri
+    fun getMapUri(): String? = _activeGrid.value?.mapUri
+    fun getWelcomeUri(): String? = _activeGrid.value?.welcomeUri ?: _activeGrid.value?.website
     
     /**
      * Called when login succeeds

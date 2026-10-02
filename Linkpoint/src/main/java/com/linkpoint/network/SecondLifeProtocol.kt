@@ -187,7 +187,18 @@ class SecondLifeProtocol(private val context: Context) {
         val truncatedPassword = password.trim().take(16)
         val passwordHash = createPasswordHash(password)
         
-        Log.d(TAG, "Login details - URI: $loginUri, firstName: $firstName, lastName: $lastName, " +
+        // Dynamically resolve GridInfo endpoints prior to executing login RPC
+        val selectedGrid = app.gridManager.getSelectedGrid()
+        val resolvedGrid = if (selectedGrid.isResolved || com.linkpoint.network.grid.GridInfoResolver.isSecondLifeUri(loginUri)) {
+            selectedGrid
+        } else {
+            com.linkpoint.network.grid.GridInfoResolver.resolveGridInfo(loginUri, selectedGrid)
+        }
+        app.gridManager.updateSelectedGrid(resolvedGrid)
+        app.sessionManager.setActiveGrid(resolvedGrid)
+        val effectiveLoginUri = if (resolvedGrid.loginUri.isNotBlank()) resolvedGrid.loginUri else loginUri
+
+        Log.d(TAG, "Login details - URI: $effectiveLoginUri (resolved grid: ${resolvedGrid.name}), firstName: $firstName, lastName: $lastName, " +
             "passwordLen: ${password.length}, truncatedLen: ${truncatedPassword.length}, startLoc: $startLocation")
         
         // Log detailed authentication parameters (without sensitive data)
@@ -213,7 +224,7 @@ class SecondLifeProtocol(private val context: Context) {
             "Sending login request"
         )
         
-        val result = networkingService.login(loginUri, xmlRequest)
+        val result = networkingService.login(effectiveLoginUri, xmlRequest)
         
         when (result) {
             is CoreNetworkingService.LoginResult.Success -> {

@@ -138,4 +138,106 @@ describe('InteractionDialog', () => {
     await click(button(host, 'OK'));
     expect(host.querySelector('[role="alertdialog"]')).toBeNull();
   });
+
+  describe('Payment confirmation modal', () => {
+    it('presents a modal confirmation dialog displaying object name, seller identity, price, and balance', async () => {
+      vi.spyOn(app.protocol as any, 'requireConnected').mockImplementation(() => undefined);
+      vi.spyOn(app.protocol, 'refreshBalance').mockResolvedValue(1000);
+      (app.protocol as any).balance = 1000;
+
+      const host = await mount();
+      await act(async () => {
+        app.interactions.requestPayment({
+          objectId: 'obj-450',
+          objectName: 'Sunset Lamp v3',
+          sellerName: 'Pat Resident',
+          price: 450,
+        });
+      });
+
+      const sheet = host.querySelector('[role="alertdialog"]');
+      expect(sheet).not.toBeNull();
+      expect(host.textContent).toContain('PAYMENT CONFIRMATION');
+      expect(host.textContent).toContain('Sunset Lamp v3');
+      expect(host.textContent).toContain('Seller: Pat Resident');
+      expect(host.textContent).toContain('L$ 450');
+      expect(host.textContent).toContain('L$ 1,000');
+    });
+
+    it('detects insufficient balance, displays an alert, and disables the payment button', async () => {
+      vi.spyOn(app.protocol as any, 'requireConnected').mockImplementation(() => undefined);
+      vi.spyOn(app.protocol, 'refreshBalance').mockResolvedValue(100);
+      (app.protocol as any).balance = 100;
+
+      const host = await mount();
+      await act(async () => {
+        app.interactions.requestPayment({
+          objectId: 'obj-999',
+          objectName: 'Luxury Mansion',
+          sellerName: 'Real Estate Inc',
+          price: 500,
+        });
+      });
+
+      expect(host.textContent).toContain('Insufficient Funds');
+      expect(host.textContent).toContain('requires L$ 500, but your available balance is L$ 100');
+      const confirmBtn = button(host, 'INSUFFICIENT FUNDS') || button(host, 'CONFIRM (L$ 500)');
+      expect(confirmBtn).toBeDefined();
+      expect(confirmBtn!.disabled).toBe(true);
+    });
+
+    it('dispatches payment packet on Confirm when balance is sufficient', async () => {
+      vi.spyOn(app.protocol as any, 'requireConnected').mockImplementation(() => undefined);
+      vi.spyOn(app.protocol, 'refreshBalance').mockResolvedValue(1000);
+      (app.protocol as any).balance = 1000;
+      const paySpy = vi.spyOn(app.protocol, 'payObject').mockResolvedValue({ paid: 'obj-100', amount: 200, balance: 800 });
+
+      const host = await mount();
+      await act(async () => {
+        app.interactions.requestPayment({
+          objectId: 'obj-100',
+          objectName: 'Sculpted Light',
+          sellerName: 'Kit Sandalwood',
+          price: 200,
+        });
+      });
+
+      const confirmBtn = button(host, 'CONFIRM (L$ 200)');
+      expect(confirmBtn).toBeDefined();
+      expect(confirmBtn!.disabled).toBe(false);
+
+      await click(confirmBtn);
+      expect(paySpy).toHaveBeenCalledWith({
+        objectId: 'obj-100',
+        amount: 200,
+        targetId: undefined,
+        description: 'Payment for Sculpted Light',
+      });
+      expect(host.querySelector('[role="alertdialog"]')).toBeNull();
+    });
+
+    it('discards transaction immediately on Cancel without dispatching payment packets', async () => {
+      vi.spyOn(app.protocol as any, 'requireConnected').mockImplementation(() => undefined);
+      const paySpy = vi.spyOn(app.protocol, 'payObject');
+      const dismissSpy = vi.spyOn(app.protocol, 'dismissInteraction').mockResolvedValue({ dismissed: true });
+
+      const host = await mount();
+      await act(async () => {
+        app.interactions.requestPayment({
+          objectId: 'obj-300',
+          objectName: 'Cancelled Dress',
+          sellerName: 'Boutique',
+          price: 150,
+        });
+      });
+
+      const cancelBtn = button(host, 'CANCEL');
+      expect(cancelBtn).toBeDefined();
+      await click(cancelBtn);
+
+      expect(paySpy).not.toHaveBeenCalled();
+      expect(dismissSpy).toHaveBeenCalled();
+      expect(host.querySelector('[role="alertdialog"]')).toBeNull();
+    });
+  });
 });
