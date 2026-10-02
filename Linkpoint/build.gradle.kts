@@ -103,7 +103,7 @@ android {
     // otherwise System.loadLibrary("linkpoint-j2k") fails silently and
     // JPEG2000Decoder reports `Backend: none` (see PR #455 debug capture).
     ndkVersion = "26.3.11579264"
-    
+
     defaultConfig {
         applicationId = "com.linkpoint"
         // Android 8.0 (Oreo) is the explicit compatibility floor. Notification
@@ -116,14 +116,14 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
-        
+
         multiDexEnabled = true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        
+
         ndk {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
         }
-        
+
         // CMake configuration for native code
         externalNativeBuild {
             cmake {
@@ -131,22 +131,22 @@ android {
                 arguments += "-DANDROID_STL=c++_shared"
             }
         }
-        
+
         vectorDrawables.useSupportLibrary = true
-        
+
         // Add build info to BuildConfig
         buildConfigField("String", "BUILD_TIME", "\"${System.currentTimeMillis()}\"")
         buildConfigField("String", "GIT_COMMIT", "\"${getGitHash()}\"")
         buildConfigField("Boolean", "XR_EXPERIMENTAL_MODE", "false")
     }
-    
+
     externalNativeBuild {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")
             version = "3.22.1"
         }
     }
-    
+
     signingConfigs {
         create("release") {
             if (keystorePropertiesFile.exists()) {
@@ -157,7 +157,7 @@ android {
             }
         }
     }
-    
+
     productFlavors {
         create("stable") {
             dimension = "xr"
@@ -180,7 +180,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            
+
             // Sign release builds if keystore is available
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
@@ -193,18 +193,18 @@ android {
             versionNameSuffix = "-DEBUG"
         }
     }
-    
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
         isCoreLibraryDesugaringEnabled = true
     }
-    
+
     kotlinOptions {
         jvmTarget = "1.8"
         freeCompilerArgs += listOf("-opt-in=kotlin.RequiresOptIn", "-Xnested-type-aliases")
     }
-    
+
     buildFeatures {
         viewBinding = true
         buildConfig = true
@@ -216,7 +216,7 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.10"
     }
-    
+
     sourceSets {
         getByName("main") {
             manifest.srcFile("src/main/AndroidManifest.xml")
@@ -225,7 +225,7 @@ android {
             assets.srcDirs("src/main/assets")
         }
     }
-    
+
     lint {
         // Strict release safety gates: release and CI builds must fail on new
         // error/fatal findings.
@@ -236,14 +236,14 @@ android {
         // include an owner + expiry in docs/lint-exceptions.md.
         baseline = file("lint-baseline.xml")
     }
-    
+
     testOptions {
         unitTests {
             isReturnDefaultValues = true  // Return default values for unmocked Android methods like Log
             isIncludeAndroidResources = true
         }
     }
-    
+
     packaging {
         resources {
             excludes += listOf(
@@ -281,7 +281,7 @@ kotlin {
 dependencies {
     // Core library desugaring for Java 8+ APIs on older Android versions
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
-    
+
     // AndroidX Core
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
@@ -289,20 +289,20 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.fragment:fragment-ktx:1.8.4")
     implementation("androidx.activity:activity-ktx:1.9.3")
-    
+
     // Lifecycle components
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.6")
     implementation("androidx.lifecycle:lifecycle-process:2.8.6")
-    
+
     // Google libraries
     implementation("com.google.guava:guava:32.1.3-android")
     implementation("com.google.code.gson:gson:2.10.1")
-    
+
     // Multidex support
     implementation("androidx.multidex:multidex:2.0.1")
-    
+
     // Firebase / push relay
     implementation("com.google.firebase:firebase-messaging:24.0.1")
 
@@ -310,7 +310,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-drive:17.0.0")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation("com.google.android.gms:play-services-base:18.5.0")
-    
+
     // Networking - OkHttp
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
@@ -336,37 +336,37 @@ dependencies {
     // variant ships its own native libs so it works on devices without
     // Play Services. ~5-8 MB APK growth per ABI.
     implementation("org.chromium.net:cronet-embedded:119.6045.31")
-    
+
     // gRPC - Modern networking based on official SL app patterns
     implementation("io.grpc:grpc-okhttp:1.62.2")
     implementation("io.grpc:grpc-protobuf-lite:1.62.2")
     implementation("io.grpc:grpc-stub:1.62.2")
     implementation("io.grpc:grpc-kotlin-stub:1.4.1")
     implementation("com.google.protobuf:protobuf-kotlin-lite:3.25.3")
-    
+
     // Retrofit for REST API fallback
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    
+
     // Audio processing
     implementation("androidx.media:media:1.7.0")
-    
+
     // Voice Chat (WebRTC SDK providing org.webrtc packages)
     implementation("io.getstream:stream-webrtc-android:1.2.2")
-    
+
     // LLSD Java library - Commented out, using local implementation
     // implementation("lindenlab:llsd:1.0")
-    
+
     // Kotlin support
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")
     implementation("org.jetbrains.kotlin:kotlin-reflect:2.2.21")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
-    
+
     // Back-compat libs
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
-    
+
     // Preferences
     implementation("androidx.preference:preference-ktx:1.2.1")
 
@@ -376,20 +376,20 @@ dependencies {
 
     // Background orchestration
     implementation("androidx.work:work-runtime-ktx:2.9.1")
-    
+
     // Security - EncryptedSharedPreferences for secure storage
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
-    
+
     // Jetpack Navigation
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
     implementation("androidx.navigation:navigation-compose:2.7.7")
-    
+
     // Jetpack Compose
     val composeBom = platform("androidx.compose:compose-bom:2024.02.00")
     implementation(composeBom)
     androidTestImplementation(composeBom)
-    
+
     // Compose UI
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
@@ -399,20 +399,20 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
-    
+
     // Compose UI Libraries
     implementation("com.github.manalkaff:JetStick:1.2")  // Virtual joystick for avatar movement
     implementation("io.github.thechance101:chart:Beta-0.0.5")  // Charts (line, bar, pie) - Note: Radar is custom in RadarCompose.kt
 
     // Ktheme snapshot dependency is currently unavailable on JitPack;
     // keep using in-repo theme system until a stable artifact is published.
-    
+
     // LSL syntax highlighting uses custom LSLLanguage definition (native Compose implementation)
     // See com.linkpoint.scripts.lsl package for complete LSL language support with 350+ functions
-    
+
     // SceneView - Compose wrapper for Filament 3D/AR rendering
     implementation("io.github.sceneview:sceneview:2.2.1")
-    
+
     // libGDX - Cross-platform game engine for game logic and input handling
     val gdxVersion = "1.12.1"
     implementation("com.badlogicgames.gdx:gdx:$gdxVersion")
@@ -421,7 +421,7 @@ dependencies {
     natives("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a")
     natives("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86")
     natives("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86_64")
-    
+
     // KTX - Kotlin extensions for libGDX
     val ktxVersion = "1.12.1-rc1"
     implementation("io.github.libktx:ktx-app:$ktxVersion")           // Application utilities
@@ -432,28 +432,28 @@ dependencies {
     implementation("io.github.libktx:ktx-math:$ktxVersion")          // Math operators
     implementation("io.github.libktx:ktx-assets:$ktxVersion")        // Asset management
     implementation("io.github.libktx:ktx-assets-async:$ktxVersion")  // Async asset loading
-    
+
     // Compose debugging
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-    
+
     // Filament Rendering Engine
     implementation("com.google.android.filament:filament-android:1.66.0")
     implementation("com.google.android.filament:filament-utils-android:1.66.0")
     implementation("com.google.android.filament:gltfio-android:1.66.0")
     implementation("com.google.android.filament:filamat-android:1.66.0")
-    
+
     // AndroidX XR support (for future Android XR devices)
     // These are placeholders - actual XR libraries will be available when Android XR releases
     // implementation("androidx.xr:xr-core:1.0.0")
     // implementation("androidx.xr:xr-compose:1.0.0")
-    
+
     // OpenXR loader (for Quest, Pico, etc.)
     // implementation("org.khronos.openxr:openxr-android:1.0.0")
-    
+
     // Google Cardboard SDK - requires local repository or AAR
     // implementation("com.google.cardboard:sdk:1.21.0")
-    
+
     // OpenJPEG for JPEG2000 texture decoding (Second Life textures)
     implementation("com.viliussutkus89.ndk.thirdparty:openjpeg-ndk26-static:2.5.0-beta-4")
 
@@ -567,7 +567,7 @@ tasks.register("copyNatives") {
         targetDirs.forEach { dir ->
             file("libs/$dir/").mkdirs()
         }
-        
+
         // Copy native .so files from each jar
         natives.files.forEach { jarFile ->
             val targetArch = jarFile.nameWithoutExtension.substringAfterLast("natives-")
