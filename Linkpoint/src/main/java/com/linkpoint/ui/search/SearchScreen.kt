@@ -45,6 +45,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.linkpoint.model.search.*
 import com.linkpoint.ui.common.UiLoadState
 import com.linkpoint.ui.common.UiTelemetryEvents
 import com.linkpoint.ui.common.logUiTelemetry
@@ -61,51 +62,14 @@ enum class SearchCategory(val displayName: String, val icon: ImageVector) {
     EVENTS("Events", Icons.Default.Event)
 }
 
-sealed class ComposeSearchResult {
-    abstract val id: UUID
-    abstract val name: String
-    abstract val description: String
-
-    data class PersonResult(
-        override val id: UUID,
-        override val name: String,
-        override val description: String = "",
-        val isOnline: Boolean = false
-    ) : ComposeSearchResult()
-
-    data class PlaceResult(
-        override val id: UUID,
-        override val name: String,
-        override val description: String = "",
-        val traffic: Int = 0,
-        val slurl: String = ""
-    ) : ComposeSearchResult()
-
-    data class GroupResult(
-        override val id: UUID,
-        override val name: String,
-        override val description: String = "",
-        val memberCount: Int = 0,
-        val isOpen: Boolean = true
-    ) : ComposeSearchResult()
-
-    data class EventResult(
-        override val id: UUID,
-        override val name: String,
-        override val description: String = "",
-        val location: String = "",
-        val dateTime: String = ""
-    ) : ComposeSearchResult()
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    results: List<ComposeSearchResult>,
+    results: List<SearchResult>,
     uiLoadState: UiLoadState = UiLoadState.Content,
     onRetry: () -> Unit,
     onSearch: (String, SearchCategory) -> Unit,
-    onResultClick: (ComposeSearchResult) -> Unit,
+    onResultClick: (SearchResult) -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -212,7 +176,7 @@ fun SearchScreen(
 
 @Composable
 fun SearchResultCard(
-    result: ComposeSearchResult,
+    result: SearchResult,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -236,10 +200,11 @@ fun SearchResultCard(
             ) {
                 Icon(
                     imageVector = when (result) {
-                        is ComposeSearchResult.PersonResult -> Icons.Default.Person
-                        is ComposeSearchResult.PlaceResult -> Icons.Default.LocationOn
-                        is ComposeSearchResult.GroupResult -> Icons.Default.Group
-                        is ComposeSearchResult.EventResult -> Icons.Default.Event
+                        is PersonResult -> Icons.Default.Person
+                        is PlaceResult -> Icons.Default.LocationOn
+                        is GroupResult -> Icons.Default.Group
+                        is EventResult -> Icons.Default.Event
+                        else -> Icons.Default.Search
                     },
                     contentDescription = null,
                     modifier = Modifier.size(28.dp)
@@ -252,10 +217,11 @@ fun SearchResultCard(
                 Text(text = result.name, maxLines = 1, overflow = TextOverflow.Ellipsis)
 
                 val subtitle = when (result) {
-                    is ComposeSearchResult.PersonResult -> if (result.isOnline) "Online" else result.description.ifBlank { "Offline" }
-                    is ComposeSearchResult.PlaceResult -> if (result.traffic > 0) "Traffic: ${result.traffic}" else result.description
-                    is ComposeSearchResult.GroupResult -> "${result.memberCount} members" + if (result.isOpen) " • Open" else ""
-                    is ComposeSearchResult.EventResult -> result.dateTime.ifBlank { result.location }
+                    is PersonResult -> if (result.isOnline) "Online" else result.description.ifBlank { "Offline" }
+                    is PlaceResult -> if (result.traffic > 0) "Traffic: ${result.traffic.toInt()}" else result.description
+                    is GroupResult -> "${result.memberCount} members" + if (result.isOpen) " • Open" else ""
+                    is EventResult -> result.dateTime.ifBlank { result.location }
+                    else -> result.description
                 }
 
                 if (subtitle.isNotBlank()) {
