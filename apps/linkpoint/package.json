@@ -46,7 +46,7 @@
     "@types/spark-md5": "^3.0.5",
     "@types/ws": "^8.18.2",
     "@vitejs/plugin-react": "^5.0.4",
-    "electron": "^38.8.6",
+    "electron": "^44.5.1",
     "electron-builder": "^26.15.3",
     "jsdom": "^29.0.1",
     "typescript": "~5.8.2",
@@ -54,6 +54,24 @@
     "vitest": "4.1.11"
   },
   "overrides": {
-    "@xmldom/xmldom": "0.9.12"
+    "@xmldom/xmldom": "0.9.12",
+    "@caspertech/llsd": {
+      "@xmldom/xmldom": "0.9.12"
+    },
+    "@caspertech/node-metaverse": {
+      "@xmldom/xmldom": "0.9.12"
+    },
+    "@grpc/grpc-js": "^1.13.6",
+    "@firebase/firestore": {
+      "@grpc/grpc-js": "^1.13.6"
+    },
+    "@firebase/firestore-compat": {
+      "@grpc/grpc-js": "^1.13.6"
+    },
+    "firebase": {
+      "@grpc/grpc-js": "^1.13.6"
+    },
+    "extract-zip": "^2.0.1",
+    "sharp": "0.35.5"
   }
 }
