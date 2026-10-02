@@ -2,6 +2,9 @@ package com.linkpoint.render
 
 import android.os.Handler
 import android.os.HandlerThread
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.android.asCoroutineDispatcher
+import kotlinx.coroutines.withContext
 import java.util.concurrent.CountDownLatch
 
 /**
@@ -13,11 +16,21 @@ class RenderThreadDispatcher(threadName: String = "RenderThread") {
     private val thread = HandlerThread(threadName).apply { start() }
     private val handler = Handler(thread.looper)
 
+    val dispatcher: CoroutineDispatcher = handler.asCoroutineDispatcher("RenderThreadDispatcher")
+
     val renderThreadName: String = thread.name
 
     fun isRenderThread(): Boolean = Thread.currentThread() === thread
 
+    suspend fun <T> execute(task: () -> T): T = withContext(dispatcher) {
+        task()
+    }
+
     fun post(task: Runnable) {
+        handler.post(task)
+    }
+
+    fun postAsync(task: Runnable) {
         handler.post(task)
     }
 
@@ -25,6 +38,7 @@ class RenderThreadDispatcher(threadName: String = "RenderThread") {
         handler.postDelayed(task, delayMillis)
     }
 
+    @Deprecated("Use execute() suspending function to avoid blocking main thread.")
     fun <T> runBlocking(task: () -> T): T {
         if (isRenderThread()) {
             return task()
