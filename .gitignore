@@ -154,3 +154,4 @@ build_output.txt
 **/node_modules/
 **/dist/
 /target/
+/artifacts/
