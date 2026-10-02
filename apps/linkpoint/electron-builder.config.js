@@ -46,60 +46,83 @@ function mainProcessDeps(rootDir) {
 // rollup and esbuild along with it.
 const NOT_ACTUALLY_RUNTIME = new Set(['vitest']);
 
+function findWorkspaceRoot(startDir) {
+  let dir = startDir;
+  for (;;) {
+    const pkgPath = path.join(dir, 'package.json');
+    if (fs.existsSync(pkgPath)) {
+      try {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+        if (pkg.workspaces) return dir;
+      } catch (_) {}
+    }
+    const parent = path.dirname(dir);
+    if (parent === dir) return startDir;
+    dir = parent;
+  }
+}
+
 // Resolve a package the way Node does: walk up looking for node_modules.
-function resolvePackageDir(name, fromDir, rootDir) {
+function resolvePackageDir(name, fromDir, workspaceRoot) {
   let dir = fromDir;
   for (;;) {
     const candidate = path.join(dir, 'node_modules', name);
     if (fs.existsSync(path.join(candidate, 'package.json'))) return candidate;
     const parent = path.dirname(dir);
-    if (parent === dir || !dir.startsWith(rootDir)) return null;
+    if (parent === dir || !dir.startsWith(workspaceRoot)) return null;
     dir = parent;
   }
 }
 
-function dependencyClosure(rootDir) {
-  const found = new Set();
+function dependencyClosure(rootDir, workspaceRoot) {
+  const keptPackages = new Set();
+  const keptNames = new Set();
   const stack = mainProcessDeps(rootDir).map((name) => [name, rootDir]);
 
   while (stack.length) {
     const [name, fromDir] = stack.pop();
     if (NOT_ACTUALLY_RUNTIME.has(name)) continue;
 
-    const dir = resolvePackageDir(name, fromDir, rootDir);
+    const dir = resolvePackageDir(name, fromDir, workspaceRoot);
     if (!dir) continue; // optional/unmet dependency; nothing to package
 
-    const relative = path.relative(rootDir, dir).split(path.sep).join('/');
-    if (found.has(relative)) continue;
-    found.add(relative);
+    if (keptPackages.has(dir)) continue;
+    keptPackages.add(dir);
 
-    const manifest = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8'));
-    // Optional dependencies matter: sharp ships its native binary as a platform-specific optional package.
-    for (const dep of Object.keys({ ...manifest.dependencies, ...manifest.optionalDependencies })) stack.push([dep, dir]);
+    try {
+      const manifest = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8'));
+      if (manifest.name) keptNames.add(manifest.name);
+
+      // Optional dependencies matter: sharp ships its native binary as a platform-specific optional package.
+      for (const dep of Object.keys({ ...manifest.dependencies, ...manifest.optionalDependencies })) stack.push([dep, dir]);
+    } catch (_) {}
   }
 
-  return found;
+  return keptNames;
 }
 
-// Every package directly under node_modules, with scopes expanded.
-function topLevelPackages(rootDir) {
-  let modulesDir = path.join(rootDir, 'node_modules');
-  if (!fs.existsSync(modulesDir)) {
-    modulesDir = path.join(rootDir, '../../node_modules');
-  }
-  if (!fs.existsSync(modulesDir)) return [];
-  const names = [];
-  for (const entry of fs.readdirSync(modulesDir, { withFileTypes: true })) {
-    if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
-    if (entry.name.startsWith('@')) {
-      for (const scoped of fs.readdirSync(path.join(modulesDir, entry.name), { withFileTypes: true })) {
-        if (scoped.isDirectory()) names.push(`${entry.name}/${scoped.name}`);
+// Every package directly under node_modules (both local and monorepo workspace root), with scopes expanded.
+function topLevelPackages(rootDir, workspaceRoot) {
+  const names = new Set();
+  const searchDirs = [
+    path.join(rootDir, 'node_modules'),
+    path.join(workspaceRoot, 'node_modules'),
+  ];
+  for (const modulesDir of searchDirs) {
+    if (!fs.existsSync(modulesDir)) continue;
+    for (const entry of fs.readdirSync(modulesDir, { withFileTypes: true })) {
+      if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
+      if (entry.name.startsWith('@')) {
+        const scopedDir = path.join(modulesDir, entry.name);
+        for (const scoped of fs.readdirSync(scopedDir, { withFileTypes: true })) {
+          if (scoped.isDirectory()) names.add(`${entry.name}/${scoped.name}`);
+        }
+      } else {
+        names.add(entry.name);
       }
-    } else {
-      names.push(entry.name);
     }
   }
-  return names;
+  return [...names];
 }
 
 // Exclude the top-level packages the main process does not need, rather than
@@ -108,22 +131,9 @@ function topLevelPackages(rootDir) {
 // `!node_modules/**/*` defeats it: @caspertech/node-metaverse/node_modules/long
 // was dropped that way and the packaged app died on `Cannot find module 'long'`.
 function unusedTopLevelPackages(rootDir) {
-  const keep = new Set();
-  for (const dir of dependencyClosure(rootDir)) {
-    const segments = dir.split('/').filter((s) => s !== 'node_modules');
-    // Keep the outermost package, which carries any nested node_modules with
-    // it, AND the package's own name at top level. A dependency can be present
-    // both hoisted and nested, and electron-builder's walker may package the
-    // hoisted copy while this closure resolved the nested one -- dropping the
-    // hoisted copy then leaves the app with neither (`Cannot find module
-    // 'xml2js'` at startup).
-    for (const depth of [0, segments.length - 1]) {
-      const name = segments[depth];
-      if (!name) continue;
-      keep.add(name.startsWith('@') ? `${name}/${segments[depth + 1]}` : name);
-    }
-  }
-  return topLevelPackages(rootDir)
+  const workspaceRoot = findWorkspaceRoot(rootDir);
+  const keep = dependencyClosure(rootDir, workspaceRoot);
+  return topLevelPackages(rootDir, workspaceRoot)
     .filter((name) => !keep.has(name))
     .sort();
 }
