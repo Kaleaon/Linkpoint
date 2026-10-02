@@ -1,16 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
+import { useApp } from "../context/AppContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
 import { app } from "../linkpoint/app.ts";
 import { macroTaskQueue } from "../linkpoint/macro-task-queue.ts";
 import Icon from "../components/Icon.jsx";
+import ListSkeletonLoader from "../components/ListSkeletonLoader.jsx";
+import GuidedEmptyState from "../components/GuidedEmptyState.jsx";
 
 /** Inventory rows come directly from InventoryManager capability responses. */
 export default function Inventory() {
   const { V, t } = useTheme();
+  const { actions } = useApp();
   const [revision, setRevision] = useState(0);
   const [filter, setFilter] = useState("");
   const [selected, setSelected] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
+
 
   useEffect(() => {
     const refresh = () => setRevision((value) => value + 1);
@@ -102,53 +107,80 @@ export default function Inventory() {
         </button>
       </div>
       <div className="live-list">
-        {rows.length ? rows.map((entry) => (
-          <div
-            key={entry.id}
-            style={{ display: "flex", alignItems: "center", position: "relative" }}
-          >
-            <button
-              type="button"
-              className="inventory-row inventory-button"
-              style={{ borderColor: V.outv, flex: 1 }}
-              onClick={() => {
-                setSelected(entry);
-                if (entry.folder) {
-                  if (typeof app.inventory.updateViewportFolders === "function") {
-                    app.inventory.updateViewportFolders([entry.id]);
-                  }
-                  void app.inventory.fetchFolderContents(entry.id, true);
-                }
-              }}
-              onContextMenu={(e) => handleContextMenu(e, entry)}
+        {refreshing ? (
+          <ListSkeletonLoader count={5} variant="inventory" />
+        ) : rows.length ? (
+          rows.map((entry) => (
+            <div
+              key={entry.id}
+              style={{ display: "flex", alignItems: "center", position: "relative" }}
             >
-              <Icon name={entry.folder ? "folder" : "file"} size={17} style={{ color: entry.folder ? V.pri : V.sec2 }} />
-              <span style={{ font: `400 13px/1.3 ${t.font}`, flex: 1, textAlign: "left" }}>{entry.name || "Unnamed item"}</span>
-            </button>
-            {entry.folder ? (
               <button
                 type="button"
-                className="folder-context-trigger"
-                aria-label={`Options for folder ${entry.name || 'Folder'}`}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: V.pri,
-                  padding: "8px 12px",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
+                className="inventory-row inventory-button"
+                style={{ borderColor: V.outv, flex: 1 }}
+                onClick={() => {
+                  setSelected(entry);
+                  if (entry.folder) {
+                    if (typeof app.inventory.updateViewportFolders === "function") {
+                      app.inventory.updateViewportFolders([entry.id]);
+                    }
+                    void app.inventory.fetchFolderContents(entry.id, true);
+                  }
                 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleContextMenu(e, entry);
-                }}
+                onContextMenu={(e) => handleContextMenu(e, entry)}
               >
-                <Icon name="more-vertical" size={16} />
+                <Icon name={entry.folder ? "folder" : "file"} size={17} style={{ color: entry.folder ? V.pri : V.sec2 }} />
+                <span style={{ font: `400 13px/1.3 ${t.font}`, flex: 1, textAlign: "left" }}>{entry.name || "Unnamed item"}</span>
               </button>
-            ) : null}
-          </div>
-        )) : <div className="honest-empty"><Icon name="folder-open" size={28} /><p>{app.auth.isLoggedIn() ? "No inventory data has been loaded by the grid." : "Connect to a grid to load inventory."}</p></div>}
+              {entry.folder ? (
+                <button
+                  type="button"
+                  className="folder-context-trigger"
+                  aria-label={`Options for folder ${entry.name || 'Folder'}`}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: V.pri,
+                    padding: "8px 12px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleContextMenu(e, entry);
+                  }}
+                >
+                  <Icon name="more-vertical" size={16} />
+                </button>
+              ) : null}
+            </div>
+          ))
+        ) : filter.trim() ? (
+          <GuidedEmptyState
+            icon="search"
+            title="No search results"
+            description={`No inventory items match "${filter.trim()}".`}
+            isSearch={true}
+          />
+        ) : app.auth.isLoggedIn() ? (
+          <GuidedEmptyState
+            icon="folder-open"
+            title="No inventory loaded"
+            description="Your inventory is empty or has not been loaded from the grid yet."
+            actionLabel="RELOAD INVENTORY"
+            onAction={handleRefresh}
+          />
+        ) : (
+          <GuidedEmptyState
+            icon="folder-open"
+            title="Not connected to grid"
+            description="Connect to a Second Life or OpenSim grid to load and view your inventory."
+            actionLabel="CONNECT TO GRID"
+            onAction={() => actions.setScreen("Login")}
+          />
+        )}
       </div>
       {/* Floating Context Menu */}
       {contextMenu ? (
