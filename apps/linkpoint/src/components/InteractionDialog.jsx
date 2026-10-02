@@ -3,6 +3,7 @@ import { useApp } from "../context/AppContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
 import { app } from "../linkpoint/app";
 import { TEXT_BOX_MARKER } from "../linkpoint/interactions";
+import FocusTrap from "./FocusTrap.jsx";
 
 // Requests the simulator is waiting on: object dialogs (llDialog), text boxes
 // (llTextBox) and teleport offers. Shows the oldest unanswered one as a sheet.
@@ -41,13 +42,6 @@ export default function InteractionDialog() {
     if (currentId && firstRef.current) firstRef.current.focus();
   }, [currentId]);
 
-  useEffect(() => {
-    if (!currentId) return undefined;
-    const onKey = (event) => { if (event.key === "Escape") { void app.interactions.dismiss(currentId); } };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [currentId]);
-
   if (!current) return null;
 
   const busy = app.interactions.isBusy(current.id);
@@ -76,7 +70,7 @@ export default function InteractionDialog() {
   const submitText = () => { if (!busy && text.trim()) attempt(() => app.interactions.answerText(current.id, text)); };
 
   return (
-    <div style={{ position: "absolute", inset: 0, zIndex: 70, background: "rgba(0,0,0,.62)", display: "flex", alignItems: "flex-end" }}>
+    <FocusTrap active={!!current} onEscape={() => { if (currentId) void app.interactions.dismiss(currentId); }} style={{ position: "absolute", inset: 0, zIndex: 70, background: "rgba(0,0,0,.62)", display: "flex", alignItems: "flex-end" }}>
       <div role="alertdialog" aria-modal="true" aria-labelledby="interaction-title" aria-describedby="interaction-body" style={{ width: "100%", background: V.surf, borderTop: `1px solid ${V.pri}`, borderRadius: `${V.rl} ${V.rl} 0 0`, padding: "18px 16px 22px", maxHeight: "86%", overflowY: "auto" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 10 }}>
           <span style={{ flex: 1, font: `600 12px/1 ${t.font}`, letterSpacing: ".2em", color: V.pri }}>{kind}</span>
@@ -126,6 +120,7 @@ export default function InteractionDialog() {
         </div>
         {isLure ? <div style={{ marginTop: 8, font: `400 10.5px/1.4 ${t.font}`, color: V.ink2 }}>Dismissing does not notify the sender.</div> : null}
       </div>
-    </div>
+    </FocusTrap>
   );
 }
+
