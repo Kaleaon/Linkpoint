@@ -33,6 +33,7 @@ object GridInfoResolver {
     // Reusable HTTP client configured with a 2.5s timeout for fast probe resolution
     private val httpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
+            .callTimeout(DEFAULT_TIMEOUT_MS, TimeUnit.MILLISECONDS)
             .connectTimeout(DEFAULT_TIMEOUT_MS, TimeUnit.MILLISECONDS)
             .readTimeout(DEFAULT_TIMEOUT_MS, TimeUnit.MILLISECONDS)
             .writeTimeout(DEFAULT_TIMEOUT_MS, TimeUnit.MILLISECONDS)
