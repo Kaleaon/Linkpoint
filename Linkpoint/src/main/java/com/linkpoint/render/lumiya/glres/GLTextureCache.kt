@@ -53,9 +53,33 @@ class GLTextureCache(
         bitmap: Bitmap,
         semantic: TextureFormatPolicy.TextureSemantic = TextureFormatPolicy.TextureSemantic.ALBEDO
     ): Int {
-        resourceManager.assertGlThread("GLTextureCache.put")
-        // If already cached, return existing
-        cache.get(id)?.let { return it.handle }
+        return putOrUpdate(id, bitmap, semantic, isPlaceholder = false)
+    }
+
+    /**
+     * Upload a bitmap and cache or update the resulting texture.
+     * Swaps placeholder textures with high-res textures without deleting/rebuilding
+     * shader programs or vertex buffers.
+     */
+    fun putOrUpdate(
+        id: UUID,
+        bitmap: Bitmap,
+        semantic: TextureFormatPolicy.TextureSemantic = TextureFormatPolicy.TextureSemantic.ALBEDO,
+        isPlaceholder: Boolean = false
+    ): Int {
+        resourceManager.assertGlThread("GLTextureCache.putOrUpdate")
+        val existing = cache.get(id)
+        if (existing != null) {
+            if (existing.isPlaceholder && !isPlaceholder) {
+                // Delete old placeholder handle to release GPU memory
+                resourceManager.deleteTexture(existing.handle)
+                resourceManager.removeMemory(existing.sizeBytes)
+                TextureMemoryTracker.freeGpu(existing.sizeBytes)
+                cache.remove(id)
+            } else if (!existing.isPlaceholder || isPlaceholder) {
+                return existing.handle
+            }
+        }
 
         val handle = resourceManager.createTexture()
         GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, handle)
@@ -88,7 +112,7 @@ class GLTextureCache(
 
         val sizeBytes = (bitmap.width * bitmap.height * 4 * 4L / 3L) // approximate with mipmaps
         resourceManager.addMemory(sizeBytes)
-        cache.put(id, TextureEntry(handle, bitmap.width, bitmap.height, sizeBytes))
+        cache.put(id, TextureEntry(handle, bitmap.width, bitmap.height, sizeBytes, isPlaceholder))
         // Mirror the GL upload into TextureMemoryTracker so the HUD /
         // debug-report counters reflect the actual live GPU set rather
         // than the LinkpointTexture-only side path. Paired with the
@@ -115,6 +139,7 @@ class GLTextureCache(
         val handle: Int,
         val width: Int,
         val height: Int,
-        val sizeBytes: Long
+        val sizeBytes: Long,
+        val isPlaceholder: Boolean = false
     )
 }
