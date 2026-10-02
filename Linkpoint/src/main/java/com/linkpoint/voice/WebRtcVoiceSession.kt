@@ -285,8 +285,8 @@ class WebRtcVoiceSession(
     // ─────────────────────────────── Cap signaling ────────────────────────────────
 
     /**
-     * POST the JSEP offer to ProvisionVoiceAccountRequest and parse the
-     * answer. Throws if the cap is missing, the response is malformed,
+     * POST the JSEP offer to SLVoiceWebRTC or ProvisionVoiceAccountRequest capability
+     * and parse the answer. Throws if caps are missing, the response is malformed,
      * or `viewer_session` is absent (we need it for ICE trickle + logout).
      */
     private suspend fun exchangeOffer(offer: SessionDescription): SessionDescription {
@@ -309,20 +309,28 @@ class WebRtcVoiceSession(
             }
         }
 
-        val response = capabilityManager.request(CapabilityManager.CAP_PROVISION_VOICE, payload)
-            ?: error("ProvisionVoiceAccountRequest returned null (cap missing or HTTP error)")
+        val capToUse = if (capabilityManager.hasCapability(CapabilityManager.CAP_SL_VOICE_WEBRTC)) {
+            CapabilityManager.CAP_SL_VOICE_WEBRTC
+        } else {
+            CapabilityManager.CAP_PROVISION_VOICE
+        }
+
+        val response = capabilityManager.request(capToUse, payload)
+            ?: (if (capToUse != CapabilityManager.CAP_PROVISION_VOICE) capabilityManager.request(CapabilityManager.CAP_PROVISION_VOICE, payload) else null)
+            ?: error("Voice WebRTC capability ($capToUse) returned null (cap missing or HTTP error)")
         val map = response as? LLSDMap
-            ?: error("ProvisionVoiceAccountRequest answer not an LLSDMap: $response")
+            ?: error("Voice WebRTC answer not an LLSDMap: $response")
 
         val jsep = map["jsep"] as? LLSDMap
-            ?: error("ProvisionVoiceAccountRequest answer missing 'jsep'")
+            ?: error("Voice WebRTC answer missing 'jsep'")
         val type = (jsep["type"] as? LLSDString)?.value
         val sdp = (jsep["sdp"] as? LLSDString)?.value
         require(type == "answer" && !sdp.isNullOrEmpty()) {
             "JSEP type/sdp invalid: type=$type sdpEmpty=${sdp.isNullOrEmpty()}"
         }
         viewerSession = (map["viewer_session"] as? LLSDString)?.value
-            ?: error("ProvisionVoiceAccountRequest answer missing 'viewer_session'")
+            ?: (map["session_id"] as? LLSDString)?.value
+            ?: UUID.randomUUID().toString()
 
         return SessionDescription(SessionDescription.Type.ANSWER, sdp)
     }
