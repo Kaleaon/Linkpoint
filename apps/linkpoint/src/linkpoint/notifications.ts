@@ -15,6 +15,7 @@ export class NotificationsManager extends Utils.EventEmitter {
   public protocol: SLConnectionFull;
   public unreadCount: number = 0;
   public items: NotificationData[] = [];
+  private noticeCounter = 0;
 
   constructor(protocolManager: SLConnectionFull) {
     super();
@@ -23,6 +24,18 @@ export class NotificationsManager extends Utils.EventEmitter {
 
   init() {
     this.protocol.on('notification', (data: NotificationData) => this.handleNotification(data));
+    this.protocol.on('group_notice', (data: any) => {
+      this.handleNotification({
+        id: data.id || `notice-${Date.now()}-${++this.noticeCounter}`,
+        kind: 'notice',
+        title: data.subject || 'Group Notice',
+        subject: data.subject || 'Group Notice',
+        message: data.message || '',
+        from: data.fromName || data.from || 'Resident',
+        groupId: data.groupId,
+        timestamp: data.timestamp || Date.now(),
+      });
+    });
   }
 
   handleNotification(data: NotificationData) {

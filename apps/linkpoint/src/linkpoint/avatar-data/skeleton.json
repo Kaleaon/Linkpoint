@@ -1,0 +1,3293 @@
+{
+ "root": "mPelvis",
+ "aliases": {
+  "avatar_mPelvis": "mPelvis",
+  "mPelvis": "mPelvis",
+  "hip": "mPelvis",
+  "mTorso": "mTorso",
+  "avatar_mTorso": "mTorso",
+  "abdomen": "mTorso",
+  "avatar_mChest": "mChest",
+  "chest": "mChest",
+  "mChest": "mChest",
+  "mNeck": "mNeck",
+  "neck": "mNeck",
+  "avatar_mNeck": "mNeck",
+  "head": "mHead",
+  "avatar_mHead": "mHead",
+  "mHead": "mHead",
+  "mSkull": "mSkull",
+  "figureHair": "mSkull",
+  "avatar_mSkull": "mSkull",
+  "mEyeRight": "mEyeRight",
+  "avatar_mEyeRight": "mEyeRight",
+  "mEyeLeft": "mEyeLeft",
+  "avatar_mEyeLeft": "mEyeLeft",
+  "avatar_mCollarLeft": "mCollarLeft",
+  "mCollarLeft": "mCollarLeft",
+  "lCollar": "mCollarLeft",
+  "avatar_mShoulderLeft": "mShoulderLeft",
+  "lShldr": "mShoulderLeft",
+  "mShoulderLeft": "mShoulderLeft",
+  "lForeArm": "mElbowLeft",
+  "avatar_mElbowLeft": "mElbowLeft",
+  "mElbowLeft": "mElbowLeft",
+  "avatar_mWristLeft": "mWristLeft",
+  "mWristLeft": "mWristLeft",
+  "lHand": "mWristLeft",
+  "rCollar": "mCollarRight",
+  "mCollarRight": "mCollarRight",
+  "avatar_mCollarRight": "mCollarRight",
+  "mShoulderRight": "mShoulderRight",
+  "rShldr": "mShoulderRight",
+  "avatar_mShoulderRight": "mShoulderRight",
+  "mElbowRight": "mElbowRight",
+  "rForeArm": "mElbowRight",
+  "avatar_mElbowRight": "mElbowRight",
+  "avatar_mWristRight": "mWristRight",
+  "mWristRight": "mWristRight",
+  "rHand": "mWristRight",
+  "mHipRight": "mHipRight",
+  "avatar_mHipRight": "mHipRight",
+  "rThigh": "mHipRight",
+  "avatar_mKneeRight": "mKneeRight",
+  "rShin": "mKneeRight",
+  "mKneeRight": "mKneeRight",
+  "avatar_mAnkleRight": "mAnkleRight",
+  "rFoot": "mAnkleRight",
+  "mAnkleRight": "mAnkleRight",
+  "avatar_mFootRight": "mFootRight",
+  "mFootRight": "mFootRight",
+  "mToeRight": "mToeRight",
+  "avatar_mToeRight": "mToeRight",
+  "avatar_mHipLeft": "mHipLeft",
+  "lThigh": "mHipLeft",
+  "mHipLeft": "mHipLeft",
+  "mKneeLeft": "mKneeLeft",
+  "lShin": "mKneeLeft",
+  "avatar_mKneeLeft": "mKneeLeft",
+  "mAnkleLeft": "mAnkleLeft",
+  "lFoot": "mAnkleLeft",
+  "avatar_mAnkleLeft": "mAnkleLeft",
+  "mFootLeft": "mFootLeft",
+  "avatar_mFootLeft": "mFootLeft",
+  "avatar_mToeLeft": "mToeLeft",
+  "mToeLeft": "mToeLeft",
+  "PELVIS": "PELVIS",
+  "BUTT": "BUTT",
+  "BELLY": "BELLY",
+  "LEFT_HANDLE": "LEFT_HANDLE",
+  "RIGHT_HANDLE": "RIGHT_HANDLE",
+  "LOWER_BACK": "LOWER_BACK",
+  "CHEST": "CHEST",
+  "LEFT_PEC": "LEFT_PEC",
+  "RIGHT_PEC": "RIGHT_PEC",
+  "UPPER_BACK": "UPPER_BACK",
+  "NECK": "NECK",
+  "HEAD": "HEAD",
+  "L_CLAVICLE": "L_CLAVICLE",
+  "L_UPPER_ARM": "L_UPPER_ARM",
+  "L_LOWER_ARM": "L_LOWER_ARM",
+  "L_HAND": "L_HAND",
+  "R_CLAVICLE": "R_CLAVICLE",
+  "R_UPPER_ARM": "R_UPPER_ARM",
+  "R_LOWER_ARM": "R_LOWER_ARM",
+  "R_HAND": "R_HAND",
+  "R_UPPER_LEG": "R_UPPER_LEG",
+  "R_LOWER_LEG": "R_LOWER_LEG",
+  "R_FOOT": "R_FOOT",
+  "L_UPPER_LEG": "L_UPPER_LEG",
+  "L_LOWER_LEG": "L_LOWER_LEG",
+  "L_FOOT": "L_FOOT",
+  "mSpine1": "mSpine1",
+  "mSpine2": "mSpine2",
+  "mSpine3": "mSpine3",
+  "mSpine4": "mSpine4",
+  "mFaceRoot": "mFaceRoot",
+  "mFaceEyeAltRight": "mFaceEyeAltRight",
+  "mFaceEyeAltLeft": "mFaceEyeAltLeft",
+  "mFaceForeheadLeft": "mFaceForeheadLeft",
+  "mFaceForeheadRight": "mFaceForeheadRight",
+  "mFaceEyebrowOuterLeft": "mFaceEyebrowOuterLeft",
+  "mFaceEyebrowCenterLeft": "mFaceEyebrowCenterLeft",
+  "mFaceEyebrowInnerLeft": "mFaceEyebrowInnerLeft",
+  "mFaceEyebrowOuterRight": "mFaceEyebrowOuterRight",
+  "mFaceEyebrowCenterRight": "mFaceEyebrowCenterRight",
+  "mFaceEyebrowInnerRight": "mFaceEyebrowInnerRight",
+  "mFaceEyeLidUpperLeft": "mFaceEyeLidUpperLeft",
+  "mFaceEyeLidLowerLeft": "mFaceEyeLidLowerLeft",
+  "mFaceEyeLidUpperRight": "mFaceEyeLidUpperRight",
+  "mFaceEyeLidLowerRight": "mFaceEyeLidLowerRight",
+  "mFaceEar1Left": "mFaceEar1Left",
+  "mFaceEar2Left": "mFaceEar2Left",
+  "mFaceEar1Right": "mFaceEar1Right",
+  "mFaceEar2Right": "mFaceEar2Right",
+  "mFaceNoseLeft": "mFaceNoseLeft",
+  "mFaceNoseCenter": "mFaceNoseCenter",
+  "mFaceNoseRight": "mFaceNoseRight",
+  "mFaceCheekLowerLeft": "mFaceCheekLowerLeft",
+  "mFaceCheekUpperLeft": "mFaceCheekUpperLeft",
+  "mFaceCheekLowerRight": "mFaceCheekLowerRight",
+  "mFaceCheekUpperRight": "mFaceCheekUpperRight",
+  "mFaceJaw": "mFaceJaw",
+  "mFaceChin": "mFaceChin",
+  "mFaceTeethLower": "mFaceTeethLower",
+  "mFaceLipLowerLeft": "mFaceLipLowerLeft",
+  "mFaceLipLowerRight": "mFaceLipLowerRight",
+  "mFaceLipLowerCenter": "mFaceLipLowerCenter",
+  "mFaceTongueBase": "mFaceTongueBase",
+  "mFaceTongueTip": "mFaceTongueTip",
+  "mFaceJawShaper": "mFaceJawShaper",
+  "mFaceForeheadCenter": "mFaceForeheadCenter",
+  "mFaceNoseBase": "mFaceNoseBase",
+  "mFaceTeethUpper": "mFaceTeethUpper",
+  "mFaceLipUpperLeft": "mFaceLipUpperLeft",
+  "mFaceLipUpperRight": "mFaceLipUpperRight",
+  "mFaceLipCornerLeft": "mFaceLipCornerLeft",
+  "mFaceLipCornerRight": "mFaceLipCornerRight",
+  "mFaceLipUpperCenter": "mFaceLipUpperCenter",
+  "mFaceEyecornerInnerLeft": "mFaceEyecornerInnerLeft",
+  "mFaceEyecornerInnerRight": "mFaceEyecornerInnerRight",
+  "mFaceNoseBridge": "mFaceNoseBridge",
+  "mHandMiddle1Left": "mHandMiddle1Left",
+  "mHandMiddle2Left": "mHandMiddle2Left",
+  "mHandMiddle3Left": "mHandMiddle3Left",
+  "mHandIndex1Left": "mHandIndex1Left",
+  "mHandIndex2Left": "mHandIndex2Left",
+  "mHandIndex3Left": "mHandIndex3Left",
+  "mHandRing1Left": "mHandRing1Left",
+  "mHandRing2Left": "mHandRing2Left",
+  "mHandRing3Left": "mHandRing3Left",
+  "mHandPinky1Left": "mHandPinky1Left",
+  "mHandPinky2Left": "mHandPinky2Left",
+  "mHandPinky3Left": "mHandPinky3Left",
+  "mHandThumb1Left": "mHandThumb1Left",
+  "mHandThumb2Left": "mHandThumb2Left",
+  "mHandThumb3Left": "mHandThumb3Left",
+  "mHandMiddle1Right": "mHandMiddle1Right",
+  "mHandMiddle2Right": "mHandMiddle2Right",
+  "mHandMiddle3Right": "mHandMiddle3Right",
+  "mHandIndex1Right": "mHandIndex1Right",
+  "mHandIndex2Right": "mHandIndex2Right",
+  "mHandIndex3Right": "mHandIndex3Right",
+  "mHandRing1Right": "mHandRing1Right",
+  "mHandRing2Right": "mHandRing2Right",
+  "mHandRing3Right": "mHandRing3Right",
+  "mHandPinky1Right": "mHandPinky1Right",
+  "mHandPinky2Right": "mHandPinky2Right",
+  "mHandPinky3Right": "mHandPinky3Right",
+  "mHandThumb1Right": "mHandThumb1Right",
+  "mHandThumb2Right": "mHandThumb2Right",
+  "mHandThumb3Right": "mHandThumb3Right",
+  "mWingsRoot": "mWingsRoot",
+  "mWing1Left": "mWing1Left",
+  "mWing2Left": "mWing2Left",
+  "mWing3Left": "mWing3Left",
+  "mWing4Left": "mWing4Left",
+  "mWing4FanLeft": "mWing4FanLeft",
+  "mWing1Right": "mWing1Right",
+  "mWing2Right": "mWing2Right",
+  "mWing3Right": "mWing3Right",
+  "mWing4Right": "mWing4Right",
+  "mWing4FanRight": "mWing4FanRight",
+  "mTail1": "mTail1",
+  "mTail2": "mTail2",
+  "mTail3": "mTail3",
+  "mTail4": "mTail4",
+  "mTail5": "mTail5",
+  "mTail6": "mTail6",
+  "mGroin": "mGroin",
+  "mHindLimbsRoot": "mHindLimbsRoot",
+  "mHindLimb1Left": "mHindLimb1Left",
+  "mHindLimb2Left": "mHindLimb2Left",
+  "mHindLimb3Left": "mHindLimb3Left",
+  "mHindLimb4Left": "mHindLimb4Left",
+  "mHindLimb1Right": "mHindLimb1Right",
+  "mHindLimb2Right": "mHindLimb2Right",
+  "mHindLimb3Right": "mHindLimb3Right",
+  "mHindLimb4Right": "mHindLimb4Right"
+ },
+ "bones": {
+  "mSkull": {
+   "position": [
+    0.0,
+    0.0,
+    0.079
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.079
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 5
+  },
+  "mEyeRight": {
+   "position": [
+    0.098,
+    -0.036,
+    0.079
+   ],
+   "basePosition": [
+    0.098466,
+    -0.036,
+    0.079
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 6
+  },
+  "mEyeLeft": {
+   "position": [
+    0.098,
+    0.036,
+    0.079
+   ],
+   "basePosition": [
+    0.098461,
+    0.036,
+    0.079
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 7
+  },
+  "mFaceEyeAltRight": {
+   "position": [
+    0.073,
+    -0.036,
+    0.034
+   ],
+   "basePosition": [
+    0.073466,
+    -0.036,
+    0.03393
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 31
+  },
+  "mFaceEyeAltLeft": {
+   "position": [
+    0.073,
+    0.036,
+    0.034
+   ],
+   "basePosition": [
+    0.073461,
+    0.036,
+    0.03393
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 32
+  },
+  "mFaceForeheadLeft": {
+   "position": [
+    0.061,
+    0.035,
+    0.083
+   ],
+   "basePosition": [
+    0.061,
+    0.035,
+    0.083
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 33
+  },
+  "mFaceForeheadRight": {
+   "position": [
+    0.061,
+    -0.035,
+    0.083
+   ],
+   "basePosition": [
+    0.061,
+    -0.035,
+    0.083
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 34
+  },
+  "mFaceEyebrowOuterLeft": {
+   "position": [
+    0.064,
+    0.051,
+    0.048
+   ],
+   "basePosition": [
+    0.064,
+    0.051,
+    0.048
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 35
+  },
+  "mFaceEyebrowCenterLeft": {
+   "position": [
+    0.07,
+    0.043,
+    0.056
+   ],
+   "basePosition": [
+    0.07,
+    0.043,
+    0.056
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 36
+  },
+  "mFaceEyebrowInnerLeft": {
+   "position": [
+    0.075,
+    0.022,
+    0.051
+   ],
+   "basePosition": [
+    0.075,
+    0.022,
+    0.051
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 37
+  },
+  "mFaceEyebrowOuterRight": {
+   "position": [
+    0.064,
+    -0.051,
+    0.048
+   ],
+   "basePosition": [
+    0.064,
+    -0.051,
+    0.048
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 38
+  },
+  "mFaceEyebrowCenterRight": {
+   "position": [
+    0.07,
+    -0.043,
+    0.056
+   ],
+   "basePosition": [
+    0.07,
+    -0.043,
+    0.056
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 39
+  },
+  "mFaceEyebrowInnerRight": {
+   "position": [
+    0.075,
+    -0.022,
+    0.051
+   ],
+   "basePosition": [
+    0.075,
+    -0.022,
+    0.051
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 40
+  },
+  "mFaceEyeLidUpperLeft": {
+   "position": [
+    0.073,
+    0.036,
+    0.034
+   ],
+   "basePosition": [
+    0.073,
+    0.036,
+    0.034
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 41
+  },
+  "mFaceEyeLidLowerLeft": {
+   "position": [
+    0.073,
+    0.036,
+    0.034
+   ],
+   "basePosition": [
+    0.073,
+    0.036,
+    0.034
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 42
+  },
+  "mFaceEyeLidUpperRight": {
+   "position": [
+    0.073,
+    -0.036,
+    0.034
+   ],
+   "basePosition": [
+    0.073,
+    -0.036,
+    0.034
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 43
+  },
+  "mFaceEyeLidLowerRight": {
+   "position": [
+    0.073,
+    -0.036,
+    0.034
+   ],
+   "basePosition": [
+    0.073,
+    -0.036,
+    0.034
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 44
+  },
+  "mFaceEar2Left": {
+   "position": [
+    -0.019,
+    0.018,
+    0.025
+   ],
+   "basePosition": [
+    -0.019,
+    0.018,
+    0.025
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 46
+  },
+  "mFaceEar1Left": {
+   "position": [
+    0.0,
+    0.08,
+    0.002
+   ],
+   "basePosition": [
+    0.0,
+    0.08,
+    0.002
+   ],
+   "children": [
+    "mFaceEar2Left"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 45
+  },
+  "mFaceEar2Right": {
+   "position": [
+    -0.019,
+    -0.018,
+    0.025
+   ],
+   "basePosition": [
+    -0.019,
+    -0.018,
+    0.025
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 48
+  },
+  "mFaceEar1Right": {
+   "position": [
+    0.0,
+    -0.08,
+    0.002
+   ],
+   "basePosition": [
+    0.0,
+    -0.08,
+    0.002
+   ],
+   "children": [
+    "mFaceEar2Right"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 47
+  },
+  "mFaceNoseLeft": {
+   "position": [
+    0.086,
+    0.015,
+    -0.004
+   ],
+   "basePosition": [
+    0.086,
+    0.015,
+    -0.004
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 49
+  },
+  "mFaceNoseCenter": {
+   "position": [
+    0.102,
+    0.0,
+    0.0
+   ],
+   "basePosition": [
+    0.102,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 50
+  },
+  "mFaceNoseRight": {
+   "position": [
+    0.086,
+    -0.015,
+    -0.004
+   ],
+   "basePosition": [
+    0.086,
+    -0.015,
+    -0.004
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 51
+  },
+  "mFaceCheekLowerLeft": {
+   "position": [
+    0.05,
+    0.034,
+    -0.031
+   ],
+   "basePosition": [
+    0.05,
+    0.034,
+    -0.031
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 52
+  },
+  "mFaceCheekUpperLeft": {
+   "position": [
+    0.07,
+    0.034,
+    -0.005
+   ],
+   "basePosition": [
+    0.07,
+    0.034,
+    -0.005
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 53
+  },
+  "mFaceCheekLowerRight": {
+   "position": [
+    0.05,
+    -0.034,
+    -0.031
+   ],
+   "basePosition": [
+    0.05,
+    -0.034,
+    -0.031
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 54
+  },
+  "mFaceCheekUpperRight": {
+   "position": [
+    0.07,
+    -0.034,
+    -0.005
+   ],
+   "basePosition": [
+    0.07,
+    -0.034,
+    -0.005
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 55
+  },
+  "mFaceChin": {
+   "position": [
+    0.074,
+    0.0,
+    -0.054
+   ],
+   "basePosition": [
+    0.074,
+    0.0,
+    -0.054
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 57
+  },
+  "mFaceLipLowerLeft": {
+   "position": [
+    0.045,
+    0.0,
+    0.0
+   ],
+   "basePosition": [
+    0.045,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 59
+  },
+  "mFaceLipLowerRight": {
+   "position": [
+    0.045,
+    0.0,
+    0.0
+   ],
+   "basePosition": [
+    0.045,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 60
+  },
+  "mFaceLipLowerCenter": {
+   "position": [
+    0.045,
+    0.0,
+    0.0
+   ],
+   "basePosition": [
+    0.045,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 61
+  },
+  "mFaceTongueTip": {
+   "position": [
+    0.022,
+    0.0,
+    0.007
+   ],
+   "basePosition": [
+    0.022,
+    0.0,
+    0.007
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 63
+  },
+  "mFaceTongueBase": {
+   "position": [
+    0.039,
+    0.0,
+    0.005
+   ],
+   "basePosition": [
+    0.039,
+    0.0,
+    0.005
+   ],
+   "children": [
+    "mFaceTongueTip"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 62
+  },
+  "mFaceTeethLower": {
+   "position": [
+    0.021,
+    0.0,
+    -0.039
+   ],
+   "basePosition": [
+    0.021,
+    0.0,
+    -0.039
+   ],
+   "children": [
+    "mFaceLipLowerLeft",
+    "mFaceLipLowerRight",
+    "mFaceLipLowerCenter",
+    "mFaceTongueBase"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 58
+  },
+  "mFaceJaw": {
+   "position": [
+    -0.001,
+    0.0,
+    -0.015
+   ],
+   "basePosition": [
+    -0.001,
+    0.0,
+    -0.015
+   ],
+   "children": [
+    "mFaceChin",
+    "mFaceTeethLower"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 56
+  },
+  "mFaceJawShaper": {
+   "position": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 64
+  },
+  "mFaceForeheadCenter": {
+   "position": [
+    0.069,
+    0.0,
+    0.065
+   ],
+   "basePosition": [
+    0.069,
+    0.0,
+    0.065
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 65
+  },
+  "mFaceNoseBase": {
+   "position": [
+    0.094,
+    0.0,
+    -0.016
+   ],
+   "basePosition": [
+    0.094,
+    0.0,
+    -0.016
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 66
+  },
+  "mFaceLipUpperLeft": {
+   "position": [
+    0.045,
+    0.0,
+    -0.003
+   ],
+   "basePosition": [
+    0.045,
+    0.0,
+    -0.003
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 68
+  },
+  "mFaceLipUpperRight": {
+   "position": [
+    0.045,
+    0.0,
+    -0.003
+   ],
+   "basePosition": [
+    0.045,
+    0.0,
+    -0.003
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 69
+  },
+  "mFaceLipCornerLeft": {
+   "position": [
+    0.028,
+    -0.019,
+    -0.01
+   ],
+   "basePosition": [
+    0.028,
+    -0.019,
+    -0.01
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 70
+  },
+  "mFaceLipCornerRight": {
+   "position": [
+    0.028,
+    0.019,
+    -0.01
+   ],
+   "basePosition": [
+    0.028,
+    0.019,
+    -0.01
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 71
+  },
+  "mFaceLipUpperCenter": {
+   "position": [
+    0.045,
+    0.0,
+    -0.003
+   ],
+   "basePosition": [
+    0.045,
+    0.0,
+    -0.003
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 72
+  },
+  "mFaceTeethUpper": {
+   "position": [
+    0.02,
+    0.0,
+    -0.03
+   ],
+   "basePosition": [
+    0.02,
+    0.0,
+    -0.03
+   ],
+   "children": [
+    "mFaceLipUpperLeft",
+    "mFaceLipUpperRight",
+    "mFaceLipCornerLeft",
+    "mFaceLipCornerRight",
+    "mFaceLipUpperCenter"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 67
+  },
+  "mFaceEyecornerInnerLeft": {
+   "position": [
+    0.075,
+    0.017,
+    0.032
+   ],
+   "basePosition": [
+    0.075,
+    0.017,
+    0.032
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 73
+  },
+  "mFaceEyecornerInnerRight": {
+   "position": [
+    0.075,
+    -0.017,
+    0.032
+   ],
+   "basePosition": [
+    0.075,
+    -0.017,
+    0.032
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 74
+  },
+  "mFaceNoseBridge": {
+   "position": [
+    0.091,
+    0.0,
+    0.02
+   ],
+   "basePosition": [
+    0.091,
+    0.0,
+    0.02
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 75
+  },
+  "mFaceRoot": {
+   "position": [
+    0.025,
+    0.0,
+    0.045
+   ],
+   "basePosition": [
+    0.025,
+    0.0,
+    0.045
+   ],
+   "children": [
+    "mFaceEyeAltRight",
+    "mFaceEyeAltLeft",
+    "mFaceForeheadLeft",
+    "mFaceForeheadRight",
+    "mFaceEyebrowOuterLeft",
+    "mFaceEyebrowCenterLeft",
+    "mFaceEyebrowInnerLeft",
+    "mFaceEyebrowOuterRight",
+    "mFaceEyebrowCenterRight",
+    "mFaceEyebrowInnerRight",
+    "mFaceEyeLidUpperLeft",
+    "mFaceEyeLidLowerLeft",
+    "mFaceEyeLidUpperRight",
+    "mFaceEyeLidLowerRight",
+    "mFaceEar1Left",
+    "mFaceEar1Right",
+    "mFaceNoseLeft",
+    "mFaceNoseCenter",
+    "mFaceNoseRight",
+    "mFaceCheekLowerLeft",
+    "mFaceCheekUpperLeft",
+    "mFaceCheekLowerRight",
+    "mFaceCheekUpperRight",
+    "mFaceJaw",
+    "mFaceJawShaper",
+    "mFaceForeheadCenter",
+    "mFaceNoseBase",
+    "mFaceTeethUpper",
+    "mFaceEyecornerInnerLeft",
+    "mFaceEyecornerInnerRight",
+    "mFaceNoseBridge"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 30
+  },
+  "HEAD": {
+   "position": [
+    0.02,
+    0.0,
+    0.07
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.11,
+    0.09,
+    0.12
+   ]
+  },
+  "mHead": {
+   "position": [
+    0.0,
+    -0.0,
+    0.076
+   ],
+   "basePosition": [
+    0.0,
+    -0.0,
+    0.07563
+   ],
+   "children": [
+    "mSkull",
+    "mEyeRight",
+    "mEyeLeft",
+    "mFaceRoot"
+   ],
+   "collision": [
+    "HEAD"
+   ],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 4
+  },
+  "NECK": {
+   "position": [
+    0.0,
+    0.0,
+    0.02
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.05,
+    0.06,
+    0.08
+   ]
+  },
+  "mNeck": {
+   "position": [
+    -0.01,
+    0.0,
+    0.251
+   ],
+   "basePosition": [
+    -0.009507,
+    0.0,
+    0.251108
+   ],
+   "children": [
+    "mHead"
+   ],
+   "collision": [
+    "NECK"
+   ],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 3
+  },
+  "mHandMiddle3Left": {
+   "position": [
+    -0.001,
+    0.049,
+    -0.008
+   ],
+   "basePosition": [
+    -0.001,
+    0.049,
+    -0.008
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 78
+  },
+  "mHandMiddle2Left": {
+   "position": [
+    -0.001,
+    0.04,
+    -0.006
+   ],
+   "basePosition": [
+    -0.001,
+    0.04,
+    -0.006
+   ],
+   "children": [
+    "mHandMiddle3Left"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 77
+  },
+  "mHandMiddle1Left": {
+   "position": [
+    0.013,
+    0.101,
+    0.015
+   ],
+   "basePosition": [
+    0.013,
+    0.101,
+    0.015
+   ],
+   "children": [
+    "mHandMiddle2Left"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 76
+  },
+  "mHandIndex3Left": {
+   "position": [
+    0.014,
+    0.032,
+    -0.006
+   ],
+   "basePosition": [
+    0.014,
+    0.032,
+    -0.006
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 81
+  },
+  "mHandIndex2Left": {
+   "position": [
+    0.017,
+    0.036,
+    -0.006
+   ],
+   "basePosition": [
+    0.017,
+    0.036,
+    -0.006
+   ],
+   "children": [
+    "mHandIndex3Left"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 80
+  },
+  "mHandIndex1Left": {
+   "position": [
+    0.038,
+    0.097,
+    0.015
+   ],
+   "basePosition": [
+    0.038,
+    0.097,
+    0.015
+   ],
+   "children": [
+    "mHandIndex2Left"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 79
+  },
+  "mHandRing3Left": {
+   "position": [
+    -0.013,
+    0.04,
+    -0.009
+   ],
+   "basePosition": [
+    -0.013,
+    0.04,
+    -0.009
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 84
+  },
+  "mHandRing2Left": {
+   "position": [
+    -0.013,
+    0.038,
+    -0.008
+   ],
+   "basePosition": [
+    -0.013,
+    0.038,
+    -0.008
+   ],
+   "children": [
+    "mHandRing3Left"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 83
+  },
+  "mHandRing1Left": {
+   "position": [
+    -0.01,
+    0.099,
+    0.009
+   ],
+   "basePosition": [
+    -0.01,
+    0.099,
+    0.009
+   ],
+   "children": [
+    "mHandRing2Left"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 82
+  },
+  "mHandPinky3Left": {
+   "position": [
+    -0.015,
+    0.018,
+    -0.004
+   ],
+   "basePosition": [
+    -0.015,
+    0.018,
+    -0.004
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 87
+  },
+  "mHandPinky2Left": {
+   "position": [
+    -0.024,
+    0.025,
+    -0.006
+   ],
+   "basePosition": [
+    -0.024,
+    0.025,
+    -0.006
+   ],
+   "children": [
+    "mHandPinky3Left"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 86
+  },
+  "mHandPinky1Left": {
+   "position": [
+    -0.031,
+    0.095,
+    0.003
+   ],
+   "basePosition": [
+    -0.031,
+    0.095,
+    0.003
+   ],
+   "children": [
+    "mHandPinky2Left"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 85
+  },
+  "mHandThumb3Left": {
+   "position": [
+    0.023,
+    0.031,
+    -0.001
+   ],
+   "basePosition": [
+    0.023,
+    0.031,
+    -0.001
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 90
+  },
+  "mHandThumb2Left": {
+   "position": [
+    0.028,
+    0.032,
+    -0.001
+   ],
+   "basePosition": [
+    0.028,
+    0.032,
+    -0.001
+   ],
+   "children": [
+    "mHandThumb3Left"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 89
+  },
+  "mHandThumb1Left": {
+   "position": [
+    0.031,
+    0.026,
+    0.004
+   ],
+   "basePosition": [
+    0.031,
+    0.026,
+    0.004
+   ],
+   "children": [
+    "mHandThumb2Left"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 88
+  },
+  "L_HAND": {
+   "position": [
+    0.01,
+    0.05,
+    0.0
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.05,
+    0.08,
+    0.03
+   ]
+  },
+  "mWristLeft": {
+   "position": [
+    -0.0,
+    0.205,
+    0.0
+   ],
+   "basePosition": [
+    -0.0,
+    0.204846,
+    0.0
+   ],
+   "children": [
+    "mHandMiddle1Left",
+    "mHandIndex1Left",
+    "mHandRing1Left",
+    "mHandPinky1Left",
+    "mHandThumb1Left"
+   ],
+   "collision": [
+    "L_HAND"
+   ],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 11
+  },
+  "L_LOWER_ARM": {
+   "position": [
+    0.0,
+    0.1,
+    0.0
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.04,
+    0.14,
+    0.04
+   ]
+  },
+  "mElbowLeft": {
+   "position": [
+    0.0,
+    0.248,
+    0.0
+   ],
+   "basePosition": [
+    0.0,
+    0.248,
+    0.0
+   ],
+   "children": [
+    "mWristLeft"
+   ],
+   "collision": [
+    "L_LOWER_ARM"
+   ],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 10
+  },
+  "L_UPPER_ARM": {
+   "position": [
+    0.0,
+    0.12,
+    0.01
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.05,
+    0.17,
+    0.05
+   ]
+  },
+  "mShoulderLeft": {
+   "position": [
+    0.0,
+    0.079,
+    -0.0
+   ],
+   "basePosition": [
+    0.0,
+    0.079,
+    -0.0
+   ],
+   "children": [
+    "mElbowLeft"
+   ],
+   "collision": [
+    "L_UPPER_ARM"
+   ],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 9
+  },
+  "L_CLAVICLE": {
+   "position": [
+    0.02,
+    0.0,
+    0.02
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.07,
+    0.14,
+    0.05
+   ]
+  },
+  "mCollarLeft": {
+   "position": [
+    -0.021,
+    0.085,
+    0.165
+   ],
+   "basePosition": [
+    -0.020927,
+    0.084665,
+    0.165396
+   ],
+   "children": [
+    "mShoulderLeft"
+   ],
+   "collision": [
+    "L_CLAVICLE"
+   ],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 8
+  },
+  "mHandMiddle3Right": {
+   "position": [
+    -0.001,
+    -0.049,
+    -0.008
+   ],
+   "basePosition": [
+    -0.001,
+    -0.049,
+    -0.008
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 93
+  },
+  "mHandMiddle2Right": {
+   "position": [
+    -0.001,
+    -0.04,
+    -0.006
+   ],
+   "basePosition": [
+    -0.001,
+    -0.04,
+    -0.006
+   ],
+   "children": [
+    "mHandMiddle3Right"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 92
+  },
+  "mHandMiddle1Right": {
+   "position": [
+    0.013,
+    -0.101,
+    0.015
+   ],
+   "basePosition": [
+    0.013,
+    -0.101,
+    0.015
+   ],
+   "children": [
+    "mHandMiddle2Right"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 91
+  },
+  "mHandIndex3Right": {
+   "position": [
+    0.014,
+    -0.032,
+    -0.006
+   ],
+   "basePosition": [
+    0.014,
+    -0.032,
+    -0.006
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 96
+  },
+  "mHandIndex2Right": {
+   "position": [
+    0.017,
+    -0.036,
+    -0.006
+   ],
+   "basePosition": [
+    0.017,
+    -0.036,
+    -0.006
+   ],
+   "children": [
+    "mHandIndex3Right"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 95
+  },
+  "mHandIndex1Right": {
+   "position": [
+    0.038,
+    -0.097,
+    0.015
+   ],
+   "basePosition": [
+    0.038,
+    -0.097,
+    0.015
+   ],
+   "children": [
+    "mHandIndex2Right"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 94
+  },
+  "mHandRing3Right": {
+   "position": [
+    -0.013,
+    -0.04,
+    -0.009
+   ],
+   "basePosition": [
+    -0.013,
+    -0.04,
+    -0.009
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 99
+  },
+  "mHandRing2Right": {
+   "position": [
+    -0.013,
+    -0.038,
+    -0.008
+   ],
+   "basePosition": [
+    -0.013,
+    -0.038,
+    -0.008
+   ],
+   "children": [
+    "mHandRing3Right"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 98
+  },
+  "mHandRing1Right": {
+   "position": [
+    -0.01,
+    -0.099,
+    0.009
+   ],
+   "basePosition": [
+    -0.01,
+    -0.099,
+    0.009
+   ],
+   "children": [
+    "mHandRing2Right"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 97
+  },
+  "mHandPinky3Right": {
+   "position": [
+    -0.015,
+    -0.018,
+    -0.004
+   ],
+   "basePosition": [
+    -0.015,
+    -0.018,
+    -0.004
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 102
+  },
+  "mHandPinky2Right": {
+   "position": [
+    -0.024,
+    -0.025,
+    -0.006
+   ],
+   "basePosition": [
+    -0.024,
+    -0.025,
+    -0.006
+   ],
+   "children": [
+    "mHandPinky3Right"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 101
+  },
+  "mHandPinky1Right": {
+   "position": [
+    -0.031,
+    -0.095,
+    0.003
+   ],
+   "basePosition": [
+    -0.031,
+    -0.095,
+    0.003
+   ],
+   "children": [
+    "mHandPinky2Right"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 100
+  },
+  "mHandThumb3Right": {
+   "position": [
+    0.023,
+    -0.031,
+    -0.001
+   ],
+   "basePosition": [
+    0.023,
+    -0.031,
+    -0.001
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 105
+  },
+  "mHandThumb2Right": {
+   "position": [
+    0.028,
+    -0.032,
+    -0.001
+   ],
+   "basePosition": [
+    0.028,
+    -0.032,
+    -0.001
+   ],
+   "children": [
+    "mHandThumb3Right"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 104
+  },
+  "mHandThumb1Right": {
+   "position": [
+    0.031,
+    -0.026,
+    0.004
+   ],
+   "basePosition": [
+    0.031,
+    -0.026,
+    0.004
+   ],
+   "children": [
+    "mHandThumb2Right"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 103
+  },
+  "R_HAND": {
+   "position": [
+    0.01,
+    -0.05,
+    0.0
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.05,
+    0.08,
+    0.03
+   ]
+  },
+  "mWristRight": {
+   "position": [
+    0.0,
+    -0.205,
+    -0.0
+   ],
+   "basePosition": [
+    -0.0,
+    -0.205,
+    -0.0
+   ],
+   "children": [
+    "mHandMiddle1Right",
+    "mHandIndex1Right",
+    "mHandRing1Right",
+    "mHandPinky1Right",
+    "mHandThumb1Right"
+   ],
+   "collision": [
+    "R_HAND"
+   ],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 15
+  },
+  "R_LOWER_ARM": {
+   "position": [
+    0.0,
+    -0.1,
+    0.0
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.04,
+    0.14,
+    0.04
+   ]
+  },
+  "mElbowRight": {
+   "position": [
+    0.0,
+    -0.248,
+    -0.0
+   ],
+   "basePosition": [
+    0.0,
+    -0.248,
+    -0.0
+   ],
+   "children": [
+    "mWristRight"
+   ],
+   "collision": [
+    "R_LOWER_ARM"
+   ],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 14
+  },
+  "R_UPPER_ARM": {
+   "position": [
+    0.0,
+    -0.12,
+    0.01
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.05,
+    0.17,
+    0.05
+   ]
+  },
+  "mShoulderRight": {
+   "position": [
+    0.0,
+    -0.079,
+    -0.0
+   ],
+   "basePosition": [
+    0.0,
+    -0.079418,
+    -0.0
+   ],
+   "children": [
+    "mElbowRight"
+   ],
+   "collision": [
+    "R_UPPER_ARM"
+   ],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 13
+  },
+  "R_CLAVICLE": {
+   "position": [
+    0.02,
+    0.0,
+    0.02
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.07,
+    0.14,
+    0.05
+   ]
+  },
+  "mCollarRight": {
+   "position": [
+    -0.021,
+    -0.085,
+    0.165
+   ],
+   "basePosition": [
+    -0.020927,
+    -0.085,
+    0.165396
+   ],
+   "children": [
+    "mShoulderRight"
+   ],
+   "collision": [
+    "R_CLAVICLE"
+   ],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 12
+  },
+  "mWing4Left": {
+   "position": [
+    -0.171,
+    0.173,
+    0.0
+   ],
+   "basePosition": [
+    -0.171,
+    0.173,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 110
+  },
+  "mWing4FanLeft": {
+   "position": [
+    -0.171,
+    0.173,
+    0.0
+   ],
+   "basePosition": [
+    -0.171,
+    0.173,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 111
+  },
+  "mWing3Left": {
+   "position": [
+    -0.181,
+    0.183,
+    0.0
+   ],
+   "basePosition": [
+    -0.181,
+    0.183,
+    0.0
+   ],
+   "children": [
+    "mWing4Left",
+    "mWing4FanLeft"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 109
+  },
+  "mWing2Left": {
+   "position": [
+    -0.168,
+    0.169,
+    0.067
+   ],
+   "basePosition": [
+    -0.168,
+    0.169,
+    0.067
+   ],
+   "children": [
+    "mWing3Left"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 108
+  },
+  "mWing1Left": {
+   "position": [
+    -0.099,
+    0.105,
+    0.181
+   ],
+   "basePosition": [
+    -0.099,
+    0.105,
+    0.181
+   ],
+   "children": [
+    "mWing2Left"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 107
+  },
+  "mWing4Right": {
+   "position": [
+    -0.171,
+    -0.173,
+    0.0
+   ],
+   "basePosition": [
+    -0.171,
+    -0.173,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 115
+  },
+  "mWing4FanRight": {
+   "position": [
+    -0.171,
+    -0.173,
+    0.0
+   ],
+   "basePosition": [
+    -0.171,
+    -0.173,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 116
+  },
+  "mWing3Right": {
+   "position": [
+    -0.181,
+    -0.183,
+    0.0
+   ],
+   "basePosition": [
+    -0.181,
+    -0.183,
+    0.0
+   ],
+   "children": [
+    "mWing4Right",
+    "mWing4FanRight"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 114
+  },
+  "mWing2Right": {
+   "position": [
+    -0.168,
+    -0.169,
+    0.067
+   ],
+   "basePosition": [
+    -0.168,
+    -0.169,
+    0.067
+   ],
+   "children": [
+    "mWing3Right"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 113
+  },
+  "mWing1Right": {
+   "position": [
+    -0.099,
+    -0.105,
+    0.181
+   ],
+   "basePosition": [
+    -0.099,
+    -0.105,
+    0.181
+   ],
+   "children": [
+    "mWing2Right"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 112
+  },
+  "mWingsRoot": {
+   "position": [
+    -0.014,
+    0.0,
+    0.0
+   ],
+   "basePosition": [
+    -0.014,
+    0.0,
+    0.0
+   ],
+   "children": [
+    "mWing1Left",
+    "mWing1Right"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 106
+  },
+  "CHEST": {
+   "position": [
+    0.028,
+    0.0,
+    0.07
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.11,
+    0.15,
+    0.2
+   ]
+  },
+  "LEFT_PEC": {
+   "position": [
+    0.119,
+    0.082,
+    0.042
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.05,
+    0.05,
+    0.05
+   ]
+  },
+  "RIGHT_PEC": {
+   "position": [
+    0.119,
+    -0.082,
+    0.042
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.05,
+    0.05,
+    0.05
+   ]
+  },
+  "UPPER_BACK": {
+   "position": [
+    0.0,
+    0.0,
+    0.017
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.09,
+    0.13,
+    0.15
+   ]
+  },
+  "mChest": {
+   "position": [
+    -0.015,
+    0.0,
+    0.205
+   ],
+   "basePosition": [
+    -0.015368,
+    0.0,
+    0.204877
+   ],
+   "children": [
+    "mNeck",
+    "mCollarLeft",
+    "mCollarRight",
+    "mWingsRoot"
+   ],
+   "collision": [
+    "CHEST",
+    "LEFT_PEC",
+    "RIGHT_PEC",
+    "UPPER_BACK"
+   ],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 2
+  },
+  "mSpine4": {
+   "position": [
+    0.015,
+    0.0,
+    -0.205
+   ],
+   "basePosition": [
+    0.015368,
+    0.0,
+    -0.204877
+   ],
+   "children": [
+    "mChest"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 29
+  },
+  "mSpine3": {
+   "position": [
+    -0.015,
+    0.0,
+    0.205
+   ],
+   "basePosition": [
+    -0.015368,
+    0.0,
+    0.204877
+   ],
+   "children": [
+    "mSpine4"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 28
+  },
+  "BELLY": {
+   "position": [
+    0.028,
+    0.0,
+    0.04
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.09,
+    0.13,
+    0.15
+   ]
+  },
+  "LEFT_HANDLE": {
+   "position": [
+    0.0,
+    0.1,
+    0.058
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.05,
+    0.05,
+    0.05
+   ]
+  },
+  "RIGHT_HANDLE": {
+   "position": [
+    0.0,
+    -0.1,
+    0.058
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.05,
+    0.05,
+    0.05
+   ]
+  },
+  "LOWER_BACK": {
+   "position": [
+    0.0,
+    0.0,
+    0.023
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.09,
+    0.13,
+    0.15
+   ]
+  },
+  "mTorso": {
+   "position": [
+    0.0,
+    0.0,
+    0.084
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.084073
+   ],
+   "children": [
+    "mSpine3"
+   ],
+   "collision": [
+    "BELLY",
+    "LEFT_HANDLE",
+    "RIGHT_HANDLE",
+    "LOWER_BACK"
+   ],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 1
+  },
+  "mSpine2": {
+   "position": [
+    0.0,
+    0.0,
+    -0.084
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    -0.084073
+   ],
+   "children": [
+    "mTorso"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 27
+  },
+  "mSpine1": {
+   "position": [
+    0.0,
+    0.0,
+    0.084
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.084073
+   ],
+   "children": [
+    "mSpine2"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 26
+  },
+  "mToeRight": {
+   "position": [
+    0.109,
+    0.0,
+    0.0
+   ],
+   "basePosition": [
+    0.105399,
+    -0.010408,
+    -0.000104
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 20
+  },
+  "mFootRight": {
+   "position": [
+    0.112,
+    -0.0,
+    -0.061
+   ],
+   "basePosition": [
+    0.111956,
+    -0.0,
+    -0.060637
+   ],
+   "children": [
+    "mToeRight"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 19
+  },
+  "R_FOOT": {
+   "position": [
+    0.077,
+    0.0,
+    -0.041
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.13,
+    0.05,
+    0.05
+   ]
+  },
+  "mAnkleRight": {
+   "position": [
+    -0.029,
+    0.0,
+    -0.468
+   ],
+   "basePosition": [
+    -0.028869,
+    0.0,
+    -0.468494
+   ],
+   "children": [
+    "mFootRight"
+   ],
+   "collision": [
+    "R_FOOT"
+   ],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 18
+  },
+  "R_LOWER_LEG": {
+   "position": [
+    -0.02,
+    0.0,
+    -0.2
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.06,
+    0.06,
+    0.25
+   ]
+  },
+  "mKneeRight": {
+   "position": [
+    -0.001,
+    0.049,
+    -0.491
+   ],
+   "basePosition": [
+    -0.00078,
+    0.048635,
+    -0.490922
+   ],
+   "children": [
+    "mAnkleRight"
+   ],
+   "collision": [
+    "R_LOWER_LEG"
+   ],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 17
+  },
+  "R_UPPER_LEG": {
+   "position": [
+    -0.02,
+    0.05,
+    -0.22
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.09,
+    0.09,
+    0.32
+   ]
+  },
+  "mHipRight": {
+   "position": [
+    0.034,
+    -0.129,
+    -0.041
+   ],
+   "basePosition": [
+    0.03362,
+    -0.128806,
+    -0.041086
+   ],
+   "children": [
+    "mKneeRight"
+   ],
+   "collision": [
+    "R_UPPER_LEG"
+   ],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 16
+  },
+  "mToeLeft": {
+   "position": [
+    0.109,
+    0.0,
+    0.0
+   ],
+   "basePosition": [
+    0.105387,
+    0.00827,
+    0.000871
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 25
+  },
+  "mFootLeft": {
+   "position": [
+    0.112,
+    -0.0,
+    -0.061
+   ],
+   "basePosition": [
+    0.111956,
+    -0.0,
+    -0.06062
+   ],
+   "children": [
+    "mToeLeft"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 24
+  },
+  "L_FOOT": {
+   "position": [
+    0.077,
+    0.0,
+    -0.041
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.13,
+    0.05,
+    0.05
+   ]
+  },
+  "mAnkleLeft": {
+   "position": [
+    -0.029,
+    0.001,
+    -0.468
+   ],
+   "basePosition": [
+    -0.028887,
+    0.001378,
+    -0.468449
+   ],
+   "children": [
+    "mFootLeft"
+   ],
+   "collision": [
+    "L_FOOT"
+   ],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 23
+  },
+  "L_LOWER_LEG": {
+   "position": [
+    -0.02,
+    0.0,
+    -0.2
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.06,
+    0.06,
+    0.25
+   ]
+  },
+  "mKneeLeft": {
+   "position": [
+    -0.001,
+    -0.046,
+    -0.491
+   ],
+   "basePosition": [
+    -0.000887,
+    -0.045568,
+    -0.491053
+   ],
+   "children": [
+    "mAnkleLeft"
+   ],
+   "collision": [
+    "L_LOWER_LEG"
+   ],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 22
+  },
+  "L_UPPER_LEG": {
+   "position": [
+    -0.02,
+    -0.05,
+    -0.22
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.09,
+    0.09,
+    0.32
+   ]
+  },
+  "mHipLeft": {
+   "position": [
+    0.034,
+    0.127,
+    -0.041
+   ],
+   "basePosition": [
+    0.033757,
+    0.126765,
+    -0.040998
+   ],
+   "children": [
+    "mKneeLeft"
+   ],
+   "collision": [
+    "L_UPPER_LEG"
+   ],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 21
+  },
+  "mTail6": {
+   "position": [
+    -0.094,
+    0.0,
+    0.0
+   ],
+   "basePosition": [
+    -0.094,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 122
+  },
+  "mTail5": {
+   "position": [
+    -0.112,
+    0.0,
+    0.0
+   ],
+   "basePosition": [
+    -0.112,
+    0.0,
+    0.0
+   ],
+   "children": [
+    "mTail6"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 121
+  },
+  "mTail4": {
+   "position": [
+    -0.142,
+    0.0,
+    0.0
+   ],
+   "basePosition": [
+    -0.142,
+    0.0,
+    0.0
+   ],
+   "children": [
+    "mTail5"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 120
+  },
+  "mTail3": {
+   "position": [
+    -0.168,
+    0.0,
+    0.0
+   ],
+   "basePosition": [
+    -0.168,
+    0.0,
+    0.0
+   ],
+   "children": [
+    "mTail4"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 119
+  },
+  "mTail2": {
+   "position": [
+    -0.197,
+    0.0,
+    0.0
+   ],
+   "basePosition": [
+    -0.197,
+    0.0,
+    0.0
+   ],
+   "children": [
+    "mTail3"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 118
+  },
+  "mTail1": {
+   "position": [
+    -0.116,
+    0.0,
+    0.047
+   ],
+   "basePosition": [
+    -0.116,
+    0.0,
+    0.047
+   ],
+   "children": [
+    "mTail2"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 117
+  },
+  "mGroin": {
+   "position": [
+    0.064,
+    0.0,
+    -0.097
+   ],
+   "basePosition": [
+    0.064,
+    0.0,
+    -0.097
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 123
+  },
+  "mHindLimb4Left": {
+   "position": [
+    0.112,
+    0.0,
+    -0.061
+   ],
+   "basePosition": [
+    0.112,
+    0.0,
+    -0.061
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 128
+  },
+  "mHindLimb3Left": {
+   "position": [
+    -0.03,
+    -0.003,
+    -0.468
+   ],
+   "basePosition": [
+    -0.03,
+    -0.003,
+    -0.468
+   ],
+   "children": [
+    "mHindLimb4Left"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 127
+  },
+  "mHindLimb2Left": {
+   "position": [
+    0.002,
+    -0.046,
+    -0.491
+   ],
+   "basePosition": [
+    0.002,
+    -0.046,
+    -0.491
+   ],
+   "children": [
+    "mHindLimb3Left"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 126
+  },
+  "mHindLimb1Left": {
+   "position": [
+    -0.204,
+    0.129,
+    -0.125
+   ],
+   "basePosition": [
+    -0.204,
+    0.129,
+    -0.125
+   ],
+   "children": [
+    "mHindLimb2Left"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 125
+  },
+  "mHindLimb4Right": {
+   "position": [
+    0.112,
+    0.0,
+    -0.061
+   ],
+   "basePosition": [
+    0.112,
+    0.0,
+    -0.061
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 132
+  },
+  "mHindLimb3Right": {
+   "position": [
+    -0.03,
+    0.003,
+    -0.468
+   ],
+   "basePosition": [
+    -0.03,
+    0.003,
+    -0.468
+   ],
+   "children": [
+    "mHindLimb4Right"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 131
+  },
+  "mHindLimb2Right": {
+   "position": [
+    0.002,
+    0.046,
+    -0.491
+   ],
+   "basePosition": [
+    0.002,
+    0.046,
+    -0.491
+   ],
+   "children": [
+    "mHindLimb3Right"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 130
+  },
+  "mHindLimb1Right": {
+   "position": [
+    -0.204,
+    -0.129,
+    -0.125
+   ],
+   "basePosition": [
+    -0.204,
+    -0.129,
+    -0.125
+   ],
+   "children": [
+    "mHindLimb2Right"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 129
+  },
+  "mHindLimbsRoot": {
+   "position": [
+    -0.2,
+    0.0,
+    0.084
+   ],
+   "basePosition": [
+    -0.2,
+    0.0,
+    0.084
+   ],
+   "children": [
+    "mHindLimb1Left",
+    "mHindLimb1Right"
+   ],
+   "collision": [],
+   "isJoint": true,
+   "extended": true,
+   "animIndex": 124
+  },
+  "PELVIS": {
+   "position": [
+    -0.01,
+    0.0,
+    -0.02
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.12,
+    0.16,
+    0.17
+   ]
+  },
+  "BUTT": {
+   "position": [
+    -0.06,
+    0.0,
+    -0.1
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "children": [],
+   "collision": [],
+   "isJoint": false,
+   "extended": false,
+   "animIndex": -1,
+   "scale": [
+    0.1,
+    0.1,
+    0.1
+   ]
+  },
+  "mPelvis": {
+   "position": [
+    0.0,
+    0.0,
+    1.067
+   ],
+   "basePosition": [
+    0.0,
+    0.0,
+    1.067015
+   ],
+   "children": [
+    "mSpine1",
+    "mHipRight",
+    "mHipLeft",
+    "mTail1",
+    "mGroin",
+    "mHindLimbsRoot"
+   ],
+   "collision": [
+    "PELVIS",
+    "BUTT"
+   ],
+   "isJoint": true,
+   "extended": false,
+   "animIndex": 0
+  }
+ }
+}

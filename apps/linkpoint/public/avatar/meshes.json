@@ -1,0 +1,85 @@
+{
+ "hair": {
+  "vertexCount": 627,
+  "faceCount": 1020,
+  "hasWeights": true,
+  "jointNames": [
+   "mNeck",
+   "mHead"
+  ]
+ },
+ "head": {
+  "vertexCount": 1132,
+  "faceCount": 1844,
+  "hasWeights": true,
+  "jointNames": [
+   "mNeck",
+   "mHead"
+  ]
+ },
+ "eyelashes": {
+  "vertexCount": 48,
+  "faceCount": 46,
+  "hasWeights": true,
+  "jointNames": [
+   "mHead"
+  ]
+ },
+ "upperBody": {
+  "vertexCount": 2211,
+  "faceCount": 3688,
+  "hasWeights": true,
+  "jointNames": [
+   "mPelvis",
+   "mTorso",
+   "mChest",
+   "mNeck",
+   "mChest",
+   "mCollarLeft",
+   "mShoulderLeft",
+   "mElbowLeft",
+   "mWristLeft",
+   "mChest",
+   "mCollarRight",
+   "mShoulderRight",
+   "mElbowRight",
+   "mWristRight"
+  ]
+ },
+ "lowerBody": {
+  "vertexCount": 977,
+  "faceCount": 1654,
+  "hasWeights": true,
+  "jointNames": [
+   "mPelvis",
+   "mHipRight",
+   "mKneeRight",
+   "mAnkleRight",
+   "mPelvis",
+   "mHipLeft",
+   "mKneeLeft",
+   "mAnkleLeft"
+  ]
+ },
+ "eye": {
+  "vertexCount": 145,
+  "faceCount": 272,
+  "hasWeights": false,
+  "jointNames": []
+ },
+ "skirt": {
+  "vertexCount": 182,
+  "faceCount": 294,
+  "hasWeights": true,
+  "jointNames": [
+   "mPelvis",
+   "mTorso",
+   "mPelvis",
+   "mHipRight",
+   "mKneeRight",
+   "mPelvis",
+   "mHipLeft",
+   "mKneeLeft"
+  ]
+ }
+}

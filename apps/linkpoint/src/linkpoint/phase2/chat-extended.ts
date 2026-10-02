@@ -14,6 +14,7 @@ export class ChatExtended {
   private maxHistorySize: number = 1000;
   private filters: Map<string, Function> = new Map();
   private muteList: Set<string> = new Set();
+  private mutedObjects: Set<string> = new Set();
   private typingUsers: Map<string, number> = new Map();
   private typingTimeout: number = 5000; // milliseconds
 
@@ -127,6 +128,27 @@ export class ChatExtended {
 
   getMutedUsers() {
     return Array.from(this.muteList);
+  }
+
+  muteObject(nameOrId: string) {
+    if (!nameOrId || typeof nameOrId !== 'string') return;
+    this.mutedObjects.add(nameOrId.trim());
+    console.log(`[ChatExtended] Muted object: ${nameOrId}`);
+  }
+
+  unmuteObject(nameOrId: string) {
+    this.mutedObjects.delete(nameOrId.trim());
+    console.log(`[ChatExtended] Unmuted object: ${nameOrId}`);
+  }
+
+  isObjectMuted(nameOrId: string): boolean {
+    if (!nameOrId) return false;
+    const clean = nameOrId.trim();
+    return this.mutedObjects.has(clean) || Array.from(this.mutedObjects).some(m => clean.toLowerCase() === m.toLowerCase());
+  }
+
+  getMutedObjects() {
+    return Array.from(this.mutedObjects);
   }
 
   /**

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { XMLRPCClient } from './xmlrpc-client';
 import SparkMD5 from 'spark-md5';
+import { createHash } from 'node:crypto';
 
 describe('XMLRPCClient', () => {
   describe('buildLoginRequest', () => {
@@ -102,6 +103,14 @@ describe('XMLRPCClient', () => {
         passwordHash: 'hash',
       }, 'login_to_simulator_v2');
       expect(xml).toContain('<methodName>login_to_simulator_v2</methodName>');
+    });
+  });
+
+  describe('md5', () => {
+    it('hashes the UTF-8 bytes of the string, matching a reference MD5', async () => {
+      for (const text of ['', 'abc', 'p\u00e4ssw\u00f6rd', '\u20ac uro', '\ud83d\ude00 emoji', 'a'.repeat(5000)]) {
+        expect(await XMLRPCClient.md5(text)).toBe(createHash('md5').update(text, 'utf8').digest('hex'));
+      }
     });
   });
 });

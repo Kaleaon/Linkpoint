@@ -16,7 +16,9 @@ export class PreferencesManager extends Utils.EventEmitter {
     return {
       graphics: { quality: 'medium', fov: 60 },
       interface: { theme: 'dark', showFPS: true, designStyle: 'glass', colorPalette: 'linkpoint-blue' },
-      notifications: { enabled: true, soundEnabled: true }
+      notifications: { enabled: true, soundEnabled: true },
+      // Optional third-party features. Everything is off until the user turns it on in Settings.
+      integrations: { google: false }
     };
   }
 
@@ -30,6 +32,7 @@ export class PreferencesManager extends Utils.EventEmitter {
         graphics: { ...defaults.graphics, ...(saved.graphics || {}) },
         interface: { ...defaults.interface, ...(saved.interface || {}) },
         notifications: { ...defaults.notifications, ...(saved.notifications || {}) },
+        integrations: { ...defaults.integrations, ...(saved.integrations || {}) },
       };
       return;
     }
@@ -38,6 +41,11 @@ export class PreferencesManager extends Utils.EventEmitter {
 
   get(category: string, key: string) {
     return this.preferences[category]?.[key];
+  }
+
+  /** Whether the user has enabled Google sign-in for Contacts and Calendar. Off by default. */
+  isGoogleEnabled(): boolean {
+    return this.preferences.integrations?.google === true;
   }
 
   save() {

@@ -3,6 +3,7 @@
  */
 
 import { Utils } from './utils';
+import { getMfaHash, saveMfaHash } from './mfa-store';
 
 const CREDENTIALS_KEY = 'linkpoint_credentials';
 const SESSION_KEY = 'linkpoint_session';
@@ -41,9 +42,11 @@ export class AuthManager extends Utils.EventEmitter {
     Utils.storage.remove(SESSION_KEY);
   }
 
-  async login(grid: string, username: string, password: string, rememberMe: boolean, startLocation: string = 'last') {
+  async login(grid: string, username: string, password: string, rememberMe: boolean, startLocation: string = 'last', mfaToken: string = '') {
     try {
-      const response = await this.protocol.connect(grid, username, password, startLocation);
+      // A remembered device hash lets the grid skip the multi-factor prompt.
+      const response = await this.protocol.connect(grid, username, password, startLocation, { token: mfaToken || undefined, hash: getMfaHash(grid, username) || undefined });
+      if (rememberMe && response?.mfa_hash) saveMfaHash(grid, username, String(response.mfa_hash));
 
       if (rememberMe) {
         this.credentials = { username, grid, rememberMe: true };
@@ -65,6 +68,41 @@ export class AuthManager extends Utils.EventEmitter {
         mode: 'grid',
         grid,
         username,
+        user: this.user,
+        sessionId: this.protocol.sessionId,
+        agentId: this.protocol.agentId,
+        lastLoginAt: new Date().toISOString(),
+      };
+      this.emit('login_success', this.user);
+      return this.user;
+    } catch (error) {
+      this.emit('login_failed', error);
+      throw error;
+    }
+  }
+
+  async autoLogin(startLocation: string = 'last') {
+    try {
+      const response = await (this.protocol as any).autoLogin(startLocation);
+      const firstName = response.first_name || 'Kaleaon';
+      const lastName = response.last_name || 'Resident';
+      const fullName = `${firstName} ${lastName}`.trim();
+
+      this.user = {
+        id: this.protocol.agentId,
+        firstName,
+        lastName,
+        fullName,
+        grid: 'agni'
+      };
+
+      this.credentials = { username: fullName, grid: 'agni', rememberMe: true };
+      Utils.storage.set(CREDENTIALS_KEY, this.credentials);
+
+      this.sessionSnapshot = {
+        mode: 'grid',
+        grid: 'agni',
+        username: fullName,
         user: this.user,
         sessionId: this.protocol.sessionId,
         agentId: this.protocol.agentId,

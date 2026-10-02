@@ -11,7 +11,7 @@ export class CORSHandler {
 
   constructor() {
     this.environment = this.detectEnvironment();
-    this.customProxyUrl = ((import.meta as any).env.VITE_SL_PROXY_URL || '').trim() || null;
+    this.customProxyUrl = ((import.meta as any)?.env?.VITE_SL_PROXY_URL || (typeof process !== 'undefined' && process.env?.VITE_SL_PROXY_URL) || '').trim() || null;
     this.checkLocalProxy();
     this.corsProxies = this.buildProxyList();
   }
@@ -27,14 +27,12 @@ export class CORSHandler {
       });
     }
 
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (isLocalhost) {
-      proxies.unshift({
-        url: '/api/proxy?url=',
-        name: 'Local Server Proxy',
-        encode: true
-      });
-    }
+    // Always include the server-side proxy endpoint provided by our server.ts
+    proxies.push({
+      url: '/api/proxy?url=',
+      name: 'Local Server Proxy',
+      encode: true
+    });
 
     return proxies;
   }
@@ -44,20 +42,19 @@ export class CORSHandler {
    */
   async checkLocalProxy() {
     // Unit tests do not run the Express development proxy.
-    if ((import.meta as any).env.MODE === 'test') return;
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (!isLocalhost) return;
+    if (((import.meta as any)?.env?.MODE || (typeof process !== 'undefined' && process.env?.NODE_ENV) || '') === 'test') return;
 
     try {
-      const response = await fetch('/api/health');
+      if (typeof window === 'undefined') return;
+    const response = await fetch('/api/health');
       if (response.ok) {
         const data = await response.json();
-        console.log('[CORS] Local proxy is reachable:', data);
+        console.log('[CORS] Server proxy is reachable:', data);
       } else {
-        console.warn('[CORS] Local proxy health check failed:', response.status);
+        console.warn('[CORS] Server proxy health check failed:', response.status);
       }
     } catch (error) {
-      console.error('[CORS] Local proxy is unreachable:', error);
+      console.error('[CORS] Server proxy is unreachable:', error);
     }
   }
 
@@ -65,6 +62,12 @@ export class CORSHandler {
    * Detect current environment
    */
   detectEnvironment() {
+    if (typeof window === 'undefined') {
+      return { type: 'node', name: 'Node.js Environment', corsSupport: 'native', needsProxy: false };
+    }
+    if ((window as any).linkpointDesktop?.request) {
+      return { type: 'electron', name: 'Linkpoint Desktop', corsSupport: 'native', needsProxy: false };
+    }
     // Capacitor mobile app
     if ((window as any).Capacitor && (window as any).Capacitor.Plugins.CapacitorHttp) {
       return {
@@ -76,9 +79,9 @@ export class CORSHandler {
     }
 
     // Check if installed as PWA
-    const isInstalled = window.matchMedia('(display-mode: standalone)').matches ||
-                        (window.navigator as any).standalone ||
-                        document.referrer.includes('android-app://');
+    const isInstalled = (typeof window.matchMedia === 'function' && window.matchMedia('(display-mode: standalone)').matches) ||
+                        Boolean((window.navigator as any)?.standalone) ||
+                        Boolean(typeof document !== 'undefined' && document.referrer?.includes('android-app://'));
 
     if (isInstalled) {
       return {
@@ -90,13 +93,13 @@ export class CORSHandler {
     }
 
     // Regular web browser
-      return {
-        type: 'browser',
-        name: 'Web Browser',
-        corsSupport: 'server-or-custom-proxy',
-        needsProxy: true
-      };
-    }
+    return {
+      type: 'browser',
+      name: 'Web Browser',
+      corsSupport: 'server-or-custom-proxy',
+      needsProxy: true
+    };
+  }
 
   /**
    * Get environment info for display
@@ -112,6 +115,23 @@ export class CORSHandler {
     const env = this.environment;
 
     try {
+      if (env.type === 'electron') {
+        const result = await (window as any).linkpointDesktop.request({
+          url,
+          method: options.method || 'GET',
+          headers: options.headers || {},
+          body: options.body,
+        });
+        return {
+          ok: result.ok,
+          status: result.status,
+          statusText: result.statusText,
+          headers: new Headers(result.headers),
+          text: async () => result.text,
+          json: async () => JSON.parse(result.text),
+        };
+      }
+
       // 1. Capacitor native HTTP (mobile)
       if (env.type === 'capacitor') {
         console.log('[CORS] Using Capacitor native HTTP');
@@ -136,9 +156,19 @@ export class CORSHandler {
 
       // 2. Browser/PWA - Try direct first (might work for some endpoints)
       if (env.type === 'pwa-installed' || env.type === 'browser') {
+        let requestUrl = url;
+        if (typeof window !== 'undefined' && requestUrl.includes(window.location.host)) {
+          requestUrl = requestUrl.replace(/^https?:/, window.location.protocol);
+        }
+        const isSameOrigin = typeof window !== 'undefined' && (
+          requestUrl.startsWith('/') ||
+          requestUrl.startsWith(window.location.origin) ||
+          requestUrl.includes(window.location.host)
+        );
+
         // Try direct connection first
         try {
-          const response = await fetch(url, {
+          const response = await fetch(requestUrl, {
             method: options.method || 'GET',
             headers: options.headers || {},
             body: options.body,
@@ -149,6 +179,10 @@ export class CORSHandler {
           this.capturePermit(response);
           return response;
         } catch (directError) {
+          if (isSameOrigin) {
+            console.warn('[CORS] Same-origin request failed directly, rethrowing:', directError);
+            throw directError;
+          }
           // CORS blocked, use proxy
           console.log('[CORS] Direct connection failed, using configured CORS proxies');
           return await this.useTrustedProxy(url, options);

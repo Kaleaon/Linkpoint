@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { LAYOUTS } from "../theme/layouts.js";
 import { PALETTES } from "../theme/palettes.js";
 import { DEVICES, FLOATERS, HUD_DEFAULT, HUDS, CBTN, GRIDS } from "../theme/constants.js";
-import { useViewerClient } from "../viewer/ViewerClientContext";
+import { decodeSharedTheme, encodeSharedTheme, readSavedTheme, sanitizeTheme, themeFromPalette, THEME_STORAGE_KEY } from "../theme/customTheme.js";
+import { app } from "../linkpoint/app";
 
 // Ported from the mockup's `state = {...}` initializer and its instance
 // methods (flR/flDrag/flFocus/flToggle/flClose, hudDrag/toggleHud, T/D/navMode,
@@ -10,10 +11,42 @@ import { useViewerClient } from "../viewer/ViewerClientContext";
 // tick interval in componentDidMount). This hook is the state + actions layer;
 // theme/viewModel.js is the "renderVals()" computation layer that consumes it.
 export function useAppState() {
-  const viewerClient = useViewerClient();
   const [layout, setLayout] = useState("terminal");
   const [palette, setPalette] = useState("ink");
-  const [device, setDevice] = useState("ios");
+  const [customTheme, setCustomTheme] = useState(() => {
+    const shared = decodeSharedTheme(new URLSearchParams(window.location.search).get("theme") || "");
+    return shared || readSavedTheme() || themeFromPalette(PALETTES.ink);
+  });
+  const [viewMode, setViewModeState] = useState(() => {
+    try {
+      return localStorage.getItem("linkpoint_view_mode") || "auto";
+    } catch {
+      return "auto";
+    }
+  });
+
+  const deviceForViewport = useCallback(() => {
+    const width = window.innerWidth;
+    if (width >= 1280) return "desk";
+    if (width >= 900) return "tab";
+    if (width >= 600) return "fold";
+    return width >= 400 ? "and" : "ios";
+  }, []);
+
+  const resolveDevice = useCallback((mode) => {
+    if (mode === "desktop") return "desk";
+    if (mode === "mobile") return "and";
+    return deviceForViewport();
+  }, [deviceForViewport]);
+
+  const [device, setDevice] = useState(() => resolveDevice(viewMode));
+
+  useEffect(() => {
+    if (viewMode !== "auto") return;
+    const onResize = () => setDevice(deviceForViewport());
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [viewMode, deviceForViewport]);
   const [screen, setScreen] = useState("Login");
   const [dialog, setDialog] = useState(null);
   const [dense, setDense] = useState(false);
@@ -23,7 +56,20 @@ export function useAppState() {
   const [invOpen, setInvOpen] = useState({ Objects: true });
   const [dismissed, setDismissed] = useState({});
   const [pinned, setPinned] = useState({});
-  const [toggles, setToggles] = useState({ largeType: false, push: true, voice: true, chatCmds: true, autoresponse: true });
+  const [toggles, setToggles] = useState({
+    largeType: false, push: true, voice: true, chatCmds: true, autoresponse: true,
+    rlv: false, shadows: false, battery: true, timestamps: true, imLogs: true, mediaAuto: false,
+    showOnline: true, typingSent: true, cacheOnExit: false,
+  });
+  // Everything the preferences screens expose as a <select>: one flat bag so a
+  // new preference is one entry here plus one card, not a new state key each time.
+  const [prefs, setPrefs] = useState({
+    draw: "96 m", quality: "Balanced", fps: "60 fps", complexity: "80 000",
+    volume: "70%", translate: "Off", maturity: "Moderate", bandwidth: "1 500 kbps",
+    cacheLimit: 512, cacheLoc: "Internal storage",
+  });
+  const [cacheCleared, setCacheCleared] = useState({});
+  const [camPreset, setCamPreset] = useState("ORBIT");
   const [cond, setCond] = useState("normal");
   const [hudOn, setHudOn] = useState({ ...HUD_DEFAULT });
   const [hudPos, setHudPos] = useState({});
@@ -34,10 +80,6 @@ export function useAppState() {
   const [cPad, setCPad] = useState(true);
   const [cHeld, setCHeld] = useState("");
   const [cRun, setCRun] = useState(false);
-  const [cCam, setCCam] = useState("ORBIT");
-  const [cHdg, setCHdg] = useState(214);
-  const [cPitch, setCPitch] = useState(0);
-  const [cDrag, setCDrag] = useState(false);
   const [cEdit, setCEdit] = useState(false);
   const [cFlash, setCFlash] = useState("");
   const [cReason, setCReason] = useState("");
@@ -46,30 +88,35 @@ export function useAppState() {
   const [rOpen, setROpen] = useState(null);
   const [rMenu, setRMenu] = useState(null);
   const [cDock, setCDock] = useState(["fly", "sit", "snap", "mini", "inv", "home", "ao", "sun"]);
-  const [flOpen, setFlOpen] = useState({ Chat: true, Radar: true, Friends: true, Inventory: true, Map: true });
+  const [flOpen, setFlOpen] = useState({ Chat: true, Radar: true, Friends: true, Inventory: true, Map: true, Settings: true, AO: false });
   const [flMin, setFlMin] = useState({});
   const [flRect, setFlRect] = useState({});
-  const [flZ, setFlZ] = useState(["Map", "Inventory", "Friends", "Radar", "Chat"]);
+  const [flZ, setFlZ] = useState(["Map", "Inventory", "Friends", "Radar", "Chat", "Settings"]);
   const [menu, setMenu] = useState(null);
   const [tick, setTick] = useState(0);
   const [loginMode, setLoginModeState] = useState("grid");
   const [loginGrid, setLoginGrid] = useState("agni");
   const [loginBusy, setLoginBusy] = useState(false);
   const [loginError, setLoginError] = useState(null);
-  const [loginName, setLoginName] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [rememberLogin, setRememberLogin] = useState(true);
-  const [customGrids, setCustomGrids] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("linkpoint_custom_grids") || "[]"); } catch { return []; }
-  });
+  const [customGrids, setCustomGrids] = useState([]);
   const [addGrid, setAddGrid] = useState(false);
   const [addGridName, setAddGridName] = useState("");
   const [addGridHost, setAddGridHost] = useState("");
   const [searchFrom, setSearchFrom] = useState("Friends");
+  const [searchTab, setSearchTab] = useState("FRIENDS");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchState, setSearchState] = useState({});
   const [reconnecting, setReconnecting] = useState(false);
   const [toast, setToast] = useState("");
+
+  // ---- movement pad: held buttons move the real camera --------------------
+  useEffect(() => {
+    const step = { fwd: [0, 1, 0], bck: [0, -1, 0], lft: [-1, 0, 0], rgt: [1, 0, 0], up: [0, 0, 1], dn: [0, 0, -1] }[cHeld];
+    if (!step) return undefined;
+    const metersPerTick = cRun ? 1.4 : 0.55;
+    const timer = setInterval(() => app.world.moveCamera(step[0] * metersPerTick, step[1] * metersPerTick, step[2] * metersPerTick), 50);
+    return () => clearInterval(timer);
+  }, [cHeld, cRun]);
 
   // ---- tick clock (componentDidMount's setInterval) ---------------------
   useEffect(() => {
@@ -77,13 +124,20 @@ export function useAppState() {
     return () => clearInterval(iv);
   }, []);
 
+  // Form factor is an implementation concern in the real app. The design
+  // canvas exposes a manual device picker, but the React port follows its host
+  // viewport and changes navigation/layout at the same breakpoints instead.
+  useEffect(() => {
+    const syncDevice = () => setDevice(deviceForViewport());
+    window.addEventListener("resize", syncDevice);
+    return () => window.removeEventListener("resize", syncDevice);
+  }, [deviceForViewport]);
+
   // ---- timers / drag refs (were plain `this.x` fields on the class) -----
   const cflRef = useRef(null); // console-nav tap flash timeout
   const clpRef = useRef(null); // console dock long-press-to-edit timeout
   const rlpRef = useRef(null); // radar row long-press timeout
   const lpFiredRef = useRef(false);
-  const lxRef = useRef(0);
-  const lyRef = useRef(0);
   const loginTimerRef = useRef(null);
   const searchTimerRef = useRef(null);
   const reconnectTimerRef = useRef(null);
@@ -111,6 +165,26 @@ export function useAppState() {
     setToast(msg);
     toastTimerRef.current = setTimeout(() => setToast(""), 2200);
   }, []);
+
+  const setThemeColor = useCallback((key, value) => setCustomTheme((theme) => ({ ...theme, active: true, colors: { ...theme.colors, [key]: value } })), []);
+  const renameTheme = useCallback((name) => setCustomTheme((theme) => ({ ...theme, active: true, name })), []);
+  const selectPalette = useCallback((key) => { setPalette(key); setCustomTheme(themeFromPalette(PALETTES[key])); }, []);
+  const saveTheme = useCallback(() => { localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(customTheme)); notify("Theme saved to this device."); }, [customTheme, notify]);
+  const resetTheme = useCallback(() => { setCustomTheme(themeFromPalette(PALETTES[palette])); localStorage.removeItem(THEME_STORAGE_KEY); notify("Theme reset to the selected colour pack."); }, [palette, notify]);
+  const importTheme = useCallback(async (json) => {
+    try { const imported = sanitizeTheme(JSON.parse(json)); if (!imported) throw new Error(); setCustomTheme(imported); notify(`Imported “${imported.name}”.`); return true; }
+    catch { notify("That file is not a valid Linkpoint theme."); return false; }
+  }, [notify]);
+  const downloadTheme = useCallback(() => {
+    const blob = new Blob([JSON.stringify(customTheme, null, 2)], { type: "application/json" });
+    const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `${customTheme.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "linkpoint-theme"}.json`; link.click(); URL.revokeObjectURL(link.href);
+    notify("Theme JSON exported.");
+  }, [customTheme, notify]);
+  const shareTheme = useCallback(async () => {
+    const url = new URL(window.location.href); url.searchParams.set("theme", encodeSharedTheme(customTheme));
+    try { await navigator.clipboard.writeText(url.toString()); notify("Share link copied."); }
+    catch { window.prompt("Copy this theme link", url.toString()); }
+  }, [customTheme, notify]);
 
   // ---- derived lookups (T()/D()/navMode()) -------------------------------
   const T = useCallback(() => {
@@ -141,6 +215,7 @@ export function useAppState() {
   const setTab = useCallback((scr, v) => setTabs((s) => ({ ...s, [scr]: v })), []);
   const dismiss = useCallback((key) => setDismissed((s) => ({ ...s, [key]: true })), []);
   const toggleSetting = useCallback((key) => setToggles((s) => ({ ...s, [key]: !s[key] })), []);
+  const setPref = useCallback((key, v) => setPrefs((s) => ({ ...s, [key]: v })), []);
   const pin = useCallback((key) => setPinned((s) => ({ ...s, [key]: !s[key] })), []);
   const cycleLayout = useCallback(() => {
     const ks = Object.keys(LAYOUTS);
@@ -148,8 +223,10 @@ export function useAppState() {
   }, []);
   const cyclePalette = useCallback(() => {
     const ks = Object.keys(PALETTES);
-    setPalette((cur) => ks[(ks.indexOf(cur) + 1) % ks.length]);
-  }, []);
+    const next = ks[(ks.indexOf(palette) + 1) % ks.length];
+    setPalette(next);
+    setCustomTheme(themeFromPalette(PALETTES[next]));
+  }, [palette]);
 
   // ---- login (setLoginMode/setLoginGrid/connectLogin) --------------------
   // All known grids: the built-in Second Life / OpenSim presets plus
@@ -159,33 +236,23 @@ export function useAppState() {
     setLoginModeState(m);
     setLoginError(null);
   }, []);
-  const connectLogin = useCallback(async () => {
-    if (loginBusy) return;
-    if (loginMode === "offline") {
-      setLoginError(null);
-      setScreen("Chat");
-      notify("Offline session ready");
-      return;
-    }
-    if (!loginName.trim() || !loginPassword) {
-      setLoginError("Enter your avatar name and password.");
-      return;
-    }
+  const connectLogin = useCallback(async (gridKey, user, pass, remember = true, startLoc = "last") => {
     setLoginBusy(true);
     setLoginError(null);
-    const grid = allGrids().find((item) => item.key === loginGrid) || GRIDS[0];
-    const endpoint = /^https?:\/\//i.test(grid.host) ? grid.host : `https://${grid.host}`;
     try {
-      await viewerClient.execute({ type: "session.login", payload: { grid: grid.key.startsWith("custom-") ? "opensim" : "second-life", loginUri: endpoint, username: loginName.trim(), password: loginPassword, start: "last" } });
-      setLoginPassword("");
+      const gridToUse = gridKey || loginGrid;
+      const gridObj = allGrids().find((g) => g.key === gridToUse);
+      if (!gridObj || ["offline", "gemini"].includes(gridObj.key)) throw new Error("Select a live grid endpoint.");
+      const endpoint = gridObj.key.startsWith("custom-") ? gridObj.host : gridObj.key;
+      await app.auth.login(endpoint, user?.trim() || "", pass, remember, startLoc);
       setScreen("Chat");
-      notify(`Connected as ${loginName.trim()}`);
-    } catch (error) {
-      setLoginError(error instanceof Error ? error.message : `Unable to reach ${grid.host}.`);
+      notify("Connected as " + app.auth.getUserDisplayName());
+    } catch (err) {
+      setLoginError(err instanceof Error ? err.message : "Unable to connect to grid. Check your connection.");
     } finally {
       setLoginBusy(false);
     }
-  }, [loginBusy, loginMode, loginName, loginPassword, rememberLogin, loginGrid, allGrids, notify, viewerClient]);
+  }, [loginGrid, allGrids, notify]);
 
   // ---- login: add a custom grid ------------------------------------------
   // A resident can point the viewer at any OpenSim grid, not just the
@@ -203,31 +270,24 @@ export function useAppState() {
       notify("Grid name and login URI are both required");
       return;
     }
-    try {
-      const endpoint = new URL(host);
-      if (endpoint.protocol !== "https:" || endpoint.username || endpoint.password) throw new Error();
-    } catch {
-      notify("Login URI must be a valid HTTPS URL without embedded credentials");
-      return;
-    }
     const key =
       "custom-" +
       name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 24) +
       "-" +
       (customGrids.length + 1);
-    setCustomGrids((grids) => {
-      const next = grids.concat([{ key, label: name, host }]);
-      localStorage.setItem("linkpoint_custom_grids", JSON.stringify(next));
-      return next;
-    });
+    setCustomGrids((g) => g.concat([{ key, label: name, host }]));
     setLoginGrid(key);
     setAddGrid(false);
     notify("Added grid — " + name);
   }, [addGridName, addGridHost, customGrids]);
 
   // ---- resident search (openSearch/searchAdd) -----------------------------
-  const openSearch = useCallback((from) => {
+  // `tab` picks which of the picker's three panes opens first: FRIENDS (the
+  // contacts list, default — matches a real SL viewer's "start a conversation"
+  // flow), NEARBY (radar-range residents), or SEARCH (grid-wide name lookup).
+  const openSearch = useCallback((from, tab = "FRIENDS") => {
     setSearchFrom(from);
+    setSearchTab(tab);
     setSearchQuery("");
     setScreen("Search");
   }, []);
@@ -236,6 +296,28 @@ export function useAppState() {
     clearTimeout(searchTimerRef.current);
     searchTimerRef.current = setTimeout(() => setSearchState((s) => ({ ...s, [name]: "sent" })), 700);
   }, []);
+  // Start (or resume) an IM thread with a resident picked from Friends/Nearby.
+  const startIm = useCallback((name) => {
+    if (name) {
+      app.chat.openSession(name);
+    }
+    setTabs((s) => ({ ...s, Chat: "IM" }));
+    setChip(name);
+    setScreen("Chat");
+  }, []);
+
+  // ---- cache management ---------------------------------------------------
+  const clearCache = useCallback(
+    (key, name) => {
+      setCacheCleared((c) => ({ ...c, [key]: true }));
+      notify(name + " cleared \u2014 assets refetch on demand");
+    },
+    [notify]
+  );
+  const clearAllCache = useCallback(() => {
+    setCacheCleared({});
+    notify("All caches cleared \u2014 assets refetch on demand");
+  }, [notify]);
 
   // ---- settings: reconnect to grid ---------------------------------------
   const reconnect = useCallback(() => {
@@ -253,7 +335,12 @@ export function useAppState() {
     [flRect]
   );
 
+  // Focusing a window has to open it as well: only five floaters start open, so
+  // navigating to Preferences/Groups/Notices/Teleport/Profile/Statistics on Desktop
+  // used to raise and un-minimise a window that was never opened — the screen
+  // simply did not change.
   const flFocus = useCallback((id) => {
+    setFlOpen((o) => (o[id] ? o : { ...o, [id]: true }));
     setFlZ((z) => z.filter((x) => x !== id).concat(id));
     setScreen(id);
     setFlMin((m) => ({ ...m, [id]: false }));
@@ -308,6 +395,7 @@ export function useAppState() {
 
   const flClose = useCallback((id) => {
     setFlOpen((o) => ({ ...o, [id]: false }));
+    setScreen((cur) => (cur === id ? (app.auth.isLoggedIn() ? "Chat" : "Login") : cur));
     setMenu(null);
   }, []);
 
@@ -348,41 +436,28 @@ export function useAppState() {
 
   const cHold = useCallback((k) => {
     if (k === "run") setCRun((r) => !r);
-    else if (k === "cam") setCCam((c) => (c === "ORBIT" ? "MOUSELOOK" : "ORBIT"));
+    else if (k === "cam") app.world.toggleCameraMode();
     else setCHeld(k);
   }, []);
 
+  // Dock buttons either open the matching screen or say plainly that the viewer
+  // cannot do that yet. Nothing here pretends to have performed an action or
+  // reports permissions (no-fly, not-your-land) the viewer has no way to know.
   const cPress = useCallback((k) => {
     const b = CBTN[k];
-    if (b.off) {
-      setCReason("DENIED — " + b.off);
+    if (k === "ao") {
+      if (navMode() === "floaters") flToggle("AO");
+      else setScreen("AO");
       return;
     }
-    if (b.tog) {
-      setCTog((s) => ({ ...s, [k]: !s[k] }));
+    if (b.nav) {
+      if (navMode() === "floaters") flFocus(b.nav);
+      else setScreen(b.nav);
       setCReason("");
-    } else setCReason(b.label + " — ACKNOWLEDGED");
-  }, []);
-
-  // ---- console scene drag (sceneDown/sceneMove/sceneUp) ------------------
-  const sceneDown = useCallback((e) => {
-    lxRef.current = e.clientX;
-    lyRef.current = e.clientY;
-    setCDrag(true);
-  }, []);
-  const sceneMove = useCallback(
-    (e) => {
-      if (!cDrag) return;
-      const dx = e.clientX - lxRef.current,
-        dy = e.clientY - lyRef.current;
-      lxRef.current = e.clientX;
-      lyRef.current = e.clientY;
-      setCHdg((h) => h + dx * 0.35);
-      setCPitch((p) => Math.max(-70, Math.min(70, p + dy * 0.5)));
-    },
-    [cDrag]
-  );
-  const sceneUp = useCallback(() => setCDrag((d) => (d ? false : d)), []);
+      return;
+    }
+    setCReason(b.label + " — NOT AVAILABLE IN THIS VIEWER YET");
+  }, [navMode, flToggle, flFocus, setScreen]);
 
   // ---- console dock hold-to-edit / radar long-press ----------------------
   const holdStart = useCallback(() => {
@@ -432,9 +507,24 @@ export function useAppState() {
     setInvOpen((st) => ({ ...st, [name]: !(st[name] !== false) }));
   }, []);
 
+  const setViewMode = useCallback((mode) => {
+    setViewModeState(mode);
+    try {
+      localStorage.setItem("linkpoint_view_mode", mode);
+    } catch {}
+    const newDev = resolveDevice(mode);
+    setDevice(newDev);
+    notify(mode === "desktop" ? "Switched to Desktop Mode (Firestorm Multi-Window)" : mode === "mobile" ? "Switched to Mobile Mode (Lumiya Touch)" : "Switched to Auto-Responsive Mode");
+  }, [resolveDevice, notify]);
+
+  const toggleViewMode = useCallback(() => {
+    const next = device === "desk" ? "mobile" : "desktop";
+    setViewMode(next);
+  }, [device, setViewMode]);
+
   const screenPick = useCallback(
     (id) => {
-      if (navMode() === "floaters" && FLOATERS.some((f) => f.id === id)) {
+      if (app.auth.isLoggedIn() && navMode() === "floaters" && FLOATERS.some((f) => f.id === id)) {
         flFocus(id);
         setDialog(null);
         return;
@@ -447,25 +537,27 @@ export function useAppState() {
 
   return {
     state: {
-      layout, palette, device, screen, dialog, dense, tabs, chip, tileOk, invOpen, dismissed, pinned,
+      layout, palette, customTheme, device, viewMode, screen, dialog, dense, tabs, chip, tileOk, invOpen, dismissed, pinned,
       toggles, cond, hudOn, hudPos, hudPicker, target, targetPicker, navPeek,
-      cPad, cHeld, cRun, cCam, cHdg, cPitch, cDrag, cEdit, cFlash, cReason, cTog,
+      cPad, cHeld, cRun, cEdit, cFlash, cReason, cTog,
       rMode, rOpen, rMenu, cDock, flOpen, flMin, flRect, flZ, menu, tick,
-      loginMode, loginGrid, loginBusy, loginError, loginName, loginPassword, rememberLogin, customGrids, addGrid, addGridName, addGridHost,
-      searchFrom, searchQuery, searchState, reconnecting, toast,
+      loginMode, loginGrid, loginBusy, loginError, customGrids, addGrid, addGridName, addGridHost,
+      searchFrom, searchTab, searchQuery, searchState, reconnecting, toast,
+      prefs, cacheCleared, camPreset,
     },
     actions: {
-      setLayout, setPalette, setDevice, setScreen: screenPick, setDialog, setDense,
+      setLayout, setPalette: selectPalette, setThemeColor, renameTheme, saveTheme, resetTheme, importTheme, downloadTheme, shareTheme, setDevice, setViewMode, toggleViewMode, setScreen: screenPick, setDialog, setDense,
       allGrids, openAddGrid, cancelAddGrid, saveCustomGrid, setAddGridName, setAddGridHost,
       setTab, setChip, setTileOk, toggleInvFolder, dismiss, toggleSetting, pin,
       cycleLayout, cyclePalette, setCond, setMenu,
       flR, flDrag, flFocus, flToggle, flClose,
       hudDrag, toggleHud, setHudPicker, setTarget, setTargetPicker, setNavPeek,
-      cf, cTap, cHold, cPress, sceneDown, sceneMove, sceneUp,
+      cf, cTap, cHold, cPress,
       holdStart, holdEnd, endEdit, togglePad, toggleRun, flyUpDown, flyDnDown, flyRelease, addSlot, removeDockSlot,
       radarTap, radarHold, radarRelease, radarBlipPick,
       setRMode,
-      setLoginMode, setLoginGrid, setLoginName, setLoginPassword, setRememberLogin, connectLogin, openSearch, setSearchQuery, searchAdd, reconnect, notify,
+      setLoginMode, setLoginGrid, connectLogin, openSearch, setSearchTab, setSearchQuery, searchAdd, startIm, reconnect, notify,
+      setPref, clearCache, clearAllCache, setCamPreset,
     },
     T, D, navMode,
   };

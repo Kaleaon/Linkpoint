@@ -228,5 +228,13 @@ export const Utils = {
       };
       this.on(event, onceWrapper);
     }
+
+    removeAllListeners(event?: string) {
+      if (event) {
+        delete this.events[event];
+      } else {
+        this.events = {};
+      }
+    }
   }
 };

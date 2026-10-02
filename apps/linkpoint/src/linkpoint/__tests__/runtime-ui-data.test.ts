@@ -35,6 +35,41 @@ describe('runtime UI manager snapshots', () => {
     expect(objects.getObjects()[0]).toMatchObject({ id: 'object-id', primParams: { shape: 'sphere' } });
   });
 
+  it('emits friend list mutations and dispatches real friend requests', async () => {
+    const sendFriendRequest = vi.fn().mockResolvedValue(undefined);
+    const friends = new FriendsExtended({ sendFriendRequest });
+    const added = vi.fn();
+    const removed = vi.fn();
+    friends.on('friend_added', added);
+    friends.on('friend_removed', removed);
+
+    friends.replaceFriends([{ id: 'one', name: 'One Resident' }, { id: 'two', name: 'Two Resident' }]);
+    friends.replaceFriends([{ id: 'two', name: 'Two Renamed' }]);
+    await friends.sendFriendRequest('three', 'Hello');
+
+    expect(added).toHaveBeenCalledTimes(2);
+    expect(removed).toHaveBeenCalledWith(expect.objectContaining({ id: 'one' }));
+    expect(friends.getFriends()).toEqual([expect.objectContaining({ id: 'two', name: 'Two Renamed' })]);
+    expect(sendFriendRequest).toHaveBeenCalledWith('three', 'Hello');
+  });
+
+  it('normalizes live presence values and retains status events received before the buddy snapshot', () => {
+    const friends = new FriendsExtended();
+    const updated = vi.fn();
+    friends.on('friend_updated', updated);
+
+    friends.updateFriendStatus('{ABC-123}', 'online', { name: 'Early Resident' });
+    expect(friends.getFriends()).toEqual([
+      expect.objectContaining({ id: 'abc-123', name: 'Early Resident', onlineStatus: 'online' }),
+    ]);
+
+    friends.replaceFriends([{ id: 'ABC-123', name: 'Early Resident', onlineStatus: 'false' }]);
+    expect(friends.getFriends()).toEqual([
+      expect.objectContaining({ id: 'abc-123', onlineStatus: 'online' }),
+    ]);
+    expect(updated).toHaveBeenCalled();
+  });
+
   it('retains and clears live notifications', () => {
     const notifications = new NotificationsManager(new ProtocolStub() as any);
     notifications.handleNotification({ title: 'Grid notice', message: 'Live payload' });
@@ -59,6 +94,26 @@ describe('runtime UI manager snapshots', () => {
     expect(world.objects).toMatchObject([{ id: 'object-id', name: 'Live Object' }]);
     expect(regionListener).toHaveBeenCalledOnce();
     expect(objectListener).toHaveBeenCalledOnce();
+  });
+
+  it('uses login grid coordinates without inventing a region and clears world data on disconnect', () => {
+    const protocol = new ProtocolStub() as any;
+    protocol.connected = true;
+    protocol.agentId = 'self';
+    const world = new WorldViewer(protocol);
+
+    expect(world.region).toBeNull();
+    protocol.emit('connected', { sim_name: 'Grid Region', region_x: 256000, region_y: 256256 });
+    expect(world.region).toMatchObject({ name: 'Grid Region', x: 1000, y: 1001 });
+
+    protocol.emit('CoarseAvatarUpdate', { id: 'nearby', name: 'Live Resident', position: [12, 14, 20] });
+    expect(world.nearbyUsers).toMatchObject([{ id: 'nearby', name: 'Live Resident', position: [12, 14, 20] }]);
+
+    protocol.connected = false;
+    protocol.emit('disconnected');
+    expect(world.region).toBeNull();
+    expect(world.nearbyUsers).toEqual([]);
+    expect(world.objects).toEqual([]);
   });
 
   it('tracks coarse avatar locations and parcel properties for radar and map', () => {
