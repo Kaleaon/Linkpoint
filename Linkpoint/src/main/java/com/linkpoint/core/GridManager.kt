@@ -57,10 +57,24 @@ class GridManager(private val context: Context) {
         }
     }
     
+    fun updateSelectedGrid(grid: GridInfo) {
+        selectedGrid = grid
+        val index = customGrids.indexOfFirst { it.id == grid.id }
+        if (index != -1) {
+            customGrids[index] = grid
+        }
+        Log.i(TAG, "Updated selected grid: ${grid.name} (loginUri=${grid.loginUri}, helperUri=${grid.helperUri}, economyUri=${grid.economyUri}, mapUri=${grid.mapUri})")
+    }
+    
     fun addCustomGrid(grid: GridInfo) {
         if (customGrids.none { it.id == grid.id }) {
             customGrids.add(grid)
             Log.i(TAG, "Added custom grid: ${grid.name}")
+        } else {
+            val index = customGrids.indexOfFirst { it.id == grid.id }
+            if (index != -1) {
+                customGrids[index] = grid
+            }
         }
     }
     
@@ -99,5 +113,9 @@ data class GridInfo(
     val website: String? = null,
     val support: String? = null,
     val registerUri: String? = null,
-    val passwordUri: String? = null
+    val passwordUri: String? = null,
+    val economyUri: String? = null,
+    val mapUri: String? = null,
+    val welcomeUri: String? = null,
+    val isResolved: Boolean = false
 )

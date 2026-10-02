@@ -61,7 +61,8 @@ fun L2LoginRoute(
             val grid = app.gridManager.getAvailableGrids()
                 .getOrNull(credentials.selectedGridIndex)
                 ?: app.gridManager.getSelectedGrid()
-            status = "Logging in to ${grid.name}…"
+            app.gridManager.selectGrid(grid.id)
+            status = "Resolving grid & logging in to ${grid.name}…"
             app.applicationScope.launch {
                 // Map the UI label to the format expected by the login API:
                 // "last", "home", or "uri:Region&x&y&z" — never a raw
