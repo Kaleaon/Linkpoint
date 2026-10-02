@@ -128,13 +128,60 @@ class LocalCacheManager extends Utils.EventEmitter {
    * Save complete inventory (skeleton folders & items) to cache.
    */
   public async saveInventory(agentId: string, inventoryData: { folders: any[]; items: any[]; rootId?: string; rootName?: string }): Promise<void> {
+    let finalFolders = inventoryData.folders || [];
+    let finalItems = inventoryData.items || [];
+    let rootId = inventoryData.rootId;
+    let rootName = inventoryData.rootName;
+
+    const existing = await this.loadInventory(agentId);
+    if (existing && Array.isArray(existing.folders)) {
+      if (!rootId) rootId = existing.rootId;
+      if (!rootName) rootName = existing.rootName;
+
+      const incomingFolderMap = new Map(finalFolders.map((f: any) => [f.id, f]));
+      const incomingItemMap = new Map(finalItems.map((i: any) => [i.id, i]));
+      const incomingFolderIds = new Set(incomingFolderMap.keys());
+
+      const mergedFolders = new Map<string, any>(incomingFolderMap);
+      for (const ef of existing.folders) {
+        if (!ef?.id) continue;
+        if (!mergedFolders.has(ef.id)) {
+          const parentWasUpdated = ef.parent && incomingFolderIds.has(ef.parent);
+          if (!parentWasUpdated) {
+            mergedFolders.set(ef.id, ef);
+          }
+        }
+      }
+
+      const mergedItems = new Map<string, any>(incomingItemMap);
+      if (Array.isArray(existing.items)) {
+        for (const ei of existing.items) {
+          if (!ei?.id) continue;
+          if (!mergedItems.has(ei.id)) {
+            const parentWasUpdated = ei.parent && incomingFolderIds.has(ei.parent);
+            if (!parentWasUpdated) {
+              mergedItems.set(ei.id, ei);
+            }
+          }
+        }
+      }
+
+      finalFolders = Array.from(mergedFolders.values());
+      finalItems = Array.from(mergedItems.values());
+    }
+
     const payload = {
       id: `inv_${agentId}`,
       agentId,
       timestamp: Date.now(),
-      foldersCount: inventoryData.folders?.length || 0,
-      itemsCount: inventoryData.items?.length || 0,
-      data: inventoryData,
+      foldersCount: finalFolders.length,
+      itemsCount: finalItems.length,
+      data: {
+        folders: finalFolders,
+        items: finalItems,
+        rootId,
+        rootName,
+      },
     };
 
     // 1. Keep in memory for fast lookup

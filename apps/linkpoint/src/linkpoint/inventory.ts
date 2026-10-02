@@ -141,22 +141,9 @@ export class InventoryManager extends Utils.EventEmitter {
       try {
         const inv = await slBridge.fetchInventory(folderId);
         if (inv) {
-          if (Array.isArray(inv.folders)) {
-            for (const f of inv.folders) {
-              const fid = f.id || Utils.generateUUID();
-              this.folders.set(fid, { id: fid, name: f.name, type: 'folder', parent: f.parent || folderId, children: [] });
-              const parent = this.folders.get(f.parent || folderId);
-              if (parent && !parent.children.includes(fid)) parent.children.push(fid);
-            }
-          }
-          if (Array.isArray(inv.items)) {
-            for (const item of inv.items) {
-              const iid = item.id || Utils.generateUUID();
-              this.items.set(iid, { id: iid, name: item.name, type: 'item', assetType: item.assetType, parent: item.parent || folderId, description: item.description });
-              const parent = this.folders.get(item.parent || folderId);
-              if (parent && !parent.children.includes(iid)) parent.children.push(iid);
-            }
-          }
+          const incomingFolders = Array.isArray(inv.folders) ? inv.folders : [];
+          const incomingItems = Array.isArray(inv.items) ? inv.items : [];
+          await this.reconcileFolder(folderId, incomingFolders, incomingItems);
           this.emit('inventory_updated');
           this.emit('inventory_loaded');
           return;
@@ -189,47 +176,169 @@ export class InventoryManager extends Utils.EventEmitter {
       if (response && response.ok) {
         const text = await response.text();
         const data = LLSD.parseXML(text);
-        this.handleInventoryResponse(data);
+        await this.handleInventoryResponse(data);
       }
     } catch (error) {
       console.error(`Error fetching folder ${folderId}:`, error);
     }
   }
 
-  handleInventoryResponse(data: any) {
+  async handleInventoryResponse(data: any) {
     if (!data) return;
 
     const foldersList = Array.isArray(data.folders) ? data.folders : (data.categories ? [data] : []);
 
-    foldersList.forEach((folderData: any) => {
-      if (folderData.categories) {
-        folderData.categories.forEach((cat: any) => {
-          const folder = { id: cat.category_id || cat.folder_id, name: cat.name, type: 'folder', parent: cat.parent_id, children: [] };
-          this.folders.set(folder.id, folder);
-          const parent = this.folders.get(folder.parent);
-          if (parent && !parent.children.includes(folder.id)) parent.children.push(folder.id);
-        });
-      }
+    for (const folderData of foldersList) {
+      const defaultFolderId = folderData.folder_id || folderData.category_id || folderData.id;
+      const categories = Array.isArray(folderData.categories) ? folderData.categories : [];
+      const items = Array.isArray(folderData.items) ? folderData.items : [];
 
-      if (folderData.items) {
-        folderData.items.forEach((itemData: any) => {
-           const item = {
-             ...itemData,
-             id: itemData.item_id,
-             name: itemData.name,
-             type: 'item',
-             assetType: itemData.asset_type ?? itemData.type_default,
-             parent: itemData.parent_id,
-           };
-           this.items.set(item.id, item);
-           const parent = this.folders.get(item.parent);
-           if (parent && !parent.children.includes(item.id)) parent.children.push(item.id);
-        });
+      if (defaultFolderId) {
+        await this.reconcileFolder(defaultFolderId, categories, items);
+      } else {
+        const parentMap = new Map<string, { categories: any[]; items: any[] }>();
+
+        for (const cat of categories) {
+          const pid = cat.parent_id || cat.parent || 'root';
+          if (!parentMap.has(pid)) parentMap.set(pid, { categories: [], items: [] });
+          parentMap.get(pid)!.categories.push(cat);
+        }
+
+        for (const item of items) {
+          const pid = item.parent_id || item.parent || 'root';
+          if (!parentMap.has(pid)) parentMap.set(pid, { categories: [], items: [] });
+          parentMap.get(pid)!.items.push(item);
+        }
+
+        for (const [pid, group] of parentMap.entries()) {
+          await this.reconcileFolder(pid, group.categories, group.items);
+        }
       }
-    });
+    }
 
     this.emit('inventory_updated');
     this.emit('inventory_loaded');
+  }
+
+  /**
+   * Dedicated folder reconciler. Diffs incoming child items and categories for folderId,
+   * purges stale child entries (and their subtree descendants), updates in-memory maps,
+   * and synchronizes updated folder state with localCache persistent storage immediately.
+   */
+  public async reconcileFolder(folderId: string, incomingFolders: any[] = [], incomingItems: any[] = []): Promise<void> {
+    if (!folderId) return;
+
+    let parentFolder = this.folders.get(folderId);
+    if (!parentFolder) {
+      const rootId = this.rootFolder?.id || this.protocol?.inventoryRoot || 'root';
+      parentFolder = { id: folderId, name: 'Folder', type: 'folder', parent: rootId, children: [] };
+      this.folders.set(folderId, parentFolder);
+    }
+    if (!Array.isArray(parentFolder.children)) {
+      parentFolder.children = [];
+    }
+
+    const safeFolders = Array.isArray(incomingFolders) ? incomingFolders : [];
+    const safeItems = Array.isArray(incomingItems) ? incomingItems : [];
+
+    const normalizedFolders = safeFolders.map((f: any) => {
+      const fid = f.id || f.category_id || f.folder_id || Utils.generateUUID();
+      const existing = this.folders.get(fid);
+      return {
+        ...f,
+        id: fid,
+        name: f.name || existing?.name || 'New Folder',
+        type: 'folder',
+        parent: f.parent || f.parent_id || folderId,
+        children: existing?.children ? [...existing.children] : [],
+      };
+    });
+
+    const normalizedItems = safeItems.map((item: any) => {
+      const iid = item.id || item.item_id || Utils.generateUUID();
+      const existing = this.items.get(iid);
+      return {
+        ...item,
+        id: iid,
+        name: item.name || existing?.name || 'New Item',
+        type: 'item',
+        assetType: item.assetType ?? item.asset_type ?? item.type_default ?? existing?.assetType ?? 0,
+        parent: item.parent || item.parent_id || folderId,
+        description: item.description ?? item.desc ?? existing?.description ?? '',
+      };
+    });
+
+    const incomingFolderIds = new Set(normalizedFolders.map((f: any) => f.id));
+    const incomingItemIds = new Set(normalizedItems.map((i: any) => i.id));
+    const allIncomingIds = new Set([...incomingFolderIds, ...incomingItemIds]);
+
+    const existingChildIds = new Set<string>(parentFolder.children);
+    for (const [id, f] of this.folders.entries()) {
+      if (f.parent === folderId && id !== folderId) existingChildIds.add(id);
+    }
+    for (const [id, i] of this.items.entries()) {
+      if (i.parent === folderId) existingChildIds.add(id);
+    }
+
+    const staleChildIds = Array.from(existingChildIds).filter((id) => !allIncomingIds.has(id));
+
+    const purgeSubtree = (fid: string) => {
+      const folderToPurge = this.folders.get(fid);
+      if (folderToPurge) {
+        if (Array.isArray(folderToPurge.children)) {
+          for (const childId of [...folderToPurge.children]) {
+            purgeSubtree(childId);
+          }
+        }
+        this.folders.delete(fid);
+      }
+      this.items.delete(fid);
+    };
+
+    for (const staleId of staleChildIds) {
+      if (this.folders.has(staleId)) {
+        purgeSubtree(staleId);
+      } else {
+        this.items.delete(staleId);
+      }
+    }
+
+    for (const f of normalizedFolders) {
+      this.folders.set(f.id, f);
+      if (f.parent && f.parent !== folderId) {
+        const pf = this.folders.get(f.parent);
+        if (pf && Array.isArray(pf.children) && !pf.children.includes(f.id)) {
+          pf.children.push(f.id);
+        }
+      }
+    }
+
+    for (const i of normalizedItems) {
+      this.items.set(i.id, i);
+      if (i.parent && i.parent !== folderId) {
+        const pf = this.folders.get(i.parent);
+        if (pf && Array.isArray(pf.children) && !pf.children.includes(i.id)) {
+          pf.children.push(i.id);
+        }
+      }
+    }
+
+    parentFolder.children = Array.from(allIncomingIds);
+
+    const agentId = this.auth?.user?.id || this.protocol?.agentId || 'current';
+    const rootId = this.rootFolder?.id || this.protocol?.inventoryRoot || 'root';
+    const rootName = this.rootFolder?.name || 'My Inventory';
+
+    try {
+      await localCache.saveInventory(agentId, {
+        folders: Array.from(this.folders.values()),
+        items: Array.from(this.items.values()),
+        rootId,
+        rootName,
+      });
+    } catch (cacheErr) {
+      console.warn('[Inventory] localCache saveInventory error in reconcileFolder:', cacheErr);
+    }
   }
 
   handleInventoryUpdate(data: any) {
