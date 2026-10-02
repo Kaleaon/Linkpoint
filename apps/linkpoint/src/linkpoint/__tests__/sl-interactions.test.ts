@@ -223,11 +223,51 @@ describe('lures', () => {
     await expect(acceptLure(bot, pending, { id: dialogId })).rejects.toThrow(/no longer pending/);
   });
 
-  it('dismisses locally without calling the grid', () => {
+  it('dismisses non-lure interactions locally without calling the grid', async () => {
+    const pending = new PendingInteractions();
+    const id = pending.add('script-dialog', dialogEvent());
+    const sendMessage = vi.fn();
+    const bot = { currentRegion: { circuit: { sendMessage, sessionID: uuid('session') } }, clientCommands: { comms: {}, teleport: {} } };
+    await expect(dismissInteraction(bot, pending, { id })).resolves.toEqual({ dismissed: true });
+    expect(sendMessage).not.toHaveBeenCalled();
+    await expect(dismissInteraction(bot, pending, { id })).resolves.toEqual({ dismissed: false });
+    await expect(dismissInteraction(bot, pending, {})).rejects.toThrow(/id is required/);
+  });
+
+  it('transmits an IM_LURE_DECLINED packet (dialog 24) when dismissing a lure while connected', async () => {
+    const pending = new PendingInteractions();
+    const event = lureEvent();
+    const id = pending.add('lure', event);
+    const sendMessage = vi.fn().mockReturnValue(1);
+    const waitForAck = vi.fn().mockResolvedValue(undefined);
+    const circuit = { sendMessage, waitForAck, sessionID: uuid('session-id') };
+    const bot = {
+      agent: { firstName: 'Test', lastName: 'User', agentID: uuid('agent-id') },
+      currentRegion: { circuit },
+      clientCommands: { comms: {}, teleport: {} },
+    };
+
+    await expect(dismissInteraction(bot, pending, { id })).resolves.toEqual({ dismissed: true });
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+    const [packet] = sendMessage.mock.calls[0];
+    expect(packet.name).toBe('ImprovedInstantMessage');
+    expect(packet.MessageBlock.Dialog).toBe(24);
+    expect(packet.MessageBlock.ToAgentID.toString()).toBe('22222222-2222-2222-2222-222222222222');
+    expect(pending.size).toBe(0);
+  });
+
+  it('falls back gracefully to local dismissal when offline or when transmission fails', async () => {
     const pending = new PendingInteractions();
     const id = pending.add('lure', lureEvent());
-    expect(dismissInteraction(pending, { id })).toEqual({ dismissed: true });
-    expect(dismissInteraction(pending, { id })).toEqual({ dismissed: false });
-    expect(() => dismissInteraction(pending, {})).toThrow(/id is required/);
+    // Calling with no bot or disconnected bot
+    await expect(dismissInteraction(null, pending, { id })).resolves.toEqual({ dismissed: true });
+    expect(pending.size).toBe(0);
+
+    const pending2 = new PendingInteractions();
+    const id2 = pending2.add('lure', lureEvent());
+    const failingCircuit = { sendMessage: vi.fn().mockImplementation(() => { throw new Error('network down'); }) };
+    const bot = { currentRegion: { circuit: failingCircuit }, clientCommands: { comms: {}, teleport: {} } };
+    await expect(dismissInteraction(bot, pending2, { id: id2 })).resolves.toEqual({ dismissed: true });
+    expect(pending2.size).toBe(0);
   });
 });
