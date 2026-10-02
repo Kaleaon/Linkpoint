@@ -65,11 +65,11 @@ class LindenS3CapHandler(
                 }.toMap()
                 result.ifEmpty { null }
             } else {
-                Log.w(TAG, "Linden S3 capability response was not an LLSD map: ${llsd?.javaClass?.simpleName}")
+                runCatching { Log.w(TAG, "Linden S3 capability response was not an LLSD map: ${llsd?.javaClass?.simpleName}") }
                 null
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse Linden S3 capability response", e)
+            runCatching { Log.e(TAG, "Failed to parse Linden S3 capability response", e) }
             null
         }
     }
@@ -120,12 +120,12 @@ class OpenSimWebFetchCapHandler : CapabilityParserStrategy {
                     llsd.getString(key)?.takeIf { it.isNotEmpty() }?.let { key to it }
                 }.toMap()
                 if (map.isNotEmpty()) {
-                    Log.d(TAG, "Successfully parsed OpenSim capabilities via LLSD (${map.size} caps)")
+                    runCatching { Log.d(TAG, "Successfully parsed OpenSim capabilities via LLSD (${map.size} caps)") }
                     return map
                 }
             }
         } catch (e: Exception) {
-            Log.d(TAG, "LLSD parse attempt on OpenSim response failed, attempting JSON/text fallback: ${e.message}")
+            runCatching { Log.d(TAG, "LLSD parse attempt on OpenSim response failed, attempting JSON/text fallback: ${e.message}") }
         }
 
         // 2. Try JSON parsing (OpenSim WebFetch services may return JSON)
@@ -143,12 +143,12 @@ class OpenSimWebFetchCapHandler : CapabilityParserStrategy {
                     }
                 }
                 if (map.isNotEmpty()) {
-                    Log.d(TAG, "Successfully parsed OpenSim capabilities via JSON (${map.size} caps)")
+                    runCatching { Log.d(TAG, "Successfully parsed OpenSim capabilities via JSON (${map.size} caps)") }
                     return map
                 }
             }
         } catch (e: Exception) {
-            Log.d(TAG, "JSON parse attempt on OpenSim response failed: ${e.message}")
+            runCatching { Log.d(TAG, "JSON parse attempt on OpenSim response failed: ${e.message}") }
         }
 
         // 3. Try plain key-value parsing (key=value lines)
@@ -165,14 +165,14 @@ class OpenSimWebFetchCapHandler : CapabilityParserStrategy {
                 }
             }
             if (map.isNotEmpty()) {
-                Log.d(TAG, "Successfully parsed OpenSim capabilities via key-value text (${map.size} caps)")
+                runCatching { Log.d(TAG, "Successfully parsed OpenSim capabilities via key-value text (${map.size} caps)") }
                 return map
             }
         } catch (e: Exception) {
-            Log.d(TAG, "Key-value parse attempt on OpenSim response failed: ${e.message}")
+            runCatching { Log.d(TAG, "Key-value parse attempt on OpenSim response failed: ${e.message}") }
         }
 
-        Log.w(TAG, "Failed to parse OpenSim capability response across all formats")
+        runCatching { Log.w(TAG, "Failed to parse OpenSim capability response across all formats") }
         return null
     }
 
@@ -298,7 +298,9 @@ object CapabilityStrategyDispatcher {
             ?: loginUrl?.let { LinkpointTranslationLayer.detectGridType(it) }
             ?: LinkpointTranslationLayer.GridType.UNKNOWN
 
-        Log.d(TAG, "Selecting strategy for gridType=$resolvedGridType (loginUrl=$loginUrl)")
+        try {
+            Log.d(TAG, "Selecting strategy for gridType=$resolvedGridType (loginUrl=$loginUrl)")
+        } catch (_: Throwable) {}
 
         return when (resolvedGridType) {
             LinkpointTranslationLayer.GridType.AGNI,
