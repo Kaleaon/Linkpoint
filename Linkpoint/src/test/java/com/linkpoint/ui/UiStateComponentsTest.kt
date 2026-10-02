@@ -1,58 +1,44 @@
 package com.linkpoint.ui
 
-import com.linkpoint.feature.discovery.MapPlacesEventsUiState
-import com.linkpoint.feature.inventory.InventoryOutfitsUiState
-import com.linkpoint.feature.social.FriendsGroupsProfileUiState
+import com.linkpoint.feature.discovery.MapUiState
+import com.linkpoint.feature.inventory.InventoryUiState
+import com.linkpoint.feature.social.FriendsUiState
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Test
 
 class UiStateComponentsTest {
 
     @Test
     fun testSocialUiStateVariants() {
-        val states: List<FriendsGroupsProfileUiState> = listOf(
-            FriendsGroupsProfileUiState.Loading,
-            FriendsGroupsProfileUiState.Error,
-            FriendsGroupsProfileUiState.EmptyFriends,
-            FriendsGroupsProfileUiState.EmptyGroups,
-            FriendsGroupsProfileUiState.EmptyProfile,
-            FriendsGroupsProfileUiState.EmptyNearby,
-            FriendsGroupsProfileUiState.Ready
+        val states: List<FriendsUiState> = listOf(
+            FriendsUiState.Loading,
+            FriendsUiState.Error,
+            FriendsUiState.EmptyFriends,
+            FriendsUiState.Ready
         )
-        assertEquals(7, states.size)
+        assertEquals(4, states.size)
     }
 
     @Test
     fun testInventoryUiStateVariants() {
-        val states: List<InventoryOutfitsUiState> = listOf(
-            InventoryOutfitsUiState.Loading,
-            InventoryOutfitsUiState.Error,
-            InventoryOutfitsUiState.EmptyInventory,
-            InventoryOutfitsUiState.EmptyWearables,
-            InventoryOutfitsUiState.EmptyDocument,
-            InventoryOutfitsUiState.EmptyScript,
-            InventoryOutfitsUiState.Ready,
-            InventoryOutfitsUiState.Edited
+        val states: List<InventoryUiState> = listOf(
+            InventoryUiState.Loading,
+            InventoryUiState.Error,
+            InventoryUiState.EmptyInventory,
+            InventoryUiState.Ready
         )
-        assertEquals(8, states.size)
+        assertEquals(4, states.size)
     }
 
     @Test
     fun testDiscoveryUiStateVariants() {
-        val states: List<MapPlacesEventsUiState> = listOf(
-            MapPlacesEventsUiState.Loading,
-            MapPlacesEventsUiState.Error,
-            MapPlacesEventsUiState.EmptyRegionResults,
-            MapPlacesEventsUiState.EmptySearchResults,
-            MapPlacesEventsUiState.InvalidLocation,
-            MapPlacesEventsUiState.EmptyHistory,
-            MapPlacesEventsUiState.EmptySurroundings,
-            MapPlacesEventsUiState.EmptyNearbyAgents,
-            MapPlacesEventsUiState.Ready
+        val states: List<MapUiState> = listOf(
+            MapUiState.Loading,
+            MapUiState.Error,
+            MapUiState.EmptyRegionResults,
+            MapUiState.Ready
         )
-        assertEquals(9, states.size)
+        assertEquals(4, states.size)
     }
 
     @Test
