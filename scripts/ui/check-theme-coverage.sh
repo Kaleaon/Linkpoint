@@ -24,7 +24,7 @@ if not block_match:
 picker_symbols = [s.strip() for s in block_match.group(1).split(',') if s.strip()]
 
 symbol_to_id = {}
-for m in re.finditer(r'val\s+([A-Z_]+)\s*=\s*ThemePack\((.*?)\n\s*\)', text, re.S):
+for m in re.finditer(r'val\s+([A-Z0-9_]+)\s*=\s*ThemePack\((.*?)\n\s*\)', text, re.S):
     symbol = m.group(1)
     body = m.group(2)
     id_match = re.search(r'id\s*=\s*"([^"]+)"', body)
