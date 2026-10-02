@@ -29,6 +29,7 @@ add_library(
     linkpoint-j2k
     SHARED
     j2k_decoder.cpp
+    GestureTriggerEngine.cpp
     ${LINKPOINT_ETCPAK_SOURCES}
 )
 
