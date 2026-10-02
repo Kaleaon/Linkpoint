@@ -1,0 +1,154 @@
+{
+  "metadata": {
+    "id": "stargate-atlantis",
+    "name": "Stargate Atlantis",
+    "description": "Atlantean blue glass and bronze with Art Deco geometry and Frank Lloyd Wright prairie banding",
+    "author": "Linkpoint",
+    "version": "1.0.0",
+    "tags": [
+      "dark",
+      "sci-fi",
+      "stargate",
+      "atlantis",
+      "art-deco",
+      "wright",
+      "prairie",
+      "ornate"
+    ],
+    "createdAt": "2026-04-27T00:00:00.000Z",
+    "updatedAt": "2026-04-27T00:00:00.000Z"
+  },
+  "darkMode": true,
+  "colorScheme": {
+    "primary": "#C4A062",
+    "onPrimary": "#0B1B2E",
+    "primaryContainer": "#8A6E3D",
+    "onPrimaryContainer": "#FFF1D6",
+    "secondary": "#6FCFE8",
+    "onSecondary": "#001E2B",
+    "secondaryContainer": "#1A4E66",
+    "onSecondaryContainer": "#D6F4FF",
+    "tertiary": "#E8D7A3",
+    "onTertiary": "#2A2008",
+    "tertiaryContainer": "#7A6638",
+    "onTertiaryContainer": "#FFF8E0",
+    "error": "#C46462",
+    "onError": "#2A0A0A",
+    "errorContainer": "#6B1F1F",
+    "onErrorContainer": "#FFD9D9",
+    "background": "#0B1B2E",
+    "onBackground": "#E8EFF7",
+    "surface": "#133355",
+    "onSurface": "#E8EFF7",
+    "surfaceVariant": "#1A4068",
+    "onSurfaceVariant": "#8FB0CC",
+    "outline": "#C4A062",
+    "outlineVariant": "#1F4E7A",
+    "scrim": "#000000",
+    "inverseSurface": "#E8EFF7",
+    "inverseOnSurface": "#0B1B2E",
+    "inversePrimary": "#7A5F2A"
+  },
+  "effects": {
+    "metallic": {
+      "enabled": true,
+      "variant": "BRONZE",
+      "gradient": {
+        "base": "#C4A062",
+        "highlight": "#E8D7A3",
+        "shadow": "#5C3D1F",
+        "shimmer": "#F0E2B8"
+      },
+      "intensity": 0.6
+    },
+    "shadows": {
+      "enabled": true,
+      "elevation": 3,
+      "blur": 6,
+      "color": "#00000088"
+    },
+    "blur": {
+      "enabled": false,
+      "radius": 0
+    },
+    "shimmer": {
+      "enabled": true,
+      "speed": 6,
+      "intensity": 0.2,
+      "angle": 180
+    },
+    "gradients": {
+      "enabled": true,
+      "angle": 180,
+      "stops": [
+        { "offset": 0, "color": "#0B1B2E" },
+        { "offset": 0.42, "color": "#0B1B2E" },
+        { "offset": 0.425, "color": "#1F4E7A" },
+        { "offset": 0.43, "color": "#0B1B2E" },
+        { "offset": 0.56, "color": "#0B1B2E" },
+        { "offset": 0.565, "color": "#1F4E7A" },
+        { "offset": 0.57, "color": "#0B1B2E" },
+        { "offset": 1, "color": "#0B1B2E" }
+      ]
+    }
+  },
+  "typography": {
+    "fontFamily": "'Inter', system-ui, sans-serif",
+    "displayFontFamily": "'Cinzel', 'Trajan Pro', serif",
+    "fontSize": { "small": 12, "medium": 16, "large": 20, "xlarge": 28 },
+    "fontWeight": { "light": 300, "regular": 400, "medium": 500, "bold": 600 },
+    "lineHeight": 1.5,
+    "letterSpacing": 0.04
+  },
+  "adaptation": {
+    "layout": {
+      "density": "comfortable",
+      "cornerStyle": "sharp",
+      "spacingScale": 1.0,
+      "panelStyle": "flat",
+      "navigationStyle": "tabs"
+    },
+    "icons": {
+      "family": "custom",
+      "style": "line",
+      "sizeScale": 1.0,
+      "strokeWidth": 1.5,
+      "cornerStyle": "sharp"
+    },
+    "componentOverrides": [
+      {
+        "selector": ".panel",
+        "styles": {
+          "border-radius": 0,
+          "border": "1px solid #C4A062",
+          "border-top-width": 2,
+          "box-shadow": "inset 0 1px 0 rgba(232,215,163,0.25), 0 4px 0 rgba(0,0,0,0.4)"
+        }
+      },
+      {
+        "selector": ".btn",
+        "styles": {
+          "border-radius": 0,
+          "text-transform": "uppercase",
+          "letter-spacing": "0.14em",
+          "font-weight": 600
+        }
+      },
+      {
+        "selector": ".display-heading",
+        "styles": {
+          "font-family": "'Cinzel', 'Trajan Pro', serif",
+          "text-transform": "uppercase",
+          "letter-spacing": "0.18em",
+          "color": "#C4A062"
+        }
+      },
+      {
+        "selector": ".prairie-band",
+        "styles": {
+          "background": "repeating-linear-gradient(180deg, transparent 0 42%, rgba(196,160,98,0.06) 42% 43%, transparent 43% 56%, rgba(196,160,98,0.04) 56% 57%, transparent 57% 100%)"
+        }
+      }
+    ]
+  }
+}

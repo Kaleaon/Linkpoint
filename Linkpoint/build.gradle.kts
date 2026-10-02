@@ -582,9 +582,25 @@ tasks.register("copyNatives") {
     }
 }
 
-// Hook copyNatives into preBuild so native libraries are available for the build
+// Task to copy central and community JSON theme files into Android app assets
+tasks.register<Copy>("copyThemeAssets") {
+    group = "build"
+    description = "Copies central and community theme JSON files into Android app assets."
+    val dsThemes = file("../packages/design-system/themes")
+    val communityThemes = file("../ktheme-pr/themes/community")
+    from(dsThemes) {
+        include("*.json")
+    }
+    from(communityThemes) {
+        include("*.json")
+    }
+    into(file("src/main/assets/themes"))
+}
+
+// Hook copyNatives and copyThemeAssets into preBuild
 tasks.named("preBuild") {
     dependsOn("copyNatives")
+    dependsOn("copyThemeAssets")
 }
 
 
