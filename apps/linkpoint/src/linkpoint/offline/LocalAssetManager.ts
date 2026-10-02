@@ -20,12 +20,34 @@ export const ASSET_STORAGE_PREFIX = 'linkpoint_local_asset_';
 
 export class LocalAssetManager extends Utils.EventEmitter {
   private assets: Map<string, LocalAsset> = new Map();
+  private foreignRoutes: Map<string, { gridUri: string; serviceUri: string }> = new Map();
   private console: GridConsole;
 
   constructor(console: GridConsole = gridConsole) {
     super();
     this.console = console;
     this.loadPersistedAssets();
+  }
+
+  public registerForeignAssetRoute(assetId: string, gridUri: string, serviceUri: string): void {
+    if (!assetId || !gridUri || !serviceUri) return;
+    this.foreignRoutes.set(assetId, { gridUri, serviceUri });
+    this.console.info(
+      LOG_COMPONENTS.ASSET,
+      `Registered foreign asset route for ${assetId}`,
+      `grid=${gridUri} service=${serviceUri}`
+    );
+  }
+
+  public resolveAssetUri(assetId: string, gridUri?: string): string | undefined {
+    const route = this.foreignRoutes.get(assetId);
+    if (route) {
+      return `${route.serviceUri}/${encodeURIComponent(assetId)}`;
+    }
+    if (gridUri) {
+      return `${gridUri}/assets/${encodeURIComponent(assetId)}`;
+    }
+    return undefined;
   }
 
   public getConsole(): GridConsole {

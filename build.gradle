@@ -44,6 +44,15 @@ allprojects {
     }
 }
 
+// Delegating tasks for root project to included build Linkpoint
+tasks.register('testDebugUnitTest') {
+    dependsOn gradle.includedBuild('Linkpoint').task(':testStableDebugUnitTest')
+}
+
+tasks.register('assembleDebug') {
+    dependsOn gradle.includedBuild('Linkpoint').task(':assembleDebug')
+}
+
 // Universal clean task
 tasks.register('clean', Delete) {
     delete rootProject.buildDir

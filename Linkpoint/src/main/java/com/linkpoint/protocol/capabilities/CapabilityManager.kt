@@ -4,6 +4,7 @@ import android.util.Log
 import com.linkpoint.network.core.HttpRequestOptions
 import com.linkpoint.network.core.PolicyClass
 import com.linkpoint.network.core.RequestThrottler
+import com.linkpoint.protocol.caps.SlidingWindowEventQueue
 import com.linkpoint.protocol.llsd.*
 import com.linkpoint.protocol.translation.LinkpointTranslationLayer
 import kotlinx.coroutines.*
@@ -255,6 +256,12 @@ open class CapabilityManager : CapabilityRequester {
     
     private var seedCapability: String? = null
     private var eventQueueJob: Job? = null
+    private var eventQueueReconnectTriggerJob: Job? = null
+    
+    @Volatile
+    private var highestAckSequenceId: Int = 0
+
+    val slidingWindow = SlidingWindowEventQueue()
     
     private val _isReady = MutableStateFlow(false)
     val isReady: StateFlow<Boolean> = _isReady
@@ -277,6 +284,18 @@ open class CapabilityManager : CapabilityRequester {
     // Linkpoint translation layer support
     @Volatile private var loginUrl: String? = null
 
+    // Grid-aware capability strategy dispatcher
+    @Volatile var activeStrategy: CapabilityParserStrategy = CapabilityStrategyDispatcher.selectStrategy()
+        private set
+
+    /**
+     * Set explicit strategy or update strategy based on login URL.
+     */
+    fun setStrategy(strategy: CapabilityParserStrategy) {
+        this.activeStrategy = strategy
+        Log.i(TAG, "Active capability strategy updated to ${strategy.javaClass.simpleName} (${strategy.gridType})")
+    }
+
     // Background retry for capability initialization
     private var backgroundRetryJob: Job? = null
     @Volatile private var backgroundRetryCount: Int = 0
@@ -294,14 +313,15 @@ open class CapabilityManager : CapabilityRequester {
      */
     suspend fun initialize(seedCap: String, loginUrlParam: String): Boolean {
         this.loginUrl = loginUrlParam
+        this.activeStrategy = CapabilityStrategyDispatcher.selectStrategy(loginUrlParam)
         
-        // Apply URL repair to seed capability
-        val repairedSeedCap = LinkpointTranslationLayer.prepareSeedCapability(loginUrlParam, seedCap)
+        // Apply URL repair/validation via active strategy
+        val repairedSeedCap = activeStrategy.validateCapabilityUrl("SeedCapability", seedCap, loginUrlParam)
         
         if (repairedSeedCap != seedCap) {
             Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
-            Log.i(TAG, "║ LUMIYA TRANSLATION: Seed capability URL repaired")
-            Log.i(TAG, "║ Grid Type: ${LinkpointTranslationLayer.detectGridType(loginUrlParam)}")
+            Log.i(TAG, "║ CAPABILITY DISPATCHER: Seed capability URL repaired")
+            Log.i(TAG, "║ Strategy: ${activeStrategy.javaClass.simpleName} (Grid: ${activeStrategy.gridType})")
             Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
         }
         
@@ -323,10 +343,11 @@ open class CapabilityManager : CapabilityRequester {
         Log.i(TAG, "╠══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ Seed URL: ${seedCap.take(80)}...")
         val currentLoginUrl = loginUrl
-        Log.i(TAG, "║ Translation Mode: ${if (currentLoginUrl != null) "ENABLED" else "DISABLED"}")
         if (currentLoginUrl != null) {
-            Log.i(TAG, "║ Grid Type: ${LinkpointTranslationLayer.detectGridType(currentLoginUrl)}")
+            activeStrategy = CapabilityStrategyDispatcher.selectStrategy(currentLoginUrl)
         }
+        Log.i(TAG, "║ Translation Mode: ${if (currentLoginUrl != null) "ENABLED" else "DISABLED"}")
+        Log.i(TAG, "║ Capability Strategy: ${activeStrategy.javaClass.simpleName} (Grid: ${activeStrategy.gridType})")
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
         
         // Use reference capability list when enabled for better compatibility
@@ -417,15 +438,10 @@ open class CapabilityManager : CapabilityRequester {
         var repairedCount = 0
         
         resolvedCaps.forEach { (name, url) ->
-            val finalUrl = if (shouldRepairUrls) {
-                val repairedUrl = LinkpointTranslationLayer.repairUrl(loginUrl ?: "", url)
-                if (repairedUrl != url) {
-                    repairedCount++
-                    Log.d(TAG, "Repaired URL for $name")
-                }
-                repairedUrl
-            } else {
-                url
+            val finalUrl = activeStrategy.validateCapabilityUrl(name, url, loginUrl)
+            if (finalUrl != url) {
+                repairedCount++
+                Log.d(TAG, "Repaired URL for $name")
             }
             capabilities[name] = finalUrl
             Log.d(TAG, "Capability: $name -> ${finalUrl.take(60)}...")
@@ -541,9 +557,10 @@ open class CapabilityManager : CapabilityRequester {
         Log.d(TAG, "Request body length: ${xml.length} bytes")
         
         try {
-            val request = Request.Builder()
-                .url(seedUrl)
-                .header("Accept", "application/llsd+xml, application/llsd+binary")
+            val requestBuilder = Request.Builder().url(seedUrl)
+            val reqHeaders = activeStrategy.transformHeaders("SeedCapability", mapOf("Accept" to "application/llsd+xml, application/llsd+binary"))
+            reqHeaders.forEach { (k, v) -> requestBuilder.header(k, v) }
+            val request = requestBuilder
                 .post(xml.toRequestBody("application/llsd+xml".toMediaType()))
                 .build()
             
@@ -621,36 +638,18 @@ open class CapabilityManager : CapabilityRequester {
                 Log.d(TAG, "Response preview: <binary LLSD omitted>")
             }
             
-            val llsd = try {
-                LLSDParser.parseAuto(bodyBytes, contentType)
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to parse LLSD from seed capability response", e)
-                lastInitializationError = "LLSD parse error: ${e.message}"
-                return@withContext null
-            }
+            val result = activeStrategy.parseCapabilityResponse(bodyBytes, contentType)
             
-            if (llsd == LLSDUndefined) {
-                Log.e(TAG, "Seed capability response is not valid XML or binary LLSD")
-                lastInitializationError = "LLSD parse error: invalid format"
-                return@withContext null
-            }
-            
-            if (llsd is LLSDMap) {
-                val result = llsd.value.keys.mapNotNull { key ->
-                    llsd.getString(key)?.takeIf { it.isNotEmpty() }?.let { key to it }
-                }.toMap()
-                
-                Log.d(TAG, "Parsed ${result.size} capabilities from response")
-                
+            if (result != null) {
+                Log.d(TAG, "Parsed ${result.size} capabilities from response using strategy ${activeStrategy.javaClass.simpleName}")
                 if (result.isEmpty()) {
-                    Log.w(TAG, "LLSD response parsed successfully but contained no capability URLs")
-                    lastInitializationError = "LLSD contained no capability URLs"
+                    Log.w(TAG, "Capability response parsed successfully but contained no capability URLs")
+                    lastInitializationError = "Capability response contained no URLs"
                 }
-                
                 result
             } else {
-                Log.e(TAG, "LLSD response is not a map, got: ${llsd?.javaClass?.simpleName}")
-                lastInitializationError = "LLSD response is not a map"
+                Log.e(TAG, "Capability response parsing failed for strategy ${activeStrategy.javaClass.simpleName}")
+                lastInitializationError = "Capability parse error for ${activeStrategy.javaClass.simpleName}"
                 null
             }
         } catch (e: java.net.SocketTimeoutException) {
@@ -761,6 +760,8 @@ open class CapabilityManager : CapabilityRequester {
                 }
 
                 val requestBuilder = Request.Builder().url(url)
+                val reqHeaders = activeStrategy.transformHeaders(capName)
+                reqHeaders.forEach { (k, v) -> requestBuilder.header(k, v) }
 
                 if (xmlBody != null) {
                     requestBuilder.post(
@@ -878,7 +879,10 @@ open class CapabilityManager : CapabilityRequester {
                     delay(delayMs)
                 }
                 val getStart = System.currentTimeMillis()
-                val response = client.newCall(Request.Builder().url(url).get().build()).execute()
+                val reqBuilder = Request.Builder().url(url).get()
+                val reqHeaders = activeStrategy.transformHeaders(capName)
+                reqHeaders.forEach { (k, v) -> reqBuilder.header(k, v) }
+                val response = client.newCall(reqBuilder.build()).execute()
                 val getProto = response.protocol.toString()
                 if (response.code in RETRYABLE_HTTP_CODES) {
                     retryAfterSeconds = parseRetryAfterHeader(response)
@@ -973,7 +977,24 @@ open class CapabilityManager : CapabilityRequester {
     }
     
     /**
-     * Start the event queue with Firestorm-style retry handling.
+     * Triggered on Android network callback event (e.g. Wi-Fi <-> cellular switch)
+     * Forces immediate reconnection request with highest acknowledged sequence ID.
+     */
+    fun onNetworkInterfaceChanged() {
+        val url = getCapability(CAP_EVENT_QUEUE) ?: return
+        Log.i(TAG, "⚡ CapabilityManager: Network interface changed. Immediate EventQueue recovery (seq=$highestAckSequenceId)")
+        eventQueueReconnectTriggerJob?.cancel()
+        eventQueueReconnectTriggerJob = scope.launch {
+            try {
+                pollEventQueueOnce(url)
+            } catch (e: Exception) {
+                Log.w(TAG, "Immediate event queue reconnect poll error: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Start the event queue with persistent sequence tracking and Firestorm-style retry handling.
      * 
      * The event queue uses long-polling, so timeouts are expected and normal.
      * Uses exponential backoff for actual errors, but immediate retry for
@@ -982,62 +1003,14 @@ open class CapabilityManager : CapabilityRequester {
     private fun startEventQueue(url: String) {
         eventQueueJob?.cancel()
         eventQueueJob = scope.launch {
-            var ack: Int? = null
             var done = false
             var consecutiveErrors = 0
             val options = HttpRequestOptions.forEventQueue()
             
             while (isActive && !done) {
                 try {
-                    val requestBody = LLSDMap().apply {
-                        this["ack"] = ack?.let { LLSDInteger(it) } ?: LLSDBoolean(true)
-                        this["done"] = LLSDBoolean(false)
-                    }
-                    
-                    val xml = LLSDXmlUtils.wrap(requestBody)
-                    
-                    val request = Request.Builder()
-                        .url(url)
-                        .post(xml.toRequestBody("application/llsd+xml".toMediaType()))
-                        .build()
-                    
-                    eventQueueClient.newCall(request).execute().use { response ->
-                        val contentType = response.header("Content-Type")
-                        val code = response.code
-
-                        // 502 is expected for long-poll timeout - retry immediately
-                        if (code == 502) {
-                            consecutiveErrors = 0  // Not an error
-                            return@use
-                        }
-
-                        // Handle other HTTP errors with backoff
-                        if (code in RETRYABLE_HTTP_CODES) {
-                            consecutiveErrors++
-                            val retryAfter = parseRetryAfterHeader(response)
-                            val delayMs = options.calculateRetryDelay(consecutiveErrors - 1, retryAfter)
-                            Log.w(TAG, "Event queue HTTP $code, retrying in ${delayMs}ms")
-                            delay(delayMs)
-                            return@use
-                        }
-
-                        // Success - reset error count
-                        consecutiveErrors = 0
-
-                        response.body?.byteStream()?.use { stream ->
-                            val llsd = LLSDStreamingParser.parseAnyToValue(stream, contentType)
-                            if (llsd is LLSDMap) {
-                                ack = llsd.getInt("id")
-
-                                val events = llsd.getArray("events")
-                                events?.value?.forEach { event ->
-                                    if (event is LLSDMap) {
-                                        processEvent(event)
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    pollEventQueueOnce(url)
+                    consecutiveErrors = 0  // Reset on success
                 } catch (e: SocketTimeoutException) {
                     // Timeout is expected for long-polling, retry immediately
                     Log.v(TAG, "Event queue poll timeout, continuing...")
@@ -1046,17 +1019,70 @@ open class CapabilityManager : CapabilityRequester {
                 } catch (e: Exception) {
                     if (isActive) {
                         consecutiveErrors++
-                        val delayMs = options.calculateRetryDelay(consecutiveErrors - 1, null)
-                        Log.w(TAG, "Event queue error (${e.javaClass.simpleName}), " +
+                        val rawDelay = options.calculateRetryDelay(consecutiveErrors - 1, null)
+                        val delayMs = minOf(rawDelay, 30_000L) // Capped at 30 seconds max
+                        Log.w(TAG, "Event queue error (${e.javaClass.simpleName}, seq=$highestAckSequenceId), " +
                             "retrying in ${delayMs}ms (errors: $consecutiveErrors)", e)
                         
-                        // Cap consecutive errors to prevent excessive backoff
+                        delay(delayMs)
                         if (consecutiveErrors >= options.retries) {
-                            Log.e(TAG, "Too many consecutive event queue errors, longer backoff")
-                            delay(30_000)  // 30 second pause before resetting
-                            consecutiveErrors = 0
-                        } else {
-                            delay(delayMs)
+                            consecutiveErrors = options.retries - 1
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun pollEventQueueOnce(url: String) {
+        val ackSeq = highestAckSequenceId
+        val requestBody = LLSDMap().apply {
+            this["ack"] = if (ackSeq > 0) LLSDInteger(ackSeq) else LLSDBoolean(true)
+            this["done"] = LLSDBoolean(false)
+        }
+        
+        val xml = LLSDXmlUtils.wrap(requestBody)
+        
+        val request = Request.Builder()
+            .url(url)
+            .post(xml.toRequestBody("application/llsd+xml".toMediaType()))
+            .build()
+        
+        eventQueueClient.newCall(request).execute().use { response ->
+            val contentType = response.header("Content-Type")
+            val code = response.code
+
+            // 502 is expected for long-poll timeout - retry immediately
+            if (code == 502) {
+                return
+            }
+
+            // Handle other HTTP errors with backoff
+            if (code in RETRYABLE_HTTP_CODES) {
+                val retryAfter = parseRetryAfterHeader(response)
+                val delayMs = minOf(HttpRequestOptions.forEventQueue().calculateRetryDelay(1, retryAfter), 30_000L)
+                Log.w(TAG, "Event queue HTTP $code, retrying in ${delayMs}ms")
+                delay(delayMs)
+                throw RetryableException("HTTP $code")
+            }
+
+            if (!response.isSuccessful) {
+                throw IOException("HTTP $code from event queue")
+            }
+
+            response.body?.byteStream()?.use { stream ->
+                val llsd = LLSDStreamingParser.parseAnyToValue(stream, contentType)
+                if (llsd is LLSDMap) {
+                    val resId = llsd.getInt("id") ?: 0
+                    if (resId > highestAckSequenceId) {
+                        highestAckSequenceId = resId
+                        Log.d(TAG, "EventQueue updated highestAckSequenceId = $highestAckSequenceId")
+                    }
+
+                    val events = llsd.getArray("events")
+                    events?.value?.forEach { event ->
+                        if (event is LLSDMap) {
+                            processEvent(event)
                         }
                     }
                 }
@@ -1145,6 +1171,8 @@ open class CapabilityManager : CapabilityRequester {
             hasGetMesh = hasCapability(CAP_GET_MESH) || hasCapability(CAP_GET_MESH2),
             hasFetchInventory = hasCapability(CAP_FETCH_INVENTORY),
             hasEventQueue = hasCapability(CAP_EVENT_QUEUE),
+            activeStrategy = activeStrategy.javaClass.simpleName,
+            gridType = activeStrategy.gridType.name,
             // New initialization tracking fields
             initializationAttempts = lastInitializationAttempts,
             lastInitializationError = lastInitializationError,
@@ -1168,6 +1196,8 @@ open class CapabilityManager : CapabilityRequester {
         val hasGetMesh: Boolean,
         val hasFetchInventory: Boolean,
         val hasEventQueue: Boolean,
+        val activeStrategy: String = "HybridFallbackCapHandler",
+        val gridType: String = "UNKNOWN",
         // New initialization tracking fields
         val initializationAttempts: Int = 0,
         val lastInitializationError: String? = null,

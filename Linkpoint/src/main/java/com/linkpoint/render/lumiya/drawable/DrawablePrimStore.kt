@@ -42,6 +42,10 @@ class DrawablePrimStore {
     data class FaceMaterial(
         var textureId: UUID = NULL_UUID,
         var textureHandle: Int = 0,
+        var normalHandle: Int = 0,
+        var metallicRoughnessHandle: Int = 0,
+        var emissiveHandle: Int = 0,
+        var occlusionHandle: Int = 0,
         var colorR: Float = 1f,
         var colorG: Float = 1f,
         var colorB: Float = 1f,
@@ -51,6 +55,9 @@ class DrawablePrimStore {
         var offsetS: Float = 0f,
         var offsetT: Float = 0f,
         var rotation: Float = 0f,
+        var metallicFactor: Float = 0f,
+        var roughnessFactor: Float = 0.5f,
+        var descriptor: MaterialDescriptor? = null,
         /**
          * SL emissive "glow" intensity in the range 0..1. Faces with
          * glow > [GLOW_THRESHOLD] participate in the emissive
@@ -325,7 +332,13 @@ class DrawablePrimStore {
         GlesMaterialTranslator.apply(
             program,
             descriptor,
-            GlesMaterialTranslator.TextureBindings(baseColorHandle = face.textureHandle)
+            GlesMaterialTranslator.TextureBindings(
+                baseColorHandle = face.textureHandle,
+                normalHandle = face.normalHandle,
+                metallicRoughnessHandle = face.metallicRoughnessHandle,
+                emissiveHandle = face.emissiveHandle,
+                occlusionHandle = face.occlusionHandle
+            )
         )
         GLES32.glDrawElements(GLES32.GL_TRIANGLES, totalIndexCount, GLES32.GL_UNSIGNED_SHORT, 0)
     }
@@ -530,7 +543,7 @@ class DrawablePrimStore {
     }
 
     private fun FaceMaterial.toMaterialDescriptor(): MaterialDescriptor {
-        return MaterialDescriptor(
+        return descriptor ?: MaterialDescriptor(
             baseColor = MaterialDescriptor.Float4(colorR, colorG, colorB, colorA),
             baseColorTexture = if (textureHandle != 0) {
                 MaterialDescriptor.TextureRef(
@@ -538,7 +551,11 @@ class DrawablePrimStore {
                     textureId,
                     isDownloadable = true
                 )
-            } else null
+            } else null,
+            metallicFactor = metallicFactor,
+            roughnessFactor = roughnessFactor,
+            emissiveFactor = if (glow > 0f) MaterialDescriptor.Float3(glow, glow, glow) else MaterialDescriptor.Float3.ZERO,
+            uvTransform = MaterialDescriptor.UvTransform(scaleS, scaleT, offsetS, offsetT, rotation)
         )
     }
 
