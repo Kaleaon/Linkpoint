@@ -3,9 +3,15 @@ import { InteractionsManager, MAX_INTERACTIONS } from '../interactions';
 import { Utils } from '../utils';
 
 class ProtocolStub extends Utils.EventEmitter {
+  balance: number | null = 500;
+  refreshBalance = vi.fn().mockImplementation(async () => this.balance);
   respondScriptDialog = vi.fn().mockResolvedValue({ answered: true });
   acceptLure = vi.fn().mockResolvedValue({ accepted: true, message: 'Arrived' });
   dismissInteraction = vi.fn().mockResolvedValue({ dismissed: true });
+  payObject = vi.fn().mockImplementation(async (params: any) => {
+    if (this.balance !== null) this.balance -= params.amount;
+    return { paid: params.objectId, amount: params.amount, balance: this.balance };
+  });
 }
 
 const dialog = (id: string, over: any = {}) => ({
@@ -128,5 +134,69 @@ describe('InteractionsManager', () => {
     expect(changed).toHaveBeenCalledTimes(2);
     protocol.emit('disconnected', {});
     expect(changed).toHaveBeenCalledTimes(2);
+  });
+
+  describe('payment requests', () => {
+    it('intercepts payment requests and triggers a balance refresh', () => {
+      const { protocol, manager } = setup();
+      const id = manager.requestPayment({ objectId: 'vendor-1', objectName: 'Sunset Lamp', sellerName: 'Pat Resident', price: 150 });
+      expect(manager.items).toHaveLength(1);
+      expect(manager.items[0]).toMatchObject({
+        id,
+        kind: 'payment',
+        objectId: 'vendor-1',
+        objectName: 'Sunset Lamp',
+        sellerName: 'Pat Resident',
+        price: 150,
+      });
+      expect(protocol.refreshBalance).toHaveBeenCalled();
+    });
+
+    it('confirms payment when user has sufficient balance and notifies completion', async () => {
+      const { protocol, manager } = setup();
+      protocol.balance = 500;
+      const completed = vi.fn();
+      manager.on('payment_completed', completed);
+      const id = manager.requestPayment({ objectId: 'v1', objectName: 'Mesh Outfit', sellerName: 'Vendor Store', price: 200 });
+
+      await expect(manager.confirmPayment(id)).resolves.toBe(true);
+      expect(protocol.payObject).toHaveBeenCalledWith({
+        objectId: 'v1',
+        amount: 200,
+        targetId: undefined,
+        description: 'Payment for Mesh Outfit',
+      });
+      expect(manager.items).toHaveLength(0);
+      expect(completed).toHaveBeenCalledWith(expect.objectContaining({
+        newBalance: 300,
+        message: expect.stringContaining('Paid L$ 200 for "Mesh Outfit"'),
+      }));
+    });
+
+    it('rejects confirmation and throws when user has insufficient balance', async () => {
+      const { protocol, manager } = setup();
+      protocol.balance = 50;
+      const failed = vi.fn();
+      manager.on('interaction_failed', failed);
+      const id = manager.requestPayment({ objectId: 'v2', objectName: 'Expensive Rig', sellerName: 'Luxury Goods', price: 500 });
+
+      await expect(manager.confirmPayment(id)).rejects.toThrow(/Insufficient funds/);
+      expect(protocol.payObject).not.toHaveBeenCalled();
+      expect(failed).toHaveBeenCalledWith({
+        id,
+        message: expect.stringContaining('Insufficient funds'),
+      });
+      expect(manager.items).toHaveLength(1);
+    });
+
+    it('cancels payment without dispatching any payment packets', async () => {
+      const { protocol, manager } = setup();
+      const id = manager.requestPayment({ objectId: 'v3', objectName: 'Cancelled Item', sellerName: 'Seller', price: 100 });
+      expect(manager.items).toHaveLength(1);
+
+      await manager.cancelPayment(id);
+      expect(manager.items).toHaveLength(0);
+      expect(protocol.payObject).not.toHaveBeenCalled();
+    });
   });
 });

@@ -46,8 +46,16 @@ function mainProcessDeps(rootDir) {
 // rollup and esbuild along with it.
 const NOT_ACTUALLY_RUNTIME = new Set(['vitest']);
 
+function normalizePath(p) {
+  const resolved = path.resolve(p);
+  if (process.platform === 'win32' && /^[a-z]:/i.test(resolved)) {
+    return resolved[0].toUpperCase() + resolved.slice(1);
+  }
+  return resolved;
+}
+
 function findWorkspaceRoot(startDir) {
-  let dir = path.resolve(startDir);
+  let dir = normalizePath(startDir);
   for (;;) {
     const pkgPath = path.join(dir, 'package.json');
     if (fs.existsSync(pkgPath)) {
@@ -57,21 +65,23 @@ function findWorkspaceRoot(startDir) {
       } catch (_) {}
     }
     const parent = path.dirname(dir);
-    if (parent === dir) return startDir;
+    if (parent === dir) return normalizePath(startDir);
     dir = parent;
   }
 }
 
 function isSubpathOrEqual(dir, root) {
   if (!dir || !root) return false;
-  const rel = path.relative(root, dir);
+  const absDir = normalizePath(dir);
+  const absRoot = normalizePath(root);
+  const rel = path.relative(absRoot, absDir);
   return !rel.startsWith('..') && !path.isAbsolute(rel);
 }
 
 // Resolve a package the way Node does: walk up looking for node_modules.
 function resolvePackageDir(name, fromDir, workspaceRoot) {
-  let dir = path.resolve(fromDir);
-  const resolvedWorkspaceRoot = path.resolve(workspaceRoot);
+  let dir = normalizePath(fromDir);
+  const resolvedWorkspaceRoot = normalizePath(workspaceRoot);
   for (;;) {
     const candidate = path.join(dir, 'node_modules', name);
     if (fs.existsSync(path.join(candidate, 'package.json'))) return candidate;
@@ -112,20 +122,27 @@ function dependencyClosure(rootDir, workspaceRoot) {
 function topLevelPackages(rootDir, workspaceRoot) {
   const names = new Set();
   const searchDirs = [
-    path.join(rootDir, 'node_modules'),
-    path.join(workspaceRoot, 'node_modules'),
+    path.join(normalizePath(rootDir), 'node_modules'),
+    path.join(normalizePath(workspaceRoot), 'node_modules'),
   ];
   for (const modulesDir of searchDirs) {
     if (!fs.existsSync(modulesDir)) continue;
     for (const entry of fs.readdirSync(modulesDir, { withFileTypes: true })) {
-      if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
-      if (entry.name.startsWith('@')) {
-        const scopedDir = path.join(modulesDir, entry.name);
-        for (const scoped of fs.readdirSync(scopedDir, { withFileTypes: true })) {
-          if (scoped.isDirectory()) names.add(`${entry.name}/${scoped.name}`);
+      if (entry.name.startsWith('.')) continue;
+      if (entry.isDirectory() || entry.isSymbolicLink()) {
+        if (entry.name.startsWith('@')) {
+          const scopedDir = path.join(modulesDir, entry.name);
+          if (fs.existsSync(scopedDir)) {
+            for (const scoped of fs.readdirSync(scopedDir, { withFileTypes: true })) {
+              if (scoped.name.startsWith('.')) continue;
+              if (scoped.isDirectory() || scoped.isSymbolicLink()) {
+                names.add(`${entry.name}/${scoped.name}`);
+              }
+            }
+          }
+        } else {
+          names.add(entry.name);
         }
-      } else {
-        names.add(entry.name);
       }
     }
   }

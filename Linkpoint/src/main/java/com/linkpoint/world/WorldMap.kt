@@ -105,6 +105,27 @@ class WorldMap(
     }
     
     /**
+     * Get the effective map tile URL template using dynamically resolved grid mapUri or SL default.
+     */
+    fun getEffectiveMapUrlTemplate(): String {
+        try {
+            val app = com.linkpoint.LinkpointApp.getInstance()
+            val customMapUri = app.sessionManager.getMapUri() ?: app.gridManager.getSelectedGrid().mapUri
+            if (!customMapUri.isNullOrBlank()) {
+                val trimmed = customMapUri.trim()
+                if (trimmed.contains("{x}") && trimmed.contains("{y}")) {
+                    return trimmed
+                }
+                val base = trimmed.trimEnd('/')
+                return "$base/map-{zoom}-{x}-{y}-objects.jpg"
+            }
+        } catch (e: Exception) {
+            // Fallback to default template if app context is not initialized in unit tests
+        }
+        return MAP_URL_TEMPLATE
+    }
+
+    /**
      * Get map tile
      */
     suspend fun getMapTile(x: Int, y: Int, zoom: Int = ZOOM_REGION): Bitmap? {
@@ -114,7 +135,7 @@ class WorldMap(
         
         return withContext(Dispatchers.IO) {
             try {
-                val url = MAP_URL_TEMPLATE
+                val url = getEffectiveMapUrlTemplate()
                     .replace("{zoom}", zoom.toString())
                     .replace("{x}", x.toString())
                     .replace("{y}", y.toString())
@@ -214,7 +235,7 @@ class WorldMap(
                 
                 // Try MapBlockRequest capability or search by coordinates
                 // Most viewers use the map image URL to verify region existence
-                val mapUrl = MAP_URL_TEMPLATE
+                val mapUrl = getEffectiveMapUrlTemplate()
                     .replace("{zoom}", "1")
                     .replace("{x}", x.toString())
                     .replace("{y}", y.toString())

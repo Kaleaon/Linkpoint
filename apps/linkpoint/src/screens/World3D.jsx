@@ -77,6 +77,7 @@ export default function World3D({ desktopBackdrop = false }) {
       <button type="button" onClick={() => app.world.focusSelectedObject()} style={{ ...button, width: "100%", minHeight: 32, marginTop: 8, background: V.pri, color: V.onpri, fontSize: 10 }}>FOCUS CAMERA</button>
       {!selection.avatar && app.auth.isLoggedIn() ? <div style={{ display: "flex", gap: 4, marginTop: 4 }}>
         <button type="button" onClick={() => void app.world.touchSelected()} style={{ ...button, flex: 1, minHeight: 32, fontSize: 10 }}>TOUCH</button>
+        <button type="button" onClick={() => void app.interactions.requestPayment({ objectId: selection.id, objectName: selection.name || "Vendor Item", sellerName: selection.ownerName || "Simulator Resident", price: selection.payPrice || 100 })} style={{ ...button, flex: 1, minHeight: 32, fontSize: 10 }}>PAY L$</button>
         <button type="button" onClick={() => void app.protocol.sit(selection.id).catch((error) => app.world.emit("action_failed", { action: "sit", message: error instanceof Error ? error.message : "Sit failed" }))} style={{ ...button, flex: 1, minHeight: 32, fontSize: 10 }}>SIT</button>
       </div> : null}
     </aside>}

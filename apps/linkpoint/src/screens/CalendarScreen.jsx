@@ -5,6 +5,8 @@ import { buildIcs, icsFileName } from "../linkpoint/ics.ts";
 import { useApp } from "../context/AppContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
 import Icon from "../components/Icon.jsx";
+import ListSkeletonLoader from "../components/ListSkeletonLoader.jsx";
+import GuidedEmptyState from "../components/GuidedEmptyState.jsx";
 import useGoogleEnabled from "../hooks/useGoogleEnabled.js";
 import { loadGoogle } from "../services/google.ts";
 
@@ -60,7 +62,13 @@ function NoticeCalendar() {
   const groupName = (id) => (id ? app.groups.getGroups().find((group) => group.id === id || group.groupId === id)?.name : null) || "";
 
   if (!notices.length) {
-    return <div className="honest-empty"><Icon name="calendar" size={30} /><p>No group notices yet. When a group you belong to sends one, it appears here so you can add it to a calendar.</p></div>;
+    return (
+      <GuidedEmptyState
+        icon="calendar"
+        title="No group notices yet"
+        description="When a group you belong to sends a notice, it appears here so you can add it to a calendar."
+      />
+    );
   }
 
   return (
@@ -235,11 +243,13 @@ function GoogleEvents() {
 
   if (!googleEnabled) {
     return (
-      <div className="honest-empty">
-        <Icon name="calendar" size={30} />
-        <p>Google Calendar is off. Notices can still be saved as calendar files.</p>
-        <button type="button" className="screen-action" onClick={() => actions.setScreen("Settings")}>Open Settings</button>
-      </div>
+      <GuidedEmptyState
+        icon="calendar"
+        title="Google Calendar is off"
+        description="Google Calendar integration is disabled. Group notices can still be saved as calendar (.ics) files."
+        actionLabel="OPEN SETTINGS"
+        onAction={() => actions.setScreen("Settings")}
+      />
     );
   }
 
@@ -248,7 +258,17 @@ function GoogleEvents() {
       <div style={{ font: `400 11.5px/1.5 ${t.font}`, color: V.ink2 }}>Upcoming events Linkpoint added to your Google Calendar.</div>
       <button type="button" disabled={busy} style={{ ...button, justifySelf: "start" }} onClick={refresh}>{busy ? "LOADING…" : events ? "REFRESH" : "SIGN IN AND LOAD"}</button>
       {error ? <div role="alert" style={{ color: V.err, font: `500 11.5px/1.4 ${t.font}` }}>{error}</div> : null}
-      {events && !events.length ? <div className="honest-empty"><p>No upcoming events were added by Linkpoint.</p></div> : null}
+      {busy && events === null ? (
+        <ListSkeletonLoader count={3} variant="list" />
+      ) : events && !events.length ? (
+        <GuidedEmptyState
+          icon="calendar"
+          title="No upcoming events"
+          description="No upcoming events were added by Linkpoint to your Google Calendar."
+          actionLabel="REFRESH EVENTS"
+          onAction={refresh}
+        />
+      ) : null}
       {events?.length ? (
         <ul aria-label="Upcoming Linkpoint events" style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 6 }}>
           {events.map((event) => (

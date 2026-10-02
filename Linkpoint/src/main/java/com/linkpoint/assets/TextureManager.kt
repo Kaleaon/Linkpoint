@@ -9,6 +9,7 @@ import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.SSLHelper
 import com.linkpoint.protocol.types.getUUID
 import kotlinx.coroutines.*
+import kotlin.coroutines.resume
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
@@ -97,6 +98,10 @@ class TextureManager(
     private val activeDownloads = AtomicInteger(0)
     private val pendingTextures = ConcurrentHashMap<UUID, Deferred<Bitmap?>>()
     
+    // Off-thread asset decoding worker pool & frustum priority queue
+    val decodingWorkerPool = com.linkpoint.assets.pool.AssetDecodingWorkerPool(context)
+    val frustumLoadingQueue = com.linkpoint.assets.pool.FrustumPriorityLoadingQueue()
+
     // Decoded texture cache
     private val textureCache = ConcurrentHashMap<UUID, Bitmap>()
     private val textureErrorStates = ConcurrentHashMap<UUID, TextureDecodeErrorState>()
@@ -545,7 +550,7 @@ class TextureManager(
         return "$secureUrl?texture_id=$textureId"
     }
     
-    private fun decodeTexture(textureId: UUID, data: ByteArray, discardLevel: Int): Bitmap? {
+    private suspend fun decodeTexture(textureId: UUID, data: ByteArray, discardLevel: Int): Bitmap? {
         val startTime = System.currentTimeMillis()
 
         return try {
@@ -568,7 +573,7 @@ class TextureManager(
             for (attempt in 1..MAX_DECODE_RETRIES) {
                 bitmap = if (isJ2k) {
                     j2kDecodeAttempts.incrementAndGet()
-                    decodeJPEG2000(data, discardLevel)
+                    decodeJPEG2000OffThread(textureId, data, discardLevel)
                 } else {
                     BitmapFactory.decodeByteArray(data, 0, data.size)
                 }
@@ -578,7 +583,7 @@ class TextureManager(
                 }
                 decodeError = "Decode returned null (attempt $attempt/$MAX_DECODE_RETRIES)"
                 if (attempt < MAX_DECODE_RETRIES) {
-                    Thread.sleep(35L * attempt)
+                    delay(35L * attempt)
                 }
             }
 
@@ -625,6 +630,23 @@ class TextureManager(
                (data[0] == 0xFF.toByte() && data[1] == 0x4F.toByte())
     }
     
+    private suspend fun decodeJPEG2000OffThread(textureId: UUID, data: ByteArray, discardLevel: Int): Bitmap? {
+        return suspendCancellableCoroutine { continuation ->
+            val job = decodingWorkerPool.decodeTextureAsync(
+                textureId = textureId,
+                data = data,
+                discardLevel = discardLevel
+            ) { bitmap ->
+                if (continuation.isActive) {
+                    continuation.resume(bitmap)
+                }
+            }
+            continuation.invokeOnCancellation {
+                job.cancel()
+            }
+        }
+    }
+
     private fun decodeJPEG2000(data: ByteArray, discardLevel: Int): Bitmap? {
         return try {
             JPEG2000Decoder.decode(data, discardLevel)
@@ -632,6 +654,15 @@ class TextureManager(
             Log.e(TAG, "JPEG2000 decode failed", e)
             null
         }
+    }
+
+    /**
+     * Cancel pending decoding requests and clear loading queues on teleport or region crossing.
+     */
+    fun onTeleportOrRegionTransfer() {
+        Log.i(TAG, "Region transfer / teleport detected — cancelling pending decoding tasks")
+        decodingWorkerPool.cancelAllPending()
+        frustumLoadingQueue.cancelAll()
     }
 
     internal fun computeDiscardLevel(priority: TexturePriority, distanceMeters: Float? = null): Int {

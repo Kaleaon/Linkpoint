@@ -358,6 +358,18 @@ export class SLConnectionFull extends Utils.EventEmitter {
     return this.balance;
   }
 
+  async payObject(params: { objectId?: string; targetId?: string; id?: string; amount?: number; price?: number; description?: string }) {
+    this.requireConnected();
+    const result = await slBridge.payObject(params);
+    if (result && typeof result.balance === 'number' && Number.isFinite(result.balance)) {
+      this.balance = result.balance;
+      this.emit('balance_updated', this.balance);
+    } else {
+      void this.refreshBalance();
+    }
+    return result;
+  }
+
   async sendChat(message: string, channel: number = 0, type: number = 1) {
     if (!this.connected) throw new Error('Not connected to a grid');
     await slBridge.sendChat(message, channel, type);
