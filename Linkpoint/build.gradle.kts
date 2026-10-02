@@ -686,3 +686,7 @@ val verifyUiArchitectureBoundaries by tasks.registering {
 tasks.named("check") {
     dependsOn(verifyUiArchitectureBoundaries)
 }
+
+tasks.register("testDebugUnitTest") {
+    dependsOn("testStableDebugUnitTest")
+}

@@ -8,6 +8,8 @@ import com.linkpoint.assets.MeshFace
 import com.linkpoint.protocol.textures.TextureEntryParser
 import com.linkpoint.render.lumiya.core.LumiyaRenderContext
 import com.linkpoint.render.lumiya.glres.GLBufferManager
+import com.linkpoint.render.materials.GlesMaterialTranslator
+import com.linkpoint.render.materials.MaterialDescriptor
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -40,6 +42,10 @@ class DrawableMeshStore {
     data class FaceMaterial(
         var textureId: UUID = UUID(0L, 0L),
         var textureHandle: Int = 0,
+        var normalHandle: Int = 0,
+        var metallicRoughnessHandle: Int = 0,
+        var emissiveHandle: Int = 0,
+        var occlusionHandle: Int = 0,
         var colorR: Float = 1f,
         var colorG: Float = 1f,
         var colorB: Float = 1f,
@@ -48,7 +54,10 @@ class DrawableMeshStore {
         var scaleT: Float = 1f,
         var offsetS: Float = 0f,
         var offsetT: Float = 0f,
-        var rotation: Float = 0f
+        var rotation: Float = 0f,
+        var metallicFactor: Float = 1f,
+        var roughnessFactor: Float = 1f,
+        var descriptor: MaterialDescriptor? = null
     )
 
     data class MeshInstance(
@@ -224,15 +233,21 @@ class DrawableMeshStore {
         program.setModelMatrix(instance.modelMatrix)
         for ((faceIdx, vao) in mesh.faces.withIndex()) {
             val face = instance.faces.getOrNull(faceIdx) ?: continue
-            val texMatrix = buildTexMatrix(face)
-            program.setTexMatrix(texMatrix)
-            program.setColor(face.colorR, face.colorG, face.colorB, face.colorA)
-            program.setUseTexture(face.textureHandle != 0)
-            if (face.textureHandle != 0) {
-                GLES32.glActiveTexture(GLES32.GL_TEXTURE0)
-                GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, face.textureHandle)
-                program.setTextureSampler(0)
-            }
+            val matDescriptor = face.descriptor ?: MaterialDescriptor(
+                baseColor = MaterialDescriptor.Float4(face.colorR, face.colorG, face.colorB, face.colorA),
+                baseColorTexture = if (face.textureHandle != 0) MaterialDescriptor.TextureRef(face.textureId, face.textureId) else null,
+                metallicFactor = face.metallicFactor,
+                roughnessFactor = face.roughnessFactor,
+                uvTransform = MaterialDescriptor.UvTransform(face.scaleS, face.scaleT, face.offsetS, face.offsetT, face.rotation)
+            )
+            val bindings = GlesMaterialTranslator.TextureBindings(
+                baseColorHandle = face.textureHandle,
+                normalHandle = face.normalHandle,
+                metallicRoughnessHandle = face.metallicRoughnessHandle,
+                emissiveHandle = face.emissiveHandle,
+                occlusionHandle = face.occlusionHandle
+            )
+            GlesMaterialTranslator.apply(program, matDescriptor, bindings)
             GLES32.glBindVertexArray(vao.vao)
             val type = if (vao.useIntIndices) GLES32.GL_UNSIGNED_INT else GLES32.GL_UNSIGNED_SHORT
             GLES32.glDrawElements(GLES32.GL_TRIANGLES, vao.indexCount, type, 0)

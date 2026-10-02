@@ -30,6 +30,7 @@ add_library(
     SHARED
     j2k_decoder.cpp
     com_lumiya_viewer_asset_J2kDecoder.cpp
+    GestureTriggerEngine.cpp
     ${LINKPOINT_ETCPAK_SOURCES}
 )
 
