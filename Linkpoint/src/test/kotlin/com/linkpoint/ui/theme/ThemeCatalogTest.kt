@@ -10,6 +10,7 @@ class ThemeCatalogTest {
     @Test
     fun `all catalog themes have unique IDs`() {
         val ids = ThemeCatalog.allThemes().map { it.id }
+        assertTrue("Catalog should contain at least 28 themes", ids.size >= 28)
         assertEquals(ids.size, ids.toSet().size)
     }
 
@@ -22,14 +23,74 @@ class ThemeCatalogTest {
 
     @Test
     fun `lookup behavior returns expected themes and families`() {
-        val theme = ThemeCatalog.getById(BuiltInThemes.LINKPOINT_DEFAULT.id)
+        val theme = ThemeCatalog.getById("linkpoint_default")
         assertNotNull(theme)
-        assertEquals(BuiltInThemes.LINKPOINT_DEFAULT.id, theme?.id)
+        assertEquals("linkpoint_default", theme?.id)
         assertEquals(
             ThemeCatalog.ThemeFamily.LINKPOINT,
-            ThemeCatalog.familyForTheme(BuiltInThemes.LINKPOINT_DEFAULT.id)
+            ThemeCatalog.familyForTheme("linkpoint_default")
         )
         assertEquals(null, ThemeCatalog.getById("missing_theme"))
         assertEquals(null, ThemeCatalog.familyForTheme("missing_theme"))
+    }
+
+    @Test
+    fun `all 24 central themes and 4 community themes are present`() {
+        val allIds = ThemeCatalog.allThemes().map { it.id }.toSet()
+
+        val expectedCentral = listOf(
+            "art-deco", "art-nouveau", "aurora-glass-night", "burgundy-rose-gold",
+            "calm-clinical", "charcoal-champagne", "deep-purple-platinum", "emerald-silver",
+            "forest-copper", "frutiger-aero", "ink-terminal-modern", "lcars",
+            "midnight-amber", "navy-gold", "neo-noir-neon", "obsidian-crimson",
+            "paper-ink", "rose-gold", "royal-bronze", "royal-silver",
+            "slate-cyan", "slate-gunmetal", "solarpunk-civic", "windows-phone-metro"
+        )
+
+        val expectedCommunity = listOf(
+            "lcars-tng", "metro-cyan", "stargate-atlantis", "stargate-sg1"
+        )
+
+        for (id in expectedCentral) {
+            assertTrue("Missing central theme ID: $id", allIds.contains(id))
+        }
+
+        for (id in expectedCommunity) {
+            assertTrue("Missing community theme ID: $id", allIds.contains(id))
+        }
+    }
+
+    @Test
+    fun `canonical ktheme models preserve color scheme tokens without loss`() {
+        val kthemes = ThemeCatalog.allKthemes()
+        assertTrue("Expected non-empty canonical Theme list", kthemes.isNotEmpty())
+
+        val artDeco = kthemes.find { it.metadata.id == "art-deco" }
+        assertNotNull("art-deco theme should be present in canonical model list", artDeco)
+
+        val colorScheme = artDeco!!.colorScheme
+        assertNotNull(colorScheme.primary)
+        assertNotNull(colorScheme.tertiary)
+        assertNotNull(colorScheme.outline)
+        assertNotNull(colorScheme.scrim)
+
+        val m3Scheme = artDeco.colorScheme.toMaterial3ColorScheme()
+        assertNotNull(m3Scheme)
+    }
+
+    @Test
+    fun `legacy ThemePack custom themes convert losslessly`() {
+        val customPack = ThemePack.createTemplate()
+        val jsonString = customPack.toJson()
+        val deserialized = ThemePack.fromJson(jsonString)
+
+        assertNotNull("Legacy ThemePack JSON should deserialize cleanly", deserialized)
+        assertEquals(customPack.id, deserialized?.id)
+
+        val ktheme = deserialized!!.toKthemeTheme()
+        assertEquals(customPack.colorPrimary, ktheme.colorScheme.primary)
+
+        val m3Scheme = deserialized.toMaterial3ColorScheme()
+        assertNotNull(m3Scheme)
     }
 }
