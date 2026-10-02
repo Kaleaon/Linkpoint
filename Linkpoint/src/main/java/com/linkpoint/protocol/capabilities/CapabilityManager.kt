@@ -81,6 +81,7 @@ open class CapabilityManager : CapabilityRequester {
         const val CAP_OBJECT_MEDIA_NAVIGATE = "ObjectMediaNavigate"
         const val CAP_PARCEL_VOICE = "ParcelVoiceInfoRequest"
         const val CAP_PROVISION_VOICE = "ProvisionVoiceAccountRequest"
+        const val CAP_SL_VOICE_WEBRTC = "SLVoiceWebRTC"
 
         /**
          * VoiceSignalingRequest — paired with [CAP_PROVISION_VOICE] for the
@@ -373,6 +374,7 @@ open class CapabilityManager : CapabilityRequester {
                 CAP_OBJECT_MEDIA,
                 CAP_PARCEL_VOICE,
                 CAP_PROVISION_VOICE,
+                CAP_SL_VOICE_WEBRTC,
                 CAP_VOICE_SIGNALING_REQUEST,
                 CAP_CHAT_PASS,
                 CAP_ENVIRONMENT,
