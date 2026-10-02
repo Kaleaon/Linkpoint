@@ -98,9 +98,38 @@ class CapEventQueue(
     private var isActive: Boolean = false
     
     /**
+     * Current capability URL
+     */
+    private var currentCapabilityUrl: String? = null
+
+    /**
+     * Adaptive background mode flag
+     */
+    @Volatile
+    var isAdaptiveBackgroundMode: Boolean = false
+        private set
+
+    /**
      * Current acknowledgement ID
      */
     private var currentAck: Int? = null
+
+    /**
+     * Set adaptive background mode for Doze / background optimization.
+     */
+    fun setAdaptiveBackgroundMode(enabled: Boolean, intervalMs: Long = 15_000L) {
+        isAdaptiveBackgroundMode = enabled
+        if (enabled) {
+            pollIntervalMs = intervalMs
+        } else {
+            pollIntervalMs = DEFAULT_POLL_INTERVAL_MS
+        }
+        NetworkLogger.log(
+            NetworkLogger.Level.DEBUG,
+            NetworkLogger.Category.UDP,
+            "Adaptive background polling mode=${if (enabled) "ENABLED (${pollIntervalMs}ms)" else "DISABLED"}"
+        )
+    }
     
     /**
      * Register an event listener
@@ -118,6 +147,7 @@ class CapEventQueue(
             return
         }
         
+        this.currentCapabilityUrl = capabilityUrl
         this.pollIntervalMs = pollInterval
         isActive = true
         
@@ -130,6 +160,9 @@ class CapEventQueue(
                 try {
                     pollEvents(capabilityUrl)
                     consecutiveErrors = 0  // Reset on success
+                    if (isAdaptiveBackgroundMode && pollIntervalMs > 0) {
+                        delay(pollIntervalMs)
+                    }
                 } catch (e: SocketTimeoutException) {
                     // Timeout is expected for long-polling, retry immediately
                     NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Event queue poll timeout (expected)")
@@ -155,6 +188,21 @@ class CapEventQueue(
                 }
             }
         }
+    }
+
+    /**
+     * Force immediate reconnection / restart of EventQueue polling (e.g. after network interface switch).
+     */
+    fun forceReconnect(newCapabilityUrl: String? = null) {
+        val targetUrl = newCapabilityUrl ?: currentCapabilityUrl
+        if (targetUrl.isNullOrEmpty()) {
+            NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Cannot forceReconnect: No capability URL available")
+            return
+        }
+        NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP, "Force reconnecting EventQueue to $targetUrl")
+        pollingJob?.cancel()
+        isActive = false
+        start(targetUrl, pollIntervalMs)
     }
     
     private fun isCoroutineActive(): Boolean {
