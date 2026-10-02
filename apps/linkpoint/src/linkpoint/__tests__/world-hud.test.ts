@@ -183,7 +183,7 @@ describe('HUD placement in the scene', () => {
     const touched = world.touchHudAt(400, 300);
     expect(touched?.id).toBeTruthy();
     await Promise.resolve();
-    expect(protocol.touchObject).toHaveBeenCalledWith({ id: touched!.id });
+    expect(protocol.touchObject).toHaveBeenCalledWith(expect.objectContaining({ id: touched!.id, face: touched!.face }));
     expect(world.touchHudAt(2, 2)).toBeNull(); // empty corner of the view
   });
 });

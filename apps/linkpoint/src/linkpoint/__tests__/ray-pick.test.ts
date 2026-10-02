@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Camera3D } from '../camera-3d';
-import { invertMat4, intersectRayOrientedBox, rayFromNDC } from '../ray-pick';
+import { invertMat4, intersectRayOrientedBox, intersectRayTriangle, rayFromNDC } from '../ray-pick';
 import { multiplyMat4 } from '../frustum';
 
 const translate = (x: number, y: number, z: number) => new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1]);
@@ -99,5 +99,53 @@ describe('Camera3D.screenToWorldRay', () => {
 
   it('rayFromNDC returns null for a singular matrix input', () => {
     expect(rayFromNDC(new Float32Array(16), 0, 0)).toBeNull();
+  });
+});
+
+describe('intersectRayTriangle', () => {
+  const v0 = [0, 0, 0];
+  const v1 = [1, 0, 0];
+  const v2 = [0, 1, 0];
+  const uv0 = [0, 0];
+  const uv1 = [1, 0];
+  const uv2 = [0, 1];
+
+  it('intersects a triangle front-facing and interpolates barycentric UVs', () => {
+    const ray = { origin: [0.25, 0.25, 5], direction: [0, 0, -1] };
+    const hit = intersectRayTriangle(ray, v0, v1, v2, uv0, uv1, uv2);
+    expect(hit).not.toBeNull();
+    expect(hit!.t).toBeCloseTo(5, 6);
+    expect(hit!.u).toBeCloseTo(0.25, 6);
+    expect(hit!.v).toBeCloseTo(0.25, 6);
+    expect(hit!.w).toBeCloseTo(0.5, 6);
+    expect(hit!.point).toEqual([0.25, 0.25, 0]);
+    expect(hit!.uv![0]).toBeCloseTo(0.25, 6);
+    expect(hit!.uv![1]).toBeCloseTo(0.25, 6);
+  });
+
+  it('intersects a triangle back-facing (double-sided / HUD prim picking)', () => {
+    const ray = { origin: [0.25, 0.25, -5], direction: [0, 0, 1] };
+    const hit = intersectRayTriangle(ray, v0, v1, v2, uv0, uv1, uv2);
+    expect(hit).not.toBeNull();
+    expect(hit!.t).toBeCloseTo(5, 6);
+    expect(hit!.u).toBeCloseTo(0.25, 6);
+    expect(hit!.v).toBeCloseTo(0.25, 6);
+  });
+
+  it('misses rays pointing away or off the triangle', () => {
+    // Pointing away
+    expect(intersectRayTriangle({ origin: [0.25, 0.25, 5], direction: [0, 0, 1] }, v0, v1, v2)).toBeNull();
+    // Outside triangle bounds
+    expect(intersectRayTriangle({ origin: [1, 1, 5], direction: [0, 0, -1] }, v0, v1, v2)).toBeNull();
+    // Behind ray origin
+    expect(intersectRayTriangle({ origin: [0.25, 0.25, -1], direction: [0, 0, -1] }, v0, v1, v2)).toBeNull();
+  });
+
+  it('skips parallel and degenerate zero-area triangles', () => {
+    // Parallel ray
+    expect(intersectRayTriangle({ origin: [0, 0, 1], direction: [1, 0, 0] }, v0, v1, v2)).toBeNull();
+    // Degenerate zero-area triangle (collinear vertices)
+    const degV1 = [0, 0, 0];
+    expect(intersectRayTriangle({ origin: [0, 0, 5], direction: [0, 0, -1] }, v0, degV1, v2)).toBeNull();
   });
 });

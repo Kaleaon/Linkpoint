@@ -658,7 +658,16 @@ export class WorldViewer extends Utils.EventEmitter {
     const hit = this.scene3d.pick(x, y, bounds.width, bounds.height);
     const objectId = hit?.id.replace(/:(body|head|legs)$/, '') || null;
     this.selectedObject = objectId ? this.sceneObjects.get(objectId) || null : null;
-    const selection = this.selectedObject ? { ...this.selectedObject, hitPoint: hit?.point, distance: hit?.distance } : null;
+    const selection = this.selectedObject
+      ? {
+          ...this.selectedObject,
+          hitPoint: hit?.point,
+          distance: hit?.distance,
+          face: hit?.face,
+          uv: hit?.uv,
+          st: hit?.st,
+        }
+      : null;
     this.emit('selection_changed', selection);
     return selection;
   }
@@ -813,8 +822,7 @@ export class WorldViewer extends Utils.EventEmitter {
   /**
    * Tap on the displayed HUD: send a touch to the object under the finger.
    * Returns the touched prim, or null when the tap was not on the HUD.
-   * Which face or texture coordinate was hit is not resolved yet (picking uses
-   * bounding boxes), so scripts that read the touched face get the defaults.
+   * Resolves exact face index, UV and ST texture coordinates via narrow phase.
    */
   public touchHudAt(x: number, y: number) {
     if (!this.displayedHud || !this.canvas || !this.scene3d) return null;
@@ -822,15 +830,20 @@ export class WorldViewer extends Utils.EventEmitter {
     const hit = this.scene3d.pickHud(x, y, bounds.width, bounds.height);
     if (!hit) return null;
     const object = this.sceneObjects.get(hit.id);
-    void this.touchObject(hit.id);
-    this.emit('hud_touched', { id: hit.id, name: object?.name || '' });
-    return { id: hit.id, name: object?.name || '' };
+    void this.touchObject(hit.id, hit.face, hit.uv, hit.st, hit.point);
+    this.emit('hud_touched', { id: hit.id, name: object?.name || '', face: hit.face, uv: hit.uv, st: hit.st, point: hit.point });
+    return { id: hit.id, name: object?.name || '', face: hit.face, uv: hit.uv, st: hit.st, point: hit.point };
   }
 
   /** Touch an object by id through the connection; failures are reported, not hidden. */
-  public async touchObject(id: string) {
+  public async touchObject(id: string, face?: number, uv?: number[], st?: number[], position?: number[]) {
     try {
-      await this.protocol.touchObject({ id });
+      const payload: { id: string; face?: number; uv?: number[]; st?: number[]; position?: number[] } = { id };
+      if (face !== undefined) payload.face = face;
+      if (uv !== undefined) payload.uv = uv;
+      if (st !== undefined) payload.st = st;
+      if (position !== undefined) payload.position = position;
+      await this.protocol.touchObject(payload);
       return true;
     } catch (error) {
       this.emit('action_failed', { action: 'touch', message: error instanceof Error ? error.message : 'Touch failed' });
@@ -840,7 +853,15 @@ export class WorldViewer extends Utils.EventEmitter {
 
   /** Touch the object selected in the world view. */
   public async touchSelected() {
-    return this.selectedObject ? this.touchObject(this.selectedObject.id) : false;
+    return this.selectedObject
+      ? this.touchObject(
+          this.selectedObject.id,
+          this.selectedObject.face,
+          this.selectedObject.uv,
+          this.selectedObject.st,
+          this.selectedObject.hitPoint
+        )
+      : false;
   }
 
   private applySceneObject(object: any) {
