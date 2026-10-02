@@ -3,17 +3,19 @@ on:
   push:
     tags: ["next-v*"]
 permissions:
-  contents: write
-  id-token: write
-  attestations: write
+  contents: read
 jobs:
   release-web:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with: { node-version: 22, cache: npm }
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # stable
       - run: npm ci
       - run: npm run check
       - name: Create locked web artifact and inventories
@@ -25,10 +27,12 @@ jobs:
           npm sbom --sbom-format=cyclonedx > release/linkpoint-web-${GITHUB_REF_NAME}.cdx.json
           cargo metadata --locked --format-version=1 > release/linkpoint-rust-${GITHUB_REF_NAME}.metadata.json
           sha256sum release/* > release/SHA256SUMS
-      - uses: actions/attest-build-provenance@v2
+          cp release/SHA256SUMS release/checksums.sha256
+      - uses: actions/attest-build-provenance@520d128f165991a6c774bcb264f323e3d70747f4 # v2.2.0
         with: { subject-path: "release/linkpoint-web-*.tar.gz" }
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
         with:
           generate_release_notes: true
           prerelease: true
           files: release/*
+
