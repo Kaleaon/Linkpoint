@@ -23,6 +23,17 @@
     "vitest": "4.1.11",
     "vite": "7.3.6"
   },
+  "overrides": {
+    "@xmldom/xmldom": "0.9.12",
+    "@caspertech/llsd": {
+      "@xmldom/xmldom": "0.9.12"
+    },
+    "@grpc/grpc-js": "1.13.6",
+    "@firebase/firestore": {
+      "@grpc/grpc-js": "1.13.6"
+    },
+    "sharp": "^0.35.5"
+  },
   "engines": {
     "node": ">=22"
   }
