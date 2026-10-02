@@ -274,6 +274,7 @@ object LinkpointTranslationLayer {
             "NewFileAgentInventory",
             "CopyInventoryFromNotecard",
             "UpdateAvatarAppearance",
+            "ServerSideAppearance",
             "GetMesh",
             "UpdateNotecardTaskInventory",
             "UpdateScriptTask",
