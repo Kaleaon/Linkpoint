@@ -50,7 +50,7 @@ interface CapabilityRequester {
  * - Per-capability request options
  * - Linkpoint-compatible URL repair for Agni grid
  */
-class CapabilityManager : CapabilityRequester {
+open class CapabilityManager : CapabilityRequester {
     
     companion object {
         private const val TAG = "CapabilityManager"
@@ -74,6 +74,8 @@ class CapabilityManager : CapabilityRequester {
         const val CAP_AGENT_STATE = "AgentState"
         const val CAP_AGENT_PROFILE = "AgentProfile"
         const val CAP_UPDATE_AGENT_INFO = "UpdateAgentInformation"
+        const val CAP_SERVER_SIDE_APPEARANCE = "ServerSideAppearance"
+        const val CAP_UPDATE_AVATAR_APPEARANCE = "UpdateAvatarAppearance"
         const val CAP_UPLOAD_BAKED_TEXTURE = "UploadBakedTexture"
         const val CAP_OBJECT_MEDIA = "ObjectMedia"
         const val CAP_OBJECT_MEDIA_NAVIGATE = "ObjectMediaNavigate"
@@ -364,7 +366,10 @@ class CapabilityManager : CapabilityRequester {
                 CAP_VIEW_STATS,
                 CAP_AGENT_STATE,
                 CAP_UPDATE_AGENT_INFO,
+                CAP_SERVER_SIDE_APPEARANCE,
+                CAP_UPDATE_AVATAR_APPEARANCE,
                 CAP_UPLOAD_BAKED_TEXTURE,
+                CAP_AGENT_PREFERENCES,
                 CAP_OBJECT_MEDIA,
                 CAP_PARCEL_VOICE,
                 CAP_PROVISION_VOICE,
