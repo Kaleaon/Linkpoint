@@ -553,17 +553,17 @@ open class CapabilityManager : CapabilityRequester {
             }
         }
         
-        val xml = LLSDXmlUtils.wrap(requestBody)
+        val xmlBytes = LLSDXmlUtils.wrapToBytes(requestBody)
         
         Log.d(TAG, "Requesting capabilities from: ${seedUrl.take(80)}...")
-        Log.d(TAG, "Request body length: ${xml.length} bytes")
+        Log.d(TAG, "Request body length: ${xmlBytes.size} bytes")
         
         try {
             val requestBuilder = Request.Builder().url(seedUrl)
             val reqHeaders = activeStrategy.transformHeaders("SeedCapability", mapOf("Accept" to "application/llsd+xml, application/llsd+binary"))
             reqHeaders.forEach { (k, v) -> requestBuilder.header(k, v) }
             val request = requestBuilder
-                .post(xml.toRequestBody("application/llsd+xml".toMediaType()))
+                .post(xmlBytes.toRequestBody("application/llsd+xml".toMediaType()))
                 .build()
             
             val startTime = System.currentTimeMillis()
@@ -726,7 +726,7 @@ open class CapabilityManager : CapabilityRequester {
                 // failure, or when the engine isn't available (no Android
                 // context wired, native lib missing, etc.). Keeps the
                 // exact same retry / Retry-After / throttle behaviour.
-                val xmlBody: ByteArray? = body?.let { LLSDXmlUtils.wrap(it).toByteArray(Charsets.UTF_8) }
+                val xmlBody: ByteArray? = body?.let { LLSDXmlUtils.wrapToBytes(it) }
                 val ctx = androidContext
                 if (ctx != null) {
                     val cronet = com.linkpoint.network.CronetHttpClient.getOrCreate(ctx)
@@ -767,7 +767,7 @@ open class CapabilityManager : CapabilityRequester {
 
                 if (xmlBody != null) {
                     requestBuilder.post(
-                        String(xmlBody, Charsets.UTF_8).toRequestBody("application/llsd+xml".toMediaType())
+                        xmlBody.toRequestBody("application/llsd+xml".toMediaType())
                     )
                 } else {
                     requestBuilder.get()
@@ -1043,11 +1043,11 @@ open class CapabilityManager : CapabilityRequester {
             this["done"] = LLSDBoolean(false)
         }
         
-        val xml = LLSDXmlUtils.wrap(requestBody)
+        val xmlBytes = LLSDXmlUtils.wrapToBytes(requestBody)
         
         val request = Request.Builder()
             .url(url)
-            .post(xml.toRequestBody("application/llsd+xml".toMediaType()))
+            .post(xmlBytes.toRequestBody("application/llsd+xml".toMediaType()))
             .build()
         
         eventQueueClient.newCall(request).execute().use { response ->
