@@ -39,7 +39,19 @@ export interface LureRequest {
   gridY: number | null;
 }
 
-export type Interaction = ScriptDialogRequest | LureRequest;
+export interface PaymentRequest {
+  kind: 'payment';
+  id: string;
+  receivedAt: number;
+  objectId: string;
+  objectName: string;
+  sellerName: string;
+  sellerId?: string | null;
+  price: number;
+  currency?: string;
+}
+
+export type Interaction = ScriptDialogRequest | LureRequest | PaymentRequest;
 
 /** The button label a script uses (llTextBox) to ask for typed text instead of a choice. */
 export const TEXT_BOX_MARKER = '!!llTextBox!!';
@@ -60,6 +72,7 @@ export class InteractionsManager extends Utils.EventEmitter {
   init() {
     this.protocol.on('script_dialog', (data: any) => this.add('script-dialog', data));
     this.protocol.on('lure', (data: any) => this.add('lure', data));
+    this.protocol.on('payment_request', (data: any) => this.add('payment', data));
     this.protocol.on('disconnected', () => this.clear());
     this.protocol.on('connection_failed', () => this.clear());
   }
@@ -95,7 +108,8 @@ export class InteractionsManager extends Utils.EventEmitter {
           textBox: Boolean(data.textBox),
           textBoxIndex: Number.isInteger(data.textBoxIndex) ? data.textBoxIndex : -1,
         }
-      : {
+      : kind === 'lure'
+      ? {
           ...base, kind,
           fromId: data.fromId ?? null,
           fromName: String(data.fromName || ''),
@@ -104,6 +118,15 @@ export class InteractionsManager extends Utils.EventEmitter {
           position: Array.isArray(data.position) && data.position.length === 3 ? (data.position as [number, number, number]) : null,
           gridX: Number.isFinite(data.gridX) ? data.gridX : null,
           gridY: Number.isFinite(data.gridY) ? data.gridY : null,
+        }
+      : {
+          ...base, kind: 'payment',
+          objectId: String(data.objectId || data.targetId || '00000000-0000-0000-0000-000000000000'),
+          objectName: String(data.objectName || data.name || 'Vendor Item'),
+          sellerName: String(data.sellerName || data.ownerName || 'Simulator Resident'),
+          sellerId: data.sellerId || data.ownerId || null,
+          price: Math.max(0, Number.isFinite(Number(data.price ?? data.amount)) ? Number(data.price ?? data.amount) : 0),
+          currency: String(data.currency || 'L$'),
         };
     this.list.push(item);
     while (this.list.length > MAX_INTERACTIONS) this.list.shift();
@@ -167,6 +190,65 @@ export class InteractionsManager extends Utils.EventEmitter {
     const result = await this.run(id, () => this.protocol.acceptLure(id));
     if (result && lure) this.emit('lure_accepted', { lure, message: result.message });
     return Boolean(result);
+  }
+
+  /** Intercept a payment request before dispatching payment packets, opening the confirmation modal dialog. */
+  requestPayment(data: { objectId: string; objectName?: string; sellerName?: string; sellerId?: string; price: number; currency?: string }) {
+    const id = Utils.generateUUID();
+    const payload = {
+      id,
+      receivedAt: Date.now(),
+      objectId: data.objectId,
+      objectName: data.objectName || 'Vendor Item',
+      sellerName: data.sellerName || 'Simulator Resident',
+      sellerId: data.sellerId || null,
+      price: Math.max(0, Math.floor(Number(data.price) || 0)),
+      currency: data.currency || 'L$',
+    };
+    this.add('payment', payload);
+    void this.protocol.refreshBalance();
+    return id;
+  }
+
+  /** Confirm a payment interaction, sending payment packets after balance verification. */
+  async confirmPayment(id: string) {
+    const payment = this.list.find((item) => item.id === id && item.kind === 'payment') as PaymentRequest | undefined;
+    if (!payment) {
+      this.emit('interaction_failed', { id, message: 'Payment request not found or expired' });
+      return false;
+    }
+
+    const currentBalance = this.protocol.balance !== null ? this.protocol.balance : await this.protocol.refreshBalance();
+    if (currentBalance !== null && currentBalance < payment.price) {
+      const msg = `Insufficient funds: Required L$ ${payment.price}, current balance is L$ ${currentBalance}`;
+      this.emit('interaction_failed', { id, message: msg });
+      throw new Error(msg);
+    }
+
+    const result = await this.run(id, async () => {
+      return this.protocol.payObject({
+        objectId: payment.objectId,
+        amount: payment.price,
+        targetId: payment.sellerId || undefined,
+        description: `Payment for ${payment.objectName}`,
+      });
+    });
+
+    if (result) {
+      const updatedBalance = this.protocol.balance;
+      this.emit('payment_completed', {
+        payment,
+        newBalance: updatedBalance,
+        message: `Paid L$ ${payment.price} for "${payment.objectName}". Updated balance: L$ ${updatedBalance ?? 'N/A'}`,
+      });
+      return true;
+    }
+    return false;
+  }
+
+  /** Cancel a payment request locally without sending any payment packets. */
+  async cancelPayment(id: string) {
+    await this.dismiss(id);
   }
 
   /** Dismiss locally. The grid is not told: the client library cannot decline a lure. */

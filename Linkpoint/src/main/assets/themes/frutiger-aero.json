@@ -1,0 +1,173 @@
+{
+  "metadata": {
+    "id": "frutiger-aero",
+    "name": "Frutiger Aero",
+    "description": "Glossy glassy sky-and-nature palette inspired by late 90s/early 2000s UI",
+    "author": "Ktheme",
+    "version": "1.0.0",
+    "tags": [
+      "minimalist",
+      "light",
+      "reader",
+      "frutiger-aero",
+      "glassy",
+      "nostalgia"
+    ],
+    "createdAt": "2026-02-16T12:40:32.691Z",
+    "updatedAt": "2026-02-16T12:40:32.691Z"
+  },
+  "darkMode": false,
+  "colorScheme": {
+    "primary": "#39B6F0",
+    "onPrimary": "#022A40",
+    "primaryContainer": "#A9E6FF",
+    "onPrimaryContainer": "#00314D",
+    "secondary": "#79D87E",
+    "onSecondary": "#07350D",
+    "secondaryContainer": "#C6F4CC",
+    "onSecondaryContainer": "#113D17",
+    "tertiary": "#B9DBFF",
+    "onTertiary": "#0D2C4F",
+    "tertiaryContainer": "#DAEEFF",
+    "onTertiaryContainer": "#123659",
+    "error": "#BA1A1A",
+    "onError": "#FFFFFF",
+    "errorContainer": "#FFDAD6",
+    "onErrorContainer": "#410002",
+    "background": "#EAF7FF",
+    "onBackground": "#14344A",
+    "surface": "#F7FCFF",
+    "onSurface": "#173A52",
+    "surfaceVariant": "#DDF1FF",
+    "onSurfaceVariant": "#34566E",
+    "outline": "#6E93AB",
+    "outlineVariant": "#A9C7DA",
+    "scrim": "#000000",
+    "inverseSurface": "#173A52",
+    "inverseOnSurface": "#EAF7FF",
+    "inversePrimary": "#0A6FA0"
+  },
+  "effects": {
+    "shadows": {
+      "enabled": true,
+      "elevation": 1,
+      "blur": 2,
+      "color": "#00000011"
+    },
+    "metallic": {
+      "enabled": false,
+      "variant": "SILVER",
+      "gradient": {
+        "base": "#C0C0C0",
+        "highlight": "#E8E8E8",
+        "shadow": "#808080",
+        "shimmer": "#FFFFFF"
+      },
+      "intensity": 0
+    },
+    "blur": {
+      "enabled": true,
+      "radius": 12
+    },
+    "overlays": {
+      "enabled": true,
+      "color": "#A9DFFF",
+      "opacity": 0.22,
+      "blendMode": "screen"
+    },
+    "gradients": {
+      "enabled": true,
+      "angle": 135,
+      "stops": [
+        {
+          "offset": 0,
+          "color": "#EAF7FF"
+        },
+        {
+          "offset": 0.58,
+          "color": "#DAF0FF"
+        },
+        {
+          "offset": 1,
+          "color": "#BEEBFF"
+        }
+      ]
+    },
+    "shimmer": {
+      "enabled": true,
+      "speed": 4,
+      "intensity": 0.32,
+      "angle": 120
+    }
+  },
+  "adaptation": {
+    "layout": {
+      "density": "comfortable",
+      "cornerStyle": "rounded",
+      "spacingScale": 1.1,
+      "panelStyle": "glass",
+      "navigationStyle": "tabs"
+    },
+    "icons": {
+      "family": "custom",
+      "style": "duotone",
+      "sizeScale": 1.1,
+      "strokeWidth": 1.4,
+      "cornerStyle": "rounded"
+    },
+    "componentOverrides": [
+      {
+        "selector": ".app-shell",
+        "styles": {
+          "backdrop-filter": "blur(12px) saturate(140%)",
+          "border-radius": 18,
+          "box-shadow": "0 10px 28px rgba(0, 0, 0, 0.22)"
+        }
+      },
+      {
+        "selector": ".app-toolbar",
+        "styles": {
+          "min-height": 68,
+          "padding-inline": 20
+        }
+      }
+    ],
+    "desktopAdaptation": {
+      "windowChrome": {
+        "titleBarHeight": 26,
+        "headerStyle": "glass",
+        "cornerStyle": "rounded",
+        "panelRadius": 16,
+        "controlRadius": 12,
+        "borderWidth": 1,
+        "backdropBlur": 12,
+        "shadow": "0 12px 32px rgba(0, 80, 140, 0.22)"
+      },
+      "menuBar": {
+        "height": 28,
+        "fontSize": 11,
+        "letterSpacing": "0.06em",
+        "textTransform": "none",
+        "dropdownRadius": 12,
+        "dropdownShadow": "0 10px 28px rgba(0, 60, 120, 0.25)"
+      },
+      "taskbar": {
+        "height": 40,
+        "buttonRadius": 12,
+        "dockAlignment": "left",
+        "quickChatBorderRadius": 12
+      },
+      "cameraHud": {
+        "panelRadius": 16,
+        "buttonRadius": 10,
+        "shadow": "0 8px 20px rgba(0, 60, 120, 0.2)"
+      },
+      "sweep": {
+        "elbowWidth": 28,
+        "titleCapRadius": "18px",
+        "accentBand": "secondary",
+        "showElbowBar": true
+      }
+    }
+  }
+}

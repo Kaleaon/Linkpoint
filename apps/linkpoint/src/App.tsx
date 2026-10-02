@@ -4,7 +4,9 @@ import { ThemeProvider, useTheme } from "./context/ThemeContext.jsx";
 import { AnnouncerProvider } from "./context/AnnouncerContext.jsx";
 import Shell from "./components/Shell.jsx";
 import SystemDialog from "./components/SystemDialog.jsx";
+import MacroProgressOverlay from "./components/MacroProgressOverlay.jsx";
 import Toast from "./components/Toast.jsx";
+import LiveRegionAnnouncerComponent from "./components/LiveRegionAnnouncerComponent.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import type { ViewerClient } from "@linkpoint/viewer-client";
 import { ViewerClientProvider } from "./viewer/ViewerClientContext";
@@ -24,35 +26,47 @@ function Viewer() {
   }, [actions.setDevice]);
 
   return (
-    <main
-      className={`viewer-app layout-${state.layout} palette-${state.palette}`}
-      style={{
-        background: V.bg,
-        color: V.ink,
-        fontFamily: t.font,
-      }}
-    >
-      <div className="viewer-workspace">
-        <Shell />
-        <SystemDialog />
-        <Toast />
-      </div>
-    </main>
+    <>
+      <LiveRegionAnnouncerComponent />
+      <main
+        className={`viewer-app layout-${state.layout} palette-${state.palette}`}
+        style={{
+          background: V.bg,
+          color: V.ink,
+          fontFamily: t.font,
+        }}
+      >
+        <div className="viewer-workspace">
+          <Shell />
+          <SystemDialog />
+          <MacroProgressOverlay />
+          <Toast />
+        </div>
+      </main>
+    </>
   );
 }
 
-export default function App({ client }: { client: ViewerClient }) {
+export default function App({ client }: { client?: ViewerClient }) {
+  const content = (
+    <AnnouncerProvider>
+      <AppProvider>
+        <ThemeProvider>
+          <Viewer />
+        </ThemeProvider>
+      </AppProvider>
+    </AnnouncerProvider>
+  );
+
   return (
     <ErrorBoundary label="Linkpoint">
-      <AnnouncerProvider>
+      {client ? (
         <ViewerClientProvider client={client}>
-          <AppProvider>
-            <ThemeProvider>
-              <Viewer />
-            </ThemeProvider>
-          </AppProvider>
+          {content}
         </ViewerClientProvider>
-      </AnnouncerProvider>
+      ) : (
+        content
+      )}
     </ErrorBoundary>
   );
 }

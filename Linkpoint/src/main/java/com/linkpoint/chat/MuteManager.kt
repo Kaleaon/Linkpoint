@@ -30,10 +30,14 @@ class MuteManager(context: Context) {
         private const val KEY_MUTED_OBJECTS = "muted_objects"
         private const val KEY_MUTED_GROUPS = "muted_groups"
         private const val KEY_MUTED_NAMES = "muted_names"
+        private const val KEY_CACHED_CRC = "cached_crc"
         
         // Serialization format: id|name|type|flags|timestamp
         private const val MUTE_ENTRY_FIELD_COUNT = 5
     }
+    
+    var cachedCRC: Int = 0
+        private set
     
     /**
      * Mute entry types matching the Second Life protocol.
@@ -305,6 +309,8 @@ class MuteManager(context: Context) {
     
     private fun loadMuteList() {
         try {
+            cachedCRC = prefs.getInt(KEY_CACHED_CRC, 0)
+
             // Load agents
             prefs.getStringSet(KEY_MUTED_AGENTS, emptySet())?.forEach { entry ->
                 parseMuteEntry(entry)?.let { mutedAgents[it.id] = it }
@@ -325,7 +331,7 @@ class MuteManager(context: Context) {
                 parseMuteEntry(entry)?.let { mutedByName[it.name.lowercase()] = it }
             }
             
-            Log.d(TAG, "Loaded mute list: ${getMuteCount()} entries")
+            Log.d(TAG, "Loaded mute list: ${getMuteCount()} entries (CRC: ${cachedCRC.toString(16)})")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to load mute list", e)
         }
@@ -334,6 +340,7 @@ class MuteManager(context: Context) {
     private fun saveMuteList() {
         try {
             prefs.edit()
+                .putInt(KEY_CACHED_CRC, cachedCRC)
                 .putStringSet(KEY_MUTED_AGENTS, mutedAgents.values.map { serializeMuteEntry(it) }.toSet())
                 .putStringSet(KEY_MUTED_OBJECTS, mutedObjects.values.map { serializeMuteEntry(it) }.toSet())
                 .putStringSet(KEY_MUTED_GROUPS, mutedGroups.values.map { serializeMuteEntry(it) }.toSet())
@@ -341,6 +348,48 @@ class MuteManager(context: Context) {
                 .apply()
         } catch (e: Exception) {
             Log.e(TAG, "Failed to save mute list", e)
+        }
+    }
+
+    /**
+     * Parse mute list data downloaded via Xfer, calculate CRC32, update memory and SharedPreferences.
+     */
+    fun parseMuteListData(data: ByteArray) {
+        try {
+            val crc = java.util.zip.CRC32()
+            crc.update(data)
+            cachedCRC = crc.value.toInt()
+
+            mutedAgents.clear()
+            mutedObjects.clear()
+            mutedGroups.clear()
+            mutedByName.clear()
+
+            val content = String(data, Charsets.UTF_8)
+            for (line in content.lines()) {
+                val trimmed = line.trim()
+                if (trimmed.isBlank()) continue
+
+                val parts = trimmed.split(" ", limit = 4)
+                if (parts.size >= 3) {
+                    try {
+                        val typeVal = parts[0].toIntOrNull() ?: 1
+                        val type = MuteType.values().find { it.value == typeVal } ?: MuteType.AGENT
+                        val id = UUID.fromString(parts[1])
+                        val flags = if (parts.size >= 4) parts[2].toIntOrNull() ?: MuteFlags.ALL else MuteFlags.ALL
+                        val name = if (parts.size >= 4) parts[3] else parts[2]
+
+                        muteByUUID(id, name.trim(), type, flags)
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Failed to parse mute line: $trimmed", e)
+                    }
+                }
+            }
+            saveMuteList()
+            notifyChange()
+            Log.i(TAG, "Parsed ${getMuteCount()} mute entries from Xfer file (CRC: ${cachedCRC.toString(16)})")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to parse mute list data", e)
         }
     }
     

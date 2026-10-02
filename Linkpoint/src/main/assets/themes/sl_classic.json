@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "id": "sl_classic",
+    "name": "Second Life Viewer",
+    "description": "Classic Linden Lab viewer look - Linden blue on deep slate",
+    "author": "Linkpoint",
+    "version": "1.0.0",
+    "tags": ["viewer", "classic", "linden"]
+  },
+  "darkMode": true,
+  "colorScheme": {
+    "primary": "#4AA3DF",
+    "onPrimary": "#FFFFFF",
+    "primaryContainer": "#0066CC",
+    "onPrimaryContainer": "#FFFFFF",
+    "secondary": "#7FB3D5",
+    "onSecondary": "#0B1520",
+    "secondaryContainer": "#7FB3D5",
+    "onSecondaryContainer": "#0B1520",
+    "tertiary": "#7FB3D5",
+    "onTertiary": "#0B1520",
+    "tertiaryContainer": "#7FB3D5",
+    "onTertiaryContainer": "#0B1520",
+    "error": "#F44336",
+    "onError": "#FFFFFF",
+    "errorContainer": "#F44336",
+    "onErrorContainer": "#FFFFFF",
+    "background": "#1B2430",
+    "onBackground": "#E6ECF2",
+    "surface": "#263548",
+    "onSurface": "#E6ECF2",
+    "surfaceVariant": "#263548",
+    "onSurfaceVariant": "#AEBECF",
+    "outline": "#AEBECF",
+    "outlineVariant": "#AEBECF",
+    "scrim": "#000000",
+    "inverseSurface": "#E6ECF2",
+    "inverseOnSurface": "#263548",
+    "inversePrimary": "#4AA3DF"
+  }
+}

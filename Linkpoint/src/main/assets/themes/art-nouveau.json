@@ -1,0 +1,157 @@
+{
+  "metadata": {
+    "id": "art-nouveau",
+    "name": "Art Nouveau",
+    "description": "Organic curves, botanical accents, and decorative linework with a warm natural palette",
+    "author": "Ktheme",
+    "version": "1.0.0",
+    "tags": [
+      "iconic",
+      "organic",
+      "botanical",
+      "warm"
+    ],
+    "createdAt": "2026-03-05T00:00:00.000Z",
+    "updatedAt": "2026-03-05T00:00:00.000Z"
+  },
+  "darkMode": false,
+  "colorScheme": {
+    "primary": "#7B5737",
+    "onPrimary": "#FFF7EE",
+    "primaryContainer": "#D9C2A9",
+    "onPrimaryContainer": "#352214",
+    "secondary": "#6B8F57",
+    "onSecondary": "#F6FFF1",
+    "secondaryContainer": "#CFE4BF",
+    "onSecondaryContainer": "#24371A",
+    "tertiary": "#C57C52",
+    "onTertiary": "#FFF8F3",
+    "tertiaryContainer": "#F1C9AF",
+    "onTertiaryContainer": "#43210D",
+    "error": "#BA1A1A",
+    "onError": "#FFFFFF",
+    "errorContainer": "#FFDAD6",
+    "onErrorContainer": "#410002",
+    "background": "#F6F0E6",
+    "onBackground": "#2C2218",
+    "surface": "#FFF8EE",
+    "onSurface": "#2C2218",
+    "surfaceVariant": "#E7D8C7",
+    "onSurfaceVariant": "#584638",
+    "outline": "#8A7461",
+    "outlineVariant": "#CBB8A5",
+    "scrim": "#000000",
+    "inverseSurface": "#372C22",
+    "inverseOnSurface": "#FDEDDD",
+    "inversePrimary": "#E7C8A8"
+  },
+  "effects": {
+    "shadows": {
+      "enabled": true,
+      "elevation": 2,
+      "blur": 6,
+      "color": "#3A281A26"
+    },
+    "shimmer": {
+      "enabled": true,
+      "speed": 6,
+      "intensity": 0.18,
+      "angle": 115
+    }
+  },
+  "typography": {
+    "fontFamily": "\"Cormorant Garamond\", \"Times New Roman\", serif",
+    "fontSize": {
+      "small": 13,
+      "medium": 16,
+      "large": 21,
+      "xlarge": 30
+    },
+    "fontWeight": {
+      "light": 300,
+      "regular": 400,
+      "medium": 500,
+      "bold": 700
+    },
+    "lineHeight": 1.55,
+    "letterSpacing": 0.1
+  },
+  "adaptation": {
+    "layout": {
+      "density": "comfortable",
+      "cornerStyle": "pill",
+      "spacingScale": 1.08,
+      "panelStyle": "glass",
+      "navigationStyle": "tabs"
+    },
+    "icons": {
+      "family": "custom",
+      "style": "duotone",
+      "sizeScale": 1.05,
+      "strokeWidth": 1.3,
+      "cornerStyle": "rounded"
+    },
+    "componentOverrides": [
+      {
+        "selector": ".card, .panel",
+        "styles": {
+          "border-radius": 24,
+          "border": "1px solid rgba(123, 87, 55, 0.26)",
+          "box-shadow": "0 8px 22px rgba(63, 45, 30, 0.16)"
+        }
+      },
+      {
+        "selector": ".button, .chip",
+        "styles": {
+          "border-radius": 999,
+          "letter-spacing": 0.2,
+          "padding-inline": 18
+        }
+      },
+      {
+        "selector": ".section-header",
+        "styles": {
+          "text-transform": "none",
+          "border-bottom": "1px solid rgba(123, 87, 55, 0.35)",
+          "padding-bottom": 8
+        }
+      }
+    ],
+    "desktopAdaptation": {
+      "windowChrome": {
+        "titleBarHeight": 26,
+        "headerStyle": "standard",
+        "cornerStyle": "pill",
+        "panelRadius": 18,
+        "controlRadius": 999,
+        "borderWidth": 1,
+        "shadow": "0 10px 26px rgba(0,0,0,0.2)"
+      },
+      "menuBar": {
+        "height": 28,
+        "fontSize": 11,
+        "letterSpacing": "0.06em",
+        "textTransform": "none",
+        "dropdownRadius": 18,
+        "dropdownShadow": "0 8px 20px rgba(0,0,0,0.18)"
+      },
+      "taskbar": {
+        "height": 40,
+        "buttonRadius": 999,
+        "dockAlignment": "left",
+        "quickChatBorderRadius": 999
+      },
+      "cameraHud": {
+        "panelRadius": 18,
+        "buttonRadius": 999,
+        "shadow": "0 8px 20px rgba(0,0,0,0.3)"
+      },
+      "sweep": {
+        "elbowWidth": 30,
+        "titleCapRadius": "999px",
+        "accentBand": "primary",
+        "showElbowBar": true
+      }
+    }
+  }
+}

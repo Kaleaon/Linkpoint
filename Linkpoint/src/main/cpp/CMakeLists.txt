@@ -9,7 +9,7 @@ find_package(openjpeg REQUIRED CONFIG)
 # ── lumiya-native: GL extension JNI bindings ─────────────────────────────────
 # android.opengl.GLES31Ext does not include GL_EXT_buffer_storage; we resolve
 # glBufferStorageEXT at runtime via eglGetProcAddress in this thin wrapper.
-add_library(lumiya-native SHARED jni/gl_ext_jni.cpp)
+add_library(lumiya-native SHARED jni/gl_ext_jni.cpp ChatBubbleOverlay.cpp)
 target_link_libraries(lumiya-native android log EGL GLESv3)
 
 # TODO(docs/lumiya-port/README.md item 2): vendor etcpak (single-header,

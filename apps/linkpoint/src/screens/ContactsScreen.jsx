@@ -5,6 +5,8 @@ import { useApp } from "../context/AppContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
 import Icon from "../components/Icon.jsx";
 import ContactAvatar from "../components/ContactAvatar.jsx";
+import ListSkeletonLoader from "../components/ListSkeletonLoader.jsx";
+import GuidedEmptyState from "../components/GuidedEmptyState.jsx";
 import useGoogleEnabled from "../hooks/useGoogleEnabled.js";
 import { loadGoogle } from "../services/google.ts";
 
@@ -149,10 +151,25 @@ export default function ContactsScreen() {
       ) : (
         <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 8 }}>
           <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search contacts" aria-label="Search contacts" style={{ minHeight: 36, padding: "0 10px", border: `1px solid ${V.outv}`, borderRadius: V.rs, background: V.surf, color: V.ink, font: `400 12.5px/1 ${t.font}` }} />
-          {!contacts.length ? (
-            <div className="honest-empty"><Icon name="contact" size={30} /><p>No contacts saved yet. Save your friends list to start your address book.</p></div>
+          {busy ? (
+            <ListSkeletonLoader count={4} variant="contact" />
+          ) : !contacts.length ? (
+            <GuidedEmptyState
+              icon="users"
+              title="No contacts saved yet"
+              description="Save your friends list to start your address book or import saved contacts."
+              actionLabel={friends.length ? "SAVE FRIENDS LIST" : null}
+              onAction={friends.length ? () => saveFriends(friends) : null}
+              secondaryActionLabel="IMPORT CONTACTS"
+              onSecondaryAction={() => importRef.current?.click()}
+            />
           ) : !shown.length ? (
-            <div className="honest-empty"><p>No contact matches “{query}”.</p></div>
+            <GuidedEmptyState
+              icon="search"
+              title="No search results"
+              description={`No contact matches "${query.trim()}".`}
+              isSearch={true}
+            />
           ) : (
             <ul aria-label="Saved contacts" style={{ listStyle: "none", margin: 0, padding: 0, flex: selected ? "0 0 38%" : 1, minHeight: 90, overflowY: "auto", display: "grid", gap: 6, alignContent: "start" }}>
               {shown.map((contact) => (
@@ -183,9 +200,43 @@ export default function ContactsScreen() {
 
 function FriendsToAdd({ friends, total, onlineIds, busy, button, onSave, loggedIn }) {
   const { V, t } = useTheme();
-  if (!loggedIn && !total) return <div className="honest-empty"><Icon name="users" size={30} /><p>Connect to a grid to see your friends.</p></div>;
-  if (!total) return <div className="honest-empty"><Icon name="users" size={30} /><p>No friends have been loaded from the grid yet.</p></div>;
-  if (!friends.length) return <div className="honest-empty"><Icon name="check" size={30} /><p>All {total} of your friends are saved.</p></div>;
+  const { actions } = useApp();
+
+  if (busy) return <ListSkeletonLoader count={4} variant="contact" />;
+
+  if (!loggedIn && !total) {
+    return (
+      <GuidedEmptyState
+        icon="users"
+        title="Not connected to grid"
+        description="Connect to a Second Life or OpenSim grid to view and save your friends list."
+        actionLabel="CONNECT TO GRID"
+        onAction={() => actions.setScreen("Login")}
+      />
+    );
+  }
+
+  if (!total) {
+    return (
+      <GuidedEmptyState
+        icon="users"
+        title="No friends loaded"
+        description="No friends have been loaded from the grid yet."
+        actionLabel="REFRESH FRIENDS"
+        onAction={() => app.friends.refresh?.()}
+      />
+    );
+  }
+
+  if (!friends.length) {
+    return (
+      <GuidedEmptyState
+        icon="check"
+        title="All friends saved"
+        description={`All ${total} of your friends are saved in your contacts list.`}
+      />
+    );
+  }
   return (
     <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 8 }}>
       <button type="button" disabled={busy} style={{ ...button(true), alignSelf: "flex-start" }} onClick={() => onSave(friends)}>SAVE ALL {friends.length}</button>

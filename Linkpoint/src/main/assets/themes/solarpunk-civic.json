@@ -1,0 +1,141 @@
+{
+  "metadata": {
+    "id": "solarpunk-civic",
+    "name": "Solarpunk Civic",
+    "description": "Optimistic civic palette with daylight greens and trust-building clarity",
+    "author": "Ktheme",
+    "version": "1.0.0",
+    "tags": [
+      "frutiger-aero",
+      "glassy",
+      "nostalgia",
+      "solarpunk",
+      "civic",
+      "daylight"
+    ],
+    "createdAt": "2026-02-16T13:00:59.876Z",
+    "updatedAt": "2026-02-16T13:00:59.876Z"
+  },
+  "darkMode": false,
+  "colorScheme": {
+    "primary": "#38B56A",
+    "onPrimary": "#04250F",
+    "primaryContainer": "#BFEFD0",
+    "onPrimaryContainer": "#0E3F20",
+    "secondary": "#4FAEEA",
+    "onSecondary": "#05253A",
+    "secondaryContainer": "#C8E9FF",
+    "onSecondaryContainer": "#103A57",
+    "tertiary": "#F2C46C",
+    "onTertiary": "#3A2A08",
+    "tertiaryContainer": "#FFE8BA",
+    "onTertiaryContainer": "#5A420F",
+    "error": "#BA1A1A",
+    "onError": "#FFFFFF",
+    "errorContainer": "#FFDAD6",
+    "onErrorContainer": "#410002",
+    "background": "#F2FBF4",
+    "onBackground": "#1E3A27",
+    "surface": "#FBFFFC",
+    "onSurface": "#224231",
+    "surfaceVariant": "#E2F2E8",
+    "onSurfaceVariant": "#456355",
+    "outline": "#6E9380",
+    "outlineVariant": "#B3D0BF",
+    "scrim": "#000000",
+    "inverseSurface": "#1C3A28",
+    "inverseOnSurface": "#EAF8EF",
+    "inversePrimary": "#1D7A44"
+  },
+  "effects": {
+    "metallic": {
+      "enabled": false,
+      "variant": "SILVER",
+      "gradient": {
+        "base": "#C0C0C0",
+        "highlight": "#E8E8E8",
+        "shadow": "#808080",
+        "shimmer": "#FFFFFF"
+      },
+      "intensity": 0
+    },
+    "shadows": {
+      "enabled": true,
+      "elevation": 1,
+      "blur": 2,
+      "color": "#00000011"
+    },
+    "blur": {
+      "enabled": true,
+      "radius": 12
+    },
+    "overlays": {
+      "enabled": true,
+      "color": "#A9DFFF",
+      "opacity": 0.22,
+      "blendMode": "screen"
+    },
+    "gradients": {
+      "enabled": true,
+      "angle": 135,
+      "stops": [
+        {
+          "offset": 0,
+          "color": "#EAF7FF"
+        },
+        {
+          "offset": 0.58,
+          "color": "#DAF0FF"
+        },
+        {
+          "offset": 1,
+          "color": "#BEEBFF"
+        }
+      ]
+    },
+    "shimmer": {
+      "enabled": true,
+      "speed": 4,
+      "intensity": 0.32,
+      "angle": 120
+    }
+  },
+  "adaptation": {
+    "desktopAdaptation": {
+      "windowChrome": {
+        "titleBarHeight": 26,
+        "headerStyle": "standard",
+        "cornerStyle": "rounded",
+        "panelRadius": 10,
+        "controlRadius": 8,
+        "borderWidth": 1,
+        "shadow": "0 10px 26px rgba(0,0,0,0.2)"
+      },
+      "menuBar": {
+        "height": 28,
+        "fontSize": 11,
+        "letterSpacing": "0.06em",
+        "textTransform": "none",
+        "dropdownRadius": 10,
+        "dropdownShadow": "0 8px 20px rgba(0,0,0,0.18)"
+      },
+      "taskbar": {
+        "height": 40,
+        "buttonRadius": 8,
+        "dockAlignment": "left",
+        "quickChatBorderRadius": 8
+      },
+      "cameraHud": {
+        "panelRadius": 10,
+        "buttonRadius": 8,
+        "shadow": "0 8px 20px rgba(0,0,0,0.3)"
+      },
+      "sweep": {
+        "elbowWidth": 30,
+        "titleCapRadius": "10px",
+        "accentBand": "primary",
+        "showElbowBar": true
+      }
+    }
+  }
+}

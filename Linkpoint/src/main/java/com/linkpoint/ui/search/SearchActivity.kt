@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
+import com.linkpoint.model.search.*
 import com.linkpoint.world.*
 import kotlinx.coroutines.launch
 
@@ -100,27 +101,27 @@ class SearchActivity : AppCompatActivity() {
     
     private suspend fun searchPeople(query: String) {
         val results = searchManager.searchPeople(query)
-        showResults(results.results.map { SearchResult.Person(it) })
+        showResults(results.results)
     }
     
     private suspend fun searchPlaces(query: String) {
         val results = searchManager.searchPlaces(query)
-        showResults(results.results.map { SearchResult.Place(it) })
+        showResults(results.results)
     }
     
     private suspend fun searchGroups(query: String) {
         val results = searchManager.searchGroups(query)
-        showResults(results.results.map { SearchResult.Group(it) })
+        showResults(results.results)
     }
     
     private suspend fun searchEvents(query: String) {
         val results = searchManager.searchEvents(query)
-        showResults(results.results.map { SearchResult.Event(it) })
+        showResults(results.results)
     }
     
     private suspend fun loadDestinations() {
         val results = searchManager.getDestinations()
-        showResults(results.map { SearchResult.Destination(it) })
+        showResults(results)
     }
     
     private fun showResults(results: List<SearchResult>) {
@@ -141,11 +142,12 @@ class SearchActivity : AppCompatActivity() {
     
     private fun onResultClicked(result: SearchResult) {
         when (result) {
-            is SearchResult.Person -> showProfile(result.data.agentId)
-            is SearchResult.Place -> teleportToPlace(result.data)
-            is SearchResult.Group -> showGroupProfile(result.data.groupId)
-            is SearchResult.Event -> showEventDetails(result.data)
-            is SearchResult.Destination -> teleportToDestination(result.data)
+            is PersonResult -> showProfile(result.agentId)
+            is PlaceResult -> teleportToPlace(result)
+            is GroupResult -> showGroupProfile(result.groupId)
+            is EventResult -> showEventDetails(result)
+            is DestinationResult -> teleportToDestination(result)
+            else -> {}
         }
     }
     
@@ -189,14 +191,6 @@ class SearchActivity : AppCompatActivity() {
     }
 }
 
-sealed class SearchResult {
-    data class Person(val data: PersonResult) : SearchResult()
-    data class Place(val data: PlaceResult) : SearchResult()
-    data class Group(val data: GroupResult) : SearchResult()
-    data class Event(val data: EventResult) : SearchResult()
-    data class Destination(val data: DestinationResult) : SearchResult()
-}
-
 class SearchResultsAdapter(
     private val results: List<SearchResult>,
     private val onClick: (SearchResult) -> Unit
@@ -218,25 +212,29 @@ class SearchResultsAdapter(
         val result = results[position]
         
         when (result) {
-            is SearchResult.Person -> {
-                holder.title.text = result.data.displayName.ifEmpty { result.data.userName }
-                holder.subtitle.text = if (result.data.isOnline) "Online" else "Offline"
+            is PersonResult -> {
+                holder.title.text = result.displayName.ifEmpty { result.userName }
+                holder.subtitle.text = if (result.isOnline) "Online" else "Offline"
             }
-            is SearchResult.Place -> {
-                holder.title.text = result.data.name
-                holder.subtitle.text = "${result.data.region} - Traffic: ${result.data.traffic.toInt()}"
+            is PlaceResult -> {
+                holder.title.text = result.name
+                holder.subtitle.text = "${result.region} - Traffic: ${result.traffic.toInt()}"
             }
-            is SearchResult.Group -> {
-                holder.title.text = result.data.name
-                holder.subtitle.text = "${result.data.memberCount} members"
+            is GroupResult -> {
+                holder.title.text = result.name
+                holder.subtitle.text = "${result.memberCount} members"
             }
-            is SearchResult.Event -> {
-                holder.title.text = result.data.name
-                holder.subtitle.text = result.data.region
+            is EventResult -> {
+                holder.title.text = result.name
+                holder.subtitle.text = result.region
             }
-            is SearchResult.Destination -> {
-                holder.title.text = result.data.name
-                holder.subtitle.text = result.data.category
+            is DestinationResult -> {
+                holder.title.text = result.name
+                holder.subtitle.text = result.category
+            }
+            else -> {
+                holder.title.text = result.name
+                holder.subtitle.text = result.description
             }
         }
         

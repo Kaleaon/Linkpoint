@@ -1,0 +1,169 @@
+{
+  "metadata": {
+    "id": "art-deco",
+    "name": "Art Deco",
+    "description": "Geometric symmetry, stepped motifs, and premium gold-black-ivory contrast",
+    "author": "Ktheme",
+    "version": "1.0.0",
+    "tags": [
+      "iconic",
+      "geometric",
+      "luxury",
+      "high-contrast"
+    ],
+    "createdAt": "2026-03-05T00:00:00.000Z",
+    "updatedAt": "2026-03-05T00:00:00.000Z"
+  },
+  "darkMode": true,
+  "colorScheme": {
+    "primary": "#D4AF37",
+    "onPrimary": "#1A1405",
+    "primaryContainer": "#8F7121",
+    "onPrimaryContainer": "#FFF2C6",
+    "secondary": "#F4E7CF",
+    "onSecondary": "#221A0A",
+    "secondaryContainer": "#B8A17A",
+    "onSecondaryContainer": "#161005",
+    "tertiary": "#0F0F11",
+    "onTertiary": "#F6EAD1",
+    "tertiaryContainer": "#2A2A2E",
+    "onTertiaryContainer": "#F2E2B2",
+    "error": "#FFB4AB",
+    "onError": "#690005",
+    "errorContainer": "#93000A",
+    "onErrorContainer": "#FFDAD6",
+    "background": "#0B0A0A",
+    "onBackground": "#F3E8D0",
+    "surface": "#141314",
+    "onSurface": "#F3E8D0",
+    "surfaceVariant": "#232124",
+    "onSurfaceVariant": "#C9BDA2",
+    "outline": "#9E8A63",
+    "outlineVariant": "#4B4332",
+    "scrim": "#000000",
+    "inverseSurface": "#F3E8D0",
+    "inverseOnSurface": "#171311",
+    "inversePrimary": "#7A5F1D"
+  },
+  "effects": {
+    "metallic": {
+      "enabled": true,
+      "variant": "GOLD",
+      "gradient": {
+        "base": "#D4AF37",
+        "highlight": "#FFD700",
+        "shadow": "#B8860B",
+        "shimmer": "#FFF8DC"
+      },
+      "intensity": 0.86
+    },
+    "shadows": {
+      "enabled": true,
+      "elevation": 6,
+      "blur": 14,
+      "color": "#00000088"
+    },
+    "shimmer": {
+      "enabled": true,
+      "speed": 3,
+      "intensity": 0.4,
+      "angle": 90
+    }
+  },
+  "typography": {
+    "fontFamily": "\"Futura\", \"Avenir Next\", \"Arial\", sans-serif",
+    "fontSize": {
+      "small": 12,
+      "medium": 16,
+      "large": 22,
+      "xlarge": 34
+    },
+    "fontWeight": {
+      "light": 300,
+      "regular": 400,
+      "medium": 600,
+      "bold": 800
+    },
+    "lineHeight": 1.4,
+    "letterSpacing": 0.35
+  },
+  "adaptation": {
+    "layout": {
+      "density": "compact",
+      "cornerStyle": "sharp",
+      "spacingScale": 0.94,
+      "panelStyle": "elevated",
+      "navigationStyle": "rail"
+    },
+    "icons": {
+      "family": "material",
+      "style": "line",
+      "sizeScale": 0.98,
+      "strokeWidth": 1.9,
+      "cornerStyle": "sharp"
+    },
+    "componentOverrides": [
+      {
+        "selector": ".panel, .dialog",
+        "styles": {
+          "border-radius": 0,
+          "border": "1px solid rgba(212, 175, 55, 0.45)",
+          "box-shadow": "0 0 0 1px rgba(255, 246, 224, 0.16) inset, 0 10px 26px rgba(0, 0, 0, 0.55)"
+        }
+      },
+      {
+        "selector": ".data-grid, .timeline",
+        "styles": {
+          "row-gap": 4,
+          "column-gap": 16,
+          "border-left": "3px solid rgba(212, 175, 55, 0.55)"
+        }
+      },
+      {
+        "selector": ".top-nav, .toolbar",
+        "styles": {
+          "border-radius": 0,
+          "min-height": 64,
+          "text-transform": "uppercase",
+          "letter-spacing": 1.4
+        }
+      }
+    ],
+    "desktopAdaptation": {
+      "windowChrome": {
+        "titleBarHeight": 26,
+        "headerStyle": "geometric-stepped",
+        "cornerStyle": "sharp",
+        "panelRadius": 0,
+        "controlRadius": 0,
+        "borderWidth": 1,
+        "shadow": "0 16px 40px rgba(0, 0, 0, 0.75)"
+      },
+      "menuBar": {
+        "height": 28,
+        "fontSize": 11,
+        "letterSpacing": "0.18em",
+        "textTransform": "uppercase",
+        "dropdownRadius": 0,
+        "dropdownShadow": "0 14px 30px rgba(0,0,0,.7)"
+      },
+      "taskbar": {
+        "height": 40,
+        "buttonRadius": 0,
+        "dockAlignment": "left",
+        "quickChatBorderRadius": 0
+      },
+      "cameraHud": {
+        "panelRadius": 0,
+        "buttonRadius": 0,
+        "shadow": "0 8px 24px rgba(0,0,0,0.6)"
+      },
+      "sweep": {
+        "elbowWidth": 30,
+        "titleCapRadius": "0px",
+        "accentBand": "primary",
+        "showElbowBar": true
+      }
+    }
+  }
+}

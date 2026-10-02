@@ -1,0 +1,82 @@
+{
+  "metadata": {
+    "id": "lcars-tng",
+    "name": "LCARS — TNG",
+    "description": "Warm rail/sweep LCARS palette tuned for TNG-era amber and lilac, with strict pill geometry",
+    "author": "Linkpoint",
+    "version": "1.0.0",
+    "tags": [
+      "dark",
+      "sci-fi",
+      "lcars",
+      "console",
+      "tng"
+    ],
+    "createdAt": "2026-04-27T00:00:00.000Z",
+    "updatedAt": "2026-04-27T00:00:00.000Z"
+  },
+  "darkMode": true,
+  "colorScheme": {
+    "primary": "#F2A65A",
+    "onPrimary": "#000000",
+    "primaryContainer": "#CC7A2B",
+    "onPrimaryContainer": "#FFE6CC",
+    "secondary": "#C5678D",
+    "onSecondary": "#000000",
+    "secondaryContainer": "#7A2454",
+    "onSecondaryContainer": "#FFD1EA",
+    "tertiary": "#A485F7",
+    "onTertiary": "#000000",
+    "tertiaryContainer": "#4B2D80",
+    "onTertiaryContainer": "#E7CBFF",
+    "error": "#CC6666",
+    "onError": "#000000",
+    "errorContainer": "#7A1F1F",
+    "onErrorContainer": "#FFD9D9",
+    "background": "#000000",
+    "onBackground": "#FFCC99",
+    "surface": "#000000",
+    "onSurface": "#FFCC99",
+    "surfaceVariant": "#1A1A1A",
+    "onSurfaceVariant": "#CC99CC",
+    "outline": "#F2A65A",
+    "outlineVariant": "#5C3D1F",
+    "scrim": "#000000",
+    "inverseSurface": "#FFCC99",
+    "inverseOnSurface": "#000000",
+    "inversePrimary": "#8A5F28"
+  },
+  "effects": {
+    "metallic": { "enabled": false, "variant": "BRONZE", "gradient": { "base": "#CD7F32", "highlight": "#D99952", "shadow": "#6B4423", "shimmer": "#F0D9C0" }, "intensity": 0 },
+    "shadows": { "enabled": false, "elevation": 0, "blur": 0, "color": "#00000000" }
+  },
+  "typography": {
+    "fontFamily": "'Antonio', 'Oswald', 'Helvetica Neue', sans-serif",
+    "fontSize": { "small": 12, "medium": 16, "large": 22, "xlarge": 32 },
+    "fontWeight": { "light": 400, "regular": 500, "medium": 600, "bold": 700 },
+    "lineHeight": 1.2,
+    "letterSpacing": 1.1
+  },
+  "adaptation": {
+    "layout": {
+      "density": "compact",
+      "cornerStyle": "pill",
+      "spacingScale": 0.92,
+      "panelStyle": "flat",
+      "navigationStyle": "rail"
+    },
+    "icons": {
+      "family": "custom",
+      "style": "filled",
+      "sizeScale": 0.95,
+      "strokeWidth": 0,
+      "cornerStyle": "rounded"
+    },
+    "componentOverrides": [
+      { "selector": ".lcars-bar", "styles": { "border-top-left-radius": 48, "border-bottom-left-radius": 48, "padding-inline": 16, "letter-spacing": 1.1, "text-transform": "uppercase" } },
+      { "selector": ".lcars-panel", "styles": { "display": "grid", "grid-template-columns": "220px 1fr", "gap": 10 } },
+      { "selector": ".btn", "styles": { "border-radius": 0, "border-top-left-radius": 22, "border-bottom-left-radius": 22, "text-transform": "uppercase", "letter-spacing": "1.5px", "font-weight": 700 } },
+      { "selector": ".chip", "styles": { "border-radius": 0, "text-transform": "uppercase", "letter-spacing": "1px", "font-weight": 700 } }
+    ]
+  }
+}

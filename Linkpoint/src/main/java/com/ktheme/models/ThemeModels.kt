@@ -1,59 +1,65 @@
 package com.ktheme.models
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ThemeMetadata(
-    val id: String,
-    val name: String,
-    val description: String,
-    val author: String,
-    val version: String,
+    val id: String = "",
+    val name: String = "",
+    val description: String = "",
+    val author: String = "",
+    val version: String = "1.0.0",
     val tags: List<String> = emptyList(),
     val createdAt: String = "",
     val updatedAt: String = ""
 )
 
+@Serializable
 data class ColorScheme(
     val primary: String,
     val onPrimary: String,
-    val primaryContainer: String,
-    val onPrimaryContainer: String,
-    val secondary: String,
-    val onSecondary: String,
-    val secondaryContainer: String,
-    val onSecondaryContainer: String,
-    val tertiary: String,
-    val onTertiary: String,
-    val tertiaryContainer: String,
-    val onTertiaryContainer: String,
-    val error: String,
-    val onError: String,
-    val errorContainer: String,
-    val onErrorContainer: String,
-    val background: String,
-    val onBackground: String,
-    val surface: String,
-    val onSurface: String,
-    val surfaceVariant: String,
-    val onSurfaceVariant: String,
-    val outline: String,
-    val outlineVariant: String,
-    val scrim: String,
-    val inverseSurface: String,
-    val inverseOnSurface: String,
-    val inversePrimary: String
+    val primaryContainer: String = primary,
+    val onPrimaryContainer: String = onPrimary,
+    val secondary: String = primary,
+    val onSecondary: String = onPrimary,
+    val secondaryContainer: String = secondary,
+    val onSecondaryContainer: String = onSecondary,
+    val tertiary: String = secondary,
+    val onTertiary: String = onSecondary,
+    val tertiaryContainer: String = tertiary,
+    val onTertiaryContainer: String = onTertiary,
+    val error: String = "#F44336",
+    val onError: String = "#FFFFFF",
+    val errorContainer: String = error,
+    val onErrorContainer: String = onError,
+    val background: String = "#121212",
+    val onBackground: String = "#FFFFFF",
+    val surface: String = "#1E1E1E",
+    val onSurface: String = "#FFFFFF",
+    val surfaceVariant: String = surface,
+    val onSurfaceVariant: String = onSurface,
+    val outline: String = onSurfaceVariant,
+    val outlineVariant: String = outline,
+    val scrim: String = "#000000",
+    val inverseSurface: String = onSurface,
+    val inverseOnSurface: String = surface,
+    val inversePrimary: String = primary
 )
 
+@Serializable
 enum class LayoutStructure(
     val id: String,
     val displayName: String
 ) {
-    METRO("metro", "Metro"),
-    LCARS("lcars", "LCARS"),
-    FRUTIGER_AERO("frutiger_aero", "Frutiger Aero"),
-    ART_DECO("art_deco", "Art Deco"),
-    TERMINAL("terminal", "Terminal"),
-    MODERN_GLASS("modern_glass", "Modern Glass"),
-    MATERIAL3("material3", "Material3"),
-    CYBERPUNK("cyberpunk", "Cyberpunk");
+    @SerialName("metro") METRO("metro", "Metro"),
+    @SerialName("lcars") LCARS("lcars", "LCARS"),
+    @SerialName("frutiger_aero") FRUTIGER_AERO("frutiger_aero", "Frutiger Aero"),
+    @SerialName("art_deco") ART_DECO("art_deco", "Art Deco"),
+    @SerialName("terminal") TERMINAL("terminal", "Terminal"),
+    @SerialName("modern_glass") MODERN_GLASS("modern_glass", "Modern Glass"),
+    @SerialName("material3") MATERIAL3("material3", "Material3"),
+    @SerialName("cyberpunk") CYBERPUNK("cyberpunk", "Cyberpunk");
 
     companion object {
         fun fromId(id: String): LayoutStructure {
@@ -63,9 +69,11 @@ enum class LayoutStructure(
     }
 }
 
+@Serializable
 data class Theme(
     val metadata: ThemeMetadata,
-    val darkMode: Boolean,
+    val darkMode: Boolean = true,
     val colorScheme: ColorScheme,
     val layoutStructure: LayoutStructure = LayoutStructure.MATERIAL3
 )
+

@@ -141,6 +141,9 @@ export class SLBridge extends Utils.EventEmitter {
     return this.call<{ moving: boolean }>('setMovement', params);
   }
   getBalance() { return this.call<{ balance: number }>('getBalance'); }
+  payObject(params: { objectId?: string; targetId?: string; id?: string; amount?: number; price?: number; description?: string }) {
+    return this.call<{ paid: string; amount: number; balance: number | null }>('payObject', params);
+  }
 
   async sendChat(message: string, channel = 0, type = 1) { await this.call('sendChat', { message, channel, type }); }
   async sendInstantMessage(recipientId: string, message: string) { await this.call('sendInstantMessage', { recipientId, message }); }
@@ -172,6 +175,11 @@ export class SLBridge extends Utils.EventEmitter {
       return { worn: true, outfitId };
     }
   }
+
+  async wearItem(itemId: string, options: { append?: boolean } = {}) {
+    if (!this.connected) return { worn: itemId, append: Boolean(options.append) };
+    return this.call('wearItem', { itemId, append: Boolean(options.append) });
+  }
   async fetchScene() {
     if (!this.connected) return [];
     try { return await this.call<any[]>('getSceneObjects'); } catch { return []; }
@@ -182,6 +190,48 @@ export class SLBridge extends Utils.EventEmitter {
   }
   /** An animation asset from the simulator, base64-encoded. */
   fetchAnimation(id: string): Promise<{ id: string; data: string }> { return this.call('fetchAnimation', { id }); }
+
+  async requestMuteList(crc: number = 0) {
+    if (this.connected) {
+      try {
+        await this.call('requestMuteList', { crc });
+      } catch (err) {
+        console.warn('[SL Bridge] requestMuteList warning:', err);
+      }
+    }
+  }
+
+  async updateMuteListEntry(entry: { id: string; name: string; type: number | string; flags: number }) {
+    if (this.connected) {
+      try {
+        await this.call('updateMuteListEntry', entry);
+      } catch (err) {
+        console.warn('[SL Bridge] updateMuteListEntry warning:', err);
+      }
+    }
+  }
+
+  async removeMuteListEntry(entry: { id: string; name: string }) {
+    if (this.connected) {
+      try {
+        await this.call('removeMuteListEntry', entry);
+      } catch (err) {
+        console.warn('[SL Bridge] removeMuteListEntry warning:', err);
+      }
+    }
+  }
+
+  async fetchXfer(filename: string): Promise<string> {
+    if (this.connected) {
+      try {
+        const res = await this.call<{ data?: string; content?: string }>('fetchXfer', { filename });
+        return res?.data || res?.content || '';
+      } catch (err) {
+        console.warn('[SL Bridge] fetchXfer warning:', err);
+      }
+    }
+    return '';
+  }
 
   disconnect() {
     this.eventSource?.close();
