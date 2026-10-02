@@ -1,8 +1,42 @@
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+      - id: check-merge-conflict
+
   - repo: local
     hooks:
       - id: parity-snapshot-guard
         name: parity snapshot scripts enforce clean tree
         entry: bash scripts/check_parity_snapshot_guards.sh
+        language: system
+        pass_filenames: false
+
+      - id: cargo-fmt
+        name: cargo fmt
+        entry: cargo fmt --all -- --check
+        language: system
+        pass_filenames: false
+
+      - id: cargo-clippy
+        name: cargo clippy
+        entry: cargo clippy --workspace --all-targets -- -D warnings
+        language: system
+        pass_filenames: false
+
+      - id: npm-typecheck
+        name: npm run typecheck
+        entry: npm run typecheck
+        language: system
+        pass_filenames: false
+
+      - id: gradle-lint
+        name: gradle lint
+        entry: bash -c "cd Linkpoint && ./gradlew lintStableDebug"
         language: system
         pass_filenames: false
