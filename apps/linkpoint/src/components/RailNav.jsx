@@ -14,19 +14,53 @@ export default function RailNav() {
   if (nav !== "rail") return null;
 
   return (
-    <div style={{ flex: "none", width: "104px", background: V.surf, borderRight: "1px solid " + V.outv, display: "flex", flexDirection: "column", gap: "5px", padding: "12px 8px" }}>
-      <div style={{ font: "700 13px/1.15 " + t.dfont, letterSpacing: ".2em", color: V.pri, padding: "2px 6px 14px" }}>
+    <div
+      role="tablist"
+      aria-label="Navigation rail"
+      style={{
+        flex: "none",
+        width: "104px",
+        background: V.surf,
+        borderRight: "1px solid " + V.outv,
+        display: "flex",
+        flexDirection: "column",
+        gap: "5px",
+        padding: "12px 8px",
+      }}
+    >
+      <div style={{ font: "700 13px/1.15 " + (t.dfont || t.font), letterSpacing: ".2em", color: V.pri, padding: "2px 6px 14px" }}>
         LINK
         <br />
         POINT
       </div>
       {NAV_ALL.map((n) => {
         const active = navActive(state.screen, n.id);
+        const radius = V.rs || V.navr || "4px";
         return (
           <div
             key={n.id}
+            role="tab"
+            tabIndex={0}
+            aria-selected={active}
+            aria-label={"Go to " + n.label}
             onClick={() => actions.setScreen(n.id)}
-            style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", padding: "10px 4px", cursor: "pointer", borderRadius: V.navr, color: active ? V.onpriC : V.ink2, background: active ? V.priC : undefined }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                actions.setScreen(n.id);
+              }
+            }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "5px",
+              padding: "10px 4px",
+              cursor: "pointer",
+              borderRadius: radius,
+              color: active ? (V.onpri || V.onpriC || "#ffffff") : V.ink2,
+              background: active ? (V.pri || V.priC) : "transparent",
+            }}
           >
             <Icon name={n.icon} size={20} />
             <span style={{ font: "600 8.5px/1 " + t.font, letterSpacing: ".1em" }}>{n.label}</span>

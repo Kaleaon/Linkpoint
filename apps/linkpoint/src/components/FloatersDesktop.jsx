@@ -226,7 +226,7 @@ export default function FloatersDesktop() {
       ) : null}
 
       {/* Firestorm Desktop Taskbar & Nearby Quick-Chat Dock */}
-      <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: G.dock + "px", display: "flex", alignItems: "center", gap: "6px", padding: "0 8px", background: kind === "default" || kind === "sweep" ? V.surf : V.bg, borderTop: kind === "sweep" ? "6px solid " + V.pri : kind === "metro" ? "none" : "1px solid " + V.outv, borderTopRightRadius: kind === "sweep" ? 999 : 0, zIndex: 60 }}>
+      <div className="quick-chat-dock" style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: G.dock + "px", display: "flex", alignItems: "center", gap: "6px", padding: "0 8px", background: "var(--chat-bg-scrim, " + (kind === "default" || kind === "sweep" ? V.surf : V.bg) + ")", borderTop: kind === "sweep" ? "6px solid " + V.pri : kind === "metro" ? "none" : "1px solid " + V.outv, borderTopRightRadius: kind === "sweep" ? 999 : 0, zIndex: 60 }}>
         {/* Persistent Firestorm Nearby Quick Chat Input Bar */}
         <form onSubmit={sendQuickChat} style={{ display: "flex", alignItems: "center", gap: "4px", minWidth: "260px", maxWidth: "340px" }}>
           <div style={{ position: "relative", flex: 1 }}>
@@ -235,8 +235,9 @@ export default function FloatersDesktop() {
               value={quickMsg}
               onChange={(e) => setQuickMsg(e.target.value)}
               placeholder="Nearby Chat..."
+              className="chat-input-field"
               style={{
-                width: "100%", height: "26px", padding: "0 8px", background: V.bg, color: V.ink,
+                width: "100%", height: "26px", padding: "0 8px", background: "var(--chat-bg-scrim, " + V.bg + ")", color: "var(--chat-text, " + V.ink + ")",
                 border: "1px solid " + V.outv, borderRadius: kind === "sweep" ? "999px" : kind === "metro" ? 0 : V.rs, font: "400 11px/1 " + t.font, outline: "none"
               }}
             />

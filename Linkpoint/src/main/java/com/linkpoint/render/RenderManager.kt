@@ -407,6 +407,11 @@ class RenderManager(private val context: Context) {
         }
     }
 
+    suspend fun initializeAsync(surfaceView: SurfaceView): Boolean {
+        return dispatcher.execute { initialize(surfaceView) }
+    }
+
+    @Deprecated("Use initializeAsync suspending function to avoid blocking main thread.", ReplaceWith("initializeAsync(surfaceView)"))
     fun initializeOnRenderThread(surfaceView: SurfaceView): Boolean {
         return dispatcher.runBlocking { initialize(surfaceView) }
     }
@@ -1447,6 +1452,14 @@ class RenderManager(private val context: Context) {
         isInitialized = false
     }
 
+    suspend fun shutdownAsync() {
+        dispatcher.execute {
+            shutdown()
+        }
+        dispatcher.shutdown()
+    }
+
+    @Deprecated("Use shutdownAsync suspending function to avoid blocking main thread.", ReplaceWith("shutdownAsync()"))
     fun shutdownOnRenderThread() {
         dispatcher.runBlocking {
             shutdown()

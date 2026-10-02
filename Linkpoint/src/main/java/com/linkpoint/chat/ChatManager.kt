@@ -63,15 +63,16 @@ class ChatManager(
                     _typingAvatars.value = _typingAvatars.value - data.sourceId
                 }
                 else -> {
+                    val filteredData = ChatProtocolFilter.filterChatData(data)
                     val message = ChatMessage(
                         id = UUID.randomUUID(),
-                        fromName = data.fromName,
-                        sourceId = data.sourceId,
-                        ownerId = data.ownerId,
-                        sourceType = data.sourceType,
-                        chatType = data.chatType,
-                        position = data.position,
-                        message = data.message,
+                        fromName = filteredData.fromName,
+                        sourceId = filteredData.sourceId,
+                        ownerId = filteredData.ownerId,
+                        sourceType = filteredData.sourceType,
+                        chatType = filteredData.chatType,
+                        position = filteredData.position,
+                        message = filteredData.message,
                         timestamp = System.currentTimeMillis()
                     )
                     

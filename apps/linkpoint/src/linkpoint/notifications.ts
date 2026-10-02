@@ -39,6 +39,16 @@ export class NotificationsManager extends Utils.EventEmitter {
   }
 
   handleNotification(data: NotificationData) {
+    const appRef = (typeof window !== 'undefined' ? (window as any).app : null) || (globalThis as any).app;
+    if (appRef?.chatExtended && typeof appRef.chatExtended.isMuted === 'function') {
+      const sourceId = data.fromId || data.senderId || data.groupId || '';
+      const sourceName = data.from || data.fromName || data.sender || '';
+      if (appRef.chatExtended.isMuted(sourceId, sourceName)) {
+        console.log(`[NotificationsManager] Suppressing notification from muted source: ${sourceName} (${sourceId})`);
+        return;
+      }
+    }
+
     this.items.push({ ...data });
     this.unreadCount++;
     this.emit('notification_received', data);

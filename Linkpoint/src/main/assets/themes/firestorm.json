@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "id": "firestorm",
+    "name": "Firestorm Viewer",
+    "description": "Firestorm third-party viewer look - fire orange on near-black",
+    "author": "Linkpoint",
+    "version": "1.0.0",
+    "tags": ["viewer", "firestorm", "orange"]
+  },
+  "darkMode": true,
+  "colorScheme": {
+    "primary": "#E85D00",
+    "onPrimary": "#FFFFFF",
+    "primaryContainer": "#B84800",
+    "onPrimaryContainer": "#FFFFFF",
+    "secondary": "#FFB366",
+    "onSecondary": "#1A0E00",
+    "secondaryContainer": "#FFB366",
+    "onSecondaryContainer": "#1A0E00",
+    "tertiary": "#FFB366",
+    "onTertiary": "#1A0E00",
+    "tertiaryContainer": "#FFB366",
+    "onTertiaryContainer": "#1A0E00",
+    "error": "#F44336",
+    "onError": "#FFFFFF",
+    "errorContainer": "#F44336",
+    "onErrorContainer": "#FFFFFF",
+    "background": "#121212",
+    "onBackground": "#F5F5F5",
+    "surface": "#1E1E1E",
+    "onSurface": "#F5F5F5",
+    "surfaceVariant": "#1E1E1E",
+    "onSurfaceVariant": "#BDBDBD",
+    "outline": "#BDBDBD",
+    "outlineVariant": "#BDBDBD",
+    "scrim": "#000000",
+    "inverseSurface": "#F5F5F5",
+    "inverseOnSurface": "#1E1E1E",
+    "inversePrimary": "#E85D00"
+  }
+}

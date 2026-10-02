@@ -70,8 +70,8 @@ class ThemeManager private constructor(private val context: Context) {
     private fun loadThemes() {
         val themesById = linkedMapOf<String, ThemePack>()
 
-        // Add built-in themes first.
-        BuiltInThemes.getAllBuiltInThemes().forEach { themesById[it.id] = it }
+        // Add built-in themes loaded dynamically via ThemeCatalog from assets
+        ThemeCatalog.allThemes(context).forEach { themesById[it.id] = it }
 
         // Load user themes from app storage.
         loadUserThemes().forEach { themesById[it.id] = it }
@@ -85,7 +85,7 @@ class ThemeManager private constructor(private val context: Context) {
 
         val themes = themesById.values.toList()
         _availableThemes.value = themes
-        Log.d(TAG, "Loaded ${themes.size} themes (${BuiltInThemes.getAllBuiltInThemes().size} built-in)")
+        Log.d(TAG, "Loaded ${themes.size} themes (${ThemeCatalog.allThemes(context).size} built-in)")
     }
     
     /**

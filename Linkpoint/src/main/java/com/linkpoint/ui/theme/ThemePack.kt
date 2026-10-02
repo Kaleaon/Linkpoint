@@ -85,7 +85,11 @@ data class ThemePack(
     val motionProfile: MotionProfile? = null,
 
     /** Structural layout variation from Ktheme models */
-    val layoutStructure: LayoutStructure = LayoutStructure.MATERIAL3
+    val layoutStructure: LayoutStructure = LayoutStructure.MATERIAL3,
+
+    /** Optional underlying canonical Ktheme domain model */
+    @kotlinx.serialization.Transient
+    val ktheme: com.ktheme.models.Theme? = null
 ) {
     companion object {
         private val json = Json { 

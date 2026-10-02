@@ -30,22 +30,29 @@ export default function SegmentedTabs() {
   const segLook = LK.seg || "fill";
   const looks = segLooks(V, t.font);
   const base = looks[segLook];
-  const on = { background: V.priC, color: V.onpriC, borderBottom: "2px solid " + V.pri };
-  const onLook = segLook === "fill" ? { ...on, color: V.onpriC } : segLook === "pivot" ? { color: V.pri, fontWeight: 400 } : { color: V.pri, boxShadow: "inset 0 -2px 0 " + V.pri, letterSpacing: V.tls };
+  const activeStyle = segLook === "fill"
+    ? { background: V.pri, color: V.onpri }
+    : segLook === "pivot"
+    ? { color: V.pri, fontWeight: 600 }
+    : { color: V.pri, boxShadow: "inset 0 -2px 0 " + V.pri, letterSpacing: V.tls };
 
   const wrap = isFloat
     ? { flex: "none", display: "flex", flexWrap: "wrap", margin: 0, borderBottom: "1px solid " + V.outv, background: V.surf }
     : segLook === "fill"
-    ? { flex: "none", display: "flex", margin: nav === "sweep" ? "12px 12px 10px 4px" : "2px 16px 10px", border: "1px solid " + V.outv, borderRadius: V.rs, overflow: "hidden" }
+    ? { flex: "none", display: "flex", margin: nav === "sweep" ? "12px 12px 10px 4px" : "2px 16px 10px", border: "1px solid " + V.outv, borderRadius: V.rs, overflow: "hidden", background: V.surf }
     : { flex: "none", display: "flex", margin: "0 16px 8px", borderBottom: segLook === "text" ? "1px solid " + V.outv : "none", overflowX: "auto" };
 
   const isActive = (label) => curSub === label;
 
   return (
-    <div style={wrap}>
+    <div role="tablist" aria-label="Sub navigation tabs" style={wrap}>
       {tabs.map((x) => {
         const active = isActive(x.label);
-        const style = { ...base, ...(active ? onLook : null), ...(isFloat ? { minHeight: "24px", height: "24px", padding: "0 9px", flex: "none", borderRadius: 0, font: "600 9.5px/1 " + t.font, letterSpacing: ".1em" } : null) };
+        const style = {
+          ...base,
+          ...(active ? activeStyle : null),
+          ...(isFloat ? { minHeight: "24px", height: "24px", padding: "0 9px", flex: "none", borderRadius: 0, font: "600 9.5px/1 " + t.font, letterSpacing: ".1em" } : null),
+        };
         return (
           <div
             key={x.label}
