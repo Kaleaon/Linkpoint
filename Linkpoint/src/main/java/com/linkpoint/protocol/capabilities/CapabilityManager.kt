@@ -282,6 +282,18 @@ class CapabilityManager : CapabilityRequester {
     // Linkpoint translation layer support
     @Volatile private var loginUrl: String? = null
 
+    // Grid-aware capability strategy dispatcher
+    @Volatile var activeStrategy: CapabilityParserStrategy = CapabilityStrategyDispatcher.selectStrategy()
+        private set
+
+    /**
+     * Set explicit strategy or update strategy based on login URL.
+     */
+    fun setStrategy(strategy: CapabilityParserStrategy) {
+        this.activeStrategy = strategy
+        Log.i(TAG, "Active capability strategy updated to ${strategy.javaClass.simpleName} (${strategy.gridType})")
+    }
+
     // Background retry for capability initialization
     private var backgroundRetryJob: Job? = null
     @Volatile private var backgroundRetryCount: Int = 0
@@ -299,14 +311,15 @@ class CapabilityManager : CapabilityRequester {
      */
     suspend fun initialize(seedCap: String, loginUrlParam: String): Boolean {
         this.loginUrl = loginUrlParam
+        this.activeStrategy = CapabilityStrategyDispatcher.selectStrategy(loginUrlParam)
         
-        // Apply URL repair to seed capability
-        val repairedSeedCap = LinkpointTranslationLayer.prepareSeedCapability(loginUrlParam, seedCap)
+        // Apply URL repair/validation via active strategy
+        val repairedSeedCap = activeStrategy.validateCapabilityUrl("SeedCapability", seedCap, loginUrlParam)
         
         if (repairedSeedCap != seedCap) {
             Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
-            Log.i(TAG, "║ LUMIYA TRANSLATION: Seed capability URL repaired")
-            Log.i(TAG, "║ Grid Type: ${LinkpointTranslationLayer.detectGridType(loginUrlParam)}")
+            Log.i(TAG, "║ CAPABILITY DISPATCHER: Seed capability URL repaired")
+            Log.i(TAG, "║ Strategy: ${activeStrategy.javaClass.simpleName} (Grid: ${activeStrategy.gridType})")
             Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
         }
         
@@ -328,10 +341,11 @@ class CapabilityManager : CapabilityRequester {
         Log.i(TAG, "╠══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ Seed URL: ${seedCap.take(80)}...")
         val currentLoginUrl = loginUrl
-        Log.i(TAG, "║ Translation Mode: ${if (currentLoginUrl != null) "ENABLED" else "DISABLED"}")
         if (currentLoginUrl != null) {
-            Log.i(TAG, "║ Grid Type: ${LinkpointTranslationLayer.detectGridType(currentLoginUrl)}")
+            activeStrategy = CapabilityStrategyDispatcher.selectStrategy(currentLoginUrl)
         }
+        Log.i(TAG, "║ Translation Mode: ${if (currentLoginUrl != null) "ENABLED" else "DISABLED"}")
+        Log.i(TAG, "║ Capability Strategy: ${activeStrategy.javaClass.simpleName} (Grid: ${activeStrategy.gridType})")
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
         
         // Use reference capability list when enabled for better compatibility
@@ -419,15 +433,10 @@ class CapabilityManager : CapabilityRequester {
         var repairedCount = 0
         
         resolvedCaps.forEach { (name, url) ->
-            val finalUrl = if (shouldRepairUrls) {
-                val repairedUrl = LinkpointTranslationLayer.repairUrl(loginUrl ?: "", url)
-                if (repairedUrl != url) {
-                    repairedCount++
-                    Log.d(TAG, "Repaired URL for $name")
-                }
-                repairedUrl
-            } else {
-                url
+            val finalUrl = activeStrategy.validateCapabilityUrl(name, url, loginUrl)
+            if (finalUrl != url) {
+                repairedCount++
+                Log.d(TAG, "Repaired URL for $name")
             }
             capabilities[name] = finalUrl
             Log.d(TAG, "Capability: $name -> ${finalUrl.take(60)}...")
@@ -543,9 +552,10 @@ class CapabilityManager : CapabilityRequester {
         Log.d(TAG, "Request body length: ${xml.length} bytes")
         
         try {
-            val request = Request.Builder()
-                .url(seedUrl)
-                .header("Accept", "application/llsd+xml, application/llsd+binary")
+            val requestBuilder = Request.Builder().url(seedUrl)
+            val reqHeaders = activeStrategy.transformHeaders("SeedCapability", mapOf("Accept" to "application/llsd+xml, application/llsd+binary"))
+            reqHeaders.forEach { (k, v) -> requestBuilder.header(k, v) }
+            val request = requestBuilder
                 .post(xml.toRequestBody("application/llsd+xml".toMediaType()))
                 .build()
             
@@ -623,36 +633,18 @@ class CapabilityManager : CapabilityRequester {
                 Log.d(TAG, "Response preview: <binary LLSD omitted>")
             }
             
-            val llsd = try {
-                LLSDParser.parseAuto(bodyBytes, contentType)
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to parse LLSD from seed capability response", e)
-                lastInitializationError = "LLSD parse error: ${e.message}"
-                return@withContext null
-            }
+            val result = activeStrategy.parseCapabilityResponse(bodyBytes, contentType)
             
-            if (llsd == LLSDUndefined) {
-                Log.e(TAG, "Seed capability response is not valid XML or binary LLSD")
-                lastInitializationError = "LLSD parse error: invalid format"
-                return@withContext null
-            }
-            
-            if (llsd is LLSDMap) {
-                val result = llsd.value.keys.mapNotNull { key ->
-                    llsd.getString(key)?.takeIf { it.isNotEmpty() }?.let { key to it }
-                }.toMap()
-                
-                Log.d(TAG, "Parsed ${result.size} capabilities from response")
-                
+            if (result != null) {
+                Log.d(TAG, "Parsed ${result.size} capabilities from response using strategy ${activeStrategy.javaClass.simpleName}")
                 if (result.isEmpty()) {
-                    Log.w(TAG, "LLSD response parsed successfully but contained no capability URLs")
-                    lastInitializationError = "LLSD contained no capability URLs"
+                    Log.w(TAG, "Capability response parsed successfully but contained no capability URLs")
+                    lastInitializationError = "Capability response contained no URLs"
                 }
-                
                 result
             } else {
-                Log.e(TAG, "LLSD response is not a map, got: ${llsd?.javaClass?.simpleName}")
-                lastInitializationError = "LLSD response is not a map"
+                Log.e(TAG, "Capability response parsing failed for strategy ${activeStrategy.javaClass.simpleName}")
+                lastInitializationError = "Capability parse error for ${activeStrategy.javaClass.simpleName}"
                 null
             }
         } catch (e: java.net.SocketTimeoutException) {
@@ -763,6 +755,8 @@ class CapabilityManager : CapabilityRequester {
                 }
 
                 val requestBuilder = Request.Builder().url(url)
+                val reqHeaders = activeStrategy.transformHeaders(capName)
+                reqHeaders.forEach { (k, v) -> requestBuilder.header(k, v) }
 
                 if (xmlBody != null) {
                     requestBuilder.post(
@@ -880,7 +874,10 @@ class CapabilityManager : CapabilityRequester {
                     delay(delayMs)
                 }
                 val getStart = System.currentTimeMillis()
-                val response = client.newCall(Request.Builder().url(url).get().build()).execute()
+                val reqBuilder = Request.Builder().url(url).get()
+                val reqHeaders = activeStrategy.transformHeaders(capName)
+                reqHeaders.forEach { (k, v) -> reqBuilder.header(k, v) }
+                val response = client.newCall(reqBuilder.build()).execute()
                 val getProto = response.protocol.toString()
                 if (response.code in RETRYABLE_HTTP_CODES) {
                     retryAfterSeconds = parseRetryAfterHeader(response)
@@ -1169,6 +1166,8 @@ class CapabilityManager : CapabilityRequester {
             hasGetMesh = hasCapability(CAP_GET_MESH) || hasCapability(CAP_GET_MESH2),
             hasFetchInventory = hasCapability(CAP_FETCH_INVENTORY),
             hasEventQueue = hasCapability(CAP_EVENT_QUEUE),
+            activeStrategy = activeStrategy.javaClass.simpleName,
+            gridType = activeStrategy.gridType.name,
             // New initialization tracking fields
             initializationAttempts = lastInitializationAttempts,
             lastInitializationError = lastInitializationError,
@@ -1192,6 +1191,8 @@ class CapabilityManager : CapabilityRequester {
         val hasGetMesh: Boolean,
         val hasFetchInventory: Boolean,
         val hasEventQueue: Boolean,
+        val activeStrategy: String = "HybridFallbackCapHandler",
+        val gridType: String = "UNKNOWN",
         // New initialization tracking fields
         val initializationAttempts: Int = 0,
         val lastInitializationError: String? = null,

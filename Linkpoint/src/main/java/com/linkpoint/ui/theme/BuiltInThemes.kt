@@ -334,7 +334,7 @@ object BuiltInThemes {
         colorError = "#FF6B6B",
         densityProfile = DensityProfile.STANDARD,
         cornerProfile = CornerProfile.SHARP,
-        motionProfile = MotionProfile.EXPRESSIVE
+        motionProfile = MotionProfile.EXPRESSIVE,
     )
 
     /**
