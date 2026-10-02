@@ -183,6 +183,48 @@ export class SLBridge extends Utils.EventEmitter {
   /** An animation asset from the simulator, base64-encoded. */
   fetchAnimation(id: string): Promise<{ id: string; data: string }> { return this.call('fetchAnimation', { id }); }
 
+  async requestMuteList(crc: number = 0) {
+    if (this.connected) {
+      try {
+        await this.call('requestMuteList', { crc });
+      } catch (err) {
+        console.warn('[SL Bridge] requestMuteList warning:', err);
+      }
+    }
+  }
+
+  async updateMuteListEntry(entry: { id: string; name: string; type: number | string; flags: number }) {
+    if (this.connected) {
+      try {
+        await this.call('updateMuteListEntry', entry);
+      } catch (err) {
+        console.warn('[SL Bridge] updateMuteListEntry warning:', err);
+      }
+    }
+  }
+
+  async removeMuteListEntry(entry: { id: string; name: string }) {
+    if (this.connected) {
+      try {
+        await this.call('removeMuteListEntry', entry);
+      } catch (err) {
+        console.warn('[SL Bridge] removeMuteListEntry warning:', err);
+      }
+    }
+  }
+
+  async fetchXfer(filename: string): Promise<string> {
+    if (this.connected) {
+      try {
+        const res = await this.call<{ data?: string; content?: string }>('fetchXfer', { filename });
+        return res?.data || res?.content || '';
+      } catch (err) {
+        console.warn('[SL Bridge] fetchXfer warning:', err);
+      }
+    }
+    return '';
+  }
+
   disconnect() {
     this.eventSource?.close();
     this.eventSource = null;

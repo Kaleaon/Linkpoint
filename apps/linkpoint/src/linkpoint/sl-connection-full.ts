@@ -117,6 +117,10 @@ export class SLConnectionFull extends Utils.EventEmitter {
     forward('lure', 'lure');
     forward('parcel-properties', 'ParcelProperties', (data) => ({ parcelData: data }));
     forward('coarse-avatar', 'CoarseAvatarUpdate');
+    forward('mute-list-update', 'MuteListUpdate');
+    forward('use-cached-mute-list', 'UseCachedMuteList');
+    forward('update-mute-list-entry', 'UpdateMuteListEntry');
+    forward('remove-mute-list-entry', 'RemoveMuteListEntry');
     for (const name of ['avatar_presence', 'avatar-presence']) {
       slBridge.on(name, (data: any) => {
         this.emit('avatar_presence', data);

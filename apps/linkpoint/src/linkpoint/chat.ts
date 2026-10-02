@@ -370,6 +370,14 @@ export class ChatManager extends Utils.EventEmitter {
       channel: data.channel ?? 0,
     };
 
+    const appRef = (typeof window !== 'undefined' ? (window as any).app : null) || (globalThis as any).app;
+    if (appRef?.chatExtended && typeof appRef.chatExtended.shouldFilterMessage === 'function') {
+      if (appRef.chatExtended.shouldFilterMessage(messageData)) {
+        console.log(`[ChatManager] Suppressing message from muted source: ${senderName} (${senderId})`);
+        return;
+      }
+    }
+
     this.addMessage(messageData);
     this.emit('message_received', messageData);
 
