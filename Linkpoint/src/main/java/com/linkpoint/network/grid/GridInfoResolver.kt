@@ -60,7 +60,7 @@ object GridInfoResolver {
 
         // Bypasses probe for known Second Life URIs for instant response
         if (isSecondLifeUri(trimmed) || (initialGrid != null && isSecondLifeUri(initialGrid.loginUri))) {
-            Log.d(TAG, "Recognized Second Life grid address ($trimmed); bypassing GridInfo probe.")
+            logD(TAG, "Recognized Second Life grid address ($trimmed); bypassing GridInfo probe.")
             return@withContext initialGrid ?: createFallbackGridInfo(trimmed)
         }
 
@@ -70,10 +70,10 @@ object GridInfoResolver {
         }
 
         if (resolved != null) {
-            Log.i(TAG, "Successfully resolved GridInfo for $trimmed: name='${resolved.name}', loginuri='${resolved.loginUri}'")
+            logI(TAG, "Successfully resolved GridInfo for $trimmed: name='${resolved.name}', loginuri='${resolved.loginUri}'")
             resolved
         } else {
-            Log.w(TAG, "GridInfo probe for $trimmed timed out or failed within ${timeoutMs}ms; using fallback.")
+            logW(TAG, "GridInfo probe for $trimmed timed out or failed within ${timeoutMs}ms; using fallback.")
             initialGrid ?: createFallbackGridInfo(trimmed)
         }
     }
@@ -118,7 +118,7 @@ object GridInfoResolver {
                     }
                 }
             } catch (e: Exception) {
-                Log.d(TAG, "Probe failed for URL $probeUrl: ${e.message}")
+                logD(TAG, "Probe failed for URL $probeUrl: ${e.message}")
             }
         }
         return null
@@ -195,7 +195,7 @@ object GridInfoResolver {
                     }
                 }
             } catch (e: Exception) {
-                Log.d(TAG, "Failed to parse JSON GridInfo, falling back to regex: ${e.message}")
+                logD(TAG, "Failed to parse JSON GridInfo, falling back to regex: ${e.message}")
             }
         }
 
@@ -330,5 +330,17 @@ object GridInfoResolver {
         } catch (e: Exception) {
             inputAddress
         }
+    }
+
+    private fun logD(tag: String, msg: String) {
+        try { Log.d(tag, msg) } catch (_: Throwable) {}
+    }
+
+    private fun logI(tag: String, msg: String) {
+        try { Log.i(tag, msg) } catch (_: Throwable) {}
+    }
+
+    private fun logW(tag: String, msg: String) {
+        try { Log.w(tag, msg) } catch (_: Throwable) {}
     }
 }
