@@ -66,12 +66,12 @@ class Vector3d(var x: Double, var y: Double, var z: Double) {
 
     operator fun get(idx: Int): Double = when (idx) {
         0 -> x; 1 -> y; 2 -> z
-        else -> throw IndexOutOfBoundsException(idx)
+        else -> throw IndexOutOfBoundsException("Index: $idx")
     }
 
     operator fun set(idx: Int, v: Double) = when (idx) {
         0 -> x = v; 1 -> y = v; 2 -> z = v
-        else -> throw IndexOutOfBoundsException(idx)
+        else -> throw IndexOutOfBoundsException("Index: $idx")
     }
 
     operator fun plus(b: Vector3d): Vector3d = Vector3d(x + b.x, y + b.y, z + b.z)

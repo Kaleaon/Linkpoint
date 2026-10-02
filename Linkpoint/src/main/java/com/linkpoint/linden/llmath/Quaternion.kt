@@ -151,7 +151,7 @@ class Quaternion(var x: Float, var y: Float, var z: Float, var w: Float) {
 
     operator fun get(idx: Int): Float = when (idx) {
         0 -> x; 1 -> y; 2 -> z; 3 -> w
-        else -> throw IndexOutOfBoundsException(idx)
+        else -> throw IndexOutOfBoundsException("Index: $idx")
     }
 
     override fun equals(other: Any?): Boolean {
