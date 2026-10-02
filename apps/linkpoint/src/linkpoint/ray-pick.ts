@@ -111,3 +111,95 @@ export function intersectRayOrientedBox(
   }
   return tMin;
 }
+
+export interface RayTriangleHit {
+  /** Distance along the ray (`t`). */
+  t: number;
+  /** Barycentric coordinate `u` (weight for vertex v1). */
+  u: number;
+  /** Barycentric coordinate `v` (weight for vertex v2). */
+  v: number;
+  /** Barycentric coordinate `w` (weight for vertex v0, `1 - u - v`). */
+  w: number;
+  /** Intersection point in ray space (origin + direction * t). */
+  point: number[];
+  /** Interpolated texture coordinates `[u, v]` if provided at vertices. */
+  uv?: [number, number];
+}
+
+/**
+ * Möller–Trumbore ray-triangle intersection.
+ * Computes triangle intersection distance `t`, barycentric coordinates `(u, v, w)`,
+ * and interpolated surface texture coordinates (`uv`).
+ *
+ * Supports double-sided intersections for HUD prims while skipping parallel or
+ * degenerate zero-area triangles.
+ */
+export function intersectRayTriangle(
+  ray: Ray,
+  v0: ArrayLike<number>,
+  v1: ArrayLike<number>,
+  v2: ArrayLike<number>,
+  uv0?: ArrayLike<number>,
+  uv1?: ArrayLike<number>,
+  uv2?: ArrayLike<number>,
+): RayTriangleHit | null {
+  const e1x = v1[0] - v0[0];
+  const e1y = v1[1] - v0[1];
+  const e1z = v1[2] - v0[2];
+
+  const e2x = v2[0] - v0[0];
+  const e2y = v2[1] - v0[1];
+  const e2z = v2[2] - v0[2];
+
+  const px = ray.direction[1] * e2z - ray.direction[2] * e2y;
+  const py = ray.direction[2] * e2x - ray.direction[0] * e2z;
+  const pz = ray.direction[0] * e2y - ray.direction[1] * e2x;
+
+  const det = e1x * px + e1y * py + e1z * pz;
+  if (Math.abs(det) < 1e-9) return null; // Parallel or degenerate triangle
+
+  const invDet = 1 / det;
+
+  const tx = ray.origin[0] - v0[0];
+  const ty = ray.origin[1] - v0[1];
+  const tz = ray.origin[2] - v0[2];
+
+  const u = (tx * px + ty * py + tz * pz) * invDet;
+  if (u < 0 || u > 1) return null;
+
+  const qx = ty * e1z - tz * e1y;
+  const qy = tz * e1x - tx * e1z;
+  const qz = tx * e1y - ty * e1x;
+
+  const v = (ray.direction[0] * qx + ray.direction[1] * qy + ray.direction[2] * qz) * invDet;
+  if (v < 0 || u + v > 1) return null;
+
+  const t = (e2x * qx + e2y * qy + e2z * qz) * invDet;
+  if (t <= 1e-7) return null; // Behind or at ray origin
+
+  const w = 1 - u - v;
+  const point = [
+    ray.origin[0] + ray.direction[0] * t,
+    ray.origin[1] + ray.direction[1] * t,
+    ray.origin[2] + ray.direction[2] * t,
+  ];
+
+  let interpolatedUV: [number, number] | undefined;
+  if (uv0 && uv1 && uv2) {
+    interpolatedUV = [
+      w * uv0[0] + u * uv1[0] + v * uv2[0],
+      w * uv0[1] + u * uv1[1] + v * uv2[1],
+    ];
+  }
+
+  return {
+    t,
+    u,
+    v,
+    w,
+    point,
+    ...(interpolatedUV ? { uv: interpolatedUV } : {}),
+  };
+}
+

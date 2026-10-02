@@ -22,7 +22,11 @@ pub struct AssetScheduler {
 }
 impl AssetScheduler {
     pub fn enqueue(&mut self, request: AssetRequest) {
-        if !self.pending.iter().any(|item| item.id == request.id && item.grid_uri == request.grid_uri) {
+        if !self
+            .pending
+            .iter()
+            .any(|item| item.id == request.id && item.grid_uri == request.grid_uri)
+        {
             self.pending.push(request);
             self.pending
                 .sort_by_key(|item| std::cmp::Reverse(item.priority));

@@ -6,13 +6,19 @@ const BOUNDS = { min: [-0.5, -0.5, -0.5], max: [0.5, 0.5, 0.5] };
 
 function makeScene(alphaTextures: string[] = []) {
   const order: string[] = [];
+  const meshes = new Map<string, any>();
   const graphics = {
     clear: vi.fn(() => order.push('clear')),
     clearDepth: vi.fn(() => order.push('clearDepth')),
     drawMesh: vi.fn((mesh: string, _program: string, uniforms: any) => order.push(uniforms.uAlphaMode === 2 ? 'blend' : 'draw')),
-    setClearColor: vi.fn(), createMesh: vi.fn(), createRenderTarget: vi.fn(),
+    setClearColor: vi.fn(),
+    createMesh: vi.fn((name: string, vertices: number[], indices: number[], normals?: number[], texCoords?: number[]) => {
+      meshes.set(name, { bounds: BOUNDS, geometry: { vertices, indices, normals, texCoords } });
+    }),
+    createRenderTarget: vi.fn(),
     beginRenderTarget: vi.fn(() => false), endRenderTarget: vi.fn(),
-    getMeshBounds: vi.fn(() => BOUNDS),
+    getMeshBounds: vi.fn((name?: string) => meshes.get(name)?.bounds || BOUNDS),
+    getMeshGeometry: vi.fn((name?: string) => meshes.get(name)?.geometry || null),
     textureHasAlpha: vi.fn((name?: string) => Boolean(name && alphaTextures.includes(name))),
   };
   const camera = new Camera3D();
@@ -168,5 +174,67 @@ describe('textures with transparency', () => {
     scene.addObject('wall', { mesh: 'cube', position: [0, 30, 50] });
     scene.render();
     expect(graphics.drawMesh.mock.calls.map((c: any[]) => c[2].uModelMatrix[13])).toEqual([30, 10]);
+  });
+});
+
+describe('two-stage ray-picking narrow phase', () => {
+  it('resolves exact face ID and interpolated UV coordinates on a tessellated volume mesh', () => {
+    const { scene } = makeScene();
+
+    const meshes = scene.addVolumeMeshes('cylinder-test', [
+      {
+        faceIndex: 0, // Top cap
+        vertices: [-0.5, -0.5, 0.5,  0.5, -0.5, 0.5,  0.5, 0.5, 0.5,  -0.5, 0.5, 0.5],
+        indices: [0, 1, 2, 0, 2, 3],
+        texCoords: [0, 0,  1, 0,  1, 1,  0, 1],
+      },
+      {
+        faceIndex: 2, // Front/side face
+        vertices: [-0.5, -0.5, -0.5,  0.5, -0.5, -0.5,  0.5, -0.5, 0.5,  -0.5, -0.5, 0.5],
+        indices: [0, 1, 2, 0, 2, 3],
+        texCoords: [0, 0,  1, 0,  1, 1,  0, 1],
+      },
+    ]);
+
+    scene.addObject('cyl', {
+      mesh: 'cylinder',
+      meshes,
+      position: [0, 20, 50], // Ray from camera [0, 0, 50] looking +Y hits front face at y = 19.5
+      scale: [1, 1, 1],
+    });
+
+    const hit = scene.pick(400, 300, 800, 600);
+    expect(hit).not.toBeNull();
+    expect(hit!.id).toBe('cyl');
+    expect(hit!.face).toBe(2);
+    expect(hit!.uv).toBeDefined();
+    expect(hit!.uv![0]).toBeCloseTo(0.5, 2);
+    expect(hit!.uv![1]).toBeCloseTo(0.5, 2);
+    expect(hit!.st).toBeDefined();
+  });
+
+  it('skips objects whose broad-phase box passes but narrow-phase triangles miss', () => {
+    const { scene } = makeScene();
+
+    // Small triangle in top-right corner of the bounding box
+    const meshes = scene.addVolumeMeshes('corner-mesh', [
+      {
+        faceIndex: 0,
+        vertices: [0.4, 0.4, 0.5,  0.5, 0.4, 0.5,  0.5, 0.5, 0.5],
+        indices: [0, 1, 2],
+        texCoords: [0, 0, 1, 0, 1, 1],
+      },
+    ]);
+
+    scene.addObject('hole-obj', {
+      mesh: 'custom',
+      meshes,
+      position: [0, 20, 50],
+      scale: [1, 1, 1],
+    });
+
+    // Ray through centre of screen [400, 300] hits the centre [0, 20, 50] of bounding box,
+    // but misses the small triangle at [0.4..0.5, 0.4..0.5]
+    expect(scene.pick(400, 300, 800, 600)).toBeNull();
   });
 });

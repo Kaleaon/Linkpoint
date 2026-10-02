@@ -336,7 +336,8 @@ export class Graphics3D extends Utils.EventEmitter {
       indexCount: indices.length,
       indexType,
       vertexCount: vertices.length / 3,
-      bounds
+      bounds,
+      geometry: { vertices, indices, normals, texCoords },
     };
 
     // Create VAO if supported
@@ -409,6 +410,11 @@ export class Graphics3D extends Utils.EventEmitter {
   /** Local-space bounding box of a mesh, or null if unknown. */
   getMeshBounds(name: string): { min: number[]; max: number[] } | null {
     return this.meshes.get(name)?.bounds ?? null;
+  }
+
+  /** Registered CPU geometry arrays of a mesh, or null if unknown. */
+  getMeshGeometry(name: string): { vertices: number[] | Float32Array; indices: number[] | Uint16Array | Uint32Array; normals?: number[] | Float32Array; texCoords?: number[] | Float32Array } | null {
+    return this.meshes.get(name)?.geometry ?? null;
   }
 
   /**

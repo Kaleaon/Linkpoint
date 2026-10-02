@@ -7,8 +7,29 @@ import { Graphics3D } from './graphics-3d';
 import { Camera3D } from './camera-3d';
 import { Primitives3D } from './primitives-3d';
 import { extractFrustum, multiplyMat4, testAABB, transformAABB, OUTSIDE, type Frustum } from './frustum';
-import { intersectRayOrientedBox } from './ray-pick';
+import { intersectRayOrientedBox, intersectRayTriangle, invertMat4, type Ray } from './ray-pick';
 import { HEAVENLY_BODY_RADIUS, atmosphereColor, atmosphereUniforms } from './atmosphere';
+
+export function computeST(uv: ArrayLike<number>, faceConfig?: any): [number, number, number] {
+  const u = Number(uv[0]) || 0;
+  const v = Number(uv[1]) || 0;
+  const repeat = faceConfig?.repeat || [1, 1];
+  const offset = faceConfig?.offset || [0, 0];
+  const rotation = faceConfig?.rotation || 0;
+
+  const centeredU = u - 0.5;
+  const centeredV = v - 0.5;
+  const cos = Math.cos(rotation);
+  const sin = Math.sin(rotation);
+
+  const rotatedU = cos * centeredU - sin * centeredV + 0.5;
+  const rotatedV = sin * centeredU + cos * centeredV + 0.5;
+
+  const s = rotatedU * repeat[0] + offset[0];
+  const t = rotatedV * repeat[1] + offset[1];
+
+  return [s, t, 0];
+}
 import { DEFAULT_SKY, DEFAULT_WATER, dayFraction, normalizeSky, normalizeWater, skyAt, skyState, waterAt, type SkySettings, type SkyState, type WaterSettings } from './eep';
 import { DETAIL_TILE_METRES, FALLBACK_LAYER_COLORS, TERRAIN_LAYERS, compositionTexture, terrainComposition, type TerrainParams } from './terrain';
 import { fitHud, hudExtents, hudProjection, HUD_SIZE, type HudFit } from './hud';
@@ -501,12 +522,13 @@ export class Scene3D extends Utils.EventEmitter {
     const x = ((2 * screenX) / width - 1) * this.hudAspect();
     const y = 1 - (2 * screenY) / height;
     const ray = { origin: [x, y, 50], direction: [0, 0, -1] };
-    let best: { id: string; distance: number; point: number[] } | null = null;
+    let best: { id: string; distance: number; point: number[]; face?: number; uv?: number[]; st?: number[] } | null = null;
     for (const { object, local } of setup.prims) {
       const bounds = this.objectLocalBounds(object) || UNIT_CUBE_BOUNDS;
-      const distance = intersectRayOrientedBox(ray, multiplyMat4(setup.fit.matrix, local), bounds.min, bounds.max);
-      if (distance === null || (best && distance >= best.distance)) continue;
-      best = { id: object.id, distance, point: [x, y, 50 - distance] };
+      const model = multiplyMat4(setup.fit.matrix, local);
+      const hit = this.pickObjectRay(ray, object, model, bounds.min, bounds.max);
+      if (hit === null || (best && hit.distance >= best.distance)) continue;
+      best = { id: object.id, distance: hit.distance, point: hit.point, face: hit.face, uv: hit.uv, st: hit.st };
     }
     return best;
   }
@@ -606,22 +628,142 @@ export class Scene3D extends Utils.EventEmitter {
   }
 
   /**
-   * Find the nearest visible object under a screen point using each object's
-   * oriented bounding box. Terrain and water are not pickable yet. Distance is
-   * in world metres from the camera.
+   * Two-stage ray pick test against an object given its model matrix and bounding box.
+   * Performs broad-phase box culling first, then narrow-phase triangle intersection
+   * if vertex buffers are available.
+   */
+  private pickObjectRay(
+    ray: Ray,
+    object: any,
+    modelMatrix: ArrayLike<number>,
+    localMin: ArrayLike<number>,
+    localMax: ArrayLike<number>,
+  ): { distance: number; point: number[]; face: number; uv: [number, number, number]; st: [number, number, number] } | null {
+    const boxDist = intersectRayOrientedBox(ray, modelMatrix, localMin, localMax);
+    if (boxDist === null) return null;
+
+    const draws = this.objectDraws(object);
+    let hasGeometry = false;
+
+    if (typeof (this.graphics as any).getMeshGeometry === 'function') {
+      for (const draw of draws) {
+        if ((this.graphics as any).getMeshGeometry(draw.mesh)) {
+          hasGeometry = true;
+          break;
+        }
+      }
+    }
+
+    // Fallback to bounding box intersection when CPU vertex buffers are absent.
+    if (!hasGeometry) {
+      const point = [
+        ray.origin[0] + ray.direction[0] * boxDist,
+        ray.origin[1] + ray.direction[1] * boxDist,
+        ray.origin[2] + ray.direction[2] * boxDist,
+      ];
+      return {
+        distance: boxDist,
+        point,
+        face: 0,
+        uv: [0, 0, 0],
+        st: [0, 0, 0],
+      };
+    }
+
+    // Narrow phase: transform ray into object local space and test mesh triangles.
+    const inverse = invertMat4(modelMatrix);
+    if (!inverse) return null;
+
+    const ox = ray.origin[0], oy = ray.origin[1], oz = ray.origin[2];
+    const w = inverse[3] * ox + inverse[7] * oy + inverse[11] * oz + inverse[15];
+    const invW = w ? 1 / w : 1;
+    const localOrigin = [
+      (inverse[0] * ox + inverse[4] * oy + inverse[8] * oz + inverse[12]) * invW,
+      (inverse[1] * ox + inverse[5] * oy + inverse[9] * oz + inverse[13]) * invW,
+      (inverse[2] * ox + inverse[6] * oy + inverse[10] * oz + inverse[14]) * invW,
+    ];
+
+    const dx = ray.direction[0], dy = ray.direction[1], dz = ray.direction[2];
+    const localDirection = [
+      inverse[0] * dx + inverse[4] * dy + inverse[8] * dz,
+      inverse[1] * dx + inverse[5] * dy + inverse[9] * dz,
+      inverse[2] * dx + inverse[6] * dy + inverse[10] * dz,
+    ];
+
+    const localRay: Ray = { origin: localOrigin, direction: localDirection };
+
+    let bestHit: { distance: number; face: number; uv: [number, number]; point: number[] } | null = null;
+
+    for (const draw of draws) {
+      const geom = (this.graphics as any).getMeshGeometry(draw.mesh);
+      if (!geom || !geom.vertices || !geom.indices) continue;
+
+      const vertices = geom.vertices;
+      const indices = geom.indices;
+      const texCoords = geom.texCoords;
+      const faceIndex = Number(draw.materialIndex ?? 0);
+
+      for (let i = 0; i + 2 < indices.length; i += 3) {
+        const i0 = indices[i];
+        const i1 = indices[i + 1];
+        const i2 = indices[i + 2];
+
+        const v0 = [vertices[3 * i0], vertices[3 * i0 + 1], vertices[3 * i0 + 2]];
+        const v1 = [vertices[3 * i1], vertices[3 * i1 + 1], vertices[3 * i1 + 2]];
+        const v2 = [vertices[3 * i2], vertices[3 * i2 + 1], vertices[3 * i2 + 2]];
+
+        const uv0 = texCoords ? [texCoords[2 * i0], texCoords[2 * i0 + 1]] : undefined;
+        const uv1 = texCoords ? [texCoords[2 * i1], texCoords[2 * i1 + 1]] : undefined;
+        const uv2 = texCoords ? [texCoords[2 * i2], texCoords[2 * i2 + 1]] : undefined;
+
+        const hit = intersectRayTriangle(localRay, v0, v1, v2, uv0, uv1, uv2);
+        if (hit && hit.t > 0 && (!bestHit || hit.t < bestHit.distance)) {
+          const worldPoint = [
+            ray.origin[0] + ray.direction[0] * hit.t,
+            ray.origin[1] + ray.direction[1] * hit.t,
+            ray.origin[2] + ray.direction[2] * hit.t,
+          ];
+          bestHit = {
+            distance: hit.t,
+            face: faceIndex,
+            uv: hit.uv || [0, 0],
+            point: worldPoint,
+          };
+        }
+      }
+    }
+
+    if (!bestHit) return null;
+
+    const faceConfig = object.faces?.[bestHit.face];
+    const rawUV: [number, number, number] = [bestHit.uv[0], bestHit.uv[1], 0];
+    const st = computeST(rawUV, faceConfig);
+
+    return {
+      distance: bestHit.distance,
+      point: bestHit.point,
+      face: bestHit.face,
+      uv: rawUV,
+      st,
+    };
+  }
+
+  /**
+   * Find the nearest visible object under a screen point using two-stage picking
+   * (broad-phase box culling followed by narrow-phase ray-triangle intersection).
    */
   pick(screenX: number, screenY: number, width: number, height: number) {
     if (typeof this.camera.screenToWorldRay !== 'function') return null;
     const ray = this.camera.screenToWorldRay(screenX, screenY, width, height);
-    let best: { id: string; distance: number; point: number[] } | null = null;
+    let best: { id: string; distance: number; point: number[]; face?: number; uv?: number[]; st?: number[] } | null = null;
     for (const object of this.objects.values()) {
       if (!object.visible || object.hud) continue;
       // Meshes without known bounds are treated as the unit cube prims are scaled from.
       const local = this.objectLocalBounds(object) || UNIT_CUBE_BOUNDS;
       const model = this.calculateModelMatrix(object.position, object.rotation, object.scale);
-      const distance = intersectRayOrientedBox(ray, model, local.min, local.max);
-      if (distance === null || (best && distance >= best.distance)) continue;
-      best = { id: object.id, distance, point: ray.origin.map((value: number, axis: number) => value + ray.direction[axis] * distance) };
+      const hit = this.pickObjectRay(ray, object, model, local.min, local.max);
+      if (hit === null || (best && hit.distance >= best.distance)) continue;
+      best = { id: object.id, distance: hit.distance, point: hit.point, face: hit.face, uv: hit.uv, st: hit.st };
     }
     return best;
   }
