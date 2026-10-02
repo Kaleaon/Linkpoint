@@ -68,11 +68,13 @@ class AppearanceCapabilityNegotiator(
             AppearanceMode.CLIENT_SIDE_BAKING
         }
 
-        if (resolutionTimeMs > MAX_NEGOTIATION_LATENCY_MS) {
-            Log.w(TAG, "Capability negotiation exceeded target threshold: ${resolutionTimeMs}ms > ${MAX_NEGOTIATION_LATENCY_MS}ms")
-        } else {
-            Log.i(TAG, "Capability negotiation resolved in ${resolutionTimeMs}ms (Mode: $mode, SSA: $isSsaSupported)")
-        }
+        try {
+            if (resolutionTimeMs > MAX_NEGOTIATION_LATENCY_MS) {
+                Log.w(TAG, "Capability negotiation exceeded target threshold: ${resolutionTimeMs}ms > ${MAX_NEGOTIATION_LATENCY_MS}ms")
+            } else {
+                Log.i(TAG, "Capability negotiation resolved in ${resolutionTimeMs}ms (Mode: $mode, SSA: $isSsaSupported)")
+            }
+        } catch (_: Throwable) {}
 
         CapabilityNegotiationResult(
             mode = mode,
