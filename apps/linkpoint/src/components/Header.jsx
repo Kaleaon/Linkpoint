@@ -113,6 +113,29 @@ function StackHead({ title, subtitle, scr }) {
       </div>
       {/* Universal Mode Switcher */}
       <ViewModeSwitcher />
+      {/* Workspace Engine Toggle */}
+      <button
+        type="button"
+        onClick={() => actions.setUseWindowManager(!state.useWindowManager)}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "4px",
+          height: "26px",
+          padding: "0 8px",
+          border: `1px solid ${V.outv}`,
+          borderRadius: V.rs,
+          background: state.useWindowManager ? V.pri : V.surf,
+          color: state.useWindowManager ? V.onpri : V.ink,
+          font: "700 9.5px/1 " + t.dfont,
+          letterSpacing: ".08em",
+          cursor: "pointer",
+        }}
+        title="Toggle Multi-Window Workspace Engine"
+      >
+        <Icon name="grid" size={12} />
+        <span>TILES</span>
+      </button>
       {showLink ? (
         <div style={{ display: "flex", alignItems: "center", gap: "6px", height: "26px", padding: "0 8px", border: "1px solid " + V.ok, borderRadius: V.rs, background: V.surf }}>
           <span style={{ width: "6px", height: "6px", borderRadius: "3px", background: V.ok }} />

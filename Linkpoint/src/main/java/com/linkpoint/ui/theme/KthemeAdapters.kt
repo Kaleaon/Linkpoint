@@ -1,6 +1,7 @@
 package com.linkpoint.ui.theme
 
 import com.ktheme.models.ColorScheme
+import com.ktheme.models.LayoutStructure
 import com.ktheme.models.Theme
 import com.ktheme.models.ThemeMetadata
 
@@ -16,6 +17,9 @@ fun Theme.toThemePack(): ThemePack {
     }
     val motionProfile = metadata.tags.firstNotNullOfOrNull { tag ->
         tag.removePrefix("motion:").takeIf { it != tag }?.let { runCatching { MotionProfile.valueOf(it.uppercase()) }.getOrNull() }
+    }
+    val tagLayout = metadata.tags.firstNotNullOfOrNull { tag ->
+        tag.removePrefix("layout:").takeIf { it != tag }?.let { LayoutStructure.fromId(it) }
     }
 
     return ThemePack(
@@ -38,7 +42,8 @@ fun Theme.toThemePack(): ThemePack {
         colorError = colorScheme.error,
         densityProfile = densityProfile,
         cornerProfile = cornerProfile,
-        motionProfile = motionProfile
+        motionProfile = motionProfile,
+        layoutStructure = tagLayout ?: layoutStructure
     )
 }
 
@@ -56,6 +61,7 @@ fun ThemePack.toKthemeTheme(): Theme {
             version = version,
             tags = buildList {
                 add("linkpoint")
+                add("layout:${layoutStructure.id}")
                 densityProfile?.let { add("density:${it.name.lowercase()}") }
                 cornerProfile?.let { add("corner:${it.name.lowercase()}") }
                 motionProfile?.let { add("motion:${it.name.lowercase()}") }
@@ -93,6 +99,7 @@ fun ThemePack.toKthemeTheme(): Theme {
             inverseSurface = colorOnSurface,
             inverseOnSurface = colorSurface,
             inversePrimary = colorPrimary
-        )
+        ),
+        layoutStructure = layoutStructure
     )
 }

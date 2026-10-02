@@ -548,7 +548,7 @@ class ViewerSession {
   getBalance() { return actions.getBalance(this.requireBot()); }
   respondScriptDialog(params = {}) { return interactions.respondScriptDialog(this.requireBot(), this.pending, params); }
   acceptLure(params = {}) { return interactions.acceptLure(this.requireBot(), this.pending, params); }
-  dismissInteraction(params) { return interactions.dismissInteraction(this.pending, params); }
+  dismissInteraction(params) { return interactions.dismissInteraction(this.requireBot(), this.pending, params); }
 
   /**
    * Region names, ratings and map image ids for a block of the grid, as the official map asks for

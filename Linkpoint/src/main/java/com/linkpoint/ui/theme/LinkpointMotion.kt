@@ -16,7 +16,11 @@ enum class MotionProfile {
     EXPRESSIVE
 }
 
-fun ThemePack.resolvedMotionProfile(): MotionProfile = motionProfile ?: MotionProfile.STANDARD
+fun ThemePack.resolvedMotionProfile(): MotionProfile = motionProfile ?: when (layoutStructure) {
+    com.ktheme.models.LayoutStructure.MODERN_GLASS,
+    com.ktheme.models.LayoutStructure.CYBERPUNK -> MotionProfile.EXPRESSIVE
+    else -> MotionProfile.STANDARD
+}
 
 fun ThemePack.toMotion(): LinkpointMotion {
     return when (resolvedMotionProfile()) {

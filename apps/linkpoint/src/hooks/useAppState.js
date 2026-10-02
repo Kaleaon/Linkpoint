@@ -98,6 +98,9 @@ export function useAppState() {
   const [loginGrid, setLoginGrid] = useState("agni");
   const [loginBusy, setLoginBusy] = useState(false);
   const [loginError, setLoginError] = useState(null);
+  const [useWindowManager, setUseWindowManager] = useState(false);
+  const [workspacePreset, setWorkspacePreset] = useState("inworld");
+  const [tileDensity, setTileDensity] = useState("normal");
   const [customGrids, setCustomGrids] = useState([]);
   const [addGrid, setAddGrid] = useState(false);
   const [addGridName, setAddGridName] = useState("");
@@ -543,10 +546,11 @@ export function useAppState() {
       rMode, rOpen, rMenu, cDock, flOpen, flMin, flRect, flZ, menu, tick,
       loginMode, loginGrid, loginBusy, loginError, customGrids, addGrid, addGridName, addGridHost,
       searchFrom, searchTab, searchQuery, searchState, reconnecting, toast,
-      prefs, cacheCleared, camPreset,
+      prefs, cacheCleared, camPreset, useWindowManager, workspacePreset, tileDensity,
     },
     actions: {
       setLayout, setPalette: selectPalette, setThemeColor, renameTheme, saveTheme, resetTheme, importTheme, downloadTheme, shareTheme, setDevice, setViewMode, toggleViewMode, setScreen: screenPick, setDialog, setDense,
+      setUseWindowManager, setWorkspacePreset, setTileDensity,
       allGrids, openAddGrid, cancelAddGrid, saveCustomGrid, setAddGridName, setAddGridHost,
       setTab, setChip, setTileOk, toggleInvFolder, dismiss, toggleSetting, pin,
       cycleLayout, cyclePalette, setCond, setMenu,
