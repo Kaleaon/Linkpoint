@@ -33,7 +33,7 @@ interface AisOperations {
      * reparenting it. URL: `category/${folderId}`.
      */
     suspend fun patchCategory(folderId: UUID, patch: InventoryFolderPatch): Unit =
-        throw NotImplementedError("patchCategory not implemented")
+        throw java.lang.UnsupportedOperationException("patchCategory not implemented")
 
     /**
      * Slam (replace) the contents of a folder. URL: `category/${folderId}`,
@@ -41,7 +41,7 @@ interface AisOperations {
      * during inventory rebuild and outfit replace.
      */
     suspend fun slamFolder(folderId: UUID, contents: String): Unit =
-        throw NotImplementedError("slamFolder not implemented")
+        throw java.lang.UnsupportedOperationException("slamFolder not implemented")
 
     /**
      * Delete every descendant (sub-folders + items) of a category but
@@ -49,7 +49,7 @@ interface AisOperations {
      * verb DELETE.
      */
     suspend fun purgeDescendents(folderId: UUID): Unit =
-        throw NotImplementedError("purgeDescendents not implemented")
+        throw java.lang.UnsupportedOperationException("purgeDescendents not implemented")
 
     /**
      * Copy a category to a new parent. URL: `category/${sourceId}`,
@@ -61,7 +61,7 @@ interface AisOperations {
      * "copy folder" behaviour).
      */
     suspend fun copyCategory(sourceId: UUID, destinationParentId: UUID, copySubfolders: Boolean = true): Unit =
-        throw NotImplementedError("copyCategory not implemented")
+        throw java.lang.UnsupportedOperationException("copyCategory not implemented")
 
     /**
      * Move a category to a new parent. URL: `category/${sourceId}`,
@@ -69,7 +69,7 @@ interface AisOperations {
      * Typical use: drag-and-drop a folder in the inventory UI.
      */
     suspend fun moveCategory(sourceId: UUID, destinationParentId: UUID): Unit =
-        throw NotImplementedError("moveCategory not implemented")
+        throw java.lang.UnsupportedOperationException("moveCategory not implemented")
 
     /**
      * POST an inventory item (or link) under the given parent. The
@@ -78,7 +78,7 @@ interface AisOperations {
      * vs `_embedded.links`. Mirrors libremetaverse `CreateInventory`.
      */
     suspend fun postInventory(parentId: UUID, body: String, createLink: Boolean = false): UUID =
-        throw NotImplementedError("postInventory not implemented")
+        throw java.lang.UnsupportedOperationException("postInventory not implemented")
 }
 
 class AisClient(
