@@ -3,14 +3,15 @@ package com.linkpoint.render.lumiya.shaders
 import android.opengl.GLES32
 
 /**
- * Shader program for rendering Second Life primitives (prims).
+ * Shader program for rendering Second Life primitives (prims) and glTF materials.
  *
  * Design lineage: Lumiya `PrimProgram.java` + `BasicPrimProgram.java`,
- * rewritten for GLSL ES 3.20.
+ * updated for GLSL ES 3.20 with Blinn-Phong specular & normal map approximation.
  *
  * Supports:
  *  - Per-vertex position, normal, texcoord
- *  - Texture + vertex colour
+ *  - Texture + diffuse color + Blinn-Phong specular color and power
+ *  - Normal map sampling (texture unit 1)
  *  - Windlight directional + ambient lighting
  *  - Texture matrix for SL face UV offsets / repeats / rotations
  *  - Shared global UBO (binding 0) for projection/view/camera
@@ -21,11 +22,15 @@ class PrimShaderProgram : BaseShaderProgram() {
     private var uModelMatrix = -1
     private var uTexMatrix = -1
     private var uColor = -1
+    private var uSpecularColor = -1
+    private var uSpecularExponent = -1
     private var uUseTexture = -1
+    private var uUseNormalMap = -1
     private var uLightDir = -1
     private var uLightDiffuse = -1
     private var uLightAmbient = -1
     private var uTextureSampler = -1
+    private var uNormalMapSampler = -1
 
     override val vertexSource = """
         #version 320 es
@@ -82,8 +87,12 @@ class PrimShaderProgram : BaseShaderProgram() {
         in float vFogFactor;
 
         uniform sampler2D uTexture;
+        uniform sampler2D uNormalMap;
         uniform vec4 uColor;
+        uniform vec3 uSpecularColor;
+        uniform float uSpecularExponent;
         uniform int uUseTexture;
+        uniform int uUseNormalMap;
         uniform vec3 uLightDir;
         uniform vec3 uLightDiffuse;
         uniform vec3 uLightAmbient;
@@ -101,9 +110,23 @@ class PrimShaderProgram : BaseShaderProgram() {
             // Discard near-transparent fragments (SL behaviour)
             if (baseColor.a < 0.004) discard;
 
-            // Simple directional + ambient lighting
-            float NdotL = max(dot(vNormal, normalize(uLightDir)), 0.0);
-            vec3 lit = baseColor.rgb * (uLightAmbient + uLightDiffuse * NdotL);
+            vec3 N = normalize(vNormal);
+            if (uUseNormalMap != 0) {
+                vec3 mapN = texture(uNormalMap, vTexCoord).xyz * 2.0 - 1.0;
+                N = normalize(N + mapN * 0.5);
+            }
+
+            vec3 L = normalize(uLightDir);
+            float NdotL = max(dot(N, L), 0.0);
+
+            // Blinn-Phong specular calculation
+            vec3 V = normalize(uCameraPos.xyz - vWorldPos);
+            vec3 H = normalize(L + V);
+            float NdotH = max(dot(N, H), 0.0);
+            float specPower = max(uSpecularExponent, 1.0);
+            vec3 specular = uLightDiffuse * uSpecularColor * pow(NdotH, specPower);
+
+            vec3 lit = baseColor.rgb * (uLightAmbient + uLightDiffuse * NdotL) + specular;
 
             // Fog blend towards sky colour
             vec3 fogColor = vec3(0.24, 0.44, 0.76);
@@ -117,11 +140,15 @@ class PrimShaderProgram : BaseShaderProgram() {
         uModelMatrix = loc("uModelMatrix")
         uTexMatrix = loc("uTexMatrix")
         uColor = loc("uColor")
+        uSpecularColor = loc("uSpecularColor")
+        uSpecularExponent = loc("uSpecularExponent")
         uUseTexture = loc("uUseTexture")
+        uUseNormalMap = loc("uUseNormalMap")
         uLightDir = loc("uLightDir")
         uLightDiffuse = loc("uLightDiffuse")
         uLightAmbient = loc("uLightAmbient")
         uTextureSampler = loc("uTexture")
+        uNormalMapSampler = loc("uNormalMap")
 
         // Bind the GlobalData UBO to binding point 0
         val idx = uboIndex("GlobalData")
@@ -135,8 +162,12 @@ class PrimShaderProgram : BaseShaderProgram() {
     fun setModelMatrix(m: FloatArray) = GLES32.glUniformMatrix4fv(uModelMatrix, 1, false, m, 0)
     fun setTexMatrix(m: FloatArray)   = GLES32.glUniformMatrix4fv(uTexMatrix, 1, false, m, 0)
     fun setColor(r: Float, g: Float, b: Float, a: Float) = GLES32.glUniform4f(uColor, r, g, b, a)
+    fun setSpecularColor(r: Float, g: Float, b: Float) = GLES32.glUniform3f(uSpecularColor, r, g, b)
+    fun setSpecularExponent(exp: Float) = GLES32.glUniform1f(uSpecularExponent, exp)
     fun setUseTexture(use: Boolean) = GLES32.glUniform1i(uUseTexture, if (use) 1 else 0)
+    fun setUseNormalMap(use: Boolean) = GLES32.glUniform1i(uUseNormalMap, if (use) 1 else 0)
     fun setTextureSampler(unit: Int)  = GLES32.glUniform1i(uTextureSampler, unit)
+    fun setNormalMapSampler(unit: Int) = GLES32.glUniform1i(uNormalMapSampler, unit)
 
     fun setLighting(
         dirX: Float, dirY: Float, dirZ: Float,

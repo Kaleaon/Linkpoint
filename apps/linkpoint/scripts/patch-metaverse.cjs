@@ -74,6 +74,16 @@ function applyPatches(options = {}) {
     }
   }
 
+  const capsPath = path.join(__dirname, '../node_modules/@caspertech/node-metaverse/dist/lib/classes/Caps.js');
+  if (fs.existsSync(capsPath)) {
+    let capsContent = fs.readFileSync(capsPath, 'utf8');
+    if (!capsContent.includes("req.push('AgentInventoryService');")) {
+      capsContent = capsContent.replace("req.push('AgentPreferences');", "req.push('AgentPreferences');\n        req.push('AgentInventoryService');\n        req.push('AgentInventoryService3');");
+      fs.writeFileSync(capsPath, capsContent, 'utf8');
+      console.log('[patch-metaverse] Patched Caps.js successfully for AgentInventoryService.');
+    }
+  }
+
   const loginPath = path.join(__dirname, '../node_modules/@caspertech/node-metaverse/dist/lib/LoginHandler.js');
   if (fs.existsSync(loginPath)) {
     const { channel, version } = readViewerIdentity();

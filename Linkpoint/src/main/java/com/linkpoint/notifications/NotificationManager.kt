@@ -153,7 +153,8 @@ class NotificationManager(
                 timestamp = System.currentTimeMillis()
             )
         )
-        showSystemNotification(CHANNEL_IM, fromName, message, NotificationCompat.PRIORITY_HIGH)
+        val pendingIntent = createChatPendingIntent(fromId, fromName)
+        showSystemNotification(CHANNEL_IM, fromName, message, NotificationCompat.PRIORITY_HIGH, pendingIntent)
     }
 
     private fun handleGroupNotice(body: LLSDMap) {
@@ -268,14 +269,52 @@ class NotificationManager(
         _unreadCount.value = 0
     }
 
-    private fun showSystemNotification(channelId: String, title: String, message: String, priority: Int) {
+    private fun createChatPendingIntent(fromId: UUID?, fromName: String?): android.app.PendingIntent? {
+        return try {
+            val intent = android.content.Intent(context, com.linkpoint.ui.chat.ChatActivity::class.java).apply {
+                flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
+                if (fromId != null) putExtra("session_id", fromId.toString())
+                if (fromName != null) putExtra("from_name", fromName)
+            }
+            android.app.PendingIntent.getActivity(
+                context,
+                fromId?.hashCode() ?: 0,
+                intent,
+                android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+            )
+        } catch (e: Exception) {
+            val openIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+            if (openIntent != null) {
+                android.app.PendingIntent.getActivity(
+                    context,
+                    0,
+                    openIntent,
+                    android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+                )
+            } else null
+        }
+    }
+
+    private fun showSystemNotification(
+        channelId: String,
+        title: String,
+        message: String,
+        priority: Int,
+        pendingIntent: android.app.PendingIntent? = null
+    ) {
         try {
+            val contentIntent = pendingIntent ?: createChatPendingIntent(null, title)
             val notification = NotificationCompat.Builder(context, channelId)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setPriority(priority)
                 .setAutoCancel(true)
+                .apply {
+                    if (contentIntent != null) {
+                        setContentIntent(contentIntent)
+                    }
+                }
                 .build()
             NotificationManagerCompat.from(context).notify(notificationIdCounter.getAndIncrement(), notification)
         } catch (e: SecurityException) {
