@@ -211,7 +211,7 @@ export class ChatExtended {
     this.muteList.clear();
     this.mutedObjects.clear();
 
-    const lines = content.split('\n');
+    const lines = content.split(/\r?\n/);
     for (const line of lines) {
       const trimmed = line.trim();
       if (!trimmed) continue;
