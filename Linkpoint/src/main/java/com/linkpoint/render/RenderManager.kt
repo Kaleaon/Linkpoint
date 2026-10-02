@@ -164,9 +164,36 @@ class RenderManager(private val context: Context) {
         try {
             Log.d(TAG, "Initializing Filament engine...")
 
-            engine = Engine.create()
+            val driverProfile = com.linkpoint.render.driver.GraphicsDriverProbe.probe(context)
+            var createdEngine: Engine? = null
+            var backendName = "default"
+
+            if (driverProfile.hasVulkan) {
+                try {
+                    Log.i(TAG, "Probe detected Vulkan hardware level ${driverProfile.vulkanHardwareLevel}. Attempting Filament Engine.create(VULKAN)...")
+                    createdEngine = Engine.create(Engine.Backend.VULKAN)
+                    backendName = "vulkan"
+                    Log.i(TAG, "Filament Engine successfully created with VULKAN backend")
+                } catch (t: Throwable) {
+                    Log.w(TAG, "Failed to create Filament Engine with VULKAN backend, falling back to OPENGL", t)
+                }
+            }
+
+            if (createdEngine == null) {
+                try {
+                    Log.i(TAG, "Attempting Filament Engine.create(OPENGL)...")
+                    createdEngine = Engine.create(Engine.Backend.OPENGL)
+                    backendName = "opengl"
+                } catch (t: Throwable) {
+                    Log.w(TAG, "Failed to create Filament Engine with OPENGL backend, using Engine.create() default", t)
+                    createdEngine = Engine.create()
+                    backendName = "default"
+                }
+            }
+
+            engine = createdEngine
             val filamentEngine = engine ?: throw IllegalStateException("Failed to create Filament Engine")
-            RenderDiagnostics.filamentEngineCreated("backend=default")
+            RenderDiagnostics.filamentEngineCreated("backend=$backendName")
 
             renderer = filamentEngine.createRenderer()
             scene = filamentEngine.createScene()
@@ -1097,6 +1124,8 @@ class RenderManager(private val context: Context) {
      * and the consumer instead buffers them until this flips true.
      */
     fun isReady(): Boolean = primRenderer != null
+
+    fun getActiveBackend(): Engine.Backend? = engine?.backend
 
     fun getMeshPrimRenderer(): MeshPrimRenderer? = meshPrimRenderer
 
