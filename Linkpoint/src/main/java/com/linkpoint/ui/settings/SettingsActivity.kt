@@ -182,38 +182,109 @@ class SettingsActivity : AppCompatActivity() {
                     return@setOnPreferenceClickListener true
                 }
 
-                val themeNames = availableThemes.map { it.name }.toTypedArray()
-                val activeThemeId = themeManager.activeTheme.value.id
-                val activeThemeIndex = availableThemes.indexOfFirst { it.id == activeThemeId }.coerceAtLeast(0)
-                var selectedIndex = activeThemeIndex
+                val options = arrayOf(
+                    "Select Ktheme Color Palette",
+                    "Select Structural Layout Preset",
+                    "Preview Current Ktheme Tokens"
+                )
 
                 AlertDialog.Builder(requireContext())
-                    .setTitle("Select Ktheme Theme")
-                    .setSingleChoiceItems(themeNames, activeThemeIndex) { _, which ->
-                        selectedIndex = which
-                    }
-                    .setPositiveButton("Apply") { _, _ ->
-                        availableThemes.getOrNull(selectedIndex)?.let { selectedTheme ->
-                            themeManager.setActiveTheme(selectedTheme)
-                            updateKthemeThemeSummary(themePreference, themeManager)
-                            Toast.makeText(
-                                requireContext(),
-                                "Theme applied: ${selectedTheme.name}",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                    .setTitle("Ktheme Design System")
+                    .setItems(options) { _, choice ->
+                        when (choice) {
+                            0 -> showPaletteSelectionDialog(themePreference, themeManager)
+                            1 -> showLayoutSelectionDialog(themePreference, themeManager)
+                            2 -> showKthemePreviewDialog(themeManager)
                         }
                     }
-                    .setNegativeButton("Cancel", null)
+                    .setNegativeButton("Close", null)
                     .show()
 
                 true
             }
         }
 
+        private fun showPaletteSelectionDialog(themePreference: Preference, themeManager: ThemeManager) {
+            val availableThemes = themeManager.availableThemes.value
+            val themeNames = availableThemes.map { "${it.name} (${it.layoutStructure.displayName})" }.toTypedArray()
+            val activeThemeId = themeManager.activeTheme.value.id
+            val activeThemeIndex = availableThemes.indexOfFirst { it.id == activeThemeId }.coerceAtLeast(0)
+            var selectedIndex = activeThemeIndex
+
+            AlertDialog.Builder(requireContext())
+                .setTitle("Select Ktheme Color Palette")
+                .setSingleChoiceItems(themeNames, activeThemeIndex) { _, which ->
+                    selectedIndex = which
+                }
+                .setPositiveButton("Apply") { _, _ ->
+                    availableThemes.getOrNull(selectedIndex)?.let { selectedTheme ->
+                        themeManager.setActiveTheme(selectedTheme)
+                        updateKthemeThemeSummary(themePreference, themeManager)
+                        Toast.makeText(
+                            requireContext(),
+                            "Theme applied: ${selectedTheme.name}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
+        private fun showLayoutSelectionDialog(themePreference: Preference, themeManager: ThemeManager) {
+            val layouts = com.ktheme.models.LayoutStructure.entries.toTypedArray()
+            val layoutNames = layouts.map { it.displayName }.toTypedArray()
+            val currentLayout = themeManager.activeTheme.value.layoutStructure
+            val currentIndex = layouts.indexOf(currentLayout).coerceAtLeast(0)
+            var selectedIndex = currentIndex
+
+            AlertDialog.Builder(requireContext())
+                .setTitle("Select Structural Layout Preset")
+                .setSingleChoiceItems(layoutNames, currentIndex) { _, which ->
+                    selectedIndex = which
+                }
+                .setPositiveButton("Apply") { _, _ ->
+                    layouts.getOrNull(selectedIndex)?.let { selectedLayout ->
+                        themeManager.setActiveLayoutStructure(selectedLayout)
+                        updateKthemeThemeSummary(themePreference, themeManager)
+                        Toast.makeText(
+                            requireContext(),
+                            "Layout structure applied: ${selectedLayout.displayName}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
+        private fun showKthemePreviewDialog(themeManager: ThemeManager) {
+            val activeTheme = themeManager.activeTheme.value
+            val message = buildString {
+                appendLine("Theme: ${activeTheme.name}")
+                appendLine("ID: ${activeTheme.id}")
+                appendLine("Author: ${activeTheme.author}")
+                appendLine("Layout Structure: ${activeTheme.layoutStructure.displayName}")
+                appendLine()
+                appendLine("--- Palette Highlights ---")
+                appendLine("Primary: ${activeTheme.colorPrimary}")
+                appendLine("Secondary: ${activeTheme.colorSecondary}")
+                appendLine("Background: ${activeTheme.colorBackground}")
+                appendLine("Surface: ${activeTheme.colorSurface}")
+                appendLine("On Surface: ${activeTheme.colorOnSurface}")
+            }
+
+            AlertDialog.Builder(requireContext())
+                .setTitle("Ktheme Token Preview")
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show()
+        }
+
         private fun updateKthemeThemeSummary(themePreference: Preference, themeManager: ThemeManager) {
-            val activeThemeName = themeManager.activeTheme.value.name
+            val activeTheme = themeManager.activeTheme.value
             val themeCount = themeManager.availableThemes.value.size
-            themePreference.summary = "Current: $activeThemeName ($themeCount available)"
+            themePreference.summary = "Current: ${activeTheme.name} [${activeTheme.layoutStructure.displayName}] ($themeCount available)"
         }
 
         /**

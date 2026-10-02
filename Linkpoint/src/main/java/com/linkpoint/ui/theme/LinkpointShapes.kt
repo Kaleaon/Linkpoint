@@ -11,7 +11,14 @@ enum class CornerProfile {
     PILLED
 }
 
-fun ThemePack.resolvedCornerProfile(): CornerProfile = cornerProfile ?: CornerProfile.ROUNDED
+fun ThemePack.resolvedCornerProfile(): CornerProfile = cornerProfile ?: when (layoutStructure) {
+    com.ktheme.models.LayoutStructure.METRO,
+    com.ktheme.models.LayoutStructure.ART_DECO,
+    com.ktheme.models.LayoutStructure.TERMINAL,
+    com.ktheme.models.LayoutStructure.CYBERPUNK -> CornerProfile.SHARP
+    com.ktheme.models.LayoutStructure.LCARS -> CornerProfile.PILLED
+    else -> CornerProfile.ROUNDED
+}
 
 fun ThemePack.toMaterialShapes(): Shapes {
     return when (resolvedCornerProfile()) {
