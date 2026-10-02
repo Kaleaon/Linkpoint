@@ -1,4 +1,4 @@
-package com.linkpoint.feature.discovery
+package com.linkpoint.feature.social
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,8 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.SearchOff
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -20,32 +19,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-sealed interface MapPlacesEventsUiState {
-    data object Loading : MapPlacesEventsUiState
-    data object Error : MapPlacesEventsUiState
-    data object EmptyRegionResults : MapPlacesEventsUiState
-    data object EmptySearchResults : MapPlacesEventsUiState
-    data object InvalidLocation : MapPlacesEventsUiState
-    data object EmptyHistory : MapPlacesEventsUiState
-    data object EmptySurroundings : MapPlacesEventsUiState
-    data object EmptyNearbyAgents : MapPlacesEventsUiState
-    data object Ready : MapPlacesEventsUiState
+sealed interface GroupsUiState {
+    data object Loading : GroupsUiState
+    data object Error : GroupsUiState
+    data object EmptyGroups : GroupsUiState
+    data object Ready : GroupsUiState
 }
 
 @Composable
-fun MapPlacesEventsScreen(state: MapPlacesEventsUiState) {
+fun GroupsScreen(state: GroupsUiState) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         when (state) {
-            MapPlacesEventsUiState.Loading -> Column(
+            GroupsUiState.Loading -> Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
                 CircularProgressIndicator()
                 Spacer(Modifier.height(16.dp))
-                Text("Loading map…", style = MaterialTheme.typography.bodyMedium)
+                Text("Loading groups…", style = MaterialTheme.typography.bodyMedium)
             }
 
-            MapPlacesEventsUiState.Error -> Column(
+            GroupsUiState.Error -> Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
@@ -56,49 +50,31 @@ fun MapPlacesEventsScreen(state: MapPlacesEventsUiState) {
                     modifier = Modifier.size(48.dp),
                 )
                 Spacer(Modifier.height(12.dp))
-                Text("Could not load map data", style = MaterialTheme.typography.titleMedium)
+                Text("Could not load groups", style = MaterialTheme.typography.titleMedium)
             }
 
-            MapPlacesEventsUiState.EmptyRegionResults,
-            MapPlacesEventsUiState.EmptySearchResults,
-            MapPlacesEventsUiState.InvalidLocation -> Column(
+            GroupsUiState.EmptyGroups -> Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
                 Icon(
-                    imageVector = Icons.Default.SearchOff,
+                    imageVector = Icons.Default.Group,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(48.dp),
                 )
                 Spacer(Modifier.height(12.dp))
-                Text("No results found", style = MaterialTheme.typography.titleMedium)
+                Text("No groups joined", style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "Try a different search or location.",
+                    "Join a group in-world to see it here.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
-            MapPlacesEventsUiState.EmptyHistory,
-            MapPlacesEventsUiState.EmptySurroundings,
-            MapPlacesEventsUiState.EmptyNearbyAgents -> Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Map,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(48.dp),
-                )
-                Spacer(Modifier.height(12.dp))
-                Text("Nothing here yet", style = MaterialTheme.typography.titleMedium)
-            }
-
-            MapPlacesEventsUiState.Ready -> {
-                // Map content renders here once the map manager is attached.
+            GroupsUiState.Ready -> {
+                // Group list renders here once GroupManager is attached.
             }
         }
     }

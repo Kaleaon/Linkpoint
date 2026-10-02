@@ -1,7 +1,6 @@
 package com.linkpoint.avatar
 
 import android.util.Log
-import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLQuaternion
 import com.linkpoint.protocol.types.LLVector3

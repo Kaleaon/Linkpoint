@@ -28,8 +28,16 @@ fun L2LoginRoute(
     modifier: Modifier = Modifier,
 ) {
     val app = LinkpointApp.getInstance()
-    val grids = remember {
-        app.gridManager.getAvailableGrids().map { GridDisplayInfo(it.id, it.name) }
+    val gridListFlow = remember { app.gridManager.getAvailableGridsFlow() }
+    val gridList by gridListFlow.collectAsState(initial = app.gridManager.getAvailableGrids())
+    val grids = gridList.map {
+        GridDisplayInfo(
+            id = it.id,
+            name = it.name,
+            status = it.status,
+            logoUrl = it.logoUrl,
+            loginUri = it.loginUri
+        )
     }
     var status by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
@@ -38,7 +46,7 @@ fun L2LoginRoute(
     val isConnected = connectionState == ConnectionState.CONNECTED
 
     LaunchedEffect(isConnected) {
-        if (app.sessionManager.isConnected()) onLoginSuccess()
+        if (isConnected) onLoginSuccess()
     }
 
     LoginScreen(
@@ -61,7 +69,8 @@ fun L2LoginRoute(
             val grid = app.gridManager.getAvailableGrids()
                 .getOrNull(credentials.selectedGridIndex)
                 ?: app.gridManager.getSelectedGrid()
-            status = "Logging in to ${grid.name}…"
+            app.gridManager.selectGrid(grid.id)
+            status = "Resolving grid & logging in to ${grid.name}…"
             app.applicationScope.launch {
                 // Map the UI label to the format expected by the login API:
                 // "last", "home", or "uri:Region&x&y&z" — never a raw

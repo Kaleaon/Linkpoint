@@ -71,6 +71,32 @@ class InventoryManager(
     private val folders = ConcurrentHashMap<UUID, InventoryFolder>()
     private val items = ConcurrentHashMap<UUID, InventoryItem>()
     
+    // Secondary index maps using ConcurrentHashMap.newKeySet() for thread-safe parent-to-child lookups
+    val parentToFoldersMap = ConcurrentHashMap<UUID, MutableSet<UUID>>()
+    val parentToItemsMap = ConcurrentHashMap<UUID, MutableSet<UUID>>()
+
+    /**
+     * Put a folder into entity map and secondary index map.
+     */
+    fun putFolder(folder: InventoryFolder) {
+        val existing = folders.put(folder.folderId, folder)
+        if (existing != null && existing.parentId != folder.parentId) {
+            parentToFoldersMap[existing.parentId]?.remove(folder.folderId)
+        }
+        parentToFoldersMap.computeIfAbsent(folder.parentId) { ConcurrentHashMap.newKeySet() }.add(folder.folderId)
+    }
+
+    /**
+     * Put an item into entity map and secondary index map.
+     */
+    fun putItem(item: InventoryItem) {
+        val existing = items.put(item.itemId, item)
+        if (existing != null && existing.parentId != item.parentId) {
+            parentToItemsMap[existing.parentId]?.remove(item.itemId)
+        }
+        parentToItemsMap.computeIfAbsent(item.parentId) { ConcurrentHashMap.newKeySet() }.add(item.itemId)
+    }
+    
     // Special folders
     private var rootFolderId: UUID? = null
     private val systemFolders = ConcurrentHashMap<Int, UUID>()
@@ -242,14 +268,14 @@ class InventoryManager(
                 val categories = folder.getArray("categories")
                 categories?.value?.forEach { cat ->
                     if (cat is LLSDMap) {
-                        parseFolder(cat)?.let { folders[it.folderId] = it }
+                        parseFolder(cat)?.let { putFolder(it) }
                     }
                 }
                 
                 val items = folder.getArray("items")
                 items?.value?.forEach { item ->
                     if (item is LLSDMap) {
-                        parseItem(item)?.let { this.items[it.itemId] = it }
+                        parseItem(item)?.let { putItem(it) }
                     }
                 }
             }
@@ -305,18 +331,20 @@ class InventoryManager(
     }
     
     /**
-     * Get folder contents (cached)
+     * Get folder contents (cached using direct parent key lookups)
      */
     fun getFolderContents(folderId: UUID): List<InventoryNode> {
         val result = mutableListOf<InventoryNode>()
         
-        // Add subfolders
-        folders.values.filter { it.parentId == folderId }.forEach {
+        // Add subfolders via parent index
+        val childFolderIds = parentToFoldersMap[folderId] ?: emptySet()
+        childFolderIds.mapNotNull { folders[it] }.forEach {
             result.add(InventoryNode.Folder(it))
         }
         
-        // Add items
-        items.values.filter { it.parentId == folderId }.forEach {
+        // Add items via parent index
+        val childItemIds = parentToItemsMap[folderId] ?: emptySet()
+        childItemIds.mapNotNull { items[it] }.forEach {
             result.add(InventoryNode.Item(it))
         }
         
@@ -345,7 +373,7 @@ class InventoryManager(
             type = typeDefault,
             version = version
         )
-        folders[folderId] = folder
+        putFolder(folder)
         
         // Also register as system folder if it has a type
         if (typeDefault >= 0) {
@@ -354,18 +382,20 @@ class InventoryManager(
     }
     
     /**
-     * Get all subfolders of a folder (cached)
+     * Get all subfolders of a folder (cached using direct parent key lookup)
      */
     fun getFolders(parentId: UUID): List<InventoryFolder> {
-        return folders.values.filter { it.parentId == parentId }
+        val childFolderIds = parentToFoldersMap[parentId] ?: emptySet()
+        return childFolderIds.mapNotNull { folders[it] }
             .sortedBy { it.name }
     }
     
     /**
-     * Get all items in a folder (cached)
+     * Get all items in a folder (cached using direct parent key lookup)
      */
     fun getItems(parentId: UUID): List<InventoryItem> {
-        return items.values.filter { it.parentId == parentId }
+        val childItemIds = parentToItemsMap[parentId] ?: emptySet()
+        return childItemIds.mapNotNull { items[it] }
             .sortedBy { it.name }
     }
     
@@ -373,7 +403,10 @@ class InventoryManager(
      * Remove an item from inventory (called when server notifies us of removal)
      */
     fun removeItem(itemId: UUID) {
-        items.remove(itemId)
+        val existing = items.remove(itemId)
+        if (existing != null) {
+            parentToItemsMap[existing.parentId]?.remove(itemId)
+        }
         Log.d(TAG, "Removed item from cache: $itemId")
     }
     
@@ -381,7 +414,12 @@ class InventoryManager(
      * Remove a folder from inventory (called when server notifies us of removal)
      */
     fun removeFolder(folderId: UUID) {
-        folders.remove(folderId)
+        val existing = folders.remove(folderId)
+        if (existing != null) {
+            parentToFoldersMap[existing.parentId]?.remove(folderId)
+        }
+        parentToFoldersMap.remove(folderId)
+        parentToItemsMap.remove(folderId)
         systemFolders.entries.removeIf { it.value == folderId }
         Log.d(TAG, "Removed folder from cache: $folderId")
     }
@@ -446,7 +484,7 @@ class InventoryManager(
             }
             
             // Update local cache
-            items[itemId] = item.copy(parentId = newParentId)
+            putItem(item.copy(parentId = newParentId))
             return true
         }
         return false
@@ -478,7 +516,7 @@ class InventoryManager(
             }
             
             // Update local cache
-            folders[folderId] = folder.copy(parentId = newParentId)
+            putFolder(folder.copy(parentId = newParentId))
             return true
         }
         return false
@@ -518,7 +556,7 @@ class InventoryManager(
                                 type = type,
                                 version = 0
                             )
-                            folders[newFolderId] = folder
+                            putFolder(folder)
                             Log.d(TAG, "Created folder '$name' with ID $newFolderId")
                             return@withContext newFolderId
                         }
@@ -533,7 +571,7 @@ class InventoryManager(
                     type = type,
                     version = 0
                 )
-                folders[folderId] = folder
+                putFolder(folder)
                 
                 // Send CreateInventoryFolder message to server via UDP
                 try {
@@ -627,7 +665,7 @@ class InventoryManager(
         }
         
         // Update local cache
-        items[itemId] = item.copy(name = newName)
+        putItem(item.copy(name = newName))
         return success
     }
     
@@ -666,7 +704,7 @@ class InventoryManager(
         }
         
         // Update local cache
-        items[itemId] = item.copy(description = description)
+        putItem(item.copy(description = description))
         return success
     }
     
@@ -759,7 +797,7 @@ class InventoryManager(
             parentId = destinationId,
             name = actualNewName
         )
-        items[newItemId] = copy
+        putItem(copy)
         
         // Send to server
         sendCopyInventoryItem(
@@ -1008,7 +1046,7 @@ class InventoryManager(
                 // Update cached folder
                 val existing = folders[folderId]
                 if (existing != null) {
-                    folders[folderId] = existing.copy(name = name, parentId = parentId)
+                    putFolder(existing.copy(name = name, parentId = parentId))
                 }
             }
         } catch (e: Exception) {
@@ -1041,7 +1079,7 @@ class InventoryManager(
                 // Update cached folder
                 val existing = folders[folderId]
                 if (existing != null) {
-                    folders[folderId] = existing.copy(parentId = newParentId)
+                    putFolder(existing.copy(parentId = newParentId))
                 }
             }
         } catch (e: Exception) {
@@ -1092,7 +1130,7 @@ class InventoryManager(
             // Update cached item with new asset ID
             val existing = items[itemId]
             if (existing != null) {
-                items[itemId] = existing.copy(assetId = newAssetId)
+                putItem(existing.copy(assetId = newAssetId))
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing SaveAssetIntoInventory", e)

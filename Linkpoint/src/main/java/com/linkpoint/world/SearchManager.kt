@@ -1,6 +1,7 @@
 package com.linkpoint.world
 
 import android.util.Log
+import com.linkpoint.model.search.*
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
 import com.linkpoint.util.await
@@ -416,74 +417,10 @@ class SearchManager(
     }
 }
 
-data class SearchResults<T>(
+data class SearchResults<T : SearchResult>(
     val results: List<T>,
     val totalCount: Int,
     val startIndex: Int
 ) {
     val hasMore: Boolean get() = startIndex + results.size < totalCount
-}
-
-data class PersonResult(
-    val agentId: UUID,
-    val displayName: String,
-    val userName: String,
-    val isOnline: Boolean
-)
-
-data class PlaceResult(
-    val parcelId: UUID,
-    val name: String,
-    val description: String,
-    val region: String,
-    val category: String,
-    val traffic: Float,
-    val area: Int,
-    val location: String
-)
-
-data class GroupResult(
-    val groupId: UUID,
-    val name: String,
-    val charter: String,
-    val memberCount: Int,
-    val isOpen: Boolean,
-    val insigniaId: UUID?
-)
-
-data class EventResult(
-    val eventId: Int,
-    val name: String,
-    val description: String,
-    val category: String,
-    val dateUtc: Long,
-    val duration: Int,
-    val region: String,
-    val coverCharge: Int
-)
-
-data class LandResult(
-    val parcelId: UUID,
-    val name: String,
-    val description: String,
-    val region: String,
-    val area: Int,
-    val salePrice: Int,
-    val pricePerMeter: Float,
-    val saleType: LandSaleType,
-    val isAuction: Boolean
-)
-
-data class DestinationResult(
-    val name: String,
-    val description: String,
-    val category: String,
-    val region: String,
-    val location: String,
-    val imageUrl: String,
-    val rating: Float
-)
-
-enum class LandSaleType {
-    ALL, FOR_SALE, FOR_AUCTION, MAINLAND, ESTATE
 }

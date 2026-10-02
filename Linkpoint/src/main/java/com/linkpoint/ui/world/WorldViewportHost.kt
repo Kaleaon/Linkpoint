@@ -29,6 +29,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import kotlinx.coroutines.launch
 import com.linkpoint.hud.HUDOverlayView
 import com.linkpoint.ui.radar.BlipType
 import com.linkpoint.ui.radar.Radar
@@ -86,11 +87,17 @@ fun WorldViewportHost(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
 
+    val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
+
     DisposableEffect(rendererHandoffManager, lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> rendererHandoffManager?.onHostResumed()
-                Lifecycle.Event.ON_PAUSE -> rendererHandoffManager?.onHostPaused()
+                Lifecycle.Event.ON_PAUSE -> {
+                    coroutineScope.launch {
+                        rendererHandoffManager?.onHostPaused()
+                    }
+                }
                 else -> Unit
             }
         }
@@ -98,7 +105,9 @@ fun WorldViewportHost(
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
-            rendererHandoffManager?.onHostDisposed()
+            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main + kotlinx.coroutines.SupervisorJob()).launch {
+                rendererHandoffManager?.onHostDisposed()
+            }
         }
     }
 

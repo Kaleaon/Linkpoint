@@ -213,6 +213,7 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
             resourceManager = GLResourceManager(glThreadGuard)
             frustumCuller = FrustumCuller()
             textureCache = GLTextureCache(resourceManager)
+            textureCache.pboManager.initialize(glVersion)
             createGlobalUBO()
             compileShaders()
             Matrix.setIdentityM(modelMatrix, 0)
@@ -663,6 +664,7 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
             globalUBO = 0
         }
         if (::textureCache.isInitialized) {
+            textureCache.pboManager.destroy()
             textureCache.clear()
         }
         primProgram?.destroy(); primProgram = null

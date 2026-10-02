@@ -425,13 +425,18 @@ class GridConnection(
     }
     
     /**
-     * Clean up resources
+     * Clean up resources asynchronously
      */
-    fun close() {
+    fun closeAsync(completionScope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())) {
         scope.cancel()
-        runBlocking {
+        completionScope.launch {
             disconnect()
         }
+    }
+
+    suspend fun close() {
+        scope.cancel()
+        disconnect()
     }
 
     // ==================== HELPER METHODS ====================

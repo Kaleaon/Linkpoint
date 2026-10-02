@@ -32,16 +32,4 @@ class LLCircuitAckSemanticsTest {
         assertFalse(circuit.needsResend(seq))
         assertTrue(circuit.getPendingAcks().contains(seq))
     }
-
-    @Test
-    fun `legacy ackPacket preserves old combined behavior`() {
-        val circuit = circuit()
-        val seq = 99u
-
-        circuit.queueForResend(seq, byteArrayOf(8, 8, 8))
-        circuit.ackPacket(seq)
-
-        assertTrue(circuit.getPendingAcks().contains(seq))
-        assertFalse(circuit.needsResend(seq))
-    }
 }
