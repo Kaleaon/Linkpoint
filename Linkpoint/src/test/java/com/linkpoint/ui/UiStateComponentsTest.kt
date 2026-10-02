@@ -4,6 +4,7 @@ import com.linkpoint.feature.discovery.MapUiState
 import com.linkpoint.feature.discovery.MinimapUiState
 import com.linkpoint.feature.discovery.RadarUiState
 import com.linkpoint.feature.discovery.SLURLUiState
+import com.linkpoint.feature.discovery.SearchUiState
 import com.linkpoint.feature.discovery.TeleportHistoryUiState
 import com.linkpoint.feature.inventory.InventoryUiState
 import com.linkpoint.feature.inventory.MyAvatarUiState
@@ -26,28 +27,31 @@ class UiStateComponentsTest {
             FriendsUiState.EmptyFriends,
             FriendsUiState.Ready
         )
+        assertEquals(4, friendsStates.size)
+
         val groupsStates: List<GroupsUiState> = listOf(
             GroupsUiState.Loading,
             GroupsUiState.Error,
             GroupsUiState.EmptyGroups,
             GroupsUiState.Ready
         )
-        val nearbyStates: List<NearbyPeopleUiState> = listOf(
-            NearbyPeopleUiState.Loading,
-            NearbyPeopleUiState.Error,
-            NearbyPeopleUiState.EmptyNearby,
-            NearbyPeopleUiState.Ready
-        )
+        assertEquals(4, groupsStates.size)
+
         val profileStates: List<ProfileUiState> = listOf(
             ProfileUiState.Loading,
             ProfileUiState.Error,
             ProfileUiState.EmptyProfile,
             ProfileUiState.Ready
         )
-        assertEquals(4, friendsStates.size)
-        assertEquals(4, groupsStates.size)
-        assertEquals(4, nearbyStates.size)
         assertEquals(4, profileStates.size)
+
+        val nearbyStates: List<NearbyPeopleUiState> = listOf(
+            NearbyPeopleUiState.Loading,
+            NearbyPeopleUiState.Error,
+            NearbyPeopleUiState.EmptyNearby,
+            NearbyPeopleUiState.Ready
+        )
+        assertEquals(4, nearbyStates.size)
     }
 
     @Test
@@ -58,27 +62,30 @@ class UiStateComponentsTest {
             InventoryUiState.EmptyInventory,
             InventoryUiState.Ready
         )
+        assertEquals(4, inventoryStates.size)
+
         val avatarStates: List<MyAvatarUiState> = listOf(
             MyAvatarUiState.Loading,
             MyAvatarUiState.Error,
             MyAvatarUiState.EmptyWearables,
             MyAvatarUiState.Ready
         )
+        assertEquals(4, avatarStates.size)
+
         val notecardStates: List<NotecardEditorUiState> = listOf(
             NotecardEditorUiState.Loading,
             NotecardEditorUiState.Error,
             NotecardEditorUiState.EmptyDocument,
             NotecardEditorUiState.Edited
         )
+        assertEquals(4, notecardStates.size)
+
         val scriptStates: List<ScriptEditorUiState> = listOf(
             ScriptEditorUiState.Loading,
             ScriptEditorUiState.Error,
             ScriptEditorUiState.EmptyScript,
             ScriptEditorUiState.Edited
         )
-        assertEquals(4, inventoryStates.size)
-        assertEquals(4, avatarStates.size)
-        assertEquals(4, notecardStates.size)
         assertEquals(4, scriptStates.size)
     }
 
@@ -90,35 +97,47 @@ class UiStateComponentsTest {
             MapUiState.EmptyRegionResults,
             MapUiState.Ready
         )
+        assertEquals(4, mapStates.size)
+
         val radarStates: List<RadarUiState> = listOf(
             RadarUiState.Loading,
             RadarUiState.Error,
             RadarUiState.EmptyNearbyAgents,
             RadarUiState.Ready
         )
-        val minimapStates: List<MinimapUiState> = listOf(
-            MinimapUiState.Loading,
-            MinimapUiState.Error,
-            MinimapUiState.EmptySurroundings,
-            MinimapUiState.Ready
-        )
-        val historyStates: List<TeleportHistoryUiState> = listOf(
-            TeleportHistoryUiState.Loading,
-            TeleportHistoryUiState.Error,
-            TeleportHistoryUiState.EmptyHistory,
-            TeleportHistoryUiState.Ready
-        )
+        assertEquals(4, radarStates.size)
+
         val slurlStates: List<SLURLUiState> = listOf(
             SLURLUiState.Loading,
             SLURLUiState.Error,
             SLURLUiState.InvalidLocation,
             SLURLUiState.Ready
         )
-        assertEquals(4, mapStates.size)
-        assertEquals(4, radarStates.size)
-        assertEquals(4, minimapStates.size)
-        assertEquals(4, historyStates.size)
         assertEquals(4, slurlStates.size)
+
+        val historyStates: List<TeleportHistoryUiState> = listOf(
+            TeleportHistoryUiState.Loading,
+            TeleportHistoryUiState.Error,
+            TeleportHistoryUiState.EmptyHistory,
+            TeleportHistoryUiState.Ready
+        )
+        assertEquals(4, historyStates.size)
+
+        val minimapStates: List<MinimapUiState> = listOf(
+            MinimapUiState.Loading,
+            MinimapUiState.Error,
+            MinimapUiState.EmptySurroundings,
+            MinimapUiState.Ready
+        )
+        assertEquals(4, minimapStates.size)
+
+        val searchStates: List<SearchUiState> = listOf(
+            SearchUiState.Loading,
+            SearchUiState.Error,
+            SearchUiState.EmptySearchResults,
+            SearchUiState.Ready
+        )
+        assertEquals(4, searchStates.size)
     }
 
     @Test
