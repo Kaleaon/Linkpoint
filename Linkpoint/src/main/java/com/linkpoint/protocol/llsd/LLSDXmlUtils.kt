@@ -5,4 +5,6 @@ object LLSDXmlUtils {
     private const val XML_FOOTER = "</llsd>"
 
     fun wrap(value: LLSDValue): String = "$XML_HEADER${value.toXML()}$XML_FOOTER"
+
+    fun wrapToBytes(value: LLSDValue): ByteArray = wrap(value).toByteArray(Charsets.UTF_8)
 }

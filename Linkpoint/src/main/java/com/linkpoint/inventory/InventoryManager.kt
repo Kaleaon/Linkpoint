@@ -113,13 +113,17 @@ class InventoryManager(
     private class RetryableException(message: String) : Exception(message)
     
     /**
-     * Fetch folder contents with retry support.
-     * 
-     * The CapabilityManager now handles retries internally with Firestorm-style
-     * exponential backoff and Retry-After header support. This method provides
-     * additional retry logic for cases where the capability itself returns null.
+     * Fetch multiple folder contents in a single batched capability request.
+     *
+     * Combines multiple folder descriptors into a single FetchInventoryDescendents2 LLSD payload.
      */
-    suspend fun fetchFolderContents(folderId: UUID, fetchFolders: Boolean = true, fetchItems: Boolean = true): Boolean {
+    suspend fun fetchBatchFolderContents(
+        folderIds: List<UUID>,
+        fetchFolders: Boolean = true,
+        fetchItems: Boolean = true
+    ): Boolean {
+        if (folderIds.isEmpty()) return true
+        
         _isLoading.value = true
         
         return withContext(Dispatchers.IO) {
@@ -131,13 +135,15 @@ class InventoryManager(
                     try {
                         val request = LLSDMap().apply {
                             this["folders"] = LLSDArray().apply {
-                                add(LLSDMap().apply {
-                                    this["folder_id"] = LLSDString(folderId.toString())
-                                    this["owner_id"] = LLSDString(agentId.toString())
-                                    this["fetch_folders"] = LLSDBoolean(fetchFolders)
-                                    this["fetch_items"] = LLSDBoolean(fetchItems)
-                                    this["sort_order"] = LLSDInteger(1)
-                                })
+                                folderIds.forEach { folderId ->
+                                    add(LLSDMap().apply {
+                                        this["folder_id"] = LLSDString(folderId.toString())
+                                        this["owner_id"] = LLSDString(agentId.toString())
+                                        this["fetch_folders"] = LLSDBoolean(fetchFolders)
+                                        this["fetch_items"] = LLSDBoolean(fetchItems)
+                                        this["sort_order"] = LLSDInteger(1)
+                                    })
+                                }
                             }
                         }
                         
@@ -150,22 +156,18 @@ class InventoryManager(
                             parseInventoryResponse(response)
                             return@withContext true
                         } else {
-                            // Null response - throw to trigger retry logic
-                            throw RetryableException("Empty response for folder $folderId")
+                            throw RetryableException("Empty response for batched folders: ${folderIds.size} folders")
                         }
                     } catch (e: CancellationException) {
-                        // Re-throw CancellationException to not interfere with coroutine cancellation
                         throw e
                     } catch (e: RetryableException) {
-                        // Handle retryable errors in one place
                         attempts++
                         if (attempts < maxAttempts) {
-                            Log.w(TAG, "${e.message}, retrying (attempt $attempts)")
+                            Log.w(TAG, "${e.message}, retrying batch (attempt $attempts)")
                             delay(1000L * attempts)
                         }
                     } catch (e: Exception) {
-                        // Other exceptions are also retryable
-                        Log.e(TAG, "Failed to fetch folder: $folderId", e)
+                        Log.e(TAG, "Failed to fetch batched folders: ${folderIds.size} folders", e)
                         attempts++
                         if (attempts < maxAttempts) {
                             delay(1000L * attempts)
@@ -177,6 +179,15 @@ class InventoryManager(
                 _isLoading.value = false
             }
         }
+    }
+
+    /**
+     * Fetch folder contents with retry support.
+     * 
+     * Delegates to [fetchBatchFolderContents] for single-folder request compatibility.
+     */
+    suspend fun fetchFolderContents(folderId: UUID, fetchFolders: Boolean = true, fetchItems: Boolean = true): Boolean {
+        return fetchBatchFolderContents(listOf(folderId), fetchFolders, fetchItems)
     }
     
     /**
@@ -928,18 +939,14 @@ class InventoryManager(
         }
 
         scope.launch {
-            Log.i(TAG, "Warm-fetch starting for ${toFetch.size} folders: ${toFetch.map { it.first }}")
-            toFetch.map { (type, folderId) ->
-                async {
-                    try {
-                        val ok = fetchFolderContents(folderId, fetchFolders = false, fetchItems = true)
-                        Log.i(TAG, "Warm-fetch folder type=$type id=$folderId ok=$ok")
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Warm-fetch folder type=$type id=$folderId failed: ${e.message}")
-                    }
-                }
-            }.awaitAll()
-            Log.i(TAG, "Warm-fetch complete: items cached = ${items.size}")
+            Log.i(TAG, "Warm-fetch starting for ${toFetch.size} folders in 1 batched capability request: ${toFetch.map { it.first }}")
+            try {
+                val folderIds = toFetch.map { it.second }
+                val ok = fetchBatchFolderContents(folderIds, fetchFolders = false, fetchItems = true)
+                Log.i(TAG, "Warm-fetch batch request complete ok=$ok, items cached = ${items.size}")
+            } catch (e: Exception) {
+                Log.w(TAG, "Warm-fetch batch request failed: ${e.message}")
+            }
         }
     }
     
