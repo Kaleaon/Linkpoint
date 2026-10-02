@@ -83,7 +83,11 @@ function dependencyClosure(rootDir) {
 
 // Every package directly under node_modules, with scopes expanded.
 function topLevelPackages(rootDir) {
-  const modulesDir = path.join(rootDir, 'node_modules');
+  let modulesDir = path.join(rootDir, 'node_modules');
+  if (!fs.existsSync(modulesDir)) {
+    modulesDir = path.join(rootDir, '../../node_modules');
+  }
+  if (!fs.existsSync(modulesDir)) return [];
   const names = [];
   for (const entry of fs.readdirSync(modulesDir, { withFileTypes: true })) {
     if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
