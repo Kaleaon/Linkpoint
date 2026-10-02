@@ -5,15 +5,20 @@ import java.util.UUID
 
 /** Backend-neutral material payload used by both Filament and GLES paths. */
 data class MaterialDescriptor(
-    val baseColor: Float4,
+    val baseColor: Float4 = Float4(1f, 1f, 1f, 1f),
     val baseColorTexture: TextureRef? = null,
     val alphaMode: AlphaMode = AlphaMode.BLEND,
+    val alphaCutoff: Float = 0.5f,
+    val doubleSided: Boolean = false,
     val normalTexture: TextureRef? = null,
+    val normalScale: Float = 1.0f,
     val metallicRoughnessTexture: TextureRef? = null,
     val metallicFactor: Float = 0f,
     val roughnessFactor: Float = 0.5f,
     val emissiveTexture: TextureRef? = null,
     val emissiveFactor: Float3 = Float3.ZERO,
+    val occlusionTexture: TextureRef? = null,
+    val occlusionFactor: Float = 1.0f,
     val uvTransform: UvTransform = UvTransform.IDENTITY
 ) {
     enum class AlphaMode { OPAQUE, MASK, BLEND }
