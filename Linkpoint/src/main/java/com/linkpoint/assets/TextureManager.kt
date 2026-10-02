@@ -142,6 +142,28 @@ class TextureManager(
             pendingTextures.remove(textureId)
         }
     }
+
+    /**
+     * Fetch a texture progressively using lower-res placeholder mipmaps and time-sliced LOD decoding.
+     */
+    fun fetchTextureProgressive(
+        textureId: UUID,
+        priority: TexturePriority = TexturePriority.NORMAL,
+        listener: ProgressiveTextureStreamer.TextureStreamListener
+    ) {
+        scope.launch(Dispatchers.IO) {
+            val cachedData = cache.get(textureId, AssetType.TEXTURE)
+            if (cachedData != null) {
+                ProgressiveTextureStreamer.submit(textureId, cachedData, priority, 0, listener)
+                return@launch
+            }
+            val downloadedData = downloadTexture(textureId, discard = 0)
+            if (downloadedData != null) {
+                cache.put(textureId, AssetType.TEXTURE, downloadedData)
+                ProgressiveTextureStreamer.submit(textureId, downloadedData, priority, 0, listener)
+            }
+        }
+    }
     
     /**
      * Prefetch textures in background
