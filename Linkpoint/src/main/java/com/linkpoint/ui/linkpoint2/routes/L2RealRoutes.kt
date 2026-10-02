@@ -1164,3 +1164,15 @@ fun L2PrivacySettingsRoute(
         modifier = modifier,
     )
 }
+
+@Composable
+fun L2RadarRoute(
+    onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    com.linkpoint.ui.radar.Radar(
+        blips = com.linkpoint.ui.radar.createSampleBlips(),
+        modifier = modifier,
+    )
+}
+

@@ -271,9 +271,12 @@ class NotificationManager(
 
     private fun createChatPendingIntent(fromId: UUID?, fromName: String?): android.app.PendingIntent? {
         return try {
-            val intent = android.content.Intent(context, com.linkpoint.ui.chat.ChatActivity::class.java).apply {
+            val intent = com.linkpoint.ui.navigation.WorldHomeHostActivity.createIntent(
+                context = context,
+                route = com.linkpoint.ui.navigation.Routes.CHAT,
+                sessionId = fromId?.toString(),
+            ).apply {
                 flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
-                if (fromId != null) putExtra("session_id", fromId.toString())
                 if (fromName != null) putExtra("from_name", fromName)
             }
             android.app.PendingIntent.getActivity(
