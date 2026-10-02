@@ -55,7 +55,7 @@ import com.linkpoint.ui.people.NearbyPeopleScreen
 import com.linkpoint.ui.people.NearbyPerson
 import com.linkpoint.ui.profile.ProfileData
 import com.linkpoint.ui.profile.ProfileScreen
-import com.linkpoint.ui.search.ComposeSearchResult
+import com.linkpoint.model.search.*
 import com.linkpoint.ui.search.SearchScreen
 import com.linkpoint.ui.teleport.TeleportHistoryEntry
 import com.linkpoint.ui.teleport.TeleportHistoryScreen
@@ -940,7 +940,7 @@ fun L2SearchRoute(
 ) {
     val app = LinkpointApp.getInstanceOrNull()
     val scope = rememberCoroutineScope()
-    var results by remember { mutableStateOf<List<ComposeSearchResult>>(emptyList()) }
+    var results by remember { mutableStateOf<List<SearchResult>>(emptyList()) }
     var loading by remember { mutableStateOf(false) }
 
     SearchScreen(
@@ -956,42 +956,13 @@ fun L2SearchRoute(
                 results = try {
                     when (category) {
                         com.linkpoint.ui.search.SearchCategory.PEOPLE ->
-                            app.searchManager.searchPeople(query).results.map { p ->
-                                ComposeSearchResult.PersonResult(
-                                    id = p.agentId,
-                                    name = p.displayName,
-                                    description = p.userName,
-                                    isOnline = p.isOnline,
-                                )
-                            }
+                            app.searchManager.searchPeople(query).results
                         com.linkpoint.ui.search.SearchCategory.PLACES ->
-                            app.searchManager.searchPlaces(query).results.map { pl ->
-                                ComposeSearchResult.PlaceResult(
-                                    id = pl.parcelId,
-                                    name = pl.name,
-                                    description = pl.description,
-                                    traffic = pl.traffic.toInt(),
-                                    slurl = "secondlife://${pl.region}/${pl.location}",
-                                )
-                            }
+                            app.searchManager.searchPlaces(query).results
                         com.linkpoint.ui.search.SearchCategory.GROUPS ->
-                            app.searchManager.searchGroups(query).results.map { g ->
-                                ComposeSearchResult.GroupResult(
-                                    id = g.groupId,
-                                    name = g.name,
-                                    description = g.charter,
-                                    memberCount = g.memberCount,
-                                    isOpen = g.isOpen,
-                                )
-                            }
+                            app.searchManager.searchGroups(query).results
                         com.linkpoint.ui.search.SearchCategory.EVENTS ->
-                            app.searchManager.searchEvents(query).results.map { e ->
-                                ComposeSearchResult.EventResult(
-                                    id = UUID(0L, e.eventId.toLong()),
-                                    name = e.name,
-                                    description = e.description,
-                                )
-                            }
+                            app.searchManager.searchEvents(query).results
                     }
                 } catch (_: Exception) {
                     emptyList()
