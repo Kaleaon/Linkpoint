@@ -81,22 +81,56 @@
       "enabled": true,
       "angle": 180,
       "stops": [
-        { "offset": 0, "color": "#0B1B2E" },
-        { "offset": 0.42, "color": "#0B1B2E" },
-        { "offset": 0.425, "color": "#1F4E7A" },
-        { "offset": 0.43, "color": "#0B1B2E" },
-        { "offset": 0.56, "color": "#0B1B2E" },
-        { "offset": 0.565, "color": "#1F4E7A" },
-        { "offset": 0.57, "color": "#0B1B2E" },
-        { "offset": 1, "color": "#0B1B2E" }
+        {
+          "offset": 0,
+          "color": "#0B1B2E"
+        },
+        {
+          "offset": 0.42,
+          "color": "#0B1B2E"
+        },
+        {
+          "offset": 0.425,
+          "color": "#1F4E7A"
+        },
+        {
+          "offset": 0.43,
+          "color": "#0B1B2E"
+        },
+        {
+          "offset": 0.56,
+          "color": "#0B1B2E"
+        },
+        {
+          "offset": 0.565,
+          "color": "#1F4E7A"
+        },
+        {
+          "offset": 0.57,
+          "color": "#0B1B2E"
+        },
+        {
+          "offset": 1,
+          "color": "#0B1B2E"
+        }
       ]
     }
   },
   "typography": {
     "fontFamily": "'Inter', system-ui, sans-serif",
     "displayFontFamily": "'Cinzel', 'Trajan Pro', serif",
-    "fontSize": { "small": 12, "medium": 16, "large": 20, "xlarge": 28 },
-    "fontWeight": { "light": 300, "regular": 400, "medium": 500, "bold": 600 },
+    "fontSize": {
+      "small": 12,
+      "medium": 16,
+      "large": 20,
+      "xlarge": 28
+    },
+    "fontWeight": {
+      "light": 300,
+      "regular": 400,
+      "medium": 500,
+      "bold": 600
+    },
     "lineHeight": 1.5,
     "letterSpacing": 0.04
   },
@@ -149,6 +183,42 @@
           "background": "repeating-linear-gradient(180deg, transparent 0 42%, rgba(196,160,98,0.06) 42% 43%, transparent 43% 56%, rgba(196,160,98,0.04) 56% 57%, transparent 57% 100%)"
         }
       }
-    ]
+    ],
+    "desktopAdaptation": {
+      "windowChrome": {
+        "titleBarHeight": 26,
+        "headerStyle": "standard",
+        "cornerStyle": "sharp",
+        "panelRadius": 0,
+        "controlRadius": 0,
+        "borderWidth": 1,
+        "shadow": "0 14px 36px rgba(0,0,0,0.5)"
+      },
+      "menuBar": {
+        "height": 28,
+        "fontSize": 11,
+        "letterSpacing": "0.06em",
+        "textTransform": "uppercase",
+        "dropdownRadius": 0,
+        "dropdownShadow": "0 12px 28px rgba(0,0,0,0.4)"
+      },
+      "taskbar": {
+        "height": 40,
+        "buttonRadius": 0,
+        "dockAlignment": "left",
+        "quickChatBorderRadius": 0
+      },
+      "cameraHud": {
+        "panelRadius": 0,
+        "buttonRadius": 0,
+        "shadow": "0 8px 20px rgba(0,0,0,0.3)"
+      },
+      "sweep": {
+        "elbowWidth": 30,
+        "titleCapRadius": "0px",
+        "accentBand": "primary",
+        "showElbowBar": true
+      }
+    }
   }
 }
