@@ -77,6 +77,18 @@ function serializeGroupNotice(event) {
   };
 }
 
+/** Describe a PaymentRequest for the client. */
+function serializePayment(event) {
+  return {
+    objectId: idString(event.ObjectID || event.objectId || event.targetId),
+    objectName: String(event.ObjectName || event.objectName || event.name || 'Vendor Item'),
+    sellerName: String(event.SellerName || event.sellerName || event.OwnerName || event.ownerName || 'Simulator Resident'),
+    sellerId: idString(event.SellerID || event.sellerId || event.OwnerID || event.ownerId),
+    price: Math.max(0, finiteOr(event.Price ?? event.price ?? event.Amount ?? event.amount, 0)),
+    currency: String(event.Currency || event.currency || 'L$'),
+  };
+}
+
 /**
  * Original events awaiting an answer, keyed by an opaque id. Bounded, and
  * cleared when the session closes.
@@ -198,6 +210,7 @@ module.exports = {
   serializeScriptDialog,
   serializeLure,
   serializeGroupNotice,
+  serializePayment,
   PendingInteractions,
   subscribeInteractions,
   respondScriptDialog,

@@ -370,6 +370,8 @@ class ViewerSession {
   touchObject(params) { return actions.touchObject(this.requireBot(), params); }
   sit(params = {}) { return actions.sit(this.requireBot(), params); }
   stand() { return actions.stand(this.requireBot()); }
+  getBalance() { return actions.getBalance(this.requireBot()); }
+  payObject(params) { return actions.payObject(this.requireBot(), params); }
   setMovement(params = {}) {
     const agent = this.requireBot().agent;
     if (!agent?.setControlFlag || !agent?.clearControlFlag || !agent?.sendAgentUpdate) throw new Error('Avatar movement unavailable');
