@@ -8,8 +8,11 @@ import okhttp3.MediaType.Companion.toMediaType
 import okio.Timeout
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.junit.runner.RunWith
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import java.io.IOException
 
+@RunWith(AndroidJUnit4::class)
 class SearchManagerTest {
 
     @Test

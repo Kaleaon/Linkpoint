@@ -14,6 +14,7 @@ apply from: 'gradle/scripts/universal-aapt2.gradle'
 
 buildscript {
     repositories {
+        maven { url 'https://maven-central.storage-download.googleapis.com/maven2' }
         google()
         mavenCentral()
     }
@@ -29,6 +30,7 @@ buildscript {
 
 allprojects {
     repositories {
+        maven { url 'https://maven-central.storage-download.googleapis.com/maven2' }
         google()
         mavenCentral()
         // Add Clojars repository for LLSD Java library
