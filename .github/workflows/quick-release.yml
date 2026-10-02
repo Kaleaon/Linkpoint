@@ -4,6 +4,9 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 jobs:
   quick-release:
     runs-on: ubuntu-latest
@@ -11,20 +14,20 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4.7.0
         with:
           distribution: 'temurin'
           java-version: '17'
           cache: 'gradle'
 
       - name: Cache Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@94baf225fe0a508e581a564467443d0e2379123b # v4.3.0
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@00854ea68c109d98c75d956347303bf7c45b0277 # v3.2.1
         with:
           packages: >-
             platform-tools
@@ -50,8 +53,18 @@ jobs:
         env:
           GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError"
 
-      - name: Upload Release APK
-        uses: actions/upload-artifact@v4
+      - name: Compute SHA-256 checksums
+        run: |
+          set -euo pipefail
+          cd Linkpoint/build/outputs/apk
+          find . -type f -name "*.apk" -exec sha256sum {} + > checksums.sha256
+          cat checksums.sha256
+
+      - name: Upload Release APK and Checksums
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
         with:
           name: Linkpoint-release-APK
-          path: Linkpoint/build/outputs/apk/*/release/*.apk
+          path: |
+            Linkpoint/build/outputs/apk/*/release/*.apk
+            Linkpoint/build/outputs/apk/checksums.sha256
+
