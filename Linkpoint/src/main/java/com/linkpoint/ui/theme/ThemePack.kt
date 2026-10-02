@@ -2,6 +2,7 @@ package com.linkpoint.ui.theme
 
 import android.graphics.Color
 import androidx.annotation.ColorInt
+import com.ktheme.models.LayoutStructure
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -81,7 +82,10 @@ data class ThemePack(
     val cornerProfile: CornerProfile? = null,
 
     /** Optional profile that tunes motion/animation duration */
-    val motionProfile: MotionProfile? = null
+    val motionProfile: MotionProfile? = null,
+
+    /** Structural layout variation from Ktheme models */
+    val layoutStructure: LayoutStructure = LayoutStructure.MATERIAL3
 ) {
     companion object {
         private val json = Json { 
