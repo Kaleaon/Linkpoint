@@ -15,7 +15,7 @@ export class CapabilityPermitService {
     const hosts = [...new Set(capabilityUrls.flatMap((raw) => {
       try {
         const url = new URL(raw);
-        return url.protocol === 'https:' && !url.username && !url.password ? [url.hostname.toLowerCase()] : [];
+        return (url.protocol === 'https:' || url.protocol === 'http:') && !url.username && !url.password ? [url.hostname.toLowerCase()] : [];
       } catch { return []; }
     }))];
     if (hosts.length === 0) return null;

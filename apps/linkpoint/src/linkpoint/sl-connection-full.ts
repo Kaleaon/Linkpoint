@@ -21,6 +21,10 @@ export class SLConnectionFull extends Utils.EventEmitter {
   public seedCapability: string | null = null;
   public capabilities: Record<string, string> = {};
 
+  public isHypergrid: boolean = false;
+  public foreignGridUri: string | null = null;
+  public homeGridUri: string | null = null;
+
   public inventoryRoot: string | null = null;
   public eventQueueRunning: boolean = false;
   private lastEventId: number | null = null;
@@ -279,10 +283,17 @@ export class SLConnectionFull extends Utils.EventEmitter {
     if (!this.connected && !slBridge.connected) throw new Error('Not connected to a grid');
   }
 
-  /** Teleport to "secondlife://Region/x/y/z", a map URL, or "Region/x/y/z". */
+  /** Teleport to "secondlife://Region/x/y/z", a map URL, "Region/x/y/z", or Hypergrid URI (e.g. hg.osgrid.org:8002:RegionName). */
   async teleportTo(destination: string) {
     this.requireConnected();
     const result = await slBridge.teleport({ destination });
+    if (result?.isHypergrid || result?.requested?.isHypergrid) {
+      this.isHypergrid = true;
+      this.foreignGridUri = result.requested?.gridUri || null;
+    } else {
+      this.isHypergrid = false;
+      this.foreignGridUri = null;
+    }
     this.emit('teleport_requested', result);
     return result;
   }

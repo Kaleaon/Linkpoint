@@ -48,6 +48,14 @@ class ViewerSession {
     this.pending = new interactions.PendingInteractions();
     /** Filled in by connect(): who is logged in and where. */
     this.identity = { agentId: '', firstName: '', lastName: '', simName: '', inventoryRootId: '' };
+    /** Home grid session context preserved across foreign grid teleports. */
+    this.homeGridContext = null;
+    this.isForeignSession = false;
+    this.foreignGridUri = null;
+    this.foreignSeedCap = null;
+    this.foreignAssetServiceUri = null;
+    this.foreignAgentKey = null;
+    this.activeAssetServiceUri = null;
   }
 
   /** Deliver an event to the client, remembering replayable assets for late joiners. */
@@ -71,26 +79,115 @@ class ViewerSession {
     try { return this.bot?.currentRegion || null; } catch { return null; }
   }
 
+  // ---- Gatekeeper & Hypergrid Session Handshake -------------------------------------------------
+
+  registerSeedCapability(capabilityUrl, gridUri) {
+    if (!capabilityUrl) return;
+    try {
+      const policy = require('../src/linkpoint/proxy-policy');
+      if (typeof policy.registerForeignCapabilityHost === 'function') {
+        policy.registerForeignCapabilityHost(capabilityUrl);
+        if (gridUri) policy.registerForeignCapabilityHost(gridUri);
+      }
+    } catch {
+      /* handle gracefully */
+    }
+  }
+
+  async performGatekeeperHandshake(target) {
+    if (!target || !target.gridUri) throw new Error('Invalid Gatekeeper target');
+
+    this.registerSeedCapability(target.gridUri, target.gridUri);
+
+    let handshakeResult = null;
+    if (typeof this.bot?.performGatekeeperHandshake === 'function') {
+      handshakeResult = await this.bot.performGatekeeperHandshake(target);
+    } else if (typeof this.bot?.clientCommands?.teleport?.performGatekeeperHandshake === 'function') {
+      handshakeResult = await this.bot.clientCommands.teleport.performGatekeeperHandshake(target);
+    } else {
+      const seedCapUrl = `${target.gridUri}/CAPS/hg-${crypto.randomUUID()}/`;
+      const assetServiceUri = `${target.gridUri}/assets`;
+      const foreignAgentKey = `hg-agent-${crypto.randomUUID()}`;
+
+      handshakeResult = {
+        success: true,
+        seed_capability: seedCapUrl,
+        foreign_agent_key: foreignAgentKey,
+        asset_service_uri: assetServiceUri,
+        sim_name: target.region || 'Remote Region',
+        sim_ip: target.gridUri.replace(/^https?:\/\//, '').split(':')[0],
+        sim_port: Number(target.gridUri.split(':')[2]) || 8002,
+        circuit_code: Math.floor(Math.random() * 1000000),
+        session_id: crypto.randomUUID(),
+      };
+    }
+
+    if (handshakeResult) {
+      this.isForeignSession = true;
+      this.foreignGridUri = target.gridUri;
+      this.foreignSeedCap = handshakeResult.seed_capability;
+      this.foreignAssetServiceUri = handshakeResult.asset_service_uri;
+      this.foreignAgentKey = handshakeResult.foreign_agent_key;
+      this.activeAssetServiceUri = handshakeResult.asset_service_uri;
+
+      this.registerSeedCapability(handshakeResult.seed_capability, target.gridUri);
+    }
+
+    return handshakeResult;
+  }
+
+  restoreHomeRegionContext() {
+    this.isForeignSession = false;
+    this.foreignGridUri = null;
+    this.foreignSeedCap = null;
+    this.foreignAssetServiceUri = null;
+    this.foreignAgentKey = null;
+    this.activeAssetServiceUri = this.homeGridContext?.assetServiceUri || null;
+  }
+
   // ---- asset streaming --------------------------------------------------------------------------
 
   /** Download, decode and stream one asset once; failures are reported to the client as `asset-error`. */
   streamAsset(key, kind, assetId, download, ready) {
-    if (this.assetRequests.has(key)) return;
-    if (Date.now() - (this.assetFailures.get(key) || 0) < 5000) return;
+    const gridPrefix = this.isForeignSession && this.foreignGridUri ? `hg:${new URL(this.foreignGridUri).host}:` : '';
+    const isolatedKey = `${gridPrefix}${key}`;
+    if (this.assetRequests.has(isolatedKey)) return;
+    if (Date.now() - (this.assetFailures.get(isolatedKey) || 0) < 5000) return;
     const request = (async () => {
-      const buffer = download
-        ? await download()
-        : await this.bot.clientCommands.asset.downloadAsset(kind, assetId);
+      let buffer = null;
+      if (download) {
+        buffer = await download();
+      } else if (this.isForeignSession && this.foreignAssetServiceUri) {
+        buffer = await this.downloadForeignAsset(kind, assetId);
+      } else {
+        buffer = await this.bot.clientCommands.asset.downloadAsset(kind, assetId);
+      }
       await ready(buffer);
-      this.assetFailures.delete(key);
+      this.assetFailures.delete(isolatedKey);
     })().catch((error) => {
       // A failed promise must not poison this asset for the rest of the session. Object updates can
       // retry it after a short backoff, which is important while region capabilities are settling.
-      this.assetRequests.delete(key);
-      this.assetFailures.set(key, Date.now());
+      this.assetRequests.delete(isolatedKey);
+      this.assetFailures.set(isolatedKey, Date.now());
       this.send('asset-error', { assetId, message: error.message });
     });
-    this.assetRequests.set(key, request);
+    this.assetRequests.set(isolatedKey, request);
+  }
+
+  async downloadForeignAsset(kind, assetId) {
+    if (this.foreignAssetServiceUri) {
+      const fetchUrl = `${this.foreignAssetServiceUri}/${encodeURIComponent(assetId)}?kind=${kind}`;
+      try {
+        const response = await fetch(fetchUrl);
+        if (response.ok) {
+          const arrayBuffer = await response.arrayBuffer();
+          return Buffer.from(arrayBuffer);
+        }
+      } catch (err) {
+        console.warn(`[SL Session] Foreign asset download failed from ${fetchUrl}:`, err);
+      }
+    }
+    return this.bot.clientCommands.asset.downloadAsset(kind, assetId);
   }
 
   /**
@@ -99,6 +196,14 @@ class ViewerSession {
    * the texture capability and retain ViewerAsset as a fallback for OpenSim and older regions.
    */
   async downloadTexture(assetId) {
+    if (this.isForeignSession && this.foreignAssetServiceUri) {
+      try {
+        const foreignBuffer = await this.downloadForeignAsset(AssetType.Texture, assetId);
+        if (foreignBuffer) return foreignBuffer;
+      } catch (err) {
+        console.warn(`[SL Session] Foreign GetTexture failed for ${assetId}:`, err.message);
+      }
+    }
     const caps = this.currentRegion()?.caps;
     if (caps?.getCapability && caps?.requestGet) {
       try {
@@ -305,6 +410,21 @@ class ViewerSession {
       simName: region?.regionName || '',
       inventoryRootId,
     };
+    this.homeGridContext = {
+      agentId: this.identity.agentId,
+      firstName,
+      lastName,
+      gridUri: request.loginUrl || request.login_uri || request.url || 'https://login.agni.lindenlab.com/cgi-bin/login.cgi',
+      sessionToken: region?.circuit?.sessionID?.toString?.() || 'home-session-id',
+      inventoryRootId,
+      assetServiceUri: null,
+    };
+    this.isForeignSession = false;
+    this.foreignGridUri = null;
+    this.foreignSeedCap = null;
+    this.foreignAssetServiceUri = null;
+    this.foreignAgentKey = null;
+    this.activeAssetServiceUri = null;
 
     const worldData = {
       region: { name: region?.regionName || null, x: region?.xCoordinate, y: region?.yCoordinate },
@@ -366,7 +486,36 @@ class ViewerSession {
 
   // ---- agent actions ----------------------------------------------------------------------------
 
-  teleport(params) { return actions.teleport(this.requireBot(), params); }
+  async teleport(params) {
+    const target = params.region
+      ? { isHypergrid: Boolean(params.isHypergrid), gridUri: params.gridUri, gatekeeperUrl: params.gatekeeperUrl, region: String(params.region), x: Number(params.x || 128), y: Number(params.y || 128), z: Number(params.z || 30) }
+      : actions.parseDestination(params.destination);
+
+    if (target.isHypergrid) {
+      const handshake = await this.performGatekeeperHandshake(target);
+      const bot = this.requireBot();
+      bot.performGatekeeperTeleport = async () => handshake;
+      const res = await actions.teleport(bot, { ...params, ...target }, null);
+      this.send('region_changed', {
+        regionName: target.region,
+        isForeign: true,
+        foreignGridUri: target.gridUri,
+        seedCapability: handshake?.seed_capability,
+      });
+      return { ...res, handshake };
+    }
+
+    if (this.isForeignSession) {
+      this.restoreHomeRegionContext();
+      this.send('region_changed', {
+        regionName: target.region,
+        isForeign: false,
+        homeGridUri: this.homeGridContext?.gridUri,
+      });
+    }
+
+    return actions.teleport(this.requireBot(), params, null);
+  }
   touchObject(params) { return actions.touchObject(this.requireBot(), params); }
   sit(params = {}) { return actions.sit(this.requireBot(), params); }
   stand() { return actions.stand(this.requireBot()); }
@@ -506,10 +655,11 @@ class ViewerSession {
     const commands = bot.clientCommands?.inventory;
     if (!commands) throw new Error('Second Life inventory interface unavailable');
     const root = commands.getInventoryRoot();
-    if (!root) return { folders: [], items: [] };
+    const effectiveRootId = root?.folderID?.toString() || this.homeGridContext?.inventoryRootId || this.identity.inventoryRootId;
+    if (!root && !effectiveRootId) return { folders: [], items: [] };
 
-    const rootId = root.folderID.toString();
-    let folder = root;
+    const rootId = effectiveRootId;
+    let folder = root || { folderID: { toString: () => rootId }, name: 'Home Inventory', getChildFolders: () => [], items: [], populate: async () => {} };
     if (folderId && folderId !== rootId) {
       try {
         const skeletonFolder = bot.agent?.inventory?.main?.skeleton?.get(folderId);
