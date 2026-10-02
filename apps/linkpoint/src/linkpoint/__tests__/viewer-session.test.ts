@@ -231,6 +231,28 @@ describe('desktop session script dialogs and lures', () => {
     await expect(session.respondScriptDialog({ id: sent[0][1].id, buttonIndex: 0 })).rejects.toThrow(/no longer pending/);
   });
 
+  it('dismisses a lure via interactions.dismissInteraction passing bot reference', async () => {
+    const { session, sent } = await sessionAfterSubscribing();
+    const sendMessage = vi.fn().mockReturnValue(1);
+    Object.defineProperty(session.bot, 'currentRegion', {
+      get: () => ({ circuit: { sendMessage, sessionID: uuid('session-id') } }),
+      configurable: true,
+    });
+    Object.defineProperty(session.bot, 'clientCommands', {
+      get: () => ({ comms: {}, teleport: {} }),
+      configurable: true,
+    });
+    session.bot.clientEvents.onLure.next({ from: uuid('f'), fromName: 'Sam', lureMessage: '', regionID: uuid('r'), position: { x: 1, y: 2, z: 3 }, gridX: 5, gridY: 6, lureID: uuid('lid') });
+    const lureId = sent.find(([type]) => type === 'lure')?.[1]?.id;
+
+    await expect(session.dismissInteraction({ id: lureId })).resolves.toEqual({ dismissed: true });
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+    const [packet] = sendMessage.mock.calls[0];
+    expect(packet.name).toBe('ImprovedInstantMessage');
+    expect(packet.MessageBlock.Dialog).toBe(24);
+    expect(session.pending.size).toBe(0);
+  });
+
   it('drops pending requests when the session closes', async () => {
     const { session, sent } = await sessionAfterSubscribing();
     session.bot.clientEvents.onLure.next({ from: uuid('f'), fromName: 'Sam', lureMessage: '', regionID: uuid('r'), position: { x: 1, y: 2, z: 3 }, gridX: 5, gridY: 6, lureID: uuid('lid') });

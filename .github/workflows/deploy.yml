@@ -21,6 +21,8 @@ on:
 
 permissions:
   contents: read
+  id-token: write
+  attestations: write
 
 env:
   JAVA_VERSION: '17'
@@ -32,6 +34,10 @@ jobs:
     name: Build Release (${{ matrix.target }}-${{ matrix.arch }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     strategy:
       fail-fast: false
       matrix:
@@ -120,6 +126,9 @@ jobs:
         echo "version_code=$(date +%s)" >> $GITHUB_OUTPUT
 
     - name: Update version in build.gradle.kts
+      env:
+        VERSION_NAME: ${{ steps.version.outputs.version_name }}
+        VERSION_CODE: ${{ steps.version.outputs.version_code }}
       run: |
         cd Linkpoint
         sed -i "s/versionName = \".*\"/versionName = \"${{ steps.version.outputs.version_name }}\"/" build.gradle.kts
@@ -150,6 +159,9 @@ jobs:
         GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
 
     - name: Prepare isolated matrix artifacts and SHA-256 checksums
+      env:
+        TARGET_ARCH: ${{ matrix.target }}-${{ matrix.arch }}
+        VER_NAME: ${{ steps.version.outputs.version_name }}
       run: |
         set -euo pipefail
         mkdir -p Linkpoint/build/outputs/dist
@@ -230,8 +242,9 @@ jobs:
         mkdir -p artifacts
         find raw-artifacts/ -type f \( -name "*.apk" -o -name "*.aab" \) -exec cp {} artifacts/ \;
         cd artifacts
-        sha256sum *.apk *.aab > checksums.sha256
-        cat checksums.sha256
+        sha256sum *.apk *.aab > SHA256SUMS
+        cp SHA256SUMS checksums.sha256
+        cat SHA256SUMS
 
     - name: Attest build provenance (SLSA Level 3)
       uses: actions/attest-build-provenance@520d128f165991a6c774bcb264f323e3d70747f4 # v2.2.0
@@ -242,16 +255,18 @@ jobs:
 
     - name: Generate changelog
       id: changelog
+      env:
+        VERSION: ${{ steps.version.outputs.version }}
       run: |
         if [ -f CHANGELOG.md ]; then
-          VERSION_ESCAPED=$(printf '%s\n' "${{ steps.version.outputs.version }}" | sed 's/[][\\.^$*+?(){}|/-]/\\&/g')
+          VERSION_ESCAPED=$(printf '%s\n' "$VERSION" | sed 's/[][\\.^$*+?(){}|/-]/\\&/g')
           awk -v version="$VERSION_ESCAPED" '
             $0 ~ "^## \\[" version "\\]" { in_section=1; print; next }
             in_section && $0 ~ "^## \\[" { exit }
             in_section { print }
           ' CHANGELOG.md > release_notes.md
           if [ ! -s release_notes.md ]; then
-            echo "## ${{ steps.version.outputs.version }}" > release_notes.md
+            echo "## $VERSION" > release_notes.md
             echo "" >> release_notes.md
             echo "- No dedicated changelog section found; using generated commit summary." >> release_notes.md
             git log --pretty=format:"- %s (%h)" $(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")..HEAD >> release_notes.md
