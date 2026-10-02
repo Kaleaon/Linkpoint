@@ -20,12 +20,23 @@ import OutfitViewer from "../screens/OutfitViewer.jsx";
 import { FriendsScreen, GroupsScreen, NoticesScreen, MuteListScreen, GenericInventoryScreen, SearchScreen } from "../screens/LiveScreens.jsx";
 import { AOScreen, AccountsScreen, DiagnosticsScreen, GridsScreen, MediaScreen, NotecardsScreen, ParcelScreen, TeleportScreen, TransactionsScreen } from "../screens/LumiyaTools.jsx";
 
+import WindowManagerEngine from "./WindowManagerEngine.jsx";
+
 // Ported from the big content column inside `shellStyle` (headers -> segTabs
 // -> chips -> the 13 screens' bodies), plus the split-view detail pane that
 // sits beside it on tablet/foldable devices.
 export default function ScreenBody() {
   const { state, actions } = useApp();
   const { norm, scr, consoleScene } = useTheme();
+
+  if (state.useWindowManager && scr !== "Login") {
+    return (
+      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+        <Header />
+        <WindowManagerEngine />
+      </div>
+    );
+  }
 
   return (
     <div style={{ flex: 1, minWidth: 0, display: "flex", position: "relative" }}>
