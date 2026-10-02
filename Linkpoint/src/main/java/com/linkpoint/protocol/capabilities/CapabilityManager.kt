@@ -4,6 +4,7 @@ import android.util.Log
 import com.linkpoint.network.core.HttpRequestOptions
 import com.linkpoint.network.core.PolicyClass
 import com.linkpoint.network.core.RequestThrottler
+import com.linkpoint.protocol.caps.SlidingWindowEventQueue
 import com.linkpoint.protocol.llsd.*
 import com.linkpoint.protocol.translation.LinkpointTranslationLayer
 import kotlinx.coroutines.*
@@ -49,7 +50,7 @@ interface CapabilityRequester {
  * - Per-capability request options
  * - Linkpoint-compatible URL repair for Agni grid
  */
-class CapabilityManager : CapabilityRequester {
+open class CapabilityManager : CapabilityRequester {
     
     companion object {
         private const val TAG = "CapabilityManager"
@@ -73,6 +74,8 @@ class CapabilityManager : CapabilityRequester {
         const val CAP_AGENT_STATE = "AgentState"
         const val CAP_AGENT_PROFILE = "AgentProfile"
         const val CAP_UPDATE_AGENT_INFO = "UpdateAgentInformation"
+        const val CAP_SERVER_SIDE_APPEARANCE = "ServerSideAppearance"
+        const val CAP_UPDATE_AVATAR_APPEARANCE = "UpdateAvatarAppearance"
         const val CAP_UPLOAD_BAKED_TEXTURE = "UploadBakedTexture"
         const val CAP_OBJECT_MEDIA = "ObjectMedia"
         const val CAP_OBJECT_MEDIA_NAVIGATE = "ObjectMediaNavigate"
@@ -253,6 +256,12 @@ class CapabilityManager : CapabilityRequester {
     
     private var seedCapability: String? = null
     private var eventQueueJob: Job? = null
+    private var eventQueueReconnectTriggerJob: Job? = null
+    
+    @Volatile
+    private var highestAckSequenceId: Int = 0
+
+    val slidingWindow = SlidingWindowEventQueue()
     
     private val _isReady = MutableStateFlow(false)
     val isReady: StateFlow<Boolean> = _isReady
@@ -357,7 +366,10 @@ class CapabilityManager : CapabilityRequester {
                 CAP_VIEW_STATS,
                 CAP_AGENT_STATE,
                 CAP_UPDATE_AGENT_INFO,
+                CAP_SERVER_SIDE_APPEARANCE,
+                CAP_UPDATE_AVATAR_APPEARANCE,
                 CAP_UPLOAD_BAKED_TEXTURE,
+                CAP_AGENT_PREFERENCES,
                 CAP_OBJECT_MEDIA,
                 CAP_PARCEL_VOICE,
                 CAP_PROVISION_VOICE,
@@ -965,7 +977,24 @@ class CapabilityManager : CapabilityRequester {
     }
     
     /**
-     * Start the event queue with Firestorm-style retry handling.
+     * Triggered on Android network callback event (e.g. Wi-Fi <-> cellular switch)
+     * Forces immediate reconnection request with highest acknowledged sequence ID.
+     */
+    fun onNetworkInterfaceChanged() {
+        val url = getCapability(CAP_EVENT_QUEUE) ?: return
+        Log.i(TAG, "⚡ CapabilityManager: Network interface changed. Immediate EventQueue recovery (seq=$highestAckSequenceId)")
+        eventQueueReconnectTriggerJob?.cancel()
+        eventQueueReconnectTriggerJob = scope.launch {
+            try {
+                pollEventQueueOnce(url)
+            } catch (e: Exception) {
+                Log.w(TAG, "Immediate event queue reconnect poll error: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Start the event queue with persistent sequence tracking and Firestorm-style retry handling.
      * 
      * The event queue uses long-polling, so timeouts are expected and normal.
      * Uses exponential backoff for actual errors, but immediate retry for
@@ -974,62 +1003,14 @@ class CapabilityManager : CapabilityRequester {
     private fun startEventQueue(url: String) {
         eventQueueJob?.cancel()
         eventQueueJob = scope.launch {
-            var ack: Int? = null
             var done = false
             var consecutiveErrors = 0
             val options = HttpRequestOptions.forEventQueue()
             
             while (isActive && !done) {
                 try {
-                    val requestBody = LLSDMap().apply {
-                        this["ack"] = ack?.let { LLSDInteger(it) } ?: LLSDBoolean(true)
-                        this["done"] = LLSDBoolean(false)
-                    }
-                    
-                    val xml = LLSDXmlUtils.wrap(requestBody)
-                    
-                    val request = Request.Builder()
-                        .url(url)
-                        .post(xml.toRequestBody("application/llsd+xml".toMediaType()))
-                        .build()
-                    
-                    eventQueueClient.newCall(request).execute().use { response ->
-                        val contentType = response.header("Content-Type")
-                        val code = response.code
-
-                        // 502 is expected for long-poll timeout - retry immediately
-                        if (code == 502) {
-                            consecutiveErrors = 0  // Not an error
-                            return@use
-                        }
-
-                        // Handle other HTTP errors with backoff
-                        if (code in RETRYABLE_HTTP_CODES) {
-                            consecutiveErrors++
-                            val retryAfter = parseRetryAfterHeader(response)
-                            val delayMs = options.calculateRetryDelay(consecutiveErrors - 1, retryAfter)
-                            Log.w(TAG, "Event queue HTTP $code, retrying in ${delayMs}ms")
-                            delay(delayMs)
-                            return@use
-                        }
-
-                        // Success - reset error count
-                        consecutiveErrors = 0
-
-                        response.body?.byteStream()?.use { stream ->
-                            val llsd = LLSDStreamingParser.parseAnyToValue(stream, contentType)
-                            if (llsd is LLSDMap) {
-                                ack = llsd.getInt("id")
-
-                                val events = llsd.getArray("events")
-                                events?.value?.forEach { event ->
-                                    if (event is LLSDMap) {
-                                        processEvent(event)
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    pollEventQueueOnce(url)
+                    consecutiveErrors = 0  // Reset on success
                 } catch (e: SocketTimeoutException) {
                     // Timeout is expected for long-polling, retry immediately
                     Log.v(TAG, "Event queue poll timeout, continuing...")
@@ -1038,17 +1019,70 @@ class CapabilityManager : CapabilityRequester {
                 } catch (e: Exception) {
                     if (isActive) {
                         consecutiveErrors++
-                        val delayMs = options.calculateRetryDelay(consecutiveErrors - 1, null)
-                        Log.w(TAG, "Event queue error (${e.javaClass.simpleName}), " +
+                        val rawDelay = options.calculateRetryDelay(consecutiveErrors - 1, null)
+                        val delayMs = minOf(rawDelay, 30_000L) // Capped at 30 seconds max
+                        Log.w(TAG, "Event queue error (${e.javaClass.simpleName}, seq=$highestAckSequenceId), " +
                             "retrying in ${delayMs}ms (errors: $consecutiveErrors)", e)
                         
-                        // Cap consecutive errors to prevent excessive backoff
+                        delay(delayMs)
                         if (consecutiveErrors >= options.retries) {
-                            Log.e(TAG, "Too many consecutive event queue errors, longer backoff")
-                            delay(30_000)  // 30 second pause before resetting
-                            consecutiveErrors = 0
-                        } else {
-                            delay(delayMs)
+                            consecutiveErrors = options.retries - 1
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun pollEventQueueOnce(url: String) {
+        val ackSeq = highestAckSequenceId
+        val requestBody = LLSDMap().apply {
+            this["ack"] = if (ackSeq > 0) LLSDInteger(ackSeq) else LLSDBoolean(true)
+            this["done"] = LLSDBoolean(false)
+        }
+        
+        val xml = LLSDXmlUtils.wrap(requestBody)
+        
+        val request = Request.Builder()
+            .url(url)
+            .post(xml.toRequestBody("application/llsd+xml".toMediaType()))
+            .build()
+        
+        eventQueueClient.newCall(request).execute().use { response ->
+            val contentType = response.header("Content-Type")
+            val code = response.code
+
+            // 502 is expected for long-poll timeout - retry immediately
+            if (code == 502) {
+                return
+            }
+
+            // Handle other HTTP errors with backoff
+            if (code in RETRYABLE_HTTP_CODES) {
+                val retryAfter = parseRetryAfterHeader(response)
+                val delayMs = minOf(HttpRequestOptions.forEventQueue().calculateRetryDelay(1, retryAfter), 30_000L)
+                Log.w(TAG, "Event queue HTTP $code, retrying in ${delayMs}ms")
+                delay(delayMs)
+                throw RetryableException("HTTP $code")
+            }
+
+            if (!response.isSuccessful) {
+                throw IOException("HTTP $code from event queue")
+            }
+
+            response.body?.byteStream()?.use { stream ->
+                val llsd = LLSDStreamingParser.parseAnyToValue(stream, contentType)
+                if (llsd is LLSDMap) {
+                    val resId = llsd.getInt("id") ?: 0
+                    if (resId > highestAckSequenceId) {
+                        highestAckSequenceId = resId
+                        Log.d(TAG, "EventQueue updated highestAckSequenceId = $highestAckSequenceId")
+                    }
+
+                    val events = llsd.getArray("events")
+                    events?.value?.forEach { event ->
+                        if (event is LLSDMap) {
+                            processEvent(event)
                         }
                     }
                 }
