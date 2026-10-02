@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.linkpoint.LinkpointApp
 import com.linkpoint.network.LoginResult
+import com.linkpoint.core.ConnectionState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -33,8 +34,8 @@ fun L2LoginRoute(
     var status by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf(false) }
-    val isConnected by app.sessionManager.connectionState
-        .collectAsState(initial = app.sessionManager.connectionState.value)
+    val connectionState by app.sessionManager.connectionState.collectAsState()
+    val isConnected = connectionState == ConnectionState.CONNECTED
 
     LaunchedEffect(isConnected) {
         if (app.sessionManager.isConnected()) onLoginSuccess()

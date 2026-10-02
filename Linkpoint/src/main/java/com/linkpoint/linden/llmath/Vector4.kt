@@ -65,12 +65,12 @@ class Vector4(var x: Float, var y: Float, var z: Float, var w: Float) {
 
     operator fun get(idx: Int): Float = when (idx) {
         0 -> x; 1 -> y; 2 -> z; 3 -> w
-        else -> throw IndexOutOfBoundsException(idx)
+        else -> throw IndexOutOfBoundsException("Index: $idx")
     }
 
     operator fun set(idx: Int, v: Float) = when (idx) {
         0 -> x = v; 1 -> y = v; 2 -> z = v; 3 -> w = v
-        else -> throw IndexOutOfBoundsException(idx)
+        else -> throw IndexOutOfBoundsException("Index: $idx")
     }
 
     operator fun unaryMinus(): Vector4 = Vector4(-x, -y, -z, w)

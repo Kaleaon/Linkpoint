@@ -59,6 +59,7 @@ import com.linkpoint.ui.search.ComposeSearchResult
 import com.linkpoint.ui.search.SearchScreen
 import com.linkpoint.ui.teleport.TeleportHistoryEntry
 import com.linkpoint.ui.teleport.TeleportHistoryScreen
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -844,6 +845,8 @@ fun L2ProfileRoute(
         }
     }
 
+    val onlineFriends by (if (app != null && app.isFriendsManagerInitialized()) app.friendsManager.onlineFriends else MutableStateFlow(emptySet())).collectAsState()
+
     val data = ProfileData(
         id = targetId ?: UUID(0L, 0L),
         displayName = profile?.displayName
@@ -855,7 +858,7 @@ fun L2ProfileRoute(
         partner = null,
         groups = profile?.memberOf ?: emptyList(),
         webUrl = null,
-        isOnline = isMe || (app?.isFriendsManagerInitialized() == true && targetId != null && targetId in app.friendsManager.onlineFriends.value),
+        isOnline = isMe || (app?.isFriendsManagerInitialized() == true && targetId != null && targetId in onlineFriends),
         location = null,
         isFriend = targetId != null && app?.isFriendsManagerInitialized() == true &&
             app.friendsManager.getAllFriends().any { it.agentId == targetId },
