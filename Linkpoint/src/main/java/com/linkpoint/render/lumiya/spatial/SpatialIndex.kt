@@ -429,24 +429,7 @@ class OctreeNode(
         }
     }
 
-    private fun isEmptyNode(): Boolean {
-        if (objects.isNotEmpty()) return false
-        val ch = children ?: return true
-        return ch.all { it == null || (it.isLeaf && it.objects.isEmpty()) }
-    }
 
-    private fun collapseChildren(pool: OctreeNodePool?) {
-        val ch = children ?: return
-        for (child in ch) {
-            if (child != null) {
-                child.collapseChildren(pool)
-                if (pool != null) {
-                    pool.recycle(child)
-                }
-            }
-        }
-        children = null
-    }
     fun countNodes(): Int {
         var count = 1
         children?.forEach { child ->
