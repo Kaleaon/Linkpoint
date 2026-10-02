@@ -4,6 +4,7 @@ import com.linkpoint.feature.discovery.MapUiState
 import com.linkpoint.feature.discovery.MinimapUiState
 import com.linkpoint.feature.discovery.RadarUiState
 import com.linkpoint.feature.discovery.SLURLUiState
+import com.linkpoint.feature.discovery.SearchUiState
 import com.linkpoint.feature.discovery.TeleportHistoryUiState
 import com.linkpoint.feature.inventory.InventoryUiState
 import com.linkpoint.feature.inventory.MyAvatarUiState
@@ -90,6 +91,12 @@ class UiStateComponentsTest {
             MapUiState.EmptyRegionResults,
             MapUiState.Ready
         )
+        val searchStates: List<SearchUiState> = listOf(
+            SearchUiState.Loading,
+            SearchUiState.Error,
+            SearchUiState.EmptySearchResults,
+            SearchUiState.Ready
+        )
         val radarStates: List<RadarUiState> = listOf(
             RadarUiState.Loading,
             RadarUiState.Error,
@@ -115,6 +122,7 @@ class UiStateComponentsTest {
             SLURLUiState.Ready
         )
         assertEquals(4, mapStates.size)
+        assertEquals(4, searchStates.size)
         assertEquals(4, radarStates.size)
         assertEquals(4, minimapStates.size)
         assertEquals(4, historyStates.size)
