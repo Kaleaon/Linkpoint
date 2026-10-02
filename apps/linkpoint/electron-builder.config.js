@@ -46,22 +46,33 @@ function mainProcessDeps(rootDir) {
 // rollup and esbuild along with it.
 const NOT_ACTUALLY_RUNTIME = new Set(['vitest']);
 
-const rootDir = __dirname;
-const workspaceRoot = path.resolve(rootDir, '../..');
+function safeRealpath(p) {
+  try {
+    return fs.realpathSync(p);
+  } catch {
+    return path.resolve(p);
+  }
+}
+
+const rootDir = safeRealpath(__dirname);
+const workspaceRoot = safeRealpath(path.resolve(rootDir, '../..'));
 
 function isSubdirectoryOrSame(child, parent) {
-  const relative = path.relative(parent, child);
+  const realChild = safeRealpath(child);
+  const realParent = safeRealpath(parent);
+  const relative = path.relative(realParent, realChild);
   return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
 }
 
 // Resolve a package the way Node does: walk up looking for node_modules.
 function resolvePackageDir(name, fromDir, stopDir = workspaceRoot) {
-  let dir = fromDir;
+  let dir = safeRealpath(fromDir);
+  const realStopDir = safeRealpath(stopDir);
   for (;;) {
     const candidate = path.join(dir, 'node_modules', name);
-    if (fs.existsSync(path.join(candidate, 'package.json'))) return candidate;
+    if (fs.existsSync(path.join(candidate, 'package.json'))) return safeRealpath(candidate);
     const parent = path.dirname(dir);
-    if (parent === dir || !isSubdirectoryOrSame(dir, stopDir)) return null;
+    if (parent === dir || !isSubdirectoryOrSame(dir, realStopDir)) return null;
     dir = parent;
   }
 }
@@ -119,17 +130,10 @@ function topLevelPackages(rootDir) {
 function unusedTopLevelPackages(rootDir) {
   const keep = new Set();
   for (const dir of dependencyClosure(rootDir)) {
-    const segments = dir.split('/').filter((s) => s !== 'node_modules');
-    // Keep the outermost package, which carries any nested node_modules with
-    // it, AND the package's own name at top level. A dependency can be present
-    // both hoisted and nested, and electron-builder's walker may package the
-    // hoisted copy while this closure resolved the nested one -- dropping the
-    // hoisted copy then leaves the app with neither (`Cannot find module
-    // 'xml2js'` at startup).
-    for (const depth of [0, segments.length - 1]) {
-      const name = segments[depth];
-      if (!name) continue;
-      keep.add(name.startsWith('@') ? `${name}/${segments[depth + 1]}` : name);
+    // Extract every package name along the relative path chain (e.g. node_modules/@scope/pkg or node_modules/pkg)
+    const matches = dir.matchAll(/(?:^|\/)node_modules\/((?:@[^\/]+\/[^\/]+)|(?:[^\/]+))/g);
+    for (const m of matches) {
+      if (m[1]) keep.add(m[1]);
     }
   }
   return topLevelPackages(rootDir)
