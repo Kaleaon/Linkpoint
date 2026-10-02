@@ -158,14 +158,97 @@ async function acceptLure(bot, pending, params) {
   return { accepted: true, message: result && result.message ? String(result.message) : '' };
 }
 
+async function sendLureDeclined(bot, event) {
+  if (!bot || !event) return;
+  try {
+    const c = commands(bot);
+    if (c.comms && typeof c.comms.declineLure === 'function') {
+      await c.comms.declineLure(event);
+      return;
+    }
+    if (c.comms && typeof c.comms.denyTeleport === 'function') {
+      await c.comms.denyTeleport(event);
+      return;
+    }
+    const circuit = bot.currentRegion?.circuit || bot.circuit || c.comms?.circuit;
+    if (circuit && typeof circuit.sendMessage === 'function') {
+      const { ImprovedInstantMessageMessage } = require('@caspertech/node-metaverse/dist/lib/classes/messages/ImprovedInstantMessage');
+      const { InstantMessageDialog } = require('@caspertech/node-metaverse/dist/lib/enums/InstantMessageDialog');
+      const { PacketFlags } = require('@caspertech/node-metaverse/dist/lib/enums/PacketFlags');
+      const { UUID, Vector3, Utils } = require('@caspertech/node-metaverse');
+
+      const toUUID = (val) => {
+        if (!val) return UUID.zero();
+        if (val instanceof UUID) return val;
+        const str = typeof val.toString === 'function' ? val.toString() : String(val);
+        try {
+          return new UUID(str);
+        } catch {
+          return UUID.zero();
+        }
+      };
+
+      let agent = null;
+      try { agent = bot.agent; } catch { /* bot.agent getter throws if disconnected */ }
+      let agentId = UUID.zero();
+      if (agent && agent.agentID) {
+        agentId = toUUID(agent.agentID);
+      } else if (typeof bot.agentID === 'function') {
+        try { agentId = toUUID(bot.agentID()); } catch { /* agentID getter/function throws */ }
+      }
+      const firstName = (agent && agent.firstName) || bot.firstName || '';
+      const lastName = (agent && agent.lastName) || bot.lastName || '';
+      const agentName = [firstName, lastName].filter(Boolean).join(' ').trim();
+      const toId = toUUID(event.from);
+      const lureId = toUUID(event.lureID);
+
+      const im = new ImprovedInstantMessageMessage();
+      im.AgentData = {
+        AgentID: agentId,
+        SessionID: circuit.sessionID ? toUUID(circuit.sessionID) : UUID.zero(),
+      };
+      im.MessageBlock = {
+        FromGroup: false,
+        ToAgentID: toId,
+        ParentEstateID: 0,
+        RegionID: UUID.zero(),
+        Position: Vector3.getZero(),
+        Offline: 0,
+        Dialog: InstantMessageDialog.DenyTeleport,
+        ID: lureId,
+        Timestamp: Math.floor(Date.now() / 1000),
+        FromAgentName: Utils.StringToBuffer(agentName),
+        Message: Utils.StringToBuffer(''),
+        BinaryBucket: Buffer.alloc(0),
+      };
+      im.EstateBlock = { EstateID: 0 };
+
+      const seq = circuit.sendMessage(im, PacketFlags.Reliable);
+      if (typeof circuit.waitForAck === 'function' && typeof seq === 'number') {
+        await circuit.waitForAck(seq, 10000).catch(() => {});
+      }
+    }
+  } catch {
+    // Offline states and network errors fall back gracefully to local item removal
+  }
+}
+
 /**
- * Dismiss an interaction locally. This does not tell the grid anything: the
- * client library has no call for declining a lure, and an unanswered script
- * dialog simply times out in the script.
+ * Dismiss an interaction locally or notify the grid when declining a lure.
+ * Non-lure dismissals (e.g. script dialogs) clear locally without network calls.
  */
-function dismissInteraction(pending, params) {
+async function dismissInteraction(bot, pending, params) {
+  if (bot && typeof bot.remove === 'function') {
+    params = pending;
+    pending = bot;
+    bot = null;
+  }
   if (!params || typeof params.id !== 'string') throw new Error('An interaction id is required');
-  return { dismissed: pending.remove(params.id) };
+  const entry = pending && pending.items ? pending.items.get(params.id) : undefined;
+  if (entry && entry.kind === 'lure') {
+    await sendLureDeclined(bot, entry.event);
+  }
+  return { dismissed: pending ? pending.remove(params.id) : false };
 }
 
 /**
