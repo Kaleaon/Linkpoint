@@ -346,7 +346,7 @@ class MaterialLoader(
         return try {
             val builder = MaterialBuilder()
                 .platform(MaterialBuilder.Platform.MOBILE)
-                .targetApi(MaterialBuilder.TargetApi.OPENGL)
+                .targetApi(MaterialBuilder.TargetApi.ALL)
                 .optimization(MaterialBuilder.Optimization.PERFORMANCE)
                 .material(source)
 

@@ -21,6 +21,7 @@ class FilamentRenderCommandConsumer(
         private const val PENDING_CAPACITY = 4096
     }
 
+    private val recorder = ParallelCommandBufferRecorder()
     private val terrainHeightmap = FloatArray(REGION_SIZE * REGION_SIZE)
     private var consumeJob: Job? = null
     private var readyWatcherJob: Job? = null
@@ -42,11 +43,12 @@ class FilamentRenderCommandConsumer(
         if (consumeJob != null) return
         consumeJob = scope.launch {
             stream.commands.collect { command ->
+                val prepared = recorder.recordSingleCommand(command)
                 renderManager.dispatcher.post(Runnable {
                     if (!renderManager.isReady()) {
                         bufferPending(command)
                     } else {
-                        applyCommand(command)
+                        applyPreparedCommand(prepared)
                     }
                 })
             }
@@ -81,48 +83,51 @@ class FilamentRenderCommandConsumer(
         }
         if (drained.isEmpty()) return
         Log.i(TAG, "Replaying ${drained.size} pending render commands after primRenderer ready")
-        for (command in drained) applyCommand(command)
+        for (command in drained) {
+            val prepared = recorder.recordSingleCommand(command)
+            applyPreparedCommand(prepared)
+        }
     }
 
-    private fun applyCommand(command: SceneRenderCommand) {
+    private fun applyPreparedCommand(prepared: PreparedRenderCommand) {
         try {
-            when (command) {
-                is SceneRenderCommand.UpsertPrim -> {
-                    if (command.update.pcode == 47) {
+            when (prepared) {
+                is PreparedRenderCommand.PreparedUpsertPrim -> {
+                    if (prepared.isAvatar) {
                         renderManager.getSceneManager()?.updateAvatar(
-                            agentId = command.update.fullId,
-                            position = command.update.position,
-                            rotation = command.update.rotation
+                            agentId = prepared.update.fullId,
+                            position = prepared.update.position,
+                            rotation = prepared.update.rotation
                         )
                     } else {
-                        renderManager.updatePrim(command.update)
+                        renderManager.updatePrim(prepared.update)
                     }
                 }
-                is SceneRenderCommand.UpsertMesh -> {
+                is PreparedRenderCommand.PreparedUpsertMesh -> {
                     renderManager.attachMeshAsset(
-                        command.localId,
-                        command.meshData,
-                        command.textureEntry,
+                        prepared.localId,
+                        prepared.meshData,
+                        prepared.textureEntry,
                         binder = null
                     )
                 }
-                is SceneRenderCommand.UpdateMaterial -> {
-                    command.fallbackUpdate?.let { renderManager.updatePrim(it) }
+                is PreparedRenderCommand.PreparedUpdateMaterial -> {
+                    prepared.fallbackUpdate?.let { renderManager.updatePrim(it) }
                 }
-                is SceneRenderCommand.RemoveEntity -> {
-                    renderManager.removePrim(command.localId)
-                    command.fullId?.let { renderManager.getSceneManager()?.removeObject(it) }
+                is PreparedRenderCommand.PreparedRemoveEntity -> {
+                    renderManager.removePrim(prepared.localId)
+                    prepared.fullId?.let { renderManager.getSceneManager()?.removeObject(it) }
                 }
-                is SceneRenderCommand.SetCamera -> {
-                    renderManager.cameraController.setAgentPosition(command.position)
+                is PreparedRenderCommand.PreparedSetCamera -> {
+                    renderManager.cameraController.setAgentPosition(prepared.position)
                 }
-                is SceneRenderCommand.SetTerrainPatch -> {
-                    applyPatch(command.patch)
+                is PreparedRenderCommand.PreparedSetTerrainPatch -> {
+                    applyPatch(prepared.patch)
                     renderManager.getTerrainRenderer()?.setHeightmap(toRendererHeightmap())
                 }
             }
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to apply command $command: ${e.message}")
+            Log.w(TAG, "Failed to apply prepared command $prepared: ${e.message}")
         }
     }
 

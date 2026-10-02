@@ -43,6 +43,18 @@ interface CapabilityParserStrategy {
     fun transformHeaders(capName: String, headers: Map<String, String> = emptyMap()): Map<String, String>
 }
 
+private inline fun logDebug(tag: String, message: String) {
+    runCatching { Log.d(tag, message) }
+}
+
+private inline fun logWarn(tag: String, message: String) {
+    runCatching { Log.w(tag, message) }
+}
+
+private inline fun logError(tag: String, message: String, throwable: Throwable? = null) {
+    runCatching { if (throwable != null) Log.e(tag, message, throwable) else Log.e(tag, message) }
+}
+
 /**
  * Dedicated strategy for Linden Lab / Second Life grids (Agni, Aditi).
  * Encapsulates LLSD parsing, Agni simulator URL repair, and Linden S3 headers.
@@ -65,11 +77,11 @@ class LindenS3CapHandler(
                 }.toMap()
                 result.ifEmpty { null }
             } else {
-                Log.w(TAG, "Linden S3 capability response was not an LLSD map: ${llsd?.javaClass?.simpleName}")
+                logWarn(TAG, "Linden S3 capability response was not an LLSD map: ${llsd?.javaClass?.simpleName}")
                 null
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse Linden S3 capability response", e)
+            logError(TAG, "Failed to parse Linden S3 capability response", e)
             null
         }
     }
@@ -120,12 +132,12 @@ class OpenSimWebFetchCapHandler : CapabilityParserStrategy {
                     llsd.getString(key)?.takeIf { it.isNotEmpty() }?.let { key to it }
                 }.toMap()
                 if (map.isNotEmpty()) {
-                    runCatching { Log.d(TAG, "Successfully parsed OpenSim capabilities via LLSD (${map.size} caps)") }
+                    logDebug(TAG, "Successfully parsed OpenSim capabilities via LLSD (${map.size} caps)")
                     return map
                 }
             }
         } catch (e: Exception) {
-            runCatching { Log.d(TAG, "LLSD parse attempt on OpenSim response failed, attempting JSON/text fallback: ${e.message}") }
+            logDebug(TAG, "LLSD parse attempt on OpenSim response failed, attempting JSON/text fallback: ${e.message}")
         }
 
         // 2. Try JSON parsing (OpenSim WebFetch services may return JSON)
@@ -143,12 +155,12 @@ class OpenSimWebFetchCapHandler : CapabilityParserStrategy {
                     }
                 }
                 if (map.isNotEmpty()) {
-                    runCatching { Log.d(TAG, "Successfully parsed OpenSim capabilities via JSON (${map.size} caps)") }
+                    logDebug(TAG, "Successfully parsed OpenSim capabilities via JSON (${map.size} caps)")
                     return map
                 }
             }
         } catch (e: Exception) {
-            runCatching { Log.d(TAG, "JSON parse attempt on OpenSim response failed: ${e.message}") }
+            logDebug(TAG, "JSON parse attempt on OpenSim response failed: ${e.message}")
         }
 
         // 3. Try plain key-value parsing (key=value lines)
@@ -165,14 +177,14 @@ class OpenSimWebFetchCapHandler : CapabilityParserStrategy {
                 }
             }
             if (map.isNotEmpty()) {
-                runCatching { Log.d(TAG, "Successfully parsed OpenSim capabilities via key-value text (${map.size} caps)") }
+                logDebug(TAG, "Successfully parsed OpenSim capabilities via key-value text (${map.size} caps)")
                 return map
             }
         } catch (e: Exception) {
-            runCatching { Log.d(TAG, "Key-value parse attempt on OpenSim response failed: ${e.message}") }
+            logDebug(TAG, "Key-value parse attempt on OpenSim response failed: ${e.message}")
         }
 
-        runCatching { Log.w(TAG, "Failed to parse OpenSim capability response across all formats") }
+        logWarn(TAG, "Failed to parse OpenSim capability response across all formats")
         return null
     }
 
@@ -298,7 +310,7 @@ object CapabilityStrategyDispatcher {
             ?: loginUrl?.let { LinkpointTranslationLayer.detectGridType(it) }
             ?: LinkpointTranslationLayer.GridType.UNKNOWN
 
-        runCatching { Log.d(TAG, "Selecting strategy for gridType=$resolvedGridType (loginUrl=$loginUrl)") }
+        logDebug(TAG, "Selecting strategy for gridType=$resolvedGridType (loginUrl=$loginUrl)")
 
         return when (resolvedGridType) {
             LinkpointTranslationLayer.GridType.AGNI,
