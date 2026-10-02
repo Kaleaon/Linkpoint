@@ -18,6 +18,9 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.zip.Inflater
 
+import com.linkpoint.scene.worker.SceneWorkerPool
+import com.linkpoint.scene.worker.TaskPriority
+
 /**
  * Manages mesh asset downloading and parsing
  * Handles Second Life mesh format (LLMESH)
@@ -30,7 +33,8 @@ import java.util.zip.Inflater
 class MeshManager(
     private val context: Context,
     private val cache: AssetCache,
-    private val capabilityManager: CapabilityManager
+    private val capabilityManager: CapabilityManager,
+    private val workerPool: SceneWorkerPool = SceneWorkerPool.getInstance()
 ) {
     companion object {
         private const val TAG = "MeshManager"
@@ -79,6 +83,12 @@ class MeshManager(
      * Get mesh data (cached or download).
      */
     suspend fun getMesh(meshId: UUID, lod: MeshLOD = MeshLOD.HIGH): MeshData? {
+        // Drop or defer low-priority distant mesh decoding tasks when worker queue capacity reaches maximum limit
+        if (lod == MeshLOD.LOW && workerPool.getQueueSize() >= workerPool.getMaxQueueCapacity()) {
+            Log.w(TAG, "Worker queue capacity limit reached (${workerPool.getQueueSize()}/${workerPool.getMaxQueueCapacity()}). Dropping low-priority distant mesh decode for $meshId")
+            return null
+        }
+
         // Check cache (raw bytes cache is LOD-independent — parsing happens per call)
         cache.get(meshId, AssetType.MESH)?.let { data ->
             return parseMesh(meshId, data, lod)

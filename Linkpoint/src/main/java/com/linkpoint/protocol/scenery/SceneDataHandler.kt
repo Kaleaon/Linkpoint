@@ -8,9 +8,12 @@ import com.linkpoint.protocol.messages.PacketCodec
 import com.linkpoint.render.RenderQueue
 import com.linkpoint.render.RenderableUpdate
 import com.linkpoint.render.SceneGraph
+import com.linkpoint.scene.worker.SceneWorkerPool
+import com.linkpoint.scene.worker.TaskPriority
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -27,7 +30,8 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class SceneDataHandler(
     private val sceneGraph: SceneGraph? = null,
-    private val renderQueue: RenderQueue? = null
+    private val renderQueue: RenderQueue? = null,
+    private val workerPool: SceneWorkerPool = SceneWorkerPool.getInstance()
 ) {
     
     companion object {
@@ -35,6 +39,33 @@ class SceneDataHandler(
         
         // Layer types
         private const val LAYER_TYPE_TERRAIN = 76
+    }
+
+    /**
+     * Handle LayerData asynchronously on background worker thread.
+     */
+    fun handleLayerDataAsync(data: ByteArray): CompletableFuture<Boolean> {
+        return workerPool.submitCallable(TaskPriority.HIGH, "LayerDataPacket") {
+            handleLayerData(data)
+        }
+    }
+
+    /**
+     * Handle ObjectUpdate asynchronously on background worker thread.
+     */
+    fun handleObjectUpdateAsync(rawPacket: ByteArray): CompletableFuture<Boolean> {
+        return workerPool.submitCallable(TaskPriority.HIGH, "ObjectUpdatePacket") {
+            handleObjectUpdate(rawPacket)
+        }
+    }
+
+    /**
+     * Handle ObjectProperties asynchronously on background worker thread.
+     */
+    fun handleObjectPropertiesAsync(data: ByteArray): CompletableFuture<Boolean> {
+        return workerPool.submitCallable(TaskPriority.HIGH, "ObjectPropertiesPacket") {
+            handleObjectProperties(data)
+        }
     }
     
     /** Terrain data storage */
