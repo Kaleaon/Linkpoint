@@ -14,8 +14,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-test:
-    name: Build and Test
+  android:
+    name: Android
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
@@ -48,3 +48,72 @@ jobs:
 
       - name: Assemble Debug build
         run: ./gradlew assembleDebug
+
+  web:
+    name: Web
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Check viewer contract
+        run: bash scripts/check_viewer_contract.sh
+
+      - name: Run web checks (typecheck, test, build)
+        run: npm run check:web
+
+  rust:
+    name: Rust
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Set up Rust cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Check Rust formatting
+        run: cargo fmt --all --check
+
+      - name: Run Clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+      - name: Run Rust tests
+        run: cargo test --workspace --locked
+
+  ci-status:
+    name: CI Status Gate
+    runs-on: ubuntu-latest
+    needs: [android, web, rust]
+    if: always()
+
+    steps:
+      - name: Evaluate status
+        run: |
+          if [[ "${{ needs.android.result }}" != "success" || "${{ needs.web.result }}" != "success" || "${{ needs.rust.result }}" != "success" ]]; then
+            echo "One or more required CI jobs failed."
+            exit 1
+          fi
+          echo "All required CI jobs passed."
+
