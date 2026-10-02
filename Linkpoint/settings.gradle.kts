@@ -2,7 +2,6 @@ pluginManagement {
     repositories {
         maven { url = uri("https://maven-central.storage-download.googleapis.com/maven2") }
         google()
-        maven { url = uri("https://repo1.maven.org/maven2/") }
         mavenCentral()
         gradlePluginPortal()
     }
@@ -11,14 +10,18 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        maven {
+            url = uri("https://jitpack.io")
+            content {
+                includeGroupByRegex("com\\.github\\..*")
+            }
+        }
         maven { url = uri("https://maven-central.storage-download.googleapis.com/maven2") }
         google()
-        maven { url = uri("https://repo1.maven.org/maven2/") }
         mavenCentral()
-        maven { url = uri("https://jitpack.io") }
-        maven { 
+        maven {
             name = "Clojars"
-            url = uri("https://repo.clojars.org/") 
+            url = uri("https://repo.clojars.org/")
         }
     }
 }
