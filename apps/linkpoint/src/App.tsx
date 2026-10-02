@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { AppProvider, useApp } from "./context/AppContext.jsx";
 import { ThemeProvider, useTheme } from "./context/ThemeContext.jsx";
+import { AnnouncerProvider } from "./context/AnnouncerContext.jsx";
 import Shell from "./components/Shell.jsx";
 import SystemDialog from "./components/SystemDialog.jsx";
 import Toast from "./components/Toast.jsx";
@@ -47,13 +48,15 @@ function Viewer() {
 export default function App({ client }: { client: ViewerClient }) {
   return (
     <ErrorBoundary label="Linkpoint">
-      <ViewerClientProvider client={client}>
-        <AppProvider>
-          <ThemeProvider>
-            <Viewer />
-          </ThemeProvider>
-        </AppProvider>
-      </ViewerClientProvider>
+      <AnnouncerProvider>
+        <ViewerClientProvider client={client}>
+          <AppProvider>
+            <ThemeProvider>
+              <Viewer />
+            </ThemeProvider>
+          </AppProvider>
+        </ViewerClientProvider>
+      </AnnouncerProvider>
     </ErrorBoundary>
   );
 }

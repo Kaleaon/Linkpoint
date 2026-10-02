@@ -1,5 +1,6 @@
 import { useApp } from "../context/AppContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
+import { AnnouncerProvider } from "../context/AnnouncerContext.jsx";
 import { app } from "../linkpoint/app";
 import MenuBar from "./MenuBar.jsx";
 import Shell from "./Shell.jsx";
@@ -23,26 +24,28 @@ export default function DeviceFrame() {
   const cfWrap = { flex: 1, minHeight: 0, minWidth: 0, position: "relative", display: "flex", overflow: "hidden", background: V.bg };
 
   return (
-    <div className="device-frame">
-      <div style={frameStyle}>
-        {loggedIn && state.screen !== "Login" && <MenuBar />}
-        <div style={cfWrap}>
-          {state.screen === "Login" || !loggedIn ? (
-            <Shell />
-          ) : isConsole ? (
-            <ConsoleFrame />
-          ) : isFloat ? (
-            <FloatersDesktop />
-          ) : (
-            <Shell />
-          )}
-          <SystemDialog />
-          <InteractionDialog />
-          <Toast />
+    <AnnouncerProvider>
+      <div className="device-frame">
+        <div style={frameStyle}>
+          {loggedIn && state.screen !== "Login" && <MenuBar />}
+          <div style={cfWrap}>
+            {state.screen === "Login" || !loggedIn ? (
+              <Shell />
+            ) : isConsole ? (
+              <ConsoleFrame />
+            ) : isFloat ? (
+              <FloatersDesktop />
+            ) : (
+              <Shell />
+            )}
+            <SystemDialog />
+            <InteractionDialog />
+            <Toast />
+          </div>
+          <BottomTabs />
+          <TileNav />
         </div>
-        <BottomTabs />
-        <TileNav />
       </div>
-    </div>
+    </AnnouncerProvider>
   );
 }
