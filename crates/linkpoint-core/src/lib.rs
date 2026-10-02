@@ -2,6 +2,11 @@
 
 use serde::{Deserialize, Serialize};
 use std::sync::mpsc::{self, Receiver, Sender};
+use std::time::{Duration, Instant};
+
+const MESSAGE_TTL: Duration = Duration::from_secs(60);
+const TOKEN_TTL: Duration = Duration::from_secs(15 * 60);
+const MAX_RECONNECT_ATTEMPTS: u32 = 5;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -125,6 +130,8 @@ pub struct Session<T: SessionTransport> {
     subscribers: Vec<Sender<ViewerEvent>>,
     online: bool,
     reconnect_attempt: u32,
+    offline_since: Option<Instant>,
+    outbound_queue: Vec<(ViewerCommand, Instant)>,
 }
 
 impl<T: SessionTransport> std::fmt::Debug for Session<T> {
@@ -136,6 +143,7 @@ impl<T: SessionTransport> std::fmt::Debug for Session<T> {
             .field("session", &self.session)
             .field("online", &self.online)
             .field("reconnect_attempt", &self.reconnect_attempt)
+            .field("queued_commands", &self.outbound_queue.len())
             .finish_non_exhaustive()
     }
 }
@@ -150,11 +158,17 @@ impl<T: SessionTransport> Session<T> {
             subscribers: Vec::new(),
             online: true,
             reconnect_attempt: 0,
+            offline_since: None,
+            outbound_queue: Vec::new(),
         }
     }
 
     pub fn state(&self) -> SessionState {
         self.state
+    }
+
+    pub fn queued_commands_count(&self) -> usize {
+        self.outbound_queue.len()
     }
 
     pub fn subscribe(&mut self) -> Receiver<ViewerEvent> {
@@ -169,12 +183,19 @@ impl<T: SessionTransport> Session<T> {
             ViewerCommand::SessionLogout => self.logout("logout requested"),
             ViewerCommand::SessionReconnect => self.reconnect(),
             ViewerCommand::LifecycleSuspend => {
+                if self.offline_since.is_none() {
+                    self.offline_since = Some(Instant::now());
+                }
                 if self.state == SessionState::Connected {
                     self.state = SessionState::Suspended;
                 }
                 Ok(())
             }
             ViewerCommand::LifecycleResume => {
+                if self.is_token_expired(Instant::now()) {
+                    self.expire_token();
+                    return Ok(());
+                }
                 if self.state == SessionState::Suspended {
                     self.reconnect()
                 } else {
@@ -183,29 +204,53 @@ impl<T: SessionTransport> Session<T> {
             }
             ViewerCommand::NetworkChanged { online } => {
                 self.online = online;
-                if !online && matches!(self.state, SessionState::Connected) {
-                    self.state = SessionState::Reconnecting;
-                    self.emit(ViewerEvent::SessionDisconnected {
-                        reason: "network unavailable".into(),
-                    });
-                } else if online && self.state == SessionState::Reconnecting {
-                    return self.reconnect();
+                if !online {
+                    if self.offline_since.is_none() {
+                        self.offline_since = Some(Instant::now());
+                    }
+                    if matches!(self.state, SessionState::Connected) {
+                        self.state = SessionState::Reconnecting;
+                        self.reconnect_attempt = 1;
+                        self.emit(ViewerEvent::SessionReconnecting { attempt: 1 });
+                        self.emit(ViewerEvent::SessionDisconnected {
+                            reason: "network unavailable".into(),
+                        });
+                    }
+                } else {
+                    if self.is_token_expired(Instant::now()) {
+                        self.expire_token();
+                        return Ok(());
+                    }
+                    if self.state == SessionState::Reconnecting {
+                        return self.reconnect();
+                    }
                 }
                 Ok(())
             }
-            ViewerCommand::ChatSend { body } => {
-                self.require_connected()?;
+            ViewerCommand::ChatSend { ref body } => {
                 if body.trim().is_empty() {
                     return Err(CoreError::InvalidRequest("chat body is empty".into()));
                 }
-                self.transport.send_chat(&body)
+                if self.state == SessionState::Connected {
+                    self.transport.send_chat(body)
+                } else {
+                    self.enqueue_command(command, Instant::now());
+                    Ok(())
+                }
             }
-            ViewerCommand::ObjectTouch { object_id, face } => {
-                self.require_connected()?;
+            ViewerCommand::ObjectTouch {
+                ref object_id,
+                face,
+            } => {
                 if object_id.trim().is_empty() {
                     return Err(CoreError::InvalidRequest("object id is empty".into()));
                 }
-                self.transport.touch_object(&object_id, face)
+                if self.state == SessionState::Connected {
+                    self.transport.touch_object(object_id, face)
+                } else {
+                    self.enqueue_command(command, Instant::now());
+                    Ok(())
+                }
             }
         }
     }
@@ -226,8 +271,10 @@ impl<T: SessionTransport> Session<T> {
                 self.login = Some(request);
                 self.session = Some(snapshot.clone());
                 self.reconnect_attempt = 0;
+                self.offline_since = None;
                 self.state = SessionState::Connected;
                 self.emit(ViewerEvent::SessionConnected(snapshot));
+                self.flush_queue(Instant::now());
                 Ok(())
             }
             Err(error) => {
@@ -243,11 +290,34 @@ impl<T: SessionTransport> Session<T> {
     }
 
     fn reconnect(&mut self) -> Result<(), CoreError> {
+        let now = Instant::now();
         if !self.online {
             return Err(CoreError::Unavailable("network unavailable".into()));
         }
+        if self.is_token_expired(now) {
+            self.expire_token();
+            return Err(CoreError::Unavailable("session token expired".into()));
+        }
         let request = self.login.clone().ok_or(CoreError::Disconnected)?;
         self.reconnect_attempt += 1;
+        if self.reconnect_attempt > MAX_RECONNECT_ATTEMPTS {
+            self.state = SessionState::Disconnected;
+            self.clear_secrets();
+            self.outbound_queue.clear();
+            self.emit(ViewerEvent::SessionError {
+                code: "max-retries-exceeded".into(),
+                message:
+                    "Maximum reconnection attempts reached. Please retry or return to main menu."
+                        .into(),
+            });
+            self.emit(ViewerEvent::SessionDisconnected {
+                reason: "maximum reconnect attempts exceeded".into(),
+            });
+            return Err(CoreError::Unavailable(
+                "max reconnect attempts exceeded".into(),
+            ));
+        }
+
         self.state = SessionState::Reconnecting;
         self.emit(ViewerEvent::SessionReconnecting {
             attempt: self.reconnect_attempt,
@@ -256,13 +326,69 @@ impl<T: SessionTransport> Session<T> {
             Ok(snapshot) => {
                 self.session = Some(snapshot.clone());
                 self.state = SessionState::Connected;
+                self.reconnect_attempt = 0;
+                self.offline_since = None;
                 self.emit(ViewerEvent::SessionConnected(snapshot));
+                self.flush_queue(now);
                 Ok(())
             }
             Err(error) => {
                 self.state = SessionState::Reconnecting;
                 Err(error)
             }
+        }
+    }
+
+    fn is_token_expired(&self, now: Instant) -> bool {
+        if let Some(since) = self.offline_since {
+            now.duration_since(since) > TOKEN_TTL
+        } else {
+            false
+        }
+    }
+
+    fn expire_token(&mut self) {
+        self.clear_secrets();
+        self.outbound_queue.clear();
+        self.state = SessionState::Disconnected;
+        self.offline_since = None;
+        self.reconnect_attempt = 0;
+        self.emit(ViewerEvent::SessionError {
+            code: "token-expired".into(),
+            message:
+                "Cached session token expired after 15 minutes offline. Please re-authenticate."
+                    .into(),
+        });
+        self.emit(ViewerEvent::SessionDisconnected {
+            reason: "session token expired".into(),
+        });
+    }
+
+    fn enqueue_command(&mut self, command: ViewerCommand, now: Instant) {
+        self.purge_expired_queue(now);
+        self.outbound_queue.push((command, now));
+    }
+
+    fn purge_expired_queue(&mut self, now: Instant) {
+        self.outbound_queue
+            .retain(|(_, timestamp)| now.duration_since(*timestamp) <= MESSAGE_TTL);
+    }
+
+    fn flush_queue(&mut self, now: Instant) {
+        self.purge_expired_queue(now);
+        let queue = std::mem::take(&mut self.outbound_queue);
+        for (cmd, _) in queue {
+            if self.state != SessionState::Connected {
+                break;
+            }
+            let _ = match cmd {
+                ViewerCommand::ChatSend { ref body } => self.transport.send_chat(body),
+                ViewerCommand::ObjectTouch {
+                    ref object_id,
+                    face,
+                } => self.transport.touch_object(object_id, face),
+                _ => Ok(()),
+            };
         }
     }
 
@@ -273,17 +399,13 @@ impl<T: SessionTransport> Session<T> {
             self.transport.logout()
         };
         self.clear_secrets();
+        self.outbound_queue.clear();
+        self.offline_since = None;
         self.state = SessionState::Disconnected;
         self.emit(ViewerEvent::SessionDisconnected {
             reason: reason.into(),
         });
         result
-    }
-
-    fn require_connected(&self) -> Result<(), CoreError> {
-        (self.state == SessionState::Connected)
-            .then_some(())
-            .ok_or(CoreError::Disconnected)
     }
 
     fn clear_secrets(&mut self) {
@@ -429,10 +551,52 @@ mod tests {
             .execute(ViewerCommand::NetworkChanged { online: false })
             .unwrap();
         assert_eq!(session.state(), SessionState::Reconnecting);
+
+        // Queue outbound chat while offline
+        session
+            .execute(ViewerCommand::ChatSend {
+                body: "Queued offline chat".into(),
+            })
+            .unwrap();
+        assert_eq!(session.queued_commands_count(), 1);
+
         session
             .execute(ViewerCommand::NetworkChanged { online: true })
             .unwrap();
         assert_eq!(session.state(), SessionState::Connected);
+        assert_eq!(session.queued_commands_count(), 0);
+    }
+
+    #[test]
+    fn max_reconnect_attempts_fails_and_emits_error() {
+        let mut session = Session::new(FakeTransport::default());
+        session
+            .execute(ViewerCommand::SessionLogin(request()))
+            .unwrap();
+        session.online = false;
+        session
+            .execute(ViewerCommand::NetworkChanged { online: false })
+            .unwrap();
+        session.online = true;
+
+        // Transport fails during reconnects
+        session.transport.fail_login = true;
+        let events = session.subscribe();
+
+        for _ in 0..4 {
+            let _ = session.execute(ViewerCommand::SessionReconnect);
+        }
+        let _ = session.execute(ViewerCommand::SessionReconnect); // Attempt 5 fails and triggers max retries
+
+        assert_eq!(session.state(), SessionState::Disconnected);
+        let mut found_max = false;
+        while let Ok(event) = events.try_recv() {
+            if matches!(event, ViewerEvent::SessionError { ref code, .. } if code == "max-retries-exceeded")
+            {
+                found_max = true;
+            }
+        }
+        assert!(found_max);
     }
 
     #[test]
