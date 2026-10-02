@@ -37,9 +37,11 @@ class AvatarBaker(
     companion object {
         private const val TAG = "AvatarBaker"
         
-        // Bake texture sizes
+        // Bake texture size limits (max 1024x1024 per channel to prevent VRAM memory exhaustion)
         const val BAKE_WIDTH = 512
         const val BAKE_HEIGHT = 512
+        const val MAX_BAKE_WIDTH = 1024
+        const val MAX_BAKE_HEIGHT = 1024
         
         // Classic bake channels (avatar layers)
         const val BAKE_HEAD = 0
@@ -147,43 +149,50 @@ class AvatarBaker(
     suspend fun bakeChannel(channel: Int): UUID? = withContext(Dispatchers.Default) {
         Log.d(TAG, "Baking channel: $channel")
         
-        // Create base bitmap
-        val bitmap = Bitmap.createBitmap(BAKE_WIDTH, BAKE_HEIGHT, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        // Create base bitmap (bounded to max 1024x1024)
+        val targetWidth = BAKE_WIDTH.coerceAtMost(MAX_BAKE_WIDTH)
+        val targetHeight = BAKE_HEIGHT.coerceAtMost(MAX_BAKE_HEIGHT)
+        val bitmap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888)
         
-        // Get layers for this channel
-        val layers = getLayersForChannel(channel)
-        
-        // Composite each layer
-        for (layer in layers) {
-            try {
-                val texture = textureManager.getTexture(layer.textureId) ?: continue
-                
-                // Tint if needed
-                val tinted = if (layer.tint != null) {
-                    tintBitmap(texture, layer.tint)
-                } else {
-                    texture
+        try {
+            val canvas = Canvas(bitmap)
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+            
+            // Get layers for this channel
+            val layers = getLayersForChannel(channel)
+            
+            // Composite each layer
+            for (layer in layers) {
+                try {
+                    val texture = textureManager.getTexture(layer.textureId) ?: continue
+                    
+                    // Tint if needed
+                    val tinted = if (layer.tint != null) {
+                        tintBitmap(texture, layer.tint)
+                    } else {
+                        texture
+                    }
+                    
+                    // Set blend mode
+                    paint.xfermode = when (layer.blendMode) {
+                        BlendMode.NORMAL -> null
+                        BlendMode.MULTIPLY -> PorterDuffXfermode(PorterDuff.Mode.MULTIPLY)
+                        BlendMode.ADD -> PorterDuffXfermode(PorterDuff.Mode.ADD)
+                        BlendMode.MASK -> PorterDuffXfermode(PorterDuff.Mode.DST_IN)
+                    }
+                    
+                    canvas.drawBitmap(tinted, 0f, 0f, paint)
+                    paint.xfermode = null
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to composite layer: ${layer.textureId}", e)
                 }
-                
-                // Set blend mode
-                paint.xfermode = when (layer.blendMode) {
-                    BlendMode.NORMAL -> null
-                    BlendMode.MULTIPLY -> PorterDuffXfermode(PorterDuff.Mode.MULTIPLY)
-                    BlendMode.ADD -> PorterDuffXfermode(PorterDuff.Mode.ADD)
-                    BlendMode.MASK -> PorterDuffXfermode(PorterDuff.Mode.DST_IN)
-                }
-                
-                canvas.drawBitmap(tinted, 0f, 0f, paint)
-                paint.xfermode = null
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to composite layer: ${layer.textureId}", e)
             }
+            
+            // Upload baked texture
+            uploadBakedTexture(bitmap, channel)
+        } finally {
+            bitmap.recycle()
         }
-        
-        // Upload baked texture
-        uploadBakedTexture(bitmap, channel)
     }
     
     private fun getLayersForChannel(channel: Int): List<BakeLayer> {
@@ -352,12 +361,6 @@ class AvatarBaker(
             try {
                 // Compress to JPEG2000 (or use PNG fallback)
                 val outputStream = ByteArrayOutputStream()
-                // Try the native JPEG2000 encoder first; fall back to PNG
-                // (with a different MIME type) if the native library
-                // failed to load or encoding fails. The PNG fallback won't
-                // actually be accepted by SL simulators, but it lets the
-                // upload path log a real HTTP response instead of silently
-                // doing nothing on the device.
                 val j2kBytes = com.linkpoint.assets.JPEG2000Encoder.encode(bitmap, lossless = false)
                 val data: ByteArray
                 val mimeType: String
@@ -370,21 +373,38 @@ class AvatarBaker(
                     data = outputStream.toByteArray()
                     mimeType = "image/png"
                 }
-                val request = Request.Builder()
-                    .url(capUrl)
-                    .post(data.toRequestBody(mimeType.toMediaType()))
-                    .build()
-                
-                val response = httpClient.newCall(request).execute()
-                val body = response.body?.string() ?: return@withContext null
-                
-                // Parse response for texture UUID
-                val llsd = LLSDParser.parseXML(body)
-                if (llsd is LLSDMap) {
-                    val uuidStr = llsd.getString("new_asset")
-                    if (uuidStr != null) {
-                        Log.i(TAG, "Uploaded baked texture: $uuidStr (channel $channel)")
-                        return@withContext UUID.fromString(uuidStr)
+
+                // Retry handling with backoff timers for high-latency mobile LTE/5G connections
+                val maxAttempts = 3
+                var initialDelayMs = 1000L
+
+                for (attempt in 1..maxAttempts) {
+                    if (attempt > 1) {
+                        val backoffMs = initialDelayMs * (1L shl (attempt - 2))
+                        Log.w(TAG, "Retrying baked texture upload for channel $channel (attempt $attempt/$maxAttempts) after ${backoffMs}ms")
+                        delay(backoffMs)
+                    }
+
+                    try {
+                        val request = Request.Builder()
+                            .url(capUrl)
+                            .post(data.toRequestBody(mimeType.toMediaType()))
+                            .build()
+                        
+                        val response = httpClient.newCall(request).execute()
+                        if (response.isSuccessful) {
+                            val body = response.body?.string() ?: continue
+                            val llsd = LLSDParser.parseXML(body)
+                            if (llsd is LLSDMap) {
+                                val uuidStr = llsd.getString("new_asset")
+                                if (uuidStr != null) {
+                                    Log.i(TAG, "Uploaded baked texture: $uuidStr (channel $channel)")
+                                    return@withContext UUID.fromString(uuidStr)
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Upload attempt $attempt failed for channel $channel: ${e.message}")
                     }
                 }
                 

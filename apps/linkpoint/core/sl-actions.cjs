@@ -71,19 +71,79 @@ function commands(bot) {
   return c;
 }
 
-/** Parse a secondlife:// or maps.secondlife.com URL, or "Region/x/y/z". */
+/** Parse a secondlife:// or maps.secondlife.com URL, "Region/x/y/z", or Hypergrid URI (e.g. hg.osgrid.org:8002:RegionName). */
 function parseDestination(text) {
   const raw = String(text || '').trim();
   if (!raw) throw new Error('Enter a destination');
+
   let path = raw;
-  const url = raw.match(/^(?:secondlife:\/\/(?:\/app\/teleport\/)?|https?:\/\/maps\.secondlife\.com\/secondlife\/)(.+)$/i);
-  if (url) path = url[1];
+  let scheme = '';
+  const urlMatch = raw.match(/^(secondlife:\/\/(?:\/app\/teleport\/)?|https?:\/\/maps\.secondlife\.com\/secondlife\/|https?:\/\/)(.+)$/i);
+  if (urlMatch) {
+    scheme = urlMatch[1].toLowerCase();
+    path = urlMatch[2];
+  }
+
+  const hgColonMatch = path.match(/^([a-zA-Z0-9.-]+:\d+):([^/]+)(?:\/(.*))?$/);
+  const hgSlashMatch = path.match(/^([a-zA-Z0-9.-]+:\d+)\/?(.*)$/);
+
+  const parseCoords = (coordParts) => {
+    const [x, y, z] = [coordParts[0], coordParts[1], coordParts[2]].map((p) => (p === undefined || p === '' ? undefined : Number(p)));
+    const coordinates = { x: x ?? 128, y: y ?? 128, z: z ?? 30 };
+    for (const [axis, value] of Object.entries(coordinates)) {
+      if (!Number.isFinite(value)) throw new Error(`Coordinate ${axis} is not a number`);
+    }
+    if (coordinates.x < 0 || coordinates.x > 256 || coordinates.y < 0 || coordinates.y > 256) throw new Error('Coordinates must be within the region (0-256)');
+    if (coordinates.z < -100 || coordinates.z > 4096) throw new Error('Altitude is out of range');
+    return coordinates;
+  };
+
+  if (hgColonMatch) {
+    const hostPort = hgColonMatch[1];
+    const regionName = decodeURIComponent(hgColonMatch[2].trim());
+    const coordParts = hgColonMatch[3] ? hgColonMatch[3].split('/').map((p) => decodeURIComponent(p.trim())).filter(Boolean) : [];
+    const proto = scheme.startsWith('https') ? 'https' : 'http';
+    const gridUri = `${proto}://${hostPort}`;
+    const gatekeeperUrl = `${gridUri}/gatekeeper`;
+    const coords = parseCoords(coordParts);
+
+    return {
+      isHypergrid: true,
+      gridUri,
+      gatekeeperUrl,
+      region: regionName || 'Home',
+      ...coords,
+    };
+  } else if (hgSlashMatch && hgSlashMatch[1].includes(':')) {
+    const hostPort = hgSlashMatch[1];
+    const subpath = hgSlashMatch[2];
+    const parts = subpath ? subpath.split('/').map((p) => decodeURIComponent(p.trim())).filter(Boolean) : [];
+    const proto = scheme.startsWith('https') ? 'https' : 'http';
+    const gridUri = `${proto}://${hostPort}`;
+    const gatekeeperUrl = `${gridUri}/gatekeeper`;
+
+    let regionName = parts[0] || 'Home';
+    let coordParts = parts.slice(1);
+    if (parts[0] && !isNaN(Number(parts[0]))) {
+      regionName = 'Home';
+      coordParts = parts;
+    }
+
+    const coords = parseCoords(coordParts);
+
+    return {
+      isHypergrid: true,
+      gridUri,
+      gatekeeperUrl,
+      region: regionName,
+      ...coords,
+    };
+  }
+
   const parts = path.split('/').map((part) => decodeURIComponent(part.trim())).filter((part, i) => part || i > 0);
   const region = parts[0];
   if (!region) throw new Error('Destination has no region name');
   const [x, y, z] = [parts[1], parts[2], parts[3]].map((part) => (part === undefined || part === '' ? undefined : Number(part)));
-  // A destination without coordinates means the region's default spot. The grid
-  // treats an omitted SLURL position as the region centre, so that is what is requested.
   const coordinates = { x: x ?? 128, y: y ?? 128, z: z ?? 30 };
   for (const [axis, value] of Object.entries(coordinates)) {
     if (!Number.isFinite(value)) throw new Error(`Coordinate ${axis} is not a number`);
@@ -95,7 +155,23 @@ function parseDestination(text) {
 
 async function teleport(bot, params, lib) {
   const { Vector3 } = loadLibrary(lib);
-  const target = params.region ? { region: String(params.region), x: finite(params.x, 'x'), y: finite(params.y, 'y'), z: finite(params.z, 'z') } : parseDestination(params.destination);
+  const target = params.region
+    ? { isHypergrid: Boolean(params.isHypergrid), gridUri: params.gridUri, gatekeeperUrl: params.gatekeeperUrl, region: String(params.region), x: finite(params.x, 'x'), y: finite(params.y, 'y'), z: finite(params.z, 'z') }
+    : parseDestination(params.destination);
+
+  if (target.isHypergrid) {
+    let result = null;
+    const c = commands(bot);
+    if (typeof c.teleport?.performHypergridTeleport === 'function') {
+      result = await c.teleport.performHypergridTeleport(target);
+    } else if (typeof bot.performGatekeeperTeleport === 'function') {
+      result = await bot.performGatekeeperTeleport(target);
+    } else if (typeof c.teleport?.teleportTo === 'function') {
+      result = await c.teleport.teleportTo(target.region, new Vector3([target.x, target.y, target.z]), new Vector3([0, 1, 0]));
+    }
+    return { requested: target, isHypergrid: true, message: result && result.message ? String(result.message) : 'Hypergrid teleport completed' };
+  }
+
   const result = await commands(bot).teleport.teleportTo(target.region, new Vector3([target.x, target.y, target.z]), new Vector3([0, 1, 0]));
   return { requested: target, message: result && result.message ? String(result.message) : '' };
 }

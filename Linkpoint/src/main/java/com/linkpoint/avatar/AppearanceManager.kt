@@ -21,9 +21,10 @@ import java.util.concurrent.atomic.AtomicInteger
  * 
  * @see <a href="https://wiki.secondlife.com/wiki/AgentSetAppearance">AgentSetAppearance Message</a>
  */
-class AppearanceManager(
+class AppearanceManager @JvmOverloads constructor(
     private val udpConnection: UDPConnectionFixed,
-    private val avatarBaker: AvatarBaker
+    private val avatarBaker: AvatarBaker,
+    private val capabilityNegotiator: AppearanceCapabilityNegotiator? = null
 ) {
     companion object {
         private const val TAG = "AppearanceManager"
@@ -152,7 +153,8 @@ class AppearanceManager(
     
     /**
      * Send full appearance update to the simulator.
-     * This bakes all textures and sends AgentSetAppearance.
+     * Evaluates region capabilities (SSA vs CSB fallback), bakes all textures,
+     * and sends AgentSetAppearance.
      */
     suspend fun sendAppearanceUpdate() {
         val started = System.currentTimeMillis()
@@ -160,6 +162,11 @@ class AppearanceManager(
         Log.i(TAG, "═══ Appearance update starting (serial+1=${serialNum.get() + 1}) ═══")
 
         try {
+            val negotiation = capabilityNegotiator?.negotiateCapabilities()
+            if (negotiation != null) {
+                Log.i(TAG, "Negotiated appearance mode: ${negotiation.mode} (latency: ${negotiation.resolutionTimeMs}ms)")
+            }
+
             Log.d(TAG, "  baking 11 channels (head/upper/lower/eyes/skirt/hair/leftarm/leftleg/aux1/aux2/aux3)...")
             val bakedTextures = avatarBaker.bakeAll(includeBoM = true)
             lastBakedTextureCount = bakedTextures.size

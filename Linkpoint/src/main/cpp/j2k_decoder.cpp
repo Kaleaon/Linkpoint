@@ -10,6 +10,11 @@
 #include <cstring>
 #include <vector>
 
+#if defined(__ARM_NEON__) || defined(__ARM_NEON) || defined(OPJ_HAVE_NEON_INTRINSICS)
+#include <arm_neon.h>
+#define LINKPOINT_NEON_ENABLED 1
+#endif
+
 #ifdef LINKPOINT_HAVE_ETCPAK
 #include "ProcessRGB.hpp"
 #endif

@@ -29,8 +29,19 @@ add_library(
     linkpoint-j2k
     SHARED
     j2k_decoder.cpp
+    com_lumiya_viewer_asset_J2kDecoder.cpp
+    GestureTriggerEngine.cpp
     ${LINKPOINT_ETCPAK_SOURCES}
 )
+
+# Enable ARM NEON SIMD build flags and vectorization optimizations
+if(ANDROID_ABI STREQUAL "armeabi-v7a")
+    target_compile_options(linkpoint-j2k PRIVATE -mfpu=neon -mfloat-abi=softfp -O3 -ffast-math)
+    target_compile_definitions(linkpoint-j2k PRIVATE OPJ_HAVE_NEON_INTRINSICS=1 __ARM_NEON__=1)
+elseif(ANDROID_ABI STREQUAL "arm64-v8a")
+    target_compile_options(linkpoint-j2k PRIVATE -O3 -ffast-math)
+    target_compile_definitions(linkpoint-j2k PRIVATE OPJ_HAVE_NEON_INTRINSICS=1 __ARM_NEON__=1)
+endif()
 
 if(LINKPOINT_ETCPAK_SOURCES)
     target_compile_definitions(linkpoint-j2k PRIVATE LINKPOINT_HAVE_ETCPAK=1)

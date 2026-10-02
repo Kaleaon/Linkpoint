@@ -207,6 +207,20 @@ class ConnectionQualityManager(private val context: Context) {
                 _isMetered.value = !capabilities.hasCapability(
                     NetworkCapabilities.NET_CAPABILITY_NOT_METERED
                 )
+                notifyNetworkChange()
+            }
+
+            override fun onLinkPropertiesChanged(
+                network: Network,
+                linkProperties: android.net.LinkProperties
+            ) {
+                Log.d(TAG, "Link properties changed / IP address mutation on network ${network.networkHandle}")
+                NetworkLogger.log(
+                    NetworkLogger.Level.INFO,
+                    NetworkLogger.Category.CONNECTIVITY,
+                    "🌐 IP address / LinkProperties changed (handle=${network.networkHandle})"
+                )
+                notifyNetworkChange()
             }
         }
         
