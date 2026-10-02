@@ -50,7 +50,7 @@ interface CapabilityRequester {
  * - Per-capability request options
  * - Linkpoint-compatible URL repair for Agni grid
  */
-class CapabilityManager : CapabilityRequester {
+open class CapabilityManager : CapabilityRequester {
     
     companion object {
         private const val TAG = "CapabilityManager"
@@ -74,11 +74,14 @@ class CapabilityManager : CapabilityRequester {
         const val CAP_AGENT_STATE = "AgentState"
         const val CAP_AGENT_PROFILE = "AgentProfile"
         const val CAP_UPDATE_AGENT_INFO = "UpdateAgentInformation"
+        const val CAP_SERVER_SIDE_APPEARANCE = "ServerSideAppearance"
+        const val CAP_UPDATE_AVATAR_APPEARANCE = "UpdateAvatarAppearance"
         const val CAP_UPLOAD_BAKED_TEXTURE = "UploadBakedTexture"
         const val CAP_OBJECT_MEDIA = "ObjectMedia"
         const val CAP_OBJECT_MEDIA_NAVIGATE = "ObjectMediaNavigate"
         const val CAP_PARCEL_VOICE = "ParcelVoiceInfoRequest"
         const val CAP_PROVISION_VOICE = "ProvisionVoiceAccountRequest"
+        const val CAP_SL_VOICE_WEBRTC = "SLVoiceWebRTC"
 
         /**
          * VoiceSignalingRequest — paired with [CAP_PROVISION_VOICE] for the
@@ -364,10 +367,14 @@ class CapabilityManager : CapabilityRequester {
                 CAP_VIEW_STATS,
                 CAP_AGENT_STATE,
                 CAP_UPDATE_AGENT_INFO,
+                CAP_SERVER_SIDE_APPEARANCE,
+                CAP_UPDATE_AVATAR_APPEARANCE,
                 CAP_UPLOAD_BAKED_TEXTURE,
+                CAP_AGENT_PREFERENCES,
                 CAP_OBJECT_MEDIA,
                 CAP_PARCEL_VOICE,
                 CAP_PROVISION_VOICE,
+                CAP_SL_VOICE_WEBRTC,
                 CAP_VOICE_SIGNALING_REQUEST,
                 CAP_CHAT_PASS,
                 CAP_ENVIRONMENT,

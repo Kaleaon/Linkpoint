@@ -347,7 +347,7 @@ dependencies {
     // Audio processing
     implementation("androidx.media:media:1.7.0")
     
-    // Voice Chat (WebRTC)
+    // Voice Chat (WebRTC SDK providing org.webrtc packages)
     implementation("io.getstream:stream-webrtc-android:1.2.2")
     
     // LLSD Java library - Commented out, using local implementation

@@ -2,6 +2,7 @@ import { act, createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { AppProvider, useApp } from '../../context/AppContext.jsx';
 import { ThemeProvider } from '../../context/ThemeContext.jsx';
+import { AnnouncerProvider } from '../../context/AnnouncerContext.jsx';
 
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -15,7 +16,7 @@ export async function mountScreen(component: any): Promise<Mounted> {
   const ctx = { current: null as any };
   const Probe = () => { ctx.current = useApp(); return null; };
   await act(async () => {
-    root.render(createElement(AppProvider as any, null, createElement(ThemeProvider as any, null, createElement('div', null, createElement(Probe), createElement(component)))));
+    root.render(createElement(AnnouncerProvider as any, null, createElement(AppProvider as any, null, createElement(ThemeProvider as any, null, createElement('div', null, createElement(Probe), createElement(component))))));
   });
   return { host, root, ctx };
 }

@@ -8,14 +8,37 @@ import { useTheme } from "../context/ThemeContext.jsx";
 export default function Toast() {
   const { state } = useApp();
   const { V, t, isFloat } = useTheme();
-  if (!state.toast) return null;
 
-  const toastStyle = {
-    position: "absolute", left: "50%", bottom: isFloat ? "14px" : "78px", transform: "translateX(-50%)",
-    maxWidth: "84%", padding: "10px 16px", borderRadius: V.rs, background: V.priC, color: V.onpriC,
-    font: "600 11.5px/1.3 " + t.font, letterSpacing: ".02em", textAlign: "center", zIndex: 40,
-    boxShadow: "0 8px 20px rgba(0,0,0,.35)", border: "1px solid " + V.pri, pointerEvents: "none",
+  const containerStyle = {
+    position: "absolute",
+    left: "50%",
+    bottom: isFloat ? "14px" : "78px",
+    transform: "translateX(-50%)",
+    maxWidth: "84%",
+    zIndex: 40,
+    pointerEvents: "none",
   };
 
-  return <div style={toastStyle}>{state.toast}</div>;
+  const toastStyle = {
+    padding: "10px 16px",
+    borderRadius: V.rs,
+    background: V.priC,
+    color: V.onpriC,
+    font: "600 11.5px/1.3 " + t.font,
+    letterSpacing: ".02em",
+    textAlign: "center",
+    boxShadow: "0 8px 20px rgba(0,0,0,.35)",
+    border: "1px solid " + V.pri,
+  };
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      style={containerStyle}
+    >
+      {state.toast ? <div style={toastStyle}>{state.toast}</div> : null}
+    </div>
+  );
 }

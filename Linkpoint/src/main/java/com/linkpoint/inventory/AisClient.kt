@@ -1,15 +1,21 @@
 package com.linkpoint.inventory
 
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
 import java.io.IOException
 import java.util.UUID
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.math.min
 
 /**
@@ -298,11 +304,33 @@ class OkHttpAisTransport(
         // Per-request headers (e.g. Destination on COPY/MOVE).
         request.headers.forEach { (k, v) -> builder.addHeader(k, v) }
 
-        client.newCall(builder.build()).execute().use { response ->
+        val call = client.newCall(builder.build())
+        val response = call.awaitCall()
+        response.use { resp ->
             return AisHttpResponse(
-                code = response.code,
-                body = response.body?.string().orEmpty()
+                code = resp.code,
+                body = resp.body?.string().orEmpty()
             )
+        }
+    }
+
+    private suspend fun Call.awaitCall(): Response = suspendCancellableCoroutine { continuation ->
+        enqueue(object : Callback {
+            override fun onResponse(call: Call, response: Response) {
+                continuation.resume(response)
+            }
+
+            override fun onFailure(call: Call, e: IOException) {
+                if (!continuation.isCancelled) {
+                    continuation.resumeWithException(e)
+                }
+            }
+        })
+
+        continuation.invokeOnCancellation {
+            try {
+                cancel()
+            } catch (_: Throwable) {}
         }
     }
 }

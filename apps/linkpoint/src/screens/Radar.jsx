@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useTheme } from "../context/ThemeContext.jsx";
 import { useApp } from "../context/AppContext.jsx";
+import { useAnnouncer } from "../context/AnnouncerContext.jsx";
 import { app } from "../linkpoint/app.ts";
 import Icon from "../components/Icon.jsx";
 import { COMPASS } from "../data/content.js";
@@ -8,6 +9,7 @@ import { COMPASS } from "../data/content.js";
 export default function Radar() {
   const { V, t } = useTheme();
   const { state, actions } = useApp();
+  const { announce } = useAnnouncer();
 
   // Mode: "person" (Avatars) vs "item" (Objects & Attachments)
   // Synchronized with state.rMode ("person" / "item" or "AV" / "OBJ")
@@ -36,6 +38,9 @@ export default function Radar() {
   const [liveObjects, setLiveObjects] = useState(() => [...(app.world?.objects || [])]);
   const [liveNearby, setLiveNearby] = useState(() => [...(app.world?.nearbyUsers || [])]);
 
+  // Track known user IDs in proximity for announcer status updates
+  const knownUsersRef = useRef(null);
+
   useEffect(() => {
     const handleObjectsChanged = (items) => setLiveObjects([...items]);
     const handleNearbyChanged = (items) => setLiveNearby([...items]);
@@ -48,6 +53,24 @@ export default function Radar() {
       app.world?.off?.("nearby_changed", handleNearbyChanged);
     };
   }, []);
+
+  useEffect(() => {
+    const currentIds = new Set(liveNearby.map((u) => u.id || u.name).filter(Boolean));
+    if (knownUsersRef.current === null) {
+      knownUsersRef.current = currentIds;
+      return;
+    }
+
+    liveNearby.forEach((u) => {
+      const key = u.id || u.name;
+      if (key && !knownUsersRef.current.has(key)) {
+        const name = u.name || `Resident ${String(key).slice(0, 8)}`;
+        announce(`${name} entered proximity range`, "polite");
+      }
+    });
+
+    knownUsersRef.current = currentIds;
+  }, [liveNearby, announce]);
 
   // Distance range classifications (Firestorm style)
   const getBand = (dist) => {

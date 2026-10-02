@@ -1,17 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "../context/ThemeContext.jsx";
 import { useApp } from "../context/AppContext.jsx";
+import { useAnnouncer } from "../context/AnnouncerContext.jsx";
 import Icon from "../components/Icon.jsx";
 import { app } from "../linkpoint/app";
 
 export default function Chat() {
   const { V, t } = useTheme();
   const { state, actions } = useApp();
+  const { announce } = useAnnouncer();
   const [messages, setMessages] = useState(() => [...app.chat.messages]);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const messagesEndRef = useRef(null);
+  const knownMsgIdsRef = useRef(null);
   const connected = app.auth.isLoggedIn();
 
   // Auto-Reply / Away Message state
@@ -51,8 +54,32 @@ export default function Chat() {
     };
   }, []);
 
+  // Announce incoming direct messages and system notices through central announcer
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const currentIds = new Set(messages.map((m) => m.id).filter(Boolean));
+    if (knownMsgIdsRef.current === null) {
+      knownMsgIdsRef.current = currentIds;
+      return;
+    }
+
+    messages.forEach((m) => {
+      if (m.id && !knownMsgIdsRef.current.has(m.id)) {
+        const isMe = m.senderId === app.auth.user?.id;
+        if (!isMe) {
+          if (m.type === "im" || m.recipientName) {
+            announce(`Direct message from ${m.sender || "Resident"}: ${m.text}`, "polite");
+          } else if (m.type === "system" || m.type === "notice" || m.isNotice) {
+            announce(`System notice: ${m.text}`, "polite");
+          }
+        }
+      }
+    });
+
+    knownMsgIdsRef.current = currentIds;
+  }, [messages, announce]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView?.({ behavior: "smooth" });
   }, [messages, activeTab, selectedContact]);
 
   // Friends and IM Threads for Contact Picker
@@ -414,7 +441,6 @@ export default function Chat() {
       {/* Messages Transcript */}
       <section
         aria-label={`${activeTab} chat transcript`}
-        aria-live="polite"
         style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: 12, display: "flex", flexDirection: "column", gap: 8 }}
       >
         {!formatted.length && (

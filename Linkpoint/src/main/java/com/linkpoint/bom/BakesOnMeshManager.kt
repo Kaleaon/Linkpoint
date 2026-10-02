@@ -171,6 +171,31 @@ class BakesOnMeshManager(
             updateBakedTexture(avatarId, channel, textureId)
         }
     }
+
+    /**
+     * Binds composite skin and clothing baked textures directly to mesh attachment material channels.
+     * Evaluates whether region supports BoM capability and updates material textures.
+     */
+    fun bindMaterialChannels(
+        avatarId: UUID,
+        attachmentMaterialChannels: Map<Int, UUID>
+    ): Map<Int, UUID> {
+        val bakedMap = bakedTextureCache[avatarId] ?: return attachmentMaterialChannels
+        val updatedChannels = attachmentMaterialChannels.toMutableMap()
+        for ((channelIndex, textureId) in attachmentMaterialChannels) {
+            if (isBomTexture(textureId)) {
+                val bakeChannel = getBakeChannel(textureId)
+                if (bakeChannel != null && bakedMap.containsKey(bakeChannel)) {
+                    val resolvedTexture = bakedMap[bakeChannel]
+                    if (resolvedTexture != null) {
+                        updatedChannels[channelIndex] = resolvedTexture
+                        Log.d(TAG, "Bound BoM channel $channelIndex to baked texture $resolvedTexture (avatar: $avatarId)")
+                    }
+                }
+            }
+        }
+        return updatedChannels
+    }
     
     /**
      * Clear baked textures for an avatar (e.g., when they leave).
