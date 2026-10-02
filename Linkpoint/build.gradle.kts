@@ -727,11 +727,24 @@ val verifyNoLegacyApacheDependencies by tasks.registering {
     }
 }
 
+val checkThemeContrastAndSync by tasks.registering(Test::class) {
+    group = "verification"
+    description = "Validates WCAG AA contrast rules and theme catalog synchronization."
+    val testTask = tasks.named<Test>("testStableDebugUnitTest")
+    testClassesDirs = testTask.get().testClassesDirs
+    classpath = testTask.get().classpath
+    filter {
+        includeTestsMatching("com.linkpoint.ui.theme.ThemeContrastAndSyncTest")
+    }
+}
+
 tasks.named("check") {
     dependsOn(verifyUiArchitectureBoundaries)
     dependsOn(verifyNoLegacyApacheDependencies)
+    dependsOn(checkThemeContrastAndSync)
 }
 
 tasks.register("testDebugUnitTest") {
     dependsOn("testStableDebugUnitTest")
+    dependsOn(checkThemeContrastAndSync)
 }
