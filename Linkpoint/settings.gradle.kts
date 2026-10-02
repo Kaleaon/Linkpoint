@@ -1,6 +1,7 @@
 pluginManagement {
     repositories {
         google()
+        maven { url = uri("https://repository.jboss.org/nexus/repository/central/") }
         mavenCentral()
         gradlePluginPortal()
     }
@@ -10,6 +11,7 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
+        maven { url = uri("https://repository.jboss.org/nexus/repository/central/") }
         mavenCentral()
         maven { url = uri("https://jitpack.io") }
         maven { 
