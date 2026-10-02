@@ -3,6 +3,8 @@
  */
 
 import { Utils } from './utils';
+import { multiplyMat4 } from './frustum';
+import { invertMat4, rayFromNDC } from './ray-pick';
 
 export class Camera3D extends Utils.EventEmitter {
   public position: number[] = [128, 128, 25];
@@ -29,6 +31,9 @@ export class Camera3D extends Utils.EventEmitter {
   public mode: string = 'orbit'; // 'orbit', 'first-person', 'third-person'
   public orbitDistance: number = 10;
   public orbitTarget: number[] = [128, 128, 25];
+
+  /** Firestorm-style named camera positions. */
+  public preset: 'rear' | 'front' | 'first-person' | 'free' = 'rear';
 
   constructor() {
     super();
@@ -65,30 +70,53 @@ export class Camera3D extends Utils.EventEmitter {
   }
 
   /**
-   * Move camera
+   * Unit horizontal direction the camera is looking along. In orbit mode the
+   * rotation describes where the camera sits relative to its target, so the
+   * view direction is the opposite of the first-person heading.
+   */
+  private horizontalHeading(): [number, number] {
+    const yaw = this.rotation[1];
+    const sign = this.mode === 'orbit' ? -1 : 1;
+    return [sign * Math.sin(yaw), sign * Math.cos(yaw)];
+  }
+
+  /**
+   * Move camera. `forward` and `right` are relative to what is on screen:
+   * positive forward moves into the view, positive right moves to the right of
+   * it. Orbit mode moves the focus point along the ground (pitch is ignored so
+   * looking down does not sink the camera); first-person flies along the view.
    */
   move(forward: number, right: number, up: number) {
-    const [pitch, yaw] = this.rotation;
+    const pitch = this.rotation[0];
+    const [hx, hy] = this.horizontalHeading();
+    const climb = this.mode === 'orbit' ? 0 : Math.sin(pitch);
+    const reach = this.mode === 'orbit' ? 1 : Math.cos(pitch);
 
-    // Calculate movement vectors
-    const forwardVec = [
-      Math.sin(yaw) * Math.cos(pitch),
-      Math.cos(yaw) * Math.cos(pitch),
-      Math.sin(pitch)
-    ];
-
-    const rightVec = [
-      Math.sin(yaw - Math.PI / 2),
-      Math.cos(yaw - Math.PI / 2),
-      0
-    ];
-
-    this.position[0] += forwardVec[0] * forward + rightVec[0] * right;
-    this.position[1] += forwardVec[1] * forward + rightVec[1] * right;
-    this.position[2] += forwardVec[2] * forward + rightVec[2] * right + up;
+    const destination = this.mode === 'orbit' ? this.orbitTarget : this.position;
+    destination[0] += hx * reach * forward + hy * right;
+    destination[1] += hy * reach * forward - hx * right;
+    destination[2] += climb * forward + up;
 
     this.updateMatrices();
     this.emit('moved', this.position);
+  }
+
+  /**
+   * Where the camera is actually looking, as a compass heading (0 = north/+Y,
+   * clockwise) and a pitch in degrees (positive looks up). Orbit mode's rotation
+   * describes the camera's position around its target, so the view direction is
+   * derived rather than read straight from `rotation`.
+   */
+  viewAngles(): { heading: number; pitch: number } {
+    const [hx, hy] = this.horizontalHeading();
+    const heading = ((Math.atan2(hx, hy) * 180) / Math.PI + 360) % 360;
+    const pitch = ((this.mode === 'orbit' ? -this.rotation[0] : this.rotation[0]) * 180) / Math.PI;
+    return { heading, pitch };
+  }
+
+  /** Turn the view left/right on screen (positive = right), whichever mode is active. */
+  turn(amount: number) {
+    this.rotate(0, this.mode === 'orbit' ? -amount : amount);
   }
 
   /**
@@ -127,6 +155,33 @@ export class Camera3D extends Utils.EventEmitter {
     this.mode = mode;
     this.updateMatrices();
     this.emit('mode_changed', mode);
+  }
+
+  setPreset(preset: 'rear' | 'front' | 'first-person' | 'free') {
+    this.preset = preset;
+    if (preset === 'first-person') {
+      this.mode = 'first-person';
+      this.position = [...this.orbitTarget];
+      this.position[2] += 1.65;
+    } else {
+      this.mode = preset === 'free' ? 'first-person' : 'orbit';
+      if (preset === 'rear') this.rotation = [-0.28, Math.PI, 0];
+      if (preset === 'front') this.rotation = [-0.18, 0, 0];
+      if (preset !== 'free') this.orbitDistance = 7.5;
+    }
+    this.updateMatrices();
+    this.emit('preset_changed', preset);
+  }
+
+  /** Pan parallel to the view plane, as Firestorm's Alt+Ctrl+Shift drag does. */
+  pan(horizontal: number, vertical: number) {
+    const [hx, hy] = this.horizontalHeading();
+    // Screen-right is the heading rotated a quarter turn clockwise.
+    const delta = [hy * horizontal, -hx * horizontal, vertical];
+    const destination = this.mode === 'orbit' ? this.orbitTarget : this.position;
+    for (let index = 0; index < 3; index++) destination[index] += delta[index];
+    this.updateMatrices();
+    this.emit('panned', [...destination]);
   }
 
   /**
@@ -246,14 +301,24 @@ export class Camera3D extends Utils.EventEmitter {
   /**
    * Create look-at view matrix
    */
-  mat4LookAt(eye: number[], center: number[], up: number[]): Float32Array {
-    const z = this.vec3Normalize([
+  mat4LookAt(eye: number[], center: number[], up: number[] = [0, 0, 1]): Float32Array {
+    const diff = [
       eye[0] - center[0],
       eye[1] - center[1],
       eye[2] - center[2]
-    ]);
+    ];
+    const dist = Math.hypot(diff[0], diff[1], diff[2]);
+    const z = dist > 0.00001 ? [diff[0] / dist, diff[1] / dist, diff[2] / dist] : [0, 0, 1];
 
-    const x = this.vec3Normalize(this.vec3Cross(up, z));
+    let x = this.vec3Cross(up, z);
+    if (Math.hypot(x[0], x[1], x[2]) < 0.0001) {
+      // Degenerate/gimbal lock: up and z are collinear (e.g. looking straight down/up along z)
+      x = this.vec3Cross([0, 1, 0], z);
+      if (Math.hypot(x[0], x[1], x[2]) < 0.0001) {
+        x = this.vec3Cross([1, 0, 0], z);
+      }
+    }
+    x = this.vec3Normalize(x);
     const y = this.vec3Cross(z, x);
 
     return new Float32Array([
@@ -265,22 +330,12 @@ export class Camera3D extends Utils.EventEmitter {
   }
 
   /**
-   * Multiply two matrices
+   * Multiply two column-major matrices: returns `a * b`, so `P * V` is
+   * `mat4Multiply(P, V)`. (The previous row-major indexing silently returned
+   * `b * a` for WebGL-layout data.)
    */
   mat4Multiply(a: Float32Array, b: Float32Array): Float32Array {
-    const result = new Float32Array(16);
-
-    for (let i = 0; i < 4; i++) {
-      for (let j = 0; j < 4; j++) {
-        result[i * 4 + j] =
-          a[i * 4 + 0] * b[0 * 4 + j] +
-          a[i * 4 + 1] * b[1 * 4 + j] +
-          a[i * 4 + 2] * b[2 * 4 + j] +
-          a[i * 4 + 3] * b[3 * 4 + j];
-      }
-    }
-
-    return result;
+    return multiplyMat4(a, b);
   }
 
   /**
@@ -304,24 +359,19 @@ export class Camera3D extends Utils.EventEmitter {
   }
 
   /**
-   * Screen to world ray
+   * Screen to world ray. Unprojects through the inverse view-projection matrix,
+   * so it honours aspect ratio, field of view, and both orbit and first-person
+   * modes. Direction has unit length and origin is the camera position.
    */
   screenToWorldRay(screenX: number, screenY: number, width: number, height: number) {
-    // Normalized device coordinates
+    const fallback = { origin: [...this.position], direction: [0, 1, 0] };
+    if (!(width > 0) || !(height > 0)) return fallback;
+    const inverse = invertMat4(multiplyMat4(this.projectionMatrix, this.viewMatrix));
+    if (!inverse) return fallback;
     const ndcX = (2.0 * screenX) / width - 1.0;
     const ndcY = 1.0 - (2.0 * screenY) / height;
-
-    // Ray in world space (simplified)
-    const [pitch, yaw] = this.rotation;
-    const direction = [
-      Math.sin(yaw + ndcX * this.fov * Math.PI / 360) * Math.cos(pitch + ndcY * this.fov * Math.PI / 360),
-      Math.cos(yaw + ndcX * this.fov * Math.PI / 360) * Math.cos(pitch + ndcY * this.fov * Math.PI / 360),
-      Math.sin(pitch + ndcY * this.fov * Math.PI / 360)
-    ];
-
-    return {
-      origin: [...this.position],
-      direction: this.vec3Normalize(direction)
-    };
+    const ray = rayFromNDC(inverse, ndcX, ndcY);
+    // Every perspective ray passes through the eye, so start there.
+    return ray ? { origin: [...this.position], direction: ray.direction } : fallback;
   }
 }

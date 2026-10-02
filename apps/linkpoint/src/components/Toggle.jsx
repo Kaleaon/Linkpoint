@@ -5,7 +5,16 @@ export default function Toggle({ on, onClick }) {
   const { V } = useTheme();
   return (
     <span
+      role="switch"
+      aria-checked={on}
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          if (onClick) onClick();
+        }
+      }}
       style={{
         width: "42px",
         height: "24px",

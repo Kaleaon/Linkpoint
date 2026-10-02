@@ -6,6 +6,10 @@
 export const DEFAULT_PROXY_ALLOWED_HOSTS = [
   'login.agni.lindenlab.com',
   'login.aditi.lindenlab.com',
+  'login.osgrid.org',
+  'grid.kitely.com',
+  'localhost',
+  '127.0.0.1',
 ];
 
 export function getAllowedProxyHosts(value = process.env.SL_PROXY_ALLOWED_HOSTS): Set<string> {
@@ -28,7 +32,7 @@ export function validateProxyTarget(rawUrl: unknown, allowedHosts = getAllowedPr
     throw new Error('Target URL must be an absolute URL');
   }
 
-  if (target.protocol !== 'https:') {
+  if (target.protocol !== 'https:' && !['localhost', '127.0.0.1'].includes(target.hostname.toLowerCase())) {
     throw new Error('Only HTTPS targets are allowed');
   }
   if (target.username || target.password) {
@@ -45,7 +49,7 @@ export function parseSecureProxyTarget(rawUrl: unknown): URL {
   if (typeof rawUrl !== 'string' || rawUrl.trim() === '') throw new Error('Target URL is required');
   let target: URL;
   try { target = new URL(rawUrl); } catch { throw new Error('Target URL must be an absolute URL'); }
-  if (target.protocol !== 'https:') throw new Error('Only HTTPS targets are allowed');
+  if (target.protocol !== 'https:' && !['localhost', '127.0.0.1'].includes(target.hostname.toLowerCase())) throw new Error('Only HTTPS targets are allowed');
   if (target.username || target.password) throw new Error('Target URL must not include credentials');
   return target;
 }

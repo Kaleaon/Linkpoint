@@ -1,5 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import CryptoJS from 'crypto-js';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { LocalGridManager, LOCAL_GRID_STORAGE_KEYS } from '../LocalGridManager';
 import { GridConsole } from '../GridConsole';
 import {
@@ -7,6 +6,7 @@ import {
   verifyPassword,
   isPasswordRecord,
   PBKDF2_ITERATIONS,
+  PBKDF2_FALLBACK_ITERATIONS,
   KEY_BITS
 } from '../password';
 
@@ -57,25 +57,41 @@ describe('offline account password hashing', () => {
   // default on a CI runner. The assertion is the point of the test, so the
   // clock is what gets relaxed rather than the iteration count.
   it('verifies against an independently computed PBKDF2-SHA256 digest', async () => {
-    // Guards the WebCrypto and crypto-js paths against drifting apart: a record
-    // written by one implementation must verify under the other.
     const record = await hashPassword('cross-impl');
-    const expected = CryptoJS.PBKDF2('cross-impl', CryptoJS.enc.Hex.parse(record.salt), {
-      keySize: KEY_BITS / 32,
-      iterations: record.iterations,
-      hasher: CryptoJS.algo.SHA256
-    }).toString(CryptoJS.enc.Hex);
+    const keyMaterial = await globalThis.crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode('cross-impl'),
+      'PBKDF2',
+      false,
+      ['deriveBits']
+    );
+    const saltBytes = new Uint8Array(record.salt.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+    const bits = await globalThis.crypto.subtle.deriveBits(
+      { name: 'PBKDF2', salt: saltBytes, iterations: record.iterations, hash: 'SHA-256' },
+      keyMaterial,
+      KEY_BITS
+    );
+    const expected = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, '0')).join('');
     expect(record.hash).toBe(expected);
   }, 30_000);
 
   it('replays the stored iteration count rather than the current default', async () => {
     const record = await hashPassword('legacy params');
     const downgraded = { ...record, iterations: 1000 };
-    const rehashed = CryptoJS.PBKDF2('legacy params', CryptoJS.enc.Hex.parse(record.salt), {
-      keySize: KEY_BITS / 32,
-      iterations: 1000,
-      hasher: CryptoJS.algo.SHA256
-    }).toString(CryptoJS.enc.Hex);
+    const keyMaterial = await globalThis.crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode('legacy params'),
+      'PBKDF2',
+      false,
+      ['deriveBits']
+    );
+    const saltBytes = new Uint8Array(record.salt.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+    const bits = await globalThis.crypto.subtle.deriveBits(
+      { name: 'PBKDF2', salt: saltBytes, iterations: 1000, hash: 'SHA-256' },
+      keyMaterial,
+      KEY_BITS
+    );
+    const rehashed = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, '0')).join('');
 
     await expect(verifyPassword('legacy params', { ...downgraded, hash: rehashed })).resolves.toBe(true);
     expect(record.iterations).toBe(PBKDF2_ITERATIONS);
@@ -132,5 +148,23 @@ describe('offline account password hashing', () => {
 
     manager.toggleGridState(true);
     await expect(manager.getServer().authenticate('Barbara', 'Liskov', 'substitution')).resolves.toBe(true);
+  });
+
+  describe('without WebCrypto (plain-http hosting)', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it('hashes with the pure-JS fallback at the lower iteration count and the record verifies natively', async () => {
+      const real = globalThis.crypto;
+      vi.stubGlobal('crypto', { getRandomValues: real.getRandomValues.bind(real) });
+      const record = await hashPassword('plain http pw');
+      expect(record.iterations).toBe(PBKDF2_FALLBACK_ITERATIONS);
+      await expect(verifyPassword('plain http pw', record)).resolves.toBe(true);
+      await expect(verifyPassword('wrong', record)).resolves.toBe(false);
+      vi.unstubAllGlobals();
+      // The same record must verify through native WebCrypto: both compute standard PBKDF2-SHA256.
+      await expect(verifyPassword('plain http pw', record)).resolves.toBe(true);
+    }, 60_000);
   });
 });

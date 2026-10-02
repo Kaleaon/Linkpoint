@@ -34,7 +34,7 @@ export class InventoryOperations {
     }
 
     // Generate UUID for new folder (simplified)
-    const folderId = `folder-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const folderId = `folder-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 
     const folder = this.core.createFolder(folderId, {
       name: folderName,
@@ -104,7 +104,7 @@ export class InventoryOperations {
     }
 
     // Generate new UUID for copy
-    const newItemId = `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const newItemId = `item-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 
     // Create copy with new ID
     const copiedItem = this.core.addItem(newItemId, {

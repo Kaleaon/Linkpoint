@@ -6,6 +6,9 @@ import { Utils } from './utils';
 import { LLSD } from './llsd';
 import { SLConnectionFull } from './sl-connection-full';
 import { AuthManager } from './auth';
+import { corsHandler } from './cors-handler';
+import { slBridge } from './sl-bridge';
+import { localCache } from './local-cache';
 
 export class InventoryManager extends Utils.EventEmitter {
   public protocol: SLConnectionFull;
@@ -13,6 +16,7 @@ export class InventoryManager extends Utils.EventEmitter {
   public rootFolder: any = null;
   public items: Map<string, any> = new Map();
   public folders: Map<string, any> = new Map();
+  public loadedFromCache: boolean = false;
 
   constructor(protocolManager: SLConnectionFull, authManager: AuthManager) {
     super();
@@ -24,8 +28,89 @@ export class InventoryManager extends Utils.EventEmitter {
     this.protocol.on('inventory_update', (data: any) => this.handleInventoryUpdate(data));
   }
 
-  async load() {
+  async load(forceRebuild = false) {
     if (!this.auth.isLoggedIn()) return;
+    const agentId = this.auth.user?.id || this.protocol.agentId || 'current';
+
+    // 1. Check local/flashdrive cache first to avoid slow rebuild
+    if (!forceRebuild) {
+      try {
+        const cached = await localCache.loadInventory(agentId);
+        if (cached && Array.isArray(cached.folders) && cached.folders.length > 0) {
+          const rootId = cached.rootId || this.protocol.inventoryRoot || 'root';
+          this.rootFolder = { id: rootId, name: cached.rootName || 'My Inventory', type: 'folder', children: [] };
+          this.folders.set(rootId, this.rootFolder);
+
+          for (const f of cached.folders) {
+            const fid = f.id || Utils.generateUUID();
+            this.folders.set(fid, { id: fid, name: f.name, type: 'folder', parent: f.parent || rootId, children: [] });
+            const parent = this.folders.get(f.parent || rootId);
+            if (parent && !parent.children.includes(fid)) parent.children.push(fid);
+          }
+
+          if (Array.isArray(cached.items)) {
+            for (const item of cached.items) {
+              const iid = item.id || Utils.generateUUID();
+              this.items.set(iid, { id: iid, name: item.name, type: 'item', assetType: item.assetType, parent: item.parent || rootId, description: item.description });
+              const parent = this.folders.get(item.parent || rootId);
+              if (parent && !parent.children.includes(iid)) parent.children.push(iid);
+            }
+          }
+
+          this.loadedFromCache = true;
+          this.emit('inventory_loaded');
+          this.emit('inventory_updated');
+          // If we had a rich cached inventory, we don't need to block on network reload
+          if (cached.folders.length > 50) {
+            return;
+          }
+        }
+      } catch (cacheErr) {
+        console.warn('[Inventory] Cache read error:', cacheErr);
+      }
+    }
+
+    if (slBridge.connected) {
+      try {
+        const inv = await slBridge.fetchInventory();
+        if (inv) {
+          const rootId = inv.folderId || this.protocol.inventoryRoot || 'root';
+          this.rootFolder = { id: rootId, name: inv.folderName || 'My Inventory', type: 'folder', children: [] };
+          this.folders.set(rootId, this.rootFolder);
+          if (Array.isArray(inv.folders)) {
+            for (const f of inv.folders) {
+              const fid = f.id || Utils.generateUUID();
+              this.folders.set(fid, { id: fid, name: f.name, type: 'folder', parent: f.parent || rootId, children: [] });
+              const parent = this.folders.get(f.parent || rootId);
+              if (parent && !parent.children.includes(fid)) parent.children.push(fid);
+            }
+          }
+          if (Array.isArray(inv.items)) {
+            for (const item of inv.items) {
+              const iid = item.id || Utils.generateUUID();
+              this.items.set(iid, { id: iid, name: item.name, type: 'item', assetType: item.assetType, parent: item.parent || rootId, description: item.description });
+              const parent = this.folders.get(item.parent || rootId);
+              if (parent && !parent.children.includes(iid)) parent.children.push(iid);
+            }
+          }
+
+          this.loadedFromCache = false;
+          // Persist to selected cache (flashdrive or local) for instant subsequent startups
+          await localCache.saveInventory(agentId, {
+            folders: inv.folders || [],
+            items: inv.items || [],
+            rootId,
+            rootName: inv.folderName || 'My Inventory',
+          });
+
+          this.emit('inventory_loaded');
+          this.emit('inventory_updated');
+          return;
+        }
+      } catch (err) {
+        console.warn('[Inventory] slBridge inventory load error:', err);
+      }
+    }
 
     const inventoryRoot = this.protocol.inventoryRoot;
     if (!inventoryRoot) return;
@@ -41,6 +126,35 @@ export class InventoryManager extends Utils.EventEmitter {
   }
 
   async fetchFolderContents(folderId: string) {
+    if (slBridge.connected) {
+      try {
+        const inv = await slBridge.fetchInventory(folderId);
+        if (inv) {
+          if (Array.isArray(inv.folders)) {
+            for (const f of inv.folders) {
+              const fid = f.id || Utils.generateUUID();
+              this.folders.set(fid, { id: fid, name: f.name, type: 'folder', parent: f.parent || folderId, children: [] });
+              const parent = this.folders.get(f.parent || folderId);
+              if (parent && !parent.children.includes(fid)) parent.children.push(fid);
+            }
+          }
+          if (Array.isArray(inv.items)) {
+            for (const item of inv.items) {
+              const iid = item.id || Utils.generateUUID();
+              this.items.set(iid, { id: iid, name: item.name, type: 'item', assetType: item.assetType, parent: item.parent || folderId, description: item.description });
+              const parent = this.folders.get(item.parent || folderId);
+              if (parent && !parent.children.includes(iid)) parent.children.push(iid);
+            }
+          }
+          this.emit('inventory_updated');
+          this.emit('inventory_loaded');
+          return;
+        }
+      } catch (err) {
+        console.warn('[Inventory] slBridge fetchFolderContents error:', err);
+      }
+    }
+
     const url = this.protocol.getCapability('FetchInventoryDescendents2');
     if (!url) return;
 
@@ -55,13 +169,13 @@ export class InventoryManager extends Utils.EventEmitter {
         }]
       };
 
-      const response = await fetch(url, {
+      const response = await corsHandler.makeRequest(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/llsd+xml' },
         body: LLSD.buildXML(requestData)
       });
 
-      if (response.ok) {
+      if (response && response.ok) {
         const text = await response.text();
         const data = LLSD.parseXML(text);
         this.handleInventoryResponse(data);
@@ -72,9 +186,11 @@ export class InventoryManager extends Utils.EventEmitter {
   }
 
   handleInventoryResponse(data: any) {
-    if (!data || !data.folders) return;
+    if (!data) return;
 
-    data.folders.forEach((folderData: any) => {
+    const foldersList = Array.isArray(data.folders) ? data.folders : (data.categories ? [data] : []);
+
+    foldersList.forEach((folderData: any) => {
       if (folderData.categories) {
         folderData.categories.forEach((cat: any) => {
           const folder = { id: cat.category_id || cat.folder_id, name: cat.name, type: 'folder', parent: cat.parent_id, children: [] };
@@ -100,6 +216,9 @@ export class InventoryManager extends Utils.EventEmitter {
         });
       }
     });
+
+    this.emit('inventory_updated');
+    this.emit('inventory_loaded');
   }
 
   handleInventoryUpdate(data: any) {

@@ -1,0 +1,17 @@
+[
+  {
+    "rule": "placeholder-id",
+    "file": "src/linkpoint/fabricated-data.ts",
+    "reason": "Lists the placeholder ids earlier builds invented so they can be purged from stored data."
+  },
+  {
+    "rule": "invented-resident",
+    "file": "src/linkpoint/fabricated-data.ts",
+    "reason": "Describes the invented residents the purge removes."
+  },
+  {
+    "rule": "invented-coordinates",
+    "file": "src/linkpoint/offline/LocalGridServer.ts",
+    "reason": "The local test grid's own configured home position. It is that grid's setting, not live data presented as an avatar position, and the module is not part of the connected-viewer path."
+  }
+]

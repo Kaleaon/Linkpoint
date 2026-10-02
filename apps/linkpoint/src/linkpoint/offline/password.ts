@@ -7,13 +7,14 @@
  *
  * WebCrypto is used when available (native, so a high iteration count is cheap).
  * Browsers only expose `crypto.subtle` in a secure context, so a pure-JS
- * crypto-js fallback covers plain-http local hosting. Both implementations
+ * @noble/hashes fallback covers plain-http local hosting. Both implementations
  * compute standard PBKDF2-SHA256, so a record produced by one verifies against
  * the other. The parameters used are stored in the record and verification
  * always replays those, never the current defaults.
  */
 
-import CryptoJS from 'crypto-js';
+import { pbkdf2Async } from '@noble/hashes/pbkdf2.js';
+import { sha256 } from '@noble/hashes/sha2.js';
 
 export interface PasswordRecord {
   version: 1;
@@ -63,15 +64,14 @@ function hasSubtleCrypto(): boolean {
 
 function randomSalt(size: number = SALT_BYTES): Uint8Array {
   const out = new Uint8Array(size);
-  try {
-    if (typeof globalThis.crypto !== 'undefined' && typeof globalThis.crypto.getRandomValues === 'function') {
-      globalThis.crypto.getRandomValues(out);
-      return out;
+  if (typeof globalThis.crypto !== 'undefined' && typeof globalThis.crypto.getRandomValues === 'function') {
+    globalThis.crypto.getRandomValues(out);
+  } else {
+    for (let i = 0; i < size; i++) {
+      out[i] = Math.floor(Math.random() * 256);
     }
-  } catch (e) {
-    // Fall through to the crypto-js PRNG below.
   }
-  return hexToBytes(CryptoJS.lib.WordArray.random(size).toString(CryptoJS.enc.Hex));
+  return out;
 }
 
 async function deriveWithSubtle(password: string, salt: Uint8Array, iterations: number): Promise<string> {
@@ -90,19 +90,14 @@ async function deriveWithSubtle(password: string, salt: Uint8Array, iterations: 
   return bytesToHex(new Uint8Array(bits));
 }
 
-function deriveWithCryptoJS(password: string, salt: Uint8Array, iterations: number): string {
-  return CryptoJS.PBKDF2(password, CryptoJS.enc.Hex.parse(bytesToHex(salt)), {
-    keySize: KEY_BITS / 32,
-    iterations,
-    hasher: CryptoJS.algo.SHA256
-  }).toString(CryptoJS.enc.Hex);
+async function deriveWithNoble(password: string, salt: Uint8Array, iterations: number): Promise<string> {
+  // The async variant yields to the event loop so a pure-JS derivation does not freeze the UI.
+  const key = await pbkdf2Async(sha256, new TextEncoder().encode(password), salt, { c: iterations, dkLen: KEY_BITS / 8 });
+  return bytesToHex(key);
 }
 
 async function derive(password: string, salt: Uint8Array, iterations: number): Promise<string> {
-  if (hasSubtleCrypto()) {
-    return deriveWithSubtle(password, salt, iterations);
-  }
-  return deriveWithCryptoJS(password, salt, iterations);
+  return hasSubtleCrypto() ? deriveWithSubtle(password, salt, iterations) : deriveWithNoble(password, salt, iterations);
 }
 
 /** Length-independent comparison so verification does not leak the digest byte by byte. */

@@ -1,0 +1,71 @@
+// Atmospheric sky dome: sun and moon discs over the scattering model in include/atmosphere.glsl.
+// Port of SKY_VERTEX_SHADER / SKY_FRAGMENT_SHADER in src/linkpoint/sky.ts.
+//
+// Draw a unit icosphere (createSkyDome) with an identity transform at renderable priority 0.
+// The dome follows the camera and is pinned to the far plane, so any radius works. The fragment
+// output is already display referred (toneMapSky), so render the view without post processing.
+material {
+    name : sky,
+    shadingModel : unlit,
+    blending : opaque,
+    culling : none,
+    depthWrite : false,
+    depthCulling : false,
+    vertexDomain : device,
+    variables : [
+        direction
+    ],
+    parameters : [
+        { type : float3, name : uBlueHorizon },
+        { type : float3, name : uBlueDensity },
+        { type : float3, name : uAmbient },
+        { type : float3, name : uSunlight },
+        { type : float3, name : uGlow },
+        { type : float3, name : uLightNorm },
+        { type : float,  name : uHazeHorizon },
+        { type : float,  name : uHazeDensity },
+        { type : float,  name : uDensityMultiplier },
+        { type : float,  name : uMaxY },
+        { type : float,  name : uCloudShadow },
+        { type : float,  name : uSunUp },
+        { type : float,  name : uSunMoonGlow },
+        { type : float3, name : uSunDir },
+        { type : float3, name : uMoonDir },
+        { type : float,  name : uSunRadius },
+        { type : float,  name : uMoonRadius },
+        { type : float,  name : uMoonBrightness },
+        { type : float,  name : uMoonUp }
+    ]
+}
+
+vertex {
+    void materialVertex(inout MaterialVertexInputs material) {
+        material.direction = vec4(getPosition().xyz, 0.0);
+        // follow the camera, then pin to the far plane (z = w) so the dome only fills untouched pixels
+        vec4 clip = getClipFromWorldMatrix() * vec4(getWorldCameraPosition() + getPosition().xyz, 1.0);
+        material.worldPosition = clip.xyww;
+    }
+}
+
+fragment {
+//!include atmosphere.glsl
+
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        vec3 dir = normalize(variable_direction.xyz);
+        vec3 color = atmosphereColor(dir);
+        // sun disc with a soft edge and a tight bright core, dimmed as it sinks into the haze
+        float sd = dot(dir, materialParams.uSunDir);
+        float sunDisc = smoothstep(cos(materialParams.uSunRadius * 1.25), cos(materialParams.uSunRadius), sd);
+        float sunBloom = pow(max(sd, 0.0), 900.0) * 0.6;
+        float sunVisible = materialParams.uSunUp * smoothstep(-0.02, 0.06, materialParams.uSunDir.z);
+        vec3 sunColor = materialParams.uSunlight * 8.0;
+        color += sunColor * (sunDisc + sunBloom) * sunVisible;
+        // moon disc
+        float md = dot(dir, materialParams.uMoonDir);
+        float moonDisc = smoothstep(cos(materialParams.uMoonRadius * 1.15), cos(materialParams.uMoonRadius), md);
+        color += vec3(0.82, 0.88, 1.0) * moonDisc * materialParams.uMoonBrightness * 3.0 * materialParams.uMoonUp
+            * smoothstep(-0.02, 0.06, materialParams.uMoonDir.z);
+        material.baseColor = vec4(toneMapSky(color), 1.0);
+    }
+}

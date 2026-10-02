@@ -1,2 +1,3 @@
-/** Dialogs are populated from live simulator events; none are fabricated. */
+// Dialogs are populated only from live simulator events. Static scripted,
+// payment, inventory, and teleport offers would misrepresent the session.
 export const DIALOGS = {};

@@ -1,4 +1,3 @@
-import CryptoJS from 'crypto-js';
 /**
  * Linkpoint PWA - XML-RPC Client for Second Life Login
  * Based on Linkpoint Android implementation
@@ -298,7 +297,8 @@ export class XMLRPCClient {
    * Calculate MD5 hash (pure JavaScript implementation)
    */
   static async md5(str: string): Promise<string> {
-    return CryptoJS.MD5(str).toString();
+    const bytes = new TextEncoder().encode(str);
+    return SparkMD5.ArrayBuffer.hash(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer);
   }
 
   /**

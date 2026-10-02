@@ -1,0 +1,63 @@
+// Region terrain: a composition texture (R = value / 3) picks and blends four detail textures,
+// with a flat fallback colour per layer until its texture arrives. Port of
+// TERRAIN_VERTEX_SHADER / TERRAIN_FRAGMENT_SHADER in src/linkpoint/terrain.ts, including the
+// per vertex normal and the single point light plus ambient term.
+//
+// Detail textures should use REPEAT wrapping (uTileScale repeats across the whole region).
+material {
+    name : terrain,
+    shadingModel : unlit,
+    blending : opaque,
+    variables : [
+        worldPos,
+        worldNrm
+    ],
+    parameters : [
+        { type : sampler2d, name : uComposition, precision : high },
+        { type : sampler2d, name : uDetail0 },
+        { type : sampler2d, name : uDetail1 },
+        { type : sampler2d, name : uDetail2 },
+        { type : sampler2d, name : uDetail3 },
+        { type : float4, name : uDetailUse },
+        { type : float3, name : uFallback0 },
+        { type : float3, name : uFallback1 },
+        { type : float3, name : uFallback2 },
+        { type : float3, name : uFallback3 },
+        { type : float3, name : uLightPos },
+        { type : float3, name : uLightColor },
+        { type : float3, name : uAmbientColor },
+        { type : float,  name : uTileScale }
+    ],
+    requires : [ uv0, tangents ]
+}
+
+vertex {
+    void materialVertex(inout MaterialVertexInputs material) {
+        material.worldPos = vec4(material.worldPosition.xyz, 1.0);
+        // the built-in worldNormal is already transformed by the model normal matrix
+        material.worldNrm = vec4(normalize(material.worldNormal), 0.0);
+    }
+}
+
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        vec2 vTexCoord = getUV0();
+        float value = clamp(texture(materialParams_uComposition, vTexCoord).r * 3.0, 0.0, 3.0);
+        float base = min(floor(value), 2.0);
+        float f = value - base;
+        vec2 tiled = vTexCoord * materialParams.uTileScale;
+        vec3 c0 = mix(materialParams.uFallback0, texture(materialParams_uDetail0, tiled).rgb, materialParams.uDetailUse.x);
+        vec3 c1 = mix(materialParams.uFallback1, texture(materialParams_uDetail1, tiled).rgb, materialParams.uDetailUse.y);
+        vec3 c2 = mix(materialParams.uFallback2, texture(materialParams_uDetail2, tiled).rgb, materialParams.uDetailUse.z);
+        vec3 c3 = mix(materialParams.uFallback3, texture(materialParams_uDetail3, tiled).rgb, materialParams.uDetailUse.w);
+        vec3 lower = base < 0.5 ? c0 : (base < 1.5 ? c1 : c2);
+        vec3 upper = base < 0.5 ? c1 : (base < 1.5 ? c2 : c3);
+        vec3 albedo = mix(lower, upper, f);
+        vec3 normal = normalize(variable_worldNrm.xyz);
+        vec3 lightDir = normalize(materialParams.uLightPos - variable_worldPos.xyz);
+        float diff = max(dot(normal, lightDir), 0.0);
+        vec3 light = pow(min(materialParams.uAmbientColor + diff * materialParams.uLightColor, vec3(1.0)), vec3(1.0 / 2.2));
+        material.baseColor = vec4(albedo * light, 1.0);
+    }
+}

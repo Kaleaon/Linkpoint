@@ -9,20 +9,26 @@ import { pickInk } from "./color.js";
 // headLook/stateBlock) that every screen and chrome component needs.
 export function computeTheme(state, cf) {
   const L = LAYOUTS[state.layout];
-  const P = PALETTES[state.palette];
+  const base = PALETTES[state.palette];
+  const P = state.customTheme?.active
+    ? { ...base, name: state.customTheme.name, note: "A custom, shareable colour theme.", c: { ...base.c, ...state.customTheme.colors } }
+    : base;
   const t = { name: L.name + " / " + P.name, nav: L.nav, font: L.font, dfont: L.dfont, note: L.note + "   Colour pack: " + P.note + ".", v: { ...P.c, ...L.s } };
   const d = DEVICES[state.device];
 
-  // Runtime navigation follows the actual viewport. The design-canvas-only
-  // console and floating-window presentations are deliberately not app modes.
-  const nav = d.split || d.desk ? "rail" : t.nav === "TILES" ? "tiles" : "tabs";
+  let nav;
+  if (d.desk) nav = "floaters";
+  else if (t.nav === "SWEEP") nav = "sweep";
+  else if (d.split) nav = "rail";
+  else nav = t.nav === "TILES" ? "tiles" : t.nav === "RAIL" && d.w > 700 ? "rail" : "tabs";
 
   const V = t.v;
   const pad = state.dense ? "8px" : V.pad;
   const C = cf();
-  const isConsole = false;
+  const isConsole = nav === "sweep";
   const consoleScene = isConsole && state.screen === "3D View" && state.cond === "normal";
-  const isFloat = false;
+  const isFloat = nav === "floaters";
+  const isSweepDesk = isFloat && (state.layout === "sweep" || t.nav === "SWEEP");
   const bleed = isConsole || isFloat;
   const LK = LAYOUTS[state.layout].look;
 
@@ -31,11 +37,11 @@ export function computeTheme(state, cf) {
   const ink = (bg, candidates) => pickInk(bg, candidates);
 
   const condPack = state.cond === "normal" ? null : STATES[state.cond][scr] || STATES[state.cond]._;
-  const stateBlockActive = !!condPack && !["Login", "Settings", "Search"].includes(scr);
+  const stateBlockActive = !!condPack && !["Login", "Settings", "Cache", "Search"].includes(scr);
   const norm = !stateBlockActive;
   const bare = ["3D View", "Login", "Search"].includes(scr);
   const immersive = scr === "3D View" && norm;
   const headLook = bare || isFloat ? "none" : nav === "sweep" ? "sweep" : LK.head;
 
-  return { t, d, V, pad, C, isConsole, consoleScene, isFloat, bleed, LK, nav, scr, sel, ink, condPack, stateBlockActive, norm, bare, immersive, headLook };
+  return { t, d, isSweepDesk, V, pad, C, isConsole, consoleScene, isFloat, bleed, LK, nav, scr, sel, ink, condPack, stateBlockActive, norm, bare, immersive, headLook };
 }

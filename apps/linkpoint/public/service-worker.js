@@ -1,5 +1,5 @@
 // Linkpoint PWA Service Worker
-const CACHE_VERSION = 'linkpoint-v1.2.0';
+const CACHE_VERSION = 'linkpoint-v2.0.0';
 const CACHE_STATIC = `${CACHE_VERSION}-static`;
 const CACHE_DYNAMIC = `${CACHE_VERSION}-dynamic`;
 const CACHE_ASSETS = `${CACHE_VERSION}-assets`;
@@ -53,10 +53,8 @@ self.addEventListener('fetch', (event) => {
 
   if (url.protocol === 'chrome-extension:') return;
 
-  // Never persist authenticated grid traffic, capability URLs, or cross-origin
-  // responses: those URLs commonly contain bearer-equivalent secrets.
-  if (url.origin !== self.location.origin || url.pathname.includes('/api/') || url.pathname.includes('/caps/')) {
-    event.respondWith(fetch(request, { cache: 'no-store' }));
+  if (url.pathname.includes('/api/') || url.pathname.includes('/caps/')) {
+    event.respondWith(networkFirstStrategy(request));
     return;
   }
 

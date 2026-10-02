@@ -134,7 +134,7 @@ export class LLSDBinaryParser {
     private readUUID(): string {
         const bytes = this.readBytes(16);
         const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
-        return `${hex.substr(0, 8)}-${hex.substr(8, 4)}-${hex.substr(12, 4)}-${hex.substr(16, 4)}-${hex.substr(20, 12)}`;
+        return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`;
     }
 
     private readString(length: number): string {

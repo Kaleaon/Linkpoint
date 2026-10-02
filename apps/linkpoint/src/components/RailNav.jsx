@@ -2,23 +2,26 @@ import { useApp } from "../context/AppContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
 import { NAV_ALL } from "../data/content.js";
 import Icon from "./Icon.jsx";
+import { navActive } from "../theme/look.js";
 
 // Ported from the `isRail` <sc-if> block — the left rail (Navy Gold, Rule &
 // Rail packs, or any pack on a split/tablet-width device).
 export default function RailNav() {
   const { state, actions } = useApp();
-  const { V, t, nav, immersive } = useTheme();
-  if (nav !== "rail" || immersive) return null;
+  const { V, t, nav } = useTheme();
+  // Navigation stays visible on the 3D View too. Hiding it left no way out of the
+  // scene on phones and tablets (the 3D screen has no header or back button).
+  if (nav !== "rail") return null;
 
   return (
     <div style={{ flex: "none", width: "104px", background: V.surf, borderRight: "1px solid " + V.outv, display: "flex", flexDirection: "column", gap: "5px", padding: "12px 8px" }}>
       <div style={{ font: "700 13px/1.15 " + t.dfont, letterSpacing: ".2em", color: V.pri, padding: "2px 6px 14px" }}>
-        GRID
-        <br />
         LINK
+        <br />
+        POINT
       </div>
       {NAV_ALL.map((n) => {
-        const active = state.screen === n.id;
+        const active = navActive(state.screen, n.id);
         return (
           <div
             key={n.id}

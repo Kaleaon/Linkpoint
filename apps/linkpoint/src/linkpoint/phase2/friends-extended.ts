@@ -8,11 +8,29 @@
  * Extends friend functionality with requests, notifications, permissions, calling cards, and groups.
  */
 
-export class FriendsExtended {
+import { Utils } from '../utils';
+
+export class FriendsExtended extends Utils.EventEmitter {
   private friends: Map<string, any> = new Map();
   private friendRequests: Map<string, any> = new Map();
   private friendGroups: Map<string, any> = new Map();
   private onlineStatusListeners: Set<Function> = new Set();
+  private authoritativePresence: Set<string> = new Set();
+
+  constructor(private protocol?: any) {
+    super();
+  }
+
+  private normalizeId(friendId: string) {
+    return String(friendId).trim().replace(/^\{(.+)\}$/, '$1').toLowerCase();
+  }
+
+  private normalizeStatus(status: unknown): 'online' | 'offline' {
+    if (status === true || status === 1 || status === '1' || String(status).toLowerCase() === 'online' || String(status).toLowerCase() === 'true') {
+      return 'online';
+    }
+    return 'offline';
+  }
 
   /**
    * Feature 46: Friend requests
@@ -23,6 +41,10 @@ export class FriendsExtended {
       throw new Error('Valid user ID required');
     }
 
+    if (typeof this.protocol?.sendFriendRequest !== 'function') {
+      throw new Error('Friend requests are unavailable on this connection');
+    }
+    await this.protocol.sendFriendRequest(userId, message);
     const request = {
       id: `req-${Date.now()}`,
       targetUserId: userId,
@@ -77,41 +99,89 @@ export class FriendsExtended {
       throw new Error('Valid friend ID required');
     }
 
+    const normalizedId = this.normalizeId(friendId);
+    const existing = this.friends.get(normalizedId);
     const friend = {
-      id: friendId,
-      name: friendData.name || 'Friend',
-      onlineStatus: friendData.onlineStatus || 'offline',
-      permissions: friendData.permissions || {},
-      group: friendData.group || null,
-      notes: friendData.notes || '',
-      timestamp: friendData.timestamp || Date.now(),
-      ...friendData
+      ...existing,
+      name: friendData.name ?? existing?.name ?? 'Friend',
+      permissions: friendData.permissions ?? existing?.permissions ?? {},
+      group: friendData.group ?? existing?.group ?? null,
+      notes: friendData.notes ?? existing?.notes ?? '',
+      timestamp: friendData.timestamp ?? existing?.timestamp ?? Date.now(),
+      ...friendData,
+      id: normalizedId,
+      onlineStatus: this.normalizeStatus(friendData.onlineStatus ?? friendData.online ?? existing?.onlineStatus),
     };
 
-    this.friends.set(friendId, friend);
+    this.friends.set(normalizedId, friend);
+    this.emit(existing ? 'friend_updated' : 'friend_added', { ...friend });
     console.log(`[FriendsExtended] Added friend: ${friend.name}`);
+  }
+
+  /** Replace a server snapshot and remove contacts that are no longer friends. */
+  replaceFriends(friends: any[]) {
+    const currentIds = new Set<string>();
+    for (const friend of friends || []) {
+      if (!friend?.id) continue;
+      const id = this.normalizeId(String(friend.id));
+      currentIds.add(id);
+      const liveStatus = this.authoritativePresence.has(id) ? this.friends.get(id)?.onlineStatus : undefined;
+      this.addFriend(id, liveStatus ? { ...friend, onlineStatus: liveStatus } : friend);
+    }
+    for (const id of [...this.friends.keys()]) {
+      if (!currentIds.has(id)) this.removeFriend(id);
+    }
+  }
+
+  removeFriend(friendId: string) {
+    const normalizedId = this.normalizeId(friendId);
+    const friend = this.friends.get(normalizedId);
+    if (!friend) return false;
+    this.friends.delete(normalizedId);
+    this.authoritativePresence.delete(normalizedId);
+    for (const group of this.friendGroups.values()) {
+      group.members = group.members.filter((id: string) => this.normalizeId(id) !== normalizedId);
+    }
+    this.emit('friend_removed', { ...friend });
+    return true;
+  }
+
+  clear() {
+    for (const id of [...this.friends.keys()]) this.removeFriend(id);
+    this.friendRequests.clear();
   }
 
   /**
    * Feature 47: Online notifications
    * Update friend online status
    */
-  updateFriendStatus(friendId: string, status: string) {
+  updateFriendStatus(friendId: string, status: string, friendData: any = {}) {
     if (!friendId || !status) {
       throw new Error('Valid friend ID and status required');
     }
 
-    const friend = this.friends.get(friendId);
+    const normalizedId = this.normalizeId(friendId);
+    const normalizedStatus = this.normalizeStatus(status);
+    this.authoritativePresence.add(normalizedId);
+    let friend = this.friends.get(normalizedId);
+    // Presence packets can arrive before the initial buddy-list request has
+    // completed. Keep that authoritative event instead of silently dropping it.
+    if (!friend) {
+      this.addFriend(normalizedId, { ...friendData, onlineStatus: normalizedStatus });
+      friend = this.friends.get(normalizedId);
+    }
     if (friend) {
       const oldStatus = friend.onlineStatus;
-      friend.onlineStatus = status;
+      friend.onlineStatus = normalizedStatus;
+      if (friendData.name) friend.name = friendData.name;
 
       // Notify listeners
-      if (oldStatus !== status) {
-        this.notifyStatusChange(friendId, status, oldStatus);
+      if (oldStatus !== normalizedStatus) {
+        this.notifyStatusChange(normalizedId, normalizedStatus, oldStatus);
+        this.emit('friend_updated', { ...friend });
       }
 
-      console.log(`[FriendsExtended] Friend ${friendId} status: ${status}`);
+      console.log(`[FriendsExtended] Friend ${normalizedId} status: ${normalizedStatus}`);
     }
   }
 

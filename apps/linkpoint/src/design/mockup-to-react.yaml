@@ -34,6 +34,14 @@ target:
   install: npm install
   build: npm run build   # Vite; catches JSX/import errors
   dev: npm run dev
+  production_boundary: >
+    Port the in-app design, content, tokens and behavior only. The outer
+    GitHub Pages presentation canvas (title, explanatory note, picker sidebar,
+    fake device bezel and fake OS status bar) must remain in docs/index.html
+    and must not be imported by the React application root. React fills its
+    host viewport and chooses a form factor automatically from viewport width;
+    themes and layout packs remain user-selectable from the in-app Settings
+    screen.
 
 # ---------------------------------------------------------------------
 # The DSL's {{ }} binding evaluator (support.js: resolve()/resolvePath())
@@ -104,12 +112,16 @@ file_map:
   top_level_constants:
     dc: "const tables declared before `class Component` (SCREENS, GRIDS, LAYOUTS, PALETTES, DEVICES, CBTN, CSUB, CPAD/CPADR, DIALOGS, FLOATERS, FMENU, HUDS, TARGETS, STATES)"
     react: "src/theme/constants.js (most tables), layouts.js, palettes.js, dialogs.js — same names, same shape, ported near-verbatim"
+  sub_views:
+    dc: "CSUB + the subView()/setSub() methods on the component class; segTabs and the console rail's `sub` list both read them; card lists filter on the `sub` tag"
+    react: "src/theme/constants.js exports CSUB plus subView(state, scr) / setSub(actions, scr, label) / inSub(card, curSub); consumed by components/SegmentedTabs.jsx, components/ConsoleFrame.jsx, components/ScreenBody.jsx and screens/{Map,Inventory,Profile,World3D}.jsx"
+    note: "CSUB is the model, not LCARS decoration — a screen gains sub-views by appearing in the table. Radar's sub-view lives in rMode and Settings/Cache navigate instead of switching tabs; both are special-cased inside subView/setSub, nowhere else."
   render_vals_theme_head:
     dc: "the top of renderVals(): T()/D()/navMode()/cf() and turning layout+palette into V (colour tokens), t (font tokens), C (console geometry)"
     react: "src/theme/computeTheme.js, src/theme/color.js (ink()/contrast), src/hooks/useAppState.js's T()/D()/navMode()/cf()"
   render_vals_screen_content:
     dc: "the per-screen branches of renderVals() (isChat/isFriends/isRadar/... blocks, and the CARDS table)"
-    react: "src/screens/*.jsx for the screens with bespoke layouts; src/data/content.js's buildCards() + src/components/CardList.jsx for the six card-list screens (see screens map below)"
+    react: "src/screens/*.jsx for the screens with bespoke layouts; src/data/content.js's buildCards() + src/components/CardList.jsx for the card-list screens (see screens map below)"
   screens:
     Chat: docs/react/src/screens/Chat.jsx
     Radar: docs/react/src/screens/Radar.jsx
@@ -123,7 +135,13 @@ file_map:
     Groups: "same generic card list as Friends"
     Notices: "same generic card list as Friends"
     Teleport: "same generic card list as Friends"
+    Outfits: "same generic card list as Friends"
+    Objects: "same generic card list as Friends"
+    Parcel: "same generic card list as Friends"
+    Transactions: "same generic card list as Friends"
+    "Mute List": "same generic card list as Friends"
     Settings: "same generic card list as Friends"
+    Cache: "same generic card list as Friends"
     Diagnostics: "same generic card list as Friends"
   shell_chrome:
     sweep_console_frame: docs/react/src/components/ConsoleFrame.jsx
@@ -135,8 +153,9 @@ file_map:
     segmented_tabs_and_chips: docs/react/src/components/SegmentedTabs.jsx, docs/react/src/components/ChipRow.jsx
     system_dialogs: docs/react/src/components/SystemDialog.jsx
     toast: docs/react/src/components/Toast.jsx
-    device_frame_bezel: docs/react/src/components/DeviceFrame.jsx
-    status_bar: docs/react/src/components/StatusBar.jsx
+    application_viewport: "docs/react/src/components/DeviceFrame.jsx — port frame contents only; omit the mock device bezel"
+    preview_only_status_bar: "docs/index.html only — do not import docs/react/src/components/StatusBar.jsx from the React app"
+    loading_crystal: "docs/react/src/components/CrystalLoader.jsx (dc: the inline <svg> under stateBlock.pyramid in index.html; keyframes in src/index.css / the <style> block mirror each other)"
     desktop_menu_bar: docs/react/src/components/MenuBar.jsx
 
 # ---------------------------------------------------------------------
