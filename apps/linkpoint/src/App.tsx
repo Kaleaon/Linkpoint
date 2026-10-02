@@ -5,8 +5,6 @@ import { AnnouncerProvider } from "./context/AnnouncerContext.jsx";
 import Shell from "./components/Shell.jsx";
 import SystemDialog from "./components/SystemDialog.jsx";
 import Toast from "./components/Toast.jsx";
-import BottomTabs from "./components/BottomTabs.jsx";
-import TileNav from "./components/TileNav.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import type { ViewerClient } from "@linkpoint/viewer-client";
 import { ViewerClientProvider } from "./viewer/ViewerClientContext";
@@ -39,8 +37,6 @@ function Viewer() {
         <SystemDialog />
         <Toast />
       </div>
-      {state.screen !== "Login" ? <BottomTabs /> : null}
-      {state.screen !== "Login" ? <TileNav /> : null}
     </main>
   );
 }

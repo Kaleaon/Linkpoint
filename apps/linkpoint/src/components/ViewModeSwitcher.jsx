@@ -21,6 +21,9 @@ export default function ViewModeSwitcher({ compact = false, style = {} }) {
     actions.setViewMode(mode);
   };
 
+  const borderRadius = isSweepDesk ? "999px" : V.rs;
+  const font = t.font;
+
   if (compact) {
     return (
       <div style={{ display: "flex", alignItems: "center", gap: 3, ...style }}>
@@ -34,11 +37,10 @@ export default function ViewModeSwitcher({ compact = false, style = {} }) {
             height: "24px",
             padding: "0 8px",
             border: `1px solid ${V.outv}`,
-            borderRadius: isSweepDesk ? "999px" : V.rs,
+            borderRadius,
             background: V.surf,
             color: V.ink,
-            fontSize: "10px",
-            fontWeight: 700,
+            font: "700 10px/1 " + font,
             letterSpacing: ".08em",
             cursor: "pointer",
           }}
@@ -51,6 +53,27 @@ export default function ViewModeSwitcher({ compact = false, style = {} }) {
     );
   }
 
+  const getOptionStyle = (active, isAuto = false) => ({
+    display: "inline-flex",
+    alignItems: "center",
+    gap: isAuto ? 3 : 4,
+    height: "22px",
+    padding: isAuto ? "0 6px" : "0 7px",
+    border: 0,
+    borderRadius,
+    background: active ? (isAuto ? (isSweepDesk ? V.sec : V.priC || V.surf2 || V.surf) : V.pri) : "transparent",
+    color: active ? (isAuto ? V.ink : V.onpri) : V.ink2,
+    font: `${isAuto ? 600 : 700} ${isAuto ? 9 : 9.5}px/1 ${font}`,
+    letterSpacing: isAuto ? ".06em" : ".08em",
+    cursor: "pointer",
+    opacity: isAuto && !active ? 0.6 : 1,
+    transition: "background 0.15s, color 0.15s",
+  });
+
+  const mobileActive = currentMode === "mobile" || (!isDesktopActive && currentMode !== "desktop");
+  const desktopActive = currentMode === "desktop" || (isDesktopActive && currentMode !== "mobile");
+  const autoActive = currentMode === "auto";
+
   return (
     <div
       role="group"
@@ -61,7 +84,7 @@ export default function ViewModeSwitcher({ compact = false, style = {} }) {
         padding: "2px",
         background: V.surf2 || V.surf,
         border: `1px solid ${V.outv}`,
-        borderRadius: isSweepDesk ? "999px" : V.rs,
+        borderRadius,
         gap: "2px",
         ...style,
       }}
@@ -70,22 +93,7 @@ export default function ViewModeSwitcher({ compact = false, style = {} }) {
       <button
         type="button"
         onClick={() => handleSelectMode("mobile")}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 4,
-          height: "22px",
-          padding: "0 7px",
-          border: 0,
-          borderRadius: isSweepDesk ? "999px" : V.rs,
-          background: currentMode === "mobile" || (!isDesktopActive && currentMode !== "desktop") ? V.pri : "transparent",
-          color: currentMode === "mobile" || (!isDesktopActive && currentMode !== "desktop") ? V.onpri : V.ink2,
-          fontSize: "9.5px",
-          fontWeight: 700,
-          letterSpacing: ".08em",
-          cursor: "pointer",
-          transition: "background 0.15s, color 0.15s",
-        }}
+        style={getOptionStyle(mobileActive)}
         title="Mobile Touch Interface (Lumiya style with bottom navigation and touch controls)"
       >
         <Icon name="smartphone" size={11} />
@@ -96,22 +104,7 @@ export default function ViewModeSwitcher({ compact = false, style = {} }) {
       <button
         type="button"
         onClick={() => handleSelectMode("desktop")}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 4,
-          height: "22px",
-          padding: "0 7px",
-          border: 0,
-          borderRadius: isSweepDesk ? "999px" : V.rs,
-          background: currentMode === "desktop" || (isDesktopActive && currentMode !== "mobile") ? V.pri : "transparent",
-          color: currentMode === "desktop" || (isDesktopActive && currentMode !== "mobile") ? V.onpri : V.ink2,
-          fontSize: "9.5px",
-          fontWeight: 700,
-          letterSpacing: ".08em",
-          cursor: "pointer",
-          transition: "background 0.15s, color 0.15s",
-        }}
+        style={getOptionStyle(desktopActive)}
         title="Desktop Multi-Window Interface (Firestorm style with draggable floaters and top menu bar)"
       >
         <Icon name="monitor" size={11} />
@@ -122,22 +115,7 @@ export default function ViewModeSwitcher({ compact = false, style = {} }) {
       <button
         type="button"
         onClick={() => handleSelectMode("auto")}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 3,
-          height: "22px",
-          padding: "0 6px",
-          border: 0,
-          borderRadius: isSweepDesk ? "999px" : V.rs,
-          background: currentMode === "auto" ? (isSweepDesk ? V.sec : "rgba(255,255,255,0.12)") : "transparent",
-          color: currentMode === "auto" ? V.ink : V.ink2,
-          fontSize: "9px",
-          fontWeight: 600,
-          letterSpacing: ".06em",
-          cursor: "pointer",
-          opacity: currentMode === "auto" ? 1 : 0.6,
-        }}
+        style={getOptionStyle(autoActive, true)}
         title="Auto-responsive (Switches layout automatically based on viewport size)"
       >
         <Icon name="sparkles" size={10} />

@@ -19,16 +19,18 @@ export default function Header() {
   const title = rawTitle;
   const subtitle = condPack ? condPack.sub || null : runtimeSubtitle(scr, rawSubtitle);
 
+  const switcher = <ViewModeSwitcher compact={headLook !== "stack"} />;
+
   if (headLook === "none" || headLook === "sweep") {
     // "sweep" head only renders outside the console frame (isSweepHead requires
     // !isConsole); when isConsole is true the console chrome draws its own title.
-    if (headLook === "sweep" && !isConsole) return <SweepHead title={title} subtitle={subtitle} scr={scr} />;
+    if (headLook === "sweep" && !isConsole) return <SweepHead title={title} subtitle={subtitle} scr={scr} switcher={switcher} />;
     return null;
   }
-  if (headLook === "pivot") return <PivotHead title={title} subtitle={subtitle} scr={scr} />;
-  if (headLook === "rule") return <RuleHead title={title} subtitle={subtitle} scr={scr} />;
-  if (headLook === "editorial") return <EditorialHead title={title} subtitle={subtitle} scr={scr} />;
-  return <StackHead title={title} subtitle={subtitle} scr={scr} />;
+  if (headLook === "pivot") return <PivotHead title={title} subtitle={subtitle} scr={scr} switcher={switcher} />;
+  if (headLook === "rule") return <RuleHead title={title} subtitle={subtitle} scr={scr} switcher={switcher} />;
+  if (headLook === "editorial") return <EditorialHead title={title} subtitle={subtitle} scr={scr} switcher={switcher} />;
+  return <StackHead title={title} subtitle={subtitle} scr={scr} switcher={switcher} />;
 }
 
 function runtimeSubtitle(screen, fallback) {
@@ -54,7 +56,7 @@ function runtimeSubtitle(screen, fallback) {
   return runtime[screen] ?? fallback;
 }
 
-function StackHead({ title, subtitle, scr }) {
+function StackHead({ title, subtitle, scr, switcher }) {
   const { V, t } = useTheme();
   const { state, actions } = useApp();
   const showLink = scr === "Chat";
@@ -112,7 +114,7 @@ function StackHead({ title, subtitle, scr }) {
         <div style={{ font: "400 11px/1.4 " + t.font, color: V.ink2, marginTop: "4px" }}>{subtitle}</div>
       </div>
       {/* Universal Mode Switcher */}
-      <ViewModeSwitcher />
+      {switcher}
       {/* Workspace Engine Toggle */}
       <button
         type="button"
@@ -166,7 +168,7 @@ function StackHead({ title, subtitle, scr }) {
   );
 }
 
-function SweepHead({ title, subtitle, scr }) {
+function SweepHead({ title, subtitle, scr, switcher }) {
   const { V, t } = useTheme();
   const { actions } = useApp();
   const isSettingsOrSub = ["Settings", "Cache", "Diagnostics", "AO"].includes(scr);
@@ -201,14 +203,14 @@ function SweepHead({ title, subtitle, scr }) {
         <span style={{ flex: 1, height: "8px", background: V.surf2 }} />
         <span style={{ font: "600 20px/1 " + t.dfont, letterSpacing: ".12em", color: V.pri, flex: "none" }}>{title}</span>
         <span style={{ width: "38px", height: "14px", background: V.pri, borderRadius: "0 7px 7px 0", flex: "none", marginRight: 8 }} />
-        <ViewModeSwitcher compact={true} />
+        {switcher}
       </div>
       <div style={{ flex: "none", padding: "0 12px 8px", font: "400 11px/1.4 " + t.font, letterSpacing: ".06em", color: V.ink2 }}>{subtitle}</div>
     </>
   );
 }
 
-function PivotHead({ title, subtitle, scr }) {
+function PivotHead({ title, subtitle, scr, switcher }) {
   const { t, V } = useTheme();
   const { actions } = useApp();
   const nextScr = SCREENS[(SCREENS.indexOf(scr) + 1) % SCREENS.length];
@@ -243,14 +245,14 @@ function PivotHead({ title, subtitle, scr }) {
           <span style={{ flex: "none", font: "300 36px/1 " + t.dfont, color: V.ink }}>{String(title || "").toLowerCase()}</span>
           <span style={{ flex: "none", font: "300 36px/1 " + t.dfont, color: V.ink2, opacity: 0.4 }}>{nextScr.toLowerCase()}</span>
         </div>
-        <ViewModeSwitcher compact={true} />
+        {switcher}
       </div>
       <div style={{ flex: "none", padding: "2px 16px 10px", font: "300 12px/1.4 " + t.font, color: V.ink2 }}>{subtitle}</div>
     </>
   );
 }
 
-function RuleHead({ title, subtitle, scr }) {
+function RuleHead({ title, subtitle, scr, switcher }) {
   const { V, t } = useTheme();
   const { actions } = useApp();
   const isSettingsOrSub = ["Settings", "Cache", "Diagnostics", "AO"].includes(scr);
@@ -285,7 +287,7 @@ function RuleHead({ title, subtitle, scr }) {
           )}
           <div style={{ font: "600 15px/1.1 " + t.dfont, letterSpacing: V.tls, color: V.pri, textIndent: V.tls }}>{title}</div>
         </div>
-        <ViewModeSwitcher compact={true} />
+        {switcher}
       </div>
       <div style={{ textAlign: "center", font: "400 10px/1.4 " + t.font, letterSpacing: ".16em", color: V.ink2 }}>{subtitle}</div>
       <div style={{ height: "1px", background: V.outv, marginTop: "8px" }} />
@@ -293,7 +295,7 @@ function RuleHead({ title, subtitle, scr }) {
   );
 }
 
-function EditorialHead({ title, subtitle, scr }) {
+function EditorialHead({ title, subtitle, scr, switcher }) {
   const { V, t } = useTheme();
   const { actions } = useApp();
   const isSettingsOrSub = ["Settings", "Cache", "Diagnostics", "AO"].includes(scr);
@@ -326,7 +328,7 @@ function EditorialHead({ title, subtitle, scr }) {
           )}
           <div style={{ font: "600 24px/1.12 " + t.font, letterSpacing: "-.01em", color: V.ink, textTransform: "capitalize" }}>{title}</div>
         </div>
-        <ViewModeSwitcher compact={true} />
+        {switcher}
       </div>
       <div style={{ font: "400 11.5px/1.5 " + t.font, color: V.ink2, marginTop: "4px", maxWidth: "46ch" }}>{subtitle}</div>
     </div>
