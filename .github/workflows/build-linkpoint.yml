@@ -17,6 +17,8 @@ on:
 
 permissions:
   contents: read
+  id-token: write
+  attestations: write
 
 env:
   JAVA_VERSION: '17'
@@ -318,7 +320,7 @@ jobs:
 
           if [ -n "${UI_REFACTOR_GOLDEN_DIFF_CMD:-}" ]; then
             echo "Running compose screenshot/golden diff command: ${UI_REFACTOR_GOLDEN_DIFF_CMD}"
-            eval "${UI_REFACTOR_GOLDEN_DIFF_CMD}"
+            ${UI_REFACTOR_GOLDEN_DIFF_CMD}
           else
             echo "UI_REFACTOR_GOLDEN_DIFF_CMD not set; compose screenshot/golden diffs skipped by configuration"
           fi
@@ -384,12 +386,12 @@ jobs:
           set -euo pipefail
           mkdir -p apks/release
           cd apks
-          find . -type f -name "*.apk" -exec sha256sum {} + > release/checksums.sha256
-          cat release/checksums.sha256
+          find . -type f -name "*.apk" -exec sha256sum {} + > release/SHA256SUMS
+          cp release/SHA256SUMS release/checksums.sha256
+          cat release/SHA256SUMS
 
       - name: Attest build provenance (SLSA Level 3)
         uses: actions/attest-build-provenance@520d128f165991a6c774bcb264f323e3d70747f4 # v2.2.0
-        if: startsWith(github.ref, 'refs/tags/')
         with:
           subject-path: "apks/**/*.apk"
 
@@ -400,6 +402,7 @@ jobs:
           files: |
             apks/debug/*.apk
             apks/release/*.apk
+            apks/release/SHA256SUMS
             apks/release/checksums.sha256
           draft: false
           prerelease: false
