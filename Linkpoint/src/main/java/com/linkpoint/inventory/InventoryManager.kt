@@ -971,6 +971,7 @@ class InventoryManager(
         val toFetch = priorityTypes.mapNotNull { type ->
             systemFolders[type]?.let { type to it }
         }
+
         if (toFetch.isEmpty()) {
             Log.i(TAG, "Warm-fetch skipped: no priority system folders registered yet")
             return

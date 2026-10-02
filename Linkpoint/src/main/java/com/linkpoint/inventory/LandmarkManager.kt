@@ -94,22 +94,20 @@ class LandmarkManager(
                     
                     val response = capabilityManager.request(CapabilityManager.CAP_CREATE_INVENTORY_ITEM, request)
                     if (response is LLSDMap) {
-                        val itemId = response.getUUID("item_id")
-                        if (itemId != null) {
-                            val landmark = Landmark(
-                                itemId = itemId,
-                                assetId = response.getUUID("asset_id") ?: itemId,
-                                name = name,
-                                description = description,
-                                regionName = regionName,
-                                regionHandle = regionHandle,
-                                position = position
-                            )
-                            landmarks[itemId] = landmark
-                            addToRecent(landmark)
-                            Log.i(TAG, "Created landmark: $name at $regionName")
-                            return@withContext itemId
-                        }
+                        val itemId = response.getUUID("item_id") ?: return@withContext null
+                        val landmark = Landmark(
+                            itemId = itemId,
+                            assetId = response.getUUID("asset_id") ?: itemId,
+                            name = name,
+                            description = description,
+                            regionName = regionName,
+                            regionHandle = regionHandle,
+                            position = position
+                        )
+                        landmarks[itemId] = landmark
+                        addToRecent(landmark)
+                        Log.i(TAG, "Created landmark: $name at $regionName")
+                        return@withContext itemId
                     }
                 }
                 
