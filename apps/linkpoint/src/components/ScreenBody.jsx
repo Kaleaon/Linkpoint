@@ -16,6 +16,7 @@ import CacheScreen from "../screens/CacheScreen.jsx";
 import Settings from "../screens/Settings.jsx";
 import ContactsScreen from "../screens/ContactsScreen.jsx";
 import CalendarScreen from "../screens/CalendarScreen.jsx";
+import OutfitViewer from "../screens/OutfitViewer.jsx";
 import { FriendsScreen, GroupsScreen, NoticesScreen, MuteListScreen, GenericInventoryScreen, SearchScreen } from "../screens/LiveScreens.jsx";
 import { AOScreen, AccountsScreen, DiagnosticsScreen, GridsScreen, MediaScreen, NotecardsScreen, ParcelScreen, TeleportScreen, TransactionsScreen } from "../screens/LumiyaTools.jsx";
 
@@ -51,7 +52,7 @@ export default function ScreenBody() {
         {norm && scr === "Groups" && <GroupsScreen />}
         {norm && scr === "Notices" && <NoticesScreen />}
         {norm && scr === "Mute List" && <MuteListScreen />}
-        {norm && scr === "Outfits" && <GenericInventoryScreen kind="wearable" />}
+        {norm && scr === "Outfits" && <OutfitViewer />}
         {norm && scr === "Objects" && <GenericInventoryScreen kind="object" />}
         {norm && scr === "Notecards" && <NotecardsScreen />}
         {norm && scr === "Media" && <MediaScreen />}
