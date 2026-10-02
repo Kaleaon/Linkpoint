@@ -650,7 +650,9 @@ val verifyUiArchitectureBoundaries by tasks.registering {
             val pkg = packageRegex.find(text)?.groupValues?.get(1) ?: return@forEach
             val imports = importRegex.findAll(text).map { it.groupValues[1] }.toList()
 
-            val inUiPackage = pkg == "com.linkpoint.ui" || pkg.startsWith("com.linkpoint.ui.") || pkg == "com.linkpoint.world3d" || pkg.startsWith("com.linkpoint.world3d.")
+            val inUiPackage = pkg == "com.linkpoint.ui" || pkg.startsWith("com.linkpoint.ui.") ||
+                pkg == "com.linkpoint.world3d" || pkg.startsWith("com.linkpoint.world3d.") ||
+                pkg == "com.linkpoint.feature" || pkg.startsWith("com.linkpoint.feature.")
 
             if (inUiPackage) {
                 // Rule 1: UI should only touch runtime/service/protocol through interfaces/adapters.
