@@ -32,6 +32,7 @@
     "@firebase/firestore": {
       "@grpc/grpc-js": "1.13.6"
     },
+    "extract-zip": "^2.0.1",
     "sharp": "^0.35.5"
   },
   "engines": {
