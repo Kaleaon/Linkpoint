@@ -875,13 +875,18 @@ object NetworkLogger {
         val timestamp = timestampFormat.format(Date(entry.timestamp))
         val formattedMessage = "[$timestamp] [$category] ${entry.message}"
         
-        // Write to logcat
-        when (level) {
-            Level.VERBOSE -> Log.v(TAG, formattedMessage, exception)
-            Level.DEBUG -> Log.d(TAG, formattedMessage, exception)
-            Level.INFO -> Log.i(TAG, formattedMessage, exception)
-            Level.WARN -> Log.w(TAG, formattedMessage, exception)
-            Level.ERROR -> Log.e(TAG, formattedMessage, exception)
+        // Write to logcat safely (handles unit tests without Android runtime JNI)
+        try {
+            when (level) {
+                Level.VERBOSE -> Log.v(TAG, formattedMessage, exception)
+                Level.DEBUG -> Log.d(TAG, formattedMessage, exception)
+                Level.INFO -> Log.i(TAG, formattedMessage, exception)
+                Level.WARN -> Log.w(TAG, formattedMessage, exception)
+                Level.ERROR -> Log.e(TAG, formattedMessage, exception)
+            }
+        } catch (e: Throwable) {
+            // JVM Unit test fallback
+            println("[$level] [$category] $formattedMessage")
         }
     }
     
