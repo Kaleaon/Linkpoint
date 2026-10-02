@@ -47,7 +47,7 @@ function mainProcessDeps(rootDir) {
 const NOT_ACTUALLY_RUNTIME = new Set(['vitest']);
 
 function findWorkspaceRoot(startDir) {
-  let dir = startDir;
+  let dir = path.resolve(startDir);
   for (;;) {
     const pkgPath = path.join(dir, 'package.json');
     if (fs.existsSync(pkgPath)) {
@@ -62,14 +62,21 @@ function findWorkspaceRoot(startDir) {
   }
 }
 
+function isSubpathOrEqual(dir, root) {
+  if (!dir || !root) return false;
+  const rel = path.relative(root, dir);
+  return !rel.startsWith('..') && !path.isAbsolute(rel);
+}
+
 // Resolve a package the way Node does: walk up looking for node_modules.
 function resolvePackageDir(name, fromDir, workspaceRoot) {
-  let dir = fromDir;
+  let dir = path.resolve(fromDir);
+  const resolvedWorkspaceRoot = path.resolve(workspaceRoot);
   for (;;) {
     const candidate = path.join(dir, 'node_modules', name);
     if (fs.existsSync(path.join(candidate, 'package.json'))) return candidate;
     const parent = path.dirname(dir);
-    if (parent === dir || !dir.startsWith(workspaceRoot)) return null;
+    if (parent === dir || !isSubpathOrEqual(parent, resolvedWorkspaceRoot)) return null;
     dir = parent;
   }
 }
