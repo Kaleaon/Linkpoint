@@ -845,7 +845,11 @@ fun L2ProfileRoute(
         }
     }
 
-    val onlineFriends by (if (app != null && app.isFriendsManagerInitialized()) app.friendsManager.onlineFriends else MutableStateFlow(emptySet())).collectAsState()
+    val onlineFriends by if (app?.isFriendsManagerInitialized() == true) {
+        app.friendsManager.onlineFriends.collectAsState()
+    } else {
+        remember { mutableStateOf(emptySet()) }
+    }
 
     val data = ProfileData(
         id = targetId ?: UUID(0L, 0L),
@@ -858,7 +862,7 @@ fun L2ProfileRoute(
         partner = null,
         groups = profile?.memberOf ?: emptyList(),
         webUrl = null,
-        isOnline = isMe || (app?.isFriendsManagerInitialized() == true && targetId != null && targetId in onlineFriends),
+        isOnline = isMe || (targetId != null && targetId in onlineFriends),
         location = null,
         isFriend = targetId != null && app?.isFriendsManagerInitialized() == true &&
             app.friendsManager.getAllFriends().any { it.agentId == targetId },
