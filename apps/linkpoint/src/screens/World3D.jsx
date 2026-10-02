@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTheme } from "../context/ThemeContext.jsx";
 import { app } from "../linkpoint/app";
 import HudControls from "./HudControls.jsx";
+import OutfitCarouselDrawer from "../components/OutfitCarouselDrawer.jsx";
 
 export default function World3D({ desktopBackdrop = false }) {
   const { V, t } = useTheme();
@@ -12,6 +13,7 @@ export default function World3D({ desktopBackdrop = false }) {
   const [objectCount, setObjectCount] = useState(app.world.objects.length);
   const [cameraPreset, setCameraPreset] = useState("rear");
   const [selection, setSelection] = useState(app.world.selectedObject);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const refresh = () => setPosition(app.world.camera3d?.position.map(Math.round) || [0, 0, 0]);
   useEffect(() => {
@@ -79,6 +81,23 @@ export default function World3D({ desktopBackdrop = false }) {
       </div> : null}
     </aside>}
     {!desktopBackdrop && <div aria-label="Camera view" style={{ position: "absolute", right: 14, top: 14, display: "flex", gap: 4 }}>
+      <button
+        type="button"
+        aria-label="Toggle outfit drawer"
+        aria-expanded={drawerOpen}
+        onClick={() => setDrawerOpen((prev) => !prev)}
+        style={{
+          ...button,
+          minWidth: 0,
+          padding: "0 10px",
+          background: drawerOpen ? V.pri : V.surf,
+          color: drawerOpen ? V.onpri : V.pri,
+          fontSize: 9,
+          fontWeight: 700,
+        }}
+      >
+        OUTFITS
+      </button>
       {[['rear','REAR'], ['front','FRONT'], ['first-person','MOUSELOOK'], ['free','FREE']].map(([value, label]) => <button key={value} type="button" aria-pressed={cameraPreset === value} onClick={() => { app.world.setCameraPreset(value); setCameraPreset(value); refresh(); }} style={{ ...button, minWidth: 0, padding: "0 8px", background: cameraPreset === value ? V.pri : V.surf, color: cameraPreset === value ? V.onpri : V.pri, fontSize: 9 }}>{label}</button>)}
     </div>}
     {!desktopBackdrop && <div aria-label="Movement controls" style={{ position: "absolute", left: 14, bottom: 14, display: "grid", gridTemplateColumns: "repeat(3,44px)", gap: 4 }}>
@@ -87,6 +106,7 @@ export default function World3D({ desktopBackdrop = false }) {
     </div>}
     {!desktopBackdrop && <div style={{ position: "absolute", right: 14, bottom: 14, display: "grid", gap: 5 }}><button aria-label="Move up" onClick={() => move(0, 0, 1)} style={button}>UP</button><button aria-label="Move down" onClick={() => move(0, 0, -1)} style={button}>DN</button></div>}
     <HudControls />
+    {!desktopBackdrop && <OutfitCarouselDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />}
   </section>;
 }
 
