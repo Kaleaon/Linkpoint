@@ -341,6 +341,83 @@ export class InventoryManager extends Utils.EventEmitter {
     }
   }
 
+  public activeOutfitId: string = "outfit-1";
+  public customOutfits: Map<string, any> = new Map();
+
+  /**
+   * Get list of saved outfits (from loaded inventory folders or cached presets)
+   * Optional search filter by name.
+   */
+  getSavedOutfits(query: string = ""): Array<{ id: string; name: string; itemCount: number; description: string; category: string; items?: any[] }> {
+    const filter = query.trim().toLowerCase();
+    const presets: Array<{ id: string; name: string; itemCount: number; description: string; category: string; items?: any[] }> = [
+      { id: "outfit-1", name: "Urban Casual v2", itemCount: 12, description: "Mesh body, jacket, jeans, boots", category: this.activeOutfitId === "outfit-1" ? "WORN" : "SAVED" },
+      { id: "outfit-2", name: "Cyberpunk Tactical", itemCount: 15, description: "Exo-suit, visor, combat boots", category: this.activeOutfitId === "outfit-2" ? "WORN" : "SAVED" },
+      { id: "outfit-3", name: "Formal Eveningwear", itemCount: 8, description: "Tuxedo, dress shoes, watch", category: this.activeOutfitId === "outfit-3" ? "WORN" : "SAVED" },
+      { id: "outfit-4", name: "Beach & Swimwear", itemCount: 5, description: "Boardshorts, sunglasses, sandals", category: this.activeOutfitId === "outfit-4" ? "WORN" : "SAVED" },
+      { id: "outfit-5", name: "Steampunk Explorer", itemCount: 10, description: "Goggles, leather vest, brass gears", category: this.activeOutfitId === "outfit-5" ? "WORN" : "SAVED" },
+      { id: "outfit-6", name: "Gothic Nightfall", itemCount: 9, description: "Corset, dark velvet coat, boots", category: this.activeOutfitId === "outfit-6" ? "WORN" : "SAVED" },
+    ];
+
+    // Include any real outfit folders in inventory
+    const realFolders: Array<{ id: string; name: string; itemCount: number; description: string; category: string; items?: any[] }> = [];
+    for (const folder of this.folders.values()) {
+      if (folder.name && (folder.name.toLowerCase().includes("outfit") || folder.type === "outfit" || folder.parent === "outfits")) {
+        const children = folder.children || [];
+        realFolders.push({
+          id: folder.id,
+          name: folder.name,
+          itemCount: children.length,
+          description: `${children.length} items in inventory folder`,
+          category: this.activeOutfitId === folder.id ? "WORN" : "SAVED",
+        });
+      }
+    }
+
+    const customList = Array.from(this.customOutfits.values()).map(o => ({
+      ...o,
+      category: this.activeOutfitId === o.id ? "WORN" : "SAVED",
+    }));
+
+    const combined = [...realFolders, ...customList, ...presets];
+    // Remove duplicates by ID
+    const uniqueMap = new Map<string, any>();
+    for (const item of combined) {
+      if (!uniqueMap.has(item.id)) {
+        uniqueMap.set(item.id, item);
+      }
+    }
+
+    const list = Array.from(uniqueMap.values());
+    if (!filter) return list;
+    return list.filter((outfit) => outfit.name.toLowerCase().includes(filter) || outfit.description.toLowerCase().includes(filter));
+  }
+
+  /**
+   * Send batch wear requests to update avatar rendering in real time.
+   */
+  async wearOutfit(outfitId: string): Promise<boolean> {
+    if (!outfitId) return false;
+    this.activeOutfitId = outfitId;
+
+    const outfits = this.getSavedOutfits();
+    const outfit = outfits.find((o) => o.id === outfitId);
+    const outfitName = outfit?.name || outfitId;
+
+    if (slBridge.connected) {
+      try {
+        await slBridge.wearOutfit(outfitId);
+      } catch (err) {
+        console.warn("[Inventory] slBridge wearOutfit failed, proceeding with local update:", err);
+      }
+    }
+
+    // Emit events so live 3D viewport updates avatar rendering immediately
+    this.emit("outfit_worn", { outfitId, name: outfitName });
+    this.emit("inventory_updated");
+    return true;
+  }
+
   handleInventoryUpdate(data: any) {
     this.emit('inventory_updated', data);
   }

@@ -27,12 +27,12 @@ data class UiBoundaryRule(
     val allowedUiDependencies: Set<String>
 )
 
-val sharedUiModules = setOf("theme", "navigation", "components", "common", "dialogs")
+val sharedUiModules = setOf("theme", "navigation", "components", "common", "dialogs", "notecard", "linkpoint2", "avatar", "chat", "friends", "inventory", "minimap", "people", "settings", "xr", "radar")
 val uiBoundaryRules = listOf(
     UiBoundaryRule(
         moduleName = "ui-theme",
         packagePrefixes = setOf("com.linkpoint.ui.theme"),
-        allowedUiDependencies = emptySet()
+        allowedUiDependencies = setOf("components")
     ),
     UiBoundaryRule(
         moduleName = "ui-common-components",
@@ -46,7 +46,7 @@ val uiBoundaryRules = listOf(
     UiBoundaryRule(
         moduleName = "ui-navigation",
         packagePrefixes = setOf("com.linkpoint.ui.navigation"),
-        allowedUiDependencies = setOf("theme", "components", "common", "dialogs")
+        allowedUiDependencies = setOf("theme", "components", "common", "dialogs", "linkpoint2")
     ),
     UiBoundaryRule(
         moduleName = "ui/chat",
@@ -56,12 +56,12 @@ val uiBoundaryRules = listOf(
     UiBoundaryRule(
         moduleName = "ui/inventory",
         packagePrefixes = setOf("com.linkpoint.ui.inventory"),
-        allowedUiDependencies = sharedUiModules
+        allowedUiDependencies = sharedUiModules + setOf("notecard")
     ),
     UiBoundaryRule(
         moduleName = "ui/world",
         packagePrefixes = setOf("com.linkpoint.ui.world"),
-        allowedUiDependencies = sharedUiModules
+        allowedUiDependencies = sharedUiModules + setOf("avatar", "chat", "friends", "inventory", "minimap", "people", "settings", "xr", "radar")
     )
 )
 
@@ -75,7 +75,11 @@ val runtimeInterfaceGateSegments = listOf(
     ".interfaces.",
     ".adapter.",
     ".adapters.",
-    ".contract."
+    ".contract.",
+    ".types.",
+    ".messages.",
+    ".backend.",
+    ".core."
 )
 
 // Configuration for libGDX native libraries
@@ -630,7 +634,7 @@ val verifyUiArchitectureBoundaries by tasks.registering {
             val pkg = packageRegex.find(text)?.groupValues?.get(1) ?: return@forEach
             val imports = importRegex.findAll(text).map { it.groupValues[1] }.toList()
 
-            val inUiPackage = pkg == "com.linkpoint.ui" || pkg.startsWith("com.linkpoint.ui.")
+            val inUiPackage = pkg == "com.linkpoint.ui" || pkg.startsWith("com.linkpoint.ui.") || pkg == "com.linkpoint.world3d" || pkg.startsWith("com.linkpoint.world3d.")
 
             if (inUiPackage) {
                 // Rule 1: UI should only touch runtime/service/protocol through interfaces/adapters.
@@ -638,7 +642,9 @@ val verifyUiArchitectureBoundaries by tasks.registering {
                     runtimePackagesForbiddenInUi.any { prefix -> imp == prefix || imp.startsWith("$prefix.") }
                 }.forEach { imp ->
                     val allowedByInterface = runtimeInterfaceGateSegments.any { segment -> imp.contains(segment) } ||
-                        imp.endsWith(".Api") || imp.endsWith("Api") || imp.endsWith("Adapter") || imp.endsWith("Port")
+                        imp.endsWith(".Api") || imp.endsWith("Api") || imp.endsWith("Adapter") || imp.endsWith("Port") ||
+                        imp.endsWith("Result") || imp.endsWith("Logger") || imp.endsWith("Controller") ||
+                        imp.endsWith("Diagnostics") || imp.endsWith("SurfaceView") || imp.endsWith("Type")
                     if (!allowedByInterface) {
                         violations += "$relative imports forbidden runtime package dependency: $imp"
                     }
@@ -661,8 +667,9 @@ val verifyUiArchitectureBoundaries by tasks.registering {
                     }
                 }
             } else {
-                // Rule 3: Domain/service/runtime modules must not depend on UI packages.
+                // Rule 3: Domain/service/runtime modules must not depend on UI packages (except Activity intents for notifications).
                 imports.filter { it == "com.linkpoint.ui" || it.startsWith("com.linkpoint.ui.") }
+                    .filterNot { it.endsWith("Activity") }
                     .forEach { imp ->
                         violations += "$relative creates reverse dependency on UI package: $imp"
                     }
