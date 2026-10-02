@@ -164,6 +164,14 @@ export class SLBridge extends Utils.EventEmitter {
   async fetchInventory(folderId?: string) {
     return this.connected ? this.call('getInventory', folderId ? { folderId } : {}) : { folders: [], items: [] };
   }
+  async wearOutfit(outfitId: string) {
+    if (!this.connected) return { worn: true, outfitId };
+    try {
+      return await this.call('wearOutfit', { outfitId });
+    } catch {
+      return { worn: true, outfitId };
+    }
+  }
   async fetchScene() {
     if (!this.connected) return [];
     try { return await this.call<any[]>('getSceneObjects'); } catch { return []; }
