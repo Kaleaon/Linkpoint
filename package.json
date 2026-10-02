@@ -20,11 +20,8 @@
   },
   "devDependencies": {
     "typescript": "~5.8.2",
-    "vitest": "4.1.11",
-    "vite": "7.3.6"
-  },
-  "engines": {
-    "node": ">=22"
+    "vite": "7.3.6",
+    "vitest": "4.1.11"
   },
   "overrides": {
     "@xmldom/xmldom": "0.9.12",
@@ -47,5 +44,12 @@
     "extract-zip": "^2.0.1",
     "sharp": "^0.35.5",
     "electron": "^44.5.1"
+  },
+  "dependencies": {
+    "@types/sql.js": "^1.4.11",
+    "sql.js": "^1.14.2"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
