@@ -16,6 +16,7 @@ buildscript {
     repositories {
         maven { url 'https://maven-central.storage-download.googleapis.com/maven2' }
         google()
+        maven { url 'https://repo1.maven.org/maven2/' }
         mavenCentral()
     }
     dependencies {
@@ -32,6 +33,7 @@ allprojects {
     repositories {
         maven { url 'https://maven-central.storage-download.googleapis.com/maven2' }
         google()
+        maven { url 'https://repo1.maven.org/maven2/' }
         mavenCentral()
         // Add Clojars repository for LLSD Java library
         maven {

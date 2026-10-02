@@ -44,9 +44,11 @@ import kotlin.coroutines.resume
  * Services dependency so the app works on de-googled / Asian-market
  * devices, at the cost of APK size.
  */
-class CronetHttpClient private constructor(
+class CronetHttpClient(
     private val engine: CronetEngine?,
-    private val executor: Executor
+    private val executor: Executor = Executors.newSingleThreadExecutor { r ->
+        Thread(r, "CronetCallback").apply { isDaemon = true }
+    }
 ) {
 
     /** True when [engine] is non-null and ready to serve requests. */
@@ -78,13 +80,13 @@ class CronetHttpClient private constructor(
         timeoutMs: Long = 15_000L
     ): CronetResult = execute("POST", url, headers, body = body, contentType = contentType, timeoutMs = timeoutMs)
 
-    private suspend fun execute(
+    suspend fun execute(
         method: String,
         url: String,
-        headers: Map<String, String>,
-        body: ByteArray?,
-        contentType: String?,
-        timeoutMs: Long
+        headers: Map<String, String> = emptyMap(),
+        body: ByteArray? = null,
+        contentType: String? = null,
+        timeoutMs: Long = 15_000L
     ): CronetResult {
         val pinnedEngine = engine ?: return CronetResult.EngineUnavailable
         // Throttle concurrent HTTPS fetches on metered cellular. The IEEE

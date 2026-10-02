@@ -683,8 +683,46 @@ val verifyUiArchitectureBoundaries by tasks.registering {
     }
 }
 
+val verifyNoLegacyApacheDependencies by tasks.registering {
+    group = "verification"
+    description = "Enforces complete removal of legacy Apache HttpClient dependencies."
+    doLast {
+        val apachePkg = "org.apache." + "http"
+        val buildFiles = listOf(file("build.gradle.kts"), rootProject.file("build.gradle"))
+        buildFiles.forEach { buildFile ->
+            if (buildFile.exists()) {
+                val activeDirective = buildFile.readLines().any { line ->
+                    val trimmed = line.trim()
+                    !trimmed.startsWith("//") && !trimmed.startsWith("/*") &&
+                        trimmed.contains("useLibrary") && trimmed.contains(apachePkg)
+                }
+                if (activeDirective) {
+                    throw GradleException("Legacy $apachePkg.legacy build directive found in ${buildFile.path}")
+                }
+            }
+        }
+
+        val sourceRoot = file("src/main/java")
+        val legacyHttpImports = sourceRoot.walkTopDown()
+            .filter { it.isFile && (it.extension == "kt" || it.extension == "java") }
+            .filter { file ->
+                val text = file.readText()
+                text.contains("import org.apache.http.")
+            }
+            .map { it.relativeTo(projectDir).path }
+            .toList()
+
+        if (legacyHttpImports.isNotEmpty()) {
+            throw GradleException(
+                "Legacy org.apache.http imports forbidden in production source code: ${legacyHttpImports.joinToString()}"
+            )
+        }
+    }
+}
+
 tasks.named("check") {
     dependsOn(verifyUiArchitectureBoundaries)
+    dependsOn(verifyNoLegacyApacheDependencies)
 }
 
 tasks.register("testDebugUnitTest") {
