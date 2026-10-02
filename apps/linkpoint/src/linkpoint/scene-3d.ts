@@ -7,6 +7,7 @@ import { Graphics3D } from './graphics-3d';
 import { Camera3D } from './camera-3d';
 import { Primitives3D } from './primitives-3d';
 import { extractFrustum, multiplyMat4, testAABB, transformAABB, OUTSIDE, type Frustum } from './frustum';
+import { TieredSimdCuller } from './simd-culler';
 import { intersectRayOrientedBox, intersectRayTriangle, invertMat4, type Ray } from './ray-pick';
 import { HEAVENLY_BODY_RADIUS, atmosphereColor, atmosphereUniforms } from './atmosphere';
 
@@ -67,6 +68,8 @@ export class Scene3D extends Utils.EventEmitter {
   public showSky = true;
   public showWater = true;
   public cullingEnabled = true;
+  public culler = new TieredSimdCuller();
+  private frameCount = 0;
   public waterHeight = DEFAULT_WATER_HEIGHT;
   public underWater = false;
   /** Objects drawn / skipped by frustum culling in the most recent frame. */
@@ -348,6 +351,14 @@ export class Scene3D extends Utils.EventEmitter {
     };
 
     this.objects.set(id, object);
+    this.culler.upsertObject(
+      id,
+      object.position,
+      object.rotation,
+      object.scale,
+      this.objectLocalBounds(object),
+      (p, r, s) => this.calculateModelMatrix(p, r, s)
+    );
     this.emit('object_added', object);
     return object;
   }
@@ -359,6 +370,7 @@ export class Scene3D extends Utils.EventEmitter {
     const object = this.objects.get(id);
     if (object) {
       this.objects.delete(id);
+      this.culler.removeObject(id);
       this.emit('object_removed', object);
     }
   }
@@ -370,6 +382,14 @@ export class Scene3D extends Utils.EventEmitter {
     const object = this.objects.get(id);
     if (object) {
       Object.assign(object, updates);
+      this.culler.upsertObject(
+        id,
+        object.position,
+        object.rotation,
+        object.scale,
+        this.objectLocalBounds(object),
+        (p, r, s) => this.calculateModelMatrix(p, r, s)
+      );
       this.emit('object_updated', object);
     }
   }
@@ -404,6 +424,29 @@ export class Scene3D extends Utils.EventEmitter {
     const viewMatrix = this.camera.getViewMatrix();
     const projectionMatrix = this.camera.getProjectionMatrix();
     const frustum = this.cullingEnabled ? extractFrustum(multiplyMat4(projectionMatrix, viewMatrix)) : null;
+
+    this.frameCount++;
+    if (this.cullingEnabled && frustum) {
+      for (const object of this.objects.values()) {
+        if (!object.hud && object.visible !== false) {
+          const local = this.objectLocalBounds(object);
+          this.culler.upsertObject(
+            object.id,
+            object.position,
+            object.rotation,
+            object.scale,
+            local,
+            (p, r, s) => this.calculateModelMatrix(p, r, s)
+          );
+        }
+      }
+      this.culler.cull(
+        this.camera.position as [number, number, number],
+        frustum,
+        this.frameCount,
+        (p, r, s) => this.calculateModelMatrix(p, r, s)
+      );
+    }
 
     // Below the surface the sky is not visible; show the water tint instead.
     const waterActive = this.showWater && this.terrainLoaded && this.environmentMeshesReady;
@@ -619,9 +662,15 @@ export class Scene3D extends Utils.EventEmitter {
 
   /** True when the object's world bounds are entirely outside the frustum. Unknown bounds are never culled. */
   private isCulled(object: any, frustum: Frustum | null) {
-    if (!frustum) return false;
+    if (!frustum || !this.cullingEnabled) return false;
     const local = this.objectLocalBounds(object);
     if (!local) return false;
+
+    const cullerObj = this.culler.getObject(object.id);
+    if (cullerObj) {
+      return !cullerObj.visible;
+    }
+
     const model = this.calculateModelMatrix(object.position, object.rotation, object.scale);
     const world = transformAABB(model, local.min, local.max);
     return testAABB(frustum, world.min, world.max) === OUTSIDE;
