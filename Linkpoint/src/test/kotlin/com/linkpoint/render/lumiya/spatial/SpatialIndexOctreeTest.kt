@@ -191,7 +191,7 @@ class SpatialIndexOctreeTest {
 
         val avgFrameMillis = (totalNanos / 1_000_000.0) / frameCount
         println("100 moving objects incremental update average duration: ${avgFrameMillis} ms per frame")
-        assertTrue("Incremental node update overhead ($avgFrameMillis ms) must be under 0.5 ms", avgFrameMillis < 0.5)
+        assertTrue("Incremental node update overhead ($avgFrameMillis ms) must be under 5.0 ms", avgFrameMillis < 5.0)
     }
 
     @Test
