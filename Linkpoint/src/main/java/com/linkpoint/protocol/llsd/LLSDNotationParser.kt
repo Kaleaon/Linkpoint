@@ -1,5 +1,7 @@
 package com.linkpoint.protocol.llsd
 
+import java.io.BufferedInputStream
+import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.Base64
 import java.util.Date
@@ -32,8 +34,7 @@ import java.util.UUID
  *
  * Optional `<?llsd/notation?>\n` magic header is tolerated and skipped.
  *
- * Single-pass byte-driven parser using [ByteCursor] to avoid full String
- * allocation up front.
+ * Implementation strategy: direct byte-stream / byte-cursor reader.
  */
 internal object LLSDNotationParser {
 
@@ -53,70 +54,111 @@ internal object LLSDNotationParser {
 
     fun parse(bytes: ByteArray): LLSDValue {
         if (bytes.isEmpty()) return LLSDUndefined
-        val start = getNotationStartOffset(bytes)
-        val cursor = ByteCursor(bytes, pos = start)
+        return parse(java.io.ByteArrayInputStream(bytes))
+    }
+
+    fun parse(input: InputStream): LLSDValue {
+        val stream = if (input is BufferedInputStream) input else BufferedInputStream(input, 65536)
+        skipMagicStream(stream)
+        val cursor = ByteCursor(stream)
         return try {
             cursor.skipWhitespace()
             parseValue(cursor, depth = 0)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             LLSDUndefined
         }
     }
 
-    private fun getNotationStartOffset(bytes: ByteArray): Int {
-        if (bytes.size < MAGIC.length + 1) return 0
-        for (i in MAGIC.indices) {
-            if ((bytes[i].toInt() and 0xFF).toChar() != MAGIC[i]) return 0
+    private fun skipMagicStream(stream: InputStream) {
+        if (!stream.markSupported()) return
+        val magicBytes = MAGIC.toByteArray(Charsets.US_ASCII)
+        stream.mark(magicBytes.size + 2)
+        val buf = ByteArray(magicBytes.size)
+        var readTotal = 0
+        while (readTotal < magicBytes.size) {
+            val r = stream.read(buf, readTotal, magicBytes.size - readTotal)
+            if (r == -1) break
+            readTotal += r
         }
-        var i = MAGIC.length
-        if (i < bytes.size && bytes[i] == '\r'.code.toByte()) i++
-        if (i < bytes.size && bytes[i] == '\n'.code.toByte()) i++ else return 0
-        return i
+        if (readTotal == magicBytes.size && buf.contentEquals(magicBytes)) {
+            // Magic matches. Consume optional \r and \n.
+            stream.mark(2)
+            val r1 = stream.read()
+            if (r1 == '\r'.code) {
+                val r2 = stream.read()
+                if (r2 != '\n'.code && r2 != -1) {
+                    stream.reset()
+                    stream.skip(1)
+                }
+            } else if (r1 != '\n'.code && r1 != -1) {
+                stream.reset()
+            }
+        } else {
+            stream.reset()
+        }
     }
 
-    private class ByteCursor(
-        val bytes: ByteArray,
-        var pos: Int = 0,
-        val limit: Int = bytes.size
-    ) {
-        fun atEnd(): Boolean = pos >= limit
+    private class ByteCursor(private val input: InputStream) {
+        private var peeked: Int = -2
+        var position: Int = 0
+            private set
 
-        fun peekByte(): Byte = if (atEnd()) 0 else bytes[pos]
-
-        fun peekChar(): Char = if (atEnd()) '\u0000' else (bytes[pos].toInt() and 0xFF).toChar()
-
-        fun takeByte(): Byte {
-            if (atEnd()) throw IllegalStateException("Unexpected EOF at $pos")
-            return bytes[pos++]
+        fun atEnd(): Boolean {
+            if (peeked == -2) {
+                peeked = input.read()
+            }
+            return peeked == -1
         }
 
-        fun takeChar(): Char = (takeByte().toInt() and 0xFF).toChar()
+        fun peek(): Int {
+            if (peeked == -2) {
+                peeked = input.read()
+            }
+            return peeked
+        }
+
+        fun read(): Int {
+            val b = if (peeked != -2) {
+                val temp = peeked
+                peeked = -2
+                temp
+            } else {
+                input.read()
+            }
+            if (b != -1) {
+                position++
+            }
+            return b
+        }
 
         fun expect(c: Char) {
-            if (atEnd() || (bytes[pos].toInt() and 0xFF).toChar() != c) {
-                val got = if (atEnd()) "<eof>" else "'${(bytes[pos].toInt() and 0xFF).toChar()}'"
-                throw IllegalStateException("expected '$c' at $pos, got $got")
+            val b = read()
+            if (b != c.code) {
+                val actual = if (b == -1) "<eof>" else b.toChar().toString()
+                throw IllegalStateException("expected '$c' at $position, got '$actual'")
             }
-            pos++
         }
 
         fun skipWhitespace() {
-            while (pos < limit) {
-                val b = bytes[pos].toInt() and 0xFF
-                if (b == ' '.code || b == '\t'.code || b == '\r'.code || b == '\n'.code) {
-                    pos++
+            while (!atEnd()) {
+                val p = peek()
+                if (p == ' '.code || p == '\t'.code || p == '\n'.code || p == '\r'.code) {
+                    read()
                 } else {
                     break
                 }
             }
         }
 
-        fun startsWith(prefix: String): Boolean {
-            if (pos + prefix.length > limit) return false
-            for (i in prefix.indices) {
-                if ((bytes[pos + i].toInt() and 0xFF).toChar() != prefix[i]) return false
+        fun readExact(n: Int): ByteArray {
+            val bytes = ByteArray(n)
+            var count = 0
+            while (count < n) {
+                val b = read()
+                if (b == -1) throw IllegalStateException("truncated payload while reading $n bytes")
+                bytes[count++] = b.toByte()
             }
-            return true
+            return bytes
         }
     }
 
@@ -124,135 +166,182 @@ internal object LLSDNotationParser {
         if (depth > MAX_DEPTH) throw IllegalStateException("LLSD notation too deeply nested")
         c.skipWhitespace()
         if (c.atEnd()) return LLSDUndefined
-        return when (val ch = c.peekChar()) {
-            '!' -> { c.takeByte(); LLSDUndefined }
-            '1' -> { c.takeByte(); LLSDBoolean(true) }
-            '0' -> { c.takeByte(); LLSDBoolean(false) }
+        val ch = c.peek().toChar()
+        return when (ch) {
+            '!' -> { c.read(); LLSDUndefined }
+            '1' -> { c.read(); LLSDBoolean(true) }
+            '0' -> { c.read(); LLSDBoolean(false) }
             'T', 't' -> parseTrueWord(c)
             'F', 'f' -> parseFalseWord(c)
-            'i' -> { c.takeByte(); LLSDInteger(parseDigits(c).toIntOrNull() ?: 0) }
-            'r' -> { c.takeByte(); LLSDReal(parseRealBody(c)) }
-            'u' -> { c.takeByte(); LLSDUUID(parseUuidBody(c)) }
-            '"', '\'' -> LLSDString(parseDelimitedString(c, c.takeChar()))
-            's' -> { c.takeByte(); LLSDString(parseExplicitLengthString(c)) }
-            'l' -> { c.takeByte(); val q = c.takeChar(); LLSDURI(parseDelimitedString(c, q)) }
-            'd' -> { c.takeByte(); val q = c.takeChar(); LLSDDate(parseDate(parseDelimitedString(c, q))) }
-            'b' -> { c.takeByte(); parseBinary(c) }
-            '{' -> { c.takeByte(); parseMap(c, depth) }
-            '[' -> { c.takeByte(); parseArray(c, depth) }
-            else -> throw IllegalStateException("unexpected '$ch' at ${c.pos}")
+            'i' -> { c.read(); LLSDInteger(parseDigits(c).toIntOrNull() ?: 0) }
+            'r' -> { c.read(); LLSDReal(parseRealBody(c)) }
+            'u' -> { c.read(); LLSDUUID(parseUuidBody(c)) }
+            '"', '\'' -> { val q = c.read().toChar(); LLSDString(parseDelimitedString(c, q)) }
+            's' -> { c.read(); LLSDString(parseExplicitLengthString(c)) }
+            'l' -> { c.read(); val q = c.read().toChar(); LLSDURI(parseDelimitedString(c, q)) }
+            'd' -> { c.read(); val q = c.read().toChar(); LLSDDate(parseDate(parseDelimitedString(c, q))) }
+            'b' -> { c.read(); parseBinary(c) }
+            '{' -> { c.read(); parseMap(c, depth) }
+            '[' -> { c.read(); parseArray(c, depth) }
+            else -> throw IllegalStateException("unexpected '$ch' at ${c.position}")
         }
     }
 
     private fun parseTrueWord(c: ByteCursor): LLSDBoolean {
-        val matches = listOf("TRUE", "True", "true", "T", "t")
-        val matched = matches.firstOrNull { c.startsWith(it) }
-            ?: throw IllegalStateException("not a true literal at ${c.pos}")
-        c.pos += matched.length
-        return LLSDBoolean(true)
+        val p = c.peek()
+        if (p == 't'.code || p == 'T'.code) {
+            c.read()
+            val nextP = c.peek()
+            if (nextP == 'r'.code || nextP == 'R'.code) {
+                c.read()
+                val b3 = c.read()
+                val b4 = c.read()
+                if ((b3 == 'u'.code || b3 == 'U'.code) && (b4 == 'e'.code || b4 == 'E'.code)) {
+                    return LLSDBoolean(true)
+                }
+                throw IllegalStateException("invalid true word at ${c.position}")
+            }
+            return LLSDBoolean(true)
+        }
+        throw IllegalStateException("not a true literal at ${c.position}")
     }
 
     private fun parseFalseWord(c: ByteCursor): LLSDBoolean {
-        val matches = listOf("FALSE", "False", "false", "F", "f")
-        val matched = matches.firstOrNull { c.startsWith(it) }
-            ?: throw IllegalStateException("not a false literal at ${c.pos}")
-        c.pos += matched.length
-        return LLSDBoolean(false)
+        val p = c.peek()
+        if (p == 'f'.code || p == 'F'.code) {
+            c.read()
+            val nextP = c.peek()
+            if (nextP == 'a'.code || nextP == 'A'.code) {
+                c.read()
+                val b3 = c.read()
+                val b4 = c.read()
+                val b5 = c.read()
+                if ((b3 == 'l'.code || b3 == 'L'.code) &&
+                    (b4 == 's'.code || b4 == 'S'.code) &&
+                    (b5 == 'e'.code || b5 == 'E'.code)) {
+                    return LLSDBoolean(false)
+                }
+                throw IllegalStateException("invalid false word at ${c.position}")
+            }
+            return LLSDBoolean(false)
+        }
+        throw IllegalStateException("not a false literal at ${c.position}")
     }
 
     private fun parseDigits(c: ByteCursor): String {
-        val start = c.pos
-        if (!c.atEnd() && (c.peekChar() == '-' || c.peekChar() == '+')) c.takeByte()
-        while (!c.atEnd() && c.peekChar().isDigit()) c.takeByte()
-        if (start == c.pos) return ""
-        return String(c.bytes, start, c.pos - start, Charsets.US_ASCII)
+        val sb = java.lang.StringBuilder()
+        val p = c.peek()
+        if (p == '-'.code || p == '+'.code) {
+            sb.append(c.read().toChar())
+        }
+        while (!c.atEnd()) {
+            val b = c.peek()
+            if (b in '0'.code..'9'.code) {
+                sb.append(c.read().toChar())
+            } else {
+                break
+            }
+        }
+        return sb.toString()
     }
 
     private fun parseRealBody(c: ByteCursor): Double {
-        if (c.startsWith("NaN")) {
-            c.pos += 3
-            return Double.NaN
+        val p = c.peek()
+        if (p == 'N'.code || p == 'n'.code) {
+            val b1 = c.read()
+            val b2 = c.read()
+            val b3 = c.read()
+            if ((b1 == 'N'.code || b1 == 'n'.code) &&
+                (b2 == 'a'.code || b2 == 'A'.code) &&
+                (b3 == 'N'.code || b3 == 'n'.code)) {
+                return Double.NaN
+            }
+            throw IllegalStateException("invalid real value starting with $b1")
         }
-        val start = c.pos
-        if (!c.atEnd() && (c.peekChar() == '-' || c.peekChar() == '+')) c.takeByte()
-        if (c.startsWith("Inf")) {
-            c.pos += 3
-            val isNeg = (c.bytes[start].toInt().toChar() == '-')
-            return if (isNeg) Double.NEGATIVE_INFINITY else Double.POSITIVE_INFINITY
+        val sb = java.lang.StringBuilder()
+        if (p == '-'.code || p == '+'.code) {
+            sb.append(c.read().toChar())
         }
-        while (!c.atEnd() && c.peekChar().isDigit()) c.takeByte()
-        if (!c.atEnd() && c.peekChar() == '.') {
-            c.takeByte()
-            while (!c.atEnd() && c.peekChar().isDigit()) c.takeByte()
+        val nextP = c.peek()
+        if (nextP == 'I'.code || nextP == 'i'.code) {
+            val b1 = c.read()
+            val b2 = c.read()
+            val b3 = c.read()
+            if ((b1 == 'I'.code || b1 == 'i'.code) &&
+                (b2 == 'n'.code || b2 == 'N'.code) &&
+                (b3 == 'f'.code || b3 == 'F'.code)) {
+                return if (sb.startsWith("-")) Double.NEGATIVE_INFINITY else Double.POSITIVE_INFINITY
+            }
+            throw IllegalStateException("invalid real value Inf")
         }
-        if (!c.atEnd() && (c.peekChar() == 'e' || c.peekChar() == 'E')) {
-            c.takeByte()
-            if (!c.atEnd() && (c.peekChar() == '-' || c.peekChar() == '+')) c.takeByte()
-            while (!c.atEnd() && c.peekChar().isDigit()) c.takeByte()
+        while (!c.atEnd() && c.peek() in '0'.code..'9'.code) {
+            sb.append(c.read().toChar())
         }
-        if (start == c.pos) return 0.0
-        val str = String(c.bytes, start, c.pos - start, Charsets.US_ASCII)
-        return str.toDoubleOrNull() ?: 0.0
+        if (!c.atEnd() && c.peek() == '.'.code) {
+            sb.append(c.read().toChar())
+            while (!c.atEnd() && c.peek() in '0'.code..'9'.code) {
+                sb.append(c.read().toChar())
+            }
+        }
+        if (!c.atEnd() && (c.peek() == 'e'.code || c.peek() == 'E'.code)) {
+            sb.append(c.read().toChar())
+            if (!c.atEnd() && (c.peek() == '-'.code || c.peek() == '+'.code)) {
+                sb.append(c.read().toChar())
+            }
+            while (!c.atEnd() && c.peek() in '0'.code..'9'.code) {
+                sb.append(c.read().toChar())
+            }
+        }
+        return sb.toString().toDoubleOrNull() ?: 0.0
     }
 
     private fun parseUuidBody(c: ByteCursor): UUID {
-        if (c.pos + 36 > c.limit) throw IllegalStateException("UUID truncated at ${c.pos}")
-        val s = String(c.bytes, c.pos, 36, Charsets.US_ASCII)
-        c.pos += 36
+        val bytes = c.readExact(36)
+        val s = String(bytes, Charsets.UTF_8)
         return UUID.fromString(s)
     }
 
     private fun parseDelimitedString(c: ByteCursor, quote: Char): String {
-        val quoteByte = quote.code.toByte()
-        val backslashByte = '\\'.code.toByte()
-        val start = c.pos
-
-        var p = start
-        while (p < c.limit) {
-            val b = c.bytes[p]
-            if (b == quoteByte) {
-                val len = p - start
-                if (len > MAX_STRING_BYTES) throw IllegalStateException("string too long")
-                c.pos = p + 1
-                return String(c.bytes, start, len, Charsets.UTF_8)
-            }
-            if (b == backslashByte) {
-                return parseDelimitedStringWithEscapes(c, quote, start, p)
-            }
-            p++
-        }
-        throw IllegalStateException("unterminated string starting before ${c.pos}")
-    }
-
-    private fun parseDelimitedStringWithEscapes(
-        c: ByteCursor,
-        quote: Char,
-        startPos: Int,
-        escapePos: Int
-    ): String {
-        val sb = StringBuilder()
-        if (escapePos > startPos) {
-            sb.append(String(c.bytes, startPos, escapePos - startPos, Charsets.UTF_8))
-        }
-        c.pos = escapePos
+        val sb = java.lang.StringBuilder()
+        val quoteCode = quote.code
         while (!c.atEnd()) {
-            val ch = c.takeChar()
-            if (ch == quote) return sb.toString()
-            if (ch == '\\' && !c.atEnd()) {
-                val esc = c.takeChar()
+            val b = c.read()
+            if (b == quoteCode) return sb.toString()
+            if (b == '\\'.code && !c.atEnd()) {
+                val esc = c.read().toChar()
                 sb.append(when (esc) {
                     'n' -> '\n'; 't' -> '\t'; 'r' -> '\r'
                     '\\' -> '\\'; '"' -> '"'; '\'' -> '\''
-                    'a' -> ''; 'b' -> '\b'
+                    'a' -> '\u0007'; 'b' -> '\b'
                     else -> esc
                 })
                 if (sb.length > MAX_STRING_BYTES) throw IllegalStateException("string too long")
             } else {
-                sb.append(ch)
+                if (b in 0..127) {
+                    sb.append(b.toChar())
+                } else {
+                    val charBytes = readUtf8CharBytes(b, c)
+                    sb.append(String(charBytes, Charsets.UTF_8))
+                }
                 if (sb.length > MAX_STRING_BYTES) throw IllegalStateException("string too long")
             }
         }
-        throw IllegalStateException("unterminated string starting before ${c.pos}")
+        throw IllegalStateException("unterminated string starting before ${c.position}")
+    }
+
+    private fun readUtf8CharBytes(firstByte: Int, c: ByteCursor): ByteArray {
+        val len = when {
+            (firstByte and 0xE0) == 0xC0 -> 2
+            (firstByte and 0xF0) == 0xE0 -> 3
+            (firstByte and 0xF8) == 0xF0 -> 4
+            else -> 1
+        }
+        val bytes = ByteArray(len)
+        bytes[0] = firstByte.toByte()
+        for (i in 1 until len) {
+            bytes[i] = c.read().toByte()
+        }
+        return bytes
     }
 
     private fun parseExplicitLengthString(c: ByteCursor): String {
@@ -260,12 +349,11 @@ internal object LLSDNotationParser {
         val count = parseDigits(c).toIntOrNull() ?: throw IllegalStateException("bad s(N) count")
         if (count > MAX_STRING_BYTES) throw IllegalStateException("string too long")
         c.expect(')')
-        val quote = c.takeChar()
-        if (c.pos + count > c.limit) throw IllegalStateException("s(N) truncated")
-        val out = String(c.bytes, c.pos, count, Charsets.UTF_8)
-        c.pos += count
-        if (c.atEnd() || c.takeChar() != quote) throw IllegalStateException("s(N) end-quote missing")
-        return out
+        val quote = c.read().toChar()
+        val rawBytes = c.readExact(count)
+        val endQuote = c.read().toChar()
+        if (endQuote != quote) throw IllegalStateException("s(N) end-quote missing")
+        return String(rawBytes, Charsets.UTF_8)
     }
 
     private fun parseDate(text: String): Long {
@@ -277,22 +365,23 @@ internal object LLSDNotationParser {
     }
 
     private fun parseBinary(c: ByteCursor): LLSDBinary {
-        return when (c.peekChar()) {
+        val p = c.peek().toChar()
+        return when (p) {
             '1' -> {
-                c.takeByte()
-                val hexHeader = c.takeChar()
+                c.read()
+                val hexHeader = c.read().toChar()
                 if (hexHeader != '6') throw IllegalStateException("expected b16")
-                val q = c.takeChar()
+                val q = c.read().toChar()
                 val raw = parseDelimitedString(c, q)
                 val clean = raw.filter { !it.isWhitespace() }
                 if (clean.length > MAX_BINARY_BYTES * 2) throw IllegalStateException("binary too long")
                 LLSDBinary(hexDecode(clean))
             }
             '6' -> {
-                c.takeByte()
-                val n = c.takeChar()
+                c.read()
+                val n = c.read().toChar()
                 if (n != '4') throw IllegalStateException("expected b64")
-                val q = c.takeChar()
+                val q = c.read().toChar()
                 val raw = parseDelimitedString(c, q)
                 if (raw.length > MAX_BINARY_BYTES * 2) throw IllegalStateException("binary too long")
                 LLSDBinary(Base64.getDecoder().decode(raw.filter { !it.isWhitespace() }))
@@ -302,14 +391,13 @@ internal object LLSDNotationParser {
                 val n = parseDigits(c).toIntOrNull() ?: 0
                 if (n > MAX_BINARY_BYTES) throw IllegalStateException("binary too long")
                 c.expect(')')
-                val q = c.takeChar()
-                if (c.pos + n > c.limit) throw IllegalStateException("b(N) truncated")
-                val out = c.bytes.copyOfRange(c.pos, c.pos + n)
-                c.pos += n
-                if (c.atEnd() || c.takeChar() != q) throw IllegalStateException("b(N) end-quote missing")
-                LLSDBinary(out)
+                val q = c.read().toChar()
+                val rawBytes = c.readExact(n)
+                val endQuote = c.read().toChar()
+                if (endQuote != q) throw IllegalStateException("b(N) end-quote missing")
+                LLSDBinary(rawBytes)
             }
-            else -> throw IllegalStateException("unrecognised binary form at ${c.pos}")
+            else -> throw IllegalStateException("unrecognised binary form at ${c.position}")
         }
     }
 
@@ -328,10 +416,10 @@ internal object LLSDNotationParser {
         while (true) {
             c.skipWhitespace()
             if (c.atEnd()) throw IllegalStateException("map unterminated")
-            if (c.peekChar() == '}') { c.takeByte(); return map }
+            if (c.peek().toChar() == '}') { c.read(); return map }
             val keyValue = parseValue(c, depth + 1)
             val key = (keyValue as? LLSDString)?.value
-                ?: throw IllegalStateException("map key must be string at ${c.pos}")
+                ?: throw IllegalStateException("map key must be string at ${c.position}")
             c.skipWhitespace()
             c.expect(':')
             val value = parseValue(c, depth + 1)
@@ -339,7 +427,7 @@ internal object LLSDNotationParser {
             entries++
             if (entries > MAX_COLLECTION_ELEMENTS) throw IllegalStateException("map too large")
             c.skipWhitespace()
-            if (!c.atEnd() && c.peekChar() == ',') c.takeByte()
+            if (!c.atEnd() && c.peek().toChar() == ',') c.read()
         }
     }
 
@@ -349,12 +437,12 @@ internal object LLSDNotationParser {
         while (true) {
             c.skipWhitespace()
             if (c.atEnd()) throw IllegalStateException("array unterminated")
-            if (c.peekChar() == ']') { c.takeByte(); return arr }
+            if (c.peek().toChar() == ']') { c.read(); return arr }
             arr.add(parseValue(c, depth + 1))
             entries++
             if (entries > MAX_COLLECTION_ELEMENTS) throw IllegalStateException("array too large")
             c.skipWhitespace()
-            if (!c.atEnd() && c.peekChar() == ',') c.takeByte()
+            if (!c.atEnd() && c.peek().toChar() == ',') c.read()
         }
     }
 }
