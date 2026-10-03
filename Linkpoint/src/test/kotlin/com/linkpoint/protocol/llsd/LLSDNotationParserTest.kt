@@ -130,4 +130,21 @@ class LLSDNotationParserTest {
         val v = LLSDParser.parse("{'k':i7}".toByteArray()) as LLSDMap
         assertEquals(LLSDInteger(7), v["k"])
     }
+
+    @Test
+    fun `explicit length string and binary`() {
+        val s = parse("s(11)\"hello world\"")
+        assertEquals(LLSDString("hello world"), s)
+
+        val b = parse("b(4)\"1234\"")
+        assertTrue(b is LLSDBinary)
+        assertEquals(byteArrayOf(49, 50, 51, 52).toList(), (b as LLSDBinary).value.toList())
+    }
+
+    @Test
+    fun `utf8 multi byte characters in notation strings`() {
+        val v = parse("{'jp':\"こんにちは\",'emoji':\"🚀\"}") as LLSDMap
+        assertEquals(LLSDString("こんにちは"), v["jp"])
+        assertEquals(LLSDString("🚀"), v["emoji"])
+    }
 }

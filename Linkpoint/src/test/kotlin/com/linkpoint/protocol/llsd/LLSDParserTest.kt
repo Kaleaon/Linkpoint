@@ -215,4 +215,72 @@ class LLSDParserTest {
             LLSDParser.parseBinary(payload)
         }
     }
+
+    @Test
+    fun `parseXML handles byte slices directly`() {
+        val xmlBytes = "<llsd><map><key>title</key><string>Linkpoint</string></map></llsd>".toByteArray(Charsets.UTF_8)
+        val value = LLSDParser.parseXML(xmlBytes)
+        assertTrue(value is LLSDMap)
+        assertEquals(LLSDString("Linkpoint"), (value as LLSDMap)["title"])
+    }
+
+    @Test
+    fun `parseXML handles CDATA and XML entities and UTF-8 characters`() {
+        val xml = """
+            <llsd>
+              <map>
+                <key>escaped</key>
+                <string>&lt;hello &amp; "world"&gt;</string>
+                <key>cdata</key>
+                <string><![CDATA[<raw & unescaped>]]></string>
+                <key>utf8</key>
+                <string>こんにちは世界 🌍</string>
+                <key>numeric</key>
+                <string>&#60;test&#x3C;</string>
+              </map>
+            </llsd>
+        """.trimIndent()
+        val value = LLSDParser.parseXML(xml.toByteArray(Charsets.UTF_8))
+        assertTrue(value is LLSDMap)
+        val map = value as LLSDMap
+        assertEquals(LLSDString("<hello & \"world\">"), map["escaped"])
+        assertEquals(LLSDString("<raw & unescaped>"), map["cdata"])
+        assertEquals(LLSDString("こんにちは世界 🌍"), map["utf8"])
+        assertEquals(LLSDString("<test<"), map["numeric"])
+    }
+
+    @Test
+    fun `parseXML handles self-closing tags and comments`() {
+        val xml = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <!-- Top level comment -->
+            <llsd>
+              <!-- Inside llsd comment -->
+              <array>
+                <undef/>
+                <boolean/>
+                <integer/>
+                <real/>
+                <string/>
+                <uuid/>
+                <binary/>
+                <map/>
+                <array/>
+              </array>
+            </llsd>
+        """.trimIndent()
+        val value = LLSDParser.parseXML(xml)
+        assertTrue(value is LLSDArray)
+        val arr = (value as LLSDArray).value
+        assertEquals(9, arr.size)
+        assertEquals(LLSDUndefined, arr[0])
+        assertEquals(LLSDBoolean(false), arr[1])
+        assertEquals(LLSDInteger(0), arr[2])
+        assertEquals(LLSDReal(0.0), arr[3])
+        assertEquals(LLSDString(""), arr[4])
+        assertEquals(LLSDUUID.ZERO, arr[5])
+        assertEquals(LLSDBinary(byteArrayOf()), arr[6])
+        assertEquals(LLSDMap(), arr[7])
+        assertEquals(LLSDArray(), arr[8])
+    }
 }
