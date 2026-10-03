@@ -27,6 +27,15 @@ class DecodedTexture:
     status: str = "success"  # "success", "fallback", "cancelled", "error"
 
 
+@dataclasses.dataclass
+class DecodeProgressEvent:
+    texture_id: str
+    progress: float  # percentage 0.0 to 100.0
+    stage: str      # "HEADER_PARSING", "DECOMPRESSING", "COMPLETE", "CANCELLED", "FALLBACK"
+    bytes_processed: int = 0
+    total_bytes: int = 0
+
+
 def create_placeholder_texture(width: int = 16, height: int = 16, color: tuple = (128, 128, 128, 255)) -> bytes:
     """Generates a default RGBA placeholder buffer."""
     r, g, b, a = color
@@ -119,6 +128,7 @@ class TextureDecoder:
         self._cancelled_ids: Set[str] = set()
         self._active_futures: Dict[str, concurrent.futures.Future] = {}
         self._opengl_surface_handlers: Dict[str, Callable[[DecodedTexture], None]] = {}
+        self._progress_callbacks: Set[Callable[[DecodeProgressEvent], None]] = set()
 
     def register_surface_handler(self, name: str, handler: Callable[[DecodedTexture], None]):
         with self._lock:
@@ -127,6 +137,14 @@ class TextureDecoder:
     def unregister_surface_handler(self, name: str):
         with self._lock:
             self._opengl_surface_handlers.pop(name, None)
+
+    def register_progress_callback(self, callback: Callable[[DecodeProgressEvent], None]):
+        with self._lock:
+            self._progress_callbacks.add(callback)
+
+    def unregister_progress_callback(self, callback: Callable[[DecodeProgressEvent], None]):
+        with self._lock:
+            self._progress_callbacks.discard(callback)
 
     def cancel_decode(self, texture_id: str):
         with self._lock:
@@ -140,32 +158,77 @@ class TextureDecoder:
         texture_id: str,
         raw_bytes: bytes,
         callback: Optional[Callable[[DecodedTexture], None]] = None,
-        priority: int = 0
+        priority: int = 0,
+        progress_callback: Optional[Callable[[DecodeProgressEvent], None]] = None
     ) -> concurrent.futures.Future:
         """
         Submits JPEG2000 texture decoding request to background worker pool.
         Invokes callback and surface handlers upon completion.
         """
-        future = self._executor.submit(self._worker_decode, texture_id, raw_bytes, callback)
+        future = self._executor.submit(self._worker_decode, texture_id, raw_bytes, callback, progress_callback)
         with self._lock:
             self._active_futures[texture_id] = future
         return future
 
-    def _worker_decode(
-        self, texture_id: str, raw_bytes: bytes, callback: Optional[Callable[[DecodedTexture], None]]
-    ) -> DecodedTexture:
+    def _emit_progress(
+        self,
+        texture_id: str,
+        progress: float,
+        stage: str,
+        total_bytes: int,
+        bytes_processed: int,
+        request_progress_callback: Optional[Callable[[DecodeProgressEvent], None]] = None
+    ):
+        event = DecodeProgressEvent(
+            texture_id=texture_id,
+            progress=progress,
+            stage=stage,
+            bytes_processed=bytes_processed,
+            total_bytes=total_bytes
+        )
         with self._lock:
-            if texture_id in self._cancelled_ids:
-                placeholder = create_placeholder_texture(16, 16)
-                result = DecodedTexture(texture_id, placeholder, 16, 16, status="cancelled")
-                self._active_futures.pop(texture_id, None)
-                if callback:
-                    try:
-                        callback(result)
-                    except Exception as e:
-                        logger.error(f"Callback error for cancelled texture {texture_id}: {e}")
-                return result
+            callbacks = list(self._progress_callbacks)
 
+        if request_progress_callback:
+            try:
+                request_progress_callback(event)
+            except Exception as e:
+                logger.error(f"Request progress callback error for texture {texture_id}: {e}")
+
+        for cb in callbacks:
+            try:
+                cb(event)
+            except Exception as e:
+                logger.error(f"Global progress callback error for texture {texture_id}: {e}")
+
+    def _worker_decode(
+        self,
+        texture_id: str,
+        raw_bytes: bytes,
+        callback: Optional[Callable[[DecodedTexture], None]],
+        progress_callback: Optional[Callable[[DecodeProgressEvent], None]] = None
+    ) -> DecodedTexture:
+        total_len = len(raw_bytes) if raw_bytes else 0
+        self._emit_progress(texture_id, 0.0, "HEADER_PARSING", total_len, 0, progress_callback)
+
+        with self._lock:
+            is_cancelled = texture_id in self._cancelled_ids
+            if is_cancelled:
+                self._cancelled_ids.discard(texture_id)
+                self._active_futures.pop(texture_id, None)
+
+        if is_cancelled:
+            placeholder = create_placeholder_texture(16, 16)
+            result = DecodedTexture(texture_id, placeholder, 16, 16, status="cancelled")
+            self._emit_progress(texture_id, 0.0, "CANCELLED", total_len, 0, progress_callback)
+            if callback:
+                try:
+                    callback(result)
+                except Exception as e:
+                    logger.error(f"Callback error for cancelled texture {texture_id}: {e}")
+            return result
+
+        self._emit_progress(texture_id, 30.0, "DECOMPRESSING", total_len, total_len // 2, progress_callback)
         decoded = decode_jpeg2000_buffer(texture_id, raw_bytes)
 
         with self._lock:
@@ -174,6 +237,13 @@ class TextureDecoder:
                 self._cancelled_ids.discard(texture_id)
             self._active_futures.pop(texture_id, None)
             handlers = list(self._opengl_surface_handlers.values())
+
+        if decoded.status == "cancelled":
+            self._emit_progress(texture_id, 0.0, "CANCELLED", total_len, 0, progress_callback)
+        elif decoded.status == "fallback":
+            self._emit_progress(texture_id, 100.0, "FALLBACK", total_len, total_len, progress_callback)
+        else:
+            self._emit_progress(texture_id, 100.0, "COMPLETE", total_len, total_len, progress_callback)
 
         if callback:
             try:

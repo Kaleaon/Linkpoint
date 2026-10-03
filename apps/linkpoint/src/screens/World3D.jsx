@@ -15,6 +15,7 @@ export default function World3D({ desktopBackdrop = false }) {
   const [cameraPreset, setCameraPreset] = useState("rear");
   const [selection, setSelection] = useState(app.world.selectedObject);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [textureProgress, setTextureProgress] = useState(() => app.world.scene3d?.getTextureProgress() || null);
 
   const refresh = () => setPosition(app.world.camera3d?.position.map(Math.round) || [0, 0, 0]);
   useEffect(() => {
@@ -22,12 +23,14 @@ export default function World3D({ desktopBackdrop = false }) {
     const canvas = canvasRef.current;
     const updateObjects = (objects) => { if (active) setObjectCount(objects.length); };
     const updateCamera = (camera) => { if (active && camera) { setPosition(camera.position.map(Math.round)); setCameraPreset(camera.preset); } };
+    const updateProgress = (p) => { if (active) setTextureProgress(p); };
     app.world.on("objects_changed", updateObjects);
     app.world.on("camera_changed", updateCamera);
+    app.world.on("scene:texture-progress", updateProgress);
     const updateSelection = (object) => { if (active) setSelection(object); };
     app.world.on("selection_changed", updateSelection);
     app.world.init(canvas).then(() => { if (active) { setReady(!!app.world.graphics3d); refresh(); } }).catch((reason) => { if (active) setError(reason instanceof Error ? reason.message : "WebGL initialization failed"); });
-    return () => { active = false; app.world.off("objects_changed", updateObjects); app.world.off("camera_changed", updateCamera); app.world.off("selection_changed", updateSelection); app.world.destroyRenderer(canvas); };
+    return () => { active = false; app.world.off("objects_changed", updateObjects); app.world.off("camera_changed", updateCamera); app.world.off("scene:texture-progress", updateProgress); app.world.off("selection_changed", updateSelection); app.world.destroyRenderer(canvas); };
   }, []);
 
   const move = (forward, right, up = 0) => { app.world.moveCamera(right, forward, up); refresh(); };
@@ -56,6 +59,9 @@ export default function World3D({ desktopBackdrop = false }) {
       Pos: {position.join(", ")}<br />
       {dataStatus}<br />
       {objectCount} simulator objects
+      {textureProgress && (textureProgress.decoded > 0 || textureProgress.pending > 0) ? (
+        <><br /><span style={{ color: V.pri }}>Textures: {textureProgress.decoded}/{textureProgress.total || (textureProgress.decoded + textureProgress.pending)} decoded ({textureProgress.activeProgress}% {textureProgress.stage})</span></>
+      ) : null}
       <div style={{ marginTop: 6, opacity: .75 }}>Drag: orbit · Shift-drag: pan · Wheel/pinch: zoom<br />WASD / ↑↓: move · ←→: turn · E/Q: up/down · Shift: run</div>
       <div style={{ marginTop: 4, opacity: .9 }}>Tap an object to inspect it</div>
       <div style={{ marginTop: 4 }}>
@@ -116,9 +122,31 @@ export function World3DActionBar() {
   const { V } = useTheme();
   const connected = app.auth.isLoggedIn();
   const count = app.world.objects.length;
+  const [progress, setProgress] = useState(() => app.world.scene3d?.getTextureProgress() || null);
+
+  useEffect(() => {
+    let active = true;
+    const onProgress = (p) => { if (active) setProgress(p); };
+    app.world.on("scene:texture-progress", onProgress);
+    if (app.world.scene3d) {
+      app.world.scene3d.on("scene:texture-progress", onProgress);
+    }
+    return () => {
+      active = false;
+      app.world.off("scene:texture-progress", onProgress);
+      if (app.world.scene3d) {
+        app.world.scene3d.off("scene:texture-progress", onProgress);
+      }
+    };
+  }, []);
+
+  const progressLabel = progress && (progress.decoded > 0 || progress.pending > 0)
+    ? ` · TEXTURES DECODED: ${progress.decoded}/${progress.total || (progress.decoded + progress.pending)} (${progress.activeProgress}%)`
+    : "";
+
   return (
     <div role="status" style={{ padding: 8, textAlign: "center", color: connected ? V.pri : V.err, background: V.surf, fontSize: "11px", fontWeight: 700, letterSpacing: "0.5px" }}>
-      {connected ? `CONNECTED — LIVE SECOND LIFE SCENE (${count} OBJECTS)` : "DISCONNECTED"}
+      {connected ? `CONNECTED — LIVE SECOND LIFE SCENE (${count} OBJECTS)${progressLabel}` : "DISCONNECTED"}
     </div>
   );
 }

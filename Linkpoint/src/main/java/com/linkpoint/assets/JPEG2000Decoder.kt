@@ -8,6 +8,10 @@ import java.lang.reflect.Method
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
+fun interface DecodeProgressListener {
+    fun onDecodeProgress(progressPercentage: Int, stage: String)
+}
+
 /**
  * JPEG2000 (J2K/JP2) decoder using OpenJPEG native library.
  *
@@ -17,6 +21,30 @@ import java.nio.ByteOrder
 object JPEG2000Decoder {
 
     private const val TAG = "JPEG2000Decoder"
+
+    private val progressListeners = java.util.concurrent.CopyOnWriteArrayList<DecodeProgressListener>()
+
+    fun addProgressListener(listener: DecodeProgressListener) {
+        progressListeners.add(listener)
+    }
+
+    fun removeProgressListener(listener: DecodeProgressListener) {
+        progressListeners.remove(listener)
+    }
+
+    fun clearProgressListeners() {
+        progressListeners.clear()
+    }
+
+    fun notifyProgress(progressPercentage: Int, stage: String) {
+        for (listener in progressListeners) {
+            try {
+                listener.onDecodeProgress(progressPercentage, stage)
+            } catch (e: Throwable) {
+                Log.w(TAG, "Error notifying DecodeProgressListener", e)
+            }
+        }
+    }
 
     @Volatile private var nativeLoaded = false
     @Volatile private var nativeHealthCheckPassed = false
@@ -137,33 +165,44 @@ object JPEG2000Decoder {
     }
 
     fun decode(data: ByteArray): Bitmap? {
-        if (data.isEmpty()) return null
-
-        val discardPlan = buildDiscardPlan(0)
-        if (isNativeAvailable()) {
-            for (discard in discardPlan) {
-                decodeNativeWithDiscard(data, discard)?.let { return it }
-            }
-            Log.w(TAG, "Native decode failed for discard plan=$discardPlan, trying JP2ForAndroid fallback")
-        }
-
-        decodeViaJp2ForAndroid(data)?.let { return it }
-        return decodeFallback(data)
+        return decode(data, 0)
     }
 
     fun decode(data: ByteArray, discardLevel: Int): Bitmap? {
         if (data.isEmpty()) return null
 
+        notifyProgress(0, "HEADER_PARSING")
+        val size = getImageSize(data)
+        notifyProgress(30, "DECOMPRESSING")
+
         val discardPlan = buildDiscardPlan(discardLevel)
+        var resultBitmap: Bitmap? = null
+
         if (isNativeAvailable()) {
             for (discard in discardPlan) {
-                decodeNativeWithDiscard(data, discard)?.let { return it }
+                resultBitmap = decodeNativeWithDiscard(data, discard)
+                if (resultBitmap != null) break
             }
-            Log.w(TAG, "Native decode failed for discard plan=$discardPlan, trying JP2ForAndroid fallback")
+            if (resultBitmap == null) {
+                Log.w(TAG, "Native decode failed for discard plan=$discardPlan, trying JP2ForAndroid fallback")
+            }
         }
 
-        decodeViaJp2ForAndroid(data)?.let { return it }
-        return decodeFallback(data)
+        if (resultBitmap == null) {
+            resultBitmap = decodeViaJp2ForAndroid(data)
+        }
+        if (resultBitmap == null) {
+            resultBitmap = decodeFallback(data)
+        }
+
+        if (resultBitmap != null) {
+            notifyProgress(80, "CONVERTING_BITMAP")
+            notifyProgress(100, "COMPLETE")
+        } else {
+            notifyProgress(100, "FAILED")
+        }
+
+        return resultBitmap
     }
 
     fun getImageSize(data: ByteArray): Pair<Int, Int>? {
