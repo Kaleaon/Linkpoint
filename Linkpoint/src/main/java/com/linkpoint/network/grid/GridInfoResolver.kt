@@ -202,7 +202,7 @@ object GridInfoResolver {
 
         if (result.isEmpty()) {
             // XML or key-value regex parsing
-            val xmlTags = listOf("loginuri", "gridname", "gridnick", "welcome", "helperuri", "economy", "map", "platform")
+            val xmlTags = listOf("loginuri", "gridname", "gridnick", "welcome", "helperuri", "economy", "map", "platform", "currency", "currency_symbol", "zero_currency")
             for (tag in xmlTags) {
                 // Pattern 1: <tag>value</tag> or <tag_name>value</tag_name>
                 val tagPattern = Pattern.compile("<$tag>([^<]+)</$tag>", Pattern.CASE_INSENSITIVE)
@@ -252,6 +252,24 @@ object GridInfoResolver {
         val rawEconomyUri = parsedMap["economy"] ?: parsedMap["economy_uri"]
         val economyUri = if (isValidHttpUrl(rawEconomyUri)) rawEconomyUri else initialGrid?.economyUri
 
+        val isSl = isSecondLifeUri(loginUri)
+        val rawCurrencySymbol = parsedMap["currency_symbol"] ?: parsedMap["currency"]
+        val currencySymbol = rawCurrencySymbol?.ifBlank { null }
+            ?: initialGrid?.currencySymbol
+            ?: if (isSl) "L$" else "OS$"
+
+        val rawZeroCurrency = parsedMap["zero_currency"]
+        val isZeroCurrencyExplicit = rawZeroCurrency?.equals("true", ignoreCase = true) == true ||
+                rawCurrencySymbol?.equals("none", ignoreCase = true) == true ||
+                rawCurrencySymbol == "0"
+        val isZeroCurrency = if (isZeroCurrencyExplicit) {
+            true
+        } else if (economyUri == null && !isSl) {
+            true
+        } else {
+            initialGrid?.isZeroCurrency ?: false
+        }
+
         val rawMapUri = parsedMap["map"] ?: parsedMap["map_uri"] ?: parsedMap["mapuri"]
         val mapUri = if (isValidHttpUrl(rawMapUri)) rawMapUri else initialGrid?.mapUri
 
@@ -272,6 +290,8 @@ object GridInfoResolver {
             registerUri = initialGrid?.registerUri,
             passwordUri = initialGrid?.passwordUri,
             economyUri = economyUri,
+            currencySymbol = currencySymbol,
+            isZeroCurrency = isZeroCurrency,
             mapUri = mapUri,
             welcomeUri = welcomeUri,
             isResolved = true
@@ -285,12 +305,15 @@ object GridInfoResolver {
         val loginUri = normalizeLoginUri(inputAddress)
         val hostName = extractHostName(inputAddress)
         val nick = hostName.lowercase(Locale.ROOT).replace(Regex("[^a-z0-9]"), "")
+        val isSl = isSecondLifeUri(loginUri)
         return GridInfo(
             id = "grid_${if (nick.isBlank()) "custom" else nick}",
             name = if (hostName.isBlank()) "Custom Grid" else hostName,
             loginUri = loginUri,
             gridNick = nick,
             isSecure = loginUri.startsWith("https://"),
+            currencySymbol = if (isSl) "L$" else "OS$",
+            isZeroCurrency = !isSl,
             isResolved = false
         )
     }

@@ -1,5 +1,11 @@
 import { Utils } from './utils';
 import { failureFromResponseBody } from './login-failure';
+import { rateLimitedFetch } from './rate-limited-fetch';
+
+const READ_ONLY_CALLS = new Set([
+  'fetchAnimation', 'getBalance', 'getDiagnostics', 'getFriends', 'getGroups', 'getInventory',
+  'getMapBlocks', 'getSceneObjects', 'getSceneSnapshot', 'getTransactionHistory', 'searchDir',
+]);
 
 export interface SLBridgeConnectParams {
   loginUrl: string;
@@ -24,6 +30,7 @@ export class SLBridge extends Utils.EventEmitter {
   public connected: boolean = false;
   private eventSource: EventSource | null = null;
   private removeNativeListener: (() => void) | null = null;
+  private pendingReads = new Map<string, Promise<any>>();
 
   private async failure(response: Response, fallback: string) {
     const err = await response.json().catch(() => ({ error: fallback }));
@@ -114,27 +121,39 @@ export class SLBridge extends Utils.EventEmitter {
     const native = desktop();
     if (native) return native.call(method, params) as Promise<T>;
     if (!this.sessionId) throw new Error('Not connected to Second Life');
-    const response = await fetch('/api/sl/call', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId: this.sessionId, method, params }),
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.error || data.message || `Request failed (HTTP ${response.status})`);
-    return data as T;
+    const request = async () => {
+      const options = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: this.sessionId, method, params }),
+      };
+      // Never replay chat, payments, movement, or other mutations. Read calls can be throttled,
+      // coalesced and retried without applying an action twice.
+      const response = READ_ONLY_CALLS.has(method)
+        ? await rateLimitedFetch('/api/sl/call', options)
+        : await fetch('/api/sl/call', options);
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || data.message || `Request failed (HTTP ${response.status})`);
+      return data as T;
+    };
+    if (!READ_ONLY_CALLS.has(method)) return request();
+    const key = JSON.stringify([this.sessionId, method, params || null]);
+    const existing = this.pendingReads.get(key);
+    if (existing) return existing as Promise<T>;
+    const pending = request().finally(() => this.pendingReads.delete(key));
+    this.pendingReads.set(key, pending);
+    return pending;
   }
 
   teleport(params: { destination?: string; region?: string; x?: number; y?: number; z?: number }) {
-    return this.call<{ isHypergrid?: boolean; requested: { isHypergrid?: boolean; gridUri?: string; region: string; x: number; y: number; z: number }; message: string }>('teleport', params);
+    return this.call<{ requested: { region: string; x: number; y: number; z: number }; message: string }>('teleport', params);
   }
   respondScriptDialog(params: { id: string; buttonIndex?: number; text?: string }) {
     return this.call<{ answered: boolean }>('respondScriptDialog', params);
   }
   acceptLure(params: { id: string }) { return this.call<{ accepted: boolean; message: string }>('acceptLure', params); }
   acceptInventoryOffer(params: { id: string }) { return this.call<{ accepted: boolean }>('acceptInventoryOffer', params); }
-  declineInventoryOffer(params: { id: string }) { return this.call<{ declined: boolean }>('declineInventoryOffer', params); }
   acceptGroupInvite(params: { id: string }) { return this.call<{ accepted: boolean }>('acceptGroupInvite', params); }
-  declineGroupInvite(params: { id: string }) { return this.call<{ declined: boolean }>('declineGroupInvite', params); }
   dismissInteraction(params: { id: string }) { return this.call<{ dismissed: boolean }>('dismissInteraction', params); }
   touchObject(params: { id?: string; localId?: number; face?: number; uv?: number[]; st?: number[]; position?: number[] }) {
     return this.call<{ touched: string | number }>('touchObject', params);
@@ -144,9 +163,15 @@ export class SLBridge extends Utils.EventEmitter {
   setMovement(params: { forward?: number; right?: number; up?: number; turn?: number; run?: boolean }) {
     return this.call<{ moving: boolean }>('setMovement', params);
   }
-  getBalance() { return this.call<{ balance: number }>('getBalance'); }
-  payObject(params: { objectId?: string; targetId?: string; id?: string; amount?: number; price?: number; description?: string }) {
-    return this.call<{ paid: string; amount: number; balance: number | null }>('payObject', params);
+  getBalance() { return this.call<{ balance: number; currencySymbol?: string; currency_symbol?: string; isZeroCurrency?: boolean; is_zero_currency?: boolean }>('getBalance'); }
+  payObject(params: { targetId?: string; id?: string; objectId?: string; amount: number; description?: string; targetName?: string; currencySymbol?: string; isZeroCurrency?: boolean }) {
+    return this.call<{ paid: boolean; targetId: string; amount: number; description: string; transaction?: any }>('payObject', params);
+  }
+  payAvatar(params: { targetId?: string; id?: string; avatarId?: string; amount: number; description?: string; targetName?: string; currencySymbol?: string; isZeroCurrency?: boolean }) {
+    return this.call<{ paid: boolean; targetId: string; amount: number; description: string; transaction?: any }>('payAvatar', params);
+  }
+  getTransactionHistory() {
+    return this.call<{ balance: number; currencySymbol?: string; currency_symbol?: string; isZeroCurrency?: boolean; is_zero_currency?: boolean; transactions: any[] }>('getTransactionHistory');
   }
 
   async sendChat(message: string, channel = 0, type = 1) { await this.call('sendChat', { message, channel, type }); }
@@ -160,7 +185,7 @@ export class SLBridge extends Utils.EventEmitter {
     const native = desktop();
     if (native) return native.fetchProfilePhoto({ name, full });
     const query = `sessionId=${encodeURIComponent(this.sessionId || '')}&name=${encodeURIComponent(name)}${full ? '&size=full' : ''}`;
-    const response = await fetch(`/api/sl/avatar/photo?${query}`);
+    const response = await rateLimitedFetch(`/api/sl/avatar/photo?${query}`);
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || `Request failed (HTTP ${response.status})`);
     return data;
@@ -171,71 +196,53 @@ export class SLBridge extends Utils.EventEmitter {
   async fetchInventory(folderId?: string) {
     return this.connected ? this.call('getInventory', folderId ? { folderId } : {}) : { folders: [], items: [] };
   }
-  async wearOutfit(outfitId: string) {
-    if (!this.connected) return { worn: true, outfitId };
-    try {
-      return await this.call('wearOutfit', { outfitId });
-    } catch {
-      return { worn: true, outfitId };
-    }
-  }
-
-  async wearItem(itemId: string, options: { append?: boolean } = {}) {
-    if (!this.connected) return { worn: itemId, append: Boolean(options.append) };
-    return this.call('wearItem', { itemId, append: Boolean(options.append) });
-  }
   async fetchScene() {
     if (!this.connected) return [];
     try { return await this.call<any[]>('getSceneObjects'); } catch { return []; }
+  }
+  async fetchSceneSnapshot(): Promise<{ objects: any[]; assets: any[] }> {
+    if (!this.connected) return { objects: [], assets: [] };
+    try {
+      const snapshot = await this.call<{ objects: any[]; assets: any[] }>('getSceneSnapshot');
+      return snapshot || { objects: [], assets: [] };
+    } catch {
+      return { objects: await this.fetchScene(), assets: [] };
+    }
   }
   async fetchDiagnostics() {
     if (!this.connected) return null;
     try { return await this.call('getDiagnostics'); } catch { return null; }
   }
-  /** An animation asset from the simulator, base64-encoded. */
+  /** Directory search capabilities across grid categories ('people', 'groups', 'places'). */
+  async searchDir(params: { category: string; query: string; start?: number }): Promise<{
+    results: Array<{
+      id: string;
+      name?: string;
+      displayName?: string;
+      username?: string;
+      firstName?: string;
+      lastName?: string;
+      group?: string;
+      online?: boolean;
+      members?: number;
+      description?: string;
+      dwell?: number;
+      forSale?: boolean;
+      type: string;
+      simName?: string;
+    }>;
+    hasMore?: boolean;
+  }> {
+    if (!this.connected) {
+      throw new Error('Not connected to Second Life');
+    }
+    return this.call('searchDir', params);
+  }
+
   fetchAnimation(id: string): Promise<{ id: string; data: string }> { return this.call('fetchAnimation', { id }); }
-
-  async requestMuteList(crc: number = 0) {
-    if (this.connected) {
-      try {
-        await this.call('requestMuteList', { crc });
-      } catch (err) {
-        console.warn('[SL Bridge] requestMuteList warning:', err);
-      }
-    }
-  }
-
-  async updateMuteListEntry(entry: { id: string; name: string; type: number | string; flags: number }) {
-    if (this.connected) {
-      try {
-        await this.call('updateMuteListEntry', entry);
-      } catch (err) {
-        console.warn('[SL Bridge] updateMuteListEntry warning:', err);
-      }
-    }
-  }
-
-  async removeMuteListEntry(entry: { id: string; name: string }) {
-    if (this.connected) {
-      try {
-        await this.call('removeMuteListEntry', entry);
-      } catch (err) {
-        console.warn('[SL Bridge] removeMuteListEntry warning:', err);
-      }
-    }
-  }
-
-  async fetchXfer(filename: string): Promise<string> {
-    if (this.connected) {
-      try {
-        const res = await this.call<{ data?: string; content?: string }>('fetchXfer', { filename });
-        return res?.data || res?.content || '';
-      } catch (err) {
-        console.warn('[SL Bridge] fetchXfer warning:', err);
-      }
-    }
-    return '';
-  }
+  voiceProvision(sdp: string, parcelLocalId?: number) { return this.call<any>('voiceProvision', { sdp, parcelLocalId }); }
+  voiceSignal(viewerSession: string, candidates?: RTCIceCandidateInit[], completed = false) { return this.call('voiceSignal', { viewerSession, candidates, completed }); }
+  voiceLogout(viewerSession: string) { return this.call('voiceLogout', { viewerSession }); }
 
   disconnect() {
     this.eventSource?.close();
@@ -247,6 +254,7 @@ export class SLBridge extends Utils.EventEmitter {
     const sid = this.sessionId;
     this.sessionId = null;
     this.connected = false;
+    this.pendingReads.clear();
     if (wasConnected) {
       const native = desktop();
       if (native) void native.disconnectViewer().catch(() => {});

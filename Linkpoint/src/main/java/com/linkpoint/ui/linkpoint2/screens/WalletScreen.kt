@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.linkpoint.economy.CurrencyFormatter
 import com.linkpoint.ui.components.linkpoint2.primitives.L2GlassSurface
 import com.linkpoint.ui.components.linkpoint2.primitives.L2Row
 import com.linkpoint.ui.components.linkpoint2.primitives.L2SectionHeader
@@ -56,7 +57,7 @@ data class WalletTransaction(
 )
 
 /**
- * Cluster H — Wallet (L$). See design/screens-extra.jsx → WalletScreen.
+ * Cluster H — Wallet. See design/screens-extra.jsx → WalletScreen.
  */
 @Composable
 fun WalletScreen(
@@ -65,6 +66,8 @@ fun WalletScreen(
     weeklyIn: Long,
     weeklyOut: Long,
     transactions: List<WalletTransaction>,
+    currencySymbol: String = "L$",
+    isZeroCurrency: Boolean = false,
     onBack: () -> Unit,
     onSend: () -> Unit,
     onRequest: () -> Unit,
@@ -74,11 +77,13 @@ fun WalletScreen(
 ) {
     val tokens = Linkpoint2.tokens
     val nf = NumberFormat.getNumberInstance(Locale.US)
+    val activeSymbol = currencySymbol.ifEmpty { "L$" }
+
     Scaffold(
         topBar = {
             L2TopBar(
                 title = "Wallet",
-                subtitle = "L\$ balance",
+                subtitle = if (isZeroCurrency) "No Currency System" else "$activeSymbol balance",
                 leading = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -99,25 +104,61 @@ fun WalletScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            if (isZeroCurrency) {
+                item {
+                    L2GlassSurface(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(16.dp),
+                    ) {
+                        Column {
+                            Text(
+                                text = "No Currency System",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = "This grid operates with no currency system. Payments and transactions are disabled.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = tokens.onSurfaceDim,
+                            )
+                        }
+                    }
+                }
+            }
+
             item {
-                BalanceCard(balanceLinden, usdEquivalent, nf)
+                BalanceCard(balanceLinden, usdEquivalent, activeSymbol, isZeroCurrency, nf)
             }
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    L2TonalButton(onClick = onSend, modifier = Modifier.weight(1f)) {
+                    L2TonalButton(
+                        onClick = if (isZeroCurrency) { {} } else onSend,
+                        modifier = Modifier.weight(1f),
+                        enabled = !isZeroCurrency
+                    ) {
                         Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null)
                         Spacer(Modifier.width(6.dp))
                         Text("Send")
                     }
-                    L2TonalButton(onClick = onRequest, modifier = Modifier.weight(1f)) {
+                    L2TonalButton(
+                        onClick = if (isZeroCurrency) { {} } else onRequest,
+                        modifier = Modifier.weight(1f),
+                        enabled = !isZeroCurrency
+                    ) {
                         Icon(Icons.Default.ArrowDownward, contentDescription = null)
                         Spacer(Modifier.width(6.dp))
                         Text("Request")
                     }
-                    L2TonalButton(onClick = onBuy, modifier = Modifier.weight(1f)) {
+                    L2TonalButton(
+                        onClick = if (isZeroCurrency) { {} } else onBuy,
+                        modifier = Modifier.weight(1f),
+                        enabled = !isZeroCurrency
+                    ) {
                         Icon(Icons.Default.Add, contentDescription = null)
                         Spacer(Modifier.width(6.dp))
-                        Text("Buy L\$")
+                        Text("Buy $activeSymbol")
                     }
                 }
             }
@@ -136,7 +177,7 @@ fun WalletScreen(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text("Income", color = tokens.onSurfaceDim, style = MaterialTheme.typography.labelSmall)
                                 Text(
-                                    "+L\$ ${nf.format(weeklyIn)}",
+                                    CurrencyFormatter.formatTransactionAmount(weeklyIn, activeSymbol, isZeroCurrency),
                                     color = tokens.success,
                                     fontWeight = FontWeight.SemiBold,
                                     fontFamily = FontFamily.Monospace,
@@ -145,7 +186,7 @@ fun WalletScreen(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text("Outflow", color = tokens.onSurfaceDim, style = MaterialTheme.typography.labelSmall)
                                 Text(
-                                    "−L\$ ${nf.format(weeklyOut)}",
+                                    CurrencyFormatter.formatTransactionAmount(-weeklyOut, activeSymbol, isZeroCurrency),
                                     color = MaterialTheme.colorScheme.onSurface,
                                     fontWeight = FontWeight.SemiBold,
                                     fontFamily = FontFamily.Monospace,
@@ -181,8 +222,9 @@ fun WalletScreen(
                         }
                     },
                     trailing = {
+                        val amountStr = if (tx.isIncome) tx.amountLinden else -tx.amountLinden
                         Text(
-                            text = "${if (tx.isIncome) "+" else "−"}L\$ ${nf.format(tx.amountLinden)}",
+                            text = CurrencyFormatter.formatTransactionAmount(amountStr, activeSymbol, isZeroCurrency),
                             color = if (tx.isIncome) tokens.success else MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.SemiBold,
                             fontFamily = FontFamily.Monospace,
@@ -198,6 +240,8 @@ fun WalletScreen(
 private fun BalanceCard(
     balanceLinden: Long,
     usdEquivalent: Double,
+    symbol: String,
+    isZeroCurrency: Boolean,
     nf: NumberFormat,
 ) {
     val cs = MaterialTheme.colorScheme
@@ -215,23 +259,25 @@ private fun BalanceCard(
     ) {
         Column {
             Text(
-                "Linden balance",
+                if (isZeroCurrency) "Grid economy" else "$symbol balance",
                 style = MaterialTheme.typography.labelMedium,
                 color = cs.onPrimary.copy(alpha = 0.8f),
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                "L\$ ${nf.format(balanceLinden)}",
-                fontSize = 38.sp,
+                CurrencyFormatter.formatCurrency(balanceLinden, symbol, isZeroCurrency),
+                fontSize = if (isZeroCurrency) 24.sp else 38.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Monospace,
                 color = cs.onPrimary,
             )
-            Text(
-                "≈ \$${"%,.2f".format(usdEquivalent)} USD",
-                style = MaterialTheme.typography.bodyMedium,
-                color = cs.onPrimary.copy(alpha = 0.7f),
-            )
+            if (!isZeroCurrency) {
+                Text(
+                    "≈ \$${"%,.2f".format(usdEquivalent)} USD",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = cs.onPrimary.copy(alpha = 0.7f),
+                )
+            }
         }
     }
 }

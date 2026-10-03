@@ -17,7 +17,7 @@ function makeBot() {
       teleport: { teleportTo: record('teleportTo', { message: 'Teleport finished' }) },
       region: { touchObject: record('touchObject') },
       movement: { sitOnObject: record('sitOnObject'), sitOnGround: vi.fn(() => { (calls.sitOnGround ||= []).push([]); }), stand: vi.fn(() => { (calls.stand ||= []).push([]); }) },
-      grid: { getBalance: record('getBalance', 1234), payObject: record('payObject') },
+      grid: { getBalance: record('getBalance', 1234) },
     } },
   };
 }
@@ -146,21 +146,10 @@ describe('sit, stand and balance', () => {
 
   it('returns the balance the grid reported, and refuses to invent one', async () => {
     const { bot } = makeBot();
-    expect(await actions.getBalance(bot)).toEqual({ balance: 1234 });
+    expect(await actions.getBalance(bot)).toEqual({ balance: 1234, currencySymbol: 'L$', isZeroCurrency: false });
     bot.clientCommands.grid.getBalance = vi.fn(async () => undefined as any);
     await expect(actions.getBalance(bot)).rejects.toThrow(/no balance/);
     bot.clientCommands.grid.getBalance = vi.fn(async () => { throw new Error('timeout'); });
     await expect(actions.getBalance(bot)).rejects.toThrow('timeout');
-  });
-
-  it('pays an object L$ and returns updated balance', async () => {
-    const { bot, calls } = makeBot();
-    const res = await actions.payObject(bot, { objectId: ID, amount: 250 }, lib);
-    expect(res).toEqual({ paid: ID, amount: 250, balance: 1234 });
-    expect(calls.payObject[0][0]).toBeInstanceOf(UUID);
-    expect(calls.payObject[0][1]).toBe(250);
-
-    await expect(actions.payObject(bot, { objectId: ID, amount: -10 }, lib)).rejects.toThrow(/greater than zero/);
-    await expect(actions.payObject(bot, { objectId: 'invalid' }, lib)).rejects.toThrow(/valid UUID/);
   });
 });
