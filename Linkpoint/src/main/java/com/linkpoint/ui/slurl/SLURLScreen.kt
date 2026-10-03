@@ -45,7 +45,7 @@ data class SLURLInfo(
 
 /**
  * Compose version of SLURLActivity.
- * 
+ *
  * Features:
  * - Parse and display SLURL information
  * - Teleport to location
@@ -140,9 +140,9 @@ fun SLURLScreen(
                             modifier = Modifier.size(64.dp),
                             tint = MaterialTheme.colorScheme.primary
                         )
-                        
+
                         Spacer(modifier = Modifier.height(24.dp))
-                        
+
                         // Location info card
                         Card(
                             modifier = Modifier.fillMaxWidth(),
@@ -158,9 +158,9 @@ fun SLURLScreen(
                                     text = slurlInfo.regionName,
                                     style = MaterialTheme.typography.headlineMedium
                                 )
-                                
+
                                 Spacer(modifier = Modifier.height(8.dp))
-                                
+
                                 Text(
                                     text = "(${slurlInfo.x}, ${slurlInfo.y}, ${slurlInfo.z})",
                                     style = MaterialTheme.typography.bodyLarge,
@@ -168,9 +168,9 @@ fun SLURLScreen(
                                 )
                             }
                         }
-                        
+
                         Spacer(modifier = Modifier.height(32.dp))
-                        
+
                         // Action buttons
                         if (isLoggedIn) {
                             Row(
@@ -183,7 +183,7 @@ fun SLURLScreen(
                                 ) {
                                     Text("Show on Map")
                                 }
-                                
+
                                 Button(
                                     onClick = onTeleport,
                                     modifier = Modifier.weight(1f)
@@ -201,9 +201,9 @@ fun SLURLScreen(
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
-                                
+
                                 Spacer(modifier = Modifier.height(16.dp))
-                                
+
                                 Button(
                                     onClick = onLogin,
                                     modifier = Modifier.fillMaxWidth()

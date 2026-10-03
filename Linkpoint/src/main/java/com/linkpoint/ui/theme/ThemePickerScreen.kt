@@ -58,7 +58,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Theme Picker Screen - Allows users to browse, select, and manage themes.
- * 
+ *
  * Features:
  * - Browse built-in and user themes
  * - Preview theme colors
@@ -80,9 +80,9 @@ fun ThemePickerScreen(
     val availableThemes by themeManager.availableThemes.collectAsState()
     val activeTheme by themeManager.activeTheme.collectAsState()
     val scope = rememberCoroutineScope()
-    
+
     var showDeleteDialog by remember { mutableStateOf<ThemePack?>(null) }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -171,7 +171,7 @@ fun ThemePickerScreen(
             }
         }
     }
-    
+
     // Delete confirmation dialog
     showDeleteDialog?.let { theme ->
         AlertDialog(
@@ -213,7 +213,7 @@ fun ThemeCard(
     modifier: Modifier = Modifier
 ) {
     val colors = theme.toComposeColors()
-    
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -260,13 +260,13 @@ fun ThemeCard(
                             )
                         }
                     }
-                    
+
                     Text(
                         text = "by ${theme.author}",
                         style = MaterialTheme.typography.bodySmall,
                         color = colors.onSurfaceVariant
                     )
-                    
+
                     if (theme.description.isNotBlank()) {
                         Text(
                             text = theme.description,
@@ -278,7 +278,7 @@ fun ThemeCard(
                         )
                     }
                 }
-                
+
                 // Action buttons
                 Row {
                     AccessibleIconActionButton(contentDescription = "Share theme", onClick = onShare) {
@@ -288,7 +288,7 @@ fun ThemeCard(
                             tint = colors.onSurfaceVariant
                         )
                     }
-                    
+
                     onEdit?.let { edit ->
                         AccessibleIconActionButton(contentDescription = "Edit theme", onClick = edit) {
                             Icon(
@@ -298,7 +298,7 @@ fun ThemeCard(
                             )
                         }
                     }
-                    
+
                     onDelete?.let { delete ->
                         AccessibleIconActionButton(contentDescription = "Delete theme", onClick = delete) {
                             Icon(
@@ -310,9 +310,9 @@ fun ThemeCard(
                     }
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(12.dp))
-            
+
             // Color preview
             ThemeColorPreview(colors = colors)
         }
@@ -371,10 +371,10 @@ fun ColorSwatch(
 
 /**
  * Horizontal scrollable theme selector for use in settings screens or dialogs.
- * 
+ *
  * Displays themes as circular color swatches in a horizontal row.
  * The selected theme is highlighted with a border.
- * 
+ *
  * @param themes List of available theme packs to display
  * @param selectedThemeId ID of the currently selected theme
  * @param onThemeSelected Callback invoked when a theme is tapped
@@ -413,7 +413,7 @@ private fun ThemeSelectorItem(
     modifier: Modifier = Modifier
 ) {
     val colors = theme.toComposeColors()
-    
+
     Column(
         modifier = modifier
             .clickable(onClick = onClick)
@@ -443,7 +443,7 @@ private fun ThemeSelectorItem(
                 )
             }
         }
-        
+
         Text(
             text = theme.name,
             style = MaterialTheme.typography.labelSmall,

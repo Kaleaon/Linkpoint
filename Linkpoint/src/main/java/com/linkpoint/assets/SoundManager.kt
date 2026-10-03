@@ -31,56 +31,56 @@ class SoundManager(
         private const val TAG = "SoundManager"
         private const val MAX_STREAMS = 20
     }
-    
+
     private val soundPool: SoundPool
     private val loadedSounds = ConcurrentHashMap<UUID, Int>() // UUID -> SoundPool ID
     private val playingSounds = ConcurrentHashMap<Int, SoundPlayback>() // Stream ID -> Playback info
-    
+
     private val soundDispatcher: ExecutorCoroutineDispatcher = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "SoundThread").apply { isDaemon = true }
     }.asCoroutineDispatcher()
     private val scope = CoroutineScope(soundDispatcher + SupervisorJob())
-    
+
     // Listener position for spatial audio
     private var listenerPosition = LLVector3(128f, 128f, 30f)
     private var listenerForward = LLVector3(1f, 0f, 0f)
-    
+
     // Volume settings
     private var masterVolume = 1.0f
     private var soundEffectsVolume = 0.5f
     private var ambientVolume = 0.5f
-    
+
     init {
         val attributes = AudioAttributes.Builder()
             .setUsage(AudioAttributes.USAGE_GAME)
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .build()
-        
+
         soundPool = SoundPool.Builder()
             .setMaxStreams(MAX_STREAMS)
             .setAudioAttributes(attributes)
             .build()
-        
+
         soundPool.setOnLoadCompleteListener { _, sampleId, status ->
             if (status != 0) {
                 Log.w(TAG, "[${Thread.currentThread().name}] Sound load failed: $sampleId")
             }
         }
     }
-    
+
     /**
      * Update listener position for spatial audio
      */
     fun updateListener(position: LLVector3, forward: LLVector3) {
         listenerPosition = position
         listenerForward = forward.normalize()
-        
+
         // Update playing sounds
         playingSounds.values.forEach { playback ->
             updateSpatialSound(playback)
         }
     }
-    
+
     /**
      * Play a sound at a position
      */
@@ -123,7 +123,7 @@ class SoundManager(
             streamId
         }
     }
-    
+
     /**
      * Play a UI sound (no spatial)
      */
@@ -145,7 +145,7 @@ class SoundManager(
             streamId
         }
     }
-    
+
     /**
      * Stop a playing sound
      */
@@ -153,7 +153,7 @@ class SoundManager(
         soundPool.stop(streamId)
         playingSounds.remove(streamId)
     }
-    
+
     /**
      * Stop all sounds
      */
@@ -161,13 +161,13 @@ class SoundManager(
         playingSounds.keys.forEach { soundPool.stop(it) }
         playingSounds.clear()
     }
-    
+
     /**
      * Load a sound into the pool
      */
     private suspend fun loadSound(soundId: UUID): Int? {
         loadedSounds[soundId]?.let { return it }
-        
+
         soundLoadAttempts.incrementAndGet()
 
         return withContext(soundDispatcher) {
@@ -203,7 +203,7 @@ class SoundManager(
             }
         }
     }
-    
+
     /**
      * Play an attached sound from UDP message.
      * Attached sounds are played relative to an object in the world.
@@ -216,7 +216,7 @@ class SoundManager(
             Log.d(TAG, "[${Thread.currentThread().name}] Playing attached sound $soundId on object $objectId")
         }
     }
-    
+
     /**
      * Preload a sound for later playback.
      */
@@ -226,48 +226,48 @@ class SoundManager(
             Log.d(TAG, "[${Thread.currentThread().name}] Preloaded sound $soundId")
         }
     }
-    
+
     private fun calculateVolume(distance: Float, maxDistance: Float, gain: Float): Float {
         if (distance >= maxDistance) return 0f
         val attenuation = 1f - (distance / maxDistance)
         return (attenuation * attenuation * gain).coerceIn(0f, 1f)
     }
-    
+
     private fun calculatePan(position: LLVector3): Float {
         val toSound = (position - listenerPosition).normalize()
         val right = LLVector3(-listenerForward.y, listenerForward.x, 0f).normalize()
         return toSound.dot(right).coerceIn(-1f, 1f)
     }
-    
+
     private fun updateSpatialSound(playback: SoundPlayback) {
         val distance = playback.position.distance(listenerPosition)
         val volume = calculateVolume(distance, 30f, playback.gain)
         val pan = calculatePan(playback.position)
-        
+
         val leftVol = volume * (1f - pan.coerceIn(0f, 1f))
         val rightVol = volume * (1f + pan.coerceIn(-1f, 0f))
-        
-        soundPool.setVolume(playback.streamId, 
+
+        soundPool.setVolume(playback.streamId,
             leftVol * soundEffectsVolume * masterVolume,
             rightVol * soundEffectsVolume * masterVolume
         )
     }
-    
+
     /**
      * Set volume levels
      */
     fun setMasterVolume(volume: Float) {
         masterVolume = volume.coerceIn(0f, 1f)
     }
-    
+
     fun setSoundEffectsVolume(volume: Float) {
         soundEffectsVolume = volume.coerceIn(0f, 1f)
     }
-    
+
     fun setAmbientVolume(volume: Float) {
         ambientVolume = volume.coerceIn(0f, 1f)
     }
-    
+
     fun shutdown() {
         scope.cancel()
         soundDispatcher.close()
@@ -275,16 +275,16 @@ class SoundManager(
         loadedSounds.clear()
         playingSounds.clear()
     }
-    
+
     // ==================== DIAGNOSTIC METHODS ====================
-    
+
     // Tracking for diagnostics (volatile for thread safety)
     private var soundLoadAttempts = java.util.concurrent.atomic.AtomicInteger(0)
     private var soundLoadFailures = java.util.concurrent.atomic.AtomicInteger(0)
     private var soundPlayCount = java.util.concurrent.atomic.AtomicInteger(0)
     @Volatile private var lastError: String? = null
     @Volatile private var lastErrorTime: Long = 0
-    
+
     /**
      * Get comprehensive diagnostic data for debug reports
      */
@@ -304,7 +304,7 @@ class SoundManager(
             lastErrorTimeAgo = if (lastErrorTime > 0) System.currentTimeMillis() - lastErrorTime else null
         )
     }
-    
+
     /**
      * Diagnostic data class for sound manager state
      */

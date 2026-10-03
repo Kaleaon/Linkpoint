@@ -18,7 +18,7 @@ class AnimationManager(
 ) {
     companion object {
         private const val TAG = "AnimationManager"
-        
+
         // Built-in animation UUIDs
         val ANIM_WALK = UUID.fromString("6ed24bd8-91aa-4b12-ccc7-c97c857ab4e0")
         val ANIM_RUN = UUID.fromString("05ddbff8-aaa9-92a1-2b74-8fe77a29b445")
@@ -29,27 +29,27 @@ class AnimationManager(
         val ANIM_TURN_LEFT = UUID.fromString("56e0ba0d-4a9f-7f27-6117-32f2ebbf6135")
         val ANIM_TURN_RIGHT = UUID.fromString("2d6daa51-3192-6794-8e2e-a15f8338ec30")
     }
-    
+
     private val loadedAnimations = ConcurrentHashMap<UUID, AnimationData>()
     private val builtInAnimations = ConcurrentHashMap<UUID, AnimationData>()
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    
+
     init {
         // Load built-in animations from assets
         loadBuiltInAnimations()
     }
-    
+
     private fun loadBuiltInAnimations() {
         scope.launch {
             try {
                 val animFiles = context.assets.list("anims") ?: return@launch
-                
+
                 for (file in animFiles) {
                     try {
                         val inputStream = context.assets.open("anims/$file")
                         val data = inputStream.readBytes()
                         inputStream.close()
-                        
+
                         val anim = parseAnimation(UUID.randomUUID(), data)
                         if (anim != null) {
                             builtInAnimations[anim.animId] = anim
@@ -58,26 +58,26 @@ class AnimationManager(
                         Log.w(TAG, "Failed to load built-in animation: $file", e)
                     }
                 }
-                
+
                 Log.i(TAG, "Loaded ${builtInAnimations.size} built-in animations")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to load built-in animations", e)
             }
         }
     }
-    
+
     /**
      * Get animation data
      */
     suspend fun getAnimation(animId: UUID): AnimationData? {
         // Check loaded
         loadedAnimations[animId]?.let { return it }
-        
+
         // Check built-in
         builtInAnimations[animId]?.let { return it }
-        
+
         loadAttempts.incrementAndGet()
-        
+
         // Check cache
         val data = cache.get(animId, AssetType.ANIMATION)
         if (data == null) {
@@ -86,64 +86,64 @@ class AnimationManager(
             loadFailures.incrementAndGet()
             return null
         }
-        
+
         val anim = parseAnimation(animId, data)
         if (anim != null) {
             loadedAnimations[animId] = anim
         }
         return anim
     }
-    
+
     /**
      * Parse animation data
      */
     private fun parseAnimation(animId: UUID, data: ByteArray): AnimationData? {
         try {
             val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             // Header
             val version = buffer.short.toInt()
             val subVersion = buffer.short.toInt()
-            
+
             // Priority
             val priority = buffer.int
-            
+
             // Duration
             val duration = buffer.float
-            
+
             // Emote name
             val emoteNameLen = buffer.get().toInt() and 0xFF
             val emoteNameBytes = ByteArray(emoteNameLen)
             buffer.get(emoteNameBytes)
             val emoteName = String(emoteNameBytes, Charsets.UTF_8)
-            
+
             // Loop
             val loopIn = buffer.float
             val loopOut = buffer.float
             val loop = buffer.int
-            
+
             // Ease in/out
             val easeIn = buffer.float
             val easeOut = buffer.float
-            
+
             // Hand pose
             val handPose = buffer.int
-            
+
             // Joint count
             val jointCount = buffer.int
-            
+
             val joints = mutableListOf<JointAnimation>()
-            
+
             for (i in 0 until jointCount) {
                 // Joint name
                 val jointNameLen = buffer.get().toInt() and 0xFF
                 val jointNameBytes = ByteArray(jointNameLen)
                 buffer.get(jointNameBytes)
                 val jointName = String(jointNameBytes, Charsets.UTF_8).trimEnd('\u0000')
-                
+
                 // Priority for this joint
                 val jointPriority = buffer.int
-                
+
                 // Rotation keys
                 val rotKeyCount = buffer.int
                 val rotKeys = mutableListOf<AnimationKey>()
@@ -154,7 +154,7 @@ class AnimationManager(
                     val rz = buffer.short / 32767f * 2f - 1f
                     rotKeys.add(AnimationKey(time, floatArrayOf(rx, ry, rz, 1f)))
                 }
-                
+
                 // Position keys
                 val posKeyCount = buffer.int
                 val posKeys = mutableListOf<AnimationKey>()
@@ -165,7 +165,7 @@ class AnimationManager(
                     val pz = buffer.short / 32767f * 5f
                     posKeys.add(AnimationKey(time, floatArrayOf(px, py, pz)))
                 }
-                
+
                 joints.add(JointAnimation(
                     jointName = jointName,
                     priority = jointPriority,
@@ -173,7 +173,7 @@ class AnimationManager(
                     positionKeys = posKeys
                 ))
             }
-            
+
             // Constraints (optional)
             val constraints = mutableListOf<AnimationConstraint>()
             if (buffer.hasRemaining()) {
@@ -187,7 +187,7 @@ class AnimationManager(
                     }
                 }
             }
-            
+
             return AnimationData(
                 animId = animId,
                 version = version,
@@ -211,21 +211,21 @@ class AnimationManager(
             return null
         }
     }
-    
+
     fun shutdown() {
         scope.cancel()
         loadedAnimations.clear()
     }
-    
+
     // ==================== DIAGNOSTIC METHODS ====================
-    
+
     // Tracking for diagnostics (volatile for thread safety)
     private var loadAttempts = java.util.concurrent.atomic.AtomicInteger(0)
     private var loadFailures = java.util.concurrent.atomic.AtomicInteger(0)
     private var parseFailures = java.util.concurrent.atomic.AtomicInteger(0)
     @Volatile private var lastError: String? = null
     @Volatile private var lastErrorTime: Long = 0
-    
+
     /**
      * Get comprehensive diagnostic data for debug reports
      */
@@ -240,7 +240,7 @@ class AnimationManager(
             lastErrorTimeAgo = if (lastErrorTime > 0) System.currentTimeMillis() - lastErrorTime else null
         )
     }
-    
+
     /**
      * Diagnostic data class for animation manager state
      */

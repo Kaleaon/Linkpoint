@@ -41,7 +41,7 @@ class AppearanceCapabilityNegotiator(
 ) {
     companion object {
         private const val TAG = "AppearanceCapabilityNegotiator"
-        
+
         /** Maximum acceptable negotiation delay per requirement (200ms) */
         const val MAX_NEGOTIATION_LATENCY_MS = 200L
     }
@@ -61,7 +61,7 @@ class AppearanceCapabilityNegotiator(
 
         val isSsaSupported = !ssaCap.isNullOrBlank()
         val resolutionTimeMs = System.currentTimeMillis() - startTime
-        
+
         val mode = if (isSsaSupported) {
             AppearanceMode.SERVER_SIDE
         } else {
