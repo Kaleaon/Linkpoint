@@ -28,7 +28,11 @@ public class ViewerIntegrationTest {
     
     @BeforeEach
     void setUp() {
+        try {
+            java.nio.file.Files.deleteIfExists(java.nio.file.Paths.get(System.getProperty("user.home") + "/.secondlife-java/viewer-config.properties"));
+        } catch (Exception ignored) {}
         configuration = new ViewerConfiguration();
+        configuration.setBatteryOptimizationEnabled(false);
         viewer = new SecondLifeViewer();
     }
     

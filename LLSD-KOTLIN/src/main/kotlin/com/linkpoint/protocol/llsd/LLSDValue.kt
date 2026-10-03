@@ -260,3 +260,76 @@ data class LLSDArray(val value: MutableList<LLSDValue> = mutableListOf()) : LLSD
         return out.toByteArray()
     }
 }
+
+fun LLSDValue.toObject(): Any? = when (this) {
+    LLSDUndefined -> ""
+    is LLSDBoolean -> value
+    is LLSDInteger -> value
+    is LLSDReal -> value
+    is LLSDUUID -> value
+    is LLSDString -> value
+    is LLSDBinary -> value
+    is LLSDDate -> value
+    is LLSDURI -> try { java.net.URI(value) } catch (_: Exception) { value }
+    is LLSDMap -> java.util.HashMap(value.mapValues { it.value.toObject() })
+    is LLSDArray -> java.util.ArrayList(value.map { it.toObject() })
+}
+
+fun LLSDValue.toLlsd(): lindenlab.llsd.LLSD = lindenlab.llsd.LLSD(toObject())
+
+fun LLSDValue.toJSON(): String = when (this) {
+    LLSDUndefined -> "null"
+    is LLSDBoolean -> if (value) "true" else "false"
+    is LLSDInteger -> "$value"
+    is LLSDReal -> when {
+        value.isNaN() -> "\"NaN\""
+        value == Double.POSITIVE_INFINITY -> "\"Infinity\""
+        value == Double.NEGATIVE_INFINITY -> "\"-Infinity\""
+        else -> "$value"
+    }
+    is LLSDUUID -> "{\"i\":\"$value\"}"
+    is LLSDString -> "\"${escapeJson(value)}\""
+    is LLSDBinary -> "{\"b\":\"${Base64.getEncoder().encodeToString(value)}\"}"
+    is LLSDDate -> {
+        val iso = java.time.format.DateTimeFormatter.ISO_INSTANT.withZone(java.time.ZoneId.of("UTC")).format(value.toInstant())
+        "{\"d\":\"$iso\"}"
+    }
+    is LLSDURI -> "{\"u\":\"${escapeJson(value)}\"}"
+    is LLSDMap -> {
+        val entries = value.entries.joinToString(",") { (k, v) ->
+            "\"${escapeJson(k)}\":${v.toJSON()}"
+        }
+        "{$entries}"
+    }
+    is LLSDArray -> {
+        val items = value.joinToString(",") { it.toJSON() }
+        "[$items]"
+    }
+}
+
+private fun escapeJson(s: String): String = s
+    .replace("\\", "\\\\")
+    .replace("\"", "\\\"")
+    .replace("\n", "\\n")
+    .replace("\r", "\\r")
+    .replace("\t", "\\t")
+
+fun llsdOf(obj: Any?): LLSDValue = when (obj) {
+    null -> LLSDUndefined
+    is Boolean -> LLSDBoolean(obj)
+    is Int -> LLSDInteger(obj)
+    is Long -> LLSDInteger(obj.toInt())
+    is Float -> LLSDReal(obj.toDouble())
+    is Double -> LLSDReal(obj)
+    is UUID -> LLSDUUID(obj)
+    is String -> LLSDString(obj)
+    is ByteArray -> LLSDBinary(obj)
+    is Date -> LLSDDate(obj)
+    is java.time.Instant -> LLSDDate(Date.from(obj))
+    is java.net.URI -> LLSDURI(obj.toString())
+    is Map<*, *> -> LLSDMap(obj.mapKeys { it.key.toString() }.mapValues { llsdOf(it.value) }.toMutableMap())
+    is List<*> -> LLSDArray(obj.map { llsdOf(it) }.toMutableList())
+    is LLSDValue -> obj
+    is lindenlab.llsd.LLSD -> llsdOf(obj.content)
+    else -> LLSDString(obj.toString())
+}

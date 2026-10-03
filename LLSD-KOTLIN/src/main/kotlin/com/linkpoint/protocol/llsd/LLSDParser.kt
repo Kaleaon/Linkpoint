@@ -1,6 +1,5 @@
 package com.linkpoint.protocol.llsd
 
-import android.util.Log
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 import java.io.PushbackInputStream
@@ -16,11 +15,7 @@ object LLSDParser {
     private const val TAG = "LLSDParser"
 
     private fun logWarning(tag: String, message: String, throwable: Throwable? = null) {
-        try {
-            Log.w(tag, message, throwable)
-        } catch (_: Throwable) {
-            System.err.println("[$tag] $message: ${throwable?.message}")
-        }
+        SafeLog.w(tag, message, throwable)
     }
 
     private data class ParseLimits(
@@ -164,13 +159,13 @@ object LLSDParser {
 
     private fun stripBinaryMagicHeader(data: ByteArray): ByteArray {
         val magic = "<?llsd/binary?>".toByteArray(Charsets.US_ASCII)
-        if (data.size < magic.size + 1) return data
+        if (data.size < magic.size) return data
         for (i in magic.indices) {
             if (data[i] != magic[i]) return data
         }
         var idx = magic.size
         if (idx < data.size && data[idx] == '\r'.code.toByte()) idx++
-        if (idx < data.size && data[idx] == '\n'.code.toByte()) idx++ else return data
+        if (idx < data.size && data[idx] == '\n'.code.toByte()) idx++
         return data.copyOfRange(idx, data.size)
     }
 
@@ -245,7 +240,12 @@ object LLSDParser {
                 val map = LLSDMap()
                 var entries = 0
 
-                val declaredEntries = readLength(stream, state, limits)
+                val next = peekByte(stream, state, limits)
+                val declaredEntries = if (next == 0) {
+                    readLength(stream, state, limits)
+                } else {
+                    -1
+                }
                 if (declaredEntries > limits.maxMapEntries) {
                     throw ParseLimitExceededException("Map entry count exceeds maxMapEntries.")
                 }
@@ -278,7 +278,12 @@ object LLSDParser {
                 val array = LLSDArray()
                 var elements = 0
 
-                val declaredElements = readLength(stream, state, limits)
+                val next = peekByte(stream, state, limits)
+                val declaredElements = if (next == 0) {
+                    readLength(stream, state, limits)
+                } else {
+                    -1
+                }
                 if (declaredElements > limits.maxArrayLength) {
                     throw ParseLimitExceededException("Array length exceeds maxArrayLength.")
                 }

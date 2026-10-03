@@ -1,6 +1,5 @@
 package com.linkpoint.protocol.llsd
 
-import android.util.Log
 import java.io.BufferedInputStream
 import java.io.IOException
 
@@ -10,14 +9,6 @@ object LLSDContentTypeDetector {
     enum class LLSDContentType {
         LLSD_XML,
         LLSD_BINARY
-    }
-
-    private fun logDebug(tag: String, message: String) {
-        try {
-            Log.d(tag, message)
-        } catch (_: Throwable) {
-            // JVM unit test fallback
-        }
     }
 
     @Throws(IOException::class)
@@ -50,7 +41,7 @@ object LLSDContentTypeDetector {
         val isXml = text.startsWith("<llsd>") || text.startsWith("<?xml")
         var isBinary = text.startsWith("<? LLSD/Binary ?>") || text.startsWith("{") || text.startsWith("<?llsd/binary")
 
-        logDebug(
+        SafeLog.d(
             TAG,
             "contentType='$contentType', detectedBinary=$isBinary, detectedXml=$isXml, skipBytes=$skipBytes, preview='${text.take(40)}'"
         )

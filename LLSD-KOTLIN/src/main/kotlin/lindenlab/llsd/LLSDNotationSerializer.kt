@@ -61,7 +61,7 @@ class LLSDNotationSerializer {
     @Throws(IOException::class, LLSDException::class)
     private fun serializeValue(value: Any?, writer: Writer) {
         when {
-            value == null -> {
+            value == null || value == "" -> {
                 writer.write("!")
             }
             value is Map<*, *> -> {

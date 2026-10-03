@@ -28,6 +28,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "Linkpoint"
 
+include(":llsd-core")
+project(":llsd-core").projectDir = file("../LLSD-KOTLIN")
+
 /**
  * UI feature-module boundaries for the refactor plan.
  *
