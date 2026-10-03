@@ -55,6 +55,7 @@ import com.linkpoint.ui.components.linkpoint2.primitives.L2FilledButton
 import com.linkpoint.ui.components.linkpoint2.primitives.L2GhostButton
 import com.linkpoint.ui.components.linkpoint2.primitives.L2GlassSurface
 import com.linkpoint.ui.components.linkpoint2.primitives.L2OutlinedTextField
+import com.linkpoint.ui.components.linkpoint2.tokens.GeneratedTokens
 import com.linkpoint.ui.components.linkpoint2.tokens.Linkpoint2
 
 /**
@@ -411,10 +412,10 @@ private fun L2ErrorBanner(message: String) {
 @Composable
 private fun GridStatusDot(status: String, modifier: Modifier = Modifier) {
     val color = when (status.lowercase()) {
-        "online" -> Color(0xFF4CAF50)   // Green
-        "offline" -> Color(0xFFF44336)  // Red
-        "degraded" -> Color(0xFFFF9800) // Amber
-        else -> Color(0xFF9E9E9E)       // Gray
+        "online" -> GeneratedTokens.Color.Status.Online
+        "offline" -> GeneratedTokens.Color.Status.Offline
+        "degraded" -> GeneratedTokens.Color.Status.Degraded
+        else -> GeneratedTokens.Color.Status.Unknown
     }
     androidx.compose.foundation.Canvas(modifier = modifier.size(8.dp)) {
         drawCircle(color = color)
