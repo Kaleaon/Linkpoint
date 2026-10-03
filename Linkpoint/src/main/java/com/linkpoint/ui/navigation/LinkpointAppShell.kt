@@ -48,6 +48,19 @@ fun LinkpointAppShell(
     val metadata = resolveRouteMetadata(currentRoute)
     val showChrome = metadata.menuPlacement != MenuPlacement.NONE
 
+    androidx.compose.runtime.LaunchedEffect(currentRoute) {
+        if (currentRoute != null && currentRoute != Routes.WORLD && currentRoute != Routes.XR_WORLD && currentRoute != Routes.LOGIN) {
+            val routeMeta = resolveRouteMetadata(currentRoute)
+            com.linkpoint.ui.overlay.OverlayManager.getInstance().showOverlay(
+                id = "route_$currentRoute",
+                type = com.linkpoint.ui.overlay.OverlayManager.OverlayType.FULL_SCREEN_2D,
+                title = routeMeta.title
+            )
+        } else if (currentRoute == Routes.WORLD || currentRoute == Routes.XR_WORLD) {
+            com.linkpoint.ui.overlay.OverlayManager.getInstance().clearAllOverlays()
+        }
+    }
+
     val l2Tabs: List<L2Tab> = Linkpoint2BottomTabs.takeIf { it.isNotEmpty() }
         ?: bottomTabs.map {
             L2Tab(
