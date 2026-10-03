@@ -61,7 +61,6 @@ export default function Inventory() {
       y: Math.min(event.clientY, window.innerHeight - 150),
     });
   };
-
   useEffect(() => {
     const visibleFolderIds = rows.filter((r) => r.folder).map((r) => r.id).slice(0, 15);
     if (visibleFolderIds.length && typeof app.inventory.updateViewportFolders === "function") {
