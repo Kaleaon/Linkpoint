@@ -86,8 +86,8 @@ class ProgressiveTextureStreamerTest {
         val diagBefore = ProgressiveTextureStreamer.getDiagnostics()
         assertEquals("20 tasks queued for high-res pass", 20, diagBefore.pendingTasks)
 
-        // Execute frame 1 with tight budget (e.g., 1ms = 1_000_000ns)
-        val completedFrame1 = ProgressiveTextureStreamer.processFrameQueue(maxBudgetNs = 1_000_000L)
+        // Execute frame 1 with tight budget (e.g., 1ns) to trigger time-slice yield in test environment
+        val completedFrame1 = ProgressiveTextureStreamer.processFrameQueue(maxBudgetNs = 1L)
         val diagFrame1 = ProgressiveTextureStreamer.getDiagnostics()
 
         assertTrue("Frame 1 should yield due to budget cap", diagFrame1.pendingTasks < 20)

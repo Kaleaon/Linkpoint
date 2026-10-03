@@ -117,7 +117,7 @@ object ProgressiveTextureStreamer {
             val elapsedNs = System.nanoTime() - frameStartNs
 
             // Requirement 2: Strict per-frame budget cap (4ms)
-            if (elapsedNs >= maxBudgetNs) {
+            if (completedThisFrame > 0 && elapsedNs >= maxBudgetNs) {
                 timeSliceInterrupts.incrementAndGet()
                 Log.v(TAG, "Frame decode budget reached (${elapsedNs / 1_000_000}ms >= ${maxBudgetNs / 1_000_000}ms); yielding to next frame")
                 break
