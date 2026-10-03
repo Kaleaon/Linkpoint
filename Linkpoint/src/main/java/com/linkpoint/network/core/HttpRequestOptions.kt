@@ -2,17 +2,17 @@ package com.linkpoint.network.core
 
 /**
  * HTTP request options modeled after Firestorm's HttpOptions class.
- * 
+ *
  * These options can be shared across requests and provide fine-grained
  * control over HTTP behavior including timeouts, retries, and SSL settings.
- * 
+ *
  * Key features from Firestorm's implementation:
  * - Configurable retry counts and backoff timing
  * - Retry-After header support
  * - DNS cache timeout control
  * - SSL verification options
  * - Request tracing levels
- * 
+ *
  * @see https://github.com/FirestormViewer/phoenix-firestorm/blob/master/indra/llcorehttp/httpoptions.h
  */
 data class HttpRequestOptions(
@@ -21,21 +21,21 @@ data class HttpRequestOptions(
      * Default: false
      */
     val wantHeaders: Boolean = false,
-    
+
     /**
      * Tracing level for debugging.
      * 0 = Off, 1 = Basic, 2 = Verbose, 3 = Payload
      * Default: 0
      */
     val traceLevel: Int = HTTP_TRACE_OFF,
-    
+
     /**
      * Connection timeout in seconds.
      * This is the time to establish a connection.
      * Default: 30 seconds
      */
     val timeoutSeconds: Long = DEFAULT_TIMEOUT_SECONDS,
-    
+
     /**
      * Transfer timeout in seconds.
      * This is the time for the entire transfer to complete.
@@ -43,58 +43,58 @@ data class HttpRequestOptions(
      * Default: 0 (no separate transfer timeout)
      */
     val transferTimeoutSeconds: Long = DEFAULT_TRANSFER_TIMEOUT_SECONDS,
-    
+
     /**
      * Number of retry attempts on failure.
      * Default: 5 (matching Firestorm)
      */
     val retries: Int = DEFAULT_RETRY_COUNT,
-    
+
     /**
      * Minimum delay before retry in milliseconds.
      * Default: 1000ms (1 second)
      */
     val minRetryBackoffMs: Long = DEFAULT_MIN_RETRY_BACKOFF_MS,
-    
+
     /**
      * Maximum delay before retry in milliseconds.
      * Default: 5000ms (5 seconds)
      */
     val maxRetryBackoffMs: Long = DEFAULT_MAX_RETRY_BACKOFF_MS,
-    
+
     /**
      * Whether to respect server's Retry-After header.
      * When true, uses the server's suggested delay if present.
      * Default: true
      */
     val useRetryAfter: Boolean = DEFAULT_USE_RETRY_AFTER,
-    
+
     /**
      * Maximum value to accept from Retry-After header in seconds.
      * Values larger than this are capped to prevent indefinite waits.
      * Default: 30 seconds (matching Firestorm)
      */
     val maxRetryAfterSeconds: Int = MAX_RETRY_AFTER_SECONDS,
-    
+
     /**
      * Whether to follow HTTP redirects.
      * Default: true
      */
     val followRedirects: Boolean = true,
-    
+
     /**
      * Whether to verify SSL peer certificate.
      * Should be true in production for security.
      * Default: true
      */
     val sslVerifyPeer: Boolean = true,
-    
+
     /**
      * Whether to verify SSL hostname matches certificate.
      * Default: true
      */
     val sslVerifyHost: Boolean = true,
-    
+
     /**
      * DNS cache timeout in seconds.
      * -1 = Never timeout (cache forever)
@@ -103,13 +103,13 @@ data class HttpRequestOptions(
      * Default: -1 (matching Firestorm's default for stability)
      */
     val dnsCacheTimeoutSeconds: Int = DEFAULT_DNS_CACHE_TIMEOUT,
-    
+
     /**
      * Request priority. Higher values are processed first.
      * Default: PRIORITY_NORMAL
      */
     val priority: Int = PRIORITY_NORMAL,
-    
+
     /**
      * Policy class for request classification.
      * Different policy classes can have different connection limits
@@ -123,7 +123,7 @@ data class HttpRequestOptions(
         const val HTTP_TRACE_BASIC = 1
         const val HTTP_TRACE_VERBOSE = 2
         const val HTTP_TRACE_PAYLOAD = 3
-        
+
         // Default values (based on Firestorm's httpinternal.h)
         const val DEFAULT_TIMEOUT_SECONDS = 30L
         const val DEFAULT_TRANSFER_TIMEOUT_SECONDS = 0L
@@ -133,13 +133,13 @@ data class HttpRequestOptions(
         const val DEFAULT_USE_RETRY_AFTER = true
         const val MAX_RETRY_AFTER_SECONDS = 30
         const val DEFAULT_DNS_CACHE_TIMEOUT = -1  // Never timeout
-        
+
         // Priority levels
         const val PRIORITY_LOW = 0
         const val PRIORITY_NORMAL = 100
         const val PRIORITY_HIGH = 200
         const val PRIORITY_CRITICAL = 300
-        
+
         /**
          * Options optimized for login requests.
          * More patient with longer timeouts and more retries.
@@ -155,7 +155,7 @@ data class HttpRequestOptions(
             priority = PRIORITY_CRITICAL,
             policyClass = PolicyClass.LOGIN
         )
-        
+
         /**
          * Options optimized for inventory operations.
          * Moderate patience with good retry behavior.
@@ -171,7 +171,7 @@ data class HttpRequestOptions(
             priority = PRIORITY_HIGH,
             policyClass = PolicyClass.INVENTORY
         )
-        
+
         /**
          * Options optimized for texture downloads.
          * Can be more aggressive with retries since textures are less critical.
@@ -187,7 +187,7 @@ data class HttpRequestOptions(
             priority = PRIORITY_LOW,
             policyClass = PolicyClass.ASSET
         )
-        
+
         /**
          * Options optimized for mesh downloads.
          */
@@ -202,7 +202,7 @@ data class HttpRequestOptions(
             priority = PRIORITY_NORMAL,
             policyClass = PolicyClass.ASSET
         )
-        
+
         /**
          * Options for event queue long-polling.
          * Very long timeout since event queue can wait for events.
@@ -218,7 +218,7 @@ data class HttpRequestOptions(
             priority = PRIORITY_CRITICAL,
             policyClass = PolicyClass.EVENT_QUEUE
         )
-        
+
         /**
          * Options for mobile networks (LTE, etc).
          * More patient timeouts and retries.
@@ -235,10 +235,10 @@ data class HttpRequestOptions(
             policyClass = PolicyClass.DEFAULT
         )
     }
-    
+
     /**
      * Calculate retry delay for a given attempt, optionally using Retry-After.
-     * 
+     *
      * @param attempt Current retry attempt (0-based)
      * @param retryAfterSeconds Server-provided Retry-After value (or null)
      * @return Delay in milliseconds before next retry
@@ -250,15 +250,15 @@ data class HttpRequestOptions(
             val cappedRetryAfter = minOf(retryAfterSeconds, maxRetryAfterSeconds)
             return cappedRetryAfter * 1000L
         }
-        
+
         // Otherwise use exponential backoff
         // Formula: min(maxBackoff, minBackoff * 2^attempt)
         val factor = 1L shl minOf(attempt, 10)  // Cap at 2^10 = 1024
         val delay = minOf(minRetryBackoffMs * factor, maxRetryBackoffMs)
-        
+
         return delay
     }
-    
+
     /**
      * Check if we should retry based on attempt count.
      */
@@ -268,9 +268,9 @@ data class HttpRequestOptions(
 /**
  * Policy classes for request categorization.
  * Different classes can have different connection pool sizes and throttling.
- * 
+ *
  * Based on Firestorm's HTTP_POLICY_CLASS pattern.
- * 
+ *
  * Note: OkHttp's connection pool manages idle connections at the pool level.
  * For per-host request limiting, configure OkHttp's Dispatcher.maxRequestsPerHost.
  */
@@ -280,13 +280,13 @@ enum class PolicyClass(
      * This is a pool-wide limit, not per-host.
      */
     val maxIdleConnections: Int,
-    
+
     /**
      * Maximum concurrent requests per host.
      * Used to configure OkHttp's Dispatcher.maxRequestsPerHost.
      */
     val maxRequestsPerHost: Int,
-    
+
     /**
      * Rate limit for requests per second.
      * 0 means no throttling.
@@ -301,7 +301,7 @@ enum class PolicyClass(
         maxRequestsPerHost = 4,
         throttleRatePerSecond = 0  // No throttling
     ),
-    
+
     /**
      * Login operations - single connection, no throttling.
      */
@@ -310,7 +310,7 @@ enum class PolicyClass(
         maxRequestsPerHost = 1,
         throttleRatePerSecond = 0
     ),
-    
+
     /**
      * Inventory operations - moderate parallelism.
      */
@@ -319,7 +319,7 @@ enum class PolicyClass(
         maxRequestsPerHost = 2,
         throttleRatePerSecond = 10  // Max 10 requests/second
     ),
-    
+
     /**
      * Asset downloads (textures, mesh) - high parallelism.
      */
@@ -328,7 +328,7 @@ enum class PolicyClass(
         maxRequestsPerHost = 6,
         throttleRatePerSecond = 0  // No throttling for assets
     ),
-    
+
     /**
      * Event queue - dedicated connection.
      */

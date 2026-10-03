@@ -76,7 +76,7 @@ object TokenExtractor {
      */
     fun isCallbackUrl(url: String): Boolean {
         if (url.isBlank()) return false
-        
+
         val uri = try { Uri.parse(url) } catch (e: Exception) { return false }
         val scheme = uri.scheme?.lowercase() ?: ""
 

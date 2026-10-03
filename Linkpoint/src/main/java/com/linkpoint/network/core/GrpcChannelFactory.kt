@@ -22,7 +22,7 @@ import javax.net.ssl.X509TrustManager
 /**
  * Factory for creating gRPC channels with optimal configuration.
  * Based on patterns from the official Second Life app and Firestorm's llcorehttp.
- * 
+ *
  * Features:
  * - Adaptive timeouts based on network quality
  * - Proper SSL/TLS configuration
@@ -36,38 +36,38 @@ class GrpcChannelFactory(
     private val context: Context,
     private val qualityManager: ConnectionQualityManager
 ) {
-    
+
     companion object {
         private const val TAG = "GrpcChannelFactory"
-        
+
         // Default timeouts (based on official SL app)
         private const val DEFAULT_CONNECT_TIMEOUT_SECONDS = 60L
         private const val DEFAULT_READ_TIMEOUT_SECONDS = 60L
         private const val DEFAULT_WRITE_TIMEOUT_SECONDS = 30L
-        
+
         // Keep-alive configuration (important for mobile networks)
         private const val KEEP_ALIVE_TIME_SECONDS = 30L
         private const val KEEP_ALIVE_TIMEOUT_SECONDS = 10L
         private const val KEEP_ALIVE_WITHOUT_CALLS = true
-        
+
         // Idle timeout
         private const val IDLE_TIMEOUT_MINUTES = 5L
-        
+
         // Max retry attempts for gRPC
         private const val MAX_RETRY_ATTEMPTS = 5
-        
+
         // Fixed call timeout - generous to allow for all retries
         // This is a safety net, not the primary timeout mechanism
         private const val CALL_TIMEOUT_SECONDS = 300L  // 5 minutes
-        
+
         // Max message size (10MB)
         private const val MAX_MESSAGE_SIZE = 10 * 1024 * 1024
-        
+
         // DNS cache configuration (like Firestorm's mDNSCacheTimeout = -1)
         // -1 means cache forever, which is optimal for stable hosts like SL servers
         private const val DNS_CACHE_TIMEOUT_SECONDS = -1
     }
-    
+
     /**
      * Cache entry for DNS lookups.
      * Moved outside of CachingDns because data classes cannot be nested inside inner classes.
@@ -76,7 +76,7 @@ class GrpcChannelFactory(
         val addresses: List<InetAddress>,
         val timestamp: Long
     )
-    
+
     /**
      * DNS cache implementation based on Firestorm's DNS caching pattern.
      * Caches DNS lookups to avoid repeated resolution overhead,
@@ -87,38 +87,38 @@ class GrpcChannelFactory(
     ) : Dns {
         private val cache = ConcurrentHashMap<String, DnsCacheEntry>()
         private val systemDns = Dns.SYSTEM
-        
+
         override fun lookup(hostname: String): List<InetAddress> {
             val now = System.currentTimeMillis()
-            
+
             // Check cache
             val cached = cache[hostname]
             if (cached != null) {
                 // If cacheTimeoutSeconds is -1, cache forever
                 // Otherwise, check if still valid
-                if (cacheTimeoutSeconds < 0 || 
+                if (cacheTimeoutSeconds < 0 ||
                     (now - cached.timestamp) < cacheTimeoutSeconds * 1000L) {
                     Log.v(TAG, "DNS cache hit for $hostname")
                     return cached.addresses
                 }
             }
-            
+
             // Cache miss or expired - do lookup
             Log.d(TAG, "DNS lookup for $hostname (cache ${if (cached == null) "miss" else "expired"})")
             val startTime = System.currentTimeMillis()
             val addresses = systemDns.lookup(hostname)
             val elapsed = System.currentTimeMillis() - startTime
-            
+
             Log.d(TAG, "DNS resolved $hostname to ${addresses.size} addresses in ${elapsed}ms")
-            
+
             // Cache if caching is enabled (timeout != 0)
             if (cacheTimeoutSeconds != 0 && addresses.isNotEmpty()) {
                 cache[hostname] = DnsCacheEntry(addresses, now)
             }
-            
+
             return addresses
         }
-        
+
         /**
          * Clear the DNS cache.
          * Useful when network changes (e.g., WiFi to mobile).
@@ -127,7 +127,7 @@ class GrpcChannelFactory(
             cache.clear()
             Log.d(TAG, "DNS cache cleared")
         }
-        
+
         /**
          * Get cache statistics for diagnostics.
          */
@@ -136,10 +136,10 @@ class GrpcChannelFactory(
             "hosts" to cache.keys.toList()
         )
     }
-    
+
     // Shared DNS cache for all HTTP clients
     private val dnsCache = CachingDns()
-    
+
     init {
         // Register for network changes to clear DNS cache
         // This is important because DNS entries may change when network changes
@@ -149,7 +149,7 @@ class GrpcChannelFactory(
             dnsCache.clearCache()
         }
     }
-    
+
     // Thread pool for gRPC executor
     // Using a cached thread pool with daemon threads for gRPC operations
     // This is a legacy pattern that could be modernized to use coroutine dispatchers
@@ -159,10 +159,10 @@ class GrpcChannelFactory(
             isDaemon = true
         }
     }
-    
+
     // Track created channels for cleanup
     private val activeChannels = mutableListOf<ManagedChannel>()
-    
+
     /**
      * Create a gRPC channel for the given host and port
      */
@@ -173,9 +173,9 @@ class GrpcChannelFactory(
     ): ManagedChannel {
         val timeouts = qualityManager.getTimeouts()
         val multiplier = qualityManager.getTimeoutMultiplier()
-        
+
         Log.d(TAG, "Creating gRPC channel to $host:$port (TLS: $useTls, multiplier: ${multiplier}x)")
-        
+
         val builder = OkHttpChannelBuilder.forAddress(host, port)
             .executor(executor)
             // Timeouts
@@ -189,24 +189,24 @@ class GrpcChannelFactory(
             // Retry configuration
             .enableRetry()
             .maxRetryAttempts(MAX_RETRY_ATTEMPTS)
-        
+
         // Configure TLS
         if (useTls) {
             builder.useTransportSecurity()
         } else {
             builder.usePlaintext()
         }
-        
+
         val channel = builder.build()
-        
+
         synchronized(activeChannels) {
             activeChannels.add(channel)
         }
-        
+
         Log.d(TAG, "gRPC channel created successfully")
         return channel
     }
-    
+
     /**
      * Create a gRPC channel from a URL
      */
@@ -214,22 +214,22 @@ class GrpcChannelFactory(
         val (host, port, useTls) = parseUrl(url)
         return createChannel(host, port, useTls)
     }
-    
+
     /**
      * Create an OkHttpClient configured for XMLRPC login operations.
-     * 
+     *
      * This client is optimized for reliability over performance:
      * - Fresh connections preferred over pooled connections
      * - Aggressive connection cleanup to avoid stale connections
      * - Proper keep-alive handling for Second Life login servers
      * - HTTP/1.1 for XMLRPC compatibility
      * - DNS caching to avoid repeated DNS lookups
-     * 
+     *
      * EOF errors often occur due to:
      * - Server closing idle connections before client expects
      * - Load balancer timeouts
      * - Connection pool returning stale connections
-     * 
+     *
      * Mitigations implemented:
      * - Short keep-alive duration to avoid stale connections
      * - Minimal connection pooling
@@ -240,18 +240,18 @@ class GrpcChannelFactory(
     fun createHttpClient(): OkHttpClient {
         return createHttpClient(HttpRequestOptions.forLogin())
     }
-    
+
     /**
      * Create an OkHttpClient with specific request options.
      * This method allows fine-grained control based on Firestorm's HttpOptions pattern.
-     * 
+     *
      * @param options Configuration options for the HTTP client
      * @return Configured OkHttpClient instance
      */
     fun createHttpClient(options: HttpRequestOptions): OkHttpClient {
         val timeouts = qualityManager.getTimeouts()
         val multiplier = qualityManager.getTimeoutMultiplier()
-        
+
         // Calculate effective timeouts combining base options with network quality
         val connectTimeoutMs = (options.timeoutSeconds * 1000 * multiplier).toLong()
         val readTimeoutMs = if (options.transferTimeoutSeconds > 0) {
@@ -260,11 +260,11 @@ class GrpcChannelFactory(
             timeouts.readTimeoutMs
         }
         val writeTimeoutMs = timeouts.writeTimeoutMs
-        
+
         Log.d(TAG, "Creating HTTP client for ${options.policyClass}: " +
             "connect=${connectTimeoutMs}ms, read=${readTimeoutMs}ms, " +
             "retries=${options.retries}, dnsCacheTimeout=${options.dnsCacheTimeoutSeconds}s")
-        
+
         val builder = OkHttpClient.Builder()
             .connectTimeout(connectTimeoutMs, TimeUnit.MILLISECONDS)
             .readTimeout(readTimeoutMs, TimeUnit.MILLISECONDS)
@@ -278,7 +278,7 @@ class GrpcChannelFactory(
             .followSslRedirects(options.followRedirects)
             // DNS caching - key improvement from Firestorm
             .dns(getCachingDns(options.dnsCacheTimeoutSeconds))
-        
+
         // Configure connection pool based on policy class
         // maxIdleConnections is a pool-wide limit on idle connections
         val poolConfig = when (options.policyClass) {
@@ -309,14 +309,14 @@ class GrpcChannelFactory(
             )
         }
         builder.connectionPool(poolConfig)
-        
+
         // Configure dispatcher for per-host request limiting
         // This properly controls concurrent requests to a single host
         val dispatcher = Dispatcher().apply {
             maxRequestsPerHost = options.policyClass.maxRequestsPerHost
         }
         builder.dispatcher(dispatcher)
-        
+
         // Configure HTTP protocol based on policy class
         // LOGIN requests MUST use HTTP/1.1 only:
         // - Second Life login server uses XML-RPC over HTTP/1.1
@@ -329,12 +329,12 @@ class GrpcChannelFactory(
         } else {
             builder.protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
         }
-        
+
         // Add interceptor for connection handling and tracing
         builder.addNetworkInterceptor { chain ->
             val originalRequest = chain.request()
             val requestBuilder = originalRequest.newBuilder()
-            
+
             // For login requests, add headers to avoid stale connections and mitigate chunked encoding issues
             // The Accept-Encoding: identity header disables response compression, which can help avoid
             // EOF errors observed in ChunkedSource.readChunkSize() when a server closes the connection early
@@ -342,27 +342,27 @@ class GrpcChannelFactory(
                 requestBuilder.header("Connection", "close")
                 requestBuilder.header("Accept-Encoding", "identity")
             }
-            
+
             // Add tracing if enabled
             if (options.traceLevel >= HttpRequestOptions.HTTP_TRACE_BASIC) {
                 Log.d(TAG, "HTTP Request: ${originalRequest.method} ${originalRequest.url}")
             }
-            
+
             val request = requestBuilder.build()
             val startTime = System.currentTimeMillis()
             val response = chain.proceed(request)
             val elapsed = System.currentTimeMillis() - startTime
-            
+
             if (options.traceLevel >= HttpRequestOptions.HTTP_TRACE_BASIC) {
                 Log.d(TAG, "HTTP Response: ${response.code} in ${elapsed}ms")
             }
-            
+
             response
         }
-        
+
         return builder.build()
     }
-    
+
     /**
      * Get a DNS resolver with the specified cache timeout.
      * Uses the shared cache for most timeouts, creates a new one for custom timeouts.
@@ -376,7 +376,7 @@ class GrpcChannelFactory(
             CachingDns(timeoutSeconds)
         }
     }
-    
+
     /**
      * Clear the DNS cache.
      * Should be called when network changes (WiFi to mobile, etc.)
@@ -384,19 +384,19 @@ class GrpcChannelFactory(
     fun clearDnsCache() {
         dnsCache.clearCache()
     }
-    
+
     /**
      * Get DNS cache statistics.
      */
     fun getDnsCacheStats(): Map<String, Any> = dnsCache.getCacheStats()
-    
+
     /**
      * Create an OkHttpClient optimized for regular API operations (non-login).
      * This client uses connection pooling for better performance.
      */
     fun createApiClient(): OkHttpClient {
         val timeouts = qualityManager.getTimeouts()
-        
+
         return OkHttpClient.Builder()
             .connectTimeout(timeouts.connectTimeoutMs, TimeUnit.MILLISECONDS)
             .readTimeout(timeouts.readTimeoutMs, TimeUnit.MILLISECONDS)
@@ -413,33 +413,33 @@ class GrpcChannelFactory(
             .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
             .build()
     }
-    
+
     /**
      * Parse URL into host, port, and TLS flag
      */
     private fun parseUrl(url: String): Triple<String, Int, Boolean> {
         val useTls = url.startsWith("https://") || url.startsWith("grpcs://")
         val defaultPort = if (useTls) 443 else 80
-        
+
         val cleanUrl = url
             .removePrefix("https://")
             .removePrefix("http://")
             .removePrefix("grpcs://")
             .removePrefix("grpc://")
-        
+
         val hostPort = cleanUrl.split("/").first()
         val parts = hostPort.split(":")
-        
+
         val host = parts[0]
         val port = if (parts.size > 1) {
             parts[1].toIntOrNull() ?: defaultPort
         } else {
             defaultPort
         }
-        
+
         return Triple(host, port, useTls)
     }
-    
+
     /**
      * Shutdown a specific channel
      */
@@ -458,7 +458,7 @@ class GrpcChannelFactory(
             Log.e(TAG, "Error shutting down channel: ${e.message}")
         }
     }
-    
+
     /**
      * Shutdown all active channels
      */
@@ -474,7 +474,7 @@ class GrpcChannelFactory(
                     Log.e(TAG, "Error shutting down channel: ${e.message}")
                 }
             }
-            
+
             // Wait for termination
             activeChannels.forEach { channel ->
                 try {
@@ -485,11 +485,11 @@ class GrpcChannelFactory(
                     Log.e(TAG, "Error waiting for channel termination: ${e.message}")
                 }
             }
-            
+
             activeChannels.clear()
         }
     }
-    
+
     /**
      * Get the number of active channels
      */

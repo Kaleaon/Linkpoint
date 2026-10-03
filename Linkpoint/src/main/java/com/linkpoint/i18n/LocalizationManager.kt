@@ -14,51 +14,51 @@ import java.util.TimeZone
 
 /**
  * Localization Manager for Linkpoint.
- * 
+ *
  * Provides internationalization (i18n) support including:
  * - String localization with placeholder substitution
  * - Date/time formatting
  * - Currency formatting (including L$ Linden Dollars)
  * - Number formatting
- * 
+ *
  * Based on patterns from the Second Life mobile viewer's localization system.
  */
 class LocalizationManager private constructor(private val context: Context) {
-    
+
     companion object {
         private const val TAG = "LocalizationManager"
         private const val LOCALIZATION_PATH = "localization"
-        
+
         // Supported locales
         private val SUPPORTED_LOCALES = listOf("en", "es", "fr", "de", "ja", "pt", "ru", "zh", "ko", "it", "nl", "pl", "tr")
-        
+
         @Volatile
         private var instance: LocalizationManager? = null
-        
+
         fun getInstance(context: Context): LocalizationManager {
             return instance ?: synchronized(this) {
                 instance ?: LocalizationManager(context.applicationContext).also { instance = it }
             }
         }
     }
-    
+
     // Current locale
     private var currentLocale: Locale = Locale.getDefault()
-    
+
     // String resources by locale
     private val stringResources = mutableMapOf<String, MutableMap<String, String>>()
-    
+
     // Formatters
     private var dateFormat: DateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, currentLocale)
     private var timeFormat: DateFormat = DateFormat.getTimeInstance(DateFormat.SHORT, currentLocale)
     private var dateTimeFormat: DateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT, currentLocale)
     private var numberFormat: NumberFormat = NumberFormat.getNumberInstance(currentLocale)
-    
+
     init {
         loadAllLocales()
         updateFormatters()
     }
-    
+
     /**
      * Load string resources for all supported locales
      */
@@ -67,7 +67,7 @@ class LocalizationManager private constructor(private val context: Context) {
             loadLocale(locale)
         }
     }
-    
+
     /**
      * Load string resources for a specific locale
      */
@@ -78,7 +78,7 @@ class LocalizationManager private constructor(private val context: Context) {
                 val content = inputStream.bufferedReader().readText()
                 val json = JSONObject(content)
                 val stringsArray = json.getJSONArray("strings")
-                
+
                 val localeStrings = mutableMapOf<String, String>()
                 for (i in 0 until stringsArray.length()) {
                     val item = stringsArray.getJSONObject(i)
@@ -86,7 +86,7 @@ class LocalizationManager private constructor(private val context: Context) {
                     val value = item.getString("value")
                     localeStrings[key] = value
                 }
-                
+
                 stringResources[locale] = localeStrings
                 Log.i(TAG, "Loaded ${localeStrings.size} strings for locale: $locale")
             }
@@ -94,7 +94,7 @@ class LocalizationManager private constructor(private val context: Context) {
             Log.w(TAG, "Failed to load locale: $locale", e)
         }
     }
-    
+
     /**
      * Set the current locale
      */
@@ -102,7 +102,7 @@ class LocalizationManager private constructor(private val context: Context) {
         currentLocale = locale
         updateFormatters()
     }
-    
+
     /**
      * Set the current locale by language code
      */
@@ -110,7 +110,7 @@ class LocalizationManager private constructor(private val context: Context) {
         currentLocale = Locale(languageCode)
         updateFormatters()
     }
-    
+
     /**
      * Update formatters for current locale
      */
@@ -120,44 +120,44 @@ class LocalizationManager private constructor(private val context: Context) {
         dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT, currentLocale)
         numberFormat = NumberFormat.getNumberInstance(currentLocale)
     }
-    
+
     /**
      * Get current locale
      */
     fun getCurrentLocale(): Locale = currentLocale
-    
+
     /**
      * Get localized string by key
      */
     fun getString(key: String): String {
         return getString(key, *emptyArray<Any>())
     }
-    
+
     /**
      * Get localized string by key with placeholder substitution
      * Placeholders in format {0}, {1}, etc.
      */
     fun getString(key: String, vararg args: Any): String {
         val localeCode = currentLocale.language
-        
+
         // Try current locale first
         var value = stringResources[localeCode]?.get(key)
-        
+
         // Fall back to English
         if (value == null && localeCode != "en") {
             value = stringResources["en"]?.get(key)
         }
-        
+
         // If still not found, return the key
         if (value == null) {
             Log.w(TAG, "Missing string for key: $key")
             return key
         }
-        
+
         // Substitute placeholders
         return substitutePlaceholders(value, args)
     }
-    
+
     /**
      * Substitute placeholders in format string
      */
@@ -169,7 +169,7 @@ class LocalizationManager private constructor(private val context: Context) {
         }
         return result
     }
-    
+
     /**
      * Check if a string key exists
      */
@@ -178,22 +178,22 @@ class LocalizationManager private constructor(private val context: Context) {
         return stringResources[localeCode]?.containsKey(key) == true ||
                stringResources["en"]?.containsKey(key) == true
     }
-    
+
     /**
      * Format a date
      */
     fun formatDate(date: Date): String = dateFormat.format(date)
-    
+
     /**
      * Format a time
      */
     fun formatTime(date: Date): String = timeFormat.format(date)
-    
+
     /**
      * Format a date and time
      */
     fun formatDateTime(date: Date): String = dateTimeFormat.format(date)
-    
+
     /**
      * Format a date with timezone
      */
@@ -202,7 +202,7 @@ class LocalizationManager private constructor(private val context: Context) {
         format.timeZone = timeZone
         return format.format(date)
     }
-    
+
     /**
      * Format SL time (SLT/PST)
      */
@@ -212,24 +212,24 @@ class LocalizationManager private constructor(private val context: Context) {
         format.timeZone = sltZone
         return "${format.format(date)} SLT"
     }
-    
+
     /**
      * Format a number
      */
     fun formatNumber(number: Number): String = numberFormat.format(number)
-    
+
     /**
      * Format Linden Dollars (L$)
      */
     fun formatLindenDollars(amount: Int): String = "L\$$amount"
-    
+
     /**
      * Format Linden Dollars with locale-specific formatting
      */
     fun formatLindenDollarsFormatted(amount: Int): String {
         return "L\$${numberFormat.format(amount)}"
     }
-    
+
     /**
      * Format a currency amount
      */
@@ -242,7 +242,7 @@ class LocalizationManager private constructor(private val context: Context) {
             "$currencyCode $amount"
         }
     }
-    
+
     /**
      * Format a percentage
      */
@@ -250,7 +250,7 @@ class LocalizationManager private constructor(private val context: Context) {
         val percentFormat = NumberFormat.getPercentInstance(currentLocale)
         return percentFormat.format(value)
     }
-    
+
     /**
      * Format distance in meters (converts to appropriate unit based on locale)
      */
@@ -269,12 +269,12 @@ class LocalizationManager private constructor(private val context: Context) {
             }
         }
     }
-    
+
     /**
      * Get all available locales
      */
     fun getAvailableLocales(): List<String> = stringResources.keys.toList()
-    
+
     /**
      * Get all string keys for debugging
      */

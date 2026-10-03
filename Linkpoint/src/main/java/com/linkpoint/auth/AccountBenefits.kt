@@ -4,117 +4,117 @@ import android.util.Log
 
 /**
  * Account level benefits returned by the Second Life login server.
- * 
+ *
  * These values define what the account is allowed to do and various costs.
  * They are parsed from the `account_level_benefits` field in the login response.
- * 
+ *
  * Based on LibreMetaverse AccountLevelBenefits class.
- * 
+ *
  * @see <a href="https://wiki.secondlife.com/wiki/Current_login_protocols">SL Login Protocol</a>
  */
 data class AccountBenefits(
     /** Cost in L$ to upload a texture */
     val textureUploadCost: Int = 10,
-    
+
     /** Cost in L$ to upload an animation */
     val animationUploadCost: Int = 10,
-    
+
     /** Cost in L$ to upload a sound */
     val soundUploadCost: Int = 10,
-    
+
     /** Cost in L$ to upload a mesh */
     val meshUploadCost: Int = 10,
-    
+
     /** Maximum number of groups the agent can belong to */
     val groupMembershipLimit: Int = 42,
-    
+
     /** Maximum number of attachments the agent can wear */
     val attachmentLimit: Int = 38,
-    
+
     /** Maximum number of animated objects the agent can have */
     val animatedObjectLimit: Int = 1,
-    
+
     /** Maximum number of picks in profile */
     val picksLimit: Int = 10,
-    
+
     /** Weekly stipend amount (for premium accounts) */
     val stipend: Int = 0,
-    
+
     /** Signup bonus amount */
     val signupBonus: Int = 0,
-    
+
     /** Whether this is a premium account */
     val premiumAccess: Boolean = false,
-    
+
     /** Cost to create a group */
     val createGroupCost: Int = 0,
-    
+
     /** Cost to partner */
     val partnerFee: Int = 10,
-    
+
     /** Cost to unpartner */
     val unpartnerFee: Int = 25,
-    
+
     /** Whether land auctions are allowed */
     val landAuctionsAllowed: Boolean = false,
-    
+
     /** Whether voice morphing is available */
     val voiceMorphing: Boolean = false,
-    
+
     /** Limit for stored IMs */
     val storedImLimit: Int = 15,
-    
+
     /** Transaction history limit in days */
     val transactionHistoryLimit: Int = 30,
-    
+
     /** Script limit per parcel */
     val scriptLimit: Int = 0,
-    
+
     /** Mainland tier allowed (in sqm) */
     val mainlandTier: Int = 0,
-    
+
     /** Maximum local experiences */
     val localExperiences: Int = 0,
-    
+
     /** Maximum grid-wide experiences */
     val gridwideExperienceLimit: Int = 0,
-    
+
     /** Marketplace listing limit */
     val marketplaceListingLimit: Int = 0,
-    
+
     /** Premium alts allowed */
     val premiumAlts: Int = 0,
-    
+
     /** Priority entry to full regions */
     val priorityEntry: Boolean = false,
-    
+
     /** Live chat support available */
     val liveChat: Boolean = false,
-    
+
     /** Phone support available */
     val phoneSupport: Boolean = false,
-    
+
     /** Beta grid land available */
     val betaGridLand: Boolean = false,
-    
+
     /** Premium gifts available */
     val premiumGifts: Boolean = false,
-    
+
     /** Can use animesh */
     val useAnimesh: Boolean = true,
-    
+
     /** Linden buy fee percentage */
     val lindenBuyFee: Double = 0.0,
-    
+
     /** Costs for large texture uploads (array of costs by size tier) */
     val largeTextureUploadCost: List<Int> = listOf(10),
-    
+
     /** Estate access token for premium estates */
     val estateAccessToken: String = ""
 ) {
     companion object {
         private const val TAG = "AccountBenefits"
-        
+
         /**
          * Parse account benefits from login response map.
          */
@@ -123,7 +123,7 @@ data class AccountBenefits(
                 Log.d(TAG, "No account benefits in response, using defaults")
                 return AccountBenefits()
             }
-            
+
             return try {
                 AccountBenefits(
                     textureUploadCost = parseIntOrDefault(map["texture_upload_cost"], 10),
@@ -165,7 +165,7 @@ data class AccountBenefits(
                 AccountBenefits()
             }
         }
-        
+
         private fun parseIntOrDefault(value: Any?, default: Int): Int {
             return when (value) {
                 is Number -> value.toInt()
@@ -173,7 +173,7 @@ data class AccountBenefits(
                 else -> default
             }
         }
-        
+
         private fun parseBoolOrDefault(value: Any?, default: Boolean): Boolean {
             return when (value) {
                 is Boolean -> value
@@ -182,7 +182,7 @@ data class AccountBenefits(
                 else -> default
             }
         }
-        
+
         private fun parseDoubleOrDefault(value: Any?, default: Double): Double {
             return when (value) {
                 is Number -> value.toDouble()
@@ -190,15 +190,15 @@ data class AccountBenefits(
                 else -> default
             }
         }
-        
+
         private fun parseStringOrDefault(value: Any?, default: String): String {
             return value?.toString() ?: default
         }
-        
+
         @Suppress("UNCHECKED_CAST")
         private fun parseIntListOrDefault(value: Any?, default: List<Int>): List<Int> {
             return when (value) {
-                is List<*> -> value.mapNotNull { 
+                is List<*> -> value.mapNotNull {
                     when (it) {
                         is Number -> it.toInt()
                         is String -> it.toIntOrNull()
@@ -209,12 +209,12 @@ data class AccountBenefits(
             }
         }
     }
-    
+
     /**
      * Check if this is a premium account.
      */
     val isPremium: Boolean get() = premiumAccess || stipend > 0 || mainlandTier > 0
-    
+
     /**
      * Get a human-readable account type.
      */
@@ -223,7 +223,7 @@ data class AccountBenefits(
         premiumAccess -> "Premium"
         else -> "Basic"
     }
-    
+
     override fun toString(): String {
         return "AccountBenefits(type=$accountType, groups=$groupMembershipLimit, attachments=$attachmentLimit)"
     }

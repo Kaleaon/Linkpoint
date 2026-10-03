@@ -1,3 +1,6 @@
+default_stages: [pre-commit]
+exclude: '^(secondlife_decompiled|lumiya_decompiled_source|lumiya_extracted|android-sdk|disassembled-apps|Gauss|vendor)/'
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0

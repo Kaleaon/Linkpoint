@@ -6,13 +6,13 @@
 <full-backup-content>
     <!-- Exclude sensitive preferences (credentials, tokens) -->
     <exclude domain="sharedpref" path="." />
-    
+
     <!-- Exclude cache files -->
     <exclude domain="cache" path="." />
-    
+
     <!-- Exclude database files that may contain sensitive data -->
     <exclude domain="database" path="." />
-    
+
     <!-- Exclude external files -->
     <exclude domain="external" path="." />
 </full-backup-content>

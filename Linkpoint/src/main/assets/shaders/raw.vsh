@@ -9,4 +9,3 @@ void main() {
     vTexCoordOut = (vTextureTransformMatrix * vec4 (vTexCoord.x, vTexCoord.y, 0.0, 0.0)).xy;
     gl_Position = uMVPMatrix * vPosition;
 }
-

@@ -43,4 +43,3 @@ jobs:
             Linkpoint/build/reports/lint-results-*.sarif
             Linkpoint/lint-baseline.xml
           if-no-files-found: warn
-

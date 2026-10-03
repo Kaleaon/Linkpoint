@@ -1,5 +1,5 @@
 /*
- * Simple Viewer Demo - Kotlin implementation 
+ * Simple Viewer Demo - Kotlin implementation
  */
 
 package lindenlab.llsd.viewer.secondlife.demo
@@ -70,10 +70,10 @@ fun main() = runBlocking {
         val renderingSystem = viewer.getRenderingSystem()
         if (renderingSystem != null) {
             println("✓ Current quality: ${renderingSystem.qualitySettings.overallQuality}")
-            
+
             renderingSystem.applyUltraLowPreset()
             println("✓ Applied Ultra Low preset: ${renderingSystem.qualitySettings.overallQuality}")
-            
+
             renderingSystem.applyHighPreset()
             println("✓ Applied High preset: ${renderingSystem.qualitySettings.overallQuality}")
         }

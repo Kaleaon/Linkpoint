@@ -22,16 +22,16 @@ import java.util.Objects;
  * like gimbal lock that can occur with Euler angles.
  */
 public class Quaternion {
-    
+
     public static final Quaternion IDENTITY = new Quaternion(0.0, 0.0, 0.0, 1.0);
-    
+
     private static final double EPSILON = 1e-6;
-    
+
     public final double x;
     public final double y;
     public final double z;
     public final double w;
-    
+
     /**
      * Constructs a new quaternion with the specified components.
      *
@@ -46,7 +46,7 @@ public class Quaternion {
         this.z = z;
         this.w = w;
     }
-    
+
     /**
      * Constructs a new quaternion from a 4-element array in [x, y, z, w] order.
      *
@@ -62,7 +62,7 @@ public class Quaternion {
         this.z = components[2];
         this.w = components[3];
     }
-    
+
     /**
      * Constructs a new quaternion as a copy of another quaternion.
      *
@@ -74,7 +74,7 @@ public class Quaternion {
         this.z = other.z;
         this.w = other.w;
     }
-    
+
     /**
      * Creates a new quaternion representing a rotation around a specified axis.
      *
@@ -86,7 +86,7 @@ public class Quaternion {
         Vector3 normalizedAxis = axis.normalize();
         double halfAngle = angle * 0.5;
         double sinHalf = Math.sin(halfAngle);
-        
+
         return new Quaternion(
             normalizedAxis.x * sinHalf,
             normalizedAxis.y * sinHalf,
@@ -94,7 +94,7 @@ public class Quaternion {
             Math.cos(halfAngle)
         );
     }
-    
+
     /**
      * Creates a new quaternion from a set of Euler angles.
      * <p>
@@ -112,7 +112,7 @@ public class Quaternion {
         double sy = Math.sin(yaw * 0.5);
         double cr = Math.cos(roll * 0.5);
         double sr = Math.sin(roll * 0.5);
-        
+
         return new Quaternion(
             sr * cp * cy - cr * sp * sy,
             cr * sp * cy + sr * cp * sy,
@@ -120,7 +120,7 @@ public class Quaternion {
             cr * cp * cy + sr * sp * sy
         );
     }
-    
+
     /**
      * Creates a new quaternion from a 3x3 rotation matrix.
      *
@@ -132,9 +132,9 @@ public class Quaternion {
         if (matrix.length != 3 || matrix[0].length != 3) {
             throw new IllegalArgumentException("Matrix must be 3x3");
         }
-        
+
         double trace = matrix[0][0] + matrix[1][1] + matrix[2][2];
-        
+
         if (trace > 0) {
             double s = Math.sqrt(trace + 1.0) * 2; // s = 4 * qw
             return new Quaternion(
@@ -169,7 +169,7 @@ public class Quaternion {
             );
         }
     }
-    
+
     /**
      * Multiplies this quaternion by another quaternion.
      * <p>
@@ -187,7 +187,7 @@ public class Quaternion {
             w * other.w - x * other.x - y * other.y - z * other.z
         );
     }
-    
+
     /**
      * Adds another quaternion to this one, component-wise.
      *
@@ -197,7 +197,7 @@ public class Quaternion {
     public Quaternion add(Quaternion other) {
         return new Quaternion(x + other.x, y + other.y, z + other.z, w + other.w);
     }
-    
+
     /**
      * Subtracts another quaternion from this one, component-wise.
      *
@@ -207,7 +207,7 @@ public class Quaternion {
     public Quaternion subtract(Quaternion other) {
         return new Quaternion(x - other.x, y - other.y, z - other.z, w - other.w);
     }
-    
+
     /**
      * Scales all components of this quaternion by a scalar value.
      *
@@ -217,7 +217,7 @@ public class Quaternion {
     public Quaternion scale(double scalar) {
         return new Quaternion(x * scalar, y * scalar, z * scalar, w * scalar);
     }
-    
+
     /**
      * Calculates the squared norm (magnitude) of the quaternion.
      * <p>
@@ -228,7 +228,7 @@ public class Quaternion {
     public double normSquared() {
         return x * x + y * y + z * z + w * w;
     }
-    
+
     /**
      * Calculates the norm (or magnitude or length) of the quaternion.
      *
@@ -237,7 +237,7 @@ public class Quaternion {
     public double norm() {
         return Math.sqrt(normSquared());
     }
-    
+
     /**
      * Normalizes the quaternion to have a magnitude of 1.
      * <p>
@@ -254,7 +254,7 @@ public class Quaternion {
         }
         return new Quaternion(x / n, y / n, z / n, w / n);
     }
-    
+
     /**
      * Calculates the conjugate of this quaternion.
      * <p>
@@ -266,7 +266,7 @@ public class Quaternion {
     public Quaternion conjugate() {
         return new Quaternion(-x, -y, -z, w);
     }
-    
+
     /**
      * Calculates the inverse of this quaternion.
      * <p>
@@ -281,7 +281,7 @@ public class Quaternion {
         }
         return conjugate().scale(1.0 / normSq);
     }
-    
+
     /**
      * Rotates a 3D vector by this quaternion.
      *
@@ -291,13 +291,13 @@ public class Quaternion {
     public Vector3 rotate(Vector3 vector) {
         // Convert vector to quaternion
         Quaternion vecQ = new Quaternion(vector.x, vector.y, vector.z, 0.0);
-        
+
         // Perform rotation: q * v * q*
         Quaternion result = multiply(vecQ).multiply(conjugate());
-        
+
         return new Vector3(result.x, result.y, result.z);
     }
-    
+
     /**
      * Calculates the dot product of this quaternion with another.
      *
@@ -307,7 +307,7 @@ public class Quaternion {
     public double dot(Quaternion other) {
         return x * other.x + y * other.y + z * other.z + w * other.w;
     }
-    
+
     /**
      * Performs spherical linear interpolation (Slerp) between this quaternion
      * and a target quaternion.
@@ -321,32 +321,32 @@ public class Quaternion {
      */
     public Quaternion slerp(Quaternion target, double t) {
         t = Math.max(0.0, Math.min(1.0, t)); // Clamp t to [0,1]
-        
+
         Quaternion from = normalize();
         Quaternion to = target.normalize();
-        
+
         double dot = from.dot(to);
-        
+
         // If quaternions are very close, use linear interpolation
         if (Math.abs(dot) > 1.0 - EPSILON) {
             return from.add(to.subtract(from).scale(t)).normalize();
         }
-        
+
         // If dot product is negative, slerp won't take the shorter path
         if (dot < 0.0) {
             to = to.scale(-1.0);
             dot = -dot;
         }
-        
+
         double theta = Math.acos(Math.abs(dot));
         double sinTheta = Math.sin(theta);
-        
+
         double a = Math.sin((1.0 - t) * theta) / sinTheta;
         double b = Math.sin(t * theta) / sinTheta;
-        
+
         return from.scale(a).add(to.scale(b));
     }
-    
+
     /**
      * Performs normalized linear interpolation (Nlerp) between this quaternion
      * and a target quaternion.
@@ -361,17 +361,17 @@ public class Quaternion {
      */
     public Quaternion lerp(Quaternion target, double t) {
         t = Math.max(0.0, Math.min(1.0, t)); // Clamp t to [0,1]
-        
+
         Quaternion to = target;
-        
+
         // Take shorter path
         if (dot(target) < 0.0) {
             to = target.scale(-1.0);
         }
-        
+
         return add(to.subtract(this).scale(t)).normalize();
     }
-    
+
     /**
      * Converts this quaternion into its axis-angle representation.
      *
@@ -379,19 +379,19 @@ public class Quaternion {
      */
     public AxisAngle toAxisAngle() {
         Quaternion q = normalize();
-        
+
         double sinHalfAngle = Math.sqrt(q.x * q.x + q.y * q.y + q.z * q.z);
-        
+
         if (sinHalfAngle < EPSILON) {
             return new AxisAngle(Vector3.X_AXIS, 0.0);
         }
-        
+
         Vector3 axis = new Vector3(q.x / sinHalfAngle, q.y / sinHalfAngle, q.z / sinHalfAngle);
         double angle = 2.0 * Math.atan2(sinHalfAngle, Math.abs(q.w));
-        
+
         return new AxisAngle(axis, angle);
     }
-    
+
     /**
      * Converts this quaternion into its Euler angle representation (pitch, yaw, roll).
      * <p>
@@ -402,12 +402,12 @@ public class Quaternion {
      */
     public EulerAngles toEulerAngles() {
         Quaternion q = normalize();
-        
+
         // Roll (x-axis rotation)
         double sinr_cosp = 2 * (q.w * q.x + q.y * q.z);
         double cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y);
         double roll = Math.atan2(sinr_cosp, cosr_cosp);
-        
+
         // Pitch (y-axis rotation)
         double sinp = 2 * (q.w * q.y - q.z * q.x);
         double pitch;
@@ -416,15 +416,15 @@ public class Quaternion {
         } else {
             pitch = Math.asin(sinp);
         }
-        
+
         // Yaw (z-axis rotation)
         double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
         double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
         double yaw = Math.atan2(siny_cosp, cosy_cosp);
-        
+
         return new EulerAngles(pitch, yaw, roll);
     }
-    
+
     /**
      * Checks if this quaternion is normalized (i.e., has a magnitude of approximately 1).
      *
@@ -433,17 +433,17 @@ public class Quaternion {
     public boolean isNormalized() {
         return Math.abs(norm() - 1.0) < EPSILON;
     }
-    
+
     /**
      * Checks if this quaternion represents an identity rotation (i.e., no rotation).
      *
      * @return {@code true} if it is the identity quaternion, {@code false} otherwise.
      */
     public boolean isIdentity() {
-        return Math.abs(x) < EPSILON && Math.abs(y) < EPSILON && 
+        return Math.abs(x) < EPSILON && Math.abs(y) < EPSILON &&
                Math.abs(z) < EPSILON && Math.abs(Math.abs(w) - 1.0) < EPSILON;
     }
-    
+
     /**
      * Converts this quaternion to a 4-element array of its components.
      *
@@ -452,7 +452,7 @@ public class Quaternion {
     public double[] toArray() {
         return new double[]{x, y, z, w};
     }
-    
+
     /**
      * Converts this quaternion into an equivalent 3x3 rotation matrix.
      *
@@ -460,7 +460,7 @@ public class Quaternion {
      */
     public double[][] toMatrix3() {
         Quaternion q = normalize();
-        
+
         double xx = q.x * q.x;
         double xy = q.x * q.y;
         double xz = q.x * q.z;
@@ -470,14 +470,14 @@ public class Quaternion {
         double yw = q.y * q.w;
         double zz = q.z * q.z;
         double zw = q.z * q.w;
-        
+
         return new double[][]{
             {1 - 2 * (yy + zz), 2 * (xy - zw), 2 * (xz + yw)},
             {2 * (xy + zw), 1 - 2 * (xx + zz), 2 * (yz - xw)},
             {2 * (xz - yw), 2 * (yz + xw), 1 - 2 * (xx + yy)}
         };
     }
-    
+
     /**
      * Parses a quaternion from a string of comma-separated values.
      *
@@ -489,12 +489,12 @@ public class Quaternion {
         if (str == null || str.trim().isEmpty()) {
             return IDENTITY;
         }
-        
+
         String[] parts = str.split(",");
         if (parts.length != 4) {
             throw new IllegalArgumentException("Quaternion string must have 4 components: " + str);
         }
-        
+
         try {
             return new Quaternion(
                 Double.parseDouble(parts[0].trim()),
@@ -506,20 +506,20 @@ public class Quaternion {
             throw new IllegalArgumentException("Invalid Quaternion string: " + str, e);
         }
     }
-    
+
     /**
      * A simple container class to hold an axis-angle representation of a rotation.
      */
     public static class AxisAngle {
         public final Vector3 axis;
         public final double angle;
-        
+
         public AxisAngle(Vector3 axis, double angle) {
             this.axis = axis;
             this.angle = angle;
         }
     }
-    
+
     /**
      * A simple container class to hold an Euler angle representation of a rotation.
      */
@@ -530,14 +530,14 @@ public class Quaternion {
         public final double yaw;
         /** Rotation around the z-axis. */
         public final double roll;
-        
+
         public EulerAngles(double pitch, double yaw, double roll) {
             this.pitch = pitch;
             this.yaw = yaw;
             this.roll = roll;
         }
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -548,7 +548,7 @@ public class Quaternion {
                Math.abs(that.z - z) < EPSILON &&
                Math.abs(that.w - w) < EPSILON;
     }
-    
+
     @Override
     public int hashCode() {
         return Objects.hash(
@@ -558,12 +558,12 @@ public class Quaternion {
             Math.round(w / EPSILON)
         );
     }
-    
+
     @Override
     public String toString() {
         return String.format("Quaternion(%.6f, %.6f, %.6f, %.6f)", x, y, z, w);
     }
-    
+
     /**
      * Returns a compact string representation of the quaternion, formatted to two decimal places.
      *

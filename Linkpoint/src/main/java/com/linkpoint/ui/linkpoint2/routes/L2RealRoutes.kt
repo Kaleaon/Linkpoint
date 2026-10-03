@@ -1179,4 +1179,3 @@ fun L2RadarRoute(
         modifier = modifier,
     )
 }
-

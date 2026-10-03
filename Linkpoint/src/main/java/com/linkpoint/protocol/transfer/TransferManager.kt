@@ -14,14 +14,14 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Transfer Manager - Handles asset transfers via UDP protocol.
- * 
+ *
  * Based on the reference viewer's SLTransferManager.java
- * 
+ *
  * Transfer types:
  * - Asset transfers (textures, animations, sounds, etc.)
  * - Inventory item transfers
  * - Notecard/script content transfers
- * 
+ *
  * Transfer flow:
  * 1. Client sends TransferRequest
  * 2. Server sends TransferInfo with status and size
@@ -35,16 +35,16 @@ class TransferManager(
 ) {
     companion object {
         private const val TAG = "TransferManager"
-        
+
         // Transfer channel types
         const val CHANNEL_ASSET = 2
         const val CHANNEL_MISC = 1
-        
+
         // Transfer source types
         const val SOURCE_ASSET = 2
         const val SOURCE_SIM_INV_ITEM = 3
         const val SOURCE_SIM_ESTATE = 4
-        
+
         // Transfer status codes
         const val STATUS_OK = 0
         const val STATUS_DONE = 1
@@ -54,32 +54,32 @@ class TransferManager(
         const val STATUS_UNKNOWN_SOURCE = -2
         const val STATUS_INSUFFICIENT_PERMISSIONS = -3
         const val STATUS_ASSET_NOT_FOUND = -4
-        
+
         // Default priority for transfers
         const val DEFAULT_PRIORITY = 10000.0f
     }
-    
+
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    
+
     // Active transfers by transfer UUID
     private val activeTransfers = ConcurrentHashMap<UUID, Transfer>()
-    
+
     // Mapping of asset keys to transfer UUIDs
     private val assetToTransfer = ConcurrentHashMap<AssetKey, UUID>()
-    
+
     // Pending callbacks for transfer completion
     private val transferCallbacks = ConcurrentHashMap<UUID, TransferCallback>()
-    
+
     // Transfer statistics
     private val _stats = MutableStateFlow(TransferStats())
     val stats: StateFlow<TransferStats> = _stats
-    
+
     // Pending completions for suspend functions
     private val pendingCompletions = ConcurrentHashMap<UUID, CompletableDeferred<ByteArray?>>()
-    
+
     /**
      * Fetch an asset synchronously (suspend function).
-     * 
+     *
      * @param assetId The UUID of the asset
      * @param assetType The asset type code
      * @return The asset data or null if failed
@@ -88,7 +88,7 @@ class TransferManager(
         return withContext(Dispatchers.IO) {
             val deferred = CompletableDeferred<ByteArray?>()
             val type = AssetType.fromCode(assetType) ?: AssetType.OBJECT
-            
+
             val transferId = requestAssetTransfer(
                 assetId = assetId,
                 assetType = type,
@@ -99,9 +99,9 @@ class TransferManager(
                     }
                 }
             )
-            
+
             pendingCompletions[transferId] = deferred
-            
+
             try {
                 // Wait with timeout
                 withTimeout(30_000) {
@@ -115,10 +115,10 @@ class TransferManager(
             }
         }
     }
-    
+
     /**
      * Request an asset transfer.
-     * 
+     *
      * @param assetId The UUID of the asset to transfer
      * @param assetType The type of asset (texture, animation, etc.)
      * @param callback Callback for transfer completion
@@ -131,14 +131,14 @@ class TransferManager(
         callback: TransferCallback? = null
     ): UUID {
         val assetKey = AssetKey(assetId, assetType)
-        
+
         // Check if already transferring
         assetToTransfer[assetKey]?.let { existingId ->
             Log.d(TAG, "Asset $assetId already being transferred: $existingId")
             callback?.let { transferCallbacks[existingId] = it }
             return existingId
         }
-        
+
         val transfer = Transfer(
             transferId = UUID.randomUUID(),
             assetKey = assetKey,
@@ -148,22 +148,22 @@ class TransferManager(
             agentId = agentId,
             sessionId = sessionId
         )
-        
+
         activeTransfers[transfer.transferId] = transfer
         assetToTransfer[assetKey] = transfer.transferId
         callback?.let { transferCallbacks[transfer.transferId] = it }
-        
+
         Log.d(TAG, "Starting asset transfer: ${assetKey.assetId} type=${assetKey.assetType}")
-        
+
         scope.launch {
             sendTransferRequest(transfer)
         }
-        
+
         updateStats { it.copy(activeTransfers = activeTransfers.size) }
-        
+
         return transfer.transferId
     }
-    
+
     /**
      * Request an inventory item asset transfer.
      */
@@ -176,7 +176,7 @@ class TransferManager(
         callback: TransferCallback? = null
     ): UUID {
         val assetKey = AssetKey(assetId, assetType)
-        
+
         val transfer = Transfer(
             transferId = UUID.randomUUID(),
             assetKey = assetKey,
@@ -189,62 +189,62 @@ class TransferManager(
             ownerId = ownerId,
             taskId = taskId
         )
-        
+
         activeTransfers[transfer.transferId] = transfer
         assetToTransfer[assetKey] = transfer.transferId
         callback?.let { transferCallbacks[transfer.transferId] = it }
-        
+
         Log.d(TAG, "Starting inventory item transfer: itemId=$itemId assetId=$assetId")
-        
+
         scope.launch {
             sendTransferRequest(transfer)
         }
-        
+
         return transfer.transferId
     }
-    
+
     /**
      * Cancel an active transfer.
      */
     fun cancelTransfer(transferId: UUID) {
         val transfer = activeTransfers.remove(transferId) ?: return
-        
+
         assetToTransfer.remove(transfer.assetKey)
         transferCallbacks.remove(transferId)
-        
+
         Log.d(TAG, "Cancelling transfer: $transferId")
-        
+
         scope.launch {
             sendTransferAbort(transfer)
         }
-        
+
         updateStats { it.copy(activeTransfers = activeTransfers.size, cancelledTransfers = it.cancelledTransfers + 1) }
     }
-    
+
     /**
      * Handle TransferInfo message from server.
      */
     fun handleTransferInfo(payload: ByteArray) {
         try {
             val buffer = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             val transferId = PacketCodec.fromBuffer(buffer).readUuid()
             val channelType = buffer.int
             val targetType = buffer.int
             val status = buffer.int
             val size = buffer.int
-            
+
             val transfer = activeTransfers[transferId]
             if (transfer == null) {
                 Log.w(TAG, "Received TransferInfo for unknown transfer: $transferId")
                 return
             }
-            
+
             Log.d(TAG, "TransferInfo: id=$transferId status=$status size=$size")
-            
+
             transfer.status = status
             transfer.expectedSize = size
-            
+
             if (status != STATUS_OK && status != STATUS_DONE) {
                 // Transfer failed
                 completeTransfer(transfer, TransferResult.Error(status, getStatusMessage(status)))
@@ -253,7 +253,7 @@ class TransferManager(
             Log.e(TAG, "Error parsing TransferInfo", e)
         }
     }
-    
+
     /**
      * Handle TransferInfo message from parsed data.
      */
@@ -263,49 +263,49 @@ class TransferManager(
             Log.w(TAG, "Received TransferInfo for unknown transfer: ${data.transferID}")
             return
         }
-        
+
         Log.d(TAG, "TransferInfo: id=${data.transferID} status=${data.status} size=${data.size}")
-        
+
         transfer.status = data.status
         transfer.expectedSize = data.size
-        
+
         if (data.status != STATUS_OK && data.status != STATUS_DONE) {
             // Transfer failed
             completeTransfer(transfer, TransferResult.Error(data.status, getStatusMessage(data.status)))
         }
     }
-    
+
     /**
      * Handle TransferPacket message from server.
      */
     fun handleTransferPacket(payload: ByteArray) {
         try {
             val buffer = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             val transferId = PacketCodec.fromBuffer(buffer).readUuid()
             val channelType = buffer.int
             val packetNum = buffer.int
             val status = buffer.int
-            
+
             // Read variable-length data
             val dataLen = buffer.short.toInt() and 0xFFFF
             val data = ByteArray(dataLen)
             buffer.get(data)
-            
+
             val transfer = activeTransfers[transferId]
             if (transfer == null) {
                 Log.w(TAG, "Received TransferPacket for unknown transfer: $transferId")
                 return
             }
-            
+
             Log.v(TAG, "TransferPacket: id=$transferId packet=$packetNum status=$status size=${data.size}")
-            
+
             // Add data to transfer
             transfer.addPacket(packetNum, data)
             transfer.status = status
-            
+
             // Check if transfer is complete
-            if (status == STATUS_DONE || 
+            if (status == STATUS_DONE ||
                 (transfer.expectedSize > 0 && transfer.receivedSize >= transfer.expectedSize)) {
                 completeTransfer(transfer, TransferResult.Success(transfer.assembleData()))
             } else if (status != STATUS_OK) {
@@ -315,7 +315,7 @@ class TransferManager(
             Log.e(TAG, "Error parsing TransferPacket", e)
         }
     }
-    
+
     /**
      * Handle TransferPacket message from parsed data.
      */
@@ -325,42 +325,42 @@ class TransferManager(
             Log.w(TAG, "Received TransferPacket for unknown transfer: ${data.transferID}")
             return
         }
-        
+
         Log.v(TAG, "TransferPacket: id=${data.transferID} packet=${data.packet} status=${data.status} size=${data.data.size}")
-        
+
         // Add data to transfer
         transfer.addPacket(data.packet, data.data)
         transfer.status = data.status
-        
+
         // Check if transfer is complete
-        if (data.status == STATUS_DONE || 
+        if (data.status == STATUS_DONE ||
             (transfer.expectedSize > 0 && transfer.receivedSize >= transfer.expectedSize)) {
             completeTransfer(transfer, TransferResult.Success(transfer.assembleData()))
         } else if (data.status != STATUS_OK) {
             completeTransfer(transfer, TransferResult.Error(data.status, getStatusMessage(data.status)))
         }
     }
-    
+
     /**
      * Send TransferRequest message.
      */
     private suspend fun sendTransferRequest(transfer: Transfer) {
         val params = buildTransferParams(transfer)
-        
+
         // Build the message
         // Header: FFFF 00 99 (high frequency, ID 0x99)
         val payload = ByteBuffer.allocate(34 + params.size).order(ByteOrder.LITTLE_ENDIAN)
-        
+
         // TransferInfo block
         PacketCodec.fromBuffer(payload).writeUuid(transfer.transferId)
         payload.putInt(transfer.channelType)
         payload.putInt(transfer.sourceType)
         payload.putFloat(transfer.priority)
-        
+
         // Variable-length params
         payload.putShort(params.size.toShort())
         payload.put(params)
-        
+
         try {
             udpConnection.sendPacket(MessageIdRegistry.TRANSFER_REQUEST, payload.array(), reliable = true)
             Log.d(TAG, "Sent TransferRequest for ${transfer.assetKey.assetId}")
@@ -369,16 +369,16 @@ class TransferManager(
             completeTransfer(transfer, TransferResult.Error(STATUS_ERROR, "Failed to send request: ${e.message}"))
         }
     }
-    
+
     /**
      * Send TransferAbort message.
      */
     private suspend fun sendTransferAbort(transfer: Transfer) {
         val payload = ByteBuffer.allocate(20).order(ByteOrder.LITTLE_ENDIAN)
-        
+
         PacketCodec.fromBuffer(payload).writeUuid(transfer.transferId)
         payload.putInt(transfer.channelType)
-        
+
         try {
             udpConnection.sendPacket(MessageIdRegistry.TRANSFER_ABORT, payload.array(), reliable = true)
             Log.d(TAG, "Sent TransferAbort for ${transfer.transferId}")
@@ -386,7 +386,7 @@ class TransferManager(
             Log.e(TAG, "Failed to send TransferAbort", e)
         }
     }
-    
+
     /**
      * Build transfer parameters based on source type.
      */
@@ -419,16 +419,16 @@ class TransferManager(
             else -> ByteArray(0)
         }
     }
-    
+
     /**
      * Complete a transfer and notify callback.
      */
     private fun completeTransfer(transfer: Transfer, result: TransferResult) {
         activeTransfers.remove(transfer.transferId)
         assetToTransfer.remove(transfer.assetKey)
-        
+
         val callback = transferCallbacks.remove(transfer.transferId)
-        
+
         when (result) {
             is TransferResult.Success -> {
                 Log.i(TAG, "Transfer completed: ${transfer.assetKey.assetId} size=${result.data.size}")
@@ -446,10 +446,10 @@ class TransferManager(
                 )}
             }
         }
-        
+
         callback?.onComplete(transfer.assetKey, result)
     }
-    
+
     private fun getStatusMessage(status: Int): String {
         return when (status) {
             STATUS_OK -> "OK"
@@ -463,11 +463,11 @@ class TransferManager(
             else -> "Unknown status: $status"
         }
     }
-    
+
     private inline fun updateStats(update: (TransferStats) -> TransferStats) {
         _stats.value = update(_stats.value)
     }
-    
+
     /**
      * Get diagnostics information.
      */
@@ -478,16 +478,16 @@ class TransferManager(
             stats = _stats.value
         )
     }
-    
+
     /**
      * Shutdown the transfer manager.
      */
     fun shutdown() {
         Log.i(TAG, "Shutting down TransferManager")
-        
+
         // Cancel all active transfers
         activeTransfers.keys.toList().forEach { cancelTransfer(it) }
-        
+
         scope.cancel()
     }
 }
@@ -535,7 +535,7 @@ enum class AssetType(val code: Int) {
     MESH(49),
     SETTINGS(56),
     MATERIAL(57);
-    
+
     companion object {
         fun fromCode(code: Int): AssetType? = values().find { it.code == code }
     }
@@ -559,29 +559,29 @@ internal class Transfer(
     var status: Int = TransferManager.STATUS_OK
     var expectedSize: Int = 0
     var receivedSize: Int = 0
-    
+
     private val packets = mutableMapOf<Int, ByteArray>()
-    
+
     fun addPacket(packetNum: Int, data: ByteArray) {
         packets[packetNum] = data
         receivedSize += data.size
     }
-    
+
     fun assembleData(): ByteArray {
         if (packets.isEmpty()) return ByteArray(0)
-        
+
         val totalSize = packets.values.sumOf { it.size }
         val result = ByteArray(totalSize)
         var offset = 0
-        
+
         // Assemble packets in order
         packets.keys.sorted().forEach { packetNum ->
-            val data = packets[packetNum] 
+            val data = packets[packetNum]
                 ?: throw IllegalStateException("Packet $packetNum not found in transfer data")
             System.arraycopy(data, 0, result, offset, data.size)
             offset += data.size
         }
-        
+
         return result
     }
 }
@@ -596,10 +596,10 @@ sealed class TransferResult {
             if (other !is Success) return false
             return data.contentEquals(other.data)
         }
-        
+
         override fun hashCode(): Int = data.contentHashCode()
     }
-    
+
     data class Error(val status: Int, val message: String) : TransferResult()
 }
 

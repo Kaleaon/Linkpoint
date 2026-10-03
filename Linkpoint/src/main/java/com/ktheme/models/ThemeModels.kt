@@ -76,4 +76,3 @@ data class Theme(
     val colorScheme: ColorScheme,
     val layoutStructure: LayoutStructure = LayoutStructure.MATERIAL3
 )
-

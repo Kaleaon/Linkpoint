@@ -58,7 +58,7 @@ This directory contains Java implementations of all major libraries used by the 
 ### Platform Abstraction
 - **`platform/`** - Platform-specific functionality
   - `windows/` - Windows-specific features
-  - `linux/` - Linux-specific features  
+  - `linux/` - Linux-specific features
   - `macos/` - macOS-specific features
 
 ## Implementation Status

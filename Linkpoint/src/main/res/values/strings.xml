@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">Linkpoint</string>
     <string name="app_description">Second Life Viewer for Android and XR</string>
-    
+
     <!-- Login -->
     <string name="login_title">Login</string>
     <string name="first_name">First Name</string>
@@ -14,7 +14,7 @@
     <string name="login">Login</string>
     <string name="logging_in">Logging in…</string>
     <string name="login_failed">Login Failed</string>
-    
+
     <!-- Navigation -->
     <string name="nav_chat">Chat</string>
     <string name="nav_inventory">Inventory</string>
@@ -24,13 +24,13 @@
     <string name="nav_xr_mode">XR Mode</string>
     <string name="nav_logout">Logout</string>
     <string name="cache_management">Cache Management</string>
-    
+
     <!-- Bottom Navigation -->
     <string name="chat">Chat</string>
     <string name="inventory">Inventory</string>
     <string name="minimap">Minimap</string>
     <string name="settings">Settings</string>
-    
+
     <!-- Chat -->
     <string name="type_message">Type a message…</string>
     <string name="send">Send</string>
@@ -38,7 +38,7 @@
     <string name="tab_ims">IMs</string>
     <string name="tab_groups">Groups</string>
     <string name="tab_nearby">Nearby</string>
-    
+
     <!-- Inventory -->
     <string name="inventory_empty">This folder is empty</string>
     <string name="inventory_root">My Inventory</string>
@@ -68,7 +68,7 @@
     <string name="item_id">Item ID</string>
     <string name="parent_id">Parent ID</string>
     <string name="flags">Flags</string>
-    
+
     <!-- Settings -->
     <string name="settings_orientation_apply_hint">Screen orientation will apply when you return to the world view</string>
     <string name="settings_secondary_renderer_enabled">Secondary renderer enabled. Reopen world view to apply.</string>
@@ -92,11 +92,11 @@
     <string name="settings_audio">Audio</string>
     <string name="settings_network">Network</string>
     <string name="settings_xr">XR/VR</string>
-    
+
     <!-- XR -->
     <string name="xr_not_available">XR mode is not available on this device</string>
     <string name="xr_mode_started">Entering XR mode…</string>
-    
+
     <!-- General -->
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
@@ -105,7 +105,7 @@
     <string name="loading">Loading…</string>
     <string name="error">Error</string>
     <string name="unknown_region">Unknown Region</string>
-    
+
     <!-- Debug -->
     <string name="capture_debug_report">Capture Debug Report</string>
 
@@ -235,7 +235,7 @@
     <string name="set_as_active_group">Set as Active Group</string>
     <string name="gestures_not_available">Gestures not available</string>
     <string name="no_active_gestures">No active gestures</string>
-    
+
     <!-- Teleport -->
     <string name="teleport_not_available">Teleport not available</string>
     <string name="teleporting_home">Teleporting home…</string>
@@ -246,14 +246,14 @@
     <string name="accept_teleport">Accept Teleport</string>
     <string name="decline_teleport">Decline Teleport</string>
     <string name="teleport_offer_from">Teleport offer from %s</string>
-    
+
     <!-- HUD -->
     <string name="show_huds">Show HUDs</string>
     <string name="hide_huds">Hide HUDs</string>
     <string name="huds_hidden">HUDs hidden</string>
     <string name="huds_visible">HUDs visible</string>
     <string name="no_huds_attached">No HUDs attached</string>
-    
+
     <!-- Start Location Selection -->
     <string name="select_start_location">Select Start Location</string>
     <string name="search_locations">Search locations…</string>
@@ -269,7 +269,7 @@
     <string name="select">Select</string>
     <string name="custom_location">Custom Location</string>
     <string name="start_at">Start at: %s</string>
-    
+
     <!-- Avatar Selection -->
     <string name="select_avatar">Select Avatar</string>
     <string name="avatar_type">Avatar Type</string>
@@ -282,7 +282,7 @@
     <string name="vehicle_object">Vehicle/Object</string>
     <string name="keep_current">Keep Current</string>
     <string name="saved_avatars">Saved Avatars</string>
-    
+
     <!-- Destination Guide -->
     <string name="destination_guide">Destination Guide</string>
     <string name="newcomer_friendly">Newcomer Friendly</string>

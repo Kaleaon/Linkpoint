@@ -85,13 +85,13 @@ public class LLVector2 {
 public class LLVector3 {
     public static final LLVector3 Zero = new LLVector3(0.0f, 0.0f, 0.0f);
     public float x, y, z;
-    
+
     // Cross product for normal calculations
     public static LLVector3 cross(LLVector3 a, LLVector3 b);
-    
+
     // Linear interpolation for animations
     public static LLVector3 lerp(LLVector3 start, LLVector3 end, float t);
-    
+
     // Network data parsing
     public static LLVector3 parseFloatVec(ByteBuffer buffer);
     public static LLVector3 parseU16Vec(ByteBuffer buffer, ...);
@@ -110,11 +110,11 @@ public class LLVector4 {
 
 public class LLQuaternion {
     public float x, y, z, w;
-    
+
     // Rotation matrix conversion
     public float[] getMatrix();
     public float[] getInverseMatrix();
-    
+
     // Euler angle conversion
     public void setFromEulerAngles(float roll, float pitch, float yaw);
 }
@@ -124,10 +124,10 @@ public class LLQuaternion {
 ```java
 public class LLSDUUID extends LLSDNode {
     private UUID value;
-    
+
     // String-based UUID construction
     public LLSDUUID(String uuidString);
-    
+
     // Binary serialization
     public void serializeXML(XmlSerializer serializer);
     public void serializeBinary(DataOutputStream stream);
@@ -153,7 +153,7 @@ public class SLAgentCircuit extends SLThreadingCircuit {
     // Main protocol handler implementing Second Life's circuit system
     // Handles reliable UDP communication
     // Message acknowledgment and retransmission
-    
+
     public void sendMessage(SLMessage message);
     public void handleMessage(SLMessage message);
 }
@@ -169,7 +169,7 @@ public class SLConnection {
 ##### Avatar Management Messages
 ```java
 AvatarAppearance.java          - Avatar visual appearance
-AvatarAnimation.java           - Animation state changes  
+AvatarAnimation.java           - Animation state changes
 AgentMovementComplete.java     - Movement acknowledgment
 AgentPause.java               - Pause agent updates
 AgentResume.java              - Resume agent updates
@@ -235,7 +235,7 @@ public class SLCaps {
     // HTTP-based capabilities for modern Second Life features
     // RESTful API endpoints for asset upload/download
     // Event queue management
-    
+
     public String getCapabilityURL(String capability);
     public void requestCapability(String capability, ...);
 }
@@ -244,7 +244,7 @@ public class SLCapEventQueue {
     // Long-polling HTTP event queue
     // Real-time event delivery from simulator
     // Handles connection failures and reconnection
-    
+
     public interface ICapsEventHandler {
         void handleCapsEvent(CapsEvent event);
     }
@@ -262,10 +262,10 @@ public class RenderContext {
     private boolean hasGL11;    // Legacy fixed-function pipeline
     private boolean hasGL20;    // Programmable shaders
     private boolean hasGL30;    // Advanced features
-    
+
     // GPU capabilities detection
     private GPUDetection gpuDetection;
-    
+
     // Shader program management
     private PrimProgram primProgram;
     private AvatarProgram avatarProgram;
@@ -273,7 +273,7 @@ public class RenderContext {
     private SkyProgram skyProgram;
     private WaterProgram waterProgram;
     private FXAAProgram fxaaProgram;
-    
+
     // Resource management
     private GLResourceManager glResourceManager;
     private GLLoadQueue loadQueue;
@@ -287,7 +287,7 @@ public abstract class ShaderProgram {
     protected int programId;
     protected Map<String, Integer> uniforms;
     protected Map<String, Integer> attributes;
-    
+
     // Shader compilation and linking
     public void compileShader(String vertexSource, String fragmentSource);
     public void bindAttributes();
@@ -332,7 +332,7 @@ public class GLTexture {
     private int textureId;
     private int width, height;
     private int format;
-    
+
     // Texture creation and management
     public void uploadTexture(Bitmap bitmap);
     public void uploadCompressedTexture(byte[] data);
@@ -343,7 +343,7 @@ public class TextureCache extends ResourceFileCache<UUID, TextureData> {
     // Texture asset caching with LRU eviction
     // Automatic texture compression and resizing
     // Memory pressure handling
-    
+
     private class TextureDownloadRequest extends ResourceRequest<UUID, TextureData> {
         // Background texture downloading
         // JPEG2000 decompression using OpenJPEG
@@ -368,7 +368,7 @@ public class SpatialTree {
     // Octree-based spatial partitioning
     // Efficient object queries and collision detection
     // Level-of-detail management
-    
+
     public void insert(SpatialListEntry entry);
     public List<SpatialListEntry> query(SpatialBox bounds);
     public void update(SpatialListEntry entry);
@@ -384,7 +384,7 @@ public class FrustrumPlanes {
     // View frustum culling implementation
     // Plane equation calculations
     // Object visibility testing
-    
+
     public boolean isVisible(SpatialBox bounds);
     public void updateFromMatrix(float[] mvpMatrix);
 }
@@ -393,7 +393,7 @@ public class DrawList {
     // Render queue management
     // Depth sorting for transparency
     // Batch optimization for similar objects
-    
+
     public void addPrimitive(DrawListPrimEntry entry);
     public void addAvatar(DrawListAvatarEntry entry);
     public void addTerrain(DrawListTerrainEntry entry);
@@ -408,7 +408,7 @@ public class ResourceManager<K, V> {
     // Central resource coordination
     // Cache hierarchies and fallback strategies
     // Memory management and cleanup
-    
+
     public V getResource(K key);
     public void preloadResource(K key);
     public void evictResource(K key);
@@ -418,7 +418,7 @@ public class MeshCache extends ResourceFileCache<UUID, MeshData> {
     // 3D mesh asset caching
     // Compressed mesh data handling
     // Level-of-detail mesh variants
-    
+
     private class MeshDownloadRequest implements Runnable {
         // Background mesh downloading from CAPS
         // Mesh decompression and optimization
@@ -445,7 +445,7 @@ public class AvatarSkeleton {
     // Bone hierarchy management
     // Joint transformations and constraints
     // Inverse kinematics support
-    
+
     private Map<SLSkeletonBoneID, Bone> bones;
     public void updateBone(SLSkeletonBoneID boneId, LLVector3 position, LLQuaternion rotation);
     public float[] getBoneMatrix(SLSkeletonBoneID boneId);
@@ -455,7 +455,7 @@ public class AnimationData {
     // Keyframe animation data
     // Bone transformation sequences
     // Animation blending weights
-    
+
     public void applyToSkeleton(AvatarSkeleton skeleton, float time);
     public float getDuration();
     public boolean isLooping();
@@ -465,7 +465,7 @@ public class AvatarAnimationList {
     // Multi-animation blending
     // Priority-based animation mixing
     // Smooth transitions between animations
-    
+
     public void addAnimation(UUID animationId, float weight);
     public void removeAnimation(UUID animationId);
     public void updateAnimations(float deltaTime);
@@ -481,7 +481,7 @@ import com.lumiyaviewer.lumiya.openjpeg.OpenJPEG;
 
 // Standard formats
 // - PNG (via Android Bitmap)
-// - JPEG (via Android Bitmap)  
+// - JPEG (via Android Bitmap)
 // - TGA (custom implementation)
 ```
 
@@ -528,7 +528,7 @@ public class SLCircuit {
     // Sequence number tracking
     // Acknowledgment and retransmission
     // Flow control and congestion avoidance
-    
+
     protected void sendReliableMessage(SLMessage message);
     protected void handleAcknowledgment(int sequenceNumber);
     protected void retransmitMessage(SLMessage message);
@@ -548,7 +548,7 @@ public class SLCaps {
     // JSON/LLSD data serialization
     // Asset upload/download via HTTP POST
     // Event queue via long-polling GET
-    
+
     public void uploadAsset(AssetType type, byte[] data, ...);
     public byte[] downloadAsset(UUID assetId);
     public void pollEventQueue();
@@ -561,10 +561,10 @@ public class SLCaps {
 public abstract class LLSDNode {
     // XML serialization
     public abstract void serializeXML(XmlSerializer serializer);
-    
+
     // Binary serialization
     public abstract void serializeBinary(DataOutputStream stream);
-    
+
     // JSON serialization (for CAPS)
     public abstract String toJSONString();
 }
@@ -601,7 +601,7 @@ public class GLResourceManager {
     // OpenGL object lifecycle management
     // Texture, buffer, and shader cleanup
     // Memory leak prevention
-    
+
     public void registerTexture(GLTexture texture);
     public void unregisterTexture(GLTexture texture);
     public void cleanupOrphanedResources();
@@ -623,7 +623,7 @@ public class SynchronousExecutor implements Executor {
 
 // Background processing executors
 // - Asset downloading threads
-// - Mesh processing threads  
+// - Mesh processing threads
 // - Animation calculation threads
 // - Network I/O threads
 ```
@@ -636,7 +636,7 @@ public class Debug {
     // Conditional logging based on build type
     // Performance timing measurements
     // Memory usage tracking
-    
+
     public static void Printf(String format, Object... args);
     public static void Assert(boolean condition, String message);
 }
@@ -698,7 +698,7 @@ import android.app.ActivityManager; // System resource monitoring
 The Linkpoint project demonstrates comprehensive API usage across multiple domains:
 
 1. **Graphics APIs**: Full OpenGL ES pipeline with modern shader support
-2. **Network APIs**: Custom UDP protocol with HTTP capabilities  
+2. **Network APIs**: Custom UDP protocol with HTTP capabilities
 3. **Asset APIs**: Multi-format asset loading and caching
 4. **Math APIs**: Complete 3D mathematics library
 5. **Platform APIs**: Deep Android integration
