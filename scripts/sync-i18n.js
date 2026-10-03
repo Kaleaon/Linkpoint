@@ -79,11 +79,24 @@ function syncLocale(lang) {
     existingKeys = parseAndroidXmlKeys(existingXml);
   }
 
+  // Load English baseline keys (from values/strings.xml) for fallback
+  let enKeys = new Map();
+  const enXmlPath = getAndroidPathForLocale('en');
+  if (lang !== 'en' && fs.existsSync(enXmlPath)) {
+    enKeys = parseAndroidXmlKeys(fs.readFileSync(enXmlPath, 'utf8'));
+  }
+
   let xmlContent = '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n';
   
-  // Merge existing Android keys with Web keys
-  const mergedMap = new Map(existingKeys);
+  // Merge English baseline keys, existing locale keys, and Web keys
+  const mergedMap = new Map(lang === 'en' ? existingKeys : enKeys);
 
+  // Overlay existing locale keys if lang != 'en'
+  for (const [key, value] of existingKeys.entries()) {
+    mergedMap.set(key, value);
+  }
+
+  // Overlay Web keys
   for (const [key, value] of Object.entries(webTranslations)) {
     const normKey = normalizeKey(key);
     mergedMap.set(normKey, escapeXmlValue(value));
