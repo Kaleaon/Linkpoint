@@ -1050,8 +1050,7 @@ class RenderManager(private val context: Context) {
     fun pauseDrawing(reason: String = "panel_open") {
         if (drawingEnabled.compareAndSet(true, false)) {
             Log.i(TAG, "Drawing paused: $reason")
-            renderStateManager.setFullScreenOverlayActive(true)
-            RenderDiagnostics.filamentDrawingPaused(reason)
+            renderStateManager.setFullScreenOverlayActive(true, reason)
         }
     }
 
@@ -1063,8 +1062,7 @@ class RenderManager(private val context: Context) {
     fun resumeDrawing(reason: String = "panel_close") {
         if (drawingEnabled.compareAndSet(false, true)) {
             Log.i(TAG, "Drawing resumed: $reason")
-            renderStateManager.setFullScreenOverlayActive(false)
-            RenderDiagnostics.filamentDrawingResumed(reason)
+            renderStateManager.setFullScreenOverlayActive(false, reason)
         }
     }
 

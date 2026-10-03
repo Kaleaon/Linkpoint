@@ -121,7 +121,11 @@ class RenderStateManager {
      * When true, configures dirty-flag rendering (`RENDERMODE_WHEN_DIRTY`) to pause continuous 3D rendering.
      * When false, restores continuous rendering at 60 FPS.
      */
-    fun setFullScreenOverlayActive(active: Boolean, nowMs: Long = System.currentTimeMillis()) {
+    fun setFullScreenOverlayActive(
+        active: Boolean,
+        reason: String = if (active) "fullscreen_chat_overlay" else "overlay_dismissed",
+        nowMs: Long = System.currentTimeMillis()
+    ) {
         isOverlayActiveRef.set(active)
         lastActivityTimeMsRef.set(nowMs)
 
@@ -132,9 +136,9 @@ class RenderStateManager {
             if (currentModeRef.compareAndSet(previous, targetMode)) {
                 Log.i(TAG, "Overlay state change ($active): $previous -> $targetMode")
                 if (active) {
-                    RenderDiagnostics.filamentDrawingPaused("fullscreen_chat_overlay")
+                    RenderDiagnostics.filamentDrawingPaused(reason)
                 } else {
-                    RenderDiagnostics.filamentDrawingResumed("overlay_dismissed")
+                    RenderDiagnostics.filamentDrawingResumed(reason)
                 }
                 applyRenderModeToSurfaceView(targetMode)
                 notifyListenersModeChanged(previous, targetMode)

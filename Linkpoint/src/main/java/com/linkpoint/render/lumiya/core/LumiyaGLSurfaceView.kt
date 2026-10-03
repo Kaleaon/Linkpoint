@@ -37,8 +37,6 @@ class LumiyaGLSurfaceView @JvmOverloads constructor(
         setEGLConfigChooser(8, 8, 8, 8, 24, 8)
         preserveEGLContextOnPause = true
 
-        renderStateManager.attachGlSurfaceView(this)
-
         setRenderer(object : Renderer {
             override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
                 Log.i(TAG, "onSurfaceCreated")
@@ -79,7 +77,7 @@ class LumiyaGLSurfaceView @JvmOverloads constructor(
             }
         })
 
-        renderMode = RENDERMODE_CONTINUOUSLY
+        renderStateManager.attachGlSurfaceView(this)
     }
 
     fun getRenderer(): LumiyaRenderer = lumiyaRenderer
