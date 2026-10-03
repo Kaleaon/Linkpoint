@@ -307,4 +307,3 @@ fun EventsScreen(
         }
     }
 }
-

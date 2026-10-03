@@ -19,7 +19,7 @@ class ConnectionDiagnosticTest {
         const val MSG_PACKET_ACK = -5
         const val MSG_REGION_HANDSHAKE = -65388
         const val MSG_AGENT_UPDATE = 4
-        
+
         // Packet flags
         const val FLAG_RELIABLE = 0x40
         const val FLAG_RESENT = 0x20
@@ -30,7 +30,7 @@ class ConnectionDiagnosticTest {
     fun `test packet header parsing - reliable flag detected`() {
         // Create a packet with reliable flag set
         val packet = createTestPacket(flags = FLAG_RELIABLE, sequenceNumber = 1, messageId = MSG_USE_CIRCUIT_CODE)
-        
+
         val flags = packet[0].toInt() and 0xFF
         assertTrue("Reliable flag should be set", (flags and FLAG_RELIABLE) != 0)
         assertFalse("Resent flag should not be set", (flags and FLAG_RESENT) != 0)
@@ -40,7 +40,7 @@ class ConnectionDiagnosticTest {
     fun `test packet header parsing - sequence number extraction`() {
         val expectedSequence = 12345
         val packet = createTestPacket(flags = 0, sequenceNumber = expectedSequence, messageId = MSG_AGENT_UPDATE)
-        
+
         val extractedSequence = extractSequenceNumber(packet)
         assertEquals("Sequence number should match", expectedSequence, extractedSequence)
     }
@@ -49,7 +49,7 @@ class ConnectionDiagnosticTest {
     fun `test packet header parsing - message ID extraction for low frequency`() {
         // Low frequency messages (negative IDs) use 2 bytes after 0xFFFF marker
         val packet = createTestPacket(flags = FLAG_RELIABLE, sequenceNumber = 1, messageId = MSG_USE_CIRCUIT_CODE)
-        
+
         val messageId = extractMessageId(packet)
         assertEquals("Message ID should be USE_CIRCUIT_CODE", MSG_USE_CIRCUIT_CODE, messageId)
     }
@@ -58,7 +58,7 @@ class ConnectionDiagnosticTest {
     fun `test packet header parsing - message ID extraction for high frequency`() {
         // High frequency messages (positive IDs 1-255) use single byte
         val packet = createTestPacket(flags = 0, sequenceNumber = 1, messageId = MSG_AGENT_UPDATE)
-        
+
         val messageId = extractMessageId(packet)
         assertEquals("Message ID should be AGENT_UPDATE", MSG_AGENT_UPDATE, messageId)
     }
@@ -68,7 +68,7 @@ class ConnectionDiagnosticTest {
         val defaultTimeout = 3000L // 3 seconds
         val minTimeout = 1000L
         val maxTimeout = 30000L
-        
+
         assertTrue("Default timeout should be at least $minTimeout ms", defaultTimeout >= minTimeout)
         assertTrue("Default timeout should be at most $maxTimeout ms", defaultTimeout <= maxTimeout)
     }
@@ -77,11 +77,11 @@ class ConnectionDiagnosticTest {
     fun `test adaptive timeout increases with latency`() {
         val baseTimeout = 3000L
         val measuredLatency = 500L
-        
+
         // Adaptive timeout = base + (latency * multiplier)
         val multiplier = 3
         val adaptiveTimeout = baseTimeout + (measuredLatency * multiplier)
-        
+
         assertTrue("Adaptive timeout should be greater than base", adaptiveTimeout > baseTimeout)
         assertEquals("Adaptive timeout calculation", 4500L, adaptiveTimeout)
     }
@@ -91,7 +91,7 @@ class ConnectionDiagnosticTest {
         val sendTime = System.currentTimeMillis() - 4000 // 4 seconds ago
         val timeout = 3000L
         val currentTime = System.currentTimeMillis()
-        
+
         val shouldResend = (currentTime - sendTime) > timeout
         assertTrue("Should resend packet after timeout", shouldResend)
     }
@@ -101,7 +101,7 @@ class ConnectionDiagnosticTest {
         val sendTime = System.currentTimeMillis() - 1000 // 1 second ago
         val timeout = 3000L
         val currentTime = System.currentTimeMillis()
-        
+
         val shouldResend = (currentTime - sendTime) > timeout
         assertFalse("Should not resend packet before timeout", shouldResend)
     }
@@ -110,11 +110,11 @@ class ConnectionDiagnosticTest {
     fun `test pending ACK queue management`() {
         val pendingAcks = mutableListOf<Int>()
         val maxPendingAcks = 255
-        
+
         // Add some pending ACKs
         pendingAcks.addAll(listOf(1, 2, 3, 4, 5))
         assertEquals("Should have 5 pending ACKs", 5, pendingAcks.size)
-        
+
         // Simulate receiving ACK for sequences 1, 2, 3
         val ackedSequences = listOf(1, 2, 3)
         pendingAcks.removeAll(ackedSequences)
@@ -126,7 +126,7 @@ class ConnectionDiagnosticTest {
     @Test
     fun `test connection state transitions`() {
         val states = listOf("DISCONNECTED", "CONNECTING", "CONNECTED", "RECONNECTING", "ERROR")
-        
+
         // Valid transitions
         assertTrue("DISCONNECTED -> CONNECTING is valid", isValidTransition("DISCONNECTED", "CONNECTING"))
         assertTrue("CONNECTING -> CONNECTED is valid", isValidTransition("CONNECTING", "CONNECTED"))
@@ -141,10 +141,10 @@ class ConnectionDiagnosticTest {
         // UseCircuitCode contains: circuit_code (4 bytes), session_id (16 bytes), agent_id (16 bytes)
         val circuitCode = 12345678
         val packet = createUseCircuitCodePacket(circuitCode)
-        
+
         // Verify packet structure
         assertTrue("Packet should be at least 46 bytes", packet.size >= 46)
-        
+
         // Check reliable flag
         val flags = packet[0].toInt() and 0xFF
         assertTrue("UseCircuitCode should be reliable", (flags and FLAG_RELIABLE) != 0)
@@ -165,8 +165,8 @@ class ConnectionDiagnosticTest {
         // But we recommend 5 seconds for safety
         val recommendedInterval = 5000L
         val mobileNatTimeout = 30000L // Conservative mobile NAT timeout
-        
-        assertTrue("Keep-alive interval should be less than NAT timeout", 
+
+        assertTrue("Keep-alive interval should be less than NAT timeout",
             recommendedInterval < mobileNatTimeout)
     }
 
@@ -174,10 +174,10 @@ class ConnectionDiagnosticTest {
     fun `test zero-coded packet detection`() {
         val zeroCoded = createTestPacket(flags = FLAG_ZEROCODED, sequenceNumber = 1, messageId = MSG_REGION_HANDSHAKE)
         val notZeroCoded = createTestPacket(flags = FLAG_RELIABLE, sequenceNumber = 1, messageId = MSG_REGION_HANDSHAKE)
-        
+
         val zeroCodedFlag = zeroCoded[0].toInt() and FLAG_ZEROCODED
         val notZeroCodedFlag = notZeroCoded[0].toInt() and FLAG_ZEROCODED
-        
+
         assertTrue("Should detect zero-coded packet", zeroCodedFlag != 0)
         assertTrue("Should not detect zero-coded on regular packet", notZeroCodedFlag == 0)
     }
@@ -189,16 +189,16 @@ class ConnectionDiagnosticTest {
     private fun createTestPacket(flags: Int, sequenceNumber: Int, messageId: Int): ByteArray {
         val buffer = ByteBuffer.allocate(64)
         buffer.order(ByteOrder.BIG_ENDIAN)
-        
+
         // Byte 0: Flags
         buffer.put(flags.toByte())
-        
+
         // Bytes 1-4: Sequence number (big-endian)
         buffer.putInt(sequenceNumber)
-        
+
         // Byte 5: Extra header byte (usually 0)
         buffer.put(0)
-        
+
         if (messageId > 0 && messageId < 256) {
             // High frequency message - single byte
             buffer.put(messageId.toByte())
@@ -209,7 +209,7 @@ class ConnectionDiagnosticTest {
             // Convert negative ID to unsigned short
             buffer.putShort((messageId and 0xFFFF).toShort())
         }
-        
+
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -226,9 +226,9 @@ class ConnectionDiagnosticTest {
         buffer.get() // Skip flags
         buffer.int // Skip sequence
         buffer.get() // Skip extra header
-        
+
         val firstByte = buffer.get().toInt() and 0xFF
-        
+
         return if (firstByte == 0xFF) {
             val secondByte = buffer.get().toInt() and 0xFF
             if (secondByte == 0xFF) {
@@ -259,26 +259,26 @@ class ConnectionDiagnosticTest {
     private fun createUseCircuitCodePacket(circuitCode: Int): ByteArray {
         val buffer = ByteBuffer.allocate(64)
         buffer.order(ByteOrder.BIG_ENDIAN)
-        
+
         // Header
         buffer.put(FLAG_RELIABLE.toByte()) // Reliable
         buffer.putInt(0) // Sequence 0
         buffer.put(0) // Extra header
-        
+
         // Low frequency message marker + UseCircuitCode ID
         buffer.put(0xFF.toByte())
         buffer.put(0xFF.toByte())
         buffer.putShort((MSG_USE_CIRCUIT_CODE and 0xFFFF).toShort())
-        
+
         // Circuit code
         buffer.putInt(circuitCode)
-        
+
         // Session ID (16 bytes placeholder)
         repeat(16) { buffer.put(0) }
-        
+
         // Agent ID (16 bytes placeholder)
         repeat(16) { buffer.put(0) }
-        
+
         return buffer.array().copyOf(buffer.position())
     }
 

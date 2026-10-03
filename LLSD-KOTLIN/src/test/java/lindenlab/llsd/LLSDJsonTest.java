@@ -27,7 +27,7 @@ class LLSDJsonTest {
             try (InputStream input = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))) {
                 LLSDJsonParser parser = new LLSDJsonParser();
                 LLSD result = parser.parse(input);
-                
+
                 assertNotNull(result.getContent());
                 // Additional validation would go here
             }
@@ -40,7 +40,7 @@ class LLSDJsonTest {
             try (InputStream input = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))) {
                 LLSDJsonParser parser = new LLSDJsonParser();
                 LLSD result = parser.parse(input);
-                
+
                 assertNotNull(result.getContent());
                 assertTrue(result.getContent() instanceof java.util.List);
             }
@@ -53,7 +53,7 @@ class LLSDJsonTest {
             try (InputStream input = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))) {
                 LLSDJsonParser parser = new LLSDJsonParser();
                 LLSD result = parser.parse(input);
-                
+
                 assertNotNull(result.getContent());
                 assertTrue(result.getContent() instanceof java.util.Date);
             }
@@ -66,7 +66,7 @@ class LLSDJsonTest {
             try (InputStream input = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))) {
                 LLSDJsonParser parser = new LLSDJsonParser();
                 LLSD result = parser.parse(input);
-                
+
                 assertNotNull(result.getContent());
                 assertTrue(result.getContent() instanceof java.util.UUID);
                 assertEquals("550e8400-e29b-41d4-a716-446655440000", result.getContent().toString());
@@ -79,14 +79,14 @@ class LLSDJsonTest {
             String testData = "Hello World";
             String base64 = Base64.getEncoder().encodeToString(testData.getBytes(StandardCharsets.UTF_8));
             String json = "{\"b\":\"" + base64 + "\"}";
-            
+
             try (InputStream input = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))) {
                 LLSDJsonParser parser = new LLSDJsonParser();
                 LLSD result = parser.parse(input);
-                
+
                 assertNotNull(result.getContent());
                 assertTrue(result.getContent() instanceof byte[]);
-                
+
                 byte[] resultData = (byte[]) result.getContent();
                 assertEquals(testData, new String(resultData, StandardCharsets.UTF_8));
             }
@@ -115,14 +115,14 @@ class LLSDJsonTest {
             java.util.Map<String, Object> data = new java.util.HashMap<>();
             data.put("name", "test");
             data.put("value", 42);
-            
+
             LLSD llsd = new LLSD(data);
             LLSDJsonSerializer serializer = new LLSDJsonSerializer();
-            
+
             try (StringWriter writer = new StringWriter()) {
                 serializer.serialize(llsd, writer);
                 String json = writer.toString();
-                
+
                 assertNotNull(json);
                 assertTrue(json.contains("\"name\""));
                 assertTrue(json.contains("\"test\""));
@@ -135,14 +135,14 @@ class LLSDJsonTest {
         @DisplayName("Should serialize array to JSON")
         void testSerializeArray() throws Exception {
             java.util.List<Object> data = java.util.Arrays.asList(1, 2, "three", true);
-            
+
             LLSD llsd = new LLSD(data);
             LLSDJsonSerializer serializer = new LLSDJsonSerializer();
-            
+
             try (StringWriter writer = new StringWriter()) {
                 serializer.serialize(llsd, writer);
                 String json = writer.toString();
-                
+
                 assertNotNull(json);
                 assertTrue(json.startsWith("["));
                 assertTrue(json.endsWith("]"));
@@ -155,14 +155,14 @@ class LLSDJsonTest {
         @DisplayName("Should serialize date in LLSD format")
         void testSerializeDate() throws Exception {
             java.util.Date date = new java.util.Date(0); // Unix epoch
-            
+
             LLSD llsd = new LLSD(date);
             LLSDJsonSerializer serializer = new LLSDJsonSerializer();
-            
+
             try (StringWriter writer = new StringWriter()) {
                 serializer.serialize(llsd, writer);
                 String json = writer.toString();
-                
+
                 assertNotNull(json);
                 assertTrue(json.contains("\"d\""));
                 assertTrue(json.contains("1970-01-01T00:00:00Z"));
@@ -173,14 +173,14 @@ class LLSDJsonTest {
         @DisplayName("Should serialize UUID in LLSD format")
         void testSerializeUuid() throws Exception {
             java.util.UUID uuid = java.util.UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
-            
+
             LLSD llsd = new LLSD(uuid);
             LLSDJsonSerializer serializer = new LLSDJsonSerializer();
-            
+
             try (StringWriter writer = new StringWriter()) {
                 serializer.serialize(llsd, writer);
                 String json = writer.toString();
-                
+
                 assertNotNull(json);
                 assertTrue(json.contains("\"i\""));
                 assertTrue(json.contains("550e8400-e29b-41d4-a716-446655440000"));
@@ -191,17 +191,17 @@ class LLSDJsonTest {
         @DisplayName("Should serialize binary data in LLSD format")
         void testSerializeBinary() throws Exception {
             byte[] binaryData = "Hello World".getBytes(StandardCharsets.UTF_8);
-            
+
             LLSD llsd = new LLSD(binaryData);
             LLSDJsonSerializer serializer = new LLSDJsonSerializer();
-            
+
             try (StringWriter writer = new StringWriter()) {
                 serializer.serialize(llsd, writer);
                 String json = writer.toString();
-                
+
                 assertNotNull(json);
                 assertTrue(json.contains("\"b\""));
-                
+
                 String expectedBase64 = Base64.getEncoder().encodeToString(binaryData);
                 assertTrue(json.contains(expectedBase64));
             }
@@ -212,11 +212,11 @@ class LLSDJsonTest {
         void testSerializeNaN() throws Exception {
             LLSD llsd = new LLSD(Double.NaN);
             LLSDJsonSerializer serializer = new LLSDJsonSerializer();
-            
+
             try (StringWriter writer = new StringWriter()) {
                 serializer.serialize(llsd, writer);
                 String json = writer.toString();
-                
+
                 assertNotNull(json);
                 assertTrue(json.contains("\"NaN\""));
             }
@@ -234,7 +234,7 @@ class LLSDJsonTest {
             originalData.put("name", "test");
             originalData.put("value", 42);
             originalData.put("active", true);
-            
+
             // Serialize to JSON
             LLSD originalLlsd = new LLSD(originalData);
             LLSDJsonSerializer serializer = new LLSDJsonSerializer();
@@ -243,21 +243,21 @@ class LLSDJsonTest {
                 serializer.serialize(originalLlsd, writer);
                 json = writer.toString();
             }
-            
+
             // Parse back from JSON
             LLSDJsonParser parser = new LLSDJsonParser();
             LLSD parsedLlsd;
             try (InputStream input = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))) {
                 parsedLlsd = parser.parse(input);
             }
-            
+
             // Verify the data matches
             assertNotNull(parsedLlsd.getContent());
             assertTrue(parsedLlsd.getContent() instanceof java.util.Map);
-            
+
             @SuppressWarnings("unchecked")
             java.util.Map<String, Object> parsedData = (java.util.Map<String, Object>) parsedLlsd.getContent();
-            
+
             assertEquals("test", parsedData.get("name"));
             assertEquals(42, parsedData.get("value"));
             assertEquals(true, parsedData.get("active"));

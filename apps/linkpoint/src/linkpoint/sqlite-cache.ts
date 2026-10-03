@@ -501,12 +501,12 @@ export class SQLiteInventoryStore {
     this.db.exec('BEGIN TRANSACTION;');
     try {
       this.db.run(`
-        DELETE FROM items 
-        WHERE agent_id = ? 
+        DELETE FROM items
+        WHERE agent_id = ?
           AND id IN (
-            SELECT id FROM items 
-            WHERE agent_id = ? 
-            ORDER BY updated_at ASC 
+            SELECT id FROM items
+            WHERE agent_id = ?
+            ORDER BY updated_at ASC
             LIMIT (SELECT COUNT(*)/4 FROM items WHERE agent_id = ?)
           )
       `, [agentId, agentId, agentId]);

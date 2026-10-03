@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Handles avatar texture baking
  * Composites multiple wearable textures into baked textures
- * 
+ *
  * Note: Uses custom SSL configuration to handle Akamai CDN hostname verification.
  * The baked texture upload capability URLs go through the CDN.
  */
@@ -36,13 +36,13 @@ class AvatarBaker(
 ) {
     companion object {
         private const val TAG = "AvatarBaker"
-        
+
         // Bake texture size limits (max 1024x1024 per channel to prevent VRAM memory exhaustion)
         const val BAKE_WIDTH = 512
         const val BAKE_HEIGHT = 512
         const val MAX_BAKE_WIDTH = 1024
         const val MAX_BAKE_HEIGHT = 1024
-        
+
         // Classic bake channels (avatar layers)
         const val BAKE_HEAD = 0
         const val BAKE_UPPER = 1
@@ -50,23 +50,23 @@ class AvatarBaker(
         const val BAKE_EYES = 3
         const val BAKE_SKIRT = 4
         const val BAKE_HAIR = 5
-        
+
         // Bakes on Mesh (BoM) channels for mesh bodies/heads
         const val BAKE_LEFTARM = 6
         const val BAKE_LEFTLEG = 7
         const val BAKE_AUX1 = 8     // Often used for mesh head
         const val BAKE_AUX2 = 9     // Often used for mesh upper body
         const val BAKE_AUX3 = 10    // Often used for mesh lower body
-        
+
         const val NUM_BAKE_CHANNELS = 11
-        
+
         // Texture indices in wearables
         const val TEX_HEAD_BODYPAINT = 0
         const val TEX_UPPER_SHIRT = 1
         const val TEX_LOWER_PANTS = 2
         // ... etc
     }
-    
+
     // HTTP client configured for CDN access with custom hostname verification
     // Baked texture uploads go through capability URLs which may use CDN
     private val httpClient = SSLHelper.configureForCdn(
@@ -74,35 +74,35 @@ class AvatarBaker(
             .connectTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
     ).build()
-    
+
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    
+
     // Current baked textures
     private val bakedTextures = mutableMapOf<Int, UUID>()
-    
+
     // Wearable data
     private val wearables = mutableMapOf<WearableType, WearableData>()
-    
+
     /**
      * Set wearable data
      */
     fun setWearable(type: WearableType, data: WearableData) {
         wearables[type] = data
     }
-    
+
     /**
      * Remove wearable
      */
     fun removeWearable(type: WearableType) {
         wearables.remove(type)
     }
-    
+
     /**
      * Bake all textures (classic + BoM)
      */
     suspend fun bakeAll(includeBoM: Boolean = true): Map<Int, UUID> = withContext(Dispatchers.Default) {
         val results = mutableMapOf<Int, UUID>()
-        
+
         // Bake classic channels
         val classicJobs = listOf(
             async { bakeChannel(BAKE_HEAD) },
@@ -111,14 +111,14 @@ class AvatarBaker(
             async { bakeChannel(BAKE_EYES) },
             async { bakeChannel(BAKE_HAIR) }
         )
-        
+
         classicJobs.forEachIndexed { index, job ->
             val textureId = job.await()
             if (textureId != null) {
                 results[index] = textureId
             }
         }
-        
+
         // Bake BoM channels if requested
         if (includeBoM) {
             val bomJobs = listOf(
@@ -128,7 +128,7 @@ class AvatarBaker(
                 async { bakeChannel(BAKE_AUX2) },
                 async { bakeChannel(BAKE_AUX3) }
             )
-            
+
             bomJobs.forEachIndexed { index, job ->
                 val textureId = job.await()
                 if (textureId != null) {
@@ -136,43 +136,43 @@ class AvatarBaker(
                 }
             }
         }
-        
+
         bakedTextures.clear()
         bakedTextures.putAll(results)
-        
+
         results
     }
-    
+
     /**
      * Bake a single channel
      */
     suspend fun bakeChannel(channel: Int): UUID? = withContext(Dispatchers.Default) {
         Log.d(TAG, "Baking channel: $channel")
-        
+
         // Create base bitmap (bounded to max 1024x1024)
         val targetWidth = BAKE_WIDTH.coerceAtMost(MAX_BAKE_WIDTH)
         val targetHeight = BAKE_HEIGHT.coerceAtMost(MAX_BAKE_HEIGHT)
         val bitmap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888)
-        
+
         try {
             val canvas = Canvas(bitmap)
             val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-            
+
             // Get layers for this channel
             val layers = getLayersForChannel(channel)
-            
+
             // Composite each layer
             for (layer in layers) {
                 try {
                     val texture = textureManager.getTexture(layer.textureId) ?: continue
-                    
+
                     // Tint if needed
                     val tinted = if (layer.tint != null) {
                         tintBitmap(texture, layer.tint)
                     } else {
                         texture
                     }
-                    
+
                     // Set blend mode
                     paint.xfermode = when (layer.blendMode) {
                         BlendMode.NORMAL -> null
@@ -180,24 +180,24 @@ class AvatarBaker(
                         BlendMode.ADD -> PorterDuffXfermode(PorterDuff.Mode.ADD)
                         BlendMode.MASK -> PorterDuffXfermode(PorterDuff.Mode.DST_IN)
                     }
-                    
+
                     canvas.drawBitmap(tinted, 0f, 0f, paint)
                     paint.xfermode = null
                 } catch (e: Exception) {
                     Log.w(TAG, "Failed to composite layer: ${layer.textureId}", e)
                 }
             }
-            
+
             // Upload baked texture
             uploadBakedTexture(bitmap, channel)
         } finally {
             bitmap.recycle()
         }
     }
-    
+
     private fun getLayersForChannel(channel: Int): List<BakeLayer> {
         val layers = mutableListOf<BakeLayer>()
-        
+
         when (channel) {
             BAKE_HEAD -> {
                 // Base skin
@@ -330,16 +330,16 @@ class AvatarBaker(
                 }
             }
         }
-        
+
         return layers
     }
-    
+
     private fun tintBitmap(source: Bitmap, tint: IntArray): Bitmap {
         val result = source.copy(Bitmap.Config.ARGB_8888, true)
-        
+
         val pixels = IntArray(result.width * result.height)
         result.getPixels(pixels, 0, result.width, 0, 0, result.width, result.height)
-        
+
         for (i in pixels.indices) {
             val pixel = pixels[i]
             val a = (pixel shr 24) and 0xFF
@@ -348,15 +348,15 @@ class AvatarBaker(
             val b = (pixel and 0xFF) * tint[2] / 255
             pixels[i] = (a shl 24) or (r shl 16) or (g shl 8) or b
         }
-        
+
         result.setPixels(pixels, 0, result.width, 0, 0, result.width, result.height)
         return result
     }
-    
+
     private suspend fun uploadBakedTexture(bitmap: Bitmap, channel: Int): UUID? {
         val capUrl = capabilityManager.getCapability(CapabilityManager.CAP_UPLOAD_BAKED_TEXTURE)
             ?: return null
-        
+
         return withContext(Dispatchers.IO) {
             try {
                 // Compress to JPEG2000 (or use PNG fallback)
@@ -390,7 +390,7 @@ class AvatarBaker(
                             .url(capUrl)
                             .post(data.toRequestBody(mimeType.toMediaType()))
                             .build()
-                        
+
                         val response = httpClient.newCall(request).execute()
                         if (response.isSuccessful) {
                             val body = response.body?.string() ?: continue
@@ -407,7 +407,7 @@ class AvatarBaker(
                         Log.w(TAG, "Upload attempt $attempt failed for channel $channel: ${e.message}")
                     }
                 }
-                
+
                 null
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to upload baked texture", e)
@@ -415,7 +415,7 @@ class AvatarBaker(
             }
         }
     }
-    
+
     /**
      * Get currently baked textures
      */
@@ -432,7 +432,7 @@ class AvatarBaker(
         bakedTextures.clear()
         bakedTextures.putAll(bakes)
     }
-    
+
     fun shutdown() {
         scope.cancel()
     }
@@ -455,7 +455,7 @@ enum class WearableType(val value: Int) {
     ALPHA(13),
     TATTOO(14),
     PHYSICS(15);
-    
+
     companion object {
         fun fromValue(value: Int) = values().find { it.value == value } ?: SHAPE
     }

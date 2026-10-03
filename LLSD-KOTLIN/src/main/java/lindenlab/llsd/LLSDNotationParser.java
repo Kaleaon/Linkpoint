@@ -81,7 +81,7 @@ public class LLSDNotationParser {
                 sb.append(buffer, 0, charsRead);
             }
         }
-        
+
         String notationString = sb.toString().trim();
         NotationTokenizer tokenizer = new NotationTokenizer(notationString);
         Object parsedNotation = parseNotationValue(tokenizer);
@@ -139,7 +139,7 @@ public class LLSDNotationParser {
         public String consumeString(char delimiter) throws LLSDException {
             // Note: delimiter should already be consumed by caller
             StringBuilder sb = new StringBuilder();
-            
+
             while (position < notation.length()) {
                 char c = notation.charAt(position++);
                 if (c == delimiter) {
@@ -172,14 +172,14 @@ public class LLSDNotationParser {
                     sb.append(c);
                 }
             }
-            
+
             throw new LLSDException("Unterminated string");
         }
 
         public Object consumeNumber(char typeMarker) throws LLSDException {
             StringBuilder sb = new StringBuilder();
             boolean hasDecimal = false;
-            
+
             while (position < notation.length()) {
                 char c = notation.charAt(position);
                 if (Character.isDigit(c) || c == '-' || c == '+') {
@@ -217,7 +217,7 @@ public class LLSDNotationParser {
             for (char delimiter : delimiters) {
                 delimiterSet.add(delimiter);
             }
-            
+
             while (position < notation.length()) {
                 char c = notation.charAt(position);
                 if (delimiterSet.contains(c) || Character.isWhitespace(c)) {
@@ -226,7 +226,7 @@ public class LLSDNotationParser {
                 sb.append(c);
                 position++;
             }
-            
+
             return sb.toString();
         }
     }
@@ -288,7 +288,7 @@ public class LLSDNotationParser {
 
     private Boolean parseBoolean(NotationTokenizer tokenizer, boolean expectedValue) throws LLSDException {
         char ch = tokenizer.consume();
-        
+
         if (ch == '1' && expectedValue) {
             return Boolean.TRUE;
         } else if (ch == '0' && !expectedValue) {
@@ -312,7 +312,7 @@ public class LLSDNotationParser {
                 throw new LLSDException("Invalid boolean value: " + fullWord);
             }
         }
-        
+
         throw new LLSDException("Invalid boolean notation: " + ch);
     }
 
@@ -330,11 +330,11 @@ public class LLSDNotationParser {
     private UUID parseUUID(NotationTokenizer tokenizer) throws LLSDException {
         tokenizer.expect('u'); // consume 'u'
         String uuidStr = tokenizer.consumeUntil(',', ']', '}', ' ', '\t', '\n', '\r');
-        
+
         if (!LLSDUtils.UUID_PATTERN.matcher(uuidStr).matches()) {
             throw new LLSDException("Invalid UUID format: '" + uuidStr + "'. Expected format: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'");
         }
-        
+
         try {
             return UUID.fromString(uuidStr);
         } catch (IllegalArgumentException e) {
@@ -345,7 +345,7 @@ public class LLSDNotationParser {
     private Date parseDate(NotationTokenizer tokenizer) throws LLSDException {
         tokenizer.expect('d'); // consume 'd'
         String dateStr = tokenizer.consumeUntil(',', ']', '}', ' ', '\t', '\n', '\r');
-        
+
         try {
             // Create a new DateFormat instance for thread safety
             DateFormat dateFormat = new SimpleDateFormat(ISO8601_PATTERN);
@@ -359,7 +359,7 @@ public class LLSDNotationParser {
     private URI parseURI(NotationTokenizer tokenizer) throws LLSDException {
         tokenizer.expect('l'); // consume 'l'
         String uriStr = tokenizer.consumeUntil(',', ']', '}', ' ', '\t', '\n', '\r');
-        
+
         try {
             return new URI(uriStr);
         } catch (URISyntaxException e) {
@@ -369,7 +369,7 @@ public class LLSDNotationParser {
 
     private byte[] parseBinary(NotationTokenizer tokenizer) throws LLSDException {
         tokenizer.expect('b'); // consume 'b'
-        
+
         // Check for size specification b64"data" or b(size)"data"
         char next = tokenizer.peek();
         if (Character.isDigit(next)) {
@@ -391,20 +391,20 @@ public class LLSDNotationParser {
                 throw new LLSDException("Unsupported binary size specification: " + sizeStr);
             }
         } else if (next == '(') {
-            // Handle b(size)"data" format  
+            // Handle b(size)"data" format
             tokenizer.consume(); // consume '('
             String sizeStr = tokenizer.consumeUntil(')');
             tokenizer.expect(')');
             int size = Integer.parseInt(sizeStr);
-            
+
             char delimiter = tokenizer.consume(); // should be quote
             if (delimiter == '"' || delimiter == '\'') {
                 String binaryData = tokenizer.consumeString(delimiter);
-                
+
                 if (size != binaryData.length()) {
                     throw new LLSDException("Binary size mismatch: expected " + size + " but got " + binaryData.length());
                 }
-                
+
                 return binaryData.getBytes(StandardCharsets.UTF_8);
             } else {
                 throw new LLSDException("Expected quote delimiter after size specification but got: " + delimiter);

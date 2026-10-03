@@ -18,14 +18,14 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * AnimationController - Handles avatar animation playback and management.
- * 
+ *
  * Features:
  * - Play animations
  * - Stop animations
  * - Animation priority
  * - Animation state tracking
  * - Gesture animations
- * 
+ *
  * Based on the reference viewer animation system.
  */
 class AnimationController(
@@ -34,7 +34,7 @@ class AnimationController(
 ) {
     companion object {
         private const val TAG = "AnimationController"
-        
+
         // Built-in animation UUIDs
         val ANIM_STAND = UUID.fromString("2408fe9e-df1d-1d7d-f4ff-1384fa7b350f")
         val ANIM_WALK = UUID.fromString("6ed24bd8-91aa-4b12-ccc7-c97c857ab4e0")
@@ -53,31 +53,31 @@ class AnimationController(
         val ANIM_SIT = UUID.fromString("1a5fe8ac-a804-8a5d-7f59-0f0b12e4d1e9")
         val ANIM_SIT_GROUND = UUID.fromString("1c7600d6-661f-b87b-efe2-d7421eb93c86")
         val ANIM_TYPE = UUID.fromString("c541c47f-e0c0-058b-ad1a-d6ae3a4584d9")
-        
+
         // Animation priorities
         const val PRIORITY_BACKGROUND = 0
         const val PRIORITY_LOW = 1
         const val PRIORITY_MEDIUM = 2
         const val PRIORITY_HIGH = 3
         const val PRIORITY_EMOTE = 4
-        
+
         // Max simultaneous animations
         private const val MAX_PLAYING_ANIMATIONS = 30
     }
-    
+
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    
+
     // Currently playing animations
     private val playingAnimations = ConcurrentHashMap<UUID, AnimationPlayingState>()
-    
+
     // Animation events
     private val _animationEvents = MutableSharedFlow<AnimationEvent>(replay = 0, extraBufferCapacity = 32)
     val animationEvents: SharedFlow<AnimationEvent> = _animationEvents
-    
+
     // Current animations list
     private val _currentAnimations = MutableStateFlow<List<UUID>>(emptyList())
     val currentAnimations: StateFlow<List<UUID>> = _currentAnimations
-    
+
     /**
      * Play an animation.
      */
@@ -89,25 +89,25 @@ class AnimationController(
                     Log.w(TAG, "Max animations reached, not starting $animationId")
                     return@launch
                 }
-                
+
                 val payload = ByteBuffer.allocate(80).order(ByteOrder.LITTLE_ENDIAN)
-                
+
                 // AgentData
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
-                
+
                 // AnimationList - 1 entry
                 payload.put(1) // Count
-                
+
                 // Animation entry
                 payload.putUUID(animationId)
                 payload.put(1) // Start (1 = start, 0 = stop)
-                
+
                 // ObjectIDs - empty for self
                 payload.put(0)
-                
+
                 udpConnection.sendPacket(MessageIdRegistry.AGENT_ANIMATION, payload.array(), reliable = true)
-                
+
                 // Track locally
                 playingAnimations[animationId] = AnimationPlayingState(
                     animationId = animationId,
@@ -115,7 +115,7 @@ class AnimationController(
                     startTime = System.currentTimeMillis()
                 )
                 updateCurrentAnimations()
-                
+
                 _animationEvents.emit(AnimationEvent.Started(animationId))
                 Log.d(TAG, "Started animation $animationId")
             } catch (e: Exception) {
@@ -123,7 +123,7 @@ class AnimationController(
             }
         }
     }
-    
+
     /**
      * Stop an animation.
      */
@@ -131,27 +131,27 @@ class AnimationController(
         scope.launch {
             try {
                 val payload = ByteBuffer.allocate(80).order(ByteOrder.LITTLE_ENDIAN)
-                
+
                 // AgentData
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
-                
+
                 // AnimationList - 1 entry
                 payload.put(1) // Count
-                
+
                 // Animation entry
                 payload.putUUID(animationId)
                 payload.put(0) // Stop
-                
+
                 // ObjectIDs - empty
                 payload.put(0)
-                
+
                 udpConnection.sendPacket(MessageIdRegistry.AGENT_ANIMATION, payload.array(), reliable = true)
-                
+
                 // Remove from tracking
                 playingAnimations.remove(animationId)
                 updateCurrentAnimations()
-                
+
                 _animationEvents.emit(AnimationEvent.Stopped(animationId))
                 Log.d(TAG, "Stopped animation $animationId")
             } catch (e: Exception) {
@@ -159,7 +159,7 @@ class AnimationController(
             }
         }
     }
-    
+
     /**
      * Stop all playing animations.
      */
@@ -171,7 +171,7 @@ class AnimationController(
             }
         }
     }
-    
+
     /**
      * Handle AvatarAnimation message from server.
      */
@@ -180,11 +180,11 @@ class AnimationController(
             // Update our animation state
             val startedAnims = mutableSetOf<UUID>()
             val stoppedAnims = playingAnimations.keys.toMutableSet()
-            
+
             for ((animId, sequenceId) in animations) {
                 startedAnims.add(animId)
                 stoppedAnims.remove(animId)
-                
+
                 if (!playingAnimations.containsKey(animId)) {
                     playingAnimations[animId] = AnimationPlayingState(
                         animationId = animId,
@@ -197,7 +197,7 @@ class AnimationController(
                     }
                 }
             }
-            
+
             // Remove stopped animations
             for (animId in stoppedAnims) {
                 playingAnimations.remove(animId)
@@ -205,36 +205,36 @@ class AnimationController(
                     _animationEvents.emit(AnimationEvent.Stopped(animId))
                 }
             }
-            
+
             updateCurrentAnimations()
         }
     }
-    
+
     /**
      * Check if an animation is playing.
      */
     fun isAnimationPlaying(animationId: UUID): Boolean {
         return playingAnimations.containsKey(animationId)
     }
-    
+
     /**
      * Get all playing animation IDs.
      */
     fun getPlayingAnimations(): List<UUID> {
         return playingAnimations.keys.toList()
     }
-    
+
     /**
      * Get animation state.
      */
     fun getAnimationPlayingState(animationId: UUID): AnimationPlayingState? {
         return playingAnimations[animationId]
     }
-    
+
     private fun updateCurrentAnimations() {
         _currentAnimations.value = playingAnimations.keys.toList()
     }
-    
+
     fun shutdown() {
         scope.cancel()
         playingAnimations.clear()

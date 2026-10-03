@@ -14,13 +14,13 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Task Inventory Manager - Handles object inventory (contents).
- * 
+ *
  * Based on the reference viewer's SLTaskInventory.java
- * 
+ *
  * Task inventory is the inventory inside objects (prims).
  * It includes scripts, notecards, textures, and other items
  * that can be placed inside objects.
- * 
+ *
  * Flow:
  * 1. Send RequestTaskInventory message
  * 2. Server sends ReplyTaskInventory with Xfer filename
@@ -39,18 +39,18 @@ class TaskInventoryManager(
         const val INVENTORY_HEADER = "inv_object"
         const val ITEM_HEADER = "inv_item"
     }
-    
+
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    
+
     // Cache of task inventories by object local ID
     private val inventoryCache = ConcurrentHashMap<Int, TaskInventory>()
-    
+
     // Pending inventory requests
     private val pendingRequests = ConcurrentHashMap<Int, MutableList<TaskInventoryCallback>>()
-    
+
     // Mapping of xfer filenames to object local IDs
     private val xferToObject = ConcurrentHashMap<String, Int>()
-    
+
     init {
         // Register xfer handler for task inventory files
         // Task inventory files have format like "task_inv_<uuid>" or similar
@@ -59,7 +59,7 @@ class TaskInventoryManager(
             handleXferComplete(filename, result)
         }
     }
-    
+
     /**
      * Request task inventory for an object.
      */
@@ -73,35 +73,35 @@ class TaskInventoryManager(
             callback?.onInventoryLoaded(cached)
             return
         }
-        
+
         // Add to pending callbacks
         val callbacks = pendingRequests.getOrPut(localId) { mutableListOf() }
         callback?.let { callbacks.add(it) }
-        
+
         if (callbacks.size == 1) {
             scope.launch {
                 sendRequestTaskInventory(localId, objectId)
             }
         }
     }
-    
+
     /**
      * Handle ReplyTaskInventory message.
      */
     fun handleReplyTaskInventory(payload: ByteArray) {
         try {
             val buffer = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             val localId = buffer.int
-            
+
             // Read filename (variable length)
             val filenameLen = buffer.get().toInt() and 0xFF
             val filenameBytes = ByteArray(filenameLen)
             buffer.get(filenameBytes)
             val filename = String(filenameBytes, Charsets.UTF_8).trim('\u0000')
-            
+
             Log.d(TAG, "ReplyTaskInventory: localId=$localId filename=$filename")
-            
+
             if (filename.isNotEmpty()) {
                 xferToObject[filename] = localId
             } else {
@@ -110,18 +110,18 @@ class TaskInventoryManager(
                 inventoryCache[localId] = inventory
                 notifyCallbacks(localId, inventory, null)
             }
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing ReplyTaskInventory", e)
         }
     }
-    
+
     /**
      * Handle Xfer completion for task inventory.
      */
     private fun handleXferComplete(filename: String, result: XferResult) {
         val localId = xferToObject.remove(filename) ?: return
-        
+
         when (result) {
             is XferResult.Success -> {
                 try {
@@ -139,7 +139,7 @@ class TaskInventoryManager(
             }
         }
     }
-    
+
     /**
      * Send RequestTaskInventory message.
      */
@@ -159,7 +159,7 @@ class TaskInventoryManager(
 
         // InventoryData block
         payload.putInt(localId)
-        
+
         try {
             udpConnection.sendPacket(MessageIdRegistry.REQUEST_TASK_INVENTORY, payload.array(), reliable = true)
             Log.d(TAG, "Sent RequestTaskInventory for object $localId")
@@ -168,22 +168,22 @@ class TaskInventoryManager(
             notifyCallbacks(localId, null, "Failed to send request: ${e.message}")
         }
     }
-    
+
     /**
      * Parse task inventory data.
      */
     private fun parseTaskInventory(localId: Int, data: ByteArray): TaskInventory {
         val content = String(data, Charsets.UTF_8)
         val lines = content.lines()
-        
+
         Log.d(TAG, "Parsing task inventory: ${data.size} bytes, ${lines.size} lines")
-        
+
         val items = mutableListOf<TaskInventoryItem>()
-        
+
         var i = 0
         while (i < lines.size) {
             val line = lines[i].trim()
-            
+
             when {
                 line.startsWith(ITEM_HEADER) -> {
                     val itemResult = parseTaskInventoryItem(lines, i)
@@ -193,17 +193,17 @@ class TaskInventoryManager(
                 else -> i++
             }
         }
-        
+
         return TaskInventory(localId, items)
     }
-    
+
     /**
      * Parse a single task inventory item.
      */
     private fun parseTaskInventoryItem(lines: List<String>, startIndex: Int): Pair<TaskInventoryItem, Int> {
         var i = startIndex
         var braceDepth = 0
-        
+
         var itemId: UUID? = null
         var parentId: UUID? = null
         var assetId: UUID? = null
@@ -219,10 +219,10 @@ class TaskInventoryManager(
         var everyoneMask: Int = 0
         var nextOwnerMask: Int = 0
         var flags: Int = 0
-        
+
         while (i < lines.size) {
             val line = lines[i].trim()
-            
+
             when {
                 line == "{" -> braceDepth++
                 line == "}" -> {
@@ -280,7 +280,7 @@ class TaskInventoryManager(
             }
             i++
         }
-        
+
         return Pair(
             TaskInventoryItem(
                 itemId = itemId ?: UUID(0, 0),
@@ -304,7 +304,7 @@ class TaskInventoryManager(
             i
         )
     }
-    
+
     private fun parseUUID(str: String): UUID? {
         return try {
             UUID.fromString(str.trim())
@@ -312,7 +312,7 @@ class TaskInventoryManager(
             null
         }
     }
-    
+
     private fun parseHexInt(str: String): Int {
         return try {
             str.toLong(16).toInt()
@@ -320,41 +320,41 @@ class TaskInventoryManager(
             0
         }
     }
-    
+
     private fun writeUUID(buffer: ByteBuffer, uuid: UUID) {
         buffer.putLong(uuid.mostSignificantBits)
         buffer.putLong(uuid.leastSignificantBits)
     }
-    
+
     private fun notifyCallbacks(localId: Int, inventory: TaskInventory?, error: String?) {
         val callbacks = pendingRequests.remove(localId) ?: return
-        
+
         if (inventory != null) {
             callbacks.forEach { it.onInventoryLoaded(inventory) }
         } else if (error != null) {
             callbacks.forEach { it.onInventoryError(error) }
         }
     }
-    
+
     /**
      * Clear inventory cache for an object.
      */
     fun clearCache(localId: Int) {
         inventoryCache.remove(localId)
     }
-    
+
     /**
      * Clear all inventory cache.
      */
     fun clearAllCache() {
         inventoryCache.clear()
     }
-    
+
     /**
      * Get cached inventory.
      */
     fun getCachedInventory(localId: Int): TaskInventory? = inventoryCache[localId]
-    
+
     /**
      * Shutdown the manager.
      */
@@ -375,19 +375,19 @@ data class TaskInventory(
 ) {
     val scripts: List<TaskInventoryItem>
         get() = items.filter { it.assetType == AssetType.LSL_TEXT || it.assetType == AssetType.LSL_BYTECODE }
-    
+
     val notecards: List<TaskInventoryItem>
         get() = items.filter { it.assetType == AssetType.NOTECARD }
-    
+
     val textures: List<TaskInventoryItem>
         get() = items.filter { it.assetType == AssetType.TEXTURE }
-    
+
     val sounds: List<TaskInventoryItem>
         get() = items.filter { it.assetType == AssetType.SOUND }
-    
+
     val animations: List<TaskInventoryItem>
         get() = items.filter { it.assetType == AssetType.ANIMATION }
-    
+
     val objects: List<TaskInventoryItem>
         get() = items.filter { it.assetType == AssetType.OBJECT }
 }
@@ -410,7 +410,7 @@ data class TaskInventoryItem(
 ) {
     val isScript: Boolean
         get() = assetType == AssetType.LSL_TEXT || assetType == AssetType.LSL_BYTECODE
-    
+
     val isNotecard: Boolean
         get() = assetType == AssetType.NOTECARD
 }
@@ -438,7 +438,7 @@ enum class InventoryType(val code: Int) {
     MESH(22),
     SETTINGS(25),
     MATERIAL(57);
-    
+
     companion object {
         fun fromCode(code: Int): InventoryType? = values().find { it.code == code }
     }
@@ -461,7 +461,7 @@ data class ItemPermissions(
         const val PERM_MOVE = 0x00080000
         const val PERM_ALL = 0x7FFFFFFF
     }
-    
+
     val canTransfer: Boolean get() = (ownerMask and PERM_TRANSFER) != 0
     val canModify: Boolean get() = (ownerMask and PERM_MODIFY) != 0
     val canCopy: Boolean get() = (ownerMask and PERM_COPY) != 0

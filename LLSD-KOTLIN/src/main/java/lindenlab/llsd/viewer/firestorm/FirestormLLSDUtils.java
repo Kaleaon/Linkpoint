@@ -1,7 +1,7 @@
 /*
  * Firestorm LLSD Extensions - Java implementation of Firestorm-specific LLSD functionality
  *
- * Based on Firestorm viewer implementation  
+ * Based on Firestorm viewer implementation
  * Copyright (C) 2010, Linden Research, Inc.
  * Firestorm enhancements Copyright (C) The Phoenix Firestorm Project, Inc.
  * Java conversion Copyright (C) 2024
@@ -30,11 +30,11 @@ import java.util.stream.Collectors;
  * As a utility class, it is final and cannot be instantiated.
  */
 public final class FirestormLLSDUtils {
-    
+
     private FirestormLLSDUtils() {
         // Utility class - no instances
     }
-    
+
     /**
      * An enumeration of message types that are specific to the Firestorm viewer,
      * extending the base set of Second Life message types.
@@ -44,33 +44,33 @@ public final class FirestormLLSDUtils {
         RLV_COMMAND,
         RLV_RESPONSE,
         RLV_STATUS,
-        
+
         // Radar and contacts
         RADAR_UPDATE,
         CONTACT_UPDATE,
         FRIEND_STATUS,
-        
+
         // Bridge communication
         BRIDGE_REQUEST,
         BRIDGE_RESPONSE,
         BRIDGE_STATUS,
-        
+
         // Firestorm UI
         FS_PREFERENCE,
         FS_NOTIFICATION,
         FS_FLOATER_DATA,
-        
+
         // Performance monitoring
         PERF_STATS,
         MEMORY_STATS,
         RENDER_STATS,
-        
+
         // Media and streaming
         MEDIA_STATUS,
         STREAM_DATA,
         PARCEL_MEDIA
     }
-    
+
     /**
      * Represents a command for the RLV (Restrained Life Viewer) system.
      * <p>
@@ -83,7 +83,7 @@ public final class FirestormLLSDUtils {
         private final String param;
         private final String option;
         private final UUID sourceId;
-        
+
         /**
          * Constructs a new RLV command.
          *
@@ -100,13 +100,13 @@ public final class FirestormLLSDUtils {
             if (sourceId == null) {
                 throw new IllegalArgumentException("RLV sourceId cannot be null");
             }
-            
+
             this.command = command.trim();
             this.param = param != null ? param.trim() : "";
             this.option = option != null ? option.trim() : "";
             this.sourceId = sourceId;
         }
-        
+
         /**
          * Gets the RLV command string.
          * @return the command string, never null or empty
@@ -114,7 +114,7 @@ public final class FirestormLLSDUtils {
         public String getCommand() {
             return command;
         }
-        
+
         /**
          * Gets the RLV command parameter.
          * @return the parameter string, never null but may be empty
@@ -122,7 +122,7 @@ public final class FirestormLLSDUtils {
         public String getParam() {
             return param;
         }
-        
+
         /**
          * Gets the RLV command option.
          * @return the option string, never null but may be empty
@@ -130,7 +130,7 @@ public final class FirestormLLSDUtils {
         public String getOption() {
             return option;
         }
-        
+
         /**
          * Gets the source UUID for this command.
          * @return the source UUID, never null
@@ -138,7 +138,7 @@ public final class FirestormLLSDUtils {
         public UUID getSourceId() {
             return sourceId;
         }
-        
+
         /**
          * Converts this RLV command into its LLSD map representation.
          *
@@ -153,7 +153,7 @@ public final class FirestormLLSDUtils {
             rlvData.put("Timestamp", System.currentTimeMillis() / 1000.0);
             return rlvData;
         }
-        
+
         /**
          * Parses an {@code RLVCommand} from its LLSD representation.
          *
@@ -170,32 +170,32 @@ public final class FirestormLLSDUtils {
             if (!(llsdData instanceof Map)) {
                 throw new LLSDException("RLV command must be a map, got: " + llsdData.getClass().getSimpleName());
             }
-            
+
             @SuppressWarnings("unchecked")
             Map<String, Object> data = (Map<String, Object>) llsdData;
-            
+
             // Extract command (required)
             Object commandObj = data.get("Command");
             if (commandObj == null) {
                 throw new LLSDException("RLV command missing required 'Command' field");
             }
             String command = commandObj.toString();
-            
+
             // Extract parameter (optional)
-            String param = data.containsKey("Parameter") ? 
+            String param = data.containsKey("Parameter") ?
                           data.get("Parameter").toString() : "";
-            
-            // Extract option (optional)  
-            String option = data.containsKey("Option") ? 
+
+            // Extract option (optional)
+            String option = data.containsKey("Option") ?
                            data.get("Option").toString() : "";
-            
+
             // Extract sourceId (required)
             Object sourceIdObj = data.get("SourceID");
             UUID sourceId;
             if (sourceIdObj == null) {
                 throw new LLSDException("RLV command missing required 'SourceID' field");
             }
-            
+
             try {
                 if (sourceIdObj instanceof UUID) {
                     sourceId = (UUID) sourceIdObj;
@@ -205,11 +205,11 @@ public final class FirestormLLSDUtils {
             } catch (IllegalArgumentException e) {
                 throw new LLSDException("Invalid SourceID format: " + sourceIdObj, e);
             }
-            
+
             return new RLVCommand(command, param, option, sourceId);
         }
     }
-    
+
     /**
      * Creates an LLSD map representing data for the Firestorm radar system.
      *
@@ -237,7 +237,7 @@ public final class FirestormLLSDUtils {
         if (distance < 0) {
             throw new IllegalArgumentException("Distance cannot be negative: " + distance);
         }
-        
+
         Map<String, Object> radarData = new HashMap<>();
         radarData.put("AgentID", agentId.toString());
         radarData.put("DisplayName", name != null ? name : "");
@@ -245,21 +245,21 @@ public final class FirestormLLSDUtils {
         radarData.put("Distance", distance);
         radarData.put("IsTyping", typing);
         radarData.put("LastSeen", System.currentTimeMillis() / 1000.0);
-        
+
         if (position != null) {
             if (position.length != 3) {
                 throw new IllegalArgumentException("Position array must have exactly 3 elements (x, y, z)");
             }
             radarData.put("Position", Arrays.stream(position).boxed().toList());
         }
-        
+
         if (attachments != null && !attachments.isEmpty()) {
             radarData.put("Attachments", new ArrayList<>(attachments)); // Defensive copy
         }
-        
+
         return radarData;
     }
-    
+
     /**
      * Creates an LLSD map for a message to be sent over the Firestorm bridge.
      * <p>
@@ -280,20 +280,20 @@ public final class FirestormLLSDUtils {
         if (command == null || command.trim().isEmpty()) {
             throw new IllegalArgumentException("Bridge command cannot be null or empty");
         }
-        
+
         Map<String, Object> bridgeData = new HashMap<>();
         bridgeData.put("Command", command.trim());
         bridgeData.put("RequestID", requestId != null ? requestId : UUID.randomUUID().toString());
         bridgeData.put("Priority", Math.max(0, Math.min(3, priority))); // Clamp to 0-3 range
         bridgeData.put("Timestamp", System.currentTimeMillis() / 1000.0);
-        
+
         if (parameters != null && !parameters.isEmpty()) {
             bridgeData.put("Parameters", new HashMap<>(parameters)); // Defensive copy
         }
-        
+
         return bridgeData;
     }
-    
+
     /**
      * Creates an LLSD map containing performance statistics from the viewer.
      *
@@ -330,7 +330,7 @@ public final class FirestormLLSDUtils {
         if (triangles < 0) {
             throw new IllegalArgumentException("Triangle count cannot be negative: " + triangles);
         }
-        
+
         Map<String, Object> perfStats = new HashMap<>();
         perfStats.put("FPS", fps);
         perfStats.put("Bandwidth", bandwidth);
@@ -339,10 +339,10 @@ public final class FirestormLLSDUtils {
         perfStats.put("ScriptTime", scriptTime);
         perfStats.put("Triangles", triangles);
         perfStats.put("Timestamp", System.currentTimeMillis() / 1000.0);
-        
+
         return perfStats;
     }
-    
+
     /**
      * Creates an LLSD map containing settings for parcel media.
      *
@@ -368,10 +368,10 @@ public final class FirestormLLSDUtils {
         mediaData.put("Looping", looping);
         mediaData.put("Volume", Math.max(0.0, Math.min(1.0, volume))); // Clamp to 0.0-1.0 range
         mediaData.put("Timestamp", System.currentTimeMillis() / 1000.0);
-        
+
         return mediaData;
     }
-    
+
     /**
      * Validates an LLSD data structure against a set of Firestorm-specific rules.
      * <p>
@@ -384,32 +384,32 @@ public final class FirestormLLSDUtils {
      */
     public static FSValidationResult validateFSStructure(Object llsdData, FSValidationRules rules) {
         FSValidationResult result = new FSValidationResult();
-        
+
         // Use base SL validation first
-        SecondLifeLLSDUtils.ValidationResult baseResult = 
+        SecondLifeLLSDUtils.ValidationResult baseResult =
             SecondLifeLLSDUtils.validateSLStructure(llsdData, rules.getBaseRules());
-        
+
         result.addErrors(baseResult.getErrors());
         result.addWarnings(baseResult.getWarnings());
-        
+
         if (!baseResult.isValid()) {
             return result; // Don't continue if base validation failed
         }
-        
+
         // Firestorm-specific validations
         if (llsdData instanceof Map) {
             @SuppressWarnings("unchecked")
             Map<String, Object> mapData = (Map<String, Object>) llsdData;
-            
+
             // Check Firestorm version requirements
             if (rules.isRequiresFSVersion() && mapData.containsKey("ViewerVersion")) {
                 String version = mapData.get("ViewerVersion").toString();
                 if (!isCompatibleFSVersion(version, rules.getMinFSVersion())) {
-                    result.addError("Incompatible Firestorm version: " + version + 
+                    result.addError("Incompatible Firestorm version: " + version +
                                    " (required: " + rules.getMinFSVersion() + "+)");
                 }
             }
-            
+
             // Check RLV requirements
             if (rules.isRequiresRLV() && mapData.containsKey("RLVEnabled")) {
                 Boolean rlvEnabled = (Boolean) mapData.get("RLVEnabled");
@@ -417,7 +417,7 @@ public final class FirestormLLSDUtils {
                     result.addError("RLV support required but not enabled");
                 }
             }
-            
+
             // Check bridge requirements
             if (rules.isRequiresBridge() && mapData.containsKey("BridgeConnected")) {
                 Boolean bridgeConnected = (Boolean) mapData.get("BridgeConnected");
@@ -426,10 +426,10 @@ public final class FirestormLLSDUtils {
                 }
             }
         }
-        
+
         return result;
     }
-    
+
     /**
      * Compares two Firestorm version strings to check for compatibility.
      * <p>
@@ -442,32 +442,32 @@ public final class FirestormLLSDUtils {
      *         {@code minVersion}, {@code false} otherwise.
      */
     private static boolean isCompatibleFSVersion(String version, String minVersion) {
-        if (version == null || minVersion == null || 
+        if (version == null || minVersion == null ||
             version.trim().isEmpty() || minVersion.trim().isEmpty()) {
             return false;
         }
-        
+
         // Normalize versions by removing leading/trailing whitespace
         String[] versionParts = version.trim().split("\\.");
         String[] minVersionParts = minVersion.trim().split("\\.");
-        
+
         // Compare version components
         int maxLength = Math.max(versionParts.length, minVersionParts.length);
         for (int i = 0; i < maxLength; i++) {
             int v = parseVersionComponent(versionParts, i);
             int min = parseVersionComponent(minVersionParts, i);
-            
+
             if (v > min) return true;
             if (v < min) return false;
             // If equal, continue to next component
         }
-        
+
         return true; // All components are equal, so it's compatible
     }
-    
+
     /**
      * Parse a version component, handling missing parts and non-numeric values.
-     * 
+     *
      * @param parts the version parts array
      * @param index the index to parse
      * @return the numeric value, or 0 if missing/invalid
@@ -476,7 +476,7 @@ public final class FirestormLLSDUtils {
         if (index >= parts.length) {
             return 0; // Missing component defaults to 0
         }
-        
+
         try {
             return Integer.parseInt(parts[index].trim());
         } catch (NumberFormatException e) {
@@ -485,7 +485,7 @@ public final class FirestormLLSDUtils {
             return parts[index].trim().hashCode() & Integer.MAX_VALUE;
         }
     }
-    
+
     /**
      * A builder class for defining a set of validation rules specific to Firestorm LLSD.
      * <p>
@@ -494,60 +494,60 @@ public final class FirestormLLSDUtils {
      */
     public static class FSValidationRules {
         private final SecondLifeLLSDUtils.SLValidationRules baseRules = new SecondLifeLLSDUtils.SLValidationRules();
-        
+
         private boolean requiresFSVersion = false;
         private String minFSVersion = "6.0.0";
         private boolean requiresRLV = false;
         private boolean requiresBridge = false;
         private final Set<String> fsRequiredFields = new HashSet<>();
         private final Map<String, String> fsFieldValidators = new HashMap<>();
-        
+
         public FSValidationRules requireMap() {
             baseRules.requireMap();
             return this;
         }
-        
+
         public FSValidationRules requireArray() {
             baseRules.requireArray();
             return this;
         }
-        
+
         public FSValidationRules requireField(String field) {
             baseRules.requireField(field);
             return this;
         }
-        
+
         public FSValidationRules requireField(String field, Class<?> type) {
             baseRules.requireField(field, type);
             return this;
         }
-        
+
         public FSValidationRules requireFSVersion(String minVersion) {
             requiresFSVersion = true;
             minFSVersion = minVersion;
             return this;
         }
-        
+
         public FSValidationRules requireRLV() {
             requiresRLV = true;
             return this;
         }
-        
+
         public FSValidationRules requireBridge() {
             requiresBridge = true;
             return this;
         }
-        
+
         public FSValidationRules requireFSField(String field) {
             fsRequiredFields.add(field);
             return this;
         }
-        
+
         public FSValidationRules addFieldValidator(String field, String validatorName) {
             fsFieldValidators.put(field, validatorName);
             return this;
         }
-        
+
         /**
          * Returns the base SL validation rules.
          * @return the underlying SL validation rules
@@ -555,7 +555,7 @@ public final class FirestormLLSDUtils {
         SecondLifeLLSDUtils.SLValidationRules getBaseRules() {
             return baseRules;
         }
-        
+
         /**
          * Checks if Firestorm version validation is required.
          * @return true if version validation is required
@@ -563,7 +563,7 @@ public final class FirestormLLSDUtils {
         public boolean isRequiresFSVersion() {
             return requiresFSVersion;
         }
-        
+
         /**
          * Gets the minimum required Firestorm version.
          * @return the minimum version string
@@ -571,7 +571,7 @@ public final class FirestormLLSDUtils {
         public String getMinFSVersion() {
             return minFSVersion;
         }
-        
+
         /**
          * Checks if RLV support is required.
          * @return true if RLV is required
@@ -579,7 +579,7 @@ public final class FirestormLLSDUtils {
         public boolean isRequiresRLV() {
             return requiresRLV;
         }
-        
+
         /**
          * Checks if bridge connection is required.
          * @return true if bridge is required
@@ -587,7 +587,7 @@ public final class FirestormLLSDUtils {
         public boolean isRequiresBridge() {
             return requiresBridge;
         }
-        
+
         /**
          * Gets the set of required Firestorm-specific fields.
          * @return unmodifiable set of required field names
@@ -595,7 +595,7 @@ public final class FirestormLLSDUtils {
         public Set<String> getFSRequiredFields() {
             return Collections.unmodifiableSet(fsRequiredFields);
         }
-        
+
         /**
          * Gets the map of field validators.
          * @return unmodifiable map of field validators
@@ -604,7 +604,7 @@ public final class FirestormLLSDUtils {
             return Collections.unmodifiableMap(fsFieldValidators);
         }
     }
-    
+
     /**
      * A class that holds the results of a validation check performed by
      * {@link #validateFSStructure(Object, FSValidationRules)}.
@@ -616,69 +616,69 @@ public final class FirestormLLSDUtils {
         private final List<String> errors = new ArrayList<>();
         private final List<String> warnings = new ArrayList<>();
         private final List<String> info = new ArrayList<>();
-        
+
         public void addError(String error) {
             errors.add(error);
         }
-        
+
         public void addWarning(String warning) {
             warnings.add(warning);
         }
-        
+
         public void addInfo(String info) {
             this.info.add(info);
         }
-        
+
         public void addErrors(List<String> errors) {
             this.errors.addAll(errors);
         }
-        
+
         public void addWarnings(List<String> warnings) {
             this.warnings.addAll(warnings);
         }
-        
+
         public boolean isValid() {
             return errors.isEmpty();
         }
-        
+
         public boolean hasWarnings() {
             return !warnings.isEmpty();
         }
-        
+
         public List<String> getErrors() {
             return Collections.unmodifiableList(errors);
         }
-        
+
         public List<String> getWarnings() {
             return Collections.unmodifiableList(warnings);
         }
-        
+
         public List<String> getInfo() {
             return Collections.unmodifiableList(info);
         }
-        
+
         public String getSummary() {
             StringBuilder summary = new StringBuilder();
-            
+
             if (!errors.isEmpty()) {
                 summary.append("Errors: ").append(errors.size()).append("\n");
                 errors.forEach(error -> summary.append("  - ").append(error).append("\n"));
             }
-            
+
             if (!warnings.isEmpty()) {
                 summary.append("Warnings: ").append(warnings.size()).append("\n");
                 warnings.forEach(warning -> summary.append("  - ").append(warning).append("\n"));
             }
-            
+
             if (!info.isEmpty()) {
                 summary.append("Info: ").append(info.size()).append("\n");
                 info.forEach(infoMsg -> summary.append("  - ").append(infoMsg).append("\n"));
             }
-            
+
             return summary.toString();
         }
     }
-    
+
     /**
      * A thread-safe cache designed for high-performance LLSD processing, featuring
      * automatic expiration of entries.
@@ -692,7 +692,7 @@ public final class FirestormLLSDUtils {
         private final ConcurrentHashMap<String, Object> cache = new ConcurrentHashMap<>();
         private final long maxAge;
         private final ConcurrentHashMap<String, Long> timestamps = new ConcurrentHashMap<>();
-        
+
         /**
          * Creates a new cache with a specified maximum age for its entries.
          *
@@ -706,7 +706,7 @@ public final class FirestormLLSDUtils {
             }
             this.maxAge = maxAgeMillis;
         }
-        
+
         /**
          * Puts a key-value pair into the cache.
          *
@@ -718,12 +718,12 @@ public final class FirestormLLSDUtils {
             if (key == null) {
                 throw new IllegalArgumentException("Cache key cannot be null");
             }
-            
+
             long timestamp = System.currentTimeMillis();
             cache.put(key, value);
             timestamps.put(key, timestamp);
         }
-        
+
         /**
          * Retrieves a value from the cache.
          * <p>
@@ -739,7 +739,7 @@ public final class FirestormLLSDUtils {
             if (key == null) {
                 throw new IllegalArgumentException("Cache key cannot be null");
             }
-            
+
             Long timestamp = timestamps.get(key);
             if (timestamp != null && System.currentTimeMillis() - timestamp > maxAge) {
                 // Entry is expired - remove it atomically
@@ -748,7 +748,7 @@ public final class FirestormLLSDUtils {
             }
             return cache.get(key);
         }
-        
+
         /**
          * Checks if the cache contains a non-expired entry for the given key.
          *
@@ -758,10 +758,10 @@ public final class FirestormLLSDUtils {
         public boolean contains(String key) {
             return get(key) != null;
         }
-        
+
         /**
          * Removes a specific key from the cache.
-         * 
+         *
          * @param key the key to remove
          * @return the previously cached value, or null if not present
          */
@@ -769,7 +769,7 @@ public final class FirestormLLSDUtils {
             timestamps.remove(key);
             return cache.remove(key);
         }
-        
+
         /**
          * Clears all entries from the cache.
          */
@@ -777,7 +777,7 @@ public final class FirestormLLSDUtils {
             cache.clear();
             timestamps.clear();
         }
-        
+
         /**
          * Returns the number of non-expired entries currently in the cache.
          * <p>
@@ -791,33 +791,33 @@ public final class FirestormLLSDUtils {
             cleanExpiredEntries();
             return cache.size();
         }
-        
+
         /**
          * Removes all expired entries from the cache.
          * This method is thread-safe but may impact performance.
          */
         public void cleanExpiredEntries() {
             long now = System.currentTimeMillis();
-            
+
             // Find expired keys
             Set<String> expiredKeys = timestamps.entrySet().stream()
                 .filter(entry -> now - entry.getValue() > maxAge)
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
-            
+
             // Remove expired entries
             expiredKeys.forEach(this::remove);
         }
-        
+
         /**
          * Gets the maximum age setting for cache entries.
-         * 
+         *
          * @return maximum age in milliseconds
          */
         public long getMaxAge() {
             return maxAge;
         }
-        
+
         /**
          * Gets a map containing statistics about the current state of the cache.
          *

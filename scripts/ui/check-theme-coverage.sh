@@ -34,7 +34,7 @@ for m in re.finditer(r'val\s+([A-Z0-9_]+)\s*=\s*ThemePack\((.*?)\n\s*\)', text, 
     if id_match:
         theme_id = id_match.group(1)
         symbol_to_id[symbol] = theme_id
-        
+
         colors = {}
         for key in ['colorPrimary', 'colorPrimaryDark', 'colorOnPrimary', 'colorSecondary', 'colorOnSecondary', 'colorBackground', 'colorSurface', 'colorOnSurface', 'colorOnSurfaceVariant', 'colorSurfaceVariant', 'colorError']:
             cm = re.search(fr'{key}\s*=\s*"([^"]+)"', body)
@@ -225,7 +225,7 @@ if missing_in_kt:
 for tid in sorted(set(kt_by_id.keys()) & set(json_themes.keys())):
     sym, kt_colors = kt_by_id[tid]
     filepath, json_colors = json_themes[tid]
-    
+
     token_diffs = []
     for kt_key, json_key in key_mapping.items():
         if kt_key in kt_colors:
@@ -233,7 +233,7 @@ for tid in sorted(set(kt_by_id.keys()) & set(json_themes.keys())):
             json_val = json_colors.get(json_key, '').upper()
             if kt_val != json_val:
                 token_diffs.append((kt_key, json_key, kt_val, json_val))
-                
+
     if token_diffs:
         print(f"❌ Token mismatch between BuiltInThemes.kt ({sym}) and JSON ({filepath}) for theme '{tid}':")
         for kt_k, j_k, kt_v, j_v in token_diffs:
