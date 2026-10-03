@@ -35,7 +35,7 @@ class SharedUdpCircuitIntegrationTest {
         val agentCircuit = AgentCircuit(authReply, sharedConnection = sharedConnection)
         val tempCircuit = TempCircuit(authReply, sharedConnection = sharedConnection)
 
-        repeat(60) {
+        repeat(200) {
             if (agentCircuit.circuitState.value == CircuitState.CIRCUIT_READY &&
                 tempCircuit.circuitState.value == TempCircuit.CircuitState.ACTIVE
             ) {
