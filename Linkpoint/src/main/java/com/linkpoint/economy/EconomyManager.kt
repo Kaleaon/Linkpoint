@@ -1,6 +1,7 @@
 package com.linkpoint.economy
 
 import android.util.Log
+import com.linkpoint.network.grid.GridInfoResolver
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.capabilities.EventQueueDispatcher
@@ -12,20 +13,18 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 /**
- * Economy Manager - Handles L$ balance and transactions.
- * 
- * Based on the reference viewer's SLFinancialInfo.java
- * 
- * Manages:
- * - L$ balance tracking
- * - Money transactions (payments, purchases)
- * - Balance change notifications
- * - Economy data (upload prices, etc.)
+ * Economy Manager - Handles balance and financial transactions over HTTP REST and UDP.
  */
 class EconomyManager(
     private val udpConnection: UDPConnectionFixed,
@@ -79,13 +78,28 @@ class EconomyManager(
     
     private val scope = CoroutineScope(EventQueueDispatcher.dispatcher + SupervisorJob())
     
-    // L$ balance
+    // Balance state
     private val _balance = MutableStateFlow(0)
     val balance: StateFlow<Int> = _balance
+
+    // Dynamic currency metadata state
+    private val _currencySymbol = MutableStateFlow("L$")
+    val currencySymbol: StateFlow<String> = _currencySymbol
+
+    private val _isZeroCurrency = MutableStateFlow(false)
+    val isZeroCurrency: StateFlow<Boolean> = _isZeroCurrency
     
     // Economy data (upload prices, etc.)
     private val _economyData = MutableStateFlow<EconomyData?>(null)
     val economyData: StateFlow<EconomyData?> = _economyData
+
+    /**
+     * Explicitly configure grid currency symbol and zero-currency flag.
+     */
+    fun setGridCurrency(symbol: String = "L$", zeroCurrency: Boolean = false) {
+        _currencySymbol.value = symbol.ifEmpty { "L$" }
+        _isZeroCurrency.value = zeroCurrency
+    }
 
     /**
      * Get dynamically resolved economy URI from session state / GridInfo
@@ -151,7 +165,7 @@ class EconomyManager(
             val previousBalance = _balance.value
             _balance.value = newBalance
             
-            Log.d(TAG, "Balance updated: $previousBalance -> $newBalance L$ ($description)")
+            Log.d(TAG, "Balance updated: $previousBalance -> $newBalance ${_currencySymbol.value} ($description)")
             
             scope.launch {
                 _transactionEvents.emit(
@@ -216,24 +230,108 @@ class EconomyManager(
     }
     
     /**
-     * Request current L$ balance.
+     * Request current balance using HTTP REST with automated UDP fallback.
      */
-    suspend fun requestBalance() {
+    suspend fun requestBalance() = withContext(Dispatchers.IO) {
+        if (_isZeroCurrency.value) {
+            _balance.value = 0
+            Log.d(TAG, "Zero-currency grid active; balance set to 0.")
+            return@withContext
+        }
+
+        val economyUri = getResolvedEconomyUri()
+        if (GridInfoResolver.isValidHttpUrl(economyUri)) {
+            val success = requestBalanceHttp(economyUri!!)
+            if (success) return@withContext
+            Log.w(TAG, "HTTP balance endpoint failed/timed out; falling back to UDP request.")
+        }
+
+        requestBalanceUdp()
+    }
+
+    private fun requestBalanceUdp() {
         try {
             val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
-            
-            // AgentData
             writeUUID(payload, agentId)
             writeUUID(payload, udpConnection.getSessionId())
-            
-            // MoneyData
-            writeUUID(payload, UUID.randomUUID()) // TransactionID
+            writeUUID(payload, UUID.randomUUID())
             
             udpConnection.sendPacket(MessageIdRegistry.MONEY_BALANCE_REQUEST, payload.array(), reliable = true)
-            Log.d(TAG, "Requested balance")
-            
+            Log.d(TAG, "Requested balance via UDP")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to request balance", e)
+            Log.e(TAG, "Failed to request balance via UDP", e)
+        }
+    }
+
+    private suspend fun requestBalanceHttp(economyUri: String): Boolean = withContext(Dispatchers.IO) {
+        return@withContext withTimeoutOrNull(3000L) {
+            try {
+                val cleanUri = economyUri.trimEnd('/')
+                val targetUrl = "$cleanUri/balance"
+                val client = OkHttpClient.Builder()
+                    .connectTimeout(3000, TimeUnit.MILLISECONDS)
+                    .readTimeout(3000, TimeUnit.MILLISECONDS)
+                    .build()
+
+                val request = Request.Builder()
+                    .url(targetUrl)
+                    .header("User-Agent", "Linkpoint/1.0 Economy")
+                    .header("Accept", "application/json, text/plain")
+                    .get()
+                    .build()
+
+                client.newCall(request).execute().use { response ->
+                    if (response.isSuccessful) {
+                        val bodyStr = response.body?.string() ?: ""
+                        if (bodyStr.isNotBlank()) {
+                            val parsed = parseBalanceJson(bodyStr)
+                            if (parsed != null) {
+                                val previousBalance = _balance.value
+                                _balance.value = parsed.first
+                                parsed.second?.let { _currencySymbol.value = it }
+                                _transactionEvents.emit(
+                                    TransactionEvent.BalanceChanged(
+                                        previousBalance = previousBalance,
+                                        newBalance = parsed.first,
+                                        change = parsed.first - previousBalance,
+                                        description = "HTTP Balance Response"
+                                    )
+                                )
+                                return@use true
+                            }
+                        }
+                    }
+                    false
+                }
+            } catch (e: Exception) {
+                Log.d(TAG, "HTTP balance error: ${e.message}")
+                false
+            }
+        } ?: false
+    }
+
+    private fun parseBalanceJson(body: String): Pair<Int, String?>? {
+        return try {
+            val trimmed = body.trim()
+            if (trimmed.startsWith("{")) {
+                val json = JSONObject(trimmed)
+                val bal = when {
+                    json.has("balance") -> json.getInt("balance")
+                    json.has("MoneyBalance") -> json.getInt("MoneyBalance")
+                    else -> null
+                }
+                val sym = when {
+                    json.has("currency") -> json.getString("currency")
+                    json.has("currencySymbol") -> json.getString("currencySymbol")
+                    else -> null
+                }
+                if (bal != null) Pair(bal, sym) else null
+            } else {
+                val intVal = trimmed.toIntOrNull()
+                if (intVal != null) Pair(intVal, null) else null
+            }
+        } catch (e: Exception) {
+            null
         }
     }
     
@@ -257,13 +355,14 @@ class EconomyManager(
     }
     
     /**
-     * Pay L$ to an agent.
+     * Pay currency to an agent.
      */
     suspend fun payAgent(
         destinationId: UUID,
         amount: Int,
         description: String = ""
     ): Boolean {
+        if (_isZeroCurrency.value) return false
         if (amount <= 0) return false
         if (amount > _balance.value) {
             Log.w(TAG, "Insufficient balance: ${_balance.value} < $amount")
@@ -274,13 +373,14 @@ class EconomyManager(
     }
     
     /**
-     * Pay L$ to an object.
+     * Pay currency to an object.
      */
     suspend fun payObject(
         objectId: UUID,
         amount: Int,
         description: String = ""
     ): Boolean {
+        if (_isZeroCurrency.value) return false
         if (amount <= 0) return false
         if (amount > _balance.value) {
             Log.w(TAG, "Insufficient balance: ${_balance.value} < $amount")
@@ -291,9 +391,89 @@ class EconomyManager(
     }
     
     /**
-     * Send a payment.
+     * Send a payment via HTTP REST with UDP fallback.
      */
     private suspend fun sendPayment(
+        destinationId: UUID,
+        amount: Int,
+        description: String,
+        transactionType: Int
+    ): Boolean = withContext(Dispatchers.IO) {
+        if (_isZeroCurrency.value) {
+            Log.w(TAG, "Suppressed payment attempt on zero-currency grid.")
+            return@withContext false
+        }
+
+        val economyUri = getResolvedEconomyUri()
+        if (GridInfoResolver.isValidHttpUrl(economyUri)) {
+            val success = sendPaymentHttp(economyUri!!, destinationId, amount, description, transactionType)
+            if (success) return@withContext true
+            Log.w(TAG, "HTTP payment endpoint failed/timed out; falling back to UDP transfer request.")
+        }
+
+        return@withContext sendPaymentUdp(destinationId, amount, description, transactionType)
+    }
+
+    private suspend fun sendPaymentHttp(
+        economyUri: String,
+        destinationId: UUID,
+        amount: Int,
+        description: String,
+        transactionType: Int
+    ): Boolean = withContext(Dispatchers.IO) {
+        return@withContext withTimeoutOrNull(3000L) {
+            try {
+                val cleanUri = economyUri.trimEnd('/')
+                val targetUrl = "$cleanUri/transfer"
+                val jsonPayload = JSONObject().apply {
+                    put("agentId", agentId.toString())
+                    put("destinationId", destinationId.toString())
+                    put("amount", amount)
+                    put("description", description)
+                    put("transactionType", transactionType)
+                }.toString()
+
+                val requestBody = jsonPayload.toRequestBody("application/json; charset=utf-8".toMediaType())
+                val client = OkHttpClient.Builder()
+                    .connectTimeout(3000, TimeUnit.MILLISECONDS)
+                    .readTimeout(3000, TimeUnit.MILLISECONDS)
+                    .build()
+
+                val request = Request.Builder()
+                    .url(targetUrl)
+                    .header("User-Agent", "Linkpoint/1.0 Economy")
+                    .post(requestBody)
+                    .build()
+
+                client.newCall(request).execute().use { response ->
+                    if (response.isSuccessful) {
+                        val bodyStr = response.body?.string() ?: ""
+                        val isOk = !bodyStr.contains("\"success\":false") && !bodyStr.contains("\"error\"")
+                        if (isOk) {
+                            val parsed = parseBalanceJson(bodyStr)
+                            if (parsed != null) {
+                                _balance.value = parsed.first
+                            }
+                            _transactionEvents.emit(
+                                TransactionEvent.PaymentSent(
+                                    destinationId = destinationId,
+                                    amount = amount,
+                                    description = description
+                                )
+                            )
+                            return@use true
+                        }
+                    }
+                    false
+                }
+            } catch (e: Exception) {
+                Log.d(TAG, "HTTP payment error: ${e.message}")
+                false
+            }
+        } ?: false
+    }
+
+    private suspend fun sendPaymentUdp(
         destinationId: UUID,
         amount: Int,
         description: String,
@@ -305,17 +485,11 @@ class EconomyManager(
             val descBytes = cappedDesc + 0.toByte()
 
             val payload = ByteBuffer
-                .allocate(36 /* AgentData */ + 16 /* SourceID */ + 16 /* DestID */ +
-                          1 /* Flags */ + 4 /* Amount */ + 1 /* AggregatePermNextOwner */ +
-                          1 /* AggregatePermInventory */ + 4 /* TransactionType */ +
-                          1 + descBytes.size /* Description Variable 1 */)
+                .allocate(36 + 16 + 16 + 1 + 4 + 1 + 1 + 4 + 1 + descBytes.size)
                 .order(ByteOrder.LITTLE_ENDIAN)
 
-            // AgentData
             writeUUID(payload, agentId)
             writeUUID(payload, udpConnection.getSessionId())
-
-            // MoneyData
             writeUUID(payload, agentId)
             writeUUID(payload, destinationId)
             payload.put(0.toByte())
@@ -328,7 +502,7 @@ class EconomyManager(
             
             udpConnection.sendPacket(MessageIdRegistry.MONEY_TRANSFER_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
             
-            Log.i(TAG, "Sent payment: $amount L$ to $destinationId")
+            Log.i(TAG, "Sent payment via UDP: $amount ${_currencySymbol.value} to $destinationId")
             
             scope.launch {
                 _transactionEvents.emit(
@@ -343,7 +517,7 @@ class EconomyManager(
             return true
             
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to send payment", e)
+            Log.e(TAG, "Failed to send payment via UDP", e)
             return false
         }
     }
