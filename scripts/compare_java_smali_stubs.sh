@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-JAVA_ROOT="${1:-file_bundle}"
+JAVA_ROOT="${1:-lumiya_decompiled_source}"
 SMALI_ROOT="${2:-/tmp/lumiya_task/smali_out}"
 OUTPUT="${3:-docs/apk_analysis/java_smali_gap_report.json}"
 

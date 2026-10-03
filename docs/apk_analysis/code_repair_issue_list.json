@@ -1,43 +1,715 @@
 {
-  "issue_count": 6,
-  "high": 3,
-  "medium": 3,
+  "issue_count": 102,
+  "high": 102,
+  "medium": 0,
   "low": 0,
   "issues": [
     {
       "category": "java_smali_reconstruction",
       "severity": "high",
-      "file": "file_bundle/ActiveChattersManager.java",
-      "symbol": "com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager.AnonymousClass2.processRequest",
-      "details": "Unresolved decompilation stub; rebuild from smali. params=(com.lumiyaviewer.lumiya.slproto.users.ChatterID) return=com.lumiyaviewer.lumiya.slproto.users.manager.UnreadMessageInfo"
+      "file": "lumiya_decompiled_source/android/support/design/widget/CoordinatorLayout.java",
+      "symbol": "android.support.design.widget.CoordinatorLayout.doViewsOverlap",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(android.view.View, android.view.View) return=boolean"
     },
     {
       "category": "java_smali_reconstruction",
       "severity": "high",
-      "file": "file_bundle/ActiveChattersManager.java",
-      "symbol": "com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager.m273lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_13379",
-      "details": "Unresolved decompilation stub; rebuild from smali. params=(com.lumiyaviewer.lumiya.slproto.users.ChatterID, com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent, boolean) return=void"
+      "file": "lumiya_decompiled_source/android/support/design/widget/CoordinatorLayout.java",
+      "symbol": "android.support.design.widget.CoordinatorLayout.onTouchEvent",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(android.view.MotionEvent) return=boolean"
     },
     {
-      "category": "kotlin_logic_placeholder",
-      "severity": "medium",
-      "file": "src/main/java/com/linkpoint/protocol/messages/RobustUDPConnection.kt",
-      "symbol": "ByteArray(0)",
-      "details": "Potential placeholder packet/body content; verify against smali/original protocol behavior."
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/android/support/design/widget/HeaderBehavior.java",
+      "symbol": "android.support.design.widget.HeaderBehavior.onTouchEvent",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(android.support.design.widget.CoordinatorLayout, android.view.View, android.view.MotionEvent) return=boolean"
     },
     {
-      "category": "kotlin_backpressure_risk",
-      "severity": "medium",
-      "file": "src/main/java/com/linkpoint/protocol/messages/RobustUDPConnection.kt",
-      "symbol": "Channel.UNLIMITED",
-      "details": "Unbounded channel can cause memory growth; verify expected throughput and add backpressure strategy."
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/android/support/graphics/drawable/AnimationUtilsCompat.java",
+      "symbol": "android.support.graphics.drawable.AnimationUtilsCompat.createInterpolatorFromXml",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(android.content.Context, android.content.res.Resources, android.content.res.Resources$Theme, org.xmlpull.v1.XmlPullParser) return=android.view.animation.Interpolator"
     },
     {
-      "category": "kotlin_backpressure_risk",
-      "severity": "medium",
-      "file": "src/main/java/com/linkpoint/utils/SessionLogRecorder.kt",
-      "symbol": "Channel.UNLIMITED",
-      "details": "Unbounded channel can cause memory growth; verify expected throughput and add backpressure strategy."
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/android/support/transition/TransitionInflater.java",
+      "symbol": "android.support.transition.TransitionInflater.createTransitionFromXml",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(org.xmlpull.v1.XmlPullParser, android.util.AttributeSet, android.support.transition.Transition) return=android.support.transition.Transition"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/android/support/transition/TransitionInflater.java",
+      "symbol": "android.support.transition.TransitionInflater.createTransitionManagerFromXml",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(org.xmlpull.v1.XmlPullParser, android.util.AttributeSet, android.view.ViewGroup) return=android.support.transition.TransitionManager"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/android/support/v4/content/pm/ShortcutManagerCompat.java",
+      "symbol": "android.support.v4.content.pm.ShortcutManagerCompat.isRequestPinShortcutSupported",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(android.content.Context) return=boolean"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/android/support/v4/graphics/TypefaceCompatApi21Impl.java",
+      "symbol": "android.support.v4.graphics.TypefaceCompatApi21Impl.createFromFontInfo",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(android.content.Context, android.os.CancellationSignal, android.support.v4.provider.FontsContractCompat$FontInfo[], int) return=android.graphics.Typeface"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/android/support/v4/graphics/TypefaceCompatUtil.java",
+      "symbol": "android.support.v4.graphics.TypefaceCompatUtil.mmap",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(android.content.Context, android.os.CancellationSignal, android.net.Uri) return=java.nio.ByteBuffer"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/android/support/v4/media/session/MediaSessionCompat.java",
+      "symbol": "android.support.v4.media.session.MediaSessionCompat.getStateWithUpdatedPosition",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(android.support.v4.media.session.PlaybackStateCompat, android.support.v4.media.MediaMetadataCompat) return=android.support.v4.media.session.PlaybackStateCompat"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/android/support/v4/provider/FontsContractCompat.java",
+      "symbol": "android.support.v4.provider.FontsContractCompat.getFontFromProvider",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(android.content.Context, android.support.v4.provider.FontRequest, java.lang.String, android.os.CancellationSignal) return=android.support.v4.provider.FontsContractCompat$FontInfo[]"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/android/support/v4/util/LruCache.java",
+      "symbol": "android.support.v4.util.LruCache.trimToSize",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(int) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/android/support/v4/view/ViewPager.java",
+      "symbol": "android.support.v4.view.ViewPager.isGutterDrag",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(float, float) return=boolean"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/android/support/v4/widget/SlidingPaneLayout.java",
+      "symbol": "android.support.v4.widget.SlidingPaneLayout.parallaxOtherViews",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(float) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/android/support/v4/widget/ViewDragHelper.java",
+      "symbol": "android.support.v4.widget.ViewDragHelper.shouldInterceptTouchEvent",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(android.view.MotionEvent) return=boolean"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/android/support/v7/util/DiffUtil.java",
+      "symbol": "android.support.v7.util.DiffUtil.DiffResult.findMatchingItem",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(int, int, int, boolean) return=boolean"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/android/support/v7/view/SupportMenuInflater.java",
+      "symbol": "android.support.v7.view.SupportMenuInflater.parseMenu",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(org.xmlpull.v1.XmlPullParser, android.util.AttributeSet, android.view.Menu) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/android/support/v7/widget/AppCompatSpinner.java",
+      "symbol": "android.support.v7.widget.AppCompatSpinner.<init>",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(android.content.Context, android.util.AttributeSet, int, int, android.content.res.Resources$Theme) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/android/support/v7/widget/DropDownListView.java",
+      "symbol": "android.support.v7.widget.DropDownListView.onForwardedEvent",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(android.view.MotionEvent, int) return=boolean"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/android/support/v7/widget/GridLayoutManager.java",
+      "symbol": "android.support.v7.widget.GridLayoutManager.layoutChunk",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(android.support.v7.widget.RecyclerView$Recycler, android.support.v7.widget.RecyclerView$State, android.support.v7.widget.LinearLayoutManager$LayoutState, android.support.v7.widget.LinearLayoutManager$LayoutChunkResult) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/android/support/v7/widget/RecyclerView.java",
+      "symbol": "android.support.v7.widget.RecyclerView.findContainingItemView",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(android.view.View) return=android.view.View"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/android/support/v7/widget/RecyclerView.java",
+      "symbol": "android.support.v7.widget.RecyclerView.findViewHolderForPosition",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(int, boolean) return=android.support.v7.widget.RecyclerView$ViewHolder"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/base/Splitter.java",
+      "symbol": "com.google.common.base.Splitter.AnonymousClass2.AnonymousClass1.separatorStart",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(int) return=int"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/base/Suppliers.java",
+      "symbol": "com.google.common.base.Suppliers.ExpiringMemoizingSupplier.get",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=() return=java.lang.Object"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/cache/LocalCache.java",
+      "symbol": "com.google.common.cache.LocalCache.Segment.insertLoadingValueReference",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(java.lang.Object, int, boolean) return=com.google.common.cache.LocalCache$LoadingValueReference"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/cache/LocalCache.java",
+      "symbol": "com.google.common.cache.LocalCache.containsValue",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(java.lang.Object) return=boolean"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/cache/LocalCache.java",
+      "symbol": "com.google.common.cache.LocalCache.loadAll",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(java.util.Set, com.google.common.cache.CacheLoader) return=java.util.Map"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/collect/ComputingConcurrentHashMap.java",
+      "symbol": "com.google.common.collect.ComputingConcurrentHashMap.ComputingSegment.compute",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(java.lang.Object, int, com.google.common.collect.MapMakerInternalMap$ReferenceEntry, com.google.common.collect.ComputingConcurrentHashMap$ComputingValueReference) return=java.lang.Object"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/collect/ComputingConcurrentHashMap.java",
+      "symbol": "com.google.common.collect.ComputingConcurrentHashMap.ComputingSegment.getOrCompute",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(java.lang.Object, int, com.google.common.base.Function) return=java.lang.Object"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/collect/ConcurrentHashMultiset.java",
+      "symbol": "com.google.common.collect.ConcurrentHashMultiset.add",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(java.lang.Object, int) return=int"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/collect/ConcurrentHashMultiset.java",
+      "symbol": "com.google.common.collect.ConcurrentHashMultiset.setCount",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(java.lang.Object, int) return=int"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/collect/Iterators.java",
+      "symbol": "com.google.common.collect.Iterators.elementsEqual",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(java.util.Iterator, java.util.Iterator) return=boolean"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/collect/MapMakerInternalMap.java",
+      "symbol": "com.google.common.collect.MapMakerInternalMap.containsValue",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(java.lang.Object) return=boolean"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/collect/RegularImmutableSortedSet.java",
+      "symbol": "com.google.common.collect.RegularImmutableSortedSet.equals",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(java.lang.Object) return=boolean"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/eventbus/Dispatcher.java",
+      "symbol": "com.google.common.eventbus.Dispatcher.PerThreadQueuedDispatcher.dispatch",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(java.lang.Object, java.util.Iterator) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/eventbus/SubscriberRegistry.java",
+      "symbol": "com.google.common.eventbus.SubscriberRegistry.unregister",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(java.lang.Object) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/io/BaseEncoding.java",
+      "symbol": "com.google.common.io.BaseEncoding.StandardBaseEncoding.AnonymousClass2.read",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=() return=int"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/math/IntMath.java",
+      "symbol": "com.google.common.math.IntMath.divide",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(int, int, java.math.RoundingMode) return=int"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/primitives/Booleans.java",
+      "symbol": "com.google.common.primitives.Booleans.indexOf",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(boolean[], boolean[]) return=int"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/primitives/Bytes.java",
+      "symbol": "com.google.common.primitives.Bytes.indexOf",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(byte[], byte[]) return=int"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/primitives/Chars.java",
+      "symbol": "com.google.common.primitives.Chars.indexOf",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(char[], char[]) return=int"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/primitives/Doubles.java",
+      "symbol": "com.google.common.primitives.Doubles.indexOf",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(double[], double[]) return=int"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/primitives/Floats.java",
+      "symbol": "com.google.common.primitives.Floats.indexOf",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(float[], float[]) return=int"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/primitives/Ints.java",
+      "symbol": "com.google.common.primitives.Ints.indexOf",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(int[], int[]) return=int"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/primitives/Longs.java",
+      "symbol": "com.google.common.primitives.Longs.indexOf",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(long[], long[]) return=int"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/primitives/Shorts.java",
+      "symbol": "com.google.common.primitives.Shorts.indexOf",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(short[], short[]) return=int"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/reflect/TypeVisitor.java",
+      "symbol": "com.google.common.reflect.TypeVisitor.visit",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(java.lang.reflect.Type[]) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/util/concurrent/Futures.java",
+      "symbol": "com.google.common.util.concurrent.Futures.AbstractCatchingFuture.run",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=() return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/util/concurrent/ListenerCallQueue.java",
+      "symbol": "com.google.common.util.concurrent.ListenerCallQueue.run",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=() return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/util/concurrent/Monitor.java",
+      "symbol": "com.google.common.util.concurrent.Monitor.enter",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(long, java.util.concurrent.TimeUnit) return=boolean"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/util/concurrent/Monitor.java",
+      "symbol": "com.google.common.util.concurrent.Monitor.enterWhen",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(com.google.common.util.concurrent.Monitor$Guard, long, java.util.concurrent.TimeUnit) return=boolean"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/common/util/concurrent/Monitor.java",
+      "symbol": "com.google.common.util.concurrent.Monitor.waitForUninterruptibly",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(com.google.common.util.concurrent.Monitor$Guard, long, java.util.concurrent.TimeUnit) return=boolean"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/gson/internal/bind/util/ISO8601Utils.java",
+      "symbol": "com.google.gson.internal.bind.util.ISO8601Utils.parse",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(java.lang.String, java.text.ParsePosition) return=java.util.Date"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/gson/stream/JsonReader.java",
+      "symbol": "com.google.gson.stream.JsonReader.nextUnquotedValue",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=() return=java.lang.String"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/gson/stream/JsonReader.java",
+      "symbol": "com.google.gson.stream.JsonReader.peekNumber",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=() return=int"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/gson/stream/JsonWriter.java",
+      "symbol": "com.google.gson.stream.JsonWriter.string",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(java.lang.String) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/protobuf/nano/InternalNano.java",
+      "symbol": "com.google.protobuf.nano.InternalNano.equals",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(java.util.Map, java.util.Map) return=boolean"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/thirdparty/publicsuffix/TrieParser.java",
+      "symbol": "com.google.thirdparty.publicsuffix.TrieParser.doParseTrieToBuilder",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(java.util.List, java.lang.CharSequence, com.google.common.collect.ImmutableMap$Builder) return=int"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/vr/cardboard/ContentProviderVrParamsProvider.java",
+      "symbol": "com.google.vr.cardboard.ContentProviderVrParamsProvider.readParams",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(com.google.protobuf.nano.MessageNano, android.net.Uri, java.lang.String) return=com.google.protobuf.nano.MessageNano"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/vr/cardboard/DisplaySynchronizer.java",
+      "symbol": "com.google.vr.cardboard.DisplaySynchronizer.doFrame",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(long) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/vr/ndk/base/DaydreamApi.java",
+      "symbol": "com.google.vr.ndk.base.DaydreamApi.getDaydreamSetupCompleted",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(android.content.Context) return=boolean"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/google/vr/ndk/base/GvrLayout.java",
+      "symbol": "com.google.vr.ndk.base.GvrLayout.PresentationHelper.setDisplay",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(android.view.Display) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/render/glres/GLSyncLoadQueue.java",
+      "symbol": "com.lumiyaviewer.lumiya.render.glres.GLSyncLoadQueue.RunLoadQueue",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(com.lumiyaviewer.lumiya.render.RenderContext) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/res/anim/AnimationCache.java",
+      "symbol": "com.lumiyaviewer.lumiya.res.anim.AnimationCache.AssetLoadRequest.run",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=() return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/res/textures/TextureCompressedCache.java",
+      "symbol": "com.lumiyaviewer.lumiya.res.textures.TextureCompressedCache.TextureFetchRequest.run",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=() return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/SLCircuit.java",
+      "symbol": "com.lumiyaviewer.lumiya.slproto.SLCircuit.ProcessReceive",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=() return=boolean"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/SLParcelInfo.java",
+      "symbol": "com.lumiyaviewer.lumiya.slproto.SLParcelInfo.killObject",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(com.lumiyaviewer.lumiya.slproto.SLAgentCircuit, int) return=boolean"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/auth/SLAuth.java",
+      "symbol": "com.lumiyaviewer.lumiya.slproto.auth.SLAuth.SendLoginRequest",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(com.lumiyaviewer.lumiya.slproto.auth.SLAuthParams) return=com.lumiyaviewer.lumiya.slproto.auth.SLAuthReply"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/avatar/SLAnimatedMeshData.java",
+      "symbol": "com.lumiyaviewer.lumiya.slproto.avatar.SLAnimatedMeshData.GLDraw",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(com.lumiyaviewer.lumiya.render.RenderContext, com.lumiyaviewer.lumiya.render.drawable.DrawableFaceTexture) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/baker/BakeLayer.java",
+      "symbol": "com.lumiyaviewer.lumiya.slproto.baker.BakeLayer.Bake",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(com.lumiyaviewer.lumiya.openjpeg.OpenJPEG, com.lumiyaviewer.lumiya.slproto.baker.BakeProcess) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/inventory/SLInventoryHTTPFetchRequest.java",
+      "symbol": "com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.DatabaseCommitThread.run",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=() return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/inventory/SLInventoryHTTPFetchRequest.java",
+      "symbol": "com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.AnonymousClass1.run",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=() return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/modules/SLMinimap.java",
+      "symbol": "com.lumiyaviewer.lumiya.slproto.modules.SLMinimap.HandleCoarseLocationUpdate",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(com.lumiyaviewer.lumiya.slproto.messages.CoarseLocationUpdate) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/modules/SLMinimap.java",
+      "symbol": "com.lumiyaviewer.lumiya.slproto.modules.SLMinimap.HandleParcelProperties",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/modules/rlv/RLVRestrictions.java",
+      "symbol": "com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVRestrictions.RLVRestrictionList.isAllowed",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVRestrictionType$RLVRuleMatchType, java.lang.String, java.util.UUID, java.util.UUID) return=boolean"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/objects/SLObjectInfo.java",
+      "symbol": "com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo.ApplyObjectUpdate",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdateCompressed$ObjectData) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/users/manager/ObjectPopupsManager.java",
+      "symbol": "com.lumiyaviewer.lumiya.slproto.users.manager.ObjectPopupsManager.cancelObjectPopup",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/ui/chat/ContactsFragment.java",
+      "symbol": "com.lumiyaviewer.lumiya.ui.chat.ContactsFragment.updateOptionsMenu",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=() return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/ui/common/DetailsActivity.java",
+      "symbol": "com.lumiyaviewer.lumiya.ui.common.DetailsActivity.updateTitle",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=() return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/ui/common/MasterDetailsActivity.java",
+      "symbol": "com.lumiyaviewer.lumiya.ui.common.MasterDetailsActivity.onCreate",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(android.os.Bundle) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/ui/notify/OnlineNotificationInfo.java",
+      "symbol": "com.lumiyaviewer.lumiya.ui.notify.OnlineNotificationInfo.<init>",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(boolean, android.content.Context, java.lang.String, com.lumiyaviewer.lumiya.slproto.SLGridConnection, com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever, com.lumiyaviewer.lumiya.slproto.users.manager.CurrentLocationInfo) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/utils/PriorityBinQueue.java",
+      "symbol": "com.lumiyaviewer.lumiya.utils.PriorityBinQueue.poll",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(long, java.util.concurrent.TimeUnit) return=java.lang.Object"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/utils/reqset/WeakRequestSet.java",
+      "symbol": "com.lumiyaviewer.lumiya.utils.reqset.WeakRequestSet.getRequest",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=() return=java.lang.Object"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/utils/wlist/ChunkedListLoader.java",
+      "symbol": "com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader.setVisibleRange",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(int, int) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/voiceintf/VoicePluginServiceConnection.java",
+      "symbol": "com.lumiyaviewer.lumiya.voiceintf.VoicePluginServiceConnection.showIncomingCallNotification",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(com.lumiyaviewer.lumiya.voice.common.messages.VoiceRinging, java.lang.String, com.lumiyaviewer.lumiya.slproto.users.ChatterID) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/com/nineoldandroids/animation/AnimatorInflater.java",
+      "symbol": "com.nineoldandroids.animation.AnimatorInflater.createAnimatorFromXml",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(android.content.Context, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet, com.nineoldandroids.animation.AnimatorSet, int) return=com.nineoldandroids.animation.Animator"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/de/greenrobot/dao/async/AsyncOperationExecutor.java",
+      "symbol": "de.greenrobot.dao.async.AsyncOperationExecutor.mergeTxAndExecute",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(de.greenrobot.dao.async.AsyncOperation, de.greenrobot.dao.async.AsyncOperation) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/okhttp3/Cookie.java",
+      "symbol": "okhttp3.Cookie.parse",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(long, okhttp3.HttpUrl, java.lang.String) return=okhttp3.Cookie"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/okhttp3/HttpUrl.java",
+      "symbol": "okhttp3.HttpUrl.Builder.decodeIpv6",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(java.lang.String, int, int) return=java.net.InetAddress"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/okhttp3/internal/cache/CacheStrategy.java",
+      "symbol": "okhttp3.internal.cache.CacheStrategy.isCacheable",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(okhttp3.Response, okhttp3.Request) return=boolean"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/okhttp3/internal/cache2/FileOperator.java",
+      "symbol": "okhttp3.internal.cache2.FileOperator.read",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(long, okio.Buffer, long) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/okhttp3/internal/cache2/Relay.java",
+      "symbol": "okhttp3.internal.cache2.Relay.RelaySource.read",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(okio.Buffer, long) return=long"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/okhttp3/internal/http2/Http2Connection.java",
+      "symbol": "okhttp3.internal.http2.Http2Connection.newStream",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(int, java.util.List, boolean) return=okhttp3.internal.http2.Http2Stream"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/okhttp3/internal/http2/Http2Connection.java",
+      "symbol": "okhttp3.internal.http2.Http2Connection.writeData",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(int, boolean, okio.Buffer, long) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/okhttp3/internal/tls/DistinguishedNameParser.java",
+      "symbol": "okhttp3.internal.tls.DistinguishedNameParser.hexAV",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=() return=java.lang.String"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/okhttp3/internal/ws/WebSocketWriter.java",
+      "symbol": "okhttp3.internal.ws.WebSocketWriter.FrameSink.write",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(okio.Buffer, long) return=void"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/okio/Buffer.java",
+      "symbol": "okio.Buffer.equals",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(java.lang.Object) return=boolean"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/okio/Buffer.java",
+      "symbol": "okio.Buffer.indexOf",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(byte, long) return=long"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/okio/Buffer.java",
+      "symbol": "okio.Buffer.readDecimalLong",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=() return=long"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/okio/Buffer.java",
+      "symbol": "okio.Buffer.readHexadecimalUnsignedLong",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=() return=long"
+    },
+    {
+      "category": "java_smali_reconstruction",
+      "severity": "high",
+      "file": "lumiya_decompiled_source/uk/co/senab/photoview/PhotoViewAttacher.java",
+      "symbol": "uk.co.senab.photoview.PhotoViewAttacher.onDrag",
+      "details": "Unresolved decompilation stub; rebuild from smali. params=(float, float) return=void"
     },
     {
       "category": "smali_artifact_availability",
