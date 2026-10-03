@@ -17,7 +17,8 @@
     "test": "npm run test:web",
     "test:coverage": "vitest run --coverage",
     "test:web": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "postinstall": "node apps/linkpoint/scripts/patch-metaverse.cjs"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.1.11",

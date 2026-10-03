@@ -66,7 +66,7 @@ describe('diagnostics display rules', () => {
 });
 
 describe('no fabricated telemetry remains in the source', () => {
-  const read = (p: string) => readFileSync(join(process.cwd(), 'src', p), 'utf8');
+  const read = (p: string) => readFileSync(join(__dirname, '../..', p), 'utf8');
   const sources = ['screens/DiagnosticsPanel.jsx', 'linkpoint/sl-connection-full.ts', 'server/sl-session.ts', 'components/MenuBar.jsx'];
   const banned: Array<[string, RegExp]> = [
     ['hardcoded agent UUID', /f496d6bf-8235-4ebf-bd56-4f7f0464a27a/],
