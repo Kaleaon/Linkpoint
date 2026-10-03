@@ -325,11 +325,11 @@ data class PermissionRequest(
 )
 
 val DefaultPermissions = listOf(
-    PermissionRequest("mic", "Microphone", "For voice chat with friends and at events.", Icons.Default.Mic, true),
+    PermissionRequest("mic", "Microphone", "For voice chat with friends and at events.", Icons.Default.Mic, false),
     PermissionRequest("loc", "Location", "Required to suggest nearby regions and events.", Icons.Default.LocationOn, false),
     PermissionRequest("notif", "Notifications", "Receive IM and group notifications when minimised.", Icons.Default.Notifications, false),
     PermissionRequest("cam", "Camera", "For avatar photos and inworld snapshots.", Icons.Default.PhotoCamera, false),
-    PermissionRequest("storage", "Storage", "To cache textures and asset data.", Icons.Default.Storage, true),
+    PermissionRequest("storage", "Storage", "To cache textures and asset data.", Icons.Default.Storage, false),
 )
 
 @Composable
