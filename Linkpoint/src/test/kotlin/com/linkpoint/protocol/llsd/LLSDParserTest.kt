@@ -215,4 +215,36 @@ class LLSDParserTest {
             LLSDParser.parseBinary(payload)
         }
     }
+
+    @Test
+    fun `parse auto routes XML byte stream correctly`() {
+        val xmlBytes = "<?xml version=\"1.0\"?><llsd><map><key>agent</key><string>linkpoint</string></map></llsd>".toByteArray(Charsets.UTF_8)
+        val value = LLSDParser.parseAuto(xmlBytes, "application/llsd+xml")
+
+        val expected = LLSDMap().apply { this["agent"] = LLSDString("linkpoint") }
+        assertEquals(expected, value)
+    }
+
+    @Test
+    fun `parse notation stream processes bytes without full string allocation`() {
+        val notationBytes = "<?llsd/notation?>\n{'test':i99}".toByteArray(Charsets.UTF_8)
+        val valueFromBytes = LLSDParser.parseNotation(notationBytes)
+        val valueFromStream = LLSDParser.parseNotation(java.io.ByteArrayInputStream(notationBytes))
+
+        val expected = LLSDMap().apply { this["test"] = LLSDInteger(99) }
+        assertEquals(expected, valueFromBytes)
+        assertEquals(expected, valueFromStream)
+    }
+
+    @Test
+    fun `parse auto detects XML byte payload directly`() {
+        val xmlBytes = "<llsd><array><integer>1</integer><integer>2</integer></array></llsd>".toByteArray(Charsets.UTF_8)
+        val value = LLSDParser.parse(xmlBytes)
+
+        val expected = LLSDArray().apply {
+            add(LLSDInteger(1))
+            add(LLSDInteger(2))
+        }
+        assertEquals(expected, value)
+    }
 }

@@ -63,7 +63,7 @@ object LLSDParser {
         if (startsWithBytes(data, "<?llsd/binary?>")) return parseBinary(data)
 
         return when {
-            looksLikeXml(data) -> parseXML(String(data, Charsets.UTF_8))
+            looksLikeXml(data) -> parseXML(data)
             looksLikeNotation(data) -> parseNotation(data)
             else -> parseBinary(data)
         }
@@ -76,6 +76,10 @@ object LLSDParser {
      * forms.
      */
     fun parseNotation(data: ByteArray): LLSDValue = LLSDNotationParser.parse(data)
+
+    fun parseNotation(stream: InputStream): LLSDValue = LLSDNotationParser.parse(stream)
+
+    fun parseNotation(notation: String): LLSDValue = parseNotation(ByteArrayInputStream(notation.toByteArray(Charsets.UTF_8)))
 
     private fun startsWithBytes(data: ByteArray, s: String): Boolean {
         if (data.size < s.length) return false
@@ -119,7 +123,7 @@ object LLSDParser {
         val buffered = java.io.BufferedInputStream(stream, 65536)
         return when (LLSDContentTypeDetector.detect(buffered, contentType)) {
             LLSDContentTypeDetector.LLSDContentType.LLSD_BINARY -> parseBinary(data)
-            LLSDContentTypeDetector.LLSDContentType.LLSD_XML -> parseXML(String(data, Charsets.UTF_8))
+            LLSDContentTypeDetector.LLSDContentType.LLSD_XML -> parseXML(ByteArrayInputStream(data))
         }
     }
 
@@ -367,170 +371,18 @@ object LLSDParser {
         }
     }
 
-    fun parseXML(xml: String): LLSDValue {
-        var cleaned = xml.trim()
-
-        if (cleaned.startsWith("<?xml", ignoreCase = true)) {
-            val declEnd = cleaned.indexOf("?>")
-            if (declEnd == -1) {
-                logWarning(TAG, "Failed to parse XML LLSD: malformed xml header")
-                return LLSDUndefined
-            }
-            cleaned = cleaned.substring(declEnd + 2).trimStart()
-        }
-
+    fun parseXML(stream: InputStream): LLSDValue {
         return try {
-            parseXMLElement(cleaned, 0).first
+            LLSDStreamingParser.parseAnyToValue(stream, "application/llsd+xml")
         } catch (e: Exception) {
             logWarning(TAG, "Failed to parse XML LLSD: ${e.message}", e)
             LLSDUndefined
         }
     }
 
-    private fun parseXMLElement(xml: String, startPos: Int): Pair<LLSDValue, Int> {
-        var pos = startPos
+    fun parseXML(data: ByteArray): LLSDValue = parseXML(ByteArrayInputStream(data))
 
-        while (pos < xml.length && xml[pos].isWhitespace()) pos++
-
-        if (pos >= xml.length || xml[pos] != '<') {
-            return LLSDUndefined to pos
-        }
-
-        val tagStart = pos + 1
-        var tagEnd = tagStart
-        while (tagEnd < xml.length && xml[tagEnd] != '>' && xml[tagEnd] != ' ' && xml[tagEnd] != '/') {
-            tagEnd++
-        }
-
-        val tagName = xml.substring(tagStart, tagEnd).lowercase()
-
-        val closePos = xml.indexOf('>', pos)
-        if (closePos == -1) return LLSDUndefined to xml.length
-
-        val isSelfClosing = xml[closePos - 1] == '/'
-
-        if (isSelfClosing) {
-            return when (tagName) {
-                "undef" -> LLSDUndefined to closePos + 1
-                "boolean" -> LLSDBoolean(false) to closePos + 1
-                "integer" -> LLSDInteger(0) to closePos + 1
-                "real" -> LLSDReal(0.0) to closePos + 1
-                "string" -> LLSDString("") to closePos + 1
-                "uuid" -> LLSDUUID.ZERO to closePos + 1
-                "binary" -> LLSDBinary(byteArrayOf()) to closePos + 1
-                "map" -> LLSDMap() to closePos + 1
-                "array" -> LLSDArray() to closePos + 1
-                else -> LLSDUndefined to closePos + 1
-            }
-        }
-
-        val contentStart = closePos + 1
-        val closingTag = "</$tagName>"
-        val closingPos = findMatchingCloseTag(xml, tagName, contentStart)
-        if (closingPos == -1) return LLSDUndefined to xml.length
-
-        val rawContent = xml.substring(contentStart, closingPos)
-        val content = rawContent.trim()
-        val endPos = closingPos + closingTag.length
-
-        return when (tagName) {
-            "llsd" -> parseXMLElement(content, 0).let { it.first to endPos }
-            "undef" -> LLSDUndefined to endPos
-            "boolean" -> LLSDBoolean(content == "true" || content == "1") to endPos
-            "integer" -> LLSDInteger(content.toIntOrNull() ?: 0) to endPos
-            "real" -> LLSDReal(content.toDoubleOrNull() ?: 0.0) to endPos
-            "string" -> LLSDString(unescapeXML(rawContent)) to endPos
-            "uuid" -> {
-                val uuid = try { UUID.fromString(content) } catch (e: Exception) { UUID(0, 0) }
-                LLSDUUID(uuid) to endPos
-            }
-            "binary" -> {
-                val bytes = try { Base64.getDecoder().decode(content) } catch (e: Exception) { byteArrayOf() }
-                LLSDBinary(bytes) to endPos
-            }
-            "date" -> {
-                val date = parseLlsdDate(content) ?: Date()
-                LLSDDate(date) to endPos
-            }
-            "uri" -> LLSDURI(content) to endPos
-            "map" -> {
-                val map = LLSDMap()
-                var mapPos = 0
-                while (mapPos < content.length) {
-                    while (mapPos < content.length && content[mapPos].isWhitespace()) mapPos++
-                    if (mapPos >= content.length) break
-
-                    val keyStart = content.indexOf("<key>", mapPos, ignoreCase = true)
-                    if (keyStart == -1) break
-                    val keyEnd = content.indexOf("</key>", keyStart, ignoreCase = true)
-                    if (keyEnd == -1) break
-                    val key = content.substring(keyStart + 5, keyEnd)
-
-                    mapPos = keyEnd + 6
-                    val (value, newPos) = parseXMLElement(content, mapPos)
-                    map[key] = value
-                    mapPos = newPos
-                }
-                map to endPos
-            }
-            "array" -> {
-                val array = LLSDArray()
-                var arrayPos = 0
-                while (arrayPos < content.length) {
-                    while (arrayPos < content.length && content[arrayPos].isWhitespace()) arrayPos++
-                    if (arrayPos >= content.length) break
-                    if (content[arrayPos] != '<') break
-
-                    val (value, newPos) = parseXMLElement(content, arrayPos)
-                    if (value != LLSDUndefined || content.substring(arrayPos).startsWith("<undef", ignoreCase = true)) {
-                        array.add(value)
-                    }
-                    if (newPos <= arrayPos) break
-                    arrayPos = newPos
-                }
-                array to endPos
-            }
-            else -> LLSDUndefined to endPos
-        }
-    }
-
-    private fun findMatchingCloseTag(xml: String, tagName: String, startPos: Int): Int {
-        val openPrefix = "<$tagName"
-        val closeTag = "</$tagName>"
-        var depth = 1
-        var i = startPos
-        while (i < xml.length) {
-            val nextOpen = xml.indexOf(openPrefix, i, ignoreCase = true)
-            val nextClose = xml.indexOf(closeTag, i, ignoreCase = true)
-            if (nextClose == -1) return -1
-            if (nextOpen != -1 && nextOpen < nextClose) {
-                val after = nextOpen + openPrefix.length
-                val ch = if (after < xml.length) xml[after] else ' '
-                if (ch == '>' || ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '/') {
-                    val tagEnd = xml.indexOf('>', after)
-                    val selfClosing = tagEnd > 0 && xml[tagEnd - 1] == '/'
-                    if (!selfClosing) depth++
-                    i = if (tagEnd >= 0) tagEnd + 1 else after
-                    continue
-                }
-                i = after
-                continue
-            }
-            depth--
-            if (depth == 0) return nextClose
-            i = nextClose + closeTag.length
-        }
-        return -1
-    }
-
-    private fun unescapeXML(s: String): String {
-        return s
-            .replace("&lt;", "<")
-            .replace("&gt;", ">")
-            .replace("&amp;", "&")
-            .replace("&quot;", "\"")
-            .replace("&apos;", "'")
-    }
+    fun parseXML(xml: String): LLSDValue = parseXML(ByteArrayInputStream(xml.toByteArray(Charsets.UTF_8)))
 
     fun parseLlsdDate(value: String): Date? {
         val normalised = value.trim().let { v ->
