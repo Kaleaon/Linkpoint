@@ -39,7 +39,7 @@ impl<'a> Attribute<'a> {
     /// This will allocate if the value contains any escape sequences.
     ///
     /// See also [`unescaped_value_with_custom_entities()`](#method.unescaped_value_with_custom_entities)
-    pub fn unescaped_value(&self) -> XmlResult<Cow<[u8]>> {
+    pub fn unescaped_value(&self) -> XmlResult<Cow<'_, [u8]>> {
         self.make_unescaped_value(None)
     }
 
@@ -59,15 +59,15 @@ impl<'a> Attribute<'a> {
     pub fn unescaped_value_with_custom_entities(
         &self,
         custom_entities: &HashMap<Vec<u8>, Vec<u8>>,
-    ) -> XmlResult<Cow<[u8]>> {
+    ) -> XmlResult<Cow<'_, [u8]>> {
         self.make_unescaped_value(Some(custom_entities))
     }
 
     fn make_unescaped_value(
         &self,
         custom_entities: Option<&HashMap<Vec<u8>, Vec<u8>>>,
-    ) -> XmlResult<Cow<[u8]>> {
-        do_unescape(&*self.value, custom_entities).map_err(Error::EscapeError)
+    ) -> XmlResult<Cow<'_, [u8]>> {
+        do_unescape(&self.value, custom_entities).map_err(Error::EscapeError)
     }
 
     /// Decode then unescapes the value
@@ -125,7 +125,7 @@ impl<'a> Attribute<'a> {
         reader: &Reader<B>,
         custom_entities: Option<&HashMap<Vec<u8>, Vec<u8>>>,
     ) -> XmlResult<String> {
-        let decoded = reader.decode(&*self.value)?;
+        let decoded = reader.decode(&self.value)?;
         let unescaped =
             do_unescape(decoded.as_bytes(), custom_entities).map_err(Error::EscapeError)?;
         String::from_utf8(unescaped.into_owned()).map_err(|e| Error::Utf8(e.utf8_error()))
@@ -219,7 +219,7 @@ impl<'a> Attribute<'a> {
         reader: &Reader<B>,
         custom_entities: Option<&HashMap<Vec<u8>, Vec<u8>>>,
     ) -> XmlResult<String> {
-        let decoded = reader.decode_without_bom(&*self.value)?;
+        let decoded = reader.decode_without_bom(&self.value)?;
         let unescaped =
             do_unescape(decoded.as_bytes(), custom_entities).map_err(Error::EscapeError)?;
         String::from_utf8(unescaped.into_owned()).map_err(|e| Error::Utf8(e.utf8_error()))
@@ -653,16 +653,7 @@ impl IterState {
     fn skip_value(&self, slice: &[u8], offset: usize) -> Option<usize> {
         let mut iter = (offset..).zip(slice[offset..].iter());
 
-        match iter.find(|(_, &b)| is_whitespace(b)) {
-            // Input: `    key  =  value `
-            //                     |    ^
-            //                offset    e
-            Some((e, _)) => Some(e),
-            // Input: `    key  =  value`
-            //                     |    ^
-            //                offset    e = len()
-            None => None,
-        }
+        iter.find(|(_, &b)| is_whitespace(b)).map(|(e, _)| e)
     }
 
     /// Skip all characters up to first space symbol or end-of-input
@@ -889,7 +880,7 @@ impl IterState {
             None => {
                 // Because we reach end-of-input, stop iteration on next call
                 self.state = State::Done;
-                return Some(Err(AttrError::ExpectedQuote(slice.len(), quote)));
+                Some(Err(AttrError::ExpectedQuote(slice.len(), quote)))
             }
         }
     }
