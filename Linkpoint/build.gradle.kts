@@ -201,13 +201,13 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
         isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
         freeCompilerArgs += listOf("-opt-in=kotlin.RequiresOptIn", "-Xnested-type-aliases")
     }
 
@@ -226,7 +226,8 @@ android {
     sourceSets {
         getByName("main") {
             manifest.srcFile("src/main/AndroidManifest.xml")
-            java.setSrcDirs(listOf("src/main/java"))
+            java.srcDirs("src/main/java")
+            kotlin.srcDirs("src/main/java")
             res.srcDirs("src/main/res")
             assets.srcDirs("src/main/assets")
         }

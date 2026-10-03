@@ -659,8 +659,7 @@ class ObjectManager(
             // ObjectName message
             // NOTE: Second Life message blocks are little-endian; UUIDs remain raw big-endian bytes.
             val nameBytes = name.toByteArray(Charsets.UTF_8)
-            val payload = ByteBuffer.allocate(17 + 4 + 1 + nameBytes.size).order(MESSAGE_BYTE_ORDER)
-
+            val payload = ByteBuffer.allocate(128).order(MESSAGE_BYTE_ORDER)
             // AgentData
             writeAgentData(payload)
 
@@ -689,8 +688,7 @@ class ObjectManager(
             // ObjectDescription message
             // NOTE: Second Life message blocks are little-endian; UUIDs remain raw big-endian bytes.
             val descBytes = description.toByteArray(Charsets.UTF_8)
-            val payload = ByteBuffer.allocate(17 + 4 + 1 + descBytes.size).order(MESSAGE_BYTE_ORDER)
-
+            val payload = ByteBuffer.allocate(256).order(MESSAGE_BYTE_ORDER)
             // AgentData
             writeAgentData(payload)
 
@@ -1077,17 +1075,96 @@ class ObjectManager(
     )
 
     fun createPrim(params: PrimCreateParams) {
-        rezObject(UUID.randomUUID(), params.position, params.rotation)
+        scope.launch {
+            val payload = ByteBuffer.allocate(256).order(MESSAGE_BYTE_ORDER)
+            // AgentData block: AgentID, SessionID, GroupID
+            writeAgentGroupData(payload)
+            
+            // ObjectData block
+            payload.put(params.primType.toByte()) // PCode
+            payload.put(0.toByte()) // Material
+            payload.putInt(0) // AddFlags
+            
+            // Path / Profile params
+            payload.put(params.pathParams.pathType.toByte())
+            payload.putShort((params.pathParams.beginScale * 50000).toInt().toShort())
+            payload.putShort((params.pathParams.endScale * 50000).toInt().toShort())
+            
+            // Position, Scale, Rotation
+            payload.putFloat(params.position.x)
+            payload.putFloat(params.position.y)
+            payload.putFloat(params.position.z)
+            payload.putFloat(params.scale.x)
+            payload.putFloat(params.scale.y)
+            payload.putFloat(params.scale.z)
+            payload.putFloat(params.rotation.x)
+            payload.putFloat(params.rotation.y)
+            payload.putFloat(params.rotation.z)
+            payload.putFloat(params.rotation.w)
+            
+            try {
+                udpConnection.sendPacket(MessageIdRegistry.OBJECT_ADD, payload.array().copyOf(payload.position()), reliable = true)
+                Log.i(TAG, "Sent ObjectAdd packet at position ${params.position}")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to send ObjectAdd packet", e)
+            }
+        }
     }
 
     fun duplicateObject(localId: Int, offset: LLVector3) {
         val obj = objects[localId] ?: return
-        rezObject(obj.fullId, obj.position + offset, obj.rotation)
+        scope.launch {
+            val payload = ByteBuffer.allocate(128).order(MESSAGE_BYTE_ORDER)
+            writeAgentGroupData(payload)
+            
+            // SharedData: DupeFlags (0x01 = dupe at position offset)
+            payload.putInt(0x01)
+            payload.putFloat(offset.x)
+            payload.putFloat(offset.y)
+            payload.putFloat(offset.z)
+            
+            // ObjectData: count = 1, localId
+            payload.put(1.toByte())
+            payload.putInt(localId)
+            
+            try {
+                udpConnection.sendPacket(MessageIdRegistry.OBJECT_DUPLICATE, payload.array().copyOf(payload.position()), reliable = true)
+                Log.i(TAG, "Sent ObjectDuplicate packet for localId $localId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to send ObjectDuplicate packet", e)
+            }
+        }
     }
 
     fun updateObjectPosition(localId: Int, newPos: LLVector3) {
         val obj = objects[localId] ?: return
-        moveSelectedObjects(newPos - obj.position)
+        obj.position = newPos
+        sendObjectUpdate(localId, position = newPos)
+    }
+
+    fun sendObjectFlags(localId: Int, usePhysics: Boolean, isPhantom: Boolean) {
+        val obj = objects[localId] ?: return
+        var flags = obj.updateFlags
+        if (usePhysics) flags = flags or FLAG_USE_PHYSICS else flags = flags and FLAG_USE_PHYSICS.inv()
+        if (isPhantom) flags = flags or FLAG_PHANTOM else flags = flags and FLAG_PHANTOM.inv()
+        obj.updateFlags = flags
+        
+        scope.launch {
+            val payload = ByteBuffer.allocate(64).order(MESSAGE_BYTE_ORDER)
+            writeAgentData(payload)
+            payload.putInt(localId)
+            payload.put(if (usePhysics) 1.toByte() else 0.toByte())
+            payload.put(if (obj.isTemporary) 1.toByte() else 0.toByte())
+            payload.put(if (isPhantom) 1.toByte() else 0.toByte())
+            payload.put(0.toByte()) // Casts shadows
+            
+            try {
+                udpConnection.sendPacket(MessageIdRegistry.OBJECT_FLAG_UPDATE, payload.array().copyOf(payload.position()), reliable = true)
+                Log.i(TAG, "Sent ObjectFlagUpdate for localId $localId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to send ObjectFlagUpdate", e)
+            }
+        }
     }
 
 }

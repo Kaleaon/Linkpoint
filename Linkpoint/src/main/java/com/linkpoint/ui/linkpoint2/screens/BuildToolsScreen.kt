@@ -31,6 +31,7 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,17 +60,48 @@ fun BuildToolsScreen(
     selectionMeta: String = "Single prim · 0.50 m³",
     initialTool: BuildTool = BuildTool.Move,
     initialPosition: Triple<Float, Float, Float> = Triple(128f, 64f, 32f),
-    onClose: () -> Unit,
-    onApply: (BuildTool, Triple<Float, Float, Float>) -> Unit,
+    initialPhantom: Boolean = false,
+    initialPhysical: Boolean = false,
+    onClose: () -> Unit = {},
+    onApply: (BuildTool, Triple<Float, Float, Float>) -> Unit = { _, _ -> },
+    onPositionChange: ((Triple<Float, Float, Float>) -> Unit)? = null,
+    onPhantomChange: ((Boolean) -> Unit)? = null,
+    onPhysicalChange: ((Boolean) -> Unit)? = null,
+    onToolChange: ((BuildTool) -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     var tool by remember { mutableStateOf(initialTool) }
     var x by remember { mutableStateOf(initialPosition.first.toString()) }
     var y by remember { mutableStateOf(initialPosition.second.toString()) }
     var z by remember { mutableStateOf(initialPosition.third.toString()) }
-    var phantom by remember { mutableStateOf(false) }
-    var physical by remember { mutableStateOf(false) }
+    var phantom by remember { mutableStateOf(initialPhantom) }
+    var physical by remember { mutableStateOf(initialPhysical) }
     val tokens = Linkpoint2.tokens
+
+    LaunchedEffect(initialPosition) {
+        x = initialPosition.first.toString()
+        y = initialPosition.second.toString()
+        z = initialPosition.third.toString()
+    }
+
+    LaunchedEffect(initialPhantom) {
+        phantom = initialPhantom
+    }
+
+    LaunchedEffect(initialPhysical) {
+        physical = initialPhysical
+    }
+
+    val notifyPositionChange = { newXStr: String, newYStr: String, newZStr: String ->
+        val fx = newXStr.toFloatOrNull()
+        val fy = newYStr.toFloatOrNull()
+        val fz = newZStr.toFloatOrNull()
+        if (fx != null && fy != null && fz != null) {
+            val pos = Triple(fx, fy, fz)
+            onPositionChange?.invoke(pos)
+            onApply(tool, pos)
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         L2WorldSceneBackdrop()
@@ -127,7 +159,10 @@ fun BuildToolsScreen(
                         L2Chip(
                             label = t.name,
                             variant = if (t == tool) L2ChipVariant.Primary else L2ChipVariant.Neutral,
-                            onClick = { tool = t },
+                            onClick = {
+                                tool = t
+                                onToolChange?.invoke(t)
+                            },
                         )
                     }
                 }
@@ -135,20 +170,41 @@ fun BuildToolsScreen(
 
                 // XYZ inputs (color-coded)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    XyzField("X", x, Color(0xFFFF6B6B)) { x = it }
-                    XyzField("Y", y, Color(0xFF7CFFD8)) { y = it }
-                    XyzField("Z", z, Color(0xFF6DE8FF)) { z = it }
+                    XyzField("X", x, Color(0xFFFF6B6B)) {
+                        x = it
+                        notifyPositionChange(it, y, z)
+                    }
+                    XyzField("Y", y, Color(0xFF7CFFD8)) {
+                        y = it
+                        notifyPositionChange(x, it, z)
+                    }
+                    XyzField("Z", z, Color(0xFF6DE8FF)) {
+                        z = it
+                        notifyPositionChange(x, y, it)
+                    }
                 }
 
                 Spacer(Modifier.height(12.dp))
                 // Phantom / Physical toggles
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Phantom", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-                    Switch(checked = phantom, onCheckedChange = { phantom = it })
+                    Switch(
+                        checked = phantom,
+                        onCheckedChange = {
+                            phantom = it
+                            onPhantomChange?.invoke(it)
+                        }
+                    )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Physical", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-                    Switch(checked = physical, onCheckedChange = { physical = it })
+                    Switch(
+                        checked = physical,
+                        onCheckedChange = {
+                            physical = it
+                            onPhysicalChange?.invoke(it)
+                        }
+                    )
                 }
 
                 Spacer(Modifier.height(12.dp))
