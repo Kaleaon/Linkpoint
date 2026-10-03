@@ -318,7 +318,8 @@ class MuteManager(
                 val parts = line.split(" ", limit = 4)
                 if (parts.size >= 3) {
                     try {
-                        val type = MuteType.values()[parts[0].toInt()]
+                        val typeIdx = parts[0].toIntOrNull() ?: 0
+                        val type = MuteType.entries.getOrNull(typeIdx) ?: MuteType.AGENT
                         val id = UUID.fromString(parts[1])
                         val name = if (parts.size >= 4) parts[3] else parts[2]
                         val flags = if (parts.size >= 4) parts[2].toIntOrNull() ?: MUTE_ALL else MUTE_ALL
