@@ -161,7 +161,8 @@ class SecondLifeProtocol(private val context: Context) {
         loginUri: String,
         startLocation: String = "last",
         mfaToken: String = "",
-        mfaHash: String = ""
+        mfaHash: String = "",
+        webAuthToken: String = ""
     ): LoginResult = withContext(Dispatchers.IO) {
         val app = LinkpointApp.getInstance()
         app.sessionManager.setConnectionState(ConnectionState.CONNECTING)
@@ -215,7 +216,8 @@ class SecondLifeProtocol(private val context: Context) {
             passwordHash = passwordHash,
             startLocation = startLocation,
             mfaToken = mfaToken,
-            mfaHash = mfaHash
+            mfaHash = mfaHash,
+            webAuthToken = webAuthToken
         )
         
         // Use CoreNetworkingService for login with comprehensive retry handling
@@ -684,14 +686,16 @@ class SecondLifeProtocol(private val context: Context) {
         passwordHash: String,
         startLocation: String,
         mfaToken: String = "",
-        mfaHash: String = ""
+        mfaHash: String = "",
+        webAuthToken: String = ""
     ): String {
         val safeFirstName = escapeXml(firstName)
         val safeLastName = escapeXml(lastName)
         val safePassword = escapeXml(passwordHash)
         val safeStart = escapeXml(startLocation)
-        val safeToken = escapeXml(mfaToken)
+        val safeToken = escapeXml(if (mfaToken.isNotBlank()) mfaToken else webAuthToken)
         val safeMfaHash = escapeXml(mfaHash)
+        val safeWebAuthToken = escapeXml(webAuthToken)
         
         // Use persistent device identifiers (matches official viewer behavior)
         val viewerDigest = deviceIdentifier.getViewerDigest()
@@ -720,8 +724,12 @@ class SecondLifeProtocol(private val context: Context) {
             // See: https://wiki.secondlife.com/wiki/User:Brad_Linden/Login_MFA
             // - token: TOTP code from authenticator app (empty string if not responding to challenge)
             // - mfa_hash: Cached hash from previous successful MFA (allows skipping token entry)
+            // - web_auth_token: Token intercepted from embedded web view verification portal
             append("<member><name>token</name><value><string>$safeToken</string></value></member>")
             append("<member><name>mfa_hash</name><value><string>$safeMfaHash</string></value></member>")
+            if (safeWebAuthToken.isNotBlank()) {
+                append("<member><name>web_auth_token</name><value><string>$safeWebAuthToken</string></value></member>")
+            }
             
             // Viewer identification
             append("<member><name>channel</name><value><string>$VIEWER_NAME</string></value></member>")
@@ -992,6 +1000,7 @@ class SecondLifeProtocol(private val context: Context) {
         // doesn't fire after a user-initiated logout. Mirrors Lumiya's
         // `userWantsConnected = false` in `SLGridConnection.disconnect()`.
         LinkpointApp.getInstance().forgetLoginCredentials()
+        com.linkpoint.ui.auth.TokenExtractor.clearCookies()
         networkingService.disconnect()
         LinkpointApp.getInstance().sessionManager.disconnect()
     }

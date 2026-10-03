@@ -90,6 +90,7 @@ fun LoginScreen(
     statusMessage: String = "",
     isLoading: Boolean = false,
     isError: Boolean = false,
+    onWebAuthRequested: (() -> Unit)? = null,
     onLogin: (LoginCredentials) -> Unit,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
@@ -332,11 +333,19 @@ fun LoginScreen(
                             modifier = Modifier.weight(1f),
                             height = 40.dp,
                         ) { Text("Saved") }
-                        L2GhostButton(
-                            onClick = { /* add account */ },
-                            modifier = Modifier.weight(1f),
-                            height = 40.dp,
-                        ) { Text("Add account") }
+                        if (onWebAuthRequested != null) {
+                            L2GhostButton(
+                                onClick = onWebAuthRequested,
+                                modifier = Modifier.weight(1f),
+                                height = 40.dp,
+                            ) { Text("Web 2FA") }
+                        } else {
+                            L2GhostButton(
+                                onClick = { /* add account */ },
+                                modifier = Modifier.weight(1f),
+                                height = 40.dp,
+                            ) { Text("Add account") }
+                        }
                     }
 
                     if (isError && statusMessage.isNotBlank()) {

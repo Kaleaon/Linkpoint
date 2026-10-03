@@ -71,8 +71,20 @@ class GridManager(
 
     fun getSelectedGrid(): GridInfo = selectedGrid
 
+    fun resolveGrid(gridIdOrUri: String): GridInfo {
+        val existing = getAvailableGrids().find { 
+            it.id.equals(gridIdOrUri, ignoreCase = true) || 
+            it.gridNick.equals(gridIdOrUri, ignoreCase = true) || 
+            it.loginUri.equals(gridIdOrUri, ignoreCase = true) 
+        }
+        if (existing != null) return existing
+        return runBlocking(Dispatchers.IO) {
+            addCustomGrid(gridIdOrUri)
+        }
+    }
+
     fun selectGrid(gridId: String) {
-        val grid = getAvailableGrids().find { it.id == gridId } ?: resolveGrid(gridId)
+        val grid = getAvailableGrids().find { it.id == gridId }
         if (grid != null) {
             selectedGrid = grid
             Log.i(TAG, "Selected grid: ${grid.name} (${grid.loginUri})")
@@ -81,25 +93,24 @@ class GridManager(
     
     fun updateSelectedGrid(grid: GridInfo) {
         selectedGrid = grid
-        val index = customGrids.indexOfFirst { it.id == grid.id }
-        if (index != -1) {
-            customGrids[index] = grid
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                dao.insertGrid(grid.toEntity())
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to update selected grid: ${e.message}")
+            }
         }
         Log.i(TAG, "Updated selected grid: ${grid.name} (loginUri=${grid.loginUri}, helperUri=${grid.helperUri}, economyUri=${grid.economyUri}, mapUri=${grid.mapUri})")
     }
     
     fun addCustomGrid(grid: GridInfo) {
-        if (customGrids.none { it.id == grid.id }) {
-            customGrids.add(grid)
-            Log.i(TAG, "Added custom grid: ${grid.name}")
-        } else {
-            val index = customGrids.indexOfFirst { it.id == grid.id }
-            if (index != -1) {
-                customGrids[index] = grid
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                dao.insertGrid(grid.toEntity())
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to add custom grid: ${e.message}")
             }
         }
-
-        return profile.toGridInfo()
     }
 
     /**
@@ -178,6 +189,23 @@ fun GridProfileEntity.toGridInfo(): GridInfo {
     )
 }
 
+fun GridInfo.toEntity(): GridProfileEntity {
+    return GridProfileEntity(
+        id = id,
+        name = name,
+        gridNick = gridNick,
+        loginUri = loginUri,
+        helperUri = helperUri,
+        website = website,
+        support = support,
+        registerUri = registerUri,
+        passwordUri = passwordUri,
+        logoUrl = logoUrl,
+        status = status,
+        isCustom = isCustom
+    )
+}
+
 /**
  * Grid configuration data
  */
@@ -195,5 +223,8 @@ data class GridInfo(
     val economyUri: String? = null,
     val mapUri: String? = null,
     val welcomeUri: String? = null,
+    val logoUrl: String? = null,
+    val status: String = "online",
+    val isCustom: Boolean = false,
     val isResolved: Boolean = false
 )

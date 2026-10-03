@@ -298,6 +298,7 @@ class LinkpointApp : Application() {
         cachedLoginCredentials = null
         reconnectAttempts.set(0)
         firstReconnectAttemptAt = 0L
+        com.linkpoint.ui.auth.TokenExtractor.clearCookies()
         Log.d(TAG, "Cleared cached login credentials (user logout)")
     }
 
