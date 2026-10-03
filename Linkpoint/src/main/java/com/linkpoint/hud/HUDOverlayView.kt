@@ -63,6 +63,17 @@ class HUDOverlayView @JvmOverloads constructor(
         textAlign = Paint.Align.CENTER
     }
 
+    private val hudLabelContainerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.argb(220, 20, 25, 35)
+        style = Paint.Style.FILL
+    }
+
+    private val hudPlaceholderIconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.argb(140, 100, 150, 220)
+        style = Paint.Style.STROKE
+        strokeWidth = 3f
+    }
+
     private val hudTexturePaint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
     private val hudHandlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.argb(220, 230, 230, 230)
@@ -179,11 +190,11 @@ class HUDOverlayView @JvmOverloads constructor(
             RectF(left, top, left + hudWidth, top + hudHeight)
         }
         
-        // Draw HUD background
-        canvas.drawRoundRect(rect, 8f, 8f, hudBackgroundPaint)
-        canvas.drawRoundRect(rect, 8f, 8f, hudBorderPaint)
+        // Draw HUD panel background card and border
+        canvas.drawRoundRect(rect, 10f, 10f, hudBackgroundPaint)
+        canvas.drawRoundRect(rect, 10f, 10f, hudBorderPaint)
 
-        // Try to load and draw the HUD texture; fall back to name label
+        // Try to load and draw the HUD texture; fall back to styled vector UI containers and placeholders
         val textureId = hudManager?.getPrimaryTextureId(hud)
         if (textureId != null) {
             requestTexture(textureId)
@@ -191,22 +202,10 @@ class HUDOverlayView @JvmOverloads constructor(
             if (bitmap != null) {
                 canvas.drawBitmap(bitmap, null, rect, hudTexturePaint)
             } else {
-                // Texture not yet loaded - show name as placeholder
-                canvas.drawText(
-                    hud.name.take(15),
-                    rect.centerX(),
-                    rect.centerY() + hudTextPaint.textSize / 3,
-                    hudTextPaint
-                )
+                drawFallbackHUDGraphics(canvas, rect, hud.name)
             }
         } else {
-            // No texture available - show name as placeholder
-            canvas.drawText(
-                hud.name.take(15),
-                rect.centerX(),
-                rect.centerY() + hudTextPaint.textSize / 3,
-                hudTextPaint
-            )
+            drawFallbackHUDGraphics(canvas, rect, hud.name)
         }
 
         if (hud.localId == activeHudId) {
@@ -215,6 +214,43 @@ class HUDOverlayView @JvmOverloads constructor(
         
         // Store bounds for hit testing
         hud.screenBounds = rect
+    }
+
+    private fun drawFallbackHUDGraphics(canvas: Canvas, rect: RectF, name: String) {
+        // Render vector placeholder icon graphic in upper center
+        val minDim = min(rect.width(), rect.height())
+        val iconRadius = minDim * 0.18f
+        val iconCenterX = rect.centerX()
+        val iconCenterY = if (rect.height() > 60f) rect.centerY() - rect.height() * 0.12f else rect.centerY()
+        
+        if (iconRadius > 4f) {
+            canvas.drawCircle(iconCenterX, iconCenterY, iconRadius, hudPlaceholderIconPaint)
+            val boxRadius = iconRadius * 0.7f
+            canvas.drawRoundRect(
+                RectF(iconCenterX - boxRadius, iconCenterY - boxRadius, iconCenterX + boxRadius, iconCenterY + boxRadius),
+                4f, 4f, hudPlaceholderIconPaint
+            )
+        }
+
+        // Formatted UI label container bar
+        val containerWidth = rect.width() * 0.88f
+        val containerHeight = min(32f, max(18f, rect.height() * 0.35f))
+        val containerLeft = rect.centerX() - containerWidth / 2f
+        val containerTop = if (rect.height() > 60f) rect.bottom - containerHeight - 6f else rect.centerY() - containerHeight / 2f
+        val containerRect = RectF(
+            containerLeft,
+            max(rect.top + 2f, containerTop),
+            containerLeft + containerWidth,
+            min(rect.bottom - 2f, containerTop + containerHeight)
+        )
+
+        canvas.drawRoundRect(containerRect, 6f, 6f, hudLabelContainerPaint)
+        canvas.drawRoundRect(containerRect, 6f, 6f, hudBorderPaint)
+
+        // Draw HUD name text inside formatted label container
+        val label = name.take(16)
+        val textY = containerRect.centerY() + hudTextPaint.textSize / 3f
+        canvas.drawText(label, containerRect.centerX(), textY, hudTextPaint)
     }
 
     private fun drawResizeHandle(canvas: Canvas, rect: RectF) {
