@@ -50,11 +50,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.linkpoint.R
 import com.linkpoint.inventory.notecard.EmbeddedItem
 import com.linkpoint.inventory.notecard.NotecardData
 import com.linkpoint.ui.components.linkpoint2.tokens.GeneratedTokens
@@ -137,8 +139,8 @@ fun NotecardEditorScreen(
     if (showUnsavedDialog) {
         AlertDialog(
             onDismissRequest = { showUnsavedDialog = false },
-            title = { Text("Unsaved Changes") },
-            text = { Text("You have unsaved changes. Do you want to save before closing?") },
+            title = { Text(stringResource(R.string.notecard_unsaved_title)) },
+            text = { Text(stringResource(R.string.notecard_unsaved_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -155,19 +157,19 @@ fun NotecardEditorScreen(
                         }
                     }
                 ) {
-                    Text("Save")
+                    Text(stringResource(R.string.save))
                 }
             },
             dismissButton = {
                 Row {
                     TextButton(onClick = { showUnsavedDialog = false }) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.cancel))
                     }
                     TextButton(onClick = {
                         showUnsavedDialog = false
                         onNavigateBack()
                     }) {
-                        Text("Discard")
+                        Text(stringResource(R.string.discard))
                     }
                 }
             }
@@ -182,9 +184,9 @@ fun NotecardEditorScreen(
                         Text(notecardName, maxLines = 1)
                         Text(
                             text = when {
-                                hasUnsavedChanges -> "Unsaved changes"
-                                isReadOnly -> "Read Only"
-                                else -> "Editing"
+                                hasUnsavedChanges -> stringResource(R.string.notecard_status_unsaved)
+                                isReadOnly -> stringResource(R.string.notecard_status_readonly)
+                                else -> stringResource(R.string.notecard_status_editing)
                             },
                             style = MaterialTheme.typography.bodySmall,
                             color = if (hasUnsavedChanges) 
@@ -196,22 +198,25 @@ fun NotecardEditorScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = { handleBack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 actions = {
                     // Copy button
+                    val copiedText = stringResource(R.string.notecard_copied_clipboard)
                     IconButton(onClick = {
                         clipboardManager.setText(AnnotatedString(notecardContent))
                         scope.launch {
-                            snackbarHostState.showSnackbar("Notecard copied to clipboard")
+                            snackbarHostState.showSnackbar(copiedText)
                         }
                     }) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy")
+                        Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.copy))
                     }
                     
                     // Save button (only for editable notecards)
                     if (!isReadOnly && itemId != null) {
+                        val savedText = stringResource(R.string.notecard_saved)
+                        val failedText = stringResource(R.string.notecard_failed_save)
                         IconButton(
                             onClick = {
                                 scope.launch {
@@ -219,9 +224,9 @@ fun NotecardEditorScreen(
                                     if (success) {
                                         originalContent = notecardContent
                                         hasUnsavedChanges = false
-                                        snackbarHostState.showSnackbar("Notecard saved")
+                                        snackbarHostState.showSnackbar(savedText)
                                     } else {
-                                        snackbarHostState.showSnackbar("Failed to save notecard")
+                                        snackbarHostState.showSnackbar(failedText)
                                     }
                                 }
                             },
@@ -229,7 +234,7 @@ fun NotecardEditorScreen(
                         ) {
                             Icon(
                                 Icons.Default.Save,
-                                contentDescription = "Save",
+                                contentDescription = stringResource(R.string.save),
                                 tint = if (hasUnsavedChanges) 
                                     MaterialTheme.colorScheme.primary 
                                 else 
@@ -260,7 +265,7 @@ fun NotecardEditorScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     CircularProgressIndicator()
-                    Text("Loading notecard...", color = Color.White)
+                    Text(stringResource(R.string.notecard_loading), color = Color.White)
                 }
             }
         } else {
@@ -324,7 +329,7 @@ private fun EmbeddedItemsSection(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Embedded Items (${items.size})",
+                    text = stringResource(R.string.notecard_embedded_items, items.size),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White
                 )
@@ -426,23 +431,24 @@ private fun NotecardContent(
 /**
  * Convert inventory type number to human-readable name.
  */
+@Composable
 private fun getItemTypeName(type: Int): String {
     return when (type) {
-        0 -> "Texture"
-        1 -> "Sound"
-        2 -> "Calling Card"
-        3 -> "Landmark"
-        5 -> "Clothing"
-        6 -> "Object"
-        7 -> "Notecard"
-        10 -> "Script"
-        13 -> "Body Part"
-        20 -> "Animation"
-        21 -> "Gesture"
-        49 -> "Mesh"
-        56 -> "Settings"
-        57 -> "Material"
-        else -> "Item"
+        0 -> stringResource(R.string.inventory_type_texture)
+        1 -> stringResource(R.string.inventory_type_sound)
+        2 -> stringResource(R.string.inventory_type_calling_card)
+        3 -> stringResource(R.string.inventory_type_landmark)
+        5 -> stringResource(R.string.inventory_type_clothing)
+        6 -> stringResource(R.string.inventory_type_object)
+        7 -> stringResource(R.string.inventory_type_notecard)
+        10 -> stringResource(R.string.inventory_type_script)
+        13 -> stringResource(R.string.inventory_type_body_part)
+        20 -> stringResource(R.string.inventory_type_animation)
+        21 -> stringResource(R.string.inventory_type_gesture)
+        49 -> stringResource(R.string.inventory_type_mesh)
+        56 -> stringResource(R.string.inventory_type_settings)
+        57 -> stringResource(R.string.inventory_type_material)
+        else -> stringResource(R.string.inventory_type_item)
     }
 }
 

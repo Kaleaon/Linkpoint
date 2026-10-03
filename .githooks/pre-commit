@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Find repository root directory
+ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+cd "$ROOT_DIR"
+
+# Check if Android SDK environment is present and complete
+has_android_env() {
+  local sdk_path="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+  if [ -z "$sdk_path" ] || [ ! -d "$sdk_path/platforms/android-35" ]; then
+    return 1
+  fi
+  if ! java -version 2>&1 | grep -q '17\.\|version "17'; then
+    return 1
+  fi
+  return 0
+}
+
+# Check if Python pre-commit binary is available
+if command -v pre-commit >/dev/null 2>&1; then
+  if ! has_android_env; then
+    echo "[git-hooks] Android environment missing or incomplete. Bypassing gradle-lint check."
+    export SKIP="${SKIP:+$SKIP,}gradle-lint"
+  fi
+  exec pre-commit run "$@"
+else
+  echo "[git-hooks] Running native fallback pre-commit checks..."
+
+  echo "[git-hooks] Checking viewer contract..."
+  npm run check:contract
+
+  echo "[git-hooks] Checking TypeScript types..."
+  npm run typecheck
+
+  if command -v cargo >/dev/null 2>&1; then
+    echo "[git-hooks] Checking Rust formatting..."
+    cargo fmt --all -- --check
+  fi
+
+  echo "[git-hooks] All pre-commit checks passed successfully."
+fi

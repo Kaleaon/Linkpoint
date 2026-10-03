@@ -7,6 +7,10 @@ class ProtocolStub extends Utils.EventEmitter {
   refreshBalance = vi.fn().mockImplementation(async () => this.balance);
   respondScriptDialog = vi.fn().mockResolvedValue({ answered: true });
   acceptLure = vi.fn().mockResolvedValue({ accepted: true, message: 'Arrived' });
+  acceptInventoryOffer = vi.fn().mockResolvedValue({ accepted: true });
+  declineInventoryOffer = vi.fn().mockResolvedValue({ declined: true });
+  acceptGroupInvite = vi.fn().mockResolvedValue({ accepted: true });
+  declineGroupInvite = vi.fn().mockResolvedValue({ declined: true });
   dismissInteraction = vi.fn().mockResolvedValue({ dismissed: true });
   payObject = vi.fn().mockImplementation(async (params: any) => {
     if (this.balance !== null) this.balance -= params.amount;
@@ -197,6 +201,64 @@ describe('InteractionsManager', () => {
       await manager.cancelPayment(id);
       expect(manager.items).toHaveLength(0);
       expect(protocol.payObject).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('inventory offers and group invites in InteractionsManager', () => {
+    it('appends inventory_offer and group_invite protocol events and emits interaction_received', () => {
+      const { protocol, manager } = setup();
+      const received = vi.fn();
+      manager.on('interaction_received', received);
+
+      protocol.emit('inventory_offer', { id: 'io-1', senderName: 'Alice', itemName: 'Designer Dress', assetType: 0, transactionId: 'trans-101' });
+      protocol.emit('group_invite', { id: 'gi-1', senderName: 'Bob', groupName: 'Fashion Network', fee: 0, inviteId: 'inv-202' });
+
+      expect(manager.items).toHaveLength(2);
+      expect(manager.items[0]).toMatchObject({ kind: 'inventory-offer', id: 'io-1', senderName: 'Alice', itemName: 'Designer Dress' });
+      expect(manager.items[1]).toMatchObject({ kind: 'group-invite', id: 'gi-1', senderName: 'Bob', groupName: 'Fashion Network' });
+      expect(received).toHaveBeenCalledTimes(2);
+    });
+
+    it('accepts and declines inventory offers via protocol calls and removes items', async () => {
+      const { protocol, manager } = setup();
+      const accepted = vi.fn();
+      const declined = vi.fn();
+      manager.on('inventory_offer_accepted', accepted);
+      manager.on('inventory_offer_declined', declined);
+
+      protocol.emit('inventory_offer', { id: 'io-1', senderName: 'Alice', itemName: 'Gift Box' });
+      protocol.emit('inventory_offer', { id: 'io-2', senderName: 'Charlie', itemName: 'Sound Clip' });
+
+      await expect(manager.acceptInventoryOffer('io-1')).resolves.toBe(true);
+      expect(protocol.acceptInventoryOffer).toHaveBeenCalledWith('io-1');
+      expect(accepted).toHaveBeenCalledWith(expect.objectContaining({ offer: expect.objectContaining({ id: 'io-1' }) }));
+      expect(manager.items.map((i) => i.id)).toEqual(['io-2']);
+
+      await expect(manager.declineInventoryOffer('io-2')).resolves.toBe(true);
+      expect(protocol.declineInventoryOffer).toHaveBeenCalledWith('io-2');
+      expect(declined).toHaveBeenCalledWith(expect.objectContaining({ offer: expect.objectContaining({ id: 'io-2' }) }));
+      expect(manager.items).toHaveLength(0);
+    });
+
+    it('accepts and declines group invites via protocol calls and removes items', async () => {
+      const { protocol, manager } = setup();
+      const accepted = vi.fn();
+      const declined = vi.fn();
+      manager.on('group_invite_accepted', accepted);
+      manager.on('group_invite_declined', declined);
+
+      protocol.emit('group_invite', { id: 'gi-1', senderName: 'Dave', groupName: 'Explorers Club', fee: 0 });
+      protocol.emit('group_invite', { id: 'gi-2', senderName: 'Eve', groupName: 'VIP Lounge', fee: 100 });
+
+      await expect(manager.acceptGroupInvite('gi-1')).resolves.toBe(true);
+      expect(protocol.acceptGroupInvite).toHaveBeenCalledWith('gi-1');
+      expect(accepted).toHaveBeenCalledWith(expect.objectContaining({ invite: expect.objectContaining({ id: 'gi-1' }) }));
+      expect(manager.items.map((i) => i.id)).toEqual(['gi-2']);
+
+      await expect(manager.declineGroupInvite('gi-2')).resolves.toBe(true);
+      expect(protocol.declineGroupInvite).toHaveBeenCalledWith('gi-2');
+      expect(declined).toHaveBeenCalledWith(expect.objectContaining({ invite: expect.objectContaining({ id: 'gi-2' }) }));
+      expect(manager.items).toHaveLength(0);
     });
   });
 });

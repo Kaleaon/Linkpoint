@@ -1,21 +1,813 @@
 {
-  "stub_method_count": 2,
+  "stub_method_count": 101,
   "smali_class_count": 0,
-  "stubs_with_missing_smali_class_count": 2,
+  "stubs_with_missing_smali_class_count": 101,
   "stubs": [
     {
-      "java_file": "file_bundle/ActiveChattersManager.java",
-      "class": "com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager.AnonymousClass2",
-      "method": "processRequest",
-      "params": "com.lumiyaviewer.lumiya.slproto.users.ChatterID",
-      "return_type": "com.lumiyaviewer.lumiya.slproto.users.manager.UnreadMessageInfo",
+      "java_file": "lumiya_decompiled_source/android/support/design/widget/CoordinatorLayout.java",
+      "class": "android.support.design.widget.CoordinatorLayout",
+      "method": "doViewsOverlap",
+      "params": "android.view.View, android.view.View",
+      "return_type": "boolean",
       "smali_class_present": false
     },
     {
-      "java_file": "file_bundle/ActiveChattersManager.java",
-      "class": "com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager",
-      "method": "m273lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_13379",
-      "params": "com.lumiyaviewer.lumiya.slproto.users.ChatterID, com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent, boolean",
+      "java_file": "lumiya_decompiled_source/android/support/design/widget/CoordinatorLayout.java",
+      "class": "android.support.design.widget.CoordinatorLayout",
+      "method": "onTouchEvent",
+      "params": "android.view.MotionEvent",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/android/support/design/widget/HeaderBehavior.java",
+      "class": "android.support.design.widget.HeaderBehavior",
+      "method": "onTouchEvent",
+      "params": "android.support.design.widget.CoordinatorLayout, android.view.View, android.view.MotionEvent",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/android/support/graphics/drawable/AnimationUtilsCompat.java",
+      "class": "android.support.graphics.drawable.AnimationUtilsCompat",
+      "method": "createInterpolatorFromXml",
+      "params": "android.content.Context, android.content.res.Resources, android.content.res.Resources$Theme, org.xmlpull.v1.XmlPullParser",
+      "return_type": "android.view.animation.Interpolator",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/android/support/transition/TransitionInflater.java",
+      "class": "android.support.transition.TransitionInflater",
+      "method": "createTransitionFromXml",
+      "params": "org.xmlpull.v1.XmlPullParser, android.util.AttributeSet, android.support.transition.Transition",
+      "return_type": "android.support.transition.Transition",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/android/support/transition/TransitionInflater.java",
+      "class": "android.support.transition.TransitionInflater",
+      "method": "createTransitionManagerFromXml",
+      "params": "org.xmlpull.v1.XmlPullParser, android.util.AttributeSet, android.view.ViewGroup",
+      "return_type": "android.support.transition.TransitionManager",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/android/support/v4/content/pm/ShortcutManagerCompat.java",
+      "class": "android.support.v4.content.pm.ShortcutManagerCompat",
+      "method": "isRequestPinShortcutSupported",
+      "params": "android.content.Context",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/android/support/v4/graphics/TypefaceCompatApi21Impl.java",
+      "class": "android.support.v4.graphics.TypefaceCompatApi21Impl",
+      "method": "createFromFontInfo",
+      "params": "android.content.Context, android.os.CancellationSignal, android.support.v4.provider.FontsContractCompat$FontInfo[], int",
+      "return_type": "android.graphics.Typeface",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/android/support/v4/graphics/TypefaceCompatUtil.java",
+      "class": "android.support.v4.graphics.TypefaceCompatUtil",
+      "method": "mmap",
+      "params": "android.content.Context, android.os.CancellationSignal, android.net.Uri",
+      "return_type": "java.nio.ByteBuffer",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/android/support/v4/media/session/MediaSessionCompat.java",
+      "class": "android.support.v4.media.session.MediaSessionCompat",
+      "method": "getStateWithUpdatedPosition",
+      "params": "android.support.v4.media.session.PlaybackStateCompat, android.support.v4.media.MediaMetadataCompat",
+      "return_type": "android.support.v4.media.session.PlaybackStateCompat",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/android/support/v4/provider/FontsContractCompat.java",
+      "class": "android.support.v4.provider.FontsContractCompat",
+      "method": "getFontFromProvider",
+      "params": "android.content.Context, android.support.v4.provider.FontRequest, java.lang.String, android.os.CancellationSignal",
+      "return_type": "android.support.v4.provider.FontsContractCompat$FontInfo[]",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/android/support/v4/util/LruCache.java",
+      "class": "android.support.v4.util.LruCache",
+      "method": "trimToSize",
+      "params": "int",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/android/support/v4/view/ViewPager.java",
+      "class": "android.support.v4.view.ViewPager",
+      "method": "isGutterDrag",
+      "params": "float, float",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/android/support/v4/widget/SlidingPaneLayout.java",
+      "class": "android.support.v4.widget.SlidingPaneLayout",
+      "method": "parallaxOtherViews",
+      "params": "float",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/android/support/v4/widget/ViewDragHelper.java",
+      "class": "android.support.v4.widget.ViewDragHelper",
+      "method": "shouldInterceptTouchEvent",
+      "params": "android.view.MotionEvent",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/android/support/v7/util/DiffUtil.java",
+      "class": "android.support.v7.util.DiffUtil.DiffResult",
+      "method": "findMatchingItem",
+      "params": "int, int, int, boolean",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/android/support/v7/view/SupportMenuInflater.java",
+      "class": "android.support.v7.view.SupportMenuInflater",
+      "method": "parseMenu",
+      "params": "org.xmlpull.v1.XmlPullParser, android.util.AttributeSet, android.view.Menu",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/android/support/v7/widget/AppCompatSpinner.java",
+      "class": "android.support.v7.widget.AppCompatSpinner",
+      "method": "<init>",
+      "params": "android.content.Context, android.util.AttributeSet, int, int, android.content.res.Resources$Theme",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/android/support/v7/widget/DropDownListView.java",
+      "class": "android.support.v7.widget.DropDownListView",
+      "method": "onForwardedEvent",
+      "params": "android.view.MotionEvent, int",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/android/support/v7/widget/GridLayoutManager.java",
+      "class": "android.support.v7.widget.GridLayoutManager",
+      "method": "layoutChunk",
+      "params": "android.support.v7.widget.RecyclerView$Recycler, android.support.v7.widget.RecyclerView$State, android.support.v7.widget.LinearLayoutManager$LayoutState, android.support.v7.widget.LinearLayoutManager$LayoutChunkResult",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/android/support/v7/widget/RecyclerView.java",
+      "class": "android.support.v7.widget.RecyclerView",
+      "method": "findContainingItemView",
+      "params": "android.view.View",
+      "return_type": "android.view.View",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/android/support/v7/widget/RecyclerView.java",
+      "class": "android.support.v7.widget.RecyclerView",
+      "method": "findViewHolderForPosition",
+      "params": "int, boolean",
+      "return_type": "android.support.v7.widget.RecyclerView$ViewHolder",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/base/Splitter.java",
+      "class": "com.google.common.base.Splitter.AnonymousClass2.AnonymousClass1",
+      "method": "separatorStart",
+      "params": "int",
+      "return_type": "int",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/base/Suppliers.java",
+      "class": "com.google.common.base.Suppliers.ExpiringMemoizingSupplier",
+      "method": "get",
+      "params": "",
+      "return_type": "java.lang.Object",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/cache/LocalCache.java",
+      "class": "com.google.common.cache.LocalCache.Segment",
+      "method": "insertLoadingValueReference",
+      "params": "java.lang.Object, int, boolean",
+      "return_type": "com.google.common.cache.LocalCache$LoadingValueReference",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/cache/LocalCache.java",
+      "class": "com.google.common.cache.LocalCache",
+      "method": "containsValue",
+      "params": "java.lang.Object",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/cache/LocalCache.java",
+      "class": "com.google.common.cache.LocalCache",
+      "method": "loadAll",
+      "params": "java.util.Set, com.google.common.cache.CacheLoader",
+      "return_type": "java.util.Map",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/collect/ComputingConcurrentHashMap.java",
+      "class": "com.google.common.collect.ComputingConcurrentHashMap.ComputingSegment",
+      "method": "compute",
+      "params": "java.lang.Object, int, com.google.common.collect.MapMakerInternalMap$ReferenceEntry, com.google.common.collect.ComputingConcurrentHashMap$ComputingValueReference",
+      "return_type": "java.lang.Object",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/collect/ComputingConcurrentHashMap.java",
+      "class": "com.google.common.collect.ComputingConcurrentHashMap.ComputingSegment",
+      "method": "getOrCompute",
+      "params": "java.lang.Object, int, com.google.common.base.Function",
+      "return_type": "java.lang.Object",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/collect/ConcurrentHashMultiset.java",
+      "class": "com.google.common.collect.ConcurrentHashMultiset",
+      "method": "add",
+      "params": "java.lang.Object, int",
+      "return_type": "int",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/collect/ConcurrentHashMultiset.java",
+      "class": "com.google.common.collect.ConcurrentHashMultiset",
+      "method": "setCount",
+      "params": "java.lang.Object, int",
+      "return_type": "int",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/collect/Iterators.java",
+      "class": "com.google.common.collect.Iterators",
+      "method": "elementsEqual",
+      "params": "java.util.Iterator, java.util.Iterator",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/collect/MapMakerInternalMap.java",
+      "class": "com.google.common.collect.MapMakerInternalMap",
+      "method": "containsValue",
+      "params": "java.lang.Object",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/collect/RegularImmutableSortedSet.java",
+      "class": "com.google.common.collect.RegularImmutableSortedSet",
+      "method": "equals",
+      "params": "java.lang.Object",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/eventbus/Dispatcher.java",
+      "class": "com.google.common.eventbus.Dispatcher.PerThreadQueuedDispatcher",
+      "method": "dispatch",
+      "params": "java.lang.Object, java.util.Iterator",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/eventbus/SubscriberRegistry.java",
+      "class": "com.google.common.eventbus.SubscriberRegistry",
+      "method": "unregister",
+      "params": "java.lang.Object",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/io/BaseEncoding.java",
+      "class": "com.google.common.io.BaseEncoding.StandardBaseEncoding.AnonymousClass2",
+      "method": "read",
+      "params": "",
+      "return_type": "int",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/math/IntMath.java",
+      "class": "com.google.common.math.IntMath",
+      "method": "divide",
+      "params": "int, int, java.math.RoundingMode",
+      "return_type": "int",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/primitives/Booleans.java",
+      "class": "com.google.common.primitives.Booleans",
+      "method": "indexOf",
+      "params": "boolean[], boolean[]",
+      "return_type": "int",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/primitives/Bytes.java",
+      "class": "com.google.common.primitives.Bytes",
+      "method": "indexOf",
+      "params": "byte[], byte[]",
+      "return_type": "int",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/primitives/Chars.java",
+      "class": "com.google.common.primitives.Chars",
+      "method": "indexOf",
+      "params": "char[], char[]",
+      "return_type": "int",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/primitives/Doubles.java",
+      "class": "com.google.common.primitives.Doubles",
+      "method": "indexOf",
+      "params": "double[], double[]",
+      "return_type": "int",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/primitives/Floats.java",
+      "class": "com.google.common.primitives.Floats",
+      "method": "indexOf",
+      "params": "float[], float[]",
+      "return_type": "int",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/primitives/Ints.java",
+      "class": "com.google.common.primitives.Ints",
+      "method": "indexOf",
+      "params": "int[], int[]",
+      "return_type": "int",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/primitives/Longs.java",
+      "class": "com.google.common.primitives.Longs",
+      "method": "indexOf",
+      "params": "long[], long[]",
+      "return_type": "int",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/primitives/Shorts.java",
+      "class": "com.google.common.primitives.Shorts",
+      "method": "indexOf",
+      "params": "short[], short[]",
+      "return_type": "int",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/reflect/TypeVisitor.java",
+      "class": "com.google.common.reflect.TypeVisitor",
+      "method": "visit",
+      "params": "java.lang.reflect.Type[]",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/util/concurrent/Futures.java",
+      "class": "com.google.common.util.concurrent.Futures.AbstractCatchingFuture",
+      "method": "run",
+      "params": "",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/util/concurrent/ListenerCallQueue.java",
+      "class": "com.google.common.util.concurrent.ListenerCallQueue",
+      "method": "run",
+      "params": "",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/util/concurrent/Monitor.java",
+      "class": "com.google.common.util.concurrent.Monitor",
+      "method": "enter",
+      "params": "long, java.util.concurrent.TimeUnit",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/util/concurrent/Monitor.java",
+      "class": "com.google.common.util.concurrent.Monitor",
+      "method": "enterWhen",
+      "params": "com.google.common.util.concurrent.Monitor$Guard, long, java.util.concurrent.TimeUnit",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/common/util/concurrent/Monitor.java",
+      "class": "com.google.common.util.concurrent.Monitor",
+      "method": "waitForUninterruptibly",
+      "params": "com.google.common.util.concurrent.Monitor$Guard, long, java.util.concurrent.TimeUnit",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/gson/internal/bind/util/ISO8601Utils.java",
+      "class": "com.google.gson.internal.bind.util.ISO8601Utils",
+      "method": "parse",
+      "params": "java.lang.String, java.text.ParsePosition",
+      "return_type": "java.util.Date",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/gson/stream/JsonReader.java",
+      "class": "com.google.gson.stream.JsonReader",
+      "method": "nextUnquotedValue",
+      "params": "",
+      "return_type": "java.lang.String",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/gson/stream/JsonReader.java",
+      "class": "com.google.gson.stream.JsonReader",
+      "method": "peekNumber",
+      "params": "",
+      "return_type": "int",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/gson/stream/JsonWriter.java",
+      "class": "com.google.gson.stream.JsonWriter",
+      "method": "string",
+      "params": "java.lang.String",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/protobuf/nano/InternalNano.java",
+      "class": "com.google.protobuf.nano.InternalNano",
+      "method": "equals",
+      "params": "java.util.Map, java.util.Map",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/thirdparty/publicsuffix/TrieParser.java",
+      "class": "com.google.thirdparty.publicsuffix.TrieParser",
+      "method": "doParseTrieToBuilder",
+      "params": "java.util.List, java.lang.CharSequence, com.google.common.collect.ImmutableMap$Builder",
+      "return_type": "int",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/vr/cardboard/ContentProviderVrParamsProvider.java",
+      "class": "com.google.vr.cardboard.ContentProviderVrParamsProvider",
+      "method": "readParams",
+      "params": "com.google.protobuf.nano.MessageNano, android.net.Uri, java.lang.String",
+      "return_type": "com.google.protobuf.nano.MessageNano",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/vr/cardboard/DisplaySynchronizer.java",
+      "class": "com.google.vr.cardboard.DisplaySynchronizer",
+      "method": "doFrame",
+      "params": "long",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/vr/ndk/base/DaydreamApi.java",
+      "class": "com.google.vr.ndk.base.DaydreamApi",
+      "method": "getDaydreamSetupCompleted",
+      "params": "android.content.Context",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/google/vr/ndk/base/GvrLayout.java",
+      "class": "com.google.vr.ndk.base.GvrLayout.PresentationHelper",
+      "method": "setDisplay",
+      "params": "android.view.Display",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/render/glres/GLSyncLoadQueue.java",
+      "class": "com.lumiyaviewer.lumiya.render.glres.GLSyncLoadQueue",
+      "method": "RunLoadQueue",
+      "params": "com.lumiyaviewer.lumiya.render.RenderContext",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/res/anim/AnimationCache.java",
+      "class": "com.lumiyaviewer.lumiya.res.anim.AnimationCache.AssetLoadRequest",
+      "method": "run",
+      "params": "",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/res/textures/TextureCompressedCache.java",
+      "class": "com.lumiyaviewer.lumiya.res.textures.TextureCompressedCache.TextureFetchRequest",
+      "method": "run",
+      "params": "",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/SLCircuit.java",
+      "class": "com.lumiyaviewer.lumiya.slproto.SLCircuit",
+      "method": "ProcessReceive",
+      "params": "",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/SLParcelInfo.java",
+      "class": "com.lumiyaviewer.lumiya.slproto.SLParcelInfo",
+      "method": "killObject",
+      "params": "com.lumiyaviewer.lumiya.slproto.SLAgentCircuit, int",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/auth/SLAuth.java",
+      "class": "com.lumiyaviewer.lumiya.slproto.auth.SLAuth",
+      "method": "SendLoginRequest",
+      "params": "com.lumiyaviewer.lumiya.slproto.auth.SLAuthParams",
+      "return_type": "com.lumiyaviewer.lumiya.slproto.auth.SLAuthReply",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/avatar/SLAnimatedMeshData.java",
+      "class": "com.lumiyaviewer.lumiya.slproto.avatar.SLAnimatedMeshData",
+      "method": "GLDraw",
+      "params": "com.lumiyaviewer.lumiya.render.RenderContext, com.lumiyaviewer.lumiya.render.drawable.DrawableFaceTexture",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/baker/BakeLayer.java",
+      "class": "com.lumiyaviewer.lumiya.slproto.baker.BakeLayer",
+      "method": "Bake",
+      "params": "com.lumiyaviewer.lumiya.openjpeg.OpenJPEG, com.lumiyaviewer.lumiya.slproto.baker.BakeProcess",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/inventory/SLInventoryHTTPFetchRequest.java",
+      "class": "com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.DatabaseCommitThread",
+      "method": "run",
+      "params": "",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/inventory/SLInventoryHTTPFetchRequest.java",
+      "class": "com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.AnonymousClass1",
+      "method": "run",
+      "params": "",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/modules/SLMinimap.java",
+      "class": "com.lumiyaviewer.lumiya.slproto.modules.SLMinimap",
+      "method": "HandleCoarseLocationUpdate",
+      "params": "com.lumiyaviewer.lumiya.slproto.messages.CoarseLocationUpdate",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/modules/SLMinimap.java",
+      "class": "com.lumiyaviewer.lumiya.slproto.modules.SLMinimap",
+      "method": "HandleParcelProperties",
+      "params": "com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/modules/rlv/RLVRestrictions.java",
+      "class": "com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVRestrictions.RLVRestrictionList",
+      "method": "isAllowed",
+      "params": "com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVRestrictionType$RLVRuleMatchType, java.lang.String, java.util.UUID, java.util.UUID",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/objects/SLObjectInfo.java",
+      "class": "com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo",
+      "method": "ApplyObjectUpdate",
+      "params": "com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdateCompressed$ObjectData",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/slproto/users/manager/ObjectPopupsManager.java",
+      "class": "com.lumiyaviewer.lumiya.slproto.users.manager.ObjectPopupsManager",
+      "method": "cancelObjectPopup",
+      "params": "com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/ui/chat/ContactsFragment.java",
+      "class": "com.lumiyaviewer.lumiya.ui.chat.ContactsFragment",
+      "method": "updateOptionsMenu",
+      "params": "",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/ui/common/DetailsActivity.java",
+      "class": "com.lumiyaviewer.lumiya.ui.common.DetailsActivity",
+      "method": "updateTitle",
+      "params": "",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/ui/common/MasterDetailsActivity.java",
+      "class": "com.lumiyaviewer.lumiya.ui.common.MasterDetailsActivity",
+      "method": "onCreate",
+      "params": "android.os.Bundle",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/ui/notify/OnlineNotificationInfo.java",
+      "class": "com.lumiyaviewer.lumiya.ui.notify.OnlineNotificationInfo",
+      "method": "<init>",
+      "params": "boolean, android.content.Context, java.lang.String, com.lumiyaviewer.lumiya.slproto.SLGridConnection, com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever, com.lumiyaviewer.lumiya.slproto.users.manager.CurrentLocationInfo",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/utils/PriorityBinQueue.java",
+      "class": "com.lumiyaviewer.lumiya.utils.PriorityBinQueue",
+      "method": "poll",
+      "params": "long, java.util.concurrent.TimeUnit",
+      "return_type": "java.lang.Object",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/utils/reqset/WeakRequestSet.java",
+      "class": "com.lumiyaviewer.lumiya.utils.reqset.WeakRequestSet",
+      "method": "getRequest",
+      "params": "",
+      "return_type": "java.lang.Object",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/utils/wlist/ChunkedListLoader.java",
+      "class": "com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader",
+      "method": "setVisibleRange",
+      "params": "int, int",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/lumiyaviewer/lumiya/voiceintf/VoicePluginServiceConnection.java",
+      "class": "com.lumiyaviewer.lumiya.voiceintf.VoicePluginServiceConnection",
+      "method": "showIncomingCallNotification",
+      "params": "com.lumiyaviewer.lumiya.voice.common.messages.VoiceRinging, java.lang.String, com.lumiyaviewer.lumiya.slproto.users.ChatterID",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/com/nineoldandroids/animation/AnimatorInflater.java",
+      "class": "com.nineoldandroids.animation.AnimatorInflater",
+      "method": "createAnimatorFromXml",
+      "params": "android.content.Context, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet, com.nineoldandroids.animation.AnimatorSet, int",
+      "return_type": "com.nineoldandroids.animation.Animator",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/de/greenrobot/dao/async/AsyncOperationExecutor.java",
+      "class": "de.greenrobot.dao.async.AsyncOperationExecutor",
+      "method": "mergeTxAndExecute",
+      "params": "de.greenrobot.dao.async.AsyncOperation, de.greenrobot.dao.async.AsyncOperation",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/okhttp3/Cookie.java",
+      "class": "okhttp3.Cookie",
+      "method": "parse",
+      "params": "long, okhttp3.HttpUrl, java.lang.String",
+      "return_type": "okhttp3.Cookie",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/okhttp3/HttpUrl.java",
+      "class": "okhttp3.HttpUrl.Builder",
+      "method": "decodeIpv6",
+      "params": "java.lang.String, int, int",
+      "return_type": "java.net.InetAddress",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/okhttp3/internal/cache/CacheStrategy.java",
+      "class": "okhttp3.internal.cache.CacheStrategy",
+      "method": "isCacheable",
+      "params": "okhttp3.Response, okhttp3.Request",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/okhttp3/internal/cache2/FileOperator.java",
+      "class": "okhttp3.internal.cache2.FileOperator",
+      "method": "read",
+      "params": "long, okio.Buffer, long",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/okhttp3/internal/cache2/Relay.java",
+      "class": "okhttp3.internal.cache2.Relay.RelaySource",
+      "method": "read",
+      "params": "okio.Buffer, long",
+      "return_type": "long",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/okhttp3/internal/http2/Http2Connection.java",
+      "class": "okhttp3.internal.http2.Http2Connection",
+      "method": "newStream",
+      "params": "int, java.util.List, boolean",
+      "return_type": "okhttp3.internal.http2.Http2Stream",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/okhttp3/internal/http2/Http2Connection.java",
+      "class": "okhttp3.internal.http2.Http2Connection",
+      "method": "writeData",
+      "params": "int, boolean, okio.Buffer, long",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/okhttp3/internal/tls/DistinguishedNameParser.java",
+      "class": "okhttp3.internal.tls.DistinguishedNameParser",
+      "method": "hexAV",
+      "params": "",
+      "return_type": "java.lang.String",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/okhttp3/internal/ws/WebSocketWriter.java",
+      "class": "okhttp3.internal.ws.WebSocketWriter.FrameSink",
+      "method": "write",
+      "params": "okio.Buffer, long",
+      "return_type": "void",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/okio/Buffer.java",
+      "class": "okio.Buffer",
+      "method": "equals",
+      "params": "java.lang.Object",
+      "return_type": "boolean",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/okio/Buffer.java",
+      "class": "okio.Buffer",
+      "method": "indexOf",
+      "params": "byte, long",
+      "return_type": "long",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/okio/Buffer.java",
+      "class": "okio.Buffer",
+      "method": "readDecimalLong",
+      "params": "",
+      "return_type": "long",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/okio/Buffer.java",
+      "class": "okio.Buffer",
+      "method": "readHexadecimalUnsignedLong",
+      "params": "",
+      "return_type": "long",
+      "smali_class_present": false
+    },
+    {
+      "java_file": "lumiya_decompiled_source/uk/co/senab/photoview/PhotoViewAttacher.java",
+      "class": "uk.co.senab.photoview.PhotoViewAttacher",
+      "method": "onDrag",
+      "params": "float, float",
       "return_type": "void",
       "smali_class_present": false
     }

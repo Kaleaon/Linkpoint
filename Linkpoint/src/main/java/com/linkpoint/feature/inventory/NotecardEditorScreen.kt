@@ -17,7 +17,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.linkpoint.R
 
 sealed interface NotecardEditorUiState {
     data object Loading : NotecardEditorUiState
@@ -36,7 +38,7 @@ fun NotecardEditorScreen(state: NotecardEditorUiState) {
             ) {
                 CircularProgressIndicator()
                 Spacer(Modifier.height(16.dp))
-                Text("Loading notecard…", style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.notecard_loading), style = MaterialTheme.typography.bodyMedium)
             }
 
             NotecardEditorUiState.Error -> Column(
@@ -50,7 +52,7 @@ fun NotecardEditorScreen(state: NotecardEditorUiState) {
                     modifier = Modifier.size(48.dp),
                 )
                 Spacer(Modifier.height(12.dp))
-                Text("Could not load notecard", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.notecard_could_not_load), style = MaterialTheme.typography.titleMedium)
             }
 
             NotecardEditorUiState.EmptyDocument -> Column(
@@ -64,7 +66,7 @@ fun NotecardEditorScreen(state: NotecardEditorUiState) {
                     modifier = Modifier.size(48.dp),
                 )
                 Spacer(Modifier.height(12.dp))
-                Text("Notecard is empty", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.notecard_empty), style = MaterialTheme.typography.titleMedium)
             }
 
             NotecardEditorUiState.Edited -> {

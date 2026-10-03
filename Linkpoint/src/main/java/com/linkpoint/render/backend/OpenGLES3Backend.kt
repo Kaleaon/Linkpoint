@@ -1,6 +1,5 @@
 package com.linkpoint.render.backend
 
-import android.opengl.GLSurfaceView
 import android.view.SurfaceHolder
 import com.linkpoint.render.lumiya.core.LumiyaGLSurfaceView
 
@@ -9,7 +8,7 @@ class OpenGLES3Backend(
 ) : RenderBackend {
 
     init {
-        glSurfaceView.renderMode = GLSurfaceView.RENDERMODE_WHEN_DIRTY
+        // Initial render mode is managed by glSurfaceView.renderStateManager
     }
 
     override fun attachSurface(holder: SurfaceHolder) {
