@@ -3,6 +3,7 @@ package com.linkpoint.ui.linkpoint2.routes
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -16,6 +17,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalContext
 import com.linkpoint.LinkpointApp
 import com.linkpoint.ui.common.UiLoadState
+import com.linkpoint.ui.overlay.OverlayManager
 import com.linkpoint.ui.friends.FriendData
 import com.linkpoint.ui.friends.FriendStatus
 import com.linkpoint.ui.friends.FriendsScreen
@@ -256,6 +258,17 @@ fun L2InventoryRoute(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    DisposableEffect(Unit) {
+        OverlayManager.getInstance().showOverlay(
+            id = "inventory_overlay",
+            type = OverlayManager.OverlayType.FULL_SCREEN_2D,
+            title = "Inventory"
+        )
+        onDispose {
+            OverlayManager.getInstance().hideOverlay("inventory_overlay")
+        }
+    }
+
     val app = LinkpointApp.getInstanceOrNull()
     val scope = rememberCoroutineScope()
 
