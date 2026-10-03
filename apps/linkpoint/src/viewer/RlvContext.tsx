@@ -260,105 +260,120 @@ export const RlvProvider: React.FC<{
       const parsed = parseRlvCommandString(rawCommand);
       if (parsed.length === 0) return;
 
-      for (const cmd of parsed) {
-        const { name, option, value } = cmd;
+      // Group restriction state mutations into a single state update call per command string
+      setObjectRestrictions((prev) => {
+        let nextMap: Map<string, Set<RlvRestriction>> | null = null;
+        const getMutableMap = () => {
+          if (!nextMap) {
+            nextMap = new Map(prev);
+          }
+          return nextMap;
+        };
 
-        // 1. Query commands
-        if (name === 'version' || name === 'versionnew' || name === 'versionnum') {
-          const channel = parseInt(value, 10);
-          if (!isNaN(channel)) {
-            let reply = 'RestrainedLife viewer v2.8.0 (Linkpoint RLV v3.4.3)';
-            if (name === 'versionnew') {
-              reply = 'RestrainedLove viewer v2.8.0 (Linkpoint RLV v3.4.3)';
-            } else if (name === 'versionnum') {
-              reply = '3040300';
+        for (const cmd of parsed) {
+          const { name, option, value } = cmd;
+
+          // 1. Query commands
+          if (name === 'version' || name === 'versionnew' || name === 'versionnum') {
+            const channel = parseInt(value, 10);
+            if (!isNaN(channel)) {
+              let reply = 'RestrainedLife viewer v2.8.0 (Linkpoint RLV v3.4.3)';
+              if (name === 'versionnew') {
+                reply = 'RestrainedLove viewer v2.8.0 (Linkpoint RLV v3.4.3)';
+              } else if (name === 'versionnum') {
+                reply = '3040300';
+              }
+              sendReply(channel, reply);
             }
-            sendReply(channel, reply);
+            continue;
           }
-          continue;
-        }
 
-        if (name === 'getstatus') {
-          const channel = parseInt(value, 10);
-          if (!isNaN(channel)) {
-            const filter = (option ?? '').toLowerCase();
-            const activeList = Array.from(active).filter((r) => !filter || r.includes(filter));
-            const reply = activeList.length > 0 ? '/' + activeList.join('/') : '';
-            sendReply(channel, reply);
+          if (name === 'getstatus') {
+            const channel = parseInt(value, 10);
+            if (!isNaN(channel)) {
+              const filter = (option ?? '').toLowerCase();
+              const activeList = Array.from(active).filter((r) => !filter || r.includes(filter));
+              const reply = activeList.length > 0 ? '/' + activeList.join('/') : '';
+              sendReply(channel, reply);
+            }
+            continue;
           }
-          continue;
-        }
 
-        if (name === 'getstatusall') {
-          const channel = parseInt(value, 10);
-          if (!isNaN(channel)) {
-            const entries: string[] = [];
-            objectRestrictions.forEach((set, objId) => {
-              set.forEach((r) => entries.push(`${r}:${objId}`));
-            });
-            const reply = entries.join('/');
-            sendReply(channel, reply);
+          if (name === 'getstatusall') {
+            const channel = parseInt(value, 10);
+            if (!isNaN(channel)) {
+              const entries: string[] = [];
+              const targetMap = nextMap ?? prev;
+              targetMap.forEach((set, objId) => {
+                set.forEach((r) => entries.push(`${r}:${objId}`));
+              });
+              const reply = entries.join('/');
+              sendReply(channel, reply);
+            }
+            continue;
           }
-          continue;
-        }
 
-        if (name === 'getoutfit') {
-          const channel = parseInt(value, 10);
-          if (!isNaN(channel)) {
-            sendReply(channel, 'worn');
+          if (name === 'getoutfit') {
+            const channel = parseInt(value, 10);
+            if (!isNaN(channel)) {
+              sendReply(channel, 'worn');
+            }
+            continue;
           }
-          continue;
-        }
 
-        if (name === 'getattach') {
-          const channel = parseInt(value, 10);
-          if (!isNaN(channel)) {
-            sendReply(channel, option ? `attached:${option}` : 'attached');
+          if (name === 'getattach') {
+            const channel = parseInt(value, 10);
+            if (!isNaN(channel)) {
+              sendReply(channel, option ? `attached:${option}` : 'attached');
+            }
+            continue;
           }
-          continue;
-        }
 
-        // 2. Clear command
-        if (name === 'clear') {
-          const filter = (option || value || '').toLowerCase();
-          setObjectRestrictions((prev) => {
-            const next = new Map(prev);
+          // 2. Clear command
+          if (name === 'clear') {
+            const filter = (option || value || '').toLowerCase();
+            const map = getMutableMap();
             if (!filter || filter === 'y') {
-              next.delete(objectUuid);
+              map.delete(objectUuid);
             } else {
-              const currentSet = new Set(next.get(objectUuid) ?? []);
+              const currentSet = new Set(map.get(objectUuid) ?? []);
               for (const r of Array.from(currentSet)) {
                 if (r.includes(filter)) {
                   currentSet.delete(r);
                 }
               }
               if (currentSet.size === 0) {
-                next.delete(objectUuid);
+                map.delete(objectUuid);
               } else {
-                next.set(objectUuid, currentSet);
+                map.set(objectUuid, currentSet);
               }
             }
-            return next;
-          });
-          continue;
-        }
+            continue;
+          }
 
-        // 3. Restriction commands (handles standard restriction command classes)
-        // Check if name is a known RlvRestriction
-        if (name in RLV_REASONS || isRlvRestriction(name)) {
-          const restriction = name as RlvRestriction;
-          if (value === 'n' || value === 'add') {
-            setRestriction(restriction, true, objectUuid);
-          } else if (value === 'y' || value === 'rem') {
-            setRestriction(restriction, false, objectUuid);
-          } else if (value === 'force') {
-            // Force commands still enforce restriction where appropriate
-            setRestriction(restriction, true, objectUuid);
+          // 3. Restriction commands (handles standard restriction command classes)
+          if (name in RLV_REASONS || isRlvRestriction(name)) {
+            const restriction = name as RlvRestriction;
+            const map = getMutableMap();
+            const currentSet = new Set(map.get(objectUuid) ?? []);
+            if (value === 'n' || value === 'add' || value === 'force') {
+              currentSet.add(restriction);
+              map.set(objectUuid, currentSet);
+            } else if (value === 'y' || value === 'rem') {
+              currentSet.delete(restriction);
+              if (currentSet.size === 0) {
+                map.delete(objectUuid);
+              } else {
+                map.set(objectUuid, currentSet);
+              }
+            }
           }
         }
-      }
+
+        return nextMap ?? prev;
+      });
     },
-    [active, objectRestrictions, setRestriction, sendReply],
+    [active, sendReply],
   );
 
   const value = useMemo<RlvContextValue>(
