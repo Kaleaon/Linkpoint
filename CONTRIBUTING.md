@@ -68,6 +68,22 @@ npm run check:rust
 npm run check
 ```
 
+To run code coverage reports locally across components:
+
+```bash
+# Android JaCoCo coverage
+./gradlew testDebugUnitTest jacocoTestReport
+
+# Web Vitest V8 coverage
+npm run test:coverage
+
+# Rust LLVM coverage
+cargo llvm-cov --workspace --lcov --output-path lcov.info
+
+# Evaluate quality gate locally
+python3 scripts/evaluate_coverage.py
+```
+
 For a legacy Android change, also run the relevant Gradle task, normally:
 
 ```bash

@@ -8,7 +8,7 @@ import {
 } from '../windlight';
 import { computeSkyUniforms } from '../sky';
 
-const xml = (name: string) => readFileSync(resolve(process.cwd(), 'src/assets/windlight', `${name}.xml`), 'utf8');
+const xml = (name: string) => readFileSync(resolve(__dirname, '../../assets/windlight', `${name}.xml`), 'utf8');
 
 describe('Windlight preset parsing (Lumiya rules)', () => {
   const preset = parseWindlightPreset(xml('A-6AM'));

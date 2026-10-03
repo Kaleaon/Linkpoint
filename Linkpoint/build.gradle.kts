@@ -8,6 +8,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.parcelize") version "2.2.21"
     id("org.jetbrains.kotlin.plugin.compose") version "2.2.21"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.21"
+    jacoco
     // NOTE: Paparazzi's Gradle plugin (`app.cash.paparazzi`) is intentionally
     // *not* applied here. The project's production classpath bundles
     // `org.conscrypt:conscrypt-android` whose AAR ships an `org.conscrypt.R`
@@ -19,6 +20,10 @@ plugins {
     // StateComponentsSnapshotTest is annotated with @Ignore so Robolectric
     // tests remain green; the snapshots will move to the AndroidJUnit4
     // instrumented suite.
+}
+
+jacoco {
+    toolVersion = "0.8.11"
 }
 
 data class UiBoundaryRule(
@@ -188,6 +193,7 @@ android {
         }
         debug {
             isMinifyEnabled = false
+            enableUnitTestCoverage = true
             buildConfigField("boolean", "ALLOW_PLACEHOLDER_ENTITIES", "true")
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
@@ -766,4 +772,36 @@ tasks.named("check") {
 tasks.register("testDebugUnitTest") {
     dependsOn("testStableDebugUnitTest")
     dependsOn(checkThemeContrastAndSync)
+}
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testStableDebugUnitTest")
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        xml.outputLocation.set(file("${layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"))
+        html.outputLocation.set(file("${layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport/html"))
+    }
+    val javaClasses = fileTree("${layout.buildDirectory.get()}/intermediates/javac/stableDebug/compileStableDebugJavaWithJavac/classes") {
+        exclude(
+            "**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*",
+            "**/*Test*.*", "android/**/*"
+        )
+    }
+    val kotlinClasses = fileTree("${layout.buildDirectory.get()}/tmp/kotlin-classes/stableDebug") {
+        exclude(
+            "**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*",
+            "**/*Test*.*", "android/**/*"
+        )
+    }
+    classDirectories.setFrom(files(javaClasses, kotlinClasses))
+    sourceDirectories.setFrom(files("src/main/java", "src/main/kotlin"))
+    executionData.setFrom(fileTree(layout.buildDirectory).matching {
+        include(
+            "outputs/unit_test_code_coverage/stableDebugUnitTest/testStableDebugUnitTest.exec",
+            "outputs/code_coverage/stableDebugUnitTest/testStableDebugUnitTest.ec",
+            "jacoco/testStableDebugUnitTest.exec",
+            "jacoco/test.exec"
+        )
+    })
 }

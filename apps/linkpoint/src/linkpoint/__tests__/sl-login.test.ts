@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createRequire } from 'node:module';
 import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 const require = createRequire(import.meta.url);
 const actions = require('../../../core/sl-actions.cjs');
 const patcher = require('../../../scripts/patch-metaverse.cjs');
@@ -109,7 +109,12 @@ describe('viewer identity patch for node-metaverse (TPV_COMPLIANCE.md section 1)
     expect(channel).not.toMatch(/libnmv|^Second Life/i);
   });
   // After `npm ci` the postinstall patch has run, so the shipped library must not say libnmv.
-  const loginHandler = join(process.cwd(), 'node_modules/@caspertech/node-metaverse/dist/lib/LoginHandler.js');
+  let loginHandler: string;
+  try {
+    loginHandler = join(dirname(require.resolve('@caspertech/node-metaverse/package.json')), 'dist/lib/LoginHandler.js');
+  } catch (_e) {
+    loginHandler = join(process.cwd(), 'node_modules/@caspertech/node-metaverse/dist/lib/LoginHandler.js');
+  }
   it.skipIf(!existsSync(loginHandler))('the installed library identifies as this viewer', () => {
     const text = readFileSync(loginHandler, 'utf8');
     expect(text).not.toContain("channel: 'libnmv'");
