@@ -9,14 +9,14 @@ class CapabilityDeclarationAuditTest {
     @Test
     fun `capability constants must have callsite or explicit cap status annotation`() {
         val repoRoot = locateRepoRoot()
-        val capabilityFile = File(repoRoot, "Linkpoint/src/main/java/com/linkpoint/protocol/capabilities/CapabilityManager.kt")
+        val capabilityFile = locateCapabilityFile(repoRoot)
         val sourceText = capabilityFile.readText()
         val lines = capabilityFile.readLines()
 
-        val constantRegex = Regex("""const\\s+val\\s+(CAP_[A-Z0-9_]+)\\s*=\\s*\"[^\"]+\"""")
+        val constantRegex = Regex("""const\s+val\s+(CAP_[A-Z0-9_]+)\s*=\s*"[^"]+"""")
         val constants = constantRegex.findAll(sourceText).toList()
 
-        val sourceFiles = File(repoRoot, "Linkpoint/src/main/java/com/linkpoint")
+        val sourceFiles = locateSourceDir(repoRoot)
             .walkTopDown()
             .filter { it.isFile && it.extension == "kt" }
             .filter { it.absolutePath != capabilityFile.absolutePath }
@@ -47,12 +47,32 @@ class CapabilityDeclarationAuditTest {
         )
     }
 
+    private fun locateCapabilityFile(repoRoot: File): File {
+        val path1 = File(repoRoot, "Linkpoint/src/main/java/com/linkpoint/protocol/capabilities/CapabilityManager.kt")
+        if (path1.exists()) return path1
+        val path2 = File(repoRoot, "src/main/java/com/linkpoint/protocol/capabilities/CapabilityManager.kt")
+        if (path2.exists()) return path2
+        return path1
+    }
+
+    private fun locateSourceDir(repoRoot: File): File {
+        val dir1 = File(repoRoot, "Linkpoint/src/main/java/com/linkpoint")
+        if (dir1.exists()) return dir1
+        val dir2 = File(repoRoot, "src/main/java/com/linkpoint")
+        if (dir2.exists()) return dir2
+        return dir1
+    }
+
     private fun locateRepoRoot(): File {
-        var dir = File(System.getProperty("user.dir"))
+        val userDir = System.getProperty("user.dir") ?: "."
+        var dir: File? = File(userDir)
         repeat(6) {
-            if (File(dir, ".git").exists()) return dir
-            dir = dir.parentFile ?: return@repeat
+            val current = dir ?: return@repeat
+            if (File(current, ".git").exists() || File(current, "Linkpoint/src").exists()) {
+                return current
+            }
+            dir = current.parentFile
         }
-        return File(System.getProperty("user.dir"))
+        return File(userDir)
     }
 }
