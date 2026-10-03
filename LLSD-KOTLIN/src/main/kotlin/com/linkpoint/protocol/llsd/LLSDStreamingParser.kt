@@ -1,6 +1,5 @@
 package com.linkpoint.protocol.llsd
 
-import android.util.Log
 import java.io.BufferedInputStream
 import java.io.DataInputStream
 import java.io.IOException
@@ -15,21 +14,6 @@ import org.xmlpull.v1.XmlPullParserFactory
 object LLSDStreamingParser {
     private const val TAG = "LLSDStreamingParser"
 
-    private fun logWarning(tag: String, message: String, throwable: Throwable? = null) {
-        try {
-            Log.w(tag, message, throwable)
-        } catch (_: Throwable) {
-            System.err.println("[$tag] $message: ${throwable?.message}")
-        }
-    }
-
-    private fun logError(tag: String, message: String, throwable: Throwable? = null) {
-        try {
-            Log.e(tag, message, throwable)
-        } catch (_: Throwable) {
-            System.err.println("[$tag] $message: ${throwable?.message}")
-        }
-    }
     data class ParseLimits(
         val maxStringBytes: Int = 1024 * 1024,
         val maxBinaryBytes: Int = 1024 * 1024,
@@ -243,7 +227,7 @@ object LLSDStreamingParser {
                     remaining--
                 }
                 else -> {
-                    logWarning(TAG, "Unknown LLSD marker: $marker")
+                    SafeLog.w(TAG, "Unknown LLSD marker: $marker")
                     remaining--
                 }
             }
@@ -294,7 +278,7 @@ object LLSDStreamingParser {
                 parseXMLNode(null, parser, handler, limits, state)
             }
         } catch (e: XmlPullParserException) {
-            logError(TAG, "XML parse error", e)
+            SafeLog.e(TAG, "XML parse error", e)
             throw IOException("Malformed XML", e)
         }
     }

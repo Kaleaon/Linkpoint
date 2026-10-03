@@ -87,7 +87,7 @@ class LLSDBinarySerializer {
     @Throws(IOException::class, LLSDException::class)
     private fun serializeValue(value: Any?, output: OutputStream) {
         when {
-            value == null -> {
+            value == null || value == "" -> {
                 output.write(UNDEF_MARKER.toInt())
             }
             value is Map<*, *> -> {

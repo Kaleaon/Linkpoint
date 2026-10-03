@@ -1,2 +1,3 @@
-// Linkpoint is the only project - clean Kotlin Second Life viewer
+include('llsd-core')
+project(':llsd-core').projectDir = file('LLSD-KOTLIN')
 includeBuild('Linkpoint')
