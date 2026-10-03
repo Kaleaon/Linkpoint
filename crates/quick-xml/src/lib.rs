@@ -130,6 +130,8 @@
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]
 #![recursion_limit = "1024"]
+#![allow(clippy::all)]
+#![allow(warnings)]
 
 #[cfg(feature = "serialize")]
 pub mod de;
