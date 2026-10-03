@@ -73,6 +73,9 @@ jobs:
       - name: Check viewer contract
         run: bash scripts/check_viewer_contract.sh
 
+      - name: Verify i18n locale key parity
+        run: node scripts/sync-i18n.js --check
+
       - name: Run web checks (typecheck, test, build)
         run: npm run check:web
 

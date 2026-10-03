@@ -364,6 +364,15 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private fun updateHudOverlayVisibility(showHud: Boolean) {
         val visible = showHud && hudsVisibleFromManager
         worldViewportHost.setHudAttachmentsVisible(visible)
+        if (visible) {
+            com.linkpoint.ui.overlay.OverlayManager.getInstance().showOverlay(
+                id = "hud_attachments",
+                type = com.linkpoint.ui.overlay.OverlayManager.OverlayType.SEMI_TRANSPARENT_HUD,
+                title = "HUD Attachments"
+            )
+        } else {
+            com.linkpoint.ui.overlay.OverlayManager.getInstance().hideOverlay("hud_attachments")
+        }
         worldUiState.update { it.copy(overlaysVisibility = it.overlaysVisibility.copy(hudAttachments = visible)) }
     }
 

@@ -52,6 +52,14 @@ class GridManager(
         val grids = if (cachedEntities.isNotEmpty()) {
             cachedEntities.map { it.toGridInfo() }
         } else {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    dao.insertGrids(GridDatabase.DEFAULT_PRESET_GRIDS)
+                    Log.i(TAG, "Auto-populated local grid storage with default preset grids")
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to auto-populate default preset grids: ${e.message}")
+                }
+            }
             BUILTIN_GRIDS
         }
 
@@ -65,7 +73,18 @@ class GridManager(
      */
     fun getAvailableGridsFlow(): Flow<List<GridInfo>> {
         return dao.getAllGridsFlow().map { list ->
-            if (list.isNotEmpty()) list.map { it.toGridInfo() } else BUILTIN_GRIDS
+            if (list.isNotEmpty()) {
+                list.map { it.toGridInfo() }
+            } else {
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        dao.insertGrids(GridDatabase.DEFAULT_PRESET_GRIDS)
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Failed to auto-populate default preset grids: ${e.message}")
+                    }
+                }
+                BUILTIN_GRIDS
+            }
         }
     }
 

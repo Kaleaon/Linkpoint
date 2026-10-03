@@ -26,12 +26,16 @@ export default function InteractionDialog() {
     const onChanged = (list) => { setItems([...list]); setBusyTick((n) => n + 1); };
     const onFailed = ({ id, message }) => setErrors((previous) => ({ ...previous, [id]: message }));
     const onAccepted = () => actions.notify("Teleport accepted");
+    const onInventoryAccepted = () => actions.notify("Inventory offer accepted");
+    const onGroupInviteAccepted = () => actions.notify("Joined group successfully");
     const onPaymentCompleted = ({ message }) => { if (message) actions.notify(message); };
     const onBalanceUpdated = (balance) => setUserBalance(balance);
 
     manager.on("interactions_changed", onChanged);
     manager.on("interaction_failed", onFailed);
     manager.on("lure_accepted", onAccepted);
+    manager.on("inventory_offer_accepted", onInventoryAccepted);
+    manager.on("group_invite_accepted", onGroupInviteAccepted);
     manager.on("payment_completed", onPaymentCompleted);
     protocol.on("balance_updated", onBalanceUpdated);
 
@@ -43,6 +47,8 @@ export default function InteractionDialog() {
       manager.off("interactions_changed", onChanged);
       manager.off("interaction_failed", onFailed);
       manager.off("lure_accepted", onAccepted);
+      manager.off("inventory_offer_accepted", onInventoryAccepted);
+      manager.off("group_invite_accepted", onGroupInviteAccepted);
       manager.off("payment_completed", onPaymentCompleted);
       protocol.off("balance_updated", onBalanceUpdated);
     };
@@ -67,7 +73,9 @@ export default function InteractionDialog() {
   const waiting = items.length - 1;
   const isLure = current.kind === "lure";
   const isPayment = current.kind === "payment";
-  const isTextBox = !isLure && !isPayment && current.textBox;
+  const isInventoryOffer = current.kind === "inventory-offer";
+  const isGroupInvite = current.kind === "group-invite";
+  const isTextBox = !isLure && !isPayment && !isInventoryOffer && !isGroupInvite && current.textBox;
 
   const button = { flex: "1 1 40%", minHeight: 46, display: "flex", alignItems: "center", justifyContent: "center", borderWidth: 1, borderStyle: "solid", borderColor: V.outv, borderRadius: V.rs, background: "transparent", font: `700 11px/1 ${t.font}`, letterSpacing: ".1em", color: V.ink, textAlign: "center", padding: "0 8px", cursor: busy ? "default" : "pointer", opacity: busy ? 0.55 : 1 };
   const primary = { ...button, background: V.pri, color: V.onpri, borderColor: V.pri };
@@ -81,17 +89,25 @@ export default function InteractionDialog() {
     ? `${current.fromName || "A resident"} offers to teleport you`
     : isPayment
     ? current.objectName || "Vendor Item"
+    : isInventoryOffer
+    ? `${current.senderName || current.fromName || "A resident"} offered you ${current.itemName || "an item"}`
+    : isGroupInvite
+    ? `Invitation to join ${current.groupName || "Group"}`
     : (current.objectName || "Object");
 
   const kind = isLure
     ? "TELEPORT OFFER"
     : isPayment
     ? "PAYMENT CONFIRMATION"
+    : isInventoryOffer
+    ? "INVENTORY OFFER"
+    : isGroupInvite
+    ? "GROUP INVITATION"
     : isTextBox
     ? "TEXT INPUT"
     : "OBJECT DIALOG";
 
-  const visibleButtons = isLure || isPayment || isTextBox ? [] : current.buttons.map((label, index) => ({ label, index })).filter((entry) => entry.label !== TEXT_BOX_MARKER);
+  const visibleButtons = isLure || isPayment || isInventoryOffer || isGroupInvite || isTextBox ? [] : current.buttons.map((label, index) => ({ label, index })).filter((entry) => entry.label !== TEXT_BOX_MARKER);
 
   const insufficient = isPayment && userBalance !== null && userBalance < current.price;
 
@@ -119,11 +135,35 @@ export default function InteractionDialog() {
           <div style={{ marginTop: 2, font: `400 11.5px/1.4 ${t.font}`, color: V.ink2 }}>
             Seller: <strong style={{ color: V.ink }}>{current.sellerName || "Simulator Resident"}</strong>
           </div>
-        ) : (!isLure && current.ownerName) ? (
+        ) : (!isLure && !isInventoryOffer && !isGroupInvite && current.ownerName) ? (
           <div style={{ font: `400 11px/1.4 ${t.font}`, color: V.ink2, marginTop: 2 }}>Owned by {current.ownerName}</div>
         ) : null}
 
-        {isPayment ? (
+        {isInventoryOffer ? (
+          <div id="interaction-body" style={{ marginTop: 12, padding: 12, background: V.bg, border: `1px solid ${V.outv}`, borderRadius: V.rs }}>
+            <div style={{ font: `400 11.5px/1.4 ${t.font}`, color: V.ink2, marginBottom: 6 }}>
+              Sender: <strong style={{ color: V.ink }}>{current.senderName || current.fromName || "Resident"}</strong>
+            </div>
+            <div style={{ font: `400 11.5px/1.4 ${t.font}`, color: V.ink2, marginBottom: 6 }}>
+              Item: <strong style={{ color: V.ink }}>{current.itemName || "Inventory Item"}</strong>
+            </div>
+            <div style={{ font: `400 11.5px/1.4 ${t.font}`, color: V.ink2 }}>
+              Asset Type: <strong style={{ color: V.ink }}>{current.assetType}</strong>
+            </div>
+          </div>
+        ) : isGroupInvite ? (
+          <div id="interaction-body" style={{ marginTop: 12, padding: 12, background: V.bg, border: `1px solid ${V.outv}`, borderRadius: V.rs }}>
+            <div style={{ font: `400 11.5px/1.4 ${t.font}`, color: V.ink2, marginBottom: 6 }}>
+              Group: <strong style={{ color: V.ink }}>{current.groupName || "Group"}</strong>
+            </div>
+            <div style={{ font: `400 11.5px/1.4 ${t.font}`, color: V.ink2, marginBottom: 6 }}>
+              Invited by: <strong style={{ color: V.ink }}>{current.senderName || current.fromName || "Resident"}</strong>
+            </div>
+            <div style={{ font: `400 11.5px/1.4 ${t.font}`, color: V.ink2 }}>
+              Join Fee: <strong style={{ color: V.ink }}>{current.fee > 0 ? `L$ ${current.fee}` : "Free"}</strong>
+            </div>
+          </div>
+        ) : isPayment ? (
           <div id="interaction-body" style={{ marginTop: 12, padding: 12, background: V.bg, border: `1px solid ${V.outv}`, borderRadius: V.rs }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
               <span style={{ font: `500 12px/1 ${t.font}`, color: V.ink2 }}>Price:</span>
@@ -185,6 +225,16 @@ export default function InteractionDialog() {
             <>
               <button type="button" ref={firstRef} disabled={busy} style={primary} onClick={() => attempt(() => app.interactions.acceptLure(current.id))}>ACCEPT</button>
               <button type="button" disabled={busy} style={dim} onClick={() => void app.interactions.dismiss(current.id)}>DISMISS</button>
+            </>
+          ) : isInventoryOffer ? (
+            <>
+              <button type="button" ref={firstRef} disabled={busy} style={primary} onClick={() => attempt(() => app.interactions.acceptInventoryOffer(current.id))}>ACCEPT</button>
+              <button type="button" disabled={busy} style={dim} onClick={() => attempt(() => app.interactions.declineInventoryOffer(current.id))}>DECLINE</button>
+            </>
+          ) : isGroupInvite ? (
+            <>
+              <button type="button" ref={firstRef} disabled={busy} style={primary} onClick={() => attempt(() => app.interactions.acceptGroupInvite(current.id))}>JOIN GROUP</button>
+              <button type="button" disabled={busy} style={dim} onClick={() => attempt(() => app.interactions.declineGroupInvite(current.id))}>DECLINE</button>
             </>
           ) : isTextBox ? (
             <>

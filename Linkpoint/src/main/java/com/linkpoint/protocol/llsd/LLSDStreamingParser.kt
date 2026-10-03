@@ -14,6 +14,22 @@ import org.xmlpull.v1.XmlPullParserFactory
 
 object LLSDStreamingParser {
     private const val TAG = "LLSDStreamingParser"
+
+    private fun logWarning(tag: String, message: String, throwable: Throwable? = null) {
+        try {
+            Log.w(tag, message, throwable)
+        } catch (_: Throwable) {
+            System.err.println("[$tag] $message: ${throwable?.message}")
+        }
+    }
+
+    private fun logError(tag: String, message: String, throwable: Throwable? = null) {
+        try {
+            Log.e(tag, message, throwable)
+        } catch (_: Throwable) {
+            System.err.println("[$tag] $message: ${throwable?.message}")
+        }
+    }
     data class ParseLimits(
         val maxStringBytes: Int = 1024 * 1024,
         val maxBinaryBytes: Int = 1024 * 1024,
@@ -227,7 +243,7 @@ object LLSDStreamingParser {
                     remaining--
                 }
                 else -> {
-                    Log.w(TAG, "Unknown LLSD marker: $marker")
+                    logWarning(TAG, "Unknown LLSD marker: $marker")
                     remaining--
                 }
             }
@@ -264,15 +280,38 @@ object LLSDStreamingParser {
         try {
             val parser = XmlPullParserFactory.newInstance().newPullParser()
             parser.setInput(input, encoding)
-            parser.nextTag()
-            parser.require(2, null, "llsd")
-            parser.nextTag()
-            parseXMLNode(null, parser, handler, limits, state)
-            parser.require(3, null, "llsd")
+            val event = parser.nextTag()
+            if (event == XmlPullParser.START_TAG && parser.name.equals("llsd", ignoreCase = true)) {
+                if (!parser.isEmptyElementTag) {
+                    parser.nextTag()
+                    if (parser.eventType != XmlPullParser.END_TAG || !parser.name.equals("llsd", ignoreCase = true)) {
+                        parseXMLNode(null, parser, handler, limits, state)
+                    }
+                } else {
+                    handler.onPrimitiveValue(null, LLSDUndefined)
+                }
+            } else {
+                parseXMLNode(null, parser, handler, limits, state)
+            }
         } catch (e: XmlPullParserException) {
-            Log.e(TAG, "XML parse error", e)
+            logError(TAG, "XML parse error", e)
             throw IOException("Malformed XML", e)
         }
+    }
+
+    private fun advancePastEmptyElementTag(parser: XmlPullParser) {
+        parser.nextTag()
+        if (parser.eventType == XmlPullParser.END_TAG) {
+            parser.nextTag()
+        }
+    }
+
+    private fun nextTextAndAdvanceTag(parser: XmlPullParser): String {
+        val text = parser.nextText()
+        if (parser.eventType == XmlPullParser.END_TAG) {
+            parser.nextTag()
+        }
+        return text
     }
 
     @Throws(IOException::class, XmlPullParserException::class)
@@ -290,99 +329,147 @@ object LLSDStreamingParser {
         state.currentDepth++
         try {
             when (tag) {
-            "array" -> {
-                val arrayHandler = handler.onArrayBegin(name) ?: handler
-                var elements = 0
-                parser.nextTag()
-                while (parser.eventType != 3) {
-                    elements++
-                    if (elements > limits.maxArrayLength) {
-                        throw IOException("LLSD parse limit exceeded: array length exceeds ${limits.maxArrayLength}.")
+                "array" -> {
+                    val arrayHandler = handler.onArrayBegin(name) ?: handler
+                    var elements = 0
+                    if (parser.isEmptyElementTag) {
+                        arrayHandler.onArrayEnd(name)
+                        advancePastEmptyElementTag(parser)
+                    } else {
+                        parser.nextTag()
+                        while (!(parser.eventType == XmlPullParser.END_TAG && parser.name.equals("array", ignoreCase = true))) {
+                            elements++
+                            if (elements > limits.maxArrayLength) {
+                                throw IOException("LLSD parse limit exceeded: array length exceeds ${limits.maxArrayLength}.")
+                            }
+                            incrementCollectionElementCount(state, limits)
+                            parseXMLNode(null, parser, arrayHandler, limits, state)
+                        }
+                        arrayHandler.onArrayEnd(name)
+                        parser.nextTag()
                     }
-                    incrementCollectionElementCount(state, limits)
-                    parseXMLNode(null, parser, arrayHandler, limits, state)
                 }
-                arrayHandler.onArrayEnd(name)
-                parser.nextTag()
-            }
-            "map" -> {
-                val mapHandler = handler.onMapBegin(name) ?: handler
-                var entries = 0
-                parser.nextTag()
-                while (parser.eventType != 3) {
-                    val keyTag = parser.name
-                    if (!keyTag.equals("key", ignoreCase = true)) {
-                        throw XmlPullParserException("Unexpected tag: $keyTag")
+                "map" -> {
+                    val mapHandler = handler.onMapBegin(name) ?: handler
+                    var entries = 0
+                    if (parser.isEmptyElementTag) {
+                        mapHandler.onMapEnd(name)
+                        advancePastEmptyElementTag(parser)
+                    } else {
+                        parser.nextTag()
+                        while (!(parser.eventType == XmlPullParser.END_TAG && parser.name.equals("map", ignoreCase = true))) {
+                            val keyTag = parser.name
+                            if (!keyTag.equals("key", ignoreCase = true)) {
+                                throw XmlPullParserException("Unexpected tag: $keyTag")
+                            }
+                            entries++
+                            if (entries > limits.maxMapEntries) {
+                                throw IOException("LLSD parse limit exceeded: map entries exceed ${limits.maxMapEntries}.")
+                            }
+                            incrementCollectionElementCount(state, limits)
+                            val key = nextTextAndAdvanceTag(parser)
+                            if (key.toByteArray(Charsets.UTF_8).size > limits.maxStringBytes) {
+                                throw IOException("LLSD parse limit exceeded: map key exceeds ${limits.maxStringBytes} bytes.")
+                            }
+                            parseXMLNode(key, parser, mapHandler, limits, state)
+                        }
+                        mapHandler.onMapEnd(name)
+                        parser.nextTag()
                     }
-                    entries++
-                    if (entries > limits.maxMapEntries) {
-                        throw IOException("LLSD parse limit exceeded: map entries exceed ${limits.maxMapEntries}.")
+                }
+                "boolean" -> {
+                    if (parser.isEmptyElementTag) {
+                        handler.onPrimitiveValue(name, LLSDBoolean(false))
+                        advancePastEmptyElementTag(parser)
+                    } else {
+                        val text = nextTextAndAdvanceTag(parser)
+                        val isTrue = text == "1" || text.equals("true", ignoreCase = true)
+                        handler.onPrimitiveValue(name, LLSDBoolean(isTrue))
                     }
-                    incrementCollectionElementCount(state, limits)
-                    val key = parser.nextText()
-                    if (key.toByteArray(Charsets.UTF_8).size > limits.maxStringBytes) {
-                        throw IOException("LLSD parse limit exceeded: map key exceeds ${limits.maxStringBytes} bytes.")
+                }
+                "integer" -> {
+                    if (parser.isEmptyElementTag) {
+                        handler.onPrimitiveValue(name, LLSDInteger(0))
+                        advancePastEmptyElementTag(parser)
+                    } else {
+                        handler.onPrimitiveValue(name, LLSDInteger(nextTextAndAdvanceTag(parser).toIntOrNull() ?: 0))
                     }
+                }
+                "real" -> {
+                    if (parser.isEmptyElementTag) {
+                        handler.onPrimitiveValue(name, LLSDReal(0.0))
+                        advancePastEmptyElementTag(parser)
+                    } else {
+                        handler.onPrimitiveValue(name, LLSDReal(nextTextAndAdvanceTag(parser).toDoubleOrNull() ?: 0.0))
+                    }
+                }
+                "string" -> {
+                    if (parser.isEmptyElementTag) {
+                        handler.onPrimitiveValue(name, LLSDString(""))
+                        advancePastEmptyElementTag(parser)
+                    } else {
+                        val text = nextTextAndAdvanceTag(parser)
+                        val size = text.toByteArray(Charsets.UTF_8).size
+                        if (size > limits.maxStringBytes) {
+                            throw IOException("LLSD parse limit exceeded: string exceeds ${limits.maxStringBytes} bytes.")
+                        }
+                        handler.onPrimitiveValue(name, LLSDString(text))
+                    }
+                }
+                "uuid" -> {
+                    if (parser.isEmptyElementTag) {
+                        handler.onPrimitiveValue(name, LLSDUUID.ZERO)
+                        advancePastEmptyElementTag(parser)
+                    } else {
+                        val uuid = runCatching { UUID.fromString(nextTextAndAdvanceTag(parser)) }.getOrDefault(UUID(0, 0))
+                        handler.onPrimitiveValue(name, LLSDUUID(uuid))
+                    }
+                }
+                "binary" -> {
+                    if (parser.isEmptyElementTag) {
+                        handler.onPrimitiveValue(name, LLSDBinary(byteArrayOf()))
+                        advancePastEmptyElementTag(parser)
+                    } else {
+                        val bytes = runCatching { Base64.getDecoder().decode(nextTextAndAdvanceTag(parser).trim()) }.getOrDefault(byteArrayOf())
+                        if (bytes.size > limits.maxBinaryBytes) {
+                            throw IOException("LLSD parse limit exceeded: binary exceeds ${limits.maxBinaryBytes} bytes.")
+                        }
+                        handler.onPrimitiveValue(name, LLSDBinary(bytes))
+                    }
+                }
+                "date" -> {
+                    if (parser.isEmptyElementTag) {
+                        handler.onPrimitiveValue(name, LLSDDate(0L))
+                        advancePastEmptyElementTag(parser)
+                    } else {
+                        val text = nextTextAndAdvanceTag(parser)
+                        val parsed = LLSDParser.parseLlsdDate(text) ?: Date()
+                        handler.onPrimitiveValue(name, LLSDDate(parsed))
+                    }
+                }
+                "uri" -> {
+                    if (parser.isEmptyElementTag) {
+                        handler.onPrimitiveValue(name, LLSDURI(""))
+                        advancePastEmptyElementTag(parser)
+                    } else {
+                        handler.onPrimitiveValue(name, LLSDURI(nextTextAndAdvanceTag(parser)))
+                    }
+                }
+                "undef" -> {
+                    handler.onPrimitiveValue(name, LLSDUndefined)
+                    if (parser.isEmptyElementTag) {
+                        advancePastEmptyElementTag(parser)
+                    } else {
+                        parser.nextTag()
+                        if (parser.eventType == XmlPullParser.END_TAG && parser.name.equals("undef", ignoreCase = true)) {
+                            parser.nextTag()
+                        }
+                    }
+                }
+                else -> {
                     parser.nextTag()
-                    parseXMLNode(key, parser, mapHandler, limits, state)
                 }
-                mapHandler.onMapEnd(name)
-                parser.nextTag()
             }
-            "boolean" -> {
-                val text = parser.nextText()
-                val isTrue = text == "1" || text.equals("true", ignoreCase = true)
-                handler.onPrimitiveValue(name, LLSDBoolean(isTrue))
-                parser.nextTag()
-            }
-            "integer" -> {
-                handler.onPrimitiveValue(name, LLSDInteger(parser.nextText().toIntOrNull() ?: 0))
-                parser.nextTag()
-            }
-            "real" -> {
-                handler.onPrimitiveValue(name, LLSDReal(parser.nextText().toDoubleOrNull() ?: 0.0))
-                parser.nextTag()
-            }
-            "string" -> {
-                val text = parser.nextText()
-                val size = text.toByteArray(Charsets.UTF_8).size
-                if (size > limits.maxStringBytes) {
-                    throw IOException("LLSD parse limit exceeded: string exceeds ${limits.maxStringBytes} bytes.")
-                }
-                handler.onPrimitiveValue(name, LLSDString(text))
-                parser.nextTag()
-            }
-            "uuid" -> {
-                val uuid = runCatching { UUID.fromString(parser.nextText()) }.getOrDefault(UUID(0, 0))
-                handler.onPrimitiveValue(name, LLSDUUID(uuid))
-                parser.nextTag()
-            }
-            "binary" -> {
-                val bytes = runCatching { Base64.getDecoder().decode(parser.nextText()) }.getOrDefault(byteArrayOf())
-                if (bytes.size > limits.maxBinaryBytes) {
-                    throw IOException("LLSD parse limit exceeded: binary exceeds ${limits.maxBinaryBytes} bytes.")
-                }
-                handler.onPrimitiveValue(name, LLSDBinary(bytes))
-                parser.nextTag()
-            }
-            "date" -> {
-                val text = parser.nextText()
-                val parsed = LLSDParser.parseLlsdDate(text) ?: Date()
-                handler.onPrimitiveValue(name, LLSDDate(parsed))
-                parser.nextTag()
-            }
-            "uri" -> {
-                handler.onPrimitiveValue(name, LLSDURI(parser.nextText()))
-                parser.nextTag()
-            }
-            "undef" -> {
-                handler.onPrimitiveValue(name, LLSDUndefined)
-                parser.nextTag()
-            }
-            else -> {
-                parser.nextTag()
-            }
-        }
         } finally {
             state.currentDepth--
         }

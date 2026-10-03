@@ -38,7 +38,6 @@ class ComposeLoginActivity : AppCompatActivity() {
     ) { result ->
         if (result.resultCode == RESULT_OK) {
             renderShell()
-            requestStartupPermissions()
         } else {
             finishAffinity()
         }
@@ -48,17 +47,12 @@ class ComposeLoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         if (!TosActivity.hasAcceptedTos(this)) {
-            // TOS gate must complete before we ask for runtime permissions
-            // — Android system dialogs stack on top of whatever is showing,
-            // and asking for storage/mic before the user has even agreed to
-            // use the app comes across as aggressive. The tos launcher
-            // callback re-enters this flow once acceptance lands.
+            // TOS gate must complete before entering the app shell.
             tosLauncher.launch(TosActivity.createIntent(this, requireAcceptance = true))
             return
         }
 
         renderShell()
-        requestStartupPermissions()
     }
 
     private fun renderShell() {
