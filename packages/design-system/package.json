@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "scripts": {
+    "generate-tokens": "node scripts/generate-tokens.js",
+    "build:tokens": "node scripts/generate-tokens.js"
+  },
   "exports": {
     ".": "./src/index.ts",
     "./tokens": "./src/tokens/index.ts",

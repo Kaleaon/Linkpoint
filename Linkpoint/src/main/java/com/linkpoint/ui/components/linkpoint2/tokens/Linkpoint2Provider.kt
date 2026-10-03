@@ -39,8 +39,8 @@ fun ProvideLinkpoint2Tokens(
             coordColor = cs.onSurfaceVariant,
             onSurfaceDim = cs.onSurfaceVariant,
             outlineSubtle = cs.outlineVariant,
-            success = Color(0xFF7CFFD8),
-            warning = Color(0xFFFFD56D),
+            success = GeneratedTokens.Color.Status.Success,
+            warning = GeneratedTokens.Color.Status.Warning,
             unreadBadge = cs.primary,
             onUnreadBadge = cs.onPrimary,
         )

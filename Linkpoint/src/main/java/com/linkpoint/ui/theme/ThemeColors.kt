@@ -3,6 +3,7 @@ package com.linkpoint.ui.theme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 import com.ktheme.models.ColorScheme as KthemeColorScheme
+import com.linkpoint.ui.components.linkpoint2.tokens.GeneratedTokens
 
 /**
  * Safely parse a hex color string to Compose Color.

@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.sp
 import com.linkpoint.R
 import com.linkpoint.inventory.notecard.EmbeddedItem
 import com.linkpoint.inventory.notecard.NotecardData
+import com.linkpoint.ui.components.linkpoint2.tokens.GeneratedTokens
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -188,9 +189,9 @@ fun NotecardEditorScreen(
                                 else -> stringResource(R.string.notecard_status_editing)
                             },
                             style = MaterialTheme.typography.bodySmall,
-                            color = if (hasUnsavedChanges)
-                                Color(0xFFFF9800)
-                            else
+                            color = if (hasUnsavedChanges) 
+                                GeneratedTokens.Color.Status.Unsaved 
+                            else 
                                 MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -243,13 +244,13 @@ fun NotecardEditorScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF252526),
+                    containerColor = GeneratedTokens.Color.Editor.AppbarBackground,
                     titleContentColor = Color.White
                 )
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = Color(0xFF1E1E1E),
+        containerColor = GeneratedTokens.Color.Editor.Background,
         modifier = modifier
     ) { paddingValues ->
         if (isLoading) {
@@ -280,7 +281,7 @@ fun NotecardEditorScreen(
                         expanded = showEmbeddedItems,
                         onToggle = { showEmbeddedItems = !showEmbeddedItems }
                     )
-                    HorizontalDivider(color = Color(0xFF3C3C3C))
+                    HorizontalDivider(color = GeneratedTokens.Color.Editor.Divider)
                 }
 
                 // Content editor
@@ -310,7 +311,7 @@ private fun EmbeddedItemsSection(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color(0xFF2D2D2D))
+            .background(GeneratedTokens.Color.Editor.PanelBackground)
             .clickable { onToggle() }
             .padding(12.dp)
     ) {
@@ -323,7 +324,7 @@ private fun EmbeddedItemsSection(
                 Icon(
                     Icons.Default.AttachFile,
                     contentDescription = null,
-                    tint = Color(0xFFB0B0B0),
+                    tint = GeneratedTokens.Color.Editor.TextMuted,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -335,8 +336,8 @@ private fun EmbeddedItemsSection(
             }
             Icon(
                 if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                contentDescription = if (expanded) stringResource(R.string.collapse) else stringResource(R.string.expand),
-                tint = Color(0xFFB0B0B0)
+                contentDescription = if (expanded) "Collapse" else "Expand",
+                tint = GeneratedTokens.Color.Editor.TextMuted
             )
         }
 
@@ -365,19 +366,19 @@ private fun EmbeddedItemRow(
     ) {
         Text(
             text = "•",
-            color = Color(0xFF808080),
+            color = GeneratedTokens.Color.Editor.TextDim,
             modifier = Modifier.padding(end = 8.dp)
         )
         Text(
             text = item.name,
             style = MaterialTheme.typography.bodySmall,
-            color = Color(0xFFB0B0B0)
+            color = GeneratedTokens.Color.Editor.TextMuted
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = "(${getItemTypeName(item.type)})",
             style = MaterialTheme.typography.bodySmall,
-            color = Color(0xFF808080)
+            color = GeneratedTokens.Color.Editor.TextDim
         )
     }
 }
@@ -397,7 +398,7 @@ private fun NotecardContent(
 
     Box(
         modifier = modifier
-            .background(Color(0xFF1E1E1E))
+            .background(GeneratedTokens.Color.Editor.Background)
             .verticalScroll(verticalScrollState)
             .horizontalScroll(horizontalScrollState)
             .padding(16.dp)
@@ -408,7 +409,7 @@ private fun NotecardContent(
                 style = TextStyle(
                     fontFamily = FontFamily.Default,
                     fontSize = 14.sp,
-                    color = Color(0xFFD4D4D4)
+                    color = GeneratedTokens.Color.Editor.Text
                 )
             )
         } else {
@@ -418,7 +419,7 @@ private fun NotecardContent(
                 textStyle = TextStyle(
                     fontFamily = FontFamily.Default,
                     fontSize = 14.sp,
-                    color = Color(0xFFD4D4D4)
+                    color = GeneratedTokens.Color.Editor.Text
                 ),
                 cursorBrush = SolidColor(Color.White),
                 modifier = Modifier.fillMaxSize()
