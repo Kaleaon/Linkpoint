@@ -9,6 +9,10 @@ permissions:
   id-token: write
   attestations: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   quick-release:
     runs-on: ubuntu-latest
