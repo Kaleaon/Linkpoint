@@ -78,46 +78,25 @@ class GridManager(
             Log.i(TAG, "Selected grid: ${grid.name} (${grid.loginUri})")
         }
     }
+    
     fun updateSelectedGrid(grid: GridInfo) {
         selectedGrid = grid
-        Log.i(TAG, "Updated selected grid: ${grid.name} (${grid.loginUri})")
+        val index = customGrids.indexOfFirst { it.id == grid.id }
+        if (index != -1) {
+            customGrids[index] = grid
+        }
+        Log.i(TAG, "Updated selected grid: ${grid.name} (loginUri=${grid.loginUri}, helperUri=${grid.helperUri}, economyUri=${grid.economyUri}, mapUri=${grid.mapUri})")
     }
-
-    /**
-     * Resolves grid metadata instantly from local SQLite cache, or falls back gracefully
-     * to direct `/grid_info` HTTP probing for unlisted/custom grids.
-     */
-    fun resolveGrid(gridIdOrUri: String): GridInfo {
-        // Fast local SQLite lookup by ID or login URI
-        val cached = runBlocking(Dispatchers.IO) {
-            dao.getGridById(gridIdOrUri) ?: dao.getGridByLoginUri(gridIdOrUri)
-        }
-        if (cached != null) {
-            return cached.toGridInfo()
-        }
-
-        // Search in memory builtins
-        val builtin = BUILTIN_GRIDS.find { it.id == gridIdOrUri || it.loginUri == gridIdOrUri }
-        if (builtin != null) return builtin
-
-        // Guardrail 2: Fallback to direct /grid_info HTTP probe for unlisted / custom grid
-        Log.i(TAG, "Grid '$gridIdOrUri' missing from local cache — falling back to direct /grid_info probe")
-        val probed = runBlocking(Dispatchers.IO) {
-            prober.probeGrid(gridIdOrUri)
-        }
-
-        val profile = probed ?: GridProfileEntity(
-            id = "custom_" + Math.abs(gridIdOrUri.hashCode()),
-            name = gridIdOrUri,
-            gridNick = gridIdOrUri,
-            loginUri = if (gridIdOrUri.startsWith("http")) gridIdOrUri else "http://$gridIdOrUri/",
-            status = "unknown",
-            isCustom = true
-        )
-
-        // Cache probed profile in SQLite for future instant sub-10ms resolution
-        CoroutineScope(Dispatchers.IO).launch {
-            try { dao.insertGrid(profile) } catch (e: Exception) { Log.w(TAG, "Failed to cache probed grid: ${e.message}") }
+    
+    fun addCustomGrid(grid: GridInfo) {
+        if (customGrids.none { it.id == grid.id }) {
+            customGrids.add(grid)
+            Log.i(TAG, "Added custom grid: ${grid.name}")
+        } else {
+            val index = customGrids.indexOfFirst { it.id == grid.id }
+            if (index != -1) {
+                customGrids[index] = grid
+            }
         }
 
         return profile.toGridInfo()
@@ -213,9 +192,6 @@ data class GridInfo(
     val support: String? = null,
     val registerUri: String? = null,
     val passwordUri: String? = null,
-    val logoUrl: String? = null,
-    val status: String = "online",
-    val isCustom: Boolean = false,
     val economyUri: String? = null,
     val mapUri: String? = null,
     val welcomeUri: String? = null,
