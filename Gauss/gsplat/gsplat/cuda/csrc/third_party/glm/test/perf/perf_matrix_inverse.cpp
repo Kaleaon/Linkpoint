@@ -39,7 +39,7 @@ template <typename packedMatType, typename alignedMatType>
 static int comp_mat2_inverse(std::size_t Samples)
 {
 	typedef typename packedMatType::value_type T;
-	
+
 	int Error = 0;
 
 	packedMatType const Scale(0.01, 0.02, 0.03, 0.05);
@@ -57,7 +57,7 @@ static int comp_mat2_inverse(std::size_t Samples)
 		Error += glm::all(glm::equal(A, B, static_cast<T>(0.001))) ? 0 : 1;
 		assert(!Error);
 	}
-	
+
 	return Error;
 }
 
@@ -65,7 +65,7 @@ template <typename packedMatType, typename alignedMatType>
 static int comp_mat3_inverse(std::size_t Samples)
 {
 	typedef typename packedMatType::value_type T;
-	
+
 	int Error = 0;
 
 	packedMatType const Scale(0.01, 0.02, 0.03, 0.05, 0.01, 0.02, 0.03, 0.05, 0.01);
@@ -83,7 +83,7 @@ static int comp_mat3_inverse(std::size_t Samples)
 		Error += glm::all(glm::equal(A, B, static_cast<T>(0.001))) ? 0 : 1;
 		assert(!Error);
 	}
-	
+
 	return Error;
 }
 
@@ -91,7 +91,7 @@ template <typename packedMatType, typename alignedMatType>
 static int comp_mat4_inverse(std::size_t Samples)
 {
 	typedef typename packedMatType::value_type T;
-	
+
 	int Error = 0;
 
 	packedMatType const Scale(0.01, 0.02, 0.05, 0.04, 0.02, 0.08, 0.05, 0.01, 0.08, 0.03, 0.05, 0.06, 0.02, 0.03, 0.07, 0.05);
@@ -109,7 +109,7 @@ static int comp_mat4_inverse(std::size_t Samples)
 		Error += glm::all(glm::equal(A, B, static_cast<T>(0.001))) ? 0 : 1;
 		assert(!Error);
 	}
-	
+
 	return Error;
 }
 
@@ -121,19 +121,19 @@ int main()
 
 	std::printf("glm::inverse(mat2):\n");
 	Error += comp_mat2_inverse<glm::mat2, glm::aligned_mat2>(Samples);
-	
+
 	std::printf("glm::inverse(dmat2):\n");
 	Error += comp_mat2_inverse<glm::dmat2, glm::aligned_dmat2>(Samples);
 
 	std::printf("glm::inverse(mat3):\n");
 	Error += comp_mat3_inverse<glm::mat3, glm::aligned_mat3>(Samples);
-	
+
 	std::printf("glm::inverse(dmat3):\n");
 	Error += comp_mat3_inverse<glm::dmat3, glm::aligned_dmat3>(Samples);
 
 	std::printf("glm::inverse(mat4):\n");
 	Error += comp_mat4_inverse<glm::mat4, glm::aligned_mat4>(Samples);
-	
+
 	std::printf("glm::inverse(dmat4):\n");
 	Error += comp_mat4_inverse<glm::dmat4, glm::aligned_dmat4>(Samples);
 

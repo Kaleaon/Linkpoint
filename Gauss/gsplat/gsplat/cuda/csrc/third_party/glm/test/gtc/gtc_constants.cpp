@@ -25,6 +25,6 @@ int main()
 	//while (glm::half(MinHalf) == glm::half(0.0f))
 	//	MinHalf += std::numeric_limits<float>::epsilon();
 	Error += test_epsilon();
-	
+
 	return Error;
 }

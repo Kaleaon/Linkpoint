@@ -27,4 +27,3 @@ var indexSectionLabels =
   4: "Modules",
   5: "Pages"
 };
-

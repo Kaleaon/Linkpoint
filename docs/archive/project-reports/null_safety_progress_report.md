@@ -154,7 +154,7 @@ val result = object?.property?.anotherProperty
 
 #### Pattern 3: Explicit Validation
 ```kotlin
-val value = requiredValue 
+val value = requiredValue
     ?: throw IllegalStateException("Required component not initialized")
 ```
 

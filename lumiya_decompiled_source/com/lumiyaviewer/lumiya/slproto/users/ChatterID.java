@@ -378,7 +378,7 @@ public abstract class ChatterID implements Parcelable, Comparable<ChatterID> {
         Local(NotificationType.LocalChat),
         User(NotificationType.Private),
         Group(NotificationType.Group);
-        
+
         public static final ChatterType[] VALUES = valuesCustom();
         @Nonnull
         private final NotificationType notificationType;

@@ -4,10 +4,10 @@
 int test_radialGradient()
 {
 	int Error = 0;
-	
+
 	float Gradient = glm::radialGradient(glm::vec2(0), 1.0f, glm::vec2(1), glm::vec2(0.5));
 	Error += Gradient != 0.0f ? 0 : 1;
-	
+
 	return Error;
 }
 
@@ -27,8 +27,6 @@ int main()
 
     Error += test_radialGradient();
     Error += test_linearGradient();
-    
+
 	return Error;
 }
-
-

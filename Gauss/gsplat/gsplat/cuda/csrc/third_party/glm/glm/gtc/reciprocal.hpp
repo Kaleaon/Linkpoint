@@ -21,4 +21,3 @@
 
 #include "../ext/scalar_reciprocal.hpp"
 #include "../ext/vector_reciprocal.hpp"
-

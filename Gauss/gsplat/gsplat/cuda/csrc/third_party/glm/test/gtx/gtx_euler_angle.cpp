@@ -350,10 +350,10 @@ namespace test_eulerAngleYXZ
 		glm::f32 second = 0.52f;
 		glm::f32 third = -0.785f;
 
-		glm::fmat4 rotationEuler = glm::eulerAngleYXZ(first, second, third); 
+		glm::fmat4 rotationEuler = glm::eulerAngleYXZ(first, second, third);
 
-		glm::fmat4 rotationInvertedY  = glm::eulerAngleY(-1.f*first) * glm::eulerAngleX(second) * glm::eulerAngleZ(third); 
-		glm::fmat4 rotationDumb = glm::fmat4(); 
+		glm::fmat4 rotationInvertedY  = glm::eulerAngleY(-1.f*first) * glm::eulerAngleX(second) * glm::eulerAngleZ(third);
+		glm::fmat4 rotationDumb = glm::fmat4();
 		rotationDumb = glm::rotate(rotationDumb, first, glm::fvec3(0,1,0));
 		rotationDumb = glm::rotate(rotationDumb, second, glm::fvec3(1,0,0));
 		rotationDumb = glm::rotate(rotationDumb, third, glm::fvec3(0,0,1));
@@ -488,7 +488,7 @@ namespace test_extractsEulerAngles
 }//namespace test_extractsEulerAngles
 
 int main()
-{ 
+{
 	int Error = 0;
 
 	typedef glm::mat4::value_type value;
@@ -535,5 +535,5 @@ int main()
 	Error += test_extractsEulerAngles::test(glm::eulerAngleZYX<value>, glm::extractEulerAngleZYX<value>);
 	Error += test_extractsEulerAngles::test(glm::eulerAngleZXY<value>, glm::extractEulerAngleZXY<value>);
 
-	return Error; 
+	return Error;
 }

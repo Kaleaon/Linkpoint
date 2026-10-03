@@ -5,7 +5,7 @@ public enum LEDAction {
     Slow("slow"),
     Fast("fast"),
     Always("always");
-    
+
     private String preferenceValue;
 
     LEDAction(String str) {

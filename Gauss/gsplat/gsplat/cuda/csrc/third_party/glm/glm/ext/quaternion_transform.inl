@@ -21,4 +21,3 @@ namespace glm
 		return q * qua<T, Q>::wxyz(cos(AngleRad * static_cast<T>(0.5)), Tmp.x * Sin, Tmp.y * Sin, Tmp.z * Sin);
 	}
 }//namespace glm
-

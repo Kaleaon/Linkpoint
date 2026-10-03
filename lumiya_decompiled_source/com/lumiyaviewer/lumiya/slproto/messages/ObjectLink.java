@@ -18,7 +18,7 @@ import java.util.UUID;
  */
 public class ObjectLink extends SLMessage {
     private LLSD messageLLSD;
-    
+
     // Legacy compatibility fields
     public AgentData AgentData_Field;
     public ArrayList<ObjectData> ObjectData_Fields = new ArrayList<>();
@@ -37,44 +37,44 @@ public class ObjectLink extends SLMessage {
         this.AgentData_Field = new AgentData();
         initializeDefaultLLSD();
     }
-    
+
     private void initializeDefaultLLSD() {
         Map<String, Object> messageData = new HashMap<>();
-        
+
         // Agent data
         Map<String, Object> agentData = new HashMap<>();
         agentData.put("AgentID", UUID.randomUUID());
         agentData.put("SessionID", UUID.randomUUID());
         messageData.put("AgentData", agentData);
-        
+
         // Object data array
         List<Map<String, Object>> objectDataList = new ArrayList<>();
         messageData.put("ObjectData", objectDataList);
-        
+
         this.messageLLSD = new LLSD(messageData);
     }
-    
+
     // Modern LLSD-based API
     public LLSD getMessageLLSD() {
         return messageLLSD;
     }
-    
+
     public void setMessageLLSD(LLSD messageData) {
         if (messageData != null) {
             this.messageLLSD = messageData;
             syncToLegacyFields();
         }
     }
-    
+
     // Agent data accessors using enhanced LLSD utilities with proper nested navigation
     public UUID getAgentID() {
         return EnhancedLLSDUtils.safeGetUUID(messageLLSD, "AgentData.AgentID", null);
     }
-    
+
     public UUID getSessionID() {
         return EnhancedLLSDUtils.safeGetUUID(messageLLSD, "AgentData.SessionID", null);
     }
-    
+
     // Object data accessors
     public List<Integer> getObjectLocalIDs() {
         List<Integer> localIDs = new ArrayList<>();
@@ -100,7 +100,7 @@ public class ObjectLink extends SLMessage {
         }
         return localIDs;
     }
-    
+
     public void addObjectLocalID(int localID) {
         Object content = messageLLSD.getContent();
         if (content instanceof Map) {
@@ -117,7 +117,7 @@ public class ObjectLink extends SLMessage {
             }
         }
     }
-    
+
     public void clearObjectData() {
         Object content = messageLLSD.getContent();
         if (content instanceof Map) {
@@ -132,7 +132,7 @@ public class ObjectLink extends SLMessage {
             }
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     private void updateNestedLLSDField(String parentKey, String key, Object value) {
         if (messageLLSD.getContent() instanceof Map) {
@@ -145,15 +145,15 @@ public class ObjectLink extends SLMessage {
             }
         }
     }
-    
+
     private void syncToLegacyFields() {
         if (AgentData_Field == null) {
             AgentData_Field = new AgentData();
         }
-        
+
         AgentData_Field.AgentID = getAgentID();
         AgentData_Field.SessionID = getSessionID();
-        
+
         ObjectData_Fields.clear();
         List<Integer> localIDs = getObjectLocalIDs();
         for (Integer localID : localIDs) {
@@ -162,11 +162,11 @@ public class ObjectLink extends SLMessage {
             ObjectData_Fields.add(objData);
         }
     }
-    
+
     private void syncFromLegacyFields() {
         setAgentID(AgentData_Field.AgentID);
         setSessionID(AgentData_Field.SessionID);
-        
+
         clearObjectData();
         for (ObjectData objData : ObjectData_Fields) {
             addObjectLocalID(objData.ObjectLocalID);
@@ -206,27 +206,27 @@ public class ObjectLink extends SLMessage {
         if (byteBuffer == null) {
             return;
         }
-        
+
         if (AgentData_Field == null) {
             AgentData_Field = new AgentData();
         }
-        
+
         // Legacy unpacking
         AgentData_Field.AgentID = unpackUUID(byteBuffer);
         AgentData_Field.SessionID = unpackUUID(byteBuffer);
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        
+
         ObjectData_Fields.clear();
         for (int i = 0; i < b; i++) {
             ObjectData objectData = new ObjectData();
             objectData.ObjectLocalID = unpackInt(byteBuffer);
             ObjectData_Fields.add(objectData);
         }
-        
+
         // Sync to LLSD representation
         syncFromLegacyFields();
     }
-    
+
     /**
      * Export message as LLSD JSON for debugging/API usage
      * Uses proper serialization handling
@@ -238,7 +238,7 @@ public class ObjectLink extends SLMessage {
             return "{}";
         }
     }
-    
+
     /**
      * Export message as LLSD Notation (compact format)
      * Provides human-readable compact representation
@@ -250,7 +250,7 @@ public class ObjectLink extends SLMessage {
             return "{}";
         }
     }
-    
+
     /**
      * Validate message structure using LLSD utilities
      */
@@ -259,7 +259,7 @@ public class ObjectLink extends SLMessage {
             UUID agentID = getAgentID();
             UUID sessionID = getSessionID();
             List<Integer> objectIDs = getObjectLocalIDs();
-            
+
             return agentID != null && sessionID != null && objectIDs != null;
         } catch (Exception e) {
             return false;

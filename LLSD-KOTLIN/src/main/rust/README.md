@@ -39,25 +39,25 @@ fn main() -> LLSDResult<()> {
     data.insert("name".to_string(), LLSDValue::String("Alice".to_string()));
     data.insert("age".to_string(), LLSDValue::Integer(30));
     data.insert("id".to_string(), LLSDValue::UUID(Uuid::new_v4()));
-    
+
     let document = LLSDDocument::new(LLSDValue::Map(data));
-    
+
     // Serialize to different formats
     let json = LLSDFactory::serialize_json(&document, true)?;
     let xml = LLSDFactory::serialize_xml(&document, true)?;
     let binary = LLSDFactory::serialize_binary(&document)?;
-    
+
     // Parse back from any format
     let from_json = LLSDFactory::parse_json(&json)?;
     let from_xml = LLSDFactory::parse_xml(&xml)?;
     let from_binary = LLSDFactory::parse_binary(&binary)?;
-    
+
     // Safe data access
     let name = LLSDUtils::get_string(document.content(), "name", "Unknown");
     let age = LLSDUtils::get_integer(document.content(), "age", 0);
-    
+
     println!("User: {} (age: {})", name, age);
-    
+
     Ok(())
 }
 ```

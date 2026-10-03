@@ -57,14 +57,14 @@ int testForAxisAngle(glm::vec<3, T, glm::defaultp> const axisTrue, T const angle
             glm::compMax(glm::abs(errMat[2])),
             glm::compMax(glm::abs(errMat[3]))
         ));
-    
+
     return maxErr < eps ? 0 : 1;
 }
 
 static int test_axisAngle2()
 {
 	int Error = 0;
-    
+
     Error += testForAxisAngle(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
     Error += testForAxisAngle(glm::vec3(0.358f, 0.0716f, 0.9309f), 0.00001f);
     Error += testForAxisAngle(glm::vec3(1.0f, 0.0f, 0.0f), 0.0001f);
@@ -118,5 +118,3 @@ int main()
 
 	return Error;
 }
-
-

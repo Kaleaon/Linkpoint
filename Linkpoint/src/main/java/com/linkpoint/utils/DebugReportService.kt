@@ -24,7 +24,7 @@ import java.util.*
 
 /**
  * Debug Report Service for Linkpoint.
- * 
+ *
  * Captures the current app state including:
  * - Connection status
  * - Session information
@@ -34,28 +34,28 @@ import java.util.*
  * - Cache statistics (textures, sounds, meshes, animations)
  * - Current region/avatar info
  * - Error logs for debugging loading issues
- * 
+ *
  * Reports are saved to the debug_reports directory for loading and sharing.
  */
 class DebugReportService private constructor(private val context: Context) {
-    
+
     companion object {
         private const val TAG = "DebugReportService"
         private const val DEBUG_REPORT_DIR = "debug_reports"
         private const val MAX_REPORTS = 20
         private const val REPORT_PREFIX = "debug_report_"
         private const val REPORT_SUFFIX = ".txt"
-        
+
         // Truncation length for URLs in debug reports
         private const val DIAGNOSTIC_URL_TRUNCATE_LENGTH = 50
-        
+
         // Number of recent malformed packets to show in debug reports
         private const val MALFORMED_PACKET_HISTORY_COUNT = 5
         private const val EARLY_WARNING_GRACE_MS = 15_000L
-        
+
         @Volatile
         private var instance: DebugReportService? = null
-        
+
         fun getInstance(context: Context): DebugReportService {
             return instance ?: synchronized(this) {
                 instance ?: DebugReportService(context.applicationContext).also {
@@ -63,9 +63,9 @@ class DebugReportService private constructor(private val context: Context) {
                 }
             }
         }
-        
+
         fun getInstanceOrNull(): DebugReportService? = instance
-        
+
         /**
          * Phases that indicate the connection is still in progress.
          * Used to provide more accurate diagnostic messages.
@@ -80,7 +80,7 @@ class DebugReportService private constructor(private val context: Context) {
             InitializationTracker.Phase.UDP_CONNECTED,
             InitializationTracker.Phase.CAPABILITIES_FETCHING
         )
-        
+
         /**
          * Check if the current initialization phase indicates connection is still in progress.
          */
@@ -88,7 +88,7 @@ class DebugReportService private constructor(private val context: Context) {
             return phase in CONNECTING_PHASES
         }
     }
-    
+
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val storage = DebugReportStorage(context)
 
@@ -99,13 +99,13 @@ class DebugReportService private constructor(private val context: Context) {
     private fun formatUdpConnectedElapsed(elapsedMs: Long?): String {
         return if (elapsedMs != null) "${formatDuration(elapsedMs)} since UDP_CONNECTED" else "UDP_CONNECTED time unavailable"
     }
-    
+
     private val sectionBuilders = listOf(
         ConnectionSectionBuilder(),
         NetworkSectionBuilder(),
         CacheSectionBuilder()
     )
-    
+
     /**
      * Capture a debug report of the current app state.
      * Returns the file path of the saved report, or null if capture failed.
@@ -125,7 +125,7 @@ class DebugReportService private constructor(private val context: Context) {
             null
         }
     }
-    
+
     /**
      * Capture debug report asynchronously
      */
@@ -137,14 +137,14 @@ class DebugReportService private constructor(private val context: Context) {
             }
         }
     }
-    
+
     /**
      * Generate the debug report content
      */
     private suspend fun generateDebugReport(userNote: String): String {
         val timestamp = System.currentTimeMillis()
         val app = try { LinkpointApp.getInstance() } catch (e: Exception) { null }
-        
+
         return buildString {
             appendLine("╔══════════════════════════════════════════════════════════════════╗")
             appendLine("║               LINKPOINT DEBUG REPORT                              ║")
@@ -153,7 +153,7 @@ class DebugReportService private constructor(private val context: Context) {
             appendLine("Timestamp: ${DebugReportFormatting.formatTimestamp(timestamp)}")
             appendLine("Report ID: ${UUID.randomUUID()}")
             appendLine()
-            
+
             if (userNote.isNotEmpty()) {
                 appendLine("┌──────────────────────────────────────────────────────────────────┐")
                 appendLine("│ USER NOTE                                                         │")
@@ -162,10 +162,10 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine(userNote)
                 appendLine()
             }
-            
+
             val debugContext = DebugReportContext(context, app, timestamp)
             sectionBuilders.forEach { append(it.build(debugContext)) }
-            
+
             // Asset cache memory statistics
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ ASSET CACHE MEMORY                                                │")
@@ -190,7 +190,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Asset cache: App not initialized")
             }
             appendLine()
-            
+
             // Texture manager statistics
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ TEXTURE LOADING STATUS                                            │")
@@ -205,7 +205,7 @@ class DebugReportService private constructor(private val context: Context) {
                     appendLine("Failed Downloads: ${textureStats.failedCount}")
                     appendLine("Decoded: ${textureStats.decodedCount}")
                     appendLine("Decode Failures: ${textureStats.decodeFailedCount}")
-                    
+
                     if (textureStats.failedCount > 0 || textureStats.decodeFailedCount > 0) {
                         appendLine()
                         appendLine("⚠️ Texture loading issues detected - may cause missing textures")
@@ -230,9 +230,9 @@ class DebugReportService private constructor(private val context: Context) {
             appendLine("  GPU: ${formatBytes(textureMemSnap.gpuBytes)}")
             appendLine("  Total: ${formatBytes(textureMemSnap.totalBytes)}")
             appendLine()
-            
+
             // ==================== NEW DETAILED DIAGNOSTIC SECTIONS ====================
-            
+
             // UDP Connection Status - CRITICAL for understanding why world data isn't loading
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ UDP CONNECTION STATUS (Simulator Protocol)                        │")
@@ -275,7 +275,7 @@ class DebugReportService private constructor(private val context: Context) {
                             appendLine("  ... and ${udpDiag.pendingPackets.size - 5} more")
                         }
                     }
-                    
+
                     // Diagnostic warnings
                     if (!udpDiag.isConnected) {
                         appendLine()
@@ -289,7 +289,7 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine()
                         appendLine("⚠️ No handlers registered - RegionHandshake won't be processed!")
                     }
-                    
+
                     // NEW: Socket details for detailed debugging
                     appendLine()
                     val socketDetails = app.udpConnection.getSocketDetails()
@@ -300,7 +300,7 @@ class DebugReportService private constructor(private val context: Context) {
                     appendLine("  Remote Port: ${if (socketDetails.remotePort > 0) socketDetails.remotePort else "Not set"}")
                     appendLine("  Channel Connected: ${socketDetails.isConnected}")
                     appendLine("  Channel Open: ${socketDetails.isOpen}")
-                    
+
                     // Timing information
                     appendLine()
                     appendLine("Timing:")
@@ -478,7 +478,7 @@ class DebugReportService private constructor(private val context: Context) {
                             appendLine("Outgoing (last ${outgoingEntries.size}):")
                             outgoingEntries.forEach(::renderEntry)
                         }
-                        
+
                         // Summary statistics (counted within the bounded history window)
                         val sendSuccessCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.SEND_SUCCESS }
                         val sendFailedCount = packetHistory.count { it.type == UDPConnectionFixed.PacketHistoryEntry.PacketEventType.SEND_FAILED }
@@ -601,7 +601,7 @@ class DebugReportService private constructor(private val context: Context) {
                     appendLine("Total Capabilities: ${capDiag.capabilityCount}")
                     appendLine("Seed Capability: ${capDiag.seedCapability ?: "Not set"}")
                     appendLine()
-                    
+
                     // New initialization tracking section
                     appendLine("Initialization Status:")
                     appendLine("  Completed: ${capDiag.initializationComplete}")
@@ -611,7 +611,7 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("  Last Error: ${capDiag.lastInitializationError}")
                     }
                     appendLine()
-                    
+
                     appendLine("Critical Capabilities:")
                     appendLine("  GetTexture: ${if (capDiag.hasGetTexture) "✓ Available" else "✗ Missing - textures won't load!"}")
                     appendLine("  GetMesh: ${if (capDiag.hasGetMesh) "✓ Available" else "✗ Missing - meshes won't load!"}")
@@ -633,7 +633,7 @@ class DebugReportService private constructor(private val context: Context) {
                     } else {
                         appendLine("⚠️ No capabilities loaded - HTTP services unavailable!")
                     }
-                    
+
                     // Diagnostic warnings
                     if (!capDiag.isReady) {
                         appendLine()
@@ -649,7 +649,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Capabilities: App not initialized")
             }
             appendLine()
-            
+
             // Network Quality Manager Status
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ NETWORK QUALITY                                                   │")
@@ -666,7 +666,7 @@ class DebugReportService private constructor(private val context: Context) {
                     appendLine("Error Rate: ${String.format("%.1f%%", qualityReport.errorRate * 100)}")
                     appendLine("Latency Samples: ${qualityReport.sampleCount}")
                     appendLine("Timeout Multiplier: ${qualityReport.timeoutMultiplier}x")
-                    
+
                     if (qualityReport.quality == ConnectionQualityManager.Quality.POOR) {
                         appendLine()
                         appendLine("⚠️ Poor network quality - connection issues likely!")
@@ -678,7 +678,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Network quality: App not initialized")
             }
             appendLine()
-            
+
             // Network State Manager Status
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ NETWORK STATE                                                     │")
@@ -698,7 +698,7 @@ class DebugReportService private constructor(private val context: Context) {
                     appendLine("Connection Duration: ${formatDuration(stateDetails.connectionDurationMs)}")
                     appendLine("Last Status Change: ${formatDuration(stateDetails.lastStatusChangeMs)} ago")
                     appendLine("Connection Instance ID: ${stateDetails.connectionInstanceId.ifEmpty { "Not set" }}")
-                    
+
                     if (stateDetails.isFaulted) {
                         appendLine()
                         appendLine("⚠️ CONNECTION FAULTED - Manual reconnect may be required!")
@@ -714,7 +714,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Network state: App not initialized")
             }
             appendLine()
-            
+
             // Object Manager Status
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ OBJECT MANAGER STATUS                                             │")
@@ -732,7 +732,7 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("Recently Updated (last 5s): ${objDiag.recentlyUpdatedCount}")
                         appendLine("Scripted Objects: ${objDiag.scriptedObjectCount}")
                         appendLine("Physical Objects: ${objDiag.physicalObjectCount}")
-                        
+
                         if (objDiag.totalObjects == 0) {
                             appendLine()
                             // Check initialization phase to provide better context
@@ -755,7 +755,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Object manager: App not initialized")
             }
             appendLine()
-            
+
             // Avatar Manager Status
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ AVATAR MANAGER STATUS                                             │")
@@ -772,7 +772,7 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("Flying: ${avatarDiag.flyingCount}")
                         appendLine("Sitting: ${avatarDiag.sittingCount}")
                         appendLine("Typing: ${avatarDiag.typingCount}")
-                        
+
                         if (avatarDiag.totalAvatars == 0) {
                             appendLine()
                             // Check initialization phase to provide better context
@@ -795,7 +795,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Avatar manager: App not initialized")
             }
             appendLine()
-            
+
             // Inventory Manager Status
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ INVENTORY STATUS                                                  │")
@@ -821,7 +821,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Inventory: App not initialized")
             }
             appendLine()
-            
+
             // Region Info (detailed)
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ REGION DETAILS                                                    │")
@@ -836,11 +836,11 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("Position: (${regionInfo.x}, ${regionInfo.y})")
                         appendLine("Sim IP: ${regionInfo.simIP.ifEmpty { "Not set" }}")
                         appendLine("Sim Port: ${if (regionInfo.simPort > 0) regionInfo.simPort else "Not set"}")
-                        val seedCapDisplay = regionInfo.seedCapability?.let { 
-                            DebugReportFormatting.truncate(it, DIAGNOSTIC_URL_TRUNCATE_LENGTH) 
+                        val seedCapDisplay = regionInfo.seedCapability?.let {
+                            DebugReportFormatting.truncate(it, DIAGNOSTIC_URL_TRUNCATE_LENGTH)
                         } ?: "Not set"
                         appendLine("Seed Capability: $seedCapDisplay")
-                        
+
                         if (regionInfo.name == "Unknown") {
                             appendLine()
                             // Check initialization phase to provide better context
@@ -863,7 +863,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Region info: App not initialized")
             }
             appendLine()
-            
+
             // ==================== MESH MANAGER STATUS ====================
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ MESH MANAGER STATUS                                               │")
@@ -879,15 +879,15 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("Download Failed: ${meshDiag.downloadFailedCount}")
                         appendLine("Parse Failed: ${meshDiag.parseFailedCount}")
                         appendLine("Has Mesh Capability: ${if (meshDiag.hasMeshCapability) "✓ Yes" else "✗ No"}")
-                        
+
                         if (meshDiag.lastError != null) {
                             appendLine()
                             appendLine("Last Error: ${meshDiag.lastError}")
-                            meshDiag.lastErrorTimeAgo?.let { 
+                            meshDiag.lastErrorTimeAgo?.let {
                                 appendLine("Error Time: ${formatDuration(it)} ago")
                             }
                         }
-                        
+
                         if (!meshDiag.hasMeshCapability) {
                             appendLine()
                             appendLine("⚠️ NO MESH CAPABILITY - Mesh objects won't load!")
@@ -906,7 +906,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Mesh manager: App not initialized")
             }
             appendLine()
-            
+
             // ==================== TEXTURE MANAGER DETAILED STATUS ====================
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ TEXTURE MANAGER DETAILED STATUS                                   │")
@@ -958,15 +958,15 @@ class DebugReportService private constructor(private val context: Context) {
                         if (decoderStatus.warningMessage != null) {
                             appendLine("  Warning: ${decoderStatus.warningMessage}")
                         }
-                        
+
                         if (texDiag.lastError != null) {
                             appendLine()
                             appendLine("Last Error: ${texDiag.lastError}")
-                            texDiag.lastErrorTimeAgo?.let { 
+                            texDiag.lastErrorTimeAgo?.let {
                                 appendLine("Error Time: ${formatDuration(it)} ago")
                             }
                         }
-                        
+
                         if (!texDiag.hasTextureCapability) {
                             appendLine()
                             appendLine("⚠️ NO TEXTURE CAPABILITY - Using fallback asset server!")
@@ -985,7 +985,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Texture manager: App not initialized")
             }
             appendLine()
-            
+
             // ==================== RENDER MANAGER STATUS ====================
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ RENDER MANAGER STATUS (Filament)                                  │")
@@ -1078,9 +1078,9 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Render manager: App not initialized")
             }
             appendLine()
-            
+
             // ==================== END OF NEW DIAGNOSTIC SECTIONS ====================
-            
+
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ DEVICE INFORMATION                                                │")
             appendLine("└──────────────────────────────────────────────────────────────────┘")
@@ -1092,7 +1092,7 @@ class DebugReportService private constructor(private val context: Context) {
             appendLine("SDK Version: ${Build.VERSION.SDK_INT}")
             appendLine("Build ID: ${Build.ID}")
             appendLine()
-            
+
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ APP INFORMATION                                                   │")
             appendLine("└──────────────────────────────────────────────────────────────────┘")
@@ -1106,7 +1106,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("App Info: Unable to retrieve")
             }
             appendLine()
-            
+
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ MEMORY USAGE                                                      │")
             appendLine("└──────────────────────────────────────────────────────────────────┘")
@@ -1125,7 +1125,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("⚠️ High memory usage - may cause performance issues")
             }
             appendLine()
-            
+
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ XR STATUS                                                         │")
             appendLine("└──────────────────────────────────────────────────────────────────┘")
@@ -1136,7 +1136,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("XR Status: Unable to determine")
             }
             appendLine()
-            
+
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ CRASH REPORTER STATUS                                             │")
             appendLine("└──────────────────────────────────────────────────────────────────┘")
@@ -1151,7 +1151,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Crash Reporter: Not initialized")
             }
             appendLine()
-            
+
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ THREAD INFORMATION                                                │")
             appendLine("└──────────────────────────────────────────────────────────────────┘")
@@ -1159,7 +1159,7 @@ class DebugReportService private constructor(private val context: Context) {
             appendLine("Active Thread Count: ${Thread.activeCount()}")
             appendLine("Current Thread: ${Thread.currentThread().name}")
             appendLine()
-            
+
             // Initialization Timeline - CRITICAL for diagnosing "world not loading" issues
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ INITIALIZATION TIMELINE                                           │")
@@ -1173,7 +1173,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Warnings: ${initDiag.warningCount}")
                 appendLine("Errors: ${initDiag.errorCount}")
                 appendLine()
-                
+
                 if (initDiag.completedPhases.isNotEmpty()) {
                     appendLine("Completed Phases:")
                     initDiag.completedPhases.forEach { phase ->
@@ -1181,7 +1181,7 @@ class DebugReportService private constructor(private val context: Context) {
                     }
                     appendLine()
                 }
-                
+
                 if (initDiag.failedPhases.isNotEmpty()) {
                     appendLine("Failed Phases:")
                     initDiag.failedPhases.forEach { phase ->
@@ -1189,7 +1189,7 @@ class DebugReportService private constructor(private val context: Context) {
                     }
                     appendLine()
                 }
-                
+
                 if (initDiag.pendingPhases.isNotEmpty()) {
                     appendLine("Pending Phases:")
                     initDiag.pendingPhases.forEach { phase ->
@@ -1197,7 +1197,7 @@ class DebugReportService private constructor(private val context: Context) {
                     }
                     appendLine()
                 }
-                
+
                 // Recent events (show last 20 from the available events)
                 appendLine("Recent Events (last 20):")
                 initDiag.recentEvents.takeLast(20).forEach { event ->
@@ -1215,7 +1215,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Initialization timeline unavailable: ${e.message}")
             }
             appendLine()
-            
+
             // ==================== PROTOCOL MESSAGE STATISTICS ====================
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ PROTOCOL MESSAGE STATISTICS                                       │")
@@ -1225,13 +1225,13 @@ class DebugReportService private constructor(private val context: Context) {
                 try {
                     val udpDiag = app.udpConnection.getDiagnostics()
                     val msgStats = app.udpConnection.getMessageStatistics()
-                    
+
                     appendLine("Total Packets Received: ${msgStats.totalPacketsReceived}")
                     appendLine("Total Bytes Received: ${formatBytes(msgStats.totalBytesReceived)}")
                     appendLine("Packets Sent: ${udpDiag.sequenceNumber}")
                     appendLine("Packets Resent: ${msgStats.packetsResent}")
                     appendLine()
-                    
+
                     if (msgStats.messageTypeCounts.isNotEmpty()) {
                         appendLine("Messages by Type (top 10):")
                         msgStats.messageTypeCounts.entries
@@ -1242,7 +1242,7 @@ class DebugReportService private constructor(private val context: Context) {
                             }
                         appendLine()
                     }
-                    
+
                     if (msgStats.lastMessageTimes.isNotEmpty()) {
                         appendLine("Last Received (key messages):")
                         val keyMessages = listOf(
@@ -1260,7 +1260,7 @@ class DebugReportService private constructor(private val context: Context) {
                         }
                         appendLine()
                     }
-                    
+
                     if (msgStats.inboundRateBuckets.isNotEmpty()) {
                         appendLine("Inbound Rate (last ${msgStats.inboundRateBuckets.size}s, oldest first):")
                         appendLine("  second  packets    bytes")
@@ -1291,7 +1291,7 @@ class DebugReportService private constructor(private val context: Context) {
                     // Warning if critical messages haven't been received
                     val regionHandshakeTime = msgStats.lastMessageTimes["RegionHandshake"]
                     val agentMovementTime = msgStats.lastMessageTimes["AgentMovementComplete"]
-                    
+
                     if (regionHandshakeTime == null || regionHandshakeTime == 0L) {
                         val udpElapsedMs = udpConnectedElapsedMs()
                         val isProvisional = udpElapsedMs != null && udpElapsedMs < EARLY_WARNING_GRACE_MS
@@ -1312,7 +1312,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Protocol statistics: App not initialized")
             }
             appendLine()
-            
+
             // ==================== HTTP/2 PROTOCOL STATISTICS ====================
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ HTTP/2 PROTOCOL STATISTICS                                        │")
@@ -1334,7 +1334,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("  Texture Requests: ${protocolStats.lastTextureProtocol}")
                 appendLine("  Mesh Requests: ${protocolStats.lastMeshProtocol}")
                 appendLine("  Capability Requests: ${protocolStats.lastCapabilityProtocol}")
-                
+
                 if (protocolStats.http2Requests == 0 && (protocolStats.textureHttp11Count > 0 || protocolStats.meshHttp11Count > 0)) {
                     appendLine()
                     appendLine("ℹ️ HTTP/2 NOT USED - All requests using HTTP/1.1")
@@ -1344,7 +1344,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("HTTP/2 statistics unavailable: ${e.message}")
             }
             appendLine()
-            
+
             // ==================== FRIENDS MANAGER STATUS ====================
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ FRIENDS MANAGER STATUS                                            │")
@@ -1357,7 +1357,7 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("Total Friends: ${friendsDiag.totalFriends}")
                         appendLine("Online Friends: ${friendsDiag.onlineFriends}")
                         appendLine("Pending Offers: ${friendsDiag.pendingOffers}")
-                        
+
                         if (friendsDiag.totalFriends > 0 && friendsDiag.friendsList.isNotEmpty()) {
                             appendLine()
                             appendLine("Friends List (showing up to 10):")
@@ -1372,7 +1372,7 @@ class DebugReportService private constructor(private val context: Context) {
                                 appendLine("  ... and ${friendsDiag.friendsList.size - 10} more")
                             }
                         }
-                        
+
                         if (friendsDiag.totalFriends == 0) {
                             appendLine()
                             appendLine("ℹ️ NO FRIENDS LOADED - Friend list may not have been fetched yet")
@@ -1452,7 +1452,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("  Registered Handlers: ${packetStats.registeredHandlerCount}")
                 appendLine("  Unique Message Types Sent: ${packetStats.uniqueMessageTypesSent}")
                 appendLine("  Unique Message Types Received: ${packetStats.uniqueMessageTypesReceived}")
-                
+
                 if (packetStats.lastPacketSentMs >= 0) {
                     appendLine()
                     appendLine("  Last Packet Sent: ${formatDuration(packetStats.lastPacketSentMs)} ago")
@@ -1462,7 +1462,7 @@ class DebugReportService private constructor(private val context: Context) {
                 } else if (packetStats.packetsSent > 0) {
                     appendLine("  Last Packet Received: Never ⚠️")
                 }
-                
+
                 if (packetStats.packetsSent > 0 && packetStats.packetsReceived == 0L) {
                     val udpElapsedMs = udpConnectedElapsedMs()
                     val isProvisional = udpElapsedMs != null && udpElapsedMs < EARLY_WARNING_GRACE_MS
@@ -1478,12 +1478,12 @@ class DebugReportService private constructor(private val context: Context) {
                     appendLine("   - NAT traversal issue")
                     appendLine("   - Simulator not responding")
                 }
-                
+
                 if (packetStats.handlerMisses > 0) {
                     appendLine()
                     appendLine("⚠️ ${packetStats.handlerMisses} messages had no registered handler!")
                 }
-                
+
                 // Malformed packet statistics - NEW SECTION
                 appendLine()
                 appendLine("Malformed Packet Statistics:")
@@ -1496,7 +1496,7 @@ class DebugReportService private constructor(private val context: Context) {
                     if (packetStats.corruptedPayloadPackets > 0) appendLine("    Corrupted Payload: ${packetStats.corruptedPayloadPackets}")
                     if (packetStats.zeroDecodeFailures > 0) appendLine("    Zero-Decode Failures: ${packetStats.zeroDecodeFailures}")
                     if (packetStats.oversizedPackets > 0) appendLine("    Oversized Packets: ${packetStats.oversizedPackets}")
-                    
+
                     // Show recent malformed packet details
                     val malformedHistory = com.linkpoint.protocol.messages.EnhancedPacketLogger.getMalformedPacketHistory(MALFORMED_PACKET_HISTORY_COUNT)
                     if (malformedHistory.isNotEmpty()) {
@@ -1512,7 +1512,7 @@ class DebugReportService private constructor(private val context: Context) {
                 } else {
                     appendLine("  ✓ No malformed packets detected")
                 }
-                
+
                 // Show sent message breakdown
                 val sentBreakdown = com.linkpoint.protocol.messages.EnhancedPacketLogger.getSentMessageBreakdown(10)
                 if (sentBreakdown.isNotEmpty()) {
@@ -1522,7 +1522,7 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("  $name: $count")
                     }
                 }
-                
+
                 // Show received message breakdown
                 val receivedBreakdown = com.linkpoint.protocol.messages.EnhancedPacketLogger.getReceivedMessageBreakdown(10)
                 if (receivedBreakdown.isNotEmpty()) {
@@ -1536,7 +1536,7 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Enhanced packet logger unavailable: ${e.message}")
             }
             appendLine()
-            
+
             // Recent network log excerpt for debugging loading issues
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ RECENT NETWORK LOG (Last 30 entries)                              │")
@@ -1549,14 +1549,14 @@ class DebugReportService private constructor(private val context: Context) {
                 appendLine("Network logs unavailable: ${e.message}")
             }
             appendLine()
-            
+
             appendLine("═══════════════════════════════════════════════════════════════════")
             appendLine("End of Debug Report")
             appendLine("═══════════════════════════════════════════════════════════════════")
         }
     }
-    
-    
+
+
     /**
      * Get version code from package info, handling API level differences
      */
@@ -1568,14 +1568,14 @@ class DebugReportService private constructor(private val context: Context) {
             packageInfo.versionCode.toLong()
         }
     }
-    
+
     /**
      * Get all stored debug reports
      */
     fun getDebugReports(): List<File> {
         return storage.list()
     }
-    
+
     /**
      * Read a debug report file
      */
@@ -1587,7 +1587,7 @@ class DebugReportService private constructor(private val context: Context) {
             null
         }
     }
-    
+
     /**
      * Clear all debug reports
      */
@@ -1595,11 +1595,11 @@ class DebugReportService private constructor(private val context: Context) {
         storage.clear()
         Log.i(TAG, "All debug reports cleared")
     }
-    
+
     private fun formatTimestamp(timestamp: Long): String {
         return formatDateWithPattern(timestamp, "yyyy-MM-dd HH:mm:ss.SSS Z")
     }
-    
+
     /**
      * Helper method to format a timestamp with a given pattern.
      * Handles API level differences for date formatting.
@@ -1613,7 +1613,7 @@ class DebugReportService private constructor(private val context: Context) {
             SimpleDateFormat(pattern, Locale.US).format(Date(timestamp))
         }
     }
-    
+
     private fun formatBytes(bytes: Long): String {
         val kb = bytes / 1024.0
         val mb = kb / 1024.0
@@ -1625,10 +1625,10 @@ class DebugReportService private constructor(private val context: Context) {
             else -> "$bytes B"
         }
     }
-    
+
     /**
      * Format a duration in milliseconds to a human-readable string.
-     * 
+     *
      * @param ms Duration in milliseconds
      * @return Formatted string with appropriate unit:
      *         - "Xms" for durations under 1 second
@@ -1650,7 +1650,7 @@ class DebugReportService private constructor(private val context: Context) {
         val pct = (successes.toDouble() * 100.0) / attempts.toDouble()
         return String.format(Locale.US, "%.1f%% (%d/%d)", pct, successes, attempts)
     }
-    
+
     fun shutdown() {
         scope.cancel()
     }

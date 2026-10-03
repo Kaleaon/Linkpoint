@@ -45,7 +45,7 @@ __global__ void project_gaussians_2d_scale_rot_forward_kernel(
         return; // zero determinant
     }
     conics[idx] = conic;
-    
+
     xys[idx] = center;
     radii[idx] = (int)radius;
     uint2 tile_min, tile_max;

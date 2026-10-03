@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicLong
 /**
  * Manages network connection state flags.
  * Based on patterns from the official Second Life app's CoreNetworkingService.
- * 
+ *
  * Tracks:
  * - IsReconnecting
  * - ConnectionReset
@@ -19,14 +19,14 @@ import java.util.concurrent.atomic.AtomicLong
  * - AlwaysReconnect
  */
 class NetworkStateManager {
-    
+
     companion object {
         private const val TAG = "NetworkStateManager"
-        
+
         // Reset guard timeout to prevent rapid reset attempts
         private const val RESET_GUARD_TIMEOUT_MS = 5000L  // 5 seconds
     }
-    
+
     /**
      * Connection state enum
      */
@@ -38,17 +38,17 @@ class NetworkStateManager {
         ERROR,
         FAULTED
     }
-    
+
     // State flows for reactive updates
     private val _connectionStatus = MutableStateFlow(ConnectionStatus.DISCONNECTED)
     val connectionStatus: StateFlow<ConnectionStatus> = _connectionStatus.asStateFlow()
-    
+
     private val _isReconnecting = MutableStateFlow(false)
     val isReconnecting: StateFlow<Boolean> = _isReconnecting.asStateFlow()
-    
+
     private val _lastStatusChange = MutableStateFlow(0L)
     val lastStatusChange: StateFlow<Long> = _lastStatusChange.asStateFlow()
-    
+
     // Atomic flags for thread-safe access
     private val connectionIsFaulted = AtomicBoolean(false)
     private val connectionReset = AtomicBoolean(false)
@@ -56,16 +56,16 @@ class NetworkStateManager {
     private val alwaysReconnect = AtomicBoolean(true)  // Default to true
     private val logoutInProgress = AtomicBoolean(false)
     private val switchingAppsForceReconnect = AtomicBoolean(false)
-    
+
     // Reconnection tracking
     private val reconnectCount = AtomicLong(0)
     private val lastReconnectAttempt = AtomicLong(0)
     private val lastResetRequest = AtomicLong(0)
-    
+
     // Connection instance tracking
     private var connectionInstanceId: String = ""
     private var currentConnectionStartTime: Long = 0L
-    
+
     /**
      * Set the connection status
      */
@@ -76,7 +76,7 @@ class NetworkStateManager {
             Log.d(TAG, "Connection status: $previousStatus -> $status")
             _connectionStatus.value = status
             _lastStatusChange.value = System.currentTimeMillis()
-            
+
             when (status) {
                 ConnectionStatus.RECONNECTING -> {
                     _isReconnecting.value = true
@@ -100,7 +100,7 @@ class NetworkStateManager {
             }
         }
     }
-    
+
     /**
      * Request a connection reset.
      * Returns false if a reset was recently requested (guard timeout).
@@ -108,30 +108,30 @@ class NetworkStateManager {
     fun requestConnectionReset(): Boolean {
         val now = System.currentTimeMillis()
         val lastReset = lastResetRequest.get()
-        
+
         if (now - lastReset < RESET_GUARD_TIMEOUT_MS) {
             Log.w(TAG, "Reset guard active - reset requested ${now - lastReset}ms ago")
             return false
         }
-        
+
         lastResetRequest.set(now)
         connectionReset.set(true)
         Log.d(TAG, "Connection reset requested")
         return true
     }
-    
+
     /**
      * Clear the connection reset flag
      */
     fun clearConnectionReset() {
         connectionReset.set(false)
     }
-    
+
     /**
      * Check if connection reset is requested
      */
     fun isConnectionResetRequested(): Boolean = connectionReset.get()
-    
+
     /**
      * Set force reconnect flag
      */
@@ -141,24 +141,24 @@ class NetworkStateManager {
             Log.d(TAG, "Force reconnect enabled")
         }
     }
-    
+
     /**
      * Check if force reconnect is enabled
      */
     fun isForceReconnectEnabled(): Boolean = forceReconnect.get()
-    
+
     /**
      * Set always reconnect flag
      */
     fun setAlwaysReconnect(always: Boolean) {
         alwaysReconnect.set(always)
     }
-    
+
     /**
      * Check if always reconnect is enabled
      */
     fun isAlwaysReconnectEnabled(): Boolean = alwaysReconnect.get()
-    
+
     /**
      * Set logout in progress flag
      */
@@ -168,29 +168,29 @@ class NetworkStateManager {
             Log.d(TAG, "Logout in progress")
         }
     }
-    
+
     /**
      * Check if logout is in progress
      */
     fun isLogoutInProgress(): Boolean = logoutInProgress.get()
-    
+
     /**
      * Check if connection is faulted
      */
     fun isConnectionFaulted(): Boolean = connectionIsFaulted.get()
-    
+
     /**
      * Set switching apps force reconnect flag
      */
     fun setSwitchingAppsForceReconnect(force: Boolean) {
         switchingAppsForceReconnect.set(force)
     }
-    
+
     /**
      * Get the current connection instance ID
      */
     fun getConnectionInstanceId(): String = connectionInstanceId
-    
+
     /**
      * Set a new connection instance ID
      */
@@ -199,12 +199,12 @@ class NetworkStateManager {
         currentConnectionStartTime = System.currentTimeMillis()
         Log.d(TAG, "Connection instance ID: $id")
     }
-    
+
     /**
      * Get reconnection count
      */
     fun getReconnectCount(): Long = reconnectCount.get()
-    
+
     /**
      * Get time since last status change
      */
@@ -212,7 +212,7 @@ class NetworkStateManager {
         val lastChange = _lastStatusChange.value
         return if (lastChange > 0) System.currentTimeMillis() - lastChange else 0
     }
-    
+
     /**
      * Get connection details for diagnostics
      */
@@ -227,12 +227,12 @@ class NetworkStateManager {
             logoutInProgress = logoutInProgress.get(),
             reconnectCount = reconnectCount.get(),
             connectionInstanceId = connectionInstanceId,
-            connectionDurationMs = if (currentConnectionStartTime > 0) 
+            connectionDurationMs = if (currentConnectionStartTime > 0)
                 System.currentTimeMillis() - currentConnectionStartTime else 0,
             lastStatusChangeMs = getTimeSinceLastStatusChange()
         )
     }
-    
+
     /**
      * Log connection details for diagnostics
      */
@@ -251,7 +251,7 @@ class NetworkStateManager {
         Log.d(TAG, "  Connection Duration: ${details.connectionDurationMs}ms")
         Log.d(TAG, "  Last Status Change: ${details.lastStatusChangeMs}ms ago")
     }
-    
+
     /**
      * Reset all state
      */
@@ -271,7 +271,7 @@ class NetworkStateManager {
         currentConnectionStartTime = 0L
         Log.d(TAG, "Network state reset")
     }
-    
+
     data class ConnectionDetails(
         val status: ConnectionStatus,
         val isReconnecting: Boolean,

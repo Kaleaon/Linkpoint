@@ -6,7 +6,7 @@ public enum MuteType {
     OBJECT(1),
     GROUP(3),
     EXTERNAL(4);
-    
+
     private int viewOrder;
 
     MuteType(int i) {

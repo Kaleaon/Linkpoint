@@ -85,7 +85,7 @@ int test_rotation()
 int test_log()
 {
 	int Error(0);
-	
+
 	glm::quat q;
 	glm::quat p = glm::log(q);
 	glm::quat r = glm::exp(p);

@@ -14,4 +14,3 @@ namespace glm
 		return vec<1, T, defaultp>(Extent).x;
 	}
 }//namespace glm
-

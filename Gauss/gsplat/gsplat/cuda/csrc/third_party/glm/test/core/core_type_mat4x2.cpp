@@ -38,7 +38,7 @@ int test_ctr()
 
 #if(GLM_HAS_INITIALIZER_LISTS)
 	glm::mat4x2 m0(
-		glm::vec2(0, 1), 
+		glm::vec2(0, 1),
 		glm::vec2(2, 3),
 		glm::vec2(4, 5),
 		glm::vec2(6, 7));
@@ -98,7 +98,7 @@ namespace cast
 	int test()
 	{
 		int Error = 0;
-		
+
 		Error += entry<glm::mat2x2>();
 		Error += entry<glm::mat2x3>();
 		Error += entry<glm::mat2x4>();
@@ -148,4 +148,3 @@ int main()
 
 	return Error;
 }
-

@@ -33,7 +33,7 @@ class SLPacketCodec {
   /// Decompresses zero-coded SL packet bytes.
   static Uint8List zeroDecompress(Uint8List src, {int headerSize = 4}) {
     if (src.length <= headerSize) return Uint8List.fromList(src);
-    
+
     final out = <int>[];
     out.addAll(src.sublist(0, headerSize));
 
@@ -68,7 +68,7 @@ class SLPacketCodec {
                 (packetBytes[3] << 8) |
                 (packetBytes[4] ?? 0);
     final msgId = packetBytes.length > 5 ? packetBytes[5] : 0;
-    
+
     final acks = <int>[];
     if ((flags & SLPacketFlags.appendedAcks) != 0) {
       final ackCount = packetBytes.last;

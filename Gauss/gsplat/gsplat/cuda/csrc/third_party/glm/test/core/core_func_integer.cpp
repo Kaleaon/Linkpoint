@@ -50,7 +50,7 @@ namespace bitfieldInsert
 	{
 		int Error = 0;
 		glm::uint count = sizeof(Data32) / sizeof(typeU32);
-		
+
 		for(glm::uint i = 0; i < count; ++i)
 		{
 			glm::uint Return = glm::bitfieldInsert(
@@ -61,7 +61,7 @@ namespace bitfieldInsert
 
 			Error += Data32[i].Return == Return ? 0 : 1;
 		}
-		
+
 		return Error;
 	}
 }//bitfieldInsert
@@ -99,9 +99,9 @@ namespace bitfieldExtract
 		{0xffff0000,16,16, 0x0000ffff, SUCCESS},
 		{0xfffffff0, 0, 8, 0x00000000, FAIL},
 		{0xffffffff,16,16, 0x00000000, FAIL},
-		//{0xffffffff,32, 1, 0x00000000, ASSERT}, // Throw an assert 
-		//{0xffffffff, 0,33, 0x00000000, ASSERT}, // Throw an assert 
-		//{0xffffffff,16,16, 0x00000000, ASSERT}, // Throw an assert 
+		//{0xffffffff,32, 1, 0x00000000, ASSERT}, // Throw an assert
+		//{0xffffffff, 0,33, 0x00000000, ASSERT}, // Throw an assert
+		//{0xffffffff,16,16, 0x00000000, ASSERT}, // Throw an assert
 	};
 
 	static int test()
@@ -113,10 +113,10 @@ namespace bitfieldExtract
 		for(glm::uint i = 0; i < count; ++i)
 		{
 			glm::uint Return = glm::bitfieldExtract(
-				Data32[i].Value, 
-				Data32[i].Offset, 
+				Data32[i].Value,
+				Data32[i].Offset,
 				Data32[i].Bits);
-			
+
 			bool Compare = Data32[i].Return == Return;
 
 			if(Data32[i].Result == SUCCESS && Compare)
@@ -278,19 +278,19 @@ namespace bitfieldReverse
 	{
 		int Error = 0;
 		std::size_t const Count = sizeof(Data32) / sizeof(typeU32);
-		
+
 		for(std::size_t i = 0; i < Count; ++i)
 		{
 			glm::uint Return = glm::bitfieldReverse(Data32[i].Value);
-			
+
 			bool Compare = Data32[i].Return == Return;
-			
+
 			if(Data32[i].Result == SUCCESS)
 				Error += Compare ? 0 : 1;
 			else
 				Error += Compare ? 1 : 0;
 		}
-		
+
 		return Error;
 	}
 
@@ -298,19 +298,19 @@ namespace bitfieldReverse
 	{
 		int Error = 0;
 		std::size_t const Count = sizeof(Data32) / sizeof(typeU32);
-		
+
 		for(std::size_t i = 0; i < Count; ++i)
 		{
 			glm::uint Return = bitfieldReverseLoop(Data32[i].Value);
-			
+
 			bool Compare = Data32[i].Return == Return;
-			
+
 			if(Data32[i].Result == SUCCESS)
 				Error += Compare ? 0 : 1;
 			else
 				Error += Compare ? 1 : 0;
 		}
-		
+
 		return Error;
 	}
 
@@ -318,19 +318,19 @@ namespace bitfieldReverse
 	{
 		int Error = 0;
 		std::size_t const Count = sizeof(Data32) / sizeof(typeU32);
-		
+
 		for(std::size_t i = 0; i < Count; ++i)
 		{
 			glm::uint Return = bitfieldReverseUint32(Data32[i].Value);
-			
+
 			bool Compare = Data32[i].Return == Return;
-			
+
 			if(Data32[i].Result == SUCCESS)
 				Error += Compare ? 0 : 1;
 			else
 				Error += Compare ? 1 : 0;
 		}
-		
+
 		return Error;
 	}
 
@@ -338,19 +338,19 @@ namespace bitfieldReverse
 	{
 		int Error = 0;
 		std::size_t const Count = sizeof(Data32) / sizeof(typeU32);
-		
+
 		for(std::size_t i = 0; i < Count; ++i)
 		{
 			glm::uint Return = bitfieldReverseOps(Data32[i].Value);
-			
+
 			bool Compare = Data32[i].Return == Return;
-			
+
 			if(Data32[i].Result == SUCCESS)
 				Error += Compare ? 0 : 1;
 			else
 				Error += Compare ? 1 : 0;
 		}
-		
+
 		return Error;
 	}
 
@@ -358,19 +358,19 @@ namespace bitfieldReverse
 	{
 		int Error = 0;
 		std::size_t const Count = sizeof(Data64) / sizeof(typeU64);
-		
+
 		for(std::size_t i = 0; i < Count; ++i)
 		{
 			glm::uint64 Return = glm::bitfieldReverse(Data64[i].Value);
-			
+
 			bool Compare = Data64[i].Return == Return;
-			
+
 			if(Data64[i].Result == SUCCESS)
 				Error += Compare ? 0 : 1;
 			else
 				Error += Compare ? 1 : 0;
 		}
-		
+
 		return Error;
 	}
 
@@ -378,19 +378,19 @@ namespace bitfieldReverse
 	{
 		int Error = 0;
 		std::size_t const Count = sizeof(Data64) / sizeof(typeU64);
-		
+
 		for(std::size_t i = 0; i < Count; ++i)
 		{
 			glm::uint64 Return = bitfieldReverseLoop(Data64[i].Value);
-			
+
 			bool Compare = Data64[i].Return == Return;
-			
+
 			if(Data32[i].Result == SUCCESS)
 				Error += Compare ? 0 : 1;
 			else
 				Error += Compare ? 1 : 0;
 		}
-		
+
 		return Error;
 	}
 
@@ -398,19 +398,19 @@ namespace bitfieldReverse
 	{
 		int Error = 0;
 		std::size_t const Count = sizeof(Data64) / sizeof(typeU64);
-		
+
 		for(std::size_t i = 0; i < Count; ++i)
 		{
 			glm::uint64 Return = bitfieldReverseUint64(Data64[i].Value);
-			
+
 			bool Compare = Data64[i].Return == Return;
-			
+
 			if(Data64[i].Result == SUCCESS)
 				Error += Compare ? 0 : 1;
 			else
 				Error += Compare ? 1 : 0;
 		}
-		
+
 		return Error;
 	}
 
@@ -418,19 +418,19 @@ namespace bitfieldReverse
 	{
 		int Error = 0;
 		std::size_t const Count = sizeof(Data64) / sizeof(typeU64);
-		
+
 		for(std::size_t i = 0; i < Count; ++i)
 		{
 			glm::uint64 Return = bitfieldReverseOps(Data64[i].Value);
-			
+
 			bool Compare = Data64[i].Return == Return;
-			
+
 			if(Data64[i].Result == SUCCESS)
 				Error += Compare ? 0 : 1;
 			else
 				Error += Compare ? 1 : 0;
 		}
-		
+
 		return Error;
 	}
 
@@ -577,7 +577,7 @@ namespace findMSB
 	static int findMSB_095(genIUType Value)
 	{
 		GLM_STATIC_ASSERT(std::numeric_limits<genIUType>::is_integer, "'findMSB' only accept integer values");
-		
+
 		if(Value == genIUType(0) || Value == genIUType(-1))
 			return -1;
 		else if(Value > 0)
@@ -1123,7 +1123,7 @@ namespace uaddCarry
 	static int test()
 	{
 		int Error(0);
-		
+
 		{
 			glm::uint x = std::numeric_limits<glm::uint>::max();
 			glm::uint y = 0;
@@ -1173,7 +1173,7 @@ namespace usubBorrow
 	static int test()
 	{
 		int Error(0);
-		
+
 		{
 			glm::uint x = 16;
 			glm::uint y = 17;
@@ -1233,7 +1233,7 @@ namespace umulExtended
 	static int test()
 	{
 		int Error(0);
-		
+
 		{
 			glm::uint x = 2;
 			glm::uint y = 3;
@@ -1298,7 +1298,7 @@ namespace imulExtended
 	static int test()
 	{
 		int Error(0);
-		
+
 		{
 			int x = 2;
 			int y = 3;

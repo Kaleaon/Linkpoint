@@ -16,14 +16,14 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * MediaManager - Handles parcel media and music streaming.
- * 
+ *
  * Features:
  * - Parcel music streaming (Shoutcast/Icecast)
  * - Parcel media (video/web)
  * - Media on a prim (MOAP)
  * - Volume control per media type
  * - Auto-play based on parcel settings
- * 
+ *
  * Based on the reference viewer's media implementation.
  */
 class MediaManager(
@@ -35,56 +35,56 @@ class MediaManager(
         capabilityRequester?.let { InWorldMediaNavigationService(it) }
     companion object {
         private const val TAG = "MediaManager"
-        
+
         // Media types
         const val MEDIA_TYPE_NONE = 0
         const val MEDIA_TYPE_MUSIC = 1
         const val MEDIA_TYPE_MEDIA = 2
         const val MEDIA_TYPE_MOAP = 3
-        
+
         // Default volumes
         private const val DEFAULT_MUSIC_VOLUME = 0.5f
         private const val DEFAULT_MEDIA_VOLUME = 0.5f
     }
-    
+
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-    
+
     // Music player for parcel streams
     private var musicPlayer: MediaPlayer? = null
     private var currentMusicUrl: String? = null
-    
+
     // Media state
     private val _isMusicPlaying = MutableStateFlow(false)
     val isMusicPlaying: StateFlow<Boolean> = _isMusicPlaying
-    
+
     private val _musicUrl = MutableStateFlow<String?>(null)
     val musicUrl: StateFlow<String?> = _musicUrl
-    
+
     private val _mediaUrl = MutableStateFlow<String?>(null)
     val mediaUrl: StateFlow<String?> = _mediaUrl
-    
+
     private val _musicVolume = MutableStateFlow(DEFAULT_MUSIC_VOLUME)
     val musicVolume: StateFlow<Float> = _musicVolume
-    
+
     private val _mediaVolume = MutableStateFlow(DEFAULT_MEDIA_VOLUME)
     val mediaVolume: StateFlow<Float> = _mediaVolume
-    
+
     private val _isMusicEnabled = MutableStateFlow(true)
     val isMusicEnabled: StateFlow<Boolean> = _isMusicEnabled
-    
+
     private val _isMediaEnabled = MutableStateFlow(true)
     val isMediaEnabled: StateFlow<Boolean> = _isMediaEnabled
-    
+
     // MOAP (Media on a Prim) state
     private val moapSurfaces = ConcurrentHashMap<UUID, MoapSurface>()
-    
+
     // Stream metadata
     private val _streamTitle = MutableStateFlow<String?>(null)
     val streamTitle: StateFlow<String?> = _streamTitle
-    
+
     private val _streamArtist = MutableStateFlow<String?>(null)
     val streamArtist: StateFlow<String?> = _streamArtist
-    
+
     /**
      * Update parcel media/music from parcel info.
      */
@@ -99,26 +99,26 @@ class MediaManager(
                     stopMusic()
                 }
             }
-            
+
             // Handle media URL
             _mediaUrl.value = parcel.mediaUrl
         }
     }
-    
+
     /**
      * Play music stream.
      */
     fun playMusic(url: String) {
         if (!_isMusicEnabled.value) return
-        
+
         scope.launch {
             try {
                 // Stop existing music
                 stopMusicInternal()
-                
+
                 currentMusicUrl = url
                 _musicUrl.value = url
-                
+
                 musicPlayer = MediaPlayer().apply {
                     setAudioAttributes(
                         AudioAttributes.Builder()
@@ -126,20 +126,20 @@ class MediaManager(
                             .setUsage(AudioAttributes.USAGE_MEDIA)
                             .build()
                     )
-                    
+
                     setOnPreparedListener { player ->
                         player.setVolume(_musicVolume.value, _musicVolume.value)
                         player.start()
                         _isMusicPlaying.value = true
                         Log.i(TAG, "Music streaming started: $url")
                     }
-                    
+
                     setOnErrorListener { _, what, extra ->
                         Log.e(TAG, "Music player error: what=$what, extra=$extra")
                         _isMusicPlaying.value = false
                         true
                     }
-                    
+
                     setOnInfoListener { _, what, _ ->
                         // Could extract stream metadata here
                         when (what) {
@@ -152,12 +152,12 @@ class MediaManager(
                         }
                         false
                     }
-                    
+
                     setOnCompletionListener {
                         // Stream ended or disconnected
                         _isMusicPlaying.value = false
                     }
-                    
+
                     setDataSource(context, Uri.parse(url))
                     prepareAsync()
                 }
@@ -167,7 +167,7 @@ class MediaManager(
             }
         }
     }
-    
+
     /**
      * Stop music playback.
      */
@@ -176,7 +176,7 @@ class MediaManager(
             stopMusicInternal()
         }
     }
-    
+
     private fun stopMusicInternal() {
         try {
             musicPlayer?.apply {
@@ -204,7 +204,7 @@ class MediaManager(
         _streamTitle.value = null
         _streamArtist.value = null
     }
-    
+
     /**
      * Set music volume (0.0 - 1.0).
      */
@@ -213,14 +213,14 @@ class MediaManager(
         _musicVolume.value = clampedVolume
         musicPlayer?.setVolume(clampedVolume, clampedVolume)
     }
-    
+
     /**
      * Set media volume (0.0 - 1.0).
      */
     fun setMediaVolume(volume: Float) {
         _mediaVolume.value = volume.coerceIn(0f, 1f)
     }
-    
+
     /**
      * Enable/disable music streaming.
      */
@@ -230,14 +230,14 @@ class MediaManager(
             stopMusic()
         }
     }
-    
+
     /**
      * Enable/disable media playback.
      */
     fun setMediaEnabled(enabled: Boolean) {
         _isMediaEnabled.value = enabled
     }
-    
+
     /**
      * Toggle music playback.
      */
@@ -248,9 +248,9 @@ class MediaManager(
             currentMusicUrl?.let { playMusic(it) }
         }
     }
-    
+
     // ==================== MOAP (Media on a Prim) ====================
-    
+
     /**
      * Set media on a prim face.
      */
@@ -263,11 +263,11 @@ class MediaManager(
             isPlaying = autoPlay
         )
         moapSurfaces[objectId] = surface
-        
+
         // Would send ObjectMedia message to sim
         Log.d(TAG, "Set MOAP on object $objectId face $face: $url")
     }
-    
+
 
 
     /**
@@ -292,14 +292,14 @@ class MediaManager(
      * Get MOAP surface for object.
      */
     fun getMoapSurface(objectId: UUID): MoapSurface? = moapSurfaces[objectId]
-    
+
     /**
      * Remove MOAP from object.
      */
     fun removeMoapMedia(objectId: UUID) {
         moapSurfaces.remove(objectId)
     }
-    
+
     /**
      * Handle ObjectMedia message from sim.
      */
@@ -320,7 +320,7 @@ class MediaManager(
             }
         }
     }
-    
+
     fun shutdown() {
         stopMusicInternal()
         scope.cancel()

@@ -29,4 +29,3 @@
       android:textColor="?attr/colorAccent"
       android:singleLine="true"/>
 </LinearLayout>
-

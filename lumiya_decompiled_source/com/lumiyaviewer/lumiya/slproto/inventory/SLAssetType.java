@@ -29,7 +29,7 @@ public enum SLAssetType {
     AT_MESH(49, "mesh", SLInventoryType.IT_MESH, 6, R.drawable.inv_object, R.string.asset_type_object, -1),
     AT_WIDGET(40, "widget", SLInventoryType.IT_WIDGET, 6, R.drawable.inv_object, R.string.asset_type_object, -1),
     AT_UNKNOWN(-1, EnvironmentCompat.MEDIA_UNKNOWN, SLInventoryType.IT_UNKNOWN, -1, -1, -1, -1);
-    
+
     private static final ImmutableMap<String, SLAssetType> tagMap;
     private final int actionDescription;
     private final int drawableResource;

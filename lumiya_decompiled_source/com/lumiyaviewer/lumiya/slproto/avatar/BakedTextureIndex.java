@@ -7,7 +7,7 @@ public enum BakedTextureIndex {
     BAKED_EYES(AvatarTextureFaceIndex.TEX_EYES_BAKED),
     BAKED_SKIRT(AvatarTextureFaceIndex.TEX_SKIRT_BAKED),
     BAKED_HAIR(AvatarTextureFaceIndex.TEX_HAIR_BAKED);
-    
+
     private AvatarTextureFaceIndex faceIndex;
 
     BakedTextureIndex(AvatarTextureFaceIndex avatarTextureFaceIndex) {

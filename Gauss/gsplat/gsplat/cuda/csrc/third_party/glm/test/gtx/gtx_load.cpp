@@ -43,7 +43,7 @@ namespace glm
 	template<length_t L, typename T, qualifier Q, bool isAligned>
 	struct load_gentype
 	{
-	
+
 	};
 
 #	if GLM_ARCH & GLM_ARCH_SSE_BIT
@@ -68,7 +68,7 @@ namespace glm
 	template <typename genType, typename valType>
 	genType load(valType const* Mem)
 	{
-		
+
 	}
 
 	aligned_vec4 loadu(float const* Mem)

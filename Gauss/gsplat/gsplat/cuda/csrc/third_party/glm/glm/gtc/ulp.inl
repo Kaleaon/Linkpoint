@@ -170,4 +170,3 @@ namespace glm
 		return Result;
 	}
 }//namespace glm
-

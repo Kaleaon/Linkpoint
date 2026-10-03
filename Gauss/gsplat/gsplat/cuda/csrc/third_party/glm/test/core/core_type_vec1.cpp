@@ -164,6 +164,6 @@ int main()
 	Error += test_vec1_operator_increment();
 	Error += test_swizzle();
 	Error += test_constexpr();
-	
+
 	return Error;
 }

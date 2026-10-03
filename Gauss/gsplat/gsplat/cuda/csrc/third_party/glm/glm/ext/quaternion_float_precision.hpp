@@ -33,4 +33,3 @@ namespace glm
 
 	/// @}
 } //namespace glm
-

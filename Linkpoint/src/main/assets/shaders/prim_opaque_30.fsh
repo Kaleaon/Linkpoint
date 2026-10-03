@@ -12,4 +12,3 @@ out lowp vec4 fragmentColor;
 void main() {
     fragmentColor = useTexture ? (vLightColor * texture (sTexture, vTexCoordOut)) : vLightColor;
 }
-

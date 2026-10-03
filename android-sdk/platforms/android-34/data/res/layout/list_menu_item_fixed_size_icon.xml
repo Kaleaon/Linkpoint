@@ -25,4 +25,3 @@
     android:layout_marginBottom="0dip"
     android:scaleType="centerInside"
     android:duplicateParentState="true" />
-

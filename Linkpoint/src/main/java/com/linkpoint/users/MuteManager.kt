@@ -16,15 +16,15 @@ import java.util.zip.CRC32
 
 /**
  * Mute List Manager - Handles blocking/muting of avatars, objects, and groups.
- * 
+ *
  * Based on the reference viewer's SLMuteList.java
- * 
+ *
  * Mute types:
  * - AGENT: Block an avatar
  * - OBJECT: Block an object by name
  * - GROUP: Block a group
  * - BY_NAME: Block by name only (no UUID)
- * 
+ *
  * Mute flags:
  * - MUTE_CHAT: Block text chat
  * - MUTE_VOICE: Block voice
@@ -46,48 +46,48 @@ class MuteManager(
         const val MUTE_SOUNDS = 0x00000008
         const val MUTE_ALL = MUTE_CHAT or MUTE_VOICE or MUTE_PARTICLES or MUTE_SOUNDS
     }
-    
+
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    
+
     // Mute list data
     private val muteList = ConcurrentHashMap<MuteListKey, MuteListEntry>()
-    
+
     // State flow for UI updates
     private val _muteListState = MutableStateFlow<List<MuteListEntry>>(emptyList())
     val muteListState: StateFlow<List<MuteListEntry>> = _muteListState
-    
+
     // Cached CRC for server communication
     private var cachedCRC: Int = 0
-    
+
     init {
         // Register xfer handler for mute list files
         xferManager.registerHandler("mute") { filename, result ->
             handleMuteListXfer(filename, result)
         }
     }
-    
+
     /**
      * Request the mute list from the server.
      */
     suspend fun requestMuteList() {
         try {
             val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             // AgentData block
             writeUUID(payload, agentId)
             writeUUID(payload, udpConnection.getSessionId())
-            
+
             // MuteData block
             payload.putInt(cachedCRC)
-            
+
             udpConnection.sendPacket(MessageIdRegistry.MUTE_LIST_REQUEST, payload.array(), reliable = true)
             Log.d(TAG, "Requested mute list (CRC: ${cachedCRC.toString(16)})")
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Failed to request mute list", e)
         }
     }
-    
+
     /**
      * Block/mute an avatar.
      */
@@ -102,10 +102,10 @@ class MuteManager(
             type = MuteType.AGENT,
             flags = flags
         )
-        
+
         addMuteEntry(entry)
     }
-    
+
     /**
      * Block/mute an object by name.
      */
@@ -120,10 +120,10 @@ class MuteManager(
             type = MuteType.OBJECT,
             flags = flags
         )
-        
+
         addMuteEntry(entry)
     }
-    
+
     /**
      * Block/mute a group.
      */
@@ -138,10 +138,10 @@ class MuteManager(
             type = MuteType.GROUP,
             flags = flags
         )
-        
+
         addMuteEntry(entry)
     }
-    
+
     /**
      * Block by name only (no UUID).
      */
@@ -155,10 +155,10 @@ class MuteManager(
             type = MuteType.BY_NAME,
             flags = flags
         )
-        
+
         addMuteEntry(entry)
     }
-    
+
     /**
      * Add a mute entry and send to server.
      */
@@ -166,30 +166,30 @@ class MuteManager(
         val key = MuteListKey(entry.id, entry.name, entry.type)
         muteList[key] = entry
         updateState()
-        
+
         try {
             val nameBytes = entry.name.toByteArray(Charsets.UTF_8)
             val payload = ByteBuffer.allocate(56 + nameBytes.size).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             // AgentData block
             writeUUID(payload, agentId)
             writeUUID(payload, udpConnection.getSessionId())
-            
+
             // MuteData block
             writeUUID(payload, entry.id)
             payload.put(nameBytes.size.toByte())
             payload.put(nameBytes)
             payload.putInt(entry.type.ordinal)
             payload.putInt(entry.flags)
-            
+
             udpConnection.sendPacket(MessageIdRegistry.UPDATE_MUTE_LIST_ENTRY, payload.array().copyOf(payload.position()), reliable = true)
             Log.i(TAG, "Added mute entry: ${entry.name} (${entry.type})")
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Failed to add mute entry", e)
         }
     }
-    
+
     /**
      * Unmute/unblock an entry.
      */
@@ -197,28 +197,28 @@ class MuteManager(
         val key = MuteListKey(entry.id, entry.name, entry.type)
         muteList.remove(key)
         updateState()
-        
+
         try {
             val nameBytes = entry.name.toByteArray(Charsets.UTF_8)
             val payload = ByteBuffer.allocate(36 + nameBytes.size).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             // AgentData block
             writeUUID(payload, agentId)
             writeUUID(payload, udpConnection.getSessionId())
-            
+
             // MuteData block
             writeUUID(payload, entry.id)
             payload.put(nameBytes.size.toByte())
             payload.put(nameBytes)
-            
+
             udpConnection.sendPacket(MessageIdRegistry.REMOVE_MUTE_LIST_ENTRY, payload.array().copyOf(payload.position()), reliable = true)
             Log.i(TAG, "Removed mute entry: ${entry.name} (${entry.type})")
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Failed to remove mute entry", e)
         }
     }
-    
+
     /**
      * Check if an avatar is muted.
      */
@@ -226,17 +226,17 @@ class MuteManager(
         val key = MuteListKey(avatarId, "", MuteType.AGENT)
         return muteList.keys.any { it.id == avatarId && it.type == MuteType.AGENT }
     }
-    
+
     /**
      * Check if muted by name.
      */
     fun isMutedByName(name: String): Boolean {
-        return muteList.values.any { 
-            it.name.equals(name, ignoreCase = true) || 
+        return muteList.values.any {
+            it.name.equals(name, ignoreCase = true) ||
             (it.type == MuteType.BY_NAME && it.name.equals(name, ignoreCase = true))
         }
     }
-    
+
     /**
      * Check if a specific mute flag is set for an avatar.
      */
@@ -244,12 +244,12 @@ class MuteManager(
         val entry = muteList.values.find { it.id == avatarId && it.type == MuteType.AGENT }
         return entry != null && (entry.flags and flag) != 0
     }
-    
+
     /**
      * Get all muted entries.
      */
     fun getMuteList(): List<MuteListEntry> = muteList.values.toList()
-    
+
     /**
      * Handle MuteListUpdate message (server sends filename to xfer).
      */
@@ -257,14 +257,14 @@ class MuteManager(
         try {
             val buffer = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
             if (buffer.remaining() < 1) return
-            
+
             // Read filename
             val filenameLen = buffer.get().toInt() and 0xFF
             if (buffer.remaining() < filenameLen) return
             val filenameBytes = ByteArray(filenameLen)
             buffer.get(filenameBytes)
             val filename = String(filenameBytes, Charsets.UTF_8).trim('\u0000')
-            
+
             if (filename.isNotEmpty()) {
                 Log.d(TAG, "Mute list update: $filename")
                 // The xfer manager will handle the file transfer
@@ -273,14 +273,14 @@ class MuteManager(
             Log.e(TAG, "Error parsing MuteListUpdate", e)
         }
     }
-    
+
     /**
      * Handle UseCachedMuteList message.
      */
     fun handleUseCachedMuteList(payload: ByteArray) {
         Log.d(TAG, "Using cached mute list")
     }
-    
+
     /**
      * Handle mute list xfer completion.
      */
@@ -294,7 +294,7 @@ class MuteManager(
             }
         }
     }
-    
+
     /**
      * Parse mute list data from xfer.
      */
@@ -304,17 +304,17 @@ class MuteManager(
             val crc = CRC32()
             crc.update(data)
             cachedCRC = crc.value.toInt()
-            
+
             // Clear existing list
             muteList.clear()
-            
+
             // Parse the text data
             val content = String(data, Charsets.UTF_8)
             val lines = content.lines()
-            
+
             for (line in lines) {
                 if (line.isBlank()) continue
-                
+
                 val parts = line.split(" ", limit = 4)
                 if (parts.size >= 3) {
                     try {
@@ -323,7 +323,7 @@ class MuteManager(
                         val id = UUID.fromString(parts[1])
                         val name = if (parts.size >= 4) parts[3] else parts[2]
                         val flags = if (parts.size >= 4) parts[2].toIntOrNull() ?: MUTE_ALL else MUTE_ALL
-                        
+
                         val entry = MuteListEntry(id, name.trim(), type, flags)
                         val key = MuteListKey(id, name.trim(), type)
                         muteList[key] = entry
@@ -332,24 +332,24 @@ class MuteManager(
                     }
                 }
             }
-            
+
             updateState()
             Log.i(TAG, "Loaded ${muteList.size} mute entries")
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing mute list data", e)
         }
     }
-    
+
     private fun updateState() {
         _muteListState.value = muteList.values.toList()
     }
-    
+
     private fun writeUUID(buffer: ByteBuffer, uuid: UUID) {
         buffer.putLong(uuid.mostSignificantBits)
         buffer.putLong(uuid.leastSignificantBits)
     }
-    
+
     /**
      * Shutdown the manager.
      */

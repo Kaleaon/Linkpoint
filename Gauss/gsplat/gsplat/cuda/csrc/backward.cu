@@ -63,7 +63,7 @@ __global__ void nd_rasterize_backward_kernel(
 
     // df/d_out for this pixel
     const float *v_out = &(v_output[channels * pix_id]);
-    
+
     // collect and process batches of gaussians
     // each thread loads one gaussian at a time before rasterizing
 
@@ -83,7 +83,7 @@ __global__ void nd_rasterize_backward_kernel(
             const float2 xy = xys[g_id];
             xy_batch[tr] = {xy.x, xy.y};
             conic_batch[tr] = conics[g_id];
-            for (int c = 0; c < channels; ++c) 
+            for (int c = 0; c < channels; ++c)
                 rgbs_batch[tr][c] = rgbs[channels * g_id + c];
         }
 
@@ -104,11 +104,11 @@ __global__ void nd_rasterize_backward_kernel(
             if (sigma < 0.f || isnan(sigma) || isinf(sigma)) {
                 valid = 0;
             }
-            
+
             float  v_rgb_local[MAX_CHANNELS] = {0.f};
             float3 v_conic_local = {0.f, 0.f, 0.f};
             float2 v_xy_local = {0.f, 0.f};
-            
+
             if (valid) {
                 // update v_rgb for this gaussian
                 for (int c = 0; c < channels; ++c)
@@ -120,16 +120,16 @@ __global__ void nd_rasterize_backward_kernel(
                 for (int c = 0; c < channels; ++c)
                     v_sigma += rgb[c] * v_out[c];
                 v_sigma *= -d;
-                
+
                 // update v_conic for this gaussian
-                v_conic_local = {0.5f * v_sigma * delta.x * delta.x, 
-                                        v_sigma * delta.x * delta.y, 
+                v_conic_local = {0.5f * v_sigma * delta.x * delta.x,
+                                        v_sigma * delta.x * delta.y,
                                  0.5f * v_sigma * delta.y * delta.y};
                 // update v_xy for this gaussian
-                v_xy_local = {v_sigma * (conic.x * delta.x + conic.y * delta.y), 
+                v_xy_local = {v_sigma * (conic.x * delta.x + conic.y * delta.y),
                               v_sigma * (conic.y * delta.x + conic.z * delta.y)};
             }
-            
+
             // sum across the warp
             for (int c = 0; c < channels; ++c)
                 warpSum(v_rgb_local[c], warp);
@@ -141,12 +141,12 @@ __global__ void nd_rasterize_backward_kernel(
                 float* v_rgb_ptr = (float*)(v_rgb);
                 for (int c = 0; c < channels; ++c)
                     atomicAdd(v_rgb_ptr + channels * g + c, v_rgb_local[c]);
-                
+
                 float* v_conic_ptr = (float*)(v_conic);
                 atomicAdd(v_conic_ptr + 3*g + 0, v_conic_local.x);
                 atomicAdd(v_conic_ptr + 3*g + 1, v_conic_local.y);
                 atomicAdd(v_conic_ptr + 3*g + 2, v_conic_local.z);
-                
+
                 float* v_xy_ptr = (float*)(v_xy);
                 atomicAdd(v_xy_ptr + 2*g + 0, v_xy_local.x);
                 atomicAdd(v_xy_ptr + 2*g + 1, v_xy_local.y);
@@ -192,7 +192,7 @@ __global__ void nd_rasterize_backward_topk_norm_kernel(
     const float* v_out = &(v_output[channels * pix_id]);
     // topk gs id for this pixel
     const int* topk = &pixel_topk[pix_id * TOP_K];
-    
+
     // compute the normalization factor
 
     float d_local[TOP_K] = {0.0f};
@@ -213,7 +213,7 @@ __global__ void nd_rasterize_backward_topk_norm_kernel(
         d_local[k] = d;
     }
     // if (cnt > 1) {printf("cnt: %d\n", cnt);}
-    
+
     float v_d_local[TOP_K] = {0.f};
 
     // compute each gaussian's contribution to the gradient
@@ -228,12 +228,12 @@ __global__ void nd_rasterize_backward_topk_norm_kernel(
         // update v_rgb for this gaussian
         for (int c = 0; c < channels; ++c)
             v_rgb_local[c] = norm_d * v_out[c];
-        
+
         const float* rgb = &rgbs[channels * g_id];
         float* v_rgb_ptr = (float*)(v_rgb);
         for (int c = 0; c < channels; ++c)
             atomicAdd(v_rgb_ptr + channels * g_id + c, v_rgb_local[c]);
-        
+
         float v_norm_d = 0.f;
         for (int c = 0; c < channels; ++c)
             v_norm_d += rgb[c] * v_out[c];
@@ -242,11 +242,11 @@ __global__ void nd_rasterize_backward_topk_norm_kernel(
         for (int l = 0; l < TOP_K; ++l) {
             if (l == k) {
                 v_d_local[l] += v_norm_d/denom + tmp;
-            } 
+            }
             else {
                 v_d_local[l] += tmp;
             }
-        }        
+        }
     }
 
     for (int k = 0; k < TOP_K; ++k) {
@@ -261,22 +261,22 @@ __global__ void nd_rasterize_backward_topk_norm_kernel(
         float3 conic = conics[g_id];
         float2 xy = xys[g_id];
         float2 delta = {xy.x - px, xy.y - py};
-        
+
         // update v_conic for this gaussian
-        float3 v_conic_local = {0.5f * v_sigma * delta.x * delta.x, 
-                                v_sigma * delta.x * delta.y, 
+        float3 v_conic_local = {0.5f * v_sigma * delta.x * delta.x,
+                                v_sigma * delta.x * delta.y,
                          0.5f * v_sigma * delta.y * delta.y};
-        
+
         // update v_xy for this gaussian
-        float2 v_xy_local = {v_sigma * (conic.x * delta.x + conic.y * delta.y), 
+        float2 v_xy_local = {v_sigma * (conic.x * delta.x + conic.y * delta.y),
                       v_sigma * (conic.y * delta.x + conic.z * delta.y)};
-        
+
 
         float* v_conic_ptr = (float*)(v_conic);
         atomicAdd(v_conic_ptr + 3*g_id + 0, v_conic_local.x);
         atomicAdd(v_conic_ptr + 3*g_id + 1, v_conic_local.y);
         atomicAdd(v_conic_ptr + 3*g_id + 2, v_conic_local.z);
-        
+
         float* v_xy_ptr = (float*)(v_xy);
         atomicAdd(v_xy_ptr + 2*g_id + 0, v_xy_local.x);
         atomicAdd(v_xy_ptr + 2*g_id + 1, v_xy_local.y);
@@ -295,7 +295,7 @@ __global__ void nd_rasterize_backward_no_tiles_kernel(
     float* __restrict__ v_rgb,
     int* __restrict__ pixel_topk
 ) {
-    
+
     auto block = cg::this_thread_block();
     unsigned i =
         block.group_index().y * block.group_dim().y + block.thread_index().y;
@@ -315,7 +315,7 @@ __global__ void nd_rasterize_backward_no_tiles_kernel(
     const float* v_out = &(v_output[channels * pix_id]);
     // topk gs id for this pixel
     const int* topk = &pixel_topk[pix_id * TOP_K];
-    
+
     // compute the normalization factor
 
     float d_local[TOP_K] = {0.0f};
@@ -335,7 +335,7 @@ __global__ void nd_rasterize_backward_no_tiles_kernel(
         denom += d;
         d_local[k] = d;
     }
-    
+
     float v_d_local[TOP_K] = {0.f};
 
     // compute each gaussian's contribution to the gradient
@@ -350,12 +350,12 @@ __global__ void nd_rasterize_backward_no_tiles_kernel(
         // update v_rgb for this gaussian
         for (int c = 0; c < channels; ++c)
             v_rgb_local[c] = norm_d * v_out[c];
-        
+
         const float* rgb = &rgbs[channels * g_id];
         float* v_rgb_ptr = (float*)(v_rgb);
         for (int c = 0; c < channels; ++c)
             atomicAdd(v_rgb_ptr + channels * g_id + c, v_rgb_local[c]);
-        
+
         float v_norm_d = 0.f;
         for (int c = 0; c < channels; ++c)
             v_norm_d += rgb[c] * v_out[c];
@@ -364,11 +364,11 @@ __global__ void nd_rasterize_backward_no_tiles_kernel(
         for (int l = 0; l < TOP_K; ++l) {
             if (l == k) {
                 v_d_local[l] += v_norm_d/denom + tmp;
-            } 
+            }
             else {
                 v_d_local[l] += tmp;
             }
-        }        
+        }
     }
 
     for (int k = 0; k < TOP_K; ++k) {
@@ -383,22 +383,22 @@ __global__ void nd_rasterize_backward_no_tiles_kernel(
         float3 conic = conics[g_id];
         float2 xy = xys[g_id];
         float2 delta = {xy.x - px, xy.y - py};
-        
+
         // update v_conic for this gaussian
-        float3 v_conic_local = {0.5f * v_sigma * delta.x * delta.x, 
-                                v_sigma * delta.x * delta.y, 
+        float3 v_conic_local = {0.5f * v_sigma * delta.x * delta.x,
+                                v_sigma * delta.x * delta.y,
                          0.5f * v_sigma * delta.y * delta.y};
-        
+
         // update v_xy for this gaussian
-        float2 v_xy_local = {v_sigma * (conic.x * delta.x + conic.y * delta.y), 
+        float2 v_xy_local = {v_sigma * (conic.x * delta.x + conic.y * delta.y),
                       v_sigma * (conic.y * delta.x + conic.z * delta.y)};
-        
+
 
         float* v_conic_ptr = (float*)(v_conic);
         atomicAdd(v_conic_ptr + 3*g_id + 0, v_conic_local.x);
         atomicAdd(v_conic_ptr + 3*g_id + 1, v_conic_local.y);
         atomicAdd(v_conic_ptr + 3*g_id + 2, v_conic_local.z);
-        
+
         float* v_xy_ptr = (float*)(v_xy);
         atomicAdd(v_xy_ptr + 2*g_id + 0, v_xy_local.x);
         atomicAdd(v_xy_ptr + 2*g_id + 1, v_xy_local.y);
@@ -486,11 +486,11 @@ __global__ void rasterize_backward_kernel(
             if (sigma < 0.f || isnan(sigma) || isinf(sigma)) {
                 valid = 0;
             }
-            
+
             float3 v_rgb_local = {0.f, 0.f, 0.f};
             float3 v_conic_local = {0.f, 0.f, 0.f};
             float2 v_xy_local = {0.f, 0.f};
-            
+
             if (valid) {
                 // update v_rgb for this gaussian
                 v_rgb_local = {d * v_out.x, d * v_out.y, d * v_out.z};
@@ -498,19 +498,19 @@ __global__ void rasterize_backward_kernel(
                 const float3 rgb = rgbs_batch[t];
                 // update v_sigma for this gaussian
                 const float v_sigma = (
-                    rgb.x * v_out.x + 
-                    rgb.y * v_out.y + 
+                    rgb.x * v_out.x +
+                    rgb.y * v_out.y +
                     rgb.z * v_out.z
                 ) * (-d);
                 // update v_conic for this gaussian
-                v_conic_local = {0.5f * v_sigma * delta.x * delta.x, 
-                                        v_sigma * delta.x * delta.y, 
+                v_conic_local = {0.5f * v_sigma * delta.x * delta.x,
+                                        v_sigma * delta.x * delta.y,
                                  0.5f * v_sigma * delta.y * delta.y};
                 // update v_xy for this gaussian
-                v_xy_local = {v_sigma * (conic.x * delta.x + conic.y * delta.y), 
+                v_xy_local = {v_sigma * (conic.x * delta.x + conic.y * delta.y),
                               v_sigma * (conic.y * delta.x + conic.z * delta.y)};
             }
-            
+
             // sum across the warp
             warpSum3(v_rgb_local, warp);
             warpSum3(v_conic_local, warp);
@@ -522,12 +522,12 @@ __global__ void rasterize_backward_kernel(
                 atomicAdd(v_rgb_ptr + 3*g + 0, v_rgb_local.x);
                 atomicAdd(v_rgb_ptr + 3*g + 1, v_rgb_local.y);
                 atomicAdd(v_rgb_ptr + 3*g + 2, v_rgb_local.z);
-                
+
                 float* v_conic_ptr = (float*)(v_conic);
                 atomicAdd(v_conic_ptr + 3*g + 0, v_conic_local.x);
                 atomicAdd(v_conic_ptr + 3*g + 1, v_conic_local.y);
                 atomicAdd(v_conic_ptr + 3*g + 2, v_conic_local.z);
-                
+
                 float* v_xy_ptr = (float*)(v_xy);
                 atomicAdd(v_xy_ptr + 2*g + 0, v_xy_local.x);
                 atomicAdd(v_xy_ptr + 2*g + 1, v_xy_local.y);

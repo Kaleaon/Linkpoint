@@ -20,4 +20,3 @@
     <solid android:color="@color/background_floating_material_dark" />
     <corners android:radius="?android:attr/dialogCornerRadius" />
 </shape>
-

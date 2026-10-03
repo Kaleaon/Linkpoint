@@ -399,7 +399,7 @@ export default function OutfitViewer() {
         const eyeOffset = (shapeValues.eyeSize / 100) * 6 * totalScale;
         const eyeDx = 10 * headScale * cosY;
         const eyeDy = 10 * headScale * Math.sin(pitchRad);
-        
+
         ctx.fillStyle = V.pri || "#38bdf8";
         // Left & Right eye points
         ctx.beginPath();

@@ -115,10 +115,10 @@ static int test_vec4_ctor()
 	{
 		glm::ivec4 A(1);
 		glm::ivec4 B(1, 1, 1, 1);
-		
+
 		Error += A == B ? 0 : 1;
 	}
-	
+
 	{
 		std::vector<glm::ivec4> Tests;
 		Tests.push_back(glm::ivec4(glm::ivec2(1, 2), 3, 4));
@@ -129,11 +129,11 @@ static int test_vec4_ctor()
 		Tests.push_back(glm::ivec4(glm::ivec2(1, 2), glm::ivec2(3, 4)));
 		Tests.push_back(glm::ivec4(1, 2, 3, 4));
 		Tests.push_back(glm::ivec4(glm::ivec4(1, 2, 3, 4)));
-		
+
 		for(std::size_t i = 0; i < Tests.size(); ++i)
 			Error += Tests[i] == glm::ivec4(1, 2, 3, 4) ? 0 : 1;
 	}
-	
+
 	return Error;
 }
 
@@ -164,7 +164,7 @@ static int test_bvec4_ctor()
 static int test_vec4_operators()
 {
 	int Error = 0;
-	
+
 	{
 		glm::ivec4 A(1);
 		glm::ivec4 B(1);
@@ -431,4 +431,3 @@ int main()
 
 	return Error;
 }
-

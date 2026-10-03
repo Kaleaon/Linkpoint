@@ -23,4 +23,3 @@
             android:name="root"
             android:animation="@anim/progress_indeterminate_rotation_material" />
 </animated-vector>
-
