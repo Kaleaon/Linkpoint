@@ -1,6 +1,7 @@
 package com.linkpoint.ui.chat
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -14,6 +15,7 @@ import com.linkpoint.chat.IMMessage
 import com.linkpoint.chat.SessionType
 import com.linkpoint.protocol.messages.ChatSourceType
 import com.linkpoint.ui.common.UiLoadState
+import com.linkpoint.ui.overlay.OverlayManager
 import java.util.UUID
 import com.linkpoint.protocol.messages.ChatType as ProtocolChatType
 
@@ -40,6 +42,17 @@ fun L2ChatRoute(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    DisposableEffect(Unit) {
+        OverlayManager.getInstance().showOverlay(
+            id = "chat_overlay",
+            type = OverlayManager.OverlayType.FULL_SCREEN_2D,
+            title = "Text Chat"
+        )
+        onDispose {
+            OverlayManager.getInstance().hideOverlay("chat_overlay")
+        }
+    }
+
     val app = LinkpointApp.getInstanceOrNull()
 
     if (app == null || !app.isChatManagerInitialized()) {
