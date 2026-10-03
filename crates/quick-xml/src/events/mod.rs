@@ -150,12 +150,12 @@ impl<'a> BytesStart<'a> {
     /// ```
     ///
     /// [`to_end`]: #method.to_end
-    pub fn to_borrowed(&self) -> BytesStart {
+    pub fn to_borrowed(&self) -> BytesStart<'_> {
         BytesStart::borrowed(&self.buf, self.name_len)
     }
 
     /// Creates new paired close tag
-    pub fn to_end(&self) -> BytesEnd {
+    pub fn to_end(&self) -> BytesEnd<'_> {
         BytesEnd::borrowed(self.name())
     }
 
@@ -181,7 +181,7 @@ impl<'a> BytesStart<'a> {
     ///
     /// See also [`unescaped_with_custom_entities()`](#method.unescaped_with_custom_entities)
     #[inline]
-    pub fn unescaped(&self) -> Result<Cow<[u8]>> {
+    pub fn unescaped(&self) -> Result<Cow<'_, [u8]>> {
         self.make_unescaped(None)
     }
 
@@ -338,12 +338,12 @@ impl<'a> BytesStart<'a> {
     }
 
     /// Returns an iterator over the attributes of this tag.
-    pub fn attributes(&self) -> Attributes {
+    pub fn attributes(&self) -> Attributes<'_> {
         Attributes::new(&self.buf, self.name_len)
     }
 
     /// Returns an iterator over the HTML-like attributes of this tag (no mandatory quotes or `=`).
-    pub fn html_attributes(&self) -> Attributes {
+    pub fn html_attributes(&self) -> Attributes<'_> {
         Attributes::html(self, self.name_len)
     }
 
@@ -446,7 +446,7 @@ impl<'a> BytesDecl<'a> {
     /// ```
     ///
     /// [grammar]: https://www.w3.org/TR/xml11/#NT-XMLDecl
-    pub fn version(&self) -> Result<Cow<[u8]>> {
+    pub fn version(&self) -> Result<Cow<'_, [u8]>> {
         // The version *must* be the first thing in the declaration.
         match self.element.attributes().with_checks(false).next() {
             Some(Ok(a)) if a.key == b"version" => Ok(a.value),
@@ -497,7 +497,7 @@ impl<'a> BytesDecl<'a> {
     /// ```
     ///
     /// [grammar]: https://www.w3.org/TR/xml11/#NT-XMLDecl
-    pub fn encoding(&self) -> Option<Result<Cow<[u8]>>> {
+    pub fn encoding(&self) -> Option<Result<Cow<'_, [u8]>>> {
         self.element
             .try_get_attribute("encoding")
             .map(|a| a.map(|a| a.value))
@@ -539,7 +539,7 @@ impl<'a> BytesDecl<'a> {
     /// ```
     ///
     /// [grammar]: https://www.w3.org/TR/xml11/#NT-XMLDecl
-    pub fn standalone(&self) -> Option<Result<Cow<[u8]>>> {
+    pub fn standalone(&self) -> Option<Result<Cow<'_, [u8]>>> {
         self.element
             .try_get_attribute("standalone")
             .map(|a| a.map(|a| a.value))
@@ -746,7 +746,7 @@ impl<'a> BytesText<'a> {
     /// returns Malformed error with index within element if '&' is not followed by ';'
     ///
     /// See also [`unescaped_with_custom_entities()`](#method.unescaped_with_custom_entities)
-    pub fn unescaped(&self) -> Result<Cow<[u8]>> {
+    pub fn unescaped(&self) -> Result<Cow<'_, [u8]>> {
         self.make_unescaped(None)
     }
 

@@ -209,7 +209,7 @@ impl<W: Write> Writer<W> {
     /// # }
     /// ```
     #[must_use]
-    pub fn create_element<'a, N>(&'a mut self, name: &'a N) -> ElementWriter<W>
+    pub fn create_element<'a, N>(&'a mut self, name: &'a N) -> ElementWriter<'a, W>
     where
         N: 'a + AsRef<[u8]> + ?Sized,
     {
