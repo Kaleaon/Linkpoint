@@ -429,6 +429,7 @@ class OctreeNode(
         }
     }
 
+
     fun countNodes(): Int {
         var count = 1
         children?.forEach { child ->
