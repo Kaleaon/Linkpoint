@@ -3,7 +3,7 @@ plugins {
 }
 
 kotlin {
-    sourceSets["main"].kotlin.srcDirs("src/main/kotlin", "src/main/java")
+    sourceSets["main"].kotlin.srcDirs("src/main/kotlin")
 }
 
 java {
