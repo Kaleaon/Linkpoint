@@ -26,24 +26,7 @@ class MfaHashStorage(context: Context) {
     }
     
     private val prefs by lazy {
-        try {
-            // Use encrypted preferences for security
-            val masterKey = MasterKey.Builder(context)
-                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                .build()
-            
-            EncryptedSharedPreferences.create(
-                context,
-                PREFS_NAME,
-                masterKey,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            )
-        } catch (e: Exception) {
-            Log.w(TAG, "Could not create encrypted prefs, falling back to regular prefs: ${e.message}")
-            // Fallback to regular SharedPreferences if encryption fails
-            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        }
+        com.linkpoint.utils.SecurePreferences.getEncryptedPreferences(context, PREFS_NAME)
     }
     
     /**
