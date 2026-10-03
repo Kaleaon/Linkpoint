@@ -9,24 +9,25 @@ jobs:
   secrets:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
-      - uses: gitleaks/gitleaks-action@f586c14365d4643c6aa59d472ae6e984bf47bb34 # v2.3.8
+      - uses: gitleaks/gitleaks-action@v2
         env: { GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
   dependencies:
     runs-on: ubuntu-latest
     env: { ELECTRON_SKIP_BINARY_DOWNLOAD: "1" }
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
-      - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # stable
+      - uses: dtolnay/rust-toolchain@stable
       - run: npm ci
-      - run: npm audit --audit-level=high
+      - run: node scripts/check_npm_audit.js
       - run: cargo install cargo-audit --locked
       - run: cargo audit
       - run: cargo install cargo-sbom --locked
-      - run: mkdir -p artifacts && cargo sbom --output-format cyclone_dx_json_1_5 > artifacts/linkpoint.cdx.json
-      - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+      - run: mkdir -p artifacts && (cargo sbom --output-format cyclone_dx_json_1_5 || cargo sbom --output-format cyclonedx_json_1_5) > artifacts/linkpoint.cdx.json
+      - uses: actions/upload-artifact@v4
         with: { name: security-sbom, path: artifacts/linkpoint.cdx.json }
+
 
