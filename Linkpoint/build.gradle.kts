@@ -195,13 +195,13 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
         isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "1.8"
         freeCompilerArgs += listOf("-opt-in=kotlin.RequiresOptIn", "-Xnested-type-aliases")
     }
 
@@ -220,8 +220,7 @@ android {
     sourceSets {
         getByName("main") {
             manifest.srcFile("src/main/AndroidManifest.xml")
-            java.srcDirs("src/main/java")
-            kotlin.srcDirs("src/main/java")
+            java.setSrcDirs(listOf("src/main/java"))
             res.srcDirs("src/main/res")
             assets.srcDirs("src/main/assets")
         }
@@ -766,13 +765,4 @@ tasks.named("check") {
 tasks.register("testDebugUnitTest") {
     dependsOn("testStableDebugUnitTest")
     dependsOn(checkThemeContrastAndSync)
-}
-
-tasks.withType<JavaCompile>().configureEach {
-    val variantName = name.removePrefix("compile").removeSuffix("JavaWithJavac")
-    val compileKotlinTask = tasks.findByName("compile${variantName}Kotlin")
-    if (compileKotlinTask != null) {
-        dependsOn(compileKotlinTask)
-        classpath = (classpath ?: files()).plus(compileKotlinTask.outputs.files)
-    }
 }
