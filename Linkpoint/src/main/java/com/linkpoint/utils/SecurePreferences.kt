@@ -16,7 +16,19 @@ object SecurePreferences {
     private const val ENCRYPTED_SUFFIX = "_encrypted"
     private const val MIGRATION_COMPLETE_KEY = "__migration_complete"
 
+    private val instances = java.util.concurrent.ConcurrentHashMap<String, SharedPreferences>()
+
     fun getEncryptedPreferences(
+        context: Context,
+        legacyName: String,
+        migration: ((SharedPreferences, SharedPreferences) -> Unit)? = null
+    ): SharedPreferences {
+        return instances.getOrPut(legacyName) {
+            createEncryptedPreferences(context, legacyName, migration)
+        }
+    }
+
+    private fun createEncryptedPreferences(
         context: Context,
         legacyName: String,
         migration: ((SharedPreferences, SharedPreferences) -> Unit)? = null
@@ -40,7 +52,7 @@ object SecurePreferences {
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.w(TAG, "Falling back to plain SharedPreferences (AndroidKeyStore unavailable): ${e.message}")
             context.getSharedPreferences(legacyName + ENCRYPTED_SUFFIX, Context.MODE_PRIVATE)
         }

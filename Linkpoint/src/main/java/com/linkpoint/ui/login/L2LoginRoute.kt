@@ -47,8 +47,14 @@ fun L2LoginRoute(
     var showWebAuthDialog by remember { mutableStateOf(false) }
     var webAuthUrl by remember { mutableStateOf("https://id.secondlife.com/openid/login") }
     var pendingCredentials by remember { mutableStateOf<LoginCredentials?>(null) }
+    val savedAccountRepo = remember { app.savedAccountRepository }
+    var savedAccounts by remember { mutableStateOf<List<com.linkpoint.auth.SavedAccount>>(emptyList()) }
     val connectionState by app.sessionManager.connectionState.collectAsState()
     val isConnected = connectionState == ConnectionState.CONNECTED
+
+    LaunchedEffect(Unit) {
+        savedAccounts = savedAccountRepo.getSavedAccounts()
+    }
 
     LaunchedEffect(isConnected) {
         if (isConnected) onLoginSuccess()
@@ -71,6 +77,13 @@ fun L2LoginRoute(
                         "home" -> "home"
                         else -> app.startLocationManager.getStartLocationForLogin()
                     }
+                    val username = if (creds.lastName.isBlank() || creds.lastName.equals("Resident", ignoreCase = true)) {
+                        creds.firstName.trim()
+                    } else {
+                        "${creds.firstName.trim()} ${creds.lastName.trim()}"
+                    }
+                    val storedMfaHash = app.protocol.getStoredMfaHash(username) ?: ""
+                    val mfaHashToUse = interceptedToken.mfaHash ?: storedMfaHash
                     val result = app.protocol.login(
                         firstName = creds.firstName.trim(),
                         lastName = creds.lastName.trim().ifBlank { "Resident" },
@@ -78,7 +91,7 @@ fun L2LoginRoute(
                         loginUri = selectedGrid.loginUri,
                         startLocation = startLocation,
                         mfaToken = interceptedToken.token,
-                        mfaHash = interceptedToken.mfaHash ?: "",
+                        mfaHash = mfaHashToUse,
                         webAuthToken = interceptedToken.token
                     )
                     withContext(Dispatchers.Main) {
@@ -86,6 +99,18 @@ fun L2LoginRoute(
                         when (result) {
                             is LoginResult.Success -> {
                                 status = "Welcome to ${selectedGrid.name}"
+                                if (creds.savePassword) {
+                                    savedAccountRepo.saveAccount(
+                                        firstName = creds.firstName.trim(),
+                                        lastName = creds.lastName.trim().ifBlank { "Resident" },
+                                        gridId = selectedGrid.id,
+                                        password = creds.password
+                                    )
+                                }
+                                if (!result.mfaHash.isNullOrBlank()) {
+                                    app.protocol.storeMfaHash(username, result.mfaHash)
+                                }
+                                savedAccounts = savedAccountRepo.getSavedAccounts()
                             }
                             is LoginResult.MFARequired -> {
                                 status = "Additional MFA verification required."
@@ -112,6 +137,20 @@ fun L2LoginRoute(
         statusMessage = status,
         isLoading = loading,
         isError = error,
+        savedAccounts = savedAccounts,
+        onSelectSavedAccount = { account ->
+            // Update status or prepare selected profile
+        },
+        onDeleteSavedAccount = { account ->
+            app.applicationScope.launch {
+                savedAccountRepo.deleteAccount(account)
+                savedAccounts = savedAccountRepo.getSavedAccounts()
+            }
+        },
+        onAddAccount = {
+            status = ""
+            error = false
+        },
         onWebAuthRequested = {
             webAuthUrl = "https://id.secondlife.com/openid/login"
             showWebAuthDialog = true
@@ -131,18 +170,37 @@ fun L2LoginRoute(
                     "home" -> "home"
                     else -> app.startLocationManager.getStartLocationForLogin()
                 }
+                val username = if (credentials.lastName.isBlank() || credentials.lastName.equals("Resident", ignoreCase = true)) {
+                    credentials.firstName.trim()
+                } else {
+                    "${credentials.firstName.trim()} ${credentials.lastName.trim()}"
+                }
+                val storedMfaHash = app.protocol.getStoredMfaHash(username) ?: ""
                 val result = app.protocol.login(
                     firstName = credentials.firstName.trim(),
                     lastName = credentials.lastName.trim().ifBlank { "Resident" },
                     password = credentials.password,
                     loginUri = grid.loginUri,
                     startLocation = startLocation,
+                    mfaHash = storedMfaHash,
                 )
                 withContext(Dispatchers.Main) {
                     loading = false
                     when (result) {
                         is LoginResult.Success -> {
                             status = "Welcome to ${grid.name}"
+                            if (credentials.savePassword) {
+                                savedAccountRepo.saveAccount(
+                                    firstName = credentials.firstName.trim(),
+                                    lastName = credentials.lastName.trim().ifBlank { "Resident" },
+                                    gridId = grid.id,
+                                    password = credentials.password
+                                )
+                            }
+                            if (!result.mfaHash.isNullOrBlank()) {
+                                app.protocol.storeMfaHash(username, result.mfaHash)
+                            }
+                            savedAccounts = savedAccountRepo.getSavedAccounts()
                         }
                         is LoginResult.MFARequired -> {
                             status = "2FA verification required. Opening verification portal…"
