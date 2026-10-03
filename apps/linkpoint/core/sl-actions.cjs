@@ -213,6 +213,22 @@ async function getBalance(bot) {
   return { balance: Number(balance) };
 }
 
+/** Pay an object Linden Dollars. */
+async function payObject(bot, params, lib) {
+  const { UUID } = loadLibrary(lib);
+  const objectId = requireUuid(params.objectId || params.targetId || params.id, 'object id');
+  const amount = Math.floor(finite(params.amount || params.price, 'amount'));
+  if (amount <= 0) throw new Error('Amount must be greater than zero');
+  const c = commands(bot);
+  if (c.grid && typeof c.grid.payObject === 'function') {
+    await c.grid.payObject(new UUID(objectId), amount);
+  } else if (c.grid && typeof c.grid.pay === 'function') {
+    await c.grid.pay(new UUID(objectId), amount, String(params.description || ''), 1000);
+  }
+  const newBalance = await getBalance(bot).catch(() => null);
+  return { paid: objectId, amount, balance: newBalance ? newBalance.balance : null };
+}
+
 // ---- login -----------------------------------------------------------------
 
 /**
@@ -319,5 +335,5 @@ function describeLoginError(error) {
 module.exports = {
   parseLoginName, normalizeStart, buildLoginParams, describeLoginError, loginFailure, LOGIN_FAILURE_PREFIX, LOGIN_REASONS,
   ATTACHMENT_NAMES, isHudPoint, attachmentIdFromState, attachmentInfo,
-  parseDestination, teleport, touchObject, sit, stand, getBalance, requireUuid,
+  parseDestination, teleport, touchObject, sit, stand, getBalance, payObject, requireUuid,
 };

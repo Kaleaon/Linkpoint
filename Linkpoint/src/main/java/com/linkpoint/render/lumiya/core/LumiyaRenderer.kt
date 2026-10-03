@@ -78,6 +78,12 @@ class LumiyaRenderer : RenderEngineProvider {
     private var avatarStore = DrawableAvatarStore()
     private var particleManager: DrawableParticleManager? = null
 
+    /**
+     * Render proxy manager for lock-free snapshot reference swaps on frame boundaries.
+     */
+    @Volatile
+    var renderProxyManager: com.linkpoint.scene.proxy.SceneRenderProxyManager? = null
+
     // Full-screen quad VAO for FXAA resolve
     private var quadVAO = 0
     private var quadVBO = 0
@@ -313,6 +319,9 @@ class LumiyaRenderer : RenderEngineProvider {
     override fun renderFrame() {
         requireGlThread("renderFrame")
         if (!isInitialized) return
+
+        // ── Lock-free render-proxy snapshot swap on frame boundary ──────
+        val currentSceneProxy = renderProxyManager?.swapRenderProxyOnFrameBoundary()
 
         // ── 1. Preparation ───────────────────────────────────────────────
         ctx.beginFrame()

@@ -9,8 +9,6 @@ import FloatersDesktop from "./FloatersDesktop.jsx";
 import SystemDialog from "./SystemDialog.jsx";
 import InteractionDialog from "./InteractionDialog.jsx";
 import Toast from "./Toast.jsx";
-import BottomTabs from "./BottomTabs.jsx";
-import TileNav from "./TileNav.jsx";
 
 // The React deliverable is the application itself, not the GitHub Pages
 // presentation canvas. Device bezels, fake OS chrome and design pickers remain
@@ -42,8 +40,6 @@ export default function DeviceFrame() {
             <InteractionDialog />
             <Toast />
           </div>
-          <BottomTabs />
-          <TileNav />
         </div>
       </div>
     </AnnouncerProvider>

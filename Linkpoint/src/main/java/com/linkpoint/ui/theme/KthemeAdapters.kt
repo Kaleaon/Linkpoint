@@ -8,7 +8,7 @@ import com.ktheme.models.ThemeMetadata
 /**
  * Map a Ktheme theme into Linkpoint's ThemePack format.
  */
-fun Theme.toThemePack(): ThemePack {
+fun Theme.toThemePack(isBuiltIn: Boolean = true): ThemePack {
     val densityProfile = metadata.tags.firstNotNullOfOrNull { tag ->
         tag.removePrefix("density:").takeIf { it != tag }?.let { runCatching { DensityProfile.valueOf(it.uppercase()) }.getOrNull() }
     }
@@ -20,6 +20,17 @@ fun Theme.toThemePack(): ThemePack {
     }
     val tagLayout = metadata.tags.firstNotNullOfOrNull { tag ->
         tag.removePrefix("layout:").takeIf { it != tag }?.let { LayoutStructure.fromId(it) }
+    } ?: run {
+        when {
+            "lcars" in metadata.tags -> LayoutStructure.LCARS
+            "metro" in metadata.tags || "windows-phone" in metadata.tags -> LayoutStructure.METRO
+            "frutiger-aero" in metadata.tags -> LayoutStructure.FRUTIGER_AERO
+            "art-deco" in metadata.tags || "art_deco" in metadata.tags -> LayoutStructure.ART_DECO
+            "terminal" in metadata.tags -> LayoutStructure.TERMINAL
+            "neo-noir" in metadata.tags || "cyberpunk" in metadata.tags -> LayoutStructure.CYBERPUNK
+            "glass" in metadata.tags -> LayoutStructure.MODERN_GLASS
+            else -> null
+        }
     }
 
     return ThemePack(
@@ -28,7 +39,7 @@ fun Theme.toThemePack(): ThemePack {
         description = metadata.description,
         author = metadata.author,
         version = metadata.version,
-        isBuiltIn = false,
+        isBuiltIn = isBuiltIn,
         colorPrimary = colorScheme.primary,
         colorPrimaryDark = colorScheme.primaryContainer,
         colorOnPrimary = colorScheme.onPrimary,
@@ -43,7 +54,8 @@ fun Theme.toThemePack(): ThemePack {
         densityProfile = densityProfile,
         cornerProfile = cornerProfile,
         motionProfile = motionProfile,
-        layoutStructure = tagLayout ?: layoutStructure
+        layoutStructure = tagLayout ?: layoutStructure,
+        ktheme = this
     )
 }
 
@@ -51,6 +63,8 @@ fun Theme.toThemePack(): ThemePack {
  * Map a Linkpoint theme into Ktheme's Theme model for KthemeAPI sharing.
  */
 fun ThemePack.toKthemeTheme(): Theme {
+    if (ktheme != null) return ktheme
+
     val now = System.currentTimeMillis().toString()
     return Theme(
         metadata = ThemeMetadata(

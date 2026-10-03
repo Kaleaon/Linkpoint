@@ -1,0 +1,93 @@
+{
+  "metadata": {
+    "id": "paper-ink",
+    "name": "Paper & Ink",
+    "description": "Minimalist light theme for comfortable reading",
+    "author": "Ktheme",
+    "version": "1.0.0",
+    "tags": [
+      "minimalist",
+      "light",
+      "reader"
+    ],
+    "createdAt": "2026-02-15T20:42:39.611Z",
+    "updatedAt": "2026-02-15T20:42:39.611Z"
+  },
+  "darkMode": false,
+  "colorScheme": {
+    "primary": "#2C2C2C",
+    "onPrimary": "#FAF9F6",
+    "primaryContainer": "#454545",
+    "onPrimaryContainer": "#FAF9F6",
+    "secondary": "#595959",
+    "onSecondary": "#FAF9F6",
+    "secondaryContainer": "#737373",
+    "onSecondaryContainer": "#FAF9F6",
+    "tertiary": "#6B6B6B",
+    "onTertiary": "#FAF9F6",
+    "tertiaryContainer": "#828282",
+    "onTertiaryContainer": "#FAF9F6",
+    "error": "#BA1A1A",
+    "onError": "#FFFFFF",
+    "errorContainer": "#FFDAD6",
+    "onErrorContainer": "#410002",
+    "background": "#F0F0EB",
+    "onBackground": "#2C2C2C",
+    "surface": "#FAF9F6",
+    "onSurface": "#2C2C2C",
+    "surfaceVariant": "#EBEAE4",
+    "onSurfaceVariant": "#454545",
+    "outline": "#7A7A7A",
+    "outlineVariant": "#C9C9C9",
+    "scrim": "#000000",
+    "inverseSurface": "#2C2C2C",
+    "inverseOnSurface": "#FAF9F6",
+    "inversePrimary": "#9A9A9A"
+  },
+  "effects": {
+    "shadows": {
+      "enabled": true,
+      "elevation": 1,
+      "blur": 2,
+      "color": "#00000011"
+    }
+  },
+  "adaptation": {
+    "desktopAdaptation": {
+      "windowChrome": {
+        "titleBarHeight": 26,
+        "headerStyle": "editorial",
+        "cornerStyle": "quiet",
+        "panelRadius": 3,
+        "controlRadius": 2,
+        "borderWidth": 1,
+        "shadow": "0 6px 16px rgba(0, 0, 0, 0.15)"
+      },
+      "menuBar": {
+        "height": 28,
+        "fontSize": 11,
+        "letterSpacing": "0.08em",
+        "textTransform": "none",
+        "dropdownRadius": 3,
+        "dropdownShadow": "0 8px 20px rgba(0, 0, 0, 0.15)"
+      },
+      "taskbar": {
+        "height": 40,
+        "buttonRadius": 2,
+        "dockAlignment": "left",
+        "quickChatBorderRadius": 2
+      },
+      "cameraHud": {
+        "panelRadius": 3,
+        "buttonRadius": 2,
+        "shadow": "0 4px 12px rgba(0, 0, 0, 0.12)"
+      },
+      "sweep": {
+        "elbowWidth": 26,
+        "titleCapRadius": "3px",
+        "accentBand": "primary",
+        "showElbowBar": true
+      }
+    }
+  }
+}

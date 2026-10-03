@@ -15,19 +15,65 @@ export default function BottomTabs() {
   const items = NAV_ALL.filter((n) => TABS_NAV_IDS.includes(n.id));
 
   return (
-    <div style={{ flex: "none", display: "flex", background: V.surf, borderTop: "1px solid " + V.outv, padding: "6px 0 10px" }}>
+    <div
+      role="tablist"
+      aria-label="Bottom navigation tabs"
+      style={{
+        flex: "none",
+        display: "flex",
+        background: V.surf,
+        borderTop: "1px solid " + V.outv,
+        padding: "6px 0 10px",
+      }}
+    >
       {items.map((n) => {
         const active = navActive(state.screen, n.id);
+        const radius = V.rs || "0px";
         return (
           <div
             key={n.id}
+            role="tab"
+            tabIndex={0}
+            aria-selected={active}
+            aria-label={"Go to " + n.label}
             onClick={() => actions.setScreen(n.id)}
-            style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", padding: "6px 0", cursor: "pointer", color: active ? V.pri : V.ink2, position: "relative" }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                actions.setScreen(n.id);
+              }
+            }}
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "4px",
+              padding: "6px 0",
+              cursor: "pointer",
+              borderRadius: radius,
+              color: active ? V.pri : V.ink2,
+              position: "relative",
+            }}
           >
             <Icon name={n.icon} size={22} />
             <span style={{ font: "600 9px/1 " + t.font, letterSpacing: ".14em" }}>{n.label}</span>
             {n.badge ? (
-              <span style={{ position: "absolute", top: "2px", right: "24%", minWidth: "16px", height: "16px", padding: "0 4px", borderRadius: "8px", background: V.bdg, color: V.onbdg, font: "700 9px/16px " + t.font, textAlign: "center" }}>
+              <span
+                style={{
+                  position: "absolute",
+                  top: "2px",
+                  right: "24%",
+                  minWidth: "16px",
+                  height: "16px",
+                  padding: "0 4px",
+                  borderRadius: "8px",
+                  background: V.bdg,
+                  color: V.onbdg,
+                  font: "700 9px/16px " + t.font,
+                  textAlign: "center",
+                }}
+              >
                 {n.badge}
               </span>
             ) : null}

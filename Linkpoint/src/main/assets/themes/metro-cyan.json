@@ -1,0 +1,84 @@
+{
+  "metadata": {
+    "id": "metro-cyan",
+    "name": "Metro Cyan",
+    "description": "High-contrast Windows Phone Metro variant on a deep navy field with vivid cyan tile accent",
+    "author": "Linkpoint",
+    "version": "1.0.0",
+    "tags": [
+      "dark",
+      "metro",
+      "windows-phone",
+      "flat",
+      "tile",
+      "modern"
+    ],
+    "createdAt": "2026-04-27T00:00:00.000Z",
+    "updatedAt": "2026-04-27T00:00:00.000Z"
+  },
+  "darkMode": true,
+  "colorScheme": {
+    "primary": "#00AEEF",
+    "onPrimary": "#FFFFFF",
+    "primaryContainer": "#0078D7",
+    "onPrimaryContainer": "#E8F7FF",
+    "secondary": "#2D89EF",
+    "onSecondary": "#001021",
+    "secondaryContainer": "#005A9E",
+    "onSecondaryContainer": "#E8F0F5",
+    "tertiary": "#00CC6A",
+    "onTertiary": "#001A0D",
+    "tertiaryContainer": "#007A40",
+    "onTertiaryContainer": "#D9FFEC",
+    "error": "#E81123",
+    "onError": "#FFFFFF",
+    "errorContainer": "#7A0810",
+    "onErrorContainer": "#FFD9DC",
+    "background": "#000000",
+    "onBackground": "#FFFFFF",
+    "surface": "#000000",
+    "onSurface": "#FFFFFF",
+    "surfaceVariant": "#1A1A1A",
+    "onSurfaceVariant": "#B8CAD6",
+    "outline": "#444444",
+    "outlineVariant": "#222222",
+    "scrim": "#000000",
+    "inverseSurface": "#FFFFFF",
+    "inverseOnSurface": "#000000",
+    "inversePrimary": "#0080A0"
+  },
+  "effects": {
+    "metallic": { "enabled": false, "variant": "TITANIUM", "gradient": { "base": "#878681", "highlight": "#BDBBB8", "shadow": "#4A4A48", "shimmer": "#D0CFCC" }, "intensity": 0 },
+    "shadows": { "enabled": false, "elevation": 0, "blur": 0, "color": "#00000000" }
+  },
+  "typography": {
+    "fontFamily": "'Segoe UI', 'Helvetica Neue', sans-serif",
+    "fontSize": { "small": 12, "medium": 16, "large": 22, "xlarge": 36 },
+    "fontWeight": { "light": 200, "regular": 300, "medium": 400, "bold": 600 },
+    "lineHeight": 1.3,
+    "letterSpacing": 0
+  },
+  "adaptation": {
+    "layout": {
+      "density": "spacious",
+      "cornerStyle": "sharp",
+      "spacingScale": 1.25,
+      "panelStyle": "flat",
+      "navigationStyle": "pivot"
+    },
+    "icons": {
+      "family": "fluent",
+      "style": "line",
+      "sizeScale": 1,
+      "strokeWidth": 1.6,
+      "cornerStyle": "sharp"
+    },
+    "componentOverrides": [
+      { "selector": ".tile-grid", "styles": { "gap": 14, "grid-auto-rows": 92 } },
+      { "selector": ".tile", "styles": { "border-radius": 0, "text-transform": "lowercase" } },
+      { "selector": ".btn", "styles": { "border-radius": 0, "font-weight": 300, "letter-spacing": "0.5px" } },
+      { "selector": ".display-heading", "styles": { "font-weight": 200, "letter-spacing": "-0.5px", "text-transform": "lowercase" } },
+      { "selector": ".chip", "styles": { "border-radius": 0, "text-transform": "lowercase", "font-weight": 300 } }
+    ]
+  }
+}

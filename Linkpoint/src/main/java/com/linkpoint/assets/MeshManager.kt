@@ -8,6 +8,7 @@ import com.linkpoint.network.SSLHelper
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
 import kotlinx.coroutines.*
+import kotlin.coroutines.resume
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
@@ -17,6 +18,9 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.zip.Inflater
+
+import com.linkpoint.scene.worker.SceneWorkerPool
+import com.linkpoint.scene.worker.TaskPriority
 
 /**
  * Manages mesh asset downloading and parsing
@@ -30,7 +34,8 @@ import java.util.zip.Inflater
 class MeshManager(
     private val context: Context,
     private val cache: AssetCache,
-    private val capabilityManager: CapabilityManager
+    private val capabilityManager: CapabilityManager,
+    private val workerPool: SceneWorkerPool = SceneWorkerPool.getInstance()
 ) {
     companion object {
         private const val TAG = "MeshManager"
@@ -57,6 +62,9 @@ class MeshManager(
     private val pendingMeshes = ConcurrentHashMap<Pair<UUID, MeshLOD>, Deferred<MeshData?>>()
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
+    val meshFetcher = LLMeshFetcher()
+    val downloadManager = MeshDownloadManager(meshFetcher, this)
+
     /**
      * Per-mesh header cache. Headers are 1-10KB, addressed by all
      * subsequent range requests for that mesh, so caching them in
@@ -70,18 +78,52 @@ class MeshManager(
     private val headerCache = ConcurrentHashMap<UUID, ParsedHeader>()
     private val MAX_HEADER_CACHE = 500
 
+    /**
+     * Get cached mesh header map if available.
+     */
+    fun getCachedHeader(meshId: UUID): LLSDMap? = headerCache[meshId]?.map
+
+    /**
+     * Get mesh data with distance-gated LOD selection via MeshDownloadManager.
+     */
+    suspend fun getMeshDistanceGated(
+        meshId: UUID,
+        objectPos: com.linkpoint.protocol.types.LLVector3 = com.linkpoint.protocol.types.LLVector3.zero(),
+        boundingRadius: Float = 1.0f,
+        isAvatar: Boolean = false,
+        isAttachment: Boolean = false
+    ): MeshData? {
+        val header = getCachedHeader(meshId)
+        return downloadManager.requestMesh(
+            meshId = meshId,
+            objectPos = objectPos,
+            boundingRadius = boundingRadius,
+            isAvatar = isAvatar,
+            isAttachment = isAttachment,
+            header = header
+        )
+    }
+
     // Meshes queued for retry when capability becomes available
     private data class PendingMeshRequest(val meshId: UUID, val lod: MeshLOD)
     private val capabilityPendingMeshes = java.util.concurrent.ConcurrentLinkedQueue<PendingMeshRequest>()
     @Volatile private var capabilityRetryJob: Job? = null
 
+    val decodingWorkerPool = com.linkpoint.assets.pool.AssetDecodingWorkerPool(context)
+
     /**
      * Get mesh data (cached or download).
      */
     suspend fun getMesh(meshId: UUID, lod: MeshLOD = MeshLOD.HIGH): MeshData? {
+        // Drop or defer low-priority distant mesh decoding tasks when worker queue capacity reaches maximum limit
+        if (lod == MeshLOD.LOW && workerPool.getQueueSize() >= workerPool.getMaxQueueCapacity()) {
+            Log.w(TAG, "Worker queue capacity limit reached (${workerPool.getQueueSize()}/${workerPool.getMaxQueueCapacity()}). Dropping low-priority distant mesh decode for $meshId")
+            return null
+        }
+
         // Check cache (raw bytes cache is LOD-independent — parsing happens per call)
         cache.get(meshId, AssetType.MESH)?.let { data ->
-            return parseMesh(meshId, data, lod)
+            return parseMeshOffThread(meshId, data, lod)
         }
 
         val key = meshId to lod
@@ -312,7 +354,7 @@ class MeshManager(
                 downloadCount.incrementAndGet()
                 downloadedBytes.addAndGet(cronetResult.body.size.toLong())
                 cache.put(meshId, AssetType.MESH, cronetResult.body)
-                return parseMesh(meshId, cronetResult.body, lod)
+                return parseMeshOffThread(meshId, cronetResult.body, lod)
             }
         }
         return try {
@@ -335,7 +377,7 @@ class MeshManager(
                 downloadCount.incrementAndGet()
                 downloadedBytes.addAndGet(data.size.toLong())
                 cache.put(meshId, AssetType.MESH, data)
-                parseMesh(meshId, data, lod)
+                parseMeshOffThread(meshId, data, lod)
             } finally {
                 response.close()
             }
@@ -346,6 +388,28 @@ class MeshManager(
             downloadFailCount.incrementAndGet()
             null
         }
+    }
+
+    private suspend fun parseMeshOffThread(meshId: UUID, data: ByteArray, lod: MeshLOD): MeshData? {
+        return suspendCancellableCoroutine { continuation ->
+            val job = decodingWorkerPool.parseMeshAsync(
+                meshId = meshId,
+                data = data,
+                lod = lod,
+                parseBlock = { bytes, meshLod -> parseMesh(meshId, bytes, meshLod) }
+            ) { result ->
+                if (continuation.isActive) {
+                    continuation.resume(result)
+                }
+            }
+            continuation.invokeOnCancellation { job.cancel() }
+        }
+    }
+
+    /** Cancel pending mesh decoding tasks on region transfer / teleport */
+    fun onTeleportOrRegionTransfer() {
+        Log.i(TAG, "Region transfer / teleport detected — cancelling pending mesh parsing tasks")
+        decodingWorkerPool.cancelAllPending()
     }
     
     private fun parseMesh(meshId: UUID, data: ByteArray, lod: MeshLOD): MeshData? {

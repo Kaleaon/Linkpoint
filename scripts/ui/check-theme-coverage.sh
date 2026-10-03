@@ -1,58 +1,67 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-THEME_FILE="Linkpoint/src/main/java/com/linkpoint/ui/theme/BuiltInThemes.kt"
-
-if [[ ! -f "$THEME_FILE" ]]; then
-  echo "❌ Theme catalog file not found: $THEME_FILE"
-  exit 1
-fi
-
-python3 - "$THEME_FILE" <<'PY'
-import re
+python3 - <<'PY'
+import json
 import sys
-from collections import Counter
 from pathlib import Path
 
-text = Path(sys.argv[1]).read_text(encoding='utf-8')
+central_dir = Path("packages/design-system/themes")
+community_dir = Path("ktheme-pr/themes/community")
+assets_dir = Path("Linkpoint/src/main/assets/themes")
 
-block_match = re.search(r'fun\s+getAllBuiltInThemes\s*\(\)\s*:\s*List<ThemePack>\s*=\s*listOf\((.*?)\)', text, re.S)
-if not block_match:
-    print('❌ Could not parse getAllBuiltInThemes() list.')
+errors = []
+
+if not central_dir.exists():
+    errors.append(f"Central themes directory not found: {central_dir}")
+if not community_dir.exists():
+    errors.append(f"Community themes directory not found: {community_dir}")
+if not assets_dir.exists():
+    errors.append(f"Assets themes directory not found: {assets_dir}")
+
+if errors:
+    for err in errors:
+        print(f"❌ {err}")
     sys.exit(1)
 
-picker_symbols = [s.strip() for s in block_match.group(1).split(',') if s.strip()]
+central_files = sorted(list(central_dir.glob("*.json")))
+community_files = sorted(list(community_dir.glob("*.json")))
+repo_files = central_files + community_files
 
-symbol_to_id = {}
-for m in re.finditer(r'val\s+([A-Z0-9_]+)\s*=\s*ThemePack\((.*?)\n\s*\)', text, re.S):
-    symbol = m.group(1)
-    body = m.group(2)
-    id_match = re.search(r'id\s*=\s*"([^"]+)"', body)
-    if id_match:
-        symbol_to_id[symbol] = id_match.group(1)
+print(f"🔍 Found {len(central_files)} central themes and {len(community_files)} community themes ({len(repo_files)} total).")
 
-catalog_ids = list(symbol_to_id.values())
-id_counts = Counter(catalog_ids)
-duplicate_ids = sorted([theme_id for theme_id, count in id_counts.items() if count > 1])
+asset_file_names = {f.name for f in assets_dir.glob("*.json")}
+missing_in_assets = []
 
-missing_in_picker = sorted([sym for sym in symbol_to_id if sym not in picker_symbols])
-unknown_in_picker = sorted([sym for sym in picker_symbols if sym not in symbol_to_id])
+for repo_file in repo_files:
+    if repo_file.name not in asset_file_names:
+        missing_in_assets.append(str(repo_file))
 
-if duplicate_ids:
-    print('❌ Duplicate theme IDs found in BuiltInThemes catalog:')
-    for theme_id in duplicate_ids:
-        print(f'  - {theme_id}')
-if missing_in_picker:
-    print('❌ ThemeCatalog entries missing from getAllBuiltInThemes picker data:')
-    for sym in missing_in_picker:
-        print(f'  - {sym}')
-if unknown_in_picker:
-    print('❌ Unknown symbols in getAllBuiltInThemes picker data:')
-    for sym in unknown_in_picker:
-        print(f'  - {sym}')
-
-if duplicate_ids or missing_in_picker or unknown_in_picker:
+if missing_in_assets:
+    print("❌ Missing theme files in Android assets:")
+    for missing in missing_in_assets:
+        print(f"  - {missing}")
     sys.exit(1)
 
-print(f'✅ Theme coverage OK: {len(catalog_ids)} catalog themes, all unique and represented in picker data.')
+# Validate json content in assets
+seen_ids = set()
+for asset_file in assets_dir.glob("*.json"):
+    try:
+        data = json.loads(asset_file.read_text(encoding="utf-8"))
+        theme_id = data.get("metadata", {}).get("id")
+        if not theme_id:
+            print(f"❌ Missing metadata.id in asset theme: {asset_file}")
+            sys.exit(1)
+        if "colorScheme" not in data:
+            print(f"❌ Missing colorScheme in asset theme: {asset_file}")
+            sys.exit(1)
+        if theme_id in seen_ids:
+            print(f"❌ Duplicate theme ID found in assets: {theme_id} ({asset_file})")
+            sys.exit(1)
+        seen_ids.add(theme_id)
+    except Exception as e:
+        print(f"❌ Invalid JSON in asset theme {asset_file}: {e}")
+        sys.exit(1)
+
+print(f"✅ Theme coverage OK: All {len(repo_files)} repository theme files exist in assets and parsed validly ({len(seen_ids)} unique theme IDs).")
 PY
