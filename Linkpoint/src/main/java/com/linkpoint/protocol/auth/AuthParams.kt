@@ -2,10 +2,10 @@ package com.linkpoint.protocol.auth
 
 /**
  * Authentication Parameters
- *
+ * 
  * Contains all parameters needed for Second Life grid authentication.
  * Based on the reference viewer's SLAuthParams implementation.
- *
+ * 
  * Mobile-First Considerations:
  * - Minimal data overhead
  * - Efficient serialization
@@ -29,7 +29,7 @@ data class AuthParams(
      * Get the complete username
      */
     fun getUsername(): String = "$firstName $lastName"
-
+    
     /**
      * Validate the parameters
      */
@@ -39,7 +39,7 @@ data class AuthParams(
                password.isNotBlank() &&
                gridUrl.isNotBlank()
     }
-
+    
     /**
      * Get authentication statistics
      */

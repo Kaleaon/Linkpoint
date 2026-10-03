@@ -28,12 +28,12 @@ val LocalThemePack = staticCompositionLocalOf { BuiltInThemes.LINKPOINT_DEFAULT 
 
 /**
  * Linkpoint Material 3 Theme wrapper.
- *
+ * 
  * This theme system supports:
  * - Built-in theme packs from CleverFerret
  * - User-created custom themes via JSON
  * - Theme pack sharing/import/export
- *
+ * 
  * Usage:
  * ```kotlin
  * LinkpointTheme(themePack = myThemePack) {
@@ -62,7 +62,7 @@ fun LinkpointTheme(
 
     // Create Material 3 color scheme from ThemePack / canonical Ktheme model
     val colorScheme = resolvedThemePack.toMaterial3ColorScheme(darkTheme)
-
+    
     if (BuildConfig.DEBUG) {
         LaunchedEffect(resolvedThemePack) {
             ThemeContrastAudit.assertTextContrast(resolvedThemePack)
@@ -133,7 +133,7 @@ private fun ThemePack.toMaterialColorScheme(
 
 /**
  * Accessor for Linkpoint-specific colors within a Composable.
- *
+ * 
  * Usage:
  * ```kotlin
  * val colors = LinkpointTheme.colors
@@ -148,7 +148,7 @@ object LinkpointTheme {
         @Composable
         @ReadOnlyComposable
         get() = LocalLinkpointColors.current
-
+    
     /**
      * Current theme pack
      */

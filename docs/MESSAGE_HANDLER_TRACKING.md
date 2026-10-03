@@ -1,8 +1,8 @@
 # Second Life Protocol Message Handler Tracking
 
-> **Generated:** January 24, 2026
+> **Generated:** January 24, 2026  
 > **Updated:** January 24, 2026 - **COMPLETE** All 481 handlers implemented!
-> **Purpose:** Track implementation status of all SL protocol message handlers
+> **Purpose:** Track implementation status of all SL protocol message handlers  
 > **Source:** Lumiya decompiled source (`lumiya_decompiled_source/`)
 
 This document tracks all 481 message handlers from the Lumiya viewer and their implementation status in Linkpoint.
@@ -383,12 +383,12 @@ To convert Lumiya's internal IDs to wire format:
 // High frequency (1-254)
 wireFormat = id.toByte()  // Single byte
 
-// Medium frequency (65281-65535)
+// Medium frequency (65281-65535)  
 wireFormat = byteArrayOf(0xFF.toByte(), (id - 65280).toByte())
 
 // Low frequency (negative values)
 val shortValue = (id and 0xFFFF).toShort()
-wireFormat = byteArrayOf(0xFF.toByte(), 0xFF.toByte(),
+wireFormat = byteArrayOf(0xFF.toByte(), 0xFF.toByte(), 
     (shortValue shr 8).toByte(), shortValue.toByte())
 ```
 

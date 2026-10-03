@@ -71,14 +71,14 @@ public class LLSDParser {
      */
     private List<Node> extractElements(final NodeList nodes) {
         final List<Node> trimmedNodes = new ArrayList<>();
-
+        
         for (int nodeIdx = 0; nodeIdx < nodes.getLength(); nodeIdx++) {
             final Node node = nodes.item(nodeIdx);
             if (node.getNodeType() == Node.ELEMENT_NODE) {
                 trimmedNodes.add(node);
             }
         }
-
+        
         return trimmedNodes;
     }
 
@@ -133,7 +133,7 @@ public class LLSDParser {
 
         for (int nodeIdx = 0; nodeIdx < nodeList.getLength(); nodeIdx++) {
             final Node node = nodeList.item(nodeIdx);
-
+            
             if (node.getNodeType() == Node.ELEMENT_NODE) {
                 value.add(parseNode(node));
             }

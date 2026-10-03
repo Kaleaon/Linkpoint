@@ -24,7 +24,7 @@ class SlidingWindowEventQueue(
     private val pendingEvents = ConcurrentSkipListMap<Int, CapEventQueue.Event>()
     private val processedSequenceIds = ConcurrentHashMap.newKeySet<Int>()
     private val processedMessageDedupeKeys = ConcurrentHashMap.newKeySet<String>()
-
+    
     @Volatile
     private var currentMemoryBytes: Long = 0L
 
@@ -70,7 +70,7 @@ class SlidingWindowEventQueue(
 
         // Calculate approximate size of event
         val eventSize = estimateEventSize(event)
-
+        
         // Enforce memory guardrail (5 MB)
         if (currentMemoryBytes + eventSize > maxMemoryBytes) {
             NetworkLogger.log(
@@ -127,7 +127,7 @@ class SlidingWindowEventQueue(
     @Synchronized
     private fun drainInOrderEvents(): List<CapEventQueue.Event> {
         val ready = mutableListOf<CapEventQueue.Event>()
-
+        
         if (lastDeliveredSequenceId == 0 && pendingEvents.isNotEmpty()) {
             // Initialize lastDeliveredSequenceId to lowest pending - 1 if uninitialized
             val lowestKey = pendingEvents.firstKey()
@@ -139,10 +139,10 @@ class SlidingWindowEventQueue(
             val event = pendingEvents.remove(nextExpected) ?: break
             val eventSize = estimateEventSize(event)
             currentMemoryBytes = maxOf(0L, currentMemoryBytes - eventSize)
-
+            
             lastDeliveredSequenceId = nextExpected
             processedSequenceIds.add(nextExpected)
-
+            
             val dedupeKey = generateDedupeKey(nextExpected, event)
             if (dedupeKey != null) {
                 rememberDedupeKey(dedupeKey)
@@ -173,7 +173,7 @@ class SlidingWindowEventQueue(
         val msgText = eventData["message"]?.toString() ?: eventData["text"]?.toString()
         val fromId = eventData["from_id"]?.toString() ?: eventData["from_agent_id"]?.toString()
         val timestamp = eventData["timestamp"]?.toString() ?: event.timestamp.toString()
-
+        
         return if (msgText != null || fromId != null) {
             "${event.eventType}_${fromId}_${msgText}_$timestamp"
         } else if (seqId > 0) {

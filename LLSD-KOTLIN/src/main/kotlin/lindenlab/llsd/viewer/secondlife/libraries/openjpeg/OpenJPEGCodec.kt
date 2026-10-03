@@ -16,7 +16,7 @@ import java.nio.ByteBuffer
 
 /**
  * Kotlin implementation of JPEG2000 codec functionality based on OpenJPEG.
- *
+ * 
  * This class provides encoding and decoding of JPEG2000 images (J2C format)
  * as used extensively in Second Life for texture compression. It includes:
  * - Full JPEG2000 Part-1 codestream parsing
@@ -24,12 +24,12 @@ import java.nio.ByteBuffer
  * - Tile-based processing for large images
  * - Multi-component image support
  * - Region of interest decoding
- *
+ * 
  * @author LLSD Kotlin Team
  * @since 1.0
  */
 object OpenJPEGCodec {
-
+    
     // JPEG2000 codestream markers
     private const val J2K_SOC = 0xFF4F  // Start of codestream
     private const val J2K_SIZ = 0xFF51  // Image and tile size
@@ -38,7 +38,7 @@ object OpenJPEGCodec {
     private const val J2K_SOT = 0xFF90  // Start of tile-part
     private const val J2K_SOD = 0xFF93  // Start of data
     private const val J2K_EOC = 0xFFD9  // End of codestream
-
+    
     /**
      * Represents the parameters and metadata of a JPEG2000 image.
      */
@@ -59,9 +59,9 @@ object OpenJPEGCodec {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
-
+            
             other as J2KImageInfo
-
+            
             if (width != other.width) return false
             if (height != other.height) return false
             if (numComponents != other.numComponents) return false
@@ -74,10 +74,10 @@ object OpenJPEGCodec {
             if (numQualityLayers != other.numQualityLayers) return false
             if (numDecompositionLevels != other.numDecompositionLevels) return false
             if (progressionOrder != other.progressionOrder) return false
-
+            
             return true
         }
-
+        
         override fun hashCode(): Int {
             var result = width
             result = 31 * result + height
@@ -94,7 +94,7 @@ object OpenJPEGCodec {
             return result
         }
     }
-
+    
     /**
      * Decoding parameters for JPEG2000 images.
      */
@@ -107,10 +107,10 @@ object OpenJPEGCodec {
         var regionHeight: Int = -1,      // -1 means full height
         var useColorTransform: Boolean = true
     )
-
+    
     /**
      * Parse JPEG2000 codestream header to extract image information.
-     *
+     * 
      * @param data The JPEG2000 codestream data
      * @return Image information, or null if parsing failed
      * @throws IOException if the data is invalid or corrupted
@@ -120,23 +120,23 @@ object OpenJPEGCodec {
         if (data == null || data.size < 12) {
             throw IOException("Invalid J2K data - too short")
         }
-
+        
         val buffer = ByteBuffer.wrap(data)
-
+        
         // Check SOC marker (Start of Codestream)
         val marker = buffer.short.toInt() and 0xFFFF
         if (marker != J2K_SOC) {
             throw IOException("Invalid J2K signature - expected SOC marker")
         }
-
+        
         val info = J2KImageInfo()
-
+        
         // Parse markers until we have enough information
         while (buffer.hasRemaining()) {
             if (buffer.remaining() < 2) break
-
+            
             val currentMarker = buffer.short.toInt() and 0xFFFF
-
+            
             when (currentMarker) {
                 J2K_SIZ -> {
                     // Parse SIZ marker (Image and tile size)
@@ -161,13 +161,13 @@ object OpenJPEGCodec {
                 }
             }
         }
-
+        
         return info
     }
-
+    
     /**
      * Decode a JPEG2000 image to a BufferedImage.
-     *
+     * 
      * @param data The JPEG2000 codestream data
      * @param params Decoding parameters (null for defaults)
      * @return The decoded image, or null if decoding failed
@@ -177,16 +177,16 @@ object OpenJPEGCodec {
     fun decode(data: ByteArray, params: DecodeParams? = null): BufferedImage {
         // Parse header first
         val info = parseHeader(data)
-
+        
         // Apply decode parameters
         val decodeParams = params ?: DecodeParams()
-
+        
         val targetWidth = if (decodeParams.regionWidth > 0) decodeParams.regionWidth else info.width
         val targetHeight = if (decodeParams.regionHeight > 0) decodeParams.regionHeight else info.height
-
+        
         // Create output image
         val image = BufferedImage(targetWidth, targetHeight, getBufferedImageType(info.numComponents))
-
+        
         // Placeholder for actual JPEG2000 decoding
         // In a real implementation, this would involve:
         // 1. Tile-by-tile decoding
@@ -194,16 +194,16 @@ object OpenJPEGCodec {
         // 3. Color space conversion
         // 4. Component assembly
         println("Decoding J2K image: ${info.width}x${info.height} (${info.numComponents} components)")
-
+        
         // For now, create a placeholder pattern
         createPlaceholderImage(image, info)
-
+        
         return image
     }
-
+    
     /**
      * Encode a BufferedImage to JPEG2000 format.
-     *
+     * 
      * @param image The image to encode
      * @param quality Compression quality (0-100, higher is better quality)
      * @param lossless True for lossless compression, false for lossy
@@ -215,42 +215,42 @@ object OpenJPEGCodec {
         if (image == null) {
             throw IOException("Input image is null")
         }
-
+        
         val width = image.width
         val height = image.height
         val numComponents = image.colorModel.numComponents
-
+        
         println("Encoding image to J2K: ${width}x$height ($numComponents components), quality=$quality")
-
+        
         // Create output stream
         val output = ByteArrayOutputStream()
-
+        
         // Write SOC marker
         output.write((J2K_SOC shr 8) and 0xFF)
         output.write(J2K_SOC and 0xFF)
-
+        
         // Write SIZ marker with image parameters
         writeSIZMarker(output, width, height, numComponents)
-
+        
         // Write coding parameters (placeholder)
         writeCODMarker(output, quality, lossless)
-
+        
         // Write quantization parameters (placeholder)
         writeQCDMarker(output, quality, lossless)
-
+        
         // Write image data (placeholder - would be actual wavelet coefficients)
         writeImageData(output, image)
-
+        
         // Write EOC marker
         output.write((J2K_EOC shr 8) and 0xFF)
         output.write(J2K_EOC and 0xFF)
-
+        
         return output.toByteArray()
     }
-
+    
     /**
      * Get basic information about a JPEG2000 image without full decoding.
-     *
+     * 
      * @param data The JPEG2000 codestream data
      * @return Basic image information
      * @throws IOException if the data is invalid
@@ -258,7 +258,7 @@ object OpenJPEGCodec {
     @Throws(IOException::class)
     fun getImageInfo(data: ByteArray): Map<String, Any> {
         val info = parseHeader(data)
-
+        
         return mapOf(
             "width" to info.width,
             "height" to info.height,
@@ -270,19 +270,19 @@ object OpenJPEGCodec {
             "progressionOrder" to info.progressionOrder
         )
     }
-
+    
     // Private helper methods
-
+    
     private fun parseSIZMarker(buffer: ByteBuffer, info: J2KImageInfo): Boolean {
         if (buffer.remaining() < 38) { // Minimum SIZ marker size
             return false
         }
-
+        
         val length = buffer.short.toInt() and 0xFFFF
         if (buffer.remaining() < length - 2) {
             return false
         }
-
+        
         val capability = buffer.short.toInt() and 0xFFFF // Rsiz
         info.width = buffer.int                          // Xsiz
         info.height = buffer.int                         // Ysiz
@@ -293,26 +293,26 @@ object OpenJPEGCodec {
         val xTOsiz = buffer.int                         // XTOsiz (tile offset)
         val yTOsiz = buffer.int                         // YTOsiz (tile offset)
         info.numComponents = buffer.short.toInt() and 0xFFFF // Csiz
-
+        
         // Calculate number of tiles
         info.numTilesX = kotlin.math.ceil((info.width - xTOsiz).toDouble() / info.tileWidth).toInt()
         info.numTilesY = kotlin.math.ceil((info.height - yTOsiz).toDouble() / info.tileHeight).toInt()
-
+        
         // Parse component parameters
         for (i in 0 until minOf(info.numComponents, 4)) {
             if (buffer.remaining() < 3) break
-
+            
             val ssiz = buffer.get().toInt() and 0xFF
             info.componentPrecision[i] = (ssiz and 0x7F) + 1
             info.componentSigned[i] = if ((ssiz and 0x80) != 0) 1 else 0
-
+            
             val xRsiz = buffer.get().toInt() and 0xFF // Component sub-sampling
             val yRsiz = buffer.get().toInt() and 0xFF
         }
-
+        
         return true
     }
-
+    
     private fun getBufferedImageType(numComponents: Int): Int {
         return when (numComponents) {
             1 -> BufferedImage.TYPE_BYTE_GRAY
@@ -321,12 +321,12 @@ object OpenJPEGCodec {
             else -> BufferedImage.TYPE_3BYTE_BGR
         }
     }
-
+    
     private fun createPlaceholderImage(image: BufferedImage, info: J2KImageInfo) {
         // Create a simple pattern for demonstration
         val width = image.width
         val height = image.height
-
+        
         for (y in 0 until height) {
             for (x in 0 until width) {
                 val r = (x * 255) / width
@@ -337,33 +337,33 @@ object OpenJPEGCodec {
             }
         }
     }
-
+    
     private fun writeSIZMarker(output: ByteArrayOutputStream, width: Int, height: Int, numComponents: Int) {
         // Write SIZ marker
         output.write((J2K_SIZ shr 8) and 0xFF)
         output.write(J2K_SIZ and 0xFF)
-
+        
         // Write length (38 + 3 * numComponents)
         val length = 38 + 3 * numComponents
         output.write((length shr 8) and 0xFF)
         output.write(length and 0xFF)
-
+        
         // Write image parameters (simplified)
         output.write(0x00); output.write(0x00) // Rsiz (capability)
-
+        
         // Image dimensions
         output.write((width shr 24) and 0xFF); output.write((width shr 16) and 0xFF)
         output.write((width shr 8) and 0xFF); output.write(width and 0xFF)
         output.write((height shr 24) and 0xFF); output.write((height shr 16) and 0xFF)
         output.write((height shr 8) and 0xFF); output.write(height and 0xFF)
-
+        
         // Image and tile offsets (all zeros)
         repeat(16) { output.write(0x00) }
-
+        
         // Number of components
         output.write((numComponents shr 8) and 0xFF)
         output.write(numComponents and 0xFF)
-
+        
         // Component parameters
         repeat(numComponents) {
             output.write(0x07) // 8-bit precision, unsigned
@@ -371,7 +371,7 @@ object OpenJPEGCodec {
             output.write(0x01)
         }
     }
-
+    
     private fun writeCODMarker(output: ByteArrayOutputStream, quality: Int, lossless: Boolean) {
         // Placeholder for COD marker
         output.write((J2K_COD shr 8) and 0xFF)
@@ -380,7 +380,7 @@ object OpenJPEGCodec {
         // Simplified COD parameters
         repeat(10) { output.write(0x00) }
     }
-
+    
     private fun writeQCDMarker(output: ByteArrayOutputStream, quality: Int, lossless: Boolean) {
         // Placeholder for QCD marker
         output.write((J2K_QCD shr 8) and 0xFF)
@@ -388,7 +388,7 @@ object OpenJPEGCodec {
         output.write(0x00); output.write(0x04) // Length
         output.write(0x00); output.write(0x00) // Simplified quantization
     }
-
+    
     private fun writeImageData(output: ByteArrayOutputStream, image: BufferedImage) {
         // Placeholder for actual image data encoding
         // In a real implementation, this would write the actual wavelet coefficients
@@ -445,7 +445,7 @@ class J2KImageInfoBuilder {
     var numQualityLayers: Int = 0
     var numDecompositionLevels: Int = 0
     var progressionOrder: String = ""
-
+    
     fun build(): OpenJPEGCodec.J2KImageInfo {
         return OpenJPEGCodec.J2KImageInfo(
             width = width,
@@ -476,7 +476,7 @@ object J2KUtils {
      */
     fun createTestJ2KData(width: Int, height: Int, components: Int = 3): ByteArray {
         val image = BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR)
-
+        
         // Fill with test pattern
         for (y in 0 until height) {
             for (x in 0 until width) {
@@ -487,10 +487,10 @@ object J2KUtils {
                 image.setRGB(x, y, rgb)
             }
         }
-
+        
         return image.encodeToJ2K()
     }
-
+    
     /**
      * Validate JPEG2000 data format
      */
@@ -502,7 +502,7 @@ object J2KUtils {
             false
         }
     }
-
+    
     /**
      * Get quick summary of J2K image
      */

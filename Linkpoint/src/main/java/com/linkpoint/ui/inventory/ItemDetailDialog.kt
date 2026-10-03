@@ -37,19 +37,19 @@ class ItemDetailDialog : DialogFragment() {
     }
 
     private fun setupView(view: View) {
-        view.findViewById<TextView>(R.id.item_description).text =
+        view.findViewById<TextView>(R.id.item_description).text = 
             item.description.ifEmpty { getString(R.string.no_description) }
-
-        view.findViewById<TextView>(R.id.item_type).text =
+        
+        view.findViewById<TextView>(R.id.item_type).text = 
             item.assetTypeEnum.toString()
-
-        view.findViewById<TextView>(R.id.item_inventory_type).text =
+        
+        view.findViewById<TextView>(R.id.item_inventory_type).text = 
             item.inventoryType.toString()
-
-        view.findViewById<TextView>(R.id.item_creation_date).text =
+        
+        view.findViewById<TextView>(R.id.item_creation_date).text = 
             SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
                 .format(Date(item.creationDate.toLong() * 1000))
-
+        
         // Permissions
         val permissionsText = buildString {
             append("Base: ${formatPermissions(item.permissions.baseMask)}\n")
@@ -59,7 +59,7 @@ class ItemDetailDialog : DialogFragment() {
             append("Next Owner: ${formatPermissions(item.permissions.nextOwnerMask)}")
         }
         view.findViewById<TextView>(R.id.item_permissions).text = permissionsText
-
+        
         // Sale info
         val saleInfoText = if (item.saleInfo.saleType != 0) {
             "Price: ${item.saleInfo.salePrice} L$\n" +

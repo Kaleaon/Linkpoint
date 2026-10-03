@@ -21,7 +21,7 @@ package lindenlab.llsd.viewer.secondlife.assets;
  * and cannot be instantiated.
  */
 public final class SLAssetType {
-
+    
     // Standard Second Life asset types
     public static final int TEXTURE = 0;
     public static final int SOUND = 1;
@@ -51,17 +51,17 @@ public final class SLAssetType {
     public static final int LINK_FOLDER = 25;
     public static final int MARKETPLACE_FOLDER = 26;
     public static final int MESH = 49;
-
+    
     // Extended asset types for streaming
     public static final int AUDIO_STREAM = 100;
     public static final int VIDEO_STREAM = 101;
     public static final int TEXTURE_STREAM = 102;
     public static final int MODEL_STREAM = 103;
-
+    
     private SLAssetType() {
         // Utility class - no instances
     }
-
+    
     /**
      * Checks if a given asset type code corresponds to a texture type.
      *
@@ -70,13 +70,13 @@ public final class SLAssetType {
      *         IMAGE_JPEG), {@code false} otherwise.
      */
     public static boolean isTextureType(int assetType) {
-        return assetType == TEXTURE ||
-               assetType == TEXTURE_TGA ||
-               assetType == IMAGE_TGA ||
+        return assetType == TEXTURE || 
+               assetType == TEXTURE_TGA || 
+               assetType == IMAGE_TGA || 
                assetType == IMAGE_JPEG ||
                assetType == TEXTURE_STREAM;
     }
-
+    
     /**
      * Checks if a given asset type code corresponds to a sound type.
      *
@@ -85,11 +85,11 @@ public final class SLAssetType {
      *         {@code false} otherwise.
      */
     public static boolean isSoundType(int assetType) {
-        return assetType == SOUND ||
+        return assetType == SOUND || 
                assetType == SOUND_WAV ||
                assetType == AUDIO_STREAM;
     }
-
+    
     /**
      * Checks if a given asset type code corresponds to a streaming type.
      *
@@ -100,7 +100,7 @@ public final class SLAssetType {
     public static boolean isStreamType(int assetType) {
         return assetType >= AUDIO_STREAM && assetType <= MODEL_STREAM;
     }
-
+    
     /**
      * Gets the human-readable name for a given asset type code.
      *
@@ -145,7 +145,7 @@ public final class SLAssetType {
             default: return "Unknown (" + assetType + ")";
         }
     }
-
+    
     /**
      * Gets the most appropriate MIME type for a given asset type code.
      *

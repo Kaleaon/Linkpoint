@@ -19,3 +19,4 @@
         android:drawable="@drawable/spinner_dropdown_background_up" />
     <item android:drawable="@drawable/spinner_dropdown_background_down" />
 </selector>
+

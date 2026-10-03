@@ -13,11 +13,11 @@ import java.util.UUID
 
 /**
  * Temporary Circuit
- *
+ * 
  * Temporary circuit for specific operations in the Second Life grid.
  * Used for tasks like teleportation, region crossing, and temporary asset operations.
  * Based on the reference viewer's SLTempCircuit implementation with mobile-first optimizations.
- *
+ * 
  * Features:
  * - Short-lived circuit for temporary operations
  * - Lightweight UDP connection with UDPConnectionFixed
@@ -25,14 +25,14 @@ import java.util.UUID
  * - EventBus integration for reactive updates
  * - Automatic cleanup after operation completion
  * - Mobile-optimized resource usage
- *
+ * 
  * Mobile-First Considerations:
  * - Minimal memory footprint
  * - Fast creation and destruction
  * - Efficient for one-time operations
  * - Battery-conscious design
  * - 30-second timeout to prevent resource leaks
- *
+ * 
  * Integration Changes:
  * - Uses UDPConnectionFixed instead of UDPConnection
  * - Integrates MessageRouter for proper packet routing
@@ -43,13 +43,13 @@ class TempCircuit(
     private val sharedConnection: UDPConnectionFixed,
     private val scope: CoroutineScope = CoroutineScope(CircuitDispatcher.dispatcher + SupervisorJob())
 ) {
-
+    
     companion object {
         private const val TAG = "TempCircuit"
         private const val DEFAULT_TIMEOUT_MS = 30000L // 30 seconds
         private const val CLEANUP_DELAY_MS = 5000L // 5 seconds after completion
     }
-
+    
     /**
      * Circuit states
      */
@@ -61,69 +61,69 @@ class TempCircuit(
         ERROR,
         CLOSED
     }
-
+    
     /**
      * Circuit state flow
      */
     private val _circuitState = MutableStateFlow(CircuitState.INITIALIZING)
     val circuitState: StateFlow<CircuitState> = _circuitState.asStateFlow()
-
+    
     /** Shared UDP connection for this circuit. */
     private val udpConnection: UDPConnectionFixed = sharedConnection
-
+    
     /**
      * Message router for routing incoming messages to handlers
      */
     private val messageRouter = udpConnection.getMessageRouter()
-
+    
     /**
      * Circuit code
      */
     val circuitCode: Int = authReply.circuitCode
-
+    
     /**
      * Agent ID
      */
     val agentId: UUID = authReply.agentId
-
+    
     /**
      * Session ID
      */
     val sessionId: UUID = authReply.sessionId
-
+    
     /**
      * Timeout job
      */
     private var timeoutJob: Job? = null
-
+    
     /**
      * Active flag
      */
     private var isActive: Boolean = false
-
+    
     // ==================== CIRCUIT LIFECYCLE ====================
-
+    
     init {
         scope.launch {
             initializeCircuit()
         }
     }
-
+    
     /**
      * Initialize the temp circuit
      */
     private suspend fun initializeCircuit() {
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Initializing temp circuit")
-
+        
         try {
             // Start timeout timer (mobile-optimized: 30s max)
             startTimeoutTimer()
-
+            
             _circuitState.value = CircuitState.ACTIVE
             isActive = true
-
+            
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Temp circuit initialized successfully (shared UDP)")
-
+            
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Failed to initialize temp circuit: ${e.message}")
             _circuitState.value = CircuitState.ERROR
@@ -131,7 +131,7 @@ class TempCircuit(
             throw e
         }
     }
-
+    
     /**
      * Start timeout timer
      * Mobile-optimized: prevents resource leaks from abandoned circuits
@@ -139,7 +139,7 @@ class TempCircuit(
     private fun startTimeoutTimer() {
         timeoutJob = scope.launch {
             delay(DEFAULT_TIMEOUT_MS)
-
+            
             if (isActive) {
                 NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Temp circuit timed out")
                 _circuitState.value = CircuitState.TIMEOUT
@@ -147,9 +147,9 @@ class TempCircuit(
             }
         }
     }
-
+    
     // ==================== MESSAGE HANDLING ====================
-
+    
     /**
      * Register a message handler for a specific message type
      * Uses MessageRouter for efficient message routing
@@ -163,7 +163,7 @@ class TempCircuit(
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Marking temp circuit as completed")
             isActive = false
             _circuitState.value = CircuitState.COMPLETED
-
+            
             // Schedule cleanup
             scope.launch {
                 delay(CLEANUP_DELAY_MS)
@@ -171,7 +171,7 @@ class TempCircuit(
             }
         }
     }
-
+    
     /**
      * Mark operation as failed
      */
@@ -180,7 +180,7 @@ class TempCircuit(
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Marking temp circuit as failed: $error")
             isActive = false
             _circuitState.value = CircuitState.ERROR
-
+            
             // Schedule cleanup
             scope.launch {
                 delay(CLEANUP_DELAY_MS)
@@ -188,7 +188,7 @@ class TempCircuit(
             }
         }
     }
-
+    
     /**
      * Get circuit statistics
      */
@@ -205,7 +205,7 @@ class TempCircuit(
             "messageRouterStats" to messageRouter.getStatistics()
         )
     }
-
+    
     /**
      * Close the temp circuit
      */
@@ -213,19 +213,19 @@ class TempCircuit(
         if (_circuitState.value == CircuitState.CLOSED) {
             return // Already closed
         }
-
+        
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Closing temp circuit")
-
+        
         isActive = false
-
+        
         // Cancel timeout job
         timeoutJob?.cancel()
-
+        
         _circuitState.value = CircuitState.CLOSED
-
+        
         // Cancel scope
         scope.cancel()
-
+        
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Temp circuit closed (shared UDP retained)")
     }
 }

@@ -53,9 +53,9 @@ print_info() {
 # Function to check prerequisites
 check_prerequisites() {
     print_header "Checking Prerequisites"
-
+    
     local all_ok=true
-
+    
     # Check Java
     if command -v java &> /dev/null; then
         JAVA_VERSION=$(java -version 2>&1 | head -n 1 | cut -d'"' -f2)
@@ -64,7 +64,7 @@ check_prerequisites() {
         print_error "Java not found. Please install Java 17+"
         all_ok=false
     fi
-
+    
     # Check for Lumiya APKs
     if [ ! -d "$LUMIYA_DIR" ]; then
         print_error "Lumiya directory not found: $LUMIYA_DIR"
@@ -73,7 +73,7 @@ check_prerequisites() {
         APK_COUNT=$(find "$LUMIYA_DIR" -name "*.apk" | wc -l)
         print_status "Found $APK_COUNT APK files in Lumiya directory"
     fi
-
+    
     # Check/Install Ghidra
     if [ ! -d "$GHIDRA_PATH" ]; then
         print_warning "Ghidra not found at $GHIDRA_PATH"
@@ -82,34 +82,34 @@ check_prerequisites() {
     else
         print_status "Ghidra found at $GHIDRA_PATH"
     fi
-
+    
     if [ "$all_ok" = false ]; then
         print_error "Prerequisites check failed"
         exit 1
     fi
-
+    
     echo ""
 }
 
 # Function to install Ghidra
 install_ghidra() {
     print_info "Downloading Ghidra 11.4.2..."
-
+    
     mkdir -p "$(dirname "$GHIDRA_PATH")"
     cd "$(dirname "$GHIDRA_PATH")"
-
+    
     # Download Ghidra from official GitHub releases
     GHIDRA_URL="https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_11.4.2_build/ghidra_11.4.2_PUBLIC_20250312.zip"
-
+    
     if ! wget -q --show-progress "$GHIDRA_URL" -O ghidra.zip; then
         print_error "Failed to download Ghidra"
         exit 1
     fi
-
+    
     print_info "Extracting Ghidra..."
     unzip -q ghidra.zip
     rm ghidra.zip
-
+    
     if [ -d "ghidra_11.4.2_PUBLIC" ]; then
         print_status "Ghidra installed successfully"
     else
@@ -122,28 +122,28 @@ install_ghidra() {
 extract_apk_contents() {
     local apk_file="$1"
     local extract_dir="$2"
-
+    
     print_info "Extracting APK contents: $(basename "$apk_file")"
-
+    
     mkdir -p "$extract_dir"
-
+    
     # Extract APK (which is a ZIP file)
     unzip -q -o "$apk_file" -d "$extract_dir" 2>/dev/null || true
-
+    
     # List all DEX files
     local dex_files=$(find "$extract_dir" -maxdepth 1 -name "classes*.dex" | sort)
     local dex_count=$(echo "$dex_files" | wc -l)
-
+    
     if [ $dex_count -eq 0 ]; then
         print_warning "No DEX files found in APK"
         return 1
     fi
-
+    
     print_status "Found $dex_count DEX file(s)"
     echo "$dex_files" | while read -r dex; do
         print_info "  - $(basename "$dex")"
     done
-
+    
     return 0
 }
 
@@ -151,7 +151,7 @@ extract_apk_contents() {
 create_ghidra_script() {
     local apk_name="$1"
     local script_file="$2"
-
+    
     cat > "$script_file" << 'GHIDRA_SCRIPT'
 // Ghidra Auto-Analysis Script for Multi-DEX Android APKs
 // Following best practices from https://remyhax.xyz/posts/android-with-ghidra/
@@ -163,16 +163,16 @@ public class AnalyzeMultiDex extends GhidraScript {
     @Override
     public void run() throws Exception {
         println("Starting multi-DEX analysis for Lumiya APK");
-
+        
         Program currentProgram = getCurrentProgram();
         if (currentProgram == null) {
             println("ERROR: No program loaded");
             return;
         }
-
+        
         println("Analyzing: " + currentProgram.getName());
         println("Program location: " + currentProgram.getExecutablePath());
-
+        
         // The analysis will be triggered by analyzeHeadless
         println("Multi-DEX analysis script completed");
     }
@@ -186,25 +186,25 @@ analyze_apk_with_ghidra() {
     local apk_basename=$(basename "$apk_file" .apk)
     local work_dir="$ANALYSIS_DIR/$apk_basename"
     local extract_dir="$work_dir/extracted"
-
+    
     print_header "Analyzing: $apk_basename"
-
+    
     # Create working directory
     mkdir -p "$work_dir"
     mkdir -p "$extract_dir"
-
+    
     # Extract APK contents to examine DEX files
     if ! extract_apk_contents "$apk_file" "$extract_dir"; then
         print_error "Failed to extract APK contents"
         return 1
     fi
-
+    
     # Count DEX files
     local dex_files=($(find "$extract_dir" -maxdepth 1 -name "classes*.dex" | sort))
     local dex_count=${#dex_files[@]}
-
+    
     print_info "Processing $dex_count DEX file(s) with Ghidra"
-
+    
     # Set JAVA_HOME if not set
     if [ -z "${JAVA_HOME:-}" ]; then
         JAVA_BIN=$(which java 2>/dev/null || true)
@@ -213,16 +213,16 @@ analyze_apk_with_ghidra() {
             print_info "Set JAVA_HOME to $JAVA_HOME"
         fi
     fi
-
+    
     # Run Ghidra headless analysis on the APK
     # Following the guide: import as "Single file" and analyze with proper DEX handling
     print_info "Running Ghidra headless analysis..."
-
+    
     local project_name="${apk_basename}_GhidraProject"
     local ghidra_project_dir="$work_dir/ghidra_project"
-
+    
     mkdir -p "$ghidra_project_dir"
-
+    
     # Import the APK file directly
     # Ghidra will automatically detect it as Android APK format
     "$GHIDRA_PATH/support/analyzeHeadless" \
@@ -239,10 +239,10 @@ analyze_apk_with_ghidra() {
         -deleteProject || {
             print_warning "Ghidra analysis completed with warnings"
         }
-
+    
     # Now run analysis on all imported DEX files
     print_info "Running comprehensive analysis..."
-
+    
     "$GHIDRA_PATH/support/analyzeHeadless" \
         "$ghidra_project_dir" \
         "$project_name" \
@@ -253,12 +253,12 @@ analyze_apk_with_ghidra() {
         -deleteProject || {
             print_warning "Analysis completed with warnings"
         }
-
+    
     print_status "Ghidra analysis completed for $apk_basename"
-
+    
     # Generate analysis report
     generate_analysis_report "$apk_file" "$work_dir" "$dex_count"
-
+    
     return 0
 }
 
@@ -269,34 +269,34 @@ generate_analysis_report() {
     local dex_count="$3"
     local apk_basename=$(basename "$apk_file" .apk)
     local report_file="$OUTPUT_DIR/${apk_basename}_analysis_report.md"
-
+    
     print_info "Generating analysis report..."
-
+    
     mkdir -p "$OUTPUT_DIR"
-
+    
     # Extract DEX strings and class information
     local extract_dir="$work_dir/extracted"
     local all_classes=0
     local lumiya_classes=0
-
+    
     for dex in "$extract_dir"/classes*.dex; do
         if [ -f "$dex" ]; then
             strings "$dex" > "$work_dir/$(basename "$dex").strings.txt" 2>/dev/null || true
             grep -E "^Lcom/lumiyaviewer/" "$work_dir/$(basename "$dex").strings.txt" >> "$work_dir/lumiya_classes.txt" 2>/dev/null || true
-
+            
             local dex_classes=$(grep -c "^L" "$work_dir/$(basename "$dex").strings.txt" 2>/dev/null || echo "0")
             all_classes=$((all_classes + dex_classes))
         fi
     done
-
+    
     if [ -f "$work_dir/lumiya_classes.txt" ]; then
         lumiya_classes=$(wc -l < "$work_dir/lumiya_classes.txt" 2>/dev/null || echo "0")
     fi
-
+    
     # Get APK file size and info
     local apk_size=$(stat -f%z "$apk_file" 2>/dev/null || stat -c%s "$apk_file" 2>/dev/null || echo "Unknown")
     local apk_date=$(stat -f%Sm -t "%Y-%m-%d %H:%M:%S" "$apk_file" 2>/dev/null || stat -c%y "$apk_file" 2>/dev/null | cut -d'.' -f1 || echo "Unknown")
-
+    
     cat > "$report_file" << EOF
 # Ghidra Decompilation Analysis: $apk_basename
 
@@ -325,7 +325,7 @@ EOF
             echo "- \`$(basename "$dex")\` - $dex_size bytes" >> "$report_file"
         fi
     done
-
+    
     cat >> "$report_file" << EOF
 
 ## Analysis Process
@@ -356,7 +356,7 @@ EOF
         head -n 20 "$work_dir/lumiya_classes.txt" >> "$report_file" 2>/dev/null || true
         echo '```' >> "$report_file"
     fi
-
+    
     cat >> "$report_file" << EOF
 
 ## Analysis Features
@@ -375,7 +375,7 @@ EOF
 
     # Check for native libraries
     local native_libs=$(find "$extract_dir/lib" -name "*.so" 2>/dev/null | wc -l)
-
+    
     if [ $native_libs -gt 0 ]; then
         echo "**Native libraries found**: $native_libs .so files" >> "$report_file"
         echo "" >> "$report_file"
@@ -387,7 +387,7 @@ EOF
     else
         echo "**Native libraries**: None found" >> "$report_file"
     fi
-
+    
     cat >> "$report_file" << EOF
 
 ## Files Generated
@@ -414,9 +414,9 @@ EOF
 # Function to create comprehensive summary
 create_summary_report() {
     local summary_file="$OUTPUT_DIR/LUMIYA_APKS_DECOMPILATION_SUMMARY.md"
-
+    
     print_header "Creating Summary Report"
-
+    
     cat > "$summary_file" << EOF
 # Lumiya APKs Ghidra Decompilation Summary
 
@@ -447,7 +447,7 @@ EOF
         echo "- **Report**: \`${apk_name%.apk}_analysis_report.md\`" >> "$summary_file"
         echo "" >> "$summary_file"
     done
-
+    
     cat >> "$summary_file" << EOF
 
 ## Decompilation Workflow
@@ -559,31 +559,31 @@ main() {
     echo ""
     print_info "Following guide: https://remyhax.xyz/posts/android-with-ghidra/"
     echo ""
-
+    
     # Check prerequisites
     check_prerequisites
-
+    
     # Create output directory
     mkdir -p "$OUTPUT_DIR"
     mkdir -p "$ANALYSIS_DIR"
-
+    
     # Process each APK file
     local apk_count=0
     local success_count=0
-
+    
     find "$LUMIYA_DIR" -name "*.apk" | sort | while read -r apk_file; do
         apk_count=$((apk_count + 1))
-
+        
         if analyze_apk_with_ghidra "$apk_file"; then
             success_count=$((success_count + 1))
         fi
-
+        
         echo ""
     done
-
+    
     # Create comprehensive summary
     create_summary_report
-
+    
     # Final summary
     print_header "Decompilation Complete"
     print_status "All APKs processed successfully"

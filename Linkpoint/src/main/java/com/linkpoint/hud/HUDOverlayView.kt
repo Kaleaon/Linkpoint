@@ -23,12 +23,12 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * HUDOverlayView - Renders HUD elements as an overlay on the 3D world view.
- *
+ * 
  * This view:
  * - Draws HUD textures at their screen positions
  * - Handles touch events for HUD interaction
  * - Supports HUD visibility toggling
- *
+ * 
  * Based on the reference viewer's HUD rendering.
  */
 class HUDOverlayView @JvmOverloads constructor(
@@ -36,27 +36,27 @@ class HUDOverlayView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
-
+    
     interface HUDInteractionListener {
         fun onHUDTouched(hudLocalId: Int, touchPosition: LLVector3)
         fun onHUDLongPressed(hudLocalId: Int)
     }
-
+    
     var listener: HUDInteractionListener? = null
     var hudManager: HUDManager? = null
-
+    
     // Drawing paints
     private val hudBackgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.argb(180, 40, 40, 40)
         style = Paint.Style.FILL
     }
-
+    
     private val hudBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.argb(200, 100, 100, 100)
         style = Paint.Style.STROKE
         strokeWidth = 2f
     }
-
+    
     private val hudTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         textSize = 24f
@@ -72,7 +72,7 @@ class HUDOverlayView @JvmOverloads constructor(
     private val textureCache = ConcurrentHashMap<UUID, Bitmap>()
     private val textureRequestJobs = ConcurrentHashMap<UUID, Job>()
     private val textureFailureTimestamps = ConcurrentHashMap<UUID, Long>()
-
+    
     // Touch tracking
     private var touchDownTime: Long = 0
     private var touchedHudId: Int? = null
@@ -94,16 +94,16 @@ class HUDOverlayView @JvmOverloads constructor(
         DRAG,
         RESIZE
     }
-
+    
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-
+        
         val manager = hudManager ?: return
         if (!manager.hudsVisible.value) return
-
+        
         val huds = manager.getAllHUDs()
         if (huds.isEmpty()) return
-
+        
         for (hud in huds) {
             drawHUD(canvas, hud)
         }
@@ -117,7 +117,7 @@ class HUDOverlayView @JvmOverloads constructor(
             }
         }
     }
-
+    
     private fun drawHUD(canvas: Canvas, hud: HUDObject) {
         val layoutEntry = hudManager?.getLayoutEntry(hud.attachmentPoint)
         val rect = if (layoutEntry != null && layoutEntry.width > 0f && layoutEntry.height > 0f) {
@@ -136,15 +136,15 @@ class HUDOverlayView @JvmOverloads constructor(
             // Convert normalized coordinates to pixel coordinates
             val centerX = screenPos.x * width
             val centerY = screenPos.y * height
-
+            
             // Calculate HUD size (based on HUD scale, scaled for screen)
             val hudWidth = hud.scale.x * 150f  // Approximate pixel size
             val hudHeight = hud.scale.y * 150f
-
+            
             // Adjust position based on alignment
             val left: Float
             val top: Float
-
+            
             when (screenPos.alignment) {
                 HUDAlignment.TOP_LEFT -> {
                     left = centerX
@@ -175,10 +175,10 @@ class HUDOverlayView @JvmOverloads constructor(
                     top = centerY - hudHeight
                 }
             }
-
+            
             RectF(left, top, left + hudWidth, top + hudHeight)
         }
-
+        
         // Draw HUD background
         canvas.drawRoundRect(rect, 8f, 8f, hudBackgroundPaint)
         canvas.drawRoundRect(rect, 8f, 8f, hudBorderPaint)
@@ -212,7 +212,7 @@ class HUDOverlayView @JvmOverloads constructor(
         if (hud.localId == activeHudId) {
             drawResizeHandle(canvas, rect)
         }
-
+        
         // Store bounds for hit testing
         hud.screenBounds = rect
     }
@@ -253,15 +253,15 @@ class HUDOverlayView @JvmOverloads constructor(
         }
         textureRequestJobs[textureId] = job
     }
-
+    
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val manager = hudManager ?: return false
         if (!manager.hudsVisible.value) return false
-
+        
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 touchDownTime = System.currentTimeMillis()
-
+                
                 // Find which HUD was touched
                 val huds = manager.getAllHUDs()
                 for (hud in huds) {
@@ -285,7 +285,7 @@ class HUDOverlayView @JvmOverloads constructor(
                 activeHudId = null
                 interactionMode = InteractionMode.NONE
             }
-
+            
             MotionEvent.ACTION_MOVE -> {
                 val hudId = activeHudId ?: return false
                 val bounds = activeHudRect ?: return false
@@ -341,7 +341,7 @@ class HUDOverlayView @JvmOverloads constructor(
                 }
                 val hudId = touchedHudId ?: return false
                 val elapsed = System.currentTimeMillis() - touchDownTime
-
+                
                 if (elapsed < 500) {
                     // Short tap - touch the HUD
                     val hud = manager.getHUD(hudId)
@@ -351,12 +351,12 @@ class HUDOverlayView @JvmOverloads constructor(
                             // Convert touch to HUD local coordinates
                             val localX = (event.x - bounds.left) / bounds.width()
                             val localY = (event.y - bounds.top) / bounds.height()
-
+                            
                             listener?.onHUDTouched(
                                 hudId,
                                 LLVector3(localX, localY, 0f)
                             )
-
+                            
                             invalidate()
                             resetInteraction()
                             return true
@@ -368,10 +368,10 @@ class HUDOverlayView @JvmOverloads constructor(
                     resetInteraction()
                     return true
                 }
-
+                
                 resetInteraction()
             }
-
+            
             MotionEvent.ACTION_CANCEL -> {
                 val hudId = activeHudId
                 if (hudId != null) {
@@ -389,7 +389,7 @@ class HUDOverlayView @JvmOverloads constructor(
                 resetInteraction()
             }
         }
-
+        
         return super.onTouchEvent(event)
     }
 

@@ -40,12 +40,12 @@ class TeleportHistoryActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_teleport_history)
-
+        
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             title = getString(R.string.teleport_history)
         }
-
+        
         setupViews()
         setupAdapter()
         observeHistory()
@@ -103,9 +103,9 @@ class TeleportHistoryActivity : AppCompatActivity() {
             Toast.makeText(this, R.string.teleport_not_available, Toast.LENGTH_SHORT).show()
             return
         }
-
+        
         Toast.makeText(this, "Teleporting to ${entry.regionName}...", Toast.LENGTH_SHORT).show()
-
+        
         lifecycleScope.launch {
             val result = app.teleportManager.teleportToLocation(
                 entry.regionName,
@@ -113,18 +113,18 @@ class TeleportHistoryActivity : AppCompatActivity() {
                 entry.y.toFloat(),
                 entry.z.toFloat()
             )
-
+            
             when (result) {
                 is com.linkpoint.teleport.TeleportResult.Pending -> {
                     // Teleport in progress, activity will handle updates
                 }
                 is com.linkpoint.teleport.TeleportResult.Success -> {
-                    Toast.makeText(this@TeleportHistoryActivity,
+                    Toast.makeText(this@TeleportHistoryActivity, 
                         "Arrived at ${result.regionName}", Toast.LENGTH_SHORT).show()
                     finish()
                 }
                 is com.linkpoint.teleport.TeleportResult.Failure -> {
-                    Toast.makeText(this@TeleportHistoryActivity,
+                    Toast.makeText(this@TeleportHistoryActivity, 
                         "Teleport failed: ${result.message}", Toast.LENGTH_LONG).show()
                 }
             }

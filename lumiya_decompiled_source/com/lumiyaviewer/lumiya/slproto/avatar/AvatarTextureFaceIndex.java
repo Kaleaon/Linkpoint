@@ -30,7 +30,7 @@ public enum AvatarTextureFaceIndex {
     TEX_HEAD_TATTOO("head"),
     TEX_UPPER_TATTOO("upper"),
     TEX_LOWER_TATTOO("lower");
-
+    
     private String bakedTextureName;
 
     AvatarTextureFaceIndex(String str) {

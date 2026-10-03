@@ -55,7 +55,7 @@ import kotlinx.coroutines.launch
  * Based on the reference viewer's WorldViewActivity
  */
 class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-
+    
     companion object {
         private const val TAG = "WorldViewActivity"
         private const val EXTRA_LAYOUT_EDITOR_MODE = "com.linkpoint.EXTRA_LAYOUT_EDITOR_MODE"
@@ -67,7 +67,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             }
         }
     }
-
+    
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navigationView: NavigationView
     private lateinit var surfaceView: SurfaceView
@@ -77,7 +77,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private lateinit var worldOverlayCompose: ComposeView
     private lateinit var rendererHandoffManager: RendererHandoffManager
     private val worldUiState = MutableStateFlow(WorldUiState())
-
+    
     // HUD elements
     private lateinit var regionNameText: TextView
     private lateinit var avatarNameText: TextView
@@ -86,22 +86,22 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private lateinit var btnMinimap: ImageButton
     private lateinit var btnInventory: ImageButton
     private lateinit var btnXR: ImageButton
-
+    
     // HUD overlay for Second Life HUD attachments
     private lateinit var hudOverlay: com.linkpoint.hud.HUDOverlayView
-
+    
     // Joysticks
     private lateinit var joystickMove: JoystickView
     private lateinit var joystickCamera: JoystickView
     private lateinit var movementButtonsGroup: View
     private lateinit var actionButtonsGroup: View
-
+    
     // Movement control buttons
     private lateinit var btnFly: ImageButton
     private lateinit var btnRun: ImageButton
     private lateinit var btnJump: ImageButton
     private lateinit var btnSit: ImageButton
-
+    
     // Action buttons
     private lateinit var btnGestures: ImageButton
     private lateinit var btnFriends: ImageButton
@@ -114,15 +114,15 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     // CameraController in RenderManager.
     private var cameraGestureDetector: GestureDetector? = null
     private var cameraScaleDetector: ScaleGestureDetector? = null
-
+    
     // Movement controller (lazy init after login)
     private val movementController by lazy {
         app.avatarManager.movementController
     }
-
+    
     // Debug floater button
     private var debugFloaterButton: FloatingActionButton? = null
-
+    
     private val app by lazy { LinkpointApp.getInstance() }
     @Volatile private var isRendering = false
     @Volatile private var isSurfaceReady = false
@@ -131,10 +131,10 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private var useSecondaryRenderer: Boolean = true
     private var hudsVisibleFromManager: Boolean = true
     private var isLayoutEditorMode: Boolean = false
-
+    
     // Track current orientation setting to avoid unnecessary changes
     private var currentOrientationPref: String? = null
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Initialize currentOrientationPref from SharedPreferences before applying
@@ -142,7 +142,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         currentOrientationPref = prefs.getString("screen_orientation", "portrait") ?: "portrait"
         applyScreenOrientation()
         setContentView(R.layout.activity_world_view)
-
+        
         initViews()
         initRendererHandoffManager()
         initDebugFloater()
@@ -155,7 +155,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             enterLayoutEditorMode()
         }
     }
-
+    
     /**
      * Apply screen orientation based on user preference.
      * Default is portrait to avoid black screen issues in landscape mode.
@@ -174,22 +174,22 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
 
         currentOrientationPref = orientation
     }
-
+    
     /**
      * Initialize the debug floater button based on user preference.
      * When tapped, captures a debug report of the current app state.
      */
     private fun initDebugFloater() {
         debugFloaterButton = findViewById(R.id.btnDebugFloater)
-
+        
         debugFloaterButton?.setOnClickListener {
             captureDebugReport()
         }
-
+        
         // Set initial visibility based on preference
         updateDebugFloaterVisibility()
     }
-
+    
     /**
      * Update debug floater visibility based on settings
      */
@@ -198,13 +198,13 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         val showDebugFloater = prefs.getBoolean("enable_debug_floater", false)
         debugFloaterButton?.visibility = if (showDebugFloater) View.VISIBLE else View.GONE
     }
-
+    
     /**
      * Capture a debug report when the floater button is tapped
      */
     private fun captureDebugReport() {
         Toast.makeText(this, "Capturing debug report...", Toast.LENGTH_SHORT).show()
-
+        
         val debugService = DebugReportService.getInstance(this)
         debugService.captureDebugReportAsync("Captured via floater button in WorldView") { file ->
             if (file != null) {
@@ -222,42 +222,42 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             }
         }
     }
-
+    
     private fun initViews() {
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
         worldViewportHost = findViewById(R.id.worldViewportHost)
         worldOverlayCompose = findViewById(R.id.worldOverlayCompose)
-
+        
         regionNameText = findViewById(R.id.textRegionName)
         avatarNameText = findViewById(R.id.textAvatarName)
-
+        
         // Menu button - opens navigation drawer
         btnMenu = findViewById(R.id.btnMenu)
         btnMenu.setOnClickListener {
             drawerLayout.openDrawer(GravityCompat.START)
         }
-
+        
         btnChat = findViewById(R.id.btnChat)
         btnMinimap = findViewById(R.id.btnMinimap)
         btnInventory = findViewById(R.id.btnInventory)
         btnXR = findViewById(R.id.btnXR)
         movementButtonsGroup = findViewById(R.id.movementButtons)
         actionButtonsGroup = findViewById(R.id.actionButtons)
-
+        
         // Setup quick action buttons
         btnChat.setOnClickListener {
             startActivity(WorldHomeHostActivity.createIntent(this, Routes.CHAT))
         }
-
+        
         btnMinimap.setOnClickListener {
             startActivity(Intent(this, MinimapActivity::class.java))
         }
-
+        
         btnInventory.setOnClickListener {
             startActivity(WorldHomeHostActivity.createIntent(this, Routes.INVENTORY))
         }
-
+        
         btnXR.setOnClickListener {
             if (app.isXREntryAvailable()) {
                 startActivity(Intent(this, XRWorldActivity::class.java))
@@ -309,16 +309,16 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 onSit = { btnSit.performClick() }
             )
         }
-
+        
         // Initialize HUD overlay for Second Life HUD attachments
         initHudOverlay()
-
+        
         // Initialize joysticks
         initJoysticks()
-
+        
         // Initialize movement control buttons
         initMovementControls()
-
+        
         // Initialize action buttons
         initActionButtons()
 
@@ -327,28 +327,28 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
 
         applyInterfacePreferences()
     }
-
+    
     /**
      * Initialize the HUD overlay for displaying Second Life HUD attachments.
      */
     private fun initHudOverlay() {
         hudOverlay = worldViewportHost.hudOverlay
-
+        
         // Connect to HUD manager if available
         if (app.isHudManagerInitialized()) {
             hudOverlay.hudManager = app.hudManager
-
+            
             hudOverlay.listener = object : com.linkpoint.hud.HUDOverlayView.HUDInteractionListener {
                 override fun onHUDTouched(hudLocalId: Int, touchPosition: com.linkpoint.protocol.types.LLVector3) {
                     app.hudManager.touchHUD(hudLocalId, touchPosition)
                 }
-
+                
                 override fun onHUDLongPressed(hudLocalId: Int) {
                     // Show HUD options menu
                     showHUDOptionsMenu(hudLocalId)
                 }
             }
-
+            
             // Observe HUD visibility changes
             lifecycleScope.launch {
                 app.hudManager.hudsVisible.collectLatest { visible ->
@@ -430,20 +430,20 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             Toast.LENGTH_LONG
         ).show()
     }
-
+    
     /**
      * Show options menu for a HUD.
      */
     private fun showHUDOptionsMenu(hudLocalId: Int) {
         if (!app.isHudManagerInitialized()) return
-
+        
         val hud = app.hudManager.getHUD(hudLocalId) ?: return
-
+        
         val options = arrayOf(
             getString(R.string.hide_huds),
             getString(R.string.close)
         )
-
+        
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle(hud.name)
             .setItems(options) { _, which ->
@@ -453,14 +453,14 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             }
             .show()
     }
-
+    
     /**
      * Initialize joystick controls for movement and camera.
      */
     private fun initJoysticks() {
         joystickMove = findViewById(R.id.joystickMove)
         joystickCamera = findViewById(R.id.joystickCamera)
-
+        
         // Movement joystick listener
         joystickMove.listener = object : JoystickView.JoystickListener {
             override fun onJoystickMoved(x: Float, y: Float) {
@@ -469,7 +469,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                     movementController.setJoystickInput(x, y)
                 }
             }
-
+            
             override fun onJoystickReleased() {
                 // Stop movement when joystick is released
                 if (app.isAvatarManagerInitialized()) {
@@ -477,7 +477,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 }
             }
         }
-
+        
         // Camera/rotation joystick listener
         joystickCamera.listener = object : JoystickView.JoystickListener {
             override fun onJoystickMoved(x: Float, y: Float) {
@@ -487,7 +487,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                     // Y could be used for camera pitch if needed
                 }
             }
-
+            
             override fun onJoystickReleased() {
                 if (app.isAvatarManagerInitialized()) {
                     movementController.setRotationInput(0f)
@@ -495,7 +495,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             }
         }
     }
-
+    
     /**
      * Initialize movement control buttons (fly, run, jump, sit).
      */
@@ -504,7 +504,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         btnRun = findViewById(R.id.btnRun)
         btnJump = findViewById(R.id.btnJump)
         btnSit = findViewById(R.id.btnSit)
-
+        
         btnFly.setOnClickListener {
             if (app.isAvatarManagerInitialized()) {
                 movementController.toggleFly()
@@ -517,7 +517,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 updateFlyButtonState(isFlying)
             }
         }
-
+        
         btnRun.setOnClickListener {
             if (app.isAvatarManagerInitialized()) {
                 movementController.toggleRun()
@@ -530,13 +530,13 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 updateRunButtonState(isRunning)
             }
         }
-
+        
         btnJump.setOnClickListener {
             if (app.isAvatarManagerInitialized()) {
                 movementController.jump()
             }
         }
-
+        
         btnSit.setOnClickListener {
             if (app.isAvatarManagerInitialized()) {
                 if (movementController.isSitting.value) {
@@ -546,7 +546,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 }
             }
         }
-
+        
         // Observe movement state changes
         lifecycleScope.launch {
             if (app.isAvatarManagerInitialized()) {
@@ -555,7 +555,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 }
             }
         }
-
+        
         lifecycleScope.launch {
             if (app.isAvatarManagerInitialized()) {
                 movementController.isRunning.collectLatest { isRunning ->
@@ -563,7 +563,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 }
             }
         }
-
+        
         lifecycleScope.launch {
             if (app.isAvatarManagerInitialized()) {
                 movementController.isSitting.collectLatest { isSitting ->
@@ -572,7 +572,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             }
         }
     }
-
+    
     /**
      * Initialize action buttons (gestures, friends, nearby).
      */
@@ -728,7 +728,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             }
         }
     }
-
+    
     /**
      * Update fly button visual state.
      */
@@ -736,7 +736,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         btnFly.alpha = if (isFlying) 1.0f else 0.6f
         btnFly.isSelected = isFlying
     }
-
+    
     /**
      * Update run button visual state.
      */
@@ -744,7 +744,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         btnRun.alpha = if (isRunning) 1.0f else 0.6f
         btnRun.isSelected = isRunning
     }
-
+    
     /**
      * Update sit button visual state.
      */
@@ -752,7 +752,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         btnSit.alpha = if (isSitting) 1.0f else 0.6f
         btnSit.isSelected = isSitting
     }
-
+    
     /**
      * Show gestures popup menu.
      */
@@ -761,13 +761,13 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             Toast.makeText(this, R.string.gestures_not_available, Toast.LENGTH_SHORT).show()
             return
         }
-
+        
         val gestures = app.gestureManager.getActiveGestures()
         if (gestures.isEmpty()) {
             Toast.makeText(this, R.string.no_active_gestures, Toast.LENGTH_SHORT).show()
             return
         }
-
+        
         // Show a popup menu with active gestures
         val gestureNames = gestures.map { it.name }.toTypedArray()
         androidx.appcompat.app.AlertDialog.Builder(this)
@@ -781,7 +781,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             .setNegativeButton(R.string.cancel, null)
             .show()
     }
-
+    
     private fun initRenderer() {
         val targetBackend = preferredRendererBackend()
         lifecycleScope.launch {
@@ -1072,7 +1072,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             }
         }
     }
-
+    
     private fun startRenderLoop() {
         app.renderManager.dispatcher.post(object : Runnable {
             override fun run() {
@@ -1083,18 +1083,18 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             }
         })
     }
-
+    
     private fun setupNavigation() {
         navigationView.setNavigationItemSelectedListener(this)
-
+        
         // Setup header
         val headerView = navigationView.getHeaderView(0)
         val headerName = headerView.findViewById<TextView>(R.id.navHeaderName)
         val headerRegion = headerView.findViewById<TextView>(R.id.navHeaderRegion)
-
+        
         headerName.text = app.sessionManager.getAvatarName()
         worldUiState.update { it.copy(avatarName = app.sessionManager.getAvatarName()) }
-
+        
         lifecycleScope.launch {
             app.sessionManager.currentRegion.collectLatest { region ->
                 headerRegion.text = region?.name ?: "Not connected"
@@ -1105,7 +1105,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             }
         }
     }
-
+    
     private fun observeState() {
         lifecycleScope.launch {
             app.sessionManager.connectionState.collectLatest { state ->
@@ -1113,7 +1113,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                     ConnectionState.CONNECTED -> {
                         avatarNameText.text = app.sessionManager.getAvatarName()
                         worldUiState.update { it.copy(avatarName = app.sessionManager.getAvatarName()) }
-
+                        
                         // Cache landmarks from inventory after first successful login
                         if (app.startLocationManager.isFirstLoginComplete()) {
                             fetchAndCacheLandmarks()
@@ -1126,7 +1126,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 }
             }
         }
-
+        
         lifecycleScope.launch {
             app.sessionManager.currentRegion.collectLatest { region ->
                 regionNameText.text = region?.name ?: "Unknown Region"
@@ -1201,7 +1201,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             android.util.Log.d(TAG, "Inventory manager not initialized, skipping landmark caching")
             return
         }
-
+        
         lifecycleScope.launch {
             try {
                 val landmarks = app.inventoryManager.fetchLandmarks()
@@ -1221,7 +1221,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                             z = 25
                         )
                     }
-
+                    
                     app.startLocationManager.cacheLandmarksFromInventory(landmarkInfos)
                     android.util.Log.i(TAG, "Cached ${landmarkInfos.size} landmarks from inventory")
                 }
@@ -1230,7 +1230,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             }
         }
     }
-
+    
     /**
      * Extract region name from landmark description or name.
      */
@@ -1244,7 +1244,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         // Fall back to using the landmark name
         return name.substringBefore(" (").trim()
     }
-
+    
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.nav_chat -> startActivity(WorldHomeHostActivity.createIntent(this, Routes.CHAT))
@@ -1270,11 +1270,11 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 app.protocol.disconnect()
             }
         }
-
+        
         drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
-
+    
     /**
      * Teleport home (to user's home location).
      */
@@ -1302,12 +1302,12 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             }
         }
     }
-
+    
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_world_view, menu)
         return true
     }
-
+    
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
@@ -1317,7 +1317,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             else -> super.onOptionsItemSelected(item)
         }
     }
-
+    
     /**
      * Setup back press handler using modern OnBackPressedCallback
      */
@@ -1340,7 +1340,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             }
         })
     }
-
+    
     override fun onPause() {
         // Lumiya parity: flip the drawing gate FIRST so any in-flight frame on
         // the render thread short-circuits before we stop the loop or the OS
@@ -1413,7 +1413,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             }
         }
     }
-
+    
     override fun onDestroy() {
         super.onDestroy()
         if (useSecondaryRenderer) {

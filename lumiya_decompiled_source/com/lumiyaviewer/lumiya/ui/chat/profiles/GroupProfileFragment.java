@@ -118,7 +118,7 @@ public class GroupProfileFragment extends ChatterReloadableFragment implements L
         MainProfile(R.string.profile_tab_caption, GroupMainProfileTab.class),
         Roles(R.string.group_profile_roles_caption, GroupRolesProfileTab.class),
         Members(R.string.group_members_page_title, GroupMembersProfileTab.class);
-
+        
         private final int tabCaption;
         private final Class<? extends Fragment> tabClass;
 

@@ -10,15 +10,15 @@ import android.util.Log
 
 /**
  * Network diagnostics utility for debugging and optimizing login on Android devices.
- *
+ * 
  * Provides detailed network type detection, connection quality estimation,
  * and diagnostic information for troubleshooting login issues, especially
  * on mobile/LTE networks where conditions vary significantly.
  */
 object NetworkDiagnostics {
-
+    
     private const val TAG = "NetworkDiagnostics"
-
+    
     /**
      * Represents the detected network type with detailed information
      */
@@ -48,10 +48,10 @@ object NetworkDiagnostics {
                 type == NetworkType.UNKNOWN -> 2.0f
                 else -> 1.5f
             }
-
+        
         /**
          * Recommended number of retry attempts based on network type.
-         *
+         * 
          * Mobile networks, especially LTE, can experience transient connection
          * issues (EOF, resets) more frequently than Wi-Fi. Increased retry
          * counts help ensure successful connections on unstable networks.
@@ -65,7 +65,7 @@ object NetworkDiagnostics {
                 NetworkType.CELLULAR_2G -> 6  // Increased from 5
                 else -> 4  // Default increased from 3
             }
-
+        
         /**
          * Human-readable description for UI display
          */
@@ -84,7 +84,7 @@ object NetworkDiagnostics {
                 NetworkType.NONE -> "No Connection"
             }
     }
-
+    
     enum class NetworkType {
         NONE,
         WIFI,
@@ -98,14 +98,14 @@ object NetworkDiagnostics {
         BLUETOOTH,
         UNKNOWN
     }
-
+    
     /**
      * Get detailed network information for the current connection
      */
     fun getNetworkInfo(context: Context): NetworkInfo {
         val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val network = cm.activeNetwork
-
+        
         if (network == null) {
             Log.d(TAG, "No active network")
             return NetworkInfo(
@@ -119,7 +119,7 @@ object NetworkDiagnostics {
                 details = "No active network connection"
             )
         }
-
+        
         val capabilities = cm.getNetworkCapabilities(network)
         if (capabilities == null) {
             Log.d(TAG, "No network capabilities available")
@@ -134,21 +134,21 @@ object NetworkDiagnostics {
                 details = "Network capabilities unavailable"
             )
         }
-
+        
         val hasInternet = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
         val hasValidated = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
         val isMetered = !capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
-
+        
         // Detect network type
         val (networkType, subType) = detectNetworkType(context, capabilities)
-
+        
         // Estimate bandwidth and latency
         val bandwidth = estimateBandwidth(capabilities, networkType)
         val latency = estimateLatency(networkType)
-
+        
         // Check IPv6 support
         val supportsIpv6 = checkIpv6Support(cm, network)
-
+        
         val details = buildString {
             appendLine("Transport: $subType")
             appendLine("Has Internet: $hasInternet")
@@ -162,15 +162,15 @@ object NetworkDiagnostics {
                 appendLine("Link Upstream: ${capabilities.linkUpstreamBandwidthKbps}kbps")
             }
         }
-
+        
         Log.d(TAG, "Network info: $networkType ($subType), metered=$isMetered, bandwidth=$bandwidth, validated=$hasValidated")
-
+        
         // IMPORTANT: Only require hasInternet, NOT hasValidated
         // NET_CAPABILITY_VALIDATED is too strict and fails on many mobile networks:
         // - LTE networks where validation is slow or fails temporarily
         // - Networks behind captive portals
         // - Networks where Google's connectivity check is blocked
-        //
+        // 
         // The actual HTTP request will determine if connectivity works.
         // This matches the reference viewer's behavior (which logs in instantly on the same networks).
         return NetworkInfo(
@@ -184,7 +184,7 @@ object NetworkDiagnostics {
             details = details
         )
     }
-
+    
     private fun detectNetworkType(context: Context, capabilities: NetworkCapabilities): Pair<NetworkType, String> {
         return when {
             capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
@@ -207,12 +207,12 @@ object NetworkDiagnostics {
             }
         }
     }
-
+    
     @SuppressLint("MissingPermission")
     private fun detectCellularType(context: Context): Pair<NetworkType, String> {
         try {
             val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-
+            
             // Note: getDataNetworkType requires READ_PHONE_STATE permission
             // We try to get it but fall back gracefully if not available
             val networkType = try {
@@ -221,17 +221,17 @@ object NetworkDiagnostics {
                 Log.d(TAG, "Cannot access data network type: ${e.message}")
                 TelephonyManager.NETWORK_TYPE_UNKNOWN
             }
-
+            
             return when (networkType) {
                 // 5G
                 TelephonyManager.NETWORK_TYPE_NR -> NetworkType.CELLULAR_5G to "5G NR"
-
+                
                 // 4G LTE
                 TelephonyManager.NETWORK_TYPE_LTE -> NetworkType.CELLULAR_LTE to "LTE"
-
+                
                 // 4G
                 TelephonyManager.NETWORK_TYPE_HSPAP -> NetworkType.CELLULAR_4G to "HSPA+"
-
+                
                 // 3G
                 TelephonyManager.NETWORK_TYPE_UMTS,
                 TelephonyManager.NETWORK_TYPE_EVDO_0,
@@ -241,14 +241,14 @@ object NetworkDiagnostics {
                 TelephonyManager.NETWORK_TYPE_HSUPA,
                 TelephonyManager.NETWORK_TYPE_HSPA,
                 TelephonyManager.NETWORK_TYPE_EHRPD -> NetworkType.CELLULAR_3G to "3G"
-
+                
                 // 2G
                 TelephonyManager.NETWORK_TYPE_GPRS,
                 TelephonyManager.NETWORK_TYPE_EDGE,
                 TelephonyManager.NETWORK_TYPE_CDMA,
                 TelephonyManager.NETWORK_TYPE_1xRTT,
                 TelephonyManager.NETWORK_TYPE_IDEN -> NetworkType.CELLULAR_2G to "2G"
-
+                
                 else -> NetworkType.CELLULAR_LTE to "Mobile Data" // Assume LTE as fallback
             }
         } catch (e: Exception) {
@@ -256,7 +256,7 @@ object NetworkDiagnostics {
             return NetworkType.CELLULAR_LTE to "Mobile Data"
         }
     }
-
+    
     private fun estimateBandwidth(capabilities: NetworkCapabilities, type: NetworkType): Int {
         // First try to get actual reported bandwidth
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -265,7 +265,7 @@ object NetworkDiagnostics {
                 return downstream
             }
         }
-
+        
         // Fall back to estimated bandwidth based on network type
         return when (type) {
             NetworkType.WIFI -> 50000 // 50 Mbps typical
@@ -280,7 +280,7 @@ object NetworkDiagnostics {
             else -> 1000
         }
     }
-
+    
     private fun estimateLatency(type: NetworkType): Int {
         // Estimated round-trip latency in milliseconds
         return when (type) {
@@ -296,25 +296,25 @@ object NetworkDiagnostics {
             else -> 100
         }
     }
-
+    
     @Suppress("DEPRECATION")
     private fun checkIpv6Support(cm: ConnectivityManager, network: android.net.Network): Boolean {
         return try {
             val linkProperties = cm.getLinkProperties(network)
-            linkProperties?.linkAddresses?.any {
-                it.address is java.net.Inet6Address
+            linkProperties?.linkAddresses?.any { 
+                it.address is java.net.Inet6Address 
             } ?: false
         } catch (e: Exception) {
             false
         }
     }
-
+    
     /**
      * Generate a full diagnostic report for troubleshooting
      */
     fun generateDiagnosticReport(context: Context): String {
         val networkInfo = getNetworkInfo(context)
-
+        
         return buildString {
             appendLine("=== Linkpoint Network Diagnostics ===")
             appendLine()
@@ -337,14 +337,14 @@ object NetworkDiagnostics {
             append(networkInfo.details)
         }
     }
-
+    
     /**
      * Calculate adaptive timeout values based on current network conditions
      */
     fun getAdaptiveTimeouts(context: Context): AdaptiveTimeouts {
         val networkInfo = getNetworkInfo(context)
         val multiplier = networkInfo.timeoutMultiplier
-
+        
         return AdaptiveTimeouts(
             connectTimeoutMs = (30000 * multiplier).toLong(),
             readTimeoutMs = (60000 * multiplier).toLong(),
@@ -353,7 +353,7 @@ object NetworkDiagnostics {
             initialRetryDelayMs = (500 * multiplier).toLong()
         )
     }
-
+    
     data class AdaptiveTimeouts(
         val connectTimeoutMs: Long,
         val readTimeoutMs: Long,

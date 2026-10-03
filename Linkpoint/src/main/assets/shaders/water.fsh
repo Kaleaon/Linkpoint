@@ -28,11 +28,11 @@ void main() {
     waveArg = dot(direction[0], vWaterXY) * frequency[0] + time * phase[0];
     waveNormal += direction[0] * amplitude[0] * frequency[0] * cos (waveArg);
     amp += amplitude[0] * sin (waveArg);
-
+    
     waveArg = dot(direction[1], vWaterXY) * frequency[1] + time * phase[1];
     waveNormal += direction[1] * amplitude[1] * frequency[1] * cos (waveArg);
     amp += amplitude[1] * sin (waveArg);
-
+    
     waveArg = dot(direction[2], vWaterXY) * frequency[2] + time * phase[2];
     waveNormal += direction[2] * amplitude[2] * frequency[2] * cos (waveArg);
     amp += amplitude[2] * sin (waveArg);
@@ -51,3 +51,4 @@ void main() {
 
 
 }
+

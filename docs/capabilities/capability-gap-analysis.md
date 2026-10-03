@@ -1,7 +1,7 @@
 # Capability gap analysis (Lumiya / SL Official Viewer / Firestorm vs Linkpoint)
 
-**Last verified:** 2026-04-26 (UTC)
-**Commit:** `HEAD`
+**Last verified:** 2026-04-26 (UTC)  
+**Commit:** `HEAD`  
 **Static inventory scope:** `Linkpoint/src/main/java/**/*.kt`
 
 ---
@@ -20,33 +20,33 @@ Inventory was re-run against current Kotlin sources using symbol and callsite sc
 
 ## Confirmed in code now (previously reported as gaps)
 
-1. **Script upload/update flow is implemented.**
+1. **Script upload/update flow is implemented.**  
    - `ScriptManager.saveScript(itemId, scriptText, taskId)` now uses `UpdateScriptAgent`/`UpdateScriptTask` and executes uploader POST + LLSD completion handling.
 
-2. **Group profile capability is requested from seed list and consumed.**
+2. **Group profile capability is requested from seed list and consumed.**  
    - `LinkpointTranslationLayer.getReferenceCapabilityNames()` includes `"GroupProfile"`.
    - `ProfileManager.getGroupProfile(groupId)` calls the capability.
 
-3. **Swap-chain creation path exists (not a missing callback anymore).**
+3. **Swap-chain creation path exists (not a missing callback anymore).**  
    - `WorldViewActivity.surfaceCreated(...)` calls `renderManager.recreateSwapChain()`.
    - `RenderManager.recreateSwapChain()` calls `engine.createSwapChain(surface)`.
 
-4. **Object/avatar update wiring exists.**
+4. **Object/avatar update wiring exists.**  
    - `LinkpointApp.processObjectUpdate(...)` routes prim updates to `ObjectManager.handleObjectUpdate(...)` and renderer queue, and routes avatar updates to `AvatarManager.updateAvatar(...)` and renderer queue.
 
 ## Open blockers (confirmed in code now)
 
-1. **Task-notecard save path is still missing.**
+1. **Task-notecard save path is still missing.**  
    - `CapabilityManager` defines `CAP_UPDATE_NOTECARD_TASK`.
    - `LinkpointTranslationLayer.getReferenceCapabilityNames()` requests `"UpdateNotecardTaskInventory"`.
    - `NotecardManager.saveNotecard(itemId, newText)` only uses `CAP_UPDATE_NOTECARD_AGENT` and has no task/object variant.
 
-2. **Capability symbol drift (literal strings instead of constants) remains in profile flows.**
+2. **Capability symbol drift (literal strings instead of constants) remains in profile flows.**  
    - `ProfileManager.getGroupProfile(...)` calls `capabilityManager.request("GroupProfile", ...)` instead of `CapabilityManager.CAP_GROUP_PROFILE`.
    - Similar literal usage exists for `"AgentProfile"`.
    - This is not a hard runtime failure today, but it is a maintenance/parity blocker for inventory-based static verification.
 
-3. **Declared capability constants with no runtime request callsites (likely incomplete flows).**
+3. **Declared capability constants with no runtime request callsites (likely incomplete flows).**  
    - `CAP_SET_DISPLAY_NAME`, `CAP_SIMULATOR_FEATURES`, `CAP_AGENT_PREFERENCES`, `CAP_UPDATE_AGENT_LANGUAGE`, `CAP_RENDER_MATERIALS`, `CAP_OBJECT_MEDIA_NAVIGATE`, `CAP_COPY_INVENTORY_FROM_NOTECARD`, `CAP_REGION_EXPERIENCE`, `CAP_MOVE_INVENTORY_ITEM`.
    - These are currently declarations without clear feature-path usage through `capabilityManager.request(...)` callsites.
 

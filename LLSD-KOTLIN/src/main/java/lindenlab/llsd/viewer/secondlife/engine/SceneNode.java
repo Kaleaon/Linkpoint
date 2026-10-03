@@ -25,27 +25,27 @@ import java.util.UUID;
  * visitor pattern.
  */
 public class SceneNode {
-
+    
     private static final Map<UUID, SceneNode> nodeRegistry = new ConcurrentHashMap<>();
-
+    
     private final UUID nodeId;
     private final String name;
     private SceneNode parent;
     private final List<SceneNode> children;
     private final Map<String, Object> properties;
-
+    
     // Transform properties
     private Vector3 position;
     private Quaternion rotation;
     private Vector3 scale;
     private boolean visible;
     private boolean enabled;
-
+    
     // Cached transformation matrices
     private double[][] localTransform;
     private double[][] worldTransform;
     private boolean transformDirty;
-
+    
     /**
      * Constructs a new scene node with a given name and a randomly generated UUID.
      *
@@ -58,19 +58,19 @@ public class SceneNode {
         this.parent = null;
         this.children = new ArrayList<>();
         this.properties = new HashMap<>();
-
+        
         this.position = Vector3.ZERO;
         this.rotation = Quaternion.IDENTITY;
         this.scale = Vector3.ONE;
         this.visible = true;
         this.enabled = true;
-
+        
         this.transformDirty = true;
-
+        
         // Register the node
         nodeRegistry.put(nodeId, this);
     }
-
+    
     /**
      * Constructs a new scene node with a specific UUID and name.
      * <p>
@@ -86,19 +86,19 @@ public class SceneNode {
         this.parent = null;
         this.children = new ArrayList<>();
         this.properties = new HashMap<>();
-
+        
         this.position = Vector3.ZERO;
         this.rotation = Quaternion.IDENTITY;
         this.scale = Vector3.ONE;
         this.visible = true;
         this.enabled = true;
-
+        
         this.transformDirty = true;
-
+        
         // Register the node
         nodeRegistry.put(nodeId, this);
     }
-
+    
     // Getters
     public UUID getNodeId() { return nodeId; }
     public String getName() { return name; }
@@ -109,7 +109,7 @@ public class SceneNode {
     public Vector3 getScale() { return scale; }
     public boolean isVisible() { return visible; }
     public boolean isEnabled() { return enabled; }
-
+    
     /**
      * Sets the position of this node relative to its parent.
      *
@@ -119,7 +119,7 @@ public class SceneNode {
         this.position = position;
         markTransformDirty();
     }
-
+    
     /**
      * Sets the rotation of this node relative to its parent.
      *
@@ -129,7 +129,7 @@ public class SceneNode {
         this.rotation = rotation;
         markTransformDirty();
     }
-
+    
     /**
      * Sets the scale of this node relative to its parent.
      *
@@ -139,7 +139,7 @@ public class SceneNode {
         this.scale = scale;
         markTransformDirty();
     }
-
+    
     /**
      * Sets the visibility of this node and its descendants.
      *
@@ -148,7 +148,7 @@ public class SceneNode {
     public void setVisible(boolean visible) {
         this.visible = visible;
     }
-
+    
     /**
      * Sets the enabled state of this node. An inactive node might be skipped
      * during updates or rendering.
@@ -158,7 +158,7 @@ public class SceneNode {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
-
+    
     /**
      * Adds a child node to this node.
      * <p>
@@ -172,16 +172,16 @@ public class SceneNode {
         if (child == null || child == this) {
             throw new IllegalArgumentException("Invalid child node");
         }
-
+        
         if (child.parent != null) {
             child.parent.removeChild(child);
         }
-
+        
         children.add(child);
         child.parent = this;
         child.markTransformDirty();
     }
-
+    
     /**
      * Removes a specific child node from this node's list of children.
      *
@@ -193,7 +193,7 @@ public class SceneNode {
             child.markTransformDirty();
         }
     }
-
+    
     /**
      * Detaches this node from its parent, making it a root node in the scene graph.
      */
@@ -202,7 +202,7 @@ public class SceneNode {
             parent.removeChild(this);
         }
     }
-
+    
     /**
      * Finds a direct child of this node by its name.
      *
@@ -217,7 +217,7 @@ public class SceneNode {
         }
         return null;
     }
-
+    
     /**
      * Finds a direct child of this node by its UUID.
      *
@@ -232,7 +232,7 @@ public class SceneNode {
         }
         return null;
     }
-
+    
     /**
      * Recursively finds a descendant of this node by its name.
      * <p>
@@ -246,17 +246,17 @@ public class SceneNode {
         if (child != null) {
             return child;
         }
-
+        
         for (SceneNode childNode : children) {
             SceneNode descendant = childNode.findDescendant(name);
             if (descendant != null) {
                 return descendant;
             }
         }
-
+        
         return null;
     }
-
+    
     /**
      * Gets the value of a custom property associated with this node.
      *
@@ -266,7 +266,7 @@ public class SceneNode {
     public Object getProperty(String key) {
         return properties.get(key);
     }
-
+    
     /**
      * Sets a custom property on this node.
      *
@@ -276,7 +276,7 @@ public class SceneNode {
     public void setProperty(String key, Object value) {
         properties.put(key, value);
     }
-
+    
     /**
      * Removes a custom property from this node.
      *
@@ -285,7 +285,7 @@ public class SceneNode {
     public void removeProperty(String key) {
         properties.remove(key);
     }
-
+    
     /**
      * Checks if this node has a custom property with the given key.
      *
@@ -295,7 +295,7 @@ public class SceneNode {
     public boolean hasProperty(String key) {
         return properties.containsKey(key);
     }
-
+    
     /**
      * Gets a copy of the map of all custom properties on this node.
      *
@@ -304,7 +304,7 @@ public class SceneNode {
     public Map<String, Object> getProperties() {
         return new HashMap<>(properties);
     }
-
+    
     /**
      * Gets the local transformation matrix of this node.
      * <p>
@@ -319,7 +319,7 @@ public class SceneNode {
         }
         return cloneMatrix(localTransform);
     }
-
+    
     /**
      * Gets the world transformation matrix of this node.
      * <p>
@@ -335,7 +335,7 @@ public class SceneNode {
         }
         return cloneMatrix(worldTransform);
     }
-
+    
     /**
      * Calculates and returns the position of this node in world space.
      *
@@ -345,7 +345,7 @@ public class SceneNode {
         double[][] world = getWorldTransform();
         return new Vector3(world[0][3], world[1][3], world[2][3]);
     }
-
+    
     /**
      * Calculates and returns the rotation of this node in world space.
      *
@@ -355,10 +355,10 @@ public class SceneNode {
         if (parent == null) {
             return rotation;
         }
-
+        
         return parent.getWorldRotation().multiply(rotation);
     }
-
+    
     /**
      * Transforms a point from this node's local space into world space.
      *
@@ -368,7 +368,7 @@ public class SceneNode {
     public Vector3 transformToWorld(Vector3 localPoint) {
         return multiplyMatrixVector(getWorldTransform(), localPoint);
     }
-
+    
     /**
      * Transforms a point from world space into this node's local space.
      *
@@ -378,7 +378,7 @@ public class SceneNode {
     public Vector3 transformToLocal(Vector3 worldPoint) {
         return multiplyMatrixVector(invertMatrix(getWorldTransform()), worldPoint);
     }
-
+    
     /**
      * Update local transformation matrix.
      */
@@ -387,11 +387,11 @@ public class SceneNode {
         double[][] translation = createTranslationMatrix(position);
         double[][] rotationMatrix = create4x4Matrix(rotation.toMatrix3());
         double[][] scaleMatrix = createScaleMatrix(scale);
-
+        
         localTransform = multiplyMatrices(translation, multiplyMatrices(rotationMatrix, scaleMatrix));
         transformDirty = false;
     }
-
+    
     /**
      * Update world transformation matrix.
      */
@@ -399,14 +399,14 @@ public class SceneNode {
         if (transformDirty || localTransform == null) {
             updateLocalTransform();
         }
-
+        
         if (parent == null) {
             worldTransform = cloneMatrix(localTransform);
         } else {
             worldTransform = multiplyMatrices(parent.getWorldTransform(), localTransform);
         }
     }
-
+    
     /**
      * Mark this node and all children as having dirty transforms.
      */
@@ -416,7 +416,7 @@ public class SceneNode {
             child.markTransformDirty();
         }
     }
-
+    
     /**
      * Calculates the depth of this node in the scene graph hierarchy.
      * <p>
@@ -433,7 +433,7 @@ public class SceneNode {
         }
         return depth;
     }
-
+    
     /**
      * Checks if this node is an ancestor of another specified node.
      *
@@ -451,7 +451,7 @@ public class SceneNode {
         }
         return false;
     }
-
+    
     /**
      * Traverses the subtree rooted at this node in a depth-first order, applying
      * a {@link NodeVisitor} to each node.
@@ -464,7 +464,7 @@ public class SceneNode {
             child.visitSubtree(visitor);
         }
     }
-
+    
     /**
      * Traverses the subtree rooted at this node in a breadth-first order, applying
      * a {@link NodeVisitor} to each node.
@@ -474,14 +474,14 @@ public class SceneNode {
     public void visitSubtreeBreadthFirst(NodeVisitor visitor) {
         Queue<SceneNode> queue = new LinkedList<>();
         queue.add(this);
-
+        
         while (!queue.isEmpty()) {
             SceneNode current = queue.poll();
             visitor.visit(current);
             queue.addAll(current.children);
         }
     }
-
+    
     /**
      * Converts this scene node and its entire subtree into an LLSD map representation.
      *
@@ -498,16 +498,16 @@ public class SceneNode {
         nodeData.put("Visible", visible);
         nodeData.put("Enabled", enabled);
         nodeData.put("Properties", new HashMap<>(properties));
-
+        
         List<Map<String, Object>> childrenData = new ArrayList<>();
         for (SceneNode child : children) {
             childrenData.add(child.toLLSD());
         }
         nodeData.put("Children", childrenData);
-
+        
         return nodeData;
     }
-
+    
     /**
      * Disposes of this node, removing it from its parent and unregistering it
      * from the global node registry. This should be called to ensure proper cleanup.
@@ -515,16 +515,16 @@ public class SceneNode {
     public void dispose() {
         // Remove from parent
         removeFromParent();
-
+        
         // Dispose all children
         for (SceneNode child : new ArrayList<>(children)) {
             child.dispose();
         }
-
+        
         // Unregister
         nodeRegistry.remove(nodeId);
     }
-
+    
     // Matrix utility methods
     private static double[][] createTranslationMatrix(Vector3 translation) {
         return new double[][]{
@@ -534,7 +534,7 @@ public class SceneNode {
             {0, 0, 0, 1}
         };
     }
-
+    
     private static double[][] createScaleMatrix(Vector3 scale) {
         return new double[][]{
             {scale.x, 0, 0, 0},
@@ -543,7 +543,7 @@ public class SceneNode {
             {0, 0, 0, 1}
         };
     }
-
+    
     private static double[][] create4x4Matrix(double[][] matrix3) {
         return new double[][]{
             {matrix3[0][0], matrix3[0][1], matrix3[0][2], 0},
@@ -552,28 +552,28 @@ public class SceneNode {
             {0, 0, 0, 1}
         };
     }
-
+    
     private static double[][] multiplyMatrices(double[][] a, double[][] b) {
         double[][] result = new double[4][4];
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                result[i][j] = a[i][0] * b[0][j] + a[i][1] * b[1][j] +
+                result[i][j] = a[i][0] * b[0][j] + a[i][1] * b[1][j] + 
                                a[i][2] * b[2][j] + a[i][3] * b[3][j];
             }
         }
         return result;
     }
-
+    
     private static Vector3 multiplyMatrixVector(double[][] matrix, Vector3 vector) {
-        double x = matrix[0][0] * vector.x + matrix[0][1] * vector.y +
+        double x = matrix[0][0] * vector.x + matrix[0][1] * vector.y + 
                    matrix[0][2] * vector.z + matrix[0][3];
-        double y = matrix[1][0] * vector.x + matrix[1][1] * vector.y +
+        double y = matrix[1][0] * vector.x + matrix[1][1] * vector.y + 
                    matrix[1][2] * vector.z + matrix[1][3];
-        double z = matrix[2][0] * vector.x + matrix[2][1] * vector.y +
+        double z = matrix[2][0] * vector.x + matrix[2][1] * vector.y + 
                    matrix[2][2] * vector.z + matrix[2][3];
         return new Vector3(x, y, z);
     }
-
+    
     private static double[][] cloneMatrix(double[][] matrix) {
         double[][] clone = new double[matrix.length][];
         for (int i = 0; i < matrix.length; i++) {
@@ -581,31 +581,31 @@ public class SceneNode {
         }
         return clone;
     }
-
+    
     private static double[][] invertMatrix(double[][] matrix) {
         // Simple 4x4 matrix inversion (for transforms only)
         // This is a simplified version - full implementation would be more robust
         double[][] result = new double[4][4];
-
+        
         // Extract translation
         Vector3 translation = new Vector3(-matrix[0][3], -matrix[1][3], -matrix[2][3]);
-
+        
         // Transpose rotation part
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 result[i][j] = matrix[j][i];
             }
         }
-
+        
         // Transform translation
         result[0][3] = result[0][0] * translation.x + result[0][1] * translation.y + result[0][2] * translation.z;
         result[1][3] = result[1][0] * translation.x + result[1][1] * translation.y + result[1][2] * translation.z;
         result[2][3] = result[2][0] * translation.x + result[2][1] * translation.y + result[2][2] * translation.z;
         result[3][3] = 1.0;
-
+        
         return result;
     }
-
+    
     /**
      * Retrieves a {@code SceneNode} from the global registry by its UUID.
      *
@@ -615,7 +615,7 @@ public class SceneNode {
     public static SceneNode getNode(UUID nodeId) {
         return nodeRegistry.get(nodeId);
     }
-
+    
     /**
      * Gets a collection of all currently registered scene nodes.
      *
@@ -624,14 +624,14 @@ public class SceneNode {
     public static Collection<SceneNode> getAllNodes() {
         return new ArrayList<>(nodeRegistry.values());
     }
-
+    
     /**
      * Clears the global node registry, removing all registered nodes.
      */
     public static void clearRegistry() {
         nodeRegistry.clear();
     }
-
+    
     /**
      * A functional interface for implementing the visitor pattern on a scene graph.
      */
@@ -643,10 +643,10 @@ public class SceneNode {
          */
         void visit(SceneNode node);
     }
-
+    
     @Override
     public String toString() {
-        return String.format("SceneNode[%s](%s) children=%d",
+        return String.format("SceneNode[%s](%s) children=%d", 
                            name, nodeId.toString().substring(0, 8), children.size());
     }
 }

@@ -65,7 +65,7 @@ filamentView.getWorldRenderer()?.connectToWorldData(
 ### Core Classes (in `graphics/filament/`)
 ```
 FilamentRenderContext.kt         8.5KB  - Engine lifecycle
-FilamentSurfaceView.kt           5.2KB  - Rendering view
+FilamentSurfaceView.kt           5.2KB  - Rendering view  
 FilamentWorldRenderer.kt         14KB   - Main orchestrator
 FilamentMaterialManager.kt       15KB   - Material system
 FilamentTextureManager.kt        5.6KB  - Texture system
@@ -564,29 +564,29 @@ fun destroy()
 ```kotlin
 class WorldActivity : AppCompatActivity() {
     private lateinit var filamentView: FilamentSurfaceView
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        
         // 1. Create Filament view
         filamentView = FilamentSurfaceView(this)
         filamentView.initializeWorldRenderer()
         setContentView(filamentView)
-
+        
         // 2. Get world renderer
         val worldRenderer = filamentView.getWorldRenderer()
-
+        
         // 3. Connect world data
         worldRenderer?.connectToWorldData(
             objectsManager = getObjectsManager(),
             userManager = getUserManager(),
             terrainData = getTerrainData()
         )
-
+        
         // 4. Set texture fetcher
         worldRenderer?.getTextureManager()
             ?.setTextureFetcher(getTextureFetcher())
-
+        
         // 5. Configure lighting
         worldRenderer?.getLightingManager()?.apply {
             updateSunLight(
@@ -594,33 +594,33 @@ class WorldActivity : AppCompatActivity() {
                 LLVector3(1.0f, 0.98f, 0.9f),
                 100000f
             )
-
+            
             createPointLight(
                 LLVector3(128f, 128f, 25f),
                 LLVector3(1.0f, 0.8f, 0.6f),
                 10000f
             )
         }
-
+        
         // 6. Set camera
         worldRenderer?.setCameraPosition(
             LLVector3(128f, 128f, 50f),
             0f, 0f
         )
-
+        
         // Done! Everything renders automatically
     }
-
+    
     override fun onResume() {
         super.onResume()
         filamentView.onResume()
     }
-
+    
     override fun onPause() {
         filamentView.onPause()
         super.onPause()
     }
-
+    
     override fun onDestroy() {
         filamentView.destroy()
         super.onDestroy()

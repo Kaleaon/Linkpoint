@@ -8,7 +8,7 @@ public enum SLSaleType {
     FS_COPY(2, "copy"),
     FS_CONTENTS(3, "cntn"),
     FS_UNKNOWN(-1, EnvironmentCompat.MEDIA_UNKNOWN);
-
+    
     private String stringCode;
     private int typeCode;
 

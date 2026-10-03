@@ -18,7 +18,7 @@ package lindenlab.llsd.viewer.secondlife.assets
  * if a type is a texture) and for getting human-readable names and MIME types.
  */
 object SLAssetType {
-
+    
     // Standard Second Life asset types
     const val TEXTURE = 0
     const val SOUND = 1
@@ -48,13 +48,13 @@ object SLAssetType {
     const val LINK_FOLDER = 25
     const val MARKETPLACE_FOLDER = 26
     const val MESH = 49
-
+    
     // Extended asset types for streaming
     const val AUDIO_STREAM = 100
     const val VIDEO_STREAM = 101
     const val TEXTURE_STREAM = 102
     const val MODEL_STREAM = 103
-
+    
     /**
      * Checks if a given asset type code corresponds to a texture type.
      *
@@ -64,13 +64,13 @@ object SLAssetType {
      */
     @JvmStatic
     fun isTextureType(assetType: Int): Boolean {
-        return assetType == TEXTURE ||
-               assetType == TEXTURE_TGA ||
-               assetType == IMAGE_TGA ||
+        return assetType == TEXTURE || 
+               assetType == TEXTURE_TGA || 
+               assetType == IMAGE_TGA || 
                assetType == IMAGE_JPEG ||
                assetType == TEXTURE_STREAM
     }
-
+    
     /**
      * Checks if a given asset type code corresponds to a sound type.
      *
@@ -80,11 +80,11 @@ object SLAssetType {
      */
     @JvmStatic
     fun isSoundType(assetType: Int): Boolean {
-        return assetType == SOUND ||
+        return assetType == SOUND || 
                assetType == SOUND_WAV ||
                assetType == AUDIO_STREAM
     }
-
+    
     /**
      * Checks if a given asset type code corresponds to a streaming type.
      *
@@ -96,7 +96,7 @@ object SLAssetType {
     fun isStreamType(assetType: Int): Boolean {
         return assetType in AUDIO_STREAM..MODEL_STREAM
     }
-
+    
     /**
      * Gets the human-readable name for a given asset type code.
      *
@@ -142,7 +142,7 @@ object SLAssetType {
             else -> "Unknown ($assetType)"
         }
     }
-
+    
     /**
      * Gets the most appropriate MIME type for a given asset type code.
      *

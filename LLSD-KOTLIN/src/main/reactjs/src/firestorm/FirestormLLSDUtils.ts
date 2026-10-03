@@ -1,6 +1,6 @@
 /**
  * Firestorm LLSD Extensions - TypeScript Implementation
- *
+ * 
  * Based on Java implementation and Firestorm viewer functionality
  * Copyright (C) 2024 Linden Lab
  */
@@ -301,7 +301,7 @@ export class FirestormLLSDUtils {
         for (let i = 0; i < maxLength; i++) {
             const v = i < versionParts.length ? versionParts[i] : 0;
             const m = i < minParts.length ? minParts[i] : 0;
-
+            
             if (v > m) return true;
             if (v < m) return false;
         }

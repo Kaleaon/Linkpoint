@@ -23,7 +23,7 @@ public enum SLInventoryType {
     IT_MESH(22, "mesh", "Mesh"),
     IT_WIDGET(23, "widget", "Widget"),
     IT_UNKNOWN(-1, EnvironmentCompat.MEDIA_UNKNOWN, "Unknown");
-
+    
     private static final Map<String, SLInventoryType> tagMap = new HashMap(valuesCustom().length * 2);
     private String readableName;
     private String stringCode;

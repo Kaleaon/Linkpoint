@@ -10,20 +10,20 @@ import android.content.SharedPreferences
 
 /**
  * Secure Storage Manager - Provides encrypted storage for sensitive data.
- *
+ * 
  * Uses Android Keystore for key management and EncryptedSharedPreferences
  * for secure data storage.
- *
+ * 
  * Thread-safe: All operations are thread-safe
- *
+ * 
  * @property context Application context
  */
 class SecureStorage(private val context: Context) {
-
+    
     companion object {
         private const val TAG = "SecureStorage"
         private const val PREFS_FILE_NAME = "linkpoint_secure_prefs"
-
+        
         // Keys for common stored values
         const val KEY_USERNAME = "stored_username"
         const val KEY_PASSWORD = "stored_password"
@@ -32,10 +32,10 @@ class SecureStorage(private val context: Context) {
         const val KEY_START_LOCATION = "start_location"
         const val KEY_AVATAR_ID = "avatar_id"
     }
-
+    
     private val masterKey: MasterKey
     private val encryptedPrefs: SharedPreferences
-
+    
     init {
         try {
             // Create or retrieve master key from Android Keystore
@@ -52,7 +52,7 @@ class SecureStorage(private val context: Context) {
                         .build()
                 )
                 .build()
-
+            
             // Create encrypted SharedPreferences
             encryptedPrefs = EncryptedSharedPreferences.create(
                 context,
@@ -61,14 +61,14 @@ class SecureStorage(private val context: Context) {
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )
-
+            
             Log.d(TAG, "SecureStorage initialized successfully")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize SecureStorage", e)
             throw SecurityException("Cannot initialize secure storage", e)
         }
     }
-
+    
     /**
      * Save a string value securely
      */
@@ -84,7 +84,7 @@ class SecureStorage(private val context: Context) {
             Log.e(TAG, "Failed to save value for key: $key", e)
         }
     }
-
+    
     /**
      * Retrieve a string value securely
      */
@@ -96,7 +96,7 @@ class SecureStorage(private val context: Context) {
             defaultValue
         }
     }
-
+    
     /**
      * Save an integer value securely
      */
@@ -108,7 +108,7 @@ class SecureStorage(private val context: Context) {
             Log.e(TAG, "Failed to save int value for key: $key", e)
         }
     }
-
+    
     /**
      * Retrieve an integer value securely
      */
@@ -120,7 +120,7 @@ class SecureStorage(private val context: Context) {
             defaultValue
         }
     }
-
+    
     /**
      * Save a long value securely
      */
@@ -132,7 +132,7 @@ class SecureStorage(private val context: Context) {
             Log.e(TAG, "Failed to save long value for key: $key", e)
         }
     }
-
+    
     /**
      * Retrieve a long value securely
      */
@@ -144,7 +144,7 @@ class SecureStorage(private val context: Context) {
             defaultValue
         }
     }
-
+    
     /**
      * Save a boolean value securely
      */
@@ -156,7 +156,7 @@ class SecureStorage(private val context: Context) {
             Log.e(TAG, "Failed to save boolean value for key: $key", e)
         }
     }
-
+    
     /**
      * Retrieve a boolean value securely
      */
@@ -168,7 +168,7 @@ class SecureStorage(private val context: Context) {
             defaultValue
         }
     }
-
+    
     /**
      * Remove a specific key
      */
@@ -180,7 +180,7 @@ class SecureStorage(private val context: Context) {
             Log.e(TAG, "Failed to remove key: $key", e)
         }
     }
-
+    
     /**
      * Clear all stored data
      */
@@ -192,7 +192,7 @@ class SecureStorage(private val context: Context) {
             Log.e(TAG, "Failed to clear all data", e)
         }
     }
-
+    
     /**
      * Check if a key exists
      */
@@ -204,7 +204,7 @@ class SecureStorage(private val context: Context) {
             false
         }
     }
-
+    
     /**
      * Get all keys
      */

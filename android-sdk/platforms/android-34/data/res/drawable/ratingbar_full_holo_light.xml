@@ -19,3 +19,4 @@
     <item android:id="@+android:id/secondaryProgress" android:drawable="@android:drawable/ratingbar_full_empty_holo_light" />
     <item android:id="@+android:id/progress" android:drawable="@android:drawable/ratingbar_full_filled_holo_light" />
 </layer-list>
+

@@ -42,7 +42,7 @@ System.setProperty("java.net.preferIPv6Addresses", "false");
 
 ## Legal Notice
 
-This decompiled code is provided for educational purposes under fair use for interoperability and research.
+This decompiled code is provided for educational purposes under fair use for interoperability and research. 
 Lumiya is © Alina Lyvette. All rights reserved.
 
 ## Directory Structure

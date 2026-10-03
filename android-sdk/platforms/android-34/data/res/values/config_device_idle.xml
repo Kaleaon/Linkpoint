@@ -126,3 +126,4 @@
     <!-- Default for DeviceIdleController.Constants.USE_WINDOW_ALARMS -->
     <bool name="device_idle_use_window_alarms">true</bool>
 </resources>
+

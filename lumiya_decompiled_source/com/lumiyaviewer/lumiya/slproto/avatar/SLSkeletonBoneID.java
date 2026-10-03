@@ -163,7 +163,7 @@ public enum SLSkeletonBoneID {
     mHindLimb2Right(true, true, 130),
     mHindLimb3Right(true, true, 131),
     mHindLimb4Right(true, true, 132);
-
+    
     public static final int NUM_ANIMATED = 133;
     public static final int NUM_BASE_BONES = 52;
     public static final int NUM_BASE_JOINTS = 26;

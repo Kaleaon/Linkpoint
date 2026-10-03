@@ -11,23 +11,23 @@ import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Comprehensive protocol diagnostics for debugging Linkpoint ↔ Second Life communication.
- *
+ * 
  * This provides detailed logging and statistics collection to help diagnose:
  * - Capability initialization failures
  * - UDP packet issues (sending but not receiving)
  * - Message ID decoding problems
  * - Protocol version mismatches
- *
+ * 
  * Based on the diagnostic needs identified in the original debug report:
  * - "PACKETS SENT BUT NONE RECEIVED!"
  * - "Seed capability returned empty response"
  * - "Unknown(0x-FE7D)" message types
  */
 object ProtocolDiagnostics {
-
+    
     private const val TAG = "ProtocolDiag"
     private const val EARLY_WARNING_GRACE_MS = 15_000L
-
+    
     // Packet statistics
     private val packetsSent = AtomicLong(0)
     private val packetsReceived = AtomicLong(0)
@@ -35,26 +35,26 @@ object ProtocolDiagnostics {
     private val bytesReceived = AtomicLong(0)
     private val parseErrors = AtomicInteger(0)
     private val unknownMessages = AtomicInteger(0)
-
+    
     // Message type tracking
     private val messageTypeCounts = ConcurrentHashMap<Int, AtomicInteger>()
     private val unknownMessageIds = ConcurrentHashMap<Int, AtomicInteger>()
-
+    
     // Recent packet history (using ArrayDeque for O(1) removeFirst operations)
     private const val MAX_HISTORY_SIZE = 100
     private val packetHistory = java.util.ArrayDeque<PacketRecord>(MAX_HISTORY_SIZE + 10)
     private val historyLock = Any()
-
+    
     // Timing
     private var sessionStartTime: Long = 0
     private var lastPacketSentTime: Long = 0
     private var lastPacketReceivedTime: Long = 0
-
+    
     // Connection state
     @Volatile
     var isConnected: Boolean = false
         private set
-
+    
     @Volatile
     var connectionPhase: String = "DISCONNECTED"
         private set
@@ -65,7 +65,7 @@ object ProtocolDiagnostics {
         val provisional = elapsedMs != null && elapsedMs < EARLY_WARNING_GRACE_MS
         return provisional to timing
     }
-
+    
     /**
      * Record for a single packet event.
      */
@@ -81,7 +81,7 @@ object ProtocolDiagnostics {
     ) {
         val age: Long
             get() = System.currentTimeMillis() - timestamp
-
+        
         fun formatAge(): String {
             val ageMs = age
             return when {
@@ -91,11 +91,11 @@ object ProtocolDiagnostics {
             }
         }
     }
-
+    
     enum class PacketDirection {
         SENT, RECEIVED
     }
-
+    
     /**
      * Start a new diagnostic session.
      */
@@ -108,7 +108,7 @@ object ProtocolDiagnostics {
         Log.i(TAG, "║ Time: ${formatTimestamp(sessionStartTime)}")
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
     }
-
+    
     /**
      * Reset all counters.
      */
@@ -127,10 +127,10 @@ object ProtocolDiagnostics {
         lastPacketSentTime = 0
         lastPacketReceivedTime = 0
     }
-
+    
     /**
      * Format raw bytes as a hex string preview.
-     *
+     * 
      * @param bytes The raw bytes
      * @param maxBytes Maximum number of bytes to include (default 24)
      * @return Hex string like "00 01 02 03"
@@ -139,7 +139,7 @@ object ProtocolDiagnostics {
         if (bytes == null || bytes.isEmpty()) return null
         return bytes.take(maxBytes).joinToString(" ") { "%02X".format(it) }
     }
-
+    
     /**
      * Update connection state.
      */
@@ -148,7 +148,7 @@ object ProtocolDiagnostics {
         connectionPhase = phase
         Log.d(TAG, "Connection state: $phase (connected=$connected)")
     }
-
+    
     /**
      * Record a packet being sent.
      */
@@ -161,9 +161,9 @@ object ProtocolDiagnostics {
         packetsSent.incrementAndGet()
         bytesSent.addAndGet(size.toLong())
         lastPacketSentTime = System.currentTimeMillis()
-
+        
         incrementMessageCount(messageId)
-
+        
         val record = PacketRecord(
             timestamp = lastPacketSentTime,
             direction = PacketDirection.SENT,
@@ -173,14 +173,14 @@ object ProtocolDiagnostics {
             sequenceNumber = sequenceNumber,
             hexPreview = formatHexPreview(rawBytes)
         )
-
+        
         addToHistory(record)
-
+        
         if (LinkpointTranslationLayer.config.verboseLogging) {
             Log.v(TAG, "→ ${record.messageName} (seq=$sequenceNumber, ${size}B)")
         }
     }
-
+    
     /**
      * Record a packet being received.
      */
@@ -193,9 +193,9 @@ object ProtocolDiagnostics {
         packetsReceived.incrementAndGet()
         bytesReceived.addAndGet(size.toLong())
         lastPacketReceivedTime = System.currentTimeMillis()
-
+        
         incrementMessageCount(messageId)
-
+        
         val record = PacketRecord(
             timestamp = lastPacketReceivedTime,
             direction = PacketDirection.RECEIVED,
@@ -205,28 +205,28 @@ object ProtocolDiagnostics {
             sequenceNumber = sequenceNumber,
             hexPreview = formatHexPreview(rawBytes)
         )
-
+        
         addToHistory(record)
-
+        
         if (LinkpointTranslationLayer.config.verboseLogging) {
             Log.v(TAG, "← ${record.messageName} (seq=$sequenceNumber, ${size}B)")
         }
     }
-
+    
     /**
      * Record an unknown message ID.
      */
     fun recordUnknownMessage(messageId: Int, rawBytes: ByteArray? = null) {
         unknownMessages.incrementAndGet()
         unknownMessageIds.getOrPut(messageId) { AtomicInteger(0) }.incrementAndGet()
-
+        
         Log.w(TAG, "Unknown message ID: $messageId (0x${com.linkpoint.protocol.messages.MessageIdNameRegistry.formatHex(messageId)})")
-
+        
         // Log additional context for debugging
         if (rawBytes != null && rawBytes.size >= 4) {
             val hexPreview = formatHexPreview(rawBytes, 16)
             Log.d(TAG, "  Raw header: $hexPreview")
-
+            
             // Try Linkpoint decoding for comparison
             val protocolDecoded = MessageTranslation.decodeMessageId(rawBytes, 0)
             if (protocolDecoded != null) {
@@ -236,7 +236,7 @@ object ProtocolDiagnostics {
             }
         }
     }
-
+    
     /**
      * Record a parse error.
      */
@@ -244,11 +244,11 @@ object ProtocolDiagnostics {
         parseErrors.incrementAndGet()
         Log.e(TAG, "Parse error: $context", error)
     }
-
+    
     private fun incrementMessageCount(messageId: Int) {
         messageTypeCounts.getOrPut(messageId) { AtomicInteger(0) }.incrementAndGet()
     }
-
+    
     private fun addToHistory(record: PacketRecord) {
         synchronized(historyLock) {
             packetHistory.addLast(record)
@@ -257,19 +257,19 @@ object ProtocolDiagnostics {
             }
         }
     }
-
+    
     /**
      * Generate a comprehensive diagnostic report.
      */
     fun generateReport(): String {
         val sb = StringBuilder()
         val now = System.currentTimeMillis()
-
+        
         sb.appendLine("╔══════════════════════════════════════════════════════════════════╗")
         sb.appendLine("║               PROTOCOL DIAGNOSTICS REPORT                         ║")
         sb.appendLine("╚══════════════════════════════════════════════════════════════════╝")
         sb.appendLine()
-
+        
         // Session info
         sb.appendLine("┌──────────────────────────────────────────────────────────────────┐")
         sb.appendLine("│ SESSION INFORMATION                                               │")
@@ -280,7 +280,7 @@ object ProtocolDiagnostics {
         sb.appendLine("Connection Phase: $connectionPhase")
         sb.appendLine("Is Connected: $isConnected")
         sb.appendLine()
-
+        
         // Packet statistics
         sb.appendLine("┌──────────────────────────────────────────────────────────────────┐")
         sb.appendLine("│ PACKET STATISTICS                                                 │")
@@ -292,7 +292,7 @@ object ProtocolDiagnostics {
         sb.appendLine("Last Sent: ${formatTimeAgo(lastPacketSentTime)}")
         sb.appendLine("Last Received: ${formatTimeAgo(lastPacketReceivedTime)}")
         sb.appendLine()
-
+        
         // Check for common issues
         if (packetsSent.get() > 0 && packetsReceived.get() == 0L) {
             val (provisional, timing) = formatUdpConnectedWarningContext()
@@ -308,14 +308,14 @@ object ProtocolDiagnostics {
             sb.appendLine("   - Simulator not responding")
             sb.appendLine()
         }
-
+        
         // Error statistics
         sb.appendLine("┌──────────────────────────────────────────────────────────────────┐")
         sb.appendLine("│ ERROR STATISTICS                                                  │")
         sb.appendLine("└──────────────────────────────────────────────────────────────────┘")
         sb.appendLine("Parse Errors: ${parseErrors.get()}")
         sb.appendLine("Unknown Messages: ${unknownMessages.get()}")
-
+        
         if (unknownMessageIds.isNotEmpty()) {
             sb.appendLine()
             sb.appendLine("Unknown Message IDs:")
@@ -328,7 +328,7 @@ object ProtocolDiagnostics {
                 }
         }
         sb.appendLine()
-
+        
         // Message type breakdown
         sb.appendLine("┌──────────────────────────────────────────────────────────────────┐")
         sb.appendLine("│ MESSAGE TYPE BREAKDOWN (top 15)                                   │")
@@ -341,7 +341,7 @@ object ProtocolDiagnostics {
                 sb.appendLine("  $name: ${count.get()}")
             }
         sb.appendLine()
-
+        
         // Recent packet history
         sb.appendLine("┌──────────────────────────────────────────────────────────────────┐")
         sb.appendLine("│ RECENT PACKET HISTORY (last 20)                                   │")
@@ -356,15 +356,15 @@ object ProtocolDiagnostics {
                 }
             }
         }
-
+        
         sb.appendLine()
         sb.appendLine("═══════════════════════════════════════════════════════════════════")
         sb.appendLine("End of Protocol Diagnostics Report")
         sb.appendLine("═══════════════════════════════════════════════════════════════════")
-
+        
         return sb.toString()
     }
-
+    
     /**
      * Log the diagnostic report to the console.
      */
@@ -374,7 +374,7 @@ object ProtocolDiagnostics {
             Log.i(TAG, line)
         }
     }
-
+    
     /**
      * Get summary diagnostics data.
      */
@@ -398,7 +398,7 @@ object ProtocolDiagnostics {
                 .associate { MessageTranslation.KnownMessages.getName(it.key) to it.value.get() }
         )
     }
-
+    
     /**
      * Summary data class for diagnostics.
      */
@@ -417,13 +417,13 @@ object ProtocolDiagnostics {
         val messageTypeCount: Int,
         val topMessageTypes: Map<String, Int>
     )
-
+    
     // Formatting helpers
-
+    
     private fun formatTimestamp(timestamp: Long): String {
         return SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z", Locale.US).format(Date(timestamp))
     }
-
+    
     private fun formatDuration(durationMs: Long): String {
         if (durationMs < 0) return "N/A"
         val seconds = durationMs / 1000
@@ -435,7 +435,7 @@ object ProtocolDiagnostics {
             else -> "${seconds}s"
         }
     }
-
+    
     private fun formatTimeAgo(timestamp: Long): String {
         if (timestamp == 0L) return "Never"
         val ago = System.currentTimeMillis() - timestamp
@@ -446,7 +446,7 @@ object ProtocolDiagnostics {
             else -> String.format("%.1fh ago", ago / 3600000.0)
         }
     }
-
+    
     private fun formatBytes(bytes: Long): String {
         return when {
             bytes < 1024 -> "$bytes B"

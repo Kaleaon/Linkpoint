@@ -190,7 +190,7 @@ class SceneManager(
             }
         }
     }
-
+    
     /**
      * Add or update an object in the scene
      */
@@ -203,7 +203,7 @@ class SceneManager(
         parentId: UUID? = null
     ) {
         val existing = sceneObjects[objectId]
-
+        
         if (existing != null) {
             // Update existing object
             existing.position = position
@@ -223,13 +223,13 @@ class SceneManager(
                 parentId = parentId
             )
             sceneObjects[objectId] = obj
-
+            
             // Add to scene (will be renderable once mesh is loaded)
             scene.addEntity(entity)
             Log.d(TAG, "Added object: $objectId at $position")
         }
     }
-
+    
     /**
      * Remove an object from the scene
      */
@@ -240,7 +240,7 @@ class SceneManager(
             Log.d(TAG, "Removed object: $objectId")
         }
     }
-
+    
     /**
      * Add or update an avatar in the scene
      */
@@ -767,7 +767,7 @@ class SceneManager(
 
         return AvatarMesh(vb, ib)
     }
-
+    
     /**
      * Remove an avatar from the scene
      */
@@ -1036,7 +1036,7 @@ class SceneManager(
             Log.d(TAG, "Removed avatar: $agentId")
         }
     }
-
+    
     /**
      * Set object renderable (mesh loaded)
      */
@@ -1051,7 +1051,7 @@ class SceneManager(
             updateTransform(obj)
         }
     }
-
+    
     /**
      * Update camera position and target
      */
@@ -1059,7 +1059,7 @@ class SceneManager(
         cameraPosition = position
         cameraTarget = target
     }
-
+    
     /**
      * Get visible objects within range of camera. If [maxDistance] is not
      * supplied, falls back to the wired [DrawDistanceManager] (via
@@ -1092,34 +1092,34 @@ class SceneManager(
             avatar.position.distance(cameraPosition) <= effective
         }.sortedBy { it.position.distance(cameraPosition) }
     }
-
+    
     /**
      * Find object by local ID
      */
     fun findByLocalId(localId: Int): SceneObject? {
         return sceneObjects.values.find { it.localId == localId }
     }
-
+    
     /**
      * Get object by UUID
      */
     fun getObject(objectId: UUID): SceneObject? = sceneObjects[objectId]
-
+    
     /**
      * Get avatar by UUID
      */
     fun getAvatar(agentId: UUID): AvatarObject? = avatars[agentId]
-
+    
     /**
      * Get all objects
      */
     fun getAllObjects(): Collection<SceneObject> = sceneObjects.values
-
+    
     /**
      * Get all avatars
      */
     fun getAllAvatars(): Collection<AvatarObject> = avatars.values
-
+    
     /**
      * Clear all objects and avatars
      */
@@ -1129,7 +1129,7 @@ class SceneManager(
             entityManager.destroy(obj.entity)
         }
         sceneObjects.clear()
-
+        
         avatars.values.forEach { avatar ->
             avatar.bodySegmentEntities.forEach { child ->
                 scene.removeEntity(child)
@@ -1140,10 +1140,10 @@ class SceneManager(
             entityManager.destroy(avatar.entity)
         }
         avatars.clear()
-
+        
         Log.i(TAG, "Scene cleared")
     }
-
+    
     private fun updateTransform(obj: SceneObject) {
         val transformManager = engine.transformManager
         val instance = transformManager.getInstance(obj.entity)
@@ -1153,7 +1153,7 @@ class SceneManager(
             transformManager.setTransform(instance, matrix)
         }
     }
-
+    
     private fun updateTransform(avatar: AvatarObject) {
         val transformManager = engine.transformManager
         val instance = transformManager.getInstance(avatar.entity)
@@ -1170,7 +1170,7 @@ class SceneManager(
             transformManager.setTransform(instance, matrix)
         }
     }
-
+    
     private fun buildTransformMatrix(
         position: LLVector3,
         rotation: LLQuaternion,
@@ -1182,7 +1182,7 @@ class SceneManager(
         val y = rotation.y
         val z = rotation.z
         val w = rotation.w
-
+        
         val x2 = x + x
         val y2 = y + y
         val z2 = z + z
@@ -1195,22 +1195,22 @@ class SceneManager(
         val wx = w * x2
         val wy = w * y2
         val wz = w * z2
-
+        
         out[0] = (1 - (yy + zz)) * scale.x
         out[1] = (xy + wz) * scale.x
         out[2] = (xz - wy) * scale.x
         out[3] = 0f
-
+        
         out[4] = (xy - wz) * scale.y
         out[5] = (1 - (xx + zz)) * scale.y
         out[6] = (yz + wx) * scale.y
         out[7] = 0f
-
+        
         out[8] = (xz + wy) * scale.z
         out[9] = (yz - wx) * scale.z
         out[10] = (1 - (xx + yy)) * scale.z
         out[11] = 0f
-
+        
         out[12] = position.x
         out[13] = position.y
         out[14] = position.z

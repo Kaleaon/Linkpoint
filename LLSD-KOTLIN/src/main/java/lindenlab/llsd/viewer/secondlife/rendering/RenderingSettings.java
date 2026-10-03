@@ -14,22 +14,22 @@ class PerformanceSettings {
     private boolean adaptiveQualityEnabled = false;
     private int maxCPUUsage = 80; // percentage
     private long maxMemoryUsage = 2L * 1024 * 1024 * 1024; // 2GB
-
+    
     public void setTargetFPS(int fps) { this.targetFPS = fps; }
     public int getTargetFPS() { return targetFPS; }
-
+    
     public void setVSync(boolean vsync) { this.vSync = vsync; }
     public boolean isVSync() { return vSync; }
-
+    
     public void setAdaptiveQualityEnabled(boolean enabled) { this.adaptiveQualityEnabled = enabled; }
     public boolean isAdaptiveQualityEnabled() { return adaptiveQualityEnabled; }
-
+    
     public void setMaxCPUUsage(int usage) { this.maxCPUUsage = usage; }
     public int getMaxCPUUsage() { return maxCPUUsage; }
-
+    
     public void setMaxMemoryUsage(long memory) { this.maxMemoryUsage = memory; }
     public long getMaxMemoryUsage() { return maxMemoryUsage; }
-
+    
     public void applySetting(String setting, Object value) {
         switch (setting.toLowerCase()) {
             case "targetfps":
@@ -40,7 +40,7 @@ class PerformanceSettings {
                 break;
         }
     }
-
+    
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("targetFPS", targetFPS);
@@ -48,7 +48,7 @@ class PerformanceSettings {
         map.put("adaptiveQualityEnabled", adaptiveQualityEnabled);
         return map;
     }
-
+    
     public void fromMap(Map<String, Object> map) {
         if (map.containsKey("targetFPS")) setTargetFPS(((Number) map.get("targetFPS")).intValue());
         if (map.containsKey("vSync")) setVSync((Boolean) map.get("vSync"));
@@ -64,25 +64,25 @@ class EffectsSettings {
     private boolean motionBlur = false;
     private boolean depthOfField = false;
     private boolean screenSpaceReflections = true;
-
+    
     public void setEffectsEnabled(boolean enabled) { this.effectsEnabled = enabled; }
     public boolean isEffectsEnabled() { return effectsEnabled; }
-
+    
     public void setEffectsQuality(float quality) { this.effectsQuality = quality; }
     public float getEffectsQuality() { return effectsQuality; }
-
+    
     public void setBloom(boolean bloom) { this.bloom = bloom; }
     public boolean isBloom() { return bloom; }
-
+    
     public void setMotionBlur(boolean blur) { this.motionBlur = blur; }
     public boolean isMotionBlur() { return motionBlur; }
-
+    
     public void setDepthOfField(boolean dof) { this.depthOfField = dof; }
     public boolean isDepthOfField() { return depthOfField; }
-
+    
     public void setScreenSpaceReflections(boolean ssr) { this.screenSpaceReflections = ssr; }
     public boolean isScreenSpaceReflections() { return screenSpaceReflections; }
-
+    
     public void applySetting(String setting, Object value) {
         switch (setting.toLowerCase()) {
             case "enabled":
@@ -93,7 +93,7 @@ class EffectsSettings {
                 break;
         }
     }
-
+    
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("effectsEnabled", effectsEnabled);
@@ -102,7 +102,7 @@ class EffectsSettings {
         map.put("motionBlur", motionBlur);
         return map;
     }
-
+    
     public void fromMap(Map<String, Object> map) {
         if (map.containsKey("effectsEnabled")) setEffectsEnabled((Boolean) map.get("effectsEnabled"));
         if (map.containsKey("effectsQuality")) setEffectsQuality(((Number) map.get("effectsQuality")).floatValue());
@@ -118,16 +118,16 @@ class TextureSettings {
     private int anisotropyLevel = 16;
     private boolean mipmapping = true;
     private boolean textureCompression = true;
-
+    
     public void setTextureQuality(AdvancedRenderingSystem.TextureQuality quality) { this.textureQuality = quality; }
     public AdvancedRenderingSystem.TextureQuality getTextureQuality() { return textureQuality; }
-
+    
     public void setAnisotropicFiltering(boolean filtering) { this.anisotropicFiltering = filtering; }
     public boolean isAnisotropicFiltering() { return anisotropicFiltering; }
-
+    
     public void setAnisotropyLevel(int level) { this.anisotropyLevel = level; }
     public int getAnisotropyLevel() { return anisotropyLevel; }
-
+    
     public void applySetting(String setting, Object value) {
         switch (setting.toLowerCase()) {
             case "quality":
@@ -141,7 +141,7 @@ class TextureSettings {
                 break;
         }
     }
-
+    
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("textureQuality", textureQuality.name());
@@ -149,7 +149,7 @@ class TextureSettings {
         map.put("anisotropyLevel", anisotropyLevel);
         return map;
     }
-
+    
     public void fromMap(Map<String, Object> map) {
         if (map.containsKey("textureQuality")) {
             try {
@@ -169,16 +169,16 @@ class ShadowSettings {
     private AdvancedRenderingSystem.ShadowQuality shadowQuality = AdvancedRenderingSystem.ShadowQuality.MEDIUM;
     private int shadowDistance = 128;
     private float shadowBias = 0.005f;
-
+    
     public void setShadowsEnabled(boolean enabled) { this.shadowsEnabled = enabled; }
     public boolean isShadowsEnabled() { return shadowsEnabled; }
-
+    
     public void setShadowQuality(AdvancedRenderingSystem.ShadowQuality quality) { this.shadowQuality = quality; }
     public AdvancedRenderingSystem.ShadowQuality getShadowQuality() { return shadowQuality; }
-
+    
     public void setShadowDistance(int distance) { this.shadowDistance = distance; }
     public int getShadowDistance() { return shadowDistance; }
-
+    
     public void applySetting(String setting, Object value) {
         switch (setting.toLowerCase()) {
             case "enabled":
@@ -186,7 +186,7 @@ class ShadowSettings {
                 break;
         }
     }
-
+    
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("shadowsEnabled", shadowsEnabled);
@@ -194,7 +194,7 @@ class ShadowSettings {
         map.put("shadowDistance", shadowDistance);
         return map;
     }
-
+    
     public void fromMap(Map<String, Object> map) {
         if (map.containsKey("shadowsEnabled")) setShadowsEnabled((Boolean) map.get("shadowsEnabled"));
         if (map.containsKey("shadowQuality")) {
@@ -214,13 +214,13 @@ class MeshSettings {
     private int maxLodLevel = 4;
     private boolean meshStreaming = true;
     private int meshBandwidth = 500; // KB/s
-
+    
     public void setLodBias(float bias) { this.lodBias = bias; }
     public float getLodBias() { return lodBias; }
-
+    
     public void setMaxLodLevel(int level) { this.maxLodLevel = level; }
     public int getMaxLodLevel() { return maxLodLevel; }
-
+    
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("lodBias", lodBias);
@@ -228,7 +228,7 @@ class MeshSettings {
         map.put("meshStreaming", meshStreaming);
         return map;
     }
-
+    
     public void fromMap(Map<String, Object> map) {
         if (map.containsKey("lodBias")) setLodBias(((Number) map.get("lodBias")).floatValue());
         if (map.containsKey("maxLodLevel")) setMaxLodLevel(((Number) map.get("maxLodLevel")).intValue());
@@ -242,13 +242,13 @@ class AvatarSettings {
     private int avatarLodBias = 0;
     private boolean avatarImpostors = true;
     private int impostorDistance = 64;
-
+    
     public void setMaxVisibleAvatars(int max) { this.maxVisibleAvatars = max; }
     public int getMaxVisibleAvatars() { return maxVisibleAvatars; }
-
+    
     public void setAvatarLodBias(int bias) { this.avatarLodBias = bias; }
     public int getAvatarLodBias() { return avatarLodBias; }
-
+    
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("maxVisibleAvatars", maxVisibleAvatars);
@@ -256,7 +256,7 @@ class AvatarSettings {
         map.put("avatarImpostors", avatarImpostors);
         return map;
     }
-
+    
     public void fromMap(Map<String, Object> map) {
         if (map.containsKey("maxVisibleAvatars")) setMaxVisibleAvatars(((Number) map.get("maxVisibleAvatars")).intValue());
         if (map.containsKey("avatarLodBias")) setAvatarLodBias(((Number) map.get("avatarLodBias")).intValue());
@@ -269,13 +269,13 @@ class ParticleSettings {
     private int maxParticles = 2000;
     private float particleQuality = 0.6f;
     private boolean particlePhysics = true;
-
+    
     public void setMaxParticles(int max) { this.maxParticles = max; }
     public int getMaxParticles() { return maxParticles; }
-
+    
     public void setParticleQuality(float quality) { this.particleQuality = quality; }
     public float getParticleQuality() { return particleQuality; }
-
+    
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("maxParticles", maxParticles);
@@ -283,7 +283,7 @@ class ParticleSettings {
         map.put("particlePhysics", particlePhysics);
         return map;
     }
-
+    
     public void fromMap(Map<String, Object> map) {
         if (map.containsKey("maxParticles")) setMaxParticles(((Number) map.get("maxParticles")).intValue());
         if (map.containsKey("particleQuality")) setParticleQuality(((Number) map.get("particleQuality")).floatValue());
@@ -322,11 +322,11 @@ class PerformanceMonitor {
     public void startMonitoring() {
         // Start performance monitoring
     }
-
+    
     public void stopMonitoring() {
         // Stop performance monitoring
     }
-
+    
     public void shutdown() {
         // Cleanup monitoring resources
     }
@@ -334,7 +334,7 @@ class PerformanceMonitor {
 
 class PerformanceMetrics {
     private int currentFPS = 60;
-
+    
     public int getCurrentFPS() { return currentFPS; }
     public void setCurrentFPS(int fps) { this.currentFPS = fps; }
 }

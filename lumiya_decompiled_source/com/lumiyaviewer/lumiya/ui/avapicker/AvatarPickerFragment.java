@@ -86,7 +86,7 @@ public abstract class AvatarPickerFragment extends FragmentWithTitle implements 
         Recent(R.drawable.ic_tab_card),
         Friends(R.drawable.ic_tab_contacts),
         Nearby(R.drawable.ic_tab_target);
-
+        
         public final int drawableId;
 
         ContactListType(int i) {

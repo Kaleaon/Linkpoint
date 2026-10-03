@@ -49,3 +49,4 @@ class TextureFormatPolicyTest {
         assertFalse(decision.useEtcpakPath)
     }
 }
+

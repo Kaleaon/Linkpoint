@@ -13,28 +13,28 @@ import com.linkpoint.R
 
 /**
  * Terms of Service Activity
- *
+ * 
  * Based on the reference viewer's approach: Users must accept Second Life's
  * Terms of Service before their first login.
- *
+ * 
  * This is similar to how the reference viewer handles ToS acceptance - it shows
  * the ToS inline and requires explicit acceptance before proceeding.
  */
 class TosActivity : AppCompatActivity() {
-
+    
     companion object {
         private const val PREFS_NAME = "tos_prefs"
         private const val KEY_TOS_ACCEPTED = "tos_accepted"
         private const val KEY_TOS_VERSION = "tos_version"
         private const val KEY_TOS_ACCEPT_DATE = "tos_accept_date"
-
+        
         // Current ToS version - increment when ToS changes require re-acceptance
         private const val CURRENT_TOS_VERSION = 1
-
+        
         // Second Life ToS URL
         private const val TOS_URL = "https://www.lindenlab.com/tos"
         private const val COMMUNITY_STANDARDS_URL = "https://www.lindenlab.com/legal/community-standards"
-
+        
         /**
          * Check if user has accepted current ToS version
          */
@@ -43,7 +43,7 @@ class TosActivity : AppCompatActivity() {
             val acceptedVersion = prefs.getInt(KEY_TOS_VERSION, 0)
             return prefs.getBoolean(KEY_TOS_ACCEPTED, false) && acceptedVersion >= CURRENT_TOS_VERSION
         }
-
+        
         /**
          * Record ToS acceptance
          * Uses commit() instead of apply() to ensure synchronous persistence
@@ -57,7 +57,7 @@ class TosActivity : AppCompatActivity() {
                 .putLong(KEY_TOS_ACCEPT_DATE, System.currentTimeMillis())
                 .commit() // Use commit() for critical ToS data to ensure synchronous write
         }
-
+        
         /**
          * Get ToS acceptance date
          */
@@ -65,7 +65,7 @@ class TosActivity : AppCompatActivity() {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             return prefs.getLong(KEY_TOS_ACCEPT_DATE, 0)
         }
-
+        
         /**
          * Create intent to launch ToS activity
          */
@@ -75,13 +75,13 @@ class TosActivity : AppCompatActivity() {
             }
         }
     }
-
+    
     private lateinit var webView: WebView
     private lateinit var acceptButton: Button
     private lateinit var declineButton: Button
-
+    
     private var requireAcceptance = true
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tos)
@@ -104,15 +104,15 @@ class TosActivity : AppCompatActivity() {
             }
         })
     }
-
+    
     private fun setupViews() {
         webView = findViewById(R.id.tosWebView)
         acceptButton = findViewById(R.id.acceptButton)
         declineButton = findViewById(R.id.declineButton)
-
+        
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "Terms of Service"
-
+        
         // Configure WebView with security restrictions
         // ToS content is static HTML so we can disable JavaScript and file access
         webView.apply {
@@ -133,7 +133,7 @@ class TosActivity : AppCompatActivity() {
                 }
             }
         }
-
+        
         // Setup buttons
         if (requireAcceptance) {
             acceptButton.isEnabled = false // Disabled until ToS loads
@@ -153,7 +153,7 @@ class TosActivity : AppCompatActivity() {
             declineButton.visibility = android.view.View.GONE
         }
     }
-
+    
     private fun loadTos() {
         // Load the local ToS content first, fallback to online
         try {
@@ -165,7 +165,7 @@ class TosActivity : AppCompatActivity() {
             webView.loadUrl(TOS_URL)
         }
     }
-
+    
     private fun buildTosHtml(): String {
         return """
             <!DOCTYPE html>
@@ -190,11 +190,11 @@ class TosActivity : AppCompatActivity() {
             </head>
             <body>
                 <h1>Terms of Service &amp; Disclosures</h1>
-
+                
                 <div class="disclaimer">
                     <strong>Important Disclaimer:</strong> Linkpoint is <strong>not provided or supported by Linden Lab</strong>, the makers of Second Life. This is an independent, community-developed third-party viewer.
                 </div>
-
+                
                 <div class="section">
                     <h2>About Linkpoint</h2>
                     <p><strong>Viewer Name:</strong> Linkpoint</p>
@@ -202,7 +202,7 @@ class TosActivity : AppCompatActivity() {
                     <p><strong>Customer Support:</strong> Community support only via <a href="https://github.com/Kaleaon/Linkpoint/issues">GitHub Issues</a>. No official support is provided.</p>
                     <p><strong>Privacy Policy:</strong> <a href="https://github.com/Kaleaon/Linkpoint/blob/main/PRIVACY_POLICY.md">View Privacy Policy</a></p>
                 </div>
-
+                
                 <div class="section">
                     <h2>Mobile Limitations</h2>
                     <p>As a mobile viewer, Linkpoint has certain limitations compared to desktop viewers:</p>
@@ -213,11 +213,11 @@ class TosActivity : AppCompatActivity() {
                         <li>Voice chat via WebRTC implementation</li>
                     </ul>
                 </div>
-
+                
                 <div class="important">
                     <strong>Important:</strong> By using Linkpoint to access Second Life, you agree to Linden Lab's Terms of Service and Community Standards.
                 </div>
-
+                
                 <div class="section">
                     <h2>Linden Lab Terms of Service</h2>
                     <p>The complete Terms of Service can be found at:</p>
@@ -231,7 +231,7 @@ class TosActivity : AppCompatActivity() {
                         <li>User-created content remains yours, with license to Linden Lab</li>
                     </ul>
                 </div>
-
+                
                 <div class="section">
                     <h2>Community Standards</h2>
                     <p>The Community Standards can be found at:</p>
@@ -246,7 +246,7 @@ class TosActivity : AppCompatActivity() {
                         <li><strong>Disturbing the Peace:</strong> No excessive noise, spam, or griefing</li>
                     </ul>
                 </div>
-
+                
                 <div class="section">
                     <h2>Third-Party Viewer Policy</h2>
                     <p>Linkpoint complies with <a href="https://secondlife.com/corporate/third-party-viewers">Linden Lab's Third-Party Viewer Policy</a>.</p>
@@ -259,7 +259,7 @@ class TosActivity : AppCompatActivity() {
                         <li>Not use export features to copy content you don't own</li>
                     </ul>
                 </div>
-
+                
                 <div class="section">
                     <h2>Privacy</h2>
                     <p>Linkpoint stores your login credentials locally on your device if you choose to save them.</p>
@@ -272,7 +272,7 @@ class TosActivity : AppCompatActivity() {
                     <p>Your password is encrypted using Android Keystore and stored only on your device.</p>
                     <p>For full details, see our <a href="https://github.com/Kaleaon/Linkpoint/blob/main/PRIVACY_POLICY.md">Privacy Policy</a>.</p>
                 </div>
-
+                
                 <div class="disclaimer">
                     <p><strong>Trademarks:</strong> Second Life is a trademark of Linden Lab. Linkpoint is not affiliated with or endorsed by Linden Lab.</p>
                 </div>
@@ -280,14 +280,14 @@ class TosActivity : AppCompatActivity() {
             </html>
         """.trimIndent()
     }
-
+    
     private fun acceptTos() {
         recordTosAcceptance(this)
         Toast.makeText(this, "Terms of Service accepted", Toast.LENGTH_SHORT).show()
         setResult(RESULT_OK)
         finish()
     }
-
+    
     private fun declineTos() {
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("Decline Terms of Service?")
@@ -301,7 +301,7 @@ class TosActivity : AppCompatActivity() {
             }
             .show()
     }
-
+    
     override fun onSupportNavigateUp(): Boolean {
         if (requireAcceptance) {
             declineTos()

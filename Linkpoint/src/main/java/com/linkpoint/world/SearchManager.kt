@@ -25,7 +25,7 @@ class SearchManager(
 ) {
     companion object {
         private const val TAG = "SearchManager"
-
+        
         // Search categories
         const val CATEGORY_PEOPLE = "people"
         const val CATEGORY_PLACES = "places"
@@ -35,9 +35,9 @@ class SearchManager(
         const val CATEGORY_LAND = "land"
         const val CATEGORY_DESTINATIONS = "destinations"
     }
-
+    
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
+    
     /**
      * Search for avatars by name
      */
@@ -50,16 +50,16 @@ class SearchManager(
                     this["start"] = LLSDInteger(start)
                     this["count"] = LLSDInteger(count)
                 }
-
+                
                 val response = capabilityManager.request(
                     CapabilityManager.CAP_AVATAR_PICKER,
                     request
                 )
-
+                
                 if (response is LLSDMap) {
                     val results = mutableListOf<PersonResult>()
                     val agents = response.getArray("agents")
-
+                    
                     agents?.value?.forEach { agent ->
                         if (agent is LLSDMap) {
                             results.add(PersonResult(
@@ -70,7 +70,7 @@ class SearchManager(
                             ))
                         }
                     }
-
+                    
                     SearchResults(results, results.size, start)
                 } else {
                     SearchResults(emptyList(), 0, 0)
@@ -81,7 +81,7 @@ class SearchManager(
             }
         }
     }
-
+    
     /**
      * Search for places
      */
@@ -97,9 +97,9 @@ class SearchManager(
                 val url = buildSearchUrl(CATEGORY_PLACES, query, category, start, count)
                 val request = Request.Builder().url(url).build()
                 val response = httpCallFactory.newCall(request).await()
-
+                
                 if (!response.isSuccessful) return@withContext SearchResults(emptyList(), 0, 0)
-
+                
                 val body = response.body?.string() ?: return@withContext SearchResults(emptyList(), 0, 0)
                 parsePlaceResults(body, start)
             } catch (e: Exception) {
@@ -108,7 +108,7 @@ class SearchManager(
             }
         }
     }
-
+    
     /**
      * Search for groups
      */
@@ -122,9 +122,9 @@ class SearchManager(
                 val url = buildSearchUrl(CATEGORY_GROUPS, query, "", start, count)
                 val request = Request.Builder().url(url).build()
                 val response = httpCallFactory.newCall(request).await()
-
+                
                 if (!response.isSuccessful) return@withContext SearchResults(emptyList(), 0, 0)
-
+                
                 val body = response.body?.string() ?: return@withContext SearchResults(emptyList(), 0, 0)
                 parseGroupResults(body, start)
             } catch (e: Exception) {
@@ -133,7 +133,7 @@ class SearchManager(
             }
         }
     }
-
+    
     /**
      * Search for events
      */
@@ -148,9 +148,9 @@ class SearchManager(
                 val url = buildSearchUrl(CATEGORY_EVENTS, query, category, start, count)
                 val request = Request.Builder().url(url).build()
                 val response = httpCallFactory.newCall(request).await()
-
+                
                 if (!response.isSuccessful) return@withContext SearchResults(emptyList(), 0, 0)
-
+                
                 val body = response.body?.string() ?: return@withContext SearchResults(emptyList(), 0, 0)
                 parseEventResults(body, start)
             } catch (e: Exception) {
@@ -159,7 +159,7 @@ class SearchManager(
             }
         }
     }
-
+    
     /**
      * Search for land/parcels
      */
@@ -196,7 +196,7 @@ class SearchManager(
                     this["start"] = LLSDInteger(start)
                     this["count"] = LLSDInteger(count)
                 }
-
+                
                 val response = capabilityManager.request(CapabilityManager.CAP_SEARCH_LAND, request)
                 if (response != null) {
                     parseLandResults(response)
@@ -210,12 +210,12 @@ class SearchManager(
             }
         }
     }
-
+    
     private fun parseLandResults(response: Any): SearchResults<LandResult> {
         // Parse LLSD response into land results
         val results = mutableListOf<LandResult>()
         var totalCount = 0
-
+        
         try {
             if (response is LLSDMap) {
                 totalCount = (response["total_count"] as? LLSDInteger)?.value ?: 0
@@ -251,10 +251,10 @@ class SearchManager(
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse land results", e)
         }
-
+        
         return SearchResults(results, results.size, totalCount)
     }
-
+    
     /**
      * Get popular destinations
      */
@@ -266,12 +266,12 @@ class SearchManager(
                 } else {
                     "https://destinations.secondlife.com/api/destinations?category=$category"
                 }
-
+                
                 val request = Request.Builder().url(url).build()
                 val response = httpCallFactory.newCall(request).await()
-
+                
                 if (!response.isSuccessful) return@withContext emptyList()
-
+                
                 val body = response.body?.string() ?: return@withContext emptyList()
                 parseDestinations(body)
             } catch (e: Exception) {
@@ -280,7 +280,7 @@ class SearchManager(
             }
         }
     }
-
+    
     private fun buildSearchUrl(
         category: String,
         query: String,
@@ -295,20 +295,20 @@ class SearchManager(
             "start=$start",
             "perpage=$count"
         )
-
+        
         if (subCategory.isNotEmpty()) {
             params.add("category=${subCategory.encodeUrl()}")
         }
-
+        
         return "$baseUrl?${params.joinToString("&")}"
     }
-
+    
     private fun parsePlaceResults(json: String, start: Int): SearchResults<PlaceResult> {
         val results = mutableListOf<PlaceResult>()
         try {
             val root = JSONObject(json)
             val places = root.optJSONArray("places") ?: JSONArray()
-
+            
             for (i in 0 until places.length()) {
                 val place = places.getJSONObject(i)
                 results.add(PlaceResult(
@@ -322,7 +322,7 @@ class SearchManager(
                     location = place.optString("location", "")
                 ))
             }
-
+            
             val total = root.optInt("total", results.size)
             return SearchResults(results, total, start)
         } catch (e: Exception) {
@@ -330,13 +330,13 @@ class SearchManager(
             return SearchResults(emptyList(), 0, 0)
         }
     }
-
+    
     private fun parseGroupResults(json: String, start: Int): SearchResults<GroupResult> {
         val results = mutableListOf<GroupResult>()
         try {
             val root = JSONObject(json)
             val groups = root.optJSONArray("groups") ?: JSONArray()
-
+            
             for (i in 0 until groups.length()) {
                 val group = groups.getJSONObject(i)
                 results.add(GroupResult(
@@ -348,7 +348,7 @@ class SearchManager(
                     insigniaId = try { UUID.fromString(group.optString("insignia_id")) } catch (e: Exception) { null }
                 ))
             }
-
+            
             val total = root.optInt("total", results.size)
             return SearchResults(results, total, start)
         } catch (e: Exception) {
@@ -356,13 +356,13 @@ class SearchManager(
             return SearchResults(emptyList(), 0, 0)
         }
     }
-
+    
     private fun parseEventResults(json: String, start: Int): SearchResults<EventResult> {
         val results = mutableListOf<EventResult>()
         try {
             val root = JSONObject(json)
             val events = root.optJSONArray("events") ?: JSONArray()
-
+            
             for (i in 0 until events.length()) {
                 val event = events.getJSONObject(i)
                 results.add(EventResult(
@@ -376,7 +376,7 @@ class SearchManager(
                     coverCharge = event.optInt("cover", 0)
                 ))
             }
-
+            
             val total = root.optInt("total", results.size)
             return SearchResults(results, total, start)
         } catch (e: Exception) {
@@ -384,12 +384,12 @@ class SearchManager(
             return SearchResults(emptyList(), 0, 0)
         }
     }
-
+    
     private fun parseDestinations(json: String): List<DestinationResult> {
         val results = mutableListOf<DestinationResult>()
         try {
             val destinations = JSONArray(json)
-
+            
             for (i in 0 until destinations.length()) {
                 val dest = destinations.getJSONObject(i)
                 results.add(DestinationResult(
@@ -407,11 +407,11 @@ class SearchManager(
         }
         return results
     }
-
+    
     private fun String.encodeUrl(): String {
         return java.net.URLEncoder.encode(this, "UTF-8")
     }
-
+    
     fun shutdown() {
         scope.cancel()
     }

@@ -21,7 +21,7 @@ data class Vector4(
     val w: Float
 ) {
     override fun toString(): String = String.format(java.util.Locale.US, "<%f, %f, %f, %f>", x, y, z, w)
-
+    
     companion object {
         /** A vector with all components set to zero. */
         @JvmField

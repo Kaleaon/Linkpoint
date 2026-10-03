@@ -46,7 +46,7 @@ class InventoryManagerIndexTest {
     fun `index maps populate during addFolderFromLogin and parseInventoryResponse`() {
         val rootId = UUID.randomUUID()
         val folderId = UUID.randomUUID()
-
+        
         // 1. Add folder from login
         inventoryManager.addFolderFromLogin(
             folderId = folderId,

@@ -14,13 +14,13 @@ import java.util.concurrent.TimeUnit
 
 /**
  * Capability Event Queue
- *
+ * 
  * Handles capability-based event queuing for Second Life protocol.
  * Based on the reference viewer's SLCapEventQueue implementation.
- *
+ * 
  * Implements the EventQueueGet capability using HTTP long-polling
  * to receive events from the simulator.
- *
+ * 
  * Features:
  * - Persistent sequence tracking (`highestAckSequenceId`) across network handoffs
  * - Rapid network callback recovery on network interface changes (<500ms)
@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit
 class CapEventQueue(
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 ) {
-
+    
     companion object {
         private const val TAG = "CapEventQueue"
         private const val DEFAULT_POLL_INTERVAL_MS = 1000L
@@ -39,7 +39,7 @@ class CapEventQueue(
         private const val MAX_CONSECUTIVE_ERRORS = 5
         private const val MAX_BACKOFF_DELAY_MS = 30_000L
     }
-
+    
     /**
      * Event data structure
      */
@@ -48,14 +48,14 @@ class CapEventQueue(
         val eventData: Map<String, Any>,
         val timestamp: Long = System.currentTimeMillis()
     )
-
+    
     /**
      * Event listener interface
      */
     fun interface EventListener {
         fun onEvent(message: String, body: LLSDMap)
     }
-
+    
     /**
      * HTTP client configured for long-polling
      */
@@ -64,32 +64,32 @@ class CapEventQueue(
         .readTimeout(LONG_POLL_TIMEOUT_SECONDS + 5, TimeUnit.SECONDS)
         .writeTimeout(10, TimeUnit.SECONDS)
         .build()
-
+    
     /**
      * Polling job
      */
     private var pollingJob: Job? = null
-
+    
     /**
      * Event queue for local storage
      */
     private val eventQueue: MutableList<Event> = mutableListOf()
-
+    
     /**
      * Event listeners
      */
     private val eventListeners = mutableMapOf<String, MutableList<EventListener>>()
-
+    
     /**
      * Polling interval
      */
     private var pollIntervalMs: Long = DEFAULT_POLL_INTERVAL_MS
-
+    
     /**
      * Active flag
      */
     private var isActive: Boolean = false
-
+    
     /**
      * Adaptive background mode flag
      */
@@ -136,7 +136,7 @@ class CapEventQueue(
      * Network recovery trigger signal
      */
     private var pollTriggerJob: Job? = null
-
+    
     /**
      * Register an event listener
      */
@@ -158,7 +158,7 @@ class CapEventQueue(
             slidingWindow.setBaselineSequenceId(seqId)
         }
     }
-
+    
     /**
      * Start the event queue
      */
@@ -167,20 +167,20 @@ class CapEventQueue(
             NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Event queue already active")
             return
         }
-
+        
         this.currentCapabilityUrl = capabilityUrl
         this.pollIntervalMs = pollInterval
         isActive = true
-
+        
         pollingJob = scope.launch {
             NetworkLogger.log(
                 NetworkLogger.Level.DEBUG,
                 NetworkLogger.Category.UDP,
                 "Starting event queue polling: $capabilityUrl (ack=$highestAckSequenceId)"
             )
-
+            
             var consecutiveErrors = 0
-
+            
             while (isActive && isCoroutineActive()) {
                 try {
                     pollEvents(capabilityUrl)
@@ -200,16 +200,16 @@ class CapEventQueue(
                             NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
                             "Error polling events (attempt $consecutiveErrors, seq=$highestAckSequenceId): ${e.message}"
                         )
-
+                        
                         // Exponential backoff capped at 30 seconds
                         val backoff = pollIntervalMs * (1L shl minOf(consecutiveErrors, 5))
                         val delayMs = minOf(backoff, MAX_BACKOFF_DELAY_MS)
-
+                        
                         NetworkLogger.log(
                             NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
                             "Backing off event queue poll for ${delayMs}ms without resetting sequence counter ($highestAckSequenceId)"
                         )
-
+                        
                         delay(delayMs)
                         if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
                             consecutiveErrors = MAX_CONSECUTIVE_ERRORS - 1
@@ -264,11 +264,11 @@ class CapEventQueue(
             }
         }
     }
-
+    
     private fun isCoroutineActive(): Boolean {
         return scope.coroutineContext[Job]?.isCancelled != true
     }
-
+    
     /**
      * Poll for new events using HTTP long-polling.
      * Implements the EventQueueGet capability protocol.
@@ -280,14 +280,14 @@ class CapEventQueue(
             this["ack"] = if (ackSeq > 0) LLSDInteger(ackSeq) else LLSDBoolean(true)
             this["done"] = LLSDBoolean(false)
         }
-
+        
         val xml = LLSDXmlUtils.wrap(requestBody)
-
+        
         val request = Request.Builder()
             .url(capabilityUrl)
             .post(xml.toRequestBody("application/llsd+xml".toMediaType()))
             .build()
-
+        
         httpClient.newCall(request).execute().use { response ->
             val code = response.code
             val contentType = response.header("Content-Type")
@@ -344,16 +344,16 @@ class CapEventQueue(
             }
         }
     }
-
+    
     /**
      * Process an LLSD event from the server
      */
     private fun processLLSDEvent(event: LLSDMap) {
         val message = event.getString("message") ?: return
         val body = event.getMap("body") ?: LLSDMap()
-
+        
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Event: $message")
-
+        
         val eventData = convertLLSDMapToMap(body)
         val localEvent = Event(
             eventType = message,
@@ -361,7 +361,7 @@ class CapEventQueue(
             timestamp = System.currentTimeMillis()
         )
         addEvent(localEvent)
-
+        
         dispatchLocalEvent(localEvent, body)
     }
 
@@ -374,7 +374,7 @@ class CapEventQueue(
             }
         }
     }
-
+    
     /**
      * Convert LLSDMap to Map<String, Any> for simpler event data storage
      */
@@ -394,7 +394,7 @@ class CapEventQueue(
         }
         return result
     }
-
+    
     /**
      * Add an event to the queue
      */
@@ -405,12 +405,12 @@ class CapEventQueue(
                 eventQueue.removeAt(0)
                 NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Event queue full, removed oldest event")
             }
-
+            
             eventQueue.add(event)
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Added event: ${event.eventType}")
         }
     }
-
+    
     /**
      * Get the next event
      */
@@ -423,7 +423,7 @@ class CapEventQueue(
             }
         }
     }
-
+    
     /**
      * Get all pending events
      */
@@ -432,7 +432,7 @@ class CapEventQueue(
             return eventQueue.toList()
         }
     }
-
+    
     /**
      * Clear all events
      */
@@ -443,7 +443,7 @@ class CapEventQueue(
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Cleared all events")
         }
     }
-
+    
     /**
      * Get queue statistics
      */
@@ -460,7 +460,7 @@ class CapEventQueue(
             )
         }
     }
-
+    
     /**
      * Stop the event queue
      */
@@ -468,16 +468,16 @@ class CapEventQueue(
         if (!isActive) {
             return
         }
-
+        
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Stopping event queue")
-
+        
         isActive = false
         pollingJob?.cancel()
         pollTriggerJob?.cancel()
-
+        
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Event queue stopped")
     }
-
+    
     /**
      * Close the event queue
      */

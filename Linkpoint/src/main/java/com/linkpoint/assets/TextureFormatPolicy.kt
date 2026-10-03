@@ -74,3 +74,4 @@ object TextureFormatPolicy {
         return levels
     }
 }
+

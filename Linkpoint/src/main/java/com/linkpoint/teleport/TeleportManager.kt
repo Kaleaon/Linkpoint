@@ -21,7 +21,7 @@ import java.util.UUID
 
 /**
  * TeleportManager - Handles all teleportation functionality for Second Life.
- *
+ * 
  * Supports:
  * - Teleporting by region name and coordinates
  * - Teleporting by SLURL
@@ -30,7 +30,7 @@ import java.util.UUID
  * - Teleport lure (offer to teleport another user)
  * - Accepting/declining teleport offers
  * - Teleport progress tracking
- *
+ * 
  * Based on the reference viewer's teleport implementation.
  */
 class TeleportManager(
@@ -71,10 +71,10 @@ class TeleportManager(
         val gridY = (regionHandle and 0xFFFFFFFFL) / 256
         return "Region ($gridX, $gridY)"
     }
-
+    
     companion object {
         private const val TAG = "TeleportManager"
-
+        
         // Teleport flags
         const val TELEPORT_FLAGS_SET_HOME = 0x00000001
         const val TELEPORT_FLAGS_SET_LAST_LOCATION = 0x00000002
@@ -89,7 +89,7 @@ class TeleportManager(
         const val TELEPORT_FLAGS_DIRECT_LURE = 0x00000400
         const val TELEPORT_FLAGS_VIA_REGION_ID = 0x00000800
         const val TELEPORT_FLAGS_DISABLE_CANCEL = 0x00001000
-
+        
         // Teleport states (from viewer code)
         const val TELEPORT_NONE = 0
         const val TELEPORT_START = 1
@@ -100,24 +100,24 @@ class TeleportManager(
         const val TELEPORT_LOCAL = 6
         const val TELEPORT_PENDING = 7
     }
-
+    
     private val scope = CoroutineScope(EventQueueDispatcher.dispatcher + SupervisorJob())
-
+    
     // Teleport state
     private val _teleportState = MutableStateFlow(TeleportState.IDLE)
     val teleportState: StateFlow<TeleportState> = _teleportState
-
+    
     // Teleport events
     private val _teleportEvents = MutableSharedFlow<TeleportEvent>(replay = 0, extraBufferCapacity = 16)
     val teleportEvents: SharedFlow<TeleportEvent> = _teleportEvents
-
+    
     // Current teleport progress message
     private val _progressMessage = MutableStateFlow("")
     val progressMessage: StateFlow<String> = _progressMessage
-
+    
     // Pending teleport offer
     private var pendingLure: TeleportLure? = null
-
+    
     init {
         // Register for teleport-related events from the event queue
         capabilityManager.registerEventHandler("TeleportProgress", this, EventQueueDispatcher.dispatcher)
@@ -127,7 +127,7 @@ class TeleportManager(
         capabilityManager.registerEventHandler("TeleportStart", this, EventQueueDispatcher.dispatcher)
         capabilityManager.registerEventHandler("EstablishAgentCommunication", this, EventQueueDispatcher.dispatcher)
     }
-
+    
     override fun onEvent(message: String, body: LLSDMap) {
         when (message) {
             "TeleportProgress" -> handleTeleportProgress(body)
@@ -138,9 +138,9 @@ class TeleportManager(
             "EstablishAgentCommunication" -> handleEstablishAgentCommunication(body)
         }
     }
-
+    
     // ==================== TELEPORT METHODS ====================
-
+    
     /**
      * Teleport to a location by region name and coordinates.
      */
@@ -149,17 +149,17 @@ class TeleportManager(
             try {
                 _teleportState.value = TeleportState.REQUESTING
                 _progressMessage.value = "Requesting teleport to $regionName..."
-
+                
                 scope.launch {
                     _teleportEvents.emit(TeleportEvent.Started(regionName, x, y, z))
                 }
-
+                
                 // Use SimulatorLure capability if available
                 val lureCap = capabilityManager.getCapability(CapabilityManager.CAP_SIMULATE_LURE)
                 if (lureCap != null) {
                     return@withContext teleportViaCapability(regionName, x, y, z)
                 }
-
+                
                 // Fall back to UDP TeleportLocationRequest
                 return@withContext teleportViaUDP(regionName, x, y, z)
             } catch (e: Exception) {
@@ -172,7 +172,7 @@ class TeleportManager(
             }
         }
     }
-
+    
     /**
      * Teleport using SLURL format (secondlife://RegionName/x/y/z)
      */
@@ -184,7 +184,7 @@ class TeleportManager(
             TeleportResult.Failure("Invalid SLURL: $slurl")
         }
     }
-
+    
     /**
      * Teleport to a landmark from inventory.
      */
@@ -193,19 +193,19 @@ class TeleportManager(
             try {
                 _teleportState.value = TeleportState.REQUESTING
                 _progressMessage.value = "Teleporting to landmark..."
-
+                
                 val payload = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN)
-
+                
                 // AgentData - UUIDs use big-endian per SL protocol
                 payload.putUUID(agentId)
                 payload.putUUID(sessionId)
-
+                
                 // Info
                 payload.putUUID(landmarkId)
                 payload.putInt(TELEPORT_FLAGS_VIA_LANDMARK)
-
+                
                 udpConnection.sendPacket(MessageIdRegistry.TELEPORT_LANDMARK_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
-
+                
                 Log.i(TAG, "Sent teleport landmark request for $landmarkId")
                 TeleportResult.Pending
             } catch (e: Exception) {
@@ -215,7 +215,7 @@ class TeleportManager(
             }
         }
     }
-
+    
     /**
      * Teleport home.
      */
@@ -224,22 +224,22 @@ class TeleportManager(
             try {
                 _teleportState.value = TeleportState.REQUESTING
                 _progressMessage.value = "Teleporting home..."
-
+                
                 scope.launch {
                     _teleportEvents.emit(TeleportEvent.Started("Home", 0f, 0f, 0f))
                 }
-
+                
                 val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
-
+                
                 // AgentData - UUIDs use big-endian per SL protocol
                 payload.putUUID(agentId)
                 payload.putUUID(sessionId)
-
+                
                 // Flags
                 payload.putInt(TELEPORT_FLAGS_VIA_HOME)
-
+                
                 udpConnection.sendPacket(MessageIdRegistry.TELEPORT_HOME_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
-
+                
                 Log.i(TAG, "Sent teleport home request")
                 TeleportResult.Pending
             } catch (e: Exception) {
@@ -249,7 +249,7 @@ class TeleportManager(
             }
         }
     }
-
+    
     /**
      * Send a teleport offer (lure) to another user.
      */
@@ -303,7 +303,7 @@ class TeleportManager(
             }
         }
     }
-
+    
     /**
      * Accept a teleport offer.
      */
@@ -312,20 +312,20 @@ class TeleportManager(
             try {
                 _teleportState.value = TeleportState.REQUESTING
                 _progressMessage.value = "Accepting teleport from ${lure.senderName}..."
-
+                
                 val payload = ByteBuffer.allocate(80).order(ByteOrder.LITTLE_ENDIAN)
-
+                
                 // AgentData - UUIDs use big-endian per SL protocol
                 payload.putUUID(agentId)
                 payload.putUUID(sessionId)
-
+                
                 // Info
                 payload.putUUID(lure.senderId)
                 payload.putUUID(lure.lureId)
                 payload.putInt(TELEPORT_FLAGS_VIA_LURE)
-
+                
                 udpConnection.sendPacket(MessageIdRegistry.TELEPORT_LURE_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
-
+                
                 Log.i(TAG, "Accepted teleport lure from ${lure.senderName}")
                 pendingLure = null
                 TeleportResult.Pending
@@ -336,7 +336,7 @@ class TeleportManager(
             }
         }
     }
-
+    
     /**
      * Decline a teleport offer.
      */
@@ -347,7 +347,7 @@ class TeleportManager(
         }
         Log.d(TAG, "Declined teleport lure from ${lure.senderName}")
     }
-
+    
     /**
      * Cancel ongoing teleport.
      */
@@ -360,9 +360,9 @@ class TeleportManager(
             }
         }
     }
-
+    
     // ==================== PRIVATE METHODS ====================
-
+    
     private suspend fun teleportViaCapability(regionName: String, x: Float, y: Float, z: Float): TeleportResult {
         try {
             val request = LLSDMap().apply {
@@ -378,10 +378,10 @@ class TeleportManager(
                     add(LLSDReal(0.0))
                 }
             }
-
+            
             // TeleportLocation capability
             val response = capabilityManager.request(CapabilityManager.CAP_TELEPORT_LOCATION, request)
-
+            
             if (response is LLSDMap) {
                 val success = response.getBoolean("success") ?: false
                 if (success) {
@@ -393,7 +393,7 @@ class TeleportManager(
                     return TeleportResult.Failure(errorMessage)
                 }
             }
-
+            
             _teleportState.value = TeleportState.FAILED
             return TeleportResult.Failure("Invalid teleport response")
         } catch (e: Exception) {
@@ -402,39 +402,39 @@ class TeleportManager(
             return TeleportResult.Failure("Teleport failed: ${e.message}")
         }
     }
-
+    
     private suspend fun teleportViaUDP(regionName: String, x: Float, y: Float, z: Float): TeleportResult {
         try {
             val regionNameBytes = regionName.toByteArray(Charsets.UTF_8)
             val payload = ByteBuffer.allocate(100 + regionNameBytes.size).order(ByteOrder.LITTLE_ENDIAN)
-
+            
             // AgentData - UUIDs use big-endian per SL protocol
             payload.putUUID(agentId)
             payload.putUUID(sessionId)
-
+            
             // Info
             payload.putLong(0) // Region handle (0 = resolve by name)
             payload.putLong(0)
-
+            
             // Position
             payload.putFloat(x)
             payload.putFloat(y)
             payload.putFloat(z)
-
+            
             // Look at
             payload.putFloat(1f)
             payload.putFloat(0f)
             payload.putFloat(0f)
-
+            
             // Flags
             payload.putInt(TELEPORT_FLAGS_VIA_LOCATION)
-
+            
             // Region name
             payload.putShort(regionNameBytes.size.toShort())
             payload.put(regionNameBytes)
-
+            
             udpConnection.sendPacket(MessageIdRegistry.TELEPORT_LOCATION_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
-
+            
             _teleportState.value = TeleportState.IN_PROGRESS
             Log.i(TAG, "Sent UDP teleport request to $regionName ($x, $y, $z)")
             return TeleportResult.Pending
@@ -444,60 +444,60 @@ class TeleportManager(
             return TeleportResult.Failure("Teleport failed: ${e.message}")
         }
     }
-
+    
     // ==================== EVENT HANDLERS ====================
-
+    
     private fun handleTeleportProgress(body: LLSDMap) {
         val message = body.getString("message") ?: "Teleporting..."
         val flags = body.getInt("flags") ?: 0
-
+        
         _progressMessage.value = message
         Log.d(TAG, "Teleport progress: $message (flags=$flags)")
-
+        
         scope.launch {
             _teleportEvents.emit(TeleportEvent.Progress(message))
         }
     }
-
+    
     private fun handleTeleportLocal(body: LLSDMap) {
         Log.d(TAG, "Local teleport complete")
         _teleportState.value = TeleportState.COMPLETED
         _progressMessage.value = "Teleport complete"
-
+        
         scope.launch {
             _teleportEvents.emit(TeleportEvent.Completed("", 0f, 0f, 0f))
         }
     }
-
+    
     private fun handleTeleportFailed(body: LLSDMap) {
         val reason = body.getString("reason") ?: "Unknown reason"
-
+        
         Log.w(TAG, "Teleport failed: $reason")
         _teleportState.value = TeleportState.FAILED
         _progressMessage.value = "Teleport failed: $reason"
-
+        
         scope.launch {
             _teleportEvents.emit(TeleportEvent.Failed(reason))
         }
     }
-
+    
     private fun handleTeleportFinish(body: LLSDMap) {
         val regionName = body.getString("region_name") ?: ""
-
+        
         Log.i(TAG, "Teleport finished to $regionName")
         _teleportState.value = TeleportState.COMPLETED
         _progressMessage.value = "Arrived at $regionName"
-
+        
         scope.launch {
             _teleportEvents.emit(TeleportEvent.Completed(regionName, 0f, 0f, 0f))
         }
     }
-
+    
     private fun handleTeleportStart(body: LLSDMap) {
         Log.d(TAG, "Teleport starting")
         _teleportState.value = TeleportState.IN_PROGRESS
     }
-
+    
     private fun handleEstablishAgentCommunication(body: LLSDMap) {
         // EstablishAgentCommunication is the EventQueue notification that a
         // neighboring (or destination) simulator is ready to accept this
@@ -542,10 +542,10 @@ class TeleportManager(
 
     @Volatile
     private var pendingNeighborSim: NeighborSim? = null
-
+    
     // ==================== UDP MESSAGE HANDLERS ====================
     // These are called from LinkpointApp when UDP messages are received
-
+    
     /**
      * Handle TeleportFinish UDP message - teleport completed, connect to new region
      */
@@ -568,7 +568,7 @@ class TeleportManager(
             ))
         }
     }
-
+    
     /**
      * Handle TeleportFailed UDP message
      */
@@ -576,12 +576,12 @@ class TeleportManager(
         Log.e(TAG, "UDP TeleportFailed: $reason")
         _teleportState.value = TeleportState.FAILED
         _progressMessage.value = reason
-
+        
         scope.launch {
             _teleportEvents.emit(TeleportEvent.Failed(reason))
         }
     }
-
+    
     /**
      * Handle TeleportProgress UDP message
      */
@@ -589,7 +589,7 @@ class TeleportManager(
         Log.d(TAG, "UDP TeleportProgress: $message")
         _progressMessage.value = message
     }
-
+    
     /**
      * Handle TeleportStart UDP message
      */
@@ -598,7 +598,7 @@ class TeleportManager(
         _teleportState.value = TeleportState.IN_PROGRESS
         _progressMessage.value = "Teleport starting..."
     }
-
+    
     /**
      * Handle CrossedRegion UDP message - region crossing
      */
@@ -616,28 +616,28 @@ class TeleportManager(
             ))
         }
     }
-
+    
     /**
      * Handle TeleportLocal UDP message - local teleport within same region.
      */
     fun handleTeleportLocal(payload: ByteArray) {
         try {
             val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
-
+            
             // Info block
             if (buffer.remaining() < 28) return
-
+            
             val agentId = buffer.getUUID()
             val locationId = buffer.int
             val position = com.linkpoint.protocol.types.LLVector3(buffer.float, buffer.float, buffer.float)
             val lookAt = com.linkpoint.protocol.types.LLVector3(buffer.float, buffer.float, buffer.float)
             val teleportFlags = if (buffer.remaining() >= 4) buffer.int else 0
-
+            
             Log.i(TAG, "🚀 TeleportLocal: position=$position, lookAt=$lookAt")
-
+            
             _teleportState.value = TeleportState.IDLE
             _progressMessage.value = ""
-
+            
             scope.launch {
                 _teleportEvents.emit(TeleportEvent.Completed(
                     regionName = "Local",
@@ -650,7 +650,7 @@ class TeleportManager(
             Log.e(TAG, "Error parsing TeleportLocal", e)
         }
     }
-
+    
     /**
      * Handle teleport cancellation.
      */
@@ -658,24 +658,24 @@ class TeleportManager(
         Log.i(TAG, "🚀 Teleport cancelled")
         _teleportState.value = TeleportState.IDLE
         _progressMessage.value = ""
-
+        
         scope.launch {
             _teleportEvents.emit(TeleportEvent.Cancelled)
         }
     }
-
+    
     // ==================== HELPERS ====================
-
+    
     private fun parseSLURL(slurl: String): SLURLData? {
         // Parse SLURL formats:
         // secondlife://RegionName/x/y/z
         // https://maps.secondlife.com/secondlife/RegionName/x/y/z
-
+        
         val patterns = listOf(
             Regex("secondlife://([^/]+)/?(\\d+)?/?(\\d+)?/?(\\d+)?"),
             Regex("https?://maps\\.secondlife\\.com/secondlife/([^/]+)/?(\\d+)?/?(\\d+)?/?(\\d+)?")
         )
-
+        
         for (pattern in patterns) {
             val match = pattern.find(slurl)
             if (match != null) {
@@ -687,10 +687,10 @@ class TeleportManager(
                 return SLURLData(regionName, x, y, z)
             }
         }
-
+        
         return null
     }
-
+    
     fun shutdown() {
         scope.cancel()
     }

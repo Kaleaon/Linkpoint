@@ -1,6 +1,6 @@
 /**
  * Second Life LLSD Extensions - TypeScript Implementation
- *
+ * 
  * Based on Java implementation and Second Life viewer functionality
  * Copyright (C) 2024 Linden Lab
  */
@@ -72,11 +72,11 @@ export class SecondLifeLLSDUtils {
             success: success,
             message: message
         };
-
+        
         if (data !== undefined) {
             response.data = data;
         }
-
+        
         return response;
     }
 
@@ -87,7 +87,7 @@ export class SecondLifeLLSDUtils {
         if (!uuid || typeof uuid !== 'string') {
             return false;
         }
-
+        
         // Second Life uses standard UUID format
         return LLSDUtils.isUUIDString(uuid) && uuid !== '00000000-0000-0000-0000-000000000000';
     }
@@ -196,7 +196,7 @@ export class SecondLifeLLSDUtils {
             'gesture': 20,
             'mesh': 22
         };
-
+        
         const result = mapping[assetType.toLowerCase()];
         return result !== undefined ? result : -1;
     }
@@ -272,7 +272,7 @@ export class SecondLifeLLSDUtils {
 
         if (typeof llsdData === 'object' && !Array.isArray(llsdData) && llsdData !== null) {
             const map = llsdData as LLSDMap;
-
+            
             // Check required fields
             for (const field of rules.requiredFields) {
                 if (!(field in map)) {

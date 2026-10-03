@@ -8,7 +8,7 @@
 
 /**
  * Comprehensive cache management system for Second Life viewer (TypeScript/React implementation).
- *
+ * 
  * Features:
  * - IndexedDB-based persistent storage for web browsers
  * - Configurable cache storage up to 200GB (browser permitting)
@@ -75,7 +75,7 @@ export class CacheManager {
     private configuration: CacheConfiguration;
     private cacheDatabase: IDBDatabase | null = null;
     private cacheIndex = new Map<string, CacheEntry>();
-
+    
     // Statistics tracking
     private statistics = {
         totalSize: 0,
@@ -110,7 +110,7 @@ export class CacheManager {
 
     private initializeDefaultLimits(): void {
         const maxSize = this.configuration.maxCacheSize;
-
+        
         // Distribute cache space across types
         this.statistics.typeLimits.set(CacheType.TEXTURE, Math.floor(maxSize * 0.60)); // 60%
         this.statistics.typeLimits.set(CacheType.SOUND, Math.floor(maxSize * 0.15));   // 15%
@@ -149,7 +149,7 @@ export class CacheManager {
             const request = indexedDB.open('SecondLifeCache', 1);
 
             request.onerror = () => reject(new Error('Failed to open IndexedDB'));
-
+            
             request.onsuccess = (event) => {
                 this.cacheDatabase = (event.target as IDBOpenDBRequest).result;
                 resolve();
@@ -157,7 +157,7 @@ export class CacheManager {
 
             request.onupgradeneeded = (event) => {
                 const db = (event.target as IDBOpenDBRequest).result;
-
+                
                 // Create object stores for each cache type
                 Object.values(CacheType).forEach(type => {
                     if (!db.objectStoreNames.contains(type)) {
@@ -467,7 +467,7 @@ export class CacheManager {
 
     private async cleanupOldestEntries(type: CacheType, spaceNeeded: number): Promise<void> {
         const typeEntries: CacheEntry[] = [];
-
+        
         this.cacheIndex.forEach(entry => {
             if (entry.type === type) {
                 typeEntries.push(entry);
@@ -500,7 +500,7 @@ export class CacheManager {
         let freedSpace = 0;
         for (const entry of allEntries) {
             if (freedSpace >= spaceNeeded) break;
-
+            
             await this.remove(entry.type, entry.key);
             freedSpace += entry.size;
         }
@@ -523,7 +523,7 @@ export class CacheManager {
 
         const expiredKeys: string[] = [];
         this.cacheIndex.forEach((entry, key) => {
-            if (entry.type === CacheType.TEMPORARY &&
+            if (entry.type === CacheType.TEMPORARY && 
                 now - entry.creationTime > tempCacheExpiry) {
                 expiredKeys.push(key);
             }
@@ -577,7 +577,7 @@ export class CacheManager {
             typeLimits: new Map(this.statistics.typeLimits),
             storageLocation: this.configuration.storageLocation,
             basePath: 'browser',
-            usagePercent: this.configuration.maxCacheSize === 0 ? 0 :
+            usagePercent: this.configuration.maxCacheSize === 0 ? 0 : 
                 (this.statistics.totalSize / this.configuration.maxCacheSize) * 100,
             hitRatio,
             availableSpace: this.configuration.maxCacheSize - this.statistics.totalSize,
@@ -590,7 +590,7 @@ export class CacheManager {
      */
     public subscribe(listener: (stats: CacheStatistics) => void): () => void {
         this.listeners.push(listener);
-
+        
         // Return unsubscribe function
         return () => {
             const index = this.listeners.indexOf(listener);

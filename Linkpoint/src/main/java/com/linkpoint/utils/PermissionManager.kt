@@ -13,7 +13,7 @@ import androidx.core.content.ContextCompat
 
 /**
  * Centralized permission management for Linkpoint app.
- *
+ * 
  * Handles runtime permissions for:
  * - Storage (for logs and cache)
  * - Microphone (for voice chat)
@@ -22,12 +22,12 @@ import androidx.core.content.ContextCompat
  * - Camera (optional, for profile pictures)
  */
 class PermissionManager(private val activity: AppCompatActivity) {
-
+    
     companion object {
         private const val TAG = "PermissionManager"
         private const val PREFS_NAME = "permission_prefs"
         private const val KEY_PERMISSIONS_REQUESTED = "permissions_requested"
-
+        
         /**
          * Essential permissions required for the app to function properly.
          * Includes storage permissions for Linkpoint Logs directory and the
@@ -63,23 +63,23 @@ class PermissionManager(private val activity: AppCompatActivity) {
 
             return permissions.toTypedArray()
         }
-
+        
         /**
          * Storage permissions specifically for Linkpoint Logs directory
          */
         fun getStoragePermissions(): Array<String> {
             val permissions = mutableListOf<String>()
-
+            
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
                 permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
             } else if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
                 permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
-
+            
             return permissions.toTypedArray()
         }
-
+        
         /**
          * Check if storage permissions for Linkpoint Logs are granted
          */
@@ -90,7 +90,7 @@ class PermissionManager(private val activity: AppCompatActivity) {
             }
             return getStoragePermissions().all { isPermissionGranted(context, it) }
         }
-
+        
         /**
          * Voice chat permissions
          */
@@ -99,39 +99,39 @@ class PermissionManager(private val activity: AppCompatActivity) {
                 Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.MODIFY_AUDIO_SETTINGS
             )
-
+            
             // Bluetooth permissions based on Android version
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 permissions.add(Manifest.permission.BLUETOOTH_CONNECT)
             } else {
                 permissions.add(Manifest.permission.BLUETOOTH)
             }
-
+            
             return permissions.toTypedArray()
         }
-
+        
         /**
          * All permissions the app might need
          */
         fun getAllPermissions(): Array<String> {
             return getEssentialPermissions() + getVoiceChatPermissions()
         }
-
+        
         /**
          * Check if a specific permission is granted
          */
         fun isPermissionGranted(context: Context, permission: String): Boolean {
-            return ContextCompat.checkSelfPermission(context, permission) ==
+            return ContextCompat.checkSelfPermission(context, permission) == 
                 PackageManager.PERMISSION_GRANTED
         }
-
+        
         /**
          * Check if all essential permissions are granted
          */
         fun areEssentialPermissionsGranted(context: Context): Boolean {
             return getEssentialPermissions().all { isPermissionGranted(context, it) }
         }
-
+        
         /**
          * Check if voice chat permissions are granted
          */
@@ -139,11 +139,11 @@ class PermissionManager(private val activity: AppCompatActivity) {
             return getVoiceChatPermissions().all { isPermissionGranted(context, it) }
         }
     }
-
+    
     // Permission request launcher
     private var permissionLauncher: ActivityResultLauncher<Array<String>>? = null
     private var onPermissionResult: ((Map<String, Boolean>) -> Unit)? = null
-
+    
     /**
      * Register the permission launcher. Must be called in onCreate before any permission requests.
      */
@@ -152,7 +152,7 @@ class PermissionManager(private val activity: AppCompatActivity) {
     ) {
         permissionLauncher = launcher
     }
-
+    
     /**
      * Create a permission launcher for use with ActivityResultContracts
      */
@@ -163,7 +163,7 @@ class PermissionManager(private val activity: AppCompatActivity) {
             handlePermissionResults(permissions)
         }
     }
-
+    
     /**
      * Request essential permissions on app startup
      */
@@ -175,7 +175,7 @@ class PermissionManager(private val activity: AppCompatActivity) {
             onResult(denied.isEmpty(), denied)
         }
     }
-
+    
     /**
      * Request voice chat permissions when user wants to use voice
      */
@@ -187,7 +187,7 @@ class PermissionManager(private val activity: AppCompatActivity) {
             onResult(denied.isEmpty(), denied)
         }
     }
-
+    
     /**
      * Request specific permissions
      */
@@ -196,37 +196,37 @@ class PermissionManager(private val activity: AppCompatActivity) {
         onResult: (Map<String, Boolean>) -> Unit
     ) {
         // Filter out already granted permissions
-        val permissionsToRequest = permissions.filter {
-            !isPermissionGranted(activity, it)
+        val permissionsToRequest = permissions.filter { 
+            !isPermissionGranted(activity, it) 
         }.toTypedArray()
-
+        
         if (permissionsToRequest.isEmpty()) {
             // All permissions already granted
             onResult(permissions.associateWith { true })
             return
         }
-
+        
         onPermissionResult = onResult
-
+        
         permissionLauncher?.launch(permissionsToRequest)
             ?: Log.e(TAG, "Permission launcher not registered! Call registerPermissionLauncher first.")
     }
-
+    
     private fun handlePermissionResults(results: Map<String, Boolean>) {
         val granted = results.filter { it.value }.keys
         val denied = results.filter { !it.value }.keys
-
+        
         if (granted.isNotEmpty()) {
             Log.i(TAG, "Permissions granted: $granted")
         }
         if (denied.isNotEmpty()) {
             Log.w(TAG, "Permissions denied: $denied")
         }
-
+        
         onPermissionResult?.invoke(results)
         onPermissionResult = null
     }
-
+    
     /**
      * Show rationale dialog explaining why permissions are needed
      */
@@ -244,7 +244,7 @@ class PermissionManager(private val activity: AppCompatActivity) {
             .setCancelable(false)
             .show()
     }
-
+    
     /**
      * Show microphone permission rationale
      */
@@ -257,7 +257,7 @@ class PermissionManager(private val activity: AppCompatActivity) {
             onDeny = onDeny
         )
     }
-
+    
     /**
      * Show storage permission rationale
      */
@@ -270,7 +270,7 @@ class PermissionManager(private val activity: AppCompatActivity) {
             onDeny = onDeny
         )
     }
-
+    
     /**
      * Show Bluetooth permission rationale
      */
@@ -283,14 +283,14 @@ class PermissionManager(private val activity: AppCompatActivity) {
             onDeny = onDeny
         )
     }
-
+    
     /**
      * Check if we should show rationale for a permission
      */
     fun shouldShowRationale(permission: String): Boolean {
         return activity.shouldShowRequestPermissionRationale(permission)
     }
-
+    
     /**
      * Get human-readable permission name
      */
@@ -308,7 +308,7 @@ class PermissionManager(private val activity: AppCompatActivity) {
             else -> permission.substringAfterLast(".")
         }
     }
-
+    
     /**
      * Check and request all startup permissions
      */
@@ -316,21 +316,21 @@ class PermissionManager(private val activity: AppCompatActivity) {
         onComplete: (success: Boolean) -> Unit
     ) {
         val prefs = activity.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-
+        
         // Check if we've already requested on first launch
         val alreadyRequested = prefs.getBoolean(KEY_PERMISSIONS_REQUESTED, false)
-
+        
         val essentialPermissions = getEssentialPermissions()
-        val missingPermissions = essentialPermissions.filter {
-            !isPermissionGranted(activity, it)
+        val missingPermissions = essentialPermissions.filter { 
+            !isPermissionGranted(activity, it) 
         }
-
+        
         if (missingPermissions.isEmpty()) {
             Log.i(TAG, "All essential permissions already granted")
             onComplete(true)
             return
         }
-
+        
         if (!alreadyRequested) {
             // First time - request without rationale
             prefs.edit().putBoolean(KEY_PERMISSIONS_REQUESTED, true).apply()

@@ -1,6 +1,6 @@
 /*!
  * LLSD Error Types - Rust Implementation
- *
+ * 
  * Copyright (C) 2024 Linden Lab
  */
 

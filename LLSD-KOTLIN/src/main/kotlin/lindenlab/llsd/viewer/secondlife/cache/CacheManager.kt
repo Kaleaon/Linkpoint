@@ -23,10 +23,10 @@ import kotlin.streams.toList
 
 /**
  * Comprehensive cache management system for Second Life viewer (Kotlin implementation).
- *
+ * 
  * Features:
  * - Configurable cache storage (internal/external) up to 200GB
- * - Intelligent cache cleanup and management
+ * - Intelligent cache cleanup and management  
  * - Multiple cache types with performance monitoring
  * - Coroutine-based async operations
  */
@@ -38,7 +38,7 @@ class CacheManager(
         private val LOGGER = Logger.getLogger(CacheManager::class.java.name)
         const val MAX_CACHE_SIZE = 200L * 1024 * 1024 * 1024 // 200GB
         const val DEFAULT_CACHE_SIZE = 10L * 1024 * 1024 * 1024 // 10GB
-
+        
         fun formatBytes(bytes: Long): String = when {
             bytes < 1024 -> "$bytes B"
             bytes < 1024 * 1024 -> String.format("%.1f KB", bytes / 1024.0)
@@ -91,7 +91,7 @@ class CacheManager(
         initializeDefaultLimits()
         initializeCacheDirectories()
         startPeriodicCleanup()
-
+        
         LOGGER.info("Kotlin Cache manager initialized with ${storageLocation.displayName} storage, max size: ${formatBytes(maxCacheSize)}")
     }
 
@@ -140,13 +140,13 @@ class CacheManager(
     }
 
     private fun getBaseCacheDirectory(): Path = when (storageLocation) {
-        StorageLocation.INTERNAL ->
+        StorageLocation.INTERNAL -> 
             Paths.get(System.getProperty("user.dir"), "cache", "secondlife")
-        StorageLocation.EXTERNAL ->
+        StorageLocation.EXTERNAL -> 
             Paths.get(System.getProperty("user.home"), "SLCache")
-        StorageLocation.SYSTEM_TEMP ->
+        StorageLocation.SYSTEM_TEMP -> 
             Paths.get(System.getProperty("java.io.tmpdir"), "secondlife-cache")
-        StorageLocation.USER_HOME ->
+        StorageLocation.USER_HOME -> 
             Paths.get(System.getProperty("user.home"), ".secondlife", "cache")
     }
 
@@ -519,10 +519,10 @@ class CacheManager(
     // Shutdown
     fun shutdown() {
         LOGGER.info("Shutting down Kotlin cache manager")
-
+        
         cacheScope.cancel()
         cleanupScope.cancel()
-
+        
         LOGGER.info("Kotlin cache manager shutdown complete")
     }
 

@@ -23,3 +23,4 @@ those two has to be the same. -->
     android:fromAlpha="0.0"
     android:toAlpha="1.0"
     android:duration="@integer/config_dreamOpenAnimationDuration" />
+

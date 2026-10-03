@@ -76,7 +76,7 @@ public class GlobalOptions implements SharedPreferences.OnSharedPreferenceChange
         low("low_lod"),
         lowest("lowest_lod"),
         disabled(null);
-
+        
         private String lodName;
 
         MeshRendering(String str) {

@@ -13,7 +13,7 @@ import java.util.UUID
  * Manages the active session with a Second Life grid
  */
 class SessionManager(private val context: Context) {
-
+    
     companion object {
         private const val TAG = "SessionManager"
         private const val PREFS_NAME = "linkpoint_session"
@@ -21,50 +21,50 @@ class SessionManager(private val context: Context) {
         private const val KEY_HOME_LOCATION = "home_location"
         private const val MAX_HISTORY_SIZE = 50
     }
-
+    
     private val prefs = SecurePreferences.getEncryptedPreferences(context, PREFS_NAME)
-
+    
     // Session state
     private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
     val connectionState: StateFlow<ConnectionState> = _connectionState
-
+    
     private val _currentRegion = MutableStateFlow<RegionInfo?>(null)
     val currentRegion: StateFlow<RegionInfo?> = _currentRegion
 
     private val _regionSessionState = MutableStateFlow(RegionSessionState())
     val regionSessionState: StateFlow<RegionSessionState> = _regionSessionState
-
+    
     // Active grid info with resolved endpoints
     private val _activeGrid = MutableStateFlow<GridInfo?>(null)
     val activeGrid: StateFlow<GridInfo?> = _activeGrid
-
+    
     // Teleport history
     private val _teleportHistory = MutableStateFlow<List<TeleportHistoryEntry>>(emptyList())
     val teleportHistory: StateFlow<List<TeleportHistoryEntry>> = _teleportHistory
-
+    
     // Session data
     private var sessionId: String? = null
     private var agentId: UUID? = null
     private var secureSessionId: String? = null
-
+    
     // Avatar info
     private var avatarFirstName: String = ""
     private var avatarLastName: String = ""
-
+    
     // Home location
     private var homeLocation: TeleportHistoryEntry? = null
-
+    
     init {
         loadTeleportHistory()
         loadHomeLocation()
     }
-
+    
     fun isConnected(): Boolean = _connectionState.value == ConnectionState.CONNECTED
-
+    
     fun getAgentId(): UUID? = agentId
     fun getSessionId(): String? = sessionId
     fun getAvatarName(): String = "$avatarFirstName $avatarLastName".trim()
-
+    
     /**
      * Update active grid info and dynamic endpoints
      */
@@ -72,13 +72,13 @@ class SessionManager(private val context: Context) {
         _activeGrid.value = grid
         Log.i(TAG, "Active grid state updated: ${grid.name} (loginuri=${grid.loginUri}, helperuri=${grid.helperUri}, economy=${grid.economyUri}, map=${grid.mapUri})")
     }
-
+    
     fun getLoginUri(): String = _activeGrid.value?.loginUri ?: "https://login.agni.lindenlab.com/cgi-bin/login.cgi"
     fun getHelperUri(): String? = _activeGrid.value?.helperUri
     fun getEconomyUri(): String? = _activeGrid.value?.economyUri
     fun getMapUri(): String? = _activeGrid.value?.mapUri
     fun getWelcomeUri(): String? = _activeGrid.value?.welcomeUri ?: _activeGrid.value?.website
-
+    
     /**
      * Called when login succeeds
      */
@@ -95,32 +95,32 @@ class SessionManager(private val context: Context) {
         this.secureSessionId = secureSessionId
         this.avatarFirstName = firstName
         this.avatarLastName = lastName
-
+        
         _currentRegion.value = regionInfo
         _connectionState.value = ConnectionState.CONNECTED
-
+        
         // Add to teleport history
         addToHistory(regionInfo)
-
+        
         Log.i(TAG, "Session established for $firstName $lastName in ${regionInfo.name}")
     }
-
+    
     /**
      * Called when disconnecting
      */
     fun disconnect() {
         Log.i(TAG, "Disconnecting session")
-
+        
         sessionId = null
         agentId = null
         secureSessionId = null
         avatarFirstName = ""
         avatarLastName = ""
-
+        
         _currentRegion.value = null
         _connectionState.value = ConnectionState.DISCONNECTED
     }
-
+    
     /**
      * Called when teleporting to a new region
      */
@@ -129,7 +129,7 @@ class SessionManager(private val context: Context) {
         addToHistory(regionInfo)
         Log.i(TAG, "Teleported to ${regionInfo.name}")
     }
-
+    
     /**
      * Update the region name after receiving RegionHandshake.
      * This updates the region info with the actual name from the simulator.
@@ -165,7 +165,7 @@ class SessionManager(private val context: Context) {
             simAccess = simAccess
         )
     }
-
+    
     /**
      * Update region info from RegionInfo UDP message.
      */
@@ -192,7 +192,7 @@ class SessionManager(private val context: Context) {
             Log.i(TAG, "Region info created for: $regionName")
         }
     }
-
+    
     /**
      * Update the region handle and position after receiving AgentMovementComplete.
      * This provides the authoritative region handle from the simulator.
@@ -225,16 +225,16 @@ class SessionManager(private val context: Context) {
             Log.i(TAG, "Region info created with handle=$regionHandle, position=($x, $y), name=$name")
         }
     }
-
+    
     /**
      * Update connection state
      */
     fun setConnectionState(state: ConnectionState) {
         _connectionState.value = state
     }
-
+    
     // ==================== TELEPORT HISTORY ====================
-
+    
     /**
      * Add current location to teleport history.
      */
@@ -246,29 +246,29 @@ class SessionManager(private val context: Context) {
             z = 25, // Default height if not known
             timestamp = System.currentTimeMillis()
         )
-
+        
         val currentHistory = _teleportHistory.value.toMutableList()
-
+        
         // Remove duplicate if exists
         currentHistory.removeAll { it.regionName == entry.regionName }
-
+        
         // Add to front
         currentHistory.add(0, entry)
-
+        
         // Limit size
         if (currentHistory.size > MAX_HISTORY_SIZE) {
             currentHistory.removeAt(currentHistory.size - 1)
         }
-
+        
         _teleportHistory.value = currentHistory
         saveTeleportHistory()
     }
-
+    
     /**
      * Get teleport history.
      */
     fun getTeleportHistory(): List<TeleportHistoryEntry> = _teleportHistory.value
-
+    
     /**
      * Clear teleport history.
      */
@@ -276,7 +276,7 @@ class SessionManager(private val context: Context) {
         _teleportHistory.value = emptyList()
         prefs.edit().remove(KEY_TELEPORT_HISTORY).apply()
     }
-
+    
     private fun loadTeleportHistory() {
         val json = prefs.getString(KEY_TELEPORT_HISTORY, null) ?: return
         try {
@@ -297,7 +297,7 @@ class SessionManager(private val context: Context) {
             Log.e(TAG, "Failed to load teleport history", e)
         }
     }
-
+    
     private fun saveTeleportHistory() {
         try {
             val array = JSONArray()
@@ -315,9 +315,9 @@ class SessionManager(private val context: Context) {
             Log.e(TAG, "Failed to save teleport history", e)
         }
     }
-
+    
     // ==================== HOME LOCATION ====================
-
+    
     /**
      * Set current location as home.
      */
@@ -333,12 +333,12 @@ class SessionManager(private val context: Context) {
         saveHomeLocation()
         Log.i(TAG, "Home location set to ${region.name}")
     }
-
+    
     /**
      * Get home location.
      */
     fun getHomeLocation(): TeleportHistoryEntry? = homeLocation
-
+    
     /**
      * Teleport home.
      */
@@ -351,7 +351,7 @@ class SessionManager(private val context: Context) {
             Log.w(TAG, "No home location set")
         }
     }
-
+    
     private fun loadHomeLocation() {
         val json = prefs.getString(KEY_HOME_LOCATION, null) ?: return
         try {
@@ -367,7 +367,7 @@ class SessionManager(private val context: Context) {
             Log.e(TAG, "Failed to load home location", e)
         }
     }
-
+    
     private fun saveHomeLocation() {
         try {
             val home = homeLocation ?: return
@@ -382,19 +382,19 @@ class SessionManager(private val context: Context) {
             Log.e(TAG, "Failed to save home location", e)
         }
     }
-
+    
     // ==================== AGENT DATA ====================
-
+    
     // Agent group/title data (from AgentDataUpdate message)
     private var _activeGroupId: UUID? = null
     private var _activeGroupTitle: String = ""
     private var _activeGroupPowers: Long = 0
     private var _activeGroupName: String = ""
-
+    
     val activeGroupId: UUID? get() = _activeGroupId
     val activeGroupTitle: String get() = _activeGroupTitle
     val activeGroupName: String get() = _activeGroupName
-
+    
     /**
      * Update agent data from AgentDataUpdate message
      */
@@ -413,18 +413,18 @@ class SessionManager(private val context: Context) {
         if (lastName.isNotEmpty()) {
             this.avatarLastName = lastName
         }
-
+        
         // Update group data
         this._activeGroupId = activeGroupId
         this._activeGroupTitle = groupTitle
         this._activeGroupPowers = groupPowers
         this._activeGroupName = groupName
-
+        
         Log.i(TAG, "Agent data updated: $avatarFirstName $avatarLastName, group='$groupTitle' ($groupName)")
     }
-
+    
     // ==================== SIM STATISTICS ====================
-
+    
     // Sim stats storage
     private var _simFPS: Float = 0f
     private var _physFPS: Float = 0f
@@ -435,7 +435,7 @@ class SessionManager(private val context: Context) {
     private var _activePrims: Int = 0
     private var _activeScripts: Int = 0
     private var _scriptLPS: Float = 0f
-
+    
     val simFPS: Float get() = _simFPS
     val physFPS: Float get() = _physFPS
     val agentUpdatesPerSec: Float get() = _agentUpdatesPerSec
@@ -445,7 +445,7 @@ class SessionManager(private val context: Context) {
     val activePrims: Int get() = _activePrims
     val activeScripts: Int get() = _activeScripts
     val scriptLPS: Float get() = _scriptLPS
-
+    
     /**
      * Update simulator statistics from SimStats message.
      */
@@ -463,7 +463,7 @@ class SessionManager(private val context: Context) {
                 8 -> _scriptLPS = value
             }
         }
-
+        
         Log.d(TAG, "📈 SimStats: FPS=$_simFPS, PhysFPS=$_physFPS, Agents=$_mainAgents+$_childAgents, Prims=$_totalPrims")
     }
 }

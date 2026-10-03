@@ -67,7 +67,7 @@ data class GroupData(
 
 /**
  * Compose screen for Groups feature.
- *
+ * 
  * Features:
  * - My Groups list
  * - Group search tab
@@ -90,7 +90,7 @@ fun GroupsScreen(
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("My Groups", "Search")
-
+    
     Scaffold(
         topBar = {
             L2TopBar(
@@ -124,7 +124,7 @@ fun GroupsScreen(
                     )
                 }
             }
-
+            
             when (selectedTab) {
                 0 -> MyGroupsList(
                     groups = myGroups,
@@ -208,12 +208,12 @@ private fun GroupSearchTab(
     modifier: Modifier = Modifier
 ) {
     var searchQuery by remember { mutableStateOf("") }
-
+    
     Column(modifier = modifier.fillMaxSize()) {
         // Search input
         androidx.compose.material3.OutlinedTextField(
             value = searchQuery,
-            onValueChange = {
+            onValueChange = { 
                 searchQuery = it
                 if (it.length >= 3) {
                     onSearch(it)
@@ -226,7 +226,7 @@ private fun GroupSearchTab(
                 .padding(16.dp),
             singleLine = true
         )
-
+        
         if (searchResults.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -273,7 +273,7 @@ fun GroupCard(
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
-
+    
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -310,9 +310,9 @@ fun GroupCard(
                     }
                 )
             }
-
+            
             Spacer(modifier = Modifier.width(12.dp))
-
+            
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -337,7 +337,7 @@ fun GroupCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-
+            
             // Actions
             if (showJoinButton && onJoin != null && group.isOpen) {
                 androidx.compose.material3.TextButton(onClick = onJoin) {
@@ -352,12 +352,12 @@ fun GroupCard(
                         )
                     }
                 }
-
+                
                 Box {
                     IconButton(onClick = { showMenu = true }) {
                         Icon(Icons.Default.MoreVert, contentDescription = "More options")
                     }
-
+                    
                     DropdownMenu(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false }

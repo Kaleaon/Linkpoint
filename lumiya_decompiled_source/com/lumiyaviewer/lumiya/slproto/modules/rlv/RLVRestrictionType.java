@@ -21,7 +21,7 @@ public enum RLVRestrictionType {
     addoutfit(RLVRuleMatchType.TargetSpecifiesRestriction),
     redirchat(RLVRuleMatchType.TargetSpecifiesRestriction),
     sendchannel(RLVRuleMatchType.TargetSpecifiesException);
-
+    
     private RLVRuleMatchType ruleMatchType;
 
     /* loaded from: classes.dex */

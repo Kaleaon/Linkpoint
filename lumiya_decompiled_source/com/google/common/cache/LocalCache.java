@@ -509,7 +509,7 @@ public class LocalCache<K, V> extends AbstractMap<K, V> implements ConcurrentMap
                 return new WeakAccessWriteEntry(segment.keyReferenceQueue, k, i, referenceEntry);
             }
         };
-
+        
         static final int ACCESS_MASK = 1;
         static final int WEAK_MASK = 4;
         static final int WRITE_MASK = 2;

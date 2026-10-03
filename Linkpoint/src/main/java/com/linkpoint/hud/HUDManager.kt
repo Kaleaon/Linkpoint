@@ -20,12 +20,12 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * HUDManager - Manages Heads-Up Display (HUD) attachments in Second Life.
- *
+ * 
  * HUDs are special objects attached to the avatar that are:
  * - Rendered in screen space (not world space)
  * - Interactive (can be clicked/touched)
  * - Only visible to the owner
- *
+ * 
  * HUD attachment points:
  * - HUD Center 1 (35)
  * - HUD Center 2 (31)
@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap
  * - HUD Bottom Left (36)
  * - HUD Bottom (37)
  * - HUD Bottom Right (38)
- *
+ * 
  * Based on the reference viewer's HUD implementation.
  */
 class HUDManager(
@@ -49,7 +49,7 @@ class HUDManager(
         private const val PREFS_NAME = "linkpoint_hud_layout"
         private const val KEY_LAYOUT_CONFIG = "hud_layout_config"
         private const val TABLET_SMALLEST_WIDTH_DP = 600
-
+        
         // HUD attachment points
         const val ATTACH_HUD_CENTER_2 = 31
         const val ATTACH_HUD_TOP_RIGHT = 32
@@ -59,7 +59,7 @@ class HUDManager(
         const val ATTACH_HUD_BOTTOM_LEFT = 36
         const val ATTACH_HUD_BOTTOM = 37
         const val ATTACH_HUD_BOTTOM_RIGHT = 38
-
+        
         // All HUD attachment points
         val HUD_ATTACHMENT_POINTS = setOf(
             ATTACH_HUD_CENTER_2,
@@ -71,7 +71,7 @@ class HUDManager(
             ATTACH_HUD_BOTTOM,
             ATTACH_HUD_BOTTOM_RIGHT
         )
-
+        
         // Screen layout positions for HUD points
         // Values are in normalized screen coordinates (0-1)
         val HUD_SCREEN_POSITIONS = mapOf(
@@ -85,21 +85,21 @@ class HUDManager(
             ATTACH_HUD_BOTTOM_RIGHT to HUDPosition(0.95f, 0.95f, HUDAlignment.BOTTOM_RIGHT)
         )
     }
-
+    
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private var layoutConfig = HudLayoutConfig()
-
+    
     // HUD objects by attachment point
     private val hudsByPoint = ConcurrentHashMap<Int, MutableList<HUDObject>>()
-
+    
     // All HUD objects
     private val allHuds = ConcurrentHashMap<Int, HUDObject>() // By local ID
-
+    
     // HUD visibility settings
     private val _hudsVisible = MutableStateFlow(true)
     val hudsVisible: StateFlow<Boolean> = _hudsVisible
-
+    
     // Currently focused HUD (for input)
     private val _focusedHud = MutableStateFlow<HUDObject?>(null)
     val focusedHud: StateFlow<HUDObject?> = _focusedHud
@@ -107,14 +107,14 @@ class HUDManager(
     init {
         loadLayoutConfig()
     }
-
+    
     /**
      * Check if an attachment point is a HUD point.
      */
     fun isHUDAttachmentPoint(attachmentPoint: Int): Boolean {
         return attachmentPoint in HUD_ATTACHMENT_POINTS
     }
-
+    
     /**
      * Get the name of an attachment point.
      */
@@ -131,7 +131,7 @@ class HUDManager(
             else -> "Attachment Point $attachmentPoint"
         }
     }
-
+    
     /**
      * Register an object as a HUD.
      * Called when an object update indicates an object is attached to a HUD point.
@@ -141,7 +141,7 @@ class HUDManager(
             Log.w(TAG, "Not a HUD attachment point: $attachmentPoint")
             return
         }
-
+        
         val hudObject = HUDObject(
             localId = sceneObject.localId,
             fullId = sceneObject.fullId,
@@ -150,47 +150,47 @@ class HUDManager(
             scale = sceneObject.scale,
             name = sceneObject.name.ifEmpty { "HUD" }
         )
-
+        
         // Add to tracking maps
         allHuds[sceneObject.localId] = hudObject
         hudsByPoint.getOrPut(attachmentPoint) { mutableListOf() }.add(hudObject)
-
+        
         Log.d(TAG, "Registered HUD: ${hudObject.name} at ${getAttachmentPointName(attachmentPoint)}")
     }
-
+    
     /**
      * Unregister a HUD object.
      */
     fun unregisterHUD(localId: Int) {
         val hud = allHuds.remove(localId) ?: return
         hudsByPoint[hud.attachmentPoint]?.remove(hud)
-
+        
         if (_focusedHud.value?.localId == localId) {
             _focusedHud.value = null
         }
-
+        
         Log.d(TAG, "Unregistered HUD: ${hud.name}")
     }
-
+    
     /**
      * Get all HUDs at a specific attachment point.
      */
     fun getHUDsAtPoint(attachmentPoint: Int): List<HUDObject> {
         return hudsByPoint[attachmentPoint]?.toList() ?: emptyList()
     }
-
+    
     /**
      * Get all HUDs.
      */
     fun getAllHUDs(): List<HUDObject> {
         return allHuds.values.toList()
     }
-
+    
     /**
      * Get a specific HUD by local ID.
      */
     fun getHUD(localId: Int): HUDObject? = allHuds[localId]
-
+    
     /**
      * Show or hide all HUDs.
      */
@@ -198,21 +198,21 @@ class HUDManager(
         _hudsVisible.value = visible
         Log.d(TAG, "HUDs visibility: $visible")
     }
-
+    
     /**
      * Toggle HUD visibility.
      */
     fun toggleHUDsVisibility() {
         _hudsVisible.value = !_hudsVisible.value
     }
-
+    
     /**
      * Touch/click a HUD element.
      * This triggers the HUD's scripts just like clicking in the 3D viewer.
      */
     fun touchHUD(localId: Int, touchPosition: LLVector3) {
         val hud = allHuds[localId] ?: return
-
+        
         // Use ObjectManager to send the touch
         objectManager.touchObject(
             localId = localId,
@@ -220,17 +220,17 @@ class HUDManager(
             normal = LLVector3(0f, 0f, 1f),
             binormal = LLVector3(0f, 1f, 0f)
         )
-
+        
         Log.d(TAG, "Touched HUD: ${hud.name} at $touchPosition")
     }
-
+    
     /**
      * Set focus to a HUD for text input.
      */
     fun setFocusedHUD(localId: Int?) {
         _focusedHud.value = if (localId != null) allHuds[localId] else null
     }
-
+    
     /**
      * Get the screen position for a HUD attachment point.
      */
@@ -277,20 +277,20 @@ class HUDManager(
     fun persistLayoutConfig() {
         saveLayoutConfig()
     }
-
+    
     /**
      * Get ordered HUDs for rendering.
      * Returns HUDs grouped by their screen position (top-left, top-center, etc.)
      */
     fun getHUDsForRendering(): Map<HUDAlignment, List<HUDObject>> {
         if (!_hudsVisible.value) return emptyMap()
-
+        
         return allHuds.values
             .groupBy { hud ->
                 HUD_SCREEN_POSITIONS[hud.attachmentPoint]?.alignment ?: HUDAlignment.CENTER
             }
     }
-
+    
     /**
      * Hit test to find which HUD is at screen coordinates.
      * @param screenX Normalized X (0-1)
@@ -299,7 +299,7 @@ class HUDManager(
      */
     fun hitTest(screenX: Float, screenY: Float): HUDObject? {
         if (!_hudsVisible.value) return null
-
+        
         // Check each HUD's bounding box
         for (hud in allHuds.values) {
             val layoutEntry = getLayoutEntry(hud.attachmentPoint)
@@ -323,16 +323,16 @@ class HUDManager(
                 return hud
             }
         }
-
+        
         return null
     }
-
+    
     /**
      * Update HUD position/scale from object update.
      */
     fun updateHUD(localId: Int, position: LLVector3?, scale: LLVector3?) {
         val hud = allHuds[localId] ?: return
-
+        
         if (position != null) {
             hud.position = position
         }
@@ -340,7 +340,7 @@ class HUDManager(
             hud.scale = scale
         }
     }
-
+    
     /**
      * Get diagnostic information about HUDs.
      */
@@ -365,7 +365,7 @@ class HUDManager(
         val downloadable = textureIds.firstOrNull { TextureEntryParser.shouldDownload(it) }
         return downloadable ?: textureIds.firstOrNull()
     }
-
+    
     fun shutdown() {
         scope.cancel()
         allHuds.clear()

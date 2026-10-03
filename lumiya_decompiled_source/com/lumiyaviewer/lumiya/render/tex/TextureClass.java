@@ -6,7 +6,7 @@ public enum TextureClass {
     Baked("baked"),
     Asset("asset"),
     Terrain("terrain");
-
+    
     private final String storePath;
 
     TextureClass(String str) {

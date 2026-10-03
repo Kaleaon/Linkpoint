@@ -4,7 +4,7 @@ Default values for "Look At" controls.
 Various events compete for avatar attention. I.E. control where the
 user's avatar looks.
 The avatar's head will turn to look towards the source of those events
-as much as is possible.
+as much as is possible. 
 If the head cannot turn due to an animation override, the eyes will still
 track those events.
 Avatar attention will be taken by events of equal of greater priorities
@@ -48,3 +48,4 @@ MOUSELOOK: Tracks center of view when in mouselook view mode.
       <param attention="mouselook"    priority="7.0" timeout="-1"   />
    </gender>
 </linden_attentions>
+

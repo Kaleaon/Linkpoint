@@ -11,51 +11,51 @@ import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Enhanced Packet Logger for comprehensive UDP protocol debugging.
- *
+ * 
  * Provides detailed logging of:
  * - All sent/received UDP packets with full message decoding
  * - Handler registration and dispatch events
  * - ACK tracking and resend statistics
  * - Message-specific timing and frequency analysis
  * - Hex dumps for packet inspection
- *
+ * 
  * This addresses the debugging needs identified in the debug report:
  * - "PACKETS SENT BUT NONE RECEIVED!"
  * - Tracking which handlers are registered
  * - Understanding message flow timing
  */
 object EnhancedPacketLogger {
-
+    
     private const val TAG = "PacketLogger"
     private const val EARLY_WARNING_GRACE_MS = 15_000L
-
+    
     // Message names that should not count as handler misses
     // These are internal protocol messages or handled specially
     private val EXPECTED_UNHANDLED_MESSAGES = setOf(
         "PacketAck",
-        "PacketAckResponse",
+        "PacketAckResponse", 
         "StartPingCheck",
         "CompletePingCheck",
         "Unknown" // Unknown messages are expected and tracked separately
     )
-
+    
     // Configuration
     @Volatile
     var isEnabled: Boolean = true
-
+    
     @Volatile
     var verboseMode: Boolean = false
-
+    
     @Volatile
     var logHexDumps: Boolean = true
-
+    
     @Volatile
     var maxHexDumpBytes: Int = 64
-
+    
     // Packet history for debug reports
     private const val MAX_PACKET_HISTORY = 200
     private val packetHistory = ConcurrentLinkedQueue<PacketLogEntry>()
-
+    
     // Statistics
     private val packetsSent = AtomicLong(0)
     private val packetsReceived = AtomicLong(0)
@@ -66,7 +66,7 @@ object EnhancedPacketLogger {
     private val resendCount = AtomicLong(0)
     private val parseErrors = AtomicInteger(0)
     private val handlerMisses = AtomicInteger(0)
-
+    
     // Malformed packet tracking - detailed categorization for debugging
     private val malformedPacketCount = AtomicInteger(0)
     private val truncatedPacketCount = AtomicInteger(0)
@@ -75,20 +75,20 @@ object EnhancedPacketLogger {
     private val corruptedPayloadCount = AtomicInteger(0)
     private val zeroDecodeFailureCount = AtomicInteger(0)
     private val oversizedPacketCount = AtomicInteger(0)
-
+    
     // Recent malformed packet history for detailed debugging
     private const val MAX_MALFORMED_HISTORY = 50
     private val malformedPacketHistory = ConcurrentLinkedQueue<MalformedPacketEntry>()
-
+    
     // Message type tracking
     private val sentMessageCounts = ConcurrentHashMap<String, AtomicLong>()
     private val receivedMessageCounts = ConcurrentHashMap<String, AtomicLong>()
     private val lastMessageTimes = ConcurrentHashMap<String, Long>()
-
+    
     // Handler tracking
     private val registeredHandlers = ConcurrentHashMap<Int, String>()
     private val handlerDispatchCounts = ConcurrentHashMap<String, AtomicLong>()
-
+    
     // Session tracking
     @Volatile
     private var sessionStartTime: Long = 0
@@ -99,16 +99,16 @@ object EnhancedPacketLogger {
         val provisional = elapsedMs != null && elapsedMs < EARLY_WARNING_GRACE_MS
         return provisional to timing
     }
-
+    
     @Volatile
     private var lastPacketSentTime: Long = 0
-
+    
     @Volatile
     private var lastPacketReceivedTime: Long = 0
-
+    
     // Date formatter
     private val timestampFormat = SimpleDateFormat("HH:mm:ss.SSS", Locale.US)
-
+    
     /**
      * Log entry for a packet event.
      */
@@ -128,7 +128,7 @@ object EnhancedPacketLogger {
         enum class Direction {
             SENT, RECEIVED, RESENT, ACK_SENT, ACK_RECEIVED
         }
-
+        
         fun formatForDisplay(): String {
             val arrow = when (direction) {
                 Direction.SENT -> "→"
@@ -141,11 +141,11 @@ object EnhancedPacketLogger {
             val handlerStr = if (direction == Direction.RECEIVED && !handlerDispatched) " [NO HANDLER]" else ""
             val errorStr = error?.let { " ERROR: $it" } ?: ""
             val timeStr = timestampFormat.format(Date(timestamp))
-
+            
             return "[$timeStr] $arrow $messageName (seq=$sequenceNumber, ${size}B) $flagStr$handlerStr$errorStr"
         }
     }
-
+    
     /**
      * Packet flags for debugging.
      */
@@ -164,7 +164,7 @@ object EnhancedPacketLogger {
             }.ifEmpty { "-" }
         }
     }
-
+    
     /**
      * Malformed packet entry for tracking broken/invalid packets.
      * These help diagnose protocol issues and network corruption.
@@ -199,7 +199,7 @@ object EnhancedPacketLogger {
             /** General parse failure */
             PARSE_ERROR
         }
-
+        
         fun formatForDisplay(): String {
             val timeStr = SimpleDateFormat("HH:mm:ss.SSS", Locale.US).format(Date(timestamp))
             val seqInfo = sequenceNumber?.let { " seq=$it" } ?: ""
@@ -207,7 +207,7 @@ object EnhancedPacketLogger {
             return "[$timeStr] ⚠️ MALFORMED: $reason (${size}B)$seqInfo$msgIdInfo\n    Details: $details\n    Hex: $hexPreview"
         }
     }
-
+    
     /**
      * Start a new logging session.
      */
@@ -220,7 +220,7 @@ object EnhancedPacketLogger {
         Log.i(TAG, "║ Verbose: $verboseMode, HexDumps: $logHexDumps")
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
     }
-
+    
     /**
      * Reset all statistics.
      */
@@ -250,7 +250,7 @@ object EnhancedPacketLogger {
         lastPacketSentTime = 0
         lastPacketReceivedTime = 0
     }
-
+    
     /**
      * Log a packet being sent.
      */
@@ -262,16 +262,16 @@ object EnhancedPacketLogger {
         flags: PacketFlags
     ) {
         if (!isEnabled) return
-
+        
         packetsSent.incrementAndGet()
         bytesSent.addAndGet(data.size.toLong())
         lastPacketSentTime = System.currentTimeMillis()
-
+        
         sentMessageCounts.getOrPut(messageName) { AtomicLong(0) }.incrementAndGet()
         lastMessageTimes[messageName] = lastPacketSentTime
-
+        
         val hexPreview = if (logHexDumps) formatHexPreview(data) else null
-
+        
         val entry = PacketLogEntry(
             timestamp = lastPacketSentTime,
             direction = PacketLogEntry.Direction.SENT,
@@ -282,9 +282,9 @@ object EnhancedPacketLogger {
             flags = flags,
             hexPreview = hexPreview
         )
-
+        
         addToHistory(entry)
-
+        
         if (verboseMode) {
             Log.v(TAG, entry.formatForDisplay())
             hexPreview?.let { Log.v(TAG, "    Hex: $it") }
@@ -292,7 +292,7 @@ object EnhancedPacketLogger {
             Log.d(TAG, "→ $messageName (seq=$sequenceNumber, ${data.size}B)")
         }
     }
-
+    
     /**
      * Log a packet being received.
      */
@@ -306,25 +306,25 @@ object EnhancedPacketLogger {
         processingTimeMs: Long? = null
     ) {
         if (!isEnabled) return
-
+        
         packetsReceived.incrementAndGet()
         bytesReceived.addAndGet(data.size.toLong())
         lastPacketReceivedTime = System.currentTimeMillis()
-
+        
         receivedMessageCounts.getOrPut(messageName) { AtomicLong(0) }.incrementAndGet()
         lastMessageTimes[messageName] = lastPacketReceivedTime
-
+        
         // Check if this is an expected unhandled message type
         val isExpectedUnhandled = EXPECTED_UNHANDLED_MESSAGES.any { expectedName ->
             messageName.contains(expectedName, ignoreCase = true)
         }
-
+        
         if (!handlerFound && !isExpectedUnhandled) {
             handlerMisses.incrementAndGet()
         }
-
+        
         val hexPreview = if (logHexDumps) formatHexPreview(data) else null
-
+        
         val entry = PacketLogEntry(
             timestamp = lastPacketReceivedTime,
             direction = PacketLogEntry.Direction.RECEIVED,
@@ -337,12 +337,12 @@ object EnhancedPacketLogger {
             handlerDispatched = handlerFound,
             processingTimeMs = processingTimeMs
         )
-
+        
         addToHistory(entry)
-
+        
         val handlerInfo = if (!handlerFound) " [NO HANDLER]" else ""
         val procTimeInfo = processingTimeMs?.let { " (${it}ms)" } ?: ""
-
+        
         if (verboseMode) {
             Log.v(TAG, entry.formatForDisplay())
             hexPreview?.let { Log.v(TAG, "    Hex: $it") }
@@ -350,7 +350,7 @@ object EnhancedPacketLogger {
             Log.d(TAG, "← $messageName (seq=$sequenceNumber, ${data.size}B)$handlerInfo$procTimeInfo")
         }
     }
-
+    
     /**
      * Log a packet resend.
      */
@@ -362,9 +362,9 @@ object EnhancedPacketLogger {
         ageMs: Long
     ) {
         if (!isEnabled) return
-
+        
         resendCount.incrementAndGet()
-
+        
         val entry = PacketLogEntry(
             timestamp = System.currentTimeMillis(),
             direction = PacketLogEntry.Direction.RESENT,
@@ -376,25 +376,25 @@ object EnhancedPacketLogger {
             hexPreview = null,
             error = "Retry #$retryCount after ${ageMs}ms"
         )
-
+        
         addToHistory(entry)
-
+        
         Log.w(TAG, "⟳ RESEND $messageName (seq=$sequenceNumber) retry #$retryCount, age=${ageMs}ms")
     }
-
+    
     /**
      * Log ACK sent.
      */
     fun logAckSent(sequenceNumber: Int) {
         if (!isEnabled) return
-
+        
         acksSent.incrementAndGet()
-
+        
         if (verboseMode) {
             Log.v(TAG, "✓→ ACK sent for seq=$sequenceNumber")
         }
     }
-
+    
     /**
      * Log ACK received.
      */
@@ -426,7 +426,7 @@ object EnhancedPacketLogger {
             Log.v(TAG, "✓← ACK received for seq=$sequenceNumber$msgInfo")
         }
     }
-
+    
     /**
      * Log handler registration.
      */
@@ -434,27 +434,27 @@ object EnhancedPacketLogger {
         registeredHandlers[messageId] = messageName
         Log.d(TAG, "📝 Handler registered: $messageName (0x${MessageIdNameRegistry.formatHex(messageId)})")
     }
-
+    
     /**
      * Log handler dispatch.
      */
     fun logHandlerDispatched(messageName: String, payloadSize: Int, processingTimeMs: Long) {
         if (!isEnabled) return
-
+        
         handlerDispatchCounts.getOrPut(messageName) { AtomicLong(0) }.incrementAndGet()
-
+        
         if (verboseMode) {
             Log.v(TAG, "📨 Handler dispatched: $messageName (${payloadSize}B, ${processingTimeMs}ms)")
         }
     }
-
+    
     /**
      * Log parse error.
      */
     fun logParseError(context: String, error: Throwable? = null) {
         parseErrors.incrementAndGet()
         Log.e(TAG, "❌ Parse error: $context", error)
-
+        
         val entry = PacketLogEntry(
             timestamp = System.currentTimeMillis(),
             direction = PacketLogEntry.Direction.RECEIVED,
@@ -466,23 +466,23 @@ object EnhancedPacketLogger {
             hexPreview = null,
             error = "$context: ${error?.message ?: "Unknown"}"
         )
-
+        
         addToHistory(entry)
     }
-
+    
     /**
      * Log critical message.
      */
     fun logCriticalMessage(messageName: String, details: String) {
         Log.i(TAG, "⭐ CRITICAL: $messageName - $details")
     }
-
+    
     // ==================== MALFORMED PACKET LOGGING ====================
-
+    
     /**
      * Log a malformed packet with detailed information for debugging.
      * This is the main entry point for tracking broken/invalid packets.
-     *
+     * 
      * @param reason The category of malformation detected
      * @param data The raw packet data (or partial data if truncated)
      * @param details Human-readable description of the issue
@@ -499,10 +499,10 @@ object EnhancedPacketLogger {
         messageId: Int? = null
     ) {
         if (!isEnabled) return
-
+        
         // Update overall malformed count
         malformedPacketCount.incrementAndGet()
-
+        
         // Update specific category counts
         when (reason) {
             MalformedPacketEntry.MalformedReason.TRUNCATED -> truncatedPacketCount.incrementAndGet()
@@ -513,7 +513,7 @@ object EnhancedPacketLogger {
             MalformedPacketEntry.MalformedReason.OVERSIZED -> oversizedPacketCount.incrementAndGet()
             else -> {} // Other categories tracked by overall count only
         }
-
+        
         // Create entry for history
         val hexPreview = data.take(48).joinToString(" ") { "%02X".format(it) }
         val entry = MalformedPacketEntry(
@@ -526,10 +526,10 @@ object EnhancedPacketLogger {
             sequenceNumber = sequenceNumber,
             messageId = messageId
         )
-
+        
         // Add to malformed history
         addToMalformedHistory(entry)
-
+        
         // Log to console with full details
         Log.w(TAG, "⚠️ MALFORMED PACKET DETECTED ⚠️")
         Log.w(TAG, "  Reason: $reason")
@@ -540,7 +540,7 @@ object EnhancedPacketLogger {
         messageId?.let { Log.w(TAG, "  Message ID: 0x${MessageIdNameRegistry.formatHex(it)}") }
         Log.w(TAG, "  Hex Preview: $hexPreview")
     }
-
+    
     /**
      * Log a truncated packet (too small to contain required header).
      */
@@ -551,7 +551,7 @@ object EnhancedPacketLogger {
             details = "Packet size ${data.size} bytes is smaller than minimum required $expectedMinSize bytes"
         )
     }
-
+    
     /**
      * Log invalid flags in packet header.
      */
@@ -564,7 +564,7 @@ object EnhancedPacketLogger {
             sequenceNumber = extractSequenceNumber(data)
         )
     }
-
+    
     /**
      * Log failed message ID decoding.
      */
@@ -577,7 +577,7 @@ object EnhancedPacketLogger {
             sequenceNumber = extractSequenceNumber(data)
         )
     }
-
+    
     /**
      * Log zero-decode failure.
      */
@@ -590,7 +590,7 @@ object EnhancedPacketLogger {
             sequenceNumber = extractSequenceNumber(data)
         )
     }
-
+    
     /**
      * Log ACK count mismatch (reported ACK count doesn't match available bytes).
      */
@@ -603,7 +603,7 @@ object EnhancedPacketLogger {
             sequenceNumber = extractSequenceNumber(data)
         )
     }
-
+    
     /**
      * Log corrupted payload structure.
      */
@@ -617,7 +617,7 @@ object EnhancedPacketLogger {
             messageId = messageId
         )
     }
-
+    
     /**
      * Log oversized packet.
      */
@@ -630,21 +630,21 @@ object EnhancedPacketLogger {
             sequenceNumber = extractSequenceNumber(data)
         )
     }
-
+    
     private fun addToMalformedHistory(entry: MalformedPacketEntry) {
         malformedPacketHistory.offer(entry)
         while (malformedPacketHistory.size > MAX_MALFORMED_HISTORY) {
             malformedPacketHistory.poll()
         }
     }
-
+    
     /**
      * Get malformed packet history.
      */
     fun getMalformedPacketHistory(count: Int = 20): List<MalformedPacketEntry> {
         return malformedPacketHistory.toList().takeLast(count)
     }
-
+    
     /**
      * Get malformed packet statistics.
      */
@@ -659,7 +659,7 @@ object EnhancedPacketLogger {
             oversized = oversizedPacketCount.get()
         )
     }
-
+    
     /**
      * Statistics for malformed packets.
      */
@@ -673,10 +673,10 @@ object EnhancedPacketLogger {
         val oversized: Int
     ) {
         fun hasIssues(): Boolean = totalMalformed > 0
-
+        
         fun toFormattedString(): String {
             if (totalMalformed == 0) return "No malformed packets detected"
-
+            
             return buildString {
                 appendLine("Total Malformed: $totalMalformed")
                 if (truncated > 0) appendLine("  Truncated: $truncated")
@@ -688,20 +688,20 @@ object EnhancedPacketLogger {
             }
         }
     }
-
+    
     private fun addToHistory(entry: PacketLogEntry) {
         packetHistory.offer(entry)
         while (packetHistory.size > MAX_PACKET_HISTORY) {
             packetHistory.poll()
         }
     }
-
+    
     /**
      * Extract sequence number from raw packet data.
      * Packet header format: flags (1 byte), sequence (4 bytes big-endian), extra (1 byte)
-     *
+     * 
      * Uses manual byte operations for efficiency (avoids ByteBuffer allocation).
-     *
+     * 
      * @param data The raw packet data
      * @return The sequence number, or null if data is too small
      */
@@ -713,10 +713,10 @@ object EnhancedPacketLogger {
                ((data[3].toInt() and 0xFF) shl 8) or
                (data[4].toInt() and 0xFF)
     }
-
+    
     /**
      * Extract flags byte from raw packet data.
-     *
+     * 
      * @param data The raw packet data
      * @return The flags byte as Int (0-255), or null if data is empty
      */
@@ -724,15 +724,15 @@ object EnhancedPacketLogger {
         if (data.isEmpty()) return null
         return data[0].toInt() and 0xFF
     }
-
+    
     private fun formatHexPreview(data: ByteArray): String {
         return data.take(maxHexDumpBytes).joinToString(" ") { "%02X".format(it) }
     }
-
+    
     private fun formatTimestamp(timestamp: Long): String {
         return SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date(timestamp))
     }
-
+    
     private fun formatDuration(durationMs: Long): String {
         return when {
             durationMs < 1000 -> "${durationMs}ms"
@@ -741,7 +741,7 @@ object EnhancedPacketLogger {
             else -> String.format(Locale.US, "%.1fh", durationMs / 3600000.0)
         }
     }
-
+    
     private fun formatBytes(bytes: Long): String {
         return when {
             bytes < 1024 -> "$bytes B"
@@ -749,7 +749,7 @@ object EnhancedPacketLogger {
             else -> String.format(Locale.US, "%.2f MB", bytes / (1024.0 * 1024.0))
         }
     }
-
+    
     /**
      * Get statistics summary.
      */
@@ -780,7 +780,7 @@ object EnhancedPacketLogger {
             oversizedPackets = oversizedPacketCount.get()
         )
     }
-
+    
     /**
      * Get packet history for debug reports.
      */
@@ -807,14 +807,14 @@ object EnhancedPacketLogger {
             .toList()
             .asReversed()
     }
-
+    
     /**
      * Get registered handlers.
      */
     fun getRegisteredHandlers(): Map<Int, String> {
         return registeredHandlers.toMap()
     }
-
+    
     /**
      * Get sent message breakdown.
      */
@@ -824,7 +824,7 @@ object EnhancedPacketLogger {
             .take(limit)
             .map { it.key to it.value.get() }
     }
-
+    
     /**
      * Get received message breakdown.
      */
@@ -834,20 +834,20 @@ object EnhancedPacketLogger {
             .take(limit)
             .map { it.key to it.value.get() }
     }
-
+    
     /**
      * Generate a comprehensive diagnostic report.
      */
     fun generateReport(): String {
         val stats = getStatistics()
         val now = System.currentTimeMillis()
-
+        
         return buildString {
             appendLine("╔══════════════════════════════════════════════════════════════════╗")
             appendLine("║               ENHANCED PACKET LOGGER REPORT                       ║")
             appendLine("╚══════════════════════════════════════════════════════════════════╝")
             appendLine()
-
+            
             // Session info
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ SESSION INFORMATION                                               │")
@@ -858,7 +858,7 @@ object EnhancedPacketLogger {
             appendLine("Logging Enabled: $isEnabled")
             appendLine("Verbose Mode: $verboseMode")
             appendLine()
-
+            
             // Packet statistics
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ PACKET STATISTICS                                                 │")
@@ -873,20 +873,20 @@ object EnhancedPacketLogger {
             appendLine("Parse Errors: ${stats.parseErrors}")
             appendLine("Handler Misses: ${stats.handlerMisses}")
             appendLine()
-
+            
             if (stats.lastPacketSentMs >= 0) {
                 appendLine("Last Packet Sent: ${formatDuration(stats.lastPacketSentMs)} ago")
             } else {
                 appendLine("Last Packet Sent: Never")
             }
-
+            
             if (stats.lastPacketReceivedMs >= 0) {
                 appendLine("Last Packet Received: ${formatDuration(stats.lastPacketReceivedMs)} ago")
             } else {
                 appendLine("Last Packet Received: Never ⚠️")
             }
             appendLine()
-
+            
             // Warning checks
             if (stats.packetsSent > 0 && stats.packetsReceived == 0L) {
                 val (provisional, timing) = formatUdpConnectedWarningContext()
@@ -902,12 +902,12 @@ object EnhancedPacketLogger {
                 appendLine("   - Simulator not responding")
                 appendLine()
             }
-
+            
             if (stats.handlerMisses > 0) {
                 appendLine("⚠️ ${stats.handlerMisses} messages had no registered handler!")
                 appendLine()
             }
-
+            
             // Registered handlers
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ REGISTERED HANDLERS (${stats.registeredHandlerCount})                                     │")
@@ -919,7 +919,7 @@ object EnhancedPacketLogger {
                 appendLine("  ⚠️ No handlers registered!")
             }
             appendLine()
-
+            
             // Sent message breakdown
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ SENT MESSAGE TYPES (top 15)                                       │")
@@ -931,7 +931,7 @@ object EnhancedPacketLogger {
                 appendLine("  No messages sent")
             }
             appendLine()
-
+            
             // Received message breakdown
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ RECEIVED MESSAGE TYPES (top 15)                                   │")
@@ -943,7 +943,7 @@ object EnhancedPacketLogger {
                 appendLine("  No messages received ⚠️")
             }
             appendLine()
-
+            
             // Recent packet history
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ RECENT PACKET HISTORY (last 30)                                   │")
@@ -958,7 +958,7 @@ object EnhancedPacketLogger {
                 appendLine("  No packet history")
             }
             appendLine()
-
+            
             // Malformed packet section
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ MALFORMED PACKET STATISTICS                                       │")
@@ -974,7 +974,7 @@ object EnhancedPacketLogger {
                 if (malformedStats.zeroDecodeFailure > 0) appendLine("  Zero-Decode Failures: ${malformedStats.zeroDecodeFailure}")
                 if (malformedStats.oversized > 0) appendLine("  Oversized: ${malformedStats.oversized}")
                 appendLine()
-
+                
                 // Show recent malformed packet history
                 val recentMalformed = getMalformedPacketHistory(10)
                 if (recentMalformed.isNotEmpty()) {
@@ -987,13 +987,13 @@ object EnhancedPacketLogger {
                 appendLine("  ✓ No malformed packets detected")
             }
             appendLine()
-
+            
             appendLine("═══════════════════════════════════════════════════════════════════")
             appendLine("End of Enhanced Packet Logger Report")
             appendLine("═══════════════════════════════════════════════════════════════════")
         }
     }
-
+    
     /**
      * Log the report to console.
      */
@@ -1003,7 +1003,7 @@ object EnhancedPacketLogger {
             Log.i(TAG, line)
         }
     }
-
+    
     /**
      * Packet statistics data class.
      */

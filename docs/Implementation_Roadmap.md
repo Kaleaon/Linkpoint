@@ -30,7 +30,7 @@ Error: Duplicate value for resource 'attr/fontStyle'
 android {
     namespace 'com.lumiyaviewer.lumiya'
     compileSdk 34
-
+    
     // Fix resource conflicts
     packagingOptions {
         pickFirst '**/libjnidispatch.so'
@@ -41,7 +41,7 @@ android {
         exclude 'META-INF/INDEX.LIST'
         exclude 'META-INF/io.netty.versions.properties'
     }
-
+    
     // Enable resource shrinking
     buildTypes {
         release {
@@ -54,7 +54,7 @@ android {
             shrinkResources false
         }
     }
-
+    
     // Fix source set configuration
     sourceSets {
         main {
@@ -73,7 +73,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'com.google.guava:guava:32.1.2-android'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
-
+    
     // Remove conflicting dependencies
     configurations.all {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
@@ -109,7 +109,7 @@ import android.util.Log;
 
 public class ResourceConflictResolver {
     private static final String TAG = "ResourceResolver";
-
+    
     public static void initialize(Context context) {
         try {
             resolveAttributeConflicts(context);
@@ -119,11 +119,11 @@ public class ResourceConflictResolver {
             Log.e(TAG, "Failed to resolve resource conflicts", e);
         }
     }
-
+    
     private static void resolveAttributeConflicts(Context context) {
         // Handle conflicting attributes by using fully qualified names
         Resources res = context.getResources();
-
+        
         // Ensure our app's attributes take precedence
         try {
             int fontStyleAttr = res.getIdentifier("fontStyle", "attr", context.getPackageName());
@@ -134,11 +134,11 @@ public class ResourceConflictResolver {
             Log.w(TAG, "fontStyle attribute not found in app resources");
         }
     }
-
+    
     private static void resolveDrawableConflicts(Context context) {
         // Handle drawable conflicts
         Resources res = context.getResources();
-
+        
         try {
             int eyeIcon = res.getIdentifier("design_ic_visibility", "drawable", context.getPackageName());
             if (eyeIcon != 0) {
@@ -163,10 +163,10 @@ public class LumiyaApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
+        
         // Initialize resource conflict resolver
         ResourceConflictResolver.initialize(this);
-
+        
         // Continue with other initialization...
     }
 }
@@ -287,21 +287,21 @@ Java_com_lumiyaviewer_lumiya_NativeLib_decodeJPEG2000(
         JNIEnv* env,
         jobject /* this */,
         jbyteArray j2kData) {
-
+    
     LOGI("Starting JPEG2000 decode");
-
+    
     // Get input data
     jsize dataLen = env->GetArrayLength(j2kData);
     jbyte* inputData = env->GetByteArrayElements(j2kData, nullptr);
-
+    
     // TODO: Implement actual JPEG2000 decoding using OpenJPEG
     // For now, return dummy data
     jbyteArray result = env->NewByteArray(dataLen);
     env->SetByteArrayRegion(result, 0, dataLen, inputData);
-
+    
     // Release input data
     env->ReleaseByteArrayElements(j2kData, inputData, JNI_ABORT);
-
+    
     LOGI("JPEG2000 decode completed");
     return result;
 }
@@ -312,7 +312,7 @@ Java_com_lumiyaviewer_lumiya_NativeLib_initializeVulkan(
         JNIEnv* env,
         jobject /* this */,
         jobject surface) {
-
+    
 #ifdef VULKAN_SUPPORT
     LOGI("Initializing Vulkan");
     // TODO: Implement Vulkan initialization
@@ -332,17 +332,17 @@ package com.lumiyaviewer.lumiya;
 import android.view.Surface;
 
 public class NativeLib {
-
+    
     // Load native library
     static {
         System.loadLibrary("lumiya-native");
     }
-
+    
     // Native method declarations
     public static native String stringFromJNI();
     public static native byte[] decodeJPEG2000(byte[] j2kData);
     public static native boolean initializeVulkan(Surface surface);
-
+    
     // Utility methods
     public static boolean isNativeLibraryLoaded() {
         try {
@@ -385,66 +385,66 @@ import java.util.concurrent.atomic.AtomicLong;
 public class MemoryManager {
     private static final String TAG = "MemoryManager";
     private static final long MB = 1024 * 1024;
-
+    
     private final Context context;
     private final ActivityManager activityManager;
     private final AtomicLong totalAllocated = new AtomicLong(0);
     private final ConcurrentHashMap<String, WeakReference<Object>> resourceCache = new ConcurrentHashMap<>();
-
+    
     public MemoryManager(Context context) {
         this.context = context;
         this.activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
     }
-
+    
     public void trackAllocation(String key, Object resource, long size) {
         resourceCache.put(key, new WeakReference<>(resource));
         totalAllocated.addAndGet(size);
-
+        
         checkMemoryPressure();
     }
-
+    
     public void trackDeallocation(String key, long size) {
         resourceCache.remove(key);
         totalAllocated.addAndGet(-size);
     }
-
+    
     private void checkMemoryPressure() {
         ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
         activityManager.getMemoryInfo(memInfo);
-
+        
         long availableMemory = memInfo.availMem;
         long totalMemory = memInfo.totalMem;
         long usedMemory = totalMemory - availableMemory;
-
+        
         float memoryUsagePercent = (float) usedMemory / totalMemory;
-
+        
         if (memoryUsagePercent > 0.8f) {
             Log.w(TAG, "High memory usage detected: " + (memoryUsagePercent * 100) + "%");
             performMemoryCleanup();
         }
     }
-
+    
     private void performMemoryCleanup() {
         Log.i(TAG, "Performing memory cleanup");
-
+        
         // Clean up weak references
         resourceCache.entrySet().removeIf(entry -> entry.getValue().get() == null);
-
+        
         // Force garbage collection
         System.gc();
-
+        
         // Notify listeners about memory pressure
         notifyMemoryPressureListeners();
     }
-
+    
     private void notifyMemoryPressureListeners() {
         // TODO: Implement listener pattern for memory pressure
     }
-
+    
     public long getTotalAllocatedMemory() {
         return totalAllocated.get();
     }
-
+    
     public int getCachedResourceCount() {
         return resourceCache.size();
     }
@@ -465,23 +465,23 @@ import java.util.concurrent.atomic.AtomicLong;
 public class TextureCache {
     private static final String TAG = "TextureCache";
     private static final int MAX_CACHE_SIZE_MB = 128; // 128MB max cache
-
+    
     private final LruCache<String, CachedTexture> textureCache;
     private final MemoryManager memoryManager;
     private final AtomicLong cacheSize = new AtomicLong(0);
-
+    
     public TextureCache(MemoryManager memoryManager) {
         this.memoryManager = memoryManager;
-
+        
         // Create LRU cache with size-based eviction
         this.textureCache = new LruCache<String, CachedTexture>(MAX_CACHE_SIZE_MB * 1024 * 1024) {
             @Override
             protected int sizeOf(String key, CachedTexture texture) {
                 return texture.getSize();
             }
-
+            
             @Override
-            protected void entryRemoved(boolean evicted, String key,
+            protected void entryRemoved(boolean evicted, String key, 
                                       CachedTexture oldValue, CachedTexture newValue) {
                 if (oldValue != null) {
                     Log.d(TAG, "Evicting texture: " + key + " (size: " + oldValue.getSize() + " bytes)");
@@ -492,36 +492,36 @@ public class TextureCache {
             }
         };
     }
-
+    
     public CachedTexture get(String textureId) {
         return textureCache.get(textureId);
     }
-
+    
     public void put(String textureId, CachedTexture texture) {
         if (texture == null) return;
-
+        
         textureCache.put(textureId, texture);
         cacheSize.addAndGet(texture.getSize());
         memoryManager.trackAllocation(textureId, texture, texture.getSize());
-
+        
         Log.d(TAG, "Cached texture: " + textureId + " (size: " + texture.getSize() + " bytes)");
         Log.d(TAG, "Total cache size: " + (cacheSize.get() / 1024 / 1024) + " MB");
     }
-
+    
     public void clearCache() {
         Log.i(TAG, "Clearing texture cache");
         textureCache.evictAll();
         cacheSize.set(0);
     }
-
+    
     public long getCacheSize() {
         return cacheSize.get();
     }
-
+    
     public int getCacheCount() {
         return textureCache.size();
     }
-
+    
     public static class CachedTexture {
         private final int textureId;
         private final int width;
@@ -529,7 +529,7 @@ public class TextureCache {
         private final int format;
         private final long size;
         private boolean disposed = false;
-
+        
         public CachedTexture(int textureId, int width, int height, int format) {
             this.textureId = textureId;
             this.width = width;
@@ -537,7 +537,7 @@ public class TextureCache {
             this.format = format;
             this.size = calculateSize(width, height, format);
         }
-
+        
         private long calculateSize(int width, int height, int format) {
             // Estimate texture memory usage based on format
             int bytesPerPixel;
@@ -558,7 +558,7 @@ public class TextureCache {
             }
             return width * height * bytesPerPixel;
         }
-
+        
         public void dispose() {
             if (!disposed && textureId > 0) {
                 // TODO: Delete OpenGL texture
@@ -566,7 +566,7 @@ public class TextureCache {
                 disposed = true;
             }
         }
-
+        
         public int getTextureId() { return textureId; }
         public int getWidth() { return width; }
         public int getHeight() { return height; }
@@ -583,11 +583,11 @@ public class TextureCache {
 public void testMemoryManager() {
     MemoryManager memoryManager = new MemoryManager(context);
     TextureCache textureCache = new TextureCache(memoryManager);
-
+    
     // Test cache operations
     CachedTexture texture = new CachedTexture(1, 512, 512, 0x1908);
     textureCache.put("test_texture", texture);
-
+    
     assertEquals(texture, textureCache.get("test_texture"));
     assertTrue(textureCache.getCacheSize() > 0);
 }
@@ -611,17 +611,17 @@ import java.util.concurrent.TimeUnit;
 
 public class HTTP2CapsClient {
     private static final String TAG = "HTTP2CapsClient";
-
+    
     private final OkHttpClient httpClient;
     private final AuthTokenManager authManager;
-
+    
     public HTTP2CapsClient(AuthTokenManager authManager) {
         this.authManager = authManager;
-
+        
         // Configure HTTP/2 client
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
-
+        
         this.httpClient = new OkHttpClient.Builder()
             .protocols(List.of(Protocol.HTTP_2, Protocol.HTTP_1_1))
             .addInterceptor(logging)
@@ -632,18 +632,18 @@ public class HTTP2CapsClient {
             .connectionPool(new ConnectionPool(10, 5, TimeUnit.MINUTES))
             .build();
     }
-
+    
     public CompletableFuture<CapsResponse> sendRequest(CapsRequest request) {
         Request httpRequest = buildHttpRequest(request);
-
+        
         CompletableFuture<CapsResponse> future = new CompletableFuture<>();
-
+        
         httpClient.newCall(httpRequest).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 future.completeExceptionally(e);
             }
-
+            
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 try {
@@ -656,22 +656,22 @@ public class HTTP2CapsClient {
                 }
             }
         });
-
+        
         return future;
     }
-
+    
     private Request buildHttpRequest(CapsRequest request) {
         Request.Builder builder = new Request.Builder()
             .url(request.getUrl())
             .addHeader("User-Agent", "Lumiya-Viewer/3.4.3")
             .addHeader("Accept", "application/llsd+xml, application/json");
-
+        
         if (request.hasBody()) {
             RequestBody body = RequestBody.create(
-                request.getBody(),
+                request.getBody(), 
                 MediaType.get(request.getContentType())
             );
-
+            
             switch (request.getMethod()) {
                 case POST:
                     builder.post(body);
@@ -700,14 +700,14 @@ public class HTTP2CapsClient {
                     throw new IllegalArgumentException("Unsupported method: " + request.getMethod());
             }
         }
-
+        
         return builder.build();
     }
-
+    
     private CapsResponse parseResponse(Response response) throws IOException {
         String contentType = response.header("Content-Type", "");
         byte[] responseBody = response.body().bytes();
-
+        
         return new CapsResponse(
             response.code(),
             response.headers().toMultimap(),
@@ -715,18 +715,18 @@ public class HTTP2CapsClient {
             contentType
         );
     }
-
+    
     private static class AuthInterceptor implements Interceptor {
         private final AuthTokenManager authManager;
-
+        
         public AuthInterceptor(AuthTokenManager authManager) {
             this.authManager = authManager;
         }
-
+        
         @Override
         public Response intercept(Chain chain) throws IOException {
             Request originalRequest = chain.request();
-
+            
             // Add authentication if available
             String authToken = authManager.getCurrentToken();
             if (authToken != null) {
@@ -735,7 +735,7 @@ public class HTTP2CapsClient {
                     .build();
                 return chain.proceed(authenticatedRequest);
             }
-
+            
             return chain.proceed(originalRequest);
         }
     }
@@ -754,55 +754,55 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class WebSocketEventClient extends WebSocketListener {
     private static final String TAG = "WebSocketEventClient";
-
+    
     private final OkHttpClient client;
     private final ConcurrentHashMap<String, CopyOnWriteArrayList<EventListener>> eventListeners = new ConcurrentHashMap<>();
     private WebSocket webSocket;
     private boolean connected = false;
-
+    
     public WebSocketEventClient() {
         this.client = new OkHttpClient.Builder()
             .pingInterval(30, TimeUnit.SECONDS)
             .build();
     }
-
+    
     public void connect(String eventQueueUrl, String authToken) {
         Request request = new Request.Builder()
             .url(eventQueueUrl)
             .addHeader("Authorization", "Bearer " + authToken)
             .build();
-
+            
         webSocket = client.newWebSocket(request, this);
     }
-
+    
     public void disconnect() {
         if (webSocket != null) {
             webSocket.close(1000, "Normal closure");
         }
     }
-
+    
     public void subscribe(String eventType, EventListener listener) {
         eventListeners.computeIfAbsent(eventType, k -> new CopyOnWriteArrayList<>()).add(listener);
     }
-
+    
     public void unsubscribe(String eventType, EventListener listener) {
         CopyOnWriteArrayList<EventListener> listeners = eventListeners.get(eventType);
         if (listeners != null) {
             listeners.remove(listener);
         }
     }
-
+    
     @Override
     public void onOpen(WebSocket webSocket, Response response) {
         Log.i(TAG, "WebSocket connection opened");
         connected = true;
-
+        
         // Send subscription message for all registered event types
         for (String eventType : eventListeners.keySet()) {
             sendSubscription(eventType);
         }
     }
-
+    
     @Override
     public void onMessage(WebSocket webSocket, String text) {
         try {
@@ -812,7 +812,7 @@ public class WebSocketEventClient extends WebSocketListener {
             Log.e(TAG, "Failed to parse event message", e);
         }
     }
-
+    
     @Override
     public void onMessage(WebSocket webSocket, ByteString bytes) {
         try {
@@ -822,38 +822,38 @@ public class WebSocketEventClient extends WebSocketListener {
             Log.e(TAG, "Failed to parse binary event message", e);
         }
     }
-
+    
     @Override
     public void onClosing(WebSocket webSocket, int code, String reason) {
         Log.i(TAG, "WebSocket closing: " + reason);
         connected = false;
     }
-
+    
     @Override
     public void onClosed(WebSocket webSocket, int code, String reason) {
         Log.i(TAG, "WebSocket closed: " + reason);
         connected = false;
     }
-
+    
     @Override
     public void onFailure(WebSocket webSocket, Throwable t, Response response) {
         Log.e(TAG, "WebSocket failure", t);
         connected = false;
-
+        
         // Attempt reconnection after delay
         scheduleReconnect();
     }
-
+    
     private void sendSubscription(String eventType) {
         if (connected && webSocket != null) {
             String subscriptionMessage = String.format(
-                "{\"action\":\"subscribe\",\"eventType\":\"%s\"}",
+                "{\"action\":\"subscribe\",\"eventType\":\"%s\"}", 
                 eventType
             );
             webSocket.send(subscriptionMessage);
         }
     }
-
+    
     private void dispatchEvent(EventMessage event) {
         CopyOnWriteArrayList<EventListener> listeners = eventListeners.get(event.getType());
         if (listeners != null) {
@@ -866,15 +866,15 @@ public class WebSocketEventClient extends WebSocketListener {
             }
         }
     }
-
+    
     private void scheduleReconnect() {
         // TODO: Implement exponential backoff reconnection
     }
-
+    
     public interface EventListener {
         void onEvent(EventMessage event);
     }
-
+    
     public boolean isConnected() {
         return connected;
     }
@@ -887,16 +887,16 @@ public class WebSocketEventClient extends WebSocketListener {
 public void testHTTP2CapsClient() {
     AuthTokenManager authManager = mock(AuthTokenManager.class);
     when(authManager.getCurrentToken()).thenReturn("test-token");
-
+    
     HTTP2CapsClient client = new HTTP2CapsClient(authManager);
-
+    
     CapsRequest request = CapsRequest.builder()
         .url("https://test.example.com/caps/test")
         .method(HttpMethod.GET)
         .build();
-
+    
     CompletableFuture<CapsResponse> future = client.sendRequest(request);
-
+    
     // Verify request is sent correctly
     assertNotNull(future);
 }
@@ -904,16 +904,16 @@ public void testHTTP2CapsClient() {
 @Test
 public void testWebSocketEventClient() {
     WebSocketEventClient client = new WebSocketEventClient();
-
+    
     AtomicBoolean eventReceived = new AtomicBoolean(false);
     client.subscribe("ChatFromSimulator", event -> {
         eventReceived.set(true);
     });
-
+    
     // Simulate event
     EventMessage testEvent = new EventMessage("ChatFromSimulator", "test data");
     client.dispatchEvent(testEvent);
-
+    
     assertTrue(eventReceived.get());
 }
 ```

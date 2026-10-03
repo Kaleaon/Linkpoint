@@ -45,11 +45,11 @@ class LLSDNotationTest {
         void testParseUUID() throws Exception {
             String uuidStr = "550e8400-e29b-41d4-a716-446655440000";
             String notation = "u" + uuidStr;
-
+            
             try (InputStream input = new ByteArrayInputStream(notation.getBytes(StandardCharsets.UTF_8))) {
                 LLSDNotationParser parser = new LLSDNotationParser();
                 LLSD result = parser.parse(input);
-
+                
                 assertTrue(result.getContent() instanceof UUID);
                 assertEquals(uuidStr, result.getContent().toString());
             }
@@ -59,11 +59,11 @@ class LLSDNotationTest {
         @DisplayName("Should parse date notation")
         void testParseDate() throws Exception {
             String notation = "d2024-01-01T00:00:00Z";
-
+            
             try (InputStream input = new ByteArrayInputStream(notation.getBytes(StandardCharsets.UTF_8))) {
                 LLSDNotationParser parser = new LLSDNotationParser();
                 LLSD result = parser.parse(input);
-
+                
                 assertTrue(result.getContent() instanceof Date);
                 assertNotNull(result.getContent());
             }
@@ -75,11 +75,11 @@ class LLSDNotationTest {
             String testData = "Hello World";
             String base64 = Base64.getEncoder().encodeToString(testData.getBytes(StandardCharsets.UTF_8));
             String notation = "b64\"" + base64 + "\"";
-
+            
             try (InputStream input = new ByteArrayInputStream(notation.getBytes(StandardCharsets.UTF_8))) {
                 LLSDNotationParser parser = new LLSDNotationParser();
                 LLSD result = parser.parse(input);
-
+                
                 assertTrue(result.getContent() instanceof byte[]);
                 byte[] resultData = (byte[]) result.getContent();
                 assertEquals(testData, new String(resultData, StandardCharsets.UTF_8));
@@ -90,15 +90,15 @@ class LLSDNotationTest {
         @DisplayName("Should parse array notation")
         void testParseArray() throws Exception {
             String notation = "[i1,i2,s'three']";
-
+            
             try (InputStream input = new ByteArrayInputStream(notation.getBytes(StandardCharsets.UTF_8))) {
                 LLSDNotationParser parser = new LLSDNotationParser();
                 LLSD result = parser.parse(input);
-
+                
                 assertTrue(result.getContent() instanceof List);
                 @SuppressWarnings("unchecked")
                 List<Object> list = (List<Object>) result.getContent();
-
+                
                 assertEquals(3, list.size());
                 assertEquals(1, list.get(0));
                 assertEquals(2, list.get(1));
@@ -110,15 +110,15 @@ class LLSDNotationTest {
         @DisplayName("Should parse map notation")
         void testParseMap() throws Exception {
             String notation = "{name:s'John',age:i30,active:1}";
-
+            
             try (InputStream input = new ByteArrayInputStream(notation.getBytes(StandardCharsets.UTF_8))) {
                 LLSDNotationParser parser = new LLSDNotationParser();
                 LLSD result = parser.parse(input);
-
+                
                 assertTrue(result.getContent() instanceof Map);
                 @SuppressWarnings("unchecked")
                 Map<String, Object> map = (Map<String, Object>) result.getContent();
-
+                
                 assertEquals("John", map.get("name"));
                 assertEquals(30, map.get("age"));
                 assertEquals(true, map.get("active"));
@@ -147,21 +147,21 @@ class LLSDNotationTest {
         @DisplayName("Should parse nested structures")
         void testParseNested() throws Exception {
             String notation = "{users:[{name:s'Alice',age:i25},{name:s'Bob',age:i30}]}";
-
+            
             try (InputStream input = new ByteArrayInputStream(notation.getBytes(StandardCharsets.UTF_8))) {
                 LLSDNotationParser parser = new LLSDNotationParser();
                 LLSD result = parser.parse(input);
-
+                
                 assertTrue(result.getContent() instanceof Map);
                 @SuppressWarnings("unchecked")
                 Map<String, Object> rootMap = (Map<String, Object>) result.getContent();
-
+                
                 assertTrue(rootMap.containsKey("users"));
                 @SuppressWarnings("unchecked")
                 List<Object> users = (List<Object>) rootMap.get("users");
-
+                
                 assertEquals(2, users.size());
-
+                
                 @SuppressWarnings("unchecked")
                 Map<String, Object> alice = (Map<String, Object>) users.get(0);
                 assertEquals("Alice", alice.get("name"));
@@ -199,11 +199,11 @@ class LLSDNotationTest {
             UUID testUUID = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
             LLSD llsd = new LLSD(testUUID);
             LLSDNotationSerializer serializer = new LLSDNotationSerializer();
-
+            
             try (StringWriter writer = new StringWriter()) {
                 serializer.serialize(llsd, writer);
                 String notation = writer.toString();
-
+                
                 assertEquals("u550e8400-e29b-41d4-a716-446655440000", notation);
             }
         }
@@ -214,11 +214,11 @@ class LLSDNotationTest {
             byte[] binaryData = "Hello World".getBytes(StandardCharsets.UTF_8);
             LLSD llsd = new LLSD(binaryData);
             LLSDNotationSerializer serializer = new LLSDNotationSerializer();
-
+            
             try (StringWriter writer = new StringWriter()) {
                 serializer.serialize(llsd, writer);
                 String notation = writer.toString();
-
+                
                 String expectedBase64 = Base64.getEncoder().encodeToString(binaryData);
                 assertEquals("b64\"" + expectedBase64 + "\"", notation);
             }
@@ -230,11 +230,11 @@ class LLSDNotationTest {
             List<Object> array = Arrays.asList(1, 2, "three", true);
             LLSD llsd = new LLSD(array);
             LLSDNotationSerializer serializer = new LLSDNotationSerializer();
-
+            
             try (StringWriter writer = new StringWriter()) {
                 serializer.serialize(llsd, writer);
                 String notation = writer.toString();
-
+                
                 assertEquals("[i1,i2,s'three',1]", notation);
             }
         }
@@ -246,14 +246,14 @@ class LLSDNotationTest {
             map.put("name", "John");
             map.put("age", 30);
             map.put("active", true);
-
+            
             LLSD llsd = new LLSD(map);
             LLSDNotationSerializer serializer = new LLSDNotationSerializer();
-
+            
             try (StringWriter writer = new StringWriter()) {
                 serializer.serialize(llsd, writer);
                 String notation = writer.toString();
-
+                
                 // Should use unquoted keys for valid identifiers
                 assertEquals("{name:s'John',age:i30,active:1}", notation);
             }
@@ -265,11 +265,11 @@ class LLSDNotationTest {
             String testString = "Hello 'world' with\nnewlines and\ttabs";
             LLSD llsd = new LLSD(testString);
             LLSDNotationSerializer serializer = new LLSDNotationSerializer();
-
+            
             try (StringWriter writer = new StringWriter()) {
                 serializer.serialize(llsd, writer);
                 String notation = writer.toString();
-
+                
                 assertTrue(notation.startsWith("s'"));
                 assertTrue(notation.endsWith("'"));
                 assertTrue(notation.contains("\\'world\\'")); // Escaped quotes
@@ -281,7 +281,7 @@ class LLSDNotationTest {
         private void assertSerializesTo(Object value, String expectedNotation) throws Exception {
             LLSD llsd = new LLSD(value);
             LLSDNotationSerializer serializer = new LLSDNotationSerializer();
-
+            
             try (StringWriter writer = new StringWriter()) {
                 serializer.serialize(llsd, writer);
                 assertEquals(expectedNotation, writer.toString());
@@ -301,15 +301,15 @@ class LLSDNotationTest {
             originalData.put("age", 25);
             originalData.put("active", true);
             originalData.put("score", 98.7);
-
+            
             List<Object> hobbies = Arrays.asList("reading", "coding", "gaming");
             originalData.put("hobbies", hobbies);
-
+            
             Map<String, Object> address = new HashMap<>();
             address.put("street", "123 Main St");
             address.put("city", "Anytown");
             originalData.put("address", address);
-
+            
             // Serialize to notation
             LLSD originalLlsd = new LLSD(originalData);
             LLSDNotationSerializer serializer = new LLSDNotationSerializer();
@@ -318,24 +318,24 @@ class LLSDNotationTest {
                 serializer.serialize(originalLlsd, writer);
                 notation = writer.toString();
             }
-
+            
             // Parse back from notation
             LLSDNotationParser parser = new LLSDNotationParser();
             LLSD parsedLlsd;
             try (InputStream input = new ByteArrayInputStream(notation.getBytes(StandardCharsets.UTF_8))) {
                 parsedLlsd = parser.parse(input);
             }
-
+            
             // Verify the data matches
             assertTrue(parsedLlsd.getContent() instanceof Map);
             @SuppressWarnings("unchecked")
             Map<String, Object> parsedData = (Map<String, Object>) parsedLlsd.getContent();
-
+            
             assertEquals("Test User", parsedData.get("name"));
             assertEquals(25, parsedData.get("age"));
             assertEquals(true, parsedData.get("active"));
             assertEquals(98.7, parsedData.get("score"));
-
+            
             assertTrue(parsedData.get("hobbies") instanceof List);
             assertTrue(parsedData.get("address") instanceof Map);
         }

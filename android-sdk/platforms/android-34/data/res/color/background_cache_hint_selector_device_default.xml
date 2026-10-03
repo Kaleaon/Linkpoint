@@ -18,3 +18,4 @@
     <item android:state_accelerated="false" android:color="?attr/colorBackground" />
     <item android:color="@android:color/transparent" />
 </selector>
+

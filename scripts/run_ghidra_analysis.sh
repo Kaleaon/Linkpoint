@@ -169,7 +169,7 @@ This report documents the analysis of the Lumiya APK using Ghidra reverse engine
 
 ✅ **APK file successfully analyzed by Ghidra**
 ✅ **Multi-DEX handling implemented per guide**
-✅ **Symbol extraction completed**
+✅ **Symbol extraction completed**  
 ✅ **Class structure comparison completed**
 ✅ **Documentation generated**
 
@@ -233,7 +233,7 @@ This analysis validates that the current Linkpoint repository contains:
 ## Files Generated
 
 - \`dex_structure_analysis.json\`: Detailed DEX file analysis
-- \`source_structure_comparison.json\`: Source comparison results with APK analysis
+- \`source_structure_comparison.json\`: Source comparison results with APK analysis  
 - \`README.md\`: Analysis documentation
 - \`ghidra_analysis_report.md\`: This comprehensive report
 
@@ -264,7 +264,7 @@ echo -e "${GREEN}GHIDRA ANALYSIS COMPLETED${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo -e "📊 Analysis Results:"
 echo -e "   • Ghidra APK analysis: ${GREEN}✓ Completed${NC}"
-echo -e "   • APK structure: ${GREEN}✓ Analyzed${NC}"
+echo -e "   • APK structure: ${GREEN}✓ Analyzed${NC}" 
 echo -e "   • Source comparison: ${GREEN}✓ Completed${NC}"
 echo -e "   • Documentation: ${GREEN}✓ Generated${NC}"
 echo -e "\n📁 Generated Files:"
@@ -274,7 +274,7 @@ echo -e "   • docs/ghidra_analysis/dex_structure_analysis.json"
 echo -e "   • docs/ghidra_analysis/source_structure_comparison.json"
 echo -e "\n🎯 Key Findings:"
 echo -e "   • Total Classes: $TOTAL_CLASSES"
-echo -e "   • Lumiya Classes: $LUMIYA_CLASSES"
+echo -e "   • Lumiya Classes: $LUMIYA_CLASSES" 
 echo -e "   • Active Library Files: 1,321"
 echo -e "   • Analysis Status: ${GREEN}SUCCESSFUL${NC}"
 echo -e "\n${BLUE}Analysis complete! Check docs/ghidra_analysis/ for detailed results.${NC}"

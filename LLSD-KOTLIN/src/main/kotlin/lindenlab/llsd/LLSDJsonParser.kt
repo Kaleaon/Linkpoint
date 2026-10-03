@@ -38,7 +38,7 @@ import java.util.*
  * @see [LLSD JSON Specification](http://wiki.secondlife.com/wiki/LLSD#JSON_Serialization)
  */
 class LLSDJsonParser {
-
+    
     /**
      * Parses an LLSD document from a JSON input stream.
      *
@@ -57,13 +57,13 @@ class LLSDJsonParser {
         val jsonString = InputStreamReader(jsonInput, StandardCharsets.UTF_8).use { reader ->
             reader.readText()
         }.trim()
-
+        
         val tokenizer = JsonTokenizer(jsonString)
         val parsedJson = parseJsonValue(tokenizer)
         val llsdContent = convertJsonToLlsd(parsedJson)
         return LLSD(llsdContent)
     }
-
+    
     /**
      * A simple, internal tokenizer for breaking a JSON string into a sequence of tokens.
      *
@@ -74,13 +74,13 @@ class LLSDJsonParser {
      */
     private class JsonTokenizer(private val json: String) {
         private var position = 0
-
+        
         fun skipWhitespace() {
             while (position < json.length && json[position].isWhitespace()) {
                 position++
             }
         }
-
+        
         @Throws(LLSDException::class)
         fun peek(): Char {
             skipWhitespace()
@@ -89,7 +89,7 @@ class LLSDJsonParser {
             }
             return json[position]
         }
-
+        
         @Throws(LLSDException::class)
         fun consume(): Char {
             skipWhitespace()
@@ -98,7 +98,7 @@ class LLSDJsonParser {
             }
             return json[position++]
         }
-
+        
         @Throws(LLSDException::class)
         fun expect(expected: Char) {
             val actual = consume()
@@ -106,17 +106,17 @@ class LLSDJsonParser {
                 throw LLSDException("Expected '$expected' but got '$actual'")
             }
         }
-
+        
         fun hasMore(): Boolean {
             skipWhitespace()
             return position < json.length
         }
-
+        
         @Throws(LLSDException::class)
         fun consumeString(): String {
             expect('"')
             val sb = StringBuilder()
-
+            
             while (position < json.length) {
                 var c = json[position++]
                 when {
@@ -152,15 +152,15 @@ class LLSDJsonParser {
                     else -> sb.append(c)
                 }
             }
-
+            
             throw LLSDException("Unterminated string")
         }
-
+        
         @Throws(LLSDException::class)
         fun consumeNumber(): Any {
             val sb = StringBuilder()
             var hasDecimal = false
-
+            
             while (position < json.length) {
                 val c = json[position]
                 when {
@@ -180,7 +180,7 @@ class LLSDJsonParser {
                     else -> break
                 }
             }
-
+            
             val numStr = sb.toString()
             return try {
                 if (hasDecimal || numStr.contains("e", ignoreCase = true)) {
@@ -192,14 +192,14 @@ class LLSDJsonParser {
                 throw LLSDException("Invalid number format: $numStr", e)
             }
         }
-
+        
         @Throws(LLSDException::class)
         fun consumeLiteral(): Any? {
             val sb = StringBuilder()
             while (position < json.length && json[position].isLetter()) {
                 sb.append(json[position++])
             }
-
+            
             return when (val literal = sb.toString()) {
                 "true" -> true
                 "false" -> false
@@ -208,7 +208,7 @@ class LLSDJsonParser {
             }
         }
     }
-
+    
     /**
      * Parses a single JSON value from the token stream.
      *
@@ -223,7 +223,7 @@ class LLSDJsonParser {
     @Throws(LLSDException::class)
     private fun parseJsonValue(tokenizer: JsonTokenizer): Any? {
         val ch = tokenizer.peek()
-
+        
         return when (ch) {
             '{' -> parseJsonObject(tokenizer)
             '[' -> parseJsonArray(tokenizer)
@@ -238,24 +238,24 @@ class LLSDJsonParser {
             }
         }
     }
-
+    
     @Throws(LLSDException::class)
     private fun parseJsonObject(tokenizer: JsonTokenizer): Map<String, Any?> {
         val map = mutableMapOf<String, Any?>()
         tokenizer.expect('{')
-
+        
         if (tokenizer.peek() == '}') {
             tokenizer.consume() // consume '}'
             return map // Empty object
         }
-
+        
         while (true) {
             // Parse key
             val key = tokenizer.consumeString()
             tokenizer.expect(':')
             val value = parseJsonValue(tokenizer)
             map[key] = value
-
+            
             when (val next = tokenizer.peek()) {
                 '}' -> {
                     tokenizer.consume()
@@ -268,24 +268,24 @@ class LLSDJsonParser {
                 else -> throw LLSDException("Expected ',' or '}' in object, got: $next")
             }
         }
-
+        
         return map
     }
-
+    
     @Throws(LLSDException::class)
     private fun parseJsonArray(tokenizer: JsonTokenizer): List<Any?> {
         val list = mutableListOf<Any?>()
         tokenizer.expect('[')
-
+        
         if (tokenizer.peek() == ']') {
             tokenizer.consume() // consume ']'
             return list // Empty array
         }
-
+        
         while (true) {
             val value = parseJsonValue(tokenizer)
             list.add(value)
-
+            
             when (val next = tokenizer.peek()) {
                 ']' -> {
                     tokenizer.consume()
@@ -298,10 +298,10 @@ class LLSDJsonParser {
                 else -> throw LLSDException("Expected ',' or ']' in array, got: $next")
             }
         }
-
+        
         return list
     }
-
+    
     /**
      * Recursively converts a parsed JSON object structure into an LLSD object structure.
      *
@@ -319,15 +319,15 @@ class LLSDJsonParser {
         if (jsonObj == null) {
             return ""  // LLSD represents undefined as empty string
         }
-
+        
         if (jsonObj is Map<*, *>) {
             @Suppress("UNCHECKED_CAST")
             val jsonMap = jsonObj as Map<String, Any?>
-
+            
             // Check for LLSD type indicators
             if (jsonMap.size == 1) {
                 val (key, value) = jsonMap.entries.first()
-
+                
                 when (key) {
                     "d" -> if (value is String) return parseDate(value)
                     "u" -> if (value is String) return parseUri(value)
@@ -335,7 +335,7 @@ class LLSDJsonParser {
                     "b" -> if (value is String) return parseBinary(value)
                 }
             }
-
+            
             // Regular map - convert all values recursively
             val llsdMap = mutableMapOf<String, Any?>()
             for ((key, value) in jsonMap) {
@@ -343,15 +343,15 @@ class LLSDJsonParser {
             }
             return llsdMap
         }
-
+        
         if (jsonObj is List<*>) {
             return jsonObj.map { convertJsonToLlsd(it) }
         }
-
+        
         // Primitive types remain as-is
         return jsonObj
     }
-
+    
     @Throws(LLSDException::class)
     private fun parseDate(dateStr: String): Date {
         return try {
@@ -364,7 +364,7 @@ class LLSDJsonParser {
             throw LLSDException("Invalid date format: '$dateStr'. Expected ISO 8601 format: '$ISO8601_PATTERN'", e)
         }
     }
-
+    
     @Throws(LLSDException::class)
     private fun parseUri(uriStr: String): URI {
         return try {
@@ -373,7 +373,7 @@ class LLSDJsonParser {
             throw LLSDException("Invalid URI format: $uriStr", e)
         }
     }
-
+    
     @Throws(LLSDException::class)
     private fun parseUuid(uuidStr: String): UUID {
         if (!UUID_PATTERN.matches(uuidStr)) {
@@ -385,7 +385,7 @@ class LLSDJsonParser {
             throw LLSDException("Invalid UUID: $uuidStr", e)
         }
     }
-
+    
     @Throws(LLSDException::class)
     private fun parseBinary(base64Str: String): ByteArray {
         return try {
@@ -394,7 +394,7 @@ class LLSDJsonParser {
             throw LLSDException("Invalid base64 data: $base64Str", e)
         }
     }
-
+    
     companion object {
         private const val ISO8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'"
         private val UUID_PATTERN = Regex("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")

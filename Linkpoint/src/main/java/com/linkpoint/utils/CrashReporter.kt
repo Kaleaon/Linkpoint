@@ -14,18 +14,18 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
  * Automated crash reporter for Linkpoint.
- *
+ * 
  * Captures uncaught exceptions, stores crash logs, and provides
  * crash reports for debugging. Integrates with LinkpointApp for
  * automatic crash detection and reporting.
- *
+ * 
  * Storage Strategy:
  * 1. Primary: App-internal files directory (always available, no permissions needed)
  * 2. Secondary: External files directory (for user access via file manager)
  * 3. Fallback: Cache directory (always works but may be cleared by system)
  */
 class CrashReporter private constructor(private val context: Context) {
-
+    
     companion object {
         private const val TAG = "CrashReporter"
         private const val CRASH_LOG_DIR = "crash_logs"
@@ -34,10 +34,10 @@ class CrashReporter private constructor(private val context: Context) {
         private const val CRASH_LOG_PREFIX = "crash_"
         private const val CRASH_LOG_SUFFIX = ".txt"
         private const val INIT_TEST_FILE = ".crash_reporter_initialized"
-
+        
         @Volatile
         private var instance: CrashReporter? = null
-
+        
         /**
          * Initialize the crash reporter. Should be called once in Application.onCreate()
          */
@@ -52,7 +52,7 @@ class CrashReporter private constructor(private val context: Context) {
                 }
             }
         }
-
+        
         /**
          * Get the singleton instance. Must call initialize() first.
          */
@@ -61,36 +61,36 @@ class CrashReporter private constructor(private val context: Context) {
                 "CrashReporter not initialized! Call initialize() in Application.onCreate()"
             )
         }
-
+        
         /**
          * Safely get the singleton instance, or null if not initialized.
          */
         fun getInstanceOrNull(): CrashReporter? = instance
-
+        
         /**
          * Check if CrashReporter has been initialized
          */
         fun isInitialized(): Boolean = instance != null
     }
-
+    
     // Original exception handler to chain calls
     private var originalHandler: Thread.UncaughtExceptionHandler? = null
-
+    
     // In-memory crash log queue for recent crashes
     private val recentCrashes = ConcurrentLinkedQueue<CrashReport>()
-
+    
     // Coroutine scope for async operations
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
+    
     // Last crash info for display
     private var lastCrash: CrashReport? = null
-
+    
     // Initialization status
     private var initializationStatus: InitializationStatus = InitializationStatus.NOT_INITIALIZED
     private var primaryStoragePath: String? = null
     private var externalStoragePath: String? = null
     private var initializationError: String? = null
-
+    
     /**
      * Initialization status enum
      */
@@ -100,7 +100,7 @@ class CrashReporter private constructor(private val context: Context) {
         INITIALIZED_WITH_EXTERNAL,
         INITIALIZATION_FAILED
     }
-
+    
     /**
      * Initialize storage directories and verify they are writable.
      * Uses multiple fallback locations to ensure crash logs can always be saved.
@@ -120,7 +120,7 @@ class CrashReporter private constructor(private val context: Context) {
                     Log.w(TAG, "Using cache directory for crash logs: $primaryStoragePath")
                 }
             }
-
+            
             // External storage: User-accessible directory (may not be available)
             try {
                 val externalDir = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -133,7 +133,7 @@ class CrashReporter private constructor(private val context: Context) {
                     @Suppress("DEPRECATION")
                     File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), EXTERNAL_CRASH_LOG_DIR)
                 }
-
+                
                 if (externalDir != null && createAndVerifyDirectory(externalDir)) {
                     externalStoragePath = externalDir.absolutePath
                     Log.i(TAG, "External crash log storage initialized: $externalStoragePath")
@@ -141,7 +141,7 @@ class CrashReporter private constructor(private val context: Context) {
             } catch (e: Exception) {
                 Log.w(TAG, "External storage not available: ${e.message}")
             }
-
+            
             // Determine initialization status
             initializationStatus = when {
                 primaryStoragePath != null && externalStoragePath != null -> {
@@ -155,19 +155,19 @@ class CrashReporter private constructor(private val context: Context) {
                     InitializationStatus.INITIALIZATION_FAILED
                 }
             }
-
+            
             // Write test file to verify storage works
             if (primaryStoragePath != null) {
                 writeInitializationTestFile()
             }
-
+            
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize crash log storage", e)
             initializationStatus = InitializationStatus.INITIALIZATION_FAILED
             initializationError = e.message
         }
     }
-
+    
     /**
      * Create a directory and verify it's writable.
      */
@@ -180,13 +180,13 @@ class CrashReporter private constructor(private val context: Context) {
                     return false
                 }
             }
-
+            
             // Verify directory is writable
             if (!dir.canWrite()) {
                 Log.w(TAG, "Directory is not writable: ${dir.absolutePath}")
                 return false
             }
-
+            
             // Try to write a test file
             val testFile = File(dir, ".write_test")
             try {
@@ -202,14 +202,14 @@ class CrashReporter private constructor(private val context: Context) {
             false
         }
     }
-
+    
     /**
      * Write a test file to verify initialization worked.
      */
     private fun writeInitializationTestFile() {
         try {
             // Validate primary storage path is initialized
-            val storagePath = primaryStoragePath
+            val storagePath = primaryStoragePath 
                 ?: throw IllegalStateException("Primary storage path not initialized")
             val testFile = File(storagePath, INIT_TEST_FILE)
             val content = buildString {
@@ -225,7 +225,7 @@ class CrashReporter private constructor(private val context: Context) {
             Log.w(TAG, "Could not write initialization test file: ${e.message}")
         }
     }
-
+    
     /**
      * Get storage information for debugging.
      */
@@ -234,14 +234,14 @@ class CrashReporter private constructor(private val context: Context) {
         externalStoragePath?.let { append(", External: $it") }
         append(" (Status: $initializationStatus)")
     }
-
+    
     /**
      * Get detailed initialization diagnostics.
      */
     fun getDiagnostics(): CrashReporterDiagnostics {
         val primaryLogs = primaryStoragePath?.let { File(it).listFiles()?.size ?: 0 } ?: 0
         val externalLogs = externalStoragePath?.let { File(it).listFiles()?.size ?: 0 } ?: 0
-
+        
         return CrashReporterDiagnostics(
             status = initializationStatus,
             primaryStoragePath = primaryStoragePath,
@@ -253,7 +253,7 @@ class CrashReporter private constructor(private val context: Context) {
             lastCrashTimestamp = lastCrash?.timestamp
         )
     }
-
+    
     /**
      * Force re-initialization of storage (useful for debugging).
      */
@@ -262,13 +262,13 @@ class CrashReporter private constructor(private val context: Context) {
         initializeStorage()
         return initializationStatus != InitializationStatus.INITIALIZATION_FAILED
     }
-
+    
     /**
      * Install the uncaught exception handler
      */
     private fun installUncaughtExceptionHandler() {
         originalHandler = Thread.getDefaultUncaughtExceptionHandler()
-
+        
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
             try {
                 handleUncaughtException(thread, throwable)
@@ -280,33 +280,33 @@ class CrashReporter private constructor(private val context: Context) {
             }
         }
     }
-
+    
     /**
      * Handle an uncaught exception
      */
     private fun handleUncaughtException(thread: Thread, throwable: Throwable) {
         Log.e(TAG, "Uncaught exception on thread ${thread.name}", throwable)
-
+        
         val crashReport = createCrashReport(thread, throwable)
         lastCrash = crashReport
         recentCrashes.add(crashReport)
-
+        
         // Limit queue size
         while (recentCrashes.size > MAX_CRASH_LOGS) {
             recentCrashes.remove()
         }
-
+        
         // Save crash log to file synchronously (since app is crashing)
         saveCrashLogSync(crashReport)
         CodexUploadService.getInstance(context).uploadLatestReportsAsync("crash_uncaught")
     }
-
+    
     /**
      * Report a handled exception (non-fatal)
      */
     fun reportException(throwable: Throwable, context: String = "") {
         Log.w(TAG, "Reporting handled exception: $context", throwable)
-
+        
         scope.launch {
             try {
                 val report = createCrashReport(
@@ -323,7 +323,7 @@ class CrashReporter private constructor(private val context: Context) {
             }
         }
     }
-
+    
     /**
      * Create a crash report with device and app information
      */
@@ -335,7 +335,7 @@ class CrashReporter private constructor(private val context: Context) {
     ): CrashReport {
         val timestamp = System.currentTimeMillis()
         val stackTrace = getStackTraceString(throwable)
-
+        
         return CrashReport(
             timestamp = timestamp,
             threadName = thread.name,
@@ -349,7 +349,7 @@ class CrashReporter private constructor(private val context: Context) {
             memoryInfo = getMemoryInfo()
         )
     }
-
+    
     /**
      * Get the full stack trace as a string
      */
@@ -359,7 +359,7 @@ class CrashReporter private constructor(private val context: Context) {
         throwable.printStackTrace(pw)
         return sw.toString()
     }
-
+    
     /**
      * Get device information for crash report
      */
@@ -375,7 +375,7 @@ class CrashReporter private constructor(private val context: Context) {
             fingerprint = Build.FINGERPRINT
         )
     }
-
+    
     /**
      * Get app information for crash report
      */
@@ -400,7 +400,7 @@ class CrashReporter private constructor(private val context: Context) {
             )
         }
     }
-
+    
     /**
      * Get memory information for crash report
      */
@@ -413,7 +413,7 @@ class CrashReporter private constructor(private val context: Context) {
             usedMemory = runtime.totalMemory() - runtime.freeMemory()
         )
     }
-
+    
     /**
      * Save crash log to file synchronously (for fatal crashes)
      * Saves to both primary (internal) and external storage if available.
@@ -423,49 +423,49 @@ class CrashReporter private constructor(private val context: Context) {
         val content = report.toFormattedString()
         var savedToPrimary = false
         var savedToExternal = false
-
+        
         // Save to primary storage (internal - always available)
         primaryStoragePath?.let { path ->
             try {
                 val crashDir = File(path)
                 if (!crashDir.exists()) crashDir.mkdirs()
-
+                
                 val crashFile = File(crashDir, filename)
                 crashFile.writeText(content)
                 Log.i(TAG, "Crash log saved to primary: ${crashFile.absolutePath}")
                 savedToPrimary = true
-
+                
                 // Clean up old crash logs in primary
                 cleanupOldCrashLogs(crashDir)
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to save crash log to primary storage", e)
             }
         }
-
+        
         // Also save to external storage (user-accessible) if available
         externalStoragePath?.let { path ->
             try {
                 val crashDir = File(path)
                 if (!crashDir.exists()) crashDir.mkdirs()
-
+                
                 val crashFile = File(crashDir, filename)
                 crashFile.writeText(content)
                 Log.i(TAG, "Crash log saved to external: ${crashFile.absolutePath}")
                 savedToExternal = true
-
+                
                 // Clean up old crash logs in external
                 cleanupOldCrashLogs(crashDir)
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to save crash log to external storage: ${e.message}")
             }
         }
-
+        
         // Fallback: if both failed, try cache directory
         if (!savedToPrimary && !savedToExternal) {
             try {
                 val cacheDir = File(context.cacheDir, CRASH_LOG_DIR)
                 if (!cacheDir.exists()) cacheDir.mkdirs()
-
+                
                 val crashFile = File(cacheDir, filename)
                 crashFile.writeText(content)
                 Log.w(TAG, "Crash log saved to cache (fallback): ${crashFile.absolutePath}")
@@ -474,7 +474,7 @@ class CrashReporter private constructor(private val context: Context) {
             }
         }
     }
-
+    
     /**
      * Save crash log to file asynchronously (for non-fatal reports)
      */
@@ -483,7 +483,7 @@ class CrashReporter private constructor(private val context: Context) {
             saveCrashLogSync(report)
         }
     }
-
+    
     /**
      * Get the primary crash log directory.
      * Uses the initialized storage path or falls back to internal storage.
@@ -496,17 +496,17 @@ class CrashReporter private constructor(private val context: Context) {
                 return dir
             }
         }
-
+        
         // Fallback to internal files directory
         val fallbackDir = File(context.filesDir, CRASH_LOG_DIR)
         if (!fallbackDir.exists()) {
             fallbackDir.mkdirs()
         }
-
+        
         Log.d(TAG, "Crash log directory: ${fallbackDir.absolutePath}")
         return fallbackDir
     }
-
+    
     /**
      * Generate a unique filename for the crash log
      */
@@ -522,7 +522,7 @@ class CrashReporter private constructor(private val context: Context) {
         }
         return "$CRASH_LOG_PREFIX$dateString$CRASH_LOG_SUFFIX"
     }
-
+    
     /**
      * Clean up old crash logs, keeping only the most recent ones
      */
@@ -530,7 +530,7 @@ class CrashReporter private constructor(private val context: Context) {
         val crashFiles = crashDir.listFiles { file ->
             file.name.startsWith(CRASH_LOG_PREFIX) && file.name.endsWith(CRASH_LOG_SUFFIX)
         }?.sortedByDescending { it.lastModified() } ?: return
-
+        
         if (crashFiles.size > MAX_CRASH_LOGS) {
             crashFiles.drop(MAX_CRASH_LOGS).forEach { file ->
                 file.delete()
@@ -538,14 +538,14 @@ class CrashReporter private constructor(private val context: Context) {
             }
         }
     }
-
+    
     /**
      * Get all stored crash logs from all storage locations.
      * Returns a combined list sorted by last modified time.
      */
     fun getCrashLogs(): List<File> {
         val allLogs = mutableListOf<File>()
-
+        
         // Get logs from primary storage
         primaryStoragePath?.let { path ->
             val dir = File(path)
@@ -553,7 +553,7 @@ class CrashReporter private constructor(private val context: Context) {
                 file.name.startsWith(CRASH_LOG_PREFIX) && file.name.endsWith(CRASH_LOG_SUFFIX)
             }?.let { allLogs.addAll(it) }
         }
-
+        
         // Get logs from external storage (if different from primary)
         externalStoragePath?.let { path ->
             if (path != primaryStoragePath) {
@@ -563,7 +563,7 @@ class CrashReporter private constructor(private val context: Context) {
                 }?.let { allLogs.addAll(it) }
             }
         }
-
+        
         // Also check cache directory for any fallback logs
         val cacheDir = File(context.cacheDir, CRASH_LOG_DIR)
         if (cacheDir.exists()) {
@@ -571,13 +571,13 @@ class CrashReporter private constructor(private val context: Context) {
                 file.name.startsWith(CRASH_LOG_PREFIX) && file.name.endsWith(CRASH_LOG_SUFFIX)
             }?.let { allLogs.addAll(it) }
         }
-
+        
         // Remove duplicates (same filename) and sort by last modified
         return allLogs
             .distinctBy { it.name }
             .sortedByDescending { it.lastModified() }
     }
-
+    
     /**
      * Get all crash log directories that are in use.
      */
@@ -587,17 +587,17 @@ class CrashReporter private constructor(private val context: Context) {
         externalStoragePath?.let { if (it != primaryStoragePath) dirs.add(File(it)) }
         return dirs
     }
-
+    
     /**
      * Get the most recent crash report
      */
     fun getLastCrash(): CrashReport? = lastCrash
-
+    
     /**
      * Get recent crashes from memory
      */
     fun getRecentCrashes(): List<CrashReport> = recentCrashes.toList()
-
+    
     /**
      * Read a crash log file content
      */
@@ -609,7 +609,7 @@ class CrashReporter private constructor(private val context: Context) {
             null
         }
     }
-
+    
     /**
      * Clear all crash logs
      */
@@ -620,27 +620,27 @@ class CrashReporter private constructor(private val context: Context) {
         lastCrash = null
         Log.i(TAG, "All crash logs cleared")
     }
-
+    
     /**
      * Generate a crash report summary for sharing
      */
     fun generateCrashSummary(): String {
         val crashes = getCrashLogs()
         val recentCount = crashes.size
-
+        
         return buildString {
             appendLine("=== Linkpoint Crash Report Summary ===")
             appendLine()
             appendLine("Total crash logs: $recentCount")
             appendLine()
-
+            
             if (recentCount > 0) {
                 appendLine("Most recent crashes:")
                 crashes.take(3).forEachIndexed { index, file ->
                     appendLine("${index + 1}. ${file.name}")
                 }
             }
-
+            
             lastCrash?.let { crash ->
                 appendLine()
                 appendLine("Last crash details:")
@@ -651,7 +651,7 @@ class CrashReporter private constructor(private val context: Context) {
             }
         }
     }
-
+    
     private fun formatTimestamp(timestamp: Long): String {
         // Thread-safe: each call creates its own local formatter
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -662,7 +662,7 @@ class CrashReporter private constructor(private val context: Context) {
             SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date(timestamp))
         }
     }
-
+    
     /**
      * Shutdown the crash reporter
      */
@@ -696,7 +696,7 @@ data class CrashReport(
             java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z", java.util.Locale.US)
                 .format(java.util.Date(timestamp))
         }
-
+        
         return buildString {
             appendLine("╔══════════════════════════════════════════════════════════════════╗")
             appendLine("║               LINKPOINT CRASH REPORT                             ║")
@@ -708,7 +708,7 @@ data class CrashReport(
                 appendLine("Context: $context")
             }
             appendLine()
-
+            
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ EXCEPTION DETAILS                                                 │")
             appendLine("└──────────────────────────────────────────────────────────────────┘")
@@ -720,7 +720,7 @@ data class CrashReport(
             appendLine("Stack Trace:")
             appendLine(stackTrace)
             appendLine()
-
+            
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ DEVICE INFORMATION                                                │")
             appendLine("└──────────────────────────────────────────────────────────────────┘")
@@ -733,7 +733,7 @@ data class CrashReport(
             appendLine("SDK Version: ${deviceInfo.sdkVersion}")
             appendLine("Build ID: ${deviceInfo.buildId}")
             appendLine()
-
+            
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ APP INFORMATION                                                   │")
             appendLine("└──────────────────────────────────────────────────────────────────┘")
@@ -741,7 +741,7 @@ data class CrashReport(
             appendLine("Package: ${appInfo.packageName}")
             appendLine("Version: ${appInfo.versionName} (${appInfo.versionCode})")
             appendLine()
-
+            
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ MEMORY INFORMATION                                                │")
             appendLine("└──────────────────────────────────────────────────────────────────┘")
@@ -751,13 +751,13 @@ data class CrashReport(
             appendLine("Used Memory: ${formatBytes(memoryInfo.usedMemory)}")
             appendLine("Max Memory: ${formatBytes(memoryInfo.maxMemory)}")
             appendLine()
-
+            
             appendLine("═══════════════════════════════════════════════════════════════════")
             appendLine("End of Crash Report")
             appendLine("═══════════════════════════════════════════════════════════════════")
         }
     }
-
+    
     private fun formatBytes(bytes: Long): String {
         val kb = bytes / 1024.0
         val mb = kb / 1024.0
@@ -855,7 +855,7 @@ data class CrashReporterDiagnostics(
         }
         appendLine("================================")
     }
-
+    
     /**
      * Check if crash reporting is working properly.
      */

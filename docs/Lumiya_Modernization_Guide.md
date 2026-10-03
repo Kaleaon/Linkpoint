@@ -73,7 +73,7 @@ class ModernAssetLoader {
     const basis = await this.basisLoader.load(url);
     return this.transcodeToOptimalFormat(basis);
   }
-
+  
   // glTF 2.0 mesh loading with Draco compression
   async loadGLTFMesh(url) {
     const gltf = await this.gltfLoader.load(url);
@@ -88,10 +88,10 @@ class ModernAssetLoader {
 public class ModernAssetPipeline {
     // Integrate Basis Universal for optimal mobile texture compression
     private BasisUniversalDecoder basisDecoder;
-
+    
     // Support glTF 2.0 format for Second Life mesh assets
     private GLTFLoader gltfLoader;
-
+    
     public GLTexture loadOptimizedTexture(String assetId) {
         // Replace JPEG2000 with Basis Universal where supported
         if (supportsBasisUniversal()) {
@@ -108,23 +108,23 @@ public class ModernAssetPipeline {
 public class ModernRenderPipeline {
     // Physically Based Rendering from Webaverse
     private PBRShaderProgram pbrShader;
-
+    
     // Image-based lighting
     private IBLRenderer iblRenderer;
-
+    
     // Modern post-processing stack
     private PostProcessingStack postFX;
-
+    
     public void renderFrame(Camera camera, Scene scene) {
         // Deferred rendering approach from Webaverse
         gBuffer.bindForWriting();
         renderSceneToGBuffer(scene);
-
+        
         // PBR lighting pass
         pbrShader.bind();
         iblRenderer.applyEnvironmentLighting();
         renderLightingPass();
-
+        
         // Post-processing
         postFX.apply(finalImage);
     }
@@ -144,14 +144,14 @@ public class OMIExtensionHandler {
         JSONObject collider = node.getExtension("OMI_collider");
         return createCollisionShape(collider);
     }
-
+    
     // OMI_spawn_point - Avatar spawn locations
     public SpawnPoint parseOMISpawnPoint(GLTFScene scene) {
         JSONObject spawn = scene.getExtension("OMI_spawn_point");
-        return new SpawnPoint(spawn.getVector3("position"),
+        return new SpawnPoint(spawn.getVector3("position"), 
                             spawn.getQuaternion("rotation"));
     }
-
+    
     // OMI_vrm - Avatar format
     public AvatarData parseOMIVRM(GLTFDocument gltf) {
         return VRMLoader.loadAvatar(gltf);
@@ -181,20 +181,20 @@ public class USDSceneLoader {
 public class ModernSLProtocol {
     // HTTP/2 support for CAPS
     private HTTP2Client capsClient;
-
+    
     // Enhanced message parsing with protobuf support
     private MessageParser protobufParser;
-
+    
     // Modern authentication with OAuth2
     private OAuth2Handler authHandler;
-
+    
     public void connectToGrid(GridInfo grid, LoginCredentials creds) {
         // Use modern authentication flow
         AuthToken token = authHandler.authenticate(creds);
-
+        
         // Establish HTTP/2 CAPS connection
         capsClient.connect(grid.getCapsURL(), token);
-
+        
         // Fall back to UDP for legacy messages
         udpCircuit.connect(grid.getSimulatorIP());
     }
@@ -207,15 +207,15 @@ public class ModernSLProtocol {
 public class ModernAssetManager {
     // HTTP/2 asset fetching
     private AssetHTTPClient assetClient;
-
+    
     // Modern texture formats
     private TextureTranscoder textureTranscoder;
-
+    
     public Future<Texture> fetchTexture(UUID textureId) {
         return assetClient.fetchAssetAsync(textureId)
             .thenApply(this::transcodeTexture);
     }
-
+    
     private Texture transcodeTexture(byte[] rawData) {
         // Transcode JPEG2000 to optimal mobile format
         if (isMobileDevice()) {
@@ -249,7 +249,7 @@ android {
         exclude 'META-INF/LICENSE*'
         exclude 'META-INF/NOTICE*'
     }
-
+    
     // Resolve attribute conflicts
     buildFeatures {
         buildConfig true
@@ -273,11 +273,11 @@ public class ResourceConflictResolver {
 **Problem**: Supporting OpenGL ES 1.1 limits modern GPU features
 ```java
 // Current problematic code in RenderContext.java
-if (hasGL30) {
-    useModernPath();
-} else if (hasGL20) {
-    useShaderPath();
-} else {
+if (hasGL30) { 
+    useModernPath(); 
+} else if (hasGL20) { 
+    useShaderPath(); 
+} else { 
     useLegacyPath(); // This path is problematic
 }
 ```
@@ -287,27 +287,27 @@ if (hasGL30) {
 // Updated RenderContext.java
 public class ModernRenderContext {
     private static final int MIN_GL_VERSION = 0x30000; // OpenGL ES 3.0
-
+    
     public boolean initialize() {
         if (!hasRequiredGLVersion()) {
             throw new UnsupportedOperationException(
                 "OpenGL ES 3.0 required. Current device not supported.");
         }
-
+        
         // Use only modern rendering path
         return initializeModernPipeline();
     }
-
+    
     private boolean initializeModernPipeline() {
         // Uniform Buffer Objects for efficient data transfer
         setupUniformBuffers();
-
+        
         // Transform feedback for GPU-based animation
         setupTransformFeedback();
-
+        
         // Compute shaders for particle systems
         setupComputeShaders();
-
+        
         return true;
     }
 }
@@ -320,7 +320,7 @@ public class ModernRenderContext {
 // Problematic current implementation
 public class TextureCache {
     private JPEG2000Decoder decoder; // CPU-intensive
-
+    
     public GLTexture loadTexture(UUID textureId) {
         byte[] j2kData = fetchFromNetwork(textureId);
         BufferedImage image = decoder.decode(j2kData); // Slow!
@@ -336,27 +336,27 @@ public class ModernTextureManager {
     private BasisUniversalTranscoder basisTranscoder;
     private ASTC_Encoder astcEncoder;
     private GPU_TexturePool texturePool;
-
+    
     public Future<GLTexture> loadTextureAsync(UUID textureId) {
         return CompletableFuture.supplyAsync(() -> {
             // Check for pre-transcoded format
             if (hasBasisUniversalVersion(textureId)) {
                 return loadBasisTexture(textureId);
             }
-
+            
             // Fallback: transcode JPEG2000 on background thread
             byte[] j2kData = fetchFromNetwork(textureId);
             return transcodeToOptimalFormat(j2kData);
         });
     }
-
+    
     private GLTexture transcodeToOptimalFormat(byte[] j2kData) {
         // For mobile devices, use ASTC
         if (DeviceCapabilities.supportsASTC()) {
             byte[] astcData = astcEncoder.encode(j2kData);
             return texturePool.createASTC_Texture(astcData);
         }
-
+        
         // For other devices, use ETC2
         byte[] etc2Data = ETC2_Encoder.encode(j2kData);
         return texturePool.createETC2_Texture(etc2Data);
@@ -371,7 +371,7 @@ public class ModernTextureManager {
 // Current limited implementation
 public class SLConnection {
     private DatagramSocket udpSocket; // Limited to UDP
-
+    
     public void sendMessage(SLMessage message) {
         byte[] data = message.serialize();
         udpSocket.send(new DatagramPacket(data, data.length));
@@ -381,12 +381,12 @@ public class SLConnection {
 
 **Fix**: Hybrid protocol implementation
 ```java
-// New HybridSLConnection.java
+// New HybridSLConnection.java  
 public class HybridSLConnection {
     private HTTP2Client capsClient;     // For modern features
     private DatagramSocket udpSocket;   // For legacy compatibility
     private WebSocketClient wsClient;   // For real-time events
-
+    
     public void sendMessage(SLMessage message) {
         if (message.supportsHTTP2()) {
             // Use HTTP/2 for better performance
@@ -396,7 +396,7 @@ public class HybridSLConnection {
             udpSocket.send(message.toUDPPacket());
         }
     }
-
+    
     public void subscribeToEvents() {
         // Use WebSockets for real-time updates
         wsClient.subscribe("object_updates", this::handleObjectUpdate);
@@ -412,7 +412,7 @@ public class HybridSLConnection {
 // Current basic animation
 public class AvatarAnimation {
     private List<Keyframe> keyframes;
-
+    
     public void updateAnimation(float deltaTime) {
         // Simple linear interpolation only
         currentFrame += deltaTime * frameRate;
@@ -428,19 +428,19 @@ public class ModernAvatarAnimator {
     private SkeletonData skeleton;
     private AnimationBlendTree blendTree;
     private GPU_AnimationBuffer gpuBuffer;
-
+    
     public void updateAnimation(float deltaTime) {
         // GPU-accelerated skeletal animation
         blendTree.update(deltaTime);
-
+        
         // Upload bone matrices to GPU
         Matrix4f[] boneMatrices = skeleton.calculateBoneMatrices();
         gpuBuffer.uploadBoneData(boneMatrices);
-
+        
         // Use transform feedback for cloth simulation
         clothSimulation.updateOnGPU(deltaTime);
     }
-
+    
     public void blendAnimations(AnimationClip... clips) {
         // Modern animation blending
         blendTree.setBlendWeights(calculateBlendWeights(clips));
@@ -467,7 +467,7 @@ public class ModernAvatarAnimator {
 
 #### 1.3 Network Protocol Updates
 - [ ] Implement HTTP/2 CAPS client
-- [ ] Add WebSocket support for real-time events
+- [ ] Add WebSocket support for real-time events  
 - [ ] Modernize message serialization (protobuf support)
 - [ ] Implement OAuth2 authentication
 
@@ -545,18 +545,18 @@ dependencies {
     // Modern graphics libraries
     implementation 'org.khronos:vulkan-loader:1.3.+'
     implementation 'org.lwjgl:lwjgl-vulkan:3.3.+'
-
+    
     // Asset pipeline
     implementation 'com.github.KhronosGroup:glTF-Validator:+'
     implementation 'com.basis-universal:basis-loader:+'
-
+    
     // Network modernization
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'org.eclipse.jetty.http2:http2-client:11.0.+'
-
+    
     // Protocol buffers
     implementation 'com.google.protobuf:protobuf-java:3.24.+'
-
+    
     // Modern UI
     implementation 'androidx.compose:compose-bom:2023.10.01'
     implementation 'androidx.compose.ui:ui'
@@ -595,7 +595,7 @@ public class ModernAssetPipeline {
     private final BasisUniversalTranscoder basisTranscoder;
     private final GLTFLoader gltfLoader;
     private final DracoDecoder dracoDecoder;
-
+    
     public CompletableFuture<Asset> loadAssetAsync(AssetReference ref) {
         return CompletableFuture.supplyAsync(() -> {
             switch (ref.getFormat()) {
@@ -610,14 +610,14 @@ public class ModernAssetPipeline {
             }
         });
     }
-
+    
     private Asset loadGLTFAsset(AssetReference ref) {
         GLTFDocument gltf = gltfLoader.load(ref.getURL());
-
+        
         // Process OMI extensions
         OMIExtensionProcessor processor = new OMIExtensionProcessor();
         processor.processExtensions(gltf);
-
+        
         return convertToLumiyaAsset(gltf);
     }
 }
@@ -632,7 +632,7 @@ public class VulkanRenderer implements ModernRenderer {
     private VkDevice device;
     private VkCommandPool commandPool;
     private VkRenderPass renderPass;
-
+    
     @Override
     public void initialize(SurfaceView surfaceView) {
         // Initialize Vulkan
@@ -641,24 +641,24 @@ public class VulkanRenderer implements ModernRenderer {
         createLogicalDevice();
         createSwapchain(surfaceView);
         createRenderPass();
-
+        
         // Setup PBR pipeline
         createPBRPipeline();
     }
-
+    
     @Override
     public void renderFrame(Scene scene, Camera camera) {
         VkCommandBuffer cmdBuffer = beginFrame();
-
+        
         // Render scene with modern pipeline
         vkCmdBeginRenderPass(cmdBuffer, renderPass, VK_SUBPASS_CONTENTS_INLINE);
-
+        
         // PBR pass
         renderPBRPass(scene, camera);
-
+        
         // Post-processing
         renderPostProcessing();
-
+        
         vkCmdEndRenderPass(cmdBuffer);
         endFrame(cmdBuffer);
     }
@@ -674,21 +674,21 @@ public class ModernSLProtocol {
     private final HTTP2Client capsClient;
     private final WebSocketClient eventClient;
     private final UDPCircuit legacyCircuit;
-
+    
     public void connectToGrid(GridInfo grid, AuthCredentials creds) {
         // Modern OAuth2 authentication
         AuthToken token = authenticateOAuth2(creds);
-
+        
         // HTTP/2 CAPS connection for modern features
         capsClient.connect(grid.getCapsURL(), token);
-
+        
         // WebSocket for real-time events
         eventClient.connect(grid.getEventURL(), token);
-
+        
         // UDP fallback for legacy compatibility
         legacyCircuit.connect(grid.getSimulatorEndpoint());
     }
-
+    
     public CompletableFuture<Void> sendMessage(ProtocolMessage message) {
         if (message.supportsModernTransport()) {
             return capsClient.sendAsync(message.toHTTP2());
@@ -706,24 +706,24 @@ public class ModernSLProtocol {
 // New file: app/src/test/java/com/lumiyaviewer/lumiya/modern/
 @RunWith(AndroidJUnit4.class)
 public class ModernizationValidationTests {
-
+    
     @Test
     public void testVulkanRendererInitialization() {
         VulkanRenderer renderer = new VulkanRenderer();
-        assertTrue("Vulkan should initialize successfully",
+        assertTrue("Vulkan should initialize successfully", 
                   renderer.initialize(mockSurface));
     }
-
+    
     @Test
     public void testBasisUniversalTextureLoading() {
         ModernAssetPipeline pipeline = new ModernAssetPipeline();
-        CompletableFuture<Texture> future =
+        CompletableFuture<Texture> future = 
             pipeline.loadBasisTextureAsync(testTextureId);
-
+        
         Texture texture = future.get(5, TimeUnit.SECONDS);
         assertNotNull("Texture should load successfully", texture);
     }
-
+    
     @Test
     public void testModernProtocolCompatibility() {
         ModernSLProtocol protocol = new ModernSLProtocol();
@@ -737,22 +737,22 @@ public class ModernizationValidationTests {
 ```java
 @Benchmark
 public class ModernizationBenchmarks {
-
+    
     @Benchmark
     public void benchmarkVulkanVsOpenGL() {
         // Compare rendering performance
         long vulkanTime = measureRenderTime(vulkanRenderer);
         long openglTime = measureRenderTime(openglRenderer);
-
+        
         assertTrue("Vulkan should be faster", vulkanTime < openglTime);
     }
-
+    
     @Benchmark
     public void benchmarkBasisVsJPEG2000() {
         // Compare texture loading performance
         long basisTime = measureTextureLoad(basisTexture);
         long jpeg2000Time = measureTextureLoad(jpeg2000Texture);
-
+        
         assertTrue("Basis should decode faster", basisTime < jpeg2000Time);
     }
 }

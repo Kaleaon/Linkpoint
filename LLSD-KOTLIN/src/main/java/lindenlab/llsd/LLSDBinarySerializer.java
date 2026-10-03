@@ -248,7 +248,7 @@ public class LLSDBinarySerializer {
     @SuppressWarnings("unchecked")
     private void serializeArray(Object value, OutputStream output) throws IOException, LLSDException {
         List<Object> list = (List<Object>) value;
-
+        
         output.write(ARRAY_BEGIN_MARKER);
         for (Object item : list) {
             serializeValue(item, output);
@@ -260,7 +260,7 @@ public class LLSDBinarySerializer {
     @SuppressWarnings("unchecked")
     private void serializeMap(Object value, OutputStream output) throws IOException, LLSDException {
         Map<String, Object> map = (Map<String, Object>) value;
-
+        
         output.write(MAP_BEGIN_MARKER);
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             // Write key
@@ -268,7 +268,7 @@ public class LLSDBinarySerializer {
             byte[] keyBytes = entry.getKey().getBytes(StandardCharsets.UTF_8);
             writeInt32(output, keyBytes.length);
             output.write(keyBytes);
-
+            
             // Write value
             serializeValue(entry.getValue(), output);
         }

@@ -29,7 +29,7 @@ class FriendshipOfferDialog : DialogFragment() {
             .inflate(R.layout.dialog_friendship_offer, null)
 
         view.findViewById<TextView>(R.id.offer_from).text = offer.fromName
-        view.findViewById<TextView>(R.id.offer_message).text =
+        view.findViewById<TextView>(R.id.offer_message).text = 
             offer.message.ifEmpty { getString(R.string.no_message) }
 
         return MaterialAlertDialogBuilder(requireContext())

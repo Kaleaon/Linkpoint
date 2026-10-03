@@ -42,7 +42,7 @@ interface CapabilityRequester {
 /**
  * Manages Second Life Capabilities (Caps)
  * Caps are HTTP endpoints that provide various services.
- *
+ * 
  * Now enhanced with:
  * - Firestorm-style retry logic with exponential backoff
  * - Request throttling for inventory operations
@@ -51,17 +51,17 @@ interface CapabilityRequester {
  * - Linkpoint-compatible URL repair for Agni grid
  */
 open class CapabilityManager : CapabilityRequester {
-
+    
     companion object {
         private const val TAG = "CapabilityManager"
-
+        
         // Diagnostic truncation length for URLs in debug reports
         private const val DIAGNOSTIC_URL_TRUNCATE_LENGTH = 50
         private const val SEED_CAP_HEADER_PREVIEW_BYTES = 64
         private const val SEED_CAP_ASCII_CHECK_BYTES = 16
         private const val SEED_CAP_RESPONSE_PREVIEW_CHARS = 200
         private const val UTF8_BOM = '\uFEFF'
-
+        
         // Common capability names
         const val CAP_EVENT_QUEUE = "EventQueueGet"
         const val CAP_FETCH_INVENTORY = "FetchInventory2"
@@ -107,25 +107,25 @@ open class CapabilityManager : CapabilityRequester {
         const val CAP_SIMULATE_LURE = "SimulatorLure"
         const val CAP_AVATAR_PICKER = "AvatarPickerSearch"
         const val CAP_SEARCH_STATIC = "SearchStatRequest"
-
+        
         // Voice moderation capability (Project Voice Moderation)
         const val CAP_VOICE_MODERATION = "VoiceModeration"
-
+        
         // Inventory operations (added for full viewer compliance)
         const val CAP_CREATE_INVENTORY_CATEGORY = "CreateInventoryCategory"
         const val CAP_MOVE_INVENTORY_ITEM = "MoveItemsToTrash"  // Uses AISv3
         const val CAP_UPDATE_INVENTORY_ITEM = "UpdateInventoryItem"
         const val CAP_INVENTORY_API = "InventoryAPIv3"  // AISv3 endpoint
-
+        
         // Display names
         const val CAP_GET_DISPLAY_NAMES = "GetDisplayNames"
         const val CAP_SET_DISPLAY_NAME = "SetDisplayName"
-
+        
         // Simulator features
         const val CAP_SIMULATOR_FEATURES = "SimulatorFeatures"
         const val CAP_AGENT_PREFERENCES = "AgentPreferences"
         const val CAP_UPDATE_AGENT_LANGUAGE = "UpdateAgentLanguage"
-
+        
         // Render materials (PBR)
         const val CAP_RENDER_MATERIALS = "RenderMaterials"
         const val CAP_GROUP_MEMBER_DATA = "GroupMemberData"
@@ -141,7 +141,7 @@ open class CapabilityManager : CapabilityRequester {
         const val CAP_NEW_FILE_AGENT_INVENTORY = "NewFileAgentInventory"
         const val CAP_UPLOAD_AGENT_PROFILE_IMAGE = "UploadAgentProfileImage"
         const val CAP_UPLOAD_AGENT_BAKED_TEXTURE = "UploadAgentBakedTexture"
-
+        
         // Capabilities that are inventory-related (for throttling)
         private val INVENTORY_CAPS = setOf(
             CAP_FETCH_INVENTORY,
@@ -150,26 +150,26 @@ open class CapabilityManager : CapabilityRequester {
             CAP_CREATE_INVENTORY_CATEGORY,
             CAP_INVENTORY_API
         )
-
+        
         // Capabilities that are asset-related
         private val ASSET_CAPS = setOf(
             CAP_GET_TEXTURE,
             CAP_GET_MESH,
             CAP_GET_MESH2
         )
-
+        
         // Retryable HTTP status codes - defined once for efficiency
         private val RETRYABLE_HTTP_CODES = setOf(503, 429, 500, 502, 504)
-
+        
         // Retryable message patterns for IOException detection
         private val RETRYABLE_MESSAGE_PATTERNS = listOf("EOF", "reset", "closed", "timeout", "ECONNRESET")
-
+        
         // Background retry constants
         private const val BACKGROUND_RETRY_INITIAL_DELAY_MS = 10_000L  // 10 seconds
         private const val BACKGROUND_RETRY_MAX_DELAY_MS = 60_000L     // 60 seconds
         private const val BACKGROUND_RETRY_MAX_ATTEMPTS = 10
     }
-
+    
     // Request throttler for rate limiting
     private val throttler = RequestThrottler.getInstance()
 
@@ -228,7 +228,7 @@ open class CapabilityManager : CapabilityRequester {
             .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
             .build()
     }
-
+    
     /**
      * Get the appropriate HTTP client for a capability.
      */
@@ -239,7 +239,7 @@ open class CapabilityManager : CapabilityRequester {
             else -> httpClient
         }
     }
-
+    
     /**
      * Get the request options for a capability.
      */
@@ -251,19 +251,19 @@ open class CapabilityManager : CapabilityRequester {
             else -> HttpRequestOptions()
         }
     }
-
+    
     private val capabilities = ConcurrentHashMap<String, String>()
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
+    
     private var seedCapability: String? = null
     private var eventQueueJob: Job? = null
     private var eventQueueReconnectTriggerJob: Job? = null
-
+    
     @Volatile
     private var highestAckSequenceId: Int = 0
 
     val slidingWindow = SlidingWindowEventQueue()
-
+    
     private val _isReady = MutableStateFlow(false)
     val isReady: StateFlow<Boolean> = _isReady
 
@@ -301,13 +301,13 @@ open class CapabilityManager : CapabilityRequester {
     private var backgroundRetryJob: Job? = null
     @Volatile private var backgroundRetryCount: Int = 0
 
-
+    
     /**
      * Initialize capabilities from seed with Linkpoint translation layer support.
-     *
+     * 
      * This overload accepts the login URL to enable Linkpoint-compatible capability URL
      * repair and grid-specific handling.
-     *
+     * 
      * @param seedCap The seed capability URL
      * @param loginUrlParam The login URL used for authentication (enables URL repair)
      * @return true if initialization succeeded
@@ -315,20 +315,20 @@ open class CapabilityManager : CapabilityRequester {
     suspend fun initialize(seedCap: String, loginUrlParam: String): Boolean {
         this.loginUrl = loginUrlParam
         this.activeStrategy = CapabilityStrategyDispatcher.selectStrategy(loginUrlParam)
-
+        
         // Apply URL repair/validation via active strategy
         val repairedSeedCap = activeStrategy.validateCapabilityUrl("SeedCapability", seedCap, loginUrlParam)
-
+        
         if (repairedSeedCap != seedCap) {
             Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
             Log.i(TAG, "║ CAPABILITY DISPATCHER: Seed capability URL repaired")
             Log.i(TAG, "║ Strategy: ${activeStrategy.javaClass.simpleName} (Grid: ${activeStrategy.gridType})")
             Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
         }
-
+        
         return initialize(repairedSeedCap)
     }
-
+    
     /**
      * Initialize capabilities from seed
      */
@@ -338,7 +338,7 @@ open class CapabilityManager : CapabilityRequester {
         initializationStartTime = System.currentTimeMillis()
         lastInitializationError = null
         lastInitializationAttempts = 0
-
+        
         Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ CAPABILITY INITIALIZATION STARTING")
         Log.i(TAG, "╠══════════════════════════════════════════════════════════════════")
@@ -350,7 +350,7 @@ open class CapabilityManager : CapabilityRequester {
         Log.i(TAG, "║ Translation Mode: ${if (currentLoginUrl != null) "ENABLED" else "DISABLED"}")
         Log.i(TAG, "║ Capability Strategy: ${activeStrategy.javaClass.simpleName} (Grid: ${activeStrategy.gridType})")
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
-
+        
         // Use reference capability list when enabled for better compatibility
         val capNames = if (currentLoginUrl != null && LinkpointTranslationLayer.config.useReferenceCapabilityList) {
             Log.d(TAG, "Using Linkpoint-compatible capability list")
@@ -384,13 +384,13 @@ open class CapabilityManager : CapabilityRequester {
                 CAP_GROUP_PROFILE
             )
         }
-
+        
         Log.d(TAG, "Requesting ${capNames.size} capabilities from seed...")
-
+        
         val options = HttpRequestOptions.forLogin()
         var seedCaps: Map<String, String>? = null
         var lastException: Exception? = null
-
+        
         // Retry seed caps request (initial attempt + retries)
         for (attempt in 0..options.retries) {
             lastInitializationAttempts = attempt + 1
@@ -400,15 +400,15 @@ open class CapabilityManager : CapabilityRequester {
                     Log.w(TAG, "Retrying seed capability request (attempt ${attempt + 1}/${options.retries + 1}) after ${delayMs}ms")
                     delay(delayMs)
                 }
-
+                
                 Log.d(TAG, "Seed capability request attempt ${attempt + 1}...")
                 seedCaps = requestCapabilities(seedCap, capNames)
-
+                
                 if (!seedCaps.isNullOrEmpty()) {
                     Log.i(TAG, "Seed capability request succeeded with ${seedCaps.size} capabilities")
                     break
                 }
-
+                
                 lastException = Exception("Seed capability returned no entries")
                 lastInitializationError = "Seed capability returned empty response"
                 Log.w(TAG, "Seed capability response was empty on attempt ${attempt + 1}")
@@ -418,7 +418,7 @@ open class CapabilityManager : CapabilityRequester {
                 Log.e(TAG, "Seed capability request failed on attempt ${attempt + 1}", e)
             }
         }
-
+        
         val resolvedCaps = seedCaps
         if (resolvedCaps.isNullOrEmpty()) {
             _isReady.value = false
@@ -434,11 +434,11 @@ open class CapabilityManager : CapabilityRequester {
             Log.e(TAG, "╚══════════════════════════════════════════════════════════════════")
             return@withContext false
         }
-
+        
         // Apply URL repair to each capability URL if enabled
         val shouldRepairUrls = loginUrl != null && LinkpointTranslationLayer.config.repairCapabilityUrls
         var repairedCount = 0
-
+        
         resolvedCaps.forEach { (name, url) ->
             val finalUrl = activeStrategy.validateCapabilityUrl(name, url, loginUrl)
             if (finalUrl != url) {
@@ -448,11 +448,11 @@ open class CapabilityManager : CapabilityRequester {
             capabilities[name] = finalUrl
             Log.d(TAG, "Capability: $name -> ${finalUrl.take(60)}...")
         }
-
+        
         if (repairedCount > 0) {
             Log.i(TAG, "Linkpoint translation: Repaired $repairedCount capability URLs")
         }
-
+        
         // Start event queue
         val eqUrl = getCapability(CAP_EVENT_QUEUE)
         if (eqUrl != null) {
@@ -461,10 +461,10 @@ open class CapabilityManager : CapabilityRequester {
         } else {
             Log.w(TAG, "⚠️ EventQueueGet capability not available - events won't work!")
         }
-
+        
         initializationEndTime = System.currentTimeMillis()
         val duration = initializationEndTime - initializationStartTime
-
+        
         _isReady.value = true
         Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ CAPABILITY INITIALIZATION SUCCESS")
@@ -534,11 +534,11 @@ open class CapabilityManager : CapabilityRequester {
 
     /**
      * Request capabilities from seed
-     *
+     * 
      * Per Second Life protocol specification:
      * - POST an LLSD array of strings (capability names) to the seed capability URL
      * - Receive an LLSD map of capability names to URLs
-     *
+     * 
      * See: https://wiki.secondlife.com/wiki/SeedCapability
      */
     private suspend fun requestCapabilities(
@@ -552,12 +552,12 @@ open class CapabilityManager : CapabilityRequester {
                 add(LLSDString(name))
             }
         }
-
+        
         val xmlBytes = LLSDXmlUtils.wrapToBytes(requestBody)
-
+        
         Log.d(TAG, "Requesting capabilities from: ${seedUrl.take(80)}...")
         Log.d(TAG, "Request body length: ${xmlBytes.size} bytes")
-
+        
         try {
             val requestBuilder = Request.Builder().url(seedUrl)
             val reqHeaders = activeStrategy.transformHeaders("SeedCapability", mapOf("Accept" to "application/llsd+xml, application/llsd+binary"))
@@ -565,7 +565,7 @@ open class CapabilityManager : CapabilityRequester {
             val request = requestBuilder
                 .post(xmlBytes.toRequestBody("application/llsd+xml".toMediaType()))
                 .build()
-
+            
             val startTime = System.currentTimeMillis()
             val response = httpClient.newCall(request).execute()
             val elapsed = System.currentTimeMillis() - startTime
@@ -590,7 +590,7 @@ open class CapabilityManager : CapabilityRequester {
                 response.close()
                 return@withContext null
             }
-
+            
             // Use try-finally to ensure response is always closed
             val contentType = response.header("Content-Type")
             val bodyBytes: ByteArray?
@@ -599,15 +599,15 @@ open class CapabilityManager : CapabilityRequester {
             } finally {
                 response.close()
             }
-
+            
             if (bodyBytes == null || bodyBytes.isEmpty()) {
                 Log.e(TAG, "Seed capability response body is empty")
                 lastInitializationError = "Empty response body"
                 return@withContext null
             }
-
+            
             Log.d(TAG, "Response body length: ${bodyBytes.size} bytes")
-
+            
             // Log first few chars for debugging (don't log full body for security)
             val isXmlContentType = contentType?.contains("xml", ignoreCase = true) == true
             val previewSize = minOf(bodyBytes.size, SEED_CAP_HEADER_PREVIEW_BYTES)
@@ -639,9 +639,9 @@ open class CapabilityManager : CapabilityRequester {
             } else {
                 Log.d(TAG, "Response preview: <binary LLSD omitted>")
             }
-
+            
             val result = activeStrategy.parseCapabilityResponse(bodyBytes, contentType)
-
+            
             if (result != null) {
                 Log.d(TAG, "Parsed ${result.size} capabilities from response using strategy ${activeStrategy.javaClass.simpleName}")
                 if (result.isEmpty()) {
@@ -672,20 +672,20 @@ open class CapabilityManager : CapabilityRequester {
             null
         }
     }
-
+    
     /**
      * Get a capability URL
      */
     override fun getCapability(name: String): String? = capabilities[name]
-
+    
     /**
      * Check if a capability is available
      */
     override fun hasCapability(name: String): Boolean = capabilities.containsKey(name)
-
+    
     /**
      * Make a capability request with Firestorm-style retry logic.
-     *
+     * 
      * Features:
      * - Automatic retries with exponential backoff
      * - Retry-After header support
@@ -699,7 +699,7 @@ open class CapabilityManager : CapabilityRequester {
         val url = getCapability(capName) ?: return@withContext null
         val options = getOptionsForCapability(capName)
         val client = getClientForCapability(capName)
-
+        
         // Apply throttling for inventory requests
         if (INVENTORY_CAPS.contains(capName)) {
             val waitMs = throttler.acquire(PolicyClass.INVENTORY)
@@ -707,10 +707,10 @@ open class CapabilityManager : CapabilityRequester {
                 Log.d(TAG, "Throttled $capName request for ${waitMs}ms")
             }
         }
-
+        
         var lastException: Exception? = null
         var retryAfterSeconds: Int? = null
-
+        
         repeat(options.retries + 1) { attempt ->
             try {
                 if (attempt > 0) {
@@ -719,7 +719,7 @@ open class CapabilityManager : CapabilityRequester {
                     Log.d(TAG, "Retrying $capName request (attempt ${attempt + 1}/${options.retries + 1}) after ${delayMs}ms")
                     delay(delayMs)
                 }
-
+                
                 // Cronet primary path (H3/QUIC when the cap host advertises
                 // it; otherwise H2 over Cronet's TLS stack). Falls through
                 // to OkHttp+Conscrypt (H2/H1.1) on any non-2xx, network
@@ -803,7 +803,7 @@ open class CapabilityManager : CapabilityRequester {
                     protocol = okhttpProto
                 )
                 response.close()
-
+                
                 if (responseBytes == null || responseBytes.isEmpty()) {
                     if (attempt < options.retries) {
                         throw RetryableException("Empty response body")
@@ -812,7 +812,7 @@ open class CapabilityManager : CapabilityRequester {
                 }
 
                 return@withContext LLSDParser.parseAuto(responseBytes, contentType)
-
+                
             } catch (e: RetryableException) {
                 lastException = e
                 // Continue to next attempt
@@ -837,7 +837,7 @@ open class CapabilityManager : CapabilityRequester {
                 throw e
             }
         }
-
+        
         Log.e(TAG, "All retries exhausted for $capName", lastException)
         null
     }
@@ -942,7 +942,7 @@ open class CapabilityManager : CapabilityRequester {
      * Exception to signal that a request should be retried.
      */
     private class RetryableException(message: String) : Exception(message)
-
+    
     /**
      * Check if an IOException is retryable.
      */
@@ -950,7 +950,7 @@ open class CapabilityManager : CapabilityRequester {
         val message = e.message ?: return false
         return RETRYABLE_MESSAGE_PATTERNS.any { message.contains(it, ignoreCase = true) }
     }
-
+    
     /**
      * Parse Retry-After header value.
      */
@@ -958,14 +958,14 @@ open class CapabilityManager : CapabilityRequester {
         val retryAfter = response.header("Retry-After") ?: return null
         return retryAfter.toIntOrNull()?.let { minOf(it, 30) }
     }
-
+    
     /**
      * Register an event handler
      */
     fun registerEventHandler(eventName: String, handler: EventHandler) {
         registerEventHandler(eventName, handler, Dispatchers.Default)
     }
-
+    
     /**
      * Register an event handler with a specific dispatcher.
      */
@@ -977,7 +977,7 @@ open class CapabilityManager : CapabilityRequester {
         eventHandlers.getOrPut(eventName) { mutableListOf() }
             .add(EventHandlerRegistration(handler, dispatcher))
     }
-
+    
     /**
      * Triggered on Android network callback event (e.g. Wi-Fi <-> cellular switch)
      * Forces immediate reconnection request with highest acknowledged sequence ID.
@@ -997,7 +997,7 @@ open class CapabilityManager : CapabilityRequester {
 
     /**
      * Start the event queue with persistent sequence tracking and Firestorm-style retry handling.
-     *
+     * 
      * The event queue uses long-polling, so timeouts are expected and normal.
      * Uses exponential backoff for actual errors, but immediate retry for
      * expected 502 responses (long-poll timeout).
@@ -1008,7 +1008,7 @@ open class CapabilityManager : CapabilityRequester {
             var done = false
             var consecutiveErrors = 0
             val options = HttpRequestOptions.forEventQueue()
-
+            
             while (isActive && !done) {
                 try {
                     pollEventQueueOnce(url)
@@ -1025,7 +1025,7 @@ open class CapabilityManager : CapabilityRequester {
                         val delayMs = minOf(rawDelay, 30_000L) // Capped at 30 seconds max
                         Log.w(TAG, "Event queue error (${e.javaClass.simpleName}, seq=$highestAckSequenceId), " +
                             "retrying in ${delayMs}ms (errors: $consecutiveErrors)", e)
-
+                        
                         delay(delayMs)
                         if (consecutiveErrors >= options.retries) {
                             consecutiveErrors = options.retries - 1
@@ -1042,14 +1042,14 @@ open class CapabilityManager : CapabilityRequester {
             this["ack"] = if (ackSeq > 0) LLSDInteger(ackSeq) else LLSDBoolean(true)
             this["done"] = LLSDBoolean(false)
         }
-
+        
         val xmlBytes = LLSDXmlUtils.wrapToBytes(requestBody)
-
+        
         val request = Request.Builder()
             .url(url)
             .post(xmlBytes.toRequestBody("application/llsd+xml".toMediaType()))
             .build()
-
+        
         eventQueueClient.newCall(request).execute().use { response ->
             val contentType = response.header("Content-Type")
             val code = response.code
@@ -1091,13 +1091,13 @@ open class CapabilityManager : CapabilityRequester {
             }
         }
     }
-
+    
     private fun processEvent(event: LLSDMap) {
         val message = event.getString("message") ?: return
         val body = event.getMap("body")
-
+        
         Log.d(TAG, "Event: $message")
-
+        
         eventHandlers[message]?.forEach { registration ->
             scope.launch(registration.dispatcher) {
                 try {
@@ -1108,7 +1108,7 @@ open class CapabilityManager : CapabilityRequester {
             }
         }
     }
-
+    
     /**
      * Stop the capability manager
      */
@@ -1119,34 +1119,34 @@ open class CapabilityManager : CapabilityRequester {
         capabilities.clear()
         _isReady.value = false
     }
-
+    
     // ==================== DIAGNOSTIC METHODS ====================
-
+    
     /**
      * Get list of all available capability names
      */
     fun getAvailableCapabilities(): List<String> = capabilities.keys.toList()
-
+    
     /**
      * Get the total number of capabilities
      */
     fun getCapabilityCount(): Int = capabilities.size
-
+    
     /**
      * Check if event queue is active
      */
     fun isEventQueueActive(): Boolean = eventQueueJob?.isActive == true
-
+    
     /**
      * Get number of registered event handlers
      */
     fun getEventHandlerCount(): Int = eventHandlers.values.sumOf { it.size }
-
+    
     /**
      * Get list of events with registered handlers
      */
     fun getRegisteredEventTypes(): List<String> = eventHandlers.keys.toList()
-
+    
     /**
      * Get comprehensive diagnostic data for debug reports
      */
@@ -1158,11 +1158,11 @@ open class CapabilityManager : CapabilityRequester {
         } else {
             0L
         }
-
+        
         return CapabilityDiagnostics(
             isReady = _isReady.value,
-            seedCapability = seedCapability?.let {
-                if (it.length > DIAGNOSTIC_URL_TRUNCATE_LENGTH) it.take(DIAGNOSTIC_URL_TRUNCATE_LENGTH) + "..." else it
+            seedCapability = seedCapability?.let { 
+                if (it.length > DIAGNOSTIC_URL_TRUNCATE_LENGTH) it.take(DIAGNOSTIC_URL_TRUNCATE_LENGTH) + "..." else it 
             },
             capabilityCount = capabilities.size,
             availableCapabilities = capabilities.keys.toList().sorted(),
@@ -1182,7 +1182,7 @@ open class CapabilityManager : CapabilityRequester {
             initializationComplete = initializationEndTime > 0
         )
     }
-
+    
     /**
      * Diagnostic data class for capability manager state
      */

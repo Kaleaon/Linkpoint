@@ -169,7 +169,7 @@ std::tuple<
         (float3 *)colors.contiguous().data_ptr<float>(),
         (float3 *)out_img.contiguous().data_ptr<float>()
     );
-
+    
     CUDA_CALL(cudaDeviceSynchronize());
     return std::make_tuple(out_img);
 }
@@ -305,8 +305,8 @@ std::
 }
 
 std::tuple<
-    torch::Tensor, // out_img
-    torch::Tensor  // pixel_topk
+    torch::Tensor, // out_img 
+    torch::Tensor  // pixel_topk 
 > nd_rasterize_forward_topk_norm_tensor(
     const std::tuple<int, int, int> tile_bounds,
     const std::tuple<int, int, int> block,
@@ -348,7 +348,7 @@ std::tuple<
     torch::Tensor pixel_topk = torch::zeros(
         {img_height, img_width, TOP_K}, xys.options().dtype(torch::kInt32)
     );
-
+    
     nd_rasterize_forward_topk_norm<<<tile_bounds_dim3, block_dim3>>>(
         tile_bounds_dim3,
         img_size_dim3,
@@ -425,8 +425,8 @@ nd_rasterize_backward_topk_norm_tensor(
 }
 
 std::tuple<
-    torch::Tensor, // out_img
-    torch::Tensor  // pixel_topk
+    torch::Tensor, // out_img 
+    torch::Tensor  // pixel_topk 
 > nd_rasterize_forward_no_tiles_tensor(
     const std::tuple<int, int, int> img_size,
     const unsigned num_points,
@@ -463,7 +463,7 @@ std::tuple<
     torch::Tensor pixel_topk = torch::zeros(
         {img_height, img_width, TOP_K}, xys.options().dtype(torch::kInt32)
     );
-
+    
     nd_rasterize_forward_no_tiles<<<grid_size_dim3, block_dim3>>>(
         img_size_dim3,
         channels,
@@ -506,7 +506,7 @@ nd_rasterize_backward_no_tiles_tensor(
     const dim3 img_size = {img_width, img_height, 1};
     const dim3 grid_size = {(img_width + block_size.x - 1)/block_size.x,
                             (img_height + block_size.y - 1)/block_size.y, 1};
-
+    
     const int channels = colors.size(1);
     torch::Tensor v_xy = torch::zeros({num_points, 2}, xys.options());
     torch::Tensor v_conic = torch::zeros({num_points, 3}, xys.options());
@@ -530,8 +530,8 @@ nd_rasterize_backward_no_tiles_tensor(
 
 
 std::tuple<
-    torch::Tensor, // out_img
-    torch::Tensor  // pixel_topk
+    torch::Tensor, // out_img 
+    torch::Tensor  // pixel_topk 
 > nd_rasterize_forward_simple_tensor(
     const std::tuple<int, int, int> img_size,
     const unsigned num_points,
@@ -570,7 +570,7 @@ std::tuple<
     torch::Tensor pixel_topk = torch::zeros(
         {img_height, img_width, TOP_K}, xys.options().dtype(torch::kInt32)
     );
-
+    
     // nd_rasterize_forward_no_tiles<<<grid_size_dim3, block_dim3>>>(
     //     img_size_dim3,
     //     channels,
@@ -618,7 +618,7 @@ nd_rasterize_backward_simple_tensor(
     const dim3 img_size = {img_width, img_height, 1};
     const dim3 grid_size = {(img_width + block_size.x - 1)/block_size.x,
                             (img_height + block_size.y - 1)/block_size.y, 1};
-
+    
     const int channels = feat.size(1);
     torch::Tensor v_xy = torch::zeros({num_points, 2}, xys.options());
     torch::Tensor v_scale = torch::zeros({num_points, 2}, xys.options());

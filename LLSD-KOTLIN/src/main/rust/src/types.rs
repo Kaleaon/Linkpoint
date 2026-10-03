@@ -1,6 +1,6 @@
 /*!
  * LLSD Core Types - Rust Implementation
- *
+ * 
  * Based on Java implementation and Second Life viewer types
  * Copyright (C) 2024 Linden Lab
  */

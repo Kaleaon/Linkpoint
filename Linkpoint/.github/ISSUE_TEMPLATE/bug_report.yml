@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         Thanks for taking the time to fill out this bug report!
-
+        
   - type: textarea
     id: what-happened
     attributes:
@@ -16,7 +16,7 @@ body:
       placeholder: Tell us what you see!
     validations:
       required: true
-
+      
   - type: textarea
     id: reproduce
     attributes:
@@ -29,7 +29,7 @@ body:
         4. See error
     validations:
       required: true
-
+      
   - type: dropdown
     id: version
     attributes:
@@ -41,7 +41,7 @@ body:
         - Other
     validations:
       required: true
-
+      
   - type: dropdown
     id: device-type
     attributes:
@@ -55,7 +55,7 @@ body:
         - Emulator
     validations:
       required: true
-
+      
   - type: input
     id: android-version
     attributes:
@@ -64,7 +64,7 @@ body:
       placeholder: "e.g., Android 14 / API 34"
     validations:
       required: true
-
+      
   - type: input
     id: device-model
     attributes:
@@ -73,7 +73,7 @@ body:
       placeholder: "e.g., Pixel 7 Pro, Samsung Galaxy S23"
     validations:
       required: false
-
+      
   - type: dropdown
     id: grid
     attributes:
@@ -87,14 +87,14 @@ body:
         - Other OpenSim grid
     validations:
       required: true
-
+      
   - type: textarea
     id: logs
     attributes:
       label: Relevant log output
       description: Please copy and paste any relevant log output. This will be automatically formatted into code.
       render: shell
-
+      
   - type: checkboxes
     id: terms
     attributes:

@@ -10,7 +10,7 @@ public enum SettingsPage {
     Page3D(R.xml.preferences_3d, R.string.prefs_category_3d),
     PageRLV(R.xml.preferences_rlv, R.string.prefs_category_rlv),
     PageCache(R.xml.preferences_cache, R.string.prefs_category_cache);
-
+    
     private final int pageResourceId;
     private final int pageTitle;
 

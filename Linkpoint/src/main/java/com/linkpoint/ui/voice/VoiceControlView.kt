@@ -28,10 +28,10 @@ class VoiceControlView @JvmOverloads constructor(
     private lateinit var voiceStatusText: TextView
     private lateinit var voiceMuteButton: ImageButton
 
-    private val voiceManager by lazy {
-        LinkpointApp.getInstance().voiceManager
+    private val voiceManager by lazy { 
+        LinkpointApp.getInstance().voiceManager 
     }
-
+    
     // Lifecycle-aware coroutine scope for this view
     private val viewScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
@@ -124,7 +124,7 @@ class VoiceControlView @JvmOverloads constructor(
     fun isVoiceMuted(): Boolean {
         return voiceManager.isMuted.value
     }
-
+    
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         viewScope.cancel()

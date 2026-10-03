@@ -5,17 +5,17 @@ import java.util.regex.Pattern
 
 /**
  * LSL (Linden Scripting Language) Syntax Definition
- *
+ * 
  * Complete syntax highlighting rules for Second Life's scripting language.
  * Includes all functions, events, constants, and types from the official
  * LSL Portal wiki.
- *
+ * 
  * Based on Firestorm's LSL editor syntax highlighting.
  */
 object LSLSyntax {
-
+    
     // ==================== COLORS ====================
-
+    
     object Colors {
         val KEYWORD = Color.parseColor("#CC7832")      // Orange for keywords
         val TYPE = Color.parseColor("#6897BB")          // Blue for types
@@ -30,9 +30,9 @@ object LSLSyntax {
         val STATE = Color.parseColor("#FF6B68")         // Red for state names
         val DEPRECATED = Color.parseColor("#FF0000")    // Red for deprecated
     }
-
+    
     // ==================== KEYWORDS ====================
-
+    
     val KEYWORDS = setOf(
         // Control flow
         "if", "else", "for", "while", "do", "jump", "return", "state",
@@ -41,15 +41,15 @@ object LSLSyntax {
         // Logical
         "TRUE", "FALSE"
     )
-
+    
     // ==================== TYPES ====================
-
+    
     val TYPES = setOf(
         "integer", "float", "string", "key", "vector", "rotation", "quaternion", "list"
     )
-
+    
     // ==================== EVENTS ====================
-
+    
     val EVENTS = setOf(
         // Touch events
         "touch_start", "touch", "touch_end",
@@ -98,25 +98,25 @@ object LSLSyntax {
         // Path update events
         "path_update"
     )
-
+    
     // ==================== CONSTANTS ====================
-
+    
     val CONSTANTS = setOf(
         // Boolean
         "TRUE", "FALSE",
-
+        
         // Status constants
         "STATUS_PHYSICS", "STATUS_ROTATE_X", "STATUS_ROTATE_Y", "STATUS_ROTATE_Z",
         "STATUS_PHANTOM", "STATUS_SANDBOX", "STATUS_BLOCK_GRAB", "STATUS_DIE_AT_EDGE",
         "STATUS_RETURN_AT_EDGE", "STATUS_CAST_SHADOWS", "STATUS_BLOCK_GRAB_OBJECT",
-
+        
         // Agent info
         "AGENT_FLYING", "AGENT_ATTACHMENTS", "AGENT_SCRIPTED", "AGENT_MOUSELOOK",
         "AGENT_SITTING", "AGENT_ON_OBJECT", "AGENT_AWAY", "AGENT_WALKING",
         "AGENT_IN_AIR", "AGENT_TYPING", "AGENT_CROUCHING", "AGENT_BUSY",
         "AGENT_ALWAYS_RUN", "AGENT_AUTOPILOT", "AGENT_LIST_PARCEL",
         "AGENT_LIST_PARCEL_OWNER", "AGENT_LIST_REGION",
-
+        
         // Camera permissions
         "CAMERA_PITCH", "CAMERA_FOCUS_OFFSET", "CAMERA_FOCUS_OFFSET_X",
         "CAMERA_FOCUS_OFFSET_Y", "CAMERA_FOCUS_OFFSET_Z", "CAMERA_POSITION_LAG",
@@ -124,25 +124,25 @@ object LSLSyntax {
         "CAMERA_BEHINDNESS_LAG", "CAMERA_POSITION_THRESHOLD", "CAMERA_FOCUS_THRESHOLD",
         "CAMERA_ACTIVE", "CAMERA_POSITION", "CAMERA_POSITION_LOCKED", "CAMERA_FOCUS",
         "CAMERA_FOCUS_LOCKED",
-
+        
         // Animation constants
         "ANIM_ON", "ANIM_OFF",
-
+        
         // Loop mode
         "LOOP",
-
+        
         // Boolean string
         "EOF",
-
+        
         // Changed constants
         "CHANGED_INVENTORY", "CHANGED_COLOR", "CHANGED_SHAPE", "CHANGED_SCALE",
         "CHANGED_TEXTURE", "CHANGED_LINK", "CHANGED_ALLOWED_DROP", "CHANGED_OWNER",
         "CHANGED_REGION", "CHANGED_TELEPORT", "CHANGED_REGION_START", "CHANGED_MEDIA",
-
+        
         // Type constants
         "TYPE_INTEGER", "TYPE_FLOAT", "TYPE_STRING", "TYPE_KEY", "TYPE_VECTOR",
         "TYPE_ROTATION", "TYPE_INVALID",
-
+        
         // Permission constants
         "PERMISSION_DEBIT", "PERMISSION_TAKE_CONTROLS", "PERMISSION_REMAP_CONTROLS",
         "PERMISSION_TRIGGER_ANIMATION", "PERMISSION_ATTACH", "PERMISSION_RELEASE_OWNERSHIP",
@@ -150,7 +150,7 @@ object LSLSyntax {
         "PERMISSION_TRACK_CAMERA", "PERMISSION_CONTROL_CAMERA", "PERMISSION_TELEPORT",
         "PERMISSION_EXPERIENCE", "PERMISSION_SILENT_ESTATE_MANAGEMENT",
         "PERMISSION_OVERRIDE_ANIMATIONS", "PERMISSION_RETURN_OBJECTS",
-
+        
         // Attach constants
         "ATTACH_CHEST", "ATTACH_HEAD", "ATTACH_LSHOULDER", "ATTACH_RSHOULDER",
         "ATTACH_LHAND", "ATTACH_RHAND", "ATTACH_LFOOT", "ATTACH_RFOOT",
@@ -168,30 +168,30 @@ object LSLSyntax {
         "ATTACH_FACE_JAW", "ATTACH_FACE_LEAR", "ATTACH_FACE_REAR",
         "ATTACH_FACE_LEYE", "ATTACH_FACE_REYE", "ATTACH_FACE_TONGUE",
         "ATTACH_GROIN", "ATTACH_HIND_LFOOT", "ATTACH_HIND_RFOOT",
-
+        
         // Land constants
         "LAND_LEVEL", "LAND_RAISE", "LAND_LOWER", "LAND_SMOOTH", "LAND_NOISE", "LAND_REVERT",
         "LAND_SMALL_BRUSH", "LAND_MEDIUM_BRUSH", "LAND_LARGE_BRUSH",
-
+        
         // Link constants
         "LINK_ROOT", "LINK_SET", "LINK_ALL_OTHERS", "LINK_ALL_CHILDREN", "LINK_THIS",
-
+        
         // Inventory constants
         "INVENTORY_TEXTURE", "INVENTORY_SOUND", "INVENTORY_LANDMARK", "INVENTORY_CLOTHING",
         "INVENTORY_OBJECT", "INVENTORY_NOTECARD", "INVENTORY_SCRIPT", "INVENTORY_BODYPART",
         "INVENTORY_ANIMATION", "INVENTORY_GESTURE", "INVENTORY_ALL", "INVENTORY_NONE",
         "INVENTORY_SETTING", "INVENTORY_MATERIAL",
-
+        
         // Pay constants
         "PAY_HIDE", "PAY_DEFAULT",
-
+        
         // Remote data constants
         "REMOTE_DATA_CHANNEL", "REMOTE_DATA_REQUEST", "REMOTE_DATA_REPLY",
-
+        
         // Control constants
         "CONTROL_FWD", "CONTROL_BACK", "CONTROL_LEFT", "CONTROL_RIGHT", "CONTROL_ROT_LEFT",
         "CONTROL_ROT_RIGHT", "CONTROL_UP", "CONTROL_DOWN", "CONTROL_LBUTTON", "CONTROL_ML_LBUTTON",
-
+        
         // Prim type constants
         "PRIM_TYPE", "PRIM_MATERIAL", "PRIM_PHYSICS", "PRIM_TEMP_ON_REZ", "PRIM_PHANTOM",
         "PRIM_POSITION", "PRIM_SIZE", "PRIM_ROTATION", "PRIM_TYPE_BOX", "PRIM_TYPE_CYLINDER",
@@ -215,11 +215,11 @@ object LSLSyntax {
         "PRIM_ALPHA_MODE", "PRIM_ALPHA_MODE_NONE", "PRIM_ALPHA_MODE_BLEND", "PRIM_ALPHA_MODE_MASK",
         "PRIM_ALPHA_MODE_EMISSIVE", "PRIM_RENDER_MATERIAL", "PRIM_GLTF_BASE_COLOR",
         "PRIM_GLTF_NORMAL", "PRIM_GLTF_METALLIC_ROUGHNESS", "PRIM_GLTF_EMISSIVE",
-
+        
         // Mask constants
         "MASK_BASE", "MASK_OWNER", "MASK_GROUP", "MASK_EVERYONE", "MASK_NEXT",
         "PERM_TRANSFER", "PERM_MODIFY", "PERM_COPY", "PERM_MOVE", "PERM_ALL",
-
+        
         // Parcel constants
         "PARCEL_COUNT_TOTAL", "PARCEL_COUNT_OWNER", "PARCEL_COUNT_GROUP", "PARCEL_COUNT_OTHER",
         "PARCEL_COUNT_SELECTED", "PARCEL_COUNT_TEMP", "PARCEL_DETAILS_NAME", "PARCEL_DETAILS_DESC",
@@ -231,58 +231,58 @@ object LSLSyntax {
         "PARCEL_FLAG_USE_LAND_PASS_LIST", "PARCEL_FLAG_LOCAL_SOUND_ONLY", "PARCEL_FLAG_RESTRICT_PUSHOBJECT",
         "PARCEL_FLAG_ALLOW_GROUP_SCRIPTS", "PARCEL_FLAG_ALLOW_CREATE_GROUP_OBJECTS",
         "PARCEL_FLAG_ALLOW_ALL_OBJECT_ENTRY", "PARCEL_FLAG_ALLOW_GROUP_OBJECT_ENTRY",
-
+        
         // List stat constants
         "LIST_STAT_RANGE", "LIST_STAT_MIN", "LIST_STAT_MAX", "LIST_STAT_MEAN",
         "LIST_STAT_MEDIAN", "LIST_STAT_STD_DEV", "LIST_STAT_SUM", "LIST_STAT_SUM_SQUARES",
         "LIST_STAT_NUM_COUNT", "LIST_STAT_GEOMETRIC_MEAN",
-
+        
         // Click action constants
         "CLICK_ACTION_NONE", "CLICK_ACTION_TOUCH", "CLICK_ACTION_SIT", "CLICK_ACTION_BUY",
         "CLICK_ACTION_PAY", "CLICK_ACTION_OPEN", "CLICK_ACTION_PLAY", "CLICK_ACTION_OPEN_MEDIA",
         "CLICK_ACTION_ZOOM", "CLICK_ACTION_DISABLED", "CLICK_ACTION_IGNORE",
-
+        
         // Texture constants
         "TEXTURE_BLANK", "TEXTURE_DEFAULT", "TEXTURE_PLYWOOD", "TEXTURE_TRANSPARENT",
         "TEXTURE_MEDIA",
-
+        
         // Touch constants
         "TOUCH_INVALID_FACE", "TOUCH_INVALID_VECTOR", "TOUCH_INVALID_TEXCOORD",
-
+        
         // Profile constants
         "PROFILE_NONE", "PROFILE_SCRIPT_MEMORY",
-
+        
         // Region constants
         "REGION_FLAG_ALLOW_DAMAGE", "REGION_FLAG_FIXED_SUN", "REGION_FLAG_BLOCK_TERRAFORM",
         "REGION_FLAG_SANDBOX", "REGION_FLAG_DISABLE_COLLISIONS", "REGION_FLAG_DISABLE_PHYSICS",
         "REGION_FLAG_BLOCK_FLY", "REGION_FLAG_ALLOW_DIRECT_TELEPORT", "REGION_FLAG_RESTRICT_PUSHOBJECT",
-
+        
         // HTTP constants
         "HTTP_METHOD", "HTTP_MIMETYPE", "HTTP_BODY_MAXLENGTH", "HTTP_VERIFY_CERT",
         "HTTP_BODY_TRUNCATED", "HTTP_CUSTOM_HEADER", "HTTP_PRAGMA_NO_CACHE",
         "HTTP_VERBOSE_THROTTLE", "HTTP_USER_AGENT",
-
+        
         // Content type constants
         "CONTENT_TYPE_TEXT", "CONTENT_TYPE_HTML", "CONTENT_TYPE_XML", "CONTENT_TYPE_XHTML",
         "CONTENT_TYPE_ATOM", "CONTENT_TYPE_JSON", "CONTENT_TYPE_LLSD", "CONTENT_TYPE_FORM",
         "CONTENT_TYPE_RSS",
-
+        
         // Math constants
         "PI", "TWO_PI", "PI_BY_TWO", "DEG_TO_RAD", "RAD_TO_DEG", "SQRT2",
-
+        
         // Null constants
         "NULL_KEY", "EOF",
-
+        
         // Rotation constants
         "ZERO_ROTATION", "ZERO_VECTOR",
-
+        
         // String constants
         "URL_REQUEST_GRANTED", "URL_REQUEST_DENIED",
-
+        
         // JSON constants
         "JSON_INVALID", "JSON_OBJECT", "JSON_ARRAY", "JSON_NUMBER", "JSON_STRING",
         "JSON_NULL", "JSON_TRUE", "JSON_FALSE", "JSON_DELETE", "JSON_APPEND",
-
+        
         // XP error constants
         "XP_ERROR_NONE", "XP_ERROR_THROTTLED", "XP_ERROR_EXPERIENCES_DISABLED",
         "XP_ERROR_INVALID_PARAMETERS", "XP_ERROR_NOT_PERMITTED", "XP_ERROR_NO_EXPERIENCE",
@@ -290,7 +290,7 @@ object LSLSyntax {
         "XP_ERROR_EXPERIENCE_SUSPENDED", "XP_ERROR_UNKNOWN_ERROR", "XP_ERROR_QUOTA_EXCEEDED",
         "XP_ERROR_STORE_DISABLED", "XP_ERROR_STORAGE_EXCEPTION", "XP_ERROR_KEY_NOT_FOUND",
         "XP_ERROR_RETRY_UPDATE", "XP_ERROR_MATURITY_EXCEEDED",
-
+        
         // Prim media constants
         "PRIM_MEDIA_ALT_IMAGE_ENABLE", "PRIM_MEDIA_CONTROLS", "PRIM_MEDIA_CURRENT_URL",
         "PRIM_MEDIA_HOME_URL", "PRIM_MEDIA_AUTO_LOOP", "PRIM_MEDIA_AUTO_PLAY",
@@ -299,37 +299,37 @@ object LSLSyntax {
         "PRIM_MEDIA_WHITELIST", "PRIM_MEDIA_PERMS_INTERACT", "PRIM_MEDIA_PERMS_CONTROL",
         "PRIM_MEDIA_CONTROLS_STANDARD", "PRIM_MEDIA_CONTROLS_MINI"
     )
-
+    
     // ==================== FUNCTIONS ====================
-
+    
     val FUNCTIONS = setOf(
         // Math functions
         "llAbs", "llAcos", "llAsin", "llAtan2", "llCeil", "llCos", "llFabs", "llFloor",
         "llFrand", "llLog", "llLog10", "llModPow", "llPow", "llRound", "llSin", "llSqrt",
         "llTan", "llVecDist", "llVecMag", "llVecNorm",
-
+        
         // String functions
         "llDeleteSubString", "llGetSubString", "llInsertString", "llStringLength",
         "llStringToBase64", "llBase64ToString", "llBase64ToInteger", "llIntegerToBase64",
         "llMD5String", "llSHA1String", "llSHA256String", "llToLower", "llToUpper",
         "llSubStringIndex", "llChar", "llOrd", "llHash", "llEscapeURL", "llUnescapeURL",
-
+        
         // List functions
         "llCSV2List", "llDeleteSubList", "llDumpList2String", "llGetListEntryType",
         "llGetListLength", "llList2CSV", "llList2Float", "llList2Integer", "llList2Key",
         "llList2List", "llList2ListStrided", "llList2Rot", "llList2String", "llList2Vector",
         "llListFindList", "llListInsertList", "llListRandomize", "llListReplaceList",
         "llListSort", "llListStatistics", "llParseString2List", "llParseStringKeepNulls",
-
+        
         // Vector/Rotation functions
         "llAngleBetween", "llAxes2Rot", "llAxisAngle2Rot", "llEuler2Rot", "llRot2Angle",
         "llRot2Axis", "llRot2Euler", "llRot2Fwd", "llRot2Left", "llRot2Up", "llRotBetween",
-
+        
         // Agent functions
         "llGetAgentInfo", "llGetAgentLanguage", "llGetAgentList", "llGetAgentSize",
         "llGetAnimationList", "llGetDisplayName", "llGetUsername", "llKey2Name",
         "llRequestAgentData", "llRequestDisplayName", "llRequestUsername", "llSameGroup",
-
+        
         // Object functions
         "llAttachToAvatar", "llAttachToAvatarTemp", "llDetachFromAvatar", "llDie",
         "llGetAttached", "llGetAttachedList", "llGetBoundingBox", "llGetCenterOfMass",
@@ -344,7 +344,7 @@ object LSLSyntax {
         "llSetLinkMedia", "llSetLinkPrimitiveParams", "llSetLinkPrimitiveParamsFast",
         "llSetLinkTexture", "llSetLinkTextureAnim", "llSetObjectDesc", "llSetObjectName",
         "llSetPayPrice", "llSetPrimitiveParams", "llSetScale", "llSetStatus",
-
+        
         // Movement functions
         "llApplyImpulse", "llApplyRotationalImpulse", "llGetAccel", "llGetForce",
         "llGetOmega", "llGetPos", "llGetLocalPos", "llGetRegionCorner", "llGetRot",
@@ -354,133 +354,133 @@ object LSLSyntax {
         "llSetBuoyancy", "llSetForce", "llSetForceAndTorque", "llSetHoverHeight",
         "llSetPos", "llSetRegionPos", "llSetRot", "llSetTorque", "llSetVelocity",
         "llStopHover", "llStopLookAt", "llStopMoveToTarget", "llTarget", "llTargetRemove",
-
+        
         // Communication functions
         "llDialog", "llInstantMessage", "llListen", "llListenControl", "llListenRemove",
         "llOwnerSay", "llRegionSay", "llRegionSayTo", "llSay", "llShout", "llWhisper",
         "llTextBox", "llGetNotecardLine", "llGetNumberOfNotecardLines",
-
+        
         // Animation functions
         "llGetAnimation", "llGetAnimationOverride", "llResetAnimationOverride",
         "llSetAnimationOverride", "llStartAnimation", "llStopAnimation",
-
+        
         // Sensor functions
         "llSensor", "llSensorRemove", "llSensorRepeat", "llDetectedGrab", "llDetectedGroup",
         "llDetectedKey", "llDetectedLinkNumber", "llDetectedName", "llDetectedOwner",
         "llDetectedPos", "llDetectedRot", "llDetectedTouchBinormal", "llDetectedTouchFace",
         "llDetectedTouchNormal", "llDetectedTouchPos", "llDetectedTouchST",
         "llDetectedTouchUV", "llDetectedType", "llDetectedVel",
-
+        
         // Inventory functions
         "llAllowInventoryDrop", "llGetInventoryCreator", "llGetInventoryKey",
         "llGetInventoryName", "llGetInventoryNumber", "llGetInventoryPermMask",
         "llGetInventoryType", "llGiveInventory", "llGiveInventoryList",
         "llRemoveInventory", "llRezAtRoot", "llRezObject",
-
+        
         // Sound functions
         "llAdjustSoundVolume", "llGetSoundLength", "llLoopSound", "llLoopSoundMaster",
         "llLoopSoundSlave", "llPlaySound", "llPlaySoundSlave", "llPreloadSound",
         "llSetSoundQueueing", "llSetSoundRadius", "llSound", "llSoundPreload",
         "llStopSound", "llTriggerSound", "llTriggerSoundLimited",
-
+        
         // Texture functions
         "llGetAlpha", "llGetColor", "llGetTexture", "llGetTextureOffset", "llGetTextureRot",
         "llGetTextureScale", "llOffsetTexture", "llRotateTexture", "llScaleTexture",
         "llSetAlpha", "llSetColor", "llSetTexture", "llSetTextureAnim",
-
+        
         // Particle functions
         "llLinkParticleSystem", "llParticleSystem",
-
+        
         // Text functions
         "llSetText",
-
+        
         // Light functions
         "llGetLightColor", "llGetLightDirection", "llGetLightRange", "llSetLightColor",
         "llSetLightDirection", "llSetLightFalloff", "llSetLightIntensity", "llSetLightRadius",
-
+        
         // Timer functions
         "llGetTime", "llGetTimeOfDay", "llGetUnixTime", "llGetTimestamp", "llGetDate",
         "llGetGMTclock", "llResetTime", "llSetTimerEvent", "llSleep",
-
+        
         // Permission functions
         "llGetPermissions", "llGetPermissionsKey", "llRequestPermissions",
-
+        
         // Control functions
         "llReleaseControls", "llTakeControls",
-
+        
         // Camera functions
         "llClearCameraParams", "llSetCameraAtOffset", "llSetCameraEyeOffset",
         "llSetCameraParams",
-
+        
         // Parcel/Land functions
         "llAddToLandBanList", "llAddToLandPassList", "llEjectFromLand",
         "llGetLandOwnerAt", "llGetParcelDetails", "llGetParcelFlags", "llGetParcelMaxPrims",
         "llGetParcelMusicURL", "llGetParcelPrimCount", "llGetParcelPrimOwners",
         "llOverMyLand", "llRemoveFromLandBanList", "llRemoveFromLandPassList",
         "llReturnObjectsByID", "llReturnObjectsByOwner", "llSetParcelMusicURL",
-
+        
         // Region functions
         "llCloud", "llEdgeOfWorld", "llGetEnv", "llGetRegionAgentCount", "llGetRegionFPS",
         "llGetRegionFlags", "llGetRegionName", "llGetRegionTimeDilation",
         "llGetSimStats", "llGetSimulatorHostname", "llGetSunDirection", "llGround",
         "llWater", "llWind",
-
+        
         // HTTP functions
         "llGetFreeURLs", "llHTTPRequest", "llHTTPResponse", "llReleaseURL",
         "llRequestSecureURL", "llRequestURL", "llSetContentType",
-
+        
         // Email functions
         "llEmail", "llGetNextEmail",
-
+        
         // Experience functions
         "llAgentInExperience", "llCreateKeyValue", "llDataSizeKeyValue",
         "llDeleteKeyValue", "llGetExperienceDetails", "llGetExperienceErrorMessage",
         "llGetExperienceList", "llKeyCountKeyValue", "llKeysKeyValue",
         "llReadKeyValue", "llRequestExperiencePermissions", "llSitOnLink",
         "llUpdateKeyValue",
-
+        
         // JSON functions
         "llJsonGetValue", "llJsonSetValue", "llJsonValueType", "llList2Json", "llJson2List",
-
+        
         // Cast functions
         "llCastRay",
-
+        
         // Keyframe motion
         "llGetPhysicsMaterial", "llSetKeyframedMotion", "llSetPhysicsMaterial",
-
+        
         // Script functions
         "llGetFreeMemory", "llGetMemoryLimit", "llGetScriptName", "llGetScriptState",
         "llGetStartParameter", "llGetUsedMemory", "llMinEventDelay", "llResetOtherScript",
         "llResetScript", "llScriptDanger", "llScriptProfiler", "llSetMemoryLimit",
         "llSetScriptState",
-
+        
         // Link message functions
         "llMessageLinked", "llLinkSitTarget", "llSetLinkMedia",
-
+        
         // Sit functions
         "llAvatarOnLinkSitTarget", "llAvatarOnSitTarget", "llForceUnsit", "llSitTarget",
         "llUnSit",
-
+        
         // Teleport functions
         "llMapDestination", "llTeleportAgent", "llTeleportAgentGlobalCoords",
         "llTeleportAgentHome",
-
+        
         // Avatar functions
         "llGetAgentSize", "llGetEnergy", "llRequestAgentData",
-
+        
         // Pathfinding functions
         "llCreateCharacter", "llDeleteCharacter", "llEvade", "llExecCharacterCmd",
         "llFleeFrom", "llGetClosestNavPoint", "llGetStaticPath", "llNavigateTo",
         "llPatrolPoints", "llPursue", "llUpdateCharacter", "llWanderWithin",
-
+        
         // Collision functions
         "llCollisionFilter", "llCollisionSound", "llCollisionSprite",
         "llPassCollisions", "llVolumeDetect",
-
+        
         // Link functions
         "llBreakAllLinks", "llBreakLink", "llCreateLink", "llGetLinkName",
         "llSetLinkPrimitiveParams", "llSetLinkPrimitiveParamsFast",
-
+        
         // Misc functions
         "llAllowInventoryDrop", "llDumpList2String", "llGetEnergy", "llGetFreeMemory",
         "llGetMemoryLimit", "llGetObjectPrimCount", "llGetRegionAgentCount",
@@ -492,18 +492,18 @@ object LSLSyntax {
         "llSetMemoryLimit", "llSetRemoteScriptAccessPin", "llSetSitText",
         "llSetTouchText", "llTransferLindenDollars", "llTriggerSoundLimited"
     )
-
+    
     // ==================== DEPRECATED FUNCTIONS ====================
-
+    
     val DEPRECATED_FUNCTIONS = setOf(
         "llMakeExplosion", "llMakeFire", "llMakeFountain", "llMakeSmoke",
         "llSound", "llSoundPreload", "llRemoteLoadScript", "llRemoteLoadScriptPin",
         "llXorBase64StringsCorrect", "llSetInventoryPermMask", "llPointAt",
         "llStopPointAt", "llRefreshPrimURL", "llSetPrimURL", "llGetPrimURL"
     )
-
+    
     // ==================== PATTERNS ====================
-
+    
     object Patterns {
         val STRING: Pattern = Pattern.compile("\"([^\"\\\\]|\\\\.)*\"")
         val SINGLE_LINE_COMMENT: Pattern = Pattern.compile("//.*")
@@ -513,47 +513,47 @@ object LSLSyntax {
         val OPERATOR: Pattern = Pattern.compile("[+\\-*/%=<>!&|^~?:;,{}()\\[\\]]")
         val VECTOR_ROTATION: Pattern = Pattern.compile("<[^>]+>")
     }
-
+    
     /**
      * Check if a word is an LSL keyword.
      */
     fun isKeyword(word: String): Boolean = word in KEYWORDS
-
+    
     /**
      * Check if a word is an LSL type.
      */
     fun isType(word: String): Boolean = word in TYPES
-
+    
     /**
      * Check if a word is an LSL event.
      */
     fun isEvent(word: String): Boolean = word in EVENTS
-
+    
     /**
      * Check if a word is an LSL constant.
      */
     fun isConstant(word: String): Boolean = word in CONSTANTS
-
+    
     /**
      * Check if a word is an LSL function.
      */
     fun isFunction(word: String): Boolean = word in FUNCTIONS
-
+    
     /**
      * Check if a function is deprecated.
      */
     fun isDeprecated(word: String): Boolean = word in DEPRECATED_FUNCTIONS
-
+    
     /**
      * Get all LSL function names for autocomplete.
      */
     fun getAllFunctions(): List<String> = FUNCTIONS.sorted()
-
+    
     /**
      * Get all LSL constants for autocomplete.
      */
     fun getAllConstants(): List<String> = CONSTANTS.sorted()
-
+    
     /**
      * Get all LSL events for autocomplete.
      */

@@ -14,7 +14,7 @@ use tokio::time::{interval, sleep};
 use serde::{Deserialize, Serialize};
 
 /// Advanced rendering system with fine-grained controls (Rust implementation).
-///
+/// 
 /// Features:
 /// - Zero-cost abstractions with Rust's type system
 /// - Safe concurrent rendering with ownership guarantees
@@ -312,7 +312,7 @@ pub struct AdvancedRenderingSystem {
     // Rendering state with atomic operations
     rendering_enabled: Arc<RwLock<bool>>,
     battery_conservation_mode: Arc<RwLock<bool>>,
-
+    
     // Settings with thread-safe access
     quality_settings: Arc<AsyncRwLock<QualitySettings>>,
     performance_settings: Arc<AsyncRwLock<PerformanceSettings>>,
@@ -322,20 +322,20 @@ pub struct AdvancedRenderingSystem {
     mesh_settings: Arc<AsyncRwLock<MeshSettings>>,
     avatar_settings: Arc<AsyncRwLock<AvatarSettings>>,
     particle_settings: Arc<AsyncRwLock<ParticleSettings>>,
-
+    
     // Performance monitoring
     performance_metrics: Arc<RwLock<PerformanceMetrics>>,
     render_statistics: Arc<RwLock<RenderStatistics>>,
-
+    
     // Event broadcasting for React-like updates
     event_sender: broadcast::Sender<RenderEvent>,
-
+    
     // Render loop control
     render_handle: Option<tokio::task::JoinHandle<()>>,
-
+    
     // Stored settings for battery mode (using Option for ownership)
     stored_settings: Arc<RwLock<Option<StoredSettings>>>,
-
+    
     // Frame timing
     last_frame_time: Arc<RwLock<Instant>>,
     frame_count: Arc<RwLock<u64>>,
@@ -357,7 +357,7 @@ struct StoredSettings {
 impl AdvancedRenderingSystem {
     pub async fn new() -> Self {
         let (event_sender, _) = broadcast::channel(1000);
-
+        
         let system = Self {
             rendering_enabled: Arc::new(RwLock::new(true)),
             battery_conservation_mode: Arc::new(RwLock::new(false)),
@@ -380,7 +380,7 @@ impl AdvancedRenderingSystem {
         };
 
         system.apply_balanced_preset().await;
-
+        
         log::info!("Rust Advanced rendering system initialized");
         system
     }
@@ -455,238 +455,238 @@ impl AdvancedRenderingSystem {
     // Quality presets with Rust async/await
     pub async fn apply_ultra_low_preset(&self) {
         log::info!("Applying Ultra Low quality preset");
-
+        
         {
             let mut quality = self.quality_settings.write().await;
             quality.overall_quality = 0.1;
         }
-
+        
         {
             let mut performance = self.performance_settings.write().await;
             performance.target_fps = 30;
         }
-
+        
         {
             let mut effects = self.effects_settings.write().await;
             effects.effects_enabled = false;
         }
-
+        
         {
             let mut texture = self.texture_settings.write().await;
             texture.texture_quality = TextureQuality::VeryLow;
         }
-
+        
         {
             let mut shadow = self.shadow_settings.write().await;
             shadow.shadows_enabled = false;
         }
-
+        
         {
             let mut mesh = self.mesh_settings.write().await;
             mesh.lod_bias = -2.0;
         }
-
+        
         {
             let mut avatar = self.avatar_settings.write().await;
             avatar.max_visible_avatars = 5;
         }
-
+        
         {
             let mut particle = self.particle_settings.write().await;
             particle.max_particles = 100;
         }
-
+        
         let _ = self.event_sender.send(RenderEvent::QualityPresetChanged("ULTRA_LOW".to_string()));
     }
 
     pub async fn apply_low_preset(&self) {
         log::info!("Applying Low quality preset");
-
+        
         {
             let mut quality = self.quality_settings.write().await;
             quality.overall_quality = 0.3;
         }
-
+        
         {
             let mut performance = self.performance_settings.write().await;
             performance.target_fps = 45;
         }
-
+        
         {
             let mut effects = self.effects_settings.write().await;
             effects.effects_enabled = true;
             effects.effects_quality = 0.3;
         }
-
+        
         {
             let mut texture = self.texture_settings.write().await;
             texture.texture_quality = TextureQuality::Low;
         }
-
+        
         {
             let mut shadow = self.shadow_settings.write().await;
             shadow.shadows_enabled = false;
         }
-
+        
         {
             let mut mesh = self.mesh_settings.write().await;
             mesh.lod_bias = -1.0;
         }
-
+        
         {
             let mut avatar = self.avatar_settings.write().await;
             avatar.max_visible_avatars = 15;
         }
-
+        
         {
             let mut particle = self.particle_settings.write().await;
             particle.max_particles = 500;
         }
-
+        
         let _ = self.event_sender.send(RenderEvent::QualityPresetChanged("LOW".to_string()));
     }
 
     pub async fn apply_balanced_preset(&self) {
         log::info!("Applying Balanced quality preset");
-
+        
         {
             let mut quality = self.quality_settings.write().await;
             quality.overall_quality = 0.6;
         }
-
+        
         {
             let mut performance = self.performance_settings.write().await;
             performance.target_fps = 60;
         }
-
+        
         {
             let mut effects = self.effects_settings.write().await;
             effects.effects_enabled = true;
             effects.effects_quality = 0.6;
         }
-
+        
         {
             let mut texture = self.texture_settings.write().await;
             texture.texture_quality = TextureQuality::Medium;
         }
-
+        
         {
             let mut shadow = self.shadow_settings.write().await;
             shadow.shadows_enabled = true;
             shadow.shadow_quality = ShadowQuality::Medium;
         }
-
+        
         {
             let mut mesh = self.mesh_settings.write().await;
             mesh.lod_bias = 0.0;
         }
-
+        
         {
             let mut avatar = self.avatar_settings.write().await;
             avatar.max_visible_avatars = 30;
         }
-
+        
         {
             let mut particle = self.particle_settings.write().await;
             particle.max_particles = 2000;
         }
-
+        
         let _ = self.event_sender.send(RenderEvent::QualityPresetChanged("BALANCED".to_string()));
     }
 
     pub async fn apply_high_preset(&self) {
         log::info!("Applying High quality preset");
-
+        
         {
             let mut quality = self.quality_settings.write().await;
             quality.overall_quality = 0.8;
         }
-
+        
         {
             let mut performance = self.performance_settings.write().await;
             performance.target_fps = 60;
         }
-
+        
         {
             let mut effects = self.effects_settings.write().await;
             effects.effects_enabled = true;
             effects.effects_quality = 0.8;
         }
-
+        
         {
             let mut texture = self.texture_settings.write().await;
             texture.texture_quality = TextureQuality::High;
         }
-
+        
         {
             let mut shadow = self.shadow_settings.write().await;
             shadow.shadows_enabled = true;
             shadow.shadow_quality = ShadowQuality::High;
         }
-
+        
         {
             let mut mesh = self.mesh_settings.write().await;
             mesh.lod_bias = 1.0;
         }
-
+        
         {
             let mut avatar = self.avatar_settings.write().await;
             avatar.max_visible_avatars = 50;
         }
-
+        
         {
             let mut particle = self.particle_settings.write().await;
             particle.max_particles = 5000;
         }
-
+        
         let _ = self.event_sender.send(RenderEvent::QualityPresetChanged("HIGH".to_string()));
     }
 
     pub async fn apply_ultra_preset(&self) {
         log::info!("Applying Ultra quality preset");
-
+        
         {
             let mut quality = self.quality_settings.write().await;
             quality.overall_quality = 1.0;
         }
-
+        
         {
             let mut performance = self.performance_settings.write().await;
             performance.target_fps = 60;
         }
-
+        
         {
             let mut effects = self.effects_settings.write().await;
             effects.effects_enabled = true;
             effects.effects_quality = 1.0;
         }
-
+        
         {
             let mut texture = self.texture_settings.write().await;
             texture.texture_quality = TextureQuality::Ultra;
         }
-
+        
         {
             let mut shadow = self.shadow_settings.write().await;
             shadow.shadows_enabled = true;
             shadow.shadow_quality = ShadowQuality::Ultra;
         }
-
+        
         {
             let mut mesh = self.mesh_settings.write().await;
             mesh.lod_bias = 2.0;
         }
-
+        
         {
             let mut avatar = self.avatar_settings.write().await;
             avatar.max_visible_avatars = 100;
         }
-
+        
         {
             let mut particle = self.particle_settings.write().await;
             particle.max_particles = 10000;
         }
-
+        
         let _ = self.event_sender.send(RenderEvent::QualityPresetChanged("ULTRA".to_string()));
     }
 
@@ -701,7 +701,7 @@ impl AdvancedRenderingSystem {
             let texture = self.texture_settings.read().await;
             let mesh = self.mesh_settings.read().await;
             let avatar = self.avatar_settings.read().await;
-
+            
             StoredSettings {
                 target_fps: performance.target_fps,
                 vsync: performance.vsync,
@@ -725,32 +725,32 @@ impl AdvancedRenderingSystem {
             performance.target_fps = 15;
             performance.vsync = false;
         }
-
+        
         {
             let mut effects = self.effects_settings.write().await;
             effects.effects_enabled = false;
         }
-
+        
         {
             let mut shadow = self.shadow_settings.write().await;
             shadow.shadows_enabled = false;
         }
-
+        
         {
             let mut particle = self.particle_settings.write().await;
             particle.max_particles = 0;
         }
-
+        
         {
             let mut texture = self.texture_settings.write().await;
             texture.texture_quality = TextureQuality::VeryLow;
         }
-
+        
         {
             let mut mesh = self.mesh_settings.write().await;
             mesh.lod_bias = -3.0;
         }
-
+        
         {
             let mut avatar = self.avatar_settings.write().await;
             avatar.max_visible_avatars = 1;
@@ -772,32 +772,32 @@ impl AdvancedRenderingSystem {
                 performance.target_fps = stored.target_fps;
                 performance.vsync = stored.vsync;
             }
-
+            
             {
                 let mut effects = self.effects_settings.write().await;
                 effects.effects_enabled = stored.effects_enabled;
             }
-
+            
             {
                 let mut shadow = self.shadow_settings.write().await;
                 shadow.shadows_enabled = stored.shadows_enabled;
             }
-
+            
             {
                 let mut particle = self.particle_settings.write().await;
                 particle.max_particles = stored.max_particles;
             }
-
+            
             {
                 let mut texture = self.texture_settings.write().await;
                 texture.texture_quality = stored.texture_quality;
             }
-
+            
             {
                 let mut mesh = self.mesh_settings.write().await;
                 mesh.lod_bias = stored.lod_bias;
             }
-
+            
             {
                 let mut avatar = self.avatar_settings.write().await;
                 avatar.max_visible_avatars = stored.max_avatars;
@@ -917,7 +917,7 @@ impl AdvancedRenderingSystem {
     async fn render_frame(delta_time: f32, event_sender: &broadcast::Sender<RenderEvent>) {
         // Basic rendering operations (placeholder)
         // In a real implementation, this would call OpenGL/Vulkan rendering commands
-
+        
         let _ = event_sender.send(RenderEvent::FrameRendered(delta_time));
     }
 
@@ -1037,7 +1037,7 @@ impl AdvancedRenderingSystem {
     // Configuration export/import with Rust serialization
     pub async fn export_settings(&self) -> HashMap<String, serde_json::Value> {
         let mut settings = HashMap::new();
-
+        
         settings.insert("quality".to_string(), serde_json::to_value(self.quality_settings.read().await.clone()).unwrap());
         settings.insert("performance".to_string(), serde_json::to_value(self.performance_settings.read().await.clone()).unwrap());
         settings.insert("effects".to_string(), serde_json::to_value(self.effects_settings.read().await.clone()).unwrap());
@@ -1046,7 +1046,7 @@ impl AdvancedRenderingSystem {
         settings.insert("meshes".to_string(), serde_json::to_value(self.mesh_settings.read().await.clone()).unwrap());
         settings.insert("avatars".to_string(), serde_json::to_value(self.avatar_settings.read().await.clone()).unwrap());
         settings.insert("particles".to_string(), serde_json::to_value(self.particle_settings.read().await.clone()).unwrap());
-
+        
         settings
     }
 
@@ -1056,15 +1056,15 @@ impl AdvancedRenderingSystem {
                 *self.quality_settings.write().await = quality_settings;
             }
         }
-
+        
         if let Some(performance) = settings.get("performance") {
             if let Ok(performance_settings) = serde_json::from_value::<PerformanceSettings>(performance.clone()) {
                 *self.performance_settings.write().await = performance_settings;
             }
         }
-
+        
         // Import other settings...
-
+        
         log::info!("Imported rendering settings");
         let _ = self.event_sender.send(RenderEvent::SettingsImported);
     }

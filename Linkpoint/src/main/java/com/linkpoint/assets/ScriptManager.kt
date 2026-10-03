@@ -20,14 +20,14 @@ import java.util.concurrent.TimeUnit
 
 /**
  * ScriptManager - Handles LSL/Mono script viewing and basic management.
- *
+ * 
  * Features:
  * - View script source code
  * - Script state (running/not running)
  * - Reset script
  * - Set script running state
  * - Script memory/time usage
- *
+ * 
  * Note: Full script editing requires a desktop viewer. This provides
  * viewing and basic management functionality like the reference viewer.
  */
@@ -38,17 +38,17 @@ class ScriptManager(
     companion object {
         private const val TAG = "ScriptManager"
         private const val SCRIPT_UPLOAD_CONTENT_TYPE = "application/octet-stream"
-
+        
         // Script types
         const val SCRIPT_TYPE_LSL = 0
         const val SCRIPT_TYPE_MONO = 1
-
+        
         // Script states
         const val STATE_NOT_RUNNING = 0
         const val STATE_RUNNING = 1
         const val STATE_SUSPENDED = 2
     }
-
+    
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
@@ -56,14 +56,14 @@ class ScriptManager(
         .writeTimeout(30, TimeUnit.SECONDS)
         .retryOnConnectionFailure(true)
         .build()
-
+    
     // Cached script data
     private val scriptCache = ConcurrentHashMap<UUID, ScriptData>()
-
+    
     // Loading state
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
-
+    
     /**
      * Fetch script source code.
      */
@@ -71,21 +71,21 @@ class ScriptManager(
         return withContext(Dispatchers.IO) {
             try {
                 _isLoading.value = true
-
+                
                 // Check cache
                 scriptCache[assetId]?.source?.let { return@withContext it }
-
+                
                 // Fetch via transfer - asset type 10 is LSL text
                 val assetData = transferManager.fetchAsset(assetId, 10)
                     ?: return@withContext null
-
+                
                 val source = String(assetData, Charsets.UTF_8)
-
+                
                 // Cache it
                 scriptCache.getOrPut(assetId) { ScriptData(assetId) }.apply {
                     this.source = source
                 }
-
+                
                 Log.d(TAG, "Fetched script source for $assetId (${source.length} chars)")
                 source
             } catch (e: Exception) {
@@ -96,7 +96,7 @@ class ScriptManager(
             }
         }
     }
-
+    
     /**
      * Get script running state via GetScriptRunning capability.
      */
@@ -107,9 +107,9 @@ class ScriptManager(
                     this["object_id"] = LLSDUUID(objectId)
                     this["item_id"] = LLSDUUID(itemId)
                 }
-
+                
                 val response = capabilityManager.request(CapabilityManager.CAP_GET_SCRIPT_RUNNING, request)
-
+                
                 if (response is LLSDMap) {
                     ScriptRunningInfo(
                         objectId = objectId,
@@ -124,7 +124,7 @@ class ScriptManager(
             }
         }
     }
-
+    
     /**
      * Set script running state.
      */
@@ -136,9 +136,9 @@ class ScriptManager(
                     this["item_id"] = LLSDUUID(itemId)
                     this["running"] = LLSDBoolean(running)
                 }
-
+                
                 val response = capabilityManager.request(CapabilityManager.CAP_SET_SCRIPT_RUNNING, request)
-
+                
                 if (response is LLSDMap) {
                     val success = response.getBoolean("success") ?: false
                     if (success) {
@@ -152,7 +152,7 @@ class ScriptManager(
             }
         }
     }
-
+    
     /**
      * Reset script.
      */
@@ -171,7 +171,7 @@ class ScriptManager(
             }
         }
     }
-
+    
     /**
      * Get script info including memory usage.
      */
@@ -182,9 +182,9 @@ class ScriptManager(
                 val request = LLSDMap().apply {
                     this["object_id"] = LLSDUUID(objectId)
                 }
-
+                
                 val response = capabilityManager.request(CapabilityManager.CAP_GET_SCRIPT_TASK_INFO, request)
-
+                
                 if (response is LLSDMap) {
                     val scripts = response.getArray("scripts")
                     val result = mutableListOf<ScriptInfo>()
@@ -316,14 +316,14 @@ class ScriptManager(
 
         return ScriptSaveResult(success = true, compileErrors = compileErrors)
     }
-
+    
     /**
      * Clear script cache.
      */
     fun clearCache() {
         scriptCache.clear()
     }
-
+    
     /**
      * Bitmask of controls currently captured by an in-world script
      * (`AGENT_CONTROL_*` flags from llmessagesystem.h: FORWARD,
@@ -413,7 +413,7 @@ class ScriptManager(
         val captured = _capturedControls.value
         return (captured and controlBit) == 0 || _passInputsToAgent.value
     }
-
+    
     fun shutdown() {
         scope.cancel()
         clearCache()

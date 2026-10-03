@@ -19,17 +19,17 @@ import java.util.UUID
 
 /**
  * Grid Connection
- *
+ * 
  * Represents a connection to a Second Life grid.
  * Based on the reference viewer's SLGridConnection implementation with mobile-first optimizations.
- *
+ * 
  * Features:
  * - Connection state management
  * - Authentication handling
  * - Circuit management (agent and temp circuits)
  * - Event-driven architecture
  * - Mobile-optimized resource management
- *
+ * 
  * Mobile-First Considerations:
  * - Efficient state management with StateFlow
  * - Automatic cleanup on disconnection
@@ -42,7 +42,7 @@ class GridConnection(
     private val connectionId: UUID = UUID.randomUUID(),
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 ) {
-
+    
     companion object {
         private const val TAG = "GridConnection"
         private const val DEFAULT_SYSTEM_ACCOUNT = "Second Life"
@@ -52,10 +52,10 @@ class GridConnection(
         private const val VIEWER_NAME = "Linkpoint"
         private const val VIEWER_VERSION = "1.0.0"
     }
-
+    
     // ConnectionState is imported from the canonical definition in EventBus.kt
     // This class references it as GridConnection.Companion.ConnectionState via typealias
-
+    
     /**
      * Connection state flow for reactive updates
      */
@@ -67,30 +67,30 @@ class GridConnection(
      */
     var mfaMessage: String? = null
         private set
-
+    
     /**
      * Authentication parameters
      */
     var authParams: AuthParams? = null
         private set
-
+    
     /**
      * Authentication reply from grid
      */
     var authReply: AuthReply? = null
         private set
-
+    
     /**
      * Agent circuit for primary communication
      */
     var agentCircuit: AgentCircuit? = null
         private set
-
+    
     /**
      * Temporary circuits for temporary operations
      */
     private val tempCircuits: MutableMap<AuthReply, TempCircuit> = mutableMapOf()
-
+    
     /**
      * Capability manager
      */
@@ -102,13 +102,13 @@ class GridConnection(
      */
     var capEventQueue: CapEventQueue? = null
         private set
-
+    
     /**
      * Active agent UUID
      */
     var activeAgentUUID: UUID? = null
         private set
-
+    
     /**
      * Reconnection state
      */
@@ -116,28 +116,28 @@ class GridConnection(
     private var reconnectAttempts: Int = 0
     private var firstConnect: Boolean = true
     private var hadConnected: Boolean = false
-
+    
     /**
      * User preference for connection
      */
     private var userWantsConnected: Boolean = false
-
+    
     // Core services
     private val networkingService = CoreNetworkingService(context)
     private val deviceIdentifier = DeviceIdentifier(context)
     private val crashTracker = CrashTracker(context)
-
+    
     // ==================== CONNECTION MANAGEMENT ====================
-
+    
     /**
      * Connect to the grid
-     *
+     * 
      * @param authParams Authentication parameters
      */
     suspend fun connect(authParams: AuthParams) {
         this.authParams = authParams
         userWantsConnected = true
-
+        
         when (connectionState.value) {
             ConnectionState.IDLE -> performConnection()
             ConnectionState.CONNECTING -> {
@@ -151,7 +151,7 @@ class GridConnection(
             }
         }
     }
-
+    
     /**
      * Submit MFA code to proceed with login
      */
@@ -165,7 +165,7 @@ class GridConnection(
 
     /**
      * Perform the actual connection
-     *
+     * 
      * Handles:
      * 1. HTTP login (if authReply not already set)
      * 2. UDP circuit establishment
@@ -175,20 +175,20 @@ class GridConnection(
         _connectionState.value = ConnectionState.CONNECTING
         mfaMessage = null
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Starting connection process")
-
+        
         try {
             val params = authParams
-
+            
             if (params == null) {
                 NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "No auth params provided")
                 _connectionState.value = ConnectionState.ERROR
                 return
             }
-
+            
             // Step 1: Authentication (if needed)
             if (authReply == null) {
                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Performing HTTP login to ${params.gridUrl}")
-
+                
                 // Build login XML
                 val passwordHash = createPasswordHash(params.password)
                 val loginXml = buildLoginXml(
@@ -231,10 +231,10 @@ class GridConnection(
                     }
                 }
             }
-
+            
             // Validate auth reply was created/set successfully
             val reply = authReply ?: throw IllegalStateException("Auth reply was not created")
-
+            
             activeAgentUUID = reply.agentId
 
             // Step 2: Establish UDP Circuit
@@ -286,108 +286,108 @@ class GridConnection(
                     }
                 }
             }
-
+            
             _connectionState.value = ConnectionState.CONNECTED
             hadConnected = true
             firstConnect = false
             reconnectAttempts = 0
-
-            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
+            
+            NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, 
                 "Connection established. SimIP: ${reply.simIP}, SimPort: ${reply.simPort}")
-
+            
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Connection failed: ${e.message}")
             e.printStackTrace()
             _connectionState.value = ConnectionState.ERROR
-
+            
             // Attempt reconnection if appropriate
             if (shouldReconnect()) {
                 attemptReconnection()
             }
         }
     }
-
+    
     /**
      * Set the authentication reply from an external source (e.g., SecondLifeProtocol.login()).
      * Call this before connect() when you have pre-authenticated data.
      */
     fun setAuthReply(reply: AuthReply) {
         this.authReply = reply
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, 
             "Auth reply set: simIP=${reply.simIP}, simPort=${reply.simPort}")
     }
-
+    
     /**
      * Disconnect from the grid
      */
     suspend fun disconnect() {
         userWantsConnected = false
-
+        
         if (connectionState.value == ConnectionState.CONNECTED || connectionState.value == ConnectionState.CONNECTING) {
             _connectionState.value = ConnectionState.DISCONNECTING
-
+            
             try {
                 // Clean up agent circuit
                 agentCircuit?.close()
                 agentCircuit = null
-
+                
                 // Clean up temp circuits
                 tempCircuits.values.forEach { it.close() }
                 tempCircuits.clear()
-
+                
                 // Clean up capabilities
                 capabilityManager?.shutdown()
                 capabilityManager = null
 
                 capEventQueue?.close()
                 capEventQueue = null
-
+                
                 // Clean up networking service
                 networkingService.shutdown()
 
                 _connectionState.value = ConnectionState.IDLE
-
+                
                 NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Disconnected successfully")
-
+                
             } catch (e: Exception) {
                 NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Error during disconnect: ${e.message}")
                 _connectionState.value = ConnectionState.ERROR
             }
         }
     }
-
+    
     /**
      * Check if should attempt reconnection
      */
     private fun shouldReconnect(): Boolean {
-        return userWantsConnected &&
-               reconnectAttempts < MAX_RECONNECT_ATTEMPTS &&
+        return userWantsConnected && 
+               reconnectAttempts < MAX_RECONNECT_ATTEMPTS && 
                !isReconnecting
     }
-
+    
     /**
      * Attempt reconnection
      */
     private suspend fun attemptReconnection() {
         isReconnecting = true
         reconnectAttempts++
-
+        
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Attempting reconnection ($reconnectAttempts/$MAX_RECONNECT_ATTEMPTS)")
-
+        
         // Exponential backoff: 1s, 2s, 4s, 8s, 16s
         val backoffDelay = (1L shl reconnectAttempts) * 1000L
         delay(backoffDelay)
-
+        
         performConnection()
-
+        
         isReconnecting = false
     }
-
+    
     // ==================== CIRCUIT MANAGEMENT ====================
-
+    
     /**
      * Create a temporary circuit
-     *
+     * 
      * @param authReply Authentication reply for the temp circuit
      * @return The created temp circuit
      */
@@ -396,19 +396,19 @@ class GridConnection(
         tempCircuits[authReply] = tempCircuit
         return tempCircuit
     }
-
+    
     /**
      * Remove a temporary circuit
-     *
+     * 
      * @param authReply The auth reply associated with the temp circuit
      */
     fun removeTempCircuit(authReply: AuthReply) {
         tempCircuits.remove(authReply)?.close()
     }
-
+    
     /**
      * Get connection statistics
-     *
+     * 
      * @return Map containing connection statistics
      */
     fun getStatistics(): Map<String, Any> {
@@ -424,7 +424,7 @@ class GridConnection(
             "userWantsConnected" to userWantsConnected
         )
     }
-
+    
     /**
      * Clean up resources asynchronously
      */

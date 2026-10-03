@@ -35,3 +35,4 @@ jobs:
           generate_release_notes: true
           prerelease: true
           files: release/*
+

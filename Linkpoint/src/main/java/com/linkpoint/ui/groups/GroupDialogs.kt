@@ -35,17 +35,17 @@ class GroupDetailsDialog : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        
         val nameView: TextView = view.findViewById(R.id.group_name)
         val charterView: TextView = view.findViewById(R.id.group_charter)
         val membersView: TextView = view.findViewById(R.id.group_members)
         val closeButton: Button = view.findViewById(R.id.btn_close)
         val chatButton: Button = view.findViewById(R.id.btn_chat)
-
+        
         nameView.text = group.name
         charterView.text = group.charter.ifEmpty { "No charter" }
         membersView.text = "${group.memberCount} members"
-
+        
         closeButton.setOnClickListener { dismiss() }
         chatButton.setOnClickListener {
             openGroupChat(group)
@@ -102,15 +102,15 @@ class GroupOptionsDialog : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        
         val titleView: TextView = view.findViewById(R.id.dialog_title)
         val setActiveButton: Button = view.findViewById(R.id.btn_set_active)
         val groupChatButton: Button = view.findViewById(R.id.btn_group_chat)
         val leaveButton: Button = view.findViewById(R.id.btn_leave)
         val cancelButton: Button = view.findViewById(R.id.btn_cancel)
-
+        
         titleView.text = group.name
-
+        
         setActiveButton.setOnClickListener {
             val app = LinkpointApp.getInstance()
             lifecycleScope.launch {

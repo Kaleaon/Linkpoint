@@ -1,7 +1,7 @@
 material {
     name : PrimPBR,
     shadingModel : lit,
-
+    
     parameters : [
         {
             type : sampler2D,
@@ -44,7 +44,7 @@ material {
             default : [0.0, 0.0, 0.0]
         }
     ],
-
+    
     requires : [
         uv0,
         tangents
@@ -60,16 +60,16 @@ vertex {
 fragment {
     void material(inout MaterialInputs material) {
         prepareMaterial(material);
-
+        
         vec2 uv = getUV0();
-
+        
         // Sample all PBR textures
         vec4 baseColor = texture(materialParams_baseColorMap, uv);
         vec3 normal = texture(materialParams_normalMap, uv).rgb * 2.0 - 1.0;
         vec4 metallicRoughness = texture(materialParams_metallicRoughnessMap, uv);
         vec3 emissive = texture(materialParams_emissiveMap, uv).rgb;
         float occlusion = texture(materialParams_occlusionMap, uv).r;
-
+        
         // Apply factors
         material.baseColor = vec4(baseColor.rgb * materialParams.baseColorFactor, baseColor.a);
         material.normal = normal;

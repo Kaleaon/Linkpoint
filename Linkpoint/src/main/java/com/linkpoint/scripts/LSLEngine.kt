@@ -11,16 +11,16 @@ import java.util.concurrent.ConcurrentHashMap
  * and managing script state
  */
 class LSLEngine {
-
+    
     companion object {
         private const val TAG = "LSLEngine"
-
+        
         // Script states
         const val STATE_DEFAULT = "default"
         const val STATE_WAITING = "waiting"
         const val STATE_RUNNING = "running"
         const val STATE_STOPPED = "stopped"
-
+        
         // Event types
         const val EVENT_STATE_ENTRY = "state_entry"
         const val EVENT_STATE_EXIT = "state_exit"
@@ -38,19 +38,19 @@ class LSLEngine {
         const val EVENT_CHANGED = "changed"
         const val EVENT_DATASERVER = "dataserver"
     }
-
+    
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-
+    
     // Running scripts
     private val scripts = ConcurrentHashMap<UUID, ScriptInstance>()
-
+    
     // Listeners
     private val listenHandles = ConcurrentHashMap<Int, ListenHandle>()
     private var nextListenHandle = 0
-
+    
     // Timers
     private val timers = ConcurrentHashMap<UUID, Job>()
-
+    
     /**
      * Register a script
      */
@@ -69,7 +69,7 @@ class LSLEngine {
         scripts[scriptId] = instance
         return instance
     }
-
+    
     /**
      * Unregister a script
      */
@@ -77,12 +77,12 @@ class LSLEngine {
         scripts.remove(scriptId)
         timers[scriptId]?.cancel()
         timers.remove(scriptId)
-
+        
         // Remove listeners
         listenHandles.entries.filter { it.value.scriptId == scriptId }
             .forEach { listenHandles.remove(it.key) }
     }
-
+    
     /**
      * Handle touch event on object
      */
@@ -95,7 +95,7 @@ class LSLEngine {
             ))
         }
     }
-
+    
     /**
      * Handle listen event
      */
@@ -114,7 +114,7 @@ class LSLEngine {
                 ))
             }
     }
-
+    
     /**
      * Handle link message
      */
@@ -128,14 +128,14 @@ class LSLEngine {
             ))
         }
     }
-
+    
     /**
      * Handle timer event
      */
     private fun handleTimer(scriptId: UUID) {
         queueEvent(scriptId, EVENT_TIMER, emptyMap())
     }
-
+    
     /**
      * Handle HTTP response
      */
@@ -151,14 +151,14 @@ class LSLEngine {
             ))
         }
     }
-
+    
     private fun queueEvent(scriptId: UUID, eventName: String, data: Map<String, Any>) {
         val script = scripts[scriptId] ?: return
         script.eventQueue.add(ScriptEvent(eventName, data))
     }
-
+    
     // LSL Functions implementation (called by script handlers)
-
+    
     /**
      * llSay - Say message on channel
      */
@@ -166,21 +166,21 @@ class LSLEngine {
         // Would send ChatFromViewer
         Log.d(TAG, "llSay($channel, $message)")
     }
-
+    
     /**
      * llWhisper - Whisper message on channel
      */
     fun llWhisper(scriptId: UUID, channel: Int, message: String) {
         Log.d(TAG, "llWhisper($channel, $message)")
     }
-
+    
     /**
      * llShout - Shout message on channel
      */
     fun llShout(scriptId: UUID, channel: Int, message: String) {
         Log.d(TAG, "llShout($channel, $message)")
     }
-
+    
     /**
      * llListen - Start listening on channel
      */
@@ -196,25 +196,25 @@ class LSLEngine {
         )
         return handle
     }
-
+    
     /**
      * llListenRemove - Stop listening
      */
     fun llListenRemove(handle: Int) {
         listenHandles.remove(handle)
     }
-
+    
     /**
      * llSetTimerEvent - Set timer
      */
     fun llSetTimerEvent(scriptId: UUID, sec: Float) {
         timers[scriptId]?.cancel()
-
+        
         if (sec <= 0) {
             timers.remove(scriptId)
             return
         }
-
+        
         timers[scriptId] = scope.launch {
             while (isActive) {
                 delay((sec * 1000).toLong())
@@ -222,7 +222,7 @@ class LSLEngine {
             }
         }
     }
-
+    
     /**
      * llGetPos - Get object position
      */
@@ -231,7 +231,7 @@ class LSLEngine {
         // Would query object position
         return Triple(128f, 128f, 30f)
     }
-
+    
     /**
      * llSetPos - Set object position
      */
@@ -239,7 +239,7 @@ class LSLEngine {
         val script = scripts[scriptId] ?: return
         // Would send ObjectPosition update
     }
-
+    
     /**
      * llGetRot - Get object rotation
      */
@@ -248,7 +248,7 @@ class LSLEngine {
         // Would query object rotation
         return floatArrayOf(0f, 0f, 0f, 1f) // Identity quaternion
     }
-
+    
     /**
      * llSetRot - Set object rotation
      */
@@ -256,36 +256,36 @@ class LSLEngine {
         val script = scripts[scriptId] ?: return
         // Would send ObjectRotation update
     }
-
+    
     /**
      * llGetOwner - Get object owner
      */
     fun llGetOwner(scriptId: UUID): UUID? {
         return scripts[scriptId]?.ownerId
     }
-
+    
     /**
      * llHTTPRequest - Make HTTP request
      */
     fun llHTTPRequest(scriptId: UUID, url: String, params: List<String>, body: String): UUID {
         val requestId = UUID.randomUUID()
         scripts[scriptId]?.pendingHttpRequests?.add(requestId)
-
+        
         scope.launch {
             // Would make actual HTTP request
             // Then call handleHttpResponse
         }
-
+        
         return requestId
     }
-
+    
     /**
      * llGiveInventory - Give inventory item
      */
     fun llGiveInventory(scriptId: UUID, destinationId: UUID, inventoryName: String) {
         // Would send inventory give
     }
-
+    
     /**
      * llMessageLinked - Send message to linked prims
      */
@@ -293,7 +293,7 @@ class LSLEngine {
         val script = scripts[scriptId] ?: return
         handleLinkMessage(script.objectId, linkNum, num, str, id)
     }
-
+    
     fun shutdown() {
         scope.cancel()
         timers.values.forEach { it.cancel() }

@@ -22,7 +22,7 @@ enum class LLSDFormat {
      * @see LLSD
      */
     XML,
-
+    
     /**
      * A compact, human-readable text format that resembles programming language
      * literals (e.g., `i42, s'hello', [1, 2, 3]`). It is less verbose
@@ -31,7 +31,7 @@ enum class LLSDFormat {
      * @see LLSDNotationSerializer
      */
     NOTATION,
-
+    
     /**
      * A highly efficient and compact binary format designed for high-performance
      * applications and network protocols. It is not human-readable.

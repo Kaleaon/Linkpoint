@@ -27,15 +27,15 @@ import java.util.regex.Pattern;
  * @see LLSD
  */
 public final class LLSDUtils {
-
+    
     /**
      * Shared UUID validation pattern for consistent UUID parsing across all parsers.
      */
     public static final Pattern UUID_PATTERN = Pattern.compile(
-        "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+        "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", 
         Pattern.CASE_INSENSITIVE
     );
-
+    
     private LLSDUtils() {
         // Utility class - no instances
     }
@@ -217,7 +217,7 @@ public final class LLSDUtils {
         if (obj == null) {
             return null;
         }
-
+        
         if (obj instanceof Map) {
             Map<String, Object> original = (Map<String, Object>) obj;
             Map<String, Object> copy = new HashMap<>();
@@ -226,19 +226,19 @@ public final class LLSDUtils {
             }
             return copy;
         }
-
+        
         if (obj instanceof List) {
             List<Object> original = (List<Object>) obj;
             return original.stream()
                     .map(LLSDUtils::deepCopy)
                     .collect(Collectors.toList());
         }
-
+        
         if (obj instanceof byte[]) {
             byte[] original = (byte[]) obj;
             return Arrays.copyOf(original, original.length);
         }
-
+        
         // Immutable types can be returned as-is
         return obj;
     }
@@ -263,14 +263,14 @@ public final class LLSDUtils {
         if (source == null) {
             return target;
         }
-
+        
         Map<String, Object> result = new HashMap<>(target);
-
+        
         for (Map.Entry<String, Object> entry : source.entrySet()) {
             String key = entry.getKey();
             Object sourceValue = entry.getValue();
             Object targetValue = result.get(key);
-
+            
             if (targetValue instanceof Map && sourceValue instanceof Map) {
                 // Recursively merge nested maps
                 result.put(key, mergeMaps((Map<String, Object>) targetValue, (Map<String, Object>) sourceValue));
@@ -279,7 +279,7 @@ public final class LLSDUtils {
                 result.put(key, deepCopy(sourceValue));
             }
         }
-
+        
         return result;
     }
 
@@ -296,13 +296,13 @@ public final class LLSDUtils {
      */
     public static List<String> validateRequiredFields(Object obj, String... requiredFields) {
         List<String> missing = new ArrayList<>();
-
+        
         for (String field : requiredFields) {
             if (isEmpty(navigatePath(obj, field))) {
                 missing.add(field);
             }
         }
-
+        
         return missing;
     }
 
@@ -342,10 +342,10 @@ public final class LLSDUtils {
         if (root == null || path == null || path.isEmpty()) {
             return null;
         }
-
+        
         String[] parts = path.split("\\.");
         Object current = root;
-
+        
         for (String part : parts) {
             if (current instanceof Map) {
                 @SuppressWarnings("unchecked")
@@ -355,7 +355,7 @@ public final class LLSDUtils {
                 return null; // Path doesn't exist
             }
         }
-
+        
         return current;
     }
 
@@ -370,7 +370,7 @@ public final class LLSDUtils {
     @SuppressWarnings("unchecked")
     private static void prettyPrintRecursive(Object obj, int indentSize, int currentLevel, StringBuilder sb) {
         String indent = " ".repeat(indentSize * currentLevel);
-
+        
         if (obj == null) {
             sb.append("null");
         } else if (obj instanceof Map) {

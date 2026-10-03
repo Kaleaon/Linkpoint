@@ -15,22 +15,22 @@ object AdditionalMessageParsers {
     private val MESSAGE_BYTE_ORDER = ByteOrder.LITTLE_ENDIAN
 
     // ==================== UUID/NAME REPLY ====================
-
+    
     data class UUIDNameReplyData(
         val entries: List<UUIDNameEntry>
     )
-
+    
     data class UUIDNameEntry(
         val id: UUID,
         val firstName: String,
         val lastName: String
     )
-
+    
     fun parseUUIDNameReply(data: ByteArray): UUIDNameReplyData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
             val entries = mutableListOf<UUIDNameEntry>()
-
+            
             val count = buffer.get().toInt() and 0xFF
             for (i in 0 until count) {
                 if (buffer.remaining() < 16) break
@@ -39,16 +39,16 @@ object AdditionalMessageParsers {
                 val lastName = buffer.readString1()
                 entries.add(UUIDNameEntry(id, firstName, lastName))
             }
-
+            
             UUIDNameReplyData(entries)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse UUIDNameReply", e)
             null
         }
     }
-
+    
     // ==================== REGION INFO ====================
-
+    
     data class RegionInfoData(
         val regionName: String,
         val estateOwnerID: UUID,
@@ -69,15 +69,15 @@ object AdditionalMessageParsers {
         val productSKU: String,
         val productName: String
     )
-
+    
     fun parseRegionInfo(data: ByteArray): RegionInfoData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             // AgentData block (skipped - we know who we are)
             buffer.getUUID() // AgentID
             buffer.getUUID() // SessionID
-
+            
             // RegionInfo block
             val regionName = buffer.readString1()
             val estateOwnerID = buffer.getUUID()
@@ -97,7 +97,7 @@ object AdditionalMessageParsers {
             val sunHour = buffer.float
             val productSKU = buffer.readString1()
             val productName = buffer.readString1()
-
+            
             RegionInfoData(
                 regionName, estateOwnerID, estateID, parentEstateID,
                 billableFactor, pricePerMeter, redirectGridX, redirectGridY,
@@ -109,9 +109,9 @@ object AdditionalMessageParsers {
             null
         }
     }
-
+    
     // ==================== SIM STATS ====================
-
+    
     data class SimStatsData(
         val regionX: Int,
         val regionY: Int,
@@ -119,34 +119,34 @@ object AdditionalMessageParsers {
         val objectCapacity: Int,
         val stats: Map<Int, Float>
     )
-
+    
     fun parseSimStats(data: ByteArray): SimStatsData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val regionX = buffer.int
             val regionY = buffer.int
             val regionFlags = buffer.int.toLong() and 0xFFFFFFFFL
             val objectCapacity = buffer.int
-
+            
             val statCount = buffer.get().toInt() and 0xFF
             val stats = mutableMapOf<Int, Float>()
-
+            
             for (i in 0 until statCount) {
                 val statId = buffer.int
                 val statValue = buffer.float
                 stats[statId] = statValue
             }
-
+            
             SimStatsData(regionX, regionY, regionFlags, objectCapacity, stats)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse SimStats", e)
             null
         }
     }
-
+    
     // ==================== AVATAR APPEARANCE ====================
-
+    
     data class AvatarAppearanceData(
         val senderID: UUID,
         val isTrial: Boolean,
@@ -154,35 +154,35 @@ object AdditionalMessageParsers {
         val visualParams: ByteArray,
         val objectData: ByteArray
     )
-
+    
     fun parseAvatarAppearance(data: ByteArray): AvatarAppearanceData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val senderID = buffer.getUUID()
             val isTrial = buffer.get() != 0.toByte()
-
+            
             val textureLen = buffer.short.toInt() and 0xFFFF
             val textureEntries = ByteArray(textureLen)
             buffer.get(textureEntries)
-
+            
             val visualParamsLen = buffer.get().toInt() and 0xFF
             val visualParams = ByteArray(visualParamsLen)
             buffer.get(visualParams)
-
+            
             val objectDataLen = buffer.short.toInt() and 0xFFFF
             val objectData = ByteArray(objectDataLen)
             buffer.get(objectData)
-
+            
             AvatarAppearanceData(senderID, isTrial, textureEntries, visualParams, objectData)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse AvatarAppearance", e)
             null
         }
     }
-
+    
     // ==================== AVATAR PROPERTIES REPLY ====================
-
+    
     data class AvatarPropertiesReplyData(
         val agentID: UUID,
         val avatarID: UUID,
@@ -196,11 +196,11 @@ object AdditionalMessageParsers {
         val charterMember: ByteArray,
         val flags: Int
     )
-
+    
     fun parseAvatarPropertiesReply(data: ByteArray): AvatarPropertiesReplyData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val agentID = buffer.getUUID()
             val avatarID = buffer.getUUID()
             val imageID = buffer.getUUID()
@@ -214,7 +214,7 @@ object AdditionalMessageParsers {
             val charterMember = ByteArray(charterLen)
             buffer.get(charterMember)
             val flags = buffer.int
-
+            
             AvatarPropertiesReplyData(
                 agentID, avatarID, imageID, flImageID, partnerID,
                 aboutText, flAboutText, bornOn, profileURL, charterMember, flags
@@ -224,9 +224,9 @@ object AdditionalMessageParsers {
             null
         }
     }
-
+    
     // ==================== GROUP PROFILE REPLY ====================
-
+    
     data class GroupProfileReplyData(
         val groupID: UUID,
         val name: String,
@@ -245,14 +245,14 @@ object AdditionalMessageParsers {
         val maturePublish: Boolean,
         val ownerRole: UUID
     )
-
+    
     fun parseGroupProfileReply(data: ByteArray): GroupProfileReplyData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             // AgentData
             buffer.getUUID() // AgentID
-
+            
             // GroupData
             val groupID = buffer.getUUID()
             val name = buffer.readString1()
@@ -270,7 +270,7 @@ object AdditionalMessageParsers {
             val allowPublish = buffer.get() != 0.toByte()
             val maturePublish = buffer.get() != 0.toByte()
             val ownerRole = buffer.getUUID()
-
+            
             GroupProfileReplyData(
                 groupID, name, charter, showInList, memberTitle, powersMask,
                 insigniaID, founderID, membershipFee, openEnrollment, money,
@@ -281,15 +281,15 @@ object AdditionalMessageParsers {
             null
         }
     }
-
+    
     // ==================== MAP BLOCK REPLY ====================
-
+    
     data class MapBlockReplyData(
         val agentID: UUID,
         val flags: Int,
         val blocks: List<MapBlockData>
     )
-
+    
     data class MapBlockData(
         val x: Int,
         val y: Int,
@@ -300,17 +300,17 @@ object AdditionalMessageParsers {
         val agents: Int,
         val mapImageID: UUID
     )
-
+    
     fun parseMapBlockReply(data: ByteArray): MapBlockReplyData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val agentID = buffer.getUUID()
             val flags = buffer.int
-
+            
             val blockCount = buffer.get().toInt() and 0xFF
             val blocks = mutableListOf<MapBlockData>()
-
+            
             for (i in 0 until blockCount) {
                 val x = buffer.short.toInt() and 0xFFFF
                 val y = buffer.short.toInt() and 0xFFFF
@@ -320,25 +320,25 @@ object AdditionalMessageParsers {
                 val waterHeight = buffer.get().toInt() and 0xFF
                 val agents = buffer.get().toInt() and 0xFF
                 val mapImageID = buffer.getUUID()
-
+                
                 blocks.add(MapBlockData(x, y, name, access, regionFlags, waterHeight, agents, mapImageID))
             }
-
+            
             MapBlockReplyData(agentID, flags, blocks)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse MapBlockReply", e)
             null
         }
     }
-
+    
     // ==================== DIR PLACES REPLY ====================
-
+    
     data class DirPlacesReplyData(
         val agentID: UUID,
         val queryID: UUID,
         val places: List<DirPlaceData>
     )
-
+    
     data class DirPlaceData(
         val parcelID: UUID,
         val name: String,
@@ -346,17 +346,17 @@ object AdditionalMessageParsers {
         val auction: Boolean,
         val dwell: Float
     )
-
+    
     fun parseDirPlacesReply(data: ByteArray): DirPlacesReplyData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val agentID = buffer.getUUID()
             val queryID = buffer.getUUID()
-
+            
             val placeCount = buffer.get().toInt() and 0xFF
             val places = mutableListOf<DirPlaceData>()
-
+            
             for (i in 0 until placeCount) {
                 val parcelID = buffer.getUUID()
                 val name = buffer.readString1()
@@ -365,16 +365,16 @@ object AdditionalMessageParsers {
                 val dwell = buffer.float
                 places.add(DirPlaceData(parcelID, name, forSale, auction, dwell))
             }
-
+            
             DirPlacesReplyData(agentID, queryID, places)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse DirPlacesReply", e)
             null
         }
     }
-
+    
     // ==================== PARCEL INFO REPLY ====================
-
+    
     data class ParcelInfoReplyData(
         val parcelID: UUID,
         val ownerID: UUID,
@@ -392,14 +392,14 @@ object AdditionalMessageParsers {
         val salePrice: Int,
         val auctionID: Int
     )
-
+    
     fun parseParcelInfoReply(data: ByteArray): ParcelInfoReplyData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             // AgentData
             buffer.getUUID() // AgentID
-
+            
             // Data block
             val parcelID = buffer.getUUID()
             val ownerID = buffer.getUUID()
@@ -416,7 +416,7 @@ object AdditionalMessageParsers {
             val dwell = buffer.float
             val salePrice = buffer.int
             val auctionID = buffer.int
-
+            
             ParcelInfoReplyData(
                 parcelID, ownerID, name, description, actualArea, billableArea,
                 flags, globalX, globalY, globalZ, simName, snapshotID, dwell,
@@ -427,15 +427,15 @@ object AdditionalMessageParsers {
             null
         }
     }
-
+    
     // ==================== VIEWER EFFECT ====================
-
+    
     data class ViewerEffectData(
         val agentID: UUID,
         val sessionID: UUID,
         val effects: List<EffectData>
     )
-
+    
     data class EffectData(
         val id: UUID,
         val agentID: UUID,
@@ -444,17 +444,17 @@ object AdditionalMessageParsers {
         val color: ByteArray,
         val typeData: ByteArray
     )
-
+    
     fun parseViewerEffect(data: ByteArray): ViewerEffectData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val agentID = buffer.getUUID()
             val sessionID = buffer.getUUID()
-
+            
             val effectCount = buffer.get().toInt() and 0xFF
             val effects = mutableListOf<EffectData>()
-
+            
             for (i in 0 until effectCount) {
                 val id = buffer.getUUID()
                 val effectAgentID = buffer.getUUID()
@@ -465,19 +465,19 @@ object AdditionalMessageParsers {
                 val typeDataLen = buffer.get().toInt() and 0xFF
                 val typeData = ByteArray(typeDataLen)
                 buffer.get(typeData)
-
+                
                 effects.add(EffectData(id, effectAgentID, type, duration, color, typeData))
             }
-
+            
             ViewerEffectData(agentID, sessionID, effects)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse ViewerEffect", e)
             null
         }
     }
-
+    
     // ==================== SOUND MESSAGES ====================
-
+    
     data class AttachedSoundData(
         val soundID: UUID,
         val objectID: UUID,
@@ -485,47 +485,47 @@ object AdditionalMessageParsers {
         val gain: Float,
         val flags: Int
     )
-
+    
     fun parseAttachedSound(data: ByteArray): AttachedSoundData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val soundID = buffer.getUUID()
             val objectID = buffer.getUUID()
             val ownerID = buffer.getUUID()
             val gain = buffer.float
             val flags = buffer.get().toInt() and 0xFF
-
+            
             AttachedSoundData(soundID, objectID, ownerID, gain, flags)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse AttachedSound", e)
             null
         }
     }
-
+    
     data class PreloadSoundData(
         val objectID: UUID,
         val ownerID: UUID,
         val soundID: UUID
     )
-
+    
     fun parsePreloadSound(data: ByteArray): PreloadSoundData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val objectID = buffer.getUUID()
             val ownerID = buffer.getUUID()
             val soundID = buffer.getUUID()
-
+            
             PreloadSoundData(objectID, ownerID, soundID)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse PreloadSound", e)
             null
         }
     }
-
+    
     // ==================== TRANSFER MESSAGES ====================
-
+    
     data class TransferInfoData(
         val transferID: UUID,
         val channelType: Int,
@@ -534,11 +534,11 @@ object AdditionalMessageParsers {
         val size: Int,
         val params: ByteArray
     )
-
+    
     fun parseTransferInfo(data: ByteArray): TransferInfoData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val transferID = buffer.getUUID()
             val channelType = buffer.int
             val targetType = buffer.int
@@ -547,14 +547,14 @@ object AdditionalMessageParsers {
             val paramsLen = buffer.short.toInt() and 0xFFFF
             val params = ByteArray(paramsLen)
             buffer.get(params)
-
+            
             TransferInfoData(transferID, channelType, targetType, status, size, params)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse TransferInfo", e)
             null
         }
     }
-
+    
     data class TransferPacketData(
         val transferID: UUID,
         val channelType: Int,
@@ -562,11 +562,11 @@ object AdditionalMessageParsers {
         val status: Int,
         val data: ByteArray
     )
-
+    
     fun parseTransferPacket(data: ByteArray): TransferPacketData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val transferID = buffer.getUUID()
             val channelType = buffer.int
             val packet = buffer.int
@@ -574,16 +574,16 @@ object AdditionalMessageParsers {
             val dataLen = buffer.short.toInt() and 0xFFFF
             val packetData = ByteArray(dataLen)
             buffer.get(packetData)
-
+            
             TransferPacketData(transferID, channelType, packet, status, packetData)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse TransferPacket", e)
             null
         }
     }
-
+    
     // ==================== AVATAR SIT RESPONSE ====================
-
+    
     data class AvatarSitResponseData(
         val sitObjectID: UUID,
         val autopilot: Boolean,
@@ -593,31 +593,31 @@ object AdditionalMessageParsers {
         val cameraAtOffset: LLVector3,
         val forceMouselook: Boolean
     )
-
+    
     fun parseAvatarSitResponse(data: ByteArray): AvatarSitResponseData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val sitObjectID = buffer.getUUID()
             val autopilot = buffer.get() != 0.toByte()
-
+            
             val sitPos = ByteArray(12)
             buffer.get(sitPos)
             val sitPosition = LLVector3.fromBytes(sitPos)
-
+            
             val sitRotation = ByteArray(12)
             buffer.get(sitRotation)
-
+            
             val eyeOffset = ByteArray(12)
             buffer.get(eyeOffset)
             val cameraEyeOffset = LLVector3.fromBytes(eyeOffset)
-
+            
             val atOffset = ByteArray(12)
             buffer.get(atOffset)
             val cameraAtOffset = LLVector3.fromBytes(atOffset)
-
+            
             val forceMouselook = buffer.get() != 0.toByte()
-
+            
             AvatarSitResponseData(
                 sitObjectID, autopilot, sitPosition, sitRotation,
                 cameraEyeOffset, cameraAtOffset, forceMouselook
@@ -627,27 +627,27 @@ object AdditionalMessageParsers {
             null
         }
     }
-
+    
     // ==================== MEAN COLLISION ALERT ====================
-
+    
     data class MeanCollisionAlertData(
         val collisions: List<CollisionData>
     )
-
+    
     data class CollisionData(
         val perp: UUID,
         val time: Int,
         val mag: Float,
         val type: Int
     )
-
+    
     fun parseMeanCollisionAlert(data: ByteArray): MeanCollisionAlertData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val count = buffer.get().toInt() and 0xFF
             val collisions = mutableListOf<CollisionData>()
-
+            
             for (i in 0 until count) {
                 val perp = buffer.getUUID()
                 val time = buffer.int
@@ -655,84 +655,84 @@ object AdditionalMessageParsers {
                 val type = buffer.get().toInt() and 0xFF
                 collisions.add(CollisionData(perp, time, mag, type))
             }
-
+            
             MeanCollisionAlertData(collisions)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse MeanCollisionAlert", e)
             null
         }
     }
-
+    
     // ==================== FRIENDSHIP MESSAGES ====================
-
+    
     data class AcceptFriendshipData(
         val agentID: UUID,
         val transactionID: UUID,
         val folderData: List<UUID>
     )
-
+    
     fun parseAcceptFriendship(data: ByteArray): AcceptFriendshipData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val agentID = buffer.getUUID()
             buffer.getUUID() // SessionID
             val transactionID = buffer.getUUID()
-
+            
             val folderCount = buffer.get().toInt() and 0xFF
             val folderData = mutableListOf<UUID>()
             for (i in 0 until folderCount) {
                 folderData.add(buffer.getUUID())
             }
-
+            
             AcceptFriendshipData(agentID, transactionID, folderData)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse AcceptFriendship", e)
             null
         }
     }
-
+    
     data class DeclineFriendshipData(
         val agentID: UUID,
         val transactionID: UUID
     )
-
+    
     fun parseDeclineFriendship(data: ByteArray): DeclineFriendshipData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val agentID = buffer.getUUID()
             buffer.getUUID() // SessionID
             val transactionID = buffer.getUUID()
-
+            
             DeclineFriendshipData(agentID, transactionID)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse DeclineFriendship", e)
             null
         }
     }
-
+    
     data class FormFriendshipData(
         val fromAgentID: UUID,
         val toAgentID: UUID
     )
-
+    
     fun parseFormFriendship(data: ByteArray): FormFriendshipData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val fromAgentID = buffer.getUUID()
             val toAgentID = buffer.getUUID()
-
+            
             FormFriendshipData(fromAgentID, toAgentID)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse FormFriendship", e)
             null
         }
     }
-
+    
     // ==================== INVENTORY MESSAGES ====================
-
+    
     data class InventoryDescendentsData(
         val agentID: UUID,
         val folderID: UUID,
@@ -742,14 +742,14 @@ object AdditionalMessageParsers {
         val folders: List<InventoryFolderData>,
         val items: List<InventoryItemData>
     )
-
+    
     data class InventoryFolderData(
         val folderID: UUID,
         val parentID: UUID,
         val type: Int,
         val name: String
     )
-
+    
     data class InventoryItemData(
         val itemID: UUID,
         val folderID: UUID,
@@ -773,18 +773,18 @@ object AdditionalMessageParsers {
         val creationDate: Int,
         val crc: Int
     )
-
+    
     fun parseInventoryDescendents(data: ByteArray): InventoryDescendentsData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             // AgentData
             val agentID = buffer.getUUID()
             val folderID = buffer.getUUID()
             val ownerID = buffer.getUUID()
             val version = buffer.int
             val descendents = buffer.int
-
+            
             // FolderData
             val folderCount = buffer.get().toInt() and 0xFF
             val folders = mutableListOf<InventoryFolderData>()
@@ -795,7 +795,7 @@ object AdditionalMessageParsers {
                 val name = buffer.readString1()
                 folders.add(InventoryFolderData(fid, parentID, type, name))
             }
-
+            
             // ItemData
             val itemCount = buffer.get().toInt() and 0xFF
             val items = mutableListOf<InventoryItemData>()
@@ -821,7 +821,7 @@ object AdditionalMessageParsers {
                 val description = buffer.readString1()
                 val creationDate = buffer.int
                 val crc = buffer.int
-
+                
                 items.add(InventoryItemData(
                     itemID, itemFolderID, creatorID, itemOwnerID, groupID,
                     baseMask, ownerMask, groupMask, everyoneMask, nextOwnerMask,
@@ -829,44 +829,44 @@ object AdditionalMessageParsers {
                     name, description, creationDate, crc
                 ))
             }
-
+            
             InventoryDescendentsData(agentID, folderID, ownerID, version, descendents, folders, items)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse InventoryDescendents", e)
             null
         }
     }
-
+    
     // ==================== LOGOUT REPLY ====================
-
+    
     data class LogoutReplyData(
         val agentID: UUID,
         val sessionID: UUID,
         val inventoryData: List<UUID>
     )
-
+    
     fun parseLogoutReply(data: ByteArray): LogoutReplyData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val agentID = buffer.getUUID()
             val sessionID = buffer.getUUID()
-
+            
             val count = buffer.get().toInt() and 0xFF
             val inventoryData = mutableListOf<UUID>()
             for (i in 0 until count) {
                 inventoryData.add(buffer.getUUID())
             }
-
+            
             LogoutReplyData(agentID, sessionID, inventoryData)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse LogoutReply", e)
             null
         }
     }
-
+    
     // ==================== OBJECT PROPERTIES ====================
-
+    
     data class ObjectPropertiesFamilyData(
         val requestFlags: Int,
         val objectID: UUID,
@@ -885,11 +885,11 @@ object AdditionalMessageParsers {
         val name: String,
         val description: String
     )
-
+    
     fun parseObjectPropertiesFamily(data: ByteArray): ObjectPropertiesFamilyData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val requestFlags = buffer.int
             val objectID = buffer.getUUID()
             val ownerID = buffer.getUUID()
@@ -906,7 +906,7 @@ object AdditionalMessageParsers {
             val lastOwnerID = buffer.getUUID()
             val name = buffer.readString1()
             val description = buffer.readString1()
-
+            
             ObjectPropertiesFamilyData(
                 requestFlags, objectID, ownerID, groupID, baseMask, ownerMask,
                 groupMask, everyoneMask, nextOwnerMask, ownershipCost, saleType,
@@ -917,30 +917,30 @@ object AdditionalMessageParsers {
             null
         }
     }
-
+    
     // ==================== AGENT WEARABLES UPDATE ====================
-
+    
     data class AgentWearablesUpdateData(
         val agentID: UUID,
         val sessionID: UUID,
         val serialNum: Int,
         val wearables: List<WearableData>
     )
-
+    
     data class WearableData(
         val itemID: UUID,
         val assetID: UUID,
         val wearableType: Int
     )
-
+    
     fun parseAgentWearablesUpdate(data: ByteArray): AgentWearablesUpdateData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val agentID = buffer.getUUID()
             val sessionID = buffer.getUUID()
             val serialNum = buffer.int
-
+            
             val count = buffer.get().toInt() and 0xFF
             val wearables = mutableListOf<WearableData>()
             for (i in 0 until count) {
@@ -949,33 +949,33 @@ object AdditionalMessageParsers {
                 val wearableType = buffer.get().toInt() and 0xFF
                 wearables.add(WearableData(itemID, assetID, wearableType))
             }
-
+            
             AgentWearablesUpdateData(agentID, sessionID, serialNum, wearables)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse AgentWearablesUpdate", e)
             null
         }
     }
-
+    
     // ==================== GENERIC/SYSTEM MESSAGES ====================
-
+    
     data class GenericMessageData(
         val methodName: String,
         val invoice: UUID,
         val params: List<ByteArray>
     )
-
+    
     fun parseGenericMessage(data: ByteArray): GenericMessageData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             // AgentData
             buffer.getUUID() // TransactionID
-
+            
             // MethodData
             val methodName = buffer.readString1()
             val invoice = buffer.getUUID()
-
+            
             // ParamList
             val paramCount = buffer.get().toInt() and 0xFF
             val params = mutableListOf<ByteArray>()
@@ -985,30 +985,30 @@ object AdditionalMessageParsers {
                 buffer.get(param)
                 params.add(param)
             }
-
+            
             GenericMessageData(methodName, invoice, params)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse GenericMessage", e)
             null
         }
     }
-
+    
     data class SystemMessageData(
         val method: String,
         val invoice: UUID,
         val digest: ByteArray,
         val params: List<ByteArray>
     )
-
+    
     fun parseSystemMessage(data: ByteArray): SystemMessageData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val method = buffer.readString1()
             val invoice = buffer.getUUID()
             val digest = ByteArray(32)
             buffer.get(digest)
-
+            
             val paramCount = buffer.get().toInt() and 0xFF
             val params = mutableListOf<ByteArray>()
             for (i in 0 until paramCount) {
@@ -1017,67 +1017,67 @@ object AdditionalMessageParsers {
                 buffer.get(param)
                 params.add(param)
             }
-
+            
             SystemMessageData(method, invoice, digest, params)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse SystemMessage", e)
             null
         }
     }
-
+    
     data class ErrorMessageData(
         val errorCode: Int,
         val errorMessage: String
     )
-
+    
     fun parseErrorMessage(data: ByteArray): ErrorMessageData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val errorCode = buffer.int
             val errorMessage = buffer.readString2()
-
+            
             ErrorMessageData(errorCode, errorMessage)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse ErrorMessage", e)
             null
         }
     }
-
+    
     // ==================== USER INFO REPLY ====================
-
+    
     data class UserInfoReplyData(
         val agentID: UUID,
         val imViaEmail: Boolean,
         val directoryVisibility: String,
         val email: String
     )
-
+    
     fun parseUserInfoReply(data: ByteArray): UserInfoReplyData? {
         return try {
             val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
-
+            
             val agentID = buffer.getUUID()
             val imViaEmail = buffer.get() != 0.toByte()
             val directoryVisibility = buffer.readString1()
             val email = buffer.readString2()
-
+            
             UserInfoReplyData(agentID, imViaEmail, directoryVisibility, email)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse UserInfoReply", e)
             null
         }
     }
-
+    
     // ==================== EXTENSION FUNCTIONS FOR BYTEBUFFER ====================
-
+    
     private fun ByteBuffer.getUUID(): UUID {
         val bytes = ByteArray(16)
         this.get(bytes)
         val bb = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN)
         return UUID(bb.long, bb.long)
     }
-
+    
     private fun ByteBuffer.readString1(): String {
         val len = this.get().toInt() and 0xFF
         if (len == 0) return ""
@@ -1085,7 +1085,7 @@ object AdditionalMessageParsers {
         this.get(bytes)
         return String(bytes, Charsets.UTF_8).trimEnd('\u0000')
     }
-
+    
     private fun ByteBuffer.readString2(): String {
         val len = this.short.toInt() and 0xFFFF
         if (len == 0) return ""

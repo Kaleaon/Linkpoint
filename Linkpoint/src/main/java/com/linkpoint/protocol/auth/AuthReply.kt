@@ -4,10 +4,10 @@ import java.util.UUID
 
 /**
  * Authentication Reply
- *
+ * 
  * Contains the response from successful Second Life grid authentication.
  * Based on the reference viewer's SLAuthReply implementation.
- *
+ * 
  * Mobile-First Considerations:
  * - Lightweight data structure
  * - Efficient UUID handling
@@ -30,12 +30,12 @@ data class AuthReply(
      * Get the region coordinates as a string
      */
     fun getRegionCoordinates(): String = "$regionX, $regionY"
-
+    
     /**
      * Get the full region name with coordinates
      */
     fun getFullRegionName(): String = "$regionName ($regionX, $regionY)"
-
+    
     /**
      * Validate the reply
      */
@@ -46,7 +46,7 @@ data class AuthReply(
                simIP.isNotBlank() &&
                simPort > 0
     }
-
+    
     /**
      * Get authentication statistics
      */
@@ -63,13 +63,13 @@ data class AuthReply(
             "hasMfaHash" to (mfaHash != null)
         )
     }
-
+    
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-
+        
         other as AuthReply
-
+        
         if (sessionId != other.sessionId) return false
         if (agentId != other.agentId) return false
         if (circuitCode != other.circuitCode) return false
@@ -77,10 +77,10 @@ data class AuthReply(
         if (simPort != other.simPort) return false
         if (seedCapability != other.seedCapability) return false
         if (mfaHash != other.mfaHash) return false
-
+        
         return true
     }
-
+    
     override fun hashCode(): Int {
         var result = sessionId.hashCode()
         result = 31 * result + agentId.hashCode()

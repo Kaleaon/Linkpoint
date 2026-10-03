@@ -127,7 +127,7 @@ public class LLSDJsonSerializer {
     @SuppressWarnings("unchecked")
     private void serializeMap(Object value, Writer writer) throws IOException, LLSDException {
         Map<String, Object> map = (Map<String, Object>) value;
-
+        
         writer.write("{");
         boolean first = true;
         for (Map.Entry<String, Object> entry : map.entrySet()) {
@@ -135,7 +135,7 @@ public class LLSDJsonSerializer {
                 writer.write(",");
             }
             first = false;
-
+            
             serializeString(entry.getKey(), writer);
             writer.write(":");
             serializeValue(entry.getValue(), writer);
@@ -147,7 +147,7 @@ public class LLSDJsonSerializer {
     @SuppressWarnings("unchecked")
     private void serializeArray(Object value, Writer writer) throws IOException, LLSDException {
         List<Object> list = (List<Object>) value;
-
+        
         writer.write("[");
         boolean first = true;
         for (Object item : list) {
@@ -155,7 +155,7 @@ public class LLSDJsonSerializer {
                 writer.write(",");
             }
             first = false;
-
+            
             serializeValue(item, writer);
         }
         writer.write("]");

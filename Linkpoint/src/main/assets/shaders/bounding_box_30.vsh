@@ -11,3 +11,4 @@ void main() {
     gl_Position = uMVPMatrix * uObjWorldMatrix * (vPosition * uObjCoordScale);
 
 }
+

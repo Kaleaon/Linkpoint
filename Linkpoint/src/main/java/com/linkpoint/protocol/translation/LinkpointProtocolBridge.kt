@@ -12,28 +12,28 @@ import java.util.concurrent.TimeUnit
 
 /**
  * Linkpoint Protocol Bridge - Coordinates all translation between Linkpoint and SL server protocols.
- *
+ * 
  * This is the main entry point for Linkpoint compatibility. It coordinates:
- *
+ * 
  * 1. **Capability URL Management**: Applies URL repair logic from LinkpointTranslationLayer
  * 2. **Message Translation**: Uses MessageTranslation for protocol message handling
  * 3. **Request/Response Formatting**: Ensures LLSD requests match the SL server's expected format
- *
+ * 
  * Usage:
  * ```kotlin
  * val bridge = LinkpointProtocolBridge(loginUrl)
- *
+ * 
  * // Fetch capabilities using Linkpoint-compatible logic
  * val capabilities = bridge.fetchCapabilities(seedCapUrl)
- *
+ * 
  * // Make capability requests
  * val response = bridge.makeCapabilityRequest(capName, requestBody)
  * ```
- *
+ * 
  * This bridge ensures that Linkpoint can communicate with Second Life servers
  * using the same patterns that worked in the reference viewer, solving issues where
  * "straight Kotlin is unworkable" due to subtle protocol differences.
- *
+ * 
  * @param loginUrl The login URL used for authentication (determines grid-specific behavior)
  * @see LinkpointTranslationLayer
  * @see MessageTranslation
@@ -43,28 +43,28 @@ class LinkpointProtocolBridge(
 ) {
     companion object {
         private const val TAG = "LinkpointProtocolBridge"
-
+        
         // Timeouts matching the reference viewer's HTTP client settings
         private const val CONNECT_TIMEOUT_SECONDS = 30L
         private const val READ_TIMEOUT_SECONDS = 60L
         private const val WRITE_TIMEOUT_SECONDS = 30L
-
+        
         // Retry configuration
         private const val MAX_RETRIES = 3
         private const val INITIAL_RETRY_DELAY_MS = 1000L
         private const val MAX_RETRY_DELAY_MS = 15000L
-
+        
         // User-Agent for Linkpoint-compatible requests
         private const val USER_AGENT = "Linkpoint/1.0 (Linkpoint-compatible)"
-
+        
     }
-
+    
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
+    
     // Grid-specific configuration
     private val gridType = LinkpointTranslationLayer.detectGridType(loginUrl)
     private val isAgniGrid = LinkpointTranslationLayer.isAgniGrid(loginUrl)
-
+    
     // HTTP client configured for Linkpoint requests
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
@@ -72,10 +72,10 @@ class LinkpointProtocolBridge(
         .writeTimeout(WRITE_TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .retryOnConnectionFailure(true)
         .build()
-
+    
     // Cached capabilities
     private val capabilities = mutableMapOf<String, String>()
-
+    
     init {
         Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ LINKPOINT PROTOCOL BRIDGE INITIALIZED")
@@ -86,50 +86,50 @@ class LinkpointProtocolBridge(
         Log.i(TAG, "║ URL Repair: ${LinkpointTranslationLayer.config.repairCapabilityUrls}")
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
     }
-
+    
     /**
      * Prepare a seed capability URL for use.
-     *
+     * 
      * Applies all necessary repairs and validations.
-     *
+     * 
      * @param seedCapUrl The raw seed capability URL from login response
      * @return The prepared URL ready for use
      */
     fun prepareSeedCapability(seedCapUrl: String): String {
         return LinkpointTranslationLayer.prepareSeedCapability(loginUrl, seedCapUrl)
     }
-
+    
     /**
      * Fetch capabilities from the seed capability URL using Linkpoint-compatible logic.
-     *
+     * 
      * This method:
      * 1. Repairs the seed capability URL if needed
      * 2. Builds an LLSD array request with capability names (matching the SL server's expected format)
      * 3. Parses the response and repairs returned capability URLs
-     *
+     * 
      * @param seedCapUrl The seed capability URL from login response
      * @return Map of capability name to URL, or null on failure
      */
     suspend fun fetchCapabilities(seedCapUrl: String): Map<String, String>? = withContext(Dispatchers.IO) {
         val preparedUrl = prepareSeedCapability(seedCapUrl)
-
+        
         Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ FETCHING CAPABILITIES (Linkpoint-compatible)")
         Log.i(TAG, "║ Seed URL: ${preparedUrl.take(60)}...")
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
-
+        
         // Build capability request using the reference viewer's capability list
         val capabilityNames = if (LinkpointTranslationLayer.config.useReferenceCapabilityList) {
             LinkpointTranslationLayer.getReferenceCapabilityNames()
         } else {
             getStandardCapabilityNames()
         }
-
+        
         val requestBody = buildCapabilityRequestBody(capabilityNames)
-
+        
         var lastError: Exception? = null
         var retryDelay = INITIAL_RETRY_DELAY_MS
-
+        
         repeat(MAX_RETRIES) { attempt ->
             try {
                 if (attempt > 0) {
@@ -137,7 +137,7 @@ class LinkpointProtocolBridge(
                     delay(retryDelay)
                     retryDelay = minOf(retryDelay * 2, MAX_RETRY_DELAY_MS)
                 }
-
+                
                 val request = Request.Builder()
                     .url(preparedUrl)
                     .header("Accept", "application/llsd+xml, application/xml, text/xml")
@@ -145,29 +145,29 @@ class LinkpointProtocolBridge(
                     .header("User-Agent", USER_AGENT)
                     .post(requestBody.toRequestBody("application/llsd+xml".toMediaType()))
                     .build()
-
+                
                 val response = httpClient.newCall(request).execute()
                 val responseCode = response.code
                 val responseBody = response.body?.string()
                 response.close()
-
+                
                 Log.d(TAG, "Capability response: HTTP $responseCode")
-
+                
                 if (!response.isSuccessful) {
                     Log.w(TAG, "Capability fetch failed with HTTP $responseCode")
                     lastError = Exception("HTTP $responseCode")
                     return@repeat
                 }
-
+                
                 if (responseBody.isNullOrBlank()) {
                     Log.w(TAG, "Empty response body from capability fetch")
                     lastError = Exception("Empty response body")
                     return@repeat
                 }
-
+                
                 // Parse and process response
                 val result = parseCapabilityResponse(responseBody)
-
+                
                 if (result.isNullOrEmpty()) {
                     Log.w(TAG, "No capabilities parsed from response")
                     LinkpointTranslationLayer.logCapabilityDiagnostics(
@@ -180,11 +180,11 @@ class LinkpointProtocolBridge(
                     lastError = Exception("No capabilities in response")
                     return@repeat
                 }
-
+                
                 // Cache capabilities
                 capabilities.clear()
                 capabilities.putAll(result)
-
+                
                 Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
                 Log.i(TAG, "║ CAPABILITIES FETCHED SUCCESSFULLY")
                 Log.i(TAG, "║ Count: ${result.size}")
@@ -192,9 +192,9 @@ class LinkpointProtocolBridge(
                 Log.i(TAG, "║ GetTexture: ${if (result.containsKey("GetTexture")) "✓" else "✗"}")
                 Log.i(TAG, "║ GetMesh: ${if (result.containsKey("GetMesh")) "✓" else "✗"}")
                 Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
-
+                
                 return@withContext result
-
+                
             } catch (e: SocketTimeoutException) {
                 Log.w(TAG, "Capability fetch timeout on attempt ${attempt + 1}")
                 lastError = e
@@ -203,7 +203,7 @@ class LinkpointProtocolBridge(
                 lastError = e
             }
         }
-
+        
         Log.e(TAG, "All capability fetch attempts failed", lastError)
         LinkpointTranslationLayer.logCapabilityDiagnostics(
             "FETCH_FAILED",
@@ -212,13 +212,13 @@ class LinkpointProtocolBridge(
             null,
             lastError?.message
         )
-
+        
         null
     }
-
+    
     /**
      * Build the LLSD request body for capability fetching.
-     *
+     * 
      * The reference viewer sends an LLSD array of capability names to the seed capability URL.
      */
     private fun buildCapabilityRequestBody(capabilityNames: List<String>): String {
@@ -227,49 +227,49 @@ class LinkpointProtocolBridge(
                 add(LLSDString(name))
             }
         }
-
+        
         return LLSDXmlUtils.wrap(llsdArray)
     }
-
+    
     /**
      * Parse the capability response and repair URLs as needed.
      */
     private fun parseCapabilityResponse(responseBody: String): Map<String, String>? {
         return try {
             val llsd = LLSDParser.parseAuto(responseBody.toByteArray(Charsets.UTF_8), "application/llsd+xml")
-
+            
             if (llsd !is LLSDMap) {
                 Log.w(TAG, "Capability response is not a map: ${llsd.javaClass.simpleName}")
                 return null
             }
-
+            
             val result = mutableMapOf<String, String>()
-
+            
             for (key in llsd.value.keys) {
                 val url = llsd.getString(key) ?: continue
                 if (url.isBlank()) continue
-
+                
                 // Apply URL repair if configured
                 val repairedUrl = if (LinkpointTranslationLayer.config.repairCapabilityUrls) {
                     LinkpointTranslationLayer.repairUrl(loginUrl, url)
                 } else {
                     url
                 }
-
+                
                 result[key] = repairedUrl
-
+                
                 if (repairedUrl != url) {
                     Log.d(TAG, "Repaired capability URL for $key")
                 }
             }
-
+            
             result
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse capability response", e)
             null
         }
     }
-
+    
     /**
      * Get standard capability names (standard Linkpoint list).
      */
@@ -296,20 +296,20 @@ class LinkpointProtocolBridge(
             CapabilityManager.CAP_SEARCH_STATIC
         )
     }
-
+    
     /**
      * Get a cached capability URL.
      */
     fun getCapability(name: String): String? = capabilities[name]
-
+    
     /**
      * Check if a capability is available.
      */
     fun hasCapability(name: String): Boolean = capabilities.containsKey(name)
-
+    
     /**
      * Make a capability request with Linkpoint-compatible formatting.
-     *
+     * 
      * @param capabilityName The capability name
      * @param body Optional LLSD body for POST requests
      * @return The parsed LLSD response or null on failure
@@ -323,40 +323,40 @@ class LinkpointProtocolBridge(
             Log.w(TAG, "Capability not available: $capabilityName")
             return@withContext null
         }
-
+        
         try {
             val requestBuilder = Request.Builder()
                 .url(url)
                 .header("Accept", "application/llsd+xml")
                 .header("User-Agent", USER_AGENT)
-
+            
             if (body != null) {
                 val xml = LLSDXmlUtils.wrap(body)
                 requestBuilder.post(xml.toRequestBody("application/llsd+xml".toMediaType()))
             } else {
                 requestBuilder.get()
             }
-
+            
             val response = httpClient.newCall(requestBuilder.build()).execute()
             val responseBody = response.body?.string()
             response.close()
-
+            
             if (!response.isSuccessful) {
                 Log.w(TAG, "Capability request failed: $capabilityName -> HTTP ${response.code}")
                 return@withContext null
             }
-
+            
             if (responseBody.isNullOrBlank()) {
                 return@withContext null
             }
-
+            
             LLSDParser.parseAuto(responseBody.toByteArray(Charsets.UTF_8), "application/llsd+xml")
         } catch (e: Exception) {
             Log.e(TAG, "Capability request error: $capabilityName", e)
             null
         }
     }
-
+    
     /**
      * Get diagnostic information about the bridge state.
      */
@@ -370,7 +370,7 @@ class LinkpointProtocolBridge(
             config = LinkpointTranslationLayer.config
         )
     }
-
+    
     /**
      * Diagnostic data for the bridge.
      */
@@ -382,20 +382,20 @@ class LinkpointProtocolBridge(
         val capabilityNames: List<String>,
         val config: LinkpointTranslationLayer.CompatibilityConfig
     )
-
+    
     // ==================================================================================
     // ASSET TRANSFER METHODS
     // ==================================================================================
-
+    
     /**
      * Fetch a texture using Linkpoint-compatible URL handling.
-     *
+     * 
      * This method:
      * 1. Repairs the GetTexture capability URL if needed
      * 2. Builds the proper texture request URL
      * 3. Fetches the texture with appropriate headers
      * 4. Validates the returned data
-     *
+     * 
      * @param textureId The texture UUID to fetch
      * @return The raw texture data (JPEG2000 format) or null on failure
      */
@@ -405,22 +405,22 @@ class LinkpointProtocolBridge(
             Log.w(TAG, "GetTexture capability not available")
             return@withContext null
         }
-
+        
         val url = LinkpointTranslationLayer.buildTextureUrl(loginUrl, textureCapUrl, textureId)
         val headers = LinkpointTranslationLayer.getAssetFetchHeaders(LinkpointTranslationLayer.AssetTransferType.TEXTURE)
-
+        
         fetchAsset(url, headers, LinkpointTranslationLayer.AssetTransferType.TEXTURE, textureId)
     }
-
+    
     /**
      * Fetch a mesh using Linkpoint-compatible URL handling.
-     *
+     * 
      * This method:
      * 1. Repairs the GetMesh/GetMesh2 capability URL if needed
      * 2. Builds the proper mesh request URL
      * 3. Fetches the mesh with appropriate headers
      * 4. Validates the returned data
-     *
+     * 
      * @param meshId The mesh UUID to fetch
      * @return The raw mesh data (LLSD format) or null on failure
      */
@@ -431,16 +431,16 @@ class LinkpointProtocolBridge(
             Log.w(TAG, "GetMesh/GetMesh2 capability not available")
             return@withContext null
         }
-
+        
         val url = LinkpointTranslationLayer.buildMeshUrl(loginUrl, meshCapUrl, meshId)
         val headers = LinkpointTranslationLayer.getAssetFetchHeaders(LinkpointTranslationLayer.AssetTransferType.MESH)
-
+        
         fetchAsset(url, headers, LinkpointTranslationLayer.AssetTransferType.MESH, meshId)
     }
-
+    
     /**
      * Generic asset fetching with Linkpoint-compatible handling.
-     *
+     * 
      * @param url The prepared asset URL
      * @param headers HTTP headers for the request
      * @param assetType The type of asset being fetched
@@ -458,9 +458,9 @@ class LinkpointProtocolBridge(
             headers.forEach { (key, value) ->
                 requestBuilder.header(key, value)
             }
-
+            
             val response = httpClient.newCall(requestBuilder.build()).execute()
-
+            
             if (!response.isSuccessful) {
                 LinkpointTranslationLayer.logAssetTransferDiagnostics(
                     "FETCH_FAILED",
@@ -472,10 +472,10 @@ class LinkpointProtocolBridge(
                 )
                 return@withContext null
             }
-
+            
             val data = response.body?.bytes()
             response.close()
-
+            
             if (data == null || data.isEmpty()) {
                 LinkpointTranslationLayer.logAssetTransferDiagnostics(
                     "EMPTY_RESPONSE",
@@ -487,7 +487,7 @@ class LinkpointProtocolBridge(
                 )
                 return@withContext null
             }
-
+            
             // Validate the received data
             if (!LinkpointTranslationLayer.validateAssetData(data, assetType)) {
                 LinkpointTranslationLayer.logAssetTransferDiagnostics(
@@ -500,7 +500,7 @@ class LinkpointProtocolBridge(
                 )
                 return@withContext null
             }
-
+            
             LinkpointTranslationLayer.logAssetTransferDiagnostics(
                 "SUCCESS",
                 assetType,
@@ -509,7 +509,7 @@ class LinkpointProtocolBridge(
                 data.size,
                 null
             )
-
+            
             data
         } catch (e: Exception) {
             LinkpointTranslationLayer.logAssetTransferDiagnostics(
@@ -523,12 +523,12 @@ class LinkpointProtocolBridge(
             null
         }
     }
-
+    
     /**
      * Prepare an asset URL for external use.
-     *
+     * 
      * Use this when you need a repaired asset URL for use outside of this bridge.
-     *
+     * 
      * @param capabilityName The capability name (e.g., "GetTexture", "GetMesh")
      * @param assetId The asset UUID
      * @param assetType The type of asset
@@ -540,9 +540,9 @@ class LinkpointProtocolBridge(
         assetType: LinkpointTranslationLayer.AssetTransferType
     ): String? {
         val capUrl = getCapability(capabilityName) ?: return null
-
+        
         val preparedCapUrl = LinkpointTranslationLayer.prepareAssetUrl(loginUrl, capUrl, assetType)
-
+        
         return when (assetType) {
             LinkpointTranslationLayer.AssetTransferType.TEXTURE -> "$preparedCapUrl?texture_id=$assetId"
             LinkpointTranslationLayer.AssetTransferType.MESH -> "$preparedCapUrl?mesh_id=$assetId"
@@ -551,17 +551,17 @@ class LinkpointProtocolBridge(
             else -> "$preparedCapUrl?asset_id=$assetId"
         }
     }
-
+    
     /**
      * Check if the bridge has texture fetch capability.
      */
     fun hasTextureCapability(): Boolean = hasCapability("GetTexture")
-
+    
     /**
      * Check if the bridge has mesh fetch capability.
      */
     fun hasMeshCapability(): Boolean = hasCapability("GetMesh2") || hasCapability("GetMesh")
-
+    
     /**
      * Clean up resources.
      */

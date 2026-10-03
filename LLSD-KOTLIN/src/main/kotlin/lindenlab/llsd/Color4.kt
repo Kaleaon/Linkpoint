@@ -23,12 +23,12 @@ data class Color4(
     val a: Float
 ) {
     override fun toString(): String = String.format(java.util.Locale.US, "<%f, %f, %f, %f>", r, g, b, a)
-
+    
     companion object {
         /** The color black (R=0, G=0, B=0, A=1). */
         @JvmField
         val BLACK = Color4(0.0f, 0.0f, 0.0f, 1.0f)
-
+        
         /** The color white (R=1, G=1, B=1, A=1). */
         @JvmField
         val WHITE = Color4(1.0f, 1.0f, 1.0f, 1.0f)

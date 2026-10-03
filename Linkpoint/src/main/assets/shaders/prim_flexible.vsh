@@ -29,15 +29,16 @@ void main() {
 		section = uNumSectionMatrices - 1;
 	else
 		section = fSection;
-
+	
 	mat4 sectionMatrix = uSectionMatrices[section];
 
     gl_Position = uMVPMatrix * uObjWorldMatrix * ((sectionMatrix * vPosition) * uObjCoordScale);
     vTexCoordOut = vec2 (uTexMatrix * vec4 (vTexCoord, 0.0, 1.0));
 
     vec3 worldNormal = normalize (vec3 (uObjWorldMatrix * (sectionMatrix * vec4 (vNormal, 0.0))));
-    lowp vec3 lightColor = LightDiffuseColor * max (dot (worldNormal, normalize (-LightDiffuseDir)), 0.0)
+    lowp vec3 lightColor = LightDiffuseColor * max (dot (worldNormal, normalize (-LightDiffuseDir)), 0.0)  
 							+ LightAmbientColor;
 
     vLightColor = vColor * vec4 (min (lightColor, 1.0), 1.0);
 }
+

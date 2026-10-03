@@ -1,6 +1,6 @@
 /**
  * LLSD TypeScript Implementation
- *
+ * 
  * Based on Java implementation from Linden Lab and viewer code from Second Life/Firestorm
  * Copyright (C) 2024 Linden Lab
  */
@@ -29,7 +29,7 @@ export enum LLSDFormat {
 /**
  * LLSD Value types corresponding to the supported data types
  */
-export type LLSDValue =
+export type LLSDValue = 
     | boolean
     | number
     | string
@@ -119,15 +119,15 @@ export class LLSDUtils {
         if (value === null || value === undefined) {
             return LLSDType.UNKNOWN;
         }
-
+        
         if (typeof value === 'boolean') {
             return LLSDType.BOOLEAN;
         }
-
+        
         if (typeof value === 'number') {
             return Number.isInteger(value) ? LLSDType.INTEGER : LLSDType.REAL;
         }
-
+        
         if (typeof value === 'string') {
             // Check if it's a UUID format
             if (LLSDUtils.isUUIDString(value)) {
@@ -135,27 +135,27 @@ export class LLSDUtils {
             }
             return LLSDType.STRING;
         }
-
+        
         if (value instanceof Date) {
             return LLSDType.DATE;
         }
-
+        
         if (value instanceof URL) {
             return LLSDType.URI;
         }
-
+        
         if (value instanceof Uint8Array) {
             return LLSDType.BINARY;
         }
-
+        
         if (Array.isArray(value)) {
             return LLSDType.ARRAY;
         }
-
+        
         if (typeof value === 'object') {
             return LLSDType.MAP;
         }
-
+        
         return LLSDType.UNKNOWN;
     }
 
@@ -185,27 +185,27 @@ export class LLSDUtils {
         if (value === null || value === undefined) {
             return value;
         }
-
+        
         if (typeof value === 'boolean' || typeof value === 'number' || typeof value === 'string') {
             return value;
         }
-
+        
         if (value instanceof Date) {
             return new Date(value.getTime());
         }
-
+        
         if (value instanceof URL) {
             return new URL(value.href);
         }
-
+        
         if (value instanceof Uint8Array) {
             return new Uint8Array(value);
         }
-
+        
         if (Array.isArray(value)) {
             return value.map(item => LLSDUtils.deepCopy(item));
         }
-
+        
         if (typeof value === 'object') {
             const copy: LLSDMap = {};
             for (const [key, val] of Object.entries(value as LLSDMap)) {
@@ -213,7 +213,7 @@ export class LLSDUtils {
             }
             return copy;
         }
-
+        
         return value;
     }
 
@@ -224,7 +224,7 @@ export class LLSDUtils {
         if (!root) {
             return defaultValue;
         }
-
+        
         if (!path || path === '') {
             return root;
         }

@@ -10,7 +10,7 @@ describe('SecondLife LLSD Utils', () => {
     describe('SL Response Creation', () => {
         test('should create successful response', () => {
             const response = SecondLifeLLSDUtils.createSLResponse(true, 'Success', { result: 42 });
-
+            
             expect(response.success).toBe(true);
             expect(response.message).toBe('Success');
             expect(response.data).toEqual({ result: 42 });
@@ -18,7 +18,7 @@ describe('SecondLife LLSD Utils', () => {
 
         test('should create error response without data', () => {
             const response = SecondLifeLLSDUtils.createSLResponse(false, 'Error occurred');
-
+            
             expect(response.success).toBe(false);
             expect(response.message).toBe('Error occurred');
             expect(response.data).toBeUndefined();
@@ -49,11 +49,11 @@ describe('SecondLife LLSD Utils', () => {
             const serialNumber = 123;
             const isTrial = false;
             const attachments: LLSDArray = [{ id: 'attachment1' }];
-
+            
             const appearance = SecondLifeLLSDUtils.createAgentAppearance(
                 agentId, serialNumber, isTrial, attachments
             );
-
+            
             expect(appearance.agent_id).toBe(agentId);
             expect(appearance.serial_number).toBe(serialNumber);
             expect(appearance.is_trial_account).toBe(isTrial);
@@ -69,11 +69,11 @@ describe('SecondLife LLSD Utils', () => {
             const ownerId = '550e8400-e29b-41d4-a716-446655440001';
             const groupId = '550e8400-e29b-41d4-a716-446655440002';
             const permissions: LLSDMap = { base_mask: 0xFFFFFFFF };
-
+            
             const props = SecondLifeLLSDUtils.createObjectProperties(
                 objectId, ownerId, groupId, 'Test Object', 'Description', permissions
             );
-
+            
             expect(props.object_id).toBe(objectId);
             expect(props.owner_id).toBe(ownerId);
             expect(props.group_id).toBe(groupId);
@@ -91,7 +91,7 @@ describe('SecondLife LLSD Utils', () => {
             const request = SecondLifeLLSDUtils.createAssetUploadRequest(
                 'texture', 'Test Texture', 'Test Description', assetData, 10
             );
-
+            
             expect(request.asset_type).toBe('texture');
             expect(request.name).toBe('Test Texture');
             expect(request.description).toBe('Test Description');
@@ -107,7 +107,7 @@ describe('SecondLife LLSD Utils', () => {
             const message = SecondLifeLLSDUtils.createChatMessage(
                 'TestUser', 1, 0, 'Hello World', [10, 20, 30]
             );
-
+            
             expect(message.from_name).toBe('TestUser');
             expect(message.source_type).toBe(1);
             expect(message.chat_type).toBe(0);
@@ -124,7 +124,7 @@ describe('SecondLife LLSD Utils', () => {
             const stats = SecondLifeLLSDUtils.createSimStats(
                 regionId, 1.0, 45.0, 44.9, 50, 10, 5, 1000, 800, 50
             );
-
+            
             expect(stats.region_id).toBe(regionId);
             expect(stats.time_dilation).toBe(1.0);
             expect(stats.sim_fps).toBe(45.0);
@@ -141,10 +141,10 @@ describe('SecondLife LLSD Utils', () => {
                 .requireMap()
                 .requireField('name', 'string')
                 .requireField('age', 'number');
-
+            
             const validData = { name: 'Alice', age: 30, extra: 'value' };
             const result = SecondLifeLLSDUtils.validateSLStructure(validData, rules);
-
+            
             expect(result.isValid()).toBe(true);
             expect(result.getErrors()).toHaveLength(0);
         });
@@ -154,10 +154,10 @@ describe('SecondLife LLSD Utils', () => {
                 .requireMap()
                 .requireField('name')
                 .requireField('age');
-
+            
             const invalidData = { name: 'Alice' }; // missing age
             const result = SecondLifeLLSDUtils.validateSLStructure(invalidData, rules);
-
+            
             expect(result.isValid()).toBe(false);
             expect(result.getErrors()).toContain('Missing required field: age');
         });
@@ -166,10 +166,10 @@ describe('SecondLife LLSD Utils', () => {
             const rules = new SLValidationRules()
                 .requireMap()
                 .requireField('age', 'number');
-
+            
             const invalidData = { age: 'thirty' }; // wrong type
             const result = SecondLifeLLSDUtils.validateSLStructure(invalidData, rules);
-
+            
             expect(result.isValid()).toBe(true); // warnings don't make it invalid
             expect(result.getWarnings()).toContain('Field age expected number but got string');
         });
@@ -181,7 +181,7 @@ describe('Firestorm LLSD Utils', () => {
         test('should create RLV command', () => {
             const sourceId = '550e8400-e29b-41d4-a716-446655440000';
             const command = new FirestormLLSDUtils.RLVCommand('@sit', 'ground', '=force', sourceId);
-
+            
             const llsdData = command.toLLSD();
             expect(llsdData.behaviour).toBe('@sit');
             expect(llsdData.option).toBe('ground');
@@ -207,7 +207,7 @@ describe('Firestorm LLSD Utils', () => {
                 false,
                 [{ attachment: 'test' }]
             );
-
+            
             expect(radarData.agent_id).toBe('550e8400-e29b-41d4-a716-446655440000');
             expect(radarData.display_name).toBe('Test User');
             expect(radarData.user_name).toBe('testuser.resident');
@@ -221,11 +221,11 @@ describe('Firestorm LLSD Utils', () => {
         test('should create bridge message', () => {
             const requestId = LLSDUtils.generateUUID();
             const parameters = { target: 'avatar', action: 'get_data' };
-
+            
             const message = FirestormLLSDUtils.createBridgeMessage(
                 'get_avatar_data', parameters, requestId, 2
             );
-
+            
             expect(message.command).toBe('get_avatar_data');
             expect(message.parameters).toBe(parameters);
             expect(message.request_id).toBe(requestId);
@@ -239,7 +239,7 @@ describe('Firestorm LLSD Utils', () => {
             const stats = FirestormLLSDUtils.createPerformanceStats(
                 60.0, 500, 1024, 16.67, 5.2, 150000
             );
-
+            
             expect(stats.fps).toBe(60.0);
             expect(stats.bandwidth).toBe(500);
             expect(stats.memory_usage).toBe(1024);
@@ -265,7 +265,7 @@ describe('Firestorm LLSD Utils', () => {
                 0.0, 0.0, 0.0, 0.0, // end color
                 1.0, 1.0, 0.5, 0.5  // scales
             );
-
+            
             expect(particleSystem.source_id).toBe('550e8400-e29b-41d4-a716-446655440000');
             expect(particleSystem.owner_key).toBe('550e8400-e29b-41d4-a716-446655440001');
             expect(particleSystem.pattern).toBe(1);
@@ -283,13 +283,13 @@ describe('Firestorm LLSD Utils', () => {
                 .requireFSVersion('6.0.0')
                 .requireRLV()
                 .requireField('command', 'string');
-
+            
             const validData = {
                 command: 'test',
                 firestorm_version: '6.0.0',
                 rlv_enabled: true
             };
-
+            
             const result = FirestormLLSDUtils.validateFSStructure(validData, rules);
             expect(result.isValid()).toBe(true);
         });
@@ -297,10 +297,10 @@ describe('Firestorm LLSD Utils', () => {
         test('should report missing Firestorm version', () => {
             const rules = new FSValidationRules()
                 .requireFSVersion('6.0.0');
-
+            
             const invalidData = { command: 'test' }; // missing version
             const result = FirestormLLSDUtils.validateFSStructure(invalidData, rules);
-
+            
             expect(result.isValid()).toBe(false);
             expect(result.getErrors().some((e: string) => e.includes('Firestorm version'))).toBe(true);
         });
@@ -308,10 +308,10 @@ describe('Firestorm LLSD Utils', () => {
         test('should warn about missing RLV', () => {
             const rules = new FSValidationRules()
                 .requireRLV();
-
+            
             const invalidData = { command: 'test' }; // missing RLV
             const result = FirestormLLSDUtils.validateFSStructure(invalidData, rules);
-
+            
             expect(result.getWarnings().some((w: string) => w.includes('RLV'))).toBe(true);
         });
     });
@@ -320,10 +320,10 @@ describe('Firestorm LLSD Utils', () => {
         test('should store and retrieve cached data', () => {
             const cache = new FirestormLLSDUtils.FSLLSDCache(10000); // 10 second TTL
             const testData = { test: 'data', number: 42 };
-
+            
             cache.put('test-key', testData);
             const retrieved = cache.get('test-key');
-
+            
             expect(retrieved).toEqual(testData);
             expect(retrieved).not.toBe(testData); // Should be deep copied
         });
@@ -331,9 +331,9 @@ describe('Firestorm LLSD Utils', () => {
         test('should return null for expired data', (done) => {
             const cache = new FirestormLLSDUtils.FSLLSDCache(1); // 1ms TTL
             const testData = { test: 'data' };
-
+            
             cache.put('test-key', testData);
-
+            
             setTimeout(() => {
                 const retrieved = cache.get('test-key');
                 expect(retrieved).toBe(null);
@@ -350,7 +350,7 @@ describe('Firestorm LLSD Utils', () => {
             const cache = new FirestormLLSDUtils.FSLLSDCache();
             cache.put('key1', 'data1');
             cache.put('key2', 'data2');
-
+            
             expect(cache.size()).toBe(2);
             cache.clear();
             expect(cache.size()).toBe(0);
@@ -362,20 +362,20 @@ describe('Firestorm LLSD Utils', () => {
         test('should validate compatible versions', () => {
             const rules = new FSValidationRules()
                 .requireFSVersion('6.0.0');
-
+            
             const compatibleData = { firestorm_version: '6.5.0' };
             const result = FirestormLLSDUtils.validateFSStructure(compatibleData, rules);
-
+            
             expect(result.isValid()).toBe(true);
         });
 
         test('should reject incompatible versions', () => {
             const rules = new FSValidationRules()
                 .requireFSVersion('6.0.0');
-
+            
             const incompatibleData = { firestorm_version: '5.9.0' };
             const result = FirestormLLSDUtils.validateFSStructure(incompatibleData, rules);
-
+            
             expect(result.isValid()).toBe(false);
             expect(result.getErrors().some((e: string) => e.includes('Incompatible'))).toBe(true);
         });
@@ -385,7 +385,7 @@ describe('Firestorm LLSD Utils', () => {
         test('should provide deep copy functionality', () => {
             const original = { nested: { value: 42 }, array: [1, 2, 3] };
             const copy = FirestormLLSDUtils.deepCopy(original);
-
+            
             expect(copy).toEqual(original);
             expect(copy).not.toBe(original);
             expect((copy as any).nested).not.toBe((original as any).nested);

@@ -785,7 +785,7 @@ public class CardboardActivity extends DetailsActivity implements ObjectPopupsMa
         pageScriptDialog(R.id.cardboard_script_dialog),
         pageYesNo(R.id.cardboard_yesno_dialog),
         pageDetails(R.id.cardboard_details_page);
-
+        
         final int pageViewId;
 
         ControlsPage(int i) {

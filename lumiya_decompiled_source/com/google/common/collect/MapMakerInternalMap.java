@@ -397,7 +397,7 @@ public class MapMakerInternalMap<K, V> extends AbstractMap<K, V> implements Conc
                 return new WeakExpirableEvictableEntry(segment.keyReferenceQueue, k, i, referenceEntry);
             }
         };
-
+        
         static final int EVICTABLE_MASK = 2;
         static final int EXPIRABLE_MASK = 1;
         static final EntryFactory[][] factories = {new EntryFactory[]{STRONG, STRONG_EXPIRABLE, STRONG_EVICTABLE, STRONG_EXPIRABLE_EVICTABLE}, new EntryFactory[0], new EntryFactory[]{WEAK, WEAK_EXPIRABLE, WEAK_EVICTABLE, WEAK_EXPIRABLE_EVICTABLE}};

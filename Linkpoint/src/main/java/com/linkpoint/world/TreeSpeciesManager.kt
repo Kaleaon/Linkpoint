@@ -9,16 +9,16 @@ import kotlin.math.pow
 
 /**
  * Tree Species Manager - Manages tree/foliage species definitions.
- *
+ * 
  * Based on Second Life's procedural tree system. Each species defines
  * parameters for procedural generation including branching, foliage,
  * and LOD billboard properties.
  */
 class TreeSpeciesManager(context: Context?) {
-
+    
     companion object {
         private const val TAG = "TreeSpecies"
-
+        
         // Default tree species IDs from Second Life
         const val SPECIES_PINE_1 = 0
         const val SPECIES_OAK = 1
@@ -42,7 +42,7 @@ class TreeSpeciesManager(context: Context?) {
         const val SPECIES_BEACH_GRASS_1 = 19
         const val SPECIES_KELP_2 = 20
     }
-
+    
     /**
      * Tree species definition with procedural generation parameters.
      */
@@ -74,19 +74,19 @@ class TreeSpeciesManager(context: Context?) {
          */
         val isAquatic: Boolean
             get() = speciesId in setOf(SPECIES_EELGRASS, SPECIES_SEA_SWORD, SPECIES_KELP_1, SPECIES_KELP_2)
-
+        
         /**
          * Check if this is a grass/ground cover plant
          */
         val isGroundCover: Boolean
             get() = speciesId in setOf(SPECIES_FERN, SPECIES_BEACH_GRASS_1, SPECIES_TROPICAL_BUSH_1, SPECIES_TROPICAL_BUSH_2)
-
+        
         /**
          * Check if this is a winter/snowy variant
          */
         val isWinter: Boolean
             get() = speciesId in setOf(SPECIES_WINTER_PINE_1, SPECIES_WINTER_PINE_2, SPECIES_WINTER_ASPEN)
-
+        
         /**
          * Get total tree height for LOD calculations.
          * Uses geometric series formula to account for recursive branching with scale reduction.
@@ -102,10 +102,10 @@ class TreeSpeciesManager(context: Context?) {
                 }
             }
     }
-
+    
     // Loaded species definitions
     private val species = mutableMapOf<Int, TreeSpecies>()
-
+    
     init {
         if (context != null) {
             loadTreeDefinitions(context)
@@ -113,14 +113,14 @@ class TreeSpeciesManager(context: Context?) {
             loadDefaultSpecies()
         }
     }
-
+    
     private fun loadTreeDefinitions(context: Context) {
         try {
             context.assets.open("world/trees.xml").use { inputStream ->
                 val factory = DocumentBuilderFactory.newInstance()
                 val builder = factory.newDocumentBuilder()
                 val doc = builder.parse(inputStream)
-
+                
                 val treeElements = doc.getElementsByTagName("tree")
                 for (i in 0 until treeElements.length) {
                     val element = treeElements.item(i) as Element
@@ -129,7 +129,7 @@ class TreeSpeciesManager(context: Context?) {
                         species[treeSpecies.speciesId] = treeSpecies
                     }
                 }
-
+                
                 Log.i(TAG, "Loaded ${species.size} tree species definitions")
             }
         } catch (e: Exception) {
@@ -137,7 +137,7 @@ class TreeSpeciesManager(context: Context?) {
             loadDefaultSpecies()
         }
     }
-
+    
     private fun parseTreeElement(element: Element): TreeSpecies? {
         return try {
             TreeSpecies(
@@ -168,7 +168,7 @@ class TreeSpeciesManager(context: Context?) {
             null
         }
     }
-
+    
     private fun parseUUID(uuidString: String): UUID {
         return try {
             UUID.fromString(uuidString)
@@ -176,7 +176,7 @@ class TreeSpeciesManager(context: Context?) {
             UUID(0, 0) // Default null UUID
         }
     }
-
+    
     private fun loadDefaultSpecies() {
         // Add basic default species for fallback
         species[SPECIES_PINE_1] = TreeSpecies(
@@ -189,7 +189,7 @@ class TreeSpeciesManager(context: Context?) {
             branchAspect = 0.05f, leafRotate = 20f, noiseMag = 0.5f, noiseScale = 2.5f,
             taper = 0.8f, repeatZ = 3
         )
-
+        
         species[SPECIES_OAK] = TreeSpecies(
             speciesId = SPECIES_OAK,
             name = "Oak",
@@ -200,7 +200,7 @@ class TreeSpeciesManager(context: Context?) {
             branchAspect = 0.07f, leafRotate = 0f, noiseMag = 1.2f, noiseScale = 4f,
             taper = 0.3f, repeatZ = 4
         )
-
+        
         species[SPECIES_PALM_1] = TreeSpecies(
             speciesId = SPECIES_PALM_1,
             name = "Palm 1",
@@ -211,48 +211,48 @@ class TreeSpeciesManager(context: Context?) {
             branchAspect = 0.03f, leafRotate = 0f, noiseMag = 0.2f, noiseScale = 6f,
             taper = 0.7f, repeatZ = 10
         )
-
+        
         Log.i(TAG, "Loaded ${species.size} default tree species")
     }
-
+    
     /**
      * Get species definition by ID
      */
     fun getSpecies(speciesId: Int): TreeSpecies? = species[speciesId]
-
+    
     /**
      * Get all loaded species
      */
     fun getAllSpecies(): Collection<TreeSpecies> = species.values
-
+    
     /**
      * Get species by name (case insensitive)
      */
     fun getSpeciesByName(name: String): TreeSpecies? {
         return species.values.find { it.name.equals(name, ignoreCase = true) }
     }
-
+    
     /**
      * Get aquatic plant species
      */
     fun getAquaticSpecies(): List<TreeSpecies> = species.values.filter { it.isAquatic }
-
+    
     /**
      * Get winter tree species
      */
     fun getWinterSpecies(): List<TreeSpecies> = species.values.filter { it.isWinter }
-
+    
     /**
      * Get ground cover species
      */
     fun getGroundCoverSpecies(): List<TreeSpecies> = species.values.filter { it.isGroundCover }
-
+    
     /**
      * Calculate appropriate LOD level for a tree at given distance
      */
     fun calculateLODLevel(species: TreeSpecies, distance: Float): Int {
         val billboardSwitchDistance = species.billboardScale * 10f
-
+        
         return when {
             distance < billboardSwitchDistance * 0.25f -> 0  // Full detail
             distance < billboardSwitchDistance * 0.5f -> 1   // Medium detail

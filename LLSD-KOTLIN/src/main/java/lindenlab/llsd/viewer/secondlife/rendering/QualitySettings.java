@@ -12,22 +12,22 @@ public class QualitySettings {
     private boolean autoAdjustQuality = true;
     private float renderScale = 1.0f;
     private int maxDrawDistance = 256;
-
+    
     public void setOverallQuality(float quality) {
         this.overallQuality = Math.max(0.0f, Math.min(1.0f, quality));
     }
-
+    
     public float getOverallQuality() { return overallQuality; }
-
+    
     public void setAutoAdjustQuality(boolean auto) { this.autoAdjustQuality = auto; }
     public boolean isAutoAdjustQuality() { return autoAdjustQuality; }
-
+    
     public void setRenderScale(float scale) { this.renderScale = scale; }
     public float getRenderScale() { return renderScale; }
-
+    
     public void setMaxDrawDistance(int distance) { this.maxDrawDistance = distance; }
     public int getMaxDrawDistance() { return maxDrawDistance; }
-
+    
     public void applySetting(String setting, Object value) {
         switch (setting.toLowerCase()) {
             case "overallquality":
@@ -52,7 +52,7 @@ public class QualitySettings {
                 break;
         }
     }
-
+    
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("overallQuality", overallQuality);
@@ -61,7 +61,7 @@ public class QualitySettings {
         map.put("maxDrawDistance", maxDrawDistance);
         return map;
     }
-
+    
     public void fromMap(Map<String, Object> map) {
         if (map.containsKey("overallQuality")) {
             setOverallQuality(((Number) map.get("overallQuality")).floatValue());

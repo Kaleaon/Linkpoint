@@ -9,7 +9,7 @@ import java.util.UUID
  * Texture entry editor for object faces
  */
 class TextureEditor {
-
+    
     companion object {
         // Default textures
         val TEXTURE_BLANK = UUID.fromString("5748decc-f629-461c-9a36-a35a221fe21f")
@@ -17,12 +17,12 @@ class TextureEditor {
         val TEXTURE_MEDIA = UUID.fromString("8b5fec65-8d8d-9dc5-cda8-8fdf2716e361")
         val TEXTURE_PLYWOOD = UUID.fromString("89556747-24cb-43ed-920b-47caed15465f")
         val TEXTURE_TRANSPARENT = UUID.fromString("8dcd4a48-2d37-4909-9f78-f7a9eb4ef903")
-
+        
         // Face constants
         const val ALL_FACES = -1
         const val MAX_FACES = 9
     }
-
+    
     // Default texture entry
     private var defaultTexture = TEXTURE_DEFAULT
     private var defaultColor = LLColor4.white()
@@ -37,7 +37,7 @@ class TextureEditor {
     private var defaultMediaFlags = 0
     private var defaultGlow = 0f
     private var defaultMaterial = UUID(0L, 0L)
-
+    
     // Per-face data
     private val faceTextures = Array<UUID?>(MAX_FACES) { null }
     private val faceColors = Array<LLColor4?>(MAX_FACES) { null }
@@ -52,15 +52,15 @@ class TextureEditor {
     private val faceMediaFlags = IntArray(MAX_FACES) { -1 }
     private val faceGlow = FloatArray(MAX_FACES) { Float.NaN }
     private val faceMaterial = Array<UUID?>(MAX_FACES) { null }
-
+    
     /**
      * Parse texture entry from bytes
      */
     fun parse(data: ByteArray) {
         if (data.isEmpty()) return
-
+        
         val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
-
+        
         try {
             // Default texture
             if (buffer.remaining() >= 16) {
@@ -68,17 +68,17 @@ class TextureEditor {
                 buffer.get(bytes)
                 defaultTexture = bytesToUUID(bytes)
             }
-
+            
             // Per-face textures
             while (buffer.remaining() > 0) {
                 val faceMask = buffer.get().toInt() and 0xFF
                 if (faceMask == 0) break
-
+                
                 if (buffer.remaining() >= 16) {
                     val bytes = ByteArray(16)
                     buffer.get(bytes)
                     val texture = bytesToUUID(bytes)
-
+                    
                     for (face in 0 until MAX_FACES) {
                         if ((faceMask and (1 shl face)) != 0) {
                             faceTextures[face] = texture
@@ -86,7 +86,7 @@ class TextureEditor {
                     }
                 }
             }
-
+            
             // Default color
             if (buffer.remaining() >= 4) {
                 val r = (buffer.get().toInt() and 0xFF) / 255f
@@ -95,19 +95,19 @@ class TextureEditor {
                 val a = (buffer.get().toInt() and 0xFF) / 255f
                 defaultColor = LLColor4(r, g, b, a)
             }
-
+            
             // Per-face colors
             while (buffer.remaining() > 0) {
                 val faceMask = buffer.get().toInt() and 0xFF
                 if (faceMask == 0) break
-
+                
                 if (buffer.remaining() >= 4) {
                     val r = (buffer.get().toInt() and 0xFF) / 255f
                     val g = (buffer.get().toInt() and 0xFF) / 255f
                     val b = (buffer.get().toInt() and 0xFF) / 255f
                     val a = (buffer.get().toInt() and 0xFF) / 255f
                     val color = LLColor4(r, g, b, a)
-
+                    
                     for (face in 0 until MAX_FACES) {
                         if ((faceMask and (1 shl face)) != 0) {
                             faceColors[face] = color
@@ -115,29 +115,29 @@ class TextureEditor {
                     }
                 }
             }
-
+            
             // Default repeat U
             if (buffer.remaining() >= 4) {
                 defaultRepeatU = buffer.float
             }
-
+            
             // Per-face repeat U...
             // Continue parsing other fields similarly
-
+            
         } catch (e: Exception) {
             // Handle parse error
         }
     }
-
+    
     /**
      * Serialize to bytes
      */
     fun toBytes(): ByteArray {
         val buffer = ByteBuffer.allocate(4096).order(ByteOrder.LITTLE_ENDIAN)
-
+        
         // Default texture
         buffer.put(uuidToBytes(defaultTexture))
-
+        
         // Per-face textures
         for (face in 0 until MAX_FACES) {
             val texture = faceTextures[face]
@@ -147,13 +147,13 @@ class TextureEditor {
             }
         }
         buffer.put(0) // End marker
-
+        
         // Default color
         buffer.put((defaultColor.r * 255).toInt().toByte())
         buffer.put((defaultColor.g * 255).toInt().toByte())
         buffer.put((defaultColor.b * 255).toInt().toByte())
         buffer.put((defaultColor.a * 255).toInt().toByte())
-
+        
         // Per-face colors
         for (face in 0 until MAX_FACES) {
             val color = faceColors[face]
@@ -166,7 +166,7 @@ class TextureEditor {
             }
         }
         buffer.put(0) // End marker
-
+        
         // Repeat U
         buffer.putFloat(defaultRepeatU)
         for (face in 0 until MAX_FACES) {
@@ -176,7 +176,7 @@ class TextureEditor {
             }
         }
         buffer.put(0)
-
+        
         // Repeat V
         buffer.putFloat(defaultRepeatV)
         for (face in 0 until MAX_FACES) {
@@ -186,15 +186,15 @@ class TextureEditor {
             }
         }
         buffer.put(0)
-
+        
         // Continue with other fields...
-
+        
         val result = ByteArray(buffer.position())
         buffer.flip()
         buffer.get(result)
         return result
     }
-
+    
     /**
      * Set texture for face(s)
      */
@@ -208,7 +208,7 @@ class TextureEditor {
             faceTextures[face] = textureId
         }
     }
-
+    
     /**
      * Get texture for face
      */
@@ -219,7 +219,7 @@ class TextureEditor {
             defaultTexture
         }
     }
-
+    
     /**
      * Set color for face(s)
      */
@@ -233,7 +233,7 @@ class TextureEditor {
             faceColors[face] = color
         }
     }
-
+    
     /**
      * Get color for face
      */
@@ -244,7 +244,7 @@ class TextureEditor {
             defaultColor
         }
     }
-
+    
     /**
      * Set texture repeat
      */
@@ -261,7 +261,7 @@ class TextureEditor {
             faceRepeatV[face] = repeatV
         }
     }
-
+    
     /**
      * Set texture offset
      */
@@ -278,7 +278,7 @@ class TextureEditor {
             faceOffsetV[face] = offsetV
         }
     }
-
+    
     /**
      * Set texture rotation
      */
@@ -292,7 +292,7 @@ class TextureEditor {
             faceRotation[face] = rotation
         }
     }
-
+    
     /**
      * Set glow
      */
@@ -306,7 +306,7 @@ class TextureEditor {
             faceGlow[face] = glow
         }
     }
-
+    
     /**
      * Set fullbright
      */
@@ -320,7 +320,7 @@ class TextureEditor {
             faceFullbright[face] = fullbright
         }
     }
-
+    
     /**
      * Set shiny level (0-3)
      */
@@ -335,7 +335,7 @@ class TextureEditor {
             faceShiny[face] = level
         }
     }
-
+    
     /**
      * Set bump map type
      */
@@ -349,7 +349,7 @@ class TextureEditor {
             faceBump[face] = bump
         }
     }
-
+    
     /**
      * Set PBR material
      */
@@ -363,12 +363,12 @@ class TextureEditor {
             faceMaterial[face] = materialId
         }
     }
-
+    
     private fun bytesToUUID(bytes: ByteArray): UUID {
         val bb = ByteBuffer.wrap(bytes)
         return UUID(bb.long, bb.long)
     }
-
+    
     private fun uuidToBytes(uuid: UUID): ByteArray {
         val bb = ByteBuffer.allocate(16)
         bb.putLong(uuid.mostSignificantBits)

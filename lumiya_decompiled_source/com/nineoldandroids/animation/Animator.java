@@ -27,7 +27,7 @@ public abstract class Animator implements Cloneable {
     public void cancel() {
     }
 
-    @Override //
+    @Override // 
     /* renamed from: clone */
     public Animator mo918clone() {
         try {

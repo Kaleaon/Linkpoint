@@ -35,20 +35,20 @@ class GroupsManager(
     private val capabilityManager: CapabilityManager,
     private val agentId: UUID
 ) : EventHandler {
-
+    
     private val scope = CoroutineScope(MessagingDispatcher.dispatcher + SupervisorJob())
-
+    
     // Groups the agent is a member of
     private val groups = ConcurrentHashMap<UUID, Group>()
-
+    
     // Active group
     private val _activeGroup = MutableStateFlow<UUID?>(null)
     val activeGroup: StateFlow<UUID?> = _activeGroup
-
+    
     // Group events
     private val _groupEvents = MutableSharedFlow<GroupEvent>(replay = 0, extraBufferCapacity = 32)
     val groupEvents: SharedFlow<GroupEvent> = _groupEvents
-
+    
     init {
         capabilityManager.registerEventHandler(
             "AgentGroupDataUpdate",
@@ -66,7 +66,7 @@ class GroupsManager(
             MessagingDispatcher.dispatcher
         )
     }
-
+    
     override fun onEvent(message: String, body: LLSDMap) {
         scope.launch {
             when (message) {
@@ -76,10 +76,10 @@ class GroupsManager(
             }
         }
     }
-
+    
     private fun handleGroupDataUpdate(body: LLSDMap) {
         val groupData = body.getArray("GroupData") ?: return
-
+        
         for (item in groupData.value) {
             if (item is LLSDMap) {
                 val groupId = UUID.fromString(item.getString("GroupID") ?: continue)
@@ -89,7 +89,7 @@ class GroupsManager(
                 val acceptNotices = item.getBoolean("AcceptNotices") ?: true
                 val powers = item.getLong("GroupPowers") ?: 0L
                 val listInProfile = item.getBoolean("ListInProfile") ?: true
-
+                
                 val group = Group(
                     groupId = groupId,
                     name = groupName,
@@ -99,16 +99,16 @@ class GroupsManager(
                     powers = powers,
                     listInProfile = listInProfile
                 )
-
+                
                 groups[groupId] = group
             }
         }
-
+        
         scope.launch {
             _groupEvents.emit(GroupEvent.GroupsUpdated(groups.values.toList()))
         }
     }
-
+    
     private fun handleGroupNotice(body: LLSDMap) {
         val groupId = UUID.fromString(body.getString("group_id") ?: return)
         val senderId = UUID.fromString(body.getString("sender_id") ?: return)
@@ -116,7 +116,7 @@ class GroupsManager(
         val subject = body.getString("subject") ?: ""
         val message = body.getString("message") ?: ""
         val timestamp = body.getLong("timestamp") ?: System.currentTimeMillis()
-
+        
         val notice = GroupNotice(
             noticeId = UUID.randomUUID(),
             groupId = groupId,
@@ -126,19 +126,19 @@ class GroupsManager(
             message = message,
             timestamp = timestamp
         )
-
+        
         scope.launch {
             _groupEvents.emit(GroupEvent.NoticeReceived(notice))
         }
     }
-
+    
     private fun handleGroupChat(body: LLSDMap) {
         val groupId = UUID.fromString(body.getString("group_id") ?: return)
         val fromId = UUID.fromString(body.getString("from_id") ?: return)
         val fromName = body.getString("from_name") ?: "Unknown"
         val message = body.getString("message") ?: ""
         val timestamp = body.getLong("timestamp") ?: System.currentTimeMillis()
-
+        
         val chatMessage = GroupChatMessage(
             groupId = groupId,
             fromId = fromId,
@@ -146,22 +146,22 @@ class GroupsManager(
             message = message,
             timestamp = timestamp
         )
-
+        
         scope.launch {
             _groupEvents.emit(GroupEvent.ChatReceived(chatMessage))
         }
     }
-
+    
     /**
      * Get all groups
      */
     fun getAllGroups(): List<Group> = groups.values.toList()
-
+    
     /**
      * Get a specific group
      */
     fun getGroup(groupId: UUID): Group? = groups[groupId]
-
+    
     /**
      * Set active group (for name tag display)
      */
@@ -169,21 +169,21 @@ class GroupsManager(
         return withContext(Dispatchers.IO) {
             try {
                 val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
-
+                
                 // AgentData - UUIDs use big-endian per SL protocol
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
-
+                
                 // GroupData
                 if (groupId != null) {
                     payload.putUUID(groupId)
                 } else {
                     payload.putUUID(UUID(0, 0)) // UUID_ZERO
                 }
-
+                
                 udpConnection.sendPacket(MessageIdRegistry.ACTIVATE_GROUP, payload.array().copyOf(payload.position()), reliable = true)
                 _activeGroup.value = groupId
-
+                
                 Log.i(TAG, "Active group set to: $groupId")
                 true
             } catch (e: Exception) {
@@ -192,7 +192,7 @@ class GroupsManager(
             }
         }
     }
-
+    
     /**
      * Optional reference to [IMManager]. When wired (via [setIMManager]),
      * `sendGroupChat` delegates the bring-up + queueing to the IM session
@@ -306,7 +306,7 @@ class GroupsManager(
         imManager?.startGroupSessionLocal(groupId, groups[groupId]?.name ?: "Group")
         return groupId
     }
-
+    
     /**
      * Leave a group
      */
@@ -314,25 +314,25 @@ class GroupsManager(
         return withContext(Dispatchers.IO) {
             try {
                 val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
-
+                
                 // AgentData - UUIDs use big-endian per SL protocol
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
-
+                
                 // GroupData
                 payload.putUUID(groupId)
-
+                
                 udpConnection.sendPacket(MessageIdRegistry.LEAVE_GROUP_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
-
+                
                 groups.remove(groupId)
                 if (_activeGroup.value == groupId) {
                     _activeGroup.value = null
                 }
-
+                
                 scope.launch {
                     _groupEvents.emit(GroupEvent.LeftGroup(groupId))
                 }
-
+                
                 Log.i(TAG, "Left group: $groupId")
                 true
             } catch (e: Exception) {
@@ -341,7 +341,7 @@ class GroupsManager(
             }
         }
     }
-
+    
     /**
      * Request group information
      */
@@ -349,14 +349,14 @@ class GroupsManager(
         withContext(Dispatchers.IO) {
             try {
                 val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
-
+                
                 // AgentData - UUIDs use big-endian per SL protocol
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
-
+                
                 // GroupData
                 payload.putUUID(groupId)
-
+                
                 udpConnection.sendPacket(MessageIdRegistry.GROUP_PROFILE_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
                 Log.d(TAG, "Requested group info for: $groupId")
             } catch (e: Exception) {
@@ -364,33 +364,33 @@ class GroupsManager(
             }
         }
     }
-
+    
     fun shutdown() {
         scope.cancel()
     }
-
+    
     // ==================== UDP MESSAGE HANDLERS ====================
-
+    
     /**
      * Handle active group update from AgentDataUpdate message
      */
     fun handleActiveGroupUpdate(groupId: UUID, groupTitle: String, groupPowers: Long) {
         scope.launch {
             Log.i(TAG, "📋 Active group updated: $groupId, title='$groupTitle'")
-
+            
             _activeGroup.value = groupId
-
+            
             // Update group info if we have it
             groups[groupId]?.let { group ->
                 groups[groupId] = group.copy(powers = groupPowers)
             }
-
+            
             _groupEvents.emit(GroupEvent.ActiveGroupChanged(groupId, groupTitle))
         }
     }
-
+    
     // ==================== GROUP ACCOUNTING ====================
-
+    
     /**
      * Request group account summary.
      */
@@ -398,20 +398,20 @@ class GroupsManager(
         return withContext(Dispatchers.IO) {
             try {
                 val payload = ByteBuffer.allocate(52).order(ByteOrder.LITTLE_ENDIAN)
-
+                
                 // AgentData
                 payload.putUUID(agentId)
                 payload.putUUID(groupId)
                 payload.putUUID(udpConnection.getSessionId())
-
+                
                 // MoneyData
                 payload.putInt(0) // RequestID - server will echo this back
                 payload.putInt(-1) // IntervalDays - current
                 payload.putInt(0) // CurrentInterval - start
-
+                
                 udpConnection.sendPacket(MSG_GROUP_ACCOUNT_SUMMARY_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
                 Log.d(TAG, "Requested account summary for group: $groupId")
-
+                
                 // Note: Response will come via message handler
                 null
             } catch (e: Exception) {
@@ -420,7 +420,7 @@ class GroupsManager(
             }
         }
     }
-
+    
     /**
      * Request group account details.
      */
@@ -428,20 +428,20 @@ class GroupsManager(
         return withContext(Dispatchers.IO) {
             try {
                 val payload = ByteBuffer.allocate(52).order(ByteOrder.LITTLE_ENDIAN)
-
+                
                 // AgentData
                 payload.putUUID(agentId)
                 payload.putUUID(groupId)
                 payload.putUUID(udpConnection.getSessionId())
-
+                
                 // MoneyData
                 payload.putInt(0) // RequestID
                 payload.putInt(-1) // IntervalDays
                 payload.putInt(0) // CurrentInterval
-
+                
                 udpConnection.sendPacket(MSG_GROUP_ACCOUNT_DETAILS_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
                 Log.d(TAG, "Requested account details for group: $groupId")
-
+                
                 null
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to request account details", e)
@@ -449,7 +449,7 @@ class GroupsManager(
             }
         }
     }
-
+    
     /**
      * Request group account transactions.
      */
@@ -457,20 +457,20 @@ class GroupsManager(
         return withContext(Dispatchers.IO) {
             try {
                 val payload = ByteBuffer.allocate(52).order(ByteOrder.LITTLE_ENDIAN)
-
+                
                 // AgentData
                 payload.putUUID(agentId)
                 payload.putUUID(groupId)
                 payload.putUUID(udpConnection.getSessionId())
-
+                
                 // MoneyData
                 payload.putInt(0) // RequestID
                 payload.putInt(-1) // IntervalDays
                 payload.putInt(0) // CurrentInterval
-
+                
                 udpConnection.sendPacket(MSG_GROUP_ACCOUNT_TRANSACTIONS_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
                 Log.d(TAG, "Requested account transactions for group: $groupId")
-
+                
                 null
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to request account transactions", e)
@@ -478,9 +478,9 @@ class GroupsManager(
             }
         }
     }
-
+    
     // ==================== GROUP PROPOSALS/VOTING ====================
-
+    
     /**
      * Request active proposals for a group.
      */
@@ -488,17 +488,17 @@ class GroupsManager(
         withContext(Dispatchers.IO) {
             try {
                 val payload = ByteBuffer.allocate(52).order(ByteOrder.LITTLE_ENDIAN)
-
+                
                 // AgentData
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
-
+                
                 // GroupData
                 payload.putUUID(groupId)
-
+                
                 // TransactionData
                 payload.putUUID(UUID.randomUUID()) // TransactionID
-
+                
                 udpConnection.sendPacket(MSG_GROUP_ACTIVE_PROPOSALS_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
                 Log.d(TAG, "Requested active proposals for group: $groupId")
             } catch (e: Exception) {
@@ -506,7 +506,7 @@ class GroupsManager(
             }
         }
     }
-
+    
     /**
      * Request vote history for a group.
      */
@@ -514,17 +514,17 @@ class GroupsManager(
         withContext(Dispatchers.IO) {
             try {
                 val payload = ByteBuffer.allocate(52).order(ByteOrder.LITTLE_ENDIAN)
-
+                
                 // AgentData
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
-
+                
                 // GroupData
                 payload.putUUID(groupId)
-
+                
                 // TransactionData
                 payload.putUUID(UUID.randomUUID()) // TransactionID
-
+                
                 udpConnection.sendPacket(MSG_GROUP_VOTE_HISTORY_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
                 Log.d(TAG, "Requested vote history for group: $groupId")
             } catch (e: Exception) {
@@ -532,7 +532,7 @@ class GroupsManager(
             }
         }
     }
-
+    
     /**
      * Cast a vote on a proposal.
      */
@@ -541,17 +541,17 @@ class GroupsManager(
             try {
                 val voteBytes = voteString.toByteArray(Charsets.UTF_8)
                 val payload = ByteBuffer.allocate(52 + voteBytes.size).order(ByteOrder.LITTLE_ENDIAN)
-
+                
                 // AgentData
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
-
+                
                 // ProposalData
                 payload.putUUID(groupId)
                 payload.putUUID(proposalId)
                 payload.put(voteBytes.size.toByte())
                 payload.put(voteBytes)
-
+                
                 udpConnection.sendPacket(MSG_GROUP_PROPOSAL_BALLOT, payload.array().copyOf(payload.position()), reliable = true)
                 Log.i(TAG, "Cast vote on proposal $proposalId: $voteString")
                 true
@@ -561,7 +561,7 @@ class GroupsManager(
             }
         }
     }
-
+    
     /**
      * Start a new proposal.
      */
@@ -576,11 +576,11 @@ class GroupsManager(
             try {
                 val textBytes = proposalText.toByteArray(Charsets.UTF_8)
                 val payload = ByteBuffer.allocate(60 + textBytes.size).order(ByteOrder.LITTLE_ENDIAN)
-
+                
                 // AgentData
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
-
+                
                 // ProposalData
                 payload.putUUID(groupId)
                 payload.putInt(quorum)
@@ -588,7 +588,7 @@ class GroupsManager(
                 payload.putInt(duration)
                 payload.putShort(textBytes.size.toShort())
                 payload.put(textBytes)
-
+                
                 udpConnection.sendPacket(MSG_START_GROUP_PROPOSAL, payload.array().copyOf(payload.position()), reliable = true)
                 Log.i(TAG, "Started new proposal in group $groupId")
                 true
@@ -598,10 +598,10 @@ class GroupsManager(
             }
         }
     }
-
+    
     companion object {
         private const val TAG = "GroupsManager"
-
+        
         // Group powers (bit flags)
         const val GP_MEMBER_INVITE = 0x2L
         const val GP_MEMBER_EJECT = 0x4L
@@ -609,21 +609,21 @@ class GroupsManager(
         const val GP_NOTICE_SEND = 0x1000L
         const val GP_NOTICES_RECEIVE = 0x2000L
         const val GP_GROUP_CHANGE_IDENTITY = 0x10000000L
-
+        
         // Group accounting message IDs
         const val MSG_GROUP_ACCOUNT_SUMMARY_REQUEST = 0xFF0070
         const val MSG_GROUP_ACCOUNT_DETAILS_REQUEST = 0xFF0071
         const val MSG_GROUP_ACCOUNT_TRANSACTIONS_REQUEST = 0xFF0072
-
+        
         // Group proposals message IDs
         const val MSG_GROUP_ACTIVE_PROPOSALS_REQUEST = 0xFF0073
         const val MSG_GROUP_VOTE_HISTORY_REQUEST = 0xFF0074
         const val MSG_GROUP_PROPOSAL_BALLOT = 0xFF0075
         const val MSG_START_GROUP_PROPOSAL = 0xFF0076
     }
-
+    
     // ==================== UDP MESSAGE HANDLERS ====================
-
+    
     /**
      * Cached group roles keyed by groupId. Updated by [handleGroupRoleData]
      * (UDP `GroupRoleDataReply`); read by UI via [getGroupRoles] and the
@@ -777,7 +777,7 @@ class GroupsManager(
         val effective = if (bytes[len - 1] == 0.toByte()) len - 1 else len
         return String(bytes, 0, effective, Charsets.UTF_8)
     }
-
+    
     /**
      * Handle GroupNoticeAdd confirmation.
      */
@@ -789,7 +789,7 @@ class GroupsManager(
             Log.e(TAG, "Error parsing GroupNoticeAdd", e)
         }
     }
-
+    
     /**
      * Handle AgentGroupDataUpdate UDP message.
      * Updates the agent's group memberships from UDP (fallback for capability).
@@ -797,26 +797,26 @@ class GroupsManager(
     fun handleAgentGroupDataUpdate(payload: ByteArray) {
         try {
             val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
-
+            
             // AgentData block - 16 bytes
             buffer.position(buffer.position() + 16) // Skip AgentID
-
+            
             // GroupData block count
             if (buffer.remaining() < 1) return
             val groupCount = buffer.get().toInt() and 0xFF
-
+            
             Log.d(TAG, "📋 AgentGroupDataUpdate: $groupCount groups")
-
+            
             // Parse each group
             for (i in 0 until groupCount) {
                 if (buffer.remaining() < 43) break // Minimum group data size
-
+                
                 val groupId = buffer.getUUID()
                 val groupPowers = buffer.long
                 val acceptNotices = buffer.get() != 0.toByte()
                 val groupInsigniaId = buffer.getUUID()
                 val contribution = buffer.int
-
+                
                 // Read variable-length group name
                 val nameLen = buffer.get().toInt() and 0xFF
                 val nameBytes = ByteArray(nameLen)
@@ -824,7 +824,7 @@ class GroupsManager(
                     buffer.get(nameBytes)
                 }
                 val groupName = String(nameBytes, Charsets.UTF_8).trimEnd('\u0000')
-
+                
                 // Update or add group
                 val group = groups[groupId]?.copy(
                     powers = groupPowers,
@@ -839,10 +839,10 @@ class GroupsManager(
                     insigniaId = if (groupInsigniaId != UUID(0, 0)) groupInsigniaId else null,
                     contribution = contribution
                 )
-
+                
                 groups[groupId] = group
             }
-
+            
             // Emit update event
             scope.launch {
                 _groupEvents.emit(GroupEvent.GroupsUpdated(groups.values.toList()))

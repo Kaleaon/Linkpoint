@@ -266,7 +266,7 @@ public class SLInventoryHTTPFetchRequest extends SLInventoryFetchRequest {
         version,
         parent_id,
         preferred_type;
-
+        
         private static final Map<String, FolderValueKey> tagMap = new HashMap(valuesCustom().length * 2);
 
         static {
@@ -560,7 +560,7 @@ public class SLInventoryHTTPFetchRequest extends SLInventoryFetchRequest {
         flags,
         created_at,
         asset_id;
-
+        
         private static final Map<String, ItemValueKey> tagMap = new HashMap(valuesCustom().length * 2);
 
         static {
@@ -593,7 +593,7 @@ public class SLInventoryHTTPFetchRequest extends SLInventoryFetchRequest {
         next_owner_mask,
         group_mask,
         everyone_mask;
-
+        
         private static final Map<String, PermissionsValueKey> tagMap = new HashMap(valuesCustom().length * 2);
 
         static {

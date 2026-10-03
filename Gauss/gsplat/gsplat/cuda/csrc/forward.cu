@@ -111,7 +111,7 @@ __global__ void nd_rasterize_forward(
     // each thread loads one gaussian at a time before rasterizing its
     // designated pixel
     int tr = block.thread_rank();
-
+    
     // **** max 12 channels for speed ***
     float pix_out[MAX_CHANNELS] = {0.f};
 
@@ -146,15 +146,15 @@ __global__ void nd_rasterize_forward(
             const float sigma = 0.5f * (conic.x * delta.x * delta.x +
                                         conic.z * delta.y * delta.y) +
                                         conic.y * delta.x * delta.y;
-
+            
             if (sigma < 0.f || isnan(sigma) || isinf(sigma)) {
                 continue;
             }
-
+            
             const float alpha = __expf(-sigma);
             int32_t g = id_batch[t];
             const float vis = alpha;
-
+            
             for (int c = 0; c < channels; ++c) {
                 pix_out[c] += colors[g * channels + c] * vis;
             }
@@ -208,10 +208,10 @@ __global__ void nd_rasterize_forward_topk_norm(
     // each thread loads one gaussian at a time before rasterizing its
     // designated pixel
     int tr = block.thread_rank();
-
+    
     // **** max 12 channels for speed ***
     float pix_out[MAX_CHANNELS] = {0.f};
-
+    
     // top k Gaussian ids
     int32_t topk[TOP_K];
     float topk_vals[TOP_K] = {0.f};
@@ -249,11 +249,11 @@ __global__ void nd_rasterize_forward_topk_norm(
             const float sigma = 0.5f * (conic.x * delta.x * delta.x +
                                         conic.z * delta.y * delta.y) +
                                         conic.y * delta.x * delta.y;
-
+            
             if (sigma < 0.f || isnan(sigma) || isinf(sigma)) {
                 continue;
             }
-
+            
             const float alpha = __expf(-sigma);
             int32_t g = id_batch[t];
 
@@ -326,7 +326,7 @@ __global__ void nd_rasterize_forward_no_tiles(
 
     // **** max 12 channels for speed ***
     float pix_out[MAX_CHANNELS] = {0.f};
-
+    
     // top k Gaussian ids
     int32_t topk[TOP_K];
     float topk_vals[TOP_K] = {0.f};
@@ -340,11 +340,11 @@ __global__ void nd_rasterize_forward_no_tiles(
         const float sigma = 0.5f * (conic.x * delta.x * delta.x +
                                     conic.z * delta.y * delta.y) +
                                     conic.y * delta.x * delta.y;
-
+        
         if (sigma < 0.f || isnan(sigma) || isinf(sigma)) {
             continue;
         }
-
+        
         const float alpha = __expf(-sigma);
         int32_t g_id = g;
 
@@ -471,14 +471,14 @@ __global__ void rasterize_forward(
             const float sigma = 0.5f * (conic.x * delta.x * delta.x +
                                         conic.z * delta.y * delta.y) +
                                         conic.y * delta.x * delta.y;
-
+            
             // const float alpha = min(1.f, __expf(-sigma));
             if (sigma < 0.f || isnan(sigma) || isinf(sigma)) {
-            //     printf("wrong value sigma %f delta %f %f conic %f %f %f\n",
+            //     printf("wrong value sigma %f delta %f %f conic %f %f %f\n", 
             //         sigma, delta.x, delta.y, conic.x, conic.y, conic.z);
                 continue;
             }
-
+            
             const float alpha = __expf(-sigma);
             int32_t g = id_batch[t];
             const float vis = alpha;

@@ -1,6 +1,6 @@
 /*!
  * LLSD JSON Parser and Serializer - Rust Implementation
- *
+ * 
  * Based on Java implementation with enhanced functionality
  * Copyright (C) 2024 Linden Lab
  */
@@ -132,7 +132,7 @@ impl LLSDJsonSerializer {
     /// Serialize LLSD to JSON string
     pub fn serialize(&self, document: &LLSDDocument) -> LLSDResult<String> {
         let json_value = self.convert_llsd_value(document.content())?;
-
+        
         if self.pretty_print {
             Ok(serde_json::to_string_pretty(&json_value)?)
         } else {
@@ -223,23 +223,23 @@ mod tests {
     #[test]
     fn test_parse_basic_types() {
         let parser = LLSDJsonParser::new();
-
+        
         // Test null
         let doc = parser.parse("null").unwrap();
         assert!(doc.content().is_undefined());
-
+        
         // Test boolean
         let doc = parser.parse("true").unwrap();
         assert_eq!(doc.content(), &LLSDValue::Boolean(true));
-
+        
         // Test integer
         let doc = parser.parse("42").unwrap();
         assert_eq!(doc.content(), &LLSDValue::Integer(42));
-
+        
         // Test real
         let doc = parser.parse("3.14").unwrap();
         assert_eq!(doc.content(), &LLSDValue::Real(3.14));
-
+        
         // Test string
         let doc = parser.parse("\"hello\"").unwrap();
         assert_eq!(doc.content(), &LLSDValue::String("hello".to_string()));
@@ -249,7 +249,7 @@ mod tests {
     fn test_parse_array() {
         let parser = LLSDJsonParser::new();
         let doc = parser.parse("[1, \"hello\", true]").unwrap();
-
+        
         if let LLSDValue::Array(arr) = doc.content() {
             assert_eq!(arr.len(), 3);
             assert_eq!(arr[0], LLSDValue::Integer(1));
@@ -264,7 +264,7 @@ mod tests {
     fn test_parse_map() {
         let parser = LLSDJsonParser::new();
         let doc = parser.parse(r#"{"name": "Alice", "age": 30}"#).unwrap();
-
+        
         if let LLSDValue::Map(map) = doc.content() {
             assert_eq!(map.len(), 2);
             assert_eq!(map["name"], LLSDValue::String("Alice".to_string()));
@@ -279,7 +279,7 @@ mod tests {
         let parser = LLSDJsonParser::new().with_strict_uuid_parsing(false);
         let uuid_str = "550e8400-e29b-41d4-a716-446655440000";
         let doc = parser.parse(&format!("\"{}\"", uuid_str)).unwrap();
-
+        
         if let LLSDValue::UUID(uuid) = doc.content() {
             assert_eq!(uuid.to_string(), uuid_str);
         } else {
@@ -290,19 +290,19 @@ mod tests {
     #[test]
     fn test_serialize_basic_types() {
         let serializer = LLSDJsonSerializer::new();
-
+        
         // Test undefined/null
         let doc = LLSDDocument::new(LLSDValue::Undefined);
         assert_eq!(serializer.serialize(&doc).unwrap(), "null");
-
+        
         // Test boolean
         let doc = LLSDDocument::new(LLSDValue::Boolean(true));
         assert_eq!(serializer.serialize(&doc).unwrap(), "true");
-
+        
         // Test integer
         let doc = LLSDDocument::new(LLSDValue::Integer(42));
         assert_eq!(serializer.serialize(&doc).unwrap(), "42");
-
+        
         // Test string
         let doc = LLSDDocument::new(LLSDValue::String("hello".to_string()));
         assert_eq!(serializer.serialize(&doc).unwrap(), "\"hello\"");
@@ -313,7 +313,7 @@ mod tests {
         let serializer = LLSDJsonSerializer::new().with_type_preservation(true);
         let uuid = uuid!("550e8400-e29b-41d4-a716-446655440000");
         let doc = LLSDDocument::new(LLSDValue::UUID(uuid));
-
+        
         let json = serializer.serialize(&doc).unwrap();
         assert!(json.contains("__type"));
         assert!(json.contains("uuid"));
@@ -337,10 +337,10 @@ mod tests {
         let doc = LLSDDocument::new(original_data.clone());
         let serializer = LLSDJsonSerializer::new();
         let json = serializer.serialize(&doc).unwrap();
-
+        
         let parser = LLSDJsonParser::new();
         let parsed_doc = parser.parse(&json).unwrap();
-
+        
         // Note: Due to JSON's limited type system, some type information may be lost
         // This is expected behavior
         assert_eq!(parsed_doc.get_type(), doc.get_type());

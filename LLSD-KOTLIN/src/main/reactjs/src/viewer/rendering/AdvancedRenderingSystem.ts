@@ -10,7 +10,7 @@ import { EventEmitter } from 'events';
 
 /**
  * Advanced rendering system with fine-grained controls (TypeScript/React implementation).
- *
+ * 
  * Features:
  * - WebGL-based rendering with TypeScript type safety
  * - React-compatible event system for UI updates
@@ -216,23 +216,23 @@ export class AdvancedRenderingSystem extends EventEmitter {
 
     constructor(canvas?: HTMLCanvasElement) {
         super();
-
+        
         if (canvas) {
             this.initializeWebGL(canvas);
         }
 
         this.setupBatteryOptimization();
         this.applyBalancedPreset();
-
+        
         console.log('TypeScript Advanced rendering system initialized');
     }
 
     private initializeWebGL(canvas: HTMLCanvasElement): void {
         this.canvas = canvas;
-
+        
         // Try to get WebGL2 context first, then fallback to WebGL1
         this.gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-
+        
         if (!this.gl) {
             throw new Error('WebGL not supported');
         }
@@ -257,11 +257,11 @@ export class AdvancedRenderingSystem extends EventEmitter {
         if ('getBattery' in navigator) {
             (navigator as any).getBattery().then((battery: any) => {
                 this.batteryManager = battery;
-
+                
                 battery.addEventListener('levelchange', () => {
                     this.performanceMetrics.batteryLevel = battery.level;
                     this.emit('batteryLevelChanged', battery.level);
-
+                    
                     if (battery.level < 0.2 && !this.batteryConservationMode) {
                         this.emit('lowBattery', battery.level);
                     }
@@ -278,7 +278,7 @@ export class AdvancedRenderingSystem extends EventEmitter {
     public set isRenderingEnabled(enabled: boolean) {
         if (this.renderingEnabled !== enabled) {
             this.renderingEnabled = enabled;
-
+            
             if (enabled) {
                 this.startRenderLoop();
             } else {
@@ -298,7 +298,7 @@ export class AdvancedRenderingSystem extends EventEmitter {
     public set isBatteryConservationMode(enabled: boolean) {
         if (this.batteryConservationMode !== enabled) {
             this.batteryConservationMode = enabled;
-
+            
             if (enabled) {
                 this.applyPowerSavingSettings();
                 this.isRenderingEnabled = false;
@@ -323,7 +323,7 @@ export class AdvancedRenderingSystem extends EventEmitter {
     // Quality presets with TypeScript type safety
     public applyUltraLowPreset(): void {
         console.log('Applying Ultra Low quality preset');
-
+        
         this.qualitySettings.overallQuality = 0.1;
         this.performanceSettings.targetFPS = 30;
         this.effectsSettings.effectsEnabled = false;
@@ -332,13 +332,13 @@ export class AdvancedRenderingSystem extends EventEmitter {
         this.meshSettings.lodBias = -2.0;
         this.avatarSettings.maxVisibleAvatars = 5;
         this.particleSettings.maxParticles = 100;
-
+        
         this.emit('qualityPresetChanged', 'ULTRA_LOW');
     }
 
     public applyLowPreset(): void {
         console.log('Applying Low quality preset');
-
+        
         this.qualitySettings.overallQuality = 0.3;
         this.performanceSettings.targetFPS = 45;
         this.effectsSettings.effectsEnabled = true;
@@ -348,13 +348,13 @@ export class AdvancedRenderingSystem extends EventEmitter {
         this.meshSettings.lodBias = -1.0;
         this.avatarSettings.maxVisibleAvatars = 15;
         this.particleSettings.maxParticles = 500;
-
+        
         this.emit('qualityPresetChanged', 'LOW');
     }
 
     public applyBalancedPreset(): void {
         console.log('Applying Balanced quality preset');
-
+        
         this.qualitySettings.overallQuality = 0.6;
         this.performanceSettings.targetFPS = 60;
         this.effectsSettings.effectsEnabled = true;
@@ -365,13 +365,13 @@ export class AdvancedRenderingSystem extends EventEmitter {
         this.meshSettings.lodBias = 0.0;
         this.avatarSettings.maxVisibleAvatars = 30;
         this.particleSettings.maxParticles = 2000;
-
+        
         this.emit('qualityPresetChanged', 'BALANCED');
     }
 
     public applyHighPreset(): void {
         console.log('Applying High quality preset');
-
+        
         this.qualitySettings.overallQuality = 0.8;
         this.performanceSettings.targetFPS = 60;
         this.effectsSettings.effectsEnabled = true;
@@ -382,13 +382,13 @@ export class AdvancedRenderingSystem extends EventEmitter {
         this.meshSettings.lodBias = 1.0;
         this.avatarSettings.maxVisibleAvatars = 50;
         this.particleSettings.maxParticles = 5000;
-
+        
         this.emit('qualityPresetChanged', 'HIGH');
     }
 
     public applyUltraPreset(): void {
         console.log('Applying Ultra quality preset');
-
+        
         this.qualitySettings.overallQuality = 1.0;
         this.performanceSettings.targetFPS = 60;
         this.effectsSettings.effectsEnabled = true;
@@ -399,7 +399,7 @@ export class AdvancedRenderingSystem extends EventEmitter {
         this.meshSettings.lodBias = 2.0;
         this.avatarSettings.maxVisibleAvatars = 100;
         this.particleSettings.maxParticles = 10000;
-
+        
         this.emit('qualityPresetChanged', 'ULTRA');
     }
 
@@ -473,11 +473,11 @@ export class AdvancedRenderingSystem extends EventEmitter {
         this.frameCount++;
         if (currentTime - this.fpsUpdateTime >= 1000) {
             this.performanceMetrics.currentFPS = this.frameCount;
-            this.performanceMetrics.averageFPS =
+            this.performanceMetrics.averageFPS = 
                 (this.performanceMetrics.averageFPS + this.performanceMetrics.currentFPS) / 2;
             this.frameCount = 0;
             this.fpsUpdateTime = currentTime;
-
+            
             this.emit('fpsUpdated', this.performanceMetrics.currentFPS);
         }
 
@@ -519,13 +519,13 @@ export class AdvancedRenderingSystem extends EventEmitter {
     // Adaptive quality system
     public enableAdaptiveQuality(enabled: boolean): void {
         this.performanceSettings.adaptiveQualityEnabled = enabled;
-
+        
         if (enabled) {
             console.log('Adaptive quality enabled');
         } else {
             console.log('Adaptive quality disabled');
         }
-
+        
         this.emit('adaptiveQualityChanged', enabled);
     }
 

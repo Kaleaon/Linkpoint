@@ -118,13 +118,13 @@ val result = object?.property?.anotherProperty
 
 #### Pattern 3: Explicit Validation
 ```kotlin
-val value = requiredValue
+val value = requiredValue 
     ?: throw IllegalStateException("Required component not initialized")
 ```
 
 #### Pattern 4: Named Intermediate Variables
 ```kotlin
-val filamentEngine = engine
+val filamentEngine = engine 
     ?: throw IllegalStateException("Engine not initialized")
 // Use filamentEngine throughout
 ```
@@ -148,7 +148,7 @@ val filamentEngine = engine
    - Added: `private val mainScope = CoroutineScope(Dispatchers.Main + SupervisorJob())`
    - Changed: `mainHandler.post { }` → `mainScope.launch { }`
    - Added: Proper shutdown of mainScope
-   - **Benefits**:
+   - **Benefits**: 
      - Better integration with structured concurrency
      - Automatic cancellation on shutdown
      - No handler memory leaks
@@ -305,7 +305,7 @@ scope.launch {
 ```kotlin
 class MainActivity : AppCompatActivity() {
     private val scope = LifecycleAwareScopeManager.getScope(this)
-
+    
     fun loadData() {
         scope.launch {
             // Automatically cancelled when Activity is destroyed
@@ -338,13 +338,13 @@ All error messages follow this pattern:
 ```kotlin
 /**
  * Comprehensive description of the class.
- *
+ * 
  * Design philosophy and key features.
  * Usage examples and best practices.
- *
+ * 
  * @property prop1 Description of property
  * @property prop2 Description of property
- *
+ * 
  * @author Author name
  * @since Version number
  */
@@ -354,14 +354,14 @@ All error messages follow this pattern:
 ```kotlin
 /**
  * Description of what the method does.
- *
+ * 
  * Detailed explanation of behavior, edge cases, and constraints.
- *
+ * 
  * @param param1 Description of parameter
  * @param param2 Description of parameter
  * @return Description of return value
  * @throws ExceptionType When this exception is thrown
- *
+ * 
  * Example:
  * ```kotlin
  * val result = methodName(param1, param2)

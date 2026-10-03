@@ -7,7 +7,7 @@ This document provides a comprehensive technical analysis of broken and outdated
 ## Table of Contents
 
 1. [Critical Build System Issues](#critical-build-system-issues)
-2. [Legacy Graphics API Problems](#legacy-graphics-api-problems)
+2. [Legacy Graphics API Problems](#legacy-graphics-api-problems) 
 3. [Network Protocol Limitations](#network-protocol-limitations)
 4. [Asset Pipeline Bottlenecks](#asset-pipeline-bottlenecks)
 5. [Memory Management Issues](#memory-management-issues)
@@ -22,14 +22,14 @@ This document provides a comprehensive technical analysis of broken and outdated
 ```
 FAILURE: Build failed with an exception.
 * What went wrong:
-Resource compilation failed. Cause: java.lang.IllegalStateException:
+Resource compilation failed. Cause: java.lang.IllegalStateException: 
 Can not add resource to table. Duplicate value for resource 'attr/fontStyle'
 ```
 
 **Root Cause Analysis:**
 The build system fails due to conflicting resource definitions between:
 - Local app resources (`app/resources/res/`)
-- AndroidX Material Design components
+- AndroidX Material Design components  
 - Google Play Services dependencies
 - Legacy Android support libraries
 
@@ -51,7 +51,7 @@ sourceSets {
 // Updated app/build.gradle
 android {
     namespace 'com.lumiyaviewer.lumiya'
-
+    
     // Resolve resource conflicts
     packagingOptions {
         pickFirst '**/libjnidispatch.so'
@@ -61,17 +61,17 @@ android {
         exclude 'META-INF/NOTICE*'
         exclude 'META-INF/INDEX.LIST'
     }
-
+    
     // Use resource shrinking to eliminate conflicts
     buildTypes {
         release {
             minifyEnabled true
             shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 
                          'proguard-rules.pro'
         }
     }
-
+    
     // AndroidX migration settings
     useLibrary 'org.apache.http.legacy'
 }
@@ -88,25 +88,25 @@ import android.util.Log;
 
 public class ResourceConflictResolver {
     private static final String TAG = "ResourceResolver";
-
+    
     public static void resolveConflicts(Context context) {
         try {
             Resources res = context.getResources();
-
+            
             // Handle fontStyle conflicts by using app-specific identifiers
             resolveFontStyleConflicts(res);
-
+            
             // Handle drawable conflicts
             resolveDrawableConflicts(res);
-
+            
             // Handle string conflicts
             resolveStringConflicts(res);
-
+            
         } catch (Exception e) {
             Log.e(TAG, "Failed to resolve resource conflicts", e);
         }
     }
-
+    
     private static void resolveFontStyleConflicts(Resources res) {
         // Use fully qualified resource names to avoid conflicts
         // Example: com.lumiyaviewer.lumiya:attr/fontStyle
@@ -196,7 +196,7 @@ target_link_libraries(lumiya-native
 // RenderContext.java - Problematic legacy support
 public class RenderContext {
     private boolean useGL11 = false;
-
+    
     public void initializeGL() {
         if (hasGL30) {
             useModernPath();
@@ -229,7 +229,7 @@ public interface GraphicsAPI {
         OPENGL_ES3, // Fallback for mid-range devices
         WEBGL2      // For web deployment (future)
     }
-
+    
     boolean initialize(Surface surface);
     void renderFrame(Scene scene, Camera camera);
     void shutdown();
@@ -238,7 +238,7 @@ public interface GraphicsAPI {
 // Modern OpenGL ES implementation
 public class ModernOpenGLRenderer implements GraphicsAPI {
     private static final int MIN_GL_VERSION = 0x30000; // ES 3.0 minimum
-
+    
     @Override
     public boolean initialize(Surface surface) {
         // Verify OpenGL ES 3.0+ support
@@ -246,20 +246,20 @@ public class ModernOpenGLRenderer implements GraphicsAPI {
             throw new UnsupportedOperationException(
                 "OpenGL ES 3.0+ required. Device not supported.");
         }
-
+        
         // Initialize modern pipeline components
         initializePBRPipeline();
         initializeComputeShaders();
         initializeUniformBuffers();
-
+        
         return true;
     }
-
+    
     private void initializePBRPipeline() {
         // Physically-Based Rendering using OMI standards
         pbrShader = new PBRShaderProgram();
         iblRenderer = new ImageBasedLightingRenderer();
-
+        
         // Support for glTF 2.0 materials (OMI standard)
         materialSystem = new GLTFMaterialSystem();
     }
@@ -275,30 +275,30 @@ public class VulkanRenderer implements GraphicsAPI {
     private VulkanDevice device;
     private VulkanSwapchain swapchain;
     private VulkanPipelineManager pipelineManager;
-
+    
     @Override
     public boolean initialize(Surface surface) {
         try {
             // Initialize Vulkan instance
             createVulkanInstance();
-
+            
             // Create device and queues
             device = VulkanDevice.create(getPhysicalDevice());
-
+            
             // Create swapchain for presentation
             swapchain = VulkanSwapchain.create(device, surface);
-
+            
             // Create rendering pipelines
             pipelineManager = new VulkanPipelineManager(device);
             createModernPipelines();
-
+            
             return true;
         } catch (VulkanException e) {
             Log.e("VulkanRenderer", "Failed to initialize Vulkan", e);
             return false;
         }
     }
-
+    
     private void createModernPipelines() {
         // PBR rendering pipeline
         PBRPipelineConfig pbrConfig = PBRPipelineConfig.builder()
@@ -306,15 +306,15 @@ public class VulkanRenderer implements GraphicsAPI {
             .withFragmentShader("shaders/pbr.frag.spv")
             .withDescriptorSetLayouts(createPBRDescriptorLayouts())
             .build();
-
+        
         pipelineManager.createPipeline("pbr", pbrConfig);
-
+        
         // Compute pipeline for particle systems
         ComputePipelineConfig computeConfig = ComputePipelineConfig.builder()
             .withComputeShader("shaders/particles.comp.spv")
             .withLocalWorkgroupSize(64, 1, 1)
             .build();
-
+            
         pipelineManager.createComputePipeline("particles", computeConfig);
     }
 }
@@ -329,7 +329,7 @@ public class VulkanRenderer implements GraphicsAPI {
 // SLConnection.java - Limited protocol support
 public class SLConnection {
     private DatagramSocket udpSocket;  // BROKEN: UDP only
-
+    
     public void sendMessage(SLMessage message) {
         // Inefficient for large data transfers
         byte[] data = message.serialize();
@@ -357,11 +357,11 @@ public class HybridProtocol implements SLProtocol {
     private final WebSocketEventClient eventClient;
     private final UDPLegacyCircuit udpCircuit;
     private final ProtocolRouter router;
-
+    
     @Override
     public CompletableFuture<Void> sendMessage(SLMessage message) {
         ProtocolRoute route = router.determineRoute(message);
-
+        
         switch (route.getTransport()) {
             case HTTP2_CAPS:
                 return capsClient.sendAsync(message.toHTTP2Request());
@@ -373,17 +373,17 @@ public class HybridProtocol implements SLProtocol {
                 throw new UnsupportedOperationException("Unknown transport: " + route);
         }
     }
-
+    
     public void initialize(GridEndpoint endpoint, AuthCredentials credentials) {
         // Modern OAuth2 authentication
         AuthToken token = OAuth2Authenticator.authenticate(credentials);
-
+        
         // HTTP/2 CAPS connection for modern features
         capsClient.connect(endpoint.getCapsURL(), token);
-
+        
         // WebSocket for real-time events (object updates, chat, etc.)
         eventClient.connect(endpoint.getEventStreamURL(), token);
-
+        
         // UDP circuit for legacy message compatibility
         udpCircuit.connect(endpoint.getSimulatorEndpoint());
     }
@@ -399,7 +399,7 @@ public class ModernSerialization {
     private final ProtobufSerializer protobufSerializer;
     private final MessagePackSerializer msgpackSerializer;
     private final LegacyBinarySerializer legacySerializer;
-
+    
     public byte[] serialize(SLMessage message, SerializationFormat format) {
         switch (format) {
             case PROTOBUF:
@@ -415,7 +415,7 @@ public class ModernSerialization {
                 throw new IllegalArgumentException("Unsupported format: " + format);
         }
     }
-
+    
     public SLMessage deserialize(byte[] data, SerializationFormat format) {
         // Implement corresponding deserialization
         switch (format) {
@@ -436,13 +436,13 @@ public class ModernSerialization {
 // TextureCache.java - Inefficient texture loading
 public class TextureCache {
     private OpenJPEGDecoder decoder;  // BROKEN: CPU-intensive, slow
-
+    
     public GLTexture loadTexture(UUID textureId) {
         byte[] j2kData = downloadFromAssetServer(textureId);
-
+        
         // PROBLEM: Synchronous, CPU-intensive decoding
         BufferedImage image = decoder.decode(j2kData);  // Blocks main thread!
-
+        
         // PROBLEM: Uncompressed upload to GPU
         return uploadRGBAToGPU(image);  // Wastes GPU memory
     }
@@ -467,12 +467,12 @@ public class ModernTextureManager {
     private final ASTC_Encoder astcEncoder;
     private final TextureMemoryPool gpuPool;
     private final ExecutorService backgroundThreads;
-
+    
     public CompletableFuture<GLTexture> loadTextureAsync(UUID textureId) {
         return CompletableFuture.supplyAsync(() -> {
             // Check for pre-transcoded formats first
             TextureData textureData = fetchOptimizedTexture(textureId);
-
+            
             if (textureData.isBasisUniversal()) {
                 return loadBasisTexture(textureData);
             } else if (textureData.isASTC()) {
@@ -483,22 +483,22 @@ public class ModernTextureManager {
             }
         }, backgroundThreads);
     }
-
+    
     private GLTexture loadBasisTexture(TextureData data) {
         // Basis Universal: Universal texture compression
         // Transcode to optimal format for current GPU
         TextureFormat optimalFormat = detectOptimalFormat();
-
+        
         byte[] transcodedData = basisTranscoder.transcode(
             data.getData(), optimalFormat);
-
+            
         return gpuPool.createCompressedTexture(transcodedData, optimalFormat);
     }
-
+    
     private TextureFormat detectOptimalFormat() {
         // Detect best compression format for current GPU
         GPUCapabilities caps = GPUCapabilities.detect();
-
+        
         if (caps.supportsASTC()) {
             return TextureFormat.ASTC_4x4;  // Best quality
         } else if (caps.supportsETC2()) {
@@ -507,17 +507,17 @@ public class ModernTextureManager {
             return TextureFormat.DXT1;      // Fallback
         }
     }
-
+    
     private GLTexture transcodeFromJPEG2000(TextureData data) {
         // Background transcoding from legacy format
         BufferedImage image = decodeJPEG2000(data.getData());
-
+        
         // Compress to modern format for GPU efficiency
         if (GPUCapabilities.supportsASTC()) {
             byte[] astcData = astcEncoder.encode(image);
             return gpuPool.createCompressedTexture(astcData, TextureFormat.ASTC_4x4);
         }
-
+        
         // Fallback to uncompressed
         return gpuPool.createUncompressedTexture(image);
     }
@@ -533,16 +533,16 @@ public class StreamingLOD {
     private final TextureStreamer streamer;
     private final LODCalculator lodCalculator;
     private final BandwidthMonitor bandwidthMonitor;
-
+    
     public void updateTextureStreaming(Camera camera, List<RenderableObject> objects) {
         for (RenderableObject obj : objects) {
             // Calculate required LOD based on distance and screen size
             float distance = camera.getPosition().distance(obj.getPosition());
             float screenSize = calculateScreenSize(obj, camera);
-
+            
             LODLevel requiredLOD = lodCalculator.calculateLOD(distance, screenSize);
             LODLevel currentLOD = obj.getCurrentTextureLOD();
-
+            
             if (requiredLOD.isHigherThan(currentLOD)) {
                 // Stream higher quality texture
                 streamHigherLOD(obj, requiredLOD);
@@ -552,16 +552,16 @@ public class StreamingLOD {
             }
         }
     }
-
+    
     private void streamHigherLOD(RenderableObject obj, LODLevel targetLOD) {
         // Check bandwidth availability
         if (bandwidthMonitor.canStreamHigherLOD()) {
             UUID textureId = obj.getTextureId();
-
+            
             // Stream higher resolution texture in background
-            CompletableFuture<GLTexture> future =
+            CompletableFuture<GLTexture> future = 
                 streamer.loadTextureLODAsync(textureId, targetLOD);
-
+                
             future.thenAccept(texture -> {
                 obj.setTexture(texture);
                 obj.setCurrentLOD(targetLOD);
@@ -580,11 +580,11 @@ public class StreamingLOD {
 // ResourceManager.java - Memory management problems
 public class ResourceManager {
     private Map<UUID, Object> cache = new HashMap<>();  // BROKEN: No size limits
-
+    
     public void cacheResource(UUID id, Object resource) {
         cache.put(id, resource);  // MEMORY LEAK: Never cleaned up
     }
-
+    
     public GLTexture createTexture(BufferedImage image) {
         // BROKEN: No GPU memory tracking
         return new GLTexture(image);  // May cause GPU OOM
@@ -610,20 +610,20 @@ public class SmartMemoryManager {
     private final SystemMemoryMonitor memoryMonitor;
     private final MemoryPressureHandler pressureHandler;
     private final WeakReference<Activity> activityRef;
-
+    
     public GLTexture allocateTexture(TextureSpec spec) {
         // Check GPU memory availability
         if (!gpuPool.canAllocate(spec.getEstimatedSize())) {
             // Trigger memory cleanup
             pressureHandler.handleGPUMemoryPressure();
-
+            
             // If still not enough, reduce quality
             spec = spec.withReducedQuality();
         }
-
+        
         return gpuPool.allocateTexture(spec);
     }
-
+    
     public void onMemoryPressure(MemoryPressureLevel level) {
         switch (level) {
             case LOW:
@@ -655,7 +655,7 @@ public class GPUMemoryPool {
     private final long maxGPUMemory;
     private final AtomicLong allocatedMemory = new AtomicLong(0);
     private final Map<TextureFormat, Queue<GLTexture>> freePools = new ConcurrentHashMap<>();
-
+    
     public GLTexture allocateTexture(TextureSpec spec) {
         // Try to reuse existing texture from pool
         Queue<GLTexture> pool = freePools.get(spec.getFormat());
@@ -665,23 +665,23 @@ public class GPUMemoryPool {
                 return reused.resize(spec);
             }
         }
-
+        
         // Check memory budget
         long requiredMemory = spec.getEstimatedSize();
         if (allocatedMemory.get() + requiredMemory > maxGPUMemory) {
             throw new OutOfGPUMemoryException("GPU memory exhausted");
         }
-
+        
         // Allocate new texture
         GLTexture texture = new GLTexture(spec);
         allocatedMemory.addAndGet(requiredMemory);
-
+        
         return texture;
     }
-
+    
     public void deallocateTexture(GLTexture texture) {
         allocatedMemory.addAndGet(-texture.getSize());
-
+        
         // Return to pool for reuse
         Queue<GLTexture> pool = freePools.computeIfAbsent(
             texture.getFormat(), k -> new ConcurrentLinkedQueue<>());
@@ -726,21 +726,21 @@ public class ModernRenderThread {
     private final ExecutorService animationThreadPool;
     private final ExecutorService assetThreadPool;
     private final CommandBufferQueue commandQueue;
-
+    
     public void renderFrame(Scene scene, Camera camera) {
         // Parallel execution of rendering tasks
-        CompletableFuture<AnimationData> animationFuture =
-            CompletableFuture.supplyAsync(() ->
+        CompletableFuture<AnimationData> animationFuture = 
+            CompletableFuture.supplyAsync(() -> 
                 updateAnimationsParallel(scene), animationThreadPool);
-
+                
         CompletableFuture<RenderCommands> commandsFuture =
             CompletableFuture.supplyAsync(() ->
                 generateRenderCommands(scene, camera), renderThreadPool);
-
+        
         CompletableFuture<AssetData> assetFuture =
             CompletableFuture.supplyAsync(() ->
                 loadPendingAssets(), assetThreadPool);
-
+        
         // Wait for all tasks to complete
         CompletableFuture.allOf(animationFuture, commandsFuture, assetFuture)
             .thenAccept(ignored -> {
@@ -748,24 +748,24 @@ public class ModernRenderThread {
                 submitToGPU(commandsFuture.join());
             });
     }
-
+    
     private AnimationData updateAnimationsParallel(Scene scene) {
         // Parallel animation processing using work-stealing
         ForkJoinPool animationPool = ForkJoinPool.commonPool();
-
+        
         return scene.getAnimatedObjects().parallelStream()
             .map(this::updateSingleAnimation)
             .collect(AnimationData.collector());
     }
-
+    
     private RenderCommands generateRenderCommands(Scene scene, Camera camera) {
         // Multi-threaded command buffer generation
         RenderCommandBuilder builder = new RenderCommandBuilder();
-
+        
         // Parallel culling and command generation
         scene.getVisibleObjects(camera).parallelStream()
             .forEach(obj -> builder.addRenderCommand(obj));
-
+            
         return builder.build();
     }
 }
@@ -779,14 +779,14 @@ package com.lumiyaviewer.lumiya.modern.threading;
 public class LockFreeCommandQueue {
     private final AtomicReference<CommandNode> head = new AtomicReference<>();
     private final AtomicReference<CommandNode> tail = new AtomicReference<>();
-
+    
     public void enqueue(RenderCommand command) {
         CommandNode newNode = new CommandNode(command);
-
+        
         while (true) {
             CommandNode currentTail = tail.get();
             CommandNode tailNext = currentTail.next.get();
-
+            
             if (currentTail == tail.get()) {
                 if (tailNext == null) {
                     // Try to link new node
@@ -799,17 +799,17 @@ public class LockFreeCommandQueue {
                 }
             }
         }
-
+        
         // Try to advance tail
         tail.compareAndSet(tail.get(), newNode);
     }
-
+    
     public RenderCommand dequeue() {
         while (true) {
             CommandNode currentHead = head.get();
             CommandNode currentTail = tail.get();
             CommandNode headNext = currentHead.next.get();
-
+            
             if (currentHead == head.get()) {
                 if (currentHead == currentTail) {
                     if (headNext == null) {
@@ -826,11 +826,11 @@ public class LockFreeCommandQueue {
             }
         }
     }
-
+    
     private static class CommandNode {
         final RenderCommand command;
         final AtomicReference<CommandNode> next = new AtomicReference<>();
-
+        
         CommandNode(RenderCommand command) {
             this.command = command;
         }
@@ -852,17 +852,17 @@ public class WebaverseAssetPipeline {
         if (assetUrl.endsWith(".vrm")) {
             return VRMLoader.loadAvatar(assetUrl);
         }
-
+        
         // Support for Webaverse glTF scenes
         if (assetUrl.endsWith(".glb") || assetUrl.endsWith(".gltf")) {
             return GLTFLoader.loadScene(assetUrl);
         }
-
+        
         // Support for Webaverse VOX voxel models
         if (assetUrl.endsWith(".vox")) {
             return VOXLoader.loadVoxelModel(assetUrl);
         }
-
+        
         return null;
     }
 }
@@ -878,12 +878,12 @@ public class OMIStandardsHandler {
         if (gltf.hasExtension("OMI_collider")) {
             processColliderExtension(gltf);
         }
-
+        
         // OMI_spawn_point for teleportation
         if (gltf.hasExtension("OMI_spawn_point")) {
             processSpawnPointExtension(gltf);
         }
-
+        
         // OMI_vrm for avatar interoperability
         if (gltf.hasExtension("OMI_vrm")) {
             processVRMExtension(gltf);
@@ -900,10 +900,10 @@ public class ModernLibreMetaverseProtocol {
     public void handleModernMessages() {
         // Enhanced object updates with PBR materials
         registerHandler(ObjectUpdateMessage.class, this::handlePBRObjectUpdate);
-
+        
         // Improved avatar data with VRM support
         registerHandler(AvatarDataMessage.class, this::handleVRMAvatarData);
-
+        
         // Modern asset transfer with HTTP/2
         registerHandler(AssetRequestMessage.class, this::handleHTTP2AssetRequest);
     }

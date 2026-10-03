@@ -12,13 +12,13 @@ import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Manages avatar appearance and sends AgentSetAppearance to the simulator.
- *
+ * 
  * This is CRITICAL for other avatars to see your appearance. Without this,
  * you will appear as a cloud (default avatar) to others.
- *
+ * 
  * Based on LibreMetaverse AgentManager.SetAppearance() and
  * Firestorm LLAppearanceMgr::updateAppearanceFromCOF()
- *
+ * 
  * @see <a href="https://wiki.secondlife.com/wiki/AgentSetAppearance">AgentSetAppearance Message</a>
  */
 class AppearanceManager @JvmOverloads constructor(
@@ -29,13 +29,13 @@ class AppearanceManager @JvmOverloads constructor(
     companion object {
         private const val TAG = "AppearanceManager"
         private val MESSAGE_BYTE_ORDER = ByteOrder.LITTLE_ENDIAN
-
+        
         // Visual parameter count (218 params in current SL protocol)
         const val VISUAL_PARAM_COUNT = 218
-
+        
         // Texture entry constants
         const val TEX_ENTRY_COUNT = 21
-
+        
         // Baked texture indices in texture entry
         const val TEX_HEAD_BAKED = 8
         const val TEX_UPPER_BAKED = 9
@@ -49,19 +49,19 @@ class AppearanceManager @JvmOverloads constructor(
         const val TEX_AUX2_BAKED = 17
         const val TEX_AUX3_BAKED = 18
     }
-
+    
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-
+    
     // Serial number for appearance updates (must increment)
     private val serialNum = AtomicInteger(0)
-
+    
     // Current visual parameters (shape sliders)
     private var visualParams = ByteArray(VISUAL_PARAM_COUNT) { 127.toByte() } // Default to middle value
-
+    
     // Agent and session info
     private var agentId: UUID = UUID(0, 0)
     private var sessionId: UUID = UUID(0, 0)
-
+    
     // Avatar size (computed from visual params)
     private var avatarHeight: Float = 1.7f
 
@@ -114,7 +114,7 @@ class AppearanceManager @JvmOverloads constructor(
         this.agentId = agentId
         this.sessionId = sessionId
     }
-
+    
     /**
      * Set visual parameters (shape sliders).
      * Each byte represents a slider from 0-255.
@@ -127,7 +127,7 @@ class AppearanceManager @JvmOverloads constructor(
             Log.w(TAG, "Invalid visual param count: ${params.size}, expected $VISUAL_PARAM_COUNT")
         }
     }
-
+    
     /**
      * Update a single visual parameter.
      * @param index Parameter index (0-217)
@@ -139,7 +139,7 @@ class AppearanceManager @JvmOverloads constructor(
             avatarHeight = calculateAvatarHeight()
         }
     }
-
+    
     /**
      * Calculate avatar height from visual params.
      * Uses the height slider and body proportion sliders.
@@ -150,7 +150,7 @@ class AppearanceManager @JvmOverloads constructor(
         // Base height range: 1.2m - 2.2m
         return 1.2f + (heightValue * 1.0f)
     }
-
+    
     /**
      * Send full appearance update to the simulator.
      * Evaluates region capabilities (SSA vs CSB fallback), bakes all textures,
@@ -185,7 +185,7 @@ class AppearanceManager @JvmOverloads constructor(
             Log.e(TAG, "✗ Appearance update failed after ${lastUpdateDurationMs}ms", e)
         }
     }
-
+    
     /**
      * Send AgentSetAppearance message.
      *
@@ -360,7 +360,7 @@ class AppearanceManager @JvmOverloads constructor(
         out.write(0)
         return out.toByteArray()
     }
-
+    
     /**
      * Send AgentIsNowWearing message after changing outfit.
      * This tells the simulator which wearables are equipped.
@@ -369,25 +369,25 @@ class AppearanceManager @JvmOverloads constructor(
         // AgentIsNowWearing format:
         // AgentData: AgentID (16) + SessionID (16)
         // WearableData: Count (1) + N * (ItemID (16) + WearableType (1))
-
+        
         val payloadSize = 32 + 1 + wearables.size * 17
         val payload = ByteBuffer.allocate(payloadSize).order(MESSAGE_BYTE_ORDER)
-
+        
         // AgentData
         payload.putUUID(agentId)
         payload.putUUID(sessionId)
-
+        
         // WearableData
         payload.put(wearables.size.toByte())
         wearables.forEach { entry ->
             payload.putUUID(entry.itemId)
             payload.put(entry.wearableType.ordinal.toByte())
         }
-
+        
         Log.d(TAG, "Sending AgentIsNowWearing (${wearables.size} wearables)")
         udpConnection.sendPacket(MessageIdRegistry.AGENT_IS_NOW_WEARING, payload.array(), reliable = true)
     }
-
+    
     /**
      * Convert bake channel to texture entry index.
      */
@@ -407,7 +407,7 @@ class AppearanceManager @JvmOverloads constructor(
             else -> channel + TEX_HEAD_BAKED
         }
     }
-
+    
     /**
      * Request a rebake of all textures.
      * Use this when wearables change.
@@ -417,7 +417,7 @@ class AppearanceManager @JvmOverloads constructor(
             sendAppearanceUpdate()
         }
     }
-
+    
     /**
      * Live ParamID → weight overrides for the next AgentSetAppearance.
      * Empty by default: every byte falls back to per-param `valueDefault`

@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * ThemeManager handles loading, saving, and sharing theme packs.
- *
+ * 
  * Features:
  * - Load/save user-created themes from app storage
  * - Import themes from JSON files
@@ -27,43 +27,43 @@ import java.util.concurrent.atomic.AtomicBoolean
  * - Manage active theme selection
  */
 class ThemeManager private constructor(private val context: Context) {
-
+    
     companion object {
         private const val TAG = "ThemeManager"
         private const val PREFS_NAME = "linkpoint_themes"
         private const val PREF_ACTIVE_THEME = "active_theme_id"
         private const val THEMES_DIR = "themes"
         private const val THEME_FILE_EXTENSION = ".linkpoint-theme.json"
-
+        
         @Volatile
         private var instance: ThemeManager? = null
-
+        
         fun getInstance(context: Context): ThemeManager {
             return instance ?: synchronized(this) {
                 instance ?: ThemeManager(context.applicationContext).also { instance = it }
             }
         }
     }
-
+    
     private val isApplyingRemoteUpdate = AtomicBoolean(false)
 
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val themesDir = File(context.filesDir, THEMES_DIR).apply { mkdirs() }
-
+    
     // Current active theme
     private val _activeTheme = MutableStateFlow(BuiltInThemes.LINKPOINT_DEFAULT)
     val activeTheme: StateFlow<ThemePack> = _activeTheme.asStateFlow()
-
+    
     // All available themes (built-in + user)
     private val _availableThemes = MutableStateFlow<List<ThemePack>>(emptyList())
     val availableThemes: StateFlow<List<ThemePack>> = _availableThemes.asStateFlow()
-
+    
     init {
         loadThemes()
         loadActiveTheme()
         subscribeToKthemeUpdates()
     }
-
+    
     /**
      * Load all themes (built-in + user-created)
      */
@@ -87,13 +87,13 @@ class ThemeManager private constructor(private val context: Context) {
         _availableThemes.value = themes
         Log.d(TAG, "Loaded ${themes.size} themes (${ThemeCatalog.allThemes(context).size} built-in)")
     }
-
+    
     /**
      * Load user-created themes from storage
      */
     private fun loadUserThemes(): List<ThemePack> {
         val userThemes = mutableListOf<ThemePack>()
-
+        
         themesDir.listFiles { file -> file.name.endsWith(THEME_FILE_EXTENSION) }?.forEach { file ->
             try {
                 val json = file.readText()
@@ -105,10 +105,10 @@ class ThemeManager private constructor(private val context: Context) {
                 Log.e(TAG, "Failed to load theme from ${file.name}", e)
             }
         }
-
+        
         return userThemes
     }
-
+    
     /**
      * Load themes exposed via KthemeAPI and map them to ThemePack.
      */
@@ -161,7 +161,7 @@ class ThemeManager private constructor(private val context: Context) {
         _activeTheme.value = theme
         Log.d(TAG, "Active theme: ${theme.name}")
     }
-
+    
     /**
      * Set the active theme
      */
@@ -179,7 +179,7 @@ class ThemeManager private constructor(private val context: Context) {
 
         Log.d(TAG, "Set active theme: ${theme.name}")
     }
-
+    
     /**
      * Set the active layout structure on the active theme
      */
@@ -204,7 +204,7 @@ class ThemeManager private constructor(private val context: Context) {
             false
         }
     }
-
+    
     /**
      * Save a user-created theme
      */
@@ -219,21 +219,21 @@ class ThemeManager private constructor(private val context: Context) {
                 }
                 is ThemePack.ValidationResult.Valid -> { /* continue */ }
             }
-
+            
             // Ensure it's not marked as built-in
             val themeToSave = if (theme.isBuiltIn) {
                 theme.copy(isBuiltIn = false, id = "custom_${System.currentTimeMillis()}")
             } else {
                 theme
             }
-
+            
             // Save to file
             val file = File(themesDir, "${themeToSave.id}$THEME_FILE_EXTENSION")
             file.writeText(themeToSave.toJson())
-
+            
             // Reload themes
             loadThemes()
-
+            
             Log.d(TAG, "Saved theme: ${themeToSave.name}")
             Result.success(themeToSave)
         } catch (e: Exception) {
@@ -241,7 +241,7 @@ class ThemeManager private constructor(private val context: Context) {
             Result.failure(e)
         }
     }
-
+    
     /**
      * Delete a user-created theme
      */
@@ -251,10 +251,10 @@ class ThemeManager private constructor(private val context: Context) {
             Log.w(TAG, "Cannot delete built-in theme: $themeId")
             return@withContext false
         }
-
+        
         val file = File(themesDir, "$themeId$THEME_FILE_EXTENSION")
         val deleted = file.delete()
-
+        
         if (deleted) {
             // If this was the active theme, switch to default
             if (_activeTheme.value.id == themeId) {
@@ -263,10 +263,10 @@ class ThemeManager private constructor(private val context: Context) {
             loadThemes()
             Log.d(TAG, "Deleted theme: $themeId")
         }
-
+        
         deleted
     }
-
+    
     /**
      * Import a theme from a JSON string
      */
@@ -274,20 +274,20 @@ class ThemeManager private constructor(private val context: Context) {
         try {
             val theme = ThemePack.fromJson(json)
                 ?: return@withContext Result.failure(IllegalArgumentException("Invalid theme JSON"))
-
+            
             // Generate new ID to avoid conflicts
             val importedTheme = theme.copy(
                 id = "imported_${System.currentTimeMillis()}",
                 isBuiltIn = false
             )
-
+            
             saveTheme(importedTheme)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to import theme", e)
             Result.failure(e)
         }
     }
-
+    
     /**
      * Import a theme from a URI (e.g., from file picker)
      */
@@ -295,7 +295,7 @@ class ThemeManager private constructor(private val context: Context) {
         try {
             val inputStream = context.contentResolver.openInputStream(uri)
                 ?: return@withContext Result.failure(IllegalArgumentException("Cannot open file"))
-
+            
             val json = inputStream.bufferedReader().use { it.readText() }
             importTheme(json)
         } catch (e: Exception) {
@@ -303,10 +303,10 @@ class ThemeManager private constructor(private val context: Context) {
             Result.failure(e)
         }
     }
-
+    
     /**
      * Export a theme to a shareable file.
-     *
+     * 
      * Note: This requires FileProvider configuration in AndroidManifest.xml:
      * ```xml
      * <provider
@@ -327,14 +327,14 @@ class ThemeManager private constructor(private val context: Context) {
             val exportDir = File(context.cacheDir, "theme_exports").apply { mkdirs() }
             val exportFile = File(exportDir, "${theme.id}$THEME_FILE_EXTENSION")
             exportFile.writeText(theme.toJson())
-
+            
             // Get content URI for sharing (requires FileProvider in manifest)
             val uri = FileProvider.getUriForFile(
                 context,
                 "${context.packageName}.fileprovider",
                 exportFile
             )
-
+            
             Log.d(TAG, "Exported theme: ${theme.name} to $uri")
             Result.success(uri)
         } catch (e: Exception) {
@@ -342,7 +342,7 @@ class ThemeManager private constructor(private val context: Context) {
             Result.failure(e)
         }
     }
-
+    
     /**
      * Share a theme via Android share sheet
      */
@@ -358,14 +358,14 @@ class ThemeManager private constructor(private val context: Context) {
             appendLine("--- Theme JSON (copy and import in Linkpoint) ---")
             appendLine(theme.toJson())
         }
-
+        
         return Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_SUBJECT, "Linkpoint Theme: ${theme.name}")
             putExtra(Intent.EXTRA_TEXT, shareText)
         }
     }
-
+    
     /**
      * Create a share intent with the theme file attached
      */
@@ -380,7 +380,7 @@ class ThemeManager private constructor(private val context: Context) {
             }
         }
     }
-
+    
     /**
      * Create a new theme from a template
      */
@@ -399,7 +399,7 @@ class ThemeManager private constructor(private val context: Context) {
             isBuiltIn = false
         )
     }
-
+    
     /**
      * Duplicate an existing theme for editing
      */
@@ -410,7 +410,7 @@ class ThemeManager private constructor(private val context: Context) {
             isBuiltIn = false
         )
     }
-
+    
     /**
      * Refresh themes from storage
      */

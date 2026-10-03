@@ -78,7 +78,7 @@ jobs:
           TOTAL_LINES=$(find src -name "*.kt" -exec wc -l {} + 2>/dev/null | tail -1 | awk '{print $1}' || echo "0")
           echo "Total Kotlin files: $TOTAL_KOTLIN"
           echo "Total lines of code: $TOTAL_LINES"
-
+          
           echo "## 📈 Code Metrics" >> $GITHUB_STEP_SUMMARY
           echo "- **Total Kotlin files:** $TOTAL_KOTLIN" >> $GITHUB_STEP_SUMMARY
           echo "- **Total lines of code:** $TOTAL_LINES" >> $GITHUB_STEP_SUMMARY

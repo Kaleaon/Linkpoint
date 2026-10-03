@@ -17,7 +17,7 @@ import java.util.logging.Logger
 
 /**
  * Configuration management for the Second Life viewer (Kotlin implementation).
- *
+ * 
  * Features:
  * - Kotlin property delegates for reactive configuration
  * - Type-safe configuration with sealed classes
@@ -28,7 +28,7 @@ class ViewerConfiguration {
         private val LOGGER = Logger.getLogger(ViewerConfiguration::class.java.name)
         private const val CONFIG_DIR = "\${user.home}/.secondlife-java"
         private const val CONFIG_FILE = "viewer-config.properties"
-
+        
         /**
          * Create configuration from command line arguments using Kotlin features
          */
@@ -112,21 +112,21 @@ class ViewerConfiguration {
             println("""
                 Second Life Viewer - Kotlin Implementation
                 Usage: java -jar secondlife-viewer.jar [options]
-
+                
                 Cache Options:
                   --cache-location LOCATION   Storage location (INTERNAL, EXTERNAL, SYSTEM_TEMP, USER_HOME)
                   --cache-size SIZE           Max cache size (e.g., 10GB, 500MB)
-
+                
                 Rendering Options:
                   --quality PRESET            Quality preset (ULTRA_LOW, LOW, BALANCED, HIGH, ULTRA)
                   --battery-mode               Enable battery conservation mode
-
+                
                 Network Options:
                   --grid GRID                  Default grid (agni, aditi, etc.)
-
+                
                 UI Options:
                   --no-splash                  Disable splash screen
-
+                
                 Other Options:
                   --help                       Show this help message
             """.trimIndent())
@@ -423,14 +423,14 @@ class ViewerConfiguration {
     }
 
     // Utility methods using Kotlin features
-
+    
     /**
      * Reset to factory defaults
      */
     fun resetToDefaults() {
         LOGGER.info("Resetting configuration to defaults")
         properties.clear()
-
+        
         // Reset all properties to defaults
         cacheStorageLocation = CacheManager.StorageLocation.INTERNAL
         maxCacheSize = CacheManager.DEFAULT_CACHE_SIZE
@@ -443,7 +443,7 @@ class ViewerConfiguration {
         showSplashScreen = true
         minimizeToTray = true
         uiTheme = "Default"
-
+        
         loadDefaultConfiguration()
         markUpdated()
     }

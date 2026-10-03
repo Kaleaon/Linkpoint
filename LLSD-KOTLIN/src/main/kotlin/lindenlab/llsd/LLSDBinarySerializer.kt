@@ -33,7 +33,7 @@ import java.util.*
  * @see [LLSD Binary Specification](http://wiki.secondlife.com/wiki/LLSD#Binary_Serialization)
  */
 class LLSDBinarySerializer {
-
+    
     /**
      * Serializes an LLSD document into its binary representation and writes it to
      * an output stream.
@@ -52,7 +52,7 @@ class LLSDBinarySerializer {
         }
         serializeValue(llsd.content, output)
     }
-
+    
     /**
      * Serializes an LLSD document into a binary byte array.
      *
@@ -72,7 +72,7 @@ class LLSDBinarySerializer {
             throw LLSDException("Failed to serialize binary LLSD", e)
         }
     }
-
+    
     /**
      * Recursively serializes a single LLSD value to the output stream.
      *
@@ -130,13 +130,13 @@ class LLSDBinarySerializer {
             }
         }
     }
-
+    
     /** Writes a boolean value as a single byte marker ('1' or '0'). */
     @Throws(IOException::class)
     private fun serializeBoolean(value: Boolean, output: OutputStream) {
         output.write(if (value) TRUE_MARKER.toInt() else FALSE_MARKER.toInt())
     }
-
+    
     /** Writes an integer value with its marker and 4-byte big-endian representation. */
     @Throws(IOException::class)
     private fun serializeInteger(value: Int, output: OutputStream) {
@@ -145,7 +145,7 @@ class LLSDBinarySerializer {
         buffer.putInt(value)
         output.write(buffer.array())
     }
-
+    
     /** Writes a double value with its marker and 8-byte big-endian representation. */
     @Throws(IOException::class)
     private fun serializeReal(value: Double, output: OutputStream) {
@@ -154,7 +154,7 @@ class LLSDBinarySerializer {
         buffer.putDouble(value)
         output.write(buffer.array())
     }
-
+    
     /** Writes a string value with its marker, a 4-byte length prefix, and UTF-8 bytes. */
     @Throws(IOException::class)
     private fun serializeString(value: String, output: OutputStream) {
@@ -163,7 +163,7 @@ class LLSDBinarySerializer {
         writeInt32(output, stringBytes.size)
         output.write(stringBytes)
     }
-
+    
     /** Writes a UUID value with its marker and 16-byte representation. */
     @Throws(IOException::class)
     private fun serializeUUID(value: UUID, output: OutputStream) {
@@ -173,7 +173,7 @@ class LLSDBinarySerializer {
         buffer.putLong(value.leastSignificantBits)
         output.write(buffer.array())
     }
-
+    
     /** Writes a Date value with its marker and 8-byte double representation (seconds since epoch). */
     @Throws(IOException::class)
     private fun serializeDate(value: Date, output: OutputStream) {
@@ -183,7 +183,7 @@ class LLSDBinarySerializer {
         buffer.putDouble(secondsSinceEpoch)
         output.write(buffer.array())
     }
-
+    
     /** Writes a URI value with its marker, a 4-byte length prefix, and UTF-8 bytes. */
     @Throws(IOException::class)
     private fun serializeURI(value: URI, output: OutputStream) {
@@ -192,7 +192,7 @@ class LLSDBinarySerializer {
         writeInt32(output, uriBytes.size)
         output.write(uriBytes)
     }
-
+    
     /** Writes a binary data block with its marker, a 4-byte length prefix, and raw bytes. */
     @Throws(IOException::class)
     private fun serializeBinary(value: ByteArray, output: OutputStream) {
@@ -200,7 +200,7 @@ class LLSDBinarySerializer {
         writeInt32(output, value.size)
         output.write(value)
     }
-
+    
     /** Serializes a List into an LLSD array, enclosed in array markers. */
     @Throws(IOException::class, LLSDException::class)
     private fun serializeArray(list: List<*>, output: OutputStream) {
@@ -210,7 +210,7 @@ class LLSDBinarySerializer {
         }
         output.write(ARRAY_END_MARKER.toInt())
     }
-
+    
     /** Serializes a Map into an LLSD map, enclosed in map markers, with keys and values. */
     @Throws(IOException::class, LLSDException::class)
     private fun serializeMap(map: Map<String, Any?>, output: OutputStream) {
@@ -221,13 +221,13 @@ class LLSDBinarySerializer {
             val keyBytes = key.toByteArray(StandardCharsets.UTF_8)
             writeInt32(output, keyBytes.size)
             output.write(keyBytes)
-
+            
             // Write value
             serializeValue(value, output)
         }
         output.write(MAP_END_MARKER.toInt())
     }
-
+    
     /**
      * Helper method to write a 32-bit integer in big-endian format to the stream.
      */
@@ -237,11 +237,11 @@ class LLSDBinarySerializer {
         buffer.putInt(value)
         output.write(buffer.array())
     }
-
+    
     companion object {
         private const val LLSD_BINARY_HEADER = "<?llsd/binary?>"
         private val LLSD_BINARY_HEADER_BYTES = LLSD_BINARY_HEADER.toByteArray(StandardCharsets.US_ASCII)
-
+        
         // Binary markers
         private const val UNDEF_MARKER = '!'.code.toByte()
         private const val TRUE_MARKER = '1'.code.toByte()

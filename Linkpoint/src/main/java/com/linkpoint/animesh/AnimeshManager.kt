@@ -14,15 +14,15 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Animesh Manager - Handles animated mesh objects in Second Life.
- *
+ * 
  * Animesh (animated mesh) was introduced in 2018 and allows mesh objects
  * to have their own skeleton and play animations independently.
- *
+ * 
  * This is different from rigged mesh attachments which use the avatar's skeleton.
  * Animesh objects have their own skeleton and can be:
  * - Rezzed in-world as NPCs/pets
  * - Attached to avatars as animated attachments (tails, wings, etc.)
- *
+ * 
  * Reference: https://wiki.secondlife.com/wiki/Animesh
  */
 class AnimeshManager(
@@ -31,24 +31,24 @@ class AnimeshManager(
 ) {
     companion object {
         private const val TAG = "AnimeshManager"
-
+        
         // Object flags for animesh detection
         const val FLAG_ANIMESH = 0x00080000 // Animesh flag in ObjectUpdate
         const val FLAG_ANIMATED_MESH = 0x00100000
     }
-
+    
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-
+    
     // Animesh objects in the scene
     private val animeshObjects = ConcurrentHashMap<UUID, AnimeshObject>()
-
+    
     /**
      * Check if an object is animesh based on its flags.
      */
     fun isAnimesh(objectFlags: Int): Boolean {
         return (objectFlags and FLAG_ANIMESH) != 0 || (objectFlags and FLAG_ANIMATED_MESH) != 0
     }
-
+    
     /**
      * Create or update an animesh object.
      */
@@ -64,12 +64,12 @@ class AnimeshManager(
         val animesh = animeshObjects.getOrPut(objectId) {
             createAnimeshObject(objectId, localId)
         }
-
+        
         animesh.position = position
         animesh.rotation = rotation
         animesh.scale = scale
         animesh.lastUpdate = System.currentTimeMillis()
-
+        
         // Load mesh if changed
         if (meshAssetId != null && animesh.meshAssetId != meshAssetId) {
             animesh.meshAssetId = meshAssetId
@@ -77,7 +77,7 @@ class AnimeshManager(
                 loadAnimeshMesh(animesh, meshAssetId)
             }
         }
-
+        
         // Start animation if provided
         if (animationAssetId != null) {
             scope.launch {
@@ -85,17 +85,17 @@ class AnimeshManager(
             }
         }
     }
-
+    
     /**
      * Handle object update that may be animesh.
      */
     fun handleObjectUpdate(update: ObjectUpdateData) {
         if (isAnimesh(update.updateFlags)) {
             Log.d(TAG, "Animesh object detected: ${update.fullId}")
-
+            
             // Extract mesh asset ID from extra params
             val meshAssetId = update.getMeshAssetId()
-
+            
             updateAnimeshObject(
                 objectId = update.fullId,
                 localId = update.localId,
@@ -107,13 +107,13 @@ class AnimeshManager(
             )
         }
     }
-
+    
     /**
      * Handle animation update for animesh.
      */
     fun handleAnimeshAnimation(objectId: UUID, animationId: UUID, start: Boolean) {
         val animesh = animeshObjects[objectId] ?: return
-
+        
         if (start) {
             scope.launch {
                 playAnimeshAnimation(animesh, animationId)
@@ -122,7 +122,7 @@ class AnimeshManager(
             animesh.animator?.stopAnimation(animationId)
         }
     }
-
+    
     /**
      * Create a new animesh object.
      */
@@ -130,7 +130,7 @@ class AnimeshManager(
         // Create skeleton for animesh (same as avatar skeleton)
         val skeleton = AvatarSkeleton(null)
         val animator = AvatarAnimator(skeleton, animationManager)
-
+        
         return AnimeshObject(
             objectId = objectId,
             localId = localId,
@@ -138,7 +138,7 @@ class AnimeshManager(
             animator = animator
         )
     }
-
+    
     /**
      * Load the mesh asset for an animesh object.
      */
@@ -157,7 +157,7 @@ class AnimeshManager(
             Log.e(TAG, "Failed to load animesh mesh", e)
         }
     }
-
+    
     /**
      * Play an animation on an animesh object.
      */
@@ -169,7 +169,7 @@ class AnimeshManager(
             Log.e(TAG, "Failed to play animesh animation", e)
         }
     }
-
+    
     /**
      * Parse skinning/rigging data from mesh.
      */
@@ -179,7 +179,7 @@ class AnimeshManager(
         // - Bind matrices
         // - Vertex weights
         // This is used to animate the mesh vertices based on skeleton pose
-
+        
         if (meshData.skinJointNames.isNotEmpty()) {
             animesh.skeleton?.let { skeleton ->
                 for (jointName in meshData.skinJointNames) {
@@ -189,7 +189,7 @@ class AnimeshManager(
             }
         }
     }
-
+    
     /**
      * Update all animesh objects (called every frame).
      */
@@ -199,17 +199,17 @@ class AnimeshManager(
             animesh.skeleton?.updateBoneMatrices()
         }
     }
-
+    
     /**
      * Get an animesh object by ID.
      */
     fun getAnimesh(objectId: UUID): AnimeshObject? = animeshObjects[objectId]
-
+    
     /**
      * Get all animesh objects.
      */
     fun getAllAnimesh(): Collection<AnimeshObject> = animeshObjects.values
-
+    
     /**
      * Remove an animesh object.
      */
@@ -218,7 +218,7 @@ class AnimeshManager(
             animesh.animator?.stopAll()
         }
     }
-
+    
     fun shutdown() {
         scope.cancel()
         animeshObjects.values.forEach { it.animator?.stopAll() }
@@ -241,7 +241,7 @@ data class AnimeshObject(
     var meshAssetId: UUID? = null
     var meshData: com.linkpoint.assets.MeshData? = null
     var lastUpdate: Long = 0
-
+    
     // Current animations playing on this animesh
     val playingAnimations = mutableSetOf<UUID>()
 }

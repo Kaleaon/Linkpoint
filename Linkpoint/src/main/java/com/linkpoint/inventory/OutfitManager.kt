@@ -34,7 +34,7 @@ class OutfitManager(
 ) {
     companion object {
         private const val TAG = "OutfitManager"
-
+        
         // Attachment points
         const val ATTACH_CHEST = 1
         const val ATTACH_SKULL = 2
@@ -94,23 +94,23 @@ class OutfitManager(
 
         // Protocol Message IDs
         private const val OBJECT_DETACH = (0xFFFF0118).toInt()
-
+        
         // Attachment flags
         private const val ATTACHMENT_APPEND_FLAG = 0x80
     }
-
+    
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-
+    
     // Currently worn items
     private val wornWearables = ConcurrentHashMap<WearableType, UUID>()
     private val wornAttachments = ConcurrentHashMap<Int, UUID>()
-
+    
     private val _isChangingOutfit = MutableStateFlow(false)
     val isChangingOutfit: StateFlow<Boolean> = _isChangingOutfit
-
+    
     private val _currentOutfit = MutableStateFlow<List<UUID>>(emptyList())
     val currentOutfit: StateFlow<List<UUID>> = _currentOutfit
-
+    
     /**
      * Wear an item
      */
@@ -120,7 +120,7 @@ class OutfitManager(
         attachPoint: Int? = null
     ): Boolean = withContext(Dispatchers.Default) {
         val item = inventoryManager.getItem(itemId) ?: return@withContext false
-
+        
         when (item.inventoryType) {
             InventoryType.WEARABLE -> wearWearable(item, replace)
             InventoryType.OBJECT -> {
@@ -136,11 +136,11 @@ class OutfitManager(
             else -> false
         }
     }
-
+    
     private suspend fun wearWearable(item: InventoryItem, replace: Boolean): Boolean {
         val wearableType = WearableType.fromValue(item.flags and 0xFF)
         applyWearableSelection(wornWearables, wearableType, item.itemId, replace)
-
+        
         // Load wearable data
         val wearableData = loadWearableData(item)
         if (wearableData != null) {
@@ -248,7 +248,7 @@ class OutfitManager(
     }
 
     internal fun affectedBakeChannels(wearableType: WearableType): Set<Int> = affectedBakeChannelsForType(wearableType)
-
+    
     private suspend fun attachObject(item: InventoryItem, point: Int, replace: Boolean): Boolean {
         if (replace) {
             wornAttachments[point] = item.itemId
@@ -256,9 +256,9 @@ class OutfitManager(
             // Add to existing attachments at point
             wornAttachments[point] = item.itemId
         }
-
+        
         updateCurrentOutfit()
-
+        
         // RezSingleAttachmentFromInv packet
         if (udpConnection != null && agentId != null && sessionId != null) {
             try {
@@ -270,7 +270,7 @@ class OutfitManager(
 
         return true
     }
-
+    
     private suspend fun sendRezSingleAttachmentFromInv(item: InventoryItem, point: Int, replace: Boolean) {
         // Wire format (LL message_template `RezSingleAttachmentFromInv`,
         // low-freq 395; Lumiya:
@@ -332,16 +332,16 @@ class OutfitManager(
         payload.put(safeDescBytes)
 
         // Validate UDP connection before sending
-        val connection = udpConnection
+        val connection = udpConnection 
             ?: throw IllegalStateException("UDP connection not initialized in OutfitManager")
         connection.sendPacket(MessageIdRegistry.REZ_SINGLE_ATTACHMENT_FROM_INV, payload.array(), reliable = true)
         Log.d(TAG, "Sent RezSingleAttachmentFromInv for item ${item.itemId} at point $point (replace=$replace)")
     }
-
+    
     private suspend fun activateGesture(item: InventoryItem): Boolean {
         return gestureManager.activateGesture(item.assetId, item.itemId)
     }
-
+    
     /**
      * Remove a wearable
      */
@@ -352,7 +352,7 @@ class OutfitManager(
         updateCurrentOutfit()
         return true
     }
-
+    
     /**
      * Detach an object
      */
@@ -371,7 +371,7 @@ class OutfitManager(
         }
         return true
     }
-
+    
     /**
      * Send ObjectDetach packet
      */
@@ -442,32 +442,32 @@ class OutfitManager(
         val point = wornAttachments.entries.find { it.value == itemId }?.key ?: return false
         return detachFromPoint(point)
     }
-
+    
     /**
      * Wear an outfit folder
      */
     suspend fun wearOutfit(folderId: UUID, replace: Boolean = true): Boolean {
         _isChangingOutfit.value = true
-
+        
         return withContext(Dispatchers.Default) {
             try {
                 // Fetch folder contents
                 inventoryManager.fetchFolderContents(folderId)
                 val contents = inventoryManager.getFolderContents(folderId)
-
+                
                 if (replace) {
                     // Remove all current items
                     wornWearables.clear()
                     wornAttachments.clear()
                 }
-
+                
                 // Wear each item
                 for (node in contents) {
                     if (node is InventoryNode.Item) {
                         wearItem(node.item.itemId, replace = false)
                     }
                 }
-
+                
                 true
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to wear outfit", e)
@@ -477,7 +477,7 @@ class OutfitManager(
             }
         }
     }
-
+    
     /**
      * Save current outfit as a new outfit folder
      */
@@ -485,33 +485,33 @@ class OutfitManager(
         val outfitsFolder = inventoryManager.getSystemFolder(
             InventoryManager.FOLDER_TYPE_MYOUTFITS
         ) ?: return null
-
+        
         // Create new outfit folder
         val outfitFolderId = inventoryManager.createFolder(
             outfitsFolder,
             name,
             InventoryManager.FOLDER_TYPE_OUTFIT
         ) ?: return null
-
+        
         // Copy current outfit items to folder
         for (itemId in wornWearables.values) {
             inventoryManager.copyItem(itemId, outfitFolderId)
         }
-
+        
         for (itemId in wornAttachments.values) {
             inventoryManager.copyItem(itemId, outfitFolderId)
         }
-
+        
         return outfitFolderId
     }
-
+    
     /**
      * Check if item is worn
      */
     fun isWorn(itemId: UUID): Boolean {
         return wornWearables.containsValue(itemId) || wornAttachments.containsValue(itemId)
     }
-
+    
     /**
      * Get worn wearable by type
      */
@@ -521,23 +521,23 @@ class OutfitManager(
      * Get inventory item details for a worn item.
      */
     fun getInventoryItem(itemId: UUID): InventoryItem? = inventoryManager.getItem(itemId)
-
+    
     /**
      * Get attachment at point
      */
     fun getAttachmentAt(point: Int): UUID? = wornAttachments[point]
-
+    
     /**
      * Get all worn items
      */
     fun getWornItems(): List<UUID> {
         return wornWearables.values.toList() + wornAttachments.values.toList()
     }
-
+    
     private fun updateCurrentOutfit() {
         _currentOutfit.value = getWornItems()
     }
-
+    
     fun shutdown() {
         scope.cancel()
     }

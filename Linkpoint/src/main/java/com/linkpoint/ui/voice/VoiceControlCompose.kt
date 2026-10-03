@@ -31,10 +31,10 @@ import kotlinx.coroutines.launch
 
 /**
  * Compose version of the VoiceControlView.
- *
+ * 
  * Voice control widget for toggling voice chat.
  * Displays connection status, toggle button, and mute controls.
- *
+ * 
  * @param isConnected StateFlow of voice connection status
  * @param isMuted StateFlow of mute status
  * @param onVoiceToggle Callback when voice toggle is clicked (receives desired connection state).
@@ -56,7 +56,7 @@ fun VoiceControl(
 ) {
     val connected by isConnected.collectAsState()
     val muted by isMuted.collectAsState()
-
+    
     Surface(
         modifier = modifier,
         color = MaterialTheme.colorScheme.surface,
@@ -79,7 +79,7 @@ fun VoiceControl(
                     modifier = Modifier.size(28.dp)
                 )
             }
-
+            
             // Status text
             Column {
                 Text(
@@ -92,9 +92,9 @@ fun VoiceControl(
                     color = if (connected) connectedColor else disconnectedColor
                 )
             }
-
+            
             Spacer(modifier = Modifier.width(8.dp))
-
+            
             // Mute button (only visible when connected)
             if (connected) {
                 IconButton(
@@ -114,7 +114,7 @@ fun VoiceControl(
 
 /**
  * Simplified VoiceControl that takes a VoiceManager directly.
- *
+ * 
  * This is a convenience composable that wraps VoiceControl and connects
  * it to the VoiceManager's state flows.
  */

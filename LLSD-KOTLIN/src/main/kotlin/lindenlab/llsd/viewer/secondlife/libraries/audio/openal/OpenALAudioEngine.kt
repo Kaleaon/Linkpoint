@@ -17,7 +17,7 @@ import kotlin.math.min
 
 /**
  * Kotlin implementation of OpenAL-based 3D audio engine for Second Life.
- *
+ * 
  * This class provides comprehensive 3D spatial audio capabilities including:
  * - 3D positional audio with distance attenuation
  * - Doppler effect simulation
@@ -25,12 +25,12 @@ import kotlin.math.min
  * - Streaming audio support for music and large sound files
  * - Audio source management and pooling
  * - Multiple listener support for different audio contexts
- *
+ * 
  * @author LLSD Kotlin Team
  * @since 1.0
  */
 class OpenALAudioEngine {
-
+    
     private var initialized = false
     private var device: AudioDevice? = null
     private var context: AudioContext? = null
@@ -38,14 +38,14 @@ class OpenALAudioEngine {
     private val loadedBuffers = ConcurrentHashMap<UUID, AudioBuffer>()
     val settings = AudioSettings()
     private var listener: AudioListener? = null
-
+    
     // Audio source pool for efficient reuse
     private val sourcePool = ArrayDeque<AudioSource>()
-
+    
     companion object {
         private const val MAX_CONCURRENT_SOURCES = 64
     }
-
+    
     /**
      * Audio engine configuration settings.
      */
@@ -55,25 +55,25 @@ class OpenALAudioEngine {
         var musicVolume: Float = 1.0f,
         var voiceVolume: Float = 1.0f,
         var ambientVolume: Float = 1.0f,
-
+        
         // 3D audio settings
         var dopplerFactor: Float = 1.0f,
         var speedOfSound: Float = 343.3f, // meters per second
         var maxAudioDistance: Float = 100.0f,
         var rolloffFactor: Float = 1.0f,
-
+        
         // Environmental settings
         var enableReverb: Boolean = true,
         var enableEAX: Boolean = false, // Environmental Audio Extensions
         var environmentPreset: String = "Generic",
-
+        
         // Performance settings
         var maxSources: Int = 32,
         var streamingBufferSize: Int = 4096,
         var streamingBufferCount: Int = 4,
         var enableHRTF: Boolean = true // Head-Related Transfer Function
     )
-
+    
     /**
      * Represents an OpenAL audio device.
      */
@@ -83,12 +83,12 @@ class OpenALAudioEngine {
         private val _supportedExtensions: MutableList<String> = mutableListOf()
     ) {
         val supportedExtensions: List<String> get() = _supportedExtensions.toList()
-
+        
         fun addExtension(extension: String) {
             _supportedExtensions.add(extension)
         }
     }
-
+    
     /**
      * OpenAL audio context.
      */
@@ -97,7 +97,7 @@ class OpenALAudioEngine {
         val sampleRate: Int,
         val refreshRate: Int
     )
-
+    
     /**
      * 3D audio listener representing the user's ears.
      */
@@ -111,7 +111,7 @@ class OpenALAudioEngine {
         var gain: Float
             get() = _gain
             set(value) { _gain = max(0.0f, value) }
-
+        
         /**
          * Set listener orientation from forward and up vectors.
          */
@@ -120,7 +120,7 @@ class OpenALAudioEngine {
             this.up = up.normalize()
         }
     }
-
+    
     /**
      * Audio buffer containing loaded sound data.
      */
@@ -132,22 +132,22 @@ class OpenALAudioEngine {
     ) {
         val alBufferHandle: Int = generateBufferHandle() // OpenAL buffer handle
         val duration: Float = calculateDuration(format, sampleRate, size)
-
+        
         enum class AudioFormat {
             MONO8, MONO16, STEREO8, STEREO16
         }
-
+        
         private fun calculateDuration(format: AudioFormat, sampleRate: Int, size: Int): Float {
             val bytesPerSample = if (format == AudioFormat.MONO16 || format == AudioFormat.STEREO16) 2 else 1
             val channels = if (format == AudioFormat.STEREO8 || format == AudioFormat.STEREO16) 2 else 1
             return size.toFloat() / (sampleRate * bytesPerSample * channels)
         }
-
+        
         private fun generateBufferHandle(): Int {
             return abs(bufferId.hashCode()) // Mock handle generation
         }
     }
-
+    
     /**
      * 3D audio source that can play sounds at specific positions.
      */
@@ -166,81 +166,81 @@ class OpenALAudioEngine {
         var state: AudioSourceState = AudioSourceState.INITIAL
     ) {
         val alSourceHandle: Int = generateSourceHandle() // OpenAL source handle
-
+        
         enum class AudioSourceState {
             INITIAL, PLAYING, PAUSED, STOPPED
         }
-
+        
         var pitch: Float
             get() = _pitch
             set(value) { _pitch = max(0.5f, min(2.0f, value)) }
-
+        
         var gain: Float
             get() = _gain
             set(value) { _gain = max(0.0f, value) }
-
+        
         var maxDistance: Float
             get() = _maxDistance
             set(value) { _maxDistance = max(0.0f, value) }
-
+        
         var rolloffFactor: Float
             get() = _rolloffFactor
             set(value) { _rolloffFactor = max(0.0f, value) }
-
+        
         var referenceDistance: Float
             get() = _referenceDistance
             set(value) { _referenceDistance = max(0.0f, value) }
-
+        
         private fun generateSourceHandle(): Int {
             return abs(sourceId.hashCode()) // Mock handle generation
         }
     }
-
+    
     /**
      * Initialize the OpenAL audio engine.
-     *
+     * 
      * @return true if initialization was successful, false otherwise
      */
     fun initialize(): Boolean {
         if (initialized) {
             return true
         }
-
+        
         return try {
             println("Initializing OpenAL audio engine...")
-
+            
             // Initialize OpenAL device (placeholder)
             device = initializeAudioDevice()
             if (device == null) {
                 System.err.println("Failed to initialize audio device")
                 return false
             }
-
+            
             // Create audio context (placeholder)
             context = AudioContext(device!!, 44100, 60)
-
+            
             // Initialize audio listener
             listener = AudioListener()
-
+            
             // Initialize source pool
             initializeSourcePool()
-
+            
             initialized = true
             println("OpenAL audio engine initialized successfully")
             println("Device: ${device?.deviceName}")
             println("Sample Rate: ${context?.sampleRate} Hz")
-
+            
             true
-
+            
         } catch (e: Exception) {
             System.err.println("Error initializing OpenAL audio engine: ${e.message}")
             false
         }
     }
-
+    
     /**
      * Load audio data into a buffer.
-     *
+     * 
      * @param soundId Unique identifier for the sound
      * @param audioData Raw audio data
      * @param format Audio format
@@ -256,35 +256,35 @@ class OpenALAudioEngine {
         if (!initialized || audioData == null) {
             return null
         }
-
+        
         // Check if already loaded
         loadedBuffers[soundId]?.let { return it }
-
+        
         return try {
             val buffer = AudioBuffer(soundId, format, sampleRate, audioData.size)
-
+            
             // Upload audio data to OpenAL (placeholder)
             println("Loading audio buffer: $soundId (${audioData.size} bytes)")
-
+            
             loadedBuffers[soundId] = buffer
             buffer
-
+            
         } catch (e: Exception) {
             System.err.println("Failed to load audio buffer: ${e.message}")
             null
         }
     }
-
+    
     /**
      * Create a new audio source for playing sounds.
-     *
+     * 
      * @return A new audio source, or null if no sources available
      */
     fun createAudioSource(): AudioSource? {
         if (!initialized) {
             return null
         }
-
+        
         // Try to reuse a source from the pool
         val source = sourcePool.pollFirst() ?: run {
             if (activeSources.size < settings.maxSources) {
@@ -293,14 +293,14 @@ class OpenALAudioEngine {
                 null
             }
         }
-
+        
         source?.let { activeSources[it.sourceId] = it }
         return source
     }
-
+    
     /**
      * Play a sound at a specific 3D position.
-     *
+     * 
      * @param soundId The ID of the loaded sound buffer
      * @param position 3D position of the sound
      * @param gain Volume (0.0 to 1.0)
@@ -320,13 +320,13 @@ class OpenALAudioEngine {
             System.err.println("Sound buffer not found: $soundId")
             return null
         }
-
+        
         val source = createAudioSource()
         if (source == null) {
             System.err.println("No available audio sources")
             return null
         }
-
+        
         // Configure source
         source.buffer = buffer
         source.position = position
@@ -334,21 +334,21 @@ class OpenALAudioEngine {
         source.pitch = pitch
         source.isLooping = looping
         source.isRelative = false
-
+        
         // Apply 3D audio settings
         source.maxDistance = settings.maxAudioDistance
         source.rolloffFactor = settings.rolloffFactor
-
+        
         // Start playing (placeholder for actual OpenAL call)
         source.state = AudioSource.AudioSourceState.PLAYING
         println("Playing 3D sound: $soundId at $position")
-
+        
         return source
     }
-
+    
     /**
      * Update the audio listener position and orientation.
-     *
+     * 
      * @param position Listener position
      * @param velocity Listener velocity (for Doppler effect)
      * @param forward Forward vector
@@ -358,32 +358,32 @@ class OpenALAudioEngine {
         if (!initialized || listener == null) {
             return
         }
-
+        
         listener?.apply {
             this.position = position
             this.velocity = velocity
             setOrientation(forward, up)
         }
-
+        
         // Update OpenAL listener (placeholder)
         println("Updated listener position: $position")
     }
-
+    
     /**
      * Update all active audio sources (call once per frame).
-     *
+     * 
      * @param deltaTime Time elapsed since last update in seconds
      */
     fun update(deltaTime: Float) {
         if (!initialized) {
             return
         }
-
+        
         // Update all active sources
         val iterator = activeSources.entries.iterator()
         while (iterator.hasNext()) {
             val (_, source) = iterator.next()
-
+            
             // Check if source is still playing (placeholder for actual OpenAL query)
             if (source.state == AudioSource.AudioSourceState.STOPPED) {
                 // Return source to pool
@@ -391,18 +391,18 @@ class OpenALAudioEngine {
                 iterator.remove()
             }
         }
-
+        
         // Apply global audio settings (placeholder)
         updateGlobalSettings()
     }
-
+    
     /**
      * Get the audio listener.
-     *
+     * 
      * @return The audio listener object
      */
     fun getListener(): AudioListener? = listener
-
+    
     /**
      * Shutdown the audio engine and cleanup resources.
      */
@@ -410,28 +410,28 @@ class OpenALAudioEngine {
         if (!initialized) {
             return
         }
-
+        
         println("Shutting down OpenAL audio engine...")
-
+        
         // Stop all active sources
         activeSources.values.forEach { it.state = AudioSource.AudioSourceState.STOPPED }
         activeSources.clear()
         sourcePool.clear()
-
+        
         // Cleanup buffers
         loadedBuffers.clear()
-
+        
         // Destroy OpenAL context and device (placeholder)
         context = null
         device = null
         listener = null
-
+        
         initialized = false
         println("OpenAL audio engine shutdown complete")
     }
-
+    
     // Private helper methods
-
+    
     private fun initializeAudioDevice(): AudioDevice {
         // Placeholder for OpenAL device enumeration and selection
         val device = AudioDevice("Default OpenAL Device", true)
@@ -440,19 +440,19 @@ class OpenALAudioEngine {
         device.addExtension("AL_EXT_EXPONENT_DISTANCE")
         return device
     }
-
+    
     private fun initializeSourcePool() {
         // Pre-create some audio sources for efficient reuse
         repeat(min(16, settings.maxSources)) {
             sourcePool.offer(AudioSource(UUID.randomUUID()))
         }
     }
-
+    
     private fun updateGlobalSettings() {
         // Apply Doppler effect settings (placeholder)
         // alDopplerFactor(settings.dopplerFactor);
         // alSpeedOfSound(settings.speedOfSound);
-
+        
         // Update listener gain
         listener?.gain = settings.masterVolume
     }
@@ -530,35 +530,35 @@ object AudioUtils {
     ): ByteArray {
         val samples = (duration * sampleRate).toInt()
         val data = ByteArray(samples * 2) // 16-bit samples
-
+        
         for (i in 0 until samples) {
             val angle = 2.0 * Math.PI * frequency * i / sampleRate
             val sample = (Math.sin(angle) * amplitude * 32767).toInt().toShort()
-
+            
             data[i * 2] = (sample.toInt() and 0xFF).toByte()
             data[i * 2 + 1] = ((sample.toInt() shr 8) and 0xFF).toByte()
         }
-
+        
         return data
     }
-
+    
     /**
      * Calculate 3D distance between two positions
      */
     fun calculateDistance(pos1: Vector3, pos2: Vector3): Float {
         return pos1.subtract(pos2).magnitude().toFloat()
     }
-
+    
     /**
      * Calculate simple distance attenuation
      */
     fun calculateAttenuation(distance: Float, maxDistance: Float, rolloff: Float = 1.0f): Float {
         if (distance >= maxDistance) return 0.0f
         if (distance <= 0.0f) return 1.0f
-
+        
         return 1.0f / (1.0f + rolloff * distance / maxDistance)
     }
-
+    
     /**
      * Convert audio format to string description
      */
@@ -577,11 +577,11 @@ object AudioUtils {
  */
 class AudioEngineBuilder {
     private val engine = OpenALAudioEngine()
-
+    
     fun settings(init: OpenALAudioEngine.AudioSettings.() -> Unit) {
         engine.settings.init()
     }
-
+    
     fun build(): OpenALAudioEngine = engine
 }
 

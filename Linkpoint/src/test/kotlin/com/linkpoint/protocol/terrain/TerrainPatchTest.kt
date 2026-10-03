@@ -12,7 +12,7 @@ class TerrainPatchTest {
         // completes successfully without throwing ArrayIndexOutOfBoundsException.
         // The crash was caused by buildCopyMatrix16() having incorrect zigzag
         // traversal logic that could produce negative indices.
-
+        
         // Simply accessing PATCH_SIZE forces the companion object initialization
         val patchSize = TerrainPatch.PATCH_SIZE
         assertEquals(16, patchSize)
@@ -30,7 +30,7 @@ class TerrainPatchTest {
     fun `TerrainPatch can be instantiated with valid data`() {
         val heightMap = FloatArray(256) { it.toFloat() }
         val patch = TerrainPatch(5, 10, heightMap)
-
+        
         assertEquals(5, patch.x)
         assertEquals(10, patch.y)
         assertEquals(256, patch.heightMap.size)

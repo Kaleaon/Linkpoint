@@ -14,55 +14,55 @@ private const val PI_F = kotlin.math.PI.toFloat()
 
 /**
  * State holder for the 3D world scene.
- *
+ * 
  * Contains all dynamic data needed to render the world:
  * - Camera position and orientation
  * - Loaded models (avatars, objects, terrain)
  * - Lighting settings
  * - Environment/skybox
- *
+ * 
  * This class bridges SceneView rendering with libGDX game logic.
  */
 class WorldState {
-
+    
     // Camera state
     var cameraPosition by mutableStateOf(Float3(0f, 2f, 10f))
     var cameraTarget by mutableStateOf(Float3(0f, 0f, 0f))
     var cameraFov by mutableFloatStateOf(60f)
-
+    
     // Lighting
     var sunIntensity by mutableFloatStateOf(100_000f)
     var sunDirection by mutableStateOf(Float3(0f, -1f, -0.8f))
     var sunColor by mutableStateOf(Float3(0.98f, 0.92f, 0.89f))
-
+    
     // Environment
     var environmentHdrPath: String? by mutableStateOf(null)
     var skyboxEnabled by mutableStateOf(true)
-
+    
     // Models in the scene
     val modelNodes = mutableStateListOf<WorldModelData>()
-
+    
     // Avatar state
     var avatarPosition by mutableStateOf(Float3(128f, 128f, 25f))
     var avatarRotation by mutableStateOf(Quaternion())
-
+    
     // World time (for day/night cycle)
     var worldTimeHours by mutableFloatStateOf(12f) // 0-24
-
+    
     /**
      * Add a model to the scene
      */
     fun addModel(model: WorldModelData) {
         modelNodes.add(model)
     }
-
+    
     /**
      * Remove a model from the scene
      */
     fun removeModel(modelId: String) {
         modelNodes.removeIf { it.id == modelId }
     }
-
+    
     /**
      * Update a model's position
      */
@@ -72,7 +72,7 @@ class WorldState {
             modelNodes[index] = modelNodes[index].copy(position = position)
         }
     }
-
+    
     /**
      * Update a model's rotation
      */
@@ -82,14 +82,14 @@ class WorldState {
             modelNodes[index] = modelNodes[index].copy(rotation = rotation)
         }
     }
-
+    
     /**
      * Clear all models
      */
     fun clearModels() {
         modelNodes.clear()
     }
-
+    
     /**
      * Update camera to follow avatar
      */
@@ -106,29 +106,29 @@ class WorldState {
         )
         cameraTarget = avatarPos
     }
-
+    
     /**
      * Update sun position based on world time
      */
     fun updateSunForTime(hours: Float) {
         worldTimeHours = hours
-
+        
         // Calculate sun angle (0 = midnight, 12 = noon)
         val sunAngle = (hours / 24f) * 2f * PI_F - (PI_F / 2f)
-
+        
         sunDirection = Float3(
             kotlin.math.cos(sunAngle),
             -kotlin.math.abs(kotlin.math.sin(sunAngle)),
             -0.3f
         )
-
+        
         // Adjust intensity based on time
         sunIntensity = when {
             hours < 6f || hours > 18f -> 10_000f  // Night
             hours < 8f || hours > 16f -> 50_000f  // Twilight
             else -> 100_000f  // Day
         }
-
+        
         // Adjust color based on time
         sunColor = when {
             hours < 6f || hours > 18f -> Float3(0.3f, 0.3f, 0.5f)  // Night (blue)

@@ -17,18 +17,18 @@ import java.io.IOException
  * Based on the reference viewer's StreamingMediaService
  */
 class StreamingMediaService : Service() {
-
+    
     companion object {
         private const val TAG = "StreamingMediaService"
-
+        
         const val ACTION_PLAY = "com.linkpoint.action.PLAY"
         const val ACTION_STOP = "com.linkpoint.action.STOP"
         const val EXTRA_URL = "url"
         const val EXTRA_TYPE = "type"
-
+        
         const val TYPE_AUDIO = 0
         const val TYPE_VIDEO = 1
-
+        
         fun playAudio(context: Context, url: String) {
             val intent = Intent(context, StreamingMediaService::class.java).apply {
                 action = ACTION_PLAY
@@ -37,7 +37,7 @@ class StreamingMediaService : Service() {
             }
             context.startService(intent)
         }
-
+        
         fun stopAudio(context: Context) {
             val intent = Intent(context, StreamingMediaService::class.java).apply {
                 action = ACTION_STOP
@@ -45,21 +45,21 @@ class StreamingMediaService : Service() {
             context.startService(intent)
         }
     }
-
+    
     private val binder = LocalBinder()
     private var mediaPlayer: MediaPlayer? = null
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-
+    
     private var currentUrl: String? = null
     private var isPlaying = false
     private var volume = 0.5f
-
+    
     inner class LocalBinder : Binder() {
         fun getService(): StreamingMediaService = this@StreamingMediaService
     }
-
+    
     override fun onBind(intent: Intent?): IBinder = binder
-
+    
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_PLAY -> {
@@ -73,28 +73,28 @@ class StreamingMediaService : Service() {
                 stopStream()
             }
         }
-
+        
         return START_NOT_STICKY
     }
-
+    
     override fun onDestroy() {
         super.onDestroy()
         serviceScope.cancel()
         releaseMediaPlayer()
     }
-
+    
     fun playStream(url: String, type: Int = TYPE_AUDIO) {
         if (url == currentUrl && isPlaying) {
             Log.d(TAG, "Already playing: $url")
             return
         }
-
+        
         Log.i(TAG, "Playing stream: $url")
-
+        
         serviceScope.launch {
             try {
                 releaseMediaPlayer()
-
+                
                 mediaPlayer = MediaPlayer().apply {
                     setAudioAttributes(
                         AudioAttributes.Builder()
@@ -102,9 +102,9 @@ class StreamingMediaService : Service() {
                             .setUsage(AudioAttributes.USAGE_MEDIA)
                             .build()
                     )
-
+                    
                     setDataSource(url)
-
+                    
                     setOnPreparedListener {
                         it.setVolume(volume, volume)
                         it.start()
@@ -112,19 +112,19 @@ class StreamingMediaService : Service() {
                         this@StreamingMediaService.currentUrl = url
                         Log.i(TAG, "Stream started")
                     }
-
+                    
                     setOnErrorListener { _, what, extra ->
                         Log.e(TAG, "MediaPlayer error: $what, $extra")
                         this@StreamingMediaService.isPlaying = false
                         this@StreamingMediaService.currentUrl = null
                         true
                     }
-
+                    
                     setOnCompletionListener {
                         Log.d(TAG, "Stream completed")
                         this@StreamingMediaService.isPlaying = false
                     }
-
+                    
                     prepareAsync()
                 }
             } catch (e: IOException) {
@@ -134,23 +134,23 @@ class StreamingMediaService : Service() {
             }
         }
     }
-
+    
     fun stopStream() {
         Log.i(TAG, "Stopping stream")
         releaseMediaPlayer()
         currentUrl = null
         isPlaying = false
     }
-
+    
     fun setVolume(newVolume: Float) {
         volume = newVolume.coerceIn(0f, 1f)
         mediaPlayer?.setVolume(volume, volume)
     }
-
+    
     fun isPlaying(): Boolean = isPlaying
-
+    
     fun getCurrentUrl(): String? = currentUrl
-
+    
     private fun releaseMediaPlayer() {
         mediaPlayer?.apply {
             if (isPlaying) {

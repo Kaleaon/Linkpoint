@@ -17,3 +17,4 @@ void main() {
     else
         fragmentColor = color;
 }
+

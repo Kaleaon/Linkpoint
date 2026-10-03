@@ -34,7 +34,7 @@ import java.util.*
  * @see LLSDNotationSerializer
  */
 class LLSD(val content: Any?) {
-
+    
     /**
      * Serializes the contained LLSD data into its XML representation and writes it
      * to the provided [Writer].
@@ -55,7 +55,7 @@ class LLSD(val content: Any?) {
         }
         writer.write("</llsd>\n")
     }
-
+    
     /**
      * Recursively serializes a single LLSD element to the writer.
      *
@@ -153,7 +153,7 @@ class LLSD(val content: Any?) {
             }
         }
     }
-
+    
     /**
      * Returns the string representation of this LLSD document in XML format.
      *
@@ -173,10 +173,10 @@ class LLSD(val content: Any?) {
             "Unable to serialise LLSD for display: ${e.message}"
         }
     }
-
+    
     companion object {
         private val ISO8601_FORMATTER = DateTimeFormatter.ISO_INSTANT.withZone(ZoneId.of("UTC"))
-
+        
         /**
          * Encodes a string for safe inclusion in an XML document.
          *
@@ -190,10 +190,10 @@ class LLSD(val content: Any?) {
         fun encodeXML(text: String?): String {
             if (text == null) return "null"
             if (text.isEmpty()) return text
-
+            
             val textLength = text.length
             var encodeBufferSize = textLength
-
+            
             // Calculate required buffer size
             for (i in 0 until textLength) {
                 when (text[i]) {
@@ -202,12 +202,12 @@ class LLSD(val content: Any?) {
                     '"' -> encodeBufferSize += 5
                 }
             }
-
+            
             if (encodeBufferSize == textLength) return text
-
+            
             val encodeBuffer = CharArray(encodeBufferSize)
             var j = 0
-
+            
             for (i in 0 until textLength) {
                 val currentChar = text[i]
                 when (currentChar) {
@@ -248,7 +248,7 @@ class LLSD(val content: Any?) {
                     else -> encodeBuffer[j++] = currentChar
                 }
             }
-
+            
             return String(encodeBuffer)
         }
     }

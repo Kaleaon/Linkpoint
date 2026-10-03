@@ -3,7 +3,7 @@ import SwiftUI
 struct MainTabView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var selectedTab = 0
-
+    
     var body: some View {
         TabView(selection: $selectedTab) {
             WorldView()
@@ -11,19 +11,19 @@ struct MainTabView: View {
                     Label("World", systemImage: "globe")
                 }
                 .tag(0)
-
+            
             InventoryView()
                 .tabItem {
                     Label("Inventory", systemImage: "folder")
                 }
                 .tag(1)
-
+            
             ChatView()
                 .tabItem {
                     Label("Chat", systemImage: "message")
                 }
                 .tag(2)
-
+            
             ProfileView()
                 .tabItem {
                     Label("Profile", systemImage: "person")
@@ -38,16 +38,16 @@ struct WorldView: View {
         NavigationView {
             ZStack {
                 Color.black.ignoresSafeArea()
-
+                
                 VStack {
                     Text("3D World View")
                         .font(.title)
                         .foregroundColor(.white)
-
+                    
                     Text("OpenGL/Metal rendering will be implemented here")
                         .foregroundColor(.gray)
                         .padding()
-
+                    
                     // Placeholder for 3D rendering
                     Rectangle()
                         .fill(Color.gray.opacity(0.3))
@@ -70,7 +70,7 @@ struct WorldView: View {
 
 struct InventoryView: View {
     @State private var searchText = ""
-
+    
     var body: some View {
         NavigationView {
             List {
@@ -79,7 +79,7 @@ struct InventoryView: View {
                     InventoryItemRow(name: "Favorite Place", icon: "map", type: "Landmark")
                     InventoryItemRow(name: "Photo Album", icon: "photo", type: "Texture")
                 }
-
+                
                 Section(header: Text("Folders")) {
                     InventoryItemRow(name: "Animations", icon: "figure.walk", type: "Folder")
                     InventoryItemRow(name: "Body Parts", icon: "person.fill", type: "Folder")
@@ -103,13 +103,13 @@ struct InventoryItemRow: View {
     let name: String
     let icon: String
     let type: String
-
+    
     var body: some View {
         HStack {
             Image(systemName: icon)
                 .foregroundColor(.blue)
                 .frame(width: 30)
-
+            
             VStack(alignment: .leading) {
                 Text(name)
                     .font(.body)
@@ -117,9 +117,9 @@ struct InventoryItemRow: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-
+            
             Spacer()
-
+            
             Image(systemName: "chevron.right")
                 .foregroundColor(.secondary)
                 .font(.caption)
@@ -133,7 +133,7 @@ struct ChatView: View {
         ChatMessage(sender: "Local Chat", content: "Connected to region", timestamp: Date())
     ]
     @State private var newMessage = ""
-
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -146,12 +146,12 @@ struct ChatView: View {
                     }
                     .padding()
                 }
-
+                
                 // Input bar
                 HStack {
                     TextField("Type a message...", text: $newMessage)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-
+                    
                     Button(action: sendMessage) {
                         Image(systemName: "paperplane.fill")
                             .foregroundColor(.blue)
@@ -163,10 +163,10 @@ struct ChatView: View {
             .navigationTitle("Chat")
         }
     }
-
+    
     private func sendMessage() {
         guard !newMessage.isEmpty else { return }
-
+        
         let message = ChatMessage(
             sender: "You",
             content: newMessage,
@@ -186,7 +186,7 @@ struct ChatMessage: Identifiable {
 
 struct ChatMessageView: View {
     let message: ChatMessage
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
@@ -194,12 +194,12 @@ struct ChatMessageView: View {
                     .font(.caption)
                     .fontWeight(.bold)
                     .foregroundColor(.blue)
-
+                
                 Text(message.timestamp, style: .time)
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
-
+            
             Text(message.content)
                 .font(.body)
         }
@@ -209,7 +209,7 @@ struct ChatMessageView: View {
 
 struct ProfileView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
-
+    
     var body: some View {
         NavigationView {
             List {
@@ -219,7 +219,7 @@ struct ProfileView: View {
                             .resizable()
                             .frame(width: 60, height: 60)
                             .foregroundColor(.blue)
-
+                        
                         VStack(alignment: .leading) {
                             Text(authViewModel.currentUser?.fullName ?? "User")
                                 .font(.title2)
@@ -232,7 +232,7 @@ struct ProfileView: View {
                     }
                     .padding(.vertical, 8)
                 }
-
+                
                 Section(header: Text("Account")) {
                     NavigationLink(destination: Text("Edit Profile")) {
                         Label("Edit Profile", systemImage: "pencil")
@@ -244,7 +244,7 @@ struct ProfileView: View {
                         Label("Preferences", systemImage: "slider.horizontal.3")
                     }
                 }
-
+                
                 Section(header: Text("Grid")) {
                     HStack {
                         Text("Current Grid")
@@ -253,7 +253,7 @@ struct ProfileView: View {
                             .foregroundColor(.secondary)
                     }
                 }
-
+                
                 Section {
                     Button(action: { authViewModel.logout() }) {
                         HStack {

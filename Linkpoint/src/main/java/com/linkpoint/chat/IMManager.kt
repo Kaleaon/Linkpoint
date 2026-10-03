@@ -38,7 +38,7 @@ class IMManager(
     companion object {
         private const val TAG = "IMManager"
         private const val MAX_SESSION_HISTORY = 200
-
+        
         // IM dialog types
         const val IM_NOTHING_SPECIAL = 0
         const val IM_MESSAGEBOX = 1
@@ -81,28 +81,28 @@ class IMManager(
         const val IM_TYPING_START = 41
         const val IM_TYPING_STOP = 42
     }
-
+    
     private val scope = CoroutineScope(MessagingDispatcher.dispatcher + SupervisorJob())
-
+    
     // Active IM sessions
     private val sessions = ConcurrentHashMap<UUID, IMSession>()
-
+    
     // Session messages
     private val sessionMessages = ConcurrentHashMap<UUID, MutableList<IMMessage>>()
 
     private val lastMessageBySession = ConcurrentHashMap<UUID, IMMessage>()
-
+    
     // Events
     private val _messageFlow = MutableSharedFlow<IMMessage>(replay = 0, extraBufferCapacity = 64)
     val messageFlow: SharedFlow<IMMessage> = _messageFlow
-
+    
     private val _sessionFlow = MutableSharedFlow<IMSessionEvent>(replay = 0, extraBufferCapacity = 16)
     val sessionFlow: SharedFlow<IMSessionEvent> = _sessionFlow
-
+    
     // Active sessions list
     private val _activeSessions = MutableStateFlow<List<IMSession>>(emptyList())
     val activeSessions: StateFlow<List<IMSession>> = _activeSessions
-
+    
     // Unread counts
     private val _unreadCounts = MutableStateFlow<Map<UUID, Int>>(emptyMap())
     val unreadCounts: StateFlow<Map<UUID, Int>> = _unreadCounts
@@ -120,7 +120,7 @@ class IMManager(
         sessionId = udpConnection.getSessionId(),
         circuitCode = udpConnection.getCircuitCode()
     ).requireValid("IMManager outbound packet")
-
+    
     init {
         capabilityManager.registerEventHandler(
             "ChatterBoxInvitation",
@@ -140,7 +140,7 @@ class IMManager(
 
         observePushEvents()
     }
-
+    
     private fun observePushEvents() {
         scope.launch {
             PushEventBus.events.collect { event ->
@@ -184,22 +184,22 @@ class IMManager(
             }
         }
     }
-
+    
     private fun handleInvitation(body: LLSDMap) {
         val inviteInfo = body.getMap("instantmessage")?.getMap("message_params") ?: return
-
+        
         val sessionId = UUID.fromString(inviteInfo.getString("id") ?: return)
         val fromAgentId = UUID.fromString(inviteInfo.getString("from_id") ?: return)
         val fromName = inviteInfo.getString("from_name") ?: "Unknown"
         val message = inviteInfo.getString("message") ?: ""
         val type = inviteInfo.getInt("dialog") ?: 0
-
+        
         val sessionType = when (type) {
             IM_SESSION_GROUP_START -> SessionType.GROUP
             IM_SESSION_CONFERENCE_START -> SessionType.CONFERENCE
             else -> SessionType.P2P
         }
-
+        
         val session = IMSession(
             sessionId = sessionId,
             type = sessionType,
@@ -208,23 +208,23 @@ class IMManager(
         )
         sessions[sessionId] = session
         updateSessionList()
-
+        
         scope.launch {
             _sessionFlow.emit(IMSessionEvent.Invited(session))
         }
     }
-
+    
     private fun handleSessionEvent(body: LLSDMap) {
         val sessionIdStr = body.getString("session_id") ?: return
         val sessionId = try { UUID.fromString(sessionIdStr) } catch (e: Exception) { return }
         val success = body.getInt("success") == 1
         val eventType = body.getString("event") ?: "unknown"
-
+        
         val session = sessions[sessionId] ?: return
-
+        
         when (eventType) {
             "join" -> {
-                val agentId = body.getString("agent_id")?.let {
+                val agentId = body.getString("agent_id")?.let { 
                     try { UUID.fromString(it) } catch (e: Exception) { null }
                 }
                 if (agentId != null && agentId !in session.participants) {
@@ -236,7 +236,7 @@ class IMManager(
                 }
             }
             "leave" -> {
-                val agentId = body.getString("agent_id")?.let {
+                val agentId = body.getString("agent_id")?.let { 
                     try { UUID.fromString(it) } catch (e: Exception) { null }
                 }
                 if (agentId != null) {
@@ -248,7 +248,7 @@ class IMManager(
                 }
             }
             "typing" -> {
-                val agentId = body.getString("agent_id")?.let {
+                val agentId = body.getString("agent_id")?.let { 
                     try { UUID.fromString(it) } catch (e: Exception) { null }
                 }
                 val isTyping = body.getInt("typing") == 1
@@ -264,10 +264,10 @@ class IMManager(
                 Log.d(TAG, "Unknown session event: $eventType for session $sessionId")
             }
         }
-
+        
         updateSessionList()
     }
-
+    
     private fun handleSessionStart(body: LLSDMap) {
         val sessionIdStr = body.getString("session_id") ?: return
         val sessionId = try { UUID.fromString(sessionIdStr) } catch (e: Exception) { return }
@@ -303,7 +303,7 @@ class IMManager(
             updateSessionList()
         }
     }
-
+    
     fun handleIncomingIM(
         fromAgentId: UUID,
         fromName: String,
@@ -321,7 +321,7 @@ class IMManager(
                     participants = mutableListOf(fromAgentId)
                 )
             }
-
+            
             when (dialogType) {
                 IM_TYPING_START -> {
                     session.typingParticipants = session.typingParticipants + fromAgentId
@@ -340,17 +340,17 @@ class IMManager(
                         timestamp = timestamp,
                         isOutgoing = false
                     )
-
+                    
                     addMessage(sessionId, imMessage)
                     session.typingParticipants = session.typingParticipants - fromAgentId
                     pendingSyncSessions.update { it - sessionId }
                 }
             }
-
+            
             updateSessionList()
         }
     }
-
+    
     fun sendIM(sessionId: UUID, message: String) {
         val session = sessions[sessionId]
         if (session == null) {
@@ -477,10 +477,10 @@ class IMManager(
         Log.d(TAG, "Group chat (Dialog=17) sent to session $sessionId")
         return true
     }
-
+    
     fun startP2PSession(targetAgentId: UUID, targetName: String): UUID {
         val sessionId = computeP2PSessionId(agentId, targetAgentId)
-
+        
         val session = sessions.getOrPut(sessionId) {
             IMSession(
                 sessionId = sessionId,
@@ -490,11 +490,11 @@ class IMManager(
                 isActive = true
             )
         }
-
+        
         updateSessionList()
         return sessionId
     }
-
+    
     fun startGroupSessionLocal(groupId: UUID, groupName: String): UUID {
         sessions.getOrPut(groupId) {
             IMSession(
@@ -508,10 +508,10 @@ class IMManager(
         updateSessionList()
         return groupId
     }
-
+    
     suspend fun startConferenceSession(participants: List<UUID>, name: String): UUID? {
         val sessionId = UUID.randomUUID()
-
+        
         val request = LLSDMap().apply {
             this["method"] = LLSDString("start conference")
             this["session-id"] = LLSDString(sessionId.toString())
@@ -524,7 +524,7 @@ class IMManager(
                 }
             }
         }
-
+        
         val response = capabilityManager.request(CapabilityManager.CAP_CHAT_PASS, request)
         if (response is LLSDMap && response.getInt("success") == 1) {
             val session = IMSession(
@@ -538,22 +538,22 @@ class IMManager(
             updateSessionList()
             return sessionId
         }
-
+        
         return null
     }
-
+    
     suspend fun leaveSession(sessionId: UUID) {
         val request = LLSDMap().apply {
             this["method"] = LLSDString("close session")
             this["session-id"] = LLSDString(sessionId.toString())
         }
-
+        
         capabilityManager.request(CapabilityManager.CAP_CHAT_PASS, request)
-
+        
         sessions[sessionId]?.isActive = false
         updateSessionList()
     }
-
+    
     fun sendTypingStart(sessionId: UUID) {
         scope.launch { sendTypingPacket(sessionId, IM_TYPING_START) }
     }
@@ -590,7 +590,7 @@ class IMManager(
             Log.e(TAG, "Failed to send typing packet (dialog=$dialog)", e)
         }
     }
-
+    
     fun getSessionMessages(sessionId: UUID): List<IMMessage> {
         return sessionMessages[sessionId]?.toList() ?: emptyList()
     }
@@ -598,44 +598,44 @@ class IMManager(
     fun getLastSessionMessage(sessionId: UUID): IMMessage? {
         return lastMessageBySession[sessionId]
     }
-
+    
     fun markAsRead(sessionId: UUID) {
         _unreadCounts.value = _unreadCounts.value - sessionId
         pendingSyncSessions.update { it - sessionId }
     }
-
+    
     private fun addMessage(sessionId: UUID, message: IMMessage) {
         val messages = sessionMessages.getOrPut(sessionId) { mutableListOf() }
         messages.add(message)
         lastMessageBySession[sessionId] = message
-
+        
         if (messages.size > MAX_SESSION_HISTORY) {
             messages.removeAt(0)
         }
-
+        
         if (!message.isOutgoing) {
             val current = _unreadCounts.value[sessionId] ?: 0
             _unreadCounts.value = _unreadCounts.value + (sessionId to (current + 1))
         }
-
+        
         scope.launch {
             _messageFlow.emit(message)
         }
     }
-
+    
     private fun updateSessionList() {
         _activeSessions.value = sessions.values
             .filter { it.isActive }
             .sortedByDescending { sessionMessages[it.sessionId]?.lastOrNull()?.timestamp ?: 0L }
     }
-
+    
     private fun computeP2PSessionId(agent1: UUID, agent2: UUID): UUID {
         return UUID(
             agent1.mostSignificantBits xor agent2.mostSignificantBits,
             agent1.leastSignificantBits xor agent2.leastSignificantBits
         )
     }
-
+    
     fun shutdown() {
         scope.cancel()
     }

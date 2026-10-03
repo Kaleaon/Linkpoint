@@ -7,7 +7,7 @@ import com.google.common.annotations.GwtCompatible;
 public enum PublicSuffixType {
     PRIVATE(':', ','),
     ICANN('!', '?');
-
+    
     private final char innerNodeCode;
     private final char leafNodeCode;
 

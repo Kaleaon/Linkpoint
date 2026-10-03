@@ -6,12 +6,12 @@ import java.util.UUID
 
 /**
  * Extension functions for ByteBuffer to handle Second Life protocol data types.
- *
+ * 
  * Per the SL protocol specification:
  * - UUIDs are stored as 16 raw bytes in big-endian (network) order
  * - Message body numeric values are little-endian
  * - Packet header values are big-endian
- *
+ * 
  * @see <a href="https://wiki.secondlife.com/wiki/Packet_Layout">SL Packet Layout</a>
  */
 
@@ -19,7 +19,7 @@ import java.util.UUID
  * Write a UUID to ByteBuffer in big-endian (SL protocol format).
  * UUIDs in SL are always stored as 16 raw bytes in big-endian order,
  * regardless of the buffer's current byte order.
- *
+ * 
  * @param uuid The UUID to write
  * @return This ByteBuffer for chaining
  */
@@ -34,7 +34,7 @@ fun ByteBuffer.putUUID(uuid: UUID): ByteBuffer {
 
 /**
  * Read a UUID from ByteBuffer in big-endian (SL protocol format).
- *
+ * 
  * @return The UUID read from the buffer
  */
 fun ByteBuffer.getUUID(): UUID {

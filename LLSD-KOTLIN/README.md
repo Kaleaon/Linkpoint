@@ -103,11 +103,11 @@ import java.util.Map;
 // Parse an LLSD document from a file
 try {
     LLSDParser parser = new LLSDParser();
-
+    
     try (InputStream input = Files.newInputStream(Paths.get("document.xml"))) {
         LLSD document = parser.parse(input);
         Object content = document.getContent();
-
+        
         // Handle different content types
         if (content instanceof Map) {
             @SuppressWarnings("unchecked")
@@ -135,7 +135,7 @@ import lindenlab.llsd.LLSDJsonParser;
 // Parse JSON-formatted LLSD
 try {
     LLSDJsonParser jsonParser = new LLSDJsonParser();
-
+    
     try (InputStream input = Files.newInputStream(Paths.get("document.json"))) {
         LLSD document = jsonParser.parse(input);
         // Process document same as XML format
@@ -153,7 +153,7 @@ import lindenlab.llsd.LLSDNotationParser;
 // Parse notation-formatted LLSD
 try {
     LLSDNotationParser notationParser = new LLSDNotationParser();
-
+    
     try (InputStream input = Files.newInputStream(Paths.get("document.llsd"))) {
         LLSD document = notationParser.parse(input);
         // Process document same as other formats
@@ -171,7 +171,7 @@ import lindenlab.llsd.LLSDBinaryParser;
 // Parse binary-formatted LLSD
 try {
     LLSDBinaryParser binaryParser = new LLSDBinaryParser();
-
+    
     try (InputStream input = Files.newInputStream(Paths.get("document.llsd-binary"))) {
         LLSD document = binaryParser.parse(input);
         // Process document same as other formats
@@ -305,7 +305,7 @@ UUID userId = LLSDUtils.getUUID(document.getContent(), "user.id", UUID.randomUUI
 
 // Validate required fields
 List<String> missing = LLSDUtils.validateRequiredFields(
-    document.getContent(),
+    document.getContent(), 
     "user.name", "user.email", "user.id"
 );
 if (!missing.isEmpty()) {
@@ -575,7 +575,7 @@ import lindenlab.llsd.viewer.secondlife.SecondLifeLLSDUtils;
 
 // Create SL-specific data structures
 Map<String, Object> agentData = SecondLifeLLSDUtils.createAgentData(
-    agentId,
+    agentId, 
     new double[]{128.0, 128.0, 23.0}, // position
     new double[]{0.0, 0.0, 0.0, 1.0}, // rotation
     new double[]{0.0, 0.0, 0.0}       // velocity
@@ -592,7 +592,7 @@ SecondLifeLLSDUtils.SLValidationRules rules = new SecondLifeLLSDUtils.SLValidati
     .requireField("AgentID", UUID.class)
     .requireField("Message", String.class);
 
-SecondLifeLLSDUtils.ValidationResult validation =
+SecondLifeLLSDUtils.ValidationResult validation = 
     SecondLifeLLSDUtils.validateSLStructure(messageData, rules);
 
 if (!validation.isValid()) {
@@ -632,7 +632,7 @@ FirestormLLSDUtils.FSValidationRules fsRules = new FirestormLLSDUtils.FSValidati
     .requireRLV()
     .requireField("ViewerVersion", String.class);
 
-FirestormLLSDUtils.FSValidationResult fsResult =
+FirestormLLSDUtils.FSValidationResult fsResult = 
     FirestormLLSDUtils.validateFSStructure(data, fsRules);
 
 // Thread-safe caching for performance
@@ -686,7 +686,7 @@ JSON representation with special type encodings for LLSD-specific types:
 
 Special JSON encodings:
 - `{"d": "ISO8601"}` - Date values
-- `{"u": "URI"}` - URI values
+- `{"u": "URI"}` - URI values  
 - `{"i": "UUID"}` - UUID values
 - `{"b": "base64"}` - Binary data
 - `null` - Undefined values
@@ -701,7 +701,7 @@ Compact text-based format inspired by programming language literals:
 
 Notation syntax:
 - `!` - undefined
-- `1` / `0` - boolean true/false
+- `1` / `0` - boolean true/false  
 - `i42` - integer
 - `r3.14159` - real number
 - `s'text'` - string (single or double quotes)

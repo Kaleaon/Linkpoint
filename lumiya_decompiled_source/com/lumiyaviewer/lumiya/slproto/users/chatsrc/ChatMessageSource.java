@@ -19,7 +19,7 @@ public abstract class ChatMessageSource {
         User,
         Group,
         Object;
-
+        
         public static final ChatMessageSourceType[] VALUES = valuesCustom();
 
         /* renamed from: values  reason: to resolve conflict with enum method */

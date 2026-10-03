@@ -11,17 +11,17 @@ import org.json.JSONObject
 
 /**
  * Manages themed and popular destination locations from Second Life.
- *
+ * 
  * Features:
  * - Curated destination categories (Shopping, Entertainment, Education, etc.)
  * - Popular/featured destinations
  * - Caching of destination data
  * - Integration with Second Life Destination Guide API
- *
+ * 
  * Based on Second Life mobile app functionality.
  */
 class DestinationGuide(private val context: Context) {
-
+    
     companion object {
         private const val TAG = "DestinationGuide"
         private const val PREFS_NAME = "destination_guide_prefs"
@@ -30,31 +30,31 @@ class DestinationGuide(private val context: Context) {
         private const val KEY_LAST_UPDATE = "last_update"
         private const val CACHE_DURATION_MS = 24 * 60 * 60 * 1000L  // 24 hours
     }
-
+    
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
+    
     // Destination categories
     private val _categories = MutableStateFlow<List<DestinationCategory>>(emptyList())
     val categories: StateFlow<List<DestinationCategory>> = _categories
-
+    
     // Featured destinations
     private val _featuredDestinations = MutableStateFlow<List<DestinationEntry>>(emptyList())
     val featuredDestinations: StateFlow<List<DestinationEntry>> = _featuredDestinations
-
+    
     // All destinations by category
     private val _destinations = MutableStateFlow<Map<String, List<DestinationEntry>>>(emptyMap())
     val destinations: StateFlow<Map<String, List<DestinationEntry>>> = _destinations
-
+    
     // Loading state
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
-
+    
     init {
         loadCachedData()
         initializeDefaultDestinations()
     }
-
+    
     /**
      * Initialize with default curated destinations.
      * These are well-known Second Life locations that are always available.
@@ -70,7 +70,7 @@ class DestinationGuide(private val context: Context) {
             _destinations.value = getDefaultDestinationsByCategory()
         }
     }
-
+    
     /**
      * Get default destination categories.
      */
@@ -130,7 +130,7 @@ class DestinationGuide(private val context: Context) {
             iconName = "groups"
         )
     )
-
+    
     /**
      * Get default featured destinations.
      * These are popular, well-established Second Life locations.
@@ -197,16 +197,16 @@ class DestinationGuide(private val context: Context) {
             isFeatured = true
         )
     )
-
+    
     /**
      * Get default destinations organized by category.
      */
     private fun getDefaultDestinationsByCategory(): Map<String, List<DestinationEntry>> {
         val result = mutableMapOf<String, MutableList<DestinationEntry>>()
-
+        
         // Add featured destinations
         result["featured"] = _featuredDestinations.value.toMutableList()
-
+        
         // Newcomer friendly destinations
         result["newcomer"] = mutableListOf(
             DestinationEntry(
@@ -237,7 +237,7 @@ class DestinationGuide(private val context: Context) {
                 trafficRating = 4
             )
         )
-
+        
         // Shopping destinations
         result["shopping"] = mutableListOf(
             DestinationEntry(
@@ -268,7 +268,7 @@ class DestinationGuide(private val context: Context) {
                 trafficRating = 4
             )
         )
-
+        
         // Entertainment destinations
         result["entertainment"] = mutableListOf(
             DestinationEntry(
@@ -290,7 +290,7 @@ class DestinationGuide(private val context: Context) {
                 trafficRating = 4
             )
         )
-
+        
         // Parks & Nature
         result["nature"] = mutableListOf(
             DestinationEntry(
@@ -312,7 +312,7 @@ class DestinationGuide(private val context: Context) {
                 trafficRating = 4
             )
         )
-
+        
         // Arts & Culture
         result["arts"] = mutableListOf(
             DestinationEntry(
@@ -334,7 +334,7 @@ class DestinationGuide(private val context: Context) {
                 trafficRating = 4
             )
         )
-
+        
         // Roleplay
         result["roleplay"] = mutableListOf(
             DestinationEntry(
@@ -356,7 +356,7 @@ class DestinationGuide(private val context: Context) {
                 trafficRating = 3
             )
         )
-
+        
         // Education
         result["education"] = mutableListOf(
             DestinationEntry(
@@ -378,7 +378,7 @@ class DestinationGuide(private val context: Context) {
                 trafficRating = 3
             )
         )
-
+        
         // Social Hangouts
         result["hangouts"] = mutableListOf(
             DestinationEntry(
@@ -401,26 +401,26 @@ class DestinationGuide(private val context: Context) {
                 maturityRating = MaturityRating.ADULT
             )
         )
-
+        
         return result
     }
-
+    
     /**
      * Get destinations for a specific category.
      */
     fun getDestinationsForCategory(categoryId: String): List<DestinationEntry> {
         return _destinations.value[categoryId] ?: emptyList()
     }
-
+    
     /**
      * Search destinations by name or description.
      */
     fun searchDestinations(query: String): List<DestinationEntry> {
         if (query.isBlank()) return emptyList()
-
+        
         val lowerQuery = query.lowercase()
         val results = mutableListOf<DestinationEntry>()
-
+        
         _destinations.value.values.flatten().forEach { dest ->
             if (dest.name.lowercase().contains(lowerQuery) ||
                 dest.description.lowercase().contains(lowerQuery) ||
@@ -428,10 +428,10 @@ class DestinationGuide(private val context: Context) {
                 results.add(dest)
             }
         }
-
+        
         return results.sortedByDescending { it.trafficRating }
     }
-
+    
     /**
      * Get top destinations across all categories.
      */
@@ -440,7 +440,7 @@ class DestinationGuide(private val context: Context) {
             .sortedByDescending { it.trafficRating }
             .take(limit)
     }
-
+    
     /**
      * Get destinations suitable for a specific maturity rating.
      */
@@ -449,7 +449,7 @@ class DestinationGuide(private val context: Context) {
             .filter { it.maturityRating.ordinal <= maxMaturity.ordinal }
             .sortedByDescending { it.trafficRating }
     }
-
+    
     /**
      * Convert destination to start location option.
      */
@@ -463,19 +463,19 @@ class DestinationGuide(private val context: Context) {
             categoryId = destination.category
         )
     }
-
+    
     // ==================== PERSISTENCE ====================
-
+    
     private fun loadCachedData() {
         try {
             val lastUpdate = prefs.getLong(KEY_LAST_UPDATE, 0)
             val cacheAge = System.currentTimeMillis() - lastUpdate
-
+            
             if (cacheAge > CACHE_DURATION_MS) {
                 Log.d(TAG, "Cache expired, using defaults")
                 return
             }
-
+            
             // Load cached categories
             val categoriesJson = prefs.getString(KEY_CACHED_CATEGORIES, null)
             if (categoriesJson != null) {
@@ -484,7 +484,7 @@ class DestinationGuide(private val context: Context) {
                     _categories.value = categories
                 }
             }
-
+            
             // Load cached destinations
             val destinationsJson = prefs.getString(KEY_CACHED_DESTINATIONS, null)
             if (destinationsJson != null) {
@@ -495,13 +495,13 @@ class DestinationGuide(private val context: Context) {
                         .filter { it.isFeatured }
                 }
             }
-
+            
             Log.i(TAG, "Loaded cached destination data")
         } catch (e: Exception) {
             Log.w(TAG, "Failed to load cached data", e)
         }
     }
-
+    
     private fun parseCategoriesJson(json: String): List<DestinationCategory> {
         val result = mutableListOf<DestinationCategory>()
         try {
@@ -520,7 +520,7 @@ class DestinationGuide(private val context: Context) {
         }
         return result
     }
-
+    
     private fun parseDestinationsJson(json: String): Map<String, List<DestinationEntry>> {
         val result = mutableMapOf<String, MutableList<DestinationEntry>>()
         try {
@@ -530,7 +530,7 @@ class DestinationGuide(private val context: Context) {
                 val category = keys.next()
                 val array = obj.getJSONArray(category)
                 val destinations = mutableListOf<DestinationEntry>()
-
+                
                 for (i in 0 until array.length()) {
                     val destObj = array.getJSONObject(i)
                     destinations.add(DestinationEntry(
@@ -550,7 +550,7 @@ class DestinationGuide(private val context: Context) {
                         )
                     ))
                 }
-
+                
                 result[category] = destinations
             }
         } catch (e: Exception) {
@@ -558,7 +558,7 @@ class DestinationGuide(private val context: Context) {
         }
         return result
     }
-
+    
     fun shutdown() {
         scope.cancel()
     }

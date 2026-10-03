@@ -1,7 +1,7 @@
 /*
  * LLSD Serialization Framework - Java implementation based on Second Life/Firestorm C++ code
  *
- * Converted from indra/llcommon/llsdserialize.h/cpp
+ * Converted from indra/llcommon/llsdserialize.h/cpp  
  * Copyright (C) 2010, Linden Research, Inc.
  * Java conversion Copyright (C) 2024
  */
@@ -29,26 +29,26 @@ import java.nio.charset.StandardCharsets;
  * @see LLSD
  */
 public abstract class LLSDViewerSerializer {
-
+    
     /**
      * Parser failure constant.
      */
     public static final int PARSE_FAILURE = -1;
-
+    
     /**
      * Unlimited size constant.
      */
     public static final long SIZE_UNLIMITED = -1;
-
+    
     /**
      * Default maximum parsing depth.
      */
     public static final int DEFAULT_MAX_DEPTH = 64;
-
+    
     protected boolean checkLimits = true;
     protected long maxBytesLeft = SIZE_UNLIMITED;
     protected boolean parseLines = false;
-
+    
     /**
      * Parses LLSD data from an {@link InputStream} with specified byte and depth limits.
      * <p>
@@ -69,7 +69,7 @@ public abstract class LLSDViewerSerializer {
     public LLSD parse(InputStream input, long maxBytes, int maxDepth) throws IOException, LLSDException {
         this.maxBytesLeft = maxBytes;
         this.checkLimits = (maxBytes != SIZE_UNLIMITED);
-
+        
         try {
             Object content = doParse(input, maxDepth == -1 ? DEFAULT_MAX_DEPTH : maxDepth);
             return new LLSD(content);
@@ -83,7 +83,7 @@ public abstract class LLSDViewerSerializer {
             }
         }
     }
-
+    
     /**
      * Parses LLSD data from an {@link InputStream} with default (unlimited) limits.
      *
@@ -95,7 +95,7 @@ public abstract class LLSDViewerSerializer {
     public LLSD parse(InputStream input) throws IOException, LLSDException {
         return parse(input, SIZE_UNLIMITED, -1);
     }
-
+    
     /**
      * Parses LLSD data using line-based reading, which can be more robust for
      * certain formats like XML.
@@ -113,7 +113,7 @@ public abstract class LLSDViewerSerializer {
             this.parseLines = false;
         }
     }
-
+    
     /**
      * Resets the internal state of the parser, allowing it to be reused for
      * another parsing operation.
@@ -127,7 +127,7 @@ public abstract class LLSDViewerSerializer {
         checkLimits = true;
         parseLines = false;
     }
-
+    
     /**
      * The abstract method that subclasses must implement to perform the actual
      * parsing for a specific format.
@@ -139,7 +139,7 @@ public abstract class LLSDViewerSerializer {
      * @throws LLSDException if a format-specific parsing error occurs.
      */
     protected abstract Object doParse(InputStream input, int maxDepth) throws IOException, LLSDException;
-
+    
     /**
      * A hook for subclasses to implement format-specific reset logic.
      * <p>
@@ -148,7 +148,7 @@ public abstract class LLSDViewerSerializer {
     protected void doReset() {
         // Default: no-op
     }
-
+    
     /**
      * Reads a single byte from the stream while enforcing the byte limit.
      *
@@ -161,14 +161,14 @@ public abstract class LLSDViewerSerializer {
         if (checkLimits && maxBytesLeft <= 0) {
             throw new LLSDException("Byte limit exceeded during parsing");
         }
-
+        
         int b = input.read();
         if (b != -1 && checkLimits) {
             maxBytesLeft--;
         }
         return b;
     }
-
+    
     /**
      * Reads a block of bytes from the stream while enforcing the byte limit.
      *
@@ -184,18 +184,18 @@ public abstract class LLSDViewerSerializer {
         if (checkLimits && maxBytesLeft <= 0) {
             throw new LLSDException("Byte limit exceeded during parsing");
         }
-
+        
         if (checkLimits && length > maxBytesLeft) {
             length = (int) maxBytesLeft;
         }
-
+        
         int bytesRead = input.read(buffer, offset, length);
         if (bytesRead > 0 && checkLimits) {
             maxBytesLeft -= bytesRead;
         }
         return bytesRead;
     }
-
+    
     /**
      * Manually accounts for a number of bytes consumed, decrementing the
      * internal byte limit counter.
@@ -211,7 +211,7 @@ public abstract class LLSDViewerSerializer {
             }
         }
     }
-
+    
     /**
      * Checks if the current parsing depth has exceeded the configured maximum.
      *
@@ -224,7 +224,7 @@ public abstract class LLSDViewerSerializer {
             throw new LLSDException("Maximum parsing depth exceeded: " + currentDepth + " > " + maxDepth);
         }
     }
-
+    
     /**
      * A utility method for reading a string that is prefixed with its 32-bit,
      * big-endian length. This is a common pattern in binary serialization.
@@ -240,28 +240,28 @@ public abstract class LLSDViewerSerializer {
         if (readBytes(input, lengthBytes, 0, 4) != 4) {
             throw new LLSDException("Unexpected EOF reading string length");
         }
-
+        
         int length = ((lengthBytes[0] & 0xFF) << 24) |
                     ((lengthBytes[1] & 0xFF) << 16) |
                     ((lengthBytes[2] & 0xFF) << 8) |
                     (lengthBytes[3] & 0xFF);
-
+        
         if (length < 0) {
             throw new LLSDException("Invalid string length: " + length);
         }
-
+        
         if (length == 0) {
             return "";
         }
-
+        
         byte[] stringBytes = new byte[length];
         if (readBytes(input, stringBytes, 0, length) != length) {
             throw new LLSDException("Unexpected EOF reading string data");
         }
-
+        
         return new String(stringBytes, StandardCharsets.UTF_8);
     }
-
+    
     /**
      * A utility method to consume and discard whitespace characters from the stream.
      *
@@ -277,7 +277,7 @@ public abstract class LLSDViewerSerializer {
         } while (ch != -1 && Character.isWhitespace(ch));
         return ch;
     }
-
+    
     /**
      * A utility method to read characters from the stream until a specific
      * delimiter character is found.
@@ -311,7 +311,7 @@ public abstract class LLSDViewerSerializer {
  * serialization framework.
  */
 abstract class LLSDViewerSerializationUtils {
-
+    
     /**
      * An enumeration of the LLSD serialization formats supported by the viewer.
      */
@@ -325,7 +325,7 @@ abstract class LLSDViewerSerializationUtils {
         /** JSON LLSD format. */
         LLSD_JSON
     }
-
+    
     /**
      * Serializes an LLSD object to an output stream using the specified format.
      * <p>
@@ -356,7 +356,7 @@ abstract class LLSDViewerSerializationUtils {
                 throw new LLSDException("Unsupported serialization format: " + format);
         }
     }
-
+    
     /**
      * Auto-detects the LLSD format from an input stream and deserializes it.
      * <p>
@@ -376,22 +376,22 @@ abstract class LLSDViewerSerializationUtils {
         if (!input.markSupported()) {
             input = new BufferedInputStream(input);
         }
-
+        
         input.mark(16);
         byte[] header = new byte[16];
         int headerLen = input.read(header);
         input.reset();
-
+        
         if (headerLen == 0) {
             throw new LLSDException("Empty input stream");
         }
-
+        
         // Detect format from header
         String headerStr = new String(header, 0, Math.min(headerLen, 16), StandardCharsets.UTF_8);
-
+        
         if (headerStr.startsWith("<?xml") || headerStr.startsWith("<llsd>")) {
             return deserializeXML(input, maxBytes);
-        } else if (headerStr.startsWith("[") || headerStr.startsWith("{") || headerStr.startsWith("'") ||
+        } else if (headerStr.startsWith("[") || headerStr.startsWith("{") || headerStr.startsWith("'") || 
                    headerStr.startsWith("\"") || Character.isDigit(headerStr.charAt(0))) {
             return deserializeNotation(input, maxBytes);
         } else if (headerStr.startsWith("{\"") || headerStr.startsWith("[{")) {
@@ -401,42 +401,42 @@ abstract class LLSDViewerSerializationUtils {
             return deserializeBinary(input, maxBytes);
         }
     }
-
+    
     private static void serializeXML(LLSD llsd, OutputStream output) throws IOException, LLSDException {
         // Use existing XML serializer (placeholder - would use actual implementation)
         throw new LLSDException("XML serialization not yet implemented in viewer utils");
     }
-
+    
     private static void serializeBinary(LLSD llsd, OutputStream output) throws IOException, LLSDException {
-        // Use existing binary serializer (placeholder - would use actual implementation)
+        // Use existing binary serializer (placeholder - would use actual implementation)  
         throw new LLSDException("Binary serialization not yet implemented in viewer utils");
     }
-
+    
     private static void serializeNotation(LLSD llsd, OutputStream output) throws IOException, LLSDException {
         // Use existing notation serializer (placeholder - would use actual implementation)
         throw new LLSDException("Notation serialization not yet implemented in viewer utils");
     }
-
+    
     private static void serializeJSON(LLSD llsd, OutputStream output) throws IOException, LLSDException {
         // Use existing JSON serializer (placeholder - would use actual implementation)
         throw new LLSDException("JSON serialization not yet implemented in viewer utils");
     }
-
+    
     private static LLSD deserializeXML(InputStream input, long maxBytes) throws IOException, LLSDException {
         // Use existing XML parser (placeholder - would use actual implementation)
         throw new LLSDException("XML deserialization not yet implemented in viewer utils");
     }
-
+    
     private static LLSD deserializeBinary(InputStream input, long maxBytes) throws IOException, LLSDException {
         // Use existing binary parser (placeholder - would use actual implementation)
         throw new LLSDException("Binary deserialization not yet implemented in viewer utils");
     }
-
+    
     private static LLSD deserializeNotation(InputStream input, long maxBytes) throws IOException, LLSDException {
         // Use existing notation parser (placeholder - would use actual implementation)
         throw new LLSDException("Notation deserialization not yet implemented in viewer utils");
     }
-
+    
     private static LLSD deserializeJSON(InputStream input, long maxBytes) throws IOException, LLSDException {
         // Use existing JSON parser (placeholder - would use actual implementation)
         throw new LLSDException("JSON deserialization not yet implemented in viewer utils");

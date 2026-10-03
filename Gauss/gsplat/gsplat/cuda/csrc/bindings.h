@@ -68,8 +68,8 @@ std::
     );
 
 std::tuple<
-    torch::Tensor, // out_img
-    torch::Tensor  // pixel_topk
+    torch::Tensor, // out_img 
+    torch::Tensor  // pixel_topk 
 > nd_rasterize_forward_topk_norm_tensor(
     const std::tuple<int, int, int> tile_bounds,
     const std::tuple<int, int, int> block,
@@ -102,8 +102,8 @@ std::
     );
 
 std::tuple<
-    torch::Tensor, // out_img
-    torch::Tensor  // pixel_topk
+    torch::Tensor, // out_img 
+    torch::Tensor  // pixel_topk 
 > nd_rasterize_forward_no_tiles_tensor(
     const std::tuple<int, int, int> img_size,
     const unsigned num_points,
@@ -128,8 +128,8 @@ nd_rasterize_backward_no_tiles_tensor(
 );
 
 std::tuple<
-    torch::Tensor, // out_img
-    torch::Tensor  // pixel_topk
+    torch::Tensor, // out_img 
+    torch::Tensor  // pixel_topk 
 > nd_rasterize_forward_simple_tensor(
     const std::tuple<int, int, int> img_size,
     const unsigned num_points,

@@ -5,13 +5,13 @@
 def detectArchitecture() {
     def arch = System.getProperty("os.arch")
     def osName = System.getProperty("os.name").toLowerCase()
-
+    
     println "🔍 Detecting architecture: $arch on $osName"
-
+    
     // Map various architecture names to android-tools naming
     def archMapping = [
         'amd64': 'x86_64',
-        'x86_64': 'x86_64',
+        'x86_64': 'x86_64', 
         'aarch64': 'arm64-v8a',
         'arm64': 'arm64-v8a',
         'armv7l': 'armeabi-v7a',
@@ -19,10 +19,10 @@ def detectArchitecture() {
         'i386': 'x86',
         'i686': 'x86'
     ]
-
+    
     def mappedArch = archMapping[arch] ?: 'unknown'
     println "📋 Mapped architecture: $arch -> $mappedArch"
-
+    
     return [
         raw: arch,
         mapped: mappedArch,
@@ -35,20 +35,20 @@ def setupAapt2ForArchitecture(archInfo) {
         println "✅ Standard SDK AAPT2 sufficient for ${archInfo.raw}"
         return
     }
-
+    
     println "🌍 Setting up universal AAPT2 for ${archInfo.mapped}..."
-
+    
     // Enhanced architecture detection and android-tools integration
     def androidToolsDir = new File("/tmp/android-tools")
     def aapt2Path = new File("/opt/android-tools/aapt2")
-
+    
     // Use the cloned android-tools repository (CleverFerret approach)
     if (androidToolsDir.exists()) {
         // Try multiple Android versions (best to oldest)
         def androidVersions = ["android-11.0.0_r33", "android-9.0.0_r33"]
         def selectedVersion = null
         def sourceAapt2 = null
-
+        
         for (version in androidVersions) {
             def versionDir = new File(androidToolsDir, "build/$version")
             if (versionDir.exists()) {
@@ -59,24 +59,24 @@ def setupAapt2ForArchitecture(archInfo) {
                 }
             }
         }
-
+        
         if (sourceAapt2?.exists()) {
             println "✅ Found android-tools AAPT2: ${sourceAapt2.absolutePath} ($selectedVersion)"
-
-            // Setup tools directory
+            
+            // Setup tools directory  
             def toolsDir = new File("/opt/android-tools")
             toolsDir.mkdirs()
-
+            
             // Copy the binary (CleverFerret method)
             sourceAapt2.withInputStream { input ->
                 aapt2Path.withOutputStream { output ->
                     output << input
                 }
             }
-
+            
             // Make executable
             aapt2Path.setExecutable(true)
-
+            
             // Test the binary with enhanced compatibility check
             try {
                 def proc = "${aapt2Path.absolutePath} version".execute()
@@ -84,7 +84,7 @@ def setupAapt2ForArchitecture(archInfo) {
                 if (proc.exitValue() == 0) {
                     def versionOutput = proc.text.trim()
                     println "✅ Android-tools AAPT2 working: $versionOutput"
-
+                    
                     // Universal compatibility layer
                     setupUniversalCompatibilityLayer(aapt2Path.absolutePath, selectedVersion, archInfo)
                 } else {
@@ -128,7 +128,7 @@ def setupAapt2ForArchitecture(archInfo) {
 
 def setupUniversalCompatibilityLayer(aapt2Path, version, archInfo) {
     println "🔧 Setting up universal compatibility layer..."
-
+    
     // Create architecture-specific configuration
     def configFile = new File(project.rootDir, "gradle-universal-config.properties")
     configFile.text = """
@@ -148,10 +148,10 @@ org.gradle.caching=true
 android.useAndroidX=true
 android.enableJetifier=true
 """
-
+    
     // Let AGP handle AAPT2 internally with our enhanced environment
     println "📋 Using AGP's internal AAPT2 with universal compatibility layer"
-
+    
     // Set system properties for build optimization
     System.setProperty("android.tools.universal.arch", archInfo.mapped)
     System.setProperty("android.tools.universal.available", "true")
@@ -159,17 +159,17 @@ android.enableJetifier=true
 
 def setupCompatibilityLayer() {
     println "🔧 Setting up runtime compatibility layer for android-tools AAPT2"
-
+    
     // Instead of overriding AAPT2, we'll let AGP use its internal binary
     // but set up the environment for better cross-architecture support
-
+    
     def androidHome = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
     if (androidHome) {
         println "✅ Android SDK available at: $androidHome"
-
+        
         // Configure for better cross-architecture compatibility
         System.setProperty("android.builder.sdkDownload", "false")
-
+        
         // Use the build tools that come with the SDK
         println "📋 Using standard Android SDK build tools with runtime optimization"
     }
@@ -177,29 +177,29 @@ def setupCompatibilityLayer() {
 
 def setupFallbackAapt2() {
     println "🔄 Setting up fallback AAPT2..."
-
+    
     def androidHome = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
     if (!androidHome) {
         println "❌ No Android SDK found"
         return
     }
-
+    
     def sdkAapt2 = new File("$androidHome/build-tools/35.0.0/aapt2")
     if (!sdkAapt2.exists()) {
         sdkAapt2 = new File("$androidHome/build-tools/34.0.0/aapt2")
     }
-
+    
     if (sdkAapt2.exists()) {
         def fallbackPath = new File("/opt/android-tools/aapt2")
         fallbackPath.parentFile.mkdirs()
-
+        
         // Copy SDK AAPT2 as fallback
         sdkAapt2.withInputStream { input ->
             fallbackPath.withOutputStream { output ->
                 output << input
             }
         }
-
+        
         fallbackPath.setExecutable(true)
         println "📋 Fallback AAPT2 configured from Android SDK"
         project.ext.customAapt2Path = fallbackPath.absolutePath
@@ -212,13 +212,13 @@ def configureGradleProperties() {
     if (project.hasProperty('customAapt2Path')) {
         def aapt2Path = project.ext.customAapt2Path
         println "⚙️  Configuring Gradle to use: $aapt2Path"
-
+        
         // Set the property for this build
         project.ext.setProperty('android.aapt2FromMavenOverride', aapt2Path)
-
+        
         // Also set as system property for this session
         System.setProperty('android.aapt2FromMavenOverride', aapt2Path)
-
+        
         println "✅ AAPT2 override configured"
     }
 }

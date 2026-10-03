@@ -1,5 +1,5 @@
 # Lumiya-Redux Deep Dive Report for Linkpoint
-_Date:_ 2026-04-26
+_Date:_ 2026-04-26  
 _Source analyzed:_ `https://github.com/Kaleaon/Lumiya-Redux` @ `dd4f6ff`
 
 ## 1) Executive summary

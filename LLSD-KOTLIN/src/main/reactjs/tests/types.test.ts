@@ -206,7 +206,7 @@ describe('LLSD Core Types', () => {
         test('should generate valid UUIDs', () => {
             const uuid1 = LLSDUtils.generateUUID();
             const uuid2 = LLSDUtils.generateUUID();
-
+            
             expect(LLSDUtils.isUUIDString(uuid1)).toBe(true);
             expect(LLSDUtils.isUUIDString(uuid2)).toBe(true);
             expect(uuid1).not.toBe(uuid2);

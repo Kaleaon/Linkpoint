@@ -117,7 +117,7 @@ ARCHITECTURE HIGHLIGHTS
 ================================================================================
 
 Clean Architecture:
-  UI Layer → ViewModel Layer → Repository Layer →
+  UI Layer → ViewModel Layer → Repository Layer → 
   Manager Layer → Infrastructure Layer → Data Layer
 
 Design Patterns:

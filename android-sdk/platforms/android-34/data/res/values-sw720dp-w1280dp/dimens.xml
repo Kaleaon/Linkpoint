@@ -30,3 +30,4 @@
     <!-- Padding to the right of the preference panel breadcrumb -->
     <dimen name="preference_breadcrumb_paddingRight">48dp</dimen>
 </resources>
+

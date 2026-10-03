@@ -16,7 +16,7 @@ use tokio::time::{interval, Instant};
 use serde::{Deserialize, Serialize};
 
 /// Comprehensive cache management system for Second Life viewer (Rust implementation).
-///
+/// 
 /// Features:
 /// - Safe concurrent operations with Rust's ownership system
 /// - Async operations with Tokio for high performance
@@ -38,7 +38,7 @@ impl StorageLocation {
     pub fn display_name(&self) -> &'static str {
         match self {
             StorageLocation::Internal => "Internal Storage",
-            StorageLocation::External => "External Storage",
+            StorageLocation::External => "External Storage", 
             StorageLocation::SystemTemp => "System Temp",
             StorageLocation::UserHome => "User Home",
         }
@@ -220,13 +220,13 @@ impl CacheStatistics {
 impl std::fmt::Display for CacheStatistics {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Cache Statistics:")?;
-        writeln!(f, "  Total Size: {} / {} ({:.1}%)",
-                format_bytes(self.total_size),
-                format_bytes(self.max_size),
+        writeln!(f, "  Total Size: {} / {} ({:.1}%)", 
+                format_bytes(self.total_size), 
+                format_bytes(self.max_size), 
                 self.usage_percent())?;
         writeln!(f, "  Available: {}", format_bytes(self.available_space()))?;
         writeln!(f, "  Hit Ratio: {:.2}%", self.hit_ratio() * 100.0)?;
-        writeln!(f, "  Requests: {} ({} hits, {} misses)",
+        writeln!(f, "  Requests: {} ({} hits, {} misses)", 
                 self.total_requests(), self.total_hits, self.total_misses)?;
         writeln!(f, "  Writes: {}", self.total_writes)?;
         writeln!(f, "  Cleanups: {}", self.total_cleanups)?;
@@ -234,7 +234,7 @@ impl std::fmt::Display for CacheStatistics {
         writeln!(f, "  Path: {}", self.base_path)?;
         writeln!(f)?;
         writeln!(f, "  Type Breakdown:")?;
-
+        
         for cache_type in CacheType::all_types() {
             let size = self.type_size(*cache_type);
             let limit = self.type_limit(*cache_type);
@@ -245,7 +245,7 @@ impl std::fmt::Display for CacheStatistics {
                     format_bytes(limit),
                     percent)?;
         }
-
+        
         Ok(())
     }
 }
@@ -255,13 +255,13 @@ pub struct CacheManager {
     max_cache_size: u64,
     base_cache_directory: PathBuf,
     cache_directories: HashMap<CacheType, PathBuf>,
-
+    
     // Statistics with thread-safe access
     statistics: Arc<RwLock<CacheStatistics>>,
-
+    
     // Cache index with async mutex for concurrent access
     cache_index: Arc<Mutex<HashMap<String, CacheEntry>>>,
-
+    
     // Type limits and sizes
     type_limits: HashMap<CacheType, u64>,
     type_sizes: Arc<RwLock<HashMap<CacheType, u64>>>,
@@ -274,10 +274,10 @@ impl CacheManager {
     ) -> Result<Self, Box<dyn std::error::Error + Send + Sync>> {
         let max_size = max_cache_size.min(MAX_CACHE_SIZE);
         let base_cache_directory = Self::get_base_cache_directory(storage_location)?;
-
+        
         // Create cache directories
         fs::create_dir_all(&base_cache_directory)?;
-
+        
         let mut cache_directories = HashMap::new();
         for cache_type in CacheType::all_types() {
             let type_dir = base_cache_directory.join(cache_type.folder_name());
@@ -287,7 +287,7 @@ impl CacheManager {
 
         // Initialize type limits
         let type_limits = Self::initialize_default_limits(max_size);
-
+        
         // Initialize type sizes
         let mut type_sizes = HashMap::new();
         for cache_type in CacheType::all_types() {
@@ -318,7 +318,7 @@ impl CacheManager {
 
         // Load existing cache index
         manager.load_cache_index().await?;
-
+        
         // Start periodic cleanup
         manager.start_periodic_cleanup().await;
 
@@ -351,13 +351,13 @@ impl CacheManager {
                     .join("cache")
             }
         };
-
+        
         Ok(path)
     }
 
     fn initialize_default_limits(max_size: u64) -> HashMap<CacheType, u64> {
         let mut limits = HashMap::new();
-
+        
         // Distribute cache space across types (percentages)
         limits.insert(CacheType::Texture, max_size * 60 / 100);  // 60%
         limits.insert(CacheType::Sound, max_size * 15 / 100);    // 15%
@@ -367,7 +367,7 @@ impl CacheManager {
         limits.insert(CacheType::Object, max_size * 3 / 100);    // 3%
         limits.insert(CacheType::Inventory, max_size * 2 / 100); // 2%
         limits.insert(CacheType::Temporary, max_size * 1 / 100); // 1%
-
+        
         limits
     }
 
@@ -600,11 +600,11 @@ impl CacheManager {
     fn get_cache_file_path(&self, cache_type: CacheType, key: &str) -> PathBuf {
         let type_dir = self.cache_directories.get(&cache_type)
             .expect("Cache directory should exist");
-
+        
         // Create subdirectories based on key hash for better file system performance
         let hash = format!("{:x}", md5::compute(key.as_bytes()));
         let sub_dir = &hash[0..2.min(hash.len())];
-
+        
         type_dir.join(sub_dir).join(key)
     }
 
@@ -666,7 +666,7 @@ impl CacheManager {
                 format_bytes(freed_space),
                 cache_type
             );
-
+            
             let mut stats = self.statistics.write().unwrap();
             stats.total_cleanups += 1;
         }
@@ -734,10 +734,10 @@ impl CacheManager {
                     if let (Some(file_name), Ok(metadata)) = (path.file_name(), path.metadata()) {
                         let key = file_name.to_string_lossy().to_string();
                         let size = metadata.len();
-
+                        
                         let cache_entry = CacheEntry::new(key.clone(), *cache_type, size);
                         index.insert(key, cache_entry);
-
+                        
                         type_size += size;
                         total_size += size;
                     }
@@ -765,13 +765,13 @@ impl CacheManager {
     async fn start_periodic_cleanup(&self) {
         let statistics = Arc::clone(&self.statistics);
         let cache_index = Arc::clone(&self.cache_index);
-
+        
         tokio::spawn(async move {
             let mut interval = interval(Duration::from_secs(5 * 60)); // 5 minutes
-
+            
             loop {
                 interval.tick().await;
-
+                
                 // Perform maintenance cleanup
                 Self::perform_maintenance_cleanup(&statistics, &cache_index).await;
             }
@@ -819,10 +819,10 @@ impl CacheManager {
                 self.storage_location,
                 location
             );
-
+            
             self.storage_location = location;
             self.base_cache_directory = Self::get_base_cache_directory(location)?;
-
+            
             // Reinitialize cache directories
             for cache_type in CacheType::all_types() {
                 let type_dir = self.base_cache_directory.join(cache_type.folder_name());
@@ -830,7 +830,7 @@ impl CacheManager {
                 self.cache_directories.insert(*cache_type, type_dir);
             }
         }
-
+        
         Ok(())
     }
 
@@ -842,7 +842,7 @@ impl CacheManager {
                 format_bytes(self.max_cache_size),
                 format_bytes(new_size)
             );
-
+            
             self.max_cache_size = new_size;
             self.type_limits = Self::initialize_default_limits(new_size);
 
@@ -880,9 +880,9 @@ impl CacheManager {
     /// Shutdown cache manager
     pub async fn shutdown(&self) {
         log::info!("Shutting down Rust cache manager");
-
+        
         // Cache cleanup is automatic due to Rust's RAII
-
+        
         log::info!("Rust cache manager shutdown complete");
     }
 }

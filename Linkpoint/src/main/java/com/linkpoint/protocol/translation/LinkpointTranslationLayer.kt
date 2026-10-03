@@ -5,19 +5,19 @@ import java.net.URL
 
 /**
  * Translation Layer for SL protocol communication patterns.
- *
+ * 
  * This layer bridges the communication differences between Linkpoint's modern Kotlin implementation
  * and the patterns from the decompiled reference viewer. This is necessary because:
- *
+ * 
  * 1. **Capability URL Handling**: The reference viewer has specific URL repair logic for the Agni grid that
  *    fixes incomplete hostnames in capability URLs returned by Linden Lab servers.
- *
+ *    
  * 2. **Message ID Encoding**: The reference viewer uses signed byte/short values for message IDs which affects
  *    how high/medium/low frequency messages are encoded and decoded.
- *
+ *    
  * 3. **Protocol Versioning**: Different protocol versions may require different handling of
  *    certain message types or capability responses.
- *
+ *    
  * 4. **Grid-Specific Quirks**: The official SL grid (Agni) has specific behaviors that need
  *    special handling compared to OpenSim grids.
  *
@@ -25,23 +25,23 @@ import java.net.URL
  * - SLCaps.java: Capability URL repair logic
  * - SLAgentCircuit.java: Message handling patterns
  * - SLMessage.java: Message ID encoding/decoding
- *
+ * 
  * @see com.linkpoint.protocol.capabilities.CapabilityManager
  * @see com.linkpoint.protocol.messages.UDPConnection
  */
 object LinkpointTranslationLayer {
-
+    
     private const val TAG = "LinkpointTranslation"
-
+    
     // Grid detection patterns
     private const val AGNI_LOGIN_HOST = "login.agni.lindenlab.com"
     private const val AGNI_DOMAIN_SUFFIX = ".agni.lindenlab.com"
     private const val LINDENLAB_DOMAIN = ".lindenlab.com"
-
+    
     // Simulator hostname patterns that need repair
     private const val SIM_HOST_PREFIX = "sim"
     private const val SIMHOST_PREFIX = "simhost-"
-
+    
     /**
      * Grid type enumeration for grid-specific handling.
      */
@@ -55,12 +55,12 @@ object LinkpointTranslationLayer {
         /** Unknown grid type */
         UNKNOWN
     }
-
+    
     /**
      * Detect grid type from login URL.
-     *
+     * 
      * This determines which grid-specific behaviors to apply.
-     *
+     * 
      * @param loginUrl The login URL used for authentication
      * @return The detected grid type
      */
@@ -68,7 +68,7 @@ object LinkpointTranslationLayer {
         return try {
             val url = URL(loginUrl)
             val host = url.host.lowercase()
-
+            
             when {
                 host == AGNI_LOGIN_HOST || host.endsWith(AGNI_DOMAIN_SUFFIX) -> GridType.AGNI
                 host.contains("aditi") || host.contains("beta") -> GridType.ADITI
@@ -80,15 +80,15 @@ object LinkpointTranslationLayer {
             GridType.UNKNOWN
         }
     }
-
+    
     /**
      * Check if the given login URL is for the Agni (main SL) grid.
-     *
+     * 
      * This matches the reference viewer's detection logic in SLCaps.java:
      * ```java
      * z = new URL(str).getHost().equals("login.agni.lindenlab.com");
      * ```
-     *
+     * 
      * @param loginUrl The login URL
      * @return true if this is the Agni grid
      */
@@ -100,14 +100,14 @@ object LinkpointTranslationLayer {
             false
         }
     }
-
+    
     /**
      * Repair a capability URL for the Agni grid.
-     *
+     * 
      * Linden Lab's login servers sometimes return incomplete hostnames in capability URLs.
      * For example, a capability URL might contain just "sim1234" instead of the full
      * "sim1234.agni.lindenlab.com" hostname.
-     *
+     * 
      * This method implements the same repair logic as the reference viewer's SLCaps.repairCapabilityURL():
      * ```java
      * if (host.contains(".") || !host.startsWith("sim")) {
@@ -115,7 +115,7 @@ object LinkpointTranslationLayer {
      * }
      * str = str.replace(host, host + ".agni.lindenlab.com");
      * ```
-     *
+     * 
      * @param isAgni Whether this is the Agni grid
      * @param capabilityUrl The capability URL to repair
      * @return The repaired URL, or the original if no repair was needed
@@ -124,40 +124,40 @@ object LinkpointTranslationLayer {
         if (!isAgni) {
             return capabilityUrl
         }
-
+        
         return try {
             val url = URL(capabilityUrl)
             val host = url.host
-
+            
             // Check if hostname needs repair:
             // 1. Must NOT contain a dot (incomplete hostname)
             // 2. Must start with "sim" (simulator hostname pattern)
             if (host.contains(".") || !host.startsWith(SIM_HOST_PREFIX, ignoreCase = true)) {
                 return capabilityUrl
             }
-
+            
             // Repair by appending the Agni domain
             val repairedUrl = capabilityUrl.replace(host, host + AGNI_DOMAIN_SUFFIX)
-
+            
             Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
             Log.i(TAG, "║ CAPABILITY URL REPAIRED (Linkpoint compatibility)")
             Log.i(TAG, "║ Original: ${capabilityUrl.take(80)}...")
             Log.i(TAG, "║ Repaired: ${repairedUrl.take(80)}...")
             Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
-
+            
             repairedUrl
         } catch (e: Exception) {
             Log.w(TAG, "Error repairing capability URL: ${e.message}")
             capabilityUrl
         }
     }
-
+    
     /**
      * Repair a URL based on the reference login URL.
-     *
+     * 
      * This is the public API that combines grid detection and URL repair.
      * Matches the reference viewer's SLCaps.repairURL() method.
-     *
+     * 
      * @param loginUrl The login URL (used to detect grid)
      * @param capabilityUrl The capability URL to potentially repair
      * @return The repaired URL
@@ -177,53 +177,53 @@ object LinkpointTranslationLayer {
             capabilityUrl
         }
     }
-
+    
     /**
      * Validate and potentially fix a seed capability URL.
-     *
+     * 
      * The seed capability URL is critical for fetching all other capabilities.
      * This method ensures the URL is properly formatted for the target grid.
-     *
+     * 
      * @param loginUrl The login URL used for authentication
      * @param seedCapUrl The seed capability URL from login response
      * @return The validated/repaired seed capability URL
      */
     fun prepareSeedCapability(loginUrl: String, seedCapUrl: String): String {
         val gridType = detectGridType(loginUrl)
-
+        
         Log.d(TAG, "Preparing seed capability for grid type: $gridType")
         Log.d(TAG, "Original seed URL: ${seedCapUrl.take(80)}...")
-
+        
         val repairedUrl = when (gridType) {
             GridType.AGNI, GridType.ADITI -> repairCapabilityUrl(true, seedCapUrl)
             else -> seedCapUrl
         }
-
+        
         // Additional validation for known issues
         if (repairedUrl.isBlank()) {
             Log.e(TAG, "Seed capability URL is blank!")
             return seedCapUrl
         }
-
+        
         // Ensure HTTPS for Linden Lab grids
         val finalUrl = if (gridType == GridType.AGNI || gridType == GridType.ADITI) {
             ensureHttps(repairedUrl)
         } else {
             repairedUrl
         }
-
+        
         if (finalUrl != seedCapUrl) {
             Log.i(TAG, "Seed capability modified: ${finalUrl.take(80)}...")
         }
-
+        
         return finalUrl
     }
-
+    
     /**
      * Ensure a URL uses HTTPS protocol.
-     *
+     * 
      * Linden Lab grids require HTTPS for capability URLs.
-     *
+     * 
      * @param url The URL to check
      * @return The URL with HTTPS protocol
      */
@@ -236,13 +236,13 @@ object LinkpointTranslationLayer {
             url
         }
     }
-
+    
     /**
      * Translate capability names between Linkpoint and SL server formats.
-     *
+     * 
      * Some capability names may differ between implementations.
      * This ensures compatibility when requesting capabilities.
-     *
+     * 
      * @param linkpointCapName The Linkpoint capability name
      * @return The Linkpoint-compatible capability name
      */
@@ -253,13 +253,13 @@ object LinkpointTranslationLayer {
             else -> linkpointCapName
         }
     }
-
+    
     /**
      * Get the complete list of capabilities that The reference viewer requests.
-     *
+     * 
      * This ensures we request all capabilities that the SL server expects,
      * which may be different from what modern viewers request.
-     *
+     * 
      * Based on the reference viewer's SLCaps.SLCapability enum.
      */
     fun getReferenceCapabilityNames(): List<String> {
@@ -302,37 +302,37 @@ object LinkpointTranslationLayer {
             "RenderMaterials"
         )
     }
-
+    
     /**
      * Configuration for Linkpoint compatibility mode.
-     *
+     * 
      * These settings control how closely Linkpoint mimics the reference viewer's behavior.
      */
     data class CompatibilityConfig(
         /** Enable capability URL repair for Agni grid */
         val repairCapabilityUrls: Boolean = true,
-
+        
         /** Use the reference viewer's exact capability list when fetching from seed */
         val useReferenceCapabilityList: Boolean = true,
-
+        
         /** Enable verbose logging for debugging protocol issues */
         val verboseLogging: Boolean = true,
-
+        
         /** Timeout for seed capability requests (ms) */
         val seedCapabilityTimeoutMs: Long = 30_000,
-
+        
         /** Number of retries for capability requests */
         val capabilityRetries: Int = 3,
-
+        
         /** Enable legacy message ID handling */
         val useLegacyMessageIds: Boolean = true
     )
-
+    
     // Default configuration
     @Volatile
     var config = CompatibilityConfig()
         private set
-
+    
     /**
      * Update the compatibility configuration.
      */
@@ -340,7 +340,7 @@ object LinkpointTranslationLayer {
         config = newConfig
         Log.i(TAG, "Compatibility configuration updated: $newConfig")
     }
-
+    
     /**
      * Log comprehensive diagnostic information about a capability request.
      */
@@ -352,25 +352,25 @@ object LinkpointTranslationLayer {
         error: String?
     ) {
         if (!config.verboseLogging) return
-
+        
         Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ CAPABILITY DIAGNOSTICS: $operation")
         Log.i(TAG, "╠══════════════════════════════════════════════════════════════════")
         loginUrl?.let { Log.i(TAG, "║ Login URL: ${it.take(60)}...") }
         loginUrl?.let { Log.i(TAG, "║ Grid Type: ${detectGridType(it)}") }
         capabilityUrl?.let { Log.i(TAG, "║ Capability URL: ${it.take(60)}...") }
-        response?.let {
+        response?.let { 
             val preview = it.take(200).replace("\n", " ").replace("\r", "")
             Log.i(TAG, "║ Response preview: $preview...")
         }
         error?.let { Log.e(TAG, "║ Error: $it") }
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
     }
-
+    
     // ==================================================================================
     // ASSET TRANSFER TRANSLATION
     // ==================================================================================
-
+    
     /**
      * Asset types that the translation layer supports.
      */
@@ -388,14 +388,14 @@ object LinkpointTranslationLayer {
         OBJECT,
         UNKNOWN
     }
-
+    
     /**
      * Prepare an asset URL for fetching.
-     *
+     * 
      * This applies all necessary URL repairs and transformations for asset downloads.
      * Asset URLs (GetTexture, GetMesh, etc.) may also need the same hostname repair
      * as capability URLs on the Agni grid.
-     *
+     * 
      * @param loginUrl The login URL (for grid detection)
      * @param assetUrl The asset URL to prepare
      * @param assetType The type of asset being fetched
@@ -405,35 +405,35 @@ object LinkpointTranslationLayer {
         if (!config.repairCapabilityUrls) {
             return assetUrl
         }
-
+        
         val gridType = detectGridType(loginUrl)
-
+        
         // Apply URL repair for Linden Lab grids
         val repairedUrl = when (gridType) {
             GridType.AGNI, GridType.ADITI -> repairCapabilityUrl(true, assetUrl)
             else -> assetUrl
         }
-
+        
         // Ensure HTTPS for Linden Lab grids
         val finalUrl = if (gridType == GridType.AGNI || gridType == GridType.ADITI) {
             ensureHttps(repairedUrl)
         } else {
             repairedUrl
         }
-
+        
         if (config.verboseLogging && finalUrl != assetUrl) {
             Log.d(TAG, "Asset URL repaired for ${assetType.name}: ${finalUrl.take(60)}...")
         }
-
+        
         return finalUrl
     }
-
+    
     /**
      * Build a texture fetch URL with Linkpoint-compatible format.
-     *
+     * 
      * The reference viewer uses the format: capability_url?texture_id=UUID
      * This matches the official SL viewer (lltexturefetch.cpp).
-     *
+     * 
      * @param loginUrl The login URL (for grid detection)
      * @param textureCapabilityUrl The GetTexture capability URL
      * @param textureId The texture UUID to fetch
@@ -443,12 +443,12 @@ object LinkpointTranslationLayer {
         val preparedCapUrl = prepareAssetUrl(loginUrl, textureCapabilityUrl, AssetTransferType.TEXTURE)
         return "$preparedCapUrl?texture_id=$textureId"
     }
-
+    
     /**
      * Build a mesh fetch URL with Linkpoint-compatible format.
-     *
+     * 
      * The reference viewer uses the format: capability_url?mesh_id=UUID
-     *
+     * 
      * @param loginUrl The login URL (for grid detection)
      * @param meshCapabilityUrl The GetMesh/GetMesh2 capability URL
      * @param meshId The mesh UUID to fetch
@@ -458,13 +458,13 @@ object LinkpointTranslationLayer {
         val preparedCapUrl = prepareAssetUrl(loginUrl, meshCapabilityUrl, AssetTransferType.MESH)
         return "$preparedCapUrl?mesh_id=$meshId"
     }
-
+    
     /**
      * Validate asset data received from the server.
-     *
+     * 
      * Performs basic validation on the received asset data to ensure it's
      * in the expected format for the asset type.
-     *
+     * 
      * @param data The raw asset data
      * @param assetType The expected asset type
      * @return true if the data appears valid
@@ -473,7 +473,7 @@ object LinkpointTranslationLayer {
         if (data.isEmpty()) {
             return false
         }
-
+        
         return when (assetType) {
             AssetTransferType.TEXTURE -> validateTextureData(data)
             AssetTransferType.MESH -> validateMeshData(data)
@@ -482,75 +482,75 @@ object LinkpointTranslationLayer {
             else -> true // No specific validation for other types
         }
     }
-
+    
     /**
      * Validate texture data format.
      * Second Life textures are primarily JPEG2000 format.
      */
     private fun validateTextureData(data: ByteArray): Boolean {
         if (data.size < 12) return false
-
+        
         // Check for JPEG2000 magic bytes
         // JP2 file format box signature
         val isJp2 = data[0] == 0x00.toByte() && data[1] == 0x00.toByte() &&
                     data[2] == 0x00.toByte() && data[3] == 0x0C.toByte()
-
+        
         // J2C codestream signature
         val isJ2c = data[0] == 0xFF.toByte() && data[1] == 0x4F.toByte()
-
+        
         // JPEG signature (fallback format)
         val isJpeg = data[0] == 0xFF.toByte() && data[1] == 0xD8.toByte()
-
+        
         // PNG signature (fallback format)
         val isPng = data[0] == 0x89.toByte() && data[1] == 0x50.toByte() &&
                     data[2] == 0x4E.toByte() && data[3] == 0x47.toByte()
-
+        
         return isJp2 || isJ2c || isJpeg || isPng
     }
-
+    
     /**
      * Validate mesh data format.
      * Second Life meshes use LLSD binary format header.
      */
     private fun validateMeshData(data: ByteArray): Boolean {
         if (data.size < 4) return false
-
+        
         // Mesh files start with LLSD binary header
         // Look for common LLSD markers
         return data[0] == '{'.code.toByte() || // LLSD map marker
                data[0] == 0x7B.toByte() ||     // Alternate map marker
                (data.size > 10) // Minimum reasonable mesh size
     }
-
+    
     /**
      * Validate sound data format.
      * Second Life sounds use Ogg Vorbis format.
      */
     private fun validateSoundData(data: ByteArray): Boolean {
         if (data.size < 4) return false
-
+        
         // Ogg container signature: "OggS"
         return data[0] == 0x4F.toByte() && data[1] == 0x67.toByte() &&
                data[2] == 0x67.toByte() && data[3] == 0x53.toByte()
     }
-
+    
     /**
      * Validate animation data format.
      * Second Life animations use LLSD binary format.
      */
     private fun validateAnimationData(data: ByteArray): Boolean {
         if (data.size < 4) return false
-
+        
         // Animation files should have reasonable minimum size
         // and start with version info
         return data.size > 20
     }
-
+    
     /**
      * Get HTTP headers appropriate for asset fetching.
-     *
+     * 
      * Returns headers that match the reference viewer's asset fetch behavior.
-     *
+     * 
      * @param assetType The type of asset being fetched
      * @return Map of header name to value
      */
@@ -559,7 +559,7 @@ object LinkpointTranslationLayer {
             "User-Agent" to "Linkpoint/1.0 (Linkpoint-compatible)",
             "Connection" to "keep-alive"
         )
-
+        
         when (assetType) {
             AssetTransferType.TEXTURE -> {
                 baseHeaders["Accept"] = "image/x-j2c, image/jp2, image/jpeg, image/*"
@@ -577,10 +577,10 @@ object LinkpointTranslationLayer {
                 baseHeaders["Accept"] = "*/*"
             }
         }
-
+        
         return baseHeaders
     }
-
+    
     /**
      * Log asset transfer diagnostics.
      */
@@ -593,7 +593,7 @@ object LinkpointTranslationLayer {
         error: String?
     ) {
         if (!config.verboseLogging) return
-
+        
         Log.d(TAG, "Asset Transfer [$operation]: $assetType")
         Log.d(TAG, "  Asset ID: $assetId")
         url?.let { Log.d(TAG, "  URL: ${it.take(60)}...") }

@@ -14,7 +14,7 @@ public class CacheEntry {
     private final long creationTime;
     private volatile long lastAccessTime;
     private volatile int accessCount;
-
+    
     public CacheEntry(String key, CacheManager.CacheType type, long size, long creationTime) {
         this.key = key;
         this.type = type;
@@ -23,12 +23,12 @@ public class CacheEntry {
         this.lastAccessTime = creationTime;
         this.accessCount = 0;
     }
-
+    
     public void updateAccessTime() {
         this.lastAccessTime = System.currentTimeMillis();
         this.accessCount++;
     }
-
+    
     // Getters
     public String getKey() { return key; }
     public CacheManager.CacheType getType() { return type; }
@@ -36,15 +36,15 @@ public class CacheEntry {
     public long getCreationTime() { return creationTime; }
     public long getLastAccessTime() { return lastAccessTime; }
     public int getAccessCount() { return accessCount; }
-
+    
     public long getAge() {
         return System.currentTimeMillis() - creationTime;
     }
-
+    
     public long getTimeSinceLastAccess() {
         return System.currentTimeMillis() - lastAccessTime;
     }
-
+    
     @Override
     public String toString() {
         return "CacheEntry{" +

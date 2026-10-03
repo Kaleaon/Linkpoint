@@ -76,7 +76,7 @@ public class UserProfileFragment extends UserFunctionsFragment {
         Picks(R.string.profile_picks_caption, UserPicksProfileTab.class),
         Groups(R.string.profile_groups_caption, UserGroupsProfileTab.class),
         FirstLife(R.string.profile_1st_caption, UserFirstLifeProfileTab.class);
-
+        
         private final int tabCaption;
         private final Class<? extends Fragment> tabClass;
 

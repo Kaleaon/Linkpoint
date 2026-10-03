@@ -31,7 +31,7 @@
 
 <div style="width: 90%; margin: 0 auto;">
   Neural image representations have emerged as a promising approach for encoding and rendering visual data. Combined with learning-based workflows, they demonstrate impressive trade-offs between visual fidelity and memory footprint. Existing methods in this domain, however, often rely on fixed data structures that suboptimally allocate memory or compute-intensive implicit models, hindering their practicality for real-time graphics applications.
-
+  
   Inspired by recent advancements in radiance field rendering, we introduce Image-GS, a content-adaptive image representation based on 2D Gaussians. Leveraging a custom differentiable renderer, Image-GS reconstructs images by adaptively allocating and progressively optimizing a group of anisotropic, colored 2D Gaussians. It achieves a favorable balance between visual fidelity and memory efficiency across a variety of stylized images frequently seen in graphics workflows, especially for those showing non-uniformly distributed features and in low-bitrate regimes. Moreover, it supports hardware-friendly rapid random access for real-time usage, requiring only 0.3K MACs to decode a pixel. Through error-guided progressive optimization, Image-GS naturally constructs a smooth level-of-detail hierarchy. We demonstrate its versatility with several applications, including texture compression, semantics-aware compression, and joint image compression and restoration.
 
   <img src="assets/images/teaser.jpg" width="100%" />
@@ -71,7 +71,7 @@
 
 ## Quick Start
 
-#### Image Compression
+#### Image Compression 
 - Optimize an Image-GS representation for an input image `anime-1_2k.png` using `10000` Gaussians with half-precision parameters
 ```bash
 python main.py --input_path="images/anime-1_2k.png" --exp_name="test/anime-1_2k" --num_gaussians=10000 --quantize
@@ -97,7 +97,7 @@ python main.py --input_path="textures/alarm-clock_2k" --exp_name="test/alarm-clo
 python main.py --input_path="images/anime-1_2k.png" --exp_name="test/anime-1_2k" --num_gaussians=10000 --quantize --pos_bits=12 --scale_bits 12 --rot_bits 12 --feat_bits 12
 ```
 
-#### Switch to saliency-guided Gaussian position initialization
+#### Switch to saliency-guided Gaussian position initialization 
 - Optimize an Image-GS representation for an input image `anime-1_2k.png` using `10000` Gaussians with half-precision parameters and saliency-guided initialization
 ```bash
 python main.py --input_path="images/anime-1_2k.png" --exp_name="test/anime-1_2k" --num_gaussians=10000 --quantize --init_mode="saliency"
@@ -110,7 +110,7 @@ Please refer to `cfgs/default.yaml` for the full list of arguments and their def
 - `--eval` render the optimized Image-GS representation.
 - `--render_height` image height for rendering (aspect ratio is maintained).
 
-**Bit precision control**: 32 bits (float32) per dimension by default
+**Bit precision control**: 32 bits (float32) per dimension by default 
 - `--quantize` enable bit precision control of Gaussian parameters.
 - `--pos_bits` bit precision of individual coordinate dimension.
 - `--scale_bits` bit precision of individual scale dimension.

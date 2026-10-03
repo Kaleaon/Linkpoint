@@ -1,6 +1,6 @@
 /*!
  * LLSD Binary Parser and Serializer - Rust Implementation
- *
+ * 
  * Based on Java implementation and Second Life viewer binary format
  * Copyright (C) 2024 Linden Lab
  */
@@ -93,7 +93,7 @@ impl LLSDBinaryParser {
     /// Parse LLSD from binary data
     pub fn parse(&self, data: &[u8]) -> LLSDResult<LLSDDocument> {
         let mut cursor = Cursor::new(data);
-
+        
         if self.validate_magic {
             let magic = self.read_u32(&mut cursor)?;
             if magic != LLSD_BINARY_MAGIC {
@@ -159,7 +159,7 @@ impl LLSDBinaryParser {
     /// Parse an array from binary data
     fn parse_array(&self, cursor: &mut Cursor<&[u8]>, depth: usize) -> LLSDResult<LLSDValue> {
         let length = self.read_u32(cursor)? as usize;
-
+        
         if length > self.max_elements {
             return Err(LLSDError::binary_error("Array too large"));
         }
@@ -176,7 +176,7 @@ impl LLSDBinaryParser {
     /// Parse a map from binary data
     fn parse_map(&self, cursor: &mut Cursor<&[u8]>, depth: usize) -> LLSDResult<LLSDValue> {
         let length = self.read_u32(cursor)? as usize;
-
+        
         if length > self.max_elements {
             return Err(LLSDError::binary_error("Map too large"));
         }
@@ -473,7 +473,7 @@ mod tests {
         let doc = LLSDDocument::new(LLSDValue::Date(test_date));
         let data = serializer.serialize(&doc).unwrap();
         let parsed = parser.parse(&data).unwrap();
-
+        
         if let LLSDValue::Date(parsed_date) = parsed.content() {
             // Allow for some precision loss in the conversion
             let diff = (*parsed_date - test_date).num_milliseconds().abs();
@@ -544,7 +544,7 @@ mod tests {
     #[test]
     fn test_max_depth_protection() {
         let parser = LLSDBinaryParser::new().with_max_depth(3);
-
+        
         // Create deeply nested structure (beyond max depth)
         let deeply_nested = LLSDValue::Map({
             let mut map1 = HashMap::new();
@@ -566,7 +566,7 @@ mod tests {
 
         let serializer = LLSDBinarySerializer::new();
         let data = serializer.serialize(&LLSDDocument::new(deeply_nested)).unwrap();
-
+        
         // Should fail due to depth limit
         assert!(parser.parse(&data).is_err());
     }

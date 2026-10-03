@@ -32,19 +32,19 @@ import javax.imageio.ImageIO;
  * As a utility class, it is final and cannot be instantiated.
  */
 public final class SLTextureProcessor {
-
+    
     private static final int MAX_TEXTURE_SIZE = 1024;
     private static final int MIN_TEXTURE_SIZE = 64;
     private static final String[] SUPPORTED_FORMATS = {"j2c", "tga", "jpeg", "jpg", "png", "bmp"};
-
+    
     // Cache for processed textures
     private static final Map<UUID, TextureCache> textureCache = new ConcurrentHashMap<>();
     private static final long CACHE_EXPIRY_MS = 30 * 60 * 1000; // 30 minutes
-
+    
     private SLTextureProcessor() {
         // Utility class - no instances
     }
-
+    
     /**
      * An enumeration of the texture formats supported by the processor.
      */
@@ -55,18 +55,18 @@ public final class SLTextureProcessor {
         PNG("png", "image/png"),
         BMP("bmp", "image/bmp"),
         UNKNOWN("", "application/octet-stream");
-
+        
         private final String extension;
         private final String mimeType;
-
+        
         TextureFormat(String extension, String mimeType) {
             this.extension = extension;
             this.mimeType = mimeType;
         }
-
+        
         public String getExtension() { return extension; }
         public String getMimeType() { return mimeType; }
-
+        
         public static TextureFormat fromExtension(String ext) {
             if (ext == null) return UNKNOWN;
             String normalized = ext.toLowerCase();
@@ -78,7 +78,7 @@ public final class SLTextureProcessor {
             return UNKNOWN;
         }
     }
-
+    
     /**
      * A container for metadata extracted from a texture asset.
      * <p>
@@ -94,8 +94,8 @@ public final class SLTextureProcessor {
         private final int levels;
         private final long size;
         private final boolean hasAlpha;
-
-        public TextureInfo(UUID textureId, TextureFormat format, int width, int height,
+        
+        public TextureInfo(UUID textureId, TextureFormat format, int width, int height, 
                           int levels, long size, boolean hasAlpha) {
             this.textureId = textureId;
             this.format = format;
@@ -105,7 +105,7 @@ public final class SLTextureProcessor {
             this.size = size;
             this.hasAlpha = hasAlpha;
         }
-
+        
         // Getters
         public UUID getTextureId() { return textureId; }
         public TextureFormat getFormat() { return format; }
@@ -114,19 +114,19 @@ public final class SLTextureProcessor {
         public int getLevels() { return levels; }
         public long getSize() { return size; }
         public boolean hasAlpha() { return hasAlpha; }
-
+        
         public boolean isValid() {
             return textureId != null && format != TextureFormat.UNKNOWN &&
                    width >= MIN_TEXTURE_SIZE && width <= MAX_TEXTURE_SIZE &&
                    height >= MIN_TEXTURE_SIZE && height <= MAX_TEXTURE_SIZE &&
                    isPowerOfTwo(width) && isPowerOfTwo(height);
         }
-
+        
         private boolean isPowerOfTwo(int value) {
             return value > 0 && (value & (value - 1)) == 0;
         }
     }
-
+    
     /**
      * Texture cache entry.
      */
@@ -134,21 +134,21 @@ public final class SLTextureProcessor {
         private final byte[] data;
         private final TextureInfo info;
         private final long timestamp;
-
+        
         public TextureCache(byte[] data, TextureInfo info) {
             this.data = data.clone();
             this.info = info;
             this.timestamp = System.currentTimeMillis();
         }
-
+        
         public boolean isExpired() {
             return System.currentTimeMillis() - timestamp > CACHE_EXPIRY_MS;
         }
-
+        
         public byte[] getData() { return data.clone(); }
         public TextureInfo getInfo() { return info; }
     }
-
+    
     /**
      * Processes raw texture data to extract metadata and validate it.
      * <p>
@@ -169,13 +169,13 @@ public final class SLTextureProcessor {
         if (textureId == null || data == null || data.length == 0) {
             throw new LLSDException("Invalid texture data");
         }
-
+        
         // Check cache first
         TextureCache cached = textureCache.get(textureId);
         if (cached != null && !cached.isExpired()) {
             return cached.getInfo();
         }
-
+        
         TextureInfo info;
         try {
             switch (format) {
@@ -198,19 +198,19 @@ public final class SLTextureProcessor {
                     info = detectAndProcessTexture(textureId, data);
                     break;
             }
-
+            
             // Cache the processed texture
             textureCache.put(textureId, new TextureCache(data, info));
-
+            
             // Clean expired entries
             cleanExpiredCache();
-
+            
             return info;
         } catch (Exception e) {
             throw new LLSDException("Texture processing failed: " + e.getMessage(), e);
         }
     }
-
+    
     /**
      * Process JPEG2000 texture data.
      */
@@ -219,21 +219,21 @@ public final class SLTextureProcessor {
         if (data.length < 12) {
             throw new IOException("Invalid J2C data - too short");
         }
-
+        
         // Check for J2C signature
         if (data[0] != (byte)0xFF || data[1] != (byte)0x4F) {
             throw new IOException("Invalid J2C signature");
         }
-
+        
         // Extract basic dimensions (simplified - full J2C parsing would be more complex)
         int width = extractJ2CWidth(data);
         int height = extractJ2CHeight(data);
         int levels = calculateMipLevels(width, height);
-
-        return new TextureInfo(textureId, TextureFormat.J2C, width, height,
+        
+        return new TextureInfo(textureId, TextureFormat.J2C, width, height, 
                               levels, data.length, true);
     }
-
+    
     /**
      * Process TGA texture data.
      */
@@ -241,55 +241,55 @@ public final class SLTextureProcessor {
         if (data.length < 18) {
             throw new IOException("Invalid TGA data - too short");
         }
-
+        
         // Extract TGA header information
         int width = (data[12] & 0xFF) | ((data[13] & 0xFF) << 8);
         int height = (data[14] & 0xFF) | ((data[15] & 0xFF) << 8);
         int bpp = data[16] & 0xFF;
         boolean hasAlpha = bpp == 32;
-
+        
         if (width <= 0 || height <= 0) {
             throw new IOException("Invalid TGA dimensions");
         }
-
+        
         int levels = calculateMipLevels(width, height);
-        return new TextureInfo(textureId, TextureFormat.TGA, width, height,
+        return new TextureInfo(textureId, TextureFormat.TGA, width, height, 
                               levels, data.length, hasAlpha);
     }
-
+    
     /**
      * Process standard image formats using Java ImageIO.
      */
     private static TextureInfo processJPEGTexture(UUID textureId, byte[] data) throws IOException {
         return processStandardImage(textureId, data, TextureFormat.JPEG);
     }
-
+    
     private static TextureInfo processPNGTexture(UUID textureId, byte[] data) throws IOException {
         return processStandardImage(textureId, data, TextureFormat.PNG);
     }
-
+    
     private static TextureInfo processBMPTexture(UUID textureId, byte[] data) throws IOException {
         return processStandardImage(textureId, data, TextureFormat.BMP);
     }
-
-    private static TextureInfo processStandardImage(UUID textureId, byte[] data, TextureFormat format)
+    
+    private static TextureInfo processStandardImage(UUID textureId, byte[] data, TextureFormat format) 
             throws IOException {
         try (ByteArrayInputStream bis = new ByteArrayInputStream(data)) {
             BufferedImage image = ImageIO.read(bis);
             if (image == null) {
                 throw new IOException("Failed to decode " + format.name() + " image");
             }
-
+            
             int width = image.getWidth();
             int height = image.getHeight();
             boolean hasAlpha = image.getColorModel().hasAlpha();
             int levels = calculateMipLevels(width, height);
-
-            return new TextureInfo(textureId, format, width, height,
+            
+            return new TextureInfo(textureId, format, width, height, 
                                   levels, data.length, hasAlpha);
         }
     }
-
+    
     /**
      * Auto-detect texture format and process.
      */
@@ -298,7 +298,7 @@ public final class SLTextureProcessor {
         if (format == TextureFormat.UNKNOWN) {
             throw new IOException("Unsupported texture format");
         }
-
+        
         switch (format) {
             case J2C:
                 return processJ2CTexture(textureId, data);
@@ -308,7 +308,7 @@ public final class SLTextureProcessor {
                 return processStandardImage(textureId, data, format);
         }
     }
-
+    
     /**
      * Detects the texture format of a byte array by inspecting its header (magic numbers).
      *
@@ -320,27 +320,27 @@ public final class SLTextureProcessor {
         if (data == null || data.length < 4) {
             return TextureFormat.UNKNOWN;
         }
-
+        
         // Check JPEG2000
         if (data[0] == (byte)0xFF && data[1] == (byte)0x4F) {
             return TextureFormat.J2C;
         }
-
+        
         // Check JPEG
         if (data[0] == (byte)0xFF && data[1] == (byte)0xD8) {
             return TextureFormat.JPEG;
         }
-
+        
         // Check PNG
         if (data[0] == (byte)0x89 && data[1] == 'P' && data[2] == 'N' && data[3] == 'G') {
             return TextureFormat.PNG;
         }
-
+        
         // Check BMP
         if (data[0] == 'B' && data[1] == 'M') {
             return TextureFormat.BMP;
         }
-
+        
         // Check TGA (more complex detection needed)
         if (data.length >= 18) {
             int imageType = data[2] & 0xFF;
@@ -348,10 +348,10 @@ public final class SLTextureProcessor {
                 return TextureFormat.TGA;
             }
         }
-
+        
         return TextureFormat.UNKNOWN;
     }
-
+    
     /**
      * Converts texture data from a source format to a target format.
      * <p>
@@ -370,7 +370,7 @@ public final class SLTextureProcessor {
         if (sourceFormat == targetFormat) {
             return sourceData.clone();
         }
-
+        
         // Load source image
         BufferedImage image;
         try (ByteArrayInputStream bis = new ByteArrayInputStream(sourceData)) {
@@ -379,19 +379,19 @@ public final class SLTextureProcessor {
                 throw new IOException("Failed to load source image");
             }
         }
-
+        
         // Convert to target format
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             String formatName = getImageIOFormat(targetFormat);
             if (formatName == null) {
                 throw new IOException("Unsupported target format: " + targetFormat);
             }
-
+            
             ImageIO.write(image, formatName, bos);
             return bos.toByteArray();
         }
     }
-
+    
     private static String getImageIOFormat(TextureFormat format) {
         switch (format) {
             case JPEG:
@@ -404,7 +404,7 @@ public final class SLTextureProcessor {
                 return null;
         }
     }
-
+    
     /**
      * Creates a standard LLSD map structure for a texture stream.
      * <p>
@@ -430,10 +430,10 @@ public final class SLTextureProcessor {
         streamData.put("Size", info.getSize());
         streamData.put("Data", data);
         streamData.put("Timestamp", System.currentTimeMillis() / 1000.0);
-
+        
         return streamData;
     }
-
+    
     /**
      * Validates if given dimensions are valid for a Second Life texture.
      * <p>
@@ -449,7 +449,7 @@ public final class SLTextureProcessor {
                height >= MIN_TEXTURE_SIZE && height <= MAX_TEXTURE_SIZE &&
                isPowerOfTwo(width) && isPowerOfTwo(height);
     }
-
+    
     /**
      * Calculate mip levels for a texture.
      */
@@ -457,7 +457,7 @@ public final class SLTextureProcessor {
         int maxDimension = Math.max(width, height);
         return (int) (Math.log(maxDimension) / Math.log(2)) + 1;
     }
-
+    
     /**
      * Extract width from J2C data (simplified).
      */
@@ -466,7 +466,7 @@ public final class SLTextureProcessor {
         // you'd need to parse the full J2C codestream
         return 512; // Default assumption
     }
-
+    
     /**
      * Extract height from J2C data (simplified).
      */
@@ -475,25 +475,25 @@ public final class SLTextureProcessor {
         // you'd need to parse the full J2C codestream
         return 512; // Default assumption
     }
-
+    
     private static boolean isPowerOfTwo(int value) {
         return value > 0 && (value & (value - 1)) == 0;
     }
-
+    
     /**
      * Clean expired cache entries.
      */
     private static void cleanExpiredCache() {
         textureCache.entrySet().removeIf(entry -> entry.getValue().isExpired());
     }
-
+    
     /**
      * Clears all entries from the internal texture cache.
      */
     public static void clearCache() {
         textureCache.clear();
     }
-
+    
     /**
      * Gets statistics about the current state of the texture cache.
      *
@@ -503,12 +503,12 @@ public final class SLTextureProcessor {
     public static Map<String, Object> getCacheStats() {
         Map<String, Object> stats = new HashMap<>();
         stats.put("CacheSize", textureCache.size());
-
+        
         long totalSize = textureCache.values().stream()
                 .mapToLong(cache -> cache.getData().length)
                 .sum();
         stats.put("TotalCacheSize", totalSize);
-
+        
         return stats;
     }
 }

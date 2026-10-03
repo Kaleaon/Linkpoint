@@ -1,14 +1,14 @@
 /**
  * LLSD TypeScript/JavaScript Library
- *
+ * 
  * Complete implementation of LLSD (Linden Lab Structured Data) format
  * Based on Java implementation and Second Life/Firestorm viewer code
- *
+ * 
  * Copyright (C) 2024 Linden Lab
  */
 
 // Core types and utilities
-export {
+export { 
     LLSD,
     LLSDValue,
     LLSDMap,

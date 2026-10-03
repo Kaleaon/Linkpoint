@@ -32,24 +32,24 @@ class ChatManager(
         private const val TAG = "ChatManager"
         private const val MAX_CHAT_HISTORY = 500
     }
-
+    
     private val scope = CoroutineScope(MessagingDispatcher.dispatcher + SupervisorJob())
-
+    
     // Chat history
     private val chatHistory = mutableListOf<ChatMessage>()
-
+    
     // Chat events
     private val _chatFlow = MutableSharedFlow<ChatMessage>(replay = 0, extraBufferCapacity = 64)
     val chatFlow: SharedFlow<ChatMessage> = _chatFlow
-
+    
     // Typing indicators
     private val _typingAvatars = MutableStateFlow<Set<UUID>>(emptySet())
     val typingAvatars: StateFlow<Set<UUID>> = _typingAvatars
-
+    
     // Nearby avatars speaking
     private val _speakingAvatars = MutableStateFlow<Set<UUID>>(emptySet())
     val speakingAvatars: StateFlow<Set<UUID>> = _speakingAvatars
-
+    
     /**
      * Handle incoming chat from simulator
      */
@@ -75,16 +75,16 @@ class ChatManager(
                         message = filteredData.message,
                         timestamp = System.currentTimeMillis()
                     )
-
+                    
                     addMessage(message)
-
+                    
                     // Remove from typing
                     _typingAvatars.value = _typingAvatars.value - data.sourceId
                 }
             }
         }
     }
-
+    
     /**
      * Send chat message
      */
@@ -158,7 +158,7 @@ class ChatManager(
     fun stopTyping() {
         Log.v(TAG, "stopTyping: nearby-chat typing is deprecated — use IMManager.sendTypingStop")
     }
-
+    
     private fun addMessage(message: ChatMessage) {
         synchronized(chatHistory) {
             chatHistory.add(message)
@@ -166,12 +166,12 @@ class ChatManager(
                 chatHistory.removeAt(0)
             }
         }
-
+        
         scope.launch {
             _chatFlow.emit(message)
         }
     }
-
+    
     /**
      * Get chat history
      */
@@ -180,7 +180,7 @@ class ChatManager(
             chatHistory.toList()
         }
     }
-
+    
     /**
      * Clear chat history
      */
@@ -189,7 +189,7 @@ class ChatManager(
             chatHistory.clear()
         }
     }
-
+    
     fun shutdown() {
         scope.cancel()
     }

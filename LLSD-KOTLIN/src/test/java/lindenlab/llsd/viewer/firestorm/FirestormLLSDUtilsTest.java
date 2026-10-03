@@ -1,6 +1,6 @@
 /*
  * Tests for Firestorm LLSD utilities
- *
+ * 
  * Java conversion Copyright (C) 2024
  */
 
@@ -31,7 +31,7 @@ public class FirestormLLSDUtilsTest {
             UUID sourceId = UUID.randomUUID();
             FirestormLLSDUtils.RLVCommand cmd = new FirestormLLSDUtils.RLVCommand(
                 "detach", "chest", "=y", sourceId);
-
+            
             assertEquals("detach", cmd.getCommand());
             assertEquals("chest", cmd.getParam());
             assertEquals("=y", cmd.getOption());
@@ -67,7 +67,7 @@ public class FirestormLLSDUtilsTest {
             UUID sourceId = UUID.randomUUID();
             FirestormLLSDUtils.RLVCommand cmd = new FirestormLLSDUtils.RLVCommand(
                 "command", null, null, sourceId);
-
+            
             assertEquals("command", cmd.getCommand());
             assertEquals("", cmd.getParam());
             assertEquals("", cmd.getOption());
@@ -79,9 +79,9 @@ public class FirestormLLSDUtilsTest {
             UUID sourceId = UUID.randomUUID();
             FirestormLLSDUtils.RLVCommand cmd = new FirestormLLSDUtils.RLVCommand(
                 "detach", "chest", "=y", sourceId);
-
+            
             Map<String, Object> llsd = cmd.toLLSD();
-
+            
             assertEquals("detach", llsd.get("Command"));
             assertEquals("chest", llsd.get("Parameter"));
             assertEquals("=y", llsd.get("Option"));
@@ -98,9 +98,9 @@ public class FirestormLLSDUtilsTest {
             llsdData.put("Parameter", "chest");
             llsdData.put("Option", "=y");
             llsdData.put("SourceID", sourceId.toString());
-
+            
             FirestormLLSDUtils.RLVCommand cmd = FirestormLLSDUtils.RLVCommand.fromLLSD(llsdData);
-
+            
             assertEquals("detach", cmd.getCommand());
             assertEquals("chest", cmd.getParam());
             assertEquals("=y", cmd.getOption());
@@ -112,10 +112,10 @@ public class FirestormLLSDUtilsTest {
         void testRLVCommandFromInvalidLLSD() {
             assertThrows(LLSDException.class, () ->
                 FirestormLLSDUtils.RLVCommand.fromLLSD(null));
-
+            
             assertThrows(LLSDException.class, () ->
                 FirestormLLSDUtils.RLVCommand.fromLLSD("not a map"));
-
+            
             Map<String, Object> incomplete = new HashMap<>();
             incomplete.put("Command", "test");
             // Missing SourceID
@@ -133,10 +133,10 @@ public class FirestormLLSDUtilsTest {
         void testCreateRadarData() {
             UUID agentId = UUID.randomUUID();
             double[] position = {100.5, 200.5, 50.0};
-
+            
             Map<String, Object> radarData = FirestormLLSDUtils.createRadarData(
                 agentId, "TestAgent", "test.user", position, 25.5, true, null);
-
+            
             assertEquals(agentId.toString(), radarData.get("AgentID"));
             assertEquals("TestAgent", radarData.get("DisplayName"));
             assertEquals("test.user", radarData.get("UserName"));
@@ -165,7 +165,7 @@ public class FirestormLLSDUtilsTest {
         void testRadarDataInvalidPosition() {
             UUID agentId = UUID.randomUUID();
             double[] invalidPosition = {1.0, 2.0}; // Only 2 components
-
+            
             assertThrows(IllegalArgumentException.class, () ->
                 FirestormLLSDUtils.createRadarData(agentId, "name", "user", invalidPosition, 0, false, null));
         }
@@ -187,7 +187,7 @@ public class FirestormLLSDUtilsTest {
         void testCacheInvalidMaxAge() {
             assertThrows(IllegalArgumentException.class, () ->
                 new FirestormLLSDUtils.FSLLSDCache(0));
-
+            
             assertThrows(IllegalArgumentException.class, () ->
                 new FirestormLLSDUtils.FSLLSDCache(-1));
         }
@@ -196,7 +196,7 @@ public class FirestormLLSDUtilsTest {
         @DisplayName("Should store and retrieve values")
         void testCachePutGet() {
             FirestormLLSDUtils.FSLLSDCache cache = new FirestormLLSDUtils.FSLLSDCache(10000);
-
+            
             cache.put("key1", "value1");
             assertEquals("value1", cache.get("key1"));
         }
@@ -205,10 +205,10 @@ public class FirestormLLSDUtilsTest {
         @DisplayName("Should reject null keys")
         void testCacheNullKey() {
             FirestormLLSDUtils.FSLLSDCache cache = new FirestormLLSDUtils.FSLLSDCache(1000);
-
+            
             assertThrows(IllegalArgumentException.class, () ->
                 cache.put(null, "value"));
-
+            
             assertThrows(IllegalArgumentException.class, () ->
                 cache.get(null));
         }
@@ -217,12 +217,12 @@ public class FirestormLLSDUtilsTest {
         @DisplayName("Should expire old entries")
         void testCacheExpiration() throws InterruptedException {
             FirestormLLSDUtils.FSLLSDCache cache = new FirestormLLSDUtils.FSLLSDCache(50);
-
+            
             cache.put("key1", "value1");
             assertEquals("value1", cache.get("key1"));
-
+            
             Thread.sleep(100); // Wait for expiration
-
+            
             assertNull(cache.get("key1"));
         }
     }

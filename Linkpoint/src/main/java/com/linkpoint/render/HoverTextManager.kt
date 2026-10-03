@@ -7,27 +7,27 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Hover Text Manager - Manages floating text above objects.
- *
+ * 
  * Based on the reference viewer's HoverText.java and DrawableHoverText.java
- *
+ * 
  * Hover text is set by scripts using llSetText() and appears
  * floating above objects.
  */
 class HoverTextManager {
-
+    
     companion object {
         private const val TAG = "HoverTextManager"
-
+        
         // Maximum text lines
         const val MAX_TEXT_LINES = 10
-
+        
         // Maximum characters per line
         const val MAX_LINE_LENGTH = 255
-
+        
         // Default hover height (above object center)
         const val DEFAULT_HOVER_HEIGHT = 0.5f
     }
-
+    
     // Hover texts by local ID
     private val hoverTexts = ConcurrentHashMap<Int, HoverText>()
 
@@ -48,7 +48,7 @@ class HoverTextManager {
     fun setPositionProvider(provider: ((Int) -> FloatArray?)?) {
         positionProvider = provider
     }
-
+    
     /**
      * Set or update hover text for an object.
      */
@@ -63,7 +63,7 @@ class HoverTextManager {
             removeHoverText(localId)
             return
         }
-
+        
         val hoverText = HoverText(
             localId = localId,
             objectId = objectId,
@@ -71,13 +71,13 @@ class HoverTextManager {
             color = color,
             alpha = alpha.coerceIn(0f, 1f)
         )
-
+        
         hoverTexts[localId] = hoverText
         hoverTextsByUUID[objectId] = hoverText
-
+        
         Log.v(TAG, "Set hover text for object $localId: ${text.take(50)}...")
     }
-
+    
     /**
      * Set hover text from object update data.
      */
@@ -90,14 +90,14 @@ class HoverTextManager {
             removeHoverText(localId)
             return
         }
-
+        
         try {
             // Format: text (null-terminated), then 4 bytes RGBA color
             val nullIndex = textData.indexOfFirst { it == 0.toByte() }
             if (nullIndex < 0) return
-
+            
             val text = String(textData, 0, nullIndex, Charsets.UTF_8)
-
+            
             // Parse color if present (after null terminator)
             val color = if (textData.size >= nullIndex + 5) {
                 floatArrayOf(
@@ -108,20 +108,20 @@ class HoverTextManager {
             } else {
                 floatArrayOf(1f, 1f, 1f)
             }
-
+            
             val alpha = if (textData.size >= nullIndex + 5) {
                 (textData[nullIndex + 4].toInt() and 0xFF) / 255f
             } else {
                 1f
             }
-
+            
             setHoverText(localId, objectId, text, color, alpha)
-
+            
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing hover text data", e)
         }
     }
-
+    
     /**
      * Remove hover text for an object.
      */
@@ -131,22 +131,22 @@ class HoverTextManager {
             hoverTextsByUUID.remove(removed.objectId)
         }
     }
-
+    
     /**
      * Get hover text for an object by local ID.
      */
     fun getHoverText(localId: Int): HoverText? = hoverTexts[localId]
-
+    
     /**
      * Get hover text for an object by UUID.
      */
     fun getHoverTextByUUID(objectId: UUID): HoverText? = hoverTextsByUUID[objectId]
-
+    
     /**
      * Get all hover texts.
      */
     fun getAllHoverTexts(): List<HoverText> = hoverTexts.values.toList()
-
+    
     /**
      * Get hover texts within [maxDistance] of the given camera position.
      * Used by the renderer to skip rasterising hover text labels for
@@ -182,14 +182,14 @@ class HoverTextManager {
     }
 
     @Volatile private var noProviderWarned: Boolean = false
-
+    
     /**
      * Sanitize text for display.
      */
     private fun sanitizeText(text: String): String {
         // Split into lines and limit
         val lines = text.lines().take(MAX_TEXT_LINES)
-
+        
         // Truncate each line
         return lines.map { line ->
             if (line.length > MAX_LINE_LENGTH) {
@@ -199,7 +199,7 @@ class HoverTextManager {
             }
         }.joinToString("\n")
     }
-
+    
     /**
      * Clear all hover texts.
      */
@@ -207,7 +207,7 @@ class HoverTextManager {
         hoverTexts.clear()
         hoverTextsByUUID.clear()
     }
-
+    
     /**
      * Get total hover text count.
      */
@@ -235,27 +235,27 @@ data class HoverText(
             (color[2] * 255).toInt()
         )
     }
-
+    
     /**
      * Get text lines for multi-line rendering.
      */
     fun getLines(): List<String> = text.lines()
-
+    
     /**
      * Check if visible (alpha > 0).
      */
     fun isVisible(): Boolean = alpha > 0.01f
-
+    
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is HoverText) return false
-        return localId == other.localId &&
-               objectId == other.objectId &&
+        return localId == other.localId && 
+               objectId == other.objectId && 
                text == other.text &&
                color.contentEquals(other.color) &&
                alpha == other.alpha
     }
-
+    
     override fun hashCode(): Int {
         var result = localId
         result = 31 * result + objectId.hashCode()

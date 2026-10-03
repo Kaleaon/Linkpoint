@@ -20,3 +20,4 @@
         android:drawable="@drawable/btn_erase_selected" />
     <item android:drawable="@drawable/btn_erase_default" />
 </selector>
+

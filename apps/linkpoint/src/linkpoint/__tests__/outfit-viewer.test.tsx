@@ -27,7 +27,7 @@ describe('OutfitViewer screen', () => {
     mounted = await mountScreen(OutfitViewer);
     expect(mounted.host.textContent).toContain('FULL OUTFIT VIEWER');
     expect(mounted.host.textContent).toContain('Avatar 3D Viewport, Mesh Inspection & Shape Tuning');
-
+    
     // Check panel buttons exist
     expect(buttonByText(mounted.host, /3D View/)).toBeTruthy();
     expect(buttonByText(mounted.host, /Outfit Items/)).toBeTruthy();
@@ -37,7 +37,7 @@ describe('OutfitViewer screen', () => {
 
   it('switches between panels (Outfit Items, Shape Sliders, Mesh View)', async () => {
     mounted = await mountScreen(OutfitViewer);
-
+    
     // Switch to Outfit Items
     await click(buttonByText(mounted.host, /Outfit Items/)!);
     expect(mounted.host.textContent).toContain('WORN OUTFIT ITEMS');

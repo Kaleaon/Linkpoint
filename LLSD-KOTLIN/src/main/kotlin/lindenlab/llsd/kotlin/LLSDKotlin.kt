@@ -27,52 +27,52 @@ import java.util.*
  * @see llsdMap
  */
 sealed class LLSDValue {
-
+    
     /** Represents an undefined or null LLSD value. */
     object Undefined : LLSDValue()
-
+    
     /**
      * Represents an LLSD boolean value.
      * @property value The underlying [kotlin.Boolean] value.
      */
     data class Boolean(val value: kotlin.Boolean) : LLSDValue()
-
+    
     /**
      * Represents an LLSD integer value.
      * @property value The underlying [Int] value.
      */
     data class Integer(val value: Int) : LLSDValue()
-
+    
     /**
      * Represents an LLSD real (floating-point) value.
      * @property value The underlying [Double] value.
      */
     data class Real(val value: Double) : LLSDValue()
-
+    
     /**
      * Represents an LLSD string value.
      * @property value The underlying [kotlin.String] value.
      */
     data class String(val value: kotlin.String) : LLSDValue()
-
+    
     /**
      * Represents an LLSD UUID value.
      * @property value The underlying [java.util.UUID] value.
      */
     data class UUID(val value: java.util.UUID) : LLSDValue()
-
+    
     /**
      * Represents an LLSD date value.
      * @property value The underlying [Instant] value.
      */
     data class Date(val value: Instant) : LLSDValue()
-
+    
     /**
      * Represents an LLSD URI value.
      * @property value The underlying [java.net.URI] value.
      */
     data class URI(val value: java.net.URI) : LLSDValue()
-
+    
     /**
      * Represents an LLSD binary data value.
      * @property value The underlying [ByteArray].
@@ -84,18 +84,18 @@ sealed class LLSDValue {
             other as Binary
             return value.contentEquals(other.value)
         }
-
+        
         override fun hashCode(): Int = value.contentHashCode()
     }
-
+    
     /**
      * Represents an LLSD array, which is a mutable list of [LLSDValue] objects.
      * @property values The underlying [MutableList] holding the array elements.
      */
     data class Array(val values: MutableList<LLSDValue> = mutableListOf()) : LLSDValue() {
-
+        
         constructor(vararg values: LLSDValue) : this(values.toMutableList())
-
+        
         /**
          * Gets the value at the specified index, returning a default value if the
          * index is out of bounds.
@@ -106,7 +106,7 @@ sealed class LLSDValue {
         operator fun get(index: Int, default: LLSDValue = Undefined): LLSDValue {
             return values.getOrElse(index) { default }
         }
-
+        
         /**
          * Sets the value at the specified index.
          * If the index is out of bounds, the array will be automatically expanded
@@ -121,7 +121,7 @@ sealed class LLSDValue {
             }
             values[index] = value
         }
-
+        
         /**
          * Appends a value to the end of the array.
          * @param value The [LLSDValue] to add.
@@ -131,7 +131,7 @@ sealed class LLSDValue {
             values.add(value)
             return this
         }
-
+        
         /**
          * Appends multiple values to the end of the array.
          * @param values The values to add.
@@ -141,41 +141,41 @@ sealed class LLSDValue {
             this.values.addAll(values)
             return this
         }
-
+        
         /**
          * Size of array
          */
         val size: Int get() = values.size
-
+        
         /**
          * Check if empty
          */
         fun isEmpty(): kotlin.Boolean = values.isEmpty()
-
+        
         /**
          * Iterate over values
          */
         fun forEach(action: (LLSDValue) -> Unit) = values.forEach(action)
-
+        
         /**
          * Map values
          */
         fun <T> map(transform: (LLSDValue) -> T): List<T> = values.map(transform)
-
+        
         /**
          * Filter values
          */
         fun filter(predicate: (LLSDValue) -> kotlin.Boolean): List<LLSDValue> = values.filter(predicate)
     }
-
+    
     /**
      * Represents an LLSD map, which is a mutable map from [String] to [LLSDValue].
      * @property values The underlying [MutableMap] holding the key-value pairs.
      */
     data class Map(val values: MutableMap<kotlin.String, LLSDValue> = mutableMapOf()) : LLSDValue() {
-
+        
         constructor(vararg pairs: Pair<kotlin.String, LLSDValue>) : this(mutableMapOf(*pairs))
-
+        
         /**
          * Gets the value for the specified key, returning a default value if the
          * key is not found.
@@ -186,7 +186,7 @@ sealed class LLSDValue {
         operator fun get(key: kotlin.String, default: LLSDValue = Undefined): LLSDValue {
             return values[key] ?: default
         }
-
+        
         /**
          * Sets the value for the specified key.
          * @param key The key to set.
@@ -195,46 +195,46 @@ sealed class LLSDValue {
         operator fun set(key: kotlin.String, value: LLSDValue) {
             values[key] = value
         }
-
+        
         /**
          * Check if key exists
          */
         fun containsKey(key: kotlin.String): kotlin.Boolean = values.containsKey(key)
-
+        
         /**
          * Remove key
          */
         fun remove(key: kotlin.String): LLSDValue? = values.remove(key)
-
+        
         /**
          * Size of map
          */
         val size: Int get() = values.size
-
+        
         /**
          * Check if empty
          */
         fun isEmpty(): kotlin.Boolean = values.isEmpty()
-
+        
         /**
          * Get all keys
          */
         val keys: Set<kotlin.String> get() = values.keys
-
+        
         /**
          * Iterate over entries
          */
         fun forEach(action: (kotlin.String, LLSDValue) -> Unit) {
             values.forEach { (key, value) -> action(key, value) }
         }
-
+        
         /**
          * Map entries
          */
         fun <T> mapValues(transform: (LLSDValue) -> T): kotlin.collections.Map<kotlin.String, T> {
             return values.mapValues { transform(it.value) }
         }
-
+        
         /**
          * Filter entries
          */
@@ -261,14 +261,14 @@ sealed class LLSDValue {
 @LLSDDslMarker
 class LLSDArrayBuilder {
     private val values = mutableListOf<LLSDValue>()
-
+    
     /**
      * Add value to array
      */
     fun add(value: LLSDValue) {
         values.add(value)
     }
-
+    
     /**
      * Add primitive values with automatic conversion
      */
@@ -280,7 +280,7 @@ class LLSDArrayBuilder {
     fun add(value: Instant) = add(LLSDValue.Date(value))
     fun add(value: java.net.URI) = add(LLSDValue.URI(value))
     fun add(value: ByteArray) = add(LLSDValue.Binary(value))
-
+    
     /**
      * Add nested array
      */
@@ -289,7 +289,7 @@ class LLSDArrayBuilder {
         builder.init()
         add(builder.build())
     }
-
+    
     /**
      * Add nested map
      */
@@ -298,21 +298,21 @@ class LLSDArrayBuilder {
         builder.init()
         add(builder.build())
     }
-
+    
     /**
      * Operator overload for adding values
      */
     operator fun LLSDValue.unaryPlus() {
         add(this)
     }
-
+    
     operator fun kotlin.Boolean.unaryPlus() = add(this)
     operator fun kotlin.String.unaryPlus() = add(this)
     operator fun java.util.UUID.unaryPlus() = add(this)
     operator fun Instant.unaryPlus() = add(this)
     operator fun java.net.URI.unaryPlus() = add(this)
     operator fun ByteArray.unaryPlus() = add(this)
-
+    
     fun build(): LLSDValue.Array = LLSDValue.Array(values)
 }
 
@@ -334,14 +334,14 @@ class LLSDArrayBuilder {
 @LLSDDslMarker
 class LLSDMapBuilder {
     private val values = mutableMapOf<kotlin.String, LLSDValue>()
-
+    
     /**
      * Set key-value pair
      */
     infix fun kotlin.String.to(value: LLSDValue) {
         values[this] = value
     }
-
+    
     /**
      * Automatic conversion for primitive types
      */
@@ -353,14 +353,14 @@ class LLSDMapBuilder {
     infix fun kotlin.String.to(value: Instant) = this to LLSDValue.Date(value)
     infix fun kotlin.String.to(value: java.net.URI) = this to LLSDValue.URI(value)
     infix fun kotlin.String.to(value: ByteArray) = this to LLSDValue.Binary(value)
-
+    
     /**
      * Set value directly
      */
     operator fun set(key: kotlin.String, value: LLSDValue) {
         values[key] = value
     }
-
+    
     /**
      * Nested array builder
      */
@@ -369,7 +369,7 @@ class LLSDMapBuilder {
         builder.init()
         values[this] = builder.build()
     }
-
+    
     /**
      * Nested map builder
      */
@@ -378,7 +378,7 @@ class LLSDMapBuilder {
         builder.init()
         values[this] = builder.build()
     }
-
+    
     fun build(): LLSDValue.Map = LLSDValue.Map(values)
 }
 
@@ -719,8 +719,8 @@ fun LLSDValue.toPrettyString(indent: Int = 0): kotlin.String {
             if (values.isEmpty()) {
                 "{}"
             } else {
-                val items = values.entries.joinToString(",\n") {
-                    "${indentStr}  \"${it.key}\": ${it.value.toPrettyString(indent + 1)}"
+                val items = values.entries.joinToString(",\n") { 
+                    "${indentStr}  \"${it.key}\": ${it.value.toPrettyString(indent + 1)}" 
                 }
                 "{\n$items\n$indentStr}"
             }
@@ -744,7 +744,7 @@ fun LLSDValue.deepEquals(other: LLSDValue): kotlin.Boolean = when {
         values.size == other.values.size && values.zip(other.values).all { (a, b) -> a.deepEquals(b) }
     }
     this is LLSDValue.Map && other is LLSDValue.Map -> {
-        values.size == other.values.size &&
+        values.size == other.values.size && 
         values.all { (key, value) -> other.values[key]?.let { value.deepEquals(it) } ?: false }
     }
     else -> this == other

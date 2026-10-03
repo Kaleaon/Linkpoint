@@ -34,7 +34,7 @@ public enum Shader {
     RawFragmentShader(35632, "raw.fsh"),
     FXAAVertexShader(35633, "fxaa.vsh"),
     FXAAFragmentShader(35632, "fxaa.fsh");
-
+    
     private final String fileName;
     private int handle;
     private final int type;

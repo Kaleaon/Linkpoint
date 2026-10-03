@@ -1,6 +1,6 @@
 /*!
  * LLSD Rust Usage Examples
- *
+ * 
  * Copyright (C) 2024 Linden Lab
  */
 
@@ -15,13 +15,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     basic_usage_example()?;
     format_conversion_example()?;
-
+    
     #[cfg(feature = "secondlife")]
     second_life_example()?;
-
+    
     #[cfg(feature = "firestorm")]
     firestorm_example()?;
-
+    
     advanced_features_example()?;
 
     Ok(())
@@ -86,7 +86,7 @@ fn format_conversion_example() -> LLSDResult<()> {
     // Convert to binary
     let binary = LLSDFactory::serialize_binary(&document)?;
     println!("\nBinary format: {} bytes", binary.len());
-
+    
     // Round-trip test
     let parsed_json = LLSDFactory::parse_json(&json)?;
     let parsed_xml = LLSDFactory::parse_xml(&xml)?;
@@ -104,7 +104,7 @@ fn format_conversion_example() -> LLSDResult<()> {
 #[cfg(feature = "secondlife")]
 fn second_life_example() -> LLSDResult<()> {
     use llsd::secondlife::*;
-
+    
     println!("\n3. Second Life Integration");
     println!("-------------------------");
 
@@ -132,7 +132,7 @@ fn second_life_example() -> LLSDResult<()> {
         Some(Uuid::new_v4()),
     );
 
-    println!("Chat message: {}",
+    println!("Chat message: {}", 
         chat_message.get("message").unwrap().as_string().unwrap_or(""));
 
     // Validation example
@@ -157,7 +157,7 @@ fn second_life_example() -> LLSDResult<()> {
 #[cfg(feature = "firestorm")]
 fn firestorm_example() -> LLSDResult<()> {
     use llsd::firestorm::*;
-
+    
     println!("\n4. Firestorm Extensions");
     println!("----------------------");
 
@@ -175,13 +175,13 @@ fn firestorm_example() -> LLSDResult<()> {
         150000, // triangles
     );
 
-    println!("Performance stats created with {} triangles",
+    println!("Performance stats created with {} triangles", 
         perf_stats.get("triangles").unwrap().as_integer().unwrap_or(0));
 
     // Cache demonstration
     let cache = FSLLSDCache::new(5000); // 5 second TTL
     cache.put("user_data", LLSDValue::String("cached_value".to_string()));
-
+    
     if let Some(cached) = cache.get("user_data") {
         println!("Retrieved from cache: {}", cached.as_string().unwrap_or(""));
     }
@@ -204,7 +204,7 @@ fn advanced_features_example() -> LLSDResult<()> {
     // Structure analysis
     let element_count = LLSDUtils::count_elements(&complex_data);
     let max_depth = LLSDUtils::max_depth(&complex_data);
-
+    
     println!("Complex structure: {} elements, depth {}", element_count, max_depth);
 
     // Constraint validation
@@ -249,11 +249,11 @@ fn advanced_features_example() -> LLSDResult<()> {
 
 fn create_sample_data() -> LLSDValue {
     let mut data = HashMap::new();
-
+    
     data.insert("application".to_string(), LLSDValue::String("LLSD Rust Example".to_string()));
     data.insert("version".to_string(), LLSDValue::String("1.0.0".to_string()));
     data.insert("timestamp".to_string(), LLSDValue::Date(Utc::now()));
-
+    
     // User info
     let mut user = HashMap::new();
     user.insert("id".to_string(), LLSDValue::UUID(Uuid::new_v4()));
@@ -261,9 +261,9 @@ fn create_sample_data() -> LLSDValue {
     user.insert("level".to_string(), LLSDValue::Integer(42));
     user.insert("experience".to_string(), LLSDValue::Real(15750.5));
     user.insert("active".to_string(), LLSDValue::Boolean(true));
-
+    
     data.insert("user".to_string(), LLSDValue::Map(user));
-
+    
     // Settings array
     data.insert("settings".to_string(), LLSDValue::Array(vec![
         LLSDValue::String("auto_save".to_string()),
@@ -275,18 +275,18 @@ fn create_sample_data() -> LLSDValue {
     data.insert("signature".to_string(), LLSDValue::Binary(
         b"LLSD_RUST_SIGNATURE_DATA".to_vec()
     ));
-
+    
     LLSDValue::Map(data)
 }
 
 fn create_complex_data() -> LLSDValue {
     let mut root = HashMap::new();
-
+    
     // Multi-level nesting
     for i in 0..5 {
         let level1_key = format!("branch_{}", i);
         let mut level1 = HashMap::new();
-
+        
         for j in 0..3 {
             let level2_key = format!("node_{}", j);
             let level2_data = LLSDValue::Array(vec![
@@ -296,9 +296,9 @@ fn create_complex_data() -> LLSDValue {
             ]);
             level1.insert(level2_key, level2_data);
         }
-
+        
         root.insert(level1_key, LLSDValue::Map(level1));
     }
-
+    
     LLSDValue::Map(root)
 }

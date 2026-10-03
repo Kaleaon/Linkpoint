@@ -23,3 +23,4 @@ namespace detail
 		return detail::compute_cross_vec2<T, Q, detail::is_aligned<Q>::value>::call(x, y);
 	}
 }//namespace glm
+

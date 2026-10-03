@@ -7,7 +7,7 @@ public enum ErrorCode {
     FLOW_CONTROL_ERROR(3),
     REFUSED_STREAM(7),
     CANCEL(8);
-
+    
     public final int httpCode;
 
     ErrorCode(int i) {

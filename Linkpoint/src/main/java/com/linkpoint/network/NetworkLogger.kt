@@ -17,7 +17,7 @@ import kotlinx.coroutines.*
 
 /**
  * Comprehensive network activity logger for debugging connection issues.
- *
+ * 
  * Based on the reference viewer's network logging patterns. Provides automatic logging of:
  * - All HTTP requests/responses with timing
  * - Network errors with full stack traces
@@ -26,31 +26,31 @@ import kotlinx.coroutines.*
  * - SSL/TLS handshake information
  * - DNS resolution results
  * - Automatic saving to app-private diagnostics storage
- *
+ * 
  * Logs are saved to app-private storage by default and only shared via explicit export actions.
- *
+ * 
  * All logs are tagged for easy filtering in logcat:
  * - `adb logcat NetworkLogger:D *:S` - Only network logs
  * - `adb logcat NetworkLogger:V *:S` - Verbose network logs
  */
 object NetworkLogger {
-
+    
     private const val TAG = "NetworkLogger"
     private const val MAX_LOG_ENTRIES = 1000
     private const val LOG_DIR_NAME = "Linkpoint Logs"
     private const val AUTO_SAVE_INTERVAL_MS = 30000L // Auto-save every 30 seconds
     private const val MAX_RETAINED_FILES = 20
-
+    
     // URL truncation length for log messages
     private const val URL_TRUNCATE_LENGTH = 80
-
+    
     // Context for file operations
     private var appContext: Context? = null
-
+    
     // Auto-save job
     private var autoSaveJob: Job? = null
     private val autoSaveScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
+    
     // Log levels matching reference viewer's verbosity
     enum class Level {
         VERBOSE,  // Every detail including request/response bodies
@@ -59,11 +59,11 @@ object NetworkLogger {
         WARN,     // Recoverable issues (retries, timeouts)
         ERROR     // Failures requiring user attention
     }
-
+    
     // Current log level - can be changed at runtime
     @Volatile
     var logLevel: Level = Level.DEBUG
-
+    
     // In-memory log buffer for export/debugging
     private val logBuffer = ConcurrentLinkedQueue<LogEntry>()
 
@@ -81,15 +81,15 @@ object NetworkLogger {
     private val redirectCount = AtomicLong(0)
     private val entrySequence = AtomicLong(0)
     private val lastPersistedSequence = AtomicLong(0)
-
+    
     // Date formatter for timestamps
     private val timestampFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
     private val fileNameFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
-
+    
     // Current log file
     private var currentLogFile: File? = null
     private var logFileWriter: java.io.BufferedWriter? = null
-
+    
     /**
      * Initialize the logger with application context.
      * This must be called before any logging occurs, preferably in Application.onCreate()
@@ -113,7 +113,7 @@ object NetworkLogger {
             Log.w(TAG, "NetworkLogger initialized, but log directory is not available")
         }
     }
-
+    
     /**
      * Start automatic log saving
      */
@@ -130,7 +130,7 @@ object NetworkLogger {
             }
         }
     }
-
+    
     /**
      * Get app-private log directory. Diagnostics stay private unless explicitly exported.
      */
@@ -148,7 +148,7 @@ object NetworkLogger {
             null
         }
     }
-
+    
     /**
      * Save current logs to an app-private diagnostics file.
      */
@@ -157,11 +157,11 @@ object NetworkLogger {
             Log.w(TAG, "Cannot get app-private log directory")
             return null
         }
-
+        
         if (logBuffer.isEmpty()) {
             return null // Nothing to save
         }
-
+        
         try {
             // Create new log file if needed
             val file = currentLogFile
@@ -169,13 +169,13 @@ object NetworkLogger {
                 val timestamp = fileNameFormat.format(Date())
                 currentLogFile = File(logDir, "network_log_$timestamp.txt")
                 logFileWriter?.close()
-
+                
                 val logFile = currentLogFile ?: throw IllegalStateException("Failed to create log file")
                 logFileWriter = logFile.bufferedWriter()
 
                 purgeExpiredLogs(logDir)
                 cleanOldLogs(logDir)
-
+                
                 // Write header
                 logFileWriter?.apply {
                     write("=== Linkpoint Network Activity Log ===\n")
@@ -187,10 +187,10 @@ object NetworkLogger {
                     write("=".repeat(60) + "\n\n")
                     flush()
                 }
-
+                
                 Log.i(TAG, "Created new log file: ${currentLogFile?.absolutePath}")
             }
-
+            
             // Append new log entries
             logFileWriter?.apply {
                 val persistedAfter = lastPersistedSequence.get()
@@ -208,16 +208,16 @@ object NetworkLogger {
                 }
                 flush()
             }
-
+            
             Log.d(TAG, "Saved log entries through seq=${lastPersistedSequence.get()} to ${currentLogFile?.absolutePath}")
             return currentLogFile
-
+            
         } catch (e: Exception) {
             Log.e(TAG, "Failed to save logs to file: ${e.message}", e)
             return null
         }
     }
-
+    
 
     private fun purgeExpiredLogs(logDir: File) {
         val context = appContext ?: return
@@ -261,14 +261,14 @@ object NetworkLogger {
             }
         }
     }
-
+    
     /**
      * Get path to current log file
      */
     fun getCurrentLogFilePath(): String? {
         return currentLogFile?.absolutePath
     }
-
+    
     /**
      * Get the log directory path for display purposes.
      * Returns the app-private diagnostics path.
@@ -277,7 +277,7 @@ object NetworkLogger {
         val context = appContext ?: return "unavailable"
         return File(DiagnosticsLoggingConfig.diagnosticsDirectory(context), LOG_DIR_NAME).absolutePath
     }
-
+    
     /**
      * Log entry for in-memory storage
      */
@@ -289,7 +289,7 @@ object NetworkLogger {
         val message: String,
         val exception: Throwable? = null
     )
-
+    
     /**
      * Log categories for filtering
      */
@@ -321,10 +321,10 @@ object NetworkLogger {
         const val LIFECYCLE = "LIFECYCLE"
         const val CONNECTIVITY = "CONNECTIVITY"
     }
-
+    
     // ==================== HTTP/2 PROTOCOL TRACKING ====================
     // Track HTTP protocol versions used for different request types
-
+    
     /**
      * Protocol statistics for HTTP/2 usage tracking
      */
@@ -335,13 +335,13 @@ object NetworkLogger {
     fun trackProtocolUsageByType(type: ProtocolUsageTracker.RequestType, protocol: String) {
         protocolUsageTracker.trackByType(type, protocol)
     }
-
+    
     /**
      * Log an HTTP request being sent
      */
     fun logRequest(request: Request, attempt: Int = 0) {
         if (!shouldLog(Level.DEBUG)) return
-
+        
         val message = buildString {
             if (attempt > 0) {
                 append("[Attempt $attempt] ")
@@ -358,20 +358,20 @@ object NetworkLogger {
                 append("Content-Type: $type\n")
             }
         }
-
+        
         log(Level.DEBUG, Category.HTTP_REQUEST, message.trimEnd())
     }
-
+    
     /**
      * Log an HTTP response received with HTTP/2 protocol tracking
      */
     fun logResponse(response: Response, durationMs: Long) {
         if (!shouldLog(Level.DEBUG)) return
-
+        
         // Track HTTP protocol version
         val protocol = response.protocol.toString()
         trackProtocolUsage(response.request.url.toString(), protocol)
-
+        
         val message = buildString {
             append("← ${response.code} ${response.message} (${durationMs}ms)\n")
             append("URL: ${response.request.url}\n")
@@ -389,13 +389,13 @@ object NetworkLogger {
                 append("Content-Type: $type\n")
             }
         }
-
+        
         log(Level.DEBUG, Category.HTTP_RESPONSE, message.trimEnd())
     }
-
+    
     /**
      * Track protocol usage by URL pattern matching (fallback for generic HTTP responses).
-     *
+     * 
      * NOTE: For specialized logging (textures, meshes, capabilities), use the explicit
      * `trackProtocolUsageByType()` method which is more reliable than URL pattern matching.
      * This method is used as a fallback for the general `logResponse()` function.
@@ -403,7 +403,7 @@ object NetworkLogger {
     private fun trackProtocolUsage(url: String, protocol: String) {
         protocolUsageTracker.trackByUrl(url, protocol)
     }
-
+    
     /**
      * Log response body (only in VERBOSE mode to avoid log spam)
      */
@@ -411,16 +411,16 @@ object NetworkLogger {
         if (!shouldLog(Level.VERBOSE)) return
         val context = appContext ?: return
         if (!DiagnosticsLoggingConfig.isVerboseBodyLoggingEnabled(context)) return
-
+        
         val preview = if (body.length > 500) {
             body.take(500) + "... (${body.length} total chars)"
         } else {
             body
         }
-
+        
         log(Level.VERBOSE, Category.HTTP_RESPONSE, "Response body from $url:\n$preview")
     }
-
+    
     /**
      * Log an HTTP error
      */
@@ -434,10 +434,10 @@ object NetworkLogger {
             append("Message: ${error.message}\n")
             append("Stack trace:\n${error.stackTraceToString().take(500)}")
         }
-
+        
         log(Level.ERROR, Category.HTTP_ERROR, message, error)
     }
-
+    
     /**
      * Log a retry attempt
      */
@@ -445,7 +445,7 @@ object NetworkLogger {
         val message = "⟳ Retry $attempt for $url after ${delayMs}ms - Reason: $reason"
         log(Level.WARN, Category.RETRY, message)
     }
-
+    
     /**
      * Log a redirect
      */
@@ -453,7 +453,7 @@ object NetworkLogger {
         val message = "↪ Redirect #$redirectCount: $fromUrl → $toUrl"
         log(Level.INFO, Category.REDIRECT, message)
     }
-
+    
     /**
      * Log a timeout
      */
@@ -461,7 +461,7 @@ object NetworkLogger {
         val message = "⏱ Timeout ($type) after ${timeoutMs}ms for $url"
         log(Level.WARN, Category.TIMEOUT, message)
     }
-
+    
     /**
      * Log connection state change
      */
@@ -472,7 +472,7 @@ object NetworkLogger {
         }
         log(Level.INFO, Category.CONNECTION, message)
     }
-
+    
     /**
      * Log SSL/TLS information
      */
@@ -484,7 +484,7 @@ object NetworkLogger {
         }
         log(Level.DEBUG, Category.SSL_TLS, message.trimEnd())
     }
-
+    
     /**
      * Log DNS resolution
      */
@@ -494,10 +494,10 @@ object NetworkLogger {
         } else {
             "DNS Resolved: $hostname → ${addresses?.joinToString(", ") ?: "unknown"}"
         }
-
+        
         log(if (error != null) Level.ERROR else Level.DEBUG, Category.DNS, message, error)
     }
-
+    
     /**
      * Log authentication details (without sensitive data)
      */
@@ -518,7 +518,7 @@ object NetworkLogger {
         }
         log(Level.INFO, Category.AUTHENTICATION, message.trimEnd())
     }
-
+    
     /**
      * Log protocol-level information
      */
@@ -526,9 +526,9 @@ object NetworkLogger {
         val message = "📡 Protocol: $operation - $details"
         log(Level.DEBUG, Category.PROTOCOL, message)
     }
-
+    
     // ==================== TEXTURE LOGGING ====================
-
+    
     /**
      * Log texture download request
      */
@@ -540,14 +540,14 @@ object NetworkLogger {
         }
         log(Level.DEBUG, Category.TEXTURE, message)
     }
-
+    
     /**
      * Log texture download result
      */
     fun logTextureResult(
-        textureId: String,
-        success: Boolean,
-        durationMs: Long,
+        textureId: String, 
+        success: Boolean, 
+        durationMs: Long, 
         sizeBytes: Int?,
         protocol: String? = null,
         error: String? = null
@@ -557,7 +557,7 @@ object NetworkLogger {
             append("🖼️ Texture $statusIcon: $textureId\n")
             append("  Duration: ${durationMs}ms\n")
             sizeBytes?.let { append("  Size: $it bytes\n") }
-            protocol?.let {
+            protocol?.let { 
                 append("  Protocol: $it\n")
                 // Track HTTP/2 usage for textures using explicit type
                 trackProtocolUsageByType(ProtocolUsageTracker.RequestType.TEXTURE, it)
@@ -566,7 +566,7 @@ object NetworkLogger {
         }
         log(if (success) Level.DEBUG else Level.WARN, Category.TEXTURE, message.trimEnd())
     }
-
+    
     /**
      * Log texture decode attempt
      */
@@ -580,9 +580,9 @@ object NetworkLogger {
         }
         log(if (success) Level.DEBUG else Level.WARN, Category.TEXTURE, message)
     }
-
+    
     // ==================== MESH LOGGING ====================
-
+    
     /**
      * Log mesh download request
      */
@@ -593,14 +593,14 @@ object NetworkLogger {
         }
         log(Level.DEBUG, Category.MESH, message)
     }
-
+    
     /**
      * Log mesh download result
      */
     fun logMeshResult(
-        meshId: String,
-        success: Boolean,
-        durationMs: Long,
+        meshId: String, 
+        success: Boolean, 
+        durationMs: Long, 
         sizeBytes: Int?,
         protocol: String? = null,
         error: String? = null
@@ -618,9 +618,9 @@ object NetworkLogger {
         }
         log(if (success) Level.DEBUG else Level.WARN, Category.MESH, message.trimEnd())
     }
-
+    
     // ==================== FRIENDS LOGGING ====================
-
+    
     /**
      * Log friend online status change
      */
@@ -630,7 +630,7 @@ object NetworkLogger {
         val message = "$statusIcon Friend $status: $name ($agentId)"
         log(Level.INFO, Category.FRIENDS, message)
     }
-
+    
     /**
      * Log friendship offer received
      */
@@ -642,7 +642,7 @@ object NetworkLogger {
         }
         log(Level.INFO, Category.FRIENDS, logMsg)
     }
-
+    
     /**
      * Log friendship offer sent
      */
@@ -653,7 +653,7 @@ object NetworkLogger {
         }
         log(Level.INFO, Category.FRIENDS, logMsg)
     }
-
+    
     /**
      * Log friendship accepted
      */
@@ -661,7 +661,7 @@ object NetworkLogger {
         val message = "✓ Friendship Accepted: $name ($agentId)"
         log(Level.INFO, Category.FRIENDS, message)
     }
-
+    
     /**
      * Log friendship declined
      */
@@ -669,7 +669,7 @@ object NetworkLogger {
         val message = "✗ Friendship Declined: $agentId"
         log(Level.INFO, Category.FRIENDS, message)
     }
-
+    
     /**
      * Log friendship terminated
      */
@@ -678,9 +678,9 @@ object NetworkLogger {
         val message = "👋 Friendship Terminated: $agentId$nameInfo"
         log(Level.INFO, Category.FRIENDS, message)
     }
-
+    
     // ==================== CAPABILITY LOGGING ====================
-
+    
     /**
      * Log capability request
      */
@@ -691,7 +691,7 @@ object NetworkLogger {
         }
         log(Level.DEBUG, Category.CAPABILITY, message)
     }
-
+    
     /**
      * Log capability response
      */
@@ -707,14 +707,14 @@ object NetworkLogger {
         }
         log(if (success) Level.DEBUG else Level.WARN, Category.CAPABILITY, message)
     }
-
+    
     private fun isVerbosePacketLoggingEnabled(): Boolean {
         val context = appContext ?: return false
         return DiagnosticsLoggingConfig.isVerbosePacketLoggingEnabled(context)
     }
 
     // ==================== UDP LOGGING ====================
-
+    
     /**
      * Log UDP packet sent
      */
@@ -736,7 +736,7 @@ object NetworkLogger {
         }
         log(Level.DEBUG, Category.UDP_PACKET, message)
     }
-
+    
     /**
      * Log UDP packet received
      */
@@ -760,7 +760,7 @@ object NetworkLogger {
         }
         log(if (hasHandler) Level.DEBUG else Level.WARN, Category.UDP_PACKET, message)
     }
-
+    
     /**
      * Log UDP connection status change
      */
@@ -778,7 +778,7 @@ object NetworkLogger {
         }
         log(Level.INFO, Category.UDP, message)
     }
-
+    
     /**
      * Log malformed UDP packet detected
      */
@@ -798,7 +798,7 @@ object NetworkLogger {
         }
         log(Level.WARN, Category.UDP_MALFORMED, message)
     }
-
+    
     /**
      * Log UDP packet resend attempt
      */
@@ -811,7 +811,7 @@ object NetworkLogger {
         val message = "⟳ UDP Resend: $messageName (seq=$sequenceNumber, attempt #$attempt, age=${ageMs}ms)"
         log(Level.WARN, Category.UDP, message)
     }
-
+    
     /**
      * Log UDP ACK received
      */
@@ -820,7 +820,7 @@ object NetworkLogger {
         val message = "✓ UDP ACK received for seq=$sequenceNumber$msgInfo"
         log(Level.DEBUG, Category.UDP, message)
     }
-
+    
     /**
      * Log UDP packet timeout (no ACK received)
      */
@@ -832,13 +832,13 @@ object NetworkLogger {
         val message = "⏱️ UDP Timeout: $messageName (seq=$sequenceNumber) after ${timeoutMs}ms - no ACK received"
         log(Level.WARN, Category.UDP, message)
     }
-
+    
     /**
      * Main logging function - now public for direct use
      */
     fun log(level: Level, category: String, message: String, exception: Throwable? = null) {
         if (!shouldLog(level)) return
-
+        
         // Create log entry
         val entry = LogEntry(
             sequence = entrySequence.incrementAndGet(),
@@ -848,7 +848,7 @@ object NetworkLogger {
             message = DiagnosticsLogSanitizer.sanitize(message),
             exception = exception
         )
-
+        
         // Add to buffer (with size limit)
         logBuffer.offer(entry)
         while (logBuffer.size > MAX_LOG_ENTRIES) {
@@ -870,11 +870,11 @@ object NetworkLogger {
             Category.REDIRECT -> redirectCount.incrementAndGet()
             else -> {}
         }
-
+        
         // Format for logcat
         val timestamp = timestampFormat.format(Date(entry.timestamp))
         val formattedMessage = "[$timestamp] [$category] ${entry.message}"
-
+        
         // Write to logcat safely (handles unit tests without Android runtime JNI)
         try {
             when (level) {
@@ -889,14 +889,14 @@ object NetworkLogger {
             println("[$level] [$category] $formattedMessage")
         }
     }
-
+    
     /**
      * Check if we should log at this level
      */
     private fun shouldLog(level: Level): Boolean {
         return level.ordinal >= logLevel.ordinal
     }
-
+    
     /**
      * Get recent logs as formatted string for export/debugging
      */
@@ -907,7 +907,7 @@ object NetworkLogger {
             appendLine("Total Entries: ${logBuffer.size}")
             appendLine("Showing last $maxEntries entries:")
             appendLine()
-
+            
             logBuffer.toList().takeLast(maxEntries).forEach { entry ->
                 val timestamp = timestampFormat.format(Date(entry.timestamp))
                 appendLine("[$timestamp] [${entry.level}] [${entry.category}]")
@@ -919,7 +919,7 @@ object NetworkLogger {
             }
         }
     }
-
+    
     /**
      * Clear the log buffer
      */
@@ -953,7 +953,7 @@ object NetworkLogger {
             redirectCount = redirectCount.get()
         )
     }
-
+    
     /**
      * Statistics about network activity
      */

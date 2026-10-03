@@ -1,6 +1,6 @@
 /*!
  * Firestorm LLSD Extensions - Rust Implementation
- *
+ * 
  * Based on Java implementation and Firestorm viewer functionality
  * Copyright (C) 2024 Linden Lab
  */
@@ -30,7 +30,7 @@ impl FirestormLLSDUtils {
         attachments: Vec<LLSDValue>,
     ) -> HashMap<String, LLSDValue> {
         let mut radar_data = HashMap::new();
-
+        
         radar_data.insert("agent_id".to_string(), LLSDValue::UUID(agent_id));
         radar_data.insert("display_name".to_string(), LLSDValue::String(display_name.to_string()));
         radar_data.insert("user_name".to_string(), LLSDValue::String(user_name.to_string()));
@@ -44,7 +44,7 @@ impl FirestormLLSDUtils {
         radar_data.insert("attachments".to_string(), LLSDValue::Array(attachments));
         radar_data.insert("last_seen".to_string(), LLSDValue::Real(Utc::now().timestamp() as f64));
         radar_data.insert("radar_version".to_string(), LLSDValue::String("6.0.0".to_string()));
-
+        
         radar_data
     }
 
@@ -56,14 +56,14 @@ impl FirestormLLSDUtils {
         priority: i32,
     ) -> HashMap<String, LLSDValue> {
         let mut message = HashMap::new();
-
+        
         message.insert("command".to_string(), LLSDValue::String(command.to_string()));
         message.insert("parameters".to_string(), LLSDValue::Map(parameters));
         message.insert("request_id".to_string(), LLSDValue::UUID(request_id));
         message.insert("priority".to_string(), LLSDValue::Integer(priority));
         message.insert("bridge_version".to_string(), LLSDValue::String("6.0.0".to_string()));
         message.insert("timestamp".to_string(), LLSDValue::Real(Utc::now().timestamp() as f64));
-
+        
         message
     }
 
@@ -77,7 +77,7 @@ impl FirestormLLSDUtils {
         triangles: i32,
     ) -> HashMap<String, LLSDValue> {
         let mut stats = HashMap::new();
-
+        
         stats.insert("fps".to_string(), LLSDValue::Real(fps));
         stats.insert("bandwidth".to_string(), LLSDValue::Real(bandwidth));
         stats.insert("memory_usage".to_string(), LLSDValue::Real(memory_usage));
@@ -86,7 +86,7 @@ impl FirestormLLSDUtils {
         stats.insert("triangles".to_string(), LLSDValue::Integer(triangles));
         stats.insert("firestorm_version".to_string(), LLSDValue::String("6.0.0".to_string()));
         stats.insert("timestamp".to_string(), LLSDValue::Real(Utc::now().timestamp() as f64));
-
+        
         stats
     }
 
@@ -115,7 +115,7 @@ impl FirestormLLSDUtils {
         end_scale: [f64; 2],
     ) -> HashMap<String, LLSDValue> {
         let mut particle_system = HashMap::new();
-
+        
         particle_system.insert("source_id".to_string(), LLSDValue::UUID(source_id));
         particle_system.insert("owner_key".to_string(), LLSDValue::UUID(owner_key));
         particle_system.insert("pattern".to_string(), LLSDValue::Integer(pattern));
@@ -128,43 +128,43 @@ impl FirestormLLSDUtils {
         particle_system.insert("burst_speed_min".to_string(), LLSDValue::Real(burst_speed_min));
         particle_system.insert("burst_speed_max".to_string(), LLSDValue::Real(burst_speed_max));
         particle_system.insert("burst_radius".to_string(), LLSDValue::Real(burst_radius));
-
+        
         particle_system.insert("accel".to_string(), LLSDValue::Array(vec![
             LLSDValue::Real(accel[0]),
             LLSDValue::Real(accel[1]),
             LLSDValue::Real(accel[2]),
         ]));
-
+        
         particle_system.insert("texture_uuid".to_string(), LLSDValue::UUID(texture_uuid));
         particle_system.insert("target_uuid".to_string(), LLSDValue::UUID(target_uuid));
         particle_system.insert("particle_flags".to_string(), LLSDValue::Integer(particle_flags));
-
+        
         particle_system.insert("start_color".to_string(), LLSDValue::Array(vec![
             LLSDValue::Real(start_color[0]),
             LLSDValue::Real(start_color[1]),
             LLSDValue::Real(start_color[2]),
             LLSDValue::Real(start_color[3]),
         ]));
-
+        
         particle_system.insert("end_color".to_string(), LLSDValue::Array(vec![
             LLSDValue::Real(end_color[0]),
             LLSDValue::Real(end_color[1]),
             LLSDValue::Real(end_color[2]),
             LLSDValue::Real(end_color[3]),
         ]));
-
+        
         particle_system.insert("start_scale".to_string(), LLSDValue::Array(vec![
             LLSDValue::Real(start_scale[0]),
             LLSDValue::Real(start_scale[1]),
         ]));
-
+        
         particle_system.insert("end_scale".to_string(), LLSDValue::Array(vec![
             LLSDValue::Real(end_scale[0]),
             LLSDValue::Real(end_scale[1]),
         ]));
-
+        
         particle_system.insert("firestorm_enhanced".to_string(), LLSDValue::Boolean(true));
-
+        
         particle_system
     }
 
@@ -193,7 +193,7 @@ impl FirestormLLSDUtils {
         for i in 0..max_length {
             let v = version_parts.get(i).copied().unwrap_or(0);
             let m = min_parts.get(i).copied().unwrap_or(0);
-
+            
             match v.cmp(&m) {
                 std::cmp::Ordering::Greater => return true,
                 std::cmp::Ordering::Less => return false,
@@ -233,13 +233,13 @@ impl RLVCommand {
     /// Convert RLV command to LLSD
     pub fn to_llsd(&self) -> HashMap<String, LLSDValue> {
         let mut llsd = HashMap::new();
-
+        
         llsd.insert("behaviour".to_string(), LLSDValue::String(self.behaviour.clone()));
         llsd.insert("option".to_string(), LLSDValue::String(self.option.clone()));
         llsd.insert("param".to_string(), LLSDValue::String(self.param.clone()));
         llsd.insert("source_id".to_string(), LLSDValue::UUID(self.source_id));
         llsd.insert("timestamp".to_string(), LLSDValue::Real(Utc::now().timestamp() as f64));
-
+        
         llsd
     }
 
@@ -522,7 +522,7 @@ mod tests {
         assert_eq!(message["request_id"], LLSDValue::UUID(request_id));
         assert_eq!(message["priority"], LLSDValue::Integer(2));
         assert_eq!(message["bridge_version"], LLSDValue::String("6.0.0".to_string()));
-
+        
         if let LLSDValue::Map(params_map) = &message["parameters"] {
             assert_eq!(params_map["target"], LLSDValue::String("avatar".to_string()));
         } else {

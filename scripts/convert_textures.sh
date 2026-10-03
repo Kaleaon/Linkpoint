@@ -49,11 +49,11 @@ convert_texture() {
     local relative_path="$2"
     local output_file="$OUTPUT_DIR/${relative_path%.*}.ktx2"
     local output_dir="$(dirname "$output_file")"
-
+    
     mkdir -p "$output_dir"
-
+    
     echo -e "Converting: ${YELLOW}$relative_path${NC}"
-
+    
     # Use UASTC format for high quality
     if $BASISU_TOOL -ktx2 -uastc -uastc_level 2 -mipmap "$input_file" -output_file "$output_file"; then
         local input_size=$(stat -c%s "$input_file")
@@ -73,7 +73,7 @@ failed_count=0
 while IFS= read -r -d '' file; do
     # Get relative path from assets directory
     relative_path="${file#$ASSETS_DIR/}"
-
+    
     if convert_texture "$file" "$relative_path"; then
         ((converted_count++))
     else

@@ -187,3 +187,4 @@ void atomic_flag_clear_explicit(volatile atomic_flag *, memory_order);
 
 #endif /* __STDC_HOSTED__ */
 #endif /* __CLANG_STDATOMIC_H */
+

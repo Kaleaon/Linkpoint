@@ -63,7 +63,7 @@ public class InventoryActivity extends MasterDetailsActivity {
         applyUserProfile(R.string.select_picture_subtitle),
         applyFirstLife(R.string.select_picture_subtitle),
         applyPickImage(R.string.select_picture_subtitle);
-
+        
         public final int subtitleResourceId;
 
         SelectAction(int i) {

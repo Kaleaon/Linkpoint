@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * EstateManager - Handles estate/region management functions.
- *
+ * 
  * Features:
  * - Estate info retrieval
  * - Estate banning/unbanning
@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap
  * - Covenant display
  * - Sun/time settings
  * - Terrain editing (for estate managers)
- *
+ * 
  * Based on reference viewer/Firestorm estate management.
  */
 class EstateManager(
@@ -35,7 +35,7 @@ class EstateManager(
 ) {
     companion object {
         private const val TAG = "EstateManager"
-
+        
         // Estate flags
         const val FLAG_ALLOW_DIRECT_TELEPORT = 0x00000001L
         const val FLAG_DENY_ANONYMOUS = 0x00000002L
@@ -57,43 +57,43 @@ class EstateManager(
         const val FLAG_SKIP_SCRIPTS = 0x10000000L
         const val FLAG_SKIP_COLLISIONS = 0x20000000L
         const val FLAG_SKIP_PHYSICS = 0x40000000L
-
+        
         // Estate access flags
         const val ACCESS_ALLOWED = 1
         const val ACCESS_BANNED = 2
         const val ACCESS_MANAGER = 4
     }
-
+    
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
+    
     // Estate info
     private val _estateInfo = MutableStateFlow<EstateInfo?>(null)
     val estateInfo: StateFlow<EstateInfo?> = _estateInfo
-
+    
     // Access lists
     private val _allowedAgents = MutableStateFlow<List<EstateAccessEntry>>(emptyList())
     val allowedAgents: StateFlow<List<EstateAccessEntry>> = _allowedAgents
-
+    
     private val _bannedAgents = MutableStateFlow<List<EstateAccessEntry>>(emptyList())
     val bannedAgents: StateFlow<List<EstateAccessEntry>> = _bannedAgents
-
+    
     private val _managers = MutableStateFlow<List<EstateAccessEntry>>(emptyList())
     val managers: StateFlow<List<EstateAccessEntry>> = _managers
-
+    
     private val _allowedGroups = MutableStateFlow<List<UUID>>(emptyList())
     val allowedGroups: StateFlow<List<UUID>> = _allowedGroups
-
+    
     // Covenant
     private val _covenantText = MutableStateFlow<String?>(null)
     val covenantText: StateFlow<String?> = _covenantText
-
+    
     // Permission check
     private val _isEstateManager = MutableStateFlow(false)
     val isEstateManager: StateFlow<Boolean> = _isEstateManager
-
+    
     private val _isEstateOwner = MutableStateFlow(false)
     val isEstateOwner: StateFlow<Boolean> = _isEstateOwner
-
+    
     /**
      * Request estate info.
      */
@@ -102,17 +102,17 @@ class EstateManager(
             try {
                 // 3 UUIDs (48 bytes) + Invoice int (4 bytes) = 52 bytes
                 val payload = ByteBuffer.allocate(52).order(ByteOrder.LITTLE_ENDIAN)
-
+                
                 // AgentData
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
-
+                
                 // TransactionID
                 payload.putUUID(UUID.randomUUID())
-
+                
                 // Invoice
                 payload.putInt(0)
-
+                
                 udpConnection.sendPacket(MessageIdRegistry.ESTATE_OWNER_MESSAGE, payload.array(), reliable = true)
                 Log.d(TAG, "Requested estate info")
             } catch (e: Exception) {
@@ -120,7 +120,7 @@ class EstateManager(
             }
         }
     }
-
+    
     /**
      * Handle estate info from simulator.
      */
@@ -147,13 +147,13 @@ class EstateManager(
             abuseEmailAddress = abuseEmailAddress
         )
         _estateInfo.value = info
-
+        
         // Check if we're estate owner or manager
         _isEstateOwner.value = ownerId == agentId
-
+        
         Log.d(TAG, "Estate info received: $estateName (ID: $estateId)")
     }
-
+    
     /**
      * Update estate access lists.
      */
@@ -167,13 +167,13 @@ class EstateManager(
             }
         }
     }
-
+    
     /**
      * Ban an agent from the estate.
      */
     fun banAgent(targetAgentId: UUID) {
         if (!canManageEstate()) return
-
+        
         scope.launch {
             try {
                 sendEstateAccessChange(targetAgentId, add = true, banned = true)
@@ -183,13 +183,13 @@ class EstateManager(
             }
         }
     }
-
+    
     /**
      * Unban an agent from the estate.
      */
     fun unbanAgent(targetAgentId: UUID) {
         if (!canManageEstate()) return
-
+        
         scope.launch {
             try {
                 sendEstateAccessChange(targetAgentId, add = false, banned = true)
@@ -199,13 +199,13 @@ class EstateManager(
             }
         }
     }
-
+    
     /**
      * Add agent to estate access list.
      */
     fun addToAccessList(targetAgentId: UUID) {
         if (!canManageEstate()) return
-
+        
         scope.launch {
             try {
                 sendEstateAccessChange(targetAgentId, add = true, banned = false)
@@ -215,13 +215,13 @@ class EstateManager(
             }
         }
     }
-
+    
     /**
      * Remove agent from estate access list.
      */
     fun removeFromAccessList(targetAgentId: UUID) {
         if (!canManageEstate()) return
-
+        
         scope.launch {
             try {
                 sendEstateAccessChange(targetAgentId, add = false, banned = false)
@@ -231,7 +231,7 @@ class EstateManager(
             }
         }
     }
-
+    
     /**
      * Initiate region restart (estate manager/owner only).
      */
@@ -240,30 +240,30 @@ class EstateManager(
             Log.w(TAG, "Cannot restart region - not estate manager")
             return
         }
-
+        
         scope.launch {
             try {
                 // Calculate buffer size: 3 UUIDs (48) + method (1+7) + param count (1) + delay string (1 + up to 10 chars) = ~70
                 val payload = ByteBuffer.allocate(128).order(ByteOrder.LITTLE_ENDIAN)
-
+                
                 // AgentData
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
-
+                
                 // Invoice
                 payload.putUUID(UUID.randomUUID())
-
+                
                 // Method
                 val method = "restart".toByteArray()
                 payload.put(method.size.toByte())
                 payload.put(method)
-
+                
                 // Param: delay
                 payload.put(1) // 1 param
                 val delay = delaySeconds.toString().toByteArray()
                 payload.put(delay.size.toByte())
                 payload.put(delay)
-
+                
                 udpConnection.sendPacket(MessageIdRegistry.ESTATE_OWNER_MESSAGE, payload.array(), reliable = true)
                 Log.i(TAG, "Initiated region restart with $delaySeconds second delay")
             } catch (e: Exception) {
@@ -271,29 +271,29 @@ class EstateManager(
             }
         }
     }
-
+    
     /**
      * Cancel pending region restart.
      */
     fun cancelRegionRestart() {
         if (!canManageEstate()) return
-
+        
         scope.launch {
             try {
                 val payload = ByteBuffer.allocate(60).order(ByteOrder.LITTLE_ENDIAN)
-
+                
                 // AgentData
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
                 payload.putUUID(UUID.randomUUID())
-
+                
                 // Method
                 val method = "cancelrestart".toByteArray()
                 payload.put(method.size.toByte())
                 payload.put(method)
-
+                
                 payload.put(0) // No params
-
+                
                 udpConnection.sendPacket(MessageIdRegistry.ESTATE_OWNER_MESSAGE, payload.array(), reliable = true)
                 Log.i(TAG, "Cancelled region restart")
             } catch (e: Exception) {
@@ -301,40 +301,40 @@ class EstateManager(
             }
         }
     }
-
+    
     /**
      * Kick user from region (teleport home).
      */
     fun kickUser(targetAgentId: UUID, reason: String = "") {
         if (!canManageEstate()) return
-
+        
         scope.launch {
             try {
                 val payload = ByteBuffer.allocate(100 + reason.length).order(ByteOrder.LITTLE_ENDIAN)
-
+                
                 // AgentData
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
                 payload.putUUID(UUID.randomUUID())
-
+                
                 // Method
                 val method = "teleporthomeuser".toByteArray()
                 payload.put(method.size.toByte())
                 payload.put(method)
-
+                
                 // Params: preset (unused), target agent id
                 payload.put(2)
-
+                
                 // Preset
                 val preset = "0".toByteArray()
                 payload.put(preset.size.toByte())
                 payload.put(preset)
-
+                
                 // Target
                 val target = targetAgentId.toString().toByteArray()
                 payload.put(target.size.toByte())
                 payload.put(target)
-
+                
                 udpConnection.sendPacket(MessageIdRegistry.ESTATE_OWNER_MESSAGE, payload.array(), reliable = true)
                 Log.i(TAG, "Kicked user $targetAgentId from region")
             } catch (e: Exception) {
@@ -342,25 +342,25 @@ class EstateManager(
             }
         }
     }
-
+    
     /**
      * Freeze user (prevent movement/actions).
      */
     fun freezeUser(targetAgentId: UUID, freeze: Boolean) {
         if (!canManageEstate()) return
-
+        
         scope.launch {
             try {
                 val payload = ByteBuffer.allocate(80).order(ByteOrder.LITTLE_ENDIAN)
-
+                
                 // AgentData
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
-
+                
                 // TargetData
                 payload.putUUID(targetAgentId)
                 payload.putInt(if (freeze) 1 else 0) // Flags
-
+                
                 udpConnection.sendPacket(MessageIdRegistry.FREEZE_USER, payload.array(), reliable = true)
                 Log.i(TAG, "${if (freeze) "Froze" else "Unfroze"} user $targetAgentId")
             } catch (e: Exception) {
@@ -368,13 +368,13 @@ class EstateManager(
             }
         }
     }
-
+    
     // ==================== PRIVATE METHODS ====================
-
+    
     private fun canManageEstate(): Boolean {
         return _isEstateOwner.value || _isEstateManager.value
     }
-
+    
     private suspend fun sendEstateAccessChange(targetAgentId: UUID, add: Boolean, banned: Boolean) {
         // Wire format (LL message_template `EstateOwnerMessage`, low-freq 260;
         // Lumiya: slproto/messages/EstateOwnerMessage.java PackPayload):
@@ -426,7 +426,7 @@ class EstateManager(
 
         udpConnection.sendPacket(MessageIdRegistry.ESTATE_OWNER_MESSAGE, payload.array(), reliable = true)
     }
-
+    
     fun shutdown() {
         scope.cancel()
     }

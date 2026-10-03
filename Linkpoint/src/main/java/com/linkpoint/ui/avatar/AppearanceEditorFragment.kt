@@ -28,8 +28,8 @@ class AppearanceEditorFragment : Fragment() {
     private lateinit var emptyView: TextView
     private lateinit var tabLayout: TabLayout
 
-    private val avatarManager by lazy {
-        LinkpointApp.getInstance().avatarManager
+    private val avatarManager by lazy { 
+        LinkpointApp.getInstance().avatarManager 
     }
 
     private var currentWearableType = WearableType.SHAPE
@@ -105,7 +105,7 @@ class AppearanceEditorFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val wearables = avatarManager.getWearables(type)
-
+                
                 if (wearables.isNotEmpty()) {
                     adapter.submitList(wearables)
                     recyclerView.visibility = View.VISIBLE

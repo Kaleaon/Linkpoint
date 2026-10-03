@@ -57,7 +57,7 @@ data class AvatarAppearance(
 
 /**
  * Compose version of MyAvatarActivity.
- *
+ * 
  * Features:
  * - Avatar preview
  * - Appearance sliders
@@ -76,7 +76,7 @@ fun MyAvatarScreen(
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("Appearance", "Outfit", "Shape")
-
+    
     Scaffold(
         topBar = {
             com.linkpoint.ui.components.linkpoint2.primitives.L2TopBar(
@@ -123,7 +123,7 @@ fun MyAvatarScreen(
                     )
                 }
             }
-
+            
             // Tabs
             TabRow(selectedTabIndex = selectedTab) {
                 tabs.forEachIndexed { index, title ->
@@ -134,7 +134,7 @@ fun MyAvatarScreen(
                     )
                 }
             }
-
+            
             // Tab content
             Column(
                 modifier = Modifier
@@ -171,7 +171,7 @@ private fun AppearanceTab(
     modifier: Modifier = Modifier
 ) {
     var height by remember { mutableFloatStateOf(appearance.height) }
-
+    
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -191,7 +191,7 @@ private fun AppearanceTab(
                 ) {
                     Slider(
                         value = height,
-                        onValueChange = {
+                        onValueChange = { 
                             height = it
                             onAppearanceChange(appearance.copy(height = it))
                         },
@@ -206,7 +206,7 @@ private fun AppearanceTab(
                 }
             }
         }
-
+        
         Button(
             onClick = { /* Open full editor */ },
             modifier = Modifier.fillMaxWidth()
@@ -247,7 +247,7 @@ private fun OutfitTab(
                 )
             }
         }
-
+        
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -258,7 +258,7 @@ private fun OutfitTab(
             ) {
                 Text("Save Outfit")
             }
-
+            
             Button(
                 onClick = onOpenEditor,
                 modifier = Modifier.weight(1f)
@@ -281,7 +281,7 @@ private fun ShapeTab(
     var bodyFat by remember { mutableFloatStateOf(appearance.bodyFat) }
     var torsoMuscle by remember { mutableFloatStateOf(appearance.torsoMuscle) }
     var headSize by remember { mutableFloatStateOf(appearance.headSize) }
-
+    
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -290,27 +290,27 @@ private fun ShapeTab(
         ShapeSlider(
             label = "Body Fat",
             value = bodyFat,
-            onValueChange = {
+            onValueChange = { 
                 bodyFat = it
                 onAppearanceChange(appearance.copy(bodyFat = it))
             }
         )
-
+        
         // Torso Muscle
         ShapeSlider(
             label = "Torso Muscle",
             value = torsoMuscle,
-            onValueChange = {
+            onValueChange = { 
                 torsoMuscle = it
                 onAppearanceChange(appearance.copy(torsoMuscle = it))
             }
         )
-
+        
         // Head Size
         ShapeSlider(
             label = "Head Size",
             value = headSize,
-            onValueChange = {
+            onValueChange = { 
                 headSize = it
                 onAppearanceChange(appearance.copy(headSize = it))
             }

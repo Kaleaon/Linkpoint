@@ -16,7 +16,7 @@ import kotlin.collections.ArrayList
 
 /**
  * Kotlin implementation of Vulkan-based renderer for Second Life content.
- *
+ * 
  * This class provides a Kotlin abstraction layer over Vulkan graphics API,
  * designed specifically for Second Life's rendering requirements including:
  * - PBR (Physically Based Rendering) material support
@@ -24,18 +24,18 @@ import kotlin.collections.ArrayList
  * - Efficient texture streaming and management
  * - Compute shader support for physics and effects
  * - Multi-threaded command buffer recording
- *
+ * 
  * @author LLSD Kotlin Team
  * @since 1.0
  */
 class VulkanRenderer {
-
+    
     private var initialized = false
     private var device: VulkanDevice? = null
     private var commandPool: VulkanCommandPool? = null
     private val renderQueue = ArrayList<VulkanRenderObject>()
     val settings = RenderSettings()
-
+    
     /**
      * Configuration settings for Vulkan rendering pipeline.
      */
@@ -48,7 +48,7 @@ class VulkanRenderer {
         var enableAsyncCompute: Boolean = false,
         var maxTextureStreams: Int = 16,
         var maxObjectsPerFrame: Int = 10000,
-
+        
         // Second Life specific settings
         var enableTerrainTessellation: Boolean = true,
         var enableWaterRendering: Boolean = true,
@@ -63,7 +63,7 @@ class VulkanRenderer {
             MOMENT_SHADOW_MAPPING
         }
     }
-
+    
     /**
      * Represents a Vulkan logical device with associated queues and memory.
      */
@@ -73,7 +73,7 @@ class VulkanRenderer {
         val deviceMemory: Long,
         val apiVersion: Int
     )
-
+    
     /**
      * Command pool for allocating command buffers.
      */
@@ -81,7 +81,7 @@ class VulkanRenderer {
         val queueFamilyIndex: Int,
         var resetCommandBuffers: Boolean = false
     )
-
+    
     /**
      * Represents an object to be rendered with Vulkan.
      */
@@ -94,7 +94,7 @@ class VulkanRenderer {
         var isVisible: Boolean = true,
         var lodLevel: Int = 0
     )
-
+    
     /**
      * Vulkan mesh data container.
      */
@@ -106,77 +106,77 @@ class VulkanRenderer {
         val indexCount: Int = indices.size
         val vertexBuffer: Long = System.nanoTime() // Mock buffer handle
         val indexBuffer: Long = System.nanoTime()  // Mock buffer handle
-
+        
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
-
+            
             other as VulkanMesh
-
+            
             if (!vertices.contentEquals(other.vertices)) return false
             if (!indices.contentEquals(other.indices)) return false
-
+            
             return true
         }
-
+        
         override fun hashCode(): Int {
             var result = vertices.contentHashCode()
             result = 31 * result + indices.contentHashCode()
             return result
         }
     }
-
+    
     /**
      * Initialize the Vulkan renderer.
-     *
+     * 
      * @return true if initialization was successful, false otherwise
      */
     fun initialize(): Boolean {
         if (initialized) {
             return true
         }
-
+        
         return try {
             println("Initializing Vulkan renderer...")
-
+            
             // Initialize Vulkan instance (placeholder)
             if (!initializeVulkanInstance()) {
                 System.err.println("Failed to initialize Vulkan instance")
                 return false
             }
-
+            
             // Create logical device (placeholder)
             device = createLogicalDevice()
             if (device == null) {
                 System.err.println("Failed to create Vulkan logical device")
                 return false
             }
-
+            
             // Create command pool (placeholder)
             commandPool = VulkanCommandPool(0) // Graphics queue family
-
+            
             // Initialize render passes and pipelines (placeholder)
             if (!initializeRenderPipelines()) {
                 System.err.println("Failed to initialize render pipelines")
                 return false
             }
-
+            
             initialized = true
             println("Vulkan renderer initialized successfully")
             println("Device: ${device?.deviceName}")
             println("Memory: ${device?.deviceMemory?.div(1024 * 1024)} MB")
-
+            
             true
-
+            
         } catch (e: Exception) {
             System.err.println("Error initializing Vulkan renderer: ${e.message}")
             false
         }
     }
-
+    
     /**
      * Add an object to the render queue.
-     *
+     * 
      * @param obj The render object to add
      */
     fun addRenderObject(obj: VulkanRenderObject) {
@@ -184,10 +184,10 @@ class VulkanRenderer {
             renderQueue.add(obj)
         }
     }
-
+    
     /**
      * Remove an object from the render queue.
-     *
+     * 
      * @param objectId The ID of the object to remove
      * @return true if the object was removed, false if not found
      */
@@ -196,10 +196,10 @@ class VulkanRenderer {
             return renderQueue.removeIf { it.objectId == objectId }
         }
     }
-
+    
     /**
      * Render all queued objects.
-     *
+     * 
      * @param deltaTime Time elapsed since last frame in seconds
      */
     fun render(deltaTime: Float) {
@@ -207,10 +207,10 @@ class VulkanRenderer {
             System.err.println("Vulkan renderer not initialized")
             return
         }
-
+        
         // Begin command buffer recording (placeholder)
         beginCommandBuffer()
-
+        
         // Render all visible objects
         synchronized(renderQueue) {
             val renderedObjects = renderQueue
@@ -220,14 +220,14 @@ class VulkanRenderer {
                     objects.forEach { renderObject(it) }
                 }
                 .size
-
+            
             println("Rendered $renderedObjects objects")
         }
-
+        
         // End and submit command buffer (placeholder)
         endCommandBuffer()
     }
-
+    
     /**
      * Shutdown the Vulkan renderer and cleanup resources.
      */
@@ -235,58 +235,58 @@ class VulkanRenderer {
         if (!initialized) {
             return
         }
-
+        
         println("Shutting down Vulkan renderer...")
-
+        
         // Wait for all operations to complete (placeholder)
         // vkDeviceWaitIdle(device);
-
+        
         // Cleanup resources (placeholder)
         synchronized(renderQueue) {
             renderQueue.clear()
         }
-
+        
         // Destroy Vulkan objects (placeholder)
         commandPool = null
         device = null
-
+        
         initialized = false
         println("Vulkan renderer shutdown complete")
     }
-
+    
     // Private implementation methods (placeholders for actual Vulkan code)
-
+    
     private fun initializeVulkanInstance(): Boolean {
         // Placeholder for Vulkan instance creation
         // In real implementation, this would use LWJGL Vulkan bindings
         println("Creating Vulkan instance...")
         return true
     }
-
+    
     private fun createLogicalDevice(): VulkanDevice {
         // Placeholder for logical device creation
         // In real implementation, this would enumerate and select best GPU
         return VulkanDevice("Mock Vulkan Device", true, 8L * 1024 * 1024 * 1024, 0x40100A) // Vulkan 1.1
     }
-
+    
     private fun initializeRenderPipelines(): Boolean {
         // Placeholder for render pipeline creation
         // In real implementation, this would compile shaders and create pipelines
         println("Creating render pipelines...")
         return true
     }
-
+    
     private fun beginCommandBuffer() {
         // Placeholder for command buffer begin
         println("Beginning command buffer recording...")
     }
-
+    
     private fun renderObject(obj: VulkanRenderObject) {
         // Placeholder for object rendering
         // In real implementation, this would bind descriptors and draw
         println("Rendering object: ${obj.objectId}")
     }
-
+    
     private fun endCommandBuffer() {
         // Placeholder for command buffer end and submit
         println("Ending command buffer recording and submitting...")
@@ -330,7 +330,7 @@ object VulkanMeshCompanion {
         val indices = intArrayOf(0, 1, 2)
         return VulkanRenderer.VulkanMesh(vertices, indices)
     }
-
+    
     fun quad(): VulkanRenderer.VulkanMesh {
         val vertices = floatArrayOf(
             -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,

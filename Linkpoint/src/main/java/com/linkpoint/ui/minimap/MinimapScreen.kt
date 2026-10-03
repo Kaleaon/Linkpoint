@@ -57,7 +57,7 @@ data class MinimapMarker(
 
 /**
  * Compose version of MinimapActivity.
- *
+ * 
  * Features:
  * - Region minimap display
  * - Avatar positions with heading indicator
@@ -77,7 +77,7 @@ fun MinimapScreen(
     modifier: Modifier = Modifier
 ) {
     var zoom by remember { mutableFloatStateOf(1f) }
-
+    
     Scaffold(
         topBar = {
             TopAppBar(
@@ -111,12 +111,12 @@ fun MinimapScreen(
                             val canvasWidth = size.width.toFloat()
                             val canvasHeight = size.height.toFloat()
                             val scale = minOf(canvasWidth, canvasHeight) / 256f * zoom
-
+                            
                             markers.forEach { marker ->
                                 val markerX = canvasWidth / 2 + (marker.x - avatarPosition.x) * scale
                                 val markerY = canvasHeight / 2 - (marker.y - avatarPosition.y) * scale
-
-                                if ((offset.x - markerX) * (offset.x - markerX) +
+                                
+                                if ((offset.x - markerX) * (offset.x - markerX) + 
                                     (offset.y - markerY) * (offset.y - markerY) < 400) {
                                     onMarkerTapped(marker)
                                 }
@@ -129,11 +129,11 @@ fun MinimapScreen(
                 val centerX = canvasWidth / 2
                 val centerY = canvasHeight / 2
                 val scale = minOf(canvasWidth, canvasHeight) / 256f * zoom
-
+                
                 // Draw grid
                 val gridSpacing = 10f * scale
                 val gridColor = Color(0xFF2A4A2A)
-
+                
                 for (i in -25..25) {
                     val offset = i * gridSpacing
                     // Vertical lines
@@ -151,7 +151,7 @@ fun MinimapScreen(
                         strokeWidth = 1f
                     )
                 }
-
+                
                 // Draw parcel boundaries (simulated)
                 drawRect(
                     color = Color(0xFF4A6A4A),
@@ -159,25 +159,25 @@ fun MinimapScreen(
                     size = androidx.compose.ui.geometry.Size(256 * scale, 256 * scale),
                     style = Stroke(width = 2f)
                 )
-
+                
                 // Draw markers (other avatars)
                 markers.forEach { marker ->
                     val markerX = centerX + (marker.x - avatarPosition.x) * scale
                     val markerY = centerY - (marker.y - avatarPosition.y) * scale
-
+                    
                     val color = when {
                         marker.isFriend -> Color.Yellow
                         marker.isGroup -> Color.Cyan
                         else -> Color.Green
                     }
-
+                    
                     drawCircle(
                         color = color,
                         radius = 6f,
                         center = Offset(markerX, markerY)
                     )
                 }
-
+                
                 // Draw self (center) with heading indicator
                 rotate(
                     degrees = -avatarHeading * (180f / Math.PI.toFloat()),
@@ -195,14 +195,14 @@ fun MinimapScreen(
                         color = Color.White
                     )
                 }
-
+                
                 // Draw compass directions
                 val compassRadius = minOf(canvasWidth, canvasHeight) / 2 - 20f
                 listOf("N" to 0f, "E" to 90f, "S" to 180f, "W" to 270f).forEach { (label, angle) ->
                     val radians = Math.toRadians(angle.toDouble() - 90)
                     val x = centerX + (compassRadius * cos(radians)).toFloat()
                     val y = centerY + (compassRadius * sin(radians)).toFloat()
-
+                    
                     drawCircle(
                         color = if (label == "N") Color.Red else Color.White.copy(alpha = 0.5f),
                         radius = 4f,
@@ -210,7 +210,7 @@ fun MinimapScreen(
                     )
                 }
             }
-
+            
             // Zoom controls
             Column(
                 modifier = Modifier
@@ -222,16 +222,16 @@ fun MinimapScreen(
                 ) {
                     Icon(Icons.Default.ZoomIn, contentDescription = "Zoom In")
                 }
-
+                
                 Spacer(modifier = Modifier.size(8.dp))
-
+                
                 SmallFloatingActionButton(
                     onClick = { zoom = (zoom / 1.5f).coerceAtLeast(0.5f) }
                 ) {
                     Icon(Icons.Default.ZoomOut, contentDescription = "Zoom Out")
                 }
             }
-
+            
             // Position info
             Card(
                 modifier = Modifier

@@ -31,7 +31,7 @@ import java.util.*
  * @see [LLSD JSON Specification](http://wiki.secondlife.com/wiki/LLSD#JSON_Serialization)
  */
 class LLSDJsonSerializer {
-
+    
     /**
      * Serializes an LLSD document into its JSON representation and writes it to
      * the provided [Writer].
@@ -45,7 +45,7 @@ class LLSDJsonSerializer {
     fun serialize(llsd: LLSD, writer: Writer) {
         serializeValue(llsd.content, writer)
     }
-
+    
     /**
      * Recursively serializes a single LLSD value into its JSON representation.
      *
@@ -117,7 +117,7 @@ class LLSDJsonSerializer {
             }
         }
     }
-
+    
     /** Serializes a Map into a JSON object. */
     @Throws(IOException::class, LLSDException::class)
     private fun serializeMap(map: Map<String, Any?>, writer: Writer) {
@@ -128,14 +128,14 @@ class LLSDJsonSerializer {
                 writer.write(",")
             }
             first = false
-
+            
             serializeString(key, writer)
             writer.write(":")
             serializeValue(value, writer)
         }
         writer.write("}")
     }
-
+    
     /** Serializes a List into a JSON array. */
     @Throws(IOException::class, LLSDException::class)
     private fun serializeArray(list: List<*>, writer: Writer) {
@@ -150,12 +150,12 @@ class LLSDJsonSerializer {
         }
         writer.write("]")
     }
-
+    
     /** Serializes a String into a properly-escaped JSON string. */
     @Throws(IOException::class)
     private fun serializeString(str: String, writer: Writer) {
         writer.write("\"")
-
+        
         for (c in str) {
             when (c) {
                 '"' -> writer.write("\\\"")
@@ -175,10 +175,10 @@ class LLSDJsonSerializer {
                 }
             }
         }
-
+        
         writer.write("\"")
     }
-
+    
     companion object {
         private val ISO8601_FORMATTER = DateTimeFormatter.ISO_INSTANT.withZone(ZoneId.of("UTC"))
     }
