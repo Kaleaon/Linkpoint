@@ -16,7 +16,19 @@ object SecurePreferences {
     private const val ENCRYPTED_SUFFIX = "_encrypted"
     private const val MIGRATION_COMPLETE_KEY = "__migration_complete"
 
+    private val instances = java.util.concurrent.ConcurrentHashMap<String, SharedPreferences>()
+
     fun getEncryptedPreferences(
+        context: Context,
+        legacyName: String,
+        migration: ((SharedPreferences, SharedPreferences) -> Unit)? = null
+    ): SharedPreferences {
+        return instances.getOrPut(legacyName) {
+            createEncryptedPreferences(context, legacyName, migration)
+        }
+    }
+
+    private fun createEncryptedPreferences(
         context: Context,
         legacyName: String,
         migration: ((SharedPreferences, SharedPreferences) -> Unit)? = null

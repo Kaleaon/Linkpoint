@@ -437,6 +437,8 @@ class LinkpointApp : Application() {
         get() = MessagingDispatcher.dispatcher
 
     // Core managers
+    lateinit var savedAccountRepository: com.linkpoint.auth.SavedAccountRepository
+        private set
     lateinit var gridManager: GridManager
         private set
     lateinit var sessionManager: SessionManager
@@ -763,6 +765,7 @@ class LinkpointApp : Application() {
 
     internal fun initializeManagers() {
         Log.d(TAG, "Initializing managers...")
+        savedAccountRepository = com.linkpoint.auth.SavedAccountRepository.getInstance(this)
 
         // Grid management (login, multiple grids with SQLite local caching)
         gridManager = GridManager(this)

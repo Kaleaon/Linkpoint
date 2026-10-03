@@ -3,6 +3,7 @@ package com.linkpoint.feature.auth
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -18,6 +19,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.linkpoint.ui.components.linkpoint2.primitives.L2FilledButton
+import com.linkpoint.ui.components.linkpoint2.primitives.L2GhostButton
 
 sealed interface AuthGatewayUiState {
     data object Loading : AuthGatewayUiState
@@ -27,7 +30,11 @@ sealed interface AuthGatewayUiState {
 }
 
 @Composable
-fun AuthGatewayScreen(state: AuthGatewayUiState) {
+fun AuthGatewayScreen(
+    state: AuthGatewayUiState,
+    onSwitchAccount: (() -> Unit)? = null,
+    onChangeGrid: (() -> Unit)? = null,
+) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         when (state) {
             AuthGatewayUiState.Loading -> Column(
@@ -57,6 +64,25 @@ fun AuthGatewayScreen(state: AuthGatewayUiState) {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                Spacer(Modifier.height(20.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    if (onSwitchAccount != null) {
+                        L2FilledButton(
+                            onClick = onSwitchAccount,
+                            height = 40.dp,
+                        ) {
+                            Text("Switch Account")
+                        }
+                    }
+                    if (onChangeGrid != null) {
+                        L2GhostButton(
+                            onClick = onChangeGrid,
+                            height = 40.dp,
+                        ) {
+                            Text("Change Grid")
+                        }
+                    }
+                }
             }
 
             AuthGatewayUiState.EmptyGridList -> Column(
