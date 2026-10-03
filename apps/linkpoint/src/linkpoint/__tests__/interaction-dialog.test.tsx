@@ -190,7 +190,7 @@ describe('InteractionDialog', () => {
       vi.spyOn(app.protocol as any, 'requireConnected').mockImplementation(() => undefined);
       vi.spyOn(app.protocol, 'refreshBalance').mockResolvedValue(1000);
       (app.protocol as any).balance = 1000;
-      const paySpy = vi.spyOn(app.protocol, 'payObject').mockResolvedValue({ paid: 'obj-100', amount: 200, balance: 800 });
+      const paySpy = vi.spyOn(app.protocol, 'payObject').mockResolvedValue({ paid: true, targetId: 'obj-100', amount: 200, balance: 800 });
 
       const host = await mount();
       await act(async () => {
