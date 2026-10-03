@@ -45,13 +45,6 @@ internal object LLSDNotationParser {
     private const val MAX_BINARY_BYTES = 1024 * 1024
     private const val MAX_COLLECTION_ELEMENTS = 20_000
 
-    private val DATE_FMT_MS = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
-        timeZone = TimeZone.getTimeZone("UTC")
-    }
-    private val DATE_FMT_S = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
-        timeZone = TimeZone.getTimeZone("UTC")
-    }
-
     fun parse(bytes: ByteArray): LLSDValue {
         if (bytes.isEmpty()) return LLSDUndefined
         return parse(java.io.ByteArrayInputStream(bytes))
@@ -358,9 +351,17 @@ internal object LLSDNotationParser {
 
     private fun parseDate(text: String): Long {
         return try {
-            DATE_FMT_MS.parse(text)?.time ?: 0L
+            val fmtMs = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+            }
+            fmtMs.parse(text)?.time ?: 0L
         } catch (_: Exception) {
-            try { DATE_FMT_S.parse(text)?.time ?: 0L } catch (_: Exception) { 0L }
+            try {
+                val fmtS = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
+                    timeZone = TimeZone.getTimeZone("UTC")
+                }
+                fmtS.parse(text)?.time ?: 0L
+            } catch (_: Exception) { 0L }
         }
     }
 

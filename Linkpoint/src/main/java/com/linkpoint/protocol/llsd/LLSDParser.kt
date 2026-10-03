@@ -123,7 +123,7 @@ object LLSDParser {
         val buffered = java.io.BufferedInputStream(stream, 65536)
         return when (LLSDContentTypeDetector.detect(buffered, contentType)) {
             LLSDContentTypeDetector.LLSDContentType.LLSD_BINARY -> parseBinary(data)
-            LLSDContentTypeDetector.LLSDContentType.LLSD_XML -> parseXML(ByteArrayInputStream(data))
+            LLSDContentTypeDetector.LLSDContentType.LLSD_XML -> parseXML(buffered)
         }
     }
 
