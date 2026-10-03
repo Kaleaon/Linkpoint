@@ -8,13 +8,15 @@
     "packages/*"
   ],
   "scripts": {
-    "prepare": "node scripts/install_git_hooks.mjs",
-    "check": "npm run check:contract && npm run check:web && npm run check:rust",
+    "check": "npm run check:contract && npm run check:web && npm run check:rust && npm run check:dart",
     "check:contract": "bash scripts/check_viewer_contract.sh",
     "check:web": "npm run typecheck && npm run test:web && npm run typecheck -w @linkpoint/app && npm run test -w @linkpoint/app && npm run build -w @linkpoint/app",
     "check:rust": "cargo fmt --all --check && cargo test --workspace --locked && cargo clippy --workspace --all-targets --locked -- -D warnings",
+    "check:dart": "cd packages/linkpoint_dart && /opt/flutter/bin/flutter test",
     "dev": "npm run dev -w @linkpoint/app",
     "build": "npm run build -w @linkpoint/app",
+    "build:tokens": "npm run build:tokens -w @linkpoint/design-system",
+    "generate-tokens": "npm run generate-tokens -w @linkpoint/design-system",
     "test": "npm run test:web",
     "test:web": "vitest run",
     "typecheck": "tsc --noEmit"
