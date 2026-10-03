@@ -374,7 +374,7 @@ class MuteManager(context: Context) {
                 if (parts.size >= 3) {
                     try {
                         val typeVal = parts[0].toIntOrNull() ?: 1
-                        val type = MuteType.values().find { it.value == typeVal } ?: MuteType.AGENT
+                        val type = MuteType.entries.find { it.value == typeVal } ?: MuteType.AGENT
                         val id = UUID.fromString(parts[1])
                         val flags = if (parts.size >= 4) parts[2].toIntOrNull() ?: MuteFlags.ALL else MuteFlags.ALL
                         val name = if (parts.size >= 4) parts[3] else parts[2]
@@ -404,7 +404,7 @@ class MuteManager(context: Context) {
                 MuteEntry(
                     id = UUID.fromString(parts[0]),
                     name = parts[1],
-                    type = MuteType.values().find { it.value == parts[2].toInt() } ?: MuteType.AGENT,
+                    type = MuteType.entries.find { it.value == parts[2].toInt() } ?: MuteType.AGENT,
                     flags = parts[3].toInt(),
                     timestamp = parts[4].toLong()
                 )
@@ -442,7 +442,7 @@ class MuteManager(context: Context) {
             Log.d(TAG, "🔇 MuteListUpdate: $muteId ($muteName), type=$muteType, flags=$muteFlags")
             
             // Add to mute list
-            val type = MuteType.values().find { it.value == muteType } ?: MuteType.AGENT
+            val type = MuteType.entries.find { it.value == muteType } ?: MuteType.AGENT
             muteByUUID(muteId, muteName, type, muteFlags)
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing UpdateMuteListEntry", e)
