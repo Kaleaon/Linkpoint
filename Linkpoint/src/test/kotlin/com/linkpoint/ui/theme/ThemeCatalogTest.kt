@@ -35,16 +35,17 @@ class ThemeCatalogTest {
     }
 
     @Test
-    fun `all 24 central themes and 4 community themes are present`() {
+    fun `all 26 central themes and 4 community themes are present`() {
         val allIds = ThemeCatalog.allThemes().map { it.id }.toSet()
 
         val expectedCentral = listOf(
             "art-deco", "art-nouveau", "aurora-glass-night", "burgundy-rose-gold",
-            "calm-clinical", "charcoal-champagne", "deep-purple-platinum", "emerald-silver",
-            "forest-copper", "frutiger-aero", "ink-terminal-modern", "lcars",
-            "midnight-amber", "navy-gold", "neo-noir-neon", "obsidian-crimson",
-            "paper-ink", "rose-gold", "royal-bronze", "royal-silver",
-            "slate-cyan", "slate-gunmetal", "solarpunk-civic", "windows-phone-metro"
+            "calm-clinical", "charcoal-champagne", "cleverferret_gold", "deep-purple-platinum",
+            "emerald-silver", "firestorm", "forest-copper", "frutiger-aero",
+            "ink-terminal-modern", "linkpoint_default", "midnight-amber", "navy-gold",
+            "neo-noir-neon", "obsidian-crimson", "paper-ink", "rose-gold",
+            "royal-bronze", "royal-silver", "sl_classic", "slate-cyan",
+            "slate-gunmetal", "solarpunk-civic"
         )
 
         val expectedCommunity = listOf(

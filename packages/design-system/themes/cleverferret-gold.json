@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "id": "cleverferret_gold",
+    "name": "CleverFerret Gold",
+    "description": "Elegant gold accents on dark background - from CleverFerret",
+    "author": "CleverFerret",
+    "version": "1.0.0",
+    "tags": [
+      "built-in",
+      "linkpoint"
+    ],
+    "createdAt": "2026-10-02T00:00:00.000Z",
+    "updatedAt": "2026-10-02T00:00:00.000Z"
+  },
+  "darkMode": true,
+  "colorScheme": {
+    "primary": "#E5A00D",
+    "onPrimary": "#1E1E1E",
+    "secondary": "#B8860B",
+    "onSecondary": "#1E1E1E",
+    "background": "#1E1E1E",
+    "onBackground": "#E6E1E5",
+    "surface": "#2A2A2A",
+    "onSurface": "#E6E1E5",
+    "onSurfaceVariant": "#CAC4D0"
+  }
+}

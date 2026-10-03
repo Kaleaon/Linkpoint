@@ -19,11 +19,11 @@
   "darkMode": true,
   "colorScheme": {
     "primary": "#6CFF9A",
-    "onPrimary": "#03240F",
+    "onPrimary": "#0A1112",
     "primaryContainer": "#1F6640",
     "onPrimaryContainer": "#D7FFE4",
     "secondary": "#3E4E5E",
-    "onSecondary": "#EAF3FF",
+    "onSecondary": "#D7F5E6",
     "secondaryContainer": "#2A3644",
     "onSecondaryContainer": "#D8E6F4",
     "tertiary": "#8AD0B0",
