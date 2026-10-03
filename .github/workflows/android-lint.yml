@@ -14,6 +14,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
@@ -43,4 +45,3 @@ jobs:
             Linkpoint/build/reports/lint-results-*.sarif
             Linkpoint/lint-baseline.xml
           if-no-files-found: warn
-

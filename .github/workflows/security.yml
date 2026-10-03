@@ -8,6 +8,8 @@ permissions:
 jobs:
   secrets:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
@@ -15,6 +17,8 @@ jobs:
         env: { GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
   dependencies:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     env: { ELECTRON_SKIP_BINARY_DOWNLOAD: "1" }
     steps:
       - uses: actions/checkout@v4
@@ -29,5 +33,3 @@ jobs:
       - run: mkdir -p artifacts && (cargo sbom --output-format cyclone_dx_json_1_5 || cargo sbom --output-format cyclonedx_json_1_5) > artifacts/linkpoint.cdx.json
       - uses: actions/upload-artifact@v4
         with: { name: security-sbom, path: artifacts/linkpoint.cdx.json }
-
-
