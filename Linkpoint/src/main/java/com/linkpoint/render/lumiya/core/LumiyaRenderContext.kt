@@ -376,6 +376,7 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
                 GlExtHelper.GL_MAP_PERSISTENT_BIT_EXT or
                 GlExtHelper.GL_MAP_COHERENT_BIT_EXT or
                 GlExtHelper.GL_DYNAMIC_STORAGE_BIT_EXT
+
             GlExtHelper.glBufferStorageExt(GLES32.GL_UNIFORM_BUFFER, globalUBOSizeBytes, null, flags)
             val mapped = GLES32.glMapBufferRange(
                 GLES32.GL_UNIFORM_BUFFER,

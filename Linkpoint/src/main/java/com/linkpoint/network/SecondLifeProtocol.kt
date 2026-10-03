@@ -924,11 +924,10 @@ class SecondLifeProtocol(private val context: Context) {
                     val success = response.getBoolean("success") ?: false
                     if (success) {
                         return TeleportResult.Success(regionName)
-                    } else {
-                        val msg = response.getString("message") ?: "Unknown capability error"
-                        Log.w(TAG, "Capability teleport failed: $msg")
-                        return TeleportResult.Failure(msg)
                     }
+                    val msg = response.getString("message") ?: "Unknown capability error"
+                    Log.w(TAG, "Capability teleport failed: $msg")
+                    return TeleportResult.Failure(msg)
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error using TeleportLocation capability", e)
