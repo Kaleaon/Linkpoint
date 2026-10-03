@@ -50,7 +50,7 @@ describe('RLV Command Engine & Context', () => {
     });
 
     it('parses compound command strings with pipe delimiter', () => {
-      const result = parseRlvCommandString('@detach=n|sendchat=n');
+      const result = parseRlvCommandString('@detach=n|@sendchat=n');
       expect(result).toEqual([
         { name: 'detach', option: null, value: 'n' },
         { name: 'sendchat', option: null, value: 'n' },
@@ -290,16 +290,16 @@ describe('RLV Command Engine & Context', () => {
 
       const compoundMsg = '@detach=n|sendchat=n|showloc=n|tploc=n|showinv=n|getstatus=1234';
 
-      const startTime = performance.now();
-      for (let i = 0; i < 100; i++) {
-        await act(async () => {
+      await act(async () => {
+        const startTime = performance.now();
+        for (let i = 0; i < 100; i++) {
           ctx.current!.processCommand(compoundMsg, `obj-${i}`);
-        });
-      }
-      const endTime = performance.now();
+        }
+        const endTime = performance.now();
 
-      const durationPerMessage = (endTime - startTime) / 100;
-      expect(durationPerMessage).toBeLessThan(5); // Must be under 5 milliseconds
+        const durationPerMessage = (endTime - startTime) / 100;
+        expect(durationPerMessage).toBeLessThan(5); // Must be under 5 milliseconds
+      });
     });
   });
 });

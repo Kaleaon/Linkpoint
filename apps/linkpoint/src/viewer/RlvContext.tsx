@@ -111,17 +111,16 @@ export interface ParsedRlvCommand {
  */
 export function parseRlvCommandString(rawCommand: string): ParsedRlvCommand[] {
   let str = rawCommand.trim();
-  if (str.startsWith('@')) {
-    str = str.substring(1);
-  }
-
   if (!str) return [];
 
   const parts = str.split(/[|,]/);
   const parsed: ParsedRlvCommand[] = [];
 
   for (const part of parts) {
-    const trimmed = part.trim();
+    let trimmed = part.trim();
+    if (trimmed.startsWith('@')) {
+      trimmed = trimmed.substring(1).trim();
+    }
     if (!trimmed) continue;
 
     const equalsIdx = trimmed.indexOf('=');
