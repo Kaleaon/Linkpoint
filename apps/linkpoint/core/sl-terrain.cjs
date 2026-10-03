@@ -18,7 +18,7 @@ function serializeTerrainMaterials(region) {
     startHeights: [region.terrainStartHeight00, region.terrainStartHeight01, region.terrainStartHeight10, region.terrainStartHeight11].map((v) => finite(v, 20)),
     heightRanges: [region.terrainHeightRange00, region.terrainHeightRange01, region.terrainHeightRange10, region.terrainHeightRange11].map((v) => finite(v, 60)),
     origin: [finite(region.xCoordinate), finite(region.yCoordinate)],
-    waterHeight: Number.isFinite(Number(region.waterHeight)) ? Number(region.waterHeight) : null,
+    waterHeight: Number.isFinite(Number(region.waterHeight)) ? Number(region.waterHeight) : 20,
   };
 }
 

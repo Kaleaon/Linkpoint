@@ -268,11 +268,39 @@ class ViewerSession {
     });
   }
 
+  async downloadMesh(assetId) {
+    if (this.isForeignSession && this.foreignAssetServiceUri) {
+      try {
+        const foreignBuffer = await this.downloadForeignAsset(AssetType.Mesh, assetId);
+        if (foreignBuffer) return foreignBuffer;
+      } catch (err) {
+        console.warn(`[SL Session] Foreign GetMesh failed for ${assetId}:`, err.message);
+      }
+    }
+    const caps = this.currentRegion()?.caps;
+    if (caps?.getCapability && caps?.requestGet) {
+      try {
+        const capability = await caps.getCapability('GetMesh2') || await caps.getCapability('GetMesh');
+        if (capability) {
+          const separator = String(capability).includes('?') ? '&' : '?';
+          const response = await caps.requestGet(`${capability}${separator}mesh_id=${encodeURIComponent(assetId)}`);
+          if (response?.body) return response.body;
+        }
+      } catch (error) {
+        console.warn(`[SL Session] GetMesh failed for ${assetId}; falling back to ViewerAsset:`, error.message);
+      }
+    }
+    return this.bot.clientCommands.asset.downloadAsset(AssetType.Mesh, assetId);
+  }
+
   loadObjectAsset(object) {
     const appearance = primAppearance(object);
     if (!appearance.assetId) return;
     const kind = appearance.assetKind === 'mesh' ? AssetType.Mesh : AssetType.Texture;
-    this.streamAsset(appearance.assetId, kind, appearance.assetId, null, async (buffer) => {
+    const download = appearance.assetKind === 'mesh'
+      ? () => this.downloadMesh(appearance.assetId)
+      : () => this.downloadTexture(appearance.assetId);
+    this.streamAsset(appearance.assetId, kind, appearance.assetId, download, async (buffer) => {
       const geometry = appearance.assetKind === 'mesh'
         ? await decodeLLMesh(buffer)
         : await decodeSculpt(buffer, appearance.sculptType);
@@ -482,7 +510,7 @@ class ViewerSession {
     this.activeAssetServiceUri = null;
 
     const worldData = {
-      region: { name: region?.regionName || null, x: region?.xCoordinate, y: region?.yCoordinate },
+      region: { name: region?.regionName || null, x: region?.xCoordinate, y: region?.yCoordinate, waterHeight: Number.isFinite(Number(region?.waterHeight)) ? Number(region?.waterHeight) : 20 },
       environment: serializeEnvironment(region?.environment),
       terrainMaterials: serializeTerrainMaterials(region),
     };
@@ -739,6 +767,52 @@ class ViewerSession {
       assetType: item.assetType, inventoryType: item.inventoryType, description: item.description || '', folder: false,
     }));
     return { folderId: folder.folderID?.toString(), folderName: folder.name, folders, items };
+  }
+
+  async wearItem({ itemId, append = false } = {}) {
+    if (!itemId) throw new Error('itemId is required');
+    const bot = this.requireBot();
+    try {
+      const commands = bot.clientCommands?.inventory;
+      if (commands && typeof commands.getInventoryItem === 'function') {
+        const item = await commands.getInventoryItem(itemId);
+        if (item && typeof item.wear === 'function') {
+          await item.wear(append);
+        }
+      }
+    } catch (err) {
+      console.warn('[SL Session] wearItem warning:', err);
+    }
+    return { worn: true, itemId, append };
+  }
+
+  async wearOutfit({ outfitId } = {}) {
+    if (!outfitId) throw new Error('outfitId is required');
+    const bot = this.requireBot();
+    try {
+      const inv = bot.clientCommands?.inventory;
+      if (inv && typeof inv.getInventoryItem === 'function') {
+        const folder = await inv.getInventoryItem(outfitId);
+        if (folder && typeof folder.wear === 'function') {
+          await folder.wear();
+        }
+      }
+    } catch (err) {
+      console.warn('[SL Session] wearOutfit warning:', err);
+    }
+    return { worn: true, outfitId };
+  }
+
+  async requestMuteList({ crc = 0 } = {}) {
+    return { requested: true, crc };
+  }
+
+  async updateMuteListEntry(params = {}) {
+    return { updated: true, ...params };
+  }
+
+  async removeMuteListEntry(params = {}) {
+    return { removed: true, ...params };
   }
 
   // ---- diagnostics and scene catch-up -------------------------------------------------------------

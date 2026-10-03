@@ -104,8 +104,8 @@ data class Linkpoint2Tokens(
     val warning: Color,
     val unreadBadge: Color,
     val onUnreadBadge: Color,
-    val hudBackground: Color = Color(0xAA000000),
-    val hudStroke: Color = Color(0x33FFFFFF),
+    val hudBackground: Color = GeneratedTokens.Color.HudBackground,
+    val hudStroke: Color = GeneratedTokens.Color.HudStroke,
 )
 
 val LocalLinkpoint2Tokens = staticCompositionLocalOf {
@@ -114,21 +114,21 @@ val LocalLinkpoint2Tokens = staticCompositionLocalOf {
         spacing = L2Spacing.Balanced,
         type = L2TypeScale(),
         aurora = L2Aurora(
-            color1 = Color(0x386DE8FF),
-            color2 = Color(0x388C7CFF),
-            color3 = Color(0x287CFFD8),
+            color1 = GeneratedTokens.Color.Aurora.Color1,
+            color2 = GeneratedTokens.Color.Aurora.Color2,
+            color3 = GeneratedTokens.Color.Aurora.Color3,
         ),
         glass = L2Glass(
-            background = Color(0x8C101C33),
-            stroke = Color(0x14FFFFFF),
+            background = GeneratedTokens.Color.Glass.Background,
+            stroke = GeneratedTokens.Color.Glass.Stroke,
         ),
-        coordColor = Color(0xFFB5C7E9),
-        onSurfaceDim = Color(0xFFB5C7E9),
-        outlineSubtle = Color(0xFF334364),
-        success = Color(0xFF7CFFD8),
-        warning = Color(0xFFFFD56D),
-        unreadBadge = Color(0xFF6DE8FF),
-        onUnreadBadge = Color(0xFF03212A),
+        coordColor = GeneratedTokens.Color.CoordColor,
+        onSurfaceDim = GeneratedTokens.Color.OnSurfaceDim,
+        outlineSubtle = GeneratedTokens.Color.OutlineSubtle,
+        success = GeneratedTokens.Color.Status.Success,
+        warning = GeneratedTokens.Color.Status.Warning,
+        unreadBadge = GeneratedTokens.Color.UnreadBadge,
+        onUnreadBadge = GeneratedTokens.Color.OnUnreadBadge,
     )
 }
 
