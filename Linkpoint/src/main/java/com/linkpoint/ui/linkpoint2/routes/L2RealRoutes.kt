@@ -758,16 +758,16 @@ fun L2GridManagementRoute(
     modifier: Modifier = Modifier,
 ) {
     val app = LinkpointApp.getInstanceOrNull()
-    val grids: List<GridEntry> = if (app == null) emptyList() else {
-        app.gridManager.getAvailableGrids().map { g ->
-            GridEntry(
-                id = g.id,
-                name = g.name,
-                loginUrl = g.loginUri,
-                builtIn = g.id == "agni" || g.id == "aditi",
-                online = true,
-            )
-        }
+    val gridListFlow = remember(app) { app?.gridManager?.getAvailableGridsFlow() }
+    val rawGrids by (gridListFlow?.collectAsState(initial = emptyList()) ?: remember { mutableStateOf(emptyList()) })
+    val grids: List<GridEntry> = rawGrids.map { g ->
+        GridEntry(
+            id = g.id,
+            name = g.name,
+            loginUrl = g.loginUri,
+            builtIn = g.id == "agni" || g.id == "aditi",
+            online = true,
+        )
     }
     GridManagementScreen(
         grids = grids,
