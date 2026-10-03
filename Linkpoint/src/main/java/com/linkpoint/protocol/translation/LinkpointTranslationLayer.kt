@@ -266,6 +266,7 @@ object LinkpointTranslationLayer {
         return listOf(
             // Core capabilities from the reference viewer's SLCapability enum
             "EventQueueGet",
+            "ViewerAsset",
             "GetTexture",
             "UploadBakedTexture",
             "FetchInventoryDescendents2",

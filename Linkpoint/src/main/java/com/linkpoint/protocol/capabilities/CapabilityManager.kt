@@ -67,6 +67,7 @@ open class CapabilityManager : CapabilityRequester {
         const val CAP_FETCH_INVENTORY = "FetchInventory2"
         const val CAP_FETCH_LIB_INVENTORY = "FetchLib2"
         const val CAP_FETCH_INVENTORY_DESCENDENTS = "FetchInventoryDescendents2"
+        const val CAP_VIEWER_ASSET = "ViewerAsset"
         const val CAP_GET_TEXTURE = "GetTexture"
         const val CAP_GET_MESH = "GetMesh"
         const val CAP_GET_MESH2 = "GetMesh2"
@@ -153,6 +154,7 @@ open class CapabilityManager : CapabilityRequester {
         
         // Capabilities that are asset-related
         private val ASSET_CAPS = setOf(
+            CAP_VIEWER_ASSET,
             CAP_GET_TEXTURE,
             CAP_GET_MESH,
             CAP_GET_MESH2
@@ -361,6 +363,7 @@ open class CapabilityManager : CapabilityRequester {
                 CAP_FETCH_INVENTORY,
                 CAP_FETCH_LIB_INVENTORY,
                 CAP_FETCH_INVENTORY_DESCENDENTS,
+                CAP_VIEWER_ASSET,
                 CAP_GET_TEXTURE,
                 CAP_GET_MESH,
                 CAP_GET_MESH2,
@@ -472,8 +475,8 @@ open class CapabilityManager : CapabilityRequester {
         Log.i(TAG, "║ Duration: ${duration}ms")
         Log.i(TAG, "║ Capabilities loaded: ${capabilities.size}")
         Log.i(TAG, "║ EventQueue: ${if (eqUrl != null) "AVAILABLE" else "MISSING"}")
-        Log.i(TAG, "║ GetTexture: ${if (hasCapability(CAP_GET_TEXTURE)) "✓" else "✗"}")
-        Log.i(TAG, "║ GetMesh: ${if (hasCapability(CAP_GET_MESH) || hasCapability(CAP_GET_MESH2)) "✓" else "✗"}")
+        Log.i(TAG, "║ GetTexture/ViewerAsset: ${if (hasTextureCapability()) "✓" else "✗"}")
+        Log.i(TAG, "║ GetMesh/ViewerAsset: ${if (hasMeshCapability()) "✓" else "✗"}")
         Log.i(TAG, "║ FetchInventory: ${if (hasCapability(CAP_FETCH_INVENTORY)) "✓" else "✗"}")
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
         true
@@ -682,6 +685,26 @@ open class CapabilityManager : CapabilityRequester {
      * Check if a capability is available
      */
     override fun hasCapability(name: String): Boolean = capabilities.containsKey(name)
+
+    /**
+     * Base URL for HTTP texture fetches (?texture_id=): ViewerAsset, then GetTexture.
+     */
+    fun getTextureFetchURL(): String? = getCapability(CAP_VIEWER_ASSET) ?: getCapability(CAP_GET_TEXTURE)
+
+    /**
+     * Base URL for HTTP mesh fetches (?mesh_id=): ViewerAsset, then GetMesh2, then GetMesh.
+     */
+    fun getMeshFetchURL(): String? = getCapability(CAP_VIEWER_ASSET) ?: getCapability(CAP_GET_MESH2) ?: getCapability(CAP_GET_MESH)
+
+    /**
+     * Check if texture capability (ViewerAsset or GetTexture) is available
+     */
+    fun hasTextureCapability(): Boolean = hasCapability(CAP_VIEWER_ASSET) || hasCapability(CAP_GET_TEXTURE)
+
+    /**
+     * Check if mesh capability (ViewerAsset, GetMesh2 or GetMesh) is available
+     */
+    fun hasMeshCapability(): Boolean = hasCapability(CAP_VIEWER_ASSET) || hasCapability(CAP_GET_MESH2) || hasCapability(CAP_GET_MESH)
     
     /**
      * Make a capability request with Firestorm-style retry logic.
@@ -1169,8 +1192,8 @@ open class CapabilityManager : CapabilityRequester {
             eventQueueActive = eventQueueJob?.isActive == true,
             eventHandlerCount = eventHandlers.values.sumOf { it.size },
             registeredEventTypes = eventHandlers.keys.toList().sorted(),
-            hasGetTexture = hasCapability(CAP_GET_TEXTURE),
-            hasGetMesh = hasCapability(CAP_GET_MESH) || hasCapability(CAP_GET_MESH2),
+            hasGetTexture = hasTextureCapability(),
+            hasGetMesh = hasMeshCapability(),
             hasFetchInventory = hasCapability(CAP_FETCH_INVENTORY),
             hasEventQueue = hasCapability(CAP_EVENT_QUEUE),
             activeStrategy = activeStrategy.javaClass.simpleName,
