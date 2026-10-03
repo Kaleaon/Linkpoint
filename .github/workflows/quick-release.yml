@@ -6,13 +6,15 @@ on:
 
 permissions:
   contents: read
-  id-token: write
-  attestations: write
 
 jobs:
   quick-release:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
 
     steps:
       - name: Checkout
@@ -76,4 +78,3 @@ jobs:
             Linkpoint/build/outputs/apk/*/release/*.apk
             Linkpoint/build/outputs/apk/SHA256SUMS
             Linkpoint/build/outputs/apk/checksums.sha256
-
