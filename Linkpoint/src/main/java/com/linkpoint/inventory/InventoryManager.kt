@@ -426,13 +426,14 @@ class InventoryManager(
     
     /**
      * Move item to folder.
-     * Uses AISv3 capability when available, falls back to UDP MoveInventoryItem.
+     * Uses AISv3 capability when available, falls back to CAP_MOVE_INVENTORY_ITEM, then UDP MoveInventoryItem.
      */
     suspend fun moveItem(itemId: UUID, newParentId: UUID): Boolean {
         items[itemId]?.let { item ->
-            // Try to use AISv3 capability
-            val aisUrl = capabilityManager.getCapability(CapabilityManager.CAP_INVENTORY_API)
-            if (aisUrl != null) {
+            var moved = false
+
+            // 1. Try to use AISv3 capability
+            if (capabilityManager.hasCapability(CapabilityManager.CAP_INVENTORY_API)) {
                 try {
                     val request = LLSDMap().apply {
                         this["items"] = LLSDArray().apply {
@@ -445,12 +446,36 @@ class InventoryManager(
                     val response = capabilityManager.request(CapabilityManager.CAP_INVENTORY_API, request)
                     if (response != null) {
                         Log.d(TAG, "Moved item $itemId to folder $newParentId via AIS")
+                        moved = true
                     }
                 } catch (e: Exception) {
                     Log.w(TAG, "Failed to move item via AIS: ${e.message}")
                 }
-            } else {
-                // UDP Fallback for grids without AISv3
+            }
+
+            // 2. Try CAP_MOVE_INVENTORY_ITEM capability if AISv3 was absent or failed
+            if (!moved && capabilityManager.hasCapability(CapabilityManager.CAP_MOVE_INVENTORY_ITEM)) {
+                try {
+                    val request = LLSDMap().apply {
+                        this["items"] = LLSDArray().apply {
+                            add(LLSDMap().apply {
+                                this["item_id"] = LLSDUUID(itemId)
+                                this["folder_id"] = LLSDUUID(newParentId)
+                            })
+                        }
+                    }
+                    val response = capabilityManager.request(CapabilityManager.CAP_MOVE_INVENTORY_ITEM, request)
+                    if (response != null) {
+                        Log.d(TAG, "Moved item $itemId to folder $newParentId via CAP_MOVE_INVENTORY_ITEM")
+                        moved = true
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to move item via CAP_MOVE_INVENTORY_ITEM: ${e.message}")
+                }
+            }
+
+            // 3. UDP Fallback for grids without HTTP relocation capabilities or when HTTP requests fail
+            if (!moved) {
                 try {
                     // MoveInventoryItem packet
                     // AgentData block: AgentID (16) + SessionID (16) + Stamp (4) = 36 bytes
