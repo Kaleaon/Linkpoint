@@ -5,6 +5,7 @@ import android.opengl.GLSurfaceView
 import android.util.AttributeSet
 import android.util.Log
 import com.linkpoint.render.RenderDiagnostics
+import com.linkpoint.render.RenderStateManager
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
@@ -24,8 +25,10 @@ class LumiyaGLSurfaceView @JvmOverloads constructor(
         private const val TAG = "LumiyaGLSurfaceView"
     }
 
+    val renderStateManager = RenderStateManager()
     private val lumiyaRenderer = LumiyaRenderer()
     private var surfaceReady = false
+    private var lastFrameTimeMs = 0L
 
     init {
         // Request GL ES 3.2 context
@@ -55,12 +58,26 @@ class LumiyaGLSurfaceView @JvmOverloads constructor(
 
             override fun onDrawFrame(gl: GL10?) {
                 if (!surfaceReady) return
+
+                val nowMs = System.currentTimeMillis()
+                if (lastFrameTimeMs > 0L) {
+                    val elapsedMs = nowMs - lastFrameTimeMs
+                    val sleepMs = renderStateManager.calculateFrameDelayMs(elapsedMs, nowMs)
+                    if (sleepMs > 0L) {
+                        try {
+                            Thread.sleep(sleepMs)
+                        } catch (_: InterruptedException) {
+                        }
+                    }
+                }
+                lastFrameTimeMs = System.currentTimeMillis()
+
                 lumiyaRenderer.renderFrame()
                 RenderDiagnostics.glFrame()
             }
         })
 
-        renderMode = RENDERMODE_CONTINUOUSLY
+        renderStateManager.attachGlSurfaceView(this)
     }
 
     fun getRenderer(): LumiyaRenderer = lumiyaRenderer

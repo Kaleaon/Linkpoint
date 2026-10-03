@@ -12,7 +12,6 @@ use crate::errors::{Error, Result};
 use crate::events::attributes::Attribute;
 use crate::events::{BytesCData, BytesDecl, BytesEnd, BytesStart, BytesText, Event};
 
-use memchr;
 
 #[derive(Clone)]
 enum TagState {
@@ -327,7 +326,7 @@ impl<R: BufRead> Reader<R> {
     /// reads `BytesElement` starting with a `/`,
     /// if `self.check_end_names`, checks that element matches last opened element
     /// return `End` event
-    fn read_end<'a, 'b>(&'a mut self, buf: &'b [u8]) -> Result<Event<'b>> {
+    fn read_end<'b>(&mut self, buf: &'b [u8]) -> Result<Event<'b>> {
         // XML standard permits whitespaces after the markup name in closing tags.
         // Let's strip them from the buffer before comparing tag names.
         let name = if self.trim_markup_names_in_closing_tags {
@@ -367,7 +366,7 @@ impl<R: BufRead> Reader<R> {
 
     /// reads `BytesElement` starting with a `!`,
     /// return `Comment`, `CData` or `DocType` event
-    fn read_bang<'a, 'b>(&'a mut self, bang_type: BangType, buf: &'b [u8]) -> Result<Event<'b>> {
+    fn read_bang<'b>(&mut self, bang_type: BangType, buf: &'b [u8]) -> Result<Event<'b>> {
         let uncased_starts_with = |string: &[u8], prefix: &[u8]| {
             string.len() >= prefix.len() && string[..prefix.len()].eq_ignore_ascii_case(prefix)
         };
@@ -405,7 +404,7 @@ impl<R: BufRead> Reader<R> {
 
     /// reads `BytesElement` starting with a `?`,
     /// return `Decl` or `PI` event
-    fn read_question_mark<'a, 'b>(&'a mut self, buf: &'b [u8]) -> Result<Event<'b>> {
+    fn read_question_mark<'b>(&mut self, buf: &'b [u8]) -> Result<Event<'b>> {
         let len = buf.len();
         if len > 2 && buf[len - 1] == b'?' {
             if len > 5 && &buf[1..4] == b"xml" && is_whitespace(buf[4]) {
@@ -439,7 +438,7 @@ impl<R: BufRead> Reader<R> {
 
     /// reads `BytesElement` starting with any character except `/`, `!` or ``?`
     /// return `Start` or `Empty` event
-    fn read_start<'a, 'b>(&'a mut self, buf: &'b [u8]) -> Result<Event<'b>> {
+    fn read_start<'b>(&mut self, buf: &'b [u8]) -> Result<Event<'b>> {
         // TODO: do this directly when reading bufreader ...
         let len = buf.len();
         let name_end = buf.iter().position(|&b| is_whitespace(b)).unwrap_or(len);
@@ -506,7 +505,7 @@ impl<R: BufRead> Reader<R> {
     /// println!("Text events: {:?}", txt);
     /// ```
     #[inline]
-    pub fn read_event<'a, 'b>(&'a mut self, buf: &'b mut Vec<u8>) -> Result<Event<'b>> {
+    pub fn read_event<'b>(&mut self, buf: &'b mut Vec<u8>) -> Result<Event<'b>> {
         self.read_event_buffered(buf)
     }
 
@@ -538,8 +537,8 @@ impl<R: BufRead> Reader<R> {
     ///
     /// *Unqualified* event inherits the current *default namespace*.
     #[inline]
-    pub fn event_namespace<'a, 'b, 'c>(
-        &'a self,
+    pub fn event_namespace<'b, 'c>(
+        &self,
         qname: &'b [u8],
         namespace_buffer: &'c [u8],
     ) -> (Option<&'c [u8]>, &'b [u8]) {
@@ -554,8 +553,8 @@ impl<R: BufRead> Reader<R> {
     ///
     /// *Unqualified* attribute names do *not* inherit the current *default namespace*.
     #[inline]
-    pub fn attribute_namespace<'a, 'b, 'c>(
-        &'a self,
+    pub fn attribute_namespace<'b, 'c>(
+        &self,
         qname: &'b [u8],
         namespace_buffer: &'c [u8],
     ) -> (Option<&'c [u8]>, &'b [u8]) {
@@ -604,8 +603,8 @@ impl<R: BufRead> Reader<R> {
     /// println!("Found {} start events", count);
     /// println!("Text events: {:?}", txt);
     /// ```
-    pub fn read_namespaced_event<'a, 'b, 'c>(
-        &'a mut self,
+    pub fn read_namespaced_event<'b, 'c>(
+        &mut self,
         buf: &'b mut Vec<u8>,
         namespace_buffer: &'c mut Vec<u8>,
     ) -> Result<(Option<&'c [u8]>, Event<'b>)> {
@@ -615,7 +614,7 @@ impl<R: BufRead> Reader<R> {
             Ok(Event::Start(e)) => {
                 self.ns_resolver.push(&e, namespace_buffer);
                 Ok((
-                    self.ns_resolver.find(e.name(), &**namespace_buffer),
+                    self.ns_resolver.find(e.name(), namespace_buffer),
                     Event::Start(e),
                 ))
             }
@@ -630,7 +629,7 @@ impl<R: BufRead> Reader<R> {
                 // namespace scope
                 self.ns_resolver.pending_pop = true;
                 Ok((
-                    self.ns_resolver.find(e.name(), &**namespace_buffer),
+                    self.ns_resolver.find(e.name(), namespace_buffer),
                     Event::Empty(e),
                 ))
             }
@@ -639,7 +638,7 @@ impl<R: BufRead> Reader<R> {
                 // namespace scope
                 self.ns_resolver.pending_pop = true;
                 Ok((
-                    self.ns_resolver.find(e.name(), &**namespace_buffer),
+                    self.ns_resolver.find(e.name(), namespace_buffer),
                     Event::End(e),
                 ))
             }
@@ -1515,7 +1514,7 @@ impl NamespaceEntry {
         if self.prefix_len == 0 {
             !qname.contains(&b':')
         } else {
-            qname.get(self.prefix_len).map_or(false, |n| *n == b':')
+            qname.get(self.prefix_len).is_some_and(|n| *n == b':')
                 && qname.starts_with(&buffer[self.start..self.start + self.prefix_len])
         }
     }
@@ -1554,7 +1553,7 @@ impl NamespaceResolver {
     /// [namespace name]: https://www.w3.org/TR/xml-names11/#dt-NSName
     /// [unbound]: https://www.w3.org/TR/xml-names11/#scoping
     #[inline]
-    fn find<'n, 'b>(&self, element_name: &'n [u8], buffer: &'b [u8]) -> Option<&'b [u8]> {
+    fn find<'b>(&self, element_name: &[u8], buffer: &'b [u8]) -> Option<&'b [u8]> {
         self.bindings
             .iter()
             .rfind(|n| n.is_match(buffer, element_name))
@@ -1604,7 +1603,7 @@ impl NamespaceResolver {
                     match k.get(5) {
                         None => {
                             let start = buffer.len();
-                            buffer.extend_from_slice(&*v);
+                            buffer.extend_from_slice(&v);
                             self.bindings.push(NamespaceEntry {
                                 start,
                                 prefix_len: 0,
@@ -1615,7 +1614,7 @@ impl NamespaceResolver {
                         Some(&b':') => {
                             let start = buffer.len();
                             buffer.extend_from_slice(&k[6..]);
-                            buffer.extend_from_slice(&*v);
+                            buffer.extend_from_slice(&v);
                             self.bindings.push(NamespaceEntry {
                                 start,
                                 prefix_len: k.len() - 6,
