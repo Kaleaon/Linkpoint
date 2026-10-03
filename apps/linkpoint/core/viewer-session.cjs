@@ -21,7 +21,48 @@ const { decodeLLMesh, decodeGLTFMaterial, decodeSculpt, decodeJPEG2000 } = requi
 const actions = require('./sl-actions.cjs');
 const interactions = require('./sl-interactions.cjs');
 const { watchAnimations, downloadAnimation } = require('./sl-animations.cjs');
+const { Message } = require('@caspertech/node-metaverse/dist/lib/enums/Message');
 const { serializeTerrainMaterials } = require('./sl-terrain.cjs');
+
+function sunPhaseToSunHour(sunPhase) {
+  if (typeof sunPhase !== 'number' || !Number.isFinite(sunPhase)) return null;
+  const raw = ((sunPhase / (2 * Math.PI)) + 0.25) % 1.0;
+  return ((raw % 1.0) + 1.0) % 1.0;
+}
+
+function subscribeSunHour(region, send) {
+  const circuit = region?.circuit;
+  if (!circuit || typeof circuit.subscribeToMessages !== 'function') return null;
+  return circuit.subscribeToMessages([Message.SimulatorViewerTimeMessage], (packet) => {
+    const sunPhase = packet?.message?.TimeInfo?.SunPhase;
+    if (typeof sunPhase === 'number' && Number.isFinite(sunPhase)) {
+      const sunHour = sunPhaseToSunHour(sunPhase);
+      if (sunHour !== null) {
+        send('sun-hour-update', { sunHour, sunPhase });
+      }
+    }
+  });
+}
+
+function watchSunHour(getRegion, send, intervalMs = 2000) {
+  let region = getRegion();
+  let subscription = subscribeSunHour(region, send);
+  const timer = setInterval(() => {
+    const current = getRegion();
+    if (!current || (current === region && current.circuit === (region && region.circuit))) return;
+    if (subscription) subscription.unsubscribe();
+    region = current;
+    subscription = subscribeSunHour(region, send);
+  }, intervalMs);
+  if (typeof timer.unref === 'function') timer.unref();
+  return {
+    unsubscribe() {
+      clearInterval(timer);
+      if (subscription) subscription.unsubscribe();
+      subscription = null;
+    },
+  };
+}
 const {
   finite, vector, serializeEnvironment, serializeTerrain, primAppearance, serializeObject, serializeFriend,
 } = require('./serializers.cjs');
@@ -340,6 +381,18 @@ class ViewerSession {
       id: event.friend?.getKey?.()?.toString() || event.friend?.id?.toString(),
     }));
 
+    if (events?.onSimulatorViewerTimeMessage?.subscribe) {
+      this.subscriptions.push(events.onSimulatorViewerTimeMessage.subscribe((event) => {
+        const sunPhase = typeof event === 'number' ? event : event?.sunPhase ?? event?.SunPhase ?? event?.TimeInfo?.SunPhase;
+        if (typeof sunPhase === 'number' && Number.isFinite(sunPhase)) {
+          const sunHour = sunPhaseToSunHour(sunPhase);
+          if (sunHour !== null) {
+            this.send('sun-hour-update', { sunHour, sunPhase });
+          }
+        }
+      }));
+    }
+
     // Script dialogs (llDialog, llTextBox), teleport lures and group notices
     this.subscriptions.push(...interactions.subscribeInteractions(events, this.pending, (type, data) => this.send(type, data)));
     this.subscribe(events.onDisconnected, 'disconnected', (event) => ({ message: event.message || 'Disconnected from Second Life' }));
@@ -401,6 +454,8 @@ class ViewerSession {
     const region = this.currentRegion();
     const animations = watchAnimations(() => this.currentRegion(), (type, data) => this.send(type, data));
     if (animations) this.subscriptions.push(animations);
+    const sunHour = watchSunHour(() => this.currentRegion(), (type, data) => this.send(type, data));
+    if (sunHour) this.subscriptions.push(sunHour);
 
     let inventoryRootId = '';
     try { inventoryRootId = this.bot.clientCommands?.inventory?.getInventoryRoot()?.folderID?.toString() || ''; } catch { /* fetched on demand */ }

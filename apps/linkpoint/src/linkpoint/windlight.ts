@@ -184,10 +184,20 @@ export function presetToSkyFrame(preset: WindlightPreset): WindlightSkyFrame {
 }
 
 /**
+ * Convert simulator SunPhase telemetry (in radians) into a normalized sun hour fraction in [0, 1).
+ * SunPhase is zero at sunrise (0.25 in sun hour fraction / 6 AM), π/2 at noon (0.5), π at sunset (0.75),
+ * and 1.5π at midnight (0.0).
+ */
+export function sunPhaseToSunHour(sunPhase: number): number {
+  if (typeof sunPhase !== 'number' || !Number.isFinite(sunPhase)) return 0;
+  const raw = ((sunPhase / (2 * Math.PI)) + 0.25) % 1.0;
+  return ((raw % 1.0) + 1.0) % 1.0;
+}
+
+/**
  * Time of day as a fraction of a four-hour Second Life day, from a Unix time in
- * milliseconds. This is an estimate: the simulator's own sun phase is not
- * exposed by the client library, and the cycle's alignment to real time is
- * assumed (day starts at the Unix epoch, so the fraction is time mod 4 hours).
+ * milliseconds. This is an estimate: used as a fallback when simulator SunPhase
+ * telemetry is not yet available or when disconnected.
  */
 export function estimatedSunHour(nowMs: number): number {
   const seconds = nowMs / 1000;
