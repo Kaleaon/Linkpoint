@@ -5798,7 +5798,9 @@ class LinkpointApp : Application() {
         udpConnection.disconnect()
         
         xrManager.shutdown()
-        renderManager.shutdownOnRenderThread()
+        applicationScope.launch {
+            renderManager.shutdownAsync()
+        }
         
         // Shutdown protocol and networking
         protocol.shutdown()

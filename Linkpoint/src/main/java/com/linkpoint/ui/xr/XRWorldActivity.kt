@@ -8,6 +8,8 @@ import android.widget.FrameLayout
 import android.util.Log
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import com.linkpoint.BuildConfig
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
@@ -93,9 +95,11 @@ class XRWorldActivity : AppCompatActivity() {
 
         if (xrManager.initSession(mode)) {
             // Initialize renderer for XR
-            app.renderManager.initializeOnRenderThread(surfaceView)
-            isRendering = true
-            startXRRenderLoop()
+            lifecycleScope.launch {
+                app.renderManager.initializeAsync(surfaceView)
+                isRendering = true
+                startXRRenderLoop()
+            }
         } else {
             exitToStandardWorld("XR session failed to initialize")
         }

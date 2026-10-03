@@ -43,9 +43,9 @@ class PointOfUsePermissionAndGridConfigTest {
     }
 
     @Test
-    fun `test empty grid storage auto populates default preset grids synchronously sub-10ms`() {
+    fun `test empty grid storage auto populates default preset grids synchronously sub-10ms`() = runTest {
         val startTime = System.nanoTime()
-        val grids = gridManager.getAvailableGrids()
+        val grids = gridManager.getAvailableGridsAsync()
         val durationMs = (System.nanoTime() - startTime) / 1_000_000.0
 
         assertTrue("Grids should auto-populate and return built-in defaults", grids.isNotEmpty())
@@ -54,7 +54,7 @@ class PointOfUsePermissionAndGridConfigTest {
     }
 
     @Test
-    fun `test resolveAuthGridList falls back to builtin grids when local grid storage is empty`() {
+    fun `test resolveAuthGridList falls back to builtin grids when local grid storage is empty`() = runTest {
         val resolved = resolveAuthGridList(gridManager)
         assertTrue("Auth gateway must resolve non-empty grid list", resolved.isNotEmpty())
         assertEquals(GridManager.BUILTIN_GRIDS.size, resolved.size)

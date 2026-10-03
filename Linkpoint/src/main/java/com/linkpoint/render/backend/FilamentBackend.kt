@@ -3,14 +3,20 @@ package com.linkpoint.render.backend
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import com.linkpoint.render.RenderManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class FilamentBackend(
     private val renderManager: RenderManager,
-    private val surfaceView: SurfaceView
+    private val surfaceView: SurfaceView,
+    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main)
 ) : RenderBackend {
 
     init {
-        renderManager.initializeOnRenderThread(surfaceView)
+        coroutineScope.launch {
+            renderManager.initializeAsync(surfaceView)
+        }
     }
 
     override fun attachSurface(holder: SurfaceHolder) {

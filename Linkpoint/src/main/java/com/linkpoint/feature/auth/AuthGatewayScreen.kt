@@ -91,8 +91,8 @@ fun AuthGatewayScreen(state: AuthGatewayUiState) {
  * If local grid storage is empty, automatically falls back to default preset grids (BUILTIN_GRIDS)
  * to ensure 0% of fresh installs encounter an unconfigurable empty grid blocking state.
  */
-fun resolveAuthGridList(gridManager: com.linkpoint.core.GridManager): List<com.linkpoint.core.GridInfo> {
-    val grids = gridManager.getAvailableGrids()
+suspend fun resolveAuthGridList(gridManager: com.linkpoint.core.GridManager): List<com.linkpoint.core.GridInfo> {
+    val grids = gridManager.getAvailableGridsAsync()
     return if (grids.isNotEmpty()) grids else com.linkpoint.core.GridManager.BUILTIN_GRIDS
 }
 

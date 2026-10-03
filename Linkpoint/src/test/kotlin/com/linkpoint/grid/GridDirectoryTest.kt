@@ -45,12 +45,12 @@ class GridDirectoryTest {
     }
 
     @Test
-    fun `test sub-10ms grid endpoint lookups for cached grids`() {
+    fun `test sub-10ms grid endpoint lookups for cached grids`() = runTest {
         // Warm up class loading and database initialization
-        gridManager.getAvailableGrids()
+        gridManager.getAvailableGridsAsync()
 
         val startTime = System.nanoTime()
-        val grids = gridManager.getAvailableGrids()
+        val grids = gridManager.getAvailableGridsAsync()
         val durationMs = (System.nanoTime() - startTime) / 1_000_000.0
 
         assertTrue("Grids should not be empty", grids.isNotEmpty())
@@ -62,8 +62,8 @@ class GridDirectoryTest {
     }
 
     @Test
-    fun `test offline grid selection operates correctly using local records`() {
-        val selected = gridManager.resolveGrid("kitely")
+    fun `test offline grid selection operates correctly using local records`() = runTest {
+        val selected = gridManager.resolveGridAsync("kitely")
         assertNotNull("Kitely should be resolved offline", selected)
         assertEquals("https://login.kitely.com/", selected.loginUri)
         assertEquals("online", selected.status)
@@ -135,7 +135,7 @@ class GridDirectoryTest {
     }
 
     @Test
-    fun `test unlisted grid falls back cleanly to direct network probing`() {
+    fun `test unlisted grid falls back cleanly to direct network probing`() = runTest {
         val mockGridInfoJson = """
             {
               "gridname": "Dynamic OpenSim",
@@ -151,7 +151,7 @@ class GridDirectoryTest {
         )
 
         val probeUrl = mockWebServer.url("/").toString()
-        val resolved = gridManager.resolveGrid(probeUrl)
+        val resolved = gridManager.resolveGridAsync(probeUrl)
 
         assertNotNull("Resolved grid should not be null", resolved)
         assertTrue("Should have valid loginUri", resolved.loginUri.isNotBlank())

@@ -135,7 +135,7 @@ class RenderManager(private val context: Context) {
      * HoverTextManager → SceneManager position lookup) without having
      * to poll `getSceneManager()` until it returns non-null.
      *
-     * Call sites should set this before [initializeOnRenderThread].
+     * Call sites should set this before [initializeAsync].
      */
     @Volatile
     var sceneManagerReady: ((SceneManager) -> Unit)? = null
@@ -414,11 +414,6 @@ class RenderManager(private val context: Context) {
 
     suspend fun initializeAsync(surfaceView: SurfaceView): Boolean {
         return dispatcher.execute { initialize(surfaceView) }
-    }
-
-    @Deprecated("Use initializeAsync suspending function to avoid blocking main thread.", ReplaceWith("initializeAsync(surfaceView)"))
-    fun initializeOnRenderThread(surfaceView: SurfaceView): Boolean {
-        return dispatcher.runBlocking { initialize(surfaceView) }
     }
     
     private fun setupDefaultLighting() {
@@ -1459,14 +1454,6 @@ class RenderManager(private val context: Context) {
 
     suspend fun shutdownAsync() {
         dispatcher.execute {
-            shutdown()
-        }
-        dispatcher.shutdown()
-    }
-
-    @Deprecated("Use shutdownAsync suspending function to avoid blocking main thread.", ReplaceWith("shutdownAsync()"))
-    fun shutdownOnRenderThread() {
-        dispatcher.runBlocking {
             shutdown()
         }
         dispatcher.shutdown()
