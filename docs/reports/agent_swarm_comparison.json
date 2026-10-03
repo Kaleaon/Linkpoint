@@ -3,17 +3,18 @@
     "name": "Linkpoint",
     "file_counts": {
       "code": {
-        ".java": 12,
-        ".kt": 3,
-        ".md": 1
+        ".kt": 3
       },
       "resources": {
         ".xml": 1
       },
       "docs": {
-        ".md": 35
+        ".md": 94,
+        ".json": 12,
+        ".txt": 4,
+        ".csv": 2
       },
-      "total_files_scanned": 52
+      "total_files_scanned": 116
     },
     "manifest": {
       "package": null,
@@ -24,26 +25,26 @@
       "providers": []
     },
     "top_packages": {
-      "com.lumiyaviewer.lumiya": 12,
-      "com.linkpoint.protocol": 1,
+      "com.linkpoint.security": 1,
       "com.linkpoint.utils": 1,
-      "com.linkpoint.security": 1
+      "com.linkpoint.protocol": 1
     },
     "domain_hits": {
-      "Chat/IM": 51,
-      "Physics/World": 46,
-      "Maps/Navigation": 41,
-      "Auth & Identity": 38,
-      "Inventory": 36,
-      "Voice & Audio": 35,
-      "Avatar/Appearance": 35,
-      "Media/Textures": 35,
-      "Scripting": 34,
-      "Network Transport": 32,
-      "Rendering/3D": 31,
-      "Security/Crypto": 17,
-      "Notifications": 17,
-      "Telemetry/Analytics": 6
+      "Chat/IM": 107,
+      "Inventory": 86,
+      "Physics/World": 80,
+      "Auth & Identity": 79,
+      "Network Transport": 79,
+      "Maps/Navigation": 76,
+      "Rendering/3D": 75,
+      "Avatar/Appearance": 68,
+      "Media/Textures": 61,
+      "Scripting": 58,
+      "Voice & Audio": 46,
+      "Notifications": 29,
+      "Security/Crypto": 24,
+      "Telemetry/Analytics": 24,
+      "Economy/Commerce": 2
     },
     "native_libs_top": {}
   },
@@ -112,8 +113,8 @@
       "Telemetry/Analytics": 4
     },
     "native_libs_top": {
-      "libopenjpeg.so": 7,
       "librawbuf.so": 7,
+      "libopenjpeg.so": 7,
       "libgvr.so": 3
     }
   },
@@ -128,16 +129,16 @@
         ".json": 11,
         "<noext>": 5,
         ".bundle": 5,
-        ".binarypb": 1,
         ".wav": 1,
-        ".hash": 1,
-        ".bin": 1
+        ".binarypb": 1,
+        ".bin": 1,
+        ".hash": 1
       },
       "docs": {
-        ".md": 8,
+        ".md": 10,
         ".txt": 2
       },
-      "total_files_scanned": 386
+      "total_files_scanned": 388
     },
     "manifest": {
       "package": "com.lindenlab.secondlife",
@@ -149,21 +150,21 @@
     },
     "top_packages": {},
     "domain_hits": {
-      "Network Transport": 153,
-      "Inventory": 130,
-      "Chat/IM": 78,
-      "Avatar/Appearance": 78,
+      "Network Transport": 154,
+      "Inventory": 131,
+      "Chat/IM": 79,
+      "Avatar/Appearance": 79,
       "Notifications": 31,
-      "Maps/Navigation": 25,
-      "Media/Textures": 24,
-      "Telemetry/Analytics": 23,
-      "Rendering/3D": 16,
+      "Maps/Navigation": 26,
+      "Media/Textures": 25,
+      "Telemetry/Analytics": 24,
+      "Rendering/3D": 17,
       "Auth & Identity": 14,
-      "Physics/World": 11,
+      "Physics/World": 12,
+      "Voice & Audio": 11,
       "Economy/Commerce": 11,
-      "Voice & Audio": 10,
-      "Scripting": 10,
-      "Security/Crypto": 9
+      "Scripting": 11,
+      "Security/Crypto": 10
     },
     "native_libs_top": {}
   }

@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 TARGETS = {
     "Linkpoint": {
-        "code_dirs": [ROOT / "src/main/java/com/linkpoint", ROOT / "src/main/kotlin/com/linkpoint", ROOT / "file_bundle"],
+        "code_dirs": [ROOT / "src/main/java/com/linkpoint", ROOT / "src/main/kotlin/com/linkpoint"],
         "resource_dirs": [ROOT / "src/main/res"],
         "manifest": None,
         "native_dirs": [],
