@@ -882,6 +882,24 @@ export class WorldViewer extends Utils.EventEmitter {
     return null;
   }
 
+  /** Intercept an object payment request, triggering the modal payment confirmation dialog before funds leave the account. */
+  public payObject(id: string, price?: number, sellerName?: string) {
+    const object = this.sceneObjects.get(id) || (this.selectedObject?.id === id ? this.selectedObject : null);
+    const name = object?.name || 'Vendor Item';
+    const seller = sellerName || object?.ownerName || 'Simulator Resident';
+    const amount = price ?? object?.payPrice ?? 100;
+    const interactions = (this.protocol as any)?.app?.interactions;
+    if (interactions && typeof interactions.requestPayment === 'function') {
+      return interactions.requestPayment({
+        objectId: id,
+        objectName: name,
+        sellerName: seller,
+        price: amount,
+      });
+    }
+    return null;
+  }
+
   private applySceneObject(object: any) {
     if (!this.scene3d) return;
     const skin = object.assetId && !object.avatar ? this.skinRowsFor(object.assetId) : null;
