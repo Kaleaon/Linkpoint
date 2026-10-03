@@ -30,27 +30,41 @@ object TextureDecodeTranscodePipeline {
     )
 
     fun fromJ2k(uuid: UUID, j2kBytes: ByteArray, request: Request): Output? {
-        val bitmap = JPEG2000Decoder.decode(j2kBytes) ?: return null
+        if (j2kBytes.isEmpty()) return null
+        val bitmap = JPEG2000Decoder.decode(j2kBytes) ?: JPEG2000Decoder.createPlaceholderBitmap(128, 128)
         return fromBitmap(uuid, bitmap, request)
     }
 
     fun fromBasisKtx2(uuid: UUID, basisKtx2Bytes: ByteArray, request: Request): Output? {
-        if (!request.capabilities.supportsBasisTranscoding) return null
-        val rgba = BasisTranscoder.tryTranscodeToRgba32(basisKtx2Bytes) ?: return null
-        val dims = BasisTranscoder.tryReadDimensions(basisKtx2Bytes) ?: return null
-        val decision = TextureFormatPolicy.decide(
-            backend = request.backend,
-            semantic = request.semantic,
-            width = dims.first,
-            height = dims.second,
-            capabilities = request.capabilities
-        )
-        val compressed = if (decision.targetFormat == TextureFormatPolicy.TargetFormat.ETC2_RGBA) {
-            Etc2CompressorFactory.get().compress(rgba, dims.first, dims.second, hasAlpha = true)
-        } else {
-            null
+        if (basisKtx2Bytes.isEmpty()) return null
+        var rgba: ByteArray? = null
+        var dims: Pair<Int, Int>? = null
+
+        if (request.capabilities.supportsBasisTranscoding) {
+            rgba = BasisTranscoder.tryTranscodeToRgba32(basisKtx2Bytes)
+            dims = BasisTranscoder.tryReadDimensions(basisKtx2Bytes)
         }
-        return Output(uuid, dims.first, dims.second, rgba, compressed, decision)
+
+        if (rgba != null && dims != null) {
+            val decision = TextureFormatPolicy.decide(
+                backend = request.backend,
+                semantic = request.semantic,
+                width = dims.first,
+                height = dims.second,
+                capabilities = request.capabilities
+            )
+            val compressed = if (decision.targetFormat == TextureFormatPolicy.TargetFormat.ETC2_RGBA) {
+                Etc2CompressorFactory.get().compress(rgba, dims.first, dims.second, hasAlpha = true)
+            } else {
+                null
+            }
+            return Output(uuid, dims.first, dims.second, rgba, compressed, decision)
+        }
+
+        // Fallback: use parsed dimensions or 128x128 synthetic grid placeholder
+        val fallbackDims = dims ?: BasisTranscoder.tryReadDimensions(basisKtx2Bytes) ?: Pair(128, 128)
+        val placeholderBitmap = JPEG2000Decoder.createPlaceholderBitmap(fallbackDims.first, fallbackDims.second)
+        return fromBitmap(uuid, placeholderBitmap, request)
     }
 
     fun fromBitmap(uuid: UUID, bitmap: Bitmap, request: Request): Output {

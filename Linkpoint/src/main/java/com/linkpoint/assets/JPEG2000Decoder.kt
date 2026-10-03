@@ -215,33 +215,48 @@ object JPEG2000Decoder {
         }
     }
 
-    private fun decodeFallback(data: ByteArray): Bitmap? {
+    private fun decodeFallback(data: ByteArray): Bitmap {
         if (data.size >= 2 && data[0] == 0xFF.toByte() && data[1] == 0xD8.toByte()) {
-            return try {
-                BitmapFactory.decodeByteArray(data, 0, data.size)
+            try {
+                val decoded = BitmapFactory.decodeByteArray(data, 0, data.size)
+                if (decoded != null) return decoded
             } catch (_: Exception) {
-                null
+                // Fall through to placeholder generation
             }
         }
 
-        // Try J2K magic check before dropping payload entirely.
-        if (isJ2CStream(data) || isJP2Box(data)) {
-            Log.w(TAG, "JPEG2000 magic header detected but native & JP2ForAndroid decoders failed.")
-            val headerSize = parseJ2KHeader(data)
-            if (headerSize != null) {
-                val (w, h) = headerSize
-                Log.i(TAG, "Parsed dimensions from J2K header: ${w}x${h}; returning placeholder bitmap")
-                return createPlaceholderBitmap(w, h)
-            }
+        // Try J2K header dimension parsing before generating default 128x128 placeholder
+        val headerSize = parseJ2KHeader(data)
+        if (headerSize != null) {
+            val (w, h) = headerSize
+            Log.i(TAG, "Parsed dimensions from J2K header: ${w}x${h}; returning synthetic placeholder bitmap")
+            return createPlaceholderBitmap(w, h)
         }
 
-        Log.w(TAG, "Cannot decode JPEG2000 with current runtime setup")
-        return null
+        Log.w(TAG, "Cannot decode JPEG2000; generating synthetic 128x128 placeholder bitmap")
+        return createPlaceholderBitmap(128, 128)
     }
 
-    private fun createPlaceholderBitmap(width: Int, height: Int): Bitmap {
-        val bitmap = Bitmap.createBitmap(width.coerceIn(1, 2048), height.coerceIn(1, 2048), Bitmap.Config.ARGB_8888)
-        bitmap.eraseColor(0xFF808080.toInt()) // Mid gray fallback
+    fun createPlaceholderBitmap(width: Int, height: Int): Bitmap {
+        val w = width.coerceIn(1, 2048)
+        val h = height.coerceIn(1, 2048)
+        val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val pixels = IntArray(w * h)
+        val bgGray = 0xFF808080.toInt() // Mid gray
+        val gridGray = 0xFF666666.toInt() // Subtle grid border gray
+        val gridStep = 16
+        for (y in 0 until h) {
+            val isGridRow = (y % gridStep == 0)
+            val rowOffset = y * w
+            for (x in 0 until w) {
+                if (isGridRow || (x % gridStep == 0)) {
+                    pixels[rowOffset + x] = gridGray
+                } else {
+                    pixels[rowOffset + x] = bgGray
+                }
+            }
+        }
+        bitmap.setPixels(pixels, 0, w, 0, 0, w, h)
         return bitmap
     }
 
