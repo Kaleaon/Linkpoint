@@ -3,9 +3,9 @@ repos:
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
-        exclude: '.*message_template\.msg$'
+        files: '^(apps/linkpoint/src/)'
       - id: end-of-file-fixer
-        exclude: '.*message_template\.msg$'
+        files: '^(apps/linkpoint/src/)'
       - id: check-yaml
       - id: check-json
       - id: check-added-large-files
