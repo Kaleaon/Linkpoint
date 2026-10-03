@@ -22,6 +22,18 @@ class ProgressiveTextureStreamerTest {
     @Before
     fun setUp() {
         ProgressiveTextureStreamer.reset()
+        // Warm up class loading and Robolectric shadow initialization
+        val dummy = createDummyJ2kBytes()
+        ProgressiveTextureStreamer.submit(
+            id = UUID.randomUUID(),
+            data = dummy,
+            priority = TexturePriority.NORMAL,
+            listener = object : ProgressiveTextureStreamer.TextureStreamListener {
+                override fun onPlaceholderReady(id: UUID, bitmap: Bitmap) {}
+                override fun onHighResReady(id: UUID, bitmap: Bitmap) {}
+            }
+        )
+        ProgressiveTextureStreamer.reset()
     }
 
     @After
@@ -86,8 +98,8 @@ class ProgressiveTextureStreamerTest {
         val diagBefore = ProgressiveTextureStreamer.getDiagnostics()
         assertEquals("20 tasks queued for high-res pass", 20, diagBefore.pendingTasks)
 
-        // Execute frame 1 with tight budget (e.g., 1ms = 1_000_000ns)
-        val completedFrame1 = ProgressiveTextureStreamer.processFrameQueue(maxBudgetNs = 1_000_000L)
+        // Execute frame 1 with tight budget (e.g., 1ns) to force budget yielding
+        val completedFrame1 = ProgressiveTextureStreamer.processFrameQueue(maxBudgetNs = 1L)
         val diagFrame1 = ProgressiveTextureStreamer.getDiagnostics()
 
         assertTrue("Frame 1 should yield due to budget cap", diagFrame1.pendingTasks < 20)
