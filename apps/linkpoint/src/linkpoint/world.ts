@@ -66,7 +66,7 @@ export class WorldViewer extends Utils.EventEmitter {
     super();
     this.protocol = protocolManager;
     this.protocol.on('connected', (reply: any) => {
-      this.applyWorldData(reply.world_data);
+      if (reply?.world_data) this.applyWorldData(reply.world_data);
       const normalizeGridCoordinate = (value: any) => {
         const coordinate = Number(value);
         if (!Number.isFinite(coordinate)) return null;
@@ -158,6 +158,10 @@ export class WorldViewer extends Utils.EventEmitter {
       if (data?.id && Array.isArray(data.animations)) this.animator.setAnimations(String(data.id), data.animations);
     });
     this.protocol.on('scene:texture-ready', (asset: any) => this.applyTexture(asset));
+    this.protocol.on('scene:texture-progress', (data: any) => {
+      const progress = this.scene3d?.reportTextureProgress(data) || data;
+      this.emit('scene:texture-progress', progress);
+    });
     this.protocol.on('scene:material-ready', (asset: any) => this.applyMaterial(asset));
     this.protocol.on('scene:world-data', (data: any) => this.applyWorldData(data));
     this.protocol.on('scene:environment', (data: any) => this.applyWorldData({ environment: data }));
@@ -458,6 +462,9 @@ export class WorldViewer extends Utils.EventEmitter {
       }, (x, y) => this.pickObject(x, y), (motion, run) => this.controlAvatar(motion, run));
 
       const scene = new Scene3D(graphics, this.camera3d);
+      if (typeof (scene as any)?.on === 'function') {
+        (scene as any).on('scene:texture-progress', (data: any) => this.emit('scene:texture-progress', data));
+      }
       this.scene3d = scene;
       await scene.init();
       if (stale()) return;
