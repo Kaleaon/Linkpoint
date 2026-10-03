@@ -5,7 +5,6 @@ import android.os.HandlerThread
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.withContext
-import java.util.concurrent.CountDownLatch
 
 /**
  * Single-thread dispatcher for render work.
@@ -36,21 +35,6 @@ class RenderThreadDispatcher(threadName: String = "RenderThread") {
 
     fun postDelayed(task: Runnable, delayMillis: Long) {
         handler.postDelayed(task, delayMillis)
-    }
-
-    @Deprecated("Use execute() suspending function to avoid blocking main thread.")
-    fun <T> runBlocking(task: () -> T): T {
-        if (isRenderThread()) {
-            return task()
-        }
-        val latch = CountDownLatch(1)
-        var result: Result<T>? = null
-        handler.post {
-            result = runCatching { task() }
-            latch.countDown()
-        }
-        latch.await()
-        return result!!.getOrThrow()
     }
 
     fun shutdown() {
