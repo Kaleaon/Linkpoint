@@ -24,4 +24,3 @@
         android:drawable="@drawable/btn_plus_selected" />
     <item android:drawable="@drawable/btn_plus_default" />
 </selector>
-

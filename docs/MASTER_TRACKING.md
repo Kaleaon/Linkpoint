@@ -2,7 +2,7 @@
 
 **Last verified:** 2026-09-24 (UTC)
 **Commit:** current branch (protocol foundation change)
-**Machine-readable tracker:** `docs/MASTER_TRACKING.json`  
+**Machine-readable tracker:** `docs/MASTER_TRACKING.json`
 **Verification scope:** `Linkpoint/src/main/java/**/*.kt`
 
 ---
@@ -88,7 +88,7 @@ This file and `docs/MASTER_TRACKING.json` are the canonical tracker for moderniz
 
 ## Parity debt (vs reference docs)
 
-**Last verified:** 2026-04-24 (UTC)  
+**Last verified:** 2026-04-24 (UTC)
 **Commit:** `e2011834a08d4888abd75beee10b772d7d0793a3`
 
 | Debt ID | Gap vs reference docs | Impact | Owner | Status |

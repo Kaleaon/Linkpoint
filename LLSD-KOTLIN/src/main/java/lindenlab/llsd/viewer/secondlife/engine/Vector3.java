@@ -21,19 +21,19 @@ import java.util.Objects;
  * the original object is never modified.
  */
 public class Vector3 {
-    
+
     public static final Vector3 ZERO = new Vector3(0.0, 0.0, 0.0);
     public static final Vector3 ONE = new Vector3(1.0, 1.0, 1.0);
     public static final Vector3 X_AXIS = new Vector3(1.0, 0.0, 0.0);
     public static final Vector3 Y_AXIS = new Vector3(0.0, 1.0, 0.0);
     public static final Vector3 Z_AXIS = new Vector3(0.0, 0.0, 1.0);
-    
+
     private static final double EPSILON = 1e-6;
-    
+
     public final double x;
     public final double y;
     public final double z;
-    
+
     /**
      * Constructs a new vector with the specified components.
      *
@@ -46,7 +46,7 @@ public class Vector3 {
         this.y = y;
         this.z = z;
     }
-    
+
     /**
      * Constructs a new vector from a 3-element array.
      *
@@ -61,7 +61,7 @@ public class Vector3 {
         this.y = components[1];
         this.z = components[2];
     }
-    
+
     /**
      * Constructs a new vector as a copy of another vector.
      *
@@ -72,7 +72,7 @@ public class Vector3 {
         this.y = other.y;
         this.z = other.z;
     }
-    
+
     /**
      * Adds another vector to this one, component-wise.
      *
@@ -82,7 +82,7 @@ public class Vector3 {
     public Vector3 add(Vector3 other) {
         return new Vector3(x + other.x, y + other.y, z + other.z);
     }
-    
+
     /**
      * Subtracts another vector from this one, component-wise.
      *
@@ -92,7 +92,7 @@ public class Vector3 {
     public Vector3 subtract(Vector3 other) {
         return new Vector3(x - other.x, y - other.y, z - other.z);
     }
-    
+
     /**
      * Multiplies this vector by a scalar value.
      *
@@ -102,7 +102,7 @@ public class Vector3 {
     public Vector3 multiply(double scalar) {
         return new Vector3(x * scalar, y * scalar, z * scalar);
     }
-    
+
     /**
      * Performs a component-wise multiplication (Hadamard product) with another vector.
      *
@@ -113,7 +113,7 @@ public class Vector3 {
     public Vector3 multiply(Vector3 other) {
         return new Vector3(x * other.x, y * other.y, z * other.z);
     }
-    
+
     /**
      * Divides this vector by a scalar value.
      *
@@ -127,7 +127,7 @@ public class Vector3 {
         }
         return new Vector3(x / scalar, y / scalar, z / scalar);
     }
-    
+
     /**
      * Performs a component-wise division by another vector.
      *
@@ -141,7 +141,7 @@ public class Vector3 {
         }
         return new Vector3(x / other.x, y / other.y, z / other.z);
     }
-    
+
     /**
      * Negates this vector by flipping the sign of each component.
      *
@@ -150,7 +150,7 @@ public class Vector3 {
     public Vector3 negate() {
         return new Vector3(-x, -y, -z);
     }
-    
+
     /**
      * Calculates the dot product of this vector with another.
      *
@@ -160,7 +160,7 @@ public class Vector3 {
     public double dot(Vector3 other) {
         return x * other.x + y * other.y + z * other.z;
     }
-    
+
     /**
      * Calculates the cross product of this vector with another.
      *
@@ -174,7 +174,7 @@ public class Vector3 {
             x * other.y - y * other.x
         );
     }
-    
+
     /**
      * Calculates the squared magnitude (length) of this vector.
      * <p>
@@ -185,7 +185,7 @@ public class Vector3 {
     public double magnitudeSquared() {
         return x * x + y * y + z * z;
     }
-    
+
     /**
      * Calculates the magnitude (or length) of this vector.
      *
@@ -194,7 +194,7 @@ public class Vector3 {
     public double magnitude() {
         return Math.sqrt(magnitudeSquared());
     }
-    
+
     /**
      * Normalizes this vector to have a magnitude of 1.
      *
@@ -208,7 +208,7 @@ public class Vector3 {
         }
         return divide(mag);
     }
-    
+
     /**
      * Calculates the Euclidean distance between this vector and another.
      *
@@ -218,7 +218,7 @@ public class Vector3 {
     public double distance(Vector3 other) {
         return subtract(other).magnitude();
     }
-    
+
     /**
      * Calculates the squared Euclidean distance between this vector and another.
      * <p>
@@ -230,7 +230,7 @@ public class Vector3 {
     public double distanceSquared(Vector3 other) {
         return subtract(other).magnitudeSquared();
     }
-    
+
     /**
      * Performs a linear interpolation between this vector and a target vector.
      *
@@ -242,7 +242,7 @@ public class Vector3 {
         t = Math.max(0.0, Math.min(1.0, t)); // Clamp t to [0,1]
         return add(target.subtract(this).multiply(t));
     }
-    
+
     /**
      * Performs a spherical linear interpolation between this vector and a target vector.
      * <p>
@@ -256,30 +256,30 @@ public class Vector3 {
      */
     public Vector3 slerp(Vector3 target, double t) {
         t = Math.max(0.0, Math.min(1.0, t)); // Clamp t to [0,1]
-        
+
         Vector3 from = normalize();
         Vector3 to = target.normalize();
-        
+
         double dot = from.dot(to);
-        
+
         // If vectors are very close, use linear interpolation
         if (Math.abs(dot) > 1.0 - EPSILON) {
             return from.lerp(to, t);
         }
-        
+
         double theta = Math.acos(Math.abs(dot));
         double sinTheta = Math.sin(theta);
-        
+
         double a = Math.sin((1.0 - t) * theta) / sinTheta;
         double b = Math.sin(t * theta) / sinTheta;
-        
+
         if (dot < 0.0) {
             to = to.negate();
         }
-        
+
         return from.multiply(a).add(to.multiply(b));
     }
-    
+
     /**
      * Checks if this vector is a zero vector (all components are close to zero).
      *
@@ -288,7 +288,7 @@ public class Vector3 {
     public boolean isZero() {
         return Math.abs(x) < EPSILON && Math.abs(y) < EPSILON && Math.abs(z) < EPSILON;
     }
-    
+
     /**
      * Checks if this vector is normalized (has a magnitude of approximately 1).
      *
@@ -297,7 +297,7 @@ public class Vector3 {
     public boolean isNormalized() {
         return Math.abs(magnitude() - 1.0) < EPSILON;
     }
-    
+
     /**
      * Projects this vector onto another vector.
      *
@@ -311,7 +311,7 @@ public class Vector3 {
         }
         return onto.multiply(dot(onto) / ontoMagSq);
     }
-    
+
     /**
      * Reflects this vector off a surface defined by a normal vector.
      *
@@ -321,7 +321,7 @@ public class Vector3 {
     public Vector3 reflect(Vector3 normal) {
         return subtract(normal.multiply(2.0 * dot(normal)));
     }
-    
+
     /**
      * Calculates the angle in radians between this vector and another.
      *
@@ -333,7 +333,7 @@ public class Vector3 {
         Vector3 b = other.normalize();
         return Math.acos(Math.max(-1.0, Math.min(1.0, a.dot(b))));
     }
-    
+
     /**
      * Converts this vector to a 3-element array of its components.
      *
@@ -342,7 +342,7 @@ public class Vector3 {
     public double[] toArray() {
         return new double[]{x, y, z};
     }
-    
+
     /**
      * Gets a component of this vector by its index.
      *
@@ -358,7 +358,7 @@ public class Vector3 {
             default: throw new IndexOutOfBoundsException("Vector3 index must be 0, 1, or 2");
         }
     }
-    
+
     /**
      * Creates a new vector with the x-component replaced by a new value.
      *
@@ -368,7 +368,7 @@ public class Vector3 {
     public Vector3 withX(double newX) {
         return new Vector3(newX, y, z);
     }
-    
+
     /**
      * Creates a new vector with the y-component replaced by a new value.
      *
@@ -378,7 +378,7 @@ public class Vector3 {
     public Vector3 withY(double newY) {
         return new Vector3(x, newY, z);
     }
-    
+
     /**
      * Creates a new vector with the z-component replaced by a new value.
      *
@@ -388,7 +388,7 @@ public class Vector3 {
     public Vector3 withZ(double newZ) {
         return new Vector3(x, y, newZ);
     }
-    
+
     /**
      * Creates a new vector containing the minimum components from two vectors.
      *
@@ -403,7 +403,7 @@ public class Vector3 {
             Math.min(a.z, b.z)
         );
     }
-    
+
     /**
      * Creates a new vector containing the maximum components from two vectors.
      *
@@ -418,7 +418,7 @@ public class Vector3 {
             Math.max(a.z, b.z)
         );
     }
-    
+
     /**
      * Parses a vector from a string of comma-separated values.
      *
@@ -430,12 +430,12 @@ public class Vector3 {
         if (str == null || str.trim().isEmpty()) {
             return ZERO;
         }
-        
+
         String[] parts = str.split(",");
         if (parts.length != 3) {
             throw new IllegalArgumentException("Vector3 string must have 3 components: " + str);
         }
-        
+
         try {
             return new Vector3(
                 Double.parseDouble(parts[0].trim()),
@@ -446,7 +446,7 @@ public class Vector3 {
             throw new IllegalArgumentException("Invalid Vector3 string: " + str, e);
         }
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -456,7 +456,7 @@ public class Vector3 {
                Math.abs(vector3.y - y) < EPSILON &&
                Math.abs(vector3.z - z) < EPSILON;
     }
-    
+
     @Override
     public int hashCode() {
         return Objects.hash(
@@ -465,12 +465,12 @@ public class Vector3 {
             Math.round(z / EPSILON)
         );
     }
-    
+
     @Override
     public String toString() {
         return String.format("Vector3(%.6f, %.6f, %.6f)", x, y, z);
     }
-    
+
     /**
      * Returns a compact string representation of the vector, formatted to two decimal places.
      *

@@ -8,7 +8,7 @@ public enum MyAvatarDetailsPages {
     pageOutfits(R.string.my_outfits_fragment_title),
     pageBlockList(R.string.block_list_fragment_title),
     pageBalance(-1);
-    
+
     private final int titleResource;
 
     MyAvatarDetailsPages(int i) {

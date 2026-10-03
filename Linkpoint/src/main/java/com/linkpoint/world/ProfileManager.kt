@@ -17,31 +17,31 @@ class ProfileManager(
     companion object {
         private const val TAG = "ProfileManager"
     }
-    
+
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    
+
     // Cached profiles
     private val avatarProfiles = ConcurrentHashMap<UUID, AvatarProfile>()
     private val groupProfiles = ConcurrentHashMap<UUID, GroupProfile>()
-    
+
     // Display names cache
     private val displayNames = ConcurrentHashMap<UUID, String>()
-    
+
     /**
      * Get avatar profile via capability request.
      */
     suspend fun getAvatarProfile(agentId: UUID): AvatarProfile? {
         avatarProfiles[agentId]?.let { return it }
-        
+
         return withContext(Dispatchers.IO) {
             try {
                 // Request profile from AgentProfile capability
                 val request = LLSDMap().apply {
                     this["agent_id"] = LLSDString(agentId.toString())
                 }
-                
+
                 val response = capabilityManager.request(CapabilityManager.CAP_AGENT_PROFILE, request)
-                
+
                 if (response is LLSDMap) {
                     val profile = AvatarProfile(
                         agentId = agentId,
@@ -49,13 +49,13 @@ class ProfileManager(
                         userName = response.getString("username") ?: "",
                         aboutText = response.getString("sl_about_text") ?: "",
                         firstLifeText = response.getString("fl_about_text") ?: "",
-                        profileImage = response.getString("sl_image_id")?.let { 
+                        profileImage = response.getString("sl_image_id")?.let {
                             try { UUID.fromString(it) } catch (e: Exception) { null }
                         },
-                        firstLifeImage = response.getString("fl_image_id")?.let { 
+                        firstLifeImage = response.getString("fl_image_id")?.let {
                             try { UUID.fromString(it) } catch (e: Exception) { null }
                         },
-                        partner = response.getString("partner_id")?.let { 
+                        partner = response.getString("partner_id")?.let {
                             try { UUID.fromString(it) } catch (e: Exception) { null }
                         },
                         bornOn = response.getString("born_on") ?: "",
@@ -94,7 +94,7 @@ class ProfileManager(
             }
         }
     }
-    
+
     /**
      * Get display name via GetDisplayNames capability.
      *
@@ -135,7 +135,7 @@ class ProfileManager(
             }
         }
     }
-    
+
     /**
      * Get multiple display names via the GetDisplayNames capability.
      *
@@ -193,7 +193,7 @@ class ProfileManager(
             results
         }
     }
-    
+
     /**
      * Update avatar profile
      */
@@ -222,7 +222,7 @@ class ProfileManager(
                         }
                     }
                 }
-                
+
                 // Use AgentProfile capability
                 val response = capabilityManager.request(CapabilityManager.CAP_AGENT_PROFILE, request)
                 response != null
@@ -232,32 +232,32 @@ class ProfileManager(
             }
         }
     }
-    
+
     /**
      * Get group profile via GroupProfile capability.
      */
     suspend fun getGroupProfile(groupId: UUID): GroupProfile? {
         groupProfiles[groupId]?.let { return it }
-        
+
         return withContext(Dispatchers.IO) {
             try {
                 // Request group profile from capability
                 val request = LLSDMap().apply {
                     this["group_id"] = LLSDString(groupId.toString())
                 }
-                
+
                 val response = capabilityManager.request(CapabilityManager.CAP_GROUP_PROFILE, request)
-                
+
                 if (response is LLSDMap) {
                     val profile = GroupProfile(
                         groupId = groupId,
                         name = response.getString("name") ?: "",
                         charter = response.getString("charter") ?: "",
-                        insigniaId = response.getString("insignia_id")?.let { 
+                        insigniaId = response.getString("insignia_id")?.let {
                             try { UUID.fromString(it) } catch (e: Exception) { null }
                         },
                         founderName = response.getString("founder_name") ?: "",
-                        founderId = response.getString("founder_id")?.let { 
+                        founderId = response.getString("founder_id")?.let {
                             try { UUID.fromString(it) } catch (e: Exception) { null }
                         },
                         memberCount = response.getInt("member_count") ?: 0,
@@ -265,7 +265,7 @@ class ProfileManager(
                         membershipFee = response.getInt("membership_fee") ?: 0,
                         showInList = response.getInt("show_in_list") == 1,
                         maturePublish = response.getInt("mature_content") == 1,
-                        ownerRole = response.getString("owner_role_id")?.let { 
+                        ownerRole = response.getString("owner_role_id")?.let {
                             try { UUID.fromString(it) } catch (e: Exception) { null }
                         },
                         roles = emptyList(),
@@ -304,7 +304,7 @@ class ProfileManager(
             }
         }
     }
-    
+
     /**
      * Join a group
      */
@@ -316,7 +316,7 @@ class ProfileManager(
                     this["group_id"] = LLSDString(groupId.toString())
                     this["action"] = LLSDString("join")
                 }
-                
+
                 val response = capabilityManager.request(CapabilityManager.CAP_GROUP_MEMBER_DATA, request)
                 if (response != null) {
                     Log.i(TAG, "Successfully joined group $groupId")
@@ -331,7 +331,7 @@ class ProfileManager(
             }
         }
     }
-    
+
     /**
      * Leave a group
      */
@@ -343,7 +343,7 @@ class ProfileManager(
                     this["group_id"] = LLSDString(groupId.toString())
                     this["action"] = LLSDString("leave")
                 }
-                
+
                 val response = capabilityManager.request(CapabilityManager.CAP_GROUP_MEMBER_DATA, request)
                 if (response != null) {
                     Log.i(TAG, "Successfully left group $groupId")
@@ -358,7 +358,7 @@ class ProfileManager(
             }
         }
     }
-    
+
     /**
      * Send friendship request (via ImprovedInstantMessage with dialog type 38)
      * Note: This should typically be handled by FriendsManager which has UDP access
@@ -372,7 +372,7 @@ class ProfileManager(
                     this["dialog"] = LLSDInteger(38)  // IM_FRIENDSHIP_OFFERED
                     this["message"] = LLSDString(message)
                 }
-                
+
                 val response = capabilityManager.request(CapabilityManager.CAP_CHAT_SEND, request)
                 Log.i(TAG, "Sent friendship offer to $agentId")
                 response != null
@@ -382,7 +382,7 @@ class ProfileManager(
             }
         }
     }
-    
+
     /**
      * Accept friendship
      */
@@ -395,7 +395,7 @@ class ProfileManager(
                     this["transaction_id"] = LLSDString(transactionId.toString())
                     this["dialog"] = LLSDInteger(39)  // IM_FRIENDSHIP_ACCEPTED
                 }
-                
+
                 val response = capabilityManager.request(CapabilityManager.CAP_CHAT_SEND, request)
                 Log.i(TAG, "Accepted friendship from $agentId")
                 response != null
@@ -405,7 +405,7 @@ class ProfileManager(
             }
         }
     }
-    
+
     /**
      * Decline friendship
      */
@@ -418,7 +418,7 @@ class ProfileManager(
                     this["transaction_id"] = LLSDString(transactionId.toString())
                     this["dialog"] = LLSDInteger(40)  // IM_FRIENDSHIP_DECLINED
                 }
-                
+
                 val response = capabilityManager.request(CapabilityManager.CAP_CHAT_SEND, request)
                 Log.i(TAG, "Declined friendship from $agentId")
                 response != null
@@ -428,7 +428,7 @@ class ProfileManager(
             }
         }
     }
-    
+
     /**
      * Remove friend
      */
@@ -439,7 +439,7 @@ class ProfileManager(
                 val request = LLSDMap().apply {
                     this["friend_id"] = LLSDString(agentId.toString())
                 }
-                
+
                 val response = capabilityManager.request(CapabilityManager.CAP_FRIENDSHIP_TERMINATE, request)
                 Log.i(TAG, "Removed friend $agentId")
                 response != null
@@ -449,7 +449,7 @@ class ProfileManager(
             }
         }
     }
-    
+
     fun shutdown() {
         scope.cancel()
     }

@@ -82,7 +82,7 @@ template <typename genType>
 static int test_ctor()
 {
 	typedef typename genType::value_type T;
-	
+
 	int Error = 0;
 
 	genType const A = genType(1);
@@ -187,30 +187,30 @@ int main()
 	Error += test_operators<glm::u16vec1>();
 	Error += test_operators<glm::u32vec1>();
 	Error += test_operators<glm::u64vec1>();
-	
+
 	Error += test_ctor<glm::uvec1>();
 	Error += test_ctor<glm::u8vec1>();
 	Error += test_ctor<glm::u16vec1>();
 	Error += test_ctor<glm::u32vec1>();
 	Error += test_ctor<glm::u64vec1>();
-	
+
 	Error += test_size<glm::uvec1>();
 	Error += test_size<glm::u8vec1>();
 	Error += test_size<glm::u16vec1>();
 	Error += test_size<glm::u32vec1>();
 	Error += test_size<glm::u64vec1>();
-	
+
 	Error += test_relational<glm::uvec1>();
 	Error += test_relational<glm::u8vec1>();
 	Error += test_relational<glm::u16vec1>();
 	Error += test_relational<glm::u32vec1>();
 	Error += test_relational<glm::u64vec1>();
-	
+
 	Error += test_constexpr<glm::uvec1>();
 	Error += test_constexpr<glm::u8vec1>();
 	Error += test_constexpr<glm::u16vec1>();
 	Error += test_constexpr<glm::u32vec1>();
 	Error += test_constexpr<glm::u64vec1>();
-	
+
 	return Error;
 }

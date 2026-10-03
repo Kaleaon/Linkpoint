@@ -23,14 +23,14 @@ class LLSDBinaryTest {
         void testParseSimpleValues() throws Exception {
             // Test undefined
             assertBinaryParses(new byte[]{(byte)'!'}, "");
-            
+
             // Test booleans
             assertBinaryParses(new byte[]{(byte)'1'}, true);
             assertBinaryParses(new byte[]{(byte)'0'}, false);
-            
+
             // Test integer (42 as big-endian)
             assertBinaryParses(new byte[]{(byte)'i', 0, 0, 0, 42}, 42);
-            
+
             // Test string
             String testString = "hello";
             byte[] stringData = testString.getBytes(StandardCharsets.UTF_8);
@@ -49,7 +49,7 @@ class LLSDBinaryTest {
             byte[] data = new byte[headerBytes.length + 1];
             System.arraycopy(headerBytes, 0, data, 0, headerBytes.length);
             data[headerBytes.length] = (byte)'1'; // true value
-            
+
             try (InputStream input = new ByteArrayInputStream(data)) {
                 LLSDBinaryParser parser = new LLSDBinaryParser();
                 LLSD result = parser.parse(input);
@@ -66,15 +66,15 @@ class LLSDBinaryTest {
             builder.write('i'); builder.write(new byte[]{0, 0, 0, 2}); // integer 2
             builder.write('i'); builder.write(new byte[]{0, 0, 0, 3}); // integer 3
             builder.write(']'); // array end
-            
+
             try (InputStream input = new ByteArrayInputStream(builder.toByteArray())) {
                 LLSDBinaryParser parser = new LLSDBinaryParser();
                 LLSD result = parser.parse(input);
-                
+
                 assertTrue(result.getContent() instanceof List);
                 @SuppressWarnings("unchecked")
                 List<Object> list = (List<Object>) result.getContent();
-                
+
                 assertEquals(3, list.size());
                 assertEquals(1, list.get(0));
                 assertEquals(2, list.get(1));
@@ -87,28 +87,28 @@ class LLSDBinaryTest {
         void testParseBinaryMap() throws Exception {
             ByteArrayOutputStream builder = new ByteArrayOutputStream();
             builder.write('{'); // map begin
-            
+
             // Key-value pair: "name" -> "John"
             builder.write('k'); // key marker
             byte[] nameKey = "name".getBytes(StandardCharsets.UTF_8);
             builder.write(new byte[]{0, 0, 0, 4}); // key length
             builder.write(nameKey);
-            
+
             builder.write('s'); // string marker
             byte[] johnValue = "John".getBytes(StandardCharsets.UTF_8);
             builder.write(new byte[]{0, 0, 0, 4}); // value length
             builder.write(johnValue);
-            
+
             builder.write('}'); // map end
-            
+
             try (InputStream input = new ByteArrayInputStream(builder.toByteArray())) {
                 LLSDBinaryParser parser = new LLSDBinaryParser();
                 LLSD result = parser.parse(input);
-                
+
                 assertTrue(result.getContent() instanceof Map);
                 @SuppressWarnings("unchecked")
                 Map<String, Object> map = (Map<String, Object>) result.getContent();
-                
+
                 assertEquals("John", map.get("name"));
             }
         }
@@ -141,9 +141,9 @@ class LLSDBinaryTest {
             String testString = "hello";
             LLSD llsd = new LLSD(testString);
             LLSDBinarySerializer serializer = new LLSDBinarySerializer();
-            
+
             byte[] result = serializer.serialize(llsd, false); // without header
-            
+
             assertEquals((byte)'s', result[0]); // string marker
             // Check length (big-endian)
             assertEquals(0, result[1]);
@@ -160,17 +160,17 @@ class LLSDBinaryTest {
         void testSerializeWithHeader() throws Exception {
             LLSD llsd = new LLSD(true);
             LLSDBinarySerializer serializer = new LLSDBinarySerializer();
-            
+
             byte[] result = serializer.serialize(llsd, true); // with header
-            
+
             String header = "<?llsd/binary?>";
             byte[] headerBytes = header.getBytes(StandardCharsets.US_ASCII);
-            
+
             // Check header
             for (int i = 0; i < headerBytes.length; i++) {
                 assertEquals(headerBytes[i], result[i]);
             }
-            
+
             // Check value
             assertEquals((byte)'1', result[headerBytes.length]);
         }
@@ -181,11 +181,11 @@ class LLSDBinaryTest {
             List<Object> array = Arrays.asList(1, 2, 3);
             LLSD llsd = new LLSD(array);
             LLSDBinarySerializer serializer = new LLSDBinarySerializer();
-            
+
             byte[] result = serializer.serialize(llsd, false);
-            
+
             assertEquals((byte)'[', result[0]); // array begin
-            
+
             // Check that it contains integer markers and values
             boolean foundArrayEnd = false;
             for (byte b : result) {
@@ -202,18 +202,18 @@ class LLSDBinaryTest {
         void testSerializeMap() throws Exception {
             Map<String, Object> map = new HashMap<>();
             map.put("test", "value");
-            
+
             LLSD llsd = new LLSD(map);
             LLSDBinarySerializer serializer = new LLSDBinarySerializer();
-            
+
             byte[] result = serializer.serialize(llsd, false);
-            
+
             assertEquals((byte)'{', result[0]); // map begin
-            
+
             // Should contain key marker
             boolean foundKeyMarker = false;
             boolean foundMapEnd = false;
-            
+
             for (byte b : result) {
                 if (b == (byte)'k') {
                     foundKeyMarker = true;
@@ -222,7 +222,7 @@ class LLSDBinaryTest {
                     foundMapEnd = true;
                 }
             }
-            
+
             assertTrue(foundKeyMarker, "Map should contain key marker 'k'");
             assertTrue(foundMapEnd, "Map should end with '}' marker");
         }
@@ -230,7 +230,7 @@ class LLSDBinaryTest {
         private void assertSerializesToBinary(Object value, byte[] expectedBinary) throws Exception {
             LLSD llsd = new LLSD(value);
             LLSDBinarySerializer serializer = new LLSDBinarySerializer();
-            
+
             byte[] result = serializer.serialize(llsd, false); // without header
             assertArrayEquals(expectedBinary, result);
         }
@@ -246,22 +246,22 @@ class LLSDBinaryTest {
             Object[] testValues = {
                 true, false, 42, 3.14159, "hello world", ""
             };
-            
+
             for (Object originalValue : testValues) {
                 // Serialize
                 LLSD originalLlsd = new LLSD(originalValue);
                 LLSDBinarySerializer serializer = new LLSDBinarySerializer();
                 byte[] binaryData = serializer.serialize(originalLlsd, false);
-                
+
                 // Parse back
                 LLSDBinaryParser parser = new LLSDBinaryParser();
                 LLSD parsedLlsd;
                 try (InputStream input = new ByteArrayInputStream(binaryData)) {
                     parsedLlsd = parser.parse(input);
                 }
-                
+
                 // Verify
-                assertEquals(originalValue, parsedLlsd.getContent(), 
+                assertEquals(originalValue, parsedLlsd.getContent(),
                     "Round-trip failed for value: " + originalValue);
             }
         }
@@ -274,32 +274,32 @@ class LLSDBinaryTest {
             originalData.put("age", 30);
             originalData.put("active", true);
             originalData.put("score", 95.5);
-            
+
             List<Object> items = Arrays.asList("item1", "item2", "item3");
             originalData.put("items", items);
-            
+
             // Serialize
             LLSD originalLlsd = new LLSD(originalData);
             LLSDBinarySerializer serializer = new LLSDBinarySerializer();
             byte[] binaryData = serializer.serialize(originalLlsd, true); // with header
-            
+
             // Parse back
             LLSDBinaryParser parser = new LLSDBinaryParser();
             LLSD parsedLlsd;
             try (InputStream input = new ByteArrayInputStream(binaryData)) {
                 parsedLlsd = parser.parse(input);
             }
-            
+
             // Verify
             assertTrue(parsedLlsd.getContent() instanceof Map);
             @SuppressWarnings("unchecked")
             Map<String, Object> parsedData = (Map<String, Object>) parsedLlsd.getContent();
-            
+
             assertEquals("Test User", parsedData.get("name"));
             assertEquals(30, parsedData.get("age"));
             assertEquals(true, parsedData.get("active"));
             assertEquals(95.5, parsedData.get("score"));
-            
+
             assertTrue(parsedData.get("items") instanceof List);
             @SuppressWarnings("unchecked")
             List<Object> parsedItems = (List<Object>) parsedData.get("items");
@@ -311,19 +311,19 @@ class LLSDBinaryTest {
         @DisplayName("Should round-trip binary data")
         void testBinaryDataRoundTrip() throws Exception {
             byte[] originalBinary = "Hello, Binary World! 🌍".getBytes(StandardCharsets.UTF_8);
-            
+
             // Serialize
             LLSD originalLlsd = new LLSD(originalBinary);
             LLSDBinarySerializer serializer = new LLSDBinarySerializer();
             byte[] binaryData = serializer.serialize(originalLlsd, false);
-            
+
             // Parse back
             LLSDBinaryParser parser = new LLSDBinaryParser();
             LLSD parsedLlsd;
             try (InputStream input = new ByteArrayInputStream(binaryData)) {
                 parsedLlsd = parser.parse(input);
             }
-            
+
             // Verify
             assertTrue(parsedLlsd.getContent() instanceof byte[]);
             byte[] parsedBinary = (byte[]) parsedLlsd.getContent();
@@ -341,11 +341,11 @@ class LLSDBinaryTest {
             // Empty array
             LLSD emptyArray = new LLSD(new ArrayList<>());
             assertBinaryRoundTrip(emptyArray);
-            
+
             // Empty map
             LLSD emptyMap = new LLSD(new HashMap<>());
             assertBinaryRoundTrip(emptyMap);
-            
+
             // Empty binary data
             LLSD emptyBinary = new LLSD(new byte[0]);
             assertBinaryRoundTrip(emptyBinary);
@@ -359,7 +359,7 @@ class LLSDBinaryTest {
             for (int i = 0; i < 10000; i++) {
                 largeString.append("This is line ").append(i).append("\n");
             }
-            
+
             LLSD llsd = new LLSD(largeString.toString());
             assertBinaryRoundTrip(llsd);
         }
@@ -367,19 +367,19 @@ class LLSDBinaryTest {
         private void assertBinaryRoundTrip(LLSD originalLlsd) throws Exception {
             LLSDBinarySerializer serializer = new LLSDBinarySerializer();
             byte[] binaryData = serializer.serialize(originalLlsd, true);
-            
+
             LLSDBinaryParser parser = new LLSDBinaryParser();
             LLSD parsedLlsd;
             try (InputStream input = new ByteArrayInputStream(binaryData)) {
                 parsedLlsd = parser.parse(input);
             }
-            
+
             // For complex objects, we verify the type and basic structure
             Object original = originalLlsd.getContent();
             Object parsed = parsedLlsd.getContent();
-            
+
             assertEquals(original.getClass(), parsed.getClass());
-            
+
             if (original instanceof String) {
                 assertEquals(original, parsed);
             } else if (original instanceof byte[]) {

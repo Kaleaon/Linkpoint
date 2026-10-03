@@ -9,7 +9,7 @@ public enum MeshIndex {
     MESH_ID_EYEBALL_LEFT,
     MESH_ID_EYEBALL_RIGHT,
     MESH_ID_SKIRT;
-    
+
     public static final MeshIndex[] VALUES = valuesCustom();
 
     /* renamed from: values  reason: to resolve conflict with enum method */

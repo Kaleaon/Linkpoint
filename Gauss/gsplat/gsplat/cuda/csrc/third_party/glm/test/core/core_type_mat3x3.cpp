@@ -52,8 +52,8 @@ static int test_inverse()
 
 	{
 		glm::mat3 const Matrix(
-			glm::vec3(0.6f, 0.2f, 0.3f), 
-			glm::vec3(0.2f, 0.7f, 0.5f), 
+			glm::vec3(0.6f, 0.2f, 0.3f),
+			glm::vec3(0.2f, 0.7f, 0.5f),
 			glm::vec3(0.3f, 0.5f, 0.7f));
 		glm::mat3 const Inverse = glm::inverse(Matrix);
 		glm::mat3 const Identity = Matrix * Inverse;
@@ -65,8 +65,8 @@ static int test_inverse()
 
 	{
 		glm::mat3 const Matrix(
-			glm::vec3(0.6f, 0.2f, 0.3f), 
-			glm::vec3(0.2f, 0.7f, 0.5f), 
+			glm::vec3(0.6f, 0.2f, 0.3f),
+			glm::vec3(0.2f, 0.7f, 0.5f),
 			glm::vec3(0.3f, 0.5f, 0.7f));
 		glm::mat3 const Identity = Matrix / Matrix;
 
@@ -87,9 +87,9 @@ static int test_ctr()
 		glm::vec3(0, 1, 2),
 		glm::vec3(3, 4, 5),
 		glm::vec3(6, 7, 8));
-	
+
 	glm::mat3x3 m1{0, 1, 2, 3, 4, 5, 6, 7, 8};
-	
+
 	glm::mat3x3 m2{
 		{0, 1, 2},
 		{3, 4, 5},
@@ -102,7 +102,7 @@ static int test_ctr()
 		{0, 1, 2, 3, 4, 5, 6, 7, 8},
 		{0, 1, 2, 3, 4, 5, 6, 7, 8}
 	};
-	
+
 	std::vector<glm::mat3x3> v2{
 		{
 			{ 0, 1, 2},
@@ -115,9 +115,9 @@ static int test_ctr()
 			{ 6, 7, 8}
 		}
 	};
-	
+
 #endif//GLM_HAS_INITIALIZER_LISTS
-	
+
 	return Error;
 }
 
@@ -140,7 +140,7 @@ namespace cast
 	int test()
 	{
 		int Error = 0;
-		
+
 		Error += entry<glm::mat2x2>();
 		Error += entry<glm::mat2x3>();
 		Error += entry<glm::mat2x4>();
@@ -194,4 +194,3 @@ int main()
 
 	return Error;
 }
-

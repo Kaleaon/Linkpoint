@@ -36,36 +36,36 @@ import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Fixed UDP Connection Handler for Second Life Protocol
- * 
+ *
  * This is the primary UDP connection implementation used throughout Linkpoint.
  * It provides comprehensive packet handling with full diagnostic capabilities
  * for debugging connection issues.
- * 
+ *
  * ## History & Design Decision
- * 
+ *
  * This class supersedes the original `UDPConnection.kt` implementation.
  * The "Fixed" suffix reflects the architectural improvements made:
  * - Better mobile network compatibility using NIO DatagramChannel
  * - Integrated MessageRouter for proper message dispatch
  * - EventBus integration for reactive updates
  * - Comprehensive diagnostic capabilities for debugging
- * 
+ *
  * The original UDPConnection.kt was removed from the codebase as it was
  * no longer used and this implementation covers all its functionality
  * with improved reliability and diagnostics.
- * 
+ *
  * ## Architecture Overview
- * 
+ *
  * This class implements the Second Life UDP protocol with proper message routing
  * and event bus integration, following Linkpoint architecture patterns.
- * 
+ *
  * ## Key Features
- * 
+ *
  * ### Message Routing
  * - Integrated MessageRouter for proper message handling
  * - EventBus integration for reactive updates across the app
  * - Support for all SL message frequencies (high, medium, low)
- * 
+ *
  * ### Diagnostic Capabilities (Critical for Debugging)
  * - **Full Packet Logging**: Records COMPLETE packet data (all bytes) for every packet
  *   - Enables full protocol diagnosis by capturing entire packet contents
@@ -78,35 +78,35 @@ import java.util.concurrent.atomic.AtomicLong
  *   - Local/remote addresses and ports
  *   - Connection attempt and last activity timestamps
  *   - Last error information for troubleshooting
- * 
+ *
  * ### Mobile-First Design
  * - Efficient resource usage with non-blocking NIO
  * - Battery-conscious operations with selective logging
  * - Memory-efficient buffering with bounded queues
  * - Configurable logging overhead via companion object constants
- * 
+ *
  * ## Usage
- * 
+ *
  * This class is instantiated by LinkpointApp and shared across managers.
  * Packet history and diagnostics are accessed via:
  * - `getPacketHistory()` - Recent packet events with FULL hex dumps
  * - `getSocketDetails()` - Connection state and timing
  * - `getDiagnostics()` - Overall connection diagnostics
  * - `getMessageStatistics()` - Message type counts and timing
- * 
+ *
  * ## Packet Data Logging
- * 
+ *
  * FULL raw packet data is logged for diagnostic purposes:
  * - Each sent packet: message ID, sequence number, size, COMPLETE hex dump
  * - Each received packet: message ID, sequence number, size, COMPLETE hex dump
  * - Failed operations include error messages
- * 
+ *
  * Full packet data is now captured by default for complete protocol diagnosis.
  * The number of packets kept in history is configurable via [DEFAULT_PACKET_HISTORY_SIZE].
- * 
+ *
  * This addresses the debugging need identified in issue reports:
  * "Not enough data is being gathered, we need raw input and output to understand"
- * 
+ *
  * @see EnhancedPacketLogger for detailed packet statistics
  * @see MessageRouter for message dispatch logic
  * @see DebugReportService for how diagnostics are displayed
@@ -119,25 +119,25 @@ class UDPConnectionFixed(
     private val reliabilitySupervisor: ReliabilitySupervisor = ReliabilitySupervisor(),
     private val packetDiagnosticsRecorder: PacketDiagnosticsRecorder<PacketHistoryEntry> = PacketDiagnosticsRecorder()
 ) {
-    
+
     companion object {
         private const val TAG = "UDPConnectionFixed"
-        
+
         /** Maximum UDP datagram size - from LinkpointConstants */
         private val BUFFER_SIZE = TransportConstants.BUFFER_SIZE
-        
+
         /** Timeout for NIO selector operations - from LinkpointConstants (1 second idle interval) */
         private val SELECTOR_TIMEOUT_MS = TransportConstants.SELECTOR_TIMEOUT_MS
-        
-        /** 
+
+        /**
          * Packet header size: flags (1) + sequence (4) + extra (1) = 6 bytes
          * This is constant across all SL UDP packets - from LinkpointConstants
          */
         private val PACKET_HEADER_SIZE = TransportConstants.PACKET_HEADER_SIZE
-        
+
         /**
          * Frequency bases for message ID encoding (matching SL protocol)
-         * 
+         *
          * Second Life uses three message frequency ranges:
          * - High frequency: Single byte (0x00-0xFE), used for frequent messages like ObjectUpdate
          * - Medium frequency: 0xFF + byte, decoded as (byte | 65280)
@@ -145,40 +145,40 @@ class UDPConnectionFixed(
          */
         private const val MEDIUM_FREQUENCY_BASE = 65280  // 0xFF00
         private const val LOW_FREQUENCY_BASE = -65536    // 0xFFFF0000 as signed Int32
-        
+
         /** Sentinel value for invalid/unparseable message IDs */
         private const val INVALID_MESSAGE_ID = Int.MIN_VALUE
-        
+
         // ==================== CONFIGURABLE PACKET LOGGING CONSTANTS ====================
         // These control memory usage and overhead for packet diagnostic features.
         // Full packet data is captured to enable complete protocol diagnosis.
-        
+
         /**
          * Maximum number of packet events to keep in history.
          * Higher values provide more diagnostic data but use more memory.
          * Default of 50 provides sufficient history for debugging connection issues.
          */
         const val DEFAULT_PACKET_HISTORY_SIZE = DiagnosticsConstants.DEFAULT_PACKET_HISTORY_SIZE
-        
+
         /**
          * Whether to log full packet data or just a preview.
          * When true (default), all packet bytes are logged for complete diagnosis.
          * Set to false to reduce log verbosity in production.
          */
         const val LOG_FULL_PACKET_DATA = DiagnosticsConstants.LOG_FULL_PACKET_DATA
-        
+
         // ==================== LUMIYA TIMING CONSTANTS ====================
         // These critical values come from the reference viewer's proven mobile implementation
-        
+
         /** Message timeout from the reference viewer (5 seconds) */
         private val MESSAGE_TIMEOUT_MS = LinkpointConstants.MESSAGE_TIMEOUT_MS
-        
+
         /** Maximum retries from the reference viewer (3 retries) */
         private val MESSAGE_MAX_RETRIES = LinkpointConstants.MESSAGE_MAX_RETRIES
-        
+
         /** Time before sending ping from the reference viewer (10 seconds) */
         private val NEED_PING_TIMEOUT_MS = LinkpointConstants.NEED_PING_TIMEOUT_MS
-        
+
         /** Unanswered pings before disconnect from the reference viewer (3) */
         private val UNANSWERED_PINGS_DISCONNECT = LinkpointConstants.UNANSWERED_PINGS_DISCONNECT
 
@@ -195,7 +195,7 @@ class UDPConnectionFixed(
          * ObjectUpdateCached notifications arriving in the same render tick.
          */
         private const val REQUEST_MULTIPLE_OBJECTS_DEDUP_WINDOW_MS = 250L
-        
+
         /**
          * Threshold for triggering reconnection due to consecutive send errors.
          * Android socket errors like "Operation not permitted" indicate socket invalidation.
@@ -239,14 +239,14 @@ class UDPConnectionFixed(
          */
         const val POST_RECONNECT_VERIFY_MS = ReliabilityConstants.POST_RECONNECT_VERIFY_MS
     }
-    
+
     // Connection parameters
     private var simIP: String = ""
     private var simPort: Int = 0
     private var circuitCode: Int = 0
     private var sessionId: UUID = UUID(0, 0)
     private var agentId: UUID = UUID(0, 0)
-    
+
     // NIO components.
     //
     // @Volatile is required so the I/O thread (which re-reads these fields
@@ -257,7 +257,7 @@ class UDPConnectionFixed(
     @Volatile private var datagramChannel: DatagramChannel? = null
     @Volatile private var selector: Selector? = null
     @Volatile private var selectionKey: SelectionKey? = null
-    
+
     // State
     private val _isConnected = MutableStateFlow(false)
     val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
@@ -269,7 +269,7 @@ class UDPConnectionFixed(
 
     // Message routing
     private val messageRouter = MessageRouter()
-    
+
     // Coroutine scope. Used for off-thread suspending work (reconnect retry,
     // periodic AgentUpdate scheduler, EventBus publishes). The I/O thread owns
     // the DatagramChannel; nothing in this scope writes to the channel directly.
@@ -285,7 +285,7 @@ class UDPConnectionFixed(
     // Agent update job
     private var agentUpdateJob: Job? = null
     private val movementLifecycleOwner = AtomicReference<String?>(null)
-    
+
     // AgentUpdate cadence (docs/lumiya-port/README.md item 5).
     // Active cadence matches the SL viewer reference (~10 Hz). When the avatar
     // is idle (no movement controlFlags and no look-at change), back off to a
@@ -299,13 +299,13 @@ class UDPConnectionFixed(
     // ==================== STATISTICS & DIAGNOSTICS ====================
     // These fields track packet activity for debug reports and diagnostic purposes.
     // Raw packet data including hex dumps are captured to enable protocol debugging.
-    
+
     /** Total packets received from simulator */
     private val packetsReceived = AtomicInteger(0)
-    
+
     /** Total packets sent to simulator */
     private val packetsSent = AtomicInteger(0)
-    
+
     /** Total bytes received from simulator */
     private val bytesReceived = AtomicLong(0)
 
@@ -318,10 +318,10 @@ class UDPConnectionFixed(
      * in steadily or as a burst followed by silence — these can.
      */
     private val inboundRateTracker = InboundRateTracker()
-    
+
     /** Count of messages successfully routed to handlers */
     private val messagesRouted = AtomicInteger(0)
-    
+
     /** Timestamp of last packet received (for timing diagnostics) */
     @Volatile private var lastReceiveTime = 0L
 
@@ -388,32 +388,32 @@ class UDPConnectionFixed(
      * tell "the new socket is healthy" from "the new socket is silent".
      */
     private val postReconnectPacketsReceived = AtomicInteger(0)
-    
+
     /** Timestamp when connection was attempted (for connection duration) */
     private var connectionAttemptTime = 0L
     private val connectAttemptCount = AtomicInteger(0)
-    
+
     /** Last connection error message (for troubleshooting) */
     private var lastConnectionError: String? = null
-    
+
     /** Local bind address for socket diagnostics */
     private var localBindAddress: String? = null
-    
+
     /** Local bind port for socket diagnostics */
     private var localBindPort: Int = 0
-    
+
     /** Count of each message type received (for protocol analysis) */
     private val messageTypeCounts = java.util.concurrent.ConcurrentHashMap<String, AtomicInteger>()
-    
+
     /** Last time each message type was received (for protocol analysis) */
     private val lastMessageTimes = java.util.concurrent.ConcurrentHashMap<String, Long>()
-    
+
     /** Count of packets that were resent due to ACK timeout */
     private val packetsResentCount = AtomicInteger(0)
-    
+
     // ==================== RELIABLE MESSAGING SUPPORT ====================
     // Critical for SL protocol: ACKs must be sent for reliable packets or server will resend/drop connection
-    
+
     /**
      * Queue of sequence numbers from reliable packets that need to be ACKed.
      * When we receive a packet with the reliable flag (0x40), we must acknowledge it.
@@ -543,7 +543,7 @@ class UDPConnectionFixed(
     @Volatile
     var useCircuitCodeSequence: Int = -1
         private set
-    
+
     /**
      * Internal callback info with timeout handling.
      * Tracks message details for ACK/timeout callbacks.
@@ -555,13 +555,13 @@ class UDPConnectionFixed(
         var sentTime: Long,
         var retryCount: Int = 0
     )
-    
+
     /**
      * Maximum number of ACKs to include in a single PacketAck message.
      * Based on SL protocol limits .
      */
     private val MAX_ACKS_PER_PACKET = 255
-    
+
     /**
      * Interval for sending pending ACKs (milliseconds).
      * ACKs are typically sent every 100ms or piggy-backed on outgoing packets.
@@ -585,7 +585,7 @@ class UDPConnectionFixed(
      * doesn't trip it and stays on the 100ms coalescing path.
      */
     private val ACK_FLUSH_QUEUE_THRESHOLD = 8
-    
+
     /**
      * Last time ACKs were sent (for throttling standalone ACK packets).
      */
@@ -593,24 +593,24 @@ class UDPConnectionFixed(
 
     // ==================== SEND ERROR TRACKING FOR RECONNECTION ====================
     // Track consecutive send failures to detect socket invalidation (e.g., network change)
-    
+
     /**
      * Number of consecutive send errors encountered.
      * When this exceeds [CONSECUTIVE_ERROR_THRESHOLD], we should trigger reconnection.
      */
     private val consecutiveSendErrors = AtomicInteger(0)
-    
+
     /**
      * Error messages that indicate socket invalidation requiring reconnection.
      */
     private val SOCKET_INVALIDATION_ERRORS = listOf(
         "operation not permitted",
-        "network is unreachable", 
+        "network is unreachable",
         "connection refused",
         "broken pipe",
         "socket closed"
     )
-    
+
     /**
      * Callback for notifying when reconnection is needed due to send failures.
      * Set by LinkpointApp to trigger the reconnection flow.
@@ -727,31 +727,31 @@ class UDPConnectionFixed(
                 "networkStateListener threw on $transition: ${e.message}")
         }
     }
-    
+
     // ==================== PACKET HISTORY FOR RAW DATA LOGGING ====================
     // Critical for debugging: captures raw packet data with hex dumps.
     // This addresses the requirement: "we need raw input and output to understand"
-    
-    /** 
+
+    /**
      * Circular buffer of recent packet events including raw hex data.
      * Used by DebugReportService to show packet history in debug reports.
      * Each entry contains: timestamp, type, message ID, size, sequence number, hex preview
      * Size is controlled by [DEFAULT_PACKET_HISTORY_SIZE]
      */
     private val recentPacketHistory = java.util.concurrent.ConcurrentLinkedQueue<PacketHistoryEntry>()
-    
-    /** 
+
+    /**
      * Sequence number for outgoing packets.
      * Incremented for each packet sent, used for reliable delivery ACK tracking.
      */
     private val sequenceNumber = AtomicInteger(0)
-    
+
     // Control flags for movement
     private var controlFlags: Int = 0
-    
+
     // Current look-at direction
     private var currentLookAt: FloatArray = floatArrayOf(128f, 128f, 25f)
-    
+
     // Registered message handlers
     private val messageHandlers = java.util.concurrent.ConcurrentHashMap<Int, MessageHandler>()
 
@@ -761,15 +761,15 @@ class UDPConnectionFixed(
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Long>?): Boolean = size > 64
     }
     private val requestMultipleObjectsLock = Any()
-    
+
     // ==================== INTERNAL HANDLER REGISTRATION ====================
     // Register internal handlers that must be processed by UDPConnectionFixed itself.
     // This is called from init block to ensure handlers are registered before any packets arrive.
-    
+
     init {
         registerInternalHandlers()
     }
-    
+
     /**
      * Register internal message handlers for protocol messages that UDPConnectionFixed
      * must handle itself, such as PacketAck for reliable messaging.
@@ -783,19 +783,19 @@ class UDPConnectionFixed(
             }
             override fun getPriority(): Int = Int.MAX_VALUE // Highest priority - process ACKs first
         })
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, 
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
             "✓ Internal handlers registered (PacketAck)")
     }
-    
+
     /**
      * Handle incoming PacketAck messages from the server.
-     * 
+     *
      * PacketAck message format (High Frequency, ID = -5 / 0xFB):
      * - Header: flags (1) + seq (4) + extra (1) = 6 bytes
      * - Message ID: 1 byte (0xFB = -5)
      * - Packets block count: 1 byte
      * - For each packet: sequence number (4 bytes, little-endian)
-     * 
+     *
      * @param data The raw packet data including header
      * @return true if handled successfully, false on error
      */
@@ -815,19 +815,19 @@ class UDPConnectionFixed(
                     "PacketAck: Failed to decode message ID")
                 return false
             }
-            
+
             val (messageId, payloadOffset) = decodeResult
-            
+
             // Minimum size: payloadOffset + count byte (1)
             if (data.size < payloadOffset + 1) {
                 NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP,
                     "PacketAck too short: ${data.size} bytes (payload at $payloadOffset)")
                 return false
             }
-            
+
             // Extract packets block count (first byte after message ID)
             val packetsBlockCount = data[payloadOffset].toInt() and 0xFF
-            
+
             // Calculate expected size: payloadOffset + count (1) + (4 bytes per ACK)
             val expectedSize = payloadOffset + 1 + (packetsBlockCount * 4)
             if (data.size < expectedSize) {
@@ -835,10 +835,10 @@ class UDPConnectionFixed(
                     "PacketAck truncated: ${data.size} bytes (expected $expectedSize for $packetsBlockCount ACKs)")
                 return false
             }
-            
+
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
                 "📎 Received PacketAck with $packetsBlockCount ACKed packets (messageId=$messageId)")
-            
+
             // Parse each ACKed sequence number and invoke callbacks
             var offset = payloadOffset + 1 // Start after message ID + count byte
             for (i in 0 until packetsBlockCount) {
@@ -847,18 +847,18 @@ class UDPConnectionFixed(
                         "PacketAck truncated at ACK $i (need 4 bytes, have ${data.size - offset})")
                     break
                 }
-                
+
                 // Read 4-byte little-endian unsigned integer as sequence number
                 val seqNum = ((data[offset].toInt() and 0xFF)) or
                             ((data[offset + 1].toInt() and 0xFF) shl 8) or
                             ((data[offset + 2].toInt() and 0xFF) shl 16) or
                             ((data[offset + 3].toInt() and 0xFF) shl 24)
                 offset += 4
-                
+
                 // Process the ACK - this invokes any pending callbacks
                 processReceivedAck(seqNum)
             }
-            
+
             return true
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
@@ -867,7 +867,7 @@ class UDPConnectionFixed(
             return false
         }
     }
-    
+
     /**
      * Constructor with connection parameters
      */
@@ -877,7 +877,7 @@ class UDPConnectionFixed(
         this.circuitCode = circuitCode
         // Note: registerInternalHandlers() is called automatically by init block
     }
-    
+
     /**
      * Configure connection parameters
      */
@@ -886,7 +886,7 @@ class UDPConnectionFixed(
         this.simPort = simPort
         this.circuitCode = circuitCode
     }
-    
+
     /**
      * Set session information
      */
@@ -894,17 +894,17 @@ class UDPConnectionFixed(
         this.sessionId = sessionId
         this.agentId = agentId
     }
-    
+
     /**
      * Get the agent ID for this connection
      */
     fun getAgentId(): UUID = agentId
-    
+
     /**
      * Get the session ID for this connection
      */
     fun getSessionId(): UUID = sessionId
-    
+
     /**
      * Get the circuit code for this connection
      */
@@ -959,7 +959,7 @@ class UDPConnectionFixed(
     }
 
     fun getConnectAttemptCount(): Int = connectAttemptCount.get()
-    
+
     /**
      * Connect to the simulator
      */
@@ -984,12 +984,12 @@ class UDPConnectionFixed(
             connectionAttemptTime = System.currentTimeMillis()
             lastConnectionError = null
             recentPacketHistory.clear()
-            
+
             // Reset the sequence counter for a new circuit. The first packet
             // sent (UseCircuitCode) will then go out at seq=1 via incrementAndGet,
             // matching Lumiya's SLCircuit pattern.
             sequenceNumber.set(0)
-            
+
             // Reset inbound-flow watchdog state so the first observation
             // after handshake establishes the baseline (rather than tripping
             // off an old snapshot from a previous circuit).
@@ -1012,7 +1012,7 @@ class UDPConnectionFixed(
             messagesRouted.set(0)
             packetsResentCount.set(0)
             inboundRateTracker.reset()
-            
+
             // Reset timing information
             val now = System.currentTimeMillis()
             lastReceiveTime = now
@@ -1030,7 +1030,7 @@ class UDPConnectionFixed(
             lastAckSendTime = 0L
             lastPingTime.set(now)
             unansweredPings.set(0)
-            
+
             // Clear pending ACKs from previous session (they're no longer valid)
             pendingAcksToSend.clear()
 
@@ -1061,7 +1061,7 @@ class UDPConnectionFixed(
             // Clear message statistics for accurate per-session tracking
             messageTypeCounts.clear()
             lastMessageTimes.clear()
-            
+
             // Start EnhancedPacketLogger session for comprehensive tracking
             EnhancedPacketLogger.startSession()
 
@@ -1093,7 +1093,7 @@ class UDPConnectionFixed(
                 setOption(StandardSocketOptions.SO_SNDBUF, 65536)
                 connect(address)
             }
-            
+
             // Capture local bind information for diagnostics
             try {
                 val localAddr = datagramChannel?.localAddress as? InetSocketAddress
@@ -1103,34 +1103,34 @@ class UDPConnectionFixed(
             } catch (e: Exception) {
                 NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.UDP, "Could not determine local bind address: ${e.message}")
             }
-            
+
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ DatagramChannel connected to $simIP:$simPort")
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "  Channel connected: ${datagramChannel?.isConnected}")
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "  Channel open: ${datagramChannel?.isOpen}")
-            
+
             // Create selector
             selector = Selector.open()
-            
+
             // Register channel for read operations
             selectionKey = datagramChannel?.register(selector, SelectionKey.OP_READ)
-            
+
             if (selectionKey?.isValid != true) {
                 throw IllegalStateException("Selection key is not valid")
             }
-            
+
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ Selector registered for OP_READ")
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "  Selection key valid: ${selectionKey?.isValid}")
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "  Selector open: ${selector?.isOpen}")
-            
+
             // Set connected state
             _isConnected.value = true
-            
+
             // Publish connection state event
             EventBus.publish(ConnectionStateChangedEvent(
                 ConnectionState.DISCONNECTED,
                 ConnectionState.CONNECTED
             ))
-            
+
             // Start receive loop on a DEDICATED I/O thread.
             // CRITICAL FIX: Previously this ran as a coroutine that did
             // withContext(CircuitDispatcher.dispatcher) { select() }, which BLOCKED
@@ -1146,16 +1146,16 @@ class UDPConnectionFixed(
 
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "✓ Receive loop started on dedicated I/O thread")
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "=== UDP CONNECTION ESTABLISHED ===")
-            
+
             // Send initial messages
             sendUseCircuitCode()
             // Note: CompleteAgentMovement is now sent after RegionHandshake to ensure correct sequence
-            
+
             // Publish circuit established event
             EventBus.publish(CircuitEstablishedEvent(circuitCode))
-            
+
             true
-            
+
         } catch (e: Exception) {
             lastConnectionError = e.message ?: e.javaClass.simpleName
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "✗ Connection failed: ${e.message}")
@@ -1173,7 +1173,7 @@ class UDPConnectionFixed(
             false
         }
     }
-    
+
     /**
      * Blocking receive loop that runs on a dedicated thread (Lumiya pattern).
      *
@@ -1916,7 +1916,7 @@ class UDPConnectionFixed(
             }
         }
     }
-    
+
 
     /**
      * Detect the "silent socket after reconnect" pathology described in
@@ -2005,22 +2005,22 @@ class UDPConnectionFixed(
 
     /**
      * Handle PacketAck message from server
-     * 
+     *
      * PacketAck message format (High Frequency, ID = -5 / 0xFB):
      * - Header: flags (1) + seq (4) + extra (1) = 6 bytes
      * - Message ID: 1 byte (0xFB = -5)
      * - Packets block count: 1 byte
      * - For each packet being ACKed:
      *   - Sequence number: 4 bytes (unsigned int, little-endian)
-     * 
+     *
      * @param data The complete packet data including header
      * @return true if handled successfully
      */
-    
+
     /**
      * Process received ACK from server and invoke callbacks.
      * This is called when we receive a PacketAck message from the server.
-     * 
+     *
      * @param sequenceNumber The sequence number being acknowledged
      */
     private fun processReceivedAck(sequenceNumber: Int) {
@@ -2107,7 +2107,7 @@ class UDPConnectionFixed(
             recentPacketHistory.poll()
         }
     }
-    
+
     /**
      * Check for timeouts on pending reliable messages.
      * This should be called periodically to handle message timeouts.
@@ -2267,7 +2267,7 @@ class UDPConnectionFixed(
             }
         }
     }
-    
+
     /**
      * Route a message by ID to the registered app-level handlers.
      * Called by LinkpointThreadedCircuit to forward received packets.
@@ -2280,14 +2280,14 @@ class UDPConnectionFixed(
             messagesRouted.incrementAndGet()
         }
     }
-    
+
     /**
      * Extract message ID from packet using Linkpoint decoding.
-     * 
+     *
      * The packet format is:
      * - Bytes 0-5: Header (flags, sequence number, extra byte)
      * - Bytes 6+: Message ID and payload
-     * 
+     *
      * Message ID encoding:
      * - High frequency: 1 byte (values 0-254, where 255/-1 means continue to medium)
      * - Medium frequency: 2 bytes (0xFF, then value) - value | 65280
@@ -2315,42 +2315,42 @@ class UDPConnectionFixed(
         val messageStart = PACKET_HEADER_SIZE + extraHeaderLength
         return if (messageStart < data.size) messageStart else null
     }
-    
+
     /**
      * Decode message ID using Linkpoint-compatible encoding.
      * Returns Pair of (messageId, nextOffset) or null if invalid.
      */
     private fun decodeMessageIdSLProtocol(data: ByteArray, startOffset: Int): Pair<Int, Int>? {
         if (data.size <= startOffset) return null
-        
+
         var offset = startOffset
-        
+
         // First byte - check if it's 0xFF (which is -1 as signed byte)
         val b1 = data[offset].toInt() // Signed byte, -128 to 127
         offset++
-        
+
         if (b1 != -1) {
             // High frequency message - return the signed byte value directly
             // This matches the reference viewer: if (b != -1) return b;
             // e.g., 0x0C (12) = ObjectUpdate, 0xFB (-5) = PacketAck
             return Pair(b1, offset)
         }
-        
+
         // Second byte
         if (data.size <= offset) return null
         val b2 = data[offset].toInt() // Signed byte
         offset++
-        
+
         if (b2 != -1) {
             // Medium frequency message - byte OR MEDIUM_FREQUENCY_BASE
             // This matches the reference viewer: b2 | 65280
             // e.g., 0x06 (6) | 65280 = 65286 = CoarseLocationUpdate
             return Pair(b2 or MEDIUM_FREQUENCY_BASE, offset)
         }
-        
+
         // Low frequency message - next two bytes as signed short OR LOW_FREQUENCY_BASE
         if (data.size <= offset + 1) return null
-        
+
         // Big-endian to signed short conversion:
         // 1. Read two bytes as unsigned (byte3=high, byte4=low) in network/big-endian order
         // 2. Combine into a 16-bit value: (byte3 << 8) | byte4
@@ -2358,20 +2358,20 @@ class UDPConnectionFixed(
         val byte3 = data[offset].toInt() and 0xFF
         val byte4 = data[offset + 1].toInt() and 0xFF
         offset += 2
-        
+
         val shortValue = ((byte3 shl 8) or byte4).toShort().toInt()
-        
+
         // This matches the reference viewer: byteBuffer.getShort() | (-65536)
         // e.g., 0x0094 (148) | -65536 = -65388 = RegionHandshake
         return Pair(shortValue or LOW_FREQUENCY_BASE, offset)
     }
-    
+
     /**
      * Get the message router for external handler registration
      * This allows AgentCircuit and other components to register handlers
      */
     fun getMessageRouter(): MessageRouter = messageRouter
-    
+
     /**
      * Register a message handler using a lambda
      * This is a convenience method that wraps the lambda in a MessageRouter.Handler
@@ -2430,7 +2430,7 @@ class UDPConnectionFixed(
             useCircuitCodeSequence = seq
         }
     }
-    
+
     /**
      * Send CompleteAgentMovement message
      * Uses mobile-optimized packet construction
@@ -2438,7 +2438,7 @@ class UDPConnectionFixed(
     fun sendCompleteAgentMovement() {
         val identity = outboundIdentity("UDPConnectionFixed.sendCompleteAgentMovement")
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "→ Sending CompleteAgentMovement")
-        
+
         // CompleteAgentMovement message format:
         // - AgentID (16 bytes, UUID)
         // - SessionID (16 bytes, UUID)
@@ -2447,14 +2447,14 @@ class UDPConnectionFixed(
         payload.putUUID(identity.agentId)
         payload.putUUID(identity.sessionId)
         payload.putInt(identity.circuitCode ?: 0)
-        
+
         // Message ID for CompleteAgentMovement (low frequency message)
         val messageId = MessageIdRegistry.COMPLETE_AGENT_MOVEMENT
-        
+
         // Build packet with header
         sendPacket(messageId, payload.array(), reliable = true)
     }
-    
+
     /**
      * Send AgentUpdate message
      * Mobile-optimized: 10 updates/sec to balance responsiveness and battery
@@ -2464,7 +2464,7 @@ class UDPConnectionFixed(
         if (!_isConnected.value) {
             return
         }
-        
+
         // AgentUpdate message format:
         // - AgentID (16 bytes, UUID)
         // - SessionID (16 bytes, UUID)
@@ -2479,60 +2479,60 @@ class UDPConnectionFixed(
         // - ControlFlags (4 bytes, U32)
         // - Flags (1 byte)
         val payload = ByteBuffer.allocate(114).order(ByteOrder.LITTLE_ENDIAN)
-        
+
         // AgentID and SessionID
         payload.putUUID(identity.agentId)
         payload.putUUID(identity.sessionId)
-        
+
         // Body rotation (identity quaternion: x=0, y=0, z=0, w computed by server)
         payload.putFloat(0f)
         payload.putFloat(0f)
         payload.putFloat(0f)
-        
+
         // Head rotation (identity quaternion)
         payload.putFloat(0f)
         payload.putFloat(0f)
         payload.putFloat(0f)
-        
+
         // State (0 = standing)
         payload.put(0.toByte())
-        
+
         // Camera center (default position)
         payload.putFloat(128f)
         payload.putFloat(128f)
         payload.putFloat(25f)
-        
+
         // Camera look-at direction (looking forward)
         payload.putFloat(1f)
         payload.putFloat(0f)
         payload.putFloat(0f)
-        
+
         // Camera left axis
         payload.putFloat(0f)
         payload.putFloat(-1f)
         payload.putFloat(0f)
-        
+
         // Camera up axis
         payload.putFloat(0f)
         payload.putFloat(0f)
         payload.putFloat(1f)
-        
+
         // Far distance
         payload.putFloat(128f)
-        
+
         // Control flags (0 = no movement)
         payload.putInt(0)
-        
+
         // Flags
         payload.put(0.toByte())
-        
+
         // Message ID for AgentUpdate (high frequency: 4)
         val messageId = 4
-        
+
         // Build packet with header (not reliable, sent frequently)
         sendPacket(messageId, payload.array(), reliable = false)
     }
-    
+
     /**
      * Send RegionHandshakeReply message.
      * Must be sent in response to RegionHandshake from simulator.
@@ -2540,20 +2540,20 @@ class UDPConnectionFixed(
     fun sendRegionHandshakeReply(flags: Int = 0) {
         val identity = outboundIdentity("UDPConnectionFixed.sendRegionHandshakeReply")
         val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
-        
+
         // Agent ID
         payload.putUUID(identity.agentId)
-        
+
         // Session ID
         payload.putUUID(identity.sessionId)
-        
+
         // Flags (typically 0)
         payload.putInt(flags)
-        
+
         Log.d(TAG, "Sending RegionHandshakeReply")
         sendPacket(MessageIdRegistry.REGION_HANDSHAKE_REPLY, payload.array(), reliable = true, zerocoded = true)
     }
-    
+
     /**
      * Send AgentThrottle message to set bandwidth allocations.
      * Tells the simulator how much bandwidth we want for different data types.
@@ -2603,13 +2603,13 @@ class UDPConnectionFixed(
         Log.d(TAG, "Sending AgentThrottle")
         sendPacket(MessageIdRegistry.AGENT_THROTTLE, payload.array(), reliable = true)
     }
-    
+
     /**
      * Send RequestMultipleObjects message to request full object data
-     * 
+     *
      * This is used as a response to ObjectUpdateCached messages when the client
      * doesn't have the cached object data and needs the full update.
-     * 
+     *
      * @param objectIds List of local object IDs to request
      * @param cacheMissType 0 = CRC mismatch/not cached, 1 = full request
      */
@@ -2645,9 +2645,9 @@ class UDPConnectionFixed(
             return
         }
 
-        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, 
+        NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
             "→ Sending RequestMultipleObjects for ${normalizedIds.size} objects")
-        
+
         // RequestMultipleObjects message format:
         // AgentData:
         // - AgentID (16 bytes, UUID)
@@ -2655,12 +2655,12 @@ class UDPConnectionFixed(
         // ObjectData (variable, one per object):
         // - CacheMissType (1 byte)
         // - ID (4 bytes, U32)
-        
+
         // Message structure sizes
         val agentDataSize = 32    // AgentID (16) + SessionID (16)
         val objectCountSize = 1   // Object count byte
         val objectEntrySize = 5   // CacheMissType (1) + ID (4)
-        
+
         for (chunk in normalizedIds.chunked(255)) {
             val payloadSize = agentDataSize + objectCountSize + (chunk.size * objectEntrySize)
             val payload = ByteBuffer.allocate(payloadSize).order(ByteOrder.LITTLE_ENDIAN)
@@ -3134,7 +3134,7 @@ class UDPConnectionFixed(
 
     /**
      * Send a packet with proper SL protocol encoding
-     * 
+     *
      * @param messageId The message ID
      * @param payload The message payload (already encoded)
      * @param reliable Whether this packet is reliable
@@ -3416,20 +3416,20 @@ class UDPConnectionFixed(
             }
         }
     }
-    
+
     /**
      * Zero-encode packet (compress consecutive zeros)
      */
     private fun zeroEncode(data: ByteArray): ByteArray {
         val result = mutableListOf<Byte>()
         var i = 0
-        
+
         // Copy header (not zero-coded)
         while (i < 6 && i < data.size) {
             result.add(data[i])
             i++
         }
-        
+
         // Zero-encode body
         while (i < data.size) {
             if (data[i] == 0.toByte()) {
@@ -3445,13 +3445,13 @@ class UDPConnectionFixed(
                 i++
             }
         }
-        
+
         return result.toByteArray()
     }
-    
+
     /**
      * Zero-decode packet data.
-     * 
+     *
      * Zero-coding is a run-length encoding for zeros used in SL protocol.
      * Format: 0x00 followed by count byte means that many zeros.
      * The first PACKET_HEADER_SIZE bytes (header) are not zero-coded.
@@ -3471,7 +3471,7 @@ class UDPConnectionFixed(
             result.add(data[i])
             i++
         }
-        
+
         // Decode body
         while (i < data.size) {
             if (data[i] == 0.toByte()) {
@@ -3489,10 +3489,10 @@ class UDPConnectionFixed(
                 i++
             }
         }
-        
+
         return result.toByteArray()
     }
-    
+
     /**
      * Disconnect.
      *
@@ -3745,7 +3745,7 @@ class UDPConnectionFixed(
      */
     fun totalBytesReceived(): Long = bytesReceived.get()
     fun totalBytesSent(): Long = bytesSent.get()
-    
+
     /**
      * Start sending periodic AgentUpdate messages.
      * This is required for proper operation in Second Life.
@@ -3773,7 +3773,7 @@ class UDPConnectionFixed(
             }
         }
     }
-    
+
     /**
      * Stop sending periodic AgentUpdate messages.
      */
@@ -3781,7 +3781,7 @@ class UDPConnectionFixed(
         agentUpdateJob?.cancel()
         agentUpdateJob = null
     }
-    
+
     /**
      * Register a message handler for a specific message ID
      */
@@ -3797,7 +3797,7 @@ class UDPConnectionFixed(
             }
         })
     }
-    
+
     /**
      * Unregister a message handler.
      *
@@ -3811,7 +3811,7 @@ class UDPConnectionFixed(
         messageHandlers.remove(messageId)
         messageRouter.unregisterAllHandlersFor(messageId)
     }
-    
+
     /**
      * Set control flags (for movement).
      */
@@ -3847,7 +3847,7 @@ class UDPConnectionFixed(
     private fun noteAgentInput() {
         lastAgentInputAtMs = System.currentTimeMillis()
     }
-    
+
     /**
      * Get list of registered message handler IDs for diagnostics
      */
@@ -3870,19 +3870,19 @@ class UDPConnectionFixed(
             }
         }
     }
-    
+
     /**
      * Get the number of registered message handlers
      */
     fun getRegisteredHandlerCount(): Int = messageHandlers.size
-    
+
     /**
      * Update agent position for AgentUpdate messages
      */
     fun updateAgentPosition(x: Float, y: Float, z: Float) {
         // Position is not currently used in sendAgentUpdate but can be added later
     }
-    
+
     /**
      * Handle StartPingCheck message from simulator.
      * Responds with CompletePingCheck to maintain the connection.
@@ -3949,15 +3949,15 @@ class UDPConnectionFixed(
         body[0] = (body[0].toInt() and 0x10.inv()).toByte()
         return body to acks
     }
-    
+
     /**
-     * Mark handlers as ready. 
+     * Mark handlers as ready.
      * In this simplified implementation, this is a no-op.
      */
     fun setHandlersReady() {
         Log.i(TAG, "Handlers marked ready")
     }
-    
+
     /**
      * Track message reception for statistics
      */
@@ -3965,7 +3965,7 @@ class UDPConnectionFixed(
         messageTypeCounts.computeIfAbsent(messageType) { AtomicInteger(0) }.incrementAndGet()
         lastMessageTimes[messageType] = System.currentTimeMillis()
     }
-    
+
     /**
      * Get message statistics for diagnostics
      */
@@ -3979,7 +3979,7 @@ class UDPConnectionFixed(
             inboundRateBuckets = inboundRateTracker.snapshot()
         )
     }
-    
+
     /**
      * Get comprehensive diagnostic data for debug reports
      */
@@ -4050,7 +4050,7 @@ class UDPConnectionFixed(
             receiveLoopExceptions = receiveLoopExceptions.toList()
         )
     }
-    
+
     /**
      * Detailed message statistics for diagnostics
      */
@@ -4062,7 +4062,7 @@ class UDPConnectionFixed(
         val lastMessageTimes: Map<String, Long>,
         val inboundRateBuckets: List<InboundRateTracker.RateBucket> = emptyList()
     )
-    
+
     /**
      * Diagnostic data class for UDP connection state
      */
@@ -4090,7 +4090,7 @@ class UDPConnectionFixed(
         val selectorReadableKeyCount: Long,
         val receiveLoopExceptions: List<String>
     )
-    
+
     /**
      * Info about a pending packet for diagnostics
      */
@@ -4099,7 +4099,7 @@ class UDPConnectionFixed(
         val retries: Int,
         val ageMs: Long
     )
-    
+
     /**
      * Packet history entry for debugging.
      * Contains complete packet data for full protocol diagnosis.
@@ -4125,7 +4125,7 @@ class UDPConnectionFixed(
             ACK_TIMEOUT
         }
     }
-    
+
     /**
      * Socket details for diagnostics.
      */
@@ -4152,7 +4152,7 @@ class UDPConnectionFixed(
         val selectorReadableKeyCount: Long,
         val receiveLoopExceptions: List<String>
     )
-    
+
     /**
      * Record a packet event in the history for debugging.
      * Captures complete raw packet data as hex dump for full protocol diagnosis.
@@ -4167,7 +4167,7 @@ class UDPConnectionFixed(
     ) {
         // Generate complete hex dump of all packet bytes for full diagnosis
         val fullHexDump = data.joinToString(" ") { "%02X".format(it) }
-        
+
         val entry = PacketHistoryEntry(
             timestamp = packetDiagnosticsRecorder.now(),
             type = type,
@@ -4179,15 +4179,15 @@ class UDPConnectionFixed(
             success = success,
             errorMessage = errorMessage
         )
-        
+
         recentPacketHistory.offer(entry)
-        
+
         // Keep bounded size using configurable constant
         while (recentPacketHistory.size > DEFAULT_PACKET_HISTORY_SIZE) {
             recentPacketHistory.poll()
         }
     }
-    
+
     /**
      * Extract the sequence number from raw packet data.
      * Packet header format: flags (1 byte), sequence (4 bytes big-endian), extra (1 byte)
@@ -4199,7 +4199,7 @@ class UDPConnectionFixed(
                ((data[3].toInt() and 0xFF) shl 8) or
                (data[4].toInt() and 0xFF)
     }
-    
+
     /**
      * Extract packet flags from raw packet data for EnhancedPacketLogger.
      */
@@ -4215,7 +4215,7 @@ class UDPConnectionFixed(
             hasAcks = (flags and 0x10) != 0
         )
     }
-    
+
     /**
      * Get human-readable message name from ID for debugging.
      * Uses the centralized MessageIdRegistry.getMessageName() for comprehensive coverage.
@@ -4223,7 +4223,7 @@ class UDPConnectionFixed(
     private fun getMessageName(messageId: Int): String {
         return MessageIdRegistry.getMessageName(messageId)
     }
-    
+
     /**
      * Get packet history for debugging.
      * Returns the list of recent packet events including raw hex data.
@@ -4245,7 +4245,7 @@ class UDPConnectionFixed(
     fun getPacketHistory(): List<PacketHistoryEntry> {
         return recentPacketHistory.toList()
     }
-    
+
     /**
      * Get socket details for diagnostics.
      */

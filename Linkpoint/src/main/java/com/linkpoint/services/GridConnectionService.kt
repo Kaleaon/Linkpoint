@@ -23,12 +23,12 @@ import kotlinx.coroutines.flow.collectLatest
  * Based on the reference viewer's GridConnectionService
  */
 class GridConnectionService : Service() {
-    
+
     companion object {
         private const val TAG = "GridConnectionService"
         private const val NOTIFICATION_ID = 1002  // Unique ID (LinkpointConnectionService uses 1001)
         private const val CHANNEL_ID = "linkpoint_connection"
-        
+
         fun start(context: Context) {
             val intent = Intent(context, GridConnectionService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -37,44 +37,44 @@ class GridConnectionService : Service() {
                 context.startService(intent)
             }
         }
-        
+
         fun stop(context: Context) {
             context.stopService(Intent(context, GridConnectionService::class.java))
         }
     }
-    
+
     private val serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var keepAliveJob: Job? = null
-    
+
     private val app by lazy { LinkpointApp.getInstance() }
-    
+
     override fun onCreate() {
         super.onCreate()
         Log.i(TAG, "GridConnectionService created")
-        
+
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, createNotification("Connecting..."))
     }
-    
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.i(TAG, "GridConnectionService started")
-        
+
         startKeepAlive()
         observeConnectionState()
-        
+
         return START_STICKY
     }
-    
+
     override fun onBind(intent: Intent?): IBinder? = null
-    
+
     override fun onDestroy() {
         super.onDestroy()
         Log.i(TAG, "GridConnectionService destroyed")
-        
+
         keepAliveJob?.cancel()
         serviceScope.cancel()
     }
-    
+
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -85,19 +85,19 @@ class GridConnectionService : Service() {
                 description = "Maintains connection to Second Life grid"
                 setShowBadge(false)
             }
-            
+
             val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(channel)
         }
     }
-    
+
     private fun createNotification(status: String): Notification {
         val intent = Intent(this, WorldViewActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
             this, 0, intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        
+
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Linkpoint")
             .setContentText(status)
@@ -107,25 +107,25 @@ class GridConnectionService : Service() {
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
     }
-    
+
     private fun updateNotification(status: String) {
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(NOTIFICATION_ID, createNotification(status))
     }
-    
+
     private fun startKeepAlive() {
         keepAliveJob?.cancel()
         keepAliveJob = serviceScope.launch {
             while (isActive) {
                 // Send keep-alive packet
                 sendKeepAlive()
-                
+
                 // Wait 30 seconds
                 delay(30_000)
             }
         }
     }
-    
+
     private suspend fun sendKeepAlive() {
         if (app.sessionManager.isConnected()) {
             // Send UDP keep-alive to simulator
@@ -138,7 +138,7 @@ class GridConnectionService : Service() {
             }
         }
     }
-    
+
     private fun observeConnectionState() {
         serviceScope.launch {
             app.sessionManager.connectionState.collectLatest { state ->

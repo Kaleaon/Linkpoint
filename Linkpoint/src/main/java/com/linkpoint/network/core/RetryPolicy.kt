@@ -7,7 +7,7 @@ import kotlin.random.Random
 /**
  * Retry policy with exponential backoff and error tracking.
  * Based on patterns from the official Second Life app.
- * 
+ *
  * Features:
  * - Exponential backoff with jitter
  * - Error count tracking with thresholds
@@ -25,7 +25,7 @@ class RetryPolicy(
 ) {
     companion object {
         private const val TAG = "RetryPolicy"
-        
+
         // Default values based on official SL app patterns
         const val DEFAULT_MAX_RETRY_ATTEMPTS = 5
         const val DEFAULT_STARTING_RETRY_DELAY_MS = 500L
@@ -33,7 +33,7 @@ class RetryPolicy(
         const val DEFAULT_ERROR_COUNT_LIMIT = 5
         const val DEFAULT_ERROR_TIMEOUT_LIMIT_MS = 60_000L  // 1 minute
         const val DEFAULT_JITTER_FACTOR = 0.2f
-        
+
         /**
          * Create a policy optimized for LTE/mobile networks
          */
@@ -44,7 +44,7 @@ class RetryPolicy(
             errorCountLimit = 6,
             errorTimeoutLimitMs = 90_000L
         )
-        
+
         /**
          * Create a policy optimized for WiFi
          */
@@ -55,7 +55,7 @@ class RetryPolicy(
             errorCountLimit = 3,
             errorTimeoutLimitMs = 30_000L
         )
-        
+
         /**
          * Create a policy for login operations (more patient)
          */
@@ -66,7 +66,7 @@ class RetryPolicy(
             errorCountLimit = 5,
             errorTimeoutLimitMs = 120_000L  // 2 minutes
         )
-        
+
         /**
          * Create a policy for inventory operations
          */
@@ -77,7 +77,7 @@ class RetryPolicy(
             errorCountLimit = 4,
             errorTimeoutLimitMs = 90_000L
         )
-        
+
         /**
          * Create a policy for event queue (very patient, many retries)
          */
@@ -89,21 +89,21 @@ class RetryPolicy(
             errorTimeoutLimitMs = 300_000L  // 5 minutes
         )
     }
-    
+
     // Error tracking state
     private var failuresInARow = 0
     private var firstErrorTimestamp: Long = 0L
     private var lastErrorTimestamp: Long = 0L
     private var totalErrors = 0
     private var isInErrorState = false
-    
+
     // Backoff state
     private var currentRetryAttempt = 0
     private var nextRetryDelayMs = startingRetryDelayMs
-    
+
     // Retry-After support (Firestorm's mReplyRetryAfter pattern)
     private var lastRetryAfterMs: Long = 0
-    
+
     /**
      * Result of a retry decision
      */
@@ -113,26 +113,26 @@ class RetryPolicy(
             val attempt: Int,
             val reason: String
         ) : RetryDecision()
-        
+
         data class GiveUp(
             val reason: String,
             val shouldResetConnection: Boolean
         ) : RetryDecision()
-        
+
         data class Continue(
             val degraded: Boolean,
             val message: String
         ) : RetryDecision()
     }
-    
+
     /**
      * Record a Retry-After hint from the server.
      * Call this before onError() when a Retry-After header is present.
-     * 
+     *
      * Based on Firestorm's handling in _httppolicy.cpp:
      * if (op->mReplyRetryAfter > 0 && op->mReplyRetryAfter < 30)
      *     delta = op->mReplyRetryAfter * U64L(1000000);
-     * 
+     *
      * @param retryAfterSeconds Value from Retry-After header (capped at 30)
      */
     @Synchronized
@@ -142,7 +142,7 @@ class RetryPolicy(
         lastRetryAfterMs = capped * 1000L
         Log.d(TAG, "Retry-After hint set: ${capped}s")
     }
-    
+
     /**
      * Record an error and decide whether to retry
      */
@@ -152,16 +152,16 @@ class RetryPolicy(
         totalErrors++
         failuresInARow++
         lastErrorTimestamp = now
-        
+
         if (firstErrorTimestamp == 0L) {
             firstErrorTimestamp = now
         }
-        
+
         val errorDuration = now - firstErrorTimestamp
-        
+
         Log.w(TAG, "Error recorded: ${error.javaClass.simpleName}: ${error.message} " +
             "(failures: $failuresInARow/$errorCountLimit, duration: ${errorDuration}ms)")
-        
+
         // Non-recoverable errors should trigger immediate connection reset
         if (!isRecoverable) {
             Log.e(TAG, "Non-recoverable error detected. Triggering connection reset.")
@@ -171,7 +171,7 @@ class RetryPolicy(
                 shouldResetConnection = true
             )
         }
-        
+
         // Check error count limit
         if (failuresInARow >= errorCountLimit) {
             Log.e(TAG, "Hit error count limit ($failuresInARow/$errorCountLimit). Triggering connection reset.")
@@ -181,7 +181,7 @@ class RetryPolicy(
                 shouldResetConnection = true
             )
         }
-        
+
         // Check error timeout limit
         if (errorDuration >= errorTimeoutLimitMs) {
             Log.e(TAG, "Hit error timeout limit (${errorDuration}ms >= ${errorTimeoutLimitMs}ms). Triggering connection reset.")
@@ -191,7 +191,7 @@ class RetryPolicy(
                 shouldResetConnection = true
             )
         }
-        
+
         // Check retry attempts
         if (currentRetryAttempt >= maxRetryAttempts) {
             Log.w(TAG, "Max retry attempts reached ($currentRetryAttempt/$maxRetryAttempts)")
@@ -200,21 +200,21 @@ class RetryPolicy(
                 shouldResetConnection = false
             )
         }
-        
+
         // Calculate next retry delay with exponential backoff and jitter
         val delay = calculateNextRetryDelay()
         currentRetryAttempt++
-        
+
         Log.d(TAG, "Within error limit ($failuresInARow/$errorCountLimit). " +
             "Retrying in ${delay}ms (attempt $currentRetryAttempt/$maxRetryAttempts)")
-        
+
         return RetryDecision.Retry(
             delayMs = delay,
             attempt = currentRetryAttempt,
             reason = "Transient error, retrying..."
         )
     }
-    
+
     /**
      * Record a successful operation
      */
@@ -225,7 +225,7 @@ class RetryPolicy(
         }
         reset()
     }
-    
+
     /**
      * Reset the retry policy state
      */
@@ -239,10 +239,10 @@ class RetryPolicy(
         lastRetryAfterMs = 0
         isInErrorState = false
     }
-    
+
     /**
      * Calculate the next retry delay using exponential backoff with jitter.
-     * 
+     *
      * If a Retry-After hint was provided by the server, uses that instead
      * of calculated backoff (Firestorm pattern: external_delta flag).
      */
@@ -255,29 +255,29 @@ class RetryPolicy(
             nextRetryDelayMs = serverDelay
             return serverDelay
         }
-        
+
         // Otherwise use exponential backoff (internal delta)
         // Formula: delay = startingDelay * 2^attempt (capped)
         // Based on Firestorm's: delta_min * delta_factor where delta_factor = 1 << retries
         // Using bit-shifting for consistency with HttpRequestOptions.calculateRetryDelay
         val exponentialDelay = startingRetryDelayMs * (1L shl min(currentRetryAttempt, 10))
-        
+
         // Cap at maximum delay
         val cappedDelay = min(exponentialDelay, maxRetryDelayMs)
-        
+
         // Add jitter to prevent thundering herd
         val jitter = (cappedDelay * jitterFactor * Random.nextFloat()).toLong()
         val finalDelay = cappedDelay + jitter
-        
+
         nextRetryDelayMs = finalDelay
         return finalDelay
     }
-    
+
     /**
      * Check if we're currently in an error state
      */
     fun isInErrorState(): Boolean = isInErrorState
-    
+
     /**
      * Get current retry statistics
      */
@@ -287,10 +287,10 @@ class RetryPolicy(
         currentRetryAttempt = currentRetryAttempt,
         nextRetryDelayMs = nextRetryDelayMs,
         isInErrorState = isInErrorState,
-        errorDurationMs = if (firstErrorTimestamp > 0) 
+        errorDurationMs = if (firstErrorTimestamp > 0)
             System.currentTimeMillis() - firstErrorTimestamp else 0
     )
-    
+
     data class RetryStats(
         val failuresInARow: Int,
         val totalErrors: Int,

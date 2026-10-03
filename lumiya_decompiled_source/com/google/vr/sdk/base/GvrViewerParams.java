@@ -49,7 +49,7 @@ public class GvrViewerParams {
         BOTTOM(0),
         CENTER(1),
         TOP(2);
-        
+
         private final int protoValue;
 
         VerticalAlignmentType(int i) {

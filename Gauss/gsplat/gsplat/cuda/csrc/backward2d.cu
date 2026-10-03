@@ -77,7 +77,7 @@ __global__ void project_gaussians_2d_scale_rot_backward_kernel(
     glm::mat2 S = scale_to_mat2d(scales2d[idx]);
     glm::mat2 M = R * S;
     glm::mat2 theta_g = R_g * S * glm::transpose(M) + M * glm::transpose(S) * glm::transpose(R_g);
-    
+
     glm::mat2 scale_x_g = glm::mat2(0.f);
     scale_x_g[0][0] = 2.f * scales2d[idx].x;
     glm::mat2 scale_y_g = glm::mat2(0.f);
@@ -93,7 +93,7 @@ __global__ void project_gaussians_2d_scale_rot_backward_kernel(
     v_scale[idx].x = G_11 * sigma_x_g[0][0] + 2 * G_12 * sigma_x_g[0][1] + G_22 * sigma_x_g[1][1];
     v_scale[idx].y = G_11 * sigma_y_g[0][0] + 2 * G_12 * sigma_y_g[0][1] + G_22 * sigma_y_g[1][1];
     v_rot[idx] = G_11 * theta_g[0][0] + 2 * G_12 * theta_g[0][1] + G_22 * theta_g[1][1];
-    
+
     // gt v_mean2d
     v_mean2d[idx].x = v_xy[idx].x * img_size.x;
     v_mean2d[idx].y = v_xy[idx].y * img_size.y;

@@ -198,7 +198,7 @@ namespace bitfieldInterleave3
 	template<typename PARAM, typename RET>
 	inline RET refBitfieldInterleave(PARAM x, PARAM y, PARAM z)
 	{
-		RET Result = 0; 
+		RET Result = 0;
 		for(RET i = 0; i < sizeof(PARAM) * 8; ++i)
 		{
 			Result |= ((RET(x) & (RET(1U) << i)) << ((i << 1) + 0));
@@ -235,7 +235,7 @@ namespace bitfieldInterleave4
 	inline RET loopBitfieldInterleave(PARAM x, PARAM y, PARAM z, PARAM w)
 	{
 		RET const v[4] = {x, y, z, w};
-		RET Result = 0; 
+		RET Result = 0;
 		for(RET i = 0; i < sizeof(PARAM) * 8; i++)
 		{
 			Result |= ((((v[0] >> i) & 1U)) << ((i << 2) + 0));
@@ -321,7 +321,7 @@ namespace bitfieldInterleave
 /*
 	inline glm::uint64 loopBitfieldInterleave(glm::uint32 x, glm::uint32 y)
 	{
-		static glm::uint64 const Mask[5] = 
+		static glm::uint64 const Mask[5] =
 		{
 			0x5555555555555555,
 			0x3333333333333333,
@@ -393,7 +393,7 @@ namespace bitfieldInterleave
 		Reg2 = _mm_slli_epi32(Reg1, 1);
 		Reg2 = _mm_srli_si128(Reg2, 8);
 		Reg1 = _mm_or_si128(Reg1, Reg2);
-	
+
 		__m128i Result;
 		_mm_store_si128(&Result, Reg1);
 		return *reinterpret_cast<glm::uint64*>(&Result);
@@ -755,7 +755,7 @@ namespace bitfieldInterleave5
 		int Error = 0;
 
 		const std::clock_t BeginTime = std::clock();
-		
+
 		for(glm::size_t k = 0; k < 10000; ++k)
 		for(glm::size_t j = 0; j < 256; ++j)
 		for(glm::size_t i = 0; i < 256; ++i)
@@ -876,7 +876,7 @@ namespace bitfieldInterleave5
 		for(glm::size_t j = 0; j < 256; ++j)
 		for(glm::size_t i = 0; i < 256; ++i)
 			Result_u8vec4[j * 256 + i] = glm::bitfieldInterleave(glm::uint8(i), glm::uint8(j), glm::uint8(i), glm::uint8(j));
-		
+
 		Error += perf_old_u8vec4(Result_u8vec4);
 		Error += perf_new_u8vec4(Result_u8vec4);
 

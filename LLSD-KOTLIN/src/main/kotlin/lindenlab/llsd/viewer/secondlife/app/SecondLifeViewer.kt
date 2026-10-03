@@ -21,7 +21,7 @@ import java.util.logging.Logger
 
 /**
  * Main Second Life Viewer application (Kotlin implementation).
- * 
+ *
  * Features:
  * - Coroutine-based async operations
  * - Reactive configuration with Kotlin properties
@@ -34,7 +34,7 @@ class SecondLifeViewer {
         const val VERSION = "1.0.0-Kotlin"
         const val BUILD_DATE = "2024-12-19"
         const val USER_AGENT = "SecondLife-Kotlin/$VERSION"
-        
+
         /**
          * Main entry point for the Kotlin application
          */

@@ -1,6 +1,6 @@
 /*!
  * Second Life LLSD Extensions - Rust Implementation
- * 
+ *
  * Based on Java implementation and Second Life viewer functionality
  * Copyright (C) 2024 Linden Lab
  */
@@ -20,11 +20,11 @@ impl SecondLifeLLSDUtils {
         let mut response = HashMap::new();
         response.insert("success".to_string(), LLSDValue::Boolean(success));
         response.insert("message".to_string(), LLSDValue::String(message.to_string()));
-        
+
         if let Some(data_value) = data {
             response.insert("data".to_string(), data_value);
         }
-        
+
         response
     }
 
@@ -43,7 +43,7 @@ impl SecondLifeLLSDUtils {
         texture_hashes: Vec<LLSDValue>,
     ) -> HashMap<String, LLSDValue> {
         let mut appearance = HashMap::new();
-        
+
         appearance.insert("agent_id".to_string(), LLSDValue::UUID(agent_id));
         appearance.insert("serial_number".to_string(), LLSDValue::Integer(serial_number as i32));
         appearance.insert("is_trial_account".to_string(), LLSDValue::Boolean(is_trial));
@@ -52,7 +52,7 @@ impl SecondLifeLLSDUtils {
         appearance.insert("texture_hashes".to_string(), LLSDValue::Array(texture_hashes));
         appearance.insert("appearance_version".to_string(), LLSDValue::Integer(1));
         appearance.insert("cof_version".to_string(), LLSDValue::Integer(1));
-        
+
         appearance
     }
 
@@ -66,22 +66,22 @@ impl SecondLifeLLSDUtils {
         permissions: HashMap<String, LLSDValue>,
     ) -> HashMap<String, LLSDValue> {
         let mut properties = HashMap::new();
-        
+
         properties.insert("object_id".to_string(), LLSDValue::UUID(object_id));
         properties.insert("owner_id".to_string(), LLSDValue::UUID(owner_id));
         properties.insert("group_id".to_string(), LLSDValue::UUID(group_id));
         properties.insert("name".to_string(), LLSDValue::String(name.to_string()));
         properties.insert("description".to_string(), LLSDValue::String(description.to_string()));
         properties.insert("permissions".to_string(), LLSDValue::Map(permissions));
-        
+
         // Sale info
         let mut sale_info = HashMap::new();
         sale_info.insert("sale_price".to_string(), LLSDValue::Integer(0));
         sale_info.insert("sale_type".to_string(), LLSDValue::Integer(0));
         properties.insert("sale_info".to_string(), LLSDValue::Map(sale_info));
-        
+
         properties.insert("creation_date".to_string(), LLSDValue::Date(Utc::now()));
-        
+
         properties
     }
 
@@ -94,25 +94,25 @@ impl SecondLifeLLSDUtils {
         expected_upload_cost: i32,
     ) -> HashMap<String, LLSDValue> {
         let mut request = HashMap::new();
-        
+
         request.insert("asset_type".to_string(), LLSDValue::String(asset_type.to_string()));
         request.insert("name".to_string(), LLSDValue::String(name.to_string()));
         request.insert("description".to_string(), LLSDValue::String(description.to_string()));
-        
+
         // Asset resources
         let mut asset_resources = HashMap::new();
         asset_resources.insert("asset_data".to_string(), LLSDValue::Binary(data));
         request.insert("asset_resources".to_string(), LLSDValue::Map(asset_resources));
-        
+
         request.insert("folder_id".to_string(), LLSDValue::UUID(Uuid::new_v4()));
         request.insert("inventory_type".to_string(), LLSDValue::Integer(Self::asset_type_to_inventory_type(asset_type)));
         request.insert("expected_upload_cost".to_string(), LLSDValue::Integer(expected_upload_cost));
-        
+
         // Permissions
         request.insert("everyone_mask".to_string(), LLSDValue::Integer(0x00000000));
         request.insert("group_mask".to_string(), LLSDValue::Integer(0x00000000));
         request.insert("next_owner_mask".to_string(), LLSDValue::Integer(0x00082000));
-        
+
         request
     }
 
@@ -156,24 +156,24 @@ impl SecondLifeLLSDUtils {
         owner_id: Option<Uuid>,
     ) -> HashMap<String, LLSDValue> {
         let mut chat = HashMap::new();
-        
+
         chat.insert("from_name".to_string(), LLSDValue::String(from_name.to_string()));
         chat.insert("source_type".to_string(), LLSDValue::Integer(source_type));
         chat.insert("chat_type".to_string(), LLSDValue::Integer(chat_type));
         chat.insert("message".to_string(), LLSDValue::String(message.to_string()));
-        
+
         let pos = position.unwrap_or([0.0, 0.0, 0.0]);
         chat.insert("position".to_string(), LLSDValue::Array(vec![
             LLSDValue::Real(pos[0]),
             LLSDValue::Real(pos[1]),
             LLSDValue::Real(pos[2]),
         ]));
-        
+
         let owner = owner_id.unwrap_or(Uuid::nil());
         chat.insert("owner_id".to_string(), LLSDValue::UUID(owner));
         chat.insert("audible".to_string(), LLSDValue::Real(1.0));
         chat.insert("timestamp".to_string(), LLSDValue::Real(Utc::now().timestamp() as f64));
-        
+
         chat
     }
 
@@ -191,7 +191,7 @@ impl SecondLifeLLSDUtils {
         active_scripts: i32,
     ) -> HashMap<String, LLSDValue> {
         let mut stats = HashMap::new();
-        
+
         stats.insert("region_id".to_string(), LLSDValue::UUID(region_id));
         stats.insert("time_dilation".to_string(), LLSDValue::Real(time_dilation));
         stats.insert("sim_fps".to_string(), LLSDValue::Real(sim_fps));
@@ -203,7 +203,7 @@ impl SecondLifeLLSDUtils {
         stats.insert("active_prims".to_string(), LLSDValue::Integer(active_prims));
         stats.insert("active_scripts".to_string(), LLSDValue::Integer(active_scripts));
         stats.insert("timestamp".to_string(), LLSDValue::Real(Utc::now().timestamp() as f64));
-        
+
         stats
     }
 }
@@ -431,7 +431,7 @@ mod tests {
         assert_eq!(chat["chat_type"], LLSDValue::Integer(0));
         assert_eq!(chat["message"], LLSDValue::String("Hello World".to_string()));
         assert_eq!(chat["audible"], LLSDValue::Real(1.0));
-        
+
         if let LLSDValue::Array(pos) = &chat["position"] {
             assert_eq!(pos.len(), 3);
             assert_eq!(pos[0], LLSDValue::Real(128.0));

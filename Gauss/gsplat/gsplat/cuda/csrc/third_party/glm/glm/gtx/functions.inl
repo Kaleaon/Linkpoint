@@ -27,4 +27,3 @@ namespace glm
 		return exp(-(Squared.x + Squared.y));
 	}
 }//namespace glm
-

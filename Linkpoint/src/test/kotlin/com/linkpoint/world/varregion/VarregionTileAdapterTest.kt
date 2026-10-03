@@ -80,7 +80,7 @@ class VarregionTileAdapterTest {
 
         // Create heightmap data
         val heights = FloatArray(256) { 35.0f }
-        
+
         // Patch at (18, 20) in global patch grid (corresponds to world position (288m, 320m) in sub-tile (1, 1))
         val patch11 = TerrainPatch(18, 20, heights)
         val result = LayerDataResult(type = 76, patches = listOf(patch11))

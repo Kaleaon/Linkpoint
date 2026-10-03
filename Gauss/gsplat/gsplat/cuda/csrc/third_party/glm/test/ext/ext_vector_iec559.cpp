@@ -16,7 +16,7 @@ template <typename genType>
 static int test_operators()
 {
 	typedef typename genType::value_type valType;
-	
+
 	int Error = 0;
 
 	{
@@ -43,7 +43,7 @@ template <typename genType>
 static int test_ctor()
 {
 	typedef typename genType::value_type T;
-	
+
 	int Error = 0;
 
 	glm::vec<1, T> const A = genType(1);
@@ -71,7 +71,7 @@ template <typename genType>
 static int test_size()
 {
 	typedef typename genType::value_type T;
-	
+
 	int Error = 0;
 
 	Error += sizeof(glm::vec<1, T>) == sizeof(genType) ? 0 : 1;
@@ -85,7 +85,7 @@ template <typename genType>
 static int test_relational()
 {
 	typedef typename genType::value_type valType;
-	
+
 	int Error = 0;
 
 	genType const A(1);
@@ -141,26 +141,26 @@ int main()
 	Error += test_operators<glm::lowp_vec1>();
 	Error += test_operators<glm::mediump_vec1>();
 	Error += test_operators<glm::highp_vec1>();
-	
+
 	Error += test_ctor<glm::vec1>();
 	Error += test_ctor<glm::lowp_vec1>();
 	Error += test_ctor<glm::mediump_vec1>();
 	Error += test_ctor<glm::highp_vec1>();
-	
+
 	Error += test_size<glm::vec1>();
 	Error += test_size<glm::lowp_vec1>();
 	Error += test_size<glm::mediump_vec1>();
 	Error += test_size<glm::highp_vec1>();
-	
+
 	Error += test_relational<glm::vec1>();
 	Error += test_relational<glm::lowp_vec1>();
 	Error += test_relational<glm::mediump_vec1>();
 	Error += test_relational<glm::highp_vec1>();
-	
+
 	Error += test_constexpr<glm::vec1>();
 	Error += test_constexpr<glm::lowp_vec1>();
 	Error += test_constexpr<glm::mediump_vec1>();
 	Error += test_constexpr<glm::highp_vec1>();
-	
+
 	return Error;
 }

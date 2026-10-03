@@ -5,7 +5,7 @@
 int test_compiler()
 {
 	int Error(0);
-	
+
 	if(GLM_COMPILER & GLM_COMPILER_VC)
 	{
 		switch(GLM_COMPILER)
@@ -147,21 +147,21 @@ int test_compiler()
 		std::printf("Undetected compiler\n");
 		Error += 1;
 	}
-	
+
 	return Error;
 }
 
 int test_model()
 {
 	int Error = 0;
-	
+
 	Error += ((sizeof(void*) == 4) && (GLM_MODEL == GLM_MODEL_32)) || ((sizeof(void*) == 8) && (GLM_MODEL == GLM_MODEL_64)) ? 0 : 1;
-	
+
 	if(GLM_MODEL == GLM_MODEL_32)
 		std::printf("GLM_MODEL_32\n");
 	else if(GLM_MODEL == GLM_MODEL_64)
 		std::printf("GLM_MODEL_64\n");
-	
+
 	return Error;
 }
 
@@ -198,7 +198,7 @@ int test_instruction_set()
 int test_cpp_version()
 {
 	std::printf("__cplusplus: %d\n", static_cast<int>(__cplusplus));
-	
+
 	return 0;
 }
 
@@ -217,7 +217,7 @@ int main()
 	int Error = 0;
 
 #	if !defined(GLM_FORCE_PLATFORM_UNKNOWN) && !defined(GLM_FORCE_COMPILER_UNKNOWN) && !defined(GLM_FORCE_ARCH_UNKNOWN) && !defined(GLM_FORCE_CXX_UNKNOWN)
-		
+
 		Error += test_cpp_version();
 		Error += test_compiler();
 		Error += test_model();
@@ -225,6 +225,6 @@ int main()
 		Error += test_operators();
 
 #	endif
-	
+
 	return Error;
 }

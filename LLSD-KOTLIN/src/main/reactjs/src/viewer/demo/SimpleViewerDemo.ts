@@ -34,7 +34,7 @@ class SimpleViewerDemo {
             console.log();
 
             console.log('Initializing TypeScript viewer...');
-            
+
             // Wait for initialization
             await new Promise(resolve => setTimeout(resolve, 1000));
             console.log('✓ TypeScript viewer initialized successfully');
@@ -48,7 +48,7 @@ class SimpleViewerDemo {
             // Cache demo with IndexedDB
             console.log('Testing IndexedDB cache operations...');
             const textureData = new TextEncoder().encode('TypeScript demo texture data');
-            
+
             const stored = await this.cacheManager.store(CacheType.TEXTURE, 'typescript_demo', textureData.buffer);
             console.log(`✓ Stored texture data using Promise-based async: ${stored ? 'SUCCESS' : 'FAILED'}`);
 
@@ -59,10 +59,10 @@ class SimpleViewerDemo {
             console.log();
             console.log('Testing WebGL rendering system...');
             console.log(`✓ Current quality: ${this.renderingSystem.qualitySettings.overallQuality}`);
-            
+
             await this.renderingSystem.applyUltraLowPreset();
             console.log(`✓ Applied Ultra Low preset: ${this.renderingSystem.qualitySettings.overallQuality}`);
-            
+
             await this.renderingSystem.applyHighPreset();
             console.log(`✓ Applied High preset: ${this.renderingSystem.qualitySettings.overallQuality}`);
 
@@ -79,7 +79,7 @@ class SimpleViewerDemo {
             console.log();
             console.log('Testing React-style event system...');
             const unsubscribe = this.renderingSystem.subscribe();
-            
+
             this.renderingSystem.on('qualityPresetChanged', (preset: string) => {
                 console.log(`✓ Quality preset changed event: ${preset}`);
             });
@@ -91,12 +91,12 @@ class SimpleViewerDemo {
             console.log('=== PERFORMANCE STATISTICS ===');
             const finalStats = this.cacheManager.getStatistics();
             const renderStats = this.renderingSystem.getRenderStatistics();
-            
+
             console.log('Cache Statistics:');
             console.log(`  Size: ${CacheManager.formatBytes(finalStats.totalSize)}`);
             console.log(`  Hit Ratio: ${(finalStats.hitRatio * 100).toFixed(1)}%`);
             console.log(`  Writes: ${finalStats.totalWrites}`);
-            
+
             console.log('Render Statistics:');
             console.log(`  FPS: ${renderStats.currentFPS}`);
             console.log(`  Frame Time: ${renderStats.frameTime.toFixed(2)}ms`);

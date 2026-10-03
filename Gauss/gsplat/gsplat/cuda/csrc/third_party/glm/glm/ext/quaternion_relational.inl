@@ -32,4 +32,3 @@ namespace glm
 		return greaterThanEqual(abs(v), vec<4, T, Q>(epsilon));
 	}
 }//namespace glm
-

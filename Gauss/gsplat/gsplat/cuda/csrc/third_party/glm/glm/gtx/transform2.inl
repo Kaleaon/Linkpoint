@@ -122,4 +122,3 @@ namespace glm
 		return m * scaleBias<T, Q>(scale, bias);
 	}
 }//namespace glm
-

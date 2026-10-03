@@ -25,7 +25,7 @@ import com.linkpoint.scene.worker.TaskPriority
 /**
  * Manages mesh asset downloading and parsing
  * Handles Second Life mesh format (LLMESH)
- * 
+ *
  * Note: Uses custom SSL configuration to handle Akamai CDN hostname verification.
  * The Second Life asset CDN is served by Akamai, which uses certificates for
  * *.akamaized.net domains. The SSLHelper.configureForCdn() method handles this
@@ -40,7 +40,7 @@ class MeshManager(
     companion object {
         private const val TAG = "MeshManager"
     }
-    
+
     // HTTP client configured for CDN access with custom hostname verification.
     // HTTP/2 enabled (with HTTP/1.1 fallback) — see TextureManager for rationale; meshes
     // come from the same Akamai CDN and benefit from the same H2 multiplexing.
@@ -50,7 +50,7 @@ class MeshManager(
             .readTimeout(60, TimeUnit.SECONDS)
             .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
     ).build()
-    
+
     /**
      * Pending downloads keyed by (meshId, lod). Previously this was
      * keyed only by meshId, which meant two concurrent callers asking
@@ -411,7 +411,7 @@ class MeshManager(
         Log.i(TAG, "Region transfer / teleport detected — cancelling pending mesh parsing tasks")
         decodingWorkerPool.cancelAllPending()
     }
-    
+
     private fun parseMesh(meshId: UUID, data: ByteArray, lod: MeshLOD): MeshData? {
         try {
             // Parse the mesh header. The previous implementation scanned
@@ -435,7 +435,7 @@ class MeshManager(
                 parseFailCount.incrementAndGet()
                 return null
             }
-            
+
             // Get LOD data offset/size
             val lodKey = when (lod) {
                 MeshLOD.HIGHEST -> "high_lod"
@@ -443,7 +443,7 @@ class MeshManager(
                 MeshLOD.MEDIUM -> "low_lod"
                 MeshLOD.LOW -> "lowest_lod"
             }
-            
+
             val lodMap = header.getMap(lodKey) ?: header.getMap("high_lod")
             if (lodMap == null) {
                 lastError = "Missing LOD map in mesh header"
@@ -451,7 +451,7 @@ class MeshManager(
                 parseFailCount.incrementAndGet()
                 return null
             }
-            
+
             val offset = lodMap.getInt("offset")
             val size = lodMap.getInt("size")
             if (offset == null || size == null) {
@@ -460,11 +460,11 @@ class MeshManager(
                 parseFailCount.incrementAndGet()
                 return null
             }
-            
+
             // Extract and decompress LOD data
             val compressedData = data.copyOfRange(headerEnd + offset, headerEnd + offset + size)
             val decompressed = decompress(compressedData)
-            
+
             // Parse mesh geometry
             return parseMeshGeometry(meshId, decompressed, header)
         } catch (e: Exception) {
@@ -475,7 +475,7 @@ class MeshManager(
             return null
         }
     }
-    
+
     private fun decompress(data: ByteArray): ByteArray {
         // Stream into a fixed-size chunk buffer rather than pre-allocating
         // `compressedSize * 10` upfront. Mesh LOD blobs commonly have a
@@ -503,7 +503,7 @@ class MeshManager(
             inflater.end()
         }
     }
-    
+
     private fun parseMeshGeometry(meshId: UUID, data: ByteArray, header: LLSDMap): MeshData {
         // Each LOD blob, after zlib decompression, is itself an LLSD payload:
         // an array of submesh maps. Each submesh has Position / Normal /
@@ -786,7 +786,7 @@ class MeshManager(
         }
         return out
     }
-    
+
     private fun parseSkinData(skinMap: LLSDMap): SkinData? {
         try {
             val jointNames = skinMap.getArray("joint_names")?.value?.mapNotNull {
@@ -827,7 +827,7 @@ class MeshManager(
             return null
         }
     }
-    
+
     /**
      * Called when capabilities become available.
      * Retries any mesh downloads that were queued due to missing GetMesh capability.
@@ -882,9 +882,9 @@ class MeshManager(
         pendingMeshes.clear()
         headerCache.clear()
     }
-    
+
     // ==================== DIAGNOSTIC METHODS ====================
-    
+
     // Tracking variables for diagnostics (volatile for thread safety)
     private val downloadCount = java.util.concurrent.atomic.AtomicInteger(0)
     private val downloadFailCount = java.util.concurrent.atomic.AtomicInteger(0)
@@ -892,14 +892,14 @@ class MeshManager(
     private val downloadedBytes = java.util.concurrent.atomic.AtomicLong(0)
     @Volatile private var lastError: String? = null
     @Volatile private var lastErrorTime: Long = 0
-    
+
     /**
      * Get comprehensive diagnostic data for debug reports
      */
     fun getDiagnostics(): MeshManagerDiagnostics {
         val getMeshCap = capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH2)
             ?: capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH)
-        
+
         return MeshManagerDiagnostics(
             pendingDownloads = pendingMeshes.size,
             downloadedCount = downloadCount.get(),
@@ -911,7 +911,7 @@ class MeshManager(
             lastErrorTimeAgo = if (lastErrorTime > 0) System.currentTimeMillis() - lastErrorTime else null
         )
     }
-    
+
     /**
      * Diagnostic data class for mesh manager state
      */

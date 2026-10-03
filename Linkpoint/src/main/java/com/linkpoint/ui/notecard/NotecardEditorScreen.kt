@@ -64,7 +64,7 @@ import java.util.UUID
 
 /**
  * Compose-based Notecard Editor Screen.
- * 
+ *
  * Features:
  * - View and edit notecard content
  * - Display embedded items list (collapsible)
@@ -72,7 +72,7 @@ import java.util.UUID
  * - Save changes (when editable)
  * - Unsaved changes confirmation dialog
  * - Dark theme optimized for reading/editing
- * 
+ *
  * Based on reference viewer/Firestorm notecard viewer design.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,7 +90,7 @@ fun NotecardEditorScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val clipboardManager = LocalClipboardManager.current
-    
+
     var notecardContent by remember { mutableStateOf("") }
     var originalContent by remember { mutableStateOf("") }
     var embeddedItems by remember { mutableStateOf<List<EmbeddedItem>>(emptyList()) }
@@ -98,12 +98,12 @@ fun NotecardEditorScreen(
     var showEmbeddedItems by remember { mutableStateOf(false) }
     var hasUnsavedChanges by remember { mutableStateOf(false) }
     var showUnsavedDialog by remember { mutableStateOf(false) }
-    
+
     // Track changes
     LaunchedEffect(notecardContent) {
         hasUnsavedChanges = notecardContent != originalContent && !isReadOnly
     }
-    
+
     // Load notecard on mount
     LaunchedEffect(assetId) {
         if (assetId != null) {
@@ -124,7 +124,7 @@ fun NotecardEditorScreen(
             isLoading = false
         }
     }
-    
+
     // Handle back press with unsaved changes
     fun handleBack() {
         if (hasUnsavedChanges) {
@@ -133,7 +133,7 @@ fun NotecardEditorScreen(
             onNavigateBack()
         }
     }
-    
+
     // Unsaved changes dialog
     if (showUnsavedDialog) {
         AlertDialog(
@@ -174,7 +174,7 @@ fun NotecardEditorScreen(
             }
         )
     }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -188,9 +188,9 @@ fun NotecardEditorScreen(
                                 else -> stringResource(R.string.notecard_status_editing)
                             },
                             style = MaterialTheme.typography.bodySmall,
-                            color = if (hasUnsavedChanges) 
-                                Color(0xFFFF9800) 
-                            else 
+                            color = if (hasUnsavedChanges)
+                                Color(0xFFFF9800)
+                            else
                                 MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -211,7 +211,7 @@ fun NotecardEditorScreen(
                     }) {
                         Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.copy))
                     }
-                    
+
                     // Save button (only for editable notecards)
                     if (!isReadOnly && itemId != null) {
                         val savedText = stringResource(R.string.notecard_saved)
@@ -234,9 +234,9 @@ fun NotecardEditorScreen(
                             Icon(
                                 Icons.Default.Save,
                                 contentDescription = stringResource(R.string.save),
-                                tint = if (hasUnsavedChanges) 
-                                    MaterialTheme.colorScheme.primary 
-                                else 
+                                tint = if (hasUnsavedChanges)
+                                    MaterialTheme.colorScheme.primary
+                                else
                                     MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -282,7 +282,7 @@ fun NotecardEditorScreen(
                     )
                     HorizontalDivider(color = Color(0xFF3C3C3C))
                 }
-                
+
                 // Content editor
                 NotecardContent(
                     content = notecardContent,
@@ -339,7 +339,7 @@ private fun EmbeddedItemsSection(
                 tint = Color(0xFFB0B0B0)
             )
         }
-        
+
         if (expanded) {
             Spacer(modifier = Modifier.height(8.dp))
             items.forEach { item ->
@@ -394,7 +394,7 @@ private fun NotecardContent(
 ) {
     val verticalScrollState = rememberScrollState()
     val horizontalScrollState = rememberScrollState()
-    
+
     Box(
         modifier = modifier
             .background(Color(0xFF1E1E1E))

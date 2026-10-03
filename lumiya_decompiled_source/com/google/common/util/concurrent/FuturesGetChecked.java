@@ -45,7 +45,7 @@ public final class FuturesGetChecked {
         /* loaded from: classes.dex */
         enum ClassValueValidator implements GetCheckedTypeValidator {
             INSTANCE;
-            
+
             private static final ClassValue<Boolean> isValidClass = new ClassValue<Boolean>() { // from class: com.google.common.util.concurrent.FuturesGetChecked.GetCheckedTypeValidatorHolder.ClassValueValidator.1
                 protected Boolean computeValue(Class<?> cls) {
                     FuturesGetChecked.checkExceptionClassValidity(cls.asSubclass(Exception.class));
@@ -68,7 +68,7 @@ public final class FuturesGetChecked {
         /* loaded from: classes.dex */
         public enum WeakSetValidator implements GetCheckedTypeValidator {
             INSTANCE;
-            
+
             private static final Set<WeakReference<Class<? extends Exception>>> validClasses = new CopyOnWriteArraySet();
 
             @Override // com.google.common.util.concurrent.FuturesGetChecked.GetCheckedTypeValidator

@@ -35,11 +35,11 @@ class AvatarManager(
     companion object {
         private const val TAG = "AvatarManager"
         private const val MAX_AVATARS = 100
-        
+
         // Diagnostic threshold for "recently updated" avatars (5 seconds)
         private const val RECENT_UPDATE_THRESHOLD_MS = 5000L
     }
-    
+
     private val avatars = ConcurrentHashMap<UUID, Avatar>()
 
     sealed class AvatarEvent {
@@ -48,26 +48,26 @@ class AvatarManager(
         data class Removed(val agentId: UUID, val localId: Int?) : AvatarEvent()
     }
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    
+
     // Local agent
     private var myAgentId: UUID? = null
     private var myAvatar: Avatar? = null
     private var outfitManager: OutfitManager? = null
-    
+
     // Mapping from localId to agentId for terse updates
     // This is populated when we receive full object updates with both IDs
     private val localIdToAgentId = ConcurrentHashMap<Int, UUID>()
-    
+
     // Movement controller for the local avatar
     val movementController: MovementController by lazy {
         MovementController(udpConnection ?: throw IllegalStateException("UDP connection required for movement"))
     }
-    
+
     private val _avatarCount = MutableStateFlow(0)
     val avatarCount: StateFlow<Int> = _avatarCount
     private val _avatarEvents = MutableSharedFlow<AvatarEvent>(extraBufferCapacity = 256)
     val avatarEvents: SharedFlow<AvatarEvent> = _avatarEvents
-    
+
     /**
      * Set the local agent ID and proactively create the local Avatar entry.
      *
@@ -103,7 +103,7 @@ class AvatarManager(
     fun setOutfitManager(manager: OutfitManager) {
         outfitManager = manager
     }
-    
+
     /**
      * Add or update an avatar
      */
@@ -117,20 +117,20 @@ class AvatarManager(
         val avatar = avatars.getOrPut(agentId) {
             createAvatar(agentId)
         }
-        
+
         avatar.position = position
         avatar.rotation = rotation
         avatar.velocity = velocity
         avatar.lastUpdate = System.currentTimeMillis()
-        
+
         if (agentId == myAgentId) {
             myAvatar = avatar
         }
-        
+
         _avatarCount.value = avatars.size
         _avatarEvents.tryEmit(if (existed) AvatarEvent.Updated(agentId, avatar.localId) else AvatarEvent.Added(agentId, avatar.localId))
     }
-    
+
     /**
      * Add or update an avatar with localId for terse update mapping.
      * This should be called when processing full ObjectUpdate messages for avatars.
@@ -165,7 +165,7 @@ class AvatarManager(
         Log.d(TAG, "Registered localId mapping: $localId -> $agentId")
         replayPendingTerseUpdate(localId, agentId)
     }
-    
+
     /**
      * Remove an avatar
      */
@@ -180,13 +180,13 @@ class AvatarManager(
         }
         _avatarCount.value = avatars.size
     }
-    
+
     /**
      * Handle animation update from simulator
      */
     fun handleAnimationUpdate(data: AvatarAnimationData) {
         val avatar = avatars[data.agentId] ?: return
-        
+
         scope.launch {
             // Stop animations not in the new list
             val newAnimIds = data.animations.map { it.first }.toSet()
@@ -195,7 +195,7 @@ class AvatarManager(
                     avatar.animator.stopAnimation(animId)
                 }
             }
-            
+
             // Start new animations
             for ((animId, _) in data.animations) {
                 if (!avatar.animator.isPlaying(animId)) {
@@ -204,12 +204,12 @@ class AvatarManager(
             }
         }
     }
-    
+
     /**
      * Alias for handleAnimationUpdate - handles AvatarAnimation UDP messages
      */
     fun handleAvatarAnimation(data: AvatarAnimationData) = handleAnimationUpdate(data)
-    
+
     /**
      * Handle terse position update from ImprovedTerseObjectUpdate message.
      * This is used for fast position updates for avatars (when isAvatar=true).
@@ -284,7 +284,7 @@ class AvatarManager(
     fun clearPendingTerseUpdates() {
         pendingTerseUpdates.clear()
     }
-    
+
     /**
      * Handle CoarseLocationUpdate message.
      * This provides rough positions for all avatars in the region.
@@ -298,40 +298,40 @@ class AvatarManager(
         // Minimum size: You (2) + Prey (2) + count (1) = 5 bytes
         // With at least 1 agent: 5 + 19 = 24 bytes
         if (payload.size < 5) return
-        
+
         try {
             val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
-            
+
             // You block - index of our agent in the list (2 bytes, signed short, -1 if not in list)
             val youIndex = buffer.short.toInt()
-            
+
             // Prey block - index of prey agent (2 bytes, signed short, -1 if no prey)
             val preyIndex = buffer.short.toInt()
-            
+
             // AgentData blocks - count is 1 byte
             val agentCount = buffer.get().toInt() and 0xFF
-            
+
             Log.d(TAG, "CoarseLocationUpdate: $agentCount agents, youIndex=$youIndex")
-            
+
             // Reusable buffers for parsing loop
             val uuidBytes = ByteArray(16)
             val agentIdBuffer = java.nio.ByteBuffer.wrap(uuidBytes).order(java.nio.ByteOrder.BIG_ENDIAN)
 
             for (i in 0 until agentCount) {
                 if (buffer.remaining() < 19) break // 16 bytes UUID + 3 bytes position
-                
+
                 // Agent ID (16 bytes UUID)
                 buffer.get(uuidBytes)
                 agentIdBuffer.clear()
                 val agentId = UUID(agentIdBuffer.long, agentIdBuffer.long)
-                
+
                 // Position in region (X, Y, Z as bytes - each represents 0-255 in region coords)
                 val x = (buffer.get().toInt() and 0xFF).toFloat()
                 val y = (buffer.get().toInt() and 0xFF).toFloat()
                 val z = (buffer.get().toInt() and 0xFF).toFloat()
-                
+
                 val position = LLVector3(x, y, z)
-                
+
                 // Update or create avatar entry with coarse position
                 // Skip zero UUID (invalid/null UUID)
                 val isValidUUID = agentId != UUID(0L, 0L)
@@ -341,20 +341,20 @@ class AvatarManager(
                     }
                     avatar.position = position
                     avatar.lastUpdate = System.currentTimeMillis()
-                    
+
                     if (agentId == myAgentId) {
                         myAvatar = avatar
                     }
                 }
             }
-            
+
             _avatarCount.value = avatars.size
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing CoarseLocationUpdate", e)
         }
     }
-    
+
     /**
      * Update all avatars
      */
@@ -362,24 +362,24 @@ class AvatarManager(
         for (avatar in avatars.values) {
             // Update animation
             avatar.animator.update(deltaTime)
-            
+
             // Interpolate position
             if (avatar.velocity.length() > 0.01f) {
                 avatar.position = avatar.position + avatar.velocity * deltaTime
             }
         }
     }
-    
+
     /**
      * Get avatar by ID
      */
     fun getAvatar(agentId: UUID): Avatar? = avatars[agentId]
-    
+
     /**
      * Get my avatar
      */
     fun getMyAvatar(): Avatar? = myAvatar
-    
+
     /**
      * Get all nearby avatars
      */
@@ -389,7 +389,7 @@ class AvatarManager(
             avatar.position.distanceSquared(position) <= radiusSquared
         }.sortedBy { it.position.distanceSquared(position) }
     }
-    
+
     /**
      * Get all avatars
      */
@@ -401,12 +401,12 @@ class AvatarManager(
         val agentId = localIdToAgentId[localId] ?: return
         removeAvatar(agentId)
     }
-    
+
     private fun createAvatar(agentId: UUID): Avatar {
         val skeleton = AvatarSkeleton(context)
         val animator = AvatarAnimator(skeleton, animationManager)
         val baker = AvatarBaker(context, textureManager, capabilityManager)
-        
+
         return Avatar(
             agentId = agentId,
             skeleton = skeleton,
@@ -414,7 +414,7 @@ class AvatarManager(
             baker = baker
         )
     }
-    
+
     /**
      * Update avatar appearance
      */
@@ -424,44 +424,44 @@ class AvatarManager(
         visualParams: ByteArray?
     ) {
         val avatar = avatars[agentId] ?: return
-        
+
         // Update wearables
         for (wearable in wearables) {
             avatar.baker.setWearable(wearable.type, wearable)
         }
-        
+
         // Update visual params (shape, etc)
         if (visualParams != null) {
             avatar.visualParams = visualParams
             applyVisualParams(avatar)
         }
-        
+
         // Trigger rebake
         scope.launch {
             avatar.baker.bakeAll()
         }
     }
-    
+
     private fun applyVisualParams(avatar: Avatar) {
         val params = avatar.visualParams ?: return
-        
+
         // Visual params affect bone positions and scales
         // This is a simplified version - full implementation would
         // parse the complete visual params data
-        
+
         if (params.size >= 218) {
             // Height (param 33)
             val heightParam = params[33].toInt() and 0xFF
             val heightScale = 0.8f + (heightParam / 255f) * 0.4f
-            
+
             avatar.skeleton.getBone("mPelvis")?.let { pelvis ->
                 pelvis.scale = LLVector3(1f, 1f, heightScale)
             }
         }
-        
+
         avatar.skeleton.updateBoneMatrices()
     }
-    
+
     /**
      * Handle incoming avatar appearance data from UDP message.
      */
@@ -509,7 +509,7 @@ class AvatarManager(
             }
         }
     }
-    
+
     /**
      * Handle incoming wearables update from UDP message.
      */
@@ -561,7 +561,7 @@ class AvatarManager(
     private val appearanceScope = kotlinx.coroutines.CoroutineScope(
         kotlinx.coroutines.Dispatchers.Default + kotlinx.coroutines.SupervisorJob()
     )
-    
+
     /**
      * Handle AvatarSitResponse from server.
      */
@@ -573,7 +573,7 @@ class AvatarManager(
             Log.d(TAG, "Agent is now sitting on ${data.sitObjectID} at ${data.sitPosition}")
         }
     }
-    
+
     /**
      * Get wearables of a specific type from the current avatar's outfit
      */
@@ -602,7 +602,7 @@ class AvatarManager(
             )
         )
     }
-    
+
     /**
      * Wear a specific wearable item
      */
@@ -614,12 +614,12 @@ class AvatarManager(
         }
         manager.wearItem(wearable.itemId, replace = true)
     }
-    
+
     // ==================== AGENT HEALTH ====================
-    
+
     private var _agentHealth: Float = 100f
     val agentHealth: Float get() = _agentHealth
-    
+
     /**
      * Update agent health from HealthMessage
      */
@@ -627,7 +627,7 @@ class AvatarManager(
         _agentHealth = health.coerceIn(0f, 100f)
         android.util.Log.d("AvatarManager", "Agent health updated: $_agentHealth%")
     }
-    
+
     fun shutdown() {
         scope.cancel()
         if (udpConnection != null) {
@@ -639,21 +639,21 @@ class AvatarManager(
         }
         avatars.clear()
     }
-    
+
     // ==================== DIAGNOSTIC METHODS ====================
-    
+
     /**
      * Get comprehensive diagnostic data for debug reports
      */
     fun getDiagnostics(): AvatarManagerDiagnostics {
         val allAvatars = avatars.values.toList()
         val now = System.currentTimeMillis()
-        
+
         val recentlyUpdated = allAvatars.count { now - it.lastUpdate < RECENT_UPDATE_THRESHOLD_MS }
         val flyingCount = allAvatars.count { it.isFlying }
         val sittingCount = allAvatars.count { it.isSitting }
         val typingCount = allAvatars.count { it.isTyping }
-        
+
         return AvatarManagerDiagnostics(
             totalAvatars = avatars.size,
             myAgentId = myAgentId,
@@ -664,7 +664,7 @@ class AvatarManager(
             typingCount = typingCount
         )
     }
-    
+
     /**
      * Diagnostic data class for avatar manager state
      */
@@ -691,15 +691,15 @@ class Avatar(
     var visualParams: ByteArray? = null
     var textureEntry: ByteArray? = null
     var lastUpdate: Long = 0
-    
+
     // LocalId for terse update mapping (set from ObjectUpdate messages)
     var localId: Int? = null
-    
+
     // Profile data
     var displayName: String? = null
     var userName: String? = null
     var groupTitle: String? = null
-    
+
     // State
     var isFlying: Boolean = false
     var isSitting: Boolean = false

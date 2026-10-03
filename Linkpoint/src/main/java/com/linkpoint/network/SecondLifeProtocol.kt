@@ -34,7 +34,7 @@ import java.util.UUID
 /**
  * Second Life protocol implementation
  * Handles login, message sending, and grid communication
- * 
+ *
  * Now integrated with CoreNetworkingService for:
  * - gRPC-based networking (where applicable)
  * - Comprehensive retry logic with exponential backoff
@@ -42,17 +42,17 @@ import java.util.UUID
  * - Error count tracking and thresholds
  * - Automatic reconnection
  * - Network diagnostics
- * 
+ *
  * Enhanced with official viewer compliance:
  * - Persistent device identifiers (MAC, ID0)
  * - Crash tracking (last_exec_event)
  * - MFA hash storage
  * - Pre-hashed password support
- * 
+ *
  * Based on patterns from the official Second Life app and reference viewer compatibility.
  */
 class SecondLifeProtocol(private val context: Context) {
-    
+
     companion object {
         private const val TAG = "SLProtocol"
         // NOTE: Identifying as "Linkpoint" for grid compatibility.
@@ -60,27 +60,27 @@ class SecondLifeProtocol(private val context: Context) {
         private const val VIEWER_NAME = "Linkpoint"
         private const val VIEWER_VERSION = "1.0.0"
     }
-    
+
     // Reference to the LinkpointApp instance
     private val app get() = LinkpointApp.getInstance()
-    
+
     // Core networking service with all connection management features
     private val networkingService = CoreNetworkingService(context)
-    
+
     // Device identification (persistent across sessions) - matches official viewer behavior
     private val deviceIdentifier = DeviceIdentifier(context)
-    
+
     // Crash tracking for last_exec_event parameter - matches official viewer behavior
     private val crashTracker = CrashTracker(context)
-    
+
     // MFA hash storage for skipping MFA on trusted devices
     private val mfaHashStorage = MfaHashStorage(context)
-    
+
     // Expose connection quality and state for UI
     val qualityManager get() = networkingService.qualityManager
     val stateManager get() = networkingService.stateManager
     val connectionEvents get() = networkingService.connectionEvents
-    
+
     init {
         // Observe connection events and update app state
         LinkpointApp.getInstance().applicationScope.launch {
@@ -111,7 +111,7 @@ class SecondLifeProtocol(private val context: Context) {
             }
         }
     }
-    
+
     /**
      * Record that the app has started (for crash tracking).
      * Call this from Application.onCreate().
@@ -119,7 +119,7 @@ class SecondLifeProtocol(private val context: Context) {
     fun recordAppStart() {
         crashTracker.recordAppStart()
     }
-    
+
     /**
      * Record a clean shutdown (for crash tracking).
      * Call this when the user logs out properly.
@@ -127,24 +127,24 @@ class SecondLifeProtocol(private val context: Context) {
     fun recordCleanShutdown() {
         crashTracker.recordCleanShutdown()
     }
-    
+
     /**
      * Get stored MFA hash for a user (to skip MFA prompt).
      */
     fun getStoredMfaHash(username: String): String? {
         return mfaHashStorage.getMfaHash(username)
     }
-    
+
     /**
      * Store MFA hash after successful MFA verification.
      */
     fun storeMfaHash(username: String, mfaHash: String) {
         mfaHashStorage.saveMfaHash(username, mfaHash)
     }
-    
+
     /**
      * Perform login to the grid
-     * 
+     *
      * @param firstName User's first name
      * @param lastName User's last name
      * @param password User's password
@@ -166,28 +166,28 @@ class SecondLifeProtocol(private val context: Context) {
     ): LoginResult = withContext(Dispatchers.IO) {
         val app = LinkpointApp.getInstance()
         app.sessionManager.setConnectionState(ConnectionState.CONNECTING)
-        
+
         // Start initialization tracking
         com.linkpoint.utils.InitializationTracker.startSession()
         com.linkpoint.utils.InitializationTracker.reachPhase(
             com.linkpoint.utils.InitializationTracker.Phase.LOGIN_STARTING,
             "Login for $firstName $lastName"
         )
-        
+
         Log.d(TAG, "Attempting login for $firstName $lastName")
         NetworkLogger.logProtocol(
             "Second Life Login",
             "Grid: $loginUri, User: $firstName $lastName, Start: $startLocation"
         )
-        
+
         // Log network diagnostics before login
         networkingService.logNetworkDiagnostics()
-        
+
         // Create password hash - IMPORTANT: Must truncate to 16 chars like the reference viewer does
         // This is a Second Life protocol requirement
         val truncatedPassword = password.trim().take(16)
         val passwordHash = createPasswordHash(password)
-        
+
         // Dynamically resolve GridInfo endpoints prior to executing login RPC
         val selectedGrid = app.gridManager.getSelectedGrid()
         val resolvedGrid = if (selectedGrid.isResolved || com.linkpoint.network.grid.GridInfoResolver.isSecondLifeUri(loginUri)) {
@@ -201,14 +201,14 @@ class SecondLifeProtocol(private val context: Context) {
 
         Log.d(TAG, "Login details - URI: $effectiveLoginUri (resolved grid: ${resolvedGrid.name}), firstName: $firstName, lastName: $lastName, " +
             "passwordLen: ${password.length}, truncatedLen: ${truncatedPassword.length}, startLoc: $startLocation")
-        
+
         // Log detailed authentication parameters (without sensitive data)
         NetworkLogger.logAuth("Password Hash Generation", mapOf(
             "originalLength" to password.length.toString(),
             "truncatedLength" to truncatedPassword.length.toString(),
             "hashFormat" to "\$1\$MD5"
         ))
-        
+
         // Build XMLRPC request with MFA support and Modern Viewer compatibility
         val xmlRequest = buildLoginXml(
             firstName = firstName,
@@ -219,15 +219,15 @@ class SecondLifeProtocol(private val context: Context) {
             mfaHash = mfaHash,
             webAuthToken = webAuthToken
         )
-        
+
         // Use CoreNetworkingService for login with comprehensive retry handling
         com.linkpoint.utils.InitializationTracker.startPhase(
             com.linkpoint.utils.InitializationTracker.Phase.LOGIN_HTTP_REQUEST,
             "Sending login request"
         )
-        
+
         val result = networkingService.login(effectiveLoginUri, xmlRequest)
-        
+
         when (result) {
             is CoreNetworkingService.LoginResult.Success -> {
                 com.linkpoint.utils.InitializationTracker.completePhase(
@@ -238,22 +238,22 @@ class SecondLifeProtocol(private val context: Context) {
                     com.linkpoint.utils.InitializationTracker.Phase.LOGIN_SUCCESS,
                     "Processing login success"
                 )
-                
-                val agentId = try { 
-                    UUID.fromString(result.agentId) 
-                } catch (e: Exception) { 
-                    UUID.randomUUID() 
+
+                val agentId = try {
+                    UUID.fromString(result.agentId)
+                } catch (e: Exception) {
+                    UUID.randomUUID()
                 }
-                
+
                 Log.i(TAG, "Login successful! Agent: ${result.agentId}")
-                
+
                 NetworkLogger.logAuth("Login Success", mapOf(
                     "agentId" to result.agentId,
                     "sessionId" to "***REDACTED***",
                     "simIp" to result.simIp,
                     "simPort" to result.simPort.toString()
                 ))
-                
+
                 // Validate critical login response fields
                 val circuitCode = result.circuitCode ?: 0
                 if (circuitCode == 0) {
@@ -268,7 +268,7 @@ class SecondLifeProtocol(private val context: Context) {
                         technicalDetails = "The server returned a successful login but did not include the circuit code required for simulator connection."
                     )
                 }
-                
+
                 if (result.simIp.isEmpty()) {
                     Log.e(TAG, "Login failed: Server did not provide simulator IP address")
                     com.linkpoint.utils.InitializationTracker.failPhase(
@@ -281,7 +281,7 @@ class SecondLifeProtocol(private val context: Context) {
                         technicalDetails = "The server returned a successful login but did not include the simulator IP address."
                     )
                 }
-                
+
                 if (result.simPort <= 0) {
                     Log.e(TAG, "Login failed: Server did not provide a valid simulator port")
                     com.linkpoint.utils.InitializationTracker.failPhase(
@@ -294,7 +294,7 @@ class SecondLifeProtocol(private val context: Context) {
                         technicalDetails = "The server returned simPort=${result.simPort}, which is not valid."
                     )
                 }
-                
+
                 val regionInfo = RegionInfo(
                     name = result.regionName ?: "Unknown",
                     handle = 0,
@@ -304,12 +304,12 @@ class SecondLifeProtocol(private val context: Context) {
                     simPort = result.simPort,
                     seedCapability = result.seedCapability
                 )
-                
+
                 com.linkpoint.utils.InitializationTracker.startPhase(
                     com.linkpoint.utils.InitializationTracker.Phase.SESSION_SETUP,
                     "Setting up session"
                 )
-                
+
                 app.sessionManager.onLoginSuccess(
                     sessionId = result.sessionId,
                     agentId = agentId,
@@ -318,7 +318,7 @@ class SecondLifeProtocol(private val context: Context) {
                     lastName = lastName,
                     regionInfo = regionInfo
                 )
-                
+
                 // Configure cache manager with grid and user info for Linkpoint Cache structure.
                 // Grid path:  Documents/Linkpoint/Public/<gridId>/<assetType>/...
                 // User path:  Documents/Linkpoint/Private/<gridId>/<userId>/...
@@ -331,19 +331,19 @@ class SecondLifeProtocol(private val context: Context) {
                 app.cacheManager.setCurrentGrid(grid.id)
                 app.cacheManager.setCurrentUser(result.agentId)
                 Log.i(TAG, "Cache configured for grid: ${grid.id} (${grid.name}), user: ${result.agentId}")
-                
+
                 // Initialize agent-specific managers (sets app.agentId)
                 app.initializeAgentManagers(agentId)
-                
+
                 com.linkpoint.utils.InitializationTracker.completePhase(
                     com.linkpoint.utils.InitializationTracker.Phase.SESSION_SETUP,
                     "Session and managers initialized"
                 )
-                
+
                 Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
                 Log.i(TAG, "║ POST-LOGIN INITIALIZATION SEQUENCE STARTING")
                 Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
-                
+
                 // Configure and connect UDP connection for simulator communication
                 // This is critical for receiving object updates, chat, IMs, etc.
                 // IMPORTANT: We now wait for UDP connection before returning success
@@ -351,10 +351,10 @@ class SecondLifeProtocol(private val context: Context) {
                     com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTING,
                     "Connecting to ${result.simIp}:${result.simPort}"
                 )
-                
+
                 Log.i(TAG, "[STEP 1/2] Establishing UDP connection to ${result.simIp}:${result.simPort} with circuit $circuitCode")
                 app.udpConnection.configure(result.simIp, result.simPort, circuitCode)
-                
+
                 // Set session info for circuit establishment
                 val sessionUUID = try {
                     UUID.fromString(result.sessionId)
@@ -363,7 +363,7 @@ class SecondLifeProtocol(private val context: Context) {
                     UUID.randomUUID()
                 }
                 app.udpConnection.setSessionInfo(sessionUUID, agentId)
-                
+
                 // Connect UDP synchronously - wait for connection before continuing
                 val udpConnected = try {
                     Log.d(TAG, "[STEP 1/2] UDP connect() starting...")
@@ -376,7 +376,7 @@ class SecondLifeProtocol(private val context: Context) {
                     )
                     false
                 }
-                
+
                 if (udpConnected) {
                     com.linkpoint.utils.InitializationTracker.completePhase(
                         com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTING,
@@ -401,7 +401,7 @@ class SecondLifeProtocol(private val context: Context) {
                     // - Avatar movement won't be sent to simulator
                     // User will need to restart app to retry connection
                 }
-                
+
                 // Initialize capabilities from seed capability (for textures, meshes, etc.)
                 // This is critical for rendering - like the reference viewer's SLCaps.GetCapabilities()
                 // IMPORTANT: We now wait for capabilities initialization before returning success
@@ -415,7 +415,7 @@ class SecondLifeProtocol(private val context: Context) {
                     Log.i(TAG, "[STEP 2/2] Initializing capabilities from seed...")
                     Log.d(TAG, "[STEP 2/2] Seed URL: ${seedCap.take(80)}...")
                     Log.d(TAG, "[STEP 2/2] Using Linkpoint translation layer with login URL: ${loginUri.take(60)}...")
-                    
+
                     try {
                         Log.d(TAG, "[STEP 2/2] capabilityManager.initialize() starting with Linkpoint translation...")
                         // Use the overload that accepts loginUri for Linkpoint-compatible URL repair
@@ -473,7 +473,7 @@ class SecondLifeProtocol(private val context: Context) {
                     Log.w(TAG, "[STEP 2/2] ✗ No seed capability in login response - textures may not load")
                     Log.w(TAG, "  seedCapability was null or empty in login response")
                 }
-                
+
                 // Log final initialization status
                 if (udpConnected && capsInitialized) {
                     Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
@@ -486,12 +486,12 @@ class SecondLifeProtocol(private val context: Context) {
                     Log.w(TAG, "║   Capabilities Initialized: $capsInitialized")
                     Log.w(TAG, "╚══════════════════════════════════════════════════════════════════")
                 }
-                
+
                 com.linkpoint.utils.InitializationTracker.completePhase(
                     com.linkpoint.utils.InitializationTracker.Phase.LOGIN_SUCCESS,
                     "Login completed, waiting for world data"
                 )
-                
+
                 NetworkLogger.logProtocol("Login Complete", "Successfully connected to ${result.simIp}:${result.simPort}")
 
                 // Cache credentials so the auto re-login coordinator can
@@ -511,7 +511,7 @@ class SecondLifeProtocol(private val context: Context) {
             is CoreNetworkingService.LoginResult.MFARequired -> {
                 app.sessionManager.setConnectionState(ConnectionState.DISCONNECTED)
                 Log.i(TAG, "MFA required for login: ${result.message}")
-                
+
                 LoginResult.MFARequired(
                     message = result.message,
                     agentId = result.agentId
@@ -537,26 +537,26 @@ class SecondLifeProtocol(private val context: Context) {
             }
         }
     }
-    
+
     /**
      * Parse the login response XML and populate managers with initial data.
-     * 
+     *
      * This extracts:
      * - buddy-list: Friends list from login response
      * - inventory-skeleton: Initial inventory folder structure
-     * 
+     *
      * Based on the reference viewer's login response parsing logic.
      */
     private fun parseAndPopulateLoginData(responseXml: String, agentId: UUID) {
         try {
             Log.i(TAG, "[LOGIN DATA] Parsing login response for buddy-list and inventory...")
-            
+
             val parsedData = LoginResponseParser.parse(responseXml)
-            
+
             // Populate friends from buddy-list
             if (parsedData.buddyList.isNotEmpty()) {
                 Log.i(TAG, "[LOGIN DATA] Populating ${parsedData.buddyList.size} friends from login response")
-                
+
                 if (app.isFriendsManagerInitialized()) {
                     // First, add all friends with placeholder names
                     parsedData.buddyList.forEach { buddy ->
@@ -568,7 +568,7 @@ class SecondLifeProtocol(private val context: Context) {
                         )
                     }
                     Log.i(TAG, "[LOGIN DATA] ✓ Friends added: ${parsedData.buddyList.size}")
-                    
+
                     // Now resolve display names for all friends
                     if (app.isDisplayNameManagerInitialized()) {
                         try {
@@ -645,18 +645,18 @@ class SecondLifeProtocol(private val context: Context) {
             } else {
                 Log.d(TAG, "[LOGIN DATA] No friends in buddy-list")
             }
-            
+
             // Populate inventory skeleton
             if (parsedData.inventorySkeleton.isNotEmpty()) {
                 Log.i(TAG, "[LOGIN DATA] Populating ${parsedData.inventorySkeleton.size} inventory folders from login response")
-                
+
                 if (app.isInventoryManagerInitialized()) {
                     // Set root folder first
                     parsedData.inventoryRoot?.let { rootId ->
                         app.inventoryManager.setRootFolder(rootId)
                         Log.d(TAG, "[LOGIN DATA] Set inventory root: $rootId")
                     }
-                    
+
                     // Add all folders to inventory cache
                     parsedData.inventorySkeleton.forEach { folder ->
                         app.inventoryManager.addFolderFromLogin(
@@ -674,12 +674,12 @@ class SecondLifeProtocol(private val context: Context) {
             } else {
                 Log.d(TAG, "[LOGIN DATA] No folders in inventory-skeleton")
             }
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "[LOGIN DATA] Error parsing login response data", e)
         }
     }
-    
+
     private fun buildLoginXml(
         firstName: String,
         lastName: String,
@@ -696,15 +696,15 @@ class SecondLifeProtocol(private val context: Context) {
         val safeToken = escapeXml(if (mfaToken.isNotBlank()) mfaToken else webAuthToken)
         val safeMfaHash = escapeXml(mfaHash)
         val safeWebAuthToken = escapeXml(webAuthToken)
-        
+
         // Use persistent device identifiers (matches official viewer behavior)
         val viewerDigest = deviceIdentifier.getViewerDigest()
         val macAddress = deviceIdentifier.getMacAddress()
         val id0 = deviceIdentifier.getId0()
-        
+
         // Get last execution status for crash reporting (matches official viewer behavior)
         val lastExecEvent = crashTracker.getLastExecStatus()
-        
+
         // Build XML-RPC request with minimal whitespace for maximum compatibility
         return buildString {
             append("<?xml version=\"1.0\"?>")
@@ -713,13 +713,13 @@ class SecondLifeProtocol(private val context: Context) {
             append("<params>")
             append("<param>")
             append("<value><struct>")
-            
+
             // Core login fields
             append("<member><name>first</name><value><string>$safeFirstName</string></value></member>")
             append("<member><name>last</name><value><string>$safeLastName</string></value></member>")
             append("<member><name>passwd</name><value><string>$safePassword</string></value></member>")
             append("<member><name>start</name><value><string>$safeStart</string></value></member>")
-            
+
             // MFA fields - required by Second Life MFA login flow
             // See: https://wiki.secondlife.com/wiki/User:Brad_Linden/Login_MFA
             // - token: TOTP code from authenticator app (empty string if not responding to challenge)
@@ -730,26 +730,26 @@ class SecondLifeProtocol(private val context: Context) {
             if (safeWebAuthToken.isNotBlank()) {
                 append("<member><name>web_auth_token</name><value><string>$safeWebAuthToken</string></value></member>")
             }
-            
+
             // Viewer identification
             append("<member><name>channel</name><value><string>$VIEWER_NAME</string></value></member>")
             append("<member><name>version</name><value><string>$VIEWER_NAME $VIEWER_VERSION</string></value></member>")
             append("<member><name>platform</name><value><string>Android</string></value></member>")
             append("<member><name>platform_version</name><value><string>${android.os.Build.VERSION.RELEASE}</string></value></member>")
-            
+
             // Device identification (persistent, hashed - matches official viewer behavior)
             append("<member><name>mac</name><value><string>$macAddress</string></value></member>")
             append("<member><name>id0</name><value><string>$id0</string></value></member>")
             append("<member><name>viewer_digest</name><value><string>$viewerDigest</string></value></member>")
-            
+
             // Agreements and status
             append("<member><name>agree_to_tos</name><value><string>true</string></value></member>")
             append("<member><name>read_critical</name><value><string>true</string></value></member>")
-            
+
             // Last execution event - tracks previous app exit status for crash reporting
             // Required by official protocol, all desktop viewers send this
             append("<member><name>last_exec_event</name><value><i4>$lastExecEvent</i4></value></member>")
-            
+
             // Options array - comprehensive list matching official viewers
             append("<member><name>options</name><value><array><data>")
             // Core inventory options
@@ -786,16 +786,16 @@ class SecondLifeProtocol(private val context: Context) {
             append("<value><string>profile-server-url</string></value>")
             append("<value><string>search</string></value>")
             append("</data></array></value></member>")
-            
+
             append("</struct></value>")
             append("</param>")
             append("</params>")
             append("</methodCall>")
         }
     }
-    
+
     // Note: generateMacAddress() removed - now using DeviceIdentifier for persistent IDs
-    
+
     private fun escapeXml(input: String): String {
         return input
             .replace("&", "&amp;")
@@ -804,7 +804,7 @@ class SecondLifeProtocol(private val context: Context) {
             .replace("\"", "&quot;")
             .replace("'", "&apos;")
     }
-    
+
     /**
      * Create MD5 hash of input string
      */
@@ -813,18 +813,18 @@ class SecondLifeProtocol(private val context: Context) {
         val digest = md.digest(input.toByteArray())
         return digest.joinToString("") { "%02x".format(it) }
     }
-    
+
     /**
      * Create Second Life password hash.
-     * 
+     *
      * IMPORTANT: Second Life protocol requires passwords to be truncated to 16 characters
      * before MD5 hashing. This matches the official viewer implementation and is required
      * for compatibility with Second Life login servers.
-     * 
+     *
      * Supports already-hashed passwords: If the input is already in $1$<md5> format
      * (35 characters starting with $1$), it is returned unchanged. This matches
      * LibreMetaverse, Firestorm, and other official viewer behavior.
-     * 
+     *
      * @param password The plain text password (will be trimmed and truncated to 16 chars)
      *                 OR an already-hashed password in $1$<md5> format
      * @return Password hash in format "$1$<md5_hash>"
@@ -838,7 +838,7 @@ class SecondLifeProtocol(private val context: Context) {
         val truncatedPassword = password.trim().take(16)
         return "\$1\$${md5Hash(truncatedPassword)}"
     }
-    
+
     /**
      * Force a reconnection
      */
@@ -846,14 +846,14 @@ class SecondLifeProtocol(private val context: Context) {
         Log.d(TAG, "Force reconnect requested")
         networkingService.forceReconnect()
     }
-    
+
     /**
      * Get network diagnostics report
      */
     fun getNetworkDiagnosticsReport(): String {
         val qualityReport = qualityManager.getQualityReport()
         val connectionDetails = stateManager.getConnectionDetails()
-        
+
         return buildString {
             appendLine("=== Linkpoint Network Diagnostics ===")
             appendLine()
@@ -881,7 +881,7 @@ class SecondLifeProtocol(private val context: Context) {
             appendLine("Always Reconnect: ${connectionDetails.alwaysReconnect}")
         }
     }
-    
+
     /**
      * Send a chat message via ChatManager.
      * Delegates to the ChatManager which handles the actual UDP packet construction and sending.
@@ -901,7 +901,7 @@ class SecondLifeProtocol(private val context: Context) {
             Log.w(TAG, "ChatManager not initialized, cannot send chat")
         }
     }
-    
+
     /**
      * Request teleport to location
      */
@@ -989,7 +989,7 @@ class SecondLifeProtocol(private val context: Context) {
             return TeleportResult.Failure("Error sending request: ${e.message}")
         }
     }
-    
+
     /**
      * Disconnect from grid
      */
@@ -1003,7 +1003,7 @@ class SecondLifeProtocol(private val context: Context) {
         networkingService.disconnect()
         LinkpointApp.getInstance().sessionManager.disconnect()
     }
-    
+
     /**
      * Clean up resources
      */
@@ -1015,12 +1015,12 @@ class SecondLifeProtocol(private val context: Context) {
 
 sealed class LoginResult {
     data class Success(
-        val agentId: UUID, 
+        val agentId: UUID,
         val sessionId: String,
         /** MFA hash returned by server for future logins (to skip MFA prompt) */
         val mfaHash: String? = null
     ) : LoginResult()
-    
+
     /**
      * Multi-Factor Authentication is required.
      * The user must provide a TOTP code from their authenticator app.
@@ -1030,7 +1030,7 @@ sealed class LoginResult {
         val message: String,
         val agentId: String? = null
     ) : LoginResult()
-    
+
     data class Failure(
         val message: String,
         val errorCode: String? = null,

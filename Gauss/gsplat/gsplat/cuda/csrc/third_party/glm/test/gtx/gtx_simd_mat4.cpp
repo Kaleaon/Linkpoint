@@ -8,14 +8,14 @@
 /// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 /// copies of the Software, and to permit persons to whom the Software is
 /// furnished to do so, subject to the following conditions:
-/// 
+///
 /// The above copyright notice and this permission notice shall be included in
 /// all copies or substantial portions of the Software.
-/// 
+///
 /// Restrictions:
 ///		By making use of the Software for military purposes, you choose to make
 ///		a Bunny unhappy.
-/// 
+///
 /// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 /// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 /// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -66,7 +66,7 @@ std::vector<float> test_detB(std::vector<glm::mat4> const & Data)
 	{
 		_mm_prefetch((char*)&Data[i + 1], _MM_HINT_T0);
 		glm::simdMat4 m(Data[i]);
-		glm::simdVec4 d(glm::detail::sse_slow_det_ps((__m128 const * const)&m)); 
+		glm::simdVec4 d(glm::detail::sse_slow_det_ps((__m128 const * const)&m));
 		glm::vec4 v;//(d);
 		Test[i] = v.x;
 	}
@@ -109,7 +109,7 @@ std::vector<float> test_detD(std::vector<glm::mat4> const & Data)
 		_mm_prefetch((char*)&Data[i + 1], _MM_HINT_T0);
 		glm::simdMat4 m(Data[i]);
 		glm::simdVec4 d(glm::detail::sse_detd_ps((__m128 const * const)&m));
-		glm::vec4 v;//(d); 
+		glm::vec4 v;//(d);
 		Test[i] = v.x;
 	}
 
@@ -306,7 +306,7 @@ int main()
 	Error += test_compute_gtx();
 	float Det = glm::determinant(glm::simdMat4(1.0));
 	Error += Det == 1.0f ? 0 : 1;
-	
+
 	glm::simdMat4 D = glm::matrixCompMult(glm::simdMat4(1.0), glm::simdMat4(1.0));
 
 	return Error;

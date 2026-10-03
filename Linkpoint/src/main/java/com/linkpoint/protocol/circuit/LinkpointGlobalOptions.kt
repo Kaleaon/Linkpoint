@@ -13,31 +13,31 @@ import java.util.Properties
 
 /**
  * Global Options (Enhanced from the reference viewer's GlobalOptions.java)
- * 
+ *
  * User-configurable settings that affect networking and performance.
  * Enhanced for modern devices with up to 16GB+ RAM.
- * 
+ *
  * ## Modern Device Support
- * 
+ *
  * Updated for 2024+ devices:
  * - Standard memory tiers: 512MB, 1GB, 2GB, 3GB, 4GB, 6GB, 8GB, 12GB, 16GB
  * - Texture memory scales from 64MB to 2GB based on device RAM
  * - Parallel downloads scale from 2 to 32 based on device capabilities
- * 
+ *
  * ## Persistent Storage
- * 
+ *
  * Settings are stored in TWO locations for persistence:
  * 1. SharedPreferences (app-private) - cleared on uninstall
  * 2. External file backup - survives app reinstall
- * 
+ *
  * On first launch after reinstall, settings are restored from backup.
  */
 class LinkpointGlobalOptions private constructor(private val context: Context) {
-    
+
     companion object {
         private const val PREFS_NAME = "linkpoint_circuit_options"
         private const val TAG = "LinkpointGlobalOptions"
-        
+
         // External storage folder for all Linkpoint data (survives reinstall)
         const val EXTERNAL_FOLDER_NAME = "Linkpoint Viewer"
         const val SETTINGS_FILENAME = "settings.properties"
@@ -47,7 +47,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
         const val LOGS_FOLDER = "logs"
         const val SOUNDS_CACHE_FOLDER = "sounds"
         const val ANIMATIONS_CACHE_FOLDER = "animations"
-        
+
         // Preference keys
         private const val KEY_AUTO_RECONNECT = "auto_reconnect"
         private const val KEY_MAX_RECONNECT_ATTEMPTS = "max_reconnect_attempts"
@@ -68,63 +68,63 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
         private const val KEY_SYSTEM_DEFAULTS_SET = "system_defaults_set"
         private const val KEY_USER_MODIFIED = "user_modified"
         private const val KEY_DETECTED_RAM_MB = "detected_ram_mb"
-        
+
         // Maximum total cache size (100 GB)
         const val MAX_TOTAL_CACHE_GB = 100
-        
+
         // Standard RAM tiers (in MB) for snapping
         val STANDARD_RAM_TIERS_MB = listOf(
             512, 1024, 2048, 3072, 4096, 6144, 8192, 12288, 16384
         )
-        
+
         // Texture memory options (in MB) that users can select - RAM cache
         val TEXTURE_MEMORY_OPTIONS_MB = listOf(
             64, 128, 256, 384, 512, 768, 1024, 1536, 2048, 3072, 4096
         )
-        
+
         // Object memory cache options (in MB) - RAM cache
         val OBJECT_CACHE_OPTIONS_MB = listOf(
             32, 64, 128, 256, 512, 1024, 2048
         )
-        
+
         // Disk cache options (in GB) - for textures on disk
         val TEXTURE_DISK_CACHE_OPTIONS_GB = listOf(
             1, 2, 5, 10, 15, 20, 25, 30, 40, 50
         )
-        
+
         // Disk cache options (in GB) - for meshes on disk
         val MESH_DISK_CACHE_OPTIONS_GB = listOf(
             1, 2, 5, 10, 15, 20, 25, 30
         )
-        
+
         // Disk cache options (in GB) - for objects on disk
         val OBJECT_DISK_CACHE_OPTIONS_GB = listOf(
             1, 2, 5, 10, 15, 20
         )
-        
+
         // Disk cache options (in GB) - for sounds on disk
         val SOUND_DISK_CACHE_OPTIONS_GB = listOf(
             1, 2, 5, 10
         )
-        
+
         // Disk cache options (in GB) - for animations on disk
         val ANIMATION_DISK_CACHE_OPTIONS_GB = listOf(
             1, 2, 5, 10
         )
-        
+
         // Total cache limit options (in GB)
         val TOTAL_CACHE_OPTIONS_GB = listOf(
             5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100
         )
-        
+
         // Draw distance options (in meters)
         val DRAW_DISTANCE_OPTIONS = listOf(
             32, 64, 96, 128, 192, 256, 384, 512, 768, 1024
         )
-        
+
         @Volatile
         private var instance: LinkpointGlobalOptions? = null
-        
+
         fun getInstance(context: Context): LinkpointGlobalOptions {
             return instance ?: synchronized(this) {
                 instance ?: LinkpointGlobalOptions(context.applicationContext).also {
@@ -132,11 +132,11 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
                 }
             }
         }
-        
+
         /**
          * Get the main Linkpoint Viewer folder on external storage.
          * Path: /storage/sdcard0/Linkpoint Viewer
-         * 
+         *
          * This folder persists across app reinstalls and contains:
          * - settings.properties (user settings backup)
          * - textures/ (texture cache)
@@ -150,15 +150,15 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             // Try primary external storage first (/storage/sdcard0 or /storage/emulated/0)
             val primaryExternal = Environment.getExternalStorageDirectory()
             val linkpointFolder = File(primaryExternal, EXTERNAL_FOLDER_NAME)
-            
+
             // Create folder if it doesn't exist
             if (!linkpointFolder.exists()) {
                 linkpointFolder.mkdirs()
             }
-            
+
             return linkpointFolder
         }
-        
+
         /**
          * Get a specific cache subfolder
          */
@@ -169,37 +169,37 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             }
             return folder
         }
-        
+
         /**
          * Get texture cache folder: /storage/sdcard0/Linkpoint Viewer/textures
          */
         fun getTextureCacheFolder(): File = getCacheFolder(TEXTURE_CACHE_FOLDER)
-        
+
         /**
          * Get mesh cache folder: /storage/sdcard0/Linkpoint Viewer/meshes
          */
         fun getMeshCacheFolder(): File = getCacheFolder(MESH_CACHE_FOLDER)
-        
+
         /**
          * Get object cache folder: /storage/sdcard0/Linkpoint Viewer/objects
          */
         fun getObjectCacheFolder(): File = getCacheFolder(OBJECT_CACHE_FOLDER)
-        
+
         /**
          * Get logs folder: /storage/sdcard0/Linkpoint Viewer/logs
          */
         fun getLogsFolder(): File = getCacheFolder(LOGS_FOLDER)
-        
+
         /**
          * Get sounds cache folder: /storage/sdcard0/Linkpoint Viewer/sounds
          */
         fun getSoundsCacheFolder(): File = getCacheFolder(SOUNDS_CACHE_FOLDER)
-        
+
         /**
          * Get animations cache folder: /storage/sdcard0/Linkpoint Viewer/animations
          */
         fun getAnimationsCacheFolder(): File = getCacheFolder(ANIMATIONS_CACHE_FOLDER)
-        
+
         /**
          * Snap a value to the nearest standard tier
          */
@@ -207,7 +207,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             if (tiers.isEmpty()) return value
             return tiers.minByOrNull { kotlin.math.abs(it - value) } ?: value
         }
-        
+
         /**
          * Get total size of a cache folder in bytes
          */
@@ -215,7 +215,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             if (!folder.exists() || !folder.isDirectory) return 0
             return folder.walkTopDown().filter { it.isFile }.sumOf { it.length() }
         }
-        
+
         /**
          * Clear a cache folder
          */
@@ -236,9 +236,9 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             }
         }
     }
-    
+
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-    
+
     init {
         // Check for backup restore first (handles reinstall case)
         if (!prefs.getBoolean(KEY_SYSTEM_DEFAULTS_SET, false)) {
@@ -248,15 +248,15 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             }
         }
     }
-    
+
     // ==================== MEMORY/DEVICE INFO ====================
-    
+
     /**
      * Get detected device RAM in MB, snapped to standard tier
      */
     val detectedRamMb: Int
         get() = prefs.getInt(KEY_DETECTED_RAM_MB, 2048)
-    
+
     /**
      * Get detected device RAM as a readable string
      */
@@ -265,9 +265,9 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             val mb = detectedRamMb
             return if (mb >= 1024) "${mb / 1024}GB" else "${mb}MB"
         }
-    
+
     // ==================== SETTINGS PROPERTIES ====================
-    
+
     /**
      * Whether to auto-reconnect on disconnect
      */
@@ -278,7 +278,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             markUserModified()
             saveBackup()
         }
-    
+
     /**
      * Maximum reconnection attempts before giving up
      */
@@ -289,7 +289,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             markUserModified()
             saveBackup()
         }
-    
+
     /**
      * Keep WiFi awake during connection
      */
@@ -300,7 +300,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             markUserModified()
             saveBackup()
         }
-    
+
     /**
      * Maximum parallel texture downloads (2-32)
      */
@@ -311,7 +311,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             markUserModified()
             saveBackup()
         }
-    
+
     /**
      * Use high quality textures
      */
@@ -322,7 +322,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             markUserModified()
             saveBackup()
         }
-    
+
     /**
      * Use compressed textures (saves memory)
      */
@@ -333,7 +333,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             markUserModified()
             saveBackup()
         }
-    
+
     /**
      * Texture memory limit in MB (64-2048)
      */
@@ -345,7 +345,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             markUserModified()
             saveBackup()
         }
-    
+
     /**
      * Mesh memory limit in MB
      */
@@ -356,7 +356,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             markUserModified()
             saveBackup()
         }
-    
+
     /**
      * Object cache memory limit in MB
      */
@@ -368,7 +368,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             markUserModified()
             saveBackup()
         }
-    
+
     /**
      * Draw distance in meters
      */
@@ -380,11 +380,11 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             markUserModified()
             saveBackup()
         }
-    
+
     // ==================== DISK CACHE SETTINGS (GB) ====================
     // These control how much storage space is used for persistent caches
     // Maximum total: 100 GB
-    
+
     /**
      * Texture disk cache limit in GB (1-50 GB)
      * Stores downloaded textures on disk for faster loading
@@ -398,7 +398,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             markUserModified()
             saveBackup()
         }
-    
+
     /**
      * Mesh disk cache limit in GB (1-30 GB)
      * Stores downloaded meshes on disk
@@ -412,7 +412,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             markUserModified()
             saveBackup()
         }
-    
+
     /**
      * Object disk cache limit in GB (1-20 GB)
      * Stores object data on disk for faster region loading
@@ -426,7 +426,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             markUserModified()
             saveBackup()
         }
-    
+
     /**
      * Sound disk cache limit in GB (1-10 GB)
      * Stores downloaded sounds on disk
@@ -440,7 +440,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             markUserModified()
             saveBackup()
         }
-    
+
     /**
      * Animation disk cache limit in GB (1-10 GB)
      * Stores downloaded animations on disk
@@ -454,7 +454,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             markUserModified()
             saveBackup()
         }
-    
+
     /**
      * Total disk cache limit in GB (5-100 GB)
      * Maximum total storage used by all caches combined
@@ -467,14 +467,14 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             markUserModified()
             saveBackup()
         }
-    
+
     /**
      * Get the configured total cache limit across all categories
      */
     val configuredTotalCacheLimitGb: Int
-        get() = textureCacheLimitGb + meshCacheLimitGb + objectCacheLimitGb + 
+        get() = textureCacheLimitGb + meshCacheLimitGb + objectCacheLimitGb +
                 soundCacheLimitGb + animationCacheLimitGb
-    
+
     /**
      * Enforce maximum total cache limit when setting individual cache sizes
      */
@@ -490,45 +490,45 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
         val maxAllowed = (totalCacheLimitGb - otherCaches).coerceAtLeast(1)
         return requestedGb.coerceAtMost(maxAllowed)
     }
-    
+
     /**
      * Whether user has modified settings
      */
     val userModified: Boolean
         get() = prefs.getBoolean(KEY_USER_MODIFIED, false)
-    
+
     private fun markUserModified() {
         prefs.edit { putBoolean(KEY_USER_MODIFIED, true) }
     }
-    
+
     // ==================== DEVICE-ADAPTIVE DEFAULTS ====================
-    
+
     /**
      * Set device-adaptive defaults based on hardware
-     * 
+     *
      * Modern devices (2024+) can have:
      * - 4GB-16GB RAM
      * - 4-8+ CPU cores
      * - High-speed storage
-     * 
+     *
      * We allocate memory generously while leaving headroom for the system.
      */
     private fun setDeviceAdaptiveDefaults() {
         val totalMemoryMb = getTotalMemoryMb()
         val snappedRamMb = snapToNearestTier(totalMemoryMb, STANDARD_RAM_TIERS_MB)
         val cpuCores = Runtime.getRuntime().availableProcessors()
-        
+
         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.CONNECTION,
             "LinkpointOptions: Device detected - RAM: ${totalMemoryMb}MB (snapped to ${snappedRamMb}MB), Cores: $cpuCores")
-        
+
         prefs.edit {
             // Store detected RAM
             putInt(KEY_DETECTED_RAM_MB, snappedRamMb)
-            
+
             // High-quality textures for devices with 2GB+ RAM
             val highQuality = snappedRamMb >= 2048
             putBoolean(KEY_HIGH_QUALITY_TEXTURES, highQuality)
-            
+
             // Texture memory: Use ~15-25% of RAM, capped at options
             val textureMemory = when {
                 snappedRamMb >= 16384 -> 2048  // 16GB+: 2GB textures
@@ -542,15 +542,15 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
                 else -> 64                      // <1GB: 64MB textures
             }
             putInt(KEY_TEXTURE_MEMORY_LIMIT_MB, textureMemory)
-            
+
             // Mesh memory: ~50% of texture memory
             val meshMemory = textureMemory / 2
             putInt(KEY_MESH_MEMORY_LIMIT_MB, meshMemory)
-            
+
             // Object cache: ~50% of texture memory
             val objectCache = snapToNearestTier(textureMemory / 2, OBJECT_CACHE_OPTIONS_MB)
             putInt(KEY_OBJECT_CACHE_LIMIT_MB, objectCache)
-            
+
             // Draw distance based on RAM (more RAM = can handle more objects)
             val drawDist = when {
                 snappedRamMb >= 8192 -> 512    // 8GB+: 512m
@@ -560,7 +560,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
                 else -> 64                      // <1GB: 64m
             }
             putInt(KEY_DRAW_DISTANCE, drawDist)
-            
+
             // Parallel downloads based on cores and RAM
             val maxDownloads = when {
                 cpuCores >= 8 && snappedRamMb >= 8192 -> 32
@@ -572,11 +572,11 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
                 else -> 2
             }
             putInt(KEY_MAX_TEXTURE_DOWNLOADS, maxDownloads)
-            
+
             // ==================== DISK CACHE DEFAULTS ====================
             // Set generous disk cache limits based on device tier
             // Total limit is 100GB max, individual caches scale with device
-            
+
             // Total cache limit (default generous for modern devices)
             val totalCacheGb = when {
                 snappedRamMb >= 8192 -> 100   // High-end: full 100GB
@@ -585,7 +585,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
                 else -> 30                     // Low: 30GB
             }
             putInt(KEY_TOTAL_CACHE_LIMIT_GB, totalCacheGb)
-            
+
             // Texture disk cache (largest - textures are biggest assets)
             val textureCacheGb = when {
                 snappedRamMb >= 8192 -> 50    // High-end: 50GB
@@ -594,7 +594,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
                 else -> 10                     // Low: 10GB
             }
             putInt(KEY_TEXTURE_CACHE_LIMIT_GB, textureCacheGb)
-            
+
             // Mesh disk cache
             val meshCacheGb = when {
                 snappedRamMb >= 8192 -> 25    // High-end: 25GB
@@ -603,7 +603,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
                 else -> 5                      // Low: 5GB
             }
             putInt(KEY_MESH_CACHE_LIMIT_GB, meshCacheGb)
-            
+
             // Object disk cache
             val objectCacheGb = when {
                 snappedRamMb >= 8192 -> 15    // High-end: 15GB
@@ -612,36 +612,36 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
                 else -> 2                      // Low: 2GB
             }
             putInt(KEY_OBJECT_CACHE_LIMIT_GB, objectCacheGb)
-            
+
             // Sound disk cache
             val soundCacheGb = when {
                 snappedRamMb >= 4096 -> 5     // High/mid: 5GB
                 else -> 2                      // Low: 2GB
             }
             putInt(KEY_SOUND_CACHE_LIMIT_GB, soundCacheGb)
-            
+
             // Animation disk cache
             val animationCacheGb = when {
                 snappedRamMb >= 4096 -> 5     // High/mid: 5GB
                 else -> 2                      // Low: 2GB
             }
             putInt(KEY_ANIMATION_CACHE_LIMIT_GB, animationCacheGb)
-            
+
             // Mark defaults as set
             putBoolean(KEY_SYSTEM_DEFAULTS_SET, true)
             putBoolean(KEY_USER_MODIFIED, false)
         }
-        
+
         // Save backup immediately
         saveBackup()
-        
+
         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.CONNECTION,
             "LinkpointOptions: Defaults set - HQ: $highQualityTextures, " +
             "TextureMem: ${textureMemoryLimitMb}MB, MeshMem: ${meshMemoryLimitMb}MB, " +
             "ObjCache: ${objectCacheLimitMb}MB, DrawDist: ${drawDistance}m, " +
             "MaxDownloads: $maxTextureDownloads, TotalCache: ${totalCacheLimitGb}GB")
     }
-    
+
     /**
      * Get total system memory in MB
      */
@@ -654,7 +654,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
                 activityManager.getMemoryInfo(memInfo)
                 return (memInfo.totalMem / (1024 * 1024)).toInt()
             }
-            
+
             // Method 2: /proc/meminfo fallback
             BufferedReader(FileReader("/proc/meminfo"), 8192).use { reader ->
                 var line = reader.readLine()
@@ -674,13 +674,13 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             (Runtime.getRuntime().maxMemory() / (1024 * 1024)).toInt()
         }
     }
-    
+
     // ==================== PERSISTENT BACKUP ====================
-    
+
     /**
      * Get backup file location in the external Linkpoint Viewer folder.
      * Path: /storage/sdcard0/Linkpoint Viewer/settings.properties
-     * 
+     *
      * This survives app reinstalls.
      */
     private fun getBackupFile(): File? {
@@ -693,7 +693,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             null
         }
     }
-    
+
     /**
      * Save settings to external backup file
      */
@@ -701,7 +701,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
         try {
             val file = getBackupFile() ?: return
             val props = Properties()
-            
+
             // Memory settings
             props.setProperty(KEY_AUTO_RECONNECT, autoReconnect.toString())
             props.setProperty(KEY_MAX_RECONNECT_ATTEMPTS, maxReconnectAttempts.toString())
@@ -715,7 +715,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             props.setProperty(KEY_DRAW_DISTANCE, drawDistance.toString())
             props.setProperty(KEY_DETECTED_RAM_MB, detectedRamMb.toString())
             props.setProperty(KEY_USER_MODIFIED, userModified.toString())
-            
+
             // Disk cache settings (new)
             props.setProperty(KEY_TEXTURE_CACHE_LIMIT_GB, textureCacheLimitGb.toString())
             props.setProperty(KEY_MESH_CACHE_LIMIT_GB, meshCacheLimitGb.toString())
@@ -723,11 +723,11 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             props.setProperty(KEY_SOUND_CACHE_LIMIT_GB, soundCacheLimitGb.toString())
             props.setProperty(KEY_ANIMATION_CACHE_LIMIT_GB, animationCacheLimitGb.toString())
             props.setProperty(KEY_TOTAL_CACHE_LIMIT_GB, totalCacheLimitGb.toString())
-            
+
             file.outputStream().use { out ->
                 props.store(out, "Linkpoint Settings Backup - Do not delete")
             }
-            
+
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.CONNECTION,
                 "LinkpointOptions: Settings backed up to ${file.absolutePath}")
         } catch (e: Exception) {
@@ -735,7 +735,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
                 "LinkpointOptions: Failed to save backup: ${e.message}")
         }
     }
-    
+
     /**
      * Try to restore settings from backup file
      * @return true if backup was found and restored
@@ -744,92 +744,92 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
         try {
             val file = getBackupFile() ?: return false
             if (!file.exists()) return false
-            
+
             val props = Properties()
             file.inputStream().use { input ->
                 props.load(input)
             }
-            
+
             // Check if backup has user modifications
             val wasModified = props.getProperty(KEY_USER_MODIFIED, "false").toBoolean()
             if (!wasModified) {
                 // Backup exists but user never customized - recalculate for current device
                 return false
             }
-            
+
             prefs.edit {
                 // Memory settings
-                props.getProperty(KEY_AUTO_RECONNECT)?.let { 
-                    putBoolean(KEY_AUTO_RECONNECT, it.toBoolean()) 
+                props.getProperty(KEY_AUTO_RECONNECT)?.let {
+                    putBoolean(KEY_AUTO_RECONNECT, it.toBoolean())
                 }
-                props.getProperty(KEY_MAX_RECONNECT_ATTEMPTS)?.let { 
-                    putInt(KEY_MAX_RECONNECT_ATTEMPTS, it.toInt()) 
+                props.getProperty(KEY_MAX_RECONNECT_ATTEMPTS)?.let {
+                    putInt(KEY_MAX_RECONNECT_ATTEMPTS, it.toInt())
                 }
-                props.getProperty(KEY_KEEP_WIFI_ON)?.let { 
-                    putBoolean(KEY_KEEP_WIFI_ON, it.toBoolean()) 
+                props.getProperty(KEY_KEEP_WIFI_ON)?.let {
+                    putBoolean(KEY_KEEP_WIFI_ON, it.toBoolean())
                 }
-                props.getProperty(KEY_MAX_TEXTURE_DOWNLOADS)?.let { 
-                    putInt(KEY_MAX_TEXTURE_DOWNLOADS, it.toInt()) 
+                props.getProperty(KEY_MAX_TEXTURE_DOWNLOADS)?.let {
+                    putInt(KEY_MAX_TEXTURE_DOWNLOADS, it.toInt())
                 }
-                props.getProperty(KEY_HIGH_QUALITY_TEXTURES)?.let { 
-                    putBoolean(KEY_HIGH_QUALITY_TEXTURES, it.toBoolean()) 
+                props.getProperty(KEY_HIGH_QUALITY_TEXTURES)?.let {
+                    putBoolean(KEY_HIGH_QUALITY_TEXTURES, it.toBoolean())
                 }
-                props.getProperty(KEY_COMPRESSED_TEXTURES)?.let { 
-                    putBoolean(KEY_COMPRESSED_TEXTURES, it.toBoolean()) 
+                props.getProperty(KEY_COMPRESSED_TEXTURES)?.let {
+                    putBoolean(KEY_COMPRESSED_TEXTURES, it.toBoolean())
                 }
-                props.getProperty(KEY_TEXTURE_MEMORY_LIMIT_MB)?.let { 
-                    putInt(KEY_TEXTURE_MEMORY_LIMIT_MB, it.toInt()) 
+                props.getProperty(KEY_TEXTURE_MEMORY_LIMIT_MB)?.let {
+                    putInt(KEY_TEXTURE_MEMORY_LIMIT_MB, it.toInt())
                 }
-                props.getProperty(KEY_MESH_MEMORY_LIMIT_MB)?.let { 
-                    putInt(KEY_MESH_MEMORY_LIMIT_MB, it.toInt()) 
+                props.getProperty(KEY_MESH_MEMORY_LIMIT_MB)?.let {
+                    putInt(KEY_MESH_MEMORY_LIMIT_MB, it.toInt())
                 }
-                props.getProperty(KEY_OBJECT_CACHE_LIMIT_MB)?.let { 
-                    putInt(KEY_OBJECT_CACHE_LIMIT_MB, it.toInt()) 
+                props.getProperty(KEY_OBJECT_CACHE_LIMIT_MB)?.let {
+                    putInt(KEY_OBJECT_CACHE_LIMIT_MB, it.toInt())
                 }
-                props.getProperty(KEY_DRAW_DISTANCE)?.let { 
-                    putInt(KEY_DRAW_DISTANCE, it.toInt()) 
+                props.getProperty(KEY_DRAW_DISTANCE)?.let {
+                    putInt(KEY_DRAW_DISTANCE, it.toInt())
                 }
-                
+
                 // Disk cache settings (new)
-                props.getProperty(KEY_TEXTURE_CACHE_LIMIT_GB)?.let { 
-                    putInt(KEY_TEXTURE_CACHE_LIMIT_GB, it.toInt()) 
+                props.getProperty(KEY_TEXTURE_CACHE_LIMIT_GB)?.let {
+                    putInt(KEY_TEXTURE_CACHE_LIMIT_GB, it.toInt())
                 }
-                props.getProperty(KEY_MESH_CACHE_LIMIT_GB)?.let { 
-                    putInt(KEY_MESH_CACHE_LIMIT_GB, it.toInt()) 
+                props.getProperty(KEY_MESH_CACHE_LIMIT_GB)?.let {
+                    putInt(KEY_MESH_CACHE_LIMIT_GB, it.toInt())
                 }
-                props.getProperty(KEY_OBJECT_CACHE_LIMIT_GB)?.let { 
-                    putInt(KEY_OBJECT_CACHE_LIMIT_GB, it.toInt()) 
+                props.getProperty(KEY_OBJECT_CACHE_LIMIT_GB)?.let {
+                    putInt(KEY_OBJECT_CACHE_LIMIT_GB, it.toInt())
                 }
-                props.getProperty(KEY_SOUND_CACHE_LIMIT_GB)?.let { 
-                    putInt(KEY_SOUND_CACHE_LIMIT_GB, it.toInt()) 
+                props.getProperty(KEY_SOUND_CACHE_LIMIT_GB)?.let {
+                    putInt(KEY_SOUND_CACHE_LIMIT_GB, it.toInt())
                 }
-                props.getProperty(KEY_ANIMATION_CACHE_LIMIT_GB)?.let { 
-                    putInt(KEY_ANIMATION_CACHE_LIMIT_GB, it.toInt()) 
+                props.getProperty(KEY_ANIMATION_CACHE_LIMIT_GB)?.let {
+                    putInt(KEY_ANIMATION_CACHE_LIMIT_GB, it.toInt())
                 }
-                props.getProperty(KEY_TOTAL_CACHE_LIMIT_GB)?.let { 
-                    putInt(KEY_TOTAL_CACHE_LIMIT_GB, it.toInt()) 
+                props.getProperty(KEY_TOTAL_CACHE_LIMIT_GB)?.let {
+                    putInt(KEY_TOTAL_CACHE_LIMIT_GB, it.toInt())
                 }
-                
+
                 // Update detected RAM for current device
                 val currentRam = getTotalMemoryMb()
                 val snappedRam = snapToNearestTier(currentRam, STANDARD_RAM_TIERS_MB)
                 putInt(KEY_DETECTED_RAM_MB, snappedRam)
-                
+
                 putBoolean(KEY_SYSTEM_DEFAULTS_SET, true)
                 putBoolean(KEY_USER_MODIFIED, true)
             }
-            
+
             NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.CONNECTION,
                 "LinkpointOptions: Restored settings from backup")
             return true
-            
+
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.WARN, NetworkLogger.Category.CONNECTION,
                 "LinkpointOptions: Failed to restore backup: ${e.message}")
             return false
         }
     }
-    
+
     /**
      * Reset all settings to device-adaptive defaults
      */
@@ -837,7 +837,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
         prefs.edit { clear() }
         setDeviceAdaptiveDefaults()
     }
-    
+
     /**
      * Get all settings as a map (for debugging/display)
      */
@@ -856,7 +856,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
         "userModified" to userModified,
         "externalFolder" to getExternalFolder().absolutePath
     )
-    
+
     /**
      * Get recommended texture memory for current device
      */
@@ -874,16 +874,16 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             else -> 64
         }
     }
-    
+
     /**
      * Get maximum safe texture memory for current device (leaves 50% for system)
      */
     fun getMaxSafeTextureMemoryMb(): Int {
         return (detectedRamMb * 0.25).toInt().coerceAtMost(2048)
     }
-    
+
     // ==================== CACHE MANAGEMENT ====================
-    
+
     /**
      * Get cache statistics for display
      */
@@ -897,14 +897,14 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             "logs" to getCacheFolderSize(getLogsFolder())
         )
     }
-    
+
     /**
      * Get total cache size in bytes
      */
     fun getTotalCacheSize(): Long {
         return getCacheStats().values.sum()
     }
-    
+
     /**
      * Get total cache size as a readable string
      */
@@ -917,7 +917,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             else -> "$bytes bytes"
         }
     }
-    
+
     /**
      * Clear all caches
      */
@@ -928,11 +928,11 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
         clearCacheFolder(getSoundsCacheFolder())
         clearCacheFolder(getAnimationsCacheFolder())
         // Don't clear logs by default
-        
+
         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.CONNECTION,
             "LinkpointOptions: All caches cleared")
     }
-    
+
     /**
      * Clear texture cache only
      */
@@ -941,7 +941,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.CONNECTION,
             "LinkpointOptions: Texture cache cleared")
     }
-    
+
     /**
      * Clear logs folder
      */
@@ -950,7 +950,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
         NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.CONNECTION,
             "LinkpointOptions: Logs cleared")
     }
-    
+
     /**
      * Initialize all external folders (call on app startup)
      */
@@ -964,7 +964,7 @@ class LinkpointGlobalOptions private constructor(private val context: Context) {
             getLogsFolder()
             getSoundsCacheFolder()
             getAnimationsCacheFolder()
-            
+
             NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.CONNECTION,
                 "LinkpointOptions: External folders initialized at ${getExternalFolder().absolutePath}")
         } catch (e: Exception) {

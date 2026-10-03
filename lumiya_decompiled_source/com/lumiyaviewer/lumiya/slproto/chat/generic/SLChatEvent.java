@@ -155,7 +155,7 @@ public abstract class SLChatEvent implements View.OnLongClickListener {
         SystemMessage,
         VoiceUpgrade,
         MissedVoiceCall;
-        
+
         public static final ChatMessageType[] VALUES = valuesCustom();
 
         /* renamed from: values  reason: to resolve conflict with enum method */
@@ -226,7 +226,7 @@ public abstract class SLChatEvent implements View.OnLongClickListener {
                 return $m$0(view, adapter);
             }
         });
-        
+
         public static final ChatMessageViewType[] VALUES = valuesCustom();
         private final boolean alwaysInflate;
         private final int resourceId;

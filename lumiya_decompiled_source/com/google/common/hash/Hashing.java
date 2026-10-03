@@ -41,7 +41,7 @@ public final class Hashing {
                 return new Adler32();
             }
         };
-        
+
         private final int bits;
 
         ChecksumType(int i) {

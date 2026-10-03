@@ -59,7 +59,7 @@ public final class Types {
                 return cls.getEnclosingClass();
             }
         };
-        
+
         static final ClassOwnership JVM_BEHAVIOR = detectJvmBehavior();
 
         private static ClassOwnership detectJvmBehavior() {
@@ -166,7 +166,7 @@ public final class Types {
                 return JAVA7.usedInGenericType(type);
             }
         };
-        
+
         static final JavaVersion CURRENT;
 
         static {

@@ -22,7 +22,7 @@ static int test_not()
 		glm::bvec3 v(false);
 		Error += glm::all(glm::not_(v)) ? 0 : 1;
 	}
-	
+
 	{
 		glm::bvec4 v(false);
 		Error += glm::all(glm::not_(v)) ? 0 : 1;
@@ -177,4 +177,3 @@ int main()
 
 	return Error;
 }
-

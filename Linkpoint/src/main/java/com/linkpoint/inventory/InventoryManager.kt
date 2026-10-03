@@ -31,10 +31,10 @@ class InventoryManager(
 ) {
     companion object {
         private const val TAG = "InventoryManager"
-        
+
         // Null UUID constant
         private val NULL_UUID = UUID(0L, 0L)
-        
+
         // Folder types
         const val FOLDER_TYPE_TEXTURE = 0
         const val FOLDER_TYPE_SOUND = 1
@@ -64,13 +64,13 @@ class InventoryManager(
         const val FOLDER_TYPE_SETTINGS = 56
         const val FOLDER_TYPE_MATERIAL = 57
     }
-    
+
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    
+
     // Cached inventory
     private val folders = ConcurrentHashMap<UUID, InventoryFolder>()
     private val items = ConcurrentHashMap<UUID, InventoryItem>()
-    
+
     // Secondary index maps using ConcurrentHashMap.newKeySet() for thread-safe parent-to-child lookups
     val parentToFoldersMap = ConcurrentHashMap<UUID, MutableSet<UUID>>()
     val parentToItemsMap = ConcurrentHashMap<UUID, MutableSet<UUID>>()
@@ -96,14 +96,14 @@ class InventoryManager(
         }
         parentToItemsMap.computeIfAbsent(item.parentId) { ConcurrentHashMap.newKeySet() }.add(item.itemId)
     }
-    
+
     // Special folders
     private var rootFolderId: UUID? = null
     private val systemFolders = ConcurrentHashMap<Int, UUID>()
-    
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
-    
+
     private val _currentFolder = MutableStateFlow<UUID?>(null)
     val currentFolder: StateFlow<UUID?> = _currentFolder
 
@@ -112,7 +112,7 @@ class InventoryManager(
         sessionId = udpConnection.getSessionId(),
         circuitCode = udpConnection.getCircuitCode()
     ).requireValid("InventoryManager outbound packet")
-    
+
     /**
      * Set root folder ID
      */
@@ -120,24 +120,24 @@ class InventoryManager(
         rootFolderId = folderId
         systemFolders[FOLDER_TYPE_ROOT] = folderId
     }
-    
+
     /**
      * Register system folder
      */
     fun registerSystemFolder(type: Int, folderId: UUID) {
         systemFolders[type] = folderId
     }
-    
+
     /**
      * Get system folder
      */
     fun getSystemFolder(type: Int): UUID? = systemFolders[type]
-    
+
     /**
      * Exception thrown when a fetch operation should be retried.
      */
     private class RetryableException(message: String) : Exception(message)
-    
+
     /**
      * Fetch multiple folder contents in a single batched capability request.
      *
@@ -149,13 +149,13 @@ class InventoryManager(
         fetchItems: Boolean = true
     ): Boolean {
         if (folderIds.isEmpty()) return true
-        
+
         _isLoading.value = true
-        
+
         return withContext(Dispatchers.IO) {
             var attempts = 0
             val maxAttempts = 3
-            
+
             try {
                 while (attempts < maxAttempts) {
                     try {
@@ -172,12 +172,12 @@ class InventoryManager(
                                 }
                             }
                         }
-                        
+
                         val response = capabilityManager.request(
                             CapabilityManager.CAP_FETCH_INVENTORY_DESCENDENTS,
                             request
                         )
-                        
+
                         if (response is LLSDMap) {
                             parseInventoryResponse(response)
                             return@withContext true
@@ -209,19 +209,19 @@ class InventoryManager(
 
     /**
      * Fetch folder contents with retry support.
-     * 
+     *
      * Delegates to [fetchBatchFolderContents] for single-folder request compatibility.
      */
     suspend fun fetchFolderContents(folderId: UUID, fetchFolders: Boolean = true, fetchItems: Boolean = true): Boolean {
         return fetchBatchFolderContents(listOf(folderId), fetchFolders, fetchItems)
     }
-    
+
     /**
      * Fetch specific items
      */
     suspend fun fetchItems(itemIds: List<UUID>): List<InventoryItem> {
         if (itemIds.isEmpty()) return emptyList()
-        
+
         return withContext(Dispatchers.IO) {
             try {
                 val request = LLSDMap().apply {
@@ -234,12 +234,12 @@ class InventoryManager(
                         }
                     }
                 }
-                
+
                 val response = capabilityManager.request(
                     CapabilityManager.CAP_FETCH_INVENTORY,
                     request
                 )
-                
+
                 val result = mutableListOf<InventoryItem>()
                 if (response is LLSDMap) {
                     val items = response.getArray("items")
@@ -259,7 +259,7 @@ class InventoryManager(
             }
         }
     }
-    
+
     private fun parseInventoryResponse(response: LLSDMap) {
         // Parse folders
         val foldersArray = response.getArray("folders")
@@ -271,7 +271,7 @@ class InventoryManager(
                         parseFolder(cat)?.let { putFolder(it) }
                     }
                 }
-                
+
                 val items = folder.getArray("items")
                 items?.value?.forEach { item ->
                     if (item is LLSDMap) {
@@ -281,7 +281,7 @@ class InventoryManager(
             }
         }
     }
-    
+
     private fun parseFolder(data: LLSDMap): InventoryFolder? {
         return try {
             InventoryFolder(
@@ -295,11 +295,11 @@ class InventoryManager(
             null
         }
     }
-    
+
     private fun parseItem(data: LLSDMap): InventoryItem? {
         return try {
             val permissions = data.getMap("permissions")
-            
+
             InventoryItem(
                 itemId = UUID.fromString(data.getString("item_id") ?: return null),
                 assetId = UUID.fromString(data.getString("asset_id") ?: "00000000-0000-0000-0000-000000000000"),
@@ -329,38 +329,38 @@ class InventoryManager(
             null
         }
     }
-    
+
     /**
      * Get folder contents (cached using direct parent key lookups)
      */
     fun getFolderContents(folderId: UUID): List<InventoryNode> {
         val result = mutableListOf<InventoryNode>()
-        
+
         // Add subfolders via parent index
         val childFolderIds = parentToFoldersMap[folderId] ?: emptySet()
         childFolderIds.mapNotNull { folders[it] }.forEach {
             result.add(InventoryNode.Folder(it))
         }
-        
+
         // Add items via parent index
         val childItemIds = parentToItemsMap[folderId] ?: emptySet()
         childItemIds.mapNotNull { items[it] }.forEach {
             result.add(InventoryNode.Item(it))
         }
-        
+
         return result.sortedWith(compareBy({ it !is InventoryNode.Folder }, { it.name }))
     }
-    
+
     /**
      * Get item by ID (cached)
      */
     fun getItem(itemId: UUID): InventoryItem? = items[itemId]
-    
+
     /**
      * Get folder by ID (cached)
      */
     fun getFolder(folderId: UUID): InventoryFolder? = folders[folderId]
-    
+
     /**
      * Add folder from login response inventory-skeleton.
      * This caches the folder structure immediately on login.
@@ -374,13 +374,13 @@ class InventoryManager(
             version = version
         )
         putFolder(folder)
-        
+
         // Also register as system folder if it has a type
         if (typeDefault >= 0) {
             systemFolders[typeDefault] = folderId
         }
     }
-    
+
     /**
      * Get all subfolders of a folder (cached using direct parent key lookup)
      */
@@ -389,7 +389,7 @@ class InventoryManager(
         return childFolderIds.mapNotNull { folders[it] }
             .sortedBy { it.name }
     }
-    
+
     /**
      * Get all items in a folder (cached using direct parent key lookup)
      */
@@ -398,7 +398,7 @@ class InventoryManager(
         return childItemIds.mapNotNull { items[it] }
             .sortedBy { it.name }
     }
-    
+
     /**
      * Remove an item from inventory (called when server notifies us of removal)
      */
@@ -409,7 +409,7 @@ class InventoryManager(
         }
         Log.d(TAG, "Removed item from cache: $itemId")
     }
-    
+
     /**
      * Remove a folder from inventory (called when server notifies us of removal)
      */
@@ -423,7 +423,7 @@ class InventoryManager(
         systemFolders.entries.removeIf { it.value == folderId }
         Log.d(TAG, "Removed folder from cache: $folderId")
     }
-    
+
     /**
      * Move item to folder.
      * Uses AISv3 capability when available, falls back to UDP MoveInventoryItem.
@@ -482,14 +482,14 @@ class InventoryManager(
                     // Don't return false here, we still update local cache optimistically
                 }
             }
-            
+
             // Update local cache
             putItem(item.copy(parentId = newParentId))
             return true
         }
         return false
     }
-    
+
     /**
      * Move folder to new parent.
      * Uses AISv3 capability when available.
@@ -514,14 +514,14 @@ class InventoryManager(
                     Log.w(TAG, "Failed to move folder via AIS: ${e.message}")
                 }
             }
-            
+
             // Update local cache
             putFolder(folder.copy(parentId = newParentId))
             return true
         }
         return false
     }
-    
+
     /**
      * Create folder using CreateInventoryCategory capability.
      */
@@ -529,7 +529,7 @@ class InventoryManager(
         return withContext(Dispatchers.IO) {
             try {
                 val folderId = UUID.randomUUID()
-                
+
                 // Try to use CreateInventoryCategory capability
                 val capUrl = capabilityManager.getCapability(CapabilityManager.CAP_CREATE_INVENTORY_CATEGORY)
                 if (capUrl != null) {
@@ -539,12 +539,12 @@ class InventoryManager(
                         this["name"] = LLSDString(name)
                         this["type"] = LLSDInteger(type)
                     }
-                    
+
                     val response = capabilityManager.request(
-                        CapabilityManager.CAP_CREATE_INVENTORY_CATEGORY, 
+                        CapabilityManager.CAP_CREATE_INVENTORY_CATEGORY,
                         request
                     )
-                    
+
                     if (response is LLSDMap) {
                         val createdId = response.getString("folder_id")
                         if (createdId != null) {
@@ -562,7 +562,7 @@ class InventoryManager(
                         }
                     }
                 }
-                
+
                 // Fallback: create locally and send UDP packet if available
                 val folder = InventoryFolder(
                     folderId = folderId,
@@ -572,7 +572,7 @@ class InventoryManager(
                     version = 0
                 )
                 putFolder(folder)
-                
+
                 // Send CreateInventoryFolder message to server via UDP
                 try {
                     val nameBytes = name.toByteArray(Charsets.UTF_8)
@@ -604,16 +604,16 @@ class InventoryManager(
                     Log.w(TAG, "Failed to send CreateInventoryFolder packet: ${e.message}")
                     Log.d(TAG, "Created folder '$name' locally only")
                 }
-                
+
                 folderId
-                
+
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to create folder", e)
                 null
             }
         }
     }
-    
+
     /**
      * Delete item (move to trash)
      */
@@ -621,7 +621,7 @@ class InventoryManager(
         val trashFolder = systemFolders[FOLDER_TYPE_TRASH] ?: return false
         return moveItem(itemId, trashFolder)
     }
-    
+
     /**
      * Delete folder (move to trash)
      */
@@ -629,14 +629,14 @@ class InventoryManager(
         val trashFolder = systemFolders[FOLDER_TYPE_TRASH] ?: return false
         return moveFolder(folderId, trashFolder)
     }
-    
+
     /**
      * Rename item using UpdateInventoryItem capability or UDP fallback.
      */
     suspend fun renameItem(itemId: UUID, newName: String): Boolean {
         val item = items[itemId] ?: return false
         var success = false
-        
+
         // Try to use UpdateInventoryItem capability
         val capUrl = capabilityManager.getCapability(CapabilityManager.CAP_UPDATE_INVENTORY_ITEM)
         if (capUrl != null) {
@@ -652,7 +652,7 @@ class InventoryManager(
                 Log.w(TAG, "Failed to rename item via capability: ${e.message}")
             }
         }
-        
+
         // Fallback to UDP UpdateInventoryItem if capability not available or failed
         if (!success) {
             try {
@@ -663,19 +663,19 @@ class InventoryManager(
                 Log.e(TAG, "Failed to rename item via UDP: ${e.message}")
             }
         }
-        
+
         // Update local cache
         putItem(item.copy(name = newName))
         return success
     }
-    
+
     /**
      * Update item description using UpdateInventoryItem capability or UDP fallback.
      */
     suspend fun updateItemDescription(itemId: UUID, description: String): Boolean {
         val item = items[itemId] ?: return false
         var success = false
-        
+
         // Try to use UpdateInventoryItem capability
         val capUrl = capabilityManager.getCapability(CapabilityManager.CAP_UPDATE_INVENTORY_ITEM)
         if (capUrl != null) {
@@ -691,7 +691,7 @@ class InventoryManager(
                 Log.w(TAG, "Failed to update item description: ${e.message}")
             }
         }
-        
+
         // Fallback to UDP UpdateInventoryItem if capability not available or failed
         if (!success) {
             try {
@@ -702,12 +702,12 @@ class InventoryManager(
                 Log.e(TAG, "Failed to update item description via UDP: ${e.message}")
             }
         }
-        
+
         // Update local cache
         putItem(item.copy(description = description))
         return success
     }
-    
+
     /**
      * Helper to send UpdateInventoryItem packet via UDP.
      */
@@ -775,7 +775,7 @@ class InventoryManager(
 
         udpConnection.sendPacket(MessageIdRegistry.UPDATE_INVENTORY_ITEM, buffer.array(), reliable = true)
     }
-    
+
     /**
      * Copy item.
      * Note: Copy operations typically use CopyInventoryItem UDP message
@@ -783,13 +783,13 @@ class InventoryManager(
      */
     suspend fun copyItem(itemId: UUID, destinationId: UUID, newName: String? = null): UUID? {
         val source = items[itemId] ?: return null
-        
+
         // Check permissions
         if ((source.permissions.ownerMask and 0x00008000) == 0) {
             Log.w(TAG, "Cannot copy item $itemId - no copy permission")
             return null
         }
-        
+
         val newItemId = UUID.randomUUID()
         val actualNewName = newName ?: source.name
         val copy = source.copy(
@@ -798,7 +798,7 @@ class InventoryManager(
             name = actualNewName
         )
         putItem(copy)
-        
+
         // Send to server
         sendCopyInventoryItem(
             oldAgentId = source.permissions.ownerId,
@@ -853,13 +853,13 @@ class InventoryManager(
 
         udpConnection.sendPacket(MessageIdRegistry.COPY_INVENTORY_ITEM, payload.array(), reliable = true)
     }
-    
+
     /**
      * Resolve an inventory link to its target item.
-     * 
+     *
      * Inventory links (asset type 24 for items, 25 for folders) reference
      * other items/folders. This method resolves the link to the actual item.
-     * 
+     *
      * @param item The item to resolve (may or may not be a link)
      * @return The resolved item, or the original item if not a link
      */
@@ -868,19 +868,19 @@ class InventoryManager(
         if (item.assetType != 24 && item.assetType != 25) {
             return item
         }
-        
+
         // The assetId of a link points to the target item/folder
         val targetId = item.assetId
         return items[targetId]
     }
-    
+
     /**
      * Check if an item is a link.
      */
     fun isLink(item: InventoryItem): Boolean {
         return item.assetType == 24 || item.assetType == 25
     }
-    
+
     /**
      * Get the original item from a potential link chain.
      * Follows links recursively (up to 10 levels to prevent infinite loops).
@@ -888,32 +888,32 @@ class InventoryManager(
     fun resolveFullLinkChain(item: InventoryItem, maxDepth: Int = 10): InventoryItem? {
         var current = item
         var depth = 0
-        
+
         while (isLink(current) && depth < maxDepth) {
             val resolved = items[current.assetId] ?: return null
             current = resolved
             depth++
         }
-        
+
         return if (isLink(current)) null else current
     }
-    
+
     /**
      * Search inventory
      */
     fun search(query: String): List<InventoryNode> {
         val lowerQuery = query.lowercase()
         val results = mutableListOf<InventoryNode>()
-        
+
         items.values.filter { it.name.lowercase().contains(lowerQuery) }
             .forEach { results.add(InventoryNode.Item(it)) }
-        
+
         folders.values.filter { it.name.lowercase().contains(lowerQuery) }
             .forEach { results.add(InventoryNode.Folder(it)) }
-        
+
         return results.sortedBy { it.name }
     }
-    
+
     /**
      * Navigate to folder
      */
@@ -923,7 +923,7 @@ class InventoryManager(
             fetchFolderContents(folderId)
         }
     }
-    
+
     /**
      * Get all landmarks from the cached inventory.
      * Returns items of type LANDMARK (asset type 3).
@@ -932,7 +932,7 @@ class InventoryManager(
         return items.values.filter { it.assetType == 3 }
             .sortedByDescending { it.creationDate }
     }
-    
+
     /**
      * Fetch landmarks folder and return landmark items.
      * Fetches the system landmarks folder if not already cached.
@@ -988,50 +988,50 @@ class InventoryManager(
             }
         }
     }
-    
+
     fun shutdown() {
         scope.cancel()
     }
-    
+
     // ==================== UDP MESSAGE HANDLERS ====================
-    
+
     /**
      * Handle InventoryAssetResponse message - asset data for an inventory item.
      */
     fun handleAssetResponse(payload: ByteArray) {
         try {
             val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
-            
+
             // QueryData block
             val transactionId = buffer.getUUID()
             val assetType = buffer.int
             val success = buffer.get() != 0.toByte()
-            
+
             Log.d(TAG, "📦 InventoryAssetResponse: type=$assetType, success=$success")
-            
+
             // Note: Asset data follows if success
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing InventoryAssetResponse", e)
         }
     }
-    
+
     /**
      * Handle UpdateInventoryFolder message - folder was updated.
      */
     fun handleFolderUpdate(payload: ByteArray) {
         try {
             val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
-            
+
             // AgentData block
             buffer.position(buffer.position() + 32) // Skip AgentID and SessionID
-            
+
             // FolderData block count
             if (buffer.remaining() < 1) return
             val folderCount = buffer.get().toInt() and 0xFF
-            
+
             for (i in 0 until folderCount) {
                 if (buffer.remaining() < 34) break
-                
+
                 val folderId = buffer.getUUID()
                 val parentId = buffer.getUUID()
                 val type = buffer.get().toInt()
@@ -1041,9 +1041,9 @@ class InventoryManager(
                     buffer.get(nameBytes)
                 }
                 val name = String(nameBytes, Charsets.UTF_8).trimEnd('\u0000')
-                
+
                 Log.d(TAG, "📁 Folder updated: $folderId - $name (type=$type)")
-                
+
                 // Update cached folder
                 val existing = folders[folderId]
                 if (existing != null) {
@@ -1054,29 +1054,29 @@ class InventoryManager(
             Log.e(TAG, "Error parsing UpdateInventoryFolder", e)
         }
     }
-    
+
     /**
      * Handle MoveInventoryFolder message - folder was moved.
      */
     fun handleFolderMove(payload: ByteArray) {
         try {
             val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
-            
+
             // AgentData block
             buffer.position(buffer.position() + 48) // Skip AgentID, SessionID, Stamp
-            
+
             // InventoryData block count
             if (buffer.remaining() < 1) return
             val moveCount = buffer.get().toInt() and 0xFF
-            
+
             for (i in 0 until moveCount) {
                 if (buffer.remaining() < 32) break
-                
+
                 val folderId = buffer.getUUID()
                 val newParentId = buffer.getUUID()
-                
+
                 Log.d(TAG, "📁 Folder moved: $folderId -> $newParentId")
-                
+
                 // Update cached folder
                 val existing = folders[folderId]
                 if (existing != null) {
@@ -1087,47 +1087,47 @@ class InventoryManager(
             Log.e(TAG, "Error parsing MoveInventoryFolder", e)
         }
     }
-    
+
     /**
      * Handle CreateInventoryItem message - item was created.
      */
     fun handleItemCreated(payload: ByteArray) {
         try {
             val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
-            
+
             // AgentData block
             buffer.position(buffer.position() + 32) // Skip AgentID and SimApproved
-            
+
             // InventoryData block
             if (buffer.remaining() < 100) return // Item data is ~100+ bytes
-            
+
             val itemId = buffer.getUUID()
             val folderId = buffer.getUUID()
-            
+
             Log.d(TAG, "📦 Item created: $itemId in folder $folderId")
-            
+
             // Note: Full parsing would extract all item properties
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing CreateInventoryItem", e)
         }
     }
-    
+
     /**
      * Handle SaveAssetIntoInventory message - asset was saved.
      */
     fun handleAssetSaved(payload: ByteArray) {
         try {
             val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
-            
+
             // AgentData
             buffer.position(buffer.position() + 16) // Skip AgentID
-            
+
             // InventoryData
             val itemId = buffer.getUUID()
             val newAssetId = buffer.getUUID()
-            
+
             Log.d(TAG, "📦 Asset saved to inventory: item=$itemId, asset=$newAssetId")
-            
+
             // Update cached item with new asset ID
             val existing = items[itemId]
             if (existing != null) {
@@ -1137,19 +1137,19 @@ class InventoryManager(
             Log.e(TAG, "Error parsing SaveAssetIntoInventory", e)
         }
     }
-    
+
     // ==================== DIAGNOSTIC METHODS ====================
-    
+
     /**
      * Get the total count of cached folders
      */
     fun getFolderCount(): Int = folders.size
-    
+
     /**
      * Get the total count of cached items
      */
     fun getItemCount(): Int = items.size
-    
+
     /**
      * Get comprehensive diagnostic data for debug reports
      */
@@ -1163,7 +1163,7 @@ class InventoryManager(
             currentFolderId = _currentFolder.value
         )
     }
-    
+
     /**
      * Diagnostic data class for inventory manager state
      */
@@ -1220,7 +1220,7 @@ data class ItemPermissions(
         const val PERM_COPY = 0x00008000
         const val PERM_MOVE = 0x00080000
     }
-    
+
     val canTransfer: Boolean get() = (ownerMask and PERM_TRANSFER) != 0
     val canModify: Boolean get() = (ownerMask and PERM_MODIFY) != 0
     val canCopy: Boolean get() = (ownerMask and PERM_COPY) != 0
@@ -1235,12 +1235,12 @@ data class SaleInfo(
 sealed class InventoryNode {
     abstract val name: String
     abstract val id: UUID
-    
+
     data class Folder(val folder: InventoryFolder) : InventoryNode() {
         override val name: String get() = folder.name
         override val id: UUID get() = folder.folderId
     }
-    
+
     data class Item(val item: InventoryItem) : InventoryNode() {
         override val name: String get() = item.name
         override val id: UUID get() = item.itemId
