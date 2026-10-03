@@ -6,6 +6,8 @@ import Shell from "./components/Shell.jsx";
 import SystemDialog from "./components/SystemDialog.jsx";
 import MacroProgressOverlay from "./components/MacroProgressOverlay.jsx";
 import Toast from "./components/Toast.jsx";
+import BottomTabs from "./components/BottomTabs.jsx";
+import TileNav from "./components/TileNav.jsx";
 import LiveRegionAnnouncerComponent from "./components/LiveRegionAnnouncerComponent.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import type { ViewerClient } from "@linkpoint/viewer-client";
@@ -42,6 +44,8 @@ function Viewer() {
           <MacroProgressOverlay />
           <Toast />
         </div>
+        {state.screen !== "Login" ? <BottomTabs /> : null}
+        {state.screen !== "Login" ? <TileNav /> : null}
       </main>
     </>
   );
