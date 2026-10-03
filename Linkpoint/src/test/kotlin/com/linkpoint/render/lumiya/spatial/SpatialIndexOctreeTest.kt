@@ -170,7 +170,7 @@ class SpatialIndexOctreeTest {
         }
 
         // Warmup pass (trigger JVM JIT compilation)
-        for (warm in 1..50) {
+        for (warm in 1..500) {
             for (e in movingEntries) {
                 e.posX += 0.1f
                 index.updateIncremental(e)
