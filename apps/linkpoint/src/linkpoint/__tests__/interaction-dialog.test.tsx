@@ -240,4 +240,60 @@ describe('InteractionDialog', () => {
       expect(host.querySelector('[role="alertdialog"]')).toBeNull();
     });
   });
+
+  describe('Inventory offers and Group invites UI modals', () => {
+    it('renders an inventory offer modal banner and calls acceptInventoryOffer on ACCEPT', async () => {
+      vi.spyOn(app.protocol as any, 'requireConnected').mockImplementation(() => undefined);
+      const acceptSpy = vi.spyOn(app.protocol, 'acceptInventoryOffer').mockResolvedValue({ accepted: true } as any);
+
+      const host = await mount();
+      await emit('inventory_offer', {
+        id: 'io-99',
+        senderName: 'Alice Resident',
+        itemName: 'Vintage Leather Jacket',
+        assetType: 0,
+      });
+
+      const sheet = host.querySelector('[role="alertdialog"]');
+      expect(sheet).not.toBeNull();
+      expect(host.textContent).toContain('INVENTORY OFFER');
+      expect(host.textContent).toContain('Alice Resident offered you Vintage Leather Jacket');
+      expect(host.textContent).toContain('Sender: Alice Resident');
+      expect(host.textContent).toContain('Item: Vintage Leather Jacket');
+
+      const acceptBtn = button(host, 'ACCEPT');
+      expect(acceptBtn).toBeDefined();
+      await click(acceptBtn);
+
+      expect(acceptSpy).toHaveBeenCalledWith('io-99');
+      expect(host.querySelector('[role="alertdialog"]')).toBeNull();
+    });
+
+    it('renders a group invitation modal banner and calls declineGroupInvite on DECLINE', async () => {
+      vi.spyOn(app.protocol as any, 'requireConnected').mockImplementation(() => undefined);
+      const declineSpy = vi.spyOn(app.protocol, 'declineGroupInvite').mockResolvedValue({ declined: true } as any);
+
+      const host = await mount();
+      await emit('group_invite', {
+        id: 'gi-88',
+        senderName: 'Bob Resident',
+        groupName: 'Second Life Creators',
+        fee: 0,
+      });
+
+      const sheet = host.querySelector('[role="alertdialog"]');
+      expect(sheet).not.toBeNull();
+      expect(host.textContent).toContain('GROUP INVITATION');
+      expect(host.textContent).toContain('Invitation to join Second Life Creators');
+      expect(host.textContent).toContain('Invited by: Bob Resident');
+      expect(host.textContent).toContain('Join Fee: Free');
+
+      const declineBtn = button(host, 'DECLINE');
+      expect(declineBtn).toBeDefined();
+      await click(declineBtn);
+
+      expect(declineSpy).toHaveBeenCalledWith('gi-88');
+      expect(host.querySelector('[role="alertdialog"]')).toBeNull();
+    });
+  });
 });

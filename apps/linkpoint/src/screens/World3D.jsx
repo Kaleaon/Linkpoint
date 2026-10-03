@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { GENERATED_TOKENS } from "@linkpoint/design-system/tokens";
 import { useTheme } from "../context/ThemeContext.jsx";
 import { app } from "../linkpoint/app";
 import HudControls from "./HudControls.jsx";
@@ -48,8 +49,8 @@ export default function World3D({ desktopBackdrop = false }) {
   };
 
   const sceneStyle = desktopBackdrop
-    ? { position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "hidden", background: "#000" }
-    : { flex: 1, minHeight: 0, position: "relative", background: "#000" };
+    ? { position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "hidden", background: GENERATED_TOKENS.color.scene.background }
+    : { flex: 1, minHeight: 0, position: "relative", background: GENERATED_TOKENS.color.scene.background };
 
   return <section aria-label="3D world view" style={sceneStyle}>
     <canvas ref={canvasRef} id={desktopBackdrop ? "world-canvas-backdrop" : "world-canvas"} aria-label={`Interactive 3D canvas for ${region}. Drag to look, shift drag to pan, wheel or pinch to zoom. W A S D or arrow keys move the camera.`} style={{ width: "100%", height: "100%", display: "block", cursor: "grab", touchAction: "none", outline: "none" }} />
@@ -76,7 +77,7 @@ export default function World3D({ desktopBackdrop = false }) {
       {!ready && !error ? <><br />Starting renderer…</> : null}
       {error ? <><br /><span style={{ color: V.err }}>{error}</span></> : null}
     </output>}
-    {!desktopBackdrop && selection && <aside aria-label="Selected object" style={{ position: "absolute", right: 14, top: 66, width: 210, padding: 10, color: V.ink, background: V.surf, border: `1px solid ${V.pri}`, borderRadius: V.rs, boxShadow: "0 8px 24px #0008", font: `400 11px/1.4 ${t.font}` }}>
+    {!desktopBackdrop && selection && <aside aria-label="Selected object" style={{ position: "absolute", right: 14, top: 66, width: 210, padding: 10, color: V.ink, background: V.surf, border: `1px solid ${V.pri}`, borderRadius: V.rs, boxShadow: `0 8px 24px ${GENERATED_TOKENS.color.scene.shadow}`, font: `400 11px/1.4 ${t.font}` }}>
       <div style={{ color: V.pri, fontWeight: 800, letterSpacing: ".08em", fontSize: 9 }}>SELECTED</div>
       <strong style={{ display: "block", marginTop: 3 }}>{selection.name || selection.id || "Simulator object"}</strong>
       <span style={{ opacity: .7 }}>{selection.shape || (selection.avatar ? "Avatar" : "Object")} · {selection.distance?.toFixed?.(1) || "—"} m</span>

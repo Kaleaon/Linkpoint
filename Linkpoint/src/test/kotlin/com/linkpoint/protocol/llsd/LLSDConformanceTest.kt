@@ -119,5 +119,12 @@ class LLSDConformanceTest {
      * fold the disagreement here rather than masking the bug with
      * `assertEquals` tolerances.
      */
-    private fun normalise(value: LLSDValue): LLSDValue = value
+    private fun normalise(value: LLSDValue): LLSDValue {
+        return when (value) {
+            is LLSDString -> LLSDString(value.value.replace("\r\n", "\n"))
+            is LLSDMap -> LLSDMap(value.value.mapValues { normalise(it.value) }.toMutableMap())
+            is LLSDArray -> LLSDArray(value.value.map { normalise(it) }.toMutableList())
+            else -> value
+        }
+    }
 }

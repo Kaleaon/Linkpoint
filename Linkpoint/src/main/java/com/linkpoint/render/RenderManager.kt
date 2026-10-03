@@ -110,8 +110,13 @@ class RenderManager(private val context: Context) {
     // Camera controller drives the lookAt every frame in renderFrame() based
     // on user input (gestures) and agent position. Exposed so WorldViewActivity
     // can attach gesture detectors and the agent-position updater.
+    val renderStateManager: RenderStateManager = RenderStateManager()
     val cameraController: CameraController = CameraController()
     private val cameraEye = FloatArray(6)
+
+    init {
+        cameraController.renderStateManager = renderStateManager
+    }
 
     /**
      * Optional per-frame hook invoked just before render(). The app installs
@@ -1045,7 +1050,7 @@ class RenderManager(private val context: Context) {
     fun pauseDrawing(reason: String = "panel_open") {
         if (drawingEnabled.compareAndSet(true, false)) {
             Log.i(TAG, "Drawing paused: $reason")
-            RenderDiagnostics.filamentDrawingPaused(reason)
+            renderStateManager.setFullScreenOverlayActive(true, reason)
         }
     }
 
@@ -1057,7 +1062,7 @@ class RenderManager(private val context: Context) {
     fun resumeDrawing(reason: String = "panel_close") {
         if (drawingEnabled.compareAndSet(false, true)) {
             Log.i(TAG, "Drawing resumed: $reason")
-            RenderDiagnostics.filamentDrawingResumed(reason)
+            renderStateManager.setFullScreenOverlayActive(false, reason)
         }
     }
 

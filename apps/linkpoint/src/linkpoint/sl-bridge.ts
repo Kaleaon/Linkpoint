@@ -131,6 +131,10 @@ export class SLBridge extends Utils.EventEmitter {
     return this.call<{ answered: boolean }>('respondScriptDialog', params);
   }
   acceptLure(params: { id: string }) { return this.call<{ accepted: boolean; message: string }>('acceptLure', params); }
+  acceptInventoryOffer(params: { id: string }) { return this.call<{ accepted: boolean }>('acceptInventoryOffer', params); }
+  declineInventoryOffer(params: { id: string }) { return this.call<{ declined: boolean }>('declineInventoryOffer', params); }
+  acceptGroupInvite(params: { id: string }) { return this.call<{ accepted: boolean }>('acceptGroupInvite', params); }
+  declineGroupInvite(params: { id: string }) { return this.call<{ declined: boolean }>('declineGroupInvite', params); }
   dismissInteraction(params: { id: string }) { return this.call<{ dismissed: boolean }>('dismissInteraction', params); }
   touchObject(params: { id?: string; localId?: number; face?: number; uv?: number[]; st?: number[]; position?: number[] }) {
     return this.call<{ touched: string | number }>('touchObject', params);

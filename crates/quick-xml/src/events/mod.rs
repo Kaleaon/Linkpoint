@@ -150,12 +150,12 @@ impl<'a> BytesStart<'a> {
     /// ```
     ///
     /// [`to_end`]: #method.to_end
-    pub fn to_borrowed(&self) -> BytesStart {
+    pub fn to_borrowed(&self) -> BytesStart<'_> {
         BytesStart::borrowed(&self.buf, self.name_len)
     }
 
     /// Creates new paired close tag
-    pub fn to_end(&self) -> BytesEnd {
+    pub fn to_end(&self) -> BytesEnd<'_> {
         BytesEnd::borrowed(self.name())
     }
 
@@ -181,7 +181,7 @@ impl<'a> BytesStart<'a> {
     ///
     /// See also [`unescaped_with_custom_entities()`](#method.unescaped_with_custom_entities)
     #[inline]
-    pub fn unescaped(&self) -> Result<Cow<[u8]>> {
+    pub fn unescaped(&self) -> Result<Cow<'_, [u8]>> {
         self.make_unescaped(None)
     }
 
@@ -209,7 +209,7 @@ impl<'a> BytesStart<'a> {
         &'s self,
         custom_entities: Option<&HashMap<Vec<u8>, Vec<u8>>>,
     ) -> Result<Cow<'s, [u8]>> {
-        do_unescape(&*self.buf, custom_entities).map_err(Error::EscapeError)
+        do_unescape(&self.buf, custom_entities).map_err(Error::EscapeError)
     }
 
     /// Returns the unescaped and decoded string value.
@@ -270,7 +270,7 @@ impl<'a> BytesStart<'a> {
         reader: &Reader<B>,
         custom_entities: Option<&HashMap<Vec<u8>, Vec<u8>>>,
     ) -> Result<String> {
-        let decoded = reader.decode(&*self)?;
+        let decoded = reader.decode(self)?;
         let unescaped =
             do_unescape(decoded.as_bytes(), custom_entities).map_err(Error::EscapeError)?;
         String::from_utf8(unescaped.into_owned()).map_err(|e| Error::Utf8(e.utf8_error()))
@@ -327,7 +327,7 @@ impl<'a> BytesStart<'a> {
         bytes.push(b' ');
         bytes.extend_from_slice(a.key);
         bytes.extend_from_slice(b"=\"");
-        bytes.extend_from_slice(&*a.value);
+        bytes.extend_from_slice(&a.value);
         bytes.push(b'"');
     }
 
@@ -338,12 +338,12 @@ impl<'a> BytesStart<'a> {
     }
 
     /// Returns an iterator over the attributes of this tag.
-    pub fn attributes(&self) -> Attributes {
+    pub fn attributes(&self) -> Attributes<'_> {
         Attributes::new(&self.buf, self.name_len)
     }
 
     /// Returns an iterator over the HTML-like attributes of this tag (no mandatory quotes or `=`).
-    pub fn html_attributes(&self) -> Attributes {
+    pub fn html_attributes(&self) -> Attributes<'_> {
         Attributes::html(self, self.name_len)
     }
 
@@ -446,7 +446,7 @@ impl<'a> BytesDecl<'a> {
     /// ```
     ///
     /// [grammar]: https://www.w3.org/TR/xml11/#NT-XMLDecl
-    pub fn version(&self) -> Result<Cow<[u8]>> {
+    pub fn version(&self) -> Result<Cow<'_, [u8]>> {
         // The version *must* be the first thing in the declaration.
         match self.element.attributes().with_checks(false).next() {
             Some(Ok(a)) if a.key == b"version" => Ok(a.value),
@@ -497,7 +497,7 @@ impl<'a> BytesDecl<'a> {
     /// ```
     ///
     /// [grammar]: https://www.w3.org/TR/xml11/#NT-XMLDecl
-    pub fn encoding(&self) -> Option<Result<Cow<[u8]>>> {
+    pub fn encoding(&self) -> Option<Result<Cow<'_, [u8]>>> {
         self.element
             .try_get_attribute("encoding")
             .map(|a| a.map(|a| a.value))
@@ -539,7 +539,7 @@ impl<'a> BytesDecl<'a> {
     /// ```
     ///
     /// [grammar]: https://www.w3.org/TR/xml11/#NT-XMLDecl
-    pub fn standalone(&self) -> Option<Result<Cow<[u8]>>> {
+    pub fn standalone(&self) -> Option<Result<Cow<'_, [u8]>>> {
         self.element
             .try_get_attribute("standalone")
             .map(|a| a.map(|a| a.value))
@@ -644,7 +644,7 @@ impl<'a> BytesEnd<'a> {
     /// Gets `BytesEnd` event name
     #[inline]
     pub fn name(&self) -> &[u8] {
-        &*self.name
+        &self.name
     }
 
     /// local name (excluding namespace) as &[u8] (without eventual attributes)
@@ -746,7 +746,7 @@ impl<'a> BytesText<'a> {
     /// returns Malformed error with index within element if '&' is not followed by ';'
     ///
     /// See also [`unescaped_with_custom_entities()`](#method.unescaped_with_custom_entities)
-    pub fn unescaped(&self) -> Result<Cow<[u8]>> {
+    pub fn unescaped(&self) -> Result<Cow<'_, [u8]>> {
         self.make_unescaped(None)
     }
 
@@ -863,7 +863,7 @@ impl<'a> BytesText<'a> {
         reader: &Reader<B>,
         custom_entities: Option<&HashMap<Vec<u8>, Vec<u8>>>,
     ) -> Result<String> {
-        let decoded = reader.decode_without_bom(&*self)?;
+        let decoded = reader.decode_without_bom(self)?;
         let unescaped =
             do_unescape(decoded.as_bytes(), custom_entities).map_err(Error::EscapeError)?;
         String::from_utf8(unescaped.into_owned()).map_err(|e| Error::Utf8(e.utf8_error()))
@@ -915,7 +915,7 @@ impl<'a> BytesText<'a> {
         reader: &Reader<B>,
         custom_entities: Option<&HashMap<Vec<u8>, Vec<u8>>>,
     ) -> Result<String> {
-        let decoded = reader.decode(&*self)?;
+        let decoded = reader.decode(self)?;
         let unescaped =
             do_unescape(decoded.as_bytes(), custom_entities).map_err(Error::EscapeError)?;
         String::from_utf8(unescaped.into_owned()).map_err(|e| Error::Utf8(e.utf8_error()))
@@ -1101,28 +1101,28 @@ impl<'a> Event<'a> {
 impl<'a> Deref for BytesStart<'a> {
     type Target = [u8];
     fn deref(&self) -> &[u8] {
-        &*self.buf
+        &self.buf
     }
 }
 
 impl<'a> Deref for BytesDecl<'a> {
     type Target = [u8];
     fn deref(&self) -> &[u8] {
-        &*self.element
+        &self.element
     }
 }
 
 impl<'a> Deref for BytesEnd<'a> {
     type Target = [u8];
     fn deref(&self) -> &[u8] {
-        &*self.name
+        &self.name
     }
 }
 
 impl<'a> Deref for BytesText<'a> {
     type Target = [u8];
     fn deref(&self) -> &[u8] {
-        &*self.content
+        &self.content
     }
 }
 
@@ -1130,7 +1130,7 @@ impl<'a> Deref for BytesCData<'a> {
     type Target = [u8];
 
     fn deref(&self) -> &[u8] {
-        &*self.content
+        &self.content
     }
 }
 
@@ -1138,14 +1138,14 @@ impl<'a> Deref for Event<'a> {
     type Target = [u8];
     fn deref(&self) -> &[u8] {
         match *self {
-            Event::Start(ref e) | Event::Empty(ref e) => &*e,
-            Event::End(ref e) => &*e,
-            Event::Text(ref e) => &*e,
-            Event::Decl(ref e) => &*e,
-            Event::PI(ref e) => &*e,
-            Event::CData(ref e) => &*e,
-            Event::Comment(ref e) => &*e,
-            Event::DocType(ref e) => &*e,
+            Event::Start(ref e) | Event::Empty(ref e) => e,
+            Event::End(ref e) => e,
+            Event::Text(ref e) => e,
+            Event::Decl(ref e) => e,
+            Event::PI(ref e) => e,
+            Event::CData(ref e) => e,
+            Event::Comment(ref e) => e,
+            Event::DocType(ref e) => e,
             Event::Eof => &[],
         }
     }

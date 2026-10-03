@@ -51,7 +51,35 @@ export interface PaymentRequest {
   currency?: string;
 }
 
-export type Interaction = ScriptDialogRequest | LureRequest | PaymentRequest;
+export interface InventoryOfferRequest {
+  kind: 'inventory-offer';
+  id: string;
+  receivedAt: number;
+  fromId: string | null;
+  fromName: string;
+  senderName: string;
+  itemName: string;
+  message: string;
+  assetType: number;
+  transactionId: string | null;
+}
+
+export interface GroupInviteRequest {
+  kind: 'group-invite';
+  id: string;
+  receivedAt: number;
+  fromId: string | null;
+  fromName: string;
+  senderName: string;
+  groupId: string | null;
+  groupName: string;
+  roleId: string | null;
+  fee: number;
+  inviteId: string | null;
+  message: string;
+}
+
+export type Interaction = ScriptDialogRequest | LureRequest | PaymentRequest | InventoryOfferRequest | GroupInviteRequest;
 
 /** The button label a script uses (llTextBox) to ask for typed text instead of a choice. */
 export const TEXT_BOX_MARKER = '!!llTextBox!!';
@@ -73,6 +101,10 @@ export class InteractionsManager extends Utils.EventEmitter {
     this.protocol.on('script_dialog', (data: any) => this.add('script-dialog', data));
     this.protocol.on('lure', (data: any) => this.add('lure', data));
     this.protocol.on('payment_request', (data: any) => this.add('payment', data));
+    this.protocol.on('inventory_offer', (data: any) => this.add('inventory-offer', data));
+    this.protocol.on('inventory-offer', (data: any) => this.add('inventory-offer', data));
+    this.protocol.on('group_invite', (data: any) => this.add('group-invite', data));
+    this.protocol.on('group-invite', (data: any) => this.add('group-invite', data));
     this.protocol.on('disconnected', () => this.clear());
     this.protocol.on('connection_failed', () => this.clear());
   }
@@ -119,7 +151,8 @@ export class InteractionsManager extends Utils.EventEmitter {
           gridX: Number.isFinite(data.gridX) ? data.gridX : null,
           gridY: Number.isFinite(data.gridY) ? data.gridY : null,
         }
-      : {
+      : kind === 'payment'
+      ? {
           ...base, kind: 'payment',
           objectId: String(data.objectId || data.targetId || '00000000-0000-0000-0000-000000000000'),
           objectName: String(data.objectName || data.name || 'Vendor Item'),
@@ -127,6 +160,29 @@ export class InteractionsManager extends Utils.EventEmitter {
           sellerId: data.sellerId || data.ownerId || null,
           price: Math.max(0, Number.isFinite(Number(data.price ?? data.amount)) ? Number(data.price ?? data.amount) : 0),
           currency: String(data.currency || 'L$'),
+        }
+      : kind === 'inventory-offer'
+      ? {
+          ...base, kind: 'inventory-offer',
+          fromId: data.fromId ?? null,
+          fromName: String(data.fromName || data.senderName || 'Resident'),
+          senderName: String(data.senderName || data.fromName || 'Resident'),
+          itemName: String(data.itemName || data.message || data.name || 'Inventory Item'),
+          message: String(data.message || data.itemName || data.name || 'Inventory Item'),
+          assetType: Number.isFinite(Number(data.assetType ?? data.type)) ? Number(data.assetType ?? data.type) : 0,
+          transactionId: data.transactionId || data.requestId || data.requestID || null,
+        }
+      : {
+          ...base, kind: 'group-invite',
+          fromId: data.fromId ?? null,
+          fromName: String(data.fromName || data.senderName || 'Resident'),
+          senderName: String(data.senderName || data.fromName || 'Resident'),
+          groupId: data.groupId || data.groupID || null,
+          groupName: String(data.groupName || data.message || 'Group'),
+          roleId: data.roleId || data.roleID || null,
+          fee: Math.max(0, Number.isFinite(Number(data.fee ?? data.cost ?? data.joinFee)) ? Number(data.fee ?? data.cost ?? data.joinFee) : 0),
+          inviteId: data.inviteId || data.inviteID || null,
+          message: String(data.message || ''),
         };
     this.list.push(item);
     while (this.list.length > MAX_INTERACTIONS) this.list.shift();
@@ -189,6 +245,38 @@ export class InteractionsManager extends Utils.EventEmitter {
     const lure = this.list.find((item) => item.id === id && item.kind === 'lure') as LureRequest | undefined;
     const result = await this.run(id, () => this.protocol.acceptLure(id));
     if (result && lure) this.emit('lure_accepted', { lure, message: result.message });
+    return Boolean(result);
+  }
+
+  /** Accept an inventory offer. Emits `inventory_offer_accepted` upon success. */
+  async acceptInventoryOffer(id: string) {
+    const offer = this.list.find((item) => item.id === id && item.kind === 'inventory-offer') as InventoryOfferRequest | undefined;
+    const result = await this.run(id, () => this.protocol.acceptInventoryOffer(id));
+    if (result && offer) this.emit('inventory_offer_accepted', { offer });
+    return Boolean(result);
+  }
+
+  /** Decline an inventory offer. Emits `inventory_offer_declined` upon success. */
+  async declineInventoryOffer(id: string) {
+    const offer = this.list.find((item) => item.id === id && item.kind === 'inventory-offer') as InventoryOfferRequest | undefined;
+    const result = await this.run(id, () => this.protocol.declineInventoryOffer(id));
+    if (result && offer) this.emit('inventory_offer_declined', { offer });
+    return Boolean(result);
+  }
+
+  /** Accept a group membership invitation. Emits `group_invite_accepted` upon success. */
+  async acceptGroupInvite(id: string) {
+    const invite = this.list.find((item) => item.id === id && item.kind === 'group-invite') as GroupInviteRequest | undefined;
+    const result = await this.run(id, () => this.protocol.acceptGroupInvite(id));
+    if (result && invite) this.emit('group_invite_accepted', { invite });
+    return Boolean(result);
+  }
+
+  /** Decline a group membership invitation. Emits `group_invite_declined` upon success. */
+  async declineGroupInvite(id: string) {
+    const invite = this.list.find((item) => item.id === id && item.kind === 'group-invite') as GroupInviteRequest | undefined;
+    const result = await this.run(id, () => this.protocol.declineGroupInvite(id));
+    if (result && invite) this.emit('group_invite_declined', { invite });
     return Boolean(result);
   }
 

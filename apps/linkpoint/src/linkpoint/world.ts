@@ -180,6 +180,9 @@ export class WorldViewer extends Utils.EventEmitter {
     if (!data) return;
     if (data.region) {
       this.region = { ...(this.region || {}), ...data.region };
+      if (Number.isFinite(Number(data.region.waterHeight))) {
+        this.scene3d?.setWaterHeight(Number(data.region.waterHeight));
+      }
       this.emit('region_changed', { ...this.region });
     }
     if (data.environment) {
@@ -759,7 +762,10 @@ export class WorldViewer extends Utils.EventEmitter {
     // A HUD root is placed relative to its HUD attachment point, not to the avatar's world position.
     if (this.isHudRoot(object)) return { position, rotation };
     const parentId = this.localObjectIds.get(Number(object.parentId));
-    const parent = parentId && this.sceneObjects.get(parentId);
+    let parent = parentId && this.sceneObjects.get(parentId);
+    if (!parent && object.attachmentPoint > 0) {
+      parent = [...this.sceneObjects.values()].find((o) => o.avatar);
+    }
     if (!parent) return { position, rotation };
     visited.add(object.id);
     const parentTransform = this.worldTransform(parent, visited);

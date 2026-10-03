@@ -66,6 +66,48 @@ function serializeLure(event) {
   };
 }
 
+/** Describe an InventoryOfferedEvent for the client. */
+function serializeInventoryOffer(event) {
+  if (!event) event = {};
+  const fromName = String(event.fromName || event.senderName || 'Resident');
+  const itemName = String(event.itemName || event.message || event.name || 'Inventory Item');
+  const assetType = finiteOr(event.type ?? event.assetType, 0);
+  const transactionId = idString(event.requestID || event.requestId || event.transactionId || event.id);
+  const fromId = idString(event.from || event.fromId || event.senderId);
+  return {
+    fromId,
+    fromName,
+    senderName: fromName,
+    itemName,
+    message: itemName,
+    assetType,
+    transactionId,
+  };
+}
+
+/** Describe a GroupInviteEvent for the client. */
+function serializeGroupInvite(event) {
+  if (!event) event = {};
+  const fromName = String(event.fromName || event.senderName || 'Resident');
+  const groupId = idString(event.groupID || event.groupId);
+  const groupName = String(event.groupName || event.message || 'Group');
+  const roleId = idString(event.roleID || event.roleId);
+  const fee = Math.max(0, finiteOr(event.fee ?? event.cost ?? event.joinFee, 0));
+  const inviteId = idString(event.inviteID || event.inviteId || event.id);
+  const fromId = idString(event.from || event.fromId);
+  return {
+    fromId,
+    fromName,
+    senderName: fromName,
+    groupId,
+    groupName,
+    roleId,
+    fee,
+    inviteId,
+    message: String(event.message || ''),
+  };
+}
+
 /** Describe a GroupNoticeEvent. Notices need no answer, so nothing is kept for them. */
 function serializeGroupNotice(event) {
   return {
@@ -170,6 +212,50 @@ async function acceptLure(bot, pending, params) {
   return { accepted: true, message: result && result.message ? String(result.message) : '' };
 }
 
+/** Accept an inventory offer and receive the item into inventory. */
+async function acceptInventoryOffer(bot, pending, params) {
+  const event = pending.get('inventory-offer', params && params.id);
+  const c = commands(bot);
+  if (c.inventory && typeof c.inventory.acceptInventoryOffer === 'function') {
+    await c.inventory.acceptInventoryOffer(event);
+  }
+  pending.remove(params.id);
+  return { accepted: true };
+}
+
+/** Decline an inventory offer. */
+async function declineInventoryOffer(bot, pending, params) {
+  const event = pending.get('inventory-offer', params && params.id);
+  const c = commands(bot);
+  if (c.inventory && typeof c.inventory.rejectInventoryOffer === 'function') {
+    await c.inventory.rejectInventoryOffer(event);
+  }
+  pending.remove(params.id);
+  return { declined: true };
+}
+
+/** Accept a group membership invitation. */
+async function acceptGroupInvite(bot, pending, params) {
+  const event = pending.get('group-invite', params && params.id);
+  const c = commands(bot);
+  if (c.group && typeof c.group.acceptGroupInvite === 'function') {
+    await c.group.acceptGroupInvite(event);
+  }
+  pending.remove(params.id);
+  return { accepted: true };
+}
+
+/** Decline a group membership invitation. */
+async function declineGroupInvite(bot, pending, params) {
+  const event = pending.get('group-invite', params && params.id);
+  const c = commands(bot);
+  if (c.group && typeof c.group.rejectGroupInvite === 'function') {
+    await c.group.rejectGroupInvite(event);
+  }
+  pending.remove(params.id);
+  return { declined: true };
+}
+
 async function sendLureDeclined(bot, event) {
   if (!bot || !event) return;
   try {
@@ -246,7 +332,7 @@ async function sendLureDeclined(bot, event) {
 }
 
 /**
- * Dismiss an interaction locally or notify the grid when declining a lure.
+ * Dismiss an interaction locally or notify the grid when declining a lure/offer.
  * Non-lure dismissals (e.g. script dialogs) clear locally without network calls.
  */
 async function dismissInteraction(bot, pending, params) {
@@ -259,6 +345,20 @@ async function dismissInteraction(bot, pending, params) {
   const entry = pending && pending.items ? pending.items.get(params.id) : undefined;
   if (entry && entry.kind === 'lure') {
     await sendLureDeclined(bot, entry.event);
+  } else if (entry && entry.kind === 'inventory-offer') {
+    try {
+      const c = commands(bot);
+      if (c.inventory && typeof c.inventory.rejectInventoryOffer === 'function') {
+        await c.inventory.rejectInventoryOffer(entry.event);
+      }
+    } catch { /* network errors fall back gracefully */ }
+  } else if (entry && entry.kind === 'group-invite') {
+    try {
+      const c = commands(bot);
+      if (c.group && typeof c.group.rejectGroupInvite === 'function') {
+        await c.group.rejectGroupInvite(entry.event);
+      }
+    } catch { /* network errors fall back gracefully */ }
   }
   return { dismissed: pending ? pending.remove(params.id) : false };
 }
@@ -278,6 +378,8 @@ function subscribeInteractions(events, pending, send) {
   };
   watch(events.onScriptDialog, 'script-dialog', serializeScriptDialog);
   watch(events.onLure, 'lure', serializeLure);
+  watch(events.onInventoryOffered, 'inventory-offer', serializeInventoryOffer);
+  watch(events.onGroupInvite, 'group-invite', serializeGroupInvite);
   if (events.onGroupNotice && typeof events.onGroupNotice.subscribe === 'function') {
     subscriptions.push(events.onGroupNotice.subscribe((event) => {
       send('group-notice', { id: randomUUID(), timestamp: Date.now(), ...serializeGroupNotice(event) });
@@ -294,9 +396,15 @@ module.exports = {
   serializeLure,
   serializeGroupNotice,
   serializePayment,
+  serializeInventoryOffer,
+  serializeGroupInvite,
   PendingInteractions,
   subscribeInteractions,
   respondScriptDialog,
   acceptLure,
+  acceptInventoryOffer,
+  declineInventoryOffer,
+  acceptGroupInvite,
+  declineGroupInvite,
   dismissInteraction,
 };

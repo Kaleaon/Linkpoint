@@ -42,12 +42,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.linkpoint.R
 import com.linkpoint.ui.components.linkpoint2.fx.AuroraBackdrop
 import com.linkpoint.ui.components.linkpoint2.primitives.L2Chip
 import com.linkpoint.ui.components.linkpoint2.primitives.L2ChipVariant
@@ -55,6 +57,7 @@ import com.linkpoint.ui.components.linkpoint2.primitives.L2FilledButton
 import com.linkpoint.ui.components.linkpoint2.primitives.L2GhostButton
 import com.linkpoint.ui.components.linkpoint2.primitives.L2GlassSurface
 import com.linkpoint.ui.components.linkpoint2.primitives.L2OutlinedTextField
+import com.linkpoint.ui.components.linkpoint2.tokens.GeneratedTokens
 import com.linkpoint.ui.components.linkpoint2.tokens.Linkpoint2
 
 /**
@@ -139,19 +142,19 @@ fun LoginScreen(
                 }
                 Spacer(Modifier.weight(1f))
                 IconButton(onClick = onOpenSettings) {
-                    Icon(Icons.Default.Settings, contentDescription = "Settings")
+                    Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
                 }
             }
 
             Spacer(Modifier.height(20.dp))
             Text(
-                text = "Linkpoint",
+                text = stringResource(R.string.app_name),
                 fontSize = 38.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = "Step into your second world. Faster, lighter,\nbeautifully on the go.",
+                text = stringResource(R.string.login_tagline),
                 style = MaterialTheme.typography.bodyMedium,
                 color = tokens.onSurfaceDim,
                 modifier = Modifier.padding(top = 6.dp),
@@ -166,7 +169,7 @@ fun LoginScreen(
             ) {
                 Column {
                     Text(
-                        text = "SIGN IN",
+                        text = stringResource(R.string.login_sign_in),
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontWeight = FontWeight.SemiBold,
                             letterSpacing = 1.sp,
@@ -178,7 +181,7 @@ fun LoginScreen(
                     L2OutlinedTextField(
                         value = credentials.firstName,
                         onValueChange = { credentials = credentials.copy(firstName = it) },
-                        label = "First name",
+                        label = stringResource(R.string.first_name),
                         enabled = !isLoading,
                         leading = {
                             Icon(Icons.Default.AccountCircle, contentDescription = null)
@@ -188,14 +191,14 @@ fun LoginScreen(
                     L2OutlinedTextField(
                         value = credentials.lastName,
                         onValueChange = { credentials = credentials.copy(lastName = it) },
-                        label = "Last name (or 'Resident')",
+                        label = stringResource(R.string.last_name_placeholder),
                         enabled = !isLoading,
                     )
                     Spacer(Modifier.height(10.dp))
                     L2OutlinedTextField(
                         value = credentials.password,
                         onValueChange = { credentials = credentials.copy(password = it) },
-                        label = "Password",
+                        label = stringResource(R.string.password),
                         enabled = !isLoading,
                         isError = isError,
                         leading = { Icon(Icons.Default.Lock, contentDescription = null) },
@@ -204,7 +207,7 @@ fun LoginScreen(
                                 Icon(
                                     imageVector = if (passwordVisible) Icons.Default.Visibility
                                     else Icons.Default.VisibilityOff,
-                                    contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                                    contentDescription = if (passwordVisible) stringResource(R.string.hide_password) else stringResource(R.string.show_password),
                                 )
                             }
                         },
@@ -218,7 +221,7 @@ fun LoginScreen(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text(
-                            text = "Grid",
+                            text = stringResource(R.string.grid),
                             style = MaterialTheme.typography.labelMedium,
                             color = tokens.onSurfaceDim,
                         )
@@ -259,7 +262,7 @@ fun LoginScreen(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text(
-                            text = "Start location",
+                            text = stringResource(R.string.start_location),
                             style = MaterialTheme.typography.labelMedium,
                             color = tokens.onSurfaceDim,
                         )
@@ -291,7 +294,7 @@ fun LoginScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Text("Remember me", style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.remember_me), style = MaterialTheme.typography.bodyMedium)
                         Spacer(Modifier.weight(1f))
                         Switch(
                             checked = credentials.savePassword,
@@ -316,7 +319,7 @@ fun LoginScreen(
                                 strokeWidth = 2.dp,
                             )
                         } else {
-                            Text("Enter world", fontWeight = FontWeight.SemiBold)
+                            Text(stringResource(R.string.enter_world), fontWeight = FontWeight.SemiBold)
                             Spacer(Modifier.width(6.dp))
                             Icon(
                                 Icons.AutoMirrored.Filled.ArrowForward,
@@ -332,19 +335,19 @@ fun LoginScreen(
                             onClick = { /* saved accounts */ },
                             modifier = Modifier.weight(1f),
                             height = 40.dp,
-                        ) { Text("Saved") }
+                        ) { Text(stringResource(R.string.login_saved)) }
                         if (onWebAuthRequested != null) {
                             L2GhostButton(
                                 onClick = onWebAuthRequested,
                                 modifier = Modifier.weight(1f),
                                 height = 40.dp,
-                            ) { Text("Web 2FA") }
+                            ) { Text(stringResource(R.string.login_web_2fa)) }
                         } else {
                             L2GhostButton(
                                 onClick = { /* add account */ },
                                 modifier = Modifier.weight(1f),
                                 height = 40.dp,
-                            ) { Text("Add account") }
+                            ) { Text(stringResource(R.string.login_add_account)) }
                         }
                     }
 
@@ -368,12 +371,12 @@ fun LoginScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    "v2.0 · build 4831",
+                    stringResource(R.string.login_version_build),
                     style = MaterialTheme.typography.labelSmall,
                     color = tokens.onSurfaceDim,
                 )
                 Text(
-                    "Forgot password?",
+                    stringResource(R.string.forgot_password),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -399,7 +402,7 @@ private fun L2ErrorBanner(message: String) {
             contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
         ) {
             Text(
-                text = "Login failed · $message",
+                text = stringResource(R.string.login_failed_prefix, message),
                 style = MaterialTheme.typography.bodySmall,
                 color = cs.error,
                 fontWeight = FontWeight.SemiBold,
@@ -411,10 +414,10 @@ private fun L2ErrorBanner(message: String) {
 @Composable
 private fun GridStatusDot(status: String, modifier: Modifier = Modifier) {
     val color = when (status.lowercase()) {
-        "online" -> Color(0xFF4CAF50)   // Green
-        "offline" -> Color(0xFFF44336)  // Red
-        "degraded" -> Color(0xFFFF9800) // Amber
-        else -> Color(0xFF9E9E9E)       // Gray
+        "online" -> GeneratedTokens.Color.Status.Online
+        "offline" -> GeneratedTokens.Color.Status.Offline
+        "degraded" -> GeneratedTokens.Color.Status.Degraded
+        else -> GeneratedTokens.Color.Status.Unknown
     }
     androidx.compose.foundation.Canvas(modifier = modifier.size(8.dp)) {
         drawCircle(color = color)

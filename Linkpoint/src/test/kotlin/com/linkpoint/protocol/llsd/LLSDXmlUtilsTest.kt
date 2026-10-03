@@ -1,5 +1,7 @@
 package com.linkpoint.protocol.llsd
 
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -32,5 +34,31 @@ class LLSDXmlUtilsTest {
         val actualBytes = LLSDXmlUtils.wrapToBytes(array)
 
         assertArrayEquals(expectedBytes, actualBytes)
+    }
+
+    @Test
+    fun `writeToStream streams output matching wrapToBytes`() {
+        val array = LLSDArray().apply {
+            add(LLSDString("item1"))
+            add(LLSDInteger(100))
+        }
+
+        val baos = ByteArrayOutputStream()
+        LLSDXmlUtils.writeToStream(array, baos)
+
+        assertArrayEquals(LLSDXmlUtils.wrapToBytes(array), baos.toByteArray())
+    }
+
+    @Test
+    fun `parse from InputStream and ByteArray reads XML LLSD correctly`() {
+        val xmlBytes = "<?xml version=\"1.0\"?><llsd><map><key>count</key><integer>123</integer></map></llsd>".toByteArray(Charsets.UTF_8)
+
+        val parsedFromStream = LLSDXmlUtils.parse(ByteArrayInputStream(xmlBytes))
+        val parsedFromBytes = LLSDXmlUtils.parse(xmlBytes)
+
+        val expected = LLSDMap().apply { this["count"] = LLSDInteger(123) }
+
+        assertEquals(expected, parsedFromStream)
+        assertEquals(expected, parsedFromBytes)
     }
 }
