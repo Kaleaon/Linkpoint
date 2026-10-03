@@ -191,8 +191,10 @@ class RegionCrossingManager(
      * Resolve neighbor handle for local coordinates using active topography rules.
      */
     fun resolveNeighborHandle(localX: Float, localY: Float): Long? {
-        val currentHandle = _currentRegion.value?.handle ?: return null
-        return topographyProjection.getNeighborRegionHandle(currentHandle, localX, localY, REGION_SIZE)
+        val regionInfo = _currentRegion.value ?: return null
+        val currentHandle = regionInfo.handle
+        val regionSize = regionInfo.regionSizeX
+        return topographyProjection.getNeighborRegionHandle(currentHandle, localX, localY, regionSize)
     }
 
     /**
@@ -221,8 +223,11 @@ class RegionCrossingManager(
      * Used to proactively establish child connections.
      */
     fun isNearRegionBorder(localX: Float, localY: Float, threshold: Float = 10f): Boolean {
-        return localX < threshold || localX > (REGION_SIZE - threshold) ||
-               localY < threshold || localY > (REGION_SIZE - threshold)
+        val regionInfo = _currentRegion.value
+        val sizeX = regionInfo?.regionSizeX ?: REGION_SIZE
+        val sizeY = regionInfo?.regionSizeY ?: REGION_SIZE
+        return localX < threshold || localX > (sizeX - threshold) ||
+               localY < threshold || localY > (sizeY - threshold)
     }
 
     /**
