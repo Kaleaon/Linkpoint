@@ -195,26 +195,29 @@ class RegionCrossingManager(
      *         or no child connection exists to the neighbor.
      */
     fun getNeighborRegion(localX: Float, localY: Float): Long? {
-        val currentHandle = _currentRegion.value?.handle ?: return null
+        val regionInfo = _currentRegion.value ?: return null
+        val currentHandle = regionInfo.handle
+        val sizeX = regionInfo.regionSizeX
+        val sizeY = regionInfo.regionSizeY
         
         // Decode current region coordinates from handle
         val currentRegionX = (currentHandle shr 40).toInt()
         val currentRegionY = ((currentHandle shr 8) and 0xFFFFFFFF).toInt()
         
-        // Check boundaries
+        // Check boundaries against Varregion size
         val neighborX = when {
             localX < 0 -> currentRegionX - REGION_SIZE
-            localX >= REGION_SIZE -> currentRegionX + REGION_SIZE
+            localX >= sizeX -> currentRegionX + sizeX
             else -> currentRegionX
         }
         
         val neighborY = when {
             localY < 0 -> currentRegionY - REGION_SIZE
-            localY >= REGION_SIZE -> currentRegionY + REGION_SIZE
+            localY >= sizeY -> currentRegionY + sizeY
             else -> currentRegionY
         }
         
-        // If we're still in current region, no crossing needed
+        // If we're still in current region (including virtual sub-tiles of a Varregion), no crossing needed
         if (neighborX == currentRegionX && neighborY == currentRegionY) {
             return null
         }
@@ -236,8 +239,11 @@ class RegionCrossingManager(
      * Used to proactively establish child connections.
      */
     fun isNearRegionBorder(localX: Float, localY: Float, threshold: Float = 10f): Boolean {
-        return localX < threshold || localX > (REGION_SIZE - threshold) ||
-               localY < threshold || localY > (REGION_SIZE - threshold)
+        val regionInfo = _currentRegion.value
+        val sizeX = regionInfo?.regionSizeX ?: REGION_SIZE
+        val sizeY = regionInfo?.regionSizeY ?: REGION_SIZE
+        return localX < threshold || localX > (sizeX - threshold) ||
+               localY < threshold || localY > (sizeY - threshold)
     }
     
     /**
