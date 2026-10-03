@@ -95,6 +95,7 @@ network_*.java
 # Allow PWA-demo scripts
 !PWA-demo/*.sh
 !scripts/*.sh
+!scripts/*.py
 
 # Build artifacts and backups
 *.backup
@@ -158,3 +159,7 @@ build_output.txt
 **/dist/
 /target/
 /artifacts/
+/coverage/
+**/coverage/
+*.lcov
+lcov.info

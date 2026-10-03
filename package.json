@@ -15,10 +15,12 @@
     "dev": "npm run dev -w @linkpoint/app",
     "build": "npm run build -w @linkpoint/app",
     "test": "npm run test:web",
+    "test:coverage": "vitest run --coverage",
     "test:web": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.11",
     "typescript": "~5.8.2",
     "vite": "7.3.6",
     "vitest": "4.1.11"

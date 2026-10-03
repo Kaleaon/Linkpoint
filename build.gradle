@@ -55,6 +55,10 @@ tasks.register('assembleDebug') {
     dependsOn gradle.includedBuild('Linkpoint').task(':assembleDebug')
 }
 
+tasks.register('jacocoTestReport') {
+    dependsOn gradle.includedBuild('Linkpoint').task(':jacocoTestReport')
+}
+
 // Universal clean task
 tasks.register('clean', Delete) {
     delete rootProject.buildDir
