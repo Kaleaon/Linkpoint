@@ -122,7 +122,7 @@ object LLSDUtils {
      * is returned.
      */
     @JvmStatic
-    @Suppress("UNCHECKED_CAST")
+    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
     fun asList(obj: Any?): List<Any?> {
         return if (obj is List<*>) obj as List<Any?> else ArrayList()
     }

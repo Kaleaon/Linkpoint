@@ -210,14 +210,14 @@ object LLSDParser {
                 val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN)
                 LLSDUUID(UUID(buffer.long, buffer.long))
             }
-            LLSDValue.MARKER_STRING, 's' -> {
+            LLSDValue.MARKER_STRING -> {
                 val len = readLength(stream, state, limits)
                 if (len > limits.maxStringBytes) {
                     throw ParseLimitExceededException("String length exceeds maxStringBytes.")
                 }
                 LLSDString(String(readExact(stream, len, state, limits), Charsets.UTF_8))
             }
-            LLSDValue.MARKER_BINARY, 'b' -> {
+            LLSDValue.MARKER_BINARY -> {
                 val len = readLength(stream, state, limits)
                 if (len > limits.maxBinaryBytes) {
                     throw ParseLimitExceededException("Binary length exceeds maxBinaryBytes.")
@@ -229,14 +229,14 @@ object LLSDParser {
                 val seconds = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).double
                 LLSDDate((seconds * 1000).toLong())
             }
-            LLSDValue.MARKER_URI, 'l' -> {
+            LLSDValue.MARKER_URI -> {
                 val len = readLength(stream, state, limits)
                 if (len > limits.maxStringBytes) {
                     throw ParseLimitExceededException("URI length exceeds maxStringBytes.")
                 }
                 LLSDURI(String(readExact(stream, len, state, limits), Charsets.UTF_8))
             }
-            LLSDValue.MARKER_MAP, '{' -> {
+            LLSDValue.MARKER_MAP -> {
                 val map = LLSDMap()
                 var entries = 0
 
@@ -274,7 +274,7 @@ object LLSDParser {
 
                 map
             }
-            LLSDValue.MARKER_ARRAY, '[' -> {
+            LLSDValue.MARKER_ARRAY -> {
                 val array = LLSDArray()
                 var elements = 0
 
