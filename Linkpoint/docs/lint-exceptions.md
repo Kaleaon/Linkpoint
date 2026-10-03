@@ -11,7 +11,7 @@ This project runs Android Lint in strict mode (`abortOnError=true`, `checkReleas
 
 | ID | Scope | Reason | Owner | Expires On (UTC) | Tracking |
 | --- | --- | --- | --- | --- | --- |
-| _None_ | - | - | - | - | - |
+| MissingTranslation | Linkpoint/lint-baseline.xml | Baseline legacy missing translations in es/fr/ja strings until full i18n sync | @stitch | 2026-12-31 | PR #677 |
 
 ## How to update
 1. Add/adjust the lint suppression/baseline entry in code.
