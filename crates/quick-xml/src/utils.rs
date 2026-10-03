@@ -8,7 +8,7 @@ pub fn write_cow_string(f: &mut Formatter, cow_string: &Cow<[u8]>) -> fmt::Resul
     match cow_string {
         Cow::Owned(s) => {
             write!(f, "Owned(")?;
-            write_byte_string(f, &s)?;
+            write_byte_string(f, s)?;
         }
         Cow::Borrowed(s) => {
             write!(f, "Borrowed(")?;
@@ -89,7 +89,7 @@ pub struct Bytes<'de>(pub &'de [u8]);
 
 impl<'de> Debug for Bytes<'de> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write_byte_string(f, &self.0)
+        write_byte_string(f, self.0)
     }
 }
 
