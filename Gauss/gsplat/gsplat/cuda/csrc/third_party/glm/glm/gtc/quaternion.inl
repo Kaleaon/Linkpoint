@@ -205,4 +205,3 @@ namespace glm
 #if GLM_CONFIG_SIMD == GLM_ENABLE
 #	include "quaternion_simd.inl"
 #endif
-

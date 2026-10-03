@@ -12,7 +12,7 @@ public enum EDeRezDestination {
     DRD_ATTACHMENT_EXISTS(8),
     DRD_RETURN_TO_OWNER(9),
     DRD_RETURN_TO_LAST_OWNER(10);
-    
+
     private final int code;
 
     EDeRezDestination(int i) {

@@ -9,7 +9,7 @@ public enum NotificationSounds {
     LocalChat(R.raw.lumiya_local_chat_message),
     IM(R.raw.lumiya_private_message),
     Group(R.raw.lumiya_group_message);
-    
+
     private final int resourceId;
     public static final ImmutableMap<NotificationType, NotificationSounds> defaultSounds = ImmutableMap.of(NotificationType.LocalChat, LocalChat, NotificationType.Private, IM, NotificationType.Group, Group);
 

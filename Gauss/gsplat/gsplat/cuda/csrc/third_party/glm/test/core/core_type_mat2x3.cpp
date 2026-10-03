@@ -40,21 +40,21 @@ int test_ctr()
 	glm::mat2x3 m0(
 		glm::vec3(0, 1, 2),
 		glm::vec3(3, 4, 5));
-	
+
 	glm::mat2x3 m1{0, 1, 2, 3, 4, 5};
-	
+
 	glm::mat2x3 m2{
 		{0, 1, 2},
 		{3, 4, 5}};
-	
+
 	Error += glm::all(glm::equal(m0, m2, glm::epsilon<float>())) ? 0 : 1;
 	Error += glm::all(glm::equal(m1, m2, glm::epsilon<float>())) ? 0 : 1;
-	
+
 	std::vector<glm::mat2x3> v1{
 		{0, 1, 2, 3, 4, 5},
 		{0, 1, 2, 3, 4, 5}
 	};
-	
+
 	std::vector<glm::mat2x3> v2{
 		{
 			{ 0, 1, 2},
@@ -65,9 +65,9 @@ int test_ctr()
 			{ 4, 5, 6}
 		}
 	};
-	
+
 #endif//GLM_HAS_INITIALIZER_LISTS
-	
+
 	return Error;
 }
 
@@ -90,7 +90,7 @@ namespace cast
 	int test()
 	{
 		int Error = 0;
-		
+
 		Error += entry<glm::mat2x2>();
 		Error += entry<glm::mat2x3>();
 		Error += entry<glm::mat2x4>();

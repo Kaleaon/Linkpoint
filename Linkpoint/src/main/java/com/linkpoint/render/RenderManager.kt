@@ -26,22 +26,22 @@ import java.util.concurrent.atomic.AtomicLong
 /**
  * Manages rendering using Google Filament
  * Supports both standard and XR rendering modes
- * 
+ *
  * Initializes with Second Life default environment settings to ensure
  * something visible renders even before world data is loaded.
  */
 class RenderManager(private val context: Context) {
-    
+
     companion object {
         private const val TAG = "RenderManager"
         private const val FIRST_FRAME_COUNT = 1L
-        
+
         init {
             // Load Filament native libraries before any Engine operations
             Filament.init()
         }
     }
-    
+
     // Filament components
     private var engine: Engine? = null
     private var renderer: Renderer? = null
@@ -50,11 +50,11 @@ class RenderManager(private val context: Context) {
     private var camera: Camera? = null
     private var cameraEntity: Int = 0
     private var swapChain: SwapChain? = null
-    
+
     // Lock for swapchain synchronization to prevent race conditions
     // between UiHelper callbacks and manual recreateSwapChain() calls
     private val swapChainLock = Any()
-    
+
     // Scene management
     private var sceneManager: SceneManager? = null
     private val sceneGraph = SceneGraph()
@@ -80,7 +80,7 @@ class RenderManager(private val context: Context) {
     private var groundPlaneVertexBuffer: VertexBuffer? = null
     private var groundPlaneIndexBuffer: IndexBuffer? = null
     private var groundPlaneMaterial: MaterialInstance? = null
-    
+
     // State
     private var isInitialized = false
     private var isXRMode = false
@@ -134,7 +134,7 @@ class RenderManager(private val context: Context) {
      */
     @Volatile
     var sceneManagerReady: ((SceneManager) -> Unit)? = null
-    
+
     /**
      * Initialize the rendering engine
      */
@@ -200,7 +200,7 @@ class RenderManager(private val context: Context) {
             view = filamentEngine.createView()
             cameraEntity = filamentEngine.entityManager.create()
             camera = filamentEngine.createCamera(cameraEntity)
-            
+
             // Initialize scene manager
             val filamentScene = scene ?: throw IllegalStateException("Failed to create Filament Scene")
             val sm = SceneManager(filamentEngine, filamentScene, context)
@@ -279,10 +279,10 @@ class RenderManager(private val context: Context) {
                     Log.w(TAG, "No lit material available - PrimRenderer not initialized")
                 }
             }
-            
+
             view?.scene = filamentScene
             view?.camera = camera
-            
+
             // Setup UI helper for surface management
             uiHelper = UiHelper(UiHelper.ContextErrorPolicy.DONT_CHECK).apply {
                 renderCallback = object : UiHelper.RendererCallback {
@@ -361,7 +361,7 @@ class RenderManager(private val context: Context) {
             // Without this eager creation the SwapChain stays null forever and frames
             // never composite, producing the "world refuses to load" symptom.
             rebuildSwapChainForCurrentSurface()
-            
+
             // Configure renderer with SL default clear color (sky blue)
             renderer?.clearOptions?.apply {
                 clear = true
@@ -373,19 +373,19 @@ class RenderManager(private val context: Context) {
                     1.0f
                 )
             }
-            
+
             // Setup default lighting using SL defaults
             setupDefaultLighting()
-            
+
             // Setup fallback ground plane so something is visible
             setupFallbackGroundPlane()
-            
+
             // Set default camera position (elevated, looking at center)
             setupDefaultCamera()
-            
+
             // Log that defaults are being applied
             SLDefaultEnvironment.logDefaults()
-            
+
             isInitialized = true
             initializationTime = System.currentTimeMillis()
             Log.i(TAG, "Filament engine initialized successfully with SL defaults")
@@ -415,15 +415,15 @@ class RenderManager(private val context: Context) {
     fun initializeOnRenderThread(surfaceView: SurfaceView): Boolean {
         return dispatcher.runBlocking { initialize(surfaceView) }
     }
-    
+
     private fun setupDefaultLighting() {
         // Create sun light using SL default settings
         val sunDirection = SLDefaultEnvironment.DEFAULT_SUN_DIRECTION
         val sunColor = SLDefaultEnvironment.DEFAULT_SUN_COLOR
-        
+
         val sunlight = EntityManager.get().create()
         val filamentEngine = engine ?: throw IllegalStateException("Filament Engine not initialized")
-        
+
         LightManager.Builder(LightManager.Type.SUN)
             .color(sunColor.r, sunColor.g, sunColor.b)
             .intensity(SLDefaultEnvironment.DEFAULT_SUN_INTENSITY)
@@ -433,17 +433,17 @@ class RenderManager(private val context: Context) {
             .sunHaloSize(10.0f)
             .sunHaloFalloff(80.0f)
             .build(filamentEngine, sunlight)
-        
+
         scene?.addEntity(sunlight)
-        
+
         // Add ambient/indirect light using SL defaults
         scene?.indirectLight = IndirectLight.Builder()
             .intensity(SLDefaultEnvironment.DEFAULT_AMBIENT_INTENSITY)
             .build(filamentEngine)
-        
+
         Log.d(TAG, "Default SL lighting applied - Sun: ${SLDefaultEnvironment.DEFAULT_SUN_INTENSITY} lux")
     }
-    
+
     /**
      * Setup a fallback ground plane visible before terrain loads.
      * This prevents showing a black void.
@@ -539,7 +539,7 @@ class RenderManager(private val context: Context) {
             Log.w(TAG, "Could not create fallback ground plane: ${e.message}", e)
         }
     }
-    
+
     /**
      * Setup default camera position for initial view.
      */
@@ -562,7 +562,7 @@ class RenderManager(private val context: Context) {
             Camera.Fov.VERTICAL
         )
     }
-    
+
     /**
      * Notify the render manager that world data has been loaded.
      * This can hide fallback elements.
@@ -627,7 +627,7 @@ class RenderManager(private val context: Context) {
             Log.w(TAG, "Failed to upload terrain detail $index: ${e.message}", e)
         }
     }
-    
+
     private fun updateProjection(width: Int, height: Int) {
         val aspect = width.toFloat() / height.toFloat()
         camera?.setProjection(
@@ -778,7 +778,7 @@ class RenderManager(private val context: Context) {
         // Use synchronized block to prevent race conditions with UiHelper callbacks
         synchronized(swapChainLock) {
             swapChain?.let { return it }
-            
+
             val surface = surfaceView?.holder?.surface
             if (surface == null || !surface.isValid) {
                 // Throttle warnings to at most once per second (avoids log spam)
@@ -810,15 +810,15 @@ class RenderManager(private val context: Context) {
             return swapChain
         }
     }
-    
+
     /**
      * Force recreation of the SwapChain.
      * Call this when the surface becomes available or after a surface change.
-     * 
+     *
      * Thread Safety:
      * - This method uses swapChainLock for synchronization with UiHelper callbacks.
      * - Safe to call from SurfaceHolder.Callback methods (surfaceCreated, surfaceChanged).
-     * - Do NOT call this from within UiHelper.RendererCallback methods (onNativeWindowChanged, 
+     * - Do NOT call this from within UiHelper.RendererCallback methods (onNativeWindowChanged,
      *   onDetachedFromSurface) as those already hold the lock and calling this would cause deadlock.
      * - If you need to recreate the SwapChain from a UiHelper callback context, the callback
      *   already handles this automatically via the synchronized block.
@@ -918,7 +918,7 @@ class RenderManager(private val context: Context) {
         displayAttachWarningLogged = false
         helper.attach(render, display)
     }
-    
+
     /**
      * Check if enough time has passed since last warning to log again.
      * Prevents log spam by throttling warnings to at most once per second.
@@ -931,7 +931,7 @@ class RenderManager(private val context: Context) {
         }
         return false
     }
-    
+
     /**
      * Render a frame.
      *
@@ -1074,7 +1074,7 @@ class RenderManager(private val context: Context) {
         }
         applyRenderUpdates()
     }
-    
+
     /**
      * Set camera position and orientation
      */
@@ -1088,17 +1088,17 @@ class RenderManager(private val context: Context) {
             0.0, 0.0, 1.0  // Up vector (Z-up for SL)
         )
     }
-    
+
     /**
      * Get the Filament engine
      */
     fun getEngine(): Engine? = engine
-    
+
     /**
      * Get the Filament scene
      */
     fun getScene(): Scene? = scene
-    
+
     /**
      * Get the scene manager for adding/removing objects and avatars
      */
@@ -1280,9 +1280,9 @@ class RenderManager(private val context: Context) {
         requireFilamentThread("removePrim")
         primRenderer?.removePrim(localId)
     }
-    
+
     // ==================== DIAGNOSTIC METHODS ====================
-    
+
     // Tracking for diagnostics (volatile for thread safety)
     private var frameCount = AtomicLong(0)
     @Volatile private var lastFrameTime: Long = 0
@@ -1320,7 +1320,7 @@ class RenderManager(private val context: Context) {
     fun onSurfaceDestroyed() {
         setSurfaceState(RenderSurfaceState.DESTROYED, source = "backend.onSurfaceDestroyed")
     }
-    
+
     /**
      * Get comprehensive diagnostic data for debug reports
      */
@@ -1386,7 +1386,7 @@ class RenderManager(private val context: Context) {
         val visibleTerrainPatchCount: Int,
         val scenePopulationSnapshot: ScenePopulationDiagnostics.Snapshot
     )
-    
+
     /**
      * Shutdown rendering
      */
@@ -1448,7 +1448,7 @@ class RenderManager(private val context: Context) {
         uiHelper = null
         displayHelper = null
         surfaceView = null
-        
+
         isInitialized = false
     }
 
@@ -1550,7 +1550,7 @@ class RenderManager(private val context: Context) {
             Log.w(TAG, "Failed to flush Filament GPU queue ($reason): ${e.message}")
         }
     }
-    
+
     private fun FloatArray.toDoubleArray(): DoubleArray {
         return DoubleArray(this.size) { this[it].toDouble() }
     }

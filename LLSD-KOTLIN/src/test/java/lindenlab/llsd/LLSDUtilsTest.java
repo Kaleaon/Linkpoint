@@ -162,7 +162,7 @@ class LLSDUtilsTest {
             // Verify values are equal but objects are different
             assertEquals(original.get("string"), copiedMap.get("string"));
             assertEquals(original.get("number"), copiedMap.get("number"));
-            
+
             // Verify nested structures are different objects
             assertNotSame(original.get("nested"), copiedMap.get("nested"));
             assertNotSame(original.get("list"), copiedMap.get("list"));
@@ -181,7 +181,7 @@ class LLSDUtilsTest {
 
             assertTrue(copied instanceof byte[]);
             byte[] copiedBytes = (byte[]) copied;
-            
+
             assertArrayEquals(original, copiedBytes);
             assertNotSame(original, copiedBytes); // Different array objects
         }

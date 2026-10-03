@@ -383,4 +383,3 @@ namespace glm
 
 	/// @}
 }//namespace glm
-

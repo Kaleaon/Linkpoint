@@ -19,18 +19,18 @@ static int test_vec1()
 		constexpr glm::bvec1 B(true);
 		constexpr bool A = glm::all(B);
 		static_assert(A, "GLM: Failed constexpr");
-		
+
 		constexpr glm::bvec1 D(true);
 		constexpr bool C = glm::any(D);
 		static_assert(C, "GLM: Failed constexpr");
 	}
-	
+
 	{
 		constexpr glm::bvec2 C(true);
 		constexpr glm::bvec2 B(true);
 		static_assert(glm::any(glm::equal(C, B)), "GLM: Failed constexpr");
 	}
-	
+
 	{
 		constexpr glm::ivec1 O(glm::ivec1(1));
 		static_assert(glm::ivec1(1) == O, "GLM: Failed constexpr");
@@ -176,18 +176,18 @@ static int test_vec2()
 		constexpr glm::bvec2 B(true);
 		constexpr bool A = glm::all(B);
 		static_assert(A, "GLM: Failed constexpr");
-		
+
 		constexpr glm::bvec2 D(true, false);
 		constexpr bool C = glm::any(D);
 		static_assert(C, "GLM: Failed constexpr");
 	}
-	
+
 	{
 		constexpr glm::bvec2 C(true);
 		constexpr glm::bvec2 B(true, false);
 		static_assert(glm::any(glm::equal(C, B)), "GLM: Failed constexpr");
 	}
-	
+
 	{
 		constexpr glm::ivec2 O(glm::ivec1(1));
 		static_assert(glm::ivec2(1) == O, "GLM: Failed constexpr");
@@ -349,18 +349,18 @@ static int test_vec3()
 		constexpr glm::bvec3 B(true);
 		constexpr bool A = glm::all(B);
 		static_assert(A, "GLM: Failed constexpr");
-		
+
 		constexpr glm::bvec3 D(true, false, true);
 		constexpr bool C = glm::any(D);
 		static_assert(C, "GLM: Failed constexpr");
 	}
-	
+
 	{
 		constexpr glm::bvec3 C(true);
 		constexpr glm::bvec3 B(true, false, true);
 		static_assert(glm::any(glm::equal(C, B)), "GLM: Failed constexpr");
 	}
-	
+
 	{
 		constexpr glm::ivec3 O(glm::ivec1(1));
 		static_assert(glm::ivec3(1) == O, "GLM: Failed constexpr");
@@ -537,17 +537,17 @@ static int test_vec3()
 static int test_vec4()
 {
 	int Error = 0;
-	
+
 	{
 		constexpr glm::bvec4 B(true);
 		constexpr bool A = glm::all(B);
 		static_assert(A, "GLM: Failed constexpr");
-		
+
 		constexpr glm::bvec4 D(true, false, true, false);
 		constexpr bool C = glm::any(D);
 		static_assert(C, "GLM: Failed constexpr");
 	}
-	
+
 	{
 		constexpr glm::bvec4 C(true);
 		constexpr glm::bvec4 B(true, false, true, false);
@@ -747,4 +747,3 @@ int main()
 
 	return Error;
 }
-

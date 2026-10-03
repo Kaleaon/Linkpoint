@@ -24,4 +24,3 @@
         android:drawable="@drawable/btn_minus_selected" />
     <item android:drawable="@drawable/btn_minus_default" />
 </selector>
-

@@ -1,7 +1,7 @@
 material {
     name : PrimBasic,
     shadingModel : lit,
-    
+
     parameters : [
         {
             type : sampler2D,
@@ -28,11 +28,11 @@ material {
             default : 1.0
         }
     ],
-    
+
     requires : [
         uv0
     ],
-    
+
     blending : masked,
     maskThreshold : 0.4,
 }
@@ -46,10 +46,10 @@ vertex {
 fragment {
     void material(inout MaterialInputs material) {
         prepareMaterial(material);
-        
+
         vec2 uv = getUV0();
         vec4 texColor = texture(materialParams_baseColorMap, uv);
-        
+
         material.baseColor = vec4(texColor.rgb * materialParams.baseColor, texColor.a * materialParams.alpha);
         material.metallic = materialParams.metallic;
         material.roughness = materialParams.roughness;

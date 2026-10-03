@@ -45,7 +45,7 @@ public final class UnsignedBytes {
         /* loaded from: classes.dex */
         enum UnsafeComparator implements Comparator<byte[]> {
             INSTANCE;
-            
+
             static final boolean BIG_ENDIAN = ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN);
             static final Unsafe theUnsafe = getUnsafe();
             static final int BYTE_ARRAY_BASE_OFFSET = theUnsafe.arrayBaseOffset(byte[].class);

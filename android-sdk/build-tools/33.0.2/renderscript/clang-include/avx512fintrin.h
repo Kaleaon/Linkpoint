@@ -4081,7 +4081,7 @@ static __inline__ __m512i __DEFAULT_FN_ATTRS
 _mm512_maskz_cvtps_epu32 ( __mmask16 __U, __m512 __A)
 {
   return (__m512i) __builtin_ia32_cvtps2udq512_mask ((__v16sf) __A,
-                  (__v16si) 
+                  (__v16si)
                   _mm512_setzero_si512 (),
                   (__mmask16) __U ,
                   _MM_FROUND_CUR_DIRECTION);
@@ -9327,7 +9327,7 @@ _mm_mask_cvtsd_ss (__m128 __W, __mmask8 __U, __m128 __A, __m128d __B)
 {
   return __builtin_ia32_cvtsd2ss_round_mask ((__v4sf)(__A),
                                              (__v2df)(__B),
-                                             (__v4sf)(__W), 
+                                             (__v4sf)(__W),
                                              (__mmask8)(__U), _MM_FROUND_CUR_DIRECTION);
 }
 
@@ -9336,7 +9336,7 @@ _mm_maskz_cvtsd_ss (__mmask8 __U, __m128 __A, __m128d __B)
 {
   return __builtin_ia32_cvtsd2ss_round_mask ((__v4sf)(__A),
                                              (__v2df)(__B),
-                                             (__v4sf)_mm_setzero_ps(), 
+                                             (__v4sf)_mm_setzero_ps(),
                                              (__mmask8)(__U), _MM_FROUND_CUR_DIRECTION);
 }
 
@@ -9395,7 +9395,7 @@ _mm_mask_cvtss_sd (__m128d __W, __mmask8 __U, __m128d __A, __m128 __B)
   return __builtin_ia32_cvtss2sd_round_mask((__v2df)(__A),
                                               (__v4sf)(__B),
                                               (__v2df)(__W),
-                                              (__mmask8)(__U), _MM_FROUND_CUR_DIRECTION); 
+                                              (__mmask8)(__U), _MM_FROUND_CUR_DIRECTION);
 }
 
 static __inline__ __m128d __DEFAULT_FN_ATTRS
@@ -9403,8 +9403,8 @@ _mm_maskz_cvtss_sd (__mmask8 __U, __m128d __A, __m128 __B)
 {
   return __builtin_ia32_cvtss2sd_round_mask((__v2df)(__A),
                                               (__v4sf)(__B),
-                                              (__v2df)_mm_setzero_pd(), 
-                                              (__mmask8)(__U), _MM_FROUND_CUR_DIRECTION); 
+                                              (__v2df)_mm_setzero_pd(),
+                                              (__mmask8)(__U), _MM_FROUND_CUR_DIRECTION);
 }
 
 static __inline__ __m128d __DEFAULT_FN_ATTRS

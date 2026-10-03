@@ -97,7 +97,7 @@ int test_outerProduct()
 
 	{ glm::mat3x2 m = glm::outerProduct(glm::vec2(1.0f), glm::vec3(1.0f)); }
 	{ glm::mat3x4 m = glm::outerProduct(glm::vec4(1.0f), glm::vec3(1.0f)); }
-  
+
 	{ glm::mat4x2 m = glm::outerProduct(glm::vec2(1.0f), glm::vec4(1.0f)); }
 	{ glm::mat4x3 m = glm::outerProduct(glm::vec3(1.0f), glm::vec4(1.0f)); }
 
@@ -187,9 +187,9 @@ int test_inverse()
 
 	{
 		glm::mat4x4 A4x4(
-			glm::vec4(1, 0, 1, 0), 
-			glm::vec4(0, 1, 0, 0), 
-			glm::vec4(0, 0, 1, 0), 
+			glm::vec4(1, 0, 1, 0),
+			glm::vec4(0, 1, 0, 0),
+			glm::vec4(0, 0, 1, 0),
 			glm::vec4(0, 0, 0, 1));
 		glm::mat4x4 B4x4 = inverse(A4x4);
 		glm::mat4x4 I4x4 = A4x4 * B4x4;
@@ -199,8 +199,8 @@ int test_inverse()
 
 	{
 		glm::mat3x3 A3x3(
-			glm::vec3(1, 0, 1), 
-			glm::vec3(0, 1, 0), 
+			glm::vec3(1, 0, 1),
+			glm::vec3(0, 1, 0),
 			glm::vec3(0, 0, 1));
 		glm::mat3x3 B3x3 = glm::inverse(A3x3);
 		glm::mat3x3 I3x3 = A3x3 * B3x3;
@@ -210,7 +210,7 @@ int test_inverse()
 
 	{
 		glm::mat2x2 A2x2(
-			glm::vec2(1, 1), 
+			glm::vec2(1, 1),
 			glm::vec2(0, 1));
 		glm::mat2x2 B2x2 = glm::inverse(A2x2);
 		glm::mat2x2 I2x2 = A2x2 * B2x2;
@@ -389,4 +389,3 @@ int main()
 
 	return Error;
 }
-

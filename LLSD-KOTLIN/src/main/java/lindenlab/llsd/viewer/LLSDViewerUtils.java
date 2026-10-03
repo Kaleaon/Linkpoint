@@ -34,11 +34,11 @@ import java.util.stream.Collectors;
  * @see <a href="https://github.com/secondlife/viewer/blob/main/indra/llcommon/llsdutil.h">llsdutil.h</a>
  */
 public final class LLSDViewerUtils {
-    
+
     private LLSDViewerUtils() {
         // Utility class - no instances
     }
-    
+
     /**
      * Creates an LLSD integer from a 32-bit unsigned integer value.
      * <p>
@@ -54,7 +54,7 @@ public final class LLSDViewerUtils {
         }
         return (int) value;
     }
-    
+
     /**
      * Extracts a 32-bit unsigned integer from an LLSD value.
      *
@@ -75,7 +75,7 @@ public final class LLSDViewerUtils {
         }
         throw new IllegalArgumentException("Cannot convert to U32: " + sd);
     }
-    
+
     /**
      * Creates an LLSD long from a 64-bit unsigned integer value.
      * <p>
@@ -88,7 +88,7 @@ public final class LLSDViewerUtils {
     public static Object fromU64(long value) {
         return value;
     }
-    
+
     /**
      * Extracts a 64-bit unsigned integer from an LLSD value.
      *
@@ -104,7 +104,7 @@ public final class LLSDViewerUtils {
         }
         throw new IllegalArgumentException("Cannot convert to U64: " + sd);
     }
-    
+
     /**
      * Creates an LLSD integer from a 32-bit integer representing an IP address.
      *
@@ -114,7 +114,7 @@ public final class LLSDViewerUtils {
     public static Object fromIPAddress(int ipAddress) {
         return ipAddress;
     }
-    
+
     /**
      * Extracts a 32-bit integer representing an IP address from an LLSD value.
      *
@@ -128,7 +128,7 @@ public final class LLSDViewerUtils {
         }
         throw new IllegalArgumentException("Cannot convert to IP address: " + sd);
     }
-    
+
     /**
      * Converts an LLSD binary value into its Base64 string representation.
      *
@@ -142,7 +142,7 @@ public final class LLSDViewerUtils {
         }
         throw new IllegalArgumentException("Cannot convert to string from binary: " + sd);
     }
-    
+
     /**
      * Converts an LLSD string value into a byte array.
      * <p>
@@ -170,7 +170,7 @@ public final class LLSDViewerUtils {
         }
         throw new IllegalArgumentException("Cannot convert to binary from string: " + sd);
     }
-    
+
     /**
      * Check if a string looks like base64 data.
      */
@@ -181,7 +181,7 @@ public final class LLSDViewerUtils {
         // Simple heuristic: contains only base64 characters and has reasonable length
         return str.matches("[A-Za-z0-9+/]+(=*)") && str.length() % 4 == 0;
     }
-    
+
     /**
      * Compares an LLSD data structure against a template, populating a result map.
      * <p>
@@ -202,7 +202,7 @@ public final class LLSDViewerUtils {
         }
         return compareWithTemplateImpl(testLLSD, templateLLSD, resultLLSD, false);
     }
-    
+
     /**
      * Filters an LLSD data structure using a template, with support for wildcards.
      * <p>
@@ -221,10 +221,10 @@ public final class LLSDViewerUtils {
         }
         return compareWithTemplateImpl(testLLSD, templateLLSD, resultLLSD, true);
     }
-    
+
     private static boolean compareWithTemplateImpl(Object testObj, Object templateObj, Map<String, Object> result, boolean useWildcard) {
         // result should not be null - validated by public methods
-        
+
         if (templateObj == null || "".equals(templateObj)) {
             // Undefined template matches anything
             if (testObj != null) {
@@ -239,7 +239,7 @@ public final class LLSDViewerUtils {
             }
             return true;
         }
-        
+
         if (testObj == null) {
             // Use template default
             if (templateObj instanceof Map) {
@@ -249,22 +249,22 @@ public final class LLSDViewerUtils {
             }
             return true;
         }
-        
+
         // Type checking - allow compatible types
         if (!areCompatibleTypes(testObj, templateObj)) {
             return false;
         }
-        
+
         if (testObj instanceof Map && templateObj instanceof Map) {
             @SuppressWarnings("unchecked")
             Map<String, Object> testMap = (Map<String, Object>) testObj;
             @SuppressWarnings("unchecked")
             Map<String, Object> templateMap = (Map<String, Object>) templateObj;
-            
+
             for (Map.Entry<String, Object> templateEntry : templateMap.entrySet()) {
                 String key = templateEntry.getKey();
                 Object templateValue = templateEntry.getValue();
-                
+
                 if (useWildcard && "*".equals(key)) {
                     // Wildcard key - apply to all unmatched keys in test
                     for (Map.Entry<String, Object> testEntry : testMap.entrySet()) {
@@ -281,7 +281,7 @@ public final class LLSDViewerUtils {
                     }
                     continue;
                 }
-                
+
                 if (testMap.containsKey(key)) {
                     if (templateValue == null || "".equals(templateValue)) {
                         // Undefined template value means accept anything
@@ -309,7 +309,7 @@ public final class LLSDViewerUtils {
             List<Object> testArray = (List<Object>) testObj;
             @SuppressWarnings("unchecked")
             List<Object> templateArray = (List<Object>) templateObj;
-            
+
             if (useWildcard && templateArray.size() == 1) {
                 // Single template element applies to all test elements
                 List<Object> resultArray = new ArrayList<>();
@@ -347,7 +347,7 @@ public final class LLSDViewerUtils {
             return true;
         }
     }
-    
+
     /**
      * Check if two objects have compatible types for template comparison.
      */
@@ -355,40 +355,40 @@ public final class LLSDViewerUtils {
         if (test == null || template == null) {
             return true;
         }
-        
+
         Class<?> testClass = test.getClass();
         Class<?> templateClass = template.getClass();
-        
+
         // Exact match
         if (testClass.equals(templateClass)) {
             return true;
         }
-        
+
         // Numeric compatibility
         if (isNumericType(testClass) && isNumericType(templateClass)) {
             return true;
         }
-        
+
         // String compatibility with other types
         if (templateClass.equals(String.class) && isStringConvertibleType(testClass)) {
             return true;
         }
-        
+
         return false;
     }
-    
+
     private static boolean isNumericType(Class<?> clazz) {
-        return clazz.equals(Integer.class) || clazz.equals(Double.class) || 
-               clazz.equals(Float.class) || clazz.equals(Long.class) || 
+        return clazz.equals(Integer.class) || clazz.equals(Double.class) ||
+               clazz.equals(Float.class) || clazz.equals(Long.class) ||
                clazz.equals(Boolean.class);
     }
-    
+
     private static boolean isStringConvertibleType(Class<?> clazz) {
-        return clazz.equals(String.class) || clazz.equals(Integer.class) || 
+        return clazz.equals(String.class) || clazz.equals(Integer.class) ||
                clazz.equals(Double.class) || clazz.equals(Boolean.class) ||
                clazz.equals(UUID.class) || clazz.equals(Date.class);
     }
-    
+
     /**
      * Checks if an LLSD data structure matches the structure of a given prototype.
      * <p>
@@ -404,29 +404,29 @@ public final class LLSDViewerUtils {
      */
     public static String llsdMatches(Object prototype, Object data, String prefix) {
         if (prefix == null) prefix = "";
-        
+
         if (prototype == null || "".equals(prototype)) {
             return ""; // undefined prototype matches anything
         }
-        
+
         if (data == null) {
             return prefix + "missing data";
         }
-        
+
         Class<?> prototypeClass = prototype.getClass();
         Class<?> dataClass = data.getClass();
-        
+
         // Type compatibility checks
         if (prototype instanceof String) {
             // String prototype accepts string-convertible types
-            if (!(data instanceof String || data instanceof Boolean || 
+            if (!(data instanceof String || data instanceof Boolean ||
                   data instanceof Integer || data instanceof Double ||
                   data instanceof UUID || data instanceof Date)) {
                 return prefix + "expected string-convertible type, got " + dataClass.getSimpleName();
             }
         } else if (prototype instanceof Boolean || prototype instanceof Integer || prototype instanceof Double) {
             // Numeric types are interconvertible
-            if (!(data instanceof Boolean || data instanceof Integer || 
+            if (!(data instanceof Boolean || data instanceof Integer ||
                   data instanceof Double || data instanceof String)) {
                 return prefix + "expected numeric type, got " + dataClass.getSimpleName();
             }
@@ -446,14 +446,14 @@ public final class LLSDViewerUtils {
             if (!(data instanceof List)) {
                 return prefix + "expected Array, got " + dataClass.getSimpleName();
             }
-            
+
             List<?> prototypeList = (List<?>) prototype;
             List<?> dataList = (List<?>) data;
-            
+
             if (dataList.size() < prototypeList.size()) {
                 return prefix + "array too short: expected at least " + prototypeList.size() + ", got " + dataList.size();
             }
-            
+
             for (int i = 0; i < prototypeList.size(); i++) {
                 Object prototypeElement = prototypeList.get(i);
                 if (prototypeElement != null && !"".equals(prototypeElement)) {
@@ -467,14 +467,14 @@ public final class LLSDViewerUtils {
             if (!(data instanceof Map)) {
                 return prefix + "expected Map, got " + dataClass.getSimpleName();
             }
-            
+
             Map<?, ?> prototypeMap = (Map<?, ?>) prototype;
             Map<?, ?> dataMap = (Map<?, ?>) data;
-            
+
             for (Map.Entry<?, ?> entry : prototypeMap.entrySet()) {
                 String key = entry.getKey().toString();
                 Object prototypeValue = entry.getValue();
-                
+
                 if (prototypeValue != null && !"".equals(prototypeValue)) {
                     if (!dataMap.containsKey(key)) {
                         return prefix + "missing required key: " + key;
@@ -488,10 +488,10 @@ public final class LLSDViewerUtils {
         } else if (!prototypeClass.equals(dataClass)) {
             return prefix + "type mismatch: expected " + prototypeClass.getSimpleName() + ", got " + dataClass.getSimpleName();
         }
-        
+
         return "";
     }
-    
+
     /**
      * Performs a deep equality comparison between two LLSD data structures.
      * <p>
@@ -508,12 +508,12 @@ public final class LLSDViewerUtils {
     public static boolean llsdEquals(Object lhs, Object rhs, int bits) {
         if (lhs == rhs) return true;
         if (lhs == null || rhs == null) return false;
-        
+
         Class<?> lhsClass = lhs.getClass();
         Class<?> rhsClass = rhs.getClass();
-        
+
         if (!lhsClass.equals(rhsClass)) return false;
-        
+
         if (lhs instanceof Double && rhs instanceof Double) {
             if (bits == -1) {
                 return Objects.equals(lhs, rhs);
@@ -526,9 +526,9 @@ public final class LLSDViewerUtils {
         } else if (lhs instanceof List && rhs instanceof List) {
             List<?> lhsList = (List<?>) lhs;
             List<?> rhsList = (List<?>) rhs;
-            
+
             if (lhsList.size() != rhsList.size()) return false;
-            
+
             for (int i = 0; i < lhsList.size(); i++) {
                 if (!llsdEquals(lhsList.get(i), rhsList.get(i), bits)) {
                     return false;
@@ -538,9 +538,9 @@ public final class LLSDViewerUtils {
         } else if (lhs instanceof Map && rhs instanceof Map) {
             Map<?, ?> lhsMap = (Map<?, ?>) lhs;
             Map<?, ?> rhsMap = (Map<?, ?>) rhs;
-            
+
             if (lhsMap.size() != rhsMap.size()) return false;
-            
+
             for (Map.Entry<?, ?> entry : lhsMap.entrySet()) {
                 Object key = entry.getKey();
                 if (!rhsMap.containsKey(key)) return false;
@@ -555,7 +555,7 @@ public final class LLSDViewerUtils {
             return Objects.equals(lhs, rhs);
         }
     }
-    
+
     /**
      * Performs a deep equality comparison with exact floating-point matching.
      *
@@ -566,7 +566,7 @@ public final class LLSDViewerUtils {
     public static boolean llsdEquals(Object lhs, Object rhs) {
         return llsdEquals(lhs, rhs, -1);
     }
-    
+
     /**
      * Creates a deep clone of an LLSD data structure, with an optional filter
      * to include or exclude map keys.
@@ -579,25 +579,25 @@ public final class LLSDViewerUtils {
      */
     public static Object llsdClone(Object value, Map<String, Boolean> filter) {
         if (value == null) return null;
-        
+
         if (value instanceof Map) {
             @SuppressWarnings("unchecked")
             Map<String, Object> originalMap = (Map<String, Object>) value;
             Map<String, Object> clonedMap = new HashMap<>();
-            
+
             boolean hasWildcard = filter != null && filter.containsKey("*");
             boolean wildcardValue = hasWildcard ? filter.get("*") : true;
-            
+
             for (Map.Entry<String, Object> entry : originalMap.entrySet()) {
                 String key = entry.getKey();
                 boolean shouldInclude;
-                
+
                 if (filter != null && filter.containsKey(key)) {
                     shouldInclude = filter.get(key);
                 } else {
                     shouldInclude = wildcardValue;
                 }
-                
+
                 if (shouldInclude) {
                     clonedMap.put(key, llsdClone(entry.getValue(), filter));
                 }
@@ -607,7 +607,7 @@ public final class LLSDViewerUtils {
             @SuppressWarnings("unchecked")
             List<Object> originalList = (List<Object>) value;
             List<Object> clonedList = new ArrayList<>();
-            
+
             for (Object item : originalList) {
                 clonedList.add(llsdClone(item, filter));
             }
@@ -619,7 +619,7 @@ public final class LLSDViewerUtils {
             return value;
         }
     }
-    
+
     /**
      * Creates a deep clone of an LLSD data structure without any filtering.
      *
@@ -629,7 +629,7 @@ public final class LLSDViewerUtils {
     public static Object llsdClone(Object value) {
         return llsdClone(value, null);
     }
-    
+
     /**
      * Creates a shallow copy of an LLSD map or array, with an optional filter.
      * <p>
@@ -642,25 +642,25 @@ public final class LLSDViewerUtils {
      */
     public static Object llsdShallow(Object value, Map<String, Boolean> filter) {
         if (value == null) return null;
-        
+
         if (value instanceof Map) {
             @SuppressWarnings("unchecked")
             Map<String, Object> originalMap = (Map<String, Object>) value;
             Map<String, Object> copiedMap = new HashMap<>();
-            
+
             boolean hasWildcard = filter != null && filter.containsKey("*");
             boolean wildcardValue = hasWildcard ? filter.get("*") : true;
-            
+
             for (Map.Entry<String, Object> entry : originalMap.entrySet()) {
                 String key = entry.getKey();
                 boolean shouldInclude;
-                
+
                 if (filter != null && filter.containsKey(key)) {
                     shouldInclude = filter.get(key);
                 } else {
                     shouldInclude = wildcardValue;
                 }
-                
+
                 if (shouldInclude) {
                     copiedMap.put(key, entry.getValue());
                 }
@@ -674,7 +674,7 @@ public final class LLSDViewerUtils {
             return value;
         }
     }
-    
+
     /**
      * Creates a shallow copy of an LLSD map or array without any filtering.
      *

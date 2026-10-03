@@ -27,7 +27,7 @@ public abstract class SLChatYesNoEvent extends SLChatTextEvent {
         EventNew,
         EventAccepted,
         EventCancelled;
-        
+
         public static final EventState[] VALUES = valuesCustom();
 
         /* renamed from: values  reason: to resolve conflict with enum method */

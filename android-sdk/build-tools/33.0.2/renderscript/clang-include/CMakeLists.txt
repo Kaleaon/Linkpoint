@@ -104,7 +104,7 @@ foreach( f ${files} )
   list(APPEND out_files ${dst})
 endforeach( f )
 
-add_custom_command(OUTPUT ${output_dir}/arm_neon.h 
+add_custom_command(OUTPUT ${output_dir}/arm_neon.h
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/arm_neon.h
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/arm_neon.h ${output_dir}/arm_neon.h
   COMMENT "Copying clang's arm_neon.h...")

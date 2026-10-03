@@ -17,7 +17,7 @@ public class ObjectDerezDialog {
         Take(R.string.derez_confirm_take, EDeRezDestination.DRD_TAKE_INTO_AGENT_INVENTORY),
         TakeCopy(R.string.derez_confirm_take_copy, EDeRezDestination.DRD_ACQUIRE_TO_AGENT_INVENTORY),
         Delete(R.string.derez_confirm_delete, EDeRezDestination.DRD_TRASH);
-        
+
         public final EDeRezDestination deRezDestination;
         public final int derezQuestionId;
 

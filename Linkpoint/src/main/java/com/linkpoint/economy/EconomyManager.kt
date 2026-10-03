@@ -18,9 +18,9 @@ import java.util.UUID
 
 /**
  * Economy Manager - Handles L$ balance and transactions.
- * 
+ *
  * Based on the reference viewer's SLFinancialInfo.java
- * 
+ *
  * Manages:
  * - L$ balance tracking
  * - Money transactions (payments, purchases)
@@ -32,7 +32,7 @@ class EconomyManager(
     private val capabilityManager: CapabilityManager,
     private val agentId: UUID
 ) : EventHandler {
-    
+
     companion object {
         private const val TAG = "EconomyManager"
 
@@ -52,7 +52,7 @@ class EconomyManager(
         const val TRANS_GROUP_LIABILITY = 5012
         const val TRANS_GROUP_DIVIDEND = 5013
         const val TRANS_GROUP_MEMBERSHIP_DUES = 5014
-        
+
         // Money flags
         const val MONEY_FLAG_DESTINATION_AGGREGATES = 0x01
         const val MONEY_FLAG_SOURCE_AGGREGATES = 0x02
@@ -76,13 +76,13 @@ class EconomyManager(
             else -> "Transaction (#$type)"
         }
     }
-    
+
     private val scope = CoroutineScope(EventQueueDispatcher.dispatcher + SupervisorJob())
-    
+
     // L$ balance
     private val _balance = MutableStateFlow(0)
     val balance: StateFlow<Int> = _balance
-    
+
     // Economy data (upload prices, etc.)
     private val _economyData = MutableStateFlow<EconomyData?>(null)
     val economyData: StateFlow<EconomyData?> = _economyData
@@ -98,22 +98,22 @@ class EconomyManager(
             null
         }
     }
-    
+
     // Transaction events
     private val _transactionEvents = MutableSharedFlow<TransactionEvent>(replay = 0, extraBufferCapacity = 16)
     val transactionEvents: SharedFlow<TransactionEvent> = _transactionEvents
-    
+
     init {
         capabilityManager.registerEventHandler("MoneyBalanceReply", this, EventQueueDispatcher.dispatcher)
     }
-    
+
     override fun onEvent(message: String, body: LLSDMap) {
         when (message) {
             "MoneyBalanceReply" -> {
                 val newBalance = body.getInt("MoneyBalance") ?: return
                 val previousBalance = _balance.value
                 _balance.value = newBalance
-                
+
                 scope.launch {
                     _transactionEvents.emit(
                         TransactionEvent.BalanceChanged(
@@ -126,14 +126,14 @@ class EconomyManager(
             }
         }
     }
-    
+
     /**
      * Handle MoneyBalanceReply message from UDP.
      */
     fun handleMoneyBalanceReply(payload: ByteArray) {
         try {
             val buffer = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             // MoneyData block
             val requesterAgentId = readUUID(buffer)
             val transactionId = readUUID(buffer)
@@ -141,18 +141,18 @@ class EconomyManager(
             val newBalance = buffer.int
             val squareMetersCredit = buffer.int
             val squareMetersCommitted = buffer.int
-            
+
             // Read description
             val descLen = buffer.get().toInt() and 0xFF
             val descBytes = ByteArray(descLen)
             buffer.get(descBytes)
             val description = String(descBytes, Charsets.UTF_8).trim('\u0000')
-            
+
             val previousBalance = _balance.value
             _balance.value = newBalance
-            
+
             Log.d(TAG, "Balance updated: $previousBalance -> $newBalance L$ ($description)")
-            
+
             scope.launch {
                 _transactionEvents.emit(
                     TransactionEvent.BalanceChanged(
@@ -164,19 +164,19 @@ class EconomyManager(
                     )
                 )
             }
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing MoneyBalanceReply", e)
         }
     }
-    
+
     /**
      * Handle EconomyData message from UDP.
      */
     fun handleEconomyData(payload: ByteArray) {
         try {
             val buffer = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             // Info block
             val objectCapacity = buffer.int
             val objectCount = buffer.int
@@ -195,7 +195,7 @@ class EconomyManager(
             val priceObjectScaleFactor = buffer.float
             val priceParcelRent = buffer.int
             val priceGroupCreate = buffer.int
-            
+
             _economyData.value = EconomyData(
                 priceUpload = priceUpload,
                 priceGroupCreate = priceGroupCreate,
@@ -207,55 +207,55 @@ class EconomyManager(
                 objectCapacity = objectCapacity,
                 objectCount = objectCount
             )
-            
+
             Log.d(TAG, "Economy data updated: upload=$priceUpload, groupCreate=$priceGroupCreate")
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing EconomyData", e)
         }
     }
-    
+
     /**
      * Request current L$ balance.
      */
     suspend fun requestBalance() {
         try {
             val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             // AgentData
             writeUUID(payload, agentId)
             writeUUID(payload, udpConnection.getSessionId())
-            
+
             // MoneyData
             writeUUID(payload, UUID.randomUUID()) // TransactionID
-            
+
             udpConnection.sendPacket(MessageIdRegistry.MONEY_BALANCE_REQUEST, payload.array(), reliable = true)
             Log.d(TAG, "Requested balance")
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Failed to request balance", e)
         }
     }
-    
+
     /**
      * Request economy data (prices, etc.).
      */
     suspend fun requestEconomyData() {
         try {
             val payload = ByteBuffer.allocate(32).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             // AgentData
             writeUUID(payload, agentId)
             writeUUID(payload, udpConnection.getSessionId())
-            
+
             udpConnection.sendPacket(MessageIdRegistry.ECONOMY_DATA_REQUEST, payload.array(), reliable = true)
             Log.d(TAG, "Requested economy data")
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Failed to request economy data", e)
         }
     }
-    
+
     /**
      * Pay L$ to an agent.
      */
@@ -269,10 +269,10 @@ class EconomyManager(
             Log.w(TAG, "Insufficient balance: ${_balance.value} < $amount")
             return false
         }
-        
+
         return sendPayment(destinationId, amount, description, TRANS_GIFT)
     }
-    
+
     /**
      * Pay L$ to an object.
      */
@@ -286,10 +286,10 @@ class EconomyManager(
             Log.w(TAG, "Insufficient balance: ${_balance.value} < $amount")
             return false
         }
-        
+
         return sendPayment(objectId, amount, description, TRANS_PAY_OBJECT)
     }
-    
+
     /**
      * Send a payment.
      */
@@ -325,11 +325,11 @@ class EconomyManager(
             payload.putInt(transactionType)
             payload.put(descBytes.size.toByte())
             payload.put(descBytes)
-            
+
             udpConnection.sendPacket(MessageIdRegistry.MONEY_TRANSFER_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
-            
+
             Log.i(TAG, "Sent payment: $amount L$ to $destinationId")
-            
+
             scope.launch {
                 _transactionEvents.emit(
                     TransactionEvent.PaymentSent(
@@ -339,26 +339,26 @@ class EconomyManager(
                     )
                 )
             }
-            
+
             return true
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send payment", e)
             return false
         }
     }
-    
+
     private fun readUUID(buffer: ByteBuffer): UUID {
         val msb = buffer.long
         val lsb = buffer.long
         return UUID(msb, lsb)
     }
-    
+
     private fun writeUUID(buffer: ByteBuffer, uuid: UUID) {
         buffer.putLong(uuid.mostSignificantBits)
         buffer.putLong(uuid.leastSignificantBits)
     }
-    
+
     /**
      * Shutdown the manager.
      */
@@ -393,13 +393,13 @@ sealed class TransactionEvent {
         val description: String? = null,
         val transactionSuccess: Boolean = true
     ) : TransactionEvent()
-    
+
     data class PaymentSent(
         val destinationId: UUID,
         val amount: Int,
         val description: String
     ) : TransactionEvent()
-    
+
     data class PaymentReceived(
         val sourceId: UUID,
         val sourceName: String,

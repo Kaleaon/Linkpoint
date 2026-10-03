@@ -23,15 +23,15 @@ static int test_operators()
 	{
 		matType const P = N * static_cast<value_type>(2.0f);
 		Error += glm::all(glm::equal(P, M, Epsilon)) ? 0 : 1;
-		
+
 		matType const Q = M / static_cast<value_type>(2.0f);
 		Error += glm::all(glm::equal(Q, N, Epsilon)) ? 0 : 1;
 	}
-	
+
 	{
 		vecType const V = M * U;
 		Error += glm::all(glm::equal(V, vecType(static_cast<value_type>(4.f)), Epsilon)) ? 0 : 1;
-		
+
 		vecType const W = U / M;
 		Error += glm::all(glm::equal(W, vecType(static_cast<value_type>(1.f)), Epsilon)) ? 0 : 1;
 	}
@@ -50,7 +50,7 @@ static int test_inverse()
 	typedef typename matType::value_type value_type;
 
 	value_type const Epsilon = static_cast<value_type>(0.001);
-	
+
 	int Error = 0;
 
 	matType const Identity(static_cast<value_type>(1.0f));
@@ -63,7 +63,7 @@ static int test_inverse()
 	matType const Result = Matrix * Inverse;
 
 	Error += glm::all(glm::equal(Identity, Result, Epsilon)) ? 0 : 1;
-	
+
 	return Error;
 }
 
@@ -143,17 +143,17 @@ static int test_ctr()
 static int test_member_alloc_bug()
 {
 	int Error = 0;
-	
+
 	struct repro
 	{
 		repro(){ this->matrix = new glm::mat4(); }
 		~repro(){delete this->matrix;}
-		
+
 		glm::mat4* matrix;
 	};
-	
+
 	repro Repro;
-	
+
 	return Error;
 }
 

@@ -132,12 +132,12 @@ All new features must include tests:
 @Test
 fun `connectToVoiceChannel should succeed with valid credentials`() = runTest {
     val manager = LinkpointVoiceManager(context, callback)
-    
+
     val result = manager.connectToVoiceChannel(
         channelUri = "sip:test@example.com",
         authToken = "valid-token"
     )
-    
+
     assertTrue(result)
 }
 ```

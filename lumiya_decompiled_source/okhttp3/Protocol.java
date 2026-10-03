@@ -7,7 +7,7 @@ public enum Protocol {
     HTTP_1_1("http/1.1"),
     SPDY_3("spdy/3.1"),
     HTTP_2("h2");
-    
+
     private final String protocol;
 
     Protocol(String str) {

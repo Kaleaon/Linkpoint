@@ -86,16 +86,16 @@ int test_outerProduct()
 {
 	int Error = 0;
 
-	{ 
+	{
 		glm::imat2x2 const m = glm::outerProduct(glm::ivec2(1), glm::ivec2(1));
 		Error += all(equal(m, glm::imat2x2(1, 1, 1, 1))) ? 0 : 1;
 	}
-	{ 
-		glm::imat2x3 const m = glm::outerProduct(glm::ivec3(1), glm::ivec2(1)); 
+	{
+		glm::imat2x3 const m = glm::outerProduct(glm::ivec3(1), glm::ivec2(1));
 		Error += all(equal(m, glm::imat2x3(1, 1, 1, 1, 1, 1))) ? 0 : 1;
 	}
-	{ 
-		glm::imat2x4 const m = glm::outerProduct(glm::ivec4(1), glm::ivec2(1)); 
+	{
+		glm::imat2x4 const m = glm::outerProduct(glm::ivec4(1), glm::ivec2(1));
 		Error += all(equal(m, glm::imat2x4(1, 1, 1, 1, 1, 1, 1, 1))) ? 0 : 1;
 	}
 
@@ -103,8 +103,8 @@ int test_outerProduct()
 		glm::imat3x2 const m = glm::outerProduct(glm::ivec2(1), glm::ivec3(1));
 		Error += all(equal(m, glm::imat3x2(1, 1, 1, 1, 1, 1))) ? 0 : 1;
 	}
-	{ 
-		glm::imat3x3 const m = glm::outerProduct(glm::ivec3(1), glm::ivec3(1)); 
+	{
+		glm::imat3x3 const m = glm::outerProduct(glm::ivec3(1), glm::ivec3(1));
 		Error += all(equal(m, glm::imat3x3(1, 1, 1, 1, 1, 1, 1, 1, 1))) ? 0 : 1;
 	}
 	{
@@ -112,17 +112,17 @@ int test_outerProduct()
 		Error += all(equal(m, glm::imat3x4(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1))) ? 0 : 1;
 	}
 
-  
-	{ 
-		glm::imat4x2 const m = glm::outerProduct(glm::ivec2(1), glm::ivec4(1)); 
+
+	{
+		glm::imat4x2 const m = glm::outerProduct(glm::ivec2(1), glm::ivec4(1));
 		Error += all(equal(m, glm::imat4x2(1, 1, 1, 1, 1, 1, 1, 1))) ? 0 : 1;
 	}
-	{ 
+	{
 		glm::imat4x3 const m = glm::outerProduct(glm::ivec3(1), glm::ivec4(1));
 		Error += all(equal(m, glm::imat4x3(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1))) ? 0 : 1;
 	}
-	{ 
-		glm::imat4x4 const m = glm::outerProduct(glm::ivec4(1), glm::ivec4(1)); 
+	{
+		glm::imat4x4 const m = glm::outerProduct(glm::ivec4(1), glm::ivec4(1));
 		Error += all(equal(m, glm::imat4x4(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1))) ? 0 : 1;
 	}
 

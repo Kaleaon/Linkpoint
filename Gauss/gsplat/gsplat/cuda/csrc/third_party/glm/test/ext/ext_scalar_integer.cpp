@@ -342,7 +342,7 @@ namespace prevMultiple
 		};
 
 		int Error = 0;
-		
+
 		for(std::size_t i = 0, n = sizeof(Data) / sizeof(type<T>); i < n; ++i)
 		{
 			T const Result = glm::prevMultiple(Data[i].Source, Data[i].Multiple);

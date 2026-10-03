@@ -16,7 +16,7 @@ import java.util.UUID;
  */
 public class AgentDataUpdate extends SLMessage {
     private LLSD agentDataLLSD;
-    
+
     // Legacy compatibility field
     public AgentData AgentData_Field = new AgentData();
 
@@ -34,7 +34,7 @@ public class AgentDataUpdate extends SLMessage {
         this.zeroCoded = true;
         initializeDefaultLLSD();
     }
-    
+
     private void initializeDefaultLLSD() {
         Map<String, Object> agentData = new HashMap<>();
         agentData.put("AgentID", UUID.randomUUID());
@@ -44,79 +44,79 @@ public class AgentDataUpdate extends SLMessage {
         agentData.put("GroupTitle", "");
         agentData.put("GroupPowers", 0L);
         agentData.put("GroupName", "");
-        
+
         this.agentDataLLSD = new LLSD(agentData);
     }
-    
+
     // Modern LLSD-based API
     public LLSD getAgentDataLLSD() {
         return agentDataLLSD;
     }
-    
+
     public void setAgentDataLLSD(LLSD agentData) {
         if (agentData != null) {
             this.agentDataLLSD = agentData;
             syncToLegacyFields();
         }
     }
-    
+
     // Convenient getters using enhanced LLSD utilities with proper navigation
     public UUID getAgentID() {
         return EnhancedLLSDUtils.safeGetUUID(agentDataLLSD, "AgentID", null);
     }
-    
+
     public void setAgentID(UUID agentID) {
         updateLLSDField("AgentID", agentID);
     }
-    
+
     public UUID getActiveGroupID() {
         return EnhancedLLSDUtils.safeGetUUID(agentDataLLSD, "ActiveGroupID", null);
     }
-    
+
     public void setActiveGroupID(UUID activeGroupID) {
         updateLLSDField("ActiveGroupID", activeGroupID);
     }
-    
+
     public String getFirstName() {
         return EnhancedLLSDUtils.safeGetString(agentDataLLSD, "FirstName", "");
     }
-    
+
     public void setFirstName(String firstName) {
         updateLLSDField("FirstName", firstName != null ? firstName : "");
     }
-    
+
     public String getLastName() {
         return EnhancedLLSDUtils.safeGetString(agentDataLLSD, "LastName", "");
     }
-    
+
     public void setLastName(String lastName) {
         updateLLSDField("LastName", lastName != null ? lastName : "");
     }
-    
+
     public String getGroupTitle() {
         return EnhancedLLSDUtils.safeGetString(agentDataLLSD, "GroupTitle", "");
     }
-    
+
     public void setGroupTitle(String groupTitle) {
         updateLLSDField("GroupTitle", groupTitle != null ? groupTitle : "");
     }
-    
+
     public long getGroupPowers() {
         return EnhancedLLSDUtils.safeGetLong(agentDataLLSD, "GroupPowers", 0L);
     }
-    
+
     public void setGroupPowers(long groupPowers) {
         updateLLSDField("GroupPowers", groupPowers);
     }
-    
+
     public String getGroupName() {
         return EnhancedLLSDUtils.safeGetString(agentDataLLSD, "GroupName", "");
     }
-    
+
     public void setGroupName(String groupName) {
         updateLLSDField("GroupName", groupName != null ? groupName : "");
     }
-    
+
     /**
      * Update an LLSD field with proper error handling and validation
      * @param key The field key to update
@@ -127,11 +127,11 @@ public class AgentDataUpdate extends SLMessage {
         if (key == null || key.trim().isEmpty()) {
             throw new IllegalArgumentException("Field key cannot be null or empty");
         }
-        
+
         if (agentDataLLSD == null) {
             initializeDefaultLLSD();
         }
-        
+
         try {
             if (agentDataLLSD.getContent() instanceof Map) {
                 Map<String, Object> map = (Map<String, Object>) agentDataLLSD.getContent();
@@ -144,7 +144,7 @@ public class AgentDataUpdate extends SLMessage {
             throw new IllegalStateException("LLSD content cannot be cast to Map<String, Object>", e);
         }
     }
-    
+
     /**
      * Synchronize LLSD data to legacy fields for wire protocol compatibility
      */
@@ -152,7 +152,7 @@ public class AgentDataUpdate extends SLMessage {
         if (AgentData_Field == null) {
             AgentData_Field = new AgentData();
         }
-        
+
         try {
             AgentData_Field.AgentID = getAgentID();
             AgentData_Field.ActiveGroupID = getActiveGroupID();
@@ -166,7 +166,7 @@ public class AgentDataUpdate extends SLMessage {
             System.err.println("Warning: Failed to sync to legacy fields: " + e.getMessage());
         }
     }
-    
+
     /**
      * Synchronize legacy fields to LLSD data
      */
@@ -174,7 +174,7 @@ public class AgentDataUpdate extends SLMessage {
         if (AgentData_Field == null) {
             return;
         }
-        
+
         try {
             setAgentID(AgentData_Field.AgentID);
             setActiveGroupID(AgentData_Field.ActiveGroupID);
@@ -188,7 +188,7 @@ public class AgentDataUpdate extends SLMessage {
             System.err.println("Warning: Failed to sync from legacy fields: " + e.getMessage());
         }
     }
-    
+
     /**
      * Safely convert string to bytes with UTF-8 encoding
      */
@@ -202,7 +202,7 @@ public class AgentDataUpdate extends SLMessage {
             return str.getBytes(); // Fallback to default encoding
         }
     }
-    
+
     /**
      * Safely convert bytes to string with UTF-8 encoding
      */
@@ -222,10 +222,10 @@ public class AgentDataUpdate extends SLMessage {
         String lastName = getLastName();
         String groupTitle = getGroupTitle();
         String groupName = getGroupName();
-        
-        return (firstName.getBytes().length) + 17 + 1 + 
-               (lastName.getBytes().length) + 1 + 
-               (groupTitle.getBytes().length) + 16 + 8 + 1 + 
+
+        return (firstName.getBytes().length) + 17 + 1 +
+               (lastName.getBytes().length) + 1 +
+               (groupTitle.getBytes().length) + 16 + 8 + 1 +
                (groupName.getBytes().length) + 4;
     }
 
@@ -259,7 +259,7 @@ public class AgentDataUpdate extends SLMessage {
         if (byteBuffer == null) {
             return;
         }
-        
+
         // Legacy unpacking
         AgentData_Field.AgentID = unpackUUID(byteBuffer);
         AgentData_Field.FirstName = unpackVariable(byteBuffer, 1);
@@ -268,11 +268,11 @@ public class AgentDataUpdate extends SLMessage {
         AgentData_Field.ActiveGroupID = unpackUUID(byteBuffer);
         AgentData_Field.GroupPowers = unpackLong(byteBuffer);
         AgentData_Field.GroupName = unpackVariable(byteBuffer, 1);
-        
+
         // Sync to LLSD representation
         syncFromLegacyFields();
     }
-    
+
     /**
      * Get LLSD representation as XML string for debugging/serialization
      */
@@ -283,18 +283,18 @@ public class AgentDataUpdate extends SLMessage {
             return "<llsd><undef /></llsd>";
         }
     }
-    
+
     /**
      * Create AgentDataUpdate from LLSD XML string
      * Uses proper parsing with error handling
      */
     public static AgentDataUpdate fromXMLString(String xml) {
         AgentDataUpdate update = new AgentDataUpdate();
-        
+
         if (xml == null || xml.trim().isEmpty()) {
             return update; // Return default instance
         }
-        
+
         try {
             Optional<LLSD> parsedLLSD = EnhancedLLSDUtils.parseFromXMLString(xml);
             if (parsedLLSD.isPresent()) {
@@ -304,7 +304,7 @@ public class AgentDataUpdate extends SLMessage {
             // Log error but return default instance for robustness
             System.err.println("Warning: Failed to parse AgentDataUpdate from XML: " + e.getMessage());
         }
-        
+
         return update;
     }
 }

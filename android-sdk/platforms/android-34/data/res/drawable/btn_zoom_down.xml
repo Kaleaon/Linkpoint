@@ -24,4 +24,3 @@
         android:drawable="@drawable/btn_zoom_down_selected" />
     <item android:drawable="@drawable/btn_zoom_down_normal" />
 </selector>
-

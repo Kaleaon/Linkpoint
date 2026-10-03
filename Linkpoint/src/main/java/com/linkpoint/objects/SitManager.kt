@@ -15,14 +15,14 @@ import java.util.UUID
 
 /**
  * SitManager - Handles avatar sitting on objects.
- * 
+ *
  * Features:
  * - Sit on object
  * - Stand up
  * - Sit target handling
  * - Ground sit
  * - Sit position/rotation
- * 
+ *
  * Based on the reference viewer sit implementation.
  */
 class SitManager(
@@ -31,24 +31,24 @@ class SitManager(
 ) {
     companion object {
         private const val TAG = "SitManager"
-        
+
         // Sit flags
         const val AGENT_CONTROL_SIT_ON_GROUND = 0x10000000
         const val AGENT_CONTROL_STAND_UP = 0x20000000
     }
-    
+
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    
+
     // Sitting state
     private val _isSitting = MutableStateFlow(false)
     val isSitting: StateFlow<Boolean> = _isSitting
-    
+
     private val _sitTargetId = MutableStateFlow<UUID?>(null)
     val sitTargetId: StateFlow<UUID?> = _sitTargetId
-    
+
     private val _sitTargetLocalId = MutableStateFlow<Int?>(null)
     val sitTargetLocalId: StateFlow<Int?> = _sitTargetLocalId
-    
+
     /**
      * Sit on an object by UUID.
      */
@@ -56,19 +56,19 @@ class SitManager(
         scope.launch {
             try {
                 val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
-                
+
                 // AgentData
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
-                
+
                 // TargetObject
                 payload.putUUID(targetId)
-                
+
                 // Offset (optional, use default)
                 payload.putFloat(0f)
                 payload.putFloat(0f)
                 payload.putFloat(0f)
-                
+
                 udpConnection.sendPacket(MessageIdRegistry.AGENT_REQUEST_SIT, payload.array(), reliable = true)
                 Log.i(TAG, "Requested sit on object $targetId")
             } catch (e: Exception) {
@@ -76,7 +76,7 @@ class SitManager(
             }
         }
     }
-    
+
     /**
      * Sit on an object by local ID.
      */
@@ -86,16 +86,16 @@ class SitManager(
                 // Need to find UUID from local ID first
                 // For now, store local ID
                 _sitTargetLocalId.value = localId
-                
+
                 val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
-                
+
                 // AgentData
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
-                
+
                 // Use AgentRequestSit with object local ID
                 // This requires resolving the UUID
-                
+
                 udpConnection.sendPacket(MessageIdRegistry.AGENT_REQUEST_SIT, payload.array(), reliable = true)
                 Log.d(TAG, "Requested sit on local ID $localId")
             } catch (e: Exception) {
@@ -103,7 +103,7 @@ class SitManager(
             }
         }
     }
-    
+
     /**
      * Accept sit request (sent after AgentRequestSit).
      */
@@ -111,11 +111,11 @@ class SitManager(
         scope.launch {
             try {
                 val payload = ByteBuffer.allocate(32).order(ByteOrder.LITTLE_ENDIAN)
-                
+
                 // AgentData
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
-                
+
                 udpConnection.sendPacket(MessageIdRegistry.AGENT_SIT, payload.array(), reliable = true)
                 Log.d(TAG, "Accepted sit")
             } catch (e: Exception) {
@@ -123,7 +123,7 @@ class SitManager(
             }
         }
     }
-    
+
     /**
      * Stand up from current sit target.
      */
@@ -134,22 +134,22 @@ class SitManager(
                 _isSitting.value = false
                 _sitTargetId.value = null
                 _sitTargetLocalId.value = null
-                
+
                 // Send AgentSit with stand flag - handled via control flags in AgentUpdate
                 val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
                 payload.putInt(AGENT_CONTROL_STAND_UP)
-                
+
                 udpConnection.sendPacket(MessageIdRegistry.AGENT_SIT, payload.array(), reliable = true)
-                
+
                 Log.i(TAG, "Requested stand up")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to stand up", e)
             }
         }
     }
-    
+
     /**
      * Sit on ground at current position.
      */
@@ -161,9 +161,9 @@ class SitManager(
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
                 payload.putInt(AGENT_CONTROL_SIT_ON_GROUND)
-                
+
                 udpConnection.sendPacket(MessageIdRegistry.AGENT_SIT, payload.array(), reliable = true)
-                
+
                 _isSitting.value = true
                 _sitTargetId.value = null
                 Log.d(TAG, "Requested ground sit")
@@ -172,7 +172,7 @@ class SitManager(
             }
         }
     }
-    
+
     /**
      * Handle sit response from server.
      */
@@ -187,17 +187,17 @@ class SitManager(
     ) {
         _isSitting.value = true
         _sitTargetId.value = sitObjectId
-        
+
         Log.d(TAG, "Avatar sit response: target=$sitObjectId, pos=$sitPosition")
     }
-    
+
     /**
      * Update sitting state from avatar update.
      */
     fun updateSittingState(parentId: Int) {
         val wasSitting = _isSitting.value
         val nowSitting = parentId != 0
-        
+
         if (wasSitting != nowSitting) {
             _isSitting.value = nowSitting
             if (!nowSitting) {
@@ -207,7 +207,7 @@ class SitManager(
             Log.d(TAG, "Sitting state changed: $nowSitting")
         }
     }
-    
+
     fun shutdown() {
         scope.cancel()
     }

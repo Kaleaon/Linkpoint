@@ -979,7 +979,7 @@ _mm512_maskz_cvtepu64_ps (__mmask8 __U, __m512i __A) {
                                         (__v2df)(__m128d)(B), \
                                         (__v2df)_mm_setzero_pd(), \
                                         (__mmask8)(U), (int)(C), (int)(R)); })
-                     
+
 static __inline__ __mmask16 __DEFAULT_FN_ATTRS
 _mm512_movepi32_mask (__m512i __A)
 {

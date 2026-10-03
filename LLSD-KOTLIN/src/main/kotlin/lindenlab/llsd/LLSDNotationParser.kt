@@ -46,7 +46,7 @@ import java.util.*
  * @see [LLSD Notation Specification](http://wiki.secondlife.com/wiki/LLSD#Notation_Serialization)
  */
 class LLSDNotationParser {
-    
+
     /**
      * Parses an LLSD document from a notation-formatted input stream.
      *
@@ -65,12 +65,12 @@ class LLSDNotationParser {
         val notationString = InputStreamReader(notationInput, StandardCharsets.UTF_8).use { reader ->
             reader.readText()
         }.trim()
-        
+
         val tokenizer = NotationTokenizer(notationString)
         val parsedNotation = parseNotationValue(tokenizer)
         return LLSD(parsedNotation)
     }
-    
+
     /**
      * A simple, internal tokenizer for breaking LLSD notation into a sequence of tokens.
      *
@@ -79,13 +79,13 @@ class LLSDNotationParser {
      */
     private class NotationTokenizer(private val notation: String) {
         var position = 0
-        
+
         fun skipWhitespace() {
             while (position < notation.length && notation[position].isWhitespace()) {
                 position++
             }
         }
-        
+
         @Throws(LLSDException::class)
         fun peek(): Char {
             skipWhitespace()
@@ -94,7 +94,7 @@ class LLSDNotationParser {
             }
             return notation[position]
         }
-        
+
         @Throws(LLSDException::class)
         fun consume(): Char {
             skipWhitespace()
@@ -103,7 +103,7 @@ class LLSDNotationParser {
             }
             return notation[position++]
         }
-        
+
         @Throws(LLSDException::class)
         fun expect(expected: Char) {
             val actual = consume()
@@ -111,16 +111,16 @@ class LLSDNotationParser {
                 throw LLSDException("Expected '$expected' but got '$actual'")
             }
         }
-        
+
         fun hasMore(): Boolean {
             skipWhitespace()
             return position < notation.length
         }
-        
+
         @Throws(LLSDException::class)
         fun consumeString(delimiter: Char): String {
             val sb = StringBuilder()
-            
+
             while (position < notation.length) {
                 var c = notation[position++]
                 when {
@@ -141,15 +141,15 @@ class LLSDNotationParser {
                     else -> sb.append(c)
                 }
             }
-            
+
             throw LLSDException("Unterminated string")
         }
-        
+
         @Throws(LLSDException::class)
         fun consumeNumber(typeMarker: Char): Any {
             val sb = StringBuilder()
             var hasDecimal = false
-            
+
             while (position < notation.length) {
                 val c = notation[position]
                 when {
@@ -169,7 +169,7 @@ class LLSDNotationParser {
                     else -> break
                 }
             }
-            
+
             val numStr = sb.toString()
             return try {
                 when (typeMarker) {
@@ -181,11 +181,11 @@ class LLSDNotationParser {
                 throw LLSDException("Invalid number format: $numStr", e)
             }
         }
-        
+
         fun consumeUntil(vararg delimiters: Char): String {
             val sb = StringBuilder()
             val delimiterSet = delimiters.toSet()
-            
+
             while (position < notation.length) {
                 val c = notation[position]
                 if (c in delimiterSet || c.isWhitespace()) {
@@ -194,11 +194,11 @@ class LLSDNotationParser {
                 sb.append(c)
                 position++
             }
-            
+
             return sb.toString()
         }
     }
-    
+
     /**
      * Parses a single LLSD value from the token stream based on its type marker.
      *
@@ -215,7 +215,7 @@ class LLSDNotationParser {
         if (!tokenizer.hasMore()) {
             throw LLSDException("Expected value but found end of input")
         }
-        
+
         return when (val ch = tokenizer.peek()) {
             '!' -> {
                 tokenizer.consume() // consume '!'
@@ -241,11 +241,11 @@ class LLSDNotationParser {
             else -> throw LLSDException("Unexpected character in notation: $ch")
         }
     }
-    
+
     @Throws(LLSDException::class)
     private fun parseBoolean(tokenizer: NotationTokenizer, expectedValue: Boolean): Boolean {
         val ch = tokenizer.consume()
-        
+
         return when {
             ch == '1' && expectedValue -> true
             ch == '0' && !expectedValue -> false
@@ -272,7 +272,7 @@ class LLSDNotationParser {
             else -> throw LLSDException("Invalid boolean notation: $ch")
         }
     }
-    
+
     @Throws(LLSDException::class)
     private fun parseString(tokenizer: NotationTokenizer): String {
         tokenizer.expect('s') // consume 's'
@@ -284,52 +284,52 @@ class LLSDNotationParser {
             throw LLSDException("Expected string delimiter (' or \") after 's' but got: $delimiter")
         }
     }
-    
+
     @Throws(LLSDException::class)
     private fun parseUUID(tokenizer: NotationTokenizer): UUID {
         tokenizer.expect('u') // consume 'u'
         val uuidStr = tokenizer.consumeUntil(',', ']', '}', ' ', '\t', '\n', '\r')
-        
+
         val uuidPattern = Regex("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
         if (!uuidPattern.matches(uuidStr)) {
             throw LLSDException("Invalid UUID format: '$uuidStr'. Expected format: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'")
         }
-        
+
         return try {
             UUID.fromString(uuidStr)
         } catch (e: IllegalArgumentException) {
             throw LLSDException("Invalid UUID: $uuidStr", e)
         }
     }
-    
+
     @Throws(LLSDException::class)
     private fun parseDate(tokenizer: NotationTokenizer): Date {
         tokenizer.expect('d') // consume 'd'
         val dateStr = tokenizer.consumeUntil(',', ']', '}', ' ', '\t', '\n', '\r')
-        
+
         return try {
             Date.from(Instant.parse(dateStr))
         } catch (e: DateTimeParseException) {
             throw LLSDException("Invalid date format: $dateStr", e)
         }
     }
-    
+
     @Throws(LLSDException::class)
     private fun parseURI(tokenizer: NotationTokenizer): URI {
         tokenizer.expect('l') // consume 'l'
         val uriStr = tokenizer.consumeUntil(',', ']', '}', ' ', '\t', '\n', '\r')
-        
+
         return try {
             URI(uriStr)
         } catch (e: URISyntaxException) {
             throw LLSDException("Invalid URI format: $uriStr", e)
         }
     }
-    
+
     @Throws(LLSDException::class)
     private fun parseBinary(tokenizer: NotationTokenizer): ByteArray {
         tokenizer.expect('b') // consume 'b'
-        
+
         // Check for size specification b64"data" or b(size)"data"
         val next = tokenizer.peek()
         when {
@@ -353,20 +353,20 @@ class LLSDNotationParser {
                 }
             }
             next == '(' -> {
-                // Handle b(size)"data" format  
+                // Handle b(size)"data" format
                 tokenizer.consume() // consume '('
                 val sizeStr = tokenizer.consumeUntil(')')
                 tokenizer.expect(')')
                 val size = sizeStr.toInt()
-                
+
                 val delimiter = tokenizer.consume() // should be quote
                 if (delimiter == '"' || delimiter == '\'') {
                     val binaryData = tokenizer.consumeString(delimiter)
-                    
+
                     if (size != binaryData.length) {
                         throw LLSDException("Binary size mismatch: expected $size but got ${binaryData.length}")
                     }
-                    
+
                     return binaryData.toByteArray(StandardCharsets.UTF_8)
                 } else {
                     throw LLSDException("Expected quote delimiter after size specification but got: $delimiter")
@@ -375,21 +375,21 @@ class LLSDNotationParser {
             else -> throw LLSDException("Invalid binary notation format - expected digit or '(' after 'b' but got: $next")
         }
     }
-    
+
     @Throws(LLSDException::class)
     private fun parseArray(tokenizer: NotationTokenizer): List<Any?> {
         val list = mutableListOf<Any?>()
         tokenizer.expect('[')
-        
+
         if (tokenizer.peek() == ']') {
             tokenizer.consume() // consume ']'
             return list // Empty array
         }
-        
+
         while (true) {
             val value = parseNotationValue(tokenizer)
             list.add(value)
-            
+
             when (val next = tokenizer.peek()) {
                 ']' -> {
                     tokenizer.consume()
@@ -402,25 +402,25 @@ class LLSDNotationParser {
                 else -> throw LLSDException("Expected ',' or ']' in array, got: $next")
             }
         }
-        
+
         return list
     }
-    
+
     @Throws(LLSDException::class)
     private fun parseMap(tokenizer: NotationTokenizer): Map<String, Any?> {
         val map = mutableMapOf<String, Any?>()
         tokenizer.expect('{')
-        
+
         if (tokenizer.peek() == '}') {
             tokenizer.consume() // consume '}'
             return map // Empty map
         }
-        
+
         while (true) {
             // Parse key (should be an identifier or string)
             val key: String
             val keyStart = tokenizer.peek()
-            
+
             key = when {
                 keyStart == 's' -> {
                     // This could be a string literal `s'...'` or an identifier like `status`.
@@ -440,11 +440,11 @@ class LLSDNotationParser {
                 }
                 else -> throw LLSDException("Invalid map key format, got: $keyStart")
             }
-            
+
             tokenizer.expect(':')
             val value = parseNotationValue(tokenizer)
             map[key] = value
-            
+
             when (val next = tokenizer.peek()) {
                 '}' -> {
                     tokenizer.consume()
@@ -457,7 +457,7 @@ class LLSDNotationParser {
                 else -> throw LLSDException("Expected ',' or '}' in map, got: $next")
             }
         }
-        
+
         return map
     }
 }

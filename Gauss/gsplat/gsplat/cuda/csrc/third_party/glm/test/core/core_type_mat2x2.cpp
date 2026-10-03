@@ -61,7 +61,7 @@ int test_inverse()
 int test_ctr()
 {
 	int Error = 0;
-	
+
 	{
 		glm::mediump_mat2x2 const A(1.0f);
 		glm::highp_mat2x2 const B(A);
@@ -124,7 +124,7 @@ namespace cast
 	int test()
 	{
 		int Error = 0;
-		
+
 		Error += entry<glm::mat2x2>();
 		Error += entry<glm::mat2x3>();
 		Error += entry<glm::mat2x4>();

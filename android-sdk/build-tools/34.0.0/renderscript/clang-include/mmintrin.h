@@ -1542,4 +1542,3 @@ _mm_setr_pi8(char __b0, char __b1, char __b2, char __b3, char __b4, char __b5,
 #define _m_pcmpgtd _mm_cmpgt_pi32
 
 #endif /* __MMINTRIN_H */
-

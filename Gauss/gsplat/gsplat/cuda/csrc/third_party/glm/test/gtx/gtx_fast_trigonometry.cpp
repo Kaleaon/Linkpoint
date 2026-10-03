@@ -188,7 +188,7 @@ namespace taylorCos
 {
 	using glm::qualifier;
 	using glm::length_t;
-	
+
 	glm::vec4 const AngleShift(0.0f, glm::half_pi<float>(), glm::pi<float>(), glm::three_over_two_pi<float>());
 
 	template<length_t L, typename T, qualifier Q>

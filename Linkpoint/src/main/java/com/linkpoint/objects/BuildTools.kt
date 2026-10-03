@@ -22,49 +22,49 @@ class BuildTools(
         const val PRIM_RING = 6
         const val PRIM_SCULPT = 7
         const val PRIM_MESH = 8
-        
+
         // Hole types
         const val HOLE_SAME = 0
         const val HOLE_CIRCLE = 16
         const val HOLE_SQUARE = 32
         const val HOLE_TRIANGLE = 48
-        
+
         // Face constants
         const val ALL_SIDES = -1
     }
-    
+
     // Current tool state
     private var currentPrimType = PRIM_BOX
     private var gridSnap = 0.5f
     private var rotationSnap = 15f // degrees
-    
+
     // Build state
     private var isBuilding = false
     private var buildPosition = LLVector3.zero()
     private var buildRotation = LLQuaternion.identity()
     private var buildScale = LLVector3(0.5f, 0.5f, 0.5f)
-    
+
     /**
      * Set prim type for new builds
      */
     fun setPrimType(type: Int) {
         currentPrimType = type
     }
-    
+
     /**
      * Set grid snap size (0 to disable)
      */
     fun setGridSnap(size: Float) {
         gridSnap = size
     }
-    
+
     /**
      * Set rotation snap angle (0 to disable)
      */
     fun setRotationSnap(degrees: Float) {
         rotationSnap = degrees
     }
-    
+
     /**
      * Start building at position
      */
@@ -74,16 +74,16 @@ class BuildTools(
         buildRotation = LLQuaternion.identity()
         buildScale = LLVector3(0.5f, 0.5f, 0.5f)
     }
-    
+
     /**
      * Update build position during drag
      */
     fun updateBuild(position: LLVector3) {
         if (!isBuilding) return
-        
+
         val newPos = snapPosition(position)
         val delta = newPos - buildPosition
-        
+
         // Scale from drag
         buildScale = LLVector3(
             max(0.01f, abs(delta.x) * 2),
@@ -91,15 +91,15 @@ class BuildTools(
             max(0.01f, abs(delta.z) * 2)
         )
     }
-    
+
     /**
      * Finish building
      */
     fun finishBuild(): PrimCreateParams? {
         if (!isBuilding) return null
-        
+
         isBuilding = false
-        
+
         val params = PrimCreateParams(
             primType = currentPrimType,
             position = buildPosition,
@@ -108,73 +108,73 @@ class BuildTools(
             pathParams = PathParams(),
             profileParams = ProfileParams()
         )
-        
+
         // Send create request
         objectManager.createPrim(params)
-        
+
         return params
     }
-    
+
     /**
      * Cancel building
      */
     fun cancelBuild() {
         isBuilding = false
     }
-    
+
     /**
      * Snap position to grid
      */
     fun snapPosition(position: LLVector3): LLVector3 {
         if (gridSnap <= 0) return position
-        
+
         return LLVector3(
             round(position.x / gridSnap) * gridSnap,
             round(position.y / gridSnap) * gridSnap,
             round(position.z / gridSnap) * gridSnap
         )
     }
-    
+
     /**
      * Snap rotation to angle
      */
     fun snapRotation(rotation: LLQuaternion): LLQuaternion {
         if (rotationSnap <= 0) return rotation
-        
+
         // Convert to euler, snap, convert back
         val euler = rotation.toEuler()
         val snapRad = (rotationSnap * PI / 180.0).toFloat()
-        
+
         return LLQuaternion.fromEuler(
             (round(euler.x / snapRad) * snapRad),
             (round(euler.y / snapRad) * snapRad),
             (round(euler.z / snapRad) * snapRad)
         )
     }
-    
+
     /**
      * Duplicate selected objects
      */
     fun duplicateSelection(offset: LLVector3 = LLVector3(0.5f, 0.5f, 0f)) {
         val selected = objectManager.selectedObjects.value
-        
+
         for (localId in selected) {
             val obj = objectManager.getObject(localId) ?: continue
-            
+
             objectManager.duplicateObject(obj.localId, offset)
         }
     }
-    
+
     /**
      * Align selected objects
      */
     fun alignSelection(axis: Axis, alignTo: AlignType) {
         val selected = objectManager.selectedObjects.value
         if (selected.size < 2) return
-        
+
         val objects = selected.mapNotNull { objectManager.getObject(it) }
         if (objects.isEmpty()) return
-        
+
         val targetValue = when (alignTo) {
             AlignType.MIN -> objects.minOf { getAxisValue(it.position, axis) }
             AlignType.MAX -> objects.maxOf { getAxisValue(it.position, axis) }
@@ -184,36 +184,36 @@ class BuildTools(
                 (min + max) / 2
             }
         }
-        
+
         for (obj in objects) {
             val newPos = setAxisValue(obj.position, axis, targetValue)
             objectManager.moveSelectedObjects(newPos - obj.position)
         }
     }
-    
+
     /**
      * Distribute selected objects evenly
      */
     fun distributeSelection(axis: Axis) {
         val selected = objectManager.selectedObjects.value
         if (selected.size < 3) return
-        
+
         val objects = selected.mapNotNull { objectManager.getObject(it) }
             .sortedBy { getAxisValue(it.position, axis) }
-        
+
         if (objects.size < 3) return
-        
+
         val minVal = getAxisValue(objects.first().position, axis)
         val maxVal = getAxisValue(objects.last().position, axis)
         val step = (maxVal - minVal) / (objects.size - 1)
-        
+
         objects.forEachIndexed { index, obj ->
             val targetValue = minVal + step * index
             val newPos = setAxisValue(obj.position, axis, targetValue)
             objectManager.updateObjectPosition(obj.localId, newPos)
         }
     }
-    
+
     /**
      * Create default path parameters
      */
@@ -244,7 +244,7 @@ class BuildTools(
             skew = skew
         )
     }
-    
+
     /**
      * Create default profile parameters
      */
@@ -263,7 +263,7 @@ class BuildTools(
             hollowShape = hollowShape
         )
     }
-    
+
     private fun getAxisValue(v: LLVector3, axis: Axis): Float {
         return when (axis) {
             Axis.X -> v.x
@@ -271,7 +271,7 @@ class BuildTools(
             Axis.Z -> v.z
         }
     }
-    
+
     private fun setAxisValue(v: LLVector3, axis: Axis, value: Float): LLVector3 {
         return when (axis) {
             Axis.X -> LLVector3(value, v.y, v.z)

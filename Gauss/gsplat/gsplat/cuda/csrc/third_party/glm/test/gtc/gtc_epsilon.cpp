@@ -12,7 +12,7 @@ int test_defined()
 	glm::epsilonNotEqual(glm::vec2(), glm::vec2(), glm::vec2());
 	glm::epsilonNotEqual(glm::vec3(), glm::vec3(), glm::vec3());
 	glm::epsilonNotEqual(glm::vec4(), glm::vec4(), glm::vec4());
-	
+
 	glm::epsilonEqual(glm::vec2(), glm::vec2(), 0.0f);
 	glm::epsilonEqual(glm::vec3(), glm::vec3(), 0.0f);
 	glm::epsilonEqual(glm::vec4(), glm::vec4(), 0.0f);
@@ -30,7 +30,7 @@ template<typename T>
 int test_equal()
 {
 	int Error(0);
-	
+
 	{
 		T A = glm::epsilon<T>();
 		T B = glm::epsilon<T>();
@@ -74,5 +74,3 @@ int main()
 
 	return Error;
 }
-
-

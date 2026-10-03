@@ -660,7 +660,7 @@ public abstract class Transition implements Cloneable {
         this.mEndValues.mItemIdValues.clear();
     }
 
-    @Override // 
+    @Override //
     /* renamed from: clone */
     public Transition mo0clone() {
         try {

@@ -6,7 +6,7 @@
 static int test_sec()
 {
 	int Error = 0;
-	
+
 	glm::dvec1 const a = glm::sec(glm::dvec1(0.0));
 	Error += glm::all(glm::equal(a, glm::dvec1(1.0), 0.01)) ? 0 : 1;
 
@@ -28,7 +28,7 @@ static int test_sec()
 static int test_csc()
 {
 	int Error = 0;
-	
+
 	glm::dvec1 const a = glm::csc(glm::dvec1(glm::pi<double>() * 0.5));
 	Error += glm::all(glm::equal(a, glm::dvec1(1.0), 0.01)) ? 0 : 1;
 
@@ -41,7 +41,7 @@ static int test_csc()
 static int test_cot()
 {
 	int Error = 0;
-	
+
 	glm::dvec1 const a = glm::cot(glm::dvec1(glm::pi<double>() * 0.5));
 	Error += glm::all(glm::equal(a, glm::dvec1(0.0), 0.01)) ? 0 : 1;
 
@@ -54,7 +54,7 @@ static int test_cot()
 static int test_asec()
 {
 	int Error = 0;
-	
+
 	Error += glm::all(glm::equal(glm::asec(glm::dvec1(100000.0)), glm::dvec1(glm::pi<double>() * 0.5), 0.01)) ? 0 : 1;
 	Error += glm::all(glm::equal(glm::asec(glm::dvec1(-100000.0)), glm::dvec1(glm::pi<double>() * 0.5), 0.01)) ? 0 : 1;
 
@@ -64,7 +64,7 @@ static int test_asec()
 static int test_acsc()
 {
 	int Error = 0;
-	
+
 	Error += glm::all(glm::equal(glm::acsc(glm::dvec1(100000.0)), glm::dvec1(0.0), 0.01)) ? 0 : 1;
 	Error += glm::all(glm::equal(glm::acsc(glm::dvec1(-100000.0)), glm::dvec1(0.0), 0.01)) ? 0 : 1;
 
@@ -74,7 +74,7 @@ static int test_acsc()
 static int test_acot()
 {
 	int Error = 0;
-	
+
 	Error += glm::all(glm::equal(glm::acot(glm::dvec1(100000.0)), glm::dvec1(0.0), 0.01)) ? 0 : 1;
 	Error += glm::all(glm::equal(glm::acot(glm::dvec1(-100000.0)), glm::dvec1(glm::pi<double>()), 0.01)) ? 0 : 1;
 	Error += glm::all(glm::equal(glm::acot(glm::dvec1(0.0)), glm::dvec1(glm::pi<double>() * 0.5), 0.01)) ? 0 : 1;
@@ -85,7 +85,7 @@ static int test_acot()
 static int test_sech()
 {
 	int Error = 0;
-	
+
 	Error += glm::all(glm::equal(glm::sech(glm::dvec1(100000.0)), glm::dvec1(0.0), 0.01)) ? 0 : 1;
 	Error += glm::all(glm::equal(glm::sech(glm::dvec1(-100000.0)), glm::dvec1(0.0), 0.01)) ? 0 : 1;
 	Error += glm::all(glm::equal(glm::sech(glm::dvec1(0.0)), glm::dvec1(1.0), 0.01)) ? 0 : 1;
@@ -96,7 +96,7 @@ static int test_sech()
 static int test_csch()
 {
 	int Error = 0;
-	
+
 	Error += glm::all(glm::equal(glm::csch(glm::dvec1(100000.0)), glm::dvec1(0.0), 0.01)) ? 0 : 1;
 	Error += glm::all(glm::equal(glm::csch(glm::dvec1(-100000.0)), glm::dvec1(0.0), 0.01)) ? 0 : 1;
 
@@ -106,10 +106,10 @@ static int test_csch()
 static int test_coth()
 {
 	int Error = 0;
-	
+
 	glm::dvec1 const a = glm::coth(glm::dvec1(100.0));
 	Error += glm::all(glm::equal(a, glm::dvec1(1.0), 0.01)) ? 0 : 1;
-	
+
 	glm::dvec1 const b = glm::coth(glm::dvec1(-100.0));
 	Error += glm::all(glm::equal(b, glm::dvec1(-1.0), 0.01)) ? 0 : 1;
 
@@ -119,7 +119,7 @@ static int test_coth()
 static int test_asech()
 {
 	int Error = 0;
-	
+
 	glm::dvec1 const a = glm::asech(glm::dvec1(1.0));
 	Error += glm::all(glm::equal(a, glm::dvec1(0.0), 0.01)) ? 0 : 1;
 
@@ -129,7 +129,7 @@ static int test_asech()
 static int test_acsch()
 {
 	int Error = 0;
-	
+
 	glm::dvec1 const a(glm::acsch(glm::dvec1(0.01)));
 	Error += a.x > 1.0 ? 0 : 1;
 
@@ -145,16 +145,16 @@ static int test_acsch()
 static int test_acoth()
 {
 	int Error = 0;
-	
+
 	glm::dvec1 const a = glm::acoth(glm::dvec1(1.00001));
 	Error += a.x > 6.0 ? 0 : 1;
-	
+
 	glm::dvec1 const b = glm::acoth(glm::dvec1(-1.00001));
 	Error += b.x < -6.0 ? 0 : 1;
 
 	glm::dvec1 const c = glm::acoth(glm::dvec1(10000.0));
 	Error += glm::all(glm::equal(c, glm::dvec1(0.0), 0.01)) ? 0 : 1;
-	
+
 	glm::dvec1 const d = glm::acoth(glm::dvec1(-10000.0));
 	Error += glm::all(glm::equal(d, glm::dvec1(0.0), 0.01)) ? 0 : 1;
 
@@ -165,7 +165,7 @@ static int test_acoth()
 int main()
 {
 	int Error = 0;
-	
+
 	Error += test_sec();
 	Error += test_csc();
 	Error += test_cot();

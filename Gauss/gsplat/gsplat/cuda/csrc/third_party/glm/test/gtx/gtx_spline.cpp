@@ -17,15 +17,15 @@ namespace catmullRom
 			glm::vec2(0.0f, 1.0f), 0.5f);
 
 		glm::vec3 Result3 = glm::catmullRom(
-			glm::vec3(0.0f, 0.0f, 0.0f), 
-			glm::vec3(1.0f, 0.0f, 0.0f), 
-			glm::vec3(1.0f, 1.0f, 0.0f), 
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(1.0f, 0.0f, 0.0f),
+			glm::vec3(1.0f, 1.0f, 0.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f), 0.5f);
 
 		glm::vec4 Result4 = glm::catmullRom(
-			glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 
-			glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 
-			glm::vec4(1.0f, 1.0f, 0.0f, 1.0f), 
+			glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+			glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
+			glm::vec4(1.0f, 1.0f, 0.0f, 1.0f),
 			glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), 0.5f);
 
 		return Error;
@@ -45,15 +45,15 @@ namespace hermite
 			glm::vec2(0.0f, 1.0f), 0.5f);
 
 		glm::vec3 Result3 = glm::hermite(
-			glm::vec3(0.0f, 0.0f, 0.0f), 
-			glm::vec3(1.0f, 0.0f, 0.0f), 
-			glm::vec3(1.0f, 1.0f, 0.0f), 
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(1.0f, 0.0f, 0.0f),
+			glm::vec3(1.0f, 1.0f, 0.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f), 0.5f);
 
 		glm::vec4 Result4 = glm::hermite(
-			glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 
-			glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 
-			glm::vec4(1.0f, 1.0f, 0.0f, 1.0f), 
+			glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+			glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
+			glm::vec4(1.0f, 1.0f, 0.0f, 1.0f),
 			glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), 0.5f);
 
 		return Error;
@@ -73,15 +73,15 @@ namespace cubic
 			glm::vec2(0.0f, 1.0f), 0.5f);
 
 		glm::vec3 Result3 = glm::cubic(
-			glm::vec3(0.0f, 0.0f, 0.0f), 
-			glm::vec3(1.0f, 0.0f, 0.0f), 
-			glm::vec3(1.0f, 1.0f, 0.0f), 
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(1.0f, 0.0f, 0.0f),
+			glm::vec3(1.0f, 1.0f, 0.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f), 0.5f);
 
 		glm::vec4 Result = glm::cubic(
-			glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 
-			glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 
-			glm::vec4(1.0f, 1.0f, 0.0f, 1.0f), 
+			glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+			glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
+			glm::vec4(1.0f, 1.0f, 0.0f, 1.0f),
 			glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), 0.5f);
 
 		return Error;

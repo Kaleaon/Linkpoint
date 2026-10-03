@@ -15,16 +15,16 @@ import kotlin.reflect.KClass
 
 /**
  * Event Bus
- * 
+ *
  * Centralized event distribution system for reactive programming.
  * Based on the reference viewer's EventBus implementation.
- * 
+ *
  * Features:
  * - Type-safe event publishing and subscribing
  * - Flow-based event streams
  * - Priority-based event handling
  * - Thread-safe operations
- * 
+ *
  * Mobile-First Considerations:
  * - Efficient event distribution
  * - Coroutine-based for mobile performance
@@ -32,43 +32,43 @@ import kotlin.reflect.KClass
  * - Backpressure support
  */
 object EventBus {
-    
+
     private const val TAG = "EventBus"
     private const val DEFAULT_REPLAY_CACHE = 0
     private const val DEFAULT_EXTRA_BUFFER = 100
-    
+
     /**
      * Event flows by type using SharedFlow (modern replacement for BroadcastChannel)
      */
     private val flows = ConcurrentHashMap<KClass<*>, MutableSharedFlow<Any>>()
-    
+
     /**
      * Subscriber counts by type
      */
     private val subscriberCounts = ConcurrentHashMap<KClass<*>, Int>()
-    
+
     /**
      * Mutex for thread-safe operations
      */
     private val mutex = Mutex()
-    
+
     /**
      * Statistics
      */
     private var totalEventsPublished = 0
     private var totalEventsDelivered = 0
-    
+
     /**
      * Publish an event to all subscribers
-     * 
+     *
      * @param event The event to publish
      */
     suspend fun <T : Any> publish(event: T) {
         val eventClass = event::class
         totalEventsPublished++
-        
+
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Publishing event: ${eventClass.simpleName}")
-        
+
         val flow = mutex.withLock {
             flows.getOrPut(eventClass) {
                 MutableSharedFlow<Any>(
@@ -79,7 +79,7 @@ object EventBus {
                 }
             }
         }
-        
+
         try {
             flow.emit(event)
             totalEventsDelivered++
@@ -87,10 +87,10 @@ object EventBus {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP, "Failed to publish event ${eventClass.simpleName}: ${e.message}")
         }
     }
-    
+
     /**
      * Subscribe to events of a specific type
-     * 
+     *
      * @param eventType The event type to subscribe to
      * @param scope The coroutine scope for the subscription
      * @param handler The handler for received events
@@ -114,9 +114,9 @@ object EventBus {
                     subscriberCounts[eventType] = subscriberCounts.getOrDefault(eventType, 0) + 1
                 }
             }
-            
+
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Subscribed to ${eventType.simpleName}")
-            
+
             try {
                 flow.asSharedFlow()
                     .filter { eventType.isInstance(it) }
@@ -144,10 +144,10 @@ object EventBus {
             }
         }
     }
-    
+
     /**
      * Get a flow of events of a specific type
-     * 
+     *
      * @param eventType The event type
      * @return Flow of events
      */
@@ -162,12 +162,12 @@ object EventBus {
                 }
             }
         }
-        
+
         return flow.asSharedFlow()
             .filter { eventType.isInstance(it) }
             .map { @Suppress("UNCHECKED_CAST") it as T }
     }
-    
+
     /**
      * Clear all flows and subscribers
      */
@@ -180,7 +180,7 @@ object EventBus {
         }
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "All channels cleared")
     }
-    
+
     /**
      * Get statistics
      */

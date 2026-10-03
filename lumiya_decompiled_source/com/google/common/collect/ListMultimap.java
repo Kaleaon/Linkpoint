@@ -8,10 +8,10 @@ import javax.annotation.Nullable;
 @GwtCompatible
 /* loaded from: classes.dex */
 public interface ListMultimap<K, V> extends Multimap<K, V> {
-    @Override // 
+    @Override //
     Map<K, Collection<V>> asMap();
 
-    @Override // 
+    @Override //
     boolean equals(@Nullable Object obj);
 
     @Override // com.google.common.collect.Multimap

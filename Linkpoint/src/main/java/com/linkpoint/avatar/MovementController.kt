@@ -15,15 +15,15 @@ import kotlin.math.sin
 
 /**
  * Controls avatar movement in Second Life.
- * 
+ *
  * This is the core movement system that translates user input (joystick, buttons)
  * into the control flags and position updates that the simulator expects.
- * 
+ *
  * Based on the reference viewer's movement controls and LibreMetaverse AgentManager.Movement
- * 
+ *
  * Control flags are sent with AgentUpdate messages approximately 10 times per second.
  * The simulator uses these to move the avatar.
- * 
+ *
  * @see <a href="https://wiki.secondlife.com/wiki/AgentUpdate">AgentUpdate Message</a>
  */
 class MovementController(
@@ -31,7 +31,7 @@ class MovementController(
 ) {
     companion object {
         private const val TAG = "MovementController"
-        
+
         // Agent control flags from the SL protocol
         // These are bit flags that get combined and sent with AgentUpdate
         const val AGENT_CONTROL_AT_POS = 0x00000001        // Move forward
@@ -66,49 +66,49 @@ class MovementController(
         const val AGENT_CONTROL_LBUTTON_UP = 0x20000000    // Left button up
         const val AGENT_CONTROL_ML_LBUTTON_DOWN = 0x40000000.toInt() // Mouselook left button
         const val AGENT_CONTROL_ML_LBUTTON_UP = 0x80000000.toInt()   // Mouselook left button up
-        
+
         // Movement speeds (meters per second)
         const val WALK_SPEED = 3.2f
         const val RUN_SPEED = 5.0f
         const val FLY_SPEED = 10.0f
-        
+
         // Turn speeds (radians per second)
         const val TURN_SPEED = 2.0f
     }
-    
+
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    
+
     // Current movement state
     private var controlFlags: Int = 0
-    
+
     // Agent session info
     private var agentId: UUID = UUID(0, 0)
     private var sessionId: UUID = UUID(0, 0)
-    
+
     // Current position and rotation
     private var position = LLVector3(128f, 128f, 25f)
     private var rotation = LLQuaternion(0f, 0f, 0f, 1f)
     private var heading: Float = 0f  // Yaw in radians
-    
+
     // Camera direction
     private var lookAt = LLVector3(1f, 0f, 0f)
-    
+
     // Movement modes
     private val _isFlying = MutableStateFlow(false)
     val isFlying: StateFlow<Boolean> = _isFlying
-    
+
     private val _isRunning = MutableStateFlow(false)
     val isRunning: StateFlow<Boolean> = _isRunning
-    
+
     private val _isSitting = MutableStateFlow(false)
     val isSitting: StateFlow<Boolean> = _isSitting
-    
+
     private val _isAway = MutableStateFlow(false)
     val isAway: StateFlow<Boolean> = _isAway
-    
+
     // Movement update job
     private var updateJob: Job? = null
-    
+
     /**
      * Set agent and session info (required for movement).
      */
@@ -116,7 +116,7 @@ class MovementController(
         this.agentId = agentId
         this.sessionId = sessionId
     }
-    
+
     /**
      * Update current position (from simulator).
      */
@@ -124,7 +124,7 @@ class MovementController(
         position = pos
         udpConnection.updateAgentPosition(pos.x, pos.y, pos.z)
     }
-    
+
     /**
      * Update current rotation (from simulator).
      */
@@ -133,7 +133,7 @@ class MovementController(
         // Extract yaw from quaternion
         heading = rotation.getYaw()
     }
-    
+
     /**
      * Start the movement update loop.
      * This sends AgentUpdate messages regularly to the simulator.
@@ -148,7 +148,7 @@ class MovementController(
             }
         }
     }
-    
+
     /**
      * Stop movement updates.
      */
@@ -157,9 +157,9 @@ class MovementController(
         updateJob = null
         Log.i(TAG, "Stopped movement updates")
     }
-    
+
     // ==================== MOVEMENT CONTROLS ====================
-    
+
     /**
      * Move forward.
      * @param pressed true when button pressed, false when released
@@ -172,14 +172,14 @@ class MovementController(
             setControlFlag(AGENT_CONTROL_FAST_AT, false)
         }
     }
-    
+
     /**
      * Move backward.
      */
     fun moveBackward(pressed: Boolean) {
         setControlFlag(AGENT_CONTROL_AT_NEG, pressed)
     }
-    
+
     /**
      * Strafe left.
      */
@@ -191,28 +191,28 @@ class MovementController(
             setControlFlag(AGENT_CONTROL_FAST_LEFT, false)
         }
     }
-    
+
     /**
      * Strafe right.
      */
     fun strafeRight(pressed: Boolean) {
         setControlFlag(AGENT_CONTROL_LEFT_NEG, pressed)
     }
-    
+
     /**
      * Turn left.
      */
     fun turnLeft(pressed: Boolean) {
         setControlFlag(AGENT_CONTROL_YAW_POS, pressed)
     }
-    
+
     /**
      * Turn right.
      */
     fun turnRight(pressed: Boolean) {
         setControlFlag(AGENT_CONTROL_YAW_NEG, pressed)
     }
-    
+
     /**
      * Move up (fly) or jump.
      */
@@ -224,7 +224,7 @@ class MovementController(
             jump()
         }
     }
-    
+
     /**
      * Move down (fly) or crouch.
      */
@@ -236,7 +236,7 @@ class MovementController(
             setControlFlag(AGENT_CONTROL_UP_NEG, pressed)
         }
     }
-    
+
     /**
      * Jump.
      */
@@ -249,7 +249,7 @@ class MovementController(
             }
         }
     }
-    
+
     /**
      * Toggle flying mode.
      */
@@ -258,7 +258,7 @@ class MovementController(
         setControlFlag(AGENT_CONTROL_FLY, _isFlying.value)
         Log.i(TAG, "Flying: ${_isFlying.value}")
     }
-    
+
     /**
      * Set flying mode directly.
      */
@@ -266,7 +266,7 @@ class MovementController(
         _isFlying.value = flying
         setControlFlag(AGENT_CONTROL_FLY, flying)
     }
-    
+
     /**
      * Toggle running mode.
      */
@@ -274,14 +274,14 @@ class MovementController(
         _isRunning.value = !_isRunning.value
         Log.i(TAG, "Running: ${_isRunning.value}")
     }
-    
+
     /**
      * Set running mode directly.
      */
     fun setRunning(running: Boolean) {
         _isRunning.value = running
     }
-    
+
     /**
      * Stand up from sitting.
      */
@@ -295,7 +295,7 @@ class MovementController(
             }
         }
     }
-    
+
     /**
      * Sit on ground.
      */
@@ -309,7 +309,7 @@ class MovementController(
             }
         }
     }
-    
+
     /**
      * Toggle away status.
      */
@@ -318,7 +318,7 @@ class MovementController(
         setControlFlag(AGENT_CONTROL_AWAY, _isAway.value)
         Log.i(TAG, "Away: ${_isAway.value}")
     }
-    
+
     /**
      * Stop all movement.
      */
@@ -329,10 +329,10 @@ class MovementController(
         }
         udpConnection.setControlFlags(controlFlags)
     }
-    
+
     /**
      * Set joystick input for smooth movement.
-     * 
+     *
      * @param x Horizontal input (-1 to 1, negative = left, positive = right)
      * @param y Vertical input (-1 to 1, negative = backward, positive = forward)
      */
@@ -341,10 +341,10 @@ class MovementController(
         controlFlags = controlFlags and (AGENT_CONTROL_AT_POS or AGENT_CONTROL_AT_NEG or
                 AGENT_CONTROL_LEFT_POS or AGENT_CONTROL_LEFT_NEG or
                 AGENT_CONTROL_FAST_AT or AGENT_CONTROL_FAST_LEFT).inv()
-        
+
         // Apply based on deadzone (0.15)
         val deadzone = 0.15f
-        
+
         if (y > deadzone) {
             controlFlags = controlFlags or AGENT_CONTROL_AT_POS
             if (_isRunning.value) {
@@ -353,7 +353,7 @@ class MovementController(
         } else if (y < -deadzone) {
             controlFlags = controlFlags or AGENT_CONTROL_AT_NEG
         }
-        
+
         if (x < -deadzone) {
             controlFlags = controlFlags or AGENT_CONTROL_LEFT_POS
             if (_isRunning.value) {
@@ -362,31 +362,31 @@ class MovementController(
         } else if (x > deadzone) {
             controlFlags = controlFlags or AGENT_CONTROL_LEFT_NEG
         }
-        
+
         udpConnection.setControlFlags(controlFlags)
     }
-    
+
     /**
      * Set rotation joystick input.
-     * 
+     *
      * @param x Horizontal input (-1 to 1, negative = turn left, positive = turn right)
      */
     fun setRotationInput(x: Float) {
         val deadzone = 0.15f
-        
+
         controlFlags = controlFlags and (AGENT_CONTROL_YAW_POS or AGENT_CONTROL_YAW_NEG).inv()
-        
+
         if (x < -deadzone) {
             controlFlags = controlFlags or AGENT_CONTROL_YAW_POS
         } else if (x > deadzone) {
             controlFlags = controlFlags or AGENT_CONTROL_YAW_NEG
         }
-        
+
         udpConnection.setControlFlags(controlFlags)
     }
-    
+
     // ==================== INTERNAL ====================
-    
+
     private fun setControlFlag(flag: Int, enabled: Boolean) {
         controlFlags = if (enabled) {
             controlFlags or flag
@@ -395,32 +395,32 @@ class MovementController(
         }
         udpConnection.setControlFlags(controlFlags)
     }
-    
+
     private suspend fun sendMovementUpdate() {
         // Update look-at based on heading
         lookAt = LLVector3(cos(heading), sin(heading), 0f)
         udpConnection.updateLookAt(lookAt.x, lookAt.y, lookAt.z)
-        
+
         // The UDPConnection.sendAgentUpdate() handles the actual sending
         // We just need to make sure control flags are current
         udpConnection.setControlFlags(controlFlags)
     }
-    
+
     /**
      * Get current position.
      */
     fun getPosition(): LLVector3 = position
-    
+
     /**
      * Get current rotation.
      */
     fun getRotation(): LLQuaternion = rotation
-    
+
     /**
      * Get current heading in degrees.
      */
     fun getHeadingDegrees(): Float = Math.toDegrees(heading.toDouble()).toFloat()
-    
+
     /**
      * Check if any movement is active.
      */
@@ -432,7 +432,7 @@ class MovementController(
             AGENT_CONTROL_YAW_POS or AGENT_CONTROL_YAW_NEG
         )) != 0
     }
-    
+
     fun shutdown() {
         stopMovementUpdates()
         scope.cancel()

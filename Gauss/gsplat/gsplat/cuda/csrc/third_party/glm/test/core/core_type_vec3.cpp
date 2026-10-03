@@ -49,7 +49,7 @@ int test_vec3_ctor()
 	{
 		glm::ivec3 A(1);
 		glm::ivec3 B(1, 1, 1);
-		
+
 		Error += A == B ? 0 : 1;
 	}
 
@@ -158,7 +158,7 @@ static int test_bvec3_ctor()
 static int test_vec3_operators()
 {
 	int Error = 0;
-	
+
 	{
 		glm::ivec3 A(1);
 		glm::ivec3 B(1);
@@ -294,7 +294,7 @@ static int test_vec3_operators()
 int test_vec3_size()
 {
 	int Error = 0;
-	
+
 	Error += sizeof(glm::vec3) == sizeof(glm::lowp_vec3) ? 0 : 1;
 	Error += sizeof(glm::vec3) == sizeof(glm::mediump_vec3) ? 0 : 1;
 	Error += sizeof(glm::vec3) == sizeof(glm::highp_vec3) ? 0 : 1;
@@ -455,7 +455,7 @@ int test_vec3_swizzle_functions()
 #	if GLM_CONFIG_SWIZZLE == GLM_SWIZZLE_OPERATOR || GLM_CONFIG_SWIZZLE == GLM_SWIZZLE_FUNCTION
 	{
 		// NOTE: template functions cannot pick up the implicit conversion from
-		// a swizzle to the unswizzled type, therefore the operator() must be 
+		// a swizzle to the unswizzled type, therefore the operator() must be
 		// used.  E.g.:
 		//
 		// glm::dot(u.xy, v.xy);        <--- Compile error

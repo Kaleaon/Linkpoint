@@ -54,7 +54,7 @@ public enum CaseFormat {
             return Ascii.toUpperCase(str);
         }
     };
-    
+
     private final CharMatcher wordBoundary;
     private final String wordSeparator;
 

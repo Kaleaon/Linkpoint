@@ -19,4 +19,3 @@
     <item android:id="@+android:id/secondaryProgress" android:drawable="@android:drawable/rate_star_small_half" />
     <item android:id="@+android:id/progress" android:drawable="@android:drawable/rate_star_small_on" />
 </layer-list>
-

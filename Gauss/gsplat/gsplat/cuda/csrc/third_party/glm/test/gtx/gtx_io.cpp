@@ -147,7 +147,7 @@ int test_io_mat(OS& os, glm::io::order_type otype)
 		<< "mat4x2<" << typeid(T).name() << ',' << P << ">: " << glm::mat<4, 2, T,P>(v2_1, v2_2, v2_3, v2_4) << '\n'
 		<< "mat4x3<" << typeid(T).name() << ',' << P << ">: " << glm::mat<4, 3, T,P>(v3_1, v3_2, v3_3, v3_4) << '\n'
 		<< "mat4x4<" << typeid(T).name() << ',' << P << ">: " << glm::mat<4, 4, T,P>(v4_1, v4_2, v4_3, v4_4) << '\n';
-  
+
 	return 0;
 }
 

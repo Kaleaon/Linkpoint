@@ -29,7 +29,7 @@ class PrimRenderer(
 ) {
     companion object {
         private const val TAG = "PrimRenderer"
-        
+
         // Pcode types
         const val PCODE_PRIM = 9
         const val PCODE_AVATAR = 47
@@ -38,7 +38,7 @@ class PrimRenderer(
         const val PCODE_PARTICLE = 143
         const val PCODE_TREE = 255
     }
-    
+
     private val prims = ConcurrentHashMap<Int, PrimInstance>()
     // Meshes are cached by a coarse "shape key" that captures the visible
     // distinctions (path/profile curve + path/profile cuts + hollow). Path
@@ -101,7 +101,7 @@ class PrimRenderer(
     fun setMeshGeometryBuilder(builder: MeshGeometryBuilder?) {
         meshGeometryBuilder = builder
     }
-    
+
     /**
      * Initialize with default material
      */
@@ -118,7 +118,7 @@ class PrimRenderer(
         }
         Log.i(TAG, "PrimRenderer initialized with ${primMeshes.size} default meshes")
     }
-    
+
     /**
      * Add or update a prim from ObjectUpdate
      */
@@ -195,13 +195,13 @@ class PrimRenderer(
         val prim = prims.getOrPut(data.localId) {
             createPrim(data)
         }
-        
+
         // Update transform
         prim.position = data.position
         prim.rotation = data.rotation
         prim.scale = data.scale
         updateTransform(prim)
-        
+
         // Update material if texture changed
         if (!data.textureEntry.contentEquals(prim.textureEntry)) {
             prim.textureEntry = data.textureEntry
@@ -211,7 +211,7 @@ class PrimRenderer(
         ScenePopulationDiagnostics.markSceneInserted(ScenePopulationDiagnostics.EntityType.OBJECT, true)
         return true
     }
-    
+
     /**
      * Remove a prim
      */
@@ -255,17 +255,17 @@ class PrimRenderer(
         val suffix = detail?.let { """, "detail":"$it"""" } ?: ""
         Log.i(TAG, """{"event":"mesh_asset_resolution","state":"$event","localId":$localId,"meshId":"$meshId"$suffix}""")
     }
-    
+
     /**
      * Get prim by local ID
      */
     fun getPrim(localId: Int): PrimInstance? = prims[localId]
-    
+
     /**
      * Get all prims
      */
     fun getAllPrims(): Collection<PrimInstance> = prims.values
-    
+
     private fun createPrim(data: ObjectUpdateData): PrimInstance {
         val entity = EntityManager.get().create()
 
@@ -578,7 +578,7 @@ class PrimRenderer(
         return out
     }
 
-    
+
     /**
      * Box mesh. Honours `key.params.profileBegin/profileEnd` (cuts out the
      * unused side faces when the profile is partially revolved) and
@@ -621,7 +621,7 @@ class PrimRenderer(
             -0.5f,  0.5f,  0.5f, -1f,  0f,  0f,  0f, 1f,
             -0.5f,  0.5f, -0.5f, -1f,  0f,  0f,  1f, 1f
         )
-        
+
         val indices = shortArrayOf(
             0, 1, 2, 0, 2, 3,       // front
             4, 5, 6, 4, 6, 7,       // back
@@ -630,37 +630,37 @@ class PrimRenderer(
             16, 17, 18, 16, 18, 19, // right
             20, 21, 22, 20, 22, 23  // left
         )
-        
+
         return createMesh(vertices, indices)
     }
-    
+
     private fun generateSphereMesh(key: PrimShapeKey): PrimMesh {
         val segments = 24
         val rings = 16
-        
+
         val vertexCount = (rings + 1) * (segments + 1)
         val vertices = FloatArray(vertexCount * 8)
         var vIdx = 0
-        
+
         for (y in 0..rings) {
             val phi = PI * y / rings
-            
+
             for (x in 0..segments) {
                 val theta = 2 * PI * x / segments
-                
+
                 val px = (sin(phi) * cos(theta) * 0.5).toFloat()
                 val py = (cos(phi) * 0.5).toFloat()
                 val pz = (sin(phi) * sin(theta) * 0.5).toFloat()
-                
+
                 // Normal (same as position for sphere)
                 val nx = (sin(phi) * cos(theta)).toFloat()
                 val ny = cos(phi).toFloat()
                 val nz = (sin(phi) * sin(theta)).toFloat()
-                
+
                 // UV
                 val u = x.toFloat() / segments
                 val v = y.toFloat() / rings
-                
+
                 vertices[vIdx++] = px
                 vertices[vIdx++] = py
                 vertices[vIdx++] = pz
@@ -671,7 +671,7 @@ class PrimRenderer(
                 vertices[vIdx++] = v
             }
         }
-        
+
         val indexCount = rings * segments * 6
         val indices = ShortArray(indexCount)
         var iIdx = 0
@@ -682,7 +682,7 @@ class PrimRenderer(
                 val i1 = (i0 + 1).toShort()
                 val i2 = (i0 + segments + 1).toShort()
                 val i3 = (i2 + 1).toShort()
-                
+
                 indices[iIdx++] = i0
                 indices[iIdx++] = i2
                 indices[iIdx++] = i1
@@ -692,13 +692,13 @@ class PrimRenderer(
                 indices[iIdx++] = i3
             }
         }
-        
+
         return createMesh(vertices, indices)
     }
-    
+
     private fun generateCylinderMesh(key: PrimShapeKey): PrimMesh {
         val segments = 24
-        
+
         // Calculate buffer sizes
         // Vertices: 2 for side loop (per segment+1), 1 top center, 1 top loop (per segment+1),
         //           1 bottom center, 1 bottom loop (per segment+1)
@@ -711,7 +711,7 @@ class PrimRenderer(
         val indexCount = segments * 12
         val indices = ShortArray(indexCount)
         var iIdx = 0
-        
+
         // Side
         for (i in 0..segments) {
             val theta = 2 * PI * i / segments
@@ -720,7 +720,7 @@ class PrimRenderer(
             val nx = cos(theta).toFloat()
             val nz = sin(theta).toFloat()
             val u = i.toFloat() / segments
-            
+
             // Bottom vertex for side
             vertices[vIdx++] = x
             vertices[vIdx++] = -0.5f
@@ -741,14 +741,14 @@ class PrimRenderer(
             vertices[vIdx++] = u
             vertices[vIdx++] = 1f
         }
-        
+
         // Side indices
         for (i in 0 until segments) {
             val b0 = (i * 2).toShort()
             val t0 = (i * 2 + 1).toShort()
             val b1 = (i * 2 + 2).toShort()
             val t1 = (i * 2 + 3).toShort()
-            
+
             indices[iIdx++] = b0
             indices[iIdx++] = b1
             indices[iIdx++] = t0
@@ -757,7 +757,7 @@ class PrimRenderer(
             indices[iIdx++] = b1
             indices[iIdx++] = t1
         }
-        
+
         // Top cap center
         val topCenter = (vIdx / 8).toShort()
         vertices[vIdx++] = 0f
@@ -768,7 +768,7 @@ class PrimRenderer(
         vertices[vIdx++] = 0f
         vertices[vIdx++] = 0.5f
         vertices[vIdx++] = 0.5f
-        
+
         // Top cap vertices
         val topStart = (vIdx / 8).toShort()
         for (i in 0..segments) {
@@ -785,14 +785,14 @@ class PrimRenderer(
             vertices[vIdx++] = (cos(theta) * 0.5 + 0.5).toFloat()
             vertices[vIdx++] = (sin(theta) * 0.5 + 0.5).toFloat()
         }
-        
+
         // Top cap indices
         for (i in 0 until segments) {
             indices[iIdx++] = topCenter
             indices[iIdx++] = (topStart + i).toShort()
             indices[iIdx++] = (topStart + i + 1).toShort()
         }
-        
+
         // Bottom cap center
         val bottomCenter = (vIdx / 8).toShort()
         vertices[vIdx++] = 0f
@@ -803,7 +803,7 @@ class PrimRenderer(
         vertices[vIdx++] = 0f
         vertices[vIdx++] = 0.5f
         vertices[vIdx++] = 0.5f
-        
+
         // Bottom cap vertices
         val bottomStart = (vIdx / 8).toShort()
         for (i in 0..segments) {
@@ -820,23 +820,23 @@ class PrimRenderer(
             vertices[vIdx++] = (cos(theta) * 0.5 + 0.5).toFloat()
             vertices[vIdx++] = (sin(theta) * 0.5 + 0.5).toFloat()
         }
-        
+
         // Bottom cap indices
         for (i in 0 until segments) {
             indices[iIdx++] = bottomCenter
             indices[iIdx++] = (bottomStart + i + 1).toShort()
             indices[iIdx++] = (bottomStart + i).toShort()
         }
-        
+
         return createMesh(vertices, indices)
     }
-    
+
     private fun generateTorusMesh(key: PrimShapeKey): PrimMesh {
         val majorSegments = 24
         val minorSegments = 12
         val majorRadius = 0.35f
         val minorRadius = 0.15f
-        
+
         val vertexCount = (majorSegments + 1) * (minorSegments + 1)
         val vertices = FloatArray(vertexCount * 8)
         var vIdx = 0
@@ -844,21 +844,21 @@ class PrimRenderer(
         val indexCount = majorSegments * minorSegments * 6
         val indices = ShortArray(indexCount)
         var iIdx = 0
-        
+
         for (i in 0..majorSegments) {
             val u = 2 * PI * i / majorSegments
-            
+
             for (j in 0..minorSegments) {
                 val v = 2 * PI * j / minorSegments
-                
+
                 val x = ((majorRadius + minorRadius * cos(v)) * cos(u)).toFloat()
                 val y = (minorRadius * sin(v)).toFloat()
                 val z = ((majorRadius + minorRadius * cos(v)) * sin(u)).toFloat()
-                
+
                 val nx = (cos(v) * cos(u)).toFloat()
                 val ny = sin(v).toFloat()
                 val nz = (cos(v) * sin(u)).toFloat()
-                
+
                 vertices[vIdx++] = x
                 vertices[vIdx++] = y
                 vertices[vIdx++] = z
@@ -869,14 +869,14 @@ class PrimRenderer(
                 vertices[vIdx++] = j.toFloat() / minorSegments
             }
         }
-        
+
         for (i in 0 until majorSegments) {
             for (j in 0 until minorSegments) {
                 val i0 = (i * (minorSegments + 1) + j).toShort()
                 val i1 = (i0 + 1).toShort()
                 val i2 = (i0 + minorSegments + 1).toShort()
                 val i3 = (i2 + 1).toShort()
-                
+
                 indices[iIdx++] = i0
                 indices[iIdx++] = i2
                 indices[iIdx++] = i1
@@ -886,10 +886,10 @@ class PrimRenderer(
                 indices[iIdx++] = i3
             }
         }
-        
+
         return createMesh(vertices, indices)
     }
-    
+
     private fun generatePrismMesh(key: PrimShapeKey): PrimMesh {
         // Triangular prism
         val vertices = floatArrayOf(
@@ -917,7 +917,7 @@ class PrimRenderer(
             0.5f, -0.5f, 0.5f, 0.894f, 0.447f, 0f, 1f, 0f,
             0f, 0.5f, 0.5f, 0.894f, 0.447f, 0f, 0f, 0f
         )
-        
+
         val indices = shortArrayOf(
             0, 1, 2,       // front
             3, 4, 5,       // back
@@ -925,10 +925,10 @@ class PrimRenderer(
             10, 11, 12, 10, 12, 13, // left
             14, 15, 16, 14, 16, 17  // right
         )
-        
+
         return createMesh(vertices, indices)
     }
-    
+
     private fun generateRingMesh(key: PrimShapeKey): PrimMesh {
         val majorSegments = 32
         val minorSegments = 12
@@ -1069,21 +1069,21 @@ class PrimRenderer(
     private fun createMesh(vertices: FloatArray, indices: ShortArray): PrimMesh {
         val stride = 8 * 4 // 3 pos + 3 normal + 2 uv, all floats
         val vertexCount = vertices.size / 8
-        
+
         val vertexData = ByteBuffer.allocateDirect(vertices.size * 4)
             .order(ByteOrder.nativeOrder())
         for (v in vertices) {
             vertexData.putFloat(v)
         }
         vertexData.flip()
-        
+
         val indexData = ByteBuffer.allocateDirect(indices.size * 2)
             .order(ByteOrder.nativeOrder())
         for (i in indices) {
             indexData.putShort(i)
         }
         indexData.flip()
-        
+
         val vertexBuffer = VertexBuffer.Builder()
             .vertexCount(vertexCount)
             .bufferCount(1)
@@ -1091,39 +1091,39 @@ class PrimRenderer(
             .attribute(VertexAttribute.TANGENTS, 0, AttributeType.FLOAT3, 12, stride)
             .attribute(VertexAttribute.UV0, 0, AttributeType.FLOAT2, 24, stride)
             .build(engine)
-        
+
         vertexBuffer.setBufferAt(engine, 0, vertexData)
-        
+
         val indexBuffer = IndexBuffer.Builder()
             .indexCount(indices.size)
             .bufferType(IndexBuffer.Builder.IndexType.USHORT)
             .build(engine)
-        
+
         indexBuffer.setBuffer(engine, indexData)
-        
+
         return PrimMesh(vertexBuffer, indexBuffer)
     }
-    
+
     private fun updateTransform(prim: PrimInstance) {
         val m = FloatArray(16)
-        
+
         // Build transform matrix: T * R * S
         val r = prim.rotation
         r.toMatrix(m)
-        
+
         // Apply scale
         m[0] *= prim.scale.x; m[1] *= prim.scale.x; m[2] *= prim.scale.x
         m[4] *= prim.scale.y; m[5] *= prim.scale.y; m[6] *= prim.scale.y
         m[8] *= prim.scale.z; m[9] *= prim.scale.z; m[10] *= prim.scale.z
-        
+
         // Apply translation
         m[12] = prim.position.x
         m[13] = prim.position.y
         m[14] = prim.position.z
-        
+
         transformManager.setTransform(prim.transformInstance, m)
     }
-    
+
     private fun updatePrimMaterial(prim: PrimInstance, textureEntry: ByteArray) {
         // Parse texture entry to extract texture UUIDs and material properties
         // Texture entry format:
@@ -1131,19 +1131,19 @@ class PrimRenderer(
         // - Face-specific texture overrides (bitfield + UUID pairs)
         // - RGBA color
         // - Repeat U/V, Offset U/V, Rotation
-        
+
         if (textureEntry.isEmpty()) return
-        
+
         try {
             val buffer = java.nio.ByteBuffer.wrap(textureEntry)
                 .order(java.nio.ByteOrder.LITTLE_ENDIAN)
-            
+
             // Extract default texture UUID (first 16 bytes)
             if (buffer.remaining() >= 16) {
                 val uuidBytes = ByteArray(16)
                 buffer.get(uuidBytes)
                 val defaultTextureId = bytesToUUID(uuidBytes)
-                
+
                 if (defaultTextureId != UUID(0, 0)) {
                     // Bakes-on-Mesh: if the prim references one of the magic
                     // bake-slot sentinels, substitute the avatar's actual
@@ -1182,20 +1182,20 @@ class PrimRenderer(
                     }
                 }
             }
-            
+
             // Skip face-specific textures for now (complex bitfield parsing)
             // A full implementation would parse the complete texture entry
-            
+
         } catch (e: Exception) {
             Log.w(TAG, "Failed to parse texture entry for prim ${prim.localId}", e)
         }
     }
-    
+
     private fun bytesToUUID(bytes: ByteArray): UUID {
         val buffer = java.nio.ByteBuffer.wrap(bytes).order(java.nio.ByteOrder.BIG_ENDIAN)
         return UUID(buffer.long, buffer.long)
     }
-    
+
     fun shutdown() {
         for (prim in prims.values) {
             scene.removeEntity(prim.entity)
@@ -1203,13 +1203,13 @@ class PrimRenderer(
             engine.destroyEntity(prim.entity)
         }
         prims.clear()
-        
+
         for (mesh in primMeshes.values) {
             engine.destroyVertexBuffer(mesh.vertexBuffer)
             engine.destroyIndexBuffer(mesh.indexBuffer)
         }
         primMeshes.clear()
-        
+
     }
 }
 

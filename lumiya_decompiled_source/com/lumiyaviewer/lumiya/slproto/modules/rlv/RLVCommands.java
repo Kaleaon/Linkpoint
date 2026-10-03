@@ -56,7 +56,7 @@ public enum RLVCommands {
     getstatus(RLVCmdGetStatus.class),
     sendchannel(RLVCmdSendChannel.class),
     redirchat(RLVCmdRedirChat.class);
-    
+
     private Class<? extends RLVCommand> handler;
 
     RLVCommands(Class cls) {

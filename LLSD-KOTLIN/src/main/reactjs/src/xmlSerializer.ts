@@ -1,6 +1,6 @@
 /**
  * LLSD XML Serializer - TypeScript Implementation
- * 
+ *
  * Based on Java implementation and Second Life viewer XML serialization
  * Copyright (C) 2024 Linden Lab
  */

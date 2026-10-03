@@ -18,7 +18,7 @@ parts {
             y       0
         }
     }
-    
+
     controls {
         background {
             image   controls.png
@@ -357,7 +357,7 @@ layouts {
         height    908
         color     0xe0e0e0
         event     EV_SW:0:1
-        
+
         part1 {
             name    portrait
             x       0

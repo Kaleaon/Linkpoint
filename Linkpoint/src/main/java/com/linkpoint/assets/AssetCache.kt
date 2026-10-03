@@ -10,21 +10,21 @@ import java.util.UUID
 
 /**
  * Asset caching system with memory and disk levels
- * 
+ *
  * Now uses CacheManager for configurable cache sizes:
  * - Memory: 100MB - 2GB (default 512MB)
  * - Disk: 512MB - 10GB (default 2GB)
  */
 class AssetCache(private val context: Context) {
-    
+
     companion object {
         private const val TAG = "AssetCache"
         private const val DISK_CACHE_DIR = "asset_cache"
     }
-    
+
     // Cache manager for getting configured sizes
     private val cacheManager by lazy { CacheManager(context) }
-    
+
     // Memory cache (LRU) - uses configured size from CacheManager
     private val memoryCache: LruCache<String, ByteArray> by lazy {
         val configuredMB = cacheManager.getMemoryCacheSizeMB()
@@ -47,28 +47,28 @@ class AssetCache(private val context: Context) {
             override fun sizeOf(key: String, value: ByteArray): Int = value.size
         }
     }
-    
+
     // Fallback disk cache directory for asset types without CacheManager mapping
     private val diskCacheDir: File by lazy {
         File(context.cacheDir, DISK_CACHE_DIR).also { it.mkdirs() }
     }
-    
+
     // Configured disk cache size in bytes
     private val maxDiskCacheBytes: Long
         get() = cacheManager.getDiskCacheSizeMB().toLong() * 1024 * 1024
-    
+
     /**
      * Get an asset from cache (memory first, then disk)
      */
     suspend fun get(assetId: UUID, assetType: AssetType): ByteArray? {
         val key = getCacheKey(assetId, assetType)
-        
+
         // Check memory cache
         memoryCache.get(key)?.let {
             Log.d(TAG, "Memory cache hit: $assetId")
             return it
         }
-        
+
         // Check disk cache
         return withContext(Dispatchers.IO) {
             val file = getDiskFile(assetId, assetType)
@@ -88,16 +88,16 @@ class AssetCache(private val context: Context) {
             }
         }
     }
-    
+
     /**
      * Store an asset in cache
      */
     suspend fun put(assetId: UUID, assetType: AssetType, data: ByteArray) {
         val key = getCacheKey(assetId, assetType)
-        
+
         // Store in memory
         memoryCache.put(key, data)
-        
+
         // Store on disk using Public/<Grid>/<assetType>/<uuid> structure
         withContext(Dispatchers.IO) {
             try {
@@ -109,7 +109,7 @@ class AssetCache(private val context: Context) {
             }
         }
     }
-    
+
     /**
      * Check if asset exists in cache
      */
@@ -120,7 +120,7 @@ class AssetCache(private val context: Context) {
             getDiskFile(assetId, assetType).exists()
         }
     }
-    
+
     /**
      * Remove an asset from cache
      */
@@ -131,7 +131,7 @@ class AssetCache(private val context: Context) {
             getDiskFile(assetId, assetType).delete()
         }
     }
-    
+
     /**
      * Clear all caches
      */
@@ -147,7 +147,7 @@ class AssetCache(private val context: Context) {
         }
         Log.i(TAG, "Cache cleared")
     }
-    
+
     /**
      * Collect all disk cache files across CacheManager directories and fallback.
      */
@@ -159,7 +159,7 @@ class AssetCache(private val context: Context) {
         diskCacheDir.listFiles()?.let { files.addAll(it) }
         return files
     }
-    
+
     /**
      * Get cache statistics
      */
@@ -176,7 +176,7 @@ class AssetCache(private val context: Context) {
             diskAssetCount = diskCount
         )
     }
-    
+
     /**
      * Prune disk cache if over limit
      * Uses configured cache size from CacheManager
@@ -185,7 +185,7 @@ class AssetCache(private val context: Context) {
         val maxBytes = maxDiskCacheBytes
         val allFiles = allDiskFiles()
         var totalSize = allFiles.sumOf { it.length() }
-        
+
         if (totalSize > maxBytes) {
             Log.i(TAG, "Cache over limit: ${totalSize / 1024 / 1024}MB > ${maxBytes / 1024 / 1024}MB, pruning...")
             // Delete oldest files first
@@ -202,7 +202,7 @@ class AssetCache(private val context: Context) {
             Log.i(TAG, "Pruned cache to ${totalSize / 1024 / 1024}MB")
         }
     }
-    
+
     private fun getCacheKey(assetId: UUID, assetType: AssetType): String {
         // Include the grid in the memory key so the in-process LRU cache can't return a
         // payload from a previously-connected grid for the same UUID. Disk paths already
@@ -211,7 +211,7 @@ class AssetCache(private val context: Context) {
         // globally unique) but unsafe across OpenSim grids where UUIDs can collide.
         return "${cacheManager.getCurrentGridName()}_${assetType.name}_${assetId}"
     }
-    
+
     /**
      * Map AssetType to CacheableAssetType for directory routing.
      */
@@ -225,7 +225,7 @@ class AssetCache(private val context: Context) {
             else -> null
         }
     }
-    
+
     /**
      * Get the disk file for an asset using the Public/<Grid>/<assetType>/<uuid> structure.
      * Assets with a known cacheable type are stored in CacheManager directories;
@@ -277,7 +277,7 @@ enum class AssetType(val value: Int) {
     GLTF(58),           // GLTF model
     GLTF_BIN(59),       // GLTF binary
     UNKNOWN(-1);
-    
+
     companion object {
         fun fromValue(value: Int): AssetType {
             return values().find { it.value == value } ?: UNKNOWN
