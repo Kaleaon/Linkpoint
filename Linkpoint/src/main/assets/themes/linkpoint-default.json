@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "id": "linkpoint_default",
+    "name": "Linkpoint Blue",
+    "description": "The default Linkpoint theme with blue accents",
+    "author": "Linkpoint",
+    "version": "1.0.0",
+    "tags": [
+      "built-in",
+      "linkpoint"
+    ],
+    "createdAt": "2026-10-02T00:00:00.000Z",
+    "updatedAt": "2026-10-02T00:00:00.000Z"
+  },
+  "darkMode": true,
+  "colorScheme": {
+    "primary": "#1976D2",
+    "onPrimary": "#FFFFFF",
+    "secondary": "#00BCD4",
+    "onSecondary": "#000000",
+    "background": "#1A1A1A",
+    "onBackground": "#FFFFFF",
+    "surface": "#2D2D2D",
+    "onSurface": "#FFFFFF",
+    "onSurfaceVariant": "#B0B0B0"
+  }
+}

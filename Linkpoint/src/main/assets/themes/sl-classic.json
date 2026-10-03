@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "id": "sl_classic",
+    "name": "Second Life Viewer",
+    "description": "Classic Linden Lab viewer look - Linden blue on deep slate",
+    "author": "Linkpoint",
+    "version": "1.0.0",
+    "tags": [
+      "built-in",
+      "linkpoint"
+    ],
+    "createdAt": "2026-10-02T00:00:00.000Z",
+    "updatedAt": "2026-10-02T00:00:00.000Z"
+  },
+  "darkMode": true,
+  "colorScheme": {
+    "primary": "#4AA3DF",
+    "onPrimary": "#0B1520",
+    "secondary": "#7FB3D5",
+    "onSecondary": "#0B1520",
+    "background": "#1B2430",
+    "onBackground": "#E6ECF2",
+    "surface": "#263548",
+    "onSurface": "#E6ECF2",
+    "onSurfaceVariant": "#AEBECF"
+  }
+}
