@@ -21,7 +21,8 @@
   "devDependencies": {
     "typescript": "~5.8.2",
     "vitest": "4.1.11",
-    "vite": "7.3.6"
+    "vite": "7.3.6",
+    "fill-range": "^7.1.1"
   },
   "engines": {
     "node": ">=22"
@@ -46,6 +47,9 @@
     },
     "extract-zip": "^2.0.1",
     "sharp": "^0.35.5",
-    "electron": "^44.5.1"
+    "electron": "^44.5.1",
+    "@electron/get": "^5.1.0",
+    "braces": "file:vendor/braces",
+    "http-cache-semantics": "file:vendor/http-cache-semantics"
   }
 }
