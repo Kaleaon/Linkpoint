@@ -71,6 +71,29 @@ class GridManager(
 
     fun getSelectedGrid(): GridInfo = selectedGrid
 
+    fun resolveGrid(gridIdOrUri: String): GridInfo {
+        val found = getAvailableGrids().find { it.id == gridIdOrUri || it.gridNick == gridIdOrUri }
+        if (found != null) return found
+
+        return runBlocking(Dispatchers.IO) {
+            val probed = prober.probeGrid(gridIdOrUri)
+            val profile = probed ?: GridProfileEntity(
+                id = "custom_" + Math.abs(gridIdOrUri.hashCode()),
+                name = gridIdOrUri,
+                gridNick = gridIdOrUri,
+                loginUri = if (gridIdOrUri.startsWith("http")) gridIdOrUri else "http://$gridIdOrUri/",
+                status = "online",
+                isCustom = true
+            )
+            try {
+                dao.insertGrid(profile)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to insert probed grid into cache: ${e.message}")
+            }
+            profile.toGridInfo()
+        }
+    }
+
     fun selectGrid(gridId: String) {
         val grid = getAvailableGrids().find { it.id == gridId } ?: resolveGrid(gridId)
         if (grid != null) {
@@ -81,25 +104,31 @@ class GridManager(
     
     fun updateSelectedGrid(grid: GridInfo) {
         selectedGrid = grid
-        val index = customGrids.indexOfFirst { it.id == grid.id }
-        if (index != -1) {
-            customGrids[index] = grid
-        }
         Log.i(TAG, "Updated selected grid: ${grid.name} (loginUri=${grid.loginUri}, helperUri=${grid.helperUri}, economyUri=${grid.economyUri}, mapUri=${grid.mapUri})")
     }
     
     fun addCustomGrid(grid: GridInfo) {
-        if (customGrids.none { it.id == grid.id }) {
-            customGrids.add(grid)
-            Log.i(TAG, "Added custom grid: ${grid.name}")
-        } else {
-            val index = customGrids.indexOfFirst { it.id == grid.id }
-            if (index != -1) {
-                customGrids[index] = grid
+        val profile = GridProfileEntity(
+            id = grid.id,
+            name = grid.name,
+            gridNick = grid.gridNick,
+            loginUri = grid.loginUri,
+            helperUri = grid.helperUri,
+            website = grid.website,
+            support = grid.support,
+            registerUri = grid.registerUri,
+            passwordUri = grid.passwordUri,
+            logoUrl = grid.logoUrl,
+            status = grid.status,
+            isCustom = grid.isCustom
+        )
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                dao.insertGrid(profile)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to insert custom grid: ${e.message}")
             }
         }
-
-        return profile.toGridInfo()
     }
 
     /**
@@ -195,5 +224,8 @@ data class GridInfo(
     val economyUri: String? = null,
     val mapUri: String? = null,
     val welcomeUri: String? = null,
-    val isResolved: Boolean = false
+    val isResolved: Boolean = false,
+    val logoUrl: String? = null,
+    val status: String = "online",
+    val isCustom: Boolean = false
 )
