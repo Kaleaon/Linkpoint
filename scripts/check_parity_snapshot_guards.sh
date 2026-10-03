@@ -14,7 +14,7 @@ for script in "${PARITY_SNAPSHOT_SCRIPTS[@]}"; do
     continue
   fi
 
-  if ! rg -q 'require_clean_worktree\.sh' "$script"; then
+  if ! grep -q 'require_clean_worktree\.sh' "$script"; then
     echo "ERROR: $script does not enforce clean working tree guard." >&2
     missing=1
   fi
