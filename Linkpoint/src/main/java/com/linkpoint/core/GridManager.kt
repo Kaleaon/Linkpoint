@@ -73,12 +73,10 @@ class GridManager(
 
     fun selectGrid(gridId: String) {
         val grid = getAvailableGrids().find { it.id == gridId } ?: resolveGrid(gridId)
-        if (grid != null) {
-            selectedGrid = grid
-            Log.i(TAG, "Selected grid: ${grid.name} (${grid.loginUri})")
-        }
+        selectedGrid = grid
+        Log.i(TAG, "Selected grid: ${grid.name} (${grid.loginUri})")
     }
-
+    
     fun updateSelectedGrid(grid: GridInfo) {
         selectedGrid = grid
         Log.i(TAG, "Updated selected grid: ${grid.name} (loginUri=${grid.loginUri}, helperUri=${grid.helperUri}, economyUri=${grid.economyUri}, mapUri=${grid.mapUri})")
@@ -101,7 +99,7 @@ class GridManager(
         val builtin = BUILTIN_GRIDS.find { it.id == gridIdOrUri || it.loginUri == gridIdOrUri }
         if (builtin != null) return builtin
 
-        // Guardrail 2: Fallback to direct /grid_info HTTP probe for unlisted / custom grid
+        // Fallback to direct /grid_info HTTP probe for unlisted / custom grid
         Log.i(TAG, "Grid '$gridIdOrUri' missing from local cache — falling back to direct /grid_info probe")
         val probed = runBlocking(Dispatchers.IO) {
             prober.probeGrid(gridIdOrUri)
@@ -122,6 +120,26 @@ class GridManager(
         }
 
         return profile.toGridInfo()
+    }
+    
+    fun addCustomGrid(grid: GridInfo) {
+        val profile = GridProfileEntity(
+            id = grid.id,
+            name = grid.name,
+            gridNick = grid.gridNick,
+            loginUri = grid.loginUri,
+            helperUri = grid.helperUri,
+            website = grid.website,
+            support = grid.support,
+            registerUri = grid.registerUri,
+            passwordUri = grid.passwordUri,
+            logoUrl = grid.logoUrl,
+            status = grid.status,
+            isCustom = true
+        )
+        CoroutineScope(Dispatchers.IO).launch {
+            try { dao.insertGrid(profile) } catch (e: Exception) { Log.w(TAG, "Failed to add custom grid: ${e.message}") }
+        }
     }
 
     /**
@@ -214,11 +232,11 @@ data class GridInfo(
     val support: String? = null,
     val registerUri: String? = null,
     val passwordUri: String? = null,
-    val logoUrl: String? = null,
-    val status: String = "online",
-    val isCustom: Boolean = false,
     val economyUri: String? = null,
     val mapUri: String? = null,
     val welcomeUri: String? = null,
+    val logoUrl: String? = null,
+    val status: String = "online",
+    val isCustom: Boolean = false,
     val isResolved: Boolean = false
 )
