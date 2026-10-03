@@ -73,33 +73,84 @@ class GridManager(
 
     fun selectGrid(gridId: String) {
         val grid = getAvailableGrids().find { it.id == gridId } ?: resolveGrid(gridId)
-        if (grid != null) {
-            selectedGrid = grid
-            Log.i(TAG, "Selected grid: ${grid.name} (${grid.loginUri})")
+        selectedGrid = grid
+        Log.i(TAG, "Selected grid: ${grid.name} (${grid.loginUri})")
+    }
+
+    fun resolveGrid(gridIdOrUri: String): GridInfo {
+        val cached = getAvailableGrids().find { it.id == gridIdOrUri || it.gridNick == gridIdOrUri }
+        if (cached != null) return cached
+
+        return runBlocking(Dispatchers.IO) {
+            val probed = prober.probeGrid(gridIdOrUri)
+            val profile = probed ?: GridProfileEntity(
+                id = "custom_" + Math.abs(gridIdOrUri.hashCode()),
+                name = gridIdOrUri,
+                gridNick = gridIdOrUri,
+                loginUri = if (gridIdOrUri.startsWith("http://") || gridIdOrUri.startsWith("https://")) gridIdOrUri else "http://$gridIdOrUri/",
+                status = "online",
+                isCustom = true
+            )
+            try {
+                dao.insertGrid(profile)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to cache resolved grid: ${e.message}")
+            }
+            profile.toGridInfo()
         }
     }
     
     fun updateSelectedGrid(grid: GridInfo) {
         selectedGrid = grid
-        val index = customGrids.indexOfFirst { it.id == grid.id }
-        if (index != -1) {
-            customGrids[index] = grid
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                dao.insertGrid(
+                    GridProfileEntity(
+                        id = grid.id,
+                        name = grid.name,
+                        gridNick = grid.gridNick,
+                        loginUri = grid.loginUri,
+                        helperUri = grid.helperUri,
+                        website = grid.website,
+                        support = grid.support,
+                        registerUri = grid.registerUri,
+                        passwordUri = grid.passwordUri,
+                        logoUrl = grid.logoUrl,
+                        status = grid.status,
+                        isCustom = grid.isCustom
+                    )
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to persist updated grid: ${e.message}")
+            }
         }
         Log.i(TAG, "Updated selected grid: ${grid.name} (loginUri=${grid.loginUri}, helperUri=${grid.helperUri}, economyUri=${grid.economyUri}, mapUri=${grid.mapUri})")
     }
     
     fun addCustomGrid(grid: GridInfo) {
-        if (customGrids.none { it.id == grid.id }) {
-            customGrids.add(grid)
-            Log.i(TAG, "Added custom grid: ${grid.name}")
-        } else {
-            val index = customGrids.indexOfFirst { it.id == grid.id }
-            if (index != -1) {
-                customGrids[index] = grid
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                dao.insertGrid(
+                    GridProfileEntity(
+                        id = grid.id,
+                        name = grid.name,
+                        gridNick = grid.gridNick,
+                        loginUri = grid.loginUri,
+                        helperUri = grid.helperUri,
+                        website = grid.website,
+                        support = grid.support,
+                        registerUri = grid.registerUri,
+                        passwordUri = grid.passwordUri,
+                        logoUrl = grid.logoUrl,
+                        status = grid.status,
+                        isCustom = true
+                    )
+                )
+                Log.i(TAG, "Added custom grid: ${grid.name}")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to add custom grid ${grid.name}: ${e.message}")
             }
         }
-
-        return profile.toGridInfo()
     }
 
     /**
@@ -192,6 +243,9 @@ data class GridInfo(
     val support: String? = null,
     val registerUri: String? = null,
     val passwordUri: String? = null,
+    val logoUrl: String? = null,
+    val status: String = "online",
+    val isCustom: Boolean = false,
     val economyUri: String? = null,
     val mapUri: String? = null,
     val welcomeUri: String? = null,
