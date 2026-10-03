@@ -26,6 +26,7 @@ const DB_VERSION = 1;
 const STORE_INVENTORY = 'inventory';
 const STORE_TEXTURES = 'textures';
 const STORE_META = 'metadata';
+const STORE_TRANSACTIONS = 'transactions';
 
 class LocalCacheManager extends Utils.EventEmitter {
   public locationType: CacheLocationType = 'internal';
@@ -68,6 +69,9 @@ class LocalCacheManager extends Utils.EventEmitter {
           }
           if (!db.objectStoreNames.contains(STORE_META)) {
             db.createObjectStore(STORE_META, { keyPath: 'key' });
+          }
+          if (!db.objectStoreNames.contains(STORE_TRANSACTIONS)) {
+            db.createObjectStore(STORE_TRANSACTIONS, { keyPath: 'id' });
           }
         };
         req.onsuccess = (e: any) => {
@@ -498,6 +502,97 @@ class LocalCacheManager extends Utils.EventEmitter {
       lastUpdated: foldersCount > 0 ? new Date().toLocaleTimeString() : null,
       flashdriveReady: Boolean(this.locationType === 'flashdrive_path' || this.dirHandle),
     };
+  }
+
+  /**
+   * Get cached transactions for an agent.
+   */
+  public async getTransactions(agentId?: string): Promise<any[]> {
+    const aid = agentId || 'current';
+    try {
+      const db = await this.initIDB();
+      if (db && db.objectStoreNames.contains(STORE_TRANSACTIONS)) {
+        return await new Promise<any[]>((resolve) => {
+          const tx = db.transaction([STORE_TRANSACTIONS], 'readonly');
+          const store = tx.objectStore(STORE_TRANSACTIONS);
+          const req = store.getAll();
+          req.onsuccess = () => {
+            const list = (req.result || []).filter((item: any) => !item.agentId || item.agentId === aid);
+            resolve(list);
+          };
+          req.onerror = () => resolve([]);
+        });
+      }
+    } catch {
+      // Fallback
+    }
+    const raw = Utils.storage.get(`sl_txs_${aid}`);
+    if (raw) {
+      try { return JSON.parse(raw); } catch {}
+    }
+    return [];
+  }
+
+  /**
+   * Save a single transaction record to local cache.
+   */
+  public async saveTransaction(agentId: string | undefined, record: any): Promise<void> {
+    const aid = agentId || 'current';
+    const entry = { ...record, agentId: aid };
+    try {
+      const db = await this.initIDB();
+      if (db && db.objectStoreNames.contains(STORE_TRANSACTIONS)) {
+        const tx = db.transaction([STORE_TRANSACTIONS], 'readwrite');
+        tx.objectStore(STORE_TRANSACTIONS).put(entry);
+      }
+    } catch {
+      // Fallback
+    }
+    const txs = await this.getTransactions(aid);
+    const idx = txs.findIndex((t: any) => t.id === record.id);
+    if (idx >= 0) txs[idx] = entry; else txs.unshift(entry);
+    Utils.storage.set(`sl_txs_${aid}`, JSON.stringify(txs.slice(0, 100)));
+  }
+
+  /**
+   * Prune transaction records older than specified number of days.
+   */
+  public async pruneOldTransactions(agentId: string | undefined, days: number = 30): Promise<void> {
+    const aid = agentId || 'current';
+    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+    try {
+      const txs = await this.getTransactions(aid);
+      const valid = txs.filter((t: any) => (t.timestamp || 0) >= cutoff);
+      const db = await this.initIDB();
+      if (db && db.objectStoreNames.contains(STORE_TRANSACTIONS)) {
+        const tx = db.transaction([STORE_TRANSACTIONS], 'readwrite');
+        const store = tx.objectStore(STORE_TRANSACTIONS);
+        store.clear();
+        for (const item of valid) {
+          store.put(item);
+        }
+      }
+      Utils.storage.set(`sl_txs_${aid}`, JSON.stringify(valid));
+    } catch {
+      // Ignore
+    }
+  }
+
+  /**
+   * Clear all cached transaction records for an agent.
+   */
+  public async clearTransactions(agentId?: string): Promise<void> {
+    const aid = agentId || 'current';
+    try {
+      const db = await this.initIDB();
+      if (db && db.objectStoreNames.contains(STORE_TRANSACTIONS)) {
+        const tx = db.transaction([STORE_TRANSACTIONS], 'readwrite');
+        tx.objectStore(STORE_TRANSACTIONS).clear();
+      }
+    } catch {
+      // Ignore
+    }
+    Utils.storage.set(`sl_txs_${aid}`, JSON.stringify([]));
   }
 }
 
