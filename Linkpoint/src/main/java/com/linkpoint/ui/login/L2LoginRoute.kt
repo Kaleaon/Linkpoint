@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import com.linkpoint.LinkpointApp
 import com.linkpoint.network.LoginResult
 import com.linkpoint.core.ConnectionState
+import com.linkpoint.ui.auth.WebAuthInterceptorDialog
+import com.linkpoint.ui.auth.InterceptedToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -42,6 +44,9 @@ fun L2LoginRoute(
     var status by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf(false) }
+    var showWebAuthDialog by remember { mutableStateOf(false) }
+    var webAuthUrl by remember { mutableStateOf("https://id.secondlife.com/openid/login") }
+    var pendingCredentials by remember { mutableStateOf<LoginCredentials?>(null) }
     val connectionState by app.sessionManager.connectionState.collectAsState()
     val isConnected = connectionState == ConnectionState.CONNECTED
 
@@ -49,21 +54,70 @@ fun L2LoginRoute(
         if (isConnected) onLoginSuccess()
     }
 
+    if (showWebAuthDialog) {
+        val selectedGrid = app.gridManager.getSelectedGrid()
+        WebAuthInterceptorDialog(
+            initialUrl = webAuthUrl,
+            gridUri = selectedGrid.loginUri,
+            onTokenIntercepted = { interceptedToken ->
+                showWebAuthDialog = false
+                loading = true
+                error = false
+                status = "Web token captured. Authenticating grid session…"
+                app.applicationScope.launch {
+                    val creds = pendingCredentials ?: LoginCredentials()
+                    val startLocation = when (creds.startLocation.trim().lowercase()) {
+                        "last location", "last" -> "last"
+                        "home" -> "home"
+                        else -> app.startLocationManager.getStartLocationForLogin()
+                    }
+                    val result = app.protocol.login(
+                        firstName = creds.firstName.trim(),
+                        lastName = creds.lastName.trim().ifBlank { "Resident" },
+                        password = creds.password,
+                        loginUri = selectedGrid.loginUri,
+                        startLocation = startLocation,
+                        mfaToken = interceptedToken.token,
+                        mfaHash = interceptedToken.mfaHash ?: "",
+                        webAuthToken = interceptedToken.token
+                    )
+                    withContext(Dispatchers.Main) {
+                        loading = false
+                        when (result) {
+                            is LoginResult.Success -> {
+                                status = "Welcome to ${selectedGrid.name}"
+                            }
+                            is LoginResult.MFARequired -> {
+                                status = "Additional MFA verification required."
+                                error = true
+                            }
+                            is LoginResult.Failure -> {
+                                status = result.message
+                                error = true
+                            }
+                        }
+                    }
+                }
+            },
+            onDismiss = {
+                showWebAuthDialog = false
+                loading = false
+                status = "Web verification cancelled."
+            }
+        )
+    }
+
     LoginScreen(
         grids = grids,
         statusMessage = status,
         isLoading = loading,
         isError = error,
+        onWebAuthRequested = {
+            webAuthUrl = "https://id.secondlife.com/openid/login"
+            showWebAuthDialog = true
+        },
         onLogin = { credentials ->
-            // The login flow runs HTTP login + capability seed fetch + UDP
-            // handshake — easily 5–30s end to end. Launching it on a
-            // composition-bound scope (rememberCoroutineScope) means any
-            // navigation away from this route mid-login (e.g. opening
-            // Settings) tears down the scope and cancels capability
-            // initialization with a "coroutine scope left the composition"
-            // exception. Use the application-wide SupervisorJob scope
-            // instead so the login can complete regardless of UI state;
-            // the SessionManager StateFlow above drives navigation.
+            pendingCredentials = credentials
             loading = true
             error = false
             val grid = app.gridManager.getAvailableGrids()
@@ -72,9 +126,6 @@ fun L2LoginRoute(
             app.gridManager.selectGrid(grid.id)
             status = "Resolving grid & logging in to ${grid.name}…"
             app.applicationScope.launch {
-                // Map the UI label to the format expected by the login API:
-                // "last", "home", or "uri:Region&x&y&z" — never a raw
-                // lowercased/space-replaced label string.
                 val startLocation = when (credentials.startLocation.trim().lowercase()) {
                     "last location", "last" -> "last"
                     "home" -> "home"
@@ -92,16 +143,12 @@ fun L2LoginRoute(
                     when (result) {
                         is LoginResult.Success -> {
                             status = "Welcome to ${grid.name}"
-                            // SessionManager.connectionState flips to CONNECTED
-                            // inside protocol.login on success; the
-                            // LaunchedEffect(isConnected) observer above drives
-                            // navigation.  Calling onLoginSuccess() here would
-                            // invoke a composable callback from a non-composition
-                            // coroutine after the route may have left the tree.
                         }
                         is LoginResult.MFARequired -> {
-                            status = "MFA required — open the app for the full prompt."
-                            error = true
+                            status = "2FA verification required. Opening verification portal…"
+                            error = false
+                            webAuthUrl = "https://id.secondlife.com/openid/login"
+                            showWebAuthDialog = true
                         }
                         is LoginResult.Failure -> {
                             status = result.message

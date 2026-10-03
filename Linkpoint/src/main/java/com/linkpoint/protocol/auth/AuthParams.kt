@@ -21,7 +21,9 @@ data class AuthParams(
     val viewerVersion: String = "1.0.0",
     val viewerId: String = "linkpoint-android",
     val mac: String? = null,
-    val id0: String? = null
+    val id0: String? = null,
+    val webAuthToken: String = "",
+    val mfaToken: String = ""
 ) {
     /**
      * Get the complete username

@@ -196,7 +196,8 @@ class GridConnection(
                     lastName = params.lastName,
                     passwordHash = passwordHash,
                     startLocation = params.startLocation,
-                    mfaToken = mfaToken
+                    mfaToken = if (params.mfaToken.isNotBlank()) params.mfaToken else mfaToken,
+                    webAuthToken = params.webAuthToken
                 )
 
                 // Execute login
@@ -447,14 +448,16 @@ class GridConnection(
         passwordHash: String,
         startLocation: String,
         mfaToken: String = "",
-        mfaHash: String = ""
+        mfaHash: String = "",
+        webAuthToken: String = ""
     ): String {
         val safeFirstName = escapeXml(firstName)
         val safeLastName = escapeXml(lastName)
         val safePassword = escapeXml(passwordHash)
         val safeStart = escapeXml(startLocation)
-        val safeToken = escapeXml(mfaToken)
+        val safeToken = escapeXml(if (mfaToken.isNotBlank()) mfaToken else webAuthToken)
         val safeMfaHash = escapeXml(mfaHash)
+        val safeWebAuthToken = escapeXml(webAuthToken)
 
         // Use persistent device identifiers (matches official viewer behavior)
         val viewerDigest = deviceIdentifier.getViewerDigest()
@@ -482,6 +485,9 @@ class GridConnection(
             // MFA fields
             append("<member><name>token</name><value><string>$safeToken</string></value></member>")
             append("<member><name>mfa_hash</name><value><string>$safeMfaHash</string></value></member>")
+            if (safeWebAuthToken.isNotBlank()) {
+                append("<member><name>web_auth_token</name><value><string>$safeWebAuthToken</string></value></member>")
+            }
 
             // Viewer identification
             append("<member><name>channel</name><value><string>$VIEWER_NAME</string></value></member>")
