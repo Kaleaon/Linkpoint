@@ -20,10 +20,12 @@ class SavedAccountRepositoryTest {
     private lateinit var mfaStorage: MfaHashStorage
 
     @Before
-    fun setUp() {
+    fun setUp() = runBlocking {
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
         repository = SavedAccountRepository.getInstance(context)
         mfaStorage = MfaHashStorage(context)
+        repository.clearAllAccounts()
+        mfaStorage.clearAllMfaHashes()
     }
 
     @Test

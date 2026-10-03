@@ -198,7 +198,7 @@ jobs:
         if: always()
         with:
           name: lint-results-${{ github.sha }}
-          path: Linkpoint/build/reports/lint-results-debug.html
+          path: Linkpoint/build/reports/lint-results-*.html
           retention-days: 7
 
       - name: Build Summary

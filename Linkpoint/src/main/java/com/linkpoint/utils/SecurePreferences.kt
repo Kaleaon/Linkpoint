@@ -52,7 +52,7 @@ object SecurePreferences {
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.w(TAG, "Falling back to plain SharedPreferences (AndroidKeyStore unavailable): ${e.message}")
             context.getSharedPreferences(legacyName + ENCRYPTED_SUFFIX, Context.MODE_PRIVATE)
         }
