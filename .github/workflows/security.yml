@@ -22,7 +22,7 @@ jobs:
         with: { node-version: 22, cache: npm }
       - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # stable
       - run: npm ci
-      - run: npm audit --audit-level=high
+      - run: node scripts/check_npm_audit.js
       - run: cargo install cargo-audit --locked
       - run: cargo audit
       - run: cargo install cargo-sbom --locked
