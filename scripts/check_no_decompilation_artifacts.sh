@@ -18,7 +18,7 @@ hits=0
 for target in "${TARGETS[@]}"; do
   [[ -d "$target" ]] || continue
   for pattern in "${patterns[@]}"; do
-    if rg -n -F "$pattern" "$target"; then
+    if grep -rn -F "$pattern" "$target"; then
       hits=1
     fi
   done
