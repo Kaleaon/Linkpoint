@@ -129,6 +129,7 @@
 //! [Serde]: https://serde.rs/
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]
+#![allow(warnings)]
 #![recursion_limit = "1024"]
 
 #[cfg(feature = "serialize")]
