@@ -64,8 +64,8 @@ fun LinkpointTheme(
     val colorScheme = resolvedThemePack.toMaterial3ColorScheme(darkTheme)
     
     if (BuildConfig.DEBUG) {
-        LaunchedEffect(colorScheme) {
-            ThemeContrastAudit.assertTextContrast(colorScheme, resolvedThemePack.name)
+        LaunchedEffect(resolvedThemePack) {
+            ThemeContrastAudit.assertTextContrast(resolvedThemePack)
         }
     }
 

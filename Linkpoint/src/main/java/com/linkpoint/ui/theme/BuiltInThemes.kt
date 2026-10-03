@@ -595,7 +595,7 @@ object BuiltInThemes {
         isBuiltIn = true,
         colorPrimary = "#4AA3DF",
         colorPrimaryDark = "#0066CC",
-        colorOnPrimary = "#FFFFFF",
+        colorOnPrimary = "#0B1520",
         colorSecondary = "#7FB3D5",
         colorOnSecondary = "#0B1520",
         colorBackground = "#1B2430",
@@ -603,6 +603,54 @@ object BuiltInThemes {
         colorOnSurface = "#E6ECF2",
         colorOnSurfaceVariant = "#AEBECF",
         layoutStructure = LayoutStructure.MATERIAL3
+    )
+
+    /** LCARS Core Theme */
+    val LCARS = ThemePack(
+        id = "lcars",
+        name = "LCARS",
+        description = "LCARS-inspired interface with warm rails and compact controls",
+        author = "Ktheme",
+        version = "1.0.0",
+        isBuiltIn = true,
+        colorPrimary = "#F2A65A",
+        colorPrimaryDark = "#CC7A2B",
+        colorOnPrimary = "#1B0E24",
+        colorSecondary = "#C5678D",
+        colorOnSecondary = "#2B1224",
+        colorBackground = "#1B0E24",
+        colorSurface = "#251433",
+        colorOnSurface = "#F2E6FF",
+        colorOnSurfaceVariant = "#D4B3E6",
+        colorSurfaceVariant = "#3D1F5C",
+        densityProfile = DensityProfile.COMPACT,
+        cornerProfile = CornerProfile.PILLED,
+        motionProfile = MotionProfile.STANDARD,
+        layoutStructure = LayoutStructure.LCARS
+    )
+
+    /** Windows Phone Metro Core Theme */
+    val WINDOWS_PHONE_METRO = ThemePack(
+        id = "windows-phone-metro",
+        name = "Windows Phone Metro",
+        description = "Flat, tile-first Metro-inspired interface theme",
+        author = "Ktheme",
+        version = "1.0.0",
+        isBuiltIn = true,
+        colorPrimary = "#00AEEF",
+        colorPrimaryDark = "#0078D7",
+        colorOnPrimary = "#00151F",
+        colorSecondary = "#005A9E",
+        colorOnSecondary = "#EAF4FF",
+        colorBackground = "#00151F",
+        colorSurface = "#002233",
+        colorOnSurface = "#F0F8FF",
+        colorOnSurfaceVariant = "#B8CAD6",
+        colorSurfaceVariant = "#3D4854",
+        densityProfile = DensityProfile.COMFORTABLE,
+        cornerProfile = CornerProfile.SHARP,
+        motionProfile = MotionProfile.STANDARD,
+        layoutStructure = LayoutStructure.METRO
     )
 
     /** Firestorm "Starlight-Dark" look */
