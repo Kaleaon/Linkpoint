@@ -189,9 +189,9 @@ fun NotecardEditorScreen(
                                 else -> stringResource(R.string.notecard_status_editing)
                             },
                             style = MaterialTheme.typography.bodySmall,
-                            color = if (hasUnsavedChanges) 
-                                GeneratedTokens.Color.Status.Unsaved 
-                            else 
+                            color = if (hasUnsavedChanges)
+                                GeneratedTokens.Color.Status.Unsaved
+                            else
                                 MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
