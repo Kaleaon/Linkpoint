@@ -162,6 +162,7 @@ public class SecondLifeViewer {
     }
 
     private void startPerformanceMonitoring() {
+        updatePerformanceStatistics();
         performanceExecutor.scheduleAtFixedRate(
                 this::updatePerformanceStatistics,
                 1, 1, TimeUnit.SECONDS

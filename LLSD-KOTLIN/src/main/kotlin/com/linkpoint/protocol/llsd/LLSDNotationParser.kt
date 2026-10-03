@@ -58,6 +58,7 @@ internal object LLSDNotationParser {
             cursor.skipWhitespace()
             parseValue(cursor, depth = 0)
         } catch (e: Exception) {
+
             LLSDUndefined
         }
     }
@@ -170,14 +171,51 @@ internal object LLSDNotationParser {
             'r' -> { c.read(); LLSDReal(parseRealBody(c)) }
             'u' -> { c.read(); LLSDUUID(parseUuidBody(c)) }
             '"', '\'' -> { val q = c.read().toChar(); LLSDString(parseDelimitedString(c, q)) }
-            's' -> { c.read(); LLSDString(parseExplicitLengthString(c)) }
+            's' -> {
+                c.read()
+                val nextChar = if (!c.atEnd()) c.peek().toChar() else ' '
+                when (nextChar) {
+                    '(' -> LLSDString(parseExplicitLengthString(c))
+                    '\'', '"' -> { val q = c.read().toChar(); LLSDString(parseDelimitedString(c, q)) }
+                    else -> {
+                        val sb = java.lang.StringBuilder("s")
+                        while (!c.atEnd()) {
+                            val p = c.peek().toChar()
+                            if (p.isLetterOrDigit() || p == '_' || p == '-') {
+                                sb.append(c.read().toChar())
+                            } else break
+                        }
+                        LLSDString(sb.toString())
+                    }
+                }
+            }
             'l' -> { c.read(); val q = c.read().toChar(); LLSDURI(parseDelimitedString(c, q)) }
             'd' -> { c.read(); val q = c.read().toChar(); LLSDDate(parseDate(parseDelimitedString(c, q))) }
             'b' -> { c.read(); parseBinary(c) }
             '{' -> { c.read(); parseMap(c, depth) }
             '[' -> { c.read(); parseArray(c, depth) }
-            else -> throw IllegalStateException("unexpected '$ch' at ${c.position}")
+            else -> {
+                if (ch.isLetter() || ch == '_' || ch == '-') {
+                    parseBareString(c)
+                } else {
+                    throw IllegalStateException("unexpected '$ch' at ${c.position}")
+                }
+            }
         }
+    }
+
+    private fun parseBareString(c: ByteCursor): LLSDString {
+        val sb = java.lang.StringBuilder()
+        while (!c.atEnd()) {
+            val ch = c.peek().toChar()
+            if (ch.isLetterOrDigit() || ch == '_' || ch == '-') {
+                sb.append(c.read().toChar())
+            } else {
+                break
+            }
+        }
+        if (sb.isEmpty()) throw IllegalStateException("unexpected character '${c.peek().toChar()}' at ${c.position}")
+        return LLSDString(sb.toString())
     }
 
     private fun parseTrueWord(c: ByteCursor): LLSDBoolean {
@@ -411,6 +449,49 @@ internal object LLSDNotationParser {
         return out
     }
 
+    private fun parseMapKey(c: ByteCursor): String {
+        c.skipWhitespace()
+        val ch = c.peek().toChar()
+        return when (ch) {
+            '\'', '"' -> {
+                val q = c.read().toChar()
+                parseDelimitedString(c, q)
+            }
+            's' -> {
+                c.read()
+                val nextChar = if (!c.atEnd()) c.peek().toChar() else ' '
+                when (nextChar) {
+                    '(' -> parseExplicitLengthString(c)
+                    '\'', '"' -> {
+                        val q = c.read().toChar()
+                        parseDelimitedString(c, q)
+                    }
+                    else -> {
+                        val sb = java.lang.StringBuilder("s")
+                        while (!c.atEnd()) {
+                            val p = c.peek().toChar()
+                            if (p.isLetterOrDigit() || p == '_' || p == '-') {
+                                sb.append(c.read().toChar())
+                            } else break
+                        }
+                        sb.toString()
+                    }
+                }
+            }
+            else -> {
+                val sb = java.lang.StringBuilder()
+                while (!c.atEnd()) {
+                    val p = c.peek().toChar()
+                    if (p.isLetterOrDigit() || p == '_' || p == '-') {
+                        sb.append(c.read().toChar())
+                    } else break
+                }
+                if (sb.isEmpty()) throw IllegalStateException("map key expected at ${c.position}")
+                sb.toString()
+            }
+        }
+    }
+
     private fun parseMap(c: ByteCursor, depth: Int): LLSDMap {
         val map = LLSDMap()
         var entries = 0
@@ -418,9 +499,7 @@ internal object LLSDNotationParser {
             c.skipWhitespace()
             if (c.atEnd()) throw IllegalStateException("map unterminated")
             if (c.peek().toChar() == '}') { c.read(); return map }
-            val keyValue = parseValue(c, depth + 1)
-            val key = (keyValue as? LLSDString)?.value
-                ?: throw IllegalStateException("map key must be string at ${c.position}")
+            val key = parseMapKey(c)
             c.skipWhitespace()
             c.expect(':')
             val value = parseValue(c, depth + 1)

@@ -287,6 +287,7 @@ kotlin {
 }
 
 dependencies {
+    implementation(project(":llsd-core"))
     // Core library desugaring for Java 8+ APIs on older Android versions
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
