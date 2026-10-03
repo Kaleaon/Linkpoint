@@ -784,10 +784,12 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     
     private fun initRenderer() {
         val targetBackend = preferredRendererBackend()
-        if (rendererHandoffManager.currentState() == RendererHandoffManager.State.IDLE) {
-            rendererHandoffManager.activateInitialBackend(targetBackend, "activity_create")
-        } else {
-            rendererHandoffManager.switchBackend(targetBackend, "renderer_preference_changed")
+        lifecycleScope.launch {
+            if (rendererHandoffManager.currentState() == RendererHandoffManager.State.IDLE) {
+                rendererHandoffManager.activateInitialBackend(targetBackend, "activity_create")
+            } else {
+                rendererHandoffManager.switchBackend(targetBackend, "renderer_preference_changed")
+            }
         }
     }
 
@@ -809,7 +811,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             },
             onFlushPendingRenderUpdates = { backend ->
                 if (backend == RendererHandoffManager.RendererBackend.FILAMENT && app.isRenderManagerInitialized()) {
-                    app.renderManager.dispatcher.runBlocking {
+                    app.renderManager.dispatcher.execute {
                         app.renderManager.flushPendingRenderUpdates()
                     }
                 }
@@ -818,7 +820,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 when (backend) {
                     RendererHandoffManager.RendererBackend.FILAMENT -> {
                         if (app.isRenderManagerInitialized()) {
-                            app.renderManager.dispatcher.runBlocking {
+                            app.renderManager.dispatcher.execute {
                                 app.renderManager.shutdown()
                             }
                         }
@@ -1378,7 +1380,9 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
 
         val preferredBackend = preferredRendererBackend()
         if (preferredBackend != rendererHandoffManager.currentBackend()) {
-            rendererHandoffManager.switchBackend(preferredBackend, "on_resume_preferences")
+            lifecycleScope.launch {
+                rendererHandoffManager.switchBackend(preferredBackend, "on_resume_preferences")
+            }
         }
 
         if (rendererHandoffManager.currentBackend() == RendererHandoffManager.RendererBackend.LUMIYA) {

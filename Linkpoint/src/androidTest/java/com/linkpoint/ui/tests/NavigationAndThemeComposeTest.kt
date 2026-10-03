@@ -123,10 +123,10 @@ private fun BottomTabHarness() {
                 }
             }
         }
-    ) { innerPadding ->
+    ) { paddingValues ->
         Text(
             text = "Route: $selectedRoute",
-            modifier = Modifier.fillMaxSize().padding(innerPadding)
+            modifier = Modifier.fillMaxSize().padding(paddingValues)
         )
     }
 }
@@ -172,8 +172,8 @@ private fun DrawerHarness() {
                     }
                 )
             }
-        ) { innerPadding ->
-            Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+        ) { paddingValues ->
+            Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
                 Text("Section: $selectedSection")
             }
         }

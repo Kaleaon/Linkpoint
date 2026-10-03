@@ -256,9 +256,11 @@ class MuteManager(
     fun handleMuteListUpdate(payload: ByteArray) {
         try {
             val buffer = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
+            if (buffer.remaining() < 1) return
             
             // Read filename
             val filenameLen = buffer.get().toInt() and 0xFF
+            if (buffer.remaining() < filenameLen) return
             val filenameBytes = ByteArray(filenameLen)
             buffer.get(filenameBytes)
             val filename = String(filenameBytes, Charsets.UTF_8).trim('\u0000')

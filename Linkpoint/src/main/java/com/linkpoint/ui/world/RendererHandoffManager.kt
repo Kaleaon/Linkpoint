@@ -13,10 +13,10 @@ import com.linkpoint.render.CameraController
  * 4) Attach target backend and replay scene snapshot.
  */
 class RendererHandoffManager(
-    private val onPauseActiveBackendDrawing: (RendererBackend) -> Unit,
-    private val onFlushPendingRenderUpdates: (RendererBackend) -> Unit,
-    private val onDisposeBackendOwnedGpuResources: (RendererBackend) -> Unit,
-    private val onAttachTargetBackendAndReplaySnapshot: (RendererBackend, SceneStateSnapshot) -> Unit,
+    private val onPauseActiveBackendDrawing: suspend (RendererBackend) -> Unit,
+    private val onFlushPendingRenderUpdates: suspend (RendererBackend) -> Unit,
+    private val onDisposeBackendOwnedGpuResources: suspend (RendererBackend) -> Unit,
+    private val onAttachTargetBackendAndReplaySnapshot: suspend (RendererBackend, SceneStateSnapshot) -> Unit,
     private val snapshotProvider: () -> SceneStateSnapshot
 ) {
 
@@ -54,7 +54,7 @@ class RendererHandoffManager(
 
     fun currentBackend(): RendererBackend? = activeBackend
 
-    fun activateInitialBackend(targetBackend: RendererBackend, reason: String): Boolean {
+    suspend fun activateInitialBackend(targetBackend: RendererBackend, reason: String): Boolean {
         synchronized(lock) {
             if (state == State.SWITCHING) {
                 Log.w(TAG, "Ignoring initial activation while switching (reason=$reason)")
@@ -85,7 +85,7 @@ class RendererHandoffManager(
         }
     }
 
-    fun switchBackend(targetBackend: RendererBackend, reason: String): Boolean {
+    suspend fun switchBackend(targetBackend: RendererBackend, reason: String): Boolean {
         val sourceBackend: RendererBackend?
         synchronized(lock) {
             if (state == State.SWITCHING) {
@@ -124,7 +124,7 @@ class RendererHandoffManager(
     }
 
 
-    fun onHostPaused() {
+    suspend fun onHostPaused() {
         val backend = currentBackend() ?: return
         if (currentState() != State.ACTIVE) return
         onPauseActiveBackendDrawing(backend)
@@ -138,7 +138,7 @@ class RendererHandoffManager(
         }
     }
 
-    fun onHostDisposed() {
+    suspend fun onHostDisposed() {
         val backend = currentBackend() ?: return
         try {
             onDisposeBackendOwnedGpuResources(backend)

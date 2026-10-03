@@ -727,43 +727,8 @@ object BuiltInThemes {
     )
 
     /** Get all built-in themes as a list */
-    fun getAllBuiltInThemes(): List<ThemePack> = listOf(
-        LINKPOINT_DEFAULT,
-        INK_TERMINAL,
-        LCARS_TNG,
-        METRO_CYAN,
-        FRUTIGER_AERO,
-        NAVY_GOLD,
-        PAPER_INK,
-        ART_DECO,
-        NEO_NOIR_NEON,
-        EMERALD_SILVER,
-        MIDNIGHT_AMBER,
-        OBSIDIAN_CRIMSON,
-        ART_NOUVEAU,
-        AURORA_GLASS_NIGHT,
-        BURGUNDY_ROSEGOLD,
-        CALM_CLINICAL,
-        CHARCOAL_CHAMPAGNE,
-        DEEP_PURPLE_PLATINUM,
-        FOREST_COPPER,
-        ROSE_GOLD,
-        ROYAL_BRONZE,
-        ROYAL_SILVER,
-        SLATE_CYAN,
-        SLATE_GUNMETAL,
-        SOLARPUNK_CIVIC,
-        CLEVERFERRET_GOLD,
-        LCARS,
-        WINDOWS_PHONE_METRO,
-        SL_CLASSIC,
-        FIRESTORM,
-        STARGATE_ATLANTIS,
-        STARGATE_SG1
-    )
-    
+    fun getAllBuiltInThemes(): List<ThemePack> = ThemeCatalog.allThemes()
+
     /** Get a built-in theme by ID */
-    fun getById(id: String): ThemePack? {
-        return getAllBuiltInThemes().find { it.id == id }
-    }
+    fun getById(id: String): ThemePack? = ThemeCatalog.getById(id)
 }

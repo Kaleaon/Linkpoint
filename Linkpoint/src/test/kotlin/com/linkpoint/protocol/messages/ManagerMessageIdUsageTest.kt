@@ -1,5 +1,6 @@
 package com.linkpoint.protocol.messages
 
+import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import org.junit.Assert.assertEquals
 import org.junit.Assert.fail
 import org.junit.Test
@@ -42,7 +43,7 @@ class ManagerMessageIdUsageTest {
         )
 
         expected.forEach { (name, value) ->
-            val actual = MessageIds::class.java.getField(name).getInt(null)
+            val actual = MessageIdRegistry::class.java.getField(name).getInt(null)
             assertEquals("Unexpected integer for MessageIdRegistry.$name", value, actual)
         }
     }

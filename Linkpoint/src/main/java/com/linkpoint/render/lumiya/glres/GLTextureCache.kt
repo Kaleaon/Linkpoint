@@ -7,13 +7,15 @@ import android.util.Log
 import android.util.LruCache
 import com.linkpoint.assets.TextureFormatPolicy
 import com.linkpoint.assets.TextureMemoryTracker
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.UUID
 
 /**
  * LRU texture cache backed by GL texture handles.
  *
  * Design lineage: Lumiya `GLTextureCache.java` / `GLTerrainTextureCache.java`,
- * modernised with Android `LruCache` and immutable-format textures.
+ * modernised with Android `LruCache`, immutable-format textures, and PBO double-buffered uploads.
  *
  * Textures are keyed by SL asset UUID.  When evicted the GL handle is
  * returned to the resource manager for deferred deletion.
@@ -26,6 +28,8 @@ class GLTextureCache(
     companion object {
         private const val TAG = "GLTextureCache"
     }
+
+    val pboManager = PboRingBufferManager(resourceManager)
 
     private val cache = object : LruCache<UUID, TextureEntry>(maxEntries) {
         override fun entryRemoved(evicted: Boolean, key: UUID?, oldValue: TextureEntry?, newValue: TextureEntry?) {
@@ -92,8 +96,22 @@ class GLTextureCache(
             bitmap.width,
             bitmap.height
         )
-        GLUtils.texSubImage2D(GLES32.GL_TEXTURE_2D, 0, 0, 0, bitmap)
-        GLES32.glGenerateMipmap(GLES32.GL_TEXTURE_2D)
+        val uploadedViaPbo = if (pboManager.isPboSupported) {
+            try {
+                val byteBuffer = ByteBuffer.allocateDirect(bitmap.width * bitmap.height * 4).order(ByteOrder.nativeOrder())
+                bitmap.copyPixelsToBuffer(byteBuffer)
+                byteBuffer.rewind()
+                pboManager.stageAndUploadTexture(handle, bitmap.width, bitmap.height, byteBuffer)
+            } catch (e: Exception) {
+                Log.w(TAG, "PBO buffer copy failed, falling back to direct upload", e)
+                false
+            }
+        } else false
+
+        if (!uploadedViaPbo) {
+            GLUtils.texSubImage2D(GLES32.GL_TEXTURE_2D, 0, 0, 0, bitmap)
+            GLES32.glGenerateMipmap(GLES32.GL_TEXTURE_2D)
+        }
 
         // Trilinear filtering
         GLES32.glTexParameteri(GLES32.GL_TEXTURE_2D, GLES32.GL_TEXTURE_MIN_FILTER, GLES32.GL_LINEAR_MIPMAP_LINEAR)

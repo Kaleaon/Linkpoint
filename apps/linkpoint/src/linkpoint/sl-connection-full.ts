@@ -117,6 +117,10 @@ export class SLConnectionFull extends Utils.EventEmitter {
     forward('lure', 'lure');
     forward('parcel-properties', 'ParcelProperties', (data) => ({ parcelData: data }));
     forward('coarse-avatar', 'CoarseAvatarUpdate');
+    forward('mute-list-update', 'MuteListUpdate');
+    forward('use-cached-mute-list', 'UseCachedMuteList');
+    forward('update-mute-list-entry', 'UpdateMuteListEntry');
+    forward('remove-mute-list-entry', 'RemoveMuteListEntry');
     for (const name of ['avatar_presence', 'avatar-presence']) {
       slBridge.on(name, (data: any) => {
         this.emit('avatar_presence', data);
@@ -352,6 +356,18 @@ export class SLConnectionFull extends Utils.EventEmitter {
     }
     this.emit('balance_updated', this.balance);
     return this.balance;
+  }
+
+  async payObject(params: { objectId?: string; targetId?: string; id?: string; amount?: number; price?: number; description?: string }) {
+    this.requireConnected();
+    const result = await slBridge.payObject(params);
+    if (result && typeof result.balance === 'number' && Number.isFinite(result.balance)) {
+      this.balance = result.balance;
+      this.emit('balance_updated', this.balance);
+    } else {
+      void this.refreshBalance();
+    }
+    return result;
   }
 
   async sendChat(message: string, channel: number = 0, type: number = 1) {

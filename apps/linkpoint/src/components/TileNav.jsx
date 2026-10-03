@@ -13,27 +13,50 @@ export default function TileNav() {
   if (nav !== "tiles") return null;
 
   return (
-    <div style={{ flex: "none", display: "flex", gap: "2px", background: V.bg, padding: "2px" }}>
+    <div
+      role="tablist"
+      aria-label="Tile navigation"
+      style={{
+        flex: "none",
+        display: "flex",
+        gap: "2px",
+        background: V.surf,
+        borderTop: "1px solid " + V.outv,
+        padding: "2px",
+      }}
+    >
       {NAV_ALL.map((n) => {
         const active = navActive(state.screen, n.id);
+        const radius = V.rs || "0px";
         return (
           <div
             key={n.id}
-            onClick={() => actions.setScreen(n.id)}
-            role="button"
+            role="tab"
             tabIndex={0}
-            aria-label={"Go to " + n.id}
-            aria-pressed={active}
+            aria-selected={active}
+            aria-label={"Go to " + (n.label || n.id)}
+            onClick={() => actions.setScreen(n.id)}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
                 actions.setScreen(n.id);
               }
             }}
-            style={{ flex: 1, height: "62px", display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: "7px", cursor: "pointer", background: active ? V.pri : V.surf, color: active ? V.onpri : V.ink }}
+            style={{
+              flex: 1,
+              height: "62px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-end",
+              padding: "7px",
+              cursor: "pointer",
+              borderRadius: radius,
+              background: active ? V.pri : V.surf,
+              color: active ? V.onpri : V.ink2,
+            }}
           >
             <Icon name={n.icon} size={18} />
-            <span style={{ font: "300 10px/1.2 " + t.dfont, letterSpacing: ".04em", marginTop: "5px" }}>{n.tile}</span>
+            <span style={{ font: "300 10px/1.2 " + (t.dfont || t.font), letterSpacing: ".04em", marginTop: "5px" }}>{n.tile}</span>
           </div>
         );
       })}

@@ -86,6 +86,18 @@ class EconomyManager(
     // Economy data (upload prices, etc.)
     private val _economyData = MutableStateFlow<EconomyData?>(null)
     val economyData: StateFlow<EconomyData?> = _economyData
+
+    /**
+     * Get dynamically resolved economy URI from session state / GridInfo
+     */
+    fun getResolvedEconomyUri(): String? {
+        return try {
+            val app = com.linkpoint.LinkpointApp.getInstance()
+            app.sessionManager.getEconomyUri() ?: app.gridManager.getSelectedGrid().economyUri
+        } catch (e: Exception) {
+            null
+        }
+    }
     
     // Transaction events
     private val _transactionEvents = MutableSharedFlow<TransactionEvent>(replay = 0, extraBufferCapacity = 16)
