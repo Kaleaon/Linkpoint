@@ -123,7 +123,11 @@ class BatchedInventoryCapabilitiesTest {
         inventoryManager.warmFetch()
 
         // Give the coroutine launched on internal scope a brief moment to run
-        kotlinx.coroutines.delay(100)
+        var attempts = 0
+        while (capManager.requests.isEmpty() && attempts < 20) {
+            kotlinx.coroutines.delay(50)
+            attempts++
+        }
 
         assertEquals(1, capManager.requests.size)
         val req = capManager.requests.single()
