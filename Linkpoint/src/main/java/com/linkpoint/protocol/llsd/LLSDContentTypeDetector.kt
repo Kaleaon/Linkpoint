@@ -12,6 +12,14 @@ object LLSDContentTypeDetector {
         LLSD_BINARY
     }
 
+    private fun logDebug(tag: String, message: String) {
+        try {
+            Log.d(tag, message)
+        } catch (_: Throwable) {
+            // JVM unit test fallback
+        }
+    }
+
     @Throws(IOException::class)
     fun detect(input: BufferedInputStream, contentType: String?): LLSDContentType {
         val bom = byteArrayOf(-17, -69, -65)
@@ -42,7 +50,7 @@ object LLSDContentTypeDetector {
         val isXml = text.startsWith("<llsd>") || text.startsWith("<?xml")
         var isBinary = text.startsWith("<? LLSD/Binary ?>") || text.startsWith("{") || text.startsWith("<?llsd/binary")
 
-        Log.d(
+        logDebug(
             TAG,
             "contentType='$contentType', detectedBinary=$isBinary, detectedXml=$isXml, skipBytes=$skipBytes, preview='${text.take(40)}'"
         )

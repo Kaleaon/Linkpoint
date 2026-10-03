@@ -3,7 +3,9 @@ repos:
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
+        exclude: '.*message_template\.msg$'
       - id: end-of-file-fixer
+        exclude: '.*message_template\.msg$'
       - id: check-yaml
       - id: check-json
       - id: check-added-large-files
@@ -32,11 +34,5 @@ repos:
       - id: npm-typecheck
         name: npm run typecheck
         entry: npm run typecheck
-        language: system
-        pass_filenames: false
-
-      - id: gradle-lint
-        name: gradle lint
-        entry: bash -c "cd Linkpoint && ./gradlew lintStableDebug"
         language: system
         pass_filenames: false

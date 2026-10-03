@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Linkpoint</string>
+    <string name="login_header_subtitle">Second LifeまたはOpenSimログインサービスに直接接続します。</string>
+    <string name="login_label_grid">グリッド</string>
+    <string name="login_label_avatar_name">アバター名</string>
+    <string name="login_placeholder_avatar_name">名 姓 またはユーザー名</string>
+    <string name="login_label_password">パスワード</string>
+    <string name="login_placeholder_password">パスワード</string>
+    <string name="login_label_mfa">認証コード</string>
+    <string name="login_placeholder_mfa">6桁のコード</string>
+    <string name="login_label_start_location">開始位置</string>
+    <string name="login_option_last_location">最後の位置</string>
+    <string name="login_option_home">ホーム</string>
+    <string name="login_remember_me">アバター名とグリッドを記憶する（パスワードは保存されません）</string>
+    <string name="login_error_empty_credentials">アバター名とパスワードの両方を入力してください。</string>
+    <string name="login_error_invalid_grid">有効なグリッドエンドポイントを選択してください。</string>
+    <string name="login_error_rejected">グリッド接続が拒否されました。</string>
+    <string name="login_error_saved_credentials">保存されたサーバー認証情報で接続できませんでした。</string>
+    <string name="login_button_connecting">接続中…</string>
+    <string name="login_button_mfa">検証して接続</string>
+    <string name="login_button_connect">グリッドに接続</string>
+    <string name="login_button_server_credentials">サーバー認証情報で接続</string>
+    <string name="login_button_add_custom_grid">カスタムOpenSimグリッドを追加</string>
+    <string name="login_label_grid_name">グリッド名</string>
+    <string name="login_label_login_uri">ログインURI</string>
+    <string name="login_placeholder_login_uri">https://login.example.org/</string>
+    <string name="login_button_save_grid">グリッドを保存</string>
+    <string name="login_button_cancel">キャンセル</string>
+    <string name="login_version_build">v2.0 · ビルド 4831</string>
+    <string name="login_forgot_password">パスワードをお忘れですか？</string>
+</resources>
