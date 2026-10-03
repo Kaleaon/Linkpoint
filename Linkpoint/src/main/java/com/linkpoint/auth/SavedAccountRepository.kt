@@ -174,4 +174,18 @@ class SavedAccountRepository private constructor(context: Context) {
             null
         }
     }
+
+    /**
+     * Clear all saved account profiles.
+     */
+    suspend fun clearAllAccounts() = withContext(Dispatchers.IO) {
+        val allEntries = prefs.all
+        val editor = prefs.edit()
+        for ((key, _) in allEntries) {
+            if (key.startsWith(ACCOUNT_KEY_PREFIX)) {
+                editor.remove(key)
+            }
+        }
+        editor.apply()
+    }
 }
