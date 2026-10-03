@@ -9,7 +9,7 @@ and avatar renderer pipeline integration.
 import threading
 import time
 import unittest
-from texture_decoder import TextureDecoder, DecodedTexture, create_placeholder_texture, parse_jp2_dimensions
+from texture_decoder import TextureDecoder, DecodedTexture, DecodeProgressEvent, create_placeholder_texture, parse_jp2_dimensions
 from inventory_cache import InventoryCache
 from avatar_renderer import AvatarRenderer
 
@@ -155,6 +155,29 @@ class TestTextureDecoder(unittest.TestCase):
         self.assertIsNotNone(updated_attachment)
         self.assertTrue(updated_attachment.is_loaded)
         self.assertFalse(updated_attachment.is_placeholder)
+
+    def test_progress_callback_events(self):
+        jp2_header = b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a" + b"ihdr\x00\x00\x00\x40\x00\x00\x00\x40"
+        raw_bytes = jp2_header + b"\x00" * 128
+
+        progress_events = []
+        event = threading.Event()
+
+        def on_progress(p_event: DecodeProgressEvent):
+            progress_events.append(p_event)
+            if p_event.stage == "COMPLETE":
+                event.set()
+
+        self.decoder.request_decode("tex_prog", raw_bytes, progress_callback=on_progress)
+        completed = event.wait(timeout=2.0)
+
+        self.assertTrue(completed)
+        self.assertGreater(len(progress_events), 0)
+        stages = [e.stage for e in progress_events]
+        self.assertIn("HEADER_PARSING", stages)
+        self.assertIn("COMPLETE", stages)
+        self.assertEqual(progress_events[-1].progress, 100.0)
+
 
 
 if __name__ == "__main__":

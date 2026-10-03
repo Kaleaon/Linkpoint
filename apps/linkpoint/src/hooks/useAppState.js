@@ -109,8 +109,35 @@ export function useAppState() {
   const [searchTab, setSearchTab] = useState("FRIENDS");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchState, setSearchState] = useState({});
+  const [connectionState, setConnectionState] = useState(() => (app.protocol?.connected ? "connected" : "disconnected"));
   const [reconnecting, setReconnecting] = useState(false);
   const [toast, setToast] = useState("");
+
+  // ---- connection state listeners on app.protocol -----------------------
+  useEffect(() => {
+    const onConnected = () => {
+      setConnectionState("connected");
+      setReconnecting(false);
+    };
+    const onDisconnected = () => {
+      setConnectionState("disconnected");
+    };
+
+    if (app.protocol) {
+      setConnectionState(app.protocol.connected ? "connected" : "disconnected");
+      app.protocol.on("connected", onConnected);
+      app.protocol.on("disconnected", onDisconnected);
+      app.protocol.on("disconnect", onDisconnected);
+    }
+
+    return () => {
+      if (app.protocol) {
+        app.protocol.off("connected", onConnected);
+        app.protocol.off("disconnected", onDisconnected);
+        app.protocol.off("disconnect", onDisconnected);
+      }
+    };
+  }, []);
 
   // ---- movement pad: held buttons move the real camera --------------------
   useEffect(() => {
@@ -325,8 +352,12 @@ export function useAppState() {
   // ---- settings: reconnect to grid ---------------------------------------
   const reconnect = useCallback(() => {
     setReconnecting(true);
+    setConnectionState("reconnecting");
     clearTimeout(reconnectTimerRef.current);
-    reconnectTimerRef.current = setTimeout(() => setReconnecting(false), 1200);
+    reconnectTimerRef.current = setTimeout(() => {
+      setReconnecting(false);
+      setConnectionState(app.protocol?.connected ? "connected" : "disconnected");
+    }, 1200);
   }, []);
 
   // ---- desktop floater window model (flR/flDrag/flFocus/flToggle/flClose) --
@@ -545,7 +576,7 @@ export function useAppState() {
       cPad, cHeld, cRun, cEdit, cFlash, cReason, cTog,
       rMode, rOpen, rMenu, cDock, flOpen, flMin, flRect, flZ, menu, tick,
       loginMode, loginGrid, loginBusy, loginError, customGrids, addGrid, addGridName, addGridHost,
-      searchFrom, searchTab, searchQuery, searchState, reconnecting, toast,
+      searchFrom, searchTab, searchQuery, searchState, connectionState, reconnecting, toast,
       prefs, cacheCleared, camPreset, useWindowManager, workspacePreset, tileDensity,
     },
     actions: {
