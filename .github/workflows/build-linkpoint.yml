@@ -224,7 +224,7 @@ jobs:
           echo "- **Kotlin files:** ${{ env.kotlin_files }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Java files:** ${{ env.java_files }}" >> $GITHUB_STEP_SUMMARY
           
-          if [ "${{ env.java_files }}" -eq 0 ]; then
+          if [ "${{ env.java_files }}" = "0" ]; then
             echo "- **Status:** ✅ **100% Kotlin**" >> $GITHUB_STEP_SUMMARY
           fi
           

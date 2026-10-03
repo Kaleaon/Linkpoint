@@ -68,6 +68,6 @@ jobs:
           chmod +x Linkpoint/gradlew
 
       - name: Run pre-commit hooks
-        uses: pre-commit/action@2c7b3805e2e0ed2c18d5320d3e58988222fa10e7 # v3.0.1
+        uses: pre-commit/action@v3.0.1
         with:
           extra_args: --all-files
