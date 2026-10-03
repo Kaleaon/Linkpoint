@@ -16,7 +16,6 @@ buildscript {
     repositories {
         maven { url 'https://maven-central.storage-download.googleapis.com/maven2' }
         google()
-        maven { url 'https://repo1.maven.org/maven2/' }
         mavenCentral()
     }
     dependencies {
@@ -31,19 +30,18 @@ buildscript {
 
 allprojects {
     repositories {
+        // Add JitPack for compose-code-editor, JetStick, etc.
+        maven {
+            name = "JitPack"
+            url = "https://jitpack.io"
+        }
         maven { url 'https://maven-central.storage-download.googleapis.com/maven2' }
         google()
-        maven { url 'https://repo1.maven.org/maven2/' }
         mavenCentral()
         // Add Clojars repository for LLSD Java library
         maven {
             name = "Clojars"
             url = "https://repo.clojars.org/"
-        }
-        // Add JitPack for compose-code-editor
-        maven {
-            name = "JitPack"
-            url = "https://jitpack.io"
         }
     }
 }
@@ -69,16 +67,16 @@ tasks.register('archInfo') {
         def osName = System.getProperty("os.name")
         def javaHome = System.getProperty("java.home")
         def androidHome = System.getenv("ANDROID_HOME")
-        
+
         println """
 🌍 Universal Build Environment Information:
    OS: $osName
-   Architecture: $arch  
+   Architecture: $arch
    Java: $javaHome
    Android SDK: ${androidHome ?: 'Not set'}
    Gradle: ${gradle.gradleVersion}
         """.stripIndent()
-        
+
         // Check for custom AAPT2
         if (project.hasProperty('customAapt2Path')) {
             println "   AAPT2 Override: ${project.ext.customAapt2Path}"
@@ -92,10 +90,10 @@ tasks.register('archInfo') {
 tasks.register('prebuildCheck') {
     doFirst {
         println "🔍 Pre-build architecture compatibility check..."
-        
+
         def arch = System.getProperty("os.arch")
         def supportedArchs = ['amd64', 'x86_64', 'aarch64', 'arm64', 'armv7l', 'i386', 'i686']
-        
+
         if (arch in supportedArchs) {
             println "✅ Architecture $arch is supported"
         } else {
