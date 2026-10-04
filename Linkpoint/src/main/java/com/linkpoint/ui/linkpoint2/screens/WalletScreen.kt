@@ -281,4 +281,3 @@ private fun BalanceCard(
         }
     }
 }
-

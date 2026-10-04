@@ -13,9 +13,9 @@ import java.util.UUID
 
 /**
  * Script Editor Activity - View and edit LSL scripts.
- * 
+ *
  * Uses Jetpack Compose with custom LSL syntax highlighting.
- * 
+ *
  * Features:
  * - LSL syntax highlighting (350+ functions, 60+ events, 400+ constants)
  * - Line numbers
@@ -24,11 +24,11 @@ import java.util.UUID
  * - Reset script (for object scripts)
  * - Toggle running state (for object scripts)
  * - Dark theme optimized for code editing
- * 
+ *
  * Based on Firestorm/reference viewer script editor design.
  */
 class ScriptEditorActivity : ComponentActivity() {
-    
+
     companion object {
         const val EXTRA_ASSET_ID = "asset_id"
         const val EXTRA_ITEM_ID = "item_id"
@@ -36,18 +36,18 @@ class ScriptEditorActivity : ComponentActivity() {
         const val EXTRA_SCRIPT_NAME = "script_name"
         const val EXTRA_READ_ONLY = "read_only"
     }
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         val assetId = intent.getStringExtra(EXTRA_ASSET_ID)?.let { UUID.fromString(it) }
         val itemId = intent.getStringExtra(EXTRA_ITEM_ID)?.let { UUID.fromString(it) }
         val objectId = intent.getStringExtra(EXTRA_OBJECT_ID)?.let { UUID.fromString(it) }
         val scriptName = intent.getStringExtra(EXTRA_SCRIPT_NAME) ?: "Script"
         val isReadOnly = intent.getBooleanExtra(EXTRA_READ_ONLY, true)
-        
+
         val app = application as LinkpointApp
-        
+
         setContent {
             LinkpointTheme(darkTheme = true) {
                 Surface(

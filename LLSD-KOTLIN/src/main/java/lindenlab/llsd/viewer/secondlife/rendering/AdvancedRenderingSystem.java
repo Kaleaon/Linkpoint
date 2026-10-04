@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 
 /**
  * Advanced rendering system with fine-grained controls replacing basic/plus/ultra presets.
- * 
+ *
  * Features:
  * - Detailed graphics settings control
  * - Battery conservation mode (blank background)
@@ -26,12 +26,12 @@ import java.util.logging.Logger;
  */
 public class AdvancedRenderingSystem {
     private static final Logger LOGGER = Logger.getLogger(AdvancedRenderingSystem.class.getName());
-    
+
     // Rendering state
     private final AtomicBoolean renderingEnabled = new AtomicBoolean(true);
     private final AtomicBoolean batteryConservationMode = new AtomicBoolean(false);
     private final AtomicInteger frameRate = new AtomicInteger(60);
-    
+
     // Settings categories
     private final QualitySettings qualitySettings;
     private final PerformanceSettings performanceSettings;
@@ -46,11 +46,11 @@ public class AdvancedRenderingSystem {
     private final AvatarSettings avatarSettings;
     private final ParticleSettings particleSettings;
     private final UISettings uiSettings;
-    
+
     // Performance monitoring
     private final PerformanceMonitor performanceMonitor;
     private final Map<String, Object> renderStatistics;
-    
+
     public AdvancedRenderingSystem() {
         this.qualitySettings = new QualitySettings();
         this.performanceSettings = new PerformanceSettings();
@@ -65,18 +65,18 @@ public class AdvancedRenderingSystem {
         this.avatarSettings = new AvatarSettings();
         this.particleSettings = new ParticleSettings();
         this.uiSettings = new UISettings();
-        
+
         this.performanceMonitor = new PerformanceMonitor();
         this.renderStatistics = new ConcurrentHashMap<>();
-        
+
         // Apply default settings
         applyBalancedPreset();
-        
+
         LOGGER.info("Advanced rendering system initialized");
     }
-    
+
     // Main rendering control
-    
+
     public void setRenderingEnabled(boolean enabled) {
         boolean wasEnabled = renderingEnabled.getAndSet(enabled);
         if (wasEnabled != enabled) {
@@ -86,11 +86,11 @@ public class AdvancedRenderingSystem {
             }
         }
     }
-    
+
     public boolean isRenderingEnabled() {
         return renderingEnabled.get();
     }
-    
+
     public void setBatteryConservationMode(boolean enabled) {
         boolean wasEnabled = batteryConservationMode.getAndSet(enabled);
         if (wasEnabled != enabled) {
@@ -106,19 +106,19 @@ public class AdvancedRenderingSystem {
             }
         }
     }
-    
+
     public boolean isBatteryConservationMode() {
         return batteryConservationMode.get();
     }
-    
+
     private void clearFrameBuffer() {
         // Clear to black background for battery conservation
         // In real implementation, this would clear the OpenGL framebuffer
         LOGGER.fine("Clearing frame buffer to blank background");
     }
-    
+
     // Quality presets (replacing basic/plus/ultra)
-    
+
     public void applyUltraLowPreset() {
         LOGGER.info("Applying Ultra Low quality preset");
         qualitySettings.setOverallQuality(0.1f);
@@ -130,7 +130,7 @@ public class AdvancedRenderingSystem {
         avatarSettings.setMaxVisibleAvatars(5);
         particleSettings.setMaxParticles(100);
     }
-    
+
     public void applyLowPreset() {
         LOGGER.info("Applying Low quality preset");
         qualitySettings.setOverallQuality(0.3f);
@@ -143,7 +143,7 @@ public class AdvancedRenderingSystem {
         avatarSettings.setMaxVisibleAvatars(15);
         particleSettings.setMaxParticles(500);
     }
-    
+
     public void applyBalancedPreset() {
         LOGGER.info("Applying Balanced quality preset");
         qualitySettings.setOverallQuality(0.6f);
@@ -157,7 +157,7 @@ public class AdvancedRenderingSystem {
         avatarSettings.setMaxVisibleAvatars(30);
         particleSettings.setMaxParticles(2000);
     }
-    
+
     public void applyHighPreset() {
         LOGGER.info("Applying High quality preset");
         qualitySettings.setOverallQuality(0.8f);
@@ -171,7 +171,7 @@ public class AdvancedRenderingSystem {
         avatarSettings.setMaxVisibleAvatars(50);
         particleSettings.setMaxParticles(5000);
     }
-    
+
     public void applyUltraPreset() {
         LOGGER.info("Applying Ultra quality preset");
         qualitySettings.setOverallQuality(1.0f);
@@ -185,13 +185,13 @@ public class AdvancedRenderingSystem {
         avatarSettings.setMaxVisibleAvatars(100);
         particleSettings.setMaxParticles(10000);
     }
-    
+
     // Performance optimization
-    
+
     private void applyPowerSavingSettings() {
         // Store current settings for restoration
         storeCurrentSettings();
-        
+
         // Apply extreme power saving
         performanceSettings.setTargetFPS(15);
         performanceSettings.setVSync(false);
@@ -201,12 +201,12 @@ public class AdvancedRenderingSystem {
         textureSettings.setTextureQuality(TextureQuality.VERY_LOW);
         meshSettings.setLodBias(-3.0f);
         avatarSettings.setMaxVisibleAvatars(1);
-        
+
         LOGGER.info("Applied power saving settings");
     }
-    
+
     private Map<String, Object> storedSettings = new HashMap<>();
-    
+
     private void storeCurrentSettings() {
         storedSettings.clear();
         storedSettings.put("targetFPS", performanceSettings.getTargetFPS());
@@ -218,7 +218,7 @@ public class AdvancedRenderingSystem {
         storedSettings.put("lodBias", meshSettings.getLodBias());
         storedSettings.put("maxAvatars", avatarSettings.getMaxVisibleAvatars());
     }
-    
+
     private void restorePreviousSettings() {
         if (!storedSettings.isEmpty()) {
             performanceSettings.setTargetFPS((Integer) storedSettings.get("targetFPS"));
@@ -229,53 +229,53 @@ public class AdvancedRenderingSystem {
             textureSettings.setTextureQuality((TextureQuality) storedSettings.get("textureQuality"));
             meshSettings.setLodBias((Float) storedSettings.get("lodBias"));
             avatarSettings.setMaxVisibleAvatars((Integer) storedSettings.get("maxAvatars"));
-            
+
             LOGGER.info("Restored previous settings");
         }
     }
-    
+
     // Enums for quality levels
-    
+
     public enum TextureQuality {
         VERY_LOW(64, 0.25f),
         LOW(128, 0.5f),
         MEDIUM(256, 0.75f),
         HIGH(512, 1.0f),
         ULTRA(1024, 1.25f);
-        
+
         private final int maxSize;
         private final float detailBias;
-        
+
         TextureQuality(int maxSize, float detailBias) {
             this.maxSize = maxSize;
             this.detailBias = detailBias;
         }
-        
+
         public int getMaxSize() { return maxSize; }
         public float getDetailBias() { return detailBias; }
     }
-    
+
     public enum ShadowQuality {
         DISABLED(0, 0),
         LOW(512, 2),
         MEDIUM(1024, 4),
         HIGH(2048, 6),
         ULTRA(4096, 8);
-        
+
         private final int shadowMapSize;
         private final int cascadeCount;
-        
+
         ShadowQuality(int shadowMapSize, int cascadeCount) {
             this.shadowMapSize = shadowMapSize;
             this.cascadeCount = cascadeCount;
         }
-        
+
         public int getShadowMapSize() { return shadowMapSize; }
         public int getCascadeCount() { return cascadeCount; }
     }
-    
+
     // Getter methods for settings (simplified implementations)
-    
+
     public QualitySettings getQualitySettings() { return qualitySettings; }
     public PerformanceSettings getPerformanceSettings() { return performanceSettings; }
     public EffectsSettings getEffectsSettings() { return effectsSettings; }
@@ -289,9 +289,9 @@ public class AdvancedRenderingSystem {
     public AvatarSettings getAvatarSettings() { return avatarSettings; }
     public ParticleSettings getParticleSettings() { return particleSettings; }
     public UISettings getUISettings() { return uiSettings; }
-    
+
     // Statistics and monitoring
-    
+
     public Map<String, Object> getRenderStatistics() {
         Map<String, Object> stats = new HashMap<>(renderStatistics);
         stats.put("renderingEnabled", renderingEnabled.get());
@@ -299,9 +299,9 @@ public class AdvancedRenderingSystem {
         stats.put("currentFPS", frameRate.get());
         return stats;
     }
-    
+
     // Shutdown
-    
+
     public void shutdown() {
         LOGGER.info("Advanced rendering system shutdown");
     }

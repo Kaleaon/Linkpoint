@@ -27,9 +27,9 @@ import java.util.concurrent.atomic.AtomicInteger
 /**
  * Manages texture downloading and decoding
  * Handles JPEG2000 (J2K) format used by Second Life.
- * 
+ *
  * Enhanced with detailed logging for debugging texture loading issues.
- * 
+ *
  * Note: Uses custom SSL configuration to handle Akamai CDN hostname verification.
  * The Second Life asset CDN (asset-cdn.glb.agni.lindenlab.com) is served by Akamai,
  * which uses certificates for *.akamaized.net domains. The SSLHelper.configureForCdn()
@@ -40,7 +40,7 @@ class TextureManager(
     private val cache: AssetCache,
     private val capabilityManager: com.linkpoint.protocol.capabilities.CapabilityManager? = null
 ) {
-    private val capabilityUrl: String? get() = 
+    private val capabilityUrl: String? get() =
         capabilityManager?.getCapability(com.linkpoint.protocol.capabilities.CapabilityManager.CAP_GET_TEXTURE)
     companion object {
         private const val TAG = "TextureManager"
@@ -74,9 +74,9 @@ class TextureManager(
             return (base + distanceBias).coerceIn(0, 5)
         }
     }
-    
+
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    
+
     // HTTP client configured for CDN access with custom hostname verification.
     // Akamai serves the SL asset CDN under *.akamaized.net certs — SSLHelper.configureForCdn
     // adds the per-host trust dance to make that work without disabling verification.
@@ -92,12 +92,12 @@ class TextureManager(
             .readTimeout(30, TimeUnit.SECONDS)
             .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
     ).build()
-    
+
     // Download queue with priority
     private val downloadQueue = PriorityBlockingQueue<TextureRequest>(100)
     private val activeDownloads = AtomicInteger(0)
     private val pendingTextures = ConcurrentHashMap<UUID, Deferred<Bitmap?>>()
-    
+
     // Off-thread asset decoding worker pool & frustum priority queue
     val decodingWorkerPool = com.linkpoint.assets.pool.AssetDecodingWorkerPool(context)
     val frustumLoadingQueue = com.linkpoint.assets.pool.FrustumPriorityLoadingQueue()
@@ -108,11 +108,11 @@ class TextureManager(
     private val placeholderTextures = ConcurrentHashMap.newKeySet<UUID>()
 
     fun isPlaceholder(textureId: UUID): Boolean = placeholderTextures.contains(textureId)
-    
+
     // Statistics
     private val _stats = MutableStateFlow(TextureStats())
     val stats: StateFlow<TextureStats> = _stats
-    
+
     init {
         // Start download workers
         repeat(MAX_CONCURRENT_DOWNLOADS) {
@@ -121,7 +121,7 @@ class TextureManager(
             }
         }
     }
-    
+
     /**
      * Request a texture with priority
      */
@@ -134,16 +134,16 @@ class TextureManager(
         val effectiveDiscard = if (discard >= 0) discard else computeDiscardLevel(priority, distanceMeters)
         // Check decoded cache
         textureCache[textureId]?.let { return it }
-        
+
         // Check pending requests
         pendingTextures[textureId]?.let { return it.await() }
-        
+
         // Create new request
         val deferred = scope.async {
             fetchTexture(textureId, priority, effectiveDiscard)
         }
         pendingTextures[textureId] = deferred
-        
+
         return try {
             deferred.await()
         } finally {
@@ -172,7 +172,7 @@ class TextureManager(
             }
         }
     }
-    
+
     /**
      * Prefetch textures in background
      */
@@ -184,7 +184,7 @@ class TextureManager(
             }
         }
     }
-    
+
     /**
      * Clear texture from cache
      */
@@ -193,7 +193,7 @@ class TextureManager(
         textureErrorStates.remove(textureId)
         textureCache.remove(textureId)?.recycle()
     }
-    
+
     /**
      * Clear all decoded textures
      */
@@ -203,7 +203,7 @@ class TextureManager(
         textureCache.values.forEach { it.recycle() }
         textureCache.clear()
     }
-    
+
     private suspend fun fetchTexture(
         textureId: UUID,
         priority: TexturePriority,
@@ -226,7 +226,7 @@ class TextureManager(
             }
             return recordDownloadFailure(textureId, lastError ?: "Re-download failed")
         }
-        
+
         // Use priority to determine download timeout and retry behavior
         val timeoutMs = when (priority) {
             TexturePriority.CRITICAL -> 10000L   // Highest priority - avatar/UI textures
@@ -235,33 +235,33 @@ class TextureManager(
             TexturePriority.LOW -> 25000L        // Background/far away
             TexturePriority.PREFETCH -> 30000L   // Speculative loading
         }
-        
+
         // Download from server with priority-based timeout
         val data = downloadTexture(textureId, discard, timeoutMs)
             ?: return recordDownloadFailure(textureId, lastError ?: "Download failed")
-        
+
         // Cache raw data
         cache.put(textureId, AssetType.TEXTURE, data)
-        
+
         // Decode and cache
         return decodeTexture(textureId, data, effectiveDiscard)
     }
-    
+
     private suspend fun downloadTexture(
-        textureId: UUID, 
-        discard: Int, 
+        textureId: UUID,
+        discard: Int,
         timeoutMs: Long = 15000L
     ): ByteArray? = withContext(Dispatchers.IO) {
         updateStats { it.copy(pendingDownloads = it.pendingDownloads + 1) }
-        
+
         val startTime = System.currentTimeMillis()
-        
+
         try {
             val capUrl = resolveTextureCapabilityUrl(timeoutMs)
 
             // Build texture URL - returns null if capability is not available
             val url = capUrl?.let { buildTextureUrl(it, textureId) }
-            
+
             if (url == null) {
                 // No capability URL available - queue for retry when capabilities load
                 Log.w(TAG, "🖼️ Texture queued for retry: $textureId - GetTexture capability not yet available")
@@ -284,7 +284,7 @@ class TextureManager(
 
                 return@withContext null
             }
-            
+
             Log.d(TAG, "🖼️ Starting texture download: $textureId")
             NetworkLogger.logTextureRequest(textureId.toString(), url, "NORMAL")
 
@@ -336,7 +336,7 @@ class TextureManager(
             val response = httpClient.newCall(request).execute()
             val durationMs = System.currentTimeMillis() - startTime
             val protocol = response.protocol.toString()
-            
+
             // Use try-finally to ensure response is always closed to prevent connection leaks
             // This fixes "ProtocolException: Unexpected status line" errors caused by
             // unconsumed response bodies polluting the connection pool
@@ -344,7 +344,7 @@ class TextureManager(
                 if (response.isSuccessful) {
                     val data = response.body?.bytes()
                     val sizeBytes = data?.size ?: 0
-                    
+
                     Log.d(TAG, "🖼️ Texture downloaded: $textureId ($sizeBytes bytes, ${durationMs}ms, $protocol)")
                     NetworkLogger.logTextureResult(
                         textureId = textureId.toString(),
@@ -353,7 +353,7 @@ class TextureManager(
                         sizeBytes = sizeBytes,
                         protocol = protocol
                     )
-                    
+
                     updateStats { it.copy(
                         downloadedCount = it.downloadedCount + 1,
                         downloadedBytes = it.downloadedBytes + sizeBytes
@@ -374,7 +374,7 @@ class TextureManager(
                         protocol = protocol,
                         error = "HTTP ${response.code}: ${response.message}"
                     )
-                    
+
                     lastError = "HTTP ${response.code}: Download failed"
                     lastErrorTime = System.currentTimeMillis()
                     updateStats { it.copy(failedCount = it.failedCount + 1) }
@@ -394,7 +394,7 @@ class TextureManager(
                 sizeBytes = null,
                 error = "${e.javaClass.simpleName}: ${e.message}"
             )
-            
+
             lastError = "${e.javaClass.simpleName}: ${e.message}"
             lastErrorTime = System.currentTimeMillis()
             updateStats { it.copy(failedCount = it.failedCount + 1) }
@@ -422,7 +422,7 @@ class TextureManager(
 
         return if (becameReady == true) capabilityUrl else null
     }
-    
+
     /**
      * Handle ImageNotInDatabase message from server.
      * This indicates the requested texture doesn't exist.
@@ -433,37 +433,37 @@ class TextureManager(
         missingTextures.add(textureId)
         updateStats { it.copy(failedCount = it.failedCount + 1) }
     }
-    
+
     // Track textures that are known to be missing
     private val missingTextures = java.util.concurrent.ConcurrentHashMap.newKeySet<UUID>()
 
     // Track textures that failed due to missing capability (eligible for retry)
     private val capabilityPendingTextures = java.util.concurrent.ConcurrentLinkedQueue<TextureRequest>()
     @Volatile private var capabilityRetryJob: Job? = null
-    
+
     // Track in-progress UDP texture transfers
     private val udpTextureTransfers = java.util.concurrent.ConcurrentHashMap<UUID, ByteArrayOutputStream>()
-    
+
     /**
      * Handle ImageData message - first packet of UDP texture transfer.
      */
     fun handleImageData(payload: ByteArray) {
         try {
             val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
-            
+
             // ImageID block
             val textureId = buffer.getUUID()
             val codec = buffer.get().toInt() and 0xFF // 0 = raw, 2 = JPEG2000
             val size = buffer.int
             val packets = buffer.short.toInt() and 0xFFFF
-            
+
             Log.d(TAG, "🖼️ ImageData: $textureId, codec=$codec, size=$size, packets=$packets")
-            
+
             // Read image data
             if (buffer.remaining() > 0) {
                 val data = ByteArray(buffer.remaining())
                 buffer.get(data)
-                
+
                 if (packets == 1) {
                     // Single packet - decode immediately
                     processTextureData(textureId, data)
@@ -478,23 +478,23 @@ class TextureManager(
             Log.e(TAG, "Error handling ImageData", e)
         }
     }
-    
+
     /**
      * Handle ImagePacket message - subsequent packets of UDP texture transfer.
      */
     fun handleImagePacket(payload: ByteArray) {
         try {
             val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
-            
+
             // ImageID block
             val textureId = buffer.getUUID()
             val packet = buffer.short.toInt() and 0xFFFF
-            
+
             // Read image data
             if (buffer.remaining() > 0) {
                 val data = ByteArray(buffer.remaining())
                 buffer.get(data)
-                
+
                 val stream = udpTextureTransfers[textureId]
                 if (stream != null) {
                     synchronized(stream) {
@@ -509,7 +509,7 @@ class TextureManager(
             Log.e(TAG, "Error handling ImagePacket", e)
         }
     }
-    
+
     /**
      * Complete a multi-packet texture transfer.
      */
@@ -518,7 +518,7 @@ class TextureManager(
         val data = stream.toByteArray()
         processTextureData(textureId, data)
     }
-    
+
     /**
      * Process received texture data and cache it.
      */
@@ -538,7 +538,7 @@ class TextureManager(
             }
         }
     }
-    
+
     private fun buildTextureUrl(baseUrl: String, textureId: UUID): String {
         // Use capability URL if available
         // Per official SL viewer (lltexturefetch.cpp), the URL format is:
@@ -558,10 +558,10 @@ class TextureManager(
         } else {
             baseUrl
         }
-        
+
         return "$secureUrl?texture_id=$textureId"
     }
-    
+
     private suspend fun decodeTexture(textureId: UUID, data: ByteArray, discardLevel: Int): Bitmap {
         val startTime = System.currentTimeMillis()
 
@@ -652,12 +652,12 @@ class TextureManager(
     private fun isJPEG2000(data: ByteArray): Boolean {
         if (data.size < 12) return false
         // JPEG2000 magic bytes
-        return (data[0] == 0x00.toByte() && data[1] == 0x00.toByte() && 
+        return (data[0] == 0x00.toByte() && data[1] == 0x00.toByte() &&
                 data[2] == 0x00.toByte() && data[3] == 0x0C.toByte()) ||
                // J2C codestream
                (data[0] == 0xFF.toByte() && data[1] == 0x4F.toByte())
     }
-    
+
     private suspend fun decodeJPEG2000OffThread(textureId: UUID, data: ByteArray, discardLevel: Int): Bitmap? {
         return suspendCancellableCoroutine { continuation ->
             val job = decodingWorkerPool.decodeTextureAsync(
@@ -696,7 +696,7 @@ class TextureManager(
     internal fun computeDiscardLevel(priority: TexturePriority, distanceMeters: Float? = null): Int {
         return computeDiscardLevelForRequest(priority, distanceMeters)
     }
-    
+
     private suspend fun downloadWorker() {
         while (true) {
             val request = downloadQueue.take()
@@ -716,16 +716,16 @@ class TextureManager(
             }
         }
     }
-    
+
     private fun updateStats(update: (TextureStats) -> TextureStats) {
         _stats.value = update(_stats.value)
     }
-    
+
     fun shutdown() {
         scope.cancel()
         clearDecodedCache()
     }
-    
+
     /**
      * Called when capabilities are ready after login.
      *
@@ -783,15 +783,15 @@ class TextureManager(
             }
         }
     }
-    
+
     // ==================== DIAGNOSTIC METHODS ====================
-    
+
     // Additional tracking for diagnostics (volatile for thread safety)
     @Volatile private var lastError: String? = null
     @Volatile private var lastErrorTime: Long = 0
     private var j2kDecodeAttempts = java.util.concurrent.atomic.AtomicInteger(0)
     private var j2kDecodeSuccesses = java.util.concurrent.atomic.AtomicInteger(0)
-    
+
     /**
      * Get comprehensive diagnostic data for debug reports
      */
@@ -820,7 +820,7 @@ class TextureManager(
             textureErrorStateCount = textureErrorStates.size
         )
     }
-    
+
     /**
      * Diagnostic data class for texture manager state
      */

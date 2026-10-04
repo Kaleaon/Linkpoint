@@ -9,4 +9,3 @@ varying lowp vec4 vLightColor;
 void main() {
     gl_FragColor = useTexture ? (vLightColor * texture2D (sTexture, vTexCoordOut)) : vLightColor;
 }
-

@@ -77,7 +77,7 @@ This is the key step that most people skip:
    - Right-click on the entry
    - Select **"Set External Name Association"**
    - Point it to itself (e.g., classes2.dex → classes2.dex)
-   
+
 This seems redundant, but it's necessary for Ghidra to properly resolve paths when working with APK archives.
 
 ### Step 5: Verify All DEX Files Are Listed
@@ -145,7 +145,7 @@ With proper setup, you get:
 
 **Cause**: You analyzed immediately without setting up External Name Associations
 
-**Solution**: 
+**Solution**:
 1. Close the current analysis
 2. Re-import the APK following Steps 1-6 carefully
 3. Do NOT skip the External Name Association step

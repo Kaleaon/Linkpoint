@@ -33,41 +33,41 @@ typedef struct {
 
 static OPJ_SIZE_T stream_read(void* buffer, OPJ_SIZE_T numBytes, void* userData) {
     MemoryStream* stream = (MemoryStream*)userData;
-    
+
     if (stream->offset >= stream->size) {
         return (OPJ_SIZE_T)-1;
     }
-    
+
     OPJ_SIZE_T available = stream->size - stream->offset;
     OPJ_SIZE_T toRead = (numBytes < available) ? numBytes : available;
-    
+
     memcpy(buffer, stream->data + stream->offset, toRead);
     stream->offset += toRead;
-    
+
     return toRead;
 }
 
 static OPJ_OFF_T stream_skip(OPJ_OFF_T numBytes, void* userData) {
     MemoryStream* stream = (MemoryStream*)userData;
-    
+
     if (numBytes < 0) {
         return -1;
     }
-    
+
     OPJ_SIZE_T available = stream->size - stream->offset;
     OPJ_SIZE_T toSkip = ((OPJ_SIZE_T)numBytes < available) ? (OPJ_SIZE_T)numBytes : available;
-    
+
     stream->offset += toSkip;
     return (OPJ_OFF_T)toSkip;
 }
 
 static OPJ_BOOL stream_seek(OPJ_OFF_T offset, void* userData) {
     MemoryStream* stream = (MemoryStream*)userData;
-    
+
     if (offset < 0 || (OPJ_SIZE_T)offset > stream->size) {
         return OPJ_FALSE;
     }
-    
+
     stream->offset = (size_t)offset;
     return OPJ_TRUE;
 }
@@ -90,23 +90,23 @@ static OPJ_CODEC_FORMAT detectCodecFormat(const uint8_t* data, size_t size) {
     if (size < 12) {
         return OPJ_CODEC_UNKNOWN;
     }
-    
+
     // Check for JP2 file format (starts with JP2 signature box)
     if (data[0] == 0x00 && data[1] == 0x00 && data[2] == 0x00 && data[3] == 0x0C &&
         data[4] == 0x6A && data[5] == 0x50 && data[6] == 0x20 && data[7] == 0x20) {
         return OPJ_CODEC_JP2;
     }
-    
+
     // Check for J2K codestream (starts with SOC marker)
     if (data[0] == 0xFF && data[1] == 0x4F && data[2] == 0xFF && data[3] == 0x51) {
         return OPJ_CODEC_J2K;
     }
-    
+
     // Try J2K anyway if unclear
     if (data[0] == 0xFF && data[1] == 0x4F) {
         return OPJ_CODEC_J2K;
     }
-    
+
     return OPJ_CODEC_UNKNOWN;
 }
 
@@ -122,15 +122,15 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeDecode(
         LOGE("Input data too small: %d bytes", dataSize);
         return nullptr;
     }
-    
+
     jbyte* dataPtr = env->GetByteArrayElements(jdata, nullptr);
     if (!dataPtr) {
         LOGE("Failed to get byte array elements");
         return nullptr;
     }
-    
+
     const uint8_t* data = reinterpret_cast<const uint8_t*>(dataPtr);
-    
+
     // Detect format
     OPJ_CODEC_FORMAT format = detectCodecFormat(data, dataSize);
     if (format == OPJ_CODEC_UNKNOWN) {
@@ -138,7 +138,7 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeDecode(
         env->ReleaseByteArrayElements(jdata, dataPtr, JNI_ABORT);
         return nullptr;
     }
-    
+
     // Create decoder
     opj_codec_t* codec = opj_create_decompress(format);
     if (!codec) {
@@ -146,27 +146,27 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeDecode(
         env->ReleaseByteArrayElements(jdata, dataPtr, JNI_ABORT);
         return nullptr;
     }
-    
+
     // Set callbacks
     opj_set_error_handler(codec, error_callback, nullptr);
     opj_set_warning_handler(codec, warning_callback, nullptr);
     opj_set_info_handler(codec, info_callback, nullptr);
-    
+
     // Setup decoder parameters
     opj_dparameters_t params;
     opj_set_default_decoder_parameters(&params);
     params.cp_reduce = discardLevel; // Reduction factor
-    
+
     if (!opj_setup_decoder(codec, &params)) {
         LOGE("Failed to setup decoder");
         opj_destroy_codec(codec);
         env->ReleaseByteArrayElements(jdata, dataPtr, JNI_ABORT);
         return nullptr;
     }
-    
+
     // Create memory stream
     MemoryStream memStream = { data, (size_t)dataSize, 0 };
-    
+
     opj_stream_t* stream = opj_stream_default_create(OPJ_TRUE);
     if (!stream) {
         LOGE("Failed to create stream");
@@ -174,13 +174,13 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeDecode(
         env->ReleaseByteArrayElements(jdata, dataPtr, JNI_ABORT);
         return nullptr;
     }
-    
+
     opj_stream_set_read_function(stream, stream_read);
     opj_stream_set_skip_function(stream, stream_skip);
     opj_stream_set_seek_function(stream, stream_seek);
     opj_stream_set_user_data(stream, &memStream, nullptr);
     opj_stream_set_user_data_length(stream, dataSize);
-    
+
     // Read header
     opj_image_t* image = nullptr;
     if (!opj_read_header(stream, codec, &image)) {
@@ -190,7 +190,7 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeDecode(
         env->ReleaseByteArrayElements(jdata, dataPtr, JNI_ABORT);
         return nullptr;
     }
-    
+
     // Decode the image
     if (!opj_decode(codec, stream, image)) {
         LOGE("Failed to decode image");
@@ -200,7 +200,7 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeDecode(
         env->ReleaseByteArrayElements(jdata, dataPtr, JNI_ABORT);
         return nullptr;
     }
-    
+
     opj_end_decompress(codec, stream);
 
     int numComponents = image->numcomps;
@@ -315,13 +315,13 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeDecode(
             rgbaData[i * 4 + 3] = sampleToByte(c1.data[i], c1.prec, c1.sgnd);
         }
     }
-    
+
     // Cleanup OpenJPEG
     opj_image_destroy(image);
     opj_stream_destroy(stream);
     opj_destroy_codec(codec);
     env->ReleaseByteArrayElements(jdata, dataPtr, JNI_ABORT);
-    
+
     // Create result object
     jclass resultClass = env->FindClass("com/linkpoint/assets/JPEG2000Decoder$DecodeResult");
     if (!resultClass) {
@@ -329,14 +329,14 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeDecode(
         free(rgbaData);
         return nullptr;
     }
-    
+
     jmethodID constructor = env->GetMethodID(resultClass, "<init>", "(III[B)V");
     if (!constructor) {
         LOGE("Failed to find DecodeResult constructor");
         free(rgbaData);
         return nullptr;
     }
-    
+
     // Create byte array for pixels
     jbyteArray pixelArray = env->NewByteArray(rgbaSize);
     if (!pixelArray) {
@@ -344,13 +344,13 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeDecode(
         free(rgbaData);
         return nullptr;
     }
-    
+
     env->SetByteArrayRegion(pixelArray, 0, rgbaSize, reinterpret_cast<jbyte*>(rgbaData));
     free(rgbaData);
-    
+
     // Create result object
     jobject result = env->NewObject(resultClass, constructor, width, height, 4, pixelArray);
-    
+
     return result;
 }
 
@@ -364,42 +364,42 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeGetImageSize(
     if (dataSize < 50) {
         return nullptr;
     }
-    
+
     jbyte* dataPtr = env->GetByteArrayElements(jdata, nullptr);
     if (!dataPtr) {
         return nullptr;
     }
-    
+
     const uint8_t* data = reinterpret_cast<const uint8_t*>(dataPtr);
-    
+
     // Detect format
     OPJ_CODEC_FORMAT format = detectCodecFormat(data, dataSize);
     if (format == OPJ_CODEC_UNKNOWN) {
         env->ReleaseByteArrayElements(jdata, dataPtr, JNI_ABORT);
         return nullptr;
     }
-    
+
     // Create decoder
     opj_codec_t* codec = opj_create_decompress(format);
     if (!codec) {
         env->ReleaseByteArrayElements(jdata, dataPtr, JNI_ABORT);
         return nullptr;
     }
-    
+
     opj_dparameters_t params;
     opj_set_default_decoder_parameters(&params);
     opj_setup_decoder(codec, &params);
-    
+
     // Create memory stream
     MemoryStream memStream = { data, (size_t)dataSize, 0 };
-    
+
     opj_stream_t* stream = opj_stream_default_create(OPJ_TRUE);
     opj_stream_set_read_function(stream, stream_read);
     opj_stream_set_skip_function(stream, stream_skip);
     opj_stream_set_seek_function(stream, stream_seek);
     opj_stream_set_user_data(stream, &memStream, nullptr);
     opj_stream_set_user_data_length(stream, dataSize);
-    
+
     // Read header only
     opj_image_t* image = nullptr;
     if (!opj_read_header(stream, codec, &image)) {
@@ -408,26 +408,26 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeGetImageSize(
         env->ReleaseByteArrayElements(jdata, dataPtr, JNI_ABORT);
         return nullptr;
     }
-    
+
     int width = image->x1 - image->x0;
     int height = image->y1 - image->y0;
-    
+
     opj_image_destroy(image);
     opj_stream_destroy(stream);
     opj_destroy_codec(codec);
     env->ReleaseByteArrayElements(jdata, dataPtr, JNI_ABORT);
-    
+
     // Create Pair<Int, Int>
     jclass pairClass = env->FindClass("kotlin/Pair");
-    jmethodID pairConstructor = env->GetMethodID(pairClass, "<init>", 
+    jmethodID pairConstructor = env->GetMethodID(pairClass, "<init>",
         "(Ljava/lang/Object;Ljava/lang/Object;)V");
-    
+
     jclass intClass = env->FindClass("java/lang/Integer");
     jmethodID intConstructor = env->GetMethodID(intClass, "<init>", "(I)V");
-    
+
     jobject widthObj = env->NewObject(intClass, intConstructor, width);
     jobject heightObj = env->NewObject(intClass, intConstructor, height);
-    
+
     return env->NewObject(pairClass, pairConstructor, widthObj, heightObj);
 }
 

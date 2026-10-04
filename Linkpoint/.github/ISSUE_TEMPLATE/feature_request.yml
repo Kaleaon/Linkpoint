@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         Thanks for taking the time to suggest a new feature!
-        
+
   - type: textarea
     id: problem
     attributes:
@@ -16,7 +16,7 @@ body:
       placeholder: "I'm always frustrated when..."
     validations:
       required: false
-      
+
   - type: textarea
     id: solution
     attributes:
@@ -24,7 +24,7 @@ body:
       description: A clear description of what you want to happen.
     validations:
       required: true
-      
+
   - type: textarea
     id: alternatives
     attributes:
@@ -32,7 +32,7 @@ body:
       description: A clear description of any alternative solutions or features you've considered.
     validations:
       required: false
-      
+
   - type: dropdown
     id: category
     attributes:
@@ -50,7 +50,7 @@ body:
         - Other
     validations:
       required: true
-      
+
   - type: dropdown
     id: priority
     attributes:
@@ -62,7 +62,7 @@ body:
         - Critical for my use case
     validations:
       required: true
-      
+
   - type: textarea
     id: context
     attributes:

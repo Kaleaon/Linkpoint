@@ -18,13 +18,13 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Notecard Manager - Handles reading and writing notecards.
- * 
+ *
  * Based on the reference viewer's SLNotecard.java
- * 
+ *
  * Notecards in Second Life contain:
  * - Text content
  * - Embedded inventory items (textures, scripts, objects, etc.)
- * 
+ *
  * Notecard format:
  * Linden text version 2
  * {
@@ -47,21 +47,21 @@ class NotecardManager(
 ) {
     companion object {
         private const val TAG = "NotecardManager"
-        
+
         // Notecard format markers
         const val NOTECARD_HEADER = "Linden text version 2"
         const val EMBEDDED_ITEMS_HEADER = "LLEmbeddedItems version 1"
         const val TEXT_MARKER = "Text length"
     }
-    
+
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    
+
     // Cache of loaded notecards
     private val notecardCache = ConcurrentHashMap<UUID, Notecard>()
-    
+
     // Pending notecard loads
     private val pendingLoads = ConcurrentHashMap<UUID, MutableList<NotecardCallback>>()
-    
+
     /**
      * Load a notecard by asset ID.
      */
@@ -74,11 +74,11 @@ class NotecardManager(
             callback?.onNotecardLoaded(cached)
             return
         }
-        
+
         // Add to pending callbacks
         val callbacks = pendingLoads.getOrPut(assetId) { mutableListOf() }
         callback?.let { callbacks.add(it) }
-        
+
         // Only start transfer if this is the first request
         if (callbacks.size == 1) {
             val transfer = transferManager ?: run {
@@ -94,7 +94,7 @@ class NotecardManager(
             )
         }
     }
-    
+
     /**
      * Load a notecard from inventory item.
      */
@@ -110,10 +110,10 @@ class NotecardManager(
             callback?.onNotecardLoaded(cached)
             return
         }
-        
+
         val callbacks = pendingLoads.getOrPut(assetId) { mutableListOf() }
         callback?.let { callbacks.add(it) }
-        
+
         if (callbacks.size == 1) {
             val transfer = transferManager ?: run {
                 callback?.onNotecardError("Transfer manager unavailable")
@@ -131,16 +131,16 @@ class NotecardManager(
             )
         }
     }
-    
+
     private fun handleTransferResult(assetId: UUID, result: TransferResult) {
         val callbacks = pendingLoads.remove(assetId) ?: return
-        
+
         when (result) {
             is TransferResult.Success -> {
                 try {
                     val notecard = parseNotecard(assetId, result.data)
                     notecardCache[assetId] = notecard
-                    
+
                     callbacks.forEach { it.onNotecardLoaded(notecard) }
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to parse notecard $assetId", e)
@@ -153,29 +153,29 @@ class NotecardManager(
             }
         }
     }
-    
+
     /**
      * Parse notecard data from raw bytes.
      */
     private fun parseNotecard(assetId: UUID, data: ByteArray): Notecard {
         val content = String(data, Charsets.UTF_8)
         val lines = content.lines()
-        
+
         Log.d(TAG, "Parsing notecard: ${data.size} bytes, ${lines.size} lines")
-        
+
         // Validate header
         if (lines.isEmpty() || !lines[0].startsWith("Linden text")) {
             throw IllegalArgumentException("Invalid notecard format: missing header")
         }
-        
+
         val embeddedItems = mutableListOf<EmbeddedItem>()
         var textContent = ""
         var textLength = 0
-        
+
         var i = 0
         while (i < lines.size) {
             val line = lines[i].trim()
-            
+
             when {
                 line.startsWith(EMBEDDED_ITEMS_HEADER) -> {
                     // Parse embedded items section
@@ -188,7 +188,7 @@ class NotecardManager(
                     // Parse text length
                     val lengthStr = line.substringAfter(TEXT_MARKER).trim()
                     textLength = lengthStr.toIntOrNull() ?: 0
-                    
+
                     // Next line(s) contain the text
                     i++
                     val textBuilder = StringBuilder()
@@ -202,14 +202,14 @@ class NotecardManager(
                 else -> i++
             }
         }
-        
+
         return Notecard(
             assetId = assetId,
             text = textContent,
             embeddedItems = embeddedItems
         )
     }
-    
+
     /**
      * Parse embedded items section.
      * Returns list of items and the next line index to process.
@@ -219,10 +219,10 @@ class NotecardManager(
         var i = startIndex
         var count = 0
         var braceDepth = 0
-        
+
         while (i < lines.size) {
             val line = lines[i].trim()
-            
+
             when {
                 line == "{" -> {
                     braceDepth++
@@ -247,26 +247,26 @@ class NotecardManager(
             }
             i++
         }
-        
+
         return Pair(items, i)
     }
-    
+
     /**
      * Parse a single embedded item.
      */
     private fun parseEmbeddedItem(lines: List<String>, startIndex: Int): Pair<EmbeddedItem, Int> {
         var i = startIndex
         var braceDepth = 0
-        
+
         var itemId: UUID? = null
         var assetId: UUID? = null
         var assetType: Int = 0
         var name = ""
         var description = ""
-        
+
         while (i < lines.size) {
             val line = lines[i].trim()
-            
+
             when {
                 line == "{" -> braceDepth++
                 line == "}" -> {
@@ -294,7 +294,7 @@ class NotecardManager(
             }
             i++
         }
-        
+
         return Pair(
             EmbeddedItem(
                 itemId = itemId ?: UUID(0, 0),
@@ -306,7 +306,7 @@ class NotecardManager(
             i
         )
     }
-    
+
     private fun parseUUID(str: String): UUID? {
         return try {
             UUID.fromString(str.trim())
@@ -314,22 +314,22 @@ class NotecardManager(
             null
         }
     }
-    
+
     /**
      * Create notecard data from content.
      */
     fun createNotecardData(text: String, embeddedItems: List<EmbeddedItem> = emptyList()): ByteArray {
         val sb = StringBuilder()
-        
+
         // Header
         sb.appendLine(NOTECARD_HEADER)
         sb.appendLine("{")
-        
+
         // Embedded items
         sb.appendLine("$EMBEDDED_ITEMS_HEADER")
         sb.appendLine("{")
         sb.appendLine("count ${embeddedItems.size}")
-        
+
         embeddedItems.forEach { item ->
             sb.appendLine("{")
             sb.appendLine("\tinv_item\t0")
@@ -351,29 +351,29 @@ class NotecardManager(
             sb.appendLine("\t}")
             sb.appendLine("}")
         }
-        
+
         sb.appendLine("}")
-        
+
         // Text content
         sb.appendLine("$TEXT_MARKER ${text.length}")
         sb.append(text)
         sb.appendLine("}")
-        
+
         return sb.toString().toByteArray(Charsets.UTF_8)
     }
-    
+
     /**
      * Clear the notecard cache.
      */
     fun clearCache() {
         notecardCache.clear()
     }
-    
+
     /**
      * Get cached notecard.
      */
     fun getCachedNotecard(assetId: UUID): Notecard? = notecardCache[assetId]
-    
+
     /**
      * Fetch a notecard by asset ID (suspend function).
      */
@@ -395,15 +395,15 @@ class NotecardManager(
                     }
                 )
             }
-            
+
             // Fetch via transfer
             val transfer = transferManager ?: return@withContext null
             val data = transfer.fetchAsset(assetId, AssetType.NOTECARD.code) ?: return@withContext null
-            
+
             try {
                 val notecard = parseNotecard(assetId, data)
                 notecardCache[assetId] = notecard
-                
+
                 NotecardData(
                     assetId = notecard.assetId,
                     text = notecard.text,
@@ -423,7 +423,7 @@ class NotecardManager(
             }
         }
     }
-    
+
     /**
      * Save a notecard (update text content).
      * Note: Full implementation requires UpdateNotecardAgentInventory capability.
@@ -554,7 +554,7 @@ class NotecardManager(
         }
         capabilityManager.request(CapabilityManager.CAP_MOVE_INVENTORY_ITEM, request) != null
     }
-    
+
     /**
      * Shutdown the manager.
      */

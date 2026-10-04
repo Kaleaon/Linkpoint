@@ -6,13 +6,13 @@ This directory contains automation scripts for maintaining the LLSD Java library
 
 ### resolve-conflicts.sh
 
-**Purpose**: Automatically resolve merge conflicts with the master branch  
+**Purpose**: Automatically resolve merge conflicts with the master branch
 **Usage**: `./scripts/resolve-conflicts.sh`
 
 This script intelligently resolves merge conflicts by:
 
 1. **Preserving Superior Implementations**: Always keeps master's comprehensive serializer implementations
-2. **Combining Configuration Files**: Merges .gitignore files to include both sets of rules  
+2. **Combining Configuration Files**: Merges .gitignore files to include both sets of rules
 3. **Removing Incompatible Code**: Cleans up factory classes that conflict with master's API
 4. **Verifying Results**: Compiles and tests the code after resolution
 
@@ -23,7 +23,7 @@ This script intelligently resolves merge conflicts by:
 - Incompatible factory classes: Remove entirely
 - Demo files: Clean up and replace with compatible versions
 
-**When to Use**: 
+**When to Use**:
 - During merge conflicts with the master branch
 - When updating feature branches with master changes
 - For automated CI/CD conflict resolution
@@ -34,7 +34,7 @@ This script intelligently resolves merge conflicts by:
 git fetch origin master
 git merge master --no-commit
 
-# Resolve automatically  
+# Resolve automatically
 ./scripts/resolve-conflicts.sh
 
 # Complete the merge

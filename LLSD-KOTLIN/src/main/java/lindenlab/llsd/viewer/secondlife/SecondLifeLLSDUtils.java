@@ -29,11 +29,11 @@ import java.util.UUID;
  * As a utility class, it is final and cannot be instantiated.
  */
 public final class SecondLifeLLSDUtils {
-    
+
     private SecondLifeLLSDUtils() {
         // Utility class - no instances
     }
-    
+
     /**
      * An enumeration of common message types used in Second Life protocols.
      */
@@ -49,7 +49,7 @@ public final class SecondLifeLLSDUtils {
         ANIMATION_DATA,
         TEXTURE_REQUEST
     }
-    
+
     /**
      * Creates an LLSD map representing a Second Life agent's data.
      *
@@ -67,17 +67,17 @@ public final class SecondLifeLLSDUtils {
         if (position.length != 3 || rotation.length != 4 || velocity.length != 3) {
             throw new IllegalArgumentException("Invalid vector dimensions");
         }
-        
+
         Map<String, Object> agentData = new HashMap<>();
         agentData.put("AgentID", agentId);
         agentData.put("Position", Arrays.stream(position).boxed().collect(Collectors.toList()));
         agentData.put("Rotation", Arrays.stream(rotation).boxed().collect(Collectors.toList()));
         agentData.put("Velocity", Arrays.stream(velocity).boxed().collect(Collectors.toList()));
         agentData.put("Timestamp", System.currentTimeMillis() / 1000.0);
-        
+
         return agentData;
     }
-    
+
     /**
      * Creates an LLSD map representing a Second Life in-world object.
      *
@@ -99,21 +99,21 @@ public final class SecondLifeLLSDUtils {
         if (position.length != 3 || rotation.length != 4 || scale.length != 3) {
             throw new IllegalArgumentException("Invalid vector dimensions");
         }
-        
+
         Map<String, Object> objectData = new HashMap<>();
         objectData.put("ObjectID", objectId);
         objectData.put("ParentID", parentId);
         objectData.put("Position", Arrays.stream(position).boxed().collect(Collectors.toList()));
         objectData.put("Rotation", Arrays.stream(rotation).boxed().collect(Collectors.toList()));
         objectData.put("Scale", Arrays.stream(scale).boxed().collect(Collectors.toList()));
-        
+
         if (material != null) {
             objectData.put("Material", material);
         }
-        
+
         return objectData;
     }
-    
+
     /**
      * Creates an LLSD map representing data for a parcel of land in Second Life.
      *
@@ -141,10 +141,10 @@ public final class SecondLifeLLSDUtils {
         parcelData.put("OwnerID", ownerId);
         parcelData.put("GroupID", groupId);
         parcelData.put("Flags", flags);
-        
+
         return parcelData;
     }
-    
+
     /**
      * Creates an LLSD map representing an item in a Second Life inventory.
      *
@@ -171,16 +171,16 @@ public final class SecondLifeLLSDUtils {
         itemData.put("Description", description != null ? description : "");
         itemData.put("Type", type);
         itemData.put("AssetID", assetId);
-        
+
         if (permissions != null) {
             itemData.put("Permissions", permissions);
         }
-        
+
         itemData.put("CreationDate", new Date());
-        
+
         return itemData;
     }
-    
+
     /**
      * Creates an LLSD map representing an in-world chat message.
      *
@@ -205,14 +205,14 @@ public final class SecondLifeLLSDUtils {
         chatData.put("Channel", channel);
         chatData.put("Type", type);
         chatData.put("Timestamp", System.currentTimeMillis() / 1000.0);
-        
+
         if (position != null && position.length == 3) {
             chatData.put("Position", Arrays.stream(position).boxed().collect(Collectors.toList()));
         }
-        
+
         return chatData;
     }
-    
+
     /**
      * Creates an LLSD map representing a Second Life asset.
      *
@@ -238,10 +238,10 @@ public final class SecondLifeLLSDUtils {
         assetData.put("Data", data != null ? data : new byte[0]);
         assetData.put("Temporary", temporary);
         assetData.put("CreationDate", new Date());
-        
+
         return assetData;
     }
-    
+
     /**
      * Parses a generic Second Life message structure from an LLSD object.
      * <p>
@@ -258,20 +258,20 @@ public final class SecondLifeLLSDUtils {
         if (!(llsdData instanceof Map)) {
             throw new LLSDException("SL message must be a map");
         }
-        
+
         @SuppressWarnings("unchecked")
         Map<String, Object> messageMap = (Map<String, Object>) llsdData;
-        
+
         // Validate common SL message structure
         if (!messageMap.containsKey("MessageType")) {
             throw new LLSDException("SL message missing MessageType");
         }
-        
+
         String messageType = messageMap.get("MessageType").toString();
         if (!messageType.equals(expectedType.name())) {
             throw new LLSDException("Expected " + expectedType + " but got " + messageType);
         }
-        
+
         // Validate timestamp if present
         if (messageMap.containsKey("Timestamp")) {
             Object timestamp = messageMap.get("Timestamp");
@@ -279,10 +279,10 @@ public final class SecondLifeLLSDUtils {
                 throw new LLSDException("Invalid timestamp format");
             }
         }
-        
+
         return messageMap;
     }
-    
+
     /**
      * Validates a UUID to ensure it is a valid, non-null Second Life UUID.
      *
@@ -294,11 +294,11 @@ public final class SecondLifeLLSDUtils {
         if (uuid == null) {
             return false;
         }
-        
+
         // SL UUIDs should not be null UUID
         return !uuid.equals(new UUID(0L, 0L));
     }
-    
+
     /**
      * Creates a standard LLSD response map, commonly used in Second Life protocols.
      *
@@ -312,14 +312,14 @@ public final class SecondLifeLLSDUtils {
         response.put("Success", success);
         response.put("Message", message != null ? message : "");
         response.put("Timestamp", System.currentTimeMillis() / 1000.0);
-        
+
         if (data != null) {
             response.put("Data", data);
         }
-        
+
         return response;
     }
-    
+
     /**
      * Validates an LLSD data structure against a set of predefined rules.
      *
@@ -329,46 +329,46 @@ public final class SecondLifeLLSDUtils {
      */
     public static ValidationResult validateSLStructure(Object llsdData, SLValidationRules rules) {
         ValidationResult result = new ValidationResult();
-        
+
         if (rules.requiresMap && !(llsdData instanceof Map)) {
             result.addError("Expected Map but got " + (llsdData != null ? llsdData.getClass().getSimpleName() : "null"));
             return result;
         }
-        
+
         if (rules.requiresArray && !(llsdData instanceof List)) {
             result.addError("Expected Array but got " + (llsdData != null ? llsdData.getClass().getSimpleName() : "null"));
             return result;
         }
-        
+
         if (llsdData instanceof Map) {
             @SuppressWarnings("unchecked")
             Map<String, Object> mapData = (Map<String, Object>) llsdData;
-            
+
             // Check required fields
             for (String required : rules.requiredFields) {
                 if (!mapData.containsKey(required)) {
                     result.addError("Missing required field: " + required);
                 }
             }
-            
+
             // Check field types
             for (Map.Entry<String, Class<?>> typeCheck : rules.fieldTypes.entrySet()) {
                 String field = typeCheck.getKey();
                 Class<?> expectedType = typeCheck.getValue();
-                
+
                 if (mapData.containsKey(field)) {
                     Object value = mapData.get(field);
                     if (value != null && !expectedType.isAssignableFrom(value.getClass())) {
-                        result.addError("Field " + field + " expected " + expectedType.getSimpleName() + 
+                        result.addError("Field " + field + " expected " + expectedType.getSimpleName() +
                                        " but got " + value.getClass().getSimpleName());
                     }
                 }
             }
         }
-        
+
         return result;
     }
-    
+
     /**
      * A builder class for defining a set of validation rules for Second Life
      * LLSD structures.
@@ -381,29 +381,29 @@ public final class SecondLifeLLSDUtils {
         public boolean requiresArray = false;
         public Set<String> requiredFields = new HashSet<>();
         public Map<String, Class<?>> fieldTypes = new HashMap<>();
-        
+
         public SLValidationRules requireMap() {
             requiresMap = true;
             return this;
         }
-        
+
         public SLValidationRules requireArray() {
             requiresArray = true;
             return this;
         }
-        
+
         public SLValidationRules requireField(String field) {
             requiredFields.add(field);
             return this;
         }
-        
+
         public SLValidationRules requireField(String field, Class<?> type) {
             requiredFields.add(field);
             fieldTypes.put(field, type);
             return this;
         }
     }
-    
+
     /**
      * Creates an LLSD map representing a texture stream, including processed
      * texture information.
@@ -421,7 +421,7 @@ public final class SecondLifeLLSDUtils {
         SLTextureProcessor.TextureInfo info = SLTextureProcessor.processTexture(textureId, textureData, format);
         return SLTextureProcessor.createTextureStreamData(textureId, info, textureData);
     }
-    
+
     /**
      * Creates an LLSD map representing a sound stream, including processed audio info.
      *
@@ -438,7 +438,7 @@ public final class SecondLifeLLSDUtils {
         SLSoundProcessor.AudioInfo info = SLSoundProcessor.processSound(soundId, soundData, format);
         return SLSoundProcessor.createSoundStreamData(soundId, info, soundData);
     }
-    
+
     /**
      * Creates an LLSD map representing a generic data stream for asset transfer.
      * <p>
@@ -460,16 +460,16 @@ public final class SecondLifeLLSDUtils {
         try {
             SLDataStreamProcessor.DataStreamInfo info = SLDataStreamProcessor.processDataStream(
                 assetId, assetType, assetData, enableCompression);
-            
+
             List<SLDataStreamProcessor.StreamChunk> chunks = SLDataStreamProcessor.createStreamChunks(
                 assetData, info.getCompression());
-            
+
             return SLDataStreamProcessor.createDataStreamLLSD(info, chunks);
         } catch (Exception e) {
             throw new LLSDException("Failed to create data stream: " + e.getMessage(), e);
         }
     }
-    
+
     /**
      * Processes an incoming LLSD asset stream from Second Life.
      * <p>
@@ -486,16 +486,16 @@ public final class SecondLifeLLSDUtils {
         if (!streamData.containsKey("AssetType")) {
             throw new LLSDException("Missing AssetType in stream data");
         }
-        
+
         int assetType = (Integer) streamData.get("AssetType");
         UUID assetId = UUID.fromString(streamData.get("AssetID").toString());
         byte[] data = (byte[]) streamData.get("Data");
-        
+
         Map<String, Object> result = new HashMap<>();
         result.put("AssetID", assetId);
         result.put("AssetType", assetType);
         result.put("ProcessedAt", System.currentTimeMillis() / 1000.0);
-        
+
         if (SLAssetType.isTextureType(assetType)) {
             SLTextureProcessor.TextureFormat format = SLTextureProcessor.detectTextureFormat(data);
             SLTextureProcessor.TextureInfo info = SLTextureProcessor.processTexture(assetId, data, format);
@@ -512,10 +512,10 @@ public final class SecondLifeLLSDUtils {
             result.put("StreamInfo", createStreamInfoMap(info));
             result.put("Valid", info.isValid());
         }
-        
+
         return result;
     }
-    
+
     /**
      * Create texture info map for LLSD.
      */
@@ -529,7 +529,7 @@ public final class SecondLifeLLSDUtils {
         infoMap.put("HasAlpha", info.hasAlpha());
         return infoMap;
     }
-    
+
     /**
      * Create audio info map for LLSD.
      */
@@ -544,7 +544,7 @@ public final class SecondLifeLLSDUtils {
         infoMap.put("Compressed", info.isCompressed());
         return infoMap;
     }
-    
+
     /**
      * Create stream info map for LLSD.
      */
@@ -568,23 +568,23 @@ public final class SecondLifeLLSDUtils {
     public static class ValidationResult {
         private final List<String> errors = new ArrayList<>();
         private final List<String> warnings = new ArrayList<>();
-        
+
         public void addError(String error) {
             errors.add(error);
         }
-        
+
         public void addWarning(String warning) {
             warnings.add(warning);
         }
-        
+
         public boolean isValid() {
             return errors.isEmpty();
         }
-        
+
         public List<String> getErrors() {
             return Collections.unmodifiableList(errors);
         }
-        
+
         public List<String> getWarnings() {
             return Collections.unmodifiableList(warnings);
         }

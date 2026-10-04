@@ -171,4 +171,3 @@ jobs:
             exit 1
           fi
           echo "All required CI jobs and quality gates passed."
-

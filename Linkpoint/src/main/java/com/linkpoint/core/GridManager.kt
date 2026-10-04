@@ -107,7 +107,7 @@ class GridManager(
             selectedGrid = builtin
         }
     }
-    
+
     fun updateSelectedGrid(grid: GridInfo) {
         selectedGrid = grid
         Log.i(TAG, "Updated selected grid: ${grid.name} (loginUri=${grid.loginUri}, helperUri=${grid.helperUri}, economyUri=${grid.economyUri}, mapUri=${grid.mapUri})")
@@ -159,7 +159,7 @@ class GridManager(
             isCustom = true
         )
     }
-    
+
     fun addCustomGrid(grid: GridInfo) {
         val profile = GridProfileEntity(
             id = grid.id,

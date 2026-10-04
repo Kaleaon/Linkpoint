@@ -22,18 +22,18 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Lifecycle-aware coroutine scope manager for the Linkpoint app.
- * 
+ *
  * This utility provides automatic coroutine scope management tied to Android
  * lifecycle components (Activity, Fragment, Application). It prevents memory
  * leaks by automatically canceling scopes when components are destroyed.
- * 
+ *
  * Design Philosophy:
  * - Automatic lifecycle integration
  * - No manual scope management required
  * - Prevents memory leaks through automatic cancellation
  * - Supports component-scoped operations
  * - Follows Android lifecycle best practices
- * 
+ *
  * Key Features:
  * - Automatic scope creation for Activities/Fragments
  * - Automatic scope cancellation on lifecycle events
@@ -41,50 +41,50 @@ import java.util.concurrent.ConcurrentHashMap
  * - Custom scope factories
  * - Thread-safe operations
  * - Debug logging for lifecycle events
- * 
+ *
  * @see Lifecycle
  * @see CoroutineScope
  * @see SupervisorJob
- * 
+ *
  * Usage Example (Activity):
  * ```kotlin
  * class MainActivity : AppCompatActivity() {
  *     private val scope = LifecycleAwareScopeManager.getScope(this)
- *     
+ *
  *     fun loadData() {
  *         scope.launch {
  *             val data = fetchData()
  *             updateUI(data)
  *         }
  *     }
- *     
+ *
  *     // No need to call scope.cancel() - handled automatically
  * }
  * ```
- * 
+ *
  * Usage Example (Fragment):
  * ```kotlin
  * class MyFragment : Fragment() {
  *     private val scope = LifecycleAwareScopeManager.getScope(this)
- *     
+ *
  *     fun loadData() {
  *         scope.launch {
  *             val data = fetchData()
  *             updateUI(data)
  *         }
  *     }
- *     
+ *
  *     // No need to call scope.cancel() - handled automatically
  * }
  * ```
- * 
+ *
  * Usage Example (Application-wide):
  * ```kotlin
  * class LinkpointApplication : Application() {
  *     override fun onCreate() {
  *         super.onCreate()
  *         LifecycleAwareScopeManager.initialize(this)
- *         
+ *
  *         val appScope = LifecycleAwareScopeManager.getApplicationScope()
  *         appScope.launch {
  *             // Application-wide operations
@@ -92,46 +92,46 @@ import java.util.concurrent.ConcurrentHashMap
  *     }
  * }
  * ```
- * 
+ *
  * @author SuperNinja AI
  * @since 1.0
  */
 object LifecycleAwareScopeManager {
-    
+
     private const val TAG = "LifecycleScopeManager"
-    
+
     /**
      * Registry of active scopes mapped to lifecycle owners.
-     * 
+     *
      * Uses ConcurrentHashMap for thread-safe operations across multiple threads.
      */
     private val scopeRegistry = ConcurrentHashMap<LifecycleOwner, ManagedScope>()
-    
+
     /**
      * Application-wide scope for operations that should span the entire app lifecycle.
-     * 
+     *
      * This scope is only cancelled when the application process is terminated.
      */
     private var applicationScope: CoroutineScope? = null
-    
+
     /**
      * Flag indicating whether the manager has been initialized.
      */
     private var isInitialized = false
-    
+
     /**
      * Factory function for creating custom scopes.
      */
     private var scopeFactory: ScopeFactory = DefaultScopeFactory()
-    
+
     /**
      * Initializes the scope manager with application context.
-     * 
+     *
      * This should be called in Application.onCreate() to set up
      * the application-wide scope and process lifecycle tracking.
-     * 
+     *
      * @param application The application context
-     * 
+     *
      * Example:
      * ```kotlin
      * class MyApplication : Application() {
@@ -147,37 +147,37 @@ object LifecycleAwareScopeManager {
             android.util.Log.w(TAG, "LifecycleAwareScopeManager already initialized")
             return
         }
-        
+
         isInitialized = true
-        
+
         // Create application-wide scope
         applicationScope = CoroutineScope(
             Dispatchers.Default + SupervisorJob()
         )
-        
+
         // Observe process lifecycle events
         ProcessLifecycleOwner.get().lifecycle.addObserver(
             ProcessLifecycleObserver()
         )
-        
+
         android.util.Log.d(TAG, "LifecycleAwareScopeManager initialized")
     }
-    
+
     /**
      * Gets or creates a coroutine scope for the given Activity.
-     * 
+     *
      * The scope is automatically cancelled when the Activity is destroyed,
      * preventing memory leaks and resource waste.
-     * 
+     *
      * @param activity The Activity to create scope for
      * @return A CoroutineScope tied to the Activity's lifecycle
      * @throws IllegalStateException if manager is not initialized
-     * 
+     *
      * Example:
      * ```kotlin
      * class MainActivity : AppCompatActivity() {
      *     private val scope = LifecycleAwareScopeManager.getScope(this)
-     *     
+     *
      *     fun loadData() {
      *         scope.launch {
      *             // Background work
@@ -189,27 +189,27 @@ object LifecycleAwareScopeManager {
     fun getScope(activity: Activity): CoroutineScope {
         checkInitialized()
         // Modern Activities (ComponentActivity, AppCompatActivity) implement LifecycleOwner
-        require(activity is LifecycleOwner) { 
-            "Activity must implement LifecycleOwner (use ComponentActivity or AppCompatActivity)" 
+        require(activity is LifecycleOwner) {
+            "Activity must implement LifecycleOwner (use ComponentActivity or AppCompatActivity)"
         }
         return getOrCreateScope(activity as LifecycleOwner) { createActivityScope(activity) }
     }
-    
+
     /**
      * Gets or creates a coroutine scope for the given Fragment.
-     * 
+     *
      * The scope is automatically cancelled when the Fragment is destroyed,
      * preventing memory leaks and resource waste.
-     * 
+     *
      * @param fragment The Fragment to create scope for
      * @return A CoroutineScope tied to the Fragment's lifecycle
      * @throws IllegalStateException if manager is not initialized
-     * 
+     *
      * Example:
      * ```kotlin
      * class MyFragment : Fragment() {
      *     private val scope = LifecycleAwareScopeManager.getScope(this)
-     *     
+     *
      *     fun loadData() {
      *         scope.launch {
      *             // Background work
@@ -222,21 +222,21 @@ object LifecycleAwareScopeManager {
         checkInitialized()
         return getOrCreateScope(fragment) { createFragmentScope(fragment) }
     }
-    
+
     /**
      * Gets or creates a coroutine scope for any LifecycleOwner.
-     * 
+     *
      * Generic method for creating scopes for any lifecycle-aware component.
-     * 
+     *
      * @param owner The LifecycleOwner to create scope for
      * @return A CoroutineScope tied to the lifecycle owner
      * @throws IllegalStateException if manager is not initialized
-     * 
+     *
      * Example:
      * ```kotlin
      * class MyCustomView : LifecycleOwner {
      *     private val scope = LifecycleAwareScopeManager.getScope(this)
-     *     
+     *
      *     fun doWork() {
      *         scope.launch {
      *             // Background work
@@ -249,24 +249,24 @@ object LifecycleAwareScopeManager {
         checkInitialized()
         return getOrCreateScope(owner) { createDefaultScope(owner) }
     }
-    
+
     /**
      * Gets the application-wide coroutine scope.
-     * 
+     *
      * This scope is not tied to any Activity or Fragment and persists
      * for the entire application lifecycle. Use this for operations
      * that should continue even when all Activities are destroyed.
-     * 
+     *
      * @return The application-wide CoroutineScope
      * @throws IllegalStateException if manager is not initialized
-     * 
+     *
      * Example:
      * ```kotlin
      * class MyApplication : Application() {
      *     override fun onCreate() {
      *         super.onCreate()
      *         LifecycleAwareScopeManager.initialize(this)
-     *         
+     *
      *         val appScope = LifecycleAwareScopeManager.getApplicationScope()
      *         appScope.launch {
      *             // Background services, caching, etc.
@@ -281,15 +281,15 @@ object LifecycleAwareScopeManager {
             "Application scope not available. Call initialize() first."
         )
     }
-    
+
     /**
      * Manually cancels a scope for a specific lifecycle owner.
-     * 
+     *
      * Use this if you need to cancel a scope before the lifecycle event
      * that would normally cancel it.
-     * 
+     *
      * @param owner The LifecycleOwner whose scope should be cancelled
-     * 
+     *
      * Example:
      * ```kotlin
      * fun onLogout() {
@@ -305,15 +305,15 @@ object LifecycleAwareScopeManager {
             android.util.Log.d(TAG, "Cancelled scope for ${getOwnerName(owner)}")
         }
     }
-    
+
     /**
      * Sets a custom scope factory for specialized scope creation.
-     * 
+     *
      * Use this to implement custom scope creation logic for specific
      * use cases or testing scenarios.
-     * 
+     *
      * @param factory The custom ScopeFactory implementation
-     * 
+     *
      * Example:
      * ```kotlin
      * // For testing
@@ -330,12 +330,12 @@ object LifecycleAwareScopeManager {
     fun setScopeFactory(factory: ScopeFactory) {
         this.scopeFactory = factory
     }
-    
+
     /**
      * Resets the scope factory to the default implementation.
-     * 
+     *
      * Useful for testing cleanup or switching back to default behavior.
-     * 
+     *
      * Example:
      * ```kotlin
      * @After
@@ -347,14 +347,14 @@ object LifecycleAwareScopeManager {
     fun resetScopeFactory() {
         this.scopeFactory = DefaultScopeFactory()
     }
-    
+
     /**
      * Gets the number of active scopes.
-     * 
+     *
      * Useful for debugging and monitoring resource usage.
-     * 
+     *
      * @return The number of currently active scopes
-     * 
+     *
      * Example:
      * ```kotlin
      * val activeScopes = LifecycleAwareScopeManager.getActiveScopeCount()
@@ -364,18 +364,18 @@ object LifecycleAwareScopeManager {
     fun getActiveScopeCount(): Int {
         return scopeRegistry.size
     }
-    
+
     /**
      * Checks if the manager has been initialized.
-     * 
+     *
      * @return true if initialized, false otherwise
      */
     fun isInitialized(): Boolean {
         return isInitialized
     }
-    
+
     // ==================== Private Methods ====================
-    
+
     /**
      * Checks if the manager is initialized and throws if not.
      */
@@ -387,10 +387,10 @@ object LifecycleAwareScopeManager {
             )
         }
     }
-    
+
     /**
      * Gets or creates a scope for the given lifecycle owner.
-     * 
+     *
      * Thread-safe operation that returns existing scope if available,
      * or creates a new one otherwise.
      */
@@ -401,13 +401,13 @@ object LifecycleAwareScopeManager {
         return scopeRegistry.getOrPut(owner) {
             val managedScope = scopeCreator()
             android.util.Log.d(
-                TAG, 
+                TAG,
                 "Created scope for ${getOwnerName(owner)}"
             )
             managedScope
         }.scope
     }
-    
+
     /**
      * Creates a scope optimized for Activity lifecycle.
      */
@@ -420,7 +420,7 @@ object LifecycleAwareScopeManager {
         )
         return managedScope
     }
-    
+
     /**
      * Creates a scope optimized for Fragment lifecycle.
      */
@@ -429,7 +429,7 @@ object LifecycleAwareScopeManager {
         fragment.lifecycle.addObserver(
             FragmentLifecycleObserver(fragment, managedScope)
         )
-        
+
         // Also listen for fragment detachment
         if (fragment.activity is FragmentActivity) {
             (fragment.activity as FragmentActivity).supportFragmentManager
@@ -438,10 +438,10 @@ object LifecycleAwareScopeManager {
                     true
                 )
         }
-        
+
         return managedScope
     }
-    
+
     /**
      * Creates a default scope for generic LifecycleOwner.
      */
@@ -452,7 +452,7 @@ object LifecycleAwareScopeManager {
         )
         return managedScope
     }
-    
+
     /**
      * Gets a descriptive name for a lifecycle owner for logging.
      */
@@ -464,9 +464,9 @@ object LifecycleAwareScopeManager {
             else -> owner.javaClass.simpleName
         }
     }
-    
+
     // ==================== Inner Classes ====================
-    
+
     /**
      * Managed scope wrapper that holds both the scope and lifecycle reference.
      */
@@ -474,14 +474,14 @@ object LifecycleAwareScopeManager {
         val scope: CoroutineScope,
         val lifecycle: Lifecycle
     )
-    
+
     /**
      * Factory interface for creating custom scopes.
      */
     interface ScopeFactory {
         fun createScope(owner: LifecycleOwner): ManagedScope
     }
-    
+
     /**
      * Default scope factory implementation.
      */
@@ -501,11 +501,11 @@ object LifecycleAwareScopeManager {
                     Dispatchers.Default + SupervisorJob()
                 )
             }
-            
+
             return ManagedScope(scope, owner.lifecycle)
         }
     }
-    
+
     /**
      * Lifecycle observer for Activity components.
      */
@@ -513,7 +513,7 @@ object LifecycleAwareScopeManager {
         private val activity: LifecycleOwner,
         private val managedScope: ManagedScope
     ) : DefaultLifecycleObserver {
-        
+
         override fun onDestroy(owner: LifecycleOwner) {
             if (managedScope.scope.isActive) {
                 managedScope.scope.cancel()
@@ -522,7 +522,7 @@ object LifecycleAwareScopeManager {
             }
         }
     }
-    
+
     /**
      * Lifecycle observer for Fragment components.
      */
@@ -530,7 +530,7 @@ object LifecycleAwareScopeManager {
         private val fragment: Fragment,
         private val managedScope: ManagedScope
     ) : DefaultLifecycleObserver {
-        
+
         override fun onDestroy(owner: LifecycleOwner) {
             if (managedScope.scope.isActive) {
                 managedScope.scope.cancel()
@@ -539,7 +539,7 @@ object LifecycleAwareScopeManager {
             }
         }
     }
-    
+
     /**
      * Lifecycle observer for generic LifecycleOwner components.
      */
@@ -547,7 +547,7 @@ object LifecycleAwareScopeManager {
         private val owner: LifecycleOwner,
         private val managedScope: ManagedScope
     ) : DefaultLifecycleObserver {
-        
+
         override fun onDestroy(owner: LifecycleOwner) {
             if (managedScope.scope.isActive) {
                 managedScope.scope.cancel()
@@ -556,7 +556,7 @@ object LifecycleAwareScopeManager {
             }
         }
     }
-    
+
     /**
      * Fragment lifecycle callback for handling fragment detachment.
      */
@@ -564,7 +564,7 @@ object LifecycleAwareScopeManager {
         private val targetFragment: Fragment,
         private val managedScope: ManagedScope
     ) : FragmentManager.FragmentLifecycleCallbacks() {
-        
+
         override fun onFragmentDetached(
             fm: FragmentManager,
             f: Fragment
@@ -576,7 +576,7 @@ object LifecycleAwareScopeManager {
             }
         }
     }
-    
+
     /**
      * Process lifecycle observer for application-level events. Notifies
      * the simulator that the agent has paused or resumed so the sim can

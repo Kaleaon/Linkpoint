@@ -15,10 +15,10 @@ import java.io.StringReader
  * Based on Second Life's standard avatar skeleton
  */
 class AvatarSkeleton(context: Context?) {
-    
+
     companion object {
         private const val TAG = "AvatarSkeleton"
-        
+
         // Standard SL bone names (133 Bento joints)
         val BONE_NAMES = arrayOf(
             // Base joints (26)
@@ -71,11 +71,11 @@ class AvatarSkeleton(context: Context?) {
         )
         val BONES = BONE_NAMES
     }
-    
+
     val bones = mutableMapOf<String, Bone>()
     val boneArray = mutableListOf<Bone>()
     private var rootBone: Bone? = null
-    
+
     init {
         if (context != null) {
             loadDefaultSkeleton(context)
@@ -83,7 +83,7 @@ class AvatarSkeleton(context: Context?) {
             createDefaultSkeleton()
         }
     }
-    
+
     private fun loadDefaultSkeleton(context: Context) {
         try {
             // Try to load from assets
@@ -96,15 +96,15 @@ class AvatarSkeleton(context: Context?) {
             createDefaultSkeleton()
         }
     }
-    
+
     private fun logI(msg: String) {
         try { Log.i(TAG, msg) } catch (_: Throwable) {}
     }
-    
+
     private fun logW(msg: String, e: Throwable? = null) {
         try { if (e != null) Log.w(TAG, msg, e) else Log.w(TAG, msg) } catch (_: Throwable) {}
     }
-    
+
     /**
      * Parse avatar_skeleton.xml from the Linden Lab system avatar.
      *
@@ -210,11 +210,11 @@ class AvatarSkeleton(context: Context?) {
             cx * cy * cz + sx * sy * sz
         )
     }
-    
+
     private fun createDefaultSkeleton() {
         // Root
         val pelvis = createBone("mPelvis", null, LLVector3(0f, 0f, 1.0f), LLQuaternion.identity())
-        
+
         // Spine hierarchy
         val spine1 = createBone("mSpine1", pelvis, LLVector3(0f, 0f, 0.04f), LLQuaternion.identity())
         val spine2 = createBone("mSpine2", spine1, LLVector3(0f, 0f, 0.04f), LLQuaternion.identity())
@@ -225,11 +225,11 @@ class AvatarSkeleton(context: Context?) {
         val neck = createBone("mNeck", chest, LLVector3(0f, 0f, 0.206f), LLQuaternion.identity())
         val head = createBone("mHead", neck, LLVector3(0f, 0f, 0.076f), LLQuaternion.identity())
         createBone("mSkull", head, LLVector3(0f, 0f, 0.079f), LLQuaternion.identity())
-        
+
         // Eyes
         createBone("mEyeLeft", head, LLVector3(0.033f, 0.029f, 0.055f), LLQuaternion.identity())
         createBone("mEyeRight", head, LLVector3(-0.033f, 0.029f, 0.055f), LLQuaternion.identity())
-        
+
         // Face root & facial Bento joints
         val faceRoot = createBone("mFaceRoot", head, LLVector3(0f, 0.08f, 0.05f), LLQuaternion.identity())
         createBone("mFaceEyeAltLeft", faceRoot, LLVector3(0.033f, 0f, 0f), LLQuaternion.identity())
@@ -247,34 +247,34 @@ class AvatarSkeleton(context: Context?) {
         createBone("mFaceEyeLidLowerLeft", faceRoot, LLVector3(0.033f, 0f, -0.01f), LLQuaternion.identity())
         createBone("mFaceEyeLidUpperRight", faceRoot, LLVector3(-0.033f, 0f, 0.01f), LLQuaternion.identity())
         createBone("mFaceEyeLidLowerRight", faceRoot, LLVector3(-0.033f, 0f, -0.01f), LLQuaternion.identity())
-        
+
         val ear1L = createBone("mFaceEar1Left", faceRoot, LLVector3(0.06f, -0.02f, 0.01f), LLQuaternion.identity())
         createBone("mFaceEar2Left", ear1L, LLVector3(0.02f, -0.01f, 0f), LLQuaternion.identity())
         val ear1R = createBone("mFaceEar1Right", faceRoot, LLVector3(-0.06f, -0.02f, 0.01f), LLQuaternion.identity())
         createBone("mFaceEar2Right", ear1R, LLVector3(-0.02f, -0.01f, 0f), LLQuaternion.identity())
-        
+
         createBone("mFaceNoseLeft", faceRoot, LLVector3(0.01f, 0.02f, 0f), LLQuaternion.identity())
         createBone("mFaceNoseCenter", faceRoot, LLVector3(0f, 0.02f, 0f), LLQuaternion.identity())
         createBone("mFaceNoseRight", faceRoot, LLVector3(-0.01f, 0.02f, 0f), LLQuaternion.identity())
         createBone("mFaceNoseBase", faceRoot, LLVector3(0f, 0.02f, -0.01f), LLQuaternion.identity())
         createBone("mFaceNoseBridge", faceRoot, LLVector3(0f, 0.01f, 0.01f), LLQuaternion.identity())
-        
+
         createBone("mFaceCheekLowerLeft", faceRoot, LLVector3(0.03f, 0.01f, -0.02f), LLQuaternion.identity())
         createBone("mFaceCheekUpperLeft", faceRoot, LLVector3(0.03f, 0.01f, 0.01f), LLQuaternion.identity())
         createBone("mFaceCheekLowerRight", faceRoot, LLVector3(-0.03f, 0.01f, -0.02f), LLQuaternion.identity())
         createBone("mFaceCheekUpperRight", faceRoot, LLVector3(-0.03f, 0.01f, 0.01f), LLQuaternion.identity())
-        
+
         val jaw = createBone("mFaceJaw", faceRoot, LLVector3(0f, 0f, -0.04f), LLQuaternion.identity())
         createBone("mFaceChin", jaw, LLVector3(0f, 0.02f, -0.02f), LLQuaternion.identity())
         createBone("mFaceJawShaper", faceRoot, LLVector3(0f, 0f, -0.03f), LLQuaternion.identity())
-        
+
         val teethLower = createBone("mFaceTeethLower", jaw, LLVector3(0f, 0.02f, 0f), LLQuaternion.identity())
         createBone("mFaceLipLowerLeft", teethLower, LLVector3(0.01f, 0.005f, -0.005f), LLQuaternion.identity())
         createBone("mFaceLipLowerRight", teethLower, LLVector3(-0.01f, 0.005f, -0.005f), LLQuaternion.identity())
         createBone("mFaceLipLowerCenter", teethLower, LLVector3(0f, 0.005f, -0.005f), LLQuaternion.identity())
         val tongueBase = createBone("mFaceTongueBase", teethLower, LLVector3(0f, -0.01f, 0f), LLQuaternion.identity())
         createBone("mFaceTongueTip", tongueBase, LLVector3(0f, 0.015f, 0f), LLQuaternion.identity())
-        
+
         val teethUpper = createBone("mFaceTeethUpper", faceRoot, LLVector3(0f, 0.02f, -0.02f), LLQuaternion.identity())
         createBone("mFaceLipUpperLeft", teethUpper, LLVector3(0.01f, 0.005f, 0.005f), LLQuaternion.identity())
         createBone("mFaceLipUpperRight", teethUpper, LLVector3(-0.01f, 0.005f, 0.005f), LLQuaternion.identity())
@@ -283,13 +283,13 @@ class AvatarSkeleton(context: Context?) {
         createBone("mFaceLipCornerRight", teethUpper, LLVector3(-0.02f, 0.002f, 0f), LLQuaternion.identity())
         createBone("mFaceEyecornerInnerLeft", faceRoot, LLVector3(0.015f, 0.01f, 0.01f), LLQuaternion.identity())
         createBone("mFaceEyecornerInnerRight", faceRoot, LLVector3(-0.015f, 0.01f, 0.01f), LLQuaternion.identity())
-        
+
         // Left arm
         val collarL = createBone("mCollarLeft", chest, LLVector3(0.021f, 0f, 0.142f), LLQuaternion.identity())
         val shoulderL = createBone("mShoulderLeft", collarL, LLVector3(0.085f, 0f, 0f), LLQuaternion.identity())
         val elbowL = createBone("mElbowLeft", shoulderL, LLVector3(0.248f, 0f, 0f), LLQuaternion.identity())
         val wristL = createBone("mWristLeft", elbowL, LLVector3(0.205f, 0f, 0f), LLQuaternion.identity())
-        
+
         // Left hand fingers
         val m1L = createBone("mHandMiddle1Left", wristL, LLVector3(0.08f, 0f, 0f), LLQuaternion.identity())
         val m2L = createBone("mHandMiddle2Left", m1L, LLVector3(0.03f, 0f, 0f), LLQuaternion.identity())
@@ -306,13 +306,13 @@ class AvatarSkeleton(context: Context?) {
         val t1L = createBone("mHandThumb1Left", wristL, LLVector3(0.025f, 0.02f, -0.01f), LLQuaternion.identity())
         val t2L = createBone("mHandThumb2Left", t1L, LLVector3(0.025f, 0f, 0f), LLQuaternion.identity())
         createBone("mHandThumb3Left", t2L, LLVector3(0.018f, 0f, 0f), LLQuaternion.identity())
-        
+
         // Right arm
         val collarR = createBone("mCollarRight", chest, LLVector3(-0.021f, 0f, 0.142f), LLQuaternion.identity())
         val shoulderR = createBone("mShoulderRight", collarR, LLVector3(-0.085f, 0f, 0f), LLQuaternion.identity())
         val elbowR = createBone("mElbowRight", shoulderR, LLVector3(-0.248f, 0f, 0f), LLQuaternion.identity())
         val wristR = createBone("mWristRight", elbowR, LLVector3(-0.205f, 0f, 0f), LLQuaternion.identity())
-        
+
         // Right hand fingers
         val m1R = createBone("mHandMiddle1Right", wristR, LLVector3(-0.08f, 0f, 0f), LLQuaternion.identity())
         val m2R = createBone("mHandMiddle2Right", m1R, LLVector3(-0.03f, 0f, 0f), LLQuaternion.identity())
@@ -329,7 +329,7 @@ class AvatarSkeleton(context: Context?) {
         val t1R = createBone("mHandThumb1Right", wristR, LLVector3(-0.025f, 0.02f, -0.01f), LLQuaternion.identity())
         val t2R = createBone("mHandThumb2Right", t1R, LLVector3(-0.025f, 0f, 0f), LLQuaternion.identity())
         createBone("mHandThumb3Right", t2R, LLVector3(-0.018f, 0f, 0f), LLQuaternion.identity())
-        
+
         // Wings
         val wingsRoot = createBone("mWingsRoot", chest, LLVector3(0f, -0.1f, 0.1f), LLQuaternion.identity())
         val w1L = createBone("mWing1Left", wingsRoot, LLVector3(0.1f, 0f, 0f), LLQuaternion.identity())
@@ -337,27 +337,27 @@ class AvatarSkeleton(context: Context?) {
         val w3L = createBone("mWing3Left", w2L, LLVector3(0.2f, 0f, 0f), LLQuaternion.identity())
         createBone("mWing4Left", w3L, LLVector3(0.2f, 0f, 0f), LLQuaternion.identity())
         createBone("mWing4FanLeft", w3L, LLVector3(0.2f, -0.05f, 0f), LLQuaternion.identity())
-        
+
         val w1R = createBone("mWing1Right", wingsRoot, LLVector3(-0.1f, 0f, 0f), LLQuaternion.identity())
         val w2R = createBone("mWing2Right", w1R, LLVector3(-0.2f, 0f, 0f), LLQuaternion.identity())
         val w3R = createBone("mWing3Right", w2R, LLVector3(-0.2f, 0f, 0f), LLQuaternion.identity())
         createBone("mWing4Right", w3R, LLVector3(-0.2f, 0f, 0f), LLQuaternion.identity())
         createBone("mWing4FanRight", w3R, LLVector3(-0.2f, -0.05f, 0f), LLQuaternion.identity())
-        
+
         // Left leg
         val hipL = createBone("mHipLeft", pelvis, LLVector3(0.034f, 0f, -0.107f), LLQuaternion.identity())
         val kneeL = createBone("mKneeLeft", hipL, LLVector3(0f, 0f, -0.422f), LLQuaternion.identity())
         val ankleL = createBone("mAnkleLeft", kneeL, LLVector3(0f, 0f, -0.408f), LLQuaternion.identity())
         val footL = createBone("mFootLeft", ankleL, LLVector3(0f, 0.112f, -0.061f), LLQuaternion.identity())
         createBone("mToeLeft", footL, LLVector3(0f, 0.065f, 0f), LLQuaternion.identity())
-        
+
         // Right leg
         val hipR = createBone("mHipRight", pelvis, LLVector3(-0.034f, 0f, -0.107f), LLQuaternion.identity())
         val kneeR = createBone("mKneeRight", hipR, LLVector3(0f, 0f, -0.422f), LLQuaternion.identity())
         val ankleR = createBone("mAnkleRight", kneeR, LLVector3(0f, 0f, -0.408f), LLQuaternion.identity())
         val footR = createBone("mFootRight", ankleR, LLVector3(0f, 0.112f, -0.061f), LLQuaternion.identity())
         createBone("mToeRight", footR, LLVector3(0f, 0.065f, 0f), LLQuaternion.identity())
-        
+
         // Tail
         val tail1 = createBone("mTail1", pelvis, LLVector3(0f, -0.1f, -0.05f), LLQuaternion.identity())
         val tail2 = createBone("mTail2", tail1, LLVector3(0f, -0.1f, -0.05f), LLQuaternion.identity())
@@ -365,37 +365,37 @@ class AvatarSkeleton(context: Context?) {
         val tail4 = createBone("mTail4", tail3, LLVector3(0f, -0.1f, -0.05f), LLQuaternion.identity())
         val tail5 = createBone("mTail5", tail4, LLVector3(0f, -0.1f, -0.05f), LLQuaternion.identity())
         createBone("mTail6", tail5, LLVector3(0f, -0.1f, -0.05f), LLQuaternion.identity())
-        
+
         // Groin
         createBone("mGroin", pelvis, LLVector3(0f, 0.02f, -0.12f), LLQuaternion.identity())
-        
+
         // Hindlimbs
         val hindRoot = createBone("mHindLimbsRoot", pelvis, LLVector3(0f, -0.08f, -0.1f), LLQuaternion.identity())
         val h1L = createBone("mHindLimb1Left", hindRoot, LLVector3(0.05f, 0f, 0f), LLQuaternion.identity())
         val h2L = createBone("mHindLimb2Left", h1L, LLVector3(0f, 0f, -0.2f), LLQuaternion.identity())
         val h3L = createBone("mHindLimb3Left", h2L, LLVector3(0f, 0f, -0.2f), LLQuaternion.identity())
         createBone("mHindLimb4Left", h3L, LLVector3(0f, 0.05f, -0.05f), LLQuaternion.identity())
-        
+
         val h1R = createBone("mHindLimb1Right", hindRoot, LLVector3(-0.05f, 0f, 0f), LLQuaternion.identity())
         val h2R = createBone("mHindLimb2Right", h1R, LLVector3(0f, 0f, -0.2f), LLQuaternion.identity())
         val h3R = createBone("mHindLimb3Right", h2R, LLVector3(0f, 0f, -0.2f), LLQuaternion.identity())
         createBone("mHindLimb4Right", h3R, LLVector3(0f, 0.05f, -0.05f), LLQuaternion.identity())
-        
+
         // Fallback for any bone name in BONE_NAMES not explicitly created
         for (name in BONE_NAMES) {
             if (!bones.containsKey(name)) {
                 createBone(name, pelvis, LLVector3.zero(), LLQuaternion.identity())
             }
         }
-        
+
         rootBone = pelvis
-        
+
         // Calculate rest pose matrices
         updateBoneMatrices()
-        
+
         logI("Created default Bento skeleton with ${bones.size} bones")
     }
-    
+
     private fun createBone(
         name: String,
         parent: Bone?,
@@ -414,14 +414,14 @@ class AvatarSkeleton(context: Context?) {
             rotation = rotation.copy(),
             scale = LLVector3(1f, 1f, 1f)
         )
-        
+
         parent?.children?.add(bone)
         bones[name] = bone
         boneArray.add(bone)
-        
+
         return bone
     }
-    
+
     /**
      * Apply VisualParam-driven bone scale offsets to the rest pose.
      *
@@ -469,44 +469,44 @@ class AvatarSkeleton(context: Context?) {
             this[0] = 1f; this[5] = 1f; this[10] = 1f; this[15] = 1f
         }) }
     }
-    
+
     private fun calculateBoneMatrix(bone: Bone, parentMatrix: FloatArray) {
         // Local transform
         val localMatrix = FloatArray(16)
-        
+
         // Scale
         val s = bone.scale
         // Rotation
         val r = bone.rotation
         // Translation
         val t = bone.position
-        
+
         // Create matrix: T * R * S
         bone.rotation.toMatrix(localMatrix)
         localMatrix[12] = t.x
         localMatrix[13] = t.y
         localMatrix[14] = t.z
-        
+
         // Apply scale
         localMatrix[0] *= s.x; localMatrix[1] *= s.x; localMatrix[2] *= s.x
         localMatrix[4] *= s.y; localMatrix[5] *= s.y; localMatrix[6] *= s.y
         localMatrix[8] *= s.z; localMatrix[9] *= s.z; localMatrix[10] *= s.z
-        
+
         // Multiply with parent
         bone.worldMatrix = multiplyMatrices(parentMatrix, localMatrix)
-        
+
         // Skinning matrix = worldMatrix * inverseBindMatrix
         bone.skinningMatrix = multiplyMatrices(bone.worldMatrix, bone.inverseBindMatrix)
-        
+
         // Recursively update children
         bone.children.forEach { calculateBoneMatrix(it, bone.worldMatrix) }
     }
-    
+
     private fun multiplyMatrices(a: FloatArray, b: FloatArray): FloatArray {
         val result = FloatArray(16)
         for (i in 0..3) {
             for (j in 0..3) {
-                result[i * 4 + j] = 
+                result[i * 4 + j] =
                     a[i * 4 + 0] * b[0 + j] +
                     a[i * 4 + 1] * b[4 + j] +
                     a[i * 4 + 2] * b[8 + j] +
@@ -515,31 +515,31 @@ class AvatarSkeleton(context: Context?) {
         }
         return result
     }
-    
+
     /**
      * Get bone by name
      */
     fun getBone(name: String): Bone? = bones[name]
-    
+
     /**
      * Get bone by index
      */
     fun getBoneByIndex(index: Int): Bone? = boneArray.getOrNull(index)
-    
+
     /**
      * Set bone rotation
      */
     fun setBoneRotation(boneName: String, rotation: LLQuaternion) {
         bones[boneName]?.rotation = rotation
     }
-    
+
     /**
      * Set bone position (for attachment points)
      */
     fun setBonePosition(boneName: String, position: LLVector3) {
         bones[boneName]?.position = position
     }
-    
+
     /**
      * Get skinning matrices for GPU
      */
@@ -562,8 +562,8 @@ data class Bone(
     var position: LLVector3,
     var rotation: LLQuaternion,
     var scale: LLVector3,
-    var worldMatrix: FloatArray = FloatArray(16).apply { 
-        this[0] = 1f; this[5] = 1f; this[10] = 1f; this[15] = 1f 
+    var worldMatrix: FloatArray = FloatArray(16).apply {
+        this[0] = 1f; this[5] = 1f; this[10] = 1f; this[15] = 1f
     },
     var inverseBindMatrix: FloatArray = FloatArray(16).apply {
         this[0] = 1f; this[5] = 1f; this[10] = 1f; this[15] = 1f

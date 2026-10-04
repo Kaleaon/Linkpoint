@@ -44,11 +44,11 @@ import java.util.Locale
 /**
  * Settings Activity
  * Based on the reference viewer's SettingsActivity
- * 
+ *
  * Includes required disclosures per Third-Party Viewer Policy Section 1.g:
  * - Viewer name and version displayed in About section
  * - Links to Terms of Service and Privacy Policy
- * 
+ *
  * Also includes debug and diagnostics features:
  * - Crash log viewing
  * - Crash reporter status
@@ -56,23 +56,23 @@ import java.util.Locale
  * - Cache size configuration (3-500 MB)
  */
 class SettingsActivity : AppCompatActivity() {
-    
+
     companion object {
         // GitHub URLs for compliance documentation
         private const val GITHUB_BASE_URL = "https://github.com/Kaleaon/Linkpoint"
         private const val PRIVACY_POLICY_URL = "$GITHUB_BASE_URL/blob/main/PRIVACY_POLICY.md"
         private const val TPV_COMPLIANCE_URL = "$GITHUB_BASE_URL/blob/main/THIRD_PARTY_VIEWER_POLICY_COMPLIANCE.md"
     }
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
-        
+
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             title = "Settings"
         }
-        
+
         if (savedInstanceState == null) {
             supportFragmentManager
                 .beginTransaction()
@@ -80,7 +80,7 @@ class SettingsActivity : AppCompatActivity() {
                 .commit()
         }
     }
-    
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
             finish()
@@ -88,7 +88,7 @@ class SettingsActivity : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
-    
+
     class SettingsFragment : PreferenceFragmentCompat() {
         override fun onResume() {
             super.onResume()
@@ -99,7 +99,7 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
         private lateinit var logExportCoordinator: LogExportCoordinator
-        
+
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.preferences, rootKey)
             val context = requireContext()
@@ -117,7 +117,7 @@ class SettingsActivity : AppCompatActivity() {
                 onExportLog = ::confirmExportDiagnostics,
                 onShareLog = ::confirmShareCombinedLog,
             ).configure()
-            
+
             // XR settings
             val xrManager = com.linkpoint.LinkpointApp.getInstance().xrManager
             val xrCapability = xrManager.getEntryCapability()
@@ -130,42 +130,42 @@ class SettingsActivity : AppCompatActivity() {
                 }
             }
             findPreference<ListPreference>("xr_mode")?.isEnabled = xrManager.isUiEntryAvailable()
-            
+
             // Voice settings
             findPreference<SwitchPreferenceCompat>(SettingsKeys.ENABLE_VOICE)?.setOnPreferenceChangeListener { _, newValue ->
                 updateVoice(newValue as Boolean)
                 true
             }
-            
+
             // RLV settings
             findPreference<SwitchPreferenceCompat>("rlv_enabled")?.setOnPreferenceChangeListener { _, newValue ->
                 val enabled = newValue as Boolean
                 try {
                     com.linkpoint.LinkpointApp.getInstance().rlvController.setEnabled(enabled)
-                    Toast.makeText(requireContext(), 
+                    Toast.makeText(requireContext(),
                         "RLV ${if (enabled) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
                 } catch (e: Exception) {
                     Log.e("SettingsActivity", "Failed to update RLV setting", e)
                 }
                 true
             }
-            
+
             // About section - Required by TPV Policy Section 1.g
             setupAboutSection()
-            
+
             // Debug and Diagnostics section
             setupDebugSection()
-            
+
             // Cache settings
             setupCacheSettings()
 
-            
+
             // ToS viewing
             findPreference<Preference>("view_tos")?.setOnPreferenceClickListener {
                 startActivity(TosActivity.createIntent(requireContext(), requireAcceptance = false))
                 true
             }
-            
+
             // XML buffer size setting (3-500 MB)
             setupNetworkBufferSettings()
         }
@@ -292,15 +292,15 @@ class SettingsActivity : AppCompatActivity() {
          */
         private fun setupCacheSettings() {
             val cacheManager = com.linkpoint.assets.CacheManager(requireContext())
-            
+
             // Cache location
             findPreference<ListPreference>("cache_location")?.apply {
                 value = cacheManager.getCacheLocation()
                 setOnPreferenceChangeListener { _, newValue ->
                     val location = newValue as String
-                    if (location == com.linkpoint.assets.CacheManager.LOCATION_EXTERNAL && 
+                    if (location == com.linkpoint.assets.CacheManager.LOCATION_EXTERNAL &&
                         !cacheManager.isExternalStorageAvailable()) {
-                        Toast.makeText(requireContext(), 
+                        Toast.makeText(requireContext(),
                             "External storage not available", Toast.LENGTH_SHORT).show()
                         false
                     } else {
@@ -314,7 +314,7 @@ class SettingsActivity : AppCompatActivity() {
                     }
                 }
             }
-            
+
             // Total disk cache (in GB now)
             findPreference<SeekBarPreference>("disk_cache_size")?.apply {
                 val currentGB = cacheManager.getDiskCacheSizeMB() / 1024
@@ -326,31 +326,31 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
             }
-            
+
             // Memory cache (MB)
             findPreference<SeekBarPreference>("memory_cache_size")?.apply {
                 value = cacheManager.getMemoryCacheSizeMB()
                 setOnPreferenceChangeListener { _, newValue ->
                     val sizeMB = newValue as Int
                     cacheManager.setMemoryCacheSizeMB(sizeMB)
-                    Toast.makeText(requireContext(), 
+                    Toast.makeText(requireContext(),
                         "Memory cache set to ${sizeMB}MB (restart required)", Toast.LENGTH_SHORT).show()
                     true
                 }
             }
-            
+
             // Texture memory (RAM dedication)
             findPreference<SeekBarPreference>("texture_memory")?.apply {
                 value = cacheManager.getTextureMemoryMB()
                 setOnPreferenceChangeListener { _, newValue ->
                     val sizeMB = newValue as Int
                     cacheManager.setTextureMemoryMB(sizeMB)
-                    Toast.makeText(requireContext(), 
+                    Toast.makeText(requireContext(),
                         "Texture RAM set to ${sizeMB}MB", Toast.LENGTH_SHORT).show()
                     true
                 }
             }
-            
+
             // Texture cache (in GB)
             findPreference<SeekBarPreference>("texture_cache_size")?.apply {
                 val currentGB = cacheManager.getTextureCacheSizeMB() / 1024
@@ -362,7 +362,7 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
             }
-            
+
             // Mesh cache (in GB)
             findPreference<SeekBarPreference>("mesh_cache_size")?.apply {
                 val currentGB = cacheManager.getMeshCacheSizeMB() / 1024
@@ -374,7 +374,7 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
             }
-            
+
             // Sound cache (in GB)
             findPreference<SeekBarPreference>("sound_cache_size")?.apply {
                 val currentGB = cacheManager.getSoundCacheSizeMB() / 1024
@@ -386,7 +386,7 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
             }
-            
+
             // Animation cache (in GB)
             findPreference<SeekBarPreference>("animation_cache_size")?.apply {
                 val currentGB = cacheManager.getAnimationCacheSizeMB() / 1024
@@ -398,7 +398,7 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
             }
-            
+
             // Auto-clear on low space
             findPreference<SwitchPreferenceCompat>("auto_clear_cache")?.apply {
                 isChecked = cacheManager.isAutoClearOnLowSpaceEnabled()
@@ -407,20 +407,20 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
             }
-            
+
             // View cache statistics
             findPreference<Preference>("view_cache_stats")?.setOnPreferenceClickListener {
                 showCacheStatistics(cacheManager)
                 true
             }
-            
+
             // Clear all cache
             findPreference<Preference>("clear_cache")?.setOnPreferenceClickListener {
                 confirmClearAllCache(cacheManager)
                 true
             }
         }
-        
+
         /**
          * Show cache statistics dialog
          */
@@ -428,7 +428,7 @@ class SettingsActivity : AppCompatActivity() {
             viewLifecycleOwner.lifecycleScope.launch {
                 val stats = cacheManager.getCacheStats()
                 val locations = cacheManager.getAvailableCacheLocations()
-                
+
                 val message = buildString {
                     appendLine("=== Cache Usage ===")
                     appendLine()
@@ -458,7 +458,7 @@ class SettingsActivity : AppCompatActivity() {
                     appendLine("Sound Cache: ${cacheManager.getSoundCacheSizeMB() / 1024} GB")
                     appendLine("Animation Cache: ${cacheManager.getAnimationCacheSizeMB() / 1024} GB")
                 }
-                
+
                 AlertDialog.Builder(requireContext())
                     .setTitle("Cache Statistics")
                     .setMessage(message)
@@ -470,7 +470,7 @@ class SettingsActivity : AppCompatActivity() {
                     .show()
             }
         }
-        
+
         /**
          * Confirm and clear all cache
          */
@@ -492,13 +492,13 @@ class SettingsActivity : AppCompatActivity() {
                 .setNegativeButton("Cancel", null)
                 .show()
         }
-        
+
         /**
          * Setup network buffer settings (XML response buffer 3-500 MB)
          */
         private fun setupNetworkBufferSettings() {
             val networkSettings = com.linkpoint.network.NetworkSettings.getInstance(requireContext())
-            
+
             // XML buffer size preference
             findPreference<SeekBarPreference>("xml_buffer_size")?.apply {
                 value = networkSettings.getXmlBufferSizeMB()
@@ -510,7 +510,7 @@ class SettingsActivity : AppCompatActivity() {
                 }
             }
         }
-        
+
         /**
          * Setup Debug and Diagnostics section for crash log viewing
          */
@@ -567,7 +567,7 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 true
             }
-            
+
             // Capture Debug Report Now
             findPreference<Preference>("capture_debug_report")?.setOnPreferenceClickListener {
                 captureDebugReportNow()
@@ -583,19 +583,19 @@ class SettingsActivity : AppCompatActivity() {
                 forceAppearanceRefresh()
                 true
             }
-            
+
             // View Debug Reports
             findPreference<Preference>("view_debug_reports")?.setOnPreferenceClickListener {
                 showDebugReportsDialog()
                 true
             }
-            
+
             // View Crash Logs
             findPreference<Preference>("view_crash_logs")?.setOnPreferenceClickListener {
                 showCrashLogsDialog()
                 true
             }
-            
+
             // Crash Reporter Status
             findPreference<Preference>("crash_reporter_status")?.apply {
                 updateCrashReporterStatusSummary(this)
@@ -604,19 +604,19 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
             }
-            
+
             // Test Crash
             findPreference<Preference>("test_crash")?.setOnPreferenceClickListener {
                 testCrashReporter()
                 true
             }
-            
+
             // Clear Crash Logs
             findPreference<Preference>("clear_crash_logs")?.setOnPreferenceClickListener {
                 confirmClearCrashLogs()
                 true
             }
-            
+
             findPreference<SwitchPreferenceCompat>(DiagnosticsLoggingConfig.PREF_VERBOSE_PACKET_LOGGING)?.setOnPreferenceChangeListener { _, _ ->
                 Toast.makeText(requireContext(), "Verbose packet logging setting updated", Toast.LENGTH_SHORT).show()
                 true
@@ -664,7 +664,7 @@ class SettingsActivity : AppCompatActivity() {
                 true
             }
         }
-        
+
         /**
          * Capture a debug report immediately
          */
@@ -744,14 +744,14 @@ class SettingsActivity : AppCompatActivity() {
                 endpoint
             }
         }
-        
+
         /**
          * Show list of debug reports
          */
         private fun showDebugReportsDialog() {
             val debugService = com.linkpoint.utils.DebugReportService.getInstance(requireContext())
             val reports = debugService.getDebugReports()
-            
+
             if (reports.isEmpty()) {
                 AlertDialog.Builder(requireContext())
                     .setTitle("Debug Reports")
@@ -760,9 +760,9 @@ class SettingsActivity : AppCompatActivity() {
                     .show()
                 return
             }
-            
+
             val reportNames = reports.map { it.name }.toTypedArray()
-            
+
             AlertDialog.Builder(requireContext())
                 .setTitle("Debug Reports (${reports.size})")
                 .setItems(reportNames) { _, which ->
@@ -775,7 +775,7 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 .show()
         }
-        
+
         /**
          * Show content of a specific debug report
          */
@@ -784,7 +784,7 @@ class SettingsActivity : AppCompatActivity() {
                 Toast.makeText(requireContext(), "Failed to read debug report", Toast.LENGTH_SHORT).show()
                 return
             }
-            
+
             AlertDialog.Builder(requireContext())
                 .setTitle(filename)
                 .setMessage(content)
@@ -795,19 +795,19 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 .show()
         }
-        
+
         /**
          * Confirm and clear all debug reports
          */
         private fun confirmClearDebugReports() {
             val debugService = com.linkpoint.utils.DebugReportService.getInstance(requireContext())
             val reportsCount = debugService.getDebugReports().size
-            
+
             if (reportsCount == 0) {
                 Toast.makeText(requireContext(), "No debug reports to clear", Toast.LENGTH_SHORT).show()
                 return
             }
-            
+
             AlertDialog.Builder(requireContext())
                 .setTitle("Clear Debug Reports")
                 .setMessage("Delete all $reportsCount debug reports?\n\nThis cannot be undone.")
@@ -818,7 +818,7 @@ class SettingsActivity : AppCompatActivity() {
                 .setNegativeButton("Cancel", null)
                 .show()
         }
-        
+
         /**
          * Helper method to execute action with crash reporter or show error if not available.
          * Reduces code duplication for crash reporter null checks.
@@ -834,7 +834,7 @@ class SettingsActivity : AppCompatActivity() {
                 Toast.makeText(requireContext(), notAvailableMessage, Toast.LENGTH_SHORT).show()
             }
         }
-        
+
         /**
          * Update the crash reporter status summary
          */
@@ -852,14 +852,14 @@ class SettingsActivity : AppCompatActivity() {
                 pref.summary = "⚠ Crash reporter not initialized"
             }
         }
-        
+
         /**
          * Show crash logs dialog with list of available crash logs
          */
         private fun showCrashLogsDialog() = withCrashReporter { crashReporter ->
-            
+
             val crashLogs = crashReporter.getCrashLogs()
-            
+
             if (crashLogs.isEmpty()) {
                 AlertDialog.Builder(requireContext())
                     .setTitle("Crash Logs")
@@ -868,9 +868,9 @@ class SettingsActivity : AppCompatActivity() {
                     .show()
                 return@withCrashReporter
             }
-            
+
             val logNames = crashLogs.map { it.name }.toTypedArray()
-            
+
             AlertDialog.Builder(requireContext())
                 .setTitle("Crash Logs (${crashLogs.size})")
                 .setItems(logNames) { _, which ->
@@ -883,7 +883,7 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 .show()
         }
-        
+
         /**
          * Show content of a specific crash log
          */
@@ -892,7 +892,7 @@ class SettingsActivity : AppCompatActivity() {
                 Toast.makeText(requireContext(), "Failed to read crash log", Toast.LENGTH_SHORT).show()
                 return
             }
-            
+
             AlertDialog.Builder(requireContext())
                 .setTitle(filename)
                 .setMessage(content)
@@ -903,7 +903,7 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 .show()
         }
-        
+
         /**
          * Show crash summary
          */
@@ -918,7 +918,7 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 .show()
         }
-        
+
         /**
          * Show crash reporter diagnostics
          */
@@ -932,10 +932,10 @@ class SettingsActivity : AppCompatActivity() {
                     .show()
                 return
             }
-            
+
             val diagnostics = crashReporter.getDiagnostics()
             val report = diagnostics.toReport()
-            
+
             AlertDialog.Builder(requireContext())
                 .setTitle("Crash Reporter Status")
                 .setMessage(report)
@@ -958,7 +958,7 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 .show()
         }
-        
+
         /**
          * Test the crash reporter by generating a test exception
          */
@@ -972,9 +972,9 @@ class SettingsActivity : AppCompatActivity() {
                         val timestamp = System.currentTimeMillis()
                         val testException = RuntimeException("Test crash generated from Settings at $timestamp")
                         crashReporter.reportException(testException, "Settings test crash")
-                        
+
                         Toast.makeText(requireContext(), "Test crash report generated", Toast.LENGTH_SHORT).show()
-                        
+
                         // Update the status
                         findPreference<Preference>("crash_reporter_status")?.let {
                             updateCrashReporterStatusSummary(it)
@@ -986,25 +986,25 @@ class SettingsActivity : AppCompatActivity() {
                 .setNegativeButton("Cancel", null)
                 .show()
         }
-        
+
         /**
          * Confirm and clear all crash logs
          */
         private fun confirmClearCrashLogs() = withCrashReporter { crashReporter ->
             val logsCount = crashReporter.getCrashLogs().size
-            
+
             if (logsCount == 0) {
                 Toast.makeText(requireContext(), "No crash logs to clear", Toast.LENGTH_SHORT).show()
                 return@withCrashReporter
             }
-            
+
             AlertDialog.Builder(requireContext())
                 .setTitle("Clear Crash Logs")
                 .setMessage("Delete all $logsCount crash logs?\n\nThis cannot be undone.")
                 .setPositiveButton("Clear All") { _, _ ->
                     crashReporter.clearCrashLogs()
                     Toast.makeText(requireContext(), "Crash logs cleared", Toast.LENGTH_SHORT).show()
-                    
+
                     // Update the status
                     findPreference<Preference>("crash_reporter_status")?.let {
                         updateCrashReporterStatusSummary(it)
@@ -1013,7 +1013,7 @@ class SettingsActivity : AppCompatActivity() {
                 .setNegativeButton("Cancel", null)
                 .show()
         }
-        
+
         // ──────────────────────────────────────────────────────────────
         // Combined log: Copy / Share. Export is the older confirm dialog
         // immediately below; both copy and share funnel through the same
@@ -1127,7 +1127,7 @@ class SettingsActivity : AppCompatActivity() {
             logExportCoordinator.exportText(defaultFilename) { generateCombinedLog() }
         }
 
-        
+
         // ──────────────────────────────────────────────────────────────
         // Session Log Recorder controls
         //
@@ -1295,7 +1295,7 @@ class SettingsActivity : AppCompatActivity() {
                 appendLine("Device: ${Build.MANUFACTURER} ${Build.MODEL}")
                 appendLine("Android: ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})")
                 appendLine()
-                
+
                 // Include most recent debug report
                 appendLine("┌──────────────────────────────────────────────────────────────────┐")
                 appendLine("│ MOST RECENT DEBUG REPORT                                          │")
@@ -1325,7 +1325,7 @@ class SettingsActivity : AppCompatActivity() {
                     appendLine("Error reading debug reports: ${e.message}")
                 }
                 appendLine()
-                
+
                 // Include crash logs
                 appendLine("┌──────────────────────────────────────────────────────────────────┐")
                 appendLine("│ CRASH LOGS                                                        │")
@@ -1362,7 +1362,7 @@ class SettingsActivity : AppCompatActivity() {
                     appendLine("Error reading crash logs: ${e.message}")
                 }
                 appendLine()
-                
+
                 // Include recent network logs
                 appendLine("┌──────────────────────────────────────────────────────────────────┐")
                 appendLine("│ RECENT NETWORK ACTIVITY                                           │")
@@ -1375,7 +1375,7 @@ class SettingsActivity : AppCompatActivity() {
                     } else {
                         appendLine("No recent network activity logged")
                     }
-                    
+
                     appendLine()
                     appendLine("Network Statistics:")
                     val stats = NetworkLogger.getStatistics()
@@ -1389,13 +1389,13 @@ class SettingsActivity : AppCompatActivity() {
                     appendLine("Error reading network logs: ${e.message}")
                 }
                 appendLine()
-                
+
                 appendLine("═══════════════════════════════════════════════════════════════════")
                 appendLine("End of Combined Log Export")
                 appendLine("═══════════════════════════════════════════════════════════════════")
             }
         }
-        
+
         /**
          * Copy text to clipboard
          */
@@ -1404,7 +1404,7 @@ class SettingsActivity : AppCompatActivity() {
             val clip = ClipData.newPlainText(label, text)
             clipboard.setPrimaryClip(clip)
         }
-        
+
         /**
          * Setup About section with required disclosures per Third-Party Viewer Policy
          */
@@ -1422,7 +1422,7 @@ class SettingsActivity : AppCompatActivity() {
                     appendLine()
                     appendLine("Tap for more information")
                 }
-                
+
                 // Make it clickable to show full about dialog
                 isSelectable = true
                 setOnPreferenceClickListener {
@@ -1430,20 +1430,20 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
             }
-            
+
             // Add Privacy Policy preference
             findPreference<Preference>("privacy_policy")?.setOnPreferenceClickListener {
                 openPrivacyPolicy()
                 true
             }
-            
+
             // Add TPV Compliance preference
             findPreference<Preference>("tpv_compliance")?.setOnPreferenceClickListener {
                 openTpvCompliance()
                 true
             }
         }
-        
+
         /**
          * Show detailed About dialog with all required disclosures
          * Per Third-Party Viewer Policy Section 1.c and 5.e
@@ -1451,7 +1451,7 @@ class SettingsActivity : AppCompatActivity() {
         private fun showAboutDialog() {
             val versionName = BuildConfig.VERSION_NAME
             val versionCode = BuildConfig.VERSION_CODE
-            
+
             val message = buildString {
                 appendLine("Linkpoint")
                 appendLine("Version: $versionName (Build $versionCode)")
@@ -1494,7 +1494,7 @@ class SettingsActivity : AppCompatActivity() {
                 appendLine()
                 appendLine("Second Life is a trademark of Linden Lab.")
             }
-            
+
             AlertDialog.Builder(requireContext())
                 .setTitle("About Linkpoint")
                 .setMessage(message)
@@ -1504,10 +1504,10 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 .show()
         }
-        
+
         private fun openPrivacyPolicy() {
             try {
-                val intent = Intent(Intent.ACTION_VIEW, 
+                val intent = Intent(Intent.ACTION_VIEW,
                     Uri.parse(PRIVACY_POLICY_URL))
                 startActivity(intent)
             } catch (e: Exception) {
@@ -1518,10 +1518,10 @@ class SettingsActivity : AppCompatActivity() {
                 ).show()
             }
         }
-        
+
         private fun openTpvCompliance() {
             try {
-                val intent = Intent(Intent.ACTION_VIEW, 
+                val intent = Intent(Intent.ACTION_VIEW,
                     Uri.parse(TPV_COMPLIANCE_URL))
                 startActivity(intent)
             } catch (e: Exception) {
@@ -1532,10 +1532,10 @@ class SettingsActivity : AppCompatActivity() {
                 ).show()
             }
         }
-        
+
         private fun openGitHub() {
             try {
-                val intent = Intent(Intent.ACTION_VIEW, 
+                val intent = Intent(Intent.ACTION_VIEW,
                     Uri.parse(GITHUB_BASE_URL))
                 startActivity(intent)
             } catch (e: Exception) {
@@ -1546,7 +1546,7 @@ class SettingsActivity : AppCompatActivity() {
                 ).show()
             }
         }
-        
+
         /**
          * Setup Display settings (screen orientation)
          */
@@ -1597,7 +1597,7 @@ class SettingsActivity : AppCompatActivity() {
                 true
             }
         }
-        
+
         private fun updateGraphicsQuality(quality: String) {
             when (quality) {
                 "low" -> {
@@ -1614,7 +1614,7 @@ class SettingsActivity : AppCompatActivity() {
                 }
             }
         }
-        
+
         private fun updateVoice(enabled: Boolean) {
             // Enable/disable voice chat
         }

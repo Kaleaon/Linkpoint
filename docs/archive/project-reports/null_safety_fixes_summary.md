@@ -84,7 +84,7 @@ scope.launch {
 ```kotlin
 class MainActivity : AppCompatActivity() {
     private val scope = LifecycleAwareScopeManager.getScope(this)
-    
+
     fun loadData() {
         scope.launch {
             // Automatically cancelled when Activity is destroyed
@@ -215,7 +215,7 @@ this["ack"] = if (ack != null) LLSDInteger(ack) else LLSDBoolean(true)
 - Proper component validation
 
 ### 2.7 UI Dialog Components
-**Files**: 
+**Files**:
 - FriendActionsDialog.kt
 - FriendshipOfferDialog.kt
 - ItemDetailDialog.kt
@@ -356,7 +356,7 @@ val result = object?.property?.anotherProperty
 
 #### Pattern 3: Explicit Null Checks with Meaningful Errors
 ```kotlin
-val value = requiredValue 
+val value = requiredValue
     ?: throw IllegalStateException("Required component not initialized")
 ```
 

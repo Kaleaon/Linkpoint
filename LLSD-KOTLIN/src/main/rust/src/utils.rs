@@ -1,6 +1,6 @@
 /*!
  * LLSD Utilities - Rust Implementation
- * 
+ *
  * Based on Java implementation and Second Life viewer utilities
  * Copyright (C) 2024 Linden Lab
  */
@@ -148,7 +148,7 @@ impl LLSDUtils {
     /// Remove null/undefined values from an LLSD map
     pub fn remove_nulls(map: &mut HashMap<String, LLSDValue>) {
         map.retain(|_, v| !v.is_undefined());
-        
+
         // Recursively clean nested maps
         for (_, value) in map.iter_mut() {
             if let LLSDValue::Map(nested_map) = value {

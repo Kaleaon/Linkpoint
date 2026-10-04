@@ -95,4 +95,3 @@ suspend fun resolveAuthGridList(gridManager: com.linkpoint.core.GridManager): Li
     val grids = gridManager.getAvailableGridsAsync()
     return if (grids.isNotEmpty()) grids else com.linkpoint.core.GridManager.BUILTIN_GRIDS
 }
-

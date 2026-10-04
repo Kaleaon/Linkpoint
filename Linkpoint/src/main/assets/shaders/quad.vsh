@@ -11,4 +11,3 @@ void main() {
     gl_Position = vec4 ((vPosition + uPostTranslate) * uScale + uPreTranslate, 1.0);
     vTexCoordOut = vTexCoord;
 }
-

@@ -1,11 +1,11 @@
+exclude: '^(android-sdk|Gauss|disassembled-apps|lumiya_decompiled_source|lumiya_extracted|secondlife_decompiled|apk_analysis|vendor)/|.*message_template\.msg$'
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
-        exclude: '.*message_template\.msg$'
       - id: end-of-file-fixer
-        exclude: '.*message_template\.msg$'
       - id: check-yaml
       - id: check-json
       - id: check-added-large-files

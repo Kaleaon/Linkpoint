@@ -59,7 +59,7 @@ class BentoSkeletonTest {
     @Test
     fun testDefaultSkeletonHierarchyAndMatrixPropagation() {
         val skeleton = AvatarSkeleton(null)
-        
+
         // Every bone in BONES should exist in skeleton.bones
         for (boneName in AvatarSkeleton.BONES) {
             assertNotNull("Bone $boneName should exist in skeleton", skeleton.getBone(boneName))
@@ -80,11 +80,11 @@ class BentoSkeletonTest {
 
         // Matrix propagation test
         val originalJawWorldZ = skeleton.getBone("mFaceJaw")!!.worldMatrix[14]
-        
+
         // Shift head position upwards
         val head = skeleton.getBone("mHead")!!
         head.position = LLVector3(head.position.x, head.position.y, head.position.z + 1.0f)
-        
+
         // Recalculate
         val propagationTime = measureTimeMillis {
             skeleton.updateBoneMatrices()
@@ -139,9 +139,9 @@ class BentoSkeletonTest {
     fun testSkinningMatricesPreserveBentoJointsWithoutScrubbingToPelvis() {
         val skeleton = AvatarSkeleton(null)
         val testJoints = listOf("mFaceJaw", "mHandRing1Left", "mWing1Left", "mTail1", "mHindLimb4Left")
-        
+
         val pelvisBone = skeleton.getBone("mPelvis")!!
-        
+
         for (jointName in testJoints) {
             val bone = skeleton.getBone(jointName)
             assertNotNull("Bento joint $jointName must not return null bone", bone)

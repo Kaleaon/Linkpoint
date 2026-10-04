@@ -31,4 +31,3 @@ cmp "$before_kt" "$contract_kt" || {
   echo "Generated Kotlin viewer contract is stale. Run: cargo run -p linkpoint-core --example generate_contract" >&2
   exit 1
 }
-

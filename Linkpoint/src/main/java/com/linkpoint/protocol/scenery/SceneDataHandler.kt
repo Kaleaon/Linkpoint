@@ -19,12 +19,12 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Handles scene data messages from Second Life server.
  * Based on the reference viewer's scene data handlers in SLAgentCircuit.
- * 
+ *
  * This class processes scene data messages including:
  * - LayerData: Terrain heightmap data
  * - ObjectUpdate: Object position, rotation, scale
  * - ObjectProperties: Object metadata (name, description, etc.)
- * 
+ *
  * The parsed data is stored and made available to the rendering system
  * through the SceneGraph integration.
  */
@@ -33,10 +33,10 @@ class SceneDataHandler(
     private val renderQueue: RenderQueue? = null,
     private val workerPool: SceneWorkerPool = SceneWorkerPool.getInstance()
 ) {
-    
+
     companion object {
         private const val TAG = "SceneDataHandler"
-        
+
         // Layer types
         private const val LAYER_TYPE_TERRAIN = 76
     }
@@ -67,25 +67,25 @@ class SceneDataHandler(
             handleObjectProperties(data)
         }
     }
-    
+
     /** Terrain data storage */
     private val terrainData = TerrainData()
-    
+
     /** Object storage by UUID */
     private val objects = ConcurrentHashMap<UUID, SceneObject>()
-    
+
     /** Objects pending property updates */
     private val pendingProperties = ConcurrentHashMap<UUID, SceneObject>()
-    
+
     /** Count of processed messages for statistics */
     var layerDataCount = 0
     var objectUpdateCount = 0
     var objectPropertiesCount = 0
-    
+
     /**
      * Handle LayerData message
      * Contains terrain heightmap data
-     * 
+     *
      * @param data Raw message payload
      * @return true if handled successfully
      */
@@ -93,36 +93,36 @@ class SceneDataHandler(
         try {
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
                 "Processing LayerData (${data.size} bytes)")
-            
+
             val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             // Parse LayerData message format
             val layerType = buffer.get().toInt() and 0xFF
             val layerId = buffer.get().toInt() and 0xFF
-            
+
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
                 "Layer: type=$layerType, id=$layerId")
-            
+
             // Only process terrain layer (type 76)
             if (layerType != LAYER_TYPE_TERRAIN) {
                 NetworkLogger.log(NetworkLogger.Level.VERBOSE, NetworkLogger.Category.UDP,
                     "Skipping non-terrain layer type: $layerType")
                 return true
             }
-            
+
             // Extract heightmap data
             val dataSize = buffer.remaining()
             val heightmapData = ByteArray(dataSize)
             buffer.get(heightmapData)
-            
+
             // Process terrain data
             terrainData.processLayerData(heightmapData)
-            
+
             layerDataCount++
-            
+
             NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
                 "✓ Terrain data processed: ${heightmapData.size} bytes (total: $layerDataCount layers)")
-            
+
             // Update scene graph if provided
             if (renderQueue != null) {
                 val heightmapCopy = terrainData.getHeightmap().copyOf()
@@ -130,7 +130,7 @@ class SceneDataHandler(
             } else {
                 sceneGraph?.updateTerrain(terrainData)
             }
-            
+
             return true
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
@@ -139,11 +139,11 @@ class SceneDataHandler(
             return false
         }
     }
-    
+
     /**
      * Handle ObjectUpdate message
      * Contains object position, rotation, scale
-     * 
+     *
      * @param data Raw message payload
      * @return true if handled successfully
      */
@@ -200,11 +200,11 @@ class SceneDataHandler(
             return false
         }
     }
-    
+
     /**
      * Handle ObjectProperties message
      * Contains object metadata (name, description, etc.)
-     * 
+     *
      * @param data Raw message payload
      * @return true if handled successfully
      */
@@ -212,28 +212,28 @@ class SceneDataHandler(
         try {
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
                 "Processing ObjectProperties (${data.size} bytes)")
-            
+
             val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             // Parse ObjectProperties message format
             val requestID = buffer.int
             val objectCount = buffer.get().toInt() and 0xFF
-            
+
             for (i in 0 until objectCount) {
                 val codec = PacketCodec.fromBuffer(buffer)
                 val objectId = codec.readUuid()
                 val name = codec.readVariable1String()
                 val description = codec.readVariable1String()
-                
+
                 // Update object properties
                 val obj = objects[objectId]
                 if (obj != null) {
                     obj.name = name
                     obj.description = description
-                    
+
                     NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP,
                         "Updated properties: $name (${objectId})")
-                    
+
                     // Update scene graph
                     if (renderQueue != null) {
                         renderQueue.enqueue(RenderableUpdate.SceneObjectUpdate(obj.copy()))
@@ -246,17 +246,17 @@ class SceneDataHandler(
                         this.name = name
                         this.description = description
                     }
-                    
+
                     NetworkLogger.log(NetworkLogger.Level.VERBOSE, NetworkLogger.Category.UDP,
                         "Stored pending properties for: $name (${objectId})")
                 }
             }
-            
+
             objectPropertiesCount++
-            
+
             NetworkLogger.log(NetworkLogger.Level.INFO, NetworkLogger.Category.UDP,
                 "✓ Updated properties for $objectCount objects (total: $objectPropertiesCount updates)")
-            
+
             return true
         } catch (e: Exception) {
             NetworkLogger.log(NetworkLogger.Level.ERROR, NetworkLogger.Category.UDP,
@@ -265,19 +265,19 @@ class SceneDataHandler(
             return false
         }
     }
-    
+
     // ==================== Helper Methods ====================
-    
+
     /**
      * Get terrain data for rendering
      */
     fun getTerrainData(): TerrainData = terrainData
-    
+
     /**
      * Get all objects for rendering
      */
     fun getAllObjects(): Map<UUID, SceneObject> = objects.toMap()
-    
+
     /**
      * Get statistics
      */
@@ -330,7 +330,7 @@ data class SceneObject(
 class TerrainData {
     private val heightmap = FloatArray(256 * 256) // 16x16 patches of 16x16 points
     private var hasData = false
-    
+
     /**
      * Process layer data and extract heightmap
      */
@@ -339,24 +339,24 @@ class TerrainData {
         // Format: 16-bit signed integers for each height point
         for (i in data.indices step 2) {
             if (i + 1 < data.size && (i / 2) < heightmap.size) {
-                val value = ((data[i].toInt() and 0xFF) or 
+                val value = ((data[i].toInt() and 0xFF) or
                              ((data[i + 1].toInt() and 0xFF) shl 8)).toShort()
                 heightmap[i / 2] = value.toFloat()
             }
         }
         hasData = true
     }
-    
+
     /**
      * Get heightmap data
      */
     fun getHeightmap(): FloatArray = heightmap
-    
+
     /**
      * Check if terrain data has been loaded
      */
     fun hasTerrainData(): Boolean = hasData
-    
+
     /**
      * Get height at specific grid position
      */

@@ -10,12 +10,12 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * RLV (Restrained Love Viewer) Controller - Handles RLV/RLVa commands.
- * 
+ *
  * Based on the reference viewer's RLVController.java
- * 
+ *
  * RLV is an API that allows in-world objects to restrict viewer behavior.
  * Common uses: roleplay, BDSM content, furniture systems, combat systems.
- * 
+ *
  * Commands format: @command[:option]=y/n/add/rem/force
  * Examples:
  *   @unsit=n          - Prevent standing up
@@ -29,19 +29,19 @@ class RLVController(
     private val outfitManager: (() -> com.linkpoint.inventory.OutfitManager?)? = null,
     private val teleportManager: (() -> com.linkpoint.teleport.TeleportManager?)? = null
 ) {
-    
+
     companion object {
         private const val TAG = "RLVController"
-        
+
         // RLV version info
         const val RLV_VERSION = "3.4.3"
         const val RLVA_VERSION = "2.4"
         const val VIEWER_NAME = "Linkpoint"
-        
+
         // RLV command prefixes
         const val RLV_CMD_PREFIX = "@"
         const val RLV_REPLY_CHANNEL = -1812221819
-        
+
         // Restriction categories
         const val CAT_MOVEMENT = "movement"
         const val CAT_CHAT = "chat"
@@ -51,22 +51,22 @@ class RLVController(
         const val CAT_TELEPORT = "teleport"
         const val CAT_INTERACTION = "interaction"
     }
-    
+
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    
+
     // RLV enabled state
     private val _enabled = MutableStateFlow(true)
     val enabled: StateFlow<Boolean> = _enabled
-    
+
     // Active restrictions by command name
     private val restrictions = ConcurrentHashMap<String, RLVRestriction>()
-    
+
     // Exceptions (allowed items within restrictions)
     private val exceptions = ConcurrentHashMap<String, MutableSet<String>>()
-    
+
     // Behavior callbacks
     private val behaviorCallbacks = mutableListOf<RLVBehaviorCallback>()
-    
+
     /**
      * Enable/disable RLV processing.
      */
@@ -77,7 +77,7 @@ class RLVController(
         }
         Log.i(TAG, "RLV ${if (enabled) "enabled" else "disabled"}")
     }
-    
+
     /**
      * Process RLV command from chat/script.
      */
@@ -85,14 +85,14 @@ class RLVController(
         if (!_enabled.value) {
             return RLVResult.Disabled
         }
-        
+
         if (!command.startsWith(RLV_CMD_PREFIX)) {
             return RLVResult.NotRLV
         }
-        
+
         val cmdStr = command.substring(1) // Remove @
         val commands = cmdStr.split(",")
-        
+
         var result = RLVResult.Success
         for (cmd in commands) {
             val singleResult = processSingleCommand(objectId, objectName, cmd.trim())
@@ -100,27 +100,27 @@ class RLVController(
                 result = singleResult
             }
         }
-        
+
         return result
     }
-    
+
     private fun processSingleCommand(objectId: UUID, objectName: String, command: String): RLVResult {
         // Parse command: name[:option]=value
         val equalsIndex = command.lastIndexOf('=')
         if (equalsIndex < 0) {
             return RLVResult.InvalidFormat
         }
-        
+
         val cmdPart = command.substring(0, equalsIndex)
         val value = command.substring(equalsIndex + 1).lowercase()
-        
+
         // Parse command name and option
         val colonIndex = cmdPart.indexOf(':')
         val cmdName = if (colonIndex >= 0) cmdPart.substring(0, colonIndex) else cmdPart
         val option = if (colonIndex >= 0) cmdPart.substring(colonIndex + 1) else null
-        
+
         Log.d(TAG, "RLV: cmd=$cmdName option=$option value=$value from $objectName")
-        
+
         return when (value) {
             "y" -> removeRestriction(cmdName, objectId, option)
             "n" -> addRestriction(cmdName, objectId, option)
@@ -130,7 +130,7 @@ class RLVController(
             else -> handleReplyCommand(cmdName, option, value)
         }
     }
-    
+
     /**
      * Add a restriction.
      */
@@ -141,22 +141,22 @@ class RLVController(
             option = option,
             timestamp = System.currentTimeMillis()
         )
-        
+
         val key = if (option != null) "$command:$option" else command
         restrictions[key] = restriction
-        
+
         notifyBehaviorChange(command, true)
         Log.i(TAG, "Added restriction: $key")
-        
+
         return RLVResult.Success
     }
-    
+
     /**
      * Remove a restriction.
      */
     private fun removeRestriction(command: String, objectId: UUID, option: String?): RLVResult {
         val key = if (option != null) "$command:$option" else command
-        
+
         // Only remove if same object or clear all for this command
         val existing = restrictions[key]
         if (existing != null && (existing.objectId == objectId || option == null)) {
@@ -164,40 +164,40 @@ class RLVController(
             notifyBehaviorChange(command, false)
             Log.i(TAG, "Removed restriction: $key")
         }
-        
+
         return RLVResult.Success
     }
-    
+
     /**
      * Add an exception to a restriction.
      */
     private fun addException(command: String, exception: String?): RLVResult {
         if (exception == null) return RLVResult.InvalidFormat
-        
+
         exceptions.getOrPut(command) { mutableSetOf() }.add(exception)
         Log.d(TAG, "Added exception: $command -> $exception")
-        
+
         return RLVResult.Success
     }
-    
+
     /**
      * Remove an exception.
      */
     private fun removeException(command: String, exception: String?): RLVResult {
         if (exception == null) return RLVResult.InvalidFormat
-        
+
         exceptions[command]?.remove(exception)
         Log.d(TAG, "Removed exception: $command -> $exception")
-        
+
         return RLVResult.Success
     }
-    
+
     /**
      * Execute a force command (immediate action).
      */
     private fun executeForceCommand(command: String, option: String?, objectId: UUID): RLVResult {
         Log.i(TAG, "Force command: $command option=$option")
-        
+
         return when (command) {
             "sit" -> forceSit(option, objectId)
             "unsit" -> forceUnsit()
@@ -208,13 +208,13 @@ class RLVController(
             else -> RLVResult.UnknownCommand
         }
     }
-    
+
     /**
      * Handle reply/query commands.
      */
     private fun handleReplyCommand(command: String, option: String?, replyChannel: String): RLVResult {
         val channel = replyChannel.toIntOrNull() ?: return RLVResult.InvalidFormat
-        
+
         val reply = when (command) {
             "version" -> RLV_VERSION
             "versionnew" -> RLV_VERSION
@@ -225,7 +225,7 @@ class RLVController(
             "getstatusall" -> getStatusAll()
             else -> return RLVResult.UnknownCommand
         }
-        
+
         // Send reply to chat channel
         chatManager?.invoke()?.let { manager ->
             try {
@@ -238,18 +238,18 @@ class RLVController(
         } ?: run {
             Log.w(TAG, "RLV reply not sent - ChatManager unavailable. Reply: $reply on channel $channel")
         }
-        
+
         return RLVResult.Success
     }
-    
+
     // Force command implementations
-    
+
     private fun forceSit(target: String?, objectId: UUID): RLVResult {
         Log.d(TAG, "Force sit on: $target")
         if (target == null) {
             return RLVResult.InvalidFormat
         }
-        
+
         // Parse the target UUID
         val targetUUID = try {
             UUID.fromString(target)
@@ -257,7 +257,7 @@ class RLVController(
             Log.w(TAG, "Invalid UUID for force sit: $target")
             return RLVResult.InvalidFormat
         }
-        
+
         // Use SitManager to sit on the target object
         sitManager?.invoke()?.let { manager ->
             manager.sitOnObject(targetUUID)
@@ -268,10 +268,10 @@ class RLVController(
             return RLVResult.Failed
         }
     }
-    
+
     private fun forceUnsit(): RLVResult {
         Log.d(TAG, "Force unsit")
-        
+
         // Use SitManager to stand up
         sitManager?.invoke()?.let { manager ->
             manager.standUp()
@@ -282,7 +282,7 @@ class RLVController(
             return RLVResult.Failed
         }
     }
-    
+
     private fun forceTeleport(coords: String?): RLVResult {
         Log.d(TAG, "Force teleport to: $coords")
         if (coords == null) return RLVResult.InvalidFormat
@@ -297,7 +297,7 @@ class RLVController(
         }
         return RLVResult.InvalidFormat
     }
-    
+
     private fun forceAttach(target: String?): RLVResult {
         Log.d(TAG, "Force attach: $target")
         val uuid = runCatching { UUID.fromString(target ?: "") }.getOrNull() ?: return RLVResult.InvalidFormat
@@ -307,7 +307,7 @@ class RLVController(
         }
         return RLVResult.Failed
     }
-    
+
     private fun forceDetach(target: String?): RLVResult {
         Log.d(TAG, "Force detach: $target")
         val uuid = runCatching { UUID.fromString(target ?: "") }.getOrNull() ?: return RLVResult.InvalidFormat
@@ -317,41 +317,41 @@ class RLVController(
         }
         return RLVResult.Failed
     }
-    
+
     private fun forceRemoveOutfit(layer: String?): RLVResult {
         Log.d(TAG, "Force remove outfit layer: $layer")
         return RLVResult.Success
     }
-    
+
     // Query implementations
-    
+
     private fun getOutfitInfo(layer: String?): String {
         val worn = outfitManager?.invoke()?.getWornItems() ?: emptyList()
         return worn.joinToString(",") { it.toString() }
     }
-    
+
     private fun getAttachInfo(point: String?): String {
         val pt = point?.toIntOrNull() ?: return ""
         val item = outfitManager?.invoke()?.getAttachmentAt(pt)
         return item?.toString() ?: ""
     }
-    
+
     private fun getStatus(filter: String?): String {
         return restrictions.keys.joinToString("/")
     }
-    
+
     private fun getStatusAll(): String {
         return restrictions.entries.joinToString("/") { "${it.key}:${it.value.objectId}" }
     }
-    
+
     // Restriction checking
-    
+
     /**
      * Check if a behavior is restricted.
      */
     fun isRestricted(command: String, target: String? = null): Boolean {
         if (!_enabled.value) return false
-        
+
         // Check direct restriction
         if (restrictions.containsKey(command)) {
             // Check for exception
@@ -360,10 +360,10 @@ class RLVController(
             }
             return true
         }
-        
+
         return false
     }
-    
+
     /**
      * Check common restrictions.
      */
@@ -379,24 +379,24 @@ class RLVController(
     fun canSeeNames(): Boolean = !isRestricted("shownames")
     fun canSeeLocation(): Boolean = !isRestricted("showloc")
     fun canEditAppearance(): Boolean = !isRestricted("editappearance")
-    
+
     /**
      * Get all active restrictions.
      */
     fun getActiveRestrictions(): List<RLVRestriction> = restrictions.values.toList()
-    
+
     /**
      * Clear all restrictions (e.g., on detach).
      */
     fun clearRestrictions(objectId: UUID) {
         val toRemove = restrictions.filter { it.value.objectId == objectId }.keys
-        toRemove.forEach { 
+        toRemove.forEach {
             restrictions.remove(it)
             notifyBehaviorChange(it.substringBefore(':'), false)
         }
         Log.i(TAG, "Cleared ${toRemove.size} restrictions from $objectId")
     }
-    
+
     /**
      * Clear all restrictions.
      */
@@ -405,18 +405,18 @@ class RLVController(
         exceptions.clear()
         Log.i(TAG, "Cleared all RLV restrictions")
     }
-    
+
     /**
      * Register behavior change callback.
      */
     fun registerBehaviorCallback(callback: RLVBehaviorCallback) {
         behaviorCallbacks.add(callback)
     }
-    
+
     private fun notifyBehaviorChange(command: String, restricted: Boolean) {
         behaviorCallbacks.forEach { it.onBehaviorChanged(command, restricted) }
     }
-    
+
     fun shutdown() {
         scope.cancel()
         clearAllRestrictions()

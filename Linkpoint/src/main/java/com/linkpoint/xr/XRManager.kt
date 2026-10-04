@@ -6,45 +6,45 @@ import com.linkpoint.BuildConfig
 
 /**
  * Manages XR (VR/AR) functionality for Linkpoint
- * 
+ *
  * Supports:
  * - Android XR (Google's new XR platform)
  * - OpenXR compatible devices
  * - Cardboard/Daydream legacy (deprecated but supported)
  */
 class XRManager(private val context: Context) {
-    
+
     companion object {
         private const val TAG = "XRManager"
-        
+
         // XR mode types
         const val MODE_NONE = 0
         const val MODE_CARDBOARD = 1      // Legacy Google Cardboard
         const val MODE_OPENXR = 2          // OpenXR standard
         const val MODE_ANDROID_XR = 3      // Android XR (new Google platform)
     }
-    
+
     private var isInitialized = false
     private var currentMode = MODE_NONE
     private var xrSession: XRSession? = null
     private var sessionCapability: XRSessionCapability = XRSessionCapability.Unsupported("XR backend not evaluated")
-    
+
     // XR capabilities
     private var hasCardboard = false
     private var hasOpenXR = false
     private var hasAndroidXR = false
-    
+
     init {
         detectCapabilities()
     }
-    
+
     private fun detectCapabilities() {
         val pm = context.packageManager
-        
+
         // Check for Google Cardboard
         hasCardboard = pm.hasSystemFeature("android.software.vr.mode") ||
                        pm.hasSystemFeature("android.hardware.vr.high_performance")
-        
+
         // Check for OpenXR runtime
         hasOpenXR = try {
             Class.forName("org.khronos.openxr.XrInstance")
@@ -52,19 +52,19 @@ class XRManager(private val context: Context) {
         } catch (e: ClassNotFoundException) {
             false
         }
-        
+
         // Check for Android XR (new platform)
         hasAndroidXR = try {
             // Android XR is available on Android 15+ with XR hardware
-            android.os.Build.VERSION.SDK_INT >= 35 && 
+            android.os.Build.VERSION.SDK_INT >= 35 &&
             pm.hasSystemFeature("android.hardware.xr.immersive")
         } catch (e: Exception) {
             false
         }
-        
+
         Log.i(TAG, "XR Capabilities - Cardboard: $hasCardboard, OpenXR: $hasOpenXR, AndroidXR: $hasAndroidXR")
     }
-    
+
     /**
      * Check if any XR mode is available
      */
@@ -79,7 +79,7 @@ class XRManager(private val context: Context) {
     }
 
     fun getEntryCapability(): XRSessionCapability = getPreferredCapability()
-    
+
     /**
      * Get the best available XR mode
      */
@@ -99,7 +99,7 @@ class XRManager(private val context: Context) {
 
         return MODE_NONE
     }
-    
+
     /**
      * Initialize XR session
      */
@@ -107,11 +107,11 @@ class XRManager(private val context: Context) {
         if (isInitialized && currentMode == mode) {
             return true
         }
-        
+
         shutdown()
-        
+
         currentMode = mode
-        
+
         xrSession = when (mode) {
             MODE_CARDBOARD -> CardboardSession(context)
             MODE_OPENXR -> OpenXRSession(context)
@@ -132,15 +132,15 @@ class XRManager(private val context: Context) {
             xrSession = null
             return false
         }
-        
+
         isInitialized = xrSession?.initialize() == true
-        
+
         if (isInitialized) {
             Log.i(TAG, "XR session initialized with mode: $mode")
         } else {
             Log.w(TAG, "Failed to initialize XR session")
         }
-        
+
         return isInitialized
     }
 
@@ -180,35 +180,35 @@ class XRManager(private val context: Context) {
             else -> XRSessionCapability.Unsupported("No XR mode selected")
         }
     }
-    
+
     /**
      * Begin XR frame
      */
     fun beginFrame(): XRFrameData? {
         return xrSession?.beginFrame()
     }
-    
+
     /**
      * End XR frame
      */
     fun endFrame() {
         xrSession?.endFrame()
     }
-    
+
     /**
      * Get head pose for current frame
      */
     fun getHeadPose(): HeadPose? {
         return xrSession?.getHeadPose()
     }
-    
+
     /**
      * Get controller states
      */
     fun getControllers(): List<ControllerState> {
         return xrSession?.getControllers() ?: emptyList()
     }
-    
+
     /**
      * Shutdown XR session
      */
@@ -220,12 +220,12 @@ class XRManager(private val context: Context) {
         sessionCapability = XRSessionCapability.Unsupported("XR session not running")
         Log.i(TAG, "XR session shutdown")
     }
-    
+
     /**
      * Check if currently in XR mode
      */
     fun isInXRMode(): Boolean = isInitialized && xrSession != null
-    
+
     /**
      * Get current XR mode
      */

@@ -40,7 +40,7 @@ public class LLSDBinaryParser {
     private static final String LLSD_BINARY_HEADER = "<?llsd/binary?>";
     private static final byte[] LLSD_BINARY_HEADER_BYTES = LLSD_BINARY_HEADER.getBytes(StandardCharsets.US_ASCII);
     private static final String ISO8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-    
+
     // Security limits to prevent memory exhaustion attacks
     private static final int MAX_COLLECTION_SIZE = 1_000_000; // Maximum array/map size
     private static final int MAX_RECURSION_DEPTH = 1000; // Maximum nesting depth
@@ -84,7 +84,7 @@ public class LLSDBinaryParser {
      */
     public LLSD parse(final InputStream binaryInput) throws IOException, LLSDException {
         BinaryReader reader = new BinaryReader(binaryInput);
-        
+
         // Check for optional header
         skipWhitespace(reader);
         if (reader.peek() == '<') {
@@ -96,7 +96,7 @@ public class LLSDBinaryParser {
             }
             skipWhitespace(reader);
         }
-        
+
         Object parsedBinary = parseBinaryValue(reader, 0);
         return new LLSD(parsedBinary);
     }
@@ -149,7 +149,7 @@ public class LLSDBinaryParser {
                 hasPeeked = false;
                 return peekedByte;
             }
-            
+
             int result = input.read(buffer);
             if (result == -1) {
                 throw new LLSDException("Unexpected end of binary stream");
@@ -162,7 +162,7 @@ public class LLSDBinaryParser {
          * @param count The number of bytes to read.
          * @return A byte array containing the read bytes.
          * @throws IOException if an I/O error occurs.
-         * @throws LLSDException if the end of the stream is reached before all bytes are read, 
+         * @throws LLSDException if the end of the stream is reached before all bytes are read,
          *                       or if count is negative or excessively large.
          */
         public byte[] readBytes(int count) throws IOException, LLSDException {
@@ -176,17 +176,17 @@ public class LLSDBinaryParser {
             if (count > 100_000_000) { // 100MB limit
                 throw new LLSDException("Attempting to read excessively large amount of data: " + count + " bytes");
             }
-            
+
             byte[] bytes = new byte[count];
             int totalRead = 0;
-            
+
             // First use any peeked byte
             if (hasPeeked && count > 0) {
                 bytes[0] = peekedByte;
                 totalRead = 1;
                 hasPeeked = false;
             }
-            
+
             while (totalRead < count) {
                 int bytesRead = input.read(bytes, totalRead, count - totalRead);
                 if (bytesRead == -1) {
@@ -194,7 +194,7 @@ public class LLSDBinaryParser {
                 }
                 totalRead += bytesRead;
             }
-            
+
             return bytes;
         }
 
@@ -284,7 +284,7 @@ public class LLSDBinaryParser {
         if (depth > MAX_RECURSION_DEPTH) {
             throw new LLSDException("Maximum recursion depth exceeded: " + depth);
         }
-        
+
         byte marker = reader.readByte();
 
         switch (marker) {
@@ -325,7 +325,7 @@ public class LLSDBinaryParser {
                 return parseMap(reader, depth + 1);
 
             default:
-                throw new LLSDException("Unknown binary LLSD marker: 0x" + 
+                throw new LLSDException("Unknown binary LLSD marker: 0x" +
                     Integer.toHexString(marker & 0xFF).toUpperCase());
         }
     }
@@ -339,11 +339,11 @@ public class LLSDBinaryParser {
      */
     private UUID parseUUID(BinaryReader reader) throws IOException, LLSDException {
         byte[] bytes = reader.readBytes(16);
-        
+
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
         long mostSigBits = buffer.getLong();
         long leastSigBits = buffer.getLong();
-        
+
         return new UUID(mostSigBits, leastSigBits);
     }
 
@@ -411,13 +411,13 @@ public class LLSDBinaryParser {
             if (elementCount >= MAX_COLLECTION_SIZE) {
                 throw new LLSDException("Array size limit exceeded: " + MAX_COLLECTION_SIZE);
             }
-            
+
             byte marker = reader.peek();
             if (marker == ARRAY_END_MARKER) {
                 reader.readByte(); // consume ']'
                 break;
             }
-            
+
             Object value = parseBinaryValue(reader, depth);
             array.add(value);
             elementCount++;
@@ -444,7 +444,7 @@ public class LLSDBinaryParser {
             if (elementCount >= MAX_COLLECTION_SIZE) {
                 throw new LLSDException("Map size limit exceeded: " + MAX_COLLECTION_SIZE);
             }
-            
+
             byte marker = reader.peek();
             if (marker == MAP_END_MARKER) {
                 reader.readByte(); // consume '}'
@@ -455,7 +455,7 @@ public class LLSDBinaryParser {
             if (reader.readByte() != KEY_MARKER) {
                 throw new LLSDException("Expected key marker 'k' in binary LLSD map");
             }
-            
+
             String key = reader.readString();
             Object value = parseBinaryValue(reader, depth);
             map.put(key, value);

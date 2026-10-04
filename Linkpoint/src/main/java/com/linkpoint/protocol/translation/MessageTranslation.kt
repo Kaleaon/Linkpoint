@@ -7,15 +7,15 @@ import java.nio.ByteOrder
 
 /**
  * Message translation utilities for Second Life protocol compatibility.
- * 
+ *
  * This handles the differences in how message IDs are encoded/decoded between
  * Linkpoint's Kotlin implementation and the SL protocol's Java reference implementation.
- * 
+ *
  * Second Life uses three frequency classes for messages:
  * - **High frequency**: Single byte, values 1-254 (0xFF is reserved as escape)
  * - **Medium frequency**: 0xFF prefix + byte, resulting in values 65280-65534
  * - **Low frequency**: 0xFF 0xFF prefix + short, resulting in negative values
- * 
+ *
  * The reference viewer's DecodeMessageID() uses signed bytes/shorts which affects the resulting IDs:
  * ```java
  * public static int DecodeMessageID(ByteBuffer byteBuffer) {
@@ -27,20 +27,20 @@ import java.nio.ByteOrder
  *     return b2 != -1 ? b2 | 65280 : byteBuffer.getShort() | (-65536);
  * }
  * ```
- * 
+ *
  * @see com.linkpoint.protocol.messages.UDPConnection
  * @see com.linkpoint.protocol.messages.ids.MessageIdRegistry
  */
 object MessageTranslation {
-    
+
     private const val TAG = "MessageTranslation"
-    
+
     // Message frequency constants matching the SL protocol implementation
     private const val ESCAPE_BYTE: Byte = 0xFF.toByte() // -1 as signed byte
     private const val MEDIUM_FREQUENCY_BASE = 65280
     private const val LOW_FREQUENCY_BASE = -65536
     private const val HIGH_FREQUENCY_THRESHOLD = -128
-    
+
     /**
      * Message frequency classification.
      */
@@ -54,16 +54,16 @@ object MessageTranslation {
         /** Invalid or unknown frequency */
         UNKNOWN
     }
-    
+
     /**
      * Decode a message ID from raw packet bytes using Linkpoint-compatible logic.
-     * 
+     *
      * This exactly matches the reference viewer's SLMessage.DecodeMessageID() behavior:
      * - Reads the first byte as a signed byte
      * - If not -1 (0xFF), returns it as the high frequency ID
      * - If -1, reads next byte; if not -1, returns (byte | 65280) as medium frequency
      * - If both are -1, reads a short and returns (short | -65536) as low frequency
-     * 
+     *
      * @param data The raw packet data
      * @param offset The offset where the message ID starts (after packet header)
      * @return A pair of (messageId, newOffset) or null if decoding failed
@@ -73,60 +73,60 @@ object MessageTranslation {
             Log.w(TAG, "Data too short for message ID at offset $offset")
             return null
         }
-        
+
         var pos = offset
-        
+
         // First byte - treat as signed (Java/Kotlin default)
         val b1 = data[pos].toInt() // Signed byte: -128 to 127
         pos++
-        
+
         // High frequency: not -1 (0xFF)
         if (b1 != -1) {
             return Pair(b1, pos)
         }
-        
+
         // Check for second byte
         if (data.size <= pos) {
             Log.w(TAG, "Data too short for medium frequency message ID")
             return null
         }
-        
+
         // Second byte
         val b2 = data[pos].toInt() // Signed byte
         pos++
-        
+
         // Medium frequency: second byte is not -1
         if (b2 != -1) {
             return Pair(b2 or MEDIUM_FREQUENCY_BASE, pos)
         }
-        
+
         // Low frequency: need two more bytes for the short
         if (data.size <= pos + 1) {
             Log.w(TAG, "Data too short for low frequency message ID")
             return null
         }
-        
+
         // Read short in big-endian (network byte order)
         // Each byte is masked with 0xFF to get unsigned value
         val highByte = data[pos].toInt() and 0xFF
         val lowByte = data[pos + 1].toInt() and 0xFF
         pos += 2
-        
+
         // Combine bytes into a 16-bit value
         val rawShort = (highByte shl 8) or lowByte
-        
+
         // Convert to signed short (to match signed Java byte behavior)
         // then back to Int for the final message ID calculation
         val signedShortValue = rawShort.toShort().toInt()
-        
+
         return Pair(signedShortValue or LOW_FREQUENCY_BASE, pos)
     }
-    
+
     /**
      * Encode a message ID for transmission using Linkpoint-compatible logic.
-     * 
+     *
      * This is the inverse of decodeMessageId().
-     * 
+     *
      * @param messageId The message ID to encode
      * @return The encoded byte array for the message ID
      */
@@ -152,10 +152,10 @@ object MessageTranslation {
             }
         }
     }
-    
+
     /**
      * Determine the frequency class of a message ID.
-     * 
+     *
      * @param messageId The message ID
      * @return The frequency class
      */
@@ -167,10 +167,10 @@ object MessageTranslation {
             else -> MessageFrequency.UNKNOWN
         }
     }
-    
+
     /**
      * Get the encoded size of a message ID.
-     * 
+     *
      * @param messageId The message ID
      * @return The number of bytes needed to encode this ID
      */
@@ -182,10 +182,10 @@ object MessageTranslation {
             MessageFrequency.UNKNOWN -> 1 // Fallback
         }
     }
-    
+
     /**
      * Well-known message IDs with Linkpoint-compatible values.
-     * 
+     *
      * These are calculated using the same formula as the SL protocol:
      * - High frequency: signed byte value
      * - Medium frequency: byte | 65280
@@ -203,13 +203,13 @@ object MessageTranslation {
         const val IMPROVED_TERSE_OBJECT_UPDATE = 15
         const val KILL_OBJECT = 16
         const val AVATAR_ANIMATION = 20
-        
+
         // PacketAck is special - The SL protocol treats 0xFB as signed byte = -5
         const val PACKET_ACK = -5
-        
+
         // Medium frequency messages (0xFF + byte -> byte | 65280)
         const val COARSE_LOCATION_UPDATE = 65286 // 0xFF06 -> 6 | 65280
-        
+
         // Low frequency messages (0xFFFF + short -> short | -65536)
         // Format: 0xFFFFxxxx.toInt() where xxxx is the message number
         // These values are negative when stored as Int due to the high bit being set
@@ -223,7 +223,7 @@ object MessageTranslation {
         const val AGENT_MOVEMENT_COMPLETE = (0xFFFF00FA).toInt()   // Wire: FF FF 00 FA
         const val CHAT_FROM_SIMULATOR = (0xFFFF00A3).toInt()       // Wire: FF FF 00 A3
         const val IMPROVED_INSTANT_MESSAGE = (0xFFFF00FE).toInt()  // Wire: FF FF 00 FE
-        
+
         /**
          * Get a human-readable name for a message ID.
          * Delegates to the centralized MessageIdRegistry.getMessageName() for comprehensive coverage.
@@ -232,32 +232,32 @@ object MessageTranslation {
             return MessageIdRegistry.getMessageName(messageId)
         }
     }
-    
+
     /**
      * Validate that a message ID is properly formed.
-     * 
+     *
      * @param messageId The message ID to validate
      * @return true if the ID is valid
      */
     fun isValidMessageId(messageId: Int): Boolean {
         // -1 (0xFF) is reserved as escape and not a valid high frequency ID
         if (messageId == -1) return false
-        
+
         // Check valid ranges
         val frequency = getMessageFrequency(messageId)
         return frequency != MessageFrequency.UNKNOWN
     }
-    
+
     /**
      * Convert a message ID from standard format to SL protocol format.
-     * 
+     *
      * Standard format uses unsigned values:
      * - High: 0x01-0xFE
      * - Medium: 0xFF00-0xFFFE
      * - Low: 0xFFFF0000-0xFFFFFFFF
-     * 
+     *
      * SL protocol format uses signed values as decoded by DecodeMessageID().
-     * 
+     *
      * @param standardId The standard format message ID
      * @return The Linkpoint-compatible message ID
      */
@@ -279,10 +279,10 @@ object MessageTranslation {
             }
         }
     }
-    
+
     /**
      * Convert a message ID from the reference viewer format to standard format.
-     * 
+     *
      * @param protocolId The SL protocol-format message ID
      * @return The standard format message ID
      */
@@ -304,7 +304,7 @@ object MessageTranslation {
             }
         }
     }
-    
+
     /**
      * Log message ID diagnostic information.
      */
@@ -313,7 +313,7 @@ object MessageTranslation {
         val name = KnownMessages.getName(messageId)
         val encoded = encodeMessageId(messageId)
         val hexEncoded = encoded.joinToString(" ") { "%02X".format(it) }
-        
+
         Log.d(TAG, "Message ID Diagnostics [$operation]:")
         Log.d(TAG, "  ID: $messageId (0x${com.linkpoint.protocol.messages.MessageIdNameRegistry.formatHex(messageId)})")
         Log.d(TAG, "  Name: $name")
