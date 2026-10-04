@@ -521,6 +521,16 @@ fun L2WalletRoute(
         b
     } else 0
 
+    val currencySymbol: String = if (economyAvailable) {
+        val cs by app.economyManager.currencySymbol.collectAsState()
+        cs
+    } else "L$"
+
+    val isZeroCurrency: Boolean = if (economyAvailable) {
+        val zc by app.economyManager.isZeroCurrency.collectAsState()
+        zc
+    } else false
+
     // L$/USD pulled from Linden Lab's published LindeX feed (15-minute
     // cache). Falls back to a 250:1 estimate if the feed hasn't loaded
     // yet so the UI doesn't show 0.00 USD on first open.
@@ -585,6 +595,8 @@ fun L2WalletRoute(
         weeklyIn = transactions.filter { it.isIncome }.sumOf { it.amountLinden },
         weeklyOut = transactions.filter { !it.isIncome }.sumOf { it.amountLinden },
         transactions = transactions,
+        currencySymbol = currencySymbol,
+        isZeroCurrency = isZeroCurrency,
         onBack = onBack,
         onSend = { /* requires recipient picker — not yet implemented */ },
         onRequest = { openUrl("https://secondlife.com/my/lindex/request.php") },

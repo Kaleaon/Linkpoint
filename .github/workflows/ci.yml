@@ -117,6 +117,7 @@ jobs:
 
       - name: Set up Rust cache
         uses: Swatinem/rust-cache@v2
+        continue-on-error: true
 
       - name: Check Rust formatting
         run: cargo fmt --all --check

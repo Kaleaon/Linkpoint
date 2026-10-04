@@ -271,6 +271,8 @@ data class GridInfo(
     val registerUri: String? = null,
     val passwordUri: String? = null,
     val economyUri: String? = null,
+    val currencySymbol: String = "L$",
+    val isZeroCurrency: Boolean = false,
     val mapUri: String? = null,
     val welcomeUri: String? = null,
     val logoUrl: String? = null,
