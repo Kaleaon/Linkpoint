@@ -96,6 +96,12 @@ jobs:
       continue-on-error: true
       id: unit-tests
 
+    - name: Run Paparazzi snapshot tests
+      if: steps.compile.outcome == 'success'
+      run: ./gradlew :ui-components:paparazziDebugCheck --continue
+      continue-on-error: true
+      id: paparazzi-tests
+      
     - name: Run lint checks
       if: steps.compile.outcome == 'success'
       run: ./gradlew lintDebug --continue
@@ -118,6 +124,7 @@ jobs:
         path: |
           build/reports/tests/
           build/reports/lint-results-debug.html
+          ui-components/build/reports/paparazzi/
 
   build:
     name: Build APK
