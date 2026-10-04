@@ -816,6 +816,7 @@ class LinkpointApp : Application() {
         meshManager = MeshManager(this, assetCache, capabilityManager)
         animationManager = AnimationManager(this, assetCache)
         soundManager = SoundManager(this, assetCache)
+        renderManager.meshDownloadManager = meshManager.downloadManager
         renderManager.configurePrimMeshPipeline(
             requester = com.linkpoint.render.prims.PrimRenderer.MeshDataRequester { localId, meshId, lod, onResolved ->
                 applicationScope.launch {

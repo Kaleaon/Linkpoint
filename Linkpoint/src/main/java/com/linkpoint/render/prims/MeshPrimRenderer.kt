@@ -6,6 +6,7 @@ import com.google.android.filament.VertexBuffer.AttributeType
 import com.google.android.filament.VertexBuffer.VertexAttribute
 import com.linkpoint.assets.MeshData
 import com.linkpoint.assets.MeshFace
+import com.linkpoint.assets.MeshLOD
 import com.linkpoint.protocol.textures.TextureEntryParser
 import com.linkpoint.render.materials.FilamentMaterialTranslator
 import com.linkpoint.render.materials.MaterialDescriptor
@@ -58,7 +59,7 @@ class MeshPrimRenderer(
         fun bind(face: Int, textureId: UUID, onLoaded: (Texture?) -> Unit)
     }
 
-    private val compiled = ConcurrentHashMap<UUID, CompiledMesh>()
+    private val compiled = ConcurrentHashMap<Pair<UUID, MeshLOD>, CompiledMesh>()
 
     /**
      * Per-prim MaterialInstance ownership. Keyed by Filament entity ID so
@@ -73,7 +74,8 @@ class MeshPrimRenderer(
     }
 
     fun getOrCompile(data: MeshData): CompiledMesh? {
-        compiled[data.meshId]?.let { return it }
+        val key = data.meshId to data.lod
+        compiled[key]?.let { return it }
         if (data.faces.isEmpty()) return null
         val vbs = mutableListOf<VertexBuffer>()
         val ibs = mutableListOf<IndexBuffer>()
@@ -85,13 +87,40 @@ class MeshPrimRenderer(
                 ibs.add(ib)
             }
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to compile mesh ${data.meshId}", e)
+            Log.w(TAG, "Failed to compile mesh ${data.meshId} at LOD ${data.lod}", e)
             return null
         }
         if (vbs.isEmpty()) return null
         val cm = CompiledMesh(vbs, ibs)
-        compiled[data.meshId] = cm
+        compiled[key] = cm
         return cm
+    }
+
+    /**
+     * Release GPU-side vertex and index buffers for a specific mesh asset and LOD
+     * level when it is no longer referenced by active primitives.
+     */
+    fun releaseMeshLod(meshId: UUID, lod: MeshLOD) {
+        val key = meshId to lod
+        compiled.remove(key)?.let { cm ->
+            try {
+                cm.vertexBuffers.forEach { engine.destroyVertexBuffer(it) }
+                cm.indexBuffers.forEach { engine.destroyIndexBuffer(it) }
+                Log.d(TAG, "Released GPU vertex/index buffers for mesh $meshId at LOD $lod")
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to destroy GPU buffers for mesh $meshId at LOD $lod", e)
+            }
+        }
+    }
+
+    /**
+     * Reclaim GPU VRAM for downgraded or removed mesh LOD levels.
+     */
+    fun cleanUnusedLods(activeLodKeys: Set<Pair<UUID, MeshLOD>>) {
+        val toRemove = compiled.keys.filter { key -> !activeLodKeys.contains(key) }
+        for (key in toRemove) {
+            releaseMeshLod(key.first, key.second)
+        }
     }
 
     /**
