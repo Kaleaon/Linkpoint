@@ -6,6 +6,8 @@ import { HEAD } from "../data/content.js";
 import { SCREENS } from "../theme/constants.js";
 import { app } from "../linkpoint/app";
 import Icon from "./Icon.jsx";
+import DecorativeIcon from "./DecorativeIcon.jsx";
+import IconButton from "./IconButton.jsx";
 import ViewModeSwitcher from "./ViewModeSwitcher.jsx";
 
 // Ported from the five header <sc-if> blocks (hasHeader/isSweepHead/
@@ -146,22 +148,15 @@ function StackHead({ title, subtitle, scr, switcher }) {
       ) : null}
       {headerIcons
         ? headerIcons.map((hi) => (
-            <div
+            <IconButton
               key={hi.icon}
+              icon={hi.icon}
+              label={hi.label}
               onClick={hi.pick}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  hi.pick();
-                }
-              }}
-              role="button"
-              aria-label={hi.label}
-              tabIndex={0}
-              style={{ width: "36px", height: "36px", border: "1px solid " + V.outv, borderRadius: V.rs, background: V.surf, display: "flex", alignItems: "center", justifyContent: "center", color: V.pri, cursor: "pointer" }}
-            >
-              <Icon name={hi.icon} size={16} />
-            </div>
+              size={16}
+              buttonSize={36}
+              style={{ border: "1px solid " + V.outv, borderRadius: V.rs, background: V.surf, color: V.pri }}
+            />
           ))
         : null}
     </div>
