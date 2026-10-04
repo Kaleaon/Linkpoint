@@ -62,6 +62,60 @@ class EacAlphaEncoderTest {
     }
 
     @Test
+    fun `transparent semi-transparent and opaque textures encode and round-trip correctly`() {
+        val size = 64
+        val transparentSrc = ByteArray(size * size) { 0 }
+        val opaqueSrc = ByteArray(size * size) { 255.toByte() }
+        val semiTransparentSrc = ByteArray(size * size) { i ->
+            val row = i / size
+            val col = i % size
+            ((row * 4 + col * 2) % 256).toByte()
+        }
+
+        for ((name, src) in listOf(
+            "transparent" to transparentSrc,
+            "opaque" to opaqueSrc,
+            "semi-transparent" to semiTransparentSrc
+        )) {
+            val encoded = EacAlphaEncoder.encode(src, size, size)
+            assertEquals("$name encoded length", (size / 4) * (size / 4) * 8, encoded.size)
+            val decoded = decodeEac(encoded, size, size)
+            assertEquals("$name decoded length", src.size, decoded.size)
+            
+            if (name == "transparent" || name == "opaque") {
+                val expectedVal = if (name == "transparent") 0 else 255
+                for (p in src.indices) {
+                    assertEquals("$name pixel $p", expectedVal, decoded[p].toInt() and 0xFF)
+                }
+            } else {
+                var maxErr = 0
+                for (p in src.indices) {
+                    val s = src[p].toInt() and 0xFF
+                    val d = decoded[p].toInt() and 0xFF
+                    val e = kotlin.math.abs(s - d)
+                    if (e > maxErr) maxErr = e
+                }
+                assertTrue("$name max per-pixel error $maxErr should be ≤ 16", maxErr <= 16)
+            }
+        }
+    }
+
+    @Test
+    fun `transcoding 1024x1024 texture produces valid deterministic output`() {
+        val w = 1024
+        val h = 1024
+        val src = ByteArray(w * h) { i ->
+            ((i * 31 + 7) % 256).toByte()
+        }
+
+        val encoded1 = EacAlphaEncoder.encode(src, w, h)
+        val encoded2 = EacAlphaEncoder.encode(src, w, h)
+
+        assertEquals("encoded size for 1024x1024", (w / 4) * (h / 4) * 8, encoded1.size)
+        org.junit.Assert.assertArrayEquals("encodings must be deterministic byte-for-byte", encoded1, encoded2)
+    }
+
+    @Test
     fun `width and height must be multiples of 4`() {
         val src = ByteArray(5 * 4) { 0 }
         try {
