@@ -2,6 +2,7 @@ package com.linkpoint.protocol.caps
 
 import android.util.Log
 import com.linkpoint.network.NetworkLogger
+import com.linkpoint.protocol.llsd.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentSkipListMap
 
@@ -169,11 +170,21 @@ class SlidingWindowEventQueue(
     }
 
     private fun generateDedupeKey(seqId: Int, event: CapEventQueue.Event): String? {
-        val eventData = event.eventData
-        val msgText = eventData["message"]?.toString() ?: eventData["text"]?.toString()
-        val fromId = eventData["from_id"]?.toString() ?: eventData["from_agent_id"]?.toString()
-        val timestamp = eventData["timestamp"]?.toString() ?: event.timestamp.toString()
-
+        val body = event.body
+        val msgText = body.getString("message")
+            ?: body.getString("text")
+            ?: body.getUUIDString("message")
+            ?: body.getUUIDString("text")
+        val fromId = body.getString("from_id")
+            ?: body.getUUIDString("from_id")
+            ?: body.getString("from_agent_id")
+            ?: body.getUUIDString("from_agent_id")
+        val timestamp = body.getString("timestamp")
+            ?: body.getUUIDString("timestamp")
+            ?: body.getInt("timestamp")?.toString()
+            ?: body.getReal("timestamp")?.toString()
+            ?: event.timestamp.toString()
+        
         return if (msgText != null || fromId != null) {
             "${event.eventType}_${fromId}_${msgText}_$timestamp"
         } else if (seqId > 0) {
@@ -186,11 +197,39 @@ class SlidingWindowEventQueue(
     private fun estimateEventSize(event: CapEventQueue.Event): Long {
         var size = 128L // Object overhead
         size += event.eventType.length * 2L
-        for ((k, v) in event.eventData) {
+        for ((k, v) in event.body.value) {
             size += k.length * 2L
-            size += v.toString().length * 2L
+            size += estimateLLSDValueSize(v)
         }
         return size
+    }
+
+    private fun estimateLLSDValueSize(value: LLSDValue): Long {
+        return when (value) {
+            is LLSDString -> value.value.length * 2L
+            is LLSDInteger -> 4L
+            is LLSDReal -> 8L
+            is LLSDBoolean -> 1L
+            is LLSDUUID -> 16L
+            is LLSDDate -> 8L
+            is LLSDURI -> value.value.length * 2L
+            is LLSDBinary -> value.value.size.toLong()
+            is LLSDMap -> {
+                var mapSize = 32L
+                for ((k, v) in value.value) {
+                    mapSize += k.length * 2L + estimateLLSDValueSize(v)
+                }
+                mapSize
+            }
+            is LLSDArray -> {
+                var arrSize = 32L
+                for (elem in value.value) {
+                    arrSize += estimateLLSDValueSize(elem)
+                }
+                arrSize
+            }
+            else -> 16L
+        }
     }
 
     private fun evictOldestToFit(requiredBytes: Long) {
