@@ -9,7 +9,18 @@ and avatar renderer pipeline integration.
 import threading
 import time
 import unittest
-from texture_decoder import TextureDecoder, DecodedTexture, DecodeProgressEvent, create_placeholder_texture, parse_jp2_dimensions
+from unittest.mock import patch
+from texture_decoder import (
+    TextureDecoder,
+    DecodedTexture,
+    DecodeProgressEvent,
+    create_placeholder_texture,
+    parse_jp2_dimensions,
+    decode_jpeg2000_buffer,
+    populate_rgba_buffer_python,
+    populate_rgba_buffer_native,
+    _get_native_lib
+)
 from inventory_cache import InventoryCache
 from avatar_renderer import AvatarRenderer
 
@@ -177,6 +188,65 @@ class TestTextureDecoder(unittest.TestCase):
         self.assertIn("HEADER_PARSING", stages)
         self.assertIn("COMPLETE", stages)
         self.assertEqual(progress_events[-1].progress, 100.0)
+
+    def test_native_vs_python_equivalence(self):
+        sizes = [16 * 16 * 4, 64 * 64 * 4, 256 * 256 * 4]
+        for buf_size in sizes:
+            for seed in [0, 42, 128, 254]:
+                py_buf = populate_rgba_buffer_python(buf_size, seed)
+                c_buf = populate_rgba_buffer_native(buf_size, seed)
+
+                self.assertIsNotNone(c_buf, "Native C buffer population should succeed")
+                self.assertEqual(py_buf, c_buf, f"Mismatch for buffer size {buf_size} seed {seed}")
+
+    def test_fallback_when_native_fails(self):
+        jp2_header = b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a" + b"ihdr\x00\x00\x00\x20\x00\x00\x00\x20"
+        raw_bytes = jp2_header + b"\x00" * 32
+
+        with patch("texture_decoder._get_native_lib", return_value=None):
+            decoded = decode_jpeg2000_buffer("tex_fallback", raw_bytes)
+            self.assertEqual(decoded.status, "success")
+            self.assertEqual(decoded.width, 32)
+            self.assertEqual(decoded.height, 32)
+            self.assertEqual(len(decoded.buffer), 32 * 32 * 4)
+
+    def test_performance_sub_quarter_second(self):
+        # Header specifying 8192x8192 resolution
+        jp2_header = b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a" + b"ihdr\x00\x00\x20\x00\x00\x00\x20\x00"
+        raw_bytes = jp2_header + b"\x00" * 256
+
+        t0 = time.time()
+        decoded = decode_jpeg2000_buffer("tex_large_8k", raw_bytes)
+        elapsed = time.time() - t0
+
+        self.assertEqual(decoded.status, "success")
+        self.assertEqual(decoded.width, 8192)
+        self.assertEqual(decoded.height, 8192)
+        self.assertEqual(len(decoded.buffer), 8192 * 8192 * 4)
+        self.assertLess(elapsed, 0.25, f"Decoding 8192x8192 texture took {elapsed:.4f}s, expected < 0.25s")
+
+    def test_concurrent_multithreaded_safety(self):
+        jp2_data = b"\x00\x00\x00\x0c\x6a\x50\x20\x20" + b"ihdr\x00\x00\x00\x20\x00\x00\x00\x20"
+        num_requests = 20
+        received_count = 0
+        lock = threading.Lock()
+        done_event = threading.Event()
+
+        def callback(decoded: DecodedTexture):
+            nonlocal received_count
+            with lock:
+                received_count += 1
+                if received_count == num_requests:
+                    done_event.set()
+
+        futures = []
+        for i in range(num_requests):
+            f = self.decoder.request_decode(f"tex_concurrent_{i}", jp2_data, callback=callback)
+            futures.append(f)
+
+        completed = done_event.wait(timeout=5.0)
+        self.assertTrue(completed, f"Only {received_count}/{num_requests} concurrent requests completed")
+        self.assertEqual(received_count, num_requests)
 
 
 

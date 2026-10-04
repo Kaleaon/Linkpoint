@@ -6,6 +6,8 @@ repos:
     hooks:
       - id: trailing-whitespace
         files: '^(apps/linkpoint/src/)'
+      - id: end-of-file-fixer
+        files: '^(apps/linkpoint/src/)'
         exclude: '.*message_template\.msg$'
       - id: end-of-file-fixer
         files: '^(apps/linkpoint/src/)'

@@ -7,14 +7,131 @@ OpenGL surface handlers upon completion.
 """
 
 import concurrent.futures
+import ctypes
 import dataclasses
 import logging
+import os
+import platform
 import struct
+import subprocess
 import threading
 import time
 from typing import Callable, Optional, Dict, Set, Any
 
 logger = logging.getLogger(__name__)
+
+_NATIVE_LIB = None
+_NATIVE_LIB_LOADED = False
+_PYTHONAPI_INIT = False
+_PYBYTES_FROM_STRING_AND_SIZE = None
+_PYBYTES_AS_STRING = None
+
+
+def _init_pythonapi():
+    global _PYTHONAPI_INIT, _PYBYTES_FROM_STRING_AND_SIZE, _PYBYTES_AS_STRING
+    if _PYTHONAPI_INIT:
+        return
+    _PYTHONAPI_INIT = True
+    try:
+        api = ctypes.pythonapi
+        api.PyBytes_FromStringAndSize.argtypes = [ctypes.c_char_p, ctypes.c_ssize_t]
+        api.PyBytes_FromStringAndSize.restype = ctypes.py_object
+        api.PyBytes_AsString.argtypes = [ctypes.py_object]
+        api.PyBytes_AsString.restype = ctypes.POINTER(ctypes.c_ubyte)
+        _PYBYTES_FROM_STRING_AND_SIZE = api.PyBytes_FromStringAndSize
+        _PYBYTES_AS_STRING = api.PyBytes_AsString
+    except Exception as e:
+        logger.debug(f"pythonapi PyBytes initialization failed: {e}")
+
+
+def _get_native_lib():
+    global _NATIVE_LIB, _NATIVE_LIB_LOADED
+    if _NATIVE_LIB_LOADED:
+        return _NATIVE_LIB
+
+    _NATIVE_LIB_LOADED = True
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    c_source = os.path.join(base_dir, "texture_decoder_native.c")
+
+    system = platform.system().lower()
+    if "windows" in system:
+        lib_name = "texture_decoder_native.dll"
+    elif "darwin" in system:
+        lib_name = "libtexture_decoder_native.dylib"
+    else:
+        lib_name = "libtexture_decoder_native.so"
+
+    lib_path = os.path.join(base_dir, lib_name)
+
+    if not os.path.exists(lib_path) and os.path.exists(c_source):
+        compiler_cmds = [
+            ["gcc", "-O3", "-fopenmp", "-fPIC", "-shared"],
+            ["gcc", "-O3", "-fPIC", "-shared"],
+            ["clang", "-O3", "-fopenmp", "-fPIC", "-shared"],
+            ["clang", "-O3", "-fPIC", "-shared"],
+            ["cc", "-O3", "-fPIC", "-shared"],
+        ]
+        for cmd_prefix in compiler_cmds:
+            try:
+                cmd = cmd_prefix + [c_source, "-o", lib_path]
+                subprocess.check_call(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                if os.path.exists(lib_path):
+                    break
+            except Exception:
+                continue
+
+    if os.path.exists(lib_path):
+        try:
+            lib = ctypes.CDLL(lib_path)
+            lib.populate_rgba_buffer.argtypes = [
+                ctypes.POINTER(ctypes.c_ubyte),
+                ctypes.c_size_t,
+                ctypes.c_int
+            ]
+            lib.populate_rgba_buffer.restype = None
+            _NATIVE_LIB = lib
+            logger.info(f"Loaded native C JPEG2000 offload library from {lib_path}")
+        except Exception as e:
+            logger.warning(f"Failed to load native C shared library {lib_path}: {e}")
+            _NATIVE_LIB = None
+    else:
+        logger.info("Native C library not found; using Python fallback decoder.")
+
+    return _NATIVE_LIB
+
+
+def populate_rgba_buffer_python(buffer_size: int, seed: int) -> bytes:
+    """Fallback Python loop implementation for buffer population."""
+    decoded_bytes = bytearray(buffer_size)
+    for i in range(0, buffer_size, 4):
+        decoded_bytes[i] = (seed + i) % 256
+        decoded_bytes[i + 1] = (seed + i * 2) % 256
+        decoded_bytes[i + 2] = (seed + i * 3) % 256
+        decoded_bytes[i + 3] = 255
+    return bytes(decoded_bytes)
+
+
+def populate_rgba_buffer_native(buffer_size: int, seed: int) -> Optional[bytes]:
+    """
+    Attempts to populate RGBA pixel memory buffer using compiled C extension via ctypes.
+    Returns bytes object if offload succeeded, None if native execution failed.
+    """
+    native_lib = _get_native_lib()
+    if native_lib is None:
+        return None
+
+    _init_pythonapi()
+    if _PYBYTES_FROM_STRING_AND_SIZE is None or _PYBYTES_AS_STRING is None:
+        return None
+
+    try:
+        py_bytes = _PYBYTES_FROM_STRING_AND_SIZE(None, buffer_size)
+        buf_ptr = _PYBYTES_AS_STRING(py_bytes)
+        native_lib.populate_rgba_buffer(buf_ptr, buffer_size, seed)
+        return py_bytes
+    except Exception as e:
+        logger.warning(f"Native C buffer population failed: {e}. Falling back to Python loop.")
+        return None
 
 
 @dataclasses.dataclass
@@ -89,17 +206,15 @@ def decode_jpeg2000_buffer(texture_id: str, raw_bytes: bytes) -> DecodedTexture:
             raise ValueError("Corrupted JPEG2000 payload")
 
         buffer_size = width * height * 4
-        decoded_bytes = bytearray(buffer_size)
         seed = len(raw_bytes) % 255
-        for i in range(0, buffer_size, 4):
-            decoded_bytes[i] = (seed + i) % 256
-            decoded_bytes[i + 1] = (seed + i * 2) % 256
-            decoded_bytes[i + 2] = (seed + i * 3) % 256
-            decoded_bytes[i + 3] = 255
+
+        decoded_buffer = populate_rgba_buffer_native(buffer_size, seed)
+        if decoded_buffer is None:
+            decoded_buffer = populate_rgba_buffer_python(buffer_size, seed)
 
         return DecodedTexture(
             texture_id=texture_id,
-            buffer=bytes(decoded_bytes),
+            buffer=decoded_buffer,
             width=width,
             height=height,
             format="RGBA",

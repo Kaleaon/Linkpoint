@@ -63,7 +63,7 @@ export default function Settings() {
             Off by default. When on, you can copy saved contacts to Google Contacts and add group notices to Google Calendar. You sign in with Google only when you use one of those, and Linkpoint asks for just the access that feature needs. Contacts and notices work without it.
           </p>
         </div>
-        <span aria-labelledby="google-label"><Toggle on={googleEnabled} onClick={() => void toggleGoogle()} /></span>
+        <Toggle on={googleEnabled} onClick={() => void toggleGoogle()} ariaLabelledBy="google-label" />
       </div>
       {googleNote ? <p role="status">{googleNote}</p> : null}
     </section>
