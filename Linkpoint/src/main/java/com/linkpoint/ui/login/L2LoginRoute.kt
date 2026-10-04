@@ -8,7 +8,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.linkpoint.LinkpointApp
+import com.linkpoint.auth.OAuth2AuthManager
+import com.linkpoint.auth.OAuth2Result
+import com.linkpoint.auth.OAuthCallbackActivity
 import com.linkpoint.network.LoginResult
 import com.linkpoint.core.ConnectionState
 import com.linkpoint.ui.auth.WebAuthInterceptorDialog
@@ -19,8 +23,8 @@ import kotlinx.coroutines.withContext
 
 /**
  * Compose-first LOGIN destination wired into the Linkpoint 2.0 nav graph.
- * Drives the same `protocol.login(...)` flow the legacy entry point uses,
- * but renders the modern aurora + glass [LoginScreen] without any Activity
+ * Drives the modern OAuth2 Custom Tabs & `protocol.login(...)` flow,
+ * rendering the modern aurora + glass [LoginScreen] without any Activity
  * bridge.
  */
 @Composable
@@ -29,9 +33,11 @@ fun L2LoginRoute(
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     val app = LinkpointApp.getInstance()
+    val authManager = remember { OAuth2AuthManager.getInstance() }
     val gridListFlow = remember { app.gridManager.getAvailableGridsFlow() }
-    val gridList by gridListFlow.collectAsState(initial = app.gridManager.getAvailableGrids())
+    val gridList by gridListFlow.collectAsState(initial = emptyList())
     val grids = gridList.map {
         GridDisplayInfo(
             id = it.id,
@@ -45,13 +51,71 @@ fun L2LoginRoute(
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf(false) }
     var showWebAuthDialog by remember { mutableStateOf(false) }
-    var webAuthUrl by remember { mutableStateOf("https://id.secondlife.com/openid/login") }
+    var webAuthUrl by remember { mutableStateOf("https://id.secondlife.com/oauth2/authorize") }
     var pendingCredentials by remember { mutableStateOf<LoginCredentials?>(null) }
     val connectionState by app.sessionManager.connectionState.collectAsState()
     val isConnected = connectionState == ConnectionState.CONNECTED
 
     LaunchedEffect(isConnected) {
         if (isConnected) onLoginSuccess()
+    }
+
+    // Check for incoming OAuthCallbackActivity result on resume
+    LaunchedEffect(Unit) {
+        val callbackResult = OAuthCallbackActivity.latestCallbackResult
+        if (callbackResult != null) {
+            OAuthCallbackActivity.clearLatestResult()
+            when (callbackResult) {
+                is OAuth2Result.Success -> {
+                    loading = true
+                    error = false
+                    status = "Web authorization code exchanged. Resuming grid scene loading…"
+                    val selectedGrid = app.gridManager.getSelectedGrid()
+                    app.applicationScope.launch {
+                        val creds = pendingCredentials ?: LoginCredentials()
+                        val startLocation = when (creds.startLocation.trim().lowercase()) {
+                            "last location", "last" -> "last"
+                            "home" -> "home"
+                            else -> app.startLocationManager.getStartLocationForLogin()
+                        }
+                        val result = app.protocol.login(
+                            firstName = creds.firstName.trim(),
+                            lastName = creds.lastName.trim().ifBlank { "Resident" },
+                            password = creds.password,
+                            loginUri = selectedGrid.loginUri,
+                            startLocation = startLocation,
+                            mfaToken = callbackResult.accessToken,
+                            mfaHash = callbackResult.mfaHash ?: "",
+                            webAuthToken = callbackResult.accessToken
+                        )
+                        withContext(Dispatchers.Main) {
+                            loading = false
+                            when (result) {
+                                is LoginResult.Success -> status = "Welcome to ${selectedGrid.name}"
+                                is LoginResult.MFARequired -> {
+                                    status = "Additional MFA verification required."
+                                    error = true
+                                }
+                                is LoginResult.Failure -> {
+                                    status = result.message
+                                    error = true
+                                }
+                            }
+                        }
+                    }
+                }
+                is OAuth2Result.Cancelled -> {
+                    loading = false
+                    error = false
+                    status = callbackResult.message
+                }
+                is OAuth2Result.Error -> {
+                    loading = false
+                    error = true
+                    status = callbackResult.message
+                }
+            }
+        }
     }
 
     if (showWebAuthDialog) {
@@ -113,19 +177,25 @@ fun L2LoginRoute(
         isLoading = loading,
         isError = error,
         onWebAuthRequested = {
-            webAuthUrl = "https://id.secondlife.com/openid/login"
-            showWebAuthDialog = true
+            val (authUrl, _) = authManager.startAuthSession()
+            webAuthUrl = authUrl
+            val launched = authManager.launchAuthPortal(context, authUrl)
+            if (!launched) {
+                // Fallback to embedded WebView dialog if no external browser / Custom Tabs could be launched
+                showWebAuthDialog = true
+            } else {
+                status = "Opening Second Life OAuth2 Portal in Custom Tabs…"
+            }
         },
         onLogin = { credentials ->
             pendingCredentials = credentials
             loading = true
             error = false
-            val grid = app.gridManager.getAvailableGrids()
-                .getOrNull(credentials.selectedGridIndex)
+            val grid = gridList.getOrNull(credentials.selectedGridIndex)
                 ?: app.gridManager.getSelectedGrid()
-            app.gridManager.selectGrid(grid.id)
             status = "Resolving grid & logging in to ${grid.name}…"
             app.applicationScope.launch {
+                app.gridManager.selectGridAsync(grid.id)
                 val startLocation = when (credentials.startLocation.trim().lowercase()) {
                     "last location", "last" -> "last"
                     "home" -> "home"

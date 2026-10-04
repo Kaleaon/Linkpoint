@@ -50,13 +50,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.linkpoint.R
 import com.linkpoint.inventory.notecard.EmbeddedItem
 import com.linkpoint.inventory.notecard.NotecardData
+import com.linkpoint.ui.components.linkpoint2.tokens.GeneratedTokens
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -136,8 +139,8 @@ fun NotecardEditorScreen(
     if (showUnsavedDialog) {
         AlertDialog(
             onDismissRequest = { showUnsavedDialog = false },
-            title = { Text("Unsaved Changes") },
-            text = { Text("You have unsaved changes. Do you want to save before closing?") },
+            title = { Text(stringResource(R.string.notecard_unsaved_title)) },
+            text = { Text(stringResource(R.string.notecard_unsaved_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -154,19 +157,19 @@ fun NotecardEditorScreen(
                         }
                     }
                 ) {
-                    Text("Save")
+                    Text(stringResource(R.string.save))
                 }
             },
             dismissButton = {
                 Row {
                     TextButton(onClick = { showUnsavedDialog = false }) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.cancel))
                     }
                     TextButton(onClick = {
                         showUnsavedDialog = false
                         onNavigateBack()
                     }) {
-                        Text("Discard")
+                        Text(stringResource(R.string.discard))
                     }
                 }
             }
@@ -181,13 +184,13 @@ fun NotecardEditorScreen(
                         Text(notecardName, maxLines = 1)
                         Text(
                             text = when {
-                                hasUnsavedChanges -> "Unsaved changes"
-                                isReadOnly -> "Read Only"
-                                else -> "Editing"
+                                hasUnsavedChanges -> stringResource(R.string.notecard_status_unsaved)
+                                isReadOnly -> stringResource(R.string.notecard_status_readonly)
+                                else -> stringResource(R.string.notecard_status_editing)
                             },
                             style = MaterialTheme.typography.bodySmall,
                             color = if (hasUnsavedChanges) 
-                                Color(0xFFFF9800) 
+                                GeneratedTokens.Color.Status.Unsaved 
                             else 
                                 MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -195,22 +198,25 @@ fun NotecardEditorScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = { handleBack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 actions = {
                     // Copy button
+                    val copiedText = stringResource(R.string.notecard_copied_clipboard)
                     IconButton(onClick = {
                         clipboardManager.setText(AnnotatedString(notecardContent))
                         scope.launch {
-                            snackbarHostState.showSnackbar("Notecard copied to clipboard")
+                            snackbarHostState.showSnackbar(copiedText)
                         }
                     }) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy")
+                        Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.copy))
                     }
                     
                     // Save button (only for editable notecards)
                     if (!isReadOnly && itemId != null) {
+                        val savedText = stringResource(R.string.notecard_saved)
+                        val failedText = stringResource(R.string.notecard_failed_save)
                         IconButton(
                             onClick = {
                                 scope.launch {
@@ -218,9 +224,9 @@ fun NotecardEditorScreen(
                                     if (success) {
                                         originalContent = notecardContent
                                         hasUnsavedChanges = false
-                                        snackbarHostState.showSnackbar("Notecard saved")
+                                        snackbarHostState.showSnackbar(savedText)
                                     } else {
-                                        snackbarHostState.showSnackbar("Failed to save notecard")
+                                        snackbarHostState.showSnackbar(failedText)
                                     }
                                 }
                             },
@@ -228,7 +234,7 @@ fun NotecardEditorScreen(
                         ) {
                             Icon(
                                 Icons.Default.Save,
-                                contentDescription = "Save",
+                                contentDescription = stringResource(R.string.save),
                                 tint = if (hasUnsavedChanges) 
                                     MaterialTheme.colorScheme.primary 
                                 else 
@@ -238,13 +244,13 @@ fun NotecardEditorScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF252526),
+                    containerColor = GeneratedTokens.Color.Editor.AppbarBackground,
                     titleContentColor = Color.White
                 )
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = Color(0xFF1E1E1E),
+        containerColor = GeneratedTokens.Color.Editor.Background,
         modifier = modifier
     ) { paddingValues ->
         if (isLoading) {
@@ -259,7 +265,7 @@ fun NotecardEditorScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     CircularProgressIndicator()
-                    Text("Loading notecard...", color = Color.White)
+                    Text(stringResource(R.string.notecard_loading), color = Color.White)
                 }
             }
         } else {
@@ -275,7 +281,7 @@ fun NotecardEditorScreen(
                         expanded = showEmbeddedItems,
                         onToggle = { showEmbeddedItems = !showEmbeddedItems }
                     )
-                    HorizontalDivider(color = Color(0xFF3C3C3C))
+                    HorizontalDivider(color = GeneratedTokens.Color.Editor.Divider)
                 }
                 
                 // Content editor
@@ -305,7 +311,7 @@ private fun EmbeddedItemsSection(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color(0xFF2D2D2D))
+            .background(GeneratedTokens.Color.Editor.PanelBackground)
             .clickable { onToggle() }
             .padding(12.dp)
     ) {
@@ -318,12 +324,12 @@ private fun EmbeddedItemsSection(
                 Icon(
                     Icons.Default.AttachFile,
                     contentDescription = null,
-                    tint = Color(0xFFB0B0B0),
+                    tint = GeneratedTokens.Color.Editor.TextMuted,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Embedded Items (${items.size})",
+                    text = stringResource(R.string.notecard_embedded_items, items.size),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White
                 )
@@ -331,7 +337,7 @@ private fun EmbeddedItemsSection(
             Icon(
                 if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                 contentDescription = if (expanded) "Collapse" else "Expand",
-                tint = Color(0xFFB0B0B0)
+                tint = GeneratedTokens.Color.Editor.TextMuted
             )
         }
         
@@ -360,19 +366,19 @@ private fun EmbeddedItemRow(
     ) {
         Text(
             text = "•",
-            color = Color(0xFF808080),
+            color = GeneratedTokens.Color.Editor.TextDim,
             modifier = Modifier.padding(end = 8.dp)
         )
         Text(
             text = item.name,
             style = MaterialTheme.typography.bodySmall,
-            color = Color(0xFFB0B0B0)
+            color = GeneratedTokens.Color.Editor.TextMuted
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = "(${getItemTypeName(item.type)})",
             style = MaterialTheme.typography.bodySmall,
-            color = Color(0xFF808080)
+            color = GeneratedTokens.Color.Editor.TextDim
         )
     }
 }
@@ -392,7 +398,7 @@ private fun NotecardContent(
     
     Box(
         modifier = modifier
-            .background(Color(0xFF1E1E1E))
+            .background(GeneratedTokens.Color.Editor.Background)
             .verticalScroll(verticalScrollState)
             .horizontalScroll(horizontalScrollState)
             .padding(16.dp)
@@ -403,7 +409,7 @@ private fun NotecardContent(
                 style = TextStyle(
                     fontFamily = FontFamily.Default,
                     fontSize = 14.sp,
-                    color = Color(0xFFD4D4D4)
+                    color = GeneratedTokens.Color.Editor.Text
                 )
             )
         } else {
@@ -413,7 +419,7 @@ private fun NotecardContent(
                 textStyle = TextStyle(
                     fontFamily = FontFamily.Default,
                     fontSize = 14.sp,
-                    color = Color(0xFFD4D4D4)
+                    color = GeneratedTokens.Color.Editor.Text
                 ),
                 cursorBrush = SolidColor(Color.White),
                 modifier = Modifier.fillMaxSize()
@@ -425,23 +431,24 @@ private fun NotecardContent(
 /**
  * Convert inventory type number to human-readable name.
  */
+@Composable
 private fun getItemTypeName(type: Int): String {
     return when (type) {
-        0 -> "Texture"
-        1 -> "Sound"
-        2 -> "Calling Card"
-        3 -> "Landmark"
-        5 -> "Clothing"
-        6 -> "Object"
-        7 -> "Notecard"
-        10 -> "Script"
-        13 -> "Body Part"
-        20 -> "Animation"
-        21 -> "Gesture"
-        49 -> "Mesh"
-        56 -> "Settings"
-        57 -> "Material"
-        else -> "Item"
+        0 -> stringResource(R.string.inventory_type_texture)
+        1 -> stringResource(R.string.inventory_type_sound)
+        2 -> stringResource(R.string.inventory_type_calling_card)
+        3 -> stringResource(R.string.inventory_type_landmark)
+        5 -> stringResource(R.string.inventory_type_clothing)
+        6 -> stringResource(R.string.inventory_type_object)
+        7 -> stringResource(R.string.inventory_type_notecard)
+        10 -> stringResource(R.string.inventory_type_script)
+        13 -> stringResource(R.string.inventory_type_body_part)
+        20 -> stringResource(R.string.inventory_type_animation)
+        21 -> stringResource(R.string.inventory_type_gesture)
+        49 -> stringResource(R.string.inventory_type_mesh)
+        56 -> stringResource(R.string.inventory_type_settings)
+        57 -> stringResource(R.string.inventory_type_material)
+        else -> stringResource(R.string.inventory_type_item)
     }
 }
 

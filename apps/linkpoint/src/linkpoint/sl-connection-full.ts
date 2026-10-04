@@ -115,6 +115,8 @@ export class SLConnectionFull extends Utils.EventEmitter {
     forward('friend-remove', 'friend_remove');
     forward('script-dialog', 'script_dialog');
     forward('lure', 'lure');
+    forward('inventory-offer', 'inventory_offer');
+    forward('group-invite', 'group_invite');
     forward('parcel-properties', 'ParcelProperties', (data) => ({ parcelData: data }));
     forward('coarse-avatar', 'CoarseAvatarUpdate');
     forward('mute-list-update', 'MuteListUpdate');
@@ -127,8 +129,9 @@ export class SLConnectionFull extends Utils.EventEmitter {
         this.emit('avatar-presence', data);
       });
     }
+    forward('sun-hour-update', 'sun-hour-update');
     // Everything else the session announces is scene data: objects, assets, textures, terrain, environment...
-    for (const type of ['object-add', 'object-update', 'object-remove', 'asset-ready', 'asset-error', 'animations', 'texture-ready', 'material-ready', 'world-data', 'environment', 'terrain']) {
+    for (const type of ['object-add', 'object-update', 'object-remove', 'asset-ready', 'asset-error', 'animations', 'texture-ready', 'material-ready', 'world-data', 'environment', 'terrain', 'sun-hour-update']) {
       forward(type, `scene:${type}`);
     }
     slBridge.on('disconnected', (data: any) => {
@@ -318,6 +321,30 @@ export class SLConnectionFull extends Utils.EventEmitter {
   async acceptLure(id: string) {
     this.requireConnected();
     return slBridge.acceptLure({ id });
+  }
+
+  /** Accept an inventory offer. */
+  async acceptInventoryOffer(id: string) {
+    this.requireConnected();
+    return slBridge.acceptInventoryOffer({ id });
+  }
+
+  /** Decline an inventory offer. */
+  async declineInventoryOffer(id: string) {
+    this.requireConnected();
+    return slBridge.declineInventoryOffer({ id });
+  }
+
+  /** Accept a group membership invitation. */
+  async acceptGroupInvite(id: string) {
+    this.requireConnected();
+    return slBridge.acceptGroupInvite({ id });
+  }
+
+  /** Decline a group membership invitation. */
+  async declineGroupInvite(id: string) {
+    this.requireConnected();
+    return slBridge.declineGroupInvite({ id });
   }
 
   /** Forget an interaction on the server. Nothing is sent to the grid. */

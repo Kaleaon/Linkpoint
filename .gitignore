@@ -95,6 +95,7 @@ network_*.java
 # Allow PWA-demo scripts
 !PWA-demo/*.sh
 !scripts/*.sh
+!scripts/*.py
 
 # Build artifacts and backups
 *.backup
@@ -156,5 +157,11 @@ build_output.txt
 /node_modules/
 **/node_modules/
 **/dist/
+/.dart_tool/
+**/.dart_tool/
 /target/
 /artifacts/
+/coverage/
+**/coverage/
+*.lcov
+lcov.info

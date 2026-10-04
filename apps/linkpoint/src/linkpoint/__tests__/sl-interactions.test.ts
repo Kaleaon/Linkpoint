@@ -5,6 +5,8 @@ const require = createRequire(import.meta.url);
 const {
   TEXT_BOX_MARKER, MAX_REPLY_BYTES, serializeScriptDialog, serializeLure, PendingInteractions,
   subscribeInteractions, respondScriptDialog, acceptLure, dismissInteraction, serializeGroupNotice,
+  serializeInventoryOffer, serializeGroupInvite, acceptInventoryOffer, declineInventoryOffer,
+  acceptGroupInvite, declineGroupInvite,
 } = require('../../../core/sl-interactions.cjs');
 
 const uuid = (value: string) => ({ toString: () => value });
@@ -269,5 +271,102 @@ describe('lures', () => {
     const bot = { currentRegion: { circuit: failingCircuit }, clientCommands: { comms: {}, teleport: {} } };
     await expect(dismissInteraction(bot, pending2, { id: id2 })).resolves.toEqual({ dismissed: true });
     expect(pending2.size).toBe(0);
+  });
+});
+
+describe('inventory offers and group invites', () => {
+  it('serializes inventory offers with sender name, item name, asset type, and transaction ID', () => {
+    const offer = {
+      from: uuid('sender-1'),
+      fromName: 'Alice Resident',
+      message: 'Cool Shirt',
+      type: 0,
+      requestID: uuid('trans-123'),
+    };
+    expect(serializeInventoryOffer(offer)).toMatchObject({
+      fromId: 'sender-1',
+      fromName: 'Alice Resident',
+      senderName: 'Alice Resident',
+      itemName: 'Cool Shirt',
+      assetType: 0,
+      transactionId: 'trans-123',
+    });
+  });
+
+  it('serializes group invites with sender name, group ID, group name, role ID, and fee', () => {
+    const invite = {
+      from: uuid('sender-2'),
+      fromName: 'Bob Resident',
+      groupID: uuid('group-456'),
+      groupName: 'Builders Club',
+      roleID: uuid('role-789'),
+      fee: 50,
+      inviteID: uuid('invite-123'),
+    };
+    expect(serializeGroupInvite(invite)).toMatchObject({
+      fromId: 'sender-2',
+      fromName: 'Bob Resident',
+      senderName: 'Bob Resident',
+      groupId: 'group-456',
+      groupName: 'Builders Club',
+      roleId: 'role-789',
+      fee: 50,
+      inviteId: 'invite-123',
+    });
+  });
+
+  it('subscribes to onInventoryOffered and onGroupInvite events', () => {
+    const handlers: Record<string, (e: any) => void> = {};
+    const subject = (name: string) => ({ subscribe: (fn: any) => { handlers[name] = fn; return { unsubscribe: vi.fn() }; } });
+    const pending = new PendingInteractions();
+    const send = vi.fn();
+    const subs = subscribeInteractions({ onInventoryOffered: subject('io'), onGroupInvite: subject('gi') }, pending, send);
+    expect(subs).toHaveLength(2);
+
+    handlers.io({ from: uuid('s1'), fromName: 'Alice', message: 'Hat', type: 0, requestID: uuid('t1') });
+    handlers.gi({ from: uuid('s2'), fromName: 'Bob', groupID: uuid('g1'), groupName: 'Club', inviteID: uuid('i1') });
+
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(send.mock.calls[0][0]).toBe('inventory-offer');
+    expect(send.mock.calls[1][0]).toBe('group-invite');
+    expect(pending.size).toBe(2);
+  });
+
+  it('accepts and declines inventory offers, sending responses and clearing pending entries', async () => {
+    const pending = new PendingInteractions();
+    const offerEvent = { from: uuid('s1'), requestID: uuid('r1'), type: 0 };
+    const id = pending.add('inventory-offer', offerEvent);
+
+    const acceptInventoryOfferMock = vi.fn().mockResolvedValue(undefined);
+    const rejectInventoryOfferMock = vi.fn().mockResolvedValue(undefined);
+    const bot = { clientCommands: { inventory: { acceptInventoryOffer: acceptInventoryOfferMock, rejectInventoryOffer: rejectInventoryOfferMock } } };
+
+    await expect(acceptInventoryOffer(bot, pending, { id })).resolves.toEqual({ accepted: true });
+    expect(acceptInventoryOfferMock).toHaveBeenCalledWith(offerEvent);
+    expect(pending.size).toBe(0);
+
+    const id2 = pending.add('inventory-offer', offerEvent);
+    await expect(declineInventoryOffer(bot, pending, { id: id2 })).resolves.toEqual({ declined: true });
+    expect(rejectInventoryOfferMock).toHaveBeenCalledWith(offerEvent);
+    expect(pending.size).toBe(0);
+  });
+
+  it('accepts and declines group invites, sending responses and clearing pending entries', async () => {
+    const pending = new PendingInteractions();
+    const inviteEvent = { from: uuid('s2'), inviteID: uuid('i1') };
+    const id = pending.add('group-invite', inviteEvent);
+
+    const acceptGroupInviteMock = vi.fn().mockResolvedValue(undefined);
+    const rejectGroupInviteMock = vi.fn().mockResolvedValue(undefined);
+    const bot = { clientCommands: { group: { acceptGroupInvite: acceptGroupInviteMock, rejectGroupInvite: rejectGroupInviteMock } } };
+
+    await expect(acceptGroupInvite(bot, pending, { id })).resolves.toEqual({ accepted: true });
+    expect(acceptGroupInviteMock).toHaveBeenCalledWith(inviteEvent);
+    expect(pending.size).toBe(0);
+
+    const id2 = pending.add('group-invite', inviteEvent);
+    await expect(declineGroupInvite(bot, pending, { id: id2 })).resolves.toEqual({ declined: true });
+    expect(rejectGroupInviteMock).toHaveBeenCalledWith(inviteEvent);
+    expect(pending.size).toBe(0);
   });
 });

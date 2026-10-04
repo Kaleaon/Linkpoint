@@ -7,9 +7,10 @@
 const METHODS = new Set([
   'sendChat', 'sendInstantMessage', 'sendGroupMessage', 'sendFriendRequest',
   'teleport', 'touchObject', 'sit', 'stand', 'setMovement', 'getBalance', 'payObject',
-  'respondScriptDialog', 'acceptLure', 'dismissInteraction',
+  'respondScriptDialog', 'acceptLure', 'acceptInventoryOffer', 'declineInventoryOffer', 'acceptGroupInvite', 'declineGroupInvite', 'dismissInteraction',
   'fetchAnimation', 'getMapBlocks', 'getFriends', 'getGroups', 'getInventory', 'getDiagnostics',
   'getSceneObjects', 'getSceneSnapshot',
+  'wearItem', 'wearOutfit', 'requestMuteList', 'updateMuteListEntry', 'removeMuteListEntry',
 ]);
 
 async function callViewer(session, method, params) {

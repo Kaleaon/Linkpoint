@@ -42,6 +42,7 @@ export class WorldViewer extends Utils.EventEmitter {
   public nearbyUsers: any[] = [];
   public avatarPosition: [number, number, number] | null = null;
   public environment: any = null;
+  public simSunHour: number | null = null;
   public terrain: { size: number; heights: number[] } | null = null;
   public selectedObject: any = null;
   /** The worn HUD shown over the view, if any. Its size is a fraction of the view height. */
@@ -88,6 +89,7 @@ export class WorldViewer extends Utils.EventEmitter {
       this.avatarPosition = null;
       this.nearbyUsers = [];
       this.environment = null;
+      this.simSunHour = null;
       this.terrain = null;
       this.terrainMaterials = null;
       this.selectedObject = null;
@@ -162,6 +164,20 @@ export class WorldViewer extends Utils.EventEmitter {
     this.protocol.on('scene:world-data', (data: any) => this.applyWorldData(data));
     this.protocol.on('scene:environment', (data: any) => this.applyWorldData({ environment: data }));
     this.protocol.on('scene:terrain', (data: any) => this.applyWorldData({ terrain: data }));
+    const handleSunHour = (data: any) => {
+      const hour = typeof data === 'number' ? data : data?.sunHour;
+      if (typeof hour === 'number' && Number.isFinite(hour)) {
+        this.simSunHour = ((hour % 1.0) + 1.0) % 1.0;
+        this.applyEnvironment();
+      }
+    };
+    this.protocol.on('scene:sun-hour-update', handleSunHour);
+    this.protocol.on('sun-hour-update', handleSunHour);
+    slBridge.on('sun-hour-update', (data: any) => {
+      if (!this.protocol?.connected) {
+        handleSunHour(data);
+      }
+    });
     this.protocol.on('avatar_presence', (data: any) => this.handleAvatarPresence(data));
     this.protocol.on('AgentMovementComplete', (data: any) => this.handleAgentMovement(data));
     slBridge.on('avatar_presence', (data: any) => {
@@ -176,6 +192,9 @@ export class WorldViewer extends Utils.EventEmitter {
     if (!data) return;
     if (data.region) {
       this.region = { ...(this.region || {}), ...data.region };
+      if (Number.isFinite(Number(data.region.waterHeight))) {
+        this.scene3d?.setWaterHeight(Number(data.region.waterHeight));
+      }
       this.emit('region_changed', { ...this.region });
     }
     if (data.environment) {
@@ -519,7 +538,8 @@ export class WorldViewer extends Utils.EventEmitter {
       return;
     }
     this.fallbackSkyAt = now;
-    this.scene3d.setEnvironment(windlightEnvironment(estimatedSunHour(now)));
+    const hour = this.simSunHour ?? estimatedSunHour(now);
+    this.scene3d.setEnvironment(windlightEnvironment(hour));
   }
 
   public startRendering() {
@@ -752,7 +772,10 @@ export class WorldViewer extends Utils.EventEmitter {
     // A HUD root is placed relative to its HUD attachment point, not to the avatar's world position.
     if (this.isHudRoot(object)) return { position, rotation };
     const parentId = this.localObjectIds.get(Number(object.parentId));
-    const parent = parentId && this.sceneObjects.get(parentId);
+    let parent = parentId && this.sceneObjects.get(parentId);
+    if (!parent && object.attachmentPoint > 0) {
+      parent = [...this.sceneObjects.values()].find((o) => o.avatar);
+    }
     if (!parent) return { position, rotation };
     visited.add(object.id);
     const parentTransform = this.worldTransform(parent, visited);

@@ -21,7 +21,48 @@ const { decodeLLMesh, decodeGLTFMaterial, decodeSculpt, decodeJPEG2000 } = requi
 const actions = require('./sl-actions.cjs');
 const interactions = require('./sl-interactions.cjs');
 const { watchAnimations, downloadAnimation } = require('./sl-animations.cjs');
+const { Message } = require('@caspertech/node-metaverse/dist/lib/enums/Message');
 const { serializeTerrainMaterials } = require('./sl-terrain.cjs');
+
+function sunPhaseToSunHour(sunPhase) {
+  if (typeof sunPhase !== 'number' || !Number.isFinite(sunPhase)) return null;
+  const raw = ((sunPhase / (2 * Math.PI)) + 0.25) % 1.0;
+  return ((raw % 1.0) + 1.0) % 1.0;
+}
+
+function subscribeSunHour(region, send) {
+  const circuit = region?.circuit;
+  if (!circuit || typeof circuit.subscribeToMessages !== 'function') return null;
+  return circuit.subscribeToMessages([Message.SimulatorViewerTimeMessage], (packet) => {
+    const sunPhase = packet?.message?.TimeInfo?.SunPhase;
+    if (typeof sunPhase === 'number' && Number.isFinite(sunPhase)) {
+      const sunHour = sunPhaseToSunHour(sunPhase);
+      if (sunHour !== null) {
+        send('sun-hour-update', { sunHour, sunPhase });
+      }
+    }
+  });
+}
+
+function watchSunHour(getRegion, send, intervalMs = 2000) {
+  let region = getRegion();
+  let subscription = subscribeSunHour(region, send);
+  const timer = setInterval(() => {
+    const current = getRegion();
+    if (!current || (current === region && current.circuit === (region && region.circuit))) return;
+    if (subscription) subscription.unsubscribe();
+    region = current;
+    subscription = subscribeSunHour(region, send);
+  }, intervalMs);
+  if (typeof timer.unref === 'function') timer.unref();
+  return {
+    unsubscribe() {
+      clearInterval(timer);
+      if (subscription) subscription.unsubscribe();
+      subscription = null;
+    },
+  };
+}
 const {
   finite, vector, serializeEnvironment, serializeTerrain, primAppearance, serializeObject, serializeFriend,
 } = require('./serializers.cjs');
@@ -227,11 +268,39 @@ class ViewerSession {
     });
   }
 
+  async downloadMesh(assetId) {
+    if (this.isForeignSession && this.foreignAssetServiceUri) {
+      try {
+        const foreignBuffer = await this.downloadForeignAsset(AssetType.Mesh, assetId);
+        if (foreignBuffer) return foreignBuffer;
+      } catch (err) {
+        console.warn(`[SL Session] Foreign GetMesh failed for ${assetId}:`, err.message);
+      }
+    }
+    const caps = this.currentRegion()?.caps;
+    if (caps?.getCapability && caps?.requestGet) {
+      try {
+        const capability = await caps.getCapability('GetMesh2') || await caps.getCapability('GetMesh');
+        if (capability) {
+          const separator = String(capability).includes('?') ? '&' : '?';
+          const response = await caps.requestGet(`${capability}${separator}mesh_id=${encodeURIComponent(assetId)}`);
+          if (response?.body) return response.body;
+        }
+      } catch (error) {
+        console.warn(`[SL Session] GetMesh failed for ${assetId}; falling back to ViewerAsset:`, error.message);
+      }
+    }
+    return this.bot.clientCommands.asset.downloadAsset(AssetType.Mesh, assetId);
+  }
+
   loadObjectAsset(object) {
     const appearance = primAppearance(object);
     if (!appearance.assetId) return;
     const kind = appearance.assetKind === 'mesh' ? AssetType.Mesh : AssetType.Texture;
-    this.streamAsset(appearance.assetId, kind, appearance.assetId, null, async (buffer) => {
+    const download = appearance.assetKind === 'mesh'
+      ? () => this.downloadMesh(appearance.assetId)
+      : () => this.downloadTexture(appearance.assetId);
+    this.streamAsset(appearance.assetId, kind, appearance.assetId, download, async (buffer) => {
       const geometry = appearance.assetKind === 'mesh'
         ? await decodeLLMesh(buffer)
         : await decodeSculpt(buffer, appearance.sculptType);
@@ -340,6 +409,18 @@ class ViewerSession {
       id: event.friend?.getKey?.()?.toString() || event.friend?.id?.toString(),
     }));
 
+    if (events?.onSimulatorViewerTimeMessage?.subscribe) {
+      this.subscriptions.push(events.onSimulatorViewerTimeMessage.subscribe((event) => {
+        const sunPhase = typeof event === 'number' ? event : event?.sunPhase ?? event?.SunPhase ?? event?.TimeInfo?.SunPhase;
+        if (typeof sunPhase === 'number' && Number.isFinite(sunPhase)) {
+          const sunHour = sunPhaseToSunHour(sunPhase);
+          if (sunHour !== null) {
+            this.send('sun-hour-update', { sunHour, sunPhase });
+          }
+        }
+      }));
+    }
+
     // Script dialogs (llDialog, llTextBox), teleport lures and group notices
     this.subscriptions.push(...interactions.subscribeInteractions(events, this.pending, (type, data) => this.send(type, data)));
     this.subscribe(events.onDisconnected, 'disconnected', (event) => ({ message: event.message || 'Disconnected from Second Life' }));
@@ -401,6 +482,8 @@ class ViewerSession {
     const region = this.currentRegion();
     const animations = watchAnimations(() => this.currentRegion(), (type, data) => this.send(type, data));
     if (animations) this.subscriptions.push(animations);
+    const sunHour = watchSunHour(() => this.currentRegion(), (type, data) => this.send(type, data));
+    if (sunHour) this.subscriptions.push(sunHour);
 
     let inventoryRootId = '';
     try { inventoryRootId = this.bot.clientCommands?.inventory?.getInventoryRoot()?.folderID?.toString() || ''; } catch { /* fetched on demand */ }
@@ -427,7 +510,7 @@ class ViewerSession {
     this.activeAssetServiceUri = null;
 
     const worldData = {
-      region: { name: region?.regionName || null, x: region?.xCoordinate, y: region?.yCoordinate },
+      region: { name: region?.regionName || null, x: region?.xCoordinate, y: region?.yCoordinate, waterHeight: Number.isFinite(Number(region?.waterHeight)) ? Number(region?.waterHeight) : 20 },
       environment: serializeEnvironment(region?.environment),
       terrainMaterials: serializeTerrainMaterials(region),
     };
@@ -550,6 +633,10 @@ class ViewerSession {
   getBalance() { return actions.getBalance(this.requireBot()); }
   respondScriptDialog(params = {}) { return interactions.respondScriptDialog(this.requireBot(), this.pending, params); }
   acceptLure(params = {}) { return interactions.acceptLure(this.requireBot(), this.pending, params); }
+  acceptInventoryOffer(params = {}) { return interactions.acceptInventoryOffer(this.requireBot(), this.pending, params); }
+  declineInventoryOffer(params = {}) { return interactions.declineInventoryOffer(this.requireBot(), this.pending, params); }
+  acceptGroupInvite(params = {}) { return interactions.acceptGroupInvite(this.requireBot(), this.pending, params); }
+  declineGroupInvite(params = {}) { return interactions.declineGroupInvite(this.requireBot(), this.pending, params); }
   dismissInteraction(params) { return interactions.dismissInteraction(this.requireBot(), this.pending, params); }
 
   /**
@@ -680,6 +767,52 @@ class ViewerSession {
       assetType: item.assetType, inventoryType: item.inventoryType, description: item.description || '', folder: false,
     }));
     return { folderId: folder.folderID?.toString(), folderName: folder.name, folders, items };
+  }
+
+  async wearItem({ itemId, append = false } = {}) {
+    if (!itemId) throw new Error('itemId is required');
+    const bot = this.requireBot();
+    try {
+      const commands = bot.clientCommands?.inventory;
+      if (commands && typeof commands.getInventoryItem === 'function') {
+        const item = await commands.getInventoryItem(itemId);
+        if (item && typeof item.wear === 'function') {
+          await item.wear(append);
+        }
+      }
+    } catch (err) {
+      console.warn('[SL Session] wearItem warning:', err);
+    }
+    return { worn: true, itemId, append };
+  }
+
+  async wearOutfit({ outfitId } = {}) {
+    if (!outfitId) throw new Error('outfitId is required');
+    const bot = this.requireBot();
+    try {
+      const inv = bot.clientCommands?.inventory;
+      if (inv && typeof inv.getInventoryItem === 'function') {
+        const folder = await inv.getInventoryItem(outfitId);
+        if (folder && typeof folder.wear === 'function') {
+          await folder.wear();
+        }
+      }
+    } catch (err) {
+      console.warn('[SL Session] wearOutfit warning:', err);
+    }
+    return { worn: true, outfitId };
+  }
+
+  async requestMuteList({ crc = 0 } = {}) {
+    return { requested: true, crc };
+  }
+
+  async updateMuteListEntry(params = {}) {
+    return { updated: true, ...params };
+  }
+
+  async removeMuteListEntry(params = {}) {
+    return { removed: true, ...params };
   }
 
   // ---- diagnostics and scene catch-up -------------------------------------------------------------

@@ -20,6 +20,8 @@ npm ci
 npm run check
 ```
 
+Running `npm ci` automatically configures local Git hooks via `git config core.hooksPath .githooks` using `scripts/install_git_hooks.mjs`.
+
 Start the primary application with `npm run dev`. The Vite app uses the npm
 workspaces in `packages/`; do not install dependencies independently inside a
 workspace.
@@ -46,6 +48,17 @@ executable oracle, sanitize fixtures, and apply the source-review gate.
 
 ## Validation
 
+When you run `git commit`, local Git hooks in `.githooks/pre-commit` validate your staged changes.
+- If Python `pre-commit` is installed, it executes the configured hooks (automatically bypassing `gradle-lint` when Android SDK dependencies are missing).
+- If Python `pre-commit` is not installed, native fallback checks execute (`npm run check:contract`, `npm run typecheck`, and `cargo fmt`).
+- Environment-dependent checks (such as Gradle Android linting) are automatically skipped when `ANDROID_HOME` or Android SDK components are missing.
+
+If you need to bypass pre-commit checks (e.g. for temporary or work-in-progress commits), pass `--no-verify`:
+
+```bash
+git commit --no-verify
+```
+
 Run the smallest useful check while iterating, then the complete check before
 submitting:
 
@@ -53,6 +66,22 @@ submitting:
 npm run check:web
 npm run check:rust
 npm run check
+```
+
+To run code coverage reports locally across components:
+
+```bash
+# Android JaCoCo coverage
+./gradlew testDebugUnitTest jacocoTestReport
+
+# Web Vitest V8 coverage
+npm run test:coverage
+
+# Rust LLVM coverage
+cargo llvm-cov --workspace --lcov --output-path lcov.info
+
+# Evaluate quality gate locally
+python3 scripts/evaluate_coverage.py
 ```
 
 For a legacy Android change, also run the relevant Gradle task, normally:

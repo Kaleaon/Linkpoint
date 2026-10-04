@@ -55,6 +55,8 @@ class CameraController {
     @Volatile var orbitSensitivity: Float = 0.25f
     @Volatile var invertY: Boolean = false
 
+    @Volatile var renderStateManager: RenderStateManager? = null
+
     // Latest agent state pushed by the protocol layer. Defaults place the
     // camera at the standard SL spawn so something sensible renders before
     // the first AgentMovementComplete arrives.
@@ -63,14 +65,19 @@ class CameraController {
 
     fun setMode(newMode: Mode) {
         mode = newMode
+        renderStateManager?.notifyCameraOrAvatarMotion()
     }
 
     fun toggleMode() {
         mode = if (mode == Mode.FOLLOW) Mode.MOUSELOOK else Mode.FOLLOW
+        renderStateManager?.notifyCameraOrAvatarMotion()
     }
 
     /** Update the agent's position so the camera tracks the avatar. */
     fun setAgentPosition(position: LLVector3, yawDegrees: Float = agentYawDeg) {
+        if (position != agentPosition || yawDegrees != agentYawDeg) {
+            renderStateManager?.notifyCameraOrAvatarMotion()
+        }
         agentPosition = position
         agentYawDeg = yawDegrees
     }
@@ -81,6 +88,9 @@ class CameraController {
      * [orbitSensitivity]; pitch is clamped to ±85° to avoid pole flip.
      */
     fun applyOrbit(dxPixels: Float, dyPixels: Float) {
+        if (dxPixels != 0f || dyPixels != 0f) {
+            renderStateManager?.notifyCameraOrAvatarMotion()
+        }
         yawDeg = (yawDeg - dxPixels * orbitSensitivity) % 360f
         val dy = (if (invertY) -dyPixels else dyPixels) * orbitSensitivity
         pitchDeg = (pitchDeg + dy).coerceIn(MIN_PITCH_DEG, MAX_PITCH_DEG)
@@ -93,6 +103,9 @@ class CameraController {
      */
     fun applyZoom(scaleFactor: Float) {
         if (scaleFactor <= 0f) return
+        if (scaleFactor != 1.0f) {
+            renderStateManager?.notifyCameraOrAvatarMotion()
+        }
         followDistance = (followDistance / scaleFactor)
             .coerceIn(minFollowDistance, maxFollowDistance)
     }

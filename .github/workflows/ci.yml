@@ -44,10 +44,17 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run unit tests
-        run: ./gradlew testDebugUnitTest
+        run: ./gradlew testDebugUnitTest jacocoTestReport
 
       - name: Assemble Debug build
         run: ./gradlew assembleDebug
+
+      - name: Upload Android coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-coverage
+          path: Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+          if-no-files-found: ignore
 
   web:
     name: Web
@@ -73,8 +80,23 @@ jobs:
       - name: Check viewer contract
         run: bash scripts/check_viewer_contract.sh
 
-      - name: Run web checks (typecheck, test, build)
-        run: npm run check:web
+      - name: Verify i18n locale key parity
+        run: node scripts/sync-i18n.js --check
+
+      - name: Run web checks (typecheck, test with coverage, build)
+        run: |
+          npm run typecheck
+          npm run test:coverage
+          npm run typecheck -w @linkpoint/app
+          npm run test -w @linkpoint/app
+          npm run build -w @linkpoint/app
+
+      - name: Upload Web coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-coverage
+          path: coverage/lcov.info
+          if-no-files-found: ignore
 
   rust:
     name: Rust
@@ -88,10 +110,14 @@ jobs:
       - name: Set up Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
-          components: rustfmt, clippy
+          components: rustfmt, clippy, llvm-tools-preview
+
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
 
       - name: Set up Rust cache
         uses: Swatinem/rust-cache@v2
+        continue-on-error: true
 
       - name: Check Rust formatting
         run: cargo fmt --all --check
@@ -99,8 +125,15 @@ jobs:
       - name: Run Clippy
         run: cargo clippy --workspace --all-targets --locked -- -D warnings
 
-      - name: Run Rust tests
-        run: cargo test --workspace --locked
+      - name: Run Rust tests with coverage
+        run: cargo llvm-cov --workspace --locked --lcov --output-path lcov.info
+
+      - name: Upload Rust coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-coverage
+          path: lcov.info
+          if-no-files-found: ignore
 
   ci-status:
     name: CI Status Gate
@@ -109,11 +142,33 @@ jobs:
     if: always()
 
     steps:
-      - name: Evaluate status
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*-coverage'
+          merge-multiple: false
+          path: coverage-artifacts
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Evaluate Coverage Quality Gate
+        run: |
+          python3 scripts/evaluate_coverage.py \
+            --android-report coverage-artifacts/android-coverage/jacocoTestReport.xml \
+            --web-report coverage-artifacts/web-coverage/lcov.info \
+            --rust-report coverage-artifacts/rust-coverage/lcov.info
+
+      - name: Evaluate job status
         run: |
           if [[ "${{ needs.android.result }}" != "success" || "${{ needs.web.result }}" != "success" || "${{ needs.rust.result }}" != "success" ]]; then
-            echo "One or more required CI jobs failed."
+            echo "One or more required CI build jobs failed."
             exit 1
           fi
-          echo "All required CI jobs passed."
+          echo "All required CI jobs and quality gates passed."
 

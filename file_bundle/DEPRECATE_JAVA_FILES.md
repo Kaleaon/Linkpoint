@@ -1,32 +1,36 @@
 # ⚠️ DEPRECATION NOTICE: file_bundle/ Java Files
 
-**Date:** 2025-10-19  
-**Status:** ❌ NOT CONVERTIBLE - HEAVILY CORRUPTED
+**Date:** 2026-10-03  
+**Status:** ✅ REMOVED / PURGED (All 12 files purged)
 
 ---
 
 ## Summary
 
-All 12 Java files in `file_bundle/` are **HEAVILY DECOMPILED** and full of errors. These files cannot be reliably converted to Kotlin and should be **DEPRECATED** and **REWRITTEN FROM SCRATCH**.
+All 12 orphaned decompiled Java files previously residing in `file_bundle/` have been **COMPLETELY PURGED** from the repository. These files contained uncompilable decompiler artifacts, broken lambdas, synthetic variable names, and stub methods throwing `UnsupportedOperationException`. They were not integrated into any active Gradle build.
 
-## Files Status
+Developers looking for reference implementations or source context should refer directly to:
+1. Decompiled Lumiya source reference in `lumiya_decompiled_source/`
+2. Active native Kotlin implementations in `Linkpoint/src/main/kotlin/` or `src/main/`
 
-| File | Lines | Status | Issue |
-|------|-------|--------|-------|
-| `ObjectDetailsFragment.java` | 1,002 | ❌ BROKEN | Decompiled, lambda obfuscation |
-| `SyncManager.java` | 1,058 | ❌ BROKEN | Decompiled, method errors |
-| `InventoryFragmentHelper.java` | 1,127 | ❌ BROKEN | Decompiled, broken lambdas |
-| `ActiveChattersManager.java` | 1,293 | ❌ BROKEN | Decompiled, synthetic fields |
-| `SLChatEvent.java` | 1,348 | ❌ BROKEN | Massive decompiler errors |
-| `VoiceStatusView.java` | 1,502 | ❌ BROKEN | Decompiled, obfuscated |
-| `GroupMainProfileTab.java` | 1,620 | ❌ BROKEN | Decompiled, method errors |
-| `UserFunctionsFragment.java` | 1,954 | ❌ BROKEN | Decompiled, lambda issues |
-| `SLInventory.java` | 1,983 | ❌ BROKEN | 132KB+, massive errors |
-| `InventoryFragment.java` | 2,006 | ❌ BROKEN | Decompiled heavily |
-| `WorldViewActivity.java` | 2,578 | ❌ BROKEN | Large, decompiled |
-| `CardboardActivity.java` | 4,406 | ❌ BROKEN | Huge, badly decompiled |
+## Files Removal Record
 
-**Total:** 21,877 lines of UNUSABLE code
+| File | Lines | Status | Action Taken |
+|------|-------|--------|--------------|
+| `ObjectDetailsFragment.java` | 1,002 | 🗑️ PURGED | Removed from `file_bundle/` |
+| `SyncManager.java` | 1,058 | 🗑️ PURGED | Removed from `file_bundle/` |
+| `InventoryFragmentHelper.java` | 1,127 | 🗑️ PURGED | Removed from `file_bundle/` |
+| `ActiveChattersManager.java` | 1,293 | 🗑️ PURGED | Removed from `file_bundle/` |
+| `SLChatEvent.java` | 1,348 | 🗑️ PURGED | Removed from `file_bundle/` |
+| `VoiceStatusView.java` | 1,502 | 🗑️ PURGED | Removed from `file_bundle/` |
+| `GroupMainProfileTab.java` | 1,620 | 🗑️ PURGED | Removed from `file_bundle/` |
+| `UserFunctionsFragment.java` | 1,954 | 🗑️ PURGED | Removed from `file_bundle/` |
+| `SLInventory.java` | 1,983 | 🗑️ PURGED | Removed from `file_bundle/` |
+| `InventoryFragment.java` | 2,006 | 🗑️ PURGED | Removed from `file_bundle/` |
+| `WorldViewActivity.java` | 2,578 | 🗑️ PURGED | Removed from `file_bundle/` |
+| `CardboardActivity.java` | 4,406 | 🗑️ PURGED | Removed from `file_bundle/` |
+
+**Total:** 21,877 lines of orphaned code removed.
 
 ---
 
@@ -277,11 +281,11 @@ All 12 Java files in `file_bundle/` should be:
 - 2,000 lines of broken lambdas (9%)
 - 2,877 lines of missing methods (13%)
 
-**Status:** ❌ **NOT CONVERTIBLE**  
-**Action:** ⏸️ **WAIT FOR CLEAN SOURCE**  
-**Alternative:** ✅ **USE EXISTING KOTLIN VERSIONS**
+**Status:** ✅ **PURGED / REMOVED**  
+**Action:** 🗑️ **PURGE COMPLETE**  
+**Alternative:** ✅ **USE `lumiya_decompiled_source/` OR KOTLIN IN `Linkpoint/`**
 
 ---
 
-**Last Updated:** 2025-10-19  
-**Recommendation:** Proceed with checking for SecondLife/Firestorm/LLSD folders instead
+**Last Updated:** 2026-10-03  
+**Recommendation:** Refer to `lumiya_decompiled_source/` or native Kotlin code in `Linkpoint/` instead.

@@ -206,27 +206,17 @@ function stand(bot) {
   return { standing: true };
 }
 
-/** The account's L$ balance as reported by the grid. */
+/** The account's currency balance as reported by the grid. */
 async function getBalance(bot) {
   const balance = await commands(bot).grid.getBalance();
+  const currencySymbol = bot?.gridInfo?.currencySymbol || bot?.gridInfo?.currency_symbol || params_currency_symbol(bot) || 'L$';
+  const isZeroCurrency = Boolean(bot?.gridInfo?.isZeroCurrency || bot?.gridInfo?.is_zero_currency || bot?.isZeroCurrency);
   if (!Number.isFinite(Number(balance))) throw new Error('The grid returned no balance');
-  return { balance: Number(balance) };
+  return { balance: Number(balance), currencySymbol, isZeroCurrency };
 }
 
-/** Pay an object Linden Dollars. */
-async function payObject(bot, params, lib) {
-  const { UUID } = loadLibrary(lib);
-  const objectId = requireUuid(params.objectId || params.targetId || params.id, 'object id');
-  const amount = Math.floor(finite(params.amount || params.price, 'amount'));
-  if (amount <= 0) throw new Error('Amount must be greater than zero');
-  const c = commands(bot);
-  if (c.grid && typeof c.grid.payObject === 'function') {
-    await c.grid.payObject(new UUID(objectId), amount);
-  } else if (c.grid && typeof c.grid.pay === 'function') {
-    await c.grid.pay(new UUID(objectId), amount, String(params.description || ''), 1000);
-  }
-  const newBalance = await getBalance(bot).catch(() => null);
-  return { paid: objectId, amount, balance: newBalance ? newBalance.balance : null };
+function params_currency_symbol(bot) {
+  return bot?.options?.currencySymbol || bot?.options?.currency_symbol;
 }
 
 // ---- login -----------------------------------------------------------------
@@ -332,8 +322,69 @@ function describeLoginError(error) {
   };
 }
 
+async function payObject(bot, params = {}, lib) {
+  const isZeroCurrency = Boolean(params.isZeroCurrency || bot?.gridInfo?.isZeroCurrency || bot?.isZeroCurrency);
+  if (isZeroCurrency) throw new Error('Payments are disabled on zero-currency grids');
+  const { UUID } = loadLibrary(lib);
+  const targetId = params.targetId || params.id || params.objectId;
+  if (!targetId) throw new Error('A target object is required');
+  const amount = Math.floor(finite(params.amount || params.price, 'amount'));
+  if (amount <= 0) throw new Error('Payment amount must be greater than 0');
+  const description = String(params.description || params.targetName || 'Object payment');
+
+  const grid = commands(bot).grid;
+  if (typeof grid.payObject === 'function') {
+    const targetUUID = new UUID(requireUuid(targetId, 'target object id'));
+    const object = bot.currentRegion?.objects?.getObjectByUUID?.(targetUUID);
+    if (object) {
+      await grid.payObject(object, amount);
+    } else {
+      await grid.pay(targetUUID, amount, description, 5001);
+    }
+  } else if (typeof grid.pay === 'function') {
+    const targetUUID = new UUID(requireUuid(targetId, 'target object id'));
+    await grid.pay(targetUUID, amount, description, 5001);
+  } else {
+    throw new Error('Payment not supported by this connection');
+  }
+  const balanceResult = await getBalance(bot).catch(() => null);
+  return { paid: true, targetId: String(targetId), amount, description, balance: balanceResult ? balanceResult.balance : null };
+}
+
+async function payAvatar(bot, params = {}, lib) {
+  const isZeroCurrency = Boolean(params.isZeroCurrency || bot?.gridInfo?.isZeroCurrency || bot?.isZeroCurrency);
+  if (isZeroCurrency) throw new Error('Payments are disabled on zero-currency grids');
+  const { UUID } = loadLibrary(lib);
+  const targetId = requireUuid(params.targetId || params.id || params.avatarId, 'target avatar id');
+  const amount = Math.floor(finite(params.amount || params.price, 'amount'));
+  if (amount <= 0) throw new Error('Payment amount must be greater than 0');
+  const description = String(params.description || params.targetName || 'Resident gift/tip');
+
+  const grid = commands(bot).grid;
+  if (typeof grid.payAvatar === 'function') {
+    await grid.payAvatar(new UUID(targetId), amount, description);
+  } else if (typeof grid.pay === 'function') {
+    await grid.pay(new UUID(targetId), amount, description, 5000);
+  } else {
+    throw new Error('Payment not supported by this connection');
+  }
+  const balanceResult = await getBalance(bot).catch(() => null);
+  return { paid: true, targetId: String(targetId), amount, description, balance: balanceResult ? balanceResult.balance : null };
+}
+
+async function getTransactionHistory(bot, params) {
+  const balance = await getBalance(bot);
+  return {
+    balance: balance.balance,
+    currencySymbol: balance.currencySymbol,
+    isZeroCurrency: balance.isZeroCurrency,
+    transactions: []
+  };
+}
+
 module.exports = {
   parseLoginName, normalizeStart, buildLoginParams, describeLoginError, loginFailure, LOGIN_FAILURE_PREFIX, LOGIN_REASONS,
   ATTACHMENT_NAMES, isHudPoint, attachmentIdFromState, attachmentInfo,
-  parseDestination, teleport, touchObject, sit, stand, getBalance, payObject, requireUuid,
+  parseDestination, teleport, touchObject, sit, stand, getBalance, requireUuid,
+  payObject, payAvatar, getTransactionHistory,
 };

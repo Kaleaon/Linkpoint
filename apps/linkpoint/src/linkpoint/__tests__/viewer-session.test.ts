@@ -294,6 +294,29 @@ describe('desktop session texture downloads', () => {
     expect(downloadAsset).toHaveBeenCalledWith(AssetType.Texture, 'texture-id');
   });
 
+  it('uses the Second Life GetMesh capability for mesh asset downloads', async () => {
+    const session = new ViewerSession(() => undefined);
+    const requestGet = vi.fn().mockResolvedValue({ body: Buffer.from('mesh-data') });
+    const downloadAsset = vi.fn();
+    session.bot = {
+      currentRegion: { caps: { getCapability: vi.fn().mockImplementation((name) => Promise.resolve(name === 'GetMesh2' ? 'https://asset.example/mesh2' : undefined)), requestGet } },
+      clientCommands: { asset: { downloadAsset } },
+    };
+
+    await expect(session.downloadMesh('mesh-id')).resolves.toEqual(Buffer.from('mesh-data'));
+    expect(requestGet).toHaveBeenCalledWith('https://asset.example/mesh2?mesh_id=mesh-id');
+    expect(downloadAsset).not.toHaveBeenCalled();
+  });
+
+  it('handles wearItem, wearOutfit and muteList RPCs gracefully', async () => {
+    const session = new ViewerSession(() => undefined);
+    session.bot = { clientCommands: { inventory: { getInventoryItem: vi.fn().mockResolvedValue({ wear: vi.fn() }) } } };
+
+    await expect(session.wearItem({ itemId: 'item-1', append: true })).resolves.toEqual({ worn: true, itemId: 'item-1', append: true });
+    await expect(session.wearOutfit({ outfitId: 'outfit-1' })).resolves.toEqual({ worn: true, outfitId: 'outfit-1' });
+    await expect(session.requestMuteList({ crc: 123 })).resolves.toEqual({ requested: true, crc: 123 });
+  });
+
   it('allows transiently failed assets to retry instead of leaving their proxy forever', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(10_000);
@@ -341,5 +364,36 @@ describe('desktop session avatar movement', () => {
     expect(session.currentRegion()).toBeNull();
     expect(session.getSceneObjects()).toEqual([]);
     expect(session.getDiagnostics()).toMatchObject({ connected: true, regionName: '' });
+  });
+
+  it('parses SunPhase from SimulatorViewerTimeMessage and emits sun-hour-update event', () => {
+    const { Subject } = require('rxjs');
+    const sent: Array<[string, any]> = [];
+    const session = new ViewerSession((type: string, data: any) => sent.push([type, data]));
+    const timeSubject = new Subject();
+    const events = {
+      onNewObjectEvent: new Subject(),
+      onObjectUpdatedEvent: new Subject(),
+      onObjectUpdatedTerseEvent: new Subject(),
+      onObjectKilledEvent: new Subject(),
+      onNearbyChat: new Subject(),
+      onInstantMessage: new Subject(),
+      onParcelPropertiesEvent: new Subject(),
+      onAvatarEnteredRegion: new Subject(),
+      onFriendOnline: new Subject(),
+      onFriendRequest: new Subject(),
+      onFriendResponse: new Subject(),
+      onFriendRemoved: new Subject(),
+      onDisconnected: new Subject(),
+      onSimulatorViewerTimeMessage: timeSubject,
+    };
+    session.subscribeEvents(events);
+
+    // SunPhase = Math.PI / 2 -> sun hour = 0.5 (noon)
+    timeSubject.next({ SunPhase: Math.PI / 2 });
+    expect(sent).toHaveLength(1);
+    expect(sent[0][0]).toBe('sun-hour-update');
+    expect(sent[0][1].sunHour).toBeCloseTo(0.5, 6);
+    expect(sent[0][1].sunPhase).toBeCloseTo(Math.PI / 2, 6);
   });
 });

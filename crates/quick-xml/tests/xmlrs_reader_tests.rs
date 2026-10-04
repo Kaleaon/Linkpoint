@@ -365,10 +365,10 @@ fn test(input: &str, output: &str, is_short: bool) {
 fn test_bytes(input: &[u8], output: &[u8], is_short: bool) {
     // Normalize newlines on Windows to just \n, which is what the reader and
     // writer use.
-    // let input = input.replace("\r\n", "\n");
-    // let input = input.as_bytes();
-    // let output = output.replace("\r\n", "\n");
-    // let output = output.as_bytes();
+    let input_str = String::from_utf8_lossy(input).replace("\r\n", "\n");
+    let input = input_str.as_bytes();
+    let output_str = String::from_utf8_lossy(output).replace("\r\n", "\n");
+    let output = output_str.as_bytes();
     let mut reader = Reader::from_reader(input);
     reader
         .trim_text(is_short)

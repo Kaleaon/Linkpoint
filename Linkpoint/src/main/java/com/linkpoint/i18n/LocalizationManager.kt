@@ -2,8 +2,6 @@ package com.linkpoint.i18n
 
 import android.content.Context
 import android.util.Log
-import org.json.JSONArray
-import org.json.JSONObject
 import java.text.DateFormat
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
@@ -15,19 +13,13 @@ import java.util.TimeZone
 /**
  * Localization Manager for Linkpoint.
  * 
- * Provides internationalization (i18n) support including:
- * - String localization with placeholder substitution
- * - Date/time formatting
- * - Currency formatting (including L$ Linden Dollars)
- * - Number formatting
- * 
- * Based on patterns from the Second Life mobile viewer's localization system.
+ * Delegates string localization directly to Android's native resource system (`context.getString()`),
+ * using standard Android `res/values/strings.xml` and `res/values-{lang}/strings.xml` resource qualifiers.
  */
 class LocalizationManager private constructor(private val context: Context) {
     
     companion object {
         private const val TAG = "LocalizationManager"
-        private const val LOCALIZATION_PATH = "localization"
         
         // Supported locales
         private val SUPPORTED_LOCALES = listOf("en", "es", "fr", "de", "ja", "pt", "ru", "zh", "ko", "it", "nl", "pl", "tr")
@@ -45,9 +37,6 @@ class LocalizationManager private constructor(private val context: Context) {
     // Current locale
     private var currentLocale: Locale = Locale.getDefault()
     
-    // String resources by locale
-    private val stringResources = mutableMapOf<String, MutableMap<String, String>>()
-    
     // Formatters
     private var dateFormat: DateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, currentLocale)
     private var timeFormat: DateFormat = DateFormat.getTimeInstance(DateFormat.SHORT, currentLocale)
@@ -55,44 +44,7 @@ class LocalizationManager private constructor(private val context: Context) {
     private var numberFormat: NumberFormat = NumberFormat.getNumberInstance(currentLocale)
     
     init {
-        loadAllLocales()
         updateFormatters()
-    }
-    
-    /**
-     * Load string resources for all supported locales
-     */
-    private fun loadAllLocales() {
-        SUPPORTED_LOCALES.forEach { locale ->
-            loadLocale(locale)
-        }
-    }
-    
-    /**
-     * Load string resources for a specific locale
-     */
-    private fun loadLocale(locale: String) {
-        try {
-            val filename = "$LOCALIZATION_PATH/$locale.json"
-            context.assets.open(filename).use { inputStream ->
-                val content = inputStream.bufferedReader().readText()
-                val json = JSONObject(content)
-                val stringsArray = json.getJSONArray("strings")
-                
-                val localeStrings = mutableMapOf<String, String>()
-                for (i in 0 until stringsArray.length()) {
-                    val item = stringsArray.getJSONObject(i)
-                    val key = item.getString("key")
-                    val value = item.getString("value")
-                    localeStrings[key] = value
-                }
-                
-                stringResources[locale] = localeStrings
-                Log.i(TAG, "Loaded ${localeStrings.size} strings for locale: $locale")
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to load locale: $locale", e)
-        }
     }
     
     /**
@@ -127,56 +79,45 @@ class LocalizationManager private constructor(private val context: Context) {
     fun getCurrentLocale(): Locale = currentLocale
     
     /**
-     * Get localized string by key
+     * Get localized string by key using native context.getString()
      */
     fun getString(key: String): String {
         return getString(key, *emptyArray<Any>())
     }
     
     /**
-     * Get localized string by key with placeholder substitution
-     * Placeholders in format {0}, {1}, etc.
+     * Get localized string by key with placeholder substitution via context.getString()
      */
     fun getString(key: String, vararg args: Any): String {
-        val localeCode = currentLocale.language
-        
-        // Try current locale first
-        var value = stringResources[localeCode]?.get(key)
-        
-        // Fall back to English
-        if (value == null && localeCode != "en") {
-            value = stringResources["en"]?.get(key)
+        val sanitizedKey = key.replace('.', '_').replace('-', '_')
+        var resId = context.resources.getIdentifier(sanitizedKey, "string", context.packageName)
+        if (resId == 0) {
+            resId = context.resources.getIdentifier(key, "string", context.packageName)
         }
-        
-        // If still not found, return the key
-        if (value == null) {
-            Log.w(TAG, "Missing string for key: $key")
+        if (resId == 0) {
+            Log.w(TAG, "Missing string resource for key: $key")
             return key
         }
-        
-        // Substitute placeholders
-        return substitutePlaceholders(value, args)
-    }
-    
-    /**
-     * Substitute placeholders in format string
-     */
-    private fun substitutePlaceholders(format: String, args: Array<out Any>): String {
-        var result = format
-        args.forEachIndexed { index, arg ->
-            val placeholder = "{$index}"
-            result = result.replace(placeholder, arg.toString())
+        return try {
+            if (args.isEmpty()) {
+                context.getString(resId)
+            } else {
+                context.getString(resId, *args)
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to resolve string resource for key: $key", e)
+            key
         }
-        return result
     }
     
     /**
-     * Check if a string key exists
+     * Check if a string key exists in Android resources
      */
     fun hasString(key: String): Boolean {
-        val localeCode = currentLocale.language
-        return stringResources[localeCode]?.containsKey(key) == true ||
-               stringResources["en"]?.containsKey(key) == true
+        val sanitizedKey = key.replace('.', '_').replace('-', '_')
+        val resId = context.resources.getIdentifier(sanitizedKey, "string", context.packageName)
+        if (resId != 0) return true
+        return context.resources.getIdentifier(key, "string", context.packageName) != 0
     }
     
     /**
@@ -252,7 +193,7 @@ class LocalizationManager private constructor(private val context: Context) {
     }
     
     /**
-     * Format distance in meters (converts to appropriate unit based on locale)
+     * Format distance in meters
      */
     fun formatDistance(meters: Float): String {
         return when {
@@ -271,14 +212,12 @@ class LocalizationManager private constructor(private val context: Context) {
     }
     
     /**
-     * Get all available locales
+     * Get all supported locales
      */
-    fun getAvailableLocales(): List<String> = stringResources.keys.toList()
+    fun getAvailableLocales(): List<String> = SUPPORTED_LOCALES
     
     /**
      * Get all string keys for debugging
      */
-    fun getAllKeys(): Set<String> {
-        return stringResources.values.flatMap { it.keys }.toSet()
-    }
+    fun getAllKeys(): Set<String> = emptySet()
 }

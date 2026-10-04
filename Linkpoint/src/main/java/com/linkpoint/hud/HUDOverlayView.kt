@@ -477,6 +477,7 @@ class HUDOverlayView @JvmOverloads constructor(
      * Refresh the HUD display.
      */
     fun refresh() {
+        com.linkpoint.ui.overlay.OverlayManager.getInstance().requestHudDirtyRender()
         invalidate()
     }
 

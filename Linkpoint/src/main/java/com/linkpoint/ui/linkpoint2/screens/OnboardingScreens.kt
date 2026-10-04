@@ -44,10 +44,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.linkpoint.R
 import com.linkpoint.ui.components.linkpoint2.fx.AuroraBackdrop
 import com.linkpoint.ui.components.linkpoint2.primitives.AvatarSize
 import com.linkpoint.ui.components.linkpoint2.primitives.L2Avatar
@@ -106,7 +108,7 @@ fun OnboardingWelcomeScreen(
             }
             Spacer(Modifier.height(40.dp))
             Text(
-                text = "Welcome to your\nsecond world",
+                text = stringResource(R.string.onboarding_welcome_title),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -115,7 +117,7 @@ fun OnboardingWelcomeScreen(
             )
             Spacer(Modifier.height(16.dp))
             Text(
-                text = "Linkpoint 2.0 — a beautiful, lightweight viewer\nfor Second Life on the go.",
+                text = stringResource(R.string.onboarding_welcome_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = tokens.onSurfaceDim,
                 textAlign = TextAlign.Center,
@@ -128,7 +130,7 @@ fun OnboardingWelcomeScreen(
                 modifier = Modifier.fillMaxWidth(),
                 height = 52.dp,
             ) {
-                Text("Begin", fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.onboarding_begin), fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.width(6.dp))
                 Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
             }
@@ -137,7 +139,7 @@ fun OnboardingWelcomeScreen(
                 onClick = onIHaveAnAccount,
                 modifier = Modifier.fillMaxWidth(),
                 height = 48.dp,
-            ) { Text("I have an account") }
+            ) { Text(stringResource(R.string.onboarding_have_account)) }
         }
     }
 }
@@ -182,13 +184,13 @@ fun OnboardingAvatarScreen(
         ) {
             Spacer(Modifier.height(48.dp))
             Text(
-                text = "Pick a starter avatar",
+                text = stringResource(R.string.onboarding_avatar_title),
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = "You can change anytime in Inventory.",
+                text = stringResource(R.string.onboarding_avatar_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = tokens.onSurfaceDim,
                 modifier = Modifier.padding(top = 4.dp),
@@ -216,7 +218,7 @@ fun OnboardingAvatarScreen(
                             color = tokens.onSurfaceDim,
                         )
                     }
-                    L2Chip(label = "Selected", variant = L2ChipVariant.Primary)
+                    L2Chip(label = stringResource(R.string.onboarding_selected), variant = L2ChipVariant.Primary)
                 }
             }
 
@@ -246,7 +248,7 @@ fun OnboardingAvatarScreen(
             ) {
                 Icon(Icons.Default.AddAPhoto, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Or upload a photo")
+                Text(stringResource(R.string.onboarding_upload_photo))
             }
 
             Spacer(Modifier.height(16.dp))
@@ -257,7 +259,7 @@ fun OnboardingAvatarScreen(
                 modifier = Modifier.fillMaxWidth(),
                 height = 52.dp,
             ) {
-                Text("Continue", fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.onboarding_continue), fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.width(6.dp))
                 Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
             }
@@ -325,11 +327,11 @@ data class PermissionRequest(
 )
 
 val DefaultPermissions = listOf(
-    PermissionRequest("mic", "Microphone", "For voice chat with friends and at events.", Icons.Default.Mic, true),
+    PermissionRequest("mic", "Microphone", "For voice chat with friends and at events.", Icons.Default.Mic, false),
     PermissionRequest("loc", "Location", "Required to suggest nearby regions and events.", Icons.Default.LocationOn, false),
     PermissionRequest("notif", "Notifications", "Receive IM and group notifications when minimised.", Icons.Default.Notifications, false),
     PermissionRequest("cam", "Camera", "For avatar photos and inworld snapshots.", Icons.Default.PhotoCamera, false),
-    PermissionRequest("storage", "Storage", "To cache textures and asset data.", Icons.Default.Storage, true),
+    PermissionRequest("storage", "Storage", "To cache textures and asset data.", Icons.Default.Storage, false),
 )
 
 @Composable
@@ -354,13 +356,13 @@ fun OnboardingPermissionsScreen(
         ) {
             Spacer(Modifier.height(40.dp))
             Text(
-                text = "A few permissions",
+                text = stringResource(R.string.onboarding_permissions_title),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = "Linkpoint 2.0 needs these to fully connect you.",
+                text = stringResource(R.string.onboarding_permissions_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = tokens.onSurfaceDim,
                 modifier = Modifier.padding(top = 4.dp),
@@ -382,7 +384,7 @@ fun OnboardingPermissionsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 height = 52.dp,
             ) {
-                Text("Enter world", fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.enter_world), fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.width(6.dp))
                 Icon(Icons.Default.Brightness5, contentDescription = null)
             }
@@ -396,6 +398,22 @@ private fun PermissionRow(
     onAllow: () -> Unit,
     onSkip: () -> Unit,
 ) {
+    val titleText = when (p.id) {
+        "mic" -> stringResource(R.string.onboarding_permission_mic)
+        "loc" -> stringResource(R.string.onboarding_permission_loc)
+        "notif" -> stringResource(R.string.onboarding_permission_notif)
+        "cam" -> stringResource(R.string.onboarding_permission_cam)
+        "storage" -> stringResource(R.string.onboarding_permission_storage)
+        else -> p.title
+    }
+    val descText = when (p.id) {
+        "mic" -> stringResource(R.string.onboarding_permission_mic_desc)
+        "loc" -> stringResource(R.string.onboarding_permission_loc_desc)
+        "notif" -> stringResource(R.string.onboarding_permission_notif_desc)
+        "cam" -> stringResource(R.string.onboarding_permission_cam_desc)
+        "storage" -> stringResource(R.string.onboarding_permission_storage_desc)
+        else -> p.description
+    }
     L2Card(
         modifier = Modifier.fillMaxWidth(),
         contentPadding = PaddingValues(14.dp),
@@ -413,24 +431,24 @@ private fun PermissionRow(
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(p.title, fontWeight = FontWeight.SemiBold)
+                    Text(titleText, fontWeight = FontWeight.SemiBold)
                     if (p.required) {
                         Spacer(Modifier.width(6.dp))
-                        L2Chip(label = "Required", variant = L2ChipVariant.Warn)
+                        L2Chip(label = stringResource(R.string.onboarding_required), variant = L2ChipVariant.Warn)
                     }
                 }
                 Text(
-                    p.description,
+                    descText,
                     style = MaterialTheme.typography.bodySmall,
                     color = Linkpoint2.tokens.onSurfaceDim,
                 )
             }
             Spacer(Modifier.width(8.dp))
             Column(horizontalAlignment = Alignment.End) {
-                L2TonalButton(text = "Allow", onClick = onAllow)
+                L2TonalButton(text = stringResource(R.string.onboarding_allow), onClick = onAllow)
                 if (!p.required) {
                     Spacer(Modifier.height(4.dp))
-                    L2GhostButton(text = "Skip", onClick = onSkip)
+                    L2GhostButton(text = stringResource(R.string.onboarding_skip), onClick = onSkip)
                 }
             }
         }

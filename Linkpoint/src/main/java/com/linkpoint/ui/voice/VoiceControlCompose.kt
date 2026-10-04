@@ -1,5 +1,8 @@
 package com.linkpoint.ui.voice
 
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,7 +27,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import com.linkpoint.utils.PermissionManager
 import com.linkpoint.voice.VoiceManager
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -126,13 +132,30 @@ fun VoiceControl(
     disconnectedColor: Color = Color(0xFF757575)
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { results ->
+        if (results.values.all { it }) {
+            scope.launch { voiceManager.joinParcelVoice() }
+        }
+    }
+
     VoiceControl(
         isConnected = voiceManager.isConnected,
         isMuted = voiceManager.isMuted,
         onVoiceToggle = { shouldConnect ->
             scope.launch {
                 if (shouldConnect) {
-                    voiceManager.joinParcelVoice()
+                    val permissions = PermissionManager.getVoiceChatPermissions()
+                    val missing = permissions.filter { p ->
+                        ContextCompat.checkSelfPermission(context, p) != PackageManager.PERMISSION_GRANTED
+                    }
+                    if (missing.isNotEmpty()) {
+                        permissionLauncher.launch(missing.toTypedArray())
+                    } else {
+                        voiceManager.joinParcelVoice()
+                    }
                 } else {
                     voiceManager.leaveVoice()
                 }

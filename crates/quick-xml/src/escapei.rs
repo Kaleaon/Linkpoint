@@ -1,6 +1,5 @@
 //! Manage xml character escapes
 
-use memchr;
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::ops::Range;
@@ -65,7 +64,7 @@ impl std::error::Error for EscapeError {}
 
 /// Escapes a `&[u8]` and replaces all xml special characters (<, >, &, ', ") with their
 /// corresponding xml escaped value.
-pub fn escape(raw: &[u8]) -> Cow<[u8]> {
+pub fn escape(raw: &[u8]) -> Cow<'_, [u8]> {
     #[inline]
     fn to_escape(b: u8) -> bool {
         match b {
@@ -81,7 +80,7 @@ pub fn escape(raw: &[u8]) -> Cow<[u8]> {
 /// (though not recommended) to leave the quote special characters " and ' unescaped.
 /// This function escapes a `&[u8]` and replaces xml special characters (<, >, &) with
 /// their corresponding xml escaped value, but does not escape quote characters.
-pub fn partial_escape(raw: &[u8]) -> Cow<[u8]> {
+pub fn partial_escape(raw: &[u8]) -> Cow<'_, [u8]> {
     #[inline]
     fn to_escape(b: u8) -> bool {
         match b {
@@ -95,7 +94,7 @@ pub fn partial_escape(raw: &[u8]) -> Cow<[u8]> {
 
 /// Escapes a `&[u8]` and replaces a subset of xml special characters (<, >, &, ', ") with their
 /// corresponding xml escaped value.
-fn _escape<F: Fn(u8) -> bool>(raw: &[u8], escape_chars: F) -> Cow<[u8]> {
+fn _escape<F: Fn(u8) -> bool>(raw: &[u8], escape_chars: F) -> Cow<'_, [u8]> {
     let mut escaped = None;
     let mut bytes = raw.iter();
     let mut pos = 0;
@@ -129,7 +128,7 @@ fn _escape<F: Fn(u8) -> bool>(raw: &[u8], escape_chars: F) -> Cow<[u8]> {
 
 /// Unescape a `&[u8]` and replaces all xml escaped characters ('&...;') into their corresponding
 /// value
-pub fn unescape(raw: &[u8]) -> Result<Cow<[u8]>, EscapeError> {
+pub fn unescape(raw: &[u8]) -> Result<Cow<'_, [u8]>, EscapeError> {
     do_unescape(raw, None)
 }
 
@@ -176,7 +175,7 @@ pub fn do_unescape<'a>(
                 } else if pat.starts_with(b"#") {
                     push_utf8(unescaped, parse_number(&pat[1..], start..end)?);
                 } else if let Some(value) = custom_entities.and_then(|hm| hm.get(pat)) {
-                    unescaped.extend_from_slice(&value);
+                    unescaped.extend_from_slice(value);
                 } else {
                     return Err(EscapeError::UnrecognizedSymbol(
                         start + 1..end,
@@ -1684,7 +1683,7 @@ fn parse_number(bytes: &[u8], range: Range<usize>) -> Result<char, EscapeError> 
     let code = if bytes.starts_with(b"x") {
         parse_hexadecimal(&bytes[1..])
     } else {
-        parse_decimal(&bytes)
+        parse_decimal(bytes)
     }?;
     if code == 0 {
         return Err(EscapeError::EntityWithNull(range));

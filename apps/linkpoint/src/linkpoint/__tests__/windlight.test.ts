@@ -4,11 +4,11 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
   WindlightDay, getDefaultWindlightDay, parseWindlightPreset, presetToSkyFrame, sunDirection,
-  estimatedSunHour, windlightEnvironment, WINDLIGHT_HOUR_TABLE, SL_DAY_SECONDS,
+  estimatedSunHour, sunPhaseToSunHour, windlightEnvironment, WINDLIGHT_HOUR_TABLE, SL_DAY_SECONDS,
 } from '../windlight';
 import { computeSkyUniforms } from '../sky';
 
-const xml = (name: string) => readFileSync(resolve(process.cwd(), 'src/assets/windlight', `${name}.xml`), 'utf8');
+const xml = (name: string) => readFileSync(resolve(__dirname, '../../assets/windlight', `${name}.xml`), 'utf8');
 
 describe('Windlight preset parsing (Lumiya rules)', () => {
   const preset = parseWindlightPreset(xml('A-6AM'));
@@ -108,5 +108,26 @@ describe('estimated sun hour', () => {
 
   it('builds an environment flagged as the bundled default, not simulator data', () => {
     expect(windlightEnvironment(0.5).source).toBe('default-windlight');
+  });
+});
+
+describe('sunPhaseToSunHour conversion', () => {
+  it('converts SunPhase radians to normalized sun hour fractions', () => {
+    expect(sunPhaseToSunHour(0)).toBeCloseTo(0.25, 6); // Sunrise (6 AM)
+    expect(sunPhaseToSunHour(Math.PI / 2)).toBeCloseTo(0.5, 6); // Noon (12 PM)
+    expect(sunPhaseToSunHour(Math.PI)).toBeCloseTo(0.75, 6); // Sunset (6 PM)
+    expect(sunPhaseToSunHour(1.5 * Math.PI)).toBeCloseTo(0, 6); // Midnight (12 AM)
+    expect(sunPhaseToSunHour(2 * Math.PI)).toBeCloseTo(0.25, 6); // Wraps to sunrise
+  });
+
+  it('handles negative sun phases and normalizes into [0, 1)', () => {
+    expect(sunPhaseToSunHour(-0.5 * Math.PI)).toBeCloseTo(0, 6);
+    expect(sunPhaseToSunHour(-Math.PI)).toBeCloseTo(0.75, 6);
+  });
+
+  it('gracefully handles non-numeric and non-finite inputs by returning 0', () => {
+    expect(sunPhaseToSunHour(NaN)).toBe(0);
+    expect(sunPhaseToSunHour(Infinity)).toBe(0);
+    expect(sunPhaseToSunHour(null as any)).toBe(0);
   });
 });

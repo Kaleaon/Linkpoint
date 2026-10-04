@@ -12,7 +12,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 /**
@@ -37,13 +36,13 @@ class GridManager(
     private var selectedGrid: GridInfo = BUILTIN_GRIDS[0]
 
     /**
-     * Synchronously returns available grids from local SQLite database cache.
+     * Asynchronously returns available grids from local SQLite database cache.
      * Guaranteed sub-10ms lookup time.
      */
-    fun getAvailableGrids(): List<GridInfo> {
+    suspend fun getAvailableGridsAsync(): List<GridInfo> = withContext(Dispatchers.IO) {
         val startTime = System.currentTimeMillis()
         val cachedEntities = try {
-            runBlocking(Dispatchers.IO) { dao.getAllGrids() }
+            dao.getAllGrids()
         } catch (e: Exception) {
             Log.e(TAG, "Failed to query local SQLite database cache: ${e.message}")
             emptyList()
@@ -52,12 +51,25 @@ class GridManager(
         val grids = if (cachedEntities.isNotEmpty()) {
             cachedEntities.map { it.toGridInfo() }
         } else {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    dao.insertGrids(GridDatabase.DEFAULT_PRESET_GRIDS)
+                    Log.i(TAG, "Auto-populated local grid storage with default preset grids")
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to auto-populate default preset grids: ${e.message}")
+                }
+            }
             BUILTIN_GRIDS
         }
 
         val duration = System.currentTimeMillis() - startTime
         Log.d(TAG, "Loaded ${grids.size} grid profiles from SQLite cache in ${duration}ms")
-        return grids
+        grids
+    }
+
+    @Deprecated("Use getAvailableGridsAsync or getAvailableGridsFlow instead to avoid main-thread blocking.")
+    fun getAvailableGrids(): List<GridInfo> {
+        return BUILTIN_GRIDS
     }
 
     /**
@@ -65,16 +77,35 @@ class GridManager(
      */
     fun getAvailableGridsFlow(): Flow<List<GridInfo>> {
         return dao.getAllGridsFlow().map { list ->
-            if (list.isNotEmpty()) list.map { it.toGridInfo() } else BUILTIN_GRIDS
+            if (list.isNotEmpty()) {
+                list.map { it.toGridInfo() }
+            } else {
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        dao.insertGrids(GridDatabase.DEFAULT_PRESET_GRIDS)
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Failed to auto-populate default preset grids: ${e.message}")
+                    }
+                }
+                BUILTIN_GRIDS
+            }
         }
     }
 
     fun getSelectedGrid(): GridInfo = selectedGrid
 
-    fun selectGrid(gridId: String) {
-        val grid = getAvailableGrids().find { it.id == gridId } ?: resolveGrid(gridId)
+    suspend fun selectGridAsync(gridId: String) {
+        val grid = getAvailableGridsAsync().find { it.id == gridId } ?: resolveGridAsync(gridId)
         selectedGrid = grid
         Log.i(TAG, "Selected grid: ${grid.name} (${grid.loginUri})")
+    }
+
+    @Deprecated("Use selectGridAsync instead.")
+    fun selectGrid(gridId: String) {
+        val builtin = BUILTIN_GRIDS.find { it.id == gridId }
+        if (builtin != null) {
+            selectedGrid = builtin
+        }
     }
     
     fun updateSelectedGrid(grid: GridInfo) {
@@ -83,27 +114,23 @@ class GridManager(
     }
 
     /**
-     * Resolves grid metadata instantly from local SQLite cache, or falls back gracefully
+     * Resolves grid metadata asynchronously from local SQLite cache, or falls back gracefully
      * to direct `/grid_info` HTTP probing for unlisted/custom grids.
      */
-    fun resolveGrid(gridIdOrUri: String): GridInfo {
+    suspend fun resolveGridAsync(gridIdOrUri: String): GridInfo = withContext(Dispatchers.IO) {
         // Fast local SQLite lookup by ID or login URI
-        val cached = runBlocking(Dispatchers.IO) {
-            dao.getGridById(gridIdOrUri) ?: dao.getGridByLoginUri(gridIdOrUri)
-        }
+        val cached = dao.getGridById(gridIdOrUri) ?: dao.getGridByLoginUri(gridIdOrUri)
         if (cached != null) {
-            return cached.toGridInfo()
+            return@withContext cached.toGridInfo()
         }
 
         // Search in memory builtins
         val builtin = BUILTIN_GRIDS.find { it.id == gridIdOrUri || it.loginUri == gridIdOrUri }
-        if (builtin != null) return builtin
+        if (builtin != null) return@withContext builtin
 
         // Fallback to direct /grid_info HTTP probe for unlisted / custom grid
         Log.i(TAG, "Grid '$gridIdOrUri' missing from local cache — falling back to direct /grid_info probe")
-        val probed = runBlocking(Dispatchers.IO) {
-            prober.probeGrid(gridIdOrUri)
-        }
+        val probed = prober.probeGrid(gridIdOrUri)
 
         val profile = probed ?: GridProfileEntity(
             id = "custom_" + Math.abs(gridIdOrUri.hashCode()),
@@ -115,11 +142,22 @@ class GridManager(
         )
 
         // Cache probed profile in SQLite for future instant sub-10ms resolution
-        CoroutineScope(Dispatchers.IO).launch {
-            try { dao.insertGrid(profile) } catch (e: Exception) { Log.w(TAG, "Failed to cache probed grid: ${e.message}") }
-        }
+        try { dao.insertGrid(profile) } catch (e: Exception) { Log.w(TAG, "Failed to cache probed grid: ${e.message}") }
 
-        return profile.toGridInfo()
+        profile.toGridInfo()
+    }
+
+    @Deprecated("Use resolveGridAsync instead.")
+    fun resolveGrid(gridIdOrUri: String): GridInfo {
+        val builtin = BUILTIN_GRIDS.find { it.id == gridIdOrUri || it.loginUri == gridIdOrUri }
+        if (builtin != null) return builtin
+        return GridInfo(
+            id = "custom_" + Math.abs(gridIdOrUri.hashCode()),
+            name = gridIdOrUri,
+            loginUri = if (gridIdOrUri.startsWith("http")) gridIdOrUri else "http://$gridIdOrUri/",
+            gridNick = gridIdOrUri,
+            isCustom = true
+        )
     }
     
     fun addCustomGrid(grid: GridInfo) {
@@ -233,6 +271,8 @@ data class GridInfo(
     val registerUri: String? = null,
     val passwordUri: String? = null,
     val economyUri: String? = null,
+    val currencySymbol: String = "L$",
+    val isZeroCurrency: Boolean = false,
     val mapUri: String? = null,
     val welcomeUri: String? = null,
     val logoUrl: String? = null,
