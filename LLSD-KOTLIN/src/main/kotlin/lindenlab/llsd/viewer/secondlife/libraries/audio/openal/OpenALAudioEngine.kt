@@ -71,7 +71,9 @@ class OpenALAudioEngine {
         var maxSources: Int = 32,
         var streamingBufferSize: Int = 4096,
         var streamingBufferCount: Int = 4,
-        var enableHRTF: Boolean = true // Head-Related Transfer Function
+        var enableHRTF: Boolean = true, // Head-Related Transfer Function
+        var audibilityThreshold: Float = 0.001f,
+        var gainSmoothingRate: Float = 10.0f
     )
 
     /**
@@ -163,7 +165,16 @@ class OpenALAudioEngine {
         var isLooping: Boolean = false,
         var isRelative: Boolean = false, // Position relative to listener
         var buffer: AudioBuffer? = null,
-        var state: AudioSourceState = AudioSourceState.INITIAL
+        var state: AudioSourceState = AudioSourceState.INITIAL,
+        var priority: Float = 1.0f,
+        var isVirtualized: Boolean = false,
+        var isHardwareActive: Boolean = false,
+        var currentGain: Float = 0.0f,
+        var targetGain: Float = 0.0f,
+        var playbackTime: Float = 0.0f,
+        var positionUpdateCount: Int = 0,
+        var calculatedPriority: Float = 0.0f,
+        var calculatedDistance: Float = 0.0f
     ) {
         val alSourceHandle: Int = generateSourceHandle() // OpenAL source handle
 
@@ -190,6 +201,29 @@ class OpenALAudioEngine {
         var referenceDistance: Float
             get() = _referenceDistance
             set(value) { _referenceDistance = max(0.0f, value) }
+
+        fun resetForReuse() {
+            position = Vector3(0.0, 0.0, 0.0)
+            velocity = Vector3(0.0, 0.0, 0.0)
+            _pitch = 1.0f
+            _gain = 1.0f
+            _maxDistance = 100.0f
+            _rolloffFactor = 1.0f
+            _referenceDistance = 1.0f
+            isLooping = false
+            isRelative = false
+            buffer = null
+            state = AudioSourceState.INITIAL
+            priority = 1.0f
+            isVirtualized = false
+            isHardwareActive = false
+            currentGain = 0.0f
+            targetGain = 0.0f
+            playbackTime = 0.0f
+            positionUpdateCount = 0
+            calculatedPriority = 0.0f
+            calculatedDistance = 0.0f
+        }
 
         private fun generateSourceHandle(): Int {
             return abs(sourceId.hashCode()) // Mock handle generation
@@ -286,15 +320,10 @@ class OpenALAudioEngine {
         }
 
         // Try to reuse a source from the pool
-        val source = sourcePool.pollFirst() ?: run {
-            if (activeSources.size < settings.maxSources) {
-                AudioSource(UUID.randomUUID())
-            } else {
-                null
-            }
-        }
-
-        source?.let { activeSources[it.sourceId] = it }
+        val source = sourcePool.pollFirst()?.apply { resetForReuse() }
+            ?: AudioSource(UUID.randomUUID())
+        
+        activeSources[source.sourceId] = source
         return source
     }
 
@@ -306,6 +335,7 @@ class OpenALAudioEngine {
      * @param gain Volume (0.0 to 1.0)
      * @param pitch Pitch multiplier (0.5 to 2.0)
      * @param looping Whether the sound should loop
+     * @param priority Priority rank multiplier (default 1.0)
      * @return The source playing the sound, or null if failed
      */
     fun playSound3D(
@@ -313,7 +343,8 @@ class OpenALAudioEngine {
         position: Vector3,
         gain: Float,
         pitch: Float,
-        looping: Boolean
+        looping: Boolean,
+        priority: Float = 1.0f
     ): AudioSource? {
         val buffer = loadedBuffers[soundId]
         if (buffer == null) {
@@ -334,6 +365,9 @@ class OpenALAudioEngine {
         source.pitch = pitch
         source.isLooping = looping
         source.isRelative = false
+        source.priority = priority
+        source.playbackTime = 0.0f
+        source.currentGain = 0.0f
 
         // Apply 3D audio settings
         source.maxDistance = settings.maxAudioDistance
@@ -344,6 +378,19 @@ class OpenALAudioEngine {
         println("Playing 3D sound: $soundId at $position")
 
         return source
+    }
+
+    /**
+     * Overload for backwards compatibility without explicit priority argument.
+     */
+    fun playSound3D(
+        soundId: UUID,
+        position: Vector3,
+        gain: Float,
+        pitch: Float,
+        looping: Boolean
+    ): AudioSource? {
+        return playSound3D(soundId, position, gain, pitch, looping, 1.0f)
     }
 
     /**
@@ -372,6 +419,9 @@ class OpenALAudioEngine {
     /**
      * Update all active audio sources (call once per frame).
      *
+     * Evaluates spatial distance, virtualizes or culls out-of-range/low-priority sources,
+     * allocates OpenAL handles based on priority, and applies gain smoothing.
+     *
      * @param deltaTime Time elapsed since last update in seconds
      */
     fun update(deltaTime: Float) {
@@ -379,20 +429,114 @@ class OpenALAudioEngine {
             return
         }
 
-        // Update all active sources
+        val listenerPos = listener?.position ?: Vector3(0.0, 0.0, 0.0)
+        val listenerGain = listener?.gain ?: 1.0f
+        val dt = max(0.0f, deltaTime)
+
+        // 1. Cleanup stopped or finished sources
         val iterator = activeSources.entries.iterator()
         while (iterator.hasNext()) {
             val (_, source) = iterator.next()
 
-            // Check if source is still playing (placeholder for actual OpenAL query)
             if (source.state == AudioSource.AudioSourceState.STOPPED) {
-                // Return source to pool
+                source.isHardwareActive = false
+                source.isVirtualized = false
                 sourcePool.offer(source)
                 iterator.remove()
+                continue
+            }
+
+            if (source.state == AudioSource.AudioSourceState.PLAYING) {
+                source.playbackTime += dt
+                val buf = source.buffer
+                if (!source.isLooping && buf != null && buf.duration > 0.0f && source.playbackTime >= buf.duration) {
+                    source.state = AudioSource.AudioSourceState.STOPPED
+                    source.isHardwareActive = false
+                    source.isVirtualized = false
+                    sourcePool.offer(source)
+                    iterator.remove()
+                }
             }
         }
 
-        // Apply global audio settings (placeholder)
+        // 2. Evaluate distance, attenuation, and priority for all active playing sources - O(N)
+        val audibleSources = mutableListOf<AudioSource>()
+        for (source in activeSources.values) {
+            if (source.state != AudioSource.AudioSourceState.PLAYING) continue
+
+            val distance = if (source.isRelative) {
+                source.position.magnitude().toFloat()
+            } else {
+                val dx = source.position.x - listenerPos.x
+                val dy = source.position.y - listenerPos.y
+                val dz = source.position.z - listenerPos.z
+                kotlin.math.sqrt(dx * dx + dy * dy + dz * dz).toFloat()
+            }
+            source.calculatedDistance = distance
+
+            val maxDist = min(source.maxDistance, settings.maxAudioDistance)
+            if (distance > maxDist) {
+                source.targetGain = 0.0f
+                source.calculatedPriority = 0.0f
+                continue
+            }
+
+            val attenuation = if (distance <= 0.0f) 1.0f else 1.0f / (1.0f + source.rolloffFactor * distance / maxDist)
+            val effectiveTargetGain = source.gain * attenuation * listenerGain * settings.sfxVolume * settings.masterVolume
+
+            if (effectiveTargetGain < settings.audibilityThreshold) {
+                source.targetGain = 0.0f
+                source.calculatedPriority = 0.0f
+            } else {
+                source.targetGain = effectiveTargetGain
+                source.calculatedPriority = source.priority * effectiveTargetGain / (1.0f + distance)
+                audibleSources.add(source)
+            }
+        }
+
+        // 3. Priority channel allocation pool - cap active hardware playback handles at settings.maxSources
+        audibleSources.sortByDescending { it.calculatedPriority }
+        val maxHardwareChannels = max(0, settings.maxSources)
+        val hardwareActiveSet = HashSet<UUID>()
+        for (i in 0 until min(audibleSources.size, maxHardwareChannels)) {
+            hardwareActiveSet.add(audibleSources[i].sourceId)
+        }
+
+        // 4. Update hardware state, gain smoothing, and OpenAL handle positioning
+        val alpha = if (settings.gainSmoothingRate > 0.0f && dt > 0.0f) {
+            min(1.0f, dt * settings.gainSmoothingRate)
+        } else {
+            1.0f
+        }
+
+        for (source in activeSources.values) {
+            if (source.state != AudioSource.AudioSourceState.PLAYING) continue
+
+            val shouldBeHardwareActive = hardwareActiveSet.contains(source.sourceId)
+
+            if (shouldBeHardwareActive) {
+                if (source.isVirtualized) {
+                    source.isVirtualized = false
+                }
+                source.isHardwareActive = true
+
+                // Gain smoothing transition towards target gain
+                source.currentGain += (source.targetGain - source.currentGain) * alpha
+
+                // Update OpenAL 3D handle positioning ONLY for active hardware sources within distance
+                source.positionUpdateCount++
+            } else {
+                source.isHardwareActive = false
+                source.isVirtualized = true
+
+                // Smoothly decay gain to zero when virtualized
+                source.currentGain += (0.0f - source.currentGain) * alpha
+
+                // Skip OpenAL handle positioning for culled/virtualized sources!
+            }
+        }
+
+        // Apply global audio settings
         updateGlobalSettings()
     }
 
@@ -609,15 +753,3 @@ val OpenALAudioEngine.activeSourceCount: Int
     } catch (e: Exception) {
         0
     }
-
-/**
- * Coroutine support for audio operations (commented out until kotlinx-coroutines is available)
- */
-// suspend fun OpenALAudioEngine.loadSoundAsync(
-//     soundId: UUID,
-//     audioData: ByteArray,
-//     format: OpenALAudioEngine.AudioBuffer.AudioFormat = OpenALAudioEngine.AudioBuffer.AudioFormat.STEREO16,
-//     sampleRate: Int = 44100
-// ): OpenALAudioEngine.AudioBuffer? = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-//     loadAudioBuffer(soundId, audioData, format, sampleRate)
-// }
