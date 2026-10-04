@@ -103,6 +103,9 @@ mod tests {
         assert_eq!(req1.kind, AssetKind::Material);
         let req2 = scheduler.pop_next().unwrap();
         assert_eq!(req2.id, "normal_map");
-        assert_eq!(req2.kind, AssetKind::MaterialTexture(TextureChannel::Normal));
+        assert_eq!(
+            req2.kind,
+            AssetKind::MaterialTexture(TextureChannel::Normal)
+        );
     }
 }
