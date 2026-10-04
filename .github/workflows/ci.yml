@@ -211,7 +211,7 @@ jobs:
     name: Task 6 - CI Status & Coverage Quality Gate
     runs-on: ubuntu-latest
     needs: [pre-commit, android, web, rust, protocol]
-    if: always()
+    if: '!cancelled()'
     permissions:
       contents: read
 
