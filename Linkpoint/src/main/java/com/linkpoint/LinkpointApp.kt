@@ -6064,6 +6064,11 @@ class LinkpointApp : Application() {
     fun isTeleportManagerInitialized(): Boolean = ::teleportManager.isInitialized
 
     /**
+     * Check if landmark manager is initialized (for debug reports)
+     */
+    fun isLandmarkManagerInitialized(): Boolean = ::landmarkManager.isInitialized
+    
+    /**
      * Check if HUD manager is initialized (for debug reports)
      */
     fun isHudManagerInitialized(): Boolean = ::hudManager.isInitialized
