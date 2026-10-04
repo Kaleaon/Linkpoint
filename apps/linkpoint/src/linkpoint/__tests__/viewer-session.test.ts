@@ -365,4 +365,35 @@ describe('desktop session avatar movement', () => {
     expect(session.getSceneObjects()).toEqual([]);
     expect(session.getDiagnostics()).toMatchObject({ connected: true, regionName: '' });
   });
+
+  it('parses SunPhase from SimulatorViewerTimeMessage and emits sun-hour-update event', () => {
+    const { Subject } = require('rxjs');
+    const sent: Array<[string, any]> = [];
+    const session = new ViewerSession((type: string, data: any) => sent.push([type, data]));
+    const timeSubject = new Subject();
+    const events = {
+      onNewObjectEvent: new Subject(),
+      onObjectUpdatedEvent: new Subject(),
+      onObjectUpdatedTerseEvent: new Subject(),
+      onObjectKilledEvent: new Subject(),
+      onNearbyChat: new Subject(),
+      onInstantMessage: new Subject(),
+      onParcelPropertiesEvent: new Subject(),
+      onAvatarEnteredRegion: new Subject(),
+      onFriendOnline: new Subject(),
+      onFriendRequest: new Subject(),
+      onFriendResponse: new Subject(),
+      onFriendRemoved: new Subject(),
+      onDisconnected: new Subject(),
+      onSimulatorViewerTimeMessage: timeSubject,
+    };
+    session.subscribeEvents(events);
+
+    // SunPhase = Math.PI / 2 -> sun hour = 0.5 (noon)
+    timeSubject.next({ SunPhase: Math.PI / 2 });
+    expect(sent).toHaveLength(1);
+    expect(sent[0][0]).toBe('sun-hour-update');
+    expect(sent[0][1].sunHour).toBeCloseTo(0.5, 6);
+    expect(sent[0][1].sunPhase).toBeCloseTo(Math.PI / 2, 6);
+  });
 });

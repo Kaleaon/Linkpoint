@@ -129,8 +129,9 @@ export class SLConnectionFull extends Utils.EventEmitter {
         this.emit('avatar-presence', data);
       });
     }
+    forward('sun-hour-update', 'sun-hour-update');
     // Everything else the session announces is scene data: objects, assets, textures, terrain, environment...
-    for (const type of ['object-add', 'object-update', 'object-remove', 'asset-ready', 'asset-error', 'animations', 'texture-ready', 'material-ready', 'world-data', 'environment', 'terrain']) {
+    for (const type of ['object-add', 'object-update', 'object-remove', 'asset-ready', 'asset-error', 'animations', 'texture-ready', 'material-ready', 'world-data', 'environment', 'terrain', 'sun-hour-update']) {
       forward(type, `scene:${type}`);
     }
     slBridge.on('disconnected', (data: any) => {
