@@ -322,7 +322,7 @@ class OpenALAudioEngine {
         // Try to reuse a source from the pool
         val source = sourcePool.pollFirst()?.apply { resetForReuse() }
             ?: AudioSource(UUID.randomUUID())
-        
+
         activeSources[source.sourceId] = source
         return source
     }

@@ -76,6 +76,29 @@ export class Scene3D extends Utils.EventEmitter {
   public frameStats = { drawn: 0, culled: 0 };
   private environmentMeshesReady = false;
 
+  private decodedTextureCount = 0;
+  private pendingTextureCount = 0;
+  private textureProgressState = { pending: 0, decoded: 0, total: 0, activeProgress: 100, stage: 'Idle' };
+
+  public getTextureProgress() {
+    return { ...this.textureProgressState };
+  }
+
+  public reportTextureProgress(progressData: { pending?: number; decoded?: number; total?: number; activeProgress?: number; stage?: string; textureId?: string }) {
+    if (typeof progressData.decoded === 'number') this.decodedTextureCount = progressData.decoded;
+    if (typeof progressData.pending === 'number') this.pendingTextureCount = progressData.pending;
+
+    const decoded = this.decodedTextureCount;
+    const pending = this.pendingTextureCount;
+    const total = progressData.total ?? (decoded + pending);
+    const stage = progressData.stage || (pending > 0 ? 'Decompressing' : 'Complete');
+    const activeProgress = progressData.activeProgress ?? (total > 0 ? Math.round((decoded / total) * 100) : 100);
+
+    this.textureProgressState = { pending, decoded, total, activeProgress, stage };
+    this.emit('scene:texture-progress', this.textureProgressState);
+    return this.textureProgressState;
+  }
+
   /** The HUD currently overlaid on the view, if any. Its prims are objects flagged `hud` with `hudRoot` set to this id. */
   public displayedHud: { rootId: string; size: number; pan: [number, number] } | null = null;
   private skyUniforms: SkyUniforms = computeSkyUniforms(null);
@@ -199,7 +222,17 @@ export class Scene3D extends Utils.EventEmitter {
   }
 
   addAssetTexture(assetId: string, width: number, height: number, rgba: Uint8Array) {
-    return this.graphics.createTexture(`texture:${assetId}`, width, height, rgba);
+    this.decodedTextureCount++;
+    if (this.pendingTextureCount > 0) this.pendingTextureCount--;
+    const texName = this.graphics.createTexture(`texture:${assetId}`, width, height, rgba);
+    this.reportTextureProgress({
+      decoded: this.decodedTextureCount,
+      pending: this.pendingTextureCount,
+      activeProgress: 100,
+      stage: 'Decoded',
+      textureId: assetId
+    });
+    return texName;
   }
 
   /** Replace the flat helper grid with the simulator's height field. */
