@@ -7,6 +7,11 @@ import com.linkpoint.network.CronetResult
 import com.linkpoint.network.SSLHelper
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
+import com.linkpoint.assets.mesh.CascadingLodResolver
+import com.linkpoint.assets.mesh.DecompressorTelemetry
+import com.linkpoint.assets.mesh.LodResolverTelemetry
+import com.linkpoint.assets.mesh.MeshHeaderDecoder
+import com.linkpoint.assets.mesh.SafeMeshDecompressor
 import kotlinx.coroutines.*
 import kotlin.coroutines.resume
 import okhttp3.OkHttpClient
@@ -35,7 +40,10 @@ class MeshManager(
     private val context: Context,
     private val cache: AssetCache,
     private val capabilityManager: CapabilityManager,
-    private val workerPool: SceneWorkerPool = SceneWorkerPool.getInstance()
+    private val workerPool: SceneWorkerPool = SceneWorkerPool.getInstance(),
+    val headerDecoder: MeshHeaderDecoder = MeshHeaderDecoder(),
+    val decompressor: SafeMeshDecompressor = SafeMeshDecompressor(),
+    val lodResolver: CascadingLodResolver = CascadingLodResolver()
 ) {
     companion object {
         private const val TAG = "MeshManager"
@@ -185,9 +193,9 @@ class MeshManager(
      */
     private suspend fun tryRangedFetch(meshId: UUID, lod: MeshLOD, url: String): MeshData? {
         val header = ensureHeader(meshId, url) ?: return null
-        val lodMap = header.map.getMap(lodKeyFor(lod)) ?: header.map.getMap("high_lod") ?: return null
-        val lodOffset = lodMap.getInt("offset") ?: return null
-        val lodSize = lodMap.getInt("size") ?: return null
+        val lodResolution = lodResolver.resolveLodMap(header.map, lod) ?: return null
+        val lodOffset = lodResolution.lodMap.getInt("offset") ?: return null
+        val lodSize = lodResolution.lodMap.getInt("size") ?: return null
         if (lodSize <= 0) return null
 
         val lodStart = (header.headerEnd + lodOffset).toLong()
@@ -200,7 +208,7 @@ class MeshManager(
         val skinMap = parseSkinDataFromHeaderOrBlob(url, header) // may be null
 
         return try {
-            val decompressed = decompress(lodCompressed)
+            val decompressed = decompressor.decompress(lodCompressed)
             downloadCount.incrementAndGet()
             downloadedBytes.addAndGet(lodCompressed.size.toLong())
             val faces = parseGeometryFromLodBytes(meshId, decompressed)
@@ -212,13 +220,8 @@ class MeshManager(
         }
     }
 
-    /** Map [MeshLOD] to its header key. Centralised so the ranged path and the legacy parseMesh agree. */
-    private fun lodKeyFor(lod: MeshLOD): String = when (lod) {
-        MeshLOD.HIGHEST -> "high_lod"
-        MeshLOD.HIGH -> "medium_lod"
-        MeshLOD.MEDIUM -> "low_lod"
-        MeshLOD.LOW -> "lowest_lod"
-    }
+    /** Map [MeshLOD] to its header key. Delegated to [lodResolver]. */
+    private fun lodKeyFor(lod: MeshLOD): String = lodResolver.lodKeyFor(lod)
 
     /**
      * Get the parsed header for [meshId], fetching if not cached. Tries
@@ -230,9 +233,9 @@ class MeshManager(
         headerCache[meshId]?.let { return it }
         for (probeSize in longArrayOf(8 * 1024L, 32 * 1024L, 128 * 1024L)) {
             val data = fetchRange(url, 0L until probeSize, 30_000L) ?: continue
-            val (value, end) = LLSDParser.parseBinaryAndConsumed(data)
-            if (end > 0 && value is LLSDMap) {
-                val parsed = ParsedHeader(value, end)
+            val result = headerDecoder.decodeHeader(data)
+            if (result != null) {
+                val parsed = ParsedHeader(result.map, result.headerEnd)
                 if (headerCache.size >= MAX_HEADER_CACHE) {
                     headerCache.keys.firstOrNull()?.let { headerCache.remove(it) }
                 }
@@ -262,7 +265,7 @@ class MeshManager(
             val absEnd = absStart + size - 1
             val skinCompressed = fetchRange(url, absStart..absEnd, 30_000L) ?: return null
             return try {
-                val decoded = decompress(skinCompressed)
+                val decoded = decompressor.decompress(skinCompressed)
                 LLSDParser.parseBinary(decoded) as? LLSDMap
             } catch (e: Exception) {
                 Log.w(TAG, "Skin blob parse failed: ${e.message}")
@@ -415,46 +418,26 @@ class MeshManager(
 
     private fun parseMesh(meshId: UUID, data: ByteArray, lod: MeshLOD): MeshData? {
         try {
-            // Parse the mesh header. The previous implementation scanned
-            // for the first '}' (0x7D) byte in the first 64KB and treated
-            // that position as the header boundary — which is wrong any
-            // time the header itself contains an LLSDBinary value whose
-            // payload happens to include 0x7D (very common, e.g. UUIDs
-            // or quantised binary blobs). This version uses the LLSD
-            // parser's own consumed-byte count, which is the only
-            // correct way to find the boundary.
-            val (headerValue, headerEnd) = LLSDParser.parseBinaryAndConsumed(data)
-            if (headerEnd <= 0) {
+            val headerResult = headerDecoder.decodeHeader(data)
+            if (headerResult == null) {
                 lastError = "Mesh header parse failed"
                 lastErrorTime = System.currentTimeMillis()
                 parseFailCount.incrementAndGet()
                 return null
             }
-            val header = headerValue as? LLSDMap ?: run {
-                lastError = "Invalid mesh header - not an LLSDMap"
-                lastErrorTime = System.currentTimeMillis()
-                parseFailCount.incrementAndGet()
-                return null
-            }
+            val header = headerResult.map
+            val headerEnd = headerResult.headerEnd
 
-            // Get LOD data offset/size
-            val lodKey = when (lod) {
-                MeshLOD.HIGHEST -> "high_lod"
-                MeshLOD.HIGH -> "medium_lod"
-                MeshLOD.MEDIUM -> "low_lod"
-                MeshLOD.LOW -> "lowest_lod"
-            }
-
-            val lodMap = header.getMap(lodKey) ?: header.getMap("high_lod")
-            if (lodMap == null) {
+            val lodResolution = lodResolver.resolveLodMap(header, lod)
+            if (lodResolution == null) {
                 lastError = "Missing LOD map in mesh header"
                 lastErrorTime = System.currentTimeMillis()
                 parseFailCount.incrementAndGet()
                 return null
             }
 
-            val offset = lodMap.getInt("offset")
-            val size = lodMap.getInt("size")
+            val offset = lodResolution.lodMap.getInt("offset")
+            val size = lodResolution.lodMap.getInt("size")
             if (offset == null || size == null) {
                 lastError = "Missing offset/size in LOD map"
                 lastErrorTime = System.currentTimeMillis()
@@ -464,7 +447,7 @@ class MeshManager(
 
             // Extract and decompress LOD data
             val compressedData = data.copyOfRange(headerEnd + offset, headerEnd + offset + size)
-            val decompressed = decompress(compressedData)
+            val decompressed = decompressor.decompress(compressedData)
 
             // Parse mesh geometry
             return parseMeshGeometry(meshId, decompressed, header, lod)
@@ -477,33 +460,7 @@ class MeshManager(
         }
     }
 
-    private fun decompress(data: ByteArray): ByteArray {
-        // Stream into a fixed-size chunk buffer rather than pre-allocating
-        // `compressedSize * 10` upfront. Mesh LOD blobs commonly have a
-        // 5-15× compression ratio so a 16 KB buffer keeps the working
-        // set bounded even for the largest assets, while still allowing
-        // unbounded output via ByteArrayOutputStream growth.
-        val inflater = Inflater()
-        try {
-            inflater.setInput(data)
-            val buffer = ByteArray(16 * 1024)
-            val resultStream = java.io.ByteArrayOutputStream(data.size * 4)
-            while (!inflater.finished()) {
-                val count = inflater.inflate(buffer)
-                if (count == 0) {
-                    // Either inflater needs more input (shouldn't happen
-                    // here since we provided the full payload) or we hit
-                    // the end of the stream — break either way to avoid
-                    // an infinite loop on malformed assets.
-                    break
-                }
-                resultStream.write(buffer, 0, count)
-            }
-            return resultStream.toByteArray()
-        } finally {
-            inflater.end()
-        }
-    }
+    private fun decompress(data: ByteArray): ByteArray = decompressor.decompress(data)
 
     private fun parseMeshGeometry(meshId: UUID, data: ByteArray, header: LLSDMap, lod: MeshLOD = MeshLOD.HIGH): MeshData {
         // Each LOD blob, after zlib decompression, is itself an LLSD payload:
@@ -912,7 +869,10 @@ class MeshManager(
             parseFailedCount = parseFailCount.get(),
             hasMeshCapability = getMeshCap != null,
             lastError = lastError,
-            lastErrorTimeAgo = if (lastErrorTime > 0) System.currentTimeMillis() - lastErrorTime else null
+            lastErrorTimeAgo = if (lastErrorTime > 0) System.currentTimeMillis() - lastErrorTime else null,
+            decompressorTelemetry = decompressor.getTelemetry(),
+            lodResolverTelemetry = lodResolver.getTelemetry(),
+            headerParseFailures = headerDecoder.getParseFailureCount()
         )
     }
 
@@ -927,7 +887,10 @@ class MeshManager(
         val parseFailedCount: Int,
         val hasMeshCapability: Boolean,
         val lastError: String?,
-        val lastErrorTimeAgo: Long?
+        val lastErrorTimeAgo: Long?,
+        val decompressorTelemetry: DecompressorTelemetry? = null,
+        val lodResolverTelemetry: LodResolverTelemetry? = null,
+        val headerParseFailures: Long = 0
     )
 }
 
