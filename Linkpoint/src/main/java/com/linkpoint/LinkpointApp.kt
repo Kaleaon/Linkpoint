@@ -498,7 +498,8 @@ class LinkpointApp : Application() {
         private set
     lateinit var imManager: IMManager
         private set
-
+    lateinit var frameAlignedQueueService: com.linkpoint.chat.queue.FrameAlignedMessageQueueService
+        private set
     // Inventory
     lateinit var inventoryManager: InventoryManager
         private set
@@ -1204,6 +1205,13 @@ class LinkpointApp : Application() {
 
         // IM manager
         imManager = IMManager(udpConnection, capabilityManager, agentId)
+
+        // Dedicated Frame-Aligned Message Queue and Ring Buffer Service
+        frameAlignedQueueService = com.linkpoint.chat.queue.FrameAlignedMessageQueueService(
+            chatManager = chatManager,
+            imManager = imManager,
+            myAgentIdProvider = { sessionManager.getAgentId() ?: UUID(0L, 0L) }
+        )
 
         // Wire IMManager into GroupsManager so `sendGroupChat` routes
         // through the IM session state machine (Dialog=15 bring-up +
@@ -5770,6 +5778,7 @@ class LinkpointApp : Application() {
         if (::objectManager.isInitialized) objectManager.shutdown()
         if (::chatManager.isInitialized) chatManager.shutdown()
         if (::imManager.isInitialized) imManager.shutdown()
+        if (::frameAlignedQueueService.isInitialized) frameAlignedQueueService.shutdown()
         if (::inventoryManager.isInitialized) inventoryManager.shutdown()
         if (::gestureManager.isInitialized) gestureManager.shutdown()
 
@@ -5971,6 +5980,11 @@ class LinkpointApp : Application() {
      */
     fun isIMManagerInitialized(): Boolean = ::imManager.isInitialized
 
+    /**
+     * Check if frame-aligned queue service is initialized
+     */
+    fun isFrameAlignedQueueServiceInitialized(): Boolean = ::frameAlignedQueueService.isInitialized
+    
     /**
      * Check if texture manager is initialized (for debug reports)
      * Note: TextureManager is initialized early, so this is always true after app init
