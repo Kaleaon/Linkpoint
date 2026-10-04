@@ -5569,7 +5569,8 @@ class LinkpointApp : Application() {
                         message = imData.message,
                         sessionId = imData.sessionId,
                         dialogType = imData.dialog,
-                        timestamp = imData.timestamp
+                        timestamp = imData.timestamp,
+                        binaryBucket = imData.binaryBucket
                     )
                 } else {
                     Log.e(TAG, "Failed to parse ImprovedInstantMessage")

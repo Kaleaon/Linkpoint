@@ -32,7 +32,7 @@ data class UiBoundaryRule(
     val allowedUiDependencies: Set<String>
 )
 
-val sharedUiModules = setOf("theme", "navigation", "components", "common", "dialogs", "notecard", "linkpoint2", "avatar", "chat", "friends", "inventory", "minimap", "people", "settings", "xr", "radar")
+val sharedUiModules = setOf("theme", "navigation", "components", "common", "dialogs", "notecard", "linkpoint2", "avatar", "chat", "friends", "inventory", "minimap", "people", "settings", "xr", "radar", "overlay")
 val uiBoundaryRules = listOf(
     UiBoundaryRule(
         moduleName = "ui-theme",

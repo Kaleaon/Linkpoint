@@ -111,7 +111,7 @@ import java.util.concurrent.atomic.AtomicLong
  * @see MessageRouter for message dispatch logic
  * @see DebugReportService for how diagnostics are displayed
  */
-class UDPConnectionFixed(
+open class UDPConnectionFixed(
     private val clock: () -> Long = { System.currentTimeMillis() },
     private val eventEmitter: EventBus = EventBus,
     private val logger: (Int, String, String) -> Unit = { priority, tag, message -> Log.println(priority, tag, message) },
@@ -3150,7 +3150,7 @@ class UDPConnectionFixed(
      * Safe to call from any thread. Returns the assigned sequence number
      * (≥ 1) or -1 if the connection isn't up.
      */
-    fun sendPacket(
+    open fun sendPacket(
         messageId: Int,
         payload: ByteArray,
         reliable: Boolean = false,
