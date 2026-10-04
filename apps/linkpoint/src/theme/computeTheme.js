@@ -35,7 +35,8 @@ export function computeTheme(state, cf) {
       V[tok] = adj;
     }
   }
-  const pad = state.dense ? "8px" : V.pad;
+  const density = state.customTheme?.density || (state.dense ? "compact" : "standard");
+  const pad = density === "compact" ? "6px" : density === "comfortable" ? "18px" : V.pad;
   const C = cf();
   const isConsole = nav === "sweep";
   const consoleScene = isConsole && state.screen === "3D View" && state.cond === "normal";

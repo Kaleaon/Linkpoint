@@ -13,3 +13,4 @@ export * from "./ConsoleFrame.js";
 export * from "./DeviceFrame.js";
 export * from "./FormField.js";
 export * from "./ElevationBadge.js";
+export * from "./LayoutControlToolbar.js";

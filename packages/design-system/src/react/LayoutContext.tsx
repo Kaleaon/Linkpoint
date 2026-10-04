@@ -4,10 +4,13 @@ import {
   LAYOUTS,
   PALETTES,
   computeThemeTokens,
+  type BreakpointPreset,
+  type DensityMode,
   type DeviceKey,
   type DevicePack,
   type LayoutKey,
   type LayoutLook,
+  type LayoutMode,
   type NavMode,
   type PaletteKey,
   type ThemeTokens
@@ -19,6 +22,9 @@ export interface LayoutContextState {
   palette: PaletteKey;
   device: DeviceKey;
   dense: boolean;
+  density: DensityMode;
+  layoutMode: LayoutMode;
+  breakpoint: BreakpointPreset;
   largeType: boolean;
 }
 
@@ -35,6 +41,9 @@ export interface LayoutTheme {
   pad: string;
   nav: NavMode;
   d: DevicePack;
+  density: DensityMode;
+  layoutMode: LayoutMode;
+  breakpoint: BreakpointPreset;
 }
 
 export interface LayoutContextValue extends LayoutContextState {
@@ -43,6 +52,9 @@ export interface LayoutContextValue extends LayoutContextState {
   setPalette: (key: PaletteKey) => void;
   setDevice: (key: DeviceKey) => void;
   setDense: (dense: boolean) => void;
+  setDensity: (density: DensityMode) => void;
+  setLayoutMode: (mode: LayoutMode) => void;
+  setBreakpoint: (bp: BreakpointPreset) => void;
   setLargeType: (largeType: boolean) => void;
   cssVars: React.CSSProperties;
 }
@@ -65,6 +77,9 @@ export interface LayoutProviderProps {
   initialPalette?: PaletteKey;
   initialDevice?: DeviceKey;
   initialDense?: boolean;
+  initialDensity?: DensityMode;
+  initialLayoutMode?: LayoutMode;
+  initialBreakpoint?: BreakpointPreset;
   initialLargeType?: boolean;
   children: React.ReactNode;
 }
@@ -74,21 +89,32 @@ export const LayoutProvider: React.FC<LayoutProviderProps> = ({
   initialPalette = "ink",
   initialDevice = "ios",
   initialDense = false,
+  initialDensity = "standard",
+  initialLayoutMode = "grid",
+  initialBreakpoint = "desktop",
   initialLargeType = false,
   children
 }) => {
   const [layout, setLayout] = useState<LayoutKey>(initialLayout);
   const [palette, setPalette] = useState<PaletteKey>(initialPalette);
   const [device, setDevice] = useState<DeviceKey>(initialDevice);
-  const [dense, setDense] = useState<boolean>(initialDense);
+  const [dense, setDenseState] = useState<boolean>(initialDense);
+  const [density, setDensity] = useState<DensityMode>(initialDensity || (initialDense ? "compact" : "standard"));
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>(initialLayoutMode);
+  const [breakpoint, setBreakpoint] = useState<BreakpointPreset>(initialBreakpoint);
   const [largeType, setLargeType] = useState<boolean>(initialLargeType);
+
+  const setDense = (d: boolean) => {
+    setDenseState(d);
+    setDensity(d ? "compact" : "standard");
+  };
 
   const theme = useMemo<LayoutTheme>(() => {
     const L = LAYOUTS[layout] || LAYOUTS.terminal;
     const P = PALETTES[palette] || PALETTES.ink;
     const d = DEVICES[device] || DEVICES.ios;
-    const v = computeThemeTokens(layout, palette, { dense });
-    const pad = dense ? "8px" : L.s.pad;
+    const v = computeThemeTokens(layout, palette, { dense, density, layoutMode });
+    const pad = density === "compact" ? "6px" : density === "comfortable" ? "18px" : L.s.pad;
     const nav = resolveNav(layout, device);
 
     return {
@@ -103,9 +129,12 @@ export const LayoutProvider: React.FC<LayoutProviderProps> = ({
       light: P.light,
       pad,
       nav,
-      d
+      d,
+      density,
+      layoutMode,
+      breakpoint
     };
-  }, [layout, palette, device, dense]);
+  }, [layout, palette, device, dense, density, layoutMode, breakpoint]);
 
   const cssVars = useMemo<React.CSSProperties>(() => {
     const raw = generateCssVariables(theme.v);
@@ -114,8 +143,11 @@ export const LayoutProvider: React.FC<LayoutProviderProps> = ({
     vars["--dfont"] = theme.dfont;
     vars["--pad"] = theme.pad;
     vars["--body"] = largeType ? "18px" : "13px";
+    vars["--layout-mode"] = layoutMode;
+    vars["--density"] = density;
+    vars["--breakpoint"] = breakpoint;
     return vars as React.CSSProperties;
-  }, [theme, largeType]);
+  }, [theme, largeType, layoutMode, density, breakpoint]);
 
   const value = useMemo<LayoutContextValue>(
     () => ({
@@ -123,16 +155,22 @@ export const LayoutProvider: React.FC<LayoutProviderProps> = ({
       palette,
       device,
       dense,
+      density,
+      layoutMode,
+      breakpoint,
       largeType,
       theme,
       setLayout,
       setPalette,
       setDevice,
       setDense,
+      setDensity,
+      setLayoutMode,
+      setBreakpoint,
       setLargeType,
       cssVars
     }),
-    [layout, palette, device, dense, largeType, theme, cssVars]
+    [layout, palette, device, dense, density, layoutMode, breakpoint, largeType, theme, cssVars]
   );
 
   return <LayoutContext.Provider value={value}>{children}</LayoutContext.Provider>;
