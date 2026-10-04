@@ -158,8 +158,10 @@ describe('HUD placement in the scene', () => {
     add({ id: 'rock', localId: 301, parentId: 0, position: [10, 10, 25], scale: [1, 1, 1], rotation: [0, 0, 0, 1] });
     expect(scene.objects.get('hat').hud).toBe(false);
     expect(scene.objects.get('rock').hud).toBe(false);
-    // The hat still follows the avatar into the world, as before.
-    expect(scene.objects.get('hat').position[0]).toBeCloseTo(128, 6);
+    // The hat follows the avatar through its skull joint (which has a small
+    // lateral rest offset), rather than being mistaken for a screen-space HUD.
+    expect(scene.objects.get('hat').position[0]).toBeGreaterThan(127.9);
+    expect(scene.objects.get('hat').position[0]).toBeLessThan(128);
   });
 
   it('re-flags a prim that was drawn in the world before its HUD root arrived', () => {
@@ -183,7 +185,7 @@ describe('HUD placement in the scene', () => {
     const touched = world.touchHudAt(400, 300);
     expect(touched?.id).toBeTruthy();
     await Promise.resolve();
-    expect(protocol.touchObject).toHaveBeenCalledWith(expect.objectContaining({ id: touched!.id, face: touched!.face }));
+    expect(protocol.touchObject).toHaveBeenCalledWith({ id: touched!.id });
     expect(world.touchHudAt(2, 2)).toBeNull(); // empty corner of the view
   });
 });

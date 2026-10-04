@@ -148,6 +148,7 @@ open class CapabilityManager : CapabilityRequester {
             CAP_FETCH_LIB_INVENTORY,
             CAP_FETCH_INVENTORY_DESCENDENTS,
             CAP_CREATE_INVENTORY_CATEGORY,
+            CAP_MOVE_INVENTORY_ITEM,
             CAP_INVENTORY_API
         )
 
@@ -381,7 +382,8 @@ open class CapabilityManager : CapabilityRequester {
                 CAP_EXT_ENVIRONMENT,
                 CAP_AVATAR_PICKER,
                 CAP_SEARCH_STATIC,
-                CAP_GROUP_PROFILE
+                CAP_GROUP_PROFILE,
+                CAP_MOVE_INVENTORY_ITEM
             )
         }
 
