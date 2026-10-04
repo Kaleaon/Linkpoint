@@ -31,19 +31,19 @@ import java.util.concurrent.ConcurrentHashMap;
  * As a utility class, it is final and cannot be instantiated.
  */
 public final class SLSoundProcessor {
-    
+
     private static final int MAX_SOUND_SIZE = 10 * 1024 * 1024; // 10MB
     private static final int MAX_SOUND_DURATION = 10; // 10 seconds
     private static final String[] SUPPORTED_FORMATS = {"wav", "ogg", "mp3"};
-    
+
     // Cache for processed sounds
     private static final Map<UUID, SoundCache> soundCache = new ConcurrentHashMap<>();
     private static final long CACHE_EXPIRY_MS = 15 * 60 * 1000; // 15 minutes
-    
+
     private SLSoundProcessor() {
         // Utility class - no instances
     }
-    
+
     /**
      * An enumeration of the audio formats supported by the sound processor.
      */
@@ -52,18 +52,18 @@ public final class SLSoundProcessor {
         OGG("ogg", "audio/ogg"),
         MP3("mp3", "audio/mpeg"),
         UNKNOWN("", "application/octet-stream");
-        
+
         private final String extension;
         private final String mimeType;
-        
+
         AudioFormat(String extension, String mimeType) {
             this.extension = extension;
             this.mimeType = mimeType;
         }
-        
+
         public String getExtension() { return extension; }
         public String getMimeType() { return mimeType; }
-        
+
         public static AudioFormat fromExtension(String ext) {
             if (ext == null) return UNKNOWN;
             String normalized = ext.toLowerCase();
@@ -75,7 +75,7 @@ public final class SLSoundProcessor {
             return UNKNOWN;
         }
     }
-    
+
     /**
      * A container for metadata extracted from an audio asset.
      * <p>
@@ -92,7 +92,7 @@ public final class SLSoundProcessor {
         private final double duration;
         private final long size;
         private final boolean isCompressed;
-        
+
         public AudioInfo(UUID soundId, AudioFormat format, int sampleRate, int channels,
                         int bitsPerSample, double duration, long size, boolean isCompressed) {
             this.soundId = soundId;
@@ -104,7 +104,7 @@ public final class SLSoundProcessor {
             this.size = size;
             this.isCompressed = isCompressed;
         }
-        
+
         // Getters
         public UUID getSoundId() { return soundId; }
         public AudioFormat getFormat() { return format; }
@@ -114,7 +114,7 @@ public final class SLSoundProcessor {
         public double getDuration() { return duration; }
         public long getSize() { return size; }
         public boolean isCompressed() { return isCompressed; }
-        
+
         public boolean isValid() {
             return soundId != null && format != AudioFormat.UNKNOWN &&
                    sampleRate > 0 && channels > 0 && bitsPerSample > 0 &&
@@ -122,7 +122,7 @@ public final class SLSoundProcessor {
                    size <= MAX_SOUND_SIZE;
         }
     }
-    
+
     /**
      * Sound cache entry.
      */
@@ -130,21 +130,21 @@ public final class SLSoundProcessor {
         private final byte[] data;
         private final AudioInfo info;
         private final long timestamp;
-        
+
         public SoundCache(byte[] data, AudioInfo info) {
             this.data = data.clone();
             this.info = info;
             this.timestamp = System.currentTimeMillis();
         }
-        
+
         public boolean isExpired() {
             return System.currentTimeMillis() - timestamp > CACHE_EXPIRY_MS;
         }
-        
+
         public byte[] getData() { return data.clone(); }
         public AudioInfo getInfo() { return info; }
     }
-    
+
     /**
      * Processes raw audio data to extract metadata and validate it.
      * <p>
@@ -165,17 +165,17 @@ public final class SLSoundProcessor {
         if (soundId == null || data == null || data.length == 0) {
             throw new LLSDException("Invalid sound data");
         }
-        
+
         if (data.length > MAX_SOUND_SIZE) {
             throw new LLSDException("Sound data too large: " + data.length + " bytes");
         }
-        
+
         // Check cache first
         SoundCache cached = soundCache.get(soundId);
         if (cached != null && !cached.isExpired()) {
             return cached.getInfo();
         }
-        
+
         AudioInfo info;
         try {
             switch (format) {
@@ -192,19 +192,19 @@ public final class SLSoundProcessor {
                     info = detectAndProcessSound(soundId, data);
                     break;
             }
-            
+
             // Cache the processed sound
             soundCache.put(soundId, new SoundCache(data, info));
-            
+
             // Clean expired entries
             cleanExpiredCache();
-            
+
             return info;
         } catch (Exception e) {
             throw new LLSDException("Sound processing failed: " + e.getMessage(), e);
         }
     }
-    
+
     /**
      * Process WAV audio data.
      */
@@ -212,48 +212,48 @@ public final class SLSoundProcessor {
         if (data.length < 44) {
             throw new IOException("Invalid WAV data - too short");
         }
-        
+
         // Check WAV header
         if (data[0] != 'R' || data[1] != 'I' || data[2] != 'F' || data[3] != 'F') {
             throw new IOException("Invalid WAV RIFF header");
         }
-        
+
         if (data[8] != 'W' || data[9] != 'A' || data[10] != 'V' || data[11] != 'E') {
             throw new IOException("Invalid WAV format");
         }
-        
+
         // Parse WAV header
         ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
-        
+
         // Skip RIFF header (12 bytes)
         buffer.position(12);
-        
+
         // Find fmt chunk
         while (buffer.remaining() >= 8) {
             int chunkId = buffer.getInt();
             int chunkSize = buffer.getInt();
-            
+
             if (chunkId == 0x20746d66) { // "fmt "
                 if (chunkSize < 16) {
                     throw new IOException("Invalid fmt chunk size");
                 }
-                
+
                 short audioFormat = buffer.getShort();
                 short channels = buffer.getShort();
                 int sampleRate = buffer.getInt();
                 int byteRate = buffer.getInt();
                 short blockAlign = buffer.getShort();
                 short bitsPerSample = buffer.getShort();
-                
+
                 if (audioFormat != 1) { // Only PCM supported
                     throw new IOException("Unsupported WAV audio format: " + audioFormat);
                 }
-                
+
                 // Calculate duration
                 // Find data chunk size
                 long dataSize = findWAVDataSize(data, buffer.position());
                 double duration = (double) dataSize / byteRate;
-                
+
                 return new AudioInfo(soundId, AudioFormat.WAV, sampleRate, channels,
                                    bitsPerSample, duration, data.length, false);
             } else {
@@ -261,10 +261,10 @@ public final class SLSoundProcessor {
                 buffer.position(buffer.position() + chunkSize);
             }
         }
-        
+
         throw new IOException("WAV fmt chunk not found");
     }
-    
+
     /**
      * Process OGG audio data.
      */
@@ -272,23 +272,23 @@ public final class SLSoundProcessor {
         if (data.length < 4) {
             throw new IOException("Invalid OGG data - too short");
         }
-        
+
         // Check OGG signature
         if (data[0] != 'O' || data[1] != 'g' || data[2] != 'g' || data[3] != 'S') {
             throw new IOException("Invalid OGG signature");
         }
-        
+
         // Basic OGG processing (simplified - full OGG parsing would be more complex)
         // For now, assume standard values
         int sampleRate = 44100;
         int channels = 2;
         int bitsPerSample = 16;
         double duration = estimateOGGDuration(data.length);
-        
+
         return new AudioInfo(soundId, AudioFormat.OGG, sampleRate, channels,
                            bitsPerSample, duration, data.length, true);
     }
-    
+
     /**
      * Process MP3 audio data.
      */
@@ -296,22 +296,22 @@ public final class SLSoundProcessor {
         if (data.length < 3) {
             throw new IOException("Invalid MP3 data - too short");
         }
-        
+
         // Check MP3 signature
         if ((data[0] & 0xFF) != 0xFF || (data[1] & 0xE0) != 0xE0) {
             throw new IOException("Invalid MP3 frame header");
         }
-        
+
         // Basic MP3 processing (simplified)
         int sampleRate = 44100;
         int channels = 2;
         int bitsPerSample = 16;
         double duration = estimateMP3Duration(data.length);
-        
+
         return new AudioInfo(soundId, AudioFormat.MP3, sampleRate, channels,
                            bitsPerSample, duration, data.length, true);
     }
-    
+
     /**
      * Auto-detect audio format and process.
      */
@@ -320,7 +320,7 @@ public final class SLSoundProcessor {
         if (format == AudioFormat.UNKNOWN) {
             throw new IOException("Unsupported audio format");
         }
-        
+
         switch (format) {
             case WAV:
                 return processWAVSound(soundId, data);
@@ -332,7 +332,7 @@ public final class SLSoundProcessor {
                 throw new IOException("Format detection failed");
         }
     }
-    
+
     /**
      * Detects the audio format of a byte array by inspecting its header (magic numbers).
      *
@@ -344,25 +344,25 @@ public final class SLSoundProcessor {
         if (data == null || data.length < 4) {
             return AudioFormat.UNKNOWN;
         }
-        
+
         // Check WAV
         if (data[0] == 'R' && data[1] == 'I' && data[2] == 'F' && data[3] == 'F') {
             return AudioFormat.WAV;
         }
-        
+
         // Check OGG
         if (data[0] == 'O' && data[1] == 'g' && data[2] == 'g' && data[3] == 'S') {
             return AudioFormat.OGG;
         }
-        
+
         // Check MP3
         if ((data[0] & 0xFF) == 0xFF && (data[1] & 0xE0) == 0xE0) {
             return AudioFormat.MP3;
         }
-        
+
         return AudioFormat.UNKNOWN;
     }
-    
+
     /**
      * Creates a standard LLSD map structure for a sound stream.
      * <p>
@@ -389,10 +389,10 @@ public final class SLSoundProcessor {
         streamData.put("Compressed", info.isCompressed());
         streamData.put("Data", data);
         streamData.put("Timestamp", System.currentTimeMillis() / 1000.0);
-        
+
         return streamData;
     }
-    
+
     /**
      * Validates an {@link AudioInfo} object against Second Life's specific
      * constraints, such as maximum duration and file size.
@@ -406,7 +406,7 @@ public final class SLSoundProcessor {
                info.getDuration() <= MAX_SOUND_DURATION &&
                info.getSize() <= MAX_SOUND_SIZE;
     }
-    
+
     /**
      * Converts audio data from a given format to WAV format.
      * <p>
@@ -422,34 +422,34 @@ public final class SLSoundProcessor {
         if (sourceFormat == AudioFormat.WAV) {
             return sourceData.clone();
         }
-        
+
         // For now, just return original data
         // In a full implementation, you'd use audio processing libraries
         // like JavaSound API or external libraries like FFMPEG
         throw new IOException("Audio conversion not yet implemented for " + sourceFormat);
     }
-    
+
     /**
      * Find WAV data chunk size.
      */
     private static long findWAVDataSize(byte[] data, int startPos) {
         ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
         buffer.position(startPos);
-        
+
         while (buffer.remaining() >= 8) {
             int chunkId = buffer.getInt();
             int chunkSize = buffer.getInt();
-            
+
             if (chunkId == 0x61746164) { // "data"
                 return chunkSize;
             } else {
                 buffer.position(buffer.position() + chunkSize);
             }
         }
-        
+
         return 0;
     }
-    
+
     /**
      * Estimate OGG duration (simplified).
      */
@@ -458,7 +458,7 @@ public final class SLSoundProcessor {
         double estimatedBitrate = 128000; // 128 kbps
         return (fileSize * 8.0) / estimatedBitrate;
     }
-    
+
     /**
      * Estimate MP3 duration (simplified).
      */
@@ -467,21 +467,21 @@ public final class SLSoundProcessor {
         double estimatedBitrate = 128000; // 128 kbps
         return (fileSize * 8.0) / estimatedBitrate;
     }
-    
+
     /**
      * Clean expired cache entries.
      */
     private static void cleanExpiredCache() {
         soundCache.entrySet().removeIf(entry -> entry.getValue().isExpired());
     }
-    
+
     /**
      * Clears all entries from the internal sound cache.
      */
     public static void clearCache() {
         soundCache.clear();
     }
-    
+
     /**
      * Gets statistics about the current state of the sound cache.
      *
@@ -491,12 +491,12 @@ public final class SLSoundProcessor {
     public static Map<String, Object> getCacheStats() {
         Map<String, Object> stats = new HashMap<>();
         stats.put("CacheSize", soundCache.size());
-        
+
         long totalSize = soundCache.values().stream()
                 .mapToLong(cache -> cache.getData().length)
                 .sum();
         stats.put("TotalCacheSize", totalSize);
-        
+
         return stats;
     }
 }

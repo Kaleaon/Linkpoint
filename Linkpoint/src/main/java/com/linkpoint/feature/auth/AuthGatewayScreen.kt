@@ -95,4 +95,3 @@ fun resolveAuthGridList(gridManager: com.linkpoint.core.GridManager): List<com.l
     val grids = gridManager.getAvailableGrids()
     return if (grids.isNotEmpty()) grids else com.linkpoint.core.GridManager.BUILTIN_GRIDS
 }
-

@@ -7,7 +7,7 @@ import com.ktheme.models.LayoutStructure
  * Supports all 24 core Ktheme color palettes plus community and viewer-inspired skins.
  */
 object BuiltInThemes {
-    
+
     /** Default Linkpoint theme - Blue accent on dark background */
     val LINKPOINT_DEFAULT = ThemePack(
         id = "linkpoint_default",

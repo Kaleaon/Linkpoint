@@ -3,9 +3,9 @@ repos:
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
-        exclude: '.*message_template\.msg$'
+        exclude: '.*message_template\.msg$|^(lumiya_extracted|secondlife_decompiled|lumiya_decompiled_source|android-sdk|disassembled-apps|Gauss|apk_analysis|file_bundle|vendor|Linkpoint/src/test/resources|LLSD-KOTLIN/src/test/resources|src/)/'
       - id: end-of-file-fixer
-        exclude: '.*message_template\.msg$'
+        exclude: '.*message_template\.msg$|^(lumiya_extracted|secondlife_decompiled|lumiya_decompiled_source|android-sdk|disassembled-apps|Gauss|apk_analysis|file_bundle|vendor|Linkpoint/src/test/resources|LLSD-KOTLIN/src/test/resources|src/)/'
       - id: check-yaml
       - id: check-json
       - id: check-added-large-files

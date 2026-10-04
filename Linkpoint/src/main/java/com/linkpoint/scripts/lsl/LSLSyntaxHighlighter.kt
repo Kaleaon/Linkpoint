@@ -4,11 +4,11 @@ import java.util.regex.Pattern
 
 /**
  * LSL Syntax Highlighter - Provides syntax highlighting for Linden Scripting Language.
- * 
+ *
  * Uses pattern matching to identify and highlight different LSL constructs.
  */
 class LSLSyntaxHighlighter {
-    
+
     /**
      * Represents a highlighted region in text.
      */
@@ -17,36 +17,36 @@ class LSLSyntaxHighlighter {
         val endIndex: Int,
         val color: Int
     )
-    
+
     /**
      * Highlight LSL source code and return list of highlighted regions.
      */
     fun highlight(text: CharSequence, colorScheme: LSLColorScheme = LSLDarkColorScheme()): List<HighlightedRegion> {
         val highlights = mutableListOf<HighlightedRegion>()
         val textStr = text.toString()
-        
+
         // Highlight multi-line comments first (highest priority)
         highlightPattern(textStr, LSLSyntax.Patterns.MULTI_LINE_COMMENT, LSLSyntax.Colors.COMMENT, highlights)
-        
+
         // Highlight single-line comments
         highlightPattern(textStr, LSLSyntax.Patterns.SINGLE_LINE_COMMENT, LSLSyntax.Colors.COMMENT, highlights)
-        
+
         // Highlight strings
         highlightPattern(textStr, LSLSyntax.Patterns.STRING, LSLSyntax.Colors.STRING, highlights)
-        
+
         // Highlight numbers
         highlightPattern(textStr, LSLSyntax.Patterns.NUMBER, LSLSyntax.Colors.NUMBER, highlights)
-        
+
         // Highlight identifiers (keywords, types, functions, etc.)
         val identifierMatcher = LSLSyntax.Patterns.IDENTIFIER.matcher(textStr)
         while (identifierMatcher.find()) {
             val word = identifierMatcher.group()
             val start = identifierMatcher.start()
             val end = identifierMatcher.end()
-            
+
             // Skip if already highlighted (in comment or string)
             if (isInHighlightedRegion(start, highlights)) continue
-            
+
             val color = when {
                 LSLSyntax.isKeyword(word) -> LSLSyntax.Colors.KEYWORD
                 LSLSyntax.isType(word) -> LSLSyntax.Colors.TYPE
@@ -58,19 +58,19 @@ class LSLSyntaxHighlighter {
                 word.startsWith("state_") -> LSLSyntax.Colors.STATE
                 else -> null
             }
-            
+
             if (color != null) {
                 highlights.add(HighlightedRegion(start, end, color))
             }
         }
-        
+
         return highlights.sortedBy { it.startIndex }
     }
-    
+
     private fun highlightPattern(
-        text: String, 
-        pattern: Pattern, 
-        color: Int, 
+        text: String,
+        pattern: Pattern,
+        color: Int,
         highlights: MutableList<HighlightedRegion>
     ) {
         val matcher = pattern.matcher(text)
@@ -82,9 +82,9 @@ class LSLSyntaxHighlighter {
             ))
         }
     }
-    
+
     private fun isInHighlightedRegion(
-        position: Int, 
+        position: Int,
         highlights: List<HighlightedRegion>
     ): Boolean {
         return highlights.any { position >= it.startIndex && position < it.endIndex }

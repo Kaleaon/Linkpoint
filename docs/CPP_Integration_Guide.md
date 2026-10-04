@@ -8,19 +8,19 @@ This guide documents the successful integration of C++ components from the Secon
 
 ### 1. Basis Universal Transcoder (C++)
 
-**Source**: https://github.com/BinomialLLC/basis_universal  
-**Location**: `app/src/main/cpp/basis_universal/`  
+**Source**: https://github.com/BinomialLLC/basis_universal
+**Location**: `app/src/main/cpp/basis_universal/`
 **Purpose**: Runtime transcoding of KTX2 textures to GPU-native formats
 
 **Key Files**:
 - `basisu_transcoder.cpp` - Main transcoder implementation (~24k lines)
-- `basisu_transcoder.h` - Public API interface  
+- `basisu_transcoder.h` - Public API interface
 - `basisu_transcoder_internal.h` - Internal implementation details
 - `basisu_*.inc` - Lookup tables for various GPU formats
 
 ### 2. JNI Bridge Layer
 
-**Location**: `app/src/main/cpp/jni/basis_transcoder_jni.cpp`  
+**Location**: `app/src/main/cpp/jni/basis_transcoder_jni.cpp`
 **Purpose**: Java Native Interface for C++ transcoder access
 
 **Key Functions**:
@@ -32,7 +32,7 @@ This guide documents the successful integration of C++ components from the Secon
 
 ### 3. Java Wrapper API
 
-**Location**: `app/src/main/java/com/lumiyaviewer/lumiya/render/ModernTextureManager.java`  
+**Location**: `app/src/main/java/com/lumiyaviewer/lumiya/render/ModernTextureManager.java`
 **Purpose**: High-level Java API for texture loading and management
 
 **Key Features**:
@@ -78,7 +78,7 @@ android {
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         }
-        
+
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++14 -O3 -ffast-math"
@@ -86,7 +86,7 @@ android {
             }
         }
     }
-    
+
     // CMake build configuration
     externalNativeBuild {
         cmake {

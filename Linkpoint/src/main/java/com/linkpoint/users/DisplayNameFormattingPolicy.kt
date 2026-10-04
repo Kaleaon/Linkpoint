@@ -21,4 +21,3 @@ enum class DisplayNameOutputMode {
 class DisplayNameFormattingPolicyHolder(
     var policy: DisplayNameFormattingPolicy = DisplayNameFormattingPolicy()
 )
-
