@@ -113,7 +113,7 @@ impl SpatialWorkerPool {
             return Vec::new();
         }
 
-        let chunk_size = queries.len().div_ceil(self.worker_count);
+        let chunk_size = queries.len().div_ceil(self.worker_count.max(1));
         let mut receivers = Vec::new();
 
         for chunk_slice in queries.chunks(chunk_size.max(1)) {

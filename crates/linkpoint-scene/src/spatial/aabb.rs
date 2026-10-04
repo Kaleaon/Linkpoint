@@ -101,7 +101,12 @@ impl AABB {
             unsafe { self.intersects_simd_sse2(other) }
         }
 
-        #[cfg(not(target_arch = "x86_64"))]
+        #[cfg(target_arch = "aarch64")]
+        {
+            unsafe { self.intersects_simd_neon(other) }
+        }
+
+        #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
         {
             self.intersects_scalar(other)
         }
@@ -127,6 +132,29 @@ impl AABB {
         }
     }
 
+    #[cfg(target_arch = "aarch64")]
+    #[inline]
+    unsafe fn intersects_simd_neon(&self, other: &AABB) -> bool {
+        use std::arch::aarch64::*;
+
+        unsafe {
+            let v_min_a = vld1q_f32(self.min.as_ptr());
+            let v_max_a = vld1q_f32(self.max.as_ptr());
+            let v_min_b = vld1q_f32(other.min.as_ptr());
+            let v_max_b = vld1q_f32(other.max.as_ptr());
+
+            let cond1 = vcleq_f32(v_min_a, v_max_b);
+            let cond2 = vcgeq_f32(v_max_a, v_min_b);
+            let combined = vandq_u32(cond1, cond2);
+
+            let lane0 = vgetq_lane_u32::<0>(combined);
+            let lane1 = vgetq_lane_u32::<1>(combined);
+            let lane2 = vgetq_lane_u32::<2>(combined);
+
+            (lane0 & lane1 & lane2) != 0
+        }
+    }
+
     /// Scalar batch intersection testing against multiple candidates.
     pub fn intersects_batch_scalar(&self, candidates: &[AABB]) -> Vec<bool> {
         candidates
@@ -142,7 +170,12 @@ impl AABB {
             unsafe { self.intersects_batch_simd_sse2(candidates) }
         }
 
-        #[cfg(not(target_arch = "x86_64"))]
+        #[cfg(target_arch = "aarch64")]
+        {
+            unsafe { self.intersects_batch_simd_neon(candidates) }
+        }
+
+        #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
         {
             self.intersects_batch_scalar(candidates)
         }
@@ -168,6 +201,35 @@ impl AABB {
 
                 let mask = _mm_movemask_ps(combined);
                 results.push((mask & 0x07) == 0x07);
+            }
+        }
+
+        results
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    unsafe fn intersects_batch_simd_neon(&self, candidates: &[AABB]) -> Vec<bool> {
+        use std::arch::aarch64::*;
+
+        let mut results = Vec::with_capacity(candidates.len());
+
+        unsafe {
+            let v_min_a = vld1q_f32(self.min.as_ptr());
+            let v_max_a = vld1q_f32(self.max.as_ptr());
+
+            for candidate in candidates {
+                let v_min_b = vld1q_f32(candidate.min.as_ptr());
+                let v_max_b = vld1q_f32(candidate.max.as_ptr());
+
+                let cond1 = vcleq_f32(v_min_a, v_max_b);
+                let cond2 = vcgeq_f32(v_max_a, v_min_b);
+                let combined = vandq_u32(cond1, cond2);
+
+                let lane0 = vgetq_lane_u32::<0>(combined);
+                let lane1 = vgetq_lane_u32::<1>(combined);
+                let lane2 = vgetq_lane_u32::<2>(combined);
+
+                results.push((lane0 & lane1 & lane2) != 0);
             }
         }
 
