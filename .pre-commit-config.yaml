@@ -1,5 +1,4 @@
-exclude: '^(android-sdk/|secondlife_decompiled/|lumiya_extracted/|lumiya_decompiled_source/|disassembled-apps/|Gauss/|vendor/|file_bundle/|apk_analysis/|cmdline-temp/|builds/|ktheme-pr/|.*message_template\.msg$)'
-
+exclude: '^(android-sdk/|secondlife_decompiled/|lumiya_extracted/|lumiya_decompiled_source/|disassembled-apps/|Gauss/|vendor/|file_bundle/|apk_analysis/|cmdline-temp/|builds/|ktheme-pr/|Linkpoint/src/test/resources/|crates/quick-xml/tests/documents/|.*message_template\.msg$)'
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
