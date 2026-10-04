@@ -105,6 +105,9 @@ class TextureManager(
     // Decoded texture cache
     private val textureCache = ConcurrentHashMap<UUID, Bitmap>()
     private val textureErrorStates = ConcurrentHashMap<UUID, TextureDecodeErrorState>()
+    private val placeholderTextures = ConcurrentHashMap.newKeySet<UUID>()
+
+    fun isPlaceholder(textureId: UUID): Boolean = placeholderTextures.contains(textureId)
     
     // Statistics
     private val _stats = MutableStateFlow(TextureStats())
@@ -186,6 +189,8 @@ class TextureManager(
      * Clear texture from cache
      */
     fun evict(textureId: UUID) {
+        placeholderTextures.remove(textureId)
+        textureErrorStates.remove(textureId)
         textureCache.remove(textureId)?.recycle()
     }
     
@@ -193,6 +198,8 @@ class TextureManager(
      * Clear all decoded textures
      */
     fun clearDecodedCache() {
+        placeholderTextures.clear()
+        textureErrorStates.clear()
         textureCache.values.forEach { it.recycle() }
         textureCache.clear()
     }
@@ -201,7 +208,7 @@ class TextureManager(
         textureId: UUID,
         priority: TexturePriority,
         discard: Int
-    ): Bitmap? {
+    ): Bitmap {
         val effectiveDiscard = discard.coerceIn(0, 5)
         // Check raw data cache
         val cachedData = cache.get(textureId, AssetType.TEXTURE)
@@ -211,9 +218,13 @@ class TextureManager(
 
             // Deterministic retry: cached payload may be corrupt/truncated, force one re-download.
             cache.remove(textureId, AssetType.TEXTURE)
-            val redownloaded = downloadTexture(textureId, effectiveDiscard, timeoutMs = 15000L) ?: return null
-            cache.put(textureId, AssetType.TEXTURE, redownloaded)
-            return decodeTexture(textureId, redownloaded, effectiveDiscard)
+            val redownloaded = downloadTexture(textureId, effectiveDiscard, timeoutMs = 15000L)
+            if (redownloaded != null) {
+                cache.put(textureId, AssetType.TEXTURE, redownloaded)
+                val retriedDecode = decodeTexture(textureId, redownloaded, effectiveDiscard)
+                if (retriedDecode != null) return retriedDecode
+            }
+            return recordDownloadFailure(textureId, lastError ?: "Re-download failed")
         }
         
         // Use priority to determine download timeout and retry behavior
@@ -226,7 +237,8 @@ class TextureManager(
         }
         
         // Download from server with priority-based timeout
-        val data = downloadTexture(textureId, discard, timeoutMs) ?: return null
+        val data = downloadTexture(textureId, discard, timeoutMs)
+            ?: return recordDownloadFailure(textureId, lastError ?: "Download failed")
         
         // Cache raw data
         cache.put(textureId, AssetType.TEXTURE, data)
@@ -550,7 +562,7 @@ class TextureManager(
         return "$secureUrl?texture_id=$textureId"
     }
     
-    private suspend fun decodeTexture(textureId: UUID, data: ByteArray, discardLevel: Int): Bitmap? {
+    private suspend fun decodeTexture(textureId: UUID, data: ByteArray, discardLevel: Int): Bitmap {
         val startTime = System.currentTimeMillis()
 
         return try {
@@ -591,6 +603,7 @@ class TextureManager(
 
             if (bitmap != null) {
                 textureErrorStates.remove(textureId)
+                placeholderTextures.remove(textureId)
                 textureCache[textureId] = bitmap
                 updateStats { st -> st.copy(decodedCount = st.decodedCount + 1) }
                 Log.d(TAG, "🖼️ Texture decoded: $textureId (${bitmap.width}x${bitmap.height}, ${durationMs}ms)")
@@ -604,7 +617,7 @@ class TextureManager(
         }
     }
 
-    private fun recordDecodeFailure(textureId: UUID, format: String, startTime: Long, error: String): Bitmap? {
+    private fun recordDecodeFailure(textureId: UUID, format: String, startTime: Long, error: String): Bitmap {
         val durationMs = System.currentTimeMillis() - startTime
         val state = textureErrorStates.compute(textureId) { _, prev ->
             val attempts = (prev?.attempts ?: 0) + 1
@@ -616,7 +629,22 @@ class TextureManager(
         lastError = "Decode: $error"
         lastErrorTime = System.currentTimeMillis()
         updateStats { it.copy(decodeFailedCount = it.decodeFailedCount + 1) }
-        return null
+
+        val fallback = JPEG2000Decoder.createPlaceholderBitmap(128, 128)
+        textureCache[textureId] = fallback
+        placeholderTextures.add(textureId)
+        return fallback
+    }
+
+    private fun recordDownloadFailure(textureId: UUID, error: String): Bitmap {
+        textureErrorStates.compute(textureId) { _, prev ->
+            val attempts = (prev?.attempts ?: 0) + 1
+            TextureDecodeErrorState(textureId, error, attempts, System.currentTimeMillis())
+        }
+        val fallback = JPEG2000Decoder.createPlaceholderBitmap(128, 128)
+        textureCache[textureId] = fallback
+        placeholderTextures.add(textureId)
+        return fallback
     }
 
     fun getTextureErrorState(textureId: UUID): TextureDecodeErrorState? = textureErrorStates[textureId]

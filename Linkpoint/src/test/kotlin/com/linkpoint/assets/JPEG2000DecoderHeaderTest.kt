@@ -28,6 +28,38 @@ class JPEG2000DecoderHeaderTest {
         assertEquals(512, size.second)
     }
 
+    @Test
+    fun `decode returns synthetic placeholder with header dimensions when native decoder fails`() {
+        val data = buildFakeJp2(width = 256, height = 256)
+        val bitmap = JPEG2000Decoder.decode(data)
+        assertNotNull("Decoder should never return null for valid binary payloads", bitmap)
+        assertEquals(256, bitmap!!.width)
+        assertEquals(256, bitmap.height)
+    }
+
+    @Test
+    fun `decode returns 128x128 synthetic grid placeholder when header parsing fails`() {
+        val corruptData = byteArrayOf(0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08)
+        val bitmap = JPEG2000Decoder.decode(corruptData)
+        assertNotNull("Decoder should generate synthetic fallback bitmap for corrupt payloads", bitmap)
+        assertEquals(128, bitmap!!.width)
+        assertEquals(128, bitmap.height)
+    }
+
+    @Test
+    fun `pipeline returns non-null output for unhandled Basis payloads`() {
+        val basisBytes = byteArrayOf(0xAB.toByte(), 0xCD.toByte(), 0xEF.toByte())
+        val req = TextureDecodeTranscodePipeline.Request(
+            backend = TextureFormatPolicy.Backend.FILAMENT,
+            semantic = TextureFormatPolicy.TextureSemantic.ALBEDO,
+            capabilities = TextureFormatPolicy.DeviceCapabilities(supportsEtc2Rgba = true, supportsBasisTranscoding = false)
+        )
+        val output = TextureDecodeTranscodePipeline.fromBasisKtx2(java.util.UUID.randomUUID(), basisBytes, req)
+        assertNotNull("Pipeline must return non-null output for Basis payloads", output)
+        assertEquals(128, output!!.width)
+        assertEquals(128, output.height)
+    }
+
     private fun buildFakeJp2(width: Int, height: Int): ByteArray {
         val bytes = ByteArray(80)
         // Signature box length/type: 0x0000000C 'jP  '
