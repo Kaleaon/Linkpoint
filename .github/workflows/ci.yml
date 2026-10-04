@@ -92,7 +92,7 @@ jobs:
         run: ./gradlew :Linkpoint:testStableDebugUnitTest :Linkpoint:lintStableDebug jacocoTestReport --stacktrace
 
       - name: Run Paparazzi snapshot tests
-        run: ./gradlew :ui-components:paparazziDebugCheck
+        run: ./gradlew paparazziDebugCheck
 
       - name: Upload Paparazzi snapshot reports on failure
         if: failure()
