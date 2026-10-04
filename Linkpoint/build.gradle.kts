@@ -287,7 +287,7 @@ kotlin {
 
 dependencies {
     // Official Ktheme Multiplatform runtime library
-    implementation("com.ktheme:ktheme-runtime:1.0.0")
+    // implementation("com.ktheme:ktheme-runtime:1.0.0")
 
     // Core library desugaring for Java 8+ APIs on older Android versions
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
