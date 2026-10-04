@@ -105,9 +105,11 @@ object LayerDataParser {
             val layerType = buffer.getBits(8)  // Layer type
 
             Log.d(TAG, "Terrain header: stride=0x${stride.toString(16)}, patchSize=$patchSize, type=$layerType")
+            val scratch = DecompressScratchBuffers()
+
             // Decompress patches until end marker (supporting Varregions up to 4096m)
             while (!buffer.isEOF()) {
-                val patch = TerrainPatch.decompressPatch(buffer, patchSize) ?: break
+                val patch = TerrainPatch.decompressPatch(buffer, patchSize, scratch) ?: break
 
                 if (patch.x >= 0 && patch.y >= 0 && patch.x < 256 && patch.y < 256) {
                     patches.add(patch)
