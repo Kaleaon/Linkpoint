@@ -24,7 +24,8 @@ import java.util.concurrent.atomic.AtomicInteger
 class AppearanceManager @JvmOverloads constructor(
     private val udpConnection: UDPConnectionFixed,
     private val avatarBaker: AvatarBaker,
-    private val capabilityNegotiator: AppearanceCapabilityNegotiator? = null
+    private val capabilityNegotiator: AppearanceCapabilityNegotiator? = null,
+    var skeleton: AvatarSkeleton? = null
 ) {
     companion object {
         private const val TAG = "AppearanceManager"
@@ -123,6 +124,7 @@ class AppearanceManager @JvmOverloads constructor(
         if (params.size == VISUAL_PARAM_COUNT) {
             visualParams = params.copyOf()
             avatarHeight = calculateAvatarHeight()
+            triggerSkeletonRecalculation()
         } else {
             Log.w(TAG, "Invalid visual param count: ${params.size}, expected $VISUAL_PARAM_COUNT")
         }
@@ -137,6 +139,19 @@ class AppearanceManager @JvmOverloads constructor(
         if (index in 0 until VISUAL_PARAM_COUNT) {
             visualParams[index] = value.coerceIn(0, 255).toByte()
             avatarHeight = calculateAvatarHeight()
+            triggerSkeletonRecalculation()
+        }
+    }
+
+    private fun triggerSkeletonRecalculation() {
+        val skel = skeleton ?: return
+        scope.launch(Dispatchers.Default) {
+            if (VisualParamLoader.isReady) {
+                val params = VisualParamLoader.allSkeletonParams()
+                skel.applySkeletonParams(visualParams, params)
+            } else {
+                skel.updateBoneMatrices()
+            }
         }
     }
     
