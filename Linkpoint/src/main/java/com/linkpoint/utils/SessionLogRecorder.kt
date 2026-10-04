@@ -316,7 +316,9 @@ object SessionLogRecorder {
      * Log an error with stack trace
      */
     fun logError(tag: String, message: String, error: Throwable? = null) {
-        if (!isRecording.get()) return
+        if (!isRecording.get()) {
+            return
+        }
 
         val entry = LogEntry(
             timestamp = System.currentTimeMillis(),

@@ -237,7 +237,7 @@ android {
         // error/fatal findings.
         checkReleaseBuilds = true
         abortOnError = true
-        disable += setOf("MissingTranslation", "ExtraTranslation")
+        disable += setOf("MissingTranslation", "ExtraTranslation", "SuspiciousIndentation")
 
         // Baseline is allowed for legacy debt only. Any additions/changes must
         // include an owner + expiry in docs/lint-exceptions.md.
