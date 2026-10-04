@@ -1,6 +1,7 @@
 package com.linkpoint.world
 
 import android.util.Log
+import com.linkpoint.linden.llmessage.IMType
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.CapabilityRequester
 import com.linkpoint.protocol.llsd.*
@@ -369,7 +370,7 @@ class ProfileManager(
                 // Use ChatSend capability for friendship offer
                 val request = LLSDMap().apply {
                     this["target_id"] = LLSDString(agentId.toString())
-                    this["dialog"] = LLSDInteger(38)  // IM_FRIENDSHIP_OFFERED
+                    this["dialog"] = LLSDInteger(IMType.FRIENDSHIP_OFFERED.value)
                     this["message"] = LLSDString(message)
                 }
 
@@ -393,7 +394,7 @@ class ProfileManager(
                 val request = LLSDMap().apply {
                     this["target_id"] = LLSDString(agentId.toString())
                     this["transaction_id"] = LLSDString(transactionId.toString())
-                    this["dialog"] = LLSDInteger(39)  // IM_FRIENDSHIP_ACCEPTED
+                    this["dialog"] = LLSDInteger(IMType.FRIENDSHIP_ACCEPTED.value)
                 }
 
                 val response = capabilityManager.request(CapabilityManager.CAP_CHAT_SEND, request)
@@ -416,7 +417,7 @@ class ProfileManager(
                 val request = LLSDMap().apply {
                     this["target_id"] = LLSDString(agentId.toString())
                     this["transaction_id"] = LLSDString(transactionId.toString())
-                    this["dialog"] = LLSDInteger(40)  // IM_FRIENDSHIP_DECLINED
+                    this["dialog"] = LLSDInteger(IMType.FRIENDSHIP_DECLINED.value)
                 }
 
                 val response = capabilityManager.request(CapabilityManager.CAP_CHAT_SEND, request)

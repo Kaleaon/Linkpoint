@@ -3,6 +3,7 @@ package com.linkpoint.groups
 import android.os.Parcelable
 import android.util.Log
 import com.linkpoint.groups.provider.*
+import com.linkpoint.linden.llmessage.IMType
 import com.linkpoint.messaging.MessagingDispatcher
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
@@ -290,7 +291,7 @@ class GroupsManager(
                     identity = identity,
                     fromGroup = false,
                     toAgentId = groupId,
-                    dialog = IMManager.IM_SESSION_GROUP_START,
+                    dialog = IMType.SESSION_GROUP_START,
                     id = groupId,
                     timestamp = ts,
                     fromAgentName = "You",
@@ -305,7 +306,7 @@ class GroupsManager(
                     identity = identity,
                     fromGroup = false,
                     toAgentId = groupId,
-                    dialog = IMManager.IM_SESSION_SEND,
+                    dialog = IMType.SESSION_SEND,
                     id = groupId,
                     timestamp = ts,
                     fromAgentName = "You",

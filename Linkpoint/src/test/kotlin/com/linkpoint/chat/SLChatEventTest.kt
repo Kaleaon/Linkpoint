@@ -1,5 +1,6 @@
 package com.linkpoint.chat
 
+import com.linkpoint.linden.llmessage.IMType
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.messages.MessageEventListener
 import com.linkpoint.protocol.messages.UDPConnectionFixed
@@ -48,7 +49,7 @@ class SLChatEventTest {
             fromName = "Group Owner",
             message = "Join my group",
             sessionId = sessionId,
-            dialogType = IMManager.IM_GROUP_INVITATION,
+            dialogType = IMType.GROUP_INVITATION,
             timestamp = 1000L,
             binaryBucket = feeBuffer,
             isOutgoing = false
@@ -73,7 +74,7 @@ class SLChatEventTest {
             fromName = "Group Owner",
             message = "Join my group",
             sessionId = sessionId,
-            dialogType = IMManager.IM_GROUP_INVITATION,
+            dialogType = IMType.GROUP_INVITATION,
             timestamp = 1000L,
             binaryBucket = shortBucket,
             isOutgoing = false
@@ -94,7 +95,7 @@ class SLChatEventTest {
             fromName = "Friend Avatar",
             message = "Wants to be friends",
             sessionId = sessionId,
-            dialogType = IMManager.IM_FRIENDSHIP_OFFERED,
+            dialogType = IMType.FRIENDSHIP_OFFERED,
             timestamp = 2000L
         )
 
@@ -116,7 +117,7 @@ class SLChatEventTest {
             fromAgentId = senderId,
             fromName = "Friend Avatar",
             message = "Wants to be friends",
-            dialogType = IMManager.IM_FRIENDSHIP_OFFERED,
+            dialogType = IMType.FRIENDSHIP_OFFERED,
             timestamp = 2000L
         )
 
@@ -145,7 +146,7 @@ class SLChatEventTest {
             fromAgentId = groupId,
             fromName = "Group Host",
             message = "Join group",
-            dialogType = IMManager.IM_GROUP_INVITATION,
+            dialogType = IMType.GROUP_INVITATION,
             timestamp = 2000L,
             groupId = groupId,
             joinFee = 100
@@ -173,7 +174,7 @@ class SLChatEventTest {
             fromAgentId = senderId,
             fromName = "Friend Avatar",
             message = "Wants to be friends",
-            dialogType = IMManager.IM_FRIENDSHIP_OFFERED,
+            dialogType = IMType.FRIENDSHIP_OFFERED,
             timestamp = 2000L
         )
 
