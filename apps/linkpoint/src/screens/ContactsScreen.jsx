@@ -4,6 +4,7 @@ import { fileToPhotoDataUrl, base64ToBlob } from "../linkpoint/contact-photo.ts"
 import { useApp } from "../context/AppContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
 import Icon from "../components/Icon.jsx";
+import AccessibleAvatar from "../components/AccessibleAvatar.jsx";
 import ContactAvatar from "../components/ContactAvatar.jsx";
 import ListSkeletonLoader from "../components/ListSkeletonLoader.jsx";
 import GuidedEmptyState from "../components/GuidedEmptyState.jsx";
@@ -176,7 +177,7 @@ export default function ContactsScreen() {
                 <li key={contact.id}>
                   <button type="button" onClick={() => setSelectedId(selectedId === contact.id ? null : contact.id)} aria-pressed={selectedId === contact.id}
                     style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", textAlign: "left", background: V.surf, border: `1px solid ${selectedId === contact.id ? V.pri : V.outv}`, borderRadius: V.rs, color: V.ink, cursor: "pointer", font: `400 12px/1.3 ${t.font}` }}>
-                    <ContactAvatar name={contact.name} photo={contact.photo} size={36} />
+                    <AccessibleAvatar name={contact.name} photo={contact.photo} size={36} decorative={true} />
                     <span style={{ flex: 1, minWidth: 0 }}>
                       <strong style={{ display: "block", fontSize: 13 }}>{contact.name}{onlineIds.has(contact.id) ? <span style={{ color: V.pri, fontWeight: 600 }}> · online</span> : null}</strong>
                       <small style={{ color: V.ink2, display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -243,7 +244,7 @@ function FriendsToAdd({ friends, total, onlineIds, busy, button, onSave, loggedI
       <ul aria-label="Friends not yet saved" style={{ listStyle: "none", margin: 0, padding: 0, overflowY: "auto", display: "grid", gap: 6, alignContent: "start" }}>
         {friends.map((friend) => (
           <li key={friend.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", background: V.surf, border: `1px solid ${V.outv}`, borderRadius: V.rs }}>
-            <ContactAvatar name={friend.name} size={32} />
+            <AccessibleAvatar name={friend.name} size={32} decorative={true} />
             <span style={{ flex: 1, font: `600 13px/1.3 ${t.font}` }}>{friend.name}{onlineIds.has(friend.id) ? <small style={{ color: V.pri }}> · online</small> : null}</span>
             <button type="button" disabled={busy} style={button(false)} onClick={() => onSave([friend])}>SAVE</button>
           </li>
@@ -287,7 +288,7 @@ function ContactDetail({ contact, online, googleEnabled, busy, run, say, button,
   return (
     <section aria-label={`Details for ${contact.name}`} style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: 12, background: V.surf, border: `1px solid ${V.pri}`, borderRadius: V.rs, display: "grid", gap: 12, alignContent: "start" }}>
       <header style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <ContactAvatar name={contact.name} photo={contact.photo} size={64} />
+        <AccessibleAvatar name={contact.name} photo={contact.photo} size={64} decorative={true} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <h2 style={{ margin: 0, fontSize: 16 }}>{contact.name}</h2>
           <div style={{ font: `400 11px/1.4 ${t.font}`, color: V.ink2, overflowWrap: "anywhere" }}>{online ? "Online now · " : ""}{contact.id}</div>

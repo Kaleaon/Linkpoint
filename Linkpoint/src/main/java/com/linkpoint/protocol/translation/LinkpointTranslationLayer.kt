@@ -299,7 +299,8 @@ object LinkpointTranslationLayer {
             "SearchStatRequest",
             "SimulatorFeatures",
             "AgentPreferences",
-            "RenderMaterials"
+            "RenderMaterials",
+            "MoveItemsToTrash"
         )
     }
 

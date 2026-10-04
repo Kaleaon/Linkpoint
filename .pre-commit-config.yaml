@@ -5,9 +5,10 @@ repos:
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
-        exclude: '^(android-sdk/|lumiya_extracted/|lumiya_decompiled_source/|secondlife_decompiled/|disassembled-apps/|Gauss/|LLSD-KOTLIN/|Linkpoint/src/test/resources/|crates/quick-xml/|vendor/|file_bundle/|apk_analysis/|kotlin-translations/|cmdline-temp/|platforms/|tools/|packages/|apps/|design/|gradle/|app/|src/|Linkpoint/src/main/res/|Linkpoint/src/main/assets/|docs/(?!guides/docker-opensim-grid-proxy\.md|README\.md).*|scripts/(?!test-docker-grid\.sh|check_parity_snapshot_guards\.sh).*|.*message_template\.msg$)'
+        files: '^(apps/linkpoint/src/)'
       - id: end-of-file-fixer
-        exclude: '^(android-sdk/|lumiya_extracted/|lumiya_decompiled_source/|secondlife_decompiled/|disassembled-apps/|Gauss/|LLSD-KOTLIN/|Linkpoint/src/test/resources/|crates/quick-xml/|vendor/|file_bundle/|apk_analysis/|kotlin-translations/|cmdline-temp/|platforms/|tools/|packages/|apps/|design/|gradle/|app/|src/|Linkpoint/src/main/res/|Linkpoint/src/main/assets/|docs/(?!guides/docker-opensim-grid-proxy\.md|README\.md).*|scripts/(?!test-docker-grid\.sh|check_parity_snapshot_guards\.sh).*|.*message_template\.msg$)'
+        files: '^(apps/linkpoint/src/)'
+        exclude: '.*message_template\.msg$'
       - id: check-yaml
         exclude: '^(android-sdk/|lumiya_extracted/|lumiya_decompiled_source/|secondlife_decompiled/|disassembled-apps/|Gauss/|LLSD-KOTLIN/|Linkpoint/src/test/resources/|crates/quick-xml/|vendor/|file_bundle/|apk_analysis/|kotlin-translations/|cmdline-temp/|platforms/|tools/|packages/|apps/|design/|gradle/|app/|src/)'
       - id: check-json
