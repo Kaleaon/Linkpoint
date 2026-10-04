@@ -15,9 +15,9 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * User Profile Manager - Handles avatar profiles (Second Life and Web profiles).
- * 
+ *
  * Based on the reference viewer's SLUserProfiles.java
- * 
+ *
  * Profiles contain:
  * - Basic info (born date, partner, about text)
  * - Interests (skills, languages, want to)
@@ -40,15 +40,15 @@ class UserProfileManager(
         // Cache expiry (30 minutes)
         private const val CACHE_EXPIRY_MS = 30 * 60 * 1000L
     }
-    
+
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    
+
     // Profile cache
     private val profileCache = ConcurrentHashMap<UUID, CachedProfile>()
-    
+
     // Pending requests
     private val pendingRequests = ConcurrentHashMap<UUID, MutableList<ProfileCallback>>()
-    
+
     /**
      * Request an avatar's profile.
      */
@@ -62,12 +62,12 @@ class UserProfileManager(
             callback?.onProfileLoaded(cached.profile)
             return
         }
-        
+
         // Add callback
         if (callback != null) {
             pendingRequests.getOrPut(avatarId) { mutableListOf() }.add(callback)
         }
-        
+
         // Capability-first flow (Lumiya-style), only fallback to UDP when caps are unavailable/invalid.
         try {
             val cap = capabilityManager.getCapability(CapabilityManager.CAP_AGENT_PROFILE)
@@ -78,11 +78,11 @@ class UserProfileManager(
         } catch (e: Exception) {
             Log.w(TAG, "Capability fetch failed, using UDP", e)
         }
-        
+
         // Fallback to UDP
         sendPropertiesRequest(avatarId)
     }
-    
+
     /**
      * Fetch profile via AgentProfile capability.
      */
@@ -115,7 +115,7 @@ class UserProfileManager(
             sendPropertiesRequest(avatarId)
         }
     }
-    
+
     /**
      * Send AvatarPropertiesRequest via UDP.
      */
@@ -126,60 +126,60 @@ class UserProfileManager(
     private suspend fun sendPropertiesRequestInternal(avatarId: UUID) {
         try {
             val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             // AgentData
             writeUUID(payload, agentId)
             writeUUID(payload, udpConnection.getSessionId())
-            
+
             // AvatarData
             writeUUID(payload, avatarId)
-            
+
             udpConnection.sendPacket(MessageIdRegistry.AVATAR_PROPERTIES_REQUEST, payload.array(), reliable = true)
             Log.d(TAG, "Sent AvatarPropertiesRequest for $avatarId")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send properties request", e)
         }
     }
-    
+
     /**
      * Handle AvatarPropertiesReply message.
      */
     fun handlePropertiesReply(payload: ByteArray) {
         try {
             val buffer = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             val avatarId = readUUID(buffer)
             val imageId = readUUID(buffer)
             val flImageId = readUUID(buffer)
             val partnerId = readUUID(buffer)
-            
+
             // Read about text
             val aboutLen = buffer.short.toInt() and 0xFFFF
             val aboutBytes = ByteArray(aboutLen)
             buffer.get(aboutBytes)
             val aboutText = String(aboutBytes, Charsets.UTF_8)
-            
+
             // Read FL about text
             val flAboutLen = buffer.get().toInt() and 0xFF
             val flAboutBytes = ByteArray(flAboutLen)
             buffer.get(flAboutBytes)
             val flAboutText = String(flAboutBytes, Charsets.UTF_8)
-            
+
             // Read born on
             val bornLen = buffer.get().toInt() and 0xFF
             val bornBytes = ByteArray(bornLen)
             buffer.get(bornBytes)
             val bornOn = String(bornBytes, Charsets.UTF_8)
-            
+
             // Read profile URL
             val urlLen = buffer.get().toInt() and 0xFF
             val urlBytes = ByteArray(urlLen)
             buffer.get(urlBytes)
             val profileUrl = String(urlBytes, Charsets.UTF_8)
-            
+
             // Flags
             val flags = buffer.int
-            
+
             val profile = UserProfile(
                 avatarId = avatarId,
                 imageId = imageId,
@@ -191,49 +191,49 @@ class UserProfileManager(
                 profileUrl = profileUrl,
                 flags = flags
             )
-            
+
             cacheProfile(avatarId, profile)
             notifyCallbacks(avatarId, profile)
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing AvatarPropertiesReply", e)
         }
     }
-    
+
     /**
      * Request avatar interests.
      */
     suspend fun requestInterests(avatarId: UUID) {
         try {
             val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             writeUUID(payload, agentId)
             writeUUID(payload, udpConnection.getSessionId())
             writeUUID(payload, avatarId)
-            
+
             udpConnection.sendPacket(MessageIdRegistry.AVATAR_INTERESTS_REQUEST, payload.array(), reliable = true)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to request interests", e)
         }
     }
-    
+
     /**
      * Request personal notes about an avatar.
      */
     suspend fun requestNotes(avatarId: UUID) {
         try {
             val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             writeUUID(payload, agentId)
             writeUUID(payload, udpConnection.getSessionId())
             writeUUID(payload, avatarId)
-            
+
             udpConnection.sendPacket(MessageIdRegistry.AVATAR_NOTES_REQUEST, payload.array(), reliable = true)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to request notes", e)
         }
     }
-    
+
     /**
      * Update personal notes about an avatar.
      */
@@ -241,37 +241,37 @@ class UserProfileManager(
         try {
             val notesBytes = notes.toByteArray(Charsets.UTF_8)
             val payload = ByteBuffer.allocate(50 + notesBytes.size).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             writeUUID(payload, agentId)
             writeUUID(payload, udpConnection.getSessionId())
             writeUUID(payload, avatarId)
             payload.putShort(notesBytes.size.toShort())
             payload.put(notesBytes)
-            
+
             udpConnection.sendPacket(MessageIdRegistry.AVATAR_NOTES_UPDATE_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
             Log.d(TAG, "Updated notes for $avatarId")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to update notes", e)
         }
     }
-    
+
     /**
      * Request avatar picks.
      */
     suspend fun requestPicks(avatarId: UUID) {
         try {
             val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             writeUUID(payload, agentId)
             writeUUID(payload, udpConnection.getSessionId())
             writeUUID(payload, avatarId)
-            
+
             udpConnection.sendPacket(MessageIdRegistry.AVATAR_PICKS_REQUEST, payload.array(), reliable = true)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to request picks", e)
         }
     }
-    
+
     /**
      * Parse profile from LLSD (capability response).
      */
@@ -291,41 +291,41 @@ class UserProfileManager(
             accountType = llsd.getString("account_type")
         )
     }
-    
+
     private fun cacheProfile(avatarId: UUID, profile: UserProfile) {
         profileCache[avatarId] = CachedProfile(profile, System.currentTimeMillis())
     }
-    
+
     private fun notifyCallbacks(avatarId: UUID, profile: UserProfile) {
         val callbacks = pendingRequests.remove(avatarId) ?: return
         callbacks.forEach { it.onProfileLoaded(profile) }
     }
-    
+
     private fun readUUID(buffer: ByteBuffer): UUID {
         val msb = buffer.long
         val lsb = buffer.long
         return UUID(msb, lsb)
     }
-    
+
     private fun writeUUID(buffer: ByteBuffer, uuid: UUID) {
         buffer.putLong(uuid.mostSignificantBits)
         buffer.putLong(uuid.leastSignificantBits)
     }
-    
+
     /**
      * Get cached profile.
      */
     fun getCachedProfile(avatarId: UUID): UserProfile? {
         return profileCache[avatarId]?.profile
     }
-    
+
     /**
      * Clear profile cache.
      */
     fun clearCache() {
         profileCache.clear()
     }
-    
+
     fun shutdown() {
         scope.cancel()
         profileCache.clear()
@@ -393,7 +393,7 @@ internal data class CachedProfile(
     fun isExpired(): Boolean {
         return System.currentTimeMillis() - cachedAt > CACHE_EXPIRY_MS
     }
-    
+
     companion object {
         private const val CACHE_EXPIRY_MS = 30 * 60 * 1000L
     }

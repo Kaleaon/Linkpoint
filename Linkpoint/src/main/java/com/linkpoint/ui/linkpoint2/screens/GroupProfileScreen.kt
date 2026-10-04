@@ -183,4 +183,3 @@ fun GroupProfileScreen(
         }
     }
 }
-

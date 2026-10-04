@@ -47,28 +47,28 @@ generate_comprehensive_list() {
 # Function to categorize files
 categorize_files() {
     echo "Categorizing files..."
-    
+
     # Java source files
     find "$PROJECT_ROOT" -name "*.java" -type f | sort > "$OUTPUT_DIR/java_files.txt"
-    
+
     # Kotlin files (if any)
     find "$PROJECT_ROOT" -name "*.kt" -type f | sort > "$OUTPUT_DIR/kotlin_files.txt"
-    
+
     # C++ source files
     find "$PROJECT_ROOT" \( -name "*.cpp" -o -name "*.h" -o -name "*.hpp" -o -name "*.c" \) -type f | sort > "$OUTPUT_DIR/cpp_files.txt"
-    
+
     # Configuration files
     find "$PROJECT_ROOT" \( -name "*.gradle" -o -name "*.properties" -o -name "*.xml" -o -name "*.json" \) -type f | sort > "$OUTPUT_DIR/config_files.txt"
-    
+
     # Documentation files
     find "$PROJECT_ROOT" \( -name "*.md" -o -name "*.txt" -o -name "README*" -o -name "CHANGELOG*" \) -type f | sort > "$OUTPUT_DIR/documentation_files.txt"
-    
+
     # Script files
     find "$PROJECT_ROOT" \( -name "*.sh" -o -name "*.py" -o -name "*.pl" \) -type f | sort > "$OUTPUT_DIR/script_files.txt"
-    
+
     # Android resource files
     find "$PROJECT_ROOT" -path "*/res/*" -name "*.xml" -type f | sort > "$OUTPUT_DIR/android_resource_files.txt"
-    
+
     # Binary/Asset files
     find "$PROJECT_ROOT" \( -name "*.apk" -o -name "*.jar" -o -name "*.so" -o -name "*.zip" -o -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" \) -type f | sort > "$OUTPUT_DIR/binary_asset_files.txt"
 }
@@ -76,12 +76,12 @@ categorize_files() {
 # Function to generate detailed file information
 generate_detailed_info() {
     echo "Generating detailed file information..."
-    
+
     # File with metadata
     find "$PROJECT_ROOT" -type f -not -path "*/.*" -not -path "*/file_inventory/*" -exec ls -la {} \; | \
         awk '{print $9 "|" $5 "|" $6 " " $7 " " $8}' | \
         sort > "$OUTPUT_DIR/files_with_metadata.txt"
-    
+
     # Large files (>1MB)
     find "$PROJECT_ROOT" -type f -not -path "*/.*" -not -path "*/file_inventory/*" -size +1M -exec ls -lh {} \; | \
         awk '{print $9 "|" $5}' | \
@@ -91,11 +91,11 @@ generate_detailed_info() {
 # Function to analyze directory structure
 analyze_directory_structure() {
     echo "Analyzing directory structure..."
-    
+
     # Directory tree
     tree "$PROJECT_ROOT" -I ".git|file_inventory" > "$OUTPUT_DIR/directory_tree.txt" 2>/dev/null || \
         find "$PROJECT_ROOT" -type d -not -path "*/.*" -not -path "*/file_inventory/*" | sort > "$OUTPUT_DIR/directories.txt"
-    
+
     # File count per directory
     find "$PROJECT_ROOT" -type d -not -path "*/.*" -not -path "*/file_inventory/*" | while read dir; do
         count=$(find "$dir" -maxdepth 1 -type f | wc -l)
@@ -106,7 +106,7 @@ analyze_directory_structure() {
 # Function to generate review-ready summaries
 generate_review_summaries() {
     echo "Generating review summaries..."
-    
+
     cat > "$OUTPUT_DIR/inventory_summary.md" << EOF
 # Linkpoint File Inventory Summary
 Generated: $(date)
@@ -138,7 +138,7 @@ $(head -20 "$OUTPUT_DIR/files_per_directory.txt")
 ### Java Source Files ($(cat "$OUTPUT_DIR/java_files.txt" | wc -l) total)
 For detailed list see: [java_files.txt](java_files.txt)
 
-### Documentation Files ($(cat "$OUTPUT_DIR/documentation_files.txt" | wc -l) total)  
+### Documentation Files ($(cat "$OUTPUT_DIR/documentation_files.txt" | wc -l) total)
 For detailed list see: [documentation_files.txt](documentation_files.txt)
 
 ### Configuration Files ($(cat "$OUTPUT_DIR/config_files.txt" | wc -l) total)
@@ -154,11 +154,11 @@ For detailed list see: [script_files.txt](script_files.txt)
 
 ### High Priority for Review
 1. **Java Source Files** - Core application logic and business rules
-2. **Configuration Files** - Build settings, dependencies, and app configuration  
+2. **Configuration Files** - Build settings, dependencies, and app configuration
 3. **Android Manifests and Resources** - UI definitions and app permissions
 4. **Documentation** - Project guides and API documentation
 
-### Medium Priority for Review  
+### Medium Priority for Review
 1. **Script Files** - Build automation and tooling
 2. **C++ Source Files** - Native components and performance-critical code
 
@@ -174,7 +174,7 @@ For detailed list see: [script_files.txt](script_files.txt)
 - Android manifest and resource definitions
 - Documentation completeness and accuracy
 
-### Security Review Areas  
+### Security Review Areas
 - Network communication code
 - Authentication and authorization logic
 - File I/O and data storage implementations
@@ -182,7 +182,7 @@ For detailed list see: [script_files.txt](script_files.txt)
 
 ### Performance Review Areas
 - Memory management in caching systems
-- Graphics rendering pipeline efficiency  
+- Graphics rendering pipeline efficiency
 - Network protocol optimization
 - Resource loading and asset management
 EOF
@@ -191,14 +191,14 @@ EOF
 # Function to create copilot-ready file lists
 generate_copilot_lists() {
     echo "Generating copilot-ready file lists..."
-    
+
     # Create individual file review checklist
     echo "# Linkpoint Files for Automated Review" > "$OUTPUT_DIR/copilot_review_list.md"
     echo "Generated: $(date)" >> "$OUTPUT_DIR/copilot_review_list.md"
     echo "" >> "$OUTPUT_DIR/copilot_review_list.md"
     echo "## All Files to Review ($(cat "$OUTPUT_DIR/all_files.txt" | wc -l) total)" >> "$OUTPUT_DIR/copilot_review_list.md"
     echo "" >> "$OUTPUT_DIR/copilot_review_list.md"
-    
+
     # Add each file as a checkbox item
     cat "$OUTPUT_DIR/all_files.txt" | while read file; do
         relative_path=${file#$PROJECT_ROOT/}
@@ -211,7 +211,7 @@ generate_copilot_lists() {
 echo -e "${GREEN}Starting file inventory generation...${NC}"
 
 count_by_extension
-generate_comprehensive_list  
+generate_comprehensive_list
 categorize_files
 generate_detailed_info
 analyze_directory_structure

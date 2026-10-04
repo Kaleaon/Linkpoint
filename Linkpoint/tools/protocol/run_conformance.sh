@@ -68,8 +68,17 @@ require_tool() {
 
 require_tool python3
 require_tool sha1sum
+GRADLE_CMD="${GRADLE_BIN:-}"
 if [[ ${skip_gradle} -eq 0 ]]; then
-  [[ -x "${REPO_ROOT}/gradlew" ]] || { log "missing gradle wrapper at ${REPO_ROOT}/gradlew"; exit 2; }
+  if [[ -z "${GRADLE_CMD}" ]]; then
+    if command -v gradle >/dev/null 2>&1; then
+      GRADLE_CMD="gradle"
+    elif [[ -x "${REPO_ROOT}/gradlew" ]]; then
+      GRADLE_CMD="./gradlew"
+    else
+      log "missing gradle executable or wrapper"; exit 2
+    fi
+  fi
 fi
 
 failures=()
@@ -119,8 +128,8 @@ if [[ ${skip_gradle} -eq 0 ]]; then
   # The Linkpoint module declares an `xr` flavor dimension; the conformance
   # tests live under the `stable` flavor, so we target that variant directly
   # via the top-level gradle wrapper (which composite-builds Linkpoint).
-  ( cd "${REPO_ROOT}" && ./gradlew "${gradle_extra[@]}" \
-      :Linkpoint:testStableDebugUnitTest \
+  ( cd "${LINKPOINT_ROOT}" && ${GRADLE_CMD} "${gradle_extra[@]}" \
+      testStableDebugUnitTest \
       --tests 'com.linkpoint.protocol.messages.MessageTemplateProtocolConformanceTest' \
       --tests 'com.linkpoint.protocol.messages.MessageParserConformanceFixtureTest' \
       --tests 'com.linkpoint.protocol.messages.DeclaredMessageSlicesTest' \

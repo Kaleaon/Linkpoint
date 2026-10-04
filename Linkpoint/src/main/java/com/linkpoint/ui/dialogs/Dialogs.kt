@@ -211,7 +211,7 @@ fun ObjectPropertiesDialog(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
-                
+
                 InfoRow(label = "Owner", value = ownerName)
                 InfoRow(label = "Creator", value = creatorName)
             }
@@ -317,7 +317,7 @@ fun StartLocationDialog(
 ) {
     var customSLURL by remember { mutableStateOf("") }
     var showCustomInput by remember { mutableStateOf(false) }
-    
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Start Location") },
@@ -364,7 +364,7 @@ fun StartLocationDialog(
                         }
                     }
                 }
-                
+
                 // Custom SLURL option
                 if (showCustomInput) {
                     OutlinedTextField(

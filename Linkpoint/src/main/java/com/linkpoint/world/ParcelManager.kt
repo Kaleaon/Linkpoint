@@ -21,7 +21,7 @@ class ParcelManager(
 ) {
     companion object {
         private const val TAG = "ParcelManager"
-        
+
         // Parcel flags
         const val FLAG_ALLOW_FLY = 0x00000001L
         const val FLAG_ALLOW_SCRIPTS = 0x00000002L
@@ -52,22 +52,22 @@ class ParcelManager(
         const val FLAG_ALLOW_VOICE_CHAT = 0x20000000L
         const val FLAG_USE_ESTATE_VOICE_CHAN = 0x40000000L
         const val FLAG_DENY_AGEUNVERIFIED = 0x80000000L
-        
+
         // Landing types
         const val LANDING_ANYWHERE = 0
         const val LANDING_POINT = 1
         const val LANDING_NONE = 2
     }
-    
+
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    
+
     // Cached parcels
     private val parcels = ConcurrentHashMap<Int, ParcelInfo>()
-    
+
     // Current parcel
     private val _currentParcel = MutableStateFlow<ParcelInfo?>(null)
     val currentParcel: StateFlow<ParcelInfo?> = _currentParcel
-    
+
     /**
      * Write AgentData block (AgentID + SessionID) with UUIDs in big-endian bytes.
      * Message block fields remain little-endian per SL templates.
@@ -81,7 +81,7 @@ class ParcelManager(
         writeUUID(buffer, identity.agentId)
         writeUUID(buffer, identity.sessionId)
     }
-    
+
     /**
      * Write UUID to buffer using proper serialization (big-endian)
      */
@@ -99,7 +99,7 @@ class ParcelManager(
         buffer.put(safeBytes.size.toByte())
         buffer.put(safeBytes)
     }
-    
+
     /**
      * Handle ParcelProperties message
      */
@@ -178,10 +178,10 @@ class ParcelManager(
             passPrice = passPrice,
             passHours = passHours
         )
-        
+
         parcels[localId] = parcel
     }
-    
+
     /**
      * Request parcel info at position.
      * Sends ParcelInfoRequest message to get parcel data at specific coordinates.
@@ -192,15 +192,15 @@ class ParcelManager(
                 // ParcelInfoRequest message format:
                 // AgentData block + InfoData block with position
                 val payload = ByteBuffer.allocate(44).order(ByteOrder.LITTLE_ENDIAN)
-                
+
                 // AgentData
                 writeAgentData(payload)
-                
+
                 // Position (as integers, local coordinates)
                 payload.putInt(position.x.toInt())
                 payload.putInt(position.y.toInt())
                 payload.putInt(position.z.toInt())
-                
+
                 udpConnection.sendPacket(MessageIdRegistry.PARCEL_INFO_REQUEST, payload.array(), reliable = true)
                 Log.d(TAG, "Requested parcel info at position: $position")
             } catch (e: Exception) {
@@ -208,7 +208,7 @@ class ParcelManager(
             }
         }
     }
-    
+
     /**
      * Handle ParcelInfoReply message from server.
      */
@@ -216,21 +216,21 @@ class ParcelManager(
         Log.d(TAG, "Received parcel info: ${data.name} (${data.parcelID})")
         // Cache parcel info - could be used for map display or teleport preview
     }
-    
+
     /**
      * Set current parcel
      */
     fun setCurrentParcel(localId: Int) {
         _currentParcel.value = parcels[localId]
     }
-    
+
     /**
      * Get parcel at position
      */
     fun getParcelAtPosition(x: Float, y: Float): ParcelInfo? {
         val localX = x.toInt().coerceIn(0, 255)
         val localY = y.toInt().coerceIn(0, 255)
-        
+
         val index = localY * 64 + localX / 4
         if (index < parcelOverlay.size) {
             val byte = parcelOverlay[index].toInt() and 0xFF
@@ -238,10 +238,10 @@ class ParcelManager(
             val parcelId = (byte shr shift) and 0x03
             return parcels[parcelId]
         }
-        
+
         return null
     }
-    
+
     /**
      * Buy land
      */
@@ -256,10 +256,10 @@ class ParcelManager(
                 } else {
                     UUID(0L, 0L)
                 }
-                
+
                 // AgentData with proper IDs
                 writeAgentData(payload)
-                
+
                 // Data block
                 writeUUID(payload, groupId)
                 payload.put(if (forGroup) 1 else 0)  // IsGroupOwned
@@ -270,7 +270,7 @@ class ParcelManager(
                 // ParcelData block
                 payload.putInt(0)  // Price (0 = simulator authoritative price)
                 payload.putInt(0)  // Area
-                
+
                 udpConnection.sendPacket(MessageIdRegistry.PARCEL_BUY, payload.array(), reliable = true)
                 Log.i(TAG, "Sent ParcelBuy for localId=$localId")
             } catch (e: Exception) {
@@ -278,7 +278,7 @@ class ParcelManager(
             }
         }
     }
-    
+
     /**
      * Deed land to group
      */
@@ -287,14 +287,14 @@ class ParcelManager(
             try {
                 // ParcelDeedToGroup message
                 val payload = ByteBuffer.allocate(56).order(ByteOrder.LITTLE_ENDIAN)
-                
+
                 // AgentData with proper IDs
                 writeAgentData(payload)
-                
+
                 // Data block
                 writeUUID(payload, groupId)
                 payload.putInt(localId)  // LocalID
-                
+
                 udpConnection.sendPacket(MessageIdRegistry.PARCEL_DEED_TO_GROUP, payload.array(), reliable = true)
                 Log.i(TAG, "Sent ParcelDeedToGroup for localId=$localId to group $groupId")
             } catch (e: Exception) {
@@ -302,7 +302,7 @@ class ParcelManager(
             }
         }
     }
-    
+
     /**
      * Release/abandon land
      */
@@ -311,13 +311,13 @@ class ParcelManager(
             try {
                 // ParcelRelease message
                 val payload = ByteBuffer.allocate(40).order(ByteOrder.LITTLE_ENDIAN)
-                
+
                 // AgentData with proper IDs
                 writeAgentData(payload)
-                
+
                 // Data block
                 payload.putInt(localId)
-                
+
                 udpConnection.sendPacket(MessageIdRegistry.PARCEL_RELEASE, payload.array(), reliable = true)
                 Log.i(TAG, "Released land localId=$localId")
             } catch (e: Exception) {
@@ -325,7 +325,7 @@ class ParcelManager(
             }
         }
     }
-    
+
     /**
      * Set parcel for sale
      */
@@ -355,7 +355,7 @@ class ParcelManager(
             }
         }
     }
-    
+
     /**
      * Return objects from parcel
      */
@@ -364,18 +364,18 @@ class ParcelManager(
             try {
                 // ParcelReturnObjects / ParcelDisableObjects message
                 val payload = ByteBuffer.allocate(50).order(ByteOrder.LITTLE_ENDIAN)
-                
+
                 // AgentData with proper IDs
                 writeAgentData(payload)
-                
+
                 // ParcelData
                 payload.putInt(localId)
                 payload.putInt(returnType.ordinal)  // ReturnType
-                
+
                 // Empty task/owner lists
                 payload.put(0)  // TaskIDs count
                 payload.put(0)  // OwnerIDs count
-                
+
                 udpConnection.sendPacket(MessageIdRegistry.PARCEL_RETURN_OBJECTS, payload.array(), reliable = true)
                 Log.i(TAG, "Returned objects from parcel $localId, type=${returnType.name}")
             } catch (e: Exception) {
@@ -383,7 +383,7 @@ class ParcelManager(
             }
         }
     }
-    
+
     /**
      * Set parcel name
      */
@@ -400,7 +400,7 @@ class ParcelManager(
             }
         }
     }
-    
+
     /**
      * Set parcel description
      */
@@ -417,7 +417,7 @@ class ParcelManager(
             }
         }
     }
-    
+
     /**
      * Set parcel flags
      */
@@ -434,7 +434,7 @@ class ParcelManager(
             }
         }
     }
-    
+
     /**
      * Set music URL
      */
@@ -451,7 +451,7 @@ class ParcelManager(
             }
         }
     }
-    
+
     /**
      * Set media URL
      */
@@ -468,7 +468,7 @@ class ParcelManager(
             }
         }
     }
-    
+
     /**
      * Add to access list
      */
@@ -478,23 +478,23 @@ class ParcelManager(
                 // ParcelAccessListUpdate message
                 val payload = ByteBuffer.allocate(93).order(ByteOrder.LITTLE_ENDIAN)
                 val transactionId = UUID.randomUUID()
-                
+
                 // AgentData with proper IDs
                 writeAgentData(payload)
-                
+
                 // Data block
                 payload.putInt(0)  // Flags - add to access
                 payload.putInt(localId)
                 writeUUID(payload, transactionId)
                 payload.putInt(1)  // SequenceID
                 payload.putInt(1)  // Sections
-                
+
                 // List block
                 payload.put(1)  // Entry count
                 writeUUID(payload, agentId)
                 payload.putInt((hours * 3600).toInt())  // Time in seconds
                 payload.putInt(1)  // Flags - access allowed
-                
+
                 udpConnection.sendPacket(MessageIdRegistry.PARCEL_ACCESS_LIST_UPDATE, payload.array(), reliable = true)
                 Log.i(TAG, "Added $agentId to access list for parcel $localId")
             } catch (e: Exception) {
@@ -502,7 +502,7 @@ class ParcelManager(
             }
         }
     }
-    
+
     /**
      * Remove from access list
      */
@@ -511,23 +511,23 @@ class ParcelManager(
             try {
                 val payload = ByteBuffer.allocate(93).order(ByteOrder.LITTLE_ENDIAN)
                 val transactionId = UUID.randomUUID()
-                
+
                 // AgentData with proper IDs
                 writeAgentData(payload)
-                
+
                 // Data block
                 payload.putInt(1)  // Flags - remove from access
                 payload.putInt(localId)
                 writeUUID(payload, transactionId)
                 payload.putInt(1)
                 payload.putInt(1)
-                
+
                 // List block
                 payload.put(1)
                 writeUUID(payload, agentId)
                 payload.putInt(0)
                 payload.putInt(0)
-                
+
                 udpConnection.sendPacket(MessageIdRegistry.PARCEL_ACCESS_LIST_UPDATE, payload.array(), reliable = true)
                 Log.i(TAG, "Removed $agentId from access list for parcel $localId")
             } catch (e: Exception) {
@@ -535,7 +535,7 @@ class ParcelManager(
             }
         }
     }
-    
+
     /**
      * Add to ban list
      */
@@ -544,23 +544,23 @@ class ParcelManager(
             try {
                 val payload = ByteBuffer.allocate(93).order(ByteOrder.LITTLE_ENDIAN)
                 val transactionId = UUID.randomUUID()
-                
+
                 // AgentData with proper IDs
                 writeAgentData(payload)
-                
-                // Data block  
+
+                // Data block
                 payload.putInt(2)  // Flags - ban list
                 payload.putInt(localId)
                 writeUUID(payload, transactionId)
                 payload.putInt(1)
                 payload.putInt(1)
-                
+
                 // List block
                 payload.put(1)
                 writeUUID(payload, agentId)
                 payload.putInt(0)  // Permanent
                 payload.putInt(1)  // Flags - banned
-                
+
                 udpConnection.sendPacket(MessageIdRegistry.PARCEL_ACCESS_LIST_UPDATE, payload.array(), reliable = true)
                 Log.i(TAG, "Added $agentId to ban list for parcel $localId")
             } catch (e: Exception) {
@@ -568,7 +568,7 @@ class ParcelManager(
             }
         }
     }
-    
+
     /**
      * Remove from ban list
      */
@@ -577,23 +577,23 @@ class ParcelManager(
             try {
                 val payload = ByteBuffer.allocate(93).order(ByteOrder.LITTLE_ENDIAN)
                 val transactionId = UUID.randomUUID()
-                
+
                 // AgentData with proper IDs
                 writeAgentData(payload)
-                
+
                 // Data block
                 payload.putInt(3)  // Flags - remove from ban
                 payload.putInt(localId)
                 writeUUID(payload, transactionId)
                 payload.putInt(1)
                 payload.putInt(1)
-                
+
                 // List block
                 payload.put(1)
                 writeUUID(payload, agentId)
                 payload.putInt(0)
                 payload.putInt(0)
-                
+
                 udpConnection.sendPacket(MessageIdRegistry.PARCEL_ACCESS_LIST_UPDATE, payload.array(), reliable = true)
                 Log.i(TAG, "Removed $agentId from ban list for parcel $localId")
             } catch (e: Exception) {
@@ -601,7 +601,7 @@ class ParcelManager(
             }
         }
     }
-    
+
     /**
      * Send parcel properties update
      */
@@ -611,7 +611,7 @@ class ParcelManager(
         parcelFlagsOverride: Long? = null
     ) {
         val parcel = parcels[localId] ?: return
-        
+
         val nameSize = minOf(parcel.name.toByteArray(Charsets.UTF_8).size, 255)
         val descSize = minOf(parcel.description.toByteArray(Charsets.UTF_8).size, 255)
         val musicSize = minOf((parcel.musicUrl ?: "").toByteArray(Charsets.UTF_8).size, 255)
@@ -620,16 +620,16 @@ class ParcelManager(
 
         val payload = ByteBuffer.allocate(payloadSize)
             .order(ByteOrder.LITTLE_ENDIAN)
-        
+
         // AgentData
         writeAgentData(payload)
-        
+
         // ParcelData
         payload.putInt(localId)
         payload.putInt(parcelFlagsOverride?.toInt() ?: parcel.flags.toInt()) // Flags
         payload.putInt(parcel.flags.toInt()) // ParcelFlags
         payload.putInt(salePriceOverride ?: parcel.claimPrice.coerceAtLeast(0)) // SalePrice
-        
+
         // Variable-length 1-byte strings
         putVariable1String(payload, parcel.name)
         putVariable1String(payload, parcel.description)
@@ -639,7 +639,7 @@ class ParcelManager(
         // Media info
         writeUUID(payload, parcel.mediaId ?: UUID(0L, 0L))
         payload.put(if (parcel.mediaAutoScale) 1 else 0)
-        
+
         // Group
         writeUUID(payload, parcel.groupId ?: UUID(0L, 0L))
 
@@ -660,28 +660,28 @@ class ParcelManager(
         payload.putFloat(parcel.userLookAt.y)
         payload.putFloat(parcel.userLookAt.z)
         payload.put(parcel.landingType.toByte())
-        
+
         udpConnection.sendPacket(MessageIdRegistry.PARCEL_PROPERTIES_UPDATE, payload.array(), reliable = true)
     }
-    
+
     // ==================== PARCEL OVERLAY ====================
-    
+
     // Parcel overlay bitmap data (64x64 grid, 4 bits per parcel)
     private val parcelOverlay = ByteArray(2048) // 64x64 / 2 = 2048 bytes
     private var parcelOverlaySequence = 0
-    
+
     /**
      * Handle parcel overlay data from UDP message
      * The overlay is a bitmap showing parcel boundaries for the minimap
      */
     fun handleParcelOverlay(sequenceId: Int, data: ByteArray) {
         Log.d(TAG, "Received parcel overlay: sequence=$sequenceId, size=${data.size} bytes")
-        
+
         // Each sequence represents 1/4 of the total overlay
         // The region is divided into 4 horizontal strips, each 16 blocks tall
         val stripSize = 512  // 64 * 8 = 512 bytes per strip (64 wide, 16 tall, 4 bits per cell / 2 = 512)
         val offset = sequenceId * stripSize
-        
+
         if (offset >= 0 && offset + data.size <= parcelOverlay.size) {
             System.arraycopy(data, 0, parcelOverlay, offset, minOf(data.size, parcelOverlay.size - offset))
             parcelOverlaySequence = maxOf(parcelOverlaySequence, sequenceId)
@@ -690,17 +690,17 @@ class ParcelManager(
             Log.w(TAG, "Parcel overlay sequence $sequenceId out of bounds (offset=$offset, dataSize=${data.size})")
         }
     }
-    
+
     /**
      * Get the parcel overlay bitmap for rendering
      */
     fun getParcelOverlay(): ByteArray = parcelOverlay.copyOf()
-    
+
     /**
      * Check if parcel overlay is complete
      */
     fun isParcelOverlayComplete(): Boolean = parcelOverlaySequence >= 3
-    
+
     fun shutdown() {
         scope.cancel()
     }
@@ -751,7 +751,7 @@ data class ParcelInfo(
     val forSale: Boolean get() = (flags and ParcelManager.FLAG_FOR_SALE) != 0L
     val allowVoice: Boolean get() = (flags and ParcelManager.FLAG_ALLOW_VOICE_CHAT) != 0L
     val restrictPush: Boolean get() = (flags and ParcelManager.FLAG_RESTRICT_PUSHOBJECT) != 0L
-    
+
     val sizeString: String get() = "$area sqm"
     val primUsage: String get() = "$totalPrims / $maxPrims"
 }

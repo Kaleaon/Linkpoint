@@ -1,6 +1,6 @@
 /**
  * LLSD Binary Serializer - TypeScript Implementation
- * 
+ *
  * Based on Java implementation and Second Life viewer binary serialization
  * Copyright (C) 2024 Linden Lab
  */
@@ -24,10 +24,10 @@ export class LLSDBinarySerializer {
         try {
             // Write magic number
             this.writeUInt32(LLSDBinarySerializer.LLSD_BINARY_MAGIC);
-            
+
             // Write content
             this.writeValue(llsd.getContent());
-            
+
             return new Uint8Array(this.buffer);
         } catch (error) {
             if (error instanceof LLSDException) {

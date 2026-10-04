@@ -1,0 +1,415 @@
+package com.linkpoint.protocol.llsd
+
+import java.io.ByteArrayInputStream
+import java.io.InputStream
+import java.io.PushbackInputStream
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.util.*
+
+/**
+ * LLSD Parser - handles Binary, XML, and Notation formats.
+ * See https://wiki.secondlife.com/wiki/LLSD for canonical formatting details.
+ */
+object LLSDParser {
+    private const val TAG = "LLSDParser"
+
+    private fun logWarning(tag: String, message: String, throwable: Throwable? = null) {
+        SafeLog.w(tag, message, throwable)
+    }
+
+    private data class ParseLimits(
+        val maxStringBytes: Int = 1024 * 1024,
+        val maxBinaryBytes: Int = 1024 * 1024,
+        val maxArrayLength: Int = 10_000,
+        val maxMapEntries: Int = 10_000,
+        val maxCollectionElementsTotal: Int = 20_000,
+        val maxNestingDepth: Int = 128,
+        val maxTotalBytes: Int = 4 * 1024 * 1024,
+    )
+
+    private data class ParseLimitsState(
+        var currentDepth: Int = 0,
+        var accumulatedBytes: Int = 0,
+        var collectionElementsRead: Int = 0,
+    )
+
+    private open class LLSDParseException(message: String) : RuntimeException(message)
+    private class TruncatedBinaryPayloadException(expectedBytes: Int) :
+        LLSDParseException("Truncated binary LLSD payload while reading $expectedBytes bytes.")
+    private class ParseLimitExceededException(message: String) : LLSDParseException(message)
+    private class MalformedBinaryDataException(message: String) : LLSDParseException(message)
+
+    /**
+     * Parse LLSD from bytes (auto-detect format).
+     *
+     * Detection priority:
+     *   1. `<?llsd/notation?>` magic header → notation
+     *   2. `<?llsd/binary?>` magic header → binary
+     *   3. Anything starting with `<` → XML (covers `<?xml`, `<llsd>`)
+     *   4. Notation bare-form (first non-whitespace byte is one of
+     *      `{ [ i r u s d b l ! ' " 0 1 T t F f`)
+     *   5. Fallback → binary
+     */
+    fun parse(data: ByteArray): LLSDValue {
+        if (data.isEmpty()) return LLSDUndefined
+
+        if (startsWithBytes(data, "<?llsd/notation?>")) return parseNotation(data)
+        if (startsWithBytes(data, "<?llsd/binary?>")) return parseBinary(data)
+
+        return when {
+            looksLikeXml(data) -> parseXML(data)
+            looksLikeNotation(data) -> parseNotation(data)
+            else -> parseBinary(data)
+        }
+    }
+
+    /**
+     * Parse LLSD Notation (the human-readable form). See
+     * [LLSDNotationParser] for the spec mapping; this wrapper exists
+     * so the auto-detect path and API surface match the binary / XML
+     * forms.
+     */
+    fun parseNotation(data: ByteArray): LLSDValue = LLSDNotationParser.parse(data)
+
+    fun parseNotation(stream: InputStream): LLSDValue = LLSDNotationParser.parse(stream)
+
+    fun parseNotation(notation: String): LLSDValue = parseNotation(ByteArrayInputStream(notation.toByteArray(Charsets.UTF_8)))
+
+    private fun startsWithBytes(data: ByteArray, s: String): Boolean {
+        if (data.size < s.length) return false
+        for (i in s.indices) if (data[i].toInt().toChar() != s[i]) return false
+        return true
+    }
+
+
+    private fun looksLikeXml(data: ByteArray): Boolean {
+        if (data.isEmpty()) return false
+        var i = 0
+        while (i < data.size && data[i].toInt().toChar().isWhitespace()) i++
+        if (i >= data.size) return false
+        if (data[i] != '<'.code.toByte()) return false
+
+        return startsWithBytesAt(data, i, "<?xml") || startsWithBytesAt(data, i, "<llsd") || data[i] == '<'.code.toByte()
+    }
+
+    private fun startsWithBytesAt(data: ByteArray, start: Int, s: String): Boolean {
+        if (start + s.length > data.size) return false
+        for (idx in s.indices) {
+            if (data[start + idx].toInt().toChar() != s[idx]) return false
+        }
+        return true
+    }
+
+    private fun looksLikeNotation(data: ByteArray): Boolean {
+        var i = 0
+        while (i < data.size && data[i].toInt().toChar().isWhitespace()) i++
+        if (i >= data.size) return false
+        return when (data[i].toInt().toChar()) {
+            '{', '[', '!', '\'', '"', 'i', 'r', 'u', 's', 'd', 'b', 'l',
+            '0', '1', 'T', 't', 'F', 'f' -> true
+            else -> false
+        }
+    }
+
+    fun parseAuto(data: ByteArray, contentType: String?): LLSDValue {
+        if (data.isEmpty()) return LLSDUndefined
+        val stream = ByteArrayInputStream(data)
+        val buffered = java.io.BufferedInputStream(stream, 65536)
+        return when (LLSDContentTypeDetector.detect(buffered, contentType)) {
+            LLSDContentTypeDetector.LLSDContentType.LLSD_BINARY -> parseBinary(data)
+            LLSDContentTypeDetector.LLSDContentType.LLSD_XML -> parseXML(buffered)
+        }
+    }
+
+    fun parseBinary(data: ByteArray): LLSDValue {
+        val stripped = stripBinaryMagicHeader(data)
+        val stream = PushbackInputStream(ByteArrayInputStream(stripped), 1)
+        val limits = ParseLimits()
+        val state = ParseLimitsState()
+
+        return try {
+            parseBinaryValue(stream, state, limits)
+        } catch (e: LLSDParseException) {
+            logWarning(TAG, "Failed to parse binary LLSD: ${e.message}", e)
+            LLSDUndefined
+        } catch (e: IllegalArgumentException) {
+            logWarning(TAG, "Failed to parse binary LLSD due to illegal argument: ${e.message}", e)
+            LLSDUndefined
+        }
+    }
+
+    fun parseBinaryAndConsumed(data: ByteArray): Pair<LLSDValue, Int> {
+        val backing = ByteArrayInputStream(data)
+        val stream = PushbackInputStream(backing, 1)
+        val limits = ParseLimits()
+        val state = ParseLimitsState()
+        val value = try {
+            parseBinaryValue(stream, state, limits)
+        } catch (e: LLSDParseException) {
+            logWarning(TAG, "Failed in parseBinaryAndConsumed: ${e.message}", e)
+            return LLSDUndefined to -1
+        } catch (e: IllegalArgumentException) {
+            logWarning(TAG, "Failed in parseBinaryAndConsumed due to illegal argument: ${e.message}", e)
+            return LLSDUndefined to -1
+        }
+        val consumed = data.size - backing.available()
+        return value to consumed
+    }
+
+    private fun stripBinaryMagicHeader(data: ByteArray): ByteArray {
+        val magic = "<?llsd/binary?>".toByteArray(Charsets.US_ASCII)
+        if (data.size < magic.size) return data
+        for (i in magic.indices) {
+            if (data[i] != magic[i]) return data
+        }
+        var idx = magic.size
+        if (idx < data.size && data[idx] == '\r'.code.toByte()) idx++
+        if (idx < data.size && data[idx] == '\n'.code.toByte()) idx++
+        return data.copyOfRange(idx, data.size)
+    }
+
+    private fun parseBinaryValue(
+        stream: PushbackInputStream,
+        state: ParseLimitsState,
+        limits: ParseLimits,
+    ): LLSDValue {
+        if (state.currentDepth >= limits.maxNestingDepth) {
+            throw ParseLimitExceededException("Maximum nesting depth exceeded.")
+        }
+
+        state.currentDepth++
+        try {
+            val marker = readByte(stream, state, limits)
+            return parseByMarker(marker.toChar(), stream, state, limits)
+        } finally {
+            state.currentDepth--
+        }
+    }
+
+    private fun parseByMarker(
+        marker: Char,
+        stream: PushbackInputStream,
+        state: ParseLimitsState,
+        limits: ParseLimits,
+    ): LLSDValue {
+        return when (marker) {
+            LLSDValue.MARKER_UNDEF -> LLSDUndefined
+            LLSDValue.MARKER_TRUE -> LLSDBoolean(true)
+            LLSDValue.MARKER_FALSE -> LLSDBoolean(false)
+            LLSDValue.MARKER_INTEGER -> {
+                val bytes = readExact(stream, 4, state, limits)
+                LLSDInteger(ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).int)
+            }
+            LLSDValue.MARKER_REAL -> {
+                val bytes = readExact(stream, 8, state, limits)
+                LLSDReal(ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).double)
+            }
+            LLSDValue.MARKER_UUID -> {
+                val bytes = readExact(stream, 16, state, limits)
+                val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN)
+                LLSDUUID(UUID(buffer.long, buffer.long))
+            }
+            LLSDValue.MARKER_STRING -> {
+                val len = readLength(stream, state, limits)
+                if (len > limits.maxStringBytes) {
+                    throw ParseLimitExceededException("String length exceeds maxStringBytes.")
+                }
+                LLSDString(String(readExact(stream, len, state, limits), Charsets.UTF_8))
+            }
+            LLSDValue.MARKER_BINARY -> {
+                val len = readLength(stream, state, limits)
+                if (len > limits.maxBinaryBytes) {
+                    throw ParseLimitExceededException("Binary length exceeds maxBinaryBytes.")
+                }
+                LLSDBinary(readExact(stream, len, state, limits))
+            }
+            LLSDValue.MARKER_DATE -> {
+                val bytes = readExact(stream, 8, state, limits)
+                val seconds = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).double
+                LLSDDate((seconds * 1000).toLong())
+            }
+            LLSDValue.MARKER_URI -> {
+                val len = readLength(stream, state, limits)
+                if (len > limits.maxStringBytes) {
+                    throw ParseLimitExceededException("URI length exceeds maxStringBytes.")
+                }
+                LLSDURI(String(readExact(stream, len, state, limits), Charsets.UTF_8))
+            }
+            LLSDValue.MARKER_MAP -> {
+                val map = LLSDMap()
+                var entries = 0
+
+                val next = peekByte(stream, state, limits)
+                val declaredEntries = if (next == 0) {
+                    readLength(stream, state, limits)
+                } else {
+                    -1
+                }
+                if (declaredEntries > limits.maxMapEntries) {
+                    throw ParseLimitExceededException("Map entry count exceeds maxMapEntries.")
+                }
+
+                while (true) {
+                    val keyMarker = readByte(stream, state, limits).toChar()
+                    if (keyMarker == LLSDValue.MARKER_MAP_END) break
+                    if (keyMarker != 'k') {
+                        throw MalformedBinaryDataException("Malformed map: expected key marker 'k'.")
+                    }
+
+                    entries++
+                    state.collectionElementsRead++
+                    if (entries > limits.maxMapEntries) {
+                        throw ParseLimitExceededException("Map entry count exceeds maxMapEntries.")
+                    }
+                    enforceCollectionElementLimit(state, limits)
+
+                    val keyLength = readLength(stream, state, limits)
+                    if (keyLength > limits.maxStringBytes) {
+                        throw ParseLimitExceededException("Map key length exceeds maxStringBytes.")
+                    }
+                    val key = String(readExact(stream, keyLength, state, limits), Charsets.UTF_8)
+                    map[key] = parseBinaryValue(stream, state, limits)
+                }
+
+                map
+            }
+            LLSDValue.MARKER_ARRAY -> {
+                val array = LLSDArray()
+                var elements = 0
+
+                val next = peekByte(stream, state, limits)
+                val declaredElements = if (next == 0) {
+                    readLength(stream, state, limits)
+                } else {
+                    -1
+                }
+                if (declaredElements > limits.maxArrayLength) {
+                    throw ParseLimitExceededException("Array length exceeds maxArrayLength.")
+                }
+
+                while (true) {
+                    if (peekByte(stream, state, limits).toChar() == LLSDValue.MARKER_ARRAY_END) {
+                        readByte(stream, state, limits)
+                        break
+                    }
+
+                    elements++
+                    state.collectionElementsRead++
+                    if (elements > limits.maxArrayLength) {
+                        throw ParseLimitExceededException("Array length exceeds maxArrayLength.")
+                    }
+                    enforceCollectionElementLimit(state, limits)
+
+                    array.add(parseBinaryValue(stream, state, limits))
+                }
+
+                array
+            }
+            else -> LLSDUndefined
+        }
+    }
+
+    private fun readLength(
+        stream: PushbackInputStream,
+        state: ParseLimitsState,
+        limits: ParseLimits,
+    ): Int {
+        val lenBytes = readExact(stream, 4, state, limits)
+        val len = ByteBuffer.wrap(lenBytes).order(ByteOrder.BIG_ENDIAN).int
+        if (len < 0) {
+            throw MalformedBinaryDataException("Negative length in binary LLSD payload.")
+        }
+        return len
+    }
+
+    private fun readByte(stream: InputStream, state: ParseLimitsState, limits: ParseLimits): Int {
+        val value = stream.read()
+        if (value == -1) {
+            throw TruncatedBinaryPayloadException(1)
+        }
+        state.accumulatedBytes++
+        enforceTotalBytesLimit(state, limits)
+        return value
+    }
+
+    private fun peekByte(
+        stream: PushbackInputStream,
+        state: ParseLimitsState,
+        limits: ParseLimits,
+    ): Int {
+        val value = readByte(stream, state, limits)
+        stream.unread(value)
+        state.accumulatedBytes--
+        return value
+    }
+
+    private fun readExact(
+        stream: InputStream,
+        size: Int,
+        state: ParseLimitsState,
+        limits: ParseLimits,
+    ): ByteArray {
+        val bytes = ByteArray(size)
+        var offset = 0
+        while (offset < size) {
+            val read = stream.read(bytes, offset, size - offset)
+            if (read == -1) {
+                throw TruncatedBinaryPayloadException(size)
+            }
+            offset += read
+            state.accumulatedBytes += read
+            enforceTotalBytesLimit(state, limits)
+        }
+        return bytes
+    }
+
+    private fun enforceTotalBytesLimit(state: ParseLimitsState, limits: ParseLimits) {
+        if (state.accumulatedBytes > limits.maxTotalBytes) {
+            throw ParseLimitExceededException("Total bytes exceed maxTotalBytes.")
+        }
+    }
+
+    private fun enforceCollectionElementLimit(state: ParseLimitsState, limits: ParseLimits) {
+        if (state.collectionElementsRead > limits.maxCollectionElementsTotal) {
+            throw ParseLimitExceededException("Total collection elements exceed maxCollectionElementsTotal.")
+        }
+    }
+
+    fun parseXML(stream: InputStream): LLSDValue {
+        return try {
+            LLSDStreamingParser.parseAnyToValue(stream, "application/llsd+xml")
+        } catch (e: Exception) {
+            logWarning(TAG, "Failed to parse XML LLSD: ${e.message}", e)
+            LLSDUndefined
+        }
+    }
+
+    fun parseXML(data: ByteArray): LLSDValue = parseXML(ByteArrayInputStream(data))
+
+    fun parseXML(xml: String): LLSDValue = parseXML(ByteArrayInputStream(xml.toByteArray(Charsets.UTF_8)))
+
+    fun parseLlsdDate(value: String): Date? {
+        val normalised = value.trim().let { v ->
+            val tzPattern = Regex("""[+-]\d{2}:?\d{2}""")
+            if (v.endsWith("Z") && tzPattern.containsMatchIn(v.dropLast(1))) v.dropLast(1) else v
+        }
+        val patterns = listOf(
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "yyyy-MM-dd'T'HH:mm:ss'Z'",
+            "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+            "yyyy-MM-dd'T'HH:mm:ssXXX"
+        )
+        for (pattern in patterns) {
+            val formatter = java.text.SimpleDateFormat(pattern, Locale.US).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+            }
+            try {
+                return formatter.parse(normalised)
+            } catch (e: Exception) {
+                // Try next
+            }
+        }
+        return null
+    }
+}

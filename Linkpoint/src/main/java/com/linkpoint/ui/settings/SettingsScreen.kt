@@ -71,7 +71,7 @@ data class SettingsState(
 
 /**
  * Compose version of SettingsActivity.
- * 
+ *
  * Features:
  * - Account settings
  * - Notifications toggle
@@ -96,7 +96,7 @@ fun SettingsScreen(
     modifier: Modifier = Modifier
 ) {
     var currentSettings by remember { mutableStateOf(settings) }
-    
+
     Scaffold(
         topBar = {
             L2TopBar(
@@ -130,7 +130,7 @@ fun SettingsScreen(
                     onClick = onOpenAccount
                 )
             }
-            
+
             // Appearance Section
             SettingsSection(title = "Appearance") {
                 SettingsNavigationItem(
@@ -139,20 +139,20 @@ fun SettingsScreen(
                     subtitle = "Choose your color theme",
                     onClick = onOpenThemePicker
                 )
-                
+
                 HorizontalDivider()
-                
+
                 SettingsSliderItem(
                     icon = Icons.Default.BrightnessMedium,
                     title = "Brightness",
                     value = currentSettings.brightness,
-                    onValueChange = { 
+                    onValueChange = {
                         currentSettings = currentSettings.copy(brightness = it)
                         onSettingsChange(currentSettings)
                     }
                 )
             }
-            
+
             // Notifications Section
             SettingsSection(title = "Notifications") {
                 SettingsSwitchItem(
@@ -228,7 +228,7 @@ fun SettingsScreen(
                     onClick = onOpenLayoutEditor
                 )
             }
-            
+
             // Sound Section
             SettingsSection(title = "Sound") {
                 SettingsSwitchItem(
@@ -241,10 +241,10 @@ fun SettingsScreen(
                         onSettingsChange(currentSettings)
                     }
                 )
-                
+
                 if (currentSettings.soundEnabled) {
                     HorizontalDivider()
-                    
+
                     SettingsSliderItem(
                         icon = Icons.AutoMirrored.Filled.VolumeUp,
                         title = "Volume",
@@ -256,7 +256,7 @@ fun SettingsScreen(
                     )
                 }
             }
-            
+
             // Privacy Section
             SettingsSection(title = "Privacy") {
                 SettingsSwitchItem(
@@ -269,9 +269,9 @@ fun SettingsScreen(
                         onSettingsChange(currentSettings)
                     }
                 )
-                
+
                 HorizontalDivider()
-                
+
                 SettingsNavigationItem(
                     icon = Icons.Default.Security,
                     title = "Privacy Settings",
@@ -279,7 +279,7 @@ fun SettingsScreen(
                     onClick = onOpenPrivacy
                 )
             }
-            
+
             // RLV Section
             SettingsSection(title = "RLV (Restrained Love Viewer)") {
                 SettingsSwitchItem(
@@ -293,7 +293,7 @@ fun SettingsScreen(
                     }
                 )
             }
-            
+
             // Graphics Section
             SettingsSection(title = "Graphics") {
                 SettingsSliderItem(
@@ -307,7 +307,7 @@ fun SettingsScreen(
                     }
                 )
             }
-            
+
             // About Section
             SettingsSection(title = "About") {
                 SettingsNavigationItem(
@@ -337,7 +337,7 @@ fun SettingsSection(
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(bottom = 8.dp)
         )
-        
+
         Card(
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
@@ -374,9 +374,9 @@ fun SettingsSwitchItem(
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        
+
         Spacer(modifier = Modifier.width(16.dp))
-        
+
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
@@ -390,7 +390,7 @@ fun SettingsSwitchItem(
                 )
             }
         }
-        
+
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange
@@ -425,9 +425,9 @@ fun SettingsNavigationItem(
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        
+
         Spacer(modifier = Modifier.width(16.dp))
-        
+
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
@@ -441,7 +441,7 @@ fun SettingsNavigationItem(
                 )
             }
         }
-        
+
         Icon(
             imageVector = Icons.Default.ChevronRight,
             contentDescription = null,
@@ -473,9 +473,9 @@ fun SettingsSliderItem(
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            
+
             Spacer(modifier = Modifier.width(16.dp))
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
@@ -490,7 +490,7 @@ fun SettingsSliderItem(
                 }
             }
         }
-        
+
         Slider(
             value = value,
             onValueChange = onValueChange,

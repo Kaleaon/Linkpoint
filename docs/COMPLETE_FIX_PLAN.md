@@ -1,7 +1,7 @@
 # Complete Fix Plan (Current-code refresh)
 
-**Last verified:** 2026-04-09 (UTC)  
-**Commit:** `a9982607`  
+**Last verified:** 2026-04-09 (UTC)
+**Commit:** `a9982607`
 **Verification basis:** static inventory + targeted symbol/callsite inspection of `Linkpoint/src/main/java/**/*.kt`
 
 ---
@@ -123,4 +123,3 @@ Previous plan revisions mixed historical runtime incidents with static assumptio
    - exact verification date
    - exact commit hash
    - blocker status changes (confirmed-now vs historical).
-

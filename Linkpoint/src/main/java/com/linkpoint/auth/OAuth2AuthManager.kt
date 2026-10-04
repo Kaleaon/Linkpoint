@@ -95,7 +95,7 @@ class OAuth2AuthManager(
         val random = SecureRandom()
         val verifierBytes = ByteArray(64)
         random.nextBytes(verifierBytes)
-        
+
         // Base64Url unpadded encoding (RFC 7636 Section 3)
         val codeVerifier = Base64.encodeToString(
             verifierBytes,

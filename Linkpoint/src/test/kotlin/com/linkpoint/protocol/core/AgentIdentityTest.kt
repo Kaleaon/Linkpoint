@@ -51,4 +51,3 @@ class AgentIdentityTest {
         assertEquals(42, identity.circuitCode)
     }
 }
-

@@ -34,7 +34,7 @@ class CapEventQueueSequenceTrackingTest {
     @Test
     fun testNetworkInterfaceChangedTrigger() {
         eventQueue.setHighestAckSequenceId(42)
-        
+
         // Calling network interface changed should not reset sequence ID
         eventQueue.onNetworkInterfaceChanged()
         assertEquals(42, eventQueue.getHighestAckSequenceId())

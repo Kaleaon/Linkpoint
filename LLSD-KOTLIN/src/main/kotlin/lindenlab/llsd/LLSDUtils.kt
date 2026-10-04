@@ -22,13 +22,13 @@ import java.util.*
  * @see LLSD
  */
 object LLSDUtils {
-    
+
     /**
      * Shared UUID validation pattern for consistent UUID parsing across all parsers.
      */
     @JvmField
     val UUID_PATTERN = Regex("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
-    
+
     /**
      * Safely retrieves a string value from a nested LLSD structure.
      *
@@ -48,7 +48,7 @@ object LLSDUtils {
         val value = navigatePath(root, path)
         return if (value is String) value else defaultValue
     }
-    
+
     /**
      * Safely retrieves an integer value from a nested LLSD structure.
      */
@@ -57,7 +57,7 @@ object LLSDUtils {
         val value = navigatePath(root, path)
         return if (value is Int) value else defaultValue
     }
-    
+
     /**
      * Safely retrieves a double value from a nested LLSD structure.
      *
@@ -73,7 +73,7 @@ object LLSDUtils {
             else -> defaultValue
         }
     }
-    
+
     /**
      * Safely retrieves a boolean value from a nested LLSD structure.
      */
@@ -82,7 +82,7 @@ object LLSDUtils {
         val value = navigatePath(root, path)
         return if (value is Boolean) value else defaultValue
     }
-    
+
     /**
      * Safely retrieves a UUID value from a nested LLSD structure.
      *
@@ -90,7 +90,7 @@ object LLSDUtils {
      * to parse it as a UUID.
      */
     @JvmStatic
-    fun getUUID(root: Any?, path: String, defaultValue: UUID): UUID {
+    fun getUUID(root: Any?, path: String, defaultValue: UUID? = null): UUID? {
         val value = navigatePath(root, path)
         return when (value) {
             is UUID -> value
@@ -102,7 +102,7 @@ object LLSDUtils {
             else -> defaultValue
         }
     }
-    
+
     /**
      * Safely casts an object to a `Map<String, Any?>`.
      *
@@ -114,7 +114,7 @@ object LLSDUtils {
     fun asMap(obj: Any?): Map<String, Any?> {
         return if (obj is Map<*, *>) obj as Map<String, Any?> else HashMap()
     }
-    
+
     /**
      * Safely casts an object to a `List<Any?>`.
      *
@@ -122,11 +122,11 @@ object LLSDUtils {
      * is returned.
      */
     @JvmStatic
-    @Suppress("UNCHECKED_CAST")
+    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
     fun asList(obj: Any?): List<Any?> {
         return if (obj is List<*>) obj as List<Any?> else ArrayList()
     }
-    
+
     /**
      * Checks if an LLSD value is considered "empty".
      *
@@ -148,7 +148,7 @@ object LLSDUtils {
             else -> false
         }
     }
-    
+
     /**
      * Creates a deep copy of an LLSD data structure.
      *
@@ -182,7 +182,7 @@ object LLSDUtils {
             else -> obj // Immutable types can be returned as-is
         }
     }
-    
+
     /**
      * Recursively merges two LLSD maps.
      *
@@ -204,12 +204,12 @@ object LLSDUtils {
         if (source == null) {
             return target
         }
-        
+
         val result = HashMap(target)
-        
+
         for ((key, sourceValue) in source) {
             val targetValue = result[key]
-            
+
             result[key] = if (targetValue is Map<*, *> && sourceValue is Map<*, *>) {
                 // Recursively merge nested maps
                 mergeMaps(targetValue as Map<String, Any?>, sourceValue as Map<String, Any?>)
@@ -218,10 +218,10 @@ object LLSDUtils {
                 deepCopy(sourceValue)
             }
         }
-        
+
         return result
     }
-    
+
     /**
      * Validates that an LLSD data structure contains a set of required fields.
      *
@@ -236,16 +236,16 @@ object LLSDUtils {
     @JvmStatic
     fun validateRequiredFields(obj: Any?, vararg requiredFields: String): List<String> {
         val missing = mutableListOf<String>()
-        
+
         for (field in requiredFields) {
             if (isEmpty(navigatePath(obj, field))) {
                 missing.add(field)
             }
         }
-        
+
         return missing
     }
-    
+
     /**
      * Converts an LLSD data structure into a formatted, human-readable string.
      *
@@ -254,12 +254,13 @@ object LLSDUtils {
      * @return A pretty-printed string representation of the object.
      */
     @JvmStatic
+    @JvmOverloads
     fun prettyPrint(obj: Any?, indent: Int = 2): String {
         val sb = StringBuilder()
         prettyPrintRecursive(obj, indent, 0, sb)
         return sb.toString()
     }
-    
+
     /**
      * Navigates a dot-separated path within a nested LLSD data structure.
      *
@@ -272,10 +273,10 @@ object LLSDUtils {
         if (root == null || path.isEmpty()) {
             return null
         }
-        
+
         val parts = path.split(".")
         var current: Any? = root
-        
+
         for (part in parts) {
             current = if (current is Map<*, *>) {
                 @Suppress("UNCHECKED_CAST")
@@ -284,17 +285,17 @@ object LLSDUtils {
                 return null // Path doesn't exist
             }
         }
-        
+
         return current
     }
-    
+
     /**
      * The recursive helper method for [prettyPrint].
      */
     @Suppress("UNCHECKED_CAST")
     private fun prettyPrintRecursive(obj: Any?, indentSize: Int, currentLevel: Int, sb: StringBuilder) {
         val indent = " ".repeat(indentSize * currentLevel)
-        
+
         when (obj) {
             null -> sb.append("null")
             is Map<*, *> -> {

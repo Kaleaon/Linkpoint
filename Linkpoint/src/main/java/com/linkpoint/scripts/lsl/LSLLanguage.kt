@@ -8,7 +8,7 @@ import androidx.compose.ui.text.font.FontWeight
 
 /**
  * LSL (Linden Scripting Language) syntax definition for Jetpack Compose.
- * 
+ *
  * Provides full syntax highlighting for Second Life scripts including:
  * - All 350+ LSL functions (llSay, llGetPos, etc.)
  * - All 60+ events (state_entry, touch_start, etc.)
@@ -18,13 +18,13 @@ import androidx.compose.ui.text.font.FontWeight
  * - Comments (single-line // and multi-line /* */)
  * - Strings with escape sequences
  * - Numbers (integers, floats, hex)
- * 
+ *
  * Based on Firestorm's LSL editor implementation.
  */
 object LSLLanguage {
-    
+
     // ==================== COLORS ====================
-    
+
     object Colors {
         val KEYWORD = Color(0xFFCC7832)      // Orange for keywords
         val TYPE = Color(0xFF6897BB)          // Blue for types
@@ -41,22 +41,22 @@ object LSLLanguage {
         val BACKGROUND = Color(0xFF1E1E1E)   // Dark background
         val LINE_NUMBER = Color(0xFF606366)  // Line number color
     }
-    
+
     // ==================== KEYWORDS ====================
-    
+
     val KEYWORDS = setOf(
         "if", "else", "for", "while", "do", "jump", "return", "state",
         "default", "event", "TRUE", "FALSE"
     )
-    
+
     // ==================== TYPES ====================
-    
+
     val TYPES = setOf(
         "integer", "float", "string", "key", "vector", "rotation", "quaternion", "list"
     )
-    
+
     // ==================== EVENTS ====================
-    
+
     val EVENTS = setOf(
         "touch_start", "touch", "touch_end",
         "state_entry", "state_exit",
@@ -70,19 +70,19 @@ object LSLLanguage {
         "remote_data", "experience_permissions", "experience_permissions_denied",
         "transaction_result", "path_update"
     )
-    
+
     // ==================== CONSTANTS ====================
     // (Using the same constants from LSLSyntax.kt)
-    
+
     val CONSTANTS = LSLSyntax.CONSTANTS
-    
+
     // ==================== FUNCTIONS ====================
     // (Using the same functions from LSLSyntax.kt)
-    
+
     val FUNCTIONS = LSLSyntax.FUNCTIONS
-    
+
     // ==================== DEPRECATED FUNCTIONS ====================
-    
+
     val DEPRECATED_FUNCTIONS = LSLSyntax.DEPRECATED_FUNCTIONS
 
     // ==================== REGEX PATTERNS ====================
@@ -92,16 +92,16 @@ object LSLLanguage {
     private val stringRegex = Regex("\"([^\"\\\\]|\\\\.)*\"")
     private val numberRegex = Regex("\\b(0x[0-9A-Fa-f]+|\\d+\\.?\\d*([eE][+-]?\\d+)?|\\d*\\.\\d+([eE][+-]?\\d+)?)\\b")
     private val identifierRegex = Regex("\\b[a-zA-Z_][a-zA-Z0-9_]*\\b")
-    
+
     /**
      * Highlight LSL code and return an AnnotatedString with syntax highlighting.
      */
     fun highlight(code: String): AnnotatedString {
         val builder = AnnotatedString.Builder(code)
-        
+
         // Track positions that have been styled (comments and strings take priority)
         val styledRanges = mutableListOf<IntRange>()
-        
+
         // 1. Highlight multi-line comments first (highest priority)
         multiLineCommentRegex.findAll(code).forEach { match ->
             builder.addStyle(
@@ -111,7 +111,7 @@ object LSLLanguage {
             )
             styledRanges.add(match.range)
         }
-        
+
         // 2. Highlight single-line comments
         singleLineCommentRegex.findAll(code).forEach { match ->
             if (!isInStyledRange(match.range.first, styledRanges)) {
@@ -123,7 +123,7 @@ object LSLLanguage {
                 styledRanges.add(match.range)
             }
         }
-        
+
         // 3. Highlight strings
         stringRegex.findAll(code).forEach { match ->
             if (!isInStyledRange(match.range.first, styledRanges)) {
@@ -135,7 +135,7 @@ object LSLLanguage {
                 styledRanges.add(match.range)
             }
         }
-        
+
         // 4. Highlight numbers (hex and decimal)
         numberRegex.findAll(code).forEach { match ->
             if (!isInStyledRange(match.range.first, styledRanges)) {
@@ -146,7 +146,7 @@ object LSLLanguage {
                 )
             }
         }
-        
+
         // 5. Highlight identifiers (keywords, types, functions, events, constants)
         identifierRegex.findAll(code).forEach { match ->
             if (!isInStyledRange(match.range.first, styledRanges)) {
@@ -160,55 +160,55 @@ object LSLLanguage {
                     word in CONSTANTS -> SpanStyle(color = Colors.CONSTANT)
                     else -> null
                 }
-                
+
                 style?.let {
                     builder.addStyle(it, match.range.first, match.range.last + 1)
                 }
             }
         }
-        
+
         return builder.toAnnotatedString()
     }
-    
+
     private fun isInStyledRange(position: Int, ranges: List<IntRange>): Boolean {
         return ranges.any { position in it }
     }
-    
+
     /**
      * Get autocomplete suggestions for the given prefix.
      */
     fun getAutocompleteSuggestions(prefix: String): List<AutocompleteSuggestion> {
         if (prefix.length < 2) return emptyList()
-        
+
         val suggestions = mutableListOf<AutocompleteSuggestion>()
         val prefixLower = prefix.lowercase()
-        
+
         // Functions
         FUNCTIONS.filter { it.lowercase().startsWith(prefixLower) }
             .take(10)
             .forEach { suggestions.add(AutocompleteSuggestion(it, SuggestionType.FUNCTION)) }
-        
+
         // Events
         EVENTS.filter { it.lowercase().startsWith(prefixLower) }
             .take(5)
             .forEach { suggestions.add(AutocompleteSuggestion(it, SuggestionType.EVENT)) }
-        
+
         // Constants
         CONSTANTS.filter { it.lowercase().startsWith(prefixLower) }
             .take(5)
             .forEach { suggestions.add(AutocompleteSuggestion(it, SuggestionType.CONSTANT)) }
-        
+
         // Keywords
         KEYWORDS.filter { it.lowercase().startsWith(prefixLower) }
             .forEach { suggestions.add(AutocompleteSuggestion(it, SuggestionType.KEYWORD)) }
-        
+
         // Types
         TYPES.filter { it.lowercase().startsWith(prefixLower) }
             .forEach { suggestions.add(AutocompleteSuggestion(it, SuggestionType.TYPE)) }
-        
+
         return suggestions.sortedBy { it.text }
     }
-    
+
     /**
      * Default LSL script template.
      */

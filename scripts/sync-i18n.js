@@ -2,10 +2,10 @@
 
 /**
  * sync-i18n.js
- * 
+ *
  * Synchronizes translation keys between Web JSON resources (apps/linkpoint/src/locales/{lang}/translation.json)
  * and Android XML resources (Linkpoint/src/main/res/values[-{lang}]/strings.xml).
- * 
+ *
  * Usage:
  *   node scripts/sync-i18n.js          # Syncs Web JSON keys to Android XML files
  *   node scripts/sync-i18n.js --check  # Verifies key parity across platforms and languages (returns non-zero on mismatch)
@@ -80,7 +80,7 @@ function syncLocale(lang) {
   }
 
   let xmlContent = '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n';
-  
+
   // Merge existing Android keys with Web keys
   const mergedMap = new Map(existingKeys);
 

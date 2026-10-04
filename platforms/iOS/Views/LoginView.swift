@@ -7,7 +7,7 @@ struct LoginView: View {
     @State private var firstName = ""
     @State private var lastName = ""
     @State private var showingGridPicker = false
-    
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -18,7 +18,7 @@ struct LoginView: View {
                     endPoint: .bottomTrailing
                 )
                 .ignoresSafeArea()
-                
+
                 ScrollView {
                     VStack(spacing: 25) {
                         // Logo and title
@@ -27,18 +27,18 @@ struct LoginView: View {
                                 .resizable()
                                 .frame(width: 100, height: 100)
                                 .foregroundColor(.white)
-                            
+
                             Text("Linkpoint")
                                 .font(.system(size: 42, weight: .bold))
                                 .foregroundColor(.white)
-                            
+
                             Text("Connect to Virtual Worlds")
                                 .font(.subheadline)
                                 .foregroundColor(.white.opacity(0.9))
                         }
                         .padding(.top, 50)
                         .padding(.bottom, 30)
-                        
+
                         // Login form
                         VStack(spacing: 20) {
                             // Grid selector
@@ -54,24 +54,24 @@ struct LoginView: View {
                                 .background(Color(.systemBackground))
                                 .cornerRadius(10)
                             }
-                            
+
                             // Username
                             TextField("Username", text: $username)
                                 .textFieldStyle(RoundedTextFieldStyle())
                                 .autocapitalization(.none)
-                            
+
                             // Password
                             SecureField("Password", text: $password)
                                 .textFieldStyle(RoundedTextFieldStyle())
-                            
+
                             // First name
                             TextField("First Name", text: $firstName)
                                 .textFieldStyle(RoundedTextFieldStyle())
-                            
+
                             // Last name
                             TextField("Last Name", text: $lastName)
                                 .textFieldStyle(RoundedTextFieldStyle())
-                            
+
                             // Error message
                             if let error = authViewModel.errorMessage {
                                 Text(error)
@@ -79,7 +79,7 @@ struct LoginView: View {
                                     .font(.caption)
                                     .padding(.horizontal)
                             }
-                            
+
                             // Login button
                             Button(action: login) {
                                 if authViewModel.isLoading {
@@ -98,7 +98,7 @@ struct LoginView: View {
                             .disabled(!isFormValid || authViewModel.isLoading)
                         }
                         .padding(.horizontal, 30)
-                        
+
                         Spacer()
                     }
                 }
@@ -109,11 +109,11 @@ struct LoginView: View {
             }
         }
     }
-    
+
     private var isFormValid: Bool {
         !username.isEmpty && !password.isEmpty && !firstName.isEmpty && !lastName.isEmpty
     }
-    
+
     private func login() {
         Task {
             await authViewModel.login(
@@ -140,7 +140,7 @@ struct GridPickerView: View {
     @Binding var selectedGrid: Grid
     let grids: [Grid]
     @Environment(\.dismiss) var dismiss
-    
+
     var body: some View {
         NavigationView {
             List(grids) { grid in

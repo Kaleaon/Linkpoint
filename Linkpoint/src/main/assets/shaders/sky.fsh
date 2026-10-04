@@ -13,7 +13,7 @@ varying vec3 planarCoord;
 
 void main() {
 
-	float hazeIntensity = clamp ((hazeHorizon - planarCoord.z) * 2.0, 0.0, 1.0); 
+	float hazeIntensity = clamp ((hazeHorizon - planarCoord.z) * 2.0, 0.0, 1.0);
 
 	float cloudNoise = pow (textureCube (textureSampler, planarCoord).a + cloudAdd, 1.0 / cloudGamma);
 
@@ -21,7 +21,6 @@ void main() {
 						+ skyColor
 						+ hazeColor * hazeIntensity;
 
-	gl_FragColor.a = 1.0;						
- 
-}
+	gl_FragColor.a = 1.0;
 
+}

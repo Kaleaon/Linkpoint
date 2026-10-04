@@ -1,6 +1,6 @@
 /*!
  * LLSD XML Parser and Serializer - Rust Implementation
- * 
+ *
  * Based on Java implementation and Second Life viewer XML handling
  * Copyright (C) 2024 Linden Lab
  */
@@ -36,10 +36,10 @@ impl LLSDXmlParser {
     pub fn parse(&self, xml: &str) -> LLSDResult<LLSDDocument> {
         let mut reader = Reader::from_str(xml);
         reader.trim_text(true);
-        
+
         let mut buf = Vec::new();
         let mut found_llsd_root = false;
-        
+
         // Find the LLSD root element
         loop {
             match reader.read_event() {
@@ -160,7 +160,7 @@ impl LLSDXmlParser {
     /// Read text content from an element
     fn read_text_content(&self, reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>) -> LLSDResult<String> {
         let mut content = String::new();
-        
+
         loop {
             match reader.read_event() {
                 Ok(Event::Text(ref e)) => {
@@ -175,7 +175,7 @@ impl LLSDXmlParser {
                 _ => {}
             }
         }
-        
+
         Ok(content)
     }
 
@@ -209,7 +209,7 @@ impl LLSDXmlParser {
     fn parse_map(&self, reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>) -> LLSDResult<LLSDValue> {
         let mut map = HashMap::new();
         let mut current_key: Option<String> = None;
-        
+
         loop {
             match reader.read_event() {
                 Ok(Event::Start(ref e)) => {
@@ -238,7 +238,7 @@ impl LLSDXmlParser {
                 _ => {}
             }
         }
-        
+
         Ok(LLSDValue::Map(map))
     }
 
@@ -288,25 +288,25 @@ impl LLSDXmlSerializer {
     pub fn serialize(&self, document: &LLSDDocument) -> LLSDResult<String> {
         let mut output = Vec::new();
         let mut writer = Writer::new(Cursor::new(&mut output));
-        
+
         // Write XML declaration
         writer.write_event(Event::Decl(quick_xml::events::BytesDecl::new(
             "1.0", Some("UTF-8"), None
         )))?;
-        
+
         if self.pretty_print {
             writer.write_event(Event::Text(BytesText::new("\n")))?;
         }
 
         // Write LLSD root element
         writer.write_event(Event::Start(BytesStart::new("llsd")))?;
-        
+
         if self.pretty_print {
             writer.write_event(Event::Text(BytesText::new("\n")))?;
         }
 
         self.write_value(&mut writer, document.content(), if self.pretty_print { 1 } else { 0 })?;
-        
+
         if self.pretty_print {
             writer.write_event(Event::Text(BytesText::new("\n")))?;
         }
@@ -381,24 +381,24 @@ impl LLSDXmlSerializer {
             }
             LLSDValue::Array(arr) => {
                 writer.write_event(Event::Start(BytesStart::new("array")))?;
-                
+
                 for item in arr {
                     if self.pretty_print {
                         writer.write_event(Event::Text(BytesText::new("\n")))?;
                     }
                     self.write_value(writer, item, depth + 1)?;
                 }
-                
+
                 if self.pretty_print && !arr.is_empty() {
                     writer.write_event(Event::Text(BytesText::new("\n")))?;
                     writer.write_event(Event::Text(BytesText::new(&indent)))?;
                 }
-                
+
                 writer.write_event(Event::End(BytesEnd::new("array")))?;
             }
             LLSDValue::Map(map) => {
                 writer.write_event(Event::Start(BytesStart::new("map")))?;
-                
+
                 for (key, val) in map {
                     if self.pretty_print {
                         writer.write_event(Event::Text(BytesText::new("\n")))?;
@@ -406,23 +406,23 @@ impl LLSDXmlSerializer {
                             &" ".repeat((depth + 1) * self.indent_size)
                         )))?;
                     }
-                    
+
                     writer.write_event(Event::Start(BytesStart::new("key")))?;
                     writer.write_event(Event::Text(BytesText::new(key)))?;
                     writer.write_event(Event::End(BytesEnd::new("key")))?;
-                    
+
                     if self.pretty_print {
                         writer.write_event(Event::Text(BytesText::new("\n")))?;
                     }
-                    
+
                     self.write_value(writer, val, depth + 1)?;
                 }
-                
+
                 if self.pretty_print && !map.is_empty() {
                     writer.write_event(Event::Text(BytesText::new("\n")))?;
                     writer.write_event(Event::Text(BytesText::new(&indent)))?;
                 }
-                
+
                 writer.write_event(Event::End(BytesEnd::new("map")))?;
             }
         }

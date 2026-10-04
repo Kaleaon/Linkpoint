@@ -32,7 +32,7 @@ import java.util.*
  * @see [LLSD Notation Specification](http://wiki.secondlife.com/wiki/LLSD#Notation_Serialization)
  */
 class LLSDNotationSerializer {
-    
+
     /**
      * Serializes an LLSD document into its notation representation and writes it
      * to the provided [Writer].
@@ -46,7 +46,7 @@ class LLSDNotationSerializer {
     fun serialize(llsd: LLSD, writer: Writer) {
         serializeValue(llsd.content, writer)
     }
-    
+
     /**
      * Recursively serializes a single LLSD value into its notation representation.
      *
@@ -61,7 +61,7 @@ class LLSDNotationSerializer {
     @Throws(IOException::class, LLSDException::class)
     private fun serializeValue(value: Any?, writer: Writer) {
         when {
-            value == null -> {
+            value == null || value == "" -> {
                 writer.write("!")
             }
             value is Map<*, *> -> {
@@ -113,7 +113,7 @@ class LLSDNotationSerializer {
             }
         }
     }
-    
+
     /** Serializes a Map into notation as `{key:value,...}`. */
     @Throws(IOException::class, LLSDException::class)
     private fun serializeMap(map: Map<String, Any?>, writer: Writer) {
@@ -124,20 +124,20 @@ class LLSDNotationSerializer {
                 writer.write(",")
             }
             first = false
-            
+
             // Serialize key
             if (isValidIdentifier(key)) {
                 writer.write(key)
             } else {
                 serializeString(key, writer)
             }
-            
+
             writer.write(":")
             serializeValue(value, writer)
         }
         writer.write("}")
     }
-    
+
     /** Serializes a List into notation as `[value1,value2,...]`. */
     @Throws(IOException::class, LLSDException::class)
     private fun serializeArray(list: List<*>, writer: Writer) {
@@ -148,12 +148,12 @@ class LLSDNotationSerializer {
                 writer.write(",")
             }
             first = false
-            
+
             serializeValue(item, writer)
         }
         writer.write("]")
     }
-    
+
     /** Serializes a String into notation as `s'...'`. */
     @Throws(IOException::class)
     private fun serializeString(str: String, writer: Writer) {
@@ -171,7 +171,7 @@ class LLSDNotationSerializer {
         }
         writer.write("'")
     }
-    
+
     /** Serializes a byte array into base64 notation as `b64"..."`. */
     @Throws(IOException::class)
     private fun serializeBinary(data: ByteArray, writer: Writer) {
@@ -179,7 +179,7 @@ class LLSDNotationSerializer {
         writer.write(Base64.getEncoder().encodeToString(data))
         writer.write("\"")
     }
-    
+
     /**
      * Checks if a string is a valid identifier in LLSD notation.
      *
@@ -193,22 +193,22 @@ class LLSDNotationSerializer {
         if (str.isEmpty()) {
             return false
         }
-        
+
         val first = str[0]
         if (!first.isLetter() && first != '_') {
             return false
         }
-        
+
         for (i in 1 until str.length) {
             val c = str[i]
             if (!c.isLetterOrDigit() && c != '_') {
                 return false
             }
         }
-        
+
         return true
     }
-    
+
     companion object {
         private val ISO8601_FORMATTER = DateTimeFormatter.ISO_INSTANT.withZone(ZoneId.of("UTC"))
     }
