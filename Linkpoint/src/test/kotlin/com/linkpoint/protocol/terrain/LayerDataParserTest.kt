@@ -39,11 +39,11 @@ class LayerDataParserTest {
         manager.setRegionSize(512, 512)
         assertEquals(512, manager.regionSizeX)
         assertEquals(512, manager.regionSizeY)
-        
+
         val patches = LayerDataParser.createDefaultPatches(512, 512)
         val result = LayerDataResult(LayerType.LAND, patches)
         manager.processLayerData(result)
-        
+
         assertEquals(1024, manager.validPatchCount)
         assertEquals(100f, manager.getLoadPercentage(), 0.01f)
         assertEquals(true, manager.isFullyLoaded())
