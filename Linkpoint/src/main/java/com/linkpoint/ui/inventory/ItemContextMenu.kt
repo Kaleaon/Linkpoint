@@ -23,17 +23,36 @@ object ItemContextMenu {
         item: InventoryItem,
         onActionSelected: (Action) -> Unit
     ) {
-        val popup = PopupMenu(anchorView.context, anchorView, Gravity.END)
+        val context = anchorView.context
+        val popup = PopupMenu(context, anchorView, Gravity.END)
 
         popup.menuInflater.inflate(R.menu.menu_inventory_item, popup.menu)
 
         // Enable/disable items based on permissions
-        val canCopy = item.permissions.ownerMask and 0x00000010 != 0
-        val canModify = item.permissions.ownerMask and 0x00000004 != 0
-        val canTransfer = item.permissions.ownerMask and 0x00000008 != 0
+        val canCopy = item.permissions.canCopy
+        val canModify = item.permissions.canModify
+        val canTransfer = item.permissions.canTransfer
+        val canDelete = canModify && canTransfer
 
-        popup.menu.findItem(R.id.action_copy)?.isEnabled = canCopy
-        popup.menu.findItem(R.id.action_delete)?.isEnabled = canModify && canTransfer
+        val copyItem = popup.menu.findItem(R.id.action_copy)
+        copyItem?.isEnabled = canCopy
+        if (!canCopy) {
+            copyItem?.tooltipText = context.getString(R.string.inventory_item_no_copy_tooltip)
+        } else {
+            copyItem?.tooltipText = null
+        }
+
+        val deleteItem = popup.menu.findItem(R.id.action_delete)
+        deleteItem?.isEnabled = canDelete
+        if (!canDelete) {
+            deleteItem?.tooltipText = when {
+                !canModify && !canTransfer -> context.getString(R.string.inventory_item_no_modify_no_transfer_tooltip)
+                !canModify -> context.getString(R.string.inventory_item_no_modify_tooltip)
+                else -> context.getString(R.string.inventory_item_no_transfer_tooltip)
+            }
+        } else {
+            deleteItem?.tooltipText = null
+        }
 
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
