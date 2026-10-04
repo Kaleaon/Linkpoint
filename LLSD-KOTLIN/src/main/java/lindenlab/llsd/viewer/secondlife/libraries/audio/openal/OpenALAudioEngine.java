@@ -69,6 +69,8 @@ public class OpenALAudioEngine {
         public int streamingBufferSize = 4096;
         public int streamingBufferCount = 4;
         public boolean enableHRTF = true; // Head-Related Transfer Function
+        public float audibilityThreshold = 0.001f;
+        public float gainSmoothingRate = 10.0f;
     }
     
     /**
@@ -208,6 +210,16 @@ public class OpenALAudioEngine {
         private AudioBuffer buffer;
         private AudioSourceState state = AudioSourceState.INITIAL;
         
+        private float priority = 1.0f;
+        private boolean virtualized = false;
+        private boolean hardwareActive = false;
+        private float currentGain = 0.0f;
+        private float targetGain = 0.0f;
+        private float playbackTime = 0.0f;
+        private int positionUpdateCount = 0;
+        private float calculatedPriority = 0.0f;
+        private float calculatedDistance = 0.0f;
+        
         public enum AudioSourceState {
             INITIAL, PLAYING, PAUSED, STOPPED
         }
@@ -253,6 +265,56 @@ public class OpenALAudioEngine {
         
         public AudioSourceState getState() { return state; }
         public void setState(AudioSourceState state) { this.state = state; }
+
+        public float getPriority() { return priority; }
+        public void setPriority(float priority) { this.priority = priority; }
+
+        public boolean isVirtualized() { return virtualized; }
+        public void setVirtualized(boolean virtualized) { this.virtualized = virtualized; }
+
+        public boolean isHardwareActive() { return hardwareActive; }
+        public void setHardwareActive(boolean hardwareActive) { this.hardwareActive = hardwareActive; }
+
+        public float getCurrentGain() { return currentGain; }
+        public void setCurrentGain(float gain) { this.currentGain = gain; }
+
+        public float getTargetGain() { return targetGain; }
+        public void setTargetGain(float gain) { this.targetGain = gain; }
+
+        public float getPlaybackTime() { return playbackTime; }
+        public void setPlaybackTime(float playbackTime) { this.playbackTime = playbackTime; }
+
+        public int getPositionUpdateCount() { return positionUpdateCount; }
+        public void incrementPositionUpdateCount() { this.positionUpdateCount++; }
+
+        public float getCalculatedPriority() { return calculatedPriority; }
+        public void setCalculatedPriority(float priority) { this.calculatedPriority = priority; }
+
+        public float getCalculatedDistance() { return calculatedDistance; }
+        public void setCalculatedDistance(float distance) { this.calculatedDistance = distance; }
+
+        public void resetForReuse() {
+            position = new Vector3(0, 0, 0);
+            velocity = new Vector3(0, 0, 0);
+            pitch = 1.0f;
+            gain = 1.0f;
+            maxDistance = 100.0f;
+            rolloffFactor = 1.0f;
+            referenceDistance = 1.0f;
+            looping = false;
+            relative = false;
+            buffer = null;
+            state = AudioSourceState.INITIAL;
+            priority = 1.0f;
+            virtualized = false;
+            hardwareActive = false;
+            currentGain = 0.0f;
+            targetGain = 0.0f;
+            playbackTime = 0.0f;
+            positionUpdateCount = 0;
+            calculatedPriority = 0.0f;
+            calculatedDistance = 0.0f;
+        }
         
         private int generateSourceHandle() {
             return Math.abs(sourceId.hashCode()); // Mock handle generation
@@ -349,29 +411,29 @@ public class OpenALAudioEngine {
         
         // Try to reuse a source from the pool
         AudioSource source = sourcePool.poll();
-        if (source == null && activeSources.size() < settings.maxSources) {
+        if (source != null) {
+            source.resetForReuse();
+        } else {
             source = new AudioSource(UUID.randomUUID());
         }
         
-        if (source != null) {
-            activeSources.put(source.getSourceId(), source);
-        }
-        
+        activeSources.put(source.getSourceId(), source);
         return source;
     }
     
     /**
-     * Play a sound at a specific 3D position.
+     * Play a sound at a specific 3D position with priority.
      * 
      * @param soundId The ID of the loaded sound buffer
      * @param position 3D position of the sound
      * @param gain Volume (0.0 to 1.0)
      * @param pitch Pitch multiplier (0.5 to 2.0)
      * @param looping Whether the sound should loop
+     * @param priority Priority rank multiplier (default 1.0)
      * @return The source playing the sound, or null if failed
      */
     public AudioSource playSound3D(UUID soundId, Vector3 position, float gain, 
-                                  float pitch, boolean looping) {
+                                  float pitch, boolean looping, float priority) {
         AudioBuffer buffer = loadedBuffers.get(soundId);
         if (buffer == null) {
             System.err.println("Sound buffer not found: " + soundId);
@@ -391,16 +453,27 @@ public class OpenALAudioEngine {
         source.setPitch(pitch);
         source.setLooping(looping);
         source.setRelative(false);
+        source.setPriority(priority);
+        source.setPlaybackTime(0.0f);
+        source.setCurrentGain(0.0f);
         
         // Apply 3D audio settings
         source.setMaxDistance(settings.maxAudioDistance);
         source.setRolloffFactor(settings.rolloffFactor);
         
-        // Start playing (placeholder for actual OpenAL call)
+        // Start playing
         source.setState(AudioSource.AudioSourceState.PLAYING);
         System.out.println("Playing 3D sound: " + soundId + " at " + position);
         
         return source;
+    }
+
+    /**
+     * Overload for backwards compatibility without explicit priority argument.
+     */
+    public AudioSource playSound3D(UUID soundId, Vector3 position, float gain, 
+                                  float pitch, boolean looping) {
+        return playSound3D(soundId, position, gain, pitch, looping, 1.0f);
     }
     
     /**
@@ -426,6 +499,8 @@ public class OpenALAudioEngine {
     
     /**
      * Update all active audio sources (call once per frame).
+     * Evaluates spatial distance, virtualizes or culls out-of-range/low-priority sources,
+     * allocates OpenAL handles based on priority, and applies gain smoothing.
      * 
      * @param deltaTime Time elapsed since last update in seconds
      */
@@ -433,22 +508,116 @@ public class OpenALAudioEngine {
         if (!initialized) {
             return;
         }
-        
-        // Update all active sources
+
+        Vector3 listenerPos = (listener != null) ? listener.getPosition() : new Vector3(0, 0, 0);
+        float listenerGain = (listener != null) ? listener.getGain() : 1.0f;
+        float dt = Math.max(0.0f, deltaTime);
+
+        // 1. Cleanup stopped or finished sources
         Iterator<Map.Entry<UUID, AudioSource>> iterator = activeSources.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<UUID, AudioSource> entry = iterator.next();
             AudioSource source = entry.getValue();
-            
-            // Check if source is still playing (placeholder for actual OpenAL query)
+
             if (source.getState() == AudioSource.AudioSourceState.STOPPED) {
-                // Return source to pool
+                source.setHardwareActive(false);
+                source.setVirtualized(false);
                 sourcePool.offer(source);
                 iterator.remove();
+                continue;
+            }
+
+            if (source.getState() == AudioSource.AudioSourceState.PLAYING) {
+                source.setPlaybackTime(source.getPlaybackTime() + dt);
+                AudioBuffer buf = source.getBuffer();
+                if (!source.isLooping() && buf != null && buf.getDuration() > 0.0f 
+                        && source.getPlaybackTime() >= buf.getDuration()) {
+                    source.setState(AudioSource.AudioSourceState.STOPPED);
+                    source.setHardwareActive(false);
+                    source.setVirtualized(false);
+                    sourcePool.offer(source);
+                    iterator.remove();
+                }
             }
         }
-        
-        // Apply global audio settings (placeholder)
+
+        // 2. Distance evaluation, attenuation, priority - O(N)
+        List<AudioSource> audibleSources = new ArrayList<>();
+        for (AudioSource source : activeSources.values()) {
+            if (source.getState() != AudioSource.AudioSourceState.PLAYING) continue;
+
+            float distance;
+            if (source.isRelative()) {
+                distance = (float) source.getPosition().magnitude();
+            } else {
+                double dx = source.getPosition().x - listenerPos.x;
+                double dy = source.getPosition().y - listenerPos.y;
+                double dz = source.getPosition().z - listenerPos.z;
+                distance = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+            }
+            source.setCalculatedDistance(distance);
+
+            float maxDist = Math.min(source.getMaxDistance(), settings.maxAudioDistance);
+            if (distance > maxDist) {
+                source.setTargetGain(0.0f);
+                source.setCalculatedPriority(0.0f);
+                continue;
+            }
+
+            float attenuation = (distance <= 0.0f) ? 1.0f : 1.0f / (1.0f + source.getRolloffFactor() * distance / maxDist);
+            float effectiveTargetGain = source.getGain() * attenuation * listenerGain * settings.sfxVolume * settings.masterVolume;
+
+            if (effectiveTargetGain < settings.audibilityThreshold) {
+                source.setTargetGain(0.0f);
+                source.setCalculatedPriority(0.0f);
+            } else {
+                source.setTargetGain(effectiveTargetGain);
+                source.setCalculatedPriority(source.getPriority() * effectiveTargetGain / (1.0f + distance));
+                audibleSources.add(source);
+            }
+        }
+
+        // 3. Priority channel allocation pool - cap active hardware channels
+        audibleSources.sort((a, b) -> Float.compare(b.getCalculatedPriority(), a.getCalculatedPriority()));
+        int maxHardwareChannels = Math.max(0, settings.maxSources);
+        Set<UUID> hardwareActiveSet = new HashSet<>();
+        for (int i = 0; i < Math.min(audibleSources.size(), maxHardwareChannels); i++) {
+            hardwareActiveSet.add(audibleSources.get(i).getSourceId());
+        }
+
+        // 4. Update hardware state, gain smoothing, and OpenAL handle positioning
+        float alpha = (settings.gainSmoothingRate > 0.0f && dt > 0.0f)
+                ? Math.min(1.0f, dt * settings.gainSmoothingRate)
+                : 1.0f;
+
+        for (AudioSource source : activeSources.values()) {
+            if (source.getState() != AudioSource.AudioSourceState.PLAYING) continue;
+
+            boolean shouldBeHardwareActive = hardwareActiveSet.contains(source.getSourceId());
+
+            if (shouldBeHardwareActive) {
+                if (source.isVirtualized()) {
+                    source.setVirtualized(false);
+                }
+                source.setHardwareActive(true);
+
+                // Gain smoothing transition towards target gain
+                source.setCurrentGain(source.getCurrentGain() + (source.getTargetGain() - source.getCurrentGain()) * alpha);
+
+                // Update OpenAL 3D handle positioning ONLY for active hardware sources
+                source.incrementPositionUpdateCount();
+            } else {
+                source.setHardwareActive(false);
+                source.setVirtualized(true);
+
+                // Smoothly decay gain to zero when virtualized
+                source.setCurrentGain(source.getCurrentGain() + (0.0f - source.getCurrentGain()) * alpha);
+
+                // Skip OpenAL handle positioning for culled/virtualized sources!
+            }
+        }
+
+        // Apply global audio settings
         updateGlobalSettings();
     }
     
