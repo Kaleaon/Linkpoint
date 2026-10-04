@@ -3,6 +3,7 @@ import { useTheme } from "../context/ThemeContext.jsx";
 import { NAV_ALL, TABS_NAV_IDS } from "../data/content.js";
 import Icon from "./Icon.jsx";
 import { navActive } from "../theme/look.js";
+import { useRovingTabindex } from "../hooks/useRovingTabindex.js";
 
 // Ported from the `isTabs` <sc-if> block — bottom tab bar (Ink Terminal,
 // Aero Glass, Press packs).
@@ -13,6 +14,14 @@ export default function BottomTabs() {
   // scene on phones and tablets (the 3D screen has no header or back button).
   if (nav !== "tabs") return null;
   const items = NAV_ALL.filter((n) => TABS_NAV_IDS.includes(n.id));
+
+  const activeIndex = items.findIndex((n) => navActive(state.screen, n.id));
+  const { getTabProps } = useRovingTabindex({
+    count: items.length,
+    activeIndex: activeIndex >= 0 ? activeIndex : 0,
+    onSelect: (idx) => actions.setScreen(items[idx].id),
+    orientation: "horizontal",
+  });
 
   return (
     <div
@@ -26,23 +35,18 @@ export default function BottomTabs() {
         padding: "6px 0 10px",
       }}
     >
-      {items.map((n) => {
+      {items.map((n, index) => {
         const active = navActive(state.screen, n.id);
         const radius = V.rs || "0px";
+        const tabProps = getTabProps(index, active);
         return (
           <div
             key={n.id}
+            {...tabProps}
             role="tab"
-            tabIndex={0}
             aria-selected={active}
             aria-label={"Go to " + n.label}
             onClick={() => actions.setScreen(n.id)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                actions.setScreen(n.id);
-              }
-            }}
             style={{
               flex: 1,
               display: "flex",
