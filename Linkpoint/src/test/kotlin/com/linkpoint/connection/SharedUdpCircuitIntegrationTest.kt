@@ -8,6 +8,8 @@ import com.linkpoint.network.core.CircuitState
 import com.linkpoint.network.core.TempCircuit
 import com.linkpoint.protocol.auth.AuthReply
 import com.linkpoint.protocol.messages.UDPConnectionFixed
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -32,8 +34,9 @@ class SharedUdpCircuitIntegrationTest {
             seedCapability = "https://example.com/seed"
         )
 
-        val agentCircuit = AgentCircuit(authReply, sharedConnection = sharedConnection)
-        val tempCircuit = TempCircuit(authReply, sharedConnection = sharedConnection)
+        val testScope = CoroutineScope(Dispatchers.Default)
+        val agentCircuit = AgentCircuit(authReply, sharedConnection = sharedConnection, scope = testScope)
+        val tempCircuit = TempCircuit(authReply, sharedConnection = sharedConnection, scope = testScope)
 
         repeat(300) {
             if (agentCircuit.circuitState.value == CircuitState.CIRCUIT_READY &&
