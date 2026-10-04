@@ -10,23 +10,23 @@ export class Camera3D extends Utils.EventEmitter {
   public position: number[] = [128, 128, 25];
   public rotation: number[] = [0, 0, 0]; // pitch, yaw, roll
   public target: number[] = [128, 128, 0];
-
+  
   // Projection
   public fov: number = 60; // degrees
   public aspect: number = 16 / 9;
   public near: number = 0.1;
   public far: number = 1000;
-
+  
   // Movement
   public moveSpeed: number = 10.0;
   public rotateSpeed: number = 0.002;
   public zoomSpeed: number = 1.0;
-
+  
   // Matrices
   public viewMatrix: Float32Array;
   public projectionMatrix: Float32Array;
   public viewProjectionMatrix: Float32Array;
-
+  
   // Camera mode
   public mode: string = 'orbit'; // 'orbit', 'first-person', 'third-person'
   public orbitDistance: number = 10;
@@ -126,10 +126,10 @@ export class Camera3D extends Utils.EventEmitter {
     this.rotation[0] = Utils.clamp(this.rotation[0] + deltaPitch, -Math.PI / 2 + 0.01, Math.PI / 2 - 0.01);
     this.rotation[1] += deltaYaw;
     this.rotation[2] += deltaRoll;
-
+    
     // Normalize yaw to 0-2π
     this.rotation[1] = this.rotation[1] % (Math.PI * 2);
-
+    
     this.updateMatrices();
     this.emit('rotated', this.rotation);
   }
@@ -173,6 +173,23 @@ export class Camera3D extends Utils.EventEmitter {
     this.emit('preset_changed', preset);
   }
 
+  reset(target?: number[]) {
+    if (target && Array.isArray(target) && target.length >= 3) {
+      this.orbitTarget = [Number(target[0]) || 128, Number(target[1]) || 128, Number(target[2]) || 25];
+    }
+    this.mode = 'orbit';
+    this.preset = 'rear';
+    this.rotation = [-0.28, Math.PI, 0];
+    this.orbitDistance = 7.5;
+    this.fov = 60;
+    this.updateMatrices();
+    this.emit('preset_changed', this.preset);
+    this.emit('mode_changed', this.mode);
+    this.emit('zoomed', this.orbitDistance);
+    this.emit('rotated', this.rotation);
+    this.emit('reset');
+  }
+
   /** Pan parallel to the view plane, as Firestorm's Alt+Ctrl+Shift drag does. */
   pan(horizontal: number, vertical: number) {
     const [hx, hy] = this.horizontalHeading();
@@ -201,20 +218,20 @@ export class Camera3D extends Utils.EventEmitter {
     if (this.mode === 'orbit') {
       // Orbit camera
       const [pitch, yaw] = this.rotation;
-
+      
       this.position[0] = this.orbitTarget[0] + this.orbitDistance * Math.sin(yaw) * Math.cos(pitch);
       this.position[1] = this.orbitTarget[1] + this.orbitDistance * Math.cos(yaw) * Math.cos(pitch);
       this.position[2] = this.orbitTarget[2] + this.orbitDistance * Math.sin(pitch);
-
+      
       this.viewMatrix = this.mat4LookAt(this.position, this.orbitTarget, [0, 0, 1]);
     } else {
       // First-person camera
       const [pitch, yaw] = this.rotation;
-
+      
       this.target[0] = this.position[0] + Math.sin(yaw) * Math.cos(pitch);
       this.target[1] = this.position[1] + Math.cos(yaw) * Math.cos(pitch);
       this.target[2] = this.position[2] + Math.sin(pitch);
-
+      
       this.viewMatrix = this.mat4LookAt(this.position, this.target, [0, 0, 1]);
     }
   }
@@ -237,7 +254,7 @@ export class Camera3D extends Utils.EventEmitter {
   updateMatrices() {
     this.updateViewMatrix();
     this.updateProjectionMatrix();
-
+    
     // Calculate view-projection matrix
     this.viewProjectionMatrix = this.mat4Multiply(this.projectionMatrix, this.viewMatrix);
   }

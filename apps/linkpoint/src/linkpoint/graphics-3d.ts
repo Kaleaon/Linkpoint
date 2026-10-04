@@ -27,11 +27,11 @@ const BASIC_FRAGMENT_SHADER = `
         #else
         precision mediump float;
         #endif
-
+        
         varying vec3 vNormal;
         varying vec2 vTexCoord;
         varying vec3 vPosition;
-
+        
         uniform vec3 uLightPos;
         uniform vec3 uLightColor;
         uniform vec3 uAmbientColor;
@@ -53,25 +53,29 @@ const BASIC_FRAGMENT_SHADER = `
         uniform bool uUseEmissiveTexture;
         uniform float uAlphaCutoff;
         uniform int uAlphaMode;
-
+        
         void main() {
-          vec3 normal = normalize(vNormal);
-          if (uUseNormalTexture) normal = normalize(normal + (texture2D(uNormalTexture, vTexCoord).xyz * 2.0 - 1.0));
-          vec3 lightDir = normalize(uLightPos - vPosition);
-
-          // Ambient
-          vec3 ambient = uAmbientColor;
-
-          // Diffuse
-          float diff = max(dot(normal, lightDir), 0.0);
-          vec3 diffuse = diff * uLightColor;
-
-          // Final color
-          vec2 centered = vTexCoord - vec2(0.5);
+          // SL applies repeats first, then rotates around the texture centre,
+          // then applies the face offset. Rotating before repeat distorted
+          // non-square/repeated textures and made textured meshes look squeezed.
+          vec2 centered = vTexCoord * uTexTransform.xy - vec2(0.5);
           float texSin = sin(uTexRotation);
           float texCos = cos(uTexRotation);
           vec2 rotated = mat2(texCos, -texSin, texSin, texCos) * centered + vec2(0.5);
-          vec2 transformedUV = rotated * uTexTransform.xy + uTexTransform.zw;
+          vec2 transformedUV = rotated + uTexTransform.zw;
+
+          vec3 normal = normalize(vNormal);
+          if (uUseNormalTexture) normal = normalize(normal + (texture2D(uNormalTexture, transformedUV).xyz * 2.0 - 1.0));
+          vec3 lightDir = normalize(uLightPos - vPosition);
+          
+          // Ambient
+          vec3 ambient = uAmbientColor;
+          
+          // Diffuse
+          float diff = max(dot(normal, lightDir), 0.0);
+          vec3 diffuse = diff * uLightColor;
+          
+          // Final color
           vec4 baseColor = uUseTexture ? texture2D(uTexture, transformedUV) * uColor : uColor;
           if (uAlphaMode == 1 && baseColor.a < uAlphaCutoff) discard;
           vec3 orm = uUseMetallicRoughnessTexture ? texture2D(uMetallicRoughnessTexture, transformedUV).rgb : vec3(1.0);
@@ -88,7 +92,7 @@ const BASIC_FRAGMENT_SHADER = `
           vec3 diffusePbr = baseColor.rgb * (1.0 - metallic) * pow(min(ambient + diffuse, vec3(1.0)), vec3(1.0 / 2.2));
           vec3 emission = uEmissive * (uUseEmissiveTexture ? texture2D(uEmissiveTexture, transformedUV).rgb : vec3(1.0));
           vec3 result = uFullBright ? baseColor.rgb : diffusePbr + f0 * specular + emission;
-
+          
           gl_FragColor = vec4(result, baseColor.a);
         }
 `;
@@ -105,11 +109,11 @@ export class Graphics3D extends Utils.EventEmitter {
   private textureAlpha: Map<string, boolean> = new Map();
   private renderTargets: Map<string, { framebuffer: WebGLFramebuffer; depth: WebGLRenderbuffer; width: number; height: number }> = new Map();
   private clearColor: [number, number, number, number] = [0.53, 0.81, 0.92, 1];
-
+  
   // Rendering state
   public drawCalls: number = 0;
   public triangles: number = 0;
-
+  
   // Capabilities
   public extensions: any = {};
   public maxTextureSize: number = 0;
@@ -198,16 +202,16 @@ export class Graphics3D extends Utils.EventEmitter {
         attribute vec3 aPosition;
         attribute vec3 aNormal;
         attribute vec2 aTexCoord;
-
+        
         uniform mat4 uModelMatrix;
         uniform mat4 uViewMatrix;
         uniform mat4 uProjectionMatrix;
         uniform mat3 uNormalMatrix;
-
+        
         varying vec3 vNormal;
         varying vec2 vTexCoord;
         varying vec3 vPosition;
-
+        
         void main() {
           vec4 worldPos = uModelMatrix * vec4(aPosition, 1.0);
           vPosition = worldPos.xyz;
@@ -336,8 +340,7 @@ export class Graphics3D extends Utils.EventEmitter {
       indexCount: indices.length,
       indexType,
       vertexCount: vertices.length / 3,
-      bounds,
-      geometry: { vertices, indices, normals, texCoords },
+      bounds
     };
 
     // Create VAO if supported
@@ -399,22 +402,18 @@ export class Graphics3D extends Utils.EventEmitter {
     }
 
     this.meshes.set(name, mesh);
+    this.meshes.set(name.toLowerCase(), mesh);
     return mesh;
   }
 
   /** True when the mesh carries joint indices and weights. */
   isSkinnedMesh(name: string): boolean {
-    return Boolean(this.meshes.get(name)?.skinned);
+    return Boolean((this.meshes.get(name) || this.meshes.get(name.toLowerCase()))?.skinned);
   }
 
   /** Local-space bounding box of a mesh, or null if unknown. */
   getMeshBounds(name: string): { min: number[]; max: number[] } | null {
-    return this.meshes.get(name)?.bounds ?? null;
-  }
-
-  /** Registered CPU geometry arrays of a mesh, or null if unknown. */
-  getMeshGeometry(name: string): { vertices: number[] | Float32Array; indices: number[] | Uint16Array | Uint32Array; normals?: number[] | Float32Array; texCoords?: number[] | Float32Array } | null {
-    return this.meshes.get(name)?.geometry ?? null;
+    return (this.meshes.get(name) || this.meshes.get(name.toLowerCase()))?.bounds ?? null;
   }
 
   /**
@@ -422,7 +421,7 @@ export class Graphics3D extends Utils.EventEmitter {
    */
   drawMesh(meshName: string, programName: string, uniforms: any, options: DrawOptions = {}) {
     const gl = this.gl!;
-    const mesh = this.meshes.get(meshName);
+    const mesh = this.meshes.get(meshName) || this.meshes.get(meshName.toLowerCase());
     const programInfo = this.programs.get(programName);
 
     if (!mesh || !programInfo) return;
@@ -449,7 +448,8 @@ export class Graphics3D extends Utils.EventEmitter {
       const sampler = programInfo.uniforms[uniformName];
       if (!sampler) continue;
       const fallback = uniformName === 'uNormalTexture' ? '__normal' : '__white';
-      const texture = this.textures.get(uniforms[valueName]) || this.textures.get(fallback);
+      const val = uniforms[valueName];
+      const texture = this.textures.get(val) || (val && this.textures.get(String(val).toLowerCase())) || this.textures.get(fallback);
       if (!texture) continue;
       gl.activeTexture(gl.TEXTURE0 + unit);
       gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -481,33 +481,44 @@ export class Graphics3D extends Utils.EventEmitter {
 
   createTexture(name: string, width: number, height: number, rgba: Uint8Array) {
     const gl = this.gl!;
-    const existing = this.textures.get(name);
+    const existing = this.textures.get(name) || this.textures.get(name.toLowerCase());
     if (existing) gl.deleteTexture(existing);
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, rgba);
     const powerOfTwo = (value: number) => value > 0 && (value & (value - 1)) === 0;
-    const canMipmap = powerOfTwo(width) && powerOfTwo(height);
+    const webgl2 = typeof WebGL2RenderingContext !== 'undefined' && gl instanceof WebGL2RenderingContext;
+    // WebGL 2 permits repeat wrapping and mipmaps for NPOT textures. The old
+    // WebGL-1-only check clamped many SL textures, so repeats sampled a stretched
+    // edge instead of the actual surface image.
+    const canMipmap = webgl2 || (powerOfTwo(width) && powerOfTwo(height));
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, canMipmap ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, canMipmap ? gl.REPEAT : gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, canMipmap ? gl.REPEAT : gl.CLAMP_TO_EDGE);
     if (canMipmap) gl.generateMipmap(gl.TEXTURE_2D);
+    const anisotropic = this.extensions.anisotropic;
+    if (anisotropic) {
+      const maximum = gl.getParameter(anisotropic.MAX_TEXTURE_MAX_ANISOTROPY_EXT) || 1;
+      gl.texParameterf(gl.TEXTURE_2D, anisotropic.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(8, maximum));
+    }
     this.textures.set(name, texture);
+    this.textures.set(name.toLowerCase(), texture);
     let hasAlpha = false;
     for (let i = 3; i < rgba.length; i += 4) { if (rgba[i] < 250) { hasAlpha = true; break; } }
     this.textureAlpha.set(name, hasAlpha);
+    this.textureAlpha.set(name.toLowerCase(), hasAlpha);
     return name;
   }
 
   hasTexture(name: string | undefined | null): boolean {
-    return Boolean(name && this.textures.has(name));
+    return Boolean(name && (this.textures.has(name) || this.textures.has(String(name).toLowerCase())));
   }
 
   /** True when the named texture has transparent pixels. Unknown textures are opaque. */
   textureHasAlpha(name: string | undefined | null): boolean {
-    return Boolean(name && this.textureAlpha.get(name));
+    return Boolean(name && (this.textureAlpha.get(name) || this.textureAlpha.get(String(name).toLowerCase())));
   }
 
   /** Clear only the depth buffer, so a later pass (the HUD) draws over everything already rendered. */
@@ -647,7 +658,7 @@ export class Graphics3D extends Utils.EventEmitter {
     if (color) this.setClearColor(color);
     gl.clearColor(...this.clearColor);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
+    
     this.drawCalls = 0;
     this.triangles = 0;
   }
