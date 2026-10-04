@@ -163,18 +163,45 @@ class Gles3RenderCommandConsumer(
             if (update.pcode == 47) {
                 lumiya?.upsertAvatar(update.fullId, p.x, p.y, p.z)
             } else {
-                lumiya?.upsertPrim(
-                    id = update.localId.toLong(),
-                    posX = p.x, posY = p.y, posZ = p.z,
-                    scaleX = s.x, scaleY = s.y, scaleZ = s.z,
-                    rotation = quatToMatrix(update.rotation),
-                    shapeParams = update.shapeParams,
-                    textureEntry = update.textureEntry
-                ) ?: engine.addObject(update.localId.toLong(), p.x, p.y, p.z)
-                // Kick off async texture fetches for every face referencing
-                // a real (non-default) UUID so prims pick up their textures
-                // as soon as the asset cache delivers them.
-                tryBindFaceTextures(update.localId.toLong(), update.textureEntry)
+                val sculptInfo = update.getSculptInfo()
+                val sculptType = sculptInfo?.sculptType ?: update.shapeParams.sculptType
+                if (sculptType in 1..4 && sculptInfo != null) {
+                    lumiya?.upsertPrim(
+                        id = update.localId.toLong(),
+                        posX = p.x, posY = p.y, posZ = p.z,
+                        scaleX = s.x, scaleY = s.y, scaleZ = s.z,
+                        rotation = quatToMatrix(update.rotation),
+                        shapeParams = update.shapeParams,
+                        textureEntry = update.textureEntry
+                    )
+                    textureFetcher?.fetch(sculptInfo.sculptId) { bitmap ->
+                        if (bitmap != null) {
+                            val sculptMesh = com.linkpoint.render.geometry.PrimMeshGenerator.generateSculptMesh(bitmap, sculptType)
+                            runOnGl {
+                                lumiya?.removeObject(update.localId.toLong())
+                                lumiya?.upsertSculptPrim(
+                                    id = update.localId.toLong(),
+                                    posX = p.x, posY = p.y, posZ = p.z,
+                                    scaleX = s.x, scaleY = s.y, scaleZ = s.z,
+                                    rotation = quatToMatrix(update.rotation),
+                                    sculptMesh = sculptMesh,
+                                    textureEntry = update.textureEntry
+                                )
+                            }
+                        }
+                    }
+                    tryBindFaceTextures(update.localId.toLong(), update.textureEntry)
+                } else {
+                    lumiya?.upsertPrim(
+                        id = update.localId.toLong(),
+                        posX = p.x, posY = p.y, posZ = p.z,
+                        scaleX = s.x, scaleY = s.y, scaleZ = s.z,
+                        rotation = quatToMatrix(update.rotation),
+                        shapeParams = update.shapeParams,
+                        textureEntry = update.textureEntry
+                    ) ?: engine.addObject(update.localId.toLong(), p.x, p.y, p.z)
+                    tryBindFaceTextures(update.localId.toLong(), update.textureEntry)
+                }
             }
         }
     }

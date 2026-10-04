@@ -4,6 +4,7 @@ import com.linkpoint.assets.MeshData
 import com.linkpoint.assets.MeshLOD
 import com.linkpoint.protocol.types.LLQuaternion
 import com.linkpoint.protocol.types.LLVector3
+import com.linkpoint.render.geometry.PrimShape
 import org.junit.Assert.*
 import org.junit.Test
 import java.util.UUID
