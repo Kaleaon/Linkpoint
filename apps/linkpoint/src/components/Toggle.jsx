@@ -1,12 +1,24 @@
 import { useTheme } from "../context/ThemeContext.jsx";
 
 // Ported from CARDS[].toggleStyle/knobStyle in renderVals().
-export default function Toggle({ on, onClick }) {
+export default function Toggle({
+  on,
+  onClick = undefined,
+  ariaLabel = undefined,
+  ariaLabelledBy = undefined,
+  "aria-label": ariaLabelProp = undefined,
+  "aria-labelledby": ariaLabelledByProp = undefined,
+}) {
   const { V } = useTheme();
+  const computedAriaLabel = ariaLabel || ariaLabelProp;
+  const computedAriaLabelledBy = ariaLabelledBy || ariaLabelledByProp;
+
   return (
     <span
       role="switch"
       aria-checked={on}
+      aria-label={computedAriaLabel}
+      aria-labelledby={computedAriaLabelledBy}
       tabIndex={0}
       onClick={onClick}
       onKeyDown={(e) => {
