@@ -477,12 +477,6 @@ class InventoryManager(
             // 3. UDP Fallback for grids without HTTP relocation capabilities or when HTTP requests fail
             if (!moved) {
                 try {
-                    // MoveInventoryItem packet
-                    // AgentData block: AgentID (16) + SessionID (16) + Stamp (4) = 36 bytes
-                    // InventoryData block count: 1 byte
-                    // InventoryData block: ItemID (16) + FolderID (16) + NewName (1 byte length + 0 bytes) = 33 bytes
-                    // Total payload: 70 bytes
-
                     val payload = ByteBuffer.allocate(70).order(ByteOrder.LITTLE_ENDIAN)
                     val identity = outboundIdentity()
 
