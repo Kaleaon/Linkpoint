@@ -127,6 +127,11 @@ debug.keystore
 file_inventory/
 copilot_review_files/
 
+# Native shared libraries
+*.so
+*.dylib
+*.dll
+
 # Python cache files
 __pycache__/
 *.pyc
