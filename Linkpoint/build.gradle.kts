@@ -546,6 +546,8 @@ configurations.matching {
 // suite reliable in proxied CI environments without hard-coding a proxy or
 // changing behavior for developers with direct network access.
 tasks.withType<Test>().configureEach {
+    jvmArgs("-Dnet.bytebuddy.experimental=true")
+    systemProperty("net.bytebuddy.experimental", "true")
     listOf(
         "http.proxyHost",
         "http.proxyPort",
