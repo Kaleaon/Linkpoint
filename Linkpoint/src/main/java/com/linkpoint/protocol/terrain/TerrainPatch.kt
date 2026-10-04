@@ -3,6 +3,16 @@ package com.linkpoint.protocol.terrain
 import kotlin.math.cos
 
 /**
+ * Pre-allocated scratch buffers for terrain patch decompression.
+ * Reused across patch decoding calls to avoid temporary array allocations.
+ */
+class DecompressScratchBuffers(
+    val patches: IntArray = IntArray(256),
+    val block: FloatArray = FloatArray(256),
+    val temp: FloatArray = FloatArray(256)
+)
+
+/**
  * Terrain patch decoder for Second Life heightmap data.
  *
  * Based on the reference viewer's TerrainPatch implementation. Decodes DCT-compressed
@@ -96,7 +106,11 @@ class TerrainPatch(
          * Decompress a terrain patch from the bit buffer.
          * Returns null if end-of-patches marker is found.
          */
-        fun decompressPatch(buffer: BitBuffer, patchSize: Int): TerrainPatch? {
+        fun decompressPatch(
+            buffer: BitBuffer,
+            patchSize: Int,
+            scratch: DecompressScratchBuffers = DecompressScratchBuffers()
+        ): TerrainPatch? {
             val quantWBits = buffer.getBits(8)
 
             if (quantWBits == END_OF_PATCHES) {
@@ -108,16 +122,19 @@ class TerrainPatch(
             val patchIds = buffer.getBits(10)
             val wordBits = (quantWBits and 15) + 2
 
-            val patches = IntArray(patchSize * patchSize)
+            val totalSize = patchSize * patchSize
+            val patches = if (scratch.patches.size >= totalSize) scratch.patches else IntArray(totalSize)
+            val block = if (scratch.block.size >= totalSize) scratch.block else FloatArray(totalSize)
+            val temp = if (scratch.temp.size >= totalSize) scratch.temp else FloatArray(totalSize)
 
             var i = 0
-            while (i < patchSize * patchSize) {
+            while (i < totalSize) {
                 if (buffer.getBits(1) == 0) {
                     // Zero coefficient
                     patches[i] = 0
                 } else if (buffer.getBits(1) == 0) {
                     // End-of-block: rest are zeros
-                    while (i < patchSize * patchSize) {
+                    while (i < totalSize) {
                         patches[i] = 0
                         i++
                     }
@@ -133,9 +150,7 @@ class TerrainPatch(
             }
 
             // Apply inverse DCT
-            val block = FloatArray(patchSize * patchSize)
-            val temp = FloatArray(patchSize * patchSize)
-            val output = FloatArray(patchSize * patchSize)
+            val output = FloatArray(totalSize)
 
             val quantBits = (quantWBits shr 4) + 2
             val mult = (1.0f / (1 shl quantBits)) * range
@@ -159,7 +174,7 @@ class TerrainPatch(
             }
 
             // Scale and offset
-            for (j in block.indices) {
+            for (j in 0 until totalSize) {
                 output[j] = block[j] * mult + addval
             }
 
