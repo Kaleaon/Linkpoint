@@ -202,4 +202,3 @@ export function intersectRayTriangle(
     ...(interpolatedUV ? { uv: interpolatedUV } : {}),
   };
 }
-
