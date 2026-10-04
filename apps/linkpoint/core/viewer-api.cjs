@@ -5,7 +5,7 @@
  * `ViewerSession` and listed here is available on every platform.
  */
 const METHODS = new Set([
-  'sendChat', 'sendInstantMessage', 'sendGroupMessage', 'sendFriendRequest',
+  'sendChat', 'sendChatBatch', 'sendInstantMessage', 'sendGroupMessage', 'sendFriendRequest',
   'teleport', 'touchObject', 'sit', 'stand', 'setMovement', 'getBalance', 'payObject',
   'respondScriptDialog', 'acceptLure', 'acceptInventoryOffer', 'declineInventoryOffer', 'acceptGroupInvite', 'declineGroupInvite', 'dismissInteraction',
   'fetchAnimation', 'getMapBlocks', 'getFriends', 'getGroups', 'getInventory', 'getDiagnostics',

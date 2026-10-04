@@ -174,6 +174,39 @@ export class SLBridge extends Utils.EventEmitter {
   }
 
   async sendChat(message: string, channel = 0, type = 1) { await this.call('sendChat', { message, channel, type }); }
+  async sendChatBatch(items: Array<{ message: string; channel?: number; type?: number }>): Promise<{
+    successful: number;
+    failed: number;
+    results: Array<{ index: number; message: string; channel: number; type: number; success: boolean; error?: string }>;
+    errors?: Array<{ index: number; message: string; error: string }>;
+  }> {
+    if (!items || items.length === 0) return { successful: 0, failed: 0, results: [], errors: [] };
+    const CHUNK_SIZE = 50;
+    if (items.length > CHUNK_SIZE) {
+      const combinedResults: any[] = [];
+      const combinedErrors: any[] = [];
+      let totalSuccessful = 0;
+      let totalFailed = 0;
+      for (let i = 0; i < items.length; i += CHUNK_SIZE) {
+        const chunk = items.slice(i, i + CHUNK_SIZE);
+        const res = await this.call<any>('sendChatBatch', { items: chunk });
+        if (res) {
+          totalSuccessful += res.successful || 0;
+          totalFailed += res.failed || 0;
+          if (Array.isArray(res.results)) {
+            const reindexed = res.results.map((r: any) => ({ ...r, index: r.index + i }));
+            combinedResults.push(...reindexed);
+          }
+          if (Array.isArray(res.errors)) {
+            const reindexedErr = res.errors.map((e: any) => ({ ...e, index: e.index + i }));
+            combinedErrors.push(...reindexedErr);
+          }
+        }
+      }
+      return { successful: totalSuccessful, failed: totalFailed, results: combinedResults, errors: combinedErrors };
+    }
+    return this.call('sendChatBatch', { items });
+  }
   async sendInstantMessage(recipientId: string, message: string) { await this.call('sendInstantMessage', { recipientId, message }); }
   async sendGroupMessage(groupId: string, message: string) { await this.call('sendGroupMessage', { groupId, message }); }
   async sendFriendRequest(recipientId: string, message?: string) { await this.call('sendFriendRequest', { recipientId, message }); }

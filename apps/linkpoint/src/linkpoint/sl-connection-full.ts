@@ -402,6 +402,11 @@ export class SLConnectionFull extends Utils.EventEmitter {
     await slBridge.sendChat(message, channel, type);
   }
 
+  async sendChatBatch(items: Array<{ message: string; channel?: number; type?: number }>) {
+    if (!this.connected) throw new Error('Not connected to a grid');
+    return slBridge.sendChatBatch(items);
+  }
+
   async sendInstantMessage(recipientId: string, message: string) {
     if (!this.connected) throw new Error('Not connected to a grid');
     await slBridge.sendInstantMessage(recipientId, message);

@@ -546,6 +546,42 @@ class ViewerSession {
     else await comms.say(message, channel);
   }
 
+  async sendChatBatch(params) {
+    const items = Array.isArray(params) ? params : (params?.items || params?.messages || []);
+    if (!Array.isArray(items)) throw new Error('Invalid sendChatBatch parameters: expected array of chat items');
+    if (items.length > 50) {
+      throw new Error('Batch size exceeds maximum limit of 50 commands');
+    }
+    const comms = this.requireBot().clientCommands?.comms;
+    if (!comms) throw new Error('Second Life communications interface unavailable');
+
+    const results = [];
+    const errors = [];
+    let successful = 0;
+    let failed = 0;
+
+    for (let idx = 0; idx < items.length; idx++) {
+      const item = items[idx] || {};
+      const message = item.message ?? item.text ?? '';
+      const channel = item.channel ?? 0;
+      const type = item.type ?? 1;
+      try {
+        if (type === 0) await comms.whisper(message, channel);
+        else if (type === 2) await comms.shout(message, channel);
+        else await comms.say(message, channel);
+        successful++;
+        results.push({ index: idx, message, channel, type, success: true });
+      } catch (err) {
+        failed++;
+        const errorMessage = err && err.message ? err.message : String(err);
+        results.push({ index: idx, message, channel, type, success: false, error: errorMessage });
+        errors.push({ index: idx, message, error: errorMessage });
+      }
+    }
+
+    return { successful, failed, results, errors };
+  }
+
   async sendInstantMessage({ recipientId, message }) {
     const comms = this.requireBot().clientCommands?.comms;
     if (!comms) throw new Error('Second Life communications interface unavailable');
