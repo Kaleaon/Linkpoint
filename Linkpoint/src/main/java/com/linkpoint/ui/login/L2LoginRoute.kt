@@ -37,7 +37,7 @@ fun L2LoginRoute(
     val app = LinkpointApp.getInstance()
     val authManager = remember { OAuth2AuthManager.getInstance() }
     val gridListFlow = remember { app.gridManager.getAvailableGridsFlow() }
-    val gridList by gridListFlow.collectAsState(initial = app.gridManager.getAvailableGrids())
+    val gridList by gridListFlow.collectAsState(initial = emptyList())
     val grids = gridList.map {
         GridDisplayInfo(
             id = it.id,
@@ -191,12 +191,11 @@ fun L2LoginRoute(
             pendingCredentials = credentials
             loading = true
             error = false
-            val grid = app.gridManager.getAvailableGrids()
-                .getOrNull(credentials.selectedGridIndex)
+            val grid = gridList.getOrNull(credentials.selectedGridIndex)
                 ?: app.gridManager.getSelectedGrid()
-            app.gridManager.selectGrid(grid.id)
             status = "Resolving grid & logging in to ${grid.name}…"
             app.applicationScope.launch {
+                app.gridManager.selectGridAsync(grid.id)
                 val startLocation = when (credentials.startLocation.trim().lowercase()) {
                     "last location", "last" -> "last"
                     "home" -> "home"
