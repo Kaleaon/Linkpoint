@@ -90,7 +90,8 @@ function applyPatches(options = {}) {
   if (fs.existsSync(capsPath)) {
     let capsContent = fs.readFileSync(capsPath, 'utf8');
     if (!capsContent.includes("req.push('AgentInventoryService');")) {
-      capsContent = capsContent.replace("req.push('AgentPreferences');", "req.push('AgentPreferences');\n        req.push('AgentInventoryService');\n        req.push('AgentInventoryService3');");
+      const eol = capsContent.includes('\r\n') ? '\r\n' : '\n';
+      capsContent = capsContent.replace("req.push('AgentPreferences');", `req.push('AgentPreferences');${eol}        req.push('AgentInventoryService');${eol}        req.push('AgentInventoryService3');`);
       fs.writeFileSync(capsPath, capsContent, 'utf8');
       console.log('[patch-metaverse] Patched Caps.js successfully for AgentInventoryService.');
     }

@@ -14,7 +14,14 @@ const ZERO_UUID = '00000000-0000-0000-0000-000000000000';
 
 /** Built-in animations ship as static files named by UUID. */
 /** Where the app serves its static assets from (Vite's BASE_URL; '/' in tests). */
-export const assetBase = (): string => ((import.meta as any).env?.BASE_URL as string | undefined) ?? '/';
+export const assetBase = (): string => {
+  const base = (import.meta as any).env?.BASE_URL as string | undefined;
+  if (base && base !== '/') return base;
+  if (typeof window !== 'undefined' && window.location?.origin && window.location.origin !== 'null') {
+    return `${window.location.origin}/`;
+  }
+  return 'http://localhost/';
+};
 
 export function bundledAnimationLoader(baseUrl = `${assetBase()}anims/`, fetcher: typeof fetch = (input, init) => fetch(input, init)): AnimationLoader {
   return async (id) => {
