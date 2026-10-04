@@ -1,11 +1,18 @@
 //! Renderer-neutral scene representation and normalization.
 
+pub mod decoder;
+pub mod math;
 pub mod spatial;
+pub mod volume;
+pub mod wasm;
 
+pub use decoder::{calculate_discard_level, generate_placeholder_rgba, parse_j2k_header, J2KHeaderInfo};
+pub use math::{EulerAngles, Matrix4, Quaternion};
 pub use spatial::{
     AABB, ChunkGrid, ChunkId, Octree, SpatialChunk, SpatialEntity, SpatialManager,
     SpatialWorkerPool,
 };
+pub use volume::{generate_volume, VolumeFace, VolumeParams};
 
 use serde::{Deserialize, Serialize};
 

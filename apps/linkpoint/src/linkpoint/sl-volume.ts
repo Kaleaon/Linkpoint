@@ -1,13 +1,7 @@
 /**
  * Second Life prim ("volume") tessellation: a profile swept along a path.
  *
- * This is a TypeScript implementation of the algorithm the official viewer uses
- * (LLProfile / LLPath / LLVolume in indra/llmath/llvolume.cpp), so cuts, hollows,
- * twists, tapers, shears, skews, radius offsets and revolutions produce the same
- * shapes, and faces come out in the same order as texture-entry face numbers
- * (top cap, sides, inner wall, bottom cap, cut ends).
- *
- * Shapes are unit sized (about +-0.5 on each axis) and are scaled by the object.
+ * @deprecated Pure TypeScript implementation deprecated in favor of unified `linkpoint-scene` WASM core module.
  */
 
 export interface VolumeParams {

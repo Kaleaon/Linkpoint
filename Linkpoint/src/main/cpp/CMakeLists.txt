@@ -33,6 +33,7 @@ add_library(
     GestureTriggerEngine.cpp
     audio/spatial/SpatialAudioEngine.cpp
     jni/spatial_audio_jni.cpp
+    jni/math_jni.cpp
     audio/voice/VivoxVoiceEngine.cpp
     ${LINKPOINT_ETCPAK_SOURCES}
 )

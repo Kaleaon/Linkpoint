@@ -16,6 +16,7 @@ data class VolumeFace(
 
 enum class LodLevel(val detail: Int) { HIGH(4), MEDIUM(3), LOW(2), LOWEST(1) }
 
+@Deprecated("Deprecated in favor of unified native linkpoint-scene Rust core rendering library")
 class LLVolume(val params: VolumeParams, val lod: LodLevel = LodLevel.HIGH) {
 
     val faces: List<VolumeFace> by lazy { generateFaces() }
