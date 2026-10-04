@@ -6,6 +6,7 @@ import android.util.Log
 import okhttp3.CipherSuite
 import okhttp3.ConnectionSpec
 import okhttp3.OkHttpClient
+import okhttp3.Protocol
 import okhttp3.TlsVersion
 import java.security.KeyStore
 import java.security.cert.X509Certificate
@@ -82,10 +83,36 @@ object SSLHelper {
         return trustManagers[0] as X509TrustManager
     }
 
+    @Volatile
+    private var conscryptInstalled = false
+
+    /**
+     * Register Conscrypt Security Provider in SSLHelper to ensure TLS ALPN
+     * protocol support works across all Android API levels.
+     */
+    fun ensureConscryptInstalled(): Boolean {
+        if (!conscryptInstalled) {
+            synchronized(this) {
+                if (!conscryptInstalled) {
+                    try {
+                        val provider = org.conscrypt.Conscrypt.newProvider()
+                        java.security.Security.insertProviderAt(provider, 1)
+                        try { Log.i(TAG, "Conscrypt Security Provider installed via SSLHelper (ALPN active)") } catch (_: Throwable) {}
+                    } catch (e: Throwable) {
+                        try { Log.e(TAG, "Conscrypt Security Provider installation failed in SSLHelper: ${e.message}", e) } catch (_: Throwable) {}
+                    }
+                    conscryptInstalled = true
+                }
+            }
+        }
+        return conscryptInstalled
+    }
+
     /**
      * Get SSLSocketFactory configured for Android 9+ compatibility
      */
     fun getSSLSocketFactory(): Pair<SSLSocketFactory, X509TrustManager> {
+        ensureConscryptInstalled()
         val trustManager = getDefaultTrustManager()
 
         val sslContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -330,17 +357,20 @@ object SSLHelper {
      */
     fun configureForCdn(builder: OkHttpClient.Builder): OkHttpClient.Builder {
         try {
+            ensureConscryptInstalled()
             val (sslSocketFactory, trustManager) = getSSLSocketFactory()
 
             builder.sslSocketFactory(sslSocketFactory, trustManager)
             builder.hostnameVerifier(getCdnHostnameVerifier())
             builder.connectionSpecs(listOf(MODERN_TLS, COMPATIBLE_TLS))
+            builder.protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
 
-            Log.d(TAG, "SSL configured for CDN access with custom hostname verifier")
+            try { Log.d(TAG, "SSL configured for CDN access with custom hostname verifier and HTTP/2 ALPN") } catch (_: Throwable) {}
         } catch (e: Exception) {
-            Log.e(TAG, "Error configuring SSL for CDN: ${e.message}", e)
+            try { Log.e(TAG, "Error configuring SSL for CDN: ${e.message}", e) } catch (_: Throwable) {}
             // Fall back to default configuration (may fail for CDN)
             builder.connectionSpecs(listOf(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS))
+            builder.protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
         }
 
         return builder
@@ -353,28 +383,31 @@ object SSLHelper {
      */
     fun configureSSL(builder: OkHttpClient.Builder, debugMode: Boolean = false): OkHttpClient.Builder {
         try {
+            ensureConscryptInstalled()
             val (sslSocketFactory, trustManager) = getSSLSocketFactory()
 
             builder.sslSocketFactory(sslSocketFactory, trustManager)
+            builder.protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
 
             // Configure connection specs based on mode
             if (debugMode) {
                 // In debug mode, allow more protocols for testing
                 builder.connectionSpecs(listOf(MODERN_TLS, COMPATIBLE_TLS, ConnectionSpec.CLEARTEXT))
-                Log.d(TAG, "SSL configured in DEBUG mode - allowing more protocols")
+                try { Log.d(TAG, "SSL configured in DEBUG mode - allowing more protocols") } catch (_: Throwable) {}
             } else {
                 // Production: Modern TLS only, no cleartext
                 builder.connectionSpecs(listOf(MODERN_TLS, COMPATIBLE_TLS))
-                Log.d(TAG, "SSL configured in PRODUCTION mode - TLS 1.2+ only")
+                try { Log.d(TAG, "SSL configured in PRODUCTION mode - TLS 1.2+ only") } catch (_: Throwable) {}
             }
 
             // Enable hostname verification (always on for security)
             // OkHttp does this by default, but we're explicit
 
         } catch (e: Exception) {
-            Log.e(TAG, "Error configuring SSL: ${e.message}", e)
+            try { Log.e(TAG, "Error configuring SSL: ${e.message}", e) } catch (_: Throwable) {}
             // Fall back to default configuration
             builder.connectionSpecs(listOf(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS))
+            builder.protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
         }
 
         return builder

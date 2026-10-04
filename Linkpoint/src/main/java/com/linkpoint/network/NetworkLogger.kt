@@ -336,6 +336,12 @@ object NetworkLogger {
         protocolUsageTracker.trackByType(type, protocol)
     }
 
+    fun logAlpnWarning(url: String, protocol: String) {
+        protocolUsageTracker.trackAlpnWarning()
+        val message = "⚠️ ALPN Protocol Fallback Warning for $url: negotiated '$protocol' instead of HTTP/2 (h2)"
+        log(Level.WARN, Category.SSL_TLS, message)
+    }
+
     /**
      * Log an HTTP request being sent
      */
@@ -933,7 +939,11 @@ object NetworkLogger {
         retryCount.set(0)
         timeoutCount.set(0)
         redirectCount.set(0)
-        Log.i(TAG, "Network logs cleared")
+        try {
+            Log.i(TAG, "Network logs cleared")
+        } catch (e: Throwable) {
+            // Unit test fallback
+        }
     }
 
     /**
