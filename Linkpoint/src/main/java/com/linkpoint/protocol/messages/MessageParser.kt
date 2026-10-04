@@ -9,7 +9,6 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
 
-
 /**
  * Parses Second Life UDP message payloads.
  *
@@ -612,14 +611,14 @@ object MessageParser {
                 regionId = bytesToUUID(regionIdBytes)
             }
 
-            // RegionInfo3 block (optional - may not be present in all messages)
+            // RegionInfo3 block (optional - requires at least 11 bytes: cpuClass(4) + cpuRatio(4) + 3 len bytes)
             var cpuClassId: Int? = null
             var cpuRatio: Int? = null
             var coloName: String? = null
             var productSKU: String? = null
             var productName: String? = null
 
-            if (buffer.remaining() >= 8) {
+            if (buffer.remaining() >= 11) {
                 cpuClassId = buffer.int
                 cpuRatio = buffer.int
 
@@ -667,6 +666,18 @@ object MessageParser {
                 }
             }
 
+            // OpenSim extended region size fields (RegionSizeX, RegionSizeY)
+            var regionSizeX = 256
+            var regionSizeY = 256
+            if (buffer.remaining() >= 8) {
+                val sizeX = buffer.int
+                val sizeY = buffer.int
+                if (sizeX > 0 && sizeY > 0) {
+                    regionSizeX = sizeX
+                    regionSizeY = sizeY
+                }
+            }
+
             return RegionHandshakeData(
                 regionFlags = regionFlags,
                 simAccess = simAccess,
@@ -686,7 +697,9 @@ object MessageParser {
                 productSKU = productSKU,
                 productName = productName,
                 regionFlagsExtended = regionFlagsExtended,
-                regionProtocols = regionProtocols
+                regionProtocols = regionProtocols,
+                regionSizeX = regionSizeX,
+                regionSizeY = regionSizeY
             )
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse RegionHandshake", e)
@@ -973,7 +986,9 @@ data class RegionHandshakeData(
     val productName: String? = null,
     // RegionInfo4 block (optional)
     val regionFlagsExtended: Long? = null,
-    val regionProtocols: Long? = null
+    val regionProtocols: Long? = null,
+    val regionSizeX: Int = 256,
+    val regionSizeY: Int = 256
 )
 
 /**

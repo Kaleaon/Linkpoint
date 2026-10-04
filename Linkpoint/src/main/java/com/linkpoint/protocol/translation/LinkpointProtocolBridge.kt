@@ -77,6 +77,7 @@ class LinkpointProtocolBridge(
     private val capabilities = mutableMapOf<String, String>()
 
     init {
+        LinkpointTranslationLayer.configureForGrid(gridType)
         Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ LINKPOINT PROTOCOL BRIDGE INITIALIZED")
         Log.i(TAG, "╠══════════════════════════════════════════════════════════════════")
@@ -84,6 +85,7 @@ class LinkpointProtocolBridge(
         Log.i(TAG, "║ Grid Type: $gridType")
         Log.i(TAG, "║ Is Agni Grid: $isAgniGrid")
         Log.i(TAG, "║ URL Repair: ${LinkpointTranslationLayer.config.repairCapabilityUrls}")
+        Log.i(TAG, "║ Variable Region Support: ${LinkpointTranslationLayer.config.supportsVariableRegionSize}")
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
     }
 
