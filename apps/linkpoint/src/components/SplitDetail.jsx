@@ -1,9 +1,10 @@
+import { MULTI_PANE_SPECS } from "@linkpoint/design-system/tokens";
 import { useTheme } from "../context/ThemeContext.jsx";
 import { app } from "../linkpoint/app";
 import Icon from "./Icon.jsx";
 
-// Ported from the `isSplit` <sc-if> block — the 44% detail pane shown next to
-// Chat/Inventory/Radar on split (tablet/foldable) devices.
+// Ported from the `isSplit` <sc-if> block — the detail pane shown next to
+// Chat/Inventory/Radar on split (tablet/foldable) devices using MULTI_PANE_SPECS token.
 export default function SplitDetail() {
   const { V, t, d, isFloat, scr } = useTheme();
   const isSplit = d.split && !isFloat && ["Chat", "Inventory", "Radar"].includes(scr);
@@ -11,7 +12,7 @@ export default function SplitDetail() {
   const dd = runtimeDetail(scr);
 
   return (
-    <div style={{ flex: "none", width: "44%", borderLeft: "1px solid " + V.outv, background: V.surf, display: "flex", flexDirection: "column" }}>
+    <div style={{ flex: "none", width: `${MULTI_PANE_SPECS.splitRatio * 100}%`, borderLeft: "1px solid " + V.outv, background: V.surf, display: "flex", flexDirection: "column" }}>
       <div style={{ flex: "none", padding: "14px 16px 10px", borderBottom: "1px solid " + V.outv }}>
         <div style={{ font: "600 13px/1.2 " + t.font, color: V.ink }}>{dd.title}</div>
         <div style={{ font: "400 10.5px/1.4 " + t.font, color: V.ink2, marginTop: "4px" }}>{dd.sub}</div>

@@ -525,6 +525,34 @@ export const PALETTE_FAMILIES: { name: string; keys: string[] }[] = [
   { name: "DAYLIGHT", keys: ["aero", "paper", "nouveau", "calm", "solarpunk"] }
 ];
 
+/** Standardized responsive breakpoints (in dp / px). */
+export const BREAKPOINTS = {
+  compact: 600,
+  medium: 840,
+  expanded: 1200,
+} as const;
+
+export type BreakpointKey = keyof typeof BREAKPOINTS;
+
+/** Standardized multi-pane layout specification tokens. */
+export const MULTI_PANE_SPECS = {
+  splitRatio: 0.44,
+  minPaneWidth: 320,
+} as const;
+
+/**
+ * Helper function to determine responsive breakpoint category based on width.
+ */
+export function getBreakpoint(width: number): BreakpointKey {
+  if (width < BREAKPOINTS.compact) {
+    return "compact";
+  }
+  if (width < BREAKPOINTS.expanded) {
+    return "medium";
+  }
+  return "expanded";
+}
+
 export const DEVICES: Record<string, DevicePack> = {
   ios:  { name: "iPhone 15 Pro", dims: "393×852", w: 393, h: 852, split: false, notch: "island" },
   and:  { name: "Pixel 8", dims: "412×892", w: 412, h: 892, split: false, notch: "hole" },

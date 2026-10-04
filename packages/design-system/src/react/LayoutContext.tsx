@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
 import {
+  BREAKPOINTS,
   DEVICES,
   LAYOUTS,
   PALETTES,
@@ -54,7 +55,7 @@ export function resolveNav(layout: LayoutKey, device: DeviceKey): NavMode {
   if (L.nav === "SWEEP") return "sweep";
   if (d.split) return "rail";
   if (L.nav === "TILES") return "tiles";
-  if (L.nav === "RAIL" && d.w > 700) return "rail";
+  if (L.nav === "RAIL" && d.w >= BREAKPOINTS.medium) return "rail";
   return "tabs";
 }
 

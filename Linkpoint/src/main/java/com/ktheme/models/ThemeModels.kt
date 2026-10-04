@@ -70,9 +70,21 @@ enum class LayoutStructure(
 }
 
 @Serializable
+data class LayoutAdaptation(
+    val density: String? = null,
+    val spacingScale: Float = 1.0f
+)
+
+@Serializable
+data class Adaptation(
+    val layout: LayoutAdaptation? = null
+)
+
+@Serializable
 data class Theme(
     val metadata: ThemeMetadata,
     val darkMode: Boolean = true,
     val colorScheme: ColorScheme,
-    val layoutStructure: LayoutStructure = LayoutStructure.MATERIAL3
+    val layoutStructure: LayoutStructure = LayoutStructure.MATERIAL3,
+    val adaptation: Adaptation? = null
 )
