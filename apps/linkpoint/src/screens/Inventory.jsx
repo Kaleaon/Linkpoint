@@ -13,6 +13,7 @@ export default function Inventory() {
   const { actions } = useApp();
   const [revision, setRevision] = useState(0);
   const [filter, setFilter] = useState("");
+  const [category, setCategory] = useState("all");
   const [selected, setSelected] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
 
@@ -28,13 +29,17 @@ export default function Inventory() {
   }, []);
 
   const rows = useMemo(() => {
-    const query = filter.trim().toLocaleLowerCase();
-    const folders = Array.from(app.inventory.folders.values()).map((entry) => ({ ...entry, folder: true }));
-    const items = Array.from(app.inventory.items.values()).map((entry) => ({ ...entry, folder: false }));
-    return [...folders, ...items]
-      .filter((entry) => !query || String(entry.name || "").toLocaleLowerCase().includes(query))
-      .sort((a, b) => Number(b.folder) - Number(a.folder) || String(a.name).localeCompare(String(b.name)));
-  }, [filter, revision]);
+    const tree = app.inventory.getFilteredFolderTree({
+      category,
+      search: filter,
+    });
+    const flat = app.inventory.flattenTree(tree);
+    const rootId = app.inventory.rootFolder?.id || "root";
+    return flat
+      .filter((entry) => entry && entry.id !== rootId)
+      .map((entry) => ({ ...entry, folder: entry.type === "folder" || Boolean(entry.folder) }))
+      .sort((a, b) => Number(b.folder) - Number(a.folder) || String(a.name || "").localeCompare(String(b.name || "")));
+  }, [filter, category, revision]);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -80,6 +85,36 @@ export default function Inventory() {
           <Icon name="search" size={16} />
           <input value={filter} onChange={(event) => setFilter(event.target.value)} placeholder="Filter Second Life inventory" aria-label="Filter inventory" />
         </label>
+        <select
+          value={category}
+          onChange={(event) => setCategory(event.target.value)}
+          aria-label="Filter inventory by category"
+          style={{
+            height: "40px",
+            padding: "0 10px",
+            background: V.surf,
+            border: `1px solid ${V.outv}`,
+            borderRadius: V.rs,
+            color: V.pri,
+            fontSize: "12px",
+            fontWeight: 600,
+            cursor: "pointer",
+            outline: "none",
+            flex: "none",
+          }}
+        >
+          <option value="all">All Categories</option>
+          <option value="clothing">Clothing</option>
+          <option value="bodypart">Body Parts</option>
+          <option value="object">Objects</option>
+          <option value="texture">Textures</option>
+          <option value="sound">Sounds</option>
+          <option value="notecard">Notecards</option>
+          <option value="landmark">Landmarks</option>
+          <option value="animation">Animations</option>
+          <option value="gesture">Gestures</option>
+          <option value="script">Scripts</option>
+        </select>
         <button
           type="button"
           onClick={handleRefresh}
