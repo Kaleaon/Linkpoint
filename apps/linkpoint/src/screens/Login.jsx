@@ -42,8 +42,9 @@ export default function Login() {
     if (!grid) { setError(t("login_error_invalid_grid")); return; }
 
     try {
-      if (typeof slActions?.normalizeStart === "function") {
-        slActions.normalizeStart(start);
+      const normalizeStart = slActions?.normalizeStart || slActions?.default?.normalizeStart;
+      if (typeof normalizeStart === "function") {
+        normalizeStart(start);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : t("login_error_rejected"));
@@ -71,8 +72,9 @@ export default function Login() {
 
   const connectSavedSession = async () => {
     try {
-      if (typeof slActions?.normalizeStart === "function") {
-        slActions.normalizeStart(start);
+      const normalizeStart = slActions?.normalizeStart || slActions?.default?.normalizeStart;
+      if (typeof normalizeStart === "function") {
+        normalizeStart(start);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : t("login_error_rejected"));
