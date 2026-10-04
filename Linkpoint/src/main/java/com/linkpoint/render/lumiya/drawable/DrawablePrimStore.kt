@@ -363,7 +363,17 @@ class DrawablePrimStore {
         return UUID(faceTextureIdMsb[fIdx], faceTextureIdLsb[fIdx])
     }
 
-    fun bindTextureToMatchingFaces(id: Long, textureId: UUID, textureHandle: Int) {
+    /**
+     * Patch every face whose texture ID matches [textureId]
+     * to point at [textureHandle] for the specified [semantic]. Lets a single texture upload cover
+     * all faces sharing that UUID, even when per-face overrides differ.
+     */
+    fun bindTextureToMatchingFaces(
+        id: Long,
+        textureId: UUID,
+        textureHandle: Int,
+        semantic: com.linkpoint.assets.TextureFormatPolicy.TextureSemantic = com.linkpoint.assets.TextureFormatPolicy.TextureSemantic.ALBEDO
+    ) {
         val slot = prims[id] ?: return
         val msb = textureId.mostSignificantBits
         val lsb = textureId.leastSignificantBits
@@ -372,7 +382,13 @@ class DrawablePrimStore {
         for (i in 0 until count) {
             val fIdx = base + i
             if (faceTextureIdMsb[fIdx] == msb && faceTextureIdLsb[fIdx] == lsb) {
-                faceTextureHandle[fIdx] = textureHandle
+                when (semantic) {
+                    com.linkpoint.assets.TextureFormatPolicy.TextureSemantic.NORMAL -> faceNormalHandle[fIdx] = textureHandle
+                    com.linkpoint.assets.TextureFormatPolicy.TextureSemantic.METALLIC_ROUGHNESS -> faceMetallicRoughnessHandle[fIdx] = textureHandle
+                    com.linkpoint.assets.TextureFormatPolicy.TextureSemantic.EMISSIVE -> faceEmissiveHandle[fIdx] = textureHandle
+                    com.linkpoint.assets.TextureFormatPolicy.TextureSemantic.OCCLUSION -> faceOcclusionHandle[fIdx] = textureHandle
+                    else -> faceTextureHandle[fIdx] = textureHandle
+                }
                 updateFaceMaterial(slot, i)
             }
         }

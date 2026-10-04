@@ -12,7 +12,8 @@ import kotlinx.coroutines.launch
 class FilamentRenderCommandConsumer(
     private val renderManager: RenderManager,
     private val stream: RenderCommandStream,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    private val materialsManager: com.linkpoint.render.RenderMaterialsManager? = null
 ) {
     companion object {
         private const val TAG = "FilamentCmdConsumer"

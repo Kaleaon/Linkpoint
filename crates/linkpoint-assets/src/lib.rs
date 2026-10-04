@@ -1,8 +1,19 @@
 //! Asset scheduling and decoding boundary.
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum TextureChannel {
+    Albedo,
+    Normal,
+    MetallicRoughness,
+    Emissive,
+    Occlusion,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum AssetKind {
     Texture,
+    MaterialTexture(TextureChannel),
+    Material,
     Mesh,
     Animation,
     Sound,
@@ -69,5 +80,29 @@ mod tests {
         });
         assert_eq!(scheduler.len(), 2);
         assert_eq!(scheduler.pop_next().unwrap().id, "near");
+    }
+
+    #[test]
+    fn schedules_multichannel_pbr_material_textures() {
+        let mut scheduler = AssetScheduler::default();
+        scheduler.enqueue(AssetRequest {
+            id: "mat_1".into(),
+            kind: AssetKind::Material,
+            priority: 10,
+            grid_uri: None,
+        });
+        scheduler.enqueue(AssetRequest {
+            id: "normal_map".into(),
+            kind: AssetKind::MaterialTexture(TextureChannel::Normal),
+            priority: 8,
+            grid_uri: None,
+        });
+        assert_eq!(scheduler.len(), 2);
+        let req1 = scheduler.pop_next().unwrap();
+        assert_eq!(req1.id, "mat_1");
+        assert_eq!(req1.kind, AssetKind::Material);
+        let req2 = scheduler.pop_next().unwrap();
+        assert_eq!(req2.id, "normal_map");
+        assert_eq!(req2.kind, AssetKind::MaterialTexture(TextureChannel::Normal));
     }
 }
