@@ -37,7 +37,10 @@ class DrawableHudStore {
         // broke the HUD-z-order test. Caching the value at the source
         // keeps render and diagnostics agreeing without forcing tests
         // onto Robolectric.
-        var zTranslation: Float = 0f
+        var zTranslation: Float = 0f,
+        var width: Float = 1f,
+        var height: Float = 1f,
+        var depth: Float = 1f
     )
 
     private val hudPrims = linkedMapOf<Long, HudPrimInstance>()
@@ -50,7 +53,10 @@ class DrawableHudStore {
         posX: Float,
         posY: Float,
         posZ: Float,
-        layer: Int
+        layer: Int,
+        width: Float = 1f,
+        height: Float = 1f,
+        depth: Float = 1f
     ) {
         val instance = HudPrimInstance(
             id = id,
@@ -58,7 +64,10 @@ class DrawableHudStore {
             layer = layer,
             offsetX = posX,
             offsetY = posY,
-            offsetZ = posZ
+            offsetZ = posZ,
+            width = width,
+            height = height,
+            depth = depth
         )
         updateModelMatrix(instance, zOrder = 0)
         hudPrims[id] = instance
@@ -67,6 +76,63 @@ class DrawableHudStore {
 
     fun removeHudPrim(id: Long) {
         hudPrims.remove(id)
+    }
+
+    /**
+     * Cast a 3D ray against registered HUD prim AABBs.
+     * Returns the ID of the closest intersected HUD prim along the ray, or null if no hit.
+     */
+    fun pickHudPrim(rayOrigin: FloatArray, rayDir: FloatArray): Long? {
+        var bestId: Long? = null
+        var bestT = Float.MAX_VALUE
+
+        for (hud in hudPrims.values) {
+            val cx = hud.screenX
+            val cy = hud.screenY
+            val cz = hud.zTranslation
+            val halfX = hud.width / 2.0f
+            val halfY = hud.height / 2.0f
+            val halfZ = hud.depth / 2.0f
+
+            val t = rayAabbDistance(
+                rayOrigin, rayDir,
+                cx - halfX, cy - halfY, cz - halfZ,
+                cx + halfX, cy + halfY, cz + halfZ
+            )
+
+            if (t < bestT) {
+                bestT = t
+                bestId = hud.id
+            }
+        }
+        return bestId
+    }
+
+    private fun rayAabbDistance(
+        origin: FloatArray, dir: FloatArray,
+        minX: Float, minY: Float, minZ: Float,
+        maxX: Float, maxY: Float, maxZ: Float
+    ): Float {
+        var tMin = -Float.MAX_VALUE
+        var tMax = Float.MAX_VALUE
+        for (axis in 0..2) {
+            val o = origin[axis]
+            val d = dir[axis]
+            val mn = if (axis == 0) minX else if (axis == 1) minY else minZ
+            val mx = if (axis == 0) maxX else if (axis == 1) maxY else maxZ
+            if (Math.abs(d) < 1e-6f) {
+                if (o < mn || o > mx) return Float.MAX_VALUE
+            } else {
+                val inv = 1f / d
+                var t1 = (mn - o) * inv
+                var t2 = (mx - o) * inv
+                if (t1 > t2) { val tmp = t1; t1 = t2; t2 = tmp }
+                if (t1 > tMin) tMin = t1
+                if (t2 < tMax) tMax = t2
+                if (tMin > tMax) return Float.MAX_VALUE
+            }
+        }
+        return if (tMin >= 0f) tMin else if (tMax >= 0f) tMax else Float.MAX_VALUE
     }
 
     fun hasElements(): Boolean = hudPrims.isNotEmpty()

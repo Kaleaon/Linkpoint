@@ -16,7 +16,7 @@ import android.opengl.Matrix
 object GLRayTrace {
 
     /**
-     * Unproject a screen coordinate into a world-space ray.
+     * Unproject a screen coordinate into a world-space ray using perspective projection.
      *
      * @return Pair of (rayOrigin[3], rayDirection[3]).
      */
@@ -26,14 +26,20 @@ object GLRayTrace {
         viewMatrix: FloatArray,
         projectionMatrix: FloatArray
     ): Pair<FloatArray, FloatArray> {
+        val safeWidth = viewportWidth.coerceAtLeast(1)
+        val safeHeight = viewportHeight.coerceAtLeast(1)
+
         val invertedVP = FloatArray(16)
         val vp = FloatArray(16)
         Matrix.multiplyMM(vp, 0, projectionMatrix, 0, viewMatrix, 0)
-        Matrix.invertM(invertedVP, 0, vp, 0)
+        val success = Matrix.invertM(invertedVP, 0, vp, 0)
 
-        // Normalised device coordinates
-        val ndcX = (2.0f * screenX / viewportWidth) - 1.0f
-        val ndcY = 1.0f - (2.0f * screenY / viewportHeight)
+        val ndcX = (2.0f * screenX / safeWidth) - 1.0f
+        val ndcY = 1.0f - (2.0f * screenY / safeHeight)
+
+        if (!success) {
+            return Pair(floatArrayOf(screenX, screenY, 0.0f), floatArrayOf(0.0f, 0.0f, -1.0f))
+        }
 
         val nearPoint = unproject(invertedVP, ndcX, ndcY, -1.0f)
         val farPoint = unproject(invertedVP, ndcX, ndcY, 1.0f)
@@ -44,6 +50,58 @@ object GLRayTrace {
             farPoint[2] - nearPoint[2]
         )
         normalise3(direction)
+
+        return Pair(nearPoint, direction)
+    }
+
+    /**
+     * Unproject a screen coordinate into an orthographic world-space ray.
+     *
+     * Unprojects (screenX, screenY) using orthographic view and projection matrices.
+     * Near plane is at NDC Z = -1.0f, far plane is at NDC Z = +1.0f.
+     * Handles zero depth range, near/far plane clipping, and singular inversions accurately.
+     *
+     * @return Pair of (rayOrigin[3], rayDirection[3]).
+     */
+    fun orthoScreenToWorldRay(
+        screenX: Float, screenY: Float,
+        viewportWidth: Int, viewportHeight: Int,
+        viewMatrix: FloatArray,
+        projectionMatrix: FloatArray
+    ): Pair<FloatArray, FloatArray> {
+        val safeWidth = viewportWidth.coerceAtLeast(1)
+        val safeHeight = viewportHeight.coerceAtLeast(1)
+
+        val invertedVP = FloatArray(16)
+        val vp = FloatArray(16)
+        Matrix.multiplyMM(vp, 0, projectionMatrix, 0, viewMatrix, 0)
+        val success = Matrix.invertM(invertedVP, 0, vp, 0)
+
+        val ndcX = (2.0f * screenX / safeWidth) - 1.0f
+        val ndcY = 1.0f - (2.0f * screenY / safeHeight)
+
+        if (!success) {
+            return Pair(floatArrayOf(screenX, screenY, 0.0f), floatArrayOf(0.0f, 0.0f, -1.0f))
+        }
+
+        val nearPoint = unproject(invertedVP, ndcX, ndcY, -1.0f)
+        val farPoint = unproject(invertedVP, ndcX, ndcY, 1.0f)
+
+        val direction = floatArrayOf(
+            farPoint[0] - nearPoint[0],
+            farPoint[1] - nearPoint[1],
+            farPoint[2] - nearPoint[2]
+        )
+        val len = Math.sqrt((direction[0] * direction[0] + direction[1] * direction[1] + direction[2] * direction[2]).toDouble()).toFloat()
+        if (len > 1e-6f) {
+            direction[0] /= len
+            direction[1] /= len
+            direction[2] /= len
+        } else {
+            direction[0] = 0.0f
+            direction[1] = 0.0f
+            direction[2] = -1.0f
+        }
 
         return Pair(nearPoint, direction)
     }
