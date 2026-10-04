@@ -4,6 +4,8 @@ import android.opengl.GLES32
 import android.opengl.Matrix
 import com.linkpoint.render.lumiya.core.LumiyaRenderContext
 import com.linkpoint.render.lumiya.glres.GLBufferManager
+import com.linkpoint.world.topography.PlanarTopographyProjection
+import com.linkpoint.world.topography.WorldTopographyProjection
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.concurrent.ConcurrentHashMap
@@ -23,7 +25,10 @@ import kotlin.math.sqrt
  *  - Colour / scale interpolation over lifetime
  *  - Per-source max particle count
  */
-class DrawableParticleManager(private val ctx: LumiyaRenderContext) {
+class DrawableParticleManager(
+    private val ctx: LumiyaRenderContext,
+    var topographyProjection: WorldTopographyProjection = PlanarTopographyProjection()
+) {
 
     companion object {
         /** Maximum live particles across all sources. */
@@ -98,7 +103,7 @@ class DrawableParticleManager(private val ctx: LumiyaRenderContext) {
         fb.clear()
 
         for (source in sources.values) {
-            source.update(dt)
+            source.update(dt, topographyProjection)
             for (particle in source.particles) {
                 if (!particle.alive || liveCount >= MAX_PARTICLES) continue
                 val t = particle.age / particle.lifetime
@@ -241,15 +246,16 @@ class DrawableParticleManager(private val ctx: LumiyaRenderContext) {
         private var emitAccumulator = 0f
         private val rng = java.util.Random()
 
-        fun update(dt: Float) {
+        fun update(dt: Float, topography: WorldTopographyProjection = PlanarTopographyProjection()) {
             // Update existing
             for (p in particles) {
                 if (!p.alive) continue
                 p.age += dt
                 if (p.age >= p.lifetime) { p.alive = false; continue }
-                p.posX += p.velX * dt
-                p.posY += p.velY * dt
-                p.posZ += p.velZ * dt - 0.5f * dt  // gravity
+                val gVec = topography.getGravityVector(p.posX, p.posY, p.posZ, 0.5f)
+                p.posX += p.velX * dt + gVec[0] * dt
+                p.posY += p.velY * dt + gVec[1] * dt
+                p.posZ += p.velZ * dt + gVec[2] * dt
             }
 
             // Emit new

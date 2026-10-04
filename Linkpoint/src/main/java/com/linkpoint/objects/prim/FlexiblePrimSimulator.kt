@@ -1,6 +1,8 @@
 package com.linkpoint.objects.prim
 
 import android.util.Log
+import com.linkpoint.world.topography.PlanarTopographyProjection
+import com.linkpoint.world.topography.WorldTopographyProjection
 import kotlin.math.*
 
 /**
@@ -18,8 +20,9 @@ import kotlin.math.*
  * - Tension: How quickly it returns to rest
  * - Drag: Resistance to movement
  */
-class FlexiblePrimSimulator {
-
+class FlexiblePrimSimulator(
+    var topographyProjection: WorldTopographyProjection = PlanarTopographyProjection()
+) {
     companion object {
         private const val TAG = "FlexiblePrim"
 
@@ -151,10 +154,16 @@ class FlexiblePrimSimulator {
             var fx = 0f
             var fy = 0f
             var fz = 0f
-
-            // Gravity
-            fz -= params.gravity * 9.8f * t
-
+            // Gravity from topography provider
+            val gravityVec = topographyProjection.getGravityVector(
+                section.position[0],
+                section.position[1],
+                section.position[2],
+                params.gravity * 9.8f * t
+            )
+            fx += gravityVec[0]
+            fy += gravityVec[1]
+            fz += gravityVec[2]
             // Wind
             fx += windX * params.wind * t
             fy += windY * params.wind * t
